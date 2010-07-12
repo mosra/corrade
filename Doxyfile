@@ -604,7 +604,7 @@ FILE_PATTERNS          = *.cpp *.h *.dox
 # should be searched for input files as well. Possible values are YES and NO.
 # If left blank NO is used.
 
-RECURSIVE              = NO
+RECURSIVE              = YES
 
 # The EXCLUDE tag can be used to specify files and/or directories that should
 # excluded from the INPUT source files. This way you can easily exclude a
@@ -624,7 +624,7 @@ EXCLUDE_SYMLINKS       = NO
 # against the file with absolute path, so to exclude all test directories
 # for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       =
+EXCLUDE_PATTERNS       = */Test/*
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
