@@ -1,0 +1,17 @@
+/** @namespace Map2X
+ * @brief Root namespace for %Map2X
+ */
+
+/** @namespace Map2X::Core
+ * @brief %Core %Map2X library
+ */
+
+/** @namespace Map2X::Utility
+ * @brief Simple utitlities used by %Map2X
+ */
+
+/** @namespace Map2X::PluginManager
+ * @brief Plugin management for %Map2X
+ *
+ * See also @ref PluginManagement.
+ */
