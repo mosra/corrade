@@ -9,15 +9,14 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/DirectoryTestConfigure.h.cmake
 
 include_directories(${CMAKE_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR})
 
-set(Map2X_Utility_DirectoryTest_SRCS
-    DirectoryTest.cpp
-)
+qt4_wrap_cpp(Map2X_Utility_DirectoryTest_MOC DirectoryTest.h)
+qt4_wrap_cpp(Map2X_Utility_EndianTest_MOC EndianTest.h)
 
-qt4_wrap_cpp(Map2X_Utility_DirectoryTest_MOC
-    DirectoryTest.h
-)
+add_executable(DirectoryTest DirectoryTest.cpp ${Map2X_Utility_DirectoryTest_MOC})
+add_executable(EndianTest EndianTest.cpp ${Map2X_Utility_EndianTest_MOC})
 
-add_executable(DirectoryTest ${Map2X_Utility_DirectoryTest_SRCS} ${Map2X_Utility_DirectoryTest_MOC})
 target_link_libraries(DirectoryTest Map2XUtility ${QT_QTCORE_LIBRARY} ${QT_QTTEST_LIBRARY})
+target_link_libraries(EndianTest ${QT_QTCORE_LIBRARY} ${QT_QTTEST_LIBRARY})
 
 add_test(DirectoryTest DirectoryTest)
+add_test(EndianTest EndianTest)

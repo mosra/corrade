@@ -1,0 +1,1 @@
+#cmakedefine ENDIANNESS_BIG_ENDIAN
