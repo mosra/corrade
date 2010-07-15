@@ -7,7 +7,7 @@ set(UTILITY_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/DirectoryTestConfigure.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/DirectoryTestConfigure.h)
 
-include_directories(${CMAKE_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${Map2XCore_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR})
 
 qt4_wrap_cpp(Map2X_Utility_DirectoryTest_MOC DirectoryTest.h)
 qt4_wrap_cpp(Map2X_Utility_EndianTest_MOC EndianTest.h)

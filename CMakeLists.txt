@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(map2x-lib)
+project(Map2XCore)
+
+set(CMAKE_MODULE_PATH "${Map2XCore_SOURCE_DIR}/modules/")
 
 add_subdirectory(src)
 

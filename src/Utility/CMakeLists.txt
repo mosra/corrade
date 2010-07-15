@@ -1,4 +1,4 @@
-include_directories(${CMAKE_BINARY_DIR}/src)
+include_directories(${Map2XCore_BINARY_DIR}/src)
 
 include(TestBigEndian)
 test_big_endian(ENDIANNESS_BIG_ENDIAN)
