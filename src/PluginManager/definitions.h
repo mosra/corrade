@@ -74,9 +74,9 @@ namespace Map2X { namespace PluginManager {
  * must be called too.
  */
 #define PLUGIN_REGISTER_STATIC(name, className, _interface) \
-    extern "C" int name##Version() { return PLUGIN_VERSION; } \
-    extern "C" void* name##Instancer() { return new className; } \
-    extern "C" void name##MetadataCreator(Map2X::PluginManager::PluginMetadata* metadata) { \
+    extern "C" inline int name##Version() { return PLUGIN_VERSION; } \
+    extern "C" inline void* name##Instancer() { return new className; } \
+    extern "C" inline void name##MetadataCreator(Map2X::PluginManager::PluginMetadata* metadata) { \
         metadata->interface = _interface;
 
 /** @{ @name Plugin metadata
