@@ -22,7 +22,7 @@ using namespace std;
 
 namespace Map2X { namespace Utility {
 
-Directory::Directory(string path, int flags): _isLoaded(false) {
+Directory::Directory(const string& path, int flags): _isLoaded(false) {
     DIR* directory;
     dirent* entry;
 

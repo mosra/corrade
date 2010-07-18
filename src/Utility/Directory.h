@@ -68,7 +68,7 @@ class Directory: public std::vector<std::string> {
          * Tries to load items from given directory. Directory::isLoaded()
          * should be used to determine whether the load was successful or not.
          */
-        Directory(std::string path, int flags = 0);
+        Directory(const std::string& path, int flags = 0);
 
         /** @brief Whether the directory is successfully loaded */
         inline bool isLoaded() const { return _isLoaded; }
