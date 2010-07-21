@@ -38,6 +38,7 @@ namespace Map2X { namespace PluginManager {
  *      C++ Standard Core Language Active Issue #195,
  *      http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_defects.html#195 )
  * @todo Destructor, unloading at destroy
+ * @todo Print out errors to stderr
  */
 template<class T> class PluginManager: public PluginManagerStatic {
     private:
