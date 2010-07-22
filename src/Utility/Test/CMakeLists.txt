@@ -11,12 +11,16 @@ include_directories(${Map2XCore_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR})
 
 qt4_wrap_cpp(Map2X_Utility_DirectoryTest_MOC DirectoryTest.h)
 qt4_wrap_cpp(Map2X_Utility_EndianTest_MOC EndianTest.h)
+qt4_wrap_cpp(Map2X_Utility_UtilitiesTest_MOC UtilitiesTest.h)
 
 add_executable(DirectoryTest DirectoryTest.cpp ${Map2X_Utility_DirectoryTest_MOC})
 add_executable(EndianTest EndianTest.cpp ${Map2X_Utility_EndianTest_MOC})
+add_executable(UtilitiesTest UtilitiesTest.cpp ${Map2X_Utility_UtilitiesTest_MOC})
 
 target_link_libraries(DirectoryTest Map2XUtility ${QT_QTCORE_LIBRARY} ${QT_QTTEST_LIBRARY})
 target_link_libraries(EndianTest ${QT_QTCORE_LIBRARY} ${QT_QTTEST_LIBRARY})
+target_link_libraries(UtilitiesTest Map2XUtility ${QT_QTCORE_LIBRARY} ${QT_QTTEST_LIBRARY})
 
 add_test(DirectoryTest DirectoryTest)
 add_test(EndianTest EndianTest)
+add_test(UtilitiesTest UtilitiesTest)

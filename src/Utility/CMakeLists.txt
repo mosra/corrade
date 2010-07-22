@@ -8,6 +8,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/EndiannessConfigure.h.cmake
 
 set(Map2X_Utility_SRCS
     Directory.cpp
+    utilities.cpp
 )
 
 add_library(Map2XUtility STATIC ${Map2X_Utility_SRCS})
