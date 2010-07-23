@@ -14,5 +14,6 @@ set(Map2X_Utility_SRCS
 add_library(Map2XUtility STATIC ${Map2X_Utility_SRCS})
 
 if(BUILD_TESTS)
+    enable_testing()
     add_subdirectory(Test)
 endif()

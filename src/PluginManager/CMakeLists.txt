@@ -10,5 +10,6 @@ set(Map2X_PluginManager_SRCS
 add_library(Map2XPluginManager STATIC ${Map2X_PluginManager_SRCS})
 
 if(BUILD_TESTS)
+    enable_testing()
     add_subdirectory(Test)
 endif()
