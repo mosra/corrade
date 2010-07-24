@@ -56,8 +56,8 @@ template<class T> class PluginManager: public PluginManagerStatic {
          */
         PluginManager(const std::string& _pluginDirectory);
 
-        PluginManagerStatic::LoadState load(const std::string& name);
-        PluginManagerStatic::LoadState unload(const std::string& name);
+        LoadState load(const std::string& name);
+        LoadState unload(const std::string& name);
 
         /**
          * @brief Plugin class instance

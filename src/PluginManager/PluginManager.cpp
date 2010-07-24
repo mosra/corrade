@@ -27,7 +27,7 @@ using Map2X::Utility::Directory;
 
 namespace Map2X { namespace PluginManager {
 
-/** @todo Support for other systems' module filenames (Mac OS, Symbian at least) */
+/** @todo Replace with CMake values */
 #ifdef _WIN32
 #define PLUGIN_FILENAME_PREFIX ""
 #define PLUGIN_FILENAME_SUFFIX ".dll"
@@ -73,7 +73,7 @@ template<class T> PluginManager<T>::PluginManager(const string& _pluginDirectory
     }
 }
 
-template<class T> typename PluginManager<T>::LoadState PluginManager<T>::load(const string& name) {
+template<class T> PluginManagerStatic::LoadState PluginManager<T>::load(const string& name) {
     /* Plugin with given name doesn't exist */
     if(plugins.find(name) == plugins.end()) return NotFound;
 
@@ -135,7 +135,7 @@ template<class T> typename PluginManager<T>::LoadState PluginManager<T>::load(co
     return plugin.loadState;
 }
 
-template<class T> typename PluginManager<T>::LoadState PluginManager<T>::unload(const string& name) {
+template<class T> PluginManagerStatic::LoadState PluginManager<T>::unload(const string& name) {
     /* Plugin with given name doesn't exist */
     if(plugins.find(name) == plugins.end()) return NotFound;
 
