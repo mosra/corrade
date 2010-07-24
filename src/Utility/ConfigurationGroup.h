@@ -24,37 +24,44 @@
 
 namespace Map2X { namespace Utility {
 
-/** @brief Group of values in configuration file */
+class Configuration;
+
+/**
+ * @brief Group of values in configuration file
+ *
+ * @todo Faster access to elements via multimap, find() and equal_range()
+ */
 class ConfigurationGroup {
     friend class Configuration;
 
-    private:
-        ConfigurationGroup() const;
     public:
         /** @brief Flags for value type */
         enum Flags {
             Oct     = 0x01,     /**< @brief Numeric value as octal */
             Hex     = 0x02,     /**< @brief Numeric value as hexadecimal */
-            Color   = 0x04,     /**< @brief Numeric value as color representation */
+            Color   = 0x04      /**< @brief Numeric value as color representation */
         };
+
+        /** @brief Group name */
+        inline std::string name() const { return _name; }
 
         /**
          * @brief Value
          * @param key       Key name
          * @param value     Pointer where to store value
-         * @param flags     Flags (see ConfigurationGroup::Flags)
          * @param number    Number of the value. Default is first found value.
+         * @param _flags    Flags (see ConfigurationGroup::Flags)
          * @return Whether the value was found
          */
-        template<class T> bool value(const std::string& key, T* value, int flags = 0, unsigned int number = 0) const;
+        template<class T> bool value(const std::string& key, T* value, unsigned int number = 0, int _flags = 0) const;
 
         /**
          * @brief All values with given key name
          * @param key       Key name
-         * @param flags     Flags (see ConfigurationGroup::Flags)
+         * @param _flags    Flags (see ConfigurationGroup::Flags)
          * @return Vector with all found values
          */
-        template<class T> std::vector<T> values(const std::string& key, int flags = 0) const;
+        template<class T> std::vector<T> values(const std::string& key, int _flags = 0) const;
 
         /**
          * @brief Count of values with given key name
@@ -69,8 +76,8 @@ class ConfigurationGroup {
          * @brief Set value
          * @param key       Key name
          * @param value     Value
-         * @param flags     Flags (see ConfigurationGroup::Flags)
          * @param number    Number of the value. Default is first found value.
+         * @param _flags    Flags (see ConfigurationGroup::Flags)
          * @return Whether the value was set. If the number is not 0 and the
          *      value with given number doesn't exist, returns false. See also
          *      Configuration::ReadOnly.
@@ -78,17 +85,20 @@ class ConfigurationGroup {
          * If the key already exists, changes it to new value. If the key
          * doesn't exist, adds a new key with given name.
          */
-        template<class T> bool setValue(const std::string& key, const T& value, int flags = 0, unsigned int number = 0);
+        template<class T> bool setValue(const std::string& key, const T& value, unsigned int number = 0, int _flags = 0);
 
         /**
          * @brief Add new value
          * @param key       Key name
          * @param value     Value
-         * @param flags     Flags (see ConfigurationGroup::Flags)
+         * @param _flags    Flags (see ConfigurationGroup::Flags)
          * @return Whether the value was added. See Configuration::ReadOnly,
          *      Configuration::UniqueKeys and Configuration::UniqueNames.
+         *
+         * Adds new key/value pair at the end of current group (it means also
+         * after all comments).
          */
-        template<class T> bool addValue(const std::string& key, const T& value, int flags = 0);
+        template<class T> bool addValue(const std::string& key, const T& value, int _flags = 0);
 
         /**
          * @brief Remove value
@@ -103,8 +113,25 @@ class ConfigurationGroup {
          * @brief Remove all values with given key
          * @param key       Key name
          * @return Whether the values were removed. See Configuration::ReadOnly.
+         *
+         * @todo Return false if no values was removed?
          */
         bool removeAllValues(const std::string& key);
+
+    private:
+        /** @brief Configuration item */
+        struct Item {
+            std::string key,    /**< @brief Key name (only if item is key/value pair) */
+                value;          /**< @brief Value or comment, empty line */
+        };
+
+        std::string _name;
+        std::vector<Item> _items;
+        Configuration* configuration;
+
+        inline ConfigurationGroup(const std::string& name, std::vector<Item> items, Configuration* _configuration): _name(name), _items(items), configuration(_configuration) {}
+
+        inline const std::vector<Item>& items() const { return _items; }
 };
 
 }}

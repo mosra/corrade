@@ -8,6 +8,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/EndiannessConfigure.h.cmake
 
 set(Map2X_Utility_SRCS
     Directory.cpp
+    Configuration.cpp
+    ConfigurationGroup.cpp
     utilities.cpp
 )
 

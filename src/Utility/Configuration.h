@@ -21,6 +21,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include "ConfigurationGroup.h"
 
@@ -30,8 +31,17 @@ namespace Map2X { namespace Utility {
  * @brief Parser and writer for configuration files
  * @todo CR+LF / LF / CR files
  * @todo Renaming, copying groups
+ * @todo Use find() and equal_range() for faster (log) access
+ * @todo Are groups saved in same order as originallly?
+ * @todo Use some try/catch for parsing (avoid repeated code for group adding)
+ * @todo Don't throw out whole group on invalid row
+ * @todo More data types
+ * @todo EOL autodetection according to system on unsure/new files (default is
+ *      preserve)
  */
 class Configuration {
+    friend class ConfigurationGroup;
+
     public:
         /** @brief Flags for opening configuration file */
         enum Flags {
@@ -44,28 +54,41 @@ class Configuration {
             PreserveBom     = 0x01,
 
             /**
+             * @brief Force Unix line endings
+             *
+             * Forces Unix EOL (LF). Default behavior is to preserve original.
+             * If original EOL type cannot be distinguished, Unix is used.
+             */
+            ForceUnixEol    = 0x02,
+
+            /** @brief Force Windows line endings */
+            ForceWindowsEol = 0x04,
+
+            /**
              * @brief Truncate the file
              *
              * Doesn't load any configuration from file. On saving discards
              * everything in the file and writes only newly created values.
              */
-            Truncate        = 0x02,
+            Truncate        = 0x08,
 
             /**
              * @brief Skip comments in the file
              *
-             * No comments will be preserved on saving. Useful for memory saving.
+             * No comments or empty lines will be preserved on saving. Useful
+             * for memory saving. See also Configuration::ReadOnly.
              */
-            SkipComments    = 0x04,
+            SkipComments    = 0x10,
 
             /**
              * @brief Open the file read-only
              *
              * Opens the file read-only, which means faster access to elements
-             * and less memory used. Enables Configuration::SkipComments.
-             * Adding, changing and removing groups and keys will not be allowed.
+             * and less memory used. Sets also Configuration::SkipComments.
+             * Adding, changing and removing groups and keys will not be
+             * allowed.
              */
-            ReadOnly        = 0x0c,
+            ReadOnly        = 0x20,
 
             /**
              * @brief Force unique groups
@@ -74,7 +97,7 @@ class Configuration {
              * loaded, every other will be skipped and discarded on saving.
              * Also doesn't allow adding new group with already existing name.
              */
-            UniqueGroups    = 0x10,
+            UniqueGroups    = 0x40,
 
             /**
              * @brief Force unique keys
@@ -83,24 +106,53 @@ class Configuration {
              * other will be skipped and discarded on saving. Also doesn't allow
              * adding new value with the key name already existing in the group.
              */
-            UniqueKeys      = 0x20,
+            UniqueKeys      = 0x80,
 
             /**
              * @brief Force unique groups and keys
              *
              * Same as Configuration::UniqueGroups | Configuration::UniqueKeys .
              */
-            UniqueNames     = 0x30,
+            UniqueNames     = 0xc0
         };
 
         /**
          * @brief Constructor
-         * @param file      %Configuration file
-         * @param flags     Flags (see Configuration::Flags)
+         * @param _file      %Configuration file
+         * @param _flags     Flags (see Configuration::Flags)
          *
-         * Opens the file and loads it according to specified flags.
+         * Opens the file and loads it according to specified flags. If file
+         * cannot be opened, sets invalid flag (see isValid()).
          */
-        Configuration(const std::string& file, int flags = 0);
+        Configuration(const std::string& _file, int _flags = 0);
+
+        /**
+         * @brief Destructor
+         *
+         * If the configuration has been changed, writes configuration back to
+         * the file. See also save().
+         */
+        inline ~Configuration() { if(flags & Changed) save(); }
+
+        /**
+         * @brief Whether the file is valid
+         * @return Returns false if the file has syntax errors or couldn't be
+         *      opened, true otherwise.
+         *
+         * Invalid files cannot be changed or saved back.
+         */
+        inline bool isValid() { return flags & IsValid; }
+
+        /**
+         * @brief Save configuration
+         * @return Whether the file was saved successfully
+         *
+         * Writes configuration back to the file (only if
+         * Configuration::ReadOnly flag wasn't set). Note that even if no change
+         * to the configuration was made, the file could differ after saving
+         * (see Configuration::Flags).
+         */
+        bool save();
 
         /** @{ @name Group operations */
 
@@ -142,6 +194,8 @@ class Configuration {
          * @return Newly created group or null pointer when new group cannot be
          *      added (see above or flags Configuration::UniqueGroups and
          *      Configuration::ReadOnly).
+         *
+         * Adds new group at the end of file.
          */
         ConfigurationGroup* addGroup(const std::string& name);
 
@@ -160,6 +214,8 @@ class Configuration {
          *      removed.
          * @return Whether the removal was successful (see above or flag
          *      Connfiguration::ReadOnly).
+         *
+         * @todo Return false if no group was removed?
          */
         bool removeAllGroups(const std::string& name);
 
@@ -172,18 +228,21 @@ class Configuration {
          */
 
         /** @copydoc ConfigurationGroup::value() */
-        template<class T> inline bool value(const std::string& key, T* value, int flags = 0, unsigned int number = 0) const
-            { return group()->value(key, value, number); }
+        template<class T> inline bool value(const std::string& key, T* value, unsigned int number = 0, int flags = 0) const
+            { return group()->value<T>(key, value, number, flags); }
         /** @copydoc ConfigurationGroup::values() */
         template<class T> inline std::vector<T> values(const std::string& key, int flags = 0) const
-            { return group()->values<T>(key); }
+            { return group()->values<T>(key, flags); }
+        /** @copydoc ConfigurationGroup::valueCount() */
+        inline unsigned int valueCount(const std::string& key) const
+            { return group()->valueCount(key); }
 
         /** @copydoc ConfigurationGroup::setValue() */
-        template<class T> inline bool setValue(const std::string& key, const T& value, int flags = 0, unsigned int number = 0)
-            { return group()->setValue(key, value, number); }
+        template<class T> inline bool setValue(const std::string& key, const T& value, unsigned int number = 0, int flags = 0)
+            { return group()->setValue<T>(key, value, number, flags); }
         /** @copydoc ConfigurationGroup::addValue() */
         template<class T> inline bool addValue(const std::string& key, const T& value, int flags = 0)
-            { return group()->addValue(key, value); }
+            { return group()->addValue<T>(key, value, flags); }
 
         /** @copydoc ConfigurationGroup::removeValue() */
         inline bool removeValue(const std::string& key, unsigned int number = 0)
@@ -193,6 +252,28 @@ class Configuration {
             { return group()->removeAllValues(key); }
 
         /*@}*/
+
+    private:
+        /** @brief Private flags for file state */
+        enum PrivateFlags {
+            IsValid = 0x10000,      /**< @brief Whether the loaded file is valid */
+            HasBom = 0x20000,       /**< @brief BOM mark was found in the file */
+            WindowsEol = 0x40000,   /**< @brief The file has Windows line endings */
+            Changed = 0x80000       /**< @brief Whether the file has changed */
+        };
+
+        /** @brief Configuration file */
+        std::string filename;
+
+        /**
+         * @brief Flags
+         *
+         * Combination of Configuration::Flags and Configuration::PrivateFlags.
+         */
+        int flags;
+
+        /** @brief Configuration groups */
+        std::vector<ConfigurationGroup> _groups;
 };
 
 }}
