@@ -33,4 +33,34 @@ void PluginManagerStatic::importStaticPlugin(const string& name, int _version, v
     staticPlugins.push_back(p);
 }
 
+vector<string> PluginManagerStatic::nameList() const {
+    vector<string> names;
+    for(map<string, Plugin>::const_iterator i = plugins.begin(); i != plugins.end(); ++i)
+        names.push_back(i->first);
+    return names;
+}
+
+void PluginManagerStatic::loadAll() {
+    for(map<string, Plugin>::const_iterator i = plugins.begin(); i != plugins.end(); ++i)
+        load(i->first);
+}
+
+const PluginMetadata* PluginManagerStatic::metadata(const string& name) {
+    /* Plugin with given name doesn't exist */
+    if(plugins.find(name) == plugins.end()) return 0;
+
+    /* If plugin was not yet loaded, try to load it */
+    if(plugins.at(name).loadState == NotLoaded)
+        load(name);
+
+    return &plugins.at(name).metadata;
+}
+
+PluginManagerStatic::LoadState PluginManagerStatic::loadState(const string& name) {
+    /* Plugin with given name doesn't exist */
+    if(plugins.find(name) == plugins.end()) return NotFound;
+
+    return plugins.at(name).loadState;
+}
+
 }}

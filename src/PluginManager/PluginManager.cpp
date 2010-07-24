@@ -73,36 +73,6 @@ template<class T> PluginManager<T>::PluginManager(const string& _pluginDirectory
     }
 }
 
-template<class T> vector<string> PluginManager<T>::nameList() const {
-    vector<string> names;
-    for(map<string, Plugin>::const_iterator i = plugins.begin(); i != plugins.end(); ++i)
-        names.push_back(i->first);
-    return names;
-}
-
-template<class T> void PluginManager<T>::loadAll() {
-    for(map<string, Plugin>::const_iterator i = plugins.begin(); i != plugins.end(); ++i)
-        load(i->first);
-}
-
-template<class T> const PluginMetadata* PluginManager<T>::metadata(const string& name) {
-    /* Plugin with given name doesn't exist */
-    if(plugins.find(name) == plugins.end()) return 0;
-
-    /* If plugin was not yet loaded, try to load it */
-    if(plugins.at(name).loadState == NotLoaded)
-        load(name);
-
-    return &plugins.at(name).metadata;
-}
-
-template<class T> typename PluginManager<T>::LoadState PluginManager<T>::loadState(const string& name) {
-    /* Plugin with given name doesn't exist */
-    if(plugins.find(name) == plugins.end()) return NotFound;
-
-    return plugins.at(name).loadState;
-}
-
 template<class T> typename PluginManager<T>::LoadState PluginManager<T>::load(const string& name) {
     /* Plugin with given name doesn't exist */
     if(plugins.find(name) == plugins.end()) return NotFound;

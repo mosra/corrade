@@ -21,7 +21,6 @@
 
 #include <string>
 #include <vector>
-#include <map>
 
 #include "PluginMetadata.h"
 #include "PluginManagerStatic.h"
@@ -43,7 +42,6 @@ namespace Map2X { namespace PluginManager {
 template<class T> class PluginManager: public PluginManagerStatic {
     private:
         std::string pluginDirectory;
-        std::map<std::string, Plugin> plugins;
 
     public:
         /**
@@ -58,63 +56,7 @@ template<class T> class PluginManager: public PluginManagerStatic {
          */
         PluginManager(const std::string& _pluginDirectory);
 
-        /** @brief List of all available plugin names */
-        inline std::vector<std::string> nameList() const;
-
-        /**
-         * @brief Try to load all plugins
-         *
-         * Alphabetically goes through list and tries to load plugins. Does not
-         * any conflict resolving, whichever plugin was first, that plugin will
-         * be loaded and any conflicting plugins loaded after will be skipped.
-         * @see PluginManager::load()
-         */
-        void loadAll();
-
-        /**
-         * @brief Plugin metadata
-         * @param name              Plugin name
-         * @return Pointer to plugin metadata
-         */
-        const PluginMetadata* metadata(const std::string& name);
-
-        /**
-         * @brief Load state of a plugin
-         * @param name              Plugin name
-         * @return Load state of a plugin
-         *
-         * Static plugins always have PluginManangerStatic::Static state.
-         */
-        PluginManagerStatic::LoadState loadState(const std::string& name);
-
-        /**
-         * @brief Load a plugin
-         * @param name              Plugin name
-         * @return PluginManagerStatic::LoadOk on success,
-         *      PluginManagerStatic::NotFound,
-         *      PluginManagerStatic::WrongPluginVersion,
-         *      PluginManagerStatic::WrongInterfaceVersion,
-         *      PluginManagerStatic::Conflicts,
-         *      PluginManagerStatic::UnresolvedDependency or
-         *      PluginManagerStatic::LoadFailed  on failure.
-         *
-         * Checks whether a plugin is loaded, if not and loading is possible,
-         * tries to load it. If the plugin has any dependencies, they are
-         * recursively processed before loading given plugin.
-         */
         PluginManagerStatic::LoadState load(const std::string& name);
-
-        /**
-         * @brief Unload a plugin
-         * @param name              Plugin name
-         * @return PluginManagerStatic::UnloadOk on success,
-         *      PluginManagerStatic::UnloadFailed,
-         *      PluginManagerStatic::IsRequired or
-         *      PluginManagerStatic::IsStatic on failure.
-         *
-         * Checks whether a plugin is loaded, if yes, tries to unload it. If the
-         * plugin is not loaded, returns its current load state.
-         */
         PluginManagerStatic::LoadState unload(const std::string& name);
 
         /**
