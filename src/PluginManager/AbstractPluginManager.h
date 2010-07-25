@@ -125,7 +125,7 @@ class AbstractPluginManager {
 
         /**
          * @brief Constructor
-         * @param _pluginDirectory  Directory where plugins will be searched,
+         * @param pluginDirectory   Directory where plugins will be searched,
          *      with tailing slash. No recursive processing is done.
          *
          * First goes through list of static plugins and finds ones that use
@@ -133,7 +133,10 @@ class AbstractPluginManager {
          * all dynamic plugins in given directory.
          * @see PluginManager::nameList()
          */
-        AbstractPluginManager(const std::string& _pluginDirectory);
+        AbstractPluginManager(const std::string& pluginDirectory);
+
+        /** @brief Plugin directory */
+        std::string pluginDirectory() const { return _pluginDirectory; }
 
         /** @brief List of all available plugin names */
         std::vector<std::string> nameList() const;
@@ -211,13 +214,11 @@ class AbstractPluginManager {
         };
 
         static std::vector<StaticPlugin> staticPlugins;
+        std::string _pluginDirectory;
         std::map<std::string, Plugin> plugins;
 
         virtual std::string pluginInterface() const = 0;
         #endif
-
-    private:
-        std::string pluginDirectory;
 };
 
 /**

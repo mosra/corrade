@@ -39,7 +39,7 @@ void AbstractPluginManager::importStaticPlugin(const string& name, int _version,
     staticPlugins.push_back(p);
 }
 
-AbstractPluginManager::AbstractPluginManager(const string& _pluginDirectory): pluginDirectory(_pluginDirectory) {
+AbstractPluginManager::AbstractPluginManager(const string& pluginDirectory): _pluginDirectory(pluginDirectory) {
     /* Plugin directory contents */
     Directory d(_pluginDirectory, Directory::SkipDirectories|Directory::SkipSpecial);
 
@@ -107,7 +107,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
 
     /* Open plugin file, make symbols available for next libs (which depends on this) */
     /** @todo Portable directory separator or plugindir with separator */
-    void* handle = dlopen((pluginDirectory + PLUGIN_FILENAME_PREFIX + name + PLUGIN_FILENAME_SUFFIX).c_str(),
+    void* handle = dlopen((_pluginDirectory + PLUGIN_FILENAME_PREFIX + name + PLUGIN_FILENAME_SUFFIX).c_str(),
                           RTLD_NOW|RTLD_GLOBAL);
     if(!handle) {
         plugin.loadState = LoadFailed;
