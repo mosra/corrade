@@ -50,7 +50,7 @@ const PluginMetadata* PluginManagerStatic::metadata(const string& name) {
     if(plugins.find(name) == plugins.end()) return 0;
 
     /* If plugin was not yet loaded, try to load it */
-    if(plugins.at(name).loadState == NotLoaded)
+    if(plugins.at(name).loadState == Unknown)
         load(name);
 
     return &plugins.at(name).metadata;
