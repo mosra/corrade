@@ -1,4 +1,4 @@
-include_directories(${Map2XCore_BINARY_DIR}/src)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 include(TestBigEndian)
 test_big_endian(ENDIANNESS_BIG_ENDIAN)
@@ -7,6 +7,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/EndiannessConfigure.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/EndiannessConfigure.h)
 
 set(Map2X_Utility_SRCS
+    Endianness.cpp
     Directory.cpp
     Configuration.cpp
     ConfigurationGroup.cpp

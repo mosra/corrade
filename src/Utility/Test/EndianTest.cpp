@@ -19,6 +19,8 @@
 
 #include "Utility/Endianness.h"
 
+#include "../EndiannessConfigure.h"
+
 QTEST_APPLESS_MAIN(Map2X::Utility::Test::EndianTest)
 
 namespace Map2X { namespace Utility { namespace Test {
