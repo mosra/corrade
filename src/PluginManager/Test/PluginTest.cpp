@@ -43,7 +43,7 @@ void PluginTest::nameList() {
 }
 
 void PluginTest::staticPlugin() {
-    QVERIFY(manager->loadState("Dog") == PluginManagerStatic::IsStatic);
+    QVERIFY(manager->loadState("Dog") == AbstractPluginManager::IsStatic);
     QVERIFY(manager->metadata("Dog")->name == "A simple dog plugin");
 
     AbstractAnimal* animal = manager->instance("Dog");
@@ -55,9 +55,9 @@ void PluginTest::staticPlugin() {
 }
 
 void PluginTest::dynamicPlugin() {
-    QVERIFY(manager->loadState("Canary") == PluginManagerStatic::Unknown);
-    QVERIFY(manager->load("Canary") == PluginManagerStatic::LoadOk);
-    QVERIFY(manager->loadState("Canary") == PluginManagerStatic::LoadOk);
+    QVERIFY(manager->loadState("Canary") == AbstractPluginManager::Unknown);
+    QVERIFY(manager->load("Canary") == AbstractPluginManager::LoadOk);
+    QVERIFY(manager->loadState("Canary") == AbstractPluginManager::LoadOk);
     QVERIFY(manager->metadata("Canary")->name == "I'm allergic to canaries!");
 
     AbstractAnimal* animal = manager->instance("Canary");
@@ -67,8 +67,8 @@ void PluginTest::dynamicPlugin() {
     QVERIFY(animal->name() == "Achoo");
     QVERIFY(animal->legCount() == 2);
 
-    QVERIFY(manager->unload("Canary") == PluginManagerStatic::NotLoaded);
-    QVERIFY(manager->loadState("Canary") == PluginManagerStatic::NotLoaded);
+    QVERIFY(manager->unload("Canary") == AbstractPluginManager::NotLoaded);
+    QVERIFY(manager->loadState("Canary") == AbstractPluginManager::NotLoaded);
 }
 
 }}}

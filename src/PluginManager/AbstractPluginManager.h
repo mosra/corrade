@@ -1,5 +1,5 @@
-#ifndef Map2X_PluginManager_PluginManagerStatic_h
-#define Map2X_PluginManager_PluginManagerStatic_h
+#ifndef Map2X_PluginManager_AbstractPluginManager_h
+#define Map2X_PluginManager_AbstractPluginManager_h
 /*
     Copyright © 2007, 2008, 2009, 2010 Vladimír Vondruš <mosra@centrum.cz>
 
@@ -16,7 +16,7 @@
 */
 
 /** @file
- * @brief Class Map2X::PluginManager::PluginManagerStatic
+ * @brief Class Map2X::PluginManager::AbstractPluginManager
  */
 
 #include <vector>
@@ -33,7 +33,7 @@ namespace Map2X { namespace PluginManager {
  * Defines static members which are used by all PluginManager template classes.
  * See also @ref PluginManagement.
  */
-class PluginManagerStatic {
+class AbstractPluginManager {
     public:
         /**
          * @brief Load state
@@ -108,7 +108,7 @@ class PluginManagerStatic {
          * @param name              Static plugin name (defined with
          *      PLUGIN_REGISTER_STATIC())
          * @param _version          %Plugin version (must be the same as
-         *      PluginManagerStatic::version)
+         *      AbstractPluginManager::version)
          * @param metadataCreator   Pointer to metadata creator function
          * @param instancer         Pointer to plugin class instancer function
          *
@@ -149,13 +149,13 @@ class PluginManagerStatic {
         /**
          * @brief Load a plugin
          * @param name              Plugin name
-         * @return PluginManagerStatic::LoadOk on success,
-         *      PluginManagerStatic::NotFound,
-         *      PluginManagerStatic::WrongPluginVersion,
-         *      PluginManagerStatic::WrongInterfaceVersion,
-         *      PluginManagerStatic::Conflicts,
-         *      PluginManagerStatic::UnresolvedDependency or
-         *      PluginManagerStatic::LoadFailed  on failure.
+         * @return AbstractPluginManager::LoadOk on success,
+         *      AbstractPluginManager::NotFound,
+         *      AbstractPluginManager::WrongPluginVersion,
+         *      AbstractPluginManager::WrongInterfaceVersion,
+         *      AbstractPluginManager::Conflicts,
+         *      AbstractPluginManager::UnresolvedDependency or
+         *      AbstractPluginManager::LoadFailed  on failure.
          *
          * Checks whether a plugin is loaded, if not and loading is possible,
          * tries to load it. If the plugin has any dependencies, they are
@@ -166,10 +166,10 @@ class PluginManagerStatic {
         /**
          * @brief Unload a plugin
          * @param name              Plugin name
-         * @return PluginManagerStatic::UnloadOk on success,
-         *      PluginManagerStatic::UnloadFailed,
-         *      PluginManagerStatic::IsRequired or
-         *      PluginManagerStatic::IsStatic on failure.
+         * @return AbstractPluginManager::UnloadOk on success,
+         *      AbstractPluginManager::UnloadFailed,
+         *      AbstractPluginManager::IsRequired or
+         *      AbstractPluginManager::IsStatic on failure.
          *
          * Checks whether a plugin is loaded, if yes, tries to unload it. If the
          * plugin is not loaded, returns its current load state.
@@ -195,7 +195,7 @@ class PluginManagerStatic {
         static std::vector<StaticPlugin> staticPlugins;
         std::map<std::string, Plugin> plugins;
 
-        inline PluginManagerStatic() {}
+        inline AbstractPluginManager() {}
         #endif
 };
 
@@ -209,7 +209,7 @@ class PluginManagerStatic {
  * macro, otherwise it will not be loaded.
  */
 #define PLUGIN_IMPORT_STATIC(name) \
-    Map2X::PluginManager::PluginManagerStatic::importStaticPlugin(#name, name##Version(), name##MetadataCreator, name##Instancer);
+    Map2X::PluginManager::AbstractPluginManager::importStaticPlugin(#name, name##Version(), name##MetadataCreator, name##Instancer);
 
 }}
 

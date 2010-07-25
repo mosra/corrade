@@ -73,7 +73,7 @@ template<class T> PluginManager<T>::PluginManager(const string& _pluginDirectory
     }
 }
 
-template<class T> PluginManagerStatic::LoadState PluginManager<T>::load(const string& name) {
+template<class T> AbstractPluginManager::LoadState PluginManager<T>::load(const string& name) {
     /* Plugin with given name doesn't exist */
     if(plugins.find(name) == plugins.end()) return NotFound;
 
@@ -135,7 +135,7 @@ template<class T> PluginManagerStatic::LoadState PluginManager<T>::load(const st
     return plugin.loadState;
 }
 
-template<class T> PluginManagerStatic::LoadState PluginManager<T>::unload(const string& name) {
+template<class T> AbstractPluginManager::LoadState PluginManager<T>::unload(const string& name) {
     /* Plugin with given name doesn't exist */
     if(plugins.find(name) == plugins.end()) return NotFound;
 

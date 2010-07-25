@@ -3,7 +3,7 @@ include_directories(${Map2XCore_SOURCE_DIR}/src)
 add_definitions(-Wall -pedantic)
 
 set(Map2X_PluginManager_SRCS
-    PluginManagerStatic.cpp
+    AbstractPluginManager.cpp
     PluginManager.cpp
 )
 

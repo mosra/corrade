@@ -13,17 +13,17 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "PluginManagerStatic.h"
+#include "AbstractPluginManager.h"
 
 using namespace std;
 
 namespace Map2X { namespace PluginManager {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-vector<PluginManagerStatic::StaticPlugin> PluginManagerStatic::staticPlugins;
+vector<AbstractPluginManager::StaticPlugin> AbstractPluginManager::staticPlugins;
 #endif
 
-void PluginManagerStatic::importStaticPlugin(const string& name, int _version, void (*metadataCreator)(PluginMetadata*), void* (*instancer)()) {
+void AbstractPluginManager::importStaticPlugin(const string& name, int _version, void (*metadataCreator)(PluginMetadata*), void* (*instancer)()) {
     if(_version != version) return;
 
     StaticPlugin p;
@@ -33,19 +33,19 @@ void PluginManagerStatic::importStaticPlugin(const string& name, int _version, v
     staticPlugins.push_back(p);
 }
 
-vector<string> PluginManagerStatic::nameList() const {
+vector<string> AbstractPluginManager::nameList() const {
     vector<string> names;
     for(map<string, Plugin>::const_iterator i = plugins.begin(); i != plugins.end(); ++i)
         names.push_back(i->first);
     return names;
 }
 
-void PluginManagerStatic::loadAll() {
+void AbstractPluginManager::loadAll() {
     for(map<string, Plugin>::const_iterator i = plugins.begin(); i != plugins.end(); ++i)
         load(i->first);
 }
 
-const PluginMetadata* PluginManagerStatic::metadata(const string& name) {
+const PluginMetadata* AbstractPluginManager::metadata(const string& name) {
     /* Plugin with given name doesn't exist */
     if(plugins.find(name) == plugins.end()) return 0;
 
@@ -56,7 +56,7 @@ const PluginMetadata* PluginManagerStatic::metadata(const string& name) {
     return &plugins.at(name).metadata;
 }
 
-PluginManagerStatic::LoadState PluginManagerStatic::loadState(const string& name) {
+AbstractPluginManager::LoadState AbstractPluginManager::loadState(const string& name) {
     /* Plugin with given name doesn't exist */
     if(plugins.find(name) == plugins.end()) return NotFound;
 

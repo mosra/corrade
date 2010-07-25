@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "PluginMetadata.h"
-#include "PluginManagerStatic.h"
+#include "AbstractPluginManager.h"
 
 namespace Map2X { namespace PluginManager {
 
@@ -39,7 +39,7 @@ namespace Map2X { namespace PluginManager {
  * @todo Destructor, unloading at destroy
  * @todo Print out errors to stderr
  */
-template<class T> class PluginManager: public PluginManagerStatic {
+template<class T> class PluginManager: public AbstractPluginManager {
     private:
         std::string pluginDirectory;
 
