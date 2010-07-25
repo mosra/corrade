@@ -32,32 +32,23 @@ namespace Map2X { namespace PluginManager {
  *
  * Manages loading, instancing and unloading plugins.
  * See also @ref PluginManagement.
- * @todo Resolving dependecies, updating PluginMetadata with reversed deps
- * @todo Casting pointer-to-object to pointer-to-function is not ISO C++ (see
- *      C++ Standard Core Language Active Issue #195,
- *      http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_defects.html#195 )
- * @todo Destructor, unloading at destroy
- * @todo Print out errors to stderr
  */
 template<class T> class PluginManager: public AbstractPluginManager {
-    private:
-        std::string pluginDirectory;
-
     public:
-        /**
-         * @brief Constructor
-         * @param _pluginDirectory  Directory where plugins will be searched,
-         *      with tailing slash. No recursive processing is done.
-         *
-         * First goes through list of static plugins and finds ones that use
-         * the same interface as this PluginManager instance. The gets list of
-         * all dynamic plugins in given directory.
-         * @see PluginManager::nameList()
-         */
-        PluginManager(const std::string& _pluginDirectory);
+        PluginManager(const std::string& _pluginDirectory): AbstractPluginManager(_pluginDirectory) {
+            /* Load static plugins which use the same API */
+            for(std::vector<StaticPlugin>::const_iterator i = staticPlugins.begin(); i != staticPlugins.end(); ++i) {
+                Plugin p;
+                p.loadState = IsStatic;
+                p.instancer = i->instancer;
+                i->metadataCreator(&p.metadata);
 
-        LoadState load(const std::string& name);
-        LoadState unload(const std::string& name);
+                if(p.metadata.interface == pluginInterface())
+                    plugins.insert(std::pair<std::string, Plugin>(i->name, p));
+            }
+        }
+
+        std::string pluginInterface() const { return T::pluginInterface(); }
 
         /**
          * @brief Plugin class instance
@@ -67,13 +58,19 @@ template<class T> class PluginManager: public AbstractPluginManager {
          * Creates new instance of plugin class, if possible. If the plugin is
          * not successfully loaded, returns zero pointer.
          */
-        T* instance(const std::string& name);
+        T* instance(const std::string& name) {
+            /* Plugin with given name doesn't exist */
+            if(plugins.find(name) == plugins.end()) return 0;
+
+            Plugin& plugin = plugins.at(name);
+
+            /* Plugin is not successfully loaded */
+            if(!(plugin.loadState & (LoadOk|IsStatic))) return 0;
+
+            return static_cast<T*>(plugin.instancer());
+        }
 };
 
 }}
-
-#ifndef Map2X_PluginManager_PluginManager_cpp
-#include "PluginManager.cpp"
-#endif
 
 #endif

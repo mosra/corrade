@@ -22,6 +22,8 @@
 
 QTEST_APPLESS_MAIN(Map2X::PluginManager::Test::PluginTest)
 
+using namespace std;
+
 namespace Map2X { namespace PluginManager { namespace Test {
 
 PluginTest::PluginTest() {

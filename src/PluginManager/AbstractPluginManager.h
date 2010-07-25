@@ -30,8 +30,14 @@ namespace Map2X { namespace PluginManager {
 /**
  * @brief Base class of PluginManager
  *
- * Defines static members which are used by all PluginManager template classes.
- * See also @ref PluginManagement.
+ * Base abstract class for all PluginManager templated classes. See also
+ * @ref PluginManagement.
+ * @todo Resolving dependecies, updating PluginMetadata with reversed deps
+ * @todo Casting pointer-to-object to pointer-to-function is not ISO C++ (see
+ *      C++ Standard Core Language Active Issue #195,
+ *      http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_defects.html#195 )
+ * @todo Destructor, unloading at destroy
+ * @todo Print out errors to stderr
  */
 class AbstractPluginManager {
     public:
@@ -117,6 +123,18 @@ class AbstractPluginManager {
          */
         static void importStaticPlugin(const std::string& name, int _version, void (*metadataCreator)(PluginMetadata*), void* (*instancer)());
 
+        /**
+         * @brief Constructor
+         * @param _pluginDirectory  Directory where plugins will be searched,
+         *      with tailing slash. No recursive processing is done.
+         *
+         * First goes through list of static plugins and finds ones that use
+         * the same interface as this PluginManager instance. The gets list of
+         * all dynamic plugins in given directory.
+         * @see PluginManager::nameList()
+         */
+        AbstractPluginManager(const std::string& _pluginDirectory);
+
         /** @brief List of all available plugin names */
         std::vector<std::string> nameList() const;
 
@@ -161,7 +179,7 @@ class AbstractPluginManager {
          * tries to load it. If the plugin has any dependencies, they are
          * recursively processed before loading given plugin.
          */
-        virtual LoadState load(const std::string& name) = 0;
+        LoadState load(const std::string& name);
 
         /**
          * @brief Unload a plugin
@@ -174,7 +192,7 @@ class AbstractPluginManager {
          * Checks whether a plugin is loaded, if yes, tries to unload it. If the
          * plugin is not loaded, returns its current load state.
          */
-        virtual LoadState unload(const std::string& name) = 0;
+        LoadState unload(const std::string& name);
 
     protected:
         #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -195,8 +213,11 @@ class AbstractPluginManager {
         static std::vector<StaticPlugin> staticPlugins;
         std::map<std::string, Plugin> plugins;
 
-        inline AbstractPluginManager() {}
+        virtual std::string pluginInterface() const = 0;
         #endif
+
+    private:
+        std::string pluginDirectory;
 };
 
 /**
