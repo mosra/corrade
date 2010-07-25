@@ -38,6 +38,7 @@ namespace Map2X { namespace Utility {
  * @todo More data types
  * @todo EOL autodetection according to system on unsure/new files (default is
  *      preserve)
+ * @todo Use quotes for saved value if value has spaces
  */
 class Configuration {
     friend class ConfigurationGroup;
