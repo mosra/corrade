@@ -38,6 +38,7 @@ namespace Map2X { namespace PluginManager {
  *      http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_defects.html#195 )
  * @todo Destructor, unloading at destroy
  * @todo Print out errors to stderr
+ * @todo Don't unload plugin when instance is active
  */
 class AbstractPluginManager {
     public:
