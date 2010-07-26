@@ -216,9 +216,10 @@ class AbstractPluginManager {
         static std::vector<StaticPlugin> staticPlugins;
         std::string _pluginDirectory;
         std::map<std::string, Plugin> plugins;
-
-        virtual std::string pluginInterface() const = 0;
         #endif
+
+        /** @brief Plugin interface used by the plugin manager */
+        virtual std::string pluginInterface() const = 0;
 };
 
 /**

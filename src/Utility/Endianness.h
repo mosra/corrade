@@ -30,7 +30,7 @@ namespace Map2X { namespace Utility {
  *      including .cpp after every templated calll. But! - the actual swapping
  *      code needs generated header which says whether the system is Big or
  *      Little endian. So, to avoid generating that header for every call of
- *      these functions, that code must be in .cpp. Also GCC 4.5@64bit doesn't
+ *      these functions, that code must be in .cpp. Also GCC 4.5@@64bit doesn't
  *      like new unsigned char[] here, so the resulting number must be allocated
  *      in advance and the swapping function writes to that via pointer.
  */

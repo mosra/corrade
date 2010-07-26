@@ -50,18 +50,18 @@ class ConfigurationGroup {
          * @param key       Key name
          * @param value     Pointer where to store value
          * @param number    Number of the value. Default is first found value.
-         * @param _flags    Flags (see ConfigurationGroup::Flags)
+         * @param flags     Flags (see ConfigurationGroup::Flags)
          * @return Whether the value was found
          */
-        template<class T> bool value(const std::string& key, T* value, unsigned int number = 0, int _flags = 0) const;
+        template<class T> bool value(const std::string& key, T* value, unsigned int number = 0, int flags = 0) const;
 
         /**
          * @brief All values with given key name
          * @param key       Key name
-         * @param _flags    Flags (see ConfigurationGroup::Flags)
+         * @param flags     Flags (see ConfigurationGroup::Flags)
          * @return Vector with all found values
          */
-        template<class T> std::vector<T> values(const std::string& key, int _flags = 0) const;
+        template<class T> std::vector<T> values(const std::string& key, int flags = 0) const;
 
         /**
          * @brief Count of values with given key name
@@ -77,7 +77,7 @@ class ConfigurationGroup {
          * @param key       Key name
          * @param value     Value
          * @param number    Number of the value. Default is first found value.
-         * @param _flags    Flags (see ConfigurationGroup::Flags)
+         * @param flags     Flags (see ConfigurationGroup::Flags)
          * @return Whether the value was set. If the number is not 0 and the
          *      value with given number doesn't exist, returns false. See also
          *      Configuration::ReadOnly.
@@ -85,20 +85,20 @@ class ConfigurationGroup {
          * If the key already exists, changes it to new value. If the key
          * doesn't exist, adds a new key with given name.
          */
-        template<class T> bool setValue(const std::string& key, const T& value, unsigned int number = 0, int _flags = 0);
+        template<class T> bool setValue(const std::string& key, const T& value, unsigned int number = 0, int flags = 0);
 
         /**
          * @brief Add new value
          * @param key       Key name
          * @param value     Value
-         * @param _flags    Flags (see ConfigurationGroup::Flags)
+         * @param flags     Flags (see ConfigurationGroup::Flags)
          * @return Whether the value was added. See Configuration::ReadOnly,
          *      Configuration::UniqueKeys and Configuration::UniqueNames.
          *
          * Adds new key/value pair at the end of current group (it means also
          * after all comments).
          */
-        template<class T> bool addValue(const std::string& key, const T& value, int _flags = 0);
+        template<class T> bool addValue(const std::string& key, const T& value, int flags = 0);
 
         /**
          * @brief Remove value

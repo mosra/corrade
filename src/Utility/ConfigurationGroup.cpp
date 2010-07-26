@@ -21,7 +21,16 @@ using namespace std;
 
 namespace Map2X { namespace Utility {
 
-template<> bool ConfigurationGroup::value(const string& key, string* value, unsigned int number, int _flags) const {
+unsigned int ConfigurationGroup::valueCount(const string& key) const {
+    unsigned int count = 0;
+    for(vector<Item>::const_iterator it = _items.begin(); it != _items.end(); ++it)
+        if(it->key == key) count++;
+
+    return count;
+}
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+template<> bool ConfigurationGroup::value(const string& key, string* value, unsigned int number, int flags) const {
     unsigned int foundNumber = 0;
     for(vector<Item>::const_iterator it = _items.begin(); it != _items.end(); ++it) {
         if(it->key == key) {
@@ -35,7 +44,7 @@ template<> bool ConfigurationGroup::value(const string& key, string* value, unsi
     return false;
 }
 
-template<> vector<string> ConfigurationGroup::values(const string& key, int _flags) const {
+template<> vector<string> ConfigurationGroup::values(const string& key, int flags) const {
     vector<string> found;
 
     for(vector<Item>::const_iterator it = _items.begin(); it != _items.end(); ++it)
@@ -44,15 +53,7 @@ template<> vector<string> ConfigurationGroup::values(const string& key, int _fla
     return found;
 }
 
-unsigned int ConfigurationGroup::valueCount(const string& key) const {
-    unsigned int count = 0;
-    for(vector<Item>::const_iterator it = _items.begin(); it != _items.end(); ++it)
-        if(it->key == key) count++;
-
-    return count;
-}
-
-template<> bool ConfigurationGroup::setValue(const string& key, const string& value, unsigned int number, int _flags) {
+template<> bool ConfigurationGroup::setValue(const string& key, const string& value, unsigned int number, int flags) {
     if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid))
         return false;
 
@@ -78,7 +79,7 @@ template<> bool ConfigurationGroup::setValue(const string& key, const string& va
     return true;
 }
 
-template<> bool ConfigurationGroup::addValue(const string& key, const string& value, int _flags) {
+template<> bool ConfigurationGroup::addValue(const string& key, const string& value, int flags) {
     if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid))
         return false;
 
@@ -99,6 +100,7 @@ template<> bool ConfigurationGroup::addValue(const string& key, const string& va
     configuration->flags |= Configuration::Changed;
     return true;
 }
+#endif
 
 bool ConfigurationGroup::removeValue(const string& key, unsigned int number) {
     if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid))

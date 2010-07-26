@@ -35,7 +35,8 @@ namespace Map2X { namespace PluginManager {
  */
 template<class T> class PluginManager: public AbstractPluginManager {
     public:
-        PluginManager(const std::string& _pluginDirectory): AbstractPluginManager(_pluginDirectory) {
+        /** @copydoc AbstractPluginManager::AbstractPluginManager() */
+        PluginManager(const std::string& pluginDirectory): AbstractPluginManager(pluginDirectory) {
             /* Load static plugins which use the same API */
             for(std::vector<StaticPlugin>::const_iterator i = staticPlugins.begin(); i != staticPlugins.end(); ++i) {
                 Plugin p;
