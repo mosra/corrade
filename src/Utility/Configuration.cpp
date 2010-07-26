@@ -226,6 +226,10 @@ ConfigurationGroup* Configuration::group(const string& name, unsigned int number
             return &*it;
     }
 
+    /* Automatic group creation is enabled and user wants first group,
+        try to create new group */
+    if((flags & AutoCreateGroups) && number == 0) return addGroup(name);
+
     return 0;
 }
 

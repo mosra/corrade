@@ -40,6 +40,8 @@ class ConfigurationTest: public QObject {
         void uniqueGroups();
         void uniqueKeys();
         void stripComments();
+
+        void autoCreation();
 };
 
 }}}

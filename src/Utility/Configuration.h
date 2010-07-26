@@ -39,6 +39,7 @@ namespace Map2X { namespace Utility {
  * @todo EOL autodetection according to system on unsure/new files (default is
  *      preserve)
  * @todo Use quotes for saved value if value has spaces
+ * @todo Join ReadOnly / IsValid flag checks
  */
 class Configuration {
     friend class ConfigurationGroup;
@@ -145,6 +146,49 @@ class Configuration {
         inline bool isValid() { return flags & IsValid; }
 
         /**
+         * @brief Enable/disable automatic creation of inexistent groups
+         * @param enabled   Whether to enable or disable this feature
+         *
+         * By default, calling Configuration::group() with inexistent name
+         * returns null pointer. If this feature is enabled, the group is
+         * automatically created if doesn't exist. Note that this works only for
+         * first group with that name, not when requesting group with @c number
+         * parameter set to non-zero value.
+         * @todo Check readonly/isvalid
+         */
+        inline void setAutomaticGroupCreation(bool enabled)
+            { flags |= AutoCreateGroups; }
+
+        /**
+         * @brief Whether automatic creation of inexistent groups is enabled
+         *
+         * See Configuration::setAutomaticGroupCreation().
+         */
+        inline bool automaticGroupCreation() const
+            { return flags & AutoCreateGroups; }
+
+        /**
+         * @brief Enable/disable automatic creation of inexistent key/value pairs.
+         * @param enabled   Whether to enable or disable this feature
+         *
+         * By default, calling ConfigurationGroup::value() with inexistent key
+         * returns false and pointed variable is unchanged. If this feature is
+         * enabled, the key/value pair is automatically created from given key
+         * name and value in pointed variable.
+         * @todo Check readonly/isvalid
+         */
+        inline void setAutomaticKeyCreation(bool enabled)
+            { flags |= AutoCreateKeys; }
+
+        /**
+         * @brief Whether automatic creation of inexistent keys is enabled
+         *
+         * See Configuration::setAutomaticKeyCreation().
+         */
+        inline bool automaticKeyCreation() const
+            { return flags & AutoCreateKeys; }
+
+        /**
          * @brief Save configuration
          * @return Whether the file was saved successfully
          *
@@ -229,7 +273,7 @@ class Configuration {
          */
 
         /** @copydoc ConfigurationGroup::value() */
-        template<class T> inline bool value(const std::string& key, T* value, unsigned int number = 0, int flags = 0) const
+        template<class T> inline bool value(const std::string& key, T* value, unsigned int number = 0, int flags = 0)
             { return group()->value<T>(key, value, number, flags); }
         /** @copydoc ConfigurationGroup::values() */
         template<class T> inline std::vector<T> values(const std::string& key, int flags = 0) const
@@ -260,7 +304,9 @@ class Configuration {
             IsValid = 0x10000,      /**< @brief Whether the loaded file is valid */
             HasBom = 0x20000,       /**< @brief BOM mark was found in the file */
             WindowsEol = 0x40000,   /**< @brief The file has Windows line endings */
-            Changed = 0x80000       /**< @brief Whether the file has changed */
+            Changed = 0x80000,      /**< @brief Whether the file has changed */
+            AutoCreateGroups = 0x100000,    /**< @brief Automatically create inexistent groups */
+            AutoCreateKeys = 0x200000       /**< @brief Automatically create inexistent keys */
         };
 
         /** @brief Configuration file */

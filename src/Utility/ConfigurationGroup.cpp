@@ -30,20 +30,6 @@ unsigned int ConfigurationGroup::valueCount(const string& key) const {
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-template<> bool ConfigurationGroup::value(const string& key, string* value, unsigned int number, int flags) const {
-    unsigned int foundNumber = 0;
-    for(vector<Item>::const_iterator it = _items.begin(); it != _items.end(); ++it) {
-        if(it->key == key) {
-            if(foundNumber++ == number) {
-                *value = it->value;
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
 template<> vector<string> ConfigurationGroup::values(const string& key, int flags) const {
     vector<string> found;
 
@@ -99,6 +85,25 @@ template<> bool ConfigurationGroup::addValue(const string& key, const string& va
 
     configuration->flags |= Configuration::Changed;
     return true;
+}
+
+template<> bool ConfigurationGroup::value(const string& key, string* value, unsigned int number, int flags) {
+    unsigned int foundNumber = 0;
+    for(vector<Item>::const_iterator it = _items.begin(); it != _items.end(); ++it) {
+        if(it->key == key) {
+            if(foundNumber++ == number) {
+                *value = it->value;
+                return true;
+            }
+        }
+    }
+
+    /* Automatic key/value pair creation is enabled and user wants first key,
+        try to create new key/value pair */
+    if((configuration->flags & Configuration::AutoCreateKeys) && number == 0)
+        return setValue<string>(key, *value, flags);
+
+    return false;
 }
 #endif
 

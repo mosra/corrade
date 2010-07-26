@@ -109,6 +109,7 @@ void ConfigurationTest::parse() {
 void ConfigurationTest::empty() {
     Configuration conf(TESTFILES_BINARY_DIR + string("new.conf"));
     QVERIFY(conf.isValid());
+    QVERIFY(conf.save());
 
     QVERIFY(conf.groupCount("") == 1);
 }
@@ -278,6 +279,30 @@ void ConfigurationTest::stripComments() {
     QByteArray actual = fileActual.readAll();
 
     QCOMPARE(actual, original);
+}
+
+void ConfigurationTest::autoCreation() {
+    Configuration conf(TESTFILES_BINARY_DIR + string("autoCreation.conf"), Configuration::Truncate);
+
+    QVERIFY(conf.group("newGroup") == 0);
+
+    conf.setAutomaticGroupCreation(true);
+    QVERIFY(conf.group("newGroup") != 0);
+    conf.setAutomaticGroupCreation(false);
+
+    string value1 = "defaultValue1";
+    QVERIFY(!conf.group("newGroup")->value<string>("key", &value1));
+
+    conf.setAutomaticKeyCreation(true);
+    QVERIFY(conf.group("newGroup")->value<string>("key", &value1));
+    QVERIFY(conf.group("newGroup")->valueCount("key") == 1);
+    QVERIFY(value1 == "defaultValue1");
+
+    conf.setAutomaticGroupCreation(true);
+    string value2 = "defaultValue2";
+    QVERIFY(conf.group("group")->value<string>("key", &value2));
+    QVERIFY(conf.group("group")->valueCount("key") == 1);
+    QVERIFY(value2 == "defaultValue2");
 }
 
 }}}

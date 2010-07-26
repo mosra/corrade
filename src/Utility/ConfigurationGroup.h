@@ -52,8 +52,10 @@ class ConfigurationGroup {
          * @param number    Number of the value. Default is first found value.
          * @param flags     Flags (see ConfigurationGroup::Flags)
          * @return Whether the value was found
+         *
+         * See also Configuration::automaticKeyCreation().
          */
-        template<class T> bool value(const std::string& key, T* value, unsigned int number = 0, int flags = 0) const;
+        template<class T> bool value(const std::string& key, T* value, unsigned int number = 0, int flags = 0);
 
         /**
          * @brief All values with given key name
