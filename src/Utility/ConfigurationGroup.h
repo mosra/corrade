@@ -21,10 +21,37 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 namespace Map2X { namespace Utility {
 
 class Configuration;
+
+/** @{ @name TypeConversion
+ * These functions are called internally by ConfigurationGroup functions to
+ * convert values from and to templated types. Implement these two functions
+ * with template specialization to allow saving non-standard types into
+ * configuration files.
+ * @todo Document implementation (include, namespace...)
+ */
+
+/**
+ * @brief Convert value to string
+ * @param value         Value
+ * @param flags         Conversion flags (see ConfigurationGroup::Flags)
+ * @return Value as string
+ */
+template<class T> std::string configurationValueToString(const T& value, int flags = 0);
+
+/**
+ * @brief Convert value from string
+ * @param stringValue   Value as string
+ * @param flags         Conversion flags (see ConfigurationGroup::Flags)
+ * @return Value
+ */
+template<class T> T configurationValueFromString(const std::string& stringValue, int flags = 0);
+
+/*@}*/
 
 /**
  * @brief Group of values in configuration file
@@ -37,9 +64,10 @@ class ConfigurationGroup {
     public:
         /** @brief Flags for value type */
         enum Flags {
-            Oct     = 0x01,     /**< @brief Numeric value as octal */
-            Hex     = 0x02,     /**< @brief Numeric value as hexadecimal */
-            Color   = 0x04      /**< @brief Numeric value as color representation */
+            Oct         = 0x01, /**< @brief Numeric value as octal */
+            Hex         = 0x02, /**< @brief Numeric value as hexadecimal */
+            Color       = 0x04, /**< @brief Numeric value as color representation */
+            Scientific  = 0x08  /**< @brief Floating point values in scientific notation */
         };
 
         /** @brief Group name */
@@ -48,14 +76,20 @@ class ConfigurationGroup {
         /**
          * @brief Value
          * @param key       Key name
-         * @param value     Pointer where to store value
+         * @param _value    Pointer where to store value
          * @param number    Number of the value. Default is first found value.
          * @param flags     Flags (see ConfigurationGroup::Flags)
          * @return Whether the value was found
          *
          * See also Configuration::automaticKeyCreation().
          */
-        template<class T> bool value(const std::string& key, T* value, unsigned int number = 0, int flags = 0);
+        template<class T> bool value(const std::string& key, T* _value, unsigned int number = 0, int flags = 0) {
+            std::string stringValue;
+            bool ret = value<std::string>(key, &stringValue, number, flags);
+
+            *_value = configurationValueFromString<T>(stringValue, flags);
+            return ret;
+        }
 
         /**
          * @brief All values with given key name
@@ -63,7 +97,14 @@ class ConfigurationGroup {
          * @param flags     Flags (see ConfigurationGroup::Flags)
          * @return Vector with all found values
          */
-        template<class T> std::vector<T> values(const std::string& key, int flags = 0) const;
+        template<class T> std::vector<T> values(const std::string& key, int flags = 0) const {
+            std::vector<T> _values;
+            std::vector<std::string> stringValues = values<std::string>(key, flags);
+            for(std::vector<std::string>::const_iterator it = stringValues.begin(); it != stringValues.end(); ++it)
+                _values.push_back(configurationValueFromString<T>(*it, flags));
+
+            return values;
+        }
 
         /**
          * @brief Count of values with given key name
@@ -87,7 +128,9 @@ class ConfigurationGroup {
          * If the key already exists, changes it to new value. If the key
          * doesn't exist, adds a new key with given name.
          */
-        template<class T> bool setValue(const std::string& key, const T& value, unsigned int number = 0, int flags = 0);
+        template<class T> bool setValue(const std::string& key, const T& value, unsigned int number = 0, int flags = 0) {
+            return setValue<std::string>(key, configurationValueToString<T>(value, flags), number, flags);
+        }
 
         /**
          * @brief Add new value
@@ -100,7 +143,9 @@ class ConfigurationGroup {
          * Adds new key/value pair at the end of current group (it means also
          * after all comments).
          */
-        template<class T> bool addValue(const std::string& key, const T& value, int flags = 0);
+        template<class T> bool addValue(const std::string& key, const T& value, int flags = 0) {
+            return addValue<std::string>(key, configurationValueToString<T>(value, flags), flags);
+        }
 
         /**
          * @brief Remove value
@@ -135,6 +180,55 @@ class ConfigurationGroup {
 
         inline const std::vector<Item>& items() const { return _items; }
 };
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+
+template<class T> std::string configurationValueToString(const T& value, int flags = 0) {
+    std::ostringstream stream;
+
+    /* Hexadecimal / octal values */
+    if(flags & (ConfigurationGroup::Color|ConfigurationGroup::Hex))
+        stream.setf(std::istringstream::hex, std::istringstream::basefield);
+    if(flags & ConfigurationGroup::Oct)
+        stream.setf(std::istringstream::oct, std::istringstream::basefield);
+    if(flags & ConfigurationGroup::Scientific)
+        stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
+
+    stream << value;
+
+    std::string stringValue = stream.str();
+
+    /* Strip initial # character, if user wants a color */
+    if(flags & ConfigurationGroup::Color)
+        stringValue = '#' + stringValue;
+
+    return stringValue;
+}
+
+template<class T> T configurationValueFromString(const std::string& stringValue, int flags = 0) {
+    std::string _stringValue = stringValue;
+
+    /* Strip initial # character, if user wants a color */
+    if(flags & ConfigurationGroup::Color && !stringValue.empty() && stringValue[0] == '#')
+        _stringValue = stringValue.substr(1);
+
+    std::istringstream stream(_stringValue);
+
+    /* Hexadecimal / octal values, scientific notation */
+    if(flags & (ConfigurationGroup::Color|ConfigurationGroup::Hex))
+        stream.setf(std::istringstream::hex, std::istringstream::basefield);
+    if(flags & ConfigurationGroup::Oct)
+        stream.setf(std::istringstream::oct, std::istringstream::basefield);
+    if(flags & ConfigurationGroup::Scientific)
+        stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
+
+    T value;
+    stream >> value;
+
+    return value;
+}
+
+#endif
 
 }}
 

@@ -187,11 +187,82 @@ void ConfigurationTest::types() {
     Configuration conf(TESTFILES_BINARY_DIR + string("types.conf"));
 
     string tmp;
-
-    QVERIFY(conf.value("string", &tmp));
+    conf.value("string", &tmp);
     QVERIFY(tmp == "value");
-    QVERIFY(conf.value("quotes", &tmp));
+    QVERIFY(conf.setValue("string", tmp));
+    conf.value("quotes", &tmp);
     QVERIFY(tmp == " value ");
+    QVERIFY(conf.setValue("quotes", tmp));
+
+    int intTmp;
+    conf.value("int", &intTmp);
+    QVERIFY(intTmp == 5);
+    QVERIFY(conf.setValue("int", intTmp));
+    conf.value("intNeg", &intTmp);
+    QVERIFY(intTmp == -10);
+    QVERIFY(conf.setValue("intNeg", intTmp));
+
+    bool boolTmp;
+    conf.value("bool", &boolTmp, 0);
+    QVERIFY(boolTmp);
+    QVERIFY(conf.setValue("bool", boolTmp, 0));
+    boolTmp = false;
+    conf.value("bool", &boolTmp, 1);
+    QVERIFY(boolTmp);
+    boolTmp = false;
+    conf.value("bool", &boolTmp, 2);
+    QVERIFY(boolTmp);
+    boolTmp = false;
+    conf.value("bool", &boolTmp, 3);
+    QVERIFY(boolTmp);
+    conf.value("bool", &boolTmp, 4);
+    QVERIFY(!boolTmp);
+    QVERIFY(conf.setValue("bool", boolTmp, 4));
+
+    double doubleTmp;
+    conf.value("double", &doubleTmp);
+    QVERIFY(doubleTmp == 3.78);
+    QVERIFY(conf.setValue("double", doubleTmp));
+    conf.value("doubleNeg", &doubleTmp);
+    QVERIFY(doubleTmp == -2.14);
+    QVERIFY(conf.setValue("doubleNeg", doubleTmp));
+
+    /* Flags */
+    conf.value("exp", &doubleTmp);
+    QVERIFY(doubleTmp == 2.1e7);
+    conf.value("expPos", &doubleTmp);
+    QVERIFY(doubleTmp == 2.1e+7);
+    QVERIFY(conf.setValue("expPos", doubleTmp, 0, ConfigurationGroup::Scientific));
+    conf.value("expNeg", &doubleTmp);
+    QVERIFY(doubleTmp == -2.1e7);
+    conf.value("expNeg2", &doubleTmp);
+    QVERIFY(doubleTmp == 2.1e-7);
+    conf.value("expBig", &doubleTmp);
+    QVERIFY(doubleTmp == 2.1E7);
+
+    conf.value("oct", &intTmp, 0, ConfigurationGroup::Oct);
+    QVERIFY(intTmp == 0773);
+    QVERIFY(conf.setValue("oct", intTmp, 0, ConfigurationGroup::Oct));
+    conf.value("hex", &intTmp, 0, ConfigurationGroup::Hex);
+    QVERIFY(intTmp == 0x6ecab);
+    QVERIFY(conf.setValue("hex", intTmp, 0, ConfigurationGroup::Hex));
+    conf.value("hex2", &intTmp, 0, ConfigurationGroup::Hex);
+    QVERIFY(intTmp == 0x5462FF);
+    conf.value("color", &intTmp, 0, ConfigurationGroup::Color);
+    QVERIFY(intTmp == 0x34f85e);
+    QVERIFY(conf.setValue("color", intTmp, 0, ConfigurationGroup::Color));
+
+    conf.save();
+
+    /* Check saved values */
+    QFile fileOrig(TESTFILES_DIR + QString("types.conf"));
+    QFile fileActual(TESTFILES_BINARY_DIR + QString("types.conf"));
+    fileOrig.open(QFile::Text|QFile::ReadOnly);
+    fileActual.open(QFile::Text|QFile::ReadOnly);
+    QByteArray original = fileOrig.readAll();
+    QByteArray actual = fileActual.readAll();
+
+    QCOMPARE(actual, original);
 }
 
 void ConfigurationTest::eol_data() {

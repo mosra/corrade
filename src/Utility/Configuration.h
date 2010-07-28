@@ -33,10 +33,12 @@ namespace Map2X { namespace Utility {
  * @todo Use find() and equal_range() for faster (log) access
  * @todo Use some try/catch for parsing (avoid repeated code for group adding)
  * @todo Don't throw out whole group on invalid row
- * @todo More data types
  * @todo EOL autodetection according to system on unsure/new files (default is
  *      preserve)
  * @todo Join ReadOnly / IsValid flag checks
+ * @bug When value with number > 0 is not found, pointed integer is changed
+ * @bug Setting inexistent value with number > 0 creates new key/value pair
+ * @todo Test, whether the configurationValueToString() is called also with string type
  */
 class Configuration {
     friend class ConfigurationGroup;
@@ -270,8 +272,8 @@ class Configuration {
          */
 
         /** @copydoc ConfigurationGroup::value() */
-        template<class T> inline bool value(const std::string& key, T* value, unsigned int number = 0, int flags = 0)
-            { return group()->value<T>(key, value, number, flags); }
+        template<class T> inline bool value(const std::string& key, T* _value, unsigned int number = 0, int flags = 0)
+            { return group()->value<T>(key, _value, number, flags); }
         /** @copydoc ConfigurationGroup::values() */
         template<class T> inline std::vector<T> values(const std::string& key, int flags = 0) const
             { return group()->values<T>(key, flags); }
