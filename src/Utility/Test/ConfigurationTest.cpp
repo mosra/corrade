@@ -22,6 +22,7 @@
 
 #include "Utility/Configuration.h"
 #include "ConfigurationTestConfigure.h"
+#include "Wgs84Coords.h"
 
 using namespace std;
 
@@ -251,6 +252,21 @@ void ConfigurationTest::types() {
     conf.value("color", &intTmp, 0, ConfigurationGroup::Color);
     QVERIFY(intTmp == 0x34f85e);
     QVERIFY(conf.setValue("color", intTmp, 0, ConfigurationGroup::Color));
+
+    /* Wgs84 coordinates */
+    Core::Wgs84Coords coordsTmp;
+    conf.value("coords", &coordsTmp);
+    QVERIFY(coordsTmp == Core::Wgs84Coords(49.1925, 16.602222));
+    QVERIFY(conf.setValue("coords", coordsTmp));
+
+    /* Invalid coordinates (load) */
+    conf.value("coordsInvalid", &coordsTmp);
+    QVERIFY(coordsTmp == Core::Wgs84Coords());
+    QVERIFY(conf.value("coordsInvalid2", &coordsTmp));
+    QVERIFY(coordsTmp == Core::Wgs84Coords());
+
+    /* Invalid coordinates (save) */
+    QVERIFY(conf.setValue("coordsInvalidSave", coordsTmp));
 
     conf.save();
 
