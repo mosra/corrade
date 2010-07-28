@@ -29,16 +29,13 @@ namespace Map2X { namespace Utility {
 
 /**
  * @brief Parser and writer for configuration files
- * @todo CR+LF / LF / CR files
  * @todo Renaming, copying groups
  * @todo Use find() and equal_range() for faster (log) access
- * @todo Are groups saved in same order as originallly?
  * @todo Use some try/catch for parsing (avoid repeated code for group adding)
  * @todo Don't throw out whole group on invalid row
  * @todo More data types
  * @todo EOL autodetection according to system on unsure/new files (default is
  *      preserve)
- * @todo Use quotes for saved value if value has spaces
  * @todo Join ReadOnly / IsValid flag checks
  */
 class Configuration {

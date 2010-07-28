@@ -204,8 +204,13 @@ bool Configuration::save() {
         /* Foreach all items in the group */
         for(vector<ConfigurationGroup::Item>::const_iterator git = items.begin(); git != items.end(); ++git) {
             /* Key/value pair */
-            if(!git->key.empty())
-                buffer = git->key + '=' + git->value + eol;
+            if(!git->key.empty()) {
+                /** @todo Make whitespaces a constant in utilities.h */
+                if(git->value.find_first_of(" \t\f\v\r\n") != string::npos)
+                    buffer = git->key + "=\"" + git->value + '"' + eol;
+                else
+                    buffer = git->key + '=' + git->value + eol;
+            }
 
             /* Comment / empty line */
             else buffer = git->value + eol;
