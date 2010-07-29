@@ -42,6 +42,7 @@ class ConfigurationTest: public QObject {
         void stripComments();
 
         void autoCreation();
+        void directValue();
 };
 
 }}}

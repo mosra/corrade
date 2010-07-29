@@ -92,6 +92,25 @@ class ConfigurationGroup {
         }
 
         /**
+         * @brief Value (directly returned)
+         * @param key       Key name
+         * @param number    Number of the value. Default is first found value.
+         * @param flags     Flags (see ConfigurationGroup::Flags)
+         * @return Value
+         *
+         * Directly returns the value. If the key is not found, returns
+         * default constructed value.
+         * @attention The configuration file may be filled with empty values
+         *      when automatic inexistent key creation is enabled!
+         * @todo Properly test int(), double() etc. whether they return 0.
+         */
+        template<class T> T value(const std::string& key, unsigned int number = 0, int flags = 0) {
+            T _value;
+            if(!value<T>(key, &_value, number, flags)) return T();
+            return _value;
+        }
+
+        /**
          * @brief All values with given key name
          * @param key       Key name
          * @param flags     Flags (see ConfigurationGroup::Flags)

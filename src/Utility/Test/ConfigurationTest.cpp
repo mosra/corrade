@@ -399,4 +399,21 @@ void ConfigurationTest::autoCreation() {
     QVERIFY(value3 == 42);
 }
 
+void ConfigurationTest::directValue() {
+    Configuration conf(TESTFILES_BINARY_DIR + string("directValue.conf"), Configuration::Truncate);
+
+    /* Fill values */
+    conf.setValue<string>("string", "value");
+    conf.setValue<int>("key", 23);
+
+    /* Test direct return */
+    QVERIFY(conf.value<string>("string") == "value");
+    QVERIFY(conf.value<int>("key") == 23);
+
+    /* Default-configured values */
+    QVERIFY(conf.value<string>("inexistent") == "");
+    QVERIFY(conf.value<int>("inexistent") == 0);
+    QVERIFY(conf.value<double>("inexistent") == 0.0);
+}
+
 }}}

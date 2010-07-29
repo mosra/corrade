@@ -271,9 +271,12 @@ class Configuration {
          * functionality as calling Configuration::group()->foo().
          */
 
-        /** @copydoc ConfigurationGroup::value() */
+        /** @copydoc ConfigurationGroup::value(const std::string&, T*, unsigned int, int) */
         template<class T> inline bool value(const std::string& key, T* _value, unsigned int number = 0, int flags = 0)
             { return group()->value<T>(key, _value, number, flags); }
+        /** @copydoc ConfigurationGroup::value(const std::string&, unsigned int, int) */
+        template<class T> inline T value(const std::string& key, unsigned int number = 0, int flags = 0)
+            { return group()->value<T>(key, number, flags); }
         /** @copydoc ConfigurationGroup::values() */
         template<class T> inline std::vector<T> values(const std::string& key, int flags = 0) const
             { return group()->values<T>(key, flags); }
