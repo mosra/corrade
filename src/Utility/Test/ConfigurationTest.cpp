@@ -390,6 +390,13 @@ void ConfigurationTest::autoCreation() {
     QVERIFY(conf.group("group")->value<string>("key", &value2));
     QVERIFY(conf.group("group")->valueCount("key") == 1);
     QVERIFY(value2 == "defaultValue2");
+
+    /* Auto-creation of non-string values */
+    int value3 = 42;
+    QVERIFY(conf.group("group")->value<int>("integer", &value3));
+    conf.setAutomaticKeyCreation(false);
+    QVERIFY(conf.group("group")->value<int>("integer", &value3));
+    QVERIFY(value3 == 42);
 }
 
 }}}

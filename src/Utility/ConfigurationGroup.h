@@ -84,7 +84,7 @@ class ConfigurationGroup {
          * See also Configuration::automaticKeyCreation().
          */
         template<class T> bool value(const std::string& key, T* _value, unsigned int number = 0, int flags = 0) {
-            std::string stringValue;
+            std::string stringValue = configurationValueToString<T>(*_value, flags);
             bool ret = value<std::string>(key, &stringValue, number, flags);
 
             *_value = configurationValueFromString<T>(stringValue, flags);
