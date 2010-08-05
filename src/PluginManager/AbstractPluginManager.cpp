@@ -115,6 +115,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     }
 
     /* Check plugin version */
+    /** @todo Check whether the symbol was found! */
     int (*_version)(void) = reinterpret_cast<int(*)()>(dlsym(handle, "pluginVersion"));
     if(_version() == 0) {
         dlclose(handle);
@@ -128,6 +129,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     }
 
     /* Pointer to metadata creator */
+    /** @todo Check whether the symbol was found! */
     void (*metadataCreator)(PluginMetadata*) = reinterpret_cast<void (*)(PluginMetadata*)>(dlsym(handle, "pluginMetadataCreator"));
     if(metadataCreator == 0) {
         dlclose(handle);
@@ -144,6 +146,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     }
 
     /* Load plugin instancer */
+    /** @todo Check whether the symbol was found! */
     void* (*instancer)() = reinterpret_cast<void* (*)()>(dlsym(handle, "pluginInstancer"));
     if(instancer == 0) {
         dlclose(handle);
