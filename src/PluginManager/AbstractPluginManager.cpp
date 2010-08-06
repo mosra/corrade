@@ -187,7 +187,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& nam
     PluginObject& plugin = plugins.at(name);
 
     /* Plugin is not loaded or is static, nothing to do */
-    if(!(plugin.loadState & (LoadOk|UnloadFailed|IsStatic))) return plugin.loadState;
+    if(plugin.loadState & ~(LoadOk|UnloadFailed)) return plugin.loadState;
 
     /* Plugin has active instance, don't unload */
     if(instances.find(name) != instances.end()) return IsUsed;

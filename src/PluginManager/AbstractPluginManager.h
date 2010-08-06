@@ -47,72 +47,72 @@ class AbstractPluginManager {
         /**
          * @brief Load state
          *
-         * Describes state of the plugin. Values below zero are used when
-         * loading plugin, values above zero when unloading plugin. Static
-         * plugins are loaded at first, they have always state
+         * Describes state of the plugin. States before Unknown state are used
+         * when loading plugins, states after are used when unloading plugins.
+         * Static plugins are loaded at first, they have always state
          * PluginMetadataStatic::IsStatic. Dynamic plugins have at first state
          * NotLoaded, after first attempt to load the state is changed.
          */
         enum LoadState {
             /** %Plugin cannot be found */
-            NotFound = -7,
+            NotFound = 0x0001,
 
             /**
              * The plugin is build with different version of PluginManager and
              * cannot be loaded. This means the PluginMetadata are inaccessible.
              */
-            WrongPluginVersion = -6,
+            WrongPluginVersion = 0x0002,
 
             /**
              * The plugin uses different interface than the interface
              * used by PluginManager and cannot be loaded.
              */
-            WrongInterfaceVersion = -5,
+            WrongInterfaceVersion = 0x0004,
 
             /**
              * The plugin is conflicting with another plugin that is already
              * loaded. Unload conflicting plugin and try it again.
              */
-            Conflicts = -4,
+            Conflicts = 0x0008,
 
             /**
              * The plugin depends on another plugin, which cannot be loaded
              * (e.g. not found, conflict, wrong version).
              */
-            UnresolvedDependency = -3,
+            UnresolvedDependency = 0x0010,
 
             /** %Plugin failed to load */
-            LoadFailed = -2,
+            LoadFailed = 0x0020,
 
             /** %Plugin is successfully loaded */
-            LoadOk = -1,
+            LoadOk = 0x0040,
 
             /** %Plugin is not yet loaded and its state is unknown */
-            Unknown = 0,
+            Unknown = 0x0080,
 
             /**
              * %Plugin is not loaded. %Plugin can be unloaded only
              * if is dynamic and is not required by any other plugin.
              */
-            NotLoaded = 1,
+            NotLoaded = 0x0100,
 
             /** %Plugin failed to unload */
-            UnloadFailed = 2,
+            UnloadFailed = 0x0200,
 
             /**
              * %Plugin cannot be unloaded because another plugin is depending on
              * it. Unload that plugin first and try again.
              */
-            IsRequired = 3,
+            IsRequired = 0x0400,
 
             /** %Plugin is static (and cannot be unloaded) */
-            IsStatic = 4,
+            IsStatic = 0x0800,
 
             /**
              * %Plugin has active instance and cannot be unloaded. Destroy all
              * instances and try again.
              */
-            IsUsed = 5
+            IsUsed = 0x1000
         };
 
         /** @brief %Plugin version */

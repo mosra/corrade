@@ -54,6 +54,8 @@ void PluginTest::staticPlugin() {
     QVERIFY(animal->hasTail() == true);
     QVERIFY(animal->name() == "Doug");
     QVERIFY(animal->legCount() == 4);
+
+    QVERIFY(manager->unload("Dog") == AbstractPluginManager::IsStatic);
 }
 
 void PluginTest::dynamicPlugin() {
