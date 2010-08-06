@@ -15,7 +15,6 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "PluginManager/definitions.h"
 #include "PluginManager/Plugin.h"
 
 namespace Map2X { namespace PluginManager { namespace Test {
