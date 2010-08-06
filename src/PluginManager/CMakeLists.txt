@@ -13,6 +13,10 @@ set(Map2X_PluginManager_SRCS
 add_library(Map2XPluginManager STATIC ${Map2X_PluginManager_SRCS})
 target_link_libraries(Map2XPluginManager Map2XUtility)
 
+if(USE_FPIC)
+    set_target_properties(Map2XPluginManager PROPERTIES COMPILE_FLAGS -fPIC)
+endif()
+
 if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(Test)

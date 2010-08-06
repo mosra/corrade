@@ -16,6 +16,10 @@ set(Map2X_Utility_SRCS
 
 add_library(Map2XUtility STATIC ${Map2X_Utility_SRCS})
 
+if(USE_FPIC)
+    set_target_properties(Map2XUtility PROPERTIES COMPILE_FLAGS -fPIC)
+endif()
+
 if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(Test)
