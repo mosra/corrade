@@ -38,7 +38,6 @@ class Plugin;
  * @todo Casting pointer-to-object to pointer-to-function is not ISO C++ (see
  *      C++ Standard Core Language Active Issue #195,
  *      http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_defects.html#195 )
- * @todo Destructor, unloading and destroying instances at destroy
  * @todo Print out errors to stderr
  */
 class AbstractPluginManager {
@@ -144,6 +143,13 @@ class AbstractPluginManager {
          * @see PluginManager::nameList()
          */
         AbstractPluginManager(const std::string& pluginDirectory);
+
+        /**
+         * @brief Destructor
+         *
+         * Destroys all plugin instances and unload all plugins.
+         */
+        virtual ~AbstractPluginManager();
 
         /** @brief Plugin directory */
         std::string pluginDirectory() const { return _pluginDirectory; }

@@ -67,6 +67,24 @@ AbstractPluginManager::AbstractPluginManager(const string& pluginDirectory): _pl
     }
 }
 
+AbstractPluginManager::~AbstractPluginManager() {
+    /* Destroying all plugin instances. Every instance removes itself from
+        instances array on destruction, so going carefully backwards and
+        reloading iterator for every plugin name */
+    map<string, vector<Plugin*> >::const_iterator it;
+    while((it = instances.begin()) != instances.end()) {
+        for(int i = it->second.size()-1; i >= 0; --i) {
+            delete it->second[i];
+        }
+    }
+
+    /* Unload all plugins */
+    /** @todo Checking load state whether unload succeeded? */
+    for(map<string, PluginObject>::const_iterator it = plugins.begin(); it != plugins.end(); ++it)
+        /** @todo unload() tests whether plugin exists => performance-- */
+        unload(it->first);
+}
+
 vector<string> AbstractPluginManager::nameList() const {
     vector<string> names;
     for(map<string, PluginObject>::const_iterator i = plugins.begin(); i != plugins.end(); ++i)
