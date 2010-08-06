@@ -202,6 +202,10 @@ AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& nam
 }
 
 void AbstractPluginManager::registerInstance(const string& name, Plugin* instance) {
+    /* Given plugin doesn't exist or is static (static plugins cannot be unloaded
+        and thus instance counting is useless), nothing to do */
+    if(plugins.find(name) == plugins.end() || plugins[name].loadState == IsStatic) return;
+
     if(instances.find(name) == instances.end()) {
         instances.insert(pair<string, vector<Plugin* > >
             (name, vector<Plugin*>()));
@@ -211,6 +215,10 @@ void AbstractPluginManager::registerInstance(const string& name, Plugin* instanc
 }
 
 void AbstractPluginManager::unregisterInstance(const string& name, Plugin* instance) {
+    /* Given plugin doesn't exist or is static (static plugins cannot be unloaded
+        and thus instance counting is useless), nothing to do */
+    if(plugins.find(name) == plugins.end() || plugins[name].loadState == IsStatic) return;
+
     /** @todo Emit error when unregistering nonexistent instance */
     if(instances.find(name) == instances.end()) return;
 
