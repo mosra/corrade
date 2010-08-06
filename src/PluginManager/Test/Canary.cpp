@@ -14,11 +14,15 @@
 */
 
 #include "AbstractAnimal.h"
+#include "PluginManager/AbstractPluginManager.h"
 
 namespace Map2X { namespace PluginManager { namespace Test {
 
 class Canary: public AbstractAnimal {
     public:
+        inline Canary(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
+            AbstractAnimal(manager, plugin) {}
+
         std::string name() { return "Achoo"; }
         int legCount() { return 2; }
         bool hasTail() { return true; }

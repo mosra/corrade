@@ -27,6 +27,8 @@
 
 namespace Map2X { namespace PluginManager {
 
+class Plugin;
+
 /**
  * @brief Base class of PluginManager
  *
@@ -36,11 +38,12 @@ namespace Map2X { namespace PluginManager {
  * @todo Casting pointer-to-object to pointer-to-function is not ISO C++ (see
  *      C++ Standard Core Language Active Issue #195,
  *      http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_defects.html#195 )
- * @todo Destructor, unloading at destroy
+ * @todo Destructor, unloading and destroying instances at destroy
  * @todo Print out errors to stderr
- * @todo Don't unload plugin when instance is active
  */
 class AbstractPluginManager {
+    friend class Plugin;
+
     public:
         /**
          * @brief Load state
@@ -104,7 +107,13 @@ class AbstractPluginManager {
             IsRequired = 3,
 
             /** %Plugin is static (and cannot be unloaded) */
-            IsStatic = 4
+            IsStatic = 4,
+
+            /**
+             * %Plugin has active instance and cannot be unloaded. Destroy all
+             * instances and try again.
+             */
+            IsUsed = 5
         };
 
         /** @brief %Plugin version */
@@ -122,7 +131,7 @@ class AbstractPluginManager {
          * Used internally by PLUGIN_IMPORT_STATIC() macro. There is absolutely
          * no need to use this directly.
          */
-        static void importStaticPlugin(const std::string& name, int _version, void (*metadataCreator)(PluginMetadata*), void* (*instancer)());
+        static void importStaticPlugin(const std::string& name, int _version, void (*metadataCreator)(PluginMetadata*), void* (*instancer)(AbstractPluginManager*, const std::string&));
 
         /**
          * @brief Constructor
@@ -203,24 +212,30 @@ class AbstractPluginManager {
         struct StaticPlugin {
             std::string name;
             void (*metadataCreator)(PluginMetadata*);
-            void* (*instancer)();
+            void* (*instancer)(AbstractPluginManager*, const std::string&);
         };
 
-        struct Plugin {
+        struct PluginObject {
             LoadState loadState;
             PluginMetadata metadata;
-            void* (*instancer)();
+            void* (*instancer)(AbstractPluginManager*, const std::string&);
             void* handle;
-            Plugin(): loadState(Unknown), handle(0) {}
+            PluginObject(): loadState(Unknown), handle(0) {}
         };
 
         static std::vector<StaticPlugin> staticPlugins;
         std::string _pluginDirectory;
-        std::map<std::string, Plugin> plugins;
+        std::map<std::string, PluginObject> plugins;
         #endif
 
         /** @brief Plugin interface used by the plugin manager */
         virtual std::string pluginInterface() const = 0;
+
+    private:
+        std::map<std::string, std::vector<Plugin*> > instances;
+
+        void registerInstance(const std::string& name, Plugin* instance);
+        void unregisterInstance(const std::string& name, Plugin* instance);
 };
 
 /**

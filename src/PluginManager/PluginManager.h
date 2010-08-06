@@ -39,13 +39,13 @@ template<class T> class PluginManager: public AbstractPluginManager {
         PluginManager(const std::string& pluginDirectory): AbstractPluginManager(pluginDirectory) {
             /* Load static plugins which use the same API */
             for(std::vector<StaticPlugin>::const_iterator i = staticPlugins.begin(); i != staticPlugins.end(); ++i) {
-                Plugin p;
+                PluginObject p;
                 p.loadState = IsStatic;
                 p.instancer = i->instancer;
                 i->metadataCreator(&p.metadata);
 
                 if(p.metadata.interface == pluginInterface())
-                    plugins.insert(std::pair<std::string, Plugin>(i->name, p));
+                    plugins.insert(std::pair<std::string, PluginObject>(i->name, p));
             }
         }
 
@@ -63,12 +63,12 @@ template<class T> class PluginManager: public AbstractPluginManager {
             /* Plugin with given name doesn't exist */
             if(plugins.find(name) == plugins.end()) return 0;
 
-            Plugin& plugin = plugins.at(name);
+            PluginObject& plugin = plugins.at(name);
 
             /* Plugin is not successfully loaded */
             if(!(plugin.loadState & (LoadOk|IsStatic))) return 0;
 
-            return static_cast<T*>(plugin.instancer());
+            return static_cast<T*>(plugin.instancer(this, name));
         }
 };
 

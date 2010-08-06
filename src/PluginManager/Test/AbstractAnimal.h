@@ -16,13 +16,17 @@
 */
 
 #include "PluginManager/definitions.h"
+#include "PluginManager/Plugin.h"
 
 namespace Map2X { namespace PluginManager { namespace Test {
 
-class AbstractAnimal {
+class AbstractAnimal: public Plugin {
     PLUGIN_INTERFACE("cz.mosra.Map2X.PluginManager.Test.AbstractAnimal/1.0")
 
     public:
+        inline AbstractAnimal(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
+            Plugin(manager, plugin) {}
+
         virtual std::string name() = 0;
         virtual int legCount() = 0;
         virtual bool hasTail() = 0;

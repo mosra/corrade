@@ -15,9 +15,11 @@
 
 #include "AbstractPluginManager.h"
 
+#include <algorithm>
 #include <dlfcn.h>
 
 #include "PluginManager/AbstractPluginManagerConfigure.h"
+#include "Plugin.h"
 #include "Utility/Directory.h"
 
 using namespace std;
@@ -29,7 +31,7 @@ namespace Map2X { namespace PluginManager {
 vector<AbstractPluginManager::StaticPlugin> AbstractPluginManager::staticPlugins;
 #endif
 
-void AbstractPluginManager::importStaticPlugin(const string& name, int _version, void (*metadataCreator)(PluginMetadata*), void* (*instancer)()) {
+void AbstractPluginManager::importStaticPlugin(const string& name, int _version, void (*metadataCreator)(PluginMetadata*), void* (*instancer)(AbstractPluginManager*, const std::string&)) {
     if(_version != version) return;
 
     StaticPlugin p;
@@ -58,22 +60,22 @@ AbstractPluginManager::AbstractPluginManager(const string& pluginDirectory): _pl
         if(begin == 0 && end != string::npos) {
             string name = (*i).substr(begin+string(PLUGIN_FILENAME_PREFIX).size(), end-string(PLUGIN_FILENAME_PREFIX).size());
 
-            Plugin p;
+            PluginObject p;
             p.loadState = Unknown;
-            plugins.insert(pair<string, Plugin>(name, p));
+            plugins.insert(pair<string, PluginObject>(name, p));
         }
     }
 }
 
 vector<string> AbstractPluginManager::nameList() const {
     vector<string> names;
-    for(map<string, Plugin>::const_iterator i = plugins.begin(); i != plugins.end(); ++i)
+    for(map<string, PluginObject>::const_iterator i = plugins.begin(); i != plugins.end(); ++i)
         names.push_back(i->first);
     return names;
 }
 
 void AbstractPluginManager::loadAll() {
-    for(map<string, Plugin>::const_iterator i = plugins.begin(); i != plugins.end(); ++i)
+    for(map<string, PluginObject>::const_iterator i = plugins.begin(); i != plugins.end(); ++i)
         load(i->first);
 }
 
@@ -99,7 +101,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     /* Plugin with given name doesn't exist */
     if(plugins.find(name) == plugins.end()) return NotFound;
 
-    Plugin& plugin = plugins.at(name);
+    PluginObject& plugin = plugins.at(name);
 
     /* Plugin is already loaded or is static */
     if(plugin.loadState & (LoadOk|UnloadFailed|IsStatic))
@@ -147,7 +149,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
 
     /* Load plugin instancer */
     /** @todo Check whether the symbol was found! */
-    void* (*instancer)() = reinterpret_cast<void* (*)()>(dlsym(handle, "pluginInstancer"));
+    void* (*instancer)(AbstractPluginManager*, const std::string&) = reinterpret_cast<void* (*)(AbstractPluginManager*, const std::string&)>(dlsym(handle, "pluginInstancer"));
     if(instancer == 0) {
         dlclose(handle);
         plugin.loadState = LoadFailed;
@@ -164,10 +166,13 @@ AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& nam
     /* Plugin with given name doesn't exist */
     if(plugins.find(name) == plugins.end()) return NotFound;
 
-    Plugin& plugin = plugins.at(name);
+    PluginObject& plugin = plugins.at(name);
 
     /* Plugin is not loaded or is static, nothing to do */
     if(!(plugin.loadState & (LoadOk|UnloadFailed|IsStatic))) return plugin.loadState;
+
+    /* Plugin has active instance, don't unload */
+    if(instances.find(name) != instances.end()) return IsUsed;
 
     if(dlclose(plugin.handle) != 0) {
         plugin.loadState = UnloadFailed;
@@ -176,6 +181,27 @@ AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& nam
 
     plugin.loadState = NotLoaded;
     return plugin.loadState;
+}
+
+void AbstractPluginManager::registerInstance(const string& name, Plugin* instance) {
+    if(instances.find(name) == instances.end()) {
+        instances.insert(pair<string, vector<Plugin* > >
+            (name, vector<Plugin*>()));
+    }
+
+    instances[name].push_back(instance);
+}
+
+void AbstractPluginManager::unregisterInstance(const string& name, Plugin* instance) {
+    /** @todo Emit error when unregistering nonexistent instance */
+    if(instances.find(name) == instances.end()) return;
+
+    vector<Plugin*>::iterator pos = find(instances[name].begin(), instances[name].end(), instance);
+    if(pos == instances[name].end()) return;
+
+    instances[name].erase(pos);
+
+    if(instances[name].size() == 0) instances.erase(name);
 }
 
 }}

@@ -56,7 +56,8 @@ namespace Map2X { namespace PluginManager {
  */
 #define PLUGIN_REGISTER(className, _interface) \
     extern "C" int pluginVersion() { return PLUGIN_VERSION; } \
-    extern "C" void* pluginInstancer() { return new className; } \
+    extern "C" void* pluginInstancer(Map2X::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
+        { return new className(manager, plugin); } \
     extern "C" void pluginMetadataCreator(Map2X::PluginManager::PluginMetadata* metadata) { \
         metadata->interface = _interface;
 
@@ -75,7 +76,8 @@ namespace Map2X { namespace PluginManager {
  */
 #define PLUGIN_REGISTER_STATIC(name, className, _interface) \
     extern "C" inline int name##Version() { return PLUGIN_VERSION; } \
-    extern "C" inline void* name##Instancer() { return new className; } \
+    extern "C" inline void* name##Instancer(Map2X::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
+        { return new className(manager, plugin); } \
     extern "C" inline void name##MetadataCreator(Map2X::PluginManager::PluginMetadata* metadata) { \
         metadata->interface = _interface;
 

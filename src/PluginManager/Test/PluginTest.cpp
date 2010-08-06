@@ -69,6 +69,12 @@ void PluginTest::dynamicPlugin() {
     QVERIFY(animal->name() == "Achoo");
     QVERIFY(animal->legCount() == 2);
 
+    /* Try to unload plugin when instance is used */
+    QVERIFY(manager->unload("Canary") == AbstractPluginManager::IsUsed);
+    QVERIFY(manager->loadState("Canary") == AbstractPluginManager::LoadOk);
+
+    /* Plugin can be unloaded after destroying all instances */
+    delete animal;
     QVERIFY(manager->unload("Canary") == AbstractPluginManager::NotLoaded);
     QVERIFY(manager->loadState("Canary") == AbstractPluginManager::NotLoaded);
 }

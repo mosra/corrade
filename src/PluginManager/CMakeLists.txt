@@ -6,6 +6,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/AbstractPluginManagerConfigure.h.cmak
     ${CMAKE_CURRENT_BINARY_DIR}/AbstractPluginManagerConfigure.h)
 
 set(Map2X_PluginManager_SRCS
+    Plugin.cpp
     AbstractPluginManager.cpp
 )
 
