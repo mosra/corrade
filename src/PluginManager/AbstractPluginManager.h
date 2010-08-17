@@ -182,7 +182,12 @@ class AbstractPluginManager {
          *
          * Static plugins always have PluginManangerStatic::Static state.
          */
-        LoadState loadState(const std::string& name);
+        inline LoadState loadState(const std::string& name) const {
+            /* Plugin with given name doesn't exist */
+            if(plugins.find(name) == plugins.end()) return NotFound;
+
+            return plugins.at(name).loadState;
+        }
 
         /**
          * @brief Load a plugin

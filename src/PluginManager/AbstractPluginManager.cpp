@@ -108,13 +108,6 @@ const PluginMetadata* AbstractPluginManager::metadata(const string& name) {
     return &plugins.at(name).metadata;
 }
 
-AbstractPluginManager::LoadState AbstractPluginManager::loadState(const string& name) {
-    /* Plugin with given name doesn't exist */
-    if(plugins.find(name) == plugins.end()) return NotFound;
-
-    return plugins.at(name).loadState;
-}
-
 AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name) {
     /* Plugin with given name doesn't exist */
     if(plugins.find(name) == plugins.end()) return NotFound;
