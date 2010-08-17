@@ -152,7 +152,7 @@ class AbstractPluginManager {
         virtual ~AbstractPluginManager();
 
         /** @brief Plugin directory */
-        std::string pluginDirectory() const { return _pluginDirectory; }
+        inline std::string pluginDirectory() const { return _pluginDirectory; }
 
         /** @brief List of all available plugin names */
         std::vector<std::string> nameList() const;
