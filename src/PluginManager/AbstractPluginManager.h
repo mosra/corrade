@@ -160,9 +160,10 @@ class AbstractPluginManager {
         /**
          * @brief Try to load all plugins
          *
-         * Alphabetically goes through list and tries to load plugins. Does not
-         * any conflict resolving, whichever plugin was first, that plugin will
-         * be loaded and any conflicting plugins loaded after will be skipped.
+         * Alphabetically goes through list and tries to load plugins. Doesn't
+         * do any conflict resolving, whichever plugin was first, that plugin
+         * will be loaded and any conflicting plugins found after will be
+         * skipped.
          * @see PluginManager::load()
          */
         void loadAll();
