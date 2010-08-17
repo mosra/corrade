@@ -166,7 +166,7 @@ class AbstractPluginManager {
          * skipped.
          * @see PluginManager::load()
          */
-        void loadAll();
+        virtual void loadAll();
 
         /**
          * @brief Plugin metadata
@@ -204,7 +204,7 @@ class AbstractPluginManager {
          * tries to load it. If the plugin has any dependencies, they are
          * recursively processed before loading given plugin.
          */
-        LoadState load(const std::string& name);
+        virtual LoadState load(const std::string& name);
 
         /**
          * @brief Unload a plugin
@@ -217,7 +217,7 @@ class AbstractPluginManager {
          * Checks whether a plugin is loaded, if yes, tries to unload it. If the
          * plugin is not loaded, returns its current load state.
          */
-        LoadState unload(const std::string& name);
+        virtual LoadState unload(const std::string& name);
 
     protected:
         #ifndef DOXYGEN_GENERATING_OUTPUT
