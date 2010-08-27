@@ -7,19 +7,25 @@ management functions. Main features:</p>
 unexpected behavior</li>
 <li>Both static and dynamic plugin support</li>
 <li>Plugin dependecies and conflicts</li>
+<li>Use checks, manager doesn't allow plugin unload if there are any active
+plugin instances</li>
 </ul>
 
 @section PMUsage Usage
 @subsection PMInterface Plugin interface
 <p>Plugin interface is class with well defined abstract public methods, which
-defines the way how to work with a particular plugin.
-<p>Every plugin interface must defined with PLUGIN_INTERFACE() macro in header
-to make sure loaded plugins will use the same interface in the same version.
-One single argument is an string which uniquely names that particular interface.
-A good practice is to use "Java package name"-style syntax because this makes
-the name as unique as possible. The interface name should also contain version
-identifier to make sure the plugin will not be loaded with incompatible
-interface version.</p>
+defines the way how to work with a particular plugin.</p>
+<p>Every plugin interface must be derived from PluginManager::Plugin class and
+must reimplement Plugin constructor. This is needed for instance use checks, as
+described above. Plugin classes derived from that interface must reimplement the
+constructor too, of course.</p>
+<p>Additionaly, interface must be defined with PLUGIN_INTERFACE() macro in
+header to make sure loaded plugins will use the same interface in the same
+version. One single argument is an string which uniquely names that particular
+interface. A good practice is to use "Java package name"-style syntax because
+this makes the name as unique as possible. The interface name should also
+contain version identifier to make sure the plugin will not be loaded with
+incompatible interface version.</p>
 <p>So, there is an example interface class:</p>
 @code
 /* Filename: AbstractAnimal.h */
@@ -27,12 +33,15 @@ interface version.</p>
 #define AbstractAnimal_h
 
 
-#include "PluginManager/definitions.h"
+#include "PluginManager/Plugin.h"
 
 class AbstractAnimal {
     PLUGIN_INTERFACE("cz.mosra.PluginExample.AbstractAnimal/1.0")
 
     public:
+        inline AbstractAnimal(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
+            Map2X::PluginManager::Plugin(manager, plugin) {}
+
         virtual std::string name() = 0;
         virtual int legCount() = 0;
         virtual bool hasTail() = 0;
@@ -57,6 +66,9 @@ and third is name of used plugin interface. Then we can set some plugin metadata
 
 class Dog: public AbstractAnimal {
     public:
+        inline Dog(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
+            AbstractAnimal(manager, plugin) {}
+
         std::string name() { return "Doug"; }
         int legCount() { return 4; }
         bool hasTail() { return true; }
@@ -75,6 +87,9 @@ interface name as second argument.</p>
 
 class Canary: public AbstractAnimal {
     public:
+        inline Canary(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
+            AbstractAnimal(manager, plugin) {}
+
         std::string name() { return "Achoo"; }
         int legCount() { return 2; }
         bool hasTail() { return true; }
