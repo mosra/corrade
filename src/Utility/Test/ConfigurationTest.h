@@ -43,6 +43,9 @@ class ConfigurationTest: public QObject {
 
         void autoCreation();
         void directValue();
+
+        void hierarchic();
+        void hierarchicUnique();
 };
 
 }}}

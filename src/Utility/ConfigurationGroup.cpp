@@ -21,9 +21,123 @@ using namespace std;
 
 namespace Map2X { namespace Utility {
 
+ConfigurationGroup::ConfigurationGroup(const std::string& name, Configuration* _configuration): configuration(_configuration) {
+    if(name.find('/') != string::npos)
+        throw string("Slash in group name!");
+
+    _name = name;
+}
+
+ConfigurationGroup::~ConfigurationGroup() {
+    for(vector<ConfigurationGroup*>::iterator it = _groups.begin(); it != _groups.end(); ++it)
+        delete *it;
+}
+
+ConfigurationGroup* ConfigurationGroup::group(const string& name, unsigned int number) {
+    unsigned int foundNumber = 0;
+    for(vector<ConfigurationGroup*>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
+        if((*it)->name() == name && foundNumber++ == number)
+            return *it;
+    }
+
+    /* Automatic group creation is enabled and user wants first group,
+        try to create new group */
+    if((configuration->flags & Configuration::AutoCreateGroups) && number == 0) return addGroup(name);
+
+    return 0;
+}
+
+const ConfigurationGroup* ConfigurationGroup::group(const string& name, unsigned int number) const {
+    unsigned int foundNumber = 0;
+    for(vector<ConfigurationGroup*>::const_iterator it = _groups.begin(); it != _groups.end(); ++it) {
+        if((*it)->name() == name && foundNumber++ == number)
+            return *it;
+    }
+
+    return 0;
+}
+
+vector<ConfigurationGroup*> ConfigurationGroup::groups(const string& name) {
+    vector<ConfigurationGroup*> found;
+
+    for(vector<ConfigurationGroup*>::iterator it = _groups.begin(); it != _groups.end(); ++it)
+        if((*it)->name() == name) found.push_back(*it);
+
+    return found;
+}
+
+vector<const ConfigurationGroup*> ConfigurationGroup::groups(const string& name) const {
+    vector<const ConfigurationGroup*> found;
+
+    for(vector<ConfigurationGroup*>::const_iterator it = _groups.begin(); it != _groups.end(); ++it)
+        if((*it)->name() == name) found.push_back(*it);
+
+    return found;
+}
+
+unsigned int ConfigurationGroup::groupCount(const string& name) const {
+    unsigned int count = 0;
+    for(vector<ConfigurationGroup*>::const_iterator it = _groups.begin(); it != _groups.end(); ++it)
+        if((*it)->name() == name) count++;
+
+    return count;
+}
+
+ConfigurationGroup* ConfigurationGroup::addGroup(const std::string& name) {
+    if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid)) return 0;
+
+    /* Name must not be empty and must not contain slash character */
+    if(name.empty() || name.find('/') != string::npos) return 0;
+
+    /* Check for unique groups */
+    if(configuration->flags & Configuration::UniqueGroups) {
+        for(vector<ConfigurationGroup*>::const_iterator it = _groups.begin(); it != _groups.end(); ++it)
+            if((*it)->name() == name) return 0;
+    }
+
+    configuration->flags |= Configuration::Changed;
+
+    ConfigurationGroup* g = new ConfigurationGroup(name, configuration);
+    _groups.push_back(g);
+    return g;
+}
+
+bool ConfigurationGroup::removeGroup(const std::string& name, unsigned int number) {
+    if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid)) return false;
+
+    /* Global group cannot be removed */
+    if(name == "") return false;
+
+    /* Find group with given number and name */
+    unsigned int foundNumber = 0;
+    for(vector<ConfigurationGroup*>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
+        if((*it)->name() == name && foundNumber++ == number) {
+            _groups.erase(it);
+            configuration->flags |= Configuration::Changed;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool ConfigurationGroup::removeAllGroups(const std::string& name) {
+    if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid)) return false;
+
+    /* Global group cannot be removed */
+    if(name == "") return false;
+
+    for(int i = _groups.size()-1; i >= 0; --i) {
+        if(_groups[i]->name() == name) _groups.erase(_groups.begin()+i);
+    }
+
+    configuration->flags |= Configuration::Changed;
+    return true;
+}
+
 unsigned int ConfigurationGroup::valueCount(const string& key) const {
     unsigned int count = 0;
-    for(vector<Item>::const_iterator it = _items.begin(); it != _items.end(); ++it)
+    for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it)
         if(it->key == key) count++;
 
     return count;
@@ -33,7 +147,7 @@ unsigned int ConfigurationGroup::valueCount(const string& key) const {
 template<> vector<string> ConfigurationGroup::values(const string& key, int flags) const {
     vector<string> found;
 
-    for(vector<Item>::const_iterator it = _items.begin(); it != _items.end(); ++it)
+    for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it)
         if(it->key == key) found.push_back(it->value);
 
     return found;
@@ -47,7 +161,7 @@ template<> bool ConfigurationGroup::setValue(const string& key, const string& va
     if(key.empty()) return false;
 
     unsigned int foundNumber = 0;
-    for(vector<Item>::iterator it = _items.begin(); it != _items.end(); ++it) {
+    for(vector<Item>::iterator it = items.begin(); it != items.end(); ++it) {
         if(it->key == key && foundNumber++ == number) {
             it->value = value;
             configuration->flags |= Configuration::Changed;
@@ -59,7 +173,7 @@ template<> bool ConfigurationGroup::setValue(const string& key, const string& va
     Item i;
     i.key = key;
     i.value = value;
-    _items.push_back(i);
+    items.push_back(i);
 
     configuration->flags |= Configuration::Changed;
     return true;
@@ -74,14 +188,14 @@ template<> bool ConfigurationGroup::addValue(const string& key, const string& va
 
     /* Check for unique keys */
     if(configuration->flags & Configuration::UniqueKeys) {
-        for(vector<Item>::const_iterator it = _items.begin(); it != _items.end(); ++it)
+        for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it)
             if(it->key == key) return false;
     }
 
     Item i;
     i.key = key;
     i.value = value;
-    _items.push_back(i);
+    items.push_back(i);
 
     configuration->flags |= Configuration::Changed;
     return true;
@@ -89,7 +203,7 @@ template<> bool ConfigurationGroup::addValue(const string& key, const string& va
 
 template<> bool ConfigurationGroup::value(const string& key, string* value, unsigned int number, int flags) {
     unsigned int foundNumber = 0;
-    for(vector<Item>::const_iterator it = _items.begin(); it != _items.end(); ++it) {
+    for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it) {
         if(it->key == key) {
             if(foundNumber++ == number) {
                 *value = it->value;
@@ -115,9 +229,9 @@ bool ConfigurationGroup::removeValue(const string& key, unsigned int number) {
     if(key.empty()) return false;
 
     unsigned int foundNumber = 0;
-    for(vector<Item>::iterator it = _items.begin(); it != _items.end(); ++it) {
+    for(vector<Item>::iterator it = items.begin(); it != items.end(); ++it) {
         if(it->key == key && foundNumber++ == number) {
-            _items.erase(it);
+            items.erase(it);
             configuration->flags |= Configuration::Changed;
             return true;
         }
@@ -131,8 +245,8 @@ bool ConfigurationGroup::removeAllValues(const std::string& key) {
         return false;
 
     /** @todo Do it better & faster */
-    for(int i = _items.size()-1; i >= 0; --i) {
-        if(_items[i].key == key) _items.erase(_items.begin()+i);
+    for(int i = items.size()-1; i >= 0; --i) {
+        if(items[i].key == key) items.erase(items.begin()+i);
     }
 
     configuration->flags |= Configuration::Changed;

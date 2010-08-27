@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <fstream>
 
 #include "ConfigurationGroup.h"
 
@@ -40,7 +41,7 @@ namespace Map2X { namespace Utility {
  * @bug Setting inexistent value with number > 0 creates new key/value pair
  * @todo Test, whether the configurationValueToString() is called also with string type
  */
-class Configuration {
+class Configuration: public ConfigurationGroup {
     friend class ConfigurationGroup;
 
     public:
@@ -198,108 +199,6 @@ class Configuration {
          */
         bool save();
 
-        /** @{ @name Group operations */
-
-        /**
-         * @brief Get group
-         * @param name      Name of the group. Empty string means global group.
-         * @param number    Number of the group. Default is first found group.
-         * @return Pointer to group. If no group was found, returns null pointer.
-         */
-        ConfigurationGroup* group(const std::string& name = "", unsigned int number = 0);
-        const ConfigurationGroup* group(const std::string& name = "", unsigned int number = 0) const; /**< @overload */
-
-        /**
-         * @brief Get all groups
-         * @param name      Name of the group. Because global group is only one,
-         *      retrieving list of all global groups is meaningless as it
-         *      returns always one-item list. For global group use group()
-         *      instead.
-         * @return Vector of groups. If no group found, returns empty vector.
-         */
-        std::vector<ConfigurationGroup*> groups(const std::string& name);
-        std::vector<const ConfigurationGroup*> groups(const std::string& name) const; /**< @overload */
-
-        /**
-         * @brief Count of groups with given name
-         * @param name      Name of the group. Retrieving count of global groups
-         *      is meaningless as global group is always only one.
-         * @return Count
-         *
-         * See also Configuration::UniqueGroups and Configuration::UniqueNames.
-         */
-        unsigned int groupCount(const std::string& name) const;
-
-        /**
-         * @brief Add new group
-         * @param name      Name of the group. Global group is always present
-         *      and can be only one per file, so adding new global group will
-         *      fail.
-         * @return Newly created group or null pointer when new group cannot be
-         *      added (see above or flags Configuration::UniqueGroups and
-         *      Configuration::ReadOnly).
-         *
-         * Adds new group at the end of file.
-         */
-        ConfigurationGroup* addGroup(const std::string& name);
-
-        /**
-         * @brief Remove group
-         * @param name      Name of the group. Global group cannot be removed.
-         * @param number    Number of the group. Default is first found group.
-         * @return Whether the groups were removed. (see above or flag
-         *      Connfiguration::ReadOnly).
-         */
-        bool removeGroup(const std::string& name, unsigned int number = 0);
-
-        /**
-         * @brief Remove all groups with given name
-         * @param name      Name of groups to remove. Global group cannot be
-         *      removed.
-         * @return Whether the removal was successful (see above or flag
-         *      Connfiguration::ReadOnly).
-         *
-         * @todo Return false if no group was removed?
-         */
-        bool removeAllGroups(const std::string& name);
-
-        /*@}*/
-
-        /** @{ @name Convenience functions for operating with global group
-         *
-         * Calling Configuration::foo() with these functions has the same
-         * functionality as calling Configuration::group()->foo().
-         */
-
-        /** @copydoc ConfigurationGroup::value(const std::string&, T*, unsigned int, int) */
-        template<class T> inline bool value(const std::string& key, T* _value, unsigned int number = 0, int flags = 0)
-            { return group()->value<T>(key, _value, number, flags); }
-        /** @copydoc ConfigurationGroup::value(const std::string&, unsigned int, int) */
-        template<class T> inline T value(const std::string& key, unsigned int number = 0, int flags = 0)
-            { return group()->value<T>(key, number, flags); }
-        /** @copydoc ConfigurationGroup::values() */
-        template<class T> inline std::vector<T> values(const std::string& key, int flags = 0) const
-            { return group()->values<T>(key, flags); }
-        /** @copydoc ConfigurationGroup::valueCount() */
-        inline unsigned int valueCount(const std::string& key) const
-            { return group()->valueCount(key); }
-
-        /** @copydoc ConfigurationGroup::setValue() */
-        template<class T> inline bool setValue(const std::string& key, const T& value, unsigned int number = 0, int flags = 0)
-            { return group()->setValue<T>(key, value, number, flags); }
-        /** @copydoc ConfigurationGroup::addValue() */
-        template<class T> inline bool addValue(const std::string& key, const T& value, int flags = 0)
-            { return group()->addValue<T>(key, value, flags); }
-
-        /** @copydoc ConfigurationGroup::removeValue() */
-        inline bool removeValue(const std::string& key, unsigned int number = 0)
-            { return group()->removeValue(key, number); }
-        /** @copydoc ConfigurationGroup::removeAllValues() */
-        inline bool removeAllValues(const std::string& key)
-            { return group()->removeAllValues(key); }
-
-        /*@}*/
-
     private:
         /** @brief Private flags for file state */
         enum PrivateFlags {
@@ -321,8 +220,9 @@ class Configuration {
          */
         int flags;
 
-        /** @brief Configuration groups */
-        std::vector<ConfigurationGroup> _groups;
+        std::string parse(std::ifstream& file, ConfigurationGroup* group, const std::string& fullPath);
+
+        void save(std::ofstream& file, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const;
 };
 
 }}

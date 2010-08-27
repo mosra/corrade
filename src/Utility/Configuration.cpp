@@ -15,7 +15,7 @@
 
 #include "Configuration.h"
 
-#include <fstream>
+#include <iostream>
 
 #include "utilities.h"
 
@@ -23,7 +23,7 @@ using namespace std;
 
 namespace Map2X { namespace Utility {
 
-Configuration::Configuration(const string& _filename, int _flags): filename(_filename), flags(_flags) {
+Configuration::Configuration(const string& _filename, int _flags): ConfigurationGroup("", this), filename(_filename), flags(_flags) {
     /* Open file with requested flags */
     ifstream::openmode openmode = ifstream::in;
     if(flags & Truncate) openmode |= ifstream::trunc;
@@ -33,34 +33,42 @@ Configuration::Configuration(const string& _filename, int _flags): filename(_fil
     if(!file.is_open()) {
         /** @todo check better */
 
-        /* Empty global group */
-        _groups.push_back(ConfigurationGroup("", vector<ConfigurationGroup::Item>(), this));
         flags |= IsValid;
         return;
     }
 
-    if(!file.good()) {
-        /** @todo error to stderr */
-        return;
-    }
+    try {
+        if(!file.good())
+            throw string("Cannot open configuration file.");
 
-    /* It looks like BOM */
-    if(file.peek() == '\xEF') {
-        char* bom = new char[4];
-        file.get(bom, 4);
+        /* It looks like BOM */
+        if(file.peek() == '\xEF') {
+            char* bom = new char[4];
+            file.get(bom, 4);
 
-        /* This is not a BOM, rewind back */
-        if(string(bom) != "\xEF\xBB\xBF") file.seekg(0);
+            /* This is not a BOM, rewind back */
+            if(string(bom) != "\xEF\xBB\xBF") file.seekg(0);
 
-        /* Or set flag */
-        else flags |= HasBom;
+            /* Or set flag */
+            else flags |= HasBom;
 
-        delete[] bom;
-    }
+            delete[] bom;
+        }
 
-    /* Line buffer, current group name, vector of configuration items */
-    string buffer, group;
-    vector<ConfigurationGroup::Item> items;
+        /* Parse file */
+        parse(file, this, "");
+
+        /* Everything went fine */
+        flags |= IsValid;
+
+    } catch(string e) { cerr << e; }
+
+    /* Close file */
+    file.close();
+}
+
+string Configuration::parse(ifstream& file, ConfigurationGroup* group, const string& fullPath) {
+    string buffer;
 
     /* Parse file */
     while(file.good()) {
@@ -70,38 +78,46 @@ Configuration::Configuration(const string& _filename, int _flags): filename(_fil
         if(buffer[buffer.size()-1] == '\r')
             flags |= WindowsEol;
 
+        /* Trim buffer */
         buffer = trim(buffer);
 
-        /* Empty line */
-        if(buffer.size() == 0) {
-            if(flags & (SkipComments|ReadOnly)) continue;
-
-            items.push_back(ConfigurationGroup::Item());
-
         /* Group header */
-        } else if(buffer[0] == '[') {
+        if(buffer[0] == '[') {
 
             /* Check ending bracket */
-            /** @todo Error to stderr */
-            if(buffer[buffer.size()-1] != ']') return;
+            if(buffer[buffer.size()-1] != ']')
+                throw string("Missing closing bracket for group header!");
 
-            /* Finish current group and start new */
+            string nextGroup = trim(buffer.substr(1, buffer.size()-2));
 
-            /* If unique groups are set, check whether current group is unique */
-            bool save = true;
-            if(flags & UniqueGroups) {
-                for(vector<ConfigurationGroup>::const_iterator it = _groups.begin(); it != _groups.end(); ++it)
-                    if(it->name() == group) {
-                        save = false;
-                        break;
-                    }
+            if(nextGroup.empty())
+                throw string("Empty group name!");
+
+            /* Next group is subgroup of current group, recursive call */
+            while(!nextGroup.empty() && (fullPath == "" || nextGroup.substr(0, fullPath.size()) == fullPath)) {
+                ConfigurationGroup* g = new ConfigurationGroup(nextGroup.substr(fullPath.size()), configuration);
+                nextGroup = parse(file, g, nextGroup+'/');
+
+                /* If unique groups are set, check whether current group is unique */
+                bool save = true;
+                if(flags & UniqueGroups) {
+                    /** @todo Do this in logarithmic time */
+                    for(vector<ConfigurationGroup*>::const_iterator it = group->_groups.begin(); it != group->_groups.end(); ++it)
+                        if((*it)->name() == g->name()) {
+                            save = false;
+                            break;
+                        }
+                }
+                if(save) group->_groups.push_back(g);
             }
 
-            if(save) _groups.push_back(ConfigurationGroup(group, items, this));
-            group = trim(buffer.substr(1, buffer.size()-2));
-            /** @todo Error to stderr */
-            if(group.empty()) return;
-            items.clear();
+            return nextGroup;
+
+        /* Empty line */
+        } else if(buffer.size() == 0) {
+            if(flags & (SkipComments|ReadOnly)) continue;
+
+            group->items.push_back(ConfigurationGroup::Item());
 
         /* Comment */
         } else if(buffer[0] == '#' || buffer[0] == ';') {
@@ -109,13 +125,13 @@ Configuration::Configuration(const string& _filename, int _flags): filename(_fil
 
             ConfigurationGroup::Item item;
             item.value = buffer;
-            items.push_back(item);
+            group->items.push_back(item);
 
         /* Key/value pair */
         } else {
             size_t splitter = buffer.find_first_of('=');
-            /** @todo Error to stderr */
-            if(splitter == string::npos) return;
+            if(splitter == string::npos)
+                throw string("Key/value pair without '=' character!");
 
             ConfigurationGroup::Item item;
             item.key = trim(buffer.substr(0, splitter));
@@ -124,47 +140,33 @@ Configuration::Configuration(const string& _filename, int _flags): filename(_fil
             /* Remove quotes, if present */
             /** @todo Check @c '"' characters better */
             if(item.value.size() != 0 && item.value[0] == '"') {
-                /** @todo Error to stderr */
-                if(item.value.size() < 2 || item.value[item.value.size()-1] != '"') return;
+                if(item.value.size() < 2 || item.value[item.value.size()-1] != '"')
+                    throw string("Missing closing quotes in value!");
 
                 item.value = item.value.substr(1, item.value.size()-2);
             }
 
             /* If unique keys are set, check whether current key is unique */
             if(flags & UniqueKeys) {
-                bool unique = true;
-                for(vector<ConfigurationGroup::Item>::const_iterator it = items.begin(); it != items.end(); ++it) {
-                    if(it->key == item.key) unique = false;
-                }
-                if(!unique) continue;
+                bool contains = false;
+                for(vector<ConfigurationGroup::Item>::const_iterator it = group->items.begin(); it != group->items.end(); ++it)
+                    if(it->key == item.key) {
+                        contains = true;
+                        break;
+                    }
+                if(contains) continue;
             }
 
-            items.push_back(item);
+            group->items.push_back(item);
         }
     }
 
     /* Remove last empty line, if present (will be written automatically) */
-    if(items.size() != 0 && items[items.size()-1].key == "" && items[items.size()-1].value == "")
-        items.pop_back();
+    if(group->items.size() != 0 && group->items[group->items.size()-1].key == "" && group->items[group->items.size()-1].value == "")
+        group->items.pop_back();
 
-    /* If unique groups are set, check whether last group is unique */
-    bool save = true;
-    if(flags & UniqueGroups) {
-        for(vector<ConfigurationGroup>::const_iterator it = _groups.begin(); it != _groups.end(); ++it)
-            if(it->name() == group) {
-                save = false;
-                break;
-            }
-    }
-
-    /* Finish last group */
-    if(save) _groups.push_back(ConfigurationGroup(group, items, this));
-
-    /* Close file */
-    file.close();
-
-    /* Everything went fine */
-    flags |= IsValid;
+    /* This was the last group */
+    return "";
 }
 
 bool Configuration::save() {
@@ -191,139 +193,45 @@ bool Configuration::save() {
     /** @todo Checking file.good() after every operation */
     /** @todo Backup file */
 
-    /* Foreach all groups */
-    for(vector<ConfigurationGroup>::const_iterator it = _groups.begin(); it != _groups.end(); ++it) {
-        /* Group header (if this is not global group) */
-        if(!it->name().empty()) {
-            buffer = '[' + it->name() + ']' + eol;
-            file.write(buffer.c_str(), buffer.size());
-        }
-
-        const vector<ConfigurationGroup::Item>& items = it->items();
-
-        /* Foreach all items in the group */
-        for(vector<ConfigurationGroup::Item>::const_iterator git = items.begin(); git != items.end(); ++git) {
-            /* Key/value pair */
-            if(!git->key.empty()) {
-                /** @todo Make whitespaces a constant in utilities.h */
-                if(git->value.find_first_of(" \t\f\v\r\n") != string::npos)
-                    buffer = git->key + "=\"" + git->value + '"' + eol;
-                else
-                    buffer = git->key + '=' + git->value + eol;
-            }
-
-            /* Comment / empty line */
-            else buffer = git->value + eol;
-
-            file.write(buffer.c_str(), buffer.size());
-        }
-    }
+    /* Recursively save all groups */
+    save(file, eol, this, "");
 
     file.close();
 
     return true;
 }
 
-ConfigurationGroup* Configuration::group(const string& name, unsigned int number) {
-    unsigned int foundNumber = 0;
-    for(vector<ConfigurationGroup>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
-        if(it->name() == name && foundNumber++ == number)
-            return &*it;
-    }
+void Configuration::save(std::ofstream& file, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const {
+    string buffer;
 
-    /* Automatic group creation is enabled and user wants first group,
-        try to create new group */
-    if((flags & AutoCreateGroups) && number == 0) return addGroup(name);
-
-    return 0;
-}
-
-const ConfigurationGroup* Configuration::group(const string& name, unsigned int number) const {
-    unsigned int foundNumber = 0;
-    for(vector<ConfigurationGroup>::const_iterator it = _groups.begin(); it != _groups.end(); ++it) {
-        if(it->name() == name && foundNumber++ == number)
-            return it.base();
-    }
-
-    return 0;
-}
-
-vector<ConfigurationGroup*> Configuration::groups(const string& name) {
-    vector<ConfigurationGroup*> found;
-
-    for(vector<ConfigurationGroup>::iterator it = _groups.begin(); it != _groups.end(); ++it)
-        if(it->name() == name) found.push_back(it.base());
-
-    return found;
-}
-
-vector<const ConfigurationGroup*> Configuration::groups(const string& name) const {
-    vector<const ConfigurationGroup*> found;
-
-    for(vector<ConfigurationGroup>::const_iterator it = _groups.begin(); it != _groups.end(); ++it)
-        if(it->name() == name) found.push_back(it.base());
-
-    return found;
-}
-
-unsigned int Configuration::groupCount(const string& name) const {
-    unsigned int count = 0;
-    for(vector<ConfigurationGroup>::const_iterator it = _groups.begin(); it != _groups.end(); ++it)
-        if(it->name() == name) count++;
-
-    return count;
-}
-
-ConfigurationGroup* Configuration::addGroup(const std::string& name) {
-    if(flags & ReadOnly || !(flags & IsValid)) return 0;
-
-    /* Global group can be only one */
-    if(name.empty()) return 0;
-
-    /* Check for unique groups */
-    if(flags & UniqueGroups) {
-        for(vector<ConfigurationGroup>::const_iterator it = _groups.begin(); it != _groups.end(); ++it)
-            if(it->name() == name) return 0;
-    }
-
-    flags |= Changed;
-
-    ConfigurationGroup g(name, vector<ConfigurationGroup::Item>(), this);
-    _groups.push_back(g);
-    return &_groups.back();
-}
-
-bool Configuration::removeGroup(const std::string& name, unsigned int number) {
-    if(flags & ReadOnly || !(flags & IsValid)) return false;
-
-    /* Global group cannot be removed */
-    if(name == "") return false;
-
-    /* Find group with given number and name */
-    unsigned int foundNumber = 0;
-    for(vector<ConfigurationGroup>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
-        if(it->name() == name && foundNumber++ == number) {
-            _groups.erase(it);
-            flags |= Changed;
-            return true;
+    /* Foreach all items in the group */
+    for(vector<ConfigurationGroup::Item>::const_iterator it = group->items.begin(); it != group->items.end(); ++it) {
+        /* Key/value pair */
+        if(!it->key.empty()) {
+            /** @todo Make whitespaces a constant in utilities.h */
+            if(it->value.find_first_of(" \t\f\v\r\n") != string::npos)
+                buffer = it->key + "=\"" + it->value + '"' + eol;
+            else
+                buffer = it->key + '=' + it->value + eol;
         }
+
+        /* Comment / empty line */
+        else buffer = it->value + eol;
+
+        file.write(buffer.c_str(), buffer.size());
     }
 
-    return false;
-}
+    /* Recursively process all subgroups */
+    for(vector<ConfigurationGroup*>::const_iterator git = group->_groups.begin(); git != group->_groups.end(); ++git) {
+        /* Subgroup name */
+        string name = (*git)->name();
+        if(!fullPath.empty()) name = fullPath + '/' + name;
 
-bool Configuration::removeAllGroups(const std::string& name) {
-    if(flags & ReadOnly || !(flags & IsValid)) return false;
+        buffer = '[' + name + ']' + eol;
+        file.write(buffer.c_str(), buffer.size());
 
-    /* Global group cannot be removed */
-    if(name == "") return false;
-
-    for(int i = _groups.size()-1; i >= 0; --i) {
-        if(_groups[i].name() == name) _groups.erase(_groups.begin()+i);
+        save(file, eol, *git, name);
     }
-
-    flags |= Changed;
-    return true;
 }
 
 }}

@@ -53,7 +53,6 @@ void ConfigurationTest::parse() {
     QVERIFY(conf.isValid());
 
     /* Groups */
-    QVERIFY(conf.groupCount("") == 1);
     QVERIFY(conf.groupCount("group") == 2);
     QVERIFY(conf.groupCount("empty_group") == 1);
     QVERIFY(conf.groupCount("group_inexistent") == 0);
@@ -90,11 +89,6 @@ void ConfigurationTest::parse() {
     QVERIFY(conf.group("new_group")->addValue<string>("another", "value"));
     QVERIFY(conf.removeAllValues("key"));
 
-    /* Trying to add new global group or removing that group */
-    QVERIFY(conf.addGroup("") == 0);
-    QVERIFY(!conf.removeGroup(""));
-    QVERIFY(!conf.removeAllGroups(""));
-
     QVERIFY(conf.save());
 
     /* Verify changes */
@@ -111,8 +105,6 @@ void ConfigurationTest::empty() {
     Configuration conf(TESTFILES_BINARY_DIR + string("new.conf"));
     QVERIFY(conf.isValid());
     QVERIFY(conf.save());
-
-    QVERIFY(conf.groupCount("") == 1);
 }
 
 void ConfigurationTest::invalid() {
@@ -161,7 +153,6 @@ void ConfigurationTest::truncate() {
     Configuration conf(TESTFILES_BINARY_DIR + string("parse.conf"), Configuration::Truncate);
     conf.save();
 
-    QVERIFY(conf.groupCount("") == 1);
     QVERIFY(conf.valueCount("key") == 0);
 
     QFile file(TESTFILES_BINARY_DIR + QString("parse.conf"));
@@ -414,6 +405,72 @@ void ConfigurationTest::directValue() {
     QVERIFY(conf.value<string>("inexistent") == "");
     QVERIFY(conf.value<int>("inexistent") == 0);
     QVERIFY(conf.value<double>("inexistent") == 0.0);
+}
+
+void ConfigurationTest::hierarchic() {
+    Configuration conf(TESTFILES_BINARY_DIR + string("hierarchic.conf"));
+    QVERIFY(conf.isValid());
+
+    /* Check parsing */
+    QVERIFY(conf.group("z")->group("x")->group("c")->group("v")->value<string>("key1") == "val1");
+    QVERIFY(conf.groupCount("a") == 2);
+    QVERIFY(conf.group("a")->groupCount("b") == 2);
+    QVERIFY(conf.group("a")->group("b", 0)->value<string>("key2") == "val2");
+    QVERIFY(conf.group("a")->group("b", 1)->value<string>("key2") == "val3");
+    QVERIFY(conf.group("a", 1)->value<string>("key3") == "val4");
+    QVERIFY(conf.group("a", 1)->group("b")->value<string>("key2") == "val5");
+
+    /* Expect no change */
+    QVERIFY(conf.save());
+
+    QFile fileOrig(TESTFILES_DIR + QString("hierarchic.conf"));
+    QFile fileActual(TESTFILES_BINARY_DIR + QString("hierarchic.conf"));
+    fileOrig.open(QFile::Text|QFile::ReadOnly);
+    fileActual.open(QFile::Text|QFile::ReadOnly);
+    QByteArray original = fileOrig.readAll();
+    QByteArray actual = fileActual.readAll();
+    fileOrig.close();
+    fileActual.close();
+
+    QCOMPARE(actual, original);
+
+    /* Modify */
+    conf.group("a", 1)->addGroup("b")->setValue<string>("key2", "val6");
+    conf.addGroup("q")->addGroup("w")->addGroup("e")->addGroup("r")->setValue<string>("key4", "val7");
+
+    /* Cannot add group with '/' character */
+    QVERIFY(!conf.addGroup("a/b/c"));
+
+    conf.save();
+
+    /* Verify changes */
+    fileOrig.setFileName(TESTFILES_DIR + QString("hierarchic-modified.conf"));
+    fileOrig.open(QFile::Text|QFile::ReadOnly);
+    fileActual.open(QFile::Text|QFile::ReadOnly);
+    original = fileOrig.readAll();
+    actual = fileActual.readAll();
+
+    QCOMPARE(actual, original);
+}
+
+void ConfigurationTest::hierarchicUnique() {
+    /* Reload fresh hierarchic.conf */
+    QFile::remove(TESTFILES_BINARY_DIR + QString("hierarchic.conf"));
+    Q_ASSERT(QFile::copy(TESTFILES_DIR + QString("hierarchic.conf"), TESTFILES_BINARY_DIR + QString("hierarchic.conf")));
+
+    Configuration conf(TESTFILES_BINARY_DIR + string("hierarchic.conf"), Configuration::UniqueGroups);
+    conf.save();
+
+    QFile fileOrig(TESTFILES_DIR + QString("hierarchic-unique.conf"));
+    QFile fileActual(TESTFILES_BINARY_DIR + QString("hierarchic.conf"));
+    fileOrig.open(QFile::Text|QFile::ReadOnly);
+    fileActual.open(QFile::Text|QFile::ReadOnly);
+    QByteArray original = fileOrig.readAll();
+    QByteArray actual = fileActual.readAll();
+    fileOrig.close();
+    fileActual.close();
+
+    QCOMPARE(actual, original);
 }
 
 }}}

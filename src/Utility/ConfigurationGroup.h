@@ -70,8 +70,74 @@ class ConfigurationGroup {
             Scientific  = 0x08  /**< @brief Floating point values in scientific notation */
         };
 
+        /** @brief Destructor */
+        ~ConfigurationGroup();
+
+        /** @{ @name Group operations */
+
         /** @brief Group name */
         inline std::string name() const { return _name; }
+
+        /**
+         * @brief Get group
+         * @param name      Name of the group
+         * @param number    Number of the group. Default is first found group.
+         * @return Pointer to group. If no group was found, returns null pointer.
+         */
+        ConfigurationGroup* group(const std::string& name, unsigned int number = 0);
+        const ConfigurationGroup* group(const std::string& name, unsigned int number = 0) const; /**< @overload */
+
+        /**
+         * @brief Get all groups
+         * @param name      Name of the group
+         * @return Vector of groups. If no group found, returns empty vector.
+         */
+        std::vector<ConfigurationGroup*> groups(const std::string& name);
+        std::vector<const ConfigurationGroup*> groups(const std::string& name) const; /**< @overload */
+
+        /**
+         * @brief Count of groups with given name
+         * @param name      Name of the group
+         * @return Count
+         *
+         * See also Configuration::UniqueGroups and Configuration::UniqueNames.
+         */
+        unsigned int groupCount(const std::string& name) const;
+
+        /**
+         * @brief Add new group
+         * @param name      Name of the group. The name must not be empty and
+         *      must not contain '/' character.
+         * @return Newly created group or null pointer when new group cannot be
+         *      added (see above or flags Configuration::UniqueGroups and
+         *      Configuration::ReadOnly).
+         *
+         * Adds new group at the end of file.
+         */
+        ConfigurationGroup* addGroup(const std::string& name);
+
+        /**
+         * @brief Remove group
+         * @param name      Name of the group
+         * @param number    Number of the group. Default is first found group.
+         * @return Whether the groups were removed. (see above or flag
+         *      Connfiguration::ReadOnly).
+         */
+        bool removeGroup(const std::string& name, unsigned int number = 0);
+
+        /**
+         * @brief Remove all groups with given name
+         * @param name      Name of groups to remove
+         * @return Whether the removal was successful (see above or flag
+         *      Connfiguration::ReadOnly).
+         *
+         * @todo Return false if no group was removed?
+         */
+        bool removeAllGroups(const std::string& name);
+
+        /*@}*/
+
+        /** @{ @name Value operations */
 
         /**
          * @brief Value
@@ -184,6 +250,8 @@ class ConfigurationGroup {
          */
         bool removeAllValues(const std::string& key);
 
+        /*@}*/
+
     private:
         /** @brief Configuration item */
         struct Item {
@@ -191,13 +259,13 @@ class ConfigurationGroup {
                 value;          /**< @brief Value or comment, empty line */
         };
 
-        std::string _name;
-        std::vector<Item> _items;
+        std::string _name;                          /**< @brief Group name */
+        std::vector<Item> items;                    /**< @brief Values and comments */
+        std::vector<ConfigurationGroup*> _groups;   /**< @brief Subgroups */
+
         Configuration* configuration;
 
-        inline ConfigurationGroup(const std::string& name, std::vector<Item> items, Configuration* _configuration): _name(name), _items(items), configuration(_configuration) {}
-
-        inline const std::vector<Item>& items() const { return _items; }
+        ConfigurationGroup(const std::string& name, Configuration* _configuration);
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
