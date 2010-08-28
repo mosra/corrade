@@ -29,4 +29,21 @@ string trim(string str, const string& characters) {
     return str;
 }
 
+vector<string> split(const string& str, char delim, bool keepEmptyParts) {
+    vector<string> parts;
+    size_t oldpos = 0, pos = string::npos;
+
+    do {
+        pos = str.find(delim, oldpos);
+        string part = str.substr(oldpos, pos-oldpos);
+
+        if(!part.empty() || keepEmptyParts)
+            parts.push_back(part);
+
+        oldpos = pos+1;
+    } while(pos != string::npos);
+
+    return parts;
+}
+
 }}

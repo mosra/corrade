@@ -20,6 +20,7 @@
  */
 
 #include <string>
+#include <vector>
 
 namespace Map2X { namespace Utility {
 
@@ -30,6 +31,15 @@ namespace Map2X { namespace Utility {
  * @return Trimmed string
  */
 std::string trim(std::string str, const std::string& characters = " \t\f\v\r\n");
+
+/**
+ * @brief Split string on given character
+ * @param str               String to be splitted
+ * @param delim             Delimiter
+ * @param keepEmptyParts    Whether to keep empty parts
+ * @return Vector of splitted strings
+ */
+std::vector<std::string> split(const std::string& str, char delim, bool keepEmptyParts = true);
 
 }}
 

@@ -25,6 +25,9 @@ class UtilitiesTest: public QObject {
     private slots:
         void trim_data();
         void trim();
+
+        void split_data();
+        void split();
 };
 
 }}}

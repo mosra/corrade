@@ -23,7 +23,6 @@
 using namespace std;
 
 QTEST_APPLESS_MAIN(Map2X::Utility::Test::UtilitiesTest)
-Q_DECLARE_METATYPE(std::string)
 
 namespace Map2X { namespace Utility { namespace Test {
 
@@ -43,6 +42,42 @@ void UtilitiesTest::trim() {
     QFETCH(QString, out);
 
     QCOMPARE(QString::fromStdString(Utility::trim(in.toStdString())), out);
+}
+
+void UtilitiesTest::split_data() {
+    QTest::addColumn<QString>("in");
+    QTest::addColumn<bool>("keepEmptyParts");
+    QTest::addColumn<QStringList>("out");
+
+    QStringList list;
+    list << "abcdef";
+    QTest::newRow("noDelimiter") << "abcdef" << true << list;
+
+    list.clear();
+    list << "ab" << "c" << "def";
+    QTest::newRow("delimiters") << "ab/c/def" << true << list;
+
+    list.clear();
+    list << "ab" << "" << "c" << "def" << "" << "";
+    QTest::newRow("emptyParts") << "ab//c/def//" << true << list;
+
+    list.clear();
+    list << "ab" << "c" << "def";
+    QTest::newRow("skipEmptyParts") << "ab//c/def//" << false << list;
+}
+
+void UtilitiesTest::split() {
+    QFETCH(QString, in);
+    QFETCH(bool, keepEmptyParts);
+    QFETCH(QStringList, out);
+
+    vector<string> o = Utility::split(in.toStdString(), '/', keepEmptyParts);
+
+    QStringList o_;
+    for(vector<string>::const_iterator it = o.begin(); it != o.end(); ++it)
+        o_.append(QString::fromStdString(*it));
+
+    QCOMPARE(o_, out);
 }
 
 }}}
