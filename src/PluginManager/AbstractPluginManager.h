@@ -141,6 +141,7 @@ class AbstractPluginManager {
          * the same interface as this PluginManager instance. The gets list of
          * all dynamic plugins in given directory.
          * @see PluginManager::nameList()
+         * @todo Plugin dir without trailing slash.
          */
         AbstractPluginManager(const std::string& pluginDirectory);
 
