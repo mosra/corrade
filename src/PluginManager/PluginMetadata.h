@@ -58,17 +58,39 @@ struct PluginMetadata {
          */
         std::string description;
 
-        /** @brief Plugin dependencies */
+        /**
+         * @brief Plugins on which this plugin depend
+         *
+         * List of plugins which must be loaded before this plugin can be
+         * loaded. See also PluginMetadata::replaced.
+         */
         std::vector<std::string> depends;
 
         /**
-         * @brief Replaced plugins
+         * @brief Plugins which depend on this plugin
          *
-         * Plugins which are replaced with this plugin. Plugins which depends on
-         * them can be used with this plugin. The plugin cannot be loaded when
-         * any of the replaced plugins are loaded.
+         * List of plugins which uses this plugin. This plugin cannot be
+         * unloaded when any of these plugins are loaded.
+         * @note This list is automatically created by plugin manager.
+         */
+        std::vector<std::string> usedBy;
+
+        /**
+         * @brief Plugins which are replaced with this plugin
+         *
+         * Plugins which depends on them can be used with this plugin. The
+         * plugin cannot be loaded when any of the replaced plugins are loaded.
          */
         std::vector<std::string> replaces;
+
+        /**
+         * @brief Plugins which replaces this plugin
+         *
+         * List of plugins which can replace this plugin. Every plugin which
+         * depends on this plugin would work also with these.
+         * @note This list is automatically created by plugin manager.
+         */
+        std::vector<std::string> replacedWith;
 
         /**
          * @brief Conflicting plugins
