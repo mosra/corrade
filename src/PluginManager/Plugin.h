@@ -110,10 +110,10 @@ class Plugin {
  * must be called too.
  */
 #define PLUGIN_REGISTER_STATIC(name, className, _interface) \
-    extern "C" inline int name##Version() { return PLUGIN_VERSION; } \
-    extern "C" inline void* name##Instancer(Map2X::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
+    inline int name##Version() { return PLUGIN_VERSION; } \
+    inline void* name##Instancer(Map2X::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
         { return new className(manager, plugin); } \
-    extern "C" inline void name##MetadataCreator(Map2X::PluginManager::PluginMetadata* metadata) { \
+    inline void name##MetadataCreator(Map2X::PluginManager::PluginMetadata* metadata) { \
         metadata->interface = _interface;
 
 /** @{ @name Plugin metadata
