@@ -39,6 +39,7 @@ class Plugin;
  *      C++ Standard Core Language Active Issue #195,
  *      http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_defects.html#195 )
  * @todo Print out errors to stderr
+ * @todo Provide destructing function with plugin (new/delete overloads, segfaults...)
  */
 class AbstractPluginManager {
     friend class Plugin;
@@ -142,6 +143,7 @@ class AbstractPluginManager {
          * all dynamic plugins in given directory.
          * @see PluginManager::nameList()
          * @todo Plugin dir without trailing slash.
+         * @todo Make static plugin have higher priority than dynamic
          */
         AbstractPluginManager(const std::string& pluginDirectory);
 
