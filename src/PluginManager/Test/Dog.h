@@ -13,16 +13,18 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "Dog.h"
+#include "AbstractAnimal.h"
 
 namespace Map2X { namespace PluginManager { namespace Test {
 
-std::string Dog::name() { return "Doug"; }
-bool Dog::hasTail() { return true; }
-int Dog::legCount() { return 4; }
+class Dog: public AbstractAnimal {
+    public:
+        inline Dog(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
+            AbstractAnimal(manager, plugin) {}
 
-PLUGIN_REGISTER(Dog, "cz.mosra.Map2X.PluginManager.Test.AbstractAnimal/1.0")
-PLUGIN_SET_NAME("A simple dog plugin")
-PLUGIN_FINISH
+        std::string name();
+        int legCount();
+        bool hasTail();
+};
 
 }}}
