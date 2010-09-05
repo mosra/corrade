@@ -34,6 +34,9 @@ namespace Map2X { namespace Utility {
  * group has unique filename.
  *
  * See also @ref rc.cpp.
+ * @todo Ad-hoc resources
+ * @todo Test data unregistering
+ * @todo Test empty files
  */
 class Resource {
     public:
