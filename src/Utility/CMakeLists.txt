@@ -17,6 +17,9 @@ set(Map2X_Utility_SRCS
 
 add_library(Map2XUtility STATIC ${Map2X_Utility_SRCS})
 
+add_executable(map2x-rc rc.cpp)
+target_link_libraries(map2x-rc Map2XUtility)
+
 if(USE_FPIC)
     set_target_properties(Map2XUtility PROPERTIES COMPILE_FLAGS -fPIC)
 endif()

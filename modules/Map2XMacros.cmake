@@ -55,3 +55,51 @@ function(map2x_add_multifile_test test_name moc_headers_variable source_files_va
     target_link_libraries(${test_name} ${libraries} ${QT_QTCORE_LIBRARY} ${QT_QTTEST_LIBRARY})
     add_test(${test_name} ${test_name})
 endfunction()
+
+#
+# Macro for compiling data resources into application binary
+#
+# Depends on map2x-rc, which is part of Map2X utilities.
+#
+# Example usage:
+#       map2x_add_resource(name group_name file1 ALIAS alias1 file2 file3 ALIAS alias3 ...)
+#       add_executable(app source1 source2 ... ${name})
+#
+# This command generates resource file with group group_name from given
+# files in current build directory. Argument name is name under which the
+# resources can be explicitly loaded. Variable 'name' contains compiled
+# resource filename, which is then used for compiling library / executable.
+#
+function(map2x_add_resource name group_name)
+    set(IS_ALIAS OFF)
+    foreach(argument ${ARGN})
+
+        # Next argument is alias
+        if(${argument} STREQUAL "ALIAS")
+            set(IS_ALIAS ON)
+
+        # This argument is alias
+        elseif(IS_ALIAS)
+            set(arguments ${arguments} -a ${argument})
+            set(IS_ALIAS OFF)
+
+        # Filename
+        else()
+            set(arguments ${arguments} ${argument})
+            set(dependencies ${dependencies} ${argument})
+        endif()
+    endforeach()
+
+    # Run command
+    set(out resource_${name}.cpp)
+    add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${out}
+        COMMAND map2x-rc ${name} ${group_name} ${arguments} > ${CMAKE_CURRENT_BINARY_DIR}/${out}
+        DEPENDS map2x-rc ${dependencies}
+        COMMENT "Compiling data resource file ${out}"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        )
+
+    # Save output filename
+    set(${name} ${CMAKE_CURRENT_BINARY_DIR}/${out} PARENT_SCOPE)
+endfunction()
