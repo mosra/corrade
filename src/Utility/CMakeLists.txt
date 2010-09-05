@@ -11,6 +11,7 @@ set(Map2X_Utility_SRCS
     Directory.cpp
     Configuration.cpp
     ConfigurationGroup.cpp
+    Resource.cpp
     utilities.cpp
 )
 
