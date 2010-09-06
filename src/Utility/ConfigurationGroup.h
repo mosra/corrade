@@ -188,7 +188,7 @@ class ConfigurationGroup {
             for(std::vector<std::string>::const_iterator it = stringValues.begin(); it != stringValues.end(); ++it)
                 _values.push_back(configurationValueFromString<T>(*it, flags));
 
-            return values;
+            return _values;
         }
 
         /**
