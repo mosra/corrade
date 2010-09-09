@@ -103,3 +103,68 @@ function(map2x_add_resource name group_name)
     # Save output filename
     set(${name} ${CMAKE_CURRENT_BINARY_DIR}/${out} PARENT_SCOPE)
 endfunction()
+
+#
+# Function for adding dynamic plugins
+#
+# Usage:
+#       map2x_add_plugin(plugin_name install_dir metadata_file file1.cpp file2.cpp ...)
+#
+# Additional libraries can be linked in via target_link_libraries(plugin_name ...).
+#
+# If install_dir is set to CMAKE_CURRENT_BINARY_DIR (e.g. for testing purposes),
+# the files are copied directly, without need to run 'make install'.
+#
+function(map2x_add_plugin plugin_name install_dir metadata_file)
+    add_library(${plugin_name} MODULE ${ARGN})
+    if(${install_dir} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
+        add_custom_command(
+            OUTPUT ${plugin_name}.conf
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} ${CMAKE_CURRENT_BINARY_DIR}/${plugin_name}.conf
+            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file}
+        )
+        add_custom_target(${plugin_name}-metadata ALL DEPENDS ${plugin_name}.conf)
+    else()
+        install(TARGETS ${plugin_name} DESTINATION "${install_dir}/${plugin_name}.conf")
+        install(FILES ${metadata_file} DESTINATION "${install_dir}/${plugin_name}.conf")
+    endif()
+endfunction()
+
+#
+# Function for adding static plugins
+#
+# Usage:
+#       map2x_add_static_plugin(static_plugins_variable plugin_name metadata_file file1.cpp ...)
+#
+# Additional libraries can be linked in via target_link_libraries(plugin_name ...).
+#
+# Plugin library name will be added at the end of static_plugins_variable and the
+# variable is meant to be used while linking plugins to main executable/library,
+# e.g:
+#       target_link_libraries(app lib1 lib2 ... ${static_plugins_variable})
+#
+# This variable is set with parent scope so is available in parent directory. If
+# there is more intermediate directories between plugin directory and main
+# executable directory, the variable can be propagated to parent scope like
+# this:
+#       set(static_plugins_variable ${static_plugins_variable} PARENT_SCOPE)
+#
+macro(map2x_add_static_plugin static_plugins_variable plugin_name metadata_file)
+    foreach(source ${ARGN})
+        set(sources ${sources} ${source})
+    endforeach()
+
+    map2x_add_resource(${plugin_name} plugins ${metadata_file} ALIAS "${plugin_name}.conf")
+    add_library(${plugin_name} STATIC ${sources} ${${plugin_name}})
+
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        set_target_properties(${plugin_name} PROPERTIES COMPILE_FLAGS -fPIC)
+    endif()
+
+    # Unset sources array (it's a macro, thus variables stay between calls)
+    unset(sources)
+
+    # PARENT_SCOPE doesn't set it in current scope (wtf?)
+    set(${static_plugins_variable} ${${static_plugins_variable}} ${plugin_name})
+    set(${static_plugins_variable} ${${static_plugins_variable}} PARENT_SCOPE)
+endmacro()
