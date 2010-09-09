@@ -58,6 +58,8 @@ const ConfigurationGroup* ConfigurationGroup::group(const string& name, unsigned
 }
 
 vector<ConfigurationGroup*> ConfigurationGroup::groups(const string& name) {
+    if(name.empty()) return _groups;
+
     vector<ConfigurationGroup*> found;
 
     for(vector<ConfigurationGroup*>::iterator it = _groups.begin(); it != _groups.end(); ++it)
@@ -70,17 +72,9 @@ vector<const ConfigurationGroup*> ConfigurationGroup::groups(const string& name)
     vector<const ConfigurationGroup*> found;
 
     for(vector<ConfigurationGroup*>::const_iterator it = _groups.begin(); it != _groups.end(); ++it)
-        if((*it)->name() == name) found.push_back(*it);
+        if(name.empty() || (*it)->name() == name) found.push_back(*it);
 
     return found;
-}
-
-unsigned int ConfigurationGroup::groupCount(const string& name) const {
-    unsigned int count = 0;
-    for(vector<ConfigurationGroup*>::const_iterator it = _groups.begin(); it != _groups.end(); ++it)
-        if((*it)->name() == name) count++;
-
-    return count;
 }
 
 ConfigurationGroup* ConfigurationGroup::addGroup(const std::string& name) {

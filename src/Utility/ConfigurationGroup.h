@@ -89,20 +89,25 @@ class ConfigurationGroup {
 
         /**
          * @brief Get all groups
-         * @param name      Name of the group
+         * @param name      Name of the group. If empty, returns all subgroups.
          * @return Vector of groups. If no group found, returns empty vector.
          */
-        std::vector<ConfigurationGroup*> groups(const std::string& name);
-        std::vector<const ConfigurationGroup*> groups(const std::string& name) const; /**< @overload */
+        std::vector<ConfigurationGroup*> groups(const std::string& name = "");
+        std::vector<const ConfigurationGroup*> groups(const std::string& name = "") const; /**< @overload */
 
         /**
          * @brief Count of groups with given name
-         * @param name      Name of the group
+         * @param name      Name of the group. If empty, returns number of all
+         *      subgroups.
          * @return Count
          *
+         * More efficient than calling <tt>groups(name).size()</tt>.
          * See also Configuration::UniqueGroups and Configuration::UniqueNames.
          */
-        unsigned int groupCount(const std::string& name) const;
+        inline unsigned int groupCount(const std::string& name = "") const {
+            if(name.empty()) return _groups.size();
+            return groups(name).size();
+        }
 
         /**
          * @brief Add new group
