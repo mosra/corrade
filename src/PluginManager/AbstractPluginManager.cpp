@@ -23,7 +23,7 @@
 #include "Utility/Directory.h"
 
 using namespace std;
-using Map2X::Utility::Directory;
+using namespace Map2X::Utility;
 
 namespace Map2X { namespace PluginManager {
 
@@ -42,10 +42,8 @@ void AbstractPluginManager::importStaticPlugin(const string& name, int _version,
 }
 
 AbstractPluginManager::AbstractPluginManager(const string& pluginDirectory): _pluginDirectory(pluginDirectory) {
-    /* Plugin directory contents */
+    /* Foreach all files in plugin directory */
     Directory d(_pluginDirectory, Directory::SkipDirectories|Directory::SkipSpecial);
-
-    /* Get all dynamic plugin filenames */
     for(Directory::const_iterator i = d.begin(); i != d.end(); ++i) {
 
         /* Search for module filename prefix and suffix in current file */

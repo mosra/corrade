@@ -46,6 +46,7 @@ struct PluginMetadata {
          *
          * Descriptive name of plugin. Not to be confused with name under which
          * the plugin is loaded.
+         * @note This field is constant during whole plugin lifetime.
          */
         std::string name;
 
@@ -53,6 +54,7 @@ struct PluginMetadata {
          * @brief Plugin description
          *
          * More detailed description of plugin.
+         * @note This field is constant during whole plugin lifetime.
          */
         std::string description;
 
@@ -61,6 +63,7 @@ struct PluginMetadata {
          *
          * List of plugins which must be loaded before this plugin can be
          * loaded. See also PluginMetadata::replaced.
+         * @note Thus field is constant during whole plugin lifetime.
          */
         std::vector<std::string> depends;
 
@@ -69,7 +72,8 @@ struct PluginMetadata {
          *
          * List of plugins which uses this plugin. This plugin cannot be
          * unloaded when any of these plugins are loaded.
-         * @note This list is automatically created by plugin manager.
+         * @note This list is automatically created by plugin manager and can
+         *      be changed in plugin lifetime.
          */
         std::vector<std::string> usedBy;
 
@@ -78,6 +82,7 @@ struct PluginMetadata {
          *
          * Plugins which depends on them can be used with this plugin. The
          * plugin cannot be loaded when any of the replaced plugins are loaded.
+         * @note Thus field is constant during whole plugin lifetime.
          */
         std::vector<std::string> replaces;
 
@@ -86,7 +91,8 @@ struct PluginMetadata {
          *
          * List of plugins which can replace this plugin. Every plugin which
          * depends on this plugin would work also with these.
-         * @note This list is automatically created by plugin manager.
+         * @note This list is automatically created by plugin manage and can
+         *      change in plugin lifetime.
          */
         std::vector<std::string> replacedWith;
 

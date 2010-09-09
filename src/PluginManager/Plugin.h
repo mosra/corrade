@@ -62,7 +62,7 @@ class Plugin {
 
 /**
  * @brief Define plugin interface
- * @param name          Interfacce name
+ * @param name          Interface name
  * @hideinitializer
  *
  * This macro is called in class definition and makes that class usable as

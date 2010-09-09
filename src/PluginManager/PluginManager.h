@@ -36,7 +36,7 @@ template<class T> class PluginManager: public AbstractPluginManager {
     public:
         /** @copydoc AbstractPluginManager::AbstractPluginManager() */
         PluginManager(const std::string& pluginDirectory): AbstractPluginManager(pluginDirectory) {
-            /* Load static plugins which use the same API */
+            /* Load static plugins which use the same interface */
             for(std::vector<StaticPlugin>::const_iterator i = staticPlugins.begin(); i != staticPlugins.end(); ++i) {
                 PluginObject p;
                 p.loadState = IsStatic;

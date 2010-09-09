@@ -4,7 +4,7 @@ project(Map2XCore)
 
 set(CMAKE_MODULE_PATH "${Map2XCore_SOURCE_DIR}/modules/")
 
-# On 64bit Linux with GCC -fPIC is needed for building some static libraries
+# On 64bit Linux with GCC flag -fPIC is needed for building some static libraries
 if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(USE_FPIC ON)
 else()
