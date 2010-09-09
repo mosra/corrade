@@ -190,11 +190,9 @@ class ConfigurationGroup {
          *
          * Directly returns the value. If the key is not found, returns
          * default constructed value.
-         * @attention The configuration file may be filled with empty values
-         *      when automatic inexistent key creation is enabled!
          * @todo Properly test int(), double() etc. whether they return 0.
          */
-        template<class T> T value(const std::string& key, unsigned int number = 0, int flags = 0) {
+        template<class T> T value(const std::string& key, unsigned int number = 0, int flags = 0) const {
             T _value;
             if(!value<T>(key, &_value, number, flags)) return T();
             return _value;
