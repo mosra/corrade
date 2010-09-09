@@ -173,6 +173,13 @@ class ConfigurationGroup {
             *_value = configurationValueFromString<T>(stringValue, flags);
             return ret;
         }
+        template<class T> bool value(const std::string& key, T* _value, unsigned int number = 0, int flags = 0) const {
+            std::string stringValue;
+            bool ret = value<std::string>(key, &stringValue, number, flags);
+
+            *_value = configurationValueFromString<T>(stringValue, flags);
+            return ret;
+        } /**< @overload */
 
         /**
          * @brief Value (directly returned)

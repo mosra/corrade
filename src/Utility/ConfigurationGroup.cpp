@@ -203,6 +203,17 @@ template<> bool ConfigurationGroup::addValue(const string& key, const string& va
 }
 
 template<> bool ConfigurationGroup::value(const string& key, string* value, unsigned int number, int flags) {
+    const ConfigurationGroup* c = this;
+    if(c->value(key, value, number, flags)) return true;
+
+    /* Automatic key/value pair creation is enabled and user wants first key,
+        try to create new key/value pair */
+    if((configuration->flags & Configuration::AutoCreateKeys) && number == 0)
+        return setValue<string>(key, *value, flags);
+
+    return false;
+}
+template<> bool ConfigurationGroup::value(const string& key, string* value, unsigned int number, int flags) const {
     unsigned int foundNumber = 0;
     for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it) {
         if(it->key == key) {
@@ -212,11 +223,6 @@ template<> bool ConfigurationGroup::value(const string& key, string* value, unsi
             }
         }
     }
-
-    /* Automatic key/value pair creation is enabled and user wants first key,
-        try to create new key/value pair */
-    if((configuration->flags & Configuration::AutoCreateKeys) && number == 0)
-        return setValue<string>(key, *value, flags);
 
     return false;
 }
