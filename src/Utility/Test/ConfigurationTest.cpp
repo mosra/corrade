@@ -59,6 +59,11 @@ void ConfigurationTest::parse() {
     QVERIFY(conf.groupCount("empty_group") == 1);
     QVERIFY(!conf.groupExists("group_inexistent"));
 
+    vector<ConfigurationGroup*> expectedGroups;
+    expectedGroups.push_back(conf.group("group", 0));
+    expectedGroups.push_back(conf.group("group", 1));
+    QVERIFY(expectedGroups == conf.groups("group"));
+
     string tmp;
 
     /* Keys */
@@ -67,6 +72,11 @@ void ConfigurationTest::parse() {
 
     QVERIFY(conf.group("group", 1)->value("c", &tmp, 1));
     QVERIFY(tmp == "value5");
+
+    vector<string> expectedValues;
+    expectedValues.push_back("value4");
+    expectedValues.push_back("value5");
+    QVERIFY(conf.group("group", 1)->values<string>("c") == expectedValues);
 
     QVERIFY(conf.valueExists("key"));
     QVERIFY(!conf.valueExists("key_inexistent"));
