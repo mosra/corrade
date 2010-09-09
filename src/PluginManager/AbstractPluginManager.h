@@ -25,6 +25,9 @@
 
 #include "PluginMetadata.h"
 
+/** @brief Plugin version */
+#define PLUGIN_VERSION 1
+
 namespace Map2X { namespace PluginManager {
 
 class Plugin;

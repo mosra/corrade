@@ -22,7 +22,6 @@
 #include <string>
 #include <vector>
 
-#include "PluginMetadata.h"
 #include "AbstractPluginManager.h"
 
 namespace Map2X { namespace PluginManager {

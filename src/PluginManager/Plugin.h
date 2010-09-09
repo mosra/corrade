@@ -26,8 +26,6 @@
 
 #include <string>
 
-#include "PluginMetadata.h"
-
 namespace Map2X { namespace PluginManager {
 
 class AbstractPluginManager;

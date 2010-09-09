@@ -24,8 +24,6 @@
 
 namespace Map2X { namespace PluginManager {
 
-/** @brief Plugin version */
-#define PLUGIN_VERSION 1
 
 /**
  * @brief Plugin metadata
