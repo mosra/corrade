@@ -57,7 +57,7 @@ void ConfigurationTest::parse() {
     QVERIFY(conf.groups().size() == 3);
     QVERIFY(conf.groupCount("group") == 2);
     QVERIFY(conf.groupCount("empty_group") == 1);
-    QVERIFY(conf.groupCount("group_inexistent") == 0);
+    QVERIFY(!conf.groupExists("group_inexistent"));
 
     string tmp;
 

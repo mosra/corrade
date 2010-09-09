@@ -110,6 +110,18 @@ class ConfigurationGroup {
         }
 
         /**
+         * @brief Whether given group exists
+         * @param name      Name of the group. If empty, returns true if there
+         *      are any subgroups.
+         *
+         * More efficient than calling <tt>group(name) != 0</tt>.
+         */
+        inline bool groupExists(const std::string& name = "") const {
+            if(name.empty()) return !_groups.empty();
+            return group(name) != 0;
+        }
+
+        /**
          * @brief Add new group
          * @param name      Name of the group. The name must not be empty and
          *      must not contain '/' character.
