@@ -116,6 +116,15 @@ void ConfigurationTest::parse() {
     QCOMPARE(actual, original);
 }
 
+void ConfigurationTest::parseDirect() {
+    /* Configuration created directly from istream should be readonly */
+    istringstream contents("[group]\nkey=value");
+    Configuration conf(contents);
+    QVERIFY(conf.isValid());
+    QVERIFY(!conf.addValue("key2", "value2"));
+    QVERIFY(!conf.save());
+}
+
 void ConfigurationTest::empty() {
     Configuration conf(TESTFILES_BINARY_DIR + string("new.conf"));
     QVERIFY(conf.isValid());

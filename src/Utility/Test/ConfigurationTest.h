@@ -27,6 +27,7 @@ class ConfigurationTest: public QObject {
 
     private slots:
         void parse();
+        void parseDirect();
         void empty();
         void invalid();
         void readonly();

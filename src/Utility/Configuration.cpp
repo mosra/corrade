@@ -32,11 +32,24 @@ Configuration::Configuration(const string& _filename, int _flags): Configuration
     /* File doesn't exist yet */
     if(!file.is_open()) {
         /** @todo check better */
-
         flags |= IsValid;
         return;
     }
 
+    parse(file);
+
+    /* Close file */
+    file.close();
+}
+
+Configuration::Configuration(istream& file, int _flags): ConfigurationGroup("", this), flags(_flags) {
+    parse(file);
+
+    /* Set readonly flag, because the configuration cannot be saved */
+    flags |= ReadOnly;
+}
+
+void Configuration::parse(istream& file) {
     try {
         if(!file.good())
             throw string("Cannot open configuration file.");
@@ -62,12 +75,9 @@ Configuration::Configuration(const string& _filename, int _flags): Configuration
         flags |= IsValid;
 
     } catch(string e) { cerr << e; }
-
-    /* Close file */
-    file.close();
 }
 
-string Configuration::parse(ifstream& file, ConfigurationGroup* group, const string& fullPath) {
+string Configuration::parse(istream& file, ConfigurationGroup* group, const string& fullPath) {
     string buffer;
 
     /* Parse file */

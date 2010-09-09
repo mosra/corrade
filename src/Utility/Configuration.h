@@ -129,6 +129,17 @@ class Configuration: public ConfigurationGroup {
         Configuration(const std::string& _file, int _flags = 0);
 
         /**
+         * @brief Constructor
+         * @param _file     %Configuration file
+         * @param _flags    Flags (see Configuration::Flags)
+         *
+         * Creates configuration from given istream. Sets flag
+         * Configuration::ReadOnly, because the configuration cannot be saved
+         * anywhere.
+         */
+        Configuration(std::istream& _file, int _flags = 0);
+
+        /**
          * @brief Destructor
          *
          * If the configuration has been changed, writes configuration back to
@@ -220,7 +231,8 @@ class Configuration: public ConfigurationGroup {
          */
         int flags;
 
-        std::string parse(std::ifstream& file, ConfigurationGroup* group, const std::string& fullPath);
+        void parse(std::istream& file);
+        std::string parse(std::istream& file, ConfigurationGroup* group, const std::string& fullPath);
 
         void save(std::ofstream& file, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const;
 };
