@@ -344,6 +344,16 @@ template<class T> T configurationValueFromString(const std::string& stringValue,
     return value;
 }
 
+/* Forward declared template specializations to avoid infinite recursion in
+    template functions above */
+template<> bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, int flags);
+template<> bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, int flags) const;
+template<> std::vector<std::string> ConfigurationGroup::values(const std::string& key, int flags) const;
+template<> bool ConfigurationGroup::setValue(const std::string& key, const std::string& value, unsigned int number, int flags);
+template<> bool ConfigurationGroup::addValue(const std::string& key, const std::string& value, int flags);
+template<> bool configurationValueFromString<bool>(const std::string& value, int flags);
+template<> std::string configurationValueToString<bool>(const bool& value, int flags);
+
 #endif
 
 }}
