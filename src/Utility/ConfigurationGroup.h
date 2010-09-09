@@ -218,6 +218,13 @@ class ConfigurationGroup {
         unsigned int valueCount(const std::string& key) const;
 
         /**
+         * @brief Whether given key exists
+         *
+         * More efficient than calling <tt>valueCount(key) != 0</tt>.
+         */
+        bool valueExists(const std::string& key) const;
+
+        /**
          * @brief Set value
          * @param key       Key name
          * @param value     Value

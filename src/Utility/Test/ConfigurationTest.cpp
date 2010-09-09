@@ -68,6 +68,9 @@ void ConfigurationTest::parse() {
     QVERIFY(conf.group("group", 1)->value("c", &tmp, 1));
     QVERIFY(tmp == "value5");
 
+    QVERIFY(conf.valueExists("key"));
+    QVERIFY(!conf.valueExists("key_inexistent"));
+
     /* Save file back */
     QVERIFY(conf.save());
 

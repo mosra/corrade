@@ -137,6 +137,13 @@ unsigned int ConfigurationGroup::valueCount(const string& key) const {
     return count;
 }
 
+bool ConfigurationGroup::valueExists(const std::string& key) const {
+    for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it)
+        if(it->key == key) return true;
+
+    return false;
+}
+
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<> vector<string> ConfigurationGroup::values(const string& key, int flags) const {
     vector<string> found;
