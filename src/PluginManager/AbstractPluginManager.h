@@ -74,12 +74,6 @@ class AbstractPluginManager {
             WrongInterfaceVersion = 0x0004,
 
             /**
-             * The plugin is conflicting with another plugin that is already
-             * loaded. Unload conflicting plugin and try it again.
-             */
-            Conflicts = 0x0008,
-
-            /**
              * The plugin depends on another plugin, which cannot be loaded
              * (e.g. not found, conflict, wrong version).
              */

@@ -95,14 +95,6 @@ struct PluginMetadata {
          *      change in plugin lifetime.
          */
         std::vector<std::string> replacedWith;
-
-        /**
-         * @brief Conflicting plugins
-         *
-         * The plugin cannot be loaded when any of the conflicting plugins are
-         * loaded.
-         */
-        std::vector<std::string> conflicts;
 };
 
 }}

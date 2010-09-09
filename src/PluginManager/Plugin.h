@@ -128,9 +128,6 @@ class Plugin {
 /** @hideinitializer @brief Add plugin dependency */
 #define PLUGIN_ADD_DEPENDENCY(_dependency)      metadata->depends.push_back(_dependency);
 
-/** @hideinitializer @brief Add plugin conflict */
-#define PLUGIN_ADD_CONFLICT(_conflict)          metadata->conflicts.push_back(_conflict);
-
 /** @hideinitializer @brief Add replaced plugin */
 #define PLUGIN_ADD_REPLACED(_replaced)          metadata->replaces.push_back(_replaced);
 
