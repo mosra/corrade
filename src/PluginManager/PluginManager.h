@@ -19,12 +19,14 @@
  * @brief Class Map2X::PluginManager::PluginManager
  */
 
+#ifndef MAP2X_SKIP_PLUGINMANAGER_NAMESPACE
 #include <string>
 #include <vector>
 
 #include "AbstractPluginManager.h"
 
 namespace Map2X { namespace PluginManager {
+#endif
 
 /**
  * @brief Plugin manager
@@ -75,6 +77,8 @@ template<class T> class PluginManager: public AbstractPluginManager {
         }
 };
 
+#ifndef MAP2X_SKIP_PLUGINMANAGER_NAMESPACE
 }}
+#endif
 
 #endif
