@@ -24,6 +24,7 @@
 #include <map>
 
 #include "PluginMetadata.h"
+#include "Utility/Resource.h"
 
 /** @brief Plugin version */
 #define PLUGIN_VERSION 1
@@ -85,9 +86,6 @@ class AbstractPluginManager {
             /** %Plugin is successfully loaded */
             LoadOk = 0x0040,
 
-            /** %Plugin is not yet loaded and its state is unknown */
-            Unknown = 0x0080,
-
             /**
              * %Plugin is not loaded. %Plugin can be unloaded only
              * if is dynamic and is not required by any other plugin.
@@ -128,7 +126,7 @@ class AbstractPluginManager {
          * Used internally by PLUGIN_IMPORT_STATIC() macro. There is absolutely
          * no need to use this directly.
          */
-        static void importStaticPlugin(const std::string& name, int _version, void (*metadataCreator)(PluginMetadata*), void* (*instancer)(AbstractPluginManager*, const std::string&));
+        static void importStaticPlugin(const std::string& name, int _version, std::string (*interface)(), void* (*instancer)(AbstractPluginManager*, const std::string&));
 
         /**
          * @brief Constructor
@@ -223,7 +221,7 @@ class AbstractPluginManager {
         #ifndef DOXYGEN_GENERATING_OUTPUT
         struct StaticPlugin {
             std::string name;
-            void (*metadataCreator)(PluginMetadata*);
+            std::string interface;
             void* (*instancer)(AbstractPluginManager*, const std::string&);
         };
 
@@ -232,7 +230,8 @@ class AbstractPluginManager {
             PluginMetadata metadata;
             void* (*instancer)(AbstractPluginManager*, const std::string&);
             void* handle;
-            PluginObject(): loadState(Unknown), handle(0) {}
+            PluginObject(const Utility::Configuration& _metadata):
+                loadState(NotLoaded), metadata(_metadata), handle(0) {}
         };
 
         static std::vector<StaticPlugin> staticPlugins;
@@ -255,12 +254,24 @@ class AbstractPluginManager {
  * @param name      Static plugin name (defined with PLUGIN_REGISTER_STATIC())
  * @hideinitializer
  *
- * Imports statically linked plugin and makes it available in
- * PluginManager. The plugin must be registered with PLUGIN_STATIC_REGISTER()
- * macro, otherwise it will not be loaded.
+ * If static plugins are compiled into dynamic library or directly into the
+ * executable, they should be automatically loaded at startup thanks to
+ * AUTOMATIC_INITALIZER() and AUTOMATIC_FINALIZER() macros.
+ *
+ * If static plugins are compiled into static library, they are not
+ * automatically loaded at startup, so you need to load them explicitly by
+ * calling PLUGIN_IMPORT() at the beggining of main() function. You can also
+ * wrap these macro calls into another function (which will then be compiled
+ * into dynamic library or main executable) and use AUTOMATIC_INITIALIZER()
+ * macro for automatic call.
+ * @attention This macro should be called outside of any namespace. If you are
+ * running into linker errors with @c pluginInitializer_*, this could be the
+ * problem. See RESOURCE_INITIALIZE() documentation for more information.
  */
-#define PLUGIN_IMPORT_STATIC(name) \
-    Map2X::PluginManager::AbstractPluginManager::importStaticPlugin(#name, name##Version(), name##MetadataCreator, name##Instancer);
+#define PLUGIN_IMPORT(name)                                                   \
+    extern int pluginInitializer_##name();                                    \
+    pluginInitializer_##name();                                               \
+    RESOURCE_INITIALIZE(name)
 
 }}
 

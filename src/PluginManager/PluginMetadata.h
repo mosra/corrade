@@ -21,42 +21,46 @@
 
 #include <string>
 #include <vector>
+#include <map>
+
+#include "Utility/Configuration.h"
 
 namespace Map2X { namespace PluginManager {
-
 
 /**
  * @brief Plugin metadata
  *
- * This class stores metadata about particular plugin, mainly the plugin
- * interface name.
+ * This class stores metadata about particular plugin.
  * See also @ref PluginManagement.
  */
-struct PluginMetadata {
+class PluginMetadata {
+    public:
         /**
-         * @brief Plugin interface
-         *
-         * Plugin must have the same interface name as interface used by
-         * PluginManager, otherwise it cannot be loaded.
+         * @brief Constructor
+         * @param conf          Configuration file with plugin metadata
          */
-        std::string interface;
+        PluginMetadata(const Utility::Configuration& conf);
 
         /**
          * @brief Plugin name
+         * @param language      If specified, tries to get plugin name in
+         *      different language.
          *
          * Descriptive name of plugin. Not to be confused with name under which
          * the plugin is loaded.
          * @note This field is constant during whole plugin lifetime.
          */
-        std::string name;
+        std::string name(const std::string& language = "") const;
 
         /**
          * @brief Plugin description
+         * @param language      If specified, tries to get plugin name in
+         *      different language.
          *
          * More detailed description of plugin.
          * @note This field is constant during whole plugin lifetime.
          */
-        std::string description;
+        std::string description(const std::string& language = "") const;
 
         /**
          * @brief Plugins on which this plugin depend
@@ -65,7 +69,7 @@ struct PluginMetadata {
          * loaded. See also PluginMetadata::replaced.
          * @note Thus field is constant during whole plugin lifetime.
          */
-        std::vector<std::string> depends;
+        inline const std::vector<std::string>& depends() const { return _depends; }
 
         /**
          * @brief Plugins which depend on this plugin
@@ -75,7 +79,7 @@ struct PluginMetadata {
          * @note This list is automatically created by plugin manager and can
          *      be changed in plugin lifetime.
          */
-        std::vector<std::string> usedBy;
+        inline std::vector<std::string> usedBy() const { return _usedBy; }
 
         /**
          * @brief Plugins which are replaced with this plugin
@@ -84,7 +88,7 @@ struct PluginMetadata {
          * plugin cannot be loaded when any of the replaced plugins are loaded.
          * @note Thus field is constant during whole plugin lifetime.
          */
-        std::vector<std::string> replaces;
+        inline const std::vector<std::string>& replaces() const { return _replaces; }
 
         /**
          * @brief Plugins which replaces this plugin
@@ -94,7 +98,16 @@ struct PluginMetadata {
          * @note This list is automatically created by plugin manage and can
          *      change in plugin lifetime.
          */
-        std::vector<std::string> replacedWith;
+        inline std::vector<std::string> replacedWith() const { return _replacedWith; }
+
+    private:
+        std::map<std::string, std::string> names;
+        std::map<std::string, std::string> descriptions;
+
+        std::vector<std::string> _depends,
+            _usedBy,
+            _replaces,
+            _replacedWith;
 };
 
 }}

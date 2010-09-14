@@ -18,17 +18,15 @@
 /** @file
  * @brief Class Map2X::PluginManager::AbstractPlugin and plugin registering macros
  *
- * Macros PLUGIN_INTERFACE(), PLUGIN_REGISTER_STATIC(), PLUGIN_REGISTER(),
- * ::PLUGIN_FINISH, PLUGIN_SET_NAME(), PLUGIN_SET_DESCRIPTION(),
- * PLUGIN_ADD_DEPENDENCY(), PLUGIN_ADD_CONFLICT(), PLUGIN_ADD_REPLACED(),
- * PLUGIN_IMPORT_STATIC().
+ * Macros PLUGIN_INTERFACE(), PLUGIN_REGISTER_STATIC(), PLUGIN_REGISTER().
  */
 
 #include <string>
 
-namespace Map2X { namespace PluginManager {
+#include "Utility/utilities.h"
+#include "AbstractPluginManager.h"
 
-class AbstractPluginManager;
+namespace Map2X { namespace PluginManager {
 
 /**
  * @brief Base class for plugin interfaces
@@ -79,67 +77,41 @@ class Plugin {
 /**
  * @brief Register dynamic plugin
  * @param className     Plugin class name
- * @param _interface    Interface name (the same as is defined with
+ * @param interface     Interface name (the same as is defined with
  *      PLUGIN_INTERFACE() in plugin base class)
  * @hideinitializer
  *
  * Registers plugin so it can be dynamically loaded via PluginManager by
- * supplying a filename of the plugin module. Macro PLUGIN_FINISH must be
- * called too.
+ * supplying a filename of the plugin module.
  */
-#define PLUGIN_REGISTER(className, _interface) \
+#define PLUGIN_REGISTER(className, interface) \
     extern "C" int pluginVersion() { return PLUGIN_VERSION; } \
     extern "C" void* pluginInstancer(Map2X::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
         { return new className(manager, plugin); } \
-    extern "C" void pluginMetadataCreator(Map2X::PluginManager::PluginMetadata* metadata) { \
-        metadata->interface = _interface;
+    extern "C" std::string pluginInterface() { return interface; }
 
 /**
  * @brief Register static plugin
  * @param name          Name of static plugin (equivalent of dynamic plugin
  *      filename)
  * @param className     Plugin class name
- * @param _interface    Interface name (the same as is defined with
+ * @param interface     Interface name (the same as is defined with
  *      PLUGIN_INTERFACE() in plugin base class)
  * @hideinitializer
  *
  * Registers static plugin. It will be loaded automatically when PluginManager
- * instance with corresponding interface is created. Macro PLUGIN_FINISH
- * must be called too.
+ * instance with corresponding interface is created.
+ * @attention This macro should be called outside of any namespace. If you are
+ * running into linker errors with @c pluginInitializer_*, this could be the
+ * problem.
  */
-#define PLUGIN_REGISTER_STATIC(name, className, _interface) \
-    inline int name##Version() { return PLUGIN_VERSION; } \
-    inline void* name##Instancer(Map2X::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
+#define PLUGIN_REGISTER_STATIC(name, className, interface) \
+    inline int pluginVersion_##name() { return PLUGIN_VERSION; } \
+    inline void* pluginInstancer_##name(Map2X::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
         { return new className(manager, plugin); } \
-    inline void name##MetadataCreator(Map2X::PluginManager::PluginMetadata* metadata) { \
-        metadata->interface = _interface;
-
-/** @{ @name Plugin metadata
- * These macros are optional, but must be called between PLUGIN_REGISTER() or
- * PLUGIN_REGISTER_STATIC() and ::PLUGIN_FINISH macro.
- */
-
-/** @hideinitializer @brief Set plugin name */
-#define PLUGIN_SET_NAME(_name)                  metadata->name = _name;
-
-/** @hideinitializer @brief Set plugin description */
-#define PLUGIN_SET_DESCRIPTION(_description)    metadata->description = _description;
-
-/** @hideinitializer @brief Add plugin dependency */
-#define PLUGIN_ADD_DEPENDENCY(_dependency)      metadata->depends.push_back(_dependency);
-
-/** @hideinitializer @brief Add replaced plugin */
-#define PLUGIN_ADD_REPLACED(_replaced)          metadata->replaces.push_back(_replaced);
-
-/*@}*/
-
-/**
- * @brief Finish plugin registration
- *
- * Finishes plugin registration started with PLUGIN_REGISTER()
- * or PLUGIN_REGISTER_STATIC().
- */
-#define PLUGIN_FINISH }
+    inline std::string pluginInterface_##name() { return interface; } \
+    inline int pluginInitializer_##name() { Map2X::PluginManager::AbstractPluginManager::importStaticPlugin(#name, pluginVersion_##name(), pluginInterface_##name, pluginInstancer_##name); return 1; } \
+    AUTOMATIC_INITIALIZER(pluginInitializer_##name)
 
 }}
 

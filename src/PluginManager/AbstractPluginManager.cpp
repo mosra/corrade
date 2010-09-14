@@ -21,6 +21,7 @@
 #include "PluginManager/AbstractPluginManagerConfigure.h"
 #include "Plugin.h"
 #include "Utility/Directory.h"
+#include "Utility/Configuration.h"
 
 using namespace std;
 using namespace Map2X::Utility;
@@ -31,12 +32,12 @@ namespace Map2X { namespace PluginManager {
 vector<AbstractPluginManager::StaticPlugin> AbstractPluginManager::staticPlugins;
 #endif
 
-void AbstractPluginManager::importStaticPlugin(const string& name, int _version, void (*metadataCreator)(PluginMetadata*), void* (*instancer)(AbstractPluginManager*, const std::string&)) {
+void AbstractPluginManager::importStaticPlugin(const string& name, int _version, std::string (*interface)(), void* (*instancer)(AbstractPluginManager*, const std::string&)) {
     if(_version != version) return;
 
     StaticPlugin p;
     p.name = name;
-    p.metadataCreator = metadataCreator;
+    p.interface = interface();
     p.instancer = instancer;
     staticPlugins.push_back(p);
 }
@@ -54,14 +55,21 @@ AbstractPluginManager::AbstractPluginManager(const string& pluginDirectory): _pl
             begin = 0;
         size_t end = (*i).find(PLUGIN_FILENAME_SUFFIX);
 
-        /* If found, add plugin filename part to list */
-        if(begin == 0 && end != string::npos) {
-            string name = (*i).substr(begin+string(PLUGIN_FILENAME_PREFIX).size(), end-string(PLUGIN_FILENAME_PREFIX).size());
+        /* File is not plugin, continue to next */
+        if(begin != 0 || end == string::npos) continue;
 
-            PluginObject p;
-            p.loadState = Unknown;
-            plugins.insert(pair<string, PluginObject>(name, p));
-        }
+        /* Dig plugin name from filename */
+        string name = (*i).substr(begin+string(PLUGIN_FILENAME_PREFIX).size(),
+                                  end-string(PLUGIN_FILENAME_PREFIX).size());
+
+        /* Try to get plugin metadata from conf file. If metadata file is not
+            found, it's okay. */
+        Configuration metadata(pluginDirectory + name + ".conf", Configuration::ReadOnly);
+
+        /* Insert plugin to list */
+        PluginObject p(metadata);
+        p.loadState = NotLoaded;
+        plugins.insert(pair<string, PluginObject>(name, p));
     }
 }
 
@@ -99,10 +107,6 @@ const PluginMetadata* AbstractPluginManager::metadata(const string& name) {
     /* Plugin with given name doesn't exist */
     if(plugins.find(name) == plugins.end()) return 0;
 
-    /* If plugin was not yet loaded, try to load it */
-    if(plugins.at(name).loadState == Unknown)
-        load(name);
-
     return &plugins.at(name).metadata;
 }
 
@@ -139,18 +143,16 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
         return plugin.loadState;
     }
 
-    /* Pointer to metadata creator */
-    /** @todo Check whether the symbol was found! */
-    void (*metadataCreator)(PluginMetadata*) = reinterpret_cast<void (*)(PluginMetadata*)>(dlsym(handle, "pluginMetadataCreator"));
-    if(metadataCreator == 0) {
+    /* Pointer to function which returns interface string */
+    string (*interface)() = reinterpret_cast<string (*)()>(dlsym(handle, "pluginInterface"));
+    if(interface == 0) {
         dlclose(handle);
         plugin.loadState = LoadFailed;
         return plugin.loadState;
     }
 
-    /* Load metadata and check interface version */
-    metadataCreator(&plugin.metadata);
-    if(plugin.metadata.interface != pluginInterface()) {
+    /* Check interface string */
+    if(interface() != pluginInterface()) {
         dlclose(handle);
         plugin.loadState = WrongInterfaceVersion;
         return plugin.loadState;

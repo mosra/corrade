@@ -36,15 +36,19 @@ template<class T> class PluginManager: public AbstractPluginManager {
     public:
         /** @copydoc AbstractPluginManager::AbstractPluginManager() */
         PluginManager(const std::string& pluginDirectory): AbstractPluginManager(pluginDirectory) {
+            Utility::Resource r("plugins");
+
             /* Load static plugins which use the same interface */
             for(std::vector<StaticPlugin>::const_iterator i = staticPlugins.begin(); i != staticPlugins.end(); ++i) {
-                PluginObject p;
+                if(i->interface != pluginInterface()) continue;
+
+                std::istringstream file(r.get(i->name + ".conf"));
+                Utility::Configuration metadata(file);
+                PluginObject p(metadata);
                 p.loadState = IsStatic;
                 p.instancer = i->instancer;
-                i->metadataCreator(&p.metadata);
 
-                if(p.metadata.interface == pluginInterface())
-                    plugins.insert(std::pair<std::string, PluginObject>(i->name, p));
+                plugins.insert(std::pair<std::string, PluginObject>(i->name, p));
             }
         }
 

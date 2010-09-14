@@ -8,6 +8,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/AbstractPluginManagerConfigure.h.cmak
 set(Map2X_PluginManager_SRCS
     Plugin.cpp
     AbstractPluginManager.cpp
+    PluginMetadata.cpp
 )
 
 add_library(Map2XPluginManager STATIC ${Map2X_PluginManager_SRCS})
