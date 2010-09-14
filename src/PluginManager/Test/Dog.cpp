@@ -22,7 +22,5 @@ bool Dog::hasTail() { return true; }
 int Dog::legCount() { return 4; }
 
 PLUGIN_REGISTER(Dog, "cz.mosra.Map2X.PluginManager.Test.AbstractAnimal/1.0")
-PLUGIN_SET_NAME("A simple dog plugin")
-PLUGIN_FINISH
 
 }}}

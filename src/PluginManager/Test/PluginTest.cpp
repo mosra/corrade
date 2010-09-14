@@ -17,18 +17,18 @@
 
 #include <QtTest/QTest>
 
-#include "Canary.cpp"
 #include "PluginTestConfigure.h"
 
 QTEST_APPLESS_MAIN(Map2X::PluginManager::Test::PluginTest)
 
 using namespace std;
 
+void initialize() { PLUGIN_IMPORT(Canary) }
+
 namespace Map2X { namespace PluginManager { namespace Test {
 
 PluginTest::PluginTest() {
-    PLUGIN_IMPORT_STATIC(Canary)
-
+    initialize();
     manager = new PluginManager<AbstractAnimal>(PLUGINS_DIR);
 }
 
@@ -46,7 +46,7 @@ void PluginTest::nameList() {
 
 void PluginTest::staticPlugin() {
     QVERIFY(manager->loadState("Canary") == AbstractPluginManager::IsStatic);
-    QVERIFY(manager->metadata("Canary")->name == "I'm allergic to canaries!");
+    QVERIFY(manager->metadata("Canary")->name() == "I'm allergic to canaries!");
 
     AbstractAnimal* animal = manager->instance("Canary");
 
@@ -59,10 +59,10 @@ void PluginTest::staticPlugin() {
 }
 
 void PluginTest::dynamicPlugin() {
-    QVERIFY(manager->loadState("Dog") == AbstractPluginManager::Unknown);
+    QVERIFY(manager->loadState("Dog") == AbstractPluginManager::NotLoaded);
     QVERIFY(manager->load("Dog") == AbstractPluginManager::LoadOk);
     QVERIFY(manager->loadState("Dog") == AbstractPluginManager::LoadOk);
-    QVERIFY(manager->metadata("Dog")->name == "A simple dog plugin");
+    QVERIFY(manager->metadata("Dog")->name() == "A simple dog plugin");
 
     AbstractAnimal* animal = manager->instance("Dog");
 

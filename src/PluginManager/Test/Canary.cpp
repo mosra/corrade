@@ -28,8 +28,7 @@ class Canary: public AbstractAnimal {
         bool hasTail() { return true; }
 };
 
-PLUGIN_REGISTER_STATIC(Canary, Canary, "cz.mosra.Map2X.PluginManager.Test.AbstractAnimal/1.0")
-PLUGIN_SET_NAME("I'm allergic to canaries!")
-PLUGIN_FINISH
-
 }}}
+
+PLUGIN_REGISTER_STATIC(Canary, Map2X::PluginManager::Test::Canary,
+                       "cz.mosra.Map2X.PluginManager.Test.AbstractAnimal/1.0")
