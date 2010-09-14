@@ -130,11 +130,10 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     }
 
     /* Check plugin version */
-    /** @todo Check whether the symbol was found! */
     int (*_version)(void) = reinterpret_cast<int(*)()>(dlsym(handle, "pluginVersion"));
-    if(_version() == 0) {
+    if(_version == 0) {
         dlclose(handle);
-        plugin.loadState = WrongPluginVersion;
+        plugin.loadState = LoadFailed;
         return plugin.loadState;
     }
     if(_version() != version) {
@@ -143,15 +142,13 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
         return plugin.loadState;
     }
 
-    /* Pointer to function which returns interface string */
+    /* Check interface string */
     string (*interface)() = reinterpret_cast<string (*)()>(dlsym(handle, "pluginInterface"));
     if(interface == 0) {
         dlclose(handle);
         plugin.loadState = LoadFailed;
         return plugin.loadState;
     }
-
-    /* Check interface string */
     if(interface() != pluginInterface()) {
         dlclose(handle);
         plugin.loadState = WrongInterfaceVersion;
@@ -159,7 +156,6 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     }
 
     /* Load plugin instancer */
-    /** @todo Check whether the symbol was found! */
     void* (*instancer)(AbstractPluginManager*, const std::string&) = reinterpret_cast<void* (*)(AbstractPluginManager*, const std::string&)>(dlsym(handle, "pluginInstancer"));
     if(instancer == 0) {
         dlclose(handle);
