@@ -32,6 +32,11 @@ Configuration::Configuration(const string& _filename, int _flags): Configuration
     /* File doesn't exist yet */
     if(!file.is_open()) {
         /** @todo check better */
+
+        /* It is error for readonly configurations */
+        /** @todo Similar check for istream constructor (?) */
+        if(flags & ReadOnly) return;
+
         flags |= IsValid;
         return;
     }

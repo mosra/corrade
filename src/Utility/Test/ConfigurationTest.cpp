@@ -169,6 +169,11 @@ void ConfigurationTest::readonly() {
     QVERIFY(!conf.save());
 }
 
+void ConfigurationTest::readonlyWithoutFile() {
+    Configuration conf(TESTFILES_BINARY_DIR + string("inexistent.conf"), Configuration::ReadOnly);
+    QVERIFY(!conf.isValid());
+}
+
 void ConfigurationTest::truncate() {
     /* Reload fresh parse.conf */
     QFile::remove(TESTFILES_BINARY_DIR + QString("parse.conf"));

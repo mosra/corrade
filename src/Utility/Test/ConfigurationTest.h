@@ -31,6 +31,7 @@ class ConfigurationTest: public QObject {
         void empty();
         void invalid();
         void readonly();
+        void readonlyWithoutFile();
         void truncate();
         void whitespaces();
         void types();
