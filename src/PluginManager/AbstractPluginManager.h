@@ -75,6 +75,12 @@ class AbstractPluginManager {
             WrongInterfaceVersion = 0x0004,
 
             /**
+             * The plugin doesn't have metadata file or metadata file contains
+             * errors.
+             */
+            WrongMetadataFile = 0x0008,
+
+            /**
              * The plugin depends on another plugin, which cannot be loaded
              * (e.g. not found, conflict, wrong version).
              */

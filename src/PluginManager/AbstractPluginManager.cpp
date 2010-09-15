@@ -68,7 +68,8 @@ AbstractPluginManager::AbstractPluginManager(const string& pluginDirectory): _pl
 
         /* Insert plugin to list */
         PluginObject p(metadata);
-        p.loadState = NotLoaded;
+        if(metadata.isValid()) p.loadState = NotLoaded;
+        else p.loadState = WrongMetadataFile;
         plugins.insert(pair<string, PluginObject>(name, p));
     }
 }

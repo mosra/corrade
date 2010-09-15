@@ -23,7 +23,10 @@ QTEST_APPLESS_MAIN(Map2X::PluginManager::Test::PluginTest)
 
 using namespace std;
 
-void initialize() { PLUGIN_IMPORT(Canary) }
+void initialize() {
+    PLUGIN_IMPORT(Kangaroo)
+    PLUGIN_IMPORT(Canary)
+}
 
 namespace Map2X { namespace PluginManager { namespace Test {
 
@@ -34,7 +37,7 @@ PluginTest::PluginTest() {
 
 void PluginTest::nameList() {
     QStringList expected, actual;
-    expected << "Canary" << "Dog";
+    expected << "Canary" << "Dog" << "Kangaroo" << "Snail";
 
     vector<string> names = manager->nameList();
     for(vector<string>::const_iterator it = names.begin(); it != names.end(); ++it) {
@@ -42,6 +45,17 @@ void PluginTest::nameList() {
     }
 
     QCOMPARE(actual, expected);
+}
+
+void PluginTest::errors() {
+    /** @todo Wrong plugin version (it would be hard) */
+    /** @todo Wrong interface version */
+
+    /* Wrong metadata file */
+    QVERIFY(manager->loadState("Snail") == AbstractPluginManager::WrongMetadataFile);
+    QVERIFY(manager->loadState("Kangaroo") == AbstractPluginManager::WrongMetadataFile);
+    QVERIFY(manager->load("Snail") == AbstractPluginManager::WrongMetadataFile);
+    QVERIFY(manager->load("Kangaroo") == AbstractPluginManager::WrongMetadataFile);
 }
 
 void PluginTest::staticPlugin() {

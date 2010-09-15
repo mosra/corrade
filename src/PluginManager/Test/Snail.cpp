@@ -1,5 +1,3 @@
-#ifndef Map2X_PluginManager_Test_PluginTest_h
-#define Map2X_PluginManager_Test_PluginTest_h
 /*
     Copyright © 2007, 2008, 2009, 2010 Vladimír Vondruš <mosra@centrum.cz>
 
@@ -15,29 +13,22 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include <QtCore/QObject>
-
-#include "PluginManager/PluginManager.h"
 #include "AbstractAnimal.h"
+#include "PluginManager/AbstractPluginManager.h"
 
 namespace Map2X { namespace PluginManager { namespace Test {
 
-class PluginTest: public QObject {
-    Q_OBJECT
-
-    private:
-        PluginManager<AbstractAnimal>* manager;
-
+class Snail: public AbstractAnimal {
     public:
-        PluginTest();
+        inline Snail(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
+            AbstractAnimal(manager, plugin) {}
 
-    private slots:
-        void nameList();
-        void errors();
-        void staticPlugin();
-        void dynamicPlugin();
+        std::string name() { return "Hmlllghh"; }
+        int legCount() { return 0; }
+        bool hasTail() { return false; }
 };
 
 }}}
 
-#endif
+PLUGIN_REGISTER_STATIC(Snail, Map2X::PluginManager::Test::Snail,
+                       "cz.mosra.Map2X.PluginManager.Test.AbstractAnimal/1.0")

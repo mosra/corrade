@@ -47,7 +47,8 @@ template<class T> class PluginManager: public AbstractPluginManager {
                 std::istringstream file(r.get(i->name + ".conf"));
                 Utility::Configuration metadata(file);
                 PluginObject p(metadata);
-                p.loadState = IsStatic;
+                if(metadata.isValid()) p.loadState = IsStatic;
+                else p.loadState = WrongMetadataFile;
                 p.instancer = i->instancer;
 
                 plugins.insert(std::pair<std::string, PluginObject>(i->name, p));
