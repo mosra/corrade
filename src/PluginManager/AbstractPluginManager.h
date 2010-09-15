@@ -120,13 +120,13 @@ class AbstractPluginManager {
          *      PLUGIN_REGISTER_STATIC())
          * @param _version          %Plugin version (must be the same as
          *      AbstractPluginManager::version)
-         * @param metadataCreator   Pointer to metadata creator function
+         * @param interface         %Plugin interface string
          * @param instancer         Pointer to plugin class instancer function
          *
          * Used internally by PLUGIN_IMPORT_STATIC() macro. There is absolutely
          * no need to use this directly.
          */
-        static void importStaticPlugin(const std::string& name, int _version, std::string (*interface)(), void* (*instancer)(AbstractPluginManager*, const std::string&));
+        static void importStaticPlugin(const std::string& name, int _version, const std::string& interface, void* (*instancer)(AbstractPluginManager*, const std::string&));
 
         /**
          * @brief Constructor

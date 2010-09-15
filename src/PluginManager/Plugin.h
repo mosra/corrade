@@ -106,11 +106,9 @@ class Plugin {
  * problem.
  */
 #define PLUGIN_REGISTER_STATIC(name, className, interface) \
-    inline int pluginVersion_##name() { return PLUGIN_VERSION; } \
     inline void* pluginInstancer_##name(Map2X::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
         { return new className(manager, plugin); } \
-    inline std::string pluginInterface_##name() { return interface; } \
-    inline int pluginInitializer_##name() { Map2X::PluginManager::AbstractPluginManager::importStaticPlugin(#name, pluginVersion_##name(), pluginInterface_##name, pluginInstancer_##name); return 1; } \
+    inline int pluginInitializer_##name() { Map2X::PluginManager::AbstractPluginManager::importStaticPlugin(#name, PLUGIN_VERSION, interface, pluginInstancer_##name); return 1; } \
     AUTOMATIC_INITIALIZER(pluginInitializer_##name)
 
 }}

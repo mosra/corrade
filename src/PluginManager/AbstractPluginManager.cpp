@@ -32,12 +32,12 @@ namespace Map2X { namespace PluginManager {
 vector<AbstractPluginManager::StaticPlugin> AbstractPluginManager::staticPlugins;
 #endif
 
-void AbstractPluginManager::importStaticPlugin(const string& name, int _version, std::string (*interface)(), void* (*instancer)(AbstractPluginManager*, const std::string&)) {
+void AbstractPluginManager::importStaticPlugin(const string& name, int _version, const std::string& interface, void* (*instancer)(AbstractPluginManager*, const std::string&)) {
     if(_version != version) return;
 
     StaticPlugin p;
     p.name = name;
-    p.interface = interface();
+    p.interface = interface;
     p.instancer = instancer;
     staticPlugins.push_back(p);
 }
