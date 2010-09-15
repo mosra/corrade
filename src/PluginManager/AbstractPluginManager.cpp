@@ -116,8 +116,8 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
 
     PluginObject& plugin = plugins.at(name);
 
-    /* Plugin is already loaded or is static */
-    if(plugin.loadState & (LoadOk|UnloadFailed|IsStatic))
+    /* Plugin is not ready to load */
+    if(!(plugin.loadState & (NotLoaded)))
         return plugin.loadState;
 
     /* Open plugin file, make symbols available for next libs (which depends on this) */
