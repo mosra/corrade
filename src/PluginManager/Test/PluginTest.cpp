@@ -37,7 +37,7 @@ PluginTest::PluginTest() {
 
 void PluginTest::nameList() {
     QStringList expected, actual;
-    expected << "Canary" << "Dog" << "Kangaroo" << "Snail";
+    expected << "Canary" << "Chihuahua" << "Dog" << "Kangaroo" << "Snail";
 
     vector<string> names = manager->nameList();
     for(vector<string>::const_iterator it = names.begin(); it != names.end(); ++it) {
@@ -95,6 +95,35 @@ void PluginTest::dynamicPlugin() {
     delete animal;
     QVERIFY(manager->unload("Dog") == AbstractPluginManager::NotLoaded);
     QVERIFY(manager->loadState("Dog") == AbstractPluginManager::NotLoaded);
+}
+
+void PluginTest::hierarchy() {
+    QVERIFY(manager->loadState("Dog") == AbstractPluginManager::NotLoaded);
+    QVERIFY(manager->loadState("Chihuahua") == AbstractPluginManager::NotLoaded);
+
+    QVERIFY(manager->load("Chihuahua") == AbstractPluginManager::LoadOk);
+    QVERIFY(manager->loadState("Dog") == AbstractPluginManager::LoadOk);
+    QVERIFY(manager->metadata("Chihuahua")->name() == "The smallest dog in the world.");
+    QVERIFY(manager->metadata("Chihuahua")->depends().size() == 1);
+    QVERIFY(manager->metadata("Chihuahua")->depends()[0] == "Dog");
+    QVERIFY(manager->metadata("Dog")->usedBy().size() == 1);
+    QVERIFY(manager->metadata("Dog")->usedBy()[0] == "Chihuahua");
+
+    AbstractAnimal* animal = manager->instance("Chihuahua");
+
+    QVERIFY(animal != 0);
+    QVERIFY(animal->hasTail() == true); // inherited from dog
+    QVERIFY(animal->legCount() == 4); // this too
+    QVERIFY(animal->name() == "Rodriguez");
+
+    /* Try to unload plugin when another is depending on it */
+    QVERIFY(manager->unload("Dog") == AbstractPluginManager::IsRequired);
+
+    /* Unload chihuahua plugin, then try again */
+    delete animal;
+    QVERIFY(manager->unload("Chihuahua") == AbstractPluginManager::NotLoaded);
+    QVERIFY(manager->unload("Dog") == AbstractPluginManager::NotLoaded);
+    QVERIFY(manager->metadata("Dog")->usedBy().size() == 0);
 }
 
 }}}

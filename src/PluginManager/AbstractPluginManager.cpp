@@ -121,6 +121,12 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     if(!(plugin.loadState & (NotLoaded)))
         return plugin.loadState;
 
+    /* Load dependencies and add this plugin to their "used by" list */
+    for(vector<string>::const_iterator it = plugin.metadata.depends().begin(); it != plugin.metadata.depends().end(); ++it) {
+        if(!(load(*it) & (LoadOk|IsStatic))) return UnresolvedDependency;
+        plugins.at(*it).metadata.addUsedBy(name);
+    }
+
     /* Open plugin file, make symbols available for next libs (which depends on this) */
     /** @todo Portable directory separator or plugindir with separator */
     void* handle = dlopen((_pluginDirectory + PLUGIN_FILENAME_PREFIX + name + PLUGIN_FILENAME_SUFFIX).c_str(),
@@ -181,6 +187,13 @@ AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& nam
 
     /* Plugin has active instance, don't unload */
     if(instances.find(name) != instances.end()) return IsUsed;
+
+    /* Plugin is used by another plugin, don't unload */
+    if(!plugin.metadata.usedBy().empty()) return IsRequired;
+
+    /* Remove this plugin from "used by" column of dependencies */
+    for(vector<string>::const_iterator it = plugin.metadata.depends().begin(); it != plugin.metadata.depends().end(); ++it)
+        plugins.find(*it)->second.metadata.removeUsedBy(name);
 
     if(dlclose(plugin.handle) != 0) {
         plugin.loadState = UnloadFailed;

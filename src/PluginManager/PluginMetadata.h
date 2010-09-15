@@ -34,6 +34,8 @@ namespace Map2X { namespace PluginManager {
  * See also @ref PluginManagement.
  */
 class PluginMetadata {
+    friend class AbstractPluginManager;
+
     public:
         /**
          * @brief Constructor
@@ -113,6 +115,19 @@ class PluginMetadata {
          *      change in plugin lifetime.
          */
         inline std::vector<std::string> replacedWith() const { return _replacedWith; }
+
+    protected:
+        /**
+         * @brief Add plugin into "used by" list
+         * @param name      Plugin name
+         */
+        void addUsedBy(const std::string& name);
+
+        /**
+         * @brief Remove plugin from "used by" list
+         * @param name      Plugin name
+         */
+        void removeUsedBy(const std::string& name);
 
     private:
         std::map<std::string, std::string> names;
