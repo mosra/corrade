@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.6)
 project(Map2XCore)
 
 set(CMAKE_MODULE_PATH "${Map2XCore_SOURCE_DIR}/modules/")
+include(Map2XMacros)
 
 # On 64bit Linux with GCC flag -fPIC is needed for building some static libraries
 if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_SYSTEM_NAME STREQUAL "Linux")

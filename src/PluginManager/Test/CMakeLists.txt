@@ -1,7 +1,6 @@
 find_package(Qt4 REQUIRED)
 
 enable_testing()
-include(Map2XMacros)
 
 set(PLUGINMANAGER_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
