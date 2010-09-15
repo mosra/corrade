@@ -61,6 +61,8 @@ void PluginTest::errors() {
 void PluginTest::staticPlugin() {
     QVERIFY(manager->loadState("Canary") == AbstractPluginManager::IsStatic);
     QVERIFY(manager->metadata("Canary")->name() == "I'm allergic to canaries!");
+    QVERIFY(manager->metadata("Canary")->authors()[0] == "Vladimír Vondruš <mosra@centrum.cz>");
+    QVERIFY(manager->metadata("Canary")->version() == "1.0");
 
     AbstractAnimal* animal = manager->instance("Canary");
 

@@ -63,6 +63,20 @@ class PluginMetadata {
         std::string description(const std::string& language = "") const;
 
         /**
+         * @brief Plugin author(s)
+         *
+         * @note This field is constant during whole plugin lifetime.
+         */
+        inline const std::vector<std::string>& authors() const { return _authors; }
+
+        /**
+         * @brief Plugin version
+         *
+         * @note This field is constant during whole plugin lifetime.
+         */
+        inline std::string version() const { return _version; }
+
+        /**
          * @brief Plugins on which this plugin depend
          *
          * List of plugins which must be loaded before this plugin can be
@@ -104,7 +118,10 @@ class PluginMetadata {
         std::map<std::string, std::string> names;
         std::map<std::string, std::string> descriptions;
 
-        std::vector<std::string> _depends,
+        std::string _version;
+
+        std::vector<std::string> _authors,
+            _depends,
             _usedBy,
             _replaces,
             _replacedWith;

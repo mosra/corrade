@@ -21,6 +21,10 @@ using namespace Map2X::Utility;
 namespace Map2X { namespace PluginManager {
 
 PluginMetadata::PluginMetadata(const Configuration& conf) {
+    /* Author(s), version */
+    _authors = conf.values<string>("author");
+    _version = conf.value<string>("version");
+
     /* Dependencies, replacements */
     _depends = conf.values<string>("depends");
     _replaces = conf.values<string>("replaces");
