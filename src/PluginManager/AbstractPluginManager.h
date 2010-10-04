@@ -235,9 +235,9 @@ class AbstractPluginManager {
             LoadState loadState;
             PluginMetadata metadata;
             void* (*instancer)(AbstractPluginManager*, const std::string&);
-            void* handle;
+            void* module;
             PluginObject(const Utility::Configuration& _metadata):
-                loadState(NotLoaded), metadata(_metadata), handle(0) {}
+                loadState(NotLoaded), metadata(_metadata), module(0) {}
         };
 
         static std::vector<StaticPlugin> staticPlugins;

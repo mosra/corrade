@@ -171,7 +171,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     }
 
     plugin.loadState = LoadOk;
-    plugin.handle = handle;
+    plugin.module = handle;
     plugin.instancer = instancer;
     return plugin.loadState;
 }
@@ -195,7 +195,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& nam
     for(vector<string>::const_iterator it = plugin.metadata.depends().begin(); it != plugin.metadata.depends().end(); ++it)
         plugins.find(*it)->second.metadata.removeUsedBy(name);
 
-    if(dlclose(plugin.handle) != 0) {
+    if(dlclose(plugin.module) != 0) {
         plugin.loadState = UnloadFailed;
         return plugin.loadState;
     }
