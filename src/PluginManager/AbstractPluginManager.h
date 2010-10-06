@@ -44,6 +44,8 @@ class Plugin;
  *      http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_defects.html#195 )
  * @todo Print out errors to stderr
  * @todo Provide destructing function with plugin (new/delete overloads, segfaults...)
+ * @todo Static functions for metadata, unload
+ * @todo Disable copy constructor, operator=
  */
 class AbstractPluginManager {
     friend class Plugin;
@@ -169,6 +171,7 @@ class AbstractPluginManager {
          * will be loaded and any conflicting plugins found after will be
          * skipped.
          * @see PluginManager::load()
+         * @deprecated Not very smart function, use load() instead.
          */
         virtual void loadAll();
 
@@ -186,12 +189,7 @@ class AbstractPluginManager {
          *
          * Static plugins always have PluginManangerStatic::Static state.
          */
-        inline LoadState loadState(const std::string& name) const {
-            /* Plugin with given name doesn't exist */
-            if(plugins.find(name) == plugins.end()) return NotFound;
-
-            return plugins.at(name).loadState;
-        }
+        LoadState loadState(const std::string& name) const;
 
         /**
          * @brief Load a plugin
@@ -224,29 +222,61 @@ class AbstractPluginManager {
         virtual LoadState unload(const std::string& name);
 
     protected:
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        struct StaticPlugin {
-            std::string name;
-            std::string interface;
-            void* (*instancer)(AbstractPluginManager*, const std::string&);
-        };
-
+        /**
+         * @brief Plugin object
+         */
         struct PluginObject {
-            LoadState loadState;
-            PluginMetadata metadata;
+            LoadState loadState;                /**< @brief Load state */
+
+            /**
+             * @brief Plugin interface
+             *
+             * Non-static plugins have this field empty.
+             */
+            std::string interface;
+
+            PluginMetadata metadata;            /**< @brief Plugin metadata */
+
+            /**
+             * @brief Associated plugin manager
+             *
+             * If set to zero, the plugin has not any associated plugin manager
+             * and cannot be loaded.
+             */
+            AbstractPluginManager* manager;
+
+            /** @brief Pointer to plugin instancer function */
             void* (*instancer)(AbstractPluginManager*, const std::string&);
+
+            /**
+             * @brief Plugin module handler
+             *
+             * Only for dynamic plugins
+             */
             void* module;
+
+            /**
+             * @brief Constructor
+             * @param _metadata     Plugin metadata
+             */
             PluginObject(const Utility::Configuration& _metadata):
-                loadState(NotLoaded), metadata(_metadata), module(0) {}
+                loadState(NotLoaded), metadata(_metadata), manager(0), module(0) {}
         };
 
-        static std::vector<StaticPlugin> staticPlugins;
+        /** @brief Directory where to search for dynamic plugins */
         std::string _pluginDirectory;
-        std::map<std::string, PluginObject> plugins;
-        #endif
 
         /** @brief Plugin interface used by the plugin manager */
         virtual std::string pluginInterface() const = 0;
+
+        /**
+         * @brief Plugins
+         *
+         * Global storage of static, unloaded and loaded plugins.
+         * @note This neeeds to be accessed via pointer because of "Static
+         * Initialization Order Fiasco".
+         */
+        static std::map<std::string, PluginObject>* plugins();
 
     private:
         std::map<std::string, std::vector<Plugin*> > instances;

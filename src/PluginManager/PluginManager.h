@@ -38,20 +38,15 @@ template<class T> class PluginManager: public AbstractPluginManager {
     public:
         /** @copydoc AbstractPluginManager::AbstractPluginManager() */
         PluginManager(const std::string& pluginDirectory): AbstractPluginManager(pluginDirectory) {
-            Utility::Resource r("plugins");
+            /* Find static plugins which have the same interface and have not
+               assigned manager to them */
+            for(std::map<std::string, PluginObject>::iterator it = plugins()->begin(); it != plugins()->end(); ++it) {
+                /** @todo Check for dependencies! */
+                if(it->second.manager != 0 || it->second.interface != pluginInterface())
+                    continue;
 
-            /* Load static plugins which use the same interface */
-            for(std::vector<StaticPlugin>::const_iterator i = staticPlugins.begin(); i != staticPlugins.end(); ++i) {
-                if(i->interface != pluginInterface()) continue;
-
-                std::istringstream file(r.get(i->name + ".conf"));
-                Utility::Configuration metadata(file);
-                PluginObject p(metadata);
-                if(metadata.isValid()) p.loadState = IsStatic;
-                else p.loadState = WrongMetadataFile;
-                p.instancer = i->instancer;
-
-                plugins.insert(std::pair<std::string, PluginObject>(i->name, p));
+                /* Assign the plugin to this manager */
+                it->second.manager = this;
             }
         }
 
@@ -67,9 +62,9 @@ template<class T> class PluginManager: public AbstractPluginManager {
          */
         T* instance(const std::string& name) {
             /* Plugin with given name doesn't exist */
-            if(plugins.find(name) == plugins.end()) return 0;
+            if(plugins()->find(name) == plugins()->end()) return 0;
 
-            PluginObject& plugin = plugins.at(name);
+            PluginObject& plugin = plugins()->at(name);
 
             /* Plugin is not successfully loaded */
             if(!(plugin.loadState & (LoadOk|IsStatic))) return 0;
