@@ -132,7 +132,7 @@ void AbstractPluginManager::loadAll() {
     }
 }
 
-const PluginMetadata* AbstractPluginManager::metadata(const string& name) {
+const PluginMetadata* AbstractPluginManager::metadata(const string& name) const {
     map<string, PluginObject>::const_iterator found = plugins()->find(name);
 
     /* Plugin with given name doesn't exist */

@@ -180,7 +180,7 @@ class AbstractPluginManager {
          * @param name              Plugin name
          * @return Pointer to plugin metadata
          */
-        const PluginMetadata* metadata(const std::string& name);
+        const PluginMetadata* metadata(const std::string& name) const;
 
         /**
          * @brief Load state of a plugin
