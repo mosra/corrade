@@ -9,6 +9,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/PluginTestConfigure.h.cmake
 
 include_directories(${Map2XCore_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR})
 
+add_subdirectory(food)
+
 map2x_add_plugin(Snail ${CMAKE_CURRENT_BINARY_DIR} Snail.conf Snail.cpp)
 map2x_add_plugin(Dog ${CMAKE_CURRENT_BINARY_DIR} Dog.conf Dog.cpp)
 map2x_add_plugin(Chihuahua ${CMAKE_CURRENT_BINARY_DIR} Chihuahua.conf Chihuahua.cpp)

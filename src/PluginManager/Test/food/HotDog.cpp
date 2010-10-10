@@ -1,5 +1,3 @@
-#ifndef Map2X_PluginManager_Test_PluginTest_h
-#define Map2X_PluginManager_Test_PluginTest_h
 /*
     Copyright © 2007, 2008, 2009, 2010 Vladimír Vondruš <mosra@centrum.cz>
 
@@ -15,33 +13,25 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include <QtCore/QObject>
-
-#include "PluginManager/PluginManager.h"
-#include "AbstractAnimal.h"
-#include "AbstractFood.h"
+#include "../AbstractFood.h"
+#include "../Dog.h"
 
 namespace Map2X { namespace PluginManager { namespace Test {
 
-class PluginTest: public QObject {
-    Q_OBJECT
+class HotDog: public AbstractFood {
+    public:
+        HotDog(AbstractPluginManager* manager = 0, const std::string& plugin = ""): AbstractFood(manager, plugin) {}
+
+        virtual bool isTasty()
+            { return dog.hasTail() ? false : true; }
+        virtual int weight()
+            { return dog.legCount()*700 + 4000; }
 
     private:
-        PluginManager<AbstractAnimal>* manager;
-        PluginManager<AbstractFood>* foodManager;
-
-    public:
-        PluginTest();
-
-    private slots:
-        void nameList();
-        void errors();
-        void staticPlugin();
-        void dynamicPlugin();
-        void hierarchy();
-        void crossManagerDependencies();
+        Dog dog;
 };
 
 }}}
 
-#endif
+PLUGIN_REGISTER(Map2X::PluginManager::Test::HotDog,
+                "cz.mosra.Map2X.PluginManager.Test.AbstractFood/1.0")

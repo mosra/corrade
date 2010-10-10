@@ -1,5 +1,5 @@
-#ifndef Map2X_PluginManager_Test_PluginTest_h
-#define Map2X_PluginManager_Test_PluginTest_h
+#ifndef Map2X_PluginManager_Test_AbstractFood_h
+#define Map2X_PluginManager_Test_AbstractFood_h
 /*
     Copyright © 2007, 2008, 2009, 2010 Vladimír Vondruš <mosra@centrum.cz>
 
@@ -15,31 +15,19 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include <QtCore/QObject>
-
-#include "PluginManager/PluginManager.h"
-#include "AbstractAnimal.h"
-#include "AbstractFood.h"
+#include "PluginManager/Plugin.h"
 
 namespace Map2X { namespace PluginManager { namespace Test {
 
-class PluginTest: public QObject {
-    Q_OBJECT
-
-    private:
-        PluginManager<AbstractAnimal>* manager;
-        PluginManager<AbstractFood>* foodManager;
+class AbstractFood: public Plugin {
+    PLUGIN_INTERFACE("cz.mosra.Map2X.PluginManager.Test.AbstractFood/1.0")
 
     public:
-        PluginTest();
+        inline AbstractFood(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
+            Plugin(manager, plugin) {}
 
-    private slots:
-        void nameList();
-        void errors();
-        void staticPlugin();
-        void dynamicPlugin();
-        void hierarchy();
-        void crossManagerDependencies();
+        virtual int weight() = 0;
+        virtual bool isTasty() = 0;
 };
 
 }}}

@@ -173,8 +173,13 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
 
     /* Load dependencies and add this plugin to their "used by" list */
     for(vector<string>::const_iterator it = plugin.metadata.depends().begin(); it != plugin.metadata.depends().end(); ++it) {
-        if(!(load(*it) & (LoadOk|IsStatic))) return UnresolvedDependency;
-        plugins()->at(*it).metadata.addUsedBy(name);
+        /* Find manager which is associated to this plugin and load the plugin
+           with it */
+        map<string, PluginObject>::iterator found = plugins()->find(*it);
+        if(found == plugins()->end() || !found->second.manager || !(found->second.manager->load(*it) & (LoadOk|IsStatic)))
+            return UnresolvedDependency;
+
+        found->second.metadata.addUsedBy(name);
     }
 
     /* Open plugin file, make symbols available for next libs (which depends on this) */

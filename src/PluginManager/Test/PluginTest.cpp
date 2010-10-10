@@ -33,6 +33,7 @@ namespace Map2X { namespace PluginManager { namespace Test {
 PluginTest::PluginTest() {
     initialize();
     manager = new PluginManager<AbstractAnimal>(PLUGINS_DIR);
+    foodManager = new PluginManager<AbstractFood>(PLUGINS_DIR + string("food/"));
 }
 
 void PluginTest::nameList() {
@@ -122,6 +123,33 @@ void PluginTest::hierarchy() {
     /* Unload chihuahua plugin, then try again */
     delete animal;
     QVERIFY(manager->unload("Chihuahua") == AbstractPluginManager::NotLoaded);
+    QVERIFY(manager->unload("Dog") == AbstractPluginManager::NotLoaded);
+    QVERIFY(manager->metadata("Dog")->usedBy().size() == 0);
+}
+
+void PluginTest::crossManagerDependencies() {
+    QVERIFY(manager->loadState("Dog") == AbstractPluginManager::NotLoaded);
+    QVERIFY(foodManager->loadState("HotDog") == AbstractPluginManager::NotLoaded);
+
+    /* Load HotDog */
+    QVERIFY(foodManager->load("HotDog") == AbstractPluginManager::LoadOk);
+    QVERIFY(manager->loadState("Dog") == AbstractPluginManager::LoadOk);
+    QVERIFY(foodManager->metadata("HotDog")->depends().size() == 1);
+    QVERIFY(foodManager->metadata("HotDog")->depends()[0] == "Dog");
+    QVERIFY(manager->metadata("Dog")->usedBy().size() == 1);
+    QVERIFY(manager->metadata("Dog")->usedBy()[0] == "HotDog");
+
+    /* Verify hotdog */
+    AbstractFood* hotdog = foodManager->instance("HotDog");
+    QVERIFY(!hotdog->isTasty());
+    QVERIFY(hotdog->weight() == 6800);
+
+    /* Try to unload dog while dog is used in hotdog */
+    QVERIFY(manager->unload("Dog") == AbstractPluginManager::IsRequired);
+
+    /* Destroy hotdog, then try again */
+    delete hotdog;
+    QVERIFY(foodManager->unload("HotDog") == AbstractPluginManager::NotLoaded);
     QVERIFY(manager->unload("Dog") == AbstractPluginManager::NotLoaded);
     QVERIFY(manager->metadata("Dog")->usedBy().size() == 0);
 }
