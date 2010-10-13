@@ -1,4 +1,5 @@
 build
+pkg
 *.kdev4
 *~
 *.pkg.tar.xz
