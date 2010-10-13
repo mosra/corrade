@@ -104,6 +104,8 @@ class Plugin {
  * @attention This macro should be called outside of any namespace. If you are
  * running into linker errors with @c pluginInitializer_*, this could be the
  * problem.
+ * @todo Get rid of AUTOMATIC_INITIALIZER() -- PLUGIN_REGISTER_STATIC should be
+ * only in *.cpp
  */
 #define PLUGIN_REGISTER_STATIC(name, className, interface) \
     inline void* pluginInstancer_##name(Map2X::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \

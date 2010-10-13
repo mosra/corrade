@@ -40,6 +40,8 @@ namespace Map2X { namespace Utility {
  * @bug When value with number > 0 is not found, pointed integer is changed
  * @bug Setting inexistent value with number > 0 creates new key/value pair
  * @todo Test, whether the configurationValueToString() is called also with string type
+ * @todo Support different syntax for hierarchic groups [g1][g2][...] along with
+ *      [g1/g2/...]
  */
 class Configuration: public ConfigurationGroup {
     friend class ConfigurationGroup;

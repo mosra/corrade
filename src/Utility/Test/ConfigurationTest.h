@@ -46,6 +46,7 @@ class ConfigurationTest: public QObject {
         void autoCreation();
         void directValue();
 
+        /** @todo Merge into parse() and uniqueGroups() */
         void hierarchic();
         void hierarchicUnique();
 };

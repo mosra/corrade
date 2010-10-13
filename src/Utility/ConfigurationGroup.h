@@ -219,6 +219,7 @@ class ConfigurationGroup {
          * @return Count
          *
          * See also Configuration::UniqueKeys and Configuration::UniqueNames.
+         * @todo Rename to keyCount() ?
          */
         unsigned int valueCount(const std::string& key) const;
 
@@ -226,6 +227,7 @@ class ConfigurationGroup {
          * @brief Whether given key exists
          *
          * More efficient than calling <tt>valueCount(key) != 0</tt>.
+         * @todo Rename to keyExists() ?
          */
         bool valueExists(const std::string& key) const;
 

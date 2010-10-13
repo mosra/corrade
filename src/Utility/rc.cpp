@@ -24,6 +24,8 @@
  * is printed to @c stdout, status and error messages are printed to @c stderr.
  *
  * See also @ref Map2X::Utility::Resource.
+ * @todo Test it
+ * @todo Check empty files
  */
 
 #include <iostream>
