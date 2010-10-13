@@ -6,6 +6,14 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${Map2XCore_SOURCE_DIR}/modules/")
 
 include(Map2XMacros)
 
+# Default directories
+set_parent_scope(MAP2X_CORE_INCLUDE_DIR     "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set_parent_scope(MAP2X_PLUGINS_INCLUDE_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/src/Plugins")
+set_parent_scope(MAP2X_CORE_LIBRARY         Map2XCore)
+set_parent_scope(MAP2X_RC_EXECUTABLE        map2x-rc)
+
+include(FindMap2XCore)
+
 # On 64bit Linux with GCC flag -fPIC is needed for building some static libraries
 if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(USE_FPIC ON)
