@@ -104,11 +104,11 @@ string Resource::compile(const string& name, const map<string, string>& files) c
         filenames + "\n};\n\n"
         "static const unsigned char resourceData[] = {\n" +
         data +      "\n};\n\n"
-        "inline int resourceInitializer_" + name + "() {\n"
+        "int resourceInitializer_" + name + "() {\n"
         "    Map2X::Utility::Resource::registerData(\"" + group + "\", " + count.str() + ", resourcePositions, resourceFilenames, resourceData);\n"
         "    return 1;\n"
         "} AUTOMATIC_INITIALIZER(resourceInitializer_" + name + ")\n\n"
-        "inline int resourceFinalizer_" + name + "() {\n"
+        "int resourceFinalizer_" + name + "() {\n"
         "    Map2X::Utility::Resource::unregisterData(\"" + group + "\", resourceData);\n"
         "    return 1;\n"
         "} AUTOMATIC_FINALIZER(resourceFinalizer_" + name + ")\n";

@@ -110,8 +110,9 @@ class Plugin {
 #define PLUGIN_REGISTER_STATIC(name, className, interface) \
     inline void* pluginInstancer_##name(Map2X::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
         { return new className(manager, plugin); } \
-    inline int pluginInitializer_##name() { Map2X::PluginManager::AbstractPluginManager::importStaticPlugin(#name, PLUGIN_VERSION, interface, pluginInstancer_##name); return 1; } \
-    AUTOMATIC_INITIALIZER(pluginInitializer_##name)
+    int pluginInitializer_##name() { \
+        Map2X::PluginManager::AbstractPluginManager::importStaticPlugin(#name, PLUGIN_VERSION, interface, pluginInstancer_##name); return 1; \
+    } AUTOMATIC_INITIALIZER(pluginInitializer_##name)
 
 }}
 

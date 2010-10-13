@@ -29,12 +29,12 @@ static const unsigned char resourceData[] = {
     0xba,0xdc,0xf,0xfe,0xeb,0xad,0xf0,0xd
 };
 
-inline int resourceInitializer_ResourceTestData() {
+int resourceInitializer_ResourceTestData() {
     Map2X::Utility::Resource::registerData("test", 2, resourcePositions, resourceFilenames, resourceData);
     return 1;
 } AUTOMATIC_INITIALIZER(resourceInitializer_ResourceTestData)
 
-inline int resourceFinalizer_ResourceTestData() {
+int resourceFinalizer_ResourceTestData() {
     Map2X::Utility::Resource::unregisterData("test", resourceData);
     return 1;
 } AUTOMATIC_FINALIZER(resourceFinalizer_ResourceTestData)
