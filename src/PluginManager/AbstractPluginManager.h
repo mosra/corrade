@@ -38,11 +38,9 @@ class Plugin;
  *
  * Base abstract class for all PluginManager templated classes. See also
  * @ref PluginManagement.
- * @todo Resolving dependecies, updating PluginMetadata with reversed deps
  * @todo Casting pointer-to-object to pointer-to-function is not ISO C++ (see
  *      C++ Standard Core Language Active Issue #195,
  *      http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_defects.html#195 )
- * @todo Print out errors to stderr
  * @todo Provide destructing function with plugin (new/delete overloads, segfaults...)
  * @todo Static functions for metadata, unload
  * @todo Disable copy constructor, operator=

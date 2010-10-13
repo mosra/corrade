@@ -16,6 +16,7 @@
 #include "AbstractPluginManager.h"
 
 #include <algorithm>
+#include <iostream>
 #include <dlfcn.h>
 
 #include "AbstractPluginManagerConfigure.h"
@@ -187,6 +188,9 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     void* handle = dlopen((_pluginDirectory + PLUGIN_FILENAME_PREFIX + name + PLUGIN_FILENAME_SUFFIX).c_str(),
                           RTLD_NOW|RTLD_GLOBAL);
     if(!handle) {
+        cerr << "Cannot open plugin file \""
+             << _pluginDirectory + PLUGIN_FILENAME_PREFIX + name + PLUGIN_FILENAME_SUFFIX
+             << "\": " << dlerror() << endl;
         plugin.loadState = LoadFailed;
         return plugin.loadState;
     }
@@ -194,6 +198,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     /* Check plugin version */
     int (*_version)(void) = reinterpret_cast<int(*)()>(dlsym(handle, "pluginVersion"));
     if(_version == 0) {
+        cerr << "Cannot get version of plugin '" << name << "': " << dlerror() << endl;
         dlclose(handle);
         plugin.loadState = LoadFailed;
         return plugin.loadState;
@@ -207,6 +212,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     /* Check interface string */
     string (*interface)() = reinterpret_cast<string (*)()>(dlsym(handle, "pluginInterface"));
     if(interface == 0) {
+        cerr << "Cannot get interface string of plugin '" << name << "': " << dlerror() << endl;
         dlclose(handle);
         plugin.loadState = LoadFailed;
         return plugin.loadState;
@@ -220,6 +226,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     /* Load plugin instancer */
     void* (*instancer)(AbstractPluginManager*, const std::string&) = reinterpret_cast<void* (*)(AbstractPluginManager*, const std::string&)>(dlsym(handle, "pluginInstancer"));
     if(instancer == 0) {
+        cerr << "Cannot get instancer of plugin '" << name << "': " << dlerror() << endl;
         dlclose(handle);
         plugin.loadState = LoadFailed;
         return plugin.loadState;
@@ -256,6 +263,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& nam
         plugins()->find(*it)->second.metadata.removeUsedBy(name);
 
     if(dlclose(plugin.module) != 0) {
+        cerr << "Cannot unload plugin '" << name << "': " << dlerror() << endl;
         plugin.loadState = UnloadFailed;
         return plugin.loadState;
     }
