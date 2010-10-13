@@ -108,8 +108,8 @@ function(map2x_add_resource name group_name)
     set(out resource_${name}.cpp)
     add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${out}
-        COMMAND map2x-rc ${name} ${group_name} ${arguments} > ${CMAKE_CURRENT_BINARY_DIR}/${out}
-        DEPENDS map2x-rc ${dependencies}
+        COMMAND ${MAP2X_RC_EXECUTABLE} ${name} ${group_name} ${arguments} > ${CMAKE_CURRENT_BINARY_DIR}/${out}
+        DEPENDS ${MAP2X_RC_EXECUTABLE} ${dependencies}
         COMMENT "Compiling data resource file ${out}"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         )
