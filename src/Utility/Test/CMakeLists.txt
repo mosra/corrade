@@ -10,7 +10,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/DirectoryTestConfigure.h.cmake
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ConfigurationTestConfigure.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/ConfigurationTestConfigure.h)
 
-include_directories(${Map2XCore_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 map2x_add_test(DirectoryTest DirectoryTest.h DirectoryTest.cpp Map2XUtility)
 map2x_add_test(EndianTest EndianTest.h EndianTest.cpp Map2XUtility)

@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <dlfcn.h>
 
-#include "PluginManager/AbstractPluginManagerConfigure.h"
+#include "AbstractPluginManagerConfigure.h"
 #include "Plugin.h"
 #include "Utility/Directory.h"
 #include "Utility/Configuration.h"

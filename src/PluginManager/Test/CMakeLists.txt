@@ -7,7 +7,7 @@ set(PLUGINMANAGER_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR})
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/PluginTestConfigure.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/PluginTestConfigure.h)
 
-include_directories(${Map2XCore_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_subdirectory(food)
 

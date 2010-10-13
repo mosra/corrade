@@ -1,6 +1,6 @@
-include_directories(${Map2XCore_SOURCE_DIR}/src ${Map2XCore_BINARY_DIR}/src)
-
 add_definitions(-Wall -pedantic)
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/AbstractPluginManagerConfigure.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/AbstractPluginManagerConfigure.h)
