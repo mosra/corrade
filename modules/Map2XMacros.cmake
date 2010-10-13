@@ -1,4 +1,18 @@
 #
+# Set variable for current and also parent scope, if parent scope exists.
+#
+# Workaround for ugly CMake bug.
+#
+macro(set_parent_scope name)
+    set(${name} ${ARGN})
+
+    # Set to parent scope only if parent exists
+    if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+        set(${name} ${${name}} PARENT_SCOPE)
+    endif()
+endmacro()
+
+#
 # Function for adding QtTest unit tests
 #
 # These tests contain mainly from one source file and one header, which is
@@ -164,7 +178,5 @@ macro(map2x_add_static_plugin static_plugins_variable plugin_name metadata_file)
     # Unset sources array (it's a macro, thus variables stay between calls)
     unset(sources)
 
-    # PARENT_SCOPE doesn't set it in current scope (wtf?)
-    set(${static_plugins_variable} ${${static_plugins_variable}} ${plugin_name})
-    set(${static_plugins_variable} ${${static_plugins_variable}} PARENT_SCOPE)
+    set_parent_scope(${static_plugins_variable} ${${static_plugins_variable}} ${plugin_name})
 endmacro()
