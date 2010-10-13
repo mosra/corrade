@@ -24,6 +24,8 @@ if(USE_FPIC)
     set_target_properties(Map2XUtility PROPERTIES COMPILE_FLAGS -fPIC)
 endif()
 
+install(TARGETS map2x-rc DESTINATION ${MAP2X_BINARY_INSTALL_DIR})
+
 if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(Test)

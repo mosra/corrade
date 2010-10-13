@@ -1,0 +1,1 @@
+install(FILES FindMap2XCore.cmake Map2XMacros.cmake DESTINATION ${MAP2X_CMAKE_MODULE_INSTALL_DIR})
