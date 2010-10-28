@@ -32,6 +32,7 @@ endmacro()
 # library count is unlimited. Note: the enable_testing() function must be called
 # explicitly.
 #
+if(QT4_FOUND)
 function(map2x_add_test test_name moc_header source_file)
     foreach(library ${ARGN})
         set(libraries ${library} ${libraries})
@@ -42,6 +43,7 @@ function(map2x_add_test test_name moc_header source_file)
     target_link_libraries(${test_name} ${libraries} ${QT_QTCORE_LIBRARY} ${QT_QTTEST_LIBRARY})
     add_test(${test_name} ${test_name})
 endfunction()
+endif()
 
 #
 # Function for adding QtTest unit test with multiple source files
