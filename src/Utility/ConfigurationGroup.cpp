@@ -262,12 +262,12 @@ bool ConfigurationGroup::removeAllValues(const std::string& key) {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 
-template<> bool configurationValueFromString<bool>(const std::string& value, int flags) {
+bool ConfigurationValue<bool>::fromString(const std::string& value, int flags) {
     if(value == "1" || value == "yes" || value == "y" || value == "true") return true;
     return false;
 }
 
-template<> std::string configurationValueToString<bool>(const bool& value, int flags) {
+std::string ConfigurationValue<bool>::toString(const bool& value, int flags) {
     if(value) return "true";
     return "false";
 }

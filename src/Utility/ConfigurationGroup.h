@@ -27,31 +27,32 @@ namespace Map2X { namespace Utility {
 
 class Configuration;
 
-/** @{ @name TypeConversion
- * These functions are called internally by ConfigurationGroup functions to
- * convert values from and to templated types. Implement these two functions
- * with template specialization to allow saving non-standard types into
- * configuration files.
+/**
+ * @brief Template structure for type conversion
+ *
+ * Functions in this struct are called internally by ConfigurationGroup
+ * functions to convert values from and to templated types. Reimplement the
+ * structure with template specialization to allow saving and getting
+ * non-standard types into and from configuration files.
  * @todo Document implementation (include, namespace...)
  */
+template<class T> struct ConfigurationValue {
+    /**
+    * @brief Convert value to string
+    * @param value         Value
+    * @param flags         Conversion flags (see ConfigurationGroup::Flags)
+    * @return Value as string
+    */
+    static std::string toString(const T& value, int flags = 0);
 
-/**
- * @brief Convert value to string
- * @param value         Value
- * @param flags         Conversion flags (see ConfigurationGroup::Flags)
- * @return Value as string
- */
-template<class T> std::string configurationValueToString(const T& value, int flags = 0);
-
-/**
- * @brief Convert value from string
- * @param stringValue   Value as string
- * @param flags         Conversion flags (see ConfigurationGroup::Flags)
- * @return Value
- */
-template<class T> T configurationValueFromString(const std::string& stringValue, int flags = 0);
-
-/*@}*/
+    /**
+    * @brief Convert value from string
+    * @param stringValue   Value as string
+    * @param flags         Conversion flags (see ConfigurationGroup::Flags)
+    * @return Value
+    */
+    static T fromString(const std::string& stringValue, int flags = 0);
+};
 
 /**
  * @brief Group of values in configuration file
@@ -167,17 +168,17 @@ class ConfigurationGroup {
          * See also Configuration::automaticKeyCreation().
          */
         template<class T> bool value(const std::string& key, T* _value, unsigned int number = 0, int flags = 0) {
-            std::string stringValue = configurationValueToString<T>(*_value, flags);
+            std::string stringValue = ConfigurationValue<T>::toString(*_value, flags);
             bool ret = value<std::string>(key, &stringValue, number, flags);
 
-            *_value = configurationValueFromString<T>(stringValue, flags);
+            *_value = ConfigurationValue<T>::fromString(stringValue, flags);
             return ret;
         }
         template<class T> bool value(const std::string& key, T* _value, unsigned int number = 0, int flags = 0) const {
             std::string stringValue;
             bool ret = value<std::string>(key, &stringValue, number, flags);
 
-            *_value = configurationValueFromString<T>(stringValue, flags);
+            *_value = ConfigurationValue<T>::fromString(stringValue, flags);
             return ret;
         } /**< @overload */
 
@@ -208,7 +209,7 @@ class ConfigurationGroup {
             std::vector<T> _values;
             std::vector<std::string> stringValues = values<std::string>(key, flags);
             for(std::vector<std::string>::const_iterator it = stringValues.begin(); it != stringValues.end(); ++it)
-                _values.push_back(configurationValueFromString<T>(*it, flags));
+                _values.push_back(ConfigurationValue<T>::fromString(*it, flags));
 
             return _values;
         }
@@ -245,7 +246,7 @@ class ConfigurationGroup {
          * doesn't exist, adds a new key with given name.
          */
         template<class T> bool setValue(const std::string& key, const T& value, unsigned int number = 0, int flags = 0) {
-            return setValue<std::string>(key, configurationValueToString<T>(value, flags), number, flags);
+            return setValue<std::string>(key, ConfigurationValue<T>::toString(value, flags), number, flags);
         }
 
         /**
@@ -260,7 +261,7 @@ class ConfigurationGroup {
          * after all comments).
          */
         template<class T> bool addValue(const std::string& key, const T& value, int flags = 0) {
-            return addValue<std::string>(key, configurationValueToString<T>(value, flags), flags);
+            return addValue<std::string>(key, ConfigurationValue<T>::toString(value, flags), flags);
         }
 
         /**
@@ -301,7 +302,7 @@ class ConfigurationGroup {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 
-template<class T> std::string configurationValueToString(const T& value, int flags = 0) {
+template<class T> std::string ConfigurationValue<T>::toString(const T& value, int flags) {
     std::ostringstream stream;
 
     /* Hexadecimal / octal values */
@@ -323,7 +324,7 @@ template<class T> std::string configurationValueToString(const T& value, int fla
     return stringValue;
 }
 
-template<class T> T configurationValueFromString(const std::string& stringValue, int flags = 0) {
+template<class T> T ConfigurationValue<T>::fromString(const std::string& stringValue, int flags) {
     std::string _stringValue = stringValue;
 
     /* Strip initial # character, if user wants a color */
@@ -353,8 +354,11 @@ template<> bool ConfigurationGroup::value(const std::string& key, std::string* _
 template<> std::vector<std::string> ConfigurationGroup::values(const std::string& key, int flags) const;
 template<> bool ConfigurationGroup::setValue(const std::string& key, const std::string& value, unsigned int number, int flags);
 template<> bool ConfigurationGroup::addValue(const std::string& key, const std::string& value, int flags);
-template<> bool configurationValueFromString<bool>(const std::string& value, int flags);
-template<> std::string configurationValueToString<bool>(const bool& value, int flags);
+
+template<> struct ConfigurationValue<bool> {
+    static bool fromString(const std::string& value, int flags);
+    static std::string toString(const bool& value, int flags);
+};
 
 #endif
 
