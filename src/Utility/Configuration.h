@@ -156,7 +156,7 @@ class Configuration: public ConfigurationGroup {
          *
          * Invalid files cannot be changed or saved back.
          */
-        inline bool isValid() { return flags & IsValid; }
+        inline bool isValid() const { return flags & IsValid; }
 
         /**
          * @brief Enable/disable automatic creation of inexistent groups
