@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "AbstractPluginManager.h"
+#include "Plugin.h"
 
 namespace Map2X { namespace PluginManager {
 #endif
@@ -70,6 +71,21 @@ template<class T> class PluginManager: public AbstractPluginManager {
             if(!(plugin.loadState & (LoadOk|IsStatic))) return 0;
 
             return static_cast<T*>(plugin.instancer(this, name));
+        }
+
+        /**
+         * @brief Plugin name for given instance
+         * @param instance          Plugin name
+         * @return Name of plugin to which the instance belongs, empty string if
+         *      no plugin was found.
+         */
+        std::string nameOfInstance(const T* instance) {
+            for(std::map<std::string, std::vector<Map2X::PluginManager::Plugin*> >::const_iterator it = instances.begin(); it != instances.end(); ++it) {
+                for(std::vector<Map2X::PluginManager::Plugin*>::const_iterator pit = it->second.begin(); pit != it->second.end(); ++pit)
+                    if(*pit == instance) return it->first;
+            }
+
+            return "";
         }
 };
 
