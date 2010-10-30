@@ -17,11 +17,13 @@
 
 #include <QtTest/QTest>
 
+#include "Utility/Directory.h"
 #include "PluginTestConfigure.h"
 
 QTEST_APPLESS_MAIN(Map2X::PluginManager::Test::PluginTest)
 
 using namespace std;
+using namespace Map2X::Utility;
 
 void initialize() {
     PLUGIN_IMPORT(Kangaroo)
@@ -33,7 +35,7 @@ namespace Map2X { namespace PluginManager { namespace Test {
 PluginTest::PluginTest() {
     initialize();
     manager = new PluginManager<AbstractAnimal>(PLUGINS_DIR);
-    foodManager = new PluginManager<AbstractFood>(PLUGINS_DIR + string("food/"));
+    foodManager = new PluginManager<AbstractFood>(Directory::join(PLUGINS_DIR, "food"));
 }
 
 void PluginTest::nameList() {

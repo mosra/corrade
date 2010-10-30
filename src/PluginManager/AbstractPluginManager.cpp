@@ -73,7 +73,7 @@ AbstractPluginManager::AbstractPluginManager(const string& pluginDirectory): _pl
 
         /* Try to get plugin metadata from conf file. If metadata file is not
             found, it's okay. */
-        Configuration metadata(pluginDirectory + name + ".conf", Configuration::ReadOnly);
+        Configuration metadata(Directory::join(pluginDirectory, name + ".conf"), Configuration::ReadOnly);
 
         /* Insert plugin to list */
         PluginObject p(metadata);
@@ -184,8 +184,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     }
 
     /* Open plugin file, make symbols available for next libs (which depends on this) */
-    /** @todo Portable directory separator or plugindir with separator */
-    void* handle = dlopen((_pluginDirectory + PLUGIN_FILENAME_PREFIX + name + PLUGIN_FILENAME_SUFFIX).c_str(),
+    void* handle = dlopen(Directory::join(_pluginDirectory, PLUGIN_FILENAME_PREFIX + name + PLUGIN_FILENAME_SUFFIX).c_str(),
                           RTLD_NOW|RTLD_GLOBAL);
     if(!handle) {
         cerr << "Cannot open plugin file \""
