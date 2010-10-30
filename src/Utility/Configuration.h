@@ -149,6 +149,9 @@ class Configuration: public ConfigurationGroup {
          */
         inline ~Configuration() { if(flags & Changed) save(); }
 
+        /** @brief Filename */
+        inline std::string filename() const { return _filename; }
+
         /**
          * @brief Whether the file is valid
          * @return Returns false if the file has syntax errors or couldn't be
@@ -224,7 +227,7 @@ class Configuration: public ConfigurationGroup {
         };
 
         /** @brief Configuration file */
-        std::string filename;
+        std::string _filename;
 
         /**
          * @brief Flags

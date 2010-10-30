@@ -23,11 +23,11 @@ using namespace std;
 
 namespace Map2X { namespace Utility {
 
-Configuration::Configuration(const string& _filename, int _flags): ConfigurationGroup("", this), filename(_filename), flags(_flags) {
+Configuration::Configuration(const string& _filename, int _flags): ConfigurationGroup("", this), _filename(_filename), flags(_flags) {
     /* Open file with requested flags */
     ifstream::openmode openmode = ifstream::in;
     if(flags & Truncate) openmode |= ifstream::trunc;
-    ifstream file(filename.c_str(), openmode);
+    ifstream file(_filename.c_str(), openmode);
 
     /* File doesn't exist yet */
     if(!file.is_open()) {
@@ -188,7 +188,7 @@ bool Configuration::save() {
     /* File is readonly or invalid, don't save anything */
     if(flags & ReadOnly || !(flags & IsValid)) return false;
 
-    ofstream file(filename.c_str(), ofstream::out|ofstream::trunc|ofstream::binary);
+    ofstream file(_filename.c_str(), ofstream::out|ofstream::trunc|ofstream::binary);
     if(!file.good()) {
         /** @todo Error to stderr */
         return false;
