@@ -121,7 +121,7 @@ void ConfigurationTest::parseDirect() {
     istringstream contents("[group]\nkey=value");
     Configuration conf(contents);
     QVERIFY(conf.isValid());
-    QVERIFY(!conf.addValue("key2", "value2"));
+    QVERIFY(!conf.addValue<string>("key2", "value2"));
     QVERIFY(!conf.save());
 }
 
