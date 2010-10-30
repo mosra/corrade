@@ -277,10 +277,8 @@ void AbstractPluginManager::registerInstance(const string& name, Plugin* instanc
     /* Given plugin doesn't exist, nothing to do */
     if(foundPlugin == plugins()->end()) return;
 
-    /* Plugin doesn't belong to this manager or is static (static plugins cannot
-       be unloaded and thus instance counting is useless), nothing to do */
-    if(foundPlugin->second.manager != this || foundPlugin->second.loadState == IsStatic)
-        return;
+    /* Plugin doesn't belong to this manager, nothing to do */
+    if(foundPlugin->second.manager != this) return;
 
     map<string, vector<Plugin*> >::iterator foundInstance = instances.find(name);
 
@@ -298,10 +296,8 @@ void AbstractPluginManager::unregisterInstance(const string& name, Plugin* insta
     /* Given plugin doesn't exist, nothing to do */
     if(foundPlugin == plugins()->end()) return;
 
-    /* Plugin doesn't belong to this manager or is static (static plugins cannot
-       be unloaded and thus instance counting is useless), nothing to do */
-    if(foundPlugin->second.manager != this || foundPlugin->second.loadState == IsStatic)
-        return;
+    /* Plugin doesn't belong to this manager, nothing to do */
+    if(foundPlugin->second.manager != this) return;
 
     /** @todo Emit error when unregistering nonexistent instance */
     map<string, vector<Plugin*> >::iterator foundInstance = instances.find(name);
