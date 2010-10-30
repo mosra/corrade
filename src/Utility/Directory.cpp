@@ -22,6 +22,32 @@ using namespace std;
 
 namespace Map2X { namespace Utility {
 
+string Directory::path(const std::string& filename) {
+    /* If filename is already a path, return it */
+    if(!filename.empty() && filename[filename.size()-1] == '/')
+        return filename.substr(0, filename.size()-1);
+
+    size_t pos = filename.find_last_of('/');
+
+    /* Filename doesn't contain any slash (no path), return empty string */
+    if(pos == string::npos) return "";
+
+    /* Return everything to last slash */
+    return filename.substr(0, pos);
+}
+
+string Directory::join(const std::string& path, const std::string& filename) {
+    /* Absolute filename or empty path, return filename */
+    if(path.empty() || (!filename.empty() && filename[0] == '/'))
+        return filename;
+
+    /* Add leading slash to path, if not present */
+    if(path[path.size()-1] != '/')
+        return path + '/' + filename;
+
+    return path + filename;
+}
+
 Directory::Directory(const string& path, int flags): _isLoaded(false) {
     DIR* directory;
     dirent* entry;

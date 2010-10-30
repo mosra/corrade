@@ -23,6 +23,12 @@ class DirectoryTest: public QObject {
     Q_OBJECT
 
     private slots:
+        void path_data();
+        void path();
+
+        void join_data();
+        void join();
+
         void list_data();
         void list();
 };

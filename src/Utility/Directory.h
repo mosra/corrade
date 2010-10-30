@@ -60,6 +60,25 @@ class Directory: public std::vector<std::string> {
         };
 
         /**
+         * @brief Extract path from filename
+         * @param filename  Filename
+         * @return Path (everything before first slash). If the filename
+         * doesn't contain any path, returns empty string, if the filename is
+         * already a path (ends with slash), returns whole string without
+         * trailing slash.
+         */
+        static std::string path(const std::string& filename);
+
+        /**
+         * @brief Join path and filename
+         * @param path      Path
+         * @param filename  Filename
+         * @return Joined path and filename. If the path is empty or the
+         * filename is absolute (with leading slash), returns filename.
+         */
+        static std::string join(const std::string& path, const std::string& filename);
+
+        /**
          * @brief Constructor
          * @param path      %Directory path
          * @param flags     Listing flags. See Directory::Flags. If no flag is
