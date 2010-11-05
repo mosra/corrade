@@ -11,7 +11,7 @@
  */
 
 /** @namespace Map2X::PluginManager
- * @brief Plugin management for %Map2X
+ * @brief %Plugin management for %Map2X
  *
  * See also @ref PluginManagement.
  */

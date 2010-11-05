@@ -34,12 +34,12 @@ namespace Map2X { namespace PluginManager {
 class Plugin;
 
 /**
- * @brief Base class of PluginManager
+ * @brief Non-templated base class of PluginManager
  *
  * Base abstract class for all PluginManager templated classes. See also
  * @ref PluginManagement.
  * @todo Casting pointer-to-object to pointer-to-function is not ISO C++ (see
- *      C++ Standard Core Language Active Issue #195,
+ *      C++ Standard %Core Language Active Issue #195,
  *      http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_defects.html#195 )
  * @todo Provide destructing function with plugin (new/delete overloads, segfaults...)
  * @todo Static functions for metadata, unload
@@ -64,7 +64,7 @@ class AbstractPluginManager {
 
             /**
              * The plugin is build with different version of PluginManager and
-             * cannot be loaded. This means the PluginMetadata are inaccessible.
+             * cannot be loaded.
              */
             WrongPluginVersion = 0x0002,
 
@@ -129,8 +129,8 @@ class AbstractPluginManager {
          * @param interface         %Plugin interface string
          * @param instancer         Pointer to plugin class instancer function
          *
-         * Used internally by PLUGIN_IMPORT_STATIC() macro. There is absolutely
-         * no need to use this directly.
+         * Used internally by PLUGIN_IMPORT() macro. There is absolutely no
+         * need to use this directly.
          */
         static void importStaticPlugin(const std::string& name, int _version, const std::string& interface, void* (*instancer)(AbstractPluginManager*, const std::string&));
 
@@ -143,7 +143,6 @@ class AbstractPluginManager {
          * the same interface as this PluginManager instance. The gets list of
          * all dynamic plugins in given directory.
          * @see PluginManager::nameList()
-         * @todo Plugin dir without trailing slash.
          * @todo Make static plugin have higher priority than dynamic
          */
         AbstractPluginManager(const std::string& pluginDirectory);
@@ -155,7 +154,7 @@ class AbstractPluginManager {
          */
         virtual ~AbstractPluginManager();
 
-        /** @brief Plugin directory */
+        /** @brief %Plugin directory */
         inline std::string pluginDirectory() const { return _pluginDirectory; }
 
         /** @brief List of all available plugin names */
@@ -174,29 +173,28 @@ class AbstractPluginManager {
         virtual void loadAll();
 
         /**
-         * @brief Plugin metadata
-         * @param name              Plugin name
+         * @brief %Plugin metadata
+         * @param name              %Plugin name
          * @return Pointer to plugin metadata
          */
         const PluginMetadata* metadata(const std::string& name) const;
 
         /**
          * @brief Load state of a plugin
-         * @param name              Plugin name
+         * @param name              %Plugin name
          * @return Load state of a plugin
          *
-         * Static plugins always have PluginManangerStatic::Static state.
+         * Static plugins always have AbstractPluginManager::IsStatic state.
          */
         LoadState loadState(const std::string& name) const;
 
         /**
          * @brief Load a plugin
-         * @param name              Plugin name
+         * @param name              %Plugin name
          * @return AbstractPluginManager::LoadOk on success,
          *      AbstractPluginManager::NotFound,
          *      AbstractPluginManager::WrongPluginVersion,
          *      AbstractPluginManager::WrongInterfaceVersion,
-         *      AbstractPluginManager::Conflicts,
          *      AbstractPluginManager::UnresolvedDependency or
          *      AbstractPluginManager::LoadFailed  on failure.
          *
@@ -208,8 +206,8 @@ class AbstractPluginManager {
 
         /**
          * @brief Unload a plugin
-         * @param name              Plugin name
-         * @return AbstractPluginManager::UnloadOk on success,
+         * @param name              %Plugin name
+         * @return AbstractPluginManager::NotLoaded on success,
          *      AbstractPluginManager::UnloadFailed,
          *      AbstractPluginManager::IsRequired or
          *      AbstractPluginManager::IsStatic on failure.
@@ -221,19 +219,19 @@ class AbstractPluginManager {
 
     protected:
         /**
-         * @brief Plugin object
+         * @brief %Plugin object
          */
         struct PluginObject {
             LoadState loadState;                /**< @brief Load state */
 
             /**
-             * @brief Plugin interface
+             * @brief %Plugin interface
              *
              * Non-static plugins have this field empty.
              */
             std::string interface;
 
-            PluginMetadata metadata;            /**< @brief Plugin metadata */
+            PluginMetadata metadata;            /**< @brief %Plugin metadata */
 
             /**
              * @brief Associated plugin manager
@@ -247,7 +245,7 @@ class AbstractPluginManager {
             void* (*instancer)(AbstractPluginManager*, const std::string&);
 
             /**
-             * @brief Plugin module handler
+             * @brief %Plugin module handler
              *
              * Only for dynamic plugins
              */
@@ -255,7 +253,7 @@ class AbstractPluginManager {
 
             /**
              * @brief Constructor
-             * @param _metadata     Plugin metadata
+             * @param _metadata     %Plugin metadata
              */
             PluginObject(const Utility::Configuration& _metadata):
                 loadState(NotLoaded), metadata(_metadata), manager(0), module(0) {}
@@ -264,7 +262,7 @@ class AbstractPluginManager {
         /** @brief Directory where to search for dynamic plugins */
         std::string _pluginDirectory;
 
-        /** @brief Plugin interface used by the plugin manager */
+        /** @brief %Plugin interface used by the plugin manager */
         virtual std::string pluginInterface() const = 0;
 
         /**

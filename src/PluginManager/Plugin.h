@@ -16,7 +16,7 @@
 */
 
 /** @file
- * @brief Class Map2X::PluginManager::AbstractPlugin and plugin registering macros
+ * @brief Class Map2X::PluginManager::Plugin and plugin registering macros
  *
  * Macros PLUGIN_INTERFACE(), PLUGIN_REGISTER_STATIC(), PLUGIN_REGISTER().
  */
@@ -40,7 +40,7 @@ class Plugin {
         /**
          * @brief Constructor
          * @param manager       Parent plugin manager
-         * @param plugin        Plugin name
+         * @param plugin        %Plugin name
          *
          * Registers this plugin instance in plugin manager.
          */

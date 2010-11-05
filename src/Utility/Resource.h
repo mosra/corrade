@@ -72,7 +72,7 @@ class Resource {
 
         /**
          * @brief Compile data resource file
-         * @param name          Resource name (see RESOURCE_INITIALIZE())
+         * @param name          %Resource name (see RESOURCE_INITIALIZE())
          * @param files         Map with files, first item of pair is filename,
          *      second is file data.
          *
@@ -83,7 +83,7 @@ class Resource {
 
         /**
          * @brief Compile data resource file
-         * @param name          Resource name (see RESOURCE_INITIALIZE())
+         * @param name          %Resource name (see RESOURCE_INITIALIZE())
          * @param filename      Filename
          * @param data          File data
          *

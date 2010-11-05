@@ -11,8 +11,7 @@ unexpected behavior</li>
 plugin instances</li>
 </ul>
 
-@section PMUsage Usage
-@subsection PMInterface Plugin interface
+@section PMInterface Plugin interface
 <p>Plugin interface is class with well defined abstract public methods, which
 defines the way how to work with a particular plugin.</p>
 <p>Every plugin interface must be derived from PluginManager::Plugin class and
@@ -35,12 +34,12 @@ incompatible interface version.</p>
 
 #include "PluginManager/Plugin.h"
 
-class AbstractAnimal {
-    PLUGIN_INTERFACE("cz.mosra.PluginExample.AbstractAnimal/1.0")
+class AbstractAnimal: public Plugin {
+    PLUGIN_INTERFACE("cz.mosra.Map2X.PluginManager.Test.AbstractAnimal/1.0")
 
     public:
         inline AbstractAnimal(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
-            Map2X::PluginManager::Plugin(manager, plugin) {}
+            Plugin(manager, plugin) {}
 
         virtual std::string name() = 0;
         virtual int legCount() = 0;
@@ -49,38 +48,17 @@ class AbstractAnimal {
 
 #endif
 @endcode
-@subsection PMPlugin Plugin definition
+@section PMPlugin Plugin definition
 <p>Every plugin is represented by one class, which is derived from one plugin
-interface. The plugin class in then registered as static or dynamic plugin
-and optionally some plugin metadata are defined.</p>
+interface. The plugin class in then registered as static or dynamic plugin.
+Every plugin must also have its configuration file, which describes plugin
+metadata such as plugin name, author, description etc. and optionally plugin
+dependencies.</p>
 <p>First we define one static plugin, which will be included in the
 application out-of-the-box. After declaring that plugin we register it with
 macro PLUGIN_REGISTER_STATIC(). The first argument is plugin name (which will be
 used when instancing the plugin), second argument is name of the plugin class
-and third is name of used plugin interface. Then we can set some plugin metadata
-(like plugin name, for example) and finish plugin registration with
-::PLUGIN_FINISH.</p>
-@code
-/* Filename: Dog.cpp */
-#include "AbstractAnimal.h"
-
-class Dog: public AbstractAnimal {
-    public:
-        inline Dog(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
-            AbstractAnimal(manager, plugin) {}
-
-        std::string name() { return "Doug"; }
-        int legCount() { return 4; }
-        bool hasTail() { return true; }
-};
-
-PLUGIN_REGISTER_STATIC(DogPlugin, Dog, "cz.mosra.PluginExample.AbstractAnimal/1.0")
-PLUGIN_SET_NAME("A simple dog plugin")
-PLUGIN_FINISH
-@endcode
-<p>Then we define one example dynamic plugin. Dynamic plugins are registered
-with macro PLUGIN_REGISTER() which takes plugin class name as first argument and
-interface name as second argument.</p>
+and third is name of used plugin interface.</p>
 @code
 /* Filename: Canary.cpp */
 #include "AbstractAnimal.h"
@@ -95,51 +73,82 @@ class Canary: public AbstractAnimal {
         bool hasTail() { return true; }
 };
 
-PLUGIN_REGISTER(Canary, "cz.mosra.PluginExample.AbstractAnimal/1.0")
-PLUGIN_SET_NAME("I'm allergic to canaries!")
-PLUGIN_FINISH
+}}}
+
+PLUGIN_REGISTER_STATIC(Canary, Canary,
+                       "cz.mosra.Map2X.PluginManager.Test.AbstractAnimal/1.0")
 @endcode
-@subsection PMManagement Plugin management
-<p>Dynamic plugins whill be compiled as modules, static plugins will be linked
-to our executable. To make sure PluginManager will find the static plugins, we
-must import them with a macro PLUGIN_IMPORT_STATIC() (for example at the
-beginning of main function), which takes plugin name as argument.</p>
-<p>Now it's time to initialize PluginManager class and make use of the plugins.
-PluginManager is template class and that means that it will load and make
-available only plugins which implement the same interface as is specified as
-template in PluginManager instance, not any other.</p>
+@code
+# Filename: Canary.conf
+[metadata]
+name=I'm allergic to canaries!
+@endcode
+<p>Then we define one example dynamic plugin. Dynamic plugins are registered
+with macro PLUGIN_REGISTER() which takes plugin class name as first argument and
+interface name as second argument.</p>
+@code
+/* Filename: Dog.cpp */
+#include "AbstractAnimal.h"
+
+class Dog: public AbstractAnimal {
+    public:
+        inline Dog(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
+            AbstractAnimal(manager, plugin) {}
+
+        std::string Dog::name() { return "Doug"; }
+        bool Dog::hasTail() { return true; }
+        int Dog::legCount() { return 4; }
+};
+
+PLUGIN_REGISTER(Dog,
+                "cz.mosra.Map2X.PluginManager.Test.AbstractAnimal/1.0")
+@endcode
+@code
+# Filename: Dog.conf
+[metadata]
+name=A simple dog plugin
+@endcode
+@section PMManagement Plugin management
+<p>Now it's time to initialize Map2X::PluginManager::PluginManager class and
+make use of the plugins. Map2X::PluginManager::PluginManager is template class
+and that means it will load and make available only plugins which implement the
+same interface as is specified as template of PluginManager instance, not any
+other.</p>
+<p>To make sure plugin manager will find the static plugins, we must import them
+with a macro PLUGIN_IMPORT() (for example at the beginning of main function),
+which takes plugin name as argument.</p>
 <p>This example application will take first argument passed on commandline and
 if a plugin is found and loaded successfully, displays brief info about a given
 animal.</p>
 @code
+/* Filename: main.cpp */
 #include <iostream>
 
 #include "PluginManager/PluginManager.h"
-#include "Dog.cpp"
+#include "Canary.cpp"
 
 using namespace std;
 using namespace Map2X::PluginManager;
 
 int main(int argc, char** argv) {
-    /* Import static plugin using the same name as in Dog.cpp */
-    PLUGIN_IMPORT_STATIC(DogPlugin);
+    /* Import static plugin using the same name as in Canary.cpp */
+    PLUGIN_IMPORT_STATIC(CanaryPlugin);
 
     if(argc != 2) {
         cout << "Usage: " << argv[0] << " animal_plugin_name" << endl;
         return 1;
     }
 
-    /* Initialize plugin manager with given directory. The trailing slash
-        is important! */
-    PluginManager<AbstractAnimal> manager("plugins/animals/");
+    /* Initialize plugin manager with given directory */
+    PluginManager<AbstractAnimal> manager(".");
 
     /* Try to load a plugin */
-    if(!(manager.load(argv[1]) & (PluginManagerStatic::LoadOk|PluginManagerStatic::IsStatic))) {
+    if(!(manager.load(argv[1]) & (AbstractPluginManager::LoadOk|AbstractPluginManager::IsStatic))) {
         cerr << "The requested plugin cannot be loaded." << endl;
         return 2;
     }
 
-    cout << "Using plugin " << manager.metadata(argv[1])->name() << "..."
+    cout << "Using plugin '" << manager.metadata(argv[1])->name() << "'..."
          << endl << endl;
 
     /* Instance of an animal */
@@ -152,4 +161,32 @@ int main(int argc, char** argv) {
     return 0;
 }
 @endcode
+@section PMCompilation Plugin compilation
+<p>@c Map2XMacros.cmake provides convenient CMake macros for compiling both
+static and dynamic plugins:</p>
+@code
+# Filename: CMakeLists.txt
+map2x_add_plugin(Dog ${CMAKE_CURRENT_BINARY_DIR} Dog.conf Dog.cpp)
+map2x_add_static_plugin(StaticPlugins Canary Canary.conf Canary.cpp)
+
+add_executable(PluginTest main.cpp)
+target_link_libraries(PluginTest ${StaticPlugins})
+@endcode
+<p>@c map2x_add_plugin macro takes plugin name as first argument, second
+argument is dir where to install the plugin files, third argument is name of
+configuration file and after that comes one or more source files. We use the
+build directory for storing the plugins to avoid the need for installation.</p>
+<p>@c map2x_add_static_plugin macro compiles every static plugin as single
+static library. To make linking easier for you, first argument is variable where
+are stored names of all static plugins' libraries. The variable can be then
+used for linking the final executable, as seen above.</p>
+<p>After successfull compilation we can run the application with plugin name
+as argument:</p>
+<pre><strong>$</strong> ./PluginTest Dog
+Using plugin 'A simple dog plugin'
+
+Name:      Doug
+Leg count: 4
+Has tail:  yes
+</pre>
  */

@@ -50,44 +50,38 @@ class Configuration: public ConfigurationGroup {
         /** @brief Flags for opening configuration file */
         enum Flags {
             /**
-             * @brief Preserve BOM
-             *
-             * Preserves Byte-Order-Mark in UTF-8 files, if present. Otherwise
+             * Preserve Byte-Order-Mark in UTF-8 files, if present. Otherwise
              * the BOM will not be saved back into the file.
              */
             PreserveBom     = 0x01,
 
             /**
-             * @brief Force Unix line endings
-             *
-             * Forces Unix EOL (LF). Default behavior is to preserve original.
-             * If original EOL type cannot be distinguished, Unix is used.
+             * Force Unix line-endings (LF). Default behavior is to preserve
+             * original. If original EOL type cannot be distinguished, Unix is
+             * used.
              */
             ForceUnixEol    = 0x02,
 
-            /** @brief Force Windows line endings */
+            /**
+             * Force Windows line endings (CR+LF).
+             */
             ForceWindowsEol = 0x04,
 
             /**
-             * @brief Truncate the file
-             *
-             * Doesn't load any configuration from file. On saving discards
-             * everything in the file and writes only newly created values.
+             * Truncate the file. Don't load any configuration from the file.
+             * On saving discards everything in the file and writes only newly
+             * created values.
              */
             Truncate        = 0x08,
 
             /**
-             * @brief Skip comments in the file
-             *
              * No comments or empty lines will be preserved on saving. Useful
              * for memory saving. See also Configuration::ReadOnly.
              */
             SkipComments    = 0x10,
 
             /**
-             * @brief Open the file read-only
-             *
-             * Opens the file read-only, which means faster access to elements
+             * Open the file read-only, which means faster access to elements
              * and less memory used. Sets also Configuration::SkipComments.
              * Adding, changing and removing groups and keys will not be
              * allowed.
@@ -95,27 +89,24 @@ class Configuration: public ConfigurationGroup {
             ReadOnly        = 0x20,
 
             /**
-             * @brief Force unique groups
-             *
-             * When loading the file only first group with given name will be
-             * loaded, every other will be skipped and discarded on saving.
-             * Also doesn't allow adding new group with already existing name.
+             * Force unique groups. When loading the file only first group with
+             * given name will be loaded, every other will be skipped and
+             * discarded on saving. Also doesn't allow adding new group with
+             * already existing name.
              */
             UniqueGroups    = 0x40,
 
             /**
-             * @brief Force unique keys
-             *
-             * Only first value with given key (per group) will be loaded, every
-             * other will be skipped and discarded on saving. Also doesn't allow
-             * adding new value with the key name already existing in the group.
+             * Force unique keys. Only first value with given key (per group)
+             * will be loaded, every other will be skipped and discarded on
+             * saving. Also doesn't allow adding new value with the key name
+             * already existing in the group.
              */
             UniqueKeys      = 0x80,
 
             /**
-             * @brief Force unique groups and keys
-             *
-             * Same as Configuration::UniqueGroups | Configuration::UniqueKeys .
+             * Force unique groups and keys. Same as
+             * Configuration::UniqueGroups | Configuration::UniqueKeys .
              */
             UniqueNames     = 0xc0
         };
@@ -177,8 +168,7 @@ class Configuration: public ConfigurationGroup {
 
         /**
          * @brief Whether automatic creation of inexistent groups is enabled
-         *
-         * See Configuration::setAutomaticGroupCreation().
+         * @see setAutomaticGroupCreation().
          */
         inline bool automaticGroupCreation() const
             { return flags & AutoCreateGroups; }
@@ -187,9 +177,9 @@ class Configuration: public ConfigurationGroup {
          * @brief Enable/disable automatic creation of inexistent key/value pairs.
          * @param enabled   Whether to enable or disable this feature
          *
-         * By default, calling ConfigurationGroup::value() with inexistent key
-         * returns false and pointed variable is unchanged. If this feature is
-         * enabled, the key/value pair is automatically created from given key
+         * By default, calling value() with inexistent key returns false and
+         * pointed variable is unchanged. If this feature is enabled, the
+         * key/value pair is automatically created from given key
          * name and value in pointed variable.
          * @todo Check readonly/isvalid
          */
@@ -198,8 +188,7 @@ class Configuration: public ConfigurationGroup {
 
         /**
          * @brief Whether automatic creation of inexistent keys is enabled
-         *
-         * See Configuration::setAutomaticKeyCreation().
+         * @see setAutomaticKeyCreation().
          */
         inline bool automaticKeyCreation() const
             { return flags & AutoCreateKeys; }

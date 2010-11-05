@@ -28,7 +28,7 @@
 namespace Map2X { namespace PluginManager {
 
 /**
- * @brief Plugin metadata
+ * @brief %Plugin metadata
  *
  * This class stores metadata about particular plugin.
  * See also @ref PluginManagement.
@@ -44,7 +44,7 @@ class PluginMetadata {
         PluginMetadata(const Utility::Configuration& conf);
 
         /**
-         * @brief Plugin name
+         * @brief %Plugin name
          * @param language      If specified, tries to get plugin name in
          *      different language.
          *
@@ -55,7 +55,7 @@ class PluginMetadata {
         std::string name(const std::string& language = "") const;
 
         /**
-         * @brief Plugin description
+         * @brief %Plugin description
          * @param language      If specified, tries to get plugin name in
          *      different language.
          *
@@ -65,14 +65,14 @@ class PluginMetadata {
         std::string description(const std::string& language = "") const;
 
         /**
-         * @brief Plugin author(s)
+         * @brief %Plugin author(s)
          *
          * @note This field is constant during whole plugin lifetime.
          */
         inline const std::vector<std::string>& authors() const { return _authors; }
 
         /**
-         * @brief Plugin version
+         * @brief %Plugin version
          *
          * @note This field is constant during whole plugin lifetime.
          */
@@ -119,13 +119,13 @@ class PluginMetadata {
     protected:
         /**
          * @brief Add plugin into "used by" list
-         * @param name      Plugin name
+         * @param name      %Plugin name
          */
         void addUsedBy(const std::string& name);
 
         /**
          * @brief Remove plugin from "used by" list
-         * @param name      Plugin name
+         * @param name      %Plugin name
          */
         void removeUsedBy(const std::string& name);
 

@@ -29,7 +29,7 @@ namespace Map2X { namespace PluginManager {
 #endif
 
 /**
- * @brief Plugin manager
+ * @brief %Plugin manager
  *
  * Manages loading, instancing and unloading plugins.
  * See also @ref PluginManagement.
@@ -53,8 +53,8 @@ template<class T> class PluginManager: public AbstractPluginManager {
         std::string pluginInterface() const { return T::pluginInterface(); }
 
         /**
-         * @brief Plugin class instance
-         * @param name              Plugin name
+         * @brief %Plugin class instance
+         * @param name              %Plugin name
          * @return Pointer to new instance of plugin class, zero on error
          *
          * Creates new instance of plugin class, if possible. If the plugin is
