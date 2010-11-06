@@ -5,10 +5,8 @@ include(Map2XMacros)
 
 set(UTILITY_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(UTILITY_BINARY_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR})
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/DirectoryTestConfigure.h.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/DirectoryTestConfigure.h)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ConfigurationTestConfigure.h.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/ConfigurationTestConfigure.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testConfigure.h.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/testConfigure.h)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -18,8 +16,6 @@ map2x_add_test(UtilitiesTest UtilitiesTest.h UtilitiesTest.cpp Map2XUtility)
 map2x_add_test(ConfigurationTest ConfigurationTest.h ConfigurationTest.cpp Map2XCore)
 
 # Compiled-in resource test
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ResourceTestConfigure.h.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/ResourceTestConfigure.h)
 map2x_add_resource(ResourceTestData test
     ResourceTestFiles/predisposition.bin ALIAS predisposition.bin
     ResourceTestFiles/consequence.bin ALIAS consequence.bin

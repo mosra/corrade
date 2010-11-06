@@ -19,7 +19,7 @@
 #include <QtCore/QFile>
 
 #include "Utility/Resource.h"
-#include "ResourceTestConfigure.h"
+#include "testConfigure.h"
 
 QTEST_APPLESS_MAIN(Map2X::Utility::Test::ResourceTest)
 
@@ -30,8 +30,8 @@ namespace Map2X { namespace Utility { namespace Test {
 ResourceTest::ResourceTest(QObject* parent): QObject(parent) {
     /* Testing also null bytes and signed overflow, don't change binaries */
 
-    QFile _predisposition(TESTFILES_DIR + QString("predisposition.bin"));
-    QFile _consequence(TESTFILES_DIR + QString("consequence.bin"));
+    QFile _predisposition(RESOURCE_TEST_DIR + QString("predisposition.bin"));
+    QFile _consequence(RESOURCE_TEST_DIR + QString("consequence.bin"));
 
     _predisposition.open(QFile::ReadOnly);
     _consequence.open(QFile::ReadOnly);
@@ -43,7 +43,7 @@ ResourceTest::ResourceTest(QObject* parent): QObject(parent) {
 void ResourceTest::compile() {
     Resource r("test");
 
-    QFile compiled(TESTFILES_DIR + QString("compiled.cpp"));
+    QFile compiled(RESOURCE_TEST_DIR + QString("compiled.cpp"));
     compiled.open(QFile::Text|QFile::ReadOnly);
 
     map<string, string> input;

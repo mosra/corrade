@@ -19,7 +19,7 @@
 #include <QtTest/QTest>
 
 #include "Utility/Directory.h"
-#include "DirectoryTestConfigure.h"
+#include "testConfigure.h"
 
 using namespace std;
 
@@ -98,7 +98,7 @@ void DirectoryTest::list() {
     QFETCH(int, flags);
     QFETCH(QStringList, data);
 
-    Directory d(TESTFILES_DIR, flags);
+    Directory d(DIRECTORY_TEST_DIR, flags);
     QVERIFY(d.isLoaded());
 
     QStringList actual;

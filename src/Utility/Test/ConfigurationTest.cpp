@@ -21,7 +21,7 @@
 #include <QtTest/QTest>
 
 #include "Utility/Configuration.h"
-#include "ConfigurationTestConfigure.h"
+#include "testConfigure.h"
 #include "Wgs84Coords.h"
 
 using namespace std;
@@ -33,23 +33,23 @@ namespace Map2X { namespace Utility { namespace Test {
 ConfigurationTest::ConfigurationTest() {
     /* Create testing dir */
     QDir testDir;
-    Q_ASSERT(testDir.mkpath(TESTFILES_BINARY_DIR));
+    Q_ASSERT(testDir.mkpath(CONFIGURATION_WRITE_TEST_DIR));
 
     /* Copy files for testing */
-    QDir dir(TESTFILES_DIR);
+    QDir dir(CONFIGURATION_TEST_DIR);
     QStringList filters;
     filters << "*.conf";
     QStringList list = dir.entryList(filters, QDir::Files);
     foreach(QString file, list) {
         /* Remove file */
-        QFile::remove(TESTFILES_BINARY_DIR + file);
+        QFile::remove(CONFIGURATION_WRITE_TEST_DIR + file);
 
-        Q_ASSERT(QFile::copy(TESTFILES_DIR + file, TESTFILES_BINARY_DIR + file));
+        Q_ASSERT(QFile::copy(CONFIGURATION_TEST_DIR + file, CONFIGURATION_WRITE_TEST_DIR + file));
     }
 }
 
 void ConfigurationTest::parse() {
-    Configuration conf(TESTFILES_BINARY_DIR + string("parse.conf"));
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("parse.conf"));
     QVERIFY(conf.isValid());
 
     /* Groups */
@@ -85,8 +85,8 @@ void ConfigurationTest::parse() {
     QVERIFY(conf.save());
 
     /* Expecting no change */
-    QFile fileOrig(TESTFILES_DIR + QString("parse.conf"));
-    QFile fileActual(TESTFILES_BINARY_DIR + QString("parse.conf"));
+    QFile fileOrig(CONFIGURATION_TEST_DIR + QString("parse.conf"));
+    QFile fileActual(CONFIGURATION_WRITE_TEST_DIR + QString("parse.conf"));
     fileOrig.open(QFile::Text|QFile::ReadOnly);
     fileActual.open(QFile::Text|QFile::ReadOnly);
     QByteArray original = fileOrig.readAll();
@@ -107,7 +107,7 @@ void ConfigurationTest::parse() {
     QVERIFY(conf.save());
 
     /* Verify changes */
-    fileOrig.setFileName(TESTFILES_DIR + QString("parse-modified.conf"));
+    fileOrig.setFileName(CONFIGURATION_TEST_DIR + QString("parse-modified.conf"));
     fileOrig.open(QFile::Text|QFile::ReadOnly);
     fileActual.open(QFile::Text|QFile::ReadOnly);
     original = fileOrig.readAll();
@@ -126,13 +126,13 @@ void ConfigurationTest::parseDirect() {
 }
 
 void ConfigurationTest::empty() {
-    Configuration conf(TESTFILES_BINARY_DIR + string("new.conf"));
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("new.conf"));
     QVERIFY(conf.isValid());
     QVERIFY(conf.save());
 }
 
 void ConfigurationTest::invalid() {
-    Configuration conf(TESTFILES_BINARY_DIR + string("invalid.conf"));
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("invalid.conf"));
 
     /* The group is there */
     QEXPECT_FAIL("", "Currently on invalid row whole group is dropped", Continue);
@@ -153,10 +153,10 @@ void ConfigurationTest::invalid() {
 
 void ConfigurationTest::readonly() {
     /* Reload fresh parse.conf */
-    QFile::remove(TESTFILES_BINARY_DIR + QString("parse.conf"));
-    Q_ASSERT(QFile::copy(TESTFILES_DIR + QString("parse.conf"), TESTFILES_BINARY_DIR + QString("parse.conf")));
+    QFile::remove(CONFIGURATION_WRITE_TEST_DIR + QString("parse.conf"));
+    Q_ASSERT(QFile::copy(CONFIGURATION_TEST_DIR + QString("parse.conf"), CONFIGURATION_WRITE_TEST_DIR + QString("parse.conf")));
 
-    Configuration conf(TESTFILES_BINARY_DIR + string("parse.conf"), Configuration::ReadOnly);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("parse.conf"), Configuration::ReadOnly);
 
     /* Everything should be disabled */
     QVERIFY(conf.addGroup("new") == 0);
@@ -170,32 +170,32 @@ void ConfigurationTest::readonly() {
 }
 
 void ConfigurationTest::readonlyWithoutFile() {
-    Configuration conf(TESTFILES_BINARY_DIR + string("inexistent.conf"), Configuration::ReadOnly);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("inexistent.conf"), Configuration::ReadOnly);
     QVERIFY(!conf.isValid());
 }
 
 void ConfigurationTest::truncate() {
     /* Reload fresh parse.conf */
-    QFile::remove(TESTFILES_BINARY_DIR + QString("parse.conf"));
-    Q_ASSERT(QFile::copy(TESTFILES_DIR + QString("parse.conf"), TESTFILES_BINARY_DIR + QString("parse.conf")));
+    QFile::remove(CONFIGURATION_WRITE_TEST_DIR + QString("parse.conf"));
+    Q_ASSERT(QFile::copy(CONFIGURATION_TEST_DIR + QString("parse.conf"), CONFIGURATION_WRITE_TEST_DIR + QString("parse.conf")));
 
-    Configuration conf(TESTFILES_BINARY_DIR + string("parse.conf"), Configuration::Truncate);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("parse.conf"), Configuration::Truncate);
     conf.save();
 
     QVERIFY(conf.valueCount("key") == 0);
 
-    QFile file(TESTFILES_BINARY_DIR + QString("parse.conf"));
+    QFile file(CONFIGURATION_WRITE_TEST_DIR + QString("parse.conf"));
     file.open(QFile::Text|QFile::ReadOnly);
     QByteArray contents = file.readAll();
     QVERIFY(contents == "");
 }
 
 void ConfigurationTest::whitespaces() {
-    Configuration conf(TESTFILES_BINARY_DIR + string("whitespaces.conf"));
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("whitespaces.conf"));
     conf.save();
 
-    QFile fileOrig(TESTFILES_DIR + QString("whitespaces-saved.conf"));
-    QFile fileActual(TESTFILES_BINARY_DIR + QString("whitespaces.conf"));
+    QFile fileOrig(CONFIGURATION_TEST_DIR + QString("whitespaces-saved.conf"));
+    QFile fileActual(CONFIGURATION_WRITE_TEST_DIR + QString("whitespaces.conf"));
     fileOrig.open(QFile::Text|QFile::ReadOnly);
     fileActual.open(QFile::Text|QFile::ReadOnly);
     QByteArray original = fileOrig.readAll();
@@ -205,7 +205,7 @@ void ConfigurationTest::whitespaces() {
 }
 
 void ConfigurationTest::types() {
-    Configuration conf(TESTFILES_BINARY_DIR + string("types.conf"));
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("types.conf"));
 
     string tmp;
     conf.value("string", &tmp);
@@ -291,8 +291,8 @@ void ConfigurationTest::types() {
     conf.save();
 
     /* Check saved values */
-    QFile fileOrig(TESTFILES_DIR + QString("types.conf"));
-    QFile fileActual(TESTFILES_BINARY_DIR + QString("types.conf"));
+    QFile fileOrig(CONFIGURATION_TEST_DIR + QString("types.conf"));
+    QFile fileActual(CONFIGURATION_WRITE_TEST_DIR + QString("types.conf"));
     fileOrig.open(QFile::Text|QFile::ReadOnly);
     fileActual.open(QFile::Text|QFile::ReadOnly);
     QByteArray original = fileOrig.readAll();
@@ -326,14 +326,14 @@ void ConfigurationTest::eol() {
         flags |= Configuration::Truncate;
     }
 
-    Configuration conf(TESTFILES_BINARY_DIR + file, flags);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + file, flags);
 
     /* Add some data to fill the file */
     if(filename.isEmpty()) conf.addValue<string>("key", "value");
 
     conf.save();
 
-    QFile _file(TESTFILES_BINARY_DIR + QString::fromStdString(file));
+    QFile _file(CONFIGURATION_WRITE_TEST_DIR + QString::fromStdString(file));
     _file.open(QFile::ReadOnly);
     QByteArray actual = _file.readAll();
 
@@ -341,11 +341,11 @@ void ConfigurationTest::eol() {
 }
 
 void ConfigurationTest::uniqueGroups() {
-    Configuration conf(TESTFILES_BINARY_DIR + string("unique-groups.conf"), Configuration::UniqueGroups);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("unique-groups.conf"), Configuration::UniqueGroups);
     conf.save();
 
-    QFile fileOrig(TESTFILES_DIR + QString("unique-groups-saved.conf"));
-    QFile fileActual(TESTFILES_BINARY_DIR + QString("unique-groups.conf"));
+    QFile fileOrig(CONFIGURATION_TEST_DIR + QString("unique-groups-saved.conf"));
+    QFile fileActual(CONFIGURATION_WRITE_TEST_DIR + QString("unique-groups.conf"));
     fileOrig.open(QFile::Text|QFile::ReadOnly);
     fileActual.open(QFile::Text|QFile::ReadOnly);
     QByteArray original = fileOrig.readAll();
@@ -358,11 +358,11 @@ void ConfigurationTest::uniqueGroups() {
 }
 
 void ConfigurationTest::uniqueKeys() {
-    Configuration conf(TESTFILES_BINARY_DIR + string("unique-keys.conf"), Configuration::UniqueKeys);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("unique-keys.conf"), Configuration::UniqueKeys);
     conf.save();
 
-    QFile fileOrig(TESTFILES_DIR + QString("unique-keys-saved.conf"));
-    QFile fileActual(TESTFILES_BINARY_DIR + QString("unique-keys.conf"));
+    QFile fileOrig(CONFIGURATION_TEST_DIR + QString("unique-keys-saved.conf"));
+    QFile fileActual(CONFIGURATION_WRITE_TEST_DIR + QString("unique-keys.conf"));
     fileOrig.open(QFile::Text|QFile::ReadOnly);
     fileActual.open(QFile::Text|QFile::ReadOnly);
     QByteArray original = fileOrig.readAll();
@@ -375,11 +375,11 @@ void ConfigurationTest::uniqueKeys() {
 }
 
 void ConfigurationTest::stripComments() {
-    Configuration conf(TESTFILES_BINARY_DIR + string("comments.conf"), Configuration::SkipComments);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("comments.conf"), Configuration::SkipComments);
     conf.save();
 
-    QFile fileOrig(TESTFILES_DIR + QString("comments-saved.conf"));
-    QFile fileActual(TESTFILES_BINARY_DIR + QString("comments.conf"));
+    QFile fileOrig(CONFIGURATION_TEST_DIR + QString("comments-saved.conf"));
+    QFile fileActual(CONFIGURATION_WRITE_TEST_DIR + QString("comments.conf"));
     fileOrig.open(QFile::Text|QFile::ReadOnly);
     fileActual.open(QFile::Text|QFile::ReadOnly);
     QByteArray original = fileOrig.readAll();
@@ -389,7 +389,7 @@ void ConfigurationTest::stripComments() {
 }
 
 void ConfigurationTest::autoCreation() {
-    Configuration conf(TESTFILES_BINARY_DIR + string("autoCreation.conf"), Configuration::Truncate);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("autoCreation.conf"), Configuration::Truncate);
 
     QVERIFY(conf.group("newGroup") == 0);
 
@@ -420,7 +420,7 @@ void ConfigurationTest::autoCreation() {
 }
 
 void ConfigurationTest::directValue() {
-    Configuration conf(TESTFILES_BINARY_DIR + string("directValue.conf"), Configuration::Truncate);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("directValue.conf"), Configuration::Truncate);
 
     /* Fill values */
     conf.setValue<string>("string", "value");
@@ -437,7 +437,7 @@ void ConfigurationTest::directValue() {
 }
 
 void ConfigurationTest::hierarchic() {
-    Configuration conf(TESTFILES_BINARY_DIR + string("hierarchic.conf"));
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("hierarchic.conf"));
     QVERIFY(conf.isValid());
 
     /* Check parsing */
@@ -452,8 +452,8 @@ void ConfigurationTest::hierarchic() {
     /* Expect no change */
     QVERIFY(conf.save());
 
-    QFile fileOrig(TESTFILES_DIR + QString("hierarchic.conf"));
-    QFile fileActual(TESTFILES_BINARY_DIR + QString("hierarchic.conf"));
+    QFile fileOrig(CONFIGURATION_TEST_DIR + QString("hierarchic.conf"));
+    QFile fileActual(CONFIGURATION_WRITE_TEST_DIR + QString("hierarchic.conf"));
     fileOrig.open(QFile::Text|QFile::ReadOnly);
     fileActual.open(QFile::Text|QFile::ReadOnly);
     QByteArray original = fileOrig.readAll();
@@ -473,7 +473,7 @@ void ConfigurationTest::hierarchic() {
     conf.save();
 
     /* Verify changes */
-    fileOrig.setFileName(TESTFILES_DIR + QString("hierarchic-modified.conf"));
+    fileOrig.setFileName(CONFIGURATION_TEST_DIR + QString("hierarchic-modified.conf"));
     fileOrig.open(QFile::Text|QFile::ReadOnly);
     fileActual.open(QFile::Text|QFile::ReadOnly);
     original = fileOrig.readAll();
@@ -484,14 +484,14 @@ void ConfigurationTest::hierarchic() {
 
 void ConfigurationTest::hierarchicUnique() {
     /* Reload fresh hierarchic.conf */
-    QFile::remove(TESTFILES_BINARY_DIR + QString("hierarchic.conf"));
-    Q_ASSERT(QFile::copy(TESTFILES_DIR + QString("hierarchic.conf"), TESTFILES_BINARY_DIR + QString("hierarchic.conf")));
+    QFile::remove(CONFIGURATION_WRITE_TEST_DIR + QString("hierarchic.conf"));
+    Q_ASSERT(QFile::copy(CONFIGURATION_TEST_DIR + QString("hierarchic.conf"), CONFIGURATION_WRITE_TEST_DIR + QString("hierarchic.conf")));
 
-    Configuration conf(TESTFILES_BINARY_DIR + string("hierarchic.conf"), Configuration::UniqueGroups);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("hierarchic.conf"), Configuration::UniqueGroups);
     conf.save();
 
-    QFile fileOrig(TESTFILES_DIR + QString("hierarchic-unique.conf"));
-    QFile fileActual(TESTFILES_BINARY_DIR + QString("hierarchic.conf"));
+    QFile fileOrig(CONFIGURATION_TEST_DIR + QString("hierarchic-unique.conf"));
+    QFile fileActual(CONFIGURATION_WRITE_TEST_DIR + QString("hierarchic.conf"));
     fileOrig.open(QFile::Text|QFile::ReadOnly);
     fileActual.open(QFile::Text|QFile::ReadOnly);
     QByteArray original = fileOrig.readAll();
