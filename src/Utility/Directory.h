@@ -79,6 +79,14 @@ class Directory: public std::vector<std::string> {
         static std::string join(const std::string& path, const std::string& filename);
 
         /**
+         * @brief Create given path
+         * @param path      Path
+         * @return True if path was successfully created or false if an error
+         * occured.
+         */
+        static bool mkpath(const std::string& path);
+
+        /**
          * @brief Constructor
          * @param path      %Directory path
          * @param flags     Listing flags. See Directory::Flags. If no flag is

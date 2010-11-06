@@ -16,6 +16,7 @@
 #include "Directory.h"
 
 #include <dirent.h>
+#include <sys/stat.h>
 #include <algorithm>
 
 using namespace std;
@@ -46,6 +47,30 @@ string Directory::join(const std::string& path, const std::string& filename) {
         return path + '/' + filename;
 
     return path + filename;
+}
+
+bool Directory::mkpath(const std::string& _path) {
+    if(_path.empty()) return false;
+
+    /* If path contains trailing slash, strip it */
+    if(_path[_path.size()-1] == '/')
+        return mkpath(_path.substr(0, _path.size()-1));
+
+    /* If parent directory doesn't exist, create it */
+    string parentPath = path(_path);
+    if(!parentPath.empty()) {
+        DIR* directory = opendir(parentPath.c_str());
+        if(directory == 0 && !mkpath(parentPath)) return false;
+        closedir(directory);
+    }
+
+    /* Create directory */
+    int ret = mkdir(_path.c_str(), 0777);
+
+    /* Directory is successfully created or already exists */
+    if(ret == 0 || ret == -1) return true;
+
+    return false;
 }
 
 Directory::Directory(const string& path, int flags): _isLoaded(false) {

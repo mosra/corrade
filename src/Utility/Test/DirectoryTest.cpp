@@ -16,6 +16,7 @@
 #include "DirectoryTest.h"
 
 #include <QtCore/QList>
+#include <QtCore/QDir>
 #include <QtTest/QTest>
 
 #include "Utility/Directory.h"
@@ -65,6 +66,27 @@ void DirectoryTest::join() {
     std::string actual = Directory::join(path.toStdString(), filename.toStdString());
 
     QCOMPARE(QString::fromStdString(actual), expected);
+}
+
+void DirectoryTest::mkpath_data() {
+    QTest::addColumn<QString>("path");
+
+    QDir dir;
+    dir.rmpath(QString::fromStdString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "leaf")));
+    dir.rmpath(QString::fromStdString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "path/to/new/dir")));
+
+    QTest::newRow("leaf") << QString::fromStdString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "leaf"));
+    QTest::newRow("path") << QString::fromStdString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "path/to/new/dir"));
+    QTest::newRow("existing") << DIRECTORY_WRITE_TEST_DIR;
+}
+
+void DirectoryTest::mkpath() {
+    QFETCH(QString, path);
+
+    QVERIFY(Directory::mkpath(path.toStdString()));
+
+    QDir dir;
+    QVERIFY(dir.exists(path));
 }
 
 void DirectoryTest::list_data() {

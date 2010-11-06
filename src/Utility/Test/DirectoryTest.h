@@ -29,6 +29,9 @@ class DirectoryTest: public QObject {
         void join_data();
         void join();
 
+        void mkpath_data();
+        void mkpath();
+
         void list_data();
         void list();
 };
