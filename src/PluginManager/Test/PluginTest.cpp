@@ -70,7 +70,6 @@ void PluginTest::staticPlugin() {
     AbstractAnimal* animal = manager->instance("Canary");
 
     QVERIFY(animal != 0);
-    QVERIFY(manager->nameOfInstance(animal) == "Canary");
     QVERIFY(animal->hasTail() == true);
     QVERIFY(animal->name() == "Achoo");
     QVERIFY(animal->legCount() == 2);
@@ -87,7 +86,6 @@ void PluginTest::dynamicPlugin() {
     AbstractAnimal* animal = manager->instance("Dog");
 
     QVERIFY(animal != 0);
-    QVERIFY(manager->nameOfInstance(animal) == "Dog");
     QVERIFY(animal->hasTail() == true);
     QVERIFY(animal->name() == "Doug");
     QVERIFY(animal->legCount() == 4);

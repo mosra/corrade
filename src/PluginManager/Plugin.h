@@ -53,6 +53,14 @@ class Plugin {
          */
         virtual ~Plugin();
 
+        /**
+         * @brief Plugin name
+         * @return Plugin name, under which the plugin was instanced. If the
+         *      plugin was not instanced via plugin manager, returns empty
+         *      string.
+         */
+        inline std::string name() const { return _plugin; }
+
     private:
         AbstractPluginManager* _manager;
         std::string _plugin;
