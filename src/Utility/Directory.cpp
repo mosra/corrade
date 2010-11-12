@@ -37,6 +37,16 @@ string Directory::path(const std::string& filename) {
     return filename.substr(0, pos);
 }
 
+string Directory::filename(const std::string& filename) {
+    size_t pos = filename.find_last_of('/');
+
+    /* Return whole filename if it doesn't contain slash */
+    if(pos == string::npos) return filename;
+
+    /* Return everything after last slash */
+    return filename.substr(pos+1);
+}
+
 string Directory::join(const std::string& path, const std::string& filename) {
     /* Absolute filename or empty path, return filename */
     if(path.empty() || (!filename.empty() && filename[0] == '/'))

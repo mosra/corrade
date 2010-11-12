@@ -46,6 +46,24 @@ void DirectoryTest::path() {
     QCOMPARE(QString::fromStdString(actual), expected);
 }
 
+void DirectoryTest::filename_data() {
+    QTest::addColumn<QString>("input");
+    QTest::addColumn<QString>("expected");
+
+    QTest::newRow("pathOnly") << "foo/bar/" << "";
+    QTest::newRow("fileOnly") << "file.txt" << "file.txt";
+    QTest::newRow("regular") << "foo/bar/map.conf" << "map.conf";
+}
+
+void DirectoryTest::filename() {
+    QFETCH(QString, input);
+    QFETCH(QString, expected);
+
+    string actual = Directory::filename(input.toStdString());
+
+    QCOMPARE(QString::fromStdString(actual), expected);
+}
+
 void DirectoryTest::join_data() {
     QTest::addColumn<QString>("path");
     QTest::addColumn<QString>("filename");

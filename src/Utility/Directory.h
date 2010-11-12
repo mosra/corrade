@@ -70,6 +70,15 @@ class Directory: public std::vector<std::string> {
         static std::string path(const std::string& filename);
 
         /**
+         * @brief Extract filename (without path) from filename
+         * @param filename  Filename
+         * @return File name without path. If the filename doesn't contain any
+         * slash, returns whole string, otherwise returns everything after last
+         * slash.
+         */
+        static std::string filename(const std::string& filename);
+
+        /**
          * @brief Join path and filename
          * @param path      Path
          * @param filename  Filename
