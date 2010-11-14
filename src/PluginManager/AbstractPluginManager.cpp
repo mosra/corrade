@@ -17,7 +17,16 @@
 
 #include <algorithm>
 #include <iostream>
+
+#ifndef _WIN32
 #include <dlfcn.h>
+#else
+#include <windows.h>
+#undef interface
+#define dlsym GetProcAddress
+#define dlerror GetLastError
+#define dlclose FreeLibrary
+#endif
 
 #include "AbstractPluginManagerConfigure.h"
 #include "Plugin.h"
@@ -162,9 +171,14 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
         found->second->metadata.addUsedBy(name);
     }
 
+    string filename = Directory::join(_pluginDirectory, PLUGIN_FILENAME_PREFIX + name + PLUGIN_FILENAME_SUFFIX);
+
     /* Open plugin file, make symbols available for next libs (which depends on this) */
-    void* handle = dlopen(Directory::join(_pluginDirectory, PLUGIN_FILENAME_PREFIX + name + PLUGIN_FILENAME_SUFFIX).c_str(),
-                          RTLD_NOW|RTLD_GLOBAL);
+    #ifndef _WIN32
+    void* handle = dlopen(filename.c_str(), RTLD_NOW|RTLD_GLOBAL);
+    #else
+    HMODULE handle = LoadLibraryA(filename.c_str());
+    #endif
     if(!handle) {
         cerr << "Cannot open plugin file \""
              << _pluginDirectory + PLUGIN_FILENAME_PREFIX + name + PLUGIN_FILENAME_SUFFIX
@@ -240,7 +254,11 @@ AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& nam
     for(vector<string>::const_iterator it = plugin.metadata.depends().begin(); it != plugin.metadata.depends().end(); ++it)
         plugins()->find(*it)->second->metadata.removeUsedBy(name);
 
+    #ifndef _WIN32
     if(dlclose(plugin.module) != 0) {
+    #else
+    if(!FreeLibrary(plugin.module)) {
+    #endif
         cerr << "Cannot unload plugin '" << name << "': " << dlerror() << endl;
         plugin.loadState = UnloadFailed;
         return plugin.loadState;

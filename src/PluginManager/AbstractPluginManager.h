@@ -23,6 +23,11 @@
 #include <string>
 #include <map>
 
+#ifdef _WIN32
+#include <windows.h>
+#undef interface
+#endif
+
 #include "PluginMetadata.h"
 #include "Utility/utilities.h"
 #include "Utility/Resource.h"
@@ -243,7 +248,11 @@ class AbstractPluginManager {
              *
              * Only for dynamic plugins
              */
+            #ifndef _WIN32
             void* module;
+            #else
+            HMODULE module;
+            #endif
 
             /**
              * @brief Constructor (dynamic plugins)
