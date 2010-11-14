@@ -77,7 +77,11 @@ bool Directory::mkpath(const std::string& _path) {
     }
 
     /* Create directory */
+    #ifndef _WIN32
     int ret = mkdir(_path.c_str(), 0777);
+    #else
+    int ret = mkdir(_path.c_str());
+    #endif
 
     /* Directory is successfully created or already exists */
     if(ret == 0 || ret == -1) return true;
@@ -111,6 +115,7 @@ Directory::Directory(const string& path, int flags): _isLoaded(false) {
     if(directory == 0) return;
 
     while((entry = readdir(directory)) != 0) {
+        #ifndef _WIN32
         if((flags & SkipDotAndDotDot) && (string(entry->d_name) == "." || string(entry->d_name) == ".."))
             continue;
         if((flags & SkipDirectories) && entry->d_type == DT_DIR)
@@ -119,6 +124,7 @@ Directory::Directory(const string& path, int flags): _isLoaded(false) {
             continue;
         if((flags & SkipSpecial) && entry->d_type != DT_DIR && entry->d_type != DT_REG)
             continue;
+        #endif
 
         /** @todo On some systems dirent returns DT_UNKNOWN for everything */
         push_back(entry->d_name);
