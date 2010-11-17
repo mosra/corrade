@@ -132,7 +132,11 @@ endfunction()
 # the files are copied directly, without need to run 'make install'.
 #
 function(kompas_add_plugin plugin_name install_dir metadata_file)
-    add_library(${plugin_name} MODULE ${ARGN})
+    if(WIN32)
+        add_library(${plugin_name} SHARED ${ARGN})
+    else()
+        add_library(${plugin_name} MODULE ${ARGN})
+    endif()
     if(${install_dir} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
         add_custom_command(
             OUTPUT ${plugin_name}.conf
