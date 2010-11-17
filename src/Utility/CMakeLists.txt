@@ -17,7 +17,7 @@ set(Kompas_Utility_SRCS
     utilities.cpp
 )
 
-add_library(KompasUtility STATIC ${Kompas_Utility_SRCS})
+add_library(KompasUtility SHARED ${Kompas_Utility_SRCS})
 
 if(WIN32)
     set_target_properties(KompasUtility PROPERTIES COMPILE_FLAGS -DUTILITY_EXPORTING)
@@ -30,6 +30,7 @@ if(USE_FPIC)
     set_target_properties(KompasUtility PROPERTIES COMPILE_FLAGS -fPIC)
 endif()
 
+install(TARGETS KompasUtility DESTINATION ${KOMPAS_LIBRARY_INSTALL_DIR})
 install(TARGETS kompas-rc DESTINATION ${KOMPAS_BINARY_INSTALL_DIR})
 
 if(BUILD_TESTS)

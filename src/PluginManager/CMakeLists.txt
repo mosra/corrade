@@ -11,7 +11,7 @@ set(Kompas_PluginManager_SRCS
     PluginMetadata.cpp
 )
 
-add_library(KompasPluginManager STATIC ${Kompas_PluginManager_SRCS})
+add_library(KompasPluginManager SHARED ${Kompas_PluginManager_SRCS})
 target_link_libraries(KompasPluginManager KompasUtility)
 
 if(WIN32)
@@ -21,6 +21,8 @@ endif()
 if(USE_FPIC)
     set_target_properties(KompasPluginManager PROPERTIES COMPILE_FLAGS -fPIC)
 endif()
+
+install(TARGETS KompasPluginManager DESTINATION ${KOMPAS_LIBRARY_INSTALL_DIR})
 
 if(BUILD_TESTS)
     enable_testing()
