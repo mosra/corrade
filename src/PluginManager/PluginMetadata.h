@@ -34,7 +34,7 @@ namespace Kompas { namespace PluginManager {
  * This class stores metadata about particular plugin.
  * See also @ref PluginManagement.
  */
-class PluginMetadata {
+class PLUGINMANAGER_EXPORT PluginMetadata {
     friend class AbstractPluginManager;
 
     public:

@@ -22,6 +22,8 @@
 #include <string>
 #include <map>
 
+#include "utilities.h"
+
 namespace Kompas { namespace Utility {
 
 /**
@@ -38,7 +40,7 @@ namespace Kompas { namespace Utility {
  * @todo Test data unregistering
  * @todo Test empty files
  */
-class Resource {
+class UTILITY_EXPORT Resource {
     public:
         /**
          * @brief Register data resource

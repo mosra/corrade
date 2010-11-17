@@ -19,12 +19,14 @@
  * @brief Class Kompas::Utility::Endianness
  */
 
+#include "utilities.h"
+
 namespace Kompas { namespace Utility {
 
 /**
  * @brief %Endianness related functions
  */
-class Endianness {
+class UTILITY_EXPORT Endianness {
     public:
         /** @brief Whether actual system is Big-Endian */
         static bool isBigEndian();

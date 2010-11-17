@@ -21,6 +21,8 @@
 
 #include <ostream>
 
+#include "utilities.h"
+
 namespace Kompas { namespace Utility {
 
 /**
@@ -58,7 +60,7 @@ namespace Kompas { namespace Utility {
  * @todo Output to more ostreams at once
  * @see Warning, Error
  */
-class Debug {
+class UTILITY_EXPORT Debug {
     public:
         /**
          * @brief Constructor
@@ -120,7 +122,7 @@ class Debug {
  * Same as Debug, but by default writes output to standard error output. Thus
  * it is possible to separate / mute Debug, Warning and Error outputs.
  */
-class Warning: public Debug {
+class UTILITY_EXPORT Warning: public Debug {
     public:
         /** @copydoc Debug::Debug() */
         Warning(std::ostream* _output = globalOutput): Debug(_output) {}
@@ -136,7 +138,7 @@ class Warning: public Debug {
  *
  * @copydetails Warning
  */
-class Error: public Debug {
+class UTILITY_EXPORT Error: public Debug {
     public:
         /** @copydoc Debug::Debug() */
         Error(std::ostream* _output = globalOutput): Debug(_output) {}

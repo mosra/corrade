@@ -45,7 +45,7 @@ class Plugin;
  * Base abstract class for all PluginManager templated classes. See also
  * @ref PluginManagement.
  */
-class AbstractPluginManager {
+class PLUGINMANAGER_EXPORT AbstractPluginManager {
     friend class Plugin;
 
     DISABLE_COPY(AbstractPluginManager)

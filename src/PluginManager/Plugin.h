@@ -34,7 +34,7 @@ namespace Kompas { namespace PluginManager {
  * Connects every plugin instance to parent plugin manager to ensure the
  * plugin can be unloaded only if there are no active instances.
  */
-class Plugin {
+class PLUGINMANAGER_EXPORT Plugin {
     public:
         /**
          * @brief Constructor

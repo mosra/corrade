@@ -22,6 +22,8 @@
 #include <string>
 #include <vector>
 
+#include "utilities.h"
+
 namespace Kompas { namespace Utility {
 
 /**
@@ -32,7 +34,7 @@ namespace Kompas { namespace Utility {
  * sorting of the list is available.
  * @todo Make it usable on windoze without mingw :-)
  */
-class Directory: public std::vector<std::string> {
+class UTILITY_EXPORT Directory: public std::vector<std::string> {
     private:
         /* Hiding edit functions and types to private scope */
         vector::iterator;

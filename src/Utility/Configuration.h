@@ -43,7 +43,7 @@ namespace Kompas { namespace Utility {
  * @todo Support different syntax for hierarchic groups [g1][g2][...] along with
  *      [g1/g2/...]
  */
-class Configuration: public ConfigurationGroup {
+class UTILITY_EXPORT Configuration: public ConfigurationGroup {
     friend class ConfigurationGroup;
 
     DISABLE_COPY(Configuration)

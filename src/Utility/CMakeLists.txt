@@ -19,6 +19,10 @@ set(Kompas_Utility_SRCS
 
 add_library(KompasUtility STATIC ${Kompas_Utility_SRCS})
 
+if(WIN32)
+    set_target_properties(KompasUtility PROPERTIES COMPILE_FLAGS -DUTILITY_EXPORTING)
+endif()
+
 add_executable(kompas-rc rc.cpp)
 target_link_libraries(kompas-rc KompasUtility)
 

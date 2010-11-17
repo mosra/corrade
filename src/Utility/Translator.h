@@ -119,7 +119,7 @@ Translator::setLocale("cs_CZ");
 std::cout << *welcome << endl;  // Ahoj světe!
 @endcode
  */
-class Translator {
+class UTILITY_EXPORT Translator {
     public:
         /**
          * @brief Set current locale

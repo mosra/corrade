@@ -61,7 +61,7 @@ template<class T> struct ConfigurationValue {
  *
  * @todo Faster access to elements via multimap, find() and equal_range()
  */
-class ConfigurationGroup {
+class UTILITY_EXPORT ConfigurationGroup {
     friend class Configuration;
 
     DISABLE_COPY(ConfigurationGroup)
@@ -346,13 +346,13 @@ template<class T> T ConfigurationValue<T>::fromString(const std::string& stringV
 
 /* Forward declared template specializations to avoid infinite recursion in
     template functions above */
-template<> bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, int flags);
-template<> bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, int flags) const;
-template<> std::vector<std::string> ConfigurationGroup::values(const std::string& key, int flags) const;
-template<> bool ConfigurationGroup::setValue(const std::string& key, const std::string& value, unsigned int number, int flags);
-template<> bool ConfigurationGroup::addValue(const std::string& key, const std::string& value, int flags);
+template<> UTILITY_EXPORT bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, int flags);
+template<> UTILITY_EXPORT bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, int flags) const;
+template<> UTILITY_EXPORT std::vector<std::string> ConfigurationGroup::values(const std::string& key, int flags) const;
+template<> UTILITY_EXPORT bool ConfigurationGroup::setValue(const std::string& key, const std::string& value, unsigned int number, int flags);
+template<> UTILITY_EXPORT bool ConfigurationGroup::addValue(const std::string& key, const std::string& value, int flags);
 
-template<> struct ConfigurationValue<bool> {
+template<> struct UTILITY_EXPORT ConfigurationValue<bool> {
     static bool fromString(const std::string& value, int flags);
     static std::string toString(const bool& value, int flags);
 };

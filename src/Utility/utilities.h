@@ -22,6 +22,28 @@
 #include <string>
 #include <vector>
 
+#ifdef _WIN32
+#ifdef PLUGINMANAGER_EXPORTING
+    #define PLUGINMANAGER_EXPORT __declspec(dllexport)
+#else
+    #define PLUGINMANAGER_EXPORT __declspec(dllimport)
+#endif
+#ifdef UTILITY_EXPORTING
+    #define UTILITY_EXPORT __declspec(dllexport)
+#else
+    #define UTILITY_EXPORT __declspec(dllimport)
+#endif
+#ifdef CORE_EXPORTING
+    #define CORE_EXPORT __declspec(dllexport)
+#else
+    #define CORE_EXPORT __declspec(dllimport)
+#endif
+#else
+    #define PLUGINMANAGER_EXPORT
+    #define UTILITY_EXPORT
+    #define CORE_EXPORT
+#endif
+
 namespace Kompas { namespace Utility {
 
 /** @{ @name Number utilities */
@@ -41,7 +63,7 @@ inline unsigned int pow2(unsigned int number) { return 1 << number; }
  * @param characters    Characters which will be trimmed
  * @return Trimmed string
  */
-std::string trim(std::string str, const std::string& characters = " \t\f\v\r\n");
+UTILITY_EXPORT std::string trim(std::string str, const std::string& characters = " \t\f\v\r\n");
 
 /**
  * @brief Split string on given character
@@ -50,7 +72,7 @@ std::string trim(std::string str, const std::string& characters = " \t\f\v\r\n")
  * @param keepEmptyParts    Whether to keep empty parts
  * @return Vector of splitted strings
  */
-std::vector<std::string> split(const std::string& str, char delim, bool keepEmptyParts = true);
+UTILITY_EXPORT std::vector<std::string> split(const std::string& str, char delim, bool keepEmptyParts = true);
 
 /**
  * @brief Convert string to lowercase

@@ -14,6 +14,10 @@ set(Kompas_PluginManager_SRCS
 add_library(KompasPluginManager STATIC ${Kompas_PluginManager_SRCS})
 target_link_libraries(KompasPluginManager KompasUtility)
 
+if(WIN32)
+    set_target_properties(KompasPluginManager PROPERTIES COMPILE_FLAGS -DPLUGINMANAGER_EXPORTING)
+endif()
+
 if(USE_FPIC)
     set_target_properties(KompasPluginManager PROPERTIES COMPILE_FLAGS -fPIC)
 endif()
