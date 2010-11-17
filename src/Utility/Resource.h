@@ -51,7 +51,7 @@ class Resource {
          * This function is used internally for automatic data resource
          * registering, no need to use it directly.
          */
-        static void registerData(const char* group, size_t count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data);
+        static void registerData(const char* group, unsigned int count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data);
 
         /**
          * @brief Unregister data resource
@@ -101,8 +101,8 @@ class Resource {
 
     private:
         struct ResourceData {
-            size_t position;
-            size_t size;
+            unsigned int position;
+            unsigned int size;
             const unsigned char* data;
         };
 

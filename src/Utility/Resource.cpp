@@ -24,20 +24,20 @@ namespace Map2X { namespace Utility {
 
 map<string, map<string, Resource::ResourceData> > Resource::resources;
 
-void Resource::registerData(const char* group, size_t count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data) {
+void Resource::registerData(const char* group, unsigned int count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data) {
     if(resources.find(group) == resources.end()) resources.insert(pair<string, map<string, ResourceData> >(group, map<string, ResourceData>()));
 
     /* Cast to type which can be eaten by std::string constructor */
     const char* _positions = reinterpret_cast<const char*>(positions);
     const char* _filenames = reinterpret_cast<const char*>(filenames);
 
-    size_t size = sizeof(size_t);
-    size_t oldFilenamePosition = 0, oldDataPosition = 0;
+    unsigned int size = sizeof(unsigned int);
+    unsigned int oldFilenamePosition = 0, oldDataPosition = 0;
 
-    /* Every 2*sizeof(size_t) is one data */
-    for(size_t i = 0; i != count*2*size; i=i+2*size) {
-        size_t filenamePosition = numberFromString<size_t>(string(_positions+i, size));
-        size_t dataPosition = numberFromString<size_t>(string(_positions+i+size, size));
+    /* Every 2*sizeof(unsigned int) is one data */
+    for(unsigned int i = 0; i != count*2*size; i=i+2*size) {
+        unsigned int filenamePosition = numberFromString<unsigned int>(string(_positions+i, size));
+        unsigned int dataPosition = numberFromString<unsigned int>(string(_positions+i+size, size));
 
         ResourceData res;
         res.data = data;
@@ -71,7 +71,7 @@ void Resource::unregisterData(const char* group, const unsigned char* data) {
 
 string Resource::compile(const string& name, const map<string, string>& files) const {
     string positions, filenames, data;
-    size_t filenamesLen = 0, dataLen = 0;
+    unsigned int filenamesLen = 0, dataLen = 0;
 
     /* Convert data to hexacodes */
     for(map<string, string>::const_iterator it = files.begin(); it != files.end(); ++it) {
@@ -134,7 +134,7 @@ string Resource::hexcode(const string& data, const string& comment) const {
     if(!comment.empty()) output = "\n    /* " + comment + " */\n" + output;
 
     int row_len = 4;
-    for(size_t i = 0; i != data.size(); ++i) {
+    for(unsigned int i = 0; i != data.size(); ++i) {
 
         /* Every row is indented by four spaces and is max 80 characters long */
         if(row_len > 74) {
