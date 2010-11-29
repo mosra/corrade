@@ -23,6 +23,8 @@ class UtilitiesTest: public QObject {
     Q_OBJECT
 
     private slots:
+        void pow2();
+
         void trim_data();
         void trim();
 

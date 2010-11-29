@@ -24,6 +24,15 @@
 
 namespace Map2X { namespace Utility {
 
+/** @{ @name Number utilities */
+
+/** @brief Power of 2
+ * @return 2^number
+ */
+inline unsigned int pow2(unsigned int number) { return 1 << number; }
+
+/*@}*/
+
 /** @{ @name String utilities */
 
 /**

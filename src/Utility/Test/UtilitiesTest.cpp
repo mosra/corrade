@@ -26,6 +26,10 @@ QTEST_APPLESS_MAIN(Map2X::Utility::Test::UtilitiesTest)
 
 namespace Map2X { namespace Utility { namespace Test {
 
+void UtilitiesTest::pow2() {
+    QVERIFY(Utility::pow2(10) == 1024);
+}
+
 void UtilitiesTest::trim_data() {
     QTest::addColumn<QString>("in");
     QTest::addColumn<QString>("out");
