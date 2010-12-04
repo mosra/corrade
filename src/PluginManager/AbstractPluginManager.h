@@ -163,18 +163,6 @@ class AbstractPluginManager {
         std::vector<std::string> nameList() const;
 
         /**
-         * @brief Try to load all plugins
-         *
-         * Alphabetically goes through list and tries to load plugins. Doesn't
-         * do any conflict resolving, whichever plugin was first, that plugin
-         * will be loaded and any conflicting plugins found after will be
-         * skipped.
-         * @see PluginManager::load()
-         * @deprecated Not very smart function, use load() instead.
-         */
-        virtual void loadAll();
-
-        /**
          * @brief %Plugin metadata
          * @param name              %Plugin name
          * @return Pointer to plugin metadata

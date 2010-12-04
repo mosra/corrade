@@ -123,16 +123,6 @@ vector<string> AbstractPluginManager::nameList() const {
     return names;
 }
 
-void AbstractPluginManager::loadAll() {
-    for(map<string, PluginObject>::const_iterator i = plugins()->begin(); i != plugins()->end(); ++i) {
-
-        /* Plugin doesn't belong to this manager */
-        if(i->second.manager != this) continue;
-
-        load(i->first);
-    }
-}
-
 const PluginMetadata* AbstractPluginManager::metadata(const string& name) const {
     map<string, PluginObject>::const_iterator found = plugins()->find(name);
 
