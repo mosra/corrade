@@ -78,8 +78,8 @@ void ConfigurationTest::parse() {
     expectedValues.push_back("value5");
     QVERIFY(conf.group("group", 1)->values<string>("c") == expectedValues);
 
-    QVERIFY(conf.valueExists("key"));
-    QVERIFY(!conf.valueExists("key_inexistent"));
+    QVERIFY(conf.keyExists("key"));
+    QVERIFY(!conf.keyExists("key_inexistent"));
 
     /* Save file back */
     QVERIFY(conf.save());

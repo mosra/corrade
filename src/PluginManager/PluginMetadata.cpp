@@ -34,20 +34,20 @@ PluginMetadata::PluginMetadata(const Configuration& conf) {
     if(!metadata) return;
 
     /* Original name */
-    if(metadata->valueExists("name"))
+    if(metadata->keyExists("name"))
         names.insert(pair<string, string>("", metadata->value<string>("name")));
 
     /* Original description */
-    if(metadata->valueExists("description"))
+    if(metadata->keyExists("description"))
         descriptions.insert(pair<string, string>("", metadata->value<string>("description")));
 
     /* Translated names and descriptions */
     vector<const ConfigurationGroup*> tr = metadata->groups();
     for(vector<const ConfigurationGroup*>::const_iterator it = tr.begin(); it != tr.end(); ++it) {
-        if((*it)->valueExists("name"))
+        if((*it)->keyExists("name"))
             names.insert(pair<string, string>((*it)->name(), (*it)->value<string>("name")));
 
-        if((*it)->valueExists("description"))
+        if((*it)->keyExists("description"))
             descriptions.insert(pair<string, string>((*it)->name(), (*it)->value<string>("description")));
     }
 }

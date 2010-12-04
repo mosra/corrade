@@ -137,7 +137,7 @@ unsigned int ConfigurationGroup::valueCount(const string& key) const {
     return count;
 }
 
-bool ConfigurationGroup::valueExists(const std::string& key) const {
+bool ConfigurationGroup::keyExists(const std::string& key) const {
     for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it)
         if(it->key == key) return true;
 
