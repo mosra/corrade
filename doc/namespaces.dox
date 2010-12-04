@@ -1,17 +1,17 @@
-/** @namespace Map2X
- * @brief Root namespace for %Map2X
+/** @namespace Kompas
+ * @brief Root namespace for %Kompas
  */
 
-/** @namespace Map2X::Core
- * @brief %Core %Map2X library
+/** @namespace Kompas::Core
+ * @brief %Core %Kompas library
  */
 
-/** @namespace Map2X::Utility
- * @brief Simple utitlities used by %Map2X
+/** @namespace Kompas::Utility
+ * @brief Simple utitlities used by %Kompas
  */
 
-/** @namespace Map2X::PluginManager
- * @brief %Plugin management for %Map2X
+/** @namespace Kompas::PluginManager
+ * @brief %Plugin management for %Kompas
  *
  * See also @ref PluginManagement.
  */

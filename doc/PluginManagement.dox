@@ -1,6 +1,6 @@
 /** @page PluginManagement Plugin management tutorial
 
-<p>The Map2X::PluginManager::PluginManager class provides hierarchical plugin
+<p>The Kompas::PluginManager::PluginManager class provides hierarchical plugin
 management functions. Main features:</p>
 <ul>
 <li>Plugin manager version and plugin interface version checks to avoid
@@ -35,7 +35,7 @@ incompatible interface version.</p>
 #include "PluginManager/Plugin.h"
 
 class AbstractAnimal: public Plugin {
-    PLUGIN_INTERFACE("cz.mosra.Map2X.PluginManager.Test.AbstractAnimal/1.0")
+    PLUGIN_INTERFACE("cz.mosra.Kompas.PluginManager.Test.AbstractAnimal/1.0")
 
     public:
         inline AbstractAnimal(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
@@ -76,7 +76,7 @@ class Canary: public AbstractAnimal {
 }}}
 
 PLUGIN_REGISTER_STATIC(Canary, Canary,
-                       "cz.mosra.Map2X.PluginManager.Test.AbstractAnimal/1.0")
+                       "cz.mosra.Kompas.PluginManager.Test.AbstractAnimal/1.0")
 @endcode
 @code
 # Filename: Canary.conf
@@ -101,7 +101,7 @@ class Dog: public AbstractAnimal {
 };
 
 PLUGIN_REGISTER(Dog,
-                "cz.mosra.Map2X.PluginManager.Test.AbstractAnimal/1.0")
+                "cz.mosra.Kompas.PluginManager.Test.AbstractAnimal/1.0")
 @endcode
 @code
 # Filename: Dog.conf
@@ -109,8 +109,8 @@ PLUGIN_REGISTER(Dog,
 name=A simple dog plugin
 @endcode
 @section PMManagement Plugin management
-<p>Now it's time to initialize Map2X::PluginManager::PluginManager class and
-make use of the plugins. Map2X::PluginManager::PluginManager is template class
+<p>Now it's time to initialize Kompas::PluginManager::PluginManager class and
+make use of the plugins. Kompas::PluginManager::PluginManager is template class
 and that means it will load and make available only plugins which implement the
 same interface as is specified as template of PluginManager instance, not any
 other.</p>
@@ -128,7 +128,7 @@ animal.</p>
 #include "Canary.cpp"
 
 using namespace std;
-using namespace Map2X::PluginManager;
+using namespace Kompas::PluginManager;
 
 int main(int argc, char** argv) {
     /* Import static plugin using the same name as in Canary.cpp */
@@ -162,21 +162,21 @@ int main(int argc, char** argv) {
 }
 @endcode
 @section PMCompilation Plugin compilation
-<p>@c Map2XMacros.cmake provides convenient CMake macros for compiling both
+<p>@c KompasMacros.cmake provides convenient CMake macros for compiling both
 static and dynamic plugins:</p>
 @code
 # Filename: CMakeLists.txt
-map2x_add_plugin(Dog ${CMAKE_CURRENT_BINARY_DIR} Dog.conf Dog.cpp)
-map2x_add_static_plugin(StaticPlugins Canary Canary.conf Canary.cpp)
+kompas_add_plugin(Dog ${CMAKE_CURRENT_BINARY_DIR} Dog.conf Dog.cpp)
+kompas_add_static_plugin(StaticPlugins Canary Canary.conf Canary.cpp)
 
 add_executable(PluginTest main.cpp)
 target_link_libraries(PluginTest ${StaticPlugins})
 @endcode
-<p>@c map2x_add_plugin macro takes plugin name as first argument, second
+<p>@c kompas_add_plugin macro takes plugin name as first argument, second
 argument is dir where to install the plugin files, third argument is name of
 configuration file and after that comes one or more source files. We use the
 build directory for storing the plugins to avoid the need for installation.</p>
-<p>@c map2x_add_static_plugin macro compiles every static plugin as single
+<p>@c kompas_add_static_plugin macro compiles every static plugin as single
 static library. To make linking easier for you, first argument is variable where
 are stored names of all static plugins' libraries. The variable can be then
 used for linking the final executable, as seen above.</p>

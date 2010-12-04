@@ -20,7 +20,7 @@ endmacro()
 # and QtTest library, more libraries can be specified
 #
 # Example:
-#       map2x_add_test(MySimpleTest SimpleTest.h SimpleTest.cpp CoreLibrary AnotherLibrary)
+#       kompas_add_test(MySimpleTest SimpleTest.h SimpleTest.cpp CoreLibrary AnotherLibrary)
 #
 # is expanded to:
 #       qt4_wrap_cpp(MySimpleTest_MOC SimpleTest.h)
@@ -33,7 +33,7 @@ endmacro()
 # explicitly.
 #
 if(QT4_FOUND)
-function(map2x_add_test test_name moc_header source_file)
+function(kompas_add_test test_name moc_header source_file)
     foreach(library ${ARGN})
         set(libraries ${library} ${libraries})
     endforeach()
@@ -53,7 +53,7 @@ endif()
 # Example:
 #       set(test_headers ComplexTest.h MyObject.h)
 #       set(test_sources ComplexTest.cpp MyObject.cpp)
-#       map2x_add_test(MyComplexTest test_headers test_sources CoreLibrary AnotherLibrary)
+#       kompas_add_test(MyComplexTest test_headers test_sources CoreLibrary AnotherLibrary)
 #
 # is expanded to:
 #       qt4_wrap_cpp(MyComplexTest_MOC ComplexTest.h MyObject.h)
@@ -61,7 +61,7 @@ endif()
 #       target_link_libraries(MyComplexTest CoreLibrary AnotherLibrary ${QT_QTCORE_LIBRARY} ${QT_QTTEST_LIBRARY})
 #       add_test(MyComplexTest MyComplexTest)
 #
-function(map2x_add_multifile_test test_name moc_headers_variable source_files_variable)
+function(kompas_add_multifile_test test_name moc_headers_variable source_files_variable)
     foreach(library ${ARGN})
         set(libraries ${library} ${libraries})
     endforeach()
@@ -75,10 +75,10 @@ endfunction()
 #
 # Macro for compiling data resources into application binary
 #
-# Depends on map2x-rc, which is part of Map2X utilities.
+# Depends on kompas-rc, which is part of Kompas utilities.
 #
 # Example usage:
-#       map2x_add_resource(name group_name file1 ALIAS alias1 file2 file3 ALIAS alias3 ...)
+#       kompas_add_resource(name group_name file1 ALIAS alias1 file2 file3 ALIAS alias3 ...)
 #       add_executable(app source1 source2 ... ${name})
 #
 # This command generates resource file with group group_name from given
@@ -86,7 +86,7 @@ endfunction()
 # resources can be explicitly loaded. Variable 'name' contains compiled
 # resource filename, which is then used for compiling library / executable.
 #
-function(map2x_add_resource name group_name)
+function(kompas_add_resource name group_name)
     set(IS_ALIAS OFF)
     foreach(argument ${ARGN})
 
@@ -110,8 +110,8 @@ function(map2x_add_resource name group_name)
     set(out resource_${name}.cpp)
     add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${out}
-        COMMAND ${MAP2X_RC_EXECUTABLE} ${name} ${group_name} ${arguments} > ${CMAKE_CURRENT_BINARY_DIR}/${out}
-        DEPENDS ${MAP2X_RC_EXECUTABLE} ${dependencies}
+        COMMAND ${KOMPAS_RC_EXECUTABLE} ${name} ${group_name} ${arguments} > ${CMAKE_CURRENT_BINARY_DIR}/${out}
+        DEPENDS ${KOMPAS_RC_EXECUTABLE} ${dependencies}
         COMMENT "Compiling data resource file ${out}"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         )
@@ -124,14 +124,14 @@ endfunction()
 # Function for adding dynamic plugins
 #
 # Usage:
-#       map2x_add_plugin(plugin_name install_dir metadata_file file1.cpp file2.cpp ...)
+#       kompas_add_plugin(plugin_name install_dir metadata_file file1.cpp file2.cpp ...)
 #
 # Additional libraries can be linked in via target_link_libraries(plugin_name ...).
 #
 # If install_dir is set to CMAKE_CURRENT_BINARY_DIR (e.g. for testing purposes),
 # the files are copied directly, without need to run 'make install'.
 #
-function(map2x_add_plugin plugin_name install_dir metadata_file)
+function(kompas_add_plugin plugin_name install_dir metadata_file)
     add_library(${plugin_name} MODULE ${ARGN})
     if(${install_dir} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
         add_custom_command(
@@ -150,7 +150,7 @@ endfunction()
 # Function for adding static plugins
 #
 # Usage:
-#       map2x_add_static_plugin(static_plugins_variable plugin_name metadata_file file1.cpp ...)
+#       kompas_add_static_plugin(static_plugins_variable plugin_name metadata_file file1.cpp ...)
 #
 # Additional libraries can be linked in via target_link_libraries(plugin_name ...).
 #
@@ -165,12 +165,12 @@ endfunction()
 # this:
 #       set(static_plugins_variable ${static_plugins_variable} PARENT_SCOPE)
 #
-macro(map2x_add_static_plugin static_plugins_variable plugin_name metadata_file)
+macro(kompas_add_static_plugin static_plugins_variable plugin_name metadata_file)
     foreach(source ${ARGN})
         set(sources ${sources} ${source})
     endforeach()
 
-    map2x_add_resource(${plugin_name} plugins ${metadata_file} ALIAS "${plugin_name}.conf")
+    kompas_add_resource(${plugin_name} plugins ${metadata_file} ALIAS "${plugin_name}.conf")
     add_library(${plugin_name} STATIC ${sources} ${${plugin_name}})
 
     if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_SYSTEM_NAME STREQUAL "Linux")

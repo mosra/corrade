@@ -6,7 +6,7 @@ test_big_endian(ENDIANNESS_BIG_ENDIAN)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/EndiannessConfigure.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/EndiannessConfigure.h)
 
-set(Map2X_Utility_SRCS
+set(Kompas_Utility_SRCS
     Endianness.cpp
     Directory.cpp
     Configuration.cpp
@@ -15,16 +15,16 @@ set(Map2X_Utility_SRCS
     utilities.cpp
 )
 
-add_library(Map2XUtility STATIC ${Map2X_Utility_SRCS})
+add_library(KompasUtility STATIC ${Kompas_Utility_SRCS})
 
-add_executable(map2x-rc rc.cpp)
-target_link_libraries(map2x-rc Map2XUtility)
+add_executable(kompas-rc rc.cpp)
+target_link_libraries(kompas-rc KompasUtility)
 
 if(USE_FPIC)
-    set_target_properties(Map2XUtility PROPERTIES COMPILE_FLAGS -fPIC)
+    set_target_properties(KompasUtility PROPERTIES COMPILE_FLAGS -fPIC)
 endif()
 
-install(TARGETS map2x-rc DESTINATION ${MAP2X_BINARY_INSTALL_DIR})
+install(TARGETS kompas-rc DESTINATION ${KOMPAS_BINARY_INSTALL_DIR})
 
 if(BUILD_TESTS)
     enable_testing()

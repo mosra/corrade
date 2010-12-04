@@ -1,22 +1,22 @@
-#ifndef Map2X_PluginManager_AbstractPlugin_h
-#define Map2X_PluginManager_AbstractPlugin_h
+#ifndef Kompas_PluginManager_AbstractPlugin_h
+#define Kompas_PluginManager_AbstractPlugin_h
 /*
     Copyright © 2007, 2008, 2009, 2010 Vladimír Vondruš <mosra@centrum.cz>
 
-    This file is part of Map2X.
+    This file is part of Kompas.
 
-    Map2X is free software: you can redistribute it and/or modify
+    Kompas is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License version 3
     only, as published by the Free Software Foundation.
 
-    Map2X is distributed in the hope that it will be useful,
+    Kompas is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU Lesser General Public License version 3 for more details.
 */
 
 /** @file
- * @brief Class Map2X::PluginManager::Plugin and plugin registering macros
+ * @brief Class Kompas::PluginManager::Plugin and plugin registering macros
  *
  * Macros PLUGIN_INTERFACE(), PLUGIN_REGISTER_STATIC(), PLUGIN_REGISTER().
  */
@@ -26,7 +26,7 @@
 #include "Utility/utilities.h"
 #include "AbstractPluginManager.h"
 
-namespace Map2X { namespace PluginManager {
+namespace Kompas { namespace PluginManager {
 
 /**
  * @brief Base class for plugin interfaces
@@ -94,7 +94,7 @@ class Plugin {
  */
 #define PLUGIN_REGISTER(className, interface) \
     extern "C" int pluginVersion() { return PLUGIN_VERSION; } \
-    extern "C" void* pluginInstancer(Map2X::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
+    extern "C" void* pluginInstancer(Kompas::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
         { return new className(manager, plugin); } \
     extern "C" std::string pluginInterface() { return interface; }
 
@@ -116,10 +116,10 @@ class Plugin {
  * only in *.cpp
  */
 #define PLUGIN_REGISTER_STATIC(name, className, interface) \
-    inline void* pluginInstancer_##name(Map2X::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
+    inline void* pluginInstancer_##name(Kompas::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
         { return new className(manager, plugin); } \
     int pluginInitializer_##name() { \
-        Map2X::PluginManager::AbstractPluginManager::importStaticPlugin(#name, PLUGIN_VERSION, interface, pluginInstancer_##name); return 1; \
+        Kompas::PluginManager::AbstractPluginManager::importStaticPlugin(#name, PLUGIN_VERSION, interface, pluginInstancer_##name); return 1; \
     } AUTOMATIC_INITIALIZER(pluginInitializer_##name)
 
 }}

@@ -5,17 +5,17 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/AbstractPluginManagerConfigure.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/AbstractPluginManagerConfigure.h)
 
-set(Map2X_PluginManager_SRCS
+set(Kompas_PluginManager_SRCS
     Plugin.cpp
     AbstractPluginManager.cpp
     PluginMetadata.cpp
 )
 
-add_library(Map2XPluginManager STATIC ${Map2X_PluginManager_SRCS})
-target_link_libraries(Map2XPluginManager Map2XUtility)
+add_library(KompasPluginManager STATIC ${Kompas_PluginManager_SRCS})
+target_link_libraries(KompasPluginManager KompasUtility)
 
 if(USE_FPIC)
-    set_target_properties(Map2XPluginManager PROPERTIES COMPILE_FLAGS -fPIC)
+    set_target_properties(KompasPluginManager PROPERTIES COMPILE_FLAGS -fPIC)
 endif()
 
 if(BUILD_TESTS)
