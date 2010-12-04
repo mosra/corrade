@@ -215,14 +215,12 @@ class ConfigurationGroup {
         }
 
         /**
-         * @brief Count of values with given key name
+         * @brief Count of keys with given name
          * @param key       Key name
-         * @return Count
          *
          * See also Configuration::UniqueKeys and Configuration::UniqueNames.
-         * @todo Rename to keyCount() ?
          */
-        unsigned int valueCount(const std::string& key) const;
+        unsigned int keyCount(const std::string& key) const;
 
         /**
          * @brief Whether given key exists

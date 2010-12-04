@@ -129,7 +129,7 @@ bool ConfigurationGroup::removeAllGroups(const std::string& name) {
     return true;
 }
 
-unsigned int ConfigurationGroup::valueCount(const string& key) const {
+unsigned int ConfigurationGroup::keyCount(const string& key) const {
     unsigned int count = 0;
     for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it)
         if(it->key == key) count++;

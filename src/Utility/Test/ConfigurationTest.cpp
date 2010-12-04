@@ -182,7 +182,7 @@ void ConfigurationTest::truncate() {
     Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("parse.conf"), Configuration::Truncate);
     conf.save();
 
-    QVERIFY(conf.valueCount("key") == 0);
+    QVERIFY(conf.keyCount("key") == 0);
 
     QFile file(CONFIGURATION_WRITE_TEST_DIR + QString("parse.conf"));
     file.open(QFile::Text|QFile::ReadOnly);
@@ -402,13 +402,13 @@ void ConfigurationTest::autoCreation() {
 
     conf.setAutomaticKeyCreation(true);
     QVERIFY(conf.group("newGroup")->value<string>("key", &value1));
-    QVERIFY(conf.group("newGroup")->valueCount("key") == 1);
+    QVERIFY(conf.group("newGroup")->keyCount("key") == 1);
     QVERIFY(value1 == "defaultValue1");
 
     conf.setAutomaticGroupCreation(true);
     string value2 = "defaultValue2";
     QVERIFY(conf.group("group")->value<string>("key", &value2));
-    QVERIFY(conf.group("group")->valueCount("key") == 1);
+    QVERIFY(conf.group("group")->keyCount("key") == 1);
     QVERIFY(value2 == "defaultValue2");
 
     /* Auto-creation of non-string values */
