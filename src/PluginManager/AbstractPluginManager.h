@@ -24,6 +24,7 @@
 #include <map>
 
 #include "PluginMetadata.h"
+#include "Utility/utilities.h"
 #include "Utility/Resource.h"
 
 /** @brief Plugin version */
@@ -43,10 +44,11 @@ class Plugin;
  *      http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_defects.html#195 )
  * @todo Provide destructing function with plugin (new/delete overloads, segfaults...)
  * @todo Static functions for metadata, unload
- * @todo Disable copy constructor, operator=
  */
 class AbstractPluginManager {
     friend class Plugin;
+
+    DISABLE_COPY(AbstractPluginManager)
 
     public:
         /**

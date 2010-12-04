@@ -57,6 +57,17 @@ std::vector<std::string> split(const std::string& str, char delim, bool keepEmpt
 /** @{ @name Macros */
 
 /**
+ * @brief Disable copying of given class
+ * @param class             Class name
+ *
+ * Makes copy constructor and assignment operator private, so the class cannot
+ * be copied. Should be placed at the beginning of class definition
+ */
+#define DISABLE_COPY(class) \
+    class(const class&); \
+    class& operator=(const class&);
+
+/**
  * @brief Declare automatic initializer
  * @param function Initializer function name of type int(*)().
  * @todo Test this
