@@ -83,6 +83,11 @@ bool Directory::mkpath(const std::string& _path) {
     return false;
 }
 
+string Directory::home() {
+    /** @todo @c VERSION-0.1 Fix for WIN32 */
+    return getenv("HOME");
+}
+
 Directory::Directory(const string& path, int flags): _isLoaded(false) {
     DIR* directory;
     dirent* entry;

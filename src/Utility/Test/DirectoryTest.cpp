@@ -107,6 +107,10 @@ void DirectoryTest::mkpath() {
     QVERIFY(dir.exists(path));
 }
 
+void DirectoryTest::home() {
+    QCOMPARE(QString::fromStdString(Directory::home()), QDir::homePath());
+}
+
 void DirectoryTest::list_data() {
     QTest::addColumn<int>("flags");
     QTest::addColumn<QStringList>("data");

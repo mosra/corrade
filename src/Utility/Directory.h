@@ -95,6 +95,9 @@ class Directory: public std::vector<std::string> {
          */
         static bool mkpath(const std::string& path);
 
+        /** @brief Get current user's home directory */
+        static std::string home();
+
         /**
          * @brief Constructor
          * @param path      %Directory path
