@@ -30,6 +30,9 @@ class UtilitiesTest: public QObject {
 
         void split_data();
         void split();
+
+        void lowercase_data();
+        void lowercase();
 };
 
 }}}

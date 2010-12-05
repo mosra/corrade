@@ -52,6 +52,15 @@ std::string trim(std::string str, const std::string& characters = " \t\f\v\r\n")
  */
 std::vector<std::string> split(const std::string& str, char delim, bool keepEmptyParts = true);
 
+/**
+ * @brief Convert string to lowercase
+ * @param str               String to be converted
+ * @return Lowercase version of the string
+ *
+ * @note Doesn't work with UTF-8.
+ */
+std::string lowercase(std::string str);
+
 /*@}*/
 
 /** @{ @name Macros */

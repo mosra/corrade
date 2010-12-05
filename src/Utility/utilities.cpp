@@ -15,6 +15,8 @@
 
 #include "utilities.h"
 
+#include <algorithm>
+
 using namespace std;
 
 namespace Kompas { namespace Utility {
@@ -44,6 +46,11 @@ vector<string> split(const string& str, char delim, bool keepEmptyParts) {
     } while(pos != string::npos);
 
     return parts;
+}
+
+string lowercase(string str) {
+  transform(str.begin(), str.end(), str.begin(), ptr_fun<int, int>(tolower));
+  return str;
 }
 
 }}

@@ -84,4 +84,24 @@ void UtilitiesTest::split() {
     QCOMPARE(o_, out);
 }
 
+void UtilitiesTest::lowercase_data() {
+    QTest::addColumn<QString>("in");
+    QTest::addColumn<QString>("out");
+
+    QTest::newRow("lowercase") << "hello" << "hello";
+    QTest::newRow("uppercase") << "QWERTZUIOP" << "qwertzuiop";
+    QTest::newRow("special chars") << ".,?- \"!/(98765%" << ".,?- \"!/(98765%";
+    QTest::newRow("UTF-8") << "ĚŠČŘŽÝÁÍÉÚŮĎŤŇ" << "ěščřžýáíéúůďťň";
+}
+
+void UtilitiesTest::lowercase() {
+    QFETCH(QString, in);
+    QFETCH(QString, out);
+
+    QString actual = QString::fromStdString(Utility::lowercase(in.toStdString()));
+
+    QEXPECT_FAIL("UTF-8", "UTF-8 lowercasing is not supported", Continue);
+    QCOMPARE(out, actual);
+}
+
 }}}
