@@ -99,6 +99,13 @@ class Directory: public std::vector<std::string> {
         static std::string home();
 
         /**
+         * @brief Get application configuration dir
+         * @param name              Application name
+         * @param createIfNotExists Create the directory, if not exists already
+         */
+        static std::string configurationDir(const std::string& name, bool createIfNotExists = true);
+
+        /**
          * @brief Constructor
          * @param path      %Directory path
          * @param flags     Listing flags. See Directory::Flags. If no flag is

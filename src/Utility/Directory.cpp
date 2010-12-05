@@ -19,6 +19,8 @@
 #include <sys/stat.h>
 #include <algorithm>
 
+#include "utilities.h"
+
 using namespace std;
 
 namespace Kompas { namespace Utility {
@@ -86,6 +88,17 @@ bool Directory::mkpath(const std::string& _path) {
 string Directory::home() {
     /** @todo @c VERSION-0.1 Fix for WIN32 */
     return getenv("HOME");
+}
+
+string Directory::configurationDir(const std::string& applicationName, bool createIfNotExists) {
+    /** @todo @c VERSION-0.1 Fix for WIN32 -- it's $ENV{AppData} in CMake */
+    string h = home();
+    if(h.empty()) return "";
+
+    string dir = join(home(), '.' + lowercase(applicationName));
+    if(createIfNotExists) mkpath(dir);
+
+    return dir;
 }
 
 Directory::Directory(const string& path, int flags): _isLoaded(false) {

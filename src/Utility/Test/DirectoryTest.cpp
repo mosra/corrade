@@ -111,6 +111,10 @@ void DirectoryTest::home() {
     QCOMPARE(QString::fromStdString(Directory::home()), QDir::homePath());
 }
 
+void DirectoryTest::configurationDir() {
+    QCOMPARE(QString::fromStdString(Directory::configurationDir("Kompas", false)), QDir::home().filePath(".kompas"));
+}
+
 void DirectoryTest::list_data() {
     QTest::addColumn<int>("flags");
     QTest::addColumn<QStringList>("data");
