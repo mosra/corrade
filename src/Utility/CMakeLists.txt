@@ -8,6 +8,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/EndiannessConfigure.h.cmake
 
 set(Kompas_Utility_SRCS
     Endianness.cpp
+    Debug.cpp
     Directory.cpp
     Configuration.cpp
     ConfigurationGroup.cpp

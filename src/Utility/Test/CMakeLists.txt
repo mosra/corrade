@@ -14,6 +14,7 @@ kompas_add_test(DirectoryTest DirectoryTest.h DirectoryTest.cpp KompasUtility)
 kompas_add_test(EndianTest EndianTest.h EndianTest.cpp KompasUtility)
 kompas_add_test(UtilitiesTest UtilitiesTest.h UtilitiesTest.cpp KompasUtility)
 kompas_add_test(ConfigurationTest ConfigurationTest.h ConfigurationTest.cpp KompasCore)
+kompas_add_test(DebugTest DebugTest.h DebugTest.cpp KompasCore)
 
 # Compiled-in resource test
 kompas_add_resource(ResourceTestData test
