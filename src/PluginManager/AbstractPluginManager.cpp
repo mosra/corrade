@@ -95,18 +95,18 @@ AbstractPluginManager::~AbstractPluginManager() {
     }
 
     /* Unload all plugins associated with this plugin manager */
-    /** @todo Checking load state whether unload succeeded? */
-    /** @todo Faster O(log n) processing */
+    vector<string> removed;
     for(map<string, PluginObject>::const_iterator it = plugins()->begin(); it != plugins()->end(); ++it) {
-
-        /** @bug Remove plugins from global vector */
-
         /* Plugin doesn't belong to this manager */
         if(it->second.manager != this) continue;
 
-        /** @todo unload() tests whether plugin exists => performance-- */
-        unload(it->first);
+        /* Schedule the plugin for deletion, if it is not static */
+        if(unload(it->first) != IsStatic) removed.push_back(it->first);
     }
+
+    /* Remove the plugins from global container */
+    for(vector<string>::const_iterator it = removed.begin(); it != removed.end(); ++it)
+        plugins()->erase(*it);
 }
 
 vector<string> AbstractPluginManager::nameList() const {

@@ -47,6 +47,24 @@ void PluginTest::nameList() {
     }
 
     QCOMPARE(actual, expected);
+
+    /* Check if the list is cleared after destructing */
+    delete manager;
+    manager = new PluginManager<AbstractAnimal>(Directory::join(PLUGINS_DIR, "inexistent"));
+
+    QStringList expected2;
+    expected2 << "Canary";
+    actual.clear();
+    names = manager->nameList();
+    for(vector<string>::const_iterator it = names.begin(); it != names.end(); ++it) {
+        actual.append(QString::fromStdString(*it));
+    }
+
+    QCOMPARE(actual, expected2);
+
+    /* Revert manager back */
+    delete manager;
+    manager = new PluginManager<AbstractAnimal>(PLUGINS_DIR);
 }
 
 void PluginTest::errors() {
