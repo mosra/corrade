@@ -15,8 +15,7 @@
 
 #include "Configuration.h"
 
-#include <iostream>
-
+#include "Debug.h"
 #include "utilities.h"
 
 using namespace std;
@@ -79,7 +78,7 @@ void Configuration::parse(istream& file) {
         /* Everything went fine */
         flags |= IsValid;
 
-    } catch(string e) { cerr << e; }
+    } catch(string e) { Error() << e; }
 }
 
 string Configuration::parse(istream& file, ConfigurationGroup* group, const string& fullPath) {
