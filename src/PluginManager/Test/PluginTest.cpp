@@ -26,7 +26,6 @@ using namespace std;
 using namespace Kompas::Utility;
 
 void initialize() {
-    PLUGIN_IMPORT(Kangaroo)
     PLUGIN_IMPORT(Canary)
 }
 
@@ -40,7 +39,7 @@ PluginTest::PluginTest() {
 
 void PluginTest::nameList() {
     QStringList expected, actual;
-    expected << "Canary" << "Chihuahua" << "Dog" << "Kangaroo" << "Snail";
+    expected << "Canary" << "Chihuahua" << "Dog" << "Snail";
 
     vector<string> names = manager->nameList();
     for(vector<string>::const_iterator it = names.begin(); it != names.end(); ++it) {
@@ -56,9 +55,7 @@ void PluginTest::errors() {
 
     /* Wrong metadata file */
     QVERIFY(manager->loadState("Snail") == AbstractPluginManager::WrongMetadataFile);
-    QVERIFY(manager->loadState("Kangaroo") == AbstractPluginManager::WrongMetadataFile);
     QVERIFY(manager->load("Snail") == AbstractPluginManager::WrongMetadataFile);
-    QVERIFY(manager->load("Kangaroo") == AbstractPluginManager::WrongMetadataFile);
 }
 
 void PluginTest::staticPlugin() {

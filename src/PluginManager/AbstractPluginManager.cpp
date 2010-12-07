@@ -44,8 +44,7 @@ void AbstractPluginManager::importStaticPlugin(const string& name, int _version,
     Utility::Configuration metadata(file);
 
     PluginObject p(metadata);
-    if(metadata.isValid()) p.loadState = IsStatic;
-    else p.loadState = WrongMetadataFile;
+    p.loadState = IsStatic;
     p.interface = interface;
     p.instancer = instancer;
     plugins()->insert(pair<string, PluginObject>(name, p));
