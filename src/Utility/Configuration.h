@@ -46,6 +46,8 @@ namespace Kompas { namespace Utility {
 class Configuration: public ConfigurationGroup {
     friend class ConfigurationGroup;
 
+    DISABLE_COPY(Configuration)
+
     public:
         /** @brief Flags for opening configuration file */
         enum Flags {

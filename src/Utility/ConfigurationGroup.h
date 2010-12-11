@@ -23,6 +23,8 @@
 #include <vector>
 #include <sstream>
 
+#include "utilities.h"
+
 namespace Kompas { namespace Utility {
 
 class Configuration;
@@ -61,6 +63,8 @@ template<class T> struct ConfigurationValue {
  */
 class ConfigurationGroup {
     friend class Configuration;
+
+    DISABLE_COPY(ConfigurationGroup)
 
     public:
         /** @brief Flags for value type */
