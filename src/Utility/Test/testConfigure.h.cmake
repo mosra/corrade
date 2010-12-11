@@ -5,3 +5,5 @@
 #define DIRECTORY_WRITE_TEST_DIR "${CMAKE_CURRENT_BINARY_DIR}/DirectoryTestFiles"
 
 #define RESOURCE_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ResourceTestFiles/"
+
+#define TRANSLATOR_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/TranslatorTestFiles/"

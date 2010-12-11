@@ -13,6 +13,7 @@ set(Kompas_Utility_SRCS
     Configuration.cpp
     ConfigurationGroup.cpp
     Resource.cpp
+    Translator.cpp
     utilities.cpp
 )
 
