@@ -40,12 +40,12 @@ template<class T> class PluginManager: public AbstractPluginManager {
         PluginManager(const std::string& pluginDirectory): AbstractPluginManager(pluginDirectory) {
             /* Find static plugins which have the same interface and have not
                assigned manager to them */
-            for(std::map<std::string, PluginObject>::iterator it = plugins()->begin(); it != plugins()->end(); ++it) {
-                if(it->second.manager != 0 || it->second.interface != pluginInterface())
+            for(std::map<std::string, PluginObject*>::iterator it = plugins()->begin(); it != plugins()->end(); ++it) {
+                if(it->second->manager != 0 || it->second->interface != pluginInterface())
                     continue;
 
                 /* Assign the plugin to this manager */
-                it->second.manager = this;
+                it->second->manager = this;
             }
         }
 
@@ -63,7 +63,7 @@ template<class T> class PluginManager: public AbstractPluginManager {
             /* Plugin with given name doesn't exist */
             if(plugins()->find(name) == plugins()->end()) return 0;
 
-            PluginObject& plugin = plugins()->at(name);
+            PluginObject& plugin = *plugins()->at(name);
 
             /* Plugin is not successfully loaded */
             if(!(plugin.loadState & (LoadOk|IsStatic))) return 0;

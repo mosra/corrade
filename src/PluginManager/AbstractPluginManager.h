@@ -218,6 +218,13 @@ class AbstractPluginManager {
              */
             std::string interface;
 
+            /**
+             * @brief %Plugin configuration
+             *
+             * Associated configuration file.
+             */
+            const Utility::Configuration configuration;
+
             PluginMetadata metadata;            /**< @brief %Plugin metadata */
 
             /**
@@ -239,11 +246,24 @@ class AbstractPluginManager {
             void* module;
 
             /**
-             * @brief Constructor
-             * @param _metadata     %Plugin metadata
+             * @brief Constructor (dynamic plugins)
+             * @param _metadata     %Plugin metadata filename
+             * @param _manager      Associated plugin manager
              */
-            PluginObject(const Utility::Configuration& _metadata):
-                loadState(NotLoaded), metadata(_metadata), manager(0), module(0) {}
+            inline PluginObject(const std::string& _metadata, AbstractPluginManager* _manager):
+                configuration(_metadata, Utility::Configuration::ReadOnly), metadata(configuration), manager(_manager), module(0) {
+                    if(configuration.isValid()) loadState = NotLoaded;
+                    else loadState = WrongMetadataFile;
+                }
+
+            /**
+             * @brief Constructor (static plugins)
+             * @param _metadata     %Plugin metadata istream
+             * @param _interface    Interface string
+             * @param _instancer    Instancer function
+             */
+            inline PluginObject(std::istream& _metadata, std::string _interface, void* (*_instancer)(AbstractPluginManager*, const std::string&)):
+                loadState(IsStatic), interface(_interface), configuration(_metadata, Utility::Configuration::ReadOnly), metadata(configuration), manager(0), instancer(_instancer), module(0) {}
         };
 
         /** @brief Directory where to search for dynamic plugins */
@@ -259,7 +279,7 @@ class AbstractPluginManager {
          * @note This neeeds to be accessed via pointer because of "Static
          * Initialization Order Fiasco".
          */
-        static std::map<std::string, PluginObject>* plugins();
+        static std::map<std::string, PluginObject*>* plugins();
 
     private:
         std::map<std::string, std::vector<Plugin*> > instances;
