@@ -111,7 +111,6 @@ AbstractPluginManager::~AbstractPluginManager() {
 
 vector<string> AbstractPluginManager::nameList() const {
     vector<string> names;
-    /** @todo Faster O(log n) processing */
     for(map<string, PluginObject>::const_iterator i = plugins()->begin(); i != plugins()->end(); ++i) {
 
         /* Plugin doesn't belong to this manager */

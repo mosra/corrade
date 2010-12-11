@@ -118,11 +118,10 @@ Directory::Directory(const string& path, int flags): _isLoaded(false) {
         if((flags & SkipSpecial) && entry->d_type != DT_DIR && entry->d_type != DT_REG)
             continue;
 
-        /** @todo @c PORTABILITY: on some systems dirent returns DT_UNKNOWN for everything */
+        /** @todo On some systems dirent returns DT_UNKNOWN for everything */
         push_back(entry->d_name);
     }
 
-    /** @todo @c MEMLEAK: not deleted entry pointer? */
     closedir(directory);
 
     if(flags & SortAscending) sort(begin(), end());

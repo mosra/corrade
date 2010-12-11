@@ -23,16 +23,6 @@ namespace Kompas { namespace Utility {
 
 /**
  * @brief %Endianness related functions
- *
- * @todo Might not work properly when crosscompiling with CMake:
- *      http://www.cmake.org/pipermail/cmake/2006-November/012016.html
- * @todo Ugly and dangerous code. Templated functions must be in header to avoid
- *      including .cpp after every templated calll. But! - the actual swapping
- *      code needs generated header which says whether the system is Big or
- *      Little endian. So, to avoid generating that header for every call of
- *      these functions, that code must be in .cpp. Also GCC 4.5@@64bit doesn't
- *      like new unsigned char[] here, so the resulting number must be allocated
- *      in advance and the swapping function writes to that via pointer.
  */
 class Endianness {
     public:

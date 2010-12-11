@@ -92,12 +92,8 @@ class Debug {
          *
          * The implementation supports all types supported in STL streams.
          * library. Support for debugging another non-trivial types can be
-         * added with implementing @c operator<< for given type:
-         * @code
-         * Debug& operator<<(Debug debug, const Type& type);
-         * @endcode
-         * The operator should then call Debug::operator<<() with one of
-         * supported types, such as std::string.
+         * added with implementing @c operator<<(Debug, const T&) for given
+         * type.
          */
         template<class T> Debug& operator<<(const T& value) {
             if(!output) return *this;
@@ -111,7 +107,7 @@ class Debug {
         }
 
     protected:
-        std::ostream* output;
+        std::ostream* output;   /**< @brief Stream where to put the output */
 
     private:
         static std::ostream* globalOutput;
@@ -150,6 +146,18 @@ class Error: public Debug {
     private:
         static std::ostream* globalOutput;
 };
+
+#ifdef DOXYGEN_GENERATING_OUTPUT
+/**
+ * @brief Debug output for custom types
+ * @param debug     Debug class
+ * @param value     Value to be outputted
+ *
+ * The operator should convert the type to one of supported types, such as
+ * std::string and then call Debug::operator<<() with it.
+ */
+template<class T> Debug& operator<<(Debug debug, const T& value);
+#endif
 
 }}
 

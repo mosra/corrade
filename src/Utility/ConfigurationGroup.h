@@ -146,10 +146,8 @@ class ConfigurationGroup {
         /**
          * @brief Remove all groups with given name
          * @param name      Name of groups to remove
-         * @return Whether the removal was successful (see above or flag
-         *      Connfiguration::ReadOnly).
-         *
-         * @todo Return false if no group was removed?
+         * @return True if all groups with the given name were removed (see
+         *      above or flag Connfiguration::ReadOnly).
          */
         bool removeAllGroups(const std::string& name);
 
@@ -191,7 +189,6 @@ class ConfigurationGroup {
          *
          * Directly returns the value. If the key is not found, returns
          * default constructed value.
-         * @todo Properly test int(), double() etc. whether they return 0.
          */
         template<class T> T value(const std::string& key, unsigned int number = 0, int flags = 0) const {
             T _value;
@@ -273,9 +270,8 @@ class ConfigurationGroup {
         /**
          * @brief Remove all values with given key
          * @param key       Key name
-         * @return Whether the values were removed. See Configuration::ReadOnly.
-         *
-         * @todo Return false if no values was removed?
+         * @return True if all values with given key were removed. See also
+         *      Configuration::ReadOnly.
          */
         bool removeAllValues(const std::string& key);
 

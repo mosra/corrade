@@ -41,7 +41,6 @@ template<class T> class PluginManager: public AbstractPluginManager {
             /* Find static plugins which have the same interface and have not
                assigned manager to them */
             for(std::map<std::string, PluginObject>::iterator it = plugins()->begin(); it != plugins()->end(); ++it) {
-                /** @todo Check for dependencies! */
                 if(it->second.manager != 0 || it->second.interface != pluginInterface())
                     continue;
 

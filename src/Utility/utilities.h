@@ -79,7 +79,6 @@ std::string lowercase(std::string str);
 /**
  * @brief Declare automatic initializer
  * @param function Initializer function name of type int(*)().
- * @todo Test this
  *
  * Function passed as argument will be called even before entering main()
  * function. This is usable when e.g. automatically registering plugins or data
@@ -92,7 +91,6 @@ std::string lowercase(std::string str);
 /**
  * @brief Declare automatic initializer
  * @param function Finalizer function name of type int(*)().
- * @todo Test this
  *
  * Function passed as argument will be called even before entering main()
  * function. This is usable in conjuction with ::AUTOMATIC_INITIALIZER() when

@@ -39,11 +39,6 @@ class Plugin;
  *
  * Base abstract class for all PluginManager templated classes. See also
  * @ref PluginManagement.
- * @todo Casting pointer-to-object to pointer-to-function is not ISO C++ (see
- *      C++ Standard %Core Language Active Issue #195,
- *      http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_defects.html#195 )
- * @todo Provide destructing function with plugin (new/delete overloads, segfaults...)
- * @todo Static functions for metadata, unload
  */
 class AbstractPluginManager {
     friend class Plugin;
@@ -142,10 +137,12 @@ class AbstractPluginManager {
          *      with tailing slash. No recursive processing is done.
          *
          * First goes through list of static plugins and finds ones that use
-         * the same interface as this PluginManager instance. The gets list of
+         * the same interface as this PluginManager instance. Then gets list of
          * all dynamic plugins in given directory.
+         * @note Dependencies of static plugins are skipped, as static plugins
+         *      should have all dependencies present. Also, dynamic plugins
+         *      with the same name as another static plugin are skipped.
          * @see PluginManager::nameList()
-         * @todo Make static plugin have higher priority than dynamic
          */
         AbstractPluginManager(const std::string& pluginDirectory);
 
