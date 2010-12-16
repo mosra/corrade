@@ -250,7 +250,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& nam
     return plugin.loadState;
 }
 
-void AbstractPluginManager::registerInstance(const string& name, Plugin* instance) {
+void AbstractPluginManager::registerInstance(const string& name, Plugin* instance, const Configuration** configuration, const PluginMetadata** metadata) {
     map<string, PluginObject*>::const_iterator foundPlugin = plugins()->find(name);
 
     /* Given plugin doesn't exist, nothing to do */
@@ -267,6 +267,9 @@ void AbstractPluginManager::registerInstance(const string& name, Plugin* instanc
     }
 
     foundInstance->second.push_back(instance);
+
+    *configuration = &foundPlugin->second->configuration;
+    *metadata = &foundPlugin->second->metadata;
 }
 
 void AbstractPluginManager::unregisterInstance(const string& name, Plugin* instance) {

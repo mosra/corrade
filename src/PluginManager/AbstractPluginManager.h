@@ -284,7 +284,7 @@ class AbstractPluginManager {
     private:
         std::map<std::string, std::vector<Plugin*> > instances;
 
-        void registerInstance(const std::string& name, Plugin* instance);
+        void registerInstance(const std::string& name, Plugin* instance, const Utility::Configuration** configuration, const PluginMetadata** metadata);
         void unregisterInstance(const std::string& name, Plugin* instance);
 };
 

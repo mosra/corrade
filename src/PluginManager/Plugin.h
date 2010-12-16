@@ -60,9 +60,27 @@ class Plugin {
          */
         inline std::string name() const { return _plugin; }
 
+    public:
+        /**
+         * @brief Plugin metadata
+         * @return Metadata file associated with the plugin or 0, if no metadata
+         *      is available.
+         */
+        inline const PluginMetadata* metadata() const { return _metadata; }
+
+    protected:
+        /**
+         * @brief Plugin configuration
+         * @return Configuration from file associated with the plugin or 0, if
+         *      no configuration is available.
+         */
+        inline const Utility::Configuration* configuration() const { return _configuration; }
+
     private:
         AbstractPluginManager* _manager;
         std::string _plugin;
+        const Utility::Configuration* _configuration;
+        const PluginMetadata* _metadata;
 };
 
 /**

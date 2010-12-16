@@ -20,7 +20,12 @@
 namespace Kompas { namespace PluginManager {
 
 Plugin::Plugin(AbstractPluginManager* manager, const std::string& plugin): _manager(manager), _plugin(plugin) {
-    if(_manager) _manager->registerInstance(_plugin, this);
+    if(_manager)
+        _manager->registerInstance(_plugin, this, &_configuration, &_metadata);
+    else {
+        _configuration = 0;
+        _metadata = 0;
+    }
 }
 
 Plugin::~Plugin() {
