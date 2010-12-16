@@ -24,6 +24,7 @@
 #include <map>
 
 #include "Utility/Configuration.h"
+#include "Utility/Translator.h"
 
 namespace Kompas { namespace PluginManager {
 
@@ -45,24 +46,22 @@ class PluginMetadata {
 
         /**
          * @brief %Plugin name
-         * @param language      If specified, tries to get plugin name in
-         *      different language.
          *
          * Descriptive name of plugin. Not to be confused with name under which
-         * the plugin is loaded.
+         * the plugin is loaded. If translation for current Translator::locale()
+         * is present, returns the translated name.
          * @note This field is constant during whole plugin lifetime.
          */
-        std::string name(const std::string& language = "") const;
+        inline const std::string* name() const { return _name; }
 
         /**
          * @brief %Plugin description
-         * @param language      If specified, tries to get plugin name in
-         *      different language.
          *
-         * More detailed description of plugin.
+         * More detailed description of plugin. If translation for current
+         * Translator::locale() is present, returns the translated name.
          * @note This field is constant during whole plugin lifetime.
          */
-        std::string description(const std::string& language = "") const;
+        inline const std::string* description() const { return _description; }
 
         /**
          * @brief %Plugin author(s)
@@ -130,9 +129,10 @@ class PluginMetadata {
         void removeUsedBy(const std::string& name);
 
     private:
-        std::map<std::string, std::string> names;
-        std::map<std::string, std::string> descriptions;
+        Utility::Translator translator;
 
+        const std::string *_name,
+            *_description;
         std::string _version;
 
         std::vector<std::string> _authors,

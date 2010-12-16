@@ -78,7 +78,7 @@ void PluginTest::errors() {
 
 void PluginTest::staticPlugin() {
     QVERIFY(manager->loadState("Canary") == AbstractPluginManager::IsStatic);
-    QVERIFY(manager->metadata("Canary")->name() == "I'm allergic to canaries!");
+    QVERIFY(*manager->metadata("Canary")->name() == "I'm allergic to canaries!");
     QVERIFY(manager->metadata("Canary")->authors()[0] == "Vladimír Vondruš <mosra@centrum.cz>");
     QVERIFY(manager->metadata("Canary")->version() == "1.0");
 
@@ -96,7 +96,7 @@ void PluginTest::dynamicPlugin() {
     QVERIFY(manager->loadState("Dog") == AbstractPluginManager::NotLoaded);
     QVERIFY(manager->load("Dog") == AbstractPluginManager::LoadOk);
     QVERIFY(manager->loadState("Dog") == AbstractPluginManager::LoadOk);
-    QVERIFY(manager->metadata("Dog")->name() == "A simple dog plugin");
+    QVERIFY(*manager->metadata("Dog")->name() == "A simple dog plugin");
 
     AbstractAnimal* animal = manager->instance("Dog");
 
@@ -121,7 +121,7 @@ void PluginTest::hierarchy() {
 
     QVERIFY(manager->load("Chihuahua") == AbstractPluginManager::LoadOk);
     QVERIFY(manager->loadState("Dog") == AbstractPluginManager::LoadOk);
-    QVERIFY(manager->metadata("Chihuahua")->name() == "The smallest dog in the world.");
+    QVERIFY(*manager->metadata("Chihuahua")->name() == "The smallest dog in the world.");
     QVERIFY(manager->metadata("Chihuahua")->depends().size() == 1);
     QVERIFY(manager->metadata("Chihuahua")->depends()[0] == "Dog");
     QVERIFY(manager->metadata("Dog")->usedBy().size() == 1);
