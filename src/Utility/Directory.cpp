@@ -87,7 +87,9 @@ bool Directory::mkpath(const std::string& _path) {
 
 string Directory::home() {
     /** @todo @c VERSION-0.1 Fix for WIN32 */
-    return getenv("HOME");
+    char* h = getenv("HOME");
+    if(!h) return "";
+    else return h;
 }
 
 string Directory::configurationDir(const std::string& applicationName, bool createIfNotExists) {
