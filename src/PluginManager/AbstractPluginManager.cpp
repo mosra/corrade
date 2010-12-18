@@ -55,31 +55,6 @@ void AbstractPluginManager::importStaticPlugin(const string& name, int _version,
     plugins()->insert(pair<string, PluginObject*>(name, new PluginObject(metadata, interface, instancer)));
 }
 
-AbstractPluginManager::AbstractPluginManager(const string& pluginDirectory): _pluginDirectory(pluginDirectory) {
-    /* Foreach all files in plugin directory */
-    Directory d(_pluginDirectory, Directory::SkipDirectories|Directory::SkipSpecial);
-    for(Directory::const_iterator i = d.begin(); i != d.end(); ++i) {
-
-        /* Search for module filename prefix and suffix in current file */
-        size_t begin;
-        if(!string(PLUGIN_FILENAME_PREFIX).empty())
-            begin = (*i).find(PLUGIN_FILENAME_PREFIX);
-        else
-            begin = 0;
-        size_t end = (*i).find(PLUGIN_FILENAME_SUFFIX);
-
-        /* File is not plugin, continue to next */
-        if(begin != 0 || end == string::npos) continue;
-
-        /* Dig plugin name from filename */
-        string name = (*i).substr(begin+string(PLUGIN_FILENAME_PREFIX).size(),
-                                  end-string(PLUGIN_FILENAME_PREFIX).size());
-
-        /* Insert plugin to list */
-        plugins()->insert(pair<string, PluginObject*>(name, new PluginObject(Directory::join(pluginDirectory, name + ".conf"), this)));
-    }
-}
-
 AbstractPluginManager::~AbstractPluginManager() {
     /* Destroying all plugin instances. Every instance removes itself from
         instances array on destruction, so going carefully backwards and
@@ -107,6 +82,47 @@ AbstractPluginManager::~AbstractPluginManager() {
     /* Remove the plugins from global container */
     for(vector<string>::const_iterator it = removed.begin(); it != removed.end(); ++it)
         plugins()->erase(*it);
+}
+
+void AbstractPluginManager::reloadPluginDirectory() {
+    /* Get all unloaded plugins and schedule them for deletion */
+    vector<string> removed;
+    for(map<string, PluginObject*>::const_iterator it = plugins()->begin(); it != plugins()->end(); ++it) {
+        if(it->second->manager != this || it->second->loadState != NotLoaded)
+            continue;
+
+        delete it->second;
+        removed.push_back(it->first);
+    }
+
+    /* Remove the plugins from global container */
+    for(vector<string>::const_iterator it = removed.begin(); it != removed.end(); ++it)
+        plugins()->erase(*it);
+
+    /* Foreach all files in plugin directory */
+    Directory d(_pluginDirectory, Directory::SkipDirectories|Directory::SkipSpecial);
+    for(Directory::const_iterator i = d.begin(); i != d.end(); ++i) {
+        /* Search for module filename prefix and suffix in current file */
+        size_t begin;
+        if(!string(PLUGIN_FILENAME_PREFIX).empty())
+            begin = (*i).find(PLUGIN_FILENAME_PREFIX);
+        else
+            begin = 0;
+        size_t end = (*i).find(PLUGIN_FILENAME_SUFFIX);
+
+        /* File is not plugin, continue to next */
+        if(begin != 0 || end == string::npos) continue;
+
+        /* Dig plugin name from filename */
+        string name = (*i).substr(begin+string(PLUGIN_FILENAME_PREFIX).size(),
+                                  end-string(PLUGIN_FILENAME_PREFIX).size());
+
+        /* Skip the plugin if it is among loaded */
+        if(plugins()->find(name) != plugins()->end()) continue;
+
+        /* Insert plugin to list */
+        plugins()->insert(pair<string, PluginObject*>(name, new PluginObject(Directory::join(_pluginDirectory, name + ".conf"), this)));
+    }
 }
 
 vector<string> AbstractPluginManager::nameList() const {
@@ -151,10 +167,18 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     /* Plugin with given name doesn't exist */
     if(found == plugins()->end()) return NotFound;
 
-    PluginObject& plugin = *found->second;
-
     /* Plugin doesn't belong to this manager */
-    if(plugin.manager != this) return NotFound;
+    if(found->second->manager != this) return NotFound;
+
+    /* Before loading reload its metadata and if it is not found,
+        remove it from the list */
+    if(!reloadPluginMetadata(found)) {
+        delete found->second;
+        plugins()->erase(found);
+        return NotFound;
+    }
+
+    PluginObject& plugin = *found->second;
 
     /* Plugin is not ready to load */
     if(!(plugin.loadState & (NotLoaded)))
@@ -241,31 +265,63 @@ AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& nam
     /* Plugin doesn't belong to this manager */
     if(plugin.manager != this) return NotFound;
 
-    /* Plugin is not loaded or is static, nothing to do */
-    if(plugin.loadState & ~(LoadOk|UnloadFailed)) return plugin.loadState;
+    /* Only unload loaded plugin */
+    if(plugin.loadState & (LoadOk|UnloadFailed)) {
+        /* Plugin has active instance, don't unload */
+        if(instances.find(name) != instances.end()) return IsUsed;
 
-    /* Plugin has active instance, don't unload */
-    if(instances.find(name) != instances.end()) return IsUsed;
+        /* Plugin is used by another plugin, don't unload */
+        if(!plugin.metadata.usedBy().empty()) return IsRequired;
 
-    /* Plugin is used by another plugin, don't unload */
-    if(!plugin.metadata.usedBy().empty()) return IsRequired;
+        /* Remove this plugin from "used by" column of dependencies */
+        for(vector<string>::const_iterator it = plugin.metadata.depends().begin(); it != plugin.metadata.depends().end(); ++it)
+            plugins()->find(*it)->second->metadata.removeUsedBy(name);
 
-    /* Remove this plugin from "used by" column of dependencies */
-    for(vector<string>::const_iterator it = plugin.metadata.depends().begin(); it != plugin.metadata.depends().end(); ++it)
-        plugins()->find(*it)->second->metadata.removeUsedBy(name);
+        #ifndef _WIN32
+        if(dlclose(plugin.module) != 0) {
+        #else
+        if(!FreeLibrary(plugin.module)) {
+        #endif
+            cerr << "Cannot unload plugin '" << name << "': " << dlerror() << endl;
+            plugin.loadState = UnloadFailed;
+            return plugin.loadState;
+        }
 
-    #ifndef _WIN32
-    if(dlclose(plugin.module) != 0) {
-    #else
-    if(!FreeLibrary(plugin.module)) {
-    #endif
-        cerr << "Cannot unload plugin '" << name << "': " << dlerror() << endl;
-        plugin.loadState = UnloadFailed;
-        return plugin.loadState;
+        plugin.loadState = NotLoaded;
     }
 
-    plugin.loadState = NotLoaded;
-    return plugin.loadState;
+    /* After successful unload, reload its metadata and if it is not found,
+        remove it from the list */
+    if(!reloadPluginMetadata(found)) {
+        delete found->second;
+        plugins()->erase(found);
+        return NotLoaded;
+    }
+
+    /* Return directly the load state, as 'plugin' reference was deleted by
+        reloadPluginMetadata() */
+    return found->second->loadState;
+}
+
+AbstractPluginManager::LoadState AbstractPluginManager::reload(const std::string& name) {
+    /* If the plugin is not loaded, just reload its metadata */
+    if(loadState(name) == NotLoaded) {
+        map<string, PluginObject*>::iterator found = plugins()->find(name);
+
+        /* If the plugin is not found, remove it from the list */
+        if(!reloadPluginMetadata(found)) {
+            delete found->second;
+            plugins()->erase(found);
+        }
+
+        return NotLoaded;
+
+    /* Else try unload and load */
+    } else {
+        LoadState l = unload(name);
+        if(l != NotLoaded) return l;
+        return load(name);
+    }
 }
 
 void AbstractPluginManager::registerInstance(const string& name, Plugin* instance, const Configuration** configuration, const PluginMetadata** metadata) {
@@ -310,6 +366,22 @@ void AbstractPluginManager::unregisterInstance(const string& name, Plugin* insta
     _instances.erase(pos);
 
     if(_instances.size() == 0) instances.erase(name);
+}
+
+bool AbstractPluginManager::reloadPluginMetadata(map<string, PluginObject*>::iterator it) {
+    /* Don't reload metadata of alien or loaded plugins */
+    if(it->second->manager != this || (it->second->loadState & (LoadOk|IsStatic)))
+        return true;
+
+    /* If plugin binary doesn't exist, schedule the entry for deletion */
+    if(!Directory::fileExists(Directory::join(_pluginDirectory, PLUGIN_FILENAME_PREFIX + it->first + PLUGIN_FILENAME_SUFFIX)))
+        return false;
+
+    /* Reload plugin metadata */
+    delete it->second;
+    it->second = new PluginObject(Directory::join(_pluginDirectory, it->first + ".conf"), this);
+
+    return true;
 }
 
 } namespace Utility {

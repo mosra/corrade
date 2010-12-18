@@ -150,7 +150,9 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          *      with the same name as another static plugin are skipped.
          * @see PluginManager::nameList()
          */
-        AbstractPluginManager(const std::string& pluginDirectory);
+        inline AbstractPluginManager(const std::string& pluginDirectory): _pluginDirectory(pluginDirectory) {
+            reloadPluginDirectory();
+        }
 
         /**
          * @brief Destructor
@@ -161,6 +163,27 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
 
         /** @brief %Plugin directory */
         inline std::string pluginDirectory() const { return _pluginDirectory; }
+
+        /**
+         * @brief Set another plugin directory
+         * @param directory     Plugin directory
+         *
+         * @see reloadPluginDirectory()
+         */
+        inline void setPluginDirectory(const std::string& directory) {
+            _pluginDirectory = directory;
+            reloadPluginDirectory();
+        }
+
+        /**
+         * @brief Reload plugin directory
+         *
+         * Keeps loaded plugins untouched, removes unloaded plugins which are
+         * not existing anymore and adds newly found plugins.
+         *
+         * @see reload()
+         */
+        virtual void reloadPluginDirectory();
 
         /** @brief List of all available plugin names */
         std::vector<std::string> nameList() const;
@@ -205,10 +228,22 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          *      AbstractPluginManager::IsRequired or
          *      AbstractPluginManager::IsStatic on failure.
          *
-         * Checks whether a plugin is loaded, if yes, tries to unload it. If the
-         * plugin is not loaded, returns its current load state.
+         * Checks whether a plugin is loaded, if yes, tries to unload it and if
+         * unload is successful, reloads its metadata. If the plugin is not
+         * loaded, reloads its metadata and then returns its current load
+         * state.
          */
         virtual LoadState unload(const std::string& name);
+
+        /**
+         * @brief Reload a plugin
+         * @return NotLoaded if the plugin was not loaded before, see load() and
+         *      unload() for other values.
+         *
+         * If the plugin is loaded, unloads it, reloads its metadata and then
+         * loads it again. If the plugin is unloaded, only reloads its metadata.
+         */
+        LoadState reload(const std::string& name);
 
     protected:
         /**
@@ -290,6 +325,17 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          * Initialization Order Fiasco".
          */
         static std::map<std::string, PluginObject*>* plugins();
+
+        /**
+         * @brief Reload plugin metadata
+         * @param it        Iterator pointing to plugin object
+         * @return False if plugin is not loaded and binary cannot be found,
+         *      true otherwise.
+         *
+         * If the plugin is unloaded and belongs to current manager, checks
+         * whether the plugin exists and reloads its metadata.
+         */
+        virtual bool reloadPluginMetadata(std::map<std::string, PluginObject*>::iterator it);
 
     private:
         std::map<std::string, std::vector<Plugin*> > instances;

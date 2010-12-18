@@ -16,9 +16,11 @@
 #include "PluginTest.h"
 
 #include <QtTest/QTest>
+#include <QtCore/QFile>
 
 #include "Utility/Directory.h"
 #include "PluginTestConfigure.h"
+#include "AbstractPluginManagerConfigure.h"
 
 QTEST_APPLESS_MAIN(Kompas::PluginManager::Test::PluginTest)
 
@@ -169,6 +171,83 @@ void PluginTest::crossManagerDependencies() {
     QVERIFY(foodManager->unload("HotDog") == AbstractPluginManager::NotLoaded);
     QVERIFY(manager->unload("Dog") == AbstractPluginManager::NotLoaded);
     QVERIFY(manager->metadata("Dog")->usedBy().size() == 0);
+}
+
+void PluginTest::reloadPluginDirectory() {
+    /* Load Dog and rename the plugin */
+    QVERIFY(manager->load("Dog") == AbstractPluginManager::LoadOk);
+    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, PLUGIN_FILENAME_PREFIX + string("Dog") + PLUGIN_FILENAME_SUFFIX)),
+                  QString::fromStdString(Directory::join(PLUGINS_DIR, PLUGIN_FILENAME_PREFIX + string("LostDog") + PLUGIN_FILENAME_SUFFIX)));
+    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, "Dog.conf")),
+                  QString::fromStdString(Directory::join(PLUGINS_DIR, "LostDog.conf")));
+
+    /* Rename Chihuahua */
+    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, PLUGIN_FILENAME_PREFIX + string("Chihuahua") + PLUGIN_FILENAME_SUFFIX)),
+                  QString::fromStdString(Directory::join(PLUGINS_DIR, PLUGIN_FILENAME_PREFIX + string("LostChihuahua") + PLUGIN_FILENAME_SUFFIX)));
+    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, "Chihuahua.conf")),
+                  QString::fromStdString(Directory::join(PLUGINS_DIR, "LostChihuahua.conf")));
+
+    /* Reload plugin dir and check new name list */
+    manager->reloadPluginDirectory();
+
+    QStringList expected1, actual1;
+    expected1 << "Canary" << "Dog" << "LostChihuahua" << "LostDog" << "Snail";
+
+    vector<string> names = manager->nameList();
+    for(vector<string>::const_iterator it = names.begin(); it != names.end(); ++it)
+        actual1.append(QString::fromStdString(*it));
+
+    /* Unload Dog and it should disappear from the list */
+    QVERIFY(manager->unload("Dog") == AbstractPluginManager::NotLoaded);
+
+    QStringList expected2 = expected1, actual2;
+    expected2.removeAll("Dog");
+    names = manager->nameList();
+    for(vector<string>::const_iterator it = names.begin(); it != names.end(); ++it)
+        actual2.append(QString::fromStdString(*it));
+
+    /* Rename everything back and clean up */
+    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, PLUGIN_FILENAME_PREFIX + string("LostDog") + PLUGIN_FILENAME_SUFFIX)),
+                  QString::fromStdString(Directory::join(PLUGINS_DIR, PLUGIN_FILENAME_PREFIX + string("Dog") + PLUGIN_FILENAME_SUFFIX)));
+    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, "LostDog.conf")),
+                  QString::fromStdString(Directory::join(PLUGINS_DIR, "Dog.conf")));
+
+    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, PLUGIN_FILENAME_PREFIX + string("LostChihuahua") + PLUGIN_FILENAME_SUFFIX)),
+                  QString::fromStdString(Directory::join(PLUGINS_DIR, PLUGIN_FILENAME_PREFIX + string("Chihuahua") + PLUGIN_FILENAME_SUFFIX)));
+    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, "LostChihuahua.conf")),
+                  QString::fromStdString(Directory::join(PLUGINS_DIR, "Chihuahua.conf")));
+
+    manager->reloadPluginDirectory();
+
+    /* And now we can safely compare */
+    QCOMPARE(actual1, expected1);
+    QCOMPARE(actual2, expected2);
+}
+
+void PluginTest::reload() {
+    /* Keep dog sleeping */
+    QVERIFY(manager->loadState("Dog") == AbstractPluginManager::NotLoaded);
+
+    /* Rename him */
+    Configuration conf(Directory::join(PLUGINS_DIR, "Dog.conf"));
+    conf.group("metadata")->setValue<string>("name", "Angry Beast");
+    conf.save();
+
+    /* Is dog still sleeping? */
+    QVERIFY(manager->reload("Dog") == AbstractPluginManager::NotLoaded);
+
+    /* Clean everything up before parents come home */
+    conf.group("metadata")->setValue<string>("name", "A simple dog plugin");
+    conf.save();
+
+    /* And silently scare yourself to death */
+    QVERIFY(*manager->metadata("Dog")->name() == "Angry Beast");
+
+    /* Nightmare continues, try to really load dog */
+    QVERIFY(manager->load("Dog") == AbstractPluginManager::LoadOk);
+
+    /* Hopefully, Angry Beast was only a bad dream */
+    QVERIFY(*manager->metadata("Dog")->name() == "A simple dog plugin");
 }
 
 }}}

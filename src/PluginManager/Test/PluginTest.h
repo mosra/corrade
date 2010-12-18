@@ -40,6 +40,9 @@ class PluginTest: public QObject {
         void dynamicPlugin();
         void hierarchy();
         void crossManagerDependencies();
+
+        void reloadPluginDirectory();
+        void reload();
 };
 
 }}}
