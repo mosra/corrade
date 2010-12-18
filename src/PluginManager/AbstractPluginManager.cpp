@@ -312,4 +312,35 @@ void AbstractPluginManager::unregisterInstance(const string& name, Plugin* insta
     if(_instances.size() == 0) instances.erase(name);
 }
 
+} namespace Utility {
+
+using namespace PluginManager;
+
+Debug& operator<<(Debug debug, AbstractPluginManager::LoadState value) {
+    string _value;
+    switch(value) {
+        #define ls(state) case AbstractPluginManager::state: _value = #state; break;
+        ls(NotFound)
+        ls(WrongPluginVersion)
+        ls(WrongInterfaceVersion)
+        ls(WrongMetadataFile)
+        ls(UnresolvedDependency)
+        ls(LoadFailed)
+        ls(LoadOk)
+        ls(NotLoaded)
+        ls(UnloadFailed)
+        ls(IsRequired)
+        ls(IsStatic)
+        ls(IsUsed)
+        #undef ls
+
+        default:
+            ostringstream o;
+            o << value;
+            _value = o.str();
+    }
+
+    return debug << "LoadState(" + _value + ')';
+}
+
 }}

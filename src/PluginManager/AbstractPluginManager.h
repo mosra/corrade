@@ -31,6 +31,7 @@
 #include "PluginMetadata.h"
 #include "Utility/utilities.h"
 #include "Utility/Resource.h"
+#include "Utility/Debug.h"
 
 /** @brief Plugin version */
 #define PLUGIN_VERSION 1
@@ -320,6 +321,10 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
     extern int pluginInitializer_##name();                                    \
     pluginInitializer_##name();                                               \
     RESOURCE_INITIALIZE(name)
+
+} namespace Utility {
+
+Debug& operator<<(Debug debug, PluginManager::AbstractPluginManager::LoadState value);
 
 }}
 
