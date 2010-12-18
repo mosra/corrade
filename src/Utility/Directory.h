@@ -108,6 +108,14 @@ class UTILITY_EXPORT Directory: public std::vector<std::string> {
         static std::string configurationDir(const std::string& name, bool createIfNotExists = true);
 
         /**
+         * @brief Check if the file exists
+         * @param filename          Filename
+         * @return Whether the file exists and is accessible (e.g. user has
+         *      permission to open it).
+         */
+        static bool fileExists(const std::string& filename);
+
+        /**
          * @brief Constructor
          * @param path      %Directory path
          * @param flags     Listing flags. See Directory::Flags. If no flag is

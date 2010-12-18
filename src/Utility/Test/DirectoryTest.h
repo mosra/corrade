@@ -35,6 +35,8 @@ class DirectoryTest: public QObject {
         void mkpath_data();
         void mkpath();
 
+        void fileExists();
+
         void home();
         void configurationDir();
 

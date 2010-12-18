@@ -89,6 +89,13 @@ bool Directory::mkpath(const std::string& _path) {
     return false;
 }
 
+bool Directory::fileExists(const std::string& filename) {
+  struct stat fileInfo;
+
+  if(stat(filename.c_str(), &fileInfo) == 0) return true;
+  return false;
+}
+
 string Directory::home() {
     /** @todo @c VERSION-0.1 Fix for WIN32 */
     char* h = getenv("HOME");

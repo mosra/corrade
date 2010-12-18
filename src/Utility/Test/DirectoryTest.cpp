@@ -107,6 +107,11 @@ void DirectoryTest::mkpath() {
     QVERIFY(dir.exists(path));
 }
 
+void DirectoryTest::fileExists() {
+    QVERIFY(Directory::fileExists(Directory::join(DIRECTORY_TEST_DIR, "file")));
+    QVERIFY(!Directory::fileExists(Directory::join(DIRECTORY_TEST_DIR, "inexistentFile")));
+}
+
 void DirectoryTest::home() {
     QCOMPARE(QString::fromStdString(Directory::home()), QDir::homePath());
 }
