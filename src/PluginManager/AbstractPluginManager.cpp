@@ -355,7 +355,6 @@ void AbstractPluginManager::unregisterInstance(const string& name, Plugin* insta
     /* Plugin doesn't belong to this manager, nothing to do */
     if(foundPlugin->second->manager != this) return;
 
-    /** @todo Emit error when unregistering nonexistent instance */
     map<string, vector<Plugin*> >::iterator foundInstance = instances.find(name);
     if(foundInstance == instances.end()) return;
     vector<Plugin*>& _instances = foundInstance->second;
