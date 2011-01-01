@@ -19,6 +19,10 @@
 #include <sys/stat.h>
 #include <algorithm>
 
+#ifdef _WIN32
+#include <shlobj.h>
+#endif
+
 #include "utilities.h"
 
 using namespace std;
@@ -97,20 +101,34 @@ bool Directory::fileExists(const std::string& filename) {
 }
 
 string Directory::home() {
-    /** @todo @c VERSION-0.1 Fix for WIN32 */
+    #ifndef _WIN32
     char* h = getenv("HOME");
     if(!h) return "";
-    else return h;
+    #else
+    /** @bug Doesn't work at all */
+    TCHAR h[MAX_PATH];
+    if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, h)))
+        return "";
+    #endif
+
+    return h;
 }
 
 string Directory::configurationDir(const std::string& applicationName, bool createIfNotExists) {
-    /** @todo @c VERSION-0.1 Fix for WIN32 -- it's $ENV{AppData} in CMake */
+    #ifndef _WIN32
     string h = home();
     if(h.empty()) return "";
+    string dir = join(h, '.' + lowercase(applicationName));
+    #else
+    TCHAR path[MAX_PATH];
+    if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path)))
+        return "";
+    string appdata = path;
+    if(appdata.empty()) return "";
+    string dir = join(appdata, applicationName);
+    #endif
 
-    string dir = join(home(), '.' + lowercase(applicationName));
     if(createIfNotExists) mkpath(dir);
-
     return dir;
 }
 

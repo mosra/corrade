@@ -104,6 +104,11 @@ class UTILITY_EXPORT Directory: public std::vector<std::string> {
          * @brief Get application configuration dir
          * @param name              Application name
          * @param createIfNotExists Create the directory, if not exists already
+         *
+         * On Unix, the configuration dir is <tt>~/.<em>name</em></tt> (name is
+         * lowercased), on Windows the configuration dir is somewhere in
+         * <tt>C:/Document and Settings/user/Application Data/<em>name</em></tt>
+         * (name is left as is).
          */
         static std::string configurationDir(const std::string& name, bool createIfNotExists = true);
 
