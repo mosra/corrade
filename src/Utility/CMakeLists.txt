@@ -31,7 +31,10 @@ if(USE_FPIC)
 endif()
 
 install(TARGETS KompasUtility DESTINATION ${KOMPAS_LIBRARY_INSTALL_DIR})
-install(TARGETS kompas-rc DESTINATION ${KOMPAS_BINARY_INSTALL_DIR})
+
+if(NOT WIN32)
+    install(TARGETS kompas-rc DESTINATION ${KOMPAS_BINARY_INSTALL_DIR})
+endif()
 
 if(BUILD_TESTS)
     enable_testing()
