@@ -125,7 +125,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
 
         /**
          * @brief Register static plugin
-         * @param name              Static plugin name (defined with
+         * @param plugin            Plugin (name defined with
          *      PLUGIN_REGISTER_STATIC())
          * @param _version          %Plugin version (must be the same as
          *      AbstractPluginManager::version)
@@ -135,7 +135,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          * Used internally by PLUGIN_IMPORT() macro. There is absolutely no
          * need to use this directly.
          */
-        static void importStaticPlugin(const std::string& name, int _version, const std::string& interface, void* (*instancer)(AbstractPluginManager*, const std::string&));
+        static void importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, void* (*instancer)(AbstractPluginManager*, const std::string&));
 
         /**
          * @brief Constructor
@@ -186,27 +186,27 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
         virtual void reloadPluginDirectory();
 
         /** @brief List of all available plugin names */
-        std::vector<std::string> nameList() const;
+        std::vector<std::string> pluginList() const;
 
         /**
          * @brief %Plugin metadata
-         * @param name              %Plugin name
+         * @param plugin            %Plugin
          * @return Pointer to plugin metadata
          */
-        const PluginMetadata* metadata(const std::string& name) const;
+        const PluginMetadata* metadata(const std::string& plugin) const;
 
         /**
          * @brief Load state of a plugin
-         * @param name              %Plugin name
+         * @param plugin            %Plugin
          * @return Load state of a plugin
          *
          * Static plugins always have AbstractPluginManager::IsStatic state.
          */
-        LoadState loadState(const std::string& name) const;
+        LoadState loadState(const std::string& plugin) const;
 
         /**
          * @brief Load a plugin
-         * @param name              %Plugin name
+         * @param _plugin           %Plugin
          * @return AbstractPluginManager::LoadOk on success,
          *      AbstractPluginManager::NotFound,
          *      AbstractPluginManager::WrongPluginVersion,
@@ -218,11 +218,11 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          * tries to load it. If the plugin has any dependencies, they are
          * recursively processed before loading given plugin.
          */
-        virtual LoadState load(const std::string& name);
+        virtual LoadState load(const std::string& _plugin);
 
         /**
          * @brief Unload a plugin
-         * @param name              %Plugin name
+         * @param _plugin           %Plugin
          * @return AbstractPluginManager::NotLoaded on success,
          *      AbstractPluginManager::UnloadFailed,
          *      AbstractPluginManager::IsRequired or
@@ -233,7 +233,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          * loaded, reloads its metadata and then returns its current load
          * state.
          */
-        virtual LoadState unload(const std::string& name);
+        virtual LoadState unload(const std::string& _plugin);
 
         /**
          * @brief Reload a plugin
@@ -243,7 +243,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          * If the plugin is loaded, unloads it, reloads its metadata and then
          * loads it again. If the plugin is unloaded, only reloads its metadata.
          */
-        LoadState reload(const std::string& name);
+        LoadState reload(const std::string& plugin);
 
     protected:
         /**
@@ -340,8 +340,8 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
     private:
         std::map<std::string, std::vector<Plugin*> > instances;
 
-        void registerInstance(const std::string& name, Plugin* instance, const Utility::Configuration** configuration, const PluginMetadata** metadata);
-        void unregisterInstance(const std::string& name, Plugin* instance);
+        void registerInstance(const std::string& plugin, Plugin* instance, const Utility::Configuration** configuration, const PluginMetadata** metadata);
+        void unregisterInstance(const std::string& plugin, Plugin* instance);
 };
 
 /**

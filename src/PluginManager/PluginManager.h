@@ -53,22 +53,22 @@ template<class T> class PluginManager: public AbstractPluginManager {
 
         /**
          * @brief %Plugin class instance
-         * @param name              %Plugin name
+         * @param _plugin           %Plugin
          * @return Pointer to new instance of plugin class, zero on error
          *
          * Creates new instance of plugin class, if possible. If the plugin is
          * not successfully loaded, returns zero pointer.
          */
-        T* instance(const std::string& name) {
+        T* instance(const std::string& _plugin) {
             /* Plugin with given name doesn't exist */
-            if(plugins()->find(name) == plugins()->end()) return 0;
+            if(plugins()->find(_plugin) == plugins()->end()) return 0;
 
-            PluginObject& plugin = *plugins()->at(name);
+            PluginObject& plugin = *plugins()->at(_plugin);
 
             /* Plugin is not successfully loaded */
             if(!(plugin.loadState & (LoadOk|IsStatic))) return 0;
 
-            return static_cast<T*>(plugin.instancer(this, name));
+            return static_cast<T*>(plugin.instancer(this, _plugin));
         }
 };
 

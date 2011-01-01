@@ -43,7 +43,7 @@ void PluginTest::nameList() {
     QStringList expected, actual;
     expected << "Canary" << "Chihuahua" << "Dog" << "Snail";
 
-    vector<string> names = manager->nameList();
+    vector<string> names = manager->pluginList();
     for(vector<string>::const_iterator it = names.begin(); it != names.end(); ++it) {
         actual.append(QString::fromStdString(*it));
     }
@@ -57,7 +57,7 @@ void PluginTest::nameList() {
     QStringList expected2;
     expected2 << "Canary";
     actual.clear();
-    names = manager->nameList();
+    names = manager->pluginList();
     for(vector<string>::const_iterator it = names.begin(); it != names.end(); ++it) {
         actual.append(QString::fromStdString(*it));
     }
@@ -193,7 +193,7 @@ void PluginTest::reloadPluginDirectory() {
     QStringList expected1, actual1;
     expected1 << "Canary" << "Dog" << "LostChihuahua" << "LostDog" << "Snail";
 
-    vector<string> names = manager->nameList();
+    vector<string> names = manager->pluginList();
     for(vector<string>::const_iterator it = names.begin(); it != names.end(); ++it)
         actual1.append(QString::fromStdString(*it));
 
@@ -202,7 +202,7 @@ void PluginTest::reloadPluginDirectory() {
 
     QStringList expected2 = expected1, actual2;
     expected2.removeAll("Dog");
-    names = manager->nameList();
+    names = manager->pluginList();
     for(vector<string>::const_iterator it = names.begin(); it != names.end(); ++it)
         actual2.append(QString::fromStdString(*it));
 

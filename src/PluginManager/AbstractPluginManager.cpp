@@ -44,15 +44,15 @@ map<string, AbstractPluginManager::PluginObject*>* AbstractPluginManager::plugin
     return _plugins;
 }
 
-void AbstractPluginManager::importStaticPlugin(const string& name, int _version, const std::string& interface, void* (*instancer)(AbstractPluginManager*, const std::string&)) {
+void AbstractPluginManager::importStaticPlugin(const string& plugin, int _version, const std::string& interface, void* (*instancer)(AbstractPluginManager*, const std::string&)) {
     if(_version != version) return;
 
     /* Load static plugin metadata */
     Resource r("plugins");
-    std::istringstream metadata(r.get(name + ".conf"));
+    std::istringstream metadata(r.get(plugin + ".conf"));
 
     /* Insert plugin to list */
-    plugins()->insert(pair<string, PluginObject*>(name, new PluginObject(metadata, interface, instancer)));
+    plugins()->insert(pair<string, PluginObject*>(plugin, new PluginObject(metadata, interface, instancer)));
 }
 
 AbstractPluginManager::~AbstractPluginManager() {
@@ -125,7 +125,7 @@ void AbstractPluginManager::reloadPluginDirectory() {
     }
 }
 
-vector<string> AbstractPluginManager::nameList() const {
+vector<string> AbstractPluginManager::pluginList() const {
     vector<string> names;
     for(map<string, PluginObject*>::const_iterator i = plugins()->begin(); i != plugins()->end(); ++i) {
 
@@ -137,8 +137,8 @@ vector<string> AbstractPluginManager::nameList() const {
     return names;
 }
 
-const PluginMetadata* AbstractPluginManager::metadata(const string& name) const {
-    map<string, PluginObject*>::const_iterator found = plugins()->find(name);
+const PluginMetadata* AbstractPluginManager::metadata(const string& plugin) const {
+    map<string, PluginObject*>::const_iterator found = plugins()->find(plugin);
 
     /* Plugin with given name doesn't exist */
     if(found == plugins()->end()) return 0;
@@ -149,8 +149,8 @@ const PluginMetadata* AbstractPluginManager::metadata(const string& name) const 
     return &found->second->metadata;
 }
 
-AbstractPluginManager::LoadState AbstractPluginManager::loadState(const std::string& name) const {
-    map<string, PluginObject*>::const_iterator found = plugins()->find(name);
+AbstractPluginManager::LoadState AbstractPluginManager::loadState(const std::string& plugin) const {
+    map<string, PluginObject*>::const_iterator found = plugins()->find(plugin);
 
     /* Plugin with given name doesn't exist */
     if(found == plugins()->end()) return NotFound;
@@ -161,8 +161,8 @@ AbstractPluginManager::LoadState AbstractPluginManager::loadState(const std::str
     return found->second->loadState;
 }
 
-AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name) {
-    map<string, PluginObject*>::iterator found = plugins()->find(name);
+AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plugin) {
+    map<string, PluginObject*>::iterator found = plugins()->find(_plugin);
 
     /* Plugin with given name doesn't exist */
     if(found == plugins()->end()) return NotFound;
@@ -192,10 +192,10 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
         if(found == plugins()->end() || !found->second->manager || !(found->second->manager->load(*it) & (LoadOk|IsStatic)))
             return UnresolvedDependency;
 
-        found->second->metadata.addUsedBy(name);
+        found->second->metadata.addUsedBy(_plugin);
     }
 
-    string filename = Directory::join(_pluginDirectory, PLUGIN_FILENAME_PREFIX + name + PLUGIN_FILENAME_SUFFIX);
+    string filename = Directory::join(_pluginDirectory, PLUGIN_FILENAME_PREFIX + _plugin + PLUGIN_FILENAME_SUFFIX);
 
     /* Open plugin file, make symbols available for next libs (which depends on this) */
     #ifndef _WIN32
@@ -205,7 +205,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     #endif
     if(!handle) {
         cerr << "Cannot open plugin file \""
-             << _pluginDirectory + PLUGIN_FILENAME_PREFIX + name + PLUGIN_FILENAME_SUFFIX
+             << _pluginDirectory + PLUGIN_FILENAME_PREFIX + _plugin + PLUGIN_FILENAME_SUFFIX
              << "\": " << dlerror() << endl;
         plugin.loadState = LoadFailed;
         return plugin.loadState;
@@ -214,7 +214,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     /* Check plugin version */
     int (*_version)(void) = reinterpret_cast<int(*)()>(dlsym(handle, "pluginVersion"));
     if(_version == 0) {
-        cerr << "Cannot get version of plugin '" << name << "': " << dlerror() << endl;
+        cerr << "Cannot get version of plugin '" << _plugin << "': " << dlerror() << endl;
         dlclose(handle);
         plugin.loadState = LoadFailed;
         return plugin.loadState;
@@ -228,7 +228,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     /* Check interface string */
     string (*interface)() = reinterpret_cast<string (*)()>(dlsym(handle, "pluginInterface"));
     if(interface == 0) {
-        cerr << "Cannot get interface string of plugin '" << name << "': " << dlerror() << endl;
+        cerr << "Cannot get interface string of plugin '" << _plugin << "': " << dlerror() << endl;
         dlclose(handle);
         plugin.loadState = LoadFailed;
         return plugin.loadState;
@@ -242,7 +242,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     /* Load plugin instancer */
     void* (*instancer)(AbstractPluginManager*, const std::string&) = reinterpret_cast<void* (*)(AbstractPluginManager*, const std::string&)>(dlsym(handle, "pluginInstancer"));
     if(instancer == 0) {
-        cerr << "Cannot get instancer of plugin '" << name << "': " << dlerror() << endl;
+        cerr << "Cannot get instancer of plugin '" << _plugin << "': " << dlerror() << endl;
         dlclose(handle);
         plugin.loadState = LoadFailed;
         return plugin.loadState;
@@ -254,8 +254,8 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& name)
     return plugin.loadState;
 }
 
-AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& name) {
-    map<string, PluginObject*>::iterator found = plugins()->find(name);
+AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& _plugin) {
+    map<string, PluginObject*>::iterator found = plugins()->find(_plugin);
 
     /* Plugin with given name doesn't exist */
     if(found == plugins()->end()) return NotFound;
@@ -268,21 +268,21 @@ AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& nam
     /* Only unload loaded plugin */
     if(plugin.loadState & (LoadOk|UnloadFailed)) {
         /* Plugin has active instance, don't unload */
-        if(instances.find(name) != instances.end()) return IsUsed;
+        if(instances.find(_plugin) != instances.end()) return IsUsed;
 
         /* Plugin is used by another plugin, don't unload */
         if(!plugin.metadata.usedBy().empty()) return IsRequired;
 
         /* Remove this plugin from "used by" column of dependencies */
         for(vector<string>::const_iterator it = plugin.metadata.depends().begin(); it != plugin.metadata.depends().end(); ++it)
-            plugins()->find(*it)->second->metadata.removeUsedBy(name);
+            plugins()->find(*it)->second->metadata.removeUsedBy(_plugin);
 
         #ifndef _WIN32
         if(dlclose(plugin.module) != 0) {
         #else
         if(!FreeLibrary(plugin.module)) {
         #endif
-            cerr << "Cannot unload plugin '" << name << "': " << dlerror() << endl;
+            cerr << "Cannot unload plugin '" << _plugin << "': " << dlerror() << endl;
             plugin.loadState = UnloadFailed;
             return plugin.loadState;
         }
@@ -303,10 +303,10 @@ AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& nam
     return found->second->loadState;
 }
 
-AbstractPluginManager::LoadState AbstractPluginManager::reload(const std::string& name) {
+AbstractPluginManager::LoadState AbstractPluginManager::reload(const std::string& plugin) {
     /* If the plugin is not loaded, just reload its metadata */
-    if(loadState(name) == NotLoaded) {
-        map<string, PluginObject*>::iterator found = plugins()->find(name);
+    if(loadState(plugin) == NotLoaded) {
+        map<string, PluginObject*>::iterator found = plugins()->find(plugin);
 
         /* If the plugin is not found, remove it from the list */
         if(!reloadPluginMetadata(found)) {
@@ -318,14 +318,14 @@ AbstractPluginManager::LoadState AbstractPluginManager::reload(const std::string
 
     /* Else try unload and load */
     } else {
-        LoadState l = unload(name);
+        LoadState l = unload(plugin);
         if(l != NotLoaded) return l;
-        return load(name);
+        return load(plugin);
     }
 }
 
-void AbstractPluginManager::registerInstance(const string& name, Plugin* instance, const Configuration** configuration, const PluginMetadata** metadata) {
-    map<string, PluginObject*>::const_iterator foundPlugin = plugins()->find(name);
+void AbstractPluginManager::registerInstance(const string& plugin, Plugin* instance, const Configuration** configuration, const PluginMetadata** metadata) {
+    map<string, PluginObject*>::const_iterator foundPlugin = plugins()->find(plugin);
 
     /* Given plugin doesn't exist, nothing to do */
     if(foundPlugin == plugins()->end()) return;
@@ -333,11 +333,11 @@ void AbstractPluginManager::registerInstance(const string& name, Plugin* instanc
     /* Plugin doesn't belong to this manager, nothing to do */
     if(foundPlugin->second->manager != this) return;
 
-    map<string, vector<Plugin*> >::iterator foundInstance = instances.find(name);
+    map<string, vector<Plugin*> >::iterator foundInstance = instances.find(plugin);
 
     if(foundInstance == instances.end()) {
         foundInstance = instances.insert(pair<string, vector<Plugin* > >
-            (name, vector<Plugin*>())).first;
+            (plugin, vector<Plugin*>())).first;
     }
 
     foundInstance->second.push_back(instance);
@@ -346,8 +346,8 @@ void AbstractPluginManager::registerInstance(const string& name, Plugin* instanc
     *metadata = &foundPlugin->second->metadata;
 }
 
-void AbstractPluginManager::unregisterInstance(const string& name, Plugin* instance) {
-    map<string, PluginObject*>::const_iterator foundPlugin = plugins()->find(name);
+void AbstractPluginManager::unregisterInstance(const string& plugin, Plugin* instance) {
+    map<string, PluginObject*>::const_iterator foundPlugin = plugins()->find(plugin);
 
     /* Given plugin doesn't exist, nothing to do */
     if(foundPlugin == plugins()->end()) return;
@@ -355,7 +355,7 @@ void AbstractPluginManager::unregisterInstance(const string& name, Plugin* insta
     /* Plugin doesn't belong to this manager, nothing to do */
     if(foundPlugin->second->manager != this) return;
 
-    map<string, vector<Plugin*> >::iterator foundInstance = instances.find(name);
+    map<string, vector<Plugin*> >::iterator foundInstance = instances.find(plugin);
     if(foundInstance == instances.end()) return;
     vector<Plugin*>& _instances = foundInstance->second;
 
@@ -364,7 +364,7 @@ void AbstractPluginManager::unregisterInstance(const string& name, Plugin* insta
 
     _instances.erase(pos);
 
-    if(_instances.size() == 0) instances.erase(name);
+    if(_instances.size() == 0) instances.erase(plugin);
 }
 
 bool AbstractPluginManager::reloadPluginMetadata(map<string, PluginObject*>::iterator it) {
