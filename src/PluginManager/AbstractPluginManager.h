@@ -217,6 +217,8 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          * Checks whether a plugin is loaded, if not and loading is possible,
          * tries to load it. If the plugin has any dependencies, they are
          * recursively processed before loading given plugin.
+         *
+         * Calls reloadPluginMetadata().
          */
         virtual LoadState load(const std::string& _plugin);
 
@@ -232,6 +234,8 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          * unload is successful, reloads its metadata. If the plugin is not
          * loaded, reloads its metadata and then returns its current load
          * state.
+         *
+         * Calls reloadPluginMetadata().
          */
         virtual LoadState unload(const std::string& _plugin);
 
@@ -242,6 +246,8 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          *
          * If the plugin is loaded, unloads it, reloads its metadata and then
          * loads it again. If the plugin is unloaded, only reloads its metadata.
+         *
+         * Calls reloadPluginMetadata().
          */
         LoadState reload(const std::string& plugin);
 
@@ -334,6 +340,8 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          *
          * If the plugin is unloaded and belongs to current manager, checks
          * whether the plugin exists and reloads its metadata.
+         *
+         * Called from load(), unload() and reload().
          */
         virtual bool reloadPluginMetadata(std::map<std::string, PluginObject*>::iterator it);
 
