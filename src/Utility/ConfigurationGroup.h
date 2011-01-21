@@ -142,7 +142,7 @@ class UTILITY_EXPORT ConfigurationGroup {
          * @brief Remove group
          * @param name      Name of the group
          * @param number    Number of the group. Default is first found group.
-         * @return Whether the groups were removed. (see above or flag
+         * @return Whether the group was removed (see above or flag
          *      Connfiguration::ReadOnly).
          */
         bool removeGroup(const std::string& name, unsigned int number = 0);
