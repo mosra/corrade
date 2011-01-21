@@ -99,9 +99,6 @@ ConfigurationGroup* ConfigurationGroup::addGroup(const std::string& name) {
 bool ConfigurationGroup::removeGroup(const std::string& name, unsigned int number) {
     if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid)) return false;
 
-    /* Global group cannot be removed */
-    if(name == "") return false;
-
     /* Find group with given number and name */
     unsigned int foundNumber = 0;
     for(vector<ConfigurationGroup*>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
@@ -131,9 +128,6 @@ bool ConfigurationGroup::removeGroup(ConfigurationGroup* group) {
 
 bool ConfigurationGroup::removeAllGroups(const std::string& name) {
     if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid)) return false;
-
-    /* Global group cannot be removed */
-    if(name == "") return false;
 
     for(int i = _groups.size()-1; i >= 0; --i) {
         if(_groups[i]->name() == name) _groups.erase(_groups.begin()+i);
