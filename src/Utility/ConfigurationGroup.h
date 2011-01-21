@@ -148,6 +148,14 @@ class UTILITY_EXPORT ConfigurationGroup {
         bool removeGroup(const std::string& name, unsigned int number = 0);
 
         /**
+         * @brief Remove group
+         * @param group     Pointer to the group
+         * @return Whether the group was removed (see above or flag
+         *      Configuration::ReadOnly).
+         */
+        bool removeGroup(ConfigurationGroup* group);
+
+        /**
          * @brief Remove all groups with given name
          * @param name      Name of groups to remove
          * @return True if all groups with the given name were removed (see

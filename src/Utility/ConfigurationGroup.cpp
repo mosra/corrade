@@ -115,6 +115,20 @@ bool ConfigurationGroup::removeGroup(const std::string& name, unsigned int numbe
     return false;
 }
 
+bool ConfigurationGroup::removeGroup(ConfigurationGroup* group) {
+    if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid)) return false;
+
+    for(vector<ConfigurationGroup*>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
+        if(*it == group) {
+            _groups.erase(it);
+            configuration->flags |= Configuration::Changed;
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool ConfigurationGroup::removeAllGroups(const std::string& name) {
     if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid)) return false;
 
