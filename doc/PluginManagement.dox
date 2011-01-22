@@ -53,7 +53,8 @@ class AbstractAnimal: public Plugin {
 interface. The plugin class in then registered as static or dynamic plugin.
 Every plugin must also have its configuration file, which describes plugin
 metadata such as plugin name, author, description etc. and optionally plugin
-dependencies.</p>
+dependencies. Full specification of plugin configuration file syntax can be
+found in PluginMetadata class documentation.</p>
 <p>First we define one static plugin, which will be included in the
 application out-of-the-box. After declaring that plugin we register it with
 macro PLUGIN_REGISTER_STATIC(). The first argument is plugin name (which will be
