@@ -30,14 +30,46 @@ namespace Kompas { namespace Utility {
 class Configuration;
 
 /**
- * @brief Template structure for type conversion
- *
- * Functions in this struct are called internally by ConfigurationGroup
- * functions to convert values from and to templated types. Reimplement the
- * structure with template specialization to allow saving and getting
- * non-standard types into and from configuration files.
- * @todo Document implementation (include, namespace...)
- */
+@brief Template structure for type conversion
+
+Functions in this struct are called internally by ConfigurationGroup
+functions to convert values from and to templated types. Reimplement the
+structure with template specialization to allow saving and getting
+non-standard types into and from configuration files.
+
+@section ConfigurationValue_Example Example: custom structure
+We have structure named @c Foo and want to store it in configuration file as a
+sequence of two integers separated by a space.
+@code
+#include "Utility/ConfigurationGroup.h"
+
+struct Foo {
+    int a, b;
+};
+
+namespace Utility {
+
+template<> struct ConfigurationValue<Foo> {
+    static std::string toString(const Foo& value, int flags = 0) {
+        return
+            ConfigurationValue<int>::toString(value.a, flags) + ' ' +
+            ConfigurationValue<int>::toString(value.b, flags);
+    }
+
+    static Foo fromString(const std::string& stringValue, int flags = 0) {
+        std::istringstream i(stringValue);
+        std::string a, b;
+
+        Foo foo;
+        (i >> a) && (area.a = ConfigurationValue<int>::fromString(a, flags));
+        (i >> b) && (area.b = ConfigurationValue<int>::fromString(a, flags));
+        return foo;
+    }
+};
+
+}
+@endcode
+*/
 template<class T> struct ConfigurationValue {
     /**
     * @brief Convert value to string
@@ -59,6 +91,7 @@ template<class T> struct ConfigurationValue {
 /**
  * @brief Group of values in configuration file
  *
+ * Provides access to values and subgroups.
  * @todo Faster access to elements via multimap, find() and equal_range()
  */
 class UTILITY_EXPORT ConfigurationGroup {

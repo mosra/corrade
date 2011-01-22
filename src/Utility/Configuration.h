@@ -29,7 +29,78 @@
 namespace Kompas { namespace Utility {
 
 /**
- * @brief Parser and writer for configuration files
+@brief Parser and writer for configuration files
+
+Provides hierarchical configuration storage. The key/value pairs are stored in
+hierarchical groups, this class acts as an root configuration group. Supported
+are either non-unique or unique group and key names, uniqueness can be enforced
+via flag in constructor. See ConfigurationGroup class documentation for
+accessing, deleting, adding and setting groups and values.
+
+Values can be saved and retrieved using templated function, so it's possible to
+implement saving for any type. See ConfigurationValue documentation for an
+example.
+
+@section Configuration_Example Example usage
+@code
+Configuration conf("my.conf");
+
+// Get value of third occurence of the key from some deep group
+string myValue = conf.group("foo")->group("bar")->value<string>("myKey", 2);
+
+// Save new value
+conf.group("foo")->group("bar")->setValue<string>("myKey", "newValue");
+
+// Remove all groups named "bar" from root
+conf.removeGroups("bar");
+
+// Add three new values of integer type
+conf.addValue<int>("a", 1);
+conf.addValue<int>("a", 2);
+conf.addValue<int>("a", 3);
+
+conf.save();
+@endcode
+
+@section Configuration_Syntax File syntax
+File syntax is based on INI syntax. Every row can be of one type:
+- group header
+- key/value pair
+- comment / empty line
+
+Rows can have leading/trailing whitespaces, they will be stripped on parsing and
+saving. Comments and empty lines are preserved, unless the comment is in group
+which was deleted.
+
+%Configuration group header is enclosed in @c [ and @c ], hierarchic group names
+are separated with @c / character. No group name can be empty.
+
+Key/value pair consist of key name string, zero or more whitespaces, @c =
+character, zero or more whitespaces and value. Whitespaces around the value are
+stripped on parsing, if you want to preserve them, enclose the value in @c "
+characters. The value cannot span multiple lines.
+
+Comments begin with @c # or @c ; character and continue to the end of line. Each
+line of multiline comments must begin with these characters.
+
+Example %file:
+<pre># Hierarchic group
+[foo/bar]
+myKey=myValue
+
+# Multiple groups with the same name
+[group]
+a = 35.3
+[group]
+[group]
+a = 19
+
+# Value of custom type
+vec = -3 2 17 0
+
+; Another type of comment
+</pre>
+
  * @todo Renaming, copying groups
  * @todo Use find() and equal_range() for faster (log) access
  * @todo Use some try/catch for parsing (avoid repeated code for group adding)
