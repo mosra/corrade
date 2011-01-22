@@ -1,17 +1,40 @@
 /** @namespace Kompas
- * @brief Root namespace for %Kompas
+ * @brief Root namespace
  */
 
 /** @namespace Kompas::Core
- * @brief %Core %Kompas library
- */
+@brief %Core library
+
+This library contains the base classes and interfaces for map data loading and
+conversion, coordinate conversion, distance measuring etc. There are template
+classes for storing two dimensional values, like Area, AbsoluteArea and Coords.
+Wgs84Coords class provides parsing and converting coordinates from and to string
+representation.
+
+Plugin interfaces:
+ - AbstractRasterModel - plugins providing access to online or offline maps
+ - AbstractProjection - plugins for computation and conversion of map
+   coordinates
+
+*/
 
 /** @namespace Kompas::Utility
- * @brief Simple utitlities used by %Kompas
- */
+@brief Simple utitlities
+
+This library contains utility classes used by all other Kompas parts, like debug
+and error output (class Debug), directory listing (class Directory), access to
+configuration files (class Configuration), on which is based translation support
+(class Translator) or compiling data files into the executable (class Resource).
+*/
 
 /** @namespace Kompas::PluginManager
- * @brief %Plugin management for %Kompas
- *
- * See also @ref PluginManagement.
- */
+@brief %Plugin management
+
+This library contains plugin manager, which takes care of loading, unloading
+and instancing plugins. There is also an Plugin class, which is the base of all
+plugins. See @ref PluginManagement for a brief introduction to how plugins work.
+*/
+
+/** @namespace Kompas::Plugins
+@brief All plugins go here
+*/
