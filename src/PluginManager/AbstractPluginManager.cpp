@@ -184,15 +184,20 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     if(!(plugin.loadState & (NotLoaded)))
         return plugin.loadState;
 
+    /* Vector of found dependencies. If everything goes well, this plugin will
+       be added to each dependency usedBy list. */
+    vector<PluginObject*> dependencies;
+
     /* Load dependencies and add this plugin to their "used by" list */
     for(vector<string>::const_iterator it = plugin.metadata.depends().begin(); it != plugin.metadata.depends().end(); ++it) {
         /* Find manager which is associated to this plugin and load the plugin
            with it */
         map<string, PluginObject*>::iterator found = plugins()->find(*it);
+
         if(found == plugins()->end() || !found->second->manager || !(found->second->manager->load(*it) & (LoadOk|IsStatic)))
             return UnresolvedDependency;
 
-        found->second->metadata.addUsedBy(_plugin);
+        dependencies.push_back(found->second);
     }
 
     string filename = Directory::join(_pluginDirectory, PLUGIN_FILENAME_PREFIX + _plugin + PLUGIN_FILENAME_SUFFIX);
@@ -247,6 +252,10 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
         plugin.loadState = LoadFailed;
         return plugin.loadState;
     }
+
+    /* Everything is okay, add this plugin to usedBy list of each dependency */
+    for(vector<PluginObject*>::const_iterator it = dependencies.begin(); it != dependencies.end(); ++it)
+        (*it)->metadata.addUsedBy(_plugin);
 
     plugin.loadState = LoadOk;
     plugin.module = handle;
