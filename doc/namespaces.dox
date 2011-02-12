@@ -8,7 +8,7 @@
 This library contains the base classes and interfaces for map data loading and
 conversion, coordinate conversion, distance measuring etc. There are template
 classes for storing two dimensional values, like Area, AbsoluteArea and Coords.
-Wgs84Coords class provides parsing and converting coordinates from and to string
+LatLonCoords class provides parsing and converting coordinates from and to string
 representation.
 
 Plugin interfaces:
