@@ -37,17 +37,17 @@ namespace Kompas { namespace Utility {
 class UTILITY_EXPORT Directory: public std::vector<std::string> {
     private:
         /* Hiding edit functions and types to private scope */
-        vector::iterator;
-        vector::assign;
-        vector::push_back;
-        vector::pop_back;
-        vector::insert;
-        vector::erase;
-        vector::swap;
-        vector::clear;
-        vector::get_allocator;
-        vector::resize;
-        vector::reserve;
+        std::vector<std::string>::iterator;
+        std::vector<std::string>::assign;
+        std::vector<std::string>::push_back;
+        std::vector<std::string>::pop_back;
+        std::vector<std::string>::insert;
+        std::vector<std::string>::erase;
+        std::vector<std::string>::swap;
+        std::vector<std::string>::clear;
+        std::vector<std::string>::get_allocator;
+        std::vector<std::string>::resize;
+        std::vector<std::string>::reserve;
 
         bool _isLoaded;
     public:
