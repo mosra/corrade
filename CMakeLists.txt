@@ -16,7 +16,7 @@ if(BUILD_TESTS)
 
 endif()
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${KompasCore_SOURCE_DIR}/modules/")
+set(CMAKE_MODULE_PATH "${KompasCore_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
 
 include(KompasMacros)
 
