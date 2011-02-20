@@ -23,6 +23,8 @@ include(KompasMacros)
 # Default directories
 set_parent_scope(KOMPAS_CORE_INCLUDE_DIR     "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set_parent_scope(KOMPAS_PLUGINS_INCLUDE_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/src/Plugins")
+set_parent_scope(KOMPAS_UTILITY_LIBRARY      KompasUtility)
+set_parent_scope(KOMPAS_PLUGINMANAGER_LIBRARY KompasPluginManager)
 set_parent_scope(KOMPAS_CORE_LIBRARY         KompasCore)
 set_parent_scope(KOMPAS_RC_EXECUTABLE        kompas-rc)
 
