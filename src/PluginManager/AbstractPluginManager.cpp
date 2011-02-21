@@ -100,7 +100,7 @@ void AbstractPluginManager::reloadPluginDirectory() {
         plugins()->erase(*it);
 
     /* Foreach all files in plugin directory */
-    Directory d(_pluginDirectory, Directory::SkipDirectories|Directory::SkipSpecial);
+    Directory d(_pluginDirectory, Directory::SkipDirectories|Directory::SkipDotAndDotDot);
     for(Directory::const_iterator i = d.begin(); i != d.end(); ++i) {
         /* Search for module filename prefix and suffix in current file */
         size_t begin;
