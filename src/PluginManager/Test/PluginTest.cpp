@@ -173,6 +173,18 @@ void PluginTest::crossManagerDependencies() {
     QVERIFY(manager->metadata("Dog")->usedBy().size() == 0);
 }
 
+void PluginTest::usedByZombies() {
+    /* HotDogWithSnail depends on Dog and Snail, which cannot be loaded, so the
+       loading fails too. Dog plugin then shouldn't have HotDogWithSnail in
+       usedBy list. */
+
+    QVERIFY(foodManager->load("HotDogWithSnail") == AbstractPluginManager::UnresolvedDependency);
+    QVERIFY(manager->metadata("Dog")->usedBy().size() == 0);
+
+    /* Cleanup after me... */
+    QVERIFY(manager->unload("Dog") == AbstractPluginManager::NotLoaded);
+}
+
 void PluginTest::reloadPluginDirectory() {
     /* Load Dog and rename the plugin */
     QVERIFY(manager->load("Dog") == AbstractPluginManager::LoadOk);

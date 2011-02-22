@@ -1,6 +1,6 @@
 include(KompasMacros)
 
-if(NOT LIB_SUFFIX)
+if(NOT DEFINED LIB_SUFFIX AND NOT __LIB_SUFFIX_SET)
     message(STATUS "LIB_SUFFIX variable is not defined. It will be autodetected now.")
     message(STATUS "You can set it manually with -DLIB_SUFFIX=<value> (64 for example)")
 
@@ -18,6 +18,10 @@ if(NOT LIB_SUFFIX)
     else()
         set_parent_scope(LIB_SUFFIX "")
     endif()
+
+    # Workaround for another CMake bug: When LIB_SUFFIX is empty,
+    # set(LIB_SUFFIX "" PARENT_SCOPE) doesn't set anything.
+    set_parent_scope(__LIB_SUFFIX_SET True)
 
     message(STATUS "LIB_SUFFIX autodetected as '${LIB_SUFFIX}', libraries will be installed into ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}")
 endif()

@@ -4,11 +4,20 @@
 # Workaround for ugly CMake bug.
 #
 macro(set_parent_scope name)
-    set(${name} ${ARGN})
+    if("${ARGN}" STREQUAL "")
+        set(${name} "")
+    else()
+        set(${name} ${ARGN})
+    endif()
 
     # Set to parent scope only if parent exists
     if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-        set(${name} ${${name}} PARENT_SCOPE)
+        if("${ARGN}" STREQUAL "")
+            # CMake bug: nothing is set in parent scope
+            set(${name} "" PARENT_SCOPE)
+        else()
+            set(${name} ${${name}} PARENT_SCOPE)
+        endif()
     endif()
 endmacro()
 
