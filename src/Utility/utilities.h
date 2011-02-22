@@ -46,7 +46,7 @@
 
 namespace Kompas { namespace Utility {
 
-/** @{ @name Number utilities */
+/** @{ @name Numeric utilities */
 
 /** @brief Power of 2
  * @return 2^number
