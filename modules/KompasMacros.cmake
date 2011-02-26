@@ -146,6 +146,10 @@ function(kompas_add_plugin plugin_name install_dir metadata_file)
     else()
         add_library(${plugin_name} MODULE ${ARGN})
     endif()
+
+    # Plugins doesn't have any prefix (e.g. 'lib' on Linux)
+    set_target_properties(${plugin_name} PROPERTIES PREFIX "")
+
     if(${install_dir} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
         add_custom_command(
             OUTPUT ${plugin_name}.conf
