@@ -188,14 +188,14 @@ void PluginTest::usedByZombies() {
 void PluginTest::reloadPluginDirectory() {
     /* Load Dog and rename the plugin */
     QVERIFY(manager->load("Dog") == AbstractPluginManager::LoadOk);
-    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, PLUGIN_FILENAME_PREFIX + string("Dog") + PLUGIN_FILENAME_SUFFIX)),
-                  QString::fromStdString(Directory::join(PLUGINS_DIR, PLUGIN_FILENAME_PREFIX + string("LostDog") + PLUGIN_FILENAME_SUFFIX)));
+    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, string("Dog") + PLUGIN_FILENAME_SUFFIX)),
+                  QString::fromStdString(Directory::join(PLUGINS_DIR, string("LostDog") + PLUGIN_FILENAME_SUFFIX)));
     QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, "Dog.conf")),
                   QString::fromStdString(Directory::join(PLUGINS_DIR, "LostDog.conf")));
 
     /* Rename Chihuahua */
-    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, PLUGIN_FILENAME_PREFIX + string("Chihuahua") + PLUGIN_FILENAME_SUFFIX)),
-                  QString::fromStdString(Directory::join(PLUGINS_DIR, PLUGIN_FILENAME_PREFIX + string("LostChihuahua") + PLUGIN_FILENAME_SUFFIX)));
+    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, string("Chihuahua") + PLUGIN_FILENAME_SUFFIX)),
+                  QString::fromStdString(Directory::join(PLUGINS_DIR, string("LostChihuahua") + PLUGIN_FILENAME_SUFFIX)));
     QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, "Chihuahua.conf")),
                   QString::fromStdString(Directory::join(PLUGINS_DIR, "LostChihuahua.conf")));
 
@@ -219,13 +219,13 @@ void PluginTest::reloadPluginDirectory() {
         actual2.append(QString::fromStdString(*it));
 
     /* Rename everything back and clean up */
-    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, PLUGIN_FILENAME_PREFIX + string("LostDog") + PLUGIN_FILENAME_SUFFIX)),
-                  QString::fromStdString(Directory::join(PLUGINS_DIR, PLUGIN_FILENAME_PREFIX + string("Dog") + PLUGIN_FILENAME_SUFFIX)));
+    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, string("LostDog") + PLUGIN_FILENAME_SUFFIX)),
+                  QString::fromStdString(Directory::join(PLUGINS_DIR, string("Dog") + PLUGIN_FILENAME_SUFFIX)));
     QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, "LostDog.conf")),
                   QString::fromStdString(Directory::join(PLUGINS_DIR, "Dog.conf")));
 
-    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, PLUGIN_FILENAME_PREFIX + string("LostChihuahua") + PLUGIN_FILENAME_SUFFIX)),
-                  QString::fromStdString(Directory::join(PLUGINS_DIR, PLUGIN_FILENAME_PREFIX + string("Chihuahua") + PLUGIN_FILENAME_SUFFIX)));
+    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, string("LostChihuahua") + PLUGIN_FILENAME_SUFFIX)),
+                  QString::fromStdString(Directory::join(PLUGINS_DIR, string("Chihuahua") + PLUGIN_FILENAME_SUFFIX)));
     QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, "LostChihuahua.conf")),
                   QString::fromStdString(Directory::join(PLUGINS_DIR, "Chihuahua.conf")));
 

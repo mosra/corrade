@@ -37,6 +37,10 @@ else()
     set(USE_FPIC OFF)
 endif()
 
+# Library version
+set(KOMPAS_CORE_LIBRARY_VERSION 0.1.1)
+set(KOMPAS_CORE_LIBRARY_SOVERSION 0)
+
 add_subdirectory(modules)
 add_subdirectory(src)
 

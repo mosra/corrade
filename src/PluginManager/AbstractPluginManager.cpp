@@ -102,20 +102,14 @@ void AbstractPluginManager::reloadPluginDirectory() {
     /* Foreach all files in plugin directory */
     Directory d(_pluginDirectory, Directory::SkipDirectories|Directory::SkipDotAndDotDot);
     for(Directory::const_iterator i = d.begin(); i != d.end(); ++i) {
-        /* Search for module filename prefix and suffix in current file */
-        size_t begin;
-        if(!string(PLUGIN_FILENAME_PREFIX).empty())
-            begin = (*i).find(PLUGIN_FILENAME_PREFIX);
-        else
-            begin = 0;
+        /* Search for module filename suffix in current file */
         size_t end = (*i).find(PLUGIN_FILENAME_SUFFIX);
 
         /* File is not plugin, continue to next */
-        if(begin != 0 || end == string::npos) continue;
+        if(end == string::npos) continue;
 
         /* Dig plugin name from filename */
-        string name = (*i).substr(begin+string(PLUGIN_FILENAME_PREFIX).size(),
-                                  end-string(PLUGIN_FILENAME_PREFIX).size());
+        string name = (*i).substr(0, end);
 
         /* Skip the plugin if it is among loaded */
         if(plugins()->find(name) != plugins()->end()) continue;
@@ -200,7 +194,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
         dependencies.push_back(found->second);
     }
 
-    string filename = Directory::join(_pluginDirectory, PLUGIN_FILENAME_PREFIX + _plugin + PLUGIN_FILENAME_SUFFIX);
+    string filename = Directory::join(_pluginDirectory, _plugin + PLUGIN_FILENAME_SUFFIX);
 
     /* Open plugin file, make symbols available for next libs (which depends on this) */
     #ifndef _WIN32
@@ -210,7 +204,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     #endif
     if(!handle) {
         cerr << "Cannot open plugin file \""
-             << _pluginDirectory + PLUGIN_FILENAME_PREFIX + _plugin + PLUGIN_FILENAME_SUFFIX
+             << _pluginDirectory + _plugin + PLUGIN_FILENAME_SUFFIX
              << "\": " << dlerror() << endl;
         plugin.loadState = LoadFailed;
         return plugin.loadState;
@@ -382,7 +376,7 @@ bool AbstractPluginManager::reloadPluginMetadata(map<string, PluginObject*>::ite
         return true;
 
     /* If plugin binary doesn't exist, schedule the entry for deletion */
-    if(!Directory::fileExists(Directory::join(_pluginDirectory, PLUGIN_FILENAME_PREFIX + it->first + PLUGIN_FILENAME_SUFFIX)))
+    if(!Directory::fileExists(Directory::join(_pluginDirectory, it->first + PLUGIN_FILENAME_SUFFIX)))
         return false;
 
     /* Reload plugin metadata */

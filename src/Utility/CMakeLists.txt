@@ -18,6 +18,7 @@ set(Kompas_Utility_SRCS
 )
 
 add_library(KompasUtility SHARED ${Kompas_Utility_SRCS})
+set_target_properties(KompasUtility PROPERTIES VERSION ${KOMPAS_CORE_LIBRARY_VERSION} SOVERSION ${KOMPAS_CORE_LIBRARY_SOVERSION})
 
 if(WIN32)
     set_target_properties(KompasUtility PROPERTIES COMPILE_FLAGS -DUTILITY_EXPORTING)
