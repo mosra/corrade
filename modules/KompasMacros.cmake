@@ -186,7 +186,7 @@ macro(kompas_add_static_plugin static_plugins_variable plugin_name metadata_file
     kompas_add_resource(${plugin_name} plugins ${metadata_file} ALIAS "${plugin_name}.conf")
     add_library(${plugin_name} STATIC ${sources} ${${plugin_name}})
 
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    if(CMAKE_COMPILER_IS_GNUCC AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
         set_target_properties(${plugin_name} PROPERTIES COMPILE_FLAGS -fPIC)
     endif()
 
