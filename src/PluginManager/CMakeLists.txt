@@ -13,6 +13,7 @@ set(Kompas_PluginManager_SRCS
 
 add_library(KompasPluginManager SHARED ${Kompas_PluginManager_SRCS})
 target_link_libraries(KompasPluginManager KompasUtility)
+set_target_properties(KompasPluginManager PROPERTIES VERSION ${KOMPAS_CORE_LIBRARY_VERSION} SOVERSION ${KOMPAS_CORE_LIBRARY_SOVERSION})
 
 if(WIN32)
     set_target_properties(KompasPluginManager PROPERTIES COMPILE_FLAGS -DPLUGINMANAGER_EXPORTING)
