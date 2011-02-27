@@ -53,8 +53,8 @@ void ConfigurationTest::parse() {
     QVERIFY(conf.isValid());
 
     /* Groups */
-    QVERIFY(conf.groupCount() == 3);
-    QVERIFY(conf.groups().size() == 3);
+    QVERIFY(conf.groupCount() == 4);
+    QVERIFY(conf.groups().size() == 4);
     QVERIFY(conf.groupCount("group") == 2);
     QVERIFY(conf.groupCount("empty_group") == 1);
     QVERIFY(!conf.groupExists("group_inexistent"));
@@ -99,6 +99,7 @@ void ConfigurationTest::parse() {
     /* Modify */
     QVERIFY(conf.addValue<string>("new", "value"));
     QVERIFY(conf.removeAllGroups("group"));
+    QVERIFY(conf.group("third_group")->clear());
     QVERIFY(conf.removeGroup("empty_group"));
     QVERIFY(conf.addGroup("new_group"));
     QVERIFY(conf.group("new_group")->addValue<string>("another", "value"));
@@ -162,6 +163,7 @@ void ConfigurationTest::readonly() {
     QVERIFY(conf.addGroup("new") == 0);
     QVERIFY(!conf.removeGroup("group"));
     QVERIFY(!conf.removeAllGroups("group"));
+    QVERIFY(!conf.group("third_group")->clear());
     QVERIFY(!conf.addValue<string>("new", "value"));
     QVERIFY(!conf.group("group")->setValue<string>("key", "newValue"));
     QVERIFY(!conf.group("group")->removeValue("b"));
@@ -464,6 +466,7 @@ void ConfigurationTest::hierarchic() {
     QCOMPARE(actual, original);
 
     /* Modify */
+    conf.group("z")->group("x")->clear();
     conf.group("a", 1)->addGroup("b")->setValue<string>("key2", "val6");
     conf.addGroup("q")->addGroup("w")->addGroup("e")->addGroup("r")->setValue<string>("key4", "val7");
 

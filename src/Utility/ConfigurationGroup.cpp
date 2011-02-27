@@ -268,6 +268,19 @@ bool ConfigurationGroup::removeAllValues(const std::string& key) {
     return true;
 }
 
+bool ConfigurationGroup::clear() {
+    if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid))
+        return false;
+
+    items.clear();
+
+    for(vector<ConfigurationGroup*>::iterator it = _groups.begin(); it != _groups.end(); ++it)
+        delete *it;
+    _groups.clear();
+
+    return true;
+}
+
 #ifndef DOXYGEN_GENERATING_OUTPUT
 
 bool ConfigurationValue<bool>::fromString(const std::string& value, int flags) {

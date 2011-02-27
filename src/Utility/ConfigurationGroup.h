@@ -177,6 +177,8 @@ class UTILITY_EXPORT ConfigurationGroup {
          * @param number    Number of the group. Default is first found group.
          * @return Whether the group was removed (see above or flag
          *      Connfiguration::ReadOnly).
+         *
+         * @see clear()
          */
         bool removeGroup(const std::string& name, unsigned int number = 0);
 
@@ -185,6 +187,7 @@ class UTILITY_EXPORT ConfigurationGroup {
          * @param group     Pointer to the group
          * @return Whether the group was removed (see above or flag
          *      Configuration::ReadOnly).
+         * @see clear()
          */
         bool removeGroup(ConfigurationGroup* group);
 
@@ -321,6 +324,15 @@ class UTILITY_EXPORT ConfigurationGroup {
         bool removeAllValues(const std::string& key);
 
         /*@}*/
+
+        /**
+         * @brief Clear group
+         * @return Whether the group was cleared (see above or flag
+         *      Configuration::ReadOnly).
+         *
+         * Clears all values and subgroups. See also removeGroup().
+         */
+        bool clear();
 
     private:
         /** @brief Configuration item */
