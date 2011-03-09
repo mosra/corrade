@@ -7,7 +7,8 @@ if(NOT DEFINED LIB_SUFFIX AND NOT __LIB_SUFFIX_SET)
     # All 32bit system have empty lib suffix
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         # If there is /usr/lib64 and is not /usr/lib32, set suffix to 64
-        if(IS_DIRECTORY /usr/lib64)
+        # Ubuntu 64bit symlinks /usr/lib64 to /usr/lib, install to /usr/lib there
+        if(IS_DIRECTORY /usr/lib64 AND NOT IS_SYMLINK /usr/lib64)
             set_parent_scope(LIB_SUFFIX 64)
         elseif(IS_DIRECTORY /usr/lib)
             set_parent_scope(LIB_SUFFIX "")
