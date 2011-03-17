@@ -48,6 +48,7 @@ if(NOT WIN32)
     install(DIRECTORY src/ DESTINATION ${KOMPAS_CORE_INCLUDE_INSTALL_DIR}
                  FILES_MATCHING PATTERN "*.h"
                  PATTERN "*/Test" EXCLUDE
+                 PATTERN "*/doc" EXCLUDE
                  PATTERN src/Plugins EXCLUDE)
     install(DIRECTORY src/Plugins/ DESTINATION ${KOMPAS_PLUGINS_INCLUDE_INSTALL_DIR}
                 FILES_MATCHING PATTERN "*.h"
