@@ -334,6 +334,10 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          *
          * If the plugin is unloaded and belongs to current manager, checks
          * whether the plugin exists and reloads its metadata.
+         *
+         * @bug Causes problems when calling this function in a cycle through
+         * all plugins, as it can remove the plugin from vector and thus break
+         * iterators.
          */
         virtual bool reloadPluginMetadata(std::map<std::string, PluginObject*>::iterator it);
 

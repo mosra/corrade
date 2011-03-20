@@ -100,13 +100,15 @@ void AbstractPluginManager::reloadPluginDirectory() {
         plugins()->erase(*it);
 
     /* Foreach all files in plugin directory */
+    size_t suffixSize = string(PLUGIN_FILENAME_SUFFIX).size();
     Directory d(_pluginDirectory, Directory::SkipDirectories|Directory::SkipDotAndDotDot);
     for(Directory::const_iterator i = d.begin(); i != d.end(); ++i) {
         /* Search for module filename suffix in current file */
         size_t end = (*i).find(PLUGIN_FILENAME_SUFFIX);
 
-        /* File is not plugin, continue to next */
-        if(end == string::npos) continue;
+        /* File doesn't have module suffix, continue to next */
+        if(end == string::npos || end + suffixSize != i->size())
+            continue;
 
         /* Dig plugin name from filename */
         string name = (*i).substr(0, end);
