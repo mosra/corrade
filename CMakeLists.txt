@@ -38,7 +38,7 @@ else()
 endif()
 
 # Library version
-set(KOMPAS_CORE_LIBRARY_VERSION 0.1.1)
+set(KOMPAS_CORE_LIBRARY_VERSION 0.1.2)
 set(KOMPAS_CORE_LIBRARY_SOVERSION 0)
 
 add_subdirectory(modules)
