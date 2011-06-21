@@ -213,6 +213,11 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     }
 
     /* Check plugin version */
+
+    /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
+    #ifdef __GNUC__
+    __extension__
+    #endif
     int (*_version)(void) = reinterpret_cast<int(*)()>(dlsym(handle, "pluginVersion"));
     if(_version == 0) {
         cerr << "Cannot get version of plugin '" << _plugin << "': " << dlerror() << endl;
@@ -227,6 +232,11 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     }
 
     /* Check interface string */
+
+    /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
+    #ifdef __GNUC__
+    __extension__
+    #endif
     string (*interface)() = reinterpret_cast<string (*)()>(dlsym(handle, "pluginInterface"));
     if(interface == 0) {
         cerr << "Cannot get interface string of plugin '" << _plugin << "': " << dlerror() << endl;
@@ -241,6 +251,11 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     }
 
     /* Load plugin instancer */
+
+    /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
+    #ifdef __GNUC__
+    __extension__
+    #endif
     void* (*instancer)(AbstractPluginManager*, const std::string&) = reinterpret_cast<void* (*)(AbstractPluginManager*, const std::string&)>(dlsym(handle, "pluginInstancer"));
     if(instancer == 0) {
         cerr << "Cannot get instancer of plugin '" << _plugin << "': " << dlerror() << endl;
