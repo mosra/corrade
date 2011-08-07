@@ -10,6 +10,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testConfigure.h.cmake
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+kompas_add_test(AbstractHashTest AbstractHashTest.h AbstractHashTest.cpp KompasUtility)
 kompas_add_test(DirectoryTest DirectoryTest.h DirectoryTest.cpp KompasUtility)
 kompas_add_test(EndianTest EndianTest.h EndianTest.cpp KompasUtility)
 kompas_add_test(UtilitiesTest UtilitiesTest.h UtilitiesTest.cpp KompasUtility)
