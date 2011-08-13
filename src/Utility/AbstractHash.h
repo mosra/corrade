@@ -69,6 +69,33 @@ template<size_t digestSize> class AbstractHash {
                 }
 
                 /**
+                 * @brief Default constructor
+                 *
+                 * Creates zero digest.
+                 */
+                inline Digest() {
+                    memset(_digest, 0, digestSize);
+                }
+
+                /** @brief Copy constructor */
+                inline Digest(const Digest& other) {
+                    memcpy(_digest, other._digest, digestSize);
+                }
+
+                /** @brief Equality operator */
+                bool operator==(const Digest& other) const {
+                    for(int i = 0; i != digestSize; ++i)
+                        if(other._digest[i] != _digest[i]) return false;
+                    return true;
+                }
+
+                /** @brief Assignment operator */
+                Digest& operator=(const Digest& other) {
+                    memcpy(_digest, other._digest, digestSize);
+                    return *this;
+                }
+
+                /**
                  * @brief Convert the digest to lowercase hexadecimal string representation
                  */
                 std::string hexString() const {
@@ -89,9 +116,6 @@ template<size_t digestSize> class AbstractHash {
                 inline const char* byteArray() const { return _digest; }
 
             private:
-                inline Digest() {
-                    memset(_digest, 0, digestSize);
-                }
                 inline Digest(const char* digest) {
                     memcpy(_digest, digest, digestSize);
                 }
