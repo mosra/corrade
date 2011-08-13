@@ -97,6 +97,14 @@ class UTILITY_EXPORT Directory: public std::vector<std::string> {
          */
         static bool mkpath(const std::string& path);
 
+        /**
+         * @brief Remove given file or directory
+         * @param path      Path
+         * @return True if path is file or empty directory and was successfully
+         * removed, false otherwise.
+         */
+        static bool rm(const std::string& path);
+
         /** @brief Get current user's home directory */
         static std::string home();
 

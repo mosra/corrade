@@ -107,6 +107,31 @@ void DirectoryTest::mkpath() {
     QVERIFY(dir.exists(path));
 }
 
+void DirectoryTest::remove_data() {
+    QTest::addColumn<QString>("path");
+    QTest::addColumn<bool>("success");
+
+    QDir dir;
+    dir.mkpath(QString::fromStdString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "directory")));
+    QFile file(QString::fromStdString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file")));
+    file.open(QFile::WriteOnly);
+    file.close();
+
+    QTest::newRow("directory") << QString::fromStdString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "directory")) << true;
+    QTest::newRow("file") << QString::fromStdString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file")) << true;
+    QTest::newRow("inexistent") << QString::fromStdString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "inexistent")) << false;
+}
+
+void DirectoryTest::remove() {
+    QFETCH(QString, path);
+    QFETCH(bool, success);
+
+    QVERIFY(Directory::rm(path.toStdString()) == success);
+
+    QDir dir;
+    QVERIFY(!dir.exists(path));
+}
+
 void DirectoryTest::fileExists() {
     QVERIFY(Directory::fileExists(Directory::join(DIRECTORY_TEST_DIR, "file")));
     QVERIFY(!Directory::fileExists(Directory::join(DIRECTORY_TEST_DIR, "inexistentFile")));

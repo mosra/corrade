@@ -17,6 +17,7 @@
 
 #include <dirent.h>
 #include <sys/stat.h>
+#include <cstdio>
 #include <algorithm>
 
 #ifdef _WIN32
@@ -90,6 +91,11 @@ bool Directory::mkpath(const std::string& _path) {
     /* Directory is successfully created or already exists */
     if(ret == 0 || ret == -1) return true;
 
+    return false;
+}
+
+bool Directory::rm(const string& path) {
+    if(remove(path.c_str()) == 0) return true;
     return false;
 }
 
