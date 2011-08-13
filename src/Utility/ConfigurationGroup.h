@@ -215,14 +215,14 @@ class UTILITY_EXPORT ConfigurationGroup {
          */
         template<class T> bool value(const std::string& key, T* _value, unsigned int number = 0, int flags = 0) {
             std::string stringValue = ConfigurationValue<T>::toString(*_value, flags);
-            bool ret = value<std::string>(key, &stringValue, number, flags);
+            bool ret = valueInternal(key, &stringValue, number, flags);
 
             *_value = ConfigurationValue<T>::fromString(stringValue, flags);
             return ret;
         }
         template<class T> bool value(const std::string& key, T* _value, unsigned int number = 0, int flags = 0) const {
             std::string stringValue;
-            bool ret = value<std::string>(key, &stringValue, number, flags);
+            bool ret = valueInternal(key, &stringValue, number, flags);
 
             *_value = ConfigurationValue<T>::fromString(stringValue, flags);
             return ret;
@@ -252,7 +252,7 @@ class UTILITY_EXPORT ConfigurationGroup {
          */
         template<class T> std::vector<T> values(const std::string& key, int flags = 0) const {
             std::vector<T> _values;
-            std::vector<std::string> stringValues = values<std::string>(key, flags);
+            std::vector<std::string> stringValues = valuesInternal(key, flags);
             for(std::vector<std::string>::const_iterator it = stringValues.begin(); it != stringValues.end(); ++it)
                 _values.push_back(ConfigurationValue<T>::fromString(*it, flags));
 
@@ -348,6 +348,12 @@ class UTILITY_EXPORT ConfigurationGroup {
         Configuration* configuration;
 
         ConfigurationGroup(const std::string& name, Configuration* _configuration);
+
+        bool valueInternal(const std::string& key, std::string* _value, unsigned int number, int flags);
+        bool valueInternal(const std::string& key, std::string* _value, unsigned int number, int flags) const;
+        std::vector<std::string> valuesInternal(const std::string& key, int flags) const;
+        bool setValueInternal(const std::string& key, const std::string& value, unsigned int number, int flags);
+        bool addValueInternal(const std::string& key, const std::string& value, int flags);
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -399,11 +405,21 @@ template<class T> T ConfigurationValue<T>::fromString(const std::string& stringV
 
 /* Forward declared template specializations to avoid infinite recursion in
     template functions above */
-template<> UTILITY_EXPORT bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, int flags);
-template<> UTILITY_EXPORT bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, int flags) const;
-template<> UTILITY_EXPORT std::vector<std::string> ConfigurationGroup::values(const std::string& key, int flags) const;
-template<> UTILITY_EXPORT bool ConfigurationGroup::setValue(const std::string& key, const std::string& value, unsigned int number, int flags);
-template<> UTILITY_EXPORT bool ConfigurationGroup::addValue(const std::string& key, const std::string& value, int flags);
+template<> inline UTILITY_EXPORT bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, int flags) {
+    return valueInternal(key, _value, number, flags);
+}
+template<> inline UTILITY_EXPORT bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, int flags) const {
+    return valueInternal(key, _value, number, flags);
+}
+template<> inline UTILITY_EXPORT std::vector<std::string> ConfigurationGroup::values(const std::string& key, int flags) const {
+    return valuesInternal(key, flags);
+}
+template<> inline UTILITY_EXPORT bool ConfigurationGroup::setValue(const std::string& key, const std::string& value, unsigned int number, int flags) {
+    return setValueInternal(key, value, number, flags);
+}
+template<> inline UTILITY_EXPORT bool ConfigurationGroup::addValue(const std::string& key, const std::string& value, int flags) {
+    return addValueInternal(key, value, flags);
+}
 
 template<> struct UTILITY_EXPORT ConfigurationValue<bool> {
     static bool fromString(const std::string& value, int flags);

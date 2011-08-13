@@ -152,8 +152,7 @@ bool ConfigurationGroup::keyExists(const std::string& key) const {
     return false;
 }
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
-template<> vector<string> ConfigurationGroup::values(const string& key, int flags) const {
+vector<string> ConfigurationGroup::valuesInternal(const string& key, int flags) const {
     vector<string> found;
 
     for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it)
@@ -162,7 +161,7 @@ template<> vector<string> ConfigurationGroup::values(const string& key, int flag
     return found;
 }
 
-template<> bool ConfigurationGroup::setValue(const string& key, const string& value, unsigned int number, int flags) {
+bool ConfigurationGroup::setValueInternal(const string& key, const string& value, unsigned int number, int flags) {
     if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid))
         return false;
 
@@ -188,7 +187,7 @@ template<> bool ConfigurationGroup::setValue(const string& key, const string& va
     return true;
 }
 
-template<> bool ConfigurationGroup::addValue(const string& key, const string& value, int flags) {
+bool ConfigurationGroup::addValueInternal(const string& key, const string& value, int flags) {
     if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid))
         return false;
 
@@ -210,7 +209,7 @@ template<> bool ConfigurationGroup::addValue(const string& key, const string& va
     return true;
 }
 
-template<> bool ConfigurationGroup::value(const string& key, string* value, unsigned int number, int flags) {
+bool ConfigurationGroup::valueInternal(const string& key, string* value, unsigned int number, int flags) {
     const ConfigurationGroup* c = this;
     if(c->value(key, value, number, flags)) return true;
 
@@ -221,7 +220,8 @@ template<> bool ConfigurationGroup::value(const string& key, string* value, unsi
 
     return false;
 }
-template<> bool ConfigurationGroup::value(const string& key, string* value, unsigned int number, int flags) const {
+
+bool ConfigurationGroup::valueInternal(const string& key, string* value, unsigned int number, int flags) const {
     unsigned int foundNumber = 0;
     for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it) {
         if(it->key == key) {
@@ -234,7 +234,6 @@ template<> bool ConfigurationGroup::value(const string& key, string* value, unsi
 
     return false;
 }
-#endif
 
 bool ConfigurationGroup::removeValue(const string& key, unsigned int number) {
     if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid))
