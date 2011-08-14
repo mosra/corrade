@@ -89,6 +89,11 @@ template<size_t digestSize> class AbstractHash {
                     return true;
                 }
 
+                /** @brief Non-equality operator */
+                inline bool operator!=(const Digest& other) const {
+                    return !operator==(other);
+                }
+
                 /** @brief Assignment operator */
                 Digest& operator=(const Digest& other) {
                     memcpy(_digest, other._digest, digestSize);
