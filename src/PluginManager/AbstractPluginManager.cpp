@@ -294,8 +294,11 @@ AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& _pl
         if(!plugin.metadata.usedBy().empty()) return IsRequired;
 
         /* Remove this plugin from "used by" column of dependencies */
-        for(vector<string>::const_iterator it = plugin.metadata.depends().begin(); it != plugin.metadata.depends().end(); ++it)
-            plugins()->find(*it)->second->metadata.removeUsedBy(_plugin);
+        for(vector<string>::const_iterator it = plugin.metadata.depends().begin(); it != plugin.metadata.depends().end(); ++it) {
+            std::map<string, PluginObject*>::const_iterator mit = plugins()->find(*it);
+            /** @bug FIXME: use plugin hierarchy for destruction */
+            if(mit != plugins()->end()) mit->second->metadata.removeUsedBy(_plugin);
+        }
 
         #ifndef _WIN32
         if(dlclose(plugin.module) != 0) {
