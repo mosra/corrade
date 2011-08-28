@@ -22,9 +22,9 @@ class HotDog: public AbstractFood {
     public:
         HotDog(AbstractPluginManager* manager = 0, const std::string& plugin = ""): AbstractFood(manager, plugin) {}
 
-        virtual bool isTasty()
+        bool isTasty()
             { return dog.hasTail() ? false : true; }
-        virtual int weight()
+        int weight()
             { return dog.legCount()*700 + 4000; }
 
     private:

@@ -22,7 +22,7 @@ class Chihuahua: public Dog {
         inline Chihuahua(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
             Dog(manager, plugin) {}
 
-        virtual std::string name() { return "Rodriguez"; }
+        std::string name() { return "Rodriguez"; }
 };
 
 }}}
