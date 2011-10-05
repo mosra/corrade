@@ -21,6 +21,7 @@
 #include "Utility/Directory.h"
 #include "PluginTestConfigure.h"
 #include "AbstractPluginManagerConfigure.h"
+#include "AbstractDeletable.h"
 
 QTEST_APPLESS_MAIN(Kompas::PluginManager::Test::PluginTest)
 
@@ -111,10 +112,30 @@ void PluginTest::dynamicPlugin() {
     QVERIFY(manager->unload("Dog") == AbstractPluginManager::IsUsed);
     QVERIFY(manager->loadState("Dog") == AbstractPluginManager::LoadOk);
 
-    /* Plugin can be unloaded after destroying all instances */
+    /* Plugin can be unloaded after destroying all instances in which
+       canBeDeleted() returns false. */
     delete animal;
     QVERIFY(manager->unload("Dog") == AbstractPluginManager::NotLoaded);
     QVERIFY(manager->loadState("Dog") == AbstractPluginManager::NotLoaded);
+}
+
+void PluginTest::deletable() {
+    PluginManager<AbstractDeletable> deletableManager(Directory::join(PLUGINS_DIR, "deletable"));
+
+    /* Load plugin where canBeDeleted() returns true */
+    QVERIFY(deletableManager.load("Deletable") == AbstractPluginManager::LoadOk);
+
+    unsigned int var = 0;
+
+    /* create an instance and connect it to local variable, which will be
+       changed on destruction */
+    AbstractDeletable* deletable = deletableManager.instance("Deletable");
+    deletable->set(&var);
+
+    /* plugin destroys all instances on deletion => the variable will be changed */
+    QVERIFY(var == 0);
+    QVERIFY(deletableManager.unload("Deletable") == AbstractPluginManager::NotLoaded);
+    QVERIFY(var == 0xDEADBEEF);
 }
 
 void PluginTest::hierarchy() {

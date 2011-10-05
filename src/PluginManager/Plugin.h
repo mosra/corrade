@@ -53,13 +53,22 @@ class PLUGINMANAGER_EXPORT Plugin {
         virtual ~Plugin();
 
         /**
+         * @brief Plugin is about to be deleted
+         *
+         * Called from PluginManager on all active instances before the plugin
+         * is unloaded. Returns true if it is safe to delete the instance from
+         * the manager, returns false if not. If any instance returns false,
+         * the plugin is not unloaded.
+         */
+        virtual bool canBeDeleted() { return false; }
+
+        /**
          * @brief Plugin identifier
          * @return String, under which the plugin was instanced. If the plugin
          *      was not instanced via plugin manager, returns empty string.
          */
         inline std::string plugin() const { return _plugin; }
 
-    public:
         /**
          * @brief Plugin metadata
          * @return Metadata file associated with the plugin or 0, if no metadata

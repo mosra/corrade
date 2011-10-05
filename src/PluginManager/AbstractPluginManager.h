@@ -34,7 +34,7 @@
 #include "Utility/Debug.h"
 
 /** @brief Plugin version */
-#define PLUGIN_VERSION 1
+#define PLUGIN_VERSION 2
 
 namespace Kompas { namespace PluginManager {
 

@@ -287,11 +287,22 @@ AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& _pl
 
     /* Only unload loaded plugin */
     if(plugin.loadState & (LoadOk|UnloadFailed)) {
-        /* Plugin has active instance, don't unload */
-        if(instances.find(_plugin) != instances.end()) return IsUsed;
-
         /* Plugin is used by another plugin, don't unload */
         if(!plugin.metadata.usedBy().empty()) return IsRequired;
+
+        /* Plugin has active instances */
+        map<string, vector<Plugin*> >::const_iterator found = instances.find(_plugin);
+        if(found != instances.end()) {
+            /* Check if all instances can be safely deleted */
+            for(vector<Plugin*>::const_iterator it = found->second.begin(); it != found->second.end(); ++it)
+                if(!(*it)->canBeDeleted())
+                    return IsUsed;
+
+            /* If they can be, delete them. They remove itself from instances
+               list on destruction, thus going backwards */
+            for(size_t i = found->second.size(); i != 0; --i)
+                delete found->second[i-1];
+        }
 
         /* Remove this plugin from "used by" column of dependencies */
         for(vector<string>::const_iterator it = plugin.metadata.depends().begin(); it != plugin.metadata.depends().end(); ++it) {

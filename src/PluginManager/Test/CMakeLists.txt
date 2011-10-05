@@ -9,6 +9,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/PluginTestConfigure.h.cmake
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+add_subdirectory(deletable)
 add_subdirectory(food)
 
 kompas_add_plugin(Snail ${CMAKE_CURRENT_BINARY_DIR} Snail.conf Snail.cpp)

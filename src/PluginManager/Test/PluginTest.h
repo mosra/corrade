@@ -38,6 +38,7 @@ class PluginTest: public QObject {
         void errors();
         void staticPlugin();
         void dynamicPlugin();
+        void deletable();
         void hierarchy();
         void crossManagerDependencies();
         void usedByZombies();
