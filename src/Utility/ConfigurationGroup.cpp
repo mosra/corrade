@@ -16,28 +16,22 @@
 #include "ConfigurationGroup.h"
 
 #include "Configuration.h"
+#include "Debug.h"
 
 using namespace std;
 
 namespace Kompas { namespace Utility {
 
-ConfigurationGroup::ConfigurationGroup(const std::string& name, Configuration* _configuration): configuration(_configuration) {
-    if(name.find('/') != string::npos)
-        throw string("Slash in group name!");
-
-    _name = name;
-}
-
 ConfigurationGroup::~ConfigurationGroup() {
-    for(vector<ConfigurationGroup*>::iterator it = _groups.begin(); it != _groups.end(); ++it)
-        delete *it;
+    for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it)
+        delete it->group;
 }
 
 ConfigurationGroup* ConfigurationGroup::group(const string& name, unsigned int number) {
     unsigned int foundNumber = 0;
-    for(vector<ConfigurationGroup*>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
-        if((*it)->name() == name && foundNumber++ == number)
-            return *it;
+    for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
+        if(it->name == name && foundNumber++ == number)
+            return it->group;
     }
 
     /* Automatic group creation is enabled and user wants first group,
@@ -49,21 +43,19 @@ ConfigurationGroup* ConfigurationGroup::group(const string& name, unsigned int n
 
 const ConfigurationGroup* ConfigurationGroup::group(const string& name, unsigned int number) const {
     unsigned int foundNumber = 0;
-    for(vector<ConfigurationGroup*>::const_iterator it = _groups.begin(); it != _groups.end(); ++it) {
-        if((*it)->name() == name && foundNumber++ == number)
-            return *it;
+    for(vector<Group>::const_iterator it = _groups.begin(); it != _groups.end(); ++it) {
+        if(it->name == name && foundNumber++ == number)
+            return it->group;
     }
 
     return 0;
 }
 
 vector<ConfigurationGroup*> ConfigurationGroup::groups(const string& name) {
-    if(name.empty()) return _groups;
-
     vector<ConfigurationGroup*> found;
 
-    for(vector<ConfigurationGroup*>::iterator it = _groups.begin(); it != _groups.end(); ++it)
-        if((*it)->name() == name) found.push_back(*it);
+    for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it)
+        if(name.empty() || it->name == name) found.push_back(it->group);
 
     return found;
 }
@@ -71,8 +63,8 @@ vector<ConfigurationGroup*> ConfigurationGroup::groups(const string& name) {
 vector<const ConfigurationGroup*> ConfigurationGroup::groups(const string& name) const {
     vector<const ConfigurationGroup*> found;
 
-    for(vector<ConfigurationGroup*>::const_iterator it = _groups.begin(); it != _groups.end(); ++it)
-        if(name.empty() || (*it)->name() == name) found.push_back(*it);
+    for(vector<Group>::const_iterator it = _groups.begin(); it != _groups.end(); ++it)
+        if(name.empty() || it->name == name) found.push_back(it->group);
 
     return found;
 }
@@ -81,19 +73,24 @@ ConfigurationGroup* ConfigurationGroup::addGroup(const std::string& name) {
     if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid)) return 0;
 
     /* Name must not be empty and must not contain slash character */
-    if(name.empty() || name.find('/') != string::npos) return 0;
+    if(name.empty() || name.find('/') != string::npos) {
+        Error() << "Slash in group name!";
+        return 0;
+    }
 
     /* Check for unique groups */
     if(configuration->flags & Configuration::UniqueGroups) {
-        for(vector<ConfigurationGroup*>::const_iterator it = _groups.begin(); it != _groups.end(); ++it)
-            if((*it)->name() == name) return 0;
+        for(vector<Group>::const_iterator it = _groups.begin(); it != _groups.end(); ++it)
+            if(it->name == name) return 0;
     }
 
     configuration->flags |= Configuration::Changed;
 
-    ConfigurationGroup* g = new ConfigurationGroup(name, configuration);
+    Group g;
+    g.name = name;
+    g.group = new ConfigurationGroup(configuration);
     _groups.push_back(g);
-    return g;
+    return g.group;
 }
 
 bool ConfigurationGroup::removeGroup(const std::string& name, unsigned int number) {
@@ -101,8 +98,8 @@ bool ConfigurationGroup::removeGroup(const std::string& name, unsigned int numbe
 
     /* Find group with given number and name */
     unsigned int foundNumber = 0;
-    for(vector<ConfigurationGroup*>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
-        if((*it)->name() == name && foundNumber++ == number) {
+    for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
+        if(it->name == name && foundNumber++ == number) {
             _groups.erase(it);
             configuration->flags |= Configuration::Changed;
             return true;
@@ -115,8 +112,8 @@ bool ConfigurationGroup::removeGroup(const std::string& name, unsigned int numbe
 bool ConfigurationGroup::removeGroup(ConfigurationGroup* group) {
     if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid)) return false;
 
-    for(vector<ConfigurationGroup*>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
-        if(*it == group) {
+    for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
+        if(it->group == group) {
             _groups.erase(it);
             configuration->flags |= Configuration::Changed;
             return true;
@@ -130,7 +127,7 @@ bool ConfigurationGroup::removeAllGroups(const std::string& name) {
     if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid)) return false;
 
     for(int i = _groups.size()-1; i >= 0; --i) {
-        if(_groups[i]->name() == name) _groups.erase(_groups.begin()+i);
+        if(_groups[i].name == name) _groups.erase(_groups.begin()+i);
     }
 
     configuration->flags |= Configuration::Changed;
@@ -273,8 +270,8 @@ bool ConfigurationGroup::clear() {
 
     items.clear();
 
-    for(vector<ConfigurationGroup*>::iterator it = _groups.begin(); it != _groups.end(); ++it)
-        delete *it;
+    for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it)
+        delete it->group;
     _groups.clear();
 
     return true;

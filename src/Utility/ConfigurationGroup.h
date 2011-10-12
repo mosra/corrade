@@ -113,9 +113,6 @@ class UTILITY_EXPORT ConfigurationGroup {
 
         /** @{ @name Group operations */
 
-        /** @brief Group name */
-        inline std::string name() const { return _name; }
-
         /**
          * @brief Get group
          * @param name      Name of the group
@@ -341,13 +338,18 @@ class UTILITY_EXPORT ConfigurationGroup {
                 value;          /**< @brief Value or comment, empty line */
         };
 
-        std::string _name;                          /**< @brief Group name */
+        /** @brief Configuration group */
+        struct Group {
+            std::string name;           /**< @brief Group name */
+            ConfigurationGroup* group;  /**< @brief Configuration group */
+        };
+
         std::vector<Item> items;                    /**< @brief Values and comments */
-        std::vector<ConfigurationGroup*> _groups;   /**< @brief Subgroups */
+        std::vector<Group> _groups;                 /**< @brief Subgroups */
 
         Configuration* configuration;
 
-        ConfigurationGroup(const std::string& name, Configuration* _configuration);
+        ConfigurationGroup(Configuration* _configuration): configuration(_configuration) {}
 
         bool valueInternal(const std::string& key, std::string* _value, unsigned int number, int flags);
         bool valueInternal(const std::string& key, std::string* _value, unsigned int number, int flags) const;

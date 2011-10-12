@@ -22,7 +22,7 @@ using namespace std;
 
 namespace Kompas { namespace Utility {
 
-Configuration::Configuration(const string& _filename, int _flags): ConfigurationGroup("", this), _filename(_filename), flags(_flags) {
+Configuration::Configuration(const string& _filename, int _flags): ConfigurationGroup(this), _filename(_filename), flags(_flags) {
     /* Open file with requested flags */
     ifstream::openmode openmode = ifstream::in;
     if(flags & Truncate) openmode |= ifstream::trunc;
@@ -46,7 +46,7 @@ Configuration::Configuration(const string& _filename, int _flags): Configuration
     file.close();
 }
 
-Configuration::Configuration(istream& file, int _flags): ConfigurationGroup("", this), flags(_flags) {
+Configuration::Configuration(istream& file, int _flags): ConfigurationGroup(this), flags(_flags) {
     parse(file);
 
     /* Set readonly flag, because the configuration cannot be saved */
@@ -109,15 +109,17 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
 
             /* Next group is subgroup of current group, recursive call */
             while(!nextGroup.empty() && (fullPath == "" || nextGroup.substr(0, fullPath.size()) == fullPath)) {
-                ConfigurationGroup* g = new ConfigurationGroup(nextGroup.substr(fullPath.size()), configuration);
-                nextGroup = parse(file, g, nextGroup+'/');
+                ConfigurationGroup::Group g;
+                g.name = nextGroup.substr(fullPath.size());
+                g.group = new ConfigurationGroup(configuration);
+                nextGroup = parse(file, g.group, nextGroup+'/');
 
                 /* If unique groups are set, check whether current group is unique */
                 bool save = true;
                 if(flags & UniqueGroups) {
                     /** @todo Do this in logarithmic time */
-                    for(vector<ConfigurationGroup*>::const_iterator it = group->_groups.begin(); it != group->_groups.end(); ++it)
-                        if((*it)->name() == g->name()) {
+                    for(vector<Group>::const_iterator it = group->_groups.begin(); it != group->_groups.end(); ++it)
+                        if(it->name == g.name) {
                             save = false;
                             break;
                         }
@@ -236,15 +238,15 @@ void Configuration::save(std::ofstream& file, const std::string& eol, Configurat
     }
 
     /* Recursively process all subgroups */
-    for(vector<ConfigurationGroup*>::const_iterator git = group->_groups.begin(); git != group->_groups.end(); ++git) {
+    for(vector<Group>::const_iterator git = group->_groups.begin(); git != group->_groups.end(); ++git) {
         /* Subgroup name */
-        string name = (*git)->name();
+        string name = git->name;
         if(!fullPath.empty()) name = fullPath + '/' + name;
 
         buffer = '[' + name + ']' + eol;
         file.write(buffer.c_str(), buffer.size());
 
-        save(file, eol, *git, name);
+        save(file, eol, git->group, name);
     }
 }
 
