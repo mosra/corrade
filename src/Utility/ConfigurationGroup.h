@@ -164,6 +164,22 @@ class UTILITY_EXPORT ConfigurationGroup {
          * @brief Add new group
          * @param name      Name of the group. The name must not be empty and
          *      must not contain '/' character.
+         * @param group     Existing group.
+         * @return False if the group cannot be added (see above or flags
+         *      Configuration::UniqueGroups and Configuration::ReadOnly), true
+         *      otherwise.
+         *
+         * Adds existing group at the end of file. Note that the function
+         * doesn't check whether the same group already exists in the
+         * configuration - adding such group can result in infinite cycle when
+         * saving.
+         */
+        bool addGroup(const std::string& name, ConfigurationGroup* group);
+
+        /**
+         * @brief Add new group
+         * @param name      Name of the group. The name must not be empty and
+         *      must not contain '/' character.
          * @return Newly created group or null pointer when new group cannot be
          *      added (see above or flags Configuration::UniqueGroups and
          *      Configuration::ReadOnly).

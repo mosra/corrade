@@ -93,28 +93,41 @@ vector<const ConfigurationGroup*> ConfigurationGroup::groups(const string& name)
     return found;
 }
 
-ConfigurationGroup* ConfigurationGroup::addGroup(const std::string& name) {
-    if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid)) return 0;
+bool ConfigurationGroup::addGroup(const string& name, ConfigurationGroup* group) {
+    if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid))
+        return false;
+
+    /* Set configuration pointer to actual */
+    group->configuration = configuration;
 
     /* Name must not be empty and must not contain slash character */
     if(name.empty() || name.find('/') != string::npos) {
         Error() << "Slash in group name!";
-        return 0;
+        return false;
     }
 
     /* Check for unique groups */
     if(configuration->flags & Configuration::UniqueGroups) {
         for(vector<Group>::const_iterator it = _groups.begin(); it != _groups.end(); ++it)
-            if(it->name == name) return 0;
+            if(it->name == name) return false;
     }
 
     configuration->flags |= Configuration::Changed;
 
     Group g;
     g.name = name;
-    g.group = new ConfigurationGroup(configuration);
+    g.group = group;
     _groups.push_back(g);
-    return g.group;
+    return true;
+}
+
+ConfigurationGroup* ConfigurationGroup::addGroup(const std::string& name) {
+    ConfigurationGroup* group = new ConfigurationGroup(configuration);
+    if(!addGroup(name, group)) {
+        delete group;
+        group = 0;
+    }
+    return group;
 }
 
 bool ConfigurationGroup::removeGroup(const std::string& name, unsigned int number) {

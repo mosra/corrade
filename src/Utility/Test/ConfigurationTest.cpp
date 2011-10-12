@@ -103,6 +103,7 @@ void ConfigurationTest::parse() {
     QVERIFY(conf.removeGroup("empty_group"));
     QVERIFY(conf.addGroup("new_group"));
     QVERIFY(conf.group("new_group")->addValue<string>("another", "value"));
+    QVERIFY(conf.addGroup("new_group_copy", new ConfigurationGroup(*conf.group("new_group"))));
     QVERIFY(conf.removeAllValues("key"));
 
     QVERIFY(conf.save());
