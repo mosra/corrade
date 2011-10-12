@@ -22,6 +22,30 @@ using namespace std;
 
 namespace Kompas { namespace Utility {
 
+ConfigurationGroup::ConfigurationGroup(const ConfigurationGroup& other): items(other.items), _groups(other._groups) {
+    /* Deep copy groups */
+    for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it)
+        it->group = new ConfigurationGroup(*it->group);
+}
+
+ConfigurationGroup& ConfigurationGroup::operator=(const ConfigurationGroup& other) {
+    if(&other == this)
+        return *this;
+
+    /* Delete current groups */
+    for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it)
+        delete it->group;
+
+    items.assign(other.items.begin(), other.items.end());
+    _groups.assign(other._groups.begin(), other._groups.end());
+
+    /* Deep copy groups */
+    for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it)
+        it->group = new ConfigurationGroup(*it->group);
+
+    return *this;
+}
+
 ConfigurationGroup::~ConfigurationGroup() {
     for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it)
         delete it->group;

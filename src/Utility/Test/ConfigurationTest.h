@@ -49,6 +49,8 @@ class ConfigurationTest: public QObject {
         /** @todo Merge into parse() and uniqueGroups() */
         void hierarchic();
         void hierarchicUnique();
+
+        void copy();
 };
 
 }}}

@@ -505,4 +505,21 @@ void ConfigurationTest::hierarchicUnique() {
     QCOMPARE(actual, original);
 }
 
+void ConfigurationTest::copy() {
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("copy.conf"));
+
+    ConfigurationGroup* original = conf.addGroup("group");
+    original->addGroup("descendent")->setValue<int>("value", 42);
+
+    ConfigurationGroup* constructedCopy = new ConfigurationGroup(*original);
+    ConfigurationGroup* assignedCopy = conf.addGroup("another");
+    *assignedCopy = *original;
+
+    original->group("descendent")->setValue<int>("value", 666);
+
+    QCOMPARE(original->group("descendent")->value<int>("value"), 666);
+    QCOMPARE(constructedCopy->group("descendent")->value<int>("value"), 42);
+    QCOMPARE(assignedCopy->group("descendent")->value<int>("value"), 42);
+}
+
 }}}

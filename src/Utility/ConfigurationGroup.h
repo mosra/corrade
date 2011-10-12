@@ -97,8 +97,6 @@ template<class T> struct ConfigurationValue {
 class UTILITY_EXPORT ConfigurationGroup {
     friend class Configuration;
 
-    DISABLE_COPY(ConfigurationGroup)
-
     public:
         /** @brief Flags for value type */
         enum Flags {
@@ -108,8 +106,14 @@ class UTILITY_EXPORT ConfigurationGroup {
             Scientific  = 0x08  /**< @brief Floating point values in scientific notation */
         };
 
+        /** @brief Copy constructor */
+        ConfigurationGroup(const ConfigurationGroup& other);
+
         /** @brief Destructor */
         ~ConfigurationGroup();
+
+        /** @brief Assignment operator */
+        ConfigurationGroup& operator=(const ConfigurationGroup& other);
 
         /** @{ @name Group operations */
 
@@ -349,6 +353,7 @@ class UTILITY_EXPORT ConfigurationGroup {
 
         Configuration* configuration;
 
+        /** @brief Constructor */
         ConfigurationGroup(Configuration* _configuration): configuration(_configuration) {}
 
         bool valueInternal(const std::string& key, std::string* _value, unsigned int number, int flags);
