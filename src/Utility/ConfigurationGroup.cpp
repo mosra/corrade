@@ -137,6 +137,7 @@ bool ConfigurationGroup::removeGroup(const std::string& name, unsigned int numbe
     unsigned int foundNumber = 0;
     for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
         if(it->name == name && foundNumber++ == number) {
+            delete it->group;
             _groups.erase(it);
             configuration->flags |= Configuration::Changed;
             return true;
@@ -151,6 +152,7 @@ bool ConfigurationGroup::removeGroup(ConfigurationGroup* group) {
 
     for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
         if(it->group == group) {
+            delete it->group;
             _groups.erase(it);
             configuration->flags |= Configuration::Changed;
             return true;
@@ -164,7 +166,9 @@ bool ConfigurationGroup::removeAllGroups(const std::string& name) {
     if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid)) return false;
 
     for(int i = _groups.size()-1; i >= 0; --i) {
-        if(_groups[i].name == name) _groups.erase(_groups.begin()+i);
+        if(_groups[i].name != name) continue;
+        delete (_groups.begin()+i)->group;
+        _groups.erase(_groups.begin()+i);
     }
 
     configuration->flags |= Configuration::Changed;
