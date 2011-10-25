@@ -349,6 +349,26 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          */
         virtual bool reloadPluginMetadata(std::map<std::string, PluginObject*>::iterator it);
 
+        /**
+         * @brief Add plugin to usedBy list
+         * @param plugin    Plugin which is used
+         * @param usedBy    Which plugin uses it
+         *
+         * Because the plugin manager must be noticed about adding the plugin
+         * to "used by" list, it must be done through this function.
+         */
+        virtual void addUsedBy(const std::string& plugin, const std::string& usedBy);
+
+        /**
+         * @brief Remove plugin from usedBy list
+         * @param plugin    Plugin which was used
+         * @param usedBy    Which plugin used it
+         *
+         * Because the plugin manager must be noticed about removing the plugin
+         * from "used by" list, it must be done through this function.
+         */
+        virtual void removeUsedBy(const std::string& plugin, const std::string& usedBy);
+
     private:
         std::map<std::string, std::vector<Plugin*> > instances;
 

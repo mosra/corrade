@@ -67,21 +67,26 @@ AbstractPluginManager::~AbstractPluginManager() {
     }
 
     /* Unload all plugins associated with this plugin manager */
-    vector<string> removed;
-    for(map<string, PluginObject*>::const_iterator it = plugins()->begin(); it != plugins()->end(); ++it) {
+    vector<map<string, PluginObject*>::iterator> removed;
+    for(map<string, PluginObject*>::iterator it = plugins()->begin(); it != plugins()->end(); ++it) {
+
         /* Plugin doesn't belong to this manager */
         if(it->second->manager != this) continue;
 
-        /* Schedule the plugin for deletion, if it is not static */
-        if(unload(it->first) != IsStatic) {
-            delete it->second;
-            removed.push_back(it->first);
-        }
+        /* Unload the plugin and schedule it for deletion, if it is not static.
+           Otherwise just disconnect this manager from the plugin, so another
+           manager can take over it in the future. */
+        if(unload(it->first) == IsStatic)
+            it->second->manager = 0;
+        else
+            removed.push_back(it);
     }
 
     /* Remove the plugins from global container */
-    for(vector<string>::const_iterator it = removed.begin(); it != removed.end(); ++it)
+    for(vector<map<string, PluginObject*>::iterator>::const_iterator it = removed.begin(); it != removed.end(); ++it) {
+        delete (*it)->second;
         plugins()->erase(*it);
+    }
 }
 
 void AbstractPluginManager::reloadPluginDirectory() {
@@ -182,7 +187,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
 
     /* Vector of found dependencies. If everything goes well, this plugin will
        be added to each dependency usedBy list. */
-    vector<PluginObject*> dependencies;
+    vector<pair<string, PluginObject*> > dependencies;
 
     /* Load dependencies and add this plugin to their "used by" list */
     for(vector<string>::const_iterator it = plugin.metadata.depends().begin(); it != plugin.metadata.depends().end(); ++it) {
@@ -193,7 +198,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
         if(found == plugins()->end() || !found->second->manager || !(found->second->manager->load(*it) & (LoadOk|IsStatic)))
             return UnresolvedDependency;
 
-        dependencies.push_back(found->second);
+        dependencies.push_back(*found);
     }
 
     string filename = Directory::join(_pluginDirectory, _plugin + PLUGIN_FILENAME_SUFFIX);
@@ -265,8 +270,15 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     }
 
     /* Everything is okay, add this plugin to usedBy list of each dependency */
-    for(vector<PluginObject*>::const_iterator it = dependencies.begin(); it != dependencies.end(); ++it)
-        (*it)->metadata.addUsedBy(_plugin);
+    for(vector<pair<string, PluginObject*> >::const_iterator it = dependencies.begin(); it != dependencies.end(); ++it) {
+        /* If the plugin is not static with no associated manager, use its
+           manager for adding this plugin */
+        if(it->second->manager)
+            it->second->manager->addUsedBy(it->first, _plugin);
+
+        /* Otherwise add this plugin manually */
+        else it->second->metadata._usedBy.push_back(_plugin);
+    }
 
     plugin.loadState = LoadOk;
     plugin.module = handle;
@@ -308,7 +320,21 @@ AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& _pl
         for(vector<string>::const_iterator it = plugin.metadata.depends().begin(); it != plugin.metadata.depends().end(); ++it) {
             std::map<string, PluginObject*>::const_iterator mit = plugins()->find(*it);
             /** @bug FIXME: use plugin hierarchy for destruction */
-            if(mit != plugins()->end()) mit->second->metadata.removeUsedBy(_plugin);
+
+            if(mit != plugins()->end()) {
+                /* If the plugin is not static with no associated manager, use
+                   its manager for removing this plugin */
+                if(mit->second->manager)
+                    mit->second->manager->removeUsedBy(mit->first, _plugin);
+
+                /* Otherwise remove this plugin manually */
+                else for(vector<string>::iterator it = mit->second->metadata._usedBy.begin(); it != mit->second->metadata._usedBy.end(); ++it) {
+                    if(*it == _plugin) {
+                        mit->second->metadata._usedBy.erase(it);
+                        break;
+                    }
+                }
+            }
         }
 
         #ifndef _WIN32
@@ -415,6 +441,29 @@ bool AbstractPluginManager::reloadPluginMetadata(map<string, PluginObject*>::ite
     it->second = new PluginObject(Directory::join(_pluginDirectory, it->first + ".conf"), this);
 
     return true;
+}
+
+void AbstractPluginManager::addUsedBy(const string& plugin, const string& usedBy) {
+    map<string, PluginObject*>::const_iterator foundPlugin = plugins()->find(plugin);
+
+    /* Given plugin doesn't exist, nothing to do */
+    if(foundPlugin == plugins()->end()) return;
+
+    foundPlugin->second->metadata._usedBy.push_back(usedBy);
+}
+
+void AbstractPluginManager::removeUsedBy(const string& plugin, const string& usedBy) {
+    map<string, PluginObject*>::const_iterator foundPlugin = plugins()->find(plugin);
+
+    /* Given plugin doesn't exist, nothing to do */
+    if(foundPlugin == plugins()->end()) return;
+
+    for(vector<string>::iterator it = foundPlugin->second->metadata._usedBy.begin(); it != foundPlugin->second->metadata._usedBy.end(); ++it) {
+        if(*it == usedBy) {
+            foundPlugin->second->metadata._usedBy.erase(it);
+            return;
+        }
+    }
 }
 
 } namespace Utility {

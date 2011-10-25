@@ -152,19 +152,6 @@ class PLUGINMANAGER_EXPORT PluginMetadata {
          */
         inline std::vector<std::string> replacedWith() const { return _replacedWith; }
 
-    protected:
-        /**
-         * @brief Add plugin into "used by" list
-         * @param name      %Plugin name
-         */
-        void addUsedBy(const std::string& name);
-
-        /**
-         * @brief Remove plugin from "used by" list
-         * @param name      %Plugin name
-         */
-        void removeUsedBy(const std::string& name);
-
     private:
         Utility::Translator translator;
 

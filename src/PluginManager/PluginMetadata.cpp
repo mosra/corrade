@@ -36,20 +36,4 @@ PluginMetadata::PluginMetadata(const Configuration& conf) {
     _description = translator.get("description");
 }
 
-void PluginMetadata::addUsedBy(const std::string& name) {
-    for(vector<string>::const_iterator it = _usedBy.begin(); it != _usedBy.end(); ++it)
-        if(*it == name) return;
-
-    _usedBy.push_back(name);
-}
-
-void PluginMetadata::removeUsedBy(const std::string& name) {
-    for(vector<string>::iterator it = _usedBy.begin(); it != _usedBy.end(); ++it) {
-        if(*it == name) {
-            _usedBy.erase(it);
-            return;
-        }
-    }
-}
-
 }}
