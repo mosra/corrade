@@ -347,7 +347,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          * all plugins, as it can remove the plugin from vector and thus break
          * iterators.
          */
-        virtual bool reloadPluginMetadata(std::map<std::string, PluginObject*>::iterator it);
+        virtual bool reloadPluginMetadata(const std::map<std::string, Kompas::PluginManager::AbstractPluginManager::PluginObject*>::iterator& it);
 
         /**
          * @brief Add plugin to usedBy list
