@@ -30,6 +30,10 @@ void UtilitiesTest::pow2() {
     QVERIFY(Utility::pow2(10) == 1024);
 }
 
+void UtilitiesTest::log2() {
+    QVERIFY(Utility::log2(2153) == 11);
+}
+
 void UtilitiesTest::trim_data() {
     QTest::addColumn<QString>("in");
     QTest::addColumn<QString>("out");

@@ -24,6 +24,7 @@ class UtilitiesTest: public QObject {
 
     private slots:
         void pow2();
+        void log2();
 
         void trim_data();
         void trim();

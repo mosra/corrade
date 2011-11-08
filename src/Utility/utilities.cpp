@@ -21,6 +21,13 @@ using namespace std;
 
 namespace Kompas { namespace Utility {
 
+unsigned int log2(unsigned int number) {
+    int log = 0;
+    while(number >>= 1)
+        ++log;
+    return log;
+}
+
 string trim(string str, const string& characters) {
     size_t found = str.find_first_not_of(characters);
     str.erase(0, found);

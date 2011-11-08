@@ -53,6 +53,12 @@ namespace Kompas { namespace Utility {
  */
 inline unsigned int pow2(unsigned int number) { return 1 << number; }
 
+/**
+ * @brief Base-2 logarithm
+ * @return log2(number)
+ */
+UTILITY_EXPORT unsigned int log2(unsigned int number);
+
 /*@}*/
 
 /** @{ @name String utilities */
