@@ -47,8 +47,8 @@ void ResourceTest::compile() {
     compiled.open(QFile::Text|QFile::ReadOnly);
 
     map<string, string> input;
-    input.insert(pair<string, string>("predisposition.bin", string(predisposition.data(), predisposition.size())));
-    input.insert(pair<string, string>("consequence.bin", string(consequence.data(), consequence.size())));
+    input.insert(make_pair("predisposition.bin", string(predisposition.data(), predisposition.size())));
+    input.insert(make_pair("consequence.bin", string(consequence.data(), consequence.size())));
 
     QCOMPARE(QString::fromStdString(r.compile("ResourceTestData", input)), QString::fromUtf8(compiled.readAll()));
 }

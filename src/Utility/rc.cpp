@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
         } else {
             /* Save previously gathered file name and alias */
             if(!filename.empty()) {
-                files.push_back(pair<string, string>(filename, alias));
+                files.push_back(make_pair(filename, alias));
                 alias.clear();
             }
 
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
     }
 
     /* Save last gathered filename and alias */
-    files.push_back(pair<string, string>(filename, alias));
+    files.push_back(make_pair(filename, alias));
 
     /* Read all files */
     map<string, string> data;
@@ -121,9 +121,9 @@ int main(int argc, char** argv) {
 
         /* Compile file under real filename or alias, if set */
         if(it->second.empty())
-            data.insert(pair<string, string>(it->first, d.str()));
+            data.insert(make_pair(it->first, d.str()));
         else
-            data.insert(pair<string, string>(it->second, d.str()));
+            data.insert(make_pair(it->second, d.str()));
     }
 
     cerr << "Compiling..." << endl;

@@ -125,7 +125,7 @@ const string* Translator::get(const string& key) {
 
     /* If not found, load from configuration */
     string* text = new string;
-    localizations.insert(pair<string, string*>(key, text));
+    localizations.insert(make_pair(key, text));
     get(key, text, 0);
 
     return text;

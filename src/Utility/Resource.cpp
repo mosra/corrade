@@ -25,7 +25,7 @@ namespace Kompas { namespace Utility {
 map<string, map<string, Resource::ResourceData> > Resource::resources;
 
 void Resource::registerData(const char* group, unsigned int count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data) {
-    if(resources.find(group) == resources.end()) resources.insert(pair<string, map<string, ResourceData> >(group, map<string, ResourceData>()));
+    if(resources.find(group) == resources.end()) resources.insert(make_pair(group, map<string, ResourceData>()));
 
     /* Cast to type which can be eaten by std::string constructor */
     const char* _positions = reinterpret_cast<const char*>(positions);
@@ -45,7 +45,7 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
         res.size = dataPosition-oldDataPosition;
 
         string filename = string(_filenames+oldFilenamePosition, filenamePosition-oldFilenamePosition);
-        resources[group].insert(pair<string, ResourceData>(filename, res));
+        resources[group].insert(make_pair(filename, res));
 
         oldFilenamePosition = filenamePosition;
         oldDataPosition = dataPosition;
@@ -116,7 +116,7 @@ string Resource::compile(const string& name, const map<string, string>& files) c
 
 string Resource::compile(const string& name, const string& filename, const string& data) const {
     std::map<std::string, std::string> files;
-    files.insert(std::pair<std::string, std::string>(filename, data));
+    files.insert(std::make_pair(filename, data));
     return compile(name, files);
 }
 

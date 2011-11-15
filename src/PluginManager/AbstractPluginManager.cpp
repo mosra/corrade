@@ -52,7 +52,7 @@ void AbstractPluginManager::importStaticPlugin(const string& plugin, int _versio
     std::istringstream metadata(r.get(plugin + ".conf"));
 
     /* Insert plugin to list */
-    plugins()->insert(pair<string, PluginObject*>(plugin, new PluginObject(metadata, interface, instancer)));
+    plugins()->insert(make_pair(plugin, new PluginObject(metadata, interface, instancer)));
 }
 
 AbstractPluginManager::~AbstractPluginManager() {
@@ -122,7 +122,7 @@ void AbstractPluginManager::reloadPluginDirectory() {
         if(plugins()->find(name) != plugins()->end()) continue;
 
         /* Insert plugin to list */
-        plugins()->insert(pair<string, PluginObject*>(name, new PluginObject(Directory::join(_pluginDirectory, name + ".conf"), this)));
+        plugins()->insert(make_pair(name, new PluginObject(Directory::join(_pluginDirectory, name + ".conf"), this)));
     }
 }
 
@@ -396,8 +396,7 @@ void AbstractPluginManager::registerInstance(const string& plugin, Plugin* insta
     map<string, vector<Plugin*> >::iterator foundInstance = instances.find(plugin);
 
     if(foundInstance == instances.end()) {
-        foundInstance = instances.insert(pair<string, vector<Plugin* > >
-            (plugin, vector<Plugin*>())).first;
+        foundInstance = instances.insert(make_pair(plugin, vector<Plugin*>())).first;
     }
 
     foundInstance->second.push_back(instance);
