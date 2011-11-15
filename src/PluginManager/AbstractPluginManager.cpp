@@ -427,7 +427,7 @@ void AbstractPluginManager::unregisterInstance(const string& plugin, Plugin* ins
     if(_instances.size() == 0) instances.erase(plugin);
 }
 
-bool AbstractPluginManager::reloadPluginMetadata(const map<string, PluginObject*>::iterator& it) {
+bool AbstractPluginManager::reloadPluginMetadata(map<string, PluginObject*>::iterator it) {
     /* Don't reload metadata of alien or loaded plugins */
     if(it->second->manager != this || (it->second->loadState & (LoadOk|IsStatic)))
         return true;
