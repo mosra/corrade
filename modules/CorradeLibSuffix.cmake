@@ -1,4 +1,4 @@
-include(KompasMacros)
+include(CorradeMacros)
 
 if(NOT DEFINED LIB_SUFFIX AND NOT __LIB_SUFFIX_SET)
     message(STATUS "LIB_SUFFIX variable is not defined. It will be autodetected now.")

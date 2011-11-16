@@ -1,13 +1,13 @@
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011 Vladimír Vondruš <mosra@centrum.cz>
 
-    This file is part of Kompas.
+    This file is part of Corrade.
 
-    Kompas is free software: you can redistribute it and/or modify
+    Corrade is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License version 3
     only, as published by the Free Software Foundation.
 
-    Kompas is distributed in the hope that it will be useful,
+    Corrade is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU Lesser General Public License version 3 for more details.
@@ -17,13 +17,13 @@
  * @brief Utility for compiling data resources via command-line.
  *
  * Usage:
- * <tt>kompas-rc name group_name infile [-a alias] [infile2 [-a alias2] ... ] >
+ * <tt>corrade-rc name group_name infile [-a alias] [infile2 [-a alias2] ... ] >
  * outfile.cpp</tt>
  *
  * Produces compiled C++ file with data in hexadecimal representation. File
  * is printed to @c stdout, status and error messages are printed to @c stderr.
  *
- * See also @ref Kompas::Utility::Resource.
+ * See also @ref Corrade::Utility::Resource.
  * @todo Test it
  * @todo Check empty files
  */
@@ -40,13 +40,13 @@ using namespace std;
 #ifndef DOXYGEN_GENERATING_OUTPUT
 int main(int argc, char** argv) {
     if(argc < 4) {
-        cerr << "Resource compiler for Kompas.\n\nUsage:\n"
+        cerr << "Resource compiler for Corrade.\n\nUsage:\n"
              << "    " << argv[0] << " name group_name infile [-a alias] [infile2 [-a alias2] ...] > outfile.cpp"
              << endl << endl;
         return 2;
     }
 
-    Kompas::Utility::Resource r(argv[2]);
+    Corrade::Utility::Resource r(argv[2]);
 
     vector<pair<string, string> > files;
 

@@ -1,13 +1,13 @@
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011 Vladimír Vondruš <mosra@centrum.cz>
 
-    This file is part of Kompas.
+    This file is part of Corrade.
 
-    Kompas is free software: you can redistribute it and/or modify
+    Corrade is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License version 3
     only, as published by the Free Software Foundation.
 
-    Kompas is distributed in the hope that it will be useful,
+    Corrade is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU Lesser General Public License version 3 for more details.
@@ -22,13 +22,12 @@
 
 #include "Utility/Configuration.h"
 #include "testConfigure.h"
-#include "LatLonCoords.h"
 
 using namespace std;
 
-QTEST_APPLESS_MAIN(Kompas::Utility::Test::ConfigurationTest)
+QTEST_APPLESS_MAIN(Corrade::Utility::Test::ConfigurationTest)
 
-namespace Kompas { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test {
 
 ConfigurationTest::ConfigurationTest() {
     /* Create testing dir */
@@ -275,21 +274,6 @@ void ConfigurationTest::types() {
     conf.value("color", &intTmp, 0, ConfigurationGroup::Color);
     QVERIFY(intTmp == 0x34f85e);
     QVERIFY(conf.setValue("color", intTmp, 0, ConfigurationGroup::Color));
-
-    /* LatLon coordinates */
-    Core::LatLonCoords coordsTmp;
-    conf.value("coords", &coordsTmp);
-    QVERIFY(coordsTmp == Core::LatLonCoords(49.1925, 16.602222));
-    QVERIFY(conf.setValue("coords", coordsTmp));
-
-    /* Invalid coordinates (load) */
-    conf.value("coordsInvalid", &coordsTmp);
-    QVERIFY(coordsTmp == Core::LatLonCoords());
-    QVERIFY(conf.value("coordsInvalid2", &coordsTmp));
-    QVERIFY(coordsTmp == Core::LatLonCoords());
-
-    /* Invalid coordinates (save) */
-    QVERIFY(conf.setValue("coordsInvalidSave", coordsTmp));
 
     conf.save();
 

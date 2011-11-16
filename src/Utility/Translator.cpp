@@ -1,13 +1,13 @@
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011 Vladimír Vondruš <mosra@centrum.cz>
 
-    This file is part of Kompas.
+    This file is part of Corrade.
 
-    Kompas is free software: you can redistribute it and/or modify
+    Corrade is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License version 3
     only, as published by the Free Software Foundation.
 
-    Kompas is distributed in the hope that it will be useful,
+    Corrade is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU Lesser General Public License version 3 for more details.
@@ -17,7 +17,7 @@
 
 using namespace std;
 
-namespace Kompas { namespace Utility {
+namespace Corrade { namespace Utility {
 
 set<Translator*>* Translator::instances() {
     static set<Translator*>* _instances = new set<Translator*>;
@@ -83,7 +83,7 @@ void Translator::setFallback(const std::string& file) {
     fallbackFile = c;
 }
 
-void Translator::setPrimary(const Kompas::Utility::ConfigurationGroup* group, bool dynamic) {
+void Translator::setPrimary(const Corrade::Utility::ConfigurationGroup* group, bool dynamic) {
     /* Dynamic translations */
     primaryDynamicFilename.clear();
     if(dynamic && group) {
@@ -103,7 +103,7 @@ void Translator::setPrimary(const Kompas::Utility::ConfigurationGroup* group, bo
         get(it->first, it->second, 0);
 }
 
-void Translator::setFallback(const Kompas::Utility::ConfigurationGroup* group) {
+void Translator::setFallback(const Corrade::Utility::ConfigurationGroup* group) {
     /* Delete previous file */
     delete fallbackFile;
     fallbackFile = 0;

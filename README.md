@@ -1,11 +1,11 @@
-Kompas is an portable navigation system with goal to be as multiplatform and
-extensible as possible. Its core library is written in pure C++ with no
-external dependencies, on top of it is Qt and SDL GUI. The application is
-licensed under LGPLv3.
+*corrade* (v.) - "To scrape together, to gather together from various sources"
 
-This is Kompas Core library, needed by Qt and SDL GUI. It contains Plugin
-Manager, basic plugins for map servers and projections and various supporting
-utilities.
+Corrade is multiplatform plugin management and utility library, written in pure
+C++ with no external dependencies. Features:
+
+ * Plugin management library with dependency handling
+ * INI-style configuration files parser and writer
+ * Resource manager, filesystem utilites and more
 
 INSTALLATION
 ============
@@ -33,10 +33,10 @@ pass -DBUILD_TESTS=True to CMake. Unit tests use QtTest framework.
 CONTACT
 =======
 
-Want to learn more about the application? Found a bug or want to tell me an
-awesome idea? Feel free to visit project website or contact me at:
+Want to learn more about the library? Found a bug or want to tell me an
+awesome idea? Feel free to visit my website or contact me at:
 
- * Website - http://mosra.cz/blog/kompas.php
+ * Website - http://mosra.cz/blog/
  * GitHub - http://github.com/mosra
  * E-mail - mosra@centrum.cz
  * Jabber - mosra@jabbim.cz

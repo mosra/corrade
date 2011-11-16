@@ -30,11 +30,11 @@ static const unsigned char resourceData[] = {
 };
 
 int resourceInitializer_ResourceTestData() {
-    Kompas::Utility::Resource::registerData("test", 2, resourcePositions, resourceFilenames, resourceData);
+    Corrade::Utility::Resource::registerData("test", 2, resourcePositions, resourceFilenames, resourceData);
     return 1;
 } AUTOMATIC_INITIALIZER(resourceInitializer_ResourceTestData)
 
 int resourceFinalizer_ResourceTestData() {
-    Kompas::Utility::Resource::unregisterData("test", resourceData);
+    Corrade::Utility::Resource::unregisterData("test", resourceData);
     return 1;
 } AUTOMATIC_FINALIZER(resourceFinalizer_ResourceTestData)

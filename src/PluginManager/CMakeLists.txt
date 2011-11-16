@@ -5,25 +5,25 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/AbstractPluginManagerConfigure.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/AbstractPluginManagerConfigure.h)
 
-set(Kompas_PluginManager_SRCS
+set(Corrade_PluginManager_SRCS
     Plugin.cpp
     AbstractPluginManager.cpp
     PluginMetadata.cpp
 )
 
-add_library(KompasPluginManager SHARED ${Kompas_PluginManager_SRCS})
-target_link_libraries(KompasPluginManager KompasUtility)
-set_target_properties(KompasPluginManager PROPERTIES VERSION ${KOMPAS_CORE_LIBRARY_VERSION} SOVERSION ${KOMPAS_CORE_LIBRARY_SOVERSION})
+add_library(CorradePluginManager SHARED ${Corrade_PluginManager_SRCS})
+target_link_libraries(CorradePluginManager CorradeUtility)
+set_target_properties(CorradePluginManager PROPERTIES VERSION ${CORRADE_CORE_LIBRARY_VERSION} SOVERSION ${CORRADE_CORE_LIBRARY_SOVERSION})
 
 if(WIN32)
-    set_target_properties(KompasPluginManager PROPERTIES COMPILE_FLAGS -DPLUGINMANAGER_EXPORTING)
+    set_target_properties(CorradePluginManager PROPERTIES COMPILE_FLAGS -DPLUGINMANAGER_EXPORTING)
 endif()
 
 if(USE_FPIC)
-    set_target_properties(KompasPluginManager PROPERTIES COMPILE_FLAGS -fPIC)
+    set_target_properties(CorradePluginManager PROPERTIES COMPILE_FLAGS -fPIC)
 endif()
 
-install(TARGETS KompasPluginManager DESTINATION ${KOMPAS_LIBRARY_INSTALL_DIR})
+install(TARGETS CorradePluginManager DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 
 if(BUILD_TESTS)
     enable_testing()

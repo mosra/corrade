@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(KompasCore)
+project(Corrade)
 
 option(BUILD_TESTS "Build unit tests (requires Qt4)." OFF)
 
@@ -16,19 +16,17 @@ if(BUILD_TESTS)
 
 endif()
 
-set(CMAKE_MODULE_PATH "${KompasCore_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${Corrade_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
 
-include(KompasMacros)
+include(CorradeMacros)
 
 # Default directories
-set_parent_scope(KOMPAS_CORE_INCLUDE_DIR     "${CMAKE_CURRENT_SOURCE_DIR}/src")
-set_parent_scope(KOMPAS_PLUGINS_INCLUDE_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/src/Plugins")
-set_parent_scope(KOMPAS_UTILITY_LIBRARY      KompasUtility)
-set_parent_scope(KOMPAS_PLUGINMANAGER_LIBRARY KompasPluginManager)
-set_parent_scope(KOMPAS_CORE_LIBRARY         KompasCore)
-set_parent_scope(KOMPAS_RC_EXECUTABLE        kompas-rc)
+set_parent_scope(CORRADE_INCLUDE_DIR            "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set_parent_scope(CORRADE_UTILITY_LIBRARY        CorradeUtility)
+set_parent_scope(CORRADE_PLUGINMANAGER_LIBRARY  CorradePluginManager)
+set_parent_scope(CORRADE_RC_EXECUTABLE          corrade-rc)
 
-include(FindKompasCore)
+include(FindCorrade)
 
 # On 64bit Linux with GCC flag -fPIC is needed for building some static libraries
 if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -38,19 +36,16 @@ else()
 endif()
 
 # Library version
-set(KOMPAS_CORE_LIBRARY_VERSION 0.1.2)
-set(KOMPAS_CORE_LIBRARY_SOVERSION 0)
+set(CORRADE_CORE_LIBRARY_VERSION 0.1.60)
+set(CORRADE_CORE_LIBRARY_SOVERSION 0)
 
 add_subdirectory(modules)
 add_subdirectory(src)
 
 if(NOT WIN32)
-    install(DIRECTORY src/ DESTINATION ${KOMPAS_CORE_INCLUDE_INSTALL_DIR}
+    install(DIRECTORY src/ DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}
                  FILES_MATCHING PATTERN "*.h"
                  PATTERN "*/Test" EXCLUDE
                  PATTERN "*/doc" EXCLUDE
                  PATTERN src/Plugins EXCLUDE)
-    install(DIRECTORY src/Plugins/ DESTINATION ${KOMPAS_PLUGINS_INCLUDE_INSTALL_DIR}
-                FILES_MATCHING PATTERN "*.h"
-                PATTERN "*/Test" EXCLUDE)
 endif()

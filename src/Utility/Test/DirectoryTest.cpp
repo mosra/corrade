@@ -1,13 +1,13 @@
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011 Vladimír Vondruš <mosra@centrum.cz>
 
-    This file is part of Kompas.
+    This file is part of Corrade.
 
-    Kompas is free software: you can redistribute it and/or modify
+    Corrade is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License version 3
     only, as published by the Free Software Foundation.
 
-    Kompas is distributed in the hope that it will be useful,
+    Corrade is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU Lesser General Public License version 3 for more details.
@@ -24,16 +24,16 @@
 
 using namespace std;
 
-QTEST_APPLESS_MAIN(Kompas::Utility::Test::DirectoryTest)
+QTEST_APPLESS_MAIN(Corrade::Utility::Test::DirectoryTest)
 
-namespace Kompas { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test {
 
 void DirectoryTest::path_data() {
     QTest::addColumn<QString>("input");
     QTest::addColumn<QString>("expected");
 
     QTest::newRow("noPath") << "foo.txt" << "";
-    QTest::newRow("noFilename") << ".kompas/configuration/" << ".kompas/configuration";
+    QTest::newRow("noFilename") << ".corrade/configuration/" << ".corrade/configuration";
     QTest::newRow("regular") << "package/map.conf" << "package";
 }
 
@@ -142,7 +142,7 @@ void DirectoryTest::home() {
 }
 
 void DirectoryTest::configurationDir() {
-    QCOMPARE(QString::fromStdString(Directory::configurationDir("Kompas", false)), QDir::home().filePath(".kompas"));
+    QCOMPARE(QString::fromStdString(Directory::configurationDir("Corrade", false)), QDir::home().filePath(".corrade"));
 }
 
 void DirectoryTest::list_data() {

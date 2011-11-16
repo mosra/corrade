@@ -1,22 +1,22 @@
-#ifndef Kompas_PluginManager_AbstractPlugin_h
-#define Kompas_PluginManager_AbstractPlugin_h
+#ifndef Corrade_PluginManager_AbstractPlugin_h
+#define Corrade_PluginManager_AbstractPlugin_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011 Vladimír Vondruš <mosra@centrum.cz>
 
-    This file is part of Kompas.
+    This file is part of Corrade.
 
-    Kompas is free software: you can redistribute it and/or modify
+    Corrade is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License version 3
     only, as published by the Free Software Foundation.
 
-    Kompas is distributed in the hope that it will be useful,
+    Corrade is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU Lesser General Public License version 3 for more details.
 */
 
 /** @file
- * @brief Class Kompas::PluginManager::Plugin and plugin registering macros
+ * @brief Class Corrade::PluginManager::Plugin and plugin registering macros
  *
  * Macros PLUGIN_INTERFACE(), PLUGIN_REGISTER_STATIC(), PLUGIN_REGISTER().
  */
@@ -26,7 +26,7 @@
 #include "Utility/utilities.h"
 #include "AbstractPluginManager.h"
 
-namespace Kompas { namespace PluginManager {
+namespace Corrade { namespace PluginManager {
 
 /**
  * @brief Base class for plugin interfaces
@@ -119,7 +119,7 @@ class PLUGINMANAGER_EXPORT Plugin {
  */
 #define PLUGIN_REGISTER(className, interface) \
     extern "C" int pluginVersion() { return PLUGIN_VERSION; } \
-    extern "C" void* pluginInstancer(Kompas::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
+    extern "C" void* pluginInstancer(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
         { return new className(manager, plugin); } \
     extern "C" std::string pluginInterface() { return interface; }
 
@@ -141,10 +141,10 @@ class PLUGINMANAGER_EXPORT Plugin {
  * only in *.cpp
  */
 #define PLUGIN_REGISTER_STATIC(name, className, interface) \
-    inline void* pluginInstancer_##name(Kompas::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
+    inline void* pluginInstancer_##name(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
         { return new className(manager, plugin); } \
     int pluginInitializer_##name() { \
-        Kompas::PluginManager::AbstractPluginManager::importStaticPlugin(#name, PLUGIN_VERSION, interface, pluginInstancer_##name); return 1; \
+        Corrade::PluginManager::AbstractPluginManager::importStaticPlugin(#name, PLUGIN_VERSION, interface, pluginInstancer_##name); return 1; \
     } AUTOMATIC_INITIALIZER(pluginInitializer_##name)
 
 }}

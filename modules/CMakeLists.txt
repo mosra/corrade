@@ -1,7 +1,7 @@
 if(NOT WIN32)
     install(FILES
-        FindKompasCore.cmake
-        KompasLibSuffix.cmake
-        KompasMacros.cmake
-        DESTINATION ${KOMPAS_CMAKE_MODULE_INSTALL_DIR})
+        FindCorrade.cmake
+        CorradeLibSuffix.cmake
+        CorradeMacros.cmake
+        DESTINATION ${CORRADE_CMAKE_MODULE_INSTALL_DIR})
 endif()
