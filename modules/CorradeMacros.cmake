@@ -52,6 +52,11 @@ function(corrade_add_test test_name moc_header source_file)
     target_link_libraries(${test_name} ${libraries} ${QT_QTCORE_LIBRARY} ${QT_QTTEST_LIBRARY})
     add_test(${test_name} ${test_name})
 endfunction()
+else()
+function(corrade_add_test)
+    message(FATAL_ERROR "Qt4 is required for corrade_add_test(). Be sure you call "
+            "find_package(Qt4) before find_package(Corrade)")
+endfunction()
 endif()
 
 #
