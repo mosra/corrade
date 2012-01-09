@@ -27,6 +27,11 @@ ostream* Warning::globalOutput = &cerr;
 
 ostream* Error::globalOutput = &cerr;
 
+Debug::~Debug() {
+    if(output && !(flags & 0x01) && (flags & NewLineAtTheEnd))
+        *output << std::endl;
+}
+
 void Debug::setFlag(Flag flag, bool value) {
     flag = static_cast<Flag>(flag & ~0x01);
     if(value) flags |= flag;

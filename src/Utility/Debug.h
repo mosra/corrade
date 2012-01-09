@@ -76,17 +76,14 @@ class UTILITY_EXPORT Debug {
          *
          * Constructs debug object with given output. See also setOutput().
          */
-        Debug(std::ostream* _output = globalOutput): output(_output), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
+        inline Debug(std::ostream* _output = globalOutput): output(_output), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
 
         /**
          * @brief Destructor
          *
          * Adds newline at the end of debug output, if it is not empty.
          */
-        ~Debug() {
-            if(output && !(flags & 0x01) && (flags & NewLineAtTheEnd))
-                *output << std::endl;
-        }
+        ~Debug();
 
         inline bool flag(Flag flag) const { return flags & flag; }
 
@@ -101,7 +98,9 @@ class UTILITY_EXPORT Debug {
          * All successive Debug instances created with default constructor will
          * be outputted to given stream.
          */
-        inline static void setOutput(std::ostream* _output = globalOutput) { globalOutput = _output; }
+        inline static void setOutput(std::ostream* _output = globalOutput) {
+            globalOutput = _output;
+        }
 
         /**
          * @brief Write value to debug output
