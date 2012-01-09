@@ -18,7 +18,6 @@
 #include <QtTest/QTest>
 
 #include "Utility/AbstractHash.h"
-#include "Utility/Debug.h"
 
 QTEST_APPLESS_MAIN(Corrade::Utility::Test::AbstractHashTest)
 
@@ -26,7 +25,6 @@ namespace Corrade { namespace Utility { namespace Test {
 
 void AbstractHashTest::toHexString() {
     const unsigned char rawDigest[4] = { 0xCA, 0xFE, 0x90, 0xfa };
-    Debug() << "+" + AbstractHash<4>::Digest::fromByteArray(reinterpret_cast<const char*>(rawDigest)).hexString() + "+";
     QVERIFY(AbstractHash<4>::Digest::fromByteArray(reinterpret_cast<const char*>(rawDigest)).hexString() == "cafe90fa");
 }
 
