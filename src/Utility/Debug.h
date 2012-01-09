@@ -26,39 +26,39 @@
 namespace Corrade { namespace Utility {
 
 /**
- * @brief %Debug output handler
- *
- * Provides convenient stream interface for passing data to debug output
- * (standard output). Data are separated with spaces and last value is enclosed
- * with newline character.
- * Example usage:
- * @code
- * // Common usage
- * Debug() << "string" << 34 << 275.0f;
- *
- * // Redirect debug output to string
- * std::ostringstream output;
- * Debug::setOutput(&o);
- * Debug() << "the meaning of life, universe and everything is" << 42;
- *
- * // Mute debug output
- * Debug::setOutput(0);
- * Debug() << "noone should see my ebanking password" << password;
- *
- * // Reset debug output to default
- * Debug::setOutput();
- *
- * // Conditional debug output (avoid inserting newline where it's not desired)
- * Debug d();
- * d << "Cannot foo";
- * if(bar)
- *     d << "because of bar.";
- * else
- *     d << "because of everything else.";
- * // (newline character will be written to output on object destruction)
- * @endcode
- * @todo Output to more ostreams at once
- * @see Warning, Error
+@brief %Debug output handler
+
+Provides convenient stream interface for passing data to debug output
+(standard output). Data are separated with spaces and last value is enclosed
+with newline character.
+Example usage:
+@code
+// Common usage
+Debug() << "string" << 34 << 275.0f;
+
+// Redirect debug output to string
+std::ostringstream output;
+Debug::setOutput(&o);
+Debug() << "the meaning of life, universe and everything is" << 42;
+
+// Mute debug output
+Debug::setOutput(0);
+Debug() << "noone should see my ebanking password" << password;
+
+// Reset debug output to default
+Debug::setOutput();
+
+// Conditional debug output (avoid inserting newline where it's not desired)
+Debug d();
+d << "Cannot foo";
+if(bar)
+    d << "because of bar.";
+else
+    d << "because of everything else.";
+// (newline character will be written to output on object destruction)
+@endcode
+@todo Output to more ostreams at once
+@see Warning, Error
  */
 class UTILITY_EXPORT Debug {
     public:
