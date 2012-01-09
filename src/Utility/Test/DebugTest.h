@@ -24,6 +24,7 @@ class DebugTest: public QObject {
 
     private slots:
         void debug();
+        void custom();
         void flags();
 };
 

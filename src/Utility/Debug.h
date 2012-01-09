@@ -61,6 +61,9 @@ else
 @see Warning, Error
  */
 class UTILITY_EXPORT Debug {
+    /* Disabling assignment */
+    Debug& operator=(const Debug& other);
+
     public:
         /** @brief Output flags */
         enum Flag {
@@ -77,6 +80,15 @@ class UTILITY_EXPORT Debug {
          * Constructs debug object with given output. See also setOutput().
          */
         inline Debug(std::ostream* _output = globalOutput): output(_output), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
+
+        /**
+         * @brief Copy constructor
+         *
+         * When copied from class which already wrote anything on the output,
+         * disabling flag Debug::NewLineAtTheEnd, so there aren't excessive
+         * newlines in the output.
+         */
+        Debug(const Debug& other);
 
         /**
          * @brief Destructor

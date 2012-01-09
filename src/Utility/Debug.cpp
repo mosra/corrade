@@ -27,6 +27,11 @@ ostream* Warning::globalOutput = &cerr;
 
 ostream* Error::globalOutput = &cerr;
 
+Debug::Debug(const Debug& other): output(other.output), flags(other.flags) {
+    if(!(other.flags & 0x01))
+        setFlag(NewLineAtTheEnd, false);
+}
+
 Debug::~Debug() {
     if(output && !(flags & 0x01) && (flags & NewLineAtTheEnd))
         *output << std::endl;

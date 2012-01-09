@@ -46,6 +46,25 @@ void DebugTest::debug() {
     QCOMPARE(QString::fromStdString(debug.str()), QString(""));
 }
 
+struct Foo {
+    int value;
+};
+
+Debug& operator<<(Debug debug, const Foo& value) {
+    return debug << value.value;
+}
+
+void DebugTest::custom() {
+    ostringstream out;
+    Debug::setOutput(&out);
+
+    Foo f = { 42 };
+    {
+        Debug() << "The answer is" << f;
+    }
+    QCOMPARE(QString::fromStdString(out.str()), QString("The answer is 42\n"));
+}
+
 void DebugTest::flags() {
     ostringstream out;
     Debug::setOutput(&out);
