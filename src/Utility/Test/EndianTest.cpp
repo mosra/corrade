@@ -18,6 +18,7 @@
 #include <QtTest/QTest>
 
 #include "Utility/Endianness.h"
+#include "Utility/Debug.h"
 
 #include "../EndiannessConfigure.h"
 
@@ -28,12 +29,12 @@ namespace Corrade { namespace Utility { namespace Test {
 void EndianTest::endianness() {
     #ifdef ENDIANNESS_BIG_ENDIAN
         QVERIFY(Endianness::isBigEndian());
-        qDebug("Big endian system");
+        Debug() << "Big endian system";
         #define current bigEndian
         #define other littleEndian
     #else
         QVERIFY(!Endianness::isBigEndian());
-        qDebug("Little endian system");
+        Debug() << "Little endian system";
         #define current littleEndian
         #define other bigEndian
     #endif
