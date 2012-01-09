@@ -80,7 +80,7 @@ class UTILITY_EXPORT Debug {
 
         /**
          * @brief Globally set output for newly created instances
-         * @param _output       Stream where to put debuug output. If set to 0,
+         * @param _output       Stream where to put debug output. If set to 0,
          *      no debug output will be written anywhere.
          *
          * All successive Debug instances created with default constructor will
