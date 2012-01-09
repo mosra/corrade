@@ -27,4 +27,10 @@ ostream* Warning::globalOutput = &cerr;
 
 ostream* Error::globalOutput = &cerr;
 
+void Debug::setFlag(Flag flag, bool value) {
+    flag = static_cast<Flag>(flag & ~0x01);
+    if(value) flags |= flag;
+    else flags &= ~flag;
+}
+
 }}

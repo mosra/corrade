@@ -62,6 +62,13 @@ else
  */
 class UTILITY_EXPORT Debug {
     public:
+        /** @brief Output flags */
+        enum Flag {
+            /* 0x01 reserved for indicating that no value was yet written */
+            SpaceAfterEachValue = 0x02, /**< Put space after each value (enabled by default) */
+            NewLineAtTheEnd = 0x04      /**< Put newline at the end (enabled by default) */
+        };
+
         /**
          * @brief Constructor
          * @param _output       Stream where to put debug output. If set to 0,
@@ -69,14 +76,22 @@ class UTILITY_EXPORT Debug {
          *
          * Constructs debug object with given output. See also setOutput().
          */
-        Debug(std::ostream* _output = globalOutput): output(_output), firstValue(true) {}
+        Debug(std::ostream* _output = globalOutput): output(_output), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
 
         /**
          * @brief Destructor
          *
          * Adds newline at the end of debug output, if it is not empty.
          */
-        ~Debug() { if(output && !firstValue) *output << std::endl; }
+        ~Debug() {
+            if(output && !(flags & 0x01) && (flags & NewLineAtTheEnd))
+                *output << std::endl;
+        }
+
+        inline bool flag(Flag flag) const { return flags & flag; }
+
+        /** @brief Set flags */
+        void setFlag(Flag flag, bool value);
 
         /**
          * @brief Globally set output for newly created instances
@@ -100,9 +115,9 @@ class UTILITY_EXPORT Debug {
         template<class T> Debug& operator<<(const T& value) {
             if(!output) return *this;
 
-            /* Separate values with spaces */
-            if(!firstValue) *output << " ";
-            else firstValue = false;
+            /* Separate values with spaces, if enabled */
+            if(flags & 0x01) flags &= ~0x01;
+            else if(flags & SpaceAfterEachValue) *output << " ";
 
             *output << value;
             return *this;
@@ -113,7 +128,7 @@ class UTILITY_EXPORT Debug {
 
     private:
         static std::ostream* globalOutput;
-        bool firstValue;
+        int flags;
 };
 
 /**

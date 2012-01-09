@@ -46,4 +46,28 @@ void DebugTest::debug() {
     QCOMPARE(QString::fromStdString(debug.str()), QString(""));
 }
 
+void DebugTest::flags() {
+    ostringstream out;
+    Debug::setOutput(&out);
+
+    {
+        /* Don't allow to set/reset the reserved flag */
+        Debug debug;
+        debug.setFlag(static_cast<Debug::Flag>(0x01), false);
+        QVERIFY(debug.flag(static_cast<Debug::Flag>(0x01)));
+    } {
+        Debug debug;
+        debug.setFlag(Debug::SpaceAfterEachValue, false);
+        debug << 'a' << 'b' << 'c';
+    }
+    QCOMPARE(QString::fromStdString(out.str()), QString("abc\n"));
+    out.str("");
+    {
+        Debug debug;
+        debug.setFlag(Debug::NewLineAtTheEnd, false);
+        debug << 'a' << 'b' << 'c';
+    }
+    QCOMPARE(QString::fromStdString(out.str()), QString("a b c"));
+}
+
 }}}
