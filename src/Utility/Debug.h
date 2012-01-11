@@ -184,7 +184,7 @@ class UTILITY_EXPORT Error: public Debug {
  * The operator should convert the type to one of supported types, such as
  * std::string and then call Debug::operator<<() with it.
  */
-template<class T> Debug& operator<<(Debug debug, const T& value);
+template<class T> Debug operator<<(Debug debug, const T& value);
 #endif
 
 }}
