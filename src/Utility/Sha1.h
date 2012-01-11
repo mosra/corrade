@@ -1,7 +1,8 @@
 #ifndef Corrade_Utility_Sha1_h
 #define Corrade_Utility_Sha1_h
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011 Vladimír Vondruš <mosra@centrum.cz>
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
+              Vladimír Vondruš <mosra@centrum.cz>
 
     This file is part of Corrade.
 
