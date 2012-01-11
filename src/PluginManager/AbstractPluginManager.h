@@ -403,7 +403,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
 } namespace Utility {
 
 /** @copydoc operator<<(Debug, const T&) */
-Debug& operator<<(Debug debug, PluginManager::AbstractPluginManager::LoadState value);
+Debug operator<<(Debug debug, PluginManager::AbstractPluginManager::LoadState value);
 
 }}
 

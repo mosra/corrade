@@ -469,7 +469,7 @@ void AbstractPluginManager::removeUsedBy(const string& plugin, const string& use
 
 using namespace PluginManager;
 
-Debug& operator<<(Debug debug, AbstractPluginManager::LoadState value) {
+Debug operator<<(Debug debug, AbstractPluginManager::LoadState value) {
     string _value;
     switch(value) {
         #define ls(state) case AbstractPluginManager::state: _value = #state; break;
