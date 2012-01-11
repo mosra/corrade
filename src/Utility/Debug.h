@@ -21,6 +21,7 @@
 
 #include <ostream>
 
+#include "TypeTraits.h"
 #include "utilities.h"
 
 namespace Corrade { namespace Utility {
@@ -124,7 +125,7 @@ class UTILITY_EXPORT Debug {
          * added with implementing @c operator<<(Debug, const T&) for given
          * type.
          */
-        template<class T> Debug& operator<<(const T& value) {
+        template<class T> typename std::enable_if<!IsIterable<T>::value || std::is_same<T, std::string>::value, Debug&>::type operator<<(const T& value) {
             if(!output) return *this;
 
             /* Separate values with spaces, if enabled */
@@ -186,6 +187,26 @@ class UTILITY_EXPORT Error: public Debug {
  * std::string and then call Debug::operator<<() with it.
  */
 template<class T> Debug operator<<(Debug debug, const T& value);
+#else
+template<class Iterable> typename std::enable_if<IsIterable<Iterable>::value && !std::is_same<Iterable, std::string>::value, Debug>::type operator<<(Debug debug, const Iterable& value) {
+    debug << '[';
+    debug.setFlag(Debug::SpaceAfterEachValue, false);
+    for(typename Iterable::const_iterator it = value.begin(); it != value.end(); ++it) {
+        if(it != value.begin())
+            debug << ", ";
+        debug << *it;
+    }
+    debug << ']';
+    debug.setFlag(Debug::SpaceAfterEachValue, true);
+    return debug;
+}
+template<class A, class B> Debug operator<<(Debug debug, const std::pair<A, B>& value) {
+    debug << '(';
+    debug.setFlag(Debug::SpaceAfterEachValue, false);
+    debug << value.first << ", " << value.second << ')';
+    debug.setFlag(Debug::SpaceAfterEachValue, true);
+    return debug;
+}
 #endif
 
 }}

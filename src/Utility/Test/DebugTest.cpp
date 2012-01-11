@@ -15,6 +15,7 @@
 
 #include "DebugTest.h"
 
+#include <set>
 #include <sstream>
 #include <QtTest/QTest>
 
@@ -87,6 +88,21 @@ void DebugTest::flags() {
         debug << 'a' << 'b' << 'c';
     }
     QCOMPARE(QString::fromStdString(out.str()), QString("a b c"));
+}
+
+void DebugTest::iterable() {
+    ostringstream out;
+    Debug::setOutput(&out);
+    Debug() << vector<int>{1, 2, 3};
+    QCOMPARE(QString::fromStdString(out.str()), QString("[1, 2, 3]\n"));
+
+    out.str("");
+    Debug() << set<string>{"a", "b", "c"};
+    QCOMPARE(QString::fromStdString(out.str()), QString("[a, b, c]\n"));
+
+    out.str("");
+    Debug() << map<int, string>{{1, "a"}, {2, "b"}, {3, "c"}};
+    QCOMPARE(QString::fromStdString(out.str()), QString("[(1, a), (2, b), (3, c)]\n"));
 }
 
 }}}
