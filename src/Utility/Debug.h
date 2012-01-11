@@ -97,9 +97,10 @@ class UTILITY_EXPORT Debug {
          */
         ~Debug();
 
+        /** @brief Flag */
         inline bool flag(Flag flag) const { return flags & flag; }
 
-        /** @brief Set flags */
+        /** @brief Set flag */
         void setFlag(Flag flag, bool value);
 
         /**

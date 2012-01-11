@@ -22,6 +22,14 @@ namespace Corrade { namespace Utility {
 /** @brief SHA-1 */
 class Sha1: public AbstractHash<20> {
     public:
+        /**
+         * @brief Digest of given data
+         *
+         * Convenience function for
+         * @code
+         * (Sha1() << data).digest()
+         * @endcode
+         */
         inline static Digest digest(const std::string& data) {
             return (Sha1() << data).digest();
         }
@@ -30,7 +38,10 @@ class Sha1: public AbstractHash<20> {
             memcpy(_digest, initialDigest, DigestSize);
         }
 
+        /** @brief Add data for digesting */
         Sha1& operator<<(const std::string& data);
+
+        /** @brief Digest of all added data */
         Digest digest();
 
     private:
