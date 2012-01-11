@@ -15,6 +15,7 @@ set(Corrade_Utility_SRCS
     Resource.cpp
     Sha1.cpp
     Translator.cpp
+    TypeTraits.cpp
     utilities.cpp
 )
 
