@@ -33,15 +33,9 @@
 #else
     #define UTILITY_EXPORT __declspec(dllimport)
 #endif
-#ifdef CORE_EXPORTING
-    #define CORE_EXPORT __declspec(dllexport)
-#else
-    #define CORE_EXPORT __declspec(dllimport)
-#endif
 #else
     #define PLUGINMANAGER_EXPORT
     #define UTILITY_EXPORT
-    #define CORE_EXPORT
 #endif
 
 namespace Corrade { namespace Utility {

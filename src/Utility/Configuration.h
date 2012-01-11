@@ -1,5 +1,5 @@
-#ifndef Corrade_Core_Utility_Configuration_h
-#define Corrade_Core_Utility_Configuration_h
+#ifndef Corrade_Utility_Configuration_h
+#define Corrade_Utility_Configuration_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011 Vladimír Vondruš <mosra@centrum.cz>
 
