@@ -39,6 +39,8 @@ using namespace Corrade::Utility;
 
 namespace Corrade { namespace PluginManager {
 
+const int AbstractPluginManager::version = PLUGIN_VERSION;
+
 map<string, AbstractPluginManager::PluginObject*>* AbstractPluginManager::plugins() {
     static map<string, PluginObject*>* _plugins = new map<string, PluginObject*>();
 

@@ -34,9 +34,6 @@
 #include "Utility/Resource.h"
 #include "Utility/Debug.h"
 
-/** @brief Plugin version */
-#define PLUGIN_VERSION 2
-
 namespace Corrade { namespace PluginManager {
 
 class Plugin;
@@ -122,7 +119,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
         };
 
         /** @brief %Plugin version */
-        static const int version = PLUGIN_VERSION;
+        static const int version;
 
         /**
          * @brief Register static plugin
