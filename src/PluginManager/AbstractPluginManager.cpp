@@ -42,18 +42,35 @@ namespace Corrade { namespace PluginManager {
 map<string, AbstractPluginManager::PluginObject*>* AbstractPluginManager::plugins() {
     static map<string, PluginObject*>* _plugins = new map<string, PluginObject*>();
 
+    if(staticPlugins()) {
+        for(vector<StaticPluginObject>::const_iterator it = staticPlugins()->begin(); it != staticPlugins()->end(); ++it) {
+            /* Load static plugin metadata */
+            Resource r("plugins");
+            std::istringstream metadata(r.get(it->plugin + ".conf"));
+
+            /* Insert plugin to list */
+            _plugins->insert(make_pair(it->plugin, new PluginObject(metadata, it->interface, it->instancer)));
+        }
+
+        delete staticPlugins();
+        staticPlugins() = 0;
+    }
+
     return _plugins;
+}
+
+vector<AbstractPluginManager::StaticPluginObject>*& AbstractPluginManager::staticPlugins() {
+    static vector<StaticPluginObject>* _staticPlugins = new vector<StaticPluginObject>();
+
+    return _staticPlugins;
 }
 
 void AbstractPluginManager::importStaticPlugin(const string& plugin, int _version, const std::string& interface, void* (*instancer)(AbstractPluginManager*, const std::string&)) {
     if(_version != version) return;
+    if(!staticPlugins()) return;
 
-    /* Load static plugin metadata */
-    Resource r("plugins");
-    std::istringstream metadata(r.get(plugin + ".conf"));
-
-    /* Insert plugin to list */
-    plugins()->insert(make_pair(plugin, new PluginObject(metadata, interface, instancer)));
+    StaticPluginObject o = {plugin, interface, instancer};
+    staticPlugins()->push_back(o);
 }
 
 AbstractPluginManager::~AbstractPluginManager() {
