@@ -17,7 +17,6 @@
 #include "AbstractPluginManager.h"
 
 #include <algorithm>
-#include <iostream>
 
 #ifndef _WIN32
 #include <dlfcn.h>
@@ -51,7 +50,8 @@ map<string, AbstractPluginManager::PluginObject*>* AbstractPluginManager::plugin
             std::istringstream metadata(r.get(it->plugin + ".conf"));
 
             /* Insert plugin to list */
-            _plugins->insert(make_pair(it->plugin, new PluginObject(metadata, it->interface, it->instancer)));
+            if(!_plugins->insert(make_pair(it->plugin, new PluginObject(metadata, it->interface, it->instancer))).second)
+                Warning() << "PluginManager: static plugin" << '\'' + it->plugin + '\'' << "is already imported!";
         }
 
         delete staticPlugins();
@@ -68,8 +68,14 @@ vector<AbstractPluginManager::StaticPluginObject>*& AbstractPluginManager::stati
 }
 
 void AbstractPluginManager::importStaticPlugin(const string& plugin, int _version, const std::string& interface, void* (*instancer)(AbstractPluginManager*, const std::string&)) {
-    if(_version != version) return;
-    if(!staticPlugins()) return;
+    if(_version != version) {
+        Error() << "PluginManager: wrong version of static plugin" << '\'' + plugin + '\'';
+        return;
+    }
+    if(!staticPlugins()) {
+        Error() << "PluginManager: too late to import static plugin" << '\'' + plugin + '\'';
+        return;
+    }
 
     StaticPluginObject o = {plugin, interface, instancer};
     staticPlugins()->push_back(o);
@@ -230,9 +236,9 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     HMODULE handle = LoadLibraryA(filename.c_str());
     #endif
     if(!handle) {
-        cerr << "Cannot open plugin file \""
-             << _pluginDirectory + _plugin + PLUGIN_FILENAME_SUFFIX
-             << "\": " << dlerror() << endl;
+        Error() << "PluginManager: cannot open plugin file"
+                << '"' + _pluginDirectory + _plugin + PLUGIN_FILENAME_SUFFIX + "\":"
+                << dlerror();
         plugin.loadState = LoadFailed;
         return plugin.loadState;
     }
@@ -245,12 +251,13 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     #endif
     int (*_version)(void) = reinterpret_cast<int(*)()>(dlsym(handle, "pluginVersion"));
     if(_version == 0) {
-        cerr << "Cannot get version of plugin '" << _plugin << "': " << dlerror() << endl;
+        Error() << "PluginManager: cannot get version of plugin" << '\'' + _plugin + "':" << dlerror();
         dlclose(handle);
         plugin.loadState = LoadFailed;
         return plugin.loadState;
     }
     if(_version() != version) {
+        Error() << "PluginManager: wrong plugin version, expected" << _version() << "got" << version;
         dlclose(handle);
         plugin.loadState = WrongPluginVersion;
         return plugin.loadState;
@@ -264,12 +271,13 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     #endif
     string (*interface)() = reinterpret_cast<string (*)()>(dlsym(handle, "pluginInterface"));
     if(interface == 0) {
-        cerr << "Cannot get interface string of plugin '" << _plugin << "': " << dlerror() << endl;
+        Error() << "PluginManager: cannot get interface string of plugin" << '\'' + _plugin + "':" << dlerror();
         dlclose(handle);
         plugin.loadState = LoadFailed;
         return plugin.loadState;
     }
     if(interface() != pluginInterface()) {
+        Error() << "PluginManager: wrong plugin interface, expected" << '\'' + pluginInterface() + ", got '" + interface() + "'";
         dlclose(handle);
         plugin.loadState = WrongInterfaceVersion;
         return plugin.loadState;
@@ -283,7 +291,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     #endif
     void* (*instancer)(AbstractPluginManager*, const std::string&) = reinterpret_cast<void* (*)(AbstractPluginManager*, const std::string&)>(dlsym(handle, "pluginInstancer"));
     if(instancer == 0) {
-        cerr << "Cannot get instancer of plugin '" << _plugin << "': " << dlerror() << endl;
+        Error() << "PluginManager: cannot get instancer of plugin" << '\'' + _plugin + "':" << dlerror();
         dlclose(handle);
         plugin.loadState = LoadFailed;
         return plugin.loadState;
@@ -362,7 +370,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& _pl
         #else
         if(!FreeLibrary(plugin.module)) {
         #endif
-            cerr << "Cannot unload plugin '" << _plugin << "': " << dlerror() << endl;
+            Error() << "PluginManager: cannot unload plugin" << '\'' + _plugin + "':" << dlerror();
             plugin.loadState = UnloadFailed;
             return plugin.loadState;
         }
