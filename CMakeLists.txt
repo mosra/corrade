@@ -46,6 +46,5 @@ if(NOT WIN32)
     install(DIRECTORY src/ DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}
                  FILES_MATCHING PATTERN "*.h"
                  PATTERN "*/Test" EXCLUDE
-                 PATTERN "*/doc" EXCLUDE
-                 PATTERN src/Plugins EXCLUDE)
+                 PATTERN "*/doc" EXCLUDE)
 endif()
