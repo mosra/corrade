@@ -42,9 +42,7 @@ set(CORRADE_CORE_LIBRARY_SOVERSION 0)
 add_subdirectory(modules)
 add_subdirectory(src)
 
-if(NOT WIN32)
-    install(DIRECTORY src/ DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}
-                 FILES_MATCHING PATTERN "*.h"
-                 PATTERN "*/Test" EXCLUDE
-                 PATTERN "*/doc" EXCLUDE)
-endif()
+install(DIRECTORY src/ DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}
+        FILES_MATCHING PATTERN "*.h"
+        PATTERN "*/Test" EXCLUDE
+        PATTERN "*/doc" EXCLUDE)
