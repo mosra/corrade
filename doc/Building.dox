@@ -1,0 +1,82 @@
+/** @page Building Building %Corrade
+
+%Corrade can be built in many ways. You can either compile it manually (as
+described in README) or use already prepared packaging files:
+
+- @ref BuildingArch "ArchLinux"
+- @ref BuildingRPM "RPM-based distributions" (currently tested are openSUSE,
+  Fedora, Mandriva)
+- @ref BuildingDEB "Debian-based distributions" (currently tested are Debian
+  and Ubuntu)
+- @ref BuildingWin "Microsoft Windows"
+
+Minimal set of tools required for building is:
+
+- CMake >= 2.6
+- C++ compiler (e.g. GCC >= 4.4, works also with Clang, other are untested)
+
+@section BuildingArch Building ArchLinux packages
+In @c package/archlinux directory are three PKGBUILDs - one for stable
+version, one for Git development build and one for building under MinGW. The
+packages are also in AUR under the same names.
+
+There is also development PKGBUILD and MinGW development PKGBUILD in root,
+which allows you to build and install the package directly from source tree
+without downloading anything.
+
+@section BuildingRPM Building RPM packages
+Every package contains @c spec files for RPM-based distributions in
+@c package/rpm/ directory. In addition you will need @c rpm-build package
+and @c ~/.rpmmacros file, which contains at least this:
+<pre>%%_topdir /directory/where/to/store/rpms
+%%_tmppath /directory/where/to/do/compilation
+%%packager Your Name <your@email.com>
+</pre>
+First you need to download or create source tarball. Source tarball can
+be downloaded from GitHub (URL is in @c spec file), or in subdirectory
+@c package/ there is an file @c make-github-like-archive.sh, which generates
+exactly the same tarballs.
+
+The downloaded or generated tarball must be moved or copied to
+@c %{_topdir}/SOURCES directory, so @c rpmbuild can find it.
+
+When you have the sources, go to <tt>package/rpm/</tt> directory and run this:
+<pre>rpmbuild -bb corrade.spec
+</pre>
+
+This will compile and generate library and development RPM for %Corrade in
+@c %{_topdir}/RPMS.
+
+@section BuildingDEB Building DEB packages
+There is also @c debian/ directory with all files needed for building Debian
+packages. In addition you will need @c dpkg-dev pacakge. Building is easy,
+just change directory to package root, copy @c package/debian directory there
+and run @c dpkg-buildpackage:
+<pre>cp package/debian .
+dpkg-buildpackage
+</pre>
+
+This will compile binary and development packages, which will then appear in
+parent directory.
+
+@section BuildingWin Crosscompiling for Windows using MinGW
+@note This guide is tailored mainly for crosscompiling from ArchLinux. For
+this system there are also prepared @c mingw32-corrade packages, one in
+@c package/archlinux and one in root, named @c PKGBUILD-mingw32.
+
+You will need MinGW32 compiler (in ArchLinux package @c mingw32-gcc). Make
+sure you have toolchains Git submodule updated, or, if you build from source,
+download the files from https://github.com/mosra/toolchains and put them in
+toolchains/ subdirectory. Then create build directory and run cmake and make:
+<pre>
+mkdir build-win
+cd build-win
+cmake .. \
+    -DCMAKE_TOOLCHAIN_FILE=../toolchains/archlinux/basic-mingw32.cmake \
+    -DCMAKE_INSTALL_PREFIX=/usr/i486-mingw32
+make
+</pre>
+You may need to modify the @c basic-mingw32.cmake file and
+@c CMAKE_INSTALL_PREFIX to suit your distribution filesystem hierarchy. If
+everything goes well, in @c build-win/ subdirectories will be the DLLs.
+*/
