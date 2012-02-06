@@ -1,0 +1,27 @@
+# Author: mosra <mosra@centrum.cz>
+pkgname=mingw32-corrade
+pkgver=dev
+pkgrel=1
+pkgdesc="Multiplatform plugin management and utility library (mingw32)"
+arch=('any')
+url="http://mosra.cz/blog/"
+license=('LGPLv3')
+makedepends=('cmake' 'corrade')
+optdepends=('qt')
+options=(!strip)
+
+build() {
+    mkdir -p "$startdir/build-win"
+    cd "$startdir/build-win/"
+
+    cmake .. \
+        -DCMAKE_TOOLCHAIN_FILE=../toolchains/archlinux/basic-mingw32.cmake \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr/i486-mingw32
+    make
+}
+
+package() {
+  cd "$startdir/build-win"
+  make DESTDIR="$pkgdir/" install
+}
