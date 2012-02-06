@@ -25,16 +25,15 @@ if(WIN32)
     set_target_properties(CorradeUtility PROPERTIES COMPILE_FLAGS -DUTILITY_EXPORTING)
 endif()
 
-add_executable(corrade-rc rc.cpp)
-target_link_libraries(corrade-rc CorradeUtility)
-
 if(USE_FPIC)
     set_target_properties(CorradeUtility PROPERTIES COMPILE_FLAGS -fPIC)
 endif()
 
 install(TARGETS CorradeUtility DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 
-if(NOT WIN32)
+if(NOT CMAKE_CROSSCOMPILING)
+    add_executable(corrade-rc rc.cpp)
+    target_link_libraries(corrade-rc CorradeUtility)
     install(TARGETS corrade-rc DESTINATION ${CORRADE_BINARY_INSTALL_DIR})
 endif()
 
