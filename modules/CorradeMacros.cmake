@@ -239,7 +239,8 @@ function(corrade_bundle_dlls library_install_dir)
             set(${dll}_paths ${${dll}_paths} ${_path}/${path})
         endforeach()
 
-        find_file(${dll}_found ${filename} ${${dll}_paths})
+        find_file(${dll}_found ${filename} PATHS ${${dll}_paths}
+            NO_DEFAULT_PATH)
 
         if(${dll}_found)
             install(FILES ${${dll}_found} DESTINATION ${library_install_dir}/${path})
