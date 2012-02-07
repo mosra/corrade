@@ -153,12 +153,13 @@ class UTILITY_EXPORT Debug {
 class UTILITY_EXPORT Warning: public Debug {
     public:
         /** @copydoc Debug::Debug() */
-        Warning(std::ostream* _output = globalOutput): Debug(_output) {}
+        Warning(std::ostream* _output = globalWarningOutput): Debug(_output) {}
 
-        inline static void setOutput(std::ostream* _output = globalOutput) { globalOutput = _output; }
+        inline static void setOutput(std::ostream* _output = globalWarningOutput) {
+            globalWarningOutput = _output; }
 
     private:
-        static std::ostream* globalOutput;
+        static std::ostream* globalWarningOutput;
 };
 
 /**
@@ -169,12 +170,13 @@ class UTILITY_EXPORT Warning: public Debug {
 class UTILITY_EXPORT Error: public Debug {
     public:
         /** @copydoc Debug::Debug() */
-        Error(std::ostream* _output = globalOutput): Debug(_output) {}
+        Error(std::ostream* _output = globalErrorOutput): Debug(_output) {}
 
-        inline static void setOutput(std::ostream* _output = globalOutput) { globalOutput = _output; }
+        inline static void setOutput(std::ostream* _output = globalErrorOutput) {
+            globalErrorOutput = _output; }
 
     private:
-        static std::ostream* globalOutput;
+        static std::ostream* globalErrorOutput;
 };
 
 #ifdef DOXYGEN_GENERATING_OUTPUT

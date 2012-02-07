@@ -23,10 +23,8 @@ using namespace std;
 namespace Corrade { namespace Utility {
 
 ostream* Debug::globalOutput = &cout;
-
-ostream* Warning::globalOutput = &cerr;
-
-ostream* Error::globalOutput = &cerr;
+ostream* Warning::globalWarningOutput = &cerr;
+ostream* Error::globalErrorOutput = &cerr;
 
 Debug::Debug(const Debug& other): output(other.output), flags(other.flags) {
     if(!(other.flags & 0x01))
