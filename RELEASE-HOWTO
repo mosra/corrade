@@ -1,0 +1,63 @@
++----------------------------------------------------------------------------+
+|        "DON'T SCREW IT UP, PLEASE" MANUAL FOR RELEASING NEW VERSION        |
++----------------------------------------------------------------------------+
+
+0.  Test (build + unit tests) on Arch, Windows, and other systems
+    (see doc/Building.dox).
+
+1.  Bump version numbers:
+    CMakeLists.txt (CORRADE_LIBRARY_VERSION + CORRADE_LIBRARY_SOVERSION)
+
+2.  Commit:
+    git commit -m "Bump version to $version."
+
+3.  Tag new version:
+    git tag -a v$version -m "Version $version."
+
+4.  Add changelog entries:
+    package/debian/changelog
+    package/rpm/corrade.changes
+    package/rpm/corrade.spec
+
+5.  Bump version numbers:
+    package/download-obs.sh
+    package/mysql-source-arch.sh
+    package/changelog.sh (TWICE!)
+    package/make-github-like-archive.sh (TWICE!)
+    package/rpm/corrade.spec
+    package/debian-obs/corrade.dsc
+    package/archlinux/corrade/PKGBUILD
+    package/archlinux/mingw32-corrade/PKGBUILD
+
+6.  EITHER push to GitHub, download:
+    wget https://github.com/mosra/corrade/tarball/v$version/corrade-$version.tar.gz
+
+    OR create archives with:
+    cd package && ./make-github-like-archive.sh
+
+7.  Update md5sums and prefix (according to tarballs) in:
+    package/archlinux/corrade/PKGBUILD (TWICE!)
+    package/archlinux/mingw32-corrade/PKGBUILD (TWICE!)
+    package/rpm/corrade.spec
+
+8.  Commit update to OBS:
+    cp -RL package/debian-obs/* $obs/corrade/
+    cp package/rpm/corrade.{changes,spec} $obs/corrade/
+    cp package/corrade-$version.tar.gz $obs/corrade/
+    osc commit -m "New upstream version $version."
+
+9.  If not already, push v$version to GitHub, test and update packages in AUR.
+
+10. Wait for OBS packages to build, download them, remove release number and
+    insert them into blog DB:
+    cd package
+    ./download-obs.sh
+    ./mysql-source-arch.sh
+
+11. If OBS and AUR packages succeeded, commit with:
+    git commit -m "Updated packages to $version."
+
+12. Generate full changelog for release announcement:
+    cd package && ./changelog.sh > $blog/corrade/corrade-$version-changelog.txt
+
+13. Write release announcement.
