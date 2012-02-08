@@ -21,6 +21,11 @@ build() {
     make
 }
 
+check() {
+    cd "$startdir/build"
+    ctest
+}
+
 package() {
     cd "$startdir/build"
     make DESTDIR="$pkgdir/" install
