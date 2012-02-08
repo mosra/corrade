@@ -36,7 +36,7 @@ else()
 endif()
 
 # Library version
-set(CORRADE_CORE_LIBRARY_VERSION 0.1.60)
+set(CORRADE_CORE_LIBRARY_VERSION 0.2)
 set(CORRADE_CORE_LIBRARY_SOVERSION 0)
 
 add_subdirectory(modules)
