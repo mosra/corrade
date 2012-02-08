@@ -7,7 +7,8 @@ pkgdesc="Multiplatform plugin management and utility library (mingw32)"
 arch=('i686' 'x86_64')
 url="http://mosra.cz/blog/corrade.php"
 license=('LGPLv3')
-makedepends=('cmake' 'corrade')
+depends=('mingw32-runtime')
+makedepends=('mingw32-gcc' 'cmake' 'corrade')
 conflicts=('corrade-git')
 source=("https://github.com/mosra/${_pkgname}/tarball/v${pkgver}/${_pkgname}-${pkgver}.tar.gz"
         "basic-mingw32.cmake")
@@ -18,6 +19,8 @@ options=(!buildflags !strip)
 build() {
     mkdir -p "${srcdir}/build"
     cd "${srcdir}/build"
+
+    unset LDFLAGS
 
     cmake ../mosra-${_pkgname}-87ac3ee \
         -DCMAKE_TOOLCHAIN_FILE=../basic-mingw32.cmake \
