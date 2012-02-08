@@ -4,7 +4,7 @@ Maintainer: Vladimír Vondruš <mosra@centrum.cz>
 Build-Depends: debhelper (>= 7.0.50~), cmake (>= 2.6.0)
 Standards-Version: 3.8.4
 Section: libs
-Homepage: http://mosra.cz/blog/
+Homepage: http://mosra.cz/blog/corrade.php
 Vcs-Git: git://github.com/mosra/corrade.git
 Vcs-Browser: https://github.com/mosra/corrade
 

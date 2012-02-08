@@ -1,5 +1,5 @@
 Name: corrade
-URL: http://mosra.cz/blog/
+URL: http://mosra.cz/blog/corrade.php
 Version: 0.2
 Release: 1
 License: LGPLv3
