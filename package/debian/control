@@ -1,0 +1,24 @@
+Source: corrade
+Priority: optional
+Maintainer: Vladimír Vondruš <mosra@centrum.cz>
+Build-Depends: debhelper (>= 7.0.50~), cmake (>= 2.6.0)
+Standards-Version: 3.8.4
+Section: libs
+Homepage: http://mosra.cz/blog/
+Vcs-Git: git://github.com/mosra/corrade.git
+Vcs-Browser: https://github.com/mosra/corrade
+
+Package: corrade-dev
+Section: libdevel
+Architecture: any
+Depends: corrade (= ${binary:Version})
+Description: Corrade development files
+ Headers and tools needed for developing with Corrade.
+
+Package: corrade
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Multiplatform plugin management and utility library
+ Provides debugging, portability, configuration, resource management and
+ filesystem utilites and plugin management with dependency handling.

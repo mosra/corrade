@@ -1,0 +1,4 @@
+usr/bin/*
+usr/include/Corrade/*
+usr/lib*/lib*.so
+usr/share/cmake*
