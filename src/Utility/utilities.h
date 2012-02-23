@@ -82,7 +82,7 @@ UTILITY_EXPORT std::vector<std::string> split(const std::string& str, char delim
  *
  * @note Doesn't work with UTF-8.
  */
-std::string lowercase(std::string str);
+UTILITY_EXPORT std::string lowercase(std::string str);
 
 /*@}*/
 

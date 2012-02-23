@@ -57,8 +57,8 @@ vector<string> split(const string& str, char delim, bool keepEmptyParts) {
 }
 
 string lowercase(string str) {
-  transform(str.begin(), str.end(), str.begin(), ptr_fun<int, int>(tolower));
-  return str;
+    transform(str.begin(), str.end(), str.begin(), ptr_fun<int, int>(tolower));
+    return str;
 }
 
 }}
