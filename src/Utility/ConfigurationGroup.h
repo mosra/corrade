@@ -429,19 +429,19 @@ template<class T> T ConfigurationValue<T>::fromString(const std::string& stringV
 
 /* Forward declared template specializations to avoid infinite recursion in
     template functions above */
-template<> inline UTILITY_EXPORT bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, int flags) {
+template<> inline bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, int flags) {
     return valueInternal(key, _value, number, flags);
 }
-template<> inline UTILITY_EXPORT bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, int flags) const {
+template<> inline bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, int flags) const {
     return valueInternal(key, _value, number, flags);
 }
-template<> inline UTILITY_EXPORT std::vector<std::string> ConfigurationGroup::values(const std::string& key, int flags) const {
+template<> inline std::vector<std::string> ConfigurationGroup::values(const std::string& key, int flags) const {
     return valuesInternal(key, flags);
 }
-template<> inline UTILITY_EXPORT bool ConfigurationGroup::setValue(const std::string& key, const std::string& value, unsigned int number, int flags) {
+template<> inline bool ConfigurationGroup::setValue(const std::string& key, const std::string& value, unsigned int number, int flags) {
     return setValueInternal(key, value, number, flags);
 }
-template<> inline UTILITY_EXPORT bool ConfigurationGroup::addValue(const std::string& key, const std::string& value, int flags) {
+template<> inline bool ConfigurationGroup::addValue(const std::string& key, const std::string& value, int flags) {
     return addValueInternal(key, value, flags);
 }
 

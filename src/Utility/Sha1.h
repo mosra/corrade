@@ -17,11 +17,12 @@
 */
 
 #include "AbstractHash.h"
+#include "utilities.h"
 
 namespace Corrade { namespace Utility {
 
 /** @brief SHA-1 */
-class Sha1: public AbstractHash<20> {
+class UTILITY_EXPORT Sha1: public AbstractHash<20> {
     public:
         /**
          * @brief Digest of given data

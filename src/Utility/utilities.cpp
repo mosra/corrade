@@ -18,6 +18,10 @@
 
 #include <algorithm>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 using namespace std;
 
 namespace Corrade { namespace Utility {
@@ -57,8 +61,16 @@ vector<string> split(const string& str, char delim, bool keepEmptyParts) {
 }
 
 string lowercase(string str) {
-  transform(str.begin(), str.end(), str.begin(), ptr_fun<int, int>(tolower));
-  return str;
+    transform(str.begin(), str.end(), str.begin(), ptr_fun<int, int>(tolower));
+    return str;
+}
+
+void sleep(size_t ms) {
+    #ifndef _WIN32
+    usleep(ms*1000);
+    #else
+    Sleep(ms);
+    #endif
 }
 
 }}

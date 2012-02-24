@@ -1,0 +1,42 @@
+# Author: mosra <mosra@centrum.cz>
+pkgname=corrade-git
+pkgver=20120206
+pkgrel=1
+pkgdesc="Multiplatform plugin management and utility library (Git version)"
+arch=('i686' 'x86_64')
+url="http://mosra.cz/blog/corrade.php"
+license=('LGPLv3')
+makedepends=('cmake' 'git')
+provides=('corrade')
+conflicts=('corrade')
+
+_gitroot="git://github.com/mosra/corrade.git"
+_gitname="corrade"
+
+build() {
+    cd "$srcdir"
+    msg "Connecting to Git server..."
+
+    if [ -d $_gitname ] ; then
+        cd $_gitname && git pull origin
+        msg "The local files are updated."
+    else
+        git clone $_gitroot $_gitname
+    fi
+
+    msg "Git checkout done."
+    msg "Starting make..."
+
+    mkdir -p "$srcdir/build"
+    cd "$srcdir/build"
+
+    cmake ../$_gitname \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr
+    make
+}
+
+package() {
+    cd "$srcdir/build"
+    make DESTDIR="$pkgdir/" install
+}

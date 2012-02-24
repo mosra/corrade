@@ -20,28 +20,32 @@
  * @brief Class Corrade::PluginManager::PluginManager
  */
 
-#ifndef CORRADE_SKIP_PLUGINMANAGER_NAMESPACE
 #include <string>
 #include <vector>
 
 #include "AbstractPluginManager.h"
 
 namespace Corrade { namespace PluginManager {
-#endif
 
 /**
- * @brief %Plugin manager
- *
- * Manages loading, instancing and unloading plugins.
- * See also @ref PluginManagement.
+@brief %Plugin manager
+@tparam T                   Plugin interface
+@tparam BasePluginManager   Base class, subclassed from AbstractPluginManager
+    (for example if you want to add some functionality to non-templated base,
+    such as Qt signals)
+
+Manages loading, instancing and unloading plugins. See also
+@ref PluginManagement.
+
+@todo C++11 - provide constructor with arbitrary arguments
  */
-template<class T> class PluginManager: public AbstractPluginManager {
+template<class T, class BasePluginManager = AbstractPluginManager> class PluginManager: public BasePluginManager {
     public:
         /** @copydoc AbstractPluginManager::AbstractPluginManager() */
-        PluginManager(const std::string& pluginDirectory): AbstractPluginManager(pluginDirectory) {
+        PluginManager(const std::string& pluginDirectory): BasePluginManager(pluginDirectory) {
             /* Find static plugins which have the same interface and have not
                assigned manager to them */
-            for(std::map<std::string, PluginObject*>::iterator it = plugins()->begin(); it != plugins()->end(); ++it) {
+            for(typename std::map<std::string, typename BasePluginManager::PluginObject*>::iterator it = this->plugins()->begin(); it != this->plugins()->end(); ++it) {
                 if(it->second->manager != 0 || it->second->interface != pluginInterface())
                     continue;
 
@@ -50,6 +54,12 @@ template<class T> class PluginManager: public AbstractPluginManager {
             }
         }
 
+        /**
+         * @brief %Plugin interface
+         *
+         * Only plugins with the same plugin interface string can be used
+         * in this plugin manager.
+         */
         std::string pluginInterface() const { return T::pluginInterface(); }
 
         /**
@@ -62,19 +72,17 @@ template<class T> class PluginManager: public AbstractPluginManager {
          */
         T* instance(const std::string& _plugin) {
             /* Plugin with given name doesn't exist */
-            if(plugins()->find(_plugin) == plugins()->end()) return 0;
+            if(this->plugins()->find(_plugin) == this->plugins()->end()) return 0;
 
-            PluginObject& plugin = *plugins()->at(_plugin);
+            typename BasePluginManager::PluginObject& plugin = *this->plugins()->at(_plugin);
 
             /* Plugin is not successfully loaded */
-            if(!(plugin.loadState & (LoadOk|IsStatic))) return 0;
+            if(!(plugin.loadState & (BasePluginManager::LoadOk|BasePluginManager::IsStatic))) return 0;
 
             return static_cast<T*>(plugin.instancer(this, _plugin));
         }
 };
 
-#ifndef CORRADE_SKIP_PLUGINMANAGER_NAMESPACE
 }}
-#endif
 
 #endif

@@ -92,6 +92,9 @@ class PLUGINMANAGER_EXPORT Plugin {
         const PluginMetadata* _metadata;
 };
 
+/** @brief Plugin version */
+#define PLUGIN_VERSION 2
+
 /**
  * @brief Define plugin interface
  * @param name          Interface name

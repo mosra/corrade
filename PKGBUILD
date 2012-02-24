@@ -4,7 +4,7 @@ pkgver=dev
 pkgrel=1
 pkgdesc="Multiplatform plugin management and utility library"
 arch=('i686' 'x86_64')
-url="http://mosra.cz/blog/"
+url="http://mosra.cz/blog/corrade.php"
 license=('LGPLv3')
 makedepends=('cmake')
 optdepends=('qt')
@@ -21,7 +21,12 @@ build() {
     make
 }
 
+check() {
+    cd "$startdir/build"
+    ctest
+}
+
 package() {
-  cd "$startdir/build"
-  make DESTDIR="$pkgdir/" install
+    cd "$startdir/build"
+    make DESTDIR="$pkgdir/" install
 }

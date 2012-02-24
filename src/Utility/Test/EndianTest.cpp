@@ -44,7 +44,7 @@ void EndianTest::endianness() {
     QVERIFY(Endianness::other<unsigned int>(0x11223344) == 0x44332211);
     QVERIFY(Endianness::other<int>(0x77665544) == 0x44556677);
     QVERIFY(Endianness::other<short>(0x7F00) == 0x007F);
-    QVERIFY(Endianness::other<quint64>(0x1122334455667788) == 0x8877665544332211);
+    QVERIFY(Endianness::other<quint64>(0x1122334455667788ull) == 0x8877665544332211ull);
 }
 
 }}}

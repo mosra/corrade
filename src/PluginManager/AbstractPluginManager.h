@@ -34,9 +34,6 @@
 #include "Utility/Resource.h"
 #include "Utility/Debug.h"
 
-/** @brief Plugin version */
-#define PLUGIN_VERSION 2
-
 namespace Corrade { namespace PluginManager {
 
 class Plugin;
@@ -122,7 +119,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
         };
 
         /** @brief %Plugin version */
-        static const int version = PLUGIN_VERSION;
+        static const int version;
 
         /**
          * @brief Register static plugin
@@ -328,8 +325,10 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          * @brief Plugins
          *
          * Global storage of static, unloaded and loaded plugins.
-         * @note This neeeds to be accessed via pointer because of "Static
-         * Initialization Order Fiasco".
+         *
+         * @note Development note: The map is accessible via function, not
+         * directly, because we need to fill it with data from staticPlugins()
+         * before first use.
          */
         static std::map<std::string, PluginObject*>* plugins();
 
@@ -371,6 +370,35 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
         virtual void removeUsedBy(const std::string& plugin, const std::string& usedBy);
 
     private:
+        /**
+         * @brief Static plugin object
+         *
+         * See staticPlugins() for more information.
+         */
+        struct StaticPluginObject {
+            std::string plugin;      /**< @brief %Plugin name */
+            std::string interface;   /**< @brief %Plugin interface */
+
+            /** @brief %Plugin instancer function */
+            void* (*instancer)(AbstractPluginManager*, const std::string&);
+        };
+
+        /**
+         * @brief Static plugins
+         *
+         * Temporary storage of all information needed to import static
+         * plugins. They are imported to plugins() map on first call to
+         * plugins(), because at that time it is safe to assume that all
+         * static resources (plugin configuration files) are already
+         * registered.
+         *
+         * @note Development note: The vector is accessible via function, not
+         * directly, because we don't know initialization order of static
+         * members and thus the vector could be uninitalized when accessed
+         * from PLUGIN_REGISTER_STATIC.
+         */
+        static std::vector<StaticPluginObject>*& staticPlugins();
+
         std::map<std::string, std::vector<Plugin*> > instances;
 
         void registerInstance(const std::string& plugin, Plugin* instance, const Utility::Configuration** configuration, const PluginMetadata** metadata);

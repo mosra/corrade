@@ -1,0 +1,23 @@
+Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=135
+Upstream-Name: corrade
+Upstream-Maintainer: Vladimír Vondruš <mosra@centrum.cz>
+Source: https://github.com/mosra/corrade
+
+Copyright: 2007-2011 Vladimír Vondruš <mosra@centrum.cz>
+License: LGPL-3
+ Corrade is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License version 3
+ only, as published by the Free Software Foundation.
+ .
+ Corrade is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU Lesser General Public License version 3 for more details.
+ .
+ You should have received a copy of the GNU Lesser General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ .
+ On Debian systems, the full text of the GNU Lesser General Public
+ License version 3 can be found in the file
+ '/usr/share/common-licenses/LGPL-3'.
