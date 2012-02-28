@@ -23,7 +23,9 @@ using namespace std;
 
 namespace Corrade { namespace Utility {
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 static_assert(IsIterable<vector<int>>::value, "std::vector should be iterable");
 static_assert(IsIterable<string>::value, "std::string should be iterable");
+#endif
 
 }}
