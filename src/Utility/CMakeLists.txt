@@ -12,6 +12,7 @@ set(Corrade_Utility_SRCS
     Directory.cpp
     Configuration.cpp
     ConfigurationGroup.cpp
+    MurmurHash2.cpp
     Resource.cpp
     Sha1.cpp
     Translator.cpp
