@@ -28,12 +28,16 @@
 namespace Corrade { namespace Utility {
 
 /**
- * @brief %Directory listing
- *
- * Provides list of items in directory as a standard @c vector<string> class.
- * The list is not modifiable. Provides filtering of certain item types,
- * sorting of the list is available.
- * @todo Make it usable on windoze without mingw :-)
+@brief %Directory listing
+
+Provides list of items in directory as a standard `std::vector<std::string>`
+class. The list is not modifiable. Provides filtering of certain item types
+and list sorting.
+
+The class also provides portable functions for path operations and creating,
+removing and renaming files or directories.
+@todo Make it usable on windoze without mingw :-)
+@todo Return rather vector<string> instead of this voodoo?
  */
 class UTILITY_EXPORT Directory: public std::vector<std::string> {
     private:
@@ -54,9 +58,9 @@ class UTILITY_EXPORT Directory: public std::vector<std::string> {
     public:
         /** @brief Listing flags */
         enum Flags {
-            SkipDotAndDotDot = 0x01,    /**< @brief Skip @c '.' and @c '..' directories */
+            SkipDotAndDotDot = 0x01,    /**< @brief Skip `.` and `..` directories */
             SkipFiles = 0x02,           /**< @brief Skip regular files */
-            SkipDirectories = 0x04,     /**< @brief Skip directories (including @c '.' and @c '..') */
+            SkipDirectories = 0x04,     /**< @brief Skip directories (including `.` and `..`) */
             SkipSpecial = 0x08,         /**< @brief Skip everything what is not a file or directory */
             SortAscending = 0x10,       /**< @brief Sort items in ascending order */
             SortDescending = 0x20       /**< @brief Sort items in descending order */
@@ -114,10 +118,10 @@ class UTILITY_EXPORT Directory: public std::vector<std::string> {
          * @param name              Application name
          * @param createIfNotExists Create the directory, if not exists already
          *
-         * On Unix, the configuration dir is <tt>~/.<em>name</em></tt> (name is
-         * lowercased), on Windows the configuration dir is somewhere in
-         * <tt>C:/Document and Settings/user/Application Data/<em>name</em></tt>
-         * (name is left as is).
+         * On Unix, the configuration dir is `~/.name` (*name* is lowercased),
+         * on Windows the configuration dir is somewhere in
+         * `C:/Document and Settings/user/Application Data/`name` (*name* is
+         * left as is).
          */
         static std::string configurationDir(const std::string& name, bool createIfNotExists = true);
 

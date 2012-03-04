@@ -1,0 +1,88 @@
+namespace Corrade { namespace Utility {
+/** @page ResourceManagement %Resource management tutorial
+
+The Resource class provides management of resources compiled directly into the
+executable, such as icons, data files etc. This tutorial will give you a brief
+introduction into how resources are compiled into the executable and later
+retrieved in the application.
+
+@tableofcontents
+
+@section RMCompilation Resource compilation
+Imagine that you have e.g. a long license text with all these yelling words
+in all caps:
+
+    This application is copyright © John Doe et al. and the author IS NOT
+    RESPONSIBLE AT ALL FOR ANY PHYSICAL OR OTHER DAMAGES AND INJURIES WHICH
+    MAY LEAD TO DEATH OR EVEN APOCALYPSE AND CAN BE CAUSED BY THIS APPLICATION
+    ...
+
+And for obvious reasons you don't want to put directly into the code, but
+in a separate file instead. But in the end you want it compiled directly into
+the executable, so your product is one compact file.
+
+`CorradeMacros.cmake` provides macro `corrade_add_resource`, which takes one
+or more files and produces C++ source file. The source file can be then passed
+among other source files to executable or library. First argument is name of
+resulting C++ source file, second argument is resource group name (explained
+below) and list of the files follows. The files can also have aliases for
+e.g. simplifying filenames.
+@code
+# Filename: CMakeLists.txt
+
+corrade_add_resource(
+    Resources
+    data
+    licenses/en.txt ALIAS license.txt
+    icon.png
+)
+@endcode
+
+@section RMManagement Resource management
+Now it's time to make an application, which will have these resources compiled
+in. The resources should be initialized automatically, if not (for example if
+they are compiled into static library), call RESOURCE_INITIALIZE() with
+resource name as argument before they are used, for example at the beginning
+of `main()` function.
+
+This example application will just print the license text and exit:
+@code
+// Filename: main.cpp
+#include <iostream>
+
+#include "Utility/Resource.h"
+
+using namespace Corrade::Utility;
+
+int main(int argc, char** argv) {
+    // Initialize resources
+    RESOURCE_INITIALIZE(Resources);
+
+    // Initialize resource manager with name of resource group we are using
+    Resource rs("data");
+
+    std::string license = rs.get("license.txt");
+
+    cout << license << endl;
+
+    return 0;
+}
+@endcode
+Compile the application with simple CMake `add_executable` command and don't
+forget to compile in the resource file created above:
+@code
+# Filename: CMakeLists.txt (continued from above)
+
+add_executable(ResourceTest main.cpp ${Resources})
+@endcode
+
+After successful compilation the application will print out the license text:
+
+    $ ./ResourceTest
+    This application is copyright © John Doe et al. and the author IS NOT
+    RESPONSIBLE AT ALL FOR ANY PHYSICAL OR OTHER DAMAGES AND INJURIES WHICH
+    MAY LEAD TO DEATH OR EVEN APOCALYPSE AND CAN BE CAUSED BY THIS APPLICATION
+    ...
+
+*/
+}}

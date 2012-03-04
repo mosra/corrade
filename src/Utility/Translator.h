@@ -180,7 +180,7 @@ class UTILITY_EXPORT Translator {
         /**
          * @brief Load primary translation from file
          * @param file          Configuration file. If the filename contains
-         *      @c '#' character, it will be replaced with current locale name
+         *      `#` character, it will be replaced with current locale name
          *      and the translation automatically reloaded after every
          *      setLocale() call.
          *
@@ -203,7 +203,7 @@ class UTILITY_EXPORT Translator {
          * @brief Load primary translation from existing configuration
          * @param group         Configuration group
          * @param dynamic       If set to true, primary language will be fetched
-         *      from @c group subgroup with current locale name and
+         *      from `group` subgroup with current locale name and
          *      automatically reloaded after every setLocale() call.
          *
          * Uses existing configuration group for primary translation. All

@@ -1,82 +1,114 @@
 /** @page Building Building %Corrade
 
-%Corrade can be built in many ways. You can either compile it manually (as
-described in README) or use already prepared packaging files:
+%Corrade can be built in many ways. You can either @ref BuildingManual
+"compile it manually" or use already prepared packaging files, such as
+@ref BuildingArch "ArchLinux PKGBUILDs", @ref BuildingRPM "RPMs" (currently
+tested are openSUSE, Fedora, Mandriva), or @ref BuildingDEB "DEBs" (currently
+tested are Debian and Ubuntu). Guide how to @ref BuildingWin
+"crosscompile for Windows" is also available.
 
-- @ref BuildingArch "ArchLinux"
-- @ref BuildingRPM "RPM-based distributions" (currently tested are openSUSE,
-  Fedora, Mandriva)
-- @ref BuildingDEB "Debian-based distributions" (currently tested are Debian
-  and Ubuntu)
-- @ref BuildingWin "Microsoft Windows"
+@tableofcontents
 
 Minimal set of tools required for building is:
 
-- CMake >= 2.6
-- C++ compiler (e.g. GCC >= 4.4, works also with Clang, other are untested)
+- **CMake** >= 2.6
+- C++ compiler (e.g. **GCC** >= 4.4, works also with Clang, other are untested)
+
+@section BuildingManual Manual build and installation
+The library can be built and installed using these four commands:
+
+    mkdir -p build
+    cd build
+    cmake -DCMAKE_INSTALL_PREFIX=/usr .. && make
+    make install
+
+@subsection BuildingTests Building and running unit tests
+If you want to build also unit tests (which are not built by default), pass
+`-DBUILD_TESTS=True` to CMake. Unit tests use QtTest framework (you need at
+least **Qt 4.6**) and can be run using
+
+    ctest -V
+
+in build directory. Everything should pass ;-)
+
+@subsection BuildingDoc Building documentation
+The documentation (which you are currently reading) is written in **Doxygen**
+(preferrably 1.8 with Markdown support, but older versions should do good job
+too) and additionally uses **Graphviz** for class diagrams. The documentation
+can be build by running
+
+    doxygen
+
+in root directory (i.e. where `Doxyfile` is). Resulting HTML documentation
+will be in `build/doc/` directory.
 
 @section BuildingArch Building ArchLinux packages
-In @c package/archlinux directory are three PKGBUILDs - one for stable
-version, one for Git development build and one for building under MinGW. The
-packages are also in AUR under the same names.
+In `package/archlinux` directory are three PKGBUILDs - one for stable version,
+one for Git development build and one for building under MinGW. The packages
+are also in AUR under the same names.
 
 There is also development PKGBUILD and MinGW development PKGBUILD in root,
 which allows you to build and install the package directly from source tree
-without downloading anything.
+without downloading anything. The PKGBUILD also contains `check()` function
+which will run all unit tests before packaging. Note that the unit tests
+require Qt.
 
 @section BuildingRPM Building RPM packages
-Every package contains @c spec files for RPM-based distributions in
-@c package/rpm/ directory. In addition you will need @c rpm-build package
-and @c ~/.rpmmacros file, which contains at least this:
-<pre>%%_topdir /directory/where/to/store/rpms
-%%_tmppath /directory/where/to/do/compilation
-%%packager Your Name <your@email.com>
-</pre>
+Every package contains `spec` files for RPM-based distributions in
+`package/rpm/` directory. In addition you will need `rpm-build` package
+and `~/.rpmmacros` file, which contains at least this:
+
+    %%_topdir /directory/where/to/store/rpms
+    %%_tmppath /directory/where/to/do/compilation
+    %%packager Your Name <your@email.com>
+
 First you need to download or create source tarball. Source tarball can
-be downloaded from GitHub (URL is in @c spec file), or in subdirectory
-@c package/ there is an file @c make-github-like-archive.sh, which generates
-exactly the same tarballs.
+be downloaded from GitHub (URL is in spec file), or in subdirectory `package/`
+there is an script `make-github-like-archive.sh`, which generates exactly the
+same tarballs.
 
 The downloaded or generated tarball must be moved or copied to
-@c %{_topdir}/SOURCES directory, so @c rpmbuild can find it.
+`%{_topdir}/SOURCES` directory, so `rpmbuild` can find it.
 
-When you have the sources, go to <tt>package/rpm/</tt> directory and run this:
-<pre>rpmbuild -bb corrade.spec
-</pre>
+When you have the sources, go to `package/rpm/` directory and run this:
+
+    rpmbuild -bb corrade.spec
 
 This will compile and generate library and development RPM for %Corrade in
-@c %{_topdir}/RPMS.
+`%{_topdir}/RPMS`.
 
 @section BuildingDEB Building DEB packages
-There is also @c debian/ directory with all files needed for building Debian
-packages. In addition you will need @c dpkg-dev pacakge. Building is easy,
-just change directory to package root, copy @c package/debian directory there
-and run @c dpkg-buildpackage:
-<pre>cp package/debian .
-dpkg-buildpackage
-</pre>
+There is also `debian/` directory with all files needed for building Debian
+packages. In addition you will need `dpkg-dev` package. Building is easy,
+just change directory to package root, copy `package/debian` directory there
+and run `dpkg-buildpackage`:
+
+    cp package/debian .
+    dpkg-buildpackage
 
 This will compile binary and development packages, which will then appear in
 parent directory.
 
 @section BuildingWin Crosscompiling for Windows using MinGW
 @note This guide is tailored mainly for crosscompiling from ArchLinux. For
-this system there are also prepared @c mingw32-corrade packages, one in
-@c package/archlinux and one in root, named @c PKGBUILD-mingw32.
+this system there are also prepared `mingw32-corrade` packages, one in
+`package/archlinux` and one in root, named `PKGBUILD-mingw32`. The package is
+also in AUR under the same name.
 
-You will need MinGW32 compiler (in ArchLinux package @c mingw32-gcc). Make
-sure you have toolchains Git submodule updated, or, if you build from source,
-download the files from https://github.com/mosra/toolchains and put them in
-toolchains/ subdirectory. Then create build directory and run cmake and make:
-<pre>
-mkdir build-win
-cd build-win
-cmake .. \
-    -DCMAKE_TOOLCHAIN_FILE=../toolchains/archlinux/basic-mingw32.cmake \
-    -DCMAKE_INSTALL_PREFIX=/usr/i486-mingw32
-make
-</pre>
-You may need to modify the @c basic-mingw32.cmake file and
-@c CMAKE_INSTALL_PREFIX to suit your distribution filesystem hierarchy. If
-everything goes well, in @c build-win/ subdirectories will be the DLLs.
+You will need MinGW32 compiler (in ArchLinux package `mingw32-gcc`). Make
+sure you have `toolchains` Git submodule updated, or, if you build from
+source, download the files from https://github.com/mosra/toolchains and put
+them in toolchains/ subdirectory. Then create build directory and run cmake
+and make:
+
+    mkdir build-win
+    cd build-win
+    cmake .. \
+        -DCMAKE_TOOLCHAIN_FILE=../toolchains/archlinux/basic-mingw32.cmake \
+        -DCMAKE_INSTALL_PREFIX=/usr/i486-mingw32
+    make
+
+You may need to modify the `basic-mingw32.cmake` file and
+`CMAKE_INSTALL_PREFIX` to suit your distribution filesystem hierarchy. If
+everything goes well, in `build-win/` subdirectories will be the DLLs.
 */

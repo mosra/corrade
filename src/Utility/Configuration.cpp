@@ -155,7 +155,7 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
             item.value = trim(buffer.substr(splitter+1), " \t\v\f\r\n");
 
             /* Remove quotes, if present */
-            /** @todo Check @c '"' characters better */
+            /** @todo Check `"` characters better */
             if(item.value.size() != 0 && item.value[0] == '"') {
                 if(item.value.size() < 2 || item.value[item.value.size()-1] != '"')
                     throw string("Missing closing quotes in value!");

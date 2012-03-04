@@ -1,3 +1,5 @@
+#ifndef Corrade_Utility_Test_MurmurHash2Test_h
+#define Corrade_Utility_Test_MurmurHash2Test_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -14,22 +16,18 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "AbstractAnimal.h"
-#include "PluginManager/AbstractPluginManager.h"
+#include <QtCore/QObject>
 
-namespace Corrade { namespace PluginManager { namespace Test {
+namespace Corrade { namespace Utility { namespace Test {
 
-class Canary: public AbstractAnimal {
-    public:
-        inline Canary(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
-            AbstractAnimal(manager, plugin) {}
+class MurmurHash2Test: public QObject {
+    Q_OBJECT
 
-        std::string name() { return "Achoo"; }
-        int legCount() { return 2; }
-        bool hasTail() { return true; }
+    private slots:
+        void test32();
+        void test64();
 };
 
 }}}
 
-PLUGIN_REGISTER(Canary, Corrade::PluginManager::Test::Canary,
-               "cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")
+#endif

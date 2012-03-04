@@ -38,39 +38,40 @@ plugin binary in a filesystem or is compiled directly into executable with an
 static plugin. See @ref PluginManagement for tutorial and brief introduction
 into how plugins work.
 
-The plugin configuration file has an simple syntax (see Configuration class
-documentation for full specifications). The file stores plugin name,
-description, list of authors, plugin version, list of dependencies (if the
-plugin depends on another) and list of replaced plugins (if the plugin can
-replace plugin and provide the same or better functionality). Plugin name and
-description can be translated into more languages just by adding a new subgroup
-named after that language locale code. Full featured example:
-<pre># Plugin version
-version=1.0
+The plugin configuration file has an simple syntax (see
+@ref Utility::Configuration "Configuration" class documentation for full
+specification). The file stores plugin name, description, list of authors,
+plugin version, list of dependencies (if the plugin depends on another) and
+list of replaced plugins (if the plugin can replace plugin and provide the
+same or better functionality). %Plugin name and description can be translated
+into more languages just by adding a new subgroup named after that language
+locale code. Full featured example:
 
-# List of authors
-author=Vladimír Vondruš &lt;mosra@centrum.cz&gt;
-author=Some Random John Doe &lt;john@doe.net&gt;
+    # Plugin version
+    version=1.0
 
-# Dependencies
-depends=SomeRandomJohnDoesPlugin
-depends=BaseMatrixPlugin
-depends=SkyNetPlugin
+    # List of authors
+    author=Vladimír Vondruš <mosra@centrum.cz>
+    author=Some Random John Doe <john@doe.net>
 
-# Replaced plugins
-replaces=CrashingMatrixPlugin
-replaces=AlphaMatrixPlugin
+    # Dependencies
+    depends=SomeRandomJohnDoesPlugin
+    depends=BaseMatrixPlugin
+    depends=SkyNetPlugin
 
-# Metadata for default language (English)
-[metadata]
-name=Good Matrix
-description=My first matrix without bugs
+    # Replaced plugins
+    replaces=CrashingMatrixPlugin
+    replaces=AlphaMatrixPlugin
 
-# Metadata in Czech
-[metadata/cs_CZ]
-name=Dobrý Matrix
-description=Můj první Matrix bez chyb v Matrixu
-</pre>
+    # Metadata for default language (English)
+    [metadata]
+    name=Good Matrix
+    description=My first matrix without bugs
+
+    # Metadata in Czech
+    [metadata/cs_CZ]
+    name=Dobrý Matrix
+    description=Můj první Matrix bez chyb v Matrixu
  */
 class PLUGINMANAGER_EXPORT PluginMetadata {
     friend class AbstractPluginManager;

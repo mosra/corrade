@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 #ifdef _WIN32
 #ifdef PLUGINMANAGER_EXPORTING
     #define PLUGINMANAGER_EXPORT __declspec(dllexport)
@@ -37,6 +38,7 @@
 #else
     #define PLUGINMANAGER_EXPORT
     #define UTILITY_EXPORT
+#endif
 #endif
 
 namespace Corrade { namespace Utility {

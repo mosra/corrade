@@ -15,19 +15,20 @@
 */
 
 /** @file
- * @brief Utility for compiling data resources via command-line.
- *
- * Usage:
- * <tt>corrade-rc name group_name infile [-a alias] [infile2 [-a alias2] ... ] >
- * outfile.cpp</tt>
- *
- * Produces compiled C++ file with data in hexadecimal representation. File
- * is printed to @c stdout, status and error messages are printed to @c stderr.
- *
- * See also @ref Corrade::Utility::Resource.
- * @todo Test it
- * @todo Check empty files
- */
+@brief Utility for compiling data resources via command-line.
+
+Usage:
+
+    corrade-rc name group_name infile [-a alias] [infile2 [-a alias2] ... ] > outfile.cpp
+
+Produces compiled C++ file with data in hexadecimal representation. File
+is printed to `stdout`, status and error messages are printed to `stderr`.
+
+See @ref ResourceManagement for brief introduction.
+
+@todo Test it
+@todo Check empty files
+*/
 
 #include <iostream>
 #include <fstream>
