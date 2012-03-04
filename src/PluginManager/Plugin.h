@@ -19,7 +19,7 @@
 /** @file
  * @brief Class Corrade::PluginManager::Plugin and plugin registering macros
  *
- * Macros PLUGIN_INTERFACE(), PLUGIN_REGISTER_STATIC(), PLUGIN_REGISTER().
+ * Macros PLUGIN_INTERFACE(), PLUGIN_REGISTER().
  */
 
 #include <string>
@@ -112,44 +112,56 @@ class PLUGINMANAGER_EXPORT Plugin {
     public: inline static std::string pluginInterface() { return name; } private:
 
 /**
- * @brief Register dynamic plugin
- * @param className     Plugin class name
- * @param interface     Interface name (the same as is defined with
- *      PLUGIN_INTERFACE() in plugin base class)
- * @hideinitializer
- *
- * Registers plugin so it can be dynamically loaded via PluginManager by
- * supplying a filename of the plugin module.
- */
-#define PLUGIN_REGISTER(className, interface) \
-    extern "C" int pluginVersion() { return PLUGIN_VERSION; } \
-    extern "C" void* pluginInstancer(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
-        { return new className(manager, plugin); } \
-    extern "C" std::string pluginInterface() { return interface; }
+@brief Register static or dynamic lugin
+@param name          Name of static plugin (equivalent of dynamic plugin
+     filename)
+@param className     Plugin class name
+@param interface     Interface name (the same as is defined with
+     PLUGIN_INTERFACE() in plugin base class)
+@hideinitializer
 
-/**
- * @brief Register static plugin
- * @param name          Name of static plugin (equivalent of dynamic plugin
- *      filename)
- * @param className     Plugin class name
- * @param interface     Interface name (the same as is defined with
- *      PLUGIN_INTERFACE() in plugin base class)
- * @hideinitializer
- *
- * Registers static plugin. It will be loaded automatically when PluginManager
- * instance with corresponding interface is created.
- * @attention This macro should be called outside of any namespace. If you are
- * running into linker errors with @c pluginInitializer_*, this could be the
- * problem.
- * @todo Get rid of AUTOMATIC_INITIALIZER() -- PLUGIN_REGISTER_STATIC should be
- * only in *.cpp
- */
-#define PLUGIN_REGISTER_STATIC(name, className, interface) \
+If the plugin is built as **static** (using CMake command
+`corrade_add_static_plugin`), registers it, so it will be loaded automatically
+when PluginManager instance with corresponding interface is created. When
+building as static plugin, `CORRADE_STATIC_PLUGIN` preprocessor directive is
+defined.
+
+If the plugin is built as **dynamic** (using CMake command
+`corrade_add_plugin`), registers it, so it can be dynamically loaded via
+PluginManager by supplying a name of the plugin. When building as dynamic
+plugin, `CORRADE_DYNAMIC_PLUGIN` preprocessor directive is defined.
+
+If the plugin is built as dynamic or static **library or executable** (not as
+plugin, using e.g. CMake command `add_library` / `add_executable`), this macro
+won't do anything to prevent linker issues when linking more plugins together.
+No plugin-related preprocessor directive is defined.
+
+See @ref PluginManagement for more information about plugin compilation.
+
+@attention This macro should be called outside of any namespace. If you are
+running into linker errors with `pluginInitializer_`, this could be the
+problem.
+@todo Get rid of AUTOMATIC_INITIALIZER() -- PLUGIN_REGISTER() should be
+only in *.cpp
+*/
+#ifdef CORRADE_STATIC_PLUGIN
+#define PLUGIN_REGISTER(name, className, interface)                         \
     inline void* pluginInstancer_##name(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
-        { return new className(manager, plugin); } \
-    int pluginInitializer_##name() { \
+        { return new className(manager, plugin); }                          \
+    int pluginInitializer_##name() {                                        \
         Corrade::PluginManager::AbstractPluginManager::importStaticPlugin(#name, PLUGIN_VERSION, interface, pluginInstancer_##name); return 1; \
     } AUTOMATIC_INITIALIZER(pluginInitializer_##name)
+#else
+#ifdef CORRADE_DYNAMIC_PLUGIN
+#define PLUGIN_REGISTER(name, className, interface)                         \
+    extern "C" int pluginVersion() { return PLUGIN_VERSION; }               \
+    extern "C" void* pluginInstancer(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
+        { return new className(manager, plugin); }                          \
+    extern "C" std::string pluginInterface() { return interface; }
+#else
+#define PLUGIN_REGISTER(name, className, interface)
+#endif
+#endif
 
 }}
 

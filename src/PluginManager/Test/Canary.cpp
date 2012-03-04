@@ -31,5 +31,5 @@ class Canary: public AbstractAnimal {
 
 }}}
 
-PLUGIN_REGISTER_STATIC(Canary, Corrade::PluginManager::Test::Canary,
-                       "cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")
+PLUGIN_REGISTER(Canary, Corrade::PluginManager::Test::Canary,
+               "cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")

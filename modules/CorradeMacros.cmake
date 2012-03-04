@@ -153,7 +153,10 @@ function(corrade_add_plugin plugin_name install_dir metadata_file)
     endif()
 
     # Plugins doesn't have any prefix (e.g. 'lib' on Linux)
-    set_target_properties(${plugin_name} PROPERTIES PREFIX "")
+    set_target_properties(${plugin_name} PROPERTIES
+        PREFIX ""
+        COMPILE_FLAGS -DCORRADE_DYNAMIC_PLUGIN
+    )
 
     if(${install_dir} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
         add_custom_command(
@@ -196,7 +199,9 @@ macro(corrade_add_static_plugin static_plugins_variable plugin_name metadata_fil
     add_library(${plugin_name} STATIC ${sources} ${${plugin_name}})
 
     if(CMAKE_COMPILER_IS_GNUCC AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        set_target_properties(${plugin_name} PROPERTIES COMPILE_FLAGS -fPIC)
+        set_target_properties(${plugin_name} PROPERTIES COMPILE_FLAGS "-DCORRADE_STATIC_PLUGIN -fPIC")
+    else()
+        set_target_properties(${plugin_name} PROPERTIES COMPILE_FLAGS -DCORRADE_STATIC_PLUGIN)
     endif()
 
     # Unset sources array (it's a macro, thus variables stay between calls)

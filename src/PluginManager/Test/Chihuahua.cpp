@@ -28,5 +28,5 @@ class Chihuahua: public Dog {
 
 }}}
 
-PLUGIN_REGISTER(Corrade::PluginManager::Test::Chihuahua,
+PLUGIN_REGISTER(Chihuahua, Corrade::PluginManager::Test::Chihuahua,
                 "cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")

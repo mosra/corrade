@@ -31,5 +31,5 @@ class Snail: public AbstractAnimal {
 
 }}}
 
-PLUGIN_REGISTER_STATIC(Snail, Corrade::PluginManager::Test::Snail,
-                       "cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")
+PLUGIN_REGISTER(Snail, Corrade::PluginManager::Test::Snail,
+                "cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")
