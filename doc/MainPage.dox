@@ -1,6 +1,8 @@
 namespace Corrade {
 /** @mainpage
 
+*corrade* (v.) - "To scrape together, to gather together from various sources"
+
 %Corrade is multiplatform plugin management and utility library written in pure
 C++. Features:
 
