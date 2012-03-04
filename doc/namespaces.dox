@@ -14,7 +14,7 @@ configuration files (class Configuration), on which is based translation support
 /** @namespace Corrade::PluginManager
 @brief %Plugin management
 
-This library contains plugin manager, which takes care of loading, unloading
+This library contains PluginManager, which takes care of loading, unloading
 and instancing plugins. There is also an Plugin class, which is the base of all
 plugins. See @ref PluginManagement for a brief introduction to how plugins work.
 */

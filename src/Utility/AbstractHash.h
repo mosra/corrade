@@ -39,8 +39,8 @@ template<size_t digestSize> class AbstractHash {
                  * @brief Create digest from given string representation
                  *
                  * If the digest has invalid length or contains invalid
-                 * characters (other than <tt>0-9, a-f, A-F</tt>), returns
-                 * zero digest.
+                 * characters (other than `0-9, a-f, A-F`), returns zero
+                 * digest.
                  */
                 static Digest fromHexString(std::string digest) {
                     Digest d;
@@ -129,7 +129,7 @@ template<size_t digestSize> class AbstractHash {
         };
 
         /**
-         * @brief Digest size
+         * @brief %Digest size
          *
          * Physical size of the raw digest. Hexadecimal string representation
          * has double size.

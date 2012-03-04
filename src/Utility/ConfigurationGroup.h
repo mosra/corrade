@@ -39,7 +39,7 @@ structure with template specialization to allow saving and getting
 non-standard types into and from configuration files.
 
 @section ConfigurationValue_Example Example: custom structure
-We have structure named @c Foo and want to store it in configuration file as a
+We have structure named `Foo` and want to store it in configuration file as a
 sequence of two integers separated by a space.
 @code
 #include "Utility/ConfigurationGroup.h"
@@ -70,6 +70,11 @@ template<> struct ConfigurationValue<Foo> {
 
 }
 @endcode
+When saving the structure into configuration file using e.g.
+`configuration->addValue("fooValue", Foo{6, 7});`, the result will look like
+this:
+
+    fooValue=6 7
 */
 template<class T> struct ConfigurationValue {
     /**
@@ -90,11 +95,12 @@ template<class T> struct ConfigurationValue {
 };
 
 /**
- * @brief Group of values in configuration file
- *
- * Provides access to values and subgroups.
- * @todo Faster access to elements via multimap, find() and equal_range()
- */
+@brief Group of values in configuration file
+
+Provides access to values and subgroups. See Configuration class documentation
+for usage example.
+@todo Faster access to elements via multimap, find() and equal_range()
+*/
 class UTILITY_EXPORT ConfigurationGroup {
     friend class Configuration;
 
@@ -119,7 +125,7 @@ class UTILITY_EXPORT ConfigurationGroup {
         /** @{ @name Group operations */
 
         /**
-         * @brief Get group
+         * @brief Group
          * @param name      Name of the group
          * @param number    Number of the group. Default is first found group.
          * @return Pointer to group. If no group was found, returns null pointer.
@@ -128,9 +134,9 @@ class UTILITY_EXPORT ConfigurationGroup {
         const ConfigurationGroup* group(const std::string& name, unsigned int number = 0) const; /**< @overload */
 
         /**
-         * @brief Get all groups
+         * @brief All groups
          * @param name      Name of the group. If empty, returns all subgroups.
-         * @return Vector of groups. If no group found, returns empty vector.
+         * @return Vector of groups. If no group is found, returns empty vector.
          */
         std::vector<ConfigurationGroup*> groups(const std::string& name = "");
         std::vector<const ConfigurationGroup*> groups(const std::string& name = "") const; /**< @overload */
@@ -141,7 +147,7 @@ class UTILITY_EXPORT ConfigurationGroup {
          *      subgroups.
          * @return Count
          *
-         * More efficient than calling <tt>groups(name).size()</tt>.
+         * More efficient than calling `groups(name).size()`.
          * See also Configuration::UniqueGroups and Configuration::UniqueNames.
          */
         inline unsigned int groupCount(const std::string& name = "") const {
@@ -154,7 +160,8 @@ class UTILITY_EXPORT ConfigurationGroup {
          * @param name      Name of the group. If empty, returns true if there
          *      are any subgroups.
          *
-         * More efficient than calling <tt>group(name) != 0</tt>.
+         * More efficient than calling `group(name) != 0`.
+         * @todo split out to hasSubgroups()?
          */
         inline bool groupExists(const std::string& name = "") const {
             if(name.empty()) return !_groups.empty();
@@ -194,7 +201,7 @@ class UTILITY_EXPORT ConfigurationGroup {
          * @param name      Name of the group
          * @param number    Number of the group. Default is first found group.
          * @return Whether the group was removed (see above or flag
-         *      Connfiguration::ReadOnly).
+         *      Configuration::ReadOnly).
          *
          * @see clear()
          */
@@ -205,6 +212,7 @@ class UTILITY_EXPORT ConfigurationGroup {
          * @param group     Pointer to the group
          * @return Whether the group was removed (see above or flag
          *      Configuration::ReadOnly).
+         *
          * @see clear()
          */
         bool removeGroup(ConfigurationGroup* group);
@@ -288,7 +296,7 @@ class UTILITY_EXPORT ConfigurationGroup {
         /**
          * @brief Whether given key exists
          *
-         * More efficient than calling <tt>valueCount(key) != 0</tt>.
+         * More efficient than calling `valueCount(key) != 0`.
          */
         bool keyExists(const std::string& key) const;
 

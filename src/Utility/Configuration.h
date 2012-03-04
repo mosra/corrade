@@ -73,48 +73,50 @@ Rows can have leading/trailing whitespaces, they will be stripped on parsing and
 saving. Comments and empty lines are preserved, unless the comment is in group
 which was deleted.
 
-%Configuration group header is enclosed in @c [ and @c ], hierarchic group names
-are separated with @c / character. No group name can be empty.
+%Configuration group header is enclosed in `[` and `]`, hierarchic group names
+are separated with `/` character. No group name can be empty.
 
-Key/value pair consist of key name string, zero or more whitespaces, @c =
+Key/value pair consist of key name string, zero or more whitespaces, `=`
 character, zero or more whitespaces and value. Whitespaces around the value are
-stripped on parsing, if you want to preserve them, enclose the value in @c "
+stripped on parsing, if you want to preserve them, enclose the value in `"`
 characters. The value cannot span multiple lines.
 
-Comments begin with @c # or @c ; character and continue to the end of line. Each
+Comments begin with `#` or `;` character and continue to the end of line. Each
 line of multiline comments must begin with these characters.
 
-Example %file:
-<pre># Hierarchic group
-[foo/bar]
-myKey=myValue
+Example file:
 
-# Multiple groups with the same name
-[group]
-a = 35.3
-[group]
-[group]
-a = 19
+    # Hierarchic group
+    [foo/bar]
+    myKey=myValue
 
-# Value of custom type
-vec = -3 2 17 0
+    # Multiple groups with the same name
+    [group]
+    a = 35.3
+    [group]
+    [group]
+    a = 19
 
-; Another type of comment
-</pre>
+    # Value of custom type
+    vec = -3 2 17 0
 
- * @todo Renaming, copying groups
- * @todo Use find() and equal_range() for faster (log) access
- * @todo Use some try/catch for parsing (avoid repeated code for group adding)
- * @todo Don't throw out whole group on invalid row
- * @todo EOL autodetection according to system on unsure/new files (default is
- *      preserve)
- * @todo Join ReadOnly / IsValid flag checks
- * @bug When value with number > 0 is not found, pointed integer is changed
- * @bug Setting inexistent value with number > 0 creates new key/value pair
- * @todo Test, whether the configurationValueToString() is called also with string type
- * @todo Support different syntax for hierarchic groups [g1][g2][...] along with
- *      [g1/g2/...]
- */
+    ; Another type of comment
+
+@todo Renaming, copying groups
+@todo Use find() and equal_range() for faster (log) access
+@todo Use some try/catch for parsing (avoid repeated code for group adding)
+@todo Don't throw out whole group on invalid row
+@todo EOL autodetection according to system on unsure/new files (default is
+    preserve)
+@todo Join ReadOnly / IsValid flag checks
+@bug When value with number > 0 is not found, pointed integer is changed
+@bug Setting inexistent value with number > 0 creates new key/value pair
+@todo Test, whether the configurationValueToString() is called also with string type
+@todo Support different syntax for hierarchic groups [g1][g2][...] along with
+    [g1/g2/...]
+@todo C++11: move constructor, creating readonly Configuration using static
+    function returning const object, then get rid of ReadOnly flag
+*/
 class UTILITY_EXPORT Configuration: public ConfigurationGroup {
     friend class ConfigurationGroup;
 
@@ -233,7 +235,7 @@ class UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * By default, calling Configuration::group() with inexistent name
          * returns null pointer. If this feature is enabled, the group is
          * automatically created if doesn't exist. Note that this works only for
-         * first group with that name, not when requesting group with @c number
+         * first group with that name, not when requesting group with `number`
          * parameter set to non-zero value.
          * @todo Check readonly/isvalid
          */

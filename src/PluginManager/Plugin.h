@@ -54,7 +54,7 @@ class PLUGINMANAGER_EXPORT Plugin {
         virtual ~Plugin();
 
         /**
-         * @brief Plugin is about to be deleted
+         * @brief %Plugin is about to be deleted
          *
          * Called from PluginManager on all active instances before the plugin
          * is unloaded. Returns true if it is safe to delete the instance from
@@ -64,14 +64,14 @@ class PLUGINMANAGER_EXPORT Plugin {
         virtual bool canBeDeleted() { return false; }
 
         /**
-         * @brief Plugin identifier
+         * @brief %Plugin identifier
          * @return String, under which the plugin was instanced. If the plugin
          *      was not instanced via plugin manager, returns empty string.
          */
         inline std::string plugin() const { return _plugin; }
 
         /**
-         * @brief Plugin metadata
+         * @brief %Plugin metadata
          * @return Metadata file associated with the plugin or 0, if no metadata
          *      is available.
          */
@@ -79,7 +79,7 @@ class PLUGINMANAGER_EXPORT Plugin {
 
     protected:
         /**
-         * @brief Plugin configuration
+         * @brief %Plugin configuration
          * @return Configuration from file associated with the plugin or 0, if
          *      no configuration is available.
          */
@@ -96,17 +96,17 @@ class PLUGINMANAGER_EXPORT Plugin {
 #define PLUGIN_VERSION 2
 
 /**
- * @brief Define plugin interface
- * @param name          Interface name
- * @hideinitializer
- *
- * This macro is called in class definition and makes that class usable as
- * plugin interface. Plugins using that interface must have exactly the same
- * interface name, otherwise they will not be loaded. A good practice
- * is to use "Java package name"-style syntax for version name, because this
- * makes the name as unique as possible. The interface name should also contain
- * version identifier to make sure the plugin will not be loaded with
- * incompatible interface version.
+@brief Define plugin interface
+@param name          Interface name
+@hideinitializer
+
+This macro is called in class definition and makes that class usable as
+plugin interface. Plugins using that interface must have exactly the same
+interface name, otherwise they will not be loaded. A good practice
+is to use "Java package name"-style syntax for version name, because this
+makes the name as unique as possible. The interface name should also contain
+version identifier to make sure the plugin will not be loaded with
+incompatible interface version.
  */
 #define PLUGIN_INTERFACE(name) \
     public: inline static std::string pluginInterface() { return name; } private:

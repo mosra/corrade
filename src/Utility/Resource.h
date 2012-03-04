@@ -28,18 +28,18 @@
 namespace Corrade { namespace Utility {
 
 /**
- * @brief Data resource management
- *
- * This class provides support for compiled-in data resources - both compiling
- * and reading.
- *
- * Resources can be differentiated into more groups, every resource in given
- * group has unique filename.
- *
- * See also @ref rc.cpp.
- * @todo Ad-hoc resources
- * @todo Test data unregistering
- * @todo Test empty files
+@brief Data resource management
+
+This class provides support for compiled-in data resources - both compiling
+and reading. Resources can be differentiated into more groups, every resource
+in given group has unique filename.
+
+See @ref ResourceManagement for brief introduction and example usage.
+Standalone resource compiler executable is implemented in @ref rc.cpp.
+
+@todo Ad-hoc resources
+@todo Test data unregistering
+@todo Test empty files
  */
 class UTILITY_EXPORT Resource {
     public:
@@ -131,7 +131,7 @@ You can also wrap these macro calls into another function (which will then
 be compiled into dynamic library or main executable) and use
 AUTOMATIC_INITIALIZER() macro for automatic call.
 @attention This macro should be called outside of any namespace. If you are
-running into linker errors with @c resourceInitializer_*, this could be the
+running into linker errors with `resourceInitializer_*`, this could be the
 problem. If you are in a namespace and cannot call this macro from main(),
 try this:
 @code

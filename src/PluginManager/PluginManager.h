@@ -29,7 +29,7 @@ namespace Corrade { namespace PluginManager {
 
 /**
 @brief %Plugin manager
-@tparam T                   Plugin interface
+@tparam T                   %Plugin interface
 @tparam BasePluginManager   Base class, subclassed from AbstractPluginManager
     (for example if you want to add some functionality to non-templated base,
     such as Qt signals)

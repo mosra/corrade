@@ -58,6 +58,10 @@ else
     d << "because of everything else.";
 // (newline character will be written to output on object destruction)
 @endcode
+Support for printing other types (which are not handled by `iostream` itself)
+can be added by implementing function operator<<(Debug, const T&) for given
+type.
+
 @todo Output to more ostreams at once
 @see Warning, Error
  */
@@ -78,7 +82,9 @@ class UTILITY_EXPORT Debug {
          * @param _output       Stream where to put debug output. If set to 0,
          *      no debug output will be written anywhere.
          *
-         * Constructs debug object with given output. See also setOutput().
+         * Constructs debug object with given output.
+         *
+         * @see setOutput().
          */
         inline Debug(std::ostream* _output = globalOutput): output(_output), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
 
@@ -94,7 +100,10 @@ class UTILITY_EXPORT Debug {
         /**
          * @brief Destructor
          *
-         * Adds newline at the end of debug output, if it is not empty.
+         * Adds newline at the end of debug output, if it is enabled in flags
+         * and the output is not empty.
+         *
+         * @see Flag.
          */
         ~Debug();
 
@@ -110,7 +119,7 @@ class UTILITY_EXPORT Debug {
          *      no debug output will be written anywhere.
          *
          * All successive Debug instances created with default constructor will
-         * be outputted to given stream.
+         * be redirected to given stream.
          */
         inline static void setOutput(std::ostream* _output = globalOutput) {
             globalOutput = _output;
@@ -120,10 +129,9 @@ class UTILITY_EXPORT Debug {
          * @brief Write value to debug output
          * @param value         Value
          *
-         * The implementation supports all types supported in STL streams.
-         * library. Support for debugging another non-trivial types can be
-         * added with implementing @c operator<<(Debug, const T&) for given
-         * type.
+         * Support for printing other types (which are not handled by
+         * `iostream` itself) can be added by implementing function
+         * operator<<(Debug, const T&) for given type.
          */
         template<class T> Debug& operator<<(const T& value) {
             if(!output) return *this;
@@ -145,7 +153,7 @@ class UTILITY_EXPORT Debug {
 };
 
 /**
- * @brief Warning output handler
+ * @brief %Warning output handler
  *
  * Same as Debug, but by default writes output to standard error output. Thus
  * it is possible to separate / mute Debug, Warning and Error outputs.
@@ -163,7 +171,7 @@ class UTILITY_EXPORT Warning: public Debug {
 };
 
 /**
- * @brief Error output handler
+ * @brief %Error output handler
  *
  * @copydetails Warning
  */
@@ -181,12 +189,16 @@ class UTILITY_EXPORT Error: public Debug {
 
 #ifdef DOXYGEN_GENERATING_OUTPUT
 /**
- * @brief Debug output for custom types
- * @param debug     Debug class
- * @param value     Value to be outputted
- *
- * The operator should convert the type to one of supported types, such as
- * std::string and then call Debug::operator<<() with it.
+@brief Operator for printing custom types to debug
+@param debug     %Debug class
+@param value     Value to be printed
+
+Support for printing custom types (i.e. those not handled by `iostream`) can
+be added by implementing this function for given type.
+
+The function should convert the type to one of supported types (such as
+`std::string`) and then call Debug::operator<<() with it. You can also use
+Debug::setFlag() for modifying newline and whitespace behavior.
  */
 template<class T> Debug operator<<(Debug debug, const T& value);
 #endif

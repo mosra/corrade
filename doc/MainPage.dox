@@ -1,0 +1,27 @@
+namespace Corrade {
+/** @mainpage
+
+%Corrade is multiplatform plugin management and utility library written in pure
+C++. Features:
+
+- @ref PluginManager "Plugin management library" with support for both static
+  and dynamically loaded plugins, dependency handling and more. See
+  @ref PluginManagement "tutorial" for brief introduction.
+- @ref Utility::Configuration "Configuration parser and writer" with syntax
+  similar to INI files, with support for custom types and hierarchic groups.
+- @ref Utility::Resource "Resource manager" for resources compiled directly
+  into executable. See @ref ResourceManagement "tutorial" for brief
+  introduction.
+- Easy-to-use @ref Utility::Debug "Debug" classes for debug and error output
+  with support for output redirection and printing of custom types.
+- @ref Utility::Directory "Filesystem" utilities, @ref Utility::Translator
+  "translation" support, @ref Utility::Endianness "endianness" handling class,
+  implementations of @ref Utility::AbstractHash "hashing algorithms" and
+  @ref Utility "more".
+
+@section BuildingLink Building Corrade
+
+Guide @ref Building "how to build Corrade" on different platforms.
+
+*/
+}

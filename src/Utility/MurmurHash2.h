@@ -16,6 +16,10 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
+/** @file
+ * @brief Class Corrade::Utility::MurmurHash2Implementation, Corrade::Utility::MurmurHash2
+ */
+
 #include "AbstractHash.h"
 #include "utilities.h"
 
@@ -63,8 +67,8 @@ template<> class MurmurHash2Implementation<8> {
 @brief MurmurHash 2
 
 Based on algorithm copyright Austin Appleby, http://code.google.com/p/smhasher/ .
-The digest is 32bit or 64bit, depending on <tt>sizeof(size_t)</tt> and thus
-usable for hasing in e.g. <tt>std::unordered_map</tt>.
+The digest is 32bit or 64bit, depending on `sizeof(size_t)` and thus
+usable for hasing in e.g. `std::unordered_map`.
 */
 class UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(size_t)> {
     public:

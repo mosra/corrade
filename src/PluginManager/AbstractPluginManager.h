@@ -123,8 +123,8 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
 
         /**
          * @brief Register static plugin
-         * @param plugin            Plugin (name defined with
-         *      PLUGIN_REGISTER_STATIC())
+         * @param plugin            %Plugin (name defined with
+         *      PLUGIN_REGISTER())
          * @param _version          %Plugin version (must be the same as
          *      AbstractPluginManager::version)
          * @param interface         %Plugin interface string
@@ -164,7 +164,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
 
         /**
          * @brief Set another plugin directory
-         * @param directory     Plugin directory
+         * @param directory     %Plugin directory
          *
          * @see reloadPluginDirectory()
          */
@@ -249,10 +249,13 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          */
         LoadState reload(const std::string& plugin);
 
+    #ifdef DOXYGEN_GENERATING_OUTPUT
+    private:
+    #else
     protected:
-        /**
-         * @brief %Plugin object
-         */
+    #endif
+
+        /** @brief %Plugin object */
         struct PluginObject {
             LoadState loadState;                /**< @brief Load state */
 
@@ -351,7 +354,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
 
         /**
          * @brief Add plugin to usedBy list
-         * @param plugin    Plugin which is used
+         * @param plugin    %Plugin which is used
          * @param usedBy    Which plugin uses it
          *
          * Because the plugin manager must be noticed about adding the plugin
@@ -361,7 +364,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
 
         /**
          * @brief Remove plugin from usedBy list
-         * @param plugin    Plugin which was used
+         * @param plugin    %Plugin which was used
          * @param usedBy    Which plugin used it
          *
          * Because the plugin manager must be noticed about removing the plugin
@@ -395,7 +398,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          * @note Development note: The vector is accessible via function, not
          * directly, because we don't know initialization order of static
          * members and thus the vector could be uninitalized when accessed
-         * from PLUGIN_REGISTER_STATIC.
+         * from PLUGIN_REGISTER().
          */
         static std::vector<StaticPluginObject>*& staticPlugins();
 
@@ -406,23 +409,23 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
 };
 
 /**
- * @brief Import static plugin
- * @param name      Static plugin name (defined with PLUGIN_REGISTER_STATIC())
- * @hideinitializer
- *
- * If static plugins are compiled into dynamic library or directly into the
- * executable, they should be automatically loaded at startup thanks to
- * AUTOMATIC_INITALIZER() and AUTOMATIC_FINALIZER() macros.
- *
- * If static plugins are compiled into static library, they are not
- * automatically loaded at startup, so you need to load them explicitly by
- * calling PLUGIN_IMPORT() at the beggining of main() function. You can also
- * wrap these macro calls into another function (which will then be compiled
- * into dynamic library or main executable) and use AUTOMATIC_INITIALIZER()
- * macro for automatic call.
- * @attention This macro should be called outside of any namespace. If you are
- * running into linker errors with @c pluginInitializer_*, this could be the
- * problem. See RESOURCE_INITIALIZE() documentation for more information.
+@brief Import static plugin
+@param name      Static plugin name (defined with PLUGIN_REGISTER())
+@hideinitializer
+
+If static plugins are compiled into dynamic library or directly into the
+executable, they should be automatically loaded at startup thanks to
+AUTOMATIC_INITALIZER() and AUTOMATIC_FINALIZER() macros.
+
+If static plugins are compiled into static library, they are not
+automatically loaded at startup, so you need to load them explicitly by
+calling PLUGIN_IMPORT() at the beggining of main() function. You can also
+wrap these macro calls into another function (which will then be compiled
+into dynamic library or main executable) and use AUTOMATIC_INITIALIZER()
+macro for automatic call.
+@attention This macro should be called outside of any namespace. If you are
+running into linker errors with `pluginInitializer_*`, this could be the
+problem. See RESOURCE_INITIALIZE() documentation for more information.
  */
 #define PLUGIN_IMPORT(name)                                                   \
     extern int pluginInitializer_##name();                                    \
@@ -431,7 +434,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
 
 } namespace Utility {
 
-/** @copydoc operator<<(Debug, const T&) */
+/** @brief Operator for printing plugin load state to debug output */
 Debug operator<<(Debug debug, PluginManager::AbstractPluginManager::LoadState value);
 
 }}
