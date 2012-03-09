@@ -140,6 +140,7 @@ endfunction()
 # Usage:
 #       corrade_add_plugin(plugin_name install_dir metadata_file file1.cpp file2.cpp ...)
 #
+# The macro adds preprocessor directive CORRADE_DYNAMIC_PLUGIN.
 # Additional libraries can be linked in via target_link_libraries(plugin_name ...).
 #
 # If install_dir is set to CMAKE_CURRENT_BINARY_DIR (e.g. for testing purposes),
@@ -177,6 +178,7 @@ endfunction()
 # Usage:
 #       corrade_add_static_plugin(static_plugins_variable plugin_name metadata_file file1.cpp ...)
 #
+# The macro adds preprocessor directive CORRADE_STATIC_PLUGIN.
 # Additional libraries can be linked in via target_link_libraries(plugin_name ...).
 #
 # Plugin library name will be added at the end of static_plugins_variable and the
