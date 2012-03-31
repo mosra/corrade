@@ -8,6 +8,7 @@ url="http://mosra.cz/blog/corrade.php"
 license=('LGPLv3')
 makedepends=('cmake' 'qt')
 options=(!strip)
+provides=('corrade-git')
 
 build() {
     mkdir -p "$startdir/build"
