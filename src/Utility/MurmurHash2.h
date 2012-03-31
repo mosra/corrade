@@ -45,7 +45,7 @@ template<size_t> class MurmurHash2Implementation {
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-template<> class MurmurHash2Implementation<4> {
+template<> class UTILITY_EXPORT MurmurHash2Implementation<4> {
     public:
         inline MurmurHash2Implementation(unsigned int seed): seed(seed) {}
         unsigned int operator()(const unsigned char* data, unsigned int size) const;
@@ -53,7 +53,7 @@ template<> class MurmurHash2Implementation<4> {
     private:
         unsigned int seed;
 };
-template<> class MurmurHash2Implementation<8> {
+template<> class UTILITY_EXPORT MurmurHash2Implementation<8> {
     public:
         inline MurmurHash2Implementation(unsigned long long seed): seed(seed) {}
         unsigned long long operator()(const unsigned char* data, unsigned long long size) const;

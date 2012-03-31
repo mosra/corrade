@@ -24,8 +24,8 @@ crosscompiling.
 Minimal dependencies
 --------------------
 
- * **CMake** >= 2.6
  * C++ compiler (e.g. **GCC** >= 4.4, works also with Clang, other are untested)
+ * **CMake** >= 2.6
 
 Compilation, installation
 -------------------------
@@ -67,6 +67,6 @@ Want to learn more about the library? Found a bug or want to tell me an
 awesome idea? Feel free to visit my website or contact me at:
 
  * Website - http://mosra.cz/blog/corrade.php
- * GitHub - http://github.com/mosra
+ * GitHub - http://github.com/mosra/corrade
  * E-mail - mosra@centrum.cz
  * Jabber - mosra@jabbim.cz
