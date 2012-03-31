@@ -1,6 +1,6 @@
 /** @page Building Building %Corrade
 
-%Corrade can be built in many ways. You can either @ref BuildingManual
+%Corrade can be built in many ways. You can either @ref BuildingCompilation
 "compile it manually" or use already prepared packaging files, such as
 @ref BuildingArch "ArchLinux PKGBUILDs", @ref BuildingRPM "RPMs" (currently
 tested are openSUSE, Fedora, Mandriva), or @ref BuildingDEB "DEBs" (currently
@@ -11,8 +11,8 @@ tested are Debian and Ubuntu). Guide how to @ref BuildingWin
 
 Minimal set of tools required for building is:
 
-- **CMake** >= 2.6
 - C++ compiler (e.g. **GCC** >= 4.4, works also with Clang, other are untested)
+- **CMake** >= 2.6
 
 @section BuildingManual Manual build and installation
 The library can be built and installed using these four commands:
@@ -51,7 +51,7 @@ There is also development PKGBUILD and MinGW development PKGBUILD in root,
 which allows you to build and install the package directly from source tree
 without downloading anything. The PKGBUILD also contains `check()` function
 which will run all unit tests before packaging. Note that the unit tests
-require Qt.
+require Qt, as said above.
 
 @section BuildingRPM Building RPM packages
 Every package contains `spec` files for RPM-based distributions in
@@ -95,8 +95,13 @@ this system there are also prepared `mingw32-corrade` packages, one in
 `package/archlinux` and one in root, named `PKGBUILD-mingw32`. The package is
 also in AUR under the same name.
 
-You will need MinGW32 compiler (in ArchLinux package `mingw32-gcc`). Make
-sure you have `toolchains` Git submodule updated, or, if you build from
+You will need MinGW32 version of the compiler and libraries, i.e. these
+ArchLinux packages:
+
+- `mingw32-gcc`
+- `mingw32-runtime`
+
+Make sure you have `toolchains` Git submodule updated, or, if you build from
 source, download the files from https://github.com/mosra/toolchains and put
 them in toolchains/ subdirectory. Then create build directory and run cmake
 and make:
