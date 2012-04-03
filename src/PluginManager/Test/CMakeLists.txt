@@ -1,7 +1,3 @@
-find_package(Qt4 REQUIRED)
-
-enable_testing()
-
 set(PLUGINMANAGER_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/PluginTestConfigure.h.cmake

@@ -1,10 +1,6 @@
-find_package(Qt4 REQUIRED)
-
-enable_testing()
-include(CorradeMacros)
-
 set(UTILITY_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(UTILITY_BINARY_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testConfigure.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/testConfigure.h)
 

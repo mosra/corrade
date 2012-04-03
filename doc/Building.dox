@@ -14,7 +14,7 @@ Minimal set of tools required for building is:
 - C++ compiler (e.g. **GCC** >= 4.4, works also with Clang, other are untested)
 - **CMake** >= 2.6
 
-@section BuildingManual Manual build and installation
+@section BuildingCompilation Manual build and installation
 The library can be built and installed using these four commands:
 
     mkdir -p build
