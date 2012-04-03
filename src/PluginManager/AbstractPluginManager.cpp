@@ -55,7 +55,7 @@ map<string, AbstractPluginManager::PluginObject*>* AbstractPluginManager::plugin
         }
 
         delete staticPlugins();
-        staticPlugins() = 0;
+        staticPlugins() = nullptr;
     }
 
     return _plugins;
@@ -103,7 +103,7 @@ AbstractPluginManager::~AbstractPluginManager() {
            Otherwise just disconnect this manager from the plugin, so another
            manager can take over it in the future. */
         if(unload(it->first) == IsStatic)
-            it->second->manager = 0;
+            it->second->manager = nullptr;
         else
             removed.push_back(it);
     }
@@ -168,10 +168,10 @@ const PluginMetadata* AbstractPluginManager::metadata(const string& plugin) cons
     map<string, PluginObject*>::const_iterator found = plugins()->find(plugin);
 
     /* Plugin with given name doesn't exist */
-    if(found == plugins()->end()) return 0;
+    if(found == plugins()->end()) return nullptr;
 
     /* Plugin doesn't belong to this manager */
-    if(found->second->manager != this) return 0;
+    if(found->second->manager != this) return nullptr;
 
     return &found->second->metadata;
 }
@@ -250,7 +250,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     __extension__
     #endif
     int (*_version)(void) = reinterpret_cast<int(*)()>(dlsym(handle, "pluginVersion"));
-    if(_version == 0) {
+    if(_version == nullptr) {
         Error() << "PluginManager: cannot get version of plugin" << '\'' + _plugin + "':" << dlerror();
         dlclose(handle);
         plugin.loadState = LoadFailed;
@@ -270,7 +270,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     __extension__
     #endif
     string (*interface)() = reinterpret_cast<string (*)()>(dlsym(handle, "pluginInterface"));
-    if(interface == 0) {
+    if(interface == nullptr) {
         Error() << "PluginManager: cannot get interface string of plugin" << '\'' + _plugin + "':" << dlerror();
         dlclose(handle);
         plugin.loadState = LoadFailed;
@@ -290,7 +290,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     __extension__
     #endif
     void* (*instancer)(AbstractPluginManager*, const std::string&) = reinterpret_cast<void* (*)(AbstractPluginManager*, const std::string&)>(dlsym(handle, "pluginInstancer"));
-    if(instancer == 0) {
+    if(instancer == nullptr) {
         Error() << "PluginManager: cannot get instancer of plugin" << '\'' + _plugin + "':" << dlerror();
         dlclose(handle);
         plugin.loadState = LoadFailed;

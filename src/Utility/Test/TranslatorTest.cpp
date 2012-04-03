@@ -40,7 +40,7 @@ void TranslatorTest::file() {
     QVERIFY(*s == "primarily translated");
 
     /* Cleanup primary localization */
-    t.setPrimary(0);
+    t.setPrimary(nullptr);
     QVERIFY(*s == "fallback translation");
 
     /* Load inexistent primary localization */
@@ -52,7 +52,7 @@ void TranslatorTest::file() {
     QVERIFY(*s == "other fallback translation");
 
     /* Cleanup fallback localization */
-    t.setFallback(0);
+    t.setFallback(nullptr);
     QVERIFY(*s == "");
 }
 

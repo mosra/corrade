@@ -24,7 +24,7 @@ class AbstractFood: public Plugin {
     PLUGIN_INTERFACE("cz.mosra.Corrade.PluginManager.Test.AbstractFood/1.0")
 
     public:
-        inline AbstractFood(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
+        inline AbstractFood(AbstractPluginManager* manager = nullptr, const std::string& plugin = ""):
             Plugin(manager, plugin) {}
 
         virtual int weight() = 0;

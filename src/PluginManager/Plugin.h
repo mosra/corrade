@@ -44,7 +44,7 @@ class PLUGINMANAGER_EXPORT Plugin {
          *
          * Registers this plugin instance in plugin manager.
          */
-        Plugin(AbstractPluginManager* manager = 0, const std::string& plugin = "");
+        Plugin(AbstractPluginManager* manager = nullptr, const std::string& plugin = "");
 
         /**
          * @brief Destructor
