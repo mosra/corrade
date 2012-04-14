@@ -393,7 +393,8 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          * plugins. They are imported to plugins() map on first call to
          * plugins(), because at that time it is safe to assume that all
          * static resources (plugin configuration files) are already
-         * registered.
+         * registered. After that, the storage is deleted and set to nullptr
+         * to indicate that static plugins have been already processed.
          *
          * @note Development note: The vector is accessible via function, not
          * directly, because we don't know initialization order of static
