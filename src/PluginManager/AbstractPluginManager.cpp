@@ -278,7 +278,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
-    void* (*instancer)(AbstractPluginManager*, const std::string&) = reinterpret_cast<void* (*)(AbstractPluginManager*, const std::string&)>(dlsym(handle, "pluginInstancer"));
+    Instancer instancer = reinterpret_cast<void* (*)(AbstractPluginManager*, const std::string&)>(dlsym(handle, "pluginInstancer"));
     if(instancer == 0) {
         Error() << "PluginManager: cannot get instancer of plugin" << '\'' + _plugin + "':" << dlerror();
         dlclose(handle);

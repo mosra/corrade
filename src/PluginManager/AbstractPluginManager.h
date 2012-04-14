@@ -50,6 +50,8 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
     DISABLE_COPY(AbstractPluginManager)
 
     public:
+        typedef void* (*Instancer)(AbstractPluginManager*, const std::string&);
+
         /**
          * @brief Load state
          *
@@ -284,7 +286,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
             AbstractPluginManager* manager;
 
             /** @brief Pointer to plugin instancer function */
-            void* (*instancer)(AbstractPluginManager*, const std::string&);
+            Instancer instancer;
 
             /**
              * @brief %Plugin module handler
@@ -314,7 +316,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
              * @param _interface    Interface string
              * @param _instancer    Instancer function
              */
-            inline PluginObject(std::istream& _metadata, std::string _interface, void* (*_instancer)(AbstractPluginManager*, const std::string&)):
+            inline PluginObject(std::istream& _metadata, std::string _interface, Instancer _instancer):
                 loadState(IsStatic), interface(_interface), configuration(_metadata, Utility::Configuration::ReadOnly), metadata(configuration), manager(0), instancer(_instancer), module(0) {}
         };
 
@@ -383,7 +385,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
             std::string interface;   /**< @brief %Plugin interface */
 
             /** @brief %Plugin instancer function */
-            void* (*instancer)(AbstractPluginManager*, const std::string&);
+            Instancer instancer;
         };
 
         /**
