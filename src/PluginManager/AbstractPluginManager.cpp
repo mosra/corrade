@@ -18,20 +18,9 @@
 
 #include <algorithm>
 
-#ifndef _WIN32
-#include <dlfcn.h>
-#else
-#include <windows.h>
-#undef interface
-#define dlsym GetProcAddress
-#define dlerror GetLastError
-#define dlclose FreeLibrary
-#endif
-
-#include "AbstractPluginManagerConfigure.h"
-#include "Plugin.h"
 #include "Utility/Directory.h"
 #include "Utility/Configuration.h"
+#include "AbstractPluginAccessor.h"
 
 using namespace std;
 using namespace Corrade::Utility;
@@ -94,23 +83,23 @@ AbstractPluginManager::~AbstractPluginManager() {
     }
 
     /* Unload all plugins associated with this plugin manager */
-    vector<map<string, PluginObject*>::iterator> removed;
-    for(map<string, PluginObject*>::iterator it = plugins()->begin(); it != plugins()->end(); ++it) {
+    vector<map<string, AbstractPluginAccessor*>::iterator> removed;
+    for(map<string, AbstractPluginAccessor*>::iterator it = plugins()->begin(); it != plugins()->end(); ++it) {
 
         /* Plugin doesn't belong to this manager */
-        if(it->second->manager != this) continue;
+        if(it->second->pluginManager != this) continue;
 
         /* Unload the plugin and schedule it for deletion, if it is not static.
            Otherwise just disconnect this manager from the plugin, so another
            manager can take over it in the future. */
         if(unload(it->first) == IsStatic)
-            it->second->manager = 0;
+            it->second->pluginManager = 0;
         else
             removed.push_back(it);
     }
 
     /* Remove the plugins from global container */
-    for(vector<map<string, PluginObject*>::iterator>::const_iterator it = removed.begin(); it != removed.end(); ++it) {
+    for(vector<map<string, AbstractPluginAccessor*>::iterator>::const_iterator it = removed.begin(); it != removed.end(); ++it) {
         delete (*it)->second;
         plugins()->erase(*it);
     }
@@ -119,8 +108,8 @@ AbstractPluginManager::~AbstractPluginManager() {
 void AbstractPluginManager::reloadPluginDirectory() {
     /* Get all unloaded plugins and schedule them for deletion */
     vector<string> removed;
-    for(map<string, PluginObject*>::const_iterator it = plugins()->begin(); it != plugins()->end(); ++it) {
-        if(it->second->manager != this || it->second->loadState != NotLoaded)
+    for(map<string, AbstractPluginAccessor*>::const_iterator it = plugins()->begin(); it != plugins()->end(); ++it) {
+        if(it->second->pluginManager != this || it->second->loadState != NotLoaded)
             continue;
 
         delete it->second;
@@ -132,14 +121,13 @@ void AbstractPluginManager::reloadPluginDirectory() {
         plugins()->erase(*it);
 
     /* Foreach all files in plugin directory */
-    size_t suffixSize = string(PLUGIN_FILENAME_SUFFIX).size();
     Directory d(_pluginDirectory, Directory::SkipDirectories|Directory::SkipDotAndDotDot);
     for(Directory::const_iterator i = d.begin(); i != d.end(); ++i) {
-        /* Search for module filename suffix in current file */
-        size_t end = (*i).find(PLUGIN_FILENAME_SUFFIX);
+        /* Search for ".conf" suffix in current file */
+        size_t end = (*i).find(".conf");
 
-        /* File doesn't have module suffix, continue to next */
-        if(end == string::npos || end + suffixSize != i->size())
+        /* File doesn't have that suffix, continue to next */
+        if(end == string::npos || end + 4 != i->size())
             continue;
 
         /* Dig plugin name from filename */
@@ -148,8 +136,11 @@ void AbstractPluginManager::reloadPluginDirectory() {
         /* Skip the plugin if it is among loaded */
         if(plugins()->find(name) != plugins()->end()) continue;
 
+        AbstractPluginAccessor* a = new AbstractPluginAccessor; /** @todo */
+        a->initialize(this, new Configuration(Directory::join(_pluginDirectory, name + ".conf")));
+
         /* Insert plugin to list */
-        plugins()->insert(make_pair(name, new PluginObject(Directory::join(_pluginDirectory, name + ".conf"), this)));
+        plugins()->insert(make_pair(name, a));
     }
 }
 
@@ -200,7 +191,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
         return NotFound;
     }
 
-    PluginObject& plugin = *foundPlugin->second;
+    AbstractPluginAccessor& plugin = *foundPlugin->second;
 
     /* Plugin is not ready to load */
     if(!(plugin.loadState & (NotLoaded)))
@@ -222,69 +213,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
         dependencies.push_back(*foundDependency);
     }
 
-    string filename = Directory::join(_pluginDirectory, _plugin + PLUGIN_FILENAME_SUFFIX);
-
-    /* Open plugin file, make symbols available for next libs (which depends on this) */
-    #ifndef _WIN32
-    void* handle = dlopen(filename.c_str(), RTLD_NOW|RTLD_GLOBAL);
-    #else
-    HMODULE handle = LoadLibraryA(filename.c_str());
-    #endif
-    if(!handle) {
-        Error() << "PluginManager: cannot open plugin file"
-                << '"' + _pluginDirectory + _plugin + PLUGIN_FILENAME_SUFFIX + "\":"
-                << dlerror();
-        plugin.loadState = LoadFailed;
-        return plugin.loadState;
-    }
-
-    /* Check plugin version */
-    #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
-    __extension__
-    #endif
-    int (*_version)(void) = reinterpret_cast<int(*)()>(dlsym(handle, "pluginVersion"));
-    if(_version == 0) {
-        Error() << "PluginManager: cannot get version of plugin" << '\'' + _plugin + "':" << dlerror();
-        dlclose(handle);
-        plugin.loadState = LoadFailed;
-        return plugin.loadState;
-    }
-    if(_version() != version) {
-        Error() << "PluginManager: wrong plugin version, expected" << _version() << "got" << version;
-        dlclose(handle);
-        plugin.loadState = WrongPluginVersion;
-        return plugin.loadState;
-    }
-
-    /* Check interface string */
-    #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
-    __extension__
-    #endif
-    string (*interface)() = reinterpret_cast<string (*)()>(dlsym(handle, "pluginInterface"));
-    if(interface == 0) {
-        Error() << "PluginManager: cannot get interface string of plugin" << '\'' + _plugin + "':" << dlerror();
-        dlclose(handle);
-        plugin.loadState = LoadFailed;
-        return plugin.loadState;
-    }
-    if(interface() != pluginInterface()) {
-        Error() << "PluginManager: wrong plugin interface, expected" << '\'' + pluginInterface() + ", got '" + interface() + "'";
-        dlclose(handle);
-        plugin.loadState = WrongInterfaceVersion;
-        return plugin.loadState;
-    }
-
-    /* Load plugin instancer */
-    #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
-    __extension__
-    #endif
-    Instancer instancer = reinterpret_cast<void* (*)(AbstractPluginManager*, const std::string&)>(dlsym(handle, "pluginInstancer"));
-    if(instancer == 0) {
-        Error() << "PluginManager: cannot get instancer of plugin" << '\'' + _plugin + "':" << dlerror();
-        dlclose(handle);
-        plugin.loadState = LoadFailed;
-        return plugin.loadState;
-    }
+    plugin.load();
 
     /* Everything is okay, add this plugin to usedBy list of each dependency */
     for(vector<pair<string, PluginObject*> >::const_iterator it = dependencies.begin(); it != dependencies.end(); ++it) {
@@ -297,25 +226,22 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
         else it->second->metadata._usedBy.push_back(_plugin);
     }
 
-    plugin.loadState = LoadOk;
-    plugin.module = handle;
-    plugin.instancer = instancer;
     return plugin.loadState;
 }
 
 AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& _plugin) {
-    map<string, PluginObject*>::iterator foundPlugin = plugins()->find(_plugin);
+    map<string, AbstractPluginAccessor*>::iterator foundPlugin = plugins()->find(_plugin);
 
     /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
-    if(foundPlugin == plugins()->end() || foundPlugin->second->manager != this)
+    if(foundPlugin == plugins()->end() || foundPlugin->second->pluginManager != this)
         return NotFound;
 
-    PluginObject& plugin = *foundPlugin->second;
+    AbstractPluginAccessor& plugin = *foundPlugin->second;
 
     /* Only unload loaded plugin */
     if(plugin.loadState & (LoadOk|UnloadFailed)) {
         /* Plugin is used by another plugin, don't unload */
-        if(!plugin.metadata.usedBy().empty()) return IsRequired;
+        if(!plugin.pluginMetadata->usedBy().empty()) return IsRequired;
 
         /* Plugin has active instances */
         map<string, vector<Plugin*> >::const_iterator foundInstance = instances.find(_plugin);
@@ -332,37 +258,27 @@ AbstractPluginManager::LoadState AbstractPluginManager::unload(const string& _pl
         }
 
         /* Remove this plugin from "used by" column of dependencies */
-        for(vector<string>::const_iterator it = plugin.metadata.depends().begin(); it != plugin.metadata.depends().end(); ++it) {
-            std::map<string, PluginObject*>::const_iterator mit = plugins()->find(*it);
+        for(vector<string>::const_iterator it = plugin.pluginMetadata->depends().begin(); it != plugin.pluginMetadata->depends().end(); ++it) {
+            std::map<string, AbstractPluginAccessor*>::const_iterator mit = plugins()->find(*it);
             /** @bug FIXME: use plugin hierarchy for destruction */
 
             if(mit != plugins()->end()) {
                 /* If the plugin is not static with no associated manager, use
                    its manager for removing this plugin */
-                if(mit->second->manager)
-                    mit->second->manager->removeUsedBy(mit->first, _plugin);
+                if(mit->second->pluginManager)
+                    mit->second->pluginManager->removeUsedBy(mit->first, _plugin);
 
                 /* Otherwise remove this plugin manually */
-                else for(vector<string>::iterator it = mit->second->metadata._usedBy.begin(); it != mit->second->metadata._usedBy.end(); ++it) {
+                else for(vector<string>::iterator it = mit->second->pluginMetadata->_usedBy.begin(); it != mit->second->pluginMetadata->_usedBy.end(); ++it) {
                     if(*it == _plugin) {
-                        mit->second->metadata._usedBy.erase(it);
+                        mit->second->pluginMetadata->_usedBy.erase(it);
                         break;
                     }
                 }
             }
         }
 
-        #ifndef _WIN32
-        if(dlclose(plugin.module) != 0) {
-        #else
-        if(!FreeLibrary(plugin.module)) {
-        #endif
-            Error() << "PluginManager: cannot unload plugin" << '\'' + _plugin + "':" << dlerror();
-            plugin.loadState = UnloadFailed;
-            return plugin.loadState;
-        }
-
-        plugin.loadState = NotLoaded;
+        plugin.unload();
     }
 
     /* After successful unload, reload its metadata and if it is not found,

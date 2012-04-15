@@ -1,10 +1,3 @@
-add_definitions(-Wall -pedantic)
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/AbstractPluginManagerConfigure.h.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/AbstractPluginManagerConfigure.h)
-
 set(Corrade_PluginManager_SRCS
     Plugin.cpp
     AbstractPluginManager.cpp
@@ -24,6 +17,8 @@ if(USE_FPIC)
 endif()
 
 install(TARGETS CorradePluginManager DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
+
+add_subdirectory(Plugins)
 
 if(BUILD_TESTS)
     enable_testing()

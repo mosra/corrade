@@ -36,6 +36,8 @@
 
 namespace Corrade { namespace PluginManager {
 
+class AbstractPluginAccessor;
+
 class Plugin;
 
 /**
@@ -43,6 +45,9 @@ class Plugin;
  *
  * Base abstract class for all PluginManager templated classes. See also
  * @ref PluginManagement.
+ *
+ * @todo Must have PluginManager<AbstractPluginAccessor> instance all the time.
+ * How to destroy it?
  */
 class PLUGINMANAGER_EXPORT AbstractPluginManager {
     friend class Plugin;
@@ -257,69 +262,6 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
     protected:
     #endif
 
-        /** @brief %Plugin object */
-        struct PluginObject {
-            LoadState loadState;                /**< @brief Load state */
-
-            /**
-             * @brief %Plugin interface
-             *
-             * Non-static plugins have this field empty.
-             */
-            std::string interface;
-
-            /**
-             * @brief %Plugin configuration
-             *
-             * Associated configuration file.
-             */
-            const Utility::Configuration configuration;
-
-            PluginMetadata metadata;            /**< @brief %Plugin metadata */
-
-            /**
-             * @brief Associated plugin manager
-             *
-             * If set to zero, the plugin has not any associated plugin manager
-             * and cannot be loaded.
-             */
-            AbstractPluginManager* manager;
-
-            /** @brief Pointer to plugin instancer function */
-            Instancer instancer;
-
-            /**
-             * @brief %Plugin module handler
-             *
-             * Only for dynamic plugins
-             */
-            #ifndef _WIN32
-            void* module;
-            #else
-            HMODULE module;
-            #endif
-
-            /**
-             * @brief Constructor (dynamic plugins)
-             * @param _metadata     %Plugin metadata filename
-             * @param _manager      Associated plugin manager
-             */
-            inline PluginObject(const std::string& _metadata, AbstractPluginManager* _manager):
-                configuration(_metadata, Utility::Configuration::ReadOnly), metadata(configuration), manager(_manager), module(0) {
-                    if(configuration.isValid()) loadState = NotLoaded;
-                    else loadState = WrongMetadataFile;
-                }
-
-            /**
-             * @brief Constructor (static plugins)
-             * @param _metadata     %Plugin metadata istream
-             * @param _interface    Interface string
-             * @param _instancer    Instancer function
-             */
-            inline PluginObject(std::istream& _metadata, std::string _interface, Instancer _instancer):
-                loadState(IsStatic), interface(_interface), configuration(_metadata, Utility::Configuration::ReadOnly), metadata(configuration), manager(0), instancer(_instancer), module(0) {}
-        };
-
         /** @brief Directory where to search for dynamic plugins */
         std::string _pluginDirectory;
 
@@ -335,7 +277,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          * directly, because we need to fill it with data from staticPlugins()
          * before first use.
          */
-        static std::map<std::string, PluginObject*>* plugins();
+        static std::map<std::string, AbstractPluginAccessor*>* plugins();
 
         /**
          * @brief Reload plugin metadata
@@ -352,7 +294,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          * all plugins, as it can remove the plugin from vector and thus break
          * iterators.
          */
-        virtual bool reloadPluginMetadata(std::map<std::string, PluginObject*>::iterator it);
+        virtual bool reloadPluginMetadata(std::map<std::string, AbstractPluginAccessor*>::iterator it);
 
         /**
          * @brief Add plugin to usedBy list
