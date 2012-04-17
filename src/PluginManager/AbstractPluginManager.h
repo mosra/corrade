@@ -50,6 +50,8 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
     DISABLE_COPY(AbstractPluginManager)
 
     public:
+        typedef void* (*Instancer)(AbstractPluginManager*, const std::string&);
+
         /**
          * @brief Load state
          *
@@ -284,7 +286,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
             AbstractPluginManager* manager;
 
             /** @brief Pointer to plugin instancer function */
-            void* (*instancer)(AbstractPluginManager*, const std::string&);
+            Instancer instancer;
 
             /**
              * @brief %Plugin module handler
@@ -314,7 +316,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
              * @param _interface    Interface string
              * @param _instancer    Instancer function
              */
-            inline PluginObject(std::istream& _metadata, std::string _interface, void* (*_instancer)(AbstractPluginManager*, const std::string&)):
+            inline PluginObject(std::istream& _metadata, std::string _interface, Instancer _instancer):
                 loadState(IsStatic), interface(_interface), configuration(_metadata, Utility::Configuration::ReadOnly), metadata(configuration), manager(nullptr), instancer(_instancer), module(nullptr) {}
         };
 
@@ -383,7 +385,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
             std::string interface;   /**< @brief %Plugin interface */
 
             /** @brief %Plugin instancer function */
-            void* (*instancer)(AbstractPluginManager*, const std::string&);
+            Instancer instancer;
         };
 
         /**
@@ -393,7 +395,8 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          * plugins. They are imported to plugins() map on first call to
          * plugins(), because at that time it is safe to assume that all
          * static resources (plugin configuration files) are already
-         * registered.
+         * registered. After that, the storage is deleted and set to nullptr
+         * to indicate that static plugins have been already processed.
          *
          * @note Development note: The vector is accessible via function, not
          * directly, because we don't know initialization order of static

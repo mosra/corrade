@@ -38,6 +38,7 @@ The class also provides portable functions for path operations and creating,
 removing and renaming files or directories.
 @todo Make it usable on windoze without mingw :-)
 @todo Return rather vector<string> instead of this voodoo?
+@todo Unicode <-> UTF8 path conversion for Windows
  */
 class UTILITY_EXPORT Directory: public std::vector<std::string> {
     private:
