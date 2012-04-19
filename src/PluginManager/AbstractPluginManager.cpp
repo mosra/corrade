@@ -260,7 +260,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
-    string (*interface)() = reinterpret_cast<string (*)()>(dlsym(handle, "pluginInterface"));
+    const char* (*interface)() = reinterpret_cast<const char* (*)()>(dlsym(handle, "pluginInterface"));
     if(interface == 0) {
         Error() << "PluginManager: cannot get interface string of plugin" << '\'' + _plugin + "':" << dlerror();
         dlclose(handle);
