@@ -41,6 +41,16 @@ void DebugTest::debug() {
     QCOMPARE(QString::fromStdString(warning.str()), QString("w 42 c\n"));
     QCOMPARE(QString::fromStdString(error.str()), QString("e\n"));
 
+    /* Multiple times used instance */
+    debug.str("");
+    {
+        Debug d;
+        d << "a";
+        d << 33;
+        d << 0.567f;
+    }
+    QCOMPARE(QString::fromStdString(debug.str()), QString("a 33 0.567\n"));
+
     /* Don't add newline at the end of empty output */
     debug.str("");
     Debug();
