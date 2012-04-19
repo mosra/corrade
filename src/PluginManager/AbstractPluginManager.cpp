@@ -69,7 +69,7 @@ vector<AbstractPluginManager::StaticPluginObject>*& AbstractPluginManager::stati
     return _staticPlugins;
 }
 
-void AbstractPluginManager::importStaticPlugin(const string& plugin, int _version, const std::string& interface, void* (*instancer)(AbstractPluginManager*, const std::string&)) {
+void AbstractPluginManager::importStaticPlugin(const string& plugin, int _version, const std::string& interface, Instancer instancer) {
     if(_version != version) {
         Error() << "PluginManager: wrong version of static plugin" << '\'' + plugin + '\'';
         return;
@@ -278,7 +278,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
-    Instancer instancer = reinterpret_cast<void* (*)(AbstractPluginManager*, const std::string&)>(dlsym(handle, "pluginInstancer"));
+    Instancer instancer = reinterpret_cast<Instancer>(dlsym(handle, "pluginInstancer"));
     if(instancer == 0) {
         Error() << "PluginManager: cannot get instancer of plugin" << '\'' + _plugin + "':" << dlerror();
         dlclose(handle);
