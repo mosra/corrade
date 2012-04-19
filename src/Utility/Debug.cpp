@@ -31,6 +31,12 @@ Debug::Debug(const Debug& other): output(other.output), flags(other.flags) {
         setFlag(NewLineAtTheEnd, false);
 }
 
+Debug::Debug(Debug& other): output(other.output), flags(other.flags) {
+    other.flags &= ~0x01;
+
+    setFlag(NewLineAtTheEnd, false);
+}
+
 Debug::~Debug() {
     if(output && !(flags & 0x01) && (flags & NewLineAtTheEnd))
         *output << std::endl;

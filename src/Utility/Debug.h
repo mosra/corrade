@@ -69,6 +69,8 @@ class UTILITY_EXPORT Debug {
     /* Disabling assignment */
     Debug& operator=(const Debug& other);
 
+    template<class T> friend Debug operator<<(Debug, const T&);
+
     public:
         /** @brief Output flags */
         enum Flag {
@@ -94,8 +96,28 @@ class UTILITY_EXPORT Debug {
          * When copied from class which already wrote anything on the output,
          * disabling flag Debug::NewLineAtTheEnd, so there aren't excessive
          * newlines in the output.
+         *
+         * Called in this situation:
+         * @code
+         * Debug() << value;
+         * @endcode
          */
         Debug(const Debug& other);
+
+        /**
+         * @brief Reference copy constructor
+         *
+         * Marking original class like it have already written something on
+         * the output, so it adds whitespace before next value, disabling flag
+         * Debug::NewLineAtTheEnd the same way as in Debug(const Debug& other).
+         *
+         * Called in this situation:
+         * @code
+         * Debug debug;
+         * debug << value;
+         * @endcode
+         */
+        Debug(Debug& other);
 
         /**
          * @brief Destructor
@@ -125,25 +147,6 @@ class UTILITY_EXPORT Debug {
             globalOutput = _output;
         }
 
-        /**
-         * @brief Write value to debug output
-         * @param value         Value
-         *
-         * Support for printing other types (which are not handled by
-         * `iostream` itself) can be added by implementing function
-         * operator<<(Debug, const T&) for given type.
-         */
-        template<class T> Debug& operator<<(const T& value) {
-            if(!output) return *this;
-
-            /* Separate values with spaces, if enabled */
-            if(flags & 0x01) flags &= ~0x01;
-            else if(flags & SpaceAfterEachValue) *output << " ";
-
-            *output << value;
-            return *this;
-        }
-
     protected:
         std::ostream* output;   /**< @brief Stream where to put the output */
 
@@ -151,6 +154,29 @@ class UTILITY_EXPORT Debug {
         static std::ostream* globalOutput;
         int flags;
 };
+
+/**
+@brief Operator for printing values to debug output
+@param debug     %Debug class
+@param value     Value to be printed
+
+Support for printing custom types (i.e. those not handled by `iostream`) can
+be added by implementing this function for given type.
+
+The function should convert the type to one of supported types (such as
+`std::string`) and then call original operator<< with it. You can also use
+Debug::setFlag() for modifying newline and whitespace behavior.
+ */
+template<class T> Debug operator<<(Debug debug, const T& value) {
+    if(!debug.output) return debug;
+
+    /* Separate values with spaces, if enabled */
+    if(debug.flags & 0x01) debug.flags &= ~0x01;
+    else if(debug.flags & Debug::SpaceAfterEachValue) *debug.output << " ";
+
+    *debug.output << value;
+    return debug;
+}
 
 /**
  * @brief %Warning output handler
@@ -186,22 +212,6 @@ class UTILITY_EXPORT Error: public Debug {
     private:
         static std::ostream* globalErrorOutput;
 };
-
-#ifdef DOXYGEN_GENERATING_OUTPUT
-/**
-@brief Operator for printing custom types to debug
-@param debug     %Debug class
-@param value     Value to be printed
-
-Support for printing custom types (i.e. those not handled by `iostream`) can
-be added by implementing this function for given type.
-
-The function should convert the type to one of supported types (such as
-`std::string`) and then call Debug::operator<<() with it. You can also use
-Debug::setFlag() for modifying newline and whitespace behavior.
- */
-template<class T> Debug operator<<(Debug debug, const T& value);
-#endif
 
 }}
 
