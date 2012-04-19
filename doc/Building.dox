@@ -22,6 +22,9 @@ The library can be built and installed using these four commands:
     cmake -DCMAKE_INSTALL_PREFIX=/usr .. && make
     make install
 
+If you want to build with another compiler (e.g. Clang), pass
+`-DCMAKE_CXX_COMPILER=clang++` to CMake.
+
 @subsection BuildingTests Building and running unit tests
 If you want to build also unit tests (which are not built by default), pass
 `-DBUILD_TESTS=True` to CMake. Unit tests use QtTest framework (you need at
@@ -52,6 +55,13 @@ which allows you to build and install the package directly from source tree
 without downloading anything. The PKGBUILD also contains `check()` function
 which will run all unit tests before packaging. Note that the unit tests
 require Qt, as said above.
+
+If you want to build with another compiler (e.g. Clang), run makepkg this way:
+
+    CXX=clang++ makepkg
+
+Development PKGBUILD can detect when Clang is used and removes unsupported
+CXX flags.
 
 @section BuildingRPM Building RPM packages
 Every package contains `spec` files for RPM-based distributions in

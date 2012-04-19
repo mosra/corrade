@@ -24,7 +24,7 @@ crosscompiling.
 Minimal dependencies
 --------------------
 
- * C++ compiler (e.g. **GCC** >= 4.4, works also with Clang, other are untested)
+ * C++ compiler (e.g. **GCC** >= 4.4, Clang, other are untested)
  * **CMake** >= 2.6
 
 Compilation, installation
