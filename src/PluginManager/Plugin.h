@@ -157,7 +157,7 @@ only in *.cpp
     extern "C" int pluginVersion() { return PLUGIN_VERSION; }               \
     extern "C" void* pluginInstancer(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
         { return new className(manager, plugin); }                          \
-    extern "C" std::string pluginInterface() { return interface; }
+    extern "C" const char* pluginInterface() { return interface; }
 #else
 #define PLUGIN_REGISTER(name, className, interface)
 #endif

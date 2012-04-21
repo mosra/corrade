@@ -50,6 +50,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
     DISABLE_COPY(AbstractPluginManager)
 
     public:
+        /** @brief Plugin instancer function */
         typedef void* (*Instancer)(AbstractPluginManager*, const std::string&);
 
         /**
@@ -130,12 +131,12 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          * @param _version          %Plugin version (must be the same as
          *      AbstractPluginManager::version)
          * @param interface         %Plugin interface string
-         * @param instancer         Pointer to plugin class instancer function
+         * @param instancer         %Plugin instancer function
          *
          * Used internally by PLUGIN_IMPORT() macro. There is absolutely no
          * need to use this directly.
          */
-        static void importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, void* (*instancer)(AbstractPluginManager*, const std::string&));
+        static void importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, Instancer instancer);
 
         /**
          * @brief Constructor
@@ -285,7 +286,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
              */
             AbstractPluginManager* manager;
 
-            /** @brief Pointer to plugin instancer function */
+            /** @brief %Plugin instancer function */
             Instancer instancer;
 
             /**
