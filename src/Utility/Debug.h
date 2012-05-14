@@ -17,9 +17,10 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::Debug
+ * @brief Class Corrade::Utility::Debug, macro CORRADE_ASSERT().
  */
 
+#include <cstdlib>
 #include <ostream>
 
 #include "TypeTraits.h"
@@ -236,6 +237,38 @@ class UTILITY_EXPORT Error: public Debug {
     private:
         static std::ostream* globalErrorOutput;
 };
+
+
+/**
+@brief Assertion macro
+@param condition    Assert condition
+@param message      Message on assertion fail
+@param returnValue  Return value on assertion fail
+@hideinitializer
+
+By default, if assertion fails, @p message is printed to error output and the
+application exits with value `-1`. If `CORRADE_GRACEFUL_ASSERT` is defined,
+the message is printed and the function returns with @p returnValue. If
+`CORRADE_NO_ASSERT` is defined, this macro does nothing.
+*/
+#ifdef CORRADE_GRACEFUL_ASSERT
+#define CORRADE_ASSERT(condition, message, returnValue)                     \
+    if(!(condition)) {                                                      \
+        Corrade::Utility::Error() << message;                               \
+        return returnValue;                                                 \
+    }
+#else
+#ifdef CORRADE_NO_ASSERT
+#define CORRADE_ASSERT(condition, message, returnValue)
+#else
+#define CORRADE_ASSERT(condition, message, returnValue)                     \
+    if(!(condition)) {                                                      \
+        Corrade::Utility::Error() << message;                               \
+        exit(-1);                                                           \
+        return returnValue;                                                 \
+    }
+#endif
+#endif
 
 }}
 
