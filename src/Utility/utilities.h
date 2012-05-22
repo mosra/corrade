@@ -135,8 +135,8 @@ UTILITY_EXPORT void sleep(size_t ms);
 #define AUTOMATIC_FINALIZER(function)                                         \
     class __##function {                                                      \
         public:                                                               \
-            inline __##function() {};                                         \
-            inline ~__##function() { function(); };                           \
+            inline __##function() {}                                          \
+            inline ~__##function() { function(); }                            \
     } __##function;
 
 /*@}*/
