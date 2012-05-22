@@ -232,8 +232,8 @@ class UTILITY_EXPORT Translator {
         const std::string* get(const std::string& key);
 
     private:
-        static std::string* _locale();
-        static std::set<Translator*>* instances();
+        UTILITY_EXPORT static std::string* _locale();
+        UTILITY_EXPORT static std::set<Translator*>* instances();
 
         std::string primaryDynamicFilename;
         const ConfigurationGroup* primaryDynamicGroup;
@@ -246,9 +246,9 @@ class UTILITY_EXPORT Translator {
 
         std::map<std::string, std::string*> localizations;
 
-        bool get(const std::string& key, std::string* text, int level) const;
+        UTILITY_LOCAL bool get(const std::string& key, std::string* text, int level) const;
 
-        std::string replaceLocale(const std::string& filename) const;
+        UTILITY_LOCAL std::string replaceLocale(const std::string& filename) const;
 };
 
 }}

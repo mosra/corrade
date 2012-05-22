@@ -362,13 +362,13 @@ class UTILITY_EXPORT ConfigurationGroup {
 
     private:
         /** @brief Configuration item */
-        struct Item {
+        struct UTILITY_LOCAL Item {
             std::string key,    /**< @brief Key name (only if item is key/value pair) */
                 value;          /**< @brief Value or comment, empty line */
         };
 
         /** @brief Configuration group */
-        struct Group {
+        struct UTILITY_LOCAL Group {
             std::string name;           /**< @brief Group name */
             ConfigurationGroup* group;  /**< @brief Configuration group */
         };
@@ -379,13 +379,13 @@ class UTILITY_EXPORT ConfigurationGroup {
         Configuration* configuration;
 
         /** @brief Constructor */
-        ConfigurationGroup(Configuration* _configuration): configuration(_configuration) {}
+        UTILITY_LOCAL ConfigurationGroup(Configuration* _configuration): configuration(_configuration) {}
 
-        bool valueInternal(const std::string& key, std::string* _value, unsigned int number, int flags);
-        bool valueInternal(const std::string& key, std::string* _value, unsigned int number, int flags) const;
-        std::vector<std::string> valuesInternal(const std::string& key, int flags) const;
-        bool setValueInternal(const std::string& key, const std::string& value, unsigned int number, int flags);
-        bool addValueInternal(const std::string& key, const std::string& value, int flags);
+        UTILITY_EXPORT bool valueInternal(const std::string& key, std::string* _value, unsigned int number, int flags);
+        UTILITY_EXPORT bool valueInternal(const std::string& key, std::string* _value, unsigned int number, int flags) const;
+        UTILITY_EXPORT std::vector<std::string> valuesInternal(const std::string& key, int flags) const;
+        UTILITY_EXPORT bool setValueInternal(const std::string& key, const std::string& value, unsigned int number, int flags);
+        UTILITY_EXPORT bool addValueInternal(const std::string& key, const std::string& value, int flags);
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT

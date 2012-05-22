@@ -89,7 +89,7 @@ class UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(size_t)> {
         inline MurmurHash2(size_t seed = 0): implementation(seed) {}
 
         /** @brief Compute digest of given data */
-        Digest operator()(const std::string& data) const {
+        inline Digest operator()(const std::string& data) const {
             return operator()(data.c_str(), data.size());
         }
 

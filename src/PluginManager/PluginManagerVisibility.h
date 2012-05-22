@@ -1,3 +1,5 @@
+#ifndef Corrade_PluginManager_PluginManagerVisibility_h
+#define Corrade_PluginManager_PluginManagerVisibility_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -14,28 +16,22 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "AbstractAnimal.h"
+#ifndef DOXYGEN_GENERATING_OUTPUT
 
 #ifdef _WIN32
-    #ifdef Dog_EXPORTS
-        #define DOG_EXPORT __declspec(dllexport)
+    #ifdef CorradePluginManager_EXPORTS
+        #define PLUGINMANAGER_EXPORT __declspec(dllexport)
     #else
-        #define DOG_EXPORT __declspec(dllimport)
+        #define PLUGINMANAGER_EXPORT __declspec(dllimport)
     #endif
+    #define PLUGINMANAGER_LOCAL
+    #define PLUGIN_EXPORT
 #else
-    #define DOG_EXPORT __attribute__ ((visibility ("default")))
+    #define PLUGINMANAGER_EXPORT __attribute__ ((visibility ("default")))
+    #define PLUGINMANAGER_LOCAL __attribute__ ((visibility ("hidden")))
+    #define PLUGIN_EXPORT __attribute__ ((visibility ("default")))
 #endif
 
-namespace Corrade { namespace PluginManager { namespace Test {
+#endif
 
-class DOG_EXPORT Dog: public AbstractAnimal {
-    public:
-        inline Dog(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
-            AbstractAnimal(manager, plugin) {}
-
-        std::string name();
-        int legCount();
-        bool hasTail();
-};
-
-}}}
+#endif

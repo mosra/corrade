@@ -68,7 +68,7 @@ type.
  */
 class UTILITY_EXPORT Debug {
     /* Disabling assignment */
-    Debug& operator=(const Debug& other);
+    UTILITY_LOCAL Debug& operator=(const Debug& other);
 
     template<class T> friend Debug operator<<(Debug, const T&);
 
@@ -152,7 +152,7 @@ class UTILITY_EXPORT Debug {
         std::ostream* output;   /**< @brief Stream where to put the output */
 
     private:
-        static std::ostream* globalOutput;
+        UTILITY_EXPORT static std::ostream* globalOutput;
         int flags;
 };
 
@@ -194,7 +194,7 @@ class UTILITY_EXPORT Warning: public Debug {
             globalWarningOutput = _output; }
 
     private:
-        static std::ostream* globalWarningOutput;
+        UTILITY_EXPORT static std::ostream* globalWarningOutput;
 };
 
 /**
@@ -211,7 +211,7 @@ class UTILITY_EXPORT Error: public Debug {
             globalErrorOutput = _output; }
 
     private:
-        static std::ostream* globalErrorOutput;
+        UTILITY_EXPORT static std::ostream* globalErrorOutput;
 };
 
 
