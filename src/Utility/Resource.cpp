@@ -19,6 +19,8 @@
 #include <sstream>
 #include <vector>
 
+#include "Debug.h"
+
 using namespace std;
 
 namespace Corrade { namespace Utility {
@@ -123,7 +125,13 @@ string Resource::compile(const string& name, const string& filename, const strin
 
 string Resource::get(const std::string& filename) const {
     /* If the group/filename doesn't exist, return empty string */
-    if(resources.find(group) == resources.end() || resources[group].find(filename) == resources[group].end()) return "";
+    if(resources.find(group) == resources.end()) {
+        Error() << "Resource: group" << '\'' + group + '\'' << "was not found";
+        return "";
+    } else if(resources[group].find(filename) == resources[group].end()) {
+        Error() << "Resource: file" << '\'' + filename + '\'' << "was not found in group" << '\'' + group + '\'';
+        return "";
+    }
 
     const ResourceData& r = resources[group][filename];
     return string(reinterpret_cast<const char*>(r.data)+r.position, r.size);

@@ -32,6 +32,7 @@ class ResourceTest: public QObject {
     private slots:
         void compile();
         void get();
+        void getInexistent();
 };
 
 }}}

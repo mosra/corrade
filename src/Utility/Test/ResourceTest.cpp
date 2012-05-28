@@ -16,9 +16,11 @@
 
 #include "ResourceTest.h"
 
-#include <QtTest/QTest>
+#include <sstream>
 #include <QtCore/QFile>
+#include <QtTest/QTest>
 
+#include "Utility/Debug.h"
 #include "Utility/Resource.h"
 #include "testConfigure.h"
 
@@ -62,6 +64,25 @@ void ResourceTest::get() {
 
     QCOMPARE(QByteArray(pd.c_str(), pd.size()), predisposition);
     QCOMPARE(QByteArray(cd.c_str(), cd.size()), consequence);
+}
+
+void ResourceTest::getInexistent() {
+    ostringstream out;
+    Error::setOutput(&out);
+
+    {
+        Resource r("inexistentGroup");
+        QVERIFY(r.get("inexistentFile").empty());
+        QVERIFY(out.str() == "Resource: group 'inexistentGroup' was not found\n");
+    }
+
+    out.str("");
+
+    {
+        Resource r("test");
+        QVERIFY(r.get("inexistentFile").empty());
+        QVERIFY(out.str() == "Resource: file 'inexistentFile' was not found in group 'test'\n");
+    }
 }
 
 }}}
