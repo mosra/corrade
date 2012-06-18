@@ -51,14 +51,14 @@ class UTILITY_EXPORT Sha1: public AbstractHash<20> {
         Digest digest();
 
     private:
-        void processChunk(const char* data);
+        UTILITY_LOCAL void processChunk(const char* data);
 
         inline unsigned int leftrotate(unsigned int data, unsigned int shift) {
             return data << shift | data >> (32-shift);
         }
 
-        static const unsigned int initialDigest[5];
-        static const unsigned int constants[4];
+        UTILITY_EXPORT static const unsigned int initialDigest[5];
+        UTILITY_LOCAL static const unsigned int constants[4];
 
         std::string _buffer;
         unsigned long long _dataSize;

@@ -23,23 +23,7 @@
 #include <string>
 #include <vector>
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
-#ifdef _WIN32
-#ifdef PLUGINMANAGER_EXPORTING
-    #define PLUGINMANAGER_EXPORT __declspec(dllexport)
-#else
-    #define PLUGINMANAGER_EXPORT __declspec(dllimport)
-#endif
-#ifdef UTILITY_EXPORTING
-    #define UTILITY_EXPORT __declspec(dllexport)
-#else
-    #define UTILITY_EXPORT __declspec(dllimport)
-#endif
-#else
-    #define PLUGINMANAGER_EXPORT
-    #define UTILITY_EXPORT
-#endif
-#endif
+#include "UtilityVisibility.h"
 
 namespace Corrade { namespace Utility {
 
@@ -135,8 +119,8 @@ UTILITY_EXPORT void sleep(size_t ms);
 #define AUTOMATIC_FINALIZER(function)                                         \
     class __##function {                                                      \
         public:                                                               \
-            inline __##function() {};                                         \
-            inline ~__##function() { function(); };                           \
+            inline __##function() {}                                          \
+            inline ~__##function() { function(); }                            \
     } __##function;
 
 /*@}*/

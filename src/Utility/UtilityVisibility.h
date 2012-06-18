@@ -1,5 +1,5 @@
-#ifndef Corrade_Utility_Test_ResourceTest_h
-#define Corrade_Utility_Test_ResourceTest_h
+#ifndef Corrade_Utility_UtilityVisibility_h
+#define Corrade_Utility_UtilityVisibility_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -16,25 +16,20 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include <QtCore/QObject>
+#ifndef DOXYGEN_GENERATING_OUTPUT
 
-namespace Corrade { namespace Utility { namespace Test {
+#ifdef _WIN32
+    #ifdef CorradeUtility_EXPORTS
+        #define UTILITY_EXPORT __declspec(dllexport)
+    #else
+        #define UTILITY_EXPORT __declspec(dllimport)
+    #endif
+    #define UTILITY_LOCAL
+#else
+    #define UTILITY_EXPORT __attribute__ ((visibility ("default")))
+    #define UTILITY_LOCAL __attribute__ ((visibility ("hidden")))
+#endif
 
-class ResourceTest: public QObject {
-    Q_OBJECT
-
-    public:
-        ResourceTest(QObject* parent = 0);
-
-    private:
-        QByteArray predisposition, consequence;
-
-    private slots:
-        void compile();
-        void get();
-        void getInexistent();
-};
-
-}}}
+#endif
 
 #endif

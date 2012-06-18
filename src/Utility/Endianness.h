@@ -61,8 +61,8 @@ class UTILITY_EXPORT Endianness {
         }
 
     private:
-        static void _bigEndian(unsigned char* number, unsigned char* output, int size);
-        static void _littleEndian(unsigned char* number, unsigned char* output, int size);
+        UTILITY_EXPORT static void _bigEndian(unsigned char* number, unsigned char* output, int size);
+        UTILITY_EXPORT static void _littleEndian(unsigned char* number, unsigned char* output, int size);
 };
 
 }}

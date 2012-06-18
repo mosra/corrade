@@ -301,10 +301,10 @@ class UTILITY_EXPORT Configuration: public ConfigurationGroup {
          */
         int flags;
 
-        void parse(std::istream& file);
-        std::string parse(std::istream& file, ConfigurationGroup* group, const std::string& fullPath);
+        UTILITY_LOCAL void parse(std::istream& file);
+        UTILITY_LOCAL std::string parse(std::istream& file, ConfigurationGroup* group, const std::string& fullPath);
 
-        void save(std::ofstream& file, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const;
+        UTILITY_LOCAL void save(std::ofstream& file, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const;
 };
 
 }}

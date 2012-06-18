@@ -23,10 +23,6 @@ set(Corrade_Utility_SRCS
 add_library(CorradeUtility SHARED ${Corrade_Utility_SRCS})
 set_target_properties(CorradeUtility PROPERTIES VERSION ${CORRADE_CORE_LIBRARY_VERSION} SOVERSION ${CORRADE_CORE_LIBRARY_SOVERSION})
 
-if(WIN32)
-    set_target_properties(CorradeUtility PROPERTIES COMPILE_FLAGS -DUTILITY_EXPORTING)
-endif()
-
 if(USE_FPIC)
     set_target_properties(CorradeUtility PROPERTIES COMPILE_FLAGS -fPIC)
 endif()

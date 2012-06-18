@@ -103,17 +103,17 @@ class UTILITY_EXPORT Resource {
         std::string get(const std::string& filename) const;
 
     private:
-        struct ResourceData {
+        struct UTILITY_LOCAL ResourceData {
             unsigned int position;
             unsigned int size;
             const unsigned char* data;
         };
 
-        static std::map<std::string, std::map<std::string, ResourceData> > resources;
+        UTILITY_LOCAL static std::map<std::string, std::map<std::string, ResourceData> > resources;
 
         std::string group;
 
-        std::string hexcode(const std::string& data, const std::string& comment = "") const;
+        UTILITY_LOCAL std::string hexcode(const std::string& data, const std::string& comment = "") const;
 
         /** @todo Move to utilities.h? */
         template<class T> static std::string numberToString(const T& number);

@@ -154,10 +154,10 @@ only in *.cpp
 #else
 #ifdef CORRADE_DYNAMIC_PLUGIN
 #define PLUGIN_REGISTER(name, className, interface)                         \
-    extern "C" int pluginVersion() { return PLUGIN_VERSION; }               \
-    extern "C" void* pluginInstancer(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
+    extern "C" PLUGIN_EXPORT int pluginVersion() { return PLUGIN_VERSION; }               \
+    extern "C" PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
         { return new className(manager, plugin); }                          \
-    extern "C" const char* pluginInterface() { return interface; }
+    extern "C" PLUGIN_EXPORT const char* pluginInterface() { return interface; }
 #else
 #define PLUGIN_REGISTER(name, className, interface)
 #endif

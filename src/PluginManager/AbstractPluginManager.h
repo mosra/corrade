@@ -29,10 +29,9 @@
 #undef interface
 #endif
 
-#include "PluginMetadata.h"
-#include "Utility/utilities.h"
 #include "Utility/Resource.h"
 #include "Utility/Debug.h"
+#include "PluginMetadata.h"
 
 namespace Corrade { namespace PluginManager {
 
@@ -381,7 +380,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          *
          * See staticPlugins() for more information.
          */
-        struct StaticPluginObject {
+        struct PLUGINMANAGER_LOCAL StaticPluginObject {
             std::string plugin;      /**< @brief %Plugin name */
             std::string interface;   /**< @brief %Plugin interface */
 
@@ -404,12 +403,12 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          * members and thus the vector could be uninitalized when accessed
          * from PLUGIN_REGISTER().
          */
-        static std::vector<StaticPluginObject>*& staticPlugins();
+        PLUGINMANAGER_LOCAL static std::vector<StaticPluginObject>*& staticPlugins();
 
         std::map<std::string, std::vector<Plugin*> > instances;
 
-        void registerInstance(const std::string& plugin, Plugin* instance, const Utility::Configuration** configuration, const PluginMetadata** metadata);
-        void unregisterInstance(const std::string& plugin, Plugin* instance);
+        PLUGINMANAGER_LOCAL void registerInstance(const std::string& plugin, Plugin* instance, const Utility::Configuration** configuration, const PluginMetadata** metadata);
+        PLUGINMANAGER_LOCAL void unregisterInstance(const std::string& plugin, Plugin* instance);
 };
 
 /**
@@ -439,7 +438,7 @@ problem. See RESOURCE_INITIALIZE() documentation for more information.
 } namespace Utility {
 
 /** @brief Operator for printing plugin load state to debug output */
-Debug operator<<(Debug debug, PluginManager::AbstractPluginManager::LoadState value);
+Debug PLUGINMANAGER_EXPORT operator<<(Debug debug, PluginManager::AbstractPluginManager::LoadState value);
 
 }}
 
