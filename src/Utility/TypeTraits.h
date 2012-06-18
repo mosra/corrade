@@ -16,7 +16,7 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-/** @file
+/** @file Utility/TypeTraits.h
  * @brief Type traits
  */
 
