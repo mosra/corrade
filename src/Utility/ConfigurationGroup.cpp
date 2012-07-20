@@ -191,7 +191,7 @@ bool ConfigurationGroup::keyExists(const std::string& key) const {
     return false;
 }
 
-vector<string> ConfigurationGroup::valuesInternal(const string& key, int flags) const {
+vector<string> ConfigurationGroup::valuesInternal(const string& key, int) const {
     vector<string> found;
 
     for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it)
@@ -200,7 +200,7 @@ vector<string> ConfigurationGroup::valuesInternal(const string& key, int flags) 
     return found;
 }
 
-bool ConfigurationGroup::setValueInternal(const string& key, const string& value, unsigned int number, int flags) {
+bool ConfigurationGroup::setValueInternal(const string& key, const string& value, unsigned int number, int) {
     if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid))
         return false;
 
@@ -226,7 +226,7 @@ bool ConfigurationGroup::setValueInternal(const string& key, const string& value
     return true;
 }
 
-bool ConfigurationGroup::addValueInternal(const string& key, const string& value, int flags) {
+bool ConfigurationGroup::addValueInternal(const string& key, const string& value, int) {
     if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid))
         return false;
 
@@ -260,7 +260,7 @@ bool ConfigurationGroup::valueInternal(const string& key, string* value, unsigne
     return false;
 }
 
-bool ConfigurationGroup::valueInternal(const string& key, string* value, unsigned int number, int flags) const {
+bool ConfigurationGroup::valueInternal(const string& key, string* value, unsigned int number, int) const {
     unsigned int foundNumber = 0;
     for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it) {
         if(it->key == key) {
@@ -321,12 +321,12 @@ bool ConfigurationGroup::clear() {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 
-bool ConfigurationValue<bool>::fromString(const std::string& value, int flags) {
+bool ConfigurationValue<bool>::fromString(const std::string& value, int) {
     if(value == "1" || value == "yes" || value == "y" || value == "true") return true;
     return false;
 }
 
-std::string ConfigurationValue<bool>::toString(const bool& value, int flags) {
+std::string ConfigurationValue<bool>::toString(const bool& value, int) {
     if(value) return "true";
     return "false";
 }
