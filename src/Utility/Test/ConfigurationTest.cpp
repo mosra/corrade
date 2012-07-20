@@ -297,8 +297,8 @@ void ConfigurationTest::eol_data() {
     QTest::newRow("autodetect-unix") << "eol-unix.conf" << 0 << QByteArray("key=value\n");
     QTest::newRow("autodetect-windows") << "eol-windows.conf" << 0 << QByteArray("key=value\r\n");
     QTest::newRow("autodetect-mixed") << "eol-mixed.conf" << 0 << QByteArray("key=value\r\nkey=value\r\n");
-    QTest::newRow("force-unix") << "" << (int) Configuration::ForceUnixEol << QByteArray("key=value\n");
-    QTest::newRow("force-windows") << "" << (int) Configuration::ForceWindowsEol << QByteArray("key=value\r\n");
+    QTest::newRow("force-unix") << "" << int(Configuration::ForceUnixEol) << QByteArray("key=value\n");
+    QTest::newRow("force-windows") << "" << int(Configuration::ForceWindowsEol) << QByteArray("key=value\r\n");
     QTest::newRow("default") << "" << 0 << QByteArray("key=value\n");
 }
 
