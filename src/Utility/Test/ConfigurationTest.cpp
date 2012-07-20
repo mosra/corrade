@@ -380,10 +380,10 @@ void ConfigurationTest::autoCreation() {
     Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("autoCreation.conf"), Configuration::Truncate);
 
     QVERIFY(conf.group("newGroup") == 0);
-
     conf.setAutomaticGroupCreation(true);
     QVERIFY(conf.group("newGroup") != 0);
     conf.setAutomaticGroupCreation(false);
+    QVERIFY(conf.group("newGroup2") == 0);
 
     string value1 = "defaultValue1";
     QVERIFY(!conf.group("newGroup")->value<string>("key", &value1));
@@ -403,6 +403,7 @@ void ConfigurationTest::autoCreation() {
     int value3 = 42;
     QVERIFY(conf.group("group")->value<int>("integer", &value3));
     conf.setAutomaticKeyCreation(false);
+    value3 = 45;
     QVERIFY(conf.group("group")->value<int>("integer", &value3));
     QVERIFY(value3 == 42);
 }
