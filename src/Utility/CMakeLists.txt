@@ -22,10 +22,6 @@ set(Corrade_Utility_SRCS
 add_library(CorradeUtility SHARED ${Corrade_Utility_SRCS})
 set_target_properties(CorradeUtility PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
 
-if(USE_FPIC)
-    set_target_properties(CorradeUtility PROPERTIES COMPILE_FLAGS -fPIC)
-endif()
-
 install(TARGETS CorradeUtility DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 
 if(NOT CMAKE_CROSSCOMPILING)

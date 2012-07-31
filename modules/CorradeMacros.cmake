@@ -200,11 +200,7 @@ macro(corrade_add_static_plugin static_plugins_variable plugin_name metadata_fil
     corrade_add_resource(${plugin_name} plugins ${metadata_file} ALIAS "${plugin_name}.conf")
     add_library(${plugin_name} STATIC ${sources} ${${plugin_name}})
 
-    if(CMAKE_COMPILER_IS_GNUCC AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        set_target_properties(${plugin_name} PROPERTIES COMPILE_FLAGS "-DCORRADE_STATIC_PLUGIN -fPIC")
-    else()
-        set_target_properties(${plugin_name} PROPERTIES COMPILE_FLAGS -DCORRADE_STATIC_PLUGIN)
-    endif()
+    set_target_properties(${plugin_name} PROPERTIES COMPILE_FLAGS "-DCORRADE_STATIC_PLUGIN ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
 
     # Unset sources array (it's a macro, thus variables stay between calls)
     unset(sources)

@@ -15,10 +15,6 @@ add_library(CorradePluginManager SHARED ${Corrade_PluginManager_SRCS})
 target_link_libraries(CorradePluginManager CorradeUtility)
 set_target_properties(CorradePluginManager PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
 
-if(USE_FPIC)
-    set_target_properties(CorradePluginManager PROPERTIES COMPILE_FLAGS -fPIC)
-endif()
-
 install(TARGETS CorradePluginManager DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 
 if(BUILD_TESTS)
