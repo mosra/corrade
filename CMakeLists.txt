@@ -16,15 +16,14 @@ endif()
 
 set(CMAKE_MODULE_PATH "${Corrade_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
 
+set(CORRADE_RC_EXECUTABLE corrade-rc)
 include(CorradeMacros)
+include(CorradeLibSuffix)
 
-# Default directories
-set_parent_scope(CORRADE_INCLUDE_DIR            "${CMAKE_CURRENT_SOURCE_DIR}/src")
-set_parent_scope(CORRADE_UTILITY_LIBRARY        CorradeUtility)
-set_parent_scope(CORRADE_PLUGINMANAGER_LIBRARY  CorradePluginManager)
-set_parent_scope(CORRADE_RC_EXECUTABLE          corrade-rc)
-
-include(FindCorrade)
+set(CORRADE_BINARY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/bin)
+set(CORRADE_LIBRARY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
+set(CORRADE_CMAKE_MODULE_INSTALL_DIR ${CMAKE_ROOT}/Modules)
+set(CORRADE_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/Corrade)
 
 # On 64bit Linux with GCC flag -fPIC is needed for building some static libraries
 if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
