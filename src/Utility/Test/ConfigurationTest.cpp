@@ -245,24 +245,24 @@ void ConfigurationTest::types() {
 
     double doubleTmp;
     conf.value("double", &doubleTmp);
-    QVERIFY(doubleTmp == 3.78);
+    QCOMPARE(doubleTmp, 3.78);
     QVERIFY(conf.setValue("double", doubleTmp));
     conf.value("doubleNeg", &doubleTmp);
-    QVERIFY(doubleTmp == -2.14);
+    QCOMPARE(doubleTmp, -2.14);
     QVERIFY(conf.setValue("doubleNeg", doubleTmp));
 
     /* Flags */
     conf.value("exp", &doubleTmp);
-    QVERIFY(doubleTmp == 2.1e7);
+    QCOMPARE(doubleTmp, 2.1e7);
     conf.value("expPos", &doubleTmp);
-    QVERIFY(doubleTmp == 2.1e+7);
+    QCOMPARE(doubleTmp, 2.1e+7);
     QVERIFY(conf.setValue("expPos", doubleTmp, 0, ConfigurationGroup::Scientific));
     conf.value("expNeg", &doubleTmp);
-    QVERIFY(doubleTmp == -2.1e7);
+    QCOMPARE(doubleTmp, -2.1e7);
     conf.value("expNeg2", &doubleTmp);
-    QVERIFY(doubleTmp == 2.1e-7);
+    QCOMPARE(doubleTmp, 2.1e-7);
     conf.value("expBig", &doubleTmp);
-    QVERIFY(doubleTmp == 2.1E7);
+    QCOMPARE(doubleTmp, 2.1E7);
 
     conf.value("oct", &intTmp, 0, ConfigurationGroup::Oct);
     QVERIFY(intTmp == 0773);
@@ -297,8 +297,8 @@ void ConfigurationTest::eol_data() {
     QTest::newRow("autodetect-unix") << "eol-unix.conf" << 0 << QByteArray("key=value\n");
     QTest::newRow("autodetect-windows") << "eol-windows.conf" << 0 << QByteArray("key=value\r\n");
     QTest::newRow("autodetect-mixed") << "eol-mixed.conf" << 0 << QByteArray("key=value\r\nkey=value\r\n");
-    QTest::newRow("force-unix") << "" << (int) Configuration::ForceUnixEol << QByteArray("key=value\n");
-    QTest::newRow("force-windows") << "" << (int) Configuration::ForceWindowsEol << QByteArray("key=value\r\n");
+    QTest::newRow("force-unix") << "" << int(Configuration::ForceUnixEol) << QByteArray("key=value\n");
+    QTest::newRow("force-windows") << "" << int(Configuration::ForceWindowsEol) << QByteArray("key=value\r\n");
     QTest::newRow("default") << "" << 0 << QByteArray("key=value\n");
 }
 
@@ -380,10 +380,10 @@ void ConfigurationTest::autoCreation() {
     Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("autoCreation.conf"), Configuration::Truncate);
 
     QVERIFY(conf.group("newGroup") == nullptr);
-
     conf.setAutomaticGroupCreation(true);
     QVERIFY(conf.group("newGroup") != nullptr);
     conf.setAutomaticGroupCreation(false);
+    QVERIFY(conf.group("newGroup2") == 0);
 
     string value1 = "defaultValue1";
     QVERIFY(!conf.group("newGroup")->value<string>("key", &value1));
@@ -403,6 +403,7 @@ void ConfigurationTest::autoCreation() {
     int value3 = 42;
     QVERIFY(conf.group("group")->value<int>("integer", &value3));
     conf.setAutomaticKeyCreation(false);
+    value3 = 45;
     QVERIFY(conf.group("group")->value<int>("integer", &value3));
     QVERIFY(value3 == 42);
 }
@@ -421,7 +422,7 @@ void ConfigurationTest::directValue() {
     /* Default-configured values */
     QVERIFY(conf.value<string>("inexistent") == "");
     QVERIFY(conf.value<int>("inexistent") == 0);
-    QVERIFY(conf.value<double>("inexistent") == 0.0);
+    QCOMPARE(conf.value<double>("inexistent"), 0.0);
 }
 
 void ConfigurationTest::hierarchic() {

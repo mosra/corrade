@@ -305,7 +305,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
              * @param _manager      Associated plugin manager
              */
             inline PluginObject(const std::string& _metadata, AbstractPluginManager* _manager):
-                configuration(_metadata, Utility::Configuration::ReadOnly), metadata(configuration), manager(_manager), module(nullptr) {
+                configuration(_metadata, Utility::Configuration::ReadOnly), metadata(configuration), manager(_manager), instancer(nullptr), module(nullptr) {
                     if(configuration.isValid()) loadState = NotLoaded;
                     else loadState = WrongMetadataFile;
                 }

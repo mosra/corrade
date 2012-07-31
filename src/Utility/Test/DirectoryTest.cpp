@@ -153,24 +153,24 @@ void DirectoryTest::list_data() {
     QStringList data;
     data << "." << ".." << "dir" << "file";
     QTest::newRow("all") << 0 << data;
-    QTest::newRow("SkipSpecial") << (int) Directory::SkipSpecial << data;
-    QTest::newRow("allSortedAsc") << (int) Directory::SortAscending << data;
+    QTest::newRow("SkipSpecial") << int(Directory::SkipSpecial) << data;
+    QTest::newRow("allSortedAsc") << int(Directory::SortAscending) << data;
 
     data.clear();
     data << "file" << "dir" << ".." << ".";
-    QTest::newRow("allSortedDesc") << (int) Directory::SortDescending << data;
+    QTest::newRow("allSortedDesc") << int(Directory::SortDescending) << data;
 
     data.clear();
     data << "dir" << "file";
-    QTest::newRow("SkipDotAndDotDot") << (int) Directory::SkipDotAndDotDot << data;
+    QTest::newRow("SkipDotAndDotDot") << int(Directory::SkipDotAndDotDot) << data;
 
     data.clear();
     data << "file";
-    QTest::newRow("SkipDirectories") << (int) Directory::SkipDirectories << data;
+    QTest::newRow("SkipDirectories") << int(Directory::SkipDirectories) << data;
 
     data.clear();
     data << "." << ".." << "dir";
-    QTest::newRow("SkipFiles") << (int) Directory::SkipFiles << data;
+    QTest::newRow("SkipFiles") << int(Directory::SkipFiles) << data;
 }
 
 void DirectoryTest::list() {

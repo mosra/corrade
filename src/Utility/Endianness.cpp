@@ -22,11 +22,11 @@ namespace Corrade { namespace Utility {
 
 #ifdef ENDIANNESS_BIG_ENDIAN
 bool Endianness::isBigEndian() { return false; }
-void Endianness::_bigEndian(unsigned char* number, unsigned char* output, int size) {}
+void Endianness::_bigEndian(unsigned char*, unsigned char*, int) {}
 void Endianness::_littleEndian(unsigned char* number, unsigned char* output, int size) {
 #else
 bool Endianness::isBigEndian() { return false; }
-void Endianness::_littleEndian(unsigned char* number, unsigned char* output, int size) {}
+void Endianness::_littleEndian(unsigned char*, unsigned char*, int) {}
 void Endianness::_bigEndian(unsigned char* number, unsigned char* output, int size) {
 #endif
 

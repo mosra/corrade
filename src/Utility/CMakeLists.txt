@@ -4,9 +4,9 @@ include(TestBigEndian)
 test_big_endian(ENDIANNESS_BIG_ENDIAN)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/EndiannessConfigure.h.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/EndiannessConfigure.h)
+               ${CMAKE_CURRENT_BINARY_DIR}/EndiannessConfigure.h)
 
-set(Corrade_Utility_SRCS
+set(CorradeUtility_SRCS
     Endianness.cpp
     Debug.cpp
     Directory.cpp
@@ -17,15 +17,10 @@ set(Corrade_Utility_SRCS
     Sha1.cpp
     Translator.cpp
     TypeTraits.cpp
-    utilities.cpp
-)
+    utilities.cpp)
 
-add_library(CorradeUtility SHARED ${Corrade_Utility_SRCS})
-set_target_properties(CorradeUtility PROPERTIES VERSION ${CORRADE_CORE_LIBRARY_VERSION} SOVERSION ${CORRADE_CORE_LIBRARY_SOVERSION})
-
-if(USE_FPIC)
-    set_target_properties(CorradeUtility PROPERTIES COMPILE_FLAGS -fPIC)
-endif()
+add_library(CorradeUtility SHARED ${CorradeUtility_SRCS})
+set_target_properties(CorradeUtility PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
 
 install(TARGETS CorradeUtility DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 

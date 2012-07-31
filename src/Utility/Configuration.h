@@ -239,8 +239,10 @@ class UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * parameter set to non-zero value.
          * @todo Check readonly/isvalid
          */
-        inline void setAutomaticGroupCreation(bool enabled)
-            { flags |= AutoCreateGroups; }
+        inline void setAutomaticGroupCreation(bool enabled) {
+            if(enabled) flags |= AutoCreateGroups;
+            else flags &= ~AutoCreateGroups;
+        }
 
         /**
          * @brief Whether automatic creation of inexistent groups is enabled
@@ -259,8 +261,10 @@ class UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * name and value in pointed variable.
          * @todo Check readonly/isvalid
          */
-        inline void setAutomaticKeyCreation(bool enabled)
-            { flags |= AutoCreateKeys; }
+        inline void setAutomaticKeyCreation(bool enabled) {
+            if(enabled) flags |= AutoCreateKeys;
+            else flags &= ~AutoCreateKeys;
+        }
 
         /**
          * @brief Whether automatic creation of inexistent keys is enabled

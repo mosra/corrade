@@ -8,36 +8,26 @@ if(BUILD_TESTS)
     find_package(Qt4)
 
     if(NOT QT4_FOUND)
-        message(WARNING "Qt4 is required for building unit tests. No tests will be build.")
-        set(BUILD_TESTS OFF)
-    else()
-        enable_testing()
+        message(FATAL_ERROR "Qt4, required for building unit tests, was not found. Set BUILD_TESTS to OFF to skip building them.")
     endif()
 
+    enable_testing()
 endif()
 
 set(CMAKE_MODULE_PATH "${Corrade_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
 
+set(CORRADE_RC_EXECUTABLE corrade-rc)
 include(CorradeMacros)
+include(CorradeLibSuffix)
 
-# Default directories
-set_parent_scope(CORRADE_INCLUDE_DIR            "${CMAKE_CURRENT_SOURCE_DIR}/src")
-set_parent_scope(CORRADE_UTILITY_LIBRARY        CorradeUtility)
-set_parent_scope(CORRADE_PLUGINMANAGER_LIBRARY  CorradePluginManager)
-set_parent_scope(CORRADE_RC_EXECUTABLE          corrade-rc)
-
-include(FindCorrade)
-
-# On 64bit Linux with GCC flag -fPIC is needed for building some static libraries
-if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(USE_FPIC ON)
-else()
-    set(USE_FPIC OFF)
-endif()
+set(CORRADE_BINARY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/bin)
+set(CORRADE_LIBRARY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
+set(CORRADE_CMAKE_MODULE_INSTALL_DIR ${CMAKE_ROOT}/Modules)
+set(CORRADE_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/Corrade)
 
 # Library version
-set(CORRADE_CORE_LIBRARY_VERSION 0.2)
-set(CORRADE_CORE_LIBRARY_SOVERSION 0)
+set(CORRADE_LIBRARY_VERSION 0.2)
+set(CORRADE_LIBRARY_SOVERSION 0)
 
 add_subdirectory(modules)
 add_subdirectory(src)
