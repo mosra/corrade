@@ -90,9 +90,26 @@ template<class Derived> class Tester {
         }
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
+        /* Compare two identical types without explicit type specification */
         template<class T> inline void compare(const std::string& actual, const T& actualValue, const std::string& expected, const T& expectedValue) {
             return compare<T, T, T>(actual, actualValue, expected, expectedValue);
         }
+
+        /* Compare two different types without explicit type specification while
+           type of `actual` is convertible to type of `expected`, thus it is
+           converted */
+        template<class T, class U> inline typename std::enable_if<std::is_convertible<T, U>::value, void>::type compare(const std::string& actual, const T& actualValue, const std::string& expected, const U& expectedValue) {
+            return compare<U, T, U>(actual, actualValue, expected, expectedValue);
+        }
+
+        /* Compare two different types without explicit type specification while
+           type of `actual` is NOT convertible to type of `expected`, thus type
+           of `expected` is converted to type of `actual` */
+        template<class T, class U> inline typename std::enable_if<!std::is_convertible<T, U>::value, void>::type compare(const std::string& actual, const T& actualValue, const std::string& expected, const U& expectedValue) {
+            return compare<T, T, U>(actual, actualValue, expected, expectedValue);
+        }
+
+        /* Compare two different types with explicit type specification */
         template<class T, class U, class V> void compare(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
             Compare<T> compare;
             if(compare(actualValue, expectedValue)) return;
