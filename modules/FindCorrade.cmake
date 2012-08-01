@@ -12,6 +12,15 @@
 # If Corrade library is found, these macros and functions are defined:
 #
 #
+# Add unit test using Corrade's TestSuite.
+#  corrade_add_test2(test_name
+#                    sources...
+#                    [LIBRARIES libraries...])
+# Test name is also executable name. You can also specify libraries to link
+# with instead of using target_link_libraries(). Note that the
+# enable_testing() must be called explicitly.
+#
+#
 # Add QtTest unit test.
 #  corrade_add_test(test_name moc_header source_file
 #                   [libraries...])

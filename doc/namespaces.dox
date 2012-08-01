@@ -18,3 +18,9 @@ This library contains PluginManager, which takes care of loading, unloading
 and instancing plugins. There is also an Plugin class, which is the base of all
 plugins. See @ref PluginManagement for a brief introduction to how plugins work.
 */
+
+/** @namespace Corrade::TestSuite
+@brief Test suite
+
+Unit testing framework. See @ref UnitTesting for more information.
+*/
