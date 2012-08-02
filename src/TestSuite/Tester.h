@@ -30,7 +30,7 @@ namespace Corrade { namespace TestSuite {
 /**
 @brief Base class for unit tests
 
-See @ref UnitTesting for introduction.
+See @ref unit-testing for introduction.
 
 @see CORRADE_TEST_MAIN(), CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS()
 */

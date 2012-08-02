@@ -41,7 +41,7 @@ class Plugin;
  * @brief Non-templated base class of PluginManager
  *
  * Base abstract class for all PluginManager templated classes. See also
- * @ref PluginManagement.
+ * @ref plugin-management.
  */
 class PLUGINMANAGER_EXPORT AbstractPluginManager {
     friend class Plugin;

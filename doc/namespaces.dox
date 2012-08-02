@@ -5,22 +5,24 @@
 /** @namespace Corrade::Utility
 @brief Simple utitlities
 
-This library contains utility classes used by all other Corrade parts, like debug
-and error output (class Debug), directory listing (class Directory), access to
-configuration files (class Configuration), on which is based translation support
-(class Translator) or compiling data files into the executable (class Resource).
+This library contains utility classes used by all other Corrade parts, like
+debug and error output (class Debug), directory listing (class Directory),
+access to configuration files (class Configuration), on which is based
+translation support (class Translator) or compiling data files into the
+executable (class Resource, see also @ref resource-management "tutorial").
 */
 
 /** @namespace Corrade::PluginManager
 @brief %Plugin management
 
 This library contains PluginManager, which takes care of loading, unloading
-and instancing plugins. There is also an Plugin class, which is the base of all
-plugins. See @ref PluginManagement for a brief introduction to how plugins work.
+and instancing plugins. There is also an Plugin class, which is the base of
+all plugins. See @ref plugin-management for a brief introduction to how
+plugins work.
 */
 
 /** @namespace Corrade::TestSuite
 @brief Test suite
 
-Unit testing framework. See @ref UnitTesting for more information.
+Unit testing framework. See @ref unit-testing for more information.
 */

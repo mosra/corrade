@@ -136,7 +136,7 @@ plugin, using e.g. CMake command `add_library` / `add_executable`), this macro
 won't do anything to prevent linker issues when linking more plugins together.
 No plugin-related preprocessor directive is defined.
 
-See @ref PluginManagement for more information about plugin compilation.
+See @ref plugin-management for more information about plugin compilation.
 
 @attention This macro should be called outside of any namespace. If you are
 running into linker errors with `pluginInitializer_`, this could be the

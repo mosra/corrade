@@ -24,7 +24,7 @@ Usage:
 Produces compiled C++ file with data in hexadecimal representation. File
 is printed to `stdout`, status and error messages are printed to `stderr`.
 
-See @ref ResourceManagement for brief introduction.
+See @ref resource-management for brief introduction.
 
 @todo Test it
 @todo Check empty files

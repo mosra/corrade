@@ -8,14 +8,14 @@ C++11. Features:
 
 - @ref PluginManager "Plugin management library" with support for both static
   and dynamically loaded plugins, dependency handling and more. See
-  @ref PluginManagement "tutorial" for brief introduction.
+  @ref plugin-management "tutorial" for brief introduction.
 - @ref TestSuite "Unit test framework" inspired with QtTest, but without any
-  need to process files with some sort of meta compiler. See @ref UnitTesting
+  need to process files with some sort of meta compiler. See @ref unit-testing
   "tutorial" for brief introduction.
 - @ref Utility::Configuration "Configuration parser and writer" with syntax
   similar to INI files, with support for custom types and hierarchic groups.
 - @ref Utility::Resource "Resource manager" for resources compiled directly
-  into executable. See @ref ResourceManagement "tutorial" for brief
+  into executable. See @ref resource-management "tutorial" for brief
   introduction.
 - Easy-to-use @ref Utility::Debug "Debug" classes for debug and error output
   with support for output redirection and printing of custom types.
@@ -24,9 +24,9 @@ C++11. Features:
   implementations of @ref Utility::AbstractHash "hashing algorithms" and
   @ref Utility "more".
 
-@section BuildingLink Building Corrade
+@section building-link Building Corrade
 
-Guide @ref Building "how to build Corrade" on different platforms.
+Guide @ref building "how to build Corrade" on different platforms.
 
 */
 }

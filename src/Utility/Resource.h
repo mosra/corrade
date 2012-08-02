@@ -34,7 +34,7 @@ This class provides support for compiled-in data resources - both compiling
 and reading. Resources can be differentiated into more groups, every resource
 in given group has unique filename.
 
-See @ref ResourceManagement for brief introduction and example usage.
+See @ref resource-management for brief introduction and example usage.
 Standalone resource compiler executable is implemented in @ref rc.cpp.
 
 @todo Ad-hoc resources

@@ -35,7 +35,7 @@ namespace Corrade { namespace PluginManager {
     such as Qt signals)
 
 Manages loading, instancing and unloading plugins. See also
-@ref PluginManagement.
+@ref plugin-management.
 
 @todo C++11 - provide constructor with arbitrary arguments
  */

@@ -36,7 +36,7 @@ namespace Corrade { namespace PluginManager {
 This class stores metadata about particular plugin. The plugin metadata are
 stored in plugin configuration file, which resides either besides the dynamic
 plugin binary in a filesystem or is compiled directly into executable with an
-static plugin. See @ref PluginManagement for tutorial and brief introduction
+static plugin. See @ref plugin-management for tutorial and brief introduction
 into how plugins work.
 
 The plugin configuration file has an simple syntax (see

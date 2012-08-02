@@ -1,11 +1,11 @@
 namespace Corrade { namespace TestSuite {
 /**
-@page UnitTesting Unit testing with %TestSuite
+@page unit-testing Unit testing with %TestSuite
 
 %Corrade's test suite is inspired by QtTest framework, but without any need to
 process code with meta compiler.
 
-@section UnitTestingClass Tester class
+@section unit-testing-class Tester class
 
 First step for creating unit test is to subclass Tester class and add tester
 functions to it. Note that [CRTP](http://en.wikipedia.org/wiki/Curiously_Recurring_Template_Pattern)
@@ -44,7 +44,7 @@ which expects all following checks until the end of the scope to fail:
 @skip MyTest::pi()
 @until }
 
-@section UnitTestingCompilation Compilation and running
+@section unit-testing-compilation Compilation and running
 
 Lastly, we must not forget to create `main()` function using
 CORRADE_TEST_MAIN() macro:

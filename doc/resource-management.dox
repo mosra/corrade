@@ -1,5 +1,5 @@
 namespace Corrade { namespace Utility {
-/** @page ResourceManagement %Resource management tutorial
+/** @page resource-management %Resource management tutorial
 
 The Resource class provides management of resources compiled directly into the
 executable, such as icons, data files etc. This tutorial will give you a brief
@@ -8,7 +8,7 @@ retrieved in the application.
 
 @tableofcontents
 
-@section RMCompilation Resource compilation
+@section resource-management-compilation Resource compilation
 Imagine that you have e.g. a long license text with all these yelling words
 in all caps:
 
@@ -38,7 +38,7 @@ corrade_add_resource(
 )
 @endcode
 
-@section RMManagement Resource management
+@section resource-management-management Resource management
 Now it's time to make an application, which will have these resources compiled
 in. The resources should be initialized automatically, if not (for example if
 they are compiled into static library), call RESOURCE_INITIALIZE() with
