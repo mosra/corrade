@@ -88,7 +88,7 @@ void PluginTest::staticPlugin() {
 
     AbstractAnimal* animal = manager->instance("Canary");
 
-    QVERIFY(animal != 0);
+    QVERIFY(animal != nullptr);
     QVERIFY(animal->hasTail() == true);
     QVERIFY(animal->name() == "Achoo");
     QVERIFY(animal->legCount() == 2);
@@ -104,7 +104,7 @@ void PluginTest::dynamicPlugin() {
 
     AbstractAnimal* animal = manager->instance("Dog");
 
-    QVERIFY(animal != 0);
+    QVERIFY(animal != nullptr);
     QVERIFY(animal->hasTail() == true);
     QVERIFY(animal->name() == "Doug");
     QVERIFY(animal->legCount() == 4);
@@ -153,7 +153,7 @@ void PluginTest::hierarchy() {
 
     AbstractAnimal* animal = manager->instance("Chihuahua");
 
-    QVERIFY(animal != 0);
+    QVERIFY(animal != nullptr);
     QVERIFY(animal->hasTail() == true); // inherited from dog
     QVERIFY(animal->legCount() == 4); // this too
     QVERIFY(animal->name() == "Rodriguez");

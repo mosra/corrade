@@ -63,7 +63,7 @@ ConfigurationGroup* ConfigurationGroup::group(const string& name, unsigned int n
         try to create new group */
     if((configuration->flags & Configuration::AutoCreateGroups) && number == 0) return addGroup(name);
 
-    return 0;
+    return nullptr;
 }
 
 const ConfigurationGroup* ConfigurationGroup::group(const string& name, unsigned int number) const {
@@ -73,7 +73,7 @@ const ConfigurationGroup* ConfigurationGroup::group(const string& name, unsigned
             return it->group;
     }
 
-    return 0;
+    return nullptr;
 }
 
 vector<ConfigurationGroup*> ConfigurationGroup::groups(const string& name) {
@@ -126,7 +126,7 @@ ConfigurationGroup* ConfigurationGroup::addGroup(const std::string& name) {
     ConfigurationGroup* group = new ConfigurationGroup(configuration);
     if(!addGroup(name, group)) {
         delete group;
-        group = 0;
+        group = nullptr;
     }
     return group;
 }

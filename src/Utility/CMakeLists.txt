@@ -16,6 +16,7 @@ set(CorradeUtility_SRCS
     Resource.cpp
     Sha1.cpp
     Translator.cpp
+    TypeTraits.cpp
     utilities.cpp)
 
 add_library(CorradeUtility SHARED ${CorradeUtility_SRCS})

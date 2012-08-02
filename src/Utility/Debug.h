@@ -23,6 +23,7 @@
 #include <cstdlib>
 #include <ostream>
 
+#include "TypeTraits.h"
 #include "utilities.h"
 
 namespace Corrade { namespace Utility {
@@ -70,7 +71,7 @@ class UTILITY_EXPORT Debug {
     /* Disabling assignment */
     UTILITY_LOCAL Debug& operator=(const Debug& other);
 
-    template<class T> friend Debug operator<<(Debug, const T&);
+    template<class T> friend Debug operator<<(typename std::enable_if<!IsIterable<T>::value || std::is_same<T, std::string>::value, Debug>::type, const T&);
 
     public:
         /** @brief Output flags */
@@ -156,8 +157,9 @@ class UTILITY_EXPORT Debug {
         int flags;
 };
 
+#ifdef DOXYGEN_GENERATING_OUTPUT
 /**
-@brief Operator for printing values to debug output
+@brief Operator for printing custom types to debug
 @param debug     %Debug class
 @param value     Value to be printed
 
@@ -165,10 +167,12 @@ Support for printing custom types (i.e. those not handled by `iostream`) can
 be added by implementing this function for given type.
 
 The function should convert the type to one of supported types (such as
-`std::string`) and then call original operator<< with it. You can also use
+`std::string`) and then call Debug::operator<<() with it. You can also use
 Debug::setFlag() for modifying newline and whitespace behavior.
  */
-template<class T> Debug operator<<(Debug debug, const T& value) {
+template<class T> Debug operator<<(Debug debug, const T& value);
+#else
+template<class T> Debug operator<<(typename std::enable_if<!IsIterable<T>::value || std::is_same<T, std::string>::value, Debug>::type debug, const T& value) {
     if(!debug.output) return debug;
 
     /* Separate values with spaces, if enabled */
@@ -178,6 +182,26 @@ template<class T> Debug operator<<(Debug debug, const T& value) {
     *debug.output << value;
     return debug;
 }
+template<class Iterable> Debug operator<<(typename std::enable_if<IsIterable<Iterable>::value && !std::is_same<Iterable, std::string>::value, Debug>::type debug, const Iterable& value) {
+    debug << '[';
+    debug.setFlag(Debug::SpaceAfterEachValue, false);
+    for(typename Iterable::const_iterator it = value.begin(); it != value.end(); ++it) {
+        if(it != value.begin())
+            debug << ", ";
+        debug << *it;
+    }
+    debug << ']';
+    debug.setFlag(Debug::SpaceAfterEachValue, true);
+    return debug;
+}
+template<class A, class B> Debug operator<<(Debug debug, const std::pair<A, B>& value) {
+    debug << '(';
+    debug.setFlag(Debug::SpaceAfterEachValue, false);
+    debug << value.first << ", " << value.second << ')';
+    debug.setFlag(Debug::SpaceAfterEachValue, true);
+    return debug;
+}
+#endif
 
 /**
  * @brief %Warning output handler

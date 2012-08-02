@@ -1,3 +1,5 @@
+#ifndef Corrade_TestSuite_Test_FloatCompareTest_h
+#define Corrade_TestSuite_Test_FloatCompareTest_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -14,23 +16,21 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "Plugin.h"
+#include "TestSuite/Tester.h"
 
-#include "AbstractPluginManager.h"
+namespace Corrade { namespace TestSuite { namespace Test {
 
-namespace Corrade { namespace PluginManager {
+class FloatCompareTest: public Tester<FloatCompareTest> {
+    public:
+        FloatCompareTest();
 
-Plugin::Plugin(AbstractPluginManager* manager, const std::string& plugin): _manager(manager), _plugin(plugin) {
-    if(_manager)
-        _manager->registerInstance(_plugin, this, &_configuration, &_metadata);
-    else {
-        _configuration = nullptr;
-        _metadata = nullptr;
-    }
-}
+        void smallDelta();
+        void largeDelta();
+        void nan();
+        void infinity();
+        void output();
+};
 
-Plugin::~Plugin() {
-    if(_manager) _manager->unregisterInstance(_plugin, this);
-}
+}}}
 
-}}
+#endif

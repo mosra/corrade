@@ -46,7 +46,7 @@ template<class T, class BasePluginManager = AbstractPluginManager> class PluginM
             /* Find static plugins which have the same interface and have not
                assigned manager to them */
             for(typename std::map<std::string, typename BasePluginManager::PluginObject*>::iterator it = this->plugins()->begin(); it != this->plugins()->end(); ++it) {
-                if(it->second->manager != 0 || it->second->interface != pluginInterface())
+                if(it->second->manager != nullptr || it->second->interface != pluginInterface())
                     continue;
 
                 /* Assign the plugin to this manager */
@@ -72,12 +72,12 @@ template<class T, class BasePluginManager = AbstractPluginManager> class PluginM
          */
         T* instance(const std::string& _plugin) {
             /* Plugin with given name doesn't exist */
-            if(this->plugins()->find(_plugin) == this->plugins()->end()) return 0;
+            if(this->plugins()->find(_plugin) == this->plugins()->end()) return nullptr;
 
             typename BasePluginManager::PluginObject& plugin = *this->plugins()->at(_plugin);
 
             /* Plugin is not successfully loaded */
-            if(!(plugin.loadState & (BasePluginManager::LoadOk|BasePluginManager::IsStatic))) return 0;
+            if(!(plugin.loadState & (BasePluginManager::LoadOk|BasePluginManager::IsStatic))) return nullptr;
 
             return static_cast<T*>(plugin.instancer(this, _plugin));
         }

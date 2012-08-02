@@ -14,23 +14,18 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "Plugin.h"
+#include "TypeTraits.h"
 
-#include "AbstractPluginManager.h"
+#include <vector>
+#include <string>
 
-namespace Corrade { namespace PluginManager {
+using namespace std;
 
-Plugin::Plugin(AbstractPluginManager* manager, const std::string& plugin): _manager(manager), _plugin(plugin) {
-    if(_manager)
-        _manager->registerInstance(_plugin, this, &_configuration, &_metadata);
-    else {
-        _configuration = nullptr;
-        _metadata = nullptr;
-    }
-}
+namespace Corrade { namespace Utility {
 
-Plugin::~Plugin() {
-    if(_manager) _manager->unregisterInstance(_plugin, this);
-}
+#ifndef DOXYGEN_GENERATING_OUTPUT
+static_assert(IsIterable<vector<int>>::value, "std::vector should be iterable");
+static_assert(IsIterable<string>::value, "std::string should be iterable");
+#endif
 
 }}

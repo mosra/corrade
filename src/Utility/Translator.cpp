@@ -61,14 +61,14 @@ Translator::~Translator() {
 
 void Translator::setPrimary(const std::string& file) {
     /* Cleaning primary translation */
-    if(file.empty()) return setPrimary(0);
+    if(file.empty()) return setPrimary(nullptr);
 
     Configuration* c = new Configuration(replaceLocale(file), Configuration::ReadOnly);
     setPrimary(c);
     primaryFile = c;
 
     /* Dynamic translations */
-    primaryDynamicGroup = 0;
+    primaryDynamicGroup = nullptr;
     if(file.find_first_of('#') != string::npos)
         primaryDynamicFilename = file;
     else
@@ -77,7 +77,7 @@ void Translator::setPrimary(const std::string& file) {
 
 void Translator::setFallback(const std::string& file) {
     /* Cleaning fallback translation */
-    if(file.empty()) return setFallback(0);
+    if(file.empty()) return setFallback(nullptr);
 
     Configuration* c = new Configuration(file, Configuration::ReadOnly);
     setFallback(c);
@@ -91,13 +91,13 @@ void Translator::setPrimary(const Corrade::Utility::ConfigurationGroup* group, b
         primaryDynamicGroup = group;
         primary = group->group(locale());
     } else {
-        primaryDynamicGroup = 0;
+        primaryDynamicGroup = nullptr;
         primary = group;
     }
 
     /* Delete previous file */
     delete primaryFile;
-    primaryFile = 0;
+    primaryFile = nullptr;
 
     /* Reload all localizations from new files */
     for(map<string, string*>::const_iterator it = localizations.begin(); it != localizations.end(); ++it)
@@ -107,7 +107,7 @@ void Translator::setPrimary(const Corrade::Utility::ConfigurationGroup* group, b
 void Translator::setFallback(const Corrade::Utility::ConfigurationGroup* group) {
     /* Delete previous file */
     delete fallbackFile;
-    fallbackFile = 0;
+    fallbackFile = nullptr;
 
     fallback = group;
 

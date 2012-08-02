@@ -27,6 +27,8 @@ class DebugTest: public QObject {
         void debug();
         void custom();
         void flags();
+
+        void iterable();
 };
 
 }}}

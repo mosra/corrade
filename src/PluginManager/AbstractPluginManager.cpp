@@ -57,7 +57,7 @@ map<string, AbstractPluginManager::PluginObject*>* AbstractPluginManager::plugin
 
         /* Delete the array to mark them as processed */
         delete staticPlugins();
-        staticPlugins() = 0;
+        staticPlugins() = nullptr;
     }
 
     return _plugins;
@@ -104,7 +104,7 @@ AbstractPluginManager::~AbstractPluginManager() {
            Otherwise just disconnect this manager from the plugin, so another
            manager can take over it in the future. */
         if(unload(it->first) == IsStatic)
-            it->second->manager = 0;
+            it->second->manager = nullptr;
         else
             removed.push_back(it);
     }
@@ -170,7 +170,7 @@ const PluginMetadata* AbstractPluginManager::metadata(const string& plugin) cons
 
     /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
     if(foundPlugin == plugins()->end() || foundPlugin->second->manager != this)
-        return 0;
+        return nullptr;
 
     return &foundPlugin->second->metadata;
 }
@@ -243,7 +243,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     __extension__
     #endif
     int (*_version)(void) = reinterpret_cast<int(*)()>(dlsym(handle, "pluginVersion"));
-    if(_version == 0) {
+    if(_version == nullptr) {
         Error() << "PluginManager: cannot get version of plugin" << '\'' + _plugin + "':" << dlerror();
         dlclose(handle);
         plugin.loadState = LoadFailed;
@@ -261,7 +261,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     __extension__
     #endif
     const char* (*interface)() = reinterpret_cast<const char* (*)()>(dlsym(handle, "pluginInterface"));
-    if(interface == 0) {
+    if(interface == nullptr) {
         Error() << "PluginManager: cannot get interface string of plugin" << '\'' + _plugin + "':" << dlerror();
         dlclose(handle);
         plugin.loadState = LoadFailed;
@@ -279,7 +279,7 @@ AbstractPluginManager::LoadState AbstractPluginManager::load(const string& _plug
     __extension__
     #endif
     Instancer instancer = reinterpret_cast<Instancer>(dlsym(handle, "pluginInstancer"));
-    if(instancer == 0) {
+    if(instancer == nullptr) {
         Error() << "PluginManager: cannot get instancer of plugin" << '\'' + _plugin + "':" << dlerror();
         dlclose(handle);
         plugin.loadState = LoadFailed;

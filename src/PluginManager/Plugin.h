@@ -1,5 +1,5 @@
-#ifndef Corrade_PluginManager_AbstractPlugin_h
-#define Corrade_PluginManager_AbstractPlugin_h
+#ifndef Corrade_PluginManager_Plugin_h
+#define Corrade_PluginManager_Plugin_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -44,7 +44,7 @@ class PLUGINMANAGER_EXPORT Plugin {
          *
          * Registers this plugin instance in plugin manager.
          */
-        Plugin(AbstractPluginManager* manager = 0, const std::string& plugin = "");
+        Plugin(AbstractPluginManager* manager = nullptr, const std::string& plugin = "");
 
         /**
          * @brief Destructor
@@ -54,7 +54,7 @@ class PLUGINMANAGER_EXPORT Plugin {
         virtual ~Plugin();
 
         /**
-         * @brief %Plugin is about to be deleted
+         * @brief Whether the plugin can be deleted
          *
          * Called from PluginManager on all active instances before the plugin
          * is unloaded. Returns true if it is safe to delete the instance from
@@ -64,14 +64,14 @@ class PLUGINMANAGER_EXPORT Plugin {
         virtual bool canBeDeleted() { return false; }
 
         /**
-         * @brief %Plugin identifier
+         * @brief Identifier string
          * @return String, under which the plugin was instanced. If the plugin
          *      was not instanced via plugin manager, returns empty string.
          */
         inline std::string plugin() const { return _plugin; }
 
         /**
-         * @brief %Plugin metadata
+         * @brief Metadata
          * @return Metadata file associated with the plugin or 0, if no metadata
          *      is available.
          */
@@ -79,7 +79,7 @@ class PLUGINMANAGER_EXPORT Plugin {
 
     protected:
         /**
-         * @brief %Plugin configuration
+         * @brief Configuration
          * @return Configuration from file associated with the plugin or 0, if
          *      no configuration is available.
          */

@@ -16,6 +16,7 @@ endif()
 
 set(CMAKE_MODULE_PATH "${Corrade_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
 
+set(CORRADE_UTILITY_LIBRARY CorradeUtility)
 set(CORRADE_RC_EXECUTABLE corrade-rc)
 include(CorradeMacros)
 include(CorradeLibSuffix)
@@ -29,8 +30,11 @@ set(CORRADE_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/Corrade)
 set(CORRADE_LIBRARY_VERSION 0.2)
 set(CORRADE_LIBRARY_SOVERSION 0)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wold-style-cast -pedantic -fvisibility=hidden -std=c++0x")
+
 add_subdirectory(modules)
 add_subdirectory(src)
+add_subdirectory(examples EXCLUDE_FROM_ALL)
 
 install(DIRECTORY src/ DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}
         FILES_MATCHING PATTERN "*.h"

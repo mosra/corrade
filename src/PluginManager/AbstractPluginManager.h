@@ -305,7 +305,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
              * @param _manager      Associated plugin manager
              */
             inline PluginObject(const std::string& _metadata, AbstractPluginManager* _manager):
-                configuration(_metadata, Utility::Configuration::ReadOnly), metadata(configuration), manager(_manager), instancer(0), module(0) {
+                configuration(_metadata, Utility::Configuration::ReadOnly), metadata(configuration), manager(_manager), instancer(nullptr), module(nullptr) {
                     if(configuration.isValid()) loadState = NotLoaded;
                     else loadState = WrongMetadataFile;
                 }
@@ -317,7 +317,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
              * @param _instancer    Instancer function
              */
             inline PluginObject(std::istream& _metadata, std::string _interface, Instancer _instancer):
-                loadState(IsStatic), interface(_interface), configuration(_metadata, Utility::Configuration::ReadOnly), metadata(configuration), manager(0), instancer(_instancer), module(0) {}
+                loadState(IsStatic), interface(_interface), configuration(_metadata, Utility::Configuration::ReadOnly), metadata(configuration), manager(nullptr), instancer(_instancer), module(nullptr) {}
         };
 
         /** @brief Directory where to search for dynamic plugins */

@@ -1,3 +1,5 @@
+#ifndef Corrade_Examples_MyTest_h
+#define Corrade_Examples_MyTest_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -14,23 +16,20 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "Plugin.h"
+#include <TestSuite/Tester.h>
 
-#include "AbstractPluginManager.h"
+namespace Corrade { namespace Examples {
 
-namespace Corrade { namespace PluginManager {
+class MyTest: public Corrade::TestSuite::Tester<MyTest> {
+    public:
+        MyTest();
 
-Plugin::Plugin(AbstractPluginManager* manager, const std::string& plugin): _manager(manager), _plugin(plugin) {
-    if(_manager)
-        _manager->registerInstance(_plugin, this, &_configuration, &_metadata);
-    else {
-        _configuration = nullptr;
-        _metadata = nullptr;
-    }
-}
-
-Plugin::~Plugin() {
-    if(_manager) _manager->unregisterInstance(_plugin, this);
-}
+        void commutativity();
+        void associativity();
+        void pi();
+        void sin();
+};
 
 }}
+
+#endif

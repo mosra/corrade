@@ -165,7 +165,7 @@ class UTILITY_EXPORT ConfigurationGroup {
          */
         inline bool groupExists(const std::string& name = "") const {
             if(name.empty()) return !_groups.empty();
-            return group(name) != 0;
+            return group(name) != nullptr;
         }
 
         /**

@@ -141,7 +141,7 @@ void ConfigurationTest::invalid() {
     QVERIFY(conf.groupCount("group") == 1);
 
     /* Everything should be disabled */
-    QVERIFY(conf.addGroup("new") == 0);
+    QVERIFY(conf.addGroup("new") == nullptr);
     QVERIFY(!conf.removeGroup("group"));
     QVERIFY(!conf.removeAllGroups("group"));
     QVERIFY(!conf.addValue<string>("new", "value"));
@@ -161,7 +161,7 @@ void ConfigurationTest::readonly() {
     Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("parse.conf"), Configuration::ReadOnly);
 
     /* Everything should be disabled */
-    QVERIFY(conf.addGroup("new") == 0);
+    QVERIFY(conf.addGroup("new") == nullptr);
     QVERIFY(!conf.removeGroup("group"));
     QVERIFY(!conf.removeAllGroups("group"));
     QVERIFY(!conf.group("third_group")->clear());
@@ -342,7 +342,7 @@ void ConfigurationTest::uniqueGroups() {
     QCOMPARE(actual, original);
 
     /* Try to insert already existing group */
-    QVERIFY(conf.addGroup("group") == 0);
+    QVERIFY(conf.addGroup("group") == nullptr);
 }
 
 void ConfigurationTest::uniqueKeys() {
@@ -379,9 +379,9 @@ void ConfigurationTest::stripComments() {
 void ConfigurationTest::autoCreation() {
     Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("autoCreation.conf"), Configuration::Truncate);
 
-    QVERIFY(conf.group("newGroup") == 0);
+    QVERIFY(conf.group("newGroup") == nullptr);
     conf.setAutomaticGroupCreation(true);
-    QVERIFY(conf.group("newGroup") != 0);
+    QVERIFY(conf.group("newGroup") != nullptr);
     conf.setAutomaticGroupCreation(false);
     QVERIFY(conf.group("newGroup2") == 0);
 

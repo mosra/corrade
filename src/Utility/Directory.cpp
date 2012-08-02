@@ -78,7 +78,7 @@ bool Directory::mkpath(const std::string& _path) {
     string parentPath = path(_path);
     if(!parentPath.empty()) {
         DIR* directory = opendir(parentPath.c_str());
-        if(directory == 0 && !mkpath(parentPath)) return false;
+        if(directory == nullptr && !mkpath(parentPath)) return false;
         closedir(directory);
     }
 
@@ -144,9 +144,9 @@ Directory::Directory(const string& path, int flags): _isLoaded(false) {
     dirent* entry;
 
     directory = opendir(path.c_str());
-    if(directory == 0) return;
+    if(directory == nullptr) return;
 
-    while((entry = readdir(directory)) != 0) {
+    while((entry = readdir(directory)) != nullptr) {
         #ifndef _WIN32
         if((flags & SkipDotAndDotDot) && (string(entry->d_name) == "." || string(entry->d_name) == ".."))
             continue;
