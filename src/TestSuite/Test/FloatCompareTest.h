@@ -28,6 +28,7 @@ class FloatCompareTest: public Tester<FloatCompareTest> {
         void largeDelta();
         void nan();
         void infinity();
+        void output();
 };
 
 }}}

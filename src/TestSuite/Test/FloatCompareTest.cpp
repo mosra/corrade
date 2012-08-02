@@ -17,8 +17,10 @@
 #include "FloatCompareTest.h"
 
 #include <limits>
+#include <sstream>
 
 using namespace std;
+using namespace Corrade::Utility;
 
 CORRADE_TEST_MAIN(Corrade::TestSuite::Test::FloatCompareTest)
 
@@ -28,7 +30,8 @@ FloatCompareTest::FloatCompareTest() {
     addTests(&FloatCompareTest::smallDelta,
              &FloatCompareTest::largeDelta,
              &FloatCompareTest::nan,
-             &FloatCompareTest::infinity);
+             &FloatCompareTest::infinity,
+             &FloatCompareTest::output);
 }
 
 void FloatCompareTest::smallDelta() {
@@ -59,6 +62,19 @@ void FloatCompareTest::infinity() {
                                     -numeric_limits<float>::infinity()));
     CORRADE_VERIFY(!Compare<float>()(numeric_limits<float>::quiet_NaN(),
                                      numeric_limits<float>::infinity()));
+}
+
+void FloatCompareTest::output() {
+    stringstream out;
+
+    {
+        Error e(&out);
+        Compare<float> compare;
+        compare(3.0f, 8.0f);
+        compare.printErrorMessage(e, "a", "b");
+    }
+
+    CORRADE_COMPARE(out.str(), "Floating-point values a and b are not the same, actual 3 but 8 expected (delta 5).\n");
 }
 
 }}}
