@@ -12,6 +12,9 @@ set(CorradePluginManager_SRCS
 
 add_library(CorradePluginManager SHARED ${CorradePluginManager_SRCS})
 target_link_libraries(CorradePluginManager CorradeUtility)
+if(UNIX)
+    target_link_libraries(CorradePluginManager dl)
+endif()
 set_target_properties(CorradePluginManager PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
 
 install(TARGETS CorradePluginManager DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
