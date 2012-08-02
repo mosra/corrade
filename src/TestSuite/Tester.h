@@ -39,7 +39,7 @@ template<class Derived> class Tester {
         /** @brief Pointer to test case function */
         typedef void (Derived::*TestCase)();
 
-        inline constexpr Tester(): testCaseLine(0) {}
+        inline constexpr Tester(): testCaseLine(0), expectedFailure(nullptr) {}
 
         /**
          * @brief Execute the tester
@@ -67,7 +67,9 @@ template<class Derived> class Tester {
                     continue;
                 }
 
-                Utility::Debug() << "    OK:" << testCaseName;
+                Utility::Debug d;
+                d << (expectedFailure ? " XFAIL:" : "    OK:") << testCaseName;
+                if(expectedFailure) d << "\n       " << expectedFailure->message();
             }
 
             Utility::Debug d;
@@ -112,18 +114,38 @@ template<class Derived> class Tester {
         /* Compare two different types with explicit type specification */
         template<class T, class U, class V> void compare(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
             Compare<T> compare;
-            if(compare(actualValue, expectedValue)) return;
 
+            /* If the comparison succeeded or the failure is expected, done */
+            bool equal = compare(actualValue, expectedValue);
+            if(!expectedFailure) {
+                if(equal) return;
+            } else if(!equal) {
+                Utility::Debug() << " XFAIL:" << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       " << expectedFailure->message() << actual << "and" << expected << "are not equal.";
+                return;
+            }
+
+            /* Otherwise print message to error output and throw exception */
             Utility::Error e;
-            e << "  FAIL:" << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       ";
-            compare.printErrorMessage(e, actual, expected);
+            e << (expectedFailure ? " XPASS:" : "  FAIL:") << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       ";
+            if(!expectedFailure) compare.printErrorMessage(e, actual, expected);
+            else e << actual << "and" << expected << "are not expected to be equal.";
             throw Exception();
         }
 
         void verify(const std::string& expression, bool expressionValue) {
-            if(expressionValue) return;
+            /* If the expression is true or the failure is expected, done */
+            if(!expectedFailure) {
+                if(expressionValue) return;
+            } else if(!expressionValue) {
+                Utility::Debug() << " XFAIL:" << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       " << expectedFailure->message() << "Expression" << expression << "failed.";
+                return;
+            }
 
-            Utility::Error() << "  FAIL:" << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n        Expression" << expression << "failed.";
+            /* Otherwise print message to error output and throw exception */
+            Utility::Error e;
+            e << (expectedFailure ? " XPASS:" : "  FAIL:") << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n        Expression" << expression;
+            if(!expectedFailure) e << "failed.";
+            else e << "was expected to fail.";
             throw Exception();
         }
 
@@ -133,6 +155,23 @@ template<class Derived> class Tester {
         }
 
     protected:
+        class ExpectedFailure {
+            public:
+                inline ExpectedFailure(Tester* instance, const std::string& message): instance(instance), _message(message) {
+                    instance->expectedFailure = this;
+                }
+
+                inline ~ExpectedFailure() { instance->expectedFailure = nullptr; }
+
+                inline std::string message() const {
+                    return _message;
+                }
+
+            private:
+                Tester* instance;
+                std::string _message;
+        };
+
         inline void registerTestCase(const std::string& name, int line) {
             if(testCaseName.empty()) testCaseName = name + "()";
             this->testCaseLine = line;
@@ -145,8 +184,9 @@ template<class Derived> class Tester {
         void addTests() {} /* Terminator function for addTests() */
 
         std::vector<std::function<void(Derived&)>> testCases;
-        std::string testFilename, testName, testCaseName;
+        std::string testFilename, testName, testCaseName, expectFailMessage;
         size_t testCaseLine;
+        ExpectedFailure* expectedFailure;
 };
 
 /** @hideinitializer
@@ -218,6 +258,29 @@ example of more involved comparisons.
         _CORRADE_REGISTER_TEST_CASE();                                      \
         compare<Type>(#actual, actual, #expected, expected);                \
     } while(false)
+
+/** @hideinitializer
+@brief Expect failure in all following checks in the same scope
+@param message Message which will be printed into output as indication of
+    expected failure
+
+Expects failure in all following CORRADE_VERIFY(), CORRADE_COMPARE() and
+CORRADE_COMPARE_AS() checks in the same scope. In most cases it will be until
+the end of the function, but you can limit the scope by placing relevant
+checks in a separate block:
+@code
+{
+    CORRADE_EXPECT_FAIL("Not implemented");
+    CORRADE_VERIFY(isFutureClear());
+}
+
+int i = 6*7;
+CORRADE_COMPARE(i, 42);
+@endcode
+If any of the following checks passes, an error will be printed to output.
+*/
+#define CORRADE_EXPECT_FAIL(message)                                        \
+    ExpectedFailure expectedFailure##__LINE__(this, message)
 
 }}
 

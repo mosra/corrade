@@ -77,7 +77,7 @@ template<class T> class Compare {
 
         /** @brief Print error message, assuming the two values are inequal */
         void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
-            e << "Values" << actual << "and" << expected << "are not the same, actual:" << actualValue << "vs. expected:" << expectedValue;
+            e << "Values" << actual << "and" << expected << "are not the same, actual" << actualValue << "but" << expectedValue << "expected.";
         }
 
     private:
@@ -116,9 +116,9 @@ namespace Implementation {
 
             /** @brief Print error message, assuming the two values are inequal */
             void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
-                e << "Floating-point values" << actual << "and" << expected << "are not the same, actual:" << actualValue << "vs. expected:" << expectedValue;
+                e << "Floating-point values" << actual << "and" << expected << "are not the same, actual" << actualValue << "but" << expectedValue << "expected";
                 e.setFlag(Utility::Debug::SpaceAfterEachValue, false);
-                e << " (delta " << std::abs(actualValue-expectedValue) << ")";
+                e << " (delta " << std::abs(actualValue-expectedValue) << ").";
                 e.setFlag(Utility::Debug::SpaceAfterEachValue, true);
             }
 

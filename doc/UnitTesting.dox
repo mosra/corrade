@@ -28,21 +28,27 @@ output:
 
 Next macro is CORRADE_COMPARE(), which takes two values and compares them for
 equality:
-@skip MyTest::pi()
+@skip MyTest::associativity()
 @until }
 
 If both values have different type or if we want to force some type for
-comparison, we can use CORRADE_COMPARE_AS():
+comparison, we can use CORRADE_COMPARE_AS(). This macro can be used also for
+more involved comparison using "pseudo-types", see Compare class
+documentation for more information.
 @skip MyTest::sin()
 @until }
-This macro can be used also for more involved comparison using "pseudo-types",
-see Compare class documentation for more information.
 
-Lastly, we must not forget to create `main()` function using convenient
-CORRADE_TEST_MAIN() macro:
-@skipline CORRADE_TEST_MAIN
+If you have some unimplemented or broken functionality, but don't want the
+test to fail only because of that, you can use CORRADE_EXPECT_FAIL() macro,
+which expects all following checks until the end of the scope to fail:
+@skip MyTest::pi()
+@until }
 
 @section UnitTestingCompilation Compilation and running
+
+Lastly, we must not forget to create `main()` function using
+CORRADE_TEST_MAIN() macro:
+@skipline CORRADE_TEST_MAIN
 
 Now we can compile and run our test using CMake and `corrade_add_test2()`
 macro:
@@ -55,13 +61,15 @@ corrade_add_test2(mytest MyTest.cpp)
 The test can be run either manually or using `ctest`. When executed, it
 produces output similar to this:
 
-    Starting Corrade::Examples::MyTest with 3 test cases...
-      1/3 FAIL: commutativity() at examples/test/MyTest.cpp on line 33
-                Expression 15/3 == 3/15 failed.
-      2/3 FAIL: pi() at examples/test/MyTest.cpp on line 38
-                Values pi and 3.14 are not the same, actual: 3.14286 vs. expected: 3.14
-      3/3   OK: sin()
-    Finished Corrade::Examples::MyTest with 2 errors.
+    Starting Corrade::Examples::MyTest with 4 test cases...
+      FAIL: commutativity() at examples/test/MyTest.cpp on line 32
+            Expression 15/3 == 3/15 failed.
+        OK: associativity()
+        OK: sin()
+     XFAIL: pi() at examples/test/MyTest.cpp on line 47
+            Need better approximation. pi and 3.14 are not equal.
+        OK: pi()
+    Finished Corrade::Examples::MyTest with 1 errors.
 
 */
 }}

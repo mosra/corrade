@@ -36,6 +36,9 @@ class TesterTest: public Tester<TesterTest> {
                 void falseExpression();
                 void equal();
                 void nonEqual();
+                void expectFail();
+                void unexpectedPassExpression();
+                void unexpectedPassEqual();
         };
 };
 

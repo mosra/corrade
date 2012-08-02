@@ -22,8 +22,9 @@ namespace Corrade { namespace Examples {
 
 MyTest::MyTest() {
     addTests(&MyTest::commutativity,
-             &MyTest::pi,
-             &MyTest::sin);
+             &MyTest::associativity,
+             &MyTest::sin,
+             &MyTest::pi);
 }
 
 void MyTest::commutativity() {
@@ -31,13 +32,19 @@ void MyTest::commutativity() {
     CORRADE_VERIFY(15/3 == 3/15);
 }
 
-void MyTest::pi() {
-    double pi = 22/7.0;
-    CORRADE_COMPARE(pi, 3.14);
+void MyTest::associativity() {
+    int result = (42/(2*3))*191;
+    CORRADE_COMPARE(result, 1337);
 }
 
 void MyTest::sin() {
     CORRADE_COMPARE_AS(::sin(0), 0.0f, float);
+}
+
+void MyTest::pi() {
+    CORRADE_EXPECT_FAIL("Need better approximation.");
+    double pi = 22/7.0;
+    CORRADE_COMPARE(pi, 3.14);
 }
 
 }}

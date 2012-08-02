@@ -25,6 +25,7 @@ class MyTest: public Corrade::TestSuite::Tester<MyTest> {
         MyTest();
 
         void commutativity();
+        void associativity();
         void pi();
         void sin();
 };

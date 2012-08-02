@@ -35,7 +35,10 @@ TesterTest::Test::Test() {
              &Test::trueExpression,
              &Test::falseExpression,
              &Test::equal,
-             &Test::nonEqual);
+             &Test::nonEqual,
+             &Test::expectFail,
+             &Test::unexpectedPassExpression,
+             &Test::unexpectedPassEqual);
 }
 
 void TesterTest::Test::noChecks() {
@@ -60,6 +63,26 @@ void TesterTest::Test::nonEqual() {
     CORRADE_COMPARE(a, b);
 }
 
+void TesterTest::Test::expectFail() {
+    {
+        CORRADE_EXPECT_FAIL("The world is not mad yet.");
+        CORRADE_COMPARE(2 + 2, 5);
+        CORRADE_VERIFY(false == true);
+    }
+
+    CORRADE_VERIFY(true);
+}
+
+void TesterTest::Test::unexpectedPassExpression() {
+    CORRADE_EXPECT_FAIL("Not yet implemented.");
+    CORRADE_VERIFY(true == true);
+}
+
+void TesterTest::Test::unexpectedPassEqual() {
+    CORRADE_EXPECT_FAIL("Cannot get it right.");
+    CORRADE_COMPARE(2 + 2, 4);
+}
+
 void TesterTest::test() {
     stringstream out;
     Debug::setOutput(&out);
@@ -74,14 +97,23 @@ void TesterTest::test() {
 
     CORRADE_VERIFY(result == 1);
 
-    string expected = "Starting TesterTest::Test with 5 test cases...\n"
+    string expected = "Starting TesterTest::Test with 8 test cases...\n"
         "    OK: trueExpression()\n"
-        "  FAIL: falseExpression() at here.cpp on line 50 \n"
+        "  FAIL: falseExpression() at here.cpp on line 53 \n"
         "        Expression 5 != 5 failed.\n"
         "    OK: equal()\n"
-        "  FAIL: nonEqual() at here.cpp on line 60 \n"
-        "        Values a and b are not the same, actual: 5 vs. expected: 3\n"
-        "Finished TesterTest::Test with 2 errors. 1 test cases didn't contain any checks!\n";
+        "  FAIL: nonEqual() at here.cpp on line 63 \n"
+        "        Values a and b are not the same, actual 5 but 3 expected.\n"
+        " XFAIL: expectFail() at here.cpp on line 69 \n"
+        "        The world is not mad yet. 2 + 2 and 5 are not equal.\n"
+        " XFAIL: expectFail() at here.cpp on line 70 \n"
+        "        The world is not mad yet. Expression false == true failed.\n"
+        "    OK: expectFail()\n"
+        " XPASS: unexpectedPassExpression() at here.cpp on line 78 \n"
+        "        Expression true == true was expected to fail.\n"
+        " XPASS: unexpectedPassEqual() at here.cpp on line 83 \n"
+        "        2 + 2 and 4 are not expected to be equal.\n"
+        "Finished TesterTest::Test with 4 errors. 1 test cases didn't contain any checks!\n";
 
     CORRADE_COMPARE(out.str(), expected);
 }
