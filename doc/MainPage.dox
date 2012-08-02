@@ -9,6 +9,9 @@ C++11. Features:
 - @ref PluginManager "Plugin management library" with support for both static
   and dynamically loaded plugins, dependency handling and more. See
   @ref PluginManagement "tutorial" for brief introduction.
+- @ref TestSuite "Unit test framework" inspired with QtTest, but without any
+  need to process files with some sort of meta compiler. See @ref UnitTesting
+  "tutorial" for brief introduction.
 - @ref Utility::Configuration "Configuration parser and writer" with syntax
   similar to INI files, with support for custom types and hierarchic groups.
 - @ref Utility::Resource "Resource manager" for resources compiled directly

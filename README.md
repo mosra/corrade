@@ -5,6 +5,8 @@ C++11. Features:
 
  * Plugin management library with support for both static and dynamically
    loaded plugins, dependency handling and more
+ * Unit test framework inspired with QtTest, but without any need to process
+   files with some sort of meta compiler
  * Configuration parser and writer with syntax similar to INI files, with
    support for custom types and hierarchic groups
  * Resource manager for resources compiled directly into executable
