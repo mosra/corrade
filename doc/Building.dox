@@ -11,7 +11,9 @@ tested are Debian and Ubuntu). Guide how to @ref BuildingWin
 
 Minimal set of tools required for building is:
 
-- C++ compiler (e.g. **GCC** >= 4.4, works also with Clang, other are untested)
+- C++ compiler with good C++11 support. Currently there are two compilers
+  which are tested to support everything needed: **GCC** >= 4.6 and **Clang**
+  >= 3.1.
 - **CMake** >= 2.6
 
 @section BuildingCompilation Manual build and installation

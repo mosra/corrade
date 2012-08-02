@@ -1,7 +1,7 @@
 *corrade* (v.) - "To scrape together, to gather together from various sources"
 
-Corrade is multiplatform plugin management and utility library written in pure
-C++. Features:
+Corrade is multiplatform plugin management and utility library written in
+C++11. Features:
 
  * Plugin management library with support for both static and dynamically
    loaded plugins, dependency handling and more
@@ -24,7 +24,9 @@ crosscompiling.
 Minimal dependencies
 --------------------
 
- * C++ compiler (e.g. **GCC** >= 4.4, Clang, other are untested)
+ * C++ compiler with good C++11 support. Currently there are two compilers
+   which are tested to support everything needed: **GCC** >= 4.6 and **Clang**
+   >= 3.1.
  * **CMake** >= 2.6
 
 Compilation, installation
