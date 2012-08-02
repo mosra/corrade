@@ -25,8 +25,11 @@ class TesterTest: public Tester<TesterTest> {
         TesterTest();
 
         void test();
+        void emptyTest();
 
     private:
+        class EmptyTest: public Tester<EmptyTest> {};
+
         class Test: public Tester<Test> {
             public:
                 Test();

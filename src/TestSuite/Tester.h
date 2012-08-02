@@ -47,6 +47,12 @@ template<class Derived> class Tester {
          *      checking macros.
          */
         int exec() {
+            /* Fail when we have nothing to test */
+            if(testCases.empty()) {
+                Utility::Error() << "In" << testName << "weren't found any test cases!";
+                return 2;
+            }
+
             Utility::Debug() << "Starting" << testName << "with" << testCases.size() << "test cases...";
 
             unsigned int errorCount = 0,
