@@ -26,7 +26,7 @@ C++11. Features:
 
 @section building-link Building Corrade
 
-Guide @ref building "how to build Corrade" on different platforms.
+Guide @ref building-corrade "how to build Corrade" on different platforms.
 
 */
 }
