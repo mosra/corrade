@@ -1,5 +1,5 @@
 namespace Corrade { namespace Utility {
-/** @page resource-management %Resource management tutorial
+/** @page resource-management Resource management tutorial
 
 The Resource class provides management of resources compiled directly into the
 executable, such as icons, data files etc. This tutorial will give you a brief

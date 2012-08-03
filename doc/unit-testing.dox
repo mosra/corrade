@@ -1,6 +1,5 @@
 namespace Corrade { namespace TestSuite {
-/**
-@page unit-testing Unit testing with %TestSuite
+/** @page unit-testing Unit testing with TestSuite
 
 %Corrade's test suite is inspired by QtTest framework, but without any need to
 process code with meta compiler.
