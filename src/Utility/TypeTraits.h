@@ -20,6 +20,8 @@
  * @brief Type traits
  */
 
+#include "corradeCompatibility.h"
+
 namespace Corrade { namespace Utility {
 
 /**

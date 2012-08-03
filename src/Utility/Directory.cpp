@@ -26,6 +26,7 @@
 #endif
 
 #include "utilities.h"
+#include "corradeCompatibility.h"
 
 using namespace std;
 

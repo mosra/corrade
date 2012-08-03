@@ -1,5 +1,14 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+if(GCC44_COMPATIBILITY)
+    set(CORRADE_GCC44_COMPATIBILITY 1)
+    set(GCC45_COMPATIBILITY 1)
+endif()
+
+if(GCC45_COMPATIBILITY)
+    set(CORRADE_GCC45_COMPATIBILITY 1)
+endif()
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/corradeConfigure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/corradeConfigure.h)
 

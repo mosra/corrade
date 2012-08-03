@@ -25,6 +25,7 @@
 #include <sstream>
 
 #include "utilities.h"
+#include "corradeCompatibility.h"
 
 namespace Corrade { namespace Utility {
 
