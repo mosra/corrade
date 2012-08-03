@@ -26,7 +26,28 @@ C++11. Features:
 
 @section building-link Building Corrade
 
-Guide @ref building "how to build Corrade" on different platforms.
+Guide @ref building-corrade "how to build Corrade" on different platforms.
+
+@section getting-started Examples and tutorials
+
+The best way to get started is to read some @ref corrade-example-index
+"examples and tutorials".
+
+@section hacking Hacking Corrade
+
+If you want to hack on this library, if you spotted a bug, need an feature or
+have an awesome idea, you can get a copy of the sources from GitHub and start
+right now! There is the already mentioned guide about
+@ref building-corrade "how to download and build Corrade" and also guide about
+@ref corrade-coding-style "coding style and best practices" which you should
+follow to make the library as consistent and maintainable as possible.
+
+Feel free to get more information or contact the author at:
+
+- GitHub - https://github.com/mosra/magnum
+- Website - http://mosra.cz/blog/
+- E-mail - mosra@centrum.cz
+- Jabber - mosra@jabbim.cz
 
 */
 }

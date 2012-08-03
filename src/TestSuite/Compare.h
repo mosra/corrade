@@ -16,6 +16,10 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
+/** @file
+ * @brief Class Corrade::TestSuite::Compare
+ */
+
 #include "Utility/Debug.h"
 
 #include <cmath>

@@ -1,6 +1,5 @@
 namespace Corrade { namespace TestSuite {
-/**
-@page unit-testing Unit testing with %TestSuite
+/** @page unit-testing Unit testing with TestSuite
 
 %Corrade's test suite is inspired by QtTest framework, but without any need to
 process code with meta compiler.
@@ -70,6 +69,9 @@ produces output similar to this:
             Need better approximation. pi and 3.14 are not equal.
         OK: pi()
     Finished Corrade::Examples::MyTest with 1 errors.
+
+ - @ref test/MyTest.h
+ - @ref test/MyTest.cpp
 
 */
 }}

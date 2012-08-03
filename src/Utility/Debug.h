@@ -17,7 +17,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::Debug, macro CORRADE_ASSERT().
+ * @brief Class Corrade::Utility::Debug, Corrade::Utility::Warning, Corrade::Utility::Error, macro CORRADE_ASSERT().
  */
 
 #include <cstdlib>

@@ -1,5 +1,5 @@
 namespace Corrade { namespace PluginManager {
-/** @page plugin-management %Plugin management tutorial
+/** @page plugin-management Plugin management tutorial
 
 The PluginManager class provides hierarchical plugin management functions.
 Main features:

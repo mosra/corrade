@@ -1,7 +1,13 @@
+/** @dir src
+ * @brief Namespace Corrade
+ */
 /** @namespace Corrade
  * @brief Root namespace
  */
 
+/** @dir src/Utility
+ * @brief Namespace Corrade::Utility
+ */
 /** @namespace Corrade::Utility
 @brief Simple utitlities
 
@@ -12,6 +18,9 @@ translation support (class Translator) or compiling data files into the
 executable (class Resource, see also @ref resource-management "tutorial").
 */
 
+/** @dir src/PluginManager
+ * @brief Namespace Corrade::PluginManager
+ */
 /** @namespace Corrade::PluginManager
 @brief %Plugin management
 
@@ -21,6 +30,9 @@ all plugins. See @ref plugin-management for a brief introduction to how
 plugins work.
 */
 
+/** @dir src/TestSuite
+ * @brief Namespace Corrade::TestSuite
+ */
 /** @namespace Corrade::TestSuite
 @brief Test suite
 

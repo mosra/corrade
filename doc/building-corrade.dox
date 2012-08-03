@@ -1,4 +1,4 @@
-/** @page building Building %Corrade
+/** @page building-corrade Building Corrade
 
 %Corrade can be built in many ways. You can either @ref building-compilation
 "compile it manually" or use already prepared packaging files, such as
