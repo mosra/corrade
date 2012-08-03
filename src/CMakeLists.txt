@@ -1,5 +1,13 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/corradeConfigure.h.cmake
+               ${CMAKE_CURRENT_BINARY_DIR}/corradeConfigure.h)
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+# Install also the configure file
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/corradeConfigure.h DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR})
+
 if(BUILD_TESTS)
     enable_testing()
     include_directories(${QT_INCLUDE_DIR})
