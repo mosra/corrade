@@ -70,5 +70,8 @@ produces output similar to this:
         OK: pi()
     Finished Corrade::Examples::MyTest with 1 errors.
 
+ - @ref test/MyTest.h
+ - @ref test/MyTest.cpp
+
 */
 }}
