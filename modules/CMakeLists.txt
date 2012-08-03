@@ -1,4 +1,4 @@
-if(NOT WIN32)
+if(NOT CMAKE_CROSSCOMPILING)
     install(FILES
         FindCorrade.cmake
         CorradeLibSuffix.cmake
