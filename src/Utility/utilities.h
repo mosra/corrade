@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 
-#include "UtilityVisibility.h"
+#include "corradeUtilityVisibility.h"
 
 namespace Corrade { namespace Utility {
 

@@ -1,5 +1,5 @@
-#ifndef Corrade_PluginManager_PluginManagerVisibility_h
-#define Corrade_PluginManager_PluginManagerVisibility_h
+#ifndef Corrade_Utility_corradeUtilityVisibility_h
+#define Corrade_Utility_corradeUtilityVisibility_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -19,17 +19,15 @@
 #ifndef DOXYGEN_GENERATING_OUTPUT
 
 #ifdef _WIN32
-    #ifdef CorradePluginManager_EXPORTS
-        #define PLUGINMANAGER_EXPORT __declspec(dllexport)
+    #ifdef CorradeUtility_EXPORTS
+        #define UTILITY_EXPORT __declspec(dllexport)
     #else
-        #define PLUGINMANAGER_EXPORT __declspec(dllimport)
+        #define UTILITY_EXPORT __declspec(dllimport)
     #endif
-    #define PLUGINMANAGER_LOCAL
-    #define PLUGIN_EXPORT
+    #define UTILITY_LOCAL
 #else
-    #define PLUGINMANAGER_EXPORT __attribute__ ((visibility ("default")))
-    #define PLUGINMANAGER_LOCAL __attribute__ ((visibility ("hidden")))
-    #define PLUGIN_EXPORT __attribute__ ((visibility ("default")))
+    #define UTILITY_EXPORT __attribute__ ((visibility ("default")))
+    #define UTILITY_LOCAL __attribute__ ((visibility ("hidden")))
 #endif
 
 #endif

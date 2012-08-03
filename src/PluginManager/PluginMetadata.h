@@ -26,7 +26,7 @@
 
 #include "Utility/Configuration.h"
 #include "Utility/Translator.h"
-#include "PluginManagerVisibility.h"
+#include "corradePluginManagerVisibility.h"
 
 namespace Corrade { namespace PluginManager {
 
