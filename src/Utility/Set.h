@@ -20,6 +20,8 @@
  * @brief Class Corrade::Utility::Set
  */
 
+#include "corradeCompatibility.h"
+
 namespace Corrade { namespace Utility {
 
 /**
