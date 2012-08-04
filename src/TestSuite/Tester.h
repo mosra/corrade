@@ -58,10 +58,10 @@ template<class Derived> class Tester {
             unsigned int errorCount = 0,
                 noCheckCount = 0;
 
-            for(auto i: testCases) {
+            for(typename std::vector<std::function<void(Derived&)>>::const_iterator i = testCases.begin(); i != testCases.end(); ++i) {
                 try {
                     testCaseName.clear();
-                    i(*static_cast<Derived*>(this));
+                    (*i)(*static_cast<Derived*>(this));
                 } catch(Exception e) {
                     ++errorCount;
                     continue;
