@@ -16,7 +16,6 @@
 
 #include "TesterTest.h"
 
-#include <iostream>
 #include <sstream>
 
 using namespace std;
@@ -86,15 +85,10 @@ void TesterTest::Test::unexpectedPassEqual() {
 
 void TesterTest::emptyTest() {
     stringstream out;
-    Debug::setOutput(&out);
-    Error::setOutput(&out);
 
     EmptyTest t;
     t.registerTest("here.cpp", "TesterTest::EmptyTest");
-    int result = t.exec();
-
-    Debug::setOutput(&cout);
-    Error::setOutput(&cerr);
+    int result = t.exec(&out, &out);
 
     CORRADE_VERIFY(result == 2);
 
@@ -103,33 +97,28 @@ void TesterTest::emptyTest() {
 
 void TesterTest::test() {
     stringstream out;
-    Debug::setOutput(&out);
-    Error::setOutput(&out);
 
     Test t;
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec();
-
-    Debug::setOutput(&cout);
-    Error::setOutput(&cerr);
+    int result = t.exec(&out, &out);
 
     CORRADE_VERIFY(result == 1);
 
     string expected = "Starting TesterTest::Test with 8 test cases...\n"
         "    OK: trueExpression()\n"
-        "  FAIL: falseExpression() at here.cpp on line 54 \n"
+        "  FAIL: falseExpression() at here.cpp on line 53 \n"
         "        Expression 5 != 5 failed.\n"
         "    OK: equal()\n"
-        "  FAIL: nonEqual() at here.cpp on line 64 \n"
+        "  FAIL: nonEqual() at here.cpp on line 63 \n"
         "        Values a and b are not the same, actual 5 but 3 expected.\n"
-        " XFAIL: expectFail() at here.cpp on line 70 \n"
+        " XFAIL: expectFail() at here.cpp on line 69 \n"
         "        The world is not mad yet. 2 + 2 and 5 are not equal.\n"
-        " XFAIL: expectFail() at here.cpp on line 71 \n"
+        " XFAIL: expectFail() at here.cpp on line 70 \n"
         "        The world is not mad yet. Expression false == true failed.\n"
         "    OK: expectFail()\n"
-        " XPASS: unexpectedPassExpression() at here.cpp on line 79 \n"
+        " XPASS: unexpectedPassExpression() at here.cpp on line 78 \n"
         "        Expression true == true was expected to fail.\n"
-        " XPASS: unexpectedPassEqual() at here.cpp on line 84 \n"
+        " XPASS: unexpectedPassEqual() at here.cpp on line 83 \n"
         "        2 + 2 and 4 are not expected to be equal.\n"
         "Finished TesterTest::Test with 4 errors. 1 test cases didn't contain any checks!\n";
 
