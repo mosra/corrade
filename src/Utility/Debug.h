@@ -249,24 +249,43 @@ class UTILITY_EXPORT Error: public Debug {
 By default, if assertion fails, @p message is printed to error output and the
 application exits with value `-1`. If `CORRADE_GRACEFUL_ASSERT` is defined,
 the message is printed and the function returns with @p returnValue. If
-`CORRADE_NO_ASSERT` is defined, this macro does nothing.
+`CORRADE_NO_ASSERT` is defined, this macro does nothing. Example usage:
+@code
+T operator[](size_t pos) const {
+    CORRADE_ASSERT(pos < size(), "Index out of range", T());
+    return data[pos];
+}
+@endcode
+If the function has return type `void`, just use empty parameter (allowed in
+C++11):
+@code
+void compile() {
+    CORRADE_ASSERT(!sources.empty(), "No sources added", );
+
+    // ...
+}
+@endcode
 */
 #ifdef CORRADE_GRACEFUL_ASSERT
 #define CORRADE_ASSERT(condition, message, returnValue)                     \
-    if(!(condition)) {                                                      \
-        Corrade::Utility::Error() << message;                               \
-        return returnValue;                                                 \
-    }
+    do {                                                                    \
+        if(!(condition)) {                                                  \
+            Corrade::Utility::Error() << message;                           \
+            return returnValue;                                             \
+        }                                                                   \
+    } while(0)
 #else
 #ifdef CORRADE_NO_ASSERT
-#define CORRADE_ASSERT(condition, message, returnValue)
+#define CORRADE_ASSERT(condition, message, returnValue) do {} while(0)
 #else
 #define CORRADE_ASSERT(condition, message, returnValue)                     \
-    if(!(condition)) {                                                      \
-        Corrade::Utility::Error() << message;                               \
-        exit(-1);                                                           \
-        return returnValue;                                                 \
-    }
+    do {                                                                    \
+        if(!(condition)) {                                                  \
+            Corrade::Utility::Error() << message;                           \
+            exit(-1);                                                       \
+            return returnValue;                                             \
+        }                                                                   \
+    } while(0)
 #endif
 #endif
 

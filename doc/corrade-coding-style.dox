@@ -273,14 +273,7 @@ unwanted) symbol.
 Use asserts as much as possible. Utility library has convenient
 `CORRADE_ASSERT()` macro, which does everything needed - checks the statement,
 prints given message to error output and exits immediately or returns default
-value:
-
-@code
-T operator[](size_t pos) const {
-    CORRADE_ASSERT(pos < size(), "Index out of range", T())
-    return data[pos];
-}
-@endcode
+value.
 
 @subsection cpp-forbidden Forbidden C/C++ features
 
