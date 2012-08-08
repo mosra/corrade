@@ -324,9 +324,12 @@ and other commands for "out-of-place" documentation.
 Doxygen documentation is mainly in header files, additional documentation
 pages which doesn't belong to any particular class (e.g. namespaces,
 overview...) is in `doc/` directory. In source file should be only @c \@todo
-items related to particular lines of code. Documentation pages and additional
-documentation files should be named in lowercase with dashes between words.
-Additional documentation files use `*.dox` extension.
+items related to particular lines of code. Documentation pages, page sections
+and additional documentation files should be named in lowercase with dashes
+between words. Sections inside class/function documentation should be prefixed
+with corresponding name (with no case change), followed by dash. The rest of
+the name is in lowercase with dashes between words. Additional documentation
+files use `*.dox` extension.
 
 File documentation block is after license block, it explains only in
 @c \@brief what content given header contains.
