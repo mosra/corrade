@@ -21,6 +21,7 @@
  */
 
 #include <functional>
+#include <iostream>
 
 #include "Utility/Debug.h"
 #include "Compare.h"
@@ -39,21 +40,26 @@ template<class Derived> class Tester {
         /** @brief Pointer to test case function */
         typedef void (Derived::*TestCase)();
 
-        inline constexpr Tester(): testCaseLine(0), expectedFailure(nullptr) {}
+        inline constexpr Tester(): logOutput(nullptr), errorOutput(nullptr), testCaseLine(0), expectedFailure(nullptr) {}
 
         /**
          * @brief Execute the tester
-         * @return Non-zero code if any test case fails or doesn't contain any
-         *      checking macros.
+         * @param logOutput     Output stream for log messages
+         * @param errorOutput   Output stream for error messages
+         * @return Non-zero if there are no test cases, if any test case fails
+         *      or doesn't contain any checking macros, zero otherwise.
          */
-        int exec() {
+        int exec(std::ostream* logOutput = &std::cout, std::ostream* errorOutput = &std::cerr) {
+            this->logOutput = logOutput;
+            this->errorOutput = errorOutput;
+
             /* Fail when we have nothing to test */
             if(testCases.empty()) {
-                Utility::Error() << "In" << testName << "weren't found any test cases!";
+                Utility::Error(errorOutput) << "In" << testName << "weren't found any test cases!";
                 return 2;
             }
 
-            Utility::Debug() << "Starting" << testName << "with" << testCases.size() << "test cases...";
+            Utility::Debug(logOutput) << "Starting" << testName << "with" << testCases.size() << "test cases...";
 
             unsigned int errorCount = 0,
                 noCheckCount = 0;
@@ -73,12 +79,12 @@ template<class Derived> class Tester {
                     continue;
                 }
 
-                Utility::Debug d;
+                Utility::Debug d(logOutput);
                 d << (expectedFailure ? " XFAIL:" : "    OK:") << testCaseName;
                 if(expectedFailure) d << "\n       " << expectedFailure->message();
             }
 
-            Utility::Debug d;
+            Utility::Debug d(logOutput);
             d << "Finished" << testName << "with" << errorCount << "errors.";
             if(noCheckCount)
                 d << noCheckCount << "test cases didn't contain any checks!";
@@ -126,12 +132,12 @@ template<class Derived> class Tester {
             if(!expectedFailure) {
                 if(equal) return;
             } else if(!equal) {
-                Utility::Debug() << " XFAIL:" << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       " << expectedFailure->message() << actual << "and" << expected << "are not equal.";
+                Utility::Debug(logOutput) << " XFAIL:" << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       " << expectedFailure->message() << actual << "and" << expected << "are not equal.";
                 return;
             }
 
             /* Otherwise print message to error output and throw exception */
-            Utility::Error e;
+            Utility::Error e(errorOutput);
             e << (expectedFailure ? " XPASS:" : "  FAIL:") << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       ";
             if(!expectedFailure) compare.printErrorMessage(e, actual, expected);
             else e << actual << "and" << expected << "are not expected to be equal.";
@@ -143,12 +149,12 @@ template<class Derived> class Tester {
             if(!expectedFailure) {
                 if(expressionValue) return;
             } else if(!expressionValue) {
-                Utility::Debug() << " XFAIL:" << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       " << expectedFailure->message() << "Expression" << expression << "failed.";
+                Utility::Debug(logOutput) << " XFAIL:" << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       " << expectedFailure->message() << "Expression" << expression << "failed.";
                 return;
             }
 
             /* Otherwise print message to error output and throw exception */
-            Utility::Error e;
+            Utility::Error e(errorOutput);
             e << (expectedFailure ? " XPASS:" : "  FAIL:") << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n        Expression" << expression;
             if(!expectedFailure) e << "failed.";
             else e << "was expected to fail.";
@@ -189,6 +195,7 @@ template<class Derived> class Tester {
 
         void addTests() {} /* Terminator function for addTests() */
 
+        std::ostream *logOutput, *errorOutput;
         std::vector<std::function<void(Derived&)>> testCases;
         std::string testFilename, testName, testCaseName, expectFailMessage;
         size_t testCaseLine;
