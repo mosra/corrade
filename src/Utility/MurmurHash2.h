@@ -44,6 +44,8 @@ template<size_t> class MurmurHash2Implementation {
     #endif
 };
 
+/** @todo Export implementation symbols only for tests */
+
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<> class UTILITY_EXPORT MurmurHash2Implementation<4> {
     public:
