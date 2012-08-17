@@ -122,6 +122,7 @@ template<class T> class DoubleLinkedList {
          */
         void insert(T* item, T* before = nullptr) {
             CORRADE_ASSERT(!item->list(), "Containers::DoubleLinkedList: Cannot insert item already connected elsewhere.", );
+            CORRADE_ASSERT(!before || before->list() == this, "Containers::DoubleLinkedList: Cannot insert before item which is not part of the list.", );
 
             item->_list = static_cast<decltype(item->_list)>(this);
 

@@ -29,6 +29,7 @@ class DoubleLinkedListTest: public TestSuite::Tester<DoubleLinkedListTest> {
         void listBackReference();
         void insert();
         void insertFromOtherList();
+        void insertBeforeFromOtherList();
         void cut();
         void cutFromOtherList();
         void clear();

@@ -33,6 +33,7 @@ DoubleLinkedListTest::DoubleLinkedListTest() {
     addTests(&DoubleLinkedListTest::listBackReference,
              &DoubleLinkedListTest::insert,
              &DoubleLinkedListTest::insertFromOtherList,
+             &DoubleLinkedListTest::insertBeforeFromOtherList,
              &DoubleLinkedListTest::cut,
              &DoubleLinkedListTest::cutFromOtherList,
              &DoubleLinkedListTest::clear,
@@ -127,6 +128,20 @@ void DoubleLinkedListTest::insertFromOtherList() {
     DoubleLinkedList list2;
     list2.insert(&item);
     CORRADE_COMPARE(out.str(), "Containers::DoubleLinkedList: Cannot insert item already connected elsewhere.\n");
+}
+
+void DoubleLinkedListTest::insertBeforeFromOtherList() {
+    stringstream out;
+    Error::setOutput(&out);
+
+    DoubleLinkedList list;
+    Item item;
+    list.insert(&item);
+
+    DoubleLinkedList list2;
+    Item item2;
+    list2.insert(&item2, &item);
+    CORRADE_COMPARE(out.str(), "Containers::DoubleLinkedList: Cannot insert before item which is not part of the list.\n");
 }
 
 void DoubleLinkedListTest::cutFromOtherList() {
