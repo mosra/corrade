@@ -5,6 +5,15 @@
  * @brief Root namespace
  */
 
+/** @dir src/Containers
+ * @brief Namespace Corrade::Containers
+ */
+/** @namespace Corrade::Containers
+@brief Container implementations
+
+Implementations for various containers which don't have equivalents in STL.
+*/
+
 /** @dir src/Utility
  * @brief Namespace Corrade::Utility
  */

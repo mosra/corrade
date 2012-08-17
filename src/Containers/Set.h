@@ -1,5 +1,5 @@
-#ifndef Corrade_Utility_Set_h
-#define Corrade_Utility_Set_h
+#ifndef Corrade_Containers_Set_h
+#define Corrade_Containers_Set_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -17,10 +17,10 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::Set
+ * @brief Class Corrade::Containers::Set
  */
 
-namespace Corrade { namespace Utility {
+namespace Corrade { namespace Containers {
 
 /**
 @brief %Set
