@@ -2,8 +2,8 @@ add_definitions(-Wall -pedantic)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/AbstractPluginManagerConfigure.h.cmake
-               ${CMAKE_CURRENT_BINARY_DIR}/AbstractPluginManagerConfigure.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/corradePluginManagerConfigure.h.cmake
+               ${CMAKE_CURRENT_BINARY_DIR}/corradePluginManagerConfigure.h)
 
 set(CorradePluginManager_SRCS
     Plugin.cpp
