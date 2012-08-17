@@ -188,6 +188,23 @@ template<class T> class DoubleLinkedList {
         }
 
         /**
+         * @brief Move item before another
+         * @param item      Item to move
+         * @param before    Item before which to move or `nullptr`, if moving
+         *      at the end.
+         *
+         * Equivalent to:
+         * @code
+         * list.cut(item);
+         * list.move(item, before);
+         * @endcode
+         */
+        inline void move(T* item, T* before) {
+            cut(item);
+            insert(item, before);
+        }
+
+        /**
          * @brief Erase item
          * @param item      Item to erase
          *
