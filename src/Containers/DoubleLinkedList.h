@@ -26,11 +26,12 @@ namespace Corrade { namespace Containers {
 
 /**
 @brief Double linked list
+@tparam T   Item type, derived from DoubleLinkedListItem
 
 The list stores pointers to items which contain iterators in itself, not the
-other way around, so it is possible to operate directly with the items without
-any abstraction at *constant* time. The only downside of this is that the
-items or list cannot be copied (but they can be moved).
+other way around, so it is possible to operate directly with pointers to the
+items without any abstraction at *constant* time. The only downside of this is
+that the items or list cannot be copied (but they can be moved).
 
 @note For simplicity and memory usage reasons the list doesn't provide any
 method to get count of stored items, but you can traverse them and count them
@@ -58,6 +59,8 @@ for(Object* i = list.first(); i; i = i->next()) {
     // ...
 }
 @endcode
+
+@see LinkedListItem
 */
 template<class T> class DoubleLinkedList {
     DoubleLinkedList(const DoubleLinkedList<T>& other) = delete;
@@ -233,12 +236,24 @@ template<class T> class DoubleLinkedList {
         T *_first, *_last;
 };
 
-/** @brief Item of double-linked list. */
-template<class T, class List = DoubleLinkedList<T>> class DoubleLinkedListItem {
+/**
+@brief Item of DoubleLinkedList
+@param Derived  Dervied object type, i.e. type you want returned from previous() and next().
+@param List     List object type, i.e. type you want returned from list().
+
+This class is usually subclassed using [CRTP](http://en.wikipedia.org/wiki/Curiously_Recurring_Template_Pattern),
+e.g.:
+@code
+class Item: public DoubleLinkedListItem<Item> {
+    // ...
+};
+@endcode
+*/
+template<class Derived, class List = DoubleLinkedList<Derived>> class DoubleLinkedListItem {
     friend class DoubleLinkedList<T>;
 
-    DoubleLinkedListItem(const DoubleLinkedListItem<T, List>& other) = delete;
-    DoubleLinkedListItem& operator=(const DoubleLinkedListItem<T, List>& other) = delete;
+    DoubleLinkedListItem(const DoubleLinkedListItem<Derived, List>& other) = delete;
+    DoubleLinkedListItem& operator=(const DoubleLinkedListItem<Derived, List>& other) = delete;
 
     public:
         /**
@@ -249,7 +264,7 @@ template<class T, class List = DoubleLinkedList<T>> class DoubleLinkedListItem {
         inline DoubleLinkedListItem(): _list(nullptr), _previous(nullptr), _next(nullptr) {}
 
         /** @brief Move constructor */
-        DoubleLinkedListItem(DoubleLinkedListItem<T, List>&& other): _list(nullptr), _previous(nullptr), _next(nullptr) {
+        DoubleLinkedListItem(DoubleLinkedListItem<Derived, List>&& other): _list(nullptr), _previous(nullptr), _next(nullptr) {
             /* Replace other with self in the list */
             if(other._list) {
                 other._list->insert(static_cast<T*>(this), other._next);
@@ -258,7 +273,7 @@ template<class T, class List = DoubleLinkedList<T>> class DoubleLinkedListItem {
         }
 
         /** @brief Move assignment */
-        DoubleLinkedListItem<T, List>& operator=(DoubleLinkedListItem<T, List>&& other) {
+        DoubleLinkedListItem<Derived, List>& operator=(DoubleLinkedListItem<Derived, List>&& other) {
             /* Cut self from previous list */
             if(_list) _list->cut(static_cast<T*>(this));
 
@@ -282,17 +297,17 @@ template<class T, class List = DoubleLinkedList<T>> class DoubleLinkedListItem {
         inline List* list() const { return _list; }
 
         /** @brief Previous item or `nullptr`, if there is no previous item */
-        inline T* previous() const { return _previous; }
+        inline Derived* previous() const { return _previous; }
 
         /** @brief Next item or `nullptr`, if there is no previous item */
-        inline T* next() const { return _next; }
+        inline Derived* next() const { return _next; }
 
     private:
         List* _list;
-        T *_previous, *_next;
+        Derived *_previous, *_next;
 };
 
-template<class T, class List> inline DoubleLinkedListItem<T, List>::~DoubleLinkedListItem() {
+template<class Derived, class List> inline DoubleLinkedListItem<Derived, List>::~DoubleLinkedListItem() {
     if(_list) _list->cut(static_cast<T*>(this));
 }
 
