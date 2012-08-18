@@ -308,7 +308,7 @@ template<class Derived, class List = LinkedList<Derived>> class LinkedListItem {
 };
 
 template<class Derived, class List> inline LinkedListItem<Derived, List>::~LinkedListItem() {
-    if(_list) _list->cut(static_cast<Derived*>(this));
+    if(_list) _list->LinkedList<Derived>::cut(static_cast<Derived*>(this));
 }
 
 }}
