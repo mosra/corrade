@@ -14,35 +14,35 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "DoubleLinkedListTest.h"
+#include "LinkedListTest.h"
 
 #include <sstream>
 
 using namespace std;
 using namespace Corrade::Utility;
 
-CORRADE_TEST_MAIN(Corrade::Containers::Test::DoubleLinkedListTest)
+CORRADE_TEST_MAIN(Corrade::Containers::Test::LinkedListTest)
 
 namespace Corrade { namespace Containers { namespace Test {
 
-typedef Containers::DoubleLinkedList<DoubleLinkedListTest::Item> DoubleLinkedList;
+typedef Containers::LinkedList<LinkedListTest::Item> LinkedList;
 
-int DoubleLinkedListTest::Item::count = 0;
+int LinkedListTest::Item::count = 0;
 
-DoubleLinkedListTest::DoubleLinkedListTest() {
-    addTests(&DoubleLinkedListTest::listBackReference,
-             &DoubleLinkedListTest::insert,
-             &DoubleLinkedListTest::insertFromOtherList,
-             &DoubleLinkedListTest::insertBeforeFromOtherList,
-             &DoubleLinkedListTest::cut,
-             &DoubleLinkedListTest::cutFromOtherList,
-             &DoubleLinkedListTest::clear,
-             &DoubleLinkedListTest::moveList,
-             &DoubleLinkedListTest::moveItem);
+LinkedListTest::LinkedListTest() {
+    addTests(&LinkedListTest::listBackReference,
+             &LinkedListTest::insert,
+             &LinkedListTest::insertFromOtherList,
+             &LinkedListTest::insertBeforeFromOtherList,
+             &LinkedListTest::cut,
+             &LinkedListTest::cutFromOtherList,
+             &LinkedListTest::clear,
+             &LinkedListTest::moveList,
+             &LinkedListTest::moveItem);
 }
 
-void DoubleLinkedListTest::listBackReference() {
-    DoubleLinkedList list;
+void LinkedListTest::listBackReference() {
+    LinkedList list;
     Item* item = new Item;
 
     /* Insert -> list is backreferenced from the item */
@@ -60,8 +60,8 @@ void DoubleLinkedListTest::listBackReference() {
     CORRADE_VERIFY(list.isEmpty());
 }
 
-void DoubleLinkedListTest::insert() {
-    DoubleLinkedList list;
+void LinkedListTest::insert() {
+    LinkedList list;
 
     CORRADE_VERIFY(list.isEmpty());
 
@@ -117,48 +117,48 @@ void DoubleLinkedListTest::insert() {
     CORRADE_VERIFY(item3->next() == nullptr);
 }
 
-void DoubleLinkedListTest::insertFromOtherList() {
+void LinkedListTest::insertFromOtherList() {
     stringstream out;
     Error::setOutput(&out);
 
-    DoubleLinkedList list;
+    LinkedList list;
     Item item;
     list.insert(&item);
 
-    DoubleLinkedList list2;
+    LinkedList list2;
     list2.insert(&item);
-    CORRADE_COMPARE(out.str(), "Containers::DoubleLinkedList: Cannot insert item already connected elsewhere.\n");
+    CORRADE_COMPARE(out.str(), "Containers::LinkedList: Cannot insert item already connected elsewhere.\n");
 }
 
-void DoubleLinkedListTest::insertBeforeFromOtherList() {
+void LinkedListTest::insertBeforeFromOtherList() {
     stringstream out;
     Error::setOutput(&out);
 
-    DoubleLinkedList list;
+    LinkedList list;
     Item item;
     list.insert(&item);
 
-    DoubleLinkedList list2;
+    LinkedList list2;
     Item item2;
     list2.insert(&item2, &item);
-    CORRADE_COMPARE(out.str(), "Containers::DoubleLinkedList: Cannot insert before item which is not part of the list.\n");
+    CORRADE_COMPARE(out.str(), "Containers::LinkedList: Cannot insert before item which is not part of the list.\n");
 }
 
-void DoubleLinkedListTest::cutFromOtherList() {
+void LinkedListTest::cutFromOtherList() {
     stringstream out;
     Error::setOutput(&out);
 
-    DoubleLinkedList list;
+    LinkedList list;
     Item item;
     list.insert(&item);
 
-    DoubleLinkedList list2;
+    LinkedList list2;
     list2.cut(&item);
-    CORRADE_COMPARE(out.str(), "Containers::DoubleLinkedList: Cannot cut out item which is not part of the list.\n");
+    CORRADE_COMPARE(out.str(), "Containers::LinkedList: Cannot cut out item which is not part of the list.\n");
 }
 
-void DoubleLinkedListTest::cut() {
-    DoubleLinkedList list;
+void LinkedListTest::cut() {
+    LinkedList list;
     Item item;
     Item item2;
     Item item3;
@@ -217,12 +217,12 @@ void DoubleLinkedListTest::cut() {
     CORRADE_VERIFY(list.isEmpty());
 }
 
-void DoubleLinkedListTest::clear() {
+void LinkedListTest::clear() {
     CORRADE_COMPARE(Item::count, 0);
 
     /* Explicit clear */
     {
-        DoubleLinkedList list;
+        LinkedList list;
 
         list.insert(new Item);
         list.insert(new Item);
@@ -236,7 +236,7 @@ void DoubleLinkedListTest::clear() {
 
     /* Destructor */
     {
-        DoubleLinkedList list;
+        LinkedList list;
         list.insert(new Item);
         list.insert(new Item);
         list.insert(new Item);
@@ -245,15 +245,15 @@ void DoubleLinkedListTest::clear() {
     CORRADE_COMPARE(Item::count, 0);
 }
 
-void DoubleLinkedListTest::moveList() {
+void LinkedListTest::moveList() {
     Item* item1 = new Item;
     Item* item2 = new Item;
-    DoubleLinkedList list;
+    LinkedList list;
     list.insert(item1);
     list.insert(item2);
 
     /* Move constructor */
-    DoubleLinkedList list2(move(list));
+    LinkedList list2(move(list));
     CORRADE_VERIFY(list.first() == nullptr);
     CORRADE_VERIFY(list.last() == nullptr);
     CORRADE_VERIFY(list2.first() == item1);
@@ -263,7 +263,7 @@ void DoubleLinkedListTest::moveList() {
 
     CORRADE_COMPARE(Item::count, 2);
 
-    DoubleLinkedList list3;
+    LinkedList list3;
     list3.insert(new Item);
 
     /* Move assignment */
@@ -279,8 +279,8 @@ void DoubleLinkedListTest::moveList() {
     CORRADE_COMPARE(Item::count, 0);
 }
 
-void DoubleLinkedListTest::moveItem() {
-    DoubleLinkedList list;
+void LinkedListTest::moveItem() {
+    LinkedList list;
     Item item;
     Item item2;
     Item item3;
@@ -300,7 +300,7 @@ void DoubleLinkedListTest::moveItem() {
     CORRADE_VERIFY(item3.previous() == &item2Moved);
 
     /* Move assignment */
-    DoubleLinkedList list2;
+    LinkedList list2;
     Item item4;
 
     list2.insert(&item4);

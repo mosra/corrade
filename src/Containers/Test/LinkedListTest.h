@@ -1,5 +1,5 @@
-#ifndef Corrade_Containers_Test_DoubleLinkedListTest_h
-#define Corrade_Containers_Test_DoubleLinkedListTest_h
+#ifndef Corrade_Containers_Test_LinkedListTest_h
+#define Corrade_Containers_Test_LinkedListTest_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -18,13 +18,13 @@
 
 #include "TestSuite/Tester.h"
 
-#include "Containers/DoubleLinkedList.h"
+#include "Containers/LinkedList.h"
 
 namespace Corrade { namespace Containers { namespace Test {
 
-class DoubleLinkedListTest: public TestSuite::Tester<DoubleLinkedListTest> {
+class LinkedListTest: public TestSuite::Tester<LinkedListTest> {
     public:
-        DoubleLinkedListTest();
+        LinkedListTest();
 
         void listBackReference();
         void insert();
@@ -36,12 +36,12 @@ class DoubleLinkedListTest: public TestSuite::Tester<DoubleLinkedListTest> {
         void moveList();
         void moveItem();
 
-        class Item: public DoubleLinkedListItem<Item> {
+        class Item: public LinkedListItem<Item> {
             public:
-                inline Item(Item&& other): DoubleLinkedListItem(std::forward<DoubleLinkedListItem<Item>>(other)) {}
+                inline Item(Item&& other): LinkedListItem(std::forward<LinkedListItem<Item>>(other)) {}
 
                 inline Item& operator=(Item&& other) {
-                    DoubleLinkedListItem::operator=(std::forward<DoubleLinkedListItem<Item>>(other));
+                    LinkedListItem::operator=(std::forward<LinkedListItem<Item>>(other));
                     return *this;
                 }
 

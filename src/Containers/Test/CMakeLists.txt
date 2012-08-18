@@ -1,3 +1,3 @@
-corrade_add_test2(ContainersDoubleLinkedListTest DoubleLinkedListTest.cpp)
+corrade_add_test2(ContainersLinkedListTest LinkedListTest.cpp)
 
-set_target_properties(ContainersDoubleLinkedListTest PROPERTIES COMPILE_FLAGS -DCORRADE_GRACEFUL_ASSERT)
+set_target_properties(ContainersLinkedListTest PROPERTIES COMPILE_FLAGS -DCORRADE_GRACEFUL_ASSERT)

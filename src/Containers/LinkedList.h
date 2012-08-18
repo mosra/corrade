@@ -1,5 +1,5 @@
-#ifndef Corrade_Containers_DoubleLinkedList_h
-#define Corrade_Containers_DoubleLinkedList_h
+#ifndef Corrade_Containers_LinkedList_h
+#define Corrade_Containers_LinkedList_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -17,7 +17,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Containers::DoubleLinkedList
+ * @brief Class Corrade::Containers::LinkedList
  */
 
 #include "Utility/Debug.h"
@@ -25,8 +25,8 @@
 namespace Corrade { namespace Containers {
 
 /**
-@brief Double linked list
-@tparam T   Item type, derived from DoubleLinkedListItem
+@brief Linked list
+@tparam T   Item type, derived from LinkedListItem
 
 The list stores pointers to items which contain iterators in itself, not the
 other way around, so it is possible to operate directly with pointers to the
@@ -39,13 +39,13 @@ manually if desperately needed.
 
 Example:
 @code
-class Object: public DoubleLinkedListItem<Object> {
+class Object: public LinkedListItem<Object> {
     // ...
 };
 
 Object a, b, c;
 
-DoubleLinkedList<Object> list;
+LinkedList<Object> list;
 list.insert(&a);
 list.insert(&b);
 list.insert(&c);
@@ -62,9 +62,9 @@ for(Object* i = list.first(); i; i = i->next()) {
 
 @see LinkedListItem
 */
-template<class T> class DoubleLinkedList {
-    DoubleLinkedList(const DoubleLinkedList<T>& other) = delete;
-    DoubleLinkedList<T>& operator=(const DoubleLinkedList<T>& other) = delete;
+template<class T> class LinkedList {
+    LinkedList(const LinkedList<T>& other) = delete;
+    LinkedList<T>& operator=(const LinkedList<T>& other) = delete;
 
     public:
         /**
@@ -72,10 +72,10 @@ template<class T> class DoubleLinkedList {
          *
          * Creates empty list.
          */
-        inline constexpr DoubleLinkedList(): _first(nullptr), _last(nullptr) {}
+        inline constexpr LinkedList(): _first(nullptr), _last(nullptr) {}
 
         /** @brief Move constructor */
-        DoubleLinkedList(DoubleLinkedList<T>&& other): _first(other._first), _last(other._last) {
+        LinkedList(LinkedList<T>&& other): _first(other._first), _last(other._last) {
             other._first = nullptr;
             other._last = nullptr;
 
@@ -89,10 +89,10 @@ template<class T> class DoubleLinkedList {
          *
          * Clears the list.
          */
-        inline ~DoubleLinkedList() { clear(); }
+        inline ~LinkedList() { clear(); }
 
         /** @brief Move assignment */
-        DoubleLinkedList<T>& operator=(DoubleLinkedList<T>&& other) {
+        LinkedList<T>& operator=(LinkedList<T>&& other) {
             clear();
             _first = other._first;
             _last = other._last;
@@ -124,8 +124,8 @@ template<class T> class DoubleLinkedList {
          * @attention The item must not be connected to any list.
          */
         void insert(T* item, T* before = nullptr) {
-            CORRADE_ASSERT(!item->list(), "Containers::DoubleLinkedList: Cannot insert item already connected elsewhere.", );
-            CORRADE_ASSERT(!before || before->list() == this, "Containers::DoubleLinkedList: Cannot insert before item which is not part of the list.", );
+            CORRADE_ASSERT(!item->list(), "Containers::LinkedList: Cannot insert item already connected elsewhere.", );
+            CORRADE_ASSERT(!before || before->list() == this, "Containers::LinkedList: Cannot insert before item which is not part of the list.", );
 
             item->_list = static_cast<decltype(item->_list)>(this);
 
@@ -163,7 +163,7 @@ template<class T> class DoubleLinkedList {
          * The item is disconnected from the list, but not deleted.
          */
         void cut(T* item) {
-            CORRADE_ASSERT(item->list() == this, "Containers::DoubleLinkedList: Cannot cut out item which is not part of the list.", );
+            CORRADE_ASSERT(item->list() == this, "Containers::LinkedList: Cannot cut out item which is not part of the list.", );
 
             /* Removing first item */
             if(item == _first) {
@@ -237,23 +237,23 @@ template<class T> class DoubleLinkedList {
 };
 
 /**
-@brief Item of DoubleLinkedList
+@brief Item of LinkedList
 @param Derived  Dervied object type, i.e. type you want returned from previous() and next().
 @param List     List object type, i.e. type you want returned from list().
 
 This class is usually subclassed using [CRTP](http://en.wikipedia.org/wiki/Curiously_Recurring_Template_Pattern),
 e.g.:
 @code
-class Item: public DoubleLinkedListItem<Item> {
+class Item: public LinkedListItem<Item> {
     // ...
 };
 @endcode
 */
-template<class Derived, class List = DoubleLinkedList<Derived>> class DoubleLinkedListItem {
-    friend class DoubleLinkedList<T>;
+template<class Derived, class List = LinkedList<Derived>> class LinkedListItem {
+    friend class LinkedList<Derived>;
 
-    DoubleLinkedListItem(const DoubleLinkedListItem<Derived, List>& other) = delete;
-    DoubleLinkedListItem& operator=(const DoubleLinkedListItem<Derived, List>& other) = delete;
+    LinkedListItem(const LinkedListItem<Derived, List>& other) = delete;
+    LinkedListItem& operator=(const LinkedListItem<Derived, List>& other) = delete;
 
     public:
         /**
@@ -261,26 +261,26 @@ template<class Derived, class List = DoubleLinkedList<Derived>> class DoubleLink
          *
          * Creates item not connected to any list.
          */
-        inline DoubleLinkedListItem(): _list(nullptr), _previous(nullptr), _next(nullptr) {}
+        inline LinkedListItem(): _list(nullptr), _previous(nullptr), _next(nullptr) {}
 
         /** @brief Move constructor */
-        DoubleLinkedListItem(DoubleLinkedListItem<Derived, List>&& other): _list(nullptr), _previous(nullptr), _next(nullptr) {
+        LinkedListItem(LinkedListItem<Derived, List>&& other): _list(nullptr), _previous(nullptr), _next(nullptr) {
             /* Replace other with self in the list */
             if(other._list) {
-                other._list->insert(static_cast<T*>(this), other._next);
-                other._list->cut(static_cast<T*>(&other));
+                other._list->insert(static_cast<Derived*>(this), other._next);
+                other._list->cut(static_cast<Derived*>(&other));
             }
         }
 
         /** @brief Move assignment */
-        DoubleLinkedListItem<Derived, List>& operator=(DoubleLinkedListItem<Derived, List>&& other) {
+        LinkedListItem<Derived, List>& operator=(LinkedListItem<Derived, List>&& other) {
             /* Cut self from previous list */
-            if(_list) _list->cut(static_cast<T*>(this));
+            if(_list) _list->cut(static_cast<Derived*>(this));
 
             /* Replace other with self in new list */
             if(other._list) {
-                other._list->insert(static_cast<T*>(this), other._next);
-                other._list->cut(static_cast<T*>(&other));
+                other._list->insert(static_cast<Derived*>(this), other._next);
+                other._list->cut(static_cast<Derived*>(&other));
             }
 
             return *this;
@@ -291,7 +291,7 @@ template<class Derived, class List = DoubleLinkedList<Derived>> class DoubleLink
          *
          * If the item is part of any list, it is removed from it.
          */
-        virtual ~DoubleLinkedListItem() = 0;
+        virtual ~LinkedListItem() = 0;
 
         /** @brief List this item belongs to */
         inline List* list() const { return _list; }
@@ -307,8 +307,8 @@ template<class Derived, class List = DoubleLinkedList<Derived>> class DoubleLink
         Derived *_previous, *_next;
 };
 
-template<class Derived, class List> inline DoubleLinkedListItem<Derived, List>::~DoubleLinkedListItem() {
-    if(_list) _list->cut(static_cast<T*>(this));
+template<class Derived, class List> inline LinkedListItem<Derived, List>::~LinkedListItem() {
+    if(_list) _list->cut(static_cast<Derived*>(this));
 }
 
 }}
