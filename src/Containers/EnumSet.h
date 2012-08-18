@@ -1,5 +1,5 @@
-#ifndef Corrade_Containers_Set_h
-#define Corrade_Containers_Set_h
+#ifndef Corrade_Containers_EnumSet_h
+#define Corrade_Containers_EnumSet_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -17,13 +17,13 @@
 */
 
 /** @file
- * @brief Class Corrade::Containers::Set
+ * @brief Class Corrade::Containers::EnumSet
  */
 
 namespace Corrade { namespace Containers {
 
 /**
-@brief %Set
+@brief Set of enum values
 @tparam T Enum type
 @tparam U Underlying type of the enum
 
@@ -40,46 +40,46 @@ enum class State: unsigned char {
     Done = 1 << 2
 };
 
-typedef Set<State, unsigned char> States;
+typedef EnumSet<State, unsigned char> States;
 SET_OPERATORS(States)
 @endcode
 */
-template<class T, class U> class Set {
+template<class T, class U> class EnumSet {
     public:
         typedef T Type;             /**< @brief Enum type */
         typedef U UnderlyingType;   /**< @brief Underlying type of the enum */
 
         /** @brief Create empty set */
-        inline constexpr Set(): value() {}
+        inline constexpr EnumSet(): value() {}
 
         /** @brief Create set from one value */
-        inline constexpr Set(T value): value(static_cast<UnderlyingType>(value)) {}
+        inline constexpr EnumSet(T value): value(static_cast<UnderlyingType>(value)) {}
 
         /** @brief Union of two sets */
-        inline constexpr Set<T, U> operator|(Set<T, U> other) const {
-            return Set<T, U>(value | other.value);
+        inline constexpr EnumSet<T, U> operator|(EnumSet<T, U> other) const {
+            return EnumSet<T, U>(value | other.value);
         }
 
         /** @brief Union two sets and assign */
-        inline Set<T, U>& operator|=(Set<T, U> other) {
+        inline EnumSet<T, U>& operator|=(EnumSet<T, U> other) {
             value |= other.value;
             return *this;
         }
 
         /** @brief Intersection of two sets */
-        inline constexpr Set<T, U> operator&(Set<T, U> other) const {
-            return Set<T, U>(value & other.value);
+        inline constexpr EnumSet<T, U> operator&(EnumSet<T, U> other) const {
+            return EnumSet<T, U>(value & other.value);
         }
 
         /** @brief Intersect two sets and assign */
-        inline Set<T, U>& operator&=(Set<T, U> other) {
+        inline EnumSet<T, U>& operator&=(EnumSet<T, U> other) {
             value &= other.value;
             return *this;
         }
 
-        /** @brief Set complement */
-        inline constexpr Set<T, U> operator~() const {
-            return Set<T, U>(~value);
+        /** @brief EnumSet complement */
+        inline constexpr EnumSet<T, U> operator~() const {
+            return EnumSet<T, U>(~value);
         }
 
         /** @brief Value as boolean */
@@ -93,13 +93,13 @@ template<class T, class U> class Set {
         }
 
     private:
-        inline constexpr explicit Set(UnderlyingType type): value(type) {}
+        inline constexpr explicit EnumSet(UnderlyingType type): value(type) {}
 
         UnderlyingType value;
 };
 
 /** @hideinitializer
-@brief Define out-of-class operators for given Set implementation
+@brief Define out-of-class operators for given EnumSet implementation
 */
 #define SET_OPERATORS(class)                                                \
     inline constexpr class operator|(class::Type a, class b) {              \
