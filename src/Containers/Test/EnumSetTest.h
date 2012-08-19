@@ -41,7 +41,7 @@ class EnumSetTest: public TestSuite::Tester<EnumSetTest> {
         void operatorInverse();
 };
 
-SET_OPERATORS(EnumSetTest::Features)
+CORRADE_ENUMSET_OPERATORS(EnumSetTest::Features)
 
 }}}
 

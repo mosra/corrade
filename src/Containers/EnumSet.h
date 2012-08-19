@@ -31,17 +31,20 @@ Provides strongly-typed set-like functionality for strongly typed enums, such
 as binary OR and AND operations. The only requirement for enum type is that
 all the values must be binary exclusive.
 
-Desired usage is via typedef'ing and then calling SET_OPERATORS() macro with
-the resulting type as parameter to have all the operators implemented.
+@anchor EnumSet-out-of-class-operators
+Desired usage is via typedef'ing. You should also call
+CORRADE_ENUMSET_OPERATORS() macro with the resulting type as parameter to have
+also out-of-class operators defined:
 @code
-enum class State: unsigned char {
-    Ready = 1 << 0,
-    Waiting = 1 << 1,
-    Done = 1 << 2
+enum class Feature: unsigned int {
+    Fast = 1 << 0,
+    Cheap = 1 << 1,
+    Tested = 1 << 2,
+    Popular = 1 << 3
 };
 
-typedef EnumSet<State, unsigned char> States;
-SET_OPERATORS(States)
+typedef EnumSet<Feature, unsigned int> Features;
+CORRADE_ENUMSET_OPERATORS(Features)
 @endcode
 */
 template<class T, class U> class EnumSet {
@@ -77,7 +80,7 @@ template<class T, class U> class EnumSet {
             return *this;
         }
 
-        /** @brief EnumSet complement */
+        /** @brief Set complement */
         inline constexpr EnumSet<T, U> operator~() const {
             return EnumSet<T, U>(~value);
         }
@@ -99,9 +102,12 @@ template<class T, class U> class EnumSet {
 };
 
 /** @hideinitializer
-@brief Define out-of-class operators for given EnumSet implementation
+@brief Define out-of-class operators for given EnumSet
+
+See @ref EnumSet-out-of-class-operators "EnumSet" documentation for example
+usage.
 */
-#define SET_OPERATORS(class)                                                \
+#define CORRADE_ENUMSET_OPERATORS(class)                                    \
     inline constexpr class operator|(class::Type a, class b) {              \
         return b | a;                                                       \
     }                                                                       \
