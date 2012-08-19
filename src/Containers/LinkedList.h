@@ -17,7 +17,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Containers::LinkedList
+ * @brief Class Corrade::Containers::LinkedList, Corrade::Containers::LinkedListItem
  */
 
 #include "Utility/Debug.h"
