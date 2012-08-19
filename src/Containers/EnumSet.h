@@ -84,7 +84,7 @@ template<class T, class U> class EnumSet {
 
         /** @brief Value as boolean */
         inline constexpr explicit operator bool() const {
-            return value == 0;
+            return value != 0;
         }
 
         /** @brief Value in underlying type */
@@ -107,6 +107,9 @@ template<class T, class U> class EnumSet {
     }                                                                       \
     inline constexpr class operator&(class::Type a, class b) {              \
         return b & a;                                                       \
+    }                                                                       \
+    inline constexpr class operator~(class::Type a) {                       \
+        return ~class(a);                                                   \
     }
 
 }}
