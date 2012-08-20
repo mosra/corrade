@@ -195,6 +195,8 @@ TAB_SIZE               = 4
 
 ALIASES                = \
     "debugoperator{1}=@relates \1\n@brief Debug output operator" \
+    "configurationvalueref{1}=@see @ref configurationvalues \"Corrade::Utility::ConfigurationValue<\1>\"" \
+    "configurationvalue{1}=@brief %Configuration value parser and writer @xrefitem configurationvalues \"Configuration value parser and writer\" \"Configuration value parsers and writers for custom types\" Allows parsing and writing \1 from and to Corrade::Utility::Configuration." \
     "todoc=@xrefitem todoc \"Documentation todo\" \"Documentation-related todo list\""
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only).
