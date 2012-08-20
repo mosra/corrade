@@ -46,6 +46,25 @@ enum class Feature: unsigned int {
 typedef EnumSet<Feature, unsigned int> Features;
 CORRADE_ENUMSET_OPERATORS(Features)
 @endcode
+
+@anchor EnumSet-friend-operators
+If you have the EnumSet as private or protected member of any class, you have
+to declare the out-of-class operators as friends. It can be done with
+CORRADE_ENUMSET_FRIEND_OPERATORS() macro:
+@code
+class Application {
+    private:
+        enum class Flag: unsigned int {
+            Redraw = 1 << 0,
+            Exit = 1 << 1
+        };
+
+        typedef EnumSet<Flag, unsigned int> Flags;
+        CORRADE_ENUMSET_FRIEND_OPERATORS(Flags)
+};
+
+CORRADE_ENUMSET_OPERATORS(Application::Flags)
+@endcode
 */
 template<class T, class U> class EnumSet {
     public:
@@ -117,6 +136,16 @@ usage.
     inline constexpr class operator~(class::Type a) {                       \
         return ~class(a);                                                   \
     }
+
+/** @hideinitializer
+@brief Define out-of-class operators for given EnumSet as friends of encapsulating class
+
+See @ref EnumSet-friend-operators "EnumSet" documentation for example usage.
+*/
+#define CORRADE_ENUMSET_FRIEND_OPERATORS(class)                             \
+    friend constexpr class operator&(class::Type, class);                   \
+    friend constexpr class operator|(class::Type, class);                   \
+    friend constexpr class operator~(class::Type);
 
 }}
 

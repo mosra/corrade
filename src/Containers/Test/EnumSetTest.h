@@ -23,6 +23,15 @@ namespace Corrade { namespace Containers { namespace Test {
 
 class EnumSetTest: public TestSuite::Tester<EnumSetTest> {
     public:
+        EnumSetTest();
+
+        void construct();
+        void operatorOr();
+        void operatorAnd();
+        void operatorBool();
+        void operatorInverse();
+
+    private:
         enum class Feature: int {
             Fast = 1 << 0,
             Cheap = 1 << 1,
@@ -31,14 +40,7 @@ class EnumSetTest: public TestSuite::Tester<EnumSetTest> {
         };
 
         typedef EnumSet<Feature, int> Features;
-
-        EnumSetTest();
-
-        void construct();
-        void operatorOr();
-        void operatorAnd();
-        void operatorBool();
-        void operatorInverse();
+        CORRADE_ENUMSET_FRIEND_OPERATORS(Features)
 };
 
 CORRADE_ENUMSET_OPERATORS(EnumSetTest::Features)
