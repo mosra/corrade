@@ -22,6 +22,7 @@ if(BUILD_TESTS)
     include_directories(${QT_INCLUDE_DIR})
 endif()
 
+add_subdirectory(Containers)
 add_subdirectory(PluginManager)
 add_subdirectory(TestSuite)
 add_subdirectory(Utility)

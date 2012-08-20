@@ -1,0 +1,4 @@
+corrade_add_test2(ContainersLinkedListTest LinkedListTest.cpp)
+corrade_add_test2(ContainersEnumSetTest EnumSetTest.cpp)
+
+set_target_properties(ContainersLinkedListTest PROPERTIES COMPILE_FLAGS -DCORRADE_GRACEFUL_ASSERT)

@@ -370,12 +370,31 @@ Operators for printing types on Corrade's debug output should be marked with
 @c \@debugoperator, e.g.:
 @code
 // @debugoperator{Hash}
-template<class T> Corrade::Utility::Debug operator<<(Corrade::Utility::Debug debug, const Hash& value) {
+Corrade::Utility::Debug operator<<(Corrade::Utility::Debug debug, const Hash& value) {
     // ...
 }
 @endcode
 They will appear as related functions within documentation of class specified
-as the parameter.
+as the parameter and also crossreferenced from page `debugoperators`.
+
+@subsubsection documentation-commands-configurationvalue Configuration value parsers and writers
+
+Helper classes for parsing and writing configuration values should be marked
+with @c \@configurationvalue, and referenced from the class using
+@c \@configurationvalueref e.g.:
+@code
+// @configurationvalueref{Hash}
+class Hash {
+};
+// @configurationvalue{Hash}
+namespace Corrade { namespace Utility {
+    struct ConfigurationValue<Hash> {
+        // ...
+    };
+}
+@endcode
+They will appear linked with documentation of class specified as the
+parameter and also crossreferenced from page `configurationvalues`.
 
 @section git Git commit messages, branch and tag format
 
