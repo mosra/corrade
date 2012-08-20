@@ -25,7 +25,8 @@ EnumSetTest::EnumSetTest() {
              &EnumSetTest::operatorOr,
              &EnumSetTest::operatorAnd,
              &EnumSetTest::operatorBool,
-             &EnumSetTest::operatorInverse);
+             &EnumSetTest::operatorInverse,
+             &EnumSetTest::comparison);
 }
 
 void EnumSetTest::construct() {
@@ -74,6 +75,26 @@ void EnumSetTest::operatorBool() {
 void EnumSetTest::operatorInverse() {
     CORRADE_COMPARE(int(~(Feature::Popular|Feature::Cheap)), ~10);
     CORRADE_COMPARE(int(~Feature::Popular), ~8);
+}
+
+void EnumSetTest::comparison() {
+    Features features = Feature::Popular|Feature::Fast|Feature::Cheap;
+    CORRADE_VERIFY(features == features);
+    CORRADE_VERIFY(!(features != features));
+    CORRADE_VERIFY(Feature::Cheap == Features(Feature::Cheap));
+    CORRADE_VERIFY(Feature::Cheap != Features(Feature::Popular));
+
+    CORRADE_VERIFY(Features() <= Feature::Popular);
+    CORRADE_VERIFY(Feature::Popular >= Features());
+    CORRADE_VERIFY(Feature::Popular <= Feature::Popular);
+    CORRADE_VERIFY(Feature::Popular >= Feature::Popular);
+    CORRADE_VERIFY(Feature::Popular <= features);
+    CORRADE_VERIFY(features >= Feature::Popular);
+    CORRADE_VERIFY(features <= features);
+    CORRADE_VERIFY(features >= features);
+
+    CORRADE_VERIFY(features <= (Feature::Popular|Feature::Fast|Feature::Cheap|Feature::Tested));
+    CORRADE_VERIFY(!(features >= (Feature::Popular|Feature::Fast|Feature::Cheap|Feature::Tested)));
 }
 
 }}}

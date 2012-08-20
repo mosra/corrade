@@ -77,6 +77,34 @@ template<class T, class U> class EnumSet {
         /** @brief Create set from one value */
         inline constexpr EnumSet(T value): value(static_cast<UnderlyingType>(value)) {}
 
+        /** @brief Equality operator */
+        inline constexpr bool operator==(EnumSet<T, U> other) const {
+            return value == other.value;
+        }
+
+        /** @brief Non-equality operator */
+        inline constexpr bool operator!=(EnumSet<T, U> other) const {
+            return !operator==(other);
+        }
+
+        /**
+         * @brief Whether @p other is subset of this
+         *
+         * Equivalent to `a & other == other`
+         */
+        inline constexpr bool operator>=(EnumSet<T, U> other) const {
+            return (*this & other) == other;
+        }
+
+        /**
+         * @brief Whether @p other is superset of this
+         *
+         * Equivalent to `a & other == a`
+         */
+        inline constexpr bool operator<=(EnumSet<T, U> other) const {
+            return (*this & other) == *this;
+        }
+
         /** @brief Union of two sets */
         inline constexpr EnumSet<T, U> operator|(EnumSet<T, U> other) const {
             return EnumSet<T, U>(value | other.value);
@@ -127,6 +155,18 @@ See @ref EnumSet-out-of-class-operators "EnumSet" documentation for example
 usage.
 */
 #define CORRADE_ENUMSET_OPERATORS(class)                                    \
+    inline constexpr bool operator==(class::Type a, class b) {              \
+        return class(a) == b;                                               \
+    }                                                                       \
+    inline constexpr bool operator!=(class::Type a, class b) {              \
+        return class(a) != b;                                               \
+    }                                                                       \
+    inline constexpr bool operator>=(class::Type a, class b) {              \
+        return class(a) >= b;                                               \
+    }                                                                       \
+    inline constexpr bool operator<=(class::Type a, class b) {              \
+        return class(a) <= b;                                               \
+    }                                                                       \
     inline constexpr class operator|(class::Type a, class b) {              \
         return b | a;                                                       \
     }                                                                       \
@@ -143,6 +183,10 @@ usage.
 See @ref EnumSet-friend-operators "EnumSet" documentation for example usage.
 */
 #define CORRADE_ENUMSET_FRIEND_OPERATORS(class)                             \
+    friend constexpr bool operator==(class::Type, class);                   \
+    friend constexpr bool operator!=(class::Type, class);                   \
+    friend constexpr bool operator>=(class::Type, class);                   \
+    friend constexpr bool operator<=(class::Type, class);                   \
     friend constexpr class operator&(class::Type, class);                   \
     friend constexpr class operator|(class::Type, class);                   \
     friend constexpr class operator~(class::Type);

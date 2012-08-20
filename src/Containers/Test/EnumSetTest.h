@@ -30,6 +30,7 @@ class EnumSetTest: public TestSuite::Tester<EnumSetTest> {
         void operatorAnd();
         void operatorBool();
         void operatorInverse();
+        void comparison();
 
     private:
         enum class Feature: int {
