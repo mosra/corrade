@@ -375,7 +375,7 @@ Corrade::Utility::Debug operator<<(Corrade::Utility::Debug debug, const Hash& va
 }
 @endcode
 They will appear as related functions within documentation of class specified
-as the parameter.
+as the parameter and also crossreferenced from page `debugoperators`.
 
 @subsubsection documentation-commands-configurationvalue Configuration value parsers and writers
 
