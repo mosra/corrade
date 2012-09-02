@@ -73,8 +73,9 @@ void EnumSetTest::operatorBool() {
 }
 
 void EnumSetTest::operatorInverse() {
-    CORRADE_COMPARE(int(~(Feature::Popular|Feature::Cheap)), ~10);
-    CORRADE_COMPARE(int(~Feature::Popular), ~8);
+    CORRADE_COMPARE(int(~Features()), 15);
+    CORRADE_COMPARE(int(~(Feature::Popular|Feature::Cheap)), 5);
+    CORRADE_COMPARE(int(~Feature::Popular), 7);
 }
 
 void EnumSetTest::comparison() {

@@ -24,8 +24,9 @@ namespace Corrade { namespace Containers {
 
 /**
 @brief Set of enum values
-@tparam T Enum type
-@tparam U Underlying type of the enum
+@tparam T           Enum type
+@tparam U           Underlying type of the enum
+@tparam fullValue   All enum values together. Defaults to all bits set to `1`.
 
 Provides strongly-typed set-like functionality for strongly typed enums, such
 as binary OR and AND operations. The only requirement for enum type is that
@@ -66,7 +67,7 @@ class Application {
 CORRADE_ENUMSET_OPERATORS(Application::Flags)
 @endcode
 */
-template<class T, class U> class EnumSet {
+template<class T, class U, U fullValue = ~U(0)> class EnumSet {
     public:
         typedef T Type;             /**< @brief Enum type */
         typedef U UnderlyingType;   /**< @brief Underlying type of the enum */
@@ -78,12 +79,12 @@ template<class T, class U> class EnumSet {
         inline constexpr EnumSet(T value): value(static_cast<UnderlyingType>(value)) {}
 
         /** @brief Equality operator */
-        inline constexpr bool operator==(EnumSet<T, U> other) const {
+        inline constexpr bool operator==(EnumSet<T, U, fullValue> other) const {
             return value == other.value;
         }
 
         /** @brief Non-equality operator */
-        inline constexpr bool operator!=(EnumSet<T, U> other) const {
+        inline constexpr bool operator!=(EnumSet<T, U, fullValue> other) const {
             return !operator==(other);
         }
 
@@ -92,7 +93,7 @@ template<class T, class U> class EnumSet {
          *
          * Equivalent to `a & other == other`
          */
-        inline constexpr bool operator>=(EnumSet<T, U> other) const {
+        inline constexpr bool operator>=(EnumSet<T, U, fullValue> other) const {
             return (*this & other) == other;
         }
 
@@ -101,35 +102,35 @@ template<class T, class U> class EnumSet {
          *
          * Equivalent to `a & other == a`
          */
-        inline constexpr bool operator<=(EnumSet<T, U> other) const {
+        inline constexpr bool operator<=(EnumSet<T, U, fullValue> other) const {
             return (*this & other) == *this;
         }
 
         /** @brief Union of two sets */
-        inline constexpr EnumSet<T, U> operator|(EnumSet<T, U> other) const {
-            return EnumSet<T, U>(value | other.value);
+        inline constexpr EnumSet<T, U, fullValue> operator|(EnumSet<T, U, fullValue> other) const {
+            return EnumSet<T, U, fullValue>(value | other.value);
         }
 
         /** @brief Union two sets and assign */
-        inline EnumSet<T, U>& operator|=(EnumSet<T, U> other) {
+        inline EnumSet<T, U, fullValue>& operator|=(EnumSet<T, U, fullValue> other) {
             value |= other.value;
             return *this;
         }
 
         /** @brief Intersection of two sets */
-        inline constexpr EnumSet<T, U> operator&(EnumSet<T, U> other) const {
-            return EnumSet<T, U>(value & other.value);
+        inline constexpr EnumSet<T, U, fullValue> operator&(EnumSet<T, U, fullValue> other) const {
+            return EnumSet<T, U, fullValue>(value & other.value);
         }
 
         /** @brief Intersect two sets and assign */
-        inline EnumSet<T, U>& operator&=(EnumSet<T, U> other) {
+        inline EnumSet<T, U, fullValue>& operator&=(EnumSet<T, U, fullValue> other) {
             value &= other.value;
             return *this;
         }
 
         /** @brief Set complement */
-        inline constexpr EnumSet<T, U> operator~() const {
-            return EnumSet<T, U>(~value);
+        inline constexpr EnumSet<T, U, fullValue> operator~() const {
+            return EnumSet<T, U, fullValue>(fullValue & ~value);
         }
 
         /** @brief Value as boolean */

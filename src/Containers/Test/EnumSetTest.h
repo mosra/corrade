@@ -40,7 +40,7 @@ class EnumSetTest: public TestSuite::Tester<EnumSetTest> {
             Popular = 1 << 3
         };
 
-        typedef EnumSet<Feature, int> Features;
+        typedef EnumSet<Feature, int, 15> Features;
         CORRADE_ENUMSET_FRIEND_OPERATORS(Features)
 };
 
