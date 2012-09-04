@@ -71,6 +71,8 @@ for example as following:
 @code
 CORRADE_COMPARE_AS("actual.dat", "expected.dat", FileContents);
 @endcode
+
+See Compare namespace for pseudo-type comparator implementations.
 */
 template<class T> class Comparator {
     public:

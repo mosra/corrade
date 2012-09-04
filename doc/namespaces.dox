@@ -47,3 +47,12 @@ plugins work.
 
 Unit testing framework. See @ref unit-testing for more information.
 */
+
+/** @dir src/TestSuite/Compare
+ * @brief Namespace Corrade::TestSuite::Compare
+ */
+/** @namespace Corrade::TestSuite::Compare
+@brief Various test suite comparison helpers
+
+See @ref Comparator-pseudo-types for more information.
+*/

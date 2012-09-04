@@ -1,5 +1,3 @@
-add_subdirectory(Compare)
-
 if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(Test)
