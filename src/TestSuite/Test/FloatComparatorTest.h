@@ -1,5 +1,5 @@
-#ifndef Corrade_TestSuite_Test_FloatCompareTest_h
-#define Corrade_TestSuite_Test_FloatCompareTest_h
+#ifndef Corrade_TestSuite_Test_FloatComparatorTest_h
+#define Corrade_TestSuite_Test_FloatComparatorTest_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -20,9 +20,9 @@
 
 namespace Corrade { namespace TestSuite { namespace Test {
 
-class FloatCompareTest: public Tester<FloatCompareTest> {
+class FloatComparatorTest: public Tester<FloatComparatorTest> {
     public:
-        FloatCompareTest();
+        FloatComparatorTest();
 
         void smallDelta();
         void largeDelta();

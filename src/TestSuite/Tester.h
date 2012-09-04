@@ -23,8 +23,7 @@
 #include <functional>
 #include <iostream>
 
-#include "Utility/Debug.h"
-#include "Compare.h"
+#include "Comparator.h"
 
 namespace Corrade { namespace TestSuite {
 
@@ -125,10 +124,10 @@ template<class Derived> class Tester {
 
         /* Compare two different types with explicit type specification */
         template<class T, class U, class V> void compare(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
-            Compare<T> compare;
+            Comparator<T> comparator;
 
             /* If the comparison succeeded or the failure is expected, done */
-            bool equal = compare(actualValue, expectedValue);
+            bool equal = comparator(actualValue, expectedValue);
             if(!expectedFailure) {
                 if(equal) return;
             } else if(!equal) {
@@ -139,7 +138,7 @@ template<class Derived> class Tester {
             /* Otherwise print message to error output and throw exception */
             Utility::Error e(errorOutput);
             e << (expectedFailure ? " XPASS:" : "  FAIL:") << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       ";
-            if(!expectedFailure) compare.printErrorMessage(e, actual, expected);
+            if(!expectedFailure) comparator.printErrorMessage(e, actual, expected);
             else e << actual << "and" << expected << "are not expected to be equal.";
             throw Exception();
         }
@@ -261,8 +260,8 @@ of given test case is terminated. Example usage:
 @code
 CORRADE_COMPARE_AS(sin(0.0f), 0.0f, float);
 @endcode
-See also @ref Corrade::TestSuite::Compare "Compare" class documentation for
-example of more involved comparisons.
+See also @ref Corrade::TestSuite::Comparator "Comparator" class documentation
+for example of more involved comparisons.
 
 @see CORRADE_VERIFY(), CORRADE_COMPARE()
 */

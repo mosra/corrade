@@ -1,5 +1,5 @@
-#ifndef Corrade_TestSuite_Compare_h
-#define Corrade_TestSuite_Compare_h
+#ifndef Corrade_TestSuite_Comparator_h
+#define Corrade_TestSuite_Comparator_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -17,7 +17,7 @@
 */
 
 /** @file
- * @brief Class Corrade::TestSuite::Compare
+ * @brief Class Corrade::TestSuite::Comparator
  */
 
 #include "Utility/Debug.h"
@@ -27,7 +27,7 @@
 namespace Corrade { namespace TestSuite {
 
 /**
-@brief Default comparison implementation
+@brief Default comparator implementation
 
 You can reimplement this class for your own data types and even pseudo types
 for providing different ways to compare the same type.
@@ -36,16 +36,16 @@ You have to implement operator()() for comparison of two values with arbitrary
 type and printErrorMessage() for printing error message when the comparison
 failed.
 
-@section ComparePseudoTypes Comparing with pseudo types
+@section Comparator-pseudo-types Comparing with pseudo types
 Imagine you have two filenames and you want to compare their contents instead
 of comparing the filename strings. Because you want to also compare strings
 elsewhere, you cannot override its behavior. The solution is to have some
-"pseudo type", for which you create the Compare template specialization, but
+"pseudo type", for which you create the Comparator template specialization, but
 the actual comparison operator will still take strings as parameters:
 @code
 class FileContents {};
 
-template<> class Compare<FileContents> {
+template<> class Comparator<FileContents> {
     public:
         bool operator()(const std::string& actual, const std::string& expected) {
             actualContents = ...;
@@ -68,7 +68,7 @@ for example as following:
 CORRADE_COMPARE_AS("actual.dat", "expected.dat", FileContents);
 @endcode
 */
-template<class T> class Compare {
+template<class T> class Comparator {
     public:
         /** @brief %Compare two values */
         bool operator()(const T& actual, const T& expected) {
@@ -90,28 +90,28 @@ template<class T> class Compare {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Implementation {
-    template<class T> class FloatCompareEpsilon {};
+    template<class T> class FloatComparatorEpsilon {};
 
-    template<> class FloatCompareEpsilon<float> {
+    template<> class FloatComparatorEpsilon<float> {
         public:
             inline constexpr static float epsilon() {
                 return 1.0e-6f;
             }
     };
 
-    template<> class FloatCompareEpsilon<double> {
+    template<> class FloatComparatorEpsilon<double> {
         public:
             inline constexpr static double epsilon() {
                 return 1.0e-12;
             }
     };
 
-    template<class T> class FloatCompare {
+    template<class T> class FloatComparator {
         public:
             /** @brief %Compare two values */
             bool operator()(T actual, T expected) {
                 if(actual == expected || (actual != actual && expected != expected) ||
-                    std::abs(actual - expected) < FloatCompareEpsilon<T>::epsilon()) return true;
+                    std::abs(actual - expected) < FloatComparatorEpsilon<T>::epsilon()) return true;
 
                 actualValue = actual;
                 expectedValue = expected;
@@ -133,10 +133,10 @@ namespace Implementation {
 #endif
 
 /** @brief Fuzzy-compare for float values */
-template<> class Compare<float>: public Implementation::FloatCompare<float> {};
+template<> class Comparator<float>: public Implementation::FloatComparator<float> {};
 
 /** @brief Fuzzy-compare for double values */
-template<> class Compare<double>: public Implementation::FloatCompare<double> {};
+template<> class Comparator<double>: public Implementation::FloatComparator<double> {};
 
 }}
 
