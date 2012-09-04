@@ -45,6 +45,8 @@ the actual comparison operator will still take strings as parameters:
 @code
 class FileContents {};
 
+namespace Corrade { namespace TestSuite { // the namespace is important
+
 template<> class Comparator<FileContents> {
     public:
         bool operator()(const std::string& actual, const std::string& expected) {
@@ -60,6 +62,8 @@ template<> class Comparator<FileContents> {
     private:
         std::string actualContents, expectedContents;
 };
+
+}}
 @endcode
 You can add more overloads for operator()() in one class, e.g. for comparing
 file contents with string or input stream etc. The actual use in unit test is
