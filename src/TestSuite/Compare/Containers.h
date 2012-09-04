@@ -33,7 +33,7 @@ Prints the length of both containers (if they are different) and prints value
 of first different item in both containers. Example usage:
 @code
 vector<int> a, b;
-CORRADE_COMPARE_AS(a, b, Compare::Containers<vector<int>>);
+CORRADE_COMPARE_AS(a, b, Compare::Containers);
 @endcode
 
 See @ref Comparator-pseudo-types for more information.

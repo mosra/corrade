@@ -113,6 +113,15 @@ template<class Derived> class Tester {
             return compare<typename std::common_type<T, U>::type, T, U>(actual, actualValue, expected, expectedValue);
         }
 
+        /* Compare two different types with explicit templated type
+           specification (e.g. Compare::Containers). This allows the user to
+           call only `CORRADE_COMPARE_AS(a, b, Compare::Containers)` without
+           explicitly specifying the type, e.g.
+           `CORRADE_COMPARE_AS(a, b, Compare::Containers<std::vector<int>>)` */
+        template<template<class> class T, class U, class V> inline void compare(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
+            return compare<T<typename std::common_type<U, V>::type>, U, V>(actual, actualValue, expected, expectedValue);
+        }
+
         /* Compare two different types with explicit type specification */
         template<class T, class U, class V> void compare(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
             Comparator<T> comparator;
