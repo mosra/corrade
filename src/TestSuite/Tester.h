@@ -108,18 +108,9 @@ template<class Derived> class Tester {
             return compare<T, T, T>(actual, actualValue, expected, expectedValue);
         }
 
-        /* Compare two different types without explicit type specification while
-           type of `actual` is convertible to type of `expected`, thus it is
-           converted */
-        template<class T, class U> inline typename std::enable_if<std::is_convertible<T, U>::value, void>::type compare(const std::string& actual, const T& actualValue, const std::string& expected, const U& expectedValue) {
-            return compare<U, T, U>(actual, actualValue, expected, expectedValue);
-        }
-
-        /* Compare two different types without explicit type specification while
-           type of `actual` is NOT convertible to type of `expected`, thus type
-           of `expected` is converted to type of `actual` */
-        template<class T, class U> inline typename std::enable_if<!std::is_convertible<T, U>::value, void>::type compare(const std::string& actual, const T& actualValue, const std::string& expected, const U& expectedValue) {
-            return compare<T, T, U>(actual, actualValue, expected, expectedValue);
+        /* Compare two different types without explicit type specification */
+        template<class T, class U> inline void compare(const std::string& actual, const T& actualValue, const std::string& expected, const U& expectedValue) {
+            return compare<typename std::common_type<T, U>::type, T, U>(actual, actualValue, expected, expectedValue);
         }
 
         /* Compare two different types with explicit type specification */
