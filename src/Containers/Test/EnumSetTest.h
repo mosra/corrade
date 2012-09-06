@@ -16,8 +16,9 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "TestSuite/Tester.h"
 #include "Containers/EnumSet.h"
+
+#include "TestSuite/Tester.h"
 
 namespace Corrade { namespace Containers { namespace Test {
 

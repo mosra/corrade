@@ -20,6 +20,8 @@
  * @brief Class Corrade::Containers::EnumSet
  */
 
+#include <type_traits>
+
 namespace Corrade { namespace Containers {
 
 /**
