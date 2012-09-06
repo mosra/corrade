@@ -17,7 +17,7 @@
 */
 
 /** @file
- * @brief Class Corrade::TestSuite::Compare::Containers
+ * @brief Class Corrade::TestSuite::Compare::Container
  */
 
 #include "TestSuite/Comparator.h"
@@ -33,17 +33,17 @@ Prints the length of both containers (if they are different) and prints value
 of first different item in both containers. Example usage:
 @code
 vector<int> a, b;
-CORRADE_COMPARE_AS(a, b, Compare::Containers);
+CORRADE_COMPARE_AS(a, b, Compare::Container);
 @endcode
 
 See @ref Comparator-pseudo-types for more information.
 */
-template<class T> class Containers {};
+template<class T> class Container {};
 
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-template<class T> class Comparator<Compare::Containers<T>> {
+template<class T> class Comparator<Compare::Container<T>> {
     public:
         inline bool operator()(const T& actual, const T& expected) {
             if(actual == expected) return true;

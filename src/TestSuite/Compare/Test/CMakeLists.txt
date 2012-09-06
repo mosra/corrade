@@ -1,1 +1,1 @@
-corrade_add_test2(TestSuiteCompareContainersTest ContainersTest.cpp)
+corrade_add_test2(TestSuiteCompareContainerTest ContainerTest.cpp)

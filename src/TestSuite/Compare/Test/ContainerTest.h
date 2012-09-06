@@ -1,5 +1,5 @@
-#ifndef Corrade_TestSuite_Compare_Test_ContainersTest_h
-#define Corrade_TestSuite_Compare_Test_ContainersTest_h
+#ifndef Corrade_TestSuite_Compare_Test_ContainerTest_h
+#define Corrade_TestSuite_Compare_Test_ContainerTest_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -20,9 +20,9 @@
 
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test {
 
-class ContainersTest: public Tester<ContainersTest> {
+class ContainerTest: public Tester<ContainerTest> {
     public:
-        ContainersTest();
+        ContainerTest();
 
         void same();
         void outputActualSmaller();
