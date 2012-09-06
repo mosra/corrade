@@ -70,6 +70,8 @@ CORRADE_ENUMSET_OPERATORS(Application::Flags)
 @endcode
 */
 template<class T, class U, U fullValue = ~U(0)> class EnumSet {
+    static_assert(std::is_enum<T>::value && !std::is_convertible<T, U>::value, "EnumSet type must be strongly typed enum");
+
     public:
         typedef T Type;             /**< @brief Enum type */
         typedef U UnderlyingType;   /**< @brief Underlying type of the enum */
