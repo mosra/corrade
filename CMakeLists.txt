@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.6)
 project(Corrade)
 
 option(BUILD_TESTS "Build unit tests (requires Qt4)." OFF)
+option(BUILD_EXAMPLES "Build examples." OFF)
 
 if(BUILD_TESTS)
     find_package(Qt4)
@@ -34,7 +35,16 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wold-style-cast -pedantic
 
 add_subdirectory(modules)
 add_subdirectory(src)
-add_subdirectory(examples EXCLUDE_FROM_ALL)
+
+if(BUILD_EXAMPLES)
+    # Work around find_package(Corrade)
+    set(CORRADE_UTILITY_LIBRARY CorradeUtility)
+    set(CORRADE_PLUGINMANAGER_LIBRARY CorradePluginManager)
+    set(CORRADE_RC_EXECUTABLE corrade-rc)
+    set(CORRADE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/src")
+
+    add_subdirectory(examples)
+endif()
 
 install(DIRECTORY src/ DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}
         FILES_MATCHING PATTERN "*.h"
