@@ -21,7 +21,7 @@
 
 #include "Utility/Directory.h"
 #include "PluginTestConfigure.h"
-#include "AbstractPluginManagerConfigure.h"
+#include "corradePluginManagerConfigure.h"
 #include "AbstractDeletable.h"
 
 QTEST_APPLESS_MAIN(Corrade::PluginManager::Test::PluginTest)
