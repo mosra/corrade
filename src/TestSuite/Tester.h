@@ -105,12 +105,12 @@ template<class Derived> class Tester {
         #ifndef DOXYGEN_GENERATING_OUTPUT
         /* Compare two identical types without explicit type specification */
         template<class T> inline void compare(const std::string& actual, const T& actualValue, const std::string& expected, const T& expectedValue) {
-            return compare<T, T, T>(actual, actualValue, expected, expectedValue);
+            compare<T, T, T>(actual, actualValue, expected, expectedValue);
         }
 
         /* Compare two different types without explicit type specification */
         template<class T, class U> inline void compare(const std::string& actual, const T& actualValue, const std::string& expected, const U& expectedValue) {
-            return compare<typename std::common_type<T, U>::type, T, U>(actual, actualValue, expected, expectedValue);
+            compare<typename std::common_type<T, U>::type, T, U>(actual, actualValue, expected, expectedValue);
         }
 
         /* Compare two different types with explicit templated type
@@ -119,7 +119,7 @@ template<class Derived> class Tester {
            explicitly specifying the type, e.g.
            `CORRADE_COMPARE_AS(a, b, Compare::Containers<std::vector<int>>)` */
         template<template<class> class T, class U, class V> inline void compare(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
-            return compare<T<typename std::common_type<U, V>::type>, U, V>(actual, actualValue, expected, expectedValue);
+            compare<T<typename std::common_type<U, V>::type>, U, V>(actual, actualValue, expected, expectedValue);
         }
 
         /* Compare two different types with explicit type specification */
