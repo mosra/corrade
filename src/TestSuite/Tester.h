@@ -64,6 +64,13 @@ template<class Derived> class Tester {
                 noCheckCount = 0;
 
             for(auto i: testCases) {
+                /* Reset output to stdout for each test case to prevent debug
+                   output segfaults */
+                /** @todo Drop this when Debug has proper output scoping */
+                Utility::Debug::setOutput(&std::cout);
+                Utility::Error::setOutput(&std::cerr);
+                Utility::Warning::setOutput(&std::cerr);
+
                 try {
                     testCaseName.clear();
                     i(*static_cast<Derived*>(this));
