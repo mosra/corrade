@@ -368,7 +368,7 @@ with @c \@todoc instead of @c \@todo. They will appear on @ref todoc
 
 @subsubsection documentation-commands-debugoperator Debugging operators
 
-Operators for printing types on Corrade's debug output should be marked with
+Operators for printing types on %Corrade's debug output should be marked with
 @c \@debugoperator, e.g.:
 @code
 // @debugoperator{Hash}
@@ -377,7 +377,7 @@ Corrade::Utility::Debug operator<<(Corrade::Utility::Debug debug, const Hash& va
 }
 @endcode
 They will appear as related functions within documentation of class specified
-as the parameter and also crossreferenced from page `debugoperators`.
+as the parameter and also crossreferenced from page @ref debugoperators.
 
 @subsubsection documentation-commands-configurationvalue Configuration value parsers and writers
 
