@@ -77,7 +77,7 @@ Sha1::Digest Sha1::digest() {
     Digest d = Digest::fromByteArray(reinterpret_cast<const char*>(digest));
 
     /* Clear data and return */
-    memcpy(_digest, initialDigest, DigestSize);
+    copy(initialDigest, initialDigest+5, _digest);
     _buffer.clear();
     _dataSize = 0;
     return d;
@@ -94,7 +94,7 @@ void Sha1::processChunk(const char* data) {
     /* Initialize value for this chunk */
     unsigned int d[5];
     unsigned int f, constant, temp;
-    memcpy(d, _digest, DigestSize);
+    copy(_digest, _digest+5, d);
 
     /* Main loop */
     for(int i = 0; i != 80; ++i) {

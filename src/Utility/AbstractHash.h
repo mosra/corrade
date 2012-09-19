@@ -21,7 +21,6 @@
  */
 
 #include <string>
-#include <cstring>
 
 namespace Corrade { namespace Utility {
 
@@ -61,12 +60,12 @@ template<size_t digestSize> class AbstractHash {
                 }
 
                 /**
-                 * @brief Create digest from given byte array
+                 * @brief Digest from given byte array
                  *
                  * Assumes that the array has the right length.
                  */
-                inline static Digest fromByteArray(const char* digest) {
-                    return Digest(digest);
+                inline static const Digest& fromByteArray(const char* digest) {
+                    return *reinterpret_cast<const Digest*>(digest);
                 }
 
                 /**
@@ -74,14 +73,7 @@ template<size_t digestSize> class AbstractHash {
                  *
                  * Creates zero digest.
                  */
-                inline Digest() {
-                    memset(_digest, 0, digestSize);
-                }
-
-                /** @brief Copy constructor */
-                inline Digest(const Digest& other) {
-                    memcpy(_digest, other._digest, digestSize);
-                }
+                inline Digest(): _digest() {}
 
                 /** @brief Equality operator */
                 bool operator==(const Digest& other) const {
@@ -93,12 +85,6 @@ template<size_t digestSize> class AbstractHash {
                 /** @brief Non-equality operator */
                 inline bool operator!=(const Digest& other) const {
                     return !operator==(other);
-                }
-
-                /** @brief Assignment operator */
-                Digest& operator=(const Digest& other) {
-                    memcpy(_digest, other._digest, digestSize);
-                    return *this;
                 }
 
                 /**
@@ -122,9 +108,6 @@ template<size_t digestSize> class AbstractHash {
                 inline const char* byteArray() const { return _digest; }
 
             private:
-                inline Digest(const char* digest) {
-                    memcpy(_digest, digest, digestSize);
-                }
                 char _digest[digestSize];
         };
 

@@ -40,9 +40,9 @@ class UTILITY_EXPORT Sha1: public AbstractHash<20> {
             return (Sha1() << data).digest();
         }
 
-        inline Sha1(): _dataSize(0) {
-            memcpy(_digest, initialDigest, DigestSize);
-        }
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        inline Sha1(): _dataSize(0), _digest{initialDigest[0], initialDigest[1], initialDigest[2], initialDigest[3], initialDigest[4]} {}
+        #endif
 
         /** @brief Add data for digesting */
         Sha1& operator<<(const std::string& data);
