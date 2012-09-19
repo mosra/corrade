@@ -16,7 +16,11 @@
 
 #include "AbstractHashTest.h"
 
+#include <sstream>
+
 #include "Utility/AbstractHash.h"
+
+using namespace std;
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::AbstractHashTest)
 
@@ -24,7 +28,8 @@ namespace Corrade { namespace Utility { namespace Test {
 
 AbstractHashTest::AbstractHashTest() {
     addTests(&AbstractHashTest::toHexString,
-             &AbstractHashTest::fromHexString);
+             &AbstractHashTest::fromHexString,
+             &AbstractHashTest::debug);
 }
 
 void AbstractHashTest::toHexString() {
@@ -37,6 +42,12 @@ void AbstractHashTest::fromHexString() {
     CORRADE_COMPARE(AbstractHash<4>::Digest::fromHexString("1234abcdef").hexString(), "00000000");
     CORRADE_COMPARE(AbstractHash<4>::Digest::fromHexString("babe").hexString(), "00000000");
     CORRADE_COMPARE(AbstractHash<4>::Digest::fromHexString("bullshit").hexString(), "00000000");
+}
+
+void AbstractHashTest::debug() {
+    ostringstream out;
+    Debug(&out) << AbstractHash<4>::Digest::fromHexString("defeca7e");
+    CORRADE_COMPARE(out.str(), "defeca7e\n");
 }
 
 }}}

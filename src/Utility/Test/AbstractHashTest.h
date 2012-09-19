@@ -26,6 +26,7 @@ class AbstractHashTest: public TestSuite::Tester<AbstractHashTest> {
 
         void toHexString();
         void fromHexString();
+        void debug();
 };
 
 }}}

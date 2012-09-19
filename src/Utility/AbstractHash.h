@@ -22,7 +22,89 @@
 
 #include <string>
 
+#include "Debug.h"
+
 namespace Corrade { namespace Utility {
+
+/** @brief Hash digest */
+template<size_t size> class HashDigest {
+    public:
+        /**
+         * @brief Create digest from given string representation
+         *
+         * If the digest has invalid length or contains invalid
+         * characters (other than `0-9, a-f, A-F`), returns zero
+         * digest.
+         */
+        static HashDigest<size> fromHexString(std::string digest) {
+            HashDigest<size> d;
+            if(digest.size() != size*2) return d;
+
+            for(int i = 0; i != size*2; ++i) {
+                if(digest[i] >= '0' && digest[i] <= '9')
+                    digest[i] -= '0';
+                else if(digest[i] >= 'a' && digest[i] <= 'f')
+                    digest[i] -= 'a'-0xa;
+                else if(digest[i] >= 'A' && digest[i] <= 'F')
+                    digest[i] -= 'A'-0xa;
+                else return HashDigest<size>();
+
+                d._digest[i/2] |= (digest[i]) << (i%2 == 0 ? 4 : 0);
+            }
+            return d;
+        }
+
+        /**
+         * @brief Digest from given byte array
+         *
+         * Assumes that the array has the right length.
+         */
+        inline static const HashDigest<size>& fromByteArray(const char* digest) {
+            return *reinterpret_cast<const HashDigest<size>*>(digest);
+        }
+
+        /**
+         * @brief Default constructor
+         *
+         * Creates zero digest.
+         */
+        inline HashDigest(): _digest() {}
+
+        /** @brief Equality operator */
+        bool operator==(const HashDigest<size>& other) const {
+            for(int i = 0; i != size; ++i)
+                if(other._digest[i] != _digest[i]) return false;
+            return true;
+        }
+
+        /** @brief Non-equality operator */
+        inline bool operator!=(const HashDigest<size>& other) const {
+            return !operator==(other);
+        }
+
+        /**
+         * @brief Convert the digest to lowercase hexadecimal string representation
+         */
+        std::string hexString() const {
+            std::string d(size*2, '0');
+            for(int i = 0; i != size*2; ++i) {
+                d[i] = (_digest[i/2] >> (i%2 == 0 ? 4 : 0)) & 0xF;
+                d[i] += d[i] >= 0xa ? 'a'-0xa : '0';
+            }
+            return d;
+        }
+
+        /**
+         * @brief Raw digest byte array
+         *
+         * @attention Don't attempt to modify this array. This array
+         * will be deleted on class destruction.
+         */
+        inline const char* byteArray() const { return _digest; }
+
+    private:
+        char _digest[size];
+};
 
 /**
 @brief Base template for hashing classes
@@ -32,84 +114,7 @@ Provides Digest class for storing and converting digests.
 template<size_t digestSize> class AbstractHash {
     public:
         /** @brief Hash digest */
-        class Digest {
-            public:
-                /**
-                 * @brief Create digest from given string representation
-                 *
-                 * If the digest has invalid length or contains invalid
-                 * characters (other than `0-9, a-f, A-F`), returns zero
-                 * digest.
-                 */
-                static Digest fromHexString(std::string digest) {
-                    Digest d;
-                    if(digest.size() != digestSize*2) return d;
-
-                    for(int i = 0; i != digestSize*2; ++i) {
-                        if(digest[i] >= '0' && digest[i] <= '9')
-                            digest[i] -= '0';
-                        else if(digest[i] >= 'a' && digest[i] <= 'f')
-                            digest[i] -= 'a'-0xa;
-                        else if(digest[i] >= 'A' && digest[i] <= 'F')
-                            digest[i] -= 'A'-0xa;
-                        else return Digest();
-
-                        d._digest[i/2] |= (digest[i]) << (i%2 == 0 ? 4 : 0);
-                    }
-                    return d;
-                }
-
-                /**
-                 * @brief Digest from given byte array
-                 *
-                 * Assumes that the array has the right length.
-                 */
-                inline static const Digest& fromByteArray(const char* digest) {
-                    return *reinterpret_cast<const Digest*>(digest);
-                }
-
-                /**
-                 * @brief Default constructor
-                 *
-                 * Creates zero digest.
-                 */
-                inline Digest(): _digest() {}
-
-                /** @brief Equality operator */
-                bool operator==(const Digest& other) const {
-                    for(int i = 0; i != digestSize; ++i)
-                        if(other._digest[i] != _digest[i]) return false;
-                    return true;
-                }
-
-                /** @brief Non-equality operator */
-                inline bool operator!=(const Digest& other) const {
-                    return !operator==(other);
-                }
-
-                /**
-                 * @brief Convert the digest to lowercase hexadecimal string representation
-                 */
-                std::string hexString() const {
-                    std::string d(digestSize*2, '0');
-                    for(int i = 0; i != digestSize*2; ++i) {
-                        d[i] = (_digest[i/2] >> (i%2 == 0 ? 4 : 0)) & 0xF;
-                        d[i] += d[i] >= 0xa ? 'a'-0xa : '0';
-                    }
-                    return d;
-                }
-
-                /**
-                 * @brief Raw digest byte array
-                 *
-                 * @attention Don't attempt to modify this array. This array
-                 * will be deleted on class destruction.
-                 */
-                inline const char* byteArray() const { return _digest; }
-
-            private:
-                char _digest[digestSize];
-        };
+        typedef HashDigest<digestSize> Digest;
 
         /**
          * @brief %Digest size
@@ -119,6 +124,11 @@ template<size_t digestSize> class AbstractHash {
          */
         static const size_t DigestSize = digestSize;
 };
+
+/** @debugoperator{Corrade::Utility::HashDigest} */
+template<size_t size> Debug operator<<(Debug debug, const HashDigest<size>& value) {
+    return debug << value.hexString();
+}
 
 }}
 
