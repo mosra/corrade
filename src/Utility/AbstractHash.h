@@ -104,8 +104,8 @@ template<size_t size> class HashDigest {
 /**
 @brief Base template for hashing classes
 
-Provides Digest class for storing and converting digests.
- */
+@see HashDigest
+*/
 template<size_t digestSize> class AbstractHash {
     public:
         /** @brief Hash digest */
@@ -114,7 +114,7 @@ template<size_t digestSize> class AbstractHash {
         /**
          * @brief %Digest size
          *
-         * Physical size of the raw digest. Hexadecimal string representation
+         * Size of the raw digest in bytes. Hexadecimal string representation
          * has double size.
          */
         static const size_t DigestSize = digestSize;
