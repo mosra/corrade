@@ -68,7 +68,7 @@ template<size_t size> class HashDigest {
          *
          * Creates zero digest.
          */
-        inline HashDigest(): _digest() {}
+        inline constexpr HashDigest(): _digest() {}
 
         /** @brief Equality operator */
         bool operator==(const HashDigest<size>& other) const {
@@ -94,13 +94,8 @@ template<size_t size> class HashDigest {
             return d;
         }
 
-        /**
-         * @brief Raw digest byte array
-         *
-         * @attention Don't attempt to modify this array. This array
-         * will be deleted on class destruction.
-         */
-        inline const char* byteArray() const { return _digest; }
+        /** @brief Raw digest byte array */
+        inline constexpr const char* byteArray() const { return _digest; }
 
     private:
         char _digest[size];
