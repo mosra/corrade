@@ -24,8 +24,8 @@ using namespace std;
 namespace Corrade { namespace Utility {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-static_assert(IsIterable<vector<int>>::value, "std::vector should be iterable");
-static_assert(IsIterable<string>::value, "std::string should be iterable");
+static_assert(IsIterable<vector<int>>::Value, "std::vector should be iterable");
+static_assert(IsIterable<string>::Value, "std::string should be iterable");
 
 struct AnyType {};
 static_assert(!HasInsertionOperator<AnyType>::Value, "Generic type shouldn't be outputable to std::ostream");

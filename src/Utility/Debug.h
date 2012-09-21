@@ -184,7 +184,7 @@ template<class T> typename std::enable_if<HasInsertionOperator<T>::Value, Debug>
     *debug.output << value;
     return debug;
 }
-template<class Iterable> Debug operator<<(typename std::enable_if<IsIterable<Iterable>::value && !std::is_same<Iterable, std::string>::value, Debug>::type debug, const Iterable& value) {
+template<class Iterable> Debug operator<<(typename std::enable_if<IsIterable<Iterable>::Value && !std::is_same<Iterable, std::string>::value, Debug>::type debug, const Iterable& value) {
     debug << '[';
     debug.setFlag(Debug::SpaceAfterEachValue, false);
     for(typename Iterable::const_iterator it = value.begin(); it != value.end(); ++it) {

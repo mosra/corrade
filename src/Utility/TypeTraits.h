@@ -44,7 +44,7 @@ template<class T> class className {                                         \
     static T& reference();                                                  \
                                                                             \
     public:                                                                 \
-        static const bool value =                                           \
+        static const bool Value =                                           \
             sizeof(get(reference())) == sizeof(SmallType);                  \
 };
 
@@ -57,13 +57,13 @@ Actually created using HasType macro:
 HasType(const_iterator, IsIterable)
 @endcode
 */
-template<class T> class IsIterable {
+template<class T> struct IsIterable {
     /**
      * @brief Whether given class is iterable
      *
      * True when given class has const_iterator, false otherwise.
      */
-    static const bool value;
+    static const bool Value;
 }
 #else
 HasType(const_iterator, IsIterable)
