@@ -124,8 +124,8 @@ template<class T> class LinkedList {
          * @attention The item must not be connected to any list.
          */
         void insert(T* item, T* before = nullptr) {
-            CORRADE_ASSERT(!item->list(), "Containers::LinkedList: Cannot insert item already connected elsewhere.", );
-            CORRADE_ASSERT(!before || before->list() == this, "Containers::LinkedList: Cannot insert before item which is not part of the list.", );
+            CORRADE_ASSERT(!(item->_list), "Containers::LinkedList: Cannot insert item already connected elsewhere.", );
+            CORRADE_ASSERT(!before || before->_list == this, "Containers::LinkedList: Cannot insert before item which is not part of the list.", );
 
             item->_list = static_cast<decltype(item->_list)>(this);
 
@@ -163,7 +163,7 @@ template<class T> class LinkedList {
          * The item is disconnected from the list, but not deleted.
          */
         void cut(T* item) {
-            CORRADE_ASSERT(item->list() == this, "Containers::LinkedList: Cannot cut out item which is not part of the list.", );
+            CORRADE_ASSERT(item->_list == this, "Containers::LinkedList: Cannot cut out item which is not part of the list.", );
 
             /* Removing first item */
             if(item == _first) {
