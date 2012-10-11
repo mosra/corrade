@@ -28,6 +28,8 @@ See @ref resource-management for brief introduction.
 
 @todo Test it
 @todo Check empty files
+@todo Write to file (and don't create any on error)
+@todo Use Debug classes
 */
 
 #include <iostream>
