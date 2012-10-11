@@ -78,6 +78,12 @@ int main(int argc, char** argv) {
             isAlias = false;
 
         } else {
+            /* Check for "infile -a alias" */
+            if(filename.empty() && !alias.empty()) {
+                cerr << "Error: specified alias without filename!" << endl;
+                return 5;
+            }
+
             /* Save previously gathered file name and alias */
             if(!filename.empty()) {
                 files.push_back(make_pair(filename, alias));
