@@ -114,8 +114,11 @@ string Directory::home() {
     #else
     /** @bug Doesn't work at all */
     TCHAR h[MAX_PATH];
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wold-style-cast"
     if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, h)))
         return "";
+    #pragma GCC diagnostic pop
     #endif
 
     return h;
@@ -128,8 +131,11 @@ string Directory::configurationDir(const std::string& applicationName, bool crea
     string dir = join(h, '.' + lowercase(applicationName));
     #else
     TCHAR path[MAX_PATH];
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wold-style-cast"
     if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path)))
         return "";
+    #pragma GCC diagnostic pop
     string appdata = path;
     if(appdata.empty()) return "";
     string dir = join(appdata, applicationName);
