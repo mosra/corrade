@@ -20,17 +20,25 @@
  * @brief Class Corrade::Utility::Endianness
  */
 
-#include "utilities.h"
+#include <cstdint>
+
+#include "corradeConfigure.h"
 
 namespace Corrade { namespace Utility {
 
 /**
  * @brief %Endianness related functions
  */
-class UTILITY_EXPORT Endianness {
+class Endianness {
     public:
         /** @brief Whether actual system is Big-Endian */
-        static bool isBigEndian();
+        inline constexpr static bool isBigEndian() {
+            #ifdef CORRADE_BIG_ENDIAN
+            return true;
+            #else
+            return false;
+            #endif
+        }
 
         /**
          * @brief Convert number from or to Big-Endian
@@ -39,11 +47,11 @@ class UTILITY_EXPORT Endianness {
          *      value.
          */
         template<class T> inline static T bigEndian(T number) {
-            T output = number;
-            _bigEndian(reinterpret_cast<unsigned char*>(&number),
-                       reinterpret_cast<unsigned char*>(&output),
-                       sizeof(number));
-            return output;
+            #ifdef CORRADE_BIG_ENDIAN
+            return number;
+            #else
+            return swap<sizeof(T)>(*reinterpret_cast<typename TypeFor<sizeof(T)>::Type*>(&number));
+            #endif
         }
 
         /**
@@ -53,17 +61,43 @@ class UTILITY_EXPORT Endianness {
          *      unchanged value.
          */
         template<class T> inline static T littleEndian(T number) {
-            T output = number;
-            _littleEndian(reinterpret_cast<unsigned char*>(&number),
-                          reinterpret_cast<unsigned char*>(&output),
-                          sizeof(number));
-            return output;
+            #ifdef CORRADE_BIG_ENDIAN
+            return swap<sizeof(T)>(*reinterpret_cast<typename TypeFor<sizeof(T)>::Type*>(&number));
+            #else
+            return number;
+            #endif
         }
 
     private:
-        UTILITY_EXPORT static void _bigEndian(unsigned char* number, unsigned char* output, int size);
-        UTILITY_EXPORT static void _littleEndian(unsigned char* number, unsigned char* output, int size);
+        template<std::size_t size> struct TypeFor {};
+
+        template<std::size_t size> static typename TypeFor<size>::Type swap(typename TypeFor<size>::Type value);
 };
+
+template<> struct Endianness::TypeFor<2> { typedef std::uint16_t Type; };
+template<> struct Endianness::TypeFor<4> { typedef std::uint32_t Type; };
+template<> struct Endianness::TypeFor<8> { typedef std::uint64_t Type; };
+
+template<> inline std::uint16_t Endianness::swap<2>(std::uint16_t value) {
+    return (value >> 8) |
+           (value << 8);
+}
+template<> inline std::uint32_t Endianness::swap<4>(std::uint32_t value) {
+    return (value >> 24) |
+          ((value << 8) & 0x00ff0000u) |
+          ((value >> 8) & 0x0000ff00u) |
+           (value << 24);
+}
+template<> inline std::uint64_t Endianness::swap<8>(std::uint64_t value) {
+    return (value >> 56) |
+          ((value << 40) & 0x00ff000000000000ull) |
+          ((value << 24) & 0x0000ff0000000000ull) |
+          ((value <<  8) & 0x000000ff00000000ull) |
+          ((value >>  8) & 0x00000000ff000000ull) |
+          ((value >> 24) & 0x0000000000ff0000ull) |
+          ((value >> 40) & 0x000000000000ff00ull) |
+           (value << 56);
+}
 
 }}
 

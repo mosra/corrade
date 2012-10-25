@@ -1,0 +1,1 @@
+#cmakedefine CORRADE_BIG_ENDIAN
