@@ -74,6 +74,7 @@ class Endianness {
         template<std::size_t size> static typename TypeFor<size>::Type swap(typename TypeFor<size>::Type value);
 };
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 template<> struct Endianness::TypeFor<2> { typedef std::uint16_t Type; };
 template<> struct Endianness::TypeFor<4> { typedef std::uint32_t Type; };
 template<> struct Endianness::TypeFor<8> { typedef std::uint64_t Type; };
@@ -98,6 +99,7 @@ template<> inline std::uint64_t Endianness::swap<8>(std::uint64_t value) {
           ((value >> 40) & 0x000000000000ff00ull) |
            (value << 56);
 }
+#endif
 
 }}
 
