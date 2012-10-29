@@ -107,10 +107,12 @@ template<class T> class LinkedList {
         }
 
         /** @brief First item or `nullptr`, if the list is empty */
-        inline constexpr T* first() const { return _first; }
+        inline T* first() { return _first; }
+        inline constexpr const T* first() const { return _first; } /**< @overload */
 
         /** @brief Last item or `nullptr`, if the list is empty */
-        inline constexpr T* last() const { return _last; }
+        inline T* last() { return _last; }
+        inline constexpr const T* last() const { return _last; } /**< @overload */
 
         /** @brief Whether the list is empty */
         inline constexpr bool isEmpty() const { return !_first; }
@@ -294,13 +296,16 @@ template<class Derived, class List = LinkedList<Derived>> class LinkedListItem {
         virtual ~LinkedListItem() = 0;
 
         /** @brief List this item belongs to */
-        inline List* list() const { return _list; }
+        inline List* list() { return _list; }
+        inline const List* list() const { return _list; } /**< @overload */
 
         /** @brief Previous item or `nullptr`, if there is no previous item */
-        inline Derived* previous() const { return _previous; }
+        inline Derived* previous() { return _previous; }
+        inline const Derived* previous() const { return _previous; } /**< @overload */
 
         /** @brief Next item or `nullptr`, if there is no previous item */
-        inline Derived* next() const { return _next; }
+        inline Derived* next() { return _next; }
+        inline const Derived* next() const { return _next; } /**< @overload */
 
     private:
         List* _list;
