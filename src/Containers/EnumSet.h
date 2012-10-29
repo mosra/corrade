@@ -68,6 +68,28 @@ class Application {
 
 CORRADE_ENUMSET_OPERATORS(Application::Flags)
 @endcode
+
+One thing these macros cannot do is to provide operators for enum sets inside
+templated classes. If the enum values are not depending on the template, you
+can work around the issue by declaring the enum in some hidden namespace
+outside the class and then typedef'ing it back into the class:
+@code
+namespace Implementation {
+    enum class ObjectFlag: unsigned int {
+        Dirty = 1 << 0,
+        Marked = 1 << 1
+    };
+
+    typedef EnumSet<ObjectFlag, unsigned int> ObjectFlags;
+    CORRADE_ENUMSET_OPERATORS(ObjectFlags)
+}
+
+template<class T> class Object {
+    public:
+        typedef Implementation::ObjectFlag Flag;
+        typedef Implementation::ObjectFlags Flags;
+};
+@endcode
 */
 template<class T, class U, U fullValue = ~U(0)> class EnumSet {
     static_assert(std::is_enum<T>::value && !std::is_convertible<T, U>::value, "EnumSet type must be strongly typed enum");
@@ -156,7 +178,7 @@ template<class T, class U, U fullValue = ~U(0)> class EnumSet {
 /** @hideinitializer
 @brief Define out-of-class operators for given EnumSet
 
-See @ref EnumSet-out-of-class-operators "EnumSet" documentation for example
+See @ref EnumSet-out-of-class-operators "EnumSet documentation" for example
 usage.
 */
 #define CORRADE_ENUMSET_OPERATORS(class)                                    \
@@ -185,7 +207,7 @@ usage.
 /** @hideinitializer
 @brief Define out-of-class operators for given EnumSet as friends of encapsulating class
 
-See @ref EnumSet-friend-operators "EnumSet" documentation for example usage.
+See @ref EnumSet-friend-operators "EnumSet documentation" for example usage.
 */
 #define CORRADE_ENUMSET_FRIEND_OPERATORS(class)                             \
     friend constexpr bool operator==(class::Type, class);                   \
