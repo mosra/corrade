@@ -24,7 +24,8 @@
 #include <ostream>
 
 #include "TypeTraits.h"
-#include "utilities.h"
+
+#include "corradeUtilityVisibility.h"
 
 namespace Corrade { namespace Utility {
 
