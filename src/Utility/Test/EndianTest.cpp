@@ -21,14 +21,12 @@
 #include "Utility/Endianness.h"
 #include "Utility/Debug.h"
 
-#include "../EndiannessConfigure.h"
-
 QTEST_APPLESS_MAIN(Corrade::Utility::Test::EndianTest)
 
 namespace Corrade { namespace Utility { namespace Test {
 
 void EndianTest::endianness() {
-    #ifdef ENDIANNESS_BIG_ENDIAN
+    #ifdef CORRADE_BIG_ENDIAN
         QVERIFY(Endianness::isBigEndian());
         Debug() << "Big endian system";
         #define current bigEndian
