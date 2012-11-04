@@ -40,6 +40,8 @@ class Endianness {
             #endif
         }
 
+        /** @todo fix strict-aliasing warnings (this won't work for e.g. floats: http://stackoverflow.com/a/1723938 ) */
+
         /**
          * @brief Convert number from or to Big-Endian
          * @param number    Number to convert
