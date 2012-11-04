@@ -22,6 +22,8 @@
 
 #include <cstdint>
 
+#include "utilities.h"
+
 #include "corradeConfigure.h"
 
 namespace Corrade { namespace Utility {
@@ -40,8 +42,6 @@ class Endianness {
             #endif
         }
 
-        /** @todo fix strict-aliasing warnings (this won't work for e.g. floats: http://stackoverflow.com/a/1723938 ) */
-
         /**
          * @brief Convert number from or to Big-Endian
          * @param number    Number to convert
@@ -52,7 +52,7 @@ class Endianness {
             #ifdef CORRADE_BIG_ENDIAN
             return number;
             #else
-            return swap<sizeof(T)>(*reinterpret_cast<typename TypeFor<sizeof(T)>::Type*>(&number));
+            return swap<sizeof(T)>(bitCast<typename TypeFor<sizeof(T)>::Type>(number));
             #endif
         }
 
@@ -64,7 +64,7 @@ class Endianness {
          */
         template<class T> inline static T littleEndian(T number) {
             #ifdef CORRADE_BIG_ENDIAN
-            return swap<sizeof(T)>(*reinterpret_cast<typename TypeFor<sizeof(T)>::Type*>(&number));
+            return swap<sizeof(T)>(bitCast<typename TypeFor<sizeof(T)>::Type>(number));
             #else
             return number;
             #endif
