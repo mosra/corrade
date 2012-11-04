@@ -16,8 +16,9 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "TestSuite/Tester.h"
 #include "Containers/EnumSet.h"
+
+#include "TestSuite/Tester.h"
 
 namespace Corrade { namespace Containers { namespace Test {
 
@@ -40,7 +41,7 @@ class EnumSetTest: public TestSuite::Tester<EnumSetTest> {
             Popular = 1 << 3
         };
 
-        typedef EnumSet<Feature, int> Features;
+        typedef EnumSet<Feature, int, 15> Features;
         CORRADE_ENUMSET_FRIEND_OPERATORS(Features)
 };
 

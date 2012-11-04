@@ -6,7 +6,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testConfigure.h.cmake
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-corrade_add_test(AbstractHashTest AbstractHashTest.h AbstractHashTest.cpp CorradeUtility)
+corrade_add_test2(AbstractHashTest AbstractHashTest.cpp LIBRARIES CorradeUtility)
 corrade_add_test(DirectoryTest DirectoryTest.h DirectoryTest.cpp CorradeUtility)
 corrade_add_test(EndianTest EndianTest.h EndianTest.cpp CorradeUtility)
 corrade_add_test(MurmurHash2Test MurmurHash2Test.h MurmurHash2Test.cpp CorradeUtility)

@@ -1,3 +1,5 @@
+#ifndef Corrade_TestSuite_Test_FloatComparatorTest_h
+#define Corrade_TestSuite_Test_FloatComparatorTest_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -14,22 +16,21 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "TypeTraits.h"
+#include "TestSuite/Tester.h"
 
-#include <vector>
-#include <string>
+namespace Corrade { namespace TestSuite { namespace Test {
 
-using namespace std;
+class FloatComparatorTest: public Tester<FloatComparatorTest> {
+    public:
+        FloatComparatorTest();
 
-namespace Corrade { namespace Utility {
+        void smallDelta();
+        void largeDelta();
+        void nan();
+        void infinity();
+        void output();
+};
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
-static_assert(IsIterable<vector<int>>::Value, "std::vector should be iterable");
-static_assert(IsIterable<string>::Value, "std::string should be iterable");
+}}}
 
-struct AnyType {};
-static_assert(!HasInsertionOperator<AnyType>::Value, "Generic type shouldn't be outputable to std::ostream");
-static_assert(HasInsertionOperator<string>::Value, "std::string should be outputtable to std::ostream");
 #endif
-
-}}

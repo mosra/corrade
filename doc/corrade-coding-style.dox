@@ -9,11 +9,21 @@ Please note that if you have a good excuse to either break the rules or modify
 them, feel free to do it (and update this guide accordingly, if appropriate).
 Nothing is worse than rule that hurts productivity instead of improving it.
 
-You can also take inspiration from other thorougly written coding style
+You can also take inspiration from other thoroughly written coding style
 guidelines of large projects:
 
  - LLVM: http://llvm.org/docs/CodingStandards.html
  - Qt: http://qt-project.org/wiki/Qt_Coding_Style
+
+@section text Text files in general
+
+Each file must have one blank line at the end (Git will warn you in the
+diff if it's not the case), indentation is done exclusively with spaces (4
+spaces). Trailing whitespaces are not permitted (and you should set up your
+Git installation to warn about that).
+
+The text (and code) should be wrapped around 80th column, long single-line
+statements are allowed unless it hurts readability.
 
 @section cmake CMake code
 
@@ -161,14 +171,6 @@ variables, static members are more important than non-static.
 
 The goal is to preserve readability with minimal amount of wasted vertical
 and horizontal space.
-
-Each file must have one blank line at the end (Git will warn you in the
-diff if it's not the case), indentation is done exclusively with spaces (4
-spaces). Trailing whitespaces are not permitted (and you should set up your
-Git installation to warn about that).
-
-The code should be wrapped around 80th column, exceptions for long single-line
-statements are allowed unless it hurts readability.
 
 Indented is everything except namespace declarations (as specified above) -
 blocks, class protection levels, `case` statements. Overlong line breaks are
@@ -366,7 +368,7 @@ with @c \@todoc instead of @c \@todo. They will appear on @ref todoc
 
 @subsubsection documentation-commands-debugoperator Debugging operators
 
-Operators for printing types on Corrade's debug output should be marked with
+Operators for printing types on %Corrade's debug output should be marked with
 @c \@debugoperator, e.g.:
 @code
 // @debugoperator{Hash}
@@ -375,7 +377,7 @@ Corrade::Utility::Debug operator<<(Corrade::Utility::Debug debug, const Hash& va
 }
 @endcode
 They will appear as related functions within documentation of class specified
-as the parameter and also crossreferenced from page `debugoperators`.
+as the parameter and also crossreferenced from page @ref debugoperators.
 
 @subsubsection documentation-commands-configurationvalue Configuration value parsers and writers
 

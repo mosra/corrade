@@ -82,6 +82,7 @@ class PLUGINMANAGER_EXPORT Plugin {
          * @brief Configuration
          * @return Configuration from file associated with the plugin or 0, if
          *      no configuration is available.
+         * @todo Make use of this, change to pointer to ConfigurationGroup
          */
         inline const Utility::Configuration* configuration() const { return _configuration; }
 

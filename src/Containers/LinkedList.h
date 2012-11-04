@@ -107,10 +107,12 @@ template<class T> class LinkedList {
         }
 
         /** @brief First item or `nullptr`, if the list is empty */
-        inline constexpr T* first() const { return _first; }
+        inline T* first() { return _first; }
+        inline constexpr const T* first() const { return _first; } /**< @overload */
 
         /** @brief Last item or `nullptr`, if the list is empty */
-        inline constexpr T* last() const { return _last; }
+        inline T* last() { return _last; }
+        inline constexpr const T* last() const { return _last; } /**< @overload */
 
         /** @brief Whether the list is empty */
         inline constexpr bool isEmpty() const { return !_first; }
@@ -124,8 +126,8 @@ template<class T> class LinkedList {
          * @attention The item must not be connected to any list.
          */
         void insert(T* item, T* before = nullptr) {
-            CORRADE_ASSERT(!item->list(), "Containers::LinkedList: Cannot insert item already connected elsewhere.", );
-            CORRADE_ASSERT(!before || before->list() == this, "Containers::LinkedList: Cannot insert before item which is not part of the list.", );
+            CORRADE_ASSERT(!(item->_list), "Containers::LinkedList: Cannot insert item already connected elsewhere.", );
+            CORRADE_ASSERT(!before || before->_list == this, "Containers::LinkedList: Cannot insert before item which is not part of the list.", );
 
             item->_list = static_cast<decltype(item->_list)>(this);
 
@@ -163,7 +165,7 @@ template<class T> class LinkedList {
          * The item is disconnected from the list, but not deleted.
          */
         void cut(T* item) {
-            CORRADE_ASSERT(item->list() == this, "Containers::LinkedList: Cannot cut out item which is not part of the list.", );
+            CORRADE_ASSERT(item->_list == this, "Containers::LinkedList: Cannot cut out item which is not part of the list.", );
 
             /* Removing first item */
             if(item == _first) {
@@ -294,13 +296,16 @@ template<class Derived, class List = LinkedList<Derived>> class LinkedListItem {
         virtual ~LinkedListItem() = 0;
 
         /** @brief List this item belongs to */
-        inline List* list() const { return _list; }
+        inline List* list() { return _list; }
+        inline const List* list() const { return _list; } /**< @overload */
 
         /** @brief Previous item or `nullptr`, if there is no previous item */
-        inline Derived* previous() const { return _previous; }
+        inline Derived* previous() { return _previous; }
+        inline const Derived* previous() const { return _previous; } /**< @overload */
 
-        /** @brief Next item or `nullptr`, if there is no previous item */
-        inline Derived* next() const { return _next; }
+        /** @brief Next item or `nullptr`, if there is no next item */
+        inline Derived* next() { return _next; }
+        inline const Derived* next() const { return _next; } /**< @overload */
 
     private:
         List* _list;

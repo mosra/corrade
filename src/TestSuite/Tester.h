@@ -23,8 +23,7 @@
 #include <functional>
 #include <iostream>
 
-#include "Utility/Debug.h"
-#include "Compare.h"
+#include "Comparator.h"
 
 namespace Corrade { namespace TestSuite {
 
@@ -34,6 +33,7 @@ namespace Corrade { namespace TestSuite {
 See @ref unit-testing for introduction.
 
 @see CORRADE_TEST_MAIN(), CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS()
+@todo Data-driven tests
 */
 template<class Derived> class Tester {
     public:
@@ -65,6 +65,13 @@ template<class Derived> class Tester {
                 noCheckCount = 0;
 
             for(typename std::vector<std::function<void(Derived&)>>::const_iterator i = testCases.begin(); i != testCases.end(); ++i) {
+                /* Reset output to stdout for each test case to prevent debug
+                   output segfaults */
+                /** @todo Drop this when Debug has proper output scoping */
+                Utility::Debug::setOutput(&std::cout);
+                Utility::Error::setOutput(&std::cerr);
+                Utility::Warning::setOutput(&std::cerr);
+
                 try {
                     testCaseName.clear();
                     (*i)(*static_cast<Derived*>(this));
@@ -106,29 +113,29 @@ template<class Derived> class Tester {
         #ifndef DOXYGEN_GENERATING_OUTPUT
         /* Compare two identical types without explicit type specification */
         template<class T> inline void compare(const std::string& actual, const T& actualValue, const std::string& expected, const T& expectedValue) {
-            return compare<T, T, T>(actual, actualValue, expected, expectedValue);
+            compare<T, T, T>(actual, actualValue, expected, expectedValue);
         }
 
-        /* Compare two different types without explicit type specification while
-           type of `actual` is convertible to type of `expected`, thus it is
-           converted */
-        template<class T, class U> inline typename std::enable_if<std::is_convertible<T, U>::value, void>::type compare(const std::string& actual, const T& actualValue, const std::string& expected, const U& expectedValue) {
-            return compare<U, T, U>(actual, actualValue, expected, expectedValue);
+        /* Compare two different types without explicit type specification */
+        template<class T, class U> inline void compare(const std::string& actual, const T& actualValue, const std::string& expected, const U& expectedValue) {
+            compare<typename std::common_type<T, U>::type, T, U>(actual, actualValue, expected, expectedValue);
         }
 
-        /* Compare two different types without explicit type specification while
-           type of `actual` is NOT convertible to type of `expected`, thus type
-           of `expected` is converted to type of `actual` */
-        template<class T, class U> inline typename std::enable_if<!std::is_convertible<T, U>::value, void>::type compare(const std::string& actual, const T& actualValue, const std::string& expected, const U& expectedValue) {
-            return compare<T, T, U>(actual, actualValue, expected, expectedValue);
+        /* Compare two different types with explicit templated type
+           specification (e.g. Compare::Containers). This allows the user to
+           call only `CORRADE_COMPARE_AS(a, b, Compare::Containers)` without
+           explicitly specifying the type, e.g.
+           `CORRADE_COMPARE_AS(a, b, Compare::Containers<std::vector<int>>)` */
+        template<template<class> class T, class U, class V> inline void compare(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
+            compare<T<typename std::common_type<U, V>::type>, U, V>(actual, actualValue, expected, expectedValue);
         }
 
         /* Compare two different types with explicit type specification */
         template<class T, class U, class V> void compare(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
-            Compare<T> compare;
+            Comparator<T> comparator;
 
             /* If the comparison succeeded or the failure is expected, done */
-            bool equal = compare(actualValue, expectedValue);
+            bool equal = comparator(actualValue, expectedValue);
             if(!expectedFailure) {
                 if(equal) return;
             } else if(!equal) {
@@ -139,7 +146,7 @@ template<class Derived> class Tester {
             /* Otherwise print message to error output and throw exception */
             Utility::Error e(errorOutput);
             e << (expectedFailure ? " XPASS:" : "  FAIL:") << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       ";
-            if(!expectedFailure) compare.printErrorMessage(e, actual, expected);
+            if(!expectedFailure) comparator.printErrorMessage(e, actual, expected);
             else e << actual << "and" << expected << "are not expected to be equal.";
             throw Exception();
         }
@@ -236,7 +243,7 @@ CORRADE_VERIFY(!s.empty());
     } while(false)
 
 /** @hideinitializer
-@brief Compare two values in Tester subclass
+@brief %Compare two values in Tester subclass
 
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
@@ -254,15 +261,15 @@ CORRADE_COMPARE(a, 8);
     } while(false)
 
 /** @hideinitializer
-@brief Compare two values in Tester subclass with explicitly specified type
+@brief %Compare two values in Tester subclass with explicitly specified type
 
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
 @code
 CORRADE_COMPARE_AS(sin(0.0f), 0.0f, float);
 @endcode
-See also @ref Corrade::TestSuite::Compare "Compare" class documentation for
-example of more involved comparisons.
+See also @ref Corrade::TestSuite::Comparator "Comparator" class documentation
+for example of more involved comparisons.
 
 @see CORRADE_VERIFY(), CORRADE_COMPARE()
 */

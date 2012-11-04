@@ -71,7 +71,9 @@ class UTILITY_EXPORT Debug {
     /* Disabling assignment */
     UTILITY_LOCAL Debug& operator=(const Debug& other);
 
-    template<class T> friend Debug operator<<(typename std::enable_if<!IsIterable<T>::value || std::is_same<T, std::string>::value, Debug>::type, const T&);
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    template<class T> friend typename std::enable_if<HasInsertionOperator<T>::Value, Debug>::type operator<<(Debug, const T&);
+    #endif
 
     public:
         /** @brief Output flags */
@@ -172,7 +174,7 @@ Debug::setFlag() for modifying newline and whitespace behavior.
  */
 template<class T> Debug operator<<(Debug debug, const T& value);
 #else
-template<class T> Debug operator<<(typename std::enable_if<!IsIterable<T>::value || std::is_same<T, std::string>::value, Debug>::type debug, const T& value) {
+template<class T> typename std::enable_if<HasInsertionOperator<T>::Value, Debug>::type operator<<(Debug debug, const T& value) {
     if(!debug.output) return debug;
 
     /* Separate values with spaces, if enabled */
@@ -182,7 +184,7 @@ template<class T> Debug operator<<(typename std::enable_if<!IsIterable<T>::value
     *debug.output << value;
     return debug;
 }
-template<class Iterable> Debug operator<<(typename std::enable_if<IsIterable<Iterable>::value && !std::is_same<Iterable, std::string>::value, Debug>::type debug, const Iterable& value) {
+template<class Iterable> Debug operator<<(typename std::enable_if<IsIterable<Iterable>::Value && !std::is_same<Iterable, std::string>::value, Debug>::type debug, const Iterable& value) {
     debug << '[';
     debug.setFlag(Debug::SpaceAfterEachValue, false);
     for(typename Iterable::const_iterator it = value.begin(); it != value.end(); ++it) {

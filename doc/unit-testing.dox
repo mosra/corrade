@@ -32,7 +32,7 @@ equality:
 
 If both values have different type or if we want to force some type for
 comparison, we can use CORRADE_COMPARE_AS(). This macro can be used also for
-more involved comparison using "pseudo-types", see Compare class
+more involved comparison using "pseudo-types", see Comparator class
 documentation for more information.
 @skip MyTest::sin()
 @until }

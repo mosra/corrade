@@ -1,13 +1,6 @@
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-include(TestBigEndian)
-test_big_endian(ENDIANNESS_BIG_ENDIAN)
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/EndiannessConfigure.h.cmake
-               ${CMAKE_CURRENT_BINARY_DIR}/EndiannessConfigure.h)
-
 set(CorradeUtility_SRCS
-    Endianness.cpp
     Debug.cpp
     Directory.cpp
     Configuration.cpp

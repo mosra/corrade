@@ -20,14 +20,17 @@
  * @brief Class Corrade::Containers::EnumSet
  */
 
+#include <type_traits>
+
 #include "corradeCompatibility.h"
 
 namespace Corrade { namespace Containers {
 
 /**
 @brief Set of enum values
-@tparam T Enum type
-@tparam U Underlying type of the enum
+@tparam T           Enum type
+@tparam U           Underlying type of the enum
+@tparam fullValue   All enum values together. Defaults to all bits set to `1`.
 
 Provides strongly-typed set-like functionality for strongly typed enums, such
 as binary OR and AND operations. The only requirement for enum type is that
@@ -67,8 +70,32 @@ class Application {
 
 CORRADE_ENUMSET_OPERATORS(Application::Flags)
 @endcode
+
+One thing these macros cannot do is to provide operators for enum sets inside
+templated classes. If the enum values are not depending on the template, you
+can work around the issue by declaring the enum in some hidden namespace
+outside the class and then typedef'ing it back into the class:
+@code
+namespace Implementation {
+    enum class ObjectFlag: unsigned int {
+        Dirty = 1 << 0,
+        Marked = 1 << 1
+    };
+
+    typedef EnumSet<ObjectFlag, unsigned int> ObjectFlags;
+    CORRADE_ENUMSET_OPERATORS(ObjectFlags)
+}
+
+template<class T> class Object {
+    public:
+        typedef Implementation::ObjectFlag Flag;
+        typedef Implementation::ObjectFlags Flags;
+};
+@endcode
 */
-template<class T, class U> class EnumSet {
+template<class T, class U, U fullValue = ~U(0)> class EnumSet {
+    static_assert(std::is_enum<T>::value && !std::is_convertible<T, U>::value, "EnumSet type must be strongly typed enum");
+
     public:
         typedef T Type;             /**< @brief Enum type */
         typedef U UnderlyingType;   /**< @brief Underlying type of the enum */
@@ -80,12 +107,12 @@ template<class T, class U> class EnumSet {
         inline constexpr EnumSet(T value): value(static_cast<UnderlyingType>(value)) {}
 
         /** @brief Equality operator */
-        inline constexpr bool operator==(EnumSet<T, U> other) const {
+        inline constexpr bool operator==(EnumSet<T, U, fullValue> other) const {
             return value == other.value;
         }
 
         /** @brief Non-equality operator */
-        inline constexpr bool operator!=(EnumSet<T, U> other) const {
+        inline constexpr bool operator!=(EnumSet<T, U, fullValue> other) const {
             return !operator==(other);
         }
 
@@ -94,7 +121,7 @@ template<class T, class U> class EnumSet {
          *
          * Equivalent to `a & other == other`
          */
-        inline constexpr bool operator>=(EnumSet<T, U> other) const {
+        inline constexpr bool operator>=(EnumSet<T, U, fullValue> other) const {
             return (*this & other) == other;
         }
 
@@ -103,35 +130,35 @@ template<class T, class U> class EnumSet {
          *
          * Equivalent to `a & other == a`
          */
-        inline constexpr bool operator<=(EnumSet<T, U> other) const {
+        inline constexpr bool operator<=(EnumSet<T, U, fullValue> other) const {
             return (*this & other) == *this;
         }
 
         /** @brief Union of two sets */
-        inline constexpr EnumSet<T, U> operator|(EnumSet<T, U> other) const {
-            return EnumSet<T, U>(value | other.value);
+        inline constexpr EnumSet<T, U, fullValue> operator|(EnumSet<T, U, fullValue> other) const {
+            return EnumSet<T, U, fullValue>(value | other.value);
         }
 
         /** @brief Union two sets and assign */
-        inline EnumSet<T, U>& operator|=(EnumSet<T, U> other) {
+        inline EnumSet<T, U, fullValue>& operator|=(EnumSet<T, U, fullValue> other) {
             value |= other.value;
             return *this;
         }
 
         /** @brief Intersection of two sets */
-        inline constexpr EnumSet<T, U> operator&(EnumSet<T, U> other) const {
-            return EnumSet<T, U>(value & other.value);
+        inline constexpr EnumSet<T, U, fullValue> operator&(EnumSet<T, U, fullValue> other) const {
+            return EnumSet<T, U, fullValue>(value & other.value);
         }
 
         /** @brief Intersect two sets and assign */
-        inline EnumSet<T, U>& operator&=(EnumSet<T, U> other) {
+        inline EnumSet<T, U, fullValue>& operator&=(EnumSet<T, U, fullValue> other) {
             value &= other.value;
             return *this;
         }
 
         /** @brief Set complement */
-        inline constexpr EnumSet<T, U> operator~() const {
-            return EnumSet<T, U>(~value);
+        inline constexpr EnumSet<T, U, fullValue> operator~() const {
+            return EnumSet<T, U, fullValue>(fullValue & ~value);
         }
 
         /** @brief Value as boolean */
@@ -153,7 +180,7 @@ template<class T, class U> class EnumSet {
 /** @hideinitializer
 @brief Define out-of-class operators for given EnumSet
 
-See @ref EnumSet-out-of-class-operators "EnumSet" documentation for example
+See @ref EnumSet-out-of-class-operators "EnumSet documentation" for example
 usage.
 */
 #define CORRADE_ENUMSET_OPERATORS(class)                                    \
@@ -182,7 +209,7 @@ usage.
 /** @hideinitializer
 @brief Define out-of-class operators for given EnumSet as friends of encapsulating class
 
-See @ref EnumSet-friend-operators "EnumSet" documentation for example usage.
+See @ref EnumSet-friend-operators "EnumSet documentation" for example usage.
 */
 #define CORRADE_ENUMSET_FRIEND_OPERATORS(class)                             \
     friend constexpr bool operator==(class::Type, class);                   \

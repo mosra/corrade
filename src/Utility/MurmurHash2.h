@@ -47,6 +47,7 @@ template<size_t> class MurmurHash2Implementation {
 /** @todo Export implementation symbols only for tests */
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
+/** @todo Used only in unit test, export in only there? */
 template<> class UTILITY_EXPORT MurmurHash2Implementation<4> {
     public:
         inline MurmurHash2Implementation(unsigned int seed): seed(seed) {}
@@ -55,6 +56,7 @@ template<> class UTILITY_EXPORT MurmurHash2Implementation<4> {
     private:
         unsigned int seed;
 };
+/** @todo Used only in unit test, export in only there? */
 template<> class UTILITY_EXPORT MurmurHash2Implementation<8> {
     public:
         inline MurmurHash2Implementation(unsigned long long seed): seed(seed) {}
@@ -71,6 +73,8 @@ template<> class UTILITY_EXPORT MurmurHash2Implementation<8> {
 Based on algorithm copyright Austin Appleby, http://code.google.com/p/smhasher/ .
 The digest is 32bit or 64bit, depending on `sizeof(size_t)` and thus
 usable for hasing in e.g. `std::unordered_map`.
+
+@todo constexpr algorithm
 */
 class UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(size_t)> {
     public:
@@ -93,6 +97,12 @@ class UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(size_t)> {
         /** @brief Compute digest of given data */
         inline Digest operator()(const std::string& data) const {
             return operator()(data.c_str(), data.size());
+        }
+
+        /** @copydoc operator()(const std::string&) const */
+        template<size_t size> inline Digest operator()(const char(&data)[size]) const {
+            size_t d = implementation(reinterpret_cast<const unsigned char*>(data), size);
+            return Digest::fromByteArray(reinterpret_cast<const char*>(&d));
         }
 
         /** @copydoc operator()(const std::string&) const */
