@@ -33,6 +33,7 @@ namespace Corrade { namespace TestSuite {
 See @ref unit-testing for introduction.
 
 @see CORRADE_TEST_MAIN(), CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS()
+@todo Data-driven tests
 */
 template<class Derived> class Tester {
     public:

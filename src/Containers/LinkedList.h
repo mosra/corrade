@@ -303,7 +303,7 @@ template<class Derived, class List = LinkedList<Derived>> class LinkedListItem {
         inline Derived* previous() { return _previous; }
         inline const Derived* previous() const { return _previous; } /**< @overload */
 
-        /** @brief Next item or `nullptr`, if there is no previous item */
+        /** @brief Next item or `nullptr`, if there is no next item */
         inline Derived* next() { return _next; }
         inline const Derived* next() const { return _next; } /**< @overload */
 

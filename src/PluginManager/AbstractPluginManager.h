@@ -437,7 +437,7 @@ problem. See RESOURCE_INITIALIZE() documentation for more information.
 
 } namespace Utility {
 
-/** @brief Operator for printing plugin load state to debug output */
+/** @debugoperator{Corrade::PluginManager::AbstractPluginManager} */
 Debug PLUGINMANAGER_EXPORT operator<<(Debug debug, PluginManager::AbstractPluginManager::LoadState value);
 
 }}

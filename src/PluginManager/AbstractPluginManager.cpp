@@ -480,6 +480,7 @@ void AbstractPluginManager::removeUsedBy(const string& plugin, const string& use
 
 using namespace PluginManager;
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 Debug operator<<(Debug debug, AbstractPluginManager::LoadState value) {
     string _value;
     switch(value) {
@@ -506,5 +507,6 @@ Debug operator<<(Debug debug, AbstractPluginManager::LoadState value) {
 
     return debug << "LoadState(" + _value + ')';
 }
+#endif
 
 }}
