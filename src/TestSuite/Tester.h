@@ -22,6 +22,7 @@
 
 #include <functional>
 #include <iostream>
+#include <vector>
 
 #include "Comparator.h"
 
