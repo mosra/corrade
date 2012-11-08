@@ -18,6 +18,7 @@
 
 #include <set>
 #include <sstream>
+#include <vector>
 #include <QtTest/QTest>
 
 #include "Utility/Debug.h"

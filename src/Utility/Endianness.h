@@ -24,6 +24,7 @@
 
 #include "utilities.h"
 
+#include "corradeCompatibility.h"
 #include "corradeConfigure.h"
 
 namespace Corrade { namespace Utility {
