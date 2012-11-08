@@ -162,12 +162,20 @@ template<class T, class U, U fullValue = ~U(0)> class EnumSet {
         }
 
         /** @brief Value as boolean */
+        #ifndef CORRADE_GCC44_COMPATIBILITY
         inline constexpr explicit operator bool() const {
+        #else /* GCC 4.4 doesn't support explicit conversion operators */
+        inline constexpr operator bool() const {
+        #endif
             return value != 0;
         }
 
         /** @brief Value in underlying type */
+        #ifndef CORRADE_GCC44_COMPATIBILITY
         inline constexpr explicit operator UnderlyingType() const {
+        #else /* GCC 4.4 doesn't support explicit conversion operators */
+        inline constexpr operator UnderlyingType() const {
+        #endif
             return value;
         }
 
