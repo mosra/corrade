@@ -87,8 +87,13 @@ void EnumSetTest::comparison() {
 
     CORRADE_VERIFY(Features() <= Feature::Popular);
     CORRADE_VERIFY(Feature::Popular >= Features());
+    #ifndef CORRADE_GCC44_COMPATIBILITY
     CORRADE_VERIFY(Feature::Popular <= Feature::Popular);
     CORRADE_VERIFY(Feature::Popular >= Feature::Popular);
+    #else /* GCC 4.4 somehow doesn't find the operator for two enums */
+    CORRADE_VERIFY(Feature::Popular <= Features(Feature::Popular));
+    CORRADE_VERIFY(Feature::Popular >= Features(Feature::Popular));
+    #endif
     CORRADE_VERIFY(Feature::Popular <= features);
     CORRADE_VERIFY(features >= Feature::Popular);
     CORRADE_VERIFY(features <= features);
