@@ -242,12 +242,14 @@ class UTILITY_EXPORT Error: public Debug {
 };
 
 
-/**
+/** @hideinitializer
 @brief Assertion macro
 @param condition    Assert condition
 @param message      Message on assertion fail
 @param returnValue  Return value on assertion fail
-@hideinitializer
+
+Usable for sanity checks on user input, as it prints explanational message on
+error.
 
 By default, if assertion fails, @p message is printed to error output and the
 application exits with value `-1`. If `CORRADE_GRACEFUL_ASSERT` is defined,
@@ -268,6 +270,8 @@ void compile() {
     // ...
 }
 @endcode
+
+@see CORRADE_INTERNAL_ASSERT()
 */
 #ifdef CORRADE_GRACEFUL_ASSERT
 #define CORRADE_ASSERT(condition, message, returnValue)                     \
@@ -290,6 +294,32 @@ void compile() {
         }                                                                   \
     } while(0)
 #endif
+#endif
+
+/** @hideinitializer
+@brief Internal assertion macro
+@param condition    Assert condition
+
+Unlike CORRADE_ASSERT() usable for sanity checks on internal state, as it
+prints what failed and where.
+
+By default, if assertion fails, failed condition, file and line is printed to
+error output and the application exits with value `-1`. If `CORRADE_NO_ASSERT`
+is defined, this macro does nothing. Example usage:
+@code
+CORRADE_INTERNAL_ASSERT(!nullptr);
+@endcode
+*/
+#ifdef CORRADE_NO_ASSERT
+#define CORRADE_INTERNAL_ASSERT(condition) do {} while(0)
+#else
+#define CORRADE_INTERNAL_ASSERT(condition)                                  \
+    do {                                                                    \
+        if(!(condition)) {                                                  \
+            Corrade::Utility::Error() << "Assertion" << #condition << "failed in" << __FILE__ << "on line" << __LINE__; \
+            exit(-1);                                                       \
+        }                                                                   \
+    } while(0)
 #endif
 
 }}
