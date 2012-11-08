@@ -38,10 +38,10 @@ class LinkedListTest: public TestSuite::Tester<LinkedListTest> {
 
         class Item: public LinkedListItem<Item> {
             public:
-                inline Item(Item&& other): LinkedListItem(std::forward<LinkedListItem<Item>>(other)) {}
+                inline Item(Item&& other): LinkedListItem<Item>(std::forward<LinkedListItem<Item>>(other)) {}
 
                 inline Item& operator=(Item&& other) {
-                    LinkedListItem::operator=(std::forward<LinkedListItem<Item>>(other));
+                    LinkedListItem<Item>::operator=(std::forward<LinkedListItem<Item>>(other));
                     return *this;
                 }
 
