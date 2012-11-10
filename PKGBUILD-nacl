@@ -17,7 +17,8 @@ build() {
         -DCMAKE_MODULE_PATH="$startdir/toolchains/modules" \
         -DCMAKE_TOOLCHAIN_FILE="$startdir/toolchains/generic/NaCl-glibc-x86-64.cmake" \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=/usr/nacl
+        -DCMAKE_INSTALL_PREFIX=/usr/nacl \
+        -DGCC44_COMPATIBILITY=ON
     make
 }
 
