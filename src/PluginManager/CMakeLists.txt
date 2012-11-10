@@ -12,7 +12,7 @@ set(CorradePluginManager_SRCS
 
 add_library(CorradePluginManager SHARED ${CorradePluginManager_SRCS})
 target_link_libraries(CorradePluginManager CorradeUtility)
-if(UNIX)
+if(UNIX OR ${CMAKE_SYSTEM_NAME} STREQUAL NaCl)
     target_link_libraries(CorradePluginManager dl)
 endif()
 set_target_properties(CorradePluginManager PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
