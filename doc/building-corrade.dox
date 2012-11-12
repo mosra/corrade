@@ -1,4 +1,4 @@
-/** @page building-corrade Building Corrade
+/** @page building-corrade Downloading and building
 
 %Corrade can be built in many ways. You can either @ref building-compilation
 "compile it manually" or use already prepared packaging files, such as
@@ -16,7 +16,22 @@ Minimal set of tools required for building is:
   >= 3.1.
 - **CMake** >= 2.6
 
-@section building-compilation Manual build and installation
+@section building-download Downloading the sources
+The source is available on GitHub: https://github.com/mosra/corrade. Clone the
+repository with your favorite IDE or Git GUI, download currrent snapshot as
+compressed archive or use the command line:
+
+    git clone git://github.com/mosra/corrade.git
+
+If you need toolchains for crosscompiling, run also the following commands, or,
+if you build from source archive, download snapshot of toolchains repository
+from https://github.com/mosra/toolchains and put them in `toolchains/`
+subdirectory.
+
+    git submodule init
+    git submodule update
+
+@section building-compilation Compilation, installation
 The library can be built and installed using these four commands:
 
     mkdir -p build
@@ -102,6 +117,7 @@ This will compile binary and development packages, which will then appear in
 parent directory.
 
 @section building-win Crosscompiling for Windows using MinGW
+
 @note This guide is tailored mainly for crosscompiling from ArchLinux. For
 this system there are also prepared `mingw32-corrade` packages, one in
 `package/archlinux` and one in root, named `PKGBUILD-mingw32`. The package is
@@ -113,10 +129,10 @@ ArchLinux packages:
 - `mingw32-gcc`
 - `mingw32-runtime`
 
-Make sure you have `toolchains` Git submodule updated, or, if you build from
-source, download the files from https://github.com/mosra/toolchains and put
-them in toolchains/ subdirectory. Then create build directory and run cmake
-and make:
+Make sure you have `toolchains` submodule updated, as
+@ref building-download "explained above". Then create build directory and run
+cmake and make. You may need to modify the `basic-mingw32.cmake` file and
+`CMAKE_INSTALL_PREFIX` to suit your distribution filesystem hierarchy.
 
     mkdir build-win
     cd build-win
@@ -125,7 +141,6 @@ and make:
         -DCMAKE_INSTALL_PREFIX=/usr/i486-mingw32
     make
 
-You may need to modify the `basic-mingw32.cmake` file and
-`CMAKE_INSTALL_PREFIX` to suit your distribution filesystem hierarchy. If
-everything goes well, in `build-win/` subdirectories will be the DLLs.
+Then you can install the package using `make install` to make it available for
+depending projects.
 */
