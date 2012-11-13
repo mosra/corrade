@@ -11,13 +11,16 @@ options=(!strip)
 provides=('corrade-git')
 
 build() {
-    mkdir -p "$startdir/build-gcc45"
+    if [ ! -d "$startdir/build-gcc45" ]; then
+        mkdir "$startdir/build-gcc45" && cd "$startdir/build-gcc45"
+        cmake .. -DCMAKE_CXX_COMPILER=g++-4.5
+    fi
+
     cd "$startdir/build-gcc45"
 
     cmake .. \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=/usr \
-        -DCMAKE_CXX_COMPILER=g++-4.5 \
         -DGCC45_COMPATIBILITY=ON \
         -DBUILD_TESTS=ON
     make
