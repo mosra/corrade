@@ -37,7 +37,8 @@ that the items or list cannot be copied (but they can be moved).
 method to get count of stored items, but you can traverse them and count them
 manually if desperately needed.
 
-Example:
+@section LinkedList-usage Basic usage
+
 @code
 class Object: public LinkedListItem<Object> {
     // ...
@@ -61,7 +62,54 @@ for(Object* i = list.first(); i; i = i->next()) {
 }
 @endcode
 
-@see LinkedListItem
+@section LinkedList-usage-list-pointer Making advantage of pointer to the list
+
+Each node stores pointer to the list, which you can take advantage of. For
+example, if you have group of some objects and want to access the group from
+each object, you can reuse the list() pointer, which will be cast to type you
+specify as @p List template parameter of LinkedListItem class:
+@code
+class ObjectGroup: public LinkedList<Object> {
+    // ...
+};
+
+class Object: public LinkedListItem<Object, ObjectGroup> {
+    public:
+        inline ObjectGroup* group() { return list(); }
+
+    // ...
+};
+@endcode
+
+@section LinkedList-usage-private-inheritance Using private inheritance
+
+You might want to subclass LinkedList and LinkedListItem privately and for
+example provide wrapper functions with more descriptive names. In that case
+you need to friend both LinkedList and LinkedListItem in both your subclasses.
+@code
+class ObjectGroup: private LinkedList<Object> {
+    friend class LinkedList<Object>;
+    friend class LinkedListItem<Object, ObjectGroup>;
+
+    public:
+        inline Object* firstObject() { return first(); }
+        inline Object* lastObject() { return last(); }
+
+    // ...
+};
+
+class Object: private LinkedListItem<Object, ObjectGroup> {
+    friend class LinkedList<Object>;
+    friend class LinkedListItem<Object, ObjectGroup>;
+
+    public:
+        inline ObjectGroup* group() { return list(); }
+        inline Object* previousObject() { return previous(); }
+        inline Object* nextObject() { return next(); }
+
+    // ...
+};
+@endcode
 */
 template<class T> class LinkedList {
     LinkedList(const LinkedList<T>& other) = delete;
