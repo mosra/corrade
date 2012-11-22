@@ -20,8 +20,7 @@
  * @brief Class Corrade::Utility::Debug, Corrade::Utility::Warning, Corrade::Utility::Error, macro CORRADE_ASSERT().
  */
 
-#include <cstdlib>
-#include <ostream>
+#include <cstddef>
 
 #include "TypeTraits.h"
 
