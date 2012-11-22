@@ -53,7 +53,8 @@ list.insert(&c);
 list.cut(&b);
 @endcode
 
-Traversing through the list is done like following:
+Traversing through the list is done like in the following code. It is also
+possible to go in reverse order using last() and LinkedListItem::previous().
 @code
 for(Object* i = list.first(); i; i = i->next()) {
     // ...

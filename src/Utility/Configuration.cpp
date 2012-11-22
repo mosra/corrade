@@ -16,6 +16,8 @@
 
 #include "Configuration.h"
 
+#include <fstream>
+
 #include "Debug.h"
 #include "utilities.h"
 

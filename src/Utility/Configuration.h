@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <fstream>
+#include <iosfwd>
 
 #include "ConfigurationGroup.h"
 

@@ -20,8 +20,7 @@
  * @brief Class Corrade::Utility::Debug, Corrade::Utility::Warning, Corrade::Utility::Error, macro CORRADE_ASSERT().
  */
 
-#include <cstdlib>
-#include <ostream>
+#include <cstddef>
 
 #include "TypeTraits.h"
 
@@ -252,7 +251,7 @@ Usable for sanity checks on user input, as it prints explanational message on
 error.
 
 By default, if assertion fails, @p message is printed to error output and the
-application exits with value `-1`. If `CORRADE_GRACEFUL_ASSERT` is defined,
+application exits with value `-2`. If `CORRADE_GRACEFUL_ASSERT` is defined,
 the message is printed and the function returns with @p returnValue. If
 `CORRADE_NO_ASSERT` is defined, this macro does nothing. Example usage:
 @code
@@ -289,7 +288,7 @@ void compile() {
     do {                                                                    \
         if(!(condition)) {                                                  \
             Corrade::Utility::Error() << message;                           \
-            exit(-1);                                                       \
+            exit(-2);                                                       \
             return returnValue;                                             \
         }                                                                   \
     } while(0)
