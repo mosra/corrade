@@ -7,7 +7,7 @@ arch=('any')
 url="http://mosra.cz/blog/corrade.php"
 license=('LGPLv3')
 makedepends=('nacl-sdk' 'cmake')
-options=(!makeflags !buildflags !strip)
+options=(!buildflags !strip)
 
 build() {
     # Build 32bit
