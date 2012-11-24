@@ -256,7 +256,7 @@ void ConfigurationTest::types() {
     QCOMPARE(doubleTmp, 2.1e7);
     conf.value("expPos", &doubleTmp);
     QCOMPARE(doubleTmp, 2.1e+7);
-    QVERIFY(conf.setValue("expPos", doubleTmp, 0, ConfigurationGroup::Scientific));
+    QVERIFY(conf.setValue("expPos", doubleTmp, 0, ConfigurationValueFlag::Scientific));
     conf.value("expNeg", &doubleTmp);
     QCOMPARE(doubleTmp, -2.1e7);
     conf.value("expNeg2", &doubleTmp);
@@ -264,17 +264,17 @@ void ConfigurationTest::types() {
     conf.value("expBig", &doubleTmp);
     QCOMPARE(doubleTmp, 2.1E7);
 
-    conf.value("oct", &intTmp, 0, ConfigurationGroup::Oct);
+    conf.value("oct", &intTmp, 0, ConfigurationValueFlag::Oct);
     QVERIFY(intTmp == 0773);
-    QVERIFY(conf.setValue("oct", intTmp, 0, ConfigurationGroup::Oct));
-    conf.value("hex", &intTmp, 0, ConfigurationGroup::Hex);
+    QVERIFY(conf.setValue("oct", intTmp, 0, ConfigurationValueFlag::Oct));
+    conf.value("hex", &intTmp, 0, ConfigurationValueFlag::Hex);
     QVERIFY(intTmp == 0x6ecab);
-    QVERIFY(conf.setValue("hex", intTmp, 0, ConfigurationGroup::Hex));
-    conf.value("hex2", &intTmp, 0, ConfigurationGroup::Hex);
+    QVERIFY(conf.setValue("hex", intTmp, 0, ConfigurationValueFlag::Hex));
+    conf.value("hex2", &intTmp, 0, ConfigurationValueFlag::Hex);
     QVERIFY(intTmp == 0x5462FF);
-    conf.value("color", &intTmp, 0, ConfigurationGroup::Color);
+    conf.value("color", &intTmp, 0, ConfigurationValueFlag::Color);
     QVERIFY(intTmp == 0x34f85e);
-    QVERIFY(conf.setValue("color", intTmp, 0, ConfigurationGroup::Color));
+    QVERIFY(conf.setValue("color", intTmp, 0, ConfigurationValueFlag::Color));
 
     conf.save();
 

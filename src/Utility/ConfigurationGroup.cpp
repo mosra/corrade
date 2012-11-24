@@ -191,7 +191,7 @@ bool ConfigurationGroup::keyExists(const std::string& key) const {
     return false;
 }
 
-vector<string> ConfigurationGroup::valuesInternal(const string& key, int) const {
+vector<string> ConfigurationGroup::valuesInternal(const string& key, ConfigurationValueFlags) const {
     vector<string> found;
 
     for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it)
@@ -200,7 +200,7 @@ vector<string> ConfigurationGroup::valuesInternal(const string& key, int) const 
     return found;
 }
 
-bool ConfigurationGroup::setValueInternal(const string& key, const string& value, unsigned int number, int) {
+bool ConfigurationGroup::setValueInternal(const string& key, const string& value, unsigned int number, ConfigurationValueFlags) {
     if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid))
         return false;
 
@@ -226,7 +226,7 @@ bool ConfigurationGroup::setValueInternal(const string& key, const string& value
     return true;
 }
 
-bool ConfigurationGroup::addValueInternal(const string& key, const string& value, int) {
+bool ConfigurationGroup::addValueInternal(const string& key, const string& value, ConfigurationValueFlags) {
     if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid))
         return false;
 
@@ -248,7 +248,7 @@ bool ConfigurationGroup::addValueInternal(const string& key, const string& value
     return true;
 }
 
-bool ConfigurationGroup::valueInternal(const string& key, string* value, unsigned int number, int flags) {
+bool ConfigurationGroup::valueInternal(const string& key, string* value, unsigned int number, ConfigurationValueFlags flags) {
     const ConfigurationGroup* c = this;
     if(c->value(key, value, number, flags)) return true;
 
@@ -260,7 +260,7 @@ bool ConfigurationGroup::valueInternal(const string& key, string* value, unsigne
     return false;
 }
 
-bool ConfigurationGroup::valueInternal(const string& key, string* value, unsigned int number, int) const {
+bool ConfigurationGroup::valueInternal(const string& key, string* value, unsigned int number, ConfigurationValueFlags) const {
     unsigned int foundNumber = 0;
     for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it) {
         if(it->key == key) {
@@ -321,12 +321,12 @@ bool ConfigurationGroup::clear() {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 
-bool ConfigurationValue<bool>::fromString(const std::string& value, int) {
+bool ConfigurationValue<bool>::fromString(const std::string& value, ConfigurationValueFlags) {
     if(value == "1" || value == "yes" || value == "y" || value == "true") return true;
     return false;
 }
 
-std::string ConfigurationValue<bool>::toString(const bool& value, int) {
+std::string ConfigurationValue<bool>::toString(const bool& value, ConfigurationValueFlags) {
     if(value) return "true";
     return "false";
 }

@@ -20,15 +20,40 @@
  * @brief Class Corrade::Utility::ConfigurationGroup
  */
 
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <sstream>
 
+#include "Containers/EnumSet.h"
 #include "utilities.h"
 
 namespace Corrade { namespace Utility {
 
 class Configuration;
+
+/**
+@brief Configuration value conversion flag
+
+@see ConfigurationValueFlags
+*/
+enum class ConfigurationValueFlag: std::uint8_t {
+    Oct = 1 << 0,           /**< Numeric value as octal */
+    Hex = 1 << 1,           /**< Numeric value as hexadecimal */
+    Color = 1 << 2,         /**< Numeric value as color representation */
+    Scientific = 1 << 3     /**< Floating point values in scientific notation */
+};
+
+/**
+@brief Configuration value conversion flags
+
+@see ConfigurationGroup::value(), ConfigurationGroup::values(),
+    ConfigurationGroup::setValue(), ConfigurationGroup::addValue(),
+    ConfigurationValue::toString(), ConfigurationValue::fromString()
+*/
+typedef Containers::EnumSet<ConfigurationValueFlag, std::uint8_t> ConfigurationValueFlags;
+
+CORRADE_ENUMSET_OPERATORS(ConfigurationValueFlags)
 
 /**
 @brief Template structure for type conversion
@@ -51,13 +76,13 @@ struct Foo {
 namespace Utility {
 
 template<> struct ConfigurationValue<Foo> {
-    static std::string toString(const Foo& value, int flags = 0) {
+    static std::string toString(const Foo& value, ConfigurationValueFlags flags) {
         return
             ConfigurationValue<int>::toString(value.a, flags) + ' ' +
             ConfigurationValue<int>::toString(value.b, flags);
     }
 
-    static Foo fromString(const std::string& stringValue, int flags = 0) {
+    static Foo fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
         std::istringstream i(stringValue);
         std::string a, b;
 
@@ -80,18 +105,18 @@ template<class T> struct ConfigurationValue {
     /**
     * @brief Convert value to string
     * @param value         Value
-    * @param flags         Conversion flags (see ConfigurationGroup::Flags)
+    * @param flags         Flags
     * @return Value as string
     */
-    static std::string toString(const T& value, int flags = 0);
+    static std::string toString(const T& value, ConfigurationValueFlags flags);
 
     /**
     * @brief Convert value from string
     * @param stringValue   Value as string
-    * @param flags         Conversion flags (see ConfigurationGroup::Flags)
+    * @param flags         Flags
     * @return Value
     */
-    static T fromString(const std::string& stringValue, int flags = 0);
+    static T fromString(const std::string& stringValue, ConfigurationValueFlags flags);
 };
 
 /**
@@ -105,14 +130,6 @@ class UTILITY_EXPORT ConfigurationGroup {
     friend class Configuration;
 
     public:
-        /** @brief Flags for value type */
-        enum Flags {
-            Oct         = 0x01, /**< @brief Numeric value as octal */
-            Hex         = 0x02, /**< @brief Numeric value as hexadecimal */
-            Color       = 0x04, /**< @brief Numeric value as color representation */
-            Scientific  = 0x08  /**< @brief Floating point values in scientific notation */
-        };
-
         /** @brief Copy constructor */
         ConfigurationGroup(const ConfigurationGroup& other);
 
@@ -239,14 +256,14 @@ class UTILITY_EXPORT ConfigurationGroup {
          *
          * See also Configuration::automaticKeyCreation().
          */
-        template<class T> bool value(const std::string& key, T* _value, unsigned int number = 0, int flags = 0) {
+        template<class T> bool value(const std::string& key, T* _value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
             std::string stringValue = ConfigurationValue<T>::toString(*_value, flags);
             bool ret = valueInternal(key, &stringValue, number, flags);
 
             *_value = ConfigurationValue<T>::fromString(stringValue, flags);
             return ret;
         }
-        template<class T> bool value(const std::string& key, T* _value, unsigned int number = 0, int flags = 0) const {
+        template<class T> bool value(const std::string& key, T* _value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
             std::string stringValue;
             bool ret = valueInternal(key, &stringValue, number, flags);
 
@@ -264,7 +281,7 @@ class UTILITY_EXPORT ConfigurationGroup {
          * Directly returns the value. If the key is not found, returns
          * default constructed value.
          */
-        template<class T> T value(const std::string& key, unsigned int number = 0, int flags = 0) const {
+        template<class T> T value(const std::string& key, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
             T _value;
             if(!value<T>(key, &_value, number, flags)) return T();
             return _value;
@@ -276,7 +293,7 @@ class UTILITY_EXPORT ConfigurationGroup {
          * @param flags     Flags (see ConfigurationGroup::Flags)
          * @return Vector with all found values
          */
-        template<class T> std::vector<T> values(const std::string& key, int flags = 0) const {
+        template<class T> std::vector<T> values(const std::string& key, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
             std::vector<T> _values;
             std::vector<std::string> stringValues = valuesInternal(key, flags);
             for(std::vector<std::string>::const_iterator it = stringValues.begin(); it != stringValues.end(); ++it)
@@ -313,7 +330,7 @@ class UTILITY_EXPORT ConfigurationGroup {
          * If the key already exists, changes it to new value. If the key
          * doesn't exist, adds a new key with given name.
          */
-        template<class T> bool setValue(const std::string& key, const T& value, unsigned int number = 0, int flags = 0) {
+        template<class T> bool setValue(const std::string& key, const T& value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
             return setValue<std::string>(key, ConfigurationValue<T>::toString(value, flags), number, flags);
         }
 
@@ -328,7 +345,7 @@ class UTILITY_EXPORT ConfigurationGroup {
          * Adds new key/value pair at the end of current group (it means also
          * after all comments).
          */
-        template<class T> bool addValue(const std::string& key, const T& value, int flags = 0) {
+        template<class T> bool addValue(const std::string& key, const T& value, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
             return addValue<std::string>(key, ConfigurationValue<T>::toString(value, flags), flags);
         }
 
@@ -381,24 +398,24 @@ class UTILITY_EXPORT ConfigurationGroup {
         /** @brief Constructor */
         UTILITY_LOCAL ConfigurationGroup(Configuration* _configuration): configuration(_configuration) {}
 
-        UTILITY_EXPORT bool valueInternal(const std::string& key, std::string* _value, unsigned int number, int flags);
-        UTILITY_EXPORT bool valueInternal(const std::string& key, std::string* _value, unsigned int number, int flags) const;
-        UTILITY_EXPORT std::vector<std::string> valuesInternal(const std::string& key, int flags) const;
-        UTILITY_EXPORT bool setValueInternal(const std::string& key, const std::string& value, unsigned int number, int flags);
-        UTILITY_EXPORT bool addValueInternal(const std::string& key, const std::string& value, int flags);
+        UTILITY_EXPORT bool valueInternal(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags);
+        UTILITY_EXPORT bool valueInternal(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags) const;
+        UTILITY_EXPORT std::vector<std::string> valuesInternal(const std::string& key, ConfigurationValueFlags flags) const;
+        UTILITY_EXPORT bool setValueInternal(const std::string& key, const std::string& value, unsigned int number, ConfigurationValueFlags flags);
+        UTILITY_EXPORT bool addValueInternal(const std::string& key, const std::string& value, ConfigurationValueFlags flags);
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 
-template<class T> std::string ConfigurationValue<T>::toString(const T& value, int flags) {
+template<class T> std::string ConfigurationValue<T>::toString(const T& value, ConfigurationValueFlags flags) {
     std::ostringstream stream;
 
     /* Hexadecimal / octal values */
-    if(flags & (ConfigurationGroup::Color|ConfigurationGroup::Hex))
+    if(flags & (ConfigurationValueFlag::Color|ConfigurationValueFlag::Hex))
         stream.setf(std::istringstream::hex, std::istringstream::basefield);
-    if(flags & ConfigurationGroup::Oct)
+    if(flags & ConfigurationValueFlag::Oct)
         stream.setf(std::istringstream::oct, std::istringstream::basefield);
-    if(flags & ConfigurationGroup::Scientific)
+    if(flags & ConfigurationValueFlag::Scientific)
         stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
 
     stream << value;
@@ -406,27 +423,27 @@ template<class T> std::string ConfigurationValue<T>::toString(const T& value, in
     std::string stringValue = stream.str();
 
     /* Strip initial # character, if user wants a color */
-    if(flags & ConfigurationGroup::Color)
+    if(flags & ConfigurationValueFlag::Color)
         stringValue = '#' + stringValue;
 
     return stringValue;
 }
 
-template<class T> T ConfigurationValue<T>::fromString(const std::string& stringValue, int flags) {
+template<class T> T ConfigurationValue<T>::fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
     std::string _stringValue = stringValue;
 
     /* Strip initial # character, if user wants a color */
-    if(flags & ConfigurationGroup::Color && !stringValue.empty() && stringValue[0] == '#')
+    if(flags & ConfigurationValueFlag::Color && !stringValue.empty() && stringValue[0] == '#')
         _stringValue = stringValue.substr(1);
 
     std::istringstream stream(_stringValue);
 
     /* Hexadecimal / octal values, scientific notation */
-    if(flags & (ConfigurationGroup::Color|ConfigurationGroup::Hex))
+    if(flags & (ConfigurationValueFlag::Color|ConfigurationValueFlag::Hex))
         stream.setf(std::istringstream::hex, std::istringstream::basefield);
-    if(flags & ConfigurationGroup::Oct)
+    if(flags & ConfigurationValueFlag::Oct)
         stream.setf(std::istringstream::oct, std::istringstream::basefield);
-    if(flags & ConfigurationGroup::Scientific)
+    if(flags & ConfigurationValueFlag::Scientific)
         stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
 
     T value;
@@ -437,25 +454,25 @@ template<class T> T ConfigurationValue<T>::fromString(const std::string& stringV
 
 /* Forward declared template specializations to avoid infinite recursion in
     template functions above */
-template<> inline bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, int flags) {
+template<> inline bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags) {
     return valueInternal(key, _value, number, flags);
 }
-template<> inline bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, int flags) const {
+template<> inline bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags) const {
     return valueInternal(key, _value, number, flags);
 }
-template<> inline std::vector<std::string> ConfigurationGroup::values(const std::string& key, int flags) const {
+template<> inline std::vector<std::string> ConfigurationGroup::values(const std::string& key, ConfigurationValueFlags flags) const {
     return valuesInternal(key, flags);
 }
-template<> inline bool ConfigurationGroup::setValue(const std::string& key, const std::string& value, unsigned int number, int flags) {
+template<> inline bool ConfigurationGroup::setValue(const std::string& key, const std::string& value, unsigned int number, ConfigurationValueFlags flags) {
     return setValueInternal(key, value, number, flags);
 }
-template<> inline bool ConfigurationGroup::addValue(const std::string& key, const std::string& value, int flags) {
+template<> inline bool ConfigurationGroup::addValue(const std::string& key, const std::string& value, ConfigurationValueFlags flags) {
     return addValueInternal(key, value, flags);
 }
 
 template<> struct UTILITY_EXPORT ConfigurationValue<bool> {
-    static bool fromString(const std::string& value, int flags);
-    static std::string toString(const bool& value, int flags);
+    static bool fromString(const std::string& value, ConfigurationValueFlags flags);
+    static std::string toString(const bool& value, ConfigurationValueFlags flags);
 };
 
 #endif
