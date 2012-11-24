@@ -5,6 +5,7 @@ set(CorradeUtility_SRCS
     Directory.cpp
     Configuration.cpp
     ConfigurationGroup.cpp
+    ConfigurationValue.cpp
     MurmurHash2.cpp
     Resource.cpp
     Sha1.cpp
