@@ -260,6 +260,7 @@ T operator[](size_t pos) const {
     return data[pos];
 }
 @endcode
+
 If the function has return type `void`, just use empty parameter (allowed in
 C++11):
 @code
@@ -268,6 +269,12 @@ void compile() {
 
     // ...
 }
+@endcode
+
+You can use stream output operators for formatting just like when printing to
+Debug output:
+@code
+CORRADE_ASSERT(pos < size(), "Cannot access element" << pos << "in array of size" << size(), );
 @endcode
 
 @see CORRADE_INTERNAL_ASSERT()
