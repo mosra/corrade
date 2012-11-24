@@ -255,7 +255,7 @@ bool ConfigurationGroup::valueInternal(const string& key, string* value, unsigne
     /* Automatic key/value pair creation is enabled and user wants first key,
         try to create new key/value pair */
     if((configuration->flags & Configuration::AutoCreateKeys) && number == 0)
-        return setValue<string>(key, *value, flags);
+        return setValue<string>(key, *value, number, flags);
 
     return false;
 }
