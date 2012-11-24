@@ -188,6 +188,13 @@ class UTILITY_EXPORT Configuration: public ConfigurationGroup {
         };
 
         /**
+         * @brief Default constructor
+         *
+         * Creates empty configuration with no filename.
+         */
+        inline Configuration(): ConfigurationGroup(this), flags(0) {}
+
+        /**
          * @brief Constructor
          * @param _file      %Configuration file
          * @param _flags     Flags (see Configuration::Flags)
