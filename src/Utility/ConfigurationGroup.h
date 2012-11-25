@@ -191,7 +191,7 @@ class UTILITY_EXPORT ConfigurationGroup {
          * Directly returns the value. If the key is not found, returns
          * default constructed value.
          */
-        template<class T> T value(const std::string& key, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
+        template<class T = std::string> T value(const std::string& key, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
             T _value;
             if(!value<T>(key, &_value, number, flags)) return T();
             return _value;
@@ -203,7 +203,7 @@ class UTILITY_EXPORT ConfigurationGroup {
          * @param flags     Flags (see ConfigurationGroup::Flags)
          * @return Vector with all found values
          */
-        template<class T> std::vector<T> values(const std::string& key, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
+        template<class T = std::string> std::vector<T> values(const std::string& key, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
             std::vector<T> _values;
             std::vector<std::string> stringValues = valuesInternal(key, flags);
             for(std::vector<std::string>::const_iterator it = stringValues.begin(); it != stringValues.end(); ++it)
