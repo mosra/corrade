@@ -1,5 +1,3 @@
-#ifndef Corrade_Utility_Test_MurmurHash2Test_h
-#define Corrade_Utility_Test_MurmurHash2Test_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -16,19 +14,20 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "TestSuite/Tester.h"
+#include "ConfigurationValue.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility {
 
-class MurmurHash2Test: public TestSuite::Tester<MurmurHash2Test> {
-    public:
-        MurmurHash2Test();
+#ifndef DOXYGEN_GENERATING_OUTPUT
+bool ConfigurationValue<bool>::fromString(const std::string& value, ConfigurationValueFlags) {
+    if(value == "1" || value == "yes" || value == "y" || value == "true") return true;
+    return false;
+}
 
-        void test32();
-        void test64();
-        void constructor();
-};
-
-}}}
-
+std::string ConfigurationValue<bool>::toString(const bool& value, ConfigurationValueFlags) {
+    if(value) return "true";
+    return "false";
+}
 #endif
+
+}}
