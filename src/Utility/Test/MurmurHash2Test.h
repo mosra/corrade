@@ -26,6 +26,7 @@ class MurmurHash2Test: public TestSuite::Tester<MurmurHash2Test> {
 
         void test32();
         void test64();
+        void constructor();
 };
 
 }}}

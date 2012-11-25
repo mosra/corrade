@@ -24,7 +24,8 @@ namespace Corrade { namespace Utility { namespace Test {
 
 MurmurHash2Test::MurmurHash2Test() {
     addTests(&MurmurHash2Test::test32,
-             &MurmurHash2Test::test64);
+             &MurmurHash2Test::test64,
+             &MurmurHash2Test::constructor);
 }
 
 void MurmurHash2Test::test32() {
@@ -34,6 +35,12 @@ void MurmurHash2Test::test32() {
 void MurmurHash2Test::test64() {
     CORRADE_COMPARE(MurmurHash2Implementation<8>(23)(reinterpret_cast<const unsigned char*>("string"), 6), 7441339218310318127ull);
     CORRADE_COMPARE(MurmurHash2Implementation<8>(23)(reinterpret_cast<const unsigned char*>("eightbit"), 8), 14685337704530366946ull);
+}
+
+void MurmurHash2Test::constructor() {
+    /* All should give the same value */
+    CORRADE_COMPARE(MurmurHash2()("hello"), MurmurHash2()("hello", 5));
+    CORRADE_COMPARE(MurmurHash2()(std::string("hello")), MurmurHash2()("hello", 5));
 }
 
 }}}

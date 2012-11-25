@@ -101,7 +101,7 @@ class UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(size_t)> {
 
         /** @copydoc operator()(const std::string&) const */
         template<size_t size> inline Digest operator()(const char(&data)[size]) const {
-            size_t d = implementation(reinterpret_cast<const unsigned char*>(data), size);
+            size_t d = implementation(reinterpret_cast<const unsigned char*>(data), size-1);
             return Digest::fromByteArray(reinterpret_cast<const char*>(&d));
         }
 
