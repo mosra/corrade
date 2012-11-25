@@ -76,6 +76,8 @@ See Compare namespace for pseudo-type comparator implementations.
 */
 template<class T> class Comparator {
     public:
+        inline constexpr Comparator(): actualValue(), expectedValue() {}
+
         /** @brief %Compare two values */
         bool operator()(const T& actual, const T& expected) {
             if(actual == expected) return true;
