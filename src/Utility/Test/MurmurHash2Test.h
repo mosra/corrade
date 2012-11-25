@@ -16,14 +16,14 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include <QtCore/QObject>
+#include "TestSuite/Tester.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class MurmurHash2Test: public QObject {
-    Q_OBJECT
+class MurmurHash2Test: public TestSuite::Tester<MurmurHash2Test> {
+    public:
+        MurmurHash2Test();
 
-    private slots:
         void test32();
         void test64();
 };

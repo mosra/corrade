@@ -16,21 +16,24 @@
 
 #include "MurmurHash2Test.h"
 
-#include <QtTest/QTest>
-
 #include "Utility/MurmurHash2.h"
 
-QTEST_APPLESS_MAIN(Corrade::Utility::Test::MurmurHash2Test)
+CORRADE_TEST_MAIN(Corrade::Utility::Test::MurmurHash2Test)
 
 namespace Corrade { namespace Utility { namespace Test {
 
+MurmurHash2Test::MurmurHash2Test() {
+    addTests(&MurmurHash2Test::test32,
+             &MurmurHash2Test::test64);
+}
+
 void MurmurHash2Test::test32() {
-    QCOMPARE(MurmurHash2Implementation<4>(23)(reinterpret_cast<const unsigned char*>("string"), 6), 3435905073u);
-    QCOMPARE(MurmurHash2Implementation<4>(23)(reinterpret_cast<const unsigned char*>("four"), 4), 2072697618u);
+    CORRADE_COMPARE(MurmurHash2Implementation<4>(23)(reinterpret_cast<const unsigned char*>("string"), 6), 3435905073u);
+    CORRADE_COMPARE(MurmurHash2Implementation<4>(23)(reinterpret_cast<const unsigned char*>("four"), 4), 2072697618u);
 }
 void MurmurHash2Test::test64() {
-    QCOMPARE(MurmurHash2Implementation<8>(23)(reinterpret_cast<const unsigned char*>("string"), 6), 7441339218310318127ull);
-    QCOMPARE(MurmurHash2Implementation<8>(23)(reinterpret_cast<const unsigned char*>("eightbit"), 8), 14685337704530366946ull);
+    CORRADE_COMPARE(MurmurHash2Implementation<8>(23)(reinterpret_cast<const unsigned char*>("string"), 6), 7441339218310318127ull);
+    CORRADE_COMPARE(MurmurHash2Implementation<8>(23)(reinterpret_cast<const unsigned char*>("eightbit"), 8), 14685337704530366946ull);
 }
 
 }}}
