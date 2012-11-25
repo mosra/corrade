@@ -192,7 +192,7 @@ class UTILITY_EXPORT Configuration: public ConfigurationGroup {
          *
          * Creates empty configuration with no filename.
          */
-        inline Configuration(): ConfigurationGroup(this), flags(0) {}
+        inline Configuration(int flags = 0): ConfigurationGroup(this), flags(flags|IsValid) {}
 
         /**
          * @brief Constructor
