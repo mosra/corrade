@@ -21,6 +21,7 @@
  */
 
 #include <cstddef>
+#include <cstdlib>
 
 #include "TypeTraits.h"
 
@@ -295,7 +296,7 @@ CORRADE_ASSERT(pos < size(), "Cannot access element" << pos << "in array of size
     do {                                                                    \
         if(!(condition)) {                                                  \
             Corrade::Utility::Error() << message;                           \
-            exit(-2);                                                       \
+            std::exit(-2);                                                  \
             return returnValue;                                             \
         }                                                                   \
     } while(0)
@@ -323,7 +324,7 @@ CORRADE_INTERNAL_ASSERT(!nullptr);
     do {                                                                    \
         if(!(condition)) {                                                  \
             Corrade::Utility::Error() << "Assertion" << #condition << "failed in" << __FILE__ << "on line" << __LINE__; \
-            exit(-1);                                                       \
+            std::exit(-1);                                                  \
         }                                                                   \
     } while(0)
 #endif
