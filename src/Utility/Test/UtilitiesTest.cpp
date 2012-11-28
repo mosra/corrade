@@ -16,97 +16,76 @@
 
 #include "UtilitiesTest.h"
 
-#include <string>
-#include <QtTest/QTest>
-
 #include "Utility/utilities.h"
 
-using namespace std;
-
-QTEST_APPLESS_MAIN(Corrade::Utility::Test::UtilitiesTest)
+CORRADE_TEST_MAIN(Corrade::Utility::Test::UtilitiesTest)
 
 namespace Corrade { namespace Utility { namespace Test {
 
+UtilitiesTest::UtilitiesTest() {
+    addTests(&UtilitiesTest::pow2,
+             &UtilitiesTest::log2,
+             &UtilitiesTest::trim,
+             &UtilitiesTest::split,
+             &UtilitiesTest::lowercase);
+}
+
 void UtilitiesTest::pow2() {
-    QVERIFY(Utility::pow2(10) == 1024);
+    CORRADE_COMPARE(Utility::pow2(10), 1024);
 }
 
 void UtilitiesTest::log2() {
-    QVERIFY(Utility::log2(2153) == 11);
-}
-
-void UtilitiesTest::trim_data() {
-    QTest::addColumn<QString>("in");
-    QTest::addColumn<QString>("out");
-
-    QTest::newRow("spaces at the end") << "abc  " << "abc";
-    QTest::newRow("spaces at beginning") << "  abc" << "abc";
-    QTest::newRow("no spaces") << "abc" << "abc";
-    QTest::newRow("all spaces") << "    " << "";
-    QTest::newRow("different kinds of spaces") << "\t\r\n\f\v " << "";
+    CORRADE_COMPARE(Utility::log2(2153), 11);
 }
 
 void UtilitiesTest::trim() {
-    QFETCH(QString, in);
-    QFETCH(QString, out);
+    /* Spaces at the end */
+    CORRADE_COMPARE(Utility::trim("abc  "), "abc");
 
-    QCOMPARE(QString::fromStdString(Utility::trim(in.toStdString())), out);
-}
+    /* Spaces at the beginning */
+    CORRADE_COMPARE(Utility::trim("  abc"), "abc");
 
-void UtilitiesTest::split_data() {
-    QTest::addColumn<QString>("in");
-    QTest::addColumn<bool>("keepEmptyParts");
-    QTest::addColumn<QStringList>("out");
+    /* Spaces on both beginning and end */
+    CORRADE_COMPARE(Utility::trim("  abc  "), "abc");
 
-    QStringList list;
-    list << "abcdef";
-    QTest::newRow("noDelimiter") << "abcdef" << true << list;
+    /* No spaces */
+    CORRADE_COMPARE(Utility::trim("abc"), "abc");
 
-    list.clear();
-    list << "ab" << "c" << "def";
-    QTest::newRow("delimiters") << "ab/c/def" << true << list;
-
-    list.clear();
-    list << "ab" << "" << "c" << "def" << "" << "";
-    QTest::newRow("emptyParts") << "ab//c/def//" << true << list;
-
-    list.clear();
-    list << "ab" << "c" << "def";
-    QTest::newRow("skipEmptyParts") << "ab//c/def//" << false << list;
+    /* All spaces */
+    CORRADE_COMPARE(Utility::trim("\t\r\n\f\v "), "");
 }
 
 void UtilitiesTest::split() {
-    QFETCH(QString, in);
-    QFETCH(bool, keepEmptyParts);
-    QFETCH(QStringList, out);
+    /* No delimiters */
+    CORRADE_COMPARE(Utility::split("abcdef", '/'),
+                    std::vector<std::string>{"abcdef"});
 
-    vector<string> o = Utility::split(in.toStdString(), '/', keepEmptyParts);
+    /* Common case */
+    CORRADE_COMPARE(Utility::split("ab/c/def", '/'),
+                    (std::vector<std::string>{"ab", "c", "def"}));
 
-    QStringList o_;
-    for(vector<string>::const_iterator it = o.begin(); it != o.end(); ++it)
-        o_.append(QString::fromStdString(*it));
+    /* Empty parts */
+    CORRADE_COMPARE(Utility::split("ab//c/def//", '/'),
+                    (std::vector<std::string>{"ab", "", "c", "def", "", ""}));
 
-    QCOMPARE(o_, out);
-}
-
-void UtilitiesTest::lowercase_data() {
-    QTest::addColumn<QString>("in");
-    QTest::addColumn<QString>("out");
-
-    QTest::newRow("lowercase") << "hello" << "hello";
-    QTest::newRow("uppercase") << "QWERTZUIOP" << "qwertzuiop";
-    QTest::newRow("special chars") << ".,?- \"!/(98765%" << ".,?- \"!/(98765%";
-    QTest::newRow("UTF-8") << "ĚŠČŘŽÝÁÍÉÚŮĎŤŇ" << "ěščřžýáíéúůďťň";
+    /* Skip empty parts */
+    CORRADE_COMPARE(Utility::split("ab//c/def//", '/', false),
+                    (std::vector<std::string>{"ab", "c", "def"}));
 }
 
 void UtilitiesTest::lowercase() {
-    QFETCH(QString, in);
-    QFETCH(QString, out);
+    /* Lowecase */
+    CORRADE_COMPARE(Utility::lowercase("hello"), "hello");
 
-    QString actual = QString::fromStdString(Utility::lowercase(in.toStdString()));
+    /* Uppercase */
+    CORRADE_COMPARE(Utility::lowercase("QWERTZUIOP"), "qwertzuiop");
 
-    QEXPECT_FAIL("UTF-8", "UTF-8 lowercasing is not supported", Continue);
-    QCOMPARE(out, actual);
+    /* Special chars */
+    CORRADE_COMPARE(Utility::lowercase(".,?- \"!/(98765%"), ".,?- \"!/(98765%");
+
+    /* UTF-8 */
+    CORRADE_EXPECT_FAIL("UTF-8 lowercasing is not supported.");
+    CORRADE_COMPARE(Utility::lowercase("ĚŠČŘŽÝÁÍÉÚŮĎŤŇ"), "ěščřžýáíéúůďťň");
 }
 
 }}}

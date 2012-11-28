@@ -10,7 +10,7 @@ corrade_add_test2(AbstractHashTest AbstractHashTest.cpp LIBRARIES CorradeUtility
 corrade_add_test(DirectoryTest DirectoryTest.h DirectoryTest.cpp CorradeUtility)
 corrade_add_test(EndianTest EndianTest.h EndianTest.cpp CorradeUtility)
 corrade_add_test2(MurmurHash2Test MurmurHash2Test.cpp LIBRARIES CorradeUtility)
-corrade_add_test(UtilitiesTest UtilitiesTest.h UtilitiesTest.cpp CorradeUtility)
+corrade_add_test2(UtilitiesTest UtilitiesTest.cpp LIBRARIES CorradeUtility)
 corrade_add_test(ConfigurationTest ConfigurationTest.h ConfigurationTest.cpp CorradeUtility)
 corrade_add_test(DebugTest DebugTest.h DebugTest.cpp CorradeUtility)
 corrade_add_test(Sha1Test Sha1Test.h Sha1Test.cpp CorradeUtility)

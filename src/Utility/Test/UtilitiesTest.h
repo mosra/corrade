@@ -16,24 +16,18 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include <QtCore/QObject>
+#include <TestSuite/Tester.h>
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class UtilitiesTest: public QObject {
-    Q_OBJECT
+class UtilitiesTest: public TestSuite::Tester<UtilitiesTest> {
+    public:
+        UtilitiesTest();
 
-    private slots:
         void pow2();
         void log2();
-
-        void trim_data();
         void trim();
-
-        void split_data();
         void split();
-
-        void lowercase_data();
         void lowercase();
 };
 
