@@ -63,7 +63,7 @@ void Translator::setPrimary(const std::string& file) {
     /* Cleaning primary translation */
     if(file.empty()) return setPrimary(nullptr);
 
-    Configuration* c = new Configuration(replaceLocale(file), Configuration::ReadOnly);
+    Configuration* c = new Configuration(replaceLocale(file), Configuration::Flag::ReadOnly);
     setPrimary(c);
     primaryFile = c;
 
@@ -79,7 +79,7 @@ void Translator::setFallback(const std::string& file) {
     /* Cleaning fallback translation */
     if(file.empty()) return setFallback(nullptr);
 
-    Configuration* c = new Configuration(file, Configuration::ReadOnly);
+    Configuration* c = new Configuration(file, Configuration::Flag::ReadOnly);
     setFallback(c);
     fallbackFile = c;
 }

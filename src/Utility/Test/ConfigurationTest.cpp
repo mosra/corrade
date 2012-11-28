@@ -28,6 +28,8 @@ using namespace std;
 
 QTEST_APPLESS_MAIN(Corrade::Utility::Test::ConfigurationTest)
 
+Q_DECLARE_METATYPE(Corrade::Utility::Configuration::Flags)
+
 namespace Corrade { namespace Utility { namespace Test {
 
 ConfigurationTest::ConfigurationTest() {
@@ -158,7 +160,7 @@ void ConfigurationTest::readonly() {
     QFile::remove(CONFIGURATION_WRITE_TEST_DIR + QString("parse.conf"));
     Q_ASSERT(QFile::copy(CONFIGURATION_TEST_DIR + QString("parse.conf"), CONFIGURATION_WRITE_TEST_DIR + QString("parse.conf")));
 
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("parse.conf"), Configuration::ReadOnly);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("parse.conf"), Configuration::Flag::ReadOnly);
 
     /* Everything should be disabled */
     QVERIFY(conf.addGroup("new") == nullptr);
@@ -173,7 +175,7 @@ void ConfigurationTest::readonly() {
 }
 
 void ConfigurationTest::readonlyWithoutFile() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("inexistent.conf"), Configuration::ReadOnly);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("inexistent.conf"), Configuration::Flag::ReadOnly);
     QVERIFY(!conf.isValid());
 }
 
@@ -182,7 +184,7 @@ void ConfigurationTest::truncate() {
     QFile::remove(CONFIGURATION_WRITE_TEST_DIR + QString("parse.conf"));
     Q_ASSERT(QFile::copy(CONFIGURATION_TEST_DIR + QString("parse.conf"), CONFIGURATION_WRITE_TEST_DIR + QString("parse.conf")));
 
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("parse.conf"), Configuration::Truncate);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("parse.conf"), Configuration::Flag::Truncate);
     conf.save();
 
     QVERIFY(conf.keyCount("key") == 0);
@@ -291,27 +293,27 @@ void ConfigurationTest::types() {
 
 void ConfigurationTest::eol_data() {
     QTest::addColumn<QString>("filename");
-    QTest::addColumn<int>("flags");
+    QTest::addColumn<Configuration::Flags>("flags");
     QTest::addColumn<QByteArray>("output");
 
-    QTest::newRow("autodetect-unix") << "eol-unix.conf" << 0 << QByteArray("key=value\n");
-    QTest::newRow("autodetect-windows") << "eol-windows.conf" << 0 << QByteArray("key=value\r\n");
-    QTest::newRow("autodetect-mixed") << "eol-mixed.conf" << 0 << QByteArray("key=value\r\nkey=value\r\n");
-    QTest::newRow("force-unix") << "" << int(Configuration::ForceUnixEol) << QByteArray("key=value\n");
-    QTest::newRow("force-windows") << "" << int(Configuration::ForceWindowsEol) << QByteArray("key=value\r\n");
-    QTest::newRow("default") << "" << 0 << QByteArray("key=value\n");
+    QTest::newRow("autodetect-unix") << "eol-unix.conf" << Configuration::Flags() << QByteArray("key=value\n");
+    QTest::newRow("autodetect-windows") << "eol-windows.conf" << Configuration::Flags() << QByteArray("key=value\r\n");
+    QTest::newRow("autodetect-mixed") << "eol-mixed.conf" << Configuration::Flags() << QByteArray("key=value\r\nkey=value\r\n");
+    QTest::newRow("force-unix") << "" << Configuration::Flags(Configuration::Flag::ForceUnixEol) << QByteArray("key=value\n");
+    QTest::newRow("force-windows") << "" << Configuration::Flags(Configuration::Flag::ForceWindowsEol) << QByteArray("key=value\r\n");
+    QTest::newRow("default") << "" << Configuration::Flags() << QByteArray("key=value\n");
 }
 
 void ConfigurationTest::eol() {
     QFETCH(QString, filename);
-    QFETCH(int, flags);
+    QFETCH(Configuration::Flags, flags);
     QFETCH(QByteArray, output);
 
     string file;
     if(!filename.isEmpty()) file = filename.toStdString();
     else {
         file = "temp.conf";
-        flags |= Configuration::Truncate;
+        flags |= Configuration::Flag::Truncate;
     }
 
     Configuration conf(CONFIGURATION_WRITE_TEST_DIR + file, flags);
@@ -329,7 +331,7 @@ void ConfigurationTest::eol() {
 }
 
 void ConfigurationTest::uniqueGroups() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("unique-groups.conf"), Configuration::UniqueGroups);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("unique-groups.conf"), Configuration::Flag::UniqueGroups);
     conf.save();
 
     QFile fileOrig(CONFIGURATION_TEST_DIR + QString("unique-groups-saved.conf"));
@@ -346,7 +348,7 @@ void ConfigurationTest::uniqueGroups() {
 }
 
 void ConfigurationTest::uniqueKeys() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("unique-keys.conf"), Configuration::UniqueKeys);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("unique-keys.conf"), Configuration::Flag::UniqueKeys);
     conf.save();
 
     QFile fileOrig(CONFIGURATION_TEST_DIR + QString("unique-keys-saved.conf"));
@@ -363,7 +365,7 @@ void ConfigurationTest::uniqueKeys() {
 }
 
 void ConfigurationTest::stripComments() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("comments.conf"), Configuration::SkipComments);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("comments.conf"), Configuration::Flag::SkipComments);
     conf.save();
 
     QFile fileOrig(CONFIGURATION_TEST_DIR + QString("comments-saved.conf"));
@@ -377,7 +379,7 @@ void ConfigurationTest::stripComments() {
 }
 
 void ConfigurationTest::autoCreation() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("autoCreation.conf"), Configuration::Truncate);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("autoCreation.conf"), Configuration::Flag::Truncate);
 
     QVERIFY(conf.group("newGroup") == nullptr);
     conf.setAutomaticGroupCreation(true);
@@ -409,7 +411,7 @@ void ConfigurationTest::autoCreation() {
 }
 
 void ConfigurationTest::directValue() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("directValue.conf"), Configuration::Truncate);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("directValue.conf"), Configuration::Flag::Truncate);
 
     /* Fill values */
     conf.setValue<string>("string", "value");
@@ -477,7 +479,7 @@ void ConfigurationTest::hierarchicUnique() {
     QFile::remove(CONFIGURATION_WRITE_TEST_DIR + QString("hierarchic.conf"));
     Q_ASSERT(QFile::copy(CONFIGURATION_TEST_DIR + QString("hierarchic.conf"), CONFIGURATION_WRITE_TEST_DIR + QString("hierarchic.conf")));
 
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("hierarchic.conf"), Configuration::UniqueGroups);
+    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("hierarchic.conf"), Configuration::Flag::UniqueGroups);
     conf.save();
 
     QFile fileOrig(CONFIGURATION_TEST_DIR + QString("hierarchic-unique.conf"));
