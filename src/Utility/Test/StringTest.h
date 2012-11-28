@@ -27,6 +27,7 @@ class StringTest: public TestSuite::Tester<StringTest> {
         void trim();
         void split();
         void lowercase();
+        void whitespace();
 };
 
 }}}

@@ -22,6 +22,8 @@ using namespace std;
 
 namespace Corrade { namespace Utility {
 
+const std::string String::Whitespace(" \t\f\v\r\n");
+
 string String::trim(string str, const string& characters) {
     size_t found = str.find_first_not_of(characters);
     str.erase(0, found);

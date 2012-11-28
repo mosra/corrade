@@ -26,7 +26,8 @@ namespace Corrade { namespace Utility { namespace Test {
 StringTest::StringTest() {
     addTests(&StringTest::trim,
              &StringTest::split,
-             &StringTest::lowercase);
+             &StringTest::lowercase,
+             &StringTest::whitespace);
 }
 
 void StringTest::trim() {
@@ -77,6 +78,11 @@ void StringTest::lowercase() {
     /* UTF-8 */
     CORRADE_EXPECT_FAIL("UTF-8 lowercasing is not supported.");
     CORRADE_COMPARE(String::lowercase("ĚŠČŘŽÝÁÍÉÚŮĎŤŇ"), "ěščřžýáíéúůďťň");
+}
+
+void StringTest::whitespace() {
+    for(char i: String::Whitespace)
+        CORRADE_VERIFY(std::isspace(i));
 }
 
 }}}

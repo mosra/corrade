@@ -154,7 +154,7 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
 
             ConfigurationGroup::Item item;
             item.key = String::trim(buffer.substr(0, splitter));
-            item.value = String::trim(buffer.substr(splitter+1), " \t\v\f\r\n");
+            item.value = String::trim(buffer.substr(splitter+1));
 
             /* Remove quotes, if present */
             /** @todo Check `"` characters better */
@@ -227,8 +227,7 @@ void Configuration::save(std::ofstream& file, const std::string& eol, Configurat
     for(vector<ConfigurationGroup::Item>::const_iterator it = group->items.begin(); it != group->items.end(); ++it) {
         /* Key/value pair */
         if(!it->key.empty()) {
-            /** @todo Make whitespaces a constant in utilities.h */
-            if(it->value.find_first_of(" \t\f\v\r\n") != string::npos)
+            if(it->value.find_first_of(String::Whitespace) != string::npos)
                 buffer = it->key + "=\"" + it->value + '"' + eol;
             else
                 buffer = it->key + '=' + it->value + eol;

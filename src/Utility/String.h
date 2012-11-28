@@ -30,6 +30,14 @@ namespace Corrade { namespace Utility {
 /** @brief %String utilities */
 class UTILITY_EXPORT String {
     public:
+        /**
+         * @brief Whitespace characters
+         *
+         * Characters for which `std::isspace()` returns `true`. Equals to
+         * <tt>" \t\f\v\r\n"</tt>.
+         */
+        static const std::string Whitespace;
+
         String() = delete;
 
         /**
@@ -39,7 +47,7 @@ class UTILITY_EXPORT String {
          * @return Trimmed string
          */
         /* Parameter intentionally passed by copy to avoid another copy internally */
-        static std::string trim(std::string str, const std::string& characters = " \t\f\v\r\n");
+        static std::string trim(std::string str, const std::string& characters = Whitespace);
 
         /**
          * @brief Split string on given character
