@@ -1,5 +1,9 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+if(GCC46_COMPATIBILITY)
+    set(CORRADE_GCC46_COMPATIBILITY 1)
+endif()
+
 include(TestBigEndian)
 test_big_endian(CMAKE_BIG_ENDIAN)
 

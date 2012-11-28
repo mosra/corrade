@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.6)
 
 project(Corrade)
 
+option(GCC46_COMPATIBILITY "Enable compatibility mode for GCC 4.6 (might disable some features)" OFF)
+
 option(BUILD_TESTS "Build unit tests (requires Qt4)." OFF)
 option(BUILD_EXAMPLES "Build examples." OFF)
 
