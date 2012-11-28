@@ -32,7 +32,7 @@ namespace Compare {
 Prints the length of both containers (if they are different) and prints value
 of first different item in both containers. Example usage:
 @code
-vector<int> a, b;
+std::vector<int> a, b;
 CORRADE_COMPARE_AS(a, b, Compare::Container);
 @endcode
 
@@ -60,7 +60,7 @@ template<class T> class Comparator<Compare::Container<T>> {
             else
                 e << "contents.";
 
-            for(size_t i = 0, end = std::max(actualContents.size(), expectedContents.size()); i != end; ++i) {
+            for(std::size_t i = 0, end = std::max(actualContents.size(), expectedContents.size()); i != end; ++i) {
                 if(actualContents.size() > i && expectedContents.size() > i && actualContents[i] == expectedContents[i]) continue;
 
                 if(actualContents.size() <= i)
