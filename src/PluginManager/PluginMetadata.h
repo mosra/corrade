@@ -74,7 +74,7 @@ locale code. Full featured example:
     name=Dobrý Matrix
     description=Můj první Matrix bez chyb v Matrixu
  */
-class PLUGINMANAGER_EXPORT PluginMetadata {
+class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
     friend class AbstractPluginManager;
 
     public:

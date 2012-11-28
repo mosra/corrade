@@ -28,7 +28,7 @@
 namespace Corrade { namespace Utility {
 
 /** @brief %String utilities */
-class UTILITY_EXPORT String {
+class CORRADE_UTILITY_EXPORT String {
     public:
         /**
          * @brief Whitespace characters

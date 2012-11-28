@@ -48,7 +48,7 @@ template<size_t> class MurmurHash2Implementation {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /** @todo Used only in unit test, export in only there? */
-template<> class UTILITY_EXPORT MurmurHash2Implementation<4> {
+template<> class CORRADE_UTILITY_EXPORT MurmurHash2Implementation<4> {
     public:
         inline MurmurHash2Implementation(unsigned int seed): seed(seed) {}
         unsigned int operator()(const unsigned char* data, unsigned int size) const;
@@ -57,7 +57,7 @@ template<> class UTILITY_EXPORT MurmurHash2Implementation<4> {
         unsigned int seed;
 };
 /** @todo Used only in unit test, export in only there? */
-template<> class UTILITY_EXPORT MurmurHash2Implementation<8> {
+template<> class CORRADE_UTILITY_EXPORT MurmurHash2Implementation<8> {
     public:
         inline MurmurHash2Implementation(unsigned long long seed): seed(seed) {}
         unsigned long long operator()(const unsigned char* data, unsigned long long size) const;
@@ -76,7 +76,7 @@ usable for hasing in e.g. `std::unordered_map`.
 
 @todo constexpr algorithm
 */
-class UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(size_t)> {
+class CORRADE_UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(size_t)> {
     public:
         /**
          * @brief Digest of given data

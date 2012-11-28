@@ -164,7 +164,7 @@ template<class T> T ConfigurationValue<T>::fromString(const std::string& stringV
     return value;
 }
 
-template<> struct UTILITY_EXPORT ConfigurationValue<bool> {
+template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<bool> {
     static bool fromString(const std::string& value, ConfigurationValueFlags flags);
     static std::string toString(const bool& value, ConfigurationValueFlags flags);
 };

@@ -35,7 +35,7 @@ namespace Corrade { namespace PluginManager {
  * Connects every plugin instance to parent plugin manager to ensure the
  * plugin can be unloaded only if there are no active instances.
  */
-class PLUGINMANAGER_EXPORT Plugin {
+class CORRADE_PLUGINMANAGER_EXPORT Plugin {
     public:
         /**
          * @brief Constructor
@@ -155,10 +155,10 @@ only in *.cpp
 #else
 #ifdef CORRADE_DYNAMIC_PLUGIN
 #define PLUGIN_REGISTER(name, className, interface)                         \
-    extern "C" PLUGIN_EXPORT int pluginVersion() { return PLUGIN_VERSION; }               \
-    extern "C" PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
+    extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion() { return PLUGIN_VERSION; }               \
+    extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
         { return new className(manager, plugin); }                          \
-    extern "C" PLUGIN_EXPORT const char* pluginInterface() { return interface; }
+    extern "C" CORRADE_PLUGIN_EXPORT const char* pluginInterface() { return interface; }
 #else
 #define PLUGIN_REGISTER(name, className, interface)
 #endif

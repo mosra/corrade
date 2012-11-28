@@ -26,7 +26,7 @@
 namespace Corrade { namespace Utility {
 
 /** @brief SHA-1 */
-class UTILITY_EXPORT Sha1: public AbstractHash<20> {
+class CORRADE_UTILITY_EXPORT Sha1: public AbstractHash<20> {
     public:
         /**
          * @brief Digest of given data
@@ -51,14 +51,14 @@ class UTILITY_EXPORT Sha1: public AbstractHash<20> {
         Digest digest();
 
     private:
-        UTILITY_LOCAL void processChunk(const char* data);
+        CORRADE_UTILITY_LOCAL void processChunk(const char* data);
 
         inline unsigned int leftrotate(unsigned int data, unsigned int shift) {
             return data << shift | data >> (32-shift);
         }
 
-        UTILITY_EXPORT static const unsigned int initialDigest[5];
-        UTILITY_LOCAL static const unsigned int constants[4];
+        CORRADE_UTILITY_EXPORT static const unsigned int initialDigest[5];
+        CORRADE_UTILITY_LOCAL static const unsigned int constants[4];
 
         std::string _buffer;
         unsigned long long _dataSize;

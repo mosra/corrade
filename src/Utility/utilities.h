@@ -55,7 +55,7 @@ inline unsigned int pow2(unsigned int number) { return 1 << number; }
  * @brief Base-2 logarithm
  * @return log2(number)
  */
-UTILITY_EXPORT unsigned int log2(unsigned int number);
+CORRADE_UTILITY_EXPORT unsigned int log2(unsigned int number);
 
 /*@}*/
 
@@ -65,7 +65,7 @@ UTILITY_EXPORT unsigned int log2(unsigned int number);
  * @brief Sleep for given time
  * @param ms                Miliseconds
  */
-UTILITY_EXPORT void sleep(size_t ms);
+CORRADE_UTILITY_EXPORT void sleep(size_t ms);
 
 /*@}*/
 

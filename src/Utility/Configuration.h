@@ -117,7 +117,7 @@ Example file:
 @todo C++11: move constructor, creating readonly Configuration using static
     function returning const object, then get rid of ReadOnly flag
 */
-class UTILITY_EXPORT Configuration: public ConfigurationGroup {
+class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
     friend class ConfigurationGroup;
 
     DISABLE_COPY(Configuration)
@@ -326,9 +326,9 @@ class UTILITY_EXPORT Configuration: public ConfigurationGroup {
 
         CORRADE_ENUMSET_FRIEND_OPERATORS(InternalFlags)
 
-        UTILITY_LOCAL void parse(std::istream& file);
-        UTILITY_LOCAL std::string parse(std::istream& file, ConfigurationGroup* group, const std::string& fullPath);
-        UTILITY_LOCAL void save(std::ofstream& file, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const;
+        CORRADE_UTILITY_LOCAL void parse(std::istream& file);
+        CORRADE_UTILITY_LOCAL std::string parse(std::istream& file, ConfigurationGroup* group, const std::string& fullPath);
+        CORRADE_UTILITY_LOCAL void save(std::ofstream& file, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const;
 
         std::string _filename;
         InternalFlags flags;

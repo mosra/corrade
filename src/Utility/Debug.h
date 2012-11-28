@@ -68,9 +68,9 @@ type.
 @todo Output to more ostreams at once
 @see Warning, Error
  */
-class UTILITY_EXPORT Debug {
+class CORRADE_UTILITY_EXPORT Debug {
     /* Disabling assignment */
-    UTILITY_LOCAL Debug& operator=(const Debug& other);
+    CORRADE_UTILITY_LOCAL Debug& operator=(const Debug& other);
 
     #ifndef DOXYGEN_GENERATING_OUTPUT
     template<class T> friend typename std::enable_if<HasInsertionOperator<T>::Value, Debug>::type operator<<(Debug, const T&);
@@ -156,7 +156,7 @@ class UTILITY_EXPORT Debug {
         std::ostream* output;   /**< @brief Stream where to put the output */
 
     private:
-        UTILITY_EXPORT static std::ostream* globalOutput;
+        CORRADE_UTILITY_EXPORT static std::ostream* globalOutput;
         int flags;
 };
 
@@ -212,7 +212,7 @@ template<class A, class B> Debug operator<<(Debug debug, const std::pair<A, B>& 
  * Same as Debug, but by default writes output to standard error output. Thus
  * it is possible to separate / mute Debug, Warning and Error outputs.
  */
-class UTILITY_EXPORT Warning: public Debug {
+class CORRADE_UTILITY_EXPORT Warning: public Debug {
     public:
         /** @copydoc Debug::Debug() */
         Warning(std::ostream* _output = globalWarningOutput): Debug(_output) {}
@@ -221,7 +221,7 @@ class UTILITY_EXPORT Warning: public Debug {
             globalWarningOutput = _output; }
 
     private:
-        UTILITY_EXPORT static std::ostream* globalWarningOutput;
+        CORRADE_UTILITY_EXPORT static std::ostream* globalWarningOutput;
 };
 
 /**
@@ -229,7 +229,7 @@ class UTILITY_EXPORT Warning: public Debug {
  *
  * @copydetails Warning
  */
-class UTILITY_EXPORT Error: public Debug {
+class CORRADE_UTILITY_EXPORT Error: public Debug {
     public:
         /** @copydoc Debug::Debug() */
         Error(std::ostream* _output = globalErrorOutput): Debug(_output) {}
@@ -238,7 +238,7 @@ class UTILITY_EXPORT Error: public Debug {
             globalErrorOutput = _output; }
 
     private:
-        UTILITY_EXPORT static std::ostream* globalErrorOutput;
+        CORRADE_UTILITY_EXPORT static std::ostream* globalErrorOutput;
 };
 
 

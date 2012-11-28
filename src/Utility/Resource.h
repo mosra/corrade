@@ -41,7 +41,7 @@ Standalone resource compiler executable is implemented in @ref rc.cpp.
 @todo Test data unregistering
 @todo Test empty files
  */
-class UTILITY_EXPORT Resource {
+class CORRADE_UTILITY_EXPORT Resource {
     public:
         /**
          * @brief Register data resource
@@ -103,17 +103,17 @@ class UTILITY_EXPORT Resource {
         std::string get(const std::string& filename) const;
 
     private:
-        struct UTILITY_LOCAL ResourceData {
+        struct CORRADE_UTILITY_LOCAL ResourceData {
             unsigned int position;
             unsigned int size;
             const unsigned char* data;
         };
 
-        UTILITY_LOCAL static std::map<std::string, std::map<std::string, ResourceData> > resources;
+        CORRADE_UTILITY_LOCAL static std::map<std::string, std::map<std::string, ResourceData> > resources;
 
         std::string group;
 
-        UTILITY_LOCAL std::string hexcode(const std::string& data, const std::string& comment = "") const;
+        CORRADE_UTILITY_LOCAL std::string hexcode(const std::string& data, const std::string& comment = "") const;
 
         /** @todo Move to utilities.h? */
         template<class T> static std::string numberToString(const T& number);

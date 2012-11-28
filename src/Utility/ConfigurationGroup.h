@@ -36,7 +36,7 @@ Provides access to values and subgroups. See Configuration class documentation
 for usage example.
 @todo Faster access to elements via multimap, find() and equal_range()
 */
-class UTILITY_EXPORT ConfigurationGroup {
+class CORRADE_UTILITY_EXPORT ConfigurationGroup {
     friend class Configuration;
 
     public:
@@ -289,13 +289,13 @@ class UTILITY_EXPORT ConfigurationGroup {
 
     private:
         /** @brief Configuration item */
-        struct UTILITY_LOCAL Item {
+        struct CORRADE_UTILITY_LOCAL Item {
             std::string key,    /**< @brief Key name (only if item is key/value pair) */
                 value;          /**< @brief Value or comment, empty line */
         };
 
         /** @brief Configuration group */
-        struct UTILITY_LOCAL Group {
+        struct CORRADE_UTILITY_LOCAL Group {
             std::string name;           /**< @brief Group name */
             ConfigurationGroup* group;  /**< @brief Configuration group */
         };
@@ -306,13 +306,13 @@ class UTILITY_EXPORT ConfigurationGroup {
         Configuration* configuration;
 
         /** @brief Constructor */
-        UTILITY_LOCAL ConfigurationGroup(Configuration* _configuration): configuration(_configuration) {}
+        CORRADE_UTILITY_LOCAL ConfigurationGroup(Configuration* _configuration): configuration(_configuration) {}
 
-        UTILITY_EXPORT bool valueInternal(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags);
-        UTILITY_EXPORT bool valueInternal(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags) const;
-        UTILITY_EXPORT std::vector<std::string> valuesInternal(const std::string& key, ConfigurationValueFlags flags) const;
-        UTILITY_EXPORT bool setValueInternal(const std::string& key, const std::string& value, unsigned int number, ConfigurationValueFlags flags);
-        UTILITY_EXPORT bool addValueInternal(const std::string& key, const std::string& value, ConfigurationValueFlags flags);
+        CORRADE_UTILITY_EXPORT bool valueInternal(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags);
+        CORRADE_UTILITY_EXPORT bool valueInternal(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags) const;
+        CORRADE_UTILITY_EXPORT std::vector<std::string> valuesInternal(const std::string& key, ConfigurationValueFlags flags) const;
+        CORRADE_UTILITY_EXPORT bool setValueInternal(const std::string& key, const std::string& value, unsigned int number, ConfigurationValueFlags flags);
+        CORRADE_UTILITY_EXPORT bool addValueInternal(const std::string& key, const std::string& value, ConfigurationValueFlags flags);
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
