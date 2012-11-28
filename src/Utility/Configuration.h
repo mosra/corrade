@@ -207,24 +207,24 @@ class UTILITY_EXPORT Configuration: public ConfigurationGroup {
 
         /**
          * @brief Constructor
-         * @param _file      %Configuration file
-         * @param _flags     Flags
+         * @param file      %Configuration file
+         * @param flags     Flags
          *
          * Opens the file and loads it according to specified flags. If file
          * cannot be opened, sets invalid flag (see isValid()).
          */
-        Configuration(const std::string& _file, Flags _flags = Flags());
+        Configuration(const std::string& file, Flags flags = Flags());
 
         /**
          * @brief Constructor
-         * @param _file     %Configuration file
-         * @param _flags    Flags
+         * @param file      %Configuration file
+         * @param flags     Flags
          *
          * Creates configuration from given istream. Sets flag
          * Configuration::ReadOnly, because the configuration cannot be saved
          * anywhere.
          */
-        Configuration(std::istream& _file, Flags _flags = Flags());
+        Configuration(std::istream& file, Flags flags = Flags());
 
         /**
          * @brief Destructor

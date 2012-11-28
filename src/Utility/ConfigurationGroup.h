@@ -159,25 +159,25 @@ class UTILITY_EXPORT ConfigurationGroup {
         /**
          * @brief Value
          * @param key       Key name
-         * @param _value    Pointer where to store value
+         * @param value     Pointer where to store value
          * @param number    Number of the value. Default is first found value.
          * @param flags     Flags (see ConfigurationGroup::Flags)
          * @return Whether the value was found
          *
          * See also Configuration::automaticKeyCreation().
          */
-        template<class T> bool value(const std::string& key, T* _value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
-            std::string stringValue = ConfigurationValue<T>::toString(*_value, flags);
+        template<class T> bool value(const std::string& key, T* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
+            std::string stringValue = ConfigurationValue<T>::toString(*value, flags);
             bool ret = valueInternal(key, &stringValue, number, flags);
 
-            *_value = ConfigurationValue<T>::fromString(stringValue, flags);
+            *value = ConfigurationValue<T>::fromString(stringValue, flags);
             return ret;
         }
-        template<class T> bool value(const std::string& key, T* _value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
+        template<class T> bool value(const std::string& key, T* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
             std::string stringValue;
             bool ret = valueInternal(key, &stringValue, number, flags);
 
-            *_value = ConfigurationValue<T>::fromString(stringValue, flags);
+            *value = ConfigurationValue<T>::fromString(stringValue, flags);
             return ret;
         } /**< @overload */
 

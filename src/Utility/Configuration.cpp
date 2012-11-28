@@ -25,11 +25,11 @@ using namespace std;
 
 namespace Corrade { namespace Utility {
 
-Configuration::Configuration(const string& _filename, Flags _flags): ConfigurationGroup(this), _filename(_filename), flags(static_cast<InternalFlag>(std::uint32_t(_flags))) {
+Configuration::Configuration(const string& filename, Flags flags): ConfigurationGroup(this), _filename(filename), flags(static_cast<InternalFlag>(std::uint32_t(flags))) {
     /* Open file with requested flags */
     ifstream::openmode openmode = ifstream::in;
-    if(flags & InternalFlag::Truncate) openmode |= ifstream::trunc;
-    ifstream file(_filename.c_str(), openmode);
+    if(this->flags & InternalFlag::Truncate) openmode |= ifstream::trunc;
+    ifstream file(filename.c_str(), openmode);
 
     /* File doesn't exist yet */
     if(!file.is_open()) {
@@ -37,9 +37,9 @@ Configuration::Configuration(const string& _filename, Flags _flags): Configurati
 
         /* It is error for readonly configurations */
         /** @todo Similar check for istream constructor (?) */
-        if(flags & InternalFlag::ReadOnly) return;
+        if(this->flags & InternalFlag::ReadOnly) return;
 
-        flags |= InternalFlag::IsValid;
+        this->flags |= InternalFlag::IsValid;
         return;
     }
 
@@ -49,11 +49,11 @@ Configuration::Configuration(const string& _filename, Flags _flags): Configurati
     file.close();
 }
 
-Configuration::Configuration(istream& file, Flags _flags): ConfigurationGroup(this), flags(static_cast<InternalFlag>(std::uint32_t(_flags))) {
+Configuration::Configuration(istream& file, Flags flags): ConfigurationGroup(this), flags(static_cast<InternalFlag>(std::uint32_t(flags))) {
     parse(file);
 
     /* Set readonly flag, because the configuration cannot be saved */
-    flags |= InternalFlag::ReadOnly;
+    this->flags |= InternalFlag::ReadOnly;
 }
 
 void Configuration::parse(istream& file) {
