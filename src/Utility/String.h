@@ -48,13 +48,36 @@ class UTILITY_EXPORT String {
         String() = delete;
 
         /**
-         * @brief Trim leading and trailing whitespaces from string
+         * @brief Trim leading whitespace from string
          * @param str           %String to be trimmed
          * @param characters    Characters which will be trimmed
-         * @return Trimmed string
+         *
+         * @see rtrim(), trim()
          */
         /* Parameter intentionally passed by copy to avoid another copy internally */
-        static std::string trim(std::string str, const std::string& characters = Whitespace);
+        static std::string ltrim(std::string str, const std::string& characters = Whitespace);
+
+        /**
+         * @brief Trim trailing whitespace from string
+         * @param str           %String to be trimmed
+         * @param characters    Characters which will be trimmed
+         *
+         * @see ltrim(), trim()
+         */
+        /* Parameter intentionally passed by copy to avoid another copy internally */
+        static std::string rtrim(std::string str, const std::string& characters = Whitespace);
+
+        /**
+         * @brief Trim leading and trailing whitespace from string
+         * @param str           %String to be trimmed
+         * @param characters    Characters which will be trimmed
+         *
+         * Equivalent to `ltrim(rtrim(str)`.
+         */
+        /* Parameter intentionally passed by copy to avoid another copy internally */
+        inline static std::string trim(const std::string& str, const std::string& characters = Whitespace) {
+            return ltrim(rtrim(str), characters);
+        }
 
         /**
          * @brief Split string on given character

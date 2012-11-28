@@ -32,10 +32,12 @@ StringTest::StringTest() {
 
 void StringTest::trim() {
     /* Spaces at the end */
-    CORRADE_COMPARE(String::trim("abc  "), "abc");
+    CORRADE_COMPARE(String::ltrim("abc  "), "abc  ");
+    CORRADE_COMPARE(String::rtrim("abc  "), "abc");
 
     /* Spaces at the beginning */
-    CORRADE_COMPARE(String::trim("  abc"), "abc");
+    CORRADE_COMPARE(String::ltrim("  abc"), "abc");
+    CORRADE_COMPARE(String::rtrim("  abc"), "  abc");
 
     /* Spaces on both beginning and end */
     CORRADE_COMPARE(String::trim("  abc  "), "abc");
@@ -45,6 +47,9 @@ void StringTest::trim() {
 
     /* All spaces */
     CORRADE_COMPARE(String::trim("\t\r\n\f\v "), "");
+
+    /* Special characters */
+    CORRADE_COMPARE(String::trim("ouya", "aeiyou"), "");
 }
 
 void StringTest::split() {
