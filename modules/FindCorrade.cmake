@@ -7,6 +7,7 @@
 #  CORRADE_INCLUDE_DIR              - Include dir for Corrade
 #  CORRADE_UTILITY_LIBRARY          - Corrade Utility library
 #  CORRADE_PLUGINMANAGER_LIBRARY    - Corrade Plugin manager library
+#  CORRADE_TESTSUITE_LIBRARY        - Corrade TestSuite library
 #  CORRADE_RC_EXECUTABLE            - Corrade resource compiler executable
 # If Corrade library is found, these macros and functions are defined:
 #
@@ -97,6 +98,7 @@
 # Libraries
 find_library(CORRADE_UTILITY_LIBRARY CorradeUtility)
 find_library(CORRADE_PLUGINMANAGER_LIBRARY CorradePluginManager)
+find_library(CORRADE_TESTSUITE_LIBRARY CorradeTestSuite)
 
 # RC executable
 find_program(CORRADE_RC_EXECUTABLE corrade-rc)
@@ -110,6 +112,7 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Corrade DEFAULT_MSG
     CORRADE_UTILITY_LIBRARY
     CORRADE_PLUGINMANAGER_LIBRARY
+    CORRADE_TESTSUITE_LIBRARY
     CORRADE_INCLUDE_DIR
     CORRADE_RC_EXECUTABLE)
 
