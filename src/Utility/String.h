@@ -38,6 +38,13 @@ class UTILITY_EXPORT String {
          */
         static const std::string Whitespace;
 
+        /**
+         * @brief Byte-order marker (UTF-8)
+         *
+         * Equals to <tt>"\xEF\xBB\xBF"</tt>.
+         */
+        static const std::string Bom;
+
         String() = delete;
 
         /**

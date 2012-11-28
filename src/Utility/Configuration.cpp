@@ -62,12 +62,12 @@ void Configuration::parse(istream& file) {
             throw string("Cannot open configuration file.");
 
         /* It looks like BOM */
-        if(file.peek() == '\xEF') {
+        if(file.peek() == String::Bom[0]) {
             char* bom = new char[4];
             file.get(bom, 4);
 
             /* This is not a BOM, rewind back */
-            if(string(bom) != "\xEF\xBB\xBF") file.seekg(0);
+            if(bom != String::Bom) file.seekg(0);
 
             /* Or set flag */
             else flags |= InternalFlag::HasBom;
@@ -200,7 +200,7 @@ bool Configuration::save() {
 
     /* BOM, if user explicitly wants that crap */
     if((flags & InternalFlag::PreserveBom) && (flags & InternalFlag::HasBom))
-        file.write("\xEF\xBB\xBF", 3);
+        file.write(String::Bom.c_str(), 3);
 
     /* EOL character */
     string eol;

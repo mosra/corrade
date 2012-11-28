@@ -23,6 +23,7 @@ using namespace std;
 namespace Corrade { namespace Utility {
 
 const std::string String::Whitespace(" \t\f\v\r\n");
+const std::string String::Bom("\xEF\xBB\xBF");
 
 string String::trim(string str, const string& characters) {
     size_t found = str.find_first_not_of(characters);
