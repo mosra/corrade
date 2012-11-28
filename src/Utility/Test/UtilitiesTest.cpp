@@ -24,10 +24,7 @@ namespace Corrade { namespace Utility { namespace Test {
 
 UtilitiesTest::UtilitiesTest() {
     addTests(&UtilitiesTest::pow2,
-             &UtilitiesTest::log2,
-             &UtilitiesTest::trim,
-             &UtilitiesTest::split,
-             &UtilitiesTest::lowercase);
+             &UtilitiesTest::log2);
 }
 
 void UtilitiesTest::pow2() {
@@ -36,56 +33,6 @@ void UtilitiesTest::pow2() {
 
 void UtilitiesTest::log2() {
     CORRADE_COMPARE(Utility::log2(2153), 11);
-}
-
-void UtilitiesTest::trim() {
-    /* Spaces at the end */
-    CORRADE_COMPARE(Utility::trim("abc  "), "abc");
-
-    /* Spaces at the beginning */
-    CORRADE_COMPARE(Utility::trim("  abc"), "abc");
-
-    /* Spaces on both beginning and end */
-    CORRADE_COMPARE(Utility::trim("  abc  "), "abc");
-
-    /* No spaces */
-    CORRADE_COMPARE(Utility::trim("abc"), "abc");
-
-    /* All spaces */
-    CORRADE_COMPARE(Utility::trim("\t\r\n\f\v "), "");
-}
-
-void UtilitiesTest::split() {
-    /* No delimiters */
-    CORRADE_COMPARE(Utility::split("abcdef", '/'),
-                    std::vector<std::string>{"abcdef"});
-
-    /* Common case */
-    CORRADE_COMPARE(Utility::split("ab/c/def", '/'),
-                    (std::vector<std::string>{"ab", "c", "def"}));
-
-    /* Empty parts */
-    CORRADE_COMPARE(Utility::split("ab//c/def//", '/'),
-                    (std::vector<std::string>{"ab", "", "c", "def", "", ""}));
-
-    /* Skip empty parts */
-    CORRADE_COMPARE(Utility::split("ab//c/def//", '/', false),
-                    (std::vector<std::string>{"ab", "c", "def"}));
-}
-
-void UtilitiesTest::lowercase() {
-    /* Lowecase */
-    CORRADE_COMPARE(Utility::lowercase("hello"), "hello");
-
-    /* Uppercase */
-    CORRADE_COMPARE(Utility::lowercase("QWERTZUIOP"), "qwertzuiop");
-
-    /* Special chars */
-    CORRADE_COMPARE(Utility::lowercase(".,?- \"!/(98765%"), ".,?- \"!/(98765%");
-
-    /* UTF-8 */
-    CORRADE_EXPECT_FAIL("UTF-8 lowercasing is not supported.");
-    CORRADE_COMPARE(Utility::lowercase("ĚŠČŘŽÝÁÍÉÚŮĎŤŇ"), "ěščřžýáíéúůďťň");
 }
 
 }}}

@@ -14,6 +14,7 @@ corrade_add_test2(UtilitiesTest UtilitiesTest.cpp LIBRARIES CorradeUtility)
 corrade_add_test(ConfigurationTest ConfigurationTest.h ConfigurationTest.cpp CorradeUtility)
 corrade_add_test(DebugTest DebugTest.h DebugTest.cpp CorradeUtility)
 corrade_add_test(Sha1Test Sha1Test.h Sha1Test.cpp CorradeUtility)
+corrade_add_test2(StringTest StringTest.cpp LIBRARIES CorradeUtility)
 corrade_add_test(TranslatorTest TranslatorTest.h TranslatorTest.cpp CorradeUtility)
 
 # Compiled-in resource test

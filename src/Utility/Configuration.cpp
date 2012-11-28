@@ -19,7 +19,7 @@
 #include <fstream>
 
 #include "Debug.h"
-#include "utilities.h"
+#include "String.h"
 
 using namespace std;
 
@@ -96,7 +96,7 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
             flags |= InternalFlag::WindowsEol;
 
         /* Trim buffer */
-        buffer = trim(buffer);
+        buffer = String::trim(buffer);
 
         /* Group header */
         if(buffer[0] == '[') {
@@ -105,7 +105,7 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
             if(buffer[buffer.size()-1] != ']')
                 throw string("Missing closing bracket for group header!");
 
-            string nextGroup = trim(buffer.substr(1, buffer.size()-2));
+            string nextGroup = String::trim(buffer.substr(1, buffer.size()-2));
 
             if(nextGroup.empty())
                 throw string("Empty group name!");
@@ -153,8 +153,8 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
                 throw string("Key/value pair without '=' character!");
 
             ConfigurationGroup::Item item;
-            item.key = trim(buffer.substr(0, splitter));
-            item.value = trim(buffer.substr(splitter+1), " \t\v\f\r\n");
+            item.key = String::trim(buffer.substr(0, splitter));
+            item.value = String::trim(buffer.substr(splitter+1), " \t\v\f\r\n");
 
             /* Remove quotes, if present */
             /** @todo Check `"` characters better */
