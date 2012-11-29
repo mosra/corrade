@@ -5,10 +5,20 @@
 # This module tries to find Corrade library and then defines:
 #  CORRADE_FOUND                    - True if Corrade library is found
 #  CORRADE_INCLUDE_DIR              - Include dir for Corrade
-#  CORRADE_UTILITY_LIBRARY          - Corrade Utility library
-#  CORRADE_PLUGINMANAGER_LIBRARY    - Corrade Plugin manager library
-#  CORRADE_TESTSUITE_LIBRARY        - Corrade TestSuite library
+#  CORRADE_UTILITY_LIBRARIES        - Corrade Utility library and dependent
+#   libraries
+#  CORRADE_PLUGINMANAGER_LIBRARIES  - Corrade Plugin manager library and
+#   dependent libraries
+#  CORRADE_TESTSUITE_LIBRARIES      - Corrade TestSuite library and dependent
+#   libraries
 #  CORRADE_RC_EXECUTABLE            - Corrade resource compiler executable
+# Additionally these variables are defined for internal usage:
+#  CORRADE_UTILITY_LIBRARY          - Corrade Utility library (w/o
+#   dependencies)
+#  CORRADE_PLUGINMANAGER_LIBRARY    - Corrade Plugin manager library (w/o
+#   dependencies)
+#  CORRADE_TESTSUITE_LIBRARY        - Corrade TestSuite library (w/o
+#   dependencies)
 # If Corrade library is found, these macros and functions are defined:
 #
 #
@@ -119,6 +129,11 @@ find_package_handle_standard_args(Corrade DEFAULT_MSG
 if(NOT CORRADE_FOUND)
     return()
 endif()
+
+set(CORRADE_UTILITY_LIBRARIES ${CORRADE_UTILITY_LIBRARY})
+set(CORRADE_PLUGINMANAGER_LIBRARIES ${CORRADE_PLUGINMANAGER_LIBRARY} ${CORRADE_UTILITY_LIBRARIES})
+set(CORRADE_TESTSUITE_LIBRARIES ${CORRADE_TESTSUITE_LIBRARY} ${CORRADE_UTILITY_LIBRARIES})
+mark_as_advanced(CORRADE_UTILITY_LIBRARY CORRADE_PLUGINMANAGER_LIBRARY CORRADE_TESTSUITE_LIBRARY)
 
 include(CorradeMacros)
 include(CorradeLibSuffix)
