@@ -238,6 +238,16 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         inline std::string filename() const { return _filename; }
 
         /**
+         * @brief Set filename
+         *
+         * The configuration will be saved under this filename.
+         * @see save()
+         */
+        inline void setFilename(const std::string& filename) {
+            _filename = filename;
+        }
+
+        /**
          * @brief Whether the file is valid
          * @return Returns false if the file has syntax errors or couldn't be
          *      opened, true otherwise.
@@ -299,6 +309,8 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * Configuration::ReadOnly flag wasn't set). Note that even if no change
          * to the configuration was made, the file could differ after saving
          * (see Configuration::Flags).
+         *
+         * @see filename(), setFilename()
          */
         bool save();
 
