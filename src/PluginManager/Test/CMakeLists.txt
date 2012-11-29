@@ -12,7 +12,7 @@ corrade_add_plugin(Snail ${CMAKE_CURRENT_BINARY_DIR} Snail.conf Snail.cpp)
 corrade_add_plugin(Dog ${CMAKE_CURRENT_BINARY_DIR} Dog.conf Dog.cpp)
 corrade_add_plugin(Chihuahua ${CMAKE_CURRENT_BINARY_DIR} Chihuahua.conf Chihuahua.cpp)
 corrade_add_static_plugin(CorradeCore_PluginManager_Test_Plugins Canary Canary.conf Canary.cpp)
-corrade_add_test(PluginTest PluginTest.h PluginTest.cpp CorradePluginManager ${CorradeCore_PluginManager_Test_Plugins})
+corrade_add_test(PluginManagerPluginTest PluginTest.h PluginTest.cpp CorradePluginManager ${CorradeCore_PluginManager_Test_Plugins})
 
 if(WIN32)
     target_link_libraries(Snail CorradePluginManager)

@@ -49,8 +49,3 @@ if(BUILD_EXAMPLES)
 
     add_subdirectory(examples)
 endif()
-
-install(DIRECTORY src/ DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}
-        FILES_MATCHING PATTERN "*.h"
-        PATTERN "*/Test" EXCLUDE
-        PATTERN "*/doc" EXCLUDE)

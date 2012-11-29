@@ -14,10 +14,29 @@ set(CorradeUtility_SRCS
     TypeTraits.cpp
     utilities.cpp)
 
+set(CorradeUtility_HEADERS
+    AbstractHash.h
+    Configuration.h
+    ConfigurationGroup.h
+    ConfigurationValue.h
+    Debug.h
+    Directory.h
+    Endianness.h
+    MurmurHash2.h
+    Resource.h
+    Sha1.h
+    String.h
+    Translator.h
+    TypeTraits.h
+    utilities.h
+
+    corradeUtilityVisibility.h)
+
 add_library(CorradeUtility SHARED ${CorradeUtility_SRCS})
 set_target_properties(CorradeUtility PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
 
 install(TARGETS CorradeUtility DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
+install(FILES ${CorradeUtility_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/Utility)
 
 if(NOT CMAKE_CROSSCOMPILING)
     add_executable(corrade-rc rc.cpp)
