@@ -1,7 +1,8 @@
 add_subdirectory(Compare)
 
 set(CorradeTestSuite_SRCS
-    Compare/File.cpp)
+    Compare/File.cpp
+    Compare/FileToString.cpp)
 
 add_library(CorradeTestSuite SHARED ${CorradeTestSuite_SRCS})
 set_target_properties(CorradeTestSuite PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})

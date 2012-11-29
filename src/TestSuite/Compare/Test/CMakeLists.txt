@@ -7,3 +7,4 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 corrade_add_test2(TestSuiteCompareContainerTest ContainerTest.cpp)
 corrade_add_test2(TestSuiteCompareFileTest FileTest.cpp)
+corrade_add_test2(TestSuiteCompareFileToStringTest FileToStringTest.cpp)
