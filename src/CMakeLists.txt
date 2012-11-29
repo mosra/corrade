@@ -16,6 +16,10 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/corradeConfigure.h DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR})
 
 if(BUILD_TESTS)
+    # Explicitly set TestSuite libraries, because CORRADE_TESTSUITE_LIBRARIES
+    # is not available here
+    set(CORRADE_TESTSUITE_LIBRARIES CorradeTestSuite CorradeUtility)
+
     enable_testing()
     include_directories(${QT_INCLUDE_DIR})
 endif()

@@ -27,8 +27,9 @@
 #                    sources...
 #                    [LIBRARIES libraries...])
 # Test name is also executable name. You can also specify libraries to link
-# with instead of using target_link_libraries(). Note that the
-# enable_testing() must be called explicitly.
+# with instead of using target_link_libraries(). CORRADE_TESTSUITE_LIBRARIES
+# are linked atuomatically to each test. Note that the enable_testing()
+# function must be called explicitly.
 #
 #
 # Add QtTest unit test.

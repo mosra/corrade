@@ -6,15 +6,15 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testConfigure.h.cmake
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-corrade_add_test2(AbstractHashTest AbstractHashTest.cpp LIBRARIES CorradeUtility)
+corrade_add_test2(AbstractHashTest AbstractHashTest.cpp)
 corrade_add_test(DirectoryTest DirectoryTest.h DirectoryTest.cpp CorradeUtility)
 corrade_add_test(EndianTest EndianTest.h EndianTest.cpp CorradeUtility)
-corrade_add_test2(MurmurHash2Test MurmurHash2Test.cpp LIBRARIES CorradeUtility)
-corrade_add_test2(UtilitiesTest UtilitiesTest.cpp LIBRARIES CorradeUtility)
+corrade_add_test2(MurmurHash2Test MurmurHash2Test.cpp)
+corrade_add_test2(UtilitiesTest UtilitiesTest.cpp)
 corrade_add_test(ConfigurationTest ConfigurationTest.h ConfigurationTest.cpp CorradeUtility)
 corrade_add_test(DebugTest DebugTest.h DebugTest.cpp CorradeUtility)
 corrade_add_test(Sha1Test Sha1Test.h Sha1Test.cpp CorradeUtility)
-corrade_add_test2(StringTest StringTest.cpp LIBRARIES CorradeUtility)
+corrade_add_test2(StringTest StringTest.cpp)
 corrade_add_test(TranslatorTest TranslatorTest.h TranslatorTest.cpp CorradeUtility)
 
 # Compiled-in resource test
