@@ -57,7 +57,7 @@ void TranslatorTest::file() {
 }
 
 void TranslatorTest::group() {
-    Configuration c(Directory::join(TRANSLATOR_TEST_DIR, "primary.conf"), Configuration::ReadOnly);
+    Configuration c(Directory::join(TRANSLATOR_TEST_DIR, "primary.conf"), Configuration::Flag::ReadOnly);
 
     Translator t(&c);
 
@@ -71,7 +71,7 @@ void TranslatorTest::group() {
 }
 
 void TranslatorTest::dynamic() {
-    Configuration c(Directory::join(TRANSLATOR_TEST_DIR, "primary.conf"), Configuration::ReadOnly);
+    Configuration c(Directory::join(TRANSLATOR_TEST_DIR, "primary.conf"), Configuration::Flag::ReadOnly);
     Translator t1(Directory::join(TRANSLATOR_TEST_DIR, "#.conf"));
     Translator t2;
     t2.setPrimary(&c, true);

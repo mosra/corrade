@@ -23,7 +23,37 @@ using namespace Corrade::Utility;
 
 CORRADE_TEST_MAIN(Corrade::TestSuite::Test::TesterTest)
 
-namespace Corrade { namespace TestSuite { namespace Test {
+namespace Corrade { namespace TestSuite {
+
+class StringLength;
+
+template<> class Comparator<StringLength> {
+    public:
+        inline Comparator(int epsilon = 0): epsilon(epsilon) {}
+
+        inline bool operator()(const std::string& actual, const std::string& expected) {
+            return std::abs(int(actual.size()) - int(expected.size())) <= epsilon;
+        }
+
+        inline void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
+            e << "Length of actual" << actual << "doesn't match length of expected" << expected << "with epsilon" << epsilon;
+        }
+
+    private:
+        int epsilon;
+};
+
+class StringLength {
+    public:
+        StringLength(int epsilon = 0): c(epsilon) {}
+
+        inline Comparator<StringLength> comparator() { return c; }
+
+    private:
+        Comparator<StringLength> c;
+};
+
+namespace Test {
 
 TesterTest::TesterTest() {
     addTests(&TesterTest::test,
@@ -38,7 +68,11 @@ TesterTest::Test::Test() {
              &Test::nonEqual,
              &Test::expectFail,
              &Test::unexpectedPassExpression,
-             &Test::unexpectedPassEqual);
+             &Test::unexpectedPassEqual,
+             &Test::compareAs,
+             &Test::compareAsFail,
+             &Test::compareWth,
+             &Test::compareWithFail);
 }
 
 void TesterTest::Test::noChecks() {
@@ -83,6 +117,22 @@ void TesterTest::Test::unexpectedPassEqual() {
     CORRADE_COMPARE(2 + 2, 4);
 }
 
+void TesterTest::Test::compareAs() {
+    CORRADE_COMPARE_AS("kill!", "hello", StringLength);
+}
+
+void TesterTest::Test::compareAsFail() {
+    CORRADE_COMPARE_AS("meh", "hello", StringLength);
+}
+
+void TesterTest::Test::compareWth() {
+    CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(10));
+}
+
+void TesterTest::Test::compareWithFail() {
+    CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(9));
+}
+
 void TesterTest::emptyTest() {
     stringstream out;
 
@@ -104,23 +154,30 @@ void TesterTest::test() {
 
     CORRADE_VERIFY(result == 1);
 
-    string expected = "Starting TesterTest::Test with 8 test cases...\n"
+    string expected =
+        "Starting TesterTest::Test with 12 test cases...\n"
         "    OK: trueExpression()\n"
-        "  FAIL: falseExpression() at here.cpp on line 53 \n"
+        "  FAIL: falseExpression() at here.cpp on line 87 \n"
         "        Expression 5 != 5 failed.\n"
         "    OK: equal()\n"
-        "  FAIL: nonEqual() at here.cpp on line 63 \n"
+        "  FAIL: nonEqual() at here.cpp on line 97 \n"
         "        Values a and b are not the same, actual 5 but 3 expected.\n"
-        " XFAIL: expectFail() at here.cpp on line 69 \n"
+        " XFAIL: expectFail() at here.cpp on line 103 \n"
         "        The world is not mad yet. 2 + 2 and 5 are not equal.\n"
-        " XFAIL: expectFail() at here.cpp on line 70 \n"
+        " XFAIL: expectFail() at here.cpp on line 104 \n"
         "        The world is not mad yet. Expression false == true failed.\n"
         "    OK: expectFail()\n"
-        " XPASS: unexpectedPassExpression() at here.cpp on line 78 \n"
+        " XPASS: unexpectedPassExpression() at here.cpp on line 112 \n"
         "        Expression true == true was expected to fail.\n"
-        " XPASS: unexpectedPassEqual() at here.cpp on line 83 \n"
+        " XPASS: unexpectedPassEqual() at here.cpp on line 117 \n"
         "        2 + 2 and 4 are not expected to be equal.\n"
-        "Finished TesterTest::Test with 4 errors. 1 test cases didn't contain any checks!\n";
+        "    OK: compareAs()\n"
+        "  FAIL: compareAsFail() at here.cpp on line 125 \n"
+        "        Length of actual \"meh\" doesn't match length of expected \"hello\" with epsilon 0\n"
+        "    OK: compareWth()\n"
+        "  FAIL: compareWithFail() at here.cpp on line 133 \n"
+        "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
+        "Finished TesterTest::Test with 6 errors. 1 test cases didn't contain any checks!\n";
 
     CORRADE_COMPARE(out.str(), expected);
 }

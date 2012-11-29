@@ -21,8 +21,6 @@
  */
 
 #include <cstring>
-#include <string>
-#include <vector>
 
 #include "corradeUtilityVisibility.h"
 
@@ -57,37 +55,7 @@ inline unsigned int pow2(unsigned int number) { return 1 << number; }
  * @brief Base-2 logarithm
  * @return log2(number)
  */
-UTILITY_EXPORT unsigned int log2(unsigned int number);
-
-/*@}*/
-
-/** @{ @name String utilities */
-
-/**
- * @brief Trim leading and trailing whitespaces from string
- * @param str           String to be trimmed
- * @param characters    Characters which will be trimmed
- * @return Trimmed string
- */
-UTILITY_EXPORT std::string trim(std::string str, const std::string& characters = " \t\f\v\r\n");
-
-/**
- * @brief Split string on given character
- * @param str               String to be splitted
- * @param delim             Delimiter
- * @param keepEmptyParts    Whether to keep empty parts
- * @return Vector of splitted strings
- */
-UTILITY_EXPORT std::vector<std::string> split(const std::string& str, char delim, bool keepEmptyParts = true);
-
-/**
- * @brief Convert string to lowercase
- * @param str               String to be converted
- * @return Lowercase version of the string
- *
- * @note Doesn't work with UTF-8.
- */
-UTILITY_EXPORT std::string lowercase(std::string str);
+CORRADE_UTILITY_EXPORT unsigned int log2(unsigned int number);
 
 /*@}*/
 
@@ -97,7 +65,7 @@ UTILITY_EXPORT std::string lowercase(std::string str);
  * @brief Sleep for given time
  * @param ms                Miliseconds
  */
-UTILITY_EXPORT void sleep(size_t ms);
+CORRADE_UTILITY_EXPORT void sleep(size_t ms);
 
 /*@}*/
 

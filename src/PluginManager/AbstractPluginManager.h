@@ -43,7 +43,7 @@ class Plugin;
  * Base abstract class for all PluginManager templated classes. See also
  * @ref plugin-management.
  */
-class PLUGINMANAGER_EXPORT AbstractPluginManager {
+class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
     friend class Plugin;
 
     DISABLE_COPY(AbstractPluginManager)
@@ -305,7 +305,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
              * @param _manager      Associated plugin manager
              */
             inline PluginObject(const std::string& _metadata, AbstractPluginManager* _manager):
-                configuration(_metadata, Utility::Configuration::ReadOnly), metadata(configuration), manager(_manager), instancer(nullptr), module(nullptr) {
+                configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(_manager), instancer(nullptr), module(nullptr) {
                     if(configuration.isValid()) loadState = NotLoaded;
                     else loadState = WrongMetadataFile;
                 }
@@ -317,7 +317,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
              * @param _instancer    Instancer function
              */
             inline PluginObject(std::istream& _metadata, std::string _interface, Instancer _instancer):
-                loadState(IsStatic), interface(_interface), configuration(_metadata, Utility::Configuration::ReadOnly), metadata(configuration), manager(nullptr), instancer(_instancer), module(nullptr) {}
+                loadState(IsStatic), interface(_interface), configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(nullptr), instancer(_instancer), module(nullptr) {}
         };
 
         /** @brief Directory where to search for dynamic plugins */
@@ -380,7 +380,7 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          *
          * See staticPlugins() for more information.
          */
-        struct PLUGINMANAGER_LOCAL StaticPluginObject {
+        struct CORRADE_PLUGINMANAGER_LOCAL StaticPluginObject {
             std::string plugin;      /**< @brief %Plugin name */
             std::string interface;   /**< @brief %Plugin interface */
 
@@ -403,12 +403,12 @@ class PLUGINMANAGER_EXPORT AbstractPluginManager {
          * members and thus the vector could be uninitalized when accessed
          * from PLUGIN_REGISTER().
          */
-        PLUGINMANAGER_LOCAL static std::vector<StaticPluginObject>*& staticPlugins();
+        CORRADE_PLUGINMANAGER_LOCAL static std::vector<StaticPluginObject>*& staticPlugins();
 
         std::map<std::string, std::vector<Plugin*> > instances;
 
-        PLUGINMANAGER_LOCAL void registerInstance(const std::string& plugin, Plugin* instance, const Utility::Configuration** configuration, const PluginMetadata** metadata);
-        PLUGINMANAGER_LOCAL void unregisterInstance(const std::string& plugin, Plugin* instance);
+        CORRADE_PLUGINMANAGER_LOCAL void registerInstance(const std::string& plugin, Plugin* instance, const Utility::Configuration** configuration, const PluginMetadata** metadata);
+        CORRADE_PLUGINMANAGER_LOCAL void unregisterInstance(const std::string& plugin, Plugin* instance);
 };
 
 /**
@@ -438,7 +438,7 @@ problem. See RESOURCE_INITIALIZE() documentation for more information.
 } namespace Utility {
 
 /** @debugoperator{Corrade::PluginManager::AbstractPluginManager} */
-Debug PLUGINMANAGER_EXPORT operator<<(Debug debug, PluginManager::AbstractPluginManager::LoadState value);
+Debug CORRADE_PLUGINMANAGER_EXPORT operator<<(Debug debug, PluginManager::AbstractPluginManager::LoadState value);
 
 }}
 

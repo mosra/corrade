@@ -133,8 +133,11 @@ template<class Derived> class Tester {
 
         /* Compare two different types with explicit type specification */
         template<class T, class U, class V> void compare(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
-            Comparator<T> comparator;
+            compareWith(Comparator<T>(), actual, actualValue, expected, expectedValue);
+        }
 
+        /* Compare two different types with explicit comparator specification */
+        template<class T, class U, class V> void compareWith(Comparator<T> comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
             /* If the comparison succeeded or the failure is expected, done */
             bool equal = comparator(actualValue, expectedValue);
             if(!expectedFailure) {
@@ -272,12 +275,31 @@ CORRADE_COMPARE_AS(sin(0.0f), 0.0f, float);
 See also @ref Corrade::TestSuite::Comparator "Comparator" class documentation
 for example of more involved comparisons.
 
-@see CORRADE_VERIFY(), CORRADE_COMPARE()
+@see CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_WITH()
 */
 #define CORRADE_COMPARE_AS(actual, expected, Type)                          \
     do {                                                                    \
         _CORRADE_REGISTER_TEST_CASE();                                      \
         compare<Type>(#actual, actual, #expected, expected);                \
+    } while(false)
+
+/** @hideinitializer
+@brief %Compare two values in Tester subclass with explicitly specified comparator
+
+If the values are not the same, they are printed for comparison and execution
+of given test case is terminated. Example usage:
+@code
+CORRADE_COMPARE_WITH("actual.txt", "expected.txt", Compare::File("/common/path/prefix"));
+@endcode
+See @ref Corrade::TestSuite::Comparator "Comparator" class documentation for
+more information.
+
+@see CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS()
+*/
+#define CORRADE_COMPARE_WITH(actual, expected, comparatorInstance)          \
+    do {                                                                    \
+        _CORRADE_REGISTER_TEST_CASE();                                      \
+        compareWith(comparatorInstance.comparator(), #actual, actual, #expected, expected); \
     } while(false)
 
 /** @hideinitializer

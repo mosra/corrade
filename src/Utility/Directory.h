@@ -40,7 +40,7 @@ removing and renaming files or directories.
 @todo Return rather vector<string> instead of this voodoo?
 @todo Unicode <-> UTF8 path conversion for Windows
  */
-class UTILITY_EXPORT Directory: public std::vector<std::string> {
+class CORRADE_UTILITY_EXPORT Directory: public std::vector<std::string> {
     private:
         /* Hiding edit functions and types to private scope */
         using std::vector<std::string>::iterator;

@@ -25,7 +25,8 @@
 #include <shlobj.h>
 #endif
 
-#include "utilities.h"
+#include "String.h"
+
 #include "corradeCompatibility.h"
 
 using namespace std;
@@ -129,7 +130,7 @@ string Directory::configurationDir(const std::string& applicationName, bool crea
     #ifndef _WIN32
     string h = home();
     if(h.empty()) return "";
-    string dir = join(h, '.' + lowercase(applicationName));
+    string dir = join(h, '.' + String::lowercase(applicationName));
     #else
     TCHAR path[MAX_PATH];
     #pragma GCC diagnostic push

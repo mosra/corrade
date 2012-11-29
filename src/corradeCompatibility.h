@@ -1,5 +1,5 @@
-#ifndef corradeCompatibility_h
-#define corradeCompatibility_h
+#ifndef Corrade_corradeCompatibility_h
+#define Corrade_corradeCompatibility_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -21,6 +21,10 @@
 #ifdef CORRADE_GCC45_COMPATIBILITY
 #define constexpr
 #define nullptr 0
+#endif
+
+#ifdef CORRADE_GCC46_COMPATIBILITY
+#define override
 #endif
 
 #endif

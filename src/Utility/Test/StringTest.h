@@ -1,5 +1,5 @@
-#ifndef Corrade_Utility_Test_UtilitiesTest_h
-#define Corrade_Utility_Test_UtilitiesTest_h
+#ifndef Corrade_Utility_Test_StringTest_h
+#define Corrade_Utility_Test_StringTest_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -20,12 +20,14 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class UtilitiesTest: public TestSuite::Tester<UtilitiesTest> {
+class StringTest: public TestSuite::Tester<StringTest> {
     public:
-        UtilitiesTest();
+        StringTest();
 
-        void pow2();
-        void log2();
+        void trim();
+        void split();
+        void lowercase();
+        void whitespace();
 };
 
 }}}

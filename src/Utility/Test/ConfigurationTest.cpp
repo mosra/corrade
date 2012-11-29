@@ -16,484 +16,435 @@
 
 #include "ConfigurationTest.h"
 
-#include <string>
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtTest/QTest>
-
+#include "TestSuite/Compare/Container.h"
+#include "TestSuite/Compare/File.h"
+#include "TestSuite/Compare/FileToString.h"
 #include "Utility/Configuration.h"
+#include "Utility/Directory.h"
+
 #include "testConfigure.h"
 
-using namespace std;
-
-QTEST_APPLESS_MAIN(Corrade::Utility::Test::ConfigurationTest)
+CORRADE_TEST_MAIN(Corrade::Utility::Test::ConfigurationTest)
 
 namespace Corrade { namespace Utility { namespace Test {
 
 ConfigurationTest::ConfigurationTest() {
+    addTests(&ConfigurationTest::parse,
+             &ConfigurationTest::parseDirect,
+             &ConfigurationTest::empty,
+             &ConfigurationTest::invalid,
+             &ConfigurationTest::readonly,
+             &ConfigurationTest::readonlyWithoutFile,
+             &ConfigurationTest::truncate,
+             &ConfigurationTest::whitespaces,
+             &ConfigurationTest::types,
+             &ConfigurationTest::eol,
+             &ConfigurationTest::uniqueGroups,
+             &ConfigurationTest::uniqueKeys,
+             &ConfigurationTest::stripComments,
+             &ConfigurationTest::autoCreation,
+             &ConfigurationTest::directValue,
+             &ConfigurationTest::hierarchic,
+             &ConfigurationTest::hierarchicUnique,
+             &ConfigurationTest::copy);
+
     /* Create testing dir */
-    QDir testDir;
-    Q_ASSERT(testDir.mkpath(CONFIGURATION_WRITE_TEST_DIR));
+    Directory::mkpath(CONFIGURATION_WRITE_TEST_DIR);
 
-    /* Copy files for testing */
-    QDir dir(CONFIGURATION_TEST_DIR);
-    QStringList filters;
-    filters << "*.conf";
-    QStringList list = dir.entryList(filters, QDir::Files);
-    foreach(QString file, list) {
-        /* Remove file */
-        QFile::remove(CONFIGURATION_WRITE_TEST_DIR + file);
-
-        Q_ASSERT(QFile::copy(CONFIGURATION_TEST_DIR + file, CONFIGURATION_WRITE_TEST_DIR + file));
-    }
+    /* Remove everything there */
+    Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"));
+    Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "new.conf"));
+    Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types.conf"));
 }
 
 void ConfigurationTest::parse() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("parse.conf"));
-    QVERIFY(conf.isValid());
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "parse.conf"));
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"));
+    CORRADE_VERIFY(conf.isValid());
 
     /* Groups */
-    QVERIFY(conf.groupCount() == 4);
-    QVERIFY(conf.groups().size() == 4);
-    QVERIFY(conf.groupCount("group") == 2);
-    QVERIFY(conf.groupCount("empty_group") == 1);
-    QVERIFY(!conf.groupExists("group_inexistent"));
+    CORRADE_COMPARE(conf.groupCount(), 4);
+    CORRADE_COMPARE(conf.groups().size(), 4);
+    CORRADE_COMPARE(conf.groupCount("group"), 2);
+    CORRADE_COMPARE(conf.groupCount("empty_group"), 1);
+    CORRADE_VERIFY(!conf.groupExists("group_inexistent"));
+    CORRADE_COMPARE_AS((std::vector<ConfigurationGroup*>{conf.group("group", 0), conf.group("group", 1)}),
+        conf.groups("group"), TestSuite::Compare::Container);
 
-    vector<ConfigurationGroup*> expectedGroups;
-    expectedGroups.push_back(conf.group("group", 0));
-    expectedGroups.push_back(conf.group("group", 1));
-    QVERIFY(expectedGroups == conf.groups("group"));
-
-    string tmp;
+    std::string tmp;
 
     /* Keys */
-    QVERIFY(conf.value("key", &tmp));
-    QVERIFY(tmp == "value");
+    CORRADE_VERIFY(conf.value("key", &tmp));
+    CORRADE_COMPARE(tmp, "value");
+    CORRADE_VERIFY(conf.group("group", 1)->value("c", &tmp, 1));
+    CORRADE_COMPARE(tmp, "value5");
+    CORRADE_COMPARE_AS(conf.group("group", 1)->values<std::string>("c"),
+        (std::vector<std::string>{"value4", "value5"}), TestSuite::Compare::Container);
+    CORRADE_VERIFY(conf.keyExists("key"));
+    CORRADE_VERIFY(!conf.keyExists("key_inexistent"));
 
-    QVERIFY(conf.group("group", 1)->value("c", &tmp, 1));
-    QVERIFY(tmp == "value5");
-
-    vector<string> expectedValues;
-    expectedValues.push_back("value4");
-    expectedValues.push_back("value5");
-    QVERIFY(conf.group("group", 1)->values<string>("c") == expectedValues);
-
-    QVERIFY(conf.keyExists("key"));
-    QVERIFY(!conf.keyExists("key_inexistent"));
-
-    /* Save file back */
-    QVERIFY(conf.save());
-
-    /* Expecting no change */
-    QFile fileOrig(CONFIGURATION_TEST_DIR + QString("parse.conf"));
-    QFile fileActual(CONFIGURATION_WRITE_TEST_DIR + QString("parse.conf"));
-    fileOrig.open(QFile::Text|QFile::ReadOnly);
-    fileActual.open(QFile::Text|QFile::ReadOnly);
-    QByteArray original = fileOrig.readAll();
-    QByteArray actual = fileActual.readAll();
-    fileActual.close();
-    fileOrig.close();
-
-    QCOMPARE(actual, original);
+    /* Save file back - expecting no change */
+    CORRADE_VERIFY(conf.save());
 
     /* Modify */
-    QVERIFY(conf.addValue<string>("new", "value"));
-    QVERIFY(conf.removeAllGroups("group"));
-    QVERIFY(conf.group("third_group")->clear());
-    QVERIFY(conf.removeGroup("empty_group"));
-    QVERIFY(conf.addGroup("new_group"));
-    QVERIFY(conf.group("new_group")->addValue<string>("another", "value"));
-    QVERIFY(conf.addGroup("new_group_copy", new ConfigurationGroup(*conf.group("new_group"))));
-    QVERIFY(conf.removeAllValues("key"));
+    CORRADE_VERIFY(conf.addValue<std::string>("new", "value"));
+    CORRADE_VERIFY(conf.removeAllGroups("group"));
+    CORRADE_VERIFY(conf.group("third_group")->clear());
+    CORRADE_VERIFY(conf.removeGroup("empty_group"));
+    CORRADE_VERIFY(conf.addGroup("new_group"));
+    CORRADE_VERIFY(conf.group("new_group")->addValue<std::string>("another", "value"));
+    CORRADE_VERIFY(conf.addGroup("new_group_copy", new ConfigurationGroup(*conf.group("new_group"))));
+    CORRADE_VERIFY(conf.removeAllValues("key"));
 
-    QVERIFY(conf.save());
-
-    /* Verify changes */
-    fileOrig.setFileName(CONFIGURATION_TEST_DIR + QString("parse-modified.conf"));
-    fileOrig.open(QFile::Text|QFile::ReadOnly);
-    fileActual.open(QFile::Text|QFile::ReadOnly);
-    original = fileOrig.readAll();
-    actual = fileActual.readAll();
-
-    QCOMPARE(actual, original);
+    /* Save again, verify changes */
+    CORRADE_VERIFY(conf.save());
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "parse-modified.conf"),
+                       TestSuite::Compare::File);
 }
 
 void ConfigurationTest::parseDirect() {
     /* Configuration created directly from istream should be readonly */
-    istringstream contents("[group]\nkey=value");
+    std::istringstream contents("[group]\nkey=value");
     Configuration conf(contents);
-    QVERIFY(conf.isValid());
-    QVERIFY(!conf.addValue<string>("key2", "value2"));
-    QVERIFY(!conf.save());
+    CORRADE_VERIFY(conf.isValid());
+    CORRADE_VERIFY(!conf.addValue<std::string>("key2", "value2"));
+    CORRADE_VERIFY(!conf.save());
 }
 
 void ConfigurationTest::empty() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("new.conf"));
-    QVERIFY(conf.isValid());
-    QVERIFY(conf.save());
+    Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "new.conf"));
+    CORRADE_VERIFY(conf.isValid());
+    CORRADE_VERIFY(conf.save());
 }
 
 void ConfigurationTest::invalid() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("invalid.conf"));
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "invalid.conf"));
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "invalid.conf"));
 
     /* The group is there */
-    QEXPECT_FAIL("", "Currently on invalid row whole group is dropped", Continue);
-    QVERIFY(conf.groupCount("group") == 1);
+    {
+        CORRADE_EXPECT_FAIL("Currently on invalid row whole group is dropped");
+        CORRADE_COMPARE(conf.groupCount("group"), 1);
+        /* TODO: enable after fix of XFAIL */
+        // CORRADE_VERIFY(!conf.group("group")->setValue<string>("key", "newValue"));
+        // CORRADE_VERIFY(!conf.group("group")->removeValue("key"));
+        // CORRADE_VERIFY(!conf.group("group")->removeAllValues("key"));
+    }
 
     /* Everything should be disabled */
-    QVERIFY(conf.addGroup("new") == nullptr);
-    QVERIFY(!conf.removeGroup("group"));
-    QVERIFY(!conf.removeAllGroups("group"));
-    QVERIFY(!conf.addValue<string>("new", "value"));
-/* TODO: enable after fix of XFAIL
-    QVERIFY(!conf.group("group")->setValue<string>("key", "newValue"));
-    QVERIFY(!conf.group("group")->removeValue("key"));
-    QVERIFY(!conf.group("group")->removeAllValues("key"));
-*/
-    QVERIFY(!conf.save());
+    CORRADE_VERIFY(!conf.isValid());
+    CORRADE_VERIFY(!conf.addGroup("new"));
+    CORRADE_VERIFY(!conf.removeGroup("group"));
+    CORRADE_VERIFY(!conf.removeAllGroups("group"));
+    CORRADE_VERIFY(!conf.addValue<std::string>("new", "value"));
+    CORRADE_VERIFY(!conf.save());
 }
 
 void ConfigurationTest::readonly() {
-    /* Reload fresh parse.conf */
-    QFile::remove(CONFIGURATION_WRITE_TEST_DIR + QString("parse.conf"));
-    Q_ASSERT(QFile::copy(CONFIGURATION_TEST_DIR + QString("parse.conf"), CONFIGURATION_WRITE_TEST_DIR + QString("parse.conf")));
-
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("parse.conf"), Configuration::ReadOnly);
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "parse.conf"), Configuration::Flag::ReadOnly);
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"));
 
     /* Everything should be disabled */
-    QVERIFY(conf.addGroup("new") == nullptr);
-    QVERIFY(!conf.removeGroup("group"));
-    QVERIFY(!conf.removeAllGroups("group"));
-    QVERIFY(!conf.group("third_group")->clear());
-    QVERIFY(!conf.addValue<string>("new", "value"));
-    QVERIFY(!conf.group("group")->setValue<string>("key", "newValue"));
-    QVERIFY(!conf.group("group")->removeValue("b"));
-    QVERIFY(!conf.group("group")->removeAllValues("b"));
-    QVERIFY(!conf.save());
+    CORRADE_VERIFY(!conf.addGroup("new"));
+    CORRADE_VERIFY(!conf.removeGroup("group"));
+    CORRADE_VERIFY(!conf.removeAllGroups("group"));
+    CORRADE_VERIFY(!conf.group("third_group")->clear());
+    CORRADE_VERIFY(!conf.addValue<std::string>("new", "value"));
+    CORRADE_VERIFY(!conf.group("group")->setValue<std::string>("key", "newValue"));
+    CORRADE_VERIFY(!conf.group("group")->removeValue("b"));
+    CORRADE_VERIFY(!conf.group("group")->removeAllValues("b"));
+    CORRADE_VERIFY(!conf.save());
 }
 
 void ConfigurationTest::readonlyWithoutFile() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("inexistent.conf"), Configuration::ReadOnly);
-    QVERIFY(!conf.isValid());
+    Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "inexistent.conf"), Configuration::Flag::ReadOnly);
+    CORRADE_VERIFY(!conf.isValid());
 }
 
 void ConfigurationTest::truncate() {
-    /* Reload fresh parse.conf */
-    QFile::remove(CONFIGURATION_WRITE_TEST_DIR + QString("parse.conf"));
-    Q_ASSERT(QFile::copy(CONFIGURATION_TEST_DIR + QString("parse.conf"), CONFIGURATION_WRITE_TEST_DIR + QString("parse.conf")));
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "parse.conf"), Configuration::Flag::Truncate);
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"));
 
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("parse.conf"), Configuration::Truncate);
-    conf.save();
+    CORRADE_COMPARE(conf.keyCount("key"), 0);
 
-    QVERIFY(conf.keyCount("key") == 0);
-
-    QFile file(CONFIGURATION_WRITE_TEST_DIR + QString("parse.conf"));
-    file.open(QFile::Text|QFile::ReadOnly);
-    QByteArray contents = file.readAll();
-    QVERIFY(contents == "");
+    CORRADE_VERIFY(conf.save());
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"),
+                       "", TestSuite::Compare::FileToString);
 }
 
 void ConfigurationTest::whitespaces() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("whitespaces.conf"));
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "whitespaces.conf"));
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "whitespaces.conf"));
     conf.save();
 
-    QFile fileOrig(CONFIGURATION_TEST_DIR + QString("whitespaces-saved.conf"));
-    QFile fileActual(CONFIGURATION_WRITE_TEST_DIR + QString("whitespaces.conf"));
-    fileOrig.open(QFile::Text|QFile::ReadOnly);
-    fileActual.open(QFile::Text|QFile::ReadOnly);
-    QByteArray original = fileOrig.readAll();
-    QByteArray actual = fileActual.readAll();
-
-    QCOMPARE(actual, original);
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "whitespaces.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "whitespaces-saved.conf"),
+                       TestSuite::Compare::File);
 }
 
 void ConfigurationTest::types() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("types.conf"));
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "types.conf"));
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types.conf"));
 
-    string tmp;
-    conf.value("string", &tmp);
-    QVERIFY(tmp == "value");
-    QVERIFY(conf.setValue("string", tmp));
-    conf.value("quotes", &tmp);
-    QVERIFY(tmp == " value ");
-    QVERIFY(conf.setValue("quotes", tmp));
+    std::string tmp;
+    CORRADE_VERIFY(conf.value("string", &tmp));
+    CORRADE_COMPARE(tmp, "value");
+    CORRADE_VERIFY(conf.setValue("string", tmp));
+    CORRADE_VERIFY(conf.value("quotes", &tmp));
+    CORRADE_COMPARE(tmp, " value ");
+    CORRADE_VERIFY(conf.setValue("quotes", tmp));
 
     int intTmp;
-    conf.value("int", &intTmp);
-    QVERIFY(intTmp == 5);
-    QVERIFY(conf.setValue("int", intTmp));
-    conf.value("intNeg", &intTmp);
-    QVERIFY(intTmp == -10);
-    QVERIFY(conf.setValue("intNeg", intTmp));
+    CORRADE_VERIFY(conf.value("int", &intTmp));
+    CORRADE_COMPARE(intTmp, 5);
+    CORRADE_VERIFY(conf.setValue("int", intTmp));
+    CORRADE_VERIFY(conf.value("intNeg", &intTmp));
+    CORRADE_COMPARE(intTmp, -10);
+    CORRADE_VERIFY(conf.setValue("intNeg", intTmp));
 
     bool boolTmp;
-    conf.value("bool", &boolTmp, 0);
-    QVERIFY(boolTmp);
-    QVERIFY(conf.setValue("bool", boolTmp, 0));
+    CORRADE_VERIFY(conf.value("bool", &boolTmp, 0));
+    CORRADE_VERIFY(boolTmp);
+    CORRADE_VERIFY(conf.setValue("bool", boolTmp, 0));
     boolTmp = false;
-    conf.value("bool", &boolTmp, 1);
-    QVERIFY(boolTmp);
+    CORRADE_VERIFY(conf.value("bool", &boolTmp, 1));
+    CORRADE_VERIFY(boolTmp);
     boolTmp = false;
-    conf.value("bool", &boolTmp, 2);
-    QVERIFY(boolTmp);
+    CORRADE_VERIFY(conf.value("bool", &boolTmp, 2));
+    CORRADE_VERIFY(boolTmp);
     boolTmp = false;
-    conf.value("bool", &boolTmp, 3);
-    QVERIFY(boolTmp);
-    conf.value("bool", &boolTmp, 4);
-    QVERIFY(!boolTmp);
-    QVERIFY(conf.setValue("bool", boolTmp, 4));
+    CORRADE_VERIFY(conf.value("bool", &boolTmp, 3));
+    CORRADE_VERIFY(boolTmp);
+    CORRADE_VERIFY(conf.value("bool", &boolTmp, 4));
+    CORRADE_VERIFY(!boolTmp);
+    CORRADE_VERIFY(conf.setValue("bool", boolTmp, 4));
 
     double doubleTmp;
-    conf.value("double", &doubleTmp);
-    QCOMPARE(doubleTmp, 3.78);
-    QVERIFY(conf.setValue("double", doubleTmp));
-    conf.value("doubleNeg", &doubleTmp);
-    QCOMPARE(doubleTmp, -2.14);
-    QVERIFY(conf.setValue("doubleNeg", doubleTmp));
+    CORRADE_VERIFY(conf.value("double", &doubleTmp));
+    CORRADE_COMPARE(doubleTmp, 3.78);
+    CORRADE_VERIFY(conf.setValue("double", doubleTmp));
+    CORRADE_VERIFY(conf.value("doubleNeg", &doubleTmp));
+    CORRADE_COMPARE(doubleTmp, -2.14);
+    CORRADE_VERIFY(conf.setValue("doubleNeg", doubleTmp));
 
     /* Flags */
-    conf.value("exp", &doubleTmp);
-    QCOMPARE(doubleTmp, 2.1e7);
-    conf.value("expPos", &doubleTmp);
-    QCOMPARE(doubleTmp, 2.1e+7);
-    QVERIFY(conf.setValue("expPos", doubleTmp, 0, ConfigurationValueFlag::Scientific));
-    conf.value("expNeg", &doubleTmp);
-    QCOMPARE(doubleTmp, -2.1e7);
-    conf.value("expNeg2", &doubleTmp);
-    QCOMPARE(doubleTmp, 2.1e-7);
-    conf.value("expBig", &doubleTmp);
-    QCOMPARE(doubleTmp, 2.1E7);
+    CORRADE_VERIFY(conf.value("exp", &doubleTmp));
+    CORRADE_COMPARE(doubleTmp, 2.1e7);
+    CORRADE_VERIFY(conf.value("expPos", &doubleTmp));
+    CORRADE_COMPARE(doubleTmp, 2.1e+7);
+    CORRADE_VERIFY(conf.setValue("expPos", doubleTmp, 0, ConfigurationValueFlag::Scientific));
+    CORRADE_VERIFY(conf.value("expNeg", &doubleTmp));
+    CORRADE_COMPARE(doubleTmp, -2.1e7);
+    CORRADE_VERIFY(conf.value("expNeg2", &doubleTmp));
+    CORRADE_COMPARE(doubleTmp, 2.1e-7);
+    CORRADE_VERIFY(conf.value("expBig", &doubleTmp));
+    CORRADE_COMPARE(doubleTmp, 2.1E7);
 
-    conf.value("oct", &intTmp, 0, ConfigurationValueFlag::Oct);
-    QVERIFY(intTmp == 0773);
-    QVERIFY(conf.setValue("oct", intTmp, 0, ConfigurationValueFlag::Oct));
-    conf.value("hex", &intTmp, 0, ConfigurationValueFlag::Hex);
-    QVERIFY(intTmp == 0x6ecab);
-    QVERIFY(conf.setValue("hex", intTmp, 0, ConfigurationValueFlag::Hex));
-    conf.value("hex2", &intTmp, 0, ConfigurationValueFlag::Hex);
-    QVERIFY(intTmp == 0x5462FF);
-    conf.value("color", &intTmp, 0, ConfigurationValueFlag::Color);
-    QVERIFY(intTmp == 0x34f85e);
-    QVERIFY(conf.setValue("color", intTmp, 0, ConfigurationValueFlag::Color));
-
-    conf.save();
+    CORRADE_VERIFY(conf.value("oct", &intTmp, 0, ConfigurationValueFlag::Oct));
+    CORRADE_COMPARE(intTmp, 0773);
+    CORRADE_VERIFY(conf.setValue("oct", intTmp, 0, ConfigurationValueFlag::Oct));
+    CORRADE_VERIFY(conf.value("hex", &intTmp, 0, ConfigurationValueFlag::Hex));
+    CORRADE_COMPARE(intTmp, 0x6ecab);
+    CORRADE_VERIFY(conf.setValue("hex", intTmp, 0, ConfigurationValueFlag::Hex));
+    CORRADE_VERIFY(conf.value("hex2", &intTmp, 0, ConfigurationValueFlag::Hex));
+    CORRADE_COMPARE(intTmp, 0x5462FF);
+    CORRADE_VERIFY(conf.value("color", &intTmp, 0, ConfigurationValueFlag::Color));
+    CORRADE_COMPARE(intTmp, 0x34f85e);
+    CORRADE_VERIFY(conf.setValue("color", intTmp, 0, ConfigurationValueFlag::Color));
 
     /* Check saved values */
-    QFile fileOrig(CONFIGURATION_TEST_DIR + QString("types.conf"));
-    QFile fileActual(CONFIGURATION_WRITE_TEST_DIR + QString("types.conf"));
-    fileOrig.open(QFile::Text|QFile::ReadOnly);
-    fileActual.open(QFile::Text|QFile::ReadOnly);
-    QByteArray original = fileOrig.readAll();
-    QByteArray actual = fileActual.readAll();
-
-    QCOMPARE(actual, original);
-}
-
-void ConfigurationTest::eol_data() {
-    QTest::addColumn<QString>("filename");
-    QTest::addColumn<int>("flags");
-    QTest::addColumn<QByteArray>("output");
-
-    QTest::newRow("autodetect-unix") << "eol-unix.conf" << 0 << QByteArray("key=value\n");
-    QTest::newRow("autodetect-windows") << "eol-windows.conf" << 0 << QByteArray("key=value\r\n");
-    QTest::newRow("autodetect-mixed") << "eol-mixed.conf" << 0 << QByteArray("key=value\r\nkey=value\r\n");
-    QTest::newRow("force-unix") << "" << int(Configuration::ForceUnixEol) << QByteArray("key=value\n");
-    QTest::newRow("force-windows") << "" << int(Configuration::ForceWindowsEol) << QByteArray("key=value\r\n");
-    QTest::newRow("default") << "" << 0 << QByteArray("key=value\n");
+    CORRADE_VERIFY(conf.save());
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "types.conf"),
+                       TestSuite::Compare::File);
 }
 
 void ConfigurationTest::eol() {
-    QFETCH(QString, filename);
-    QFETCH(int, flags);
-    QFETCH(QByteArray, output);
-
-    string file;
-    if(!filename.isEmpty()) file = filename.toStdString();
-    else {
-        file = "temp.conf";
-        flags |= Configuration::Truncate;
+    {
+        /* Autodetect Unix */
+        Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "eol-unix.conf"));
+        conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-unix.conf"));
+        CORRADE_VERIFY(conf.save());
+        CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-unix.conf"),
+            "key=value\n", TestSuite::Compare::FileToString);
+    } {
+        /* Autodetect Windows */
+        Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "eol-windows.conf"));
+        conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-windows.conf"));
+        CORRADE_VERIFY(conf.save());
+        CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-windows.conf"),
+            "key=value\r\n", TestSuite::Compare::FileToString);
+    } {
+        /* Autodetect mixed (both \r and \r\n) */
+        Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "eol-mixed.conf"));
+        conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-mixed.conf"));
+        CORRADE_VERIFY(conf.save());
+        CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-mixed.conf"),
+            "key=value\r\nkey=value\r\n", TestSuite::Compare::FileToString);
+    } {
+        /* Force Unix */
+        Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
+            Configuration::Flag::Truncate|Configuration::Flag::ForceUnixEol);
+        CORRADE_VERIFY(conf.setValue<std::string>("key", "value"));
+        CORRADE_VERIFY(conf.save());
+        CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
+            "key=value\n", TestSuite::Compare::FileToString);
+    } {
+        /* Force Windows */
+        Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
+            Configuration::Flag::Truncate|Configuration::Flag::ForceWindowsEol);
+        CORRADE_VERIFY(conf.setValue<std::string>("key", "value"));
+        CORRADE_VERIFY(conf.save());
+        CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
+            "key=value\r\n", TestSuite::Compare::FileToString);
+    } {
+        /* Default */
+        Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
+            Configuration::Flag::Truncate);
+        CORRADE_VERIFY(conf.setValue<std::string>("key", "value"));
+        CORRADE_VERIFY(conf.save());
+        CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
+            "key=value\n", TestSuite::Compare::FileToString);
     }
-
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + file, flags);
-
-    /* Add some data to fill the file */
-    if(filename.isEmpty()) conf.addValue<string>("key", "value");
-
-    conf.save();
-
-    QFile _file(CONFIGURATION_WRITE_TEST_DIR + QString::fromStdString(file));
-    _file.open(QFile::ReadOnly);
-    QByteArray actual = _file.readAll();
-
-    QCOMPARE(actual, output);
 }
 
 void ConfigurationTest::uniqueGroups() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("unique-groups.conf"), Configuration::UniqueGroups);
-    conf.save();
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "unique-groups.conf"), Configuration::Flag::UniqueGroups);
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "unique-groups.conf"));
 
-    QFile fileOrig(CONFIGURATION_TEST_DIR + QString("unique-groups-saved.conf"));
-    QFile fileActual(CONFIGURATION_WRITE_TEST_DIR + QString("unique-groups.conf"));
-    fileOrig.open(QFile::Text|QFile::ReadOnly);
-    fileActual.open(QFile::Text|QFile::ReadOnly);
-    QByteArray original = fileOrig.readAll();
-    QByteArray actual = fileActual.readAll();
-
-    QCOMPARE(actual, original);
+    /* Verify that non-unique groups were removed */
+    CORRADE_VERIFY(conf.save());
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "unique-groups.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "unique-groups-saved.conf"),
+                       TestSuite::Compare::File);
 
     /* Try to insert already existing group */
-    QVERIFY(conf.addGroup("group") == nullptr);
+    CORRADE_VERIFY(!conf.addGroup("group"));
 }
 
 void ConfigurationTest::uniqueKeys() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("unique-keys.conf"), Configuration::UniqueKeys);
-    conf.save();
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "unique-keys.conf"), Configuration::Flag::UniqueKeys);
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "unique-keys.conf"));
 
-    QFile fileOrig(CONFIGURATION_TEST_DIR + QString("unique-keys-saved.conf"));
-    QFile fileActual(CONFIGURATION_WRITE_TEST_DIR + QString("unique-keys.conf"));
-    fileOrig.open(QFile::Text|QFile::ReadOnly);
-    fileActual.open(QFile::Text|QFile::ReadOnly);
-    QByteArray original = fileOrig.readAll();
-    QByteArray actual = fileActual.readAll();
-
-    QCOMPARE(actual, original);
+    /* Verify that non-unique keys were removed */
+    CORRADE_VERIFY(conf.save());
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "unique-keys.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "unique-keys-saved.conf"),
+                       TestSuite::Compare::File);
 
     /* Try to insert already existing key */
-    QVERIFY(conf.addValue<string>("key", "val") == 0);
+    CORRADE_VERIFY(!conf.addValue<std::string>("key", "val"));
 }
 
 void ConfigurationTest::stripComments() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("comments.conf"), Configuration::SkipComments);
-    conf.save();
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "comments.conf"), Configuration::Flag::SkipComments);
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "comments.conf"));
 
-    QFile fileOrig(CONFIGURATION_TEST_DIR + QString("comments-saved.conf"));
-    QFile fileActual(CONFIGURATION_WRITE_TEST_DIR + QString("comments.conf"));
-    fileOrig.open(QFile::Text|QFile::ReadOnly);
-    fileActual.open(QFile::Text|QFile::ReadOnly);
-    QByteArray original = fileOrig.readAll();
-    QByteArray actual = fileActual.readAll();
-
-    QCOMPARE(actual, original);
+    /* Verify that comments were removed */
+    CORRADE_VERIFY(conf.save());
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "comments.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "comments-saved.conf"),
+                       TestSuite::Compare::File);
 }
 
 void ConfigurationTest::autoCreation() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("autoCreation.conf"), Configuration::Truncate);
+    Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "autoCreation.conf"), Configuration::Flag::Truncate);
 
-    QVERIFY(conf.group("newGroup") == nullptr);
+    CORRADE_VERIFY(!conf.group("newGroup"));
     conf.setAutomaticGroupCreation(true);
-    QVERIFY(conf.group("newGroup") != nullptr);
+    CORRADE_VERIFY(conf.group("newGroup"));
     conf.setAutomaticGroupCreation(false);
-    QVERIFY(conf.group("newGroup2") == 0);
+    CORRADE_VERIFY(!conf.group("newGroup2"));
 
-    string value1 = "defaultValue1";
-    QVERIFY(!conf.group("newGroup")->value<string>("key", &value1));
+    std::string value1 = "defaultValue1";
+    CORRADE_VERIFY(!conf.group("newGroup")->value<std::string>("key", &value1));
 
     conf.setAutomaticKeyCreation(true);
-    QVERIFY(conf.group("newGroup")->value<string>("key", &value1));
-    QVERIFY(conf.group("newGroup")->keyCount("key") == 1);
-    QVERIFY(value1 == "defaultValue1");
+    CORRADE_VERIFY(conf.group("newGroup")->value<std::string>("key", &value1));
+    CORRADE_COMPARE(conf.group("newGroup")->keyCount("key"), 1);
+    CORRADE_COMPARE(value1, "defaultValue1");
 
     conf.setAutomaticGroupCreation(true);
-    string value2 = "defaultValue2";
-    QVERIFY(conf.group("group")->value<string>("key", &value2));
-    QVERIFY(conf.group("group")->keyCount("key") == 1);
-    QVERIFY(value2 == "defaultValue2");
+    std::string value2 = "defaultValue2";
+    CORRADE_VERIFY(conf.group("group")->value<std::string>("key", &value2));
+    CORRADE_COMPARE(conf.group("group")->keyCount("key"), 1);
+    CORRADE_COMPARE(value2, "defaultValue2");
 
     /* Auto-creation of non-string values */
     int value3 = 42;
-    QVERIFY(conf.group("group")->value<int>("integer", &value3));
+    CORRADE_VERIFY(conf.group("group")->value<int>("integer", &value3));
     conf.setAutomaticKeyCreation(false);
     value3 = 45;
-    QVERIFY(conf.group("group")->value<int>("integer", &value3));
-    QVERIFY(value3 == 42);
+    CORRADE_VERIFY(conf.group("group")->value<int>("integer", &value3));
+    CORRADE_COMPARE(value3, 42);
 }
 
 void ConfigurationTest::directValue() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("directValue.conf"), Configuration::Truncate);
+    Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "directValue.conf"), Configuration::Flag::Truncate);
 
     /* Fill values */
-    conf.setValue<string>("string", "value");
+    conf.setValue<std::string>("string", "value");
     conf.setValue<int>("key", 23);
 
     /* Test direct return */
-    QVERIFY(conf.value<string>("string") == "value");
-    QVERIFY(conf.value<int>("key") == 23);
+    CORRADE_COMPARE(conf.value<std::string>("string"), "value");
+    CORRADE_COMPARE(conf.value<int>("key"), 23);
 
-    /* Default-configured values */
-    QVERIFY(conf.value<string>("inexistent") == "");
-    QVERIFY(conf.value<int>("inexistent") == 0);
-    QCOMPARE(conf.value<double>("inexistent"), 0.0);
+    /* Default-constructed values */
+    CORRADE_COMPARE(conf.value<std::string>("inexistent"), "");
+    CORRADE_COMPARE(conf.value<int>("inexistent"), 0);
+    CORRADE_COMPARE(conf.value<double>("inexistent"), 0.0);
 }
 
 void ConfigurationTest::hierarchic() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("hierarchic.conf"));
-    QVERIFY(conf.isValid());
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "hierarchic.conf"));
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"));
+    CORRADE_VERIFY(conf.isValid());
 
     /* Check parsing */
-    QVERIFY(conf.group("z")->group("x")->group("c")->group("v")->value<string>("key1") == "val1");
-    QVERIFY(conf.groupCount("a") == 2);
-    QVERIFY(conf.group("a")->groupCount("b") == 2);
-    QVERIFY(conf.group("a")->group("b", 0)->value<string>("key2") == "val2");
-    QVERIFY(conf.group("a")->group("b", 1)->value<string>("key2") == "val3");
-    QVERIFY(conf.group("a", 1)->value<string>("key3") == "val4");
-    QVERIFY(conf.group("a", 1)->group("b")->value<string>("key2") == "val5");
+    CORRADE_COMPARE(conf.group("z")->group("x")->group("c")->group("v")->value<std::string>("key1"), "val1");
+    CORRADE_COMPARE(conf.groupCount("a"), 2);
+    CORRADE_COMPARE(conf.group("a")->groupCount("b"), 2);
+    CORRADE_COMPARE(conf.group("a")->group("b", 0)->value<std::string>("key2"), "val2");
+    CORRADE_COMPARE(conf.group("a")->group("b", 1)->value<std::string>("key2"), "val3");
+    CORRADE_COMPARE(conf.group("a", 1)->value<std::string>("key3"), "val4");
+    CORRADE_COMPARE(conf.group("a", 1)->group("b")->value<std::string>("key2"), "val5");
 
     /* Expect no change */
-    QVERIFY(conf.save());
-
-    QFile fileOrig(CONFIGURATION_TEST_DIR + QString("hierarchic.conf"));
-    QFile fileActual(CONFIGURATION_WRITE_TEST_DIR + QString("hierarchic.conf"));
-    fileOrig.open(QFile::Text|QFile::ReadOnly);
-    fileActual.open(QFile::Text|QFile::ReadOnly);
-    QByteArray original = fileOrig.readAll();
-    QByteArray actual = fileActual.readAll();
-    fileOrig.close();
-    fileActual.close();
-
-    QCOMPARE(actual, original);
+    CORRADE_VERIFY(conf.save());
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "hierarchic.conf"),
+                       TestSuite::Compare::File);
 
     /* Modify */
     conf.group("z")->group("x")->clear();
-    conf.group("a", 1)->addGroup("b")->setValue<string>("key2", "val6");
-    conf.addGroup("q")->addGroup("w")->addGroup("e")->addGroup("r")->setValue<string>("key4", "val7");
+    conf.group("a", 1)->addGroup("b")->setValue<std::string>("key2", "val6");
+    conf.addGroup("q")->addGroup("w")->addGroup("e")->addGroup("r")->setValue<std::string>("key4", "val7");
 
     /* Cannot add group with '/' character */
-    QVERIFY(!conf.addGroup("a/b/c"));
-
-    conf.save();
+    CORRADE_VERIFY(!conf.addGroup("a/b/c"));
 
     /* Verify changes */
-    fileOrig.setFileName(CONFIGURATION_TEST_DIR + QString("hierarchic-modified.conf"));
-    fileOrig.open(QFile::Text|QFile::ReadOnly);
-    fileActual.open(QFile::Text|QFile::ReadOnly);
-    original = fileOrig.readAll();
-    actual = fileActual.readAll();
-
-    QCOMPARE(actual, original);
+    CORRADE_VERIFY(conf.save());
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "hierarchic-modified.conf"),
+                       TestSuite::Compare::File);
 }
 
 void ConfigurationTest::hierarchicUnique() {
-    /* Reload fresh hierarchic.conf */
-    QFile::remove(CONFIGURATION_WRITE_TEST_DIR + QString("hierarchic.conf"));
-    Q_ASSERT(QFile::copy(CONFIGURATION_TEST_DIR + QString("hierarchic.conf"), CONFIGURATION_WRITE_TEST_DIR + QString("hierarchic.conf")));
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "hierarchic.conf"), Configuration::Flag::UniqueGroups);
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"));
 
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("hierarchic.conf"), Configuration::UniqueGroups);
-    conf.save();
-
-    QFile fileOrig(CONFIGURATION_TEST_DIR + QString("hierarchic-unique.conf"));
-    QFile fileActual(CONFIGURATION_WRITE_TEST_DIR + QString("hierarchic.conf"));
-    fileOrig.open(QFile::Text|QFile::ReadOnly);
-    fileActual.open(QFile::Text|QFile::ReadOnly);
-    QByteArray original = fileOrig.readAll();
-    QByteArray actual = fileActual.readAll();
-    fileOrig.close();
-    fileActual.close();
-
-    QCOMPARE(actual, original);
+    /* Verify that non-unique groups were removed */
+    CORRADE_VERIFY(conf.save());
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "hierarchic-unique.conf"),
+                       TestSuite::Compare::File);
 }
 
 void ConfigurationTest::copy() {
-    Configuration conf(CONFIGURATION_WRITE_TEST_DIR + string("copy.conf"));
+    Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "copy.conf"));
 
     ConfigurationGroup* original = conf.addGroup("group");
     original->addGroup("descendent")->setValue<int>("value", 42);
@@ -504,9 +455,9 @@ void ConfigurationTest::copy() {
 
     original->group("descendent")->setValue<int>("value", 666);
 
-    QCOMPARE(original->group("descendent")->value<int>("value"), 666);
-    QCOMPARE(constructedCopy->group("descendent")->value<int>("value"), 42);
-    QCOMPARE(assignedCopy->group("descendent")->value<int>("value"), 42);
+    CORRADE_COMPARE(original->group("descendent")->value<int>("value"), 666);
+    CORRADE_COMPARE(constructedCopy->group("descendent")->value<int>("value"), 42);
+    CORRADE_COMPARE(assignedCopy->group("descendent")->value<int>("value"), 42);
 }
 
 }}}

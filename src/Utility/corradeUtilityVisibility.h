@@ -20,14 +20,14 @@
 
 #ifdef _WIN32
     #ifdef CorradeUtility_EXPORTS
-        #define UTILITY_EXPORT __declspec(dllexport)
+        #define CORRADE_UTILITY_EXPORT __declspec(dllexport)
     #else
-        #define UTILITY_EXPORT __declspec(dllimport)
+        #define CORRADE_UTILITY_EXPORT __declspec(dllimport)
     #endif
-    #define UTILITY_LOCAL
+    #define CORRADE_UTILITY_LOCAL
 #else
-    #define UTILITY_EXPORT __attribute__ ((visibility ("default")))
-    #define UTILITY_LOCAL __attribute__ ((visibility ("hidden")))
+    #define CORRADE_UTILITY_EXPORT __attribute__ ((visibility ("default")))
+    #define CORRADE_UTILITY_LOCAL __attribute__ ((visibility ("hidden")))
 #endif
 
 #endif

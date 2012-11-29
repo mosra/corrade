@@ -37,7 +37,7 @@ function(corrade_add_test2 test_name)
     endforeach()
 
     add_executable(${test_name} ${sources})
-    target_link_libraries(${test_name} ${CORRADE_UTILITY_LIBRARY} ${libraries})
+    target_link_libraries(${test_name} ${CORRADE_TESTSUITE_LIBRARIES} ${libraries})
     add_test(${test_name} ${test_name})
 endfunction()
 

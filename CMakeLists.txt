@@ -4,6 +4,7 @@ project(Corrade)
 
 option(GCC44_COMPATIBILITY "Enable compatibility mode for GCC 4.4 (might disable some features)" OFF)
 option(GCC45_COMPATIBILITY "Enable compatibility mode for GCC 4.5 (might disable some features)" OFF)
+option(GCC46_COMPATIBILITY "Enable compatibility mode for GCC 4.6 (might disable some features)" OFF)
 
 option(BUILD_TESTS "Build unit tests (requires Qt4)." OFF)
 option(BUILD_EXAMPLES "Build examples." OFF)

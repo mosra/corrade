@@ -117,44 +117,48 @@ Example file:
 @todo C++11: move constructor, creating readonly Configuration using static
     function returning const object, then get rid of ReadOnly flag
 */
-class UTILITY_EXPORT Configuration: public ConfigurationGroup {
+class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
     friend class ConfigurationGroup;
 
     DISABLE_COPY(Configuration)
 
     public:
-        /** @brief Flags for opening configuration file */
-        enum Flags {
+        /**
+         * @brief Flag for opening configuration file
+         *
+         * @see Flags
+         */
+        enum class Flag: std::uint32_t {
             /**
              * Preserve Byte-Order-Mark in UTF-8 files, if present. Otherwise
              * the BOM will not be saved back into the file.
              */
-            PreserveBom     = 0x01,
+            PreserveBom     = 1 << 0,
 
             /**
              * Force Unix line-endings (LF). Default behavior is to preserve
              * original. If original EOL type cannot be distinguished, Unix is
              * used.
              */
-            ForceUnixEol    = 0x02,
+            ForceUnixEol    = 1 << 1,
 
             /**
              * Force Windows line endings (CR+LF).
              */
-            ForceWindowsEol = 0x04,
+            ForceWindowsEol = 1 << 2,
 
             /**
              * Truncate the file. Don't load any configuration from the file.
              * On saving discards everything in the file and writes only newly
              * created values.
              */
-            Truncate        = 0x08,
+            Truncate        = 1 << 3,
 
             /**
              * No comments or empty lines will be preserved on saving. Useful
              * for memory saving. See also Configuration::ReadOnly.
              */
-            SkipComments    = 0x10,
+            SkipComments    = 1 << 4,
 
             /**
              * Open the file read-only, which means faster access to elements
@@ -162,7 +166,7 @@ class UTILITY_EXPORT Configuration: public ConfigurationGroup {
              * Adding, changing and removing groups and keys will not be
              * allowed.
              */
-            ReadOnly        = 0x20,
+            ReadOnly        = 1 << 5,
 
             /**
              * Force unique groups. When loading the file only first group with
@@ -170,7 +174,7 @@ class UTILITY_EXPORT Configuration: public ConfigurationGroup {
              * discarded on saving. Also doesn't allow adding new group with
              * already existing name.
              */
-            UniqueGroups    = 0x40,
+            UniqueGroups    = 1 << 6,
 
             /**
              * Force unique keys. Only first value with given key (per group)
@@ -178,42 +182,49 @@ class UTILITY_EXPORT Configuration: public ConfigurationGroup {
              * saving. Also doesn't allow adding new value with the key name
              * already existing in the group.
              */
-            UniqueKeys      = 0x80,
+            UniqueKeys      = 1 << 7,
 
             /**
              * Force unique groups and keys. Same as
              * Configuration::UniqueGroups | Configuration::UniqueKeys .
              */
-            UniqueNames     = 0xc0
+            UniqueNames     = 1 << 8
         };
+
+        /**
+         * @brief Flags for opening configuration file
+         *
+         * @see Configuration::Configuration()
+         */
+        typedef Containers::EnumSet<Flag, std::uint32_t> Flags;
 
         /**
          * @brief Default constructor
          *
          * Creates empty configuration with no filename.
          */
-        inline Configuration(int flags = 0): ConfigurationGroup(this), flags(flags|IsValid) {}
+        inline Configuration(Flags flags = Flags()): ConfigurationGroup(this), flags(static_cast<InternalFlag>(std::uint32_t(flags))|InternalFlag::IsValid) {}
 
         /**
          * @brief Constructor
-         * @param _file      %Configuration file
-         * @param _flags     Flags (see Configuration::Flags)
+         * @param file      %Configuration file
+         * @param flags     Flags
          *
          * Opens the file and loads it according to specified flags. If file
          * cannot be opened, sets invalid flag (see isValid()).
          */
-        Configuration(const std::string& _file, int _flags = 0);
+        Configuration(const std::string& file, Flags flags = Flags());
 
         /**
          * @brief Constructor
-         * @param _file     %Configuration file
-         * @param _flags    Flags (see Configuration::Flags)
+         * @param file      %Configuration file
+         * @param flags     Flags
          *
          * Creates configuration from given istream. Sets flag
          * Configuration::ReadOnly, because the configuration cannot be saved
          * anywhere.
          */
-        Configuration(std::istream& _file, int _flags = 0);
+        Configuration(std::istream& file, Flags flags = Flags());
 
         /**
          * @brief Destructor
@@ -221,10 +232,20 @@ class UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * If the configuration has been changed, writes configuration back to
          * the file. See also save().
          */
-        inline ~Configuration() { if(flags & Changed) save(); }
+        inline ~Configuration() { if(flags & InternalFlag::Changed) save(); }
 
         /** @brief Filename */
         inline std::string filename() const { return _filename; }
+
+        /**
+         * @brief Set filename
+         *
+         * The configuration will be saved under this filename.
+         * @see save()
+         */
+        inline void setFilename(const std::string& filename) {
+            _filename = filename;
+        }
 
         /**
          * @brief Whether the file is valid
@@ -233,7 +254,7 @@ class UTILITY_EXPORT Configuration: public ConfigurationGroup {
          *
          * Invalid files cannot be changed or saved back.
          */
-        inline bool isValid() const { return flags & IsValid; }
+        inline bool isValid() const { return bool(flags & InternalFlag::IsValid); }
 
         /**
          * @brief Enable/disable automatic creation of inexistent groups
@@ -247,8 +268,8 @@ class UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * @todo Check readonly/isvalid
          */
         inline void setAutomaticGroupCreation(bool enabled) {
-            if(enabled) flags |= AutoCreateGroups;
-            else flags &= ~AutoCreateGroups;
+            if(enabled) flags |= InternalFlag::AutoCreateGroups;
+            else flags &= ~InternalFlag::AutoCreateGroups;
         }
 
         /**
@@ -256,7 +277,7 @@ class UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * @see setAutomaticGroupCreation().
          */
         inline bool automaticGroupCreation() const
-            { return flags & AutoCreateGroups; }
+            { return bool(flags & InternalFlag::AutoCreateGroups); }
 
         /**
          * @brief Enable/disable automatic creation of inexistent key/value pairs.
@@ -269,8 +290,8 @@ class UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * @todo Check readonly/isvalid
          */
         inline void setAutomaticKeyCreation(bool enabled) {
-            if(enabled) flags |= AutoCreateKeys;
-            else flags &= ~AutoCreateKeys;
+            if(enabled) flags |= InternalFlag::AutoCreateKeys;
+            else flags &= ~InternalFlag::AutoCreateKeys;
         }
 
         /**
@@ -278,7 +299,7 @@ class UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * @see setAutomaticKeyCreation().
          */
         inline bool automaticKeyCreation() const
-            { return flags & AutoCreateKeys; }
+            { return bool(flags & InternalFlag::AutoCreateKeys); }
 
         /**
          * @brief Save configuration
@@ -288,35 +309,45 @@ class UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * Configuration::ReadOnly flag wasn't set). Note that even if no change
          * to the configuration was made, the file could differ after saving
          * (see Configuration::Flags).
+         *
+         * @see filename(), setFilename()
          */
         bool save();
 
     private:
-        /** @brief Private flags for file state */
-        enum PrivateFlags {
-            IsValid = 0x10000,      /**< @brief Whether the loaded file is valid */
-            HasBom = 0x20000,       /**< @brief BOM mark was found in the file */
-            WindowsEol = 0x40000,   /**< @brief The file has Windows line endings */
-            Changed = 0x80000,      /**< @brief Whether the file has changed */
-            AutoCreateGroups = 0x100000,    /**< @brief Automatically create inexistent groups */
-            AutoCreateKeys = 0x200000       /**< @brief Automatically create inexistent keys */
+        enum class InternalFlag: std::uint32_t {
+            PreserveBom     = std::uint32_t(Flag::PreserveBom),
+            ForceUnixEol    = std::uint32_t(Flag::ForceUnixEol),
+            ForceWindowsEol = std::uint32_t(Flag::ForceWindowsEol),
+            Truncate        = std::uint32_t(Flag::Truncate),
+            SkipComments    = std::uint32_t(Flag::SkipComments),
+            ReadOnly        = std::uint32_t(Flag::ReadOnly),
+            UniqueGroups    = std::uint32_t(Flag::UniqueGroups),
+            UniqueKeys      = std::uint32_t(Flag::UniqueKeys),
+            UniqueNames     = std::uint32_t(Flag::UniqueNames),
+
+            IsValid = 1 << 16,
+            HasBom = 1 << 17,
+            WindowsEol = 1 << 18,
+            Changed = 1 << 19,
+            AutoCreateGroups = 1 << 20,
+            AutoCreateKeys = 1 << 21
         };
 
-        /** @brief Configuration file */
+        typedef Containers::EnumSet<InternalFlag, std::uint32_t> InternalFlags;
+
+        CORRADE_ENUMSET_FRIEND_OPERATORS(InternalFlags)
+
+        CORRADE_UTILITY_LOCAL void parse(std::istream& file);
+        CORRADE_UTILITY_LOCAL std::string parse(std::istream& file, ConfigurationGroup* group, const std::string& fullPath);
+        CORRADE_UTILITY_LOCAL void save(std::ofstream& file, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const;
+
         std::string _filename;
-
-        /**
-         * @brief Flags
-         *
-         * Combination of Configuration::Flags and Configuration::PrivateFlags.
-         */
-        int flags;
-
-        UTILITY_LOCAL void parse(std::istream& file);
-        UTILITY_LOCAL std::string parse(std::istream& file, ConfigurationGroup* group, const std::string& fullPath);
-
-        UTILITY_LOCAL void save(std::ofstream& file, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const;
+        InternalFlags flags;
 };
+
+CORRADE_ENUMSET_OPERATORS(Configuration::Flags)
+CORRADE_ENUMSET_OPERATORS(Configuration::InternalFlags)
 
 }}
 

@@ -120,7 +120,7 @@ Translator::setLocale("cs_CZ");
 std::cout << *welcome << endl;  // Ahoj světe!
 @endcode
  */
-class UTILITY_EXPORT Translator {
+class CORRADE_UTILITY_EXPORT Translator {
     public:
         /**
          * @brief Set current locale
@@ -232,8 +232,8 @@ class UTILITY_EXPORT Translator {
         const std::string* get(const std::string& key);
 
     private:
-        UTILITY_EXPORT static std::string* _locale();
-        UTILITY_EXPORT static std::set<Translator*>* instances();
+        CORRADE_UTILITY_EXPORT static std::string* _locale();
+        CORRADE_UTILITY_EXPORT static std::set<Translator*>* instances();
 
         std::string primaryDynamicFilename;
         const ConfigurationGroup* primaryDynamicGroup;
@@ -246,9 +246,9 @@ class UTILITY_EXPORT Translator {
 
         std::map<std::string, std::string*> localizations;
 
-        UTILITY_LOCAL bool get(const std::string& key, std::string* text, int level) const;
+        CORRADE_UTILITY_LOCAL bool get(const std::string& key, std::string* text, int level) const;
 
-        UTILITY_LOCAL std::string replaceLocale(const std::string& filename) const;
+        CORRADE_UTILITY_LOCAL std::string replaceLocale(const std::string& filename) const;
 };
 
 }}

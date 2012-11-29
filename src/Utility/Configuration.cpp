@@ -19,17 +19,17 @@
 #include <fstream>
 
 #include "Debug.h"
-#include "utilities.h"
+#include "String.h"
 
 using namespace std;
 
 namespace Corrade { namespace Utility {
 
-Configuration::Configuration(const string& _filename, int _flags): ConfigurationGroup(this), _filename(_filename), flags(_flags) {
+Configuration::Configuration(const string& filename, Flags flags): ConfigurationGroup(this), _filename(filename), flags(static_cast<InternalFlag>(std::uint32_t(flags))) {
     /* Open file with requested flags */
     ifstream::openmode openmode = ifstream::in;
-    if(flags & Truncate) openmode |= ifstream::trunc;
-    ifstream file(_filename.c_str(), openmode);
+    if(this->flags & InternalFlag::Truncate) openmode |= ifstream::trunc;
+    ifstream file(filename.c_str(), openmode);
 
     /* File doesn't exist yet */
     if(!file.is_open()) {
@@ -37,9 +37,9 @@ Configuration::Configuration(const string& _filename, int _flags): Configuration
 
         /* It is error for readonly configurations */
         /** @todo Similar check for istream constructor (?) */
-        if(flags & ReadOnly) return;
+        if(this->flags & InternalFlag::ReadOnly) return;
 
-        flags |= IsValid;
+        this->flags |= InternalFlag::IsValid;
         return;
     }
 
@@ -49,11 +49,11 @@ Configuration::Configuration(const string& _filename, int _flags): Configuration
     file.close();
 }
 
-Configuration::Configuration(istream& file, int _flags): ConfigurationGroup(this), flags(_flags) {
+Configuration::Configuration(istream& file, Flags flags): ConfigurationGroup(this), flags(static_cast<InternalFlag>(std::uint32_t(flags))) {
     parse(file);
 
     /* Set readonly flag, because the configuration cannot be saved */
-    flags |= ReadOnly;
+    this->flags |= InternalFlag::ReadOnly;
 }
 
 void Configuration::parse(istream& file) {
@@ -62,15 +62,15 @@ void Configuration::parse(istream& file) {
             throw string("Cannot open configuration file.");
 
         /* It looks like BOM */
-        if(file.peek() == '\xEF') {
+        if(file.peek() == String::Bom[0]) {
             char* bom = new char[4];
             file.get(bom, 4);
 
             /* This is not a BOM, rewind back */
-            if(string(bom) != "\xEF\xBB\xBF") file.seekg(0);
+            if(bom != String::Bom) file.seekg(0);
 
             /* Or set flag */
-            else flags |= HasBom;
+            else flags |= InternalFlag::HasBom;
 
             delete[] bom;
         }
@@ -79,7 +79,7 @@ void Configuration::parse(istream& file) {
         parse(file, this, "");
 
         /* Everything went fine */
-        flags |= IsValid;
+        flags |= InternalFlag::IsValid;
 
     } catch(string e) { Error() << e; }
 }
@@ -93,10 +93,10 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
 
         /* Windows EOL */
         if(buffer[buffer.size()-1] == '\r')
-            flags |= WindowsEol;
+            flags |= InternalFlag::WindowsEol;
 
         /* Trim buffer */
-        buffer = trim(buffer);
+        buffer = String::trim(buffer);
 
         /* Group header */
         if(buffer[0] == '[') {
@@ -105,7 +105,7 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
             if(buffer[buffer.size()-1] != ']')
                 throw string("Missing closing bracket for group header!");
 
-            string nextGroup = trim(buffer.substr(1, buffer.size()-2));
+            string nextGroup = String::trim(buffer.substr(1, buffer.size()-2));
 
             if(nextGroup.empty())
                 throw string("Empty group name!");
@@ -119,7 +119,7 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
 
                 /* If unique groups are set, check whether current group is unique */
                 bool save = true;
-                if(flags & UniqueGroups) {
+                if(flags & InternalFlag::UniqueGroups) {
                     /** @todo Do this in logarithmic time */
                     for(vector<Group>::const_iterator it = group->_groups.begin(); it != group->_groups.end(); ++it)
                         if(it->name == g.name) {
@@ -134,13 +134,13 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
 
         /* Empty line */
         } else if(buffer.size() == 0) {
-            if(flags & (SkipComments|ReadOnly)) continue;
+            if(flags & (InternalFlag::SkipComments|InternalFlag::ReadOnly)) continue;
 
             group->items.push_back(ConfigurationGroup::Item());
 
         /* Comment */
         } else if(buffer[0] == '#' || buffer[0] == ';') {
-            if(flags & (SkipComments|ReadOnly)) continue;
+            if(flags & (InternalFlag::SkipComments|InternalFlag::ReadOnly)) continue;
 
             ConfigurationGroup::Item item;
             item.value = buffer;
@@ -153,8 +153,8 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
                 throw string("Key/value pair without '=' character!");
 
             ConfigurationGroup::Item item;
-            item.key = trim(buffer.substr(0, splitter));
-            item.value = trim(buffer.substr(splitter+1), " \t\v\f\r\n");
+            item.key = String::trim(buffer.substr(0, splitter));
+            item.value = String::trim(buffer.substr(splitter+1));
 
             /* Remove quotes, if present */
             /** @todo Check `"` characters better */
@@ -166,7 +166,7 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
             }
 
             /* If unique keys are set, check whether current key is unique */
-            if(flags & UniqueKeys) {
+            if(flags & InternalFlag::UniqueKeys) {
                 bool contains = false;
                 for(vector<ConfigurationGroup::Item>::const_iterator it = group->items.begin(); it != group->items.end(); ++it)
                     if(it->key == item.key) {
@@ -190,7 +190,7 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
 
 bool Configuration::save() {
     /* File is readonly or invalid, don't save anything */
-    if(flags & ReadOnly || !(flags & IsValid)) return false;
+    if(flags & InternalFlag::ReadOnly || !(flags & InternalFlag::IsValid)) return false;
 
     ofstream file(_filename.c_str(), ofstream::out|ofstream::trunc|ofstream::binary);
     if(!file.good()) {
@@ -199,12 +199,12 @@ bool Configuration::save() {
     }
 
     /* BOM, if user explicitly wants that crap */
-    if((flags & PreserveBom) && (flags & HasBom))
-        file.write("\xEF\xBB\xBF", 3);
+    if((flags & InternalFlag::PreserveBom) && (flags & InternalFlag::HasBom))
+        file.write(String::Bom.c_str(), 3);
 
     /* EOL character */
     string eol;
-    if(flags & (ForceWindowsEol|WindowsEol) && !(flags & ForceUnixEol)) eol = "\r\n";
+    if(flags & (InternalFlag::ForceWindowsEol|InternalFlag::WindowsEol) && !(flags & InternalFlag::ForceUnixEol)) eol = "\r\n";
     else eol = "\n";
 
     string buffer;
@@ -227,8 +227,7 @@ void Configuration::save(std::ofstream& file, const std::string& eol, Configurat
     for(vector<ConfigurationGroup::Item>::const_iterator it = group->items.begin(); it != group->items.end(); ++it) {
         /* Key/value pair */
         if(!it->key.empty()) {
-            /** @todo Make whitespaces a constant in utilities.h */
-            if(it->value.find_first_of(" \t\f\v\r\n") != string::npos)
+            if(it->value.find_first_of(String::Whitespace) != string::npos)
                 buffer = it->key + "=\"" + it->value + '"' + eol;
             else
                 buffer = it->key + '=' + it->value + eol;

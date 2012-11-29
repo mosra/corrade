@@ -42,6 +42,11 @@ class TesterTest: public Tester<TesterTest> {
                 void expectFail();
                 void unexpectedPassExpression();
                 void unexpectedPassEqual();
+
+                void compareAs();
+                void compareAsFail();
+                void compareWth();
+                void compareWithFail();
         };
 };
 

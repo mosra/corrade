@@ -16,17 +16,14 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include <QtCore/QObject>
+#include "TestSuite/Tester.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class ConfigurationTest: public QObject {
-    Q_OBJECT
-
+class ConfigurationTest: public TestSuite::Tester<ConfigurationTest> {
     public:
         ConfigurationTest();
 
-    private slots:
         void parse();
         void parseDirect();
         void empty();
@@ -36,10 +33,7 @@ class ConfigurationTest: public QObject {
         void truncate();
         void whitespaces();
         void types();
-
-        void eol_data();
         void eol();
-
         void uniqueGroups();
         void uniqueKeys();
         void stripComments();

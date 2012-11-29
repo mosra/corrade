@@ -9,6 +9,7 @@ set(CorradeUtility_SRCS
     MurmurHash2.cpp
     Resource.cpp
     Sha1.cpp
+    String.cpp
     Translator.cpp
     TypeTraits.cpp
     utilities.cpp)

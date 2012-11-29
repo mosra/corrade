@@ -20,16 +20,16 @@
 
 #ifdef _WIN32
     #ifdef CorradePluginManager_EXPORTS
-        #define PLUGINMANAGER_EXPORT __declspec(dllexport)
+        #define CORRADE_PLUGINMANAGER_EXPORT __declspec(dllexport)
     #else
-        #define PLUGINMANAGER_EXPORT __declspec(dllimport)
+        #define CORRADE_PLUGINMANAGER_EXPORT __declspec(dllimport)
     #endif
-    #define PLUGINMANAGER_LOCAL
-    #define PLUGIN_EXPORT
+    #define CORRADE_PLUGINMANAGER_LOCAL
+    #define CORRADE_PLUGIN_EXPORT
 #else
-    #define PLUGINMANAGER_EXPORT __attribute__ ((visibility ("default")))
-    #define PLUGINMANAGER_LOCAL __attribute__ ((visibility ("hidden")))
-    #define PLUGIN_EXPORT __attribute__ ((visibility ("default")))
+    #define CORRADE_PLUGINMANAGER_EXPORT __attribute__ ((visibility ("default")))
+    #define CORRADE_PLUGINMANAGER_LOCAL __attribute__ ((visibility ("hidden")))
+    #define CORRADE_PLUGIN_EXPORT __attribute__ ((visibility ("default")))
 #endif
 
 #endif

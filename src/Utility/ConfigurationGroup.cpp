@@ -61,7 +61,7 @@ ConfigurationGroup* ConfigurationGroup::group(const string& name, unsigned int n
 
     /* Automatic group creation is enabled and user wants first group,
         try to create new group */
-    if((configuration->flags & Configuration::AutoCreateGroups) && number == 0) return addGroup(name);
+    if((configuration->flags & Configuration::InternalFlag::AutoCreateGroups) && number == 0) return addGroup(name);
 
     return nullptr;
 }
@@ -95,7 +95,8 @@ vector<const ConfigurationGroup*> ConfigurationGroup::groups(const string& name)
 }
 
 bool ConfigurationGroup::addGroup(const string& name, ConfigurationGroup* group) {
-    if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid))
+    if(configuration->flags & Configuration::InternalFlag::ReadOnly ||
+     !(configuration->flags & Configuration::InternalFlag::IsValid))
         return false;
 
     /* Set configuration pointer to actual */
@@ -108,12 +109,12 @@ bool ConfigurationGroup::addGroup(const string& name, ConfigurationGroup* group)
     }
 
     /* Check for unique groups */
-    if(configuration->flags & Configuration::UniqueGroups) {
+    if(configuration->flags & Configuration::InternalFlag::UniqueGroups) {
         for(vector<Group>::const_iterator it = _groups.begin(); it != _groups.end(); ++it)
             if(it->name == name) return false;
     }
 
-    configuration->flags |= Configuration::Changed;
+    configuration->flags |= Configuration::InternalFlag::Changed;
 
     Group g;
     g.name = name;
@@ -132,7 +133,8 @@ ConfigurationGroup* ConfigurationGroup::addGroup(const std::string& name) {
 }
 
 bool ConfigurationGroup::removeGroup(const std::string& name, unsigned int number) {
-    if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid)) return false;
+    if(configuration->flags & Configuration::InternalFlag::ReadOnly ||
+     !(configuration->flags & Configuration::InternalFlag::IsValid)) return false;
 
     /* Find group with given number and name */
     unsigned int foundNumber = 0;
@@ -140,7 +142,7 @@ bool ConfigurationGroup::removeGroup(const std::string& name, unsigned int numbe
         if(it->name == name && foundNumber++ == number) {
             delete it->group;
             _groups.erase(it);
-            configuration->flags |= Configuration::Changed;
+            configuration->flags |= Configuration::InternalFlag::Changed;
             return true;
         }
     }
@@ -149,13 +151,14 @@ bool ConfigurationGroup::removeGroup(const std::string& name, unsigned int numbe
 }
 
 bool ConfigurationGroup::removeGroup(ConfigurationGroup* group) {
-    if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid)) return false;
+    if(configuration->flags & Configuration::InternalFlag::ReadOnly ||
+     !(configuration->flags & Configuration::InternalFlag::IsValid)) return false;
 
     for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
         if(it->group == group) {
             delete it->group;
             _groups.erase(it);
-            configuration->flags |= Configuration::Changed;
+            configuration->flags |= Configuration::InternalFlag::Changed;
             return true;
         }
     }
@@ -164,7 +167,8 @@ bool ConfigurationGroup::removeGroup(ConfigurationGroup* group) {
 }
 
 bool ConfigurationGroup::removeAllGroups(const std::string& name) {
-    if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid)) return false;
+    if(configuration->flags & Configuration::InternalFlag::ReadOnly ||
+     !(configuration->flags & Configuration::InternalFlag::IsValid)) return false;
 
     for(int i = _groups.size()-1; i >= 0; --i) {
         if(_groups[i].name != name) continue;
@@ -172,7 +176,7 @@ bool ConfigurationGroup::removeAllGroups(const std::string& name) {
         _groups.erase(_groups.begin()+i);
     }
 
-    configuration->flags |= Configuration::Changed;
+    configuration->flags |= Configuration::InternalFlag::Changed;
     return true;
 }
 
@@ -201,7 +205,8 @@ vector<string> ConfigurationGroup::valuesInternal(const string& key, Configurati
 }
 
 bool ConfigurationGroup::setValueInternal(const string& key, const string& value, unsigned int number, ConfigurationValueFlags) {
-    if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid))
+    if(configuration->flags & Configuration::InternalFlag::ReadOnly ||
+     !(configuration->flags & Configuration::InternalFlag::IsValid))
         return false;
 
     /* Key cannot be empty => this would change comments / empty lines */
@@ -211,7 +216,7 @@ bool ConfigurationGroup::setValueInternal(const string& key, const string& value
     for(vector<Item>::iterator it = items.begin(); it != items.end(); ++it) {
         if(it->key == key && foundNumber++ == number) {
             it->value = value;
-            configuration->flags |= Configuration::Changed;
+            configuration->flags |= Configuration::InternalFlag::Changed;
             return true;
         }
     }
@@ -222,19 +227,20 @@ bool ConfigurationGroup::setValueInternal(const string& key, const string& value
     i.value = value;
     items.push_back(i);
 
-    configuration->flags |= Configuration::Changed;
+    configuration->flags |= Configuration::InternalFlag::Changed;
     return true;
 }
 
 bool ConfigurationGroup::addValueInternal(const string& key, const string& value, ConfigurationValueFlags) {
-    if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid))
+    if(configuration->flags & Configuration::InternalFlag::ReadOnly ||
+     !(configuration->flags & Configuration::InternalFlag::IsValid))
         return false;
 
     /* Key cannot be empty => empty keys are treated as comments / empty lines */
     if(key.empty()) return false;
 
     /* Check for unique keys */
-    if(configuration->flags & Configuration::UniqueKeys) {
+    if(configuration->flags & Configuration::InternalFlag::UniqueKeys) {
         for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it)
             if(it->key == key) return false;
     }
@@ -244,7 +250,7 @@ bool ConfigurationGroup::addValueInternal(const string& key, const string& value
     i.value = value;
     items.push_back(i);
 
-    configuration->flags |= Configuration::Changed;
+    configuration->flags |= Configuration::InternalFlag::Changed;
     return true;
 }
 
@@ -254,7 +260,7 @@ bool ConfigurationGroup::valueInternal(const string& key, string* value, unsigne
 
     /* Automatic key/value pair creation is enabled and user wants first key,
         try to create new key/value pair */
-    if((configuration->flags & Configuration::AutoCreateKeys) && number == 0)
+    if((configuration->flags & Configuration::InternalFlag::AutoCreateKeys) && number == 0)
         return setValue<string>(key, *value, number, flags);
 
     return false;
@@ -275,7 +281,8 @@ bool ConfigurationGroup::valueInternal(const string& key, string* value, unsigne
 }
 
 bool ConfigurationGroup::removeValue(const string& key, unsigned int number) {
-    if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid))
+    if(configuration->flags & Configuration::InternalFlag::ReadOnly ||
+     !(configuration->flags & Configuration::InternalFlag::IsValid))
         return false;
 
     /* Key cannot be empty => empty keys are treated as comments / empty lines */
@@ -285,7 +292,7 @@ bool ConfigurationGroup::removeValue(const string& key, unsigned int number) {
     for(vector<Item>::iterator it = items.begin(); it != items.end(); ++it) {
         if(it->key == key && foundNumber++ == number) {
             items.erase(it);
-            configuration->flags |= Configuration::Changed;
+            configuration->flags |= Configuration::InternalFlag::Changed;
             return true;
         }
     }
@@ -294,7 +301,8 @@ bool ConfigurationGroup::removeValue(const string& key, unsigned int number) {
 }
 
 bool ConfigurationGroup::removeAllValues(const std::string& key) {
-    if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid))
+    if(configuration->flags & Configuration::InternalFlag::ReadOnly ||
+     !(configuration->flags & Configuration::InternalFlag::IsValid))
         return false;
 
     /** @todo Do it better & faster */
@@ -302,12 +310,13 @@ bool ConfigurationGroup::removeAllValues(const std::string& key) {
         if(items[i].key == key) items.erase(items.begin()+i);
     }
 
-    configuration->flags |= Configuration::Changed;
+    configuration->flags |= Configuration::InternalFlag::Changed;
     return true;
 }
 
 bool ConfigurationGroup::clear() {
-    if(configuration->flags & Configuration::ReadOnly || !(configuration->flags & Configuration::IsValid))
+    if(configuration->flags & Configuration::InternalFlag::ReadOnly ||
+     !(configuration->flags & Configuration::InternalFlag::IsValid))
         return false;
 
     items.clear();
