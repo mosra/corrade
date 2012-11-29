@@ -86,8 +86,8 @@ void StringTest::lowercase() {
 }
 
 void StringTest::whitespace() {
-    for(char i: String::Whitespace)
-        CORRADE_VERIFY(std::isspace(i));
+    for(auto it = String::Whitespace.begin(); it != String::Whitespace.end(); ++it)
+        CORRADE_VERIFY(std::isspace(*it));
 }
 
 }}}
