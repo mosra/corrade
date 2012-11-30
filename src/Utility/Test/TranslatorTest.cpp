@@ -16,44 +16,47 @@
 
 #include "TranslatorTest.h"
 
-#include <QtTest/QTest>
-
 #include "Utility/Translator.h"
 #include "Utility/Directory.h"
+
 #include "testConfigure.h"
 
-using namespace std;
-
-QTEST_APPLESS_MAIN(Corrade::Utility::Test::TranslatorTest)
+CORRADE_TEST_MAIN(Corrade::Utility::Test::TranslatorTest)
 
 namespace Corrade { namespace Utility { namespace Test {
 
+TranslatorTest::TranslatorTest() {
+    addTests(&TranslatorTest::file,
+             &TranslatorTest::group,
+             &TranslatorTest::dynamic);
+}
+
 void TranslatorTest::file() {
     Translator t(Directory::join(TRANSLATOR_TEST_DIR, "primary.conf"), Directory::join(TRANSLATOR_TEST_DIR, "fallback.conf"));
-    const string* s = t.get("string");
+    const std::string* s = t.get("string");
 
-    QVERIFY(*s == "primarily default translated");
+    CORRADE_COMPARE(*s, "primarily default translated");
 
     /* Load another primary localization */
     t.setPrimary(Directory::join(TRANSLATOR_TEST_DIR, "en_US.conf"));
 
-    QVERIFY(*s == "primarily translated");
+    CORRADE_COMPARE(*s, "primarily translated");
 
     /* Cleanup primary localization */
     t.setPrimary(nullptr);
-    QVERIFY(*s == "fallback translation");
+    CORRADE_COMPARE(*s, "fallback translation");
 
     /* Load inexistent primary localization */
     t.setPrimary(Directory::join(TRANSLATOR_TEST_DIR, "inexistent.conf"));
-    QVERIFY(*s == "fallback translation");
+    CORRADE_COMPARE(*s, "fallback translation");
 
     /* Load another fallback localization */
     t.setFallback(Directory::join(TRANSLATOR_TEST_DIR, "fallback2.conf"));
-    QVERIFY(*s == "other fallback translation");
+    CORRADE_COMPARE(*s, "other fallback translation");
 
     /* Cleanup fallback localization */
     t.setFallback(nullptr);
-    QVERIFY(*s == "");
+    CORRADE_VERIFY(s->empty());
 }
 
 void TranslatorTest::group() {
@@ -61,13 +64,13 @@ void TranslatorTest::group() {
 
     Translator t(&c);
 
-    const string* s = t.get("string");
+    const std::string* s = t.get("string");
 
-    QVERIFY(*s == "primarily default translated");
+    CORRADE_COMPARE(*s, "primarily default translated");
 
     /* Load another group */
     t.setPrimary(c.group("cs_CZ"));
-    QVERIFY(*s == "primárně přeloženo");
+    CORRADE_COMPARE(*s, u8"primárně přeloženo");
 }
 
 void TranslatorTest::dynamic() {
@@ -76,18 +79,18 @@ void TranslatorTest::dynamic() {
     Translator t2;
     t2.setPrimary(&c, true);
 
-    const string* s1 = t1.get("string");
-    const string* s2 = t2.get("string");
+    const std::string* s1 = t1.get("string");
+    const std::string* s2 = t2.get("string");
 
     Translator::setLocale("en_US");
 
-    QVERIFY(*s1 == "primarily translated");
-    QVERIFY(*s2 == "primarily translated");
+    CORRADE_COMPARE(*s1, "primarily translated");
+    CORRADE_COMPARE(*s2, "primarily translated");
 
     Translator::setLocale("cs_CZ");
 
-    QVERIFY(*s1 == "primárně přeloženo");
-    QVERIFY(*s2 == "primárně přeloženo");
+    CORRADE_COMPARE(*s1, u8"primárně přeloženo");
+    CORRADE_COMPARE(*s2, u8"primárně přeloženo");
 
     /* Fixed translations, not affected with setLocale() */
     t1.setPrimary(Directory::join(TRANSLATOR_TEST_DIR, "cs_CZ.conf"));
@@ -95,8 +98,8 @@ void TranslatorTest::dynamic() {
 
     Translator::setLocale("en_US");
 
-    QVERIFY(*s1 == "primárně přeloženo");
-    QVERIFY(*s2 == "primárně přeloženo");
+    CORRADE_COMPARE(*s1, u8"primárně přeloženo");
+    CORRADE_COMPARE(*s2, u8"primárně přeloženo");
 }
 
 }}}

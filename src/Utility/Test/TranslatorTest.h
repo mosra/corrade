@@ -16,14 +16,14 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include <QtCore/QObject>
+#include "TestSuite/Tester.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class TranslatorTest: public QObject {
-    Q_OBJECT
+class TranslatorTest: public TestSuite::Tester<TranslatorTest> {
+    public:
+        TranslatorTest();
 
-    private slots:
         void file();
         void group();
         void dynamic();
