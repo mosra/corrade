@@ -16,33 +16,35 @@
 
 #include "EndianTest.h"
 
-#include <QtTest/QTest>
-
 #include "Utility/Endianness.h"
 #include "Utility/Debug.h"
 
-QTEST_APPLESS_MAIN(Corrade::Utility::Test::EndianTest)
+CORRADE_TEST_MAIN(Corrade::Utility::Test::EndianTest)
 
 namespace Corrade { namespace Utility { namespace Test {
 
+EndianTest::EndianTest() {
+    addTests(&EndianTest::endianness);
+}
+
 void EndianTest::endianness() {
     #ifdef CORRADE_BIG_ENDIAN
-        QVERIFY(Endianness::isBigEndian());
+        CORRADE_VERIFY(Endianness::isBigEndian());
         Debug() << "Big endian system";
         #define current bigEndian
         #define other littleEndian
     #else
-        QVERIFY(!Endianness::isBigEndian());
+        CORRADE_VERIFY(!Endianness::isBigEndian());
         Debug() << "Little endian system";
         #define current littleEndian
         #define other bigEndian
     #endif
 
-    QVERIFY(Endianness::current<unsigned int>(0x11223344) == 0x11223344);
-    QVERIFY(Endianness::other<unsigned int>(0x11223344) == 0x44332211);
-    QVERIFY(Endianness::other<int>(0x77665544) == 0x44556677);
-    QVERIFY(Endianness::other<short>(0x7F00) == 0x007F);
-    QVERIFY(Endianness::other<quint64>(0x1122334455667788ull) == 0x8877665544332211ull);
+    CORRADE_COMPARE(Endianness::current<std::uint32_t>(0x11223344), 0x11223344);
+    CORRADE_COMPARE(Endianness::other<std::uint32_t>(0x11223344), 0x44332211);
+    CORRADE_COMPARE(Endianness::other<std::int32_t>(0x77665544), 0x44556677);
+    CORRADE_COMPARE(Endianness::other<std::int16_t>(0x7F00), 0x007F);
+    CORRADE_COMPARE(Endianness::other<std::uint64_t>(0x1122334455667788ull), 0x8877665544332211ull);
 }
 
 }}}

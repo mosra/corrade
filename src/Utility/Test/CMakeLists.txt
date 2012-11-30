@@ -8,7 +8,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 corrade_add_test2(UtilityAbstractHashTest AbstractHashTest.cpp)
 corrade_add_test(UtilityDirectoryTest DirectoryTest.h DirectoryTest.cpp CorradeUtility)
-corrade_add_test(UtilityEndianTest EndianTest.h EndianTest.cpp CorradeUtility)
+corrade_add_test2(UtilityEndianTest EndianTest.cpp)
 corrade_add_test2(UtilityMurmurHash2Test MurmurHash2Test.cpp)
 corrade_add_test2(UtilityUtilitiesTest UtilitiesTest.cpp)
 corrade_add_test2(UtilityConfigurationTest ConfigurationTest.cpp)

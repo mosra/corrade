@@ -16,14 +16,14 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include <QtCore/QObject>
+#include "TestSuite/Tester.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class EndianTest: public QObject {
-    Q_OBJECT
+class EndianTest: public TestSuite::Tester<EndianTest> {
+    public:
+        EndianTest();
 
-    private slots:
         void endianness();
 };
 
