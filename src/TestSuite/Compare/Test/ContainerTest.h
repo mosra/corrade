@@ -28,6 +28,7 @@ class ContainerTest: public Tester<ContainerTest> {
         void outputActualSmaller();
         void outputExpectedSmaller();
         void output();
+        void sorted();
 };
 
 }}}}

@@ -31,7 +31,8 @@ ContainerTest::ContainerTest() {
     addTests(&ContainerTest::same,
              &ContainerTest::outputActualSmaller,
              &ContainerTest::outputExpectedSmaller,
-             &ContainerTest::output);
+             &ContainerTest::output,
+             &ContainerTest::sorted);
 }
 
 void ContainerTest::same() {
@@ -85,6 +86,16 @@ void ContainerTest::output() {
     }
 
     CORRADE_COMPARE(out.str(), "Containers a and b have different contents. Actual 9 but 2 expected on position 1.\n");
+}
+
+void ContainerTest::sorted() {
+    std::vector<int> a{1, 2, 4, 3};
+    std::vector<int> b{1, 4, 3, 2};
+    std::vector<int> c{1, 4, 3, 3};
+
+    CORRADE_VERIFY(Comparator<Compare::Container<std::vector<int>>>(Compare::ContainerMethod::Sorted)(a, b));
+    CORRADE_VERIFY(Comparator<Compare::Container<std::vector<int>>>(Compare::ContainerMethod::Sorted)(b, a));
+    CORRADE_VERIFY(!Comparator<Compare::Container<std::vector<int>>>(Compare::ContainerMethod::Sorted)(a, c));
 }
 
 }}}}
