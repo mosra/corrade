@@ -54,5 +54,6 @@ Unit testing framework. See @ref unit-testing for more information.
 /** @namespace Corrade::TestSuite::Compare
 @brief Various test suite comparison helpers
 
-See @ref Comparator-pseudo-types for more information.
+See CORRADE_COMPARE_AS(), CORRADE_COMPARE_WITH() and Comparator for more
+information.
 */
