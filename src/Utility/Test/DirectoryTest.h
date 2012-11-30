@@ -16,35 +16,22 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include <QtCore/QObject>
+#include "TestSuite/Tester.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class DirectoryTest: public QObject {
-    Q_OBJECT
+class DirectoryTest: public Corrade::TestSuite::Tester<DirectoryTest> {
+    public:
+        DirectoryTest();
 
-    private slots:
-        void path_data();
         void path();
-
-        void filename_data();
         void filename();
-
-        void join_data();
         void join();
-
-        void mkpath_data();
-        void mkpath();
-
-        void remove_data();
-        void remove();
-
         void fileExists();
-
+        void remove();
+        void mkpath();
         void home();
         void configurationDir();
-
-        void list_data();
         void list();
 };
 
