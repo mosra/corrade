@@ -13,7 +13,7 @@ corrade_add_test2(UtilityMurmurHash2Test MurmurHash2Test.cpp)
 corrade_add_test2(UtilityUtilitiesTest UtilitiesTest.cpp)
 corrade_add_test2(UtilityConfigurationTest ConfigurationTest.cpp)
 corrade_add_test(UtilityDebugTest DebugTest.h DebugTest.cpp CorradeUtility)
-corrade_add_test(UtilitySha1Test Sha1Test.h Sha1Test.cpp CorradeUtility)
+corrade_add_test2(UtilitySha1Test Sha1Test.cpp)
 corrade_add_test2(UtilityStringTest StringTest.cpp)
 corrade_add_test2(UtilityTranslatorTest TranslatorTest.cpp)
 

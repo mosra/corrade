@@ -16,14 +16,14 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include <QtCore/QObject>
+#include "TestSuite/Tester.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class Sha1Test: public QObject {
-    Q_OBJECT
+class Sha1Test: public TestSuite::Tester<Sha1Test>{
+    public:
+        Sha1Test();
 
-    private slots:
         void emptyString();
         void exact64bytes();
         void exactOneBlockPadding();
