@@ -16,72 +16,81 @@
 
 #include "ResourceTest.h"
 
+#include <fstream>
 #include <sstream>
-#include <QtCore/QFile>
-#include <QtTest/QTest>
 
-#include "Utility/Debug.h"
+#include "TestSuite/Compare/StringToFile.h"
+#include "Utility/Directory.h"
 #include "Utility/Resource.h"
+
 #include "testConfigure.h"
 
-QTEST_APPLESS_MAIN(Corrade::Utility::Test::ResourceTest)
-
-using namespace std;
+CORRADE_TEST_MAIN(Corrade::Utility::Test::ResourceTest)
 
 namespace Corrade { namespace Utility { namespace Test {
 
-ResourceTest::ResourceTest(QObject* parent): QObject(parent) {
-    /* Testing also null bytes and signed overflow, don't change binaries */
-
-    QFile _predisposition(RESOURCE_TEST_DIR + QString("predisposition.bin"));
-    QFile _consequence(RESOURCE_TEST_DIR + QString("consequence.bin"));
-
-    _predisposition.open(QFile::ReadOnly);
-    _consequence.open(QFile::ReadOnly);
-
-    predisposition = _predisposition.readAll();
-    consequence = _consequence.readAll();
+ResourceTest::ResourceTest() {
+    addTests(&ResourceTest::compile,
+             &ResourceTest::get,
+             &ResourceTest::getInexistent);
 }
 
 void ResourceTest::compile() {
+    /* Testing also null bytes and signed overflow, don't change binaries */
+    std::ifstream predispositionIn(Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"));
+    std::ifstream consequenceIn(Directory::join(RESOURCE_TEST_DIR, "consequence.bin"));
+    CORRADE_VERIFY(predispositionIn.good());
+    CORRADE_VERIFY(consequenceIn.good());
+
+    predispositionIn.seekg(0, std::ios::end);
+    std::string predisposition;
+    predisposition.reserve(predispositionIn.tellg());
+    predispositionIn.seekg(0, std::ios::beg);
+
+    consequenceIn.seekg(0, std::ios::end);
+    std::string consequence;
+    consequence.reserve(consequenceIn.tellg());
+    consequenceIn.seekg(0, std::ios::beg);
+
+    predisposition.assign((std::istreambuf_iterator<char>(predispositionIn)), std::istreambuf_iterator<char>());
+    consequence.assign((std::istreambuf_iterator<char>(consequenceIn)), std::istreambuf_iterator<char>());
+
     Resource r("test");
 
-    QFile compiled(RESOURCE_TEST_DIR + QString("compiled.cpp"));
-    compiled.open(QFile::Text|QFile::ReadOnly);
-
-    map<string, string> input;
-    input.insert(make_pair("predisposition.bin", string(predisposition.data(), predisposition.size())));
-    input.insert(make_pair("consequence.bin", string(consequence.data(), consequence.size())));
-
-    QCOMPARE(QString::fromStdString(r.compile("ResourceTestData", input)), QString::fromUtf8(compiled.readAll()));
+    std::map<std::string, std::string> input{
+        std::make_pair("predisposition.bin", std::string(predisposition.data(), predisposition.size())),
+        std::make_pair("consequence.bin", std::string(consequence.data(), consequence.size()))};
+    CORRADE_COMPARE_AS(r.compile("ResourceTestData", input),
+                       Directory::join(RESOURCE_TEST_DIR, "compiled.cpp"),
+                       TestSuite::Compare::StringToFile);
 }
 
 void ResourceTest::get() {
     Resource r("test");
-
-    string pd = r.get("predisposition.bin");
-    string cd = r.get("consequence.bin");
-
-    QCOMPARE(QByteArray(pd.c_str(), pd.size()), predisposition);
-    QCOMPARE(QByteArray(cd.c_str(), cd.size()), consequence);
+    CORRADE_COMPARE_AS(r.get("predisposition.bin"),
+                       Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"),
+                       TestSuite::Compare::StringToFile);
+    CORRADE_COMPARE_AS(r.get("consequence.bin"),
+                       Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
+                       TestSuite::Compare::StringToFile);
 }
 
 void ResourceTest::getInexistent() {
-    ostringstream out;
+    std::ostringstream out;
     Error::setOutput(&out);
 
     {
         Resource r("inexistentGroup");
-        QVERIFY(r.get("inexistentFile").empty());
-        QVERIFY(out.str() == "Resource: group 'inexistentGroup' was not found\n");
+        CORRADE_VERIFY(r.get("inexistentFile").empty());
+        CORRADE_COMPARE(out.str(), "Resource: group 'inexistentGroup' was not found\n");
     }
 
     out.str("");
 
     {
         Resource r("test");
-        QVERIFY(r.get("inexistentFile").empty());
-        QVERIFY(out.str() == "Resource: file 'inexistentFile' was not found in group 'test'\n");
+        CORRADE_VERIFY(r.get("inexistentFile").empty());
+        CORRADE_COMPARE(out.str(), "Resource: file 'inexistentFile' was not found in group 'test'\n");
     }
 }
 

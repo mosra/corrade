@@ -22,11 +22,10 @@ corrade_add_resource(ResourceTestData test
     ResourceTestFiles/predisposition.bin ALIAS predisposition.bin
     ResourceTestFiles/consequence.bin ALIAS consequence.bin
     )
-set(ResourceTest_MOC ResourceTest.h)
-set(ResourceTest_SRCS ResourceTest.cpp ${ResourceTestData})
-corrade_add_multifile_test(UtilityResourceTest ResourceTest_MOC ResourceTest_SRCS CorradeUtility)
+corrade_add_test2(UtilityResourceTest ResourceTest.cpp ${ResourceTestData})
 
 # Static lib resource test
 add_library(ResourceTestDataLib STATIC ${ResourceTestData})
-set(ResourceTestStatic_SRCS ${ResourceTest_SRCS} registerStaticResource)
-corrade_add_multifile_test(UtilityResourceTestStatic ResourceTest_MOC ResourceTestStatic_SRCS CorradeUtility ResourceTestDataLib)
+corrade_add_test2(UtilityResourceTestStatic
+    ResourceTest.cpp ${ResourceTestData} registerStaticResource.cpp
+    LIBRARIES ResourceTestDataLib)

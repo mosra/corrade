@@ -16,20 +16,14 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include <QtCore/QObject>
+#include "TestSuite/Tester.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class ResourceTest: public QObject {
-    Q_OBJECT
-
+class ResourceTest: public TestSuite::Tester<ResourceTest> {
     public:
-        ResourceTest(QObject* parent = 0);
+        ResourceTest();
 
-    private:
-        QByteArray predisposition, consequence;
-
-    private slots:
         void compile();
         void get();
         void getInexistent();
