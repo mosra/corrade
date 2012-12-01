@@ -16,14 +16,14 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include <QtCore/QObject>
+#include "TestSuite/Tester.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class DebugTest: public QObject {
-    Q_OBJECT
+class DebugTest: public TestSuite::Tester<DebugTest> {
+    public:
+        DebugTest();
 
-    private slots:
         void debug();
         void custom();
         void flags();

@@ -16,20 +16,25 @@
 
 #include "DebugTest.h"
 
+#include <map>
 #include <set>
 #include <sstream>
-#include <QtTest/QTest>
 
 #include "Utility/Debug.h"
 
-using namespace std;
-
-QTEST_APPLESS_MAIN(Corrade::Utility::Test::DebugTest)
+CORRADE_TEST_MAIN(Corrade::Utility::Test::DebugTest)
 
 namespace Corrade { namespace Utility { namespace Test {
 
+DebugTest::DebugTest() {
+    addTests(&DebugTest::debug,
+             &DebugTest::custom,
+             &DebugTest::flags,
+             &DebugTest::iterable);
+}
+
 void DebugTest::debug() {
-    ostringstream debug, warning, error;
+    std::ostringstream debug, warning, error;
 
     Debug::setOutput(&debug);
     Warning::setOutput(&warning);
@@ -38,9 +43,9 @@ void DebugTest::debug() {
     Warning() << "w" << 42 << 'c';
     Error() << "e";
 
-    QCOMPARE(QString::fromStdString(debug.str()), QString("a 33 0.567\n"));
-    QCOMPARE(QString::fromStdString(warning.str()), QString("w 42 c\n"));
-    QCOMPARE(QString::fromStdString(error.str()), QString("e\n"));
+    CORRADE_COMPARE(debug.str(), "a 33 0.567\n");
+    CORRADE_COMPARE(warning.str(), "w 42 c\n");
+    CORRADE_COMPARE(error.str(), "e\n");
 
     /* Multiple times used instance */
     debug.str("");
@@ -50,12 +55,12 @@ void DebugTest::debug() {
         d << 33;
         d << 0.567f;
     }
-    QCOMPARE(QString::fromStdString(debug.str()), QString("a 33 0.567\n"));
+    CORRADE_COMPARE(debug.str(), "a 33 0.567\n");
 
     /* Don't add newline at the end of empty output */
     debug.str("");
     Debug();
-    QCOMPARE(QString::fromStdString(debug.str()), QString(""));
+    CORRADE_COMPARE(debug.str(), "");
 }
 
 struct Foo {
@@ -67,53 +72,53 @@ Debug operator<<(Debug debug, const Foo& value) {
 }
 
 void DebugTest::custom() {
-    ostringstream out;
+    std::ostringstream out;
     Debug::setOutput(&out);
 
     Foo f = { 42 };
     {
         Debug() << "The answer is" << f;
     }
-    QCOMPARE(QString::fromStdString(out.str()), QString("The answer is 42\n"));
+    CORRADE_COMPARE(out.str(), "The answer is 42\n");
 }
 
 void DebugTest::flags() {
-    ostringstream out;
+    std::ostringstream out;
     Debug::setOutput(&out);
 
     {
         /* Don't allow to set/reset the reserved flag */
         Debug debug;
         debug.setFlag(static_cast<Debug::Flag>(0x01), false);
-        QVERIFY(debug.flag(static_cast<Debug::Flag>(0x01)));
+        CORRADE_VERIFY(debug.flag(static_cast<Debug::Flag>(0x01)));
     } {
         Debug debug;
         debug.setFlag(Debug::SpaceAfterEachValue, false);
         debug << 'a' << 'b' << 'c';
     }
-    QCOMPARE(QString::fromStdString(out.str()), QString("abc\n"));
+    CORRADE_COMPARE(out.str(), "abc\n");
     out.str("");
     {
         Debug debug;
         debug.setFlag(Debug::NewLineAtTheEnd, false);
         debug << 'a' << 'b' << 'c';
     }
-    QCOMPARE(QString::fromStdString(out.str()), QString("a b c"));
+    CORRADE_COMPARE(out.str(), "a b c");
 }
 
 void DebugTest::iterable() {
-    ostringstream out;
+    std::ostringstream out;
     Debug::setOutput(&out);
-    Debug() << vector<int>{1, 2, 3};
-    QCOMPARE(QString::fromStdString(out.str()), QString("[1, 2, 3]\n"));
+    Debug() << std::vector<int>{1, 2, 3};
+    CORRADE_COMPARE(out.str(), "[1, 2, 3]\n");
 
     out.str("");
-    Debug() << set<string>{"a", "b", "c"};
-    QCOMPARE(QString::fromStdString(out.str()), QString("[a, b, c]\n"));
+    Debug() << std::set<std::string>{"a", "b", "c"};
+    CORRADE_COMPARE(out.str(), "[a, b, c]\n");
 
     out.str("");
-    Debug() << map<int, string>{{1, "a"}, {2, "b"}, {3, "c"}};
-    QCOMPARE(QString::fromStdString(out.str()), QString("[(1, a), (2, b), (3, c)]\n"));
+    Debug() << std::map<int, std::string>{{1, "a"}, {2, "b"}, {3, "c"}};
+    CORRADE_COMPARE(out.str(), "[(1, a), (2, b), (3, c)]\n");
 }
 
 }}}
