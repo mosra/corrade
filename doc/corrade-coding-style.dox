@@ -1,4 +1,4 @@
-namespace Magnum {
+namespace Corrade {
 /** @page corrade-coding-style Coding style
 @brief Coding style and best practices to preserve maintainability and
 consistent style across whole project.
