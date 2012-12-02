@@ -39,6 +39,15 @@ all plugins. See @ref plugin-management for a brief introduction to how
 plugins work.
 */
 
+/** @dir src/Interconnect
+ * @brief Namespace Corrade::Interconnect
+ */
+/** @namespace Corrade::Interconnect
+@brief Signal/slot connections
+
+This library allows you to interconnect objects.
+*/
+
 /** @dir src/TestSuite
  * @brief Namespace Corrade::TestSuite
  */

@@ -30,6 +30,7 @@ if(BUILD_TESTS)
 endif()
 
 add_subdirectory(Containers)
+add_subdirectory(Interconnect)
 add_subdirectory(PluginManager)
 add_subdirectory(TestSuite)
 add_subdirectory(Utility)
