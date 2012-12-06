@@ -31,7 +31,7 @@ class EnumSetTest: public TestSuite::Tester {
         void operatorAnd();
         void operatorBool();
         void operatorInverse();
-        void comparison();
+        void compare();
 
     private:
         enum class Feature: int {

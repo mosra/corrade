@@ -26,7 +26,7 @@ EnumSetTest::EnumSetTest() {
              &EnumSetTest::operatorAnd,
              &EnumSetTest::operatorBool,
              &EnumSetTest::operatorInverse,
-             &EnumSetTest::comparison);
+             &EnumSetTest::compare);
 }
 
 void EnumSetTest::construct() {
@@ -78,7 +78,7 @@ void EnumSetTest::operatorInverse() {
     CORRADE_COMPARE(int(~Feature::Popular), 7);
 }
 
-void EnumSetTest::comparison() {
+void EnumSetTest::compare() {
     Features features = Feature::Popular|Feature::Fast|Feature::Cheap;
     CORRADE_VERIFY(features == features);
     CORRADE_VERIFY(!(features != features));

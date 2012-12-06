@@ -171,7 +171,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 #define _CORRADE_REGISTER_TEST_CASE()                                       \
-    registerTestCase(__func__, __LINE__);
+    Tester::registerTestCase(__func__, __LINE__);
 #endif
 
 /** @hideinitializer
@@ -189,7 +189,7 @@ CORRADE_VERIFY(!s.empty());
 #define CORRADE_VERIFY(expression)                                          \
     do {                                                                    \
         _CORRADE_REGISTER_TEST_CASE();                                      \
-        verify(#expression, expression);                                    \
+        Tester::verify(#expression, expression);                            \
     } while(false)
 
 /** @hideinitializer
@@ -207,7 +207,7 @@ CORRADE_COMPARE(a, 8);
 #define CORRADE_COMPARE(actual, expected)                                   \
     do {                                                                    \
         _CORRADE_REGISTER_TEST_CASE();                                      \
-        compare(#actual, actual, #expected, expected);                      \
+        Tester::compare(#actual, actual, #expected, expected);              \
     } while(false)
 
 /** @hideinitializer
@@ -226,7 +226,7 @@ for example of more involved comparisons.
 #define CORRADE_COMPARE_AS(actual, expected, Type)                          \
     do {                                                                    \
         _CORRADE_REGISTER_TEST_CASE();                                      \
-        compare<Type>(#actual, actual, #expected, expected);                \
+        Tester::compare<Type>(#actual, actual, #expected, expected);        \
     } while(false)
 
 /** @hideinitializer
@@ -245,7 +245,7 @@ more information.
 #define CORRADE_COMPARE_WITH(actual, expected, comparatorInstance)          \
     do {                                                                    \
         _CORRADE_REGISTER_TEST_CASE();                                      \
-        compareWith(comparatorInstance.comparator(), #actual, actual, #expected, expected); \
+        Tester::compareWith(comparatorInstance.comparator(), #actual, actual, #expected, expected); \
     } while(false)
 
 /** @hideinitializer
