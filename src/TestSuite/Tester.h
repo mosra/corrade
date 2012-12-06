@@ -20,7 +20,6 @@
  * @brief Class Corrade::TestSuite::Tester, macros CORRADE_TEST_MAIN(), CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS().
  */
 
-#include <iostream>
 #include <vector>
 
 #include "Comparator.h"
@@ -48,7 +47,17 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @return Non-zero if there are no test cases, if any test case fails
          *      or doesn't contain any checking macros, zero otherwise.
          */
-        int exec(std::ostream* logOutput = &std::cout, std::ostream* errorOutput = &std::cerr);
+        int exec(std::ostream* logOutput, std::ostream* errorOutput);
+
+        /**
+         * @brief Execute the tester
+         * @return Non-zero if there are no test cases, if any test case fails
+         *      or doesn't contain any checking macros, zero otherwise.
+         *
+         * The same as above, redirects log output to `std::cout` and error
+         * output to `std::cerr`.
+         */
+        int exec();
 
         /**
          * @brief Add test cases

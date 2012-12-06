@@ -16,7 +16,11 @@
 
 #include "Tester.h"
 
+#include <iostream>
+
 namespace Corrade { namespace TestSuite {
+
+int Tester::exec() { return exec(&std::cout, &std::cerr); }
 
 int Tester::exec(std::ostream* logOutput, std::ostream* errorOutput) {
     this->logOutput = logOutput;
