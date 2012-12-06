@@ -20,8 +20,6 @@
  * @brief Type traits
  */
 
-#include <ostream>
-
 namespace Corrade { namespace Utility {
 
 /**
@@ -67,35 +65,6 @@ template<class T> struct IsIterable {
 }
 #else
 HasType(const_iterator, IsIterable)
-#endif
-
-#ifndef DOXYGEN_GENERATING_OUTPUT
-namespace HasInsertionOperatorImplementation {
-    typedef char No;
-    typedef char Yes[2];
-
-    struct AnyType {
-        template<class T> AnyType(const T&);
-    };
-
-    No operator<<(const std::ostream&, const AnyType&);
-
-    Yes& test(std::ostream&);
-    No test(No);
-
-    template<class T> struct Has {
-        static std::ostream& s;
-        static const T& t;
-        static const bool Value = sizeof(test(s << t)) == sizeof(Yes);
-    };
-}
-template<class T> struct HasInsertionOperator: HasInsertionOperatorImplementation::Has<T> {};
-#else
-/** @brief Whether given class has `operator<<` for printing to `std::ostream` */
-template<class T> struct HasInsertionOperator {
-    /** @brief Whether given class has insertion operator */
-    static const bool Value;
-};
 #endif
 
 }}

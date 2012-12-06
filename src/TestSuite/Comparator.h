@@ -20,6 +20,8 @@
  * @brief Class Corrade::TestSuite::Comparator
  */
 
+#include <string>
+
 #include "Utility/Debug.h"
 
 namespace Corrade { namespace TestSuite {

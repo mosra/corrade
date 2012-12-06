@@ -40,11 +40,11 @@ void DebugTest::debug() {
     Warning::setOutput(&warning);
     Error::setOutput(&error);
     Debug() << "a" << 33 << 0.567f;
-    Warning() << "w" << 42 << 'c';
+    Warning() << "w" << 42 << 'c' << false;
     Error() << "e";
 
     CORRADE_COMPARE(debug.str(), "a 33 0.567\n");
-    CORRADE_COMPARE(warning.str(), "w 42 c\n");
+    CORRADE_COMPARE(warning.str(), "w 42 c false\n");
     CORRADE_COMPARE(error.str(), "e\n");
 
     /* Multiple times used instance */

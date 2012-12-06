@@ -20,8 +20,10 @@
  * @brief Class Corrade::Utility::Debug, Corrade::Utility::Warning, Corrade::Utility::Error, macro CORRADE_ASSERT().
  */
 
-#include <cstddef>
 #include <cstdlib>
+#include <iosfwd>
+#include <utility>
+#include <type_traits>
 
 #include "TypeTraits.h"
 
@@ -72,10 +74,6 @@ class CORRADE_UTILITY_EXPORT Debug {
     /* Disabling assignment */
     CORRADE_UTILITY_LOCAL Debug& operator=(const Debug& other);
 
-    #ifndef DOXYGEN_GENERATING_OUTPUT
-    template<class T> friend typename std::enable_if<HasInsertionOperator<T>::Value, Debug>::type operator<<(Debug, const T&);
-    #endif
-
     public:
         /** @brief Output flags */
         enum Flag {
@@ -90,8 +88,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          *      no debug output will be written anywhere.
          *
          * Constructs debug object with given output.
-         *
-         * @see setOutput().
+         * @see setOutput()
          */
         inline Debug(std::ostream* _output = globalOutput): output(_output), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
 
@@ -129,8 +126,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * Adds newline at the end of debug output, if it is enabled in flags
          * and the output is not empty.
-         *
-         * @see Flag.
+         * @see Flag
          */
         ~Debug();
 
@@ -139,6 +135,28 @@ class CORRADE_UTILITY_EXPORT Debug {
 
         /** @brief Set flag */
         void setFlag(Flag flag, bool value);
+
+        /**
+         * @brief Print string to debug output
+         *
+         * If there is already something on the output, puts space before
+         * the value.
+         * @see operator<<(Debug, const T&)
+         */
+        Debug operator<<(const std::string& value);
+        Debug operator<<(const char* value);            /**< @overload */
+        Debug operator<<(const void* value);            /**< @overload */
+        Debug operator<<(bool value);                   /**< @overload */
+        Debug operator<<(char value);                   /**< @overload */
+        Debug operator<<(int value);                    /**< @overload */
+        Debug operator<<(long value);                   /**< @overload */
+        Debug operator<<(long long value);              /**< @overload */
+        Debug operator<<(unsigned value);               /**< @overload */
+        Debug operator<<(unsigned long value);          /**< @overload */
+        Debug operator<<(unsigned long long value);     /**< @overload */
+        Debug operator<<(float value);                  /**< @overload */
+        Debug operator<<(double value);                 /**< @overload */
+        Debug operator<<(long double value);            /**< @overload */
 
         /**
          * @brief Globally set output for newly created instances
@@ -156,6 +174,8 @@ class CORRADE_UTILITY_EXPORT Debug {
         std::ostream* output;   /**< @brief Stream where to put the output */
 
     private:
+        template<class T> Debug print(const T& value);
+
         CORRADE_UTILITY_EXPORT static std::ostream* globalOutput;
         int flags;
 };
@@ -175,16 +195,6 @@ Debug::setFlag() for modifying newline and whitespace behavior.
  */
 template<class T> Debug operator<<(Debug debug, const T& value);
 #else
-template<class T> typename std::enable_if<HasInsertionOperator<T>::Value, Debug>::type operator<<(Debug debug, const T& value) {
-    if(!debug.output) return debug;
-
-    /* Separate values with spaces, if enabled */
-    if(debug.flags & 0x01) debug.flags &= ~0x01;
-    else if(debug.flags & Debug::SpaceAfterEachValue) *debug.output << " ";
-
-    *debug.output << value;
-    return debug;
-}
 template<class Iterable> Debug operator<<(typename std::enable_if<IsIterable<Iterable>::Value && !std::is_same<Iterable, std::string>::value, Debug>::type debug, const Iterable& value) {
     debug << '[';
     debug.setFlag(Debug::SpaceAfterEachValue, false);
