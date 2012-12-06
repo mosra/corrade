@@ -1,12 +1,15 @@
 namespace Corrade {
 /** @page corrade-example-index Examples and tutorials
 
+ - @subpage interconnect
  - @subpage plugin-management
  - @subpage resource-management
  - @subpage unit-testing
 
 @todoc Rename (merge) to page `examples` when doxygen treats it as regular page.
 
+@example interconnect/CMakeLists.txt
+@example interconnect/main.cpp
 @example test/MyTest.h
 @example test/MyTest.cpp
 @example test/CMakeLists.txt

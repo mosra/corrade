@@ -6,4 +6,5 @@ find_package(Corrade REQUIRED)
 
 include_directories(${CORRADE_INCLUDE_DIR})
 
+add_subdirectory(interconnect)
 add_subdirectory(test)
