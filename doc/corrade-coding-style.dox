@@ -48,7 +48,7 @@ Source and header lists should be ordered alphabetically.
 
 @section cpp C++ code
 
-@subsection cpp-files File naming and directory structure
+@subsection cpp-files File and directory naming
 
 All C++ header and source files are named after the class they contain with no
 case change. Thus there should be only one class per file, but if the classes
@@ -67,7 +67,7 @@ visible to end users should be in `Implementation` subnamespace in the same
 file as the class/function for which the implementation is. See @ref documentation
 section below for guide how to hide it also from Doxygen documentation.
 
-@subsection cpp-headers Headers
+@subsection cpp-files File structure
 
 Headers have an strict structure. Include guards are basically include path
 with slashes replaced with underscores to make refactoring as easy as possible.
@@ -75,18 +75,18 @@ Directly after them is license block, blank line, then file documentation,
 blank line and after that the contents of the header. Include guard ending is
 only `endif`, without any additional comments.
 
-It's probably common practice, but repeating won't hurt: headers shouldn't
-have `using` declarations inside them (unless there is good excuse for
-bringing some useful feature from different namespace into another namespace -
-but not in the default namespace!).
-
-@subsection cpp-sources Source files
-
 Source file have similar structure as headers - first license block, then
-blank line, then the includes, then contents of the file.
+blank line, then the includes, then blank line, then contents of the file.
 
-Unlike headers, it's good to use `using` declaration in source files as much
-as needed to make the code less verbose (unless the name is used only once).
+Includes should be organized into separate groups separated with blank line -
+first header belonging to the particular source file (if the file is source
+file), then system includes, then includes from the engine itself and then
+internal includes used only in the particular file (e.g. `configure.h`).
+Includes from system libraries and dependencies are in angle brackets,
+includes from the library itself are in quotes. Includes should be sorted by
+"level" (e.g. C includes (`&lt;cstdlib&gt;`) before C++ includes
+(`&lt;string&gt;`) and those before dependencies (`&lt;dirent.h&gt;`)),
+then by path name.
 
 @subsection cpp-format Code format
 
@@ -119,6 +119,30 @@ one underscore before them, don't use two underscores, as they are reserved
 for internal usage by the C++ standard. Underscores before the name shouldn't
 be used in public API or function parameters, as it looks ugly in the
 documentation.
+
+@subsubsection cpp-using <tt>using</tt> keyword
+
+`using namespace std` is not allowed. It brings many symbols into default
+namespace and can lead to unintended behavior. Consider `abs()` function. If
+using it without `std::` prefix, you can by mistake use the non-overloaded
+`double abs(double)` from plain C `<math.h> header, which can cause serious
+performance issues when using it for integers only. By explicitly calling
+`std::abs()` you ensure that proper overload is always selected.
+
+`using namespace` keyword should be used only for root namespace, i.e.
+`using namespace Corrade` and not `using namespace Corrade::Utility`. If you
+are using some class from subnamespace in many places, use only that
+particular name, e.g. `using Corrade::Utility::ConfigurationGroup`.
+
+It's probably common practice, but repeating won't hurt: headers shouldn't
+have `using` declarations inside them (unless there is good excuse for
+bringing some useful feature from different namespace into another namespace -
+but not in the default namespace!).
+
+@subsubsection cpp-forward-declarations Forward declarations and forward declaration headers
+
+Use forward declarations in headers as much as possible, as it can
+significantly reduce time of compilation.
 
 @subsubsection cpp-namespace Namespace declarations
 
@@ -239,18 +263,6 @@ Use keywords in this order: `template virtual inline constexpr static`. Only
 base virtual functions should have `virtual` keyword, not the
 reimplementations.
 
-@subsubsection cpp-includes Includes
-
-Includes should be organized into separate groups separated with blank line -
-first header belonging to the particular source file (if the file is source
-file), then system includes, then includes from the engine itself and then
-internal includes used only in the particular file (e.g. `configure.h`).
-Includes from system libraries and dependencies are in angle brackets,
-includes from engine itself are in quotes. Includes should be sorted by
-"level" (e.g. C includes (`&lt;cstdlib&gt;`) before C++ includes
-(`&lt;string&gt;`) and those before dependencies (`&lt;dirent.h&gt;`)),
-then by path name.
-
 @subsubsection cpp-macros Preprocessor macros
 
 Preprocessor macros should have the same indentation as surrounding code. If
@@ -272,12 +284,19 @@ unwanted) symbol.
 
 @subsection cpp-assert Assertions
 
-Use asserts as much as possible. Utility library has convenient
-`CORRADE_ASSERT()` macro, which does everything needed - checks the statement,
-prints given message to error output and exits immediately or returns default
-value.
+Use asserts as much as possible. Utility library has convenient `CORRADE_ASSERT()`
+and `CORRADE_INTERNAL_ASSERT()` macros, see their documentation for more
+information.
 
 @subsection cpp-forbidden Forbidden C/C++ features
+
+Don't <tt>#</tt><tt>include &lt;*stream&gt;</tt> in header files. STL's
+streams library headers are amazingly large and this single
+<tt>#</tt><tt>include</tt> brings >25k of source code which needs to be
+preprocessed and compiled even if majority of it is later tossed out. Use
+`&lt;iosfwd&gt;` instead and include stream headers only in source files.
+If you want to just print something to output, use Utility::Debug class and
+friends.
 
 Don't use C-style casts, use C++-style `static_cast` and `reinterpret_cast`
 instead. For numeric types (e.g. casting from int to float) you can use
