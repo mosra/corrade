@@ -20,7 +20,7 @@
 
 namespace Corrade { namespace TestSuite { namespace Test {
 
-class TesterTest: public Tester<TesterTest> {
+class TesterTest: public Tester {
     public:
         TesterTest();
 
@@ -28,9 +28,9 @@ class TesterTest: public Tester<TesterTest> {
         void emptyTest();
 
     private:
-        class EmptyTest: public Tester<EmptyTest> {};
+        class EmptyTest: public Tester {};
 
-        class Test: public Tester<Test> {
+        class Test: public Tester {
             public:
                 Test();
 

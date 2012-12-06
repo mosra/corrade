@@ -1,6 +1,8 @@
 add_subdirectory(Compare)
 
 set(CorradeTestSuite_SRCS
+    Tester.cpp
+
     Compare/File.cpp
     Compare/FileToString.cpp
     Compare/StringToFile.cpp)

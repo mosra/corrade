@@ -20,7 +20,7 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class Sha1Test: public TestSuite::Tester<Sha1Test>{
+class Sha1Test: public TestSuite::Tester {
     public:
         Sha1Test();
 

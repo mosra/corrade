@@ -20,7 +20,7 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class AbstractHashTest: public TestSuite::Tester<AbstractHashTest> {
+class AbstractHashTest: public TestSuite::Tester {
     public:
         AbstractHashTest();
 

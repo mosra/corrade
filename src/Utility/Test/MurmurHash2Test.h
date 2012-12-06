@@ -20,7 +20,7 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class MurmurHash2Test: public TestSuite::Tester<MurmurHash2Test> {
+class MurmurHash2Test: public TestSuite::Tester {
     public:
         MurmurHash2Test();
 

@@ -22,7 +22,7 @@
 
 namespace Corrade { namespace Containers { namespace Test {
 
-class LinkedListTest: public TestSuite::Tester<LinkedListTest> {
+class LinkedListTest: public TestSuite::Tester {
     public:
         LinkedListTest();
 

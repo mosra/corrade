@@ -25,6 +25,8 @@
 
 #include "Comparator.h"
 
+#include "corradeTestSuiteVisibility.h"
+
 namespace Corrade { namespace TestSuite {
 
 /**
@@ -35,11 +37,8 @@ See @ref unit-testing for introduction.
 @see CORRADE_TEST_MAIN(), CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS()
 @todo Data-driven tests
 */
-template<class Derived> class Tester {
+class CORRADE_TESTSUITE_EXPORT Tester {
     public:
-        /** @brief Pointer to test case function */
-        typedef void (Derived::*TestCase)();
-
         inline Tester(): logOutput(nullptr), errorOutput(nullptr), testCaseLine(0), expectedFailure(nullptr) {}
 
         /**
@@ -49,63 +48,15 @@ template<class Derived> class Tester {
          * @return Non-zero if there are no test cases, if any test case fails
          *      or doesn't contain any checking macros, zero otherwise.
          */
-        int exec(std::ostream* logOutput = &std::cout, std::ostream* errorOutput = &std::cerr) {
-            this->logOutput = logOutput;
-            this->errorOutput = errorOutput;
-
-            /* Fail when we have nothing to test */
-            if(testCases.empty()) {
-                Utility::Error(errorOutput) << "In" << testName << "weren't found any test cases!";
-                return 2;
-            }
-
-            Utility::Debug(logOutput) << "Starting" << testName << "with" << testCases.size() << "test cases...";
-
-            unsigned int errorCount = 0,
-                noCheckCount = 0;
-
-            for(auto i: testCases) {
-                /* Reset output to stdout for each test case to prevent debug
-                   output segfaults */
-                /** @todo Drop this when Debug has proper output scoping */
-                Utility::Debug::setOutput(&std::cout);
-                Utility::Error::setOutput(&std::cerr);
-                Utility::Warning::setOutput(&std::cerr);
-
-                try {
-                    testCaseName.clear();
-                    (static_cast<Derived*>(this)->*i)();
-                } catch(Exception e) {
-                    ++errorCount;
-                    continue;
-                }
-
-                /* No testing macros called, don't print function name to output */
-                if(testCaseName.empty()) {
-                    ++noCheckCount;
-                    continue;
-                }
-
-                Utility::Debug d(logOutput);
-                d << (expectedFailure ? " XFAIL:" : "    OK:") << testCaseName;
-                if(expectedFailure) d << "\n       " << expectedFailure->message();
-            }
-
-            Utility::Debug d(logOutput);
-            d << "Finished" << testName << "with" << errorCount << "errors.";
-            if(noCheckCount)
-                d << noCheckCount << "test cases didn't contain any checks!";
-
-            return errorCount != 0 || noCheckCount != 0;
-        }
+        int exec(std::ostream* logOutput = &std::cout, std::ostream* errorOutput = &std::cerr);
 
         /**
          * @brief Add test cases
          *
          * Adds one or more test cases to be executed when calling exec().
          */
-        template<class ...T> void addTests(TestCase first, T... next) {
-            testCases.push_back(first);
+        template<class Derived, class ...T> void addTests(void(Derived::*first)(), T... next) {
+            testCases.push_back(static_cast<TestCase>(first));
 
             addTests(next...);
         }
@@ -154,22 +105,7 @@ template<class Derived> class Tester {
             throw Exception();
         }
 
-        void verify(const std::string& expression, bool expressionValue) {
-            /* If the expression is true or the failure is expected, done */
-            if(!expectedFailure) {
-                if(expressionValue) return;
-            } else if(!expressionValue) {
-                Utility::Debug(logOutput) << " XFAIL:" << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       " << expectedFailure->message() << "Expression" << expression << "failed.";
-                return;
-            }
-
-            /* Otherwise print message to error output and throw exception */
-            Utility::Error e(errorOutput);
-            e << (expectedFailure ? " XPASS:" : "  FAIL:") << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n        Expression" << expression;
-            if(!expectedFailure) e << "failed.";
-            else e << "was expected to fail.";
-            throw Exception();
-        }
+        void verify(const std::string& expression, bool expressionValue);
 
         inline void registerTest(const std::string& filename, const std::string& name) {
             testFilename = filename;
@@ -203,12 +139,14 @@ template<class Derived> class Tester {
     private:
         class Exception {};
 
+        typedef void (Tester::*TestCase)();
+
         void addTests() {} /* Terminator function for addTests() */
 
         std::ostream *logOutput, *errorOutput;
         std::vector<TestCase> testCases;
         std::string testFilename, testName, testCaseName, expectFailMessage;
-        size_t testCaseLine;
+        std::size_t testCaseLine;
         ExpectedFailure* expectedFailure;
 };
 

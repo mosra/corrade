@@ -20,7 +20,7 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class ConfigurationTest: public TestSuite::Tester<ConfigurationTest> {
+class ConfigurationTest: public TestSuite::Tester {
     public:
         ConfigurationTest();
 

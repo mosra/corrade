@@ -22,7 +22,7 @@
 
 namespace Corrade { namespace Containers { namespace Test {
 
-class EnumSetTest: public TestSuite::Tester<EnumSetTest> {
+class EnumSetTest: public TestSuite::Tester {
     public:
         EnumSetTest();
 

@@ -20,7 +20,7 @@
 
 namespace Corrade { namespace TestSuite { namespace Test {
 
-class FloatComparatorTest: public Tester<FloatComparatorTest> {
+class FloatComparatorTest: public Tester {
     public:
         FloatComparatorTest();
 

@@ -20,7 +20,7 @@
 
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test {
 
-class FileToStringTest: public Tester<FileToStringTest> {
+class FileToStringTest: public Tester {
     public:
         FileToStringTest();
 

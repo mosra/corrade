@@ -20,7 +20,7 @@
 
 namespace Corrade { namespace Interconnect { namespace Test {
 
-class Test: public TestSuite::Tester<Test> {
+class Test: public TestSuite::Tester {
     public:
         Test();
 

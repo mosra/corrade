@@ -20,7 +20,7 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class EndianTest: public TestSuite::Tester<EndianTest> {
+class EndianTest: public TestSuite::Tester {
     public:
         EndianTest();
 

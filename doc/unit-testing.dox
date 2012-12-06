@@ -7,8 +7,7 @@ process code with meta compiler.
 @section unit-testing-class Tester class
 
 First step for creating unit test is to subclass Tester class and add tester
-functions to it. Note that [CRTP](http://en.wikipedia.org/wiki/Curiously_Recurring_Template_Pattern)
-needs to be used when subclassing to make things working.
+functions to it.
 @dontinclude test/MyTest.h
 @skip class MyTest
 @until };
