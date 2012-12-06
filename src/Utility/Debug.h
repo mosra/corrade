@@ -70,8 +70,8 @@ type.
 @todo Output to more ostreams at once
  */
 class CORRADE_UTILITY_EXPORT Debug {
-    /* Disabling assignment */
-    CORRADE_UTILITY_LOCAL Debug& operator=(const Debug& other);
+    Debug& operator=(const Debug& other) = delete;
+    Debug& operator=(Debug&& other) = delete;
 
     public:
         /** @brief Output flags */
