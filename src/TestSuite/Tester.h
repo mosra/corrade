@@ -40,7 +40,7 @@ template<class Derived> class Tester {
         /** @brief Pointer to test case function */
         typedef void (Derived::*TestCase)();
 
-        inline constexpr Tester(): logOutput(nullptr), errorOutput(nullptr), testCaseLine(0), expectedFailure(nullptr) {}
+        inline Tester(): logOutput(nullptr), errorOutput(nullptr), testCaseLine(0), expectedFailure(nullptr) {}
 
         /**
          * @brief Execute the tester
