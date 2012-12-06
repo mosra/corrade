@@ -20,7 +20,6 @@
  * @brief Class Corrade::TestSuite::Tester, macros CORRADE_TEST_MAIN(), CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS().
  */
 
-#include <functional>
 #include <iostream>
 #include <vector>
 
@@ -75,7 +74,7 @@ template<class Derived> class Tester {
 
                 try {
                     testCaseName.clear();
-                    i(*static_cast<Derived*>(this));
+                    (static_cast<Derived*>(this)->*i)();
                 } catch(Exception e) {
                     ++errorCount;
                     continue;
@@ -106,7 +105,7 @@ template<class Derived> class Tester {
          * Adds one or more test cases to be executed when calling exec().
          */
         template<class ...T> void addTests(TestCase first, T... next) {
-            testCases.push_back(std::mem_fn(first));
+            testCases.push_back(first);
 
             addTests(next...);
         }
@@ -207,7 +206,7 @@ template<class Derived> class Tester {
         void addTests() {} /* Terminator function for addTests() */
 
         std::ostream *logOutput, *errorOutput;
-        std::vector<std::function<void(Derived&)>> testCases;
+        std::vector<TestCase> testCases;
         std::string testFilename, testName, testCaseName, expectFailMessage;
         size_t testCaseLine;
         ExpectedFailure* expectedFailure;
