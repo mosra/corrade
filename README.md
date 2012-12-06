@@ -64,6 +64,18 @@ support, but older versions should do good job too) and additionally uses
 in root directory (i.e. where `Doxyfile` is). Resulting HTML documentation
 will be in `build/doc/` directory.
 
+Building examples
+-----------------
+
+The library comes with handful of examples, contained in `examples/`
+directory. Each example is thoroughly explained in documentation. The examples
+require Corrade to be installed and they are built separately:
+
+    mkdir -p build-examples
+    cd build-examples
+    cmake ../examples
+    make
+
 CONTACT
 =======
 

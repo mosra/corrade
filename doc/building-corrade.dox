@@ -67,6 +67,17 @@ can be build by running
 in root directory (i.e. where `Doxyfile` is). Resulting HTML documentation
 will be in `build/doc/` directory.
 
+@subsection Building-examples Building examples
+
+The library comes with handful of examples, contained in `examples/`
+directory. Documentation for them is available on page @ref corrade-example-index.
+The examples require %Corrade to be installed and they are built separately:
+
+    mkdir -p build-examples
+    cd build-examples
+    cmake ../examples
+    make
+
 @section building-arch Building ArchLinux packages
 
 In `package/archlinux` directory are three PKGBUILDs - one for stable version,

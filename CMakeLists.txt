@@ -5,7 +5,6 @@ project(Corrade)
 option(GCC46_COMPATIBILITY "Enable compatibility mode for GCC 4.6 (might disable some features)" OFF)
 
 option(BUILD_TESTS "Build unit tests (requires Qt4)." OFF)
-option(BUILD_EXAMPLES "Build examples." OFF)
 
 if(BUILD_TESTS)
     find_package(Qt4)
@@ -37,13 +36,3 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wold-style-cast -Winit-se
 
 add_subdirectory(modules)
 add_subdirectory(src)
-
-if(BUILD_EXAMPLES)
-    # Work around find_package(Corrade)
-    set(CORRADE_UTILITY_LIBRARY CorradeUtility)
-    set(CORRADE_PLUGINMANAGER_LIBRARY CorradePluginManager)
-    set(CORRADE_RC_EXECUTABLE corrade-rc)
-    set(CORRADE_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/src")
-
-    add_subdirectory(examples)
-endif()
