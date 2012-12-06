@@ -5,6 +5,7 @@ set(CorradeTestSuite_SRCS
 
     Compare/File.cpp
     Compare/FileToString.cpp
+    Compare/FloatingPoint.cpp
     Compare/StringToFile.cpp)
 
 set(CorradeTestSuite_HEADERS

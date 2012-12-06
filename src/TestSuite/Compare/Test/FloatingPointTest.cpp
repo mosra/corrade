@@ -14,7 +14,7 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "FloatComparatorTest.h"
+#include "FloatingPointTest.h"
 
 #include <limits>
 #include <sstream>
@@ -22,40 +22,40 @@
 using namespace std;
 using namespace Corrade::Utility;
 
-CORRADE_TEST_MAIN(Corrade::TestSuite::Test::FloatComparatorTest)
+CORRADE_TEST_MAIN(Corrade::TestSuite::Test::FloatingPointTest)
 
 namespace Corrade { namespace TestSuite { namespace Test {
 
-FloatComparatorTest::FloatComparatorTest() {
-    addTests(&FloatComparatorTest::smallDelta,
-             &FloatComparatorTest::largeDelta,
-             &FloatComparatorTest::nan,
-             &FloatComparatorTest::infinity,
-             &FloatComparatorTest::output);
+FloatingPointTest::FloatingPointTest() {
+    addTests(&FloatingPointTest::smallDelta,
+             &FloatingPointTest::largeDelta,
+             &FloatingPointTest::nan,
+             &FloatingPointTest::infinity,
+             &FloatingPointTest::output);
 }
 
-void FloatComparatorTest::smallDelta() {
+void FloatingPointTest::smallDelta() {
     CORRADE_VERIFY(Comparator<float>()(3.2021220f,
                                        3.2021225f));
     CORRADE_VERIFY(Comparator<double>()(3.2021222324250,
                                         3.2021222324255));
 }
 
-void FloatComparatorTest::largeDelta() {
+void FloatingPointTest::largeDelta() {
     CORRADE_VERIFY(!Comparator<float>()(3.202120f,
                                         3.202125f));
     CORRADE_VERIFY(!Comparator<double>()(3.202122232420,
                                          3.202122232425));
 }
 
-void FloatComparatorTest::nan() {
+void FloatingPointTest::nan() {
     CORRADE_VERIFY(Comparator<float>()(numeric_limits<float>::quiet_NaN(),
                                        numeric_limits<float>::quiet_NaN()));
     CORRADE_VERIFY(!Comparator<float>()(numeric_limits<float>::quiet_NaN(), 0));
     CORRADE_VERIFY(!Comparator<float>()(0, numeric_limits<float>::quiet_NaN()));
 }
 
-void FloatComparatorTest::infinity() {
+void FloatingPointTest::infinity() {
     CORRADE_VERIFY(Comparator<float>()(numeric_limits<float>::infinity(),
                                        numeric_limits<float>::infinity()));
     CORRADE_VERIFY(Comparator<float>()(-numeric_limits<float>::infinity(),
@@ -64,7 +64,7 @@ void FloatComparatorTest::infinity() {
                                         numeric_limits<float>::infinity()));
 }
 
-void FloatComparatorTest::output() {
+void FloatingPointTest::output() {
     stringstream out;
 
     {

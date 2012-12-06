@@ -22,8 +22,6 @@
 
 #include "Utility/Debug.h"
 
-#include <cmath>
-
 namespace Corrade { namespace TestSuite {
 
 /**
@@ -144,56 +142,6 @@ template<class T> class Comparator {
     private:
         T actualValue, expectedValue;
 };
-
-#ifndef DOXYGEN_GENERATING_OUTPUT
-namespace Implementation {
-    template<class T> class FloatComparatorEpsilon {};
-
-    template<> class FloatComparatorEpsilon<float> {
-        public:
-            inline constexpr static float epsilon() {
-                return 1.0e-6f;
-            }
-    };
-
-    template<> class FloatComparatorEpsilon<double> {
-        public:
-            inline constexpr static double epsilon() {
-                return 1.0e-12;
-            }
-    };
-
-    template<class T> class FloatComparator {
-        public:
-            /** @brief %Compare two values */
-            bool operator()(T actual, T expected) {
-                if(actual == expected || (actual != actual && expected != expected) ||
-                    std::abs(actual - expected) < FloatComparatorEpsilon<T>::epsilon()) return true;
-
-                actualValue = actual;
-                expectedValue = expected;
-                return false;
-            }
-
-            /** @brief Print error message, assuming the two values are inequal */
-            void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
-                e << "Floating-point values" << actual << "and" << expected << "are not the same, actual" << actualValue << "but" << expectedValue << "expected";
-                e.setFlag(Utility::Debug::SpaceAfterEachValue, false);
-                e << " (delta " << std::abs(actualValue-expectedValue) << ").";
-                e.setFlag(Utility::Debug::SpaceAfterEachValue, true);
-            }
-
-        private:
-            T actualValue, expectedValue;
-    };
-}
-#endif
-
-/** @brief Fuzzy-compare for float values */
-template<> class Comparator<float>: public Implementation::FloatComparator<float> {};
-
-/** @brief Fuzzy-compare for double values */
-template<> class Comparator<double>: public Implementation::FloatComparator<double> {};
 
 }}
 

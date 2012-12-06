@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "Comparator.h"
+#include "Compare/FloatingPoint.h"
 
 #include "corradeTestSuiteVisibility.h"
 

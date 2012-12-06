@@ -1,2 +1,1 @@
 corrade_add_test2(TestSuiteTesterTest TesterTest.cpp)
-corrade_add_test2(TestSuiteFloatComparatorTest FloatComparatorTest.cpp)
