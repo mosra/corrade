@@ -20,7 +20,7 @@
  * @brief Type traits
  */
 
-#include <iostream>
+#include <ostream>
 
 namespace Corrade { namespace Utility {
 
