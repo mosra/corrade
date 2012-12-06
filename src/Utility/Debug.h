@@ -89,7 +89,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * Constructs debug object with given output.
          * @see setOutput()
          */
-        inline Debug(std::ostream* _output = globalOutput): output(_output), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
+        inline explicit Debug(std::ostream* _output = globalOutput): output(_output), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
 
         /**
          * @brief Copy constructor
