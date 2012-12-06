@@ -17,10 +17,9 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::Debug, Corrade::Utility::Warning, Corrade::Utility::Error, macro CORRADE_ASSERT().
+ * @brief Class Corrade::Utility::Debug, Corrade::Utility::Warning, Corrade::Utility::Error
  */
 
-#include <cstdlib>
 #include <iosfwd>
 #include <utility>
 #include <type_traits>
@@ -67,8 +66,8 @@ Support for printing other types (which are not handled by `iostream` itself)
 can be added by implementing function operator<<(Debug, const T&) for given
 type.
 
+@see Warning, Error, CORRADE_ASSERT(), CORRADE_INTERNAL_ASSERT()
 @todo Output to more ostreams at once
-@see Warning, Error
  */
 class CORRADE_UTILITY_EXPORT Debug {
     /* Disabling assignment */
@@ -181,7 +180,7 @@ class CORRADE_UTILITY_EXPORT Debug {
 };
 
 #ifdef DOXYGEN_GENERATING_OUTPUT
-/**
+/** @relates Debug
 @brief Operator for printing custom types to debug
 @param debug     %Debug class
 @param value     Value to be printed
@@ -250,94 +249,6 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
     private:
         CORRADE_UTILITY_EXPORT static std::ostream* globalErrorOutput;
 };
-
-
-/** @hideinitializer
-@brief Assertion macro
-@param condition    Assert condition
-@param message      Message on assertion fail
-@param returnValue  Return value on assertion fail
-
-Usable for sanity checks on user input, as it prints explanational message on
-error.
-
-By default, if assertion fails, @p message is printed to error output and the
-application exits with value `-2`. If `CORRADE_GRACEFUL_ASSERT` is defined,
-the message is printed and the function returns with @p returnValue. If
-`CORRADE_NO_ASSERT` is defined, this macro does nothing. Example usage:
-@code
-T operator[](size_t pos) const {
-    CORRADE_ASSERT(pos < size(), "Index out of range", T());
-    return data[pos];
-}
-@endcode
-
-If the function has return type `void`, just use empty parameter (allowed in
-C++11):
-@code
-void compile() {
-    CORRADE_ASSERT(!sources.empty(), "No sources added", );
-
-    // ...
-}
-@endcode
-
-You can use stream output operators for formatting just like when printing to
-Debug output:
-@code
-CORRADE_ASSERT(pos < size(), "Cannot access element" << pos << "in array of size" << size(), );
-@endcode
-
-@see CORRADE_INTERNAL_ASSERT()
-*/
-#ifdef CORRADE_GRACEFUL_ASSERT
-#define CORRADE_ASSERT(condition, message, returnValue)                     \
-    do {                                                                    \
-        if(!(condition)) {                                                  \
-            Corrade::Utility::Error() << message;                           \
-            return returnValue;                                             \
-        }                                                                   \
-    } while(0)
-#else
-#ifdef CORRADE_NO_ASSERT
-#define CORRADE_ASSERT(condition, message, returnValue) do {} while(0)
-#else
-#define CORRADE_ASSERT(condition, message, returnValue)                     \
-    do {                                                                    \
-        if(!(condition)) {                                                  \
-            Corrade::Utility::Error() << message;                           \
-            std::exit(-2);                                                  \
-            return returnValue;                                             \
-        }                                                                   \
-    } while(0)
-#endif
-#endif
-
-/** @hideinitializer
-@brief Internal assertion macro
-@param condition    Assert condition
-
-Unlike CORRADE_ASSERT() usable for sanity checks on internal state, as it
-prints what failed and where.
-
-By default, if assertion fails, failed condition, file and line is printed to
-error output and the application exits with value `-1`. If `CORRADE_NO_ASSERT`
-is defined, this macro does nothing. Example usage:
-@code
-CORRADE_INTERNAL_ASSERT(!nullptr);
-@endcode
-*/
-#ifdef CORRADE_NO_ASSERT
-#define CORRADE_INTERNAL_ASSERT(condition) do {} while(0)
-#else
-#define CORRADE_INTERNAL_ASSERT(condition)                                  \
-    do {                                                                    \
-        if(!(condition)) {                                                  \
-            Corrade::Utility::Error() << "Assertion" << #condition << "failed in" << __FILE__ << "on line" << __LINE__; \
-            std::exit(-1);                                                  \
-        }                                                                   \
-    } while(0)
-#endif
 
 }}
 

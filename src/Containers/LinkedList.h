@@ -20,7 +20,7 @@
  * @brief Class Corrade::Containers::LinkedList, Corrade::Containers::LinkedListItem
  */
 
-#include "Utility/Debug.h"
+#include "Utility/Assert.h"
 
 namespace Corrade { namespace Containers {
 

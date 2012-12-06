@@ -16,7 +16,7 @@
 
 #include "Connection.h"
 
-#include "Utility/Debug.h"
+#include "Utility/Assert.h"
 #include "Emitter.h"
 #include "Receiver.h"
 

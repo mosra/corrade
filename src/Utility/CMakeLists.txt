@@ -16,6 +16,7 @@ set(CorradeUtility_SRCS
 
 set(CorradeUtility_HEADERS
     AbstractHash.h
+    Assert.h
     Configuration.h
     ConfigurationGroup.h
     ConfigurationValue.h

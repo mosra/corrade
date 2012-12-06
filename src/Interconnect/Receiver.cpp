@@ -16,7 +16,7 @@
 
 #include "Receiver.h"
 
-#include "Utility/Debug.h"
+#include "Utility/Assert.h"
 #include "Emitter.h"
 
 namespace Corrade { namespace Interconnect {
