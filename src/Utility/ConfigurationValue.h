@@ -72,7 +72,7 @@ struct Foo {
     int a, b;
 };
 
-namespace Utility {
+namespace Corrade { namespace Utility {
 
 template<> struct ConfigurationValue<Foo> {
     static std::string toString(const Foo& value, ConfigurationValueFlags flags) {
@@ -92,7 +92,7 @@ template<> struct ConfigurationValue<Foo> {
     }
 };
 
-}
+}}
 @endcode
 When saving the structure into configuration file using e.g.
 `configuration->addValue("fooValue", Foo{6, 7});`, the result will look like
