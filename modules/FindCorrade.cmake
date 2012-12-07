@@ -34,30 +34,6 @@
 # function must be called explicitly.
 #
 #
-# Add QtTest unit test.
-#  corrade_add_test(test_name moc_header source_file
-#                   [libraries...])
-# These tests contain mainly from one source file and one header, which is
-# processed by Qt meta-object compiler. The executable is then linked to QtCore
-# and QtTest library, more libraries can be specified as another parameters.
-# Test name is also executable name. Header file is processed with Qt's moc.
-#
-# Note: Before using this function you must find package Qt4. The
-# enable_testing() function must be also called explicitly.
-#
-#
-# Add QtTest unit test with multiple source files.
-#  corrade_add_multifile_test(test_name
-#                             moc_header_variable
-#                             source_files_variable)
-# Useful when there is need to compile more than one cpp/h file into the test.
-#
-# Example usage:
-#  set(test_headers ComplexTest.h MyObject.h)
-#  set(test_sources ComplexTest.cpp MyObject.cpp)
-#  corrade_add_test(MyComplexTest test_headers test_sources
-#                   CoreLibrary AnotherLibrary)
-#
 # Compile data resources into application binary.
 #  corrade_add_resource(name group_name
 #                       file [ALIAS alias]

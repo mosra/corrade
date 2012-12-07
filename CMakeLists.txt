@@ -4,15 +4,9 @@ project(Corrade)
 
 option(GCC46_COMPATIBILITY "Enable compatibility mode for GCC 4.6 (might disable some features)" OFF)
 
-option(BUILD_TESTS "Build unit tests (requires Qt4)." OFF)
+option(BUILD_TESTS "Build unit tests." OFF)
 
 if(BUILD_TESTS)
-    find_package(Qt4)
-
-    if(NOT QT4_FOUND)
-        message(FATAL_ERROR "Qt4, required for building unit tests, was not found. Set BUILD_TESTS to OFF to skip building them.")
-    endif()
-
     enable_testing()
 endif()
 

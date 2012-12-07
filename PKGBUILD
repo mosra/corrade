@@ -6,7 +6,7 @@ pkgdesc="Multiplatform plugin management and utility library"
 arch=('i686' 'x86_64')
 url="http://mosra.cz/blog/corrade.php"
 license=('LGPLv3')
-makedepends=('cmake' 'qt')
+makedepends=('cmake')
 options=(!strip)
 provides=('corrade-git')
 

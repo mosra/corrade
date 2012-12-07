@@ -48,10 +48,10 @@ If you want to build with another compiler (e.g. Clang), pass
 @subsection building-tests Building and running unit tests
 
 If you want to build also unit tests (which are not built by default), pass
-`-DBUILD_TESTS=True` to CMake. Unit tests use QtTest framework (you need at
-least **Qt 4.6**) and can be run using
+`-DBUILD_TESTS=ON` to CMake. Unit tests use Corrade's own
+@ref Corrade::TestSuite "TestSuite" framework and can be run using
 
-    ctest -V
+    ctest --output-on-failure
 
 in build directory. Everything should pass ;-)
 
@@ -87,8 +87,7 @@ are also in AUR under the same names.
 There is also development PKGBUILD and MinGW development PKGBUILD in root,
 which allows you to build and install the package directly from source tree
 without downloading anything. The PKGBUILD also contains `check()` function
-which will run all unit tests before packaging. Note that the unit tests
-require Qt, as said above.
+which will run all unit tests before packaging.
 
 If you want to build with another compiler (e.g. Clang), run makepkg this way:
 
