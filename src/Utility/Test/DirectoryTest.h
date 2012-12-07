@@ -29,6 +29,8 @@ class DirectoryTest: public Corrade::TestSuite::Tester {
         void join();
         void fileExists();
         void remove();
+        void moveFile();
+        void moveDirectory();
         void mkpath();
         void home();
         void configurationDir();

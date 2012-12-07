@@ -33,6 +33,8 @@ DirectoryTest::DirectoryTest() {
              &DirectoryTest::join,
              &DirectoryTest::fileExists,
              &DirectoryTest::remove,
+             &DirectoryTest::moveFile,
+             &DirectoryTest::moveDirectory,
              &DirectoryTest::mkpath,
              &DirectoryTest::home,
              &DirectoryTest::configurationDir,
@@ -110,6 +112,41 @@ void DirectoryTest::remove() {
     std::string inexistent = Directory::join(DIRECTORY_WRITE_TEST_DIR, "inexistent");
     CORRADE_VERIFY(!Directory::fileExists(inexistent));
     CORRADE_VERIFY(!Directory::rm(inexistent));
+}
+
+void DirectoryTest::moveFile() {
+    /* Old file, create if not exists */
+    std::string oldFile = Directory::join(DIRECTORY_WRITE_TEST_DIR, "oldFile.txt");
+    if(!Directory::fileExists(oldFile)) {
+        std::ofstream out(oldFile);
+        CORRADE_VERIFY(out.good());
+        out.put('a');
+    }
+
+    /* New file, remove if exists */
+    std::string newFile = Directory::join(DIRECTORY_WRITE_TEST_DIR, "newFile.txt");
+    if(Directory::fileExists(newFile))
+        CORRADE_VERIFY(Directory::rm(newFile));
+
+    CORRADE_VERIFY(Directory::move(oldFile, newFile));
+    CORRADE_VERIFY(!Directory::fileExists(oldFile));
+    CORRADE_VERIFY(Directory::fileExists(newFile));
+}
+
+void DirectoryTest::moveDirectory() {
+    /* Old directory, create if not exists */
+    std::string oldDirectory = Directory::join(DIRECTORY_WRITE_TEST_DIR, "oldDirectory");
+    if(!Directory::fileExists(oldDirectory))
+        CORRADE_VERIFY(Directory::mkpath(oldDirectory));
+
+    /* New directory, remove if exists */
+    std::string newDirectory = Directory::join(DIRECTORY_WRITE_TEST_DIR, "newDirectory");
+    if(Directory::fileExists(newDirectory))
+        CORRADE_VERIFY(Directory::rm(newDirectory));
+
+    CORRADE_VERIFY(Directory::move(oldDirectory, newDirectory));
+    CORRADE_VERIFY(!Directory::fileExists(oldDirectory));
+    CORRADE_VERIFY(Directory::fileExists(newDirectory));
 }
 
 void DirectoryTest::mkpath() {

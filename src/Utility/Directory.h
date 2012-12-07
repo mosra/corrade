@@ -106,10 +106,18 @@ class CORRADE_UTILITY_EXPORT Directory: public std::vector<std::string> {
         /**
          * @brief Remove given file or directory
          * @param path      Path
-         * @return True if path is file or empty directory and was successfully
-         * removed, false otherwise.
+         * @return `True` if path is file or empty directory and was
+         *      successfully removed, `false` otherwise.
          */
         static bool rm(const std::string& path);
+
+        /**
+         * @brief Move given file or directory
+         * @param oldPath   Old path
+         * @param newPath   New path
+         * @return `True` on success, `false` otherwise.
+         */
+        static bool move(const std::string& oldPath, const std::string& newPath);
 
         /** @brief Get current user's home directory */
         static std::string home();

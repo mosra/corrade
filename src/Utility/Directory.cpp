@@ -97,6 +97,10 @@ bool Directory::rm(const std::string& path) {
     return std::remove(path.c_str()) == 0;
 }
 
+bool Directory::move(const std::string& oldPath, const std::string& newPath) {
+    return std::rename(oldPath.c_str(), newPath.c_str()) == 0;
+}
+
 bool Directory::fileExists(const std::string& filename) {
   struct stat fileInfo;
 
