@@ -1,1 +1,1 @@
-corrade_add_test2(InterconnectTest Test.cpp LIBRARIES CorradeInterconnect)
+corrade_add_test(InterconnectTest Test.cpp LIBRARIES CorradeInterconnect)

@@ -5,8 +5,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-corrade_add_test2(TestSuiteCompareContainerTest ContainerTest.cpp)
-corrade_add_test2(TestSuiteCompareFileTest FileTest.cpp)
-corrade_add_test2(TestSuiteCompareFileToStringTest FileToStringTest.cpp)
-corrade_add_test2(TestSuiteCompareFloatingPointTest FloatingPointTest.cpp)
-corrade_add_test2(TestSuiteCompareStringToFileTest StringToFileTest.cpp)
+corrade_add_test(TestSuiteCompareContainerTest ContainerTest.cpp)
+corrade_add_test(TestSuiteCompareFileTest FileTest.cpp)
+corrade_add_test(TestSuiteCompareFileToStringTest FileToStringTest.cpp)
+corrade_add_test(TestSuiteCompareFloatingPointTest FloatingPointTest.cpp)
+corrade_add_test(TestSuiteCompareStringToFileTest StringToFileTest.cpp)

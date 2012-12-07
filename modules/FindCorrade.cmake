@@ -25,9 +25,9 @@
 #
 #
 # Add unit test using Corrade's TestSuite.
-#  corrade_add_test2(test_name
-#                    sources...
-#                    [LIBRARIES libraries...])
+#  corrade_add_test(test_name
+#                   sources...
+#                   [LIBRARIES libraries...])
 # Test name is also executable name. You can also specify libraries to link
 # with instead of using target_link_libraries(). CORRADE_TESTSUITE_LIBRARIES
 # are linked atuomatically to each test. Note that the enable_testing()

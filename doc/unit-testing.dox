@@ -48,12 +48,12 @@ Lastly, we must not forget to create `main()` function using
 CORRADE_TEST_MAIN() macro:
 @skipline CORRADE_TEST_MAIN
 
-Now we can compile and run our test using CMake and `corrade_add_test2()`
+Now we can compile and run our test using CMake and `corrade_add_test()`
 macro:
 @code
 find_package(Corrade REQUIRED)
 include_directories(${CORRADE_INCLUDE_DIR})
-corrade_add_test2(mytest MyTest.cpp)
+corrade_add_test(mytest MyTest.cpp)
 @endcode
 
 The test can be run either manually or using `ctest`. When executed, it

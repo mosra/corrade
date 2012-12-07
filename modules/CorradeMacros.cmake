@@ -22,7 +22,7 @@ macro(set_parent_scope name)
     endif()
 endmacro()
 
-function(corrade_add_test2 test_name)
+function(corrade_add_test test_name)
     # Get DLL and path lists
     foreach(arg ${ARGN})
         if(${arg} STREQUAL LIBRARIES)
