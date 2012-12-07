@@ -31,7 +31,7 @@ unsigned int log2(unsigned int number) {
     return log;
 }
 
-void sleep(size_t ms) {
+void sleep(std::size_t ms) {
     #ifndef _WIN32
     usleep(ms*1000);
     #else

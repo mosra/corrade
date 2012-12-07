@@ -28,19 +28,19 @@ namespace Corrade { namespace Utility {
 /**
 @brief MurmurHash implementation
 
-Specialized implementation for 32bit and 64bit size_t.
+Specialized implementation for 32bit and 64bit `std::size_t`.
 */
-template<size_t> class MurmurHash2Implementation {
+template<std::size_t> class MurmurHash2Implementation {
     #ifdef DOXYGEN_GENERATING_OUTPUT
     public:
         /**
          * @brief Constructor
          * @param seed      Seed to initialize the hash
          */
-        MurmurHash2Implementation(size_t seed);
+        MurmurHash2Implementation(std::size_t seed);
 
         /** @brief Compute digest of given data */
-        size_t operator()(const char* data, size_t size);
+        std::size_t operator()(const char* data, std::size_t size);
     #endif
 };
 
@@ -71,12 +71,12 @@ template<> class CORRADE_UTILITY_EXPORT MurmurHash2Implementation<8> {
 @brief MurmurHash 2
 
 Based on algorithm copyright Austin Appleby, http://code.google.com/p/smhasher/ .
-The digest is 32bit or 64bit, depending on `sizeof(size_t)` and thus
+The digest is 32bit or 64bit, depending on `sizeof(std::size_t)` and thus
 usable for hasing in e.g. `std::unordered_map`.
 
 @todo constexpr algorithm
 */
-class CORRADE_UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(size_t)> {
+class CORRADE_UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(std::size_t)> {
     public:
         /**
          * @brief Digest of given data
@@ -92,7 +92,7 @@ class CORRADE_UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(size_t)> {
          * @brief Constructor
          * @param seed      Seed to initialize the hash
          */
-        inline MurmurHash2(size_t seed = 0): implementation(seed) {}
+        inline MurmurHash2(std::size_t seed = 0): implementation(seed) {}
 
         /** @brief Compute digest of given data */
         inline Digest operator()(const std::string& data) const {
@@ -100,19 +100,19 @@ class CORRADE_UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(size_t)> {
         }
 
         /** @copydoc operator()(const std::string&) const */
-        template<size_t size> inline Digest operator()(const char(&data)[size]) const {
-            size_t d = implementation(reinterpret_cast<const unsigned char*>(data), size-1);
+        template<std::size_t size> inline Digest operator()(const char(&data)[size]) const {
+            std::size_t d = implementation(reinterpret_cast<const unsigned char*>(data), size-1);
             return Digest::fromByteArray(reinterpret_cast<const char*>(&d));
         }
 
         /** @copydoc operator()(const std::string&) const */
-        Digest operator()(const char* data, size_t size) const {
-            size_t d = implementation(reinterpret_cast<const unsigned char*>(data), size);
+        Digest operator()(const char* data, std::size_t size) const {
+            std::size_t d = implementation(reinterpret_cast<const unsigned char*>(data), size);
             return Digest::fromByteArray(reinterpret_cast<const char*>(&d));
         }
 
     private:
-        MurmurHash2Implementation<sizeof(size_t)> implementation;
+        MurmurHash2Implementation<sizeof(std::size_t)> implementation;
 };
 
 }}

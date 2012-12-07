@@ -65,7 +65,7 @@ CORRADE_UTILITY_EXPORT unsigned int log2(unsigned int number);
  * @brief Sleep for given time
  * @param ms                Miliseconds
  */
-CORRADE_UTILITY_EXPORT void sleep(size_t ms);
+CORRADE_UTILITY_EXPORT void sleep(std::size_t ms);
 
 /*@}*/
 

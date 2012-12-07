@@ -27,7 +27,7 @@
 namespace Corrade { namespace Utility {
 
 /** @brief Hash digest */
-template<size_t size> class HashDigest {
+template<std::size_t size> class HashDigest {
     public:
         /**
          * @brief Create digest from given string representation
@@ -106,7 +106,7 @@ template<size_t size> class HashDigest {
 
 @see HashDigest
 */
-template<size_t digestSize> class AbstractHash {
+template<std::size_t digestSize> class AbstractHash {
     public:
         /** @brief Hash digest */
         typedef HashDigest<digestSize> Digest;
@@ -117,11 +117,11 @@ template<size_t digestSize> class AbstractHash {
          * Size of the raw digest in bytes. Hexadecimal string representation
          * has double size.
          */
-        static const size_t DigestSize = digestSize;
+        static const std::size_t DigestSize = digestSize;
 };
 
 /** @debugoperator{Corrade::Utility::HashDigest} */
-template<size_t size> Debug operator<<(Debug debug, const HashDigest<size>& value) {
+template<std::size_t size> Debug operator<<(Debug debug, const HashDigest<size>& value) {
     return debug << value.hexString();
 }
 

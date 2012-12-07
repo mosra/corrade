@@ -30,7 +30,7 @@ unsigned int MurmurHash2Implementation<4>::operator()(const unsigned char* data,
     unsigned int h = seed^size;
 
     /* Mix 4 bytes at a time into the hash */
-    for(size_t i = 0; i+4 <= size; i += 4) {
+    for(std::size_t i = 0; i+4 <= size; i += 4) {
         unsigned int k = *reinterpret_cast<const unsigned int*>(data+i);
 
         k *= m;
@@ -67,7 +67,7 @@ unsigned long long MurmurHash2Implementation<8>::operator()(const unsigned char*
     unsigned long long h = seed^(size*m);
 
     /* Mix 8 bytes at a time into the hash */
-    for(size_t i = 0; i+8 <= size; i += 8) {
+    for(std::size_t i = 0; i+8 <= size; i += 8) {
         unsigned long long k = *reinterpret_cast<const unsigned long long*>(data+i);
 
         k *= m;

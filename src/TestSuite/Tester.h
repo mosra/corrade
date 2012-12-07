@@ -217,7 +217,7 @@ CORRADE_COMPARE(a, 8);
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
 @code
-CORRADE_COMPARE_AS(sin(0.0f), 0.0f, float);
+CORRADE_COMPARE_AS(std::sin(0.0), 0.0f, float);
 @endcode
 See also @ref Corrade::TestSuite::Comparator "Comparator" class documentation
 for example of more involved comparisons.
