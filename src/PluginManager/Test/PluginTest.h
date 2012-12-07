@@ -16,7 +16,7 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include <QtCore/QObject>
+#include "TestSuite/Tester.h"
 
 #include "PluginManager/PluginManager.h"
 #include "AbstractAnimal.h"
@@ -24,9 +24,7 @@
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-class PluginTest: public QObject {
-    Q_OBJECT
-
+class PluginTest: public TestSuite::Tester {
     private:
         PluginManager<AbstractAnimal>* manager;
         PluginManager<AbstractFood>* foodManager;
@@ -34,7 +32,6 @@ class PluginTest: public QObject {
     public:
         PluginTest();
 
-    private slots:
         void nameList();
         void errors();
         void staticPlugin();
