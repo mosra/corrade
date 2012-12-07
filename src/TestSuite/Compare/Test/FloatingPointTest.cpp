@@ -19,7 +19,6 @@
 #include <limits>
 #include <sstream>
 
-using namespace std;
 using namespace Corrade::Utility;
 
 CORRADE_TEST_MAIN(Corrade::TestSuite::Test::FloatingPointTest)
@@ -49,23 +48,23 @@ void FloatingPointTest::largeDelta() {
 }
 
 void FloatingPointTest::nan() {
-    CORRADE_VERIFY(Comparator<float>()(numeric_limits<float>::quiet_NaN(),
-                                       numeric_limits<float>::quiet_NaN()));
-    CORRADE_VERIFY(!Comparator<float>()(numeric_limits<float>::quiet_NaN(), 0));
-    CORRADE_VERIFY(!Comparator<float>()(0, numeric_limits<float>::quiet_NaN()));
+    CORRADE_VERIFY(Comparator<float>()(std::numeric_limits<float>::quiet_NaN(),
+                                       std::numeric_limits<float>::quiet_NaN()));
+    CORRADE_VERIFY(!Comparator<float>()(std::numeric_limits<float>::quiet_NaN(), 0));
+    CORRADE_VERIFY(!Comparator<float>()(0, std::numeric_limits<float>::quiet_NaN()));
 }
 
 void FloatingPointTest::infinity() {
-    CORRADE_VERIFY(Comparator<float>()(numeric_limits<float>::infinity(),
-                                       numeric_limits<float>::infinity()));
-    CORRADE_VERIFY(Comparator<float>()(-numeric_limits<float>::infinity(),
-                                       -numeric_limits<float>::infinity()));
-    CORRADE_VERIFY(!Comparator<float>()(numeric_limits<float>::quiet_NaN(),
-                                        numeric_limits<float>::infinity()));
+    CORRADE_VERIFY(Comparator<float>()(std::numeric_limits<float>::infinity(),
+                                       std::numeric_limits<float>::infinity()));
+    CORRADE_VERIFY(Comparator<float>()(-std::numeric_limits<float>::infinity(),
+                                       -std::numeric_limits<float>::infinity()));
+    CORRADE_VERIFY(!Comparator<float>()(std::numeric_limits<float>::quiet_NaN(),
+                                        std::numeric_limits<float>::infinity()));
 }
 
 void FloatingPointTest::output() {
-    stringstream out;
+    std::stringstream out;
 
     {
         Error e(&out);

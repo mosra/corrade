@@ -26,7 +26,6 @@
 
 QTEST_APPLESS_MAIN(Corrade::PluginManager::Test::PluginTest)
 
-using namespace std;
 using namespace Corrade::Utility;
 
 void initialize() {
@@ -45,8 +44,8 @@ void PluginTest::nameList() {
     QStringList expected, actual;
     expected << "Canary" << "Chihuahua" << "Dog" << "Snail";
 
-    vector<string> names = manager->pluginList();
-    for(vector<string>::const_iterator it = names.begin(); it != names.end(); ++it) {
+    std::vector<std::string> names = manager->pluginList();
+    for(auto it = names.cbegin(); it != names.cend(); ++it) {
         actual.append(QString::fromStdString(*it));
     }
 
@@ -60,7 +59,7 @@ void PluginTest::nameList() {
     expected2 << "Canary";
     actual.clear();
     names = manager->pluginList();
-    for(vector<string>::const_iterator it = names.begin(); it != names.end(); ++it) {
+    for(auto it = names.cbegin(); it != names.cend(); ++it) {
         actual.append(QString::fromStdString(*it));
     }
 
@@ -210,14 +209,14 @@ void PluginTest::usedByZombies() {
 void PluginTest::reloadPluginDirectory() {
     /* Load Dog and rename the plugin */
     QVERIFY(manager->load("Dog") == AbstractPluginManager::LoadOk);
-    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, string("Dog") + PLUGIN_FILENAME_SUFFIX)),
-                  QString::fromStdString(Directory::join(PLUGINS_DIR, string("LostDog") + PLUGIN_FILENAME_SUFFIX)));
+    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, std::string("Dog") + PLUGIN_FILENAME_SUFFIX)),
+                  QString::fromStdString(Directory::join(PLUGINS_DIR, std::string("LostDog") + PLUGIN_FILENAME_SUFFIX)));
     QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, "Dog.conf")),
                   QString::fromStdString(Directory::join(PLUGINS_DIR, "LostDog.conf")));
 
     /* Rename Chihuahua */
-    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, string("Chihuahua") + PLUGIN_FILENAME_SUFFIX)),
-                  QString::fromStdString(Directory::join(PLUGINS_DIR, string("LostChihuahua") + PLUGIN_FILENAME_SUFFIX)));
+    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, std::string("Chihuahua") + PLUGIN_FILENAME_SUFFIX)),
+                  QString::fromStdString(Directory::join(PLUGINS_DIR, std::string("LostChihuahua") + PLUGIN_FILENAME_SUFFIX)));
     QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, "Chihuahua.conf")),
                   QString::fromStdString(Directory::join(PLUGINS_DIR, "LostChihuahua.conf")));
 
@@ -227,8 +226,8 @@ void PluginTest::reloadPluginDirectory() {
     QStringList expected1, actual1;
     expected1 << "Canary" << "Dog" << "LostChihuahua" << "LostDog" << "Snail";
 
-    vector<string> names = manager->pluginList();
-    for(vector<string>::const_iterator it = names.begin(); it != names.end(); ++it)
+    std::vector<std::string> names = manager->pluginList();
+    for(auto it = names.cbegin(); it != names.cend(); ++it)
         actual1.append(QString::fromStdString(*it));
 
     /* Unload Dog and it should disappear from the list */
@@ -237,17 +236,17 @@ void PluginTest::reloadPluginDirectory() {
     QStringList expected2 = expected1, actual2;
     expected2.removeAll("Dog");
     names = manager->pluginList();
-    for(vector<string>::const_iterator it = names.begin(); it != names.end(); ++it)
+    for(auto it = names.cbegin(); it != names.cend(); ++it)
         actual2.append(QString::fromStdString(*it));
 
     /* Rename everything back and clean up */
-    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, string("LostDog") + PLUGIN_FILENAME_SUFFIX)),
-                  QString::fromStdString(Directory::join(PLUGINS_DIR, string("Dog") + PLUGIN_FILENAME_SUFFIX)));
+    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, std::string("LostDog") + PLUGIN_FILENAME_SUFFIX)),
+                  QString::fromStdString(Directory::join(PLUGINS_DIR, std::string("Dog") + PLUGIN_FILENAME_SUFFIX)));
     QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, "LostDog.conf")),
                   QString::fromStdString(Directory::join(PLUGINS_DIR, "Dog.conf")));
 
-    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, string("LostChihuahua") + PLUGIN_FILENAME_SUFFIX)),
-                  QString::fromStdString(Directory::join(PLUGINS_DIR, string("Chihuahua") + PLUGIN_FILENAME_SUFFIX)));
+    QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, std::string("LostChihuahua") + PLUGIN_FILENAME_SUFFIX)),
+                  QString::fromStdString(Directory::join(PLUGINS_DIR, std::string("Chihuahua") + PLUGIN_FILENAME_SUFFIX)));
     QFile::rename(QString::fromStdString(Directory::join(PLUGINS_DIR, "LostChihuahua.conf")),
                   QString::fromStdString(Directory::join(PLUGINS_DIR, "Chihuahua.conf")));
 
@@ -264,14 +263,14 @@ void PluginTest::reload() {
 
     /* Rename him */
     Configuration conf(Directory::join(PLUGINS_DIR, "Dog.conf"));
-    conf.group("metadata")->setValue<string>("name", "Angry Beast");
+    conf.group("metadata")->setValue<std::string>("name", "Angry Beast");
     conf.save();
 
     /* Is dog still sleeping? */
     QVERIFY(manager->reload("Dog") == AbstractPluginManager::NotLoaded);
 
     /* Clean everything up before parents come home */
-    conf.group("metadata")->setValue<string>("name", "A simple dog plugin");
+    conf.group("metadata")->setValue<std::string>("name", "A simple dog plugin");
     conf.save();
 
     /* And silently scare yourself to death */

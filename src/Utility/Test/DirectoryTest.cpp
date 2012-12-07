@@ -23,8 +23,6 @@
 
 #include "testConfigure.h"
 
-using namespace std;
-
 CORRADE_TEST_MAIN(Corrade::Utility::Test::DirectoryTest)
 
 namespace Corrade { namespace Utility { namespace Test {

@@ -21,14 +21,12 @@
 
 #include "Debug.h"
 
-using namespace std;
-
 namespace Corrade { namespace Utility {
 
-map<string, map<string, Resource::ResourceData> > Resource::resources;
+std::map<std::string, std::map<std::string, Resource::ResourceData>> Resource::resources;
 
 void Resource::registerData(const char* group, unsigned int count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data) {
-    if(resources.find(group) == resources.end()) resources.insert(make_pair(group, map<string, ResourceData>()));
+    if(resources.find(group) == resources.end()) resources.insert(std::make_pair(group, std::map<std::string, ResourceData>()));
 
     /* Cast to type which can be eaten by std::string constructor */
     const char* _positions = reinterpret_cast<const char*>(positions);
@@ -39,16 +37,16 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
 
     /* Every 2*sizeof(unsigned int) is one data */
     for(unsigned int i = 0; i != count*2*size; i=i+2*size) {
-        unsigned int filenamePosition = numberFromString<unsigned int>(string(_positions+i, size));
-        unsigned int dataPosition = numberFromString<unsigned int>(string(_positions+i+size, size));
+        unsigned int filenamePosition = numberFromString<unsigned int>(std::string(_positions+i, size));
+        unsigned int dataPosition = numberFromString<unsigned int>(std::string(_positions+i+size, size));
 
         ResourceData res;
         res.data = data;
         res.position = oldDataPosition;
         res.size = dataPosition-oldDataPosition;
 
-        string filename = string(_filenames+oldFilenamePosition, filenamePosition-oldFilenamePosition);
-        resources[group].insert(make_pair(filename, res));
+        std::string filename = std::string(_filenames+oldFilenamePosition, filenamePosition-oldFilenamePosition);
+        resources[group].insert(std::make_pair(filename, res));
 
         oldFilenamePosition = filenamePosition;
         oldDataPosition = dataPosition;
@@ -59,25 +57,26 @@ void Resource::unregisterData(const char* group, const unsigned char* data) {
     if(resources.find(group) == resources.end()) return;
 
     /* Positions which to remove */
-    vector<string> positions;
+    std::vector<std::string> positions;
 
-    for(map<string, ResourceData>::iterator it = resources[group].begin(); it != resources[group].end(); ++it) {
+    for(auto it = resources[group].begin(); it != resources[group].end(); ++it) {
         if(it->second.data == data)
             positions.push_back(it->first);
     }
 
-    for(vector<string>::const_iterator it = positions.begin(); it != positions.end(); ++it)
+    /** @todo wtf? this doesn't crash?? */
+    for(auto it = positions.cbegin(); it != positions.cend(); ++it)
         resources[group].erase(*it);
 
     if(resources[group].empty()) resources.erase(group);
 }
 
-string Resource::compile(const string& name, const map<string, string>& files) const {
-    string positions, filenames, data;
+std::string Resource::compile(const std::string& name, const std::map<std::string, std::string>& files) const {
+    std::string positions, filenames, data;
     unsigned int filenamesLen = 0, dataLen = 0;
 
     /* Convert data to hexacodes */
-    for(map<string, string>::const_iterator it = files.begin(); it != files.end(); ++it) {
+    for(auto it = files.cbegin(); it != files.cend(); ++it) {
         filenamesLen += it->first.size();
         dataLen += it->second.size();
 
@@ -94,7 +93,7 @@ string Resource::compile(const string& name, const map<string, string>& files) c
     data = data.substr(0, data.size()-2);
 
     /* Resource count */
-    ostringstream count;
+    std::ostringstream count;
     count << files.size();
 
     /* Return C++ file */
@@ -117,13 +116,13 @@ string Resource::compile(const string& name, const map<string, string>& files) c
         "} AUTOMATIC_FINALIZER(resourceFinalizer_" + name + ")\n";
 }
 
-string Resource::compile(const string& name, const string& filename, const string& data) const {
+std::string Resource::compile(const std::string& name, const std::string& filename, const std::string& data) const {
     std::map<std::string, std::string> files;
     files.insert(std::make_pair(filename, data));
     return compile(name, files);
 }
 
-string Resource::get(const std::string& filename) const {
+std::string Resource::get(const std::string& filename) const {
     /* If the group/filename doesn't exist, return empty string */
     if(resources.find(group) == resources.end()) {
         Error() << "Resource: group" << '\'' + group + '\'' << "was not found";
@@ -134,12 +133,12 @@ string Resource::get(const std::string& filename) const {
     }
 
     const ResourceData& r = resources[group][filename];
-    return string(reinterpret_cast<const char*>(r.data)+r.position, r.size);
+    return {reinterpret_cast<const char*>(r.data)+r.position, r.size};
 }
 
-string Resource::hexcode(const string& data, const string& comment) const {
+std::string Resource::hexcode(const std::string& data, const std::string& comment) const {
     /* Add comment, if set */
-    string output = "    ";
+    std::string output = "    ";
     if(!comment.empty()) output = "\n    /* " + comment + " */\n" + output;
 
     int row_len = 4;
@@ -152,7 +151,7 @@ string Resource::hexcode(const string& data, const string& comment) const {
         }
 
         /* Convert char to hex */
-        ostringstream converter;
+        std::ostringstream converter;
         converter << std::hex;
         converter << static_cast<unsigned int>(static_cast<unsigned char>(data[i]));
 
@@ -164,8 +163,8 @@ string Resource::hexcode(const string& data, const string& comment) const {
     return output + '\n';
 }
 
-template<class T> string Resource::numberToString(const T& number) {
-    return string(reinterpret_cast<const char*>(&number), sizeof(T));
+template<class T> std::string Resource::numberToString(const T& number) {
+    return {reinterpret_cast<const char*>(&number), sizeof(T)};
 }
 
 template<class T> T Resource::numberFromString(const std::string& number) {

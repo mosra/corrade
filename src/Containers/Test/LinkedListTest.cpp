@@ -18,7 +18,6 @@
 
 #include <sstream>
 
-using namespace std;
 using namespace Corrade::Utility;
 
 CORRADE_TEST_MAIN(Corrade::Containers::Test::LinkedListTest)
@@ -118,7 +117,7 @@ void LinkedListTest::insert() {
 }
 
 void LinkedListTest::insertFromOtherList() {
-    stringstream out;
+    std::stringstream out;
     Error::setOutput(&out);
 
     LinkedList list;
@@ -131,7 +130,7 @@ void LinkedListTest::insertFromOtherList() {
 }
 
 void LinkedListTest::insertBeforeFromOtherList() {
-    stringstream out;
+    std::stringstream out;
     Error::setOutput(&out);
 
     LinkedList list;
@@ -145,7 +144,7 @@ void LinkedListTest::insertBeforeFromOtherList() {
 }
 
 void LinkedListTest::cutFromOtherList() {
-    stringstream out;
+    std::stringstream out;
     Error::setOutput(&out);
 
     LinkedList list;
@@ -253,7 +252,7 @@ void LinkedListTest::moveList() {
     list.insert(item2);
 
     /* Move constructor */
-    LinkedList list2(move(list));
+    LinkedList list2(std::move(list));
     CORRADE_VERIFY(list.first() == nullptr);
     CORRADE_VERIFY(list.last() == nullptr);
     CORRADE_VERIFY(list2.first() == item1);
@@ -267,7 +266,7 @@ void LinkedListTest::moveList() {
     list3.insert(new Item);
 
     /* Move assignment */
-    list3 = move(list2);
+    list3 = std::move(list2);
     CORRADE_VERIFY(list2.first() == nullptr);
     CORRADE_VERIFY(list2.last() == nullptr);
     CORRADE_VERIFY(list3.first() == item1);
@@ -289,7 +288,7 @@ void LinkedListTest::moveItem() {
     list.insert(&item3);
 
     /* Move item in the midde */
-    Item item2Moved(move(item2));
+    Item item2Moved(std::move(item2));
     CORRADE_VERIFY(item2.list() == nullptr);
     CORRADE_VERIFY(item2.previous() == nullptr);
     CORRADE_VERIFY(item2.next() == nullptr);
@@ -306,7 +305,7 @@ void LinkedListTest::moveItem() {
     list2.insert(&item4);
     CORRADE_VERIFY(!list2.isEmpty());
 
-    item4 = move(item2Moved);
+    item4 = std::move(item2Moved);
     CORRADE_VERIFY(list2.isEmpty());
 
     CORRADE_VERIFY(item2Moved.list() == nullptr);
@@ -323,7 +322,7 @@ void LinkedListTest::moveItem() {
     list.cut(&item3);
 
     /* Move item at the beginning/end */
-    Item itemMoved(move(item));
+    Item itemMoved(std::move(item));
     CORRADE_VERIFY(itemMoved.list() == &list);
     CORRADE_VERIFY(list.first() == &itemMoved);
     CORRADE_VERIFY(list.last() == &itemMoved);
@@ -334,7 +333,7 @@ void LinkedListTest::moveItem() {
     list2.insert(&item5);
     CORRADE_VERIFY(!list2.isEmpty());
 
-    item5 = move(itemMoved);
+    item5 = std::move(itemMoved);
     CORRADE_VERIFY(item5.list() == &list);
     CORRADE_VERIFY(list2.isEmpty());
 

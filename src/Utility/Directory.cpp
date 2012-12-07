@@ -27,35 +27,33 @@
 
 #include "String.h"
 
-using namespace std;
-
 namespace Corrade { namespace Utility {
 
-string Directory::path(const std::string& filename) {
+std::string Directory::path(const std::string& filename) {
     /* If filename is already a path, return it */
     if(!filename.empty() && filename[filename.size()-1] == '/')
         return filename.substr(0, filename.size()-1);
 
-    size_t pos = filename.find_last_of('/');
+    std::size_t pos = filename.find_last_of('/');
 
     /* Filename doesn't contain any slash (no path), return empty string */
-    if(pos == string::npos) return "";
+    if(pos == std::string::npos) return "";
 
     /* Return everything to last slash */
     return filename.substr(0, pos);
 }
 
-string Directory::filename(const std::string& filename) {
-    size_t pos = filename.find_last_of('/');
+std::string Directory::filename(const std::string& filename) {
+    std::size_t pos = filename.find_last_of('/');
 
     /* Return whole filename if it doesn't contain slash */
-    if(pos == string::npos) return filename;
+    if(pos == std::string::npos) return filename;
 
     /* Return everything after last slash */
     return filename.substr(pos+1);
 }
 
-string Directory::join(const std::string& path, const std::string& filename) {
+std::string Directory::join(const std::string& path, const std::string& filename) {
     /* Absolute filename or empty path, return filename */
     if(path.empty() || (!filename.empty() && filename[0] == '/'))
         return filename;
@@ -75,7 +73,7 @@ bool Directory::mkpath(const std::string& _path) {
         return mkpath(_path.substr(0, _path.size()-1));
 
     /* If parent directory doesn't exist, create it */
-    string parentPath = path(_path);
+    std::string parentPath = path(_path);
     if(!parentPath.empty()) {
         DIR* directory = opendir(parentPath.c_str());
         if(directory == nullptr && !mkpath(parentPath)) return false;
@@ -95,9 +93,8 @@ bool Directory::mkpath(const std::string& _path) {
     return false;
 }
 
-bool Directory::rm(const string& path) {
-    if(remove(path.c_str()) == 0) return true;
-    return false;
+bool Directory::rm(const std::string& path) {
+    return std::remove(path.c_str()) == 0;
 }
 
 bool Directory::fileExists(const std::string& filename) {
@@ -107,7 +104,7 @@ bool Directory::fileExists(const std::string& filename) {
   return false;
 }
 
-string Directory::home() {
+std::string Directory::home() {
     #ifndef _WIN32
     char* h = getenv("HOME");
     if(!h) return "";
@@ -124,11 +121,11 @@ string Directory::home() {
     return h;
 }
 
-string Directory::configurationDir(const std::string& applicationName, bool createIfNotExists) {
+std::string Directory::configurationDir(const std::string& applicationName, bool createIfNotExists) {
     #ifndef _WIN32
-    string h = home();
+    std::string h = home();
     if(h.empty()) return "";
-    string dir = join(h, '.' + String::lowercase(applicationName));
+    std::string dir = join(h, '.' + String::lowercase(applicationName));
     #else
     TCHAR path[MAX_PATH];
     #pragma GCC diagnostic push
@@ -136,16 +133,16 @@ string Directory::configurationDir(const std::string& applicationName, bool crea
     if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path)))
         return "";
     #pragma GCC diagnostic pop
-    string appdata = path;
+    std::string appdata = path;
     if(appdata.empty()) return "";
-    string dir = join(appdata, applicationName);
+    std::string dir = join(appdata, applicationName);
     #endif
 
     if(createIfNotExists) mkpath(dir);
     return dir;
 }
 
-Directory::Directory(const string& path, int flags): _isLoaded(false) {
+Directory::Directory(const std::string& path, int flags): _isLoaded(false) {
     DIR* directory;
     dirent* entry;
 
@@ -154,7 +151,7 @@ Directory::Directory(const string& path, int flags): _isLoaded(false) {
 
     while((entry = readdir(directory)) != nullptr) {
         #ifndef _WIN32
-        if((flags & SkipDotAndDotDot) && (string(entry->d_name) == "." || string(entry->d_name) == ".."))
+        if((flags & SkipDotAndDotDot) && (std::string(entry->d_name) == "." || std::string(entry->d_name) == ".."))
             continue;
         if((flags & SkipDirectories) && entry->d_type == DT_DIR)
             continue;
@@ -170,8 +167,8 @@ Directory::Directory(const string& path, int flags): _isLoaded(false) {
 
     closedir(directory);
 
-    if(flags & SortAscending) sort(begin(), end());
-    if(flags & SortDescending) sort(rbegin(), rend());
+    if(flags & SortAscending) std::sort(begin(), end());
+    if(flags & SortDescending) std::sort(rbegin(), rend());
 
     _isLoaded = true;
 }

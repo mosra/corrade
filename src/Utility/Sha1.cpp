@@ -18,8 +18,6 @@
 
 #include "Utility/Endianness.h"
 
-using namespace std;
-
 namespace Corrade { namespace Utility {
 
 const unsigned int Sha1::initialDigest[5] = { 0x67452301,
@@ -33,7 +31,7 @@ const unsigned int Sha1::constants[4] = { 0x5A827999,
                                           0x8F1BBCDC,
                                           0xCA62C1D6 };
 
-Sha1& Sha1::operator<<(const string& data) {
+Sha1& Sha1::operator<<(const std::string& data) {
     /* Process leftovers */
     if(_buffer.size() != 0) {
         /* Not enough large, try it next time */
@@ -46,12 +44,12 @@ Sha1& Sha1::operator<<(const string& data) {
         processChunk(_buffer.c_str());
     }
 
-    for(size_t i = _buffer.size(); i != data.size()/64; ++i)
+    for(std::size_t i = _buffer.size(); i != data.size()/64; ++i)
         processChunk(data.c_str()+i*64);
 
     /* Save last unfinished 512-bit chunk of data */
     if(data.size()%64 != 0) _buffer = data.substr((data.size()/64)*64);
-    else _buffer = string();
+    else _buffer = {};
 
     _dataSize += data.size();
     return *this;
@@ -67,7 +65,7 @@ Sha1::Digest Sha1::digest() {
     _buffer.append(reinterpret_cast<const char*>(&dataSizeBigEndian), 8);
 
     /* Process remaining chunks */
-    for(size_t i = 0; i != _buffer.size()/64; ++i)
+    for(std::size_t i = 0; i != _buffer.size()/64; ++i)
         processChunk(_buffer.c_str()+i*64);
 
     /* Convert digest from big endian */
@@ -77,7 +75,7 @@ Sha1::Digest Sha1::digest() {
     Digest d = Digest::fromByteArray(reinterpret_cast<const char*>(digest));
 
     /* Clear data and return */
-    copy(initialDigest, initialDigest+5, _digest);
+    std::copy(initialDigest, initialDigest+5, _digest);
     _buffer.clear();
     _dataSize = 0;
     return d;
@@ -94,7 +92,7 @@ void Sha1::processChunk(const char* data) {
     /* Initialize value for this chunk */
     unsigned int d[5];
     unsigned int f, constant, temp;
-    copy(_digest, _digest+5, d);
+    std::copy(_digest, _digest+5, d);
 
     /* Main loop */
     for(int i = 0; i != 80; ++i) {

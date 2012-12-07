@@ -22,7 +22,6 @@
 
 CORRADE_TEST_MAIN(Corrade::TestSuite::Compare::Test::ContainerTest)
 
-using namespace std;
 using namespace Corrade::Utility;
 
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test {
@@ -41,7 +40,7 @@ void ContainerTest::same() {
 }
 
 void ContainerTest::outputActualSmaller() {
-    stringstream out;
+    std::stringstream out;
 
     std::vector<int> a{1, 2, 3};
     std::vector<int> b{1, 2, 3, 4};
@@ -57,7 +56,7 @@ void ContainerTest::outputActualSmaller() {
 }
 
 void ContainerTest::outputExpectedSmaller() {
-    stringstream out;
+    std::stringstream out;
 
     std::vector<int> a{1, 2, 3, 4};
     std::vector<int> b{1, 2, 3};
@@ -73,7 +72,7 @@ void ContainerTest::outputExpectedSmaller() {
 }
 
 void ContainerTest::output() {
-    stringstream out;
+    std::stringstream out;
 
     std::vector<int> a{1, 9, 3, 4};
     std::vector<int> b{1, 2, 3, 4};

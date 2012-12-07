@@ -16,19 +16,18 @@
 
 #include "PluginMetadata.h"
 
-using namespace std;
 using namespace Corrade::Utility;
 
 namespace Corrade { namespace PluginManager {
 
 PluginMetadata::PluginMetadata(const Configuration& conf) {
     /* Author(s), version */
-    _authors = conf.values<string>("author");
-    _version = conf.value<string>("version");
+    _authors = conf.values("author");
+    _version = conf.value("version");
 
     /* Dependencies, replacements */
-    _depends = conf.values<string>("depends");
-    _replaces = conf.values<string>("replaces");
+    _depends = conf.values("depends");
+    _replaces = conf.values("replaces");
 
     const ConfigurationGroup* metadata = conf.group("metadata");
     translator.setFallback(metadata);

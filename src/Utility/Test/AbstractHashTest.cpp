@@ -20,8 +20,6 @@
 
 #include "Utility/AbstractHash.h"
 
-using namespace std;
-
 CORRADE_TEST_MAIN(Corrade::Utility::Test::AbstractHashTest)
 
 namespace Corrade { namespace Utility { namespace Test {
@@ -45,7 +43,7 @@ void AbstractHashTest::fromHexString() {
 }
 
 void AbstractHashTest::debug() {
-    ostringstream out;
+    std::ostringstream out;
     Debug(&out) << AbstractHash<4>::Digest::fromHexString("defeca7e");
     CORRADE_COMPARE(out.str(), "defeca7e\n");
 }

@@ -19,13 +19,11 @@
 #include <vector>
 #include <string>
 
-using namespace std;
-
 namespace Corrade { namespace Utility {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-static_assert(IsIterable<vector<int>>::Value, "std::vector should be iterable");
-static_assert(IsIterable<string>::Value, "std::string should be iterable");
+static_assert(IsIterable<std::vector<int>>::Value, "std::vector should be iterable");
+static_assert(IsIterable<std::string>::Value, "std::string should be iterable");
 #endif
 
 }}

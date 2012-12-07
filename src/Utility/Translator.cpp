@@ -16,17 +16,15 @@
 
 #include "Translator.h"
 
-using namespace std;
-
 namespace Corrade { namespace Utility {
 
-set<Translator*>* Translator::instances() {
-    static set<Translator*>* _instances = new set<Translator*>;
+std::set<Translator*>* Translator::instances() {
+    static std::set<Translator*>* _instances = new std::set<Translator*>;
     return _instances;
 }
 
-string* Translator::_locale() {
-    static string* locale = new string;
+std::string* Translator::_locale() {
+    static std::string* locale = new std::string;
     return locale;
 }
 
@@ -34,7 +32,7 @@ void Translator::setLocale(const std::string& locale) {
     *_locale() = locale;
 
     /* Reload dynamically set languages */
-    for(set<Translator*>::const_iterator it = instances()->begin(); it != instances()->end(); ++it) {
+    for(auto it = instances()->cbegin(); it != instances()->cend(); ++it) {
         /* Dynamic filename */
         if(!(*it)->primaryDynamicFilename.empty())
             /* primaryDynamicFilename is cleared, pass a copy to avoid loading
@@ -48,7 +46,7 @@ void Translator::setLocale(const std::string& locale) {
 }
 
 Translator::~Translator() {
-    for(map<string, string*>::const_iterator it = localizations.begin(); it != localizations.end(); ++it)
+    for(auto it = localizations.cbegin(); it != localizations.cend(); ++it)
         delete it->second;
 
     /* Destroy configuration files, if present. Translations loaded directly
@@ -69,7 +67,7 @@ void Translator::setPrimary(const std::string& file) {
 
     /* Dynamic translations */
     primaryDynamicGroup = nullptr;
-    if(file.find_first_of('#') != string::npos)
+    if(file.find_first_of('#') != std::string::npos)
         primaryDynamicFilename = file;
     else
         primaryDynamicFilename.clear();
@@ -100,7 +98,7 @@ void Translator::setPrimary(const Corrade::Utility::ConfigurationGroup* group, b
     primaryFile = nullptr;
 
     /* Reload all localizations from new files */
-    for(map<string, string*>::const_iterator it = localizations.begin(); it != localizations.end(); ++it)
+    for(auto it = localizations.cbegin(); it != localizations.cend(); ++it)
         get(it->first, it->second, 0);
 }
 
@@ -115,24 +113,24 @@ void Translator::setFallback(const Corrade::Utility::ConfigurationGroup* group) 
     if(primaryDynamicGroup) setPrimary(primaryDynamicGroup, true);
 
     /* Reload all localizations from new files */
-    for(map<string, string*>::const_iterator it = localizations.begin(); it != localizations.end(); ++it)
+    for(auto it = localizations.cbegin(); it != localizations.cend(); ++it)
         get(it->first, it->second, 0);
 }
 
-const string* Translator::get(const string& key) {
+const std::string* Translator::get(const std::string& key) {
     /* First try to find existing localization */
-    map<string, string*>::const_iterator found = localizations.find(key);
+    auto found = localizations.find(key);
     if(found != localizations.end()) return found->second;
 
     /* If not found, load from configuration */
-    string* text = new string;
-    localizations.insert(make_pair(key, text));
+    std::string* text = new std::string;
+    localizations.insert(std::make_pair(key, text));
     get(key, text, 0);
 
     return text;
 }
 
-bool Translator::get(const string& key, string* text, int level) const {
+bool Translator::get(const std::string& key, std::string* text, int level) const {
     const ConfigurationGroup* g;
     switch(level) {
         case 0: g = primary; break;
@@ -146,9 +144,9 @@ bool Translator::get(const string& key, string* text, int level) const {
     return true;
 }
 
-string Translator::replaceLocale(const std::string& filename) const {
-    size_t pos = filename.find_first_of('#');
-    if(pos == string::npos) return filename;
+std::string Translator::replaceLocale(const std::string& filename) const {
+    std::size_t pos = filename.find_first_of('#');
+    if(pos == std::string::npos) return filename;
 
     return filename.substr(0, pos) + locale() + filename.substr(pos+1);
 }

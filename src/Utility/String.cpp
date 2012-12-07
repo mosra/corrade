@@ -18,40 +18,38 @@
 
 #include <algorithm>
 
-using namespace std;
-
 namespace Corrade { namespace Utility {
 
 const std::string String::Whitespace(" \t\f\v\r\n");
 const std::string String::Bom("\xEF\xBB\xBF");
 
-string String::ltrim(string str, const string& characters) {
+std::string String::ltrim(std::string str, const std::string& characters) {
     return str.erase(0, str.find_first_not_of(characters));
 }
 
-string String::rtrim(string str, const string& characters) {
+std::string String::rtrim(std::string str, const std::string& characters) {
     return str.erase(str.find_last_not_of(characters)+1);
 }
 
-vector<string> String::split(const string& str, char delim, bool keepEmptyParts) {
-    vector<string> parts;
-    size_t oldpos = 0, pos = string::npos;
+std::vector<std::string> String::split(const std::string& str, char delim, bool keepEmptyParts) {
+    std::vector<std::string> parts;
+    std::size_t oldpos = 0, pos = std::string::npos;
 
     do {
         pos = str.find(delim, oldpos);
-        string part = str.substr(oldpos, pos-oldpos);
+        std::string part = str.substr(oldpos, pos-oldpos);
 
         if(!part.empty() || keepEmptyParts)
             parts.push_back(part);
 
         oldpos = pos+1;
-    } while(pos != string::npos);
+    } while(pos != std::string::npos);
 
     return parts;
 }
 
-string String::lowercase(string str) {
-    transform(str.begin(), str.end(), str.begin(), ptr_fun<int, int>(tolower));
+std::string String::lowercase(std::string str) {
+    std::transform(str.begin(), str.end(), str.begin(), std::ptr_fun<int, int>(std::tolower));
     return str;
 }
 

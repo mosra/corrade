@@ -18,7 +18,6 @@
 
 #include <sstream>
 
-using namespace std;
 using namespace Corrade::Utility;
 
 CORRADE_TEST_MAIN(Corrade::TestSuite::Test::TesterTest)
@@ -134,7 +133,7 @@ void TesterTest::Test::compareWithFail() {
 }
 
 void TesterTest::emptyTest() {
-    stringstream out;
+    std::stringstream out;
 
     EmptyTest t;
     t.registerTest("here.cpp", "TesterTest::EmptyTest");
@@ -146,7 +145,7 @@ void TesterTest::emptyTest() {
 }
 
 void TesterTest::test() {
-    stringstream out;
+    std::stringstream out;
 
     Test t;
     t.registerTest("here.cpp", "TesterTest::Test");
@@ -154,28 +153,28 @@ void TesterTest::test() {
 
     CORRADE_VERIFY(result == 1);
 
-    string expected =
+    std::string expected =
         "Starting TesterTest::Test with 12 test cases...\n"
         "    OK: trueExpression()\n"
-        "  FAIL: falseExpression() at here.cpp on line 87 \n"
+        "  FAIL: falseExpression() at here.cpp on line 86 \n"
         "        Expression 5 != 5 failed.\n"
         "    OK: equal()\n"
-        "  FAIL: nonEqual() at here.cpp on line 97 \n"
+        "  FAIL: nonEqual() at here.cpp on line 96 \n"
         "        Values a and b are not the same, actual 5 but 3 expected.\n"
-        " XFAIL: expectFail() at here.cpp on line 103 \n"
+        " XFAIL: expectFail() at here.cpp on line 102 \n"
         "        The world is not mad yet. 2 + 2 and 5 are not equal.\n"
-        " XFAIL: expectFail() at here.cpp on line 104 \n"
+        " XFAIL: expectFail() at here.cpp on line 103 \n"
         "        The world is not mad yet. Expression false == true failed.\n"
         "    OK: expectFail()\n"
-        " XPASS: unexpectedPassExpression() at here.cpp on line 112 \n"
+        " XPASS: unexpectedPassExpression() at here.cpp on line 111 \n"
         "        Expression true == true was expected to fail.\n"
-        " XPASS: unexpectedPassEqual() at here.cpp on line 117 \n"
+        " XPASS: unexpectedPassEqual() at here.cpp on line 116 \n"
         "        2 + 2 and 4 are not expected to be equal.\n"
         "    OK: compareAs()\n"
-        "  FAIL: compareAsFail() at here.cpp on line 125 \n"
+        "  FAIL: compareAsFail() at here.cpp on line 124 \n"
         "        Length of actual \"meh\" doesn't match length of expected \"hello\" with epsilon 0\n"
         "    OK: compareWth()\n"
-        "  FAIL: compareWithFail() at here.cpp on line 133 \n"
+        "  FAIL: compareWithFail() at here.cpp on line 132 \n"
         "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
         "Finished TesterTest::Test with 6 errors. 1 test cases didn't contain any checks!\n";
 
