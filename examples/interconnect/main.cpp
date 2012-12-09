@@ -42,19 +42,29 @@ void Bomb::launch(const std::string& password, int timeout) {
     Utility::Warning() << "Launching bomb in" << timeout << "seconds.";
 
     // ...
+
+    delete this; // commit suicide
 }
 
 int main(int, char**) {
     RemoteControl rc;
-    Bomb bomb1, bomb2, bomb3;
+    Bomb *bomb1 = new Bomb,
+         *bomb2 = new Bomb,
+         *bomb3 = new Bomb;
 
-    Interconnect::Emitter::connect(&rc, &RemoteControl::triggered, &bomb1, &Bomb::launch);
-    Interconnect::Emitter::connect(&rc, &RemoteControl::triggered, &bomb2, &Bomb::launch);
-    Interconnect::Emitter::connect(&rc, &RemoteControl::triggered, &bomb3, &Bomb::launch);
+    Interconnect::Emitter::connect(&rc, &RemoteControl::triggered, bomb1, &Bomb::launch);
+    Interconnect::Emitter::connect(&rc, &RemoteControl::triggered, bomb2, &Bomb::launch);
+    Interconnect::Emitter::connect(&rc, &RemoteControl::triggered, bomb3, &Bomb::launch);
 
     Utility::Debug() << "Successfully installed" << rc.connectionCount() << "bombs.";
 
     rc.triggered("terrorist69", 60); // Launch all connected bombs after 60 seconds
 
+    if(rc.connectionCount()) {
+        Utility::Error() << "Mission failed!" << rc.connectionCount() << "bombs didn't explode!";
+        return 1;
+    }
+
+    Utility::Debug() << "Mission succeeded!";
     return 0;
 }

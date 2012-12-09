@@ -44,7 +44,7 @@ limitations, you can connect any number of signals to one slot and any number
 of slots to one signal. See Emitter::connect() for more information about how
 to manage the connections.
 @skip RemoteControl rc
-@until Interconnect::Emitter::connect(&rc, &RemoteControl::triggered, &bomb3
+@until Interconnect::Emitter::connect(&rc, &RemoteControl::triggered, bomb3
 
 See Emitter::connect() and various Emitter::disconnect() and
 Receiver::disconnect() functions for information about removing connections.
