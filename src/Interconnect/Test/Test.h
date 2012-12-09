@@ -39,6 +39,9 @@ class Test: public TestSuite::Tester {
         void emit();
         void emitterSubclass();
         void virtualSlot();
+
+        void changeConnectionsInSlot();
+        void deleteReceiverInSlot();
 };
 
 }}}

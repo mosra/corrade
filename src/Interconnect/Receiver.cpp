@@ -28,6 +28,7 @@ Receiver::~Receiver() {
             if(eit->second != *it) continue;
 
             (*it)->emitter->connections.erase(eit);
+            (*it)->emitter->connectionsChanged = true;
             break;
         }
 
@@ -51,6 +52,7 @@ void Receiver::disconnect() {
             if(eit->second != *it) continue;
 
             (*it)->emitter->connections.erase(eit);
+            (*it)->emitter->connectionsChanged = true;
             break;
         }
 

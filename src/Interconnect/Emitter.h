@@ -60,11 +60,12 @@ class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
         inline virtual ~AbstractConnectionData() {}
 
     private:
-        inline AbstractConnectionData(Emitter* emitter, Receiver* receiver): connection(nullptr), emitter(emitter), receiver(receiver) {}
+        inline AbstractConnectionData(Emitter* emitter, Receiver* receiver): connection(nullptr), emitter(emitter), receiver(receiver), lastHandledSignal(0) {}
 
         Connection* connection;
         Emitter* emitter;
         Receiver* receiver;
+        std::uint32_t lastHandledSignal;
 };
 
 template<class ...Args> class MemberConnectionData: public AbstractConnectionData {
@@ -118,7 +119,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
                 constexpr Signal() = default;
         };
 
-        Emitter() = default;
+        inline Emitter(): lastHandledSignal(0), connectionsChanged(false) {}
         virtual ~Emitter() = 0;
 
         /**
@@ -199,9 +200,9 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          *      more than once, because there is no way to check whether the
          *      connection already exists. As a result, after signal is
          *      emitted, the slot function will be then called more than once.
-         * @attention In your slot implementation don't do anything what might
-         *      affect the emitter object (e.g. delete the emitter/receiver,
-         *      remove connections...) -- it can cause undefined behavior.
+         * @attention In the slot you can add or remove connenctions and also
+         *      delete receiver object, however you can't delete emitter
+         *      object, as it would lead to undefined behavior.
          *
          * @see isConnected(), connectionCount()
          *
@@ -284,12 +285,31 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * @endcode
          *
          * @todo Allow emitting slots only privately
-         * @todo more robust to allow e.g. `delete this` in slot?
          */
         template<class Emitter, class ...Args> Signal emit(Signal(Emitter::*signal)(Args...), typename std::common_type<Args>::type... args) {
+            connectionsChanged = false;
+            ++lastHandledSignal;
             auto range = connections.equal_range(Implementation::SignalData(signal));
-            for(auto it = range.first; it != range.second; ++it)
-                static_cast<Implementation::MemberConnectionData<Args...>*>(it->second)->handle(args...);
+            auto it = range.first;
+            while(it != range.second) {
+                /* If not already handled, proceed and mark as such */
+                if(it->second->lastHandledSignal != lastHandledSignal) {
+                    it->second->lastHandledSignal = lastHandledSignal;
+                    static_cast<Implementation::MemberConnectionData<Args...>*>(it->second)->handle(args...);
+
+                    /* Connections changed by the slot, go through again */
+                    if(connectionsChanged) {
+                        range = connections.equal_range(Implementation::SignalData(signal));
+                        it = range.first;
+                        connectionsChanged = false;
+                        continue;
+                    }
+                }
+
+                /* Nothing called or changed, next connection */
+                ++it;
+            }
+
             return {};
         }
 
@@ -300,6 +320,8 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         void disconnect(std::unordered_multimap<Implementation::SignalData, Implementation::AbstractConnectionData*, Implementation::SignalDataHash>::const_iterator it);
 
         std::unordered_multimap<Implementation::SignalData, Implementation::AbstractConnectionData*, Implementation::SignalDataHash> connections;
+        std::uint32_t lastHandledSignal;
+        bool connectionsChanged;
 };
 
 }}

@@ -62,7 +62,9 @@ Test::Test() {
              &Test::destroyReceiver,
              &Test::emit,
              &Test::emitterSubclass,
-             &Test::virtualSlot);
+             &Test::virtualSlot,
+             &Test::changeConnectionsInSlot,
+             &Test::deleteReceiverInSlot);
 }
 
 void Test::signalData() {
@@ -296,6 +298,66 @@ void Test::virtualSlot() {
     CORRADE_COMPARE(mailbox->money, -10);
 
     delete mailbox;
+}
+
+void Test::changeConnectionsInSlot() {
+    Postman postman;
+    Mailbox mailbox;
+
+    class PropagatingMailbox: public Interconnect::Receiver {
+        public:
+            inline PropagatingMailbox(Postman* postman, Mailbox* mailbox): postman(postman), mailbox(mailbox) {}
+
+            inline void addMessage(int, const std::string& message) {
+                this->messages += message+'\n';
+                Emitter::connect(postman, &Postman::newMessage, mailbox, &Mailbox::addMessage);
+                Emitter::connect(postman, &Postman::paymentRequested, mailbox, &Mailbox::pay);
+            }
+
+            std::string messages;
+
+        private:
+            Postman* postman;
+            Mailbox* mailbox;
+    };
+
+    PropagatingMailbox propagatingMailbox(&postman, &mailbox);
+    Emitter::connect(&postman, &Postman::newMessage, &propagatingMailbox, &PropagatingMailbox::addMessage);
+
+    /* Not connected to anything */
+    postman.paymentRequested(50);
+    CORRADE_COMPARE(mailbox.money, 0);
+
+    /* Propagating mailbox connects the other mailbox, verify the proper slots
+       are called proper times */
+    postman.newMessage(19, "hello");
+    CORRADE_COMPARE(propagatingMailbox.messages, "hello\n");
+    CORRADE_COMPARE(mailbox.messages, "hello\n");
+    CORRADE_COMPARE(mailbox.money, 19);
+}
+
+void Test::deleteReceiverInSlot() {
+    class SuicideMailbox: public Interconnect::Receiver {
+        public:
+            inline void addMessage(int, const std::string&) {
+                delete this;
+            }
+    };
+
+    Postman postman;
+    SuicideMailbox* mailbox1 = new SuicideMailbox;
+    Mailbox mailbox2, mailbox3;
+
+    Emitter::connect(&postman, &Postman::newMessage, mailbox1, &SuicideMailbox::addMessage);
+    Emitter::connect(&postman, &Postman::newMessage, &mailbox2, &Mailbox::addMessage);
+    Emitter::connect(&postman, &Postman::newMessage, &mailbox3, &Mailbox::addMessage);
+
+    /* Verify that the message is propagated to all slots */
+    CORRADE_COMPARE(postman.connectionCount(), 3);
+    postman.newMessage(11, "hello");
+    CORRADE_COMPARE(postman.connectionCount(), 2);
+    CORRADE_COMPARE(mailbox2.messages, "hello\n");
+    CORRADE_COMPARE(mailbox3.messages, "hello\n");
 }
 
 }}}

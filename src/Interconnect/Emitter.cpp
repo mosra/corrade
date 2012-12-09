@@ -47,6 +47,7 @@ Emitter::~Emitter() {
 void Emitter::connect(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data) {
     /* Add connection to emitter */
     data->emitter->connections.insert(std::make_pair(signal, data));
+    data->emitter->connectionsChanged = true;
 
     /* Add connection to receiver */
     data->receiver->connections.push_back(data);
@@ -63,6 +64,7 @@ void Emitter::disconnect(const Implementation::SignalData& signal, Implementatio
 
         data->emitter->disconnect(it);
         data->emitter->connections.erase(it);
+        data->emitter->connectionsChanged = true;
         return;
     }
 
@@ -76,6 +78,7 @@ void Emitter::disconnect(const Implementation::SignalData& signal) {
         disconnect(it);
 
     connections.erase(range.first, range.second);
+    connectionsChanged = true;
 }
 
 void Emitter::disconnect() {
@@ -83,6 +86,7 @@ void Emitter::disconnect() {
         disconnect(it);
 
     connections.clear();
+    connectionsChanged = true;
 }
 
 void Emitter::disconnect(std::unordered_multimap<Implementation::SignalData, Implementation::AbstractConnectionData*, Implementation::SignalDataHash>::const_iterator it) {
