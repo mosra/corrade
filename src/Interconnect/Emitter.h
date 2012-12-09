@@ -135,7 +135,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          *
          * @see connectionCount(), connect(), disconnect()
          */
-        template<class Emitter, class ...Args> inline bool isConnected(Signal(Emitter::*signal)(Args...) const) const {
+        template<class Emitter, class ...Args> inline bool isConnected(Signal(Emitter::*signal)(Args...)) const {
             return connections.count(Implementation::SignalData(signal)) != 0;
         }
 
@@ -151,7 +151,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          *
          * @see isConnected(), connect(), disconnect()
          */
-        template<class Emitter, class ...Args> inline std::size_t connectionCount(Signal(Emitter::*signal)(Args...) const) const {
+        template<class Emitter, class ...Args> inline std::size_t connectionCount(Signal(Emitter::*signal)(Args...)) const {
             return connections.count(Implementation::SignalData(signal));
         }
 
@@ -214,7 +214,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         #else
         Connection
         #endif
-        connect(Object* emitter, Signal(Emitter::*signal)(Args...) const, Receiver* receiver, void(Receiver::*slot)(Args...)) {
+        connect(Object* emitter, Signal(Emitter::*signal)(Args...), Receiver* receiver, void(Receiver::*slot)(Args...)) {
             static_assert(sizeof(Signal(Emitter::*)(Args...)) <= 2*sizeof(void*),
                 "Size of member function pointer is incorrectly assumed to be smaller than 2*sizeof(void*)");
 
@@ -238,7 +238,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * @see Connection::disconnect(), Receiver::disconnect(),
          *      isConnected(), connectionCount()
          */
-        template<class Emitter, class ...Args> inline void disconnect(Signal(Emitter::*signal)(Args...) const) {
+        template<class Emitter, class ...Args> inline void disconnect(Signal(Emitter::*signal)(Args...)) {
             disconnect(Implementation::SignalData(signal));
         }
 
@@ -258,18 +258,18 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          *
          * %Signal function implementation -- emits signal with given
          * arguments to all connected receivers. %Signal function must be
-         * constant member function with Signal as return type, argument count
-         * and types are not limited.
+         * member function with Signal as return type, argument count and
+         * types are not limited.
          *
          * Example signal implementations:
          * @code
          * class Postman: public Interconnect::Emitter {
          *     public:
-         *         Signal messageDelivered(const std::string& message, int price = 0) const {
+         *         Signal messageDelivered(const std::string& message, int price = 0) {
          *             return emit(&Postman::messageDelivered, message, price);
          *         }
          *
-         *         Signal paymentRequired(int amount) const {
+         *         Signal paymentRequired(int amount) {
          *             return emit(&Postman::paymentRequired, amount);
          *         }
          * };
@@ -286,7 +286,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * @todo Allow emitting slots only privately
          * @todo more robust to allow e.g. `delete this` in slot?
          */
-        template<class Emitter, class ...Args> Signal emit(Signal(Emitter::*signal)(Args...) const, typename std::common_type<Args>::type... args) const {
+        template<class Emitter, class ...Args> Signal emit(Signal(Emitter::*signal)(Args...), typename std::common_type<Args>::type... args) {
             auto range = connections.equal_range(Implementation::SignalData(signal));
             for(auto it = range.first; it != range.second; ++it)
                 static_cast<Implementation::MemberConnectionData<Args...>*>(it->second)->handle(args...);

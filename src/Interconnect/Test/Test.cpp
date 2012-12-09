@@ -25,11 +25,11 @@ namespace Corrade { namespace Interconnect { namespace Test {
 
 class Postman: public Interconnect::Emitter {
     public:
-        inline Signal newMessage(int price, const std::string& message) const {
+        inline Signal newMessage(int price, const std::string& message) {
             return emit(&Postman::newMessage, price, message);
         }
 
-        inline Signal paymentRequested(int amount) const {
+        inline Signal paymentRequested(int amount) {
             return emit(&Postman::paymentRequested, amount);
         }
 };
@@ -254,7 +254,7 @@ void Test::emit() {
 void Test::emitterSubclass() {
     class BetterPostman: public Postman {
         public:
-            inline Signal newRichTextMessage(int price, const std::string& value) const {
+            inline Signal newRichTextMessage(int price, const std::string& value) {
                 return emit(&BetterPostman::newRichTextMessage, price, "***"+value+"***");
             }
     };

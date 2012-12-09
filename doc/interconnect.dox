@@ -19,10 +19,10 @@ to given object.
 
 @section interconnect-signals Implementing signals
 
-Signals are implemented in Emitter subclass as public constant functions with
-Signal as return type. There are no limitations on argument types or argument
-count. The signal function calls Emitter::emit() internally, passes its own
-signature and all arguments to it and propagates the returned value.
+Signals are implemented in Emitter subclass as public functions with Signal as
+return type. There are no limitations on argument types or argument count. The
+signal function calls Emitter::emit() internally, passes its own signature and
+all arguments to it and propagates the returned value.
 @dontinclude interconnect/main.cpp
 @skip class RemoteControl
 @until };

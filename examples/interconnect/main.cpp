@@ -23,7 +23,7 @@ using namespace Corrade;
 
 class RemoteControl: public Interconnect::Emitter {
     public:
-        Signal triggered(const std::string& password, int timeout) const {
+        Signal triggered(const std::string& password, int timeout) {
             return emit(&RemoteControl::triggered, password, timeout);
         }
 };

@@ -39,8 +39,8 @@ namespace Implementation {
         public:
             static const std::size_t Size = 2*sizeof(void*);
 
-            template<class Emitter, class ...Args> inline SignalData(typename Emitter::Signal(Emitter::*signal)(Args...) const): data() {
-                typedef typename Emitter::Signal(Emitter::*Signal)(Args...) const;
+            template<class Emitter, class ...Args> inline SignalData(typename Emitter::Signal(Emitter::*signal)(Args...)): data() {
+                typedef typename Emitter::Signal(Emitter::*Signal)(Args...);
                 *reinterpret_cast<Signal*>(data) = signal;
             }
 
