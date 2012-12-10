@@ -45,7 +45,7 @@ Receiver::~Receiver() {
     }
 }
 
-void Receiver::disconnect() {
+void Receiver::disconnectAllSlots() {
     for(auto it = connections.begin(); it != connections.end(); ++it) {
         /* Remove connection from emitter */
         for(auto end = (*it)->emitter->connections.end(), eit = (*it)->emitter->connections.begin(); eit != end; ++eit) {

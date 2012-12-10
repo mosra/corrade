@@ -125,34 +125,36 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         /**
          * @brief Whether the emitter is connected to any slot
          *
-         * @see connectionCount(), connect(), disconnect()
+         * @see Receiver::hasSlotConnections(), Connection::isConnected(),
+         *      signalConnectionCount()
          */
-        inline bool isConnected() const {
+        inline bool hasSignalConnections() const {
             return !connections.empty();
         }
 
         /**
          * @brief Whether given signal is connected to any slot
          *
-         * @see connectionCount(), connect(), disconnect()
+         * @see Receiver::hasSlotConnections(), Connection::isConnected(),
+         *      signalConnectionCount()
          */
-        template<class Emitter, class ...Args> inline bool isConnected(Signal(Emitter::*signal)(Args...)) const {
+        template<class Emitter, class ...Args> inline bool hasSignalConnections(Signal(Emitter::*signal)(Args...)) const {
             return connections.count(Implementation::SignalData(signal)) != 0;
         }
 
         /**
-         * @brief Count of slots connected to the emitter
+         * @brief Count of connections to this emitter signals
          *
-         * @see isConnected(), connect(), disconnect()
+         * @see Receiver::slotConnectionCount(), hasSignalConnections()
          */
-        inline std::size_t connectionCount() const { return connections.size(); }
+        inline std::size_t signalConnectionCount() const { return connections.size(); }
 
         /**
          * @brief Count of slots connected to given signal
          *
-         * @see isConnected(), connect(), disconnect()
+         * @see Receiver::slotConnectionCount(), hasSignalConnections()
          */
-        template<class Emitter, class ...Args> inline std::size_t connectionCount(Signal(Emitter::*signal)(Args...)) const {
+        template<class Emitter, class ...Args> inline std::size_t signalConnectionCount(Signal(Emitter::*signal)(Args...)) const {
             return connections.count(Implementation::SignalData(signal));
         }
 
@@ -172,10 +174,10 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          *
          * The connection is automatically removed when either emitter or
          * receiver object is destroyed. You can use returned Connection
-         * object to remove this particular connection, call disconnect() to
-         * disconnect everything connected to the emitter or given slot or
-         * call Receiver::disconnect() to disconnect the receiver from
-         * everything.
+         * object to remove this particular connection, call disconnectSignal()
+         * or disconnectAllSignals() to disconnect one signal or whole emitter
+         * from everything or Receiver::disconnectAllSlots() to disconnect the
+         * receiver from everything.
          *
          * Example usage:
          * @code
@@ -204,7 +206,8 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          *      delete receiver object, however you can't delete emitter
          *      object, as it would lead to undefined behavior.
          *
-         * @see isConnected(), connectionCount()
+         * @see hasSignalConnections(), Connection::isConnected(),
+         *      signalConnectionCount()
          *
          * @todo Connecting to signals
          * @todo Connecting to non-member functions and lambda functions
@@ -236,20 +239,20 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * postman.disconnect(&postman, &Postman::messageDelivered);
          * @endcode
          *
-         * @see Connection::disconnect(), Receiver::disconnect(),
-         *      isConnected(), connectionCount()
+         * @see Connection::disconnect(), disconnectAllSignals(),
+         *      Receiver::disconnectAllSlots(), hasSignalConnections()
          */
-        template<class Emitter, class ...Args> inline void disconnect(Signal(Emitter::*signal)(Args...)) {
+        template<class Emitter, class ...Args> inline void disconnectSignal(Signal(Emitter::*signal)(Args...)) {
             disconnect(Implementation::SignalData(signal));
         }
 
         /**
-         * @brief Disconnect everything from this emitter
+         * @brief Disconnect everything from this emitter signals
          *
-         * @see Connection::disconnect(), Receiver::disconnect(),
-         *      isConnected(), connectionCount()
+         * @see Receiver::disconnectAllSlots(), Connection::disconnect(),
+         *      disconnectSignal(), hasSignalConnections()
          */
-        void disconnect();
+        void disconnectAllSignals();
 
     protected:
         /**

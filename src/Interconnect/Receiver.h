@@ -54,26 +54,26 @@ class CORRADE_INTERCONNECT_EXPORT Receiver {
         /**
          * @brief Whether the receiver is connected to any signal
          *
-         * @see connectionCount(), Emitter::connect()
+         * @see Emitter::hasSignalConnections(), slotConnectionCount()
          */
-        inline bool isConnected() const {
+        inline bool hasSlotConnections() const {
             return !connections.empty();
         }
 
         /**
-         * @brief %Connection count
+         * @brief Count of connections to this receiver slots
          *
-         * Number of signals connected to this object.
-         * @see isConnected(), Emitter::connect()
+         * @see Emitter::signalConnectionCount(), hasSlotConnections()
          */
-        inline std::size_t connectionCount() const { return connections.size(); }
+        inline std::size_t slotConnectionCount() const { return connections.size(); }
 
         /**
-         * @brief Disconnect everything from this receiver
+         * @brief Disconnect everything from this receiver slots
          *
-         * @see Connection::disconnect(), Emitter::disconnect()
+         * @see Emitter::disconnectAllSignals(), Connection::disconnect(),
+         *      Emitter::disconnectSignal(), hasSlotConnections()
          */
-        void disconnect();
+        void disconnectAllSlots();
 
     protected:
         Receiver() = default;

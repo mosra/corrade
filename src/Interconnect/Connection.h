@@ -67,8 +67,8 @@ Returned by Emitter::connect(), allows to remove or reestablish the connection.
 Destruction of %Connection object does not remove the connection, after that
 the only possibility to remove the connection is to disconnect whole emitter
 or receiver or disconnect everything connected to given signal using
-Emitter::disconnect() or Receiver::disconnect() or destroy either emitter or
-receiver object.
+Emitter::disconnectSignal(), Emitter::disconnectAllSignals() or
+Receiver::disconnectAllSlots() or destroy either emitter or receiver object.
 
 @see @ref interconnect, Emitter, Receiver
 */
@@ -105,7 +105,8 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
         /**
          * @brief Whether the connection exists
          *
-         * @see isConnectionPossible()
+         * @see isConnectionPossible(), Emitter::hasSignalConnections(),
+         *      Receiver::hasSlotConnections()
          */
         inline bool isConnected() const { return connected; }
 
@@ -113,8 +114,8 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
          * @brief Establish the connection
          *
          * If connection is not possible, returns `false`, otherwise creates
-         * the connection (if not already connected) and returns true.
-         * @see isConnectionPossible(), isConnected()
+         * the connection (if not already connected) and returns `true`.
+         * @see isConnectionPossible(), isConnected(), Emitter::connect()
          */
         bool connect();
 
@@ -122,7 +123,8 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
          * @brief Remove the connection
          *
          * Disconnects if connection exists.
-         * @see isConnected(), Emitter::disconnect(), Receiver::disconnect()
+         * @see isConnected(), Emitter::disconnectSignal(),
+         *      Emitter::disconnectAllSignals(), Receiver::disconnectAllSlots()
          */
         void disconnect();
 

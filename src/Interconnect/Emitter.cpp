@@ -81,7 +81,7 @@ void Emitter::disconnect(const Implementation::SignalData& signal) {
     connectionsChanged = true;
 }
 
-void Emitter::disconnect() {
+void Emitter::disconnectAllSignals() {
     for(auto it = connections.begin(); it != connections.end(); ++it)
         disconnect(it);
 

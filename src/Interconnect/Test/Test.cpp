@@ -96,20 +96,20 @@ void Test::connect() {
     /* Verify connection adding */
     Emitter::connect(&postman, &Postman::paymentRequested, &mailbox1, &Mailbox::pay);
     Emitter::connect(&postman, &Postman::newMessage, &mailbox2, &Mailbox::addMessage);
-    CORRADE_VERIFY(postman.isConnected());
-    CORRADE_COMPARE(postman.connectionCount(), 3);
-    CORRADE_VERIFY(postman.isConnected(&Postman::newMessage));
-    CORRADE_COMPARE(postman.connectionCount(&Postman::newMessage), 2);
-    CORRADE_VERIFY(postman.isConnected(&Postman::paymentRequested));
-    CORRADE_COMPARE(postman.connectionCount(&Postman::paymentRequested), 1);
-    CORRADE_COMPARE(mailbox1.connectionCount(), 2);
-    CORRADE_COMPARE(mailbox2.connectionCount(), 1);
+    CORRADE_VERIFY(postman.hasSignalConnections());
+    CORRADE_COMPARE(postman.signalConnectionCount(), 3);
+    CORRADE_VERIFY(postman.hasSignalConnections(&Postman::newMessage));
+    CORRADE_COMPARE(postman.signalConnectionCount(&Postman::newMessage), 2);
+    CORRADE_VERIFY(postman.hasSignalConnections(&Postman::paymentRequested));
+    CORRADE_COMPARE(postman.signalConnectionCount(&Postman::paymentRequested), 1);
+    CORRADE_COMPARE(mailbox1.slotConnectionCount(), 2);
+    CORRADE_COMPARE(mailbox2.slotConnectionCount(), 1);
 
     /* Allow multiple connections */
     Emitter::connect(&postman, &Postman::newMessage, &mailbox1, &Mailbox::addMessage);
-    CORRADE_COMPARE(postman.connectionCount(), 4);
-    CORRADE_COMPARE(postman.connectionCount(&Postman::newMessage), 3);
-    CORRADE_COMPARE(mailbox1.connectionCount(), 3);
+    CORRADE_COMPARE(postman.signalConnectionCount(), 4);
+    CORRADE_COMPARE(postman.signalConnectionCount(&Postman::newMessage), 3);
+    CORRADE_COMPARE(mailbox1.slotConnectionCount(), 3);
 }
 
 void Test::disconnect() {
@@ -124,15 +124,15 @@ void Test::disconnect() {
     connection.disconnect();
     CORRADE_VERIFY(connection.isConnectionPossible());
     CORRADE_VERIFY(!connection.isConnected());
-    CORRADE_COMPARE(postman.connectionCount(&Postman::newMessage), 1);
-    CORRADE_COMPARE(mailbox1.connectionCount(), 1);
+    CORRADE_COMPARE(postman.signalConnectionCount(&Postman::newMessage), 1);
+    CORRADE_COMPARE(mailbox1.slotConnectionCount(), 1);
 
     /* Verify connection response */
     connection.connect();
     CORRADE_VERIFY(connection.isConnectionPossible());
     CORRADE_VERIFY(connection.isConnected());
-    CORRADE_COMPARE(postman.connectionCount(&Postman::newMessage), 2);
-    CORRADE_COMPARE(mailbox1.connectionCount(), 2);
+    CORRADE_COMPARE(postman.signalConnectionCount(&Postman::newMessage), 2);
+    CORRADE_COMPARE(mailbox1.slotConnectionCount(), 2);
 }
 
 void Test::disconnectSignal() {
@@ -143,17 +143,17 @@ void Test::disconnectSignal() {
     Connection c2 = Emitter::connect(&postman, &Postman::newMessage, &mailbox2, &Mailbox::addMessage);
     Connection c3 = Emitter::connect(&postman, &Postman::paymentRequested, &mailbox1, &Mailbox::pay);
 
-    postman.disconnect(&Postman::newMessage);
+    postman.disconnectSignal(&Postman::newMessage);
     CORRADE_VERIFY(c1.isConnectionPossible());
     CORRADE_VERIFY(!c1.isConnected());
     CORRADE_VERIFY(c2.isConnectionPossible());
     CORRADE_VERIFY(!c2.isConnected());
     CORRADE_VERIFY(c3.isConnected());
-    CORRADE_COMPARE(postman.connectionCount(), 1);
-    CORRADE_VERIFY(!postman.isConnected(&Postman::newMessage));
-    CORRADE_COMPARE(postman.connectionCount(&Postman::newMessage), 0);
-    CORRADE_COMPARE(mailbox1.connectionCount(), 1);
-    CORRADE_COMPARE(mailbox2.connectionCount(), 0);
+    CORRADE_COMPARE(postman.signalConnectionCount(), 1);
+    CORRADE_VERIFY(!postman.hasSignalConnections(&Postman::newMessage));
+    CORRADE_COMPARE(postman.signalConnectionCount(&Postman::newMessage), 0);
+    CORRADE_COMPARE(mailbox1.slotConnectionCount(), 1);
+    CORRADE_COMPARE(mailbox2.slotConnectionCount(), 0);
 }
 
 void Test::disconnectEmitter() {
@@ -164,16 +164,16 @@ void Test::disconnectEmitter() {
     Connection c2 = Emitter::connect(&postman1, &Postman::paymentRequested, &mailbox, &Mailbox::pay);
     Connection c3 = Emitter::connect(&postman2, &Postman::newMessage, &mailbox, &Mailbox::addMessage);
 
-    postman1.disconnect();
+    postman1.disconnectAllSignals();
     CORRADE_VERIFY(c1.isConnectionPossible());
     CORRADE_VERIFY(!c1.isConnected());
     CORRADE_VERIFY(c2.isConnectionPossible());
     CORRADE_VERIFY(!c2.isConnected());
     CORRADE_VERIFY(c3.isConnected());
-    CORRADE_VERIFY(!postman1.isConnected());
-    CORRADE_COMPARE(postman1.connectionCount(), 0);
-    CORRADE_VERIFY(postman2.isConnected());
-    CORRADE_COMPARE(mailbox.connectionCount(), 1);
+    CORRADE_VERIFY(!postman1.hasSignalConnections());
+    CORRADE_COMPARE(postman1.signalConnectionCount(), 0);
+    CORRADE_VERIFY(postman2.hasSignalConnections());
+    CORRADE_COMPARE(mailbox.slotConnectionCount(), 1);
 }
 
 void Test::disconnectReceiver() {
@@ -184,15 +184,15 @@ void Test::disconnectReceiver() {
     Connection c2 = Emitter::connect(&postman, &Postman::paymentRequested, &mailbox1, &Mailbox::pay);
     Connection c3 = Emitter::connect(&postman, &Postman::newMessage, &mailbox2, &Mailbox::addMessage);
 
-    mailbox1.disconnect();
+    mailbox1.disconnectAllSlots();
     CORRADE_VERIFY(c1.isConnectionPossible());
     CORRADE_VERIFY(!c1.isConnected());
     CORRADE_VERIFY(c2.isConnectionPossible());
     CORRADE_VERIFY(!c2.isConnected());
     CORRADE_VERIFY(c3.isConnected());
-    CORRADE_COMPARE(postman.connectionCount(), 1);
-    CORRADE_VERIFY(!mailbox1.isConnected());
-    CORRADE_COMPARE(mailbox2.connectionCount(), 1);
+    CORRADE_COMPARE(postman.signalConnectionCount(), 1);
+    CORRADE_VERIFY(!mailbox1.hasSlotConnections());
+    CORRADE_COMPARE(mailbox2.slotConnectionCount(), 1);
 }
 
 void Test::destroyEmitter() {
@@ -210,8 +210,8 @@ void Test::destroyEmitter() {
     CORRADE_VERIFY(!c2.isConnectionPossible());
     CORRADE_VERIFY(!c2.isConnected());
     CORRADE_VERIFY(c3.isConnected());
-    CORRADE_COMPARE(postman2.connectionCount(), 1);
-    CORRADE_COMPARE(mailbox.connectionCount(), 1);
+    CORRADE_COMPARE(postman2.signalConnectionCount(), 1);
+    CORRADE_COMPARE(mailbox.slotConnectionCount(), 1);
 }
 
 void Test::destroyReceiver() {
@@ -229,8 +229,8 @@ void Test::destroyReceiver() {
     CORRADE_VERIFY(!c2.isConnectionPossible());
     CORRADE_VERIFY(!c2.isConnected());
     CORRADE_VERIFY(c3.isConnected());
-    CORRADE_COMPARE(postman.connectionCount(), 1);
-    CORRADE_COMPARE(mailbox2.connectionCount(), 1);
+    CORRADE_COMPARE(postman.signalConnectionCount(), 1);
+    CORRADE_COMPARE(mailbox2.slotConnectionCount(), 1);
 }
 
 void Test::emit() {
@@ -274,10 +274,10 @@ void Test::emitterSubclass() {
     CORRADE_COMPARE(mailbox.messages, "hello\n***ahoy***\n");
     CORRADE_COMPARE(mailbox.money, 15);
 
-    postman.disconnect(&BetterPostman::newMessage);
-    CORRADE_VERIFY(postman.isConnected(&BetterPostman::newRichTextMessage));
-    postman.disconnect(&BetterPostman::newRichTextMessage);
-    CORRADE_VERIFY(!postman.isConnected());
+    postman.disconnectSignal(&BetterPostman::newMessage);
+    CORRADE_VERIFY(postman.hasSignalConnections(&BetterPostman::newRichTextMessage));
+    postman.disconnectSignal(&BetterPostman::newRichTextMessage);
+    CORRADE_VERIFY(!postman.hasSignalConnections());
 }
 
 void Test::virtualSlot() {
@@ -353,9 +353,9 @@ void Test::deleteReceiverInSlot() {
     Emitter::connect(&postman, &Postman::newMessage, &mailbox3, &Mailbox::addMessage);
 
     /* Verify that the message is propagated to all slots */
-    CORRADE_COMPARE(postman.connectionCount(), 3);
+    CORRADE_COMPARE(postman.signalConnectionCount(), 3);
     postman.newMessage(11, "hello");
-    CORRADE_COMPARE(postman.connectionCount(), 2);
+    CORRADE_COMPARE(postman.signalConnectionCount(), 2);
     CORRADE_COMPARE(mailbox2.messages, "hello\n");
     CORRADE_COMPARE(mailbox3.messages, "hello\n");
 }

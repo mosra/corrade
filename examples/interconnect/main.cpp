@@ -56,12 +56,12 @@ int main(int, char**) {
     Interconnect::Emitter::connect(&rc, &RemoteControl::triggered, bomb2, &Bomb::launch);
     Interconnect::Emitter::connect(&rc, &RemoteControl::triggered, bomb3, &Bomb::launch);
 
-    Utility::Debug() << "Successfully installed" << rc.connectionCount() << "bombs.";
+    Utility::Debug() << "Successfully installed" << rc.signalConnectionCount() << "bombs.";
 
     rc.triggered("terrorist69", 60); // Launch all connected bombs after 60 seconds
 
-    if(rc.connectionCount()) {
-        Utility::Error() << "Mission failed!" << rc.connectionCount() << "bombs didn't explode!";
+    if(rc.signalConnectionCount()) {
+        Utility::Error() << "Mission failed!" << rc.signalConnectionCount() << "bombs didn't explode!";
         return 1;
     }
 

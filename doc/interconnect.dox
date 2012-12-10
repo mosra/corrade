@@ -46,8 +46,9 @@ to manage the connections.
 @skip RemoteControl rc
 @until Interconnect::Emitter::connect(&rc, &RemoteControl::triggered, bomb3
 
-See Emitter::connect() and various Emitter::disconnect() and
-Receiver::disconnect() functions for information about removing connections.
+See Emitter::connect(), Emitter::disconnectSignal(), Emitter::disconnectAllSignals()
+and Receiver::disconnectAllSlots() functions for information about removing
+connections.
 
 @section interconnect-emitting Emitting signals
 
