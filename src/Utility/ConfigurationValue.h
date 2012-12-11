@@ -21,7 +21,7 @@
  */
 
 #include <cstdint>
-#include <sstream>
+#include <string>
 
 #include "Containers/EnumSet.h"
 
@@ -55,7 +55,7 @@ typedef Containers::EnumSet<ConfigurationValueFlag, std::uint8_t> ConfigurationV
 CORRADE_ENUMSET_OPERATORS(ConfigurationValueFlags)
 
 /**
-@brief Template structure for type conversion
+@brief %Configuration value parser and writer
 
 Functions in this struct are called internally by ConfigurationGroup
 functions to convert values from and to templated types. Reimplement the
@@ -101,6 +101,7 @@ this:
     fooValue=6 7
 */
 template<class T> struct ConfigurationValue {
+    #ifdef DOXYGEN_GENERATING_OUTPUT
     /**
     * @brief Convert value to string
     * @param value         Value
@@ -116,59 +117,50 @@ template<class T> struct ConfigurationValue {
     * @return Value
     */
     static T fromString(const std::string& stringValue, ConfigurationValueFlags flags);
+    #endif
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-template<class T> std::string ConfigurationValue<T>::toString(const T& value, ConfigurationValueFlags flags) {
-    std::ostringstream stream;
-
-    /* Hexadecimal / octal values */
-    if(flags & (ConfigurationValueFlag::Color|ConfigurationValueFlag::Hex))
-        stream.setf(std::istringstream::hex, std::istringstream::basefield);
-    if(flags & ConfigurationValueFlag::Oct)
-        stream.setf(std::istringstream::oct, std::istringstream::basefield);
-    if(flags & ConfigurationValueFlag::Scientific)
-        stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
-
-    stream << value;
-
-    std::string stringValue = stream.str();
-
-    /* Strip initial # character, if user wants a color */
-    if(flags & ConfigurationValueFlag::Color)
-        stringValue = '#' + stringValue;
-
-    return stringValue;
+namespace Implementation {
+    template<class T> struct CORRADE_UTILITY_EXPORT BasicConfigurationValue {
+        static std::string toString(const T& value, ConfigurationValueFlags flags);
+        static T fromString(const std::string& stringValue, ConfigurationValueFlags flags);
+    };
 }
+#endif
 
-template<class T> T ConfigurationValue<T>::fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
-    std::string _stringValue = stringValue;
+/** @brief %Configuration value parser and writer for `short` type */
+template<> struct ConfigurationValue<short>: public Implementation::BasicConfigurationValue<short> {};
+/** @brief %Configuration value parser and writer for `unsigned short` type */
+template<> struct ConfigurationValue<unsigned short>: public Implementation::BasicConfigurationValue<unsigned short> {};
+/** @brief %Configuration value parser and writer for `int` type */
+template<> struct ConfigurationValue<int>: public Implementation::BasicConfigurationValue<int> {};
+/** @brief %Configuration value parser and writer for `unsigned int` type */
+template<> struct ConfigurationValue<unsigned int>: public Implementation::BasicConfigurationValue<unsigned int> {};
+/** @brief %Configuration value parser and writer for `long` type */
+template<> struct ConfigurationValue<long>: public Implementation::BasicConfigurationValue<long> {};
+/** @brief %Configuration value parser and writer for `unsigned long` type */
+template<> struct ConfigurationValue<unsigned long>: public Implementation::BasicConfigurationValue<unsigned long> {};
+/** @brief %Configuration value parser and writer for `long long` type */
+template<> struct ConfigurationValue<long long>: public Implementation::BasicConfigurationValue<long long> {};
+/** @brief %Configuration value parser and writer for `unsigned long long` type */
+template<> struct ConfigurationValue<unsigned long long>: public Implementation::BasicConfigurationValue<unsigned long long> {};
+/** @brief %Configuration value parser and writer for `float` type */
+template<> struct ConfigurationValue<float>: public Implementation::BasicConfigurationValue<float> {};
+/** @brief %Configuration value parser and writer for `double` type */
+template<> struct ConfigurationValue<double>: public Implementation::BasicConfigurationValue<double> {};
+/** @brief %Configuration value parser and writer for `long double` type */
+template<> struct ConfigurationValue<long double>: public Implementation::BasicConfigurationValue<long double> {};
+/** @brief %Configuration value parser and writer for `sd::string` type */
+template<> struct ConfigurationValue<std::string>: public Implementation::BasicConfigurationValue<std::string> {};
 
-    /* Strip initial # character, if user wants a color */
-    if(flags & ConfigurationValueFlag::Color && !stringValue.empty() && stringValue[0] == '#')
-        _stringValue = stringValue.substr(1);
-
-    std::istringstream stream(_stringValue);
-
-    /* Hexadecimal / octal values, scientific notation */
-    if(flags & (ConfigurationValueFlag::Color|ConfigurationValueFlag::Hex))
-        stream.setf(std::istringstream::hex, std::istringstream::basefield);
-    if(flags & ConfigurationValueFlag::Oct)
-        stream.setf(std::istringstream::oct, std::istringstream::basefield);
-    if(flags & ConfigurationValueFlag::Scientific)
-        stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
-
-    T value;
-    stream >> value;
-
-    return value;
-}
-
+/** @brief %Configuration value parser and writer for `bool` type */
 template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<bool> {
+    #ifndef DOXYGEN_GENERATING_OUTPUT
     static bool fromString(const std::string& value, ConfigurationValueFlags flags);
     static std::string toString(const bool& value, ConfigurationValueFlags flags);
+    #endif
 };
-#endif
 
 }}
 

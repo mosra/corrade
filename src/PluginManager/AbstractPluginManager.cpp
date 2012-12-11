@@ -17,6 +17,7 @@
 #include "AbstractPluginManager.h"
 
 #include <algorithm>
+#include <sstream>
 
 #ifndef _WIN32
 #include <dlfcn.h>

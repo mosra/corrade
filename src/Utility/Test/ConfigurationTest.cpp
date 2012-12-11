@@ -16,6 +16,8 @@
 
 #include "ConfigurationTest.h"
 
+#include <sstream>
+
 #include "TestSuite/Compare/Container.h"
 #include "TestSuite/Compare/File.h"
 #include "TestSuite/Compare/FileToString.h"

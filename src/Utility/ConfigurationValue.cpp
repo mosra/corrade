@@ -16,9 +16,71 @@
 
 #include "ConfigurationValue.h"
 
+#include <sstream>
+
 namespace Corrade { namespace Utility {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
+namespace Implementation {
+    template<class T> std::string BasicConfigurationValue<T>::toString(const T& value, ConfigurationValueFlags flags) {
+        std::ostringstream stream;
+
+        /* Hexadecimal / octal values */
+        if(flags & (ConfigurationValueFlag::Color|ConfigurationValueFlag::Hex))
+            stream.setf(std::istringstream::hex, std::istringstream::basefield);
+        if(flags & ConfigurationValueFlag::Oct)
+            stream.setf(std::istringstream::oct, std::istringstream::basefield);
+        if(flags & ConfigurationValueFlag::Scientific)
+            stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
+
+        stream << value;
+
+        std::string stringValue = stream.str();
+
+        /* Strip initial # character, if user wants a color */
+        if(flags & ConfigurationValueFlag::Color)
+            stringValue = '#' + stringValue;
+
+        return stringValue;
+    }
+
+    template<class T> T BasicConfigurationValue<T>::fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
+        std::string _stringValue = stringValue;
+
+        /* Strip initial # character, if user wants a color */
+        if(flags & ConfigurationValueFlag::Color && !stringValue.empty() && stringValue[0] == '#')
+            _stringValue = stringValue.substr(1);
+
+        std::istringstream stream(_stringValue);
+
+        /* Hexadecimal / octal values, scientific notation */
+        if(flags & (ConfigurationValueFlag::Color|ConfigurationValueFlag::Hex))
+            stream.setf(std::istringstream::hex, std::istringstream::basefield);
+        if(flags & ConfigurationValueFlag::Oct)
+            stream.setf(std::istringstream::oct, std::istringstream::basefield);
+        if(flags & ConfigurationValueFlag::Scientific)
+            stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
+
+        T value;
+        stream >> value;
+
+        return value;
+    }
+
+    template class BasicConfigurationValue<short>;
+    template class BasicConfigurationValue<unsigned short>;
+    template class BasicConfigurationValue<int>;
+    template class BasicConfigurationValue<unsigned int>;
+    template class BasicConfigurationValue<long>;
+    template class BasicConfigurationValue<unsigned long>;
+    template class BasicConfigurationValue<long long>;
+    template class BasicConfigurationValue<unsigned long long>;
+    template class BasicConfigurationValue<float>;
+    template class BasicConfigurationValue<double>;
+    template class BasicConfigurationValue<long double>;
+    template class BasicConfigurationValue<std::string>;
+}
+
 bool ConfigurationValue<bool>::fromString(const std::string& value, ConfigurationValueFlags) {
     if(value == "1" || value == "yes" || value == "y" || value == "true") return true;
     return false;
