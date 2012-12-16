@@ -120,7 +120,7 @@ for internal usage by the C++ standard. Underscores before the name shouldn't
 be used in public API or function parameters, as it looks ugly in the
 documentation.
 
-@subsubsection cpp-using <tt>using</tt> keyword
+@subsubsection cpp-using using keyword
 
 `using namespace std` is not allowed. It brings many symbols into default
 namespace and can lead to unintended behavior. Consider `abs()` function. If
@@ -259,9 +259,9 @@ switch(type) {
 
 @subsubsection cpp-keywords Class member and function keywords
 
-Use keywords in this order: `template virtual inline constexpr static`. Only
-base virtual functions should have `virtual` keyword, not the
-reimplementations.
+Use keywords in this order: `template virtual inline constexpr explicit static`.
+Only base virtual functions should have `virtual` keyword, the
+reimplementations should be marked with `override` instead.
 
 @subsubsection cpp-macros Preprocessor macros
 
@@ -270,6 +270,36 @@ the macro is long or contains code which should be spanned or multiple lines,
 it should be wrapped on multiple lines, each successive line indented and the
 line wrapping indicator `\` should be aligned around 80th column, preferably
 on some tab-stop.
+
+@subsection cpp-constructors Class constructors
+
+All constructors (except copy and move constructors) should be `explicit` by
+default. Remove the keyword only if you want to allow implicit conversions
+or want to construct the class with brace initializer (e.g. vector and matrix
+classes). If the class has no constructor, add explicit default-created one:
+@code
+class MyClass {
+    public:
+        explicit MyClass() = default;
+
+        // ...
+};
+@endcode
+
+If the constructor is intentionally implicit, mark it with appropriate
+comment.
+
+If the class has only static members (e.g. various utility classes, traits
+classes), delete the constructor to prevent instantiating the class by
+mistake:
+@code
+class MyClass {
+    public:
+        MyClass() = delete;
+
+        // ...
+};
+@endcode
 
 @subsection cpp-constexpr Constant expressions and constants
 
