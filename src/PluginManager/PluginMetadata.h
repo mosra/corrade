@@ -82,7 +82,7 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          * @brief Constructor
          * @param conf          Configuration file with plugin metadata
          */
-        PluginMetadata(const Utility::Configuration& conf);
+        explicit PluginMetadata(const Utility::Configuration& conf);
 
         /**
          * @brief %Plugin name

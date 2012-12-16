@@ -37,6 +37,7 @@ template<class T> class className {                                         \
     typedef char SmallType;                                                 \
     typedef short LargeType;                                                \
                                                                             \
+    className() = delete;                                                   \
     template<class U> static SmallType get(U&, typename U::type* = nullptr);\
     static LargeType get(...);                                              \
     static T& reference();                                                  \

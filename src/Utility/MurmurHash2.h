@@ -37,7 +37,7 @@ template<std::size_t> class MurmurHash2Implementation {
          * @brief Constructor
          * @param seed      Seed to initialize the hash
          */
-        MurmurHash2Implementation(std::size_t seed);
+        explicit MurmurHash2Implementation(std::size_t seed);
 
         /** @brief Compute digest of given data */
         std::size_t operator()(const char* data, std::size_t size);
@@ -50,7 +50,7 @@ template<std::size_t> class MurmurHash2Implementation {
 /** @todo Used only in unit test, export in only there? */
 template<> class CORRADE_UTILITY_EXPORT MurmurHash2Implementation<4> {
     public:
-        inline MurmurHash2Implementation(unsigned int seed): seed(seed) {}
+        inline explicit MurmurHash2Implementation(unsigned int seed): seed(seed) {}
         unsigned int operator()(const unsigned char* data, unsigned int size) const;
 
     private:
@@ -59,7 +59,7 @@ template<> class CORRADE_UTILITY_EXPORT MurmurHash2Implementation<4> {
 /** @todo Used only in unit test, export in only there? */
 template<> class CORRADE_UTILITY_EXPORT MurmurHash2Implementation<8> {
     public:
-        inline MurmurHash2Implementation(unsigned long long seed): seed(seed) {}
+        inline explicit MurmurHash2Implementation(unsigned long long seed): seed(seed) {}
         unsigned long long operator()(const unsigned char* data, unsigned long long size) const;
 
     private:
@@ -92,7 +92,7 @@ class CORRADE_UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(std::size_t
          * @brief Constructor
          * @param seed      Seed to initialize the hash
          */
-        inline MurmurHash2(std::size_t seed = 0): implementation(seed) {}
+        inline explicit MurmurHash2(std::size_t seed = 0): implementation(seed) {}
 
         /** @brief Compute digest of given data */
         inline Digest operator()(const std::string& data) const {

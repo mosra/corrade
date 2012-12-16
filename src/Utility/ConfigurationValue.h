@@ -101,6 +101,8 @@ this:
     fooValue=6 7
 */
 template<class T> struct ConfigurationValue {
+    ConfigurationValue() = delete;
+
     #ifdef DOXYGEN_GENERATING_OUTPUT
     /**
     * @brief Convert value to string
@@ -123,6 +125,8 @@ template<class T> struct ConfigurationValue {
 #ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Implementation {
     template<class T> struct CORRADE_UTILITY_EXPORT BasicConfigurationValue {
+        BasicConfigurationValue() = delete;
+
         static std::string toString(const T& value, ConfigurationValueFlags flags);
         static T fromString(const std::string& stringValue, ConfigurationValueFlags flags);
     };
@@ -156,6 +160,8 @@ template<> struct ConfigurationValue<std::string>: public Implementation::BasicC
 
 /** @brief %Configuration value parser and writer for `bool` type */
 template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<bool> {
+    ConfigurationValue() = delete;
+
     #ifndef DOXYGEN_GENERATING_OUTPUT
     static bool fromString(const std::string& value, ConfigurationValueFlags flags);
     static std::string toString(const bool& value, ConfigurationValueFlags flags);

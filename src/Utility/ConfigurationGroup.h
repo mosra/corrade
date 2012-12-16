@@ -306,7 +306,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         Configuration* configuration;
 
         /** @brief Constructor */
-        CORRADE_UTILITY_LOCAL ConfigurationGroup(Configuration* _configuration): configuration(_configuration) {}
+        CORRADE_UTILITY_LOCAL explicit ConfigurationGroup(Configuration* _configuration): configuration(_configuration) {}
 
         CORRADE_UTILITY_EXPORT bool valueInternal(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags);
         CORRADE_UTILITY_EXPORT bool valueInternal(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags) const;

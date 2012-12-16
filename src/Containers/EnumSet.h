@@ -99,10 +99,10 @@ template<class T, class U, U fullValue = ~U(0)> class EnumSet {
         typedef U UnderlyingType;   /**< @brief Underlying type of the enum */
 
         /** @brief Create empty set */
-        inline constexpr EnumSet(): value() {}
+        inline constexpr /*implicit*/ EnumSet(): value() {}
 
         /** @brief Create set from one value */
-        inline constexpr EnumSet(T value): value(static_cast<UnderlyingType>(value)) {}
+        inline constexpr /*implicit*/ EnumSet(T value): value(static_cast<UnderlyingType>(value)) {}
 
         /** @brief Equality operator */
         inline constexpr bool operator==(EnumSet<T, U, fullValue> other) const {

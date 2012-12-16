@@ -49,7 +49,8 @@ class CORRADE_INTERCONNECT_EXPORT Receiver {
     Receiver& operator=(Receiver&&) = delete;
 
     public:
-        virtual ~Receiver();
+        explicit Receiver() = default;
+        virtual ~Receiver() = 0;
 
         /**
          * @brief Whether the receiver is connected to any signal
@@ -74,9 +75,6 @@ class CORRADE_INTERCONNECT_EXPORT Receiver {
          *      Emitter::disconnectSignal(), hasSlotConnections()
          */
         void disconnectAllSlots();
-
-    protected:
-        Receiver() = default;
 
     private:
         std::vector<Implementation::AbstractConnectionData*> connections;

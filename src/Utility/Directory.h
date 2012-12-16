@@ -151,7 +151,7 @@ class CORRADE_UTILITY_EXPORT Directory: public std::vector<std::string> {
          * Tries to load items from given directory. Directory::isLoaded()
          * should be used to determine whether the load was successful or not.
          */
-        Directory(const std::string& path, int flags = 0);
+        explicit Directory(const std::string& path, int flags = 0);
 
         /** @brief Whether the directory is successfully loaded */
         inline bool isLoaded() const { return _isLoaded; }

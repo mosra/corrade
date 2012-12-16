@@ -71,7 +71,7 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @param _group        Group name for getting data or compiling new
          *      resources.
          */
-        inline Resource(const std::string& _group): group(_group) {}
+        inline explicit Resource(const std::string& _group): group(_group) {}
 
         /**
          * @brief Compile data resource file

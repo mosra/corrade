@@ -33,6 +33,8 @@ namespace Corrade { namespace Utility {
  */
 class Endianness {
     public:
+        Endianness() = delete;
+
         /** @brief Whether actual system is Big-Endian */
         inline constexpr static bool isBigEndian() {
             #ifdef CORRADE_BIG_ENDIAN

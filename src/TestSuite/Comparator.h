@@ -125,7 +125,7 @@ CORRADE_COMPARE_WITH("actual.dat", "expected.dat", FileContents("/common/path/pr
 */
 template<class T> class Comparator {
     public:
-        inline constexpr Comparator(): actualValue(), expectedValue() {}
+        inline constexpr explicit Comparator(): actualValue(), expectedValue() {}
 
         /** @brief %Compare two values */
         bool operator()(const T& actual, const T& expected) {

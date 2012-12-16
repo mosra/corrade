@@ -42,7 +42,7 @@ Manages loading, instancing and unloading plugins. See also
 template<class T, class BasePluginManager = AbstractPluginManager> class PluginManager: public BasePluginManager {
     public:
         /** @copydoc AbstractPluginManager::AbstractPluginManager() */
-        PluginManager(const std::string& pluginDirectory): BasePluginManager(pluginDirectory) {
+        explicit PluginManager(const std::string& pluginDirectory): BasePluginManager(pluginDirectory) {
             /* Find static plugins which have the same interface and have not
                assigned manager to them */
             for(typename std::map<std::string, typename BasePluginManager::PluginObject*>::iterator it = this->plugins()->begin(); it != this->plugins()->end(); ++it) {

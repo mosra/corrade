@@ -203,7 +203,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          *
          * Creates empty configuration with no filename.
          */
-        inline Configuration(Flags flags = Flags()): ConfigurationGroup(this), flags(static_cast<InternalFlag>(std::uint32_t(flags))|InternalFlag::IsValid) {}
+        inline explicit Configuration(Flags flags = Flags()): ConfigurationGroup(this), flags(static_cast<InternalFlag>(std::uint32_t(flags))|InternalFlag::IsValid) {}
 
         /**
          * @brief Constructor
@@ -213,7 +213,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * Opens the file and loads it according to specified flags. If file
          * cannot be opened, sets invalid flag (see isValid()).
          */
-        Configuration(const std::string& file, Flags flags = Flags());
+        explicit Configuration(const std::string& file, Flags flags = Flags());
 
         /**
          * @brief Constructor
@@ -224,7 +224,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * Configuration::ReadOnly, because the configuration cannot be saved
          * anywhere.
          */
-        Configuration(std::istream& file, Flags flags = Flags());
+        explicit Configuration(std::istream& file, Flags flags = Flags());
 
         /**
          * @brief Destructor

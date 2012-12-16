@@ -39,7 +39,7 @@ See @ref unit-testing for introduction.
 */
 class CORRADE_TESTSUITE_EXPORT Tester {
     public:
-        inline Tester(): logOutput(nullptr), errorOutput(nullptr), testCaseLine(0), expectedFailure(nullptr) {}
+        inline explicit Tester(): logOutput(nullptr), errorOutput(nullptr), testCaseLine(0), expectedFailure(nullptr) {}
 
         /**
          * @brief Execute the tester

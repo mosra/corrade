@@ -121,7 +121,7 @@ template<class T> class LinkedList {
          *
          * Creates empty list.
          */
-        inline constexpr LinkedList(): _first(nullptr), _last(nullptr) {}
+        inline constexpr explicit LinkedList(): _first(nullptr), _last(nullptr) {}
 
         /** @brief Move constructor */
         LinkedList(LinkedList<T>&& other): _first(other._first), _last(other._last) {

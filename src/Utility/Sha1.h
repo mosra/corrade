@@ -41,7 +41,7 @@ class CORRADE_UTILITY_EXPORT Sha1: public AbstractHash<20> {
         }
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        inline Sha1(): _dataSize(0), _digest{initialDigest[0], initialDigest[1], initialDigest[2], initialDigest[3], initialDigest[4]} {}
+        inline explicit Sha1(): _dataSize(0), _digest{initialDigest[0], initialDigest[1], initialDigest[2], initialDigest[3], initialDigest[4]} {}
         #endif
 
         /** @brief Add data for digesting */

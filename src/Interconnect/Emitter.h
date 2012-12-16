@@ -57,6 +57,7 @@ class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
     AbstractConnectionData& operator=(AbstractConnectionData&&) = delete;
 
     public:
+        explicit AbstractConnectionData() = default;
         inline virtual ~AbstractConnectionData() {}
 
     private:
@@ -73,6 +74,8 @@ template<class ...Args> class MemberConnectionData: public AbstractConnectionDat
 
     private:
         typedef void(Receiver::*Slot)(Args...);
+
+        explicit MemberConnectionData() = default;
 
         template<class Emitter, class Receiver> inline MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): AbstractConnectionData(emitter, receiver), slot(static_cast<Slot>(slot)) {}
 
@@ -112,14 +115,11 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         class Signal {
             friend class Emitter;
 
-            public:
-                ~Signal() = default;
-
             private:
-                constexpr Signal() = default;
+                constexpr explicit Signal() = default;
         };
 
-        inline Emitter(): lastHandledSignal(0), connectionsChanged(false) {}
+        inline explicit Emitter(): lastHandledSignal(0), connectionsChanged(false) {}
         virtual ~Emitter() = 0;
 
         /**

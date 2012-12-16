@@ -129,7 +129,7 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
         void disconnect();
 
     private:
-        Connection(Implementation::SignalData signal, Implementation::AbstractConnectionData* data);
+        explicit Connection(Implementation::SignalData signal, Implementation::AbstractConnectionData* data);
 
         void destroy();
         void move(Connection&& other);

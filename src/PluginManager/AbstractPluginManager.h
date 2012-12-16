@@ -150,7 +150,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          *      with the same name as another static plugin are skipped.
          * @see PluginManager::nameList()
          */
-        inline AbstractPluginManager(const std::string& pluginDirectory): _pluginDirectory(pluginDirectory) {
+        inline explicit AbstractPluginManager(const std::string& pluginDirectory): _pluginDirectory(pluginDirectory) {
             reloadPluginDirectory();
         }
 
