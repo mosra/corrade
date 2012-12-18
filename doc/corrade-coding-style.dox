@@ -14,6 +14,7 @@ guidelines of large projects:
 
  - LLVM: http://llvm.org/docs/CodingStandards.html
  - Qt: http://qt-project.org/wiki/Qt_Coding_Style
+ - Chromium: http://dev.chromium.org/developers/coding-style/cpp-dos-and-donts
 
 @section text Text files in general
 
