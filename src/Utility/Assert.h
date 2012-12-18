@@ -20,9 +20,11 @@
  * @brief Macros CORRADE_ASSERT(), CORRADE_INTERNAL_ASSERT()
  */
 
+#ifndef CORRADE_NO_ASSERT
 #include <cstdlib>
 
 #include "Debug.h"
+#endif
 
 namespace Corrade { namespace Utility {
 
