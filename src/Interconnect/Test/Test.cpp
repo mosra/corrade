@@ -19,6 +19,8 @@
 #include "Interconnect/Emitter.h"
 #include "Interconnect/Receiver.h"
 
+#include "corradeCompatibility.h"
+
 CORRADE_TEST_MAIN(Corrade::Interconnect::Test::Test)
 
 namespace Corrade { namespace Interconnect { namespace Test {
