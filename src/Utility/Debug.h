@@ -146,7 +146,6 @@ class CORRADE_UTILITY_EXPORT Debug {
         Debug operator<<(const char* value);            /**< @overload */
         Debug operator<<(const void* value);            /**< @overload */
         Debug operator<<(bool value);                   /**< @overload */
-        Debug operator<<(char value);                   /**< @overload */
         Debug operator<<(int value);                    /**< @overload */
         Debug operator<<(long value);                   /**< @overload */
         Debug operator<<(long long value);              /**< @overload */
@@ -195,21 +194,21 @@ Debug::setFlag() for modifying newline and whitespace behavior.
 template<class T> Debug operator<<(Debug debug, const T& value);
 #else
 template<class Iterable> Debug operator<<(typename std::enable_if<IsIterable<Iterable>::Value && !std::is_same<Iterable, std::string>::value, Debug>::type debug, const Iterable& value) {
-    debug << '[';
+    debug << "[";
     debug.setFlag(Debug::SpaceAfterEachValue, false);
     for(typename Iterable::const_iterator it = value.begin(); it != value.end(); ++it) {
         if(it != value.begin())
             debug << ", ";
         debug << *it;
     }
-    debug << ']';
+    debug << "]";
     debug.setFlag(Debug::SpaceAfterEachValue, true);
     return debug;
 }
 template<class A, class B> Debug operator<<(Debug debug, const std::pair<A, B>& value) {
-    debug << '(';
+    debug << "(";
     debug.setFlag(Debug::SpaceAfterEachValue, false);
-    debug << value.first << ", " << value.second << ')';
+    debug << value.first << ", " << value.second << ")";
     debug.setFlag(Debug::SpaceAfterEachValue, true);
     return debug;
 }

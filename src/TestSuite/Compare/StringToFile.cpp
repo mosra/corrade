@@ -41,7 +41,7 @@ bool Comparator<Compare::StringToFile>::operator()(const std::string& actualCont
 
 void Comparator<Compare::StringToFile>::printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
     if(state != State::Success) {
-        e << "File" << actual << '(' + filename + ')' << "cannot be read.";
+        e << "File" << actual << "(" + filename + ")" << "cannot be read.";
         return;
     }
 
@@ -55,15 +55,15 @@ void Comparator<Compare::StringToFile>::printErrorMessage(Utility::Error& e, con
         if(actualContents.size() > i && expectedContents.size() > i && actualContents[i] == expectedContents[i]) continue;
 
         if(actualContents.size() <= i)
-            e << "Expected has character" << expectedContents[i];
+            e << "Expected has character" << std::string() + expectedContents[i];
         else if(expectedContents.size() <= i)
-            e << "Actual has character" << actualContents[i];
+            e << "Actual has character" << std::string() + actualContents[i];
         else
-            e << "Actual character" << actualContents[i] << "but" << expectedContents[i] << "expected";
+            e << "Actual character" << std::string() + actualContents[i] << "but" << std::string() + expectedContents[i] << "expected";
 
         e << "on position" << i;
         e.setFlag(Utility::Debug::SpaceAfterEachValue, false);
-        e << '.';
+        e << ".";
         e.setFlag(Utility::Debug::SpaceAfterEachValue, true);
 
         break;

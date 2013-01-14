@@ -25,6 +25,8 @@ class DebugTest: public TestSuite::Tester {
         DebugTest();
 
         void debug();
+        void boolean();
+        void chars();
         void custom();
         void flags();
 

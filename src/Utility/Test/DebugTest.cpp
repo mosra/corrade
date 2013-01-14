@@ -28,6 +28,8 @@ namespace Corrade { namespace Utility { namespace Test {
 
 DebugTest::DebugTest() {
     addTests(&DebugTest::debug,
+             &DebugTest::boolean,
+             &DebugTest::chars,
              &DebugTest::custom,
              &DebugTest::flags,
              &DebugTest::iterable);
@@ -40,11 +42,11 @@ void DebugTest::debug() {
     Warning::setOutput(&warning);
     Error::setOutput(&error);
     Debug() << "a" << 33 << 0.567f;
-    Warning() << "w" << 42 << 'c' << false;
+    Warning() << "w" << 42 << "meh";
     Error() << "e";
 
     CORRADE_COMPARE(debug.str(), "a 33 0.567\n");
-    CORRADE_COMPARE(warning.str(), "w 42 c false\n");
+    CORRADE_COMPARE(warning.str(), "w 42 meh\n");
     CORRADE_COMPARE(error.str(), "e\n");
 
     /* Multiple times used instance */
@@ -61,6 +63,18 @@ void DebugTest::debug() {
     debug.str("");
     Debug();
     CORRADE_COMPARE(debug.str(), "");
+}
+
+void DebugTest::boolean() {
+    std::ostringstream o;
+    Debug(&o) << true << false;
+    CORRADE_COMPARE(o.str(), "true false\n");
+}
+
+void DebugTest::chars() {
+    std::ostringstream o;
+    Debug(&o) << 'a';
+    CORRADE_COMPARE(o.str(), "97\n");
 }
 
 struct Foo {
@@ -94,14 +108,14 @@ void DebugTest::flags() {
     } {
         Debug debug;
         debug.setFlag(Debug::SpaceAfterEachValue, false);
-        debug << 'a' << 'b' << 'c';
+        debug << "a" << "b" << "c";
     }
     CORRADE_COMPARE(out.str(), "abc\n");
     out.str("");
     {
         Debug debug;
         debug.setFlag(Debug::NewLineAtTheEnd, false);
-        debug << 'a' << 'b' << 'c';
+        debug << "a" << "b" << "c";
     }
     CORRADE_COMPARE(out.str(), "a b c");
 }

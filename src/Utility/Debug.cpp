@@ -61,7 +61,6 @@ Debug Debug::operator<<(const std::string& value) { return print(value); }
 Debug Debug::operator<<(const void* value) { return print(value); }
 Debug Debug::operator<<(const char* value) { return print(value); }
 Debug Debug::operator<<(bool value) { return print(value ? "true" : "false"); }
-Debug Debug::operator<<(char value) { return print(value); }
 Debug Debug::operator<<(int value) { return print(value); }
 Debug Debug::operator<<(long value) { return print(value); }
 Debug Debug::operator<<(long long value) { return print(value); }

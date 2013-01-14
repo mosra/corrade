@@ -76,7 +76,7 @@ template<class T> class Comparator<Compare::Container<T>> {
 
                 e << "on position" << i;
                 e.setFlag(Utility::Debug::SpaceAfterEachValue, false);
-                e << '.';
+                e << ".";
                 e.setFlag(Utility::Debug::SpaceAfterEachValue, true);
 
                 break;

@@ -57,12 +57,12 @@ bool Comparator<Compare::File>::operator()(const std::string& actualFilename, co
 
 void Comparator<Compare::File>::printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
     if(actualState != State::Success) {
-        e << "Actual file" << actual << '(' + actualFilename + ')' << "cannot be read.";
+        e << "Actual file" << actual << "(" + actualFilename + ")" << "cannot be read.";
         return;
     }
 
     if(expectedState != State::Success) {
-        e << "Expected file" << expected << '(' + expectedFilename + ')' << "cannot be read.";
+        e << "Expected file" << expected << "(" + expectedFilename + ")" << "cannot be read.";
         return;
     }
 
@@ -76,15 +76,15 @@ void Comparator<Compare::File>::printErrorMessage(Utility::Error& e, const std::
         if(actualContents.size() > i && expectedContents.size() > i && actualContents[i] == expectedContents[i]) continue;
 
         if(actualContents.size() <= i)
-            e << "Expected has character" << expectedContents[i];
+            e << "Expected has character" << std::string() + expectedContents[i];
         else if(expectedContents.size() <= i)
-            e << "Actual has character" << actualContents[i];
+            e << "Actual has character" << std::string() + actualContents[i];
         else
-            e << "Actual character" << actualContents[i] << "but" << expectedContents[i] << "expected";
+            e << "Actual character" << std::string() + actualContents[i] << "but" << std::string() + expectedContents[i] << "expected";
 
         e << "on position" << i;
         e.setFlag(Utility::Debug::SpaceAfterEachValue, false);
-        e << '.';
+        e << ".";
         e.setFlag(Utility::Debug::SpaceAfterEachValue, true);
 
         break;
