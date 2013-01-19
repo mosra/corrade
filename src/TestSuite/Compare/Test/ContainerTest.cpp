@@ -14,17 +14,25 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "ContainerTest.h"
-
 #include <sstream>
 
+#include "TestSuite/Tester.h"
 #include "TestSuite/Compare/Container.h"
-
-CORRADE_TEST_MAIN(Corrade::TestSuite::Compare::Test::ContainerTest)
 
 using namespace Corrade::Utility;
 
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test {
+
+class ContainerTest: public Tester {
+    public:
+        ContainerTest();
+
+        void same();
+        void outputActualSmaller();
+        void outputExpectedSmaller();
+        void output();
+        void sorted();
+};
 
 ContainerTest::ContainerTest() {
     addTests(&ContainerTest::same,
@@ -98,3 +106,5 @@ void ContainerTest::sorted() {
 }
 
 }}}}
+
+CORRADE_TEST_MAIN(Corrade::TestSuite::Compare::Test::ContainerTest)

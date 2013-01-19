@@ -14,13 +14,19 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "MurmurHash2Test.h"
-
+#include "TestSuite/Tester.h"
 #include "Utility/MurmurHash2.h"
 
-CORRADE_TEST_MAIN(Corrade::Utility::Test::MurmurHash2Test)
-
 namespace Corrade { namespace Utility { namespace Test {
+
+class MurmurHash2Test: public TestSuite::Tester {
+    public:
+        MurmurHash2Test();
+
+        void test32();
+        void test64();
+        void constructor();
+};
 
 MurmurHash2Test::MurmurHash2Test() {
     addTests(&MurmurHash2Test::test32,
@@ -44,3 +50,5 @@ void MurmurHash2Test::constructor() {
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::Utility::Test::MurmurHash2Test)

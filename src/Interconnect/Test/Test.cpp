@@ -14,16 +14,37 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "Test.h"
-
+#include "TestSuite/Tester.h"
 #include "Interconnect/Emitter.h"
 #include "Interconnect/Receiver.h"
 
 #include "corradeCompatibility.h"
 
-CORRADE_TEST_MAIN(Corrade::Interconnect::Test::Test)
-
 namespace Corrade { namespace Interconnect { namespace Test {
+
+class Test: public TestSuite::Tester {
+    public:
+        Test();
+
+        void signalData();
+
+        void connect();
+
+        void disconnect();
+        void disconnectSignal();
+        void disconnectEmitter();
+        void disconnectReceiver();
+
+        void destroyEmitter();
+        void destroyReceiver();
+
+        void emit();
+        void emitterSubclass();
+        void virtualSlot();
+
+        void changeConnectionsInSlot();
+        void deleteReceiverInSlot();
+};
 
 class Postman: public Interconnect::Emitter {
     public:
@@ -363,3 +384,5 @@ void Test::deleteReceiverInSlot() {
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::Interconnect::Test::Test)

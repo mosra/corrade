@@ -14,13 +14,11 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "TesterTest.h"
-
 #include <sstream>
 
-using namespace Corrade::Utility;
+#include "TestSuite/Tester.h"
 
-CORRADE_TEST_MAIN(Corrade::TestSuite::Test::TesterTest)
+using namespace Corrade::Utility;
 
 namespace Corrade { namespace TestSuite {
 
@@ -54,12 +52,41 @@ class StringLength {
 
 namespace Test {
 
+class TesterTest: public Tester {
+    public:
+        TesterTest();
+
+        void test();
+        void emptyTest();
+};
+
+class EmptyTest: public Tester {};
+
+class Test: public Tester {
+    public:
+        Test();
+
+        void noChecks();
+        void trueExpression();
+        void falseExpression();
+        void equal();
+        void nonEqual();
+        void expectFail();
+        void unexpectedPassExpression();
+        void unexpectedPassEqual();
+
+        void compareAs();
+        void compareAsFail();
+        void compareWth();
+        void compareWithFail();
+};
+
 TesterTest::TesterTest() {
     addTests(&TesterTest::test,
              &TesterTest::emptyTest);
 }
 
-TesterTest::Test::Test() {
+Test::Test() {
     addTests(&Test::noChecks,
              &Test::trueExpression,
              &Test::falseExpression,
@@ -74,29 +101,29 @@ TesterTest::Test::Test() {
              &Test::compareWithFail);
 }
 
-void TesterTest::Test::noChecks() {
+void Test::noChecks() {
     return;
 }
 
-void TesterTest::Test::trueExpression() {
+void Test::trueExpression() {
     CORRADE_VERIFY(true);
 }
 
-void TesterTest::Test::falseExpression() {
+void Test::falseExpression() {
     CORRADE_VERIFY(5 != 5);
 }
 
-void TesterTest::Test::equal() {
+void Test::equal() {
     CORRADE_COMPARE(3, 3);
 }
 
-void TesterTest::Test::nonEqual() {
+void Test::nonEqual() {
     int a = 5;
     int b = 3;
     CORRADE_COMPARE(a, b);
 }
 
-void TesterTest::Test::expectFail() {
+void Test::expectFail() {
     {
         CORRADE_EXPECT_FAIL("The world is not mad yet.");
         CORRADE_COMPARE(2 + 2, 5);
@@ -106,29 +133,29 @@ void TesterTest::Test::expectFail() {
     CORRADE_VERIFY(true);
 }
 
-void TesterTest::Test::unexpectedPassExpression() {
+void Test::unexpectedPassExpression() {
     CORRADE_EXPECT_FAIL("Not yet implemented.");
     CORRADE_VERIFY(true == true);
 }
 
-void TesterTest::Test::unexpectedPassEqual() {
+void Test::unexpectedPassEqual() {
     CORRADE_EXPECT_FAIL("Cannot get it right.");
     CORRADE_COMPARE(2 + 2, 4);
 }
 
-void TesterTest::Test::compareAs() {
+void Test::compareAs() {
     CORRADE_COMPARE_AS("kill!", "hello", StringLength);
 }
 
-void TesterTest::Test::compareAsFail() {
+void Test::compareAsFail() {
     CORRADE_COMPARE_AS("meh", "hello", StringLength);
 }
 
-void TesterTest::Test::compareWth() {
+void Test::compareWth() {
     CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(10));
 }
 
-void TesterTest::Test::compareWithFail() {
+void Test::compareWithFail() {
     CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(9));
 }
 
@@ -156,25 +183,25 @@ void TesterTest::test() {
     std::string expected =
         "Starting TesterTest::Test with 12 test cases...\n"
         "    OK: trueExpression()\n"
-        "  FAIL: falseExpression() at here.cpp on line 86 \n"
+        "  FAIL: falseExpression() at here.cpp on line 113 \n"
         "        Expression 5 != 5 failed.\n"
         "    OK: equal()\n"
-        "  FAIL: nonEqual() at here.cpp on line 96 \n"
+        "  FAIL: nonEqual() at here.cpp on line 123 \n"
         "        Values a and b are not the same, actual 5 but 3 expected.\n"
-        " XFAIL: expectFail() at here.cpp on line 102 \n"
+        " XFAIL: expectFail() at here.cpp on line 129 \n"
         "        The world is not mad yet. 2 + 2 and 5 are not equal.\n"
-        " XFAIL: expectFail() at here.cpp on line 103 \n"
+        " XFAIL: expectFail() at here.cpp on line 130 \n"
         "        The world is not mad yet. Expression false == true failed.\n"
         "    OK: expectFail()\n"
-        " XPASS: unexpectedPassExpression() at here.cpp on line 111 \n"
+        " XPASS: unexpectedPassExpression() at here.cpp on line 138 \n"
         "        Expression true == true was expected to fail.\n"
-        " XPASS: unexpectedPassEqual() at here.cpp on line 116 \n"
+        " XPASS: unexpectedPassEqual() at here.cpp on line 143 \n"
         "        2 + 2 and 4 are not expected to be equal.\n"
         "    OK: compareAs()\n"
-        "  FAIL: compareAsFail() at here.cpp on line 124 \n"
+        "  FAIL: compareAsFail() at here.cpp on line 151 \n"
         "        Length of actual \"meh\" doesn't match length of expected \"hello\" with epsilon 0\n"
         "    OK: compareWth()\n"
-        "  FAIL: compareWithFail() at here.cpp on line 132 \n"
+        "  FAIL: compareWithFail() at here.cpp on line 159 \n"
         "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
         "Finished TesterTest::Test with 6 errors. 1 test cases didn't contain any checks!\n";
 
@@ -182,3 +209,5 @@ void TesterTest::test() {
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::TestSuite::Test::TesterTest)

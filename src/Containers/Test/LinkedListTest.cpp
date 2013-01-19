@@ -14,19 +14,47 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "LinkedListTest.h"
-
 #include <sstream>
+
+#include "Containers/LinkedList.h"
+#include "TestSuite/Tester.h"
 
 using namespace Corrade::Utility;
 
-CORRADE_TEST_MAIN(Corrade::Containers::Test::LinkedListTest)
-
 namespace Corrade { namespace Containers { namespace Test {
 
-typedef Containers::LinkedList<LinkedListTest::Item> LinkedList;
+class LinkedListTest: public TestSuite::Tester {
+    public:
+        LinkedListTest();
 
-int LinkedListTest::Item::count = 0;
+        void listBackReference();
+        void insert();
+        void insertFromOtherList();
+        void insertBeforeFromOtherList();
+        void cut();
+        void cutFromOtherList();
+        void clear();
+        void moveList();
+        void moveItem();
+};
+
+class Item: public LinkedListItem<Item> {
+    public:
+        inline Item(Item&& other): LinkedListItem<Item>(std::forward<LinkedListItem<Item>>(other)) {}
+
+        inline Item& operator=(Item&& other) {
+            LinkedListItem<Item>::operator=(std::forward<LinkedListItem<Item>>(other));
+            return *this;
+        }
+
+        static int count;
+        inline Item() { ++count; }
+        inline ~Item() { --count; }
+};
+
+typedef Containers::LinkedList<Item> LinkedList;
+
+int Item::count = 0;
 
 LinkedListTest::LinkedListTest() {
     addTests(&LinkedListTest::listBackReference,
@@ -344,3 +372,5 @@ void LinkedListTest::moveItem() {
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::Containers::Test::LinkedListTest)

@@ -14,11 +14,33 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "EnumSetTest.h"
-
-CORRADE_TEST_MAIN(Corrade::Containers::Test::EnumSetTest)
+#include "Containers/EnumSet.h"
+#include "TestSuite/Tester.h"
 
 namespace Corrade { namespace Containers { namespace Test {
+
+class EnumSetTest: public TestSuite::Tester {
+    public:
+        EnumSetTest();
+
+        void construct();
+        void operatorOr();
+        void operatorAnd();
+        void operatorBool();
+        void operatorInverse();
+        void compare();
+};
+
+enum class Feature: int {
+    Fast = 1 << 0,
+    Cheap = 1 << 1,
+    Tested = 1 << 2,
+    Popular = 1 << 3
+};
+
+typedef EnumSet<Feature, int, 15> Features;
+
+CORRADE_ENUMSET_OPERATORS(Features)
 
 EnumSetTest::EnumSetTest() {
     addTests(&EnumSetTest::construct,
@@ -99,3 +121,5 @@ void EnumSetTest::compare() {
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::Containers::Test::EnumSetTest)

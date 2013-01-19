@@ -14,13 +14,20 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "Sha1Test.h"
-
+#include "TestSuite/Tester.h"
 #include "Utility/Sha1.h"
 
-CORRADE_TEST_MAIN(Corrade::Utility::Test::Sha1Test)
-
 namespace Corrade { namespace Utility { namespace Test {
+
+class Sha1Test: public TestSuite::Tester {
+    public:
+        Sha1Test();
+
+        void emptyString();
+        void exact64bytes();
+        void exactOneBlockPadding();
+        void twoBlockPadding();
+};
 
 Sha1Test::Sha1Test() {
     addTests(&Sha1Test::emptyString,
@@ -50,3 +57,5 @@ void Sha1Test::twoBlockPadding() {
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::Utility::Test::Sha1Test)

@@ -14,16 +14,17 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "PluginTest.h"
-
+#include "PluginManager/PluginManager.h"
+#include "TestSuite/Tester.h"
 #include "TestSuite/Compare/Container.h"
 #include "Utility/Directory.h"
+
+#include "AbstractAnimal.h"
+#include "AbstractFood.h"
 #include "AbstractDeletable.h"
 
 #include "PluginTestConfigure.h"
 #include "corradePluginManagerConfigure.h"
-
-CORRADE_TEST_MAIN(Corrade::PluginManager::Test::PluginTest)
 
 using Corrade::Utility::Directory;
 
@@ -32,6 +33,27 @@ void initialize() {
 }
 
 namespace Corrade { namespace PluginManager { namespace Test {
+
+class PluginTest: public TestSuite::Tester {
+    public:
+        PluginTest();
+
+        void nameList();
+        void errors();
+        void staticPlugin();
+        void dynamicPlugin();
+        void deletable();
+        void hierarchy();
+        void crossManagerDependencies();
+        void usedByZombies();
+
+        void reloadPluginDirectory();
+        void reload();
+
+    private:
+        PluginManager<AbstractAnimal>* manager;
+        PluginManager<AbstractFood>* foodManager;
+};
 
 PluginTest::PluginTest() {
     addTests(&PluginTest::nameList,
@@ -268,3 +290,5 @@ void PluginTest::reload() {
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::PluginManager::Test::PluginTest)

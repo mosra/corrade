@@ -14,20 +14,26 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "ResourceTest.h"
-
 #include <fstream>
 #include <sstream>
 
+#include "TestSuite/Tester.h"
 #include "TestSuite/Compare/StringToFile.h"
 #include "Utility/Directory.h"
 #include "Utility/Resource.h"
 
 #include "testConfigure.h"
 
-CORRADE_TEST_MAIN(Corrade::Utility::Test::ResourceTest)
-
 namespace Corrade { namespace Utility { namespace Test {
+
+class ResourceTest: public TestSuite::Tester {
+    public:
+        ResourceTest();
+
+        void compile();
+        void get();
+        void getInexistent();
+};
 
 ResourceTest::ResourceTest() {
     addTests(&ResourceTest::compile,
@@ -95,3 +101,5 @@ void ResourceTest::getInexistent() {
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::Utility::Test::ResourceTest)

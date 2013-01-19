@@ -14,14 +14,18 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "EndianTest.h"
-
+#include "TestSuite/Tester.h"
 #include "Utility/Endianness.h"
 #include "Utility/Debug.h"
 
-CORRADE_TEST_MAIN(Corrade::Utility::Test::EndianTest)
-
 namespace Corrade { namespace Utility { namespace Test {
+
+class EndianTest: public TestSuite::Tester {
+    public:
+        EndianTest();
+
+        void endianness();
+};
 
 EndianTest::EndianTest() {
     addTests(&EndianTest::endianness);
@@ -48,3 +52,5 @@ void EndianTest::endianness() {
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::Utility::Test::EndianTest)

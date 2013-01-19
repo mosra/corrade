@@ -14,14 +14,21 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "StringTest.h"
-
+#include "TestSuite/Tester.h"
 #include "TestSuite/Compare/Container.h"
 #include "Utility/String.h"
 
-CORRADE_TEST_MAIN(Corrade::Utility::Test::StringTest)
-
 namespace Corrade { namespace Utility { namespace Test {
+
+class StringTest: public TestSuite::Tester {
+    public:
+        StringTest();
+
+        void trim();
+        void split();
+        void lowercase();
+        void whitespace();
+};
 
 StringTest::StringTest() {
     addTests(&StringTest::trim,
@@ -91,3 +98,5 @@ void StringTest::whitespace() {
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::Utility::Test::StringTest)

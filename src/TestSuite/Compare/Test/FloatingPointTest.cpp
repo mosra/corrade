@@ -14,16 +14,25 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "FloatingPointTest.h"
-
 #include <limits>
 #include <sstream>
 
+#include "TestSuite/Tester.h"
+
 using namespace Corrade::Utility;
 
-CORRADE_TEST_MAIN(Corrade::TestSuite::Test::FloatingPointTest)
-
 namespace Corrade { namespace TestSuite { namespace Test {
+
+class FloatingPointTest: public Tester {
+    public:
+        FloatingPointTest();
+
+        void smallDelta();
+        void largeDelta();
+        void nan();
+        void infinity();
+        void output();
+};
 
 FloatingPointTest::FloatingPointTest() {
     addTests(&FloatingPointTest::smallDelta,
@@ -77,3 +86,5 @@ void FloatingPointTest::output() {
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::TestSuite::Test::FloatingPointTest)

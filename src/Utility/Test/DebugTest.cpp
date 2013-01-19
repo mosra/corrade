@@ -14,17 +14,27 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "DebugTest.h"
-
 #include <map>
 #include <set>
 #include <sstream>
 
+#include "TestSuite/Tester.h"
 #include "Utility/Debug.h"
 
-CORRADE_TEST_MAIN(Corrade::Utility::Test::DebugTest)
-
 namespace Corrade { namespace Utility { namespace Test {
+
+class DebugTest: public TestSuite::Tester {
+    public:
+        DebugTest();
+
+        void debug();
+        void boolean();
+        void chars();
+        void custom();
+        void flags();
+
+        void iterable();
+};
 
 DebugTest::DebugTest() {
     addTests(&DebugTest::debug,
@@ -136,3 +146,5 @@ void DebugTest::iterable() {
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::Utility::Test::DebugTest)

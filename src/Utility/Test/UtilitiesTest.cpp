@@ -14,13 +14,18 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "UtilitiesTest.h"
-
+#include "TestSuite/Tester.h"
 #include "Utility/utilities.h"
 
-CORRADE_TEST_MAIN(Corrade::Utility::Test::UtilitiesTest)
-
 namespace Corrade { namespace Utility { namespace Test {
+
+class UtilitiesTest: public TestSuite::Tester {
+    public:
+        UtilitiesTest();
+
+        void pow2();
+        void log2();
+};
 
 UtilitiesTest::UtilitiesTest() {
     addTests(&UtilitiesTest::pow2,
@@ -36,3 +41,5 @@ void UtilitiesTest::log2() {
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::Utility::Test::UtilitiesTest)

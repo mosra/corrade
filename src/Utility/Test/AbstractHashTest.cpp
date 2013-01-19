@@ -14,15 +14,21 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "AbstractHashTest.h"
-
 #include <sstream>
 
+#include "TestSuite/Tester.h"
 #include "Utility/AbstractHash.h"
 
-CORRADE_TEST_MAIN(Corrade::Utility::Test::AbstractHashTest)
-
 namespace Corrade { namespace Utility { namespace Test {
+
+class AbstractHashTest: public TestSuite::Tester {
+    public:
+        AbstractHashTest();
+
+        void toHexString();
+        void fromHexString();
+        void debug();
+};
 
 AbstractHashTest::AbstractHashTest() {
     addTests(&AbstractHashTest::toHexString,
@@ -49,3 +55,5 @@ void AbstractHashTest::debug() {
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::Utility::Test::AbstractHashTest)

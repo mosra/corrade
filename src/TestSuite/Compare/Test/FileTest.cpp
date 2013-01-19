@@ -14,20 +14,32 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "FileTest.h"
-
 #include <sstream>
 
+#include "TestSuite/Tester.h"
 #include "TestSuite/Compare/File.h"
 #include "Utility/Directory.h"
 
 #include "configure.h"
 
-CORRADE_TEST_MAIN(Corrade::TestSuite::Compare::Test::FileTest)
-
 using namespace Corrade::Utility;
 
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test {
+
+class FileTest: public Tester {
+    public:
+        FileTest();
+
+        void same();
+        void empty();
+
+        void actualNotFound();
+        void expectedNotFound();
+
+        void outputActualSmaller();
+        void outputExpectedSmaller();
+        void output();
+};
 
 FileTest::FileTest() {
     addTests(&FileTest::same,
@@ -113,3 +125,5 @@ void FileTest::output() {
 }
 
 }}}}
+
+CORRADE_TEST_MAIN(Corrade::TestSuite::Compare::Test::FileTest)

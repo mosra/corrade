@@ -14,16 +14,22 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "TranslatorTest.h"
-
+#include "TestSuite/Tester.h"
 #include "Utility/Translator.h"
 #include "Utility/Directory.h"
 
 #include "testConfigure.h"
 
-CORRADE_TEST_MAIN(Corrade::Utility::Test::TranslatorTest)
-
 namespace Corrade { namespace Utility { namespace Test {
+
+class TranslatorTest: public TestSuite::Tester {
+    public:
+        TranslatorTest();
+
+        void file();
+        void group();
+        void dynamic();
+};
 
 TranslatorTest::TranslatorTest() {
     addTests(&TranslatorTest::file,
@@ -103,3 +109,5 @@ void TranslatorTest::dynamic() {
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::Utility::Test::TranslatorTest)

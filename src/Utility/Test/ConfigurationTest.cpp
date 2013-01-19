@@ -14,10 +14,9 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "ConfigurationTest.h"
-
 #include <sstream>
 
+#include "TestSuite/Tester.h"
 #include "TestSuite/Compare/Container.h"
 #include "TestSuite/Compare/File.h"
 #include "TestSuite/Compare/FileToString.h"
@@ -26,9 +25,35 @@
 
 #include "testConfigure.h"
 
-CORRADE_TEST_MAIN(Corrade::Utility::Test::ConfigurationTest)
-
 namespace Corrade { namespace Utility { namespace Test {
+
+class ConfigurationTest: public TestSuite::Tester {
+    public:
+        ConfigurationTest();
+
+        void parse();
+        void parseDirect();
+        void empty();
+        void invalid();
+        void readonly();
+        void readonlyWithoutFile();
+        void truncate();
+        void whitespaces();
+        void types();
+        void eol();
+        void uniqueGroups();
+        void uniqueKeys();
+        void stripComments();
+
+        void autoCreation();
+        void directValue();
+
+        /** @todo Merge into parse() and uniqueGroups() */
+        void hierarchic();
+        void hierarchicUnique();
+
+        void copy();
+};
 
 ConfigurationTest::ConfigurationTest() {
     addTests(&ConfigurationTest::parse,
@@ -463,3 +488,5 @@ void ConfigurationTest::copy() {
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::Utility::Test::ConfigurationTest)

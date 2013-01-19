@@ -14,18 +14,32 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "DirectoryTest.h"
-
 #include <fstream>
 
+#include "TestSuite/Tester.h"
 #include "TestSuite/Compare/Container.h"
 #include "Utility/Directory.h"
 
 #include "testConfigure.h"
 
-CORRADE_TEST_MAIN(Corrade::Utility::Test::DirectoryTest)
-
 namespace Corrade { namespace Utility { namespace Test {
+
+class DirectoryTest: public Corrade::TestSuite::Tester {
+    public:
+        DirectoryTest();
+
+        void path();
+        void filename();
+        void join();
+        void fileExists();
+        void remove();
+        void moveFile();
+        void moveDirectory();
+        void mkpath();
+        void home();
+        void configurationDir();
+        void list();
+};
 
 DirectoryTest::DirectoryTest() {
     addTests(&DirectoryTest::path,
@@ -231,3 +245,5 @@ void DirectoryTest::list() {
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::Utility::Test::DirectoryTest)

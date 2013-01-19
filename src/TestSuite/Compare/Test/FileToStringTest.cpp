@@ -14,20 +14,31 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "FileToStringTest.h"
-
 #include <sstream>
 
+#include "TestSuite/Tester.h"
 #include "TestSuite/Compare/FileToString.h"
 #include "Utility/Directory.h"
 
 #include "configure.h"
 
-CORRADE_TEST_MAIN(Corrade::TestSuite::Compare::Test::FileToStringTest)
-
 using namespace Corrade::Utility;
 
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test {
+
+class FileToStringTest: public Tester {
+    public:
+        FileToStringTest();
+
+        void same();
+        void empty();
+
+        void notFound();
+
+        void outputActualSmaller();
+        void outputExpectedSmaller();
+        void output();
+};
 
 FileToStringTest::FileToStringTest() {
     addTests(&FileToStringTest::same,
@@ -99,3 +110,5 @@ void FileToStringTest::output() {
 }
 
 }}}}
+
+CORRADE_TEST_MAIN(Corrade::TestSuite::Compare::Test::FileToStringTest)
