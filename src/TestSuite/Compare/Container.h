@@ -17,7 +17,7 @@
 */
 
 /** @file
- * @brief Class Corrade::TestSuite::Compare::Container
+ * @brief Class Corrade::TestSuite::Compare::Container, Corrade::TestSuite::Compare::SortedContainer
  */
 
 #include <algorithm>
@@ -27,32 +27,41 @@
 namespace Corrade { namespace TestSuite {
 
 namespace Compare {
-    /**
-     * @brief %Container comparison method
-     *
-     * @see Container
-     */
-    enum class ContainerMethod {
-        Unsorted,   /**< Don't sort the containers before comparison */
-        Sorted      /**< Sort the containers before comparison */
-    };
 
-    template<class> class Container;
+/**
+@brief Pseudo-type for comparing container contents
+
+Prints the length of both containers (if they are different) and prints value
+of first different item in both containers. Example usage:
+@code
+std::vector<int> a, b;
+CORRADE_COMPARE_AS(a, b, Compare::Container);
+@endcode
+
+It is also possible to sort the containers before comparison using SortedContainer:
+@code
+CORRADE_COMPARE_AS(a, b, Compare::SortedContainer);
+@endcode
+
+See @ref Comparator-pseudo-types for more information.
+*/
+template<class> class Container {};
+
+/**
+@brief Pseudo-type for comparing sorted container contents
+
+See Container for more information.
+*/
+template<class T> class SortedContainer: public Container<T> {};
+
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<class T> class Comparator<Compare::Container<T>> {
     public:
-        inline Comparator(Compare::ContainerMethod method = Compare::ContainerMethod::Unsorted): method(method) {}
-
         inline bool operator()(const T& actual, const T& expected) {
             actualContents = actual;
             expectedContents = expected;
-
-            if(method == Compare::ContainerMethod::Sorted) {
-                std::sort(actualContents.begin(), actualContents.end());
-                std::sort(expectedContents.begin(), expectedContents.end());
-            }
 
             return actualContents == expectedContents;
         }
@@ -83,51 +92,23 @@ template<class T> class Comparator<Compare::Container<T>> {
             }
         }
 
-    private:
-        Compare::ContainerMethod method;
+    protected:
         T actualContents, expectedContents;
 };
-#endif
 
-namespace Compare {
-
-/**
-@brief Pseudo-type for comparing container contents
-
-Prints the length of both containers (if they are different) and prints value
-of first different item in both containers. Example usage:
-@code
-std::vector<int> a, b;
-CORRADE_COMPARE_AS(a, b, Compare::Container);
-@endcode
-
-It is also possible to sort the containers before comparison:
-@code
-CORRADE_COMPARE_WITH(a, b, Compare::Container<std::vector<int>>(Compare::Container::Method::Sorted));
-@endcode
-
-See @ref Comparator-pseudo-types for more information.
-@todo Is it possible to make sorted comparison more convenient?
-*/
-template<class T> class Container {
+template<class T> class Comparator<Compare::SortedContainer<T>>: public Comparator<Compare::Container<T>> {
     public:
-        /**
-         * @brief Constructor
-         * @param method    Comparison method
-         *
-         * See class documentation for more information.
-         */
-        Container(ContainerMethod method = ContainerMethod::Unsorted): c(method) {}
+        inline bool operator()(const T& actual, const T& expected) {
+            this->actualContents = actual;
+            this->expectedContents = expected;
 
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        inline Comparator<Compare::Container<T>>& comparator() { return c; }
-        #endif
+            std::sort(this->actualContents.begin(), this->actualContents.end());
+            std::sort(this->expectedContents.begin(), this->expectedContents.end());
 
-    private:
-        Comparator<Compare::Container<T>> c;
+            return this->actualContents == this->expectedContents;
+        }
 };
-
-}
+#endif
 
 }}
 

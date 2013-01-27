@@ -100,9 +100,9 @@ void ContainerTest::sorted() {
     std::vector<int> b{1, 4, 3, 2};
     std::vector<int> c{1, 4, 3, 3};
 
-    CORRADE_VERIFY(Comparator<Compare::Container<std::vector<int>>>(Compare::ContainerMethod::Sorted)(a, b));
-    CORRADE_VERIFY(Comparator<Compare::Container<std::vector<int>>>(Compare::ContainerMethod::Sorted)(b, a));
-    CORRADE_VERIFY(!Comparator<Compare::Container<std::vector<int>>>(Compare::ContainerMethod::Sorted)(a, c));
+    CORRADE_VERIFY((Comparator<Compare::SortedContainer<std::vector<int>>>()(a, b)));
+    CORRADE_VERIFY((Comparator<Compare::SortedContainer<std::vector<int>>>()(b, a)));
+    CORRADE_VERIFY((!Comparator<Compare::SortedContainer<std::vector<int>>>()(a, c)));
 }
 
 }}}}

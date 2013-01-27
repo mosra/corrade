@@ -203,14 +203,14 @@ void DirectoryTest::list() {
         /* All */
         Directory d(DIRECTORY_TEST_DIR);
         CORRADE_VERIFY(d.isLoaded());
-        CORRADE_COMPARE_WITH(d, (std::vector<std::string>{".", "..", "dir", "file"}),
-            TestSuite::Compare::Container<std::vector<std::string>>(TestSuite::Compare::ContainerMethod::Sorted));
+        CORRADE_COMPARE_AS(d, (std::vector<std::string>{".", "..", "dir", "file"}),
+            TestSuite::Compare::SortedContainer);
     } {
         /* Skip special */
         Directory d(DIRECTORY_TEST_DIR, Directory::SkipSpecial);
         CORRADE_VERIFY(d.isLoaded());
-        CORRADE_COMPARE_WITH(d, (std::vector<std::string>{".", "..", "dir", "file"}),
-            TestSuite::Compare::Container<std::vector<std::string>>(TestSuite::Compare::ContainerMethod::Sorted));
+        CORRADE_COMPARE_AS(d, (std::vector<std::string>{".", "..", "dir", "file"}),
+            TestSuite::Compare::SortedContainer);
     } {
         /* All, sorted ascending */
         Directory d(DIRECTORY_TEST_DIR, Directory::SortAscending);
@@ -227,20 +227,20 @@ void DirectoryTest::list() {
         /* Skip . and .. */
         Directory d(DIRECTORY_TEST_DIR, Directory::SkipDotAndDotDot);
         CORRADE_VERIFY(d.isLoaded());
-        CORRADE_COMPARE_WITH(d, (std::vector<std::string>{"dir", "file"}),
-            TestSuite::Compare::Container<std::vector<std::string>>(TestSuite::Compare::ContainerMethod::Sorted));
+        CORRADE_COMPARE_AS(d, (std::vector<std::string>{"dir", "file"}),
+            TestSuite::Compare::SortedContainer);
     } {
         /* Skip directories */
         Directory d(DIRECTORY_TEST_DIR, Directory::SkipDirectories);
         CORRADE_VERIFY(d.isLoaded());
-        CORRADE_COMPARE_WITH(d, std::vector<std::string>{"file"},
-            TestSuite::Compare::Container<std::vector<std::string>>(TestSuite::Compare::ContainerMethod::Sorted));
+        CORRADE_COMPARE_AS(d, std::vector<std::string>{"file"},
+            TestSuite::Compare::SortedContainer);
     } {
         /* Skip files */
         Directory d(DIRECTORY_TEST_DIR, Directory::SkipFiles);
         CORRADE_VERIFY(d.isLoaded());
-        CORRADE_COMPARE_WITH(d, (std::vector<std::string>{".", "..", "dir"}),
-            TestSuite::Compare::Container<std::vector<std::string>>(TestSuite::Compare::ContainerMethod::Sorted));
+        CORRADE_COMPARE_AS(d, (std::vector<std::string>{".", "..", "dir"}),
+            TestSuite::Compare::SortedContainer);
     }
 }
 
