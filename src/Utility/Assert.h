@@ -17,7 +17,7 @@
 */
 
 /** @file
- * @brief Macros CORRADE_ASSERT(), CORRADE_INTERNAL_ASSERT()
+ * @brief Macros CORRADE_ASSERT(), CORRADE_INTERNAL_ASSERT(), CORRADE_INTERNAL_ASSERT_OUTPUT()
  */
 
 #ifndef CORRADE_NO_ASSERT
@@ -64,6 +64,14 @@ Debug output:
 CORRADE_ASSERT(pos < size(), "Cannot access element" << pos << "in array of size" << size(), );
 @endcode
 
+@attention Don't use this function for checking function output like this:
+    @code
+    CORRADE_ASSERT(initialize(userParam), "Initialization failed: wrong parameter" << userParam, );
+    @endcode
+    If `CORRADE_NO_ASSERT` is defined, the macro is not expanded and thus the
+    function gets never called. See CORRADE_INTERNAL_ASSERT_OUTPUT() for
+    possible solution.
+
 @see CORRADE_INTERNAL_ASSERT()
 */
 #ifdef CORRADE_GRACEFUL_ASSERT
@@ -102,6 +110,13 @@ is defined, this macro does nothing. Example usage:
 @code
 CORRADE_INTERNAL_ASSERT(!nullptr);
 @endcode
+
+@attention Don't use this function for checking function output like this:
+    @code
+    CORRADE_INTERNAL_ASSERT(initialize());
+    @endcode
+    If `CORRADE_NO_ASSERT` is defined, the macro is not expanded and thus the
+    function gets never called. Use CORRADE_INTERNAL_ASSERT_OUTPUT() instead.
 */
 #ifdef CORRADE_NO_ASSERT
 #define CORRADE_INTERNAL_ASSERT(condition) do {} while(0)
@@ -110,6 +125,33 @@ CORRADE_INTERNAL_ASSERT(!nullptr);
     do {                                                                    \
         if(!(condition)) {                                                  \
             Corrade::Utility::Error() << "Assertion" << #condition << "failed in" << __FILE__ << "on line" << __LINE__; \
+            std::exit(-1);                                                  \
+        }                                                                   \
+    } while(0)
+#endif
+
+/** @hideinitializer
+@brief Internal call output assertion macro
+@param call         Assert call
+
+Unlike CORRADE_INTERNAL_ASSERT(), this macro performs the call even if
+`CORRADE_NO_ASSERT` is defined, making it usable for checking function output.
+Otherwise the behavior is the same as with CORRADE_INTERNAL_ASSERT(). Example
+usage:
+@code
+CORRADE_INTERNAL_ASSERT_OUTPUT(initialize());
+@endcode
+*/
+#ifdef CORRADE_NO_ASSERT
+#define CORRADE_INTERNAL_ASSERT_OUTPUT(call)                                \
+    do {                                                                    \
+        call;                                                               \
+    } while(0)
+#else
+#define CORRADE_INTERNAL_ASSERT_OUTPUT(call)                                \
+    do {                                                                    \
+        if(!(call)) {                                                       \
+            Corrade::Utility::Error() << "Assertion" << #call << "failed in" << __FILE__ << "on line" << __LINE__; \
             std::exit(-1);                                                  \
         }                                                                   \
     } while(0)
