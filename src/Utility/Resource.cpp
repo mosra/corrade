@@ -17,6 +17,7 @@
 #include "Resource.h"
 
 #include <sstream>
+#include <tuple>
 #include <vector>
 
 #include "Debug.h"
@@ -122,18 +123,25 @@ std::string Resource::compile(const std::string& name, const std::string& filena
     return compile(name, files);
 }
 
-std::string Resource::get(const std::string& filename) const {
+std::tuple<const char*, std::size_t> Resource::getRaw(const std::string& filename) const {
     /* If the group/filename doesn't exist, return empty string */
     if(resources.find(group) == resources.end()) {
         Error() << "Resource: group" << '\'' + group + '\'' << "was not found";
-        return "";
+        return {};
     } else if(resources[group].find(filename) == resources[group].end()) {
         Error() << "Resource: file" << '\'' + filename + '\'' << "was not found in group" << '\'' + group + '\'';
-        return "";
+        return {};
     }
 
     const ResourceData& r = resources[group][filename];
-    return {reinterpret_cast<const char*>(r.data)+r.position, r.size};
+    return std::make_tuple(reinterpret_cast<const char*>(r.data)+r.position, r.size);
+}
+
+std::string Resource::get(const std::string& filename) const {
+    const char* data;
+    std::size_t size;
+    std::tie(data, size) = getRaw(filename);
+    return data ? std::string(data, size) : std::string();
 }
 
 std::string Resource::hexcode(const std::string& data, const std::string& comment) const {

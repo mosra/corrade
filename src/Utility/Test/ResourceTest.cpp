@@ -16,6 +16,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <tuple>
 
 #include "TestSuite/Tester.h"
 #include "TestSuite/Compare/StringToFile.h"
@@ -98,6 +99,13 @@ void ResourceTest::getInexistent() {
         CORRADE_VERIFY(r.get("inexistentFile").empty());
         CORRADE_COMPARE(out.str(), "Resource: file 'inexistentFile' was not found in group 'test'\n");
     }
+
+    Resource r("inexistentGroup");
+    const char* data;
+    std::size_t size;
+    std::tie(data, size) = r.getRaw("inexistentFile");
+    CORRADE_VERIFY(!data);
+    CORRADE_VERIFY(!size);
 }
 
 }}}

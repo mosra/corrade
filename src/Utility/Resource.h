@@ -95,6 +95,15 @@ class CORRADE_UTILITY_EXPORT Resource {
         std::string compile(const std::string& name, const std::string& filename, const std::string& data) const;
 
         /**
+         * @brief Get pointer to raw resource data
+         * @param filename      Filename
+         *
+         * Returns data of given group and filename as pair of pointer and
+         * size. If not found, the pointer is `nullptr` and size is `0`.
+         */
+        std::tuple<const char*, std::size_t> getRaw(const std::string& filename) const;
+
+        /**
          * @brief Get data resource
          * @param filename      Filename
          * @return Data of given group (specified in constructor) and filename.
