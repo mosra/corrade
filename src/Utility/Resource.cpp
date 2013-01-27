@@ -123,7 +123,7 @@ std::string Resource::compile(const std::string& name, const std::string& filena
     return compile(name, files);
 }
 
-std::tuple<const char*, std::size_t> Resource::getRaw(const std::string& filename) const {
+std::tuple<const unsigned char*, std::size_t> Resource::getRaw(const std::string& filename) const {
     /* If the group/filename doesn't exist, return empty string */
     if(resources.find(group) == resources.end()) {
         Error() << "Resource: group" << '\'' + group + '\'' << "was not found";
@@ -134,14 +134,14 @@ std::tuple<const char*, std::size_t> Resource::getRaw(const std::string& filenam
     }
 
     const ResourceData& r = resources[group][filename];
-    return std::make_tuple(reinterpret_cast<const char*>(r.data)+r.position, r.size);
+    return std::make_tuple(r.data+r.position, r.size);
 }
 
 std::string Resource::get(const std::string& filename) const {
-    const char* data;
+    const unsigned char* data;
     std::size_t size;
     std::tie(data, size) = getRaw(filename);
-    return data ? std::string(data, size) : std::string();
+    return data ? std::string(reinterpret_cast<const char*>(data), size) : std::string();
 }
 
 std::string Resource::hexcode(const std::string& data, const std::string& comment) const {

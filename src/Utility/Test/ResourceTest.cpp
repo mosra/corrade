@@ -101,7 +101,7 @@ void ResourceTest::getInexistent() {
     }
 
     Resource r("inexistentGroup");
-    const char* data;
+    const unsigned char* data;
     std::size_t size;
     std::tie(data, size) = r.getRaw("inexistentFile");
     CORRADE_VERIFY(!data);
