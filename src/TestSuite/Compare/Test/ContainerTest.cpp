@@ -19,8 +19,6 @@
 #include "TestSuite/Tester.h"
 #include "TestSuite/Compare/Container.h"
 
-using namespace Corrade::Utility;
-
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test {
 
 class ContainerTest: public Tester {

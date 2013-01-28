@@ -40,6 +40,36 @@ See @ref unit-testing for introduction.
 */
 class CORRADE_TESTSUITE_EXPORT Tester {
     public:
+        /**
+         * @brief Alias for debug output
+         *
+         * For convenient debug output inside test cases (instead of using
+         * fully qualified name):
+         * @code
+         * void myTestCase() {
+         *     int a = 4;
+         *     Debug() << a;
+         *     CORRADE_COMPARE(a + a, 8);
+         * }
+         * @endcode
+         * @see Warning, Error
+         */
+        typedef Corrade::Utility::Debug Debug;
+
+        /**
+         * @brief Alias for warning output
+         *
+         * See @ref Debug for more information.
+         */
+        typedef Corrade::Utility::Warning Warning;
+
+        /**
+         * @brief Alias for error output
+         *
+         * See @ref Debug for more information.
+         */
+        typedef Corrade::Utility::Error Error;
+
         inline explicit Tester(): logOutput(nullptr), errorOutput(nullptr), testCaseLine(0), expectedFailure(nullptr) {}
 
         /**

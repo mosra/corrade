@@ -19,8 +19,6 @@
 #include "Containers/LinkedList.h"
 #include "TestSuite/Tester.h"
 
-using namespace Corrade::Utility;
-
 namespace Corrade { namespace Containers { namespace Test {
 
 class LinkedListTest: public TestSuite::Tester {

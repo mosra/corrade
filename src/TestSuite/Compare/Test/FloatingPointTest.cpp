@@ -19,8 +19,6 @@
 
 #include "TestSuite/Tester.h"
 
-using namespace Corrade::Utility;
-
 namespace Corrade { namespace TestSuite { namespace Test {
 
 class FloatingPointTest: public Tester {

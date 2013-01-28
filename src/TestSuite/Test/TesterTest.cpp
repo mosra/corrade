@@ -18,8 +18,6 @@
 
 #include "TestSuite/Tester.h"
 
-using namespace Corrade::Utility;
-
 namespace Corrade { namespace TestSuite {
 
 class StringLength;
@@ -186,22 +184,22 @@ void TesterTest::test() {
         "  FAIL: falseExpression() at here.cpp on line 113 \n"
         "        Expression 5 != 5 failed.\n"
         "    OK: equal()\n"
-        "  FAIL: nonEqual() at here.cpp on line 123 \n"
+        "  FAIL: nonEqual() at here.cpp on line 121 \n"
         "        Values a and b are not the same, actual 5 but 3 expected.\n"
-        " XFAIL: expectFail() at here.cpp on line 129 \n"
+        " XFAIL: expectFail() at here.cpp on line 127 \n"
         "        The world is not mad yet. 2 + 2 and 5 are not equal.\n"
-        " XFAIL: expectFail() at here.cpp on line 130 \n"
+        " XFAIL: expectFail() at here.cpp on line 128 \n"
         "        The world is not mad yet. Expression false == true failed.\n"
         "    OK: expectFail()\n"
-        " XPASS: unexpectedPassExpression() at here.cpp on line 138 \n"
+        " XPASS: unexpectedPassExpression() at here.cpp on line 136 \n"
         "        Expression true == true was expected to fail.\n"
-        " XPASS: unexpectedPassEqual() at here.cpp on line 143 \n"
+        " XPASS: unexpectedPassEqual() at here.cpp on line 141 \n"
         "        2 + 2 and 4 are not expected to be equal.\n"
         "    OK: compareAs()\n"
-        "  FAIL: compareAsFail() at here.cpp on line 151 \n"
+        "  FAIL: compareAsFail() at here.cpp on line 149 \n"
         "        Length of actual \"meh\" doesn't match length of expected \"hello\" with epsilon 0\n"
         "    OK: compareWth()\n"
-        "  FAIL: compareWithFail() at here.cpp on line 159 \n"
+        "  FAIL: compareWithFail() at here.cpp on line 157 \n"
         "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
         "Finished TesterTest::Test with 6 errors. 1 test cases didn't contain any checks!\n";
 

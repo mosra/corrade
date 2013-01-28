@@ -22,7 +22,7 @@
 
 #include "configure.h"
 
-using namespace Corrade::Utility;
+using Corrade::Utility::Directory;
 
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test {
 
