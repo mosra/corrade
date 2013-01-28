@@ -52,14 +52,12 @@ This example application will just print the license text and exit:
 
 #include "Utility/Resource.h"
 
-using namespace Corrade::Utility;
-
 int main(int argc, char** argv) {
     // Initialize resources
     RESOURCE_INITIALIZE(Resources);
 
     // Initialize resource manager with name of resource group we are using
-    Resource rs("data");
+    Corrade::Utility::Resource rs("data");
 
     std::string license = rs.get("license.txt");
 

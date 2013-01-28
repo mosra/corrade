@@ -66,7 +66,8 @@ Support for printing other types (which are not handled by `iostream` itself)
 can be added by implementing function operator<<(Debug, const T&) for given
 type.
 
-@see Warning, Error, CORRADE_ASSERT(), CORRADE_INTERNAL_ASSERT()
+@see Warning, Error, CORRADE_ASSERT(), CORRADE_INTERNAL_ASSERT(),
+    CORRADE_INTERNAL_ASSERT_OUTPUT()
 @todo Output to more ostreams at once
  */
 class CORRADE_UTILITY_EXPORT Debug {
@@ -225,6 +226,7 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
         /** @copydoc Debug::Debug() */
         Warning(std::ostream* _output = globalWarningOutput): Debug(_output) {}
 
+        /** @copydoc Debug::setOutput() */
         inline static void setOutput(std::ostream* _output = globalWarningOutput) {
             globalWarningOutput = _output; }
 
@@ -242,6 +244,7 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
         /** @copydoc Debug::Debug() */
         Error(std::ostream* _output = globalErrorOutput): Debug(_output) {}
 
+        /** @copydoc Debug::setOutput() */
         inline static void setOutput(std::ostream* _output = globalErrorOutput) {
             globalErrorOutput = _output; }
 

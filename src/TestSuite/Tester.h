@@ -34,7 +34,8 @@ namespace Corrade { namespace TestSuite {
 
 See @ref unit-testing for introduction.
 
-@see CORRADE_TEST_MAIN(), CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS()
+@see CORRADE_TEST_MAIN(), CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS(),
+    CORRADE_COMPARE_WITH()
 @todo Data-driven tests
 */
 class CORRADE_TESTSUITE_EXPORT Tester {
