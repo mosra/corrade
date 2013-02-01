@@ -65,7 +65,7 @@ int Tester::exec(std::ostream* logOutput, std::ostream* errorOutput) {
     }
 
     Utility::Debug d(logOutput);
-    d << "Finished" << testName << "with" << errorCount << "errors.";
+    d << "Finished" << testName << "with" << errorCount << "errors out of" << checkCount << "checks.";
     if(noCheckCount)
         d << noCheckCount << "test cases didn't contain any checks!";
 
@@ -90,5 +90,11 @@ void Tester::verify(const std::string& expression, bool expressionValue) {
     throw Exception();
 }
 #endif
+
+void Tester::registerTestCase(const std::string& name, int line) {
+    if(testCaseName.empty()) testCaseName = name + "()";
+    testCaseLine = line;
+    ++checkCount;
+}
 
 }}

@@ -181,7 +181,7 @@ void TesterTest::test() {
     std::string expected =
         "Starting TesterTest::Test with 12 test cases...\n"
         "    OK: trueExpression()\n"
-        "  FAIL: falseExpression() at here.cpp on line 113 \n"
+        "  FAIL: falseExpression() at here.cpp on line 111 \n"
         "        Expression 5 != 5 failed.\n"
         "    OK: equal()\n"
         "  FAIL: nonEqual() at here.cpp on line 121 \n"
@@ -201,7 +201,7 @@ void TesterTest::test() {
         "    OK: compareWth()\n"
         "  FAIL: compareWithFail() at here.cpp on line 157 \n"
         "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
-        "Finished TesterTest::Test with 6 errors. 1 test cases didn't contain any checks!\n";
+        "Finished TesterTest::Test with 6 errors out of 13 checks. 1 test cases didn't contain any checks!\n";
 
     CORRADE_COMPARE(out.str(), expected);
 }

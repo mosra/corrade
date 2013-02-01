@@ -70,7 +70,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          */
         typedef Corrade::Utility::Error Error;
 
-        inline explicit Tester(): logOutput(nullptr), errorOutput(nullptr), testCaseLine(0), expectedFailure(nullptr) {}
+        inline explicit Tester(): logOutput(nullptr), errorOutput(nullptr), testCaseLine(0), checkCount(0), expectedFailure(nullptr) {}
 
         /**
          * @brief Execute the tester
@@ -171,10 +171,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                 std::string _message;
         };
 
-        inline void registerTestCase(const std::string& name, int line) {
-            if(testCaseName.empty()) testCaseName = name + "()";
-            this->testCaseLine = line;
-        }
+        void registerTestCase(const std::string& name, int line);
         #endif
 
     private:
@@ -187,7 +184,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         std::ostream *logOutput, *errorOutput;
         std::vector<TestCase> testCases;
         std::string testFilename, testName, testCaseName, expectFailMessage;
-        std::size_t testCaseLine;
+        std::size_t testCaseLine, checkCount;
         ExpectedFailure* expectedFailure;
 };
 
