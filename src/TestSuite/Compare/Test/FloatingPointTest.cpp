@@ -80,7 +80,7 @@ void FloatingPointTest::output() {
         compare.printErrorMessage(e, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Floating-point values a and b are not the same, actual 3 but 8 expected (delta 5).\n");
+    CORRADE_COMPARE(out.str(), "Floating-point values a and b are not the same, actual 3 but 8 expected (delta -5).\n");
 }
 
 }}}
