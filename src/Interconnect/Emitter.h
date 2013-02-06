@@ -212,7 +212,13 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * @todo Connecting to signals
          * @todo Connecting to non-member functions and lambda functions
          */
-        template<class Emitter, class Receiver, class ...Args> inline static Connection connect(Emitter* emitter, Signal(std::common_type<Emitter>::type::*signal)(Args...), Receiver* receiver, void(std::common_type<Receiver>::type::*slot)(Args...)) {
+        template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> inline static
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        Connection
+        #else
+        typename std::enable_if<std::is_base_of<Emitter, EmitterObject>::value && std::is_base_of<Receiver, ReceiverObject>::value, Connection>::type
+        #endif
+        connect(EmitterObject* emitter, Signal(Emitter::*signal)(Args...), ReceiverObject* receiver, void(Receiver::*slot)(Args...)) {
             static_assert(sizeof(Signal(Emitter::*)(Args...)) <= 2*sizeof(void*),
                 "Size of member function pointer is incorrectly assumed to be smaller than 2*sizeof(void*)");
 
