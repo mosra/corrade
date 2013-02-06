@@ -67,18 +67,18 @@ namespace Implementation {
         return value;
     }
 
-    template class BasicConfigurationValue<short>;
-    template class BasicConfigurationValue<unsigned short>;
-    template class BasicConfigurationValue<int>;
-    template class BasicConfigurationValue<unsigned int>;
-    template class BasicConfigurationValue<long>;
-    template class BasicConfigurationValue<unsigned long>;
-    template class BasicConfigurationValue<long long>;
-    template class BasicConfigurationValue<unsigned long long>;
-    template class BasicConfigurationValue<float>;
-    template class BasicConfigurationValue<double>;
-    template class BasicConfigurationValue<long double>;
-    template class BasicConfigurationValue<std::string>;
+    template struct BasicConfigurationValue<short>;
+    template struct BasicConfigurationValue<unsigned short>;
+    template struct BasicConfigurationValue<int>;
+    template struct BasicConfigurationValue<unsigned int>;
+    template struct BasicConfigurationValue<long>;
+    template struct BasicConfigurationValue<unsigned long>;
+    template struct BasicConfigurationValue<long long>;
+    template struct BasicConfigurationValue<unsigned long long>;
+    template struct BasicConfigurationValue<float>;
+    template struct BasicConfigurationValue<double>;
+    template struct BasicConfigurationValue<long double>;
+    template struct BasicConfigurationValue<std::string>;
 }
 
 bool ConfigurationValue<bool>::fromString(const std::string& value, ConfigurationValueFlags) {
