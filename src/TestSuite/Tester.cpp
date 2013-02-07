@@ -89,12 +89,12 @@ void Tester::verify(const std::string& expression, bool expressionValue) {
     else e << "was expected to fail.";
     throw Exception();
 }
-#endif
 
 void Tester::registerTestCase(const std::string& name, int line) {
     if(testCaseName.empty()) testCaseName = name + "()";
     testCaseLine = line;
     ++checkCount;
 }
+#endif
 
 }}
