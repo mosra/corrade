@@ -40,6 +40,7 @@ class Test: public TestSuite::Tester {
 
         void emit();
         void emitterSubclass();
+        void receiverSubclass();
         void virtualSlot();
 
         void changeConnectionsInSlot();
@@ -85,6 +86,7 @@ Test::Test() {
              &Test::destroyReceiver,
              &Test::emit,
              &Test::emitterSubclass,
+             &Test::receiverSubclass,
              &Test::virtualSlot,
              &Test::changeConnectionsInSlot,
              &Test::deleteReceiverInSlot);
@@ -301,6 +303,28 @@ void Test::emitterSubclass() {
     CORRADE_VERIFY(postman.hasSignalConnections(&BetterPostman::newRichTextMessage));
     postman.disconnectSignal(&BetterPostman::newRichTextMessage);
     CORRADE_VERIFY(!postman.hasSignalConnections());
+}
+
+void Test::receiverSubclass() {
+    class BlueMailbox: public Mailbox {
+        public:
+            void addBlueMessage(int price, const std::string& message) {
+                money += price;
+                messages += "Blue "+message+'\n';
+            }
+    };
+
+    Postman postman;
+    BlueMailbox mailbox;
+
+    /* Just test that this doesn't spit any compiler errors */
+    Emitter::connect(&postman, &Postman::newMessage, &mailbox, &BlueMailbox::addMessage);
+    Emitter::connect(&postman, &Postman::newMessage, &mailbox, &BlueMailbox::addBlueMessage);
+
+    /* Just to be sure */
+    postman.newMessage(5, "hello");
+    CORRADE_COMPARE(mailbox.messages, "Blue hello\nhello\n");
+    CORRADE_COMPARE(mailbox.money, 10);
 }
 
 void Test::virtualSlot() {

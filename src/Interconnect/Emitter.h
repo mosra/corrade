@@ -77,7 +77,7 @@ template<class ...Args> class MemberConnectionData: public AbstractConnectionDat
 
         explicit MemberConnectionData() = default;
 
-        template<class Emitter, class Receiver> inline MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): AbstractConnectionData(emitter, receiver), slot(static_cast<Slot>(slot)) {}
+        template<class Emitter, class ReceiverObject, class Receiver, class = typename std::enable_if<std::is_base_of<Receiver, ReceiverObject>::value, void>::type> inline MemberConnectionData(Emitter* emitter, ReceiverObject* receiver, void(Receiver::*slot)(Args...)): AbstractConnectionData(emitter, receiver), slot(static_cast<Slot>(slot)) {}
 
         void handle(Args... args) {
             (receiver->*slot)(args...);
