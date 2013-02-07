@@ -63,12 +63,12 @@ class Mailbox: public Interconnect::Receiver {
         inline Mailbox(): money(0) {}
 
         inline void addMessage(int price, const std::string& message) {
-            this->money += price;
-            this->messages += message+'\n';
+            money += price;
+            messages += message+'\n';
         }
 
-        inline virtual void pay(int amount) {
-            this->money -= amount;
+        inline void pay(int amount) {
+            money -= amount;
         }
 
         int money;
@@ -289,7 +289,7 @@ void Test::emitterSubclass() {
     BetterPostman postman;
     Mailbox mailbox;
 
-    /* Just test that this doesn't spit any compiler errors */
+    /* Test that this doesn't spit any compiler errors */
     Emitter::connect(&postman, &BetterPostman::newRichTextMessage, &mailbox, &Mailbox::addMessage);
     Emitter::connect(&postman, &BetterPostman::newMessage, &mailbox, &Mailbox::addMessage);
 
@@ -317,7 +317,7 @@ void Test::receiverSubclass() {
     Postman postman;
     BlueMailbox mailbox;
 
-    /* Just test that this doesn't spit any compiler errors */
+    /* Test that this doesn't spit any compiler errors */
     Emitter::connect(&postman, &Postman::newMessage, &mailbox, &BlueMailbox::addMessage);
     Emitter::connect(&postman, &Postman::newMessage, &mailbox, &BlueMailbox::addBlueMessage);
 
@@ -328,7 +328,24 @@ void Test::receiverSubclass() {
 }
 
 void Test::virtualSlot() {
-    class TaxDodgingMailbox: public Mailbox {
+    class VirtualMailbox: public Interconnect::Receiver {
+        public:
+            inline VirtualMailbox(): money(0) {}
+
+            inline void addMessage(int price, const std::string& message) {
+                money += price;
+                messages += message+'\n';
+            }
+
+            inline virtual void pay(int amount) {
+                money -= amount;
+            }
+
+            int money;
+            std::string messages;
+    };
+
+    class TaxDodgingMailbox: public VirtualMailbox {
         public:
             void pay(int amount) override {
                 this->money -= amount/5;
@@ -336,10 +353,10 @@ void Test::virtualSlot() {
     };
 
     Postman postman;
-    Mailbox* mailbox = new TaxDodgingMailbox;
+    VirtualMailbox* mailbox = new TaxDodgingMailbox;
 
     /* It is important to connect to the original slot, not derived */
-    Emitter::connect(&postman, &Postman::paymentRequested, mailbox, &Mailbox::pay);
+    Emitter::connect(&postman, &Postman::paymentRequested, mailbox, &VirtualMailbox::pay);
 
     postman.paymentRequested(50);
     CORRADE_COMPARE(mailbox->money, -10);
