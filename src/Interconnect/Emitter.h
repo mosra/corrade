@@ -94,6 +94,149 @@ template<class ...Args> class MemberConnectionData: public AbstractConnectionDat
 
 Contains signals and manages connections between signals and slots. See
 @ref interconnect for introduction.
+
+@section Emitter-signals Implementing signals
+
+Signals are implemented as member functions with Signal as return type,
+argument count and types are not limited. The body consists of single
+emit() call, to which you pass pointer to the function and forward all
+arguments. Example signal implementations:
+@code
+class Postman: public Interconnect::Emitter {
+    public:
+        Signal messageDelivered(const std::string& message, int price = 0) {
+            return emit(&Postman::messageDelivered, message, price);
+        }
+
+        Signal paymentRequired(int amount) {
+            return emit(&Postman::paymentRequired, amount);
+        }
+};
+@endcode
+
+The implemented signal can be emitted simply by calling the function:
+@code
+Postman postman;
+postman.messageDelivered("hello");
+postman.paymentRequired(245);
+@endcode
+
+If the signal is not declared as public function, it cannot be connected or
+called from outside the class.
+
+@section Emitter-connections Connecting signals to slots
+
+Signals implemented on %Emitter subclasses can be connected to slots using
+various connect() functions. The argument count and types of slot function
+must be exactly the same as of the signal function. When a connection is
+established, returned Connection object can be used to remove or reestablish
+given connection using Connection::disconnect() or Connection::connect():
+@code
+Connection c = Emitter::connect(...);
+// ...
+c.disconnect();
+// ...
+c.connect();
+// ...
+@endcode
+
+You can also call disconnectSignal() or disconnectAllSignals() on emitter to
+remove the connections. All emitter connections are automatically removed
+when emitter object is destroyed.
+
+@attention It is possible to connect given signal to given slot more than
+    once, because there is no way to check whether the connection already
+    exists. As a result, after signal is emitted, the slot function will be
+    then called more than once.
+@attention In the slot you can add or remove connections, however you can't
+    delete the emitter object, as it would lead to undefined behavior.
+
+You can connect any signal, as long as the emitter object is of proper type:
+@code
+class Base: public Emitter {
+    public:
+        Slot baseSignal();
+};
+
+class Derived: public Base {
+    public:
+        Slot derivedSignal();
+};
+
+Base* a = new Derived;
+Derived* b = new Derived;
+Emitter::connect(a, &Base::baseSignal, ...);       // ok
+Emitter::connect(b, &Base::baseSignal, ...);       // ok
+Emitter::connect(a, &Derived::derivedSignal, ...); // error, `a` is not of Derived type
+Emitter::connect(b, &Derived::derivedSignal, ...); // ok
+@endcode
+
+There are a few slot types, each type has its particular use:
+
+@subsection Emitter-connections-member Member function slots
+
+When connecting to member function slot with connect(), @p receiver must be
+subclass of Receiver and @p slot must be non-constant member function with
+`void` as return type.
+
+In addition to the cases mentioned above, the connection is automatically
+removed also when receiver object is destroyed. You can also use
+Receiver::disconnectAllSlots() to disconnect the receiver from everything.
+
+@note It is perfectly safe to delete receiver object in its own slot.
+
+Example usage:
+@code
+class Mailbox: public Receiver {
+    public:
+        void addMessage(const std::string& message, int price);
+};
+
+Postman postman;
+Mailbox mailbox;
+Emitter::connect(&postman, &Postman::messageDelivered, &mailbox, &Mailbox::addMessage);
+@endcode
+
+You can connect to any member function, as long as %Receiver exists somewhere
+in given object type hierarchy:
+@code
+class Foo {
+    public:
+        Signal signal();
+};
+
+class Base: public Receiver {
+    public:
+        void baseSlot();
+};
+
+class Derived: public Base {
+    public:
+        void derivedSlot();
+};
+
+Foo foo;
+Base* a = new Derived;
+Derived* b = new Derived;
+
+Emitter::connect(&foo, &Foo::signal, a, &Base::baseSlot);       // ok
+Emitter::connect(&foo, &Foo::signal, b, &Base::baseSlot);       // ok
+Emitter::connect(&foo, &Foo::signal, a, &Derived::derivedSlot); // error, `a` is not of Derived type
+Emitter::connect(&foo, &Foo::signal, b, &Derived::derivedSlot); // ok
+@endcode
+
+It is also possible to connect to member function of class which itself isn't
+subclass of %Receiver, just add %Receiver with multiple inheritance.
+Convoluted example:
+@code
+class MyString: public std::string, public Receiver {};
+
+std::string a;
+MyString b;
+Emitter::connect(&foo, &Foo::signal, &a, &std::string::clear); // error, `a` is not of Receiver type
+Emitter::connect(&foo, &Foo::signal, &b, &std::string::clear); // ok
+@endcode
+
 @see Receiver, Connection
 @todo Allow move
 */
@@ -159,7 +302,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         }
 
         /**
-         * @brief Connect signal to slot
+         * @brief Connect signal to member function slot
          * @param emitter       %Emitter
          * @param signal        %Signal
          * @param receiver      %Receiver
@@ -167,48 +310,15 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          *
          * Connects given signal to compatible slot in receiver object.
          * @p emitter must be subclass of Emitter, @p signal must be
-         * implemented signal (see emit() for more information), @p receiver
-         * must be subclass of Receiver and @p slot must be non-constant
-         * member function with `void` as return type. The argument count and
-         * types must be exactly the same.
+         * implemented signal, @p receiver must be subclass of Receiver and
+         * @p slot must be non-constant member function with `void` as return
+         * type. The argument count and types must be exactly the same.
          *
-         * The connection is automatically removed when either emitter or
-         * receiver object is destroyed. You can use returned Connection
-         * object to remove this particular connection, call disconnectSignal()
-         * or disconnectAllSignals() to disconnect one signal or whole emitter
-         * from everything or Receiver::disconnectAllSlots() to disconnect the
-         * receiver from everything.
-         *
-         * Example usage:
-         * @code
-         * Postman postman;
-         * Mailbox mailbox;
-         * Emitter::connect(&postman, &Postman::messageDelivered, &mailbox, &Mailbox::addMessage);
-         * @endcode
-         *
-         * Connecting with ability to remove (and possibly reestablish) this
-         * particular connection using Connection::disconnect() or
-         * Connection::connect():
-         * @code
-         * Connection c = Emitter::connect(&postman, &Postman::messageDelivered, &mailbox, &Mailbox::addMessage);
-         * // ...
-         * c.disconnect();
-         * // ...
-         * c.connect();
-         * // ...
-         * @endcode
-         *
-         * @attention It is possible to connect given signal to given slot
-         *      more than once, because there is no way to check whether the
-         *      connection already exists. As a result, after signal is
-         *      emitted, the slot function will be then called more than once.
-         * @attention In the slot you can add or remove connenctions and also
-         *      delete receiver object, however you can't delete emitter
-         *      object, as it would lead to undefined behavior.
+         * See @ref Emitter-connections "class documentation" for more
+         * information about connections.
          *
          * @see hasSignalConnections(), Connection::isConnected(),
          *      signalConnectionCount()
-         *
          * @todo Connecting to signals
          * @todo Connecting to non-member functions and lambda functions
          */
@@ -260,34 +370,8 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * @param signal        %Signal
          * @param args          Arguments
          *
-         * %Signal function implementation -- emits signal with given
-         * arguments to all connected receivers. %Signal function must be
-         * member function with Signal as return type, argument count and
-         * types are not limited.
-         *
-         * Example signal implementations:
-         * @code
-         * class Postman: public Interconnect::Emitter {
-         *     public:
-         *         Signal messageDelivered(const std::string& message, int price = 0) {
-         *             return emit(&Postman::messageDelivered, message, price);
-         *         }
-         *
-         *         Signal paymentRequired(int amount) {
-         *             return emit(&Postman::paymentRequired, amount);
-         *         }
-         * };
-         * @endcode
-         *
-         * The implemented signal can be emitted simply by calling the
-         * function:
-         * @code
-         * Postman postman;
-         * postman.messageDelivered("hello");
-         * postman.paymentRequired(245);
-         * @endcode
-         *
-         * @todo Allow emitting slots only privately
+         * See @ref Emitter-signals "class documentation" for more information
+         * about implementing signals.
          */
         template<class Emitter, class ...Args> Signal emit(Signal(Emitter::*signal)(Args...), typename std::common_type<Args>::type... args) {
             connectionsChanged = false;
