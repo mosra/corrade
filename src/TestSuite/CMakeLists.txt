@@ -16,6 +16,7 @@ set(CorradeTestSuite_HEADERS
 
 add_library(CorradeTestSuite SHARED ${CorradeTestSuite_SRCS})
 set_target_properties(CorradeTestSuite PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
+target_link_libraries(CorradeTestSuite CorradeUtility)
 
 install(TARGETS CorradeTestSuite DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 install(FILES ${CorradeTestSuite_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/TestSuite)
