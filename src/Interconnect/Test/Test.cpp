@@ -41,6 +41,7 @@ class Test: public TestSuite::Tester {
         void emit();
         void emitterSubclass();
         void receiverSubclass();
+        void slotInReceiverBase();
         void virtualSlot();
 
         void changeConnectionsInSlot();
@@ -87,6 +88,7 @@ Test::Test() {
              &Test::emit,
              &Test::emitterSubclass,
              &Test::receiverSubclass,
+             &Test::slotInReceiverBase,
              &Test::virtualSlot,
              &Test::changeConnectionsInSlot,
              &Test::deleteReceiverInSlot);
@@ -325,6 +327,34 @@ void Test::receiverSubclass() {
     postman.newMessage(5, "hello");
     CORRADE_COMPARE(mailbox.messages, "Blue hello\nhello\n");
     CORRADE_COMPARE(mailbox.money, 10);
+}
+
+void Test::slotInReceiverBase() {
+    class VintageMailbox {
+        public:
+            inline VintageMailbox(): money(0) {}
+
+            void addMessage(int price, const std::string& message) {
+                money += price;
+                messages += message + '\n';
+            }
+
+            int money;
+            std::string messages;
+    };
+
+    class ModernMailbox: public VintageMailbox, public Interconnect::Receiver {};
+
+    Postman postman;
+    ModernMailbox mailbox;
+
+    /* Test that this doesn't spit any compiler errors */
+    Emitter::connect(&postman, &Postman::newMessage, &mailbox, &VintageMailbox::addMessage);
+
+    /* Just to be sure */
+    postman.newMessage(5, "hello");
+    CORRADE_COMPARE(mailbox.messages, "hello\n");
+    CORRADE_COMPARE(mailbox.money, 5);
 }
 
 void Test::virtualSlot() {
