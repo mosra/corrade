@@ -16,6 +16,7 @@ corrade_add_test(UtilityDebugTest DebugTest.cpp)
 corrade_add_test(UtilitySha1Test Sha1Test.cpp)
 corrade_add_test(UtilityStringTest StringTest.cpp)
 corrade_add_test(UtilityTranslatorTest TranslatorTest.cpp)
+corrade_add_test(UtilityUnicodeTest UnicodeTest.cpp)
 
 # Compiled-in resource test
 corrade_add_resource(ResourceTestData test

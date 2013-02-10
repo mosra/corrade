@@ -12,6 +12,7 @@ set(CorradeUtility_SRCS
     String.cpp
     Translator.cpp
     TypeTraits.cpp
+    Unicode.cpp
     utilities.cpp)
 
 set(CorradeUtility_HEADERS
@@ -29,6 +30,7 @@ set(CorradeUtility_HEADERS
     String.h
     Translator.h
     TypeTraits.h
+    Unicode.h
     utilities.h
 
     corradeUtilityVisibility.h)
