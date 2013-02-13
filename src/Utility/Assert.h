@@ -38,9 +38,9 @@ Usable for sanity checks on user input, as it prints explanational message on
 error.
 
 By default, if assertion fails, @p message is printed to error output and the
-application exits with value `-2`. If `CORRADE_GRACEFUL_ASSERT` is defined,
-the message is printed and the function returns with @p returnValue. If
-`CORRADE_NO_ASSERT` is defined, this macro does nothing. Example usage:
+application aborts. If `CORRADE_GRACEFUL_ASSERT` is defined, the message is
+printed and the function returns with @p returnValue. If `CORRADE_NO_ASSERT` is
+defined, this macro does nothing. Example usage:
 @code
 T operator[](std::size_t pos) const {
     CORRADE_ASSERT(pos < size(), "Index out of range", T());
@@ -90,7 +90,7 @@ CORRADE_ASSERT(pos < size(), "Cannot access element" << pos << "in array of size
     do {                                                                    \
         if(!(condition)) {                                                  \
             Corrade::Utility::Error() << message;                           \
-            std::exit(-2);                                                  \
+            std::abort();                                                   \
             return returnValue;                                             \
         }                                                                   \
     } while(0)
@@ -105,8 +105,8 @@ Unlike CORRADE_ASSERT() usable for sanity checks on internal state, as it
 prints what failed and where.
 
 By default, if assertion fails, failed condition, file and line is printed to
-error output and the application exits with value `-1`. If `CORRADE_NO_ASSERT`
-is defined, this macro does nothing. Example usage:
+error output and the application aborts. If `CORRADE_NO_ASSERT` is defined, this
+macro does nothing. Example usage:
 @code
 CORRADE_INTERNAL_ASSERT(!nullptr);
 @endcode
@@ -125,7 +125,7 @@ CORRADE_INTERNAL_ASSERT(!nullptr);
     do {                                                                    \
         if(!(condition)) {                                                  \
             Corrade::Utility::Error() << "Assertion" << #condition << "failed in" << __FILE__ << "on line" << __LINE__; \
-            std::exit(-1);                                                  \
+            std::abort();                                                   \
         }                                                                   \
     } while(0)
 #endif
@@ -152,7 +152,7 @@ CORRADE_INTERNAL_ASSERT_OUTPUT(initialize());
     do {                                                                    \
         if(!(call)) {                                                       \
             Corrade::Utility::Error() << "Assertion" << #call << "failed in" << __FILE__ << "on line" << __LINE__; \
-            std::exit(-1);                                                  \
+            std::abort();                                                   \
         }                                                                   \
     } while(0)
 #endif
