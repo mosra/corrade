@@ -138,7 +138,8 @@ template<class T> class Comparator {
 
         /** @brief Print error message, assuming the two values are inequal */
         void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
-            e << "Values" << actual << "and" << expected << "are not the same, actual" << actualValue << "but" << expectedValue << "expected.";
+            e << "Values" << actual << "and" << expected << "are not the same, actual is\n       "
+              << actualValue << "\n        but expected\n       " << expectedValue;
         }
 
     private:

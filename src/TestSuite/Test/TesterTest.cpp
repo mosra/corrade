@@ -185,7 +185,10 @@ void TesterTest::test() {
         "        Expression 5 != 5 failed.\n"
         "    OK: equal()\n"
         "  FAIL: nonEqual() at here.cpp on line 121 \n"
-        "        Values a and b are not the same, actual 5 but 3 expected.\n"
+        "        Values a and b are not the same, actual is\n"
+        "        5 \n"
+        "        but expected\n"
+        "        3\n"
         " XFAIL: expectFail() at here.cpp on line 127 \n"
         "        The world is not mad yet. 2 + 2 and 5 are not equal.\n"
         " XFAIL: expectFail() at here.cpp on line 128 \n"
@@ -203,6 +206,7 @@ void TesterTest::test() {
         "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
         "Finished TesterTest::Test with 6 errors out of 13 checks. 1 test cases didn't contain any checks!\n";
 
+    CORRADE_COMPARE(out.str().length(), expected.length());
     CORRADE_COMPARE(out.str(), expected);
 }
 
