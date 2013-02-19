@@ -17,5 +17,6 @@ corrade_add_test(PluginManagerPluginTest PluginTest.cpp LIBRARIES CorradePluginM
 if(WIN32)
     target_link_libraries(Snail CorradePluginManager)
     target_link_libraries(Dog CorradePluginManager)
+    target_link_libraries(Canary CorradePluginManager)
     target_link_libraries(Chihuahua CorradePluginManager Dog)
 endif()

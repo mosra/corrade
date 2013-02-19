@@ -3,4 +3,5 @@ corrade_add_plugin(HotDogWithSnail ${CMAKE_CURRENT_BINARY_DIR} HotDogWithSnail.c
 
 if(WIN32)
     target_link_libraries(HotDog CorradePluginManager Dog)
+    target_link_libraries(HotDogWithSnail CorradePluginManager HotDog)
 endif()
