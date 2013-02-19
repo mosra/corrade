@@ -14,6 +14,7 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
+#include <cstdlib>
 #include <sstream>
 
 #include "TestSuite/Tester.h"
