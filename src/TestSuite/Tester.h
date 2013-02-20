@@ -105,12 +105,12 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         #ifndef DOXYGEN_GENERATING_OUTPUT
         /* Compare two identical types without explicit type specification */
         template<class T> inline void compare(const std::string& actual, const T& actualValue, const std::string& expected, const T& expectedValue) {
-            compare<T, T, T>(actual, actualValue, expected, expectedValue);
+            compareAs<T, T, T>(actual, actualValue, expected, expectedValue);
         }
 
         /* Compare two different types without explicit type specification */
         template<class T, class U> inline void compare(const std::string& actual, const T& actualValue, const std::string& expected, const U& expectedValue) {
-            compare<typename std::common_type<T, U>::type, T, U>(actual, actualValue, expected, expectedValue);
+            compareAs<typename std::common_type<T, U>::type, T, U>(actual, actualValue, expected, expectedValue);
         }
 
         /* Compare two different types with explicit templated type
@@ -118,12 +118,12 @@ class CORRADE_TESTSUITE_EXPORT Tester {
            call only `CORRADE_COMPARE_AS(a, b, Compare::Containers)` without
            explicitly specifying the type, e.g.
            `CORRADE_COMPARE_AS(a, b, Compare::Containers<std::vector<int>>)` */
-        template<template<class> class T, class U, class V> inline void compare(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
-            compare<T<typename std::common_type<U, V>::type>, U, V>(actual, actualValue, expected, expectedValue);
+        template<template<class> class T, class U, class V> inline void compareAs(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
+            compareAs<T<typename std::common_type<U, V>::type>, U, V>(actual, actualValue, expected, expectedValue);
         }
 
         /* Compare two different types with explicit type specification */
-        template<class T, class U, class V> void compare(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
+        template<class T, class U, class V> void compareAs(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
             compareWith(Comparator<T>(), actual, actualValue, expected, expectedValue);
         }
 
@@ -255,7 +255,7 @@ for example of more involved comparisons.
 #define CORRADE_COMPARE_AS(actual, expected, Type)                          \
     do {                                                                    \
         _CORRADE_REGISTER_TEST_CASE();                                      \
-        Tester::compare<Type>(#actual, actual, #expected, expected);        \
+        Tester::compareAs<Type>(#actual, actual, #expected, expected);      \
     } while(false)
 
 /** @hideinitializer
