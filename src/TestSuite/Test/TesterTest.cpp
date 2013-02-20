@@ -149,13 +149,16 @@ class TesterTest: public Tester {
 
         void test();
         void emptyTest();
+
+        void compareAsOverload();
 };
 
 class EmptyTest: public Tester {};
 
 TesterTest::TesterTest() {
     addTests(&TesterTest::test,
-             &TesterTest::emptyTest);
+             &TesterTest::emptyTest,
+             &TesterTest::compareAsOverload);
 }
 
 void TesterTest::test() {
@@ -197,6 +200,26 @@ void TesterTest::test() {
 
     CORRADE_COMPARE(out.str().length(), expected.length());
     CORRADE_COMPARE(out.str(), expected);
+}
+
+void TesterTest::emptyTest() {
+    std::stringstream out;
+
+    EmptyTest t;
+    t.registerTest("here.cpp", "TesterTest::EmptyTest");
+    int result = t.exec(&out, &out);
+
+    CORRADE_VERIFY(result == 2);
+
+    CORRADE_COMPARE(out.str(), "In TesterTest::EmptyTest weren't found any test cases!\n");
+}
+
+void TesterTest::compareAsOverload() {
+    /* Just test that this compiles well */
+    float a = 3.0f;
+    double b = 3.0f;
+    CORRADE_COMPARE_AS(a, b, float);
+    CORRADE_COMPARE_AS(a, b, double);
 }
 
 }}}
