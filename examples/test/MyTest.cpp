@@ -14,11 +14,20 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "MyTest.h"
-
 #include <cmath>
+#include <TestSuite/Tester.h>
 
 namespace Corrade { namespace Examples {
+
+class MyTest: public Corrade::TestSuite::Tester {
+    public:
+        MyTest();
+
+        void commutativity();
+        void associativity();
+        void pi();
+        void sin();
+};
 
 MyTest::MyTest() {
     addTests(&MyTest::commutativity,

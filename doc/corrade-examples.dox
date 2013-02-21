@@ -8,9 +8,8 @@ namespace Corrade {
 
 @todoc Rename (merge) to page `examples` when doxygen treats it as regular page.
 
-@example interconnect/CMakeLists.txt
 @example interconnect/main.cpp
-@example test/MyTest.h
+@example interconnect/CMakeLists.txt
 @example test/MyTest.cpp
 @example test/CMakeLists.txt
 

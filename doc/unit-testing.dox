@@ -8,12 +8,11 @@ process code with meta compiler.
 
 First step for creating unit test is to subclass Tester class and add tester
 functions to it.
-@dontinclude test/MyTest.h
+@dontinclude test/MyTest.cpp
 @skip class MyTest
 @until };
 
 In constructor we register our test cases:
-@dontinclude test/MyTest.cpp
 @skip MyTest::MyTest
 @until }
 
@@ -67,9 +66,8 @@ produces output similar to this:
      XFAIL: pi() at examples/test/MyTest.cpp on line 47
             Need better approximation. pi and 3.14 are not equal.
         OK: pi()
-    Finished Corrade::Examples::MyTest with 1 errors.
+    Finished Corrade::Examples::MyTest with 1 errors out of 5 checks.
 
- - @ref test/MyTest.h
  - @ref test/MyTest.cpp
 
 */
