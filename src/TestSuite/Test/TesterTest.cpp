@@ -95,62 +95,62 @@ void Test::noChecks() {
 }
 
 void Test::trueExpression() {
-    CORRADE_VERIFY(true);
+    CORRADE_VERIFY(true); // #1
 }
 
 void Test::falseExpression() {
-    CORRADE_VERIFY(5 != 5);
+    CORRADE_VERIFY(5 != 5); // #2
 }
 
 void Test::equal() {
-    CORRADE_COMPARE(3, 3);
+    CORRADE_COMPARE(3, 3); // #3
 }
 
 void Test::nonEqual() {
     int a = 5;
     int b = 3;
-    CORRADE_COMPARE(a, b);
+    CORRADE_COMPARE(a, b); // #4
 }
 
 void Test::expectFail() {
     {
         CORRADE_EXPECT_FAIL("The world is not mad yet.");
-        CORRADE_COMPARE(2 + 2, 5);
-        CORRADE_VERIFY(false == true);
+        CORRADE_COMPARE(2 + 2, 5); // #5
+        CORRADE_VERIFY(false == true); // #6
     }
 
-    CORRADE_VERIFY(true);
+    CORRADE_VERIFY(true); // #7
 }
 
 void Test::unexpectedPassExpression() {
     CORRADE_EXPECT_FAIL("Not yet implemented.");
-    CORRADE_VERIFY(true == true);
+    CORRADE_VERIFY(true == true); // #8
 }
 
 void Test::unexpectedPassEqual() {
     CORRADE_EXPECT_FAIL("Cannot get it right.");
-    CORRADE_COMPARE(2 + 2, 4);
+    CORRADE_COMPARE(2 + 2, 4); // #9
 }
 
 void Test::compareAs() {
-    CORRADE_COMPARE_AS("kill!", "hello", StringLength);
+    CORRADE_COMPARE_AS("kill!", "hello", StringLength); // #10
 }
 
 void Test::compareAsFail() {
-    CORRADE_COMPARE_AS("meh", "hello", StringLength);
+    CORRADE_COMPARE_AS("meh", "hello", StringLength); // #11
 }
 
 void Test::compareWith() {
-    CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(10));
+    CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(10)); // #12
 }
 
 void Test::compareWithFail() {
-    CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(9));
+    CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(9)); // #13
 }
 
 void Test::skip() {
     CORRADE_SKIP("This testcase is skipped.");
-    CORRADE_VERIFY(false);
+    CORRADE_VERIFY(false); // (not called)
 }
 
 class TesterTest: public Tester {
@@ -208,7 +208,7 @@ void TesterTest::test() {
         "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
         "  SKIP: skip() at here.cpp on line 152 \n"
         "        This testcase is skipped.\n"
-        "Finished TesterTest::Test with 6 errors out of 14 checks. 1 test cases didn't contain any checks!\n";
+        "Finished TesterTest::Test with 6 errors out of 13 checks. 1 test cases didn't contain any checks!\n";
 
     CORRADE_COMPARE(out.str().length(), expected.length());
     CORRADE_COMPARE(out.str(), expected);

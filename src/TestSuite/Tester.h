@@ -129,6 +129,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
         /* Compare two different types with explicit comparator specification */
         template<class T, class U, class V> void compareWith(Comparator<T> comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
+            ++checkCount;
+
             /* If the comparison succeeded or the failure is expected, done */
             bool equal = comparator(actualValue, expectedValue);
             if(!expectedFailure) {

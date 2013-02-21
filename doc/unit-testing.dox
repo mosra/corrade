@@ -73,7 +73,7 @@ produces output similar to this:
         OK: pi()
       SKIP: bigEndian() at examples/test/MyTest.cpp on line 63
             No affordable big endian machines exist to test this properly.
-    Finished Corrade::Examples::MyTest with 1 errors out of 6 checks.
+    Finished Corrade::Examples::MyTest with 1 errors out of 5 checks.
 
  - @ref test/MyTest.cpp
 

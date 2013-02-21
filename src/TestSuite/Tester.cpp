@@ -76,6 +76,8 @@ int Tester::exec(std::ostream* logOutput, std::ostream* errorOutput) {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 void Tester::verify(const std::string& expression, bool expressionValue) {
+    ++checkCount;
+
     /* If the expression is true or the failure is expected, done */
     if(!expectedFailure) {
         if(expressionValue) return;
@@ -101,7 +103,6 @@ void Tester::skip(const std::string& message) {
 void Tester::registerTestCase(const std::string& name, int line) {
     if(testCaseName.empty()) testCaseName = name + "()";
     testCaseLine = line;
-    ++checkCount;
 }
 #endif
 
