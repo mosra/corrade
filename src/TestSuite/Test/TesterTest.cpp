@@ -66,7 +66,7 @@ class Test: public Tester {
 
         void compareAs();
         void compareAsFail();
-        void compareWth();
+        void compareWith();
         void compareWithFail();
 };
 
@@ -81,7 +81,7 @@ Test::Test() {
              &Test::unexpectedPassEqual,
              &Test::compareAs,
              &Test::compareAsFail,
-             &Test::compareWth,
+             &Test::compareWith,
              &Test::compareWithFail);
 }
 
@@ -135,7 +135,7 @@ void Test::compareAsFail() {
     CORRADE_COMPARE_AS("meh", "hello", StringLength);
 }
 
-void Test::compareWth() {
+void Test::compareWith() {
     CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(10));
 }
 
@@ -193,7 +193,7 @@ void TesterTest::test() {
         "    OK: compareAs()\n"
         "  FAIL: compareAsFail() at here.cpp on line 135 \n"
         "        Length of actual \"meh\" doesn't match length of expected \"hello\" with epsilon 0\n"
-        "    OK: compareWth()\n"
+        "    OK: compareWith()\n"
         "  FAIL: compareWithFail() at here.cpp on line 143 \n"
         "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
         "Finished TesterTest::Test with 6 errors out of 13 checks. 1 test cases didn't contain any checks!\n";
