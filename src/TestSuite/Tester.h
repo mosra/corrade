@@ -17,7 +17,7 @@
 */
 
 /** @file
- * @brief Class Corrade::TestSuite::Tester, macros CORRADE_TEST_MAIN(), CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS().
+ * @brief Class Corrade::TestSuite::Tester, macros CORRADE_TEST_MAIN(), CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS(), CORRADE_COMPARE_WITH(), CORRADE_SKIP().
  */
 
 #include <vector>
@@ -35,7 +35,7 @@ namespace Corrade { namespace TestSuite {
 See @ref unit-testing for introduction.
 
 @see CORRADE_TEST_MAIN(), CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS(),
-    CORRADE_COMPARE_WITH()
+    CORRADE_COMPARE_WITH(), CORRADE_SKIP()
 @todo Data-driven tests
 */
 class CORRADE_TESTSUITE_EXPORT Tester {
@@ -153,6 +153,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
             testName = name;
         }
 
+        void skip(const std::string& message);
+
     protected:
         class ExpectedFailure {
             public:
@@ -176,6 +178,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
     private:
         class Exception {};
+        class SkipException {};
 
         typedef void (Tester::*TestCase)();
 
@@ -299,6 +302,25 @@ If any of the following checks passes, an error will be printed to output.
 */
 #define CORRADE_EXPECT_FAIL(message)                                        \
     ExpectedFailure expectedFailure##__LINE__(this, message)
+
+/** @hideinitializer
+@brief Skip test case
+@param message Message which will be printed into output as indication of
+    skipped test
+
+Skips all following checks in given test case. Useful for e.g. indicating that
+given feature can't be tested on given platform:
+@code
+if(!bigEndian) {
+    CORRADE_SKIP("Big endian compatibility can't be tested on this system.");
+}
+@endcode
+*/
+#define CORRADE_SKIP(message)                                               \
+    do {                                                                    \
+        _CORRADE_REGISTER_TEST_CASE();                                      \
+        Tester::skip(message);                                              \
+    } while(false)
 
 }}
 

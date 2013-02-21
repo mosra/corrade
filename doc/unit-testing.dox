@@ -41,6 +41,11 @@ which expects all following checks until the end of the scope to fail:
 @skip MyTest::pi()
 @until }
 
+For things that can't be tested on given platform (or are disabled) you can use
+CORRADE_SKIP() macro to indicate that the particular feature is not tested:
+@skip MyTest::bigEndian()
+@until }
+
 @section unit-testing-compilation Compilation and running
 
 Lastly, we must not forget to create `main()` function using
@@ -58,15 +63,17 @@ corrade_add_test(mytest MyTest.cpp)
 The test can be run either manually or using `ctest`. When executed, it
 produces output similar to this:
 
-    Starting Corrade::Examples::MyTest with 4 test cases...
-      FAIL: commutativity() at examples/test/MyTest.cpp on line 32
+    Starting Corrade::Examples::MyTest with 5 test cases...
+      FAIL: commutativity() at examples/test/MyTest.cpp on line 43
             Expression 15/3 == 3/15 failed.
         OK: associativity()
         OK: sin()
-     XFAIL: pi() at examples/test/MyTest.cpp on line 47
+     XFAIL: pi() at examples/test/MyTest.cpp on line 58
             Need better approximation. pi and 3.14 are not equal.
         OK: pi()
-    Finished Corrade::Examples::MyTest with 1 errors out of 5 checks.
+      SKIP: bigEndian() at examples/test/MyTest.cpp on line 63
+            No affordable big endian machines exist to test this properly.
+    Finished Corrade::Examples::MyTest with 1 errors out of 6 checks.
 
  - @ref test/MyTest.cpp
 

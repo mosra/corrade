@@ -27,13 +27,15 @@ class MyTest: public Corrade::TestSuite::Tester {
         void associativity();
         void pi();
         void sin();
+        void bigEndian();
 };
 
 MyTest::MyTest() {
     addTests(&MyTest::commutativity,
              &MyTest::associativity,
              &MyTest::sin,
-             &MyTest::pi);
+             &MyTest::pi,
+             &MyTest::bigEndian);
 }
 
 void MyTest::commutativity() {
@@ -54,6 +56,11 @@ void MyTest::pi() {
     CORRADE_EXPECT_FAIL("Need better approximation.");
     double pi = 22/7.0;
     CORRADE_COMPARE(pi, 3.14);
+}
+
+void MyTest::bigEndian() {
+    if(!false)
+        CORRADE_SKIP("No affordable big endian machines exist to test this properly.");
 }
 
 }}

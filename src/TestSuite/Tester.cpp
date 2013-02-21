@@ -51,6 +51,8 @@ int Tester::exec(std::ostream* logOutput, std::ostream* errorOutput) {
         } catch(Exception e) {
             ++errorCount;
             continue;
+        } catch(SkipException e) {
+            continue;
         }
 
         /* No testing macros called, don't print function name to output */
@@ -88,6 +90,12 @@ void Tester::verify(const std::string& expression, bool expressionValue) {
     if(!expectedFailure) e << "failed.";
     else e << "was expected to fail.";
     throw Exception();
+}
+
+void Tester::skip(const std::string& message) {
+    Utility::Debug e(logOutput);
+    e << "  SKIP:" << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       " << message;
+    throw SkipException();
 }
 
 void Tester::registerTestCase(const std::string& name, int line) {
