@@ -15,6 +15,7 @@
 */
 
 #include "TestSuite/Tester.h"
+#include "TestSuite/Compare/Container.h"
 #include "Interconnect/Emitter.h"
 #include "Interconnect/Receiver.h"
 
@@ -65,7 +66,7 @@ class Mailbox: public Interconnect::Receiver {
 
         inline void addMessage(int price, const std::string& message) {
             money += price;
-            messages += message+'\n';
+            messages.push_back(message);
         }
 
         inline void pay(int amount) {
@@ -73,7 +74,7 @@ class Mailbox: public Interconnect::Receiver {
         }
 
         int money;
-        std::string messages;
+        std::vector<std::string> messages;
 };
 
 Test::Test() {
@@ -272,11 +273,11 @@ void Test::emit() {
     /* Verify signal handling */
     postman.newMessage(60, "hello");
     postman.paymentRequested(50);
-    CORRADE_COMPARE(mailbox1.messages, "hello\n");
+    CORRADE_COMPARE(mailbox1.messages, std::vector<std::string>{"hello"});
     CORRADE_COMPARE(mailbox1.money, 10);
-    CORRADE_COMPARE(mailbox2.messages, "hello\n");
+    CORRADE_COMPARE(mailbox2.messages, std::vector<std::string>{"hello"});
     CORRADE_COMPARE(mailbox2.money, 10);
-    CORRADE_COMPARE(mailbox3.messages, "");
+    CORRADE_COMPARE(mailbox3.messages, std::vector<std::string>());
     CORRADE_COMPARE(mailbox3.money, -50);
 }
 
@@ -298,7 +299,8 @@ void Test::emitterSubclass() {
     /* Just to be sure */
     postman.newMessage(5, "hello");
     postman.newRichTextMessage(10, "ahoy");
-    CORRADE_COMPARE(mailbox.messages, "hello\n***ahoy***\n");
+    CORRADE_COMPARE_AS(mailbox.messages, (std::vector<std::string>{"hello", "***ahoy***"}),
+                       TestSuite::Compare::SortedContainer);
     CORRADE_COMPARE(mailbox.money, 15);
 
     postman.disconnectSignal(&BetterPostman::newMessage);
@@ -312,7 +314,7 @@ void Test::receiverSubclass() {
         public:
             void addBlueMessage(int price, const std::string& message) {
                 money += price;
-                messages += "Blue "+message+'\n';
+                messages.push_back("Blue " + message);
             }
     };
 
@@ -325,7 +327,8 @@ void Test::receiverSubclass() {
 
     /* Just to be sure */
     postman.newMessage(5, "hello");
-    CORRADE_COMPARE(mailbox.messages, "Blue hello\nhello\n");
+    CORRADE_COMPARE_AS(mailbox.messages, (std::vector<std::string>{"Blue hello", "hello"}),
+                       TestSuite::Compare::SortedContainer);
     CORRADE_COMPARE(mailbox.money, 10);
 }
 
@@ -336,11 +339,11 @@ void Test::slotInReceiverBase() {
 
             void addMessage(int price, const std::string& message) {
                 money += price;
-                messages += message + '\n';
+                messages.push_back(message);
             }
 
             int money;
-            std::string messages;
+            std::vector<std::string> messages;
     };
 
     class ModernMailbox: public VintageMailbox, public Interconnect::Receiver {};
@@ -353,7 +356,7 @@ void Test::slotInReceiverBase() {
 
     /* Just to be sure */
     postman.newMessage(5, "hello");
-    CORRADE_COMPARE(mailbox.messages, "hello\n");
+    CORRADE_COMPARE(mailbox.messages, std::vector<std::string>{"hello"});
     CORRADE_COMPARE(mailbox.money, 5);
 }
 
@@ -364,7 +367,7 @@ void Test::virtualSlot() {
 
             inline void addMessage(int price, const std::string& message) {
                 money += price;
-                messages += message+'\n';
+                messages.push_back(message);
             }
 
             inline virtual void pay(int amount) {
@@ -372,7 +375,7 @@ void Test::virtualSlot() {
             }
 
             int money;
-            std::string messages;
+            std::vector<std::string> messages;
     };
 
     class TaxDodgingMailbox: public VirtualMailbox {
@@ -403,12 +406,12 @@ void Test::changeConnectionsInSlot() {
             inline PropagatingMailbox(Postman* postman, Mailbox* mailbox): postman(postman), mailbox(mailbox) {}
 
             inline void addMessage(int, const std::string& message) {
-                this->messages += message+'\n';
+                this->messages.push_back(message);
                 Emitter::connect(postman, &Postman::newMessage, mailbox, &Mailbox::addMessage);
                 Emitter::connect(postman, &Postman::paymentRequested, mailbox, &Mailbox::pay);
             }
 
-            std::string messages;
+            std::vector<std::string> messages;
 
         private:
             Postman* postman;
@@ -425,8 +428,8 @@ void Test::changeConnectionsInSlot() {
     /* Propagating mailbox connects the other mailbox, verify the proper slots
        are called proper times */
     postman.newMessage(19, "hello");
-    CORRADE_COMPARE(propagatingMailbox.messages, "hello\n");
-    CORRADE_COMPARE(mailbox.messages, "hello\n");
+    CORRADE_COMPARE(propagatingMailbox.messages, std::vector<std::string>{"hello"});
+    CORRADE_COMPARE(mailbox.messages, std::vector<std::string>{"hello"});
     CORRADE_COMPARE(mailbox.money, 19);
 }
 
@@ -450,8 +453,8 @@ void Test::deleteReceiverInSlot() {
     CORRADE_COMPARE(postman.signalConnectionCount(), 3);
     postman.newMessage(11, "hello");
     CORRADE_COMPARE(postman.signalConnectionCount(), 2);
-    CORRADE_COMPARE(mailbox2.messages, "hello\n");
-    CORRADE_COMPARE(mailbox3.messages, "hello\n");
+    CORRADE_COMPARE(mailbox2.messages, std::vector<std::string>{"hello"});
+    CORRADE_COMPARE(mailbox3.messages, std::vector<std::string>{"hello"});
 }
 
 }}}
