@@ -97,7 +97,9 @@ std::string Resource::compile(const std::string& name, const std::map<std::strin
     std::ostringstream count;
     count << files.size();
 
-    /* Return C++ file */
+    /* Return C++ file. The functions have forward declarations to avoid warning
+       about functions which don't have corresponding declarations (enabled by
+       -Wmissing-declarations in GCC) */
     return "/* Compiled resource file. DO NOT EDIT! */\n\n"
         "#include \"Utility/utilities.h\"\n"
         "#include \"Utility/Resource.h\"\n\n"
@@ -107,10 +109,12 @@ std::string Resource::compile(const std::string& name, const std::map<std::strin
         filenames + "\n};\n\n"
         "static const unsigned char resourceData[] = {\n" +
         data +      "\n};\n\n"
+        "int resourceInitializer_" + name + "();\n"
         "int resourceInitializer_" + name + "() {\n"
         "    Corrade::Utility::Resource::registerData(\"" + group + "\", " + count.str() + ", resourcePositions, resourceFilenames, resourceData);\n"
         "    return 1;\n"
         "} AUTOMATIC_INITIALIZER(resourceInitializer_" + name + ")\n\n"
+        "int resourceFinalizer_" + name + "();\n"
         "int resourceFinalizer_" + name + "() {\n"
         "    Corrade::Utility::Resource::unregisterData(\"" + group + "\", resourceData);\n"
         "    return 1;\n"
