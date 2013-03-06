@@ -17,6 +17,7 @@ compiled and managed.
 @tableofcontents
 
 @section plugin-management-interface Plugin interface
+
 %Plugin interface is class with well defined abstract public methods, which
 defines the way how to work with a particular plugin.
 
@@ -34,34 +35,12 @@ contain version identifier to make sure the plugin will not be loaded with
 incompatible interface version.
 
 So, there is an example interface class:
-@code
-// Filename: AbstractAnimal.h
-#ifndef Animals_AbstractAnimal_h
-#define Animals_AbstractAnimal_h
-
-
-namespace Animals {
-
-#include "PluginManager/Plugin.h"
-
-class AbstractAnimal: public Plugin {
-    PLUGIN_INTERFACE("cz.mosra.Animals.AbstractAnimal/1.0")
-
-    public:
-        AbstractAnimal(AbstractPluginManager* manager = 0, const std::string& plugin = std::string()):
-            Plugin(manager, plugin) {}
-
-        virtual std::string name() const = 0;
-        virtual int legCount() const = 0;
-        virtual bool hasTail() const = 0;
-};
-
-}
-
-#endif
-@endcode
+@dontinclude pluginmanager/AbstractAnimal.h
+@skip class AbstractAnimal
+@until };
 
 @section plugin-management-plugin Plugin definition
+
 Every plugin is represented by one class, which is derived from one plugin
 interface. The plugin class in then registered as static or dynamic plugin.
 Every plugin must also have its configuration file, which can describe plugin
@@ -74,32 +53,13 @@ application out-of-the-box. After declaring that plugin we register it with
 macro PLUGIN_REGISTER(). The first argument is plugin name (which will be
 used when instancing the plugin), second argument is name of the plugin class
 and third is name of used plugin interface.
-@code
-// Filename: Canary.cpp
-#include "AbstractAnimal.h"
+@dontinclude pluginmanager/Canary.cpp
+@skip class Canary
+@until };
+@skipline PLUGIN_REGISTER
 
-namespace Animals {
-
-class Canary: public AbstractAnimal {
-    public:
-        Canary(AbstractPluginManager* manager = 0, const std::string& plugin = std::string()):
-            AbstractAnimal(manager, plugin) {}
-
-        std::string name() const { return "Achoo"; }
-        int legCount() const { return 2; }
-        bool hasTail() const { return true; }
-};
-
-}
-
-PLUGIN_REGISTER(Canary, Animals::Canary,
-               "cz.mosra.Animals.AbstractAnimal/1.0")
-@endcode
-@code
-# Filename: Canary.conf
-[metadata]
-name=I'm allergic to canaries!
-@endcode
+Configuration file for Canary plugin:
+@include pluginmanager/Canary.conf
 
 Then we define one example dynamic plugin. Note that the macro for
 registering dynamic plugin is the same, the only difference will be in
@@ -107,52 +67,40 @@ registering dynamic plugin is the same, the only difference will be in
 time which plugins will be dynamic, which will be static, or, for example,
 which will be compiled directly into the library/application, so they can be
 used directly without plugin manager.
-@code
-// Filename: Dog.cpp
-#include "AbstractAnimal.h"
+@dontinclude pluginmanager/Dog.cpp
+@skip class Dog
+@until };
+@skipline PLUGIN_REGISTER
 
-namespace Animals {
+Configuration file for Dog plugin:
+@include pluginmanager/Dog.conf
 
-class Dog: public AbstractAnimal {
-    public:
-        inline Dog(AbstractPluginManager* manager = 0, const std::string& plugin = std::string()):
-            AbstractAnimal(manager, plugin) {}
-
-        std::string name() const { return "Doug"; }
-        int legCount() const { return 4; }
-        bool hasTail() const { return true; }
-};
-
-}
-
-PLUGIN_REGISTER(Dog, Animals::Dog,
-                "cz.mosra.Animals.AbstractAnimal/1.0")
-@endcode
-@code
-# Filename: Dog.conf
-[metadata]
-name=A simple dog plugin
-@endcode
+ - @ref pluginmanager/AbstractAnimal.h
+ - @ref pluginmanager/Canary.cpp
+ - @ref pluginmanager/Canary.conf
+ - @ref pluginmanager/Dog.cpp
+ - @ref pluginmanager/Dog.conf
 
 @section plugin-management-compilation Plugin compilation
+
 `CorradeMacros.cmake` provides CMake macros for compiling both static and
 dynamic plugins:
-@code
-# Filename: CMakeLists.txt
-corrade_add_plugin(Dog ${CMAKE_CURRENT_BINARY_DIR} Dog.conf Dog.cpp)
-corrade_add_static_plugin(StaticPlugins Canary Canary.conf Canary.cpp)
-@endcode
-`corrade_add_plugin` macro takes plugin name as first argument, second
+@dontinclude pluginmanager/CMakeLists.txt
+@skip corrade_add_plugin
+@until corrade_add_static_plugin
+
+`corrade_add_plugin()` macro takes plugin name as first argument, second
 argument is dir where to install the plugin files, third argument is name of
 configuration file and after that comes one or more source files. We use the
 build directory for storing the plugins to avoid the need for installation.
 
-`corrade_add_static_plugin` macro compiles every static plugin as single
+`corrade_add_static_plugin()` macro compiles every static plugin as single
 static library. To make linking easier for you, first argument is variable
 where are stored names of all static plugins' libraries. The variable will be
 then used for linking the final executable, as you can see below.
 
 @section plugin-management-management Plugin management
+
 Now it's time to initialize PluginManager class and make use of the plugins.
 PluginManager is templated class and that means it will load and make
 available only plugins with given interface specified as template.
@@ -164,58 +112,17 @@ which takes plugin name as argument.
 This example application will take first argument passed on commandline and
 if a plugin is found and loaded successfully, displays brief info about a
 given animal.
-@code
-// Filename: main.cpp
-#include <iostream>
+@dontinclude pluginmanager/main.cpp
+@skip int main
+@until }
+@until }
+@until }
 
-#include "PluginManager/PluginManager.h"
-#include "Canary.cpp"
-
-using namespace std;
-using namespace Corrade::PluginManager;
-
-int main(int argc, char** argv) {
-    // Import static plugin using the same name as in Canary.cpp
-    PLUGIN_IMPORT(CanaryPlugin);
-
-    if(argc != 2) {
-        cout << "Usage: " << argv[0] << " animal_plugin_name" << endl;
-        return 1;
-    }
-
-    // Initialize plugin manager with given directory
-    PluginManager<Animals::AbstractAnimal> manager(".");
-
-    // Try to load a plugin
-    if(!(manager.load(argv[1]) & (AbstractPluginManager::LoadOk|AbstractPluginManager::IsStatic))) {
-        cerr << "The requested plugin cannot be loaded." << endl;
-        return 2;
-    }
-
-    cout << "Using plugin '" << manager.metadata(argv[1])->name() << "'..."
-         << endl << endl;
-
-    // Instance of an animal
-    Animals::AbstractAnimal* animal = manager.instance(argv[1]);
-
-    cout << "Name:      " << animal->name() << endl
-         << "Leg count: " << animal->legCount() << endl
-         << "Has tail:  " << animal->hasTail() ? "yes" : "no" << endl;
-
-    // Destruct the animal, so the plugin can be safely unloaded
-    delete animal;
-
-    return 0;
-}
-@endcode
-Compile the application with simple CMake `add_executable` command and don't
+Compile the application with simple CMake `add_executable()` command and don't
 forget to link in all the static plugins compiled above:
-@code
-# Filename: CMakeLists.txt (continued from above)
-
-add_executable(PluginTest main.cpp)
-target_link_libraries(PluginTest ${StaticPlugins})
-@endcode
+@dontinclude pluginmanager/CMakeLists.txt
+@skip add_executable
+@until target_link_libraries
 
 After successfull compilation we can run the application with plugin name
 as argument:

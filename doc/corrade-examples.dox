@@ -10,6 +10,13 @@ namespace Corrade {
 
 @example interconnect/main.cpp
 @example interconnect/CMakeLists.txt
+@example pluginmanager/AbstractAnimal.h
+@example pluginmanager/Canary.cpp
+@example pluginmanager/Canary.conf
+@example pluginmanager/Dog.cpp
+@example pluginmanager/Dog.conf
+@example pluginmanager/main.cpp
+@example pluginmanager/CMakeLists.txt
 @example test/MyTest.cpp
 @example test/CMakeLists.txt
 
