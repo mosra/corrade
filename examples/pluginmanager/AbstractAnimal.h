@@ -21,7 +21,7 @@
 namespace Corrade { namespace Examples {
 
 class AbstractAnimal: public PluginManager::Plugin {
-    PLUGIN_INTERFACE("cz.mosra.Animals.AbstractAnimal/1.0")
+    PLUGIN_INTERFACE("cz.mosra.Corrade.Examples.AbstractAnimal/1.0")
 
     public:
         AbstractAnimal(PluginManager::AbstractPluginManager* manager = nullptr, const std::string& plugin = std::string()):

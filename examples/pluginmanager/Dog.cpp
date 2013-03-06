@@ -30,4 +30,4 @@ class Dog: public AbstractAnimal {
 
 }}
 
-PLUGIN_REGISTER(Dog, Corrade::Examples::Dog, "cz.mosra.Animals.AbstractAnimal/1.0")
+PLUGIN_REGISTER(Dog, Corrade::Examples::Dog, "cz.mosra.Corrade.Examples.AbstractAnimal/1.0")
