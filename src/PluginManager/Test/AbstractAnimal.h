@@ -24,7 +24,7 @@ class AbstractAnimal: public Plugin {
     PLUGIN_INTERFACE("cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")
 
     public:
-        inline AbstractAnimal(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
+        inline AbstractAnimal(AbstractPluginManager* manager = 0, const std::string& plugin = std::string()):
             Plugin(manager, plugin) {}
 
         virtual std::string name() = 0;

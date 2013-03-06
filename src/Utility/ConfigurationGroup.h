@@ -65,8 +65,8 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @param name      Name of the group. If empty, returns all subgroups.
          * @return Vector of groups. If no group is found, returns empty vector.
          */
-        std::vector<ConfigurationGroup*> groups(const std::string& name = "");
-        std::vector<const ConfigurationGroup*> groups(const std::string& name = "") const; /**< @overload */
+        std::vector<ConfigurationGroup*> groups(const std::string& name = std::string());
+        std::vector<const ConfigurationGroup*> groups(const std::string& name = std::string()) const; /**< @overload */
 
         /**
          * @brief Count of groups with given name
@@ -77,7 +77,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * More efficient than calling `groups(name).size()`.
          * See also Configuration::UniqueGroups and Configuration::UniqueNames.
          */
-        inline unsigned int groupCount(const std::string& name = "") const {
+        inline unsigned int groupCount(const std::string& name = std::string()) const {
             if(name.empty()) return _groups.size();
             return groups(name).size();
         }
@@ -90,7 +90,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * More efficient than calling `group(name) != 0`.
          * @todo split out to hasSubgroups()?
          */
-        inline bool groupExists(const std::string& name = "") const {
+        inline bool groupExists(const std::string& name = std::string()) const {
             if(name.empty()) return !_groups.empty();
             return group(name) != nullptr;
         }

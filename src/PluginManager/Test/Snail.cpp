@@ -21,7 +21,7 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class Snail: public AbstractAnimal {
     public:
-        inline Snail(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
+        inline Snail(AbstractPluginManager* manager = 0, const std::string& plugin = std::string()):
             AbstractAnimal(manager, plugin) {}
 
         std::string name() { return "Hmlllghh"; }

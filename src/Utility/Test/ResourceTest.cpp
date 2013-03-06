@@ -92,7 +92,7 @@ void ResourceTest::getInexistent() {
         CORRADE_COMPARE(out.str(), "Resource: group 'inexistentGroup' was not found\n");
     }
 
-    out.str("");
+    out.str({});
 
     {
         Resource r("test");

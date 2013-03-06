@@ -21,7 +21,7 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class Deletable: public AbstractDeletable {
     public:
-        inline Deletable(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
+        inline Deletable(AbstractPluginManager* manager = 0, const std::string& plugin = std::string()):
             AbstractDeletable(manager, plugin) {}
 
         ~Deletable() { *var = 0xDEADBEEF; }

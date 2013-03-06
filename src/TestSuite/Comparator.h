@@ -93,7 +93,7 @@ namespace Corrade { namespace TestSuite { // the namespace is important
 
 template<> class Comparator<FileContents> {
     public:
-        Comparator(const std::string& pathPrefix = "");
+        Comparator(const std::string& pathPrefix = std::string());
         bool operator()(const std::string& actual, const std::string& expected);
         void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const;
 
@@ -104,7 +104,7 @@ template<> class Comparator<FileContents> {
 
 class FileContents {
     public:
-        inline FileContents(const std::string& pathPrefix = ""): c(pathPrefix) {}
+        inline FileContents(const std::string& pathPrefix = std::string()): c(pathPrefix) {}
 
         inline Comparator<FileContents>& comparator() {
             return c;

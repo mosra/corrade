@@ -37,7 +37,7 @@ std::string Directory::path(const std::string& filename) {
     std::size_t pos = filename.find_last_of('/');
 
     /* Filename doesn't contain any slash (no path), return empty string */
-    if(pos == std::string::npos) return "";
+    if(pos == std::string::npos) return {};
 
     /* Return everything to last slash */
     return filename.substr(0, pos);
@@ -111,14 +111,14 @@ bool Directory::fileExists(const std::string& filename) {
 std::string Directory::home() {
     #ifndef _WIN32
     char* h = getenv("HOME");
-    if(!h) return "";
+    if(!h) return {};
     #else
     /** @bug Doesn't work at all */
     TCHAR h[MAX_PATH];
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wold-style-cast"
     if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, h)))
-        return "";
+        return {};
     #pragma GCC diagnostic pop
     #endif
 
@@ -128,17 +128,17 @@ std::string Directory::home() {
 std::string Directory::configurationDir(const std::string& applicationName, bool createIfNotExists) {
     #ifndef _WIN32
     std::string h = home();
-    if(h.empty()) return "";
+    if(h.empty()) return {};
     std::string dir = join(h, '.' + String::lowercase(applicationName));
     #else
     TCHAR path[MAX_PATH];
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wold-style-cast"
     if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path)))
-        return "";
+        return {};
     #pragma GCC diagnostic pop
     std::string appdata = path;
-    if(appdata.empty()) return "";
+    if(appdata.empty()) return {};
     std::string dir = join(appdata, applicationName);
     #endif
 

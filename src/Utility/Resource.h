@@ -122,7 +122,7 @@ class CORRADE_UTILITY_EXPORT Resource {
 
         std::string group;
 
-        CORRADE_UTILITY_LOCAL std::string hexcode(const std::string& data, const std::string& comment = "") const;
+        CORRADE_UTILITY_LOCAL std::string hexcode(const std::string& data, const std::string& comment = std::string()) const;
 
         /** @todo Move to utilities.h? */
         template<class T> static std::string numberToString(const T& number);

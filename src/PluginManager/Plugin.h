@@ -44,7 +44,7 @@ class CORRADE_PLUGINMANAGER_EXPORT Plugin {
          *
          * Registers this plugin instance in plugin manager.
          */
-        explicit Plugin(AbstractPluginManager* manager = nullptr, const std::string& plugin = "");
+        explicit Plugin(AbstractPluginManager* manager = nullptr, const std::string& plugin = std::string());
 
         /**
          * @brief Destructor

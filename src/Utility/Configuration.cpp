@@ -74,7 +74,7 @@ void Configuration::parse(std::istream& file) {
         }
 
         /* Parse file */
-        parse(file, this, "");
+        parse(file, this, {});
 
         /* Everything went fine */
         flags |= InternalFlag::IsValid;
@@ -109,7 +109,7 @@ std::string Configuration::parse(std::istream& file, ConfigurationGroup* group, 
                 throw std::string("Empty group name!");
 
             /* Next group is subgroup of current group, recursive call */
-            while(!nextGroup.empty() && (fullPath == "" || nextGroup.substr(0, fullPath.size()) == fullPath)) {
+            while(!nextGroup.empty() && (fullPath.empty() || nextGroup.substr(0, fullPath.size()) == fullPath)) {
                 ConfigurationGroup::Group g;
                 g.name = nextGroup.substr(fullPath.size());
                 g.group = new ConfigurationGroup(configuration);
@@ -179,11 +179,11 @@ std::string Configuration::parse(std::istream& file, ConfigurationGroup* group, 
     }
 
     /* Remove last empty line, if present (will be written automatically) */
-    if(group->items.size() != 0 && group->items[group->items.size()-1].key == "" && group->items[group->items.size()-1].value == "")
+    if(group->items.size() != 0 && group->items[group->items.size()-1].key.empty() && group->items[group->items.size()-1].value.empty())
         group->items.pop_back();
 
     /* This was the last group */
-    return "";
+    return {};
 }
 
 bool Configuration::save() {
@@ -211,7 +211,7 @@ bool Configuration::save() {
     /** @todo Backup file */
 
     /* Recursively save all groups */
-    save(file, eol, this, "");
+    save(file, eol, this, {});
 
     file.close();
 

@@ -48,7 +48,7 @@ class AbstractAnimal: public Plugin {
     PLUGIN_INTERFACE("cz.mosra.Animals.AbstractAnimal/1.0")
 
     public:
-        AbstractAnimal(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
+        AbstractAnimal(AbstractPluginManager* manager = 0, const std::string& plugin = std::string()):
             Plugin(manager, plugin) {}
 
         virtual std::string name() const = 0;
@@ -82,7 +82,7 @@ namespace Animals {
 
 class Canary: public AbstractAnimal {
     public:
-        Canary(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
+        Canary(AbstractPluginManager* manager = 0, const std::string& plugin = std::string()):
             AbstractAnimal(manager, plugin) {}
 
         std::string name() const { return "Achoo"; }
@@ -115,7 +115,7 @@ namespace Animals {
 
 class Dog: public AbstractAnimal {
     public:
-        inline Dog(AbstractPluginManager* manager = 0, const std::string& plugin = ""):
+        inline Dog(AbstractPluginManager* manager = 0, const std::string& plugin = std::string()):
             AbstractAnimal(manager, plugin) {}
 
         std::string name() const { return "Doug"; }

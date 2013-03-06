@@ -153,7 +153,7 @@ class CORRADE_UTILITY_EXPORT Translator {
          *      setPrimary(const std::string&).
          * @param _fallback     Fallback language file
          */
-        inline explicit Translator(const std::string& _primary, const std::string& _fallback = ""): primaryDynamicGroup(nullptr), primaryFile(nullptr), fallbackFile(nullptr), primary(nullptr), fallback(nullptr) {
+        inline explicit Translator(const std::string& _primary, const std::string& _fallback = std::string()): primaryDynamicGroup(nullptr), primaryFile(nullptr), fallbackFile(nullptr), primary(nullptr), fallback(nullptr) {
             setFallback(_fallback);
             setPrimary(_primary);
 

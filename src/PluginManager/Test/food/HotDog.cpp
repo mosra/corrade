@@ -21,7 +21,7 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class HotDog: public AbstractFood {
     public:
-        HotDog(AbstractPluginManager* manager = nullptr, const std::string& plugin = ""): AbstractFood(manager, plugin) {}
+        HotDog(AbstractPluginManager* manager = nullptr, const std::string& plugin = std::string()): AbstractFood(manager, plugin) {}
 
         bool isTasty()
             { return dog.hasTail() ? false : true; }

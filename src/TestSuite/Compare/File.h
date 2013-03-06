@@ -33,7 +33,7 @@ namespace Compare {
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::File> {
     public:
-        inline Comparator(const std::string& pathPrefix = ""): actualState(State::ReadError), expectedState(State::ReadError), pathPrefix(pathPrefix) {}
+        inline Comparator(const std::string& pathPrefix = std::string()): actualState(State::ReadError), expectedState(State::ReadError), pathPrefix(pathPrefix) {}
 
         bool operator()(const std::string& actualFilename, const std::string& expectedFilename);
 
@@ -79,7 +79,7 @@ class File {
          *
          * See class documentation for more information.
          */
-        File(const std::string& pathPrefix = ""): c(pathPrefix) {}
+        File(const std::string& pathPrefix = std::string()): c(pathPrefix) {}
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
         inline Comparator<Compare::File> comparator() { return c; }
