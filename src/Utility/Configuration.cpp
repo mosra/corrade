@@ -131,7 +131,7 @@ std::string Configuration::parse(std::istream& file, ConfigurationGroup* group, 
             return nextGroup;
 
         /* Empty line */
-        } else if(buffer.size() == 0) {
+        } else if(buffer.empty()) {
             if(flags & (InternalFlag::SkipComments|InternalFlag::ReadOnly)) continue;
 
             group->items.push_back(ConfigurationGroup::Item());
@@ -156,7 +156,7 @@ std::string Configuration::parse(std::istream& file, ConfigurationGroup* group, 
 
             /* Remove quotes, if present */
             /** @todo Check `"` characters better */
-            if(item.value.size() != 0 && item.value[0] == '"') {
+            if(!item.value.empty() && item.value[0] == '"') {
                 if(item.value.size() < 2 || item.value[item.value.size()-1] != '"')
                     throw std::string("Missing closing quotes in value!");
 
@@ -179,7 +179,7 @@ std::string Configuration::parse(std::istream& file, ConfigurationGroup* group, 
     }
 
     /* Remove last empty line, if present (will be written automatically) */
-    if(group->items.size() != 0 && group->items[group->items.size()-1].key.empty() && group->items[group->items.size()-1].value.empty())
+    if(!group->items.empty() && group->items.back().key.empty() && group->items.back().value.empty())
         group->items.pop_back();
 
     /* This was the last group */

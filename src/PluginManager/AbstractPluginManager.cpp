@@ -434,7 +434,7 @@ void AbstractPluginManager::unregisterInstance(const std::string& plugin, Plugin
 
     _instances.erase(pos);
 
-    if(_instances.size() == 0) instances.erase(plugin);
+    if(_instances.empty()) instances.erase(plugin);
 }
 
 bool AbstractPluginManager::reloadPluginMetadata(std::map<std::string, PluginObject*>::iterator it) {

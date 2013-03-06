@@ -33,7 +33,7 @@ const unsigned int Sha1::constants[4] = { 0x5A827999,
 
 Sha1& Sha1::operator<<(const std::string& data) {
     /* Process leftovers */
-    if(_buffer.size() != 0) {
+    if(!_buffer.empty()) {
         /* Not enough large, try it next time */
         if(data.size()+ _buffer.size() < 64) {
             _buffer.append(data);
