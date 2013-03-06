@@ -146,7 +146,7 @@ std::string Configuration::parse(std::istream& file, ConfigurationGroup* group, 
 
         /* Key/value pair */
         } else {
-            std::size_t splitter = buffer.find_first_of('=');
+            const std::size_t splitter = buffer.find_first_of('=');
             if(splitter == std::string::npos)
                 throw std::string("Key/value pair without '=' character!");
 
