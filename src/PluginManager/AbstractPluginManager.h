@@ -46,8 +46,6 @@ class Plugin;
 class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
     friend class Plugin;
 
-    DISABLE_COPY(AbstractPluginManager)
-
     public:
         /** @brief Plugin instancer function */
         typedef void* (*Instancer)(AbstractPluginManager*, const std::string&);
@@ -154,12 +152,18 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
             reloadPluginDirectory();
         }
 
+        AbstractPluginManager(const AbstractPluginManager&) = delete;
+        AbstractPluginManager(AbstractPluginManager&&) = delete;
+
         /**
          * @brief Destructor
          *
          * Destroys all plugin instances and unload all plugins.
          */
         virtual ~AbstractPluginManager();
+
+        AbstractPluginManager& operator=(const AbstractPluginManager&) = delete;
+        AbstractPluginManager& operator=(AbstractPluginManager&&) = delete;
 
         /** @brief %Plugin directory */
         inline std::string pluginDirectory() const { return _pluginDirectory; }

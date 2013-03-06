@@ -120,8 +120,6 @@ Example file:
 class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
     friend class ConfigurationGroup;
 
-    DISABLE_COPY(Configuration)
-
     public:
         /**
          * @brief Flag for opening configuration file
@@ -226,6 +224,9 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          */
         explicit Configuration(std::istream& file, Flags flags = Flags());
 
+        Configuration(const Configuration&) = delete;
+        Configuration(Configuration&&) = delete;
+
         /**
          * @brief Destructor
          *
@@ -233,6 +234,9 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * the file. See also save().
          */
         inline ~Configuration() { if(flags & InternalFlag::Changed) save(); }
+
+        Configuration& operator=(const Configuration&) = delete;
+        Configuration& operator=(Configuration&&) = delete;
 
         /** @brief Filename */
         inline std::string filename() const { return _filename; }

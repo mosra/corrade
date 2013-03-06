@@ -72,17 +72,6 @@ CORRADE_UTILITY_EXPORT void sleep(std::size_t ms);
 /** @{ @name Macros */
 
 /**
- * @brief Disable copying of given class
- * @param class             Class name
- *
- * Makes copy constructor and assignment operator private, so the class cannot
- * be copied. Should be placed at the beginning of class definition
- */
-#define DISABLE_COPY(class) \
-    class(const class&); \
-    class& operator=(const class&);
-
-/**
  * @brief Declare automatic initializer
  * @param function Initializer function name of type int(*)().
  *
