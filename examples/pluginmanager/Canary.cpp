@@ -20,7 +20,7 @@ namespace Corrade { namespace Examples {
 
 class Canary: public AbstractAnimal {
     public:
-        Canary(PluginManager::AbstractPluginManager* manager = 0, const std::string& plugin = std::string()):
+        Canary(PluginManager::AbstractPluginManager* manager = nullptr, const std::string& plugin = std::string()):
             AbstractAnimal(manager, plugin) {}
 
         std::string name() const { return "Achoo"; }
