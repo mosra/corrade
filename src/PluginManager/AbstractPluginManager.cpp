@@ -133,19 +133,17 @@ void AbstractPluginManager::reloadPluginDirectory() {
         } else ++it;
     }
 
-    /* Foreach all files in plugin directory */
+    /* Find plugin files in the directory */
     static const std::size_t suffixSize = std::strlen(PLUGIN_FILENAME_SUFFIX);
     Directory d(_pluginDirectory, Directory::SkipDirectories|Directory::SkipDotAndDotDot);
-    for(Directory::const_iterator i = d.begin(); i != d.end(); ++i) {
-        /* Search for module filename suffix in current file */
-        const std::size_t end = (*i).find(PLUGIN_FILENAME_SUFFIX);
-
+    for(const std::string& filename: d) {
         /* File doesn't have module suffix, continue to next */
-        if(end == std::string::npos || end + suffixSize != i->size())
+        const std::size_t end = filename.length()-suffixSize;
+        if(filename.substr(end) != PLUGIN_FILENAME_SUFFIX)
             continue;
 
         /* Dig plugin name from filename */
-        const std::string name = (*i).substr(0, end);
+        const std::string name = filename.substr(0, end);
 
         /* Skip the plugin if it is among loaded */
         if(plugins()->find(name) != plugins()->end()) continue;
