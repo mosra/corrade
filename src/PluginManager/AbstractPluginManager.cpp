@@ -81,8 +81,8 @@ void AbstractPluginManager::importStaticPlugin(const std::string& plugin, int _v
 }
 #endif
 
-AbstractPluginManager::AbstractPluginManager(const std::string& pluginDirectory) {
-    setPluginDirectory(pluginDirectory);
+AbstractPluginManager::AbstractPluginManager(std::string pluginDirectory) {
+    setPluginDirectory(std::move(pluginDirectory));
 }
 
 AbstractPluginManager::~AbstractPluginManager() {
@@ -118,8 +118,8 @@ std::string AbstractPluginManager::pluginDirectory() const {
     return _pluginDirectory;
 }
 
-void AbstractPluginManager::setPluginDirectory(const std::string& directory) {
-    _pluginDirectory = directory;
+void AbstractPluginManager::setPluginDirectory(std::string directory) {
+    _pluginDirectory = std::move(directory);
 
     /* Remove all unloaded plugins from the container */
     auto it = plugins()->cbegin();
@@ -353,7 +353,7 @@ LoadState AbstractPluginManager::unload(const std::string& plugin) {
     return pluginObject.loadState = LoadState::NotLoaded;
 }
 
-void AbstractPluginManager::registerInstance(const std::string& plugin, Plugin* instance, const Configuration** configuration, const PluginMetadata** metadata) {
+void AbstractPluginManager::registerInstance(std::string plugin, Plugin* instance, const Configuration** configuration, const PluginMetadata** metadata) {
     auto foundPlugin = plugins()->find(plugin);
 
     /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
@@ -363,7 +363,7 @@ void AbstractPluginManager::registerInstance(const std::string& plugin, Plugin* 
     auto foundInstance = instances.find(plugin);
 
     if(foundInstance == instances.end())
-        foundInstance = instances.insert(std::make_pair(plugin, std::vector<Plugin*>())).first;
+        foundInstance = instances.insert({std::move(plugin), {}}).first;
 
     foundInstance->second.push_back(instance);
 
@@ -390,13 +390,13 @@ void AbstractPluginManager::unregisterInstance(const std::string& plugin, Plugin
     if(_instances.empty()) instances.erase(plugin);
 }
 
-void AbstractPluginManager::addUsedBy(const std::string& plugin, const std::string& usedBy) {
+void AbstractPluginManager::addUsedBy(const std::string& plugin, std::string usedBy) {
     auto foundPlugin = plugins()->find(plugin);
 
     /* Given plugin doesn't exist, nothing to do */
     if(foundPlugin == plugins()->end()) return;
 
-    foundPlugin->second->metadata._usedBy.push_back(usedBy);
+    foundPlugin->second->metadata._usedBy.push_back(std::move(usedBy));
 }
 
 void AbstractPluginManager::removeUsedBy(const std::string& plugin, const std::string& usedBy) {

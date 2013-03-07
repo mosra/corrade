@@ -177,7 +177,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          *      with the same name as another static plugin are skipped.
          * @see pluginList()
          */
-        explicit AbstractPluginManager(const std::string& pluginDirectory);
+        explicit AbstractPluginManager(std::string pluginDirectory);
 
         AbstractPluginManager(const AbstractPluginManager&) = delete;
         AbstractPluginManager(AbstractPluginManager&&) = delete;
@@ -201,7 +201,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          * Keeps loaded plugins untouched, removes unloaded plugins which are
          * not existing anymore and adds newly found plugins.
          */
-        void setPluginDirectory(const std::string& directory);
+        void setPluginDirectory(std::string directory);
 
         /**
          * @brief Reload plugin directory
@@ -305,7 +305,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
 
         /* Because the plugin manager must be noticed about adding the plugin to
            "used by" list, it must be done through this function. */
-        virtual void addUsedBy(const std::string& plugin, const std::string& usedBy);
+        virtual void addUsedBy(const std::string& plugin, std::string usedBy);
 
         /* Because the plugin manager must be noticed about removing the plugin
            from "used by" list, it must be done through this function. */
@@ -331,7 +331,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
 
         std::map<std::string, std::vector<Plugin*> > instances;
 
-        CORRADE_PLUGINMANAGER_LOCAL void registerInstance(const std::string& plugin, Plugin* instance, const Utility::Configuration** configuration, const PluginMetadata** metadata);
+        CORRADE_PLUGINMANAGER_LOCAL void registerInstance(std::string plugin, Plugin* instance, const Utility::Configuration** configuration, const PluginMetadata** metadata);
         CORRADE_PLUGINMANAGER_LOCAL void unregisterInstance(const std::string& plugin, Plugin* instance);
 };
 
