@@ -148,24 +148,24 @@ void AbstractPluginManager::reloadPluginDirectory() {
         plugins()->erase(*it);
 
     /* Foreach all files in plugin directory */
-    std::size_t suffixSize = std::string(PLUGIN_FILENAME_SUFFIX).size();
+    static const std::size_t suffixSize = std::strlen(PLUGIN_FILENAME_SUFFIX);
     Directory d(_pluginDirectory, Directory::SkipDirectories|Directory::SkipDotAndDotDot);
     for(Directory::const_iterator i = d.begin(); i != d.end(); ++i) {
         /* Search for module filename suffix in current file */
-        std::size_t end = (*i).find(PLUGIN_FILENAME_SUFFIX);
+        const std::size_t end = (*i).find(PLUGIN_FILENAME_SUFFIX);
 
         /* File doesn't have module suffix, continue to next */
         if(end == std::string::npos || end + suffixSize != i->size())
             continue;
 
         /* Dig plugin name from filename */
-        std::string name = (*i).substr(0, end);
+        const std::string name = (*i).substr(0, end);
 
         /* Skip the plugin if it is among loaded */
         if(plugins()->find(name) != plugins()->end()) continue;
 
         /* Insert plugin to list */
-        plugins()->insert(std::make_pair(name, new PluginObject(Directory::join(_pluginDirectory, name + ".conf"), this)));
+        plugins()->insert({name, new PluginObject(Directory::join(_pluginDirectory, name + ".conf"), this)});
     }
 }
 
@@ -248,8 +248,7 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
     #endif
     if(!handle) {
         Error() << "PluginManager: cannot open plugin file"
-                << '"' + filename + "\":"
-                << dlerror();
+                << '"' + filename + "\":" << dlerror();
         pluginObject.loadState = LoadState::LoadFailed;
         return pluginObject.loadState;
     }
