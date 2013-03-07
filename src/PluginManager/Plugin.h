@@ -140,10 +140,8 @@ No plugin-related preprocessor directive is defined.
 See @ref plugin-management for more information about plugin compilation.
 
 @attention This macro should be called outside of any namespace. If you are
-running into linker errors with `pluginInitializer_`, this could be the
-problem.
-@todo Get rid of AUTOMATIC_INITIALIZER() -- PLUGIN_REGISTER() should be
-only in *.cpp
+    running into linker errors with `pluginInitializer_`, this could be the
+    problem.
 */
 #ifdef CORRADE_STATIC_PLUGIN
 #define PLUGIN_REGISTER(name, className, interface)                         \
@@ -151,7 +149,7 @@ only in *.cpp
         { return new className(manager, plugin); }                          \
     int pluginInitializer_##name() {                                        \
         Corrade::PluginManager::AbstractPluginManager::importStaticPlugin(#name, PLUGIN_VERSION, interface, pluginInstancer_##name); return 1; \
-    } AUTOMATIC_INITIALIZER(pluginInitializer_##name)
+    }
 #else
 #ifdef CORRADE_DYNAMIC_PLUGIN
 #define PLUGIN_REGISTER(name, className, interface)                         \

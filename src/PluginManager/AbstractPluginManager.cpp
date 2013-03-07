@@ -53,8 +53,7 @@ std::map<std::string, AbstractPluginManager::PluginObject*>* AbstractPluginManag
             std::istringstream metadata(r.get(it->plugin + ".conf"));
 
             /* Insert plugin to list */
-            if(!_plugins->insert(std::make_pair(it->plugin, new PluginObject(metadata, it->interface, it->instancer))).second)
-                Warning() << "PluginManager: static plugin" << '\'' + it->plugin + '\'' << "is already imported!";
+            CORRADE_INTERNAL_ASSERT_OUTPUT(_plugins->insert(std::make_pair(it->plugin, new PluginObject(metadata, it->interface, it->instancer))).second);
         }
 
         /* Delete the array to mark them as processed */
