@@ -189,9 +189,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          *      with the same name as another static plugin are skipped.
          * @see PluginManager::nameList()
          */
-        inline explicit AbstractPluginManager(const std::string& pluginDirectory): _pluginDirectory(pluginDirectory) {
-            reloadPluginDirectory();
-        }
+        explicit AbstractPluginManager(const std::string& pluginDirectory);
 
         AbstractPluginManager(const AbstractPluginManager&) = delete;
         AbstractPluginManager(AbstractPluginManager&&) = delete;
@@ -207,7 +205,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
         AbstractPluginManager& operator=(AbstractPluginManager&&) = delete;
 
         /** @brief %Plugin directory */
-        inline std::string pluginDirectory() const { return _pluginDirectory; }
+        std::string pluginDirectory() const;
 
         /**
          * @brief Set another plugin directory
@@ -215,10 +213,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          *
          * @see reloadPluginDirectory()
          */
-        inline void setPluginDirectory(const std::string& directory) {
-            _pluginDirectory = directory;
-            reloadPluginDirectory();
-        }
+        void setPluginDirectory(const std::string& directory);
 
         /**
          * @brief Reload plugin directory
@@ -350,24 +345,11 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
             HMODULE module;
             #endif
 
-            /**
-             * @brief Constructor (dynamic plugins)
-             * @param _metadata     %Plugin metadata filename
-             * @param _manager      Associated plugin manager
-             */
-            inline PluginObject(const std::string& _metadata, AbstractPluginManager* _manager):
-                configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(_manager), instancer(nullptr), module(nullptr) {
-                    loadState = configuration.isValid() ? LoadState::NotLoaded : LoadState::WrongMetadataFile;
-                }
+            /* Constructor for dynamic plugins */
+            explicit PluginObject(const std::string& _metadata, AbstractPluginManager* _manager);
 
-            /**
-             * @brief Constructor (static plugins)
-             * @param _metadata     %Plugin metadata istream
-             * @param _interface    Interface string
-             * @param _instancer    Instancer function
-             */
-            inline PluginObject(std::istream& _metadata, std::string _interface, Instancer _instancer):
-                loadState(LoadState::Static), interface(_interface), configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(nullptr), instancer(_instancer), module(nullptr) {}
+            /* Constructor for static plugins */
+            explicit PluginObject(std::istream& _metadata, std::string _interface, Instancer _instancer);
         };
 
         /** @brief Directory where to search for dynamic plugins */

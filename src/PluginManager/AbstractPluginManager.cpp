@@ -84,6 +84,10 @@ void AbstractPluginManager::importStaticPlugin(const std::string& plugin, int _v
     staticPlugins()->push_back(o);
 }
 
+AbstractPluginManager::AbstractPluginManager(const std::string& pluginDirectory): _pluginDirectory(pluginDirectory) {
+    reloadPluginDirectory();
+}
+
 AbstractPluginManager::~AbstractPluginManager() {
     /* Destroying all plugin instances. Every instance removes itself from
        instance array on destruction, so going carefully backwards and
@@ -115,6 +119,15 @@ AbstractPluginManager::~AbstractPluginManager() {
         delete (*it)->second;
         plugins()->erase(*it);
     }
+}
+
+std::string AbstractPluginManager::pluginDirectory() const {
+    return _pluginDirectory;
+}
+
+void AbstractPluginManager::setPluginDirectory(const std::string& directory) {
+    _pluginDirectory = directory;
+    reloadPluginDirectory();
 }
 
 void AbstractPluginManager::reloadPluginDirectory() {
@@ -475,6 +488,12 @@ void AbstractPluginManager::removeUsedBy(const std::string& plugin, const std::s
         }
     }
 }
+
+AbstractPluginManager::PluginObject::PluginObject(const std::string& _metadata, AbstractPluginManager* _manager): configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(_manager), instancer(nullptr), module(nullptr) {
+    loadState = configuration.isValid() ? LoadState::NotLoaded : LoadState::WrongMetadataFile;
+}
+
+AbstractPluginManager::PluginObject::PluginObject(std::istream& _metadata, std::string _interface, Instancer _instancer): loadState(LoadState::Static), interface(_interface), configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(nullptr), instancer(_instancer), module(nullptr) {}
 
 } namespace Utility {
 

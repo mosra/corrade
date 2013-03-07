@@ -60,7 +60,7 @@ template<class T, class BasePluginManager = AbstractPluginManager> class PluginM
          * Only plugins with the same plugin interface string can be used
          * in this plugin manager.
          */
-        std::string pluginInterface() const { return T::pluginInterface(); }
+        std::string pluginInterface() const override { return T::pluginInterface(); }
 
         /**
          * @brief %Plugin class instance
