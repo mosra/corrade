@@ -249,8 +249,7 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
     if(!handle) {
         Error() << "PluginManager: cannot open plugin file"
                 << '"' + filename + "\":" << dlerror();
-        pluginObject.loadState = LoadState::LoadFailed;
-        return pluginObject.loadState;
+        return LoadState::LoadFailed;
     }
 
     /* Check plugin version */
@@ -261,14 +260,12 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
     if(_version == nullptr) {
         Error() << "PluginManager: cannot get version of plugin" << '\'' + plugin + "':" << dlerror();
         dlclose(handle);
-        pluginObject.loadState = LoadState::LoadFailed;
-        return pluginObject.loadState;
+        return LoadState::LoadFailed;
     }
     if(_version() != Version) {
         Error() << "PluginManager: wrong plugin version, expected" << Version << "but got" << _version;
         dlclose(handle);
-        pluginObject.loadState = LoadState::WrongPluginVersion;
-        return pluginObject.loadState;
+        return LoadState::WrongPluginVersion;
     }
 
     /* Check interface string */
@@ -279,14 +276,12 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
     if(interface == nullptr) {
         Error() << "PluginManager: cannot get interface string of plugin" << '\'' + plugin + "':" << dlerror();
         dlclose(handle);
-        pluginObject.loadState = LoadState::LoadFailed;
-        return pluginObject.loadState;
+        return LoadState::LoadFailed;
     }
     if(interface() != pluginInterface()) {
         Error() << "PluginManager: wrong plugin interface, expected" << '\'' + pluginInterface() + "but got '" + interface() + "'";
         dlclose(handle);
-        pluginObject.loadState = LoadState::WrongInterfaceVersion;
-        return pluginObject.loadState;
+        return LoadState::WrongInterfaceVersion;
     }
 
     /* Load plugin instancer */
@@ -297,8 +292,7 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
     if(instancer == nullptr) {
         Error() << "PluginManager: cannot get instancer of plugin" << '\'' + plugin + "':" << dlerror();
         dlclose(handle);
-        pluginObject.loadState = LoadState::LoadFailed;
-        return pluginObject.loadState;
+        return LoadState::LoadFailed;
     }
 
     /* Everything is okay, add this plugin to usedBy list of each dependency */
@@ -328,7 +322,7 @@ LoadState AbstractPluginManager::unload(const std::string& plugin) {
     PluginObject& pluginObject = *foundPlugin->second;
 
     /* Only unload loaded plugin */
-    if(pluginObject.loadState & (LoadState::Loaded|LoadState::UnloadFailed)) {
+    if(pluginObject.loadState == LoadState::Loaded) {
         /* Plugin is used by another plugin, don't unload */
         if(!pluginObject.metadata.usedBy().empty()) return LoadState::Required;
 
@@ -373,8 +367,8 @@ LoadState AbstractPluginManager::unload(const std::string& plugin) {
         if(!FreeLibrary(plugin.module)) {
         #endif
             Error() << "PluginManager: cannot unload plugin" << '\'' + plugin + "':" << dlerror();
-            pluginObject.loadState = LoadState::UnloadFailed;
-            return pluginObject.loadState;
+            pluginObject.loadState = LoadState::NotLoaded;
+            return LoadState::UnloadFailed;
         }
 
         pluginObject.loadState = LoadState::NotLoaded;

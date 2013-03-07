@@ -221,6 +221,7 @@ void PluginTest::usedByZombies() {
        usedBy list. */
 
     CORRADE_COMPARE(foodManager->load("HotDogWithSnail"), LoadState::UnresolvedDependency);
+    CORRADE_COMPARE(foodManager->loadState("HotDogWithSnail"), LoadState::NotLoaded);
     CORRADE_VERIFY(manager->metadata("Dog")->usedBy().empty());
 
     /* Cleanup after me... */
