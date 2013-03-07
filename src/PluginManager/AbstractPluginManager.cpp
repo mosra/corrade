@@ -30,6 +30,7 @@
 #endif
 
 #include "Plugin.h"
+#include "Utility/Assert.h"
 #include "Utility/Directory.h"
 #include "Utility/Configuration.h"
 
@@ -72,17 +73,12 @@ std::vector<AbstractPluginManager::StaticPluginObject>*& AbstractPluginManager::
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 void AbstractPluginManager::importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, Instancer instancer) {
-    if(_version != Version) {
-        Error() << "PluginManager: wrong version of static plugin" << '\'' + plugin + '\'';
-        return;
-    }
-    if(!staticPlugins()) {
-        Error() << "PluginManager: too late to import static plugin" << '\'' + plugin + '\'';
-        return;
-    }
+    CORRADE_ASSERT(_version == Version,
+        "PluginManager: wrong version of static plugin" << plugin + ", got" << _version << "but expected" << Version, );
+    CORRADE_ASSERT(staticPlugins(),
+        "PluginManager: too late to import static plugin" << plugin, );
 
-    StaticPluginObject o = {plugin, interface, instancer};
-    staticPlugins()->push_back(o);
+    staticPlugins()->push_back({plugin, interface, instancer});
 }
 #endif
 
