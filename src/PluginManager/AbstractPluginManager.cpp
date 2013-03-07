@@ -87,15 +87,6 @@ AbstractPluginManager::AbstractPluginManager(const std::string& pluginDirectory)
 }
 
 AbstractPluginManager::~AbstractPluginManager() {
-    /* Destroying all plugin instances. Every instance removes itself from
-       instance array on destruction, so going carefully backwards and
-       reloading iterator for every plugin name */
-    std::map<std::string, std::vector<Plugin*> >::const_iterator it;
-    while((it = instances.begin()) != instances.end()) {
-        for(int i = it->second.size()-1; i >= 0; --i)
-            delete it->second[i];
-    }
-
     /* Unload all plugins associated with this plugin manager */
     std::vector<std::map<std::string, PluginObject*>::iterator> removed;
     for(auto it = plugins()->begin(); it != plugins()->end(); ++it) {
@@ -103,10 +94,15 @@ AbstractPluginManager::~AbstractPluginManager() {
         /* Plugin doesn't belong to this manager */
         if(it->second->manager != this) continue;
 
-        /* Unload the plugin and schedule it for deletion, if it is not static.
-           Otherwise just disconnect this manager from the plugin, so another
-           manager can take over it in the future. */
-        if(unload(it->first) == LoadState::Static)
+        /* Unload the plugin */
+        LoadState loadState = unload(it->first);
+        CORRADE_ASSERT(loadState & (LoadState::Static|LoadState::NotLoaded|LoadState::WrongMetadataFile),
+            "PluginManager: cannot unload plugin" << it->first << "on manager destruction:" << loadState, );
+
+        /* Schedule it for deletion, if it is not static, otherwise just
+           disconnect this manager from the plugin, so another manager can take
+           over it in the future. */
+        if(loadState == LoadState::Static)
             it->second->manager = nullptr;
         else
             removed.push_back(it);
@@ -334,7 +330,6 @@ LoadState AbstractPluginManager::unload(const std::string& plugin) {
     /* Remove this plugin from "used by" column of dependencies */
     for(auto it = pluginObject.metadata.depends().cbegin(); it != pluginObject.metadata.depends().cend(); ++it) {
         auto mit = plugins()->find(*it);
-        /** @bug FIXME: use plugin hierarchy for destruction */
 
         if(mit != plugins()->end()) {
             /* If the plugin is not static with no associated manager, use
