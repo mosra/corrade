@@ -70,6 +70,7 @@ std::vector<AbstractPluginManager::StaticPluginObject>*& AbstractPluginManager::
     return _staticPlugins;
 }
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 void AbstractPluginManager::importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, Instancer instancer) {
     if(_version != version) {
         Error() << "PluginManager: wrong version of static plugin" << '\'' + plugin + '\'';
@@ -83,6 +84,7 @@ void AbstractPluginManager::importStaticPlugin(const std::string& plugin, int _v
     StaticPluginObject o = {plugin, interface, instancer};
     staticPlugins()->push_back(o);
 }
+#endif
 
 AbstractPluginManager::AbstractPluginManager(const std::string& pluginDirectory): _pluginDirectory(pluginDirectory) {
     reloadPluginDirectory();

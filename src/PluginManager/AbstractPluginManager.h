@@ -156,30 +156,18 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
     friend class Plugin;
 
     public:
-        /** @brief Plugin instancer function */
-        typedef void* (*Instancer)(AbstractPluginManager*, const std::string&);
-
         /** @brief %Plugin version */
         static const int version;
 
-        /**
-         * @brief Register static plugin
-         * @param plugin            %Plugin (name defined with
-         *      PLUGIN_REGISTER())
-         * @param _version          %Plugin version (must be the same as
-         *      AbstractPluginManager::version)
-         * @param interface         %Plugin interface string
-         * @param instancer         %Plugin instancer function
-         *
-         * Used internally by PLUGIN_IMPORT() macro. There is absolutely no
-         * need to use this directly.
-         */
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        typedef void* (*Instancer)(AbstractPluginManager*, const std::string&);
         static void importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, Instancer instancer);
+        #endif
 
         /**
          * @brief Constructor
-         * @param pluginDirectory   Directory where plugins will be searched,
-         *      with tailing slash. No recursive processing is done.
+         * @param pluginDirectory   Directory where plugins will be searched. No
+         *      recursive processing is done.
          *
          * First goes through list of static plugins and finds ones that use
          * the same interface as this PluginManager instance. Then gets list of
@@ -187,7 +175,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          * @note Dependencies of static plugins are skipped, as static plugins
          *      should have all dependencies present. Also, dynamic plugins
          *      with the same name as another static plugin are skipped.
-         * @see PluginManager::nameList()
+         * @see pluginList()
          */
         explicit AbstractPluginManager(const std::string& pluginDirectory);
 
@@ -209,9 +197,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
 
         /**
          * @brief Set another plugin directory
-         * @param directory     %Plugin directory
          *
-         * @see reloadPluginDirectory()
+         * Calls reloadPluginDirectory().
          */
         void setPluginDirectory(const std::string& directory);
 
@@ -220,7 +207,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          *
          * Keeps loaded plugins untouched, removes unloaded plugins which are
          * not existing anymore and adds newly found plugins.
-         *
          * @see reload()
          */
         virtual void reloadPluginDirectory();
@@ -230,8 +216,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
 
         /**
          * @brief %Plugin metadata
-         * @param plugin            %Plugin
-         * @return Pointer to plugin metadata
+         *
+         * Returns pointer to plugin metadata or `nullptr`, if given plugin is
+         * not found.
          */
         const PluginMetadata* metadata(const std::string& plugin) const;
 
@@ -302,43 +289,19 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
     #else
     protected:
     #endif
-
-        /** @brief %Plugin object */
         struct PluginObject {
-            LoadState loadState;                /**< @brief Load state */
-
-            /**
-             * @brief %Plugin interface
-             *
-             * Non-static plugins have this field empty.
-             */
-            std::string interface;
-
-            /**
-             * @brief %Plugin configuration
-             *
-             * Associated configuration file.
-             */
+            LoadState loadState;
+            std::string interface; /**< @todo Not needed for dynamic plugins */
             const Utility::Configuration configuration;
+            PluginMetadata metadata;
 
-            PluginMetadata metadata;            /**< @brief %Plugin metadata */
-
-            /**
-             * @brief Associated plugin manager
-             *
-             * If set to zero, the plugin has not any associated plugin manager
-             * and cannot be loaded.
-             */
+            /* If set to nullptr, the plugin has not any associated plugin
+               manager and cannot be loaded. */
             AbstractPluginManager* manager;
 
-            /** @brief %Plugin instancer function */
             Instancer instancer;
 
-            /**
-             * @brief %Plugin module handler
-             *
-             * Only for dynamic plugins
-             */
+            /** @todo Not needed for static plugins */
             #ifndef _WIN32
             void* module;
             #else
@@ -352,21 +315,14 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
             explicit PluginObject(std::istream& _metadata, std::string _interface, Instancer _instancer);
         };
 
-        /** @brief Directory where to search for dynamic plugins */
         std::string _pluginDirectory;
 
-        /** @brief %Plugin interface used by the plugin manager */
+        /* Defined in PluginManager */
         virtual std::string pluginInterface() const = 0;
 
-        /**
-         * @brief Plugins
-         *
-         * Global storage of static, unloaded and loaded plugins.
-         *
-         * @note Development note: The map is accessible via function, not
-         * directly, because we need to fill it with data from staticPlugins()
-         * before first use.
-         */
+        /* Global storage of static, unloaded and loaded plugins. The map is
+           accessible via function, not directly, because we need to fill it
+           with data from staticPlugins() before first use. */
         static std::map<std::string, PluginObject*>* plugins();
 
         /**
@@ -386,55 +342,30 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          */
         virtual bool reloadPluginMetadata(std::map<std::string, PluginObject*>::iterator it);
 
-        /**
-         * @brief Add plugin to usedBy list
-         * @param plugin    %Plugin which is used
-         * @param usedBy    Which plugin uses it
-         *
-         * Because the plugin manager must be noticed about adding the plugin
-         * to "used by" list, it must be done through this function.
-         */
+        /* Because the plugin manager must be noticed about adding the plugin to
+           "used by" list, it must be done through this function. */
         virtual void addUsedBy(const std::string& plugin, const std::string& usedBy);
 
-        /**
-         * @brief Remove plugin from usedBy list
-         * @param plugin    %Plugin which was used
-         * @param usedBy    Which plugin used it
-         *
-         * Because the plugin manager must be noticed about removing the plugin
-         * from "used by" list, it must be done through this function.
-         */
+        /* Because the plugin manager must be noticed about removing the plugin
+           from "used by" list, it must be done through this function. */
         virtual void removeUsedBy(const std::string& plugin, const std::string& usedBy);
 
     private:
-        /**
-         * @brief Static plugin object
-         *
-         * See staticPlugins() for more information.
-         */
-        struct CORRADE_PLUGINMANAGER_LOCAL StaticPluginObject {
-            std::string plugin;      /**< @brief %Plugin name */
-            std::string interface;   /**< @brief %Plugin interface */
+        /* Temporary storage of all information needed to import static plugins.
+           They are imported to plugins() map on first call to plugins(),
+           because at that time it is safe to assume that all static resources
+           (plugin configuration files) are already registered. After that, the
+           storage is deleted and set to `nullptr` to indicate that static
+           plugins have been already processed.
 
-            /** @brief %Plugin instancer function */
+           The vector is accessible via function, not directly, because we don't
+           know initialization order of static members and thus the vector could
+           be uninitalized when accessed from PLUGIN_REGISTER(). */
+        struct CORRADE_PLUGINMANAGER_LOCAL StaticPluginObject {
+            std::string plugin;
+            std::string interface;
             Instancer instancer;
         };
-
-        /**
-         * @brief Static plugins
-         *
-         * Temporary storage of all information needed to import static
-         * plugins. They are imported to plugins() map on first call to
-         * plugins(), because at that time it is safe to assume that all
-         * static resources (plugin configuration files) are already
-         * registered. After that, the storage is deleted and set to nullptr
-         * to indicate that static plugins have been already processed.
-         *
-         * @note Development note: The vector is accessible via function, not
-         * directly, because we don't know initialization order of static
-         * members and thus the vector could be uninitalized when accessed
-         * from PLUGIN_REGISTER().
-         */
         CORRADE_PLUGINMANAGER_LOCAL static std::vector<StaticPluginObject>*& staticPlugins();
 
         std::map<std::string, std::vector<Plugin*> > instances;
@@ -443,10 +374,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
         CORRADE_PLUGINMANAGER_LOCAL void unregisterInstance(const std::string& plugin, Plugin* instance);
 };
 
-/**
+/** @hideinitializer
 @brief Import static plugin
 @param name      Static plugin name (defined with PLUGIN_REGISTER())
-@hideinitializer
 
 If static plugins are compiled into dynamic library or directly into the
 executable, they should be automatically loaded at startup thanks to
