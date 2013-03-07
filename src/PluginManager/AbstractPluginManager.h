@@ -157,7 +157,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
 
     public:
         /** @brief %Plugin version */
-        static const int version;
+        static const int Version;
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
         typedef void* (*Instancer)(AbstractPluginManager*, const std::string&);

@@ -39,10 +39,10 @@ using namespace Corrade::Utility;
 
 namespace Corrade { namespace PluginManager {
 
-const int AbstractPluginManager::version = PLUGIN_VERSION;
+const int AbstractPluginManager::Version = PLUGIN_VERSION;
 
 std::map<std::string, AbstractPluginManager::PluginObject*>* AbstractPluginManager::plugins() {
-    static std::map<std::string, PluginObject*>* _plugins = new std::map<std::string, PluginObject*>();
+    static std::map<std::string, PluginObject*>* const _plugins = new std::map<std::string, PluginObject*>();
 
     /* If there are unprocessed static plugins for this manager, add them */
     if(staticPlugins()) {
@@ -72,7 +72,7 @@ std::vector<AbstractPluginManager::StaticPluginObject>*& AbstractPluginManager::
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 void AbstractPluginManager::importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, Instancer instancer) {
-    if(_version != version) {
+    if(_version != Version) {
         Error() << "PluginManager: wrong version of static plugin" << '\'' + plugin + '\'';
         return;
     }
@@ -265,8 +265,8 @@ LoadState AbstractPluginManager::load(const std::string& _plugin) {
         plugin.loadState = LoadState::LoadFailed;
         return plugin.loadState;
     }
-    if(_version() != version) {
-        Error() << "PluginManager: wrong plugin version, expected" << _version() << "got" << version;
+    if(_version() != Version) {
+        Error() << "PluginManager: wrong plugin version, expected" << Version << "but got" << _version;
         dlclose(handle);
         plugin.loadState = LoadState::WrongPluginVersion;
         return plugin.loadState;
