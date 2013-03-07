@@ -309,60 +309,60 @@ LoadState AbstractPluginManager::unload(const std::string& plugin) {
 
     PluginObject& pluginObject = *foundPlugin->second;
 
-    /* Only unload loaded plugin */
-    if(pluginObject.loadState == LoadState::Loaded) {
-        /* Plugin is used by another plugin, don't unload */
-        if(!pluginObject.metadata.usedBy().empty()) return LoadState::Required;
+    /* Plugin is not ready to unload, nothing to do */
+    if(pluginObject.loadState != LoadState::Loaded)
+        return pluginObject.loadState;
 
-        /* Plugin has active instances */
-        auto foundInstance = instances.find(plugin);
-        if(foundInstance != instances.end()) {
-            /* Check if all instances can be safely deleted */
-            for(auto it = foundInstance->second.cbegin(); it != foundInstance->second.cend(); ++it)
-                if(!(*it)->canBeDeleted())
-                    return LoadState::Used;
+    /* Plugin is used by another plugin, don't unload */
+    if(!pluginObject.metadata.usedBy().empty())
+        return LoadState::Required;
 
-            /* If they can be, delete them. They remove itself from instances
-               list on destruction, thus going backwards */
-            for(std::size_t i = foundInstance->second.size(); i != 0; --i)
-                delete foundInstance->second[i-1];
-        }
+    /* Plugin has active instances */
+    auto foundInstance = instances.find(plugin);
+    if(foundInstance != instances.end()) {
+        /* Check if all instances can be safely deleted */
+        for(auto it = foundInstance->second.cbegin(); it != foundInstance->second.cend(); ++it)
+            if(!(*it)->canBeDeleted())
+                return LoadState::Used;
 
-        /* Remove this plugin from "used by" column of dependencies */
-        for(auto it = pluginObject.metadata.depends().cbegin(); it != pluginObject.metadata.depends().cend(); ++it) {
-            auto mit = plugins()->find(*it);
-            /** @bug FIXME: use plugin hierarchy for destruction */
+        /* If they can be, delete them. They remove itself from instances
+           list on destruction, thus going backwards */
+        for(std::size_t i = foundInstance->second.size(); i != 0; --i)
+            delete foundInstance->second[i-1];
+    }
 
-            if(mit != plugins()->end()) {
-                /* If the plugin is not static with no associated manager, use
-                   its manager for removing this plugin */
-                if(mit->second->manager)
-                    mit->second->manager->removeUsedBy(mit->first, plugin);
+    /* Remove this plugin from "used by" column of dependencies */
+    for(auto it = pluginObject.metadata.depends().cbegin(); it != pluginObject.metadata.depends().cend(); ++it) {
+        auto mit = plugins()->find(*it);
+        /** @bug FIXME: use plugin hierarchy for destruction */
 
-                /* Otherwise remove this plugin manually */
-                else for(auto it = mit->second->metadata._usedBy.begin(); it != mit->second->metadata._usedBy.end(); ++it) {
-                    if(*it == plugin) {
-                        mit->second->metadata._usedBy.erase(it);
-                        break;
-                    }
+        if(mit != plugins()->end()) {
+            /* If the plugin is not static with no associated manager, use
+               its manager for removing this plugin */
+            if(mit->second->manager)
+                mit->second->manager->removeUsedBy(mit->first, plugin);
+
+            /* Otherwise remove this plugin manually */
+            else for(auto it = mit->second->metadata._usedBy.begin(); it != mit->second->metadata._usedBy.end(); ++it) {
+                if(*it == plugin) {
+                    mit->second->metadata._usedBy.erase(it);
+                    break;
                 }
             }
         }
-
-        #ifndef _WIN32
-        if(dlclose(pluginObject.module) != 0) {
-        #else
-        if(!FreeLibrary(plugin.module)) {
-        #endif
-            Error() << "PluginManager: cannot unload plugin" << '\'' + plugin + "':" << dlerror();
-            pluginObject.loadState = LoadState::NotLoaded;
-            return LoadState::UnloadFailed;
-        }
-
-        pluginObject.loadState = LoadState::NotLoaded;
     }
 
-    return pluginObject.loadState;
+    #ifndef _WIN32
+    if(dlclose(pluginObject.module) != 0) {
+    #else
+    if(!FreeLibrary(plugin.module)) {
+    #endif
+        Error() << "PluginManager: cannot unload plugin" << '\'' + plugin + "':" << dlerror();
+        pluginObject.loadState = LoadState::NotLoaded;
+        return LoadState::UnloadFailed;
+    }
+
+    return pluginObject.loadState = LoadState::NotLoaded;
 }
 
 void AbstractPluginManager::registerInstance(const std::string& plugin, Plugin* instance, const Configuration** configuration, const PluginMetadata** metadata) {
