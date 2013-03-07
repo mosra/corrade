@@ -20,8 +20,8 @@ namespace Corrade { namespace Examples {
 
 class Dog: public AbstractAnimal {
     public:
-        Dog(PluginManager::AbstractPluginManager* manager = nullptr, const std::string& plugin = std::string()):
-            AbstractAnimal(manager, plugin) {}
+        Dog() = default;
+        Dog(PluginManager::AbstractPluginManager* manager, std::string plugin): AbstractAnimal(manager, std::move(plugin)) {}
 
         std::string name() const { return "Doug"; }
         int legCount() const { return 4; }

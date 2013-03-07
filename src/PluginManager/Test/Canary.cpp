@@ -21,8 +21,7 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class Canary: public AbstractAnimal {
     public:
-        inline Canary(AbstractPluginManager* manager = 0, const std::string& plugin = std::string()):
-            AbstractAnimal(manager, plugin) {}
+        explicit Canary(AbstractPluginManager* manager, std::string plugin): AbstractAnimal(manager, std::move(plugin)) {}
 
         std::string name() { return "Achoo"; }
         int legCount() { return 2; }

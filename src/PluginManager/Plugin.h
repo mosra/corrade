@@ -38,18 +38,28 @@ namespace Corrade { namespace PluginManager {
 class CORRADE_PLUGINMANAGER_EXPORT Plugin {
     public:
         /**
-         * @brief Constructor
-         * @param manager       Parent plugin manager
-         * @param plugin        %Plugin name
+         * @brief Default constructor
          *
-         * Registers this plugin instance in plugin manager.
+         * Usable when using the plugin directly, without plugin manager. Define
+         * this constructor in your subclass only if you want to allow using the
+         * interface or plugin without plugin manager.
          */
-        explicit Plugin(AbstractPluginManager* manager = nullptr, const std::string& plugin = std::string());
+        explicit Plugin();
+
+        /**
+         * @brief Plugin manager constructor
+         *
+         * Used by plugin manager. Don't forget to redefine this constructor in
+         * all your subclasses.
+         * @see plugin(), metadata(), configuration()
+         */
+        explicit Plugin(AbstractPluginManager* manager, std::string plugin);
 
         /**
          * @brief Destructor
          *
-         * Unregisters this plugin instance in plugin manager.
+         * If instantiated through plugin manager, unregisters this instance
+         * from it.
          */
         virtual ~Plugin();
 
@@ -57,31 +67,34 @@ class CORRADE_PLUGINMANAGER_EXPORT Plugin {
          * @brief Whether the plugin can be deleted
          *
          * Called from PluginManager on all active instances before the plugin
-         * is unloaded. Returns true if it is safe to delete the instance from
-         * the manager, returns false if not. If any instance returns false,
-         * the plugin is not unloaded.
+         * is unloaded. Returns `true` if it is safe to delete the instance from
+         * the manager, `false` if not. If any instance returns `false`, the
+         * plugin is not unloaded.
          */
         virtual bool canBeDeleted() { return false; }
 
         /**
          * @brief Identifier string
-         * @return String, under which the plugin was instanced. If the plugin
-         *      was not instanced via plugin manager, returns empty string.
+         *
+         * Name under which the plugin was instanced. If the plugin was not
+         * instantiated via plugin manager, returns empty string.
          */
         inline std::string plugin() const { return _plugin; }
 
         /**
          * @brief Metadata
-         * @return Metadata file associated with the plugin or 0, if no metadata
-         *      is available.
+         *
+         * Metadata associated with given plugin. If the plugin was not
+         * instantiated through plugin manager, returns `nullptr`.
          */
         inline const PluginMetadata* metadata() const { return _metadata; }
 
     protected:
         /**
          * @brief Configuration
-         * @return Configuration from file associated with the plugin or 0, if
-         *      no configuration is available.
+         *
+         * Configuration associated with given plugin. If the plugin was not
+         * instantiated through plugin manager, returns `nullptr`.
          * @todo Make use of this, change to pointer to ConfigurationGroup
          */
         inline const Utility::Configuration* configuration() const { return _configuration; }

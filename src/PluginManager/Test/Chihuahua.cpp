@@ -20,8 +20,7 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class Chihuahua: public Dog {
     public:
-        inline Chihuahua(AbstractPluginManager* manager = 0, const std::string& plugin = std::string()):
-            Dog(manager, plugin) {}
+        explicit Chihuahua(AbstractPluginManager* manager, std::string plugin): Dog(manager, std::move(plugin)) {}
 
         std::string name() { return "Rodriguez"; }
 };

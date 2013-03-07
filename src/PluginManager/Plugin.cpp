@@ -20,13 +20,10 @@
 
 namespace Corrade { namespace PluginManager {
 
-Plugin::Plugin(AbstractPluginManager* manager, const std::string& plugin): _manager(manager), _plugin(plugin) {
-    if(_manager)
-        _manager->registerInstance(_plugin, this, &_configuration, &_metadata);
-    else {
-        _configuration = nullptr;
-        _metadata = nullptr;
-    }
+Plugin::Plugin(): _manager(nullptr), _configuration(nullptr), _metadata(nullptr) {}
+
+Plugin::Plugin(AbstractPluginManager* manager, std::string plugin): _manager(manager), _plugin(std::move(plugin)) {
+    _manager->registerInstance(_plugin, this, &_configuration, &_metadata);
 }
 
 Plugin::~Plugin() {
