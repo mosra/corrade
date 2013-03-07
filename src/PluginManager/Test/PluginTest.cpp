@@ -249,6 +249,8 @@ void PluginTest::reloadPluginDirectory() {
     manager->reloadPluginDirectory();
     std::vector<std::string> actual2 = manager->pluginList();
 
+    /** @todo Also test that "WrongMetadataFile" plugins are reloaded */
+
     /* Rename everything back and clean up */
     Directory::move(Directory::join(PLUGINS_DIR, std::string("LostDog") + PLUGIN_FILENAME_SUFFIX),
                     Directory::join(PLUGINS_DIR, std::string("Dog") + PLUGIN_FILENAME_SUFFIX));

@@ -56,6 +56,8 @@ std::map<std::string, AbstractPluginManager::PluginObject*>* AbstractPluginManag
             CORRADE_INTERNAL_ASSERT_OUTPUT(_plugins->insert(std::make_pair(it->plugin, new PluginObject(metadata, it->interface, it->instancer))).second);
         }
 
+        /** @todo Assert dependencies of static plugins */
+
         /* Delete the array to mark them as processed */
         delete staticPlugins();
         staticPlugins() = nullptr;
@@ -203,7 +205,7 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
        be added to each dependency usedBy list. */
     std::vector<std::pair<std::string, PluginObject*>> dependencies;
 
-    /* Load dependencies and add this plugin to their "used by" list */
+    /* Load dependencies and remember their names for later */
     for(auto it = pluginObject.metadata.depends().cbegin(); it != pluginObject.metadata.depends().cend(); ++it) {
         /* Find manager which is associated to this plugin and load the plugin
            with it */
@@ -215,7 +217,7 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
         dependencies.push_back(*foundDependency);
     }
 
-    std::string filename = Directory::join(_pluginDirectory, plugin + PLUGIN_FILENAME_SUFFIX);
+    const std::string filename = Directory::join(_pluginDirectory, plugin + PLUGIN_FILENAME_SUFFIX);
 
     /* Open plugin file, make symbols available for next libs (which depends on this) */
     #ifndef _WIN32
@@ -283,10 +285,11 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
         else it->second->metadata._usedBy.push_back(plugin);
     }
 
+    /* Update plugin object, set state to loaded */
     pluginObject.loadState = LoadState::Loaded;
     pluginObject.module = handle;
     pluginObject.instancer = instancer;
-    return pluginObject.loadState;
+    return LoadState::Loaded;
 }
 
 LoadState AbstractPluginManager::unload(const std::string& plugin) {
@@ -320,7 +323,7 @@ LoadState AbstractPluginManager::unload(const std::string& plugin) {
             delete foundInstance->second[i-1];
     }
 
-    /* Remove this plugin from "used by" column of dependencies */
+    /* Remove this plugin from "used by" list of dependencies */
     for(auto it = pluginObject.metadata.depends().cbegin(); it != pluginObject.metadata.depends().cend(); ++it) {
         auto mit = plugins()->find(*it);
 
@@ -340,6 +343,7 @@ LoadState AbstractPluginManager::unload(const std::string& plugin) {
         }
     }
 
+    /* Close the module */
     #ifndef _WIN32
     if(dlclose(pluginObject.module) != 0) {
     #else
@@ -350,10 +354,15 @@ LoadState AbstractPluginManager::unload(const std::string& plugin) {
         return LoadState::UnloadFailed;
     }
 
-    return pluginObject.loadState = LoadState::NotLoaded;
+    /* Update plugin object, set state to not loaded */
+    pluginObject.loadState = LoadState::NotLoaded;
+    pluginObject.module = nullptr;
+    pluginObject.instancer = nullptr;
+    return LoadState::NotLoaded;
 }
 
 void AbstractPluginManager::registerInstance(std::string plugin, Plugin* instance, const Configuration** configuration, const PluginMetadata** metadata) {
+    /** @todo assert proper interface */
     auto foundPlugin = plugins()->find(plugin);
 
     /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
