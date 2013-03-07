@@ -124,19 +124,14 @@ void AbstractPluginManager::setPluginDirectory(const std::string& directory) {
 }
 
 void AbstractPluginManager::reloadPluginDirectory() {
-    /* Get all unloaded plugins and schedule them for deletion */
-    std::vector<std::string> removed;
-    for(auto it = plugins()->cbegin(); it != plugins()->cend(); ++it) {
-        if(it->second->manager != this || it->second->loadState != LoadState::NotLoaded)
-            continue;
-
-        delete it->second;
-        removed.push_back(it->first);
+    /* Remove all unloaded plugins from the container */
+    auto it = plugins()->cbegin();
+    while(it != plugins()->cend()) {
+        if(it->second->manager == this && it->second->loadState & (LoadState::NotLoaded|LoadState::WrongMetadataFile)) {
+            delete it->second;
+            it = plugins()->erase(it);
+        } else ++it;
     }
-
-    /* Remove the plugins from global container */
-    for(auto it = removed.cbegin(); it != removed.cend(); ++it)
-        plugins()->erase(*it);
 
     /* Foreach all files in plugin directory */
     static const std::size_t suffixSize = std::strlen(PLUGIN_FILENAME_SUFFIX);
