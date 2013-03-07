@@ -31,7 +31,7 @@
 namespace Corrade { namespace PluginManager {
 
 /**
-@brief %Plugin metadata
+@brief Plugin metadata
 
 This class stores metadata about particular plugin. The plugin metadata are
 stored in plugin configuration file, which resides either besides the dynamic
@@ -44,7 +44,7 @@ The plugin configuration file has an simple syntax (see
 specification). The file stores plugin name, description, list of authors,
 plugin version, list of dependencies (if the plugin depends on another) and
 list of replaced plugins (if the plugin can replace plugin and provide the
-same or better functionality). %Plugin name and description can be translated
+same or better functionality). Plugin name and description can be translated
 into more languages just by adding a new subgroup named after that language
 locale code. Full featured example:
 
@@ -85,7 +85,7 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
         explicit PluginMetadata(const Utility::Configuration& conf);
 
         /**
-         * @brief %Plugin name
+         * @brief Plugin name
          *
          * Descriptive name of plugin. Not to be confused with name under which
          * the plugin is loaded. If translation for current Translator::locale()
@@ -95,7 +95,7 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
         inline const std::string* name() const { return _name; }
 
         /**
-         * @brief %Plugin description
+         * @brief Plugin description
          *
          * More detailed description of plugin. If translation for current
          * Translator::locale() is present, returns the translated name.
@@ -104,14 +104,14 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
         inline const std::string* description() const { return _description; }
 
         /**
-         * @brief %Plugin author(s)
+         * @brief Plugin author(s)
          *
          * @note This field is constant during whole plugin lifetime.
          */
         inline const std::vector<std::string>& authors() const { return _authors; }
 
         /**
-         * @brief %Plugin version
+         * @brief Plugin version
          *
          * @note This field is constant during whole plugin lifetime.
          */

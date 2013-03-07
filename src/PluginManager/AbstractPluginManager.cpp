@@ -29,10 +29,10 @@
 #define dlclose FreeLibrary
 #endif
 
-#include "Plugin.h"
 #include "Utility/Assert.h"
 #include "Utility/Directory.h"
 #include "Utility/Configuration.h"
+#include "PluginManager/AbstractPlugin.h"
 
 #include "corradePluginManagerConfigure.h"
 
@@ -361,7 +361,7 @@ LoadState AbstractPluginManager::unload(const std::string& plugin) {
     return LoadState::NotLoaded;
 }
 
-void AbstractPluginManager::registerInstance(std::string plugin, Plugin* instance, const Configuration** configuration, const PluginMetadata** metadata) {
+void AbstractPluginManager::registerInstance(std::string plugin, AbstractPlugin* instance, const Configuration** configuration, const PluginMetadata** metadata) {
     /** @todo assert proper interface */
     auto foundPlugin = plugins()->find(plugin);
 
@@ -380,7 +380,7 @@ void AbstractPluginManager::registerInstance(std::string plugin, Plugin* instanc
     *metadata = &foundPlugin->second->metadata;
 }
 
-void AbstractPluginManager::unregisterInstance(const std::string& plugin, Plugin* instance) {
+void AbstractPluginManager::unregisterInstance(const std::string& plugin, AbstractPlugin* instance) {
     auto foundPlugin = plugins()->find(plugin);
 
     /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
@@ -389,7 +389,7 @@ void AbstractPluginManager::unregisterInstance(const std::string& plugin, Plugin
 
     auto foundInstance = instances.find(plugin);
     if(foundInstance == instances.end()) return;
-    std::vector<Plugin*>& _instances = foundInstance->second;
+    std::vector<AbstractPlugin*>& _instances = foundInstance->second;
 
     auto pos = std::find(_instances.begin(), _instances.end(), instance);
     if(pos == _instances.end()) return;

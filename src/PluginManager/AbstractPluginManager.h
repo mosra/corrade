@@ -36,10 +36,10 @@
 
 namespace Corrade { namespace PluginManager {
 
-class Plugin;
+class AbstractPlugin;
 
 /** @relates AbstractPluginManager
-@brief %Plugin load state
+@brief Plugin load state
 
 @see LoadStates, AbstractPluginManager::loadState(),
     AbstractPluginManager::load(), AbstractPluginManager::unload(),
@@ -95,7 +95,7 @@ enum class LoadState: unsigned short {
     Loaded = 1 << 6,
 
     /**
-     * The plugin is not loaded. %Plugin can be unloaded only if is dynamic and
+     * The plugin is not loaded. Plugin can be unloaded only if is dynamic and
      * is not required by any other plugin. Returned by
      * AbstractPluginManager::loadState(), AbstractPluginManager::load() and
      * AbstractPluginManager::reload().
@@ -131,7 +131,7 @@ enum class LoadState: unsigned short {
 };
 
 /** @relates AbstractPluginManager
-@brief %Plugin load states
+@brief Plugin load states
 
 Useful when checking whether LoadState in in given set of values, for example:
 @code
@@ -153,10 +153,10 @@ CORRADE_ENUMSET_OPERATORS(LoadStates)
  * @ref plugin-management.
  */
 class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
-    friend class Plugin;
+    friend class AbstractPlugin;
 
     public:
-        /** @brief %Plugin version */
+        /** @brief Plugin version */
         static const int Version;
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -192,7 +192,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
         AbstractPluginManager& operator=(const AbstractPluginManager&) = delete;
         AbstractPluginManager& operator=(AbstractPluginManager&&) = delete;
 
-        /** @brief %Plugin directory */
+        /** @brief Plugin directory */
         std::string pluginDirectory() const;
 
         /**
@@ -214,7 +214,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
         std::vector<std::string> pluginList() const;
 
         /**
-         * @brief %Plugin metadata
+         * @brief Plugin metadata
          *
          * Returns pointer to plugin metadata or `nullptr`, if given plugin is
          * not found.
@@ -329,10 +329,10 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
         };
         CORRADE_PLUGINMANAGER_LOCAL static std::vector<StaticPluginObject>*& staticPlugins();
 
-        std::map<std::string, std::vector<Plugin*> > instances;
+        std::map<std::string, std::vector<AbstractPlugin*> > instances;
 
-        CORRADE_PLUGINMANAGER_LOCAL void registerInstance(std::string plugin, Plugin* instance, const Utility::Configuration** configuration, const PluginMetadata** metadata);
-        CORRADE_PLUGINMANAGER_LOCAL void unregisterInstance(const std::string& plugin, Plugin* instance);
+        CORRADE_PLUGINMANAGER_LOCAL void registerInstance(std::string plugin, AbstractPlugin* instance, const Utility::Configuration** configuration, const PluginMetadata** metadata);
+        CORRADE_PLUGINMANAGER_LOCAL void unregisterInstance(const std::string& plugin, AbstractPlugin* instance);
 };
 
 /** @hideinitializer

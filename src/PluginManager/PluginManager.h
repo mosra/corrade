@@ -28,8 +28,8 @@
 namespace Corrade { namespace PluginManager {
 
 /**
-@brief %Plugin manager
-@tparam T                   %Plugin interface
+@brief Plugin manager
+@tparam T                   Plugin interface
 @tparam BasePluginManager   Base class, subclassed from AbstractPluginManager
     (for example if you want to add some functionality to non-templated base,
     such as Qt signals)
@@ -55,7 +55,7 @@ template<class T, class BasePluginManager = AbstractPluginManager> class PluginM
         }
 
         /**
-         * @brief %Plugin interface
+         * @brief Plugin interface
          *
          * Only plugins with the same plugin interface string can be used
          * in this plugin manager.
@@ -63,8 +63,8 @@ template<class T, class BasePluginManager = AbstractPluginManager> class PluginM
         std::string pluginInterface() const override { return T::pluginInterface(); }
 
         /**
-         * @brief %Plugin class instance
-         * @param _plugin           %Plugin
+         * @brief Plugin class instance
+         * @param _plugin           Plugin
          * @return Pointer to new instance of plugin class, zero on error
          *
          * Creates new instance of plugin class, if possible. If the plugin is

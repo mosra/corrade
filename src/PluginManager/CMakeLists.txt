@@ -6,13 +6,13 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/corradePluginManagerConfigure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/corradePluginManagerConfigure.h)
 
 set(CorradePluginManager_SRCS
-    Plugin.cpp
+    AbstractPlugin.cpp
     AbstractPluginManager.cpp
     PluginMetadata.cpp)
 
 set(CorradePluginManager_HEADERS
+    AbstractPlugin.h
     AbstractPluginManager.h
-    Plugin.h
     PluginManager.h
     PluginMetadata.h
 

@@ -14,19 +14,19 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "Plugin.h"
+#include "AbstractPlugin.h"
 
 #include "AbstractPluginManager.h"
 
 namespace Corrade { namespace PluginManager {
 
-Plugin::Plugin(): _manager(nullptr), _configuration(nullptr), _metadata(nullptr) {}
+AbstractPlugin::AbstractPlugin(): _manager(nullptr), _configuration(nullptr), _metadata(nullptr) {}
 
-Plugin::Plugin(AbstractPluginManager* manager, std::string plugin): _manager(manager), _plugin(std::move(plugin)) {
+AbstractPlugin::AbstractPlugin(AbstractPluginManager* manager, std::string plugin): _manager(manager), _plugin(std::move(plugin)) {
     _manager->registerInstance(_plugin, this, &_configuration, &_metadata);
 }
 
-Plugin::~Plugin() {
+AbstractPlugin::~AbstractPlugin() {
     if(_manager) _manager->unregisterInstance(_plugin, this);
 }
 

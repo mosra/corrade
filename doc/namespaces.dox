@@ -31,11 +31,11 @@ executable (class Resource, see also @ref resource-management "tutorial").
  * @brief Namespace Corrade::PluginManager
  */
 /** @namespace Corrade::PluginManager
-@brief %Plugin management
+@brief Plugin management
 
 This library contains PluginManager, which takes care of loading, unloading
-and instancing plugins. There is also an Plugin class, which is the base of
-all plugins. See @ref plugin-management for a brief introduction to how
+and instancing plugins. There is also an AbstractPlugin class, which is the base
+of all plugins. See @ref plugin-management for a brief introduction to how
 plugins work.
 */
 

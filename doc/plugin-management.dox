@@ -4,10 +4,10 @@ namespace Corrade { namespace PluginManager {
 The PluginManager class provides hierarchical plugin management functions.
 Main features:
 
-- %Plugin manager version and plugin interface version checks to avoid
+- Plugin manager version and plugin interface version checks to avoid
   unexpected behavior
 - Both static and dynamic plugin support
-- %Plugin dependecies and conflicts
+- Plugin dependecies and conflicts
 - Usage checks, manager doesn't allow plugin unload if there are any active
   plugin instances
 
@@ -18,13 +18,13 @@ compiled and managed.
 
 @section plugin-management-interface Plugin interface
 
-%Plugin interface is class with well defined abstract public methods, which
+Plugin interface is class with well defined abstract public methods, which
 defines the way how to work with a particular plugin.
 
-Every plugin interface must be derived from Plugin class and must reimplement
-Plugin constructor. This is needed for instance use checks, as described
-above. %Plugin classes derived from that interface must reimplement the
-constructor too, of course.
+Every plugin interface must be derived from AbstractPlugin class and must
+reimplement AbstractPlugin constructor. This is needed for instance use checks,
+as described above. Plugin classes derived from that interface must reimplement
+the constructor too, of course.
 
 Additionaly, interface must be defined with PLUGIN_INTERFACE() macro in
 header to make sure loaded plugins will use the same interface in the same

@@ -16,16 +16,16 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "PluginManager/Plugin.h"
+#include "PluginManager/AbstractPlugin.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-class AbstractAnimal: public Plugin {
+class AbstractAnimal: public AbstractPlugin {
     PLUGIN_INTERFACE("cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")
 
     public:
         explicit AbstractAnimal() = default;
-        explicit AbstractAnimal(AbstractPluginManager* manager, std::string plugin): Plugin(manager, std::move(plugin)) {}
+        explicit AbstractAnimal(AbstractPluginManager* manager, std::string plugin): AbstractPlugin(manager, std::move(plugin)) {}
 
         virtual std::string name() = 0;
         virtual int legCount() = 0;

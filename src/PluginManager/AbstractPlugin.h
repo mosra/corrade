@@ -1,5 +1,5 @@
-#ifndef Corrade_PluginManager_Plugin_h
-#define Corrade_PluginManager_Plugin_h
+#ifndef Corrade_PluginManager_AbstractPlugin_h
+#define Corrade_PluginManager_AbstractPlugin_h
 /*
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012
               Vladimír Vondruš <mosra@centrum.cz>
@@ -17,9 +17,7 @@
 */
 
 /** @file
- * @brief Class Corrade::PluginManager::Plugin and plugin registering macros
- *
- * Macros PLUGIN_INTERFACE(), PLUGIN_REGISTER().
+ * @brief Class Corrade::PluginManager::AbstractPlugin, macro PLUGIN_INTERFACE(), PLUGIN_REGISTER().
  */
 
 #include <string>
@@ -30,12 +28,12 @@
 namespace Corrade { namespace PluginManager {
 
 /**
- * @brief Base class for plugin interfaces
- *
- * Connects every plugin instance to parent plugin manager to ensure the
- * plugin can be unloaded only if there are no active instances.
- */
-class CORRADE_PLUGINMANAGER_EXPORT Plugin {
+@brief Base class for plugin interfaces
+
+Connects every plugin instance to parent plugin manager to ensure the
+plugin can be unloaded only if there are no active instances.
+*/
+class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
     public:
         /**
          * @brief Default constructor
@@ -44,7 +42,7 @@ class CORRADE_PLUGINMANAGER_EXPORT Plugin {
          * this constructor in your subclass only if you want to allow using the
          * interface or plugin without plugin manager.
          */
-        explicit Plugin();
+        explicit AbstractPlugin();
 
         /**
          * @brief Plugin manager constructor
@@ -53,7 +51,7 @@ class CORRADE_PLUGINMANAGER_EXPORT Plugin {
          * all your subclasses.
          * @see plugin(), metadata(), configuration()
          */
-        explicit Plugin(AbstractPluginManager* manager, std::string plugin);
+        explicit AbstractPlugin(AbstractPluginManager* manager, std::string plugin);
 
         /**
          * @brief Destructor
@@ -61,7 +59,7 @@ class CORRADE_PLUGINMANAGER_EXPORT Plugin {
          * If instantiated through plugin manager, unregisters this instance
          * from it.
          */
-        virtual ~Plugin();
+        virtual ~AbstractPlugin() = 0;
 
         /**
          * @brief Whether the plugin can be deleted

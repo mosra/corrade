@@ -16,15 +16,15 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
-#include "PluginManager/Plugin.h"
+#include "PluginManager/AbstractPlugin.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-class AbstractFood: public Plugin {
+class AbstractFood: public AbstractPlugin {
     PLUGIN_INTERFACE("cz.mosra.Corrade.PluginManager.Test.AbstractFood/1.0")
 
     public:
-        explicit AbstractFood(AbstractPluginManager* manager, std::string plugin): Plugin(manager, std::move(plugin)) {}
+        explicit AbstractFood(AbstractPluginManager* manager, std::string plugin): AbstractPlugin(manager, std::move(plugin)) {}
 
         virtual int weight() = 0;
         virtual bool isTasty() = 0;
