@@ -50,7 +50,6 @@ class PluginTest: public TestSuite::Tester {
         void usedByZombies();
 
         void reloadPluginDirectory();
-        void reload();
 
         void debug();
 
@@ -69,7 +68,6 @@ PluginTest::PluginTest() {
              &PluginTest::crossManagerDependencies,
              &PluginTest::usedByZombies,
              &PluginTest::reloadPluginDirectory,
-             &PluginTest::reload,
 
              &PluginTest::debug);
 
@@ -248,6 +246,7 @@ void PluginTest::reloadPluginDirectory() {
 
     /* Unload Dog and it should disappear from the list */
     CORRADE_COMPARE(manager->unload("Dog"), LoadState::NotLoaded);
+    manager->reloadPluginDirectory();
     std::vector<std::string> actual2 = manager->pluginList();
 
     /* Rename everything back and clean up */
@@ -268,32 +267,6 @@ void PluginTest::reloadPluginDirectory() {
         "Canary", "Dog", "LostChihuahua", "LostDog", "Snail"}), TestSuite::Compare::Container);
     CORRADE_COMPARE_AS(actual2, (std::vector<std::string>{
         "Canary", "LostChihuahua", "LostDog", "Snail"}), TestSuite::Compare::Container);
-}
-
-void PluginTest::reload() {
-    /* Keep dog sleeping */
-    CORRADE_COMPARE(manager->loadState("Dog"), LoadState::NotLoaded);
-
-    /* Rename him */
-    Utility::Configuration conf(Directory::join(PLUGINS_DIR, "Dog.conf"));
-    conf.group("metadata")->setValue<std::string>("name", "Angry Beast");
-    conf.save();
-
-    /* Is dog still sleeping? */
-    CORRADE_COMPARE(manager->reload("Dog"), LoadState::NotLoaded);
-
-    /* Clean everything up before parents come home */
-    conf.group("metadata")->setValue<std::string>("name", "A simple dog plugin");
-    conf.save();
-
-    /* And silently scare yourself to death */
-    CORRADE_COMPARE(*manager->metadata("Dog")->name(), "Angry Beast");
-
-    /* Nightmare continues, try to really load dog */
-    CORRADE_COMPARE(manager->load("Dog"), LoadState::Loaded);
-
-    /* Hopefully, Angry Beast was only a bad dream */
-    CORRADE_COMPARE(*manager->metadata("Dog")->name(), "A simple dog plugin");
 }
 
 void PluginTest::debug() {

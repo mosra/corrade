@@ -208,14 +208,6 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
     if(foundPlugin == plugins()->end() || foundPlugin->second->manager != this)
         return LoadState::NotFound;
 
-    /* Before loading reload its metadata and if it is not found,
-        remove it from the list */
-    if(!reloadPluginMetadata(foundPlugin)) {
-        delete foundPlugin->second;
-        plugins()->erase(foundPlugin);
-        return LoadState::NotFound;
-    }
-
     PluginObject& pluginObject = *foundPlugin->second;
 
     /* Plugin is not ready to load */
@@ -374,38 +366,7 @@ LoadState AbstractPluginManager::unload(const std::string& plugin) {
         pluginObject.loadState = LoadState::NotLoaded;
     }
 
-    /* After successful unload, reload its metadata and if it is not found,
-       remove it from the list */
-    if(!reloadPluginMetadata(foundPlugin)) {
-        delete foundPlugin->second;
-        plugins()->erase(foundPlugin);
-        return LoadState::NotLoaded;
-    }
-
-    /* Return directly the load state, as 'plugin' reference was deleted by
-       reloadPluginMetadata() */
-    return foundPlugin->second->loadState;
-}
-
-LoadState AbstractPluginManager::reload(const std::string& plugin) {
-    /* If the plugin is not loaded, just reload its metadata */
-    if(loadState(plugin) == LoadState::NotLoaded) {
-        auto foundPlugin = plugins()->find(plugin);
-
-        /* If the plugin is not found, remove it from the list */
-        if(!reloadPluginMetadata(foundPlugin)) {
-            delete foundPlugin->second;
-            plugins()->erase(foundPlugin);
-        }
-
-        return LoadState::NotLoaded;
-
-    /* Else try unload and load */
-    } else {
-        LoadState l = unload(plugin);
-        if(l != LoadState::NotLoaded) return l;
-        return load(plugin);
-    }
+    return pluginObject.loadState;
 }
 
 void AbstractPluginManager::registerInstance(const std::string& plugin, Plugin* instance, const Configuration** configuration, const PluginMetadata** metadata) {
@@ -443,22 +404,6 @@ void AbstractPluginManager::unregisterInstance(const std::string& plugin, Plugin
     _instances.erase(pos);
 
     if(_instances.empty()) instances.erase(plugin);
-}
-
-bool AbstractPluginManager::reloadPluginMetadata(std::map<std::string, PluginObject*>::iterator it) {
-    /* Don't reload metadata of alien or loaded plugins */
-    if(it->second->manager != this || (it->second->loadState & (LoadState::Loaded|LoadState::Static)))
-        return true;
-
-    /* If plugin binary doesn't exist, schedule the entry for deletion */
-    if(!Directory::fileExists(Directory::join(_pluginDirectory, it->first + PLUGIN_FILENAME_SUFFIX)))
-        return false;
-
-    /* Reload plugin metadata */
-    delete it->second;
-    it->second = new PluginObject(Directory::join(_pluginDirectory, it->first + ".conf"), this);
-
-    return true;
 }
 
 void AbstractPluginManager::addUsedBy(const std::string& plugin, const std::string& usedBy) {

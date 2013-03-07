@@ -207,7 +207,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          *
          * Keeps loaded plugins untouched, removes unloaded plugins which are
          * not existing anymore and adds newly found plugins.
-         * @see reload()
          */
         virtual void reloadPluginDirectory();
 
@@ -243,9 +242,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          * @ref LoadState "LoadState::WrongInterfaceVersion", @ref LoadState "LoadState::UnresolvedDependency"
          * or @ref LoadState "LoadState::LoadFailed".
          *
-         * If the plugin is not yet loaded, its metadata are reloaded before the
-         * operation. If the plugin has any dependencies, they are recursively
-         * processed before loading given plugin.
+         * If the plugin has any dependencies, they are recursively processed
+         * before loading given plugin.
          *
          * @see unload(), reload(), loadState()
          */
@@ -260,29 +258,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          * @ref LoadState "LoadState::UnloadFailed", @ref LoadState "LoadState::Required"
          * or @ref LoadState "LoadState::Used".
          *
-         * %Plugin metadata are reloaded after successful operation.
-         *
          * @see load(), reload(), loadState()
          */
         virtual LoadState unload(const std::string& plugin);
-
-        /**
-         * @brief Reload a plugin
-         *
-         * Returns @ref LoadState "LoadState::NotLoaded" if the plugin was not
-         * loaded before and @ref LoadState "LoadState::Loaded" on successful
-         * reload. For static plugins always returns @ref LoadState "LoadState::Static".
-         * On failure returns @ref LoadState "LoadState::UnloadFailed",
-         * @ref LoadState "LoadState::Required", @ref LoadState "LoadState::Used",
-         * @ref LoadState "LoadState::NotFound", @ref LoadState "LoadState::WrongPluginVersion",
-         * @ref LoadState "LoadState::WrongInterfaceVersion", @ref LoadState "LoadState::UnresolvedDependency"
-         * or @ref LoadState "LoadState::LoadFailed".
-         *
-         * %Plugin metadata are reloaded during the operation.
-         *
-         * @see load(), unload(), loadState()
-         */
-        LoadState reload(const std::string& plugin);
 
     #ifdef DOXYGEN_GENERATING_OUTPUT
     private:
@@ -324,23 +302,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
            accessible via function, not directly, because we need to fill it
            with data from staticPlugins() before first use. */
         static std::map<std::string, PluginObject*>* plugins();
-
-        /**
-         * @brief Reload plugin metadata
-         * @param it        Iterator pointing to plugin object
-         * @return False if plugin is not loaded and binary cannot be found,
-         *      true otherwise.
-         *
-         * If the plugin is unloaded and belongs to current manager, checks
-         * whether the plugin exists and reloads its metadata.
-         *
-         * Called from load(), unload() and reload().
-         *
-         * @bug Causes problems when calling this function in a cycle through
-         * all plugins, as it can remove the plugin from vector and thus break
-         * iterators.
-         */
-        virtual bool reloadPluginMetadata(std::map<std::string, PluginObject*>::iterator it);
 
         /* Because the plugin manager must be noticed about adding the plugin to
            "used by" list, it must be done through this function. */
