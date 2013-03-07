@@ -198,17 +198,17 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
         /**
          * @brief Set another plugin directory
          *
-         * Calls reloadPluginDirectory().
+         * Keeps loaded plugins untouched, removes unloaded plugins which are
+         * not existing anymore and adds newly found plugins.
          */
         void setPluginDirectory(const std::string& directory);
 
         /**
          * @brief Reload plugin directory
          *
-         * Keeps loaded plugins untouched, removes unloaded plugins which are
-         * not existing anymore and adds newly found plugins.
+         * Convenience equivalent to `setPluginDirectory(pluginDirectory())`.
          */
-        virtual void reloadPluginDirectory();
+        void reloadPluginDirectory();
 
         /** @brief List of all available plugin names */
         std::vector<std::string> pluginList() const;

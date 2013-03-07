@@ -81,8 +81,8 @@ void AbstractPluginManager::importStaticPlugin(const std::string& plugin, int _v
 }
 #endif
 
-AbstractPluginManager::AbstractPluginManager(const std::string& pluginDirectory): _pluginDirectory(pluginDirectory) {
-    reloadPluginDirectory();
+AbstractPluginManager::AbstractPluginManager(const std::string& pluginDirectory) {
+    setPluginDirectory(pluginDirectory);
 }
 
 AbstractPluginManager::~AbstractPluginManager() {
@@ -120,10 +120,7 @@ std::string AbstractPluginManager::pluginDirectory() const {
 
 void AbstractPluginManager::setPluginDirectory(const std::string& directory) {
     _pluginDirectory = directory;
-    reloadPluginDirectory();
-}
 
-void AbstractPluginManager::reloadPluginDirectory() {
     /* Remove all unloaded plugins from the container */
     auto it = plugins()->cbegin();
     while(it != plugins()->cend()) {
@@ -151,6 +148,10 @@ void AbstractPluginManager::reloadPluginDirectory() {
         /* Insert plugin to list */
         plugins()->insert({name, new PluginObject(Directory::join(_pluginDirectory, name + ".conf"), this)});
     }
+}
+
+void AbstractPluginManager::reloadPluginDirectory() {
+    setPluginDirectory(pluginDirectory());
 }
 
 std::vector<std::string> AbstractPluginManager::pluginList() const {
