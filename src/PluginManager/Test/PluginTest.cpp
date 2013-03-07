@@ -14,6 +14,8 @@
     GNU Lesser General Public License version 3 for more details.
 */
 
+#include <sstream>
+
 #include "PluginManager/PluginManager.h"
 #include "TestSuite/Tester.h"
 #include "TestSuite/Compare/Container.h"
@@ -50,6 +52,8 @@ class PluginTest: public TestSuite::Tester {
         void reloadPluginDirectory();
         void reload();
 
+        void debug();
+
     private:
         PluginManager<AbstractAnimal>* manager;
         PluginManager<AbstractFood>* foodManager;
@@ -65,7 +69,9 @@ PluginTest::PluginTest() {
              &PluginTest::crossManagerDependencies,
              &PluginTest::usedByZombies,
              &PluginTest::reloadPluginDirectory,
-             &PluginTest::reload);
+             &PluginTest::reload,
+
+             &PluginTest::debug);
 
     initialize();
     manager = new PluginManager<AbstractAnimal>(PLUGINS_DIR);
@@ -93,12 +99,12 @@ void PluginTest::errors() {
     /** @todo Wrong interface version */
 
     /* Wrong metadata file */
-    CORRADE_COMPARE(manager->loadState("Snail"), AbstractPluginManager::WrongMetadataFile);
-    CORRADE_COMPARE(manager->load("Snail"), AbstractPluginManager::WrongMetadataFile);
+    CORRADE_COMPARE(manager->loadState("Snail"), LoadState::WrongMetadataFile);
+    CORRADE_COMPARE(manager->load("Snail"), LoadState::WrongMetadataFile);
 }
 
 void PluginTest::staticPlugin() {
-    CORRADE_COMPARE(manager->loadState("Canary"), AbstractPluginManager::IsStatic);
+    CORRADE_COMPARE(manager->loadState("Canary"), LoadState::Static);
     CORRADE_COMPARE(*manager->metadata("Canary")->name(), "I'm allergic to canaries!");
     CORRADE_COMPARE(manager->metadata("Canary")->authors()[0], "Vladimír Vondruš <mosra@centrum.cz>");
     CORRADE_COMPARE(manager->metadata("Canary")->version(), "1.0");
@@ -109,13 +115,13 @@ void PluginTest::staticPlugin() {
     CORRADE_COMPARE(animal->name(), "Achoo");
     CORRADE_COMPARE(animal->legCount(), 2);
 
-    CORRADE_COMPARE(manager->unload("Canary"), AbstractPluginManager::IsStatic);
+    CORRADE_COMPARE(manager->unload("Canary"), LoadState::Static);
 }
 
 void PluginTest::dynamicPlugin() {
-    CORRADE_COMPARE(manager->loadState("Dog"), AbstractPluginManager::NotLoaded);
-    CORRADE_COMPARE(manager->load("Dog"), AbstractPluginManager::LoadOk);
-    CORRADE_COMPARE(manager->loadState("Dog"), AbstractPluginManager::LoadOk);
+    CORRADE_COMPARE(manager->loadState("Dog"), LoadState::NotLoaded);
+    CORRADE_COMPARE(manager->load("Dog"), LoadState::Loaded);
+    CORRADE_COMPARE(manager->loadState("Dog"), LoadState::Loaded);
     CORRADE_COMPARE(*manager->metadata("Dog")->name(), "A simple dog plugin");
 
     AbstractAnimal* animal = manager->instance("Dog");
@@ -125,21 +131,21 @@ void PluginTest::dynamicPlugin() {
     CORRADE_COMPARE(animal->legCount(), 4);
 
     /* Try to unload plugin when instance is used */
-    CORRADE_COMPARE(manager->unload("Dog"), AbstractPluginManager::IsUsed);
-    CORRADE_COMPARE(manager->loadState("Dog"), AbstractPluginManager::LoadOk);
+    CORRADE_COMPARE(manager->unload("Dog"), LoadState::Used);
+    CORRADE_COMPARE(manager->loadState("Dog"), LoadState::Loaded);
 
     /* Plugin can be unloaded after destroying all instances in which
        canBeDeleted() returns false. */
     delete animal;
-    CORRADE_COMPARE(manager->unload("Dog"), AbstractPluginManager::NotLoaded);
-    CORRADE_COMPARE(manager->loadState("Dog"), AbstractPluginManager::NotLoaded);
+    CORRADE_COMPARE(manager->unload("Dog"), LoadState::NotLoaded);
+    CORRADE_COMPARE(manager->loadState("Dog"), LoadState::NotLoaded);
 }
 
 void PluginTest::deletable() {
     PluginManager<AbstractDeletable> deletableManager(Directory::join(PLUGINS_DIR, "deletable"));
 
     /* Load plugin where canBeDeleted() returns true */
-    CORRADE_COMPARE(deletableManager.load("Deletable"), AbstractPluginManager::LoadOk);
+    CORRADE_COMPARE(deletableManager.load("Deletable"), LoadState::Loaded);
 
     unsigned int var = 0;
 
@@ -150,16 +156,16 @@ void PluginTest::deletable() {
 
     /* plugin destroys all instances on deletion => the variable will be changed */
     CORRADE_COMPARE(var, 0);
-    CORRADE_COMPARE(deletableManager.unload("Deletable"), AbstractPluginManager::NotLoaded);
+    CORRADE_COMPARE(deletableManager.unload("Deletable"), LoadState::NotLoaded);
     CORRADE_COMPARE(var, 0xDEADBEEF);
 }
 
 void PluginTest::hierarchy() {
-    CORRADE_COMPARE(manager->loadState("Dog"), AbstractPluginManager::NotLoaded);
-    CORRADE_COMPARE(manager->loadState("Chihuahua"), AbstractPluginManager::NotLoaded);
+    CORRADE_COMPARE(manager->loadState("Dog"), LoadState::NotLoaded);
+    CORRADE_COMPARE(manager->loadState("Chihuahua"), LoadState::NotLoaded);
 
-    CORRADE_COMPARE(manager->load("Chihuahua"), AbstractPluginManager::LoadOk);
-    CORRADE_COMPARE(manager->loadState("Dog"), AbstractPluginManager::LoadOk);
+    CORRADE_COMPARE(manager->load("Chihuahua"), LoadState::Loaded);
+    CORRADE_COMPARE(manager->loadState("Dog"), LoadState::Loaded);
     CORRADE_COMPARE(*manager->metadata("Chihuahua")->name(), "The smallest dog in the world.");
     CORRADE_COMPARE(manager->metadata("Chihuahua")->depends().size(), 1);
     CORRADE_COMPARE(manager->metadata("Chihuahua")->depends()[0], "Dog");
@@ -173,22 +179,22 @@ void PluginTest::hierarchy() {
     CORRADE_COMPARE(animal->name(), "Rodriguez");
 
     /* Try to unload plugin when another is depending on it */
-    CORRADE_COMPARE(manager->unload("Dog"), AbstractPluginManager::IsRequired);
+    CORRADE_COMPARE(manager->unload("Dog"), LoadState::Required);
 
     /* Unload chihuahua plugin, then try again */
     delete animal;
-    CORRADE_COMPARE(manager->unload("Chihuahua"), AbstractPluginManager::NotLoaded);
-    CORRADE_COMPARE(manager->unload("Dog"), AbstractPluginManager::NotLoaded);
+    CORRADE_COMPARE(manager->unload("Chihuahua"), LoadState::NotLoaded);
+    CORRADE_COMPARE(manager->unload("Dog"), LoadState::NotLoaded);
     CORRADE_VERIFY(manager->metadata("Dog")->usedBy().empty());
 }
 
 void PluginTest::crossManagerDependencies() {
-    CORRADE_COMPARE(manager->loadState("Dog"), AbstractPluginManager::NotLoaded);
-    CORRADE_COMPARE(foodManager->loadState("HotDog"), AbstractPluginManager::NotLoaded);
+    CORRADE_COMPARE(manager->loadState("Dog"), LoadState::NotLoaded);
+    CORRADE_COMPARE(foodManager->loadState("HotDog"), LoadState::NotLoaded);
 
     /* Load HotDog */
-    CORRADE_COMPARE(foodManager->load("HotDog"), AbstractPluginManager::LoadOk);
-    CORRADE_COMPARE(manager->loadState("Dog"), AbstractPluginManager::LoadOk);
+    CORRADE_COMPARE(foodManager->load("HotDog"), LoadState::Loaded);
+    CORRADE_COMPARE(manager->loadState("Dog"), LoadState::Loaded);
     CORRADE_COMPARE(foodManager->metadata("HotDog")->depends().size(), 1);
     CORRADE_COMPARE(foodManager->metadata("HotDog")->depends()[0], "Dog");
     CORRADE_COMPARE(manager->metadata("Dog")->usedBy().size(), 1);
@@ -200,12 +206,12 @@ void PluginTest::crossManagerDependencies() {
     CORRADE_COMPARE(hotdog->weight(), 6800);
 
     /* Try to unload dog while dog is used in hotdog */
-    CORRADE_COMPARE(manager->unload("Dog"), AbstractPluginManager::IsRequired);
+    CORRADE_COMPARE(manager->unload("Dog"), LoadState::Required);
 
     /* Destroy hotdog, then try again */
     delete hotdog;
-    CORRADE_COMPARE(foodManager->unload("HotDog"), AbstractPluginManager::NotLoaded);
-    CORRADE_COMPARE(manager->unload("Dog"), AbstractPluginManager::NotLoaded);
+    CORRADE_COMPARE(foodManager->unload("HotDog"), LoadState::NotLoaded);
+    CORRADE_COMPARE(manager->unload("Dog"), LoadState::NotLoaded);
     CORRADE_VERIFY(manager->metadata("Dog")->usedBy().empty());
 }
 
@@ -214,16 +220,16 @@ void PluginTest::usedByZombies() {
        loading fails too. Dog plugin then shouldn't have HotDogWithSnail in
        usedBy list. */
 
-    CORRADE_COMPARE(foodManager->load("HotDogWithSnail"), AbstractPluginManager::UnresolvedDependency);
+    CORRADE_COMPARE(foodManager->load("HotDogWithSnail"), LoadState::UnresolvedDependency);
     CORRADE_VERIFY(manager->metadata("Dog")->usedBy().empty());
 
     /* Cleanup after me... */
-    CORRADE_COMPARE(manager->unload("Dog"), AbstractPluginManager::NotLoaded);
+    CORRADE_COMPARE(manager->unload("Dog"), LoadState::NotLoaded);
 }
 
 void PluginTest::reloadPluginDirectory() {
     /* Load Dog and rename the plugin */
-    CORRADE_COMPARE(manager->load("Dog"), AbstractPluginManager::LoadOk);
+    CORRADE_COMPARE(manager->load("Dog"), LoadState::Loaded);
     Directory::move(Directory::join(PLUGINS_DIR, std::string("Dog") + PLUGIN_FILENAME_SUFFIX),
                     Directory::join(PLUGINS_DIR, std::string("LostDog") + PLUGIN_FILENAME_SUFFIX));
     Directory::move(Directory::join(PLUGINS_DIR, "Dog.conf"),
@@ -240,7 +246,7 @@ void PluginTest::reloadPluginDirectory() {
     std::vector<std::string> actual1 = manager->pluginList();
 
     /* Unload Dog and it should disappear from the list */
-    CORRADE_COMPARE(manager->unload("Dog"), AbstractPluginManager::NotLoaded);
+    CORRADE_COMPARE(manager->unload("Dog"), LoadState::NotLoaded);
     std::vector<std::string> actual2 = manager->pluginList();
 
     /* Rename everything back and clean up */
@@ -265,7 +271,7 @@ void PluginTest::reloadPluginDirectory() {
 
 void PluginTest::reload() {
     /* Keep dog sleeping */
-    CORRADE_COMPARE(manager->loadState("Dog"), AbstractPluginManager::NotLoaded);
+    CORRADE_COMPARE(manager->loadState("Dog"), LoadState::NotLoaded);
 
     /* Rename him */
     Utility::Configuration conf(Directory::join(PLUGINS_DIR, "Dog.conf"));
@@ -273,7 +279,7 @@ void PluginTest::reload() {
     conf.save();
 
     /* Is dog still sleeping? */
-    CORRADE_COMPARE(manager->reload("Dog"), AbstractPluginManager::NotLoaded);
+    CORRADE_COMPARE(manager->reload("Dog"), LoadState::NotLoaded);
 
     /* Clean everything up before parents come home */
     conf.group("metadata")->setValue<std::string>("name", "A simple dog plugin");
@@ -283,10 +289,17 @@ void PluginTest::reload() {
     CORRADE_COMPARE(*manager->metadata("Dog")->name(), "Angry Beast");
 
     /* Nightmare continues, try to really load dog */
-    CORRADE_COMPARE(manager->load("Dog"), AbstractPluginManager::LoadOk);
+    CORRADE_COMPARE(manager->load("Dog"), LoadState::Loaded);
 
     /* Hopefully, Angry Beast was only a bad dream */
     CORRADE_COMPARE(*manager->metadata("Dog")->name(), "A simple dog plugin");
+}
+
+void PluginTest::debug() {
+    std::ostringstream o;
+
+    Debug(&o) << LoadState::UnresolvedDependency;
+    CORRADE_COMPARE(o.str(), "PluginManager::LoadState::UnresolvedDependency\n");
 }
 
 }}}

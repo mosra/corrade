@@ -77,7 +77,7 @@ template<class T, class BasePluginManager = AbstractPluginManager> class PluginM
             typename BasePluginManager::PluginObject& plugin = *this->plugins()->at(_plugin);
 
             /* Plugin is not successfully loaded */
-            if(!(plugin.loadState & (BasePluginManager::LoadOk|BasePluginManager::IsStatic))) return nullptr;
+            if(!(plugin.loadState & (LoadState::Loaded|LoadState::Static))) return nullptr;
 
             return static_cast<T*>(plugin.instancer(this, _plugin));
         }

@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
     PluginManager::PluginManager<Examples::AbstractAnimal> manager(".");
 
     /* Try to load a plugin */
-    if(!(manager.load(argv[1]) & (PluginManager::AbstractPluginManager::LoadOk|PluginManager::AbstractPluginManager::IsStatic))) {
+    if(!(manager.load(argv[1]) & (PluginManager::LoadState::Loaded|PluginManager::LoadState::Static))) {
         Utility::Error() << "The requested plugin" << argv[1] << "cannot be loaded.";
         return 2;
     }
