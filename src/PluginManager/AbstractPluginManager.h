@@ -249,7 +249,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          *
          * @see unload(), reload(), loadState()
          */
-        virtual LoadState load(const std::string& _plugin);
+        virtual LoadState load(const std::string& plugin);
 
         /**
          * @brief Unload a plugin
@@ -264,7 +264,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          *
          * @see load(), reload(), loadState()
          */
-        virtual LoadState unload(const std::string& _plugin);
+        virtual LoadState unload(const std::string& plugin);
 
         /**
          * @brief Reload a plugin
