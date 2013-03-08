@@ -201,49 +201,41 @@ void DirectoryTest::configurationDir() {
 }
 
 void DirectoryTest::list() {
-    {
-        /* All */
-        Directory d(DIRECTORY_TEST_DIR);
-        CORRADE_VERIFY(d.isLoaded());
-        CORRADE_COMPARE_AS(d, (std::vector<std::string>{".", "..", "dir", "file"}),
-            TestSuite::Compare::SortedContainer);
-    } {
-        /* Skip special */
-        Directory d(DIRECTORY_TEST_DIR, Directory::Flag::SkipSpecial);
-        CORRADE_VERIFY(d.isLoaded());
-        CORRADE_COMPARE_AS(d, (std::vector<std::string>{".", "..", "dir", "file"}),
-            TestSuite::Compare::SortedContainer);
-    } {
-        /* All, sorted ascending */
-        Directory d(DIRECTORY_TEST_DIR, Directory::Flag::SortAscending);
-        CORRADE_VERIFY(d.isLoaded());
-        CORRADE_COMPARE_AS(d, (std::vector<std::string>{".", "..", "dir", "file"}),
-            TestSuite::Compare::Container);
-    } {
-        /* All, sorted descending */
-        Directory d(DIRECTORY_TEST_DIR, Directory::Flag::SortDescending);
-        CORRADE_VERIFY(d.isLoaded());
-        CORRADE_COMPARE_AS(d, (std::vector<std::string>{"file", "dir", "..", "."}),
-            TestSuite::Compare::Container);
-    } {
-        /* Skip . and .. */
-        Directory d(DIRECTORY_TEST_DIR, Directory::Flag::SkipDotAndDotDot);
-        CORRADE_VERIFY(d.isLoaded());
-        CORRADE_COMPARE_AS(d, (std::vector<std::string>{"dir", "file"}),
-            TestSuite::Compare::SortedContainer);
-    } {
-        /* Skip directories */
-        Directory d(DIRECTORY_TEST_DIR, Directory::Flag::SkipDirectories);
-        CORRADE_VERIFY(d.isLoaded());
-        CORRADE_COMPARE_AS(d, std::vector<std::string>{"file"},
-            TestSuite::Compare::SortedContainer);
-    } {
-        /* Skip files */
-        Directory d(DIRECTORY_TEST_DIR, Directory::Flag::SkipFiles);
-        CORRADE_VERIFY(d.isLoaded());
-        CORRADE_COMPARE_AS(d, (std::vector<std::string>{".", "..", "dir"}),
-            TestSuite::Compare::SortedContainer);
-    }
+    /* All */
+    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR),
+        (std::vector<std::string>{".", "..", "dir", "file"}),
+        TestSuite::Compare::SortedContainer);
+
+    /* Skip special */
+    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SkipSpecial),
+        (std::vector<std::string>{".", "..", "dir", "file"}),
+        TestSuite::Compare::SortedContainer);
+
+    /* All, sorted ascending */
+    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SortAscending),
+        (std::vector<std::string>{".", "..", "dir", "file"}),
+        TestSuite::Compare::Container);
+
+    /* All, sorted descending */
+    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SortDescending),
+        (std::vector<std::string>{"file", "dir", "..", "."}),
+        TestSuite::Compare::Container);
+
+    /* Skip . and .. */
+    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SkipDotAndDotDot),
+        (std::vector<std::string>{"dir", "file"}),
+        TestSuite::Compare::SortedContainer);
+
+    /* Skip directories */
+    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SkipDirectories),
+        std::vector<std::string>{"file"},
+        TestSuite::Compare::SortedContainer);
+
+    /* Skip files */
+    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SkipFiles),
+        (std::vector<std::string>{".", "..", "dir"}),
+        TestSuite::Compare::SortedContainer);
+
 }
 
 void DirectoryTest::listSortPrecedence() {

@@ -29,39 +29,18 @@
 namespace Corrade { namespace Utility {
 
 /**
-@brief %Directory listing
-
-Provides list of items in directory as a standard `std::vector<std::string>`
-class. The list is not modifiable. Provides filtering of certain item types
-and list sorting.
-
-The class also provides portable functions for path operations and creating,
-removing and renaming files or directories.
+@brief %Directory utilities
 @todo Make it usable on windoze without mingw :-)
-@todo Return rather vector<string> instead of this voodoo?
 @todo Unicode <-> UTF8 path conversion for Windows
- */
-class CORRADE_UTILITY_EXPORT Directory: public std::vector<std::string> {
-    private:
-        /* Hiding edit functions and types to private scope */
-        using std::vector<std::string>::iterator;
-        using std::vector<std::string>::assign;
-        using std::vector<std::string>::push_back;
-        using std::vector<std::string>::pop_back;
-        using std::vector<std::string>::insert;
-        using std::vector<std::string>::erase;
-        using std::vector<std::string>::swap;
-        using std::vector<std::string>::clear;
-        using std::vector<std::string>::get_allocator;
-        using std::vector<std::string>::resize;
-        using std::vector<std::string>::reserve;
-
-        bool _isLoaded;
+*/
+class CORRADE_UTILITY_EXPORT Directory {
     public:
+        Directory() = delete;
+
         /**
          * @brief Listing flag
          *
-         * @see Flags
+         * @see Flags, list()
          */
         enum class Flag: unsigned char {
             SkipDotAndDotDot = 1 << 0,  /**< Skip `.` and `..` directories */
@@ -82,7 +61,11 @@ class CORRADE_UTILITY_EXPORT Directory: public std::vector<std::string> {
             SortDescending = 1 << 5
         };
 
-        /** @brief Listing flags */
+        /**
+         * @brief Listing flags
+         *
+         * @see list()
+         */
         typedef Containers::EnumSet<Flag, unsigned char> Flags;
 
         /**
@@ -112,6 +95,15 @@ class CORRADE_UTILITY_EXPORT Directory: public std::vector<std::string> {
          * filename is absolute (with leading slash), returns filename.
          */
         static std::string join(const std::string& path, const std::string& filename);
+
+        /**
+         * @brief List directory contents
+         * @param path      Path
+         * @param flags     %Flags
+         *
+         * On failure returns empty vector.
+         */
+        static std::vector<std::string> list(const std::string& path, Flags flags = Flags());
 
         /**
          * @brief Create given path
@@ -159,19 +151,6 @@ class CORRADE_UTILITY_EXPORT Directory: public std::vector<std::string> {
          *      permission to open it).
          */
         static bool fileExists(const std::string& filename);
-
-        /**
-         * @brief Constructor
-         * @param path      %Directory path
-         * @param flags     Listing flags
-         *
-         * Tries to load items from given directory. Directory::isLoaded()
-         * should be used to determine whether the load was successful or not.
-         */
-        explicit Directory(const std::string& path, Flags flags = Flags());
-
-        /** @brief Whether the directory is successfully loaded */
-        inline bool isLoaded() const { return _isLoaded; }
 };
 
 CORRADE_ENUMSET_OPERATORS(Directory::Flags)

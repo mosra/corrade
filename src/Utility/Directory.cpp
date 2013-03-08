@@ -146,13 +146,13 @@ std::string Directory::configurationDir(const std::string& applicationName, bool
     return dir;
 }
 
-Directory::Directory(const std::string& path, Flags flags): _isLoaded(false) {
+std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     DIR* directory;
-    dirent* entry;
-
     directory = opendir(path.c_str());
-    if(directory == nullptr) return;
+    if(directory == nullptr) return {};
 
+    std::vector<std::string> list;
+    dirent* entry;
     while((entry = readdir(directory)) != nullptr) {
         #ifndef _WIN32
         if((flags >= Flag::SkipDotAndDotDot) && (std::string(entry->d_name) == "." || std::string(entry->d_name) == ".."))
@@ -166,15 +166,17 @@ Directory::Directory(const std::string& path, Flags flags): _isLoaded(false) {
         #endif
 
         /** @todo On some systems dirent returns DT_UNKNOWN for everything */
-        push_back(entry->d_name);
+        list.push_back(entry->d_name);
     }
 
     closedir(directory);
 
-    if(flags >= Flag::SortAscending) std::sort(begin(), end());
-    else if(flags >= Flag::SortDescending) std::sort(rbegin(), rend());
+    if(flags >= Flag::SortAscending)
+        std::sort(list.begin(), list.end());
+    else if(flags >= Flag::SortDescending)
+        std::sort(list.rbegin(), list.rend());
 
-    _isLoaded = true;
+    return std::move(list);
 }
 
 }}
