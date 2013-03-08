@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 
+#include "Containers/EnumSet.h"
 #include "utilities.h"
 
 namespace Corrade { namespace Utility {
@@ -57,15 +58,32 @@ class CORRADE_UTILITY_EXPORT Directory: public std::vector<std::string> {
 
         bool _isLoaded;
     public:
-        /** @brief Listing flags */
-        enum Flags {
-            SkipDotAndDotDot = 0x01,    /**< @brief Skip `.` and `..` directories */
-            SkipFiles = 0x02,           /**< @brief Skip regular files */
-            SkipDirectories = 0x04,     /**< @brief Skip directories (including `.` and `..`) */
-            SkipSpecial = 0x08,         /**< @brief Skip everything what is not a file or directory */
-            SortAscending = 0x10,       /**< @brief Sort items in ascending order */
-            SortDescending = 0x20       /**< @brief Sort items in descending order */
+        /**
+         * @brief Listing flag
+         *
+         * @see Flags
+         */
+        enum class Flag: unsigned char {
+            SkipDotAndDotDot = 1 << 0,  /**< Skip `.` and `..` directories */
+            SkipFiles = 1 << 1,         /**< Skip regular files */
+            SkipDirectories = 1 << 2,   /**< Skip directories (including `.` and `..`) */
+            SkipSpecial = 1 << 3,       /**< Skip everything what is not a file or directory */
+
+            /**
+             * Sort items in ascending order. If specified both @ref Flag "Flag::SortAscending"
+             * and @ref Flag "Flag::SortDescending", ascending order is used.
+             */
+            SortAscending = 3 << 4,
+
+            /**
+             * Sort items in descending order. If specified both @ref Flag "Flag::SortAscending"
+             * and @ref Flag "Flag::SortDescending", ascending order is used.
+             */
+            SortDescending = 1 << 5
         };
+
+        /** @brief Listing flags */
+        typedef Containers::EnumSet<Flag, unsigned char> Flags;
 
         /**
          * @brief Extract path from filename
@@ -145,17 +163,18 @@ class CORRADE_UTILITY_EXPORT Directory: public std::vector<std::string> {
         /**
          * @brief Constructor
          * @param path      %Directory path
-         * @param flags     Listing flags. See Directory::Flags. If no flag is
-         *      specified, everything will be loaded.
+         * @param flags     Listing flags
          *
          * Tries to load items from given directory. Directory::isLoaded()
          * should be used to determine whether the load was successful or not.
          */
-        explicit Directory(const std::string& path, int flags = 0);
+        explicit Directory(const std::string& path, Flags flags = Flags());
 
         /** @brief Whether the directory is successfully loaded */
         inline bool isLoaded() const { return _isLoaded; }
 };
+
+CORRADE_ENUMSET_OPERATORS(Directory::Flags)
 
 }}
 

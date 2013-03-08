@@ -39,6 +39,7 @@ class DirectoryTest: public Corrade::TestSuite::Tester {
         void home();
         void configurationDir();
         void list();
+        void listSortPrecedence();
 };
 
 DirectoryTest::DirectoryTest() {
@@ -52,7 +53,8 @@ DirectoryTest::DirectoryTest() {
              &DirectoryTest::mkpath,
              &DirectoryTest::home,
              &DirectoryTest::configurationDir,
-             &DirectoryTest::list);
+             &DirectoryTest::list,
+             &DirectoryTest::listSortPrecedence);
 }
 
 void DirectoryTest::path() {
@@ -207,41 +209,45 @@ void DirectoryTest::list() {
             TestSuite::Compare::SortedContainer);
     } {
         /* Skip special */
-        Directory d(DIRECTORY_TEST_DIR, Directory::SkipSpecial);
+        Directory d(DIRECTORY_TEST_DIR, Directory::Flag::SkipSpecial);
         CORRADE_VERIFY(d.isLoaded());
         CORRADE_COMPARE_AS(d, (std::vector<std::string>{".", "..", "dir", "file"}),
             TestSuite::Compare::SortedContainer);
     } {
         /* All, sorted ascending */
-        Directory d(DIRECTORY_TEST_DIR, Directory::SortAscending);
+        Directory d(DIRECTORY_TEST_DIR, Directory::Flag::SortAscending);
         CORRADE_VERIFY(d.isLoaded());
         CORRADE_COMPARE_AS(d, (std::vector<std::string>{".", "..", "dir", "file"}),
             TestSuite::Compare::Container);
     } {
         /* All, sorted descending */
-        Directory d(DIRECTORY_TEST_DIR, Directory::SortDescending);
+        Directory d(DIRECTORY_TEST_DIR, Directory::Flag::SortDescending);
         CORRADE_VERIFY(d.isLoaded());
         CORRADE_COMPARE_AS(d, (std::vector<std::string>{"file", "dir", "..", "."}),
             TestSuite::Compare::Container);
     } {
         /* Skip . and .. */
-        Directory d(DIRECTORY_TEST_DIR, Directory::SkipDotAndDotDot);
+        Directory d(DIRECTORY_TEST_DIR, Directory::Flag::SkipDotAndDotDot);
         CORRADE_VERIFY(d.isLoaded());
         CORRADE_COMPARE_AS(d, (std::vector<std::string>{"dir", "file"}),
             TestSuite::Compare::SortedContainer);
     } {
         /* Skip directories */
-        Directory d(DIRECTORY_TEST_DIR, Directory::SkipDirectories);
+        Directory d(DIRECTORY_TEST_DIR, Directory::Flag::SkipDirectories);
         CORRADE_VERIFY(d.isLoaded());
         CORRADE_COMPARE_AS(d, std::vector<std::string>{"file"},
             TestSuite::Compare::SortedContainer);
     } {
         /* Skip files */
-        Directory d(DIRECTORY_TEST_DIR, Directory::SkipFiles);
+        Directory d(DIRECTORY_TEST_DIR, Directory::Flag::SkipFiles);
         CORRADE_VERIFY(d.isLoaded());
         CORRADE_COMPARE_AS(d, (std::vector<std::string>{".", "..", "dir"}),
             TestSuite::Compare::SortedContainer);
     }
+}
+
+void DirectoryTest::listSortPrecedence() {
+    CORRADE_VERIFY((Directory::Flag::SortAscending|Directory::Flag::SortDescending) == Directory::Flag::SortAscending);
 }
 
 }}}

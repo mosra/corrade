@@ -146,7 +146,7 @@ std::string Directory::configurationDir(const std::string& applicationName, bool
     return dir;
 }
 
-Directory::Directory(const std::string& path, int flags): _isLoaded(false) {
+Directory::Directory(const std::string& path, Flags flags): _isLoaded(false) {
     DIR* directory;
     dirent* entry;
 
@@ -155,13 +155,13 @@ Directory::Directory(const std::string& path, int flags): _isLoaded(false) {
 
     while((entry = readdir(directory)) != nullptr) {
         #ifndef _WIN32
-        if((flags & SkipDotAndDotDot) && (std::string(entry->d_name) == "." || std::string(entry->d_name) == ".."))
+        if((flags >= Flag::SkipDotAndDotDot) && (std::string(entry->d_name) == "." || std::string(entry->d_name) == ".."))
             continue;
-        if((flags & SkipDirectories) && entry->d_type == DT_DIR)
+        if((flags >= Flag::SkipDirectories) && entry->d_type == DT_DIR)
             continue;
-        if((flags & SkipFiles) && entry->d_type == DT_REG)
+        if((flags >= Flag::SkipFiles) && entry->d_type == DT_REG)
             continue;
-        if((flags & SkipSpecial) && entry->d_type != DT_DIR && entry->d_type != DT_REG)
+        if((flags >= Flag::SkipSpecial) && entry->d_type != DT_DIR && entry->d_type != DT_REG)
             continue;
         #endif
 
@@ -171,8 +171,8 @@ Directory::Directory(const std::string& path, int flags): _isLoaded(false) {
 
     closedir(directory);
 
-    if(flags & SortAscending) std::sort(begin(), end());
-    if(flags & SortDescending) std::sort(rbegin(), rend());
+    if(flags >= Flag::SortAscending) std::sort(begin(), end());
+    else if(flags >= Flag::SortDescending) std::sort(rbegin(), rend());
 
     _isLoaded = true;
 }
