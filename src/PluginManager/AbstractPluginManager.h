@@ -311,6 +311,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
            from "used by" list, it must be done through this function. */
         virtual void removeUsedBy(const std::string& plugin, const std::string& usedBy);
 
+        void* instanceInternal(const std::string& plugin);
+
     private:
         /* Temporary storage of all information needed to import static plugins.
            They are imported to plugins() map on first call to plugins(),

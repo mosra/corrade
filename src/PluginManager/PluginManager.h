@@ -20,9 +20,6 @@
  * @brief Class Corrade::PluginManager::PluginManager
  */
 
-#include <string>
-#include <vector>
-
 #include "AbstractPluginManager.h"
 
 namespace Corrade { namespace PluginManager {
@@ -63,23 +60,14 @@ template<class T, class BasePluginManager = AbstractPluginManager> class PluginM
         std::string pluginInterface() const override { return T::pluginInterface(); }
 
         /**
-         * @brief Plugin class instance
-         * @param _plugin           Plugin
-         * @return Pointer to new instance of plugin class, zero on error
+         * @brief Plugin instance
          *
-         * Creates new instance of plugin class, if possible. If the plugin is
-         * not successfully loaded, returns zero pointer.
+         * Returns new instance of given plugin or `nullptr` on error. The
+         * plugin must be successfully loaded for the operation to succeed.
+         * @see loadState(), load()
          */
-        T* instance(const std::string& _plugin) {
-            /* Plugin with given name doesn't exist */
-            if(this->plugins()->find(_plugin) == this->plugins()->end()) return nullptr;
-
-            typename BasePluginManager::PluginObject& plugin = *this->plugins()->at(_plugin);
-
-            /* Plugin is not successfully loaded */
-            if(!(plugin.loadState & (LoadState::Loaded|LoadState::Static))) return nullptr;
-
-            return static_cast<T*>(plugin.instancer(this, _plugin));
+        T* instance(const std::string& plugin) {
+            return static_cast<T*>(this->instanceInternal(plugin));
         }
 };
 

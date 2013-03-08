@@ -422,6 +422,16 @@ void AbstractPluginManager::removeUsedBy(const std::string& plugin, const std::s
     }
 }
 
+void* AbstractPluginManager::instanceInternal(const std::string& plugin) {
+    auto foundPlugin = plugins()->find(plugin);
+
+    /* Plugin with given name doesn't exist or isn't successfully loaded */
+    if(foundPlugin == plugins()->end() || !(foundPlugin->second->loadState & (LoadState::Loaded|LoadState::Static)))
+        return nullptr;
+
+    return foundPlugin->second->instancer(this, plugin);
+}
+
 AbstractPluginManager::PluginObject::PluginObject(const std::string& _metadata, AbstractPluginManager* _manager): configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(_manager), instancer(nullptr), module(nullptr) {
     loadState = configuration.isValid() ? LoadState::NotLoaded : LoadState::WrongMetadataFile;
 }
