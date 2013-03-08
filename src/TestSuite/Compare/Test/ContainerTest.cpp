@@ -33,11 +33,11 @@ class ContainerTest: public Tester {
 };
 
 ContainerTest::ContainerTest() {
-    addTests(&ContainerTest::same,
-             &ContainerTest::outputActualSmaller,
-             &ContainerTest::outputExpectedSmaller,
-             &ContainerTest::output,
-             &ContainerTest::sorted);
+    addTests({&ContainerTest::same,
+              &ContainerTest::outputActualSmaller,
+              &ContainerTest::outputExpectedSmaller,
+              &ContainerTest::output,
+              &ContainerTest::sorted});
 }
 
 void ContainerTest::same() {

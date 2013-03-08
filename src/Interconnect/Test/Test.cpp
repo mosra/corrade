@@ -78,21 +78,21 @@ class Mailbox: public Interconnect::Receiver {
 };
 
 Test::Test() {
-    addTests(&Test::signalData,
-             &Test::connect,
-             &Test::disconnect,
-             &Test::disconnectSignal,
-             &Test::disconnectEmitter,
-             &Test::disconnectReceiver,
-             &Test::destroyEmitter,
-             &Test::destroyReceiver,
-             &Test::emit,
-             &Test::emitterSubclass,
-             &Test::receiverSubclass,
-             &Test::slotInReceiverBase,
-             &Test::virtualSlot,
-             &Test::changeConnectionsInSlot,
-             &Test::deleteReceiverInSlot);
+    addTests({&Test::signalData,
+              &Test::connect,
+              &Test::disconnect,
+              &Test::disconnectSignal,
+              &Test::disconnectEmitter,
+              &Test::disconnectReceiver,
+              &Test::destroyEmitter,
+              &Test::destroyReceiver,
+              &Test::emit,
+              &Test::emitterSubclass,
+              &Test::receiverSubclass,
+              &Test::slotInReceiverBase,
+              &Test::virtualSlot,
+              &Test::changeConnectionsInSlot,
+              &Test::deleteReceiverInSlot});
 }
 
 void Test::signalData() {

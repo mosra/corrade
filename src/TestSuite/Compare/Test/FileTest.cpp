@@ -42,13 +42,13 @@ class FileTest: public Tester {
 };
 
 FileTest::FileTest() {
-    addTests(&FileTest::same,
-             &FileTest::empty,
-             &FileTest::actualNotFound,
-             &FileTest::expectedNotFound,
-             &FileTest::outputActualSmaller,
-             &FileTest::outputExpectedSmaller,
-             &FileTest::output);
+    addTests({&FileTest::same,
+              &FileTest::empty,
+              &FileTest::actualNotFound,
+              &FileTest::expectedNotFound,
+              &FileTest::outputActualSmaller,
+              &FileTest::outputExpectedSmaller,
+              &FileTest::output});
 }
 
 void FileTest::same() {

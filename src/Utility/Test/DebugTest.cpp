@@ -37,12 +37,12 @@ class DebugTest: public TestSuite::Tester {
 };
 
 DebugTest::DebugTest() {
-    addTests(&DebugTest::debug,
-             &DebugTest::boolean,
-             &DebugTest::chars,
-             &DebugTest::custom,
-             &DebugTest::flags,
-             &DebugTest::iterable);
+    addTests({&DebugTest::debug,
+              &DebugTest::boolean,
+              &DebugTest::chars,
+              &DebugTest::custom,
+              &DebugTest::flags,
+              &DebugTest::iterable});
 }
 
 void DebugTest::debug() {

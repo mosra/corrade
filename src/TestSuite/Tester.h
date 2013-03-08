@@ -96,10 +96,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          *
          * Adds one or more test cases to be executed when calling exec().
          */
-        template<class Derived, class ...T> void addTests(void(Derived::*first)(), T... next) {
-            testCases.push_back(static_cast<TestCase>(first));
-
-            addTests(next...);
+        template<class Derived> void addTests(std::initializer_list<void(Derived::*)()> tests) {
+            testCases.reserve(testCases.size() + tests.size());
+            for(auto test: tests)
+                testCases.push_back(static_cast<TestCase>(test));
         }
 
         #ifndef DOXYGEN_GENERATING_OUTPUT

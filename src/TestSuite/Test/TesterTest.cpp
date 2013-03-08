@@ -73,21 +73,21 @@ class Test: public Tester {
 };
 
 Test::Test() {
-    addTests(&Test::noChecks,
-             &Test::trueExpression,
-             &Test::falseExpression,
-             &Test::equal,
-             &Test::nonEqual,
-             &Test::expectFail,
-             &Test::unexpectedPassExpression,
-             &Test::unexpectedPassEqual,
+    addTests({&Test::noChecks,
+              &Test::trueExpression,
+              &Test::falseExpression,
+              &Test::equal,
+              &Test::nonEqual,
+              &Test::expectFail,
+              &Test::unexpectedPassExpression,
+              &Test::unexpectedPassEqual,
 
-             &Test::compareAs,
-             &Test::compareAsFail,
-             &Test::compareWith,
-             &Test::compareWithFail,
+              &Test::compareAs,
+              &Test::compareAsFail,
+              &Test::compareWith,
+              &Test::compareWithFail,
 
-             &Test::skip);
+              &Test::skip});
 }
 
 void Test::noChecks() {
@@ -166,9 +166,9 @@ class TesterTest: public Tester {
 class EmptyTest: public Tester {};
 
 TesterTest::TesterTest() {
-    addTests(&TesterTest::test,
-             &TesterTest::emptyTest,
-             &TesterTest::compareAsOverload);
+    addTests({&TesterTest::test,
+              &TesterTest::emptyTest,
+              &TesterTest::compareAsOverload});
 }
 
 void TesterTest::test() {

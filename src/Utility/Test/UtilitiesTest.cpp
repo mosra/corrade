@@ -28,8 +28,8 @@ class UtilitiesTest: public TestSuite::Tester {
 };
 
 UtilitiesTest::UtilitiesTest() {
-    addTests(&UtilitiesTest::pow2,
-             &UtilitiesTest::log2);
+    addTests({&UtilitiesTest::pow2,
+              &UtilitiesTest::log2});
 }
 
 void UtilitiesTest::pow2() {

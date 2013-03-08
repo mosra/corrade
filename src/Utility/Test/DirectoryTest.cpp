@@ -43,18 +43,18 @@ class DirectoryTest: public Corrade::TestSuite::Tester {
 };
 
 DirectoryTest::DirectoryTest() {
-    addTests(&DirectoryTest::path,
-             &DirectoryTest::filename,
-             &DirectoryTest::join,
-             &DirectoryTest::fileExists,
-             &DirectoryTest::remove,
-             &DirectoryTest::moveFile,
-             &DirectoryTest::moveDirectory,
-             &DirectoryTest::mkpath,
-             &DirectoryTest::home,
-             &DirectoryTest::configurationDir,
-             &DirectoryTest::list,
-             &DirectoryTest::listSortPrecedence);
+    addTests({&DirectoryTest::path,
+              &DirectoryTest::filename,
+              &DirectoryTest::join,
+              &DirectoryTest::fileExists,
+              &DirectoryTest::remove,
+              &DirectoryTest::moveFile,
+              &DirectoryTest::moveDirectory,
+              &DirectoryTest::mkpath,
+              &DirectoryTest::home,
+              &DirectoryTest::configurationDir,
+              &DirectoryTest::list,
+              &DirectoryTest::listSortPrecedence});
 }
 
 void DirectoryTest::path() {

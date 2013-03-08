@@ -33,11 +33,11 @@ class FloatingPointTest: public Tester {
 };
 
 FloatingPointTest::FloatingPointTest() {
-    addTests(&FloatingPointTest::smallDelta,
-             &FloatingPointTest::largeDelta,
-             &FloatingPointTest::nan,
-             &FloatingPointTest::infinity,
-             &FloatingPointTest::output);
+    addTests({&FloatingPointTest::smallDelta,
+              &FloatingPointTest::largeDelta,
+              &FloatingPointTest::nan,
+              &FloatingPointTest::infinity,
+              &FloatingPointTest::output});
 }
 
 void FloatingPointTest::smallDelta() {

@@ -32,9 +32,9 @@ class TranslatorTest: public TestSuite::Tester {
 };
 
 TranslatorTest::TranslatorTest() {
-    addTests(&TranslatorTest::file,
-             &TranslatorTest::group,
-             &TranslatorTest::dynamic);
+    addTests({&TranslatorTest::file,
+              &TranslatorTest::group,
+              &TranslatorTest::dynamic});
 }
 
 void TranslatorTest::file() {

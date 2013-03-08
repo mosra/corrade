@@ -59,17 +59,17 @@ class PluginTest: public TestSuite::Tester {
 };
 
 PluginTest::PluginTest() {
-    addTests(&PluginTest::nameList,
-             &PluginTest::errors,
-             &PluginTest::staticPlugin,
-             &PluginTest::dynamicPlugin,
-             &PluginTest::deletable,
-             &PluginTest::hierarchy,
-             &PluginTest::crossManagerDependencies,
-             &PluginTest::usedByZombies,
-             &PluginTest::reloadPluginDirectory,
+    addTests({&PluginTest::nameList,
+              &PluginTest::errors,
+              &PluginTest::staticPlugin,
+              &PluginTest::dynamicPlugin,
+              &PluginTest::deletable,
+              &PluginTest::hierarchy,
+              &PluginTest::crossManagerDependencies,
+              &PluginTest::usedByZombies,
+              &PluginTest::reloadPluginDirectory,
 
-             &PluginTest::debug);
+              &PluginTest::debug});
 
     initialize();
     manager = new PluginManager<AbstractAnimal>(PLUGINS_DIR);

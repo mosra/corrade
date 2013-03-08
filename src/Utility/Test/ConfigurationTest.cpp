@@ -56,24 +56,24 @@ class ConfigurationTest: public TestSuite::Tester {
 };
 
 ConfigurationTest::ConfigurationTest() {
-    addTests(&ConfigurationTest::parse,
-             &ConfigurationTest::parseDirect,
-             &ConfigurationTest::empty,
-             &ConfigurationTest::invalid,
-             &ConfigurationTest::readonly,
-             &ConfigurationTest::readonlyWithoutFile,
-             &ConfigurationTest::truncate,
-             &ConfigurationTest::whitespaces,
-             &ConfigurationTest::types,
-             &ConfigurationTest::eol,
-             &ConfigurationTest::uniqueGroups,
-             &ConfigurationTest::uniqueKeys,
-             &ConfigurationTest::stripComments,
-             &ConfigurationTest::autoCreation,
-             &ConfigurationTest::directValue,
-             &ConfigurationTest::hierarchic,
-             &ConfigurationTest::hierarchicUnique,
-             &ConfigurationTest::copy);
+    addTests({&ConfigurationTest::parse,
+              &ConfigurationTest::parseDirect,
+              &ConfigurationTest::empty,
+              &ConfigurationTest::invalid,
+              &ConfigurationTest::readonly,
+              &ConfigurationTest::readonlyWithoutFile,
+              &ConfigurationTest::truncate,
+              &ConfigurationTest::whitespaces,
+              &ConfigurationTest::types,
+              &ConfigurationTest::eol,
+              &ConfigurationTest::uniqueGroups,
+              &ConfigurationTest::uniqueKeys,
+              &ConfigurationTest::stripComments,
+              &ConfigurationTest::autoCreation,
+              &ConfigurationTest::directValue,
+              &ConfigurationTest::hierarchic,
+              &ConfigurationTest::hierarchicUnique,
+              &ConfigurationTest::copy});
 
     /* Create testing dir */
     Directory::mkpath(CONFIGURATION_WRITE_TEST_DIR);

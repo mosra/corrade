@@ -41,12 +41,12 @@ class StringToFileTest: public Tester {
 };
 
 StringToFileTest::StringToFileTest() {
-    addTests(&StringToFileTest::same,
-             &StringToFileTest::empty,
-             &StringToFileTest::notFound,
-             &StringToFileTest::outputActualSmaller,
-             &StringToFileTest::outputExpectedSmaller,
-             &StringToFileTest::output);
+    addTests({&StringToFileTest::same,
+              &StringToFileTest::empty,
+              &StringToFileTest::notFound,
+              &StringToFileTest::outputActualSmaller,
+              &StringToFileTest::outputExpectedSmaller,
+              &StringToFileTest::output});
 }
 
 void StringToFileTest::same() {

@@ -31,10 +31,10 @@ class StringTest: public TestSuite::Tester {
 };
 
 StringTest::StringTest() {
-    addTests(&StringTest::trim,
-             &StringTest::split,
-             &StringTest::lowercase,
-             &StringTest::whitespace);
+    addTests({&StringTest::trim,
+              &StringTest::split,
+              &StringTest::lowercase,
+              &StringTest::whitespace});
 }
 
 void StringTest::trim() {

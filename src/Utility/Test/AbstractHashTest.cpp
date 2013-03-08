@@ -31,9 +31,9 @@ class AbstractHashTest: public TestSuite::Tester {
 };
 
 AbstractHashTest::AbstractHashTest() {
-    addTests(&AbstractHashTest::toHexString,
-             &AbstractHashTest::fromHexString,
-             &AbstractHashTest::debug);
+    addTests({&AbstractHashTest::toHexString,
+              &AbstractHashTest::fromHexString,
+              &AbstractHashTest::debug});
 }
 
 void AbstractHashTest::toHexString() {

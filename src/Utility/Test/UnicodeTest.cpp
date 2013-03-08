@@ -30,8 +30,8 @@ class UnicodeTest: public TestSuite::Tester {
 };
 
 UnicodeTest::UnicodeTest() {
-    addTests(&UnicodeTest::nextUtf8,
-             &UnicodeTest::nextUtf8Error);
+    addTests({&UnicodeTest::nextUtf8,
+              &UnicodeTest::nextUtf8Error});
 }
 
 void UnicodeTest::nextUtf8() {

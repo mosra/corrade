@@ -28,7 +28,7 @@ class EndianTest: public TestSuite::Tester {
 };
 
 EndianTest::EndianTest() {
-    addTests(&EndianTest::endianness);
+    addTests({&EndianTest::endianness});
 }
 
 void EndianTest::endianness() {

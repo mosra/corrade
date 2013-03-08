@@ -37,9 +37,9 @@ class ResourceTest: public TestSuite::Tester {
 };
 
 ResourceTest::ResourceTest() {
-    addTests(&ResourceTest::compile,
-             &ResourceTest::get,
-             &ResourceTest::getInexistent);
+    addTests({&ResourceTest::compile,
+              &ResourceTest::get,
+              &ResourceTest::getInexistent});
 }
 
 void ResourceTest::compile() {

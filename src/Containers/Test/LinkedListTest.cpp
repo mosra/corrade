@@ -55,15 +55,15 @@ typedef Containers::LinkedList<Item> LinkedList;
 int Item::count = 0;
 
 LinkedListTest::LinkedListTest() {
-    addTests(&LinkedListTest::listBackReference,
-             &LinkedListTest::insert,
-             &LinkedListTest::insertFromOtherList,
-             &LinkedListTest::insertBeforeFromOtherList,
-             &LinkedListTest::cut,
-             &LinkedListTest::cutFromOtherList,
-             &LinkedListTest::clear,
-             &LinkedListTest::moveList,
-             &LinkedListTest::moveItem);
+    addTests({&LinkedListTest::listBackReference,
+              &LinkedListTest::insert,
+              &LinkedListTest::insertFromOtherList,
+              &LinkedListTest::insertBeforeFromOtherList,
+              &LinkedListTest::cut,
+              &LinkedListTest::cutFromOtherList,
+              &LinkedListTest::clear,
+              &LinkedListTest::moveList,
+              &LinkedListTest::moveItem});
 }
 
 void LinkedListTest::listBackReference() {
