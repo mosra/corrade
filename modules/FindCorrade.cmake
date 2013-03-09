@@ -132,4 +132,3 @@ mark_as_advanced(CORRADE_UTILITY_LIBRARY
     CORRADE_TESTSUITE_LIBRARY)
 
 include(CorradeMacros)
-include(CorradeLibSuffix)
