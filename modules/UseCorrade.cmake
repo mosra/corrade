@@ -1,6 +1,12 @@
 
 # (the blank line is here so CMake doesn't generate documentation from it)
 
+# Mandatory C++ flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+
+# Optional C++ flags
+set(CORRADE_CXX_FLAGS "-Wall -Wextra -Wold-style-cast -Winit-self -pedantic -fvisibility=hidden")
+
 # Set variable for current and also parent scope, if parent scope exists.
 #  set_parent_scope(name value)
 # Workaround for ugly CMake bug.

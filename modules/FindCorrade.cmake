@@ -23,6 +23,10 @@
 #   dependencies)
 #  CORRADE_TESTSUITE_LIBRARY        - Corrade TestSuite library (w/o
 #   dependencies)
+# Corrade configures the compiler to use C++11 standard. Additionally you can
+# use CORRADE_CXX_FLAGS to enable additional pedantic set of warnings and enable
+# hidden visibility by default.
+#
 # If Corrade library is found, these macros and functions are defined:
 #
 #
@@ -126,4 +130,4 @@ mark_as_advanced(CORRADE_UTILITY_LIBRARY
     CORRADE_PLUGINMANAGER_LIBRARY
     CORRADE_TESTSUITE_LIBRARY)
 
-include(CorradeMacros)
+include(UseCorrade)
