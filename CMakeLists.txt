@@ -1,22 +1,24 @@
 cmake_minimum_required(VERSION 2.6)
-
 project(Corrade)
 
 option(GCC46_COMPATIBILITY "Enable compatibility mode for GCC 4.6 (might disable some features)" OFF)
 
 option(BUILD_TESTS "Build unit tests." OFF)
-
 if(BUILD_TESTS)
     enable_testing()
 endif()
 
-set(CMAKE_MODULE_PATH "${Corrade_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
-
+# Initialize macros
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
 set(CORRADE_UTILITY_LIBRARY CorradeUtility)
 set(CORRADE_RC_EXECUTABLE corrade-rc)
+if(BUILD_TESTS)
+    set(CORRADE_TESTSUITE_LIBRARIES CorradeTestSuite CorradeUtility)
+endif()
 include(CorradeMacros)
-include(CorradeLibSuffix)
 
+# Installation paths
+include(CorradeLibSuffix)
 set(CORRADE_BINARY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/bin)
 set(CORRADE_LIBRARY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
 set(CORRADE_CMAKE_MODULE_INSTALL_DIR ${CMAKE_ROOT}/Modules)

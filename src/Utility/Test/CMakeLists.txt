@@ -1,10 +1,10 @@
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 set(UTILITY_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(UTILITY_BINARY_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testConfigure.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/testConfigure.h)
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 corrade_add_test(UtilityAbstractHashTest AbstractHashTest.cpp)
 corrade_add_test(UtilityDirectoryTest DirectoryTest.cpp)
@@ -21,8 +21,7 @@ corrade_add_test(UtilityUnicodeTest UnicodeTest.cpp)
 # Compiled-in resource test
 corrade_add_resource(ResourceTestData test
     ResourceTestFiles/predisposition.bin ALIAS predisposition.bin
-    ResourceTestFiles/consequence.bin ALIAS consequence.bin
-    )
+    ResourceTestFiles/consequence.bin ALIAS consequence.bin)
 corrade_add_test(UtilityResourceTest ResourceTest.cpp ${ResourceTestData})
 
 # Static lib resource test

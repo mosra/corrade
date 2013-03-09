@@ -18,6 +18,5 @@ install(TARGETS CorradeInterconnect DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 install(FILES ${CorradeInterconnect_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/Interconnect)
 
 if(BUILD_TESTS)
-    enable_testing()
     add_subdirectory(Test)
 endif()

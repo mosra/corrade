@@ -1,5 +1,3 @@
-add_definitions(-Wall -pedantic)
-
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/corradePluginManagerConfigure.h.cmake
@@ -29,6 +27,5 @@ install(TARGETS CorradePluginManager DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 install(FILES ${CorradePluginManager_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/PluginManager)
 
 if(BUILD_TESTS)
-    enable_testing()
     add_subdirectory(Test)
 endif()

@@ -1,5 +1,3 @@
-add_subdirectory(Compare)
-
 set(CorradeTestSuite_SRCS
     Tester.cpp
 
@@ -21,7 +19,8 @@ target_link_libraries(CorradeTestSuite CorradeUtility)
 install(TARGETS CorradeTestSuite DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 install(FILES ${CorradeTestSuite_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/TestSuite)
 
+add_subdirectory(Compare)
+
 if(BUILD_TESTS)
-    enable_testing()
     add_subdirectory(Test)
 endif()
