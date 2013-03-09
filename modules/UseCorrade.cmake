@@ -5,7 +5,10 @@
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
 # Optional C++ flags
-set(CORRADE_CXX_FLAGS "-Wall -Wextra -Wold-style-cast -Winit-self -pedantic -fvisibility=hidden")
+set(CORRADE_CXX_FLAGS "-Wall -Wextra -Wold-style-cast -Winit-self -Werror=return-type -Wmissing-declarations -pedantic -fvisibility=hidden")
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS} -Wdouble-promotion")
+endif()
 
 # Set variable for current and also parent scope, if parent scope exists.
 #  set_parent_scope(name value)

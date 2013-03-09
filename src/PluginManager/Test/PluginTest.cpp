@@ -30,7 +30,7 @@
 
 using Corrade::Utility::Directory;
 
-void initialize() {
+static void initialize() {
     PLUGIN_IMPORT(Canary)
 }
 

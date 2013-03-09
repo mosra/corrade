@@ -144,7 +144,7 @@ running into linker errors with `resourceInitializer_*`, this could be the
 problem. If you are in a namespace and cannot call this macro from main(),
 try this:
 @code
-void initialize() {
+static void initialize() {
     RESOURCE_INITIALIZE(res)
 }
 

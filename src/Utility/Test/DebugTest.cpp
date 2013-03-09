@@ -87,12 +87,16 @@ void DebugTest::chars() {
     CORRADE_COMPARE(o.str(), "97\n");
 }
 
+namespace {
+
 struct Foo {
     int value;
 };
 
 Debug operator<<(Debug debug, const Foo& value) {
     return debug << value.value;
+}
+
 }
 
 void DebugTest::custom() {

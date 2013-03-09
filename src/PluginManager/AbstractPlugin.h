@@ -158,15 +158,19 @@ See @ref plugin-management for more information about plugin compilation.
 #define PLUGIN_REGISTER(name, className, interface)                         \
     inline void* pluginInstancer_##name(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
         { return new className(manager, plugin); }                          \
+    int pluginInitializer_##name();                                         \
     int pluginInitializer_##name() {                                        \
         Corrade::PluginManager::AbstractPluginManager::importStaticPlugin(#name, PLUGIN_VERSION, interface, pluginInstancer_##name); return 1; \
     }
 #else
 #ifdef CORRADE_DYNAMIC_PLUGIN
 #define PLUGIN_REGISTER(name, className, interface)                         \
-    extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion() { return PLUGIN_VERSION; }               \
+    extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion();                   \
+    extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion() { return PLUGIN_VERSION; } \
+    extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin); \
     extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
         { return new className(manager, plugin); }                          \
+    extern "C" CORRADE_PLUGIN_EXPORT const char* pluginInterface();         \
     extern "C" CORRADE_PLUGIN_EXPORT const char* pluginInterface() { return interface; }
 #else
 #define PLUGIN_REGISTER(name, className, interface)
