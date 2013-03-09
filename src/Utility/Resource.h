@@ -169,7 +169,7 @@ namespace Foo {
  * RESOURCE_INITIALIZE() documentation for more information.
  */
 #define RESOURCE_CLEANUP(name)                                                \
-    extern int resourceInitializer_##name();                                  \
+    extern int resourceFinalizer_##name();                                    \
     resourceFinalizer_##name();
 
 }}
