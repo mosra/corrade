@@ -81,7 +81,7 @@ CORRADE_UTILITY_EXPORT void sleep(std::size_t ms);
  * @attention This macro does nothing in static libraries.
  */
 #define AUTOMATIC_INITIALIZER(function)                                       \
-    static const int __##function = function();
+    static const int initializer_##function = function();
 
 /**
  * @brief Declare automatic initializer
@@ -93,11 +93,11 @@ CORRADE_UTILITY_EXPORT void sleep(std::size_t ms);
  * @attention This macro does nothing in static libraries.
  */
 #define AUTOMATIC_FINALIZER(function)                                         \
-    class __##function {                                                      \
+    class Finalizer_##function {                                              \
         public:                                                               \
-            inline __##function() {}                                          \
-            inline ~__##function() { function(); }                            \
-    } __##function;
+            inline Finalizer_##function() {}                                  \
+            inline ~Finalizer_##function() { function(); }                    \
+    } Finalizer_##function;
 
 /*@}*/
 
