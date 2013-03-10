@@ -29,7 +29,6 @@ namespace Corrade { namespace Examples {
 
 class Dog: public AbstractAnimal {
     public:
-        Dog() = default;
         Dog(PluginManager::AbstractPluginManager* manager, std::string plugin):
             AbstractAnimal(manager, std::move(plugin)) {}
 

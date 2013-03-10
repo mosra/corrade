@@ -33,7 +33,6 @@ class AbstractAnimal: public PluginManager::AbstractPlugin {
     PLUGIN_INTERFACE("cz.mosra.Corrade.Examples.AbstractAnimal/1.0")
 
     public:
-        AbstractAnimal() = default;
         AbstractAnimal(PluginManager::AbstractPluginManager* manager, std::string plugin):
             AbstractPlugin(manager, std::move(plugin)) {}
 
