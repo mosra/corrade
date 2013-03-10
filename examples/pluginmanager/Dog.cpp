@@ -33,9 +33,9 @@ class Dog: public AbstractAnimal {
         Dog(PluginManager::AbstractPluginManager* manager, std::string plugin):
             AbstractAnimal(manager, std::move(plugin)) {}
 
-        std::string name() const { return "Doug"; }
-        int legCount() const { return 4; }
-        bool hasTail() const { return true; }
+        std::string name() const override { return "Doug"; }
+        int legCount() const override { return 4; }
+        bool hasTail() const override { return true; }
 };
 
 }}

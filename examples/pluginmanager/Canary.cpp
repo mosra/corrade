@@ -32,9 +32,9 @@ class Canary: public AbstractAnimal {
         Canary(PluginManager::AbstractPluginManager* manager, std::string plugin):
             AbstractAnimal(manager, std::move(plugin)) {}
 
-        std::string name() const { return "Achoo"; }
-        int legCount() const { return 2; }
-        bool hasTail() const { return true; }
+        std::string name() const override { return "Achoo"; }
+        int legCount() const override { return 2; }
+        bool hasTail() const override { return true; }
 };
 
 }}
