@@ -215,9 +215,21 @@ and horizontal space.
 
 Indented is everything except namespace declarations (as specified above) -
 blocks, class protection levels, `case` statements. Overlong line breaks are
-indented also with 4 spaces or better where it makes more sense (e.g. for
-aligning similar code), multiline comments are indented with three spaces for
-the comment text block to be aligned.
+indented also with 4 spaces (or any other value if it makes more sense, e.g. for
+aligning similar code).
+@code
+class Foo {
+    public:
+        void bar() {
+            addMethods(&Foo::methodNameOne,
+                       &Foo::methodNameTwo);
+        }
+
+    protected:
+        void methodNameOne();
+        void methodNameTwo();
+};
+@endcode
 
 Whitespace is **not allowed** inside parentheses and between function name or
 branch/loop statement and left parenthesis (or between constructed variable
@@ -225,16 +237,20 @@ name and left brace) and before semicolon. It **must be** around block braces
 if the block is not empty. It **must not** be space before, but after the
 comma.
 @code
-if ( statement ){foo (a ,b) ;} // awful!
-if(statement) { foo(a, b); }   // good
+if ( statement ){foo ( a ,b ) ;} // awful! (_everything_ is misplaced)
+if(statement) { foo(a, b); }     // perfect
 @endcode
 
-Whitespace should be around operators with low precedence (namely `+`, `-`,
-`<<`, `>>` but not on unary `-`), around all boolean and comparison operators,
-around `=` and related operators and around ternary operator. Whitespace is
-should be around `/`, `*`, `%` to indicate they have precedence before
-addition and substraction. Whitespace can or need not to be around binary
-operators, whichever looks better in particular content.
+Whitespace **should be** around operators with low precedence (namely `+`, `-`,
+`<<`, `>>` but not on unary `-`), around all boolean and comparison operators
+(`&&`, `||`, `==`, `!=`, `<`, `<=`, `>=`, `>`), around `=` and related operators
+and around ternary operator. Whitespace **shouldn't be** around `/`, `*`, `%` to
+indicate they have precedence before addition and substraction. Whitespace can
+or need not to be around binary operators (`&`, `|`, `^`), whichever looks
+better in particular content.
+@code
+a += b*5 - 3*(c != 0 ? 64/c : 1);
+@endcode
 
 Block opening braces start on the same line as corresponding statement (class/
 function declaration, branch and loop statement), `else` and `else if`
@@ -303,16 +319,15 @@ class MyClass {
 };
 @endcode
 
-If the constructor is intentionally implicit, mark it with appropriate
-comment.
+If the constructor is intentionally implicit, mark it with appropriate comment.
 
 If the class has only static members (e.g. various utility classes, traits
 classes), delete the constructor to prevent instantiating the class by
 mistake:
 @code
-class MyClass {
+class UtilityClass {
     public:
-        MyClass() = delete;
+        UtilityClass() = delete;
 
         // ...
 };
@@ -320,9 +335,9 @@ class MyClass {
 
 @subsection cpp-constexpr Constant expressions and constants
 
-Use `constexpr` keyword as much as possible, mainly for getters, operators and
-static pure functions, e.g. Containers::EnumSet::operator&(). If the function is
-not a single return-statement, try hard to make it so.
+Use `constexpr` keyword where appropriate, mainly for getters, operators and
+static pure functions which will be heavily used with compile-time constants,
+such as Containers::EnumSet::operator&().
 
 Traits class members and class constants which are not meant to be referenced
 or pointed to should be defined as `inline constexpr` function or using
@@ -412,9 +427,9 @@ Doxygen documentation uses C-style comments with two asterisks, each
 successive line should start with asterisk and space. However, documentation
 block starting at beginning of the line (with no indentation) and spanning
 more lines shouldn't have leading asterisks and use whole 80 column width to
-avoid wasted space.
+save horizontal space.
 
-Doxygen commands are prefixed with `@`.
+Doxygen commands are prefixed with `@`, not `\`.
 
 If the documentation comment is short enough, it can be on one line. If not,
 the first line should contain only the slash and two asterisks. However, there
@@ -422,18 +437,31 @@ are exceptions for commands that can be on the first line of the multiline
 documentation block - namely @c \@page, @c \@name, @c \@file, @c \@namespace
 and other commands for "out-of-place" documentation.
 
-Doxygen documentation is mainly in header files, additional documentation
-pages which doesn't belong to any particular class (e.g. namespaces,
-overview...) is in `doc/` directory. In source file should be only @c \@todo
-items related to particular lines of code. Documentation pages, page sections
-and additional documentation files should be named in lowercase with dashes
-between words. Sections inside class/function documentation should be prefixed
-with corresponding name (with no case change), followed by dash. The rest of
-the name is in lowercase with dashes between words. Additional documentation
-files use `*.dox` extension.
+Doxygen documentation is mainly in header files. In source file should be only
+@c \@todo or @c \@bug items related to particular lines of code. Sections inside
+class/function documentation should be prefixed with corresponding name (with no
+case change), followed by dash, the rest of the name is in lowercase with dashes
+between words:
+@code
+// ...
+// @section ConfigurationValue-basic-usage Basic usage
+// ...
+class ConfigurationValue {
+@endcode
 
-File documentation block is after license block, it explains only in
-@c \@brief what content given header contains.
+Additional documentation files which don't belong to any particular class
+(e.g. namespaces, overview...) are in `doc/` directory and use `*.dox`
+extension. Documentation pages, page sections and documentation files should be
+named in lowercase with dashes between words, e.g. `corrade-coding-style`,
+filename corresponds to name of documentation page it contains.
+
+File documentation block (@c \@file) is after license block, it explains only
+in @c \@brief what content given header contains:
+@code
+// @file
+// @brief Class Corrade::Utility::Unicode
+//
+@endcode
 
 Namespace documentation is only in file `namespaces.dox` inside `doc/`
 directory.
@@ -442,20 +470,42 @@ Class and function documentation block nearly always starts with an @c \@brief
 description (the only exception is enum value documentation). After that is
 documentation of template parameters, function parameters and return value.
 These are documented only if it's not obvious from the description or
-function/parameter name (i.e. it's not needed for setters).
+function/parameter name (i.e. it's not needed for getters and setters).
 
-Trivial function overloads (e.g. const overloads) are marked only with
-@c \@overload keyword and are always *after* the original documented function.
+Trivial function overloads (e.g. `const` overloads) are marked only with
+@c \@overload keyword and are always *after* the original documented function:
+@code
+// @brief Data
+inline char* data() { return _data; }
+
+// @overload
+inline const char* data() const { return _data; }
+@endcode
 
 If the documentation is short enough, it can be placed after the documented
 element only if it doesn't exceed 80 character limit too much (e.g. enum value
-documentation).
+documentation):
+@code
+enum class Flag: unsigned char {
+    Active,         //< Foo has active bar
+    Inactive,       //< Foo has no active bars
+    FileNotFound    //< File was not found
+};
+@endcode
 
 For hiding implementation details from documentation or for working around
 Doxygen parsing issues (and false positive warnings), preprocessor define
-`DOXYGEN_GENERATING_OUTPUT` can be used. It is defined only when doxygen
+`DOXYGEN_GENERATING_OUTPUT` can be used. It is defined only when Doxygen
 generates the documentation. If that works around some Doxygen parsing bug,
-don't forget to mark it with @c \@todoc (see below).
+don't forget to mark it with @c \@todoc (see below). Example:
+@code
+// @brief Set new value
+#ifdef DOXYGEN_GENERATING_OUTPUT
+template<class T> void set(T value);
+#else
+template<class T> type std::enable_if<std::is_convertible<T, int>::value, void>::type set(T value);
+#endif
+@endcode
 
 @subsection documentation-commands Special documentation commands
 
@@ -485,8 +535,7 @@ with @c \@configurationvalue, and referenced from the class using
 @c \@configurationvalueref e.g.:
 @code
 // @configurationvalueref{Hash}
-class Hash {
-};
+class Hash;
 // @configurationvalue{Hash}
 namespace Corrade { namespace Utility {
     struct ConfigurationValue<Hash> {
