@@ -34,7 +34,8 @@ class AbstractAnimal: public PluginManager::AbstractPlugin {
 
     public:
         AbstractAnimal() = default;
-        AbstractAnimal(PluginManager::AbstractPluginManager* manager, std::string plugin): AbstractPlugin(manager, std::move(plugin)) {}
+        AbstractAnimal(PluginManager::AbstractPluginManager* manager, std::string plugin):
+            AbstractPlugin(manager, std::move(plugin)) {}
 
         virtual std::string name() const = 0;
         virtual int legCount() const = 0;
