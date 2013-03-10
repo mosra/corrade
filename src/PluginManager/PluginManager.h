@@ -31,6 +31,8 @@
 
 #include "AbstractPluginManager.h"
 
+#include "corradeCompatibility.h"
+
 namespace Corrade { namespace PluginManager {
 
 /**
