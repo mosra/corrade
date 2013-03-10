@@ -23,5 +23,13 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+cmake_minimum_required(VERSION 2.8)
+project(CorradeTestExample)
+
+find_package(Corrade REQUIRED)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CORRADE_CXX_FLAGS}")
+include_directories(${CORRADE_INCLUDE_DIR})
+
 enable_testing()
 corrade_add_test(MyTest MyTest.cpp)

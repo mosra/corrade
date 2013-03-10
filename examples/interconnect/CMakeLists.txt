@@ -23,5 +23,13 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+cmake_minimum_required(VERSION 2.8)
+project(CorradeInterconnectExample)
+
+find_package(Corrade REQUIRED)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CORRADE_CXX_FLAGS}")
+include_directories(${CORRADE_INCLUDE_DIR})
+
 add_executable(interconnect main.cpp)
 target_link_libraries(interconnect ${CORRADE_INTERCONNECT_LIBRARIES})
