@@ -5,7 +5,7 @@ pkgrel=1
 pkgdesc="Multiplatform plugin management and utility library (NaCl version)"
 arch=('any')
 url="http://mosra.cz/blog/corrade.php"
-license=('LGPLv3')
+license=('MIT')
 makedepends=('nacl-sdk' 'cmake')
 options=(!buildflags !strip)
 

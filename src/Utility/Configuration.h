@@ -1,19 +1,28 @@
 #ifndef Corrade_Utility_Configuration_h
 #define Corrade_Utility_Configuration_h
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
 /** @file
@@ -120,8 +129,6 @@ Example file:
 class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
     friend class ConfigurationGroup;
 
-    DISABLE_COPY(Configuration)
-
     public:
         /**
          * @brief Flag for opening configuration file
@@ -203,7 +210,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          *
          * Creates empty configuration with no filename.
          */
-        inline Configuration(Flags flags = Flags()): ConfigurationGroup(this), flags(static_cast<InternalFlag>(std::uint32_t(flags))|InternalFlag::IsValid) {}
+        inline explicit Configuration(Flags flags = Flags()): ConfigurationGroup(this), flags(static_cast<InternalFlag>(std::uint32_t(flags))|InternalFlag::IsValid) {}
 
         /**
          * @brief Constructor
@@ -213,7 +220,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * Opens the file and loads it according to specified flags. If file
          * cannot be opened, sets invalid flag (see isValid()).
          */
-        Configuration(const std::string& file, Flags flags = Flags());
+        explicit Configuration(const std::string& file, Flags flags = Flags());
 
         /**
          * @brief Constructor
@@ -224,7 +231,10 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * Configuration::ReadOnly, because the configuration cannot be saved
          * anywhere.
          */
-        Configuration(std::istream& file, Flags flags = Flags());
+        explicit Configuration(std::istream& file, Flags flags = Flags());
+
+        Configuration(const Configuration&) = delete;
+        Configuration(Configuration&&) = delete;
 
         /**
          * @brief Destructor
@@ -233,6 +243,9 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * the file. See also save().
          */
         inline ~Configuration() { if(flags & InternalFlag::Changed) save(); }
+
+        Configuration& operator=(const Configuration&) = delete;
+        Configuration& operator=(Configuration&&) = delete;
 
         /** @brief Filename */
         inline std::string filename() const { return _filename; }

@@ -1,44 +1,78 @@
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
-
-#include "LinkedListTest.h"
 
 #include <sstream>
 
-using namespace std;
-using namespace Corrade::Utility;
-
-CORRADE_TEST_MAIN(Corrade::Containers::Test::LinkedListTest)
+#include "Containers/LinkedList.h"
+#include "TestSuite/Tester.h"
 
 namespace Corrade { namespace Containers { namespace Test {
 
-typedef Containers::LinkedList<LinkedListTest::Item> LinkedList;
+class LinkedListTest: public TestSuite::Tester {
+    public:
+        LinkedListTest();
 
-int LinkedListTest::Item::count = 0;
+        void listBackReference();
+        void insert();
+        void insertFromOtherList();
+        void insertBeforeFromOtherList();
+        void cut();
+        void cutFromOtherList();
+        void clear();
+        void moveList();
+        void moveItem();
+};
+
+class Item: public LinkedListItem<Item> {
+    public:
+        inline Item(Item&& other): LinkedListItem<Item>(std::forward<LinkedListItem<Item>>(other)) {}
+
+        inline Item& operator=(Item&& other) {
+            LinkedListItem<Item>::operator=(std::forward<LinkedListItem<Item>>(other));
+            return *this;
+        }
+
+        static int count;
+        inline Item() { ++count; }
+        inline ~Item() { --count; }
+};
+
+typedef Containers::LinkedList<Item> LinkedList;
+
+int Item::count = 0;
 
 LinkedListTest::LinkedListTest() {
-    addTests(&LinkedListTest::listBackReference,
-             &LinkedListTest::insert,
-             &LinkedListTest::insertFromOtherList,
-             &LinkedListTest::insertBeforeFromOtherList,
-             &LinkedListTest::cut,
-             &LinkedListTest::cutFromOtherList,
-             &LinkedListTest::clear,
-             &LinkedListTest::moveList,
-             &LinkedListTest::moveItem);
+    addTests({&LinkedListTest::listBackReference,
+              &LinkedListTest::insert,
+              &LinkedListTest::insertFromOtherList,
+              &LinkedListTest::insertBeforeFromOtherList,
+              &LinkedListTest::cut,
+              &LinkedListTest::cutFromOtherList,
+              &LinkedListTest::clear,
+              &LinkedListTest::moveList,
+              &LinkedListTest::moveItem});
 }
 
 void LinkedListTest::listBackReference() {
@@ -118,7 +152,7 @@ void LinkedListTest::insert() {
 }
 
 void LinkedListTest::insertFromOtherList() {
-    stringstream out;
+    std::stringstream out;
     Error::setOutput(&out);
 
     LinkedList list;
@@ -131,7 +165,7 @@ void LinkedListTest::insertFromOtherList() {
 }
 
 void LinkedListTest::insertBeforeFromOtherList() {
-    stringstream out;
+    std::stringstream out;
     Error::setOutput(&out);
 
     LinkedList list;
@@ -145,7 +179,7 @@ void LinkedListTest::insertBeforeFromOtherList() {
 }
 
 void LinkedListTest::cutFromOtherList() {
-    stringstream out;
+    std::stringstream out;
     Error::setOutput(&out);
 
     LinkedList list;
@@ -253,7 +287,7 @@ void LinkedListTest::moveList() {
     list.insert(item2);
 
     /* Move constructor */
-    LinkedList list2(move(list));
+    LinkedList list2(std::move(list));
     CORRADE_VERIFY(list.first() == nullptr);
     CORRADE_VERIFY(list.last() == nullptr);
     CORRADE_VERIFY(list2.first() == item1);
@@ -267,7 +301,7 @@ void LinkedListTest::moveList() {
     list3.insert(new Item);
 
     /* Move assignment */
-    list3 = move(list2);
+    list3 = std::move(list2);
     CORRADE_VERIFY(list2.first() == nullptr);
     CORRADE_VERIFY(list2.last() == nullptr);
     CORRADE_VERIFY(list3.first() == item1);
@@ -289,7 +323,7 @@ void LinkedListTest::moveItem() {
     list.insert(&item3);
 
     /* Move item in the midde */
-    Item item2Moved(move(item2));
+    Item item2Moved(std::move(item2));
     CORRADE_VERIFY(item2.list() == nullptr);
     CORRADE_VERIFY(item2.previous() == nullptr);
     CORRADE_VERIFY(item2.next() == nullptr);
@@ -306,7 +340,7 @@ void LinkedListTest::moveItem() {
     list2.insert(&item4);
     CORRADE_VERIFY(!list2.isEmpty());
 
-    item4 = move(item2Moved);
+    item4 = std::move(item2Moved);
     CORRADE_VERIFY(list2.isEmpty());
 
     CORRADE_VERIFY(item2Moved.list() == nullptr);
@@ -323,7 +357,7 @@ void LinkedListTest::moveItem() {
     list.cut(&item3);
 
     /* Move item at the beginning/end */
-    Item itemMoved(move(item));
+    Item itemMoved(std::move(item));
     CORRADE_VERIFY(itemMoved.list() == &list);
     CORRADE_VERIFY(list.first() == &itemMoved);
     CORRADE_VERIFY(list.last() == &itemMoved);
@@ -334,7 +368,7 @@ void LinkedListTest::moveItem() {
     list2.insert(&item5);
     CORRADE_VERIFY(!list2.isEmpty());
 
-    item5 = move(itemMoved);
+    item5 = std::move(itemMoved);
     CORRADE_VERIFY(item5.list() == &list);
     CORRADE_VERIFY(list2.isEmpty());
 
@@ -345,3 +379,5 @@ void LinkedListTest::moveItem() {
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::Containers::Test::LinkedListTest)

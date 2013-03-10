@@ -1,17 +1,26 @@
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
 #include "ConfigurationGroup.h"
@@ -19,13 +28,11 @@
 #include "Configuration.h"
 #include "Debug.h"
 
-using namespace std;
-
 namespace Corrade { namespace Utility {
 
 ConfigurationGroup::ConfigurationGroup(const ConfigurationGroup& other): items(other.items), _groups(other._groups) {
     /* Deep copy groups */
-    for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it)
+    for(auto it = _groups.begin(); it != _groups.end(); ++it)
         it->group = new ConfigurationGroup(*it->group);
 }
 
@@ -34,27 +41,27 @@ ConfigurationGroup& ConfigurationGroup::operator=(const ConfigurationGroup& othe
         return *this;
 
     /* Delete current groups */
-    for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it)
+    for(auto it = _groups.begin(); it != _groups.end(); ++it)
         delete it->group;
 
     items.assign(other.items.begin(), other.items.end());
     _groups.assign(other._groups.begin(), other._groups.end());
 
     /* Deep copy groups */
-    for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it)
+    for(auto it = _groups.begin(); it != _groups.end(); ++it)
         it->group = new ConfigurationGroup(*it->group);
 
     return *this;
 }
 
 ConfigurationGroup::~ConfigurationGroup() {
-    for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it)
+    for(auto it = _groups.begin(); it != _groups.end(); ++it)
         delete it->group;
 }
 
-ConfigurationGroup* ConfigurationGroup::group(const string& name, unsigned int number) {
+ConfigurationGroup* ConfigurationGroup::group(const std::string& name, unsigned int number) {
     unsigned int foundNumber = 0;
-    for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
+    for(auto it = _groups.begin(); it != _groups.end(); ++it) {
         if(it->name == name && foundNumber++ == number)
             return it->group;
     }
@@ -66,9 +73,9 @@ ConfigurationGroup* ConfigurationGroup::group(const string& name, unsigned int n
     return nullptr;
 }
 
-const ConfigurationGroup* ConfigurationGroup::group(const string& name, unsigned int number) const {
+const ConfigurationGroup* ConfigurationGroup::group(const std::string& name, unsigned int number) const {
     unsigned int foundNumber = 0;
-    for(vector<Group>::const_iterator it = _groups.begin(); it != _groups.end(); ++it) {
+    for(auto it = _groups.cbegin(); it != _groups.cend(); ++it) {
         if(it->name == name && foundNumber++ == number)
             return it->group;
     }
@@ -76,25 +83,25 @@ const ConfigurationGroup* ConfigurationGroup::group(const string& name, unsigned
     return nullptr;
 }
 
-vector<ConfigurationGroup*> ConfigurationGroup::groups(const string& name) {
-    vector<ConfigurationGroup*> found;
+std::vector<ConfigurationGroup*> ConfigurationGroup::groups(const std::string& name) {
+    std::vector<ConfigurationGroup*> found;
 
-    for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it)
+    for(auto it = _groups.begin(); it != _groups.end(); ++it)
         if(name.empty() || it->name == name) found.push_back(it->group);
 
     return found;
 }
 
-vector<const ConfigurationGroup*> ConfigurationGroup::groups(const string& name) const {
-    vector<const ConfigurationGroup*> found;
+std::vector<const ConfigurationGroup*> ConfigurationGroup::groups(const std::string& name) const {
+    std::vector<const ConfigurationGroup*> found;
 
-    for(vector<Group>::const_iterator it = _groups.begin(); it != _groups.end(); ++it)
+    for(auto it = _groups.cbegin(); it != _groups.cend(); ++it)
         if(name.empty() || it->name == name) found.push_back(it->group);
 
     return found;
 }
 
-bool ConfigurationGroup::addGroup(const string& name, ConfigurationGroup* group) {
+bool ConfigurationGroup::addGroup(const std::string& name, ConfigurationGroup* group) {
     if(configuration->flags & Configuration::InternalFlag::ReadOnly ||
      !(configuration->flags & Configuration::InternalFlag::IsValid))
         return false;
@@ -103,14 +110,14 @@ bool ConfigurationGroup::addGroup(const string& name, ConfigurationGroup* group)
     group->configuration = configuration;
 
     /* Name must not be empty and must not contain slash character */
-    if(name.empty() || name.find('/') != string::npos) {
+    if(name.empty() || name.find('/') != std::string::npos) {
         Error() << "Slash in group name!";
         return false;
     }
 
     /* Check for unique groups */
     if(configuration->flags & Configuration::InternalFlag::UniqueGroups) {
-        for(vector<Group>::const_iterator it = _groups.begin(); it != _groups.end(); ++it)
+        for(auto it = _groups.cbegin(); it != _groups.cend(); ++it)
             if(it->name == name) return false;
     }
 
@@ -138,7 +145,7 @@ bool ConfigurationGroup::removeGroup(const std::string& name, unsigned int numbe
 
     /* Find group with given number and name */
     unsigned int foundNumber = 0;
-    for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
+    for(auto it = _groups.begin(); it != _groups.end(); ++it) {
         if(it->name == name && foundNumber++ == number) {
             delete it->group;
             _groups.erase(it);
@@ -154,7 +161,7 @@ bool ConfigurationGroup::removeGroup(ConfigurationGroup* group) {
     if(configuration->flags & Configuration::InternalFlag::ReadOnly ||
      !(configuration->flags & Configuration::InternalFlag::IsValid)) return false;
 
-    for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
+    for(auto it = _groups.begin(); it != _groups.end(); ++it) {
         if(it->group == group) {
             delete it->group;
             _groups.erase(it);
@@ -180,31 +187,31 @@ bool ConfigurationGroup::removeAllGroups(const std::string& name) {
     return true;
 }
 
-unsigned int ConfigurationGroup::keyCount(const string& key) const {
+unsigned int ConfigurationGroup::keyCount(const std::string& key) const {
     unsigned int count = 0;
-    for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it)
+    for(auto it = items.cbegin(); it != items.cend(); ++it)
         if(it->key == key) count++;
 
     return count;
 }
 
 bool ConfigurationGroup::keyExists(const std::string& key) const {
-    for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it)
+    for(auto it = items.cbegin(); it != items.cend(); ++it)
         if(it->key == key) return true;
 
     return false;
 }
 
-vector<string> ConfigurationGroup::valuesInternal(const string& key, ConfigurationValueFlags) const {
-    vector<string> found;
+std::vector<std::string> ConfigurationGroup::valuesInternal(const std::string& key, ConfigurationValueFlags) const {
+    std::vector<std::string> found;
 
-    for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it)
+    for(auto it = items.cbegin(); it != items.cend(); ++it)
         if(it->key == key) found.push_back(it->value);
 
     return found;
 }
 
-bool ConfigurationGroup::setValueInternal(const string& key, const string& value, unsigned int number, ConfigurationValueFlags) {
+bool ConfigurationGroup::setValueInternal(const std::string& key, const std::string& value, unsigned int number, ConfigurationValueFlags) {
     if(configuration->flags & Configuration::InternalFlag::ReadOnly ||
      !(configuration->flags & Configuration::InternalFlag::IsValid))
         return false;
@@ -213,7 +220,7 @@ bool ConfigurationGroup::setValueInternal(const string& key, const string& value
     if(key.empty()) return false;
 
     unsigned int foundNumber = 0;
-    for(vector<Item>::iterator it = items.begin(); it != items.end(); ++it) {
+    for(auto it = items.begin(); it != items.end(); ++it) {
         if(it->key == key && foundNumber++ == number) {
             it->value = value;
             configuration->flags |= Configuration::InternalFlag::Changed;
@@ -231,7 +238,7 @@ bool ConfigurationGroup::setValueInternal(const string& key, const string& value
     return true;
 }
 
-bool ConfigurationGroup::addValueInternal(const string& key, const string& value, ConfigurationValueFlags) {
+bool ConfigurationGroup::addValueInternal(const std::string& key, const std::string& value, ConfigurationValueFlags) {
     if(configuration->flags & Configuration::InternalFlag::ReadOnly ||
      !(configuration->flags & Configuration::InternalFlag::IsValid))
         return false;
@@ -241,7 +248,7 @@ bool ConfigurationGroup::addValueInternal(const string& key, const string& value
 
     /* Check for unique keys */
     if(configuration->flags & Configuration::InternalFlag::UniqueKeys) {
-        for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it)
+        for(auto it = items.cbegin(); it != items.cend(); ++it)
             if(it->key == key) return false;
     }
 
@@ -254,21 +261,21 @@ bool ConfigurationGroup::addValueInternal(const string& key, const string& value
     return true;
 }
 
-bool ConfigurationGroup::valueInternal(const string& key, string* value, unsigned int number, ConfigurationValueFlags flags) {
+bool ConfigurationGroup::valueInternal(const std::string& key, std::string* value, unsigned int number, ConfigurationValueFlags flags) {
     const ConfigurationGroup* c = this;
     if(c->value(key, value, number, flags)) return true;
 
     /* Automatic key/value pair creation is enabled and user wants first key,
         try to create new key/value pair */
     if((configuration->flags & Configuration::InternalFlag::AutoCreateKeys) && number == 0)
-        return setValue<string>(key, *value, number, flags);
+        return setValue<std::string>(key, *value, number, flags);
 
     return false;
 }
 
-bool ConfigurationGroup::valueInternal(const string& key, string* value, unsigned int number, ConfigurationValueFlags) const {
+bool ConfigurationGroup::valueInternal(const std::string& key, std::string* value, unsigned int number, ConfigurationValueFlags) const {
     unsigned int foundNumber = 0;
-    for(vector<Item>::const_iterator it = items.begin(); it != items.end(); ++it) {
+    for(auto it = items.cbegin(); it != items.cend(); ++it) {
         if(it->key == key) {
             if(foundNumber++ == number) {
                 *value = it->value;
@@ -280,7 +287,7 @@ bool ConfigurationGroup::valueInternal(const string& key, string* value, unsigne
     return false;
 }
 
-bool ConfigurationGroup::removeValue(const string& key, unsigned int number) {
+bool ConfigurationGroup::removeValue(const std::string& key, unsigned int number) {
     if(configuration->flags & Configuration::InternalFlag::ReadOnly ||
      !(configuration->flags & Configuration::InternalFlag::IsValid))
         return false;
@@ -289,7 +296,7 @@ bool ConfigurationGroup::removeValue(const string& key, unsigned int number) {
     if(key.empty()) return false;
 
     unsigned int foundNumber = 0;
-    for(vector<Item>::iterator it = items.begin(); it != items.end(); ++it) {
+    for(auto it = items.begin(); it != items.end(); ++it) {
         if(it->key == key && foundNumber++ == number) {
             items.erase(it);
             configuration->flags |= Configuration::InternalFlag::Changed;
@@ -321,7 +328,7 @@ bool ConfigurationGroup::clear() {
 
     items.clear();
 
-    for(vector<Group>::iterator it = _groups.begin(); it != _groups.end(); ++it)
+    for(auto it = _groups.begin(); it != _groups.end(); ++it)
         delete it->group;
     _groups.clear();
 

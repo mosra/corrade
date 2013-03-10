@@ -1,19 +1,28 @@
 #ifndef Corrade_Utility_Translator_h
 #define Corrade_Utility_Translator_h
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
 /** @file
@@ -143,7 +152,7 @@ class CORRADE_UTILITY_EXPORT Translator {
         /**
          * @brief Construct empty translator
          */
-        inline Translator(): primaryDynamicGroup(nullptr), primaryFile(nullptr), fallbackFile(nullptr), primary(nullptr), fallback(nullptr) {
+        inline explicit Translator(): primaryDynamicGroup(nullptr), primaryFile(nullptr), fallbackFile(nullptr), primary(nullptr), fallback(nullptr) {
             instances()->insert(this);
         }
 
@@ -153,7 +162,7 @@ class CORRADE_UTILITY_EXPORT Translator {
          *      setPrimary(const std::string&).
          * @param _fallback     Fallback language file
          */
-        inline Translator(const std::string& _primary, const std::string& _fallback = ""): primaryDynamicGroup(nullptr), primaryFile(nullptr), fallbackFile(nullptr), primary(nullptr), fallback(nullptr) {
+        inline explicit Translator(const std::string& _primary, const std::string& _fallback = std::string()): primaryDynamicGroup(nullptr), primaryFile(nullptr), fallbackFile(nullptr), primary(nullptr), fallback(nullptr) {
             setFallback(_fallback);
             setPrimary(_primary);
 
@@ -167,7 +176,7 @@ class CORRADE_UTILITY_EXPORT Translator {
          * @param dynamic       Whether treat primary group as dynamic. See
          *      setPrimary(const ConfigurationGroup*, bool).
          */
-        inline Translator(const ConfigurationGroup* _primary, const ConfigurationGroup* _fallback = nullptr, bool dynamic = false): primaryDynamicGroup(nullptr), primaryFile(nullptr), fallbackFile(nullptr), primary(nullptr), fallback(nullptr) {
+        inline explicit Translator(const ConfigurationGroup* _primary, const ConfigurationGroup* _fallback = nullptr, bool dynamic = false): primaryDynamicGroup(nullptr), primaryFile(nullptr), fallbackFile(nullptr), primary(nullptr), fallback(nullptr) {
             setFallback(_fallback);
             setPrimary(_primary, dynamic);
 

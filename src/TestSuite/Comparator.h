@@ -1,28 +1,37 @@
 #ifndef Corrade_TestSuite_Comparator_h
 #define Corrade_TestSuite_Comparator_h
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
 /** @file
  * @brief Class Corrade::TestSuite::Comparator
  */
 
-#include "Utility/Debug.h"
+#include <string>
 
-#include <cmath>
+#include "Utility/Debug.h"
 
 namespace Corrade { namespace TestSuite {
 
@@ -93,7 +102,7 @@ namespace Corrade { namespace TestSuite { // the namespace is important
 
 template<> class Comparator<FileContents> {
     public:
-        Comparator(const std::string& pathPrefix = "");
+        Comparator(const std::string& pathPrefix = std::string());
         bool operator()(const std::string& actual, const std::string& expected);
         void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const;
 
@@ -104,7 +113,7 @@ template<> class Comparator<FileContents> {
 
 class FileContents {
     public:
-        inline FileContents(const std::string& pathPrefix = ""): c(pathPrefix) {}
+        inline FileContents(const std::string& pathPrefix = std::string()): c(pathPrefix) {}
 
         inline Comparator<FileContents>& comparator() {
             return c;
@@ -125,7 +134,7 @@ CORRADE_COMPARE_WITH("actual.dat", "expected.dat", FileContents("/common/path/pr
 */
 template<class T> class Comparator {
     public:
-        inline constexpr Comparator(): actualValue(), expectedValue() {}
+        inline constexpr explicit Comparator(): actualValue(), expectedValue() {}
 
         /** @brief %Compare two values */
         bool operator()(const T& actual, const T& expected) {
@@ -138,62 +147,13 @@ template<class T> class Comparator {
 
         /** @brief Print error message, assuming the two values are inequal */
         void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
-            e << "Values" << actual << "and" << expected << "are not the same, actual" << actualValue << "but" << expectedValue << "expected.";
+            e << "Values" << actual << "and" << expected << "are not the same, actual is\n       "
+              << actualValue << "\n        but expected\n       " << expectedValue;
         }
 
     private:
         T actualValue, expectedValue;
 };
-
-#ifndef DOXYGEN_GENERATING_OUTPUT
-namespace Implementation {
-    template<class T> class FloatComparatorEpsilon {};
-
-    template<> class FloatComparatorEpsilon<float> {
-        public:
-            inline constexpr static float epsilon() {
-                return 1.0e-6f;
-            }
-    };
-
-    template<> class FloatComparatorEpsilon<double> {
-        public:
-            inline constexpr static double epsilon() {
-                return 1.0e-12;
-            }
-    };
-
-    template<class T> class FloatComparator {
-        public:
-            /** @brief %Compare two values */
-            bool operator()(T actual, T expected) {
-                if(actual == expected || (actual != actual && expected != expected) ||
-                    std::abs(actual - expected) < FloatComparatorEpsilon<T>::epsilon()) return true;
-
-                actualValue = actual;
-                expectedValue = expected;
-                return false;
-            }
-
-            /** @brief Print error message, assuming the two values are inequal */
-            void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
-                e << "Floating-point values" << actual << "and" << expected << "are not the same, actual" << actualValue << "but" << expectedValue << "expected";
-                e.setFlag(Utility::Debug::SpaceAfterEachValue, false);
-                e << " (delta " << std::abs(actualValue-expectedValue) << ").";
-                e.setFlag(Utility::Debug::SpaceAfterEachValue, true);
-            }
-
-        private:
-            T actualValue, expectedValue;
-    };
-}
-#endif
-
-/** @brief Fuzzy-compare for float values */
-template<> class Comparator<float>: public Implementation::FloatComparator<float> {};
-
-/** @brief Fuzzy-compare for double values */
-template<> class Comparator<double>: public Implementation::FloatComparator<double> {};
 
 }}
 

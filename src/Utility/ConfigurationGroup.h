@@ -1,19 +1,28 @@
 #ifndef Corrade_Utility_ConfigurationGroup_h
 #define Corrade_Utility_ConfigurationGroup_h
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
 /** @file
@@ -66,8 +75,8 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @param name      Name of the group. If empty, returns all subgroups.
          * @return Vector of groups. If no group is found, returns empty vector.
          */
-        std::vector<ConfigurationGroup*> groups(const std::string& name = "");
-        std::vector<const ConfigurationGroup*> groups(const std::string& name = "") const; /**< @overload */
+        std::vector<ConfigurationGroup*> groups(const std::string& name = std::string());
+        std::vector<const ConfigurationGroup*> groups(const std::string& name = std::string()) const; /**< @overload */
 
         /**
          * @brief Count of groups with given name
@@ -78,7 +87,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * More efficient than calling `groups(name).size()`.
          * See also Configuration::UniqueGroups and Configuration::UniqueNames.
          */
-        inline unsigned int groupCount(const std::string& name = "") const {
+        inline unsigned int groupCount(const std::string& name = std::string()) const {
             if(name.empty()) return _groups.size();
             return groups(name).size();
         }
@@ -91,7 +100,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * More efficient than calling `group(name) != 0`.
          * @todo split out to hasSubgroups()?
          */
-        inline bool groupExists(const std::string& name = "") const {
+        inline bool groupExists(const std::string& name = std::string()) const {
             if(name.empty()) return !_groups.empty();
             return group(name) != nullptr;
         }
@@ -307,7 +316,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         Configuration* configuration;
 
         /** @brief Constructor */
-        CORRADE_UTILITY_LOCAL ConfigurationGroup(Configuration* _configuration): configuration(_configuration) {}
+        CORRADE_UTILITY_LOCAL explicit ConfigurationGroup(Configuration* _configuration): configuration(_configuration) {}
 
         CORRADE_UTILITY_EXPORT bool valueInternal(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags);
         CORRADE_UTILITY_EXPORT bool valueInternal(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags) const;

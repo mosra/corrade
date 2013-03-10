@@ -1,24 +1,31 @@
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
 #include "Sha1.h"
 
 #include "Utility/Endianness.h"
-
-using namespace std;
 
 namespace Corrade { namespace Utility {
 
@@ -33,9 +40,9 @@ const unsigned int Sha1::constants[4] = { 0x5A827999,
                                           0x8F1BBCDC,
                                           0xCA62C1D6 };
 
-Sha1& Sha1::operator<<(const string& data) {
+Sha1& Sha1::operator<<(const std::string& data) {
     /* Process leftovers */
-    if(_buffer.size() != 0) {
+    if(!_buffer.empty()) {
         /* Not enough large, try it next time */
         if(data.size()+ _buffer.size() < 64) {
             _buffer.append(data);
@@ -46,12 +53,12 @@ Sha1& Sha1::operator<<(const string& data) {
         processChunk(_buffer.c_str());
     }
 
-    for(size_t i = _buffer.size(); i != data.size()/64; ++i)
+    for(std::size_t i = _buffer.size(); i != data.size()/64; ++i)
         processChunk(data.c_str()+i*64);
 
     /* Save last unfinished 512-bit chunk of data */
     if(data.size()%64 != 0) _buffer = data.substr((data.size()/64)*64);
-    else _buffer = string();
+    else _buffer = {};
 
     _dataSize += data.size();
     return *this;
@@ -67,7 +74,7 @@ Sha1::Digest Sha1::digest() {
     _buffer.append(reinterpret_cast<const char*>(&dataSizeBigEndian), 8);
 
     /* Process remaining chunks */
-    for(size_t i = 0; i != _buffer.size()/64; ++i)
+    for(std::size_t i = 0; i != _buffer.size()/64; ++i)
         processChunk(_buffer.c_str()+i*64);
 
     /* Convert digest from big endian */
@@ -77,7 +84,7 @@ Sha1::Digest Sha1::digest() {
     Digest d = Digest::fromByteArray(reinterpret_cast<const char*>(digest));
 
     /* Clear data and return */
-    copy(initialDigest, initialDigest+5, _digest);
+    std::copy(initialDigest, initialDigest+5, _digest);
     _buffer.clear();
     _dataSize = 0;
     return d;
@@ -94,7 +101,7 @@ void Sha1::processChunk(const char* data) {
     /* Initialize value for this chunk */
     unsigned int d[5];
     unsigned int f, constant, temp;
-    copy(_digest, _digest+5, d);
+    std::copy(_digest, _digest+5, d);
 
     /* Main loop */
     for(int i = 0; i != 80; ++i) {

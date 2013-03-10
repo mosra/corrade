@@ -1,193 +1,256 @@
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
-#include "DirectoryTest.h"
+#include <fstream>
 
-#include <QtCore/QList>
-#include <QtCore/QDir>
-#include <QtTest/QTest>
-
+#include "TestSuite/Tester.h"
+#include "TestSuite/Compare/Container.h"
 #include "Utility/Directory.h"
+
 #include "testConfigure.h"
-
-using namespace std;
-
-QTEST_APPLESS_MAIN(Corrade::Utility::Test::DirectoryTest)
 
 namespace Corrade { namespace Utility { namespace Test {
 
-void DirectoryTest::path_data() {
-    QTest::addColumn<QString>("input");
-    QTest::addColumn<QString>("expected");
+class DirectoryTest: public Corrade::TestSuite::Tester {
+    public:
+        DirectoryTest();
 
-    QTest::newRow("noPath") << "foo.txt" << "";
-    QTest::newRow("noFilename") << ".corrade/configuration/" << ".corrade/configuration";
-    QTest::newRow("regular") << "package/map.conf" << "package";
+        void path();
+        void filename();
+        void join();
+        void fileExists();
+        void remove();
+        void moveFile();
+        void moveDirectory();
+        void mkpath();
+        void home();
+        void configurationDir();
+        void list();
+        void listSortPrecedence();
+};
+
+DirectoryTest::DirectoryTest() {
+    addTests({&DirectoryTest::path,
+              &DirectoryTest::filename,
+              &DirectoryTest::join,
+              &DirectoryTest::fileExists,
+              &DirectoryTest::remove,
+              &DirectoryTest::moveFile,
+              &DirectoryTest::moveDirectory,
+              &DirectoryTest::mkpath,
+              &DirectoryTest::home,
+              &DirectoryTest::configurationDir,
+              &DirectoryTest::list,
+              &DirectoryTest::listSortPrecedence});
 }
 
 void DirectoryTest::path() {
-    QFETCH(QString, input);
-    QFETCH(QString, expected);
+    /* No path */
+    CORRADE_COMPARE(Directory::path("foo.txt"), "");
 
-    string actual = Directory::path(input.toStdString());
+    /* No filename */
+    CORRADE_COMPARE(Directory::path(".corrade/configuration/"), ".corrade/configuration");
 
-    QCOMPARE(QString::fromStdString(actual), expected);
-}
-
-void DirectoryTest::filename_data() {
-    QTest::addColumn<QString>("input");
-    QTest::addColumn<QString>("expected");
-
-    QTest::newRow("pathOnly") << "foo/bar/" << "";
-    QTest::newRow("fileOnly") << "file.txt" << "file.txt";
-    QTest::newRow("regular") << "foo/bar/map.conf" << "map.conf";
+    /* Common case */
+    CORRADE_COMPARE(Directory::path("package/map.conf"), "package");
 }
 
 void DirectoryTest::filename() {
-    QFETCH(QString, input);
-    QFETCH(QString, expected);
+    /* Path only */
+    CORRADE_COMPARE(Directory::filename("foo/bar/"), "");
 
-    string actual = Directory::filename(input.toStdString());
+    /* File only */
+    CORRADE_COMPARE(Directory::filename("file.txt"), "file.txt");
 
-    QCOMPARE(QString::fromStdString(actual), expected);
-}
-
-void DirectoryTest::join_data() {
-    QTest::addColumn<QString>("path");
-    QTest::addColumn<QString>("filename");
-    QTest::addColumn<QString>("expected");
-
-    QTest::newRow("emptyPath") << "" << "/foo.txt" << "/foo.txt";
-    QTest::newRow("emptyAll") << "" << "" << "";
-    QTest::newRow("absoluteFilename") << "/foo/bar" << "/file.txt" << "/file.txt";
-    QTest::newRow("trailingSlash") << "/foo/bar/" << "file.txt" << "/foo/bar/file.txt";
-    QTest::newRow("regular") << "/foo/bar" << "file.txt" << "/foo/bar/file.txt";
+    /* Common case */
+    CORRADE_COMPARE(Directory::filename("foo/bar/map.conf"), "map.conf");
 }
 
 void DirectoryTest::join() {
-    QFETCH(QString, path);
-    QFETCH(QString, filename);
-    QFETCH(QString, expected);
+    /* Empty path */
+    CORRADE_COMPARE(Directory::join("", "/foo.txt"), "/foo.txt");
 
-    std::string actual = Directory::join(path.toStdString(), filename.toStdString());
+    /* Empty all */
+    CORRADE_COMPARE(Directory::join("", ""), "");
 
-    QCOMPARE(QString::fromStdString(actual), expected);
-}
+    /* Absolute filename */
+    CORRADE_COMPARE(Directory::join("/foo/bar", "/file.txt"), "/file.txt");
 
-void DirectoryTest::mkpath_data() {
-    QTest::addColumn<QString>("path");
+    /* Trailing slash */
+    CORRADE_COMPARE(Directory::join("/foo/bar/", "file.txt"), "/foo/bar/file.txt");
 
-    QDir dir;
-    dir.rmpath(QString::fromStdString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "leaf")));
-    dir.rmpath(QString::fromStdString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "path/to/new/dir")));
-
-    QTest::newRow("leaf") << QString::fromStdString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "leaf"));
-    QTest::newRow("path") << QString::fromStdString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "path/to/new/dir"));
-    QTest::newRow("existing") << DIRECTORY_WRITE_TEST_DIR;
-}
-
-void DirectoryTest::mkpath() {
-    QFETCH(QString, path);
-
-    QVERIFY(Directory::mkpath(path.toStdString()));
-
-    QDir dir;
-    QVERIFY(dir.exists(path));
-}
-
-void DirectoryTest::remove_data() {
-    QTest::addColumn<QString>("path");
-    QTest::addColumn<bool>("success");
-
-    QDir dir;
-    dir.mkpath(QString::fromStdString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "directory")));
-    QFile file(QString::fromStdString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file")));
-    file.open(QFile::WriteOnly);
-    file.close();
-
-    QTest::newRow("directory") << QString::fromStdString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "directory")) << true;
-    QTest::newRow("file") << QString::fromStdString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file")) << true;
-    QTest::newRow("inexistent") << QString::fromStdString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "inexistent")) << false;
-}
-
-void DirectoryTest::remove() {
-    QFETCH(QString, path);
-    QFETCH(bool, success);
-
-    QVERIFY(Directory::rm(path.toStdString()) == success);
-
-    QDir dir;
-    QVERIFY(!dir.exists(path));
+    /* Common case */
+    CORRADE_COMPARE(Directory::join("/foo/bar", "file.txt"), "/foo/bar/file.txt");
 }
 
 void DirectoryTest::fileExists() {
-    QVERIFY(Directory::fileExists(Directory::join(DIRECTORY_TEST_DIR, "file")));
-    QVERIFY(!Directory::fileExists(Directory::join(DIRECTORY_TEST_DIR, "inexistentFile")));
+    /* File */
+    CORRADE_VERIFY(Directory::fileExists(Directory::join(DIRECTORY_TEST_DIR, "file")));
+
+    /* Directory */
+    CORRADE_VERIFY(Directory::fileExists(DIRECTORY_TEST_DIR));
+
+    /* Inexistent file */
+    CORRADE_VERIFY(!Directory::fileExists(Directory::join(DIRECTORY_TEST_DIR, "inexistentFile")));
+}
+
+void DirectoryTest::remove() {
+    /* Directory */
+    std::string directory = Directory::join(DIRECTORY_WRITE_TEST_DIR, "directory");
+    CORRADE_VERIFY(Directory::mkpath(directory));
+    CORRADE_VERIFY(Directory::rm(directory));
+    CORRADE_VERIFY(!Directory::fileExists(directory));
+
+    /* File */
+    std::string file = Directory::join(DIRECTORY_WRITE_TEST_DIR, "file.txt");
+    {
+        std::ofstream out(file);
+        CORRADE_VERIFY(out.good());
+        out.put('a');
+    }
+    CORRADE_VERIFY(Directory::rm(file));
+    CORRADE_VERIFY(!Directory::fileExists(file));
+
+    /* Inexistent file */
+    std::string inexistent = Directory::join(DIRECTORY_WRITE_TEST_DIR, "inexistent");
+    CORRADE_VERIFY(!Directory::fileExists(inexistent));
+    CORRADE_VERIFY(!Directory::rm(inexistent));
+}
+
+void DirectoryTest::moveFile() {
+    /* Old file, create if not exists */
+    std::string oldFile = Directory::join(DIRECTORY_WRITE_TEST_DIR, "oldFile.txt");
+    if(!Directory::fileExists(oldFile)) {
+        std::ofstream out(oldFile);
+        CORRADE_VERIFY(out.good());
+        out.put('a');
+    }
+
+    /* New file, remove if exists */
+    std::string newFile = Directory::join(DIRECTORY_WRITE_TEST_DIR, "newFile.txt");
+    if(Directory::fileExists(newFile))
+        CORRADE_VERIFY(Directory::rm(newFile));
+
+    CORRADE_VERIFY(Directory::move(oldFile, newFile));
+    CORRADE_VERIFY(!Directory::fileExists(oldFile));
+    CORRADE_VERIFY(Directory::fileExists(newFile));
+}
+
+void DirectoryTest::moveDirectory() {
+    /* Old directory, create if not exists */
+    std::string oldDirectory = Directory::join(DIRECTORY_WRITE_TEST_DIR, "oldDirectory");
+    if(!Directory::fileExists(oldDirectory))
+        CORRADE_VERIFY(Directory::mkpath(oldDirectory));
+
+    /* New directory, remove if exists */
+    std::string newDirectory = Directory::join(DIRECTORY_WRITE_TEST_DIR, "newDirectory");
+    if(Directory::fileExists(newDirectory))
+        CORRADE_VERIFY(Directory::rm(newDirectory));
+
+    CORRADE_VERIFY(Directory::move(oldDirectory, newDirectory));
+    CORRADE_VERIFY(!Directory::fileExists(oldDirectory));
+    CORRADE_VERIFY(Directory::fileExists(newDirectory));
+}
+
+void DirectoryTest::mkpath() {
+    /* Existing */
+    CORRADE_VERIFY(Directory::fileExists(DIRECTORY_WRITE_TEST_DIR));
+    CORRADE_VERIFY(Directory::mkpath(DIRECTORY_WRITE_TEST_DIR));
+
+    /* Leaf */
+    std::string leaf = Directory::join(DIRECTORY_WRITE_TEST_DIR, "leaf");
+    if(Directory::fileExists(leaf)) CORRADE_VERIFY(Directory::rm(leaf));
+    CORRADE_VERIFY(Directory::mkpath(leaf));
+    CORRADE_VERIFY(Directory::fileExists(leaf));
+
+    /* Path */
+    std::string path = Directory::join(DIRECTORY_WRITE_TEST_DIR, "path/to/new/dir");
+    if(Directory::fileExists(path)) CORRADE_VERIFY(Directory::rm(path));
+    if(Directory::fileExists(Directory::join(DIRECTORY_WRITE_TEST_DIR, "path/to/new")))
+        CORRADE_VERIFY(Directory::rm(Directory::join(DIRECTORY_WRITE_TEST_DIR, "path/to/new")));
+    if(Directory::fileExists(Directory::join(DIRECTORY_WRITE_TEST_DIR, "path/to")))
+        CORRADE_VERIFY(Directory::rm(Directory::join(DIRECTORY_WRITE_TEST_DIR, "path/to")));
+    if(Directory::fileExists(Directory::join(DIRECTORY_WRITE_TEST_DIR, "path")))
+        CORRADE_VERIFY(Directory::rm(Directory::join(DIRECTORY_WRITE_TEST_DIR, "path")));
+
+    CORRADE_VERIFY(Directory::mkpath(leaf));
+    CORRADE_VERIFY(Directory::fileExists(leaf));
 }
 
 void DirectoryTest::home() {
-    QCOMPARE(QString::fromStdString(Directory::home()), QDir::homePath());
+    CORRADE_EXPECT_FAIL("Don't know how to properly test without another well tested framework.");
+    CORRADE_COMPARE(Directory::home(), ""/*QDir::homePath()*/);
 }
 
 void DirectoryTest::configurationDir() {
-    QCOMPARE(QString::fromStdString(Directory::configurationDir("Corrade", false)), QDir::home().filePath(".corrade"));
-}
-
-void DirectoryTest::list_data() {
-    QTest::addColumn<int>("flags");
-    QTest::addColumn<QStringList>("data");
-
-    QStringList data;
-    data << "." << ".." << "dir" << "file";
-    QTest::newRow("all") << 0 << data;
-    QTest::newRow("SkipSpecial") << int(Directory::SkipSpecial) << data;
-    QTest::newRow("allSortedAsc") << int(Directory::SortAscending) << data;
-
-    data.clear();
-    data << "file" << "dir" << ".." << ".";
-    QTest::newRow("allSortedDesc") << int(Directory::SortDescending) << data;
-
-    data.clear();
-    data << "dir" << "file";
-    QTest::newRow("SkipDotAndDotDot") << int(Directory::SkipDotAndDotDot) << data;
-
-    data.clear();
-    data << "file";
-    QTest::newRow("SkipDirectories") << int(Directory::SkipDirectories) << data;
-
-    data.clear();
-    data << "." << ".." << "dir";
-    QTest::newRow("SkipFiles") << int(Directory::SkipFiles) << data;
+    CORRADE_EXPECT_FAIL("Don't know how to properly test without another well tested framework.");
+    CORRADE_COMPARE(Directory::configurationDir("Corrade", false), ""/*QDir::home().filePath(".corrade")*/);
 }
 
 void DirectoryTest::list() {
-    QFETCH(int, flags);
-    QFETCH(QStringList, data);
+    /* All */
+    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR),
+        (std::vector<std::string>{".", "..", "dir", "file"}),
+        TestSuite::Compare::SortedContainer);
 
-    Directory d(DIRECTORY_TEST_DIR, flags);
-    QVERIFY(d.isLoaded());
+    /* Skip special */
+    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SkipSpecial),
+        (std::vector<std::string>{".", "..", "dir", "file"}),
+        TestSuite::Compare::SortedContainer);
 
-    QStringList actual;
-    for(Directory::const_iterator i = d.begin(); i != d.end(); ++i)
-        actual << QString::fromStdString(*i);
+    /* All, sorted ascending */
+    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SortAscending),
+        (std::vector<std::string>{".", "..", "dir", "file"}),
+        TestSuite::Compare::Container);
 
-    if(!(flags & (Directory::SortAscending|Directory::SortDescending)))
-        actual.sort();
+    /* All, sorted descending */
+    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SortDescending),
+        (std::vector<std::string>{"file", "dir", "..", "."}),
+        TestSuite::Compare::Container);
 
-    QCOMPARE(actual, data);
+    /* Skip . and .. */
+    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SkipDotAndDotDot),
+        (std::vector<std::string>{"dir", "file"}),
+        TestSuite::Compare::SortedContainer);
+
+    /* Skip directories */
+    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SkipDirectories),
+        std::vector<std::string>{"file"},
+        TestSuite::Compare::SortedContainer);
+
+    /* Skip files */
+    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SkipFiles),
+        (std::vector<std::string>{".", "..", "dir"}),
+        TestSuite::Compare::SortedContainer);
+
+}
+
+void DirectoryTest::listSortPrecedence() {
+    CORRADE_VERIFY((Directory::Flag::SortAscending|Directory::Flag::SortDescending) == Directory::Flag::SortAscending);
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::Utility::Test::DirectoryTest)

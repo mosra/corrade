@@ -45,10 +45,10 @@ Building and running unit tests
 -------------------------------
 
 If you want to build also unit tests (which are not built by default), pass
-`-DBUILD_TESTS=True` to CMake. Unit tests use QtTest framework (you need at
-least **Qt 4.6**) and can be run using
+`-DBUILD_TESTS=ON` to CMake. Unit tests use Corrade's own TestSuite framework
+and can be run using
 
-    ctest -V
+    ctest --output-on-failure
 
 in build directory. Everything should pass ;-)
 
@@ -64,6 +64,18 @@ support, but older versions should do good job too) and additionally uses
 in root directory (i.e. where `Doxyfile` is). Resulting HTML documentation
 will be in `build/doc/` directory.
 
+Building examples
+-----------------
+
+The library comes with handful of examples, contained in `examples/`
+directory. Each example is thoroughly explained in documentation. The examples
+require Corrade to be installed and they are built separately:
+
+    mkdir -p build-examples
+    cd build-examples
+    cmake ../examples
+    make
+
 CONTACT
 =======
 
@@ -74,3 +86,9 @@ awesome idea? Feel free to visit my website or contact me at:
  * GitHub - http://github.com/mosra/corrade
  * E-mail - mosra@centrum.cz
  * Jabber - mosra@jabbim.cz
+
+LICENSE
+=======
+
+Corrade is licensed under MIT/Expat license, see [COPYING](COPYING) file for
+details.

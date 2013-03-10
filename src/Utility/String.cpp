@@ -1,57 +1,64 @@
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
 #include "String.h"
 
 #include <algorithm>
 
-using namespace std;
-
 namespace Corrade { namespace Utility {
 
 const std::string String::Whitespace(" \t\f\v\r\n");
 const std::string String::Bom("\xEF\xBB\xBF");
 
-string String::ltrim(string str, const string& characters) {
+std::string String::ltrim(std::string str, const std::string& characters) {
     return str.erase(0, str.find_first_not_of(characters));
 }
 
-string String::rtrim(string str, const string& characters) {
+std::string String::rtrim(std::string str, const std::string& characters) {
     return str.erase(str.find_last_not_of(characters)+1);
 }
 
-vector<string> String::split(const string& str, char delim, bool keepEmptyParts) {
-    vector<string> parts;
-    size_t oldpos = 0, pos = string::npos;
+std::vector<std::string> String::split(const std::string& str, char delim, bool keepEmptyParts) {
+    std::vector<std::string> parts;
+    std::size_t oldpos = 0, pos = std::string::npos;
 
     do {
         pos = str.find(delim, oldpos);
-        string part = str.substr(oldpos, pos-oldpos);
+        std::string part = str.substr(oldpos, pos-oldpos);
 
         if(!part.empty() || keepEmptyParts)
             parts.push_back(part);
 
         oldpos = pos+1;
-    } while(pos != string::npos);
+    } while(pos != std::string::npos);
 
     return parts;
 }
 
-string String::lowercase(string str) {
-    transform(str.begin(), str.end(), str.begin(), ptr_fun<int, int>(tolower));
+std::string String::lowercase(std::string str) {
+    std::transform(str.begin(), str.end(), str.begin(), std::ptr_fun<int, int>(std::tolower));
     return str;
 }
 

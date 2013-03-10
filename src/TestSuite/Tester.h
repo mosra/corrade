@@ -1,30 +1,40 @@
 #ifndef Corrade_TestSuite_Tester_h
 #define Corrade_TestSuite_Tester_h
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
 /** @file
- * @brief Class Corrade::TestSuite::Tester, macros CORRADE_TEST_MAIN(), CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS().
+ * @brief Class Corrade::TestSuite::Tester, macros CORRADE_TEST_MAIN(), CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS(), CORRADE_COMPARE_WITH(), CORRADE_SKIP().
  */
 
-#include <functional>
-#include <iostream>
 #include <vector>
 
 #include "Comparator.h"
+#include "Compare/FloatingPoint.h"
+
+#include "corradeTestSuiteVisibility.h"
 
 namespace Corrade { namespace TestSuite {
 
@@ -33,15 +43,43 @@ namespace Corrade { namespace TestSuite {
 
 See @ref unit-testing for introduction.
 
-@see CORRADE_TEST_MAIN(), CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS()
+@see CORRADE_TEST_MAIN(), CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS(),
+    CORRADE_COMPARE_WITH(), CORRADE_SKIP()
 @todo Data-driven tests
 */
-template<class Derived> class Tester {
+class CORRADE_TESTSUITE_EXPORT Tester {
     public:
-        /** @brief Pointer to test case function */
-        typedef void (Derived::*TestCase)();
+        /**
+         * @brief Alias for debug output
+         *
+         * For convenient debug output inside test cases (instead of using
+         * fully qualified name):
+         * @code
+         * void myTestCase() {
+         *     int a = 4;
+         *     Debug() << a;
+         *     CORRADE_COMPARE(a + a, 8);
+         * }
+         * @endcode
+         * @see Warning, Error
+         */
+        typedef Corrade::Utility::Debug Debug;
 
-        inline constexpr Tester(): logOutput(nullptr), errorOutput(nullptr), testCaseLine(0), expectedFailure(nullptr) {}
+        /**
+         * @brief Alias for warning output
+         *
+         * See @ref Debug for more information.
+         */
+        typedef Corrade::Utility::Warning Warning;
+
+        /**
+         * @brief Alias for error output
+         *
+         * See @ref Debug for more information.
+         */
+        typedef Corrade::Utility::Error Error;
+
+        inline explicit Tester(): logOutput(nullptr), errorOutput(nullptr), testCaseLine(0), checkCount(0), expectedFailure(nullptr) {}
 
         /**
          * @brief Execute the tester
@@ -50,76 +88,38 @@ template<class Derived> class Tester {
          * @return Non-zero if there are no test cases, if any test case fails
          *      or doesn't contain any checking macros, zero otherwise.
          */
-        int exec(std::ostream* logOutput = &std::cout, std::ostream* errorOutput = &std::cerr) {
-            this->logOutput = logOutput;
-            this->errorOutput = errorOutput;
+        int exec(std::ostream* logOutput, std::ostream* errorOutput);
 
-            /* Fail when we have nothing to test */
-            if(testCases.empty()) {
-                Utility::Error(errorOutput) << "In" << testName << "weren't found any test cases!";
-                return 2;
-            }
-
-            Utility::Debug(logOutput) << "Starting" << testName << "with" << testCases.size() << "test cases...";
-
-            unsigned int errorCount = 0,
-                noCheckCount = 0;
-
-            for(typename std::vector<std::function<void(Derived&)>>::const_iterator i = testCases.begin(); i != testCases.end(); ++i) {
-                /* Reset output to stdout for each test case to prevent debug
-                   output segfaults */
-                /** @todo Drop this when Debug has proper output scoping */
-                Utility::Debug::setOutput(&std::cout);
-                Utility::Error::setOutput(&std::cerr);
-                Utility::Warning::setOutput(&std::cerr);
-
-                try {
-                    testCaseName.clear();
-                    (*i)(*static_cast<Derived*>(this));
-                } catch(Exception e) {
-                    ++errorCount;
-                    continue;
-                }
-
-                /* No testing macros called, don't print function name to output */
-                if(testCaseName.empty()) {
-                    ++noCheckCount;
-                    continue;
-                }
-
-                Utility::Debug d(logOutput);
-                d << (expectedFailure ? " XFAIL:" : "    OK:") << testCaseName;
-                if(expectedFailure) d << "\n       " << expectedFailure->message();
-            }
-
-            Utility::Debug d(logOutput);
-            d << "Finished" << testName << "with" << errorCount << "errors.";
-            if(noCheckCount)
-                d << noCheckCount << "test cases didn't contain any checks!";
-
-            return errorCount != 0 || noCheckCount != 0;
-        }
+        /**
+         * @brief Execute the tester
+         * @return Non-zero if there are no test cases, if any test case fails
+         *      or doesn't contain any checking macros, zero otherwise.
+         *
+         * The same as above, redirects log output to `std::cout` and error
+         * output to `std::cerr`.
+         */
+        int exec();
 
         /**
          * @brief Add test cases
          *
          * Adds one or more test cases to be executed when calling exec().
          */
-        template<class ...T> void addTests(TestCase first, T... next) {
-            testCases.push_back(std::mem_fn(first));
-
-            addTests(next...);
+        template<class Derived> void addTests(std::initializer_list<void(Derived::*)()> tests) {
+            testCases.reserve(testCases.size() + tests.size());
+            for(auto test: tests)
+                testCases.push_back(static_cast<TestCase>(test));
         }
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
         /* Compare two identical types without explicit type specification */
         template<class T> inline void compare(const std::string& actual, const T& actualValue, const std::string& expected, const T& expectedValue) {
-            compare<T, T, T>(actual, actualValue, expected, expectedValue);
+            compareAs<T, T, T>(actual, actualValue, expected, expectedValue);
         }
 
         /* Compare two different types without explicit type specification */
         template<class T, class U> inline void compare(const std::string& actual, const T& actualValue, const std::string& expected, const U& expectedValue) {
-            compare<typename std::common_type<T, U>::type, T, U>(actual, actualValue, expected, expectedValue);
+            compareAs<typename std::common_type<T, U>::type, T, U>(actual, actualValue, expected, expectedValue);
         }
 
         /* Compare two different types with explicit templated type
@@ -127,17 +127,19 @@ template<class Derived> class Tester {
            call only `CORRADE_COMPARE_AS(a, b, Compare::Containers)` without
            explicitly specifying the type, e.g.
            `CORRADE_COMPARE_AS(a, b, Compare::Containers<std::vector<int>>)` */
-        template<template<class> class T, class U, class V> inline void compare(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
-            compare<T<typename std::common_type<U, V>::type>, U, V>(actual, actualValue, expected, expectedValue);
+        template<template<class> class T, class U, class V> inline void compareAs(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
+            compareAs<T<typename std::common_type<U, V>::type>, U, V>(actual, actualValue, expected, expectedValue);
         }
 
         /* Compare two different types with explicit type specification */
-        template<class T, class U, class V> void compare(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
+        template<class T, class U, class V> void compareAs(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
             compareWith(Comparator<T>(), actual, actualValue, expected, expectedValue);
         }
 
         /* Compare two different types with explicit comparator specification */
         template<class T, class U, class V> void compareWith(Comparator<T> comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
+            ++checkCount;
+
             /* If the comparison succeeded or the failure is expected, done */
             bool equal = comparator(actualValue, expectedValue);
             if(!expectedFailure) {
@@ -155,27 +157,14 @@ template<class Derived> class Tester {
             throw Exception();
         }
 
-        void verify(const std::string& expression, bool expressionValue) {
-            /* If the expression is true or the failure is expected, done */
-            if(!expectedFailure) {
-                if(expressionValue) return;
-            } else if(!expressionValue) {
-                Utility::Debug(logOutput) << " XFAIL:" << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       " << expectedFailure->message() << "Expression" << expression << "failed.";
-                return;
-            }
-
-            /* Otherwise print message to error output and throw exception */
-            Utility::Error e(errorOutput);
-            e << (expectedFailure ? " XPASS:" : "  FAIL:") << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n        Expression" << expression;
-            if(!expectedFailure) e << "failed.";
-            else e << "was expected to fail.";
-            throw Exception();
-        }
+        void verify(const std::string& expression, bool expressionValue);
 
         inline void registerTest(const std::string& filename, const std::string& name) {
             testFilename = filename;
             testName = name;
         }
+
+        void skip(const std::string& message);
 
     protected:
         class ExpectedFailure {
@@ -195,21 +184,21 @@ template<class Derived> class Tester {
                 std::string _message;
         };
 
-        inline void registerTestCase(const std::string& name, int line) {
-            if(testCaseName.empty()) testCaseName = name + "()";
-            this->testCaseLine = line;
-        }
+        void registerTestCase(const std::string& name, int line);
         #endif
 
     private:
         class Exception {};
+        class SkipException {};
+
+        typedef void (Tester::*TestCase)();
 
         void addTests() {} /* Terminator function for addTests() */
 
         std::ostream *logOutput, *errorOutput;
-        std::vector<std::function<void(Derived&)>> testCases;
+        std::vector<TestCase> testCases;
         std::string testFilename, testName, testCaseName, expectFailMessage;
-        size_t testCaseLine;
+        std::size_t testCaseLine, checkCount;
         ExpectedFailure* expectedFailure;
 };
 
@@ -225,7 +214,7 @@ template<class Derived> class Tester {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 #define _CORRADE_REGISTER_TEST_CASE()                                       \
-    registerTestCase(__func__, __LINE__);
+    Tester::registerTestCase(__func__, __LINE__);
 #endif
 
 /** @hideinitializer
@@ -243,7 +232,7 @@ CORRADE_VERIFY(!s.empty());
 #define CORRADE_VERIFY(expression)                                          \
     do {                                                                    \
         _CORRADE_REGISTER_TEST_CASE();                                      \
-        verify(#expression, expression);                                    \
+        Tester::verify(#expression, expression);                            \
     } while(false)
 
 /** @hideinitializer
@@ -261,7 +250,7 @@ CORRADE_COMPARE(a, 8);
 #define CORRADE_COMPARE(actual, expected)                                   \
     do {                                                                    \
         _CORRADE_REGISTER_TEST_CASE();                                      \
-        compare(#actual, actual, #expected, expected);                      \
+        Tester::compare(#actual, actual, #expected, expected);              \
     } while(false)
 
 /** @hideinitializer
@@ -270,7 +259,7 @@ CORRADE_COMPARE(a, 8);
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
 @code
-CORRADE_COMPARE_AS(sin(0.0f), 0.0f, float);
+CORRADE_COMPARE_AS(std::sin(0.0), 0.0f, float);
 @endcode
 See also @ref Corrade::TestSuite::Comparator "Comparator" class documentation
 for example of more involved comparisons.
@@ -280,7 +269,7 @@ for example of more involved comparisons.
 #define CORRADE_COMPARE_AS(actual, expected, Type)                          \
     do {                                                                    \
         _CORRADE_REGISTER_TEST_CASE();                                      \
-        compare<Type>(#actual, actual, #expected, expected);                \
+        Tester::compareAs<Type>(#actual, actual, #expected, expected);      \
     } while(false)
 
 /** @hideinitializer
@@ -299,7 +288,7 @@ more information.
 #define CORRADE_COMPARE_WITH(actual, expected, comparatorInstance)          \
     do {                                                                    \
         _CORRADE_REGISTER_TEST_CASE();                                      \
-        compareWith(comparatorInstance.comparator(), #actual, actual, #expected, expected); \
+        Tester::compareWith(comparatorInstance.comparator(), #actual, actual, #expected, expected); \
     } while(false)
 
 /** @hideinitializer
@@ -324,6 +313,25 @@ If any of the following checks passes, an error will be printed to output.
 */
 #define CORRADE_EXPECT_FAIL(message)                                        \
     ExpectedFailure expectedFailure##__LINE__(this, message)
+
+/** @hideinitializer
+@brief Skip test case
+@param message Message which will be printed into output as indication of
+    skipped test
+
+Skips all following checks in given test case. Useful for e.g. indicating that
+given feature can't be tested on given platform:
+@code
+if(!bigEndian) {
+    CORRADE_SKIP("Big endian compatibility can't be tested on this system.");
+}
+@endcode
+*/
+#define CORRADE_SKIP(message)                                               \
+    do {                                                                    \
+        _CORRADE_REGISTER_TEST_CASE();                                      \
+        Tester::skip(message);                                              \
+    } while(false)
 
 }}
 

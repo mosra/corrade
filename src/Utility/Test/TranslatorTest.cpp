@@ -1,59 +1,77 @@
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
-#include "TranslatorTest.h"
-
-#include <QtTest/QTest>
-
+#include "TestSuite/Tester.h"
 #include "Utility/Translator.h"
 #include "Utility/Directory.h"
+
 #include "testConfigure.h"
-
-using namespace std;
-
-QTEST_APPLESS_MAIN(Corrade::Utility::Test::TranslatorTest)
 
 namespace Corrade { namespace Utility { namespace Test {
 
+class TranslatorTest: public TestSuite::Tester {
+    public:
+        TranslatorTest();
+
+        void file();
+        void group();
+        void dynamic();
+};
+
+TranslatorTest::TranslatorTest() {
+    addTests({&TranslatorTest::file,
+              &TranslatorTest::group,
+              &TranslatorTest::dynamic});
+}
+
 void TranslatorTest::file() {
     Translator t(Directory::join(TRANSLATOR_TEST_DIR, "primary.conf"), Directory::join(TRANSLATOR_TEST_DIR, "fallback.conf"));
-    const string* s = t.get("string");
+    const std::string* s = t.get("string");
 
-    QVERIFY(*s == "primarily default translated");
+    CORRADE_COMPARE(*s, "primarily default translated");
 
     /* Load another primary localization */
     t.setPrimary(Directory::join(TRANSLATOR_TEST_DIR, "en_US.conf"));
 
-    QVERIFY(*s == "primarily translated");
+    CORRADE_COMPARE(*s, "primarily translated");
 
     /* Cleanup primary localization */
     t.setPrimary(nullptr);
-    QVERIFY(*s == "fallback translation");
+    CORRADE_COMPARE(*s, "fallback translation");
 
     /* Load inexistent primary localization */
     t.setPrimary(Directory::join(TRANSLATOR_TEST_DIR, "inexistent.conf"));
-    QVERIFY(*s == "fallback translation");
+    CORRADE_COMPARE(*s, "fallback translation");
 
     /* Load another fallback localization */
     t.setFallback(Directory::join(TRANSLATOR_TEST_DIR, "fallback2.conf"));
-    QVERIFY(*s == "other fallback translation");
+    CORRADE_COMPARE(*s, "other fallback translation");
 
     /* Cleanup fallback localization */
     t.setFallback(nullptr);
-    QVERIFY(*s == "");
+    CORRADE_VERIFY(s->empty());
 }
 
 void TranslatorTest::group() {
@@ -61,13 +79,13 @@ void TranslatorTest::group() {
 
     Translator t(&c);
 
-    const string* s = t.get("string");
+    const std::string* s = t.get("string");
 
-    QVERIFY(*s == "primarily default translated");
+    CORRADE_COMPARE(*s, "primarily default translated");
 
     /* Load another group */
     t.setPrimary(c.group("cs_CZ"));
-    QVERIFY(*s == "primárně přeloženo");
+    CORRADE_COMPARE(*s, u8"primárně přeloženo");
 }
 
 void TranslatorTest::dynamic() {
@@ -76,18 +94,18 @@ void TranslatorTest::dynamic() {
     Translator t2;
     t2.setPrimary(&c, true);
 
-    const string* s1 = t1.get("string");
-    const string* s2 = t2.get("string");
+    const std::string* s1 = t1.get("string");
+    const std::string* s2 = t2.get("string");
 
     Translator::setLocale("en_US");
 
-    QVERIFY(*s1 == "primarily translated");
-    QVERIFY(*s2 == "primarily translated");
+    CORRADE_COMPARE(*s1, "primarily translated");
+    CORRADE_COMPARE(*s2, "primarily translated");
 
     Translator::setLocale("cs_CZ");
 
-    QVERIFY(*s1 == "primárně přeloženo");
-    QVERIFY(*s2 == "primárně přeloženo");
+    CORRADE_COMPARE(*s1, u8"primárně přeloženo");
+    CORRADE_COMPARE(*s2, u8"primárně přeloženo");
 
     /* Fixed translations, not affected with setLocale() */
     t1.setPrimary(Directory::join(TRANSLATOR_TEST_DIR, "cs_CZ.conf"));
@@ -95,8 +113,10 @@ void TranslatorTest::dynamic() {
 
     Translator::setLocale("en_US");
 
-    QVERIFY(*s1 == "primárně přeloženo");
-    QVERIFY(*s2 == "primárně přeloženo");
+    CORRADE_COMPARE(*s1, u8"primárně přeloženo");
+    CORRADE_COMPARE(*s2, u8"primárně přeloženo");
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::Utility::Test::TranslatorTest)

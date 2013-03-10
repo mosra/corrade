@@ -1,6 +1,40 @@
 
 # (the blank line is here so CMake doesn't generate documentation from it)
 
+#
+#   This file is part of Corrade.
+#
+#   Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+#             Vladimír Vondruš <mosra@centrum.cz>
+#
+#   Permission is hereby granted, free of charge, to any person obtaining a
+#   copy of this software and associated documentation files (the "Software"),
+#   to deal in the Software without restriction, including without limitation
+#   the rights to use, copy, modify, merge, publish, distribute, sublicense,
+#   and/or sell copies of the Software, and to permit persons to whom the
+#   Software is furnished to do so, subject to the following conditions:
+#
+#   The above copyright notice and this permission notice shall be included
+#   in all copies or substantial portions of the Software.
+#
+#   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+#   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#   DEALINGS IN THE SOFTWARE.
+#
+
+# Mandatory C++ flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+
+# Optional C++ flags
+set(CORRADE_CXX_FLAGS "-Wall -Wextra -Wold-style-cast -Winit-self -Werror=return-type -Wmissing-declarations -pedantic -fvisibility=hidden")
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS} -Wdouble-promotion")
+endif()
+
 # Set variable for current and also parent scope, if parent scope exists.
 #  set_parent_scope(name value)
 # Workaround for ugly CMake bug.
@@ -22,7 +56,7 @@ macro(set_parent_scope name)
     endif()
 endmacro()
 
-function(corrade_add_test2 test_name)
+function(corrade_add_test test_name)
     # Get DLL and path lists
     foreach(arg ${ARGN})
         if(${arg} STREQUAL LIBRARIES)
@@ -38,35 +72,6 @@ function(corrade_add_test2 test_name)
 
     add_executable(${test_name} ${sources})
     target_link_libraries(${test_name} ${CORRADE_TESTSUITE_LIBRARIES} ${libraries})
-    add_test(${test_name} ${test_name})
-endfunction()
-
-if(QT4_FOUND)
-function(corrade_add_test test_name moc_header source_file)
-    foreach(library ${ARGN})
-        set(libraries ${library} ${libraries})
-    endforeach()
-
-    qt4_wrap_cpp(${test_name}_MOC ${moc_header})
-    add_executable(${test_name} ${source_file} ${${test_name}_MOC})
-    target_link_libraries(${test_name} ${libraries} ${QT_QTCORE_LIBRARY} ${QT_QTTEST_LIBRARY})
-    add_test(${test_name} ${test_name})
-endfunction()
-else()
-function(corrade_add_test)
-    message(FATAL_ERROR "Qt4 is required for corrade_add_test(). Be sure you call "
-            "find_package(Qt4) before find_package(Corrade)")
-endfunction()
-endif()
-
-function(corrade_add_multifile_test test_name moc_headers_variable source_files_variable)
-    foreach(library ${ARGN})
-        set(libraries ${library} ${libraries})
-    endforeach()
-
-    qt4_wrap_cpp(${test_name}_MOC ${${moc_headers_variable}})
-    add_executable(${test_name} ${${source_files_variable}} ${${test_name}_MOC})
-    target_link_libraries(${test_name} ${libraries} ${QT_QTCORE_LIBRARY} ${QT_QTTEST_LIBRARY})
     add_test(${test_name} ${test_name})
 endfunction()
 

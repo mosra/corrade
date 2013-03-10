@@ -29,11 +29,13 @@ static const unsigned char resourceData[] = {
     0xba,0xdc,0xf,0xfe,0xeb,0xad,0xf0,0xd
 };
 
+int resourceInitializer_ResourceTestData();
 int resourceInitializer_ResourceTestData() {
     Corrade::Utility::Resource::registerData("test", 2, resourcePositions, resourceFilenames, resourceData);
     return 1;
 } AUTOMATIC_INITIALIZER(resourceInitializer_ResourceTestData)
 
+int resourceFinalizer_ResourceTestData();
 int resourceFinalizer_ResourceTestData() {
     Corrade::Utility::Resource::unregisterData("test", resourceData);
     return 1;

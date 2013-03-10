@@ -1,25 +1,32 @@
-#ifndef Corrade_PluginManager_Plugin_h
-#define Corrade_PluginManager_Plugin_h
+#ifndef Corrade_PluginManager_AbstractPlugin_h
+#define Corrade_PluginManager_AbstractPlugin_h
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
 /** @file
- * @brief Class Corrade::PluginManager::Plugin and plugin registering macros
- *
- * Macros PLUGIN_INTERFACE(), PLUGIN_REGISTER().
+ * @brief Class Corrade::PluginManager::AbstractPlugin, macro PLUGIN_INTERFACE(), PLUGIN_REGISTER().
  */
 
 #include <string>
@@ -30,58 +37,71 @@
 namespace Corrade { namespace PluginManager {
 
 /**
- * @brief Base class for plugin interfaces
- *
- * Connects every plugin instance to parent plugin manager to ensure the
- * plugin can be unloaded only if there are no active instances.
- */
-class CORRADE_PLUGINMANAGER_EXPORT Plugin {
+@brief Base class for plugin interfaces
+
+Connects every plugin instance to parent plugin manager to ensure the
+plugin can be unloaded only if there are no active instances.
+*/
+class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
     public:
         /**
-         * @brief Constructor
-         * @param manager       Parent plugin manager
-         * @param plugin        %Plugin name
+         * @brief Default constructor
          *
-         * Registers this plugin instance in plugin manager.
+         * Usable when using the plugin directly, without plugin manager. Define
+         * this constructor in your subclass only if you want to allow using the
+         * interface or plugin without plugin manager.
          */
-        Plugin(AbstractPluginManager* manager = nullptr, const std::string& plugin = "");
+        explicit AbstractPlugin();
+
+        /**
+         * @brief Plugin manager constructor
+         *
+         * Used by plugin manager. Don't forget to redefine this constructor in
+         * all your subclasses.
+         * @see plugin(), metadata(), configuration()
+         */
+        explicit AbstractPlugin(AbstractPluginManager* manager, std::string plugin);
 
         /**
          * @brief Destructor
          *
-         * Unregisters this plugin instance in plugin manager.
+         * If instantiated through plugin manager, unregisters this instance
+         * from it.
          */
-        virtual ~Plugin();
+        virtual ~AbstractPlugin() = 0;
 
         /**
          * @brief Whether the plugin can be deleted
          *
          * Called from PluginManager on all active instances before the plugin
-         * is unloaded. Returns true if it is safe to delete the instance from
-         * the manager, returns false if not. If any instance returns false,
-         * the plugin is not unloaded.
+         * is unloaded. Returns `true` if it is safe to delete the instance from
+         * the manager, `false` if not. If any instance returns `false`, the
+         * plugin is not unloaded.
          */
         virtual bool canBeDeleted() { return false; }
 
         /**
          * @brief Identifier string
-         * @return String, under which the plugin was instanced. If the plugin
-         *      was not instanced via plugin manager, returns empty string.
+         *
+         * Name under which the plugin was instanced. If the plugin was not
+         * instantiated via plugin manager, returns empty string.
          */
         inline std::string plugin() const { return _plugin; }
 
         /**
          * @brief Metadata
-         * @return Metadata file associated with the plugin or 0, if no metadata
-         *      is available.
+         *
+         * Metadata associated with given plugin. If the plugin was not
+         * instantiated through plugin manager, returns `nullptr`.
          */
         inline const PluginMetadata* metadata() const { return _metadata; }
 
     protected:
         /**
          * @brief Configuration
-         * @return Configuration from file associated with the plugin or 0, if
-         *      no configuration is available.
+         *
+         * Configuration associated with given plugin. If the plugin was not
+         * instantiated through plugin manager, returns `nullptr`.
          * @todo Make use of this, change to pointer to ConfigurationGroup
          */
         inline const Utility::Configuration* configuration() const { return _configuration; }
@@ -140,24 +160,26 @@ No plugin-related preprocessor directive is defined.
 See @ref plugin-management for more information about plugin compilation.
 
 @attention This macro should be called outside of any namespace. If you are
-running into linker errors with `pluginInitializer_`, this could be the
-problem.
-@todo Get rid of AUTOMATIC_INITIALIZER() -- PLUGIN_REGISTER() should be
-only in *.cpp
+    running into linker errors with `pluginInitializer_`, this could be the
+    problem.
 */
 #ifdef CORRADE_STATIC_PLUGIN
 #define PLUGIN_REGISTER(name, className, interface)                         \
     inline void* pluginInstancer_##name(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
         { return new className(manager, plugin); }                          \
+    int pluginInitializer_##name();                                         \
     int pluginInitializer_##name() {                                        \
         Corrade::PluginManager::AbstractPluginManager::importStaticPlugin(#name, PLUGIN_VERSION, interface, pluginInstancer_##name); return 1; \
-    } AUTOMATIC_INITIALIZER(pluginInitializer_##name)
+    }
 #else
 #ifdef CORRADE_DYNAMIC_PLUGIN
 #define PLUGIN_REGISTER(name, className, interface)                         \
-    extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion() { return PLUGIN_VERSION; }               \
+    extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion();                   \
+    extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion() { return PLUGIN_VERSION; } \
+    extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin); \
     extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
         { return new className(manager, plugin); }                          \
+    extern "C" CORRADE_PLUGIN_EXPORT const char* pluginInterface();         \
     extern "C" CORRADE_PLUGIN_EXPORT const char* pluginInterface() { return interface; }
 #else
 #define PLUGIN_REGISTER(name, className, interface)

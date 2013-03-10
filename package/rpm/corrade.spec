@@ -2,7 +2,7 @@ Name: corrade
 URL: http://mosra.cz/blog/corrade.php
 Version: 0.2
 Release: 1
-License: LGPLv3
+License: MIT
 %if %{defined suse_version}
 Group: System/Libraries
 %else

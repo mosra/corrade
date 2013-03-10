@@ -1,27 +1,37 @@
 #ifndef Corrade_Utility_Debug_h
 #define Corrade_Utility_Debug_h
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
 /** @file
- * @brief Class Corrade::Utility::Debug, Corrade::Utility::Warning, Corrade::Utility::Error, macro CORRADE_ASSERT().
+ * @brief Class Corrade::Utility::Debug, Corrade::Utility::Warning, Corrade::Utility::Error
  */
 
-#include <cstddef>
-#include <cstdlib>
+#include <iosfwd>
+#include <utility>
+#include <type_traits>
 
 #include "TypeTraits.h"
 
@@ -65,16 +75,13 @@ Support for printing other types (which are not handled by `iostream` itself)
 can be added by implementing function operator<<(Debug, const T&) for given
 type.
 
+@see Warning, Error, CORRADE_ASSERT(), CORRADE_INTERNAL_ASSERT(),
+    CORRADE_INTERNAL_ASSERT_OUTPUT()
 @todo Output to more ostreams at once
-@see Warning, Error
  */
 class CORRADE_UTILITY_EXPORT Debug {
-    /* Disabling assignment */
-    CORRADE_UTILITY_LOCAL Debug& operator=(const Debug& other);
-
-    #ifndef DOXYGEN_GENERATING_OUTPUT
-    template<class T> friend typename std::enable_if<HasInsertionOperator<T>::Value, Debug>::type operator<<(Debug, const T&);
-    #endif
+    Debug& operator=(const Debug& other) = delete;
+    Debug& operator=(Debug&& other) = delete;
 
     public:
         /** @brief Output flags */
@@ -90,10 +97,9 @@ class CORRADE_UTILITY_EXPORT Debug {
          *      no debug output will be written anywhere.
          *
          * Constructs debug object with given output.
-         *
-         * @see setOutput().
+         * @see setOutput()
          */
-        inline Debug(std::ostream* _output = globalOutput): output(_output), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
+        inline explicit Debug(std::ostream* _output = globalOutput): output(_output), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
 
         /**
          * @brief Copy constructor
@@ -129,8 +135,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * Adds newline at the end of debug output, if it is enabled in flags
          * and the output is not empty.
-         *
-         * @see Flag.
+         * @see Flag
          */
         ~Debug();
 
@@ -139,6 +144,27 @@ class CORRADE_UTILITY_EXPORT Debug {
 
         /** @brief Set flag */
         void setFlag(Flag flag, bool value);
+
+        /**
+         * @brief Print string to debug output
+         *
+         * If there is already something on the output, puts space before
+         * the value.
+         * @see operator<<(Debug, const T&)
+         */
+        Debug operator<<(const std::string& value);
+        Debug operator<<(const char* value);            /**< @overload */
+        Debug operator<<(const void* value);            /**< @overload */
+        Debug operator<<(bool value);                   /**< @overload */
+        Debug operator<<(int value);                    /**< @overload */
+        Debug operator<<(long value);                   /**< @overload */
+        Debug operator<<(long long value);              /**< @overload */
+        Debug operator<<(unsigned value);               /**< @overload */
+        Debug operator<<(unsigned long value);          /**< @overload */
+        Debug operator<<(unsigned long long value);     /**< @overload */
+        Debug operator<<(float value);                  /**< @overload */
+        Debug operator<<(double value);                 /**< @overload */
+        Debug operator<<(long double value);            /**< @overload */
 
         /**
          * @brief Globally set output for newly created instances
@@ -156,12 +182,14 @@ class CORRADE_UTILITY_EXPORT Debug {
         std::ostream* output;   /**< @brief Stream where to put the output */
 
     private:
+        template<class T> Debug print(const T& value);
+
         CORRADE_UTILITY_EXPORT static std::ostream* globalOutput;
         int flags;
 };
 
 #ifdef DOXYGEN_GENERATING_OUTPUT
-/**
+/** @relates Debug
 @brief Operator for printing custom types to debug
 @param debug     %Debug class
 @param value     Value to be printed
@@ -175,32 +203,22 @@ Debug::setFlag() for modifying newline and whitespace behavior.
  */
 template<class T> Debug operator<<(Debug debug, const T& value);
 #else
-template<class T> typename std::enable_if<HasInsertionOperator<T>::Value, Debug>::type operator<<(Debug debug, const T& value) {
-    if(!debug.output) return debug;
-
-    /* Separate values with spaces, if enabled */
-    if(debug.flags & 0x01) debug.flags &= ~0x01;
-    else if(debug.flags & Debug::SpaceAfterEachValue) *debug.output << " ";
-
-    *debug.output << value;
-    return debug;
-}
 template<class Iterable> Debug operator<<(typename std::enable_if<IsIterable<Iterable>::Value && !std::is_same<Iterable, std::string>::value, Debug>::type debug, const Iterable& value) {
-    debug << '[';
+    debug << "[";
     debug.setFlag(Debug::SpaceAfterEachValue, false);
     for(typename Iterable::const_iterator it = value.begin(); it != value.end(); ++it) {
         if(it != value.begin())
             debug << ", ";
         debug << *it;
     }
-    debug << ']';
+    debug << "]";
     debug.setFlag(Debug::SpaceAfterEachValue, true);
     return debug;
 }
 template<class A, class B> Debug operator<<(Debug debug, const std::pair<A, B>& value) {
-    debug << '(';
+    debug << "(";
     debug.setFlag(Debug::SpaceAfterEachValue, false);
-    debug << value.first << ", " << value.second << ')';
+    debug << value.first << ", " << value.second << ")";
     debug.setFlag(Debug::SpaceAfterEachValue, true);
     return debug;
 }
@@ -217,6 +235,7 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
         /** @copydoc Debug::Debug() */
         Warning(std::ostream* _output = globalWarningOutput): Debug(_output) {}
 
+        /** @copydoc Debug::setOutput() */
         inline static void setOutput(std::ostream* _output = globalWarningOutput) {
             globalWarningOutput = _output; }
 
@@ -234,100 +253,13 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
         /** @copydoc Debug::Debug() */
         Error(std::ostream* _output = globalErrorOutput): Debug(_output) {}
 
+        /** @copydoc Debug::setOutput() */
         inline static void setOutput(std::ostream* _output = globalErrorOutput) {
             globalErrorOutput = _output; }
 
     private:
         CORRADE_UTILITY_EXPORT static std::ostream* globalErrorOutput;
 };
-
-
-/** @hideinitializer
-@brief Assertion macro
-@param condition    Assert condition
-@param message      Message on assertion fail
-@param returnValue  Return value on assertion fail
-
-Usable for sanity checks on user input, as it prints explanational message on
-error.
-
-By default, if assertion fails, @p message is printed to error output and the
-application exits with value `-2`. If `CORRADE_GRACEFUL_ASSERT` is defined,
-the message is printed and the function returns with @p returnValue. If
-`CORRADE_NO_ASSERT` is defined, this macro does nothing. Example usage:
-@code
-T operator[](size_t pos) const {
-    CORRADE_ASSERT(pos < size(), "Index out of range", T());
-    return data[pos];
-}
-@endcode
-
-If the function has return type `void`, just use empty parameter (allowed in
-C++11):
-@code
-void compile() {
-    CORRADE_ASSERT(!sources.empty(), "No sources added", );
-
-    // ...
-}
-@endcode
-
-You can use stream output operators for formatting just like when printing to
-Debug output:
-@code
-CORRADE_ASSERT(pos < size(), "Cannot access element" << pos << "in array of size" << size(), );
-@endcode
-
-@see CORRADE_INTERNAL_ASSERT()
-*/
-#ifdef CORRADE_GRACEFUL_ASSERT
-#define CORRADE_ASSERT(condition, message, returnValue)                     \
-    do {                                                                    \
-        if(!(condition)) {                                                  \
-            Corrade::Utility::Error() << message;                           \
-            return returnValue;                                             \
-        }                                                                   \
-    } while(0)
-#else
-#ifdef CORRADE_NO_ASSERT
-#define CORRADE_ASSERT(condition, message, returnValue) do {} while(0)
-#else
-#define CORRADE_ASSERT(condition, message, returnValue)                     \
-    do {                                                                    \
-        if(!(condition)) {                                                  \
-            Corrade::Utility::Error() << message;                           \
-            std::exit(-2);                                                  \
-            return returnValue;                                             \
-        }                                                                   \
-    } while(0)
-#endif
-#endif
-
-/** @hideinitializer
-@brief Internal assertion macro
-@param condition    Assert condition
-
-Unlike CORRADE_ASSERT() usable for sanity checks on internal state, as it
-prints what failed and where.
-
-By default, if assertion fails, failed condition, file and line is printed to
-error output and the application exits with value `-1`. If `CORRADE_NO_ASSERT`
-is defined, this macro does nothing. Example usage:
-@code
-CORRADE_INTERNAL_ASSERT(!nullptr);
-@endcode
-*/
-#ifdef CORRADE_NO_ASSERT
-#define CORRADE_INTERNAL_ASSERT(condition) do {} while(0)
-#else
-#define CORRADE_INTERNAL_ASSERT(condition)                                  \
-    do {                                                                    \
-        if(!(condition)) {                                                  \
-            Corrade::Utility::Error() << "Assertion" << #condition << "failed in" << __FILE__ << "on line" << __LINE__; \
-            std::exit(-1);                                                  \
-        }                                                                   \
-    } while(0)
-#endif
 
 }}
 

@@ -1,26 +1,33 @@
 #ifndef Corrade_Utility_TypeTraits_h
 #define Corrade_Utility_TypeTraits_h
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
 /** @file Utility/TypeTraits.h
  * @brief Type traits
  */
-
-#include <iostream>
 
 #include "corradeCompatibility.h"
 
@@ -41,6 +48,7 @@ template<class T> class className {                                         \
     typedef char SmallType;                                                 \
     typedef short LargeType;                                                \
                                                                             \
+    className() = delete;                                                   \
     template<class U> static SmallType get(U&, typename U::type* = nullptr);\
     static LargeType get(...);                                              \
     static T& reference();                                                  \
@@ -69,35 +77,6 @@ template<class T> struct IsIterable {
 }
 #else
 HasType(const_iterator, IsIterable)
-#endif
-
-#ifndef DOXYGEN_GENERATING_OUTPUT
-namespace HasInsertionOperatorImplementation {
-    typedef char No;
-    typedef char Yes[2];
-
-    struct AnyType {
-        template<class T> AnyType(const T&);
-    };
-
-    No operator<<(const std::ostream&, const AnyType&);
-
-    Yes& test(std::ostream&);
-    No test(No);
-
-    template<class T> struct Has {
-        static std::ostream& s;
-        static const T& t;
-        static const bool Value = sizeof(test(s << t)) == sizeof(Yes);
-    };
-}
-template<class T> struct HasInsertionOperator: HasInsertionOperatorImplementation::Has<T> {};
-#else
-/** @brief Whether given class has `operator<<` for printing to `std::ostream` */
-template<class T> struct HasInsertionOperator {
-    /** @brief Whether given class has insertion operator */
-    static const bool Value;
-};
 #endif
 
 }}

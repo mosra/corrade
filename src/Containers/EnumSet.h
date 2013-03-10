@@ -1,19 +1,28 @@
 #ifndef Corrade_Containers_EnumSet_h
 #define Corrade_Containers_EnumSet_h
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
 /** @file
@@ -93,7 +102,7 @@ template<class T> class Object {
 };
 @endcode
 */
-template<class T, class U, U fullValue = ~U(0)> class EnumSet {
+template<class T, class U, U fullValue = U(~0)> class EnumSet {
     static_assert(std::is_enum<T>::value && !std::is_convertible<T, U>::value, "EnumSet type must be strongly typed enum");
 
     public:
@@ -101,10 +110,10 @@ template<class T, class U, U fullValue = ~U(0)> class EnumSet {
         typedef U UnderlyingType;   /**< @brief Underlying type of the enum */
 
         /** @brief Create empty set */
-        inline constexpr EnumSet(): value() {}
+        inline constexpr /*implicit*/ EnumSet(): value() {}
 
         /** @brief Create set from one value */
-        inline constexpr EnumSet(T value): value(static_cast<UnderlyingType>(value)) {}
+        inline constexpr /*implicit*/ EnumSet(T value): value(static_cast<UnderlyingType>(value)) {}
 
         /** @brief Equality operator */
         inline constexpr bool operator==(EnumSet<T, U, fullValue> other) const {

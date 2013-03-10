@@ -1,47 +1,73 @@
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
-#include "DebugTest.h"
-
+#include <map>
 #include <set>
 #include <sstream>
 #include <vector>
-#include <QtTest/QTest>
 
+#include "TestSuite/Tester.h"
 #include "Utility/Debug.h"
-
-using namespace std;
-
-QTEST_APPLESS_MAIN(Corrade::Utility::Test::DebugTest)
 
 namespace Corrade { namespace Utility { namespace Test {
 
+class DebugTest: public TestSuite::Tester {
+    public:
+        DebugTest();
+
+        void debug();
+        void boolean();
+        void chars();
+        void custom();
+        void flags();
+
+        void iterable();
+};
+
+DebugTest::DebugTest() {
+    addTests({&DebugTest::debug,
+              &DebugTest::boolean,
+              &DebugTest::chars,
+              &DebugTest::custom,
+              &DebugTest::flags,
+              &DebugTest::iterable});
+}
+
 void DebugTest::debug() {
-    ostringstream debug, warning, error;
+    std::ostringstream debug, warning, error;
 
     Debug::setOutput(&debug);
     Warning::setOutput(&warning);
     Error::setOutput(&error);
     Debug() << "a" << 33 << 0.567f;
-    Warning() << "w" << 42 << 'c';
+    Warning() << "w" << 42 << "meh";
     Error() << "e";
 
-    QCOMPARE(QString::fromStdString(debug.str()), QString("a 33 0.567\n"));
-    QCOMPARE(QString::fromStdString(warning.str()), QString("w 42 c\n"));
-    QCOMPARE(QString::fromStdString(error.str()), QString("e\n"));
+    CORRADE_COMPARE(debug.str(), "a 33 0.567\n");
+    CORRADE_COMPARE(warning.str(), "w 42 meh\n");
+    CORRADE_COMPARE(error.str(), "e\n");
 
     /* Multiple times used instance */
     debug.str("");
@@ -51,13 +77,27 @@ void DebugTest::debug() {
         d << 33;
         d << 0.567f;
     }
-    QCOMPARE(QString::fromStdString(debug.str()), QString("a 33 0.567\n"));
+    CORRADE_COMPARE(debug.str(), "a 33 0.567\n");
 
     /* Don't add newline at the end of empty output */
     debug.str("");
     Debug();
-    QCOMPARE(QString::fromStdString(debug.str()), QString(""));
+    CORRADE_COMPARE(debug.str(), "");
 }
+
+void DebugTest::boolean() {
+    std::ostringstream o;
+    Debug(&o) << true << false;
+    CORRADE_COMPARE(o.str(), "true false\n");
+}
+
+void DebugTest::chars() {
+    std::ostringstream o;
+    Debug(&o) << 'a';
+    CORRADE_COMPARE(o.str(), "97\n");
+}
+
+namespace {
 
 struct Foo {
     int value;
@@ -67,54 +107,58 @@ Debug operator<<(Debug debug, const Foo& value) {
     return debug << value.value;
 }
 
+}
+
 void DebugTest::custom() {
-    ostringstream out;
+    std::ostringstream out;
     Debug::setOutput(&out);
 
     Foo f = { 42 };
     {
         Debug() << "The answer is" << f;
     }
-    QCOMPARE(QString::fromStdString(out.str()), QString("The answer is 42\n"));
+    CORRADE_COMPARE(out.str(), "The answer is 42\n");
 }
 
 void DebugTest::flags() {
-    ostringstream out;
+    std::ostringstream out;
     Debug::setOutput(&out);
 
     {
         /* Don't allow to set/reset the reserved flag */
         Debug debug;
         debug.setFlag(static_cast<Debug::Flag>(0x01), false);
-        QVERIFY(debug.flag(static_cast<Debug::Flag>(0x01)));
+        CORRADE_VERIFY(debug.flag(static_cast<Debug::Flag>(0x01)));
     } {
         Debug debug;
         debug.setFlag(Debug::SpaceAfterEachValue, false);
-        debug << 'a' << 'b' << 'c';
+        debug << "a" << "b" << "c";
     }
-    QCOMPARE(QString::fromStdString(out.str()), QString("abc\n"));
+    CORRADE_COMPARE(out.str(), "abc\n");
     out.str("");
     {
         Debug debug;
         debug.setFlag(Debug::NewLineAtTheEnd, false);
-        debug << 'a' << 'b' << 'c';
+        debug << "a" << "b" << "c";
     }
-    QCOMPARE(QString::fromStdString(out.str()), QString("a b c"));
+    CORRADE_COMPARE(out.str(), "a b c");
 }
 
 void DebugTest::iterable() {
-    ostringstream out;
+    std::ostringstream out;
     Debug::setOutput(&out);
-    Debug() << vector<int>{1, 2, 3};
-    QCOMPARE(QString::fromStdString(out.str()), QString("[1, 2, 3]\n"));
+    Debug() << std::vector<int>{1, 2, 3};
+    CORRADE_COMPARE(out.str(), "[1, 2, 3]\n");
 
     out.str("");
-    Debug() << set<string>{"a", "b", "c"};
-    QCOMPARE(QString::fromStdString(out.str()), QString("[a, b, c]\n"));
+    Debug() << std::set<std::string>{"a", "b", "c"};
+    CORRADE_COMPARE(out.str(), "[a, b, c]\n");
 
     out.str("");
-    Debug() << map<int, string>{{1, "a"}, {2, "b"}, {3, "c"}};
-    QCOMPARE(QString::fromStdString(out.str()), QString("[(1, a), (2, b), (3, c)]\n"));
+    Debug() << std::map<int, std::string>{{1, "a"}, {2, "b"}, {3, "c"}};
+    CORRADE_COMPARE(out.str(), "[(1, a), (2, b), (3, c)]\n");
 }
 
 }}}
+
+CORRADE_TEST_MAIN(Corrade::Utility::Test::DebugTest)

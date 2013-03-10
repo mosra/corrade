@@ -1,3 +1,28 @@
+/*
+    This file is part of Corrade.
+
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
+*/
+
 namespace Corrade { namespace TestSuite {
 /** @page unit-testing Unit testing with TestSuite
 
@@ -7,14 +32,12 @@ process code with meta compiler.
 @section unit-testing-class Tester class
 
 First step for creating unit test is to subclass Tester class and add tester
-functions to it. Note that [CRTP](http://en.wikipedia.org/wiki/Curiously_Recurring_Template_Pattern)
-needs to be used when subclassing to make things working.
-@dontinclude test/MyTest.h
+functions to it.
+@dontinclude test/MyTest.cpp
 @skip class MyTest
 @until };
 
 In constructor we register our test cases:
-@dontinclude test/MyTest.cpp
 @skip MyTest::MyTest
 @until }
 
@@ -43,35 +66,41 @@ which expects all following checks until the end of the scope to fail:
 @skip MyTest::pi()
 @until }
 
+For things that can't be tested on given platform (or are disabled) you can use
+CORRADE_SKIP() macro to indicate that the particular feature is not tested:
+@skip MyTest::bigEndian()
+@until }
+
 @section unit-testing-compilation Compilation and running
 
 Lastly, we must not forget to create `main()` function using
 CORRADE_TEST_MAIN() macro:
 @skipline CORRADE_TEST_MAIN
 
-Now we can compile and run our test using CMake and `corrade_add_test2()`
-macro:
-@code
-find_package(Corrade REQUIRED)
-include_directories(${CORRADE_INCLUDE_DIR})
-corrade_add_test2(mytest MyTest.cpp)
-@endcode
+Now we can compile and run our test using CMake and `corrade_add_test()` macro.
+Don't forget to call also `enable_testing()` so `ctest` is able to collect and
+run all the tests.
+@dontinclude test/CMakeLists.txt
+@skip enable_testing
+@until corrade_add_test
 
 The test can be run either manually or using `ctest`. When executed, it
 produces output similar to this:
 
-    Starting Corrade::Examples::MyTest with 4 test cases...
-      FAIL: commutativity() at examples/test/MyTest.cpp on line 32
+    Starting Corrade::Examples::MyTest with 5 test cases...
+      FAIL: commutativity() at examples/test/MyTest.cpp on line 52
             Expression 15/3 == 3/15 failed.
         OK: associativity()
         OK: sin()
-     XFAIL: pi() at examples/test/MyTest.cpp on line 47
+     XFAIL: pi() at examples/test/MyTest.cpp on line 67
             Need better approximation. pi and 3.14 are not equal.
         OK: pi()
-    Finished Corrade::Examples::MyTest with 1 errors.
+      SKIP: bigEndian() at examples/test/MyTest.cpp on line 72
+            No affordable big endian machines exist to test this properly.
+    Finished Corrade::Examples::MyTest with 1 errors out of 5 checks.
 
- - @ref test/MyTest.h
  - @ref test/MyTest.cpp
+ - @ref test/CMakeLists.txt
 
 */
 }}

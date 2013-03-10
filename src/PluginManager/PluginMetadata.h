@@ -1,19 +1,28 @@
 #ifndef Corrade_Plugins_PluginMetadata_h
 #define Corrade_Plugins_PluginMetadata_h
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
 /** @file
@@ -31,7 +40,7 @@
 namespace Corrade { namespace PluginManager {
 
 /**
-@brief %Plugin metadata
+@brief Plugin metadata
 
 This class stores metadata about particular plugin. The plugin metadata are
 stored in plugin configuration file, which resides either besides the dynamic
@@ -44,7 +53,7 @@ The plugin configuration file has an simple syntax (see
 specification). The file stores plugin name, description, list of authors,
 plugin version, list of dependencies (if the plugin depends on another) and
 list of replaced plugins (if the plugin can replace plugin and provide the
-same or better functionality). %Plugin name and description can be translated
+same or better functionality). Plugin name and description can be translated
 into more languages just by adding a new subgroup named after that language
 locale code. Full featured example:
 
@@ -82,10 +91,10 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          * @brief Constructor
          * @param conf          Configuration file with plugin metadata
          */
-        PluginMetadata(const Utility::Configuration& conf);
+        explicit PluginMetadata(const Utility::Configuration& conf);
 
         /**
-         * @brief %Plugin name
+         * @brief Plugin name
          *
          * Descriptive name of plugin. Not to be confused with name under which
          * the plugin is loaded. If translation for current Translator::locale()
@@ -95,7 +104,7 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
         inline const std::string* name() const { return _name; }
 
         /**
-         * @brief %Plugin description
+         * @brief Plugin description
          *
          * More detailed description of plugin. If translation for current
          * Translator::locale() is present, returns the translated name.
@@ -104,14 +113,14 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
         inline const std::string* description() const { return _description; }
 
         /**
-         * @brief %Plugin author(s)
+         * @brief Plugin author(s)
          *
          * @note This field is constant during whole plugin lifetime.
          */
         inline const std::vector<std::string>& authors() const { return _authors; }
 
         /**
-         * @brief %Plugin version
+         * @brief Plugin version
          *
          * @note This field is constant during whole plugin lifetime.
          */

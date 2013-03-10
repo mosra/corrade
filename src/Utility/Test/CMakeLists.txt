@@ -1,32 +1,56 @@
+#
+#   This file is part of Corrade.
+#
+#   Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+#             Vladimír Vondruš <mosra@centrum.cz>
+#
+#   Permission is hereby granted, free of charge, to any person obtaining a
+#   copy of this software and associated documentation files (the "Software"),
+#   to deal in the Software without restriction, including without limitation
+#   the rights to use, copy, modify, merge, publish, distribute, sublicense,
+#   and/or sell copies of the Software, and to permit persons to whom the
+#   Software is furnished to do so, subject to the following conditions:
+#
+#   The above copyright notice and this permission notice shall be included
+#   in all copies or substantial portions of the Software.
+#
+#   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+#   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#   DEALINGS IN THE SOFTWARE.
+#
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 set(UTILITY_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(UTILITY_BINARY_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testConfigure.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/testConfigure.h)
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
-corrade_add_test2(UtilityAbstractHashTest AbstractHashTest.cpp)
-corrade_add_test(UtilityDirectoryTest DirectoryTest.h DirectoryTest.cpp CorradeUtility)
-corrade_add_test(UtilityEndianTest EndianTest.h EndianTest.cpp CorradeUtility)
-corrade_add_test2(UtilityMurmurHash2Test MurmurHash2Test.cpp)
-corrade_add_test2(UtilityUtilitiesTest UtilitiesTest.cpp)
-corrade_add_test2(UtilityConfigurationTest ConfigurationTest.cpp)
-corrade_add_test(UtilityDebugTest DebugTest.h DebugTest.cpp CorradeUtility)
-corrade_add_test(UtilitySha1Test Sha1Test.h Sha1Test.cpp CorradeUtility)
-corrade_add_test2(UtilityStringTest StringTest.cpp)
-corrade_add_test(UtilityTranslatorTest TranslatorTest.h TranslatorTest.cpp CorradeUtility)
+corrade_add_test(UtilityAbstractHashTest AbstractHashTest.cpp)
+corrade_add_test(UtilityDirectoryTest DirectoryTest.cpp)
+corrade_add_test(UtilityEndianTest EndianTest.cpp)
+corrade_add_test(UtilityMurmurHash2Test MurmurHash2Test.cpp)
+corrade_add_test(UtilityUtilitiesTest UtilitiesTest.cpp)
+corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp)
+corrade_add_test(UtilityDebugTest DebugTest.cpp)
+corrade_add_test(UtilitySha1Test Sha1Test.cpp)
+corrade_add_test(UtilityStringTest StringTest.cpp)
+corrade_add_test(UtilityTranslatorTest TranslatorTest.cpp)
+corrade_add_test(UtilityUnicodeTest UnicodeTest.cpp)
 
 # Compiled-in resource test
 corrade_add_resource(ResourceTestData test
     ResourceTestFiles/predisposition.bin ALIAS predisposition.bin
-    ResourceTestFiles/consequence.bin ALIAS consequence.bin
-    )
-set(ResourceTest_MOC ResourceTest.h)
-set(ResourceTest_SRCS ResourceTest.cpp ${ResourceTestData})
-corrade_add_multifile_test(UtilityResourceTest ResourceTest_MOC ResourceTest_SRCS CorradeUtility)
+    ResourceTestFiles/consequence.bin ALIAS consequence.bin)
+corrade_add_test(UtilityResourceTest ResourceTest.cpp ${ResourceTestData})
 
 # Static lib resource test
 add_library(ResourceTestDataLib STATIC ${ResourceTestData})
-set(ResourceTestStatic_SRCS ${ResourceTest_SRCS} registerStaticResource)
-corrade_add_multifile_test(UtilityResourceTestStatic ResourceTest_MOC ResourceTestStatic_SRCS CorradeUtility ResourceTestDataLib)
+corrade_add_test(UtilityResourceTestStatic
+    ResourceTest.cpp ${ResourceTestData} registerStaticResource.cpp
+    LIBRARIES ResourceTestDataLib)

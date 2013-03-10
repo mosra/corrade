@@ -1,17 +1,26 @@
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
 #include "Configuration.h"
@@ -21,15 +30,13 @@
 #include "Debug.h"
 #include "String.h"
 
-using namespace std;
-
 namespace Corrade { namespace Utility {
 
-Configuration::Configuration(const string& filename, Flags flags): ConfigurationGroup(this), _filename(filename), flags(static_cast<InternalFlag>(std::uint32_t(flags))) {
+Configuration::Configuration(const std::string& filename, Flags flags): ConfigurationGroup(this), _filename(filename), flags(static_cast<InternalFlag>(std::uint32_t(flags))) {
     /* Open file with requested flags */
-    ifstream::openmode openmode = ifstream::in;
-    if(this->flags & InternalFlag::Truncate) openmode |= ifstream::trunc;
-    ifstream file(filename.c_str(), openmode);
+    std::ifstream::openmode openmode = std::ifstream::in;
+    if(this->flags & InternalFlag::Truncate) openmode |= std::ifstream::trunc;
+    std::ifstream file(filename.c_str(), openmode);
 
     /* File doesn't exist yet */
     if(!file.is_open()) {
@@ -49,17 +56,17 @@ Configuration::Configuration(const string& filename, Flags flags): Configuration
     file.close();
 }
 
-Configuration::Configuration(istream& file, Flags flags): ConfigurationGroup(this), flags(static_cast<InternalFlag>(std::uint32_t(flags))) {
+Configuration::Configuration(std::istream& file, Flags flags): ConfigurationGroup(this), flags(static_cast<InternalFlag>(std::uint32_t(flags))) {
     parse(file);
 
     /* Set readonly flag, because the configuration cannot be saved */
     this->flags |= InternalFlag::ReadOnly;
 }
 
-void Configuration::parse(istream& file) {
+void Configuration::parse(std::istream& file) {
     try {
         if(!file.good())
-            throw string("Cannot open configuration file.");
+            throw std::string("Cannot open configuration file.");
 
         /* It looks like BOM */
         if(file.peek() == String::Bom[0]) {
@@ -76,20 +83,20 @@ void Configuration::parse(istream& file) {
         }
 
         /* Parse file */
-        parse(file, this, "");
+        parse(file, this, {});
 
         /* Everything went fine */
         flags |= InternalFlag::IsValid;
 
-    } catch(string e) { Error() << e; }
+    } catch(std::string e) { Error() << e; }
 }
 
-string Configuration::parse(istream& file, ConfigurationGroup* group, const string& fullPath) {
-    string buffer;
+std::string Configuration::parse(std::istream& file, ConfigurationGroup* group, const std::string& fullPath) {
+    std::string buffer;
 
     /* Parse file */
     while(file.good()) {
-        getline(file, buffer);
+        std::getline(file, buffer);
 
         /* Windows EOL */
         if(buffer[buffer.size()-1] == '\r')
@@ -103,15 +110,15 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
 
             /* Check ending bracket */
             if(buffer[buffer.size()-1] != ']')
-                throw string("Missing closing bracket for group header!");
+                throw std::string("Missing closing bracket for group header!");
 
-            string nextGroup = String::trim(buffer.substr(1, buffer.size()-2));
+            std::string nextGroup = String::trim(buffer.substr(1, buffer.size()-2));
 
             if(nextGroup.empty())
-                throw string("Empty group name!");
+                throw std::string("Empty group name!");
 
             /* Next group is subgroup of current group, recursive call */
-            while(!nextGroup.empty() && (fullPath == "" || nextGroup.substr(0, fullPath.size()) == fullPath)) {
+            while(!nextGroup.empty() && (fullPath.empty() || nextGroup.substr(0, fullPath.size()) == fullPath)) {
                 ConfigurationGroup::Group g;
                 g.name = nextGroup.substr(fullPath.size());
                 g.group = new ConfigurationGroup(configuration);
@@ -121,7 +128,7 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
                 bool save = true;
                 if(flags & InternalFlag::UniqueGroups) {
                     /** @todo Do this in logarithmic time */
-                    for(vector<Group>::const_iterator it = group->_groups.begin(); it != group->_groups.end(); ++it)
+                    for(auto it = group->_groups.cbegin(); it != group->_groups.cend(); ++it)
                         if(it->name == g.name) {
                             save = false;
                             break;
@@ -133,7 +140,7 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
             return nextGroup;
 
         /* Empty line */
-        } else if(buffer.size() == 0) {
+        } else if(buffer.empty()) {
             if(flags & (InternalFlag::SkipComments|InternalFlag::ReadOnly)) continue;
 
             group->items.push_back(ConfigurationGroup::Item());
@@ -148,9 +155,9 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
 
         /* Key/value pair */
         } else {
-            size_t splitter = buffer.find_first_of('=');
-            if(splitter == string::npos)
-                throw string("Key/value pair without '=' character!");
+            const std::size_t splitter = buffer.find_first_of('=');
+            if(splitter == std::string::npos)
+                throw std::string("Key/value pair without '=' character!");
 
             ConfigurationGroup::Item item;
             item.key = String::trim(buffer.substr(0, splitter));
@@ -158,9 +165,9 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
 
             /* Remove quotes, if present */
             /** @todo Check `"` characters better */
-            if(item.value.size() != 0 && item.value[0] == '"') {
+            if(!item.value.empty() && item.value[0] == '"') {
                 if(item.value.size() < 2 || item.value[item.value.size()-1] != '"')
-                    throw string("Missing closing quotes in value!");
+                    throw std::string("Missing closing quotes in value!");
 
                 item.value = item.value.substr(1, item.value.size()-2);
             }
@@ -168,7 +175,7 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
             /* If unique keys are set, check whether current key is unique */
             if(flags & InternalFlag::UniqueKeys) {
                 bool contains = false;
-                for(vector<ConfigurationGroup::Item>::const_iterator it = group->items.begin(); it != group->items.end(); ++it)
+                for(auto it = group->items.cbegin(); it != group->items.cend(); ++it)
                     if(it->key == item.key) {
                         contains = true;
                         break;
@@ -181,18 +188,18 @@ string Configuration::parse(istream& file, ConfigurationGroup* group, const stri
     }
 
     /* Remove last empty line, if present (will be written automatically) */
-    if(group->items.size() != 0 && group->items[group->items.size()-1].key == "" && group->items[group->items.size()-1].value == "")
+    if(!group->items.empty() && group->items.back().key.empty() && group->items.back().value.empty())
         group->items.pop_back();
 
     /* This was the last group */
-    return "";
+    return {};
 }
 
 bool Configuration::save() {
     /* File is readonly or invalid, don't save anything */
     if(flags & InternalFlag::ReadOnly || !(flags & InternalFlag::IsValid)) return false;
 
-    ofstream file(_filename.c_str(), ofstream::out|ofstream::trunc|ofstream::binary);
+    std::ofstream file(_filename.c_str(), std::ofstream::out|std::ofstream::trunc|std::ofstream::binary);
     if(!file.good()) {
         /** @todo Error to stderr */
         return false;
@@ -203,17 +210,17 @@ bool Configuration::save() {
         file.write(String::Bom.c_str(), 3);
 
     /* EOL character */
-    string eol;
+    std::string eol;
     if(flags & (InternalFlag::ForceWindowsEol|InternalFlag::WindowsEol) && !(flags & InternalFlag::ForceUnixEol)) eol = "\r\n";
     else eol = "\n";
 
-    string buffer;
+    std::string buffer;
 
     /** @todo Checking file.good() after every operation */
     /** @todo Backup file */
 
     /* Recursively save all groups */
-    save(file, eol, this, "");
+    save(file, eol, this, {});
 
     file.close();
 
@@ -221,13 +228,13 @@ bool Configuration::save() {
 }
 
 void Configuration::save(std::ofstream& file, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const {
-    string buffer;
+    std::string buffer;
 
     /* Foreach all items in the group */
-    for(vector<ConfigurationGroup::Item>::const_iterator it = group->items.begin(); it != group->items.end(); ++it) {
+    for(auto it = group->items.cbegin(); it != group->items.cend(); ++it) {
         /* Key/value pair */
         if(!it->key.empty()) {
-            if(it->value.find_first_of(String::Whitespace) != string::npos)
+            if(it->value.find_first_of(String::Whitespace) != std::string::npos)
                 buffer = it->key + "=\"" + it->value + '"' + eol;
             else
                 buffer = it->key + '=' + it->value + eol;
@@ -240,9 +247,9 @@ void Configuration::save(std::ofstream& file, const std::string& eol, Configurat
     }
 
     /* Recursively process all subgroups */
-    for(vector<Group>::const_iterator git = group->_groups.begin(); git != group->_groups.end(); ++git) {
+    for(auto git = group->_groups.cbegin(); git != group->_groups.cend(); ++git) {
         /* Subgroup name */
-        string name = git->name;
+        std::string name = git->name;
         if(!fullPath.empty()) name = fullPath + '/' + name;
 
         buffer = '[' + name + ']' + eol;

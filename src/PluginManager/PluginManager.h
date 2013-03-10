@@ -1,35 +1,43 @@
 #ifndef Corrade_Plugins_PluginManager_h
 #define Corrade_Plugins_PluginManager_h
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
 /** @file
  * @brief Class Corrade::PluginManager::PluginManager
  */
 
-#include <string>
-#include <vector>
-
 #include "AbstractPluginManager.h"
+
+#include "corradeCompatibility.h"
 
 namespace Corrade { namespace PluginManager {
 
 /**
-@brief %Plugin manager
-@tparam T                   %Plugin interface
+@brief Plugin manager
+@tparam T                   Plugin interface
 @tparam BasePluginManager   Base class, subclassed from AbstractPluginManager
     (for example if you want to add some functionality to non-templated base,
     such as Qt signals)
@@ -42,7 +50,7 @@ Manages loading, instancing and unloading plugins. See also
 template<class T, class BasePluginManager = AbstractPluginManager> class PluginManager: public BasePluginManager {
     public:
         /** @copydoc AbstractPluginManager::AbstractPluginManager() */
-        PluginManager(const std::string& pluginDirectory): BasePluginManager(pluginDirectory) {
+        explicit PluginManager(const std::string& pluginDirectory): BasePluginManager(pluginDirectory) {
             /* Find static plugins which have the same interface and have not
                assigned manager to them */
             for(typename std::map<std::string, typename BasePluginManager::PluginObject*>::iterator it = this->plugins()->begin(); it != this->plugins()->end(); ++it) {
@@ -55,31 +63,22 @@ template<class T, class BasePluginManager = AbstractPluginManager> class PluginM
         }
 
         /**
-         * @brief %Plugin interface
+         * @brief Plugin interface
          *
          * Only plugins with the same plugin interface string can be used
          * in this plugin manager.
          */
-        std::string pluginInterface() const { return T::pluginInterface(); }
+        std::string pluginInterface() const override { return T::pluginInterface(); }
 
         /**
-         * @brief %Plugin class instance
-         * @param _plugin           %Plugin
-         * @return Pointer to new instance of plugin class, zero on error
+         * @brief Plugin instance
          *
-         * Creates new instance of plugin class, if possible. If the plugin is
-         * not successfully loaded, returns zero pointer.
+         * Returns new instance of given plugin or `nullptr` on error. The
+         * plugin must be successfully loaded for the operation to succeed.
+         * @see loadState(), load()
          */
-        T* instance(const std::string& _plugin) {
-            /* Plugin with given name doesn't exist */
-            if(this->plugins()->find(_plugin) == this->plugins()->end()) return nullptr;
-
-            typename BasePluginManager::PluginObject& plugin = *this->plugins()->at(_plugin);
-
-            /* Plugin is not successfully loaded */
-            if(!(plugin.loadState & (BasePluginManager::LoadOk|BasePluginManager::IsStatic))) return nullptr;
-
-            return static_cast<T*>(plugin.instancer(this, _plugin));
+        T* instance(const std::string& plugin) {
+            return static_cast<T*>(this->instanceInternal(plugin));
         }
 };
 

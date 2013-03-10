@@ -1,19 +1,28 @@
 #ifndef Corrade_Utility_Directory_h
 #define Corrade_Utility_Directory_h
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
 /** @file
@@ -23,49 +32,50 @@
 #include <string>
 #include <vector>
 
+#include "Containers/EnumSet.h"
 #include "utilities.h"
 
 namespace Corrade { namespace Utility {
 
 /**
-@brief %Directory listing
-
-Provides list of items in directory as a standard `std::vector<std::string>`
-class. The list is not modifiable. Provides filtering of certain item types
-and list sorting.
-
-The class also provides portable functions for path operations and creating,
-removing and renaming files or directories.
+@brief %Directory utilities
 @todo Make it usable on windoze without mingw :-)
-@todo Return rather vector<string> instead of this voodoo?
 @todo Unicode <-> UTF8 path conversion for Windows
- */
-class CORRADE_UTILITY_EXPORT Directory: public std::vector<std::string> {
-    private:
-        /* Hiding edit functions and types to private scope */
-        using std::vector<std::string>::iterator;
-        using std::vector<std::string>::assign;
-        using std::vector<std::string>::push_back;
-        using std::vector<std::string>::pop_back;
-        using std::vector<std::string>::insert;
-        using std::vector<std::string>::erase;
-        using std::vector<std::string>::swap;
-        using std::vector<std::string>::clear;
-        using std::vector<std::string>::get_allocator;
-        using std::vector<std::string>::resize;
-        using std::vector<std::string>::reserve;
-
-        bool _isLoaded;
+*/
+class CORRADE_UTILITY_EXPORT Directory {
     public:
-        /** @brief Listing flags */
-        enum Flags {
-            SkipDotAndDotDot = 0x01,    /**< @brief Skip `.` and `..` directories */
-            SkipFiles = 0x02,           /**< @brief Skip regular files */
-            SkipDirectories = 0x04,     /**< @brief Skip directories (including `.` and `..`) */
-            SkipSpecial = 0x08,         /**< @brief Skip everything what is not a file or directory */
-            SortAscending = 0x10,       /**< @brief Sort items in ascending order */
-            SortDescending = 0x20       /**< @brief Sort items in descending order */
+        Directory() = delete;
+
+        /**
+         * @brief Listing flag
+         *
+         * @see Flags, list()
+         */
+        enum class Flag: unsigned char {
+            SkipDotAndDotDot = 1 << 0,  /**< Skip `.` and `..` directories */
+            SkipFiles = 1 << 1,         /**< Skip regular files */
+            SkipDirectories = 1 << 2,   /**< Skip directories (including `.` and `..`) */
+            SkipSpecial = 1 << 3,       /**< Skip everything what is not a file or directory */
+
+            /**
+             * Sort items in ascending order. If specified both @ref Flag "Flag::SortAscending"
+             * and @ref Flag "Flag::SortDescending", ascending order is used.
+             */
+            SortAscending = 3 << 4,
+
+            /**
+             * Sort items in descending order. If specified both @ref Flag "Flag::SortAscending"
+             * and @ref Flag "Flag::SortDescending", ascending order is used.
+             */
+            SortDescending = 1 << 5
         };
+
+        /**
+         * @brief Listing flags
+         *
+         * @see list()
+         */
+        typedef Containers::EnumSet<Flag, unsigned char> Flags;
 
         /**
          * @brief Extract path from filename
@@ -96,6 +106,15 @@ class CORRADE_UTILITY_EXPORT Directory: public std::vector<std::string> {
         static std::string join(const std::string& path, const std::string& filename);
 
         /**
+         * @brief List directory contents
+         * @param path      Path
+         * @param flags     %Flags
+         *
+         * On failure returns empty vector.
+         */
+        static std::vector<std::string> list(const std::string& path, Flags flags = Flags());
+
+        /**
          * @brief Create given path
          * @param path      Path
          * @return True if path was successfully created or false if an error
@@ -106,10 +125,18 @@ class CORRADE_UTILITY_EXPORT Directory: public std::vector<std::string> {
         /**
          * @brief Remove given file or directory
          * @param path      Path
-         * @return True if path is file or empty directory and was successfully
-         * removed, false otherwise.
+         * @return `True` if path is file or empty directory and was
+         *      successfully removed, `false` otherwise.
          */
         static bool rm(const std::string& path);
+
+        /**
+         * @brief Move given file or directory
+         * @param oldPath   Old path
+         * @param newPath   New path
+         * @return `True` on success, `false` otherwise.
+         */
+        static bool move(const std::string& oldPath, const std::string& newPath);
 
         /** @brief Get current user's home directory */
         static std::string home();
@@ -133,21 +160,9 @@ class CORRADE_UTILITY_EXPORT Directory: public std::vector<std::string> {
          *      permission to open it).
          */
         static bool fileExists(const std::string& filename);
-
-        /**
-         * @brief Constructor
-         * @param path      %Directory path
-         * @param flags     Listing flags. See Directory::Flags. If no flag is
-         *      specified, everything will be loaded.
-         *
-         * Tries to load items from given directory. Directory::isLoaded()
-         * should be used to determine whether the load was successful or not.
-         */
-        Directory(const std::string& path, int flags = 0);
-
-        /** @brief Whether the directory is successfully loaded */
-        inline bool isLoaded() const { return _isLoaded; }
 };
+
+CORRADE_ENUMSET_OPERATORS(Directory::Flags)
 
 }}
 

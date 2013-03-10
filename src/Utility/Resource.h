@@ -1,19 +1,28 @@
 #ifndef Corrade_Utility_Resource_h
 #define Corrade_Utility_Resource_h
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
 /** @file
@@ -71,7 +80,7 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @param _group        Group name for getting data or compiling new
          *      resources.
          */
-        inline Resource(const std::string& _group): group(_group) {}
+        inline explicit Resource(const std::string& _group): group(_group) {}
 
         /**
          * @brief Compile data resource file
@@ -95,6 +104,15 @@ class CORRADE_UTILITY_EXPORT Resource {
         std::string compile(const std::string& name, const std::string& filename, const std::string& data) const;
 
         /**
+         * @brief Get pointer to raw resource data
+         * @param filename      Filename
+         *
+         * Returns data of given group and filename as pair of pointer and
+         * size. If not found, the pointer is `nullptr` and size is `0`.
+         */
+        std::tuple<const unsigned char*, std::size_t> getRaw(const std::string& filename) const;
+
+        /**
          * @brief Get data resource
          * @param filename      Filename
          * @return Data of given group (specified in constructor) and filename.
@@ -109,11 +127,11 @@ class CORRADE_UTILITY_EXPORT Resource {
             const unsigned char* data;
         };
 
-        CORRADE_UTILITY_LOCAL static std::map<std::string, std::map<std::string, ResourceData> > resources;
+        CORRADE_UTILITY_LOCAL static std::map<std::string, std::map<std::string, ResourceData>> resources;
 
         std::string group;
 
-        CORRADE_UTILITY_LOCAL std::string hexcode(const std::string& data, const std::string& comment = "") const;
+        CORRADE_UTILITY_LOCAL std::string hexcode(const std::string& data, const std::string& comment = std::string()) const;
 
         /** @todo Move to utilities.h? */
         template<class T> static std::string numberToString(const T& number);
@@ -123,19 +141,20 @@ class CORRADE_UTILITY_EXPORT Resource {
 /**
 @brief Initialize resource
 
-If a resource is compiled into dynamic library or directly into executable,
-it will be initialized automatically thanks to AUTOMATIC_INITIALIZER()
-macros. However, if the resource is compiled into static library, it must
-be explicitly initialized via this macro, e.g. at the beginning of main().
-You can also wrap these macro calls into another function (which will then
-be compiled into dynamic library or main executable) and use
-AUTOMATIC_INITIALIZER() macro for automatic call.
+If a resource is compiled into dynamic library or directly into executable, it
+will be initialized automatically thanks to AUTOMATIC_INITIALIZER() macros.
+However, if the resource is compiled into static library, it must be explicitly
+initialized via this macro, e.g. at the beginning of main(). You can also wrap
+these macro calls into another function (which will then be compiled into
+dynamic library or main executable) and use AUTOMATIC_INITIALIZER() macro for
+automatic call.
+
 @attention This macro should be called outside of any namespace. If you are
-running into linker errors with `resourceInitializer_*`, this could be the
-problem. If you are in a namespace and cannot call this macro from main(),
-try this:
+    running into linker errors with `resourceInitializer_*`, this could be the
+    problem. If you are in a namespace and cannot call this macro from main(),
+    try this:
 @code
-void initialize() {
+static void initialize() {
     RESOURCE_INITIALIZE(res)
 }
 
@@ -147,20 +166,21 @@ namespace Foo {
     }
 }
 @endcode
- */
+*/
 #define RESOURCE_INITIALIZE(name)                                             \
     extern int resourceInitializer_##name();                                  \
     resourceInitializer_##name();
 
 /**
- * @brief Cleanup resource
- *
- * Cleans up previously (even automatically) initialized resource.
- * @attention This macro should be called outside of any namespace. See
- * RESOURCE_INITIALIZE() documentation for more information.
- */
+@brief Cleanup resource
+
+Cleans up previously (even automatically) initialized resource.
+
+@attention This macro should be called outside of any namespace. See
+    RESOURCE_INITIALIZE() documentation for more information.
+*/
 #define RESOURCE_CLEANUP(name)                                                \
-    extern int resourceInitializer_##name();                                  \
+    extern int resourceFinalizer_##name();                                    \
     resourceFinalizer_##name();
 
 }}

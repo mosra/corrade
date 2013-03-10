@@ -1,4 +1,29 @@
-namespace Magnum {
+/*
+    This file is part of Corrade.
+
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
+*/
+
+namespace Corrade {
 /** @page corrade-coding-style Coding style
 @brief Coding style and best practices to preserve maintainability and
 consistent style across whole project.
@@ -14,6 +39,7 @@ guidelines of large projects:
 
  - LLVM: http://llvm.org/docs/CodingStandards.html
  - Qt: http://qt-project.org/wiki/Qt_Coding_Style
+ - Chromium: http://dev.chromium.org/developers/coding-style/cpp-dos-and-donts
 
 @section text Text files in general
 
@@ -48,7 +74,7 @@ Source and header lists should be ordered alphabetically.
 
 @section cpp C++ code
 
-@subsection cpp-files File naming and directory structure
+@subsection cpp-files File and directory naming
 
 All C++ header and source files are named after the class they contain with no
 case change. Thus there should be only one class per file, but if the classes
@@ -67,26 +93,34 @@ visible to end users should be in `Implementation` subnamespace in the same
 file as the class/function for which the implementation is. See @ref documentation
 section below for guide how to hide it also from Doxygen documentation.
 
-@subsection cpp-headers Headers
+Implementation details which are not referenced from any header should be either
+in anonymous namespace in source file (@ref cpp-anonymous-namespace "see below")
+or (if referenced from more than one source file, from tests etc.) in
+`Implementation` namespace in separate file in `Implementation` subdirectory.
+These subdirectories are treated as private implementation, thus they are by
+default excluded from documentation, their symbols shouldn't be exported and
+contents of these subdirectories shouldn't be installed anywhere.
+
+@subsection cpp-files File structure
 
 Headers have an strict structure. Include guards are basically include path
 with slashes replaced with underscores to make refactoring as easy as possible.
 Directly after them is license block, blank line, then file documentation,
 blank line and after that the contents of the header. Include guard ending is
-only `endif`, without any additional comments.
-
-It's probably common practice, but repeating won't hurt: headers shouldn't
-have `using` declarations inside them (unless there is good excuse for
-bringing some useful feature from different namespace into another namespace -
-but not in the default namespace!).
-
-@subsection cpp-sources Source files
+only <tt>#</tt><tt>endif</tt>, without any additional comments.
 
 Source file have similar structure as headers - first license block, then
-blank line, then the includes, then contents of the file.
+blank line, then the includes, then blank line, then contents of the file.
 
-Unlike headers, it's good to use `using` declaration in source files as much
-as needed to make the code less verbose (unless the name is used only once).
+Includes should be organized into separate groups separated with blank line -
+first header belonging to the particular source file (if the file is source
+file), then system includes, then includes from the engine itself and then
+internal includes used only in the particular file (e.g. `configure.h`).
+Includes from system libraries and dependencies are in angle brackets,
+includes from the library itself are in quotes. Includes should be sorted by
+"level" (e.g. C includes (`&lt;cstdlib&gt;`) before C++ includes
+(`&lt;string&gt;`) and those before dependencies (`&lt;dirent.h&gt;`)),
+then by path name.
 
 @subsection cpp-format Code format
 
@@ -120,6 +154,12 @@ for internal usage by the C++ standard. Underscores before the name shouldn't
 be used in public API or function parameters, as it looks ugly in the
 documentation.
 
+@subsubsection cpp-forward-declarations Forward declarations and forward declaration headers
+
+Use forward declarations in headers as much as possible, as it can significantly
+reduce time of compilation. If forward declarations are overly complex, consider
+adding forward declaration header containing all of them to save users' time.
+
 @subsubsection cpp-namespace Namespace declarations
 
 Namespace declaration is on one line, separated with blank lines on both
@@ -139,7 +179,8 @@ improves readability, e.g.:
 namespace Corrade { namespace Utility {
     class Configuration;
 }}
-
+@endcode
+@code
 namespace Corrade {
 
 namespace TestSuite {
@@ -174,9 +215,21 @@ and horizontal space.
 
 Indented is everything except namespace declarations (as specified above) -
 blocks, class protection levels, `case` statements. Overlong line breaks are
-indented also with 4 spaces or better where it makes more sense (e.g. for
-aligning similar code), multiline comments are indented with three spaces for
-the comment text block to be aligned.
+indented also with 4 spaces (or any other value if it makes more sense, e.g. for
+aligning similar code).
+@code
+class Foo {
+    public:
+        void bar() {
+            addMethods(&Foo::methodNameOne,
+                       &Foo::methodNameTwo);
+        }
+
+    protected:
+        void methodNameOne();
+        void methodNameTwo();
+};
+@endcode
 
 Whitespace is **not allowed** inside parentheses and between function name or
 branch/loop statement and left parenthesis (or between constructed variable
@@ -184,16 +237,20 @@ name and left brace) and before semicolon. It **must be** around block braces
 if the block is not empty. It **must not** be space before, but after the
 comma.
 @code
-if ( statement ){foo (a ,b) ;} // awful!
-if(statement) { foo(a, b); }   // good
+if ( statement ){foo ( a ,b ) ;} // awful! (_everything_ is misplaced)
+if(statement) { foo(a, b); }     // perfect
 @endcode
 
-Whitespace should be around operators with low precedence (namely `+`, `-`,
-`<<`, `>>` but not on unary `-`), around all boolean and comparison operators,
-around `=` and related operators and around ternary operator. Whitespace is
-should be around `/`, `*`, `%` to indicate they have precedence before
-addition and substraction. Whitespace can or need not to be around binary
-operators, whichever looks better in particular content.
+Whitespace **should be** around operators with low precedence (namely `+`, `-`,
+`<<`, `>>` but not on unary `-`), around all boolean and comparison operators
+(`&&`, `||`, `==`, `!=`, `<`, `<=`, `>=`, `>`), around `=` and related operators
+and around ternary operator. Whitespace **shouldn't be** around `/`, `*`, `%` to
+indicate they have precedence before addition and substraction. Whitespace can
+or need not to be around binary operators (`&`, `|`, `^`), whichever looks
+better in particular content.
+@code
+a += b*5 - 3*(c != 0 ? 64/c : 1);
+@endcode
 
 Block opening braces start on the same line as corresponding statement (class/
 function declaration, branch and loop statement), `else` and `else if`
@@ -235,21 +292,9 @@ switch(type) {
 
 @subsubsection cpp-keywords Class member and function keywords
 
-Use keywords in this order: `template virtual inline constexpr static`. Only
-base virtual functions should have `virtual` keyword, not the
-reimplementations.
-
-@subsubsection cpp-includes Includes
-
-Includes should be organized into separate groups separated with blank line -
-first header belonging to the particular source file (if the file is source
-file), then system includes, then includes from the engine itself and then
-internal includes used only in the particular file (e.g. `configure.h`).
-Includes from system libraries and dependencies are in angle brackets,
-includes from engine itself are in quotes. Includes should be sorted by
-"level" (e.g. C includes (`&lt;cstdlib&gt;`) before C++ includes
-(`&lt;string&gt;`) and those before dependencies (`&lt;dirent.h&gt;`)),
-then by path name.
+Use keywords in this order: `template virtual inline constexpr explicit static`.
+Only base virtual functions should have `virtual` keyword, the
+reimplementations should be marked with `override` instead.
 
 @subsubsection cpp-macros Preprocessor macros
 
@@ -259,30 +304,90 @@ it should be wrapped on multiple lines, each successive line indented and the
 line wrapping indicator `\` should be aligned around 80th column, preferably
 on some tab-stop.
 
+@subsection cpp-constructors Class constructors
+
+All constructors (except copy and move constructors) should be `explicit` by
+default. Remove the keyword only if you want to allow implicit conversions
+or want to construct the class with brace initializer (e.g. vector and matrix
+classes). If the class has no constructor, add explicit default-created one:
+@code
+class MyClass {
+    public:
+        explicit MyClass() = default;
+
+        // ...
+};
+@endcode
+
+If the constructor is intentionally implicit, mark it with appropriate comment.
+
+If the class has only static members (e.g. various utility classes, traits
+classes), delete the constructor to prevent instantiating the class by
+mistake:
+@code
+class UtilityClass {
+    public:
+        UtilityClass() = delete;
+
+        // ...
+};
+@endcode
+
 @subsection cpp-constexpr Constant expressions and constants
 
-Use `constexpr` keyword as much as possible, mainly for getters, operators and
-static pure functions, e.g. Set::operator&(). If the function is not a single
-return-statement, try hard to make it so.
+Use `constexpr` keyword where appropriate, mainly for getters, operators and
+static pure functions which will be heavily used with compile-time constants,
+such as Containers::EnumSet::operator&().
 
 Traits class members and class constants which are not meant to be referenced
-or pointed to should be defined as inline (constexpr) function, because
-declaring them as static const variable will result in another (probably
-unwanted) symbol.
+or pointed to should be defined as `inline constexpr` function or using
+anonymous typed enum (@ref cpp-enums "see below"), because declaring them as
+`static const` variable will result in another (probably unwanted) symbol and
+the constant might not be always inlined.
 
 @subsection cpp-assert Assertions
 
-Use asserts as much as possible. Utility library has convenient
-`CORRADE_ASSERT()` macro, which does everything needed - checks the statement,
-prints given message to error output and exits immediately or returns default
-value.
+Use asserts as much as possible. Utility library has convenient CORRADE_ASSERT(),
+CORRADE_INTERNAL_ASSERT() and CORRADE_INTERNAL_ASSERT_OUTPUT() macros, see their
+documentation for more information.
 
-@subsection cpp-forbidden Forbidden C/C++ features
+@subsection cpp-forbidden Forbidden and deprecated C/C++ features
+
+Don't include `<*stream>` in header files. STL's stream library headers are
+amazingly large and this single <tt>#</tt><tt>include</tt> brings >25k of
+source code which needs to be preprocessed and compiled even if majority of it
+is later tossed out. Use `<iosfwd>` instead and include stream headers only in
+source files. If you want to just print something to output, use Utility::Debug
+class and friends.
+
+Don't use RTTI (`dynamic_cast` and `std::typeinfo`) and exceptions, if you don't
+desperately need to. They violate C++ principle of "don't pay for what you don't
+use".
+
+@subsubsection cpp-using using namespace keyword
+
+`using namespace std` is not allowed. It brings many symbols into default
+namespace and can lead to unintended behavior. Consider `abs()` function. If
+using it without `std::` prefix, you can by mistake use the non-overloaded
+`double abs(double)` from plain C `<math.h>` header, which can cause serious
+performance issues when using it for integers only. By explicitly calling
+`std::abs()` you ensure that proper overload is always selected.
+
+`using namespace` keyword should be used only for root namespace, i.e.
+`using namespace %Corrade` and not `using namespace %Corrade::Utility`. If you
+are using some class from subnamespace in many places, use only that particular
+name, e.g. `using %Corrade::Utility::ConfigurationGroup`.
+
+It's probably common practice, but repeating won't hurt: **headers shouldn't
+have `using` declarations at all** (unless there is good excuse for bringing
+some useful feature from different namespace into another namespace -- but not
+in the default namespace!).
+
+@subsubsection cpp-backward C-style casts
 
 Don't use C-style casts, use C++-style `static_cast` and `reinterpret_cast`
-instead. For numeric types (e.g. casting from int to float) you can use
-"constructor cast":
-
+instead. %Corrade enables compiler warning about their usage in `CORRADE_CXX_FLAGS`
+CMake variable. You can also use "constructor cast" instead of `static_cast`:
 @code
 int a = 22;
 int b = 7;
@@ -291,9 +396,18 @@ float pi = static_cast<float>(a)/b; // good
 float pi = float(a)/b;              // even better here
 @endcode
 
-Don't use RTTI (`dynamic_cast` and `std::typeinfo`) and exceptions. They
-violate C++ principle of "don't pay for what you don't use" and thus they are
-disabled in the code (GCC/Clang option `-fno-rtti -fno-exceptions`).
+@subsubsection cpp-enums Unscoped and untyped enums
+
+Prefer to use C++11 `enum class`. Use Containers::EnumSet instead of integral
+bit masks. Always explicitly specify underlying type, it might save some memory
+and also allows for forward declaration of the enum, which is good if the enum
+is part of otherwise large header.
+
+@subsubsection cpp-anonymous-namespace static keyword
+
+Prefer to use anonymous namespaces instead of `static` keyword. Anonymous
+namespace ensures that the symbols won't be exported and unlike `static` keyword
+it can be used also for type declarations.
 
 @section comments Comments
 
@@ -313,9 +427,9 @@ Doxygen documentation uses C-style comments with two asterisks, each
 successive line should start with asterisk and space. However, documentation
 block starting at beginning of the line (with no indentation) and spanning
 more lines shouldn't have leading asterisks and use whole 80 column width to
-avoid wasted space.
+save horizontal space.
 
-Doxygen commands are prefixed with `@`.
+Doxygen commands are prefixed with `@`, not `\`.
 
 If the documentation comment is short enough, it can be on one line. If not,
 the first line should contain only the slash and two asterisks. However, there
@@ -323,18 +437,31 @@ are exceptions for commands that can be on the first line of the multiline
 documentation block - namely @c \@page, @c \@name, @c \@file, @c \@namespace
 and other commands for "out-of-place" documentation.
 
-Doxygen documentation is mainly in header files, additional documentation
-pages which doesn't belong to any particular class (e.g. namespaces,
-overview...) is in `doc/` directory. In source file should be only @c \@todo
-items related to particular lines of code. Documentation pages, page sections
-and additional documentation files should be named in lowercase with dashes
-between words. Sections inside class/function documentation should be prefixed
-with corresponding name (with no case change), followed by dash. The rest of
-the name is in lowercase with dashes between words. Additional documentation
-files use `*.dox` extension.
+Doxygen documentation is mainly in header files. In source file should be only
+@c \@todo or @c \@bug items related to particular lines of code. Sections inside
+class/function documentation should be prefixed with corresponding name (with no
+case change), followed by dash, the rest of the name is in lowercase with dashes
+between words:
+@code
+// ...
+// @section ConfigurationValue-basic-usage Basic usage
+// ...
+class ConfigurationValue {
+@endcode
 
-File documentation block is after license block, it explains only in
-@c \@brief what content given header contains.
+Additional documentation files which don't belong to any particular class
+(e.g. namespaces, overview...) are in `doc/` directory and use `*.dox`
+extension. Documentation pages, page sections and documentation files should be
+named in lowercase with dashes between words, e.g. `corrade-coding-style`,
+filename corresponds to name of documentation page it contains.
+
+File documentation block (@c \@file) is after license block, it explains only
+in @c \@brief what content given header contains:
+@code
+// @file
+// @brief Class Corrade::Utility::Unicode
+//
+@endcode
 
 Namespace documentation is only in file `namespaces.dox` inside `doc/`
 directory.
@@ -343,20 +470,42 @@ Class and function documentation block nearly always starts with an @c \@brief
 description (the only exception is enum value documentation). After that is
 documentation of template parameters, function parameters and return value.
 These are documented only if it's not obvious from the description or
-function/parameter name (i.e. it's not needed for setters).
+function/parameter name (i.e. it's not needed for getters and setters).
 
-Trivial function overloads (e.g. const overloads) are marked only with
-@c \@overload keyword and are always *after* the original documented function.
+Trivial function overloads (e.g. `const` overloads) are marked only with
+@c \@overload keyword and are always *after* the original documented function:
+@code
+// @brief Data
+inline char* data() { return _data; }
+
+// @overload
+inline const char* data() const { return _data; }
+@endcode
 
 If the documentation is short enough, it can be placed after the documented
 element only if it doesn't exceed 80 character limit too much (e.g. enum value
-documentation).
+documentation):
+@code
+enum class Flag: unsigned char {
+    Active,         //< Foo has active bar
+    Inactive,       //< Foo has no active bars
+    FileNotFound    //< File was not found
+};
+@endcode
 
 For hiding implementation details from documentation or for working around
 Doxygen parsing issues (and false positive warnings), preprocessor define
-`DOXYGEN_GENERATING_OUTPUT` can be used. It is defined only when doxygen
+`DOXYGEN_GENERATING_OUTPUT` can be used. It is defined only when Doxygen
 generates the documentation. If that works around some Doxygen parsing bug,
-don't forget to mark it with @c \@todoc (see below).
+don't forget to mark it with @c \@todoc (see below). Example:
+@code
+// @brief Set new value
+#ifdef DOXYGEN_GENERATING_OUTPUT
+template<class T> void set(T value);
+#else
+template<class T> type std::enable_if<std::is_convertible<T, int>::value, void>::type set(T value);
+#endif
+@endcode
 
 @subsection documentation-commands Special documentation commands
 
@@ -386,8 +535,7 @@ with @c \@configurationvalue, and referenced from the class using
 @c \@configurationvalueref e.g.:
 @code
 // @configurationvalueref{Hash}
-class Hash {
-};
+class Hash;
 // @configurationvalue{Hash}
 namespace Corrade { namespace Utility {
     struct ConfigurationValue<Hash> {
@@ -400,28 +548,27 @@ parameter and also crossreferenced from page `configurationvalues`.
 
 @section git Git commit messages, branch and tag format
 
-It is encouraged to follow best practices of git commit messages as explained
-here: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
+Each commit message should have short one-line explanation at the beginning,
+formed as a sentence (i.e., first word capitalized and period at the end). If
+the commit affects only some submodule (namespace...), module name should be
+prepended and separated from the (uncapitalized) rest of the sentence with
+colon (and space). Detailed example:
 
-In short, each commit message should be in this format, each line at most 72
-characters long:
+    ModuleName: short one-line summary.
 
-~~~~
-Capitalized short summary
+    More detailed explanation text, if necessary, wrapped on multiple lines,
+    each line at most ~72 characters long to avoid ugly wrapping in git log.
 
-More detailed explanation text, if necessary, wrapped on multiple lines.
+     - Bullet points, indented with one space before and one space after the
+       bullet, indented to have the text aligned. Colons are allowed too, but
+       not mixed with bullets.
+     - Bullet points are separated from surrounding text with blank lines.
 
- - Bullet points, indented with one space before (if there is preceeding
-   paragraph) and one space after the bullet, indented to have the text
-   aligned. Colons are allowed too, but not mixed.
- - Bullet points are separated from surrounding text with blank lines.
+    It is good to use *emphasise*, _underline_ or `code` as in Markdown, if
+    necessary, but they shouldn't be overused.
 
-It is good to use *emphasise*, _underline_ or `code` as in Markdown, if
-necessary, but they shouldn't be overused.
-
-    Multi-line code examples are indented with four spaces, as in Markdown
-    syntax.
-~~~~
+        Multi-line code examples are indented with four spaces, as in Markdown
+        syntax.
 
 Branches and tags should be named with lowercase names with words separated
 with colons (`-`), e.g. `physics-performance-tweaks`. Version tags start with

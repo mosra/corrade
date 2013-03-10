@@ -1,17 +1,26 @@
 /*
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012
-              Vladimír Vondruš <mosra@centrum.cz>
-
     This file is part of Corrade.
 
-    Corrade is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License version 3
-    only, as published by the Free Software Foundation.
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013
+              Vladimír Vondruš <mosra@centrum.cz>
 
-    Corrade is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Lesser General Public License version 3 for more details.
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
 */
 
 #include "Directory.h"
@@ -29,35 +38,33 @@
 
 #include "corradeCompatibility.h"
 
-using namespace std;
-
 namespace Corrade { namespace Utility {
 
-string Directory::path(const std::string& filename) {
+std::string Directory::path(const std::string& filename) {
     /* If filename is already a path, return it */
     if(!filename.empty() && filename[filename.size()-1] == '/')
         return filename.substr(0, filename.size()-1);
 
-    size_t pos = filename.find_last_of('/');
+    std::size_t pos = filename.find_last_of('/');
 
     /* Filename doesn't contain any slash (no path), return empty string */
-    if(pos == string::npos) return "";
+    if(pos == std::string::npos) return {};
 
     /* Return everything to last slash */
     return filename.substr(0, pos);
 }
 
-string Directory::filename(const std::string& filename) {
-    size_t pos = filename.find_last_of('/');
+std::string Directory::filename(const std::string& filename) {
+    std::size_t pos = filename.find_last_of('/');
 
     /* Return whole filename if it doesn't contain slash */
-    if(pos == string::npos) return filename;
+    if(pos == std::string::npos) return filename;
 
     /* Return everything after last slash */
     return filename.substr(pos+1);
 }
 
-string Directory::join(const std::string& path, const std::string& filename) {
+std::string Directory::join(const std::string& path, const std::string& filename) {
     /* Absolute filename or empty path, return filename */
     if(path.empty() || (!filename.empty() && filename[0] == '/'))
         return filename;
@@ -77,7 +84,7 @@ bool Directory::mkpath(const std::string& _path) {
         return mkpath(_path.substr(0, _path.size()-1));
 
     /* If parent directory doesn't exist, create it */
-    string parentPath = path(_path);
+    std::string parentPath = path(_path);
     if(!parentPath.empty()) {
         DIR* directory = opendir(parentPath.c_str());
         if(directory == nullptr && !mkpath(parentPath)) return false;
@@ -97,9 +104,12 @@ bool Directory::mkpath(const std::string& _path) {
     return false;
 }
 
-bool Directory::rm(const string& path) {
-    if(remove(path.c_str()) == 0) return true;
-    return false;
+bool Directory::rm(const std::string& path) {
+    return std::remove(path.c_str()) == 0;
+}
+
+bool Directory::move(const std::string& oldPath, const std::string& newPath) {
+    return std::rename(oldPath.c_str(), newPath.c_str()) == 0;
 }
 
 bool Directory::fileExists(const std::string& filename) {
@@ -109,73 +119,75 @@ bool Directory::fileExists(const std::string& filename) {
   return false;
 }
 
-string Directory::home() {
+std::string Directory::home() {
     #ifndef _WIN32
     char* h = getenv("HOME");
-    if(!h) return "";
+    if(!h) return {};
     #else
     /** @bug Doesn't work at all */
     TCHAR h[MAX_PATH];
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wold-style-cast"
     if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, h)))
-        return "";
+        return {};
     #pragma GCC diagnostic pop
     #endif
 
     return h;
 }
 
-string Directory::configurationDir(const std::string& applicationName, bool createIfNotExists) {
+std::string Directory::configurationDir(const std::string& applicationName, bool createIfNotExists) {
     #ifndef _WIN32
-    string h = home();
-    if(h.empty()) return "";
-    string dir = join(h, '.' + String::lowercase(applicationName));
+    std::string h = home();
+    if(h.empty()) return {};
+    std::string dir = join(h, '.' + String::lowercase(applicationName));
     #else
     TCHAR path[MAX_PATH];
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wold-style-cast"
     if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path)))
-        return "";
+        return {};
     #pragma GCC diagnostic pop
-    string appdata = path;
-    if(appdata.empty()) return "";
-    string dir = join(appdata, applicationName);
+    std::string appdata = path;
+    if(appdata.empty()) return {};
+    std::string dir = join(appdata, applicationName);
     #endif
 
     if(createIfNotExists) mkpath(dir);
     return dir;
 }
 
-Directory::Directory(const string& path, int flags): _isLoaded(false) {
+std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     DIR* directory;
-    dirent* entry;
-
     directory = opendir(path.c_str());
-    if(directory == nullptr) return;
+    if(directory == nullptr) return {};
 
+    std::vector<std::string> list;
+    dirent* entry;
     while((entry = readdir(directory)) != nullptr) {
         #ifndef _WIN32
-        if((flags & SkipDotAndDotDot) && (string(entry->d_name) == "." || string(entry->d_name) == ".."))
+        if((flags >= Flag::SkipDotAndDotDot) && (std::string(entry->d_name) == "." || std::string(entry->d_name) == ".."))
             continue;
-        if((flags & SkipDirectories) && entry->d_type == DT_DIR)
+        if((flags >= Flag::SkipDirectories) && entry->d_type == DT_DIR)
             continue;
-        if((flags & SkipFiles) && entry->d_type == DT_REG)
+        if((flags >= Flag::SkipFiles) && entry->d_type == DT_REG)
             continue;
-        if((flags & SkipSpecial) && entry->d_type != DT_DIR && entry->d_type != DT_REG)
+        if((flags >= Flag::SkipSpecial) && entry->d_type != DT_DIR && entry->d_type != DT_REG)
             continue;
         #endif
 
         /** @todo On some systems dirent returns DT_UNKNOWN for everything */
-        push_back(entry->d_name);
+        list.push_back(entry->d_name);
     }
 
     closedir(directory);
 
-    if(flags & SortAscending) sort(begin(), end());
-    if(flags & SortDescending) sort(rbegin(), rend());
+    if(flags >= Flag::SortAscending)
+        std::sort(list.begin(), list.end());
+    else if(flags >= Flag::SortDescending)
+        std::sort(list.rbegin(), list.rend());
 
-    _isLoaded = true;
+    return std::move(list);
 }
 
 }}
