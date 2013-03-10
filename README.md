@@ -86,3 +86,9 @@ awesome idea? Feel free to visit my website or contact me at:
  * GitHub - http://github.com/mosra/corrade
  * E-mail - mosra@centrum.cz
  * Jabber - mosra@jabbim.cz
+
+LICENSE
+=======
+
+Corrade is licensed under MIT/Expat license, see [COPYING](COPYING) file for
+details.
