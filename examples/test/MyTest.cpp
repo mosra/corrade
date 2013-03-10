@@ -58,7 +58,7 @@ void MyTest::associativity() {
 }
 
 void MyTest::sin() {
-    CORRADE_COMPARE_AS(::sin(0), 0.0f, float);
+    CORRADE_COMPARE_AS(std::sin(0), 0.0f, float);
 }
 
 void MyTest::pi() {
