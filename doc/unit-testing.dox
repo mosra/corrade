@@ -77,30 +77,30 @@ Lastly, we must not forget to create `main()` function using
 CORRADE_TEST_MAIN() macro:
 @skipline CORRADE_TEST_MAIN
 
-Now we can compile and run our test using CMake and `corrade_add_test()`
-macro:
-@code
-find_package(Corrade REQUIRED)
-include_directories(${CORRADE_INCLUDE_DIR})
-corrade_add_test(mytest MyTest.cpp)
-@endcode
+Now we can compile and run our test using CMake and `corrade_add_test()` macro.
+Don't forget to call also `enable_testing()` so `ctest` is able to collect and
+run all the tests.
+@dontinclude test/CMakeLists.txt
+@skip enable_testing
+@until corrade_add_test
 
 The test can be run either manually or using `ctest`. When executed, it
 produces output similar to this:
 
     Starting Corrade::Examples::MyTest with 5 test cases...
-      FAIL: commutativity() at examples/test/MyTest.cpp on line 43
+      FAIL: commutativity() at examples/test/MyTest.cpp on line 52
             Expression 15/3 == 3/15 failed.
         OK: associativity()
         OK: sin()
-     XFAIL: pi() at examples/test/MyTest.cpp on line 58
+     XFAIL: pi() at examples/test/MyTest.cpp on line 67
             Need better approximation. pi and 3.14 are not equal.
         OK: pi()
-      SKIP: bigEndian() at examples/test/MyTest.cpp on line 63
+      SKIP: bigEndian() at examples/test/MyTest.cpp on line 72
             No affordable big endian machines exist to test this properly.
     Finished Corrade::Examples::MyTest with 1 errors out of 5 checks.
 
  - @ref test/MyTest.cpp
+ - @ref test/CMakeLists.txt
 
 */
 }}

@@ -40,11 +40,11 @@ class MyTest: public Corrade::TestSuite::Tester {
 };
 
 MyTest::MyTest() {
-    addTests(&MyTest::commutativity,
-             &MyTest::associativity,
-             &MyTest::sin,
-             &MyTest::pi,
-             &MyTest::bigEndian);
+    addTests({&MyTest::commutativity,
+              &MyTest::associativity,
+              &MyTest::sin,
+              &MyTest::pi,
+              &MyTest::bigEndian});
 }
 
 void MyTest::commutativity() {

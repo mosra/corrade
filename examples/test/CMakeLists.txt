@@ -23,5 +23,5 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-add_executable(mytest MyTest.cpp)
-target_link_libraries(mytest ${CORRADE_TESTSUITE_LIBRARIES})
+enable_testing()
+corrade_add_test(MyTest MyTest.cpp)
