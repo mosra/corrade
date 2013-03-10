@@ -93,13 +93,21 @@ visible to end users should be in `Implementation` subnamespace in the same
 file as the class/function for which the implementation is. See @ref documentation
 section below for guide how to hide it also from Doxygen documentation.
 
+Implementation details which are not referenced from any header should be either
+in anonymous namespace in source file (@ref cpp-anonymous-namespace "see below")
+or (if referenced from more than one source file, from tests etc.) in
+`Implementation` namespace in separate file in `Implementation` subdirectory.
+These subdirectories are treated as private implementation, thus they are by
+default excluded from documentation, their symbols shouldn't be exported and
+contents of these subdirectories shouldn't be installed anywhere.
+
 @subsection cpp-files File structure
 
 Headers have an strict structure. Include guards are basically include path
 with slashes replaced with underscores to make refactoring as easy as possible.
 Directly after them is license block, blank line, then file documentation,
 blank line and after that the contents of the header. Include guard ending is
-only `endif`, without any additional comments.
+only <tt>#</tt><tt>endif</tt>, without any additional comments.
 
 Source file have similar structure as headers - first license block, then
 blank line, then the includes, then blank line, then contents of the file.
@@ -146,29 +154,11 @@ for internal usage by the C++ standard. Underscores before the name shouldn't
 be used in public API or function parameters, as it looks ugly in the
 documentation.
 
-@subsubsection cpp-using using keyword
-
-`using namespace std` is not allowed. It brings many symbols into default
-namespace and can lead to unintended behavior. Consider `abs()` function. If
-using it without `std::` prefix, you can by mistake use the non-overloaded
-`double abs(double)` from plain C `<math.h> header, which can cause serious
-performance issues when using it for integers only. By explicitly calling
-`std::abs()` you ensure that proper overload is always selected.
-
-`using namespace` keyword should be used only for root namespace, i.e.
-`using namespace Corrade` and not `using namespace Corrade::Utility`. If you
-are using some class from subnamespace in many places, use only that
-particular name, e.g. `using Corrade::Utility::ConfigurationGroup`.
-
-It's probably common practice, but repeating won't hurt: headers shouldn't
-have `using` declarations inside them (unless there is good excuse for
-bringing some useful feature from different namespace into another namespace -
-but not in the default namespace!).
-
 @subsubsection cpp-forward-declarations Forward declarations and forward declaration headers
 
-Use forward declarations in headers as much as possible, as it can
-significantly reduce time of compilation.
+Use forward declarations in headers as much as possible, as it can significantly
+reduce time of compilation. If forward declarations are overly complex, consider
+adding forward declaration header containing all of them to save users' time.
 
 @subsubsection cpp-namespace Namespace declarations
 
@@ -189,7 +179,8 @@ improves readability, e.g.:
 namespace Corrade { namespace Utility {
     class Configuration;
 }}
-
+@endcode
+@code
 namespace Corrade {
 
 namespace TestSuite {
@@ -330,34 +321,58 @@ class MyClass {
 @subsection cpp-constexpr Constant expressions and constants
 
 Use `constexpr` keyword as much as possible, mainly for getters, operators and
-static pure functions, e.g. Set::operator&(). If the function is not a single
-return-statement, try hard to make it so.
+static pure functions, e.g. Containers::EnumSet::operator&(). If the function is
+not a single return-statement, try hard to make it so.
 
 Traits class members and class constants which are not meant to be referenced
-or pointed to should be defined as inline (constexpr) function, because
-declaring them as static const variable will result in another (probably
-unwanted) symbol.
+or pointed to should be defined as `inline constexpr` function or using
+anonymous typed enum (@ref cpp-enums "see below"), because declaring them as
+`static const` variable will result in another (probably unwanted) symbol and
+the constant might not be always inlined.
 
 @subsection cpp-assert Assertions
 
-Use asserts as much as possible. Utility library has convenient `CORRADE_ASSERT()`
-and `CORRADE_INTERNAL_ASSERT()` macros, see their documentation for more
-information.
+Use asserts as much as possible. Utility library has convenient CORRADE_ASSERT(),
+CORRADE_INTERNAL_ASSERT() and CORRADE_INTERNAL_ASSERT_OUTPUT() macros, see their
+documentation for more information.
 
-@subsection cpp-forbidden Forbidden C/C++ features
+@subsection cpp-forbidden Forbidden and deprecated C/C++ features
 
-Don't <tt>#</tt><tt>include &lt;*stream&gt;</tt> in header files. STL's
-streams library headers are amazingly large and this single
-<tt>#</tt><tt>include</tt> brings >25k of source code which needs to be
-preprocessed and compiled even if majority of it is later tossed out. Use
-`&lt;iosfwd&gt;` instead and include stream headers only in source files.
-If you want to just print something to output, use Utility::Debug class and
-friends.
+Don't include `<*stream>` in header files. STL's stream library headers are
+amazingly large and this single <tt>#</tt><tt>include</tt> brings >25k of
+source code which needs to be preprocessed and compiled even if majority of it
+is later tossed out. Use `<iosfwd>` instead and include stream headers only in
+source files. If you want to just print something to output, use Utility::Debug
+class and friends.
+
+Don't use RTTI (`dynamic_cast` and `std::typeinfo`) and exceptions, if you don't
+desperately need to. They violate C++ principle of "don't pay for what you don't
+use".
+
+@subsubsection cpp-using using namespace keyword
+
+`using namespace std` is not allowed. It brings many symbols into default
+namespace and can lead to unintended behavior. Consider `abs()` function. If
+using it without `std::` prefix, you can by mistake use the non-overloaded
+`double abs(double)` from plain C `<math.h>` header, which can cause serious
+performance issues when using it for integers only. By explicitly calling
+`std::abs()` you ensure that proper overload is always selected.
+
+`using namespace` keyword should be used only for root namespace, i.e.
+`using namespace %Corrade` and not `using namespace %Corrade::Utility`. If you
+are using some class from subnamespace in many places, use only that particular
+name, e.g. `using %Corrade::Utility::ConfigurationGroup`.
+
+It's probably common practice, but repeating won't hurt: **headers shouldn't
+have `using` declarations at all** (unless there is good excuse for bringing
+some useful feature from different namespace into another namespace -- but not
+in the default namespace!).
+
+@subsubsection cpp-backward C-style casts
 
 Don't use C-style casts, use C++-style `static_cast` and `reinterpret_cast`
-instead. For numeric types (e.g. casting from int to float) you can use
-"constructor cast":
-
+instead. %Corrade enables compiler warning about their usage in `CORRADE_CXX_FLAGS`
+CMake variable. You can also use "constructor cast" instead of `static_cast`:
 @code
 int a = 22;
 int b = 7;
@@ -366,9 +381,18 @@ float pi = static_cast<float>(a)/b; // good
 float pi = float(a)/b;              // even better here
 @endcode
 
-Don't use RTTI (`dynamic_cast` and `std::typeinfo`) and exceptions. They
-violate C++ principle of "don't pay for what you don't use" and thus they are
-disabled in the code (GCC/Clang option `-fno-rtti -fno-exceptions`).
+@subsubsection cpp-enums Unscoped and untyped enums
+
+Prefer to use C++11 `enum class`. Use Containers::EnumSet instead of integral
+bit masks. Always explicitly specify underlying type, it might save some memory
+and also allows for forward declaration of the enum, which is good if the enum
+is part of otherwise large header.
+
+@subsubsection cpp-anonymous-namespace static keyword
+
+Prefer to use anonymous namespaces instead of `static` keyword. Anonymous
+namespace ensures that the symbols won't be exported and unlike `static` keyword
+it can be used also for type declarations.
 
 @section comments Comments
 
@@ -475,28 +499,27 @@ parameter and also crossreferenced from page `configurationvalues`.
 
 @section git Git commit messages, branch and tag format
 
-It is encouraged to follow best practices of git commit messages as explained
-here: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
+Each commit message should have short one-line explanation at the beginning,
+formed as a sentence (i.e., first word capitalized and period at the end). If
+the commit affects only some submodule (namespace...), module name should be
+prepended and separated from the (uncapitalized) rest of the sentence with
+colon (and space). Detailed example:
 
-In short, each commit message should be in this format, each line at most 72
-characters long:
+    ModuleName: short one-line summary.
 
-~~~~
-Capitalized short summary
+    More detailed explanation text, if necessary, wrapped on multiple lines,
+    each line at most ~72 characters long to avoid ugly wrapping in git log.
 
-More detailed explanation text, if necessary, wrapped on multiple lines.
+     - Bullet points, indented with one space before and one space after the
+       bullet, indented to have the text aligned. Colons are allowed too, but
+       not mixed with bullets.
+     - Bullet points are separated from surrounding text with blank lines.
 
- - Bullet points, indented with one space before (if there is preceeding
-   paragraph) and one space after the bullet, indented to have the text
-   aligned. Colons are allowed too, but not mixed.
- - Bullet points are separated from surrounding text with blank lines.
+    It is good to use *emphasise*, _underline_ or `code` as in Markdown, if
+    necessary, but they shouldn't be overused.
 
-It is good to use *emphasise*, _underline_ or `code` as in Markdown, if
-necessary, but they shouldn't be overused.
-
-    Multi-line code examples are indented with four spaces, as in Markdown
-    syntax.
-~~~~
+        Multi-line code examples are indented with four spaces, as in Markdown
+        syntax.
 
 Branches and tags should be named with lowercase names with words separated
 with colons (`-`), e.g. `physics-performance-tweaks`. Version tags start with
