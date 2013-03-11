@@ -185,7 +185,7 @@ std::string Resource::hexcode(const std::string& data, const std::string& commen
 }
 
 template<class T> std::string Resource::numberToString(const T& number) {
-    return {reinterpret_cast<const char*>(&number), sizeof(T)};
+    return std::string(reinterpret_cast<const char*>(&number), sizeof(T));
 }
 
 template<class T> T Resource::numberFromString(const std::string& number) {

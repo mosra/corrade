@@ -88,7 +88,7 @@ void AbstractPluginManager::importStaticPlugin(const std::string& plugin, int _v
     CORRADE_ASSERT(staticPlugins(),
         "PluginManager: too late to import static plugin" << plugin, );
 
-    staticPlugins()->push_back({plugin, interface, instancer});
+    staticPlugins()->push_back(StaticPluginObject{plugin, interface, instancer});
 }
 #endif
 
