@@ -33,13 +33,15 @@ class AbstractAnimal: public AbstractPlugin {
     PLUGIN_INTERFACE("cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")
 
     public:
-        explicit AbstractAnimal() = default;
+        explicit AbstractAnimal();
         explicit AbstractAnimal(AbstractPluginManager* manager, std::string plugin): AbstractPlugin(manager, std::move(plugin)) {}
 
         virtual std::string name() = 0;
         virtual int legCount() = 0;
         virtual bool hasTail() = 0;
 };
+
+inline AbstractAnimal::AbstractAnimal() = default;
 
 }}}
 

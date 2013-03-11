@@ -270,7 +270,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
             friend class Emitter;
 
             private:
-                constexpr explicit Signal() = default;
+                constexpr explicit Signal();
         };
 
         inline explicit Emitter(): lastHandledSignal(0), connectionsChanged(false) {}
@@ -421,6 +421,8 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         std::uint32_t lastHandledSignal;
         bool connectionsChanged;
 };
+
+inline constexpr Emitter::Signal::Signal() = default;
 
 }}
 

@@ -30,6 +30,8 @@
 
 namespace Corrade { namespace Interconnect {
 
+Receiver::Receiver() = default;
+
 Receiver::~Receiver() {
     for(auto end = connections.end(), it = connections.begin(); it != end; ++it) {
         /* Remove connection from emitter */

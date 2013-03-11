@@ -58,7 +58,7 @@ class CORRADE_INTERCONNECT_EXPORT Receiver {
     Receiver& operator=(Receiver&&) = delete;
 
     public:
-        explicit Receiver() = default;
+        explicit Receiver();
         virtual ~Receiver() = 0;
 
         /**

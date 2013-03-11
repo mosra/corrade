@@ -39,12 +39,14 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class DOG_EXPORT Dog: public AbstractAnimal {
     public:
-        explicit Dog() = default;
+        explicit Dog();
         explicit Dog(AbstractPluginManager* manager, std::string plugin): AbstractAnimal(manager, std::move(plugin)) {}
 
         std::string name();
         int legCount();
         bool hasTail();
 };
+
+inline Dog::Dog() = default;
 
 }}}
