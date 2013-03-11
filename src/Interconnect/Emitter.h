@@ -406,7 +406,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
                 ++it;
             }
 
-            return {};
+            return Signal();
         }
 
     private:
