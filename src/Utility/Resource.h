@@ -29,8 +29,9 @@
  * @brief Class Corrade::Utility::Resource
  */
 
-#include <string>
 #include <map>
+#include <string>
+#include <tuple>
 
 #include "utilities.h"
 
