@@ -136,7 +136,7 @@ std::string Resource::compile(const std::string& name, const std::string& filena
     return compile(name, files);
 }
 
-std::tuple<const unsigned char*, std::size_t> Resource::getRaw(const std::string& filename) const {
+std::tuple<const unsigned char*, unsigned int> Resource::getRaw(const std::string& filename) const {
     /* If the group/filename doesn't exist, return empty string */
     if(resources.find(group) == resources.end()) {
         Error() << "Resource: group" << '\'' + group + '\'' << "was not found";
@@ -152,7 +152,7 @@ std::tuple<const unsigned char*, std::size_t> Resource::getRaw(const std::string
 
 std::string Resource::get(const std::string& filename) const {
     const unsigned char* data;
-    std::size_t size;
+    unsigned int size;
     std::tie(data, size) = getRaw(filename);
     return data ? std::string(reinterpret_cast<const char*>(data), size) : std::string();
 }
