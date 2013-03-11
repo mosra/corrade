@@ -34,6 +34,8 @@
 
 #include "Connection.h"
 
+#include "corradeCompatibility.h"
+
 namespace Corrade { namespace Interconnect {
 
 class Emitter;
