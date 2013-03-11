@@ -145,7 +145,8 @@ void AbstractPluginManager::setPluginDirectory(std::string directory) {
     static const std::size_t suffixSize = std::strlen(PLUGIN_FILENAME_SUFFIX);
     const std::vector<std::string> d = Directory::list(_pluginDirectory,
         Directory::Flag::SkipDirectories|Directory::Flag::SkipDotAndDotDot);
-    for(const std::string& filename: d) {
+    for(auto it = d.cbegin(); it != d.cend(); ++it) {
+        const std::string& filename = *it;
         /* File doesn't have module suffix, continue to next */
         const std::size_t end = filename.length()-suffixSize;
         if(filename.substr(end) != PLUGIN_FILENAME_SUFFIX)

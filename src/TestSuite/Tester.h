@@ -107,8 +107,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          */
         template<class Derived> void addTests(std::initializer_list<void(Derived::*)()> tests) {
             testCases.reserve(testCases.size() + tests.size());
-            for(auto test: tests)
-                testCases.push_back(static_cast<TestCase>(test));
+            for(auto it = tests.begin(); it != tests.end(); ++it)
+                testCases.push_back(static_cast<TestCase>(*it));
         }
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
