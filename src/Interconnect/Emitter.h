@@ -66,11 +66,10 @@ class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
     AbstractConnectionData& operator=(AbstractConnectionData&&) = delete;
 
     public:
-        explicit AbstractConnectionData() = default;
         inline virtual ~AbstractConnectionData() {}
 
     private:
-        inline AbstractConnectionData(Emitter* emitter, Receiver* receiver): connection(nullptr), emitter(emitter), receiver(receiver), lastHandledSignal(0) {}
+        inline explicit AbstractConnectionData(Emitter* emitter, Receiver* receiver): connection(nullptr), emitter(emitter), receiver(receiver), lastHandledSignal(0) {}
 
         Connection* connection;
         Emitter* emitter;
@@ -84,9 +83,7 @@ template<class ...Args> class MemberConnectionData: public AbstractConnectionDat
     private:
         typedef void(Receiver::*Slot)(Args...);
 
-        explicit MemberConnectionData() = default;
-
-        template<class Emitter, class Receiver> inline MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): AbstractConnectionData(emitter, receiver), slot(static_cast<Slot>(slot)) {}
+        template<class Emitter, class Receiver> inline explicit MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): AbstractConnectionData(emitter, receiver), slot(static_cast<Slot>(slot)) {}
 
         void handle(Args... args) {
             (receiver->*slot)(args...);
