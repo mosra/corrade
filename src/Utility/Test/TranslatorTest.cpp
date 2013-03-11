@@ -85,7 +85,11 @@ void TranslatorTest::group() {
 
     /* Load another group */
     t.setPrimary(c.group("cs_CZ"));
+    #ifndef CORRADE_GCC44_COMPATIBILITY
     CORRADE_COMPARE(*s, u8"primárně přeloženo");
+    #else
+    CORRADE_COMPARE(*s, "primárně přeloženo");
+    #endif
 }
 
 void TranslatorTest::dynamic() {
@@ -104,8 +108,13 @@ void TranslatorTest::dynamic() {
 
     Translator::setLocale("cs_CZ");
 
+    #ifndef CORRADE_GCC44_COMPATIBILITY
     CORRADE_COMPARE(*s1, u8"primárně přeloženo");
     CORRADE_COMPARE(*s2, u8"primárně přeloženo");
+    #else
+    CORRADE_COMPARE(*s1, "primárně přeloženo");
+    CORRADE_COMPARE(*s2, "primárně přeloženo");
+    #endif
 
     /* Fixed translations, not affected with setLocale() */
     t1.setPrimary(Directory::join(TRANSLATOR_TEST_DIR, "cs_CZ.conf"));
@@ -113,8 +122,13 @@ void TranslatorTest::dynamic() {
 
     Translator::setLocale("en_US");
 
+    #ifndef CORRADE_GCC44_COMPATIBILITY
     CORRADE_COMPARE(*s1, u8"primárně přeloženo");
     CORRADE_COMPARE(*s2, u8"primárně přeloženo");
+    #else
+    CORRADE_COMPARE(*s1, "primárně přeloženo");
+    CORRADE_COMPARE(*s2, "primárně přeloženo");
+    #endif
 }
 
 }}}
