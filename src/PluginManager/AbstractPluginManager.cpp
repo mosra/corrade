@@ -133,8 +133,8 @@ void AbstractPluginManager::setPluginDirectory(std::string directory) {
     _pluginDirectory = std::move(directory);
 
     /* Remove all unloaded plugins from the container */
-    auto it = plugins()->cbegin();
-    while(it != plugins()->cend()) {
+    auto it = plugins()->begin();
+    while(it != plugins()->end()) {
         if(it->second->manager == this && it->second->loadState & (LoadState::NotLoaded|LoadState::WrongMetadataFile)) {
             delete it->second;
             it = plugins()->erase(it);
