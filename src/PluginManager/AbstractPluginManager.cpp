@@ -137,7 +137,17 @@ void AbstractPluginManager::setPluginDirectory(std::string directory) {
     while(it != plugins()->end()) {
         if(it->second->manager == this && it->second->loadState & (LoadState::NotLoaded|LoadState::WrongMetadataFile)) {
             delete it->second;
+
+            #ifndef CORRADE_GCC44_COMPATIBILITY
             it = plugins()->erase(it);
+            #else
+            /* GCC 4.4 returns void from map::erase(), but other iterators
+               aren't invalidated, so it's safe */
+            auto erase = it;
+            ++it;
+            plugins()->erase(erase);
+            #endif
+
         } else ++it;
     }
 
