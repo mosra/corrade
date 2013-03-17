@@ -53,7 +53,7 @@ Emitter::~Emitter() {
     }
 }
 
-void Emitter::connect(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data) {
+void Emitter::connectInternal(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data) {
     /* Add connection to emitter */
     data->emitter->connections.insert(std::make_pair(signal, data));
     data->emitter->connectionsChanged = true;
@@ -65,13 +65,13 @@ void Emitter::connect(const Implementation::SignalData& signal, Implementation::
     if(data->connection) data->connection->connected = true;
 }
 
-void Emitter::disconnect(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data) {
+void Emitter::disconnectInternal(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data) {
     /* Find given connection, disconnect it and erase */
     auto range = data->emitter->connections.equal_range(signal);
     for(auto it = range.first; it != range.second; ++it) {
         if(it->second != data) continue;
 
-        data->emitter->disconnect(it);
+        data->emitter->disconnectInternal(it);
         data->emitter->connections.erase(it);
         data->emitter->connectionsChanged = true;
         return;
@@ -81,10 +81,10 @@ void Emitter::disconnect(const Implementation::SignalData& signal, Implementatio
     CORRADE_INTERNAL_ASSERT(false);
 }
 
-void Emitter::disconnect(const Implementation::SignalData& signal) {
+void Emitter::disconnectInternal(const Implementation::SignalData& signal) {
     auto range = connections.equal_range(signal);
     for(auto it = range.first; it != range.second; ++it)
-        disconnect(it);
+        disconnectInternal(it);
 
     connections.erase(range.first, range.second);
     connectionsChanged = true;
@@ -92,13 +92,13 @@ void Emitter::disconnect(const Implementation::SignalData& signal) {
 
 void Emitter::disconnectAllSignals() {
     for(auto it = connections.begin(); it != connections.end(); ++it)
-        disconnect(it);
+        disconnectInternal(it);
 
     connections.clear();
     connectionsChanged = true;
 }
 
-void Emitter::disconnect(std::unordered_multimap<Implementation::SignalData, Implementation::AbstractConnectionData*, Implementation::SignalDataHash>::const_iterator it) {
+void Emitter::disconnectInternal(std::unordered_multimap<Implementation::SignalData, Implementation::AbstractConnectionData*, Implementation::SignalDataHash>::const_iterator it) {
     Implementation::AbstractConnectionData* data = it->second;
 
     /* Remove connection from receiver */

@@ -58,7 +58,7 @@ bool Connection::connect() {
     if(connected) return true;
 
     /* Create the connection */
-    Emitter::connect(signal, data);
+    Emitter::connectInternal(signal, data);
     return true;
 }
 
@@ -66,7 +66,7 @@ void Connection::disconnect() {
     /* Already disconnected or the connection doesn't exist anymore */
     if(!connected || !data) return;
 
-    Emitter::disconnect(signal, data);
+    Emitter::disconnectInternal(signal, data);
 }
 
 Connection::Connection(Implementation::SignalData signal, Implementation::AbstractConnectionData* data): signal(signal), data(data), connected(true) {
