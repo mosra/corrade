@@ -290,7 +290,9 @@ void Test::emit() {
     CORRADE_COMPARE(mailbox3.money, -50);
 }
 
+#ifndef CORRADE_GCC44_COMPATIBILITY
 void Test::emitterSubclass() {
+#endif
     class BetterPostman: public Postman {
         public:
             inline Signal newRichTextMessage(int price, const std::string& value) {
@@ -298,6 +300,9 @@ void Test::emitterSubclass() {
             }
     };
 
+#ifdef CORRADE_GCC44_COMPATIBILITY
+void Test::emitterSubclass() { /* Local types are not allowed as template arguments */
+#endif
     BetterPostman postman;
     Mailbox mailbox;
 
@@ -318,7 +323,9 @@ void Test::emitterSubclass() {
     CORRADE_VERIFY(!postman.hasSignalConnections());
 }
 
+#ifndef CORRADE_GCC44_COMPATIBILITY
 void Test::receiverSubclass() {
+#endif
     class BlueMailbox: public Mailbox {
         public:
             void addBlueMessage(int price, const std::string& message) {
@@ -327,6 +334,9 @@ void Test::receiverSubclass() {
             }
     };
 
+#ifdef CORRADE_GCC44_COMPATIBILITY
+void Test::receiverSubclass() { /* Local types are not allowed as template arguments */
+#endif
     Postman postman;
     BlueMailbox mailbox;
 
@@ -341,7 +351,9 @@ void Test::receiverSubclass() {
     CORRADE_COMPARE(mailbox.money, 10);
 }
 
+#ifndef CORRADE_GCC44_COMPATIBILITY
 void Test::slotInReceiverBase() {
+#endif
     class VintageMailbox {
         public:
             inline VintageMailbox(): money(0) {}
@@ -357,6 +369,9 @@ void Test::slotInReceiverBase() {
 
     class ModernMailbox: public VintageMailbox, public Interconnect::Receiver {};
 
+#ifdef CORRADE_GCC44_COMPATIBILITY
+void Test::slotInReceiverBase() { /* Local types are not allowed as template arguments */
+#endif
     Postman postman;
     ModernMailbox mailbox;
 
@@ -369,7 +384,9 @@ void Test::slotInReceiverBase() {
     CORRADE_COMPARE(mailbox.money, 5);
 }
 
+#ifndef CORRADE_GCC44_COMPATIBILITY
 void Test::virtualSlot() {
+#endif
     class VirtualMailbox: public Interconnect::Receiver {
         public:
             inline VirtualMailbox(): money(0) {}
@@ -394,6 +411,9 @@ void Test::virtualSlot() {
             }
     };
 
+#ifdef CORRADE_GCC44_COMPATIBILITY
+void Test::virtualSlot() { /* Local types are not allowed as template arguments */
+#endif
     Postman postman;
     VirtualMailbox* mailbox = new TaxDodgingMailbox;
 
@@ -406,10 +426,9 @@ void Test::virtualSlot() {
     delete mailbox;
 }
 
+#ifndef CORRADE_GCC44_COMPATIBILITY
 void Test::changeConnectionsInSlot() {
-    Postman postman;
-    Mailbox mailbox;
-
+#endif
     class PropagatingMailbox: public Interconnect::Receiver {
         public:
             inline PropagatingMailbox(Postman* postman, Mailbox* mailbox): postman(postman), mailbox(mailbox) {}
@@ -427,6 +446,12 @@ void Test::changeConnectionsInSlot() {
             Mailbox* mailbox;
     };
 
+#ifdef CORRADE_GCC44_COMPATIBILITY
+void Test::changeConnectionsInSlot() { /* Local types are not allowed as template arguments */
+#endif
+    Postman postman;
+    Mailbox mailbox;
+
     PropagatingMailbox propagatingMailbox(&postman, &mailbox);
     Emitter::connect(&postman, &Postman::newMessage, &propagatingMailbox, &PropagatingMailbox::addMessage);
 
@@ -442,7 +467,9 @@ void Test::changeConnectionsInSlot() {
     CORRADE_COMPARE(mailbox.money, 19);
 }
 
+#ifndef CORRADE_GCC44_COMPATIBILITY
 void Test::deleteReceiverInSlot() {
+#endif
     class SuicideMailbox: public Interconnect::Receiver {
         public:
             inline void addMessage(int, const std::string&) {
@@ -450,6 +477,9 @@ void Test::deleteReceiverInSlot() {
             }
     };
 
+#ifdef CORRADE_GCC44_COMPATIBILITY
+void Test::deleteReceiverInSlot() { /* Local types are not allowed as template arguments */
+#endif
     Postman postman;
     SuicideMailbox* mailbox1 = new SuicideMailbox;
     Mailbox mailbox2, mailbox3;
