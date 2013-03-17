@@ -46,10 +46,8 @@ class SignalDataHash {
     public:
         inline std::size_t operator()(const SignalData& data) const {
             std::size_t hash = 0;
-            for(std::size_t i = 0; i != SignalData::Size/sizeof(std::size_t); ++i) {
-                const std::size_t* const p = reinterpret_cast<const std::size_t*>(data.data+i*sizeof(std::size_t));
-                hash ^= *p;
-            }
+            for(std::size_t i = 0; i != SignalData::Size; ++i)
+                hash ^= data.data[i];
             return hash;
         }
 };
