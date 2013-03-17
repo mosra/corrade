@@ -61,11 +61,13 @@ class Test: public TestSuite::Tester {
 class Postman: public Interconnect::Emitter {
     public:
         inline Signal newMessage(int price, const std::string& message) {
-            return emit(&Postman::newMessage, price, message);
+            /* GCC 4.4 needs the arguments explicitly */
+            return emit<Postman, int, const std::string&>(&Postman::newMessage, price, message);
         }
 
         inline Signal paymentRequested(int amount) {
-            return emit(&Postman::paymentRequested, amount);
+            /* GCC 4.4 needs the arguments explicitly */
+            return emit<Postman, int>(&Postman::paymentRequested, amount);
         }
 };
 
@@ -296,7 +298,8 @@ void Test::emitterSubclass() {
     class BetterPostman: public Postman {
         public:
             inline Signal newRichTextMessage(int price, const std::string& value) {
-                return emit(&BetterPostman::newRichTextMessage, price, "***"+value+"***");
+                /* GCC 4.4 needs the arguments explicitly */
+                return emit<BetterPostman, int, const std::string&>(&BetterPostman::newRichTextMessage, price, "***"+value+"***");
             }
     };
 
