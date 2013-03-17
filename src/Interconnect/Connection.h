@@ -46,7 +46,7 @@ namespace Implementation {
         friend class SignalDataHash;
 
         public:
-            static const std::size_t Size = 2*sizeof(void*);
+            static const std::size_t Size = 2*sizeof(void*)/sizeof(std::size_t);
 
             template<class Emitter, class ...Args> inline SignalData(typename Emitter::Signal(Emitter::*signal)(Args...)): data() {
                 typedef typename Emitter::Signal(Emitter::*Signal)(Args...);
@@ -64,7 +64,7 @@ namespace Implementation {
             }
 
         private:
-            char data[Size];
+            std::size_t data[Size];
     };
 }
 #endif

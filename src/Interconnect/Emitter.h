@@ -48,10 +48,8 @@ class SignalDataHash {
     public:
         inline std::size_t operator()(const SignalData& data) const {
             std::size_t hash = 0;
-            for(std::size_t i = 0; i != SignalData::Size/sizeof(std::size_t); ++i) {
-                const std::size_t* const p = reinterpret_cast<const std::size_t*>(data.data+i*sizeof(std::size_t));
-                hash ^= *p;
-            }
+            for(std::size_t i = 0; i != SignalData::Size; ++i)
+                hash ^= data.data[i];
             return hash;
         }
 };
@@ -342,7 +340,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
 
             Implementation::SignalData signalData(signal);
             auto data = new Implementation::MemberConnectionData<Args...>(emitter, receiver, static_cast<void(ReceiverObject::*)(Args...)>(slot));
-            connect(signalData, data);
+            connectInternal(signalData, data);
             return Connection(signalData, data);
         }
 
@@ -361,7 +359,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          *      Receiver::disconnectAllSlots(), hasSignalConnections()
          */
         template<class Emitter, class ...Args> inline void disconnectSignal(Signal(Emitter::*signal)(Args...)) {
-            disconnect(Implementation::SignalData(signal));
+            disconnectInternal(Implementation::SignalData(signal));
         }
 
         /**
@@ -409,10 +407,10 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         }
 
     private:
-        static void connect(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data);
-        static void disconnect(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data);
-        void disconnect(const Implementation::SignalData& signal);
-        void disconnect(std::unordered_multimap<Implementation::SignalData, Implementation::AbstractConnectionData*, Implementation::SignalDataHash>::const_iterator it);
+        static void connectInternal(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data);
+        static void disconnectInternal(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data);
+        void disconnectInternal(const Implementation::SignalData& signal);
+        void disconnectInternal(std::unordered_multimap<Implementation::SignalData, Implementation::AbstractConnectionData*, Implementation::SignalDataHash>::const_iterator it);
 
         std::unordered_multimap<Implementation::SignalData, Implementation::AbstractConnectionData*, Implementation::SignalDataHash> connections;
         std::uint32_t lastHandledSignal;
