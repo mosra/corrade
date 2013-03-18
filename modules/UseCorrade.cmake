@@ -31,7 +31,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
 # Optional C++ flags
 set(CORRADE_CXX_FLAGS "-Wall -Wextra -Wold-style-cast -Winit-self -Werror=return-type -Wmissing-declarations -pedantic -fvisibility=hidden")
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+
+# -Wdouble-promotion is supported from GCC 4.6
+# TODO: do this with check_c_compiler_flags()
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.6.0")
     set(CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS} -Wdouble-promotion")
 endif()
 
