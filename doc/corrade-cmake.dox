@@ -59,6 +59,10 @@ also available as preprocessor variables if including Corrade.h:
 
 - `%CORRADE_GCC46_COMPATIBILITY` - Defined if compiled with compatibility mode
   for GCC 4.6
+- `%CORRADE_GCC45_COMPATIBILITY` - Defined if compiled with compatibility mode
+  for GCC 4.5
+- `%CORRADE_GCC44_COMPATIBILITY` - Defined if compiled with compatibility mode
+  for GCC 4.4
 
 %Corrade provides these macros and functions:
 

@@ -46,6 +46,24 @@ enabled.
 */
 #define CORRADE_GCC46_COMPATIBILITY_
 
+/**
+@brief GCC 4.5 compatibility
+
+`CORRADE_GCC45_COMPATIBILITY` is defined if compatibility mode for GCC 4.5 is
+enabled.
+@see @ref building-corrade
+*/
+#define CORRADE_GCC45_COMPATIBILITY_
+
+/**
+@brief GCC 4.4 compatibility
+
+`CORRADE_GCC44_COMPATIBILITY` is defined if compatibility mode for GCC 4.4 is
+enabled.
+@see @ref building-corrade
+*/
+#define CORRADE_GCC44_COMPATIBILITY_
+
 #endif
 
 }

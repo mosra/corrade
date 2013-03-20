@@ -21,6 +21,10 @@
 # Features of found Corrade library are exposed in these variables:
 #  CORRADE_GCC46_COMPATIBILITY - Defined if compiled with compatibility
 #   mode for GCC 4.6
+#  CORRADE_GCC45_COMPATIBILITY - Defined if compiled with compatibility
+#   mode for GCC 4.5
+#  CORRADE_GCC44_COMPATIBILITY - Defined if compiled with compatibility
+#   mode for GCC 4.4
 #
 # Corrade provides these macros and functions:
 #
