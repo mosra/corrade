@@ -232,11 +232,11 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
 
     /* Open plugin file, make symbols available for next libs (which depends on this) */
     #ifndef _WIN32
-    void* handle = dlopen(filename.c_str(), RTLD_NOW|RTLD_GLOBAL);
+    void* module = dlopen(filename.c_str(), RTLD_NOW|RTLD_GLOBAL);
     #else
-    HMODULE handle = LoadLibraryA(filename.c_str());
+    HMODULE module = LoadLibraryA(filename.c_str());
     #endif
-    if(!handle) {
+    if(!module) {
         Error() << "PluginManager: cannot open plugin file"
                 << '"' + filename + "\":" << dlerror();
         return LoadState::LoadFailed;
@@ -246,15 +246,15 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
     #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
-    int (*_version)(void) = reinterpret_cast<int(*)()>(dlsym(handle, "pluginVersion"));
+    int (*_version)(void) = reinterpret_cast<int(*)()>(dlsym(module, "pluginVersion"));
     if(_version == nullptr) {
         Error() << "PluginManager: cannot get version of plugin" << '\'' + plugin + "':" << dlerror();
-        dlclose(handle);
+        dlclose(module);
         return LoadState::LoadFailed;
     }
     if(_version() != Version) {
         Error() << "PluginManager: wrong plugin version, expected" << Version << "but got" << _version;
-        dlclose(handle);
+        dlclose(module);
         return LoadState::WrongPluginVersion;
     }
 
@@ -262,15 +262,15 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
     #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
-    const char* (*interface)() = reinterpret_cast<const char* (*)()>(dlsym(handle, "pluginInterface"));
+    const char* (*interface)() = reinterpret_cast<const char* (*)()>(dlsym(module, "pluginInterface"));
     if(interface == nullptr) {
         Error() << "PluginManager: cannot get interface string of plugin" << '\'' + plugin + "':" << dlerror();
-        dlclose(handle);
+        dlclose(module);
         return LoadState::LoadFailed;
     }
     if(interface() != pluginInterface()) {
         Error() << "PluginManager: wrong plugin interface, expected" << '\'' + pluginInterface() + "but got '" + interface() + "'";
-        dlclose(handle);
+        dlclose(module);
         return LoadState::WrongInterfaceVersion;
     }
 
@@ -278,10 +278,10 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
     #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
-    Instancer instancer = reinterpret_cast<Instancer>(dlsym(handle, "pluginInstancer"));
+    Instancer instancer = reinterpret_cast<Instancer>(dlsym(module, "pluginInstancer"));
     if(instancer == nullptr) {
         Error() << "PluginManager: cannot get instancer of plugin" << '\'' + plugin + "':" << dlerror();
-        dlclose(handle);
+        dlclose(module);
         return LoadState::LoadFailed;
     }
 
@@ -298,7 +298,7 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
 
     /* Update plugin object, set state to loaded */
     pluginObject.loadState = LoadState::Loaded;
-    pluginObject.module = handle;
+    pluginObject.module = module;
     pluginObject.instancer = instancer;
     return LoadState::Loaded;
 }
