@@ -63,9 +63,7 @@ std::map<std::string, AbstractPluginManager::Plugin*>* AbstractPluginManager::pl
             std::istringstream metadata(r.get(staticPlugin->plugin + ".conf"));
 
             /* Insert plugin to list */
-            CORRADE_INTERNAL_ASSERT_OUTPUT(_plugins->insert(std::make_pair(staticPlugin->plugin, new Plugin(metadata, staticPlugin->interface, staticPlugin->instancer))).second);
-
-            delete staticPlugin;
+            CORRADE_INTERNAL_ASSERT_OUTPUT(_plugins->insert(std::make_pair(staticPlugin->plugin, new Plugin(metadata, staticPlugin))).second);
         }
 
         /** @todo Assert dependencies of static plugins */
@@ -449,7 +447,11 @@ AbstractPluginManager::Plugin::Plugin(const std::string& _metadata, AbstractPlug
     loadState = configuration.isValid() ? LoadState::NotLoaded : LoadState::WrongMetadataFile;
 }
 
-AbstractPluginManager::Plugin::Plugin(std::istream& _metadata, std::string _interface, Instancer _instancer): loadState(LoadState::Static), interface(_interface), configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(nullptr), instancer(_instancer), module(nullptr) {}
+AbstractPluginManager::Plugin::Plugin(std::istream& _metadata, StaticPlugin* staticPlugin): loadState(LoadState::Static), configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(nullptr), instancer(staticPlugin->instancer), staticPlugin(staticPlugin) {}
+
+AbstractPluginManager::Plugin::~Plugin() {
+    if(loadState == LoadState::Static) delete staticPlugin;
+}
 
 } namespace Utility {
 

@@ -276,9 +276,14 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
     #else
     protected:
     #endif
+        struct StaticPlugin {
+            std::string plugin;
+            std::string interface;
+            Instancer instancer;
+        };
+
         struct Plugin {
             LoadState loadState;
-            std::string interface; /**< @todo Not needed for dynamic plugins */
             const Utility::Configuration configuration;
             PluginMetadata metadata;
 
@@ -288,17 +293,25 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
 
             Instancer instancer;
 
-            #ifndef _WIN32
-            void* module;
-            #else
-            HMODULE module;
-            #endif
+            union {
+                /* For static plugins */
+                StaticPlugin* staticPlugin;
+
+                /* For dynamic plugins */
+                #ifndef _WIN32
+                void* module;
+                #else
+                HMODULE module;
+                #endif
+            };
 
             /* Constructor for dynamic plugins */
             explicit Plugin(const std::string& _metadata, AbstractPluginManager* _manager);
 
             /* Constructor for static plugins */
-            explicit Plugin(std::istream& _metadata, std::string _interface, Instancer _instancer);
+            explicit Plugin(std::istream& _metadata, StaticPlugin* staticPlugin);
+
+            ~Plugin();
         };
 
         std::string _pluginDirectory;
@@ -332,11 +345,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
            The vector is accessible via function, not directly, because we don't
            know initialization order of static members and thus the vector could
            be uninitalized when accessed from PLUGIN_REGISTER(). */
-        struct CORRADE_PLUGINMANAGER_LOCAL StaticPlugin {
-            std::string plugin;
-            std::string interface;
-            Instancer instancer;
-        };
         CORRADE_PLUGINMANAGER_LOCAL static std::vector<StaticPlugin*>*& staticPlugins();
 
         std::map<std::string, std::vector<AbstractPlugin*> > instances;
