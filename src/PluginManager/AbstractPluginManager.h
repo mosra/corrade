@@ -338,7 +338,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
             std::string interface;
             Instancer instancer;
         };
-        CORRADE_PLUGINMANAGER_LOCAL static std::vector<StaticPluginObject>*& staticPlugins();
+        CORRADE_PLUGINMANAGER_LOCAL static std::vector<StaticPluginObject*>*& staticPlugins();
 
         std::map<std::string, std::vector<AbstractPlugin*> > instances;
 

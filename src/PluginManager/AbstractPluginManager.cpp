@@ -56,13 +56,15 @@ std::map<std::string, AbstractPluginManager::PluginObject*>* AbstractPluginManag
 
     /* If there are unprocessed static plugins for this manager, add them */
     if(staticPlugins()) {
-        for(auto it = staticPlugins()->cbegin(); it != staticPlugins()->cend(); ++it) {
+        for(StaticPluginObject* staticPlugin: *staticPlugins()) {
             /* Load static plugin metadata */
             Resource r("plugins");
-            std::istringstream metadata(r.get(it->plugin + ".conf"));
+            std::istringstream metadata(r.get(staticPlugin->plugin + ".conf"));
 
             /* Insert plugin to list */
-            CORRADE_INTERNAL_ASSERT_OUTPUT(_plugins->insert(std::make_pair(it->plugin, new PluginObject(metadata, it->interface, it->instancer))).second);
+            CORRADE_INTERNAL_ASSERT_OUTPUT(_plugins->insert(std::make_pair(staticPlugin->plugin, new PluginObject(metadata, staticPlugin->interface, staticPlugin->instancer))).second);
+
+            delete staticPlugin;
         }
 
         /** @todo Assert dependencies of static plugins */
@@ -75,8 +77,8 @@ std::map<std::string, AbstractPluginManager::PluginObject*>* AbstractPluginManag
     return _plugins;
 }
 
-std::vector<AbstractPluginManager::StaticPluginObject>*& AbstractPluginManager::staticPlugins() {
-    static std::vector<StaticPluginObject>* _staticPlugins = new std::vector<StaticPluginObject>();
+std::vector<AbstractPluginManager::StaticPluginObject*>*& AbstractPluginManager::staticPlugins() {
+    static std::vector<StaticPluginObject*>* _staticPlugins = new std::vector<StaticPluginObject*>();
 
     return _staticPlugins;
 }
@@ -88,7 +90,7 @@ void AbstractPluginManager::importStaticPlugin(const std::string& plugin, int _v
     CORRADE_ASSERT(staticPlugins(),
         "PluginManager: too late to import static plugin" << plugin, );
 
-    staticPlugins()->push_back({plugin, interface, instancer});
+    staticPlugins()->push_back(new StaticPluginObject{plugin, interface, instancer});
 }
 #endif
 
