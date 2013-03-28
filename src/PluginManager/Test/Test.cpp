@@ -34,7 +34,7 @@
 #include "AbstractFood.h"
 #include "AbstractDeletable.h"
 
-#include "PluginTestConfigure.h"
+#include "TestConfigure.h"
 #include "corradePluginManagerConfigure.h"
 
 using Corrade::Utility::Directory;
@@ -45,9 +45,9 @@ static void initialize() {
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-class PluginTest: public TestSuite::Tester {
+class Test: public TestSuite::Tester {
     public:
-        PluginTest();
+        Test();
 
         void nameList();
         void errors();
@@ -63,23 +63,23 @@ class PluginTest: public TestSuite::Tester {
         void debug();
 };
 
-PluginTest::PluginTest() {
-    addTests({&PluginTest::nameList,
-              &PluginTest::errors,
-              &PluginTest::staticPlugin,
-              &PluginTest::dynamicPlugin,
-              &PluginTest::deletable,
-              &PluginTest::hierarchy,
-              &PluginTest::crossManagerDependencies,
-              &PluginTest::usedByZombies,
-              &PluginTest::reloadPluginDirectory,
+Test::Test() {
+    addTests({&Test::nameList,
+              &Test::errors,
+              &Test::staticPlugin,
+              &Test::dynamicPlugin,
+              &Test::deletable,
+              &Test::hierarchy,
+              &Test::crossManagerDependencies,
+              &Test::usedByZombies,
+              &Test::reloadPluginDirectory,
 
-              &PluginTest::debug});
+              &Test::debug});
 
     initialize();
 }
 
-void PluginTest::nameList() {
+void Test::nameList() {
     auto manager = new PluginManager<AbstractAnimal>(PLUGINS_DIR);
 
     CORRADE_COMPARE_AS(manager->pluginList(), (std::vector<std::string>{
@@ -95,7 +95,7 @@ void PluginTest::nameList() {
     delete manager;
 }
 
-void PluginTest::errors() {
+void Test::errors() {
     PluginManager<AbstractAnimal> manager(PLUGINS_DIR);
 
     /** @todo Wrong plugin version (it would be hard) */
@@ -106,7 +106,7 @@ void PluginTest::errors() {
     CORRADE_COMPARE(manager.load("Snail"), LoadState::WrongMetadataFile);
 }
 
-void PluginTest::staticPlugin() {
+void Test::staticPlugin() {
     PluginManager<AbstractAnimal> manager(PLUGINS_DIR);
 
     CORRADE_COMPARE(manager.loadState("Canary"), LoadState::Static);
@@ -123,7 +123,7 @@ void PluginTest::staticPlugin() {
     CORRADE_COMPARE(manager.unload("Canary"), LoadState::Static);
 }
 
-void PluginTest::dynamicPlugin() {
+void Test::dynamicPlugin() {
     PluginManager<AbstractAnimal> manager(PLUGINS_DIR);
 
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotLoaded);
@@ -148,7 +148,7 @@ void PluginTest::dynamicPlugin() {
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotLoaded);
 }
 
-void PluginTest::deletable() {
+void Test::deletable() {
     PluginManager<AbstractDeletable> deletableManager(Directory::join(PLUGINS_DIR, "deletable"));
 
     /* Load plugin where canBeDeleted() returns true */
@@ -167,7 +167,7 @@ void PluginTest::deletable() {
     CORRADE_COMPARE(var, 0xDEADBEEF);
 }
 
-void PluginTest::hierarchy() {
+void Test::hierarchy() {
     PluginManager<AbstractAnimal> manager(PLUGINS_DIR);
 
     CORRADE_COMPARE(manager.load("Chihuahua"), LoadState::Loaded);
@@ -194,7 +194,7 @@ void PluginTest::hierarchy() {
     CORRADE_VERIFY(manager.metadata("Dog")->usedBy().empty());
 }
 
-void PluginTest::crossManagerDependencies() {
+void Test::crossManagerDependencies() {
     PluginManager<AbstractAnimal> manager(PLUGINS_DIR);
     PluginManager<AbstractFood> foodManager(Directory::join(PLUGINS_DIR, "food"));
 
@@ -221,7 +221,7 @@ void PluginTest::crossManagerDependencies() {
     CORRADE_VERIFY(manager.metadata("Dog")->usedBy().empty());
 }
 
-void PluginTest::usedByZombies() {
+void Test::usedByZombies() {
     PluginManager<AbstractAnimal> manager(PLUGINS_DIR);
     PluginManager<AbstractFood> foodManager(Directory::join(PLUGINS_DIR, "food"));
 
@@ -234,7 +234,7 @@ void PluginTest::usedByZombies() {
     CORRADE_VERIFY(manager.metadata("Dog")->usedBy().empty());
 }
 
-void PluginTest::reloadPluginDirectory() {
+void Test::reloadPluginDirectory() {
     PluginManager<AbstractAnimal> manager(PLUGINS_DIR);
 
     /* Load Dog and rename the plugin */
@@ -281,7 +281,7 @@ void PluginTest::reloadPluginDirectory() {
         "Canary", "LostChihuahua", "LostDog", "Snail"}), TestSuite::Compare::Container);
 }
 
-void PluginTest::debug() {
+void Test::debug() {
     std::ostringstream o;
 
     Debug(&o) << LoadState::UnresolvedDependency;
@@ -290,4 +290,4 @@ void PluginTest::debug() {
 
 }}}
 
-CORRADE_TEST_MAIN(Corrade::PluginManager::Test::PluginTest)
+CORRADE_TEST_MAIN(Corrade::PluginManager::Test::Test)
