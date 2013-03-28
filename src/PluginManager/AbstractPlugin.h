@@ -160,15 +160,15 @@ No plugin-related preprocessor directive is defined.
 See @ref plugin-management for more information about plugin compilation.
 
 @attention This macro should be called outside of any namespace. If you are
-    running into linker errors with `pluginInitializer_`, this could be the
+    running into linker errors with `pluginImporter_`, this could be the
     problem.
 */
 #ifdef CORRADE_STATIC_PLUGIN
 #define PLUGIN_REGISTER(name, className, interface)                         \
     inline void* pluginInstancer_##name(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
         { return new className(manager, plugin); }                          \
-    int pluginInitializer_##name();                                         \
-    int pluginInitializer_##name() {                                        \
+    int pluginImporter_##name();                                            \
+    int pluginImporter_##name() {                                           \
         Corrade::PluginManager::AbstractPluginManager::importStaticPlugin(#name, PLUGIN_VERSION, interface, pluginInstancer_##name); return 1; \
     }
 #else
