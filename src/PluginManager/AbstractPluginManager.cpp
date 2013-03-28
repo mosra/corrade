@@ -51,19 +51,19 @@ namespace Corrade { namespace PluginManager {
 
 const int AbstractPluginManager::Version = PLUGIN_VERSION;
 
-std::map<std::string, AbstractPluginManager::PluginObject*>* AbstractPluginManager::plugins() {
-    static std::map<std::string, PluginObject*>* const _plugins = new std::map<std::string, PluginObject*>();
+std::map<std::string, AbstractPluginManager::Plugin*>* AbstractPluginManager::plugins() {
+    static std::map<std::string, Plugin*>* const _plugins = new std::map<std::string, Plugin*>();
 
     /* If there are unprocessed static plugins for this manager, add them */
     if(staticPlugins()) {
         Resource r("plugins");
 
-        for(StaticPluginObject* staticPlugin: *staticPlugins()) {
+        for(StaticPlugin* staticPlugin: *staticPlugins()) {
             /* Load static plugin metadata */
             std::istringstream metadata(r.get(staticPlugin->plugin + ".conf"));
 
             /* Insert plugin to list */
-            CORRADE_INTERNAL_ASSERT_OUTPUT(_plugins->insert(std::make_pair(staticPlugin->plugin, new PluginObject(metadata, staticPlugin->interface, staticPlugin->instancer))).second);
+            CORRADE_INTERNAL_ASSERT_OUTPUT(_plugins->insert(std::make_pair(staticPlugin->plugin, new Plugin(metadata, staticPlugin->interface, staticPlugin->instancer))).second);
 
             delete staticPlugin;
         }
@@ -78,8 +78,8 @@ std::map<std::string, AbstractPluginManager::PluginObject*>* AbstractPluginManag
     return _plugins;
 }
 
-std::vector<AbstractPluginManager::StaticPluginObject*>*& AbstractPluginManager::staticPlugins() {
-    static std::vector<StaticPluginObject*>* _staticPlugins = new std::vector<StaticPluginObject*>();
+std::vector<AbstractPluginManager::StaticPlugin*>*& AbstractPluginManager::staticPlugins() {
+    static std::vector<StaticPlugin*>* _staticPlugins = new std::vector<StaticPlugin*>();
 
     return _staticPlugins;
 }
@@ -91,7 +91,7 @@ void AbstractPluginManager::importStaticPlugin(const std::string& plugin, int _v
     CORRADE_ASSERT(staticPlugins(),
         "PluginManager: too late to import static plugin" << plugin, );
 
-    staticPlugins()->push_back(new StaticPluginObject{plugin, interface, instancer});
+    staticPlugins()->push_back(new StaticPlugin{plugin, interface, instancer});
 }
 #endif
 
@@ -101,7 +101,7 @@ AbstractPluginManager::AbstractPluginManager(std::string pluginDirectory) {
 
 AbstractPluginManager::~AbstractPluginManager() {
     /* Unload all plugins associated with this plugin manager */
-    std::vector<std::map<std::string, PluginObject*>::iterator> removed;
+    std::vector<std::map<std::string, Plugin*>::iterator> removed;
     for(auto it = plugins()->begin(); it != plugins()->end(); ++it) {
 
         /* Plugin doesn't belong to this manager */
@@ -161,7 +161,7 @@ void AbstractPluginManager::setPluginDirectory(std::string directory) {
         if(plugins()->find(name) != plugins()->end()) continue;
 
         /* Insert plugin to list */
-        plugins()->insert({name, new PluginObject(Directory::join(_pluginDirectory, name + ".conf"), this)});
+        plugins()->insert({name, new Plugin(Directory::join(_pluginDirectory, name + ".conf"), this)});
     }
 }
 
@@ -208,7 +208,7 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
     if(foundPlugin == plugins()->end() || foundPlugin->second->manager != this)
         return LoadState::NotFound;
 
-    PluginObject& pluginObject = *foundPlugin->second;
+    Plugin& pluginObject = *foundPlugin->second;
 
     /* Plugin is not ready to load */
     if(pluginObject.loadState != LoadState::NotLoaded)
@@ -216,7 +216,7 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
 
     /* Vector of found dependencies. If everything goes well, this plugin will
        be added to each dependency usedBy list. */
-    std::vector<std::pair<std::string, PluginObject*>> dependencies;
+    std::vector<std::pair<std::string, Plugin*>> dependencies;
 
     /* Load dependencies and remember their names for later */
     for(auto it = pluginObject.metadata.depends().cbegin(); it != pluginObject.metadata.depends().cend(); ++it) {
@@ -312,7 +312,7 @@ LoadState AbstractPluginManager::unload(const std::string& plugin) {
     if(foundPlugin == plugins()->end() || foundPlugin->second->manager != this)
         return LoadState::NotFound;
 
-    PluginObject& pluginObject = *foundPlugin->second;
+    Plugin& pluginObject = *foundPlugin->second;
 
     /* Plugin is not ready to unload, nothing to do */
     if(pluginObject.loadState != LoadState::Loaded)
@@ -445,11 +445,11 @@ void* AbstractPluginManager::instanceInternal(const std::string& plugin) {
     return foundPlugin->second->instancer(this, plugin);
 }
 
-AbstractPluginManager::PluginObject::PluginObject(const std::string& _metadata, AbstractPluginManager* _manager): configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(_manager), instancer(nullptr), module(nullptr) {
+AbstractPluginManager::Plugin::Plugin(const std::string& _metadata, AbstractPluginManager* _manager): configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(_manager), instancer(nullptr), module(nullptr) {
     loadState = configuration.isValid() ? LoadState::NotLoaded : LoadState::WrongMetadataFile;
 }
 
-AbstractPluginManager::PluginObject::PluginObject(std::istream& _metadata, std::string _interface, Instancer _instancer): loadState(LoadState::Static), interface(_interface), configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(nullptr), instancer(_instancer), module(nullptr) {}
+AbstractPluginManager::Plugin::Plugin(std::istream& _metadata, std::string _interface, Instancer _instancer): loadState(LoadState::Static), interface(_interface), configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(nullptr), instancer(_instancer), module(nullptr) {}
 
 } namespace Utility {
 

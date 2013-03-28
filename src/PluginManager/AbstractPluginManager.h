@@ -276,7 +276,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
     #else
     protected:
     #endif
-        struct PluginObject {
+        struct Plugin {
             LoadState loadState;
             std::string interface; /**< @todo Not needed for dynamic plugins */
             const Utility::Configuration configuration;
@@ -288,7 +288,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
 
             Instancer instancer;
 
-            /** @todo Not needed for static plugins */
             #ifndef _WIN32
             void* module;
             #else
@@ -296,10 +295,10 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
             #endif
 
             /* Constructor for dynamic plugins */
-            explicit PluginObject(const std::string& _metadata, AbstractPluginManager* _manager);
+            explicit Plugin(const std::string& _metadata, AbstractPluginManager* _manager);
 
             /* Constructor for static plugins */
-            explicit PluginObject(std::istream& _metadata, std::string _interface, Instancer _instancer);
+            explicit Plugin(std::istream& _metadata, std::string _interface, Instancer _instancer);
         };
 
         std::string _pluginDirectory;
@@ -310,7 +309,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
         /* Global storage of static, unloaded and loaded plugins. The map is
            accessible via function, not directly, because we need to fill it
            with data from staticPlugins() before first use. */
-        static std::map<std::string, PluginObject*>* plugins();
+        static std::map<std::string, Plugin*>* plugins();
 
         /* Because the plugin manager must be noticed about adding the plugin to
            "used by" list, it must be done through this function. */
@@ -333,12 +332,12 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
            The vector is accessible via function, not directly, because we don't
            know initialization order of static members and thus the vector could
            be uninitalized when accessed from PLUGIN_REGISTER(). */
-        struct CORRADE_PLUGINMANAGER_LOCAL StaticPluginObject {
+        struct CORRADE_PLUGINMANAGER_LOCAL StaticPlugin {
             std::string plugin;
             std::string interface;
             Instancer instancer;
         };
-        CORRADE_PLUGINMANAGER_LOCAL static std::vector<StaticPluginObject*>*& staticPlugins();
+        CORRADE_PLUGINMANAGER_LOCAL static std::vector<StaticPlugin*>*& staticPlugins();
 
         std::map<std::string, std::vector<AbstractPlugin*> > instances;
 
