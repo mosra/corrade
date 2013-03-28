@@ -29,6 +29,10 @@
 
 namespace Corrade { namespace PluginManager {
 
+void AbstractPlugin::initialize() {}
+
+void AbstractPlugin::finalize() {}
+
 AbstractPlugin::AbstractPlugin(): _manager(nullptr), _configuration(nullptr), _metadata(nullptr) {}
 
 AbstractPlugin::AbstractPlugin(AbstractPluginManager* manager, std::string plugin): _manager(manager), _plugin(std::move(plugin)) {

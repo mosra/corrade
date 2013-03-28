@@ -30,6 +30,9 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class Canary: public AbstractAnimal {
     public:
+        static void initialize() { Utility::Debug() << "Canary initialized"; }
+        static void finalize() { Utility::Debug() << "Canary finalized"; }
+
         explicit Canary(AbstractPluginManager* manager, std::string plugin): AbstractAnimal(manager, std::move(plugin)) {}
 
         std::string name() { return "Achoo"; }

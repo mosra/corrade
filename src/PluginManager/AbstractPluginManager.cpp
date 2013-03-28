@@ -83,13 +83,13 @@ std::vector<AbstractPluginManager::StaticPlugin*>*& AbstractPluginManager::stati
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-void AbstractPluginManager::importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, Instancer instancer) {
+void AbstractPluginManager::importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, Instancer instancer, void(*initializer)(), void(*finalizer)()) {
     CORRADE_ASSERT(_version == Version,
         "PluginManager: wrong version of static plugin" << plugin + ", got" << _version << "but expected" << Version, );
     CORRADE_ASSERT(staticPlugins(),
         "PluginManager: too late to import static plugin" << plugin, );
 
-    staticPlugins()->push_back(new StaticPlugin{plugin, interface, instancer});
+    staticPlugins()->push_back(new StaticPlugin{plugin, interface, instancer, initializer, finalizer});
 }
 #endif
 
@@ -111,11 +111,12 @@ AbstractPluginManager::~AbstractPluginManager() {
             "PluginManager: cannot unload plugin" << it->first << "on manager destruction:" << loadState, );
 
         /* Schedule it for deletion, if it is not static, otherwise just
-           disconnect this manager from the plugin, so another manager can take
-           over it in the future. */
-        if(loadState == LoadState::Static)
+           disconnect this manager from the plugin and finalize it, so another
+           manager can take over it in the future. */
+        if(loadState == LoadState::Static) {
             it->second->manager = nullptr;
-        else
+            it->second->staticPlugin->finalizer();
+        } else
             removed.push_back(it);
     }
 
@@ -285,6 +286,18 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
         return LoadState::LoadFailed;
     }
 
+    /* Initialize plugin */
+    #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
+    __extension__
+    #endif
+    void(*initializer)() = reinterpret_cast<void(*)()>(dlsym(module, "pluginInitializer"));
+    if(initializer == nullptr) {
+        Error() << "PluginManager: cannot get initializer of plugin" << '\'' + plugin + "':" << dlerror();
+        dlclose(module);
+        return LoadState::LoadFailed;
+    }
+    initializer();
+
     /* Everything is okay, add this plugin to usedBy list of each dependency */
     for(auto it = dependencies.cbegin(); it != dependencies.cend(); ++it) {
         /* If the plugin is not static with no associated manager, use its
@@ -353,6 +366,17 @@ LoadState AbstractPluginManager::unload(const std::string& plugin) {
             }
         }
     }
+
+    /* Finalize plugin */
+    #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
+    __extension__
+    #endif
+    void(*finalizer)() = reinterpret_cast<void(*)()>(dlsym(pluginObject.module, "pluginFinalizer"));
+    if(finalizer == nullptr) {
+        Error() << "PluginManager: cannot get finalizer of plugin" << '\'' + plugin + "':" << dlerror();
+        /* Not fatal, continue with unloading */
+    }
+    finalizer();
 
     /* Close the module */
     #ifndef _WIN32

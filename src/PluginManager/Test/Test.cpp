@@ -51,8 +51,12 @@ class Test: public TestSuite::Tester {
 
         void nameList();
         void errors();
+
         void staticPlugin();
         void dynamicPlugin();
+        void staticPluginInitFini();
+        void dynamicPluginInitFini();
+
         void deletable();
         void hierarchy();
         void crossManagerDependencies();
@@ -66,8 +70,12 @@ class Test: public TestSuite::Tester {
 Test::Test() {
     addTests({&Test::nameList,
               &Test::errors,
+
               &Test::staticPlugin,
               &Test::dynamicPlugin,
+              &Test::staticPluginInitFini,
+              &Test::dynamicPluginInitFini,
+
               &Test::deletable,
               &Test::hierarchy,
               &Test::crossManagerDependencies,
@@ -146,6 +154,38 @@ void Test::dynamicPlugin() {
     delete animal;
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotLoaded);
+}
+
+void Test::staticPluginInitFini() {
+    std::ostringstream out;
+    Debug::setOutput(&out);
+
+    /* Initialization is right after manager assigns them to itself */
+    out.str({});
+    auto manager = new PluginManager<AbstractAnimal>({});
+    CORRADE_COMPARE(out.str(), "Canary initialized\n");
+
+    /* Finalization is right before manager frees them */
+    out.str({});
+    delete manager;
+    CORRADE_COMPARE(out.str(), "Canary finalized\n");
+}
+
+void Test::dynamicPluginInitFini() {
+    std::ostringstream out;
+    Debug::setOutput(&out);
+
+    PluginManager<AbstractAnimal> manager(PLUGINS_DIR);
+
+    /* Initialization is right after manager loads them */
+    out.str({});
+    CORRADE_COMPARE(manager.load("Dog"), LoadState::Loaded);
+    CORRADE_COMPARE(out.str(), "Dog initialized\n");
+
+    /* Finalization is right before manager unloads them */
+    out.str({});
+    CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
+    CORRADE_COMPARE(out.str(), "Dog finalized\n");
 }
 
 void Test::deletable() {

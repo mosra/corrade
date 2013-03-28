@@ -45,6 +45,34 @@ plugin can be unloaded only if there are no active instances.
 class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
     public:
         /**
+         * @brief Initialize plugin
+         *
+         * You can override this function to perform initialization before any
+         * plugin instance is created. Default implementation does nothing.
+         *
+         * If the plugin is static, this function is called on construction of
+         * corresponding plugin manager, if the plugin is dynamic, this
+         * function is called on plugin load. If the plugin is used directly
+         * without plugin manager, you have to call this function manually (if
+         * needed).
+         */
+        static void initialize();
+
+        /**
+         * @brief Finalize plugin
+         *
+         * You can override this function to perform finalization after all
+         * plugin instances are destroyed. Default implementation does nothing.
+         *
+         * If the plugin is static, this function is called on destruction of
+         * corresponding plugin manager, if the plugin is dynamic, this
+         * function is called on plugin unload. If the plugin is used directly
+         * without plugin manager, you have to call this function manually (if
+         * needed).
+         */
+        static void finalize();
+
+        /**
          * @brief Default constructor
          *
          * Usable when using the plugin directly, without plugin manager. Define
@@ -169,7 +197,7 @@ See @ref plugin-management for more information about plugin compilation.
         { return new className(manager, plugin); }                          \
     int pluginImporter_##name();                                            \
     int pluginImporter_##name() {                                           \
-        Corrade::PluginManager::AbstractPluginManager::importStaticPlugin(#name, PLUGIN_VERSION, interface, pluginInstancer_##name); return 1; \
+        Corrade::PluginManager::AbstractPluginManager::importStaticPlugin(#name, PLUGIN_VERSION, interface, pluginInstancer_##name, className::initialize, className::finalize); return 1; \
     }
 #else
 #ifdef CORRADE_DYNAMIC_PLUGIN
@@ -179,6 +207,12 @@ See @ref plugin-management for more information about plugin compilation.
     extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin); \
     extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractPluginManager* manager, const std::string& plugin) \
         { return new className(manager, plugin); }                          \
+    extern "C" CORRADE_PLUGIN_EXPORT void pluginInitializer();              \
+    extern "C" CORRADE_PLUGIN_EXPORT void pluginInitializer()               \
+        { className::initialize(); }                                        \
+    extern "C" CORRADE_PLUGIN_EXPORT void pluginFinalizer();                \
+    extern "C" CORRADE_PLUGIN_EXPORT void pluginFinalizer()                 \
+        { className::finalize(); }                                          \
     extern "C" CORRADE_PLUGIN_EXPORT const char* pluginInterface();         \
     extern "C" CORRADE_PLUGIN_EXPORT const char* pluginInterface() { return interface; }
 #else
