@@ -105,6 +105,11 @@ AbstractPluginManager::~AbstractPluginManager() {
         /* Plugin doesn't belong to this manager */
         if(it->second->manager != this) continue;
 
+        /**
+         * @bug When two plugins depend on each other and the base is unloaded
+         *      first, it fails (but it shouldn't)
+         */
+
         /* Unload the plugin */
         LoadState loadState = unload(it->first);
         CORRADE_ASSERT(loadState & (LoadState::Static|LoadState::NotLoaded|LoadState::WrongMetadataFile),
