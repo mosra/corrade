@@ -55,6 +55,10 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * function is called on plugin load. If the plugin is used directly
          * without plugin manager, you have to call this function manually (if
          * needed).
+         *
+         * Note that this function might be called subsequently more than once
+         * (e.g. when loading derived plugin after the base plugin has been
+         * already initialized).
          */
         static void initialize();
 
@@ -69,6 +73,10 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * function is called on plugin unload. If the plugin is used directly
          * without plugin manager, you have to call this function manually (if
          * needed).
+         *
+         * Note that this function might be called subsequently more than once
+         * (e.g. when loading derived plugin after the base plugin has been
+         * already initialized).
          */
         static void finalize();
 
