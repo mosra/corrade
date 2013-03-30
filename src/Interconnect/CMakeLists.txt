@@ -38,6 +38,9 @@ set(CorradeInterconnect_HEADERS
 add_library(CorradeInterconnect ${SHARED_OR_STATIC} ${CorradeInterconnect_SRCS})
 if(NOT BUILD_STATIC)
     set_target_properties(CorradeInterconnect PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
+elseif(BUILD_STATIC_PIC)
+    # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
+    set_target_properties(CorradeInterconnect PROPERTIES COMPILE_FLAGS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS})
 endif()
 target_link_libraries(CorradeInterconnect CorradeUtility)
 
