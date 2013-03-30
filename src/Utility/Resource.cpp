@@ -33,10 +33,13 @@
 
 namespace Corrade { namespace Utility {
 
-std::map<std::string, std::map<std::string, Resource::ResourceData>> Resource::resources;
+std::map<std::string, std::map<std::string, Resource::ResourceData>>& Resource::resources() {
+    static std::map<std::string, std::map<std::string, Resource::ResourceData>> resources;
+    return resources;
+}
 
 void Resource::registerData(const char* group, unsigned int count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data) {
-    if(resources.find(group) == resources.end()) resources.insert(std::make_pair(group, std::map<std::string, ResourceData>()));
+    if(resources().find(group) == resources().end()) resources().insert(std::make_pair(group, std::map<std::string, ResourceData>()));
 
     /* Cast to type which can be eaten by std::string constructor */
     const char* _positions = reinterpret_cast<const char*>(positions);
@@ -56,7 +59,7 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
         res.size = dataPosition-oldDataPosition;
 
         std::string filename = std::string(_filenames+oldFilenamePosition, filenamePosition-oldFilenamePosition);
-        resources[group].insert(std::make_pair(filename, res));
+        resources()[group].insert(std::make_pair(filename, res));
 
         oldFilenamePosition = filenamePosition;
         oldDataPosition = dataPosition;
@@ -64,21 +67,21 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
 }
 
 void Resource::unregisterData(const char* group, const unsigned char* data) {
-    if(resources.find(group) == resources.end()) return;
+    if(resources().find(group) == resources().end()) return;
 
     /* Positions which to remove */
     std::vector<std::string> positions;
 
-    for(auto it = resources[group].begin(); it != resources[group].end(); ++it) {
+    for(auto it = resources()[group].begin(); it != resources()[group].end(); ++it) {
         if(it->second.data == data)
             positions.push_back(it->first);
     }
 
     /** @todo wtf? this doesn't crash?? */
     for(auto it = positions.cbegin(); it != positions.cend(); ++it)
-        resources[group].erase(*it);
+        resources()[group].erase(*it);
 
-    if(resources[group].empty()) resources.erase(group);
+    if(resources()[group].empty()) resources().erase(group);
 }
 
 std::string Resource::compile(const std::string& name, const std::map<std::string, std::string>& files) const {
@@ -138,15 +141,15 @@ std::string Resource::compile(const std::string& name, const std::string& filena
 
 std::tuple<const unsigned char*, unsigned int> Resource::getRaw(const std::string& filename) const {
     /* If the group/filename doesn't exist, return empty string */
-    if(resources.find(group) == resources.end()) {
+    if(resources().find(group) == resources().end()) {
         Error() << "Resource: group" << '\'' + group + '\'' << "was not found";
         return {};
-    } else if(resources[group].find(filename) == resources[group].end()) {
+    } else if(resources()[group].find(filename) == resources()[group].end()) {
         Error() << "Resource: file" << '\'' + filename + '\'' << "was not found in group" << '\'' + group + '\'';
         return {};
     }
 
-    const ResourceData& r = resources[group][filename];
+    const ResourceData& r = resources()[group][filename];
     return std::make_tuple(r.data+r.position, r.size);
 }
 

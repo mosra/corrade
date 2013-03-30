@@ -127,7 +127,9 @@ class CORRADE_UTILITY_EXPORT Resource {
             const unsigned char* data;
         };
 
-        CORRADE_UTILITY_LOCAL static std::map<std::string, std::map<std::string, ResourceData>> resources;
+        /* Accessed through function to overcome "static initialization order
+           fiasco" which I think currently fails only in static build */
+        CORRADE_UTILITY_LOCAL static std::map<std::string, std::map<std::string, ResourceData>>& resources();
 
         std::string group;
 
