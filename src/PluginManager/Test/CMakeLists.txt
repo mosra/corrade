@@ -36,10 +36,10 @@ corrade_add_plugin(Chihuahua ${CMAKE_CURRENT_BINARY_DIR} Chihuahua.conf Chihuahu
 corrade_add_static_plugin(CorradePluginManagerTestPlugins Canary Canary.conf Canary.cpp)
 corrade_add_test(PluginManagerTest Test.cpp LIBRARIES CorradePluginManager ${CorradePluginManagerTestPlugins})
 
+target_link_libraries(Canary CorradePluginManager)
 if(WIN32)
     target_link_libraries(Snail CorradePluginManager)
     target_link_libraries(Dog CorradePluginManager)
-    target_link_libraries(Canary CorradePluginManager)
     target_link_libraries(Chihuahua CorradePluginManager Dog)
 endif()
 

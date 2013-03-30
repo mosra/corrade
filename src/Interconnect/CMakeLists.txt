@@ -35,8 +35,10 @@ set(CorradeInterconnect_HEADERS
 
     corradeInterconnectVisibility.h)
 
-add_library(CorradeInterconnect SHARED ${CorradeInterconnect_SRCS})
-set_target_properties(CorradeInterconnect PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
+add_library(CorradeInterconnect ${SHARED_OR_STATIC} ${CorradeInterconnect_SRCS})
+if(NOT BUILD_STATIC)
+    set_target_properties(CorradeInterconnect PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
+endif()
 target_link_libraries(CorradeInterconnect CorradeUtility)
 
 install(TARGETS CorradeInterconnect DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})

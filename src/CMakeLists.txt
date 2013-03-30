@@ -30,6 +30,12 @@ if(GCC46_COMPATIBILITY)
     set(CORRADE_GCC46_COMPATIBILITY 1)
 endif()
 
+if(NOT BUILD_STATIC)
+    set(SHARED_OR_STATIC SHARED)
+else()
+    set(SHARED_OR_STATIC STATIC)
+endif()
+
 include(TestBigEndian)
 test_big_endian(CMAKE_BIG_ENDIAN)
 

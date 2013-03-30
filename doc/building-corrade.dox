@@ -67,7 +67,8 @@ The library can be built and installed using these four commands:
     cmake -DCMAKE_INSTALL_PREFIX=/usr .. && make
     make install
 
-If you want to build with another compiler (e.g. Clang), pass
+The libraries are build as shared by default, pass `-DBUILD_STATIC=ON` to build
+them as static. If you want to build with another compiler (e.g. Clang), pass
 `-DCMAKE_CXX_COMPILER=clang++` to CMake.
 
 @subsection building-tests Building and running unit tests

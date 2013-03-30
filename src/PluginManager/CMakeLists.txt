@@ -41,12 +41,14 @@ set(CorradePluginManager_HEADERS
 
     corradePluginManagerVisibility.h)
 
-add_library(CorradePluginManager SHARED ${CorradePluginManager_SRCS})
+add_library(CorradePluginManager ${SHARED_OR_STATIC} ${CorradePluginManager_SRCS})
 target_link_libraries(CorradePluginManager CorradeUtility)
 if(UNIX OR ${CMAKE_SYSTEM_NAME} STREQUAL NaCl)
     target_link_libraries(CorradePluginManager dl)
 endif()
-set_target_properties(CorradePluginManager PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
+if(NOT BUILD_STATIC)
+    set_target_properties(CorradePluginManager PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
+endif()
 
 install(TARGETS CorradePluginManager DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 install(FILES ${CorradePluginManager_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/PluginManager)
