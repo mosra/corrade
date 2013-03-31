@@ -59,6 +59,12 @@ also available as preprocessor variables if including Corrade.h:
 
 - `%CORRADE_GCC46_COMPATIBILITY` - Defined if compiled with compatibility mode
   for GCC 4.6
+- `CORRADE_TARGET_NACL` -- Defined if the library is built for Google
+  Chrome Native Client
+- `CORRADE_TARGET_NACL_NEWLIB` -- Defined if the library is built for Google
+  Chrome Native Client with `newlib` toolchain
+- `CORRADE_TARGET_NACL_GLIBC` -- Defined if the library is built for Google
+  Chrome Native Client with `glibc` toolchain
 
 %Corrade provides these macros and functions:
 
