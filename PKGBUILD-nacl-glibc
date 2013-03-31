@@ -11,8 +11,8 @@ options=(!buildflags !strip)
 
 build() {
     # Build 32bit
-    mkdir -p "$startdir/build-nacl-x86-32"
-    cd "$startdir/build-nacl-x86-32"
+    mkdir -p "$startdir/build-nacl-glibc-x86-32"
+    cd "$startdir/build-nacl-glibc-x86-32"
 
     cmake .. \
         -DCMAKE_MODULE_PATH="$startdir/toolchains/modules" \
@@ -24,8 +24,8 @@ build() {
     make
 
     # Build 64bit
-    mkdir -p "$startdir/build-nacl-x86-64"
-    cd "$startdir/build-nacl-x86-64"
+    mkdir -p "$startdir/build-nacl-glibc-x86-64"
+    cd "$startdir/build-nacl-glibc-x86-64"
 
     cmake .. \
         -DCMAKE_MODULE_PATH="$startdir/toolchains/modules" \
