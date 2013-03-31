@@ -58,7 +58,9 @@ std::map<std::string, AbstractPluginManager::Plugin*>* AbstractPluginManager::pl
     if(staticPlugins()) {
         Resource r("plugins");
 
-        for(StaticPlugin* staticPlugin: *staticPlugins()) {
+        for(auto it = staticPlugins()->begin(); it != staticPlugins()->end(); ++it) {
+            StaticPlugin* const staticPlugin = *it;
+
             /* Load static plugin metadata */
             std::istringstream metadata(r.get(staticPlugin->plugin + ".conf"));
 
