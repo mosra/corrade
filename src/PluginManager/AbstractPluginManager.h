@@ -62,10 +62,13 @@ enum class LoadState: unsigned short {
      */
     NotFound = 1 << 0,
 
+    #ifndef CORRADE_TARGET_NACL_NEWLIB
     /**
      * The plugin is build with different version of plugin manager and cannot
      * be loaded. Returned by AbstractPluginManager::load() and
      * AbstractPluginManager::reload().
+     * @partialsupport Only static plugins are supported in
+     *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
     WrongPluginVersion = 1 << 1,
 
@@ -73,6 +76,8 @@ enum class LoadState: unsigned short {
      * The plugin uses different interface than the interface used by plugin
      * manager and cannot be loaded. Returned by AbstractPluginManager::load()
      * and AbstractPluginManager::reload().
+     * @partialsupport Only static plugins are supported in
+     *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
     WrongInterfaceVersion = 1 << 2,
 
@@ -80,6 +85,8 @@ enum class LoadState: unsigned short {
      * The plugin doesn't have any metadata file or the metadata file contains
      * errors. Returned by AbstractPluginManager::load() and
      * AbstractPluginManager::reload().
+     * @partialsupport Only static plugins are supported in
+     *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
     WrongMetadataFile = 1 << 3,
 
@@ -87,6 +94,8 @@ enum class LoadState: unsigned short {
      * The plugin depends on another plugin, which cannot be loaded (e.g. not
      * found or wrong version). Returned by AbstractPluginManager::load() and
      * AbstractPluginManager::reload().
+     * @partialsupport Only static plugins are supported in
+     *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
     UnresolvedDependency = 1 << 4,
 
@@ -94,6 +103,8 @@ enum class LoadState: unsigned short {
      * The plugin failed to load for other reason (e.g. linking failure).
      * Returned by AbstractPluginManager::load() and
      * AbstractPluginManager::reload().
+     * @partialsupport Only static plugins are supported in
+     *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
     LoadFailed = 1 << 5,
 
@@ -101,6 +112,8 @@ enum class LoadState: unsigned short {
      * The plugin is successfully loaded. Returned by
      * AbstractPluginManager::loadState(), AbstractPluginManager::load() and
      * AbstractPluginManager::reload().
+     * @partialsupport Only static plugins are supported in
+     *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
     Loaded = 1 << 6,
 
@@ -109,12 +122,16 @@ enum class LoadState: unsigned short {
      * is not required by any other plugin. Returned by
      * AbstractPluginManager::loadState(), AbstractPluginManager::load() and
      * AbstractPluginManager::reload().
+     * @partialsupport Only static plugins are supported in
+     *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
     NotLoaded = 1 << 7,
 
     /**
      * The plugin failed to unload. Returned by AbstractPluginManager::unload()
      * and AbstractPluginManager::reload().
+     * @partialsupport Only static plugins are supported in
+     *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
     UnloadFailed = 1 << 8,
 
@@ -122,22 +139,30 @@ enum class LoadState: unsigned short {
      * The plugin cannot be unloaded because another plugin is depending on it.
      * Unload that plugin first and try again. Returned by
      * AbstractPluginManager::unload() and AbstractPluginManager::reload().
+     * @partialsupport Only static plugins are supported in
+     *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
     Required = 1 << 9,
+    #endif
 
     /**
      * The plugin is static. Returned by AbstractPluginManager::loadState(),
      * AbstractPluginManager::load(), AbstractPluginManager::reload() and
      * AbstractPluginManager::unload().
      */
-    Static = 1 << 10,
+    Static = 1 << 10
 
+    #ifndef CORRADE_TARGET_NACL_NEWLIB
+    ,
     /**
      * The plugin has active instance and cannot be unloaded. Destroy all
      * instances and try again. Returned by AbstractPluginManager::unload()
      * and AbstractPluginManager::reload().
+     * @partialsupport Only static plugins are supported in
+     *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
     Used = 1 << 11
+    #endif
 };
 
 /** @relates AbstractPluginManager
@@ -186,6 +211,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          *      should have all dependencies present. Also, dynamic plugins
          *      with the same name as another static plugin are skipped.
          * @see pluginList()
+         * @partialsupport Parameter @p pluginDirectory has no effect on
+         *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib" as only static
+         *      plugins are supported.
          */
         explicit AbstractPluginManager(std::string pluginDirectory);
 
@@ -202,7 +230,13 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
         AbstractPluginManager& operator=(const AbstractPluginManager&) = delete;
         AbstractPluginManager& operator=(AbstractPluginManager&&) = delete;
 
-        /** @brief Plugin directory */
+        #ifndef CORRADE_TARGET_NACL_NEWLIB
+        /**
+         * @brief Plugin directory
+         *
+         * @partialsupport Only static plugins are supported in
+         *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
+         */
         std::string pluginDirectory() const;
 
         /**
@@ -210,6 +244,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          *
          * Keeps loaded plugins untouched, removes unloaded plugins which are
          * not existing anymore and adds newly found plugins.
+         * @partialsupport Only static plugins are supported in
+         *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
          */
         void setPluginDirectory(std::string directory);
 
@@ -217,8 +253,11 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          * @brief Reload plugin directory
          *
          * Convenience equivalent to `setPluginDirectory(pluginDirectory())`.
+         * @partialsupport Only static plugins are supported in
+         *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
          */
         void reloadPluginDirectory();
+        #endif
 
         /** @brief List of all available plugin names */
         std::vector<std::string> pluginList() const;
@@ -256,6 +295,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          * before loading given plugin.
          *
          * @see unload(), reload(), loadState()
+         * @partialsupport Only static plugins are supported in
+         *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
          */
         virtual LoadState load(const std::string& plugin);
 
@@ -269,6 +310,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          * or @ref LoadState "LoadState::Used".
          *
          * @see load(), reload(), loadState()
+         * @partialsupport Only static plugins are supported in
+         *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
          */
         virtual LoadState unload(const std::string& plugin);
 
@@ -291,7 +334,11 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
         };
 
         struct Plugin {
+            #ifndef CORRADE_TARGET_NACL_NEWLIB
             LoadState loadState;
+            #else
+            const LoadState loadState;
+            #endif
             const Utility::Configuration configuration;
             PluginMetadata metadata;
 
@@ -301,10 +348,13 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
 
             Instancer instancer;
 
+            #ifndef CORRADE_TARGET_NACL_NEWLIB
             union {
+            #endif
                 /* For static plugins */
                 StaticPlugin* staticPlugin;
 
+            #ifndef CORRADE_TARGET_NACL_NEWLIB
                 /* For dynamic plugins */
                 #ifndef _WIN32
                 void* module;
@@ -312,9 +362,12 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
                 HMODULE module;
                 #endif
             };
+            #endif
 
+            #ifndef CORRADE_TARGET_NACL_NEWLIB
             /* Constructor for dynamic plugins */
             explicit Plugin(const std::string& _metadata, AbstractPluginManager* _manager);
+            #endif
 
             /* Constructor for static plugins */
             explicit Plugin(std::istream& _metadata, StaticPlugin* staticPlugin);
@@ -322,7 +375,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
             ~Plugin();
         };
 
+        #ifndef CORRADE_TARGET_NACL_NEWLIB
         std::string _pluginDirectory;
+        #endif
 
         /* Defined in PluginManager */
         virtual std::string pluginInterface() const = 0;

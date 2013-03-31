@@ -19,12 +19,18 @@
 # hidden visibility by default.
 #
 # Features of found Corrade library are exposed in these variables:
-#  CORRADE_GCC46_COMPATIBILITY - Defined if compiled with compatibility
+#  CORRADE_GCC46_COMPATIBILITY  - Defined if compiled with compatibility
 #   mode for GCC 4.6
-#  CORRADE_GCC45_COMPATIBILITY - Defined if compiled with compatibility
+#  CORRADE_GCC45_COMPATIBILITY  - Defined if compiled with compatibility
 #   mode for GCC 4.5
-#  CORRADE_GCC44_COMPATIBILITY - Defined if compiled with compatibility
+#  CORRADE_GCC44_COMPATIBILITY  - Defined if compiled with compatibility
 #   mode for GCC 4.4
+#  CORRADE_TARGET_NACL          - Defined if compiled for Google Chrome
+#   Native Client
+#  CORRADE_TARGET_NACL_NEWLIB   - Defined if compiled for Google Chrome
+#   Native Client with `newlib` toolchain
+#  CORRADE_TARGET_NACL_GLIBC    - Defined if compiled for Google Chrome
+#   Native Client with `glibc` toolchain
 #
 # Corrade provides these macros and functions:
 #
@@ -160,6 +166,18 @@ endif()
 string(FIND "${_corradeConfigure}" "#define CORRADE_GCC46_COMPATIBILITY" _GCC46_COMPATIBILITY)
 if(NOT _GCC46_COMPATIBILITY EQUAL -1)
     set(CORRADE_GCC46_COMPATIBILITY 1)
+endif()
+string(FIND "${_corradeConfigure}" "#define CORRADE_TARGET_NACL" _TARGET_NACL)
+if(NOT _TARGET_NACL EQUAL -1)
+    set(CORRADE_TARGET_NACL 1)
+endif()
+string(FIND "${_corradeConfigure}" "#define CORRADE_TARGET_NACL_NEWLIB" _TARGET_NACL_NEWLIB)
+if(NOT _TARGET_NACL_NEWLIB EQUAL -1)
+    set(CORRADE_TARGET_NACL_NEWLIB 1)
+endif()
+string(FIND "${_corradeConfigure}" "#define CORRADE_TARGET_NACL_GLIBC" _TARGET_NACL_GLIBC)
+if(NOT _TARGET_NACL_GLIBC EQUAL -1)
+    set(CORRADE_TARGET_NACL_GLIBC 1)
 endif()
 
 set(CORRADE_UTILITY_LIBRARIES ${CORRADE_UTILITY_LIBRARY})

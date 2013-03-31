@@ -52,10 +52,33 @@ class CORRADE_UTILITY_EXPORT Directory {
          * @see Flags, list()
          */
         enum class Flag: unsigned char {
-            SkipDotAndDotDot = 1 << 0,  /**< Skip `.` and `..` directories */
-            SkipFiles = 1 << 1,         /**< Skip regular files */
-            SkipDirectories = 1 << 2,   /**< Skip directories (including `.` and `..`) */
-            SkipSpecial = 1 << 3,       /**< Skip everything what is not a file or directory */
+            /**
+             * Skip `.` and `..` directories
+             * @partialsupport Has no effect on Windows and in
+             *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
+             */
+            SkipDotAndDotDot = 1 << 0,
+
+            /**
+             * Skip regular files
+             * @partialsupport Has no effect on Windows and in
+             *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
+             */
+            SkipFiles = 1 << 1,
+
+            /**
+             * Skip directories (including `.` and `..`)
+             * @partialsupport Has no effect on Windows and in
+             *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
+             */
+            SkipDirectories = 1 << 2,
+
+            /**
+             * Skip everything what is not a file or directory
+             * @partialsupport Has no effect on Windows and in
+             *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
+             */
+            SkipSpecial = 1 << 3,
 
             /**
              * Sort items in ascending order. If specified both @ref Flag "Flag::SortAscending"

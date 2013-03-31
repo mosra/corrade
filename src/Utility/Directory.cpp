@@ -165,7 +165,7 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     std::vector<std::string> list;
     dirent* entry;
     while((entry = readdir(directory)) != nullptr) {
-        #ifndef _WIN32
+        #if !defined(_WIN32) && !defined(CORRADE_TARGET_NACL_NEWLIB)
         if((flags >= Flag::SkipDotAndDotDot) && (std::string(entry->d_name) == "." || std::string(entry->d_name) == ".."))
             continue;
         if((flags >= Flag::SkipDirectories) && entry->d_type == DT_DIR)

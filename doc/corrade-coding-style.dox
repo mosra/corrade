@@ -546,6 +546,11 @@ namespace Corrade { namespace Utility {
 They will appear linked with documentation of class specified as the
 parameter and also crossreferenced from page `configurationvalues`.
 
+@subsubsection documentation-commands-partialsupport Partially supported features
+
+Features that are not supported on all platform should be marked with
+@c \@partialsupport, listing unsupported platforms and optionally reason why.
+
 @section git Git commit messages, branch and tag format
 
 Each commit message should have short one-line explanation at the beginning,

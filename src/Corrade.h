@@ -64,6 +64,33 @@ enabled.
 */
 #define CORRADE_GCC44_COMPATIBILITY_
 
+/**
+@brief Google Chrome Native Client target
+
+`CORRADE_TARGET_NACL` is defined if the library is built for Google Chrome
+Native Client.
+@see @ref building-corrade
+*/
+#define CORRADE_TARGET_NACL_
+
+/**
+@brief Google Chrome Native Client target with `newlib` toolchain
+
+`CORRADE_TARGET_NACL_NEWLIB` is defined if the library is built for Google
+Chrome Native Client with `newlib` toolchain.
+@see @ref building-corrade
+*/
+#define CORRADE_TARGET_NACL_NEWLIB_
+
+/**
+@brief Google Chrome Native Client target with `glibc` toolchain
+
+`CORRADE_TARGET_NACL_GLIBC` is defined if the library is built for Google
+Chrome Native Client with `glibc` toolchain.
+@see @ref building-corrade
+*/
+#define CORRADE_TARGET_NACL_GLIBC_
+
 #endif
 
 }

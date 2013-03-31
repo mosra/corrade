@@ -37,6 +37,15 @@ if(BUILD_TESTS)
     enable_testing()
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL NaCl)
+    set(CORRADE_TARGET_NACL 1)
+    if(NACL_TOOLCHAIN STREQUAL newlib)
+        set(CORRADE_TARGET_NACL_NEWLIB 1)
+    else()
+        set(CORRADE_TARGET_NACL_GLIBC 1)
+    endif()
+endif()
+
 # Initialize macros etc.
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
 set(CORRADE_UTILITY_LIBRARY CorradeUtility)

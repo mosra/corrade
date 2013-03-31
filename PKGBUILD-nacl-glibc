@@ -1,8 +1,8 @@
 # Author: mosra <mosra@centrum.cz>
 pkgname=nacl-corrade
-pkgver=dev
+pkgver=dev.glibc
 pkgrel=1
-pkgdesc="Multiplatform plugin management and utility library (NaCl version)"
+pkgdesc="Multiplatform plugin management and utility library (NaCl glibc version)"
 arch=('any')
 url="http://mosra.cz/blog/corrade.php"
 license=('MIT')
