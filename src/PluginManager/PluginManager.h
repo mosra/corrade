@@ -53,12 +53,13 @@ template<class T, class BasePluginManager = AbstractPluginManager> class PluginM
         explicit PluginManager(const std::string& pluginDirectory): BasePluginManager(pluginDirectory) {
             /* Find static plugins which have the same interface and have not
                assigned manager to them */
-            for(typename std::map<std::string, typename BasePluginManager::PluginObject*>::iterator it = this->plugins()->begin(); it != this->plugins()->end(); ++it) {
-                if(it->second->manager != nullptr || it->second->interface != pluginInterface())
+            for(typename std::map<std::string, typename BasePluginManager::Plugin*>::iterator it = this->plugins()->begin(); it != this->plugins()->end(); ++it) {
+                if(it->second->loadState != LoadState::Static || it->second->manager != nullptr || it->second->staticPlugin->interface != pluginInterface())
                     continue;
 
-                /* Assign the plugin to this manager */
+                /* Assign the plugin to this manager and initialize it */
                 it->second->manager = this;
+                it->second->staticPlugin->initializer();
             }
         }
 

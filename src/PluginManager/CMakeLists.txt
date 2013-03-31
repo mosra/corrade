@@ -41,12 +41,17 @@ set(CorradePluginManager_HEADERS
 
     corradePluginManagerVisibility.h)
 
-add_library(CorradePluginManager SHARED ${CorradePluginManager_SRCS})
+add_library(CorradePluginManager ${SHARED_OR_STATIC} ${CorradePluginManager_SRCS})
+if(NOT BUILD_STATIC)
+    set_target_properties(CorradePluginManager PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
+elseif(BUILD_STATIC_PIC)
+    # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
+    set_target_properties(CorradePluginManager PROPERTIES COMPILE_FLAGS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS})
+endif()
 target_link_libraries(CorradePluginManager CorradeUtility)
 if(UNIX OR ${CMAKE_SYSTEM_NAME} STREQUAL NaCl)
     target_link_libraries(CorradePluginManager dl)
 endif()
-set_target_properties(CorradePluginManager PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
 
 install(TARGETS CorradePluginManager DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 install(FILES ${CorradePluginManager_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/PluginManager)

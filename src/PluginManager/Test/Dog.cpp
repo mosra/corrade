@@ -27,6 +27,8 @@
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
+void Dog::initialize() { Utility::Debug() << "Dog initialized"; }
+void Dog::finalize() { Utility::Debug() << "Dog finalized"; }
 std::string Dog::name() { return "Doug"; }
 bool Dog::hasTail() { return true; }
 int Dog::legCount() { return 4; }

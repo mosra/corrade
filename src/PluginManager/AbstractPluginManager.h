@@ -170,7 +170,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
         typedef void* (*Instancer)(AbstractPluginManager*, const std::string&);
-        static void importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, Instancer instancer);
+        static void importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, Instancer instancer, void(*initializer)(), void(*finalizer)());
         #endif
 
         /**
@@ -276,9 +276,16 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
     #else
     protected:
     #endif
-        struct PluginObject {
+        struct StaticPlugin {
+            std::string plugin;
+            std::string interface;
+            Instancer instancer;
+            void(*initializer)();
+            void(*finalizer)();
+        };
+
+        struct Plugin {
             LoadState loadState;
-            std::string interface; /**< @todo Not needed for dynamic plugins */
             const Utility::Configuration configuration;
             PluginMetadata metadata;
 
@@ -288,18 +295,25 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
 
             Instancer instancer;
 
-            /** @todo Not needed for static plugins */
-            #ifndef _WIN32
-            void* module;
-            #else
-            HMODULE module;
-            #endif
+            union {
+                /* For static plugins */
+                StaticPlugin* staticPlugin;
+
+                /* For dynamic plugins */
+                #ifndef _WIN32
+                void* module;
+                #else
+                HMODULE module;
+                #endif
+            };
 
             /* Constructor for dynamic plugins */
-            explicit PluginObject(const std::string& _metadata, AbstractPluginManager* _manager);
+            explicit Plugin(const std::string& _metadata, AbstractPluginManager* _manager);
 
             /* Constructor for static plugins */
-            explicit PluginObject(std::istream& _metadata, std::string _interface, Instancer _instancer);
+            explicit Plugin(std::istream& _metadata, StaticPlugin* staticPlugin);
+
+            ~Plugin();
         };
 
         std::string _pluginDirectory;
@@ -310,7 +324,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
         /* Global storage of static, unloaded and loaded plugins. The map is
            accessible via function, not directly, because we need to fill it
            with data from staticPlugins() before first use. */
-        static std::map<std::string, PluginObject*>* plugins();
+        static std::map<std::string, Plugin*>* plugins();
 
         /* Because the plugin manager must be noticed about adding the plugin to
            "used by" list, it must be done through this function. */
@@ -333,12 +347,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
            The vector is accessible via function, not directly, because we don't
            know initialization order of static members and thus the vector could
            be uninitalized when accessed from PLUGIN_REGISTER(). */
-        struct CORRADE_PLUGINMANAGER_LOCAL StaticPluginObject {
-            std::string plugin;
-            std::string interface;
-            Instancer instancer;
-        };
-        CORRADE_PLUGINMANAGER_LOCAL static std::vector<StaticPluginObject>*& staticPlugins();
+        CORRADE_PLUGINMANAGER_LOCAL static std::vector<StaticPlugin*>*& staticPlugins();
 
         std::map<std::string, std::vector<AbstractPlugin*> > instances;
 
@@ -361,12 +370,12 @@ wrap these macro calls into another function (which will then be compiled
 into dynamic library or main executable) and use AUTOMATIC_INITIALIZER()
 macro for automatic call.
 @attention This macro should be called outside of any namespace. If you are
-running into linker errors with `pluginInitializer_*`, this could be the
-problem. See RESOURCE_INITIALIZE() documentation for more information.
+    running into linker errors with `pluginImporter_*`, this could be the
+    problem. See RESOURCE_INITIALIZE() documentation for more information.
  */
-#define PLUGIN_IMPORT(name)                                                   \
-    extern int pluginInitializer_##name();                                    \
-    pluginInitializer_##name();                                               \
+#define PLUGIN_IMPORT(name)                                                 \
+    extern int pluginImporter_##name();                                     \
+    pluginImporter_##name();                                                \
     RESOURCE_INITIALIZE(name)
 
 } namespace Utility {

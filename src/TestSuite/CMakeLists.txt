@@ -37,8 +37,13 @@ set(CorradeTestSuite_HEADERS
 
     corradeTestSuiteVisibility.h)
 
-add_library(CorradeTestSuite SHARED ${CorradeTestSuite_SRCS})
-set_target_properties(CorradeTestSuite PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
+add_library(CorradeTestSuite ${SHARED_OR_STATIC} ${CorradeTestSuite_SRCS})
+if(NOT BUILD_STATIC)
+    set_target_properties(CorradeTestSuite PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
+elseif(BUILD_STATIC_PIC)
+    # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
+    set_target_properties(CorradeTestSuite PROPERTIES COMPILE_FLAGS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS})
+endif()
 target_link_libraries(CorradeTestSuite CorradeUtility)
 
 install(TARGETS CorradeTestSuite DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})

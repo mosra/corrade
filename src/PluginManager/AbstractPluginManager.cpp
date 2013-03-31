@@ -51,18 +51,19 @@ namespace Corrade { namespace PluginManager {
 
 const int AbstractPluginManager::Version = PLUGIN_VERSION;
 
-std::map<std::string, AbstractPluginManager::PluginObject*>* AbstractPluginManager::plugins() {
-    static std::map<std::string, PluginObject*>* const _plugins = new std::map<std::string, PluginObject*>();
+std::map<std::string, AbstractPluginManager::Plugin*>* AbstractPluginManager::plugins() {
+    static std::map<std::string, Plugin*>* const _plugins = new std::map<std::string, Plugin*>();
 
     /* If there are unprocessed static plugins for this manager, add them */
     if(staticPlugins()) {
-        for(auto it = staticPlugins()->cbegin(); it != staticPlugins()->cend(); ++it) {
+        Resource r("plugins");
+
+        for(StaticPlugin* staticPlugin: *staticPlugins()) {
             /* Load static plugin metadata */
-            Resource r("plugins");
-            std::istringstream metadata(r.get(it->plugin + ".conf"));
+            std::istringstream metadata(r.get(staticPlugin->plugin + ".conf"));
 
             /* Insert plugin to list */
-            CORRADE_INTERNAL_ASSERT_OUTPUT(_plugins->insert(std::make_pair(it->plugin, new PluginObject(metadata, it->interface, it->instancer))).second);
+            CORRADE_INTERNAL_ASSERT_OUTPUT(_plugins->insert(std::make_pair(staticPlugin->plugin, new Plugin(metadata, staticPlugin))).second);
         }
 
         /** @todo Assert dependencies of static plugins */
@@ -75,20 +76,20 @@ std::map<std::string, AbstractPluginManager::PluginObject*>* AbstractPluginManag
     return _plugins;
 }
 
-std::vector<AbstractPluginManager::StaticPluginObject>*& AbstractPluginManager::staticPlugins() {
-    static std::vector<StaticPluginObject>* _staticPlugins = new std::vector<StaticPluginObject>();
+std::vector<AbstractPluginManager::StaticPlugin*>*& AbstractPluginManager::staticPlugins() {
+    static std::vector<StaticPlugin*>* _staticPlugins = new std::vector<StaticPlugin*>();
 
     return _staticPlugins;
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-void AbstractPluginManager::importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, Instancer instancer) {
+void AbstractPluginManager::importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, Instancer instancer, void(*initializer)(), void(*finalizer)()) {
     CORRADE_ASSERT(_version == Version,
         "PluginManager: wrong version of static plugin" << plugin + ", got" << _version << "but expected" << Version, );
     CORRADE_ASSERT(staticPlugins(),
         "PluginManager: too late to import static plugin" << plugin, );
 
-    staticPlugins()->push_back(StaticPluginObject{plugin, interface, instancer});
+    staticPlugins()->push_back(new StaticPlugin{plugin, interface, instancer, initializer, finalizer});
 }
 #endif
 
@@ -98,11 +99,16 @@ AbstractPluginManager::AbstractPluginManager(std::string pluginDirectory) {
 
 AbstractPluginManager::~AbstractPluginManager() {
     /* Unload all plugins associated with this plugin manager */
-    std::vector<std::map<std::string, PluginObject*>::iterator> removed;
+    std::vector<std::map<std::string, Plugin*>::iterator> removed;
     for(auto it = plugins()->begin(); it != plugins()->end(); ++it) {
 
         /* Plugin doesn't belong to this manager */
         if(it->second->manager != this) continue;
+
+        /**
+         * @bug When two plugins depend on each other and the base is unloaded
+         *      first, it fails (but it shouldn't)
+         */
 
         /* Unload the plugin */
         LoadState loadState = unload(it->first);
@@ -110,11 +116,12 @@ AbstractPluginManager::~AbstractPluginManager() {
             "PluginManager: cannot unload plugin" << it->first << "on manager destruction:" << loadState, );
 
         /* Schedule it for deletion, if it is not static, otherwise just
-           disconnect this manager from the plugin, so another manager can take
-           over it in the future. */
-        if(loadState == LoadState::Static)
+           disconnect this manager from the plugin and finalize it, so another
+           manager can take over it in the future. */
+        if(loadState == LoadState::Static) {
             it->second->manager = nullptr;
-        else
+            it->second->staticPlugin->finalizer();
+        } else
             removed.push_back(it);
     }
 
@@ -169,7 +176,7 @@ void AbstractPluginManager::setPluginDirectory(std::string directory) {
         if(plugins()->find(name) != plugins()->end()) continue;
 
         /* Insert plugin to list */
-        plugins()->insert({name, new PluginObject(Directory::join(_pluginDirectory, name + ".conf"), this)});
+        plugins()->insert({name, new Plugin(Directory::join(_pluginDirectory, name + ".conf"), this)});
     }
 }
 
@@ -216,7 +223,7 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
     if(foundPlugin == plugins()->end() || foundPlugin->second->manager != this)
         return LoadState::NotFound;
 
-    PluginObject& pluginObject = *foundPlugin->second;
+    Plugin& pluginObject = *foundPlugin->second;
 
     /* Plugin is not ready to load */
     if(pluginObject.loadState != LoadState::NotLoaded)
@@ -224,7 +231,7 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
 
     /* Vector of found dependencies. If everything goes well, this plugin will
        be added to each dependency usedBy list. */
-    std::vector<std::pair<std::string, PluginObject*>> dependencies;
+    std::vector<std::pair<std::string, Plugin*>> dependencies;
 
     /* Load dependencies and remember their names for later */
     for(auto it = pluginObject.metadata.depends().cbegin(); it != pluginObject.metadata.depends().cend(); ++it) {
@@ -242,11 +249,11 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
 
     /* Open plugin file, make symbols available for next libs (which depends on this) */
     #ifndef _WIN32
-    void* handle = dlopen(filename.c_str(), RTLD_NOW|RTLD_GLOBAL);
+    void* module = dlopen(filename.c_str(), RTLD_NOW|RTLD_GLOBAL);
     #else
-    HMODULE handle = LoadLibraryA(filename.c_str());
+    HMODULE module = LoadLibraryA(filename.c_str());
     #endif
-    if(!handle) {
+    if(!module) {
         Error() << "PluginManager: cannot open plugin file"
                 << '"' + filename + "\":" << dlerror();
         return LoadState::LoadFailed;
@@ -256,15 +263,15 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
     #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
-    int (*_version)(void) = reinterpret_cast<int(*)()>(dlsym(handle, "pluginVersion"));
+    int (*_version)(void) = reinterpret_cast<int(*)()>(dlsym(module, "pluginVersion"));
     if(_version == nullptr) {
         Error() << "PluginManager: cannot get version of plugin" << '\'' + plugin + "':" << dlerror();
-        dlclose(handle);
+        dlclose(module);
         return LoadState::LoadFailed;
     }
     if(_version() != Version) {
         Error() << "PluginManager: wrong plugin version, expected" << Version << "but got" << _version;
-        dlclose(handle);
+        dlclose(module);
         return LoadState::WrongPluginVersion;
     }
 
@@ -272,15 +279,15 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
     #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
-    const char* (*interface)() = reinterpret_cast<const char* (*)()>(dlsym(handle, "pluginInterface"));
+    const char* (*interface)() = reinterpret_cast<const char* (*)()>(dlsym(module, "pluginInterface"));
     if(interface == nullptr) {
         Error() << "PluginManager: cannot get interface string of plugin" << '\'' + plugin + "':" << dlerror();
-        dlclose(handle);
+        dlclose(module);
         return LoadState::LoadFailed;
     }
     if(interface() != pluginInterface()) {
         Error() << "PluginManager: wrong plugin interface, expected" << '\'' + pluginInterface() + "but got '" + interface() + "'";
-        dlclose(handle);
+        dlclose(module);
         return LoadState::WrongInterfaceVersion;
     }
 
@@ -288,12 +295,24 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
     #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
-    Instancer instancer = reinterpret_cast<Instancer>(dlsym(handle, "pluginInstancer"));
+    Instancer instancer = reinterpret_cast<Instancer>(dlsym(module, "pluginInstancer"));
     if(instancer == nullptr) {
         Error() << "PluginManager: cannot get instancer of plugin" << '\'' + plugin + "':" << dlerror();
-        dlclose(handle);
+        dlclose(module);
         return LoadState::LoadFailed;
     }
+
+    /* Initialize plugin */
+    #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
+    __extension__
+    #endif
+    void(*initializer)() = reinterpret_cast<void(*)()>(dlsym(module, "pluginInitializer"));
+    if(initializer == nullptr) {
+        Error() << "PluginManager: cannot get initializer of plugin" << '\'' + plugin + "':" << dlerror();
+        dlclose(module);
+        return LoadState::LoadFailed;
+    }
+    initializer();
 
     /* Everything is okay, add this plugin to usedBy list of each dependency */
     for(auto it = dependencies.cbegin(); it != dependencies.cend(); ++it) {
@@ -308,7 +327,7 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
 
     /* Update plugin object, set state to loaded */
     pluginObject.loadState = LoadState::Loaded;
-    pluginObject.module = handle;
+    pluginObject.module = module;
     pluginObject.instancer = instancer;
     return LoadState::Loaded;
 }
@@ -320,7 +339,7 @@ LoadState AbstractPluginManager::unload(const std::string& plugin) {
     if(foundPlugin == plugins()->end() || foundPlugin->second->manager != this)
         return LoadState::NotFound;
 
-    PluginObject& pluginObject = *foundPlugin->second;
+    Plugin& pluginObject = *foundPlugin->second;
 
     /* Plugin is not ready to unload, nothing to do */
     if(pluginObject.loadState != LoadState::Loaded)
@@ -363,6 +382,17 @@ LoadState AbstractPluginManager::unload(const std::string& plugin) {
             }
         }
     }
+
+    /* Finalize plugin */
+    #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
+    __extension__
+    #endif
+    void(*finalizer)() = reinterpret_cast<void(*)()>(dlsym(pluginObject.module, "pluginFinalizer"));
+    if(finalizer == nullptr) {
+        Error() << "PluginManager: cannot get finalizer of plugin" << '\'' + plugin + "':" << dlerror();
+        /* Not fatal, continue with unloading */
+    }
+    finalizer();
 
     /* Close the module */
     #ifndef _WIN32
@@ -453,11 +483,15 @@ void* AbstractPluginManager::instanceInternal(const std::string& plugin) {
     return foundPlugin->second->instancer(this, plugin);
 }
 
-AbstractPluginManager::PluginObject::PluginObject(const std::string& _metadata, AbstractPluginManager* _manager): configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(_manager), instancer(nullptr), module(nullptr) {
+AbstractPluginManager::Plugin::Plugin(const std::string& _metadata, AbstractPluginManager* _manager): configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(_manager), instancer(nullptr), module(nullptr) {
     loadState = configuration.isValid() ? LoadState::NotLoaded : LoadState::WrongMetadataFile;
 }
 
-AbstractPluginManager::PluginObject::PluginObject(std::istream& _metadata, std::string _interface, Instancer _instancer): loadState(LoadState::Static), interface(_interface), configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(nullptr), instancer(_instancer), module(nullptr) {}
+AbstractPluginManager::Plugin::Plugin(std::istream& _metadata, StaticPlugin* staticPlugin): loadState(LoadState::Static), configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(nullptr), instancer(staticPlugin->instancer), staticPlugin(staticPlugin) {}
+
+AbstractPluginManager::Plugin::~Plugin() {
+    if(loadState == LoadState::Static) delete staticPlugin;
+}
 
 } namespace Utility {
 
