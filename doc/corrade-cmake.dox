@@ -57,12 +57,14 @@ enable hidden visibility by default.
 Features of found %Corrade library are exposed in these variables, they are
 also available as preprocessor variables if including Corrade.h:
 
-- `%CORRADE_GCC46_COMPATIBILITY` -- Defined if compiled with compatibility mode
+- `CORRADE_GCC46_COMPATIBILITY` -- Defined if compiled with compatibility mode
   for GCC 4.6
-- `%CORRADE_GCC45_COMPATIBILITY` -- Defined if compiled with compatibility mode
+- `CORRADE_GCC45_COMPATIBILITY` -- Defined if compiled with compatibility mode
   for GCC 4.5
-- `%CORRADE_GCC44_COMPATIBILITY` -- Defined if compiled with compatibility mode
+- `CORRADE_GCC44_COMPATIBILITY` -- Defined if compiled with compatibility mode
   for GCC 4.4
+- `CORRADE_BUILD_STATIC` -- Defined if built as static libraries. Default are
+  shared libraries.
 - `CORRADE_TARGET_NACL` -- Defined if the library is built for Google
   Chrome Native Client
 - `CORRADE_TARGET_NACL_NEWLIB` -- Defined if the library is built for Google

@@ -65,6 +65,15 @@ enabled.
 #define CORRADE_GCC44_COMPATIBILITY_
 
 /**
+@brief Static library build
+
+`CORRADE_BUILD_STATIC` is defined if built as static libraries. Default are
+shared libraries.
+@see @ref building-corrade
+*/
+#define CORRADE_BUILD_STATIC_
+
+/**
 @brief Google Chrome Native Client target
 
 `CORRADE_TARGET_NACL` is defined if the library is built for Google Chrome
