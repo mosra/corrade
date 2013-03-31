@@ -42,6 +42,7 @@
 #include "Utility/Resource.h"
 #include "Utility/Debug.h"
 #include "PluginMetadata.h"
+#include "corradeCompatibility.h"
 
 namespace Corrade { namespace PluginManager {
 
@@ -277,6 +278,11 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
     protected:
     #endif
         struct StaticPlugin {
+            /* GCC 4.6 cannot create this via new and initializer list */
+            #ifdef CORRADE_GCC46_COMPATIBILITY
+            inline StaticPlugin(std::string plugin, std::string interface, Instancer instancer, void(*initializer)(), void(*finalizer)()): plugin(std::move(plugin)), interface(std::move(interface)), instancer(instancer), initializer(initializer), finalizer(finalizer) {}
+            #endif
+
             std::string plugin;
             std::string interface;
             Instancer instancer;
