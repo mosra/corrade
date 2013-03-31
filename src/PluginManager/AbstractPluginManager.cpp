@@ -29,7 +29,9 @@
 #include <sstream>
 
 #ifndef _WIN32
+#ifndef CORRADE_TARGET_NACL_NEWLIB
 #include <dlfcn.h>
+#endif
 #else
 #include <windows.h>
 #undef interface
@@ -93,13 +95,19 @@ void AbstractPluginManager::importStaticPlugin(const std::string& plugin, int _v
 }
 #endif
 
+#ifndef CORRADE_TARGET_NACL_NEWLIB
 AbstractPluginManager::AbstractPluginManager(std::string pluginDirectory) {
     setPluginDirectory(std::move(pluginDirectory));
 }
+#else
+AbstractPluginManager::AbstractPluginManager(std::string) {}
+#endif
 
 AbstractPluginManager::~AbstractPluginManager() {
     /* Unload all plugins associated with this plugin manager */
+    #ifndef CORRADE_TARGET_NACL_NEWLIB
     std::vector<std::map<std::string, Plugin*>::iterator> removed;
+    #endif
     for(auto it = plugins()->begin(); it != plugins()->end(); ++it) {
 
         /* Plugin doesn't belong to this manager */
@@ -110,6 +118,7 @@ AbstractPluginManager::~AbstractPluginManager() {
          *      first, it fails (but it shouldn't)
          */
 
+        #ifndef CORRADE_TARGET_NACL_NEWLIB
         /* Unload the plugin */
         LoadState loadState = unload(it->first);
         CORRADE_ASSERT(loadState & (LoadState::Static|LoadState::NotLoaded|LoadState::WrongMetadataFile),
@@ -119,19 +128,25 @@ AbstractPluginManager::~AbstractPluginManager() {
            disconnect this manager from the plugin and finalize it, so another
            manager can take over it in the future. */
         if(loadState == LoadState::Static) {
+        #endif
             it->second->manager = nullptr;
             it->second->staticPlugin->finalizer();
+        #ifndef CORRADE_TARGET_NACL_NEWLIB
         } else
             removed.push_back(it);
+        #endif
     }
 
+    #ifndef CORRADE_TARGET_NACL_NEWLIB
     /* Remove the plugins from global container */
     for(auto it = removed.cbegin(); it != removed.cend(); ++it) {
         delete (*it)->second;
         plugins()->erase(*it);
     }
+    #endif
 }
 
+#ifndef CORRADE_TARGET_NACL_NEWLIB
 std::string AbstractPluginManager::pluginDirectory() const {
     return _pluginDirectory;
 }
@@ -172,6 +187,7 @@ void AbstractPluginManager::setPluginDirectory(std::string directory) {
 void AbstractPluginManager::reloadPluginDirectory() {
     setPluginDirectory(pluginDirectory());
 }
+#endif
 
 std::vector<std::string> AbstractPluginManager::pluginList() const {
     std::vector<std::string> names;
@@ -214,6 +230,9 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
 
     Plugin& pluginObject = *foundPlugin->second;
 
+    #ifdef CORRADE_TARGET_NACL_NEWLIB
+    return pluginObject.loadState;
+    #else
     /* Plugin is not ready to load */
     if(pluginObject.loadState != LoadState::NotLoaded)
         return pluginObject.loadState;
@@ -319,6 +338,7 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
     pluginObject.module = module;
     pluginObject.instancer = instancer;
     return LoadState::Loaded;
+    #endif
 }
 
 LoadState AbstractPluginManager::unload(const std::string& plugin) {
@@ -330,6 +350,9 @@ LoadState AbstractPluginManager::unload(const std::string& plugin) {
 
     Plugin& pluginObject = *foundPlugin->second;
 
+    #ifdef CORRADE_TARGET_NACL_NEWLIB
+    return pluginObject.loadState;
+    #else
     /* Plugin is not ready to unload, nothing to do */
     if(pluginObject.loadState != LoadState::Loaded)
         return pluginObject.loadState;
@@ -399,6 +422,7 @@ LoadState AbstractPluginManager::unload(const std::string& plugin) {
     pluginObject.module = nullptr;
     pluginObject.instancer = nullptr;
     return LoadState::NotLoaded;
+    #endif
 }
 
 void AbstractPluginManager::registerInstance(std::string plugin, AbstractPlugin* instance, const Configuration** configuration, const PluginMetadata** metadata) {
@@ -466,20 +490,29 @@ void* AbstractPluginManager::instanceInternal(const std::string& plugin) {
     auto foundPlugin = plugins()->find(plugin);
 
     /* Plugin with given name doesn't exist or isn't successfully loaded */
+    #ifndef CORRADE_TARGET_NACL_NEWLIB
     if(foundPlugin == plugins()->end() || !(foundPlugin->second->loadState & (LoadState::Loaded|LoadState::Static)))
+    #else
+    if(foundPlugin == plugins()->end())
+    #endif
         return nullptr;
 
     return foundPlugin->second->instancer(this, plugin);
 }
 
+#ifndef CORRADE_TARGET_NACL_NEWLIB
 AbstractPluginManager::Plugin::Plugin(const std::string& _metadata, AbstractPluginManager* _manager): configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(_manager), instancer(nullptr), module(nullptr) {
     loadState = configuration.isValid() ? LoadState::NotLoaded : LoadState::WrongMetadataFile;
 }
+#endif
 
 AbstractPluginManager::Plugin::Plugin(std::istream& _metadata, StaticPlugin* staticPlugin): loadState(LoadState::Static), configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(nullptr), instancer(staticPlugin->instancer), staticPlugin(staticPlugin) {}
 
 AbstractPluginManager::Plugin::~Plugin() {
-    if(loadState == LoadState::Static) delete staticPlugin;
+    #ifndef CORRADE_TARGET_NACL_NEWLIB
+    if(loadState == LoadState::Static)
+    #endif
+        delete staticPlugin;
 }
 
 } namespace Utility {
@@ -489,6 +522,7 @@ Debug operator<<(Debug debug, PluginManager::LoadState value) {
     switch(value) {
         #define ls(state) case PluginManager::LoadState::state: return debug << "PluginManager::LoadState::" #state;
         ls(NotFound)
+        #ifndef CORRADE_TARGET_NACL_NEWLIB
         ls(WrongPluginVersion)
         ls(WrongInterfaceVersion)
         ls(WrongMetadataFile)
@@ -498,8 +532,11 @@ Debug operator<<(Debug debug, PluginManager::LoadState value) {
         ls(NotLoaded)
         ls(UnloadFailed)
         ls(Required)
+        #endif
         ls(Static)
+        #ifndef CORRADE_TARGET_NACL_NEWLIB
         ls(Used)
+        #endif
         #undef ls
     }
 
