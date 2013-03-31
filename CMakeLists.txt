@@ -35,6 +35,10 @@ if(BUILD_TESTS)
     enable_testing()
 endif()
 
+if(BUILD_STATIC)
+    set(CORRADE_BUILD_STATIC 1)
+endif()
+
 if(CMAKE_SYSTEM_NAME STREQUAL NaCl)
     set(CORRADE_TARGET_NACL 1)
     if(NACL_TOOLCHAIN STREQUAL newlib)
