@@ -23,15 +23,14 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "../AbstractDeletable.h"
+#include "PluginManager/Test/AbstractDeletable.h"
 #include "PluginManager/AbstractPluginManager.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
 class Deletable: public AbstractDeletable {
     public:
-        inline Deletable(AbstractPluginManager* manager = 0, const std::string& plugin = std::string()):
-            AbstractDeletable(manager, plugin) {}
+        explicit Deletable(AbstractPluginManager* manager, std::string plugin): AbstractDeletable(manager, std::move(plugin)) {}
 
         ~Deletable() { *var = 0xDEADBEEF; }
 };
