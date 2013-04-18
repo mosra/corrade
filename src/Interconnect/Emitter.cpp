@@ -78,7 +78,7 @@ void Emitter::disconnectInternal(const Implementation::SignalData& signal, Imple
     }
 
     /* The connection must be found */
-    CORRADE_INTERNAL_ASSERT(false);
+    CORRADE_ASSERT_UNREACHABLE();
 }
 
 void Emitter::disconnectInternal(const Implementation::SignalData& signal) {
