@@ -23,8 +23,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "../AbstractFood.h"
-#include "../Dog.h"
+#include "PluginManager/Test/AbstractFood.h"
+#include "PluginManager/Test/Dog.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 

@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Macros CORRADE_ASSERT(), CORRADE_INTERNAL_ASSERT(), CORRADE_INTERNAL_ASSERT_OUTPUT()
+ * @brief Macros CORRADE_ASSERT(), CORRADE_INTERNAL_ASSERT(), CORRADE_INTERNAL_ASSERT_OUTPUT(), CORRADE_ASSERT_UNREACHABLE()
  */
 
 #ifndef CORRADE_NO_ASSERT
@@ -34,8 +34,6 @@
 
 #include "Debug.h"
 #endif
-
-namespace Corrade { namespace Utility {
 
 /** @hideinitializer
 @brief Assertion macro
@@ -126,6 +124,8 @@ CORRADE_INTERNAL_ASSERT(!nullptr);
     @endcode
     If `CORRADE_NO_ASSERT` is defined, the macro is not expanded and thus the
     function gets never called. Use CORRADE_INTERNAL_ASSERT_OUTPUT() instead.
+
+@see CORRADE_ASSERT_UNREACHABLE()
 */
 #ifdef CORRADE_NO_ASSERT
 #define CORRADE_INTERNAL_ASSERT(condition) do {} while(0)
@@ -166,6 +166,30 @@ CORRADE_INTERNAL_ASSERT_OUTPUT(initialize());
     } while(0)
 #endif
 
-}}
+/** @hideinitializer
+@brief Assert that the following code is unreachable
+
+Useful to mark the code as unreachable, e.g.:
+@code
+switch(flag) {
+    case Flag::A: return foo;
+    case Flag::B: return bar;
+    default: CORRADE_ASSERT_UNREACHABLE();
+}
+@endcode
+Should be used instead of CORRADE_ASSERT(), because it gives the compiler more
+information.
+*/
+#ifdef CORRADE_NO_ASSERT
+#define CORRADE_ASSERT_UNREACHABLE() do {} while(0)
+#elif defined(__GNUC__)
+#define CORRADE_ASSERT_UNREACHABLE() __builtin_unreachable()
+#else
+#define CORRADE_ASSERT_UNREACHABLE()                                        \
+    do {                                                                    \
+        Corrade::Utility::Error() << "Reached unreachable code in" << __FILE__ << "on line" << __LINE__; \
+        std::abort();                                                       \
+    } while(0)
+#endif
 
 #endif
