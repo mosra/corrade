@@ -25,22 +25,19 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
+#include "Utility/Visibility.h"
+
+#ifdef CorradePluginManager_EXPORTS
+    #define CORRADE_PLUGINMANAGER_EXPORT CORRADE_VISIBILITY_EXPORT
+#else
+    #define CORRADE_PLUGINMANAGER_EXPORT CORRADE_VISIBILITY_IMPORT
+#endif
+#define CORRADE_PLUGINMANAGER_LOCAL CORRADE_VISIBILITY_LOCAL
 
 #ifdef _WIN32
-    #ifdef CorradePluginManager_EXPORTS
-        #define CORRADE_PLUGINMANAGER_EXPORT __declspec(dllexport)
-    #else
-        #define CORRADE_PLUGINMANAGER_EXPORT __declspec(dllimport)
-    #endif
-    #define CORRADE_PLUGINMANAGER_LOCAL
     #define CORRADE_PLUGIN_EXPORT
 #else
-    #define CORRADE_PLUGINMANAGER_EXPORT __attribute__ ((visibility ("default")))
-    #define CORRADE_PLUGINMANAGER_LOCAL __attribute__ ((visibility ("hidden")))
     #define CORRADE_PLUGIN_EXPORT __attribute__ ((visibility ("default")))
-#endif
-
 #endif
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef Corrade_Utility_corradeTestSuiteVisibility_h
-#define Corrade_Utility_corradeTestSuiteVisibility_h
+#ifndef Corrade_Utility_Visibility_h
+#define Corrade_Utility_Visibility_h
 /*
     This file is part of Corrade.
 
@@ -25,13 +25,41 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Utility/Visibility.h"
+/** @file
+ * @brief Macros @ref CORRADE_VISIBILITY_EXPORT, @ref CORRADE_VISIBILITY_IMPORT, @ref CORRADE_VISIBILITY_LOCAL
+ */
 
-#ifdef CorradeTestSuite_EXPORTS
-    #define CORRADE_TESTSUITE_EXPORT CORRADE_VISIBILITY_EXPORT
+/**
+@brief Export symbol
+
+The symbol name will be exported into shared library.
+*/
+#ifdef _WIN32
+#define CORRADE_VISIBILITY_EXPORT __declspec(dllexport)
 #else
-    #define CORRADE_TESTSUITE_EXPORT CORRADE_VISIBILITY_IMPORT
+#define CORRADE_VISIBILITY_EXPORT __attribute__ ((visibility ("default")))
 #endif
-#define CORRADE_TESTSUITE_LOCAL CORRADE_VISIBILITY_LOCAL
+
+/**
+@brief Import symbol
+
+The symbol name will be imported from shared library.
+*/
+#ifdef _WIN32
+#define CORRADE_VISIBILITY_IMPORT __declspec(dllimport)
+#else
+#define CORRADE_VISIBILITY_IMPORT __attribute__ ((visibility ("default")))
+#endif
+
+/**
+@brief Local symbol
+
+The symbol name will not be exported into shared library.
+*/
+#ifdef _WIN32
+#define CORRADE_VISIBILITY_LOCAL
+#else
+#define CORRADE_VISIBILITY_LOCAL __attribute__ ((visibility ("hidden")))
+#endif
 
 #endif

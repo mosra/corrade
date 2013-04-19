@@ -25,20 +25,13 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
+#include "Utility/Visibility.h"
 
-#ifdef _WIN32
-    #ifdef CorradeUtility_EXPORTS
-        #define CORRADE_UTILITY_EXPORT __declspec(dllexport)
-    #else
-        #define CORRADE_UTILITY_EXPORT __declspec(dllimport)
-    #endif
-    #define CORRADE_UTILITY_LOCAL
+#ifdef CorradeUtility_EXPORTS
+    #define CORRADE_UTILITY_EXPORT CORRADE_VISIBILITY_EXPORT
 #else
-    #define CORRADE_UTILITY_EXPORT __attribute__ ((visibility ("default")))
-    #define CORRADE_UTILITY_LOCAL __attribute__ ((visibility ("hidden")))
+    #define CORRADE_UTILITY_EXPORT CORRADE_VISIBILITY_IMPORT
 #endif
-
-#endif
+#define CORRADE_UTILITY_LOCAL CORRADE_VISIBILITY_LOCAL
 
 #endif

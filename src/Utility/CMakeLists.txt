@@ -57,6 +57,7 @@ set(CorradeUtility_HEADERS
     TypeTraits.h
     Unicode.h
     utilities.h
+    Visibility.h
 
     corradeUtilityVisibility.h)
 
