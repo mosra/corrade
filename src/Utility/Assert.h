@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Macros CORRADE_ASSERT(), CORRADE_INTERNAL_ASSERT(), CORRADE_INTERNAL_ASSERT_OUTPUT()
+ * @brief Macros CORRADE_ASSERT(), CORRADE_INTERNAL_ASSERT(), CORRADE_INTERNAL_ASSERT_OUTPUT(), CORRADE_ASSERT_UNREACHABLE()
  */
 
 #ifndef CORRADE_NO_ASSERT
@@ -34,8 +34,6 @@
 
 #include "Debug.h"
 #endif
-
-namespace Corrade { namespace Utility {
 
 /** @hideinitializer
 @brief Assertion macro
@@ -193,7 +191,5 @@ information.
         std::abort();                                                       \
     } while(0)
 #endif
-
-}}
 
 #endif
