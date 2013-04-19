@@ -79,7 +79,7 @@ CORRADE_ASSERT(pos < size(), "Cannot access element" << pos << "in array of size
     function gets never called. See CORRADE_INTERNAL_ASSERT_OUTPUT() for
     possible solution.
 
-@see CORRADE_INTERNAL_ASSERT()
+@see CORRADE_INTERNAL_ASSERT(), CORRADE_ASSERT_UNREACHABLE()
 */
 #ifdef CORRADE_GRACEFUL_ASSERT
 #define CORRADE_ASSERT(condition, message, returnValue)                     \
@@ -169,7 +169,10 @@ CORRADE_INTERNAL_ASSERT_OUTPUT(initialize());
 /** @hideinitializer
 @brief Assert that the following code is unreachable
 
-Useful to mark the code as unreachable, e.g.:
+By default, if code marked with this macro is reached, message with file and
+line is printed to error output and the application aborts. If
+`CORRADE_NO_ASSERT` is defined, this macro hints to the compiler that given
+code is not reachable, possibly improving performance. Example usage:
 @code
 switch(flag) {
     case Flag::A: return foo;
@@ -177,13 +180,14 @@ switch(flag) {
     default: CORRADE_ASSERT_UNREACHABLE();
 }
 @endcode
-Should be used instead of CORRADE_ASSERT(), because it gives the compiler more
-information.
+@see CORRADE_ASSERT()
 */
 #ifdef CORRADE_NO_ASSERT
-#define CORRADE_ASSERT_UNREACHABLE() do {} while(0)
-#elif defined(__GNUC__)
+#if defined(__GNUC__)
 #define CORRADE_ASSERT_UNREACHABLE() __builtin_unreachable()
+#else
+#define CORRADE_ASSERT_UNREACHABLE() std::abort()
+#endif
 #else
 #define CORRADE_ASSERT_UNREACHABLE()                                        \
     do {                                                                    \
