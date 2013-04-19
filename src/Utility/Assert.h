@@ -182,7 +182,7 @@ information.
 */
 #ifdef CORRADE_NO_ASSERT
 #define CORRADE_ASSERT_UNREACHABLE() do {} while(0)
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) && !defined(CORRADE_GCC44_COMPATIBILITY)
 #define CORRADE_ASSERT_UNREACHABLE() __builtin_unreachable()
 #else
 #define CORRADE_ASSERT_UNREACHABLE()                                        \
