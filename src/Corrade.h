@@ -82,6 +82,15 @@ Chrome Native Client with `glibc` toolchain.
 */
 #define CORRADE_TARGET_NACL_GLIBC_
 
+/**
+@brief Emscripten target
+
+`CORRADE_TARGET_EMSCRIPTEN` is defined if the library is built for
+[Emscripten](https://github.com/kripken/emscripten/wiki).
+@see @ref building-corrade
+*/
+#define CORRADE_TARGET_EMSCRIPTEN_
+
 #endif
 
 }

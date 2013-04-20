@@ -44,6 +44,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL NaCl)
     else()
         set(CORRADE_TARGET_NACL_GLIBC 1)
     endif()
+elseif(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+    set(CORRADE_TARGET_EMSCRIPTEN 1)
 endif()
 
 if(BUILD_STATIC)

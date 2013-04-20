@@ -55,7 +55,7 @@ use `CORRADE_CXX_FLAGS` to enable additional pedantic set of warnings and
 enable hidden visibility by default.
 
 Features of found %Corrade library are exposed in these variables, they are
-also available as preprocessor variables if including Corrade.h:
+also available as preprocessor variables if you include Corrade.h:
 
 - `CORRADE_GCC46_COMPATIBILITY` -- Defined if compiled with compatibility mode
   for GCC 4.6
@@ -67,6 +67,7 @@ also available as preprocessor variables if including Corrade.h:
   Chrome Native Client with `newlib` toolchain
 - `CORRADE_TARGET_NACL_GLIBC` -- Defined if the library is built for Google
   Chrome Native Client with `glibc` toolchain
+- `CORRADE_TARGET_EMSCRIPTEN` -- Defined if the library is built for Emscripten
 
 %Corrade provides these macros and functions:
 
