@@ -52,11 +52,7 @@ class CORRADE_UTILITY_EXPORT Directory {
          * @see Flags, list()
          */
         enum class Flag: unsigned char {
-            /**
-             * Skip `.` and `..` directories
-             * @partialsupport Has no effect on Windows and in
-             *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
-             */
+            /** Skip `.` and `..` directories */
             SkipDotAndDotDot = 1 << 0,
 
             /**
