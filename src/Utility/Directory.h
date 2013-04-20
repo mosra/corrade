@@ -161,7 +161,12 @@ class CORRADE_UTILITY_EXPORT Directory {
          */
         static bool move(const std::string& oldPath, const std::string& newPath);
 
-        /** @brief Get current user's home directory */
+        /**
+         * @brief Current user's home directory
+         *
+         * @partialsupport In @ref CORRADE_TARGET_EMSCRIPTEN_ "Emscripten"
+         *      returns empty string.
+         */
         static std::string home();
 
         /**

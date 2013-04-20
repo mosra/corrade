@@ -36,6 +36,8 @@
 
 #include "String.h"
 
+#include "corradeConfigure.h"
+
 namespace Corrade { namespace Utility {
 
 std::string Directory::path(const std::string& filename) {
@@ -118,10 +120,10 @@ bool Directory::fileExists(const std::string& filename) {
 }
 
 std::string Directory::home() {
-    #ifndef _WIN32
-    char* h = getenv("HOME");
-    if(!h) return {};
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    return {};
     #else
+    #ifdef _WIN32
     /** @bug Doesn't work at all */
     TCHAR h[MAX_PATH];
     #pragma GCC diagnostic push
@@ -129,9 +131,12 @@ std::string Directory::home() {
     if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, h)))
         return {};
     #pragma GCC diagnostic pop
+    #else
+    char* h = getenv("HOME");
+    if(!h) return {};
     #endif
-
     return h;
+    #endif
 }
 
 std::string Directory::configurationDir(const std::string& applicationName, bool createIfNotExists) {
