@@ -58,7 +58,9 @@ class CORRADE_UTILITY_EXPORT Directory {
             /**
              * Skip regular files
              * @partialsupport Has no effect on Windows and in
-             *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
+             *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib". In
+             *      @ref CORRADE_TARGET_EMSCRIPTEN_ "Emscripten" skips
+             *      everything except directories.
              */
             SkipFiles = 1 << 1,
 
@@ -72,7 +74,9 @@ class CORRADE_UTILITY_EXPORT Directory {
             /**
              * Skip everything what is not a file or directory
              * @partialsupport Has no effect on Windows and in
-             *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
+             *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib". In
+             *      @ref CORRADE_TARGET_EMSCRIPTEN_ "Emscripten" skips
+             *      everything except directories.
              */
             SkipSpecial = 1 << 3,
 

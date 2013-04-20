@@ -173,13 +173,17 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
         #if !defined(_WIN32) && !defined(CORRADE_TARGET_NACL_NEWLIB)
         if((flags >= Flag::SkipDirectories) && entry->d_type == DT_DIR)
             continue;
+        #ifndef CORRADE_TARGET_EMSCRIPTEN
         if((flags >= Flag::SkipFiles) && entry->d_type == DT_REG)
             continue;
         if((flags >= Flag::SkipSpecial) && entry->d_type != DT_DIR && entry->d_type != DT_REG)
             continue;
+        #else
+        if((flags >= Flag::SkipFiles || flags >= Flag::SkipSpecial) && entry->d_type != DT_DIR)
+            continue;
+        #endif
         #endif
 
-        /** @todo On some systems dirent returns DT_UNKNOWN for everything */
         list.push_back(entry->d_name);
     }
 
