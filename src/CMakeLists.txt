@@ -37,7 +37,7 @@ else()
 endif()
 
 include(TestBigEndian)
-test_big_endian(CMAKE_BIG_ENDIAN)
+test_big_endian(CORRADE_BIG_ENDIAN)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/corradeConfigure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/corradeConfigure.h)
