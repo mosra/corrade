@@ -28,26 +28,23 @@ namespace Corrade {
 
 *corrade* (v.) - "To scrape together, to gather together from various sources"
 
-%Corrade is multiplatform plugin management and utility library written in
-C++11. Features:
+%Corrade is multiplatform utility library written in C++11.
 
-- @ref PluginManager "Plugin management library" with support for both static
-  and dynamically loaded plugins, dependency handling and more. See
-  @ref plugin-management "tutorial" for brief introduction.
-- @ref TestSuite "Unit test framework" inspired with QtTest, but without any
-  need to process files with some sort of meta compiler. See @ref unit-testing
-  "tutorial" for brief introduction.
-- @ref Utility::Configuration "Configuration parser and writer" with syntax
-  similar to INI files, with support for custom types and hierarchic groups.
-- @ref Utility::Resource "Resource manager" for resources compiled directly
-  into executable. See @ref resource-management "tutorial" for brief
-  introduction.
-- Easy-to-use @ref Utility::Debug "Debug" classes for debug and error output
-  with support for output redirection and printing of custom types.
-- @ref Utility::Directory "Filesystem" utilities, @ref Utility::Translator
-  "translation" support, @ref Utility::Endianness "endianness" handling class,
-  implementations of @ref Utility::AbstractHash "hashing algorithms" and
-  @ref Utility "more".
+@section mainpage-platforms Supported platforms
+
+-   **Linux** and embedded Linux
+-   **Windows**
+-   **Google Chrome** (through [Native Client](https://developers.google.com/native-client/),
+    both `newlib` and `glibc` toolchains are supported)
+-   **HTML5/JavaScript** (through [Emscripten](https://github.com/kripken/emscripten/wiki))
+
+@section mainpage-features Features
+
+-   Signal/slot connection library with compile-time argument checking.
+-   Plugin management library with static and dynamic plugins and dependency
+    handling.
+-   Easy-to-use unit test framework and extensible debugging output.
+-   Various utilities to ease multiplatform development.
 
 @section building-link Building Corrade
 

@@ -1,24 +1,31 @@
 *corrade* (v.) - "To scrape together, to gather together from various sources"
 
-Corrade is multiplatform plugin management and utility library written in
-C++11. Features:
+Corrade is multiplatform utility library written in C++11.
 
- * Plugin management library with support for both static and dynamically
-   loaded plugins, dependency handling and more
- * Unit test framework inspired with QtTest, but without any need to process
-   files with some sort of meta compiler
- * Configuration parser and writer with syntax similar to INI files, with
-   support for custom types and hierarchic groups
- * Resource manager for resources compiled directly into executable
- * Easy-to-use classes for debug and error output with support for output
-   redirection and printing of custom types
- * Filesystem utilities, translation support, endianness handling class,
-   implementations of hashing algorithms and more
+SUPPORTED PLATFORMS
+===================
+
+*   **Linux** and embedded Linux
+*   **Windows**
+*   **Google Chrome** (through [Native Client](https://developers.google.com/native-client/),
+    both `newlib` and `glibc` toolchains are supported)
+*   **HTML5/JavaScript** (through [Emscripten](https://github.com/kripken/emscripten/wiki))
+
+FEATURES
+========
+
+*   Actively maintained Doxygen documentation with tutorials and examples.
+    Snapshot is available at http://mosra.cz/blog/corrade-doc/.
+*   Signal/slot connection library with compile-time argument checking.
+*   Plugin management library with static and dynamic plugins and dependency
+    handling.
+*   Easy-to-use unit test framework and extensible debugging output.
+*   Various utilities to ease multiplatform development.
 
 INSTALLATION
 ============
 
-You can either use packaging scripts, which are stored in package/
+You can either use packaging scripts, which are stored in `package/`
 subdirectory, or compile and install everything manually. Note that Doxygen
 documentation contains more comprehensive guide for building, packaging and
 crosscompiling.
