@@ -35,17 +35,19 @@ if(BUILD_TESTS)
     enable_testing()
 endif()
 
-if(BUILD_STATIC)
-    set(CORRADE_BUILD_STATIC 1)
-endif()
-
 if(CMAKE_SYSTEM_NAME STREQUAL NaCl)
     set(CORRADE_TARGET_NACL 1)
+    # Newlib toolchain supports only static linking
     if(NACL_TOOLCHAIN STREQUAL newlib)
         set(CORRADE_TARGET_NACL_NEWLIB 1)
+        set(BUILD_STATIC ON)
     else()
         set(CORRADE_TARGET_NACL_GLIBC 1)
     endif()
+endif()
+
+if(BUILD_STATIC)
+    set(CORRADE_BUILD_STATIC 1)
 endif()
 
 # Initialize macros etc.
