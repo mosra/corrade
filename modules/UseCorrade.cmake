@@ -79,7 +79,12 @@ function(corrade_add_test test_name)
 
     add_executable(${test_name} ${sources})
     target_link_libraries(${test_name} ${CORRADE_TESTSUITE_LIBRARIES} ${libraries})
-    add_test(${test_name} ${test_name})
+    if(CORRADE_TARGET_EMSCRIPTEN)
+        find_package(NodeJs REQUIRED)
+        add_test(NAME ${test_name} COMMAND ${NODEJS_EXECUTABLE} $<TARGET_FILE:${test_name}>)
+    else()
+        add_test(${test_name} ${test_name})
+    endif()
 endfunction()
 
 function(corrade_add_resource name group_name)
