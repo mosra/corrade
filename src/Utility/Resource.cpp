@@ -50,8 +50,8 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
 
     /* Every 2*sizeof(unsigned int) is one data */
     for(unsigned int i = 0; i != count*2*size; i=i+2*size) {
-        unsigned int filenamePosition = numberFromString<unsigned int>(std::string(_positions+i, size));
-        unsigned int dataPosition = numberFromString<unsigned int>(std::string(_positions+i+size, size));
+        unsigned int filenamePosition = *reinterpret_cast<const unsigned int*>(_positions+i);
+        unsigned int dataPosition = *reinterpret_cast<const unsigned int*>(_positions+i+size);
 
         ResourceData res;
         res.data = data;
@@ -188,11 +188,7 @@ std::string Resource::hexcode(const std::string& data, const std::string& commen
 }
 
 template<class T> std::string Resource::numberToString(const T& number) {
-    return {reinterpret_cast<const char*>(&number), sizeof(T)};
-}
-
-template<class T> T Resource::numberFromString(const std::string& number) {
-    return *reinterpret_cast<const T*>(number.c_str());
+    return std::string(reinterpret_cast<const char*>(&number), sizeof(T));
 }
 
 }}

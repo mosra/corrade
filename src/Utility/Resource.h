@@ -137,7 +137,6 @@ class CORRADE_UTILITY_EXPORT Resource {
 
         /** @todo Move to utilities.h? */
         template<class T> static std::string numberToString(const T& number);
-        template<class T> static T numberFromString(const std::string& number);
 };
 
 /**
