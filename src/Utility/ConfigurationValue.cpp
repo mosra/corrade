@@ -86,7 +86,9 @@ namespace Implementation {
     template struct BasicConfigurationValue<unsigned long long>;
     template struct BasicConfigurationValue<float>;
     template struct BasicConfigurationValue<double>;
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
     template struct BasicConfigurationValue<long double>;
+    #endif
     template struct BasicConfigurationValue<std::string>;
 }
 

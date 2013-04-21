@@ -35,6 +35,7 @@
 
 #include "TypeTraits.h"
 
+#include "corradeConfigure.h"
 #include "corradeUtilityVisibility.h"
 
 namespace Corrade { namespace Utility {
@@ -164,7 +165,13 @@ class CORRADE_UTILITY_EXPORT Debug {
         Debug operator<<(unsigned long long value);     /**< @overload */
         Debug operator<<(float value);                  /**< @overload */
         Debug operator<<(double value);                 /**< @overload */
-        Debug operator<<(long double value);            /**< @overload */
+        #ifndef CORRADE_TARGET_EMSCRIPTEN
+        /** @overload
+         * @partialsupport Not available in @ref CORRADE_TARGET_EMSCRIPTEN_ "Emscripten"
+         *      as JavaScript doesn't support doubles larger than 64 bits.
+         */
+        Debug operator<<(long double value);
+        #endif
 
         /**
          * @brief Globally set output for newly created instances
