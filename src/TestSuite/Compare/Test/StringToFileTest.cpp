@@ -72,11 +72,11 @@ void StringToFileTest::notFound() {
     {
         Error e(&out);
         Comparator<Compare::StringToFile> compare;
-        CORRADE_VERIFY(!compare("Hello World!", "inexistent"));
-        compare.printErrorMessage(e, "a", "b");
+        CORRADE_VERIFY(!compare("Hello World!", "inexistent.txt"));
+        compare.printErrorMessage(e, "a", "file");
     }
 
-    CORRADE_COMPARE(out.str(), "File a (inexistent) cannot be read.\n");
+    CORRADE_COMPARE(out.str(), "File file (inexistent.txt) cannot be read.\n");
 }
 
 void StringToFileTest::outputActualSmaller() {
