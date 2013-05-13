@@ -353,16 +353,29 @@ documentation for more information.
 
 @subsection cpp-forbidden Forbidden and deprecated C/C++ features
 
-Don't include `<*stream>` in header files. STL's stream library headers are
-amazingly large and this single <tt>#</tt><tt>include</tt> brings >25k of
-source code which needs to be preprocessed and compiled even if majority of it
-is later tossed out. Use `<iosfwd>` instead and include stream headers only in
-source files. If you want to just print something to output, use Utility::Debug
-class and friends.
-
 Don't use RTTI (`dynamic_cast` and `std::typeinfo`) and exceptions, if you don't
 desperately need to. They violate C++ principle of "don't pay for what you don't
-use".
+use". Ideally the code should be compilable with `-fno-rtti -fno-exceptions`.
+
+@subsubsection cpp-heavy-headers Heavy STL headers
+
+Don't add heavy STL includes in header files. Each of these
+<tt>#</tt><tt>include</tt>s brings >20k lines of source code which needs to be
+preprocessed and compiled even if majority of it is later tossed out. Prefer to
+include these only in source files. The following headers are the heaviest,
+numbers taken from `g++-4.8 -std=c++11 -E | wc -l`:
+
+-   `<algorithm>` -- 46k lines after preprocessing. Most of it are new
+    C++11 features, with C++03 it had only ~10k.
+-   `<istream>` and friends -- 22-24k lines after preprocessing. Use `<iosfwd>`
+    instead and include stream headers only in source files. If you want to
+    just print something to output, use Utility::Debug class and friends.
+-   `<iterator>` -- includes stream headers, thus the same as above.
+-   `<memory>` -- 25k lines after preprocessing.
+-   `<random>` -- 36k lines after preprocessing.
+
+Some other headers (e.g. the container ones) are heavy too, but in most cases
+they just need to be included.
 
 @subsubsection cpp-using using namespace keyword
 
