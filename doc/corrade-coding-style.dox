@@ -351,6 +351,63 @@ Use asserts as much as possible. Utility library has convenient CORRADE_ASSERT()
 CORRADE_INTERNAL_ASSERT() and CORRADE_INTERNAL_ASSERT_OUTPUT() macros, see their
 documentation for more information.
 
+@subsection cpp-enum-inheritance Enums and inheritance
+
+Try to avoid having one enum accessible through more than one type, for
+example:
+@code
+class AbstractImage {
+    public:
+        enum class Format { RGB, RGBA };
+
+        void setFormat(Format);
+};
+class Image2D: public AbstractImage {};
+class ImageWrapper: public AbstractImage {};
+@endcode
+
+With this you have more than one way to specify the format (trivial choices
+slowing down the development), not to mention confusion (are all the enums the
+same or is each enum different?) and weird combinations:
+@code
+Image2D image;
+image.setFormat(AbstractImage::Format::RGB); // should I prefer `AbstractImage`
+image.setFormat(Image2D::Format::RGB);       // or `Image2D`?
+image.setFormat(ImageWrapper::Format::RGBA); // is this even allowed?
+@endcode
+
+Better way would be to extract the enum out, now there is only one way to
+specify the format (and it's less typing). Also, when the user later decides to
+change the image type to another, the enum value doesn't need to be updated:
+@code
+enum class ImageFormat { RGB, RGBA };
+
+class AbstractImage {
+    public:
+        void setFormat(ImageFormat);
+};
+class Image2D: public AbstractImage {};
+class ImageWrapper: public AbstractImage {};
+
+Image2D image;
+image.setFormat(ImageFormat::RGBA);
+@endcode
+
+On the other hand, if each class has its own enum values, the original way is
+the preferred one:
+@code
+class ColoredImage {
+    public:
+        enum class Format { RGB, RGBA };
+};
+class BWImage {
+    public:
+        enum class Format { Grayscale, Binary };
+};
+@endcode
+
+@see @ref cpp-enums
+
 @subsection cpp-forbidden Forbidden and deprecated C/C++ features
 
 Don't use RTTI (`dynamic_cast` and `std::typeinfo`) and exceptions, if you don't
@@ -415,6 +472,8 @@ Prefer to use C++11 `enum class`. Use Containers::EnumSet instead of integral
 bit masks. Always explicitly specify underlying type, it might save some memory
 and also allows for forward declaration of the enum, which is good if the enum
 is part of otherwise large header.
+
+@see @ref cpp-enum-inheritance
 
 @subsubsection cpp-anonymous-namespace static keyword
 
