@@ -79,15 +79,6 @@
 # this:
 #  set(static_plugins_variable ${static_plugins_variable} PARENT_SCOPE)
 #
-# Find and install DLLs for bundling with Windows build.
-#  corrade_bundle_dlls(library_install_dir
-#                      dlls...
-#                      [PATHS paths...])
-# It is possible to specify also additional paths for searching. DLL names can
-# also contain paths, they will be installed into exact specified path. If an
-# DLL is not found, fatal error message is printed.
-#
-#
 # Additionally these variables are defined for internal usage:
 #  CORRADE_INTERCONNECT_LIBRARY     - Interconnect library (w/o
 #   dependencies)
