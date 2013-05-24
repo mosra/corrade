@@ -32,7 +32,7 @@
 #include <string>
 #include <map>
 
-#include "utilities.h"
+#include "Utility/corradeUtilityVisibility.h"
 
 namespace Corrade { namespace Utility {
 

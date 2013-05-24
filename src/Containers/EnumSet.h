@@ -31,6 +31,8 @@
 
 #include <type_traits>
 
+#include "Containers/Containers.h"
+
 namespace Corrade { namespace Containers {
 
 /**
@@ -100,7 +102,12 @@ template<class T> class Object {
 };
 @endcode
 */
-template<class T, class U, U fullValue = U(~0)> class EnumSet {
+#ifdef DOXYGEN_GENERATING_OUTPUT
+template<class T, class U, U fullValue = U(~0)>
+#else
+template<class T, class U, U fullValue>
+#endif
+class EnumSet {
     static_assert(std::is_enum<T>::value && !std::is_convertible<T, U>::value, "EnumSet type must be strongly typed enum");
 
     public:

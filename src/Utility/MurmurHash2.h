@@ -30,7 +30,6 @@
  */
 
 #include "AbstractHash.h"
-#include "utilities.h"
 
 namespace Corrade { namespace Utility {
 

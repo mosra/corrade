@@ -29,6 +29,7 @@
  * @brief Class Corrade::Containers::LinkedList, Corrade::Containers::LinkedListItem
  */
 
+#include "Containers/Containers.h"
 #include "Utility/Assert.h"
 
 namespace Corrade { namespace Containers {
@@ -309,7 +310,12 @@ class Item: public LinkedListItem<Item> {
 };
 @endcode
 */
-template<class Derived, class List = LinkedList<Derived>> class LinkedListItem {
+#ifdef DOXYGEN_GENERATING_OUTPUT
+template<class Derived, class List = LinkedList<Derived>>
+#else
+template<class Derived, class List>
+#endif
+class LinkedListItem {
     friend class LinkedList<Derived>;
 
     LinkedListItem(const LinkedListItem<Derived, List>& other) = delete;

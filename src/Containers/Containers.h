@@ -1,3 +1,5 @@
+#ifndef Corrade_Containers_Containers_h
+#define Corrade_Containers_Containers_h
 /*
     This file is part of Corrade.
 
@@ -23,26 +25,17 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "PluginMetadata.h"
+/** @file
+ * @brief Forward declarations for Corrade::Containers namespace
+ */
 
-#include "Utility/Configuration.h"
+namespace Corrade { namespace Containers {
 
-namespace Corrade { namespace PluginManager {
-
-PluginMetadata::PluginMetadata(const Utility::Configuration& conf) {
-    /* Author(s), version */
-    _authors = conf.values("author");
-    _version = conf.value("version");
-
-    /* Dependencies, replacements */
-    _depends = conf.values("depends");
-    _replaces = conf.values("replaces");
-
-    const Utility::ConfigurationGroup* metadata = conf.group("metadata");
-    translator.setFallback(metadata);
-    translator.setPrimary(metadata, true);
-    _name = translator.get("name");
-    _description = translator.get("description");
-}
+template<class> class Array;
+template<class, class U, U fullValue = U(~0)> class EnumSet;
+template<class> class LinkedList;
+template<class Derived, class List = LinkedList<Derived>> class LinkedListItem;
 
 }}
+
+#endif

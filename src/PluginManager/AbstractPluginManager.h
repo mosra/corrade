@@ -39,9 +39,10 @@
 #endif
 
 #include "Containers/EnumSet.h"
-#include "Utility/Resource.h"
+#include "Utility/Configuration.h"
 #include "Utility/Debug.h"
-#include "PluginMetadata.h"
+#include "Utility/Resource.h"
+#include "PluginManager/PluginMetadata.h"
 #include "corradeCompatibility.h"
 
 namespace Corrade { namespace PluginManager {

@@ -1,3 +1,5 @@
+#ifndef Corrade_Interconnect_Interconnect_h
+#define Corrade_Interconnect_Interconnect_h
 /*
     This file is part of Corrade.
 
@@ -23,26 +25,16 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "PluginMetadata.h"
+/** @file
+ * @brief Forward declarations for Corrade::Interconnect namespace
+ */
 
-#include "Utility/Configuration.h"
+namespace Corrade { namespace Interconnect {
 
-namespace Corrade { namespace PluginManager {
-
-PluginMetadata::PluginMetadata(const Utility::Configuration& conf) {
-    /* Author(s), version */
-    _authors = conf.values("author");
-    _version = conf.value("version");
-
-    /* Dependencies, replacements */
-    _depends = conf.values("depends");
-    _replaces = conf.values("replaces");
-
-    const Utility::ConfigurationGroup* metadata = conf.group("metadata");
-    translator.setFallback(metadata);
-    translator.setPrimary(metadata, true);
-    _name = translator.get("name");
-    _description = translator.get("description");
-}
+class Connection;
+class Emitter;
+class Receiver;
 
 }}
+
+#endif

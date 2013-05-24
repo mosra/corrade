@@ -33,7 +33,7 @@
 #include <vector>
 
 #include "Containers/EnumSet.h"
-#include "utilities.h"
+#include "Utility/corradeUtilityVisibility.h"
 
 namespace Corrade { namespace Utility {
 

@@ -31,12 +31,10 @@
 
 #include <vector>
 
-#include "ConfigurationValue.h"
-#include "utilities.h"
+#include "Utility/ConfigurationValue.h"
+#include "Utility/Utility.h"
 
 namespace Corrade { namespace Utility {
-
-class Configuration;
 
 /**
 @brief Group of values in configuration file

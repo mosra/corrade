@@ -39,8 +39,6 @@
 
 namespace Corrade { namespace Utility {
 
-class Configuration;
-
 /** @relates ConfigurationGroup
 @brief %Configuration value conversion flag
 

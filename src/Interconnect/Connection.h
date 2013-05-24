@@ -29,13 +29,12 @@
  * @brief Class Corrade::Interconnect::Connection
  */
 
-#include "corradeInterconnectVisibility.h"
+#include "Interconnect/Interconnect.h"
+#include "Interconnect/corradeInterconnectVisibility.h"
 
 #include <cstddef>
 
 namespace Corrade { namespace Interconnect {
-
-class Emitter;
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Implementation {

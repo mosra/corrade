@@ -33,7 +33,6 @@
 #include <vector>
 #include <map>
 
-#include "Utility/Configuration.h"
 #include "Utility/Translator.h"
 #include "corradePluginManagerVisibility.h"
 

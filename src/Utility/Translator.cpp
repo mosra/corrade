@@ -25,6 +25,8 @@
 
 #include "Translator.h"
 
+#include "Utility/Configuration.h"
+
 namespace Corrade { namespace Utility {
 
 std::set<Translator*>* Translator::instances() {

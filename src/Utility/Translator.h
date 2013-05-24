@@ -33,7 +33,8 @@
 #include <map>
 #include <set>
 
-#include "Configuration.h"
+#include "Utility/Utility.h"
+#include "Utility/corradeUtilityVisibility.h"
 
 namespace Corrade { namespace Utility {
 

@@ -1,3 +1,5 @@
+#ifndef Corrade_Utility_Utility_h
+#define Corrade_Utility_Utility_h
 /*
     This file is part of Corrade.
 
@@ -23,26 +25,38 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "PluginMetadata.h"
+/** @file
+ * @brief Forward declarations for Corrade::Utility namespace
+ */
 
-#include "Utility/Configuration.h"
+#include <cstdint>
 
-namespace Corrade { namespace PluginManager {
+#include "Containers/Containers.h"
 
-PluginMetadata::PluginMetadata(const Utility::Configuration& conf) {
-    /* Author(s), version */
-    _authors = conf.values("author");
-    _version = conf.value("version");
+namespace Corrade { namespace Utility {
 
-    /* Dependencies, replacements */
-    _depends = conf.values("depends");
-    _replaces = conf.values("replaces");
+template<std::size_t> class HashDigest;
+/* AbstractHash is not used directly */
 
-    const Utility::ConfigurationGroup* metadata = conf.group("metadata");
-    translator.setFallback(metadata);
-    translator.setPrimary(metadata, true);
-    _name = translator.get("name");
-    _description = translator.get("description");
-}
+class Configuration;
+class ConfigurationGroup;
+enum class ConfigurationValueFlag: std::uint8_t;
+typedef Containers::EnumSet<ConfigurationValueFlag, std::uint8_t> ConfigurationValueFlags;
+template<class T> struct ConfigurationValue;
+
+/* Debug doesn't need forward declaration */
+/* Error doesn't need forward declaration */
+/* Warning doesn't need forward declaration */
+
+/* Directory used only statically */
+/* Endianness used only statically */
+class MurmurHash2;
+/* Resource doesn't need forward declaration */
+class Sha1;
+/* String used only statically */
+class Translator;
+/* Unicode used only statically */
 
 }}
+
+#endif

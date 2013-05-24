@@ -36,9 +36,6 @@
 
 namespace Corrade { namespace Interconnect {
 
-class Emitter;
-class Receiver;
-
 #ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Implementation {
 
