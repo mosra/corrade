@@ -25,7 +25,7 @@
 
 #include "AbstractPlugin.h"
 
-#include "AbstractPluginManager.h"
+#include "AbstractManager.h"
 
 namespace Corrade { namespace PluginManager {
 
@@ -35,7 +35,7 @@ void AbstractPlugin::finalize() {}
 
 AbstractPlugin::AbstractPlugin(): _manager(nullptr), _configuration(nullptr), _metadata(nullptr) {}
 
-AbstractPlugin::AbstractPlugin(AbstractPluginManager* manager, std::string plugin): _manager(manager), _plugin(std::move(plugin)) {
+AbstractPlugin::AbstractPlugin(AbstractManager* manager, std::string plugin): _manager(manager), _plugin(std::move(plugin)) {
     _manager->registerInstance(_plugin, this, &_configuration, &_metadata);
 }
 

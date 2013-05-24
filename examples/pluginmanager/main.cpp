@@ -23,7 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <PluginManager/PluginManager.h>
+#include <PluginManager/Manager.h>
 
 #include "AbstractAnimal.h"
 
@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
     }
 
     /* Initialize plugin manager with given directory */
-    PluginManager::PluginManager<Examples::AbstractAnimal> manager(".");
+    PluginManager::Manager<Examples::AbstractAnimal> manager(".");
 
     /* Try to load a plugin */
     if(!(manager.load(argv[1]) & (PluginManager::LoadState::Loaded|PluginManager::LoadState::Static))) {

@@ -1,5 +1,5 @@
-#ifndef Corrade_Plugins_PluginManager_h
-#define Corrade_Plugins_PluginManager_h
+#ifndef Corrade_PluginManager_Manager_h
+#define Corrade_PluginManager_Manager_h
 /*
     This file is part of Corrade.
 
@@ -26,10 +26,10 @@
 */
 
 /** @file
- * @brief Class Corrade::PluginManager::PluginManager
+ * @brief Class Corrade::PluginManager::Manager
  */
 
-#include "AbstractPluginManager.h"
+#include "AbstractManager.h"
 
 #include "corradeCompatibility.h"
 
@@ -37,23 +37,23 @@ namespace Corrade { namespace PluginManager {
 
 /**
 @brief Plugin manager
-@tparam T                   Plugin interface
-@tparam BasePluginManager   Base class, subclassed from AbstractPluginManager
+@tparam T               Plugin interface
+@tparam BaseManager     Base class, subclassed from AbstractManager
     (for example if you want to add some functionality to non-templated base,
-    such as Qt signals)
+    such as signals...)
 
 Manages loading, instancing and unloading plugins. See also
 @ref plugin-management.
 
 @todo C++11 - provide constructor with arbitrary arguments
  */
-template<class T, class BasePluginManager = AbstractPluginManager> class PluginManager: public BasePluginManager {
+template<class T, class BaseManager = AbstractManager> class Manager: public BaseManager {
     public:
-        /** @copydoc AbstractPluginManager::AbstractPluginManager() */
-        explicit PluginManager(const std::string& pluginDirectory): BasePluginManager(pluginDirectory) {
+        /** @copydoc AbstractManager::AbstractManager() */
+        explicit Manager(const std::string& pluginDirectory): BaseManager(pluginDirectory) {
             /* Find static plugins which have the same interface and have not
                assigned manager to them */
-            for(typename std::map<std::string, typename BasePluginManager::Plugin*>::iterator it = this->plugins()->begin(); it != this->plugins()->end(); ++it) {
+            for(typename std::map<std::string, typename BaseManager::Plugin*>::iterator it = this->plugins()->begin(); it != this->plugins()->end(); ++it) {
                 if(it->second->loadState != LoadState::Static || it->second->manager != nullptr || it->second->staticPlugin->interface != pluginInterface())
                     continue;
 

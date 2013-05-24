@@ -36,7 +36,7 @@ class AbstractDeletable: public AbstractPlugin {
         unsigned int* var;
 
     public:
-        explicit AbstractDeletable(AbstractPluginManager* manager, std::string plugin): AbstractPlugin(manager, std::move(plugin)) {}
+        explicit AbstractDeletable(AbstractManager* manager, std::string plugin): AbstractPlugin(manager, std::move(plugin)) {}
 
         void set(unsigned int* var) { this->var = var; }
 

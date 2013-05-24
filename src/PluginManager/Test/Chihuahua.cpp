@@ -29,7 +29,7 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class Chihuahua: public Dog {
     public:
-        explicit Chihuahua(AbstractPluginManager* manager, std::string plugin): Dog(manager, std::move(plugin)) {}
+        explicit Chihuahua(AbstractManager* manager, std::string plugin): Dog(manager, std::move(plugin)) {}
 
         std::string name() { return "Rodriguez"; }
 };

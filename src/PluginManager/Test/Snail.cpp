@@ -24,13 +24,13 @@
 */
 
 #include "AbstractAnimal.h"
-#include "PluginManager/AbstractPluginManager.h"
+#include "PluginManager/AbstractManager.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
 class Snail: public AbstractAnimal {
     public:
-        explicit Snail(AbstractPluginManager* manager, std::string plugin): AbstractAnimal(manager, std::move(plugin)) {}
+        explicit Snail(AbstractManager* manager, std::string plugin): AbstractAnimal(manager, std::move(plugin)) {}
 
         std::string name() { return "Hmlllghh"; }
         int legCount() { return 0; }

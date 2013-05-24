@@ -83,7 +83,7 @@ locale code. Full featured example:
     description=Můj první Matrix bez chyb v Matrixu
  */
 class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
-    friend class AbstractPluginManager;
+    friend class AbstractManager;
 
     public:
         /**
