@@ -23,7 +23,8 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-corrade_add_test(ContainersLinkedListTest LinkedListTest.cpp)
+corrade_add_test(ContainersArrayTest ArrayTest.cpp)
 corrade_add_test(ContainersEnumSetTest EnumSetTest.cpp)
+corrade_add_test(ContainersLinkedListTest LinkedListTest.cpp)
 
 set_target_properties(ContainersLinkedListTest PROPERTIES COMPILE_FLAGS -DCORRADE_GRACEFUL_ASSERT)

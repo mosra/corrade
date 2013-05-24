@@ -24,6 +24,7 @@
 #
 
 set(CorradeContainers_HEADERS
+    Array.h
     EnumSet.h
     LinkedList.h)
 
