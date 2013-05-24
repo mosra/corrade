@@ -38,16 +38,15 @@
 #undef interface
 #endif
 
+#include "corradeCompatibility.h"
 #include "Containers/EnumSet.h"
 #include "Utility/Configuration.h"
 #include "Utility/Debug.h"
 #include "Utility/Resource.h"
 #include "PluginManager/PluginMetadata.h"
-#include "corradeCompatibility.h"
+#include "PluginManager/PluginManager.h"
 
 namespace Corrade { namespace PluginManager {
-
-class AbstractPlugin;
 
 /** @relates AbstractManager
 @brief Plugin load state

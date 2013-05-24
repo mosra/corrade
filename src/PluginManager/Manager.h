@@ -47,7 +47,12 @@ Manages loading, instancing and unloading plugins. See also
 
 @todo C++11 - provide constructor with arbitrary arguments
  */
-template<class T, class BaseManager = AbstractManager> class Manager: public BaseManager {
+#ifdef DOXYGEN_GENERATING_OUTPUT
+template<class T, class BaseManager = AbstractManager>
+#else
+template<class T, class BaseManager>
+#endif
+class Manager: public BaseManager {
     public:
         /** @copydoc AbstractManager::AbstractManager() */
         explicit Manager(const std::string& pluginDirectory): BaseManager(pluginDirectory) {

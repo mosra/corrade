@@ -1,5 +1,5 @@
-#ifndef Corrade_Plugins_PluginMetadata_h
-#define Corrade_Plugins_PluginMetadata_h
+#ifndef Corrade_PluginManager_PluginMetadata_h
+#define Corrade_PluginManager_PluginMetadata_h
 /*
     This file is part of Corrade.
 
