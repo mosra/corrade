@@ -113,9 +113,9 @@ template<> class Comparator<FileContents> {
 
 class FileContents {
     public:
-        inline FileContents(const std::string& pathPrefix = std::string()): c(pathPrefix) {}
+        FileContents(const std::string& pathPrefix = std::string()): c(pathPrefix) {}
 
-        inline Comparator<FileContents>& comparator() {
+        Comparator<FileContents>& comparator() {
             return c;
         }
 
@@ -134,26 +134,32 @@ CORRADE_COMPARE_WITH("actual.dat", "expected.dat", FileContents("/common/path/pr
 */
 template<class T> class Comparator {
     public:
-        inline constexpr explicit Comparator(): actualValue(), expectedValue() {}
+        explicit Comparator();
 
         /** @brief %Compare two values */
-        bool operator()(const T& actual, const T& expected) {
-            if(actual == expected) return true;
-
-            actualValue = actual;
-            expectedValue = expected;
-            return false;
-        }
+        bool operator()(const T& actual, const T& expected);
 
         /** @brief Print error message, assuming the two values are inequal */
-        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
-            e << "Values" << actual << "and" << expected << "are not the same, actual is\n       "
-              << actualValue << "\n        but expected\n       " << expectedValue;
-        }
+        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const;
 
     private:
         T actualValue, expectedValue;
 };
+
+template<class T> Comparator<T>::Comparator(): actualValue(), expectedValue() {}
+
+template<class T> bool Comparator<T>::operator()(const T& actual, const T& expected) {
+    if(actual == expected) return true;
+
+    actualValue = actual;
+    expectedValue = expected;
+    return false;
+}
+
+template<class T> void Comparator<T>::printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
+    e << "Values" << actual << "and" << expected << "are not the same, actual is\n       "
+      << actualValue << "\n        but expected\n       " << expectedValue;
+}
 
 }}
 

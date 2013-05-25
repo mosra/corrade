@@ -34,13 +34,13 @@ class StringLength;
 
 template<> class Comparator<StringLength> {
     public:
-        inline Comparator(int epsilon = 0): epsilon(epsilon) {}
+        Comparator(int epsilon = 0): epsilon(epsilon) {}
 
-        inline bool operator()(const std::string& actual, const std::string& expected) {
+        bool operator()(const std::string& actual, const std::string& expected) {
             return std::abs(int(actual.size()) - int(expected.size())) <= epsilon;
         }
 
-        inline void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
+        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
             e << "Length of actual" << actual << "doesn't match length of expected" << expected << "with epsilon" << epsilon;
         }
 
@@ -52,7 +52,7 @@ class StringLength {
     public:
         StringLength(int epsilon = 0): c(epsilon) {}
 
-        inline Comparator<StringLength> comparator() { return c; }
+        Comparator<StringLength> comparator() { return c; }
 
     private:
         Comparator<StringLength> c;

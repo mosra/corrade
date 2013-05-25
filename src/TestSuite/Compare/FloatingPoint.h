@@ -41,16 +41,12 @@ namespace Implementation {
 
     template<> class FloatComparatorEpsilon<float> {
         public:
-            inline constexpr static float epsilon() {
-                return 1.0e-6f;
-            }
+            constexpr static float epsilon() { return 1.0e-6f; }
     };
 
     template<> class FloatComparatorEpsilon<double> {
         public:
-            inline constexpr static double epsilon() {
-                return 1.0e-12;
-            }
+            constexpr static double epsilon() { return 1.0e-12; }
     };
 
     template<class T> class CORRADE_TESTSUITE_EXPORT FloatComparator {
