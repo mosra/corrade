@@ -85,7 +85,7 @@ class ObjectGroup: public LinkedList<Object> {
 
 class Object: public LinkedListItem<Object, ObjectGroup> {
     public:
-        inline ObjectGroup* group() { return list(); }
+        ObjectGroup* group() { return list(); }
 
     // ...
 };
@@ -102,8 +102,8 @@ class ObjectGroup: private LinkedList<Object> {
     friend class LinkedListItem<Object, ObjectGroup>;
 
     public:
-        inline Object* firstObject() { return first(); }
-        inline Object* lastObject() { return last(); }
+        Object* firstObject() { return first(); }
+        Object* lastObject() { return last(); }
 
     // ...
 };
@@ -113,68 +113,52 @@ class Object: private LinkedListItem<Object, ObjectGroup> {
     friend class LinkedListItem<Object, ObjectGroup>;
 
     public:
-        inline ObjectGroup* group() { return list(); }
-        inline Object* previousObject() { return previous(); }
-        inline Object* nextObject() { return next(); }
+        ObjectGroup* group() { return list(); }
+        Object* previousObject() { return previous(); }
+        Object* nextObject() { return next(); }
 
     // ...
 };
 @endcode
 */
 template<class T> class LinkedList {
-    LinkedList(const LinkedList<T>& other) = delete;
-    LinkedList<T>& operator=(const LinkedList<T>& other) = delete;
-
     public:
         /**
          * @brief Default constructor
          *
          * Creates empty list.
          */
-        inline constexpr explicit LinkedList(): _first(nullptr), _last(nullptr) {}
+        constexpr explicit LinkedList() noexcept: _first(nullptr), _last(nullptr) {}
+
+        /** @brief Copying is not allowed */
+        LinkedList(const LinkedList<T>&) = delete;
 
         /** @brief Move constructor */
-        LinkedList(LinkedList<T>&& other): _first(other._first), _last(other._last) {
-            other._first = nullptr;
-            other._last = nullptr;
-
-            /* Backreference this list from the items */
-            for(T* i = _first; i; i = i->_next)
-                i->_list = static_cast<decltype(i->_list)>(this);
-        }
+        LinkedList(LinkedList<T>&& other) noexcept;
 
         /**
          * @brief Destructor
          *
          * Clears the list.
          */
-        inline ~LinkedList() { clear(); }
+        ~LinkedList() { clear(); }
+
+        /** @brief Copying is not allowed */
+        LinkedList<T>& operator=(const LinkedList<T>&) = delete;
 
         /** @brief Move assignment */
-        LinkedList<T>& operator=(LinkedList<T>&& other) {
-            clear();
-            _first = other._first;
-            _last = other._last;
-            other._first = nullptr;
-            other._last = nullptr;
-
-            /* Backreference this list from the items */
-            for(T* i = _first; i; i = i->_next)
-                i->_list = static_cast<decltype(i->_list)>(this);
-
-            return *this;
-        }
+        LinkedList<T>& operator=(LinkedList<T>&& other);
 
         /** @brief First item or `nullptr`, if the list is empty */
-        inline T* first() { return _first; }
-        inline constexpr const T* first() const { return _first; } /**< @overload */
+        T* first() { return _first; }
+        constexpr const T* first() const { return _first; } /**< @overload */
 
         /** @brief Last item or `nullptr`, if the list is empty */
-        inline T* last() { return _last; }
-        inline constexpr const T* last() const { return _last; } /**< @overload */
+        T* last() { return _last; }
+        constexpr const T* last() const { return _last; } /**< @overload */
 
         /** @brief Whether the list is empty */
-        inline constexpr bool isEmpty() const { return !_first; }
+        constexpr bool isEmpty() const { return !_first; }
 
         /**
          * @brief Insert item
@@ -184,38 +168,7 @@ template<class T> class LinkedList {
          *
          * @attention The item must not be connected to any list.
          */
-        void insert(T* item, T* before = nullptr) {
-            CORRADE_ASSERT(!(item->_list), "Containers::LinkedList: Cannot insert item already connected elsewhere.", );
-            CORRADE_ASSERT(!before || before->_list == this, "Containers::LinkedList: Cannot insert before item which is not part of the list.", );
-
-            item->_list = static_cast<decltype(item->_list)>(this);
-
-            /* Adding as last item */
-            if(!before) {
-                /* First item in the list ever */
-                if(!_first) _first = item;
-
-                else {
-                    _last->_next = item;
-                    item->_previous = _last;
-                }
-
-                _last = item;
-
-            /* Adding as first item */
-            } else if(!before->_previous) {
-                item->_next = _first;
-                _first->_previous = item;
-                _first = item;
-
-            /* Adding in the middle */
-            } else {
-                item->_previous = before->_previous;
-                item->_next = before;
-                before->_previous->_next = item;
-                before->_previous = item;
-            }
-        }
+        void insert(T* item, T* before = nullptr);
 
         /**
          * @brief Cut item out
@@ -223,33 +176,7 @@ template<class T> class LinkedList {
          *
          * The item is disconnected from the list, but not deleted.
          */
-        void cut(T* item) {
-            CORRADE_ASSERT(item->_list == this, "Containers::LinkedList: Cannot cut out item which is not part of the list.", );
-
-            /* Removing first item */
-            if(item == _first) {
-                _first = _first->_next;
-                if(_first) _first->_previous = nullptr;
-
-                /* The item is last remaining in the list */
-                if(item == _last)
-                    _last = nullptr;
-
-            /* Removing last item */
-            } else if(item == _last) {
-                _last = _last->_previous;
-                if(_last) _last->_next = nullptr;
-
-            /* Removing item in the middle */
-            } else {
-                item->_previous->_next = item->_next;
-                item->_next->_previous = item->_previous;
-            }
-
-            item->_list = nullptr;
-            item->_previous = nullptr;
-            item->_next = nullptr;
-        }
+        void cut(T* item);
 
         /**
          * @brief Move item before another
@@ -263,10 +190,7 @@ template<class T> class LinkedList {
          * list.move(item, before);
          * @endcode
          */
-        inline void move(T* item, T* before) {
-            cut(item);
-            insert(item, before);
-        }
+        void move(T* item, T* before);
 
         /**
          * @brief Erase item
@@ -278,20 +202,10 @@ template<class T> class LinkedList {
          * delete item;
          * @endcode
          */
-        inline void erase(T* item) {
-            cut(item);
-            delete item;
-        }
+        void erase(T* item);
 
         /** @brief Clear the list */
-        void clear() {
-            T* i = _first;
-            while(i) {
-                T* next = i->_next;
-                erase(i);
-                i = next;
-            }
-        }
+        void clear();
 
     private:
         T *_first, *_last;
@@ -318,39 +232,25 @@ template<class Derived, class List>
 class LinkedListItem {
     friend class LinkedList<Derived>;
 
-    LinkedListItem(const LinkedListItem<Derived, List>& other) = delete;
-    LinkedListItem& operator=(const LinkedListItem<Derived, List>& other) = delete;
-
     public:
         /**
          * @brief Default constructor
          *
          * Creates item not connected to any list.
          */
-        inline LinkedListItem(): _list(nullptr), _previous(nullptr), _next(nullptr) {}
+        LinkedListItem() noexcept: _list(nullptr), _previous(nullptr), _next(nullptr) {}
+
+        /** @brief Copying is not allowed */
+        LinkedListItem(const LinkedListItem<Derived, List>&) = delete;
 
         /** @brief Move constructor */
-        LinkedListItem(LinkedListItem<Derived, List>&& other): _list(nullptr), _previous(nullptr), _next(nullptr) {
-            /* Replace other with self in the list */
-            if(other._list) {
-                other._list->insert(static_cast<Derived*>(this), other._next);
-                other._list->cut(static_cast<Derived*>(&other));
-            }
-        }
+        LinkedListItem(LinkedListItem<Derived, List>&& other);
+
+        /** @brief Copying is not allowed */
+        LinkedListItem& operator=(const LinkedListItem<Derived, List>&) = delete;
 
         /** @brief Move assignment */
-        LinkedListItem<Derived, List>& operator=(LinkedListItem<Derived, List>&& other) {
-            /* Cut self from previous list */
-            if(_list) _list->cut(static_cast<Derived*>(this));
-
-            /* Replace other with self in new list */
-            if(other._list) {
-                other._list->insert(static_cast<Derived*>(this), other._next);
-                other._list->cut(static_cast<Derived*>(&other));
-            }
-
-            return *this;
-        }
+        LinkedListItem<Derived, List>& operator=(LinkedListItem<Derived, List>&& other);
 
         /**
          * @brief Destructor
@@ -360,24 +260,149 @@ class LinkedListItem {
         virtual ~LinkedListItem() = 0;
 
         /** @brief List this item belongs to */
-        inline List* list() { return _list; }
-        inline const List* list() const { return _list; } /**< @overload */
+        List* list() { return _list; }
+        const List* list() const { return _list; } /**< @overload */
 
         /** @brief Previous item or `nullptr`, if there is no previous item */
-        inline Derived* previous() { return _previous; }
-        inline const Derived* previous() const { return _previous; } /**< @overload */
+        Derived* previous() { return _previous; }
+        const Derived* previous() const { return _previous; } /**< @overload */
 
         /** @brief Next item or `nullptr`, if there is no next item */
-        inline Derived* next() { return _next; }
-        inline const Derived* next() const { return _next; } /**< @overload */
+        Derived* next() { return _next; }
+        const Derived* next() const { return _next; } /**< @overload */
 
     private:
         List* _list;
         Derived *_previous, *_next;
 };
 
-template<class Derived, class List> inline LinkedListItem<Derived, List>::~LinkedListItem() {
+template<class T> LinkedList<T>::LinkedList(LinkedList<T>&& other) noexcept: _first(other._first), _last(other._last) {
+    other._first = nullptr;
+    other._last = nullptr;
+
+    /* Backreference this list from the items */
+    for(T* i = _first; i; i = i->_next)
+        i->_list = static_cast<decltype(i->_list)>(this);
+}
+
+template<class T> LinkedList<T>& LinkedList<T>::operator=(LinkedList<T>&& other) {
+    /** @todo Make it noexcept */
+    clear();
+    _first = other._first;
+    _last = other._last;
+    other._first = nullptr;
+    other._last = nullptr;
+
+    /* Backreference this list from the items */
+    for(T* i = _first; i; i = i->_next)
+        i->_list = static_cast<decltype(i->_list)>(this);
+
+    return *this;
+}
+
+template<class T> void LinkedList<T>::insert(T* const item, T* const before) {
+    CORRADE_ASSERT(!(item->_list), "Containers::LinkedList: Cannot insert item already connected elsewhere.", );
+    CORRADE_ASSERT(!before || before->_list == this, "Containers::LinkedList: Cannot insert before item which is not part of the list.", );
+
+    item->_list = static_cast<decltype(item->_list)>(this);
+
+    /* Adding as last item */
+    if(!before) {
+        /* First item in the list ever */
+        if(!_first) _first = item;
+
+        else {
+            _last->_next = item;
+            item->_previous = _last;
+        }
+
+        _last = item;
+
+    /* Adding as first item */
+    } else if(!before->_previous) {
+        item->_next = _first;
+        _first->_previous = item;
+        _first = item;
+
+    /* Adding in the middle */
+    } else {
+        item->_previous = before->_previous;
+        item->_next = before;
+        before->_previous->_next = item;
+        before->_previous = item;
+    }
+}
+
+template<class T> void LinkedList<T>::cut(T* const item) {
+    CORRADE_ASSERT(item->_list == this, "Containers::LinkedList: Cannot cut out item which is not part of the list.", );
+
+    /* Removing first item */
+    if(item == _first) {
+        _first = _first->_next;
+        if(_first) _first->_previous = nullptr;
+
+        /* The item is last remaining in the list */
+        if(item == _last)
+            _last = nullptr;
+
+    /* Removing last item */
+    } else if(item == _last) {
+        _last = _last->_previous;
+        if(_last) _last->_next = nullptr;
+
+    /* Removing item in the middle */
+    } else {
+        item->_previous->_next = item->_next;
+        item->_next->_previous = item->_previous;
+    }
+
+    item->_list = nullptr;
+    item->_previous = nullptr;
+    item->_next = nullptr;
+}
+
+template<class T> inline void LinkedList<T>::move(T* const item, T* const before) {
+    cut(item);
+    insert(item, before);
+}
+
+template<class T> inline void LinkedList<T>::erase(T* const item) {
+    cut(item);
+    delete item;
+}
+
+template<class T> void LinkedList<T>::clear() {
+    T* i = _first;
+    while(i) {
+        T* next = i->_next;
+        erase(i);
+        i = next;
+    }
+}
+
+template<class Derived, class List> LinkedListItem<Derived, List>::LinkedListItem(LinkedListItem<Derived, List>&& other): _list(nullptr), _previous(nullptr), _next(nullptr) {
+    /* Replace other with self in the list */
+    if(other._list) {
+        other._list->insert(static_cast<Derived*>(this), other._next);
+        other._list->cut(static_cast<Derived*>(&other));
+    }
+}
+
+template<class Derived, class List> LinkedListItem<Derived, List>::~LinkedListItem() {
     if(_list) _list->LinkedList<Derived>::cut(static_cast<Derived*>(this));
+}
+
+template<class Derived, class List> LinkedListItem<Derived, List>& LinkedListItem<Derived, List>::operator=(LinkedListItem<Derived, List>&& other) {
+    /* Cut self from previous list */
+    if(_list) _list->cut(static_cast<Derived*>(this));
+
+    /* Replace other with self in new list */
+    if(other._list) {
+        other._list->insert(static_cast<Derived*>(this), other._next);
+        other._list->cut(static_cast<Derived*>(&other));
+    }
+
+    return *this;
 }
 
 }}

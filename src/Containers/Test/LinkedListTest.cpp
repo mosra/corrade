@@ -47,16 +47,16 @@ class LinkedListTest: public TestSuite::Tester {
 
 class Item: public LinkedListItem<Item> {
     public:
-        inline Item(Item&& other): LinkedListItem<Item>(std::forward<LinkedListItem<Item>>(other)) {}
+        Item(Item&& other): LinkedListItem<Item>(std::forward<LinkedListItem<Item>>(other)) {}
 
-        inline Item& operator=(Item&& other) {
+        Item& operator=(Item&& other) {
             LinkedListItem<Item>::operator=(std::forward<LinkedListItem<Item>>(other));
             return *this;
         }
 
         static int count;
-        inline Item() { ++count; }
-        inline ~Item() { --count; }
+        Item() { ++count; }
+        ~Item() { --count; }
 };
 
 typedef Containers::LinkedList<Item> LinkedList;

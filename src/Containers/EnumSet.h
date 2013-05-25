@@ -115,18 +115,18 @@ class EnumSet {
         typedef U UnderlyingType;   /**< @brief Underlying type of the enum */
 
         /** @brief Create empty set */
-        inline constexpr /*implicit*/ EnumSet(): value() {}
+        constexpr /*implicit*/ EnumSet(): value() {}
 
         /** @brief Create set from one value */
-        inline constexpr /*implicit*/ EnumSet(T value): value(static_cast<UnderlyingType>(value)) {}
+        constexpr /*implicit*/ EnumSet(T value): value(static_cast<UnderlyingType>(value)) {}
 
         /** @brief Equality operator */
-        inline constexpr bool operator==(EnumSet<T, U, fullValue> other) const {
+        constexpr bool operator==(EnumSet<T, U, fullValue> other) const {
             return value == other.value;
         }
 
         /** @brief Non-equality operator */
-        inline constexpr bool operator!=(EnumSet<T, U, fullValue> other) const {
+        constexpr bool operator!=(EnumSet<T, U, fullValue> other) const {
             return !operator==(other);
         }
 
@@ -135,7 +135,7 @@ class EnumSet {
          *
          * Equivalent to `a & other == other`
          */
-        inline constexpr bool operator>=(EnumSet<T, U, fullValue> other) const {
+        constexpr bool operator>=(EnumSet<T, U, fullValue> other) const {
             return (*this & other) == other;
         }
 
@@ -144,49 +144,49 @@ class EnumSet {
          *
          * Equivalent to `a & other == a`
          */
-        inline constexpr bool operator<=(EnumSet<T, U, fullValue> other) const {
+        constexpr bool operator<=(EnumSet<T, U, fullValue> other) const {
             return (*this & other) == *this;
         }
 
         /** @brief Union of two sets */
-        inline constexpr EnumSet<T, U, fullValue> operator|(EnumSet<T, U, fullValue> other) const {
+        constexpr EnumSet<T, U, fullValue> operator|(EnumSet<T, U, fullValue> other) const {
             return EnumSet<T, U, fullValue>(value | other.value);
         }
 
         /** @brief Union two sets and assign */
-        inline EnumSet<T, U, fullValue>& operator|=(EnumSet<T, U, fullValue> other) {
+        EnumSet<T, U, fullValue>& operator|=(EnumSet<T, U, fullValue> other) {
             value |= other.value;
             return *this;
         }
 
         /** @brief Intersection of two sets */
-        inline constexpr EnumSet<T, U, fullValue> operator&(EnumSet<T, U, fullValue> other) const {
+        constexpr EnumSet<T, U, fullValue> operator&(EnumSet<T, U, fullValue> other) const {
             return EnumSet<T, U, fullValue>(value & other.value);
         }
 
         /** @brief Intersect two sets and assign */
-        inline EnumSet<T, U, fullValue>& operator&=(EnumSet<T, U, fullValue> other) {
+        EnumSet<T, U, fullValue>& operator&=(EnumSet<T, U, fullValue> other) {
             value &= other.value;
             return *this;
         }
 
         /** @brief Set complement */
-        inline constexpr EnumSet<T, U, fullValue> operator~() const {
+        constexpr EnumSet<T, U, fullValue> operator~() const {
             return EnumSet<T, U, fullValue>(fullValue & ~value);
         }
 
         /** @brief Value as boolean */
-        inline constexpr explicit operator bool() const {
+        constexpr explicit operator bool() const {
             return value != 0;
         }
 
         /** @brief Value in underlying type */
-        inline constexpr explicit operator UnderlyingType() const {
+        constexpr explicit operator UnderlyingType() const {
             return value;
         }
 
     private:
-        inline constexpr explicit EnumSet(UnderlyingType type): value(type) {}
+        constexpr explicit EnumSet(UnderlyingType type): value(type) {}
 
         UnderlyingType value;
 };
@@ -198,25 +198,25 @@ See @ref EnumSet-out-of-class-operators "EnumSet documentation" for example
 usage.
 */
 #define CORRADE_ENUMSET_OPERATORS(class)                                    \
-    inline constexpr bool operator==(class::Type a, class b) {              \
+    constexpr bool operator==(class::Type a, class b) {                     \
         return class(a) == b;                                               \
     }                                                                       \
-    inline constexpr bool operator!=(class::Type a, class b) {              \
+    constexpr bool operator!=(class::Type a, class b) {                     \
         return class(a) != b;                                               \
     }                                                                       \
-    inline constexpr bool operator>=(class::Type a, class b) {              \
+    constexpr bool operator>=(class::Type a, class b) {                     \
         return class(a) >= b;                                               \
     }                                                                       \
-    inline constexpr bool operator<=(class::Type a, class b) {              \
+    constexpr bool operator<=(class::Type a, class b) {                     \
         return class(a) <= b;                                               \
     }                                                                       \
-    inline constexpr class operator|(class::Type a, class b) {              \
+    constexpr class operator|(class::Type a, class b) {                     \
         return b | a;                                                       \
     }                                                                       \
-    inline constexpr class operator&(class::Type a, class b) {              \
+    constexpr class operator&(class::Type a, class b) {                     \
         return b & a;                                                       \
     }                                                                       \
-    inline constexpr class operator~(class::Type a) {                       \
+    constexpr class operator~(class::Type a) {                              \
         return ~class(a);                                                   \
     }
 
