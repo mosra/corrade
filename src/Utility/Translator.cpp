@@ -56,6 +56,26 @@ void Translator::setLocale(const std::string& locale) {
     }
 }
 
+std::string Translator::locale() { return *_locale(); }
+
+Translator::Translator(): primaryDynamicGroup(nullptr), primaryFile(nullptr), fallbackFile(nullptr), primary(nullptr), fallback(nullptr) {
+    instances()->insert(this);
+}
+
+Translator::Translator(const std::string& _primary, const std::string& _fallback): primaryDynamicGroup(nullptr), primaryFile(nullptr), fallbackFile(nullptr), primary(nullptr), fallback(nullptr) {
+    setFallback(_fallback);
+    setPrimary(_primary);
+
+    instances()->insert(this);
+}
+
+Translator::Translator(const ConfigurationGroup* _primary, const ConfigurationGroup* _fallback, bool dynamic): primaryDynamicGroup(nullptr), primaryFile(nullptr), fallbackFile(nullptr), primary(nullptr), fallback(nullptr) {
+    setFallback(_fallback);
+    setPrimary(_primary, dynamic);
+
+    instances()->insert(this);
+}
+
 Translator::~Translator() {
     for(auto it = localizations.cbegin(); it != localizations.cend(); ++it)
         delete it->second;

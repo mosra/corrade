@@ -100,7 +100,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * Constructs debug object with given output.
          * @see setOutput()
          */
-        inline explicit Debug(std::ostream* _output = globalOutput): output(_output), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
+        explicit Debug(std::ostream* _output = globalOutput): output(_output), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
 
         /**
          * @brief Copy constructor
@@ -141,7 +141,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         ~Debug();
 
         /** @brief Flag */
-        inline bool flag(Flag flag) const { return flags & flag; }
+        bool flag(Flag flag) const { return flags & flag; }
 
         /** @brief Set flag */
         void setFlag(Flag flag, bool value);
@@ -181,7 +181,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * All successive Debug instances created with default constructor will
          * be redirected to given stream.
          */
-        inline static void setOutput(std::ostream* _output = globalOutput) {
+        static void setOutput(std::ostream* _output = globalOutput) {
             globalOutput = _output;
         }
 
@@ -243,7 +243,7 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
         Warning(std::ostream* _output = globalWarningOutput): Debug(_output) {}
 
         /** @copydoc Debug::setOutput() */
-        inline static void setOutput(std::ostream* _output = globalWarningOutput) {
+        static void setOutput(std::ostream* _output = globalWarningOutput) {
             globalWarningOutput = _output; }
 
     private:
@@ -261,7 +261,7 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
         Error(std::ostream* _output = globalErrorOutput): Debug(_output) {}
 
         /** @copydoc Debug::setOutput() */
-        inline static void setOutput(std::ostream* _output = globalErrorOutput) {
+        static void setOutput(std::ostream* _output = globalErrorOutput) {
             globalErrorOutput = _output; }
 
     private:

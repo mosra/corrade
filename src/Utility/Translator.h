@@ -148,14 +148,12 @@ class CORRADE_UTILITY_EXPORT Translator {
          * @return Current locale
          * @todo Set to system locale on initialization
          */
-        inline static std::string locale() { return *_locale(); }
+        static std::string locale();
 
         /**
          * @brief Construct empty translator
          */
-        inline explicit Translator(): primaryDynamicGroup(nullptr), primaryFile(nullptr), fallbackFile(nullptr), primary(nullptr), fallback(nullptr) {
-            instances()->insert(this);
-        }
+        explicit Translator();
 
         /**
          * @brief Construct from file
@@ -163,12 +161,7 @@ class CORRADE_UTILITY_EXPORT Translator {
          *      setPrimary(const std::string&).
          * @param _fallback     Fallback language file
          */
-        inline explicit Translator(const std::string& _primary, const std::string& _fallback = std::string()): primaryDynamicGroup(nullptr), primaryFile(nullptr), fallbackFile(nullptr), primary(nullptr), fallback(nullptr) {
-            setFallback(_fallback);
-            setPrimary(_primary);
-
-            instances()->insert(this);
-        }
+        explicit Translator(const std::string& _primary, const std::string& _fallback = std::string());
 
         /**
          * @brief Construct from existing configuration
@@ -177,12 +170,7 @@ class CORRADE_UTILITY_EXPORT Translator {
          * @param dynamic       Whether treat primary group as dynamic. See
          *      setPrimary(const ConfigurationGroup*, bool).
          */
-        inline explicit Translator(const ConfigurationGroup* _primary, const ConfigurationGroup* _fallback = nullptr, bool dynamic = false): primaryDynamicGroup(nullptr), primaryFile(nullptr), fallbackFile(nullptr), primary(nullptr), fallback(nullptr) {
-            setFallback(_fallback);
-            setPrimary(_primary, dynamic);
-
-            instances()->insert(this);
-        }
+        explicit Translator(const ConfigurationGroup* _primary, const ConfigurationGroup* _fallback = nullptr, bool dynamic = false);
 
         /** @brief Destructor */
         ~Translator();

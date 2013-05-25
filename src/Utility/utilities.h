@@ -89,7 +89,7 @@ CORRADE_UTILITY_EXPORT void sleep(std::size_t ms);
  * resources without forcing the user to write additional code in main().
  * @attention This macro does nothing in static libraries.
  */
-#define AUTOMATIC_INITIALIZER(function)                                       \
+#define AUTOMATIC_INITIALIZER(function)                                     \
     static const int initializer_##function = function();
 
 /**
@@ -101,11 +101,11 @@ CORRADE_UTILITY_EXPORT void sleep(std::size_t ms);
  * there is need to properly discard initialized data.
  * @attention This macro does nothing in static libraries.
  */
-#define AUTOMATIC_FINALIZER(function)                                         \
-    class Finalizer_##function {                                              \
-        public:                                                               \
-            inline Finalizer_##function() {}                                  \
-            inline ~Finalizer_##function() { function(); }                    \
+#define AUTOMATIC_FINALIZER(function)                                       \
+    class Finalizer_##function {                                            \
+        public:                                                             \
+            Finalizer_##function() {}                                       \
+            ~Finalizer_##function() { function(); }                         \
     } Finalizer_##function;
 
 /*@}*/

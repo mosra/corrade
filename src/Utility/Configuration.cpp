@@ -32,6 +32,8 @@
 
 namespace Corrade { namespace Utility {
 
+Configuration::Configuration(Configuration::Flags flags): ConfigurationGroup(this), flags(static_cast<InternalFlag>(std::uint32_t(flags))|InternalFlag::IsValid) {}
+
 Configuration::Configuration(const std::string& filename, Flags flags): ConfigurationGroup(this), _filename(filename), flags(static_cast<InternalFlag>(std::uint32_t(flags))) {
     /* Open file with requested flags */
     std::ifstream::openmode openmode = std::ifstream::in;
@@ -61,6 +63,14 @@ Configuration::Configuration(std::istream& file, Flags flags): ConfigurationGrou
 
     /* Set readonly flag, because the configuration cannot be saved */
     this->flags |= InternalFlag::ReadOnly;
+}
+
+Configuration::~Configuration() { if(flags & InternalFlag::Changed) save(); }
+
+std::string Configuration::filename() const { return _filename; }
+
+void Configuration::setFilename(std::string filename) {
+    _filename = std::move(filename);
 }
 
 void Configuration::parse(std::istream& file) {

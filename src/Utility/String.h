@@ -63,7 +63,6 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * @see rtrim(), trim()
          */
-        /* Parameter intentionally passed by copy to avoid another copy internally */
         static std::string ltrim(std::string str, const std::string& characters = Whitespace);
 
         /**
@@ -73,7 +72,6 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * @see ltrim(), trim()
          */
-        /* Parameter intentionally passed by copy to avoid another copy internally */
         static std::string rtrim(std::string str, const std::string& characters = Whitespace);
 
         /**
@@ -83,10 +81,7 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * Equivalent to `ltrim(rtrim(str)`.
          */
-        /* Parameter intentionally passed by copy to avoid another copy internally */
-        inline static std::string trim(const std::string& str, const std::string& characters = Whitespace) {
-            return ltrim(rtrim(str), characters);
-        }
+        static std::string trim(std::string str, const std::string& characters = Whitespace);
 
         /**
          * @brief Split string on given character
@@ -104,7 +99,6 @@ class CORRADE_UTILITY_EXPORT String {
          *
          * @attention Doesn't work with UTF-8.
          */
-        /* Parameter intentionally passed by copy to avoid another copy internally */
         static std::string lowercase(std::string str);
 };
 

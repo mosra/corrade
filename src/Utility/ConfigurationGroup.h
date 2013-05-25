@@ -84,23 +84,17 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * More efficient than calling `groups(name).size()`.
          * See also Configuration::UniqueGroups and Configuration::UniqueNames.
          */
-        inline unsigned int groupCount(const std::string& name = std::string()) const {
-            if(name.empty()) return _groups.size();
-            return groups(name).size();
-        }
+        unsigned int groupCount(const std::string& name = std::string()) const;
 
         /**
          * @brief Whether given group exists
          * @param name      Name of the group. If empty, returns true if there
          *      are any subgroups.
          *
-         * More efficient than calling `group(name) != 0`.
+         * More efficient than calling `group(name) != nullptr`.
          * @todo split out to hasSubgroups()?
          */
-        inline bool groupExists(const std::string& name = std::string()) const {
-            if(name.empty()) return !_groups.empty();
-            return group(name) != nullptr;
-        }
+        bool groupExists(const std::string& name = std::string()) const;
 
         /**
          * @brief Add new group
@@ -173,20 +167,8 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          *
          * See also Configuration::automaticKeyCreation().
          */
-        template<class T> bool value(const std::string& key, T* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
-            std::string stringValue = ConfigurationValue<T>::toString(*value, flags);
-            bool ret = valueInternal(key, &stringValue, number, flags);
-
-            *value = ConfigurationValue<T>::fromString(stringValue, flags);
-            return ret;
-        }
-        template<class T> bool value(const std::string& key, T* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
-            std::string stringValue;
-            bool ret = valueInternal(key, &stringValue, number, flags);
-
-            *value = ConfigurationValue<T>::fromString(stringValue, flags);
-            return ret;
-        } /**< @overload */
+        template<class T> bool value(const std::string& key, T* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags());
+        template<class T> bool value(const std::string& key, T* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const; /**< @overload */
 
         /**
          * @brief Value (directly returned)
@@ -198,11 +180,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * Directly returns the value. If the key is not found, returns
          * default constructed value.
          */
-        template<class T = std::string> T value(const std::string& key, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
-            T _value;
-            if(!value<T>(key, &_value, number, flags)) return T();
-            return _value;
-        }
+        template<class T = std::string> T value(const std::string& key, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const;
 
         /**
          * @brief All values with given key name
@@ -210,14 +188,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @param flags     Flags (see ConfigurationGroup::Flags)
          * @return Vector with all found values
          */
-        template<class T = std::string> std::vector<T> values(const std::string& key, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
-            std::vector<T> _values;
-            std::vector<std::string> stringValues = valuesInternal(key, flags);
-            for(std::vector<std::string>::const_iterator it = stringValues.begin(); it != stringValues.end(); ++it)
-                _values.push_back(ConfigurationValue<T>::fromString(*it, flags));
-
-            return _values;
-        }
+        template<class T = std::string> std::vector<T> values(const std::string& key, ConfigurationValueFlags flags = ConfigurationValueFlags()) const;
 
         /**
          * @brief Count of keys with given name
@@ -323,8 +294,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-/* Forward declared template specializations to avoid infinite recursion in
-    template functions above */
+/* Shorthand template specializations for string values */
 template<> inline bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags) {
     return valueInternal(key, _value, number, flags);
 }
@@ -341,6 +311,37 @@ template<> inline bool ConfigurationGroup::addValue(const std::string& key, cons
     return addValueInternal(key, value, flags);
 }
 #endif
+
+template<class T> bool ConfigurationGroup::value(const std::string& key, T* value, const unsigned int number, const ConfigurationValueFlags flags) {
+    std::string stringValue = ConfigurationValue<T>::toString(*value, flags);
+    const bool ret = valueInternal(key, &stringValue, number, flags);
+
+    *value = ConfigurationValue<T>::fromString(stringValue, flags);
+    return ret;
+}
+
+template<class T> bool ConfigurationGroup::value(const std::string& key, T* value, const unsigned int number, const ConfigurationValueFlags flags) const {
+    std::string stringValue;
+    const bool ret = valueInternal(key, &stringValue, number, flags);
+
+    *value = ConfigurationValue<T>::fromString(stringValue, flags);
+    return ret;
+}
+
+template<class T> T ConfigurationGroup::value(const std::string& key, const unsigned int number, const ConfigurationValueFlags flags) const {
+    T _value;
+    if(!value<T>(key, &_value, number, flags)) return T();
+    return _value;
+}
+
+template<class T> std::vector<T> ConfigurationGroup::values(const std::string& key, const ConfigurationValueFlags flags) const {
+    std::vector<T> _values;
+    std::vector<std::string> stringValues = valuesInternal(key, flags);
+    for(std::vector<std::string>::const_iterator it = stringValues.begin(); it != stringValues.end(); ++it)
+        _values.push_back(ConfigurationValue<T>::fromString(*it, flags));
+
+    return _values;
+}
 
 }}
 

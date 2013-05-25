@@ -40,6 +40,10 @@ std::string String::rtrim(std::string str, const std::string& characters) {
     return str.erase(str.find_last_not_of(characters)+1);
 }
 
+std::string String::trim(std::string str, const std::string& characters) {
+    return ltrim(rtrim(std::move(str)), characters);
+}
+
 std::vector<std::string> String::split(const std::string& str, char delim, bool keepEmptyParts) {
     std::vector<std::string> parts;
     std::size_t oldpos = 0, pos = std::string::npos;

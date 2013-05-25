@@ -44,12 +44,12 @@ class CORRADE_UTILITY_EXPORT Sha1: public AbstractHash<20> {
          * (Sha1() << data).digest()
          * @endcode
          */
-        inline static Digest digest(const std::string& data) {
+        static Digest digest(const std::string& data) {
             return (Sha1() << data).digest();
         }
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        inline explicit Sha1(): _dataSize(0), _digest{initialDigest[0], initialDigest[1], initialDigest[2], initialDigest[3], initialDigest[4]} {}
+        explicit Sha1(): _dataSize(0), _digest{initialDigest[0], initialDigest[1], initialDigest[2], initialDigest[3], initialDigest[4]} {}
         #endif
 
         /** @brief Add data for digesting */
@@ -61,7 +61,7 @@ class CORRADE_UTILITY_EXPORT Sha1: public AbstractHash<20> {
     private:
         CORRADE_UTILITY_LOCAL void processChunk(const char* data);
 
-        inline unsigned int leftrotate(unsigned int data, unsigned int shift) {
+        unsigned int leftrotate(unsigned int data, unsigned int shift) {
             return data << shift | data >> (32-shift);
         }
 

@@ -101,6 +101,18 @@ std::vector<const ConfigurationGroup*> ConfigurationGroup::groups(const std::str
     return found;
 }
 
+unsigned int ConfigurationGroup::groupCount(const std::string& name) const {
+    /** @todo How the hell is THIS more efficient??? */
+    if(name.empty()) return _groups.size();
+    return groups(name).size();
+}
+
+bool ConfigurationGroup::groupExists(const std::string& name) const {
+    /** @todo How the hell is THIS more efficient??? */
+    if(name.empty()) return !_groups.empty();
+    return group(name) != nullptr;
+}
+
 bool ConfigurationGroup::addGroup(const std::string& name, ConfigurationGroup* group) {
     if(configuration->flags & Configuration::InternalFlag::ReadOnly ||
      !(configuration->flags & Configuration::InternalFlag::IsValid))

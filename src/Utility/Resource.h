@@ -77,10 +77,10 @@ class CORRADE_UTILITY_EXPORT Resource {
 
         /**
          * @brief Constructor
-         * @param _group        Group name for getting data or compiling new
+         * @param group         Group name for getting data or compiling new
          *      resources.
          */
-        inline explicit Resource(const std::string& _group): group(_group) {}
+        explicit Resource(std::string group);
 
         /**
          * @brief Compile data resource file

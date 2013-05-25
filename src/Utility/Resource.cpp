@@ -84,6 +84,8 @@ void Resource::unregisterData(const char* group, const unsigned char* data) {
     if(resources()[group].empty()) resources().erase(group);
 }
 
+Resource::Resource(std::string group): group(std::move(group)) {}
+
 std::string Resource::compile(const std::string& name, const std::map<std::string, std::string>& files) const {
     std::string positions, filenames, data;
     unsigned int filenamesLen = 0, dataLen = 0;
