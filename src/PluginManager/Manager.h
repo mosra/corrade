@@ -52,21 +52,10 @@ template<class T, class BaseManager = AbstractManager>
 #else
 template<class T, class BaseManager>
 #endif
-class Manager: public BaseManager {
+class Manager final: public BaseManager {
     public:
         /** @copydoc AbstractManager::AbstractManager() */
-        explicit Manager(const std::string& pluginDirectory): BaseManager(pluginDirectory) {
-            /* Find static plugins which have the same interface and have not
-               assigned manager to them */
-            for(typename std::map<std::string, typename BaseManager::Plugin*>::iterator it = this->plugins()->begin(); it != this->plugins()->end(); ++it) {
-                if(it->second->loadState != LoadState::Static || it->second->manager != nullptr || it->second->staticPlugin->interface != pluginInterface())
-                    continue;
-
-                /* Assign the plugin to this manager and initialize it */
-                it->second->manager = this;
-                it->second->staticPlugin->initializer();
-            }
-        }
+        explicit Manager(const std::string& pluginDirectory);
 
         /**
          * @brief Plugin interface
@@ -74,7 +63,7 @@ class Manager: public BaseManager {
          * Only plugins with the same plugin interface string can be used
          * in this plugin manager.
          */
-        std::string pluginInterface() const override { return T::pluginInterface(); }
+        std::string pluginInterface() const override;
 
         /**
          * @brief Plugin instance
@@ -87,6 +76,23 @@ class Manager: public BaseManager {
             return static_cast<T*>(this->instanceInternal(plugin));
         }
 };
+
+template<class T, class BaseManager> Manager<T, BaseManager>::Manager(const std::string& pluginDirectory): BaseManager(pluginDirectory) {
+    /* Find static plugins which have the same interface and have not
+        assigned manager to them */
+    for(typename std::map<std::string, typename BaseManager::Plugin*>::iterator it = this->plugins()->begin(); it != this->plugins()->end(); ++it) {
+        if(it->second->loadState != LoadState::Static || it->second->manager != nullptr || it->second->staticPlugin->interface != pluginInterface())
+            continue;
+
+        /* Assign the plugin to this manager and initialize it */
+        it->second->manager = this;
+        it->second->staticPlugin->initializer();
+    }
+}
+
+template<class T, class BaseManager> std::string Manager<T, BaseManager>::pluginInterface() const {
+    return T::pluginInterface();
+}
 
 }}
 

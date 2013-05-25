@@ -219,13 +219,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         AbstractManager(const AbstractManager&) = delete;
         AbstractManager(AbstractManager&&) = delete;
 
-        /**
-         * @brief Destructor
-         *
-         * Destroys all plugin instances and unload all plugins.
-         */
-        virtual ~AbstractManager();
-
         AbstractManager& operator=(const AbstractManager&) = delete;
         AbstractManager& operator=(AbstractManager&&) = delete;
 
@@ -314,6 +307,16 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          */
         virtual LoadState unload(const std::string& plugin);
 
+    protected:
+        /**
+         * @brief Destructor
+         *
+         * Destroys all plugin instances and unloads all plugins.
+         */
+        /* Nobody will need to have (and delete) AbstractManager*, thus this is
+           faster than public virtual destructor */
+        ~AbstractManager();
+
     #ifdef DOXYGEN_GENERATING_OUTPUT
     private:
     #else
@@ -322,7 +325,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         struct StaticPlugin {
             /* GCC 4.6 cannot create this via new and initializer list */
             #ifdef CORRADE_GCC46_COMPATIBILITY
-            inline StaticPlugin(std::string plugin, std::string interface, Instancer instancer, void(*initializer)(), void(*finalizer)()): plugin(std::move(plugin)), interface(std::move(interface)), instancer(instancer), initializer(initializer), finalizer(finalizer) {}
+            StaticPlugin(std::string plugin, std::string interface, Instancer instancer, void(*initializer)(), void(*finalizer)()): plugin(std::move(plugin)), interface(std::move(interface)), instancer(instancer), initializer(initializer), finalizer(finalizer) {}
             #endif
 
             std::string plugin;

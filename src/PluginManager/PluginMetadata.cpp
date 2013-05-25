@@ -45,4 +45,10 @@ PluginMetadata::PluginMetadata(const Utility::Configuration& conf) {
     _description = translator.get("description");
 }
 
+std::string PluginMetadata::version() const { return _version; }
+
+std::vector<std::string> PluginMetadata::usedBy() const { return _usedBy; }
+
+std::vector<std::string> PluginMetadata::replacedWith() const { return _replacedWith; }
+
 }}

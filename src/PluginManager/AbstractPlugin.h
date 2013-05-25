@@ -106,6 +106,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * If instantiated through plugin manager, unregisters this instance
          * from it.
          */
+        /* This is needed to be public virtual as AbstractPlugin* are deleted */
         virtual ~AbstractPlugin() = 0;
 
         /**
@@ -116,7 +117,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * the manager, `false` if not. If any instance returns `false`, the
          * plugin is not unloaded.
          */
-        virtual bool canBeDeleted() { return false; }
+        virtual bool canBeDeleted();
 
         /**
          * @brief Identifier string
@@ -124,7 +125,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * Name under which the plugin was instanced. If the plugin was not
          * instantiated via plugin manager, returns empty string.
          */
-        inline std::string plugin() const { return _plugin; }
+        std::string plugin() const;
 
         /**
          * @brief Metadata
@@ -132,7 +133,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * Metadata associated with given plugin. If the plugin was not
          * instantiated through plugin manager, returns `nullptr`.
          */
-        inline const PluginMetadata* metadata() const { return _metadata; }
+        const PluginMetadata* metadata() const { return _metadata; }
 
     protected:
         /**
@@ -142,7 +143,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * instantiated through plugin manager, returns `nullptr`.
          * @todo Make use of this, change to pointer to ConfigurationGroup
          */
-        inline const Utility::Configuration* configuration() const { return _configuration; }
+        const Utility::Configuration* configuration() const { return _configuration; }
 
     private:
         AbstractManager* _manager;
@@ -168,7 +169,7 @@ version identifier to make sure the plugin will not be loaded with
 incompatible interface version.
  */
 #define PLUGIN_INTERFACE(name) \
-    public: inline static std::string pluginInterface() { return name; } private:
+    public: static std::string pluginInterface() { return name; } private:
 
 /**
 @brief Register static or dynamic lugin

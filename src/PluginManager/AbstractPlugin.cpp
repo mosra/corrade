@@ -43,4 +43,9 @@ AbstractPlugin::~AbstractPlugin() {
     if(_manager) _manager->unregisterInstance(_plugin, this);
 }
 
+bool AbstractPlugin::canBeDeleted() { return false; }
+
+std::string AbstractPlugin::plugin() const { return _plugin; }
+
+
 }}
