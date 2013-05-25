@@ -120,7 +120,8 @@ Example file:
 @todo Join ReadOnly / IsValid flag checks
 @bug When value with number > 0 is not found, pointed integer is changed
 @bug Setting inexistent value with number > 0 creates new key/value pair
-@todo Test, whether the configurationValueToString() is called also with string type
+@todo Test that the configurationValueToString() isn't called with string type
+    (e.g. value with spaces)
 @todo Support different syntax for hierarchic groups [g1][g2][...] along with
     [g1/g2/...]
 @todo C++11: move constructor, creating readonly Configuration using static
