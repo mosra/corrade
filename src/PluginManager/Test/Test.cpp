@@ -88,19 +88,18 @@ Test::Test() {
 }
 
 void Test::nameList() {
-    auto manager = new PluginManager::Manager<AbstractAnimal>(PLUGINS_DIR);
+    {
+        PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
 
-    CORRADE_COMPARE_AS(manager->pluginList(), (std::vector<std::string>{
-        "Canary", "Chihuahua", "Dog", "Snail"}), TestSuite::Compare::Container);
+        CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
+            "Canary", "Chihuahua", "Dog", "Snail"}), TestSuite::Compare::Container);
+    }
 
     /* Check if the list of dynamic plugins is cleared after destructing */
-    delete manager;
-    manager = new PluginManager::Manager<AbstractAnimal>(Directory::join(PLUGINS_DIR, "inexistent"));
+    PluginManager::Manager<AbstractAnimal> manager(Directory::join(PLUGINS_DIR, "inexistent"));
 
-    CORRADE_COMPARE_AS(manager->pluginList(), std::vector<std::string>{
+    CORRADE_COMPARE_AS(manager.pluginList(), std::vector<std::string>{
         "Canary"}, TestSuite::Compare::Container);
-
-    delete manager;
 }
 
 void Test::errors() {
@@ -160,14 +159,18 @@ void Test::staticPluginInitFini() {
     std::ostringstream out;
     Debug::setOutput(&out);
 
-    /* Initialization is right after manager assigns them to itself */
-    out.str({});
-    auto manager = new PluginManager::Manager<AbstractAnimal>({});
-    CORRADE_COMPARE(out.str(), "Canary initialized\n");
+    {
+        /* Initialization is right after manager assigns them to itself */
+        out.str({});
+        PluginManager::Manager<AbstractAnimal> manager{std::string()};
+        CORRADE_COMPARE_AS(manager.pluginList(), std::vector<std::string>{
+            "Canary"}, TestSuite::Compare::Container);
+        CORRADE_COMPARE(out.str(), "Canary initialized\n");
 
-    /* Finalization is right before manager frees them */
-    out.str({});
-    delete manager;
+        /* Finalization is right before manager frees them */
+        out.str({});
+    }
+
     CORRADE_COMPARE(out.str(), "Canary finalized\n");
 }
 

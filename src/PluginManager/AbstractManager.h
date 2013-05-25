@@ -216,10 +216,16 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          */
         explicit AbstractManager(std::string pluginDirectory);
 
+        /** @brief Copying is not allowed */
         AbstractManager(const AbstractManager&) = delete;
+
+        /** @brief Moving is not allowed */
         AbstractManager(AbstractManager&&) = delete;
 
+        /** @brief Copying is not allowed */
         AbstractManager& operator=(const AbstractManager&) = delete;
+
+        /** @brief Moving is not allowed */
         AbstractManager& operator=(AbstractManager&&) = delete;
 
         #ifndef CORRADE_TARGET_NACL_NEWLIB

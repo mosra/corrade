@@ -52,7 +52,7 @@ template<class T, class BaseManager = AbstractManager>
 #else
 template<class T, class BaseManager>
 #endif
-class Manager final: public BaseManager {
+class Manager: public BaseManager {
     public:
         /** @copydoc AbstractManager::AbstractManager() */
         explicit Manager(const std::string& pluginDirectory);
