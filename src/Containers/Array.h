@@ -74,28 +74,28 @@ template<class T> class Array {
         Array<T>& operator=(Array<T>&&) noexcept;
 
         /** @brief Whether the array is empty */
-        bool empty() const noexcept { return !_size; }
+        bool empty() const { return !_size; }
 
         /** @brief %Array size */
-        std::size_t size() const noexcept { return _size; }
+        std::size_t size() const { return _size; }
 
         /** @brief Pointer to first element */
-        T* begin() noexcept { return _data; }
-        const T* begin() const noexcept { return _data; }       /**< @overload */
-        const T* cbegin() const noexcept { return _data; }      /**< @overload */
+        T* begin() { return _data; }
+        const T* begin() const { return _data; }       /**< @overload */
+        const T* cbegin() const { return _data; }      /**< @overload */
 
         /** @brief Pointer to (one item after) last element */
-        T* end() noexcept { return _data+_size; }
-        const T* end() const noexcept { return _data+_size; }   /**< @overload */
-        const T* cend() const noexcept { return _data+_size; }  /**< @overload */
+        T* end() { return _data+_size; }
+        const T* end() const { return _data+_size; }   /**< @overload */
+        const T* cend() const { return _data+_size; }  /**< @overload */
 
         /** @brief Conversion to array type */
-        operator T*() noexcept { return _data; }
-        operator const T*() const noexcept { return _data; } /**< @overload */
+        operator T*() { return _data; }
+        operator const T*() const { return _data; } /**< @overload */
 
         /** @brief Element access */
-        T& operator[](std::size_t i) noexcept { return _data[i]; }
-        const T& operator[](std::size_t i) const noexcept { return _data[i]; } /**< @overload */
+        T& operator[](std::size_t i) { return _data[i]; }
+        const T& operator[](std::size_t i) const { return _data[i]; } /**< @overload */
 
     private:
         T* _data;
