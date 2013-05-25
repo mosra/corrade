@@ -199,12 +199,12 @@ namespace TestSuite {
 @subsubsection cpp-classes Class and structure declarations
 
 Class and structure protection levels are ordered as following: first friend
-declarations, then deleted copy/move constructors and assignment operators,
-then public members, then protected members and finally private members, so
-class public interface is easy to spot at the top of the file.
+declarations, then public members, then protected members and finally private
+members, so class public interface is easy to spot at the top of the file.
 
 Members are ordered as following: first classes and enums, then static
-functions, then non-static functions, then static variables, then non-static
+functions, then non-static functions (where constructors, destructors and
+assignment operators are first), then static variables, then non-static
 variables. Again, classes and methods are more important for user than
 variables, static members are more important than non-static.
 
@@ -293,8 +293,10 @@ switch(type) {
 @subsubsection cpp-keywords Class member and function keywords
 
 Use keywords in this order: `template virtual inline constexpr explicit static`.
-Only base virtual functions should have `virtual` keyword, the
-reimplementations should be marked with `override` instead.
+When the function is fully defined in class body or when it is marked as
+`constexpr`, don't mark it as `inline`, it's redundant. Only base virtual
+functions should have `virtual` keyword, the reimplementations should be marked
+with `override` instead.
 
 @subsubsection cpp-macros Preprocessor macros
 
@@ -340,8 +342,8 @@ static pure functions which will be heavily used with compile-time constants,
 such as Containers::EnumSet::operator&().
 
 Traits class members and class constants which are not meant to be referenced
-or pointed to should be defined as `inline constexpr` function or using
-anonymous typed enum (@ref cpp-enums "see below"), because declaring them as
+or pointed to should be defined as `constexpr` function or using anonymous
+typed enum (@ref cpp-enums "see below"), because declaring them as
 `static const` variable will result in another (probably unwanted) symbol and
 the constant might not be always inlined.
 
@@ -548,10 +550,10 @@ Trivial function overloads (e.g. `const` overloads) are marked only with
 @c \@overload keyword and are always *after* the original documented function:
 @code
 // @brief Data
-inline char* data() { return _data; }
+char* data() { return _data; }
 
 // @overload
-inline const char* data() const { return _data; }
+const char* data() const { return _data; }
 @endcode
 
 If the documentation is short enough, it can be placed after the documented
