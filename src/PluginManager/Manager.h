@@ -44,8 +44,6 @@ namespace Corrade { namespace PluginManager {
 
 Manages loading, instancing and unloading plugins. See also
 @ref plugin-management.
-
-@todo C++11 - provide constructor with arbitrary arguments
  */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T, class BaseManager = AbstractManager>
@@ -55,7 +53,7 @@ template<class T, class BaseManager>
 class Manager: public BaseManager {
     public:
         /** @copydoc AbstractManager::AbstractManager() */
-        explicit Manager(const std::string& pluginDirectory);
+        template<class ...U> explicit Manager(U&&... args);
 
         /**
          * @brief Plugin interface
@@ -77,7 +75,7 @@ class Manager: public BaseManager {
         }
 };
 
-template<class T, class BaseManager> Manager<T, BaseManager>::Manager(const std::string& pluginDirectory): BaseManager(pluginDirectory) {
+template<class T, class BaseManager> template<class ...U> Manager<T, BaseManager>::Manager(U&&... args): BaseManager(std::forward<U>(args)...) {
     /* Find static plugins which have the same interface and have not
         assigned manager to them */
     for(typename std::map<std::string, typename BaseManager::Plugin*>::iterator it = this->plugins()->begin(); it != this->plugins()->end(); ++it) {
