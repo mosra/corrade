@@ -47,18 +47,18 @@ namespace Implementation {
         public:
             static const std::size_t Size = 2*sizeof(void*)/sizeof(std::size_t);
 
-            template<class Emitter, class ...Args> inline SignalData(typename Emitter::Signal(Emitter::*signal)(Args...)): data() {
+            template<class Emitter, class ...Args> SignalData(typename Emitter::Signal(Emitter::*signal)(Args...)): data() {
                 typedef typename Emitter::Signal(Emitter::*Signal)(Args...);
                 *reinterpret_cast<Signal*>(data) = signal;
             }
 
-            inline bool operator==(const SignalData& other) const {
+            bool operator==(const SignalData& other) const {
                 for(std::size_t i = 0; i != Size; ++i)
                     if(data[i] != other.data[i]) return false;
                 return true;
             }
 
-            inline bool operator!=(const SignalData& other) const {
+            bool operator!=(const SignalData& other) const {
                 return !operator==(other);
             }
 
@@ -84,12 +84,15 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
     friend class Emitter;
     friend class Receiver;
 
-    Connection(const Connection&) = delete;
-    Connection& operator=(const Connection&) = delete;
-
     public:
+        /** @brief Copying is not allowed */
+        Connection(const Connection&) = delete;
+
         /** @brief Move constructor */
         Connection(Connection&& other);
+
+        /** @brief Copying is not allowed */
+        Connection& operator=(const Connection&) = delete;
 
         /** @brief Move assignment */
         Connection& operator=(Connection&& other);
@@ -108,7 +111,7 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
          *
          * @see isConnected()
          */
-        inline bool isConnectionPossible() const { return data; }
+        bool isConnectionPossible() const { return data; }
 
         /**
          * @brief Whether the connection exists
@@ -116,7 +119,7 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
          * @see isConnectionPossible(), Emitter::hasSignalConnections(),
          *      Receiver::hasSlotConnections()
          */
-        inline bool isConnected() const { return connected; }
+        bool isConnected() const { return connected; }
 
         /**
          * @brief Establish the connection

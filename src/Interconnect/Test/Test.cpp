@@ -60,25 +60,25 @@ class Test: public TestSuite::Tester {
 
 class Postman: public Interconnect::Emitter {
     public:
-        inline Signal newMessage(int price, const std::string& message) {
+        Signal newMessage(int price, const std::string& message) {
             return emit(&Postman::newMessage, price, message);
         }
 
-        inline Signal paymentRequested(int amount) {
+        Signal paymentRequested(int amount) {
             return emit(&Postman::paymentRequested, amount);
         }
 };
 
 class Mailbox: public Interconnect::Receiver {
     public:
-        inline Mailbox(): money(0) {}
+        Mailbox(): money(0) {}
 
-        inline void addMessage(int price, const std::string& message) {
+        void addMessage(int price, const std::string& message) {
             money += price;
             messages.push_back(message);
         }
 
-        inline void pay(int amount) {
+        void pay(int amount) {
             money -= amount;
         }
 
@@ -293,7 +293,7 @@ void Test::emit() {
 void Test::emitterSubclass() {
     class BetterPostman: public Postman {
         public:
-            inline Signal newRichTextMessage(int price, const std::string& value) {
+            Signal newRichTextMessage(int price, const std::string& value) {
                 return emit(&BetterPostman::newRichTextMessage, price, "***"+value+"***");
             }
     };
@@ -344,7 +344,7 @@ void Test::receiverSubclass() {
 void Test::slotInReceiverBase() {
     class VintageMailbox {
         public:
-            inline VintageMailbox(): money(0) {}
+            VintageMailbox(): money(0) {}
 
             void addMessage(int price, const std::string& message) {
                 money += price;
@@ -372,14 +372,16 @@ void Test::slotInReceiverBase() {
 void Test::virtualSlot() {
     class VirtualMailbox: public Interconnect::Receiver {
         public:
-            inline VirtualMailbox(): money(0) {}
+            VirtualMailbox(): money(0) {}
 
-            inline void addMessage(int price, const std::string& message) {
+            virtual ~VirtualMailbox() {}
+
+            void addMessage(int price, const std::string& message) {
                 money += price;
                 messages.push_back(message);
             }
 
-            inline virtual void pay(int amount) {
+            virtual void pay(int amount) {
                 money -= amount;
             }
 
@@ -412,9 +414,9 @@ void Test::changeConnectionsInSlot() {
 
     class PropagatingMailbox: public Interconnect::Receiver {
         public:
-            inline PropagatingMailbox(Postman* postman, Mailbox* mailbox): postman(postman), mailbox(mailbox) {}
+            PropagatingMailbox(Postman* postman, Mailbox* mailbox): postman(postman), mailbox(mailbox) {}
 
-            inline void addMessage(int, const std::string& message) {
+            void addMessage(int, const std::string& message) {
                 this->messages.push_back(message);
                 Emitter::connect(postman, &Postman::newMessage, mailbox, &Mailbox::addMessage);
                 Emitter::connect(postman, &Postman::paymentRequested, mailbox, &Mailbox::pay);
@@ -445,7 +447,7 @@ void Test::changeConnectionsInSlot() {
 void Test::deleteReceiverInSlot() {
     class SuicideMailbox: public Interconnect::Receiver {
         public:
-            inline void addMessage(int, const std::string&) {
+            void addMessage(int, const std::string&) {
                 delete this;
             }
     };

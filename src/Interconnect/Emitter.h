@@ -41,7 +41,7 @@ namespace Implementation {
 
 class SignalDataHash {
     public:
-        inline std::size_t operator()(const SignalData& data) const {
+        std::size_t operator()(const SignalData& data) const {
             std::size_t hash = 0;
             for(std::size_t i = 0; i != SignalData::Size; ++i)
                 hash ^= data.data[i];
@@ -61,10 +61,10 @@ class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
     AbstractConnectionData& operator=(AbstractConnectionData&&) = delete;
 
     public:
-        inline virtual ~AbstractConnectionData() {}
+        virtual ~AbstractConnectionData() = 0;
 
     private:
-        inline explicit AbstractConnectionData(Emitter* emitter, Receiver* receiver): connection(nullptr), emitter(emitter), receiver(receiver), lastHandledSignal(0) {}
+        explicit AbstractConnectionData(Emitter* emitter, Receiver* receiver): connection(nullptr), emitter(emitter), receiver(receiver), lastHandledSignal(0) {}
 
         Connection* connection;
         Emitter* emitter;
@@ -78,7 +78,7 @@ template<class ...Args> class MemberConnectionData: public AbstractConnectionDat
     private:
         typedef void(Receiver::*Slot)(Args...);
 
-        template<class Emitter, class Receiver> inline explicit MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): AbstractConnectionData(emitter, receiver), slot(static_cast<Slot>(slot)) {}
+        template<class Emitter, class Receiver> explicit MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): AbstractConnectionData(emitter, receiver), slot(static_cast<Slot>(slot)) {}
 
         void handle(Args... args) {
             (receiver->*slot)(args...);
@@ -263,8 +263,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
                 constexpr explicit Signal() = default;
         };
 
-        inline explicit Emitter(): lastHandledSignal(0), connectionsChanged(false) {}
-        virtual ~Emitter() = 0;
+        explicit Emitter();
 
         /**
          * @brief Whether the emitter is connected to any slot
@@ -272,7 +271,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * @see Receiver::hasSlotConnections(), Connection::isConnected(),
          *      signalConnectionCount()
          */
-        inline bool hasSignalConnections() const {
+        bool hasSignalConnections() const {
             return !connections.empty();
         }
 
@@ -282,7 +281,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * @see Receiver::hasSlotConnections(), Connection::isConnected(),
          *      signalConnectionCount()
          */
-        template<class Emitter, class ...Args> inline bool hasSignalConnections(Signal(Emitter::*signal)(Args...)) const {
+        template<class Emitter, class ...Args> bool hasSignalConnections(Signal(Emitter::*signal)(Args...)) const {
             return connections.count(Implementation::SignalData(signal)) != 0;
         }
 
@@ -291,14 +290,14 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          *
          * @see Receiver::slotConnectionCount(), hasSignalConnections()
          */
-        inline std::size_t signalConnectionCount() const { return connections.size(); }
+        std::size_t signalConnectionCount() const { return connections.size(); }
 
         /**
          * @brief Count of slots connected to given signal
          *
          * @see Receiver::slotConnectionCount(), hasSignalConnections()
          */
-        template<class Emitter, class ...Args> inline std::size_t signalConnectionCount(Signal(Emitter::*signal)(Args...)) const {
+        template<class Emitter, class ...Args> std::size_t signalConnectionCount(Signal(Emitter::*signal)(Args...)) const {
             return connections.count(Implementation::SignalData(signal));
         }
 
@@ -323,21 +322,13 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * @todo Connecting to signals
          * @todo Connecting to non-member functions and lambda functions
          */
-        template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> inline static
+        template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> static
         #ifdef DOXYGEN_GENERATING_OUTPUT
         Connection
         #else
         typename std::enable_if<std::is_base_of<Emitter, EmitterObject>::value && std::is_base_of<Receiver, ReceiverObject>::value, Connection>::type
         #endif
-        connect(EmitterObject* emitter, Signal(Emitter::*signal)(Args...), ReceiverObject* receiver, void(Receiver::*slot)(Args...)) {
-            static_assert(sizeof(Signal(Emitter::*)(Args...)) <= 2*sizeof(void*),
-                "Size of member function pointer is incorrectly assumed to be smaller than 2*sizeof(void*)");
-
-            Implementation::SignalData signalData(signal);
-            auto data = new Implementation::MemberConnectionData<Args...>(emitter, receiver, static_cast<void(ReceiverObject::*)(Args...)>(slot));
-            connectInternal(signalData, data);
-            return Connection(signalData, data);
-        }
+        connect(EmitterObject* emitter, Signal(Emitter::*signal)(Args...), ReceiverObject* receiver, void(Receiver::*slot)(Args...));
 
         /**
          * @brief Disconnect signal
@@ -353,7 +344,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * @see Connection::disconnect(), disconnectAllSignals(),
          *      Receiver::disconnectAllSlots(), hasSignalConnections()
          */
-        template<class Emitter, class ...Args> inline void disconnectSignal(Signal(Emitter::*signal)(Args...)) {
+        template<class Emitter, class ...Args> void disconnectSignal(Signal(Emitter::*signal)(Args...)) {
             disconnectInternal(Implementation::SignalData(signal));
         }
 
@@ -366,6 +357,10 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         void disconnectAllSignals();
 
     protected:
+        /* Nobody will need to have (and delete) Emitter*, thus this is faster
+           than public pure virtual destructor */
+        ~Emitter();
+
         /**
          * @brief Emit signal
          * @param signal        %Signal
@@ -374,32 +369,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * See @ref Emitter-signals "class documentation" for more information
          * about implementing signals.
          */
-        template<class Emitter, class ...Args> Signal emit(Signal(Emitter::*signal)(Args...), typename std::common_type<Args>::type... args) {
-            connectionsChanged = false;
-            ++lastHandledSignal;
-            auto range = connections.equal_range(Implementation::SignalData(signal));
-            auto it = range.first;
-            while(it != range.second) {
-                /* If not already handled, proceed and mark as such */
-                if(it->second->lastHandledSignal != lastHandledSignal) {
-                    it->second->lastHandledSignal = lastHandledSignal;
-                    static_cast<Implementation::MemberConnectionData<Args...>*>(it->second)->handle(args...);
-
-                    /* Connections changed by the slot, go through again */
-                    if(connectionsChanged) {
-                        range = connections.equal_range(Implementation::SignalData(signal));
-                        it = range.first;
-                        connectionsChanged = false;
-                        continue;
-                    }
-                }
-
-                /* Nothing called or changed, next connection */
-                ++it;
-            }
-
-            return Signal();
-        }
+        template<class Emitter, class ...Args> Signal emit(Signal(Emitter::*signal)(Args...), typename std::common_type<Args>::type... args);
 
     private:
         static void connectInternal(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data);
@@ -411,6 +381,49 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         std::uint32_t lastHandledSignal;
         bool connectionsChanged;
 };
+
+template<class EmitterObject, class Emitter_, class Receiver, class ReceiverObject, class ...Args>
+#ifdef DOXYGEN_GENERATING_OUTPUT
+Connection
+#else
+typename std::enable_if<std::is_base_of<Emitter_, EmitterObject>::value && std::is_base_of<Receiver, ReceiverObject>::value, Connection>::type
+#endif
+Emitter::connect(EmitterObject* emitter, Signal(Emitter_::*signal)(Args...), ReceiverObject* receiver, void(Receiver::*slot)(Args...)) {
+    static_assert(sizeof(Signal(Emitter_::*)(Args...)) <= 2*sizeof(void*),
+        "Size of member function pointer is incorrectly assumed to be smaller than 2*sizeof(void*)");
+
+    Implementation::SignalData signalData(signal);
+    auto data = new Implementation::MemberConnectionData<Args...>(emitter, receiver, static_cast<void(ReceiverObject::*)(Args...)>(slot));
+    connectInternal(signalData, data);
+    return Connection(signalData, data);
+}
+
+template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emitter_::*signal)(Args...), typename std::common_type<Args>::type... args) {
+    connectionsChanged = false;
+    ++lastHandledSignal;
+    auto range = connections.equal_range(Implementation::SignalData(signal));
+    auto it = range.first;
+    while(it != range.second) {
+        /* If not already handled, proceed and mark as such */
+        if(it->second->lastHandledSignal != lastHandledSignal) {
+            it->second->lastHandledSignal = lastHandledSignal;
+            static_cast<Implementation::MemberConnectionData<Args...>*>(it->second)->handle(args...);
+
+            /* Connections changed by the slot, go through again */
+            if(connectionsChanged) {
+                range = connections.equal_range(Implementation::SignalData(signal));
+                it = range.first;
+                connectionsChanged = false;
+                continue;
+            }
+        }
+
+        /* Nothing called or changed, next connection */
+        ++it;
+    }
+
+    return Signal();
+}
 
 }}
 

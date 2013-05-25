@@ -58,15 +58,14 @@ class CORRADE_INTERCONNECT_EXPORT Receiver {
     Receiver& operator=(Receiver&&) = delete;
 
     public:
-        explicit Receiver() = default;
-        virtual ~Receiver() = 0;
+        explicit Receiver();
 
         /**
          * @brief Whether the receiver is connected to any signal
          *
          * @see Emitter::hasSignalConnections(), slotConnectionCount()
          */
-        inline bool hasSlotConnections() const {
+        bool hasSlotConnections() const {
             return !connections.empty();
         }
 
@@ -75,7 +74,7 @@ class CORRADE_INTERCONNECT_EXPORT Receiver {
          *
          * @see Emitter::signalConnectionCount(), hasSlotConnections()
          */
-        inline std::size_t slotConnectionCount() const { return connections.size(); }
+        std::size_t slotConnectionCount() const { return connections.size(); }
 
         /**
          * @brief Disconnect everything from this receiver slots
@@ -84,6 +83,11 @@ class CORRADE_INTERCONNECT_EXPORT Receiver {
          *      Emitter::disconnectSignal(), hasSlotConnections()
          */
         void disconnectAllSlots();
+
+    protected:
+        /* Nobody will need to have (and delete) Receiver*, thus this is faster
+           than public pure virtual destructor */
+        ~Receiver();
 
     private:
         std::vector<Implementation::AbstractConnectionData*> connections;
