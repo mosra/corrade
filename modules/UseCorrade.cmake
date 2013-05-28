@@ -26,6 +26,11 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+# Already included, nothing to do
+if(_CORRADE_USE_INCLUDED)
+    return()
+endif()
+
 # Mandatory C++ flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
@@ -160,3 +165,5 @@ macro(corrade_add_static_plugin static_plugins_variable plugin_name metadata_fil
 
     set_parent_scope(${static_plugins_variable} ${${static_plugins_variable}} ${plugin_name})
 endmacro()
+
+set(_CORRADE_USE_INCLUDED TRUE)
