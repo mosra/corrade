@@ -347,8 +347,8 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /* Shorthand template specialization for string values, delete unwanted ones */
-template<> bool ConfigurationGroup::value(const std::string&, std::string*, unsigned int, ConfigurationValueFlags flags) = delete;
-template<> bool ConfigurationGroup::value(const std::string&, std::string*, unsigned int, ConfigurationValueFlags flags) const = delete;
+template<> bool ConfigurationGroup::value(const std::string&, std::string*, unsigned int, ConfigurationValueFlags) = delete;
+template<> bool ConfigurationGroup::value(const std::string&, std::string*, unsigned int, ConfigurationValueFlags) const = delete;
 template<> bool ConfigurationGroup::setValue(const std::string&, const std::string&, unsigned int, ConfigurationValueFlags) = delete;
 template<> bool ConfigurationGroup::addValue(std::string, const std::string&, ConfigurationValueFlags) = delete;
 template<> inline std::string ConfigurationGroup::value(const std::string& key, unsigned int number, const ConfigurationValueFlags flags) const {
