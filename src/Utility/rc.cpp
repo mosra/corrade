@@ -38,22 +38,24 @@ See @ref resource-management for brief introduction.
 @todo Test it
 @todo Check empty files
 @todo Write to file (and don't create any on error)
-@todo Use Debug classes
 */
 
-#include <iostream>
 #include <fstream>
-#include <sstream>
-#include <vector>
+#include <iostream>
 
-#include "Resource.h"
+#include "Utility/Debug.h"
+#include "Utility/Resource.h"
+
+using Corrade::Utility::Error;
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 int main(int argc, char** argv) {
     if(argc < 4) {
-        std::cerr << "Resource compiler for Corrade.\n\nUsage:\n"
-             << "    " << argv[0] << " name group_name infile [-a alias] [infile2 [-a alias2] ...] > outfile.cpp"
-             << std::endl << std::endl;
+        Error() << "Resource compiler for Corrade.";
+        Error() << "";
+        Error() << "Usage:";
+        Error() << "   " << argv[0] << "name group_name infile [-a alias] [infile2 [-a alias2] ...] > outfile.cpp";
+        Error() << "";
         return 2;
     }
 
@@ -68,7 +70,7 @@ int main(int argc, char** argv) {
         if(std::string(argv[i]) == "-a") {
             /* Check for "infile -a -a alias" */
             if(isAlias) {
-                std::cerr << "Error: two subsequent aliases!" << std::endl;
+                Error() << "Error: two subsequent aliases";
                 return 4;
             }
             isAlias = true;
@@ -79,7 +81,7 @@ int main(int argc, char** argv) {
         if(isAlias) {
             /* Check for "infile -a alias1 -a alias2" */
             if(!alias.empty()) {
-                std::cerr << "Error: two subsequent aliases!" << std::endl;
+                Error() << "Error: two subsequent aliases";
                 return 3;
             }
 
@@ -89,7 +91,7 @@ int main(int argc, char** argv) {
         } else {
             /* Check for "infile -a alias" */
             if(filename.empty() && !alias.empty()) {
-                std::cerr << "Error: specified alias without filename!" << std::endl;
+                Error() << "Error: alias specified without filename";
                 return 5;
             }
 
@@ -105,13 +107,13 @@ int main(int argc, char** argv) {
 
     /* Check for "infile -a" */
     if(isAlias) {
-        std::cerr << "Error: no alias specified!" << std::endl;
+        Error() << "Error: no alias specified";
         return 5;
     }
 
     /* Check for no files present */
     if(filename.empty()) {
-        std::cerr << "Error: no input file specified!" << std::endl;
+        Error() << "Error: no input file specified";
         return 6;
     }
 
@@ -119,33 +121,32 @@ int main(int argc, char** argv) {
     files.push_back(make_pair(filename, alias));
 
     /* Read all files */
-    std::map<std::string, std::string> data;
+    std::vector<std::pair<std::string, std::string>> data;
     for(auto it = files.cbegin(); it != files.cend(); ++it) {
-        std::cerr << "Reading file " << it-files.begin()+1 << "/" << files.size() << std::endl
-                  << "    " << it->first << std::endl;
+        Error() << "Reading file" << it-files.begin()+1 << "of" << files.size();
+        Error() << "   " << it->first;
         if(!it->second.empty())
-            std::cerr << " -> " << it->second << std::endl;
+            Error() << " ->" << it->second;
 
-        std::ifstream f(it->first.c_str(), std::ifstream::in|std::ifstream::binary);
+        std::ifstream f(it->first.c_str(), std::ifstream::binary);
 
-        if(!f.is_open()) {
-            std::cerr << "Cannot open file " << it->first << std::endl;
+        if(f.bad()) {
+            Error() << "Cannot open file " << it->first;
             return 1;
         }
 
-        std::ostringstream d;
-        d << f.rdbuf();
+        f.seekg(0, std::ios::end);
+        std::string d(f.tellg(), '\0');
+        f.seekg(0, std::ios::beg);
+        f.read(&d[0], d.size());
 
         /* Compile file under real filename or alias, if set */
-        if(it->second.empty())
-            data.insert(std::make_pair(it->first, d.str()));
-        else
-            data.insert(std::make_pair(it->second, d.str()));
+        data.emplace_back(it->second.empty() ? std::move(it->first) : std::move(it->second), std::move(d));
     }
 
-    std::cerr << "Compiling..." << std::endl;
+    Error() << "Compiling...";
     std::cout << r.compile(argv[1], data);
-    std::cerr << "Done." << std::endl;
+    Error() << "Done.";
 
     return 0;
 }

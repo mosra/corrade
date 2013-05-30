@@ -25,6 +25,7 @@
 
 #include "Resource.h"
 
+#include <iomanip>
 #include <sstream>
 #include <tuple>
 #include <vector>
@@ -39,27 +40,28 @@ std::map<std::string, std::map<std::string, Resource::ResourceData>>& Resource::
 }
 
 void Resource::registerData(const char* group, unsigned int count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data) {
-    if(resources().find(group) == resources().end()) resources().insert(std::make_pair(group, std::map<std::string, ResourceData>()));
+    auto groupData = resources().find(group);
+    if(groupData == resources().end())
+        groupData = resources().emplace(group, std::map<std::string, ResourceData>()).first;
 
     /* Cast to type which can be eaten by std::string constructor */
     const char* _positions = reinterpret_cast<const char*>(positions);
     const char* _filenames = reinterpret_cast<const char*>(filenames);
 
-    unsigned int size = sizeof(unsigned int);
+    const unsigned int size = sizeof(unsigned int);
     unsigned int oldFilenamePosition = 0, oldDataPosition = 0;
 
     /* Every 2*sizeof(unsigned int) is one data */
-    for(unsigned int i = 0; i != count*2*size; i=i+2*size) {
+    for(unsigned int i = 0; i != count*2*size; i += 2*size) {
         unsigned int filenamePosition = *reinterpret_cast<const unsigned int*>(_positions+i);
         unsigned int dataPosition = *reinterpret_cast<const unsigned int*>(_positions+i+size);
 
-        ResourceData res;
-        res.data = data;
-        res.position = oldDataPosition;
-        res.size = dataPosition-oldDataPosition;
+        ResourceData res{
+            oldDataPosition,
+            dataPosition-oldDataPosition,
+            data};
 
-        std::string filename = std::string(_filenames+oldFilenamePosition, filenamePosition-oldFilenamePosition);
-        resources()[group].insert(std::make_pair(filename, res));
+        groupData->second.emplace(std::string(_filenames+oldFilenamePosition, filenamePosition-oldFilenamePosition), res);
 
         oldFilenamePosition = filenamePosition;
         oldDataPosition = dataPosition;
@@ -86,7 +88,7 @@ void Resource::unregisterData(const char* group, const unsigned char* data) {
 
 Resource::Resource(std::string group): group(std::move(group)) {}
 
-std::string Resource::compile(const std::string& name, const std::map<std::string, std::string>& files) const {
+std::string Resource::compile(const std::string& name, const std::vector<std::pair<std::string, std::string>>& files) const {
     std::string positions, filenames, data;
     unsigned int filenamesLen = 0, dataLen = 0;
 
@@ -98,18 +100,17 @@ std::string Resource::compile(const std::string& name, const std::map<std::strin
         positions += hexcode(numberToString(filenamesLen));
         positions += hexcode(numberToString(dataLen));
 
-        filenames += hexcode(it->first, it->first);
-        data += hexcode(it->second, it->first);
+        filenames += comment(it->first);
+        filenames += hexcode(it->first);
+
+        data += comment(it->first);
+        data += hexcode(it->second);
     }
 
     /* Remove last comma from data */
-    positions = positions.substr(0, positions.size()-2);
-    filenames = filenames.substr(0, filenames.size()-2);
-    data = data.substr(0, data.size()-2);
-
-    /* Resource count */
-    std::ostringstream count;
-    count << files.size();
+    positions.resize(positions.size()-2);
+    filenames.resize(filenames.size()-2);
+    data.resize(data.size()-2);
 
     /* Return C++ file. The functions have forward declarations to avoid warning
        about functions which don't have corresponding declarations (enabled by
@@ -125,7 +126,7 @@ std::string Resource::compile(const std::string& name, const std::map<std::strin
         data +      "\n};\n\n"
         "int resourceInitializer_" + name + "();\n"
         "int resourceInitializer_" + name + "() {\n"
-        "    Corrade::Utility::Resource::registerData(\"" + group + "\", " + count.str() + ", resourcePositions, resourceFilenames, resourceData);\n"
+        "    Corrade::Utility::Resource::registerData(\"" + group + "\", " + std::to_string(files.size()) + ", resourcePositions, resourceFilenames, resourceData);\n"
         "    return 1;\n"
         "} AUTOMATIC_INITIALIZER(resourceInitializer_" + name + ")\n\n"
         "int resourceFinalizer_" + name + "();\n"
@@ -133,12 +134,6 @@ std::string Resource::compile(const std::string& name, const std::map<std::strin
         "    Corrade::Utility::Resource::unregisterData(\"" + group + "\", resourceData);\n"
         "    return 1;\n"
         "} AUTOMATIC_FINALIZER(resourceFinalizer_" + name + ")\n";
-}
-
-std::string Resource::compile(const std::string& name, const std::string& filename, const std::string& data) const {
-    std::map<std::string, std::string> files;
-    files.insert(std::make_pair(filename, data));
-    return compile(name, files);
 }
 
 std::tuple<const unsigned char*, unsigned int> Resource::getRaw(const std::string& filename) const {
@@ -162,31 +157,29 @@ std::string Resource::get(const std::string& filename) const {
     return data ? std::string(reinterpret_cast<const char*>(data), size) : std::string();
 }
 
-std::string Resource::hexcode(const std::string& data, const std::string& comment) const {
-    /* Add comment, if set */
-    std::string output = "    ";
-    if(!comment.empty()) output = "\n    /* " + comment + " */\n" + output;
+std::string Resource::comment(const std::string& comment) {
+    return "\n    /* " + comment + " */\n";
+}
 
-    int row_len = 4;
-    for(unsigned int i = 0; i != data.size(); ++i) {
+std::string Resource::hexcode(const std::string& data) {
+    std::ostringstream out;
+    out << std::hex;
 
-        /* Every row is indented by four spaces and is max 80 characters long */
-        if(row_len > 74) {
-            output += "\n    ";
-            row_len = 4;
+    /* Each row is indented by four spaces and has newline at the end */
+    for(std::size_t row = 0; row < data.size(); row += 15) {
+        out << "    ";
+
+        /* Convert all characters on a row to hex "0xab,0x01,..." */
+        for(std::size_t end = std::min(row + 15, data.size()), i = row; i != end; ++i) {
+            out << "0x" << std::setw(2) << std::setfill('0')
+                << static_cast<unsigned int>(static_cast<unsigned char>(data[i]))
+                << ",";
         }
 
-        /* Convert char to hex */
-        std::ostringstream converter;
-        converter << std::hex;
-        converter << static_cast<unsigned int>(static_cast<unsigned char>(data[i]));
-
-        /* Append to output */
-        output += "0x" + converter.str() + ",";
-        row_len += 3+converter.str().size();
+        out << '\n';
     }
 
-    return output + '\n';
+    return out.str();
 }
 
 template<class T> std::string Resource::numberToString(const T& number) {

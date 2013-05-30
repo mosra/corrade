@@ -29,8 +29,9 @@
  * @brief Class Corrade::Utility::Resource
  */
 
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
 #include "Utility/corradeUtilityVisibility.h"
 
@@ -53,29 +54,6 @@ Standalone resource compiler executable is implemented in @ref rc.cpp.
 class CORRADE_UTILITY_EXPORT Resource {
     public:
         /**
-         * @brief Register data resource
-         * @param group         Group name
-         * @param count         File count
-         * @param positions     Positions of filenames and data in binary blobs
-         * @param filenames     Pointer to binary blob with filenames
-         * @param data          Pointer to binary blob with file data
-         *
-         * This function is used internally for automatic data resource
-         * registering, no need to use it directly.
-         */
-        static void registerData(const char* group, unsigned int count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data);
-
-        /**
-         * @brief Unregister data resource
-         * @param group         Group name
-         * @param data          Pointer to binary blob with file data
-         *
-         * This function is used internally for automatic data resource
-         * unregistering, no need to use it directly.
-         */
-        static void unregisterData(const char* group, const unsigned char* data);
-
-        /**
          * @brief Constructor
          * @param group         Group name for getting data or compiling new
          *      resources.
@@ -85,23 +63,12 @@ class CORRADE_UTILITY_EXPORT Resource {
         /**
          * @brief Compile data resource file
          * @param name          %Resource name (see RESOURCE_INITIALIZE())
-         * @param files         Map with files, first item of pair is filename,
-         *      second is file data.
+         * @param files         Files (pairs of filename, file data)
          *
-         * Produces C++ file with hexadecimally represented file data. The file
+         * Produces C++ file with hexadecimal data representation. The file
          * then must be compiled directly to executable or library.
          */
-        std::string compile(const std::string& name, const std::map<std::string, std::string>& files) const;
-
-        /**
-         * @brief Compile data resource file
-         * @param name          %Resource name (see RESOURCE_INITIALIZE())
-         * @param filename      Filename
-         * @param data          File data
-         *
-         * Convenience function for compiling resource with only one file.
-         */
-        std::string compile(const std::string& name, const std::string& filename, const std::string& data) const;
+        std::string compile(const std::string& name, const std::vector<std::pair<std::string, std::string>>& files) const;
 
         /**
          * @brief Get pointer to raw resource data
@@ -120,6 +87,13 @@ class CORRADE_UTILITY_EXPORT Resource {
          */
         std::string get(const std::string& filename) const;
 
+    #ifdef DOXYGEN_GENERATING_OUTPUT
+    private:
+    #endif
+        /* Internal use only. */
+        static void registerData(const char* group, unsigned int count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data);
+        static void unregisterData(const char* group, const unsigned char* data);
+
     private:
         struct CORRADE_UTILITY_LOCAL ResourceData {
             unsigned int position;
@@ -133,9 +107,8 @@ class CORRADE_UTILITY_EXPORT Resource {
 
         std::string group;
 
-        CORRADE_UTILITY_LOCAL std::string hexcode(const std::string& data, const std::string& comment = std::string()) const;
-
-        /** @todo Move to utilities.h? */
+        CORRADE_UTILITY_LOCAL static std::string comment(const std::string& comment);
+        CORRADE_UTILITY_LOCAL static std::string hexcode(const std::string& data);
         template<class T> static std::string numberToString(const T& number);
 };
 

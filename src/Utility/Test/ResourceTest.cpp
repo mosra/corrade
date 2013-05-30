@@ -59,23 +59,20 @@ void ResourceTest::compile() {
     CORRADE_VERIFY(consequenceIn.good());
 
     predispositionIn.seekg(0, std::ios::end);
-    std::string predisposition;
-    predisposition.reserve(predispositionIn.tellg());
+    std::string predisposition(predispositionIn.tellg(), '\0');
     predispositionIn.seekg(0, std::ios::beg);
+    predispositionIn.read(&predisposition[0], predisposition.size());
 
     consequenceIn.seekg(0, std::ios::end);
-    std::string consequence;
-    consequence.reserve(consequenceIn.tellg());
+    std::string consequence(consequenceIn.tellg(), '\0');
     consequenceIn.seekg(0, std::ios::beg);
-
-    predisposition.assign((std::istreambuf_iterator<char>(predispositionIn)), std::istreambuf_iterator<char>());
-    consequence.assign((std::istreambuf_iterator<char>(consequenceIn)), std::istreambuf_iterator<char>());
+    consequenceIn.read(&consequence[0], consequence.size());
 
     Resource r("test");
 
-    std::map<std::string, std::string> input{
-        std::make_pair("predisposition.bin", std::string(predisposition.data(), predisposition.size())),
-        std::make_pair("consequence.bin", std::string(consequence.data(), consequence.size()))};
+    std::vector<std::pair<std::string, std::string>> input{
+        {"predisposition.bin", predisposition},
+        {"consequence.bin", consequence}};
     CORRADE_COMPARE_AS(r.compile("ResourceTestData", input),
                        Directory::join(RESOURCE_TEST_DIR, "compiled.cpp"),
                        TestSuite::Compare::StringToFile);
