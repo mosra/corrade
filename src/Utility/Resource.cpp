@@ -142,20 +142,24 @@ std::string Resource::compile(const std::string& name, const std::string& group,
         "} AUTOMATIC_FINALIZER(resourceFinalizer_" + name + ")\n";
 }
 
-Resource::Resource(std::string group): group(std::move(group)) {}
+Resource::Resource(const std::string& group) {
+    _group = resources().find(group);
+    if(_group == resources().end())
+        Error() << "Resource: group" << '\'' + group + '\'' << "was not found";
+}
 
 std::pair<const unsigned char*, unsigned int> Resource::getRaw(const std::string& filename) const {
-    /* If the group/filename doesn't exist, return empty string */
-    if(resources().find(group) == resources().end()) {
-        Error() << "Resource: group" << '\'' + group + '\'' << "was not found";
-        return {};
-    } else if(resources()[group].find(filename) == resources()[group].end()) {
-        Error() << "Resource: file" << '\'' + filename + '\'' << "was not found in group" << '\'' + group + '\'';
+    /* No-op, error already emitted in constructor */
+    if(_group == resources().end()) return {};
+
+    /* If the filename doesn't exist, return empty string */
+    const auto it = _group->second.find(filename);
+    if(it == _group->second.end()) {
+        Error() << "Resource: file" << '\'' + filename + '\'' << "was not found in group" << '\'' + _group->first + '\'';
         return {};
     }
 
-    const ResourceData& r = resources()[group][filename];
-    return {r.data+r.position, r.size};
+    return {it->second.data+it->second.position, it->second.size};
 }
 
 std::string Resource::get(const std::string& filename) const {

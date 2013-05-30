@@ -66,15 +66,18 @@ class CORRADE_UTILITY_EXPORT Resource {
         /**
          * @brief Constructor
          * @param group         Group name for getting data
+         *
+         * If the group is not found, prints message to error output.
          */
-        explicit Resource(std::string group);
+        explicit Resource(const std::string& group);
 
         /**
          * @brief Get pointer to raw resource data
          * @param filename      Filename
          *
-         * Returns data of given group and filename as pair of pointer and
-         * size. If not found, the pointer is `nullptr` and size is `0`.
+         * Returns data of given file in the group as pair of pointer and size.
+         * If the group does not exist, returns `{nullptr, 0}`. If the file was
+         * not found, prints message to error output and returns `{nullptr, 0}`.
          */
         std::pair<const unsigned char*, unsigned int> getRaw(const std::string& filename) const;
 
@@ -83,6 +86,10 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @param filename      Filename
          * @return Data of given group (specified in constructor) and filename.
          *      Returns empty string if nothing was found.
+         *
+         * Returns data of given file in the group. If the group does not
+         * exist, returns empty string. If the file was not found, prints
+         * message to error output and returns empty string.
          */
         std::string get(const std::string& filename) const;
 
@@ -104,11 +111,11 @@ class CORRADE_UTILITY_EXPORT Resource {
            fiasco" which I think currently fails only in static build */
         CORRADE_UTILITY_LOCAL static std::map<std::string, std::map<std::string, ResourceData>>& resources();
 
-        std::string group;
-
         CORRADE_UTILITY_LOCAL static std::string comment(const std::string& comment);
         CORRADE_UTILITY_LOCAL static std::string hexcode(const std::string& data);
         template<class T> static std::string numberToString(const T& number);
+
+        std::map<std::string, std::map<std::string, ResourceData>>::const_iterator _group;
 };
 
 /**
