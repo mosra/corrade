@@ -23,10 +23,42 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include "TestSuite/Tester.h"
+#include "TestSuite/Compare/StringToFile.h"
+#include "Utility/Directory.h"
 #include "Utility/Resource.h"
-#include "Utility/utilities.h"
 
-static int staticResourceInitializer() {
+#include "testConfigure.h"
+
+static void initializeStaticResource() {
     RESOURCE_INITIALIZE(ResourceTestData)
-    return 1;
-} AUTOMATIC_INITIALIZER(staticResourceInitializer)
+}
+
+namespace Corrade { namespace Utility { namespace Test {
+
+class ResourceStaticTest: public TestSuite::Tester {
+    public:
+        ResourceStaticTest();
+
+        void get();
+};
+
+ResourceStaticTest::ResourceStaticTest() {
+    addTests({&ResourceStaticTest::get});
+
+    initializeStaticResource();
+}
+
+void ResourceStaticTest::get() {
+    Resource r("test");
+    CORRADE_COMPARE_AS(r.get("predisposition.bin"),
+                       Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"),
+                       TestSuite::Compare::StringToFile);
+    CORRADE_COMPARE_AS(r.get("consequence.bin"),
+                       Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
+                       TestSuite::Compare::StringToFile);
+}
+
+}}}
+
+CORRADE_TEST_MAIN(Corrade::Utility::Test::ResourceStaticTest)
