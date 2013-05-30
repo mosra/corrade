@@ -9,15 +9,12 @@ static const unsigned char resourcePositions[] = {
 };
 
 static const unsigned char resourceFilenames[] = {
-
     /* empty.bin */
     0x65,0x6d,0x70,0x74,0x79,0x2e,0x62,0x69,0x6e
 };
 
 static const unsigned char resourceData[] = {
-
     /* empty.bin */
-
 };
 
 int resourceInitializer_ResourceTestData();

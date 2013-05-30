@@ -97,6 +97,11 @@ std::string Resource::compile(const std::string& name, const std::vector<std::pa
         filenamesLen += it->first.size();
         dataLen += it->second.size();
 
+        if(it != files.begin()) {
+            filenames += '\n';
+            data += '\n';
+        }
+
         positions += hexcode(numberToString(filenamesLen));
         positions += hexcode(numberToString(dataLen));
 
@@ -108,13 +113,12 @@ std::string Resource::compile(const std::string& name, const std::vector<std::pa
     }
 
     /* Remove last comma from positions and filenames array */
-    positions.resize(positions.size()-2);
-    filenames.resize(filenames.size()-2);
+    positions.resize(positions.size()-1);
+    filenames.resize(filenames.size()-1);
 
-    /* Remove last comma and newline from data array only if the last file is
-       not empty */
+    /* Remove last comma from data array only if the last file is not empty */
     if(!files.back().second.empty())
-        data.resize(data.size()-2);
+        data.resize(data.size()-1);
 
     /* Return C++ file. The functions have forward declarations to avoid warning
        about functions which don't have corresponding declarations (enabled by
@@ -122,11 +126,11 @@ std::string Resource::compile(const std::string& name, const std::vector<std::pa
     return "/* Compiled resource file. DO NOT EDIT! */\n\n"
         "#include \"Utility/utilities.h\"\n"
         "#include \"Utility/Resource.h\"\n\n"
-        "static const unsigned char resourcePositions[] = {\n" +
+        "static const unsigned char resourcePositions[] = {" +
         positions + "\n};\n\n"
-        "static const unsigned char resourceFilenames[] = {\n" +
+        "static const unsigned char resourceFilenames[] = {" +
         filenames + "\n};\n\n"
-        "static const unsigned char resourceData[] = {\n" +
+        "static const unsigned char resourceData[] = {" +
         data +      "\n};\n\n"
         "int resourceInitializer_" + name + "();\n"
         "int resourceInitializer_" + name + "() {\n"
@@ -162,7 +166,7 @@ std::string Resource::get(const std::string& filename) const {
 }
 
 std::string Resource::comment(const std::string& comment) {
-    return "\n    /* " + comment + " */\n";
+    return "\n    /* " + comment + " */";
 }
 
 std::string Resource::hexcode(const std::string& data) {
@@ -171,7 +175,7 @@ std::string Resource::hexcode(const std::string& data) {
 
     /* Each row is indented by four spaces and has newline at the end */
     for(std::size_t row = 0; row < data.size(); row += 15) {
-        out << "    ";
+        out << "\n    ";
 
         /* Convert all characters on a row to hex "0xab,0x01,..." */
         for(std::size_t end = std::min(row + 15, data.size()), i = row; i != end; ++i) {
@@ -179,8 +183,6 @@ std::string Resource::hexcode(const std::string& data) {
                 << static_cast<unsigned int>(static_cast<unsigned char>(data[i]))
                 << ",";
         }
-
-        out << '\n';
     }
 
     return out.str();
