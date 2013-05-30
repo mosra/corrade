@@ -49,7 +49,6 @@ Standalone resource compiler executable is implemented in @ref rc.cpp.
 
 @todo Ad-hoc resources
 @todo Test data unregistering
-@todo Test empty files
  */
 class CORRADE_UTILITY_EXPORT Resource {
     public:

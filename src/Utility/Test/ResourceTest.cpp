@@ -41,12 +41,14 @@ class ResourceTest: public TestSuite::Tester {
         ResourceTest();
 
         void compile();
+        void compileEmptyFile();
         void get();
         void getInexistent();
 };
 
 ResourceTest::ResourceTest() {
     addTests({&ResourceTest::compile,
+              &ResourceTest::compileEmptyFile,
               &ResourceTest::get,
               &ResourceTest::getInexistent});
 }
@@ -75,6 +77,16 @@ void ResourceTest::compile() {
         {"consequence.bin", consequence}};
     CORRADE_COMPARE_AS(r.compile("ResourceTestData", input),
                        Directory::join(RESOURCE_TEST_DIR, "compiled.cpp"),
+                       TestSuite::Compare::StringToFile);
+}
+
+void ResourceTest::compileEmptyFile() {
+    Resource r("test");
+
+    std::vector<std::pair<std::string, std::string>> input{
+        {"empty.bin", ""}};
+    CORRADE_COMPARE_AS(r.compile("ResourceTestData", input),
+                       Directory::join(RESOURCE_TEST_DIR, "compiledEmpty.cpp"),
                        TestSuite::Compare::StringToFile);
 }
 
