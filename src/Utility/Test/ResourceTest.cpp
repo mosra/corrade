@@ -70,22 +70,18 @@ void ResourceTest::compile() {
     consequenceIn.seekg(0, std::ios::beg);
     consequenceIn.read(&consequence[0], consequence.size());
 
-    Resource r("test");
-
     std::vector<std::pair<std::string, std::string>> input{
         {"predisposition.bin", predisposition},
         {"consequence.bin", consequence}};
-    CORRADE_COMPARE_AS(r.compile("ResourceTestData", input),
+    CORRADE_COMPARE_AS(Resource::compile("ResourceTestData", "test", input),
                        Directory::join(RESOURCE_TEST_DIR, "compiled.cpp"),
                        TestSuite::Compare::StringToFile);
 }
 
 void ResourceTest::compileEmptyFile() {
-    Resource r("test");
-
     std::vector<std::pair<std::string, std::string>> input{
         {"empty.bin", ""}};
-    CORRADE_COMPARE_AS(r.compile("ResourceTestData", input),
+    CORRADE_COMPARE_AS(Resource::compile("ResourceTestData", "test", input),
                        Directory::join(RESOURCE_TEST_DIR, "compiledEmpty.cpp"),
                        TestSuite::Compare::StringToFile);
 }

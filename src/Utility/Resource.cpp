@@ -86,9 +86,7 @@ void Resource::unregisterData(const char* group, const unsigned char* data) {
     if(resources()[group].empty()) resources().erase(group);
 }
 
-Resource::Resource(std::string group): group(std::move(group)) {}
-
-std::string Resource::compile(const std::string& name, const std::vector<std::pair<std::string, std::string>>& files) const {
+std::string Resource::compile(const std::string& name, const std::string& group, const std::vector<std::pair<std::string, std::string>>& files) {
     std::string positions, filenames, data;
     unsigned int filenamesLen = 0, dataLen = 0;
 
@@ -143,6 +141,8 @@ std::string Resource::compile(const std::string& name, const std::vector<std::pa
         "    return 1;\n"
         "} AUTOMATIC_FINALIZER(resourceFinalizer_" + name + ")\n";
 }
+
+Resource::Resource(std::string group): group(std::move(group)) {}
 
 std::pair<const unsigned char*, unsigned int> Resource::getRaw(const std::string& filename) const {
     /* If the group/filename doesn't exist, return empty string */

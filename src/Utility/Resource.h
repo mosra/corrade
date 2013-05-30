@@ -53,21 +53,21 @@ Standalone resource compiler executable is implemented in @ref rc.cpp.
 class CORRADE_UTILITY_EXPORT Resource {
     public:
         /**
-         * @brief Constructor
-         * @param group         Group name for getting data or compiling new
-         *      resources.
-         */
-        explicit Resource(std::string group);
-
-        /**
          * @brief Compile data resource file
          * @param name          %Resource name (see RESOURCE_INITIALIZE())
+         * @param group         Group name for getting data
          * @param files         Files (pairs of filename, file data)
          *
          * Produces C++ file with hexadecimal data representation. The file
          * then must be compiled directly to executable or library.
          */
-        std::string compile(const std::string& name, const std::vector<std::pair<std::string, std::string>>& files) const;
+        static std::string compile(const std::string& name, const std::string& group, const std::vector<std::pair<std::string, std::string>>& files);
+
+        /**
+         * @brief Constructor
+         * @param group         Group name for getting data
+         */
+        explicit Resource(std::string group);
 
         /**
          * @brief Get pointer to raw resource data

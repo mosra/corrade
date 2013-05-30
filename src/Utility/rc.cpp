@@ -59,8 +59,6 @@ int main(int argc, char** argv) {
         return 2;
     }
 
-    Corrade::Utility::Resource r(argv[2]);
-
     std::vector<std::pair<std::string, std::string>> files;
 
     bool isAlias = false;
@@ -145,7 +143,7 @@ int main(int argc, char** argv) {
     }
 
     Error() << "Compiling...";
-    std::cout << r.compile(argv[1], data);
+    std::cout << Corrade::Utility::Resource::compile(argv[1], argv[2], data);
     Error() << "Done.";
 
     return 0;
