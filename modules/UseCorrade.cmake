@@ -116,8 +116,8 @@ function(corrade_add_resource name group_name)
     # Run command
     set(out resource_${name}.cpp)
     add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${out}
-        COMMAND ${CORRADE_RC_EXECUTABLE} ${name} ${group_name} ${arguments} > ${CMAKE_CURRENT_BINARY_DIR}/${out}
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${out}"
+        COMMAND ${CORRADE_RC_EXECUTABLE} ${name} ${group_name} "${CMAKE_CURRENT_BINARY_DIR}/${out}" ${arguments}
         DEPENDS ${CORRADE_RC_EXECUTABLE} ${dependencies}
         COMMENT "Compiling data resource file ${out}"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})

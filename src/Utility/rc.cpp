@@ -37,25 +37,24 @@ See @ref resource-management for brief introduction.
 
 @todo Test it
 @todo Check empty files
-@todo Write to file (and don't create any on error)
 */
 
 #include <fstream>
-#include <iostream>
 
 #include "Utility/Debug.h"
 #include "Utility/Resource.h"
 
+using Corrade::Utility::Debug;
 using Corrade::Utility::Error;
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 int main(int argc, char** argv) {
-    if(argc < 4) {
-        Error() << "Resource compiler for Corrade.";
-        Error() << "";
-        Error() << "Usage:";
-        Error() << "   " << argv[0] << "name group_name infile [-a alias] [infile2 [-a alias2] ...] > outfile.cpp";
-        Error() << "";
+    if(argc < 5) {
+        Debug() << "Resource compiler for Corrade.";
+        Debug() << "";
+        Debug() << "Usage:";
+        Debug() << "   " << argv[0] << "name group_name outfile infile [-a alias] [infile2 [-a alias2] ...] > outfile.cpp";
+        Debug() << "";
         return 2;
     }
 
@@ -63,7 +62,7 @@ int main(int argc, char** argv) {
 
     bool isAlias = false;
     std::string filename, alias;
-    for(int i = 3; i != argc; ++i) {
+    for(int i = 4; i != argc; ++i) {
         /* If argument is -a, next argument will be an alias */
         if(std::string(argv[i]) == "-a") {
             /* Check for "infile -a -a alias" */
@@ -121,10 +120,10 @@ int main(int argc, char** argv) {
     /* Read all files */
     std::vector<std::pair<std::string, std::string>> data;
     for(auto it = files.cbegin(); it != files.cend(); ++it) {
-        Error() << "Reading file" << it-files.begin()+1 << "of" << files.size();
-        Error() << "   " << it->first;
+        Debug() << "Reading file" << it-files.begin()+1 << "of" << files.size();
+        Debug() << "   " << it->first;
         if(!it->second.empty())
-            Error() << " ->" << it->second;
+            Debug() << " ->" << it->second;
 
         std::ifstream f(it->first.c_str(), std::ifstream::binary);
 
@@ -142,10 +141,17 @@ int main(int argc, char** argv) {
         data.emplace_back(it->second.empty() ? std::move(it->first) : std::move(it->second), std::move(d));
     }
 
-    Error() << "Compiling...";
-    std::cout << Corrade::Utility::Resource::compile(argv[1], argv[2], data);
-    Error() << "Done.";
+    Debug() << "Compiling...";
+    const std::string compiled = Corrade::Utility::Resource::compile(argv[1], argv[2], data);
+    Debug() << "Done.";
 
+    std::ofstream out(argv[3], std::ofstream::binary);
+    if(!out.good()) {
+        Error() << "Cannot open output file " << argv[3];
+        return 7;
+    }
+
+    out.write(compiled.data(), compiled.size());
     return 0;
 }
 #endif
