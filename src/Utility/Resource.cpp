@@ -136,7 +136,7 @@ std::string Resource::compile(const std::string& name, const std::vector<std::pa
         "} AUTOMATIC_FINALIZER(resourceFinalizer_" + name + ")\n";
 }
 
-std::tuple<const unsigned char*, unsigned int> Resource::getRaw(const std::string& filename) const {
+std::pair<const unsigned char*, unsigned int> Resource::getRaw(const std::string& filename) const {
     /* If the group/filename doesn't exist, return empty string */
     if(resources().find(group) == resources().end()) {
         Error() << "Resource: group" << '\'' + group + '\'' << "was not found";
@@ -147,7 +147,7 @@ std::tuple<const unsigned char*, unsigned int> Resource::getRaw(const std::strin
     }
 
     const ResourceData& r = resources()[group][filename];
-    return std::make_tuple(r.data+r.position, r.size);
+    return {r.data+r.position, r.size};
 }
 
 std::string Resource::get(const std::string& filename) const {

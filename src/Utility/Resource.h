@@ -77,7 +77,7 @@ class CORRADE_UTILITY_EXPORT Resource {
          * Returns data of given group and filename as pair of pointer and
          * size. If not found, the pointer is `nullptr` and size is `0`.
          */
-        std::tuple<const unsigned char*, unsigned int> getRaw(const std::string& filename) const;
+        std::pair<const unsigned char*, unsigned int> getRaw(const std::string& filename) const;
 
         /**
          * @brief Get data resource
