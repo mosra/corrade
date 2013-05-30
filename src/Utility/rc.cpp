@@ -42,6 +42,7 @@ See @ref resource-management for brief introduction.
 #include <fstream>
 
 #include "Utility/Debug.h"
+#include "Utility/Directory.h"
 #include "Utility/Resource.h"
 
 using Corrade::Utility::Debug;
@@ -53,10 +54,13 @@ int main(int argc, char** argv) {
         Debug() << "Resource compiler for Corrade.";
         Debug() << "";
         Debug() << "Usage:";
-        Debug() << "   " << argv[0] << "name group_name outfile infile [-a alias] [infile2 [-a alias2] ...] > outfile.cpp";
+        Debug() << "   " << argv[0] << "name group_name outfile.cpp infile [-a alias] [infile2 [-a alias2] ...]";
         Debug() << "";
         return 2;
     }
+
+    /* Remove previous output file */
+    Corrade::Utility::Directory::rm(argv[3]);
 
     std::vector<std::pair<std::string, std::string>> files;
 
