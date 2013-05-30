@@ -107,10 +107,14 @@ std::string Resource::compile(const std::string& name, const std::vector<std::pa
         data += hexcode(it->second);
     }
 
-    /* Remove last comma from data */
+    /* Remove last comma from positions and filenames array */
     positions.resize(positions.size()-2);
     filenames.resize(filenames.size()-2);
-    data.resize(data.size()-2);
+
+    /* Remove last comma and newline from data array only if the last file is
+       not empty */
+    if(!files.back().second.empty())
+        data.resize(data.size()-2);
 
     /* Return C++ file. The functions have forward declarations to avoid warning
        about functions which don't have corresponding declarations (enabled by
