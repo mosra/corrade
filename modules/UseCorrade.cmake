@@ -156,7 +156,7 @@ macro(corrade_add_static_plugin static_plugins_variable plugin_name metadata_fil
 
     # Compile resources
     set(resource_file "${CMAKE_CURRENT_BINARY_DIR}/resources_${plugin_name}.conf")
-    file(WRITE "${resource_file}" "group=plugins\n[file]\nfilename=\"${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file}\"\nalias=${plugin_name}.conf")
+    file(WRITE "${resource_file}" "group=CorradeStaticPlugin_${plugin_name}\n[file]\nfilename=\"${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file}\"\nalias=${plugin_name}.conf")
     corrade_add_resource(${plugin_name} "${resource_file}")
 
     # Create static library

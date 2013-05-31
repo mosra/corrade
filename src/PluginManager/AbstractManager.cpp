@@ -58,10 +58,9 @@ std::map<std::string, AbstractManager::Plugin*>* AbstractManager::plugins() {
 
     /* If there are unprocessed static plugins for this manager, add them */
     if(staticPlugins()) {
-        Resource r("plugins");
-
         for(StaticPlugin* staticPlugin: *staticPlugins()) {
             /* Load static plugin metadata */
+            Resource r("CorradeStaticPlugin_" + staticPlugin->plugin);
             std::istringstream metadata(r.get(staticPlugin->plugin + ".conf"));
 
             /* Insert plugin to list */
