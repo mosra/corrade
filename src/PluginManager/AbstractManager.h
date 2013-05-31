@@ -440,12 +440,13 @@ into dynamic library or main executable) and use AUTOMATIC_INITIALIZER()
 macro for automatic call.
 @attention This macro should be called outside of any namespace. If you are
     running into linker errors with `pluginImporter_*`, this could be the
-    problem. See RESOURCE_INITIALIZE() documentation for more information.
+    problem. See CORRADE_RESOURCE_INITIALIZE() documentation for more
+    information.
  */
 #define PLUGIN_IMPORT(name)                                                 \
     extern int pluginImporter_##name();                                     \
     pluginImporter_##name();                                                \
-    RESOURCE_INITIALIZE(name)
+    CORRADE_RESOURCE_INITIALIZE(name)
 
 } namespace Utility {
 

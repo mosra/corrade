@@ -57,7 +57,7 @@ the files. The files can also have aliases for e.g. simplifying filenames.
 @section resource-management-management Resource management
 Now it's time to make an application which will have these resources compiled
 in. The resources should be initialized automatically, if not (for example if
-they are compiled into static library), call RESOURCE_INITIALIZE() with
+they are compiled into static library), call CORRADE_RESOURCE_INITIALIZE() with
 resource name as argument before they are used, for example at the beginning
 of `main()` function.
 

@@ -75,7 +75,7 @@ class CORRADE_UTILITY_EXPORT Resource {
     public:
         /**
          * @brief Compile data resource file
-         * @param name          %Resource name (see RESOURCE_INITIALIZE())
+         * @param name          %Resource name (see CORRADE_RESOURCE_INITIALIZE())
          * @param group         Group name for getting data
          * @param files         Files (pairs of filename, file data)
          *
@@ -85,7 +85,7 @@ class CORRADE_UTILITY_EXPORT Resource {
 
         /**
          * @brief Compile data resource file using configuration file
-         * @param name          %Resource name (see RESOURCE_INITIALIZE())
+         * @param name          %Resource name (see CORRADE_RESOURCE_INITIALIZE())
          * @param configurationFile %Filename of configuration file
          *
          * Produces C++ file with hexadecimal data representation. See class
@@ -169,7 +169,7 @@ automatic call.
     try this:
 @code
 static void initialize() {
-    RESOURCE_INITIALIZE(res)
+    CORRADE_RESOURCE_INITIALIZE(res)
 }
 
 namespace Foo {
@@ -180,20 +180,23 @@ namespace Foo {
     }
 }
 @endcode
+
+@see CORRADE_RESOURCE_FINALIZE()
 */
-#define RESOURCE_INITIALIZE(name)                                             \
+#define CORRADE_RESOURCE_INITIALIZE(name)                                     \
     extern int resourceInitializer_##name();                                  \
     resourceInitializer_##name();
 
 /**
 @brief Cleanup resource
 
-Cleans up previously (even automatically) initialized resource.
+Cleans up resource previously (even automatically) initialized via
+CORRADE_RESOURCE_INITIALIZE().
 
 @attention This macro should be called outside of any namespace. See
-    RESOURCE_INITIALIZE() documentation for more information.
+    CORRADE_RESOURCE_INITIALIZE() documentation for more information.
 */
-#define RESOURCE_CLEANUP(name)                                                \
+#define CORRADE_RESOURCE_FINALIZE(name)                                       \
     extern int resourceFinalizer_##name();                                    \
     resourceFinalizer_##name();
 

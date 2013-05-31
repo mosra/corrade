@@ -31,7 +31,7 @@
 #include "testConfigure.h"
 
 static void initializeStaticResource() {
-    RESOURCE_INITIALIZE(ResourceTestData)
+    CORRADE_RESOURCE_INITIALIZE(ResourceTestData)
 }
 
 namespace Corrade { namespace Utility { namespace Test {
