@@ -415,7 +415,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
            The vector is accessible via function, not directly, because we don't
            know initialization order of static members and thus the vector could
-           be uninitalized when accessed from PLUGIN_REGISTER(). */
+           be uninitalized when accessed from CORRADE_PLUGIN_REGISTER(). */
         CORRADE_PLUGINMANAGER_LOCAL static std::vector<StaticPlugin*>*& staticPlugins();
 
         std::map<std::string, std::vector<AbstractPlugin*> > instances;
@@ -426,7 +426,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
 /** @hideinitializer
 @brief Import static plugin
-@param name      Static plugin name (defined with PLUGIN_REGISTER())
+@param name      Static plugin name (defined with CORRADE_PLUGIN_REGISTER())
 
 If static plugins are compiled into dynamic library or directly into the
 executable, they should be automatically loaded at startup thanks to
@@ -434,8 +434,8 @@ AUTOMATIC_INITALIZER() and AUTOMATIC_FINALIZER() macros.
 
 If static plugins are compiled into static library, they are not
 automatically loaded at startup, so you need to load them explicitly by
-calling PLUGIN_IMPORT() at the beggining of main() function. You can also
-wrap these macro calls into another function (which will then be compiled
+calling CORRADE_PLUGIN_IMPORT() at the beggining of main() function. You can
+also wrap these macro calls into another function (which will then be compiled
 into dynamic library or main executable) and use AUTOMATIC_INITIALIZER()
 macro for automatic call.
 @attention This macro should be called outside of any namespace. If you are
@@ -443,7 +443,7 @@ macro for automatic call.
     problem. See CORRADE_RESOURCE_INITIALIZE() documentation for more
     information.
  */
-#define PLUGIN_IMPORT(name)                                                 \
+#define CORRADE_PLUGIN_IMPORT(name)                                         \
     extern int pluginImporter_##name();                                     \
     pluginImporter_##name();                                                \
     CORRADE_RESOURCE_INITIALIZE(name)

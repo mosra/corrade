@@ -40,7 +40,7 @@
 using Corrade::Utility::Directory;
 
 static void initialize() {
-    PLUGIN_IMPORT(Canary)
+    CORRADE_PLUGIN_IMPORT(Canary)
 }
 
 namespace Corrade { namespace PluginManager { namespace Test {

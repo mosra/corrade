@@ -30,7 +30,7 @@
 namespace Corrade { namespace PluginManager { namespace Test {
 
 class AbstractAnimal: public AbstractPlugin {
-    PLUGIN_INTERFACE("cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")
+    CORRADE_PLUGIN_INTERFACE("cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")
 
     public:
         explicit AbstractAnimal() = default;

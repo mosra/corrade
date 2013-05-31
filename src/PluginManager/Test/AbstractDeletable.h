@@ -30,7 +30,7 @@
 namespace Corrade { namespace PluginManager { namespace Test {
 
 class AbstractDeletable: public AbstractPlugin {
-    PLUGIN_INTERFACE("cz.mosra.Corrade.PluginManager.Test.AbstractDeletable/1.0")
+    CORRADE_PLUGIN_INTERFACE("cz.mosra.Corrade.PluginManager.Test.AbstractDeletable/1.0")
 
     protected:
         unsigned int* var;
