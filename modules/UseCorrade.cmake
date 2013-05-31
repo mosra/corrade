@@ -84,7 +84,7 @@ function(corrade_add_test test_name)
     endforeach()
 
     add_executable(${test_name} ${sources})
-    target_link_libraries(${test_name} ${CORRADE_TESTSUITE_LIBRARIES} ${libraries})
+    target_link_libraries(${test_name} ${libraries} ${CORRADE_TESTSUITE_LIBRARIES})
     if(CORRADE_TARGET_EMSCRIPTEN)
         find_package(NodeJs REQUIRED)
         add_test(NAME ${test_name} COMMAND ${NODEJS_EXECUTABLE} $<TARGET_FILE:${test_name}>)
