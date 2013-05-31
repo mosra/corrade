@@ -73,11 +73,18 @@ void ArrayTest::constructMove() {
     CORRADE_VERIFY(a);
     const int* const ptr = a;
 
-    const Array b(std::move(a));
+    Array b(std::move(a));
     CORRADE_VERIFY(a == nullptr);
     CORRADE_VERIFY(b == ptr);
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(b.size(), 5);
+
+    Array c;
+    c = std::move(b);
+    CORRADE_VERIFY(b == nullptr);
+    CORRADE_VERIFY(c == ptr);
+    CORRADE_COMPARE(b.size(), 0);
+    CORRADE_COMPARE(c.size(), 5);
 }
 
 void ArrayTest::emptyCheck() {
