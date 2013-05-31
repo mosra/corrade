@@ -31,6 +31,7 @@
 #include <tuple>
 #include <vector>
 
+#include "Utility/Assert.h"
 #include "Utility/Configuration.h"
 #include "Utility/Debug.h"
 #include "Utility/Directory.h"
@@ -181,20 +182,17 @@ std::string Resource::compile(const std::string& name, const std::string& group,
 
 Resource::Resource(const std::string& group) {
     _group = resources().find(group);
-    if(_group == resources().end())
-        Error() << "Resource: group" << '\'' + group + '\'' << "was not found";
+    CORRADE_ASSERT(_group != resources().end(),
+        "Utility::Resource: group" << '\'' + group + '\'' << "was not found", );
 }
 
 std::pair<const unsigned char*, unsigned int> Resource::getRaw(const std::string& filename) const {
-    /* No-op, error already emitted in constructor */
-    if(_group == resources().end()) return {};
+    CORRADE_INTERNAL_ASSERT(_group != resources().end());
 
     /* If the filename doesn't exist, return empty string */
     const auto it = _group->second.find(filename);
-    if(it == _group->second.end()) {
-        Error() << "Resource: file" << '\'' + filename + '\'' << "was not found in group" << '\'' + _group->first + '\'';
-        return {};
-    }
+    CORRADE_ASSERT(it != _group->second.end(),
+        "Utility::Resource::get(): file" << '\'' + filename + '\'' << "was not found in group" << '\'' + _group->first + '\'', {});
 
     return {it->second.data+it->second.position, it->second.size};
 }

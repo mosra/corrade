@@ -36,7 +36,7 @@ Minimal dependencies
  * C++ compiler with good C++11 support. Currently there are two compilers
    which are tested to support everything needed: **GCC** >= 4.6 and **Clang**
    >= 3.1.
- * **CMake** >= 2.6
+ * **CMake** >= 2.8.8
 
 Compilation, installation
 -------------------------

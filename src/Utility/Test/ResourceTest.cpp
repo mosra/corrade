@@ -120,8 +120,7 @@ void ResourceTest::getInexistent() {
 
     {
         Resource r("inexistentGroup");
-        CORRADE_VERIFY(r.get("inexistentFile").empty());
-        CORRADE_COMPARE(out.str(), "Resource: group 'inexistentGroup' was not found\n");
+        CORRADE_COMPARE(out.str(), "Utility::Resource: group 'inexistentGroup' was not found\n");
     }
 
     out.str({});
@@ -129,10 +128,10 @@ void ResourceTest::getInexistent() {
     {
         Resource r("test");
         CORRADE_VERIFY(r.get("inexistentFile").empty());
-        CORRADE_COMPARE(out.str(), "Resource: file 'inexistentFile' was not found in group 'test'\n");
+        CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'inexistentFile' was not found in group 'test'\n");
     }
 
-    Resource r("inexistentGroup");
+    Resource r("test");
     const unsigned char* data;
     std::size_t size;
     std::tie(data, size) = r.getRaw("inexistentFile");
