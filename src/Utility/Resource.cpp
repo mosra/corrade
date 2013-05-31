@@ -31,6 +31,7 @@
 #include <tuple>
 #include <vector>
 
+#include "Containers/Array.h"
 #include "Utility/Assert.h"
 #include "Utility/Configuration.h"
 #include "Utility/Debug.h"
@@ -38,15 +39,22 @@
 
 namespace Corrade { namespace Utility {
 
-std::map<std::string, std::map<std::string, Resource::ResourceData>>& Resource::resources() {
-    static std::map<std::string, std::map<std::string, Resource::ResourceData>> resources;
+struct Resource::OverrideData {
+    const Configuration conf;
+    std::map<std::string, Containers::Array<unsigned char>> data;
+
+    explicit OverrideData(const std::string& filename): conf(filename) {}
+};
+
+auto Resource::resources() -> std::map<std::string, GroupData>& {
+    static std::map<std::string, GroupData> resources;
     return resources;
 }
 
 void Resource::registerData(const char* group, unsigned int count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data) {
     auto groupData = resources().find(group);
     if(groupData == resources().end())
-        groupData = resources().emplace(group, std::map<std::string, ResourceData>()).first;
+        groupData = resources().emplace(group, GroupData()).first;
 
     /* Cast to type which can be eaten by std::string constructor */
     const char* _positions = reinterpret_cast<const char*>(positions);
@@ -65,7 +73,7 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
             dataPosition-oldDataPosition,
             data};
 
-        groupData->second.emplace(std::string(_filenames+oldFilenamePosition, filenamePosition-oldFilenamePosition), res);
+        groupData->second.resources.emplace(std::string(_filenames+oldFilenamePosition, filenamePosition-oldFilenamePosition), res);
 
         oldFilenamePosition = filenamePosition;
         oldDataPosition = dataPosition;
@@ -73,21 +81,22 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
 }
 
 void Resource::unregisterData(const char* group, const unsigned char* data) {
+    /** @todo redo and test this */
     if(resources().find(group) == resources().end()) return;
 
     /* Positions which to remove */
     std::vector<std::string> positions;
 
-    for(auto it = resources()[group].begin(); it != resources()[group].end(); ++it) {
+    for(auto it = resources()[group].resources.begin(); it != resources()[group].resources.end(); ++it) {
         if(it->second.data == data)
             positions.push_back(it->first);
     }
 
     /** @todo wtf? this doesn't crash?? */
     for(auto it = positions.cbegin(); it != positions.cend(); ++it)
-        resources()[group].erase(*it);
+        resources()[group].resources.erase(*it);
 
-    if(resources()[group].empty()) resources().erase(group);
+    if(resources()[group].resources.empty()) resources().erase(group);
 }
 
 std::string Resource::compileFrom(const std::string& name, const std::string& configurationFile) {
@@ -115,10 +124,10 @@ std::string Resource::compileFrom(const std::string& name, const std::string& co
         if(alias != filename) Debug() << " ->" << alias;
 
         bool success;
-        std::string contents;
+        Containers::Array<unsigned char> contents;
         std::tie(success, contents) = fileContents(Directory::join(path, filename));
         if(!success) return {};
-        fileData.emplace_back(std::move(alias), std::move(contents));
+        fileData.emplace_back(std::move(alias), std::string(reinterpret_cast<char*>(contents.begin()), contents.size()));
     }
 
     return compile(name, group, fileData);
@@ -180,18 +189,70 @@ std::string Resource::compile(const std::string& name, const std::string& group,
         "} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_" + name + ")\n";
 }
 
-Resource::Resource(const std::string& group) {
+void Resource::overrideGroup(const std::string& group, const std::string& configurationFile) {
+    auto it = resources().find(group);
+    CORRADE_ASSERT(it != resources().end(),
+        "Utility::Resource::overrideGroup(): group" << '\'' + group + '\'' << "was not found", );
+    it->second.overrideGroup = configurationFile;
+}
+
+Resource::Resource(const std::string& group): _overrideGroup(nullptr) {
     _group = resources().find(group);
     CORRADE_ASSERT(_group != resources().end(),
         "Utility::Resource: group" << '\'' + group + '\'' << "was not found", );
+
+    if(!_group->second.overrideGroup.empty()) {
+        Debug() << "Utility::Resource: group" << '\'' + group + '\''
+                << "overriden with" << '\'' + _group->second.overrideGroup + '\'';
+        _overrideGroup = new OverrideData(_group->second.overrideGroup);
+
+        if(_overrideGroup->conf.value("group") != _group->first)
+            Warning() << "Utility::Resource: overriden with different group, found"
+                      << '\'' + _overrideGroup->conf.value("group") + '\''
+                      << "but expected" << '\'' + group + '\'';
+    }
+}
+
+Resource::~Resource() {
+    delete _overrideGroup;
 }
 
 std::pair<const unsigned char*, unsigned int> Resource::getRaw(const std::string& filename) const {
     CORRADE_INTERNAL_ASSERT(_group != resources().end());
 
+    /* The group is overriden with live data */
+    if(_overrideGroup) {
+        /* The file is already loaded */
+        auto it = _overrideGroup->data.find(filename);
+        if(it != _overrideGroup->data.end())
+            return {it->second.begin(), it->second.size()};
+
+        /* Load the file and save it for later use. Linear search is not an
+           issue, as this shouldn't be used in production code anyway. */
+        std::vector<const ConfigurationGroup*> files = _overrideGroup->conf.groups("file");
+        for(auto file: files) {
+            const std::string name = file->keyExists("alias") ? file->value("alias") : file->value("filename");
+            if(name != filename) continue;
+
+            /* Load the file */
+            bool success;
+            Containers::Array<unsigned char> data;
+            std::tie(success, data) = fileContents(Directory::join(Directory::path(_group->second.overrideGroup), file->value("filename")));
+            if(!success) return {nullptr, 0};
+
+            /* Save the file for later use and return */
+            it = _overrideGroup->data.emplace(filename, std::move(data)).first;
+            return {it->second.begin(), it->second.size()};
+        }
+
+        /* The file was not found, fallback to compiled-in ones */
+        Warning() << "Utility::Resource::get(): file" << '\'' + filename + '\''
+                  << "was not found in overriden group, fallback to compiled-in resources";
+    }
+
     /* If the filename doesn't exist, return empty string */
-    const auto it = _group->second.find(filename);
-    CORRADE_ASSERT(it != _group->second.end(),
+    const auto it = _group->second.resources.find(filename);
+    CORRADE_ASSERT(it != _group->second.resources.end(),
         "Utility::Resource::get(): file" << '\'' + filename + '\'' << "was not found in group" << '\'' + _group->first + '\'', {});
 
     return {it->second.data+it->second.position, it->second.size};
@@ -204,19 +265,19 @@ std::string Resource::get(const std::string& filename) const {
     return data ? std::string(reinterpret_cast<const char*>(data), size) : std::string();
 }
 
-std::pair<bool, std::string> Resource::fileContents(const std::string& filename) {
+std::pair<bool, Containers::Array<unsigned char>> Resource::fileContents(const std::string& filename) {
     std::ifstream file(filename.data(), std::ifstream::binary);
 
     if(!file.good()) {
         Error() << "Cannot open file " << filename;
-        return {false, std::string()};
+        return {false, Containers::Array<unsigned char>()};
     }
 
     file.seekg(0, std::ios::end);
-    if(file.tellg() == 0) return {true, std::string()};
-    std::string data(file.tellg(), '\0');
+    if(file.tellg() == 0) return {true, Containers::Array<unsigned char>()};
+    Containers::Array<unsigned char> data(file.tellg());
     file.seekg(0, std::ios::beg);
-    file.read(&data[0], data.size());
+    file.read(reinterpret_cast<char*>(data.begin()), data.size());
 
     return {true, std::move(data)};
 }

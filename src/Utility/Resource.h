@@ -33,6 +33,7 @@
 #include <string>
 #include <vector>
 
+#include "Containers/Containers.h"
 #include "Utility/corradeUtilityVisibility.h"
 
 namespace Corrade { namespace Utility {
@@ -52,8 +53,9 @@ Standalone resource compiler executable is implemented in @ref rc.cpp.
 Function compileFrom() takes configuration file as parameter. The file allows
 you to specify filenames and filename aliases of resource files instead of
 passing the data manually to compile(). The file is used when compiling
-resources using @ref corrade-cmake "corrade_add_resource()" via CMake. Example
-file:
+resources using @ref corrade-cmake "corrade_add_resource()" via CMake. The file
+can be also used when overriding compiled-in resources with live data using
+overrideGroup(). Example file:
 
     group=myGroup
 
@@ -76,7 +78,7 @@ class CORRADE_UTILITY_EXPORT Resource {
         /**
          * @brief Compile data resource file
          * @param name          %Resource name (see CORRADE_RESOURCE_INITIALIZE())
-         * @param group         Group name for getting data
+         * @param group         Group name
          * @param files         Files (pairs of filename, file data)
          *
          * Produces C++ file with hexadecimal data representation.
@@ -95,12 +97,28 @@ class CORRADE_UTILITY_EXPORT Resource {
         static std::string compileFrom(const std::string& name, const std::string& configurationFile);
 
         /**
+         * @brief Override group
+         * @param group         Group name
+         * @param configurationFile %Filename of configuration file. Empty
+         *      string will discard the override.
+         *
+         * Overrides compiled-in resources of given group with live data
+         * specified in given configuration file, useful during development and
+         * debugging. Subsequently created Resource instances with the same
+         * group will take data from live filesystem instead and fallback to
+         * compiled-in resources only for not found files.
+         */
+        static void overrideGroup(const std::string& group, const std::string& configurationFile);
+
+        /**
          * @brief Constructor
-         * @param group         Group name for getting data
+         * @param group         Group name
          *
          * If the group is not found, prints message to error output.
          */
         explicit Resource(const std::string& group);
+
+        ~Resource();
 
         /**
          * @brief Get pointer to raw resource data
@@ -138,18 +156,25 @@ class CORRADE_UTILITY_EXPORT Resource {
             const unsigned char* data;
         };
 
+        struct CORRADE_UTILITY_LOCAL GroupData {
+            std::string overrideGroup;
+            std::map<std::string, ResourceData> resources;
+        };
+
+        struct OverrideData;
+
         /* Accessed through function to overcome "static initialization order
            fiasco" which I think currently fails only in static build */
-        CORRADE_UTILITY_LOCAL static std::map<std::string, std::map<std::string, ResourceData>>& resources();
+        CORRADE_UTILITY_LOCAL static std::map<std::string, GroupData>& resources();
 
-        CORRADE_UTILITY_LOCAL static std::string compileFromInternal(const std::string& name, std::istream& in, const std::string& path);
-        CORRADE_UTILITY_LOCAL static std::pair<bool, std::string> fileContents(const std::string& filename);
-
+        CORRADE_UTILITY_LOCAL static std::pair<bool, Containers::Array<unsigned char>> fileContents(const std::string& filename);
         CORRADE_UTILITY_LOCAL static std::string comment(const std::string& comment);
         CORRADE_UTILITY_LOCAL static std::string hexcode(const std::string& data);
         template<class T> static std::string numberToString(const T& number);
 
-        std::map<std::string, std::map<std::string, ResourceData>>::const_iterator _group;
+        std::map<std::string, GroupData>::const_iterator _group;
+
+        OverrideData* _overrideGroup;
 };
 
 /**
