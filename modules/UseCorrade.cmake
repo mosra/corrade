@@ -93,37 +93,36 @@ function(corrade_add_test test_name)
     endif()
 endfunction()
 
-function(corrade_add_resource name group_name)
-    set(IS_ALIAS OFF)
-    foreach(argument ${ARGN})
+function(corrade_add_resource name configurationFile)
+    # TODO: remove this when backward compatibility is non-issue
+    list(LENGTH ARGN list_length)
+    if(NOT ${list_length} EQUAL 0)
+        message(FATAL_ERROR "Superfluous arguments to corrade_add_resource():" ${ARGN})
+    endif()
 
-        # Next argument is alias
-        if(${argument} STREQUAL "ALIAS")
-            set(IS_ALIAS ON)
-
-        # This argument is alias
-        elseif(IS_ALIAS)
-            set(arguments ${arguments} -a ${argument})
-            set(IS_ALIAS OFF)
-
-        # Filename
-        else()
-            set(arguments ${arguments} ${argument})
-            set(dependencies ${dependencies} ${argument})
+    # Parse dependencies from the file
+    set(filenameRegex "^[ \t]*filename[ \t]*=[ \t]*\"?([^\"]+)\"?[ \t]*$")
+    get_filename_component(configurationFilePath ${configurationFile} PATH)
+    file(STRINGS "${configurationFile}" files REGEX ${filenameRegex})
+    foreach(file ${files})
+        string(REGEX REPLACE ${filenameRegex} "\\1" filename "${file}")
+        if(NOT IS_ABSOLUTE "${filename}" AND configurationFilePath)
+            set(filename "${configurationFilePath}/${filename}")
         endif()
+        list(APPEND dependencies "${filename}")
     endforeach()
 
     # Run command
-    set(out resource_${name}.cpp)
+    set(out "${CMAKE_CURRENT_BINARY_DIR}/resource_${name}.cpp")
     add_custom_command(
-        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${out}"
-        COMMAND ${CORRADE_RC_EXECUTABLE} ${name} ${group_name} "${CMAKE_CURRENT_BINARY_DIR}/${out}" ${arguments}
-        DEPENDS ${CORRADE_RC_EXECUTABLE} ${dependencies}
+        OUTPUT "${out}"
+        COMMAND "${CORRADE_RC_EXECUTABLE}" ${name} "${configurationFile}" "${out}"
+        DEPENDS "${CORRADE_RC_EXECUTABLE}" ${dependencies}
         COMMENT "Compiling data resource file ${out}"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
     # Save output filename
-    set(${name} ${CMAKE_CURRENT_BINARY_DIR}/${out} PARENT_SCOPE)
+    set(${name} "${out}" PARENT_SCOPE)
 endfunction()
 
 function(corrade_add_plugin plugin_name install_dir metadata_file)
@@ -155,9 +154,13 @@ macro(corrade_add_static_plugin static_plugins_variable plugin_name metadata_fil
         set(sources ${sources} ${source})
     endforeach()
 
-    corrade_add_resource(${plugin_name} plugins ${metadata_file} ALIAS "${plugin_name}.conf")
-    add_library(${plugin_name} STATIC ${sources} ${${plugin_name}})
+    # Compile resources
+    set(resource_file "${CMAKE_CURRENT_BINARY_DIR}/resources_${plugin_name}.conf")
+    file(WRITE "${resource_file}" "group=plugins\n[file]\nfilename=\"${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file}\"\nalias=${plugin_name}.conf")
+    corrade_add_resource(${plugin_name} "${resource_file}")
 
+    # Create static library
+    add_library(${plugin_name} STATIC ${sources} ${${plugin_name}})
     set_target_properties(${plugin_name} PROPERTIES COMPILE_FLAGS "-DCORRADE_STATIC_PLUGIN ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
 
     # Unset sources array (it's a macro, thus variables stay between calls)

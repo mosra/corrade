@@ -24,8 +24,14 @@
 #
 
 cmake_minimum_required(VERSION 2.8)
+project(CorradeResourceExample)
 
-add_subdirectory(interconnect)
-add_subdirectory(pluginmanager)
-add_subdirectory(resource)
-add_subdirectory(test)
+find_package(Corrade REQUIRED)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CORRADE_CXX_FLAGS}")
+include_directories(${CORRADE_INCLUDE_DIR})
+
+corrade_add_resource(Resources resources.conf)
+
+add_executable(ResourceTest main.cpp ${Resources})
+target_link_libraries(ResourceTest ${CORRADE_UTILITY_LIBRARY})

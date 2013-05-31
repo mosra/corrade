@@ -42,6 +42,7 @@ class ResourceTest: public TestSuite::Tester {
 
         void compile();
         void compileEmptyFile();
+        void compileFrom();
         void get();
         void getInexistent();
 };
@@ -49,6 +50,7 @@ class ResourceTest: public TestSuite::Tester {
 ResourceTest::ResourceTest() {
     addTests({&ResourceTest::compile,
               &ResourceTest::compileEmptyFile,
+              &ResourceTest::compileFrom,
               &ResourceTest::get,
               &ResourceTest::getInexistent});
 }
@@ -84,6 +86,22 @@ void ResourceTest::compileEmptyFile() {
     CORRADE_COMPARE_AS(Resource::compile("ResourceTestData", "test", input),
                        Directory::join(RESOURCE_TEST_DIR, "compiledEmpty.cpp"),
                        TestSuite::Compare::StringToFile);
+}
+
+void ResourceTest::compileFrom() {
+    std::ostringstream out;
+    Debug::setOutput(&out);
+
+    const std::string compiled = Resource::compileFrom("ResourceTestData",
+        Directory::join(RESOURCE_TEST_DIR, "resources.conf"));
+    CORRADE_COMPARE_AS(compiled, Directory::join(RESOURCE_TEST_DIR, "compiled.cpp"),
+                       TestSuite::Compare::StringToFile);
+    CORRADE_COMPARE(out.str(),
+        "Reading file 1 of 2 in group 'test'\n"
+        "    ../ResourceTestFiles/predisposition.bin\n"
+        " -> predisposition.bin\n"
+        "Reading file 2 of 2 in group 'test'\n"
+        "    consequence.bin\n");
 }
 
 void ResourceTest::get() {

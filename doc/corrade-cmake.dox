@@ -84,18 +84,16 @@ must be called explicitly.
 
 ### Compile data resources into application binary
 
-    corrade_add_resource(name group_name
-                         file [ALIAS alias]
-                         [file1 [ALIAS alias1]...])
+    corrade_add_resource(name resources.conf)
 
-Depends on `corrade-rc`, which is part of %Corrade utilities. This command
-generates resource file with group group_name from given files in current build
+Depends on corrade-rc, which is part of %Corrade utilities. This command
+generates resource data using given configuration file in current build
 directory. Argument name is name under which the resources can be explicitly
-loaded. Variable `name` contains compiled resource filename, which is then used
-for compiling library / executable. Example usage:
+loaded. Variable `name` contains compiled resource filename, which is then
+used for compiling library / executable. Example usage:
 
-    corrade_add_resource(name group_name file1 ALIAS alias1 file2 file3)
-    add_executable(app source1 source2 ... ${name})
+    corrade_add_resource(app_resources resources.conf)
+    add_executable(app source1 source2 ... ${app_resources})
 
 ### Add dynamic plugin
 

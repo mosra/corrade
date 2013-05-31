@@ -47,6 +47,27 @@ in given group has unique filename.
 See @ref resource-management for brief introduction and example usage.
 Standalone resource compiler executable is implemented in @ref rc.cpp.
 
+@section UtilityResource-configuration Resource configuration file
+
+Function compileFrom() takes configuration file as parameter. The file allows
+you to specify filenames and filename aliases of resource files instead of
+passing the data manually to compile(). The file is used when compiling
+resources using @ref corrade-cmake "corrade_add_resource()" via CMake. Example
+file:
+
+    group=myGroup
+
+    [file]
+    filename=../resources/intro-new-final.ogg
+    alias=intro.ogg
+
+    [file]
+    filename=license.txt
+
+    [file]
+    filename=levels-insane.conf
+    alias=levels-easy.conf
+
 @todo Ad-hoc resources
 @todo Test data unregistering
  */
@@ -58,10 +79,20 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @param group         Group name for getting data
          * @param files         Files (pairs of filename, file data)
          *
-         * Produces C++ file with hexadecimal data representation. The file
-         * then must be compiled directly to executable or library.
+         * Produces C++ file with hexadecimal data representation.
          */
         static std::string compile(const std::string& name, const std::string& group, const std::vector<std::pair<std::string, std::string>>& files);
+
+        /**
+         * @brief Compile data resource file using configuration file
+         * @param name          %Resource name (see RESOURCE_INITIALIZE())
+         * @param configurationFile %Filename of configuration file
+         *
+         * Produces C++ file with hexadecimal data representation. See class
+         * documentation for configuration file syntax overview. The filenames
+         * are taken relative to configuration file path.
+         */
+        static std::string compileFrom(const std::string& name, const std::string& configurationFile);
 
         /**
          * @brief Constructor
@@ -110,6 +141,9 @@ class CORRADE_UTILITY_EXPORT Resource {
         /* Accessed through function to overcome "static initialization order
            fiasco" which I think currently fails only in static build */
         CORRADE_UTILITY_LOCAL static std::map<std::string, std::map<std::string, ResourceData>>& resources();
+
+        CORRADE_UTILITY_LOCAL static std::string compileFromInternal(const std::string& name, std::istream& in, const std::string& path);
+        CORRADE_UTILITY_LOCAL static std::pair<bool, std::string> fileContents(const std::string& filename);
 
         CORRADE_UTILITY_LOCAL static std::string comment(const std::string& comment);
         CORRADE_UTILITY_LOCAL static std::string hexcode(const std::string& data);

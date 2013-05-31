@@ -23,31 +23,17 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-namespace Corrade {
-/** @page corrade-example-index Examples and tutorials
+#include <Utility/Resource.h>
+#include <Utility/Debug.h>
 
- - @subpage interconnect
- - @subpage plugin-management
- - @subpage resource-management
- - @subpage unit-testing
+using namespace Corrade;
 
-@todoc Rename (merge) to page `examples` when doxygen treats it as regular page.
+int main() {
+    /* Initialize resource manager with name of resource group we are using */
+    Utility::Resource rs("data");
 
-@example interconnect/main.cpp
-@example interconnect/CMakeLists.txt
-@example pluginmanager/AbstractAnimal.h
-@example pluginmanager/Canary.cpp
-@example pluginmanager/Canary.conf
-@example pluginmanager/Dog.cpp
-@example pluginmanager/Dog.conf
-@example pluginmanager/main.cpp
-@example pluginmanager/CMakeLists.txt
-@example resource/licenses/en.txt
-@example resource/resources.conf
-@example resource/main.cpp
-@example resource/CMakeLists.txt
-@example test/MyTest.cpp
-@example test/CMakeLists.txt
+    /* Print out the license */
+    Utility::Debug() << rs.get("license.txt");
 
-*/
+    return 0;
 }

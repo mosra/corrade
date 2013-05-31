@@ -25,12 +25,15 @@
 
 #include "Resource.h"
 
+#include <fstream>
 #include <iomanip>
 #include <sstream>
 #include <tuple>
 #include <vector>
 
-#include "Debug.h"
+#include "Utility/Configuration.h"
+#include "Utility/Debug.h"
+#include "Utility/Directory.h"
 
 namespace Corrade { namespace Utility {
 
@@ -84,6 +87,40 @@ void Resource::unregisterData(const char* group, const unsigned char* data) {
         resources()[group].erase(*it);
 
     if(resources()[group].empty()) resources().erase(group);
+}
+
+std::string Resource::compileFrom(const std::string& name, const std::string& configurationFile) {
+    const std::string path = Directory::path(configurationFile);
+    const Configuration conf(configurationFile);
+
+    /* Group name */
+    const std::string group = conf.value("group");
+
+    /* Load all files */
+    std::vector<const ConfigurationGroup*> files = conf.groups("file");
+    std::vector<std::pair<std::string, std::string>> fileData;
+    fileData.reserve(files.size());
+    for(const auto file: files) {
+        Debug() << "Reading file" << fileData.size()+1 << "of" << files.size() << "in group" << '\'' + group + '\'';
+
+        const std::string filename = file->value("filename");
+        const std::string alias = file->keyExists("alias") ? file->value("alias") : filename;
+        if(filename.empty() || alias.empty()) {
+            Error() << "    Error: empty filename or alias!";
+            return {};
+        }
+
+        Debug() << "   " << filename;
+        if(alias != filename) Debug() << " ->" << alias;
+
+        bool success;
+        std::string contents;
+        std::tie(success, contents) = fileContents(Directory::join(path, filename));
+        if(!success) return {};
+        fileData.emplace_back(std::move(alias), std::move(contents));
+    }
+
+    return compile(name, group, fileData);
 }
 
 std::string Resource::compile(const std::string& name, const std::string& group, const std::vector<std::pair<std::string, std::string>>& files) {
@@ -167,6 +204,23 @@ std::string Resource::get(const std::string& filename) const {
     unsigned int size;
     std::tie(data, size) = getRaw(filename);
     return data ? std::string(reinterpret_cast<const char*>(data), size) : std::string();
+}
+
+std::pair<bool, std::string> Resource::fileContents(const std::string& filename) {
+    std::ifstream file(filename.data(), std::ifstream::binary);
+
+    if(!file.good()) {
+        Error() << "Cannot open file " << filename;
+        return {false, std::string()};
+    }
+
+    file.seekg(0, std::ios::end);
+    if(file.tellg() == 0) return {true, std::string()};
+    std::string data(file.tellg(), '\0');
+    file.seekg(0, std::ios::beg);
+    file.read(&data[0], data.size());
+
+    return {true, std::move(data)};
 }
 
 std::string Resource::comment(const std::string& comment) {
