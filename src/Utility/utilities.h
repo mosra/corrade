@@ -81,27 +81,27 @@ CORRADE_UTILITY_EXPORT void sleep(std::size_t ms);
 /** @{ @name Macros */
 
 /**
- * @brief Declare automatic initializer
- * @param function Initializer function name of type int(*)().
- *
- * Function passed as argument will be called even before entering main()
- * function. This is usable when e.g. automatically registering plugins or data
- * resources without forcing the user to write additional code in main().
- * @attention This macro does nothing in static libraries.
- */
-#define AUTOMATIC_INITIALIZER(function)                                     \
+@brief Declare automatic initializer
+@param function Initializer function name of type int(*)().
+
+Function passed as argument will be called even before entering `main()`
+function. This is usable when e.g. automatically registering plugins or data
+resources without forcing the user to write additional code in `main()`.
+@attention This macro does nothing in static libraries.
+*/
+#define CORRADE_AUTOMATIC_INITIALIZER(function)                             \
     static const int initializer_##function = function();
 
 /**
- * @brief Declare automatic initializer
- * @param function Finalizer function name of type int(*)().
- *
- * Function passed as argument will be called even before entering main()
- * function. This is usable in conjuction with ::AUTOMATIC_INITIALIZER() when
- * there is need to properly discard initialized data.
- * @attention This macro does nothing in static libraries.
- */
-#define AUTOMATIC_FINALIZER(function)                                       \
+@brief Declare automatic initializer
+@param function Finalizer function name of type int(*)().
+
+Function passed as argument will be called even before entering `main()`
+function. This is usable in conjuction with CORRADE_AUTOMATIC_INITIALIZER()
+when there is need to properly discard initialized data.
+@attention This macro does nothing in static libraries.
+*/
+#define CORRADE_AUTOMATIC_FINALIZER(function)                               \
     class Finalizer_##function {                                            \
         public:                                                             \
             Finalizer_##function() {}                                       \

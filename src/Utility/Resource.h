@@ -156,12 +156,12 @@ class CORRADE_UTILITY_EXPORT Resource {
 @brief Initialize resource
 
 If a resource is compiled into dynamic library or directly into executable, it
-will be initialized automatically thanks to AUTOMATIC_INITIALIZER() macros.
-However, if the resource is compiled into static library, it must be explicitly
-initialized via this macro, e.g. at the beginning of main(). You can also wrap
-these macro calls into another function (which will then be compiled into
-dynamic library or main executable) and use AUTOMATIC_INITIALIZER() macro for
-automatic call.
+will be initialized automatically thanks to CORRADE_AUTOMATIC_INITIALIZER()
+macros. However, if the resource is compiled into static library, it must be
+explicitly initialized via this macro, e.g. at the beginning of main(). You can
+also wrap these macro calls into another function (which will then be compiled
+into dynamic library or main executable) and use CORRADE_AUTOMATIC_INITIALIZER()
+macro for automatic call.
 
 @attention This macro should be called outside of any namespace. If you are
     running into linker errors with `resourceInitializer_*`, this could be the

@@ -171,12 +171,12 @@ std::string Resource::compile(const std::string& name, const std::string& group,
         "int resourceInitializer_" + name + "() {\n"
         "    Corrade::Utility::Resource::registerData(\"" + group + "\", " + std::to_string(files.size()) + ", resourcePositions, resourceFilenames, resourceData);\n"
         "    return 1;\n"
-        "} AUTOMATIC_INITIALIZER(resourceInitializer_" + name + ")\n\n"
+        "} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_" + name + ")\n\n"
         "int resourceFinalizer_" + name + "();\n"
         "int resourceFinalizer_" + name + "() {\n"
         "    Corrade::Utility::Resource::unregisterData(\"" + group + "\", resourceData);\n"
         "    return 1;\n"
-        "} AUTOMATIC_FINALIZER(resourceFinalizer_" + name + ")\n";
+        "} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_" + name + ")\n";
 }
 
 Resource::Resource(const std::string& group) {
