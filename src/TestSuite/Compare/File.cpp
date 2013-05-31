@@ -106,7 +106,9 @@ namespace Compare {
 
 File::File(const std::string& pathPrefix): c(pathPrefix) {}
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 Comparator<File> File::comparator() { return c; }
+#endif
 
 }
 

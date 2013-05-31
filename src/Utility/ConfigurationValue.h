@@ -130,7 +130,6 @@ template<class T> struct ConfigurationValue {
     #endif
 };
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Implementation {
     template<class T> struct CORRADE_UTILITY_EXPORT BasicConfigurationValue {
         BasicConfigurationValue() = delete;
@@ -139,7 +138,6 @@ namespace Implementation {
         static T fromString(const std::string& stringValue, ConfigurationValueFlags flags);
     };
 }
-#endif
 
 /** @brief %Configuration value parser and writer for `short` type */
 template<> struct ConfigurationValue<short>: public Implementation::BasicConfigurationValue<short> {};

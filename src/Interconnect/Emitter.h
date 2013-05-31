@@ -36,7 +36,6 @@
 
 namespace Corrade { namespace Interconnect {
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Implementation {
 
 class SignalDataHash {
@@ -88,7 +87,6 @@ template<class ...Args> class MemberConnectionData: public AbstractConnectionDat
 };
 
 }
-#endif
 
 /**
 @brief %Emitter object
@@ -382,6 +380,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         bool connectionsChanged;
 };
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 template<class EmitterObject, class Emitter_, class Receiver, class ReceiverObject, class ...Args>
 #ifdef DOXYGEN_GENERATING_OUTPUT
 Connection
@@ -424,6 +423,7 @@ template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emi
 
     return Signal();
 }
+#endif
 
 }}
 

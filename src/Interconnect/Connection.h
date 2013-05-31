@@ -36,7 +36,6 @@
 
 namespace Corrade { namespace Interconnect {
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Implementation {
     class AbstractConnectionData;
 
@@ -66,7 +65,6 @@ namespace Implementation {
             std::size_t data[Size];
     };
 }
-#endif
 
 /**
 @brief %Connection

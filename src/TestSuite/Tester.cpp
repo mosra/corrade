@@ -85,7 +85,6 @@ int Tester::exec(std::ostream* logOutput, std::ostream* errorOutput) {
     return errorCount != 0 || noCheckCount != 0;
 }
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 void Tester::verify(const std::string& expression, bool expressionValue) {
     ++checkCount;
 
@@ -130,7 +129,5 @@ Tester::ExpectedFailure::~ExpectedFailure() {
 }
 
 std::string Tester::ExpectedFailure::message() const { return _message; }
-
-#endif
 
 }}

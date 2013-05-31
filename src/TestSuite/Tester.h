@@ -111,7 +111,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                 testCases.push_back(static_cast<TestCase>(test));
         }
 
-        #ifndef DOXYGEN_GENERATING_OUTPUT
+    #ifdef DOXYGEN_GENERATING_OUTPUT
+    private:
+    #endif
         /* Compare two identical types without explicit type specification */
         template<class T> void compare(const std::string& actual, const T& actualValue, const std::string& expected, const T& expectedValue) {
             compareAs<T, T, T>(actual, actualValue, expected, expectedValue);
@@ -145,7 +147,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
         void skip(const std::string& message);
 
+    #ifndef DOXYGEN_GENERATING_OUTPUT
     protected:
+    #endif
         class ExpectedFailure {
             public:
                 explicit ExpectedFailure(Tester* instance, std::string message);
@@ -160,7 +164,6 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         };
 
         void registerTestCase(const std::string& name, int line);
-        #endif
 
     private:
         class Exception {};

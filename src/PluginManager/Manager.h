@@ -52,7 +52,12 @@ template<class T, class BaseManager>
 #endif
 class Manager: public BaseManager {
     public:
-        /** @copydoc AbstractManager::AbstractManager() */
+        /**
+         * @brief Constructor
+         *
+         * Forwards arguments to @p BaseManager constructor. See
+         * AbstractManager::AbstractManager() for more information.
+         */
         template<class ...U> explicit Manager(U&&... args);
 
         /**

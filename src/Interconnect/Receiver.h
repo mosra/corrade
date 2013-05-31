@@ -35,11 +35,9 @@
 
 namespace Corrade { namespace Interconnect {
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Implementation {
     class AbstractConnectionData;
 }
-#endif
 
 /**
 @brief %Receiver object

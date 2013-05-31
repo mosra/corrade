@@ -167,13 +167,13 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          *
          * See also Configuration::automaticKeyCreation().
          */
-        bool value(const std::string& key, std::string* _value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
-            return valueInternal(key, _value, number, flags);
+        bool value(const std::string& key, std::string* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
+            return valueInternal(key, value, number, flags);
         }
 
         /** @overload */
-        bool value(const std::string& key, std::string* _value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
-            return valueInternal(key, _value, number, flags);
+        bool value(const std::string& key, std::string* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
+            return valueInternal(key, value, number, flags);
         }
 
         /**

@@ -35,7 +35,6 @@
 
 namespace Corrade { namespace TestSuite {
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Implementation {
     template<class T> class FloatComparatorEpsilon {};
 
@@ -58,7 +57,6 @@ namespace Implementation {
             T actualValue, expectedValue;
     };
 }
-#endif
 
 /** @brief Fuzzy-compare for float values */
 template<> class Comparator<float>: public Implementation::FloatComparator<float> {};

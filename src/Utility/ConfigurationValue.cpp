@@ -29,7 +29,6 @@
 
 namespace Corrade { namespace Utility {
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Implementation {
     template<class T> std::string BasicConfigurationValue<T>::toString(const T& value, ConfigurationValueFlags flags) {
         std::ostringstream stream;
@@ -92,6 +91,7 @@ namespace Implementation {
     template struct BasicConfigurationValue<std::string>;
 }
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 bool ConfigurationValue<bool>::fromString(const std::string& value, ConfigurationValueFlags) {
     if(value == "1" || value == "yes" || value == "y" || value == "true") return true;
     return false;

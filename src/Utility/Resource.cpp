@@ -246,8 +246,10 @@ std::string Resource::hexcode(const std::string& data) {
     return out.str();
 }
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 template<class T> std::string Resource::numberToString(const T& number) {
     return std::string(reinterpret_cast<const char*>(&number), sizeof(T));
 }
+#endif
 
 }}
