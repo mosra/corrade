@@ -108,6 +108,7 @@ void ArrayTest::access() {
 }
 
 void ArrayTest::rangeBasedFor() {
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     Array a(5);
     for(auto& i: a)
         i = 3;
@@ -117,6 +118,9 @@ void ArrayTest::rangeBasedFor() {
     CORRADE_COMPARE(a[2], 3);
     CORRADE_COMPARE(a[3], 3);
     CORRADE_COMPARE(a[4], 3);
+    #else
+    CORRADE_SKIP("Range-based for is not available in GCC 4.5");
+    #endif
 }
 
 }}}

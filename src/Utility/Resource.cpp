@@ -118,7 +118,9 @@ std::string Resource::compileFrom(const std::string& name, const std::string& co
     std::vector<const ConfigurationGroup*> files = conf.groups("file");
     std::vector<std::pair<std::string, std::string>> fileData;
     fileData.reserve(files.size());
-    for(const auto file: files) {
+    for(auto it = files.begin(); it != files.end(); ++it) {
+        const ConfigurationGroup* const file = *it;
+
         Debug() << "Reading file" << fileData.size()+1 << "of" << files.size() << "in group" << '\'' + group + '\'';
 
         const std::string filename = file->value("filename");
@@ -238,7 +240,9 @@ std::pair<const unsigned char*, unsigned int> Resource::getRaw(const std::string
         /* Load the file and save it for later use. Linear search is not an
            issue, as this shouldn't be used in production code anyway. */
         std::vector<const ConfigurationGroup*> files = _overrideGroup->conf.groups("file");
-        for(auto file: files) {
+        for(auto fit = files.begin(); fit != files.end(); ++fit) {
+            const ConfigurationGroup* const file = *fit;
+
             const std::string name = file->keyExists("alias") ? file->value("alias") : file->value("filename");
             if(name != filename) continue;
 
