@@ -38,6 +38,15 @@ namespace Corrade {
 #ifdef DOXYGEN_GENERATING_OUTPUT
 
 /**
+@brief GCC 4.7 compatibility
+
+`CORRADE_GCC47_COMPATIBILITY` is defined if compatibility mode for GCC 4.7 is
+enabled.
+@see @ref building-corrade
+*/
+#define CORRADE_GCC47_COMPATIBILITY_
+
+/**
 @brief GCC 4.6 compatibility
 
 `CORRADE_GCC46_COMPATIBILITY` is defined if compatibility mode for GCC 4.6 is

@@ -54,7 +54,11 @@ auto Resource::resources() -> std::map<std::string, GroupData>& {
 void Resource::registerData(const char* group, unsigned int count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data) {
     auto groupData = resources().find(group);
     if(groupData == resources().end())
+        #ifndef CORRADE_GCC47_COMPATIBILITY
         groupData = resources().emplace(group, GroupData()).first;
+        #else
+        groupData = resources().insert(std::make_pair(group, GroupData())).first;
+        #endif
 
     /* Cast to type which can be eaten by std::string constructor */
     const char* _positions = reinterpret_cast<const char*>(positions);
@@ -73,7 +77,11 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
             dataPosition-oldDataPosition,
             data};
 
+        #ifndef CORRADE_GCC47_COMPATIBILITY
         groupData->second.resources.emplace(std::string(_filenames+oldFilenamePosition, filenamePosition-oldFilenamePosition), res);
+        #else
+        groupData->second.resources.insert(std::make_pair(std::string(_filenames+oldFilenamePosition, filenamePosition-oldFilenamePosition), res));
+        #endif
 
         oldFilenamePosition = filenamePosition;
         oldDataPosition = dataPosition;
@@ -241,7 +249,11 @@ std::pair<const unsigned char*, unsigned int> Resource::getRaw(const std::string
             if(!success) return {nullptr, 0};
 
             /* Save the file for later use and return */
+            #ifndef CORRADE_GCC47_COMPATIBILITY
             it = _overrideGroup->data.emplace(filename, std::move(data)).first;
+            #else
+            it = _overrideGroup->data.insert(std::make_pair(filename, std::move(data))).first;
+            #endif
             return {it->second.begin(), it->second.size()};
         }
 
