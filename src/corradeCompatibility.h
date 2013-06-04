@@ -34,6 +34,7 @@
 
 #ifdef CORRADE_GCC46_COMPATIBILITY
 #define override
+#define noexcept
 #endif
 
 #endif
