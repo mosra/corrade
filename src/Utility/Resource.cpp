@@ -189,7 +189,14 @@ std::string Resource::compile(const std::string& name, const std::string& group,
         data +      "\n};\n\n"
         "int resourceInitializer_" + name + "();\n"
         "int resourceInitializer_" + name + "() {\n"
-        "    Corrade::Utility::Resource::registerData(\"" + group + "\", " + std::to_string(files.size()) + ", resourcePositions, resourceFilenames, resourceData);\n"
+        "    Corrade::Utility::Resource::registerData(\"" + group + "\", " +
+            /* This shouldn't be ambiguous. But is. */
+            #ifndef CORRADE_GCC44_COMPATIBILITY
+            std::to_string(files.size()) +
+            #else
+            std::to_string(static_cast<unsigned long long int>(files.size())) +
+            #endif
+        ", resourcePositions, resourceFilenames, resourceData);\n"
         "    return 1;\n"
         "} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_" + name + ")\n\n"
         "int resourceFinalizer_" + name + "();\n"
