@@ -28,6 +28,7 @@
 #include "corradeConfigure.h"
 
 #ifdef CORRADE_GCC46_COMPATIBILITY
+#define final
 #define override
 #endif
 
