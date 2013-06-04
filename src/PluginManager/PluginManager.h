@@ -29,10 +29,14 @@
  * @brief Forward declarations for Corrade::PluginManager namespace
  */
 
+#include "corradeCompatibility.h"
+
 namespace Corrade { namespace PluginManager {
 
+#ifndef CORRADE_GCC45_COMPATIBILITY
 enum class LoadState: unsigned short;
 /* LoadStates won't be used without LoadState definition */
+#endif
 
 class AbstractManager;
 class AbstractPlugin;

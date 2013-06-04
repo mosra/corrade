@@ -32,6 +32,7 @@
 #include <cstdint>
 
 #include "Containers/Containers.h"
+#include "corradeCompatibility.h"
 
 namespace Corrade { namespace Utility {
 
@@ -40,8 +41,10 @@ template<std::size_t> class HashDigest;
 
 class Configuration;
 class ConfigurationGroup;
+#ifndef CORRADE_GCC45_COMPATIBILITY
 enum class ConfigurationValueFlag: std::uint8_t;
 typedef Containers::EnumSet<ConfigurationValueFlag, std::uint8_t> ConfigurationValueFlags;
+#endif
 template<class T> struct ConfigurationValue;
 
 /* Debug doesn't need forward declaration */
