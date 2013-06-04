@@ -31,6 +31,8 @@
 
 #include <utility>
 
+#include "corradeCompatibility.h"
+
 namespace Corrade { namespace Containers {
 
 /**
@@ -49,7 +51,11 @@ template<class T> class Array {
          * Creates zero-sized array. Move array with nonzero size onto the
          * instance to make it useful.
          */
+        #ifndef CORRADE_GCC45_COMPATIBILITY
         explicit Array() noexcept: _data(nullptr), _size(0) {}
+        #else
+        explicit Array(): _data(nullptr), _size(0) {}
+        #endif
 
         /**
          * @brief Constructor
@@ -65,13 +71,21 @@ template<class T> class Array {
         Array(const Array<T>&) = delete;
 
         /** @brief Move constructor */
+        #ifndef CORRADE_GCC45_COMPATIBILITY
         Array(Array<T>&& other) noexcept;
+        #else
+        Array(Array<T>&& other);
+        #endif
 
         /** @brief Copying is not allowed */
         Array<T>& operator=(const Array<T>&) = delete;
 
         /** @brief Move assignment */
+        #ifndef CORRADE_GCC45_COMPATIBILITY
         Array<T>& operator=(Array<T>&&) noexcept;
+        #else
+        Array<T>& operator=(Array<T>&&);
+        #endif
 
         /** @brief Whether the array is empty */
         bool empty() const { return !_size; }
@@ -102,12 +116,23 @@ template<class T> class Array {
         std::size_t _size;
 };
 
-template<class T> inline Array<T>::Array(Array<T>&& other) noexcept: _data(other._data), _size(other._size) {
+#ifndef CORRADE_GCC45_COMPATIBILITY
+template<class T> inline Array<T>::Array(Array<T>&& other) noexcept:
+#else
+template<class T> inline Array<T>::Array(Array<T>&& other):
+#endif
+    _data(other._data), _size(other._size)
+{
     other._data = nullptr;
     other._size = 0;
 }
 
-template<class T> inline Array<T>& Array<T>::operator=(Array<T>&& other) noexcept {
+#ifndef CORRADE_GCC45_COMPATIBILITY
+template<class T> inline Array<T>& Array<T>::operator=(Array<T>&& other) noexcept
+#else
+template<class T> inline Array<T>& Array<T>::operator=(Array<T>&& other)
+#endif
+{
     std::swap(_data, other._data);
     std::swap(_size, other._size);
     return *this;

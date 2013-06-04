@@ -128,13 +128,21 @@ template<class T> class LinkedList {
          *
          * Creates empty list.
          */
+        #ifndef CORRADE_GCC45_COMPATIBILITY
         constexpr explicit LinkedList() noexcept: _first(nullptr), _last(nullptr) {}
+        #else
+        constexpr explicit LinkedList(): _first(nullptr), _last(nullptr) {}
+        #endif
 
         /** @brief Copying is not allowed */
         LinkedList(const LinkedList<T>&) = delete;
 
         /** @brief Move constructor */
+        #ifndef CORRADE_GCC45_COMPATIBILITY
         LinkedList(LinkedList<T>&& other) noexcept;
+        #else
+        LinkedList(LinkedList<T>&& other);
+        #endif
 
         /**
          * @brief Destructor
@@ -238,7 +246,11 @@ class LinkedListItem {
          *
          * Creates item not connected to any list.
          */
+        #ifndef CORRADE_GCC45_COMPATIBILITY
         LinkedListItem() noexcept: _list(nullptr), _previous(nullptr), _next(nullptr) {}
+        #else
+        LinkedListItem(): _list(nullptr), _previous(nullptr), _next(nullptr) {}
+        #endif
 
         /** @brief Copying is not allowed */
         LinkedListItem(const LinkedListItem<Derived, List>&) = delete;
@@ -276,7 +288,13 @@ class LinkedListItem {
         Derived *_previous, *_next;
 };
 
-template<class T> LinkedList<T>::LinkedList(LinkedList<T>&& other) noexcept: _first(other._first), _last(other._last) {
+#ifndef CORRADE_GCC45_COMPATIBILITY
+template<class T> LinkedList<T>::LinkedList(LinkedList<T>&& other) noexcept:
+#else
+template<class T> LinkedList<T>::LinkedList(LinkedList<T>&& other):
+#endif
+    _first(other._first), _last(other._last)
+{
     other._first = nullptr;
     other._last = nullptr;
 
