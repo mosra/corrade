@@ -257,7 +257,13 @@ std::pair<const unsigned char*, unsigned int> Resource::getRaw(const std::string
             bool success;
             Containers::Array<unsigned char> data;
             std::tie(success, data) = fileContents(Directory::join(Directory::path(_group->second.overrideGroup), file->value("filename")));
-            if(!success) return {nullptr, 0};
+            /* No nullptr here -> issue */
+            if(!success)
+                #ifndef CORRADE_GCC44_COMPATIBILITY
+                return {nullptr, 0};
+                #else
+                return {};
+                #endif
 
             /* Save the file for later use and return */
             #ifndef CORRADE_GCC47_COMPATIBILITY
