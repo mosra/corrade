@@ -137,11 +137,14 @@ class CORRADE_UTILITY_EXPORT Directory {
          */
         static std::vector<std::string> list(const std::string& path, Flags flags = Flags());
 
+        #ifndef CORRADE_TARGET_NACL_NEWLIB
         /**
          * @brief Create given path
          * @param path      Path
          * @return True if path was successfully created or false if an error
          * occured.
+         *
+         * @partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
          */
         static bool mkpath(const std::string& path);
 
@@ -150,6 +153,8 @@ class CORRADE_UTILITY_EXPORT Directory {
          * @param path      Path
          * @return `True` if path is file or empty directory and was
          *      successfully removed, `false` otherwise.
+         *
+         * @partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
          */
         static bool rm(const std::string& path);
 
@@ -158,8 +163,11 @@ class CORRADE_UTILITY_EXPORT Directory {
          * @param oldPath   Old path
          * @param newPath   New path
          * @return `True` on success, `false` otherwise.
+         *
+         * @partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
          */
         static bool move(const std::string& oldPath, const std::string& newPath);
+        #endif
 
         /**
          * @brief Current user's home directory

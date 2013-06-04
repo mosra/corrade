@@ -76,6 +76,7 @@ std::string Directory::join(const std::string& path, const std::string& filename
     return path + filename;
 }
 
+#ifndef CORRADE_TARGET_NACL_NEWLIB
 bool Directory::mkpath(const std::string& _path) {
     if(_path.empty()) return false;
 
@@ -111,6 +112,7 @@ bool Directory::rm(const std::string& path) {
 bool Directory::move(const std::string& oldPath, const std::string& newPath) {
     return std::rename(oldPath.c_str(), newPath.c_str()) == 0;
 }
+#endif
 
 bool Directory::fileExists(const std::string& filename) {
   struct stat fileInfo;
@@ -156,7 +158,11 @@ std::string Directory::configurationDir(const std::string& applicationName, bool
     std::string dir = join(appdata, applicationName);
     #endif
 
+    #ifndef CORRADE_TARGET_NACL_NEWLIB
     if(createIfNotExists) mkpath(dir);
+    #else
+    static_cast<void>(createIfNotExists);
+    #endif
     return dir;
 }
 
