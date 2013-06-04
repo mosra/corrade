@@ -1,5 +1,5 @@
-#ifndef Corrade_Plugins_PluginMetadata_h
-#define Corrade_Plugins_PluginMetadata_h
+#ifndef Corrade_PluginManager_PluginMetadata_h
+#define Corrade_PluginManager_PluginMetadata_h
 /*
     This file is part of Corrade.
 
@@ -33,7 +33,6 @@
 #include <vector>
 #include <map>
 
-#include "Utility/Configuration.h"
 #include "Utility/Translator.h"
 #include "corradePluginManagerVisibility.h"
 
@@ -84,7 +83,7 @@ locale code. Full featured example:
     description=Můj první Matrix bez chyb v Matrixu
  */
 class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
-    friend class AbstractPluginManager;
+    friend class AbstractManager;
 
     public:
         /**
@@ -101,7 +100,7 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          * is present, returns the translated name.
          * @note This field is constant during whole plugin lifetime.
          */
-        inline const std::string* name() const { return _name; }
+        const std::string* name() const { return _name; }
 
         /**
          * @brief Plugin description
@@ -110,21 +109,21 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          * Translator::locale() is present, returns the translated name.
          * @note This field is constant during whole plugin lifetime.
          */
-        inline const std::string* description() const { return _description; }
+        const std::string* description() const { return _description; }
 
         /**
          * @brief Plugin author(s)
          *
          * @note This field is constant during whole plugin lifetime.
          */
-        inline const std::vector<std::string>& authors() const { return _authors; }
+        const std::vector<std::string>& authors() const { return _authors; }
 
         /**
          * @brief Plugin version
          *
          * @note This field is constant during whole plugin lifetime.
          */
-        inline std::string version() const { return _version; }
+        std::string version() const;
 
         /**
          * @brief Plugins on which this plugin depend
@@ -133,7 +132,7 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          * loaded. See also PluginMetadata::replaced.
          * @note Thus field is constant during whole plugin lifetime.
          */
-        inline const std::vector<std::string>& depends() const { return _depends; }
+        const std::vector<std::string>& depends() const { return _depends; }
 
         /**
          * @brief Plugins which depend on this plugin
@@ -143,7 +142,7 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          * @note This list is automatically created by plugin manager and can
          *      be changed in plugin lifetime.
          */
-        inline std::vector<std::string> usedBy() const { return _usedBy; }
+        std::vector<std::string> usedBy() const;
 
         /**
          * @brief Plugins which are replaced with this plugin
@@ -152,7 +151,7 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          * plugin cannot be loaded when any of the replaced plugins are loaded.
          * @note Thus field is constant during whole plugin lifetime.
          */
-        inline const std::vector<std::string>& replaces() const { return _replaces; }
+        const std::vector<std::string>& replaces() const { return _replaces; }
 
         /**
          * @brief Plugins which replaces this plugin
@@ -162,7 +161,7 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          * @note This list is automatically created by plugin manage and can
          *      change in plugin lifetime.
          */
-        inline std::vector<std::string> replacedWith() const { return _replacedWith; }
+        std::vector<std::string> replacedWith() const;
 
     private:
         Utility::Translator translator;

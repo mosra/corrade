@@ -25,6 +25,8 @@
 
 #include "Translator.h"
 
+#include "Utility/Configuration.h"
+
 namespace Corrade { namespace Utility {
 
 std::set<Translator*>* Translator::instances() {
@@ -52,6 +54,26 @@ void Translator::setLocale(const std::string& locale) {
         else if((*it)->primaryDynamicGroup)
             (*it)->setPrimary((*it)->primaryDynamicGroup, true);
     }
+}
+
+std::string Translator::locale() { return *_locale(); }
+
+Translator::Translator(): primaryDynamicGroup(nullptr), primaryFile(nullptr), fallbackFile(nullptr), primary(nullptr), fallback(nullptr) {
+    instances()->insert(this);
+}
+
+Translator::Translator(const std::string& _primary, const std::string& _fallback): primaryDynamicGroup(nullptr), primaryFile(nullptr), fallbackFile(nullptr), primary(nullptr), fallback(nullptr) {
+    setFallback(_fallback);
+    setPrimary(_primary);
+
+    instances()->insert(this);
+}
+
+Translator::Translator(const ConfigurationGroup* _primary, const ConfigurationGroup* _fallback, bool dynamic): primaryDynamicGroup(nullptr), primaryFile(nullptr), fallbackFile(nullptr), primary(nullptr), fallback(nullptr) {
+    setFallback(_fallback);
+    setPrimary(_primary, dynamic);
+
+    instances()->insert(this);
 }
 
 Translator::~Translator() {

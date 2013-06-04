@@ -23,7 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "AbstractPluginManager.h"
+#include "AbstractManager.h"
 
 #include <algorithm>
 #include <sstream>
@@ -51,19 +51,18 @@ using namespace Corrade::Utility;
 
 namespace Corrade { namespace PluginManager {
 
-const int AbstractPluginManager::Version = PLUGIN_VERSION;
+const int AbstractManager::Version = CORRADE_PLUGIN_VERSION;
 
-std::map<std::string, AbstractPluginManager::Plugin*>* AbstractPluginManager::plugins() {
+std::map<std::string, AbstractManager::Plugin*>* AbstractManager::plugins() {
     static std::map<std::string, Plugin*>* const _plugins = new std::map<std::string, Plugin*>();
 
     /* If there are unprocessed static plugins for this manager, add them */
     if(staticPlugins()) {
-        Resource r("plugins");
-
         for(auto it = staticPlugins()->begin(); it != staticPlugins()->end(); ++it) {
             StaticPlugin* const staticPlugin = *it;
 
             /* Load static plugin metadata */
+            Resource r("CorradeStaticPlugin_" + staticPlugin->plugin);
             std::istringstream metadata(r.get(staticPlugin->plugin + ".conf"));
 
             /* Insert plugin to list */
@@ -80,14 +79,14 @@ std::map<std::string, AbstractPluginManager::Plugin*>* AbstractPluginManager::pl
     return _plugins;
 }
 
-std::vector<AbstractPluginManager::StaticPlugin*>*& AbstractPluginManager::staticPlugins() {
+std::vector<AbstractManager::StaticPlugin*>*& AbstractManager::staticPlugins() {
     static std::vector<StaticPlugin*>* _staticPlugins = new std::vector<StaticPlugin*>();
 
     return _staticPlugins;
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-void AbstractPluginManager::importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, Instancer instancer, void(*initializer)(), void(*finalizer)()) {
+void AbstractManager::importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, Instancer instancer, void(*initializer)(), void(*finalizer)()) {
     CORRADE_ASSERT(_version == Version,
         "PluginManager: wrong version of static plugin" << plugin + ", got" << _version << "but expected" << Version, );
     CORRADE_ASSERT(staticPlugins(),
@@ -98,14 +97,14 @@ void AbstractPluginManager::importStaticPlugin(const std::string& plugin, int _v
 #endif
 
 #ifndef CORRADE_TARGET_NACL_NEWLIB
-AbstractPluginManager::AbstractPluginManager(std::string pluginDirectory) {
+AbstractManager::AbstractManager(std::string pluginDirectory) {
     setPluginDirectory(std::move(pluginDirectory));
 }
 #else
-AbstractPluginManager::AbstractPluginManager(std::string) {}
+AbstractManager::AbstractManager(std::string) {}
 #endif
 
-AbstractPluginManager::~AbstractPluginManager() {
+AbstractManager::~AbstractManager() {
     /* Unload all plugins associated with this plugin manager */
     #ifndef CORRADE_TARGET_NACL_NEWLIB
     std::vector<std::map<std::string, Plugin*>::iterator> removed;
@@ -149,11 +148,11 @@ AbstractPluginManager::~AbstractPluginManager() {
 }
 
 #ifndef CORRADE_TARGET_NACL_NEWLIB
-std::string AbstractPluginManager::pluginDirectory() const {
+std::string AbstractManager::pluginDirectory() const {
     return _pluginDirectory;
 }
 
-void AbstractPluginManager::setPluginDirectory(std::string directory) {
+void AbstractManager::setPluginDirectory(std::string directory) {
     _pluginDirectory = std::move(directory);
 
     /* Remove all unloaded plugins from the container */
@@ -197,12 +196,12 @@ void AbstractPluginManager::setPluginDirectory(std::string directory) {
     }
 }
 
-void AbstractPluginManager::reloadPluginDirectory() {
+void AbstractManager::reloadPluginDirectory() {
     setPluginDirectory(pluginDirectory());
 }
 #endif
 
-std::vector<std::string> AbstractPluginManager::pluginList() const {
+std::vector<std::string> AbstractManager::pluginList() const {
     std::vector<std::string> names;
     for(auto i = plugins()->cbegin(); i != plugins()->cend(); ++i) {
 
@@ -214,7 +213,7 @@ std::vector<std::string> AbstractPluginManager::pluginList() const {
     return names;
 }
 
-const PluginMetadata* AbstractPluginManager::metadata(const std::string& plugin) const {
+const PluginMetadata* AbstractManager::metadata(const std::string& plugin) const {
     auto foundPlugin = plugins()->find(plugin);
 
     /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
@@ -224,7 +223,7 @@ const PluginMetadata* AbstractPluginManager::metadata(const std::string& plugin)
     return &foundPlugin->second->metadata;
 }
 
-LoadState AbstractPluginManager::loadState(const std::string& plugin) const {
+LoadState AbstractManager::loadState(const std::string& plugin) const {
     auto foundPlugin = plugins()->find(plugin);
 
     /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
@@ -234,7 +233,7 @@ LoadState AbstractPluginManager::loadState(const std::string& plugin) const {
     return foundPlugin->second->loadState;
 }
 
-LoadState AbstractPluginManager::load(const std::string& plugin) {
+LoadState AbstractManager::load(const std::string& plugin) {
     auto foundPlugin = plugins()->find(plugin);
 
     /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
@@ -354,7 +353,7 @@ LoadState AbstractPluginManager::load(const std::string& plugin) {
     #endif
 }
 
-LoadState AbstractPluginManager::unload(const std::string& plugin) {
+LoadState AbstractManager::unload(const std::string& plugin) {
     auto foundPlugin = plugins()->find(plugin);
 
     /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
@@ -438,7 +437,7 @@ LoadState AbstractPluginManager::unload(const std::string& plugin) {
     #endif
 }
 
-void AbstractPluginManager::registerInstance(std::string plugin, AbstractPlugin* instance, const Configuration** configuration, const PluginMetadata** metadata) {
+void AbstractManager::registerInstance(std::string plugin, AbstractPlugin* instance, const Configuration** configuration, const PluginMetadata** metadata) {
     /** @todo assert proper interface */
     auto foundPlugin = plugins()->find(plugin);
 
@@ -457,7 +456,7 @@ void AbstractPluginManager::registerInstance(std::string plugin, AbstractPlugin*
     *metadata = &foundPlugin->second->metadata;
 }
 
-void AbstractPluginManager::unregisterInstance(const std::string& plugin, AbstractPlugin* instance) {
+void AbstractManager::unregisterInstance(const std::string& plugin, AbstractPlugin* instance) {
     auto foundPlugin = plugins()->find(plugin);
 
     /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
@@ -476,7 +475,7 @@ void AbstractPluginManager::unregisterInstance(const std::string& plugin, Abstra
     if(_instances.empty()) instances.erase(plugin);
 }
 
-void AbstractPluginManager::addUsedBy(const std::string& plugin, std::string usedBy) {
+void AbstractManager::addUsedBy(const std::string& plugin, std::string usedBy) {
     auto foundPlugin = plugins()->find(plugin);
 
     /* Given plugin doesn't exist, nothing to do */
@@ -485,7 +484,7 @@ void AbstractPluginManager::addUsedBy(const std::string& plugin, std::string use
     foundPlugin->second->metadata._usedBy.push_back(std::move(usedBy));
 }
 
-void AbstractPluginManager::removeUsedBy(const std::string& plugin, const std::string& usedBy) {
+void AbstractManager::removeUsedBy(const std::string& plugin, const std::string& usedBy) {
     auto foundPlugin = plugins()->find(plugin);
 
     /* Given plugin doesn't exist, nothing to do */
@@ -499,7 +498,7 @@ void AbstractPluginManager::removeUsedBy(const std::string& plugin, const std::s
     }
 }
 
-void* AbstractPluginManager::instanceInternal(const std::string& plugin) {
+void* AbstractManager::instanceInternal(const std::string& plugin) {
     auto foundPlugin = plugins()->find(plugin);
 
     /* Plugin with given name doesn't exist or isn't successfully loaded */
@@ -514,14 +513,14 @@ void* AbstractPluginManager::instanceInternal(const std::string& plugin) {
 }
 
 #ifndef CORRADE_TARGET_NACL_NEWLIB
-AbstractPluginManager::Plugin::Plugin(const std::string& _metadata, AbstractPluginManager* _manager): configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(_manager), instancer(nullptr), module(nullptr) {
+AbstractManager::Plugin::Plugin(const std::string& _metadata, AbstractManager* _manager): configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(_manager), instancer(nullptr), module(nullptr) {
     loadState = configuration.isValid() ? LoadState::NotLoaded : LoadState::WrongMetadataFile;
 }
 #endif
 
-AbstractPluginManager::Plugin::Plugin(std::istream& _metadata, StaticPlugin* staticPlugin): loadState(LoadState::Static), configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(nullptr), instancer(staticPlugin->instancer), staticPlugin(staticPlugin) {}
+AbstractManager::Plugin::Plugin(std::istream& _metadata, StaticPlugin* staticPlugin): loadState(LoadState::Static), configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(nullptr), instancer(staticPlugin->instancer), staticPlugin(staticPlugin) {}
 
-AbstractPluginManager::Plugin::~Plugin() {
+AbstractManager::Plugin::~Plugin() {
     #ifndef CORRADE_TARGET_NACL_NEWLIB
     if(loadState == LoadState::Static)
     #endif

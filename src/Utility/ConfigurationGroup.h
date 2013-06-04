@@ -31,13 +31,10 @@
 
 #include <vector>
 
-#include "ConfigurationValue.h"
-#include "utilities.h"
-#include "corradeCompatibility.h"
+#include "Utility/ConfigurationValue.h"
+#include "Utility/Utility.h"
 
 namespace Corrade { namespace Utility {
-
-class Configuration;
 
 /**
 @brief Group of values in configuration file
@@ -87,23 +84,17 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * More efficient than calling `groups(name).size()`.
          * See also Configuration::UniqueGroups and Configuration::UniqueNames.
          */
-        inline unsigned int groupCount(const std::string& name = std::string()) const {
-            if(name.empty()) return _groups.size();
-            return groups(name).size();
-        }
+        unsigned int groupCount(const std::string& name = std::string()) const;
 
         /**
          * @brief Whether given group exists
          * @param name      Name of the group. If empty, returns true if there
          *      are any subgroups.
          *
-         * More efficient than calling `group(name) != 0`.
+         * More efficient than calling `group(name) != nullptr`.
          * @todo split out to hasSubgroups()?
          */
-        inline bool groupExists(const std::string& name = std::string()) const {
-            if(name.empty()) return !_groups.empty();
-            return group(name) != nullptr;
-        }
+        bool groupExists(const std::string& name = std::string()) const;
 
         /**
          * @brief Add new group
@@ -167,7 +158,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         /** @{ @name Value operations */
 
         /**
-         * @brief Value
+         * @brief String value
          * @param key       Key name
          * @param value     Pointer where to store value
          * @param number    Number of the value. Default is first found value.
@@ -176,20 +167,24 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          *
          * See also Configuration::automaticKeyCreation().
          */
-        template<class T> bool value(const std::string& key, T* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
-            std::string stringValue = ConfigurationValue<T>::toString(*value, flags);
-            bool ret = valueInternal(key, &stringValue, number, flags);
-
-            *value = ConfigurationValue<T>::fromString(stringValue, flags);
-            return ret;
+        bool value(const std::string& key, std::string* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
+            return valueInternal(key, value, number, flags);
         }
-        template<class T> bool value(const std::string& key, T* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
-            std::string stringValue;
-            bool ret = valueInternal(key, &stringValue, number, flags);
 
-            *value = ConfigurationValue<T>::fromString(stringValue, flags);
-            return ret;
-        } /**< @overload */
+        /** @overload */
+        bool value(const std::string& key, std::string* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
+            return valueInternal(key, value, number, flags);
+        }
+
+        /**
+         * @brief Value converted to given type
+         *
+         * Uses ConfigurationValue to convert the value to given type. See
+         * value(const std::string&, std::string*, unsigned int, ConfigurationValueFlags)
+         * for more information.
+         */
+        template<class T> bool value(const std::string& key, T* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags());
+        template<class T> bool value(const std::string& key, T* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const; /**< @overload */
 
         /**
          * @brief Value (directly returned)
@@ -199,28 +194,21 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @return Value
          *
          * Directly returns the value. If the key is not found, returns
-         * default constructed value.
+         * default constructed value. If @p T is not `std::string`, uses
+         * ConfigurationValue::fromString() to convert the value to given type.
          */
-        template<class T = std::string> T value(const std::string& key, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
-            T _value;
-            if(!value<T>(key, &_value, number, flags)) return T();
-            return _value;
-        }
+        template<class T = std::string> T value(const std::string& key, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const;
 
         /**
          * @brief All values with given key name
          * @param key       Key name
          * @param flags     Flags (see ConfigurationGroup::Flags)
          * @return Vector with all found values
+         *
+         * If @p T is not `std::string`, uses ConfigurationValue::fromString()
+         * to convert the value to given type.
          */
-        template<class T = std::string> std::vector<T> values(const std::string& key, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
-            std::vector<T> _values;
-            std::vector<std::string> stringValues = valuesInternal(key, flags);
-            for(std::vector<std::string>::const_iterator it = stringValues.begin(); it != stringValues.end(); ++it)
-                _values.push_back(ConfigurationValue<T>::fromString(*it, flags));
-
-            return _values;
-        }
+        template<class T = std::string> std::vector<T> values(const std::string& key, ConfigurationValueFlags flags = ConfigurationValueFlags()) const;
 
         /**
          * @brief Count of keys with given name
@@ -238,7 +226,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         bool keyExists(const std::string& key) const;
 
         /**
-         * @brief Set value
+         * @brief Set string value
          * @param key       Key name
          * @param value     Value
          * @param number    Number of the value. Default is first found value.
@@ -250,8 +238,24 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * If the key already exists, changes it to new value. If the key
          * doesn't exist, adds a new key with given name.
          */
+        bool setValue(const std::string& key, std::string value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
+            return setValueInternal(key, std::move(value), number, flags);
+        }
+
+        /** @overload */
+        bool setValue(const std::string& key, const char* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
+            return setValueInternal(key, value, number, flags);
+        }
+
+        /**
+         * @brief Set value converted from given type
+         *
+         * Uses ConfigurationValue::toString() to convert the value from given
+         * type. See setValue(const std::string&, std::string, unsigned int, ConfigurationValueFlags)
+         * for more information.
+         */
         template<class T> bool setValue(const std::string& key, const T& value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
-            return setValue<std::string>(key, ConfigurationValue<T>::toString(value, flags), number, flags);
+            return setValueInternal(key, ConfigurationValue<T>::toString(value, flags), number, flags);
         }
 
         /**
@@ -265,8 +269,24 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * Adds new key/value pair at the end of current group (it means also
          * after all comments).
          */
-        template<class T> bool addValue(const std::string& key, const T& value, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
-            return addValue<std::string>(key, ConfigurationValue<T>::toString(value, flags), flags);
+        bool addValue(std::string key, std::string value, const ConfigurationValueFlags flags = ConfigurationValueFlags()) {
+            return addValueInternal(std::move(key), std::move(value), flags);
+        }
+
+        /** @overload */
+        bool addValue(std::string key, const char* value, const ConfigurationValueFlags flags = ConfigurationValueFlags()) {
+            return addValueInternal(std::move(key), value, flags);
+        }
+
+        /**
+         * @brief Add new value
+         *
+         * Uses ConfigurationValue::toString() to convert the value from given
+         * type. See addValue(const std::string&, std::string, ConfigurationValueFlags)
+         * for more information.
+         */
+        template<class T> bool addValue(std::string key, const T& value, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
+            return addValueInternal(std::move(key), ConfigurationValue<T>::toString(value, flags), flags);
         }
 
         /**
@@ -321,29 +341,56 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         CORRADE_UTILITY_EXPORT bool valueInternal(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags);
         CORRADE_UTILITY_EXPORT bool valueInternal(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags) const;
         CORRADE_UTILITY_EXPORT std::vector<std::string> valuesInternal(const std::string& key, ConfigurationValueFlags flags) const;
-        CORRADE_UTILITY_EXPORT bool setValueInternal(const std::string& key, const std::string& value, unsigned int number, ConfigurationValueFlags flags);
-        CORRADE_UTILITY_EXPORT bool addValueInternal(const std::string& key, const std::string& value, ConfigurationValueFlags flags);
+        CORRADE_UTILITY_EXPORT bool setValueInternal(const std::string& key, std::string value, unsigned int number, ConfigurationValueFlags flags);
+        CORRADE_UTILITY_EXPORT bool addValueInternal(std::string key, std::string value, ConfigurationValueFlags flags);
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-/* Forward declared template specializations to avoid infinite recursion in
-    template functions above */
-template<> inline bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags) {
-    return valueInternal(key, _value, number, flags);
+/* Shorthand template specialization for string values, delete unwanted ones */
+template<> bool ConfigurationGroup::value(const std::string&, std::string*, unsigned int, ConfigurationValueFlags) = delete;
+template<> bool ConfigurationGroup::value(const std::string&, std::string*, unsigned int, ConfigurationValueFlags) const = delete;
+template<> bool ConfigurationGroup::setValue(const std::string&, const std::string&, unsigned int, ConfigurationValueFlags) = delete;
+template<> bool ConfigurationGroup::addValue(std::string, const std::string&, ConfigurationValueFlags) = delete;
+template<> inline std::string ConfigurationGroup::value(const std::string& key, unsigned int number, const ConfigurationValueFlags flags) const {
+    std::string stringValue;
+    valueInternal(key, &stringValue, number, flags);
+    return std::move(stringValue);
 }
-template<> inline bool ConfigurationGroup::value(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags) const {
-    return valueInternal(key, _value, number, flags);
-}
-template<> inline std::vector<std::string> ConfigurationGroup::values(const std::string& key, ConfigurationValueFlags flags) const {
+template<> inline std::vector<std::string> ConfigurationGroup::values(const std::string& key, const ConfigurationValueFlags flags) const {
     return valuesInternal(key, flags);
 }
-template<> inline bool ConfigurationGroup::setValue(const std::string& key, const std::string& value, unsigned int number, ConfigurationValueFlags flags) {
-    return setValueInternal(key, value, number, flags);
-}
-template<> inline bool ConfigurationGroup::addValue(const std::string& key, const std::string& value, ConfigurationValueFlags flags) {
-    return addValueInternal(key, value, flags);
-}
 #endif
+
+template<class T> bool ConfigurationGroup::value(const std::string& key, T* value, const unsigned int number, const ConfigurationValueFlags flags) {
+    std::string stringValue = ConfigurationValue<T>::toString(*value, flags);
+    const bool ret = valueInternal(key, &stringValue, number, flags);
+
+    *value = ConfigurationValue<T>::fromString(stringValue, flags);
+    return ret;
+}
+
+template<class T> bool ConfigurationGroup::value(const std::string& key, T* value, const unsigned int number, const ConfigurationValueFlags flags) const {
+    std::string stringValue;
+    const bool ret = valueInternal(key, &stringValue, number, flags);
+
+    *value = ConfigurationValue<T>::fromString(stringValue, flags);
+    return ret;
+}
+
+template<class T> T ConfigurationGroup::value(const std::string& key, const unsigned int number, const ConfigurationValueFlags flags) const {
+    T _value;
+    if(!value<T>(key, &_value, number, flags)) return T();
+    return std::move(_value);
+}
+
+template<class T> std::vector<T> ConfigurationGroup::values(const std::string& key, const ConfigurationValueFlags flags) const {
+    std::vector<T> _values;
+    std::vector<std::string> stringValues = valuesInternal(key, flags);
+    for(std::vector<std::string>::const_iterator it = stringValues.begin(); it != stringValues.end(); ++it)
+        _values.push_back(ConfigurationValue<T>::fromString(*it, flags));
+
+    return _values;
+}
 
 }}
 

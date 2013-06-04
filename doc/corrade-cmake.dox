@@ -55,7 +55,7 @@ use `CORRADE_CXX_FLAGS` to enable additional pedantic set of warnings and
 enable hidden visibility by default.
 
 Features of found %Corrade library are exposed in these variables, they are
-also available as preprocessor variables if including Corrade.h:
+also available as preprocessor variables if you include Corrade.h:
 
 - `CORRADE_GCC46_COMPATIBILITY` -- Defined if compiled with compatibility mode
   for GCC 4.6
@@ -71,6 +71,7 @@ also available as preprocessor variables if including Corrade.h:
   Chrome Native Client with `newlib` toolchain
 - `CORRADE_TARGET_NACL_GLIBC` -- Defined if the library is built for Google
   Chrome Native Client with `glibc` toolchain
+- `CORRADE_TARGET_EMSCRIPTEN` -- Defined if the library is built for Emscripten
 
 %Corrade provides these macros and functions:
 
@@ -87,18 +88,16 @@ must be called explicitly.
 
 ### Compile data resources into application binary
 
-    corrade_add_resource(name group_name
-                         file [ALIAS alias]
-                         [file1 [ALIAS alias1]...])
+    corrade_add_resource(name resources.conf)
 
-Depends on `corrade-rc`, which is part of %Corrade utilities. This command
-generates resource file with group group_name from given files in current build
+Depends on corrade-rc, which is part of %Corrade utilities. This command
+generates resource data using given configuration file in current build
 directory. Argument name is name under which the resources can be explicitly
-loaded. Variable `name` contains compiled resource filename, which is then used
-for compiling library / executable. Example usage:
+loaded. Variable `name` contains compiled resource filename, which is then
+used for compiling library / executable. Example usage:
 
-    corrade_add_resource(name group_name file1 ALIAS alias1 file2 file3)
-    add_executable(app source1 source2 ... ${name})
+    corrade_add_resource(app_resources resources.conf)
+    add_executable(app source1 source2 ... ${app_resources})
 
 ### Add dynamic plugin
 

@@ -27,7 +27,6 @@
 
 #include <cmath>
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Corrade { namespace TestSuite { namespace Implementation {
 
 template<class T> bool FloatComparator<T>::operator()(T actual, T expected) {
@@ -50,4 +49,3 @@ template class FloatComparator<float>;
 template class FloatComparator<double>;
 
 }}}
-#endif

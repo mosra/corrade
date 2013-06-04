@@ -33,7 +33,7 @@
 #include <vector>
 
 #include "Containers/EnumSet.h"
-#include "utilities.h"
+#include "Utility/corradeUtilityVisibility.h"
 
 namespace Corrade { namespace Utility {
 
@@ -52,17 +52,15 @@ class CORRADE_UTILITY_EXPORT Directory {
          * @see Flags, list()
          */
         enum class Flag: unsigned char {
-            /**
-             * Skip `.` and `..` directories
-             * @partialsupport Has no effect on Windows and in
-             *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
-             */
+            /** Skip `.` and `..` directories */
             SkipDotAndDotDot = 1 << 0,
 
             /**
              * Skip regular files
              * @partialsupport Has no effect on Windows and in
-             *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
+             *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib". In
+             *      @ref CORRADE_TARGET_EMSCRIPTEN_ "Emscripten" skips
+             *      everything except directories.
              */
             SkipFiles = 1 << 1,
 
@@ -76,7 +74,9 @@ class CORRADE_UTILITY_EXPORT Directory {
             /**
              * Skip everything what is not a file or directory
              * @partialsupport Has no effect on Windows and in
-             *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
+             *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib". In
+             *      @ref CORRADE_TARGET_EMSCRIPTEN_ "Emscripten" skips
+             *      everything except directories.
              */
             SkipSpecial = 1 << 3,
 
@@ -161,7 +161,12 @@ class CORRADE_UTILITY_EXPORT Directory {
          */
         static bool move(const std::string& oldPath, const std::string& newPath);
 
-        /** @brief Get current user's home directory */
+        /**
+         * @brief Current user's home directory
+         *
+         * @partialsupport In @ref CORRADE_TARGET_EMSCRIPTEN_ "Emscripten"
+         *      returns empty string.
+         */
         static std::string home();
 
         /**

@@ -24,8 +24,9 @@
 */
 
 #include "TestSuite/Tester.h"
-#include "Utility/Translator.h"
+#include "Utility/Configuration.h"
 #include "Utility/Directory.h"
+#include "Utility/Translator.h"
 
 #include "testConfigure.h"
 

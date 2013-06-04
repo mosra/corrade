@@ -31,6 +31,7 @@ set(CorradeInterconnect_SRCS
 set(CorradeInterconnect_HEADERS
     Connection.h
     Emitter.h
+    Interconnect.h
     Receiver.h
 
     corradeInterconnectVisibility.h)

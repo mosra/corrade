@@ -43,7 +43,7 @@ class DOG_EXPORT Dog: public AbstractAnimal {
         static void finalize();
 
         explicit Dog();
-        explicit Dog(AbstractPluginManager* manager, std::string plugin): AbstractAnimal(manager, std::move(plugin)) {}
+        explicit Dog(AbstractManager* manager, std::string plugin): AbstractAnimal(manager, std::move(plugin)) {}
 
         std::string name();
         int legCount();

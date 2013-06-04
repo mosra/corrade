@@ -35,6 +35,7 @@
 
 #include "TypeTraits.h"
 
+#include "corradeConfigure.h"
 #include "corradeUtilityVisibility.h"
 
 namespace Corrade { namespace Utility {
@@ -99,7 +100,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * Constructs debug object with given output.
          * @see setOutput()
          */
-        inline explicit Debug(std::ostream* _output = globalOutput): output(_output), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
+        explicit Debug(std::ostream* _output = globalOutput): output(_output), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
 
         /**
          * @brief Copy constructor
@@ -140,7 +141,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         ~Debug();
 
         /** @brief Flag */
-        inline bool flag(Flag flag) const { return flags & flag; }
+        bool flag(Flag flag) const { return flags & flag; }
 
         /** @brief Set flag */
         void setFlag(Flag flag, bool value);
@@ -164,7 +165,13 @@ class CORRADE_UTILITY_EXPORT Debug {
         Debug operator<<(unsigned long long value);     /**< @overload */
         Debug operator<<(float value);                  /**< @overload */
         Debug operator<<(double value);                 /**< @overload */
-        Debug operator<<(long double value);            /**< @overload */
+        #ifndef CORRADE_TARGET_EMSCRIPTEN
+        /** @overload
+         * @partialsupport Not available in @ref CORRADE_TARGET_EMSCRIPTEN_ "Emscripten"
+         *      as JavaScript doesn't support doubles larger than 64 bits.
+         */
+        Debug operator<<(long double value);
+        #endif
 
         /**
          * @brief Globally set output for newly created instances
@@ -174,7 +181,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * All successive Debug instances created with default constructor will
          * be redirected to given stream.
          */
-        inline static void setOutput(std::ostream* _output = globalOutput) {
+        static void setOutput(std::ostream* _output = globalOutput) {
             globalOutput = _output;
         }
 
@@ -236,7 +243,7 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
         Warning(std::ostream* _output = globalWarningOutput): Debug(_output) {}
 
         /** @copydoc Debug::setOutput() */
-        inline static void setOutput(std::ostream* _output = globalWarningOutput) {
+        static void setOutput(std::ostream* _output = globalWarningOutput) {
             globalWarningOutput = _output; }
 
     private:
@@ -254,7 +261,7 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
         Error(std::ostream* _output = globalErrorOutput): Debug(_output) {}
 
         /** @copydoc Debug::setOutput() */
-        inline static void setOutput(std::ostream* _output = globalErrorOutput) {
+        static void setOutput(std::ostream* _output = globalErrorOutput) {
             globalErrorOutput = _output; }
 
     private:

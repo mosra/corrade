@@ -31,6 +31,7 @@
 
 #include <type_traits>
 
+#include "Containers/Containers.h"
 #include "corradeCompatibility.h"
 
 namespace Corrade { namespace Containers {
@@ -102,7 +103,12 @@ template<class T> class Object {
 };
 @endcode
 */
-template<class T, class U, U fullValue = U(~0)> class EnumSet {
+#ifdef DOXYGEN_GENERATING_OUTPUT
+template<class T, class U, U fullValue = U(~0)>
+#else
+template<class T, class U, U fullValue>
+#endif
+class EnumSet {
     static_assert(std::is_enum<T>::value && !std::is_convertible<T, U>::value, "EnumSet type must be strongly typed enum");
 
     public:
@@ -110,18 +116,18 @@ template<class T, class U, U fullValue = U(~0)> class EnumSet {
         typedef U UnderlyingType;   /**< @brief Underlying type of the enum */
 
         /** @brief Create empty set */
-        inline constexpr /*implicit*/ EnumSet(): value() {}
+        constexpr /*implicit*/ EnumSet(): value() {}
 
         /** @brief Create set from one value */
-        inline constexpr /*implicit*/ EnumSet(T value): value(static_cast<UnderlyingType>(value)) {}
+        constexpr /*implicit*/ EnumSet(T value): value(static_cast<UnderlyingType>(value)) {}
 
         /** @brief Equality operator */
-        inline constexpr bool operator==(EnumSet<T, U, fullValue> other) const {
+        constexpr bool operator==(EnumSet<T, U, fullValue> other) const {
             return value == other.value;
         }
 
         /** @brief Non-equality operator */
-        inline constexpr bool operator!=(EnumSet<T, U, fullValue> other) const {
+        constexpr bool operator!=(EnumSet<T, U, fullValue> other) const {
             return !operator==(other);
         }
 
@@ -130,7 +136,7 @@ template<class T, class U, U fullValue = U(~0)> class EnumSet {
          *
          * Equivalent to `a & other == other`
          */
-        inline constexpr bool operator>=(EnumSet<T, U, fullValue> other) const {
+        constexpr bool operator>=(EnumSet<T, U, fullValue> other) const {
             return (*this & other) == other;
         }
 
@@ -139,57 +145,57 @@ template<class T, class U, U fullValue = U(~0)> class EnumSet {
          *
          * Equivalent to `a & other == a`
          */
-        inline constexpr bool operator<=(EnumSet<T, U, fullValue> other) const {
+        constexpr bool operator<=(EnumSet<T, U, fullValue> other) const {
             return (*this & other) == *this;
         }
 
         /** @brief Union of two sets */
-        inline constexpr EnumSet<T, U, fullValue> operator|(EnumSet<T, U, fullValue> other) const {
+        constexpr EnumSet<T, U, fullValue> operator|(EnumSet<T, U, fullValue> other) const {
             return EnumSet<T, U, fullValue>(value | other.value);
         }
 
         /** @brief Union two sets and assign */
-        inline EnumSet<T, U, fullValue>& operator|=(EnumSet<T, U, fullValue> other) {
+        EnumSet<T, U, fullValue>& operator|=(EnumSet<T, U, fullValue> other) {
             value |= other.value;
             return *this;
         }
 
         /** @brief Intersection of two sets */
-        inline constexpr EnumSet<T, U, fullValue> operator&(EnumSet<T, U, fullValue> other) const {
+        constexpr EnumSet<T, U, fullValue> operator&(EnumSet<T, U, fullValue> other) const {
             return EnumSet<T, U, fullValue>(value & other.value);
         }
 
         /** @brief Intersect two sets and assign */
-        inline EnumSet<T, U, fullValue>& operator&=(EnumSet<T, U, fullValue> other) {
+        EnumSet<T, U, fullValue>& operator&=(EnumSet<T, U, fullValue> other) {
             value &= other.value;
             return *this;
         }
 
         /** @brief Set complement */
-        inline constexpr EnumSet<T, U, fullValue> operator~() const {
+        constexpr EnumSet<T, U, fullValue> operator~() const {
             return EnumSet<T, U, fullValue>(fullValue & ~value);
         }
 
+        #ifndef CORRADE_GCC44_COMPATIBILITY
         /** @brief Value as boolean */
         /* GCC 4.4 doesn't support explicit conversion operators, thus this
            would conflict with operator UnderlyingType() */
-        #ifndef CORRADE_GCC44_COMPATIBILITY
-        inline constexpr explicit operator bool() const {
+        constexpr explicit operator bool() const {
             return value != 0;
         }
         #endif
 
         /** @brief Value in underlying type */
         #ifndef CORRADE_GCC44_COMPATIBILITY
-        inline constexpr explicit operator UnderlyingType() const {
+        constexpr explicit operator UnderlyingType() const {
         #else /* GCC 4.4 doesn't support explicit conversion operators */
-        inline constexpr operator UnderlyingType() const {
+        constexpr operator UnderlyingType() const {
         #endif
             return value;
         }
 
     private:
-        inline constexpr explicit EnumSet(UnderlyingType type): value(type) {}
+        constexpr explicit EnumSet(UnderlyingType type): value(type) {}
 
         UnderlyingType value;
 };
@@ -201,25 +207,25 @@ See @ref EnumSet-out-of-class-operators "EnumSet documentation" for example
 usage.
 */
 #define CORRADE_ENUMSET_OPERATORS(class)                                    \
-    inline constexpr bool operator==(class::Type a, class b) {              \
+    constexpr bool operator==(class::Type a, class b) {                     \
         return class(a) == b;                                               \
     }                                                                       \
-    inline constexpr bool operator!=(class::Type a, class b) {              \
+    constexpr bool operator!=(class::Type a, class b) {                     \
         return class(a) != b;                                               \
     }                                                                       \
-    inline constexpr bool operator>=(class::Type a, class b) {              \
+    constexpr bool operator>=(class::Type a, class b) {                     \
         return class(a) >= b;                                               \
     }                                                                       \
-    inline constexpr bool operator<=(class::Type a, class b) {              \
+    constexpr bool operator<=(class::Type a, class b) {                     \
         return class(a) <= b;                                               \
     }                                                                       \
-    inline constexpr class operator|(class::Type a, class b) {              \
+    constexpr class operator|(class::Type a, class b) {                     \
         return b | a;                                                       \
     }                                                                       \
-    inline constexpr class operator&(class::Type a, class b) {              \
+    constexpr class operator&(class::Type a, class b) {                     \
         return b & a;                                                       \
     }                                                                       \
-    inline constexpr class operator~(class::Type a) {                       \
+    constexpr class operator~(class::Type a) {                              \
         return ~class(a);                                                   \
     }
 

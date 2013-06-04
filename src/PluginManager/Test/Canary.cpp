@@ -24,7 +24,7 @@
 */
 
 #include "AbstractAnimal.h"
-#include "PluginManager/AbstractPluginManager.h"
+#include "PluginManager/AbstractManager.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
@@ -33,7 +33,7 @@ class Canary: public AbstractAnimal {
         static void initialize() { Utility::Debug() << "Canary initialized"; }
         static void finalize() { Utility::Debug() << "Canary finalized"; }
 
-        explicit Canary(AbstractPluginManager* manager, std::string plugin): AbstractAnimal(manager, std::move(plugin)) {}
+        explicit Canary(AbstractManager* manager, std::string plugin): AbstractAnimal(manager, std::move(plugin)) {}
 
         std::string name() { return "Achoo"; }
         int legCount() { return 2; }
@@ -42,5 +42,5 @@ class Canary: public AbstractAnimal {
 
 }}}
 
-PLUGIN_REGISTER(Canary, Corrade::PluginManager::Test::Canary,
-               "cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")
+CORRADE_PLUGIN_REGISTER(Canary, Corrade::PluginManager::Test::Canary,
+    "cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")

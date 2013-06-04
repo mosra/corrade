@@ -28,124 +28,51 @@
 
 Usage:
 
-    corrade-rc name group_name infile [-a alias] [infile2 [-a alias2] ... ] > outfile.cpp
+    corrade-rc name resources.conf outfile.cpp
 
-Produces compiled C++ file with data in hexadecimal representation. File
-is printed to `stdout`, status and error messages are printed to `stderr`.
+Produces compiled C++ file with data in hexadecimal representation. Status
+messages are printed to standard output, errors are printed to error output.
 
 See @ref resource-management for brief introduction.
-
-@todo Test it
-@todo Check empty files
-@todo Write to file (and don't create any on error)
-@todo Use Debug classes
 */
 
-#include <iostream>
 #include <fstream>
-#include <sstream>
-#include <vector>
 
-#include "Resource.h"
+#include "Utility/Debug.h"
+#include "Utility/Directory.h"
+#include "Utility/Resource.h"
+
+using Corrade::Utility::Debug;
+using Corrade::Utility::Error;
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 int main(int argc, char** argv) {
-    if(argc < 4) {
-        std::cerr << "Resource compiler for Corrade.\n\nUsage:\n"
-             << "    " << argv[0] << " name group_name infile [-a alias] [infile2 [-a alias2] ...] > outfile.cpp"
-             << std::endl << std::endl;
-        return 2;
+    if(argc != 4) {
+        Debug() << "Resource compiler for Corrade.";
+        Debug() << "";
+        Debug() << "Usage:";
+        Debug() << "   " << argv[0] << "name resources.conf outfile.cpp";
+        Debug() << "";
+        if(argc == 0) return 0;
+        return 1;
     }
 
-    Corrade::Utility::Resource r(argv[2]);
+    /* Remove previous output file */
+    Corrade::Utility::Directory::rm(argv[3]);
 
-    std::vector<std::pair<std::string, std::string>> files;
+    /* Compile file */
+    const std::string compiled = Corrade::Utility::Resource::compileFrom(argv[1], argv[2]);
 
-    bool isAlias = false;
-    std::string filename, alias;
-    for(int i = 3; i != argc; ++i) {
-        /* If argument is -a, next argument will be an alias */
-        if(std::string(argv[i]) == "-a") {
-            /* Check for "infile -a -a alias" */
-            if(isAlias) {
-                std::cerr << "Error: two subsequent aliases!" << std::endl;
-                return 4;
-            }
-            isAlias = true;
-            continue;
-        }
+    /* Compilation failed */
+    if(compiled.empty()) return 2;
 
-        /* Previous argument was -a */
-        if(isAlias) {
-            /* Check for "infile -a alias1 -a alias2" */
-            if(!alias.empty()) {
-                std::cerr << "Error: two subsequent aliases!" << std::endl;
-                return 3;
-            }
-
-            alias = argv[i];
-            isAlias = false;
-
-        } else {
-            /* Check for "infile -a alias" */
-            if(filename.empty() && !alias.empty()) {
-                std::cerr << "Error: specified alias without filename!" << std::endl;
-                return 5;
-            }
-
-            /* Save previously gathered file name and alias */
-            if(!filename.empty()) {
-                files.push_back(make_pair(filename, alias));
-                alias.clear();
-            }
-
-            filename = argv[i];
-        }
+    /* Save output */
+    std::ofstream out(argv[3], std::ofstream::binary);
+    if(!out.good()) {
+        Error() << "Cannot open output file " << '\'' + std::string(argv[3]) + '\'';
+        return 3;
     }
-
-    /* Check for "infile -a" */
-    if(isAlias) {
-        std::cerr << "Error: no alias specified!" << std::endl;
-        return 5;
-    }
-
-    /* Check for no files present */
-    if(filename.empty()) {
-        std::cerr << "Error: no input file specified!" << std::endl;
-        return 6;
-    }
-
-    /* Save last gathered filename and alias */
-    files.push_back(make_pair(filename, alias));
-
-    /* Read all files */
-    std::map<std::string, std::string> data;
-    for(auto it = files.cbegin(); it != files.cend(); ++it) {
-        std::cerr << "Reading file " << it-files.begin()+1 << "/" << files.size() << std::endl
-                  << "    " << it->first << std::endl;
-        if(!it->second.empty())
-            std::cerr << " -> " << it->second << std::endl;
-
-        std::ifstream f(it->first.c_str(), std::ifstream::in|std::ifstream::binary);
-
-        if(!f.is_open()) {
-            std::cerr << "Cannot open file " << it->first << std::endl;
-            return 1;
-        }
-
-        std::ostringstream d;
-        d << f.rdbuf();
-
-        /* Compile file under real filename or alias, if set */
-        if(it->second.empty())
-            data.insert(std::make_pair(it->first, d.str()));
-        else
-            data.insert(std::make_pair(it->second, d.str()));
-    }
-
-    std::cerr << "Compiling..." << std::endl;
-    std::cout << r.compile(argv[1], data);
-    std::cerr << "Done." << std::endl;
+    out.write(compiled.data(), compiled.size());
 
     return 0;
 }

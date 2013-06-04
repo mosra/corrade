@@ -101,6 +101,18 @@ std::vector<const ConfigurationGroup*> ConfigurationGroup::groups(const std::str
     return found;
 }
 
+unsigned int ConfigurationGroup::groupCount(const std::string& name) const {
+    /** @todo How the hell is THIS more efficient??? */
+    if(name.empty()) return _groups.size();
+    return groups(name).size();
+}
+
+bool ConfigurationGroup::groupExists(const std::string& name) const {
+    /** @todo How the hell is THIS more efficient??? */
+    if(name.empty()) return !_groups.empty();
+    return group(name) != nullptr;
+}
+
 bool ConfigurationGroup::addGroup(const std::string& name, ConfigurationGroup* group) {
     if(configuration->flags & Configuration::InternalFlag::ReadOnly ||
      !(configuration->flags & Configuration::InternalFlag::IsValid))
@@ -211,7 +223,7 @@ std::vector<std::string> ConfigurationGroup::valuesInternal(const std::string& k
     return found;
 }
 
-bool ConfigurationGroup::setValueInternal(const std::string& key, const std::string& value, unsigned int number, ConfigurationValueFlags) {
+bool ConfigurationGroup::setValueInternal(const std::string& key, std::string value, unsigned int number, ConfigurationValueFlags) {
     if(configuration->flags & Configuration::InternalFlag::ReadOnly ||
      !(configuration->flags & Configuration::InternalFlag::IsValid))
         return false;
@@ -222,7 +234,7 @@ bool ConfigurationGroup::setValueInternal(const std::string& key, const std::str
     unsigned int foundNumber = 0;
     for(auto it = items.begin(); it != items.end(); ++it) {
         if(it->key == key && foundNumber++ == number) {
-            it->value = value;
+            it->value = std::move(value);
             configuration->flags |= Configuration::InternalFlag::Changed;
             return true;
         }
@@ -231,14 +243,14 @@ bool ConfigurationGroup::setValueInternal(const std::string& key, const std::str
     /* No value with that name was found, add new */
     Item i;
     i.key = key;
-    i.value = value;
+    i.value = std::move(value);
     items.push_back(i);
 
     configuration->flags |= Configuration::InternalFlag::Changed;
     return true;
 }
 
-bool ConfigurationGroup::addValueInternal(const std::string& key, const std::string& value, ConfigurationValueFlags) {
+bool ConfigurationGroup::addValueInternal(std::string key, std::string value, ConfigurationValueFlags) {
     if(configuration->flags & Configuration::InternalFlag::ReadOnly ||
      !(configuration->flags & Configuration::InternalFlag::IsValid))
         return false;
@@ -253,8 +265,8 @@ bool ConfigurationGroup::addValueInternal(const std::string& key, const std::str
     }
 
     Item i;
-    i.key = key;
-    i.value = value;
+    i.key = std::move(key);
+    i.value = std::move(value);
     items.push_back(i);
 
     configuration->flags |= Configuration::InternalFlag::Changed;
@@ -268,7 +280,7 @@ bool ConfigurationGroup::valueInternal(const std::string& key, std::string* valu
     /* Automatic key/value pair creation is enabled and user wants first key,
         try to create new key/value pair */
     if((configuration->flags & Configuration::InternalFlag::AutoCreateKeys) && number == 0)
-        return setValue<std::string>(key, *value, number, flags);
+        return setValueInternal(key, *value, number, flags);
 
     return false;
 }

@@ -34,11 +34,10 @@
 
 #include "Containers/EnumSet.h"
 
+#include "corradeConfigure.h"
 #include "corradeUtilityVisibility.h"
 
 namespace Corrade { namespace Utility {
-
-class Configuration;
 
 /** @relates ConfigurationGroup
 @brief %Configuration value conversion flag
@@ -131,7 +130,6 @@ template<class T> struct ConfigurationValue {
     #endif
 };
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Implementation {
     template<class T> struct CORRADE_UTILITY_EXPORT BasicConfigurationValue {
         BasicConfigurationValue() = delete;
@@ -140,7 +138,6 @@ namespace Implementation {
         static T fromString(const std::string& stringValue, ConfigurationValueFlags flags);
     };
 }
-#endif
 
 /** @brief %Configuration value parser and writer for `short` type */
 template<> struct ConfigurationValue<short>: public Implementation::BasicConfigurationValue<short> {};
@@ -162,8 +159,16 @@ template<> struct ConfigurationValue<unsigned long long>: public Implementation:
 template<> struct ConfigurationValue<float>: public Implementation::BasicConfigurationValue<float> {};
 /** @brief %Configuration value parser and writer for `double` type */
 template<> struct ConfigurationValue<double>: public Implementation::BasicConfigurationValue<double> {};
-/** @brief %Configuration value parser and writer for `long double` type */
+
+#ifndef CORRADE_TARGET_EMSCRIPTEN
+/**
+@brief %Configuration value parser and writer for `long double` type
+@partialsupport Not available in @ref CORRADE_TARGET_EMSCRIPTEN_ "Emscripten"
+    as JavaScript doesn't support doubles larger than 64 bits.
+*/
 template<> struct ConfigurationValue<long double>: public Implementation::BasicConfigurationValue<long double> {};
+#endif
+
 /** @brief %Configuration value parser and writer for `sd::string` type */
 template<> struct ConfigurationValue<std::string>: public Implementation::BasicConfigurationValue<std::string> {};
 

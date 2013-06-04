@@ -1,3 +1,5 @@
+#ifndef Corrade_Interconnect_Interconnect_h
+#define Corrade_Interconnect_Interconnect_h
 /*
     This file is part of Corrade.
 
@@ -23,10 +25,16 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Utility/Resource.h"
-#include "Utility/utilities.h"
+/** @file
+ * @brief Forward declarations for Corrade::Interconnect namespace
+ */
 
-static int staticResourceInitializer() {
-    RESOURCE_INITIALIZE(ResourceTestData)
-    return 1;
-} AUTOMATIC_INITIALIZER(staticResourceInitializer)
+namespace Corrade { namespace Interconnect {
+
+class Connection;
+class Emitter;
+class Receiver;
+
+}}
+
+#endif

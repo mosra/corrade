@@ -199,12 +199,12 @@ namespace TestSuite {
 @subsubsection cpp-classes Class and structure declarations
 
 Class and structure protection levels are ordered as following: first friend
-declarations, then deleted copy/move constructors and assignment operators,
-then public members, then protected members and finally private members, so
-class public interface is easy to spot at the top of the file.
+declarations, then public members, then protected members and finally private
+members, so class public interface is easy to spot at the top of the file.
 
 Members are ordered as following: first classes and enums, then static
-functions, then non-static functions, then static variables, then non-static
+functions, then non-static functions (where constructors, destructors and
+assignment operators are first), then static variables, then non-static
 variables. Again, classes and methods are more important for user than
 variables, static members are more important than non-static.
 
@@ -293,8 +293,10 @@ switch(type) {
 @subsubsection cpp-keywords Class member and function keywords
 
 Use keywords in this order: `template virtual inline constexpr explicit static`.
-Only base virtual functions should have `virtual` keyword, the
-reimplementations should be marked with `override` instead.
+When the function is fully defined in class body or when it is marked as
+`constexpr`, don't mark it as `inline`, it's redundant. Only base virtual
+functions should have `virtual` keyword, the reimplementations should be marked
+with `override` instead.
 
 @subsubsection cpp-macros Preprocessor macros
 
@@ -340,8 +342,8 @@ static pure functions which will be heavily used with compile-time constants,
 such as Containers::EnumSet::operator&().
 
 Traits class members and class constants which are not meant to be referenced
-or pointed to should be defined as `inline constexpr` function or using
-anonymous typed enum (@ref cpp-enums "see below"), because declaring them as
+or pointed to should be defined as `constexpr` function or using anonymous
+typed enum (@ref cpp-enums "see below"), because declaring them as
 `static const` variable will result in another (probably unwanted) symbol and
 the constant might not be always inlined.
 
@@ -351,18 +353,88 @@ Use asserts as much as possible. Utility library has convenient CORRADE_ASSERT()
 CORRADE_INTERNAL_ASSERT() and CORRADE_INTERNAL_ASSERT_OUTPUT() macros, see their
 documentation for more information.
 
-@subsection cpp-forbidden Forbidden and deprecated C/C++ features
+@subsection cpp-enum-inheritance Enums and inheritance
 
-Don't include `<*stream>` in header files. STL's stream library headers are
-amazingly large and this single <tt>#</tt><tt>include</tt> brings >25k of
-source code which needs to be preprocessed and compiled even if majority of it
-is later tossed out. Use `<iosfwd>` instead and include stream headers only in
-source files. If you want to just print something to output, use Utility::Debug
-class and friends.
+Try to avoid having one enum accessible through more than one type, for
+example:
+@code
+class AbstractImage {
+    public:
+        enum class Format { RGB, RGBA };
+
+        void setFormat(Format);
+};
+class Image2D: public AbstractImage {};
+class ImageWrapper: public AbstractImage {};
+@endcode
+
+With this you have more than one way to specify the format (trivial choices
+slowing down the development), not to mention confusion (are all the enums the
+same or is each enum different?) and weird combinations:
+@code
+Image2D image;
+image.setFormat(AbstractImage::Format::RGB); // should I prefer `AbstractImage`
+image.setFormat(Image2D::Format::RGB);       // or `Image2D`?
+image.setFormat(ImageWrapper::Format::RGBA); // is this even allowed?
+@endcode
+
+Better way would be to extract the enum out, now there is only one way to
+specify the format (and it's less typing). Also, when the user later decides to
+change the image type to another, the enum value doesn't need to be updated:
+@code
+enum class ImageFormat { RGB, RGBA };
+
+class AbstractImage {
+    public:
+        void setFormat(ImageFormat);
+};
+class Image2D: public AbstractImage {};
+class ImageWrapper: public AbstractImage {};
+
+Image2D image;
+image.setFormat(ImageFormat::RGBA);
+@endcode
+
+On the other hand, if each class has its own enum values, the original way is
+the preferred one:
+@code
+class ColoredImage {
+    public:
+        enum class Format { RGB, RGBA };
+};
+class BWImage {
+    public:
+        enum class Format { Grayscale, Binary };
+};
+@endcode
+
+@see @ref cpp-enums
+
+@subsection cpp-forbidden Forbidden and deprecated C/C++ features
 
 Don't use RTTI (`dynamic_cast` and `std::typeinfo`) and exceptions, if you don't
 desperately need to. They violate C++ principle of "don't pay for what you don't
-use".
+use". Ideally the code should be compilable with `-fno-rtti -fno-exceptions`.
+
+@subsubsection cpp-heavy-headers Heavy STL headers
+
+Don't add heavy STL includes in header files. Each of these
+<tt>#</tt><tt>include</tt>s brings >20k lines of source code which needs to be
+preprocessed and compiled even if majority of it is later tossed out. Prefer to
+include these only in source files. The following headers are the heaviest,
+numbers taken from `g++-4.8 -std=c++11 -E | wc -l`:
+
+-   `<algorithm>` -- 46k lines after preprocessing. Most of it are new
+    C++11 features, with C++03 it had only ~10k.
+-   `<istream>` and friends -- 22-24k lines after preprocessing. Use `<iosfwd>`
+    instead and include stream headers only in source files. If you want to
+    just print something to output, use Utility::Debug class and friends.
+-   `<iterator>` -- includes stream headers, thus the same as above.
+-   `<memory>` -- 25k lines after preprocessing.
+-   `<random>` -- 36k lines after preprocessing.
+
+Some other headers (e.g. the container ones) are heavy too, but in most cases
+they just need to be included.
 
 @subsubsection cpp-using using namespace keyword
 
@@ -402,6 +474,8 @@ Prefer to use C++11 `enum class`. Use Containers::EnumSet instead of integral
 bit masks. Always explicitly specify underlying type, it might save some memory
 and also allows for forward declaration of the enum, which is good if the enum
 is part of otherwise large header.
+
+@see @ref cpp-enum-inheritance
 
 @subsubsection cpp-anonymous-namespace static keyword
 
@@ -476,10 +550,10 @@ Trivial function overloads (e.g. `const` overloads) are marked only with
 @c \@overload keyword and are always *after* the original documented function:
 @code
 // @brief Data
-inline char* data() { return _data; }
+char* data() { return _data; }
 
 // @overload
-inline const char* data() const { return _data; }
+const char* data() const { return _data; }
 @endcode
 
 If the documentation is short enough, it can be placed after the documented

@@ -44,13 +44,9 @@ corrade_add_test(UtilityTranslatorTest TranslatorTest.cpp)
 corrade_add_test(UtilityUnicodeTest UnicodeTest.cpp)
 
 # Compiled-in resource test
-corrade_add_resource(ResourceTestData test
-    ResourceTestFiles/predisposition.bin ALIAS predisposition.bin
-    ResourceTestFiles/consequence.bin ALIAS consequence.bin)
-corrade_add_test(UtilityResourceTest ResourceTest.cpp ${ResourceTestData})
+corrade_add_resource(ResourceTestData ResourceTestFiles/resources.conf)
+corrade_add_test(UtilityResourceTest ResourceTest.cpp ${ResourceTestData} LIBRARIES CorradeUtilityTestLib)
 
 # Static lib resource test
 add_library(ResourceTestDataLib STATIC ${ResourceTestData})
-corrade_add_test(UtilityResourceTestStatic
-    ResourceTest.cpp ${ResourceTestData} registerStaticResource.cpp
-    LIBRARIES ResourceTestDataLib)
+corrade_add_test(UtilityResourceStaticTest ResourceStaticTest.cpp LIBRARIES ResourceTestDataLib)

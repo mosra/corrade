@@ -26,6 +26,11 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+# Already included, nothing to do
+if(_CORRADE_USE_INCLUDED)
+    return()
+endif()
+
 # Mandatory C++ flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
@@ -37,7 +42,8 @@ set(CORRADE_CXX_FLAGS "-Wall -Wextra -Wold-style-cast -Winit-self -Werror=return
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.7.0")
         set(CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS} -Wzero-as-null-pointer-constant")
-    elseif(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.6.0")
+    endif()
+    if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.6.0")
         set(CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS} -Wdouble-promotion")
     endif()
 endif()
@@ -78,41 +84,45 @@ function(corrade_add_test test_name)
     endforeach()
 
     add_executable(${test_name} ${sources})
-    target_link_libraries(${test_name} ${CORRADE_TESTSUITE_LIBRARIES} ${libraries})
-    add_test(${test_name} ${test_name})
+    target_link_libraries(${test_name} ${libraries} ${CORRADE_TESTSUITE_LIBRARIES})
+    if(CORRADE_TARGET_EMSCRIPTEN)
+        find_package(NodeJs REQUIRED)
+        add_test(NAME ${test_name} COMMAND ${NODEJS_EXECUTABLE} $<TARGET_FILE:${test_name}>)
+    else()
+        add_test(${test_name} ${test_name})
+    endif()
 endfunction()
 
-function(corrade_add_resource name group_name)
-    set(IS_ALIAS OFF)
-    foreach(argument ${ARGN})
+function(corrade_add_resource name configurationFile)
+    # TODO: remove this when backward compatibility is non-issue
+    list(LENGTH ARGN list_length)
+    if(NOT ${list_length} EQUAL 0)
+        message(FATAL_ERROR "Superfluous arguments to corrade_add_resource():" ${ARGN})
+    endif()
 
-        # Next argument is alias
-        if(${argument} STREQUAL "ALIAS")
-            set(IS_ALIAS ON)
-
-        # This argument is alias
-        elseif(IS_ALIAS)
-            set(arguments ${arguments} -a ${argument})
-            set(IS_ALIAS OFF)
-
-        # Filename
-        else()
-            set(arguments ${arguments} ${argument})
-            set(dependencies ${dependencies} ${argument})
+    # Parse dependencies from the file
+    set(filenameRegex "^[ \t]*filename[ \t]*=[ \t]*\"?([^\"]+)\"?[ \t]*$")
+    get_filename_component(configurationFilePath ${configurationFile} PATH)
+    file(STRINGS "${configurationFile}" files REGEX ${filenameRegex})
+    foreach(file ${files})
+        string(REGEX REPLACE ${filenameRegex} "\\1" filename "${file}")
+        if(NOT IS_ABSOLUTE "${filename}" AND configurationFilePath)
+            set(filename "${configurationFilePath}/${filename}")
         endif()
+        list(APPEND dependencies "${filename}")
     endforeach()
 
     # Run command
-    set(out resource_${name}.cpp)
+    set(out "${CMAKE_CURRENT_BINARY_DIR}/resource_${name}.cpp")
     add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${out}
-        COMMAND ${CORRADE_RC_EXECUTABLE} ${name} ${group_name} ${arguments} > ${CMAKE_CURRENT_BINARY_DIR}/${out}
-        DEPENDS ${CORRADE_RC_EXECUTABLE} ${dependencies}
+        OUTPUT "${out}"
+        COMMAND "${CORRADE_RC_EXECUTABLE}" ${name} "${configurationFile}" "${out}"
+        DEPENDS "${CORRADE_RC_EXECUTABLE}" ${dependencies}
         COMMENT "Compiling data resource file ${out}"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
     # Save output filename
-    set(${name} ${CMAKE_CURRENT_BINARY_DIR}/${out} PARENT_SCOPE)
+    set(${name} "${out}" PARENT_SCOPE)
 endfunction()
 
 function(corrade_add_plugin plugin_name install_dir metadata_file)
@@ -144,9 +154,13 @@ macro(corrade_add_static_plugin static_plugins_variable plugin_name metadata_fil
         set(sources ${sources} ${source})
     endforeach()
 
-    corrade_add_resource(${plugin_name} plugins ${metadata_file} ALIAS "${plugin_name}.conf")
-    add_library(${plugin_name} STATIC ${sources} ${${plugin_name}})
+    # Compile resources
+    set(resource_file "${CMAKE_CURRENT_BINARY_DIR}/resources_${plugin_name}.conf")
+    file(WRITE "${resource_file}" "group=CorradeStaticPlugin_${plugin_name}\n[file]\nfilename=\"${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file}\"\nalias=${plugin_name}.conf")
+    corrade_add_resource(${plugin_name} "${resource_file}")
 
+    # Create static library
+    add_library(${plugin_name} STATIC ${sources} ${${plugin_name}})
     set_target_properties(${plugin_name} PROPERTIES COMPILE_FLAGS "-DCORRADE_STATIC_PLUGIN ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
 
     # Unset sources array (it's a macro, thus variables stay between calls)
@@ -155,38 +169,4 @@ macro(corrade_add_static_plugin static_plugins_variable plugin_name metadata_fil
     set_parent_scope(${static_plugins_variable} ${${static_plugins_variable}} ${plugin_name})
 endmacro()
 
-function(corrade_bundle_dlls library_install_dir)
-    # Get DLL and path lists
-    foreach(arg ${ARGN})
-        if(${arg} STREQUAL PATHS)
-            set(__DOING_PATHS ON)
-        else()
-            if(__DOING_PATHS)
-                set(paths ${paths} ${arg})
-            else()
-                set(dlls ${dlls} ${arg})
-            endif()
-        endif()
-    endforeach()
-
-    # Find and install all DLLs
-    foreach(dll ${dlls})
-        # Separate filename from path
-        get_filename_component(path ${dll} PATH)
-        get_filename_component(filename ${dll} NAME)
-
-        # Add current DLL's path to search paths
-        foreach(_path ${paths})
-            set(${dll}_paths ${${dll}_paths} ${_path}/${path})
-        endforeach()
-
-        find_file(${dll}_found ${filename} PATHS ${${dll}_paths}
-            NO_DEFAULT_PATH)
-
-        if(${dll}_found)
-            install(FILES ${${dll}_found} DESTINATION ${library_install_dir}/${path})
-        else()
-            message(FATAL_ERROR "DLL ${dll} needed for bundle not found!")
-        endif()
-    endforeach()
-endfunction()
+set(_CORRADE_USE_INCLUDED TRUE)

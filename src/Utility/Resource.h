@@ -31,9 +31,10 @@
 
 #include <map>
 #include <string>
-#include <tuple>
+#include <vector>
 
-#include "utilities.h"
+#include "Containers/Containers.h"
+#include "Utility/corradeUtilityVisibility.h"
 
 namespace Corrade { namespace Utility {
 
@@ -47,79 +48,106 @@ in given group has unique filename.
 See @ref resource-management for brief introduction and example usage.
 Standalone resource compiler executable is implemented in @ref rc.cpp.
 
+@section UtilityResource-configuration Resource configuration file
+
+Function compileFrom() takes configuration file as parameter. The file allows
+you to specify filenames and filename aliases of resource files instead of
+passing the data manually to compile(). The file is used when compiling
+resources using @ref corrade-cmake "corrade_add_resource()" via CMake. The file
+can be also used when overriding compiled-in resources with live data using
+overrideGroup(). Example file:
+
+    group=myGroup
+
+    [file]
+    filename=../resources/intro-new-final.ogg
+    alias=intro.ogg
+
+    [file]
+    filename=license.txt
+
+    [file]
+    filename=levels-insane.conf
+    alias=levels-easy.conf
+
 @todo Ad-hoc resources
 @todo Test data unregistering
-@todo Test empty files
  */
 class CORRADE_UTILITY_EXPORT Resource {
     public:
         /**
-         * @brief Register data resource
+         * @brief Compile data resource file
+         * @param name          %Resource name (see CORRADE_RESOURCE_INITIALIZE())
          * @param group         Group name
-         * @param count         File count
-         * @param positions     Positions of filenames and data in binary blobs
-         * @param filenames     Pointer to binary blob with filenames
-         * @param data          Pointer to binary blob with file data
+         * @param files         Files (pairs of filename, file data)
          *
-         * This function is used internally for automatic data resource
-         * registering, no need to use it directly.
+         * Produces C++ file with hexadecimal data representation.
          */
-        static void registerData(const char* group, unsigned int count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data);
+        static std::string compile(const std::string& name, const std::string& group, const std::vector<std::pair<std::string, std::string>>& files);
 
         /**
-         * @brief Unregister data resource
-         * @param group         Group name
-         * @param data          Pointer to binary blob with file data
+         * @brief Compile data resource file using configuration file
+         * @param name          %Resource name (see CORRADE_RESOURCE_INITIALIZE())
+         * @param configurationFile %Filename of configuration file
          *
-         * This function is used internally for automatic data resource
-         * unregistering, no need to use it directly.
+         * Produces C++ file with hexadecimal data representation. See class
+         * documentation for configuration file syntax overview. The filenames
+         * are taken relative to configuration file path.
          */
-        static void unregisterData(const char* group, const unsigned char* data);
+        static std::string compileFrom(const std::string& name, const std::string& configurationFile);
+
+        /**
+         * @brief Override group
+         * @param group         Group name
+         * @param configurationFile %Filename of configuration file. Empty
+         *      string will discard the override.
+         *
+         * Overrides compiled-in resources of given group with live data
+         * specified in given configuration file, useful during development and
+         * debugging. Subsequently created Resource instances with the same
+         * group will take data from live filesystem instead and fallback to
+         * compiled-in resources only for not found files.
+         */
+        static void overrideGroup(const std::string& group, const std::string& configurationFile);
 
         /**
          * @brief Constructor
-         * @param _group        Group name for getting data or compiling new
-         *      resources.
-         */
-        inline explicit Resource(const std::string& _group): group(_group) {}
-
-        /**
-         * @brief Compile data resource file
-         * @param name          %Resource name (see RESOURCE_INITIALIZE())
-         * @param files         Map with files, first item of pair is filename,
-         *      second is file data.
+         * @param group         Group name
          *
-         * Produces C++ file with hexadecimally represented file data. The file
-         * then must be compiled directly to executable or library.
+         * If the group is not found, prints message to error output.
          */
-        std::string compile(const std::string& name, const std::map<std::string, std::string>& files) const;
+        explicit Resource(const std::string& group);
 
-        /**
-         * @brief Compile data resource file
-         * @param name          %Resource name (see RESOURCE_INITIALIZE())
-         * @param filename      Filename
-         * @param data          File data
-         *
-         * Convenience function for compiling resource with only one file.
-         */
-        std::string compile(const std::string& name, const std::string& filename, const std::string& data) const;
+        ~Resource();
 
         /**
          * @brief Get pointer to raw resource data
          * @param filename      Filename
          *
-         * Returns data of given group and filename as pair of pointer and
-         * size. If not found, the pointer is `nullptr` and size is `0`.
+         * Returns data of given file in the group as pair of pointer and size.
+         * If the group does not exist, returns `{nullptr, 0}`. If the file was
+         * not found, prints message to error output and returns `{nullptr, 0}`.
          */
-        std::tuple<const unsigned char*, unsigned int> getRaw(const std::string& filename) const;
+        std::pair<const unsigned char*, unsigned int> getRaw(const std::string& filename) const;
 
         /**
          * @brief Get data resource
          * @param filename      Filename
          * @return Data of given group (specified in constructor) and filename.
          *      Returns empty string if nothing was found.
+         *
+         * Returns data of given file in the group. If the group does not
+         * exist, returns empty string. If the file was not found, prints
+         * message to error output and returns empty string.
          */
         std::string get(const std::string& filename) const;
+
+    #ifdef DOXYGEN_GENERATING_OUTPUT
+    private:
+    #endif
+        /* Internal use only. */
+        static void registerData(const char* group, unsigned int count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data);
+        static void unregisterData(const char* group, const unsigned char* data);
 
     private:
         struct CORRADE_UTILITY_LOCAL ResourceData {
@@ -128,29 +156,37 @@ class CORRADE_UTILITY_EXPORT Resource {
             const unsigned char* data;
         };
 
+        struct CORRADE_UTILITY_LOCAL GroupData {
+            std::string overrideGroup;
+            std::map<std::string, ResourceData> resources;
+        };
+
+        struct OverrideData;
+
         /* Accessed through function to overcome "static initialization order
            fiasco" which I think currently fails only in static build */
-        CORRADE_UTILITY_LOCAL static std::map<std::string, std::map<std::string, ResourceData>>& resources();
+        CORRADE_UTILITY_LOCAL static std::map<std::string, GroupData>& resources();
 
-        std::string group;
-
-        CORRADE_UTILITY_LOCAL std::string hexcode(const std::string& data, const std::string& comment = std::string()) const;
-
-        /** @todo Move to utilities.h? */
+        CORRADE_UTILITY_LOCAL static std::pair<bool, Containers::Array<unsigned char>> fileContents(const std::string& filename);
+        CORRADE_UTILITY_LOCAL static std::string comment(const std::string& comment);
+        CORRADE_UTILITY_LOCAL static std::string hexcode(const std::string& data);
         template<class T> static std::string numberToString(const T& number);
-        template<class T> static T numberFromString(const std::string& number);
+
+        std::map<std::string, GroupData>::const_iterator _group;
+
+        OverrideData* _overrideGroup;
 };
 
 /**
 @brief Initialize resource
 
 If a resource is compiled into dynamic library or directly into executable, it
-will be initialized automatically thanks to AUTOMATIC_INITIALIZER() macros.
-However, if the resource is compiled into static library, it must be explicitly
-initialized via this macro, e.g. at the beginning of main(). You can also wrap
-these macro calls into another function (which will then be compiled into
-dynamic library or main executable) and use AUTOMATIC_INITIALIZER() macro for
-automatic call.
+will be initialized automatically thanks to CORRADE_AUTOMATIC_INITIALIZER()
+macros. However, if the resource is compiled into static library, it must be
+explicitly initialized via this macro, e.g. at the beginning of main(). You can
+also wrap these macro calls into another function (which will then be compiled
+into dynamic library or main executable) and use CORRADE_AUTOMATIC_INITIALIZER()
+macro for automatic call.
 
 @attention This macro should be called outside of any namespace. If you are
     running into linker errors with `resourceInitializer_*`, this could be the
@@ -158,7 +194,7 @@ automatic call.
     try this:
 @code
 static void initialize() {
-    RESOURCE_INITIALIZE(res)
+    CORRADE_RESOURCE_INITIALIZE(res)
 }
 
 namespace Foo {
@@ -169,20 +205,23 @@ namespace Foo {
     }
 }
 @endcode
+
+@see CORRADE_RESOURCE_FINALIZE()
 */
-#define RESOURCE_INITIALIZE(name)                                             \
+#define CORRADE_RESOURCE_INITIALIZE(name)                                     \
     extern int resourceInitializer_##name();                                  \
     resourceInitializer_##name();
 
 /**
 @brief Cleanup resource
 
-Cleans up previously (even automatically) initialized resource.
+Cleans up resource previously (even automatically) initialized via
+CORRADE_RESOURCE_INITIALIZE().
 
 @attention This macro should be called outside of any namespace. See
-    RESOURCE_INITIALIZE() documentation for more information.
+    CORRADE_RESOURCE_INITIALIZE() documentation for more information.
 */
-#define RESOURCE_CLEANUP(name)                                                \
+#define CORRADE_RESOURCE_FINALIZE(name)                                       \
     extern int resourceFinalizer_##name();                                    \
     resourceFinalizer_##name();
 

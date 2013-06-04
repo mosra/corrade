@@ -29,6 +29,8 @@
 
 namespace Corrade { namespace TestSuite {
 
+Tester::Tester(): logOutput(nullptr), errorOutput(nullptr), testCaseLine(0), checkCount(0), expectedFailure(nullptr) {}
+
 int Tester::exec() { return exec(&std::cout, &std::cerr); }
 
 int Tester::exec(std::ostream* logOutput, std::ostream* errorOutput) {
@@ -83,7 +85,6 @@ int Tester::exec(std::ostream* logOutput, std::ostream* errorOutput) {
     return errorCount != 0 || noCheckCount != 0;
 }
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 void Tester::verify(const std::string& expression, bool expressionValue) {
     ++checkCount;
 
@@ -103,6 +104,11 @@ void Tester::verify(const std::string& expression, bool expressionValue) {
     throw Exception();
 }
 
+void Tester::registerTest(std::string filename, std::string name) {
+    testFilename = std::move(filename);
+    testName = std::move(name);
+}
+
 void Tester::skip(const std::string& message) {
     Utility::Debug e(logOutput);
     e << "  SKIP:" << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       " << message;
@@ -113,6 +119,15 @@ void Tester::registerTestCase(const std::string& name, int line) {
     if(testCaseName.empty()) testCaseName = name + "()";
     testCaseLine = line;
 }
-#endif
+
+Tester::ExpectedFailure::ExpectedFailure(Tester* instance, std::string message): instance(instance), _message(std::move(message)) {
+    instance->expectedFailure = this;
+}
+
+Tester::ExpectedFailure::~ExpectedFailure() {
+    instance->expectedFailure = nullptr;
+}
+
+std::string Tester::ExpectedFailure::message() const { return _message; }
 
 }}

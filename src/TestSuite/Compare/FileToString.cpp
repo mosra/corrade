@@ -29,6 +29,8 @@
 
 namespace Corrade { namespace TestSuite {
 
+Comparator<Compare::FileToString>::Comparator(): state(State::ReadError) {}
+
 bool Comparator<Compare::FileToString>::operator()(const std::string& filename, const std::string& expectedContents) {
     this->filename = filename;
 

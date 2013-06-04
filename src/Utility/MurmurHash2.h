@@ -30,7 +30,6 @@
  */
 
 #include "AbstractHash.h"
-#include "utilities.h"
 
 namespace Corrade { namespace Utility {
 
@@ -59,7 +58,7 @@ template<std::size_t> class MurmurHash2Implementation {
 /** @todo Used only in unit test, export in only there? */
 template<> class CORRADE_UTILITY_EXPORT MurmurHash2Implementation<4> {
     public:
-        inline explicit MurmurHash2Implementation(unsigned int seed): seed(seed) {}
+        constexpr explicit MurmurHash2Implementation(unsigned int seed): seed(seed) {}
         unsigned int operator()(const unsigned char* data, unsigned int size) const;
 
     private:
@@ -68,7 +67,7 @@ template<> class CORRADE_UTILITY_EXPORT MurmurHash2Implementation<4> {
 /** @todo Used only in unit test, export in only there? */
 template<> class CORRADE_UTILITY_EXPORT MurmurHash2Implementation<8> {
     public:
-        inline explicit MurmurHash2Implementation(unsigned long long seed): seed(seed) {}
+        constexpr explicit MurmurHash2Implementation(unsigned long long seed): seed(seed) {}
         unsigned long long operator()(const unsigned char* data, unsigned long long size) const;
 
     private:
@@ -93,7 +92,7 @@ class CORRADE_UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(std::size_t
          * Computes digest using default zero seed. This function is here for
          * consistency with other AbstractHash subclasses.
          */
-        inline static Digest digest(const std::string& data) {
+        static Digest digest(const std::string& data) {
             return MurmurHash2()(data);
         }
 
@@ -101,15 +100,15 @@ class CORRADE_UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(std::size_t
          * @brief Constructor
          * @param seed      Seed to initialize the hash
          */
-        inline explicit MurmurHash2(std::size_t seed = 0): implementation(seed) {}
+        constexpr explicit MurmurHash2(std::size_t seed = 0): implementation(seed) {}
 
         /** @brief Compute digest of given data */
-        inline Digest operator()(const std::string& data) const {
+        Digest operator()(const std::string& data) const {
             return operator()(data.c_str(), data.size());
         }
 
         /** @copydoc operator()(const std::string&) const */
-        template<std::size_t size> inline Digest operator()(const char(&data)[size]) const {
+        template<std::size_t size> Digest operator()(const char(&data)[size]) const {
             std::size_t d = implementation(reinterpret_cast<const unsigned char*>(data), size-1);
             return Digest::fromByteArray(reinterpret_cast<const char*>(&d));
         }

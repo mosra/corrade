@@ -29,7 +29,7 @@ namespace Corrade { namespace Examples {
 
 class Dog: public AbstractAnimal {
     public:
-        Dog(PluginManager::AbstractPluginManager* manager, std::string plugin):
+        Dog(PluginManager::AbstractManager* manager, std::string plugin):
             AbstractAnimal(manager, std::move(plugin)) {}
 
         std::string name() const override { return "Doug"; }
@@ -39,4 +39,5 @@ class Dog: public AbstractAnimal {
 
 }}
 
-PLUGIN_REGISTER(Dog, Corrade::Examples::Dog, "cz.mosra.Corrade.Examples.AbstractAnimal/1.0")
+CORRADE_PLUGIN_REGISTER(Dog, Corrade::Examples::Dog,
+    "cz.mosra.Corrade.Examples.AbstractAnimal/1.0")

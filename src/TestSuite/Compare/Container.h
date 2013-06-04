@@ -68,38 +68,9 @@ template<class T> class SortedContainer: public Container<T> {};
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<class T> class Comparator<Compare::Container<T>> {
     public:
-        inline bool operator()(const T& actual, const T& expected) {
-            actualContents = actual;
-            expectedContents = expected;
+        bool operator()(const T& actual, const T& expected);
 
-            return actualContents == expectedContents;
-        }
-
-        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
-            e << "Containers" << actual << "and" << expected << "have different";
-            if(actualContents.size() != expectedContents.size())
-                e << "size, actual" << actualContents.size() << "but" << expectedContents.size() << "expected.";
-            else
-                e << "contents.";
-
-            for(std::size_t i = 0, end = std::max(actualContents.size(), expectedContents.size()); i != end; ++i) {
-                if(actualContents.size() > i && expectedContents.size() > i && actualContents[i] == expectedContents[i]) continue;
-
-                if(actualContents.size() <= i)
-                    e << "Expected has" << expectedContents[i];
-                else if(expectedContents.size() <= i)
-                    e << "Actual has" << actualContents[i];
-                else
-                    e << "Actual" << actualContents[i] << "but" << expectedContents[i] << "expected";
-
-                e << "on position" << i;
-                e.setFlag(Utility::Debug::SpaceAfterEachValue, false);
-                e << ".";
-                e.setFlag(Utility::Debug::SpaceAfterEachValue, true);
-
-                break;
-            }
-        }
+        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const;
 
     protected:
         T actualContents, expectedContents;
@@ -107,16 +78,52 @@ template<class T> class Comparator<Compare::Container<T>> {
 
 template<class T> class Comparator<Compare::SortedContainer<T>>: public Comparator<Compare::Container<T>> {
     public:
-        inline bool operator()(const T& actual, const T& expected) {
-            this->actualContents = actual;
-            this->expectedContents = expected;
-
-            std::sort(this->actualContents.begin(), this->actualContents.end());
-            std::sort(this->expectedContents.begin(), this->expectedContents.end());
-
-            return this->actualContents == this->expectedContents;
-        }
+        bool operator()(const T& actual, const T& expected);
 };
+
+template<class T> bool Comparator<Compare::Container<T>>::operator()(const T& actual, const T& expected) {
+    actualContents = actual;
+    expectedContents = expected;
+
+    return actualContents == expectedContents;
+}
+
+template<class T> void Comparator<Compare::Container<T>>::printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
+    e << "Containers" << actual << "and" << expected << "have different";
+    if(actualContents.size() != expectedContents.size())
+        e << "size, actual" << actualContents.size() << "but" << expectedContents.size() << "expected.";
+    else
+        e << "contents.";
+
+    for(std::size_t i = 0, end = std::max(actualContents.size(), expectedContents.size()); i != end; ++i) {
+        if(actualContents.size() > i && expectedContents.size() > i && actualContents[i] == expectedContents[i]) continue;
+
+        if(actualContents.size() <= i)
+            e << "Expected has" << expectedContents[i];
+        else if(expectedContents.size() <= i)
+            e << "Actual has" << actualContents[i];
+        else
+            e << "Actual" << actualContents[i] << "but" << expectedContents[i] << "expected";
+
+        e << "on position" << i;
+        e.setFlag(Utility::Debug::SpaceAfterEachValue, false);
+        e << ".";
+        e.setFlag(Utility::Debug::SpaceAfterEachValue, true);
+
+        break;
+    }
+}
+
+template<class T> bool Comparator<Compare::SortedContainer<T>>::operator()(const T& actual, const T& expected) {
+    this->actualContents = actual;
+    this->expectedContents = expected;
+
+    std::sort(this->actualContents.begin(), this->actualContents.end());
+    std::sort(this->expectedContents.begin(), this->expectedContents.end());
+
+    return this->actualContents == this->expectedContents;
+}
+
 #endif
 
 }}

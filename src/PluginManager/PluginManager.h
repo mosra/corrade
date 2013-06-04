@@ -1,5 +1,5 @@
-#ifndef Corrade_Plugins_PluginManager_h
-#define Corrade_Plugins_PluginManager_h
+#ifndef Corrade_PluginManager_PluginManager_h
+#define Corrade_PluginManager_PluginManager_h
 /*
     This file is part of Corrade.
 
@@ -26,62 +26,18 @@
 */
 
 /** @file
- * @brief Class Corrade::PluginManager::PluginManager
+ * @brief Forward declarations for Corrade::PluginManager namespace
  */
-
-#include "AbstractPluginManager.h"
-
-#include "corradeCompatibility.h"
 
 namespace Corrade { namespace PluginManager {
 
-/**
-@brief Plugin manager
-@tparam T                   Plugin interface
-@tparam BasePluginManager   Base class, subclassed from AbstractPluginManager
-    (for example if you want to add some functionality to non-templated base,
-    such as Qt signals)
+enum class LoadState: unsigned short;
+/* LoadStates won't be used without LoadState definition */
 
-Manages loading, instancing and unloading plugins. See also
-@ref plugin-management.
-
-@todo C++11 - provide constructor with arbitrary arguments
- */
-template<class T, class BasePluginManager = AbstractPluginManager> class PluginManager: public BasePluginManager {
-    public:
-        /** @copydoc AbstractPluginManager::AbstractPluginManager() */
-        explicit PluginManager(const std::string& pluginDirectory): BasePluginManager(pluginDirectory) {
-            /* Find static plugins which have the same interface and have not
-               assigned manager to them */
-            for(typename std::map<std::string, typename BasePluginManager::Plugin*>::iterator it = this->plugins()->begin(); it != this->plugins()->end(); ++it) {
-                if(it->second->loadState != LoadState::Static || it->second->manager != nullptr || it->second->staticPlugin->interface != pluginInterface())
-                    continue;
-
-                /* Assign the plugin to this manager and initialize it */
-                it->second->manager = this;
-                it->second->staticPlugin->initializer();
-            }
-        }
-
-        /**
-         * @brief Plugin interface
-         *
-         * Only plugins with the same plugin interface string can be used
-         * in this plugin manager.
-         */
-        std::string pluginInterface() const override { return T::pluginInterface(); }
-
-        /**
-         * @brief Plugin instance
-         *
-         * Returns new instance of given plugin or `nullptr` on error. The
-         * plugin must be successfully loaded for the operation to succeed.
-         * @see loadState(), load()
-         */
-        T* instance(const std::string& plugin) {
-            return static_cast<T*>(this->instanceInternal(plugin));
-        }
-};
+class AbstractManager;
+class AbstractPlugin;
+template<class, class = AbstractManager> class Manager;
+class PluginMetadata;
 
 }}
 

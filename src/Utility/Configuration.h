@@ -120,7 +120,8 @@ Example file:
 @todo Join ReadOnly / IsValid flag checks
 @bug When value with number > 0 is not found, pointed integer is changed
 @bug Setting inexistent value with number > 0 creates new key/value pair
-@todo Test, whether the configurationValueToString() is called also with string type
+@todo Test that the configurationValueToString() isn't called with string type
+    (e.g. value with spaces)
 @todo Support different syntax for hierarchic groups [g1][g2][...] along with
     [g1/g2/...]
 @todo C++11: move constructor, creating readonly Configuration using static
@@ -210,7 +211,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          *
          * Creates empty configuration with no filename.
          */
-        inline explicit Configuration(Flags flags = Flags()): ConfigurationGroup(this), flags(static_cast<InternalFlag>(std::uint32_t(flags))|InternalFlag::IsValid) {}
+        explicit Configuration(Flags flags = Flags());
 
         /**
          * @brief Constructor
@@ -233,7 +234,10 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          */
         explicit Configuration(std::istream& file, Flags flags = Flags());
 
+        /** @brief Copying is not allowed */
         Configuration(const Configuration&) = delete;
+
+        /** @brief Moving is not allowed */
         Configuration(Configuration&&) = delete;
 
         /**
@@ -242,13 +246,16 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * If the configuration has been changed, writes configuration back to
          * the file. See also save().
          */
-        inline ~Configuration() { if(flags & InternalFlag::Changed) save(); }
+        ~Configuration();
 
+        /** @brief Copying is not allowed */
         Configuration& operator=(const Configuration&) = delete;
+
+        /** @brief Moving is not allowed */
         Configuration& operator=(Configuration&&) = delete;
 
         /** @brief Filename */
-        inline std::string filename() const { return _filename; }
+        std::string filename() const;
 
         /**
          * @brief Set filename
@@ -256,9 +263,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * The configuration will be saved under this filename.
          * @see save()
          */
-        inline void setFilename(const std::string& filename) {
-            _filename = filename;
-        }
+        void setFilename(std::string filename);
 
         /**
          * @brief Whether the file is valid
@@ -267,7 +272,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          *
          * Invalid files cannot be changed or saved back.
          */
-        inline bool isValid() const { return bool(flags & InternalFlag::IsValid); }
+        bool isValid() const { return bool(flags & InternalFlag::IsValid); }
 
         /**
          * @brief Enable/disable automatic creation of inexistent groups
@@ -280,7 +285,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * parameter set to non-zero value.
          * @todo Check readonly/isvalid
          */
-        inline void setAutomaticGroupCreation(bool enabled) {
+        void setAutomaticGroupCreation(bool enabled) {
             if(enabled) flags |= InternalFlag::AutoCreateGroups;
             else flags &= ~InternalFlag::AutoCreateGroups;
         }
@@ -289,8 +294,9 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * @brief Whether automatic creation of inexistent groups is enabled
          * @see setAutomaticGroupCreation().
          */
-        inline bool automaticGroupCreation() const
-            { return bool(flags & InternalFlag::AutoCreateGroups); }
+        bool automaticGroupCreation() const {
+            return bool(flags & InternalFlag::AutoCreateGroups);
+        }
 
         /**
          * @brief Enable/disable automatic creation of inexistent key/value pairs.
@@ -302,7 +308,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * name and value in pointed variable.
          * @todo Check readonly/isvalid
          */
-        inline void setAutomaticKeyCreation(bool enabled) {
+        void setAutomaticKeyCreation(bool enabled) {
             if(enabled) flags |= InternalFlag::AutoCreateKeys;
             else flags &= ~InternalFlag::AutoCreateKeys;
         }
@@ -311,8 +317,9 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * @brief Whether automatic creation of inexistent keys is enabled
          * @see setAutomaticKeyCreation().
          */
-        inline bool automaticKeyCreation() const
-            { return bool(flags & InternalFlag::AutoCreateKeys); }
+        bool automaticKeyCreation() const {
+            return bool(flags & InternalFlag::AutoCreateKeys);
+        }
 
         /**
          * @brief Save configuration

@@ -51,7 +51,7 @@ reimplement AbstractPlugin constructor. This is needed for instance use checks,
 as described above. Plugin classes derived from that interface must reimplement
 the constructor too, of course.
 
-Additionaly, interface must be defined with PLUGIN_INTERFACE() macro in
+Additionaly, interface must be defined with CORRADE_PLUGIN_INTERFACE() macro in
 header to make sure loaded plugins will use the same interface in the same
 version. One single argument is an string which uniquely names that particular
 interface. A good practice is to use "Java package name"-style syntax because
@@ -73,29 +73,29 @@ metadata such as human readable plugin name, author, description, plugin
 dependencies etc. Full specification of plugin configuration file syntax can
 be found in PluginMetadata class documentation.
 
-First we define one static plugin, which will be included in the
-application out-of-the-box. After declaring that plugin we register it with
-macro PLUGIN_REGISTER(). The first argument is plugin name (which will be
+First we define one static plugin, which will be included in the application
+out-of-the-box. After declaring that plugin we register it with macro
+CORRADE_PLUGIN_REGISTER(). The first argument is plugin name (which will be
 used when instancing the plugin), second argument is name of the plugin class
 and third is name of used plugin interface.
 @dontinclude pluginmanager/Canary.cpp
 @skip class Canary
 @until };
-@skipline PLUGIN_REGISTER
+@skipline CORRADE_PLUGIN_REGISTER
 
 Configuration file for Canary plugin:
 @include pluginmanager/Canary.conf
 
-Then we define one example dynamic plugin. Note that the macro for
-registering dynamic plugin is the same, the only difference will be in
-`CMakeLists.txt`, as you will see below. This way you can decide at compile
-time which plugins will be dynamic, which will be static, or, for example,
-which will be compiled directly into the library/application, so they can be
-used directly without plugin manager.
+Then we define one example dynamic plugin. Note that the macro for registering
+dynamic plugin is the same, the only difference will be in `CMakeLists.txt`, as
+you will see below. This way you can decide at compile time which plugins will
+be dynamic, which will be static, or, for example, which will be compiled
+directly into the library/application, so they can be used directly without
+plugin manager.
 @dontinclude pluginmanager/Dog.cpp
 @skip class Dog
 @until };
-@skipline PLUGIN_REGISTER
+@skipline CORRADE_PLUGIN_REGISTER
 
 Configuration file for Dog plugin:
 @include pluginmanager/Dog.conf
@@ -131,8 +131,8 @@ PluginManager is templated class and that means it will load and make
 available only plugins with given interface specified as template.
 
 To make sure plugin manager will find the static plugins, we must import them
-with a macro PLUGIN_IMPORT() (for example at the beginning of main function),
-which takes plugin name as argument.
+with a macro CORRADE_PLUGIN_IMPORT() (for example at the beginning of main
+function), which takes plugin name as argument.
 
 This example application will take first argument passed on commandline and
 if a plugin is found and loaded successfully, displays brief info about a

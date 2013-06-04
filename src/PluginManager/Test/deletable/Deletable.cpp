@@ -24,18 +24,18 @@
 */
 
 #include "PluginManager/Test/AbstractDeletable.h"
-#include "PluginManager/AbstractPluginManager.h"
+#include "PluginManager/AbstractManager.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
 class Deletable: public AbstractDeletable {
     public:
-        explicit Deletable(AbstractPluginManager* manager, std::string plugin): AbstractDeletable(manager, std::move(plugin)) {}
+        explicit Deletable(AbstractManager* manager, std::string plugin): AbstractDeletable(manager, std::move(plugin)) {}
 
         ~Deletable() { *var = 0xDEADBEEF; }
 };
 
 }}}
 
-PLUGIN_REGISTER(Deletable, Corrade::PluginManager::Test::Deletable,
-                "cz.mosra.Corrade.PluginManager.Test.AbstractDeletable/1.0")
+CORRADE_PLUGIN_REGISTER(Deletable, Corrade::PluginManager::Test::Deletable,
+    "cz.mosra.Corrade.PluginManager.Test.AbstractDeletable/1.0")

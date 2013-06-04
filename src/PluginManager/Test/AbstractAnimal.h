@@ -30,11 +30,11 @@
 namespace Corrade { namespace PluginManager { namespace Test {
 
 class AbstractAnimal: public AbstractPlugin {
-    PLUGIN_INTERFACE("cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")
+    CORRADE_PLUGIN_INTERFACE("cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")
 
     public:
         explicit AbstractAnimal();
-        explicit AbstractAnimal(AbstractPluginManager* manager, std::string plugin): AbstractPlugin(manager, std::move(plugin)) {}
+        explicit AbstractAnimal(AbstractManager* manager, std::string plugin): AbstractPlugin(manager, std::move(plugin)) {}
 
         virtual std::string name() = 0;
         virtual int legCount() = 0;

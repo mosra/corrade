@@ -25,11 +25,11 @@
 
 #include "PluginMetadata.h"
 
-using namespace Corrade::Utility;
+#include "Utility/Configuration.h"
 
 namespace Corrade { namespace PluginManager {
 
-PluginMetadata::PluginMetadata(const Configuration& conf) {
+PluginMetadata::PluginMetadata(const Utility::Configuration& conf) {
     /* Author(s), version */
     _authors = conf.values("author");
     _version = conf.value("version");
@@ -38,11 +38,17 @@ PluginMetadata::PluginMetadata(const Configuration& conf) {
     _depends = conf.values("depends");
     _replaces = conf.values("replaces");
 
-    const ConfigurationGroup* metadata = conf.group("metadata");
+    const Utility::ConfigurationGroup* metadata = conf.group("metadata");
     translator.setFallback(metadata);
     translator.setPrimary(metadata, true);
     _name = translator.get("name");
     _description = translator.get("description");
 }
+
+std::string PluginMetadata::version() const { return _version; }
+
+std::vector<std::string> PluginMetadata::usedBy() const { return _usedBy; }
+
+std::vector<std::string> PluginMetadata::replacedWith() const { return _replacedWith; }
 
 }}

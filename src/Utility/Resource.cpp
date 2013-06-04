@@ -25,41 +25,55 @@
 
 #include "Resource.h"
 
+#include <fstream>
+#include <iomanip>
 #include <sstream>
 #include <tuple>
 #include <vector>
 
-#include "Debug.h"
+#include "Containers/Array.h"
+#include "Utility/Assert.h"
+#include "Utility/Configuration.h"
+#include "Utility/Debug.h"
+#include "Utility/Directory.h"
 
 namespace Corrade { namespace Utility {
 
-std::map<std::string, std::map<std::string, Resource::ResourceData>>& Resource::resources() {
-    static std::map<std::string, std::map<std::string, Resource::ResourceData>> resources;
+struct Resource::OverrideData {
+    const Configuration conf;
+    std::map<std::string, Containers::Array<unsigned char>> data;
+
+    explicit OverrideData(const std::string& filename): conf(filename) {}
+};
+
+auto Resource::resources() -> std::map<std::string, GroupData>& {
+    static std::map<std::string, GroupData> resources;
     return resources;
 }
 
 void Resource::registerData(const char* group, unsigned int count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data) {
-    if(resources().find(group) == resources().end()) resources().insert(std::make_pair(group, std::map<std::string, ResourceData>()));
+    auto groupData = resources().find(group);
+    if(groupData == resources().end())
+        groupData = resources().emplace(group, GroupData()).first;
 
     /* Cast to type which can be eaten by std::string constructor */
     const char* _positions = reinterpret_cast<const char*>(positions);
     const char* _filenames = reinterpret_cast<const char*>(filenames);
 
-    unsigned int size = sizeof(unsigned int);
+    const unsigned int size = sizeof(unsigned int);
     unsigned int oldFilenamePosition = 0, oldDataPosition = 0;
 
     /* Every 2*sizeof(unsigned int) is one data */
-    for(unsigned int i = 0; i != count*2*size; i=i+2*size) {
-        unsigned int filenamePosition = numberFromString<unsigned int>(std::string(_positions+i, size));
-        unsigned int dataPosition = numberFromString<unsigned int>(std::string(_positions+i+size, size));
+    for(unsigned int i = 0; i != count*2*size; i += 2*size) {
+        unsigned int filenamePosition = *reinterpret_cast<const unsigned int*>(_positions+i);
+        unsigned int dataPosition = *reinterpret_cast<const unsigned int*>(_positions+i+size);
 
-        ResourceData res;
-        res.data = data;
-        res.position = oldDataPosition;
-        res.size = dataPosition-oldDataPosition;
+        ResourceData res{
+            oldDataPosition,
+            dataPosition-oldDataPosition,
+            data};
 
-        std::string filename = std::string(_filenames+oldFilenamePosition, filenamePosition-oldFilenamePosition);
-        resources()[group].insert(std::make_pair(filename, res));
+        groupData->second.resources.emplace(std::string(_filenames+oldFilenamePosition, filenamePosition-oldFilenamePosition), res);
 
         oldFilenamePosition = filenamePosition;
         oldDataPosition = dataPosition;
@@ -67,24 +81,59 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
 }
 
 void Resource::unregisterData(const char* group, const unsigned char* data) {
+    /** @todo redo and test this */
     if(resources().find(group) == resources().end()) return;
 
     /* Positions which to remove */
     std::vector<std::string> positions;
 
-    for(auto it = resources()[group].begin(); it != resources()[group].end(); ++it) {
+    for(auto it = resources()[group].resources.begin(); it != resources()[group].resources.end(); ++it) {
         if(it->second.data == data)
             positions.push_back(it->first);
     }
 
     /** @todo wtf? this doesn't crash?? */
     for(auto it = positions.cbegin(); it != positions.cend(); ++it)
-        resources()[group].erase(*it);
+        resources()[group].resources.erase(*it);
 
-    if(resources()[group].empty()) resources().erase(group);
+    if(resources()[group].resources.empty()) resources().erase(group);
 }
 
-std::string Resource::compile(const std::string& name, const std::map<std::string, std::string>& files) const {
+std::string Resource::compileFrom(const std::string& name, const std::string& configurationFile) {
+    const std::string path = Directory::path(configurationFile);
+    const Configuration conf(configurationFile);
+
+    /* Group name */
+    const std::string group = conf.value("group");
+
+    /* Load all files */
+    std::vector<const ConfigurationGroup*> files = conf.groups("file");
+    std::vector<std::pair<std::string, std::string>> fileData;
+    fileData.reserve(files.size());
+    for(const auto file: files) {
+        Debug() << "Reading file" << fileData.size()+1 << "of" << files.size() << "in group" << '\'' + group + '\'';
+
+        const std::string filename = file->value("filename");
+        const std::string alias = file->keyExists("alias") ? file->value("alias") : filename;
+        if(filename.empty() || alias.empty()) {
+            Error() << "    Error: empty filename or alias!";
+            return {};
+        }
+
+        Debug() << "   " << filename;
+        if(alias != filename) Debug() << " ->" << alias;
+
+        bool success;
+        Containers::Array<unsigned char> contents;
+        std::tie(success, contents) = fileContents(Directory::join(path, filename));
+        if(!success) return {};
+        fileData.emplace_back(std::move(alias), std::string(reinterpret_cast<char*>(contents.begin()), contents.size()));
+    }
+
+    return compile(name, group, fileData);
+}
+
+std::string Resource::compile(const std::string& name, const std::string& group, const std::vector<std::pair<std::string, std::string>>& files) {
     std::string positions, filenames, data;
     unsigned int filenamesLen = 0, dataLen = 0;
 
@@ -93,21 +142,28 @@ std::string Resource::compile(const std::string& name, const std::map<std::strin
         filenamesLen += it->first.size();
         dataLen += it->second.size();
 
+        if(it != files.begin()) {
+            filenames += '\n';
+            data += '\n';
+        }
+
         positions += hexcode(numberToString(filenamesLen));
         positions += hexcode(numberToString(dataLen));
 
-        filenames += hexcode(it->first, it->first);
-        data += hexcode(it->second, it->first);
+        filenames += comment(it->first);
+        filenames += hexcode(it->first);
+
+        data += comment(it->first);
+        data += hexcode(it->second);
     }
 
-    /* Remove last comma from data */
-    positions = positions.substr(0, positions.size()-2);
-    filenames = filenames.substr(0, filenames.size()-2);
-    data = data.substr(0, data.size()-2);
+    /* Remove last comma from positions and filenames array */
+    positions.resize(positions.size()-1);
+    filenames.resize(filenames.size()-1);
 
-    /* Resource count */
-    std::ostringstream count;
-    count << files.size();
+    /* Remove last comma from data array only if the last file is not empty */
+    if(!files.back().second.empty())
+        data.resize(data.size()-1);
 
     /* Return C++ file. The functions have forward declarations to avoid warning
        about functions which don't have corresponding declarations (enabled by
@@ -115,42 +171,91 @@ std::string Resource::compile(const std::string& name, const std::map<std::strin
     return "/* Compiled resource file. DO NOT EDIT! */\n\n"
         "#include \"Utility/utilities.h\"\n"
         "#include \"Utility/Resource.h\"\n\n"
-        "static const unsigned char resourcePositions[] = {\n" +
+        "static const unsigned char resourcePositions[] = {" +
         positions + "\n};\n\n"
-        "static const unsigned char resourceFilenames[] = {\n" +
+        "static const unsigned char resourceFilenames[] = {" +
         filenames + "\n};\n\n"
-        "static const unsigned char resourceData[] = {\n" +
+        "static const unsigned char resourceData[] = {" +
         data +      "\n};\n\n"
         "int resourceInitializer_" + name + "();\n"
         "int resourceInitializer_" + name + "() {\n"
-        "    Corrade::Utility::Resource::registerData(\"" + group + "\", " + count.str() + ", resourcePositions, resourceFilenames, resourceData);\n"
+        "    Corrade::Utility::Resource::registerData(\"" + group + "\", " + std::to_string(files.size()) + ", resourcePositions, resourceFilenames, resourceData);\n"
         "    return 1;\n"
-        "} AUTOMATIC_INITIALIZER(resourceInitializer_" + name + ")\n\n"
+        "} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_" + name + ")\n\n"
         "int resourceFinalizer_" + name + "();\n"
         "int resourceFinalizer_" + name + "() {\n"
         "    Corrade::Utility::Resource::unregisterData(\"" + group + "\", resourceData);\n"
         "    return 1;\n"
-        "} AUTOMATIC_FINALIZER(resourceFinalizer_" + name + ")\n";
+        "} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_" + name + ")\n";
 }
 
-std::string Resource::compile(const std::string& name, const std::string& filename, const std::string& data) const {
-    std::map<std::string, std::string> files;
-    files.insert(std::make_pair(filename, data));
-    return compile(name, files);
+void Resource::overrideGroup(const std::string& group, const std::string& configurationFile) {
+    auto it = resources().find(group);
+    CORRADE_ASSERT(it != resources().end(),
+        "Utility::Resource::overrideGroup(): group" << '\'' + group + '\'' << "was not found", );
+    it->second.overrideGroup = configurationFile;
 }
 
-std::tuple<const unsigned char*, unsigned int> Resource::getRaw(const std::string& filename) const {
-    /* If the group/filename doesn't exist, return empty string */
-    if(resources().find(group) == resources().end()) {
-        Error() << "Resource: group" << '\'' + group + '\'' << "was not found";
-        return {};
-    } else if(resources()[group].find(filename) == resources()[group].end()) {
-        Error() << "Resource: file" << '\'' + filename + '\'' << "was not found in group" << '\'' + group + '\'';
-        return {};
+Resource::Resource(const std::string& group): _overrideGroup(nullptr) {
+    _group = resources().find(group);
+    CORRADE_ASSERT(_group != resources().end(),
+        "Utility::Resource: group" << '\'' + group + '\'' << "was not found", );
+
+    if(!_group->second.overrideGroup.empty()) {
+        Debug() << "Utility::Resource: group" << '\'' + group + '\''
+                << "overriden with" << '\'' + _group->second.overrideGroup + '\'';
+        _overrideGroup = new OverrideData(_group->second.overrideGroup);
+
+        if(_overrideGroup->conf.value("group") != _group->first)
+            Warning() << "Utility::Resource: overriden with different group, found"
+                      << '\'' + _overrideGroup->conf.value("group") + '\''
+                      << "but expected" << '\'' + group + '\'';
+    }
+}
+
+Resource::~Resource() {
+    delete _overrideGroup;
+}
+
+std::pair<const unsigned char*, unsigned int> Resource::getRaw(const std::string& filename) const {
+    CORRADE_INTERNAL_ASSERT(_group != resources().end());
+
+    /* The group is overriden with live data */
+    if(_overrideGroup) {
+        /* The file is already loaded */
+        auto it = _overrideGroup->data.find(filename);
+        if(it != _overrideGroup->data.end())
+            return {it->second.begin(), it->second.size()};
+
+        /* Load the file and save it for later use. Linear search is not an
+           issue, as this shouldn't be used in production code anyway. */
+        std::vector<const ConfigurationGroup*> files = _overrideGroup->conf.groups("file");
+        for(auto file: files) {
+            const std::string name = file->keyExists("alias") ? file->value("alias") : file->value("filename");
+            if(name != filename) continue;
+
+            /* Load the file */
+            bool success;
+            Containers::Array<unsigned char> data;
+            std::tie(success, data) = fileContents(Directory::join(Directory::path(_group->second.overrideGroup), file->value("filename")));
+            if(!success) return {nullptr, 0};
+
+            /* Save the file for later use and return */
+            it = _overrideGroup->data.emplace(filename, std::move(data)).first;
+            return {it->second.begin(), it->second.size()};
+        }
+
+        /* The file was not found, fallback to compiled-in ones */
+        Warning() << "Utility::Resource::get(): file" << '\'' + filename + '\''
+                  << "was not found in overriden group, fallback to compiled-in resources";
     }
 
-    const ResourceData& r = resources()[group][filename];
-    return std::make_tuple(r.data+r.position, r.size);
+    /* If the filename doesn't exist, return empty string */
+    const auto it = _group->second.resources.find(filename);
+    CORRADE_ASSERT(it != _group->second.resources.end(),
+        "Utility::Resource::get(): file" << '\'' + filename + '\'' << "was not found in group" << '\'' + _group->first + '\'', {});
+
+    return {it->second.data+it->second.position, it->second.size};
 }
 
 std::string Resource::get(const std::string& filename) const {
@@ -160,39 +265,50 @@ std::string Resource::get(const std::string& filename) const {
     return data ? std::string(reinterpret_cast<const char*>(data), size) : std::string();
 }
 
-std::string Resource::hexcode(const std::string& data, const std::string& comment) const {
-    /* Add comment, if set */
-    std::string output = "    ";
-    if(!comment.empty()) output = "\n    /* " + comment + " */\n" + output;
+std::pair<bool, Containers::Array<unsigned char>> Resource::fileContents(const std::string& filename) {
+    std::ifstream file(filename.data(), std::ifstream::binary);
 
-    int row_len = 4;
-    for(unsigned int i = 0; i != data.size(); ++i) {
-
-        /* Every row is indented by four spaces and is max 80 characters long */
-        if(row_len > 74) {
-            output += "\n    ";
-            row_len = 4;
-        }
-
-        /* Convert char to hex */
-        std::ostringstream converter;
-        converter << std::hex;
-        converter << static_cast<unsigned int>(static_cast<unsigned char>(data[i]));
-
-        /* Append to output */
-        output += "0x" + converter.str() + ",";
-        row_len += 3+converter.str().size();
+    if(!file.good()) {
+        Error() << "Cannot open file " << filename;
+        return {false, Containers::Array<unsigned char>()};
     }
 
-    return output + '\n';
+    file.seekg(0, std::ios::end);
+    if(file.tellg() == 0) return {true, Containers::Array<unsigned char>()};
+    Containers::Array<unsigned char> data(file.tellg());
+    file.seekg(0, std::ios::beg);
+    file.read(reinterpret_cast<char*>(data.begin()), data.size());
+
+    return {true, std::move(data)};
 }
 
+std::string Resource::comment(const std::string& comment) {
+    return "\n    /* " + comment + " */";
+}
+
+std::string Resource::hexcode(const std::string& data) {
+    std::ostringstream out;
+    out << std::hex;
+
+    /* Each row is indented by four spaces and has newline at the end */
+    for(std::size_t row = 0; row < data.size(); row += 15) {
+        out << "\n    ";
+
+        /* Convert all characters on a row to hex "0xab,0x01,..." */
+        for(std::size_t end = std::min(row + 15, data.size()), i = row; i != end; ++i) {
+            out << "0x" << std::setw(2) << std::setfill('0')
+                << static_cast<unsigned int>(static_cast<unsigned char>(data[i]))
+                << ",";
+        }
+    }
+
+    return out.str();
+}
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
 template<class T> std::string Resource::numberToString(const T& number) {
     return std::string(reinterpret_cast<const char*>(&number), sizeof(T));
 }
-
-template<class T> T Resource::numberFromString(const std::string& number) {
-    return *reinterpret_cast<const T*>(number.c_str());
-}
+#endif
 
 }}

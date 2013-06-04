@@ -32,6 +32,7 @@
 #   Native Client with `newlib` toolchain
 #  CORRADE_TARGET_NACL_GLIBC    - Defined if compiled for Google Chrome
 #   Native Client with `glibc` toolchain
+#  CORRADE_TARGET_EMSCRIPTEN    - Defined if compiled for Emscripten
 #
 # Corrade provides these macros and functions:
 #
@@ -47,16 +48,14 @@
 #
 #
 # Compile data resources into application binary.
-#  corrade_add_resource(name group_name
-#                       file [ALIAS alias]
-#                       [file1 [ALIAS alias1]...])
+#  corrade_add_resource(name resources.conf)
 # Depends on corrade-rc, which is part of Corrade utilities. This command
-# generates resource file with group group_name from given files in current
-# build directory. Argument name is name under which the resources can be
-# explicitly loaded. Variable `name` contains compiled resource filename,
-# which is then used for compiling library / executable. Example usage:
-#  corrade_add_resource(name group_name file1 ALIAS alias1 file2 file3)
-#  add_executable(app source1 source2 ... ${name})
+# generates resource data using given configuration file in current build
+# directory. Argument name is name under which the resources can be explicitly
+# loaded. Variable `name` contains compiled resource filename, which is then
+# used for compiling library / executable. Example usage:
+#  corrade_add_resource(app_resources resources.conf)
+#  add_executable(app source1 source2 ... ${app_resources})
 #
 # Add dynamic plugin.
 #  corrade_add_plugin(plugin_name install_dir metadata_file
@@ -81,15 +80,6 @@
 # executable directory, the variable can be propagated to parent scope like
 # this:
 #  set(static_plugins_variable ${static_plugins_variable} PARENT_SCOPE)
-#
-# Find and install DLLs for bundling with Windows build.
-#  corrade_bundle_dlls(library_install_dir
-#                      dlls...
-#                      [PATHS paths...])
-# It is possible to specify also additional paths for searching. DLL names can
-# also contain paths, they will be installed into exact specified path. If an
-# DLL is not found, fatal error message is printed.
-#
 #
 # Additionally these variables are defined for internal usage:
 #  CORRADE_INTERCONNECT_LIBRARY     - Interconnect library (w/o
@@ -183,6 +173,10 @@ endif()
 string(FIND "${_corradeConfigure}" "#define CORRADE_TARGET_NACL_GLIBC" _TARGET_NACL_GLIBC)
 if(NOT _TARGET_NACL_GLIBC EQUAL -1)
     set(CORRADE_TARGET_NACL_GLIBC 1)
+endif()
+string(FIND "${_corradeConfigure}" "#define CORRADE_TARGET_EMSCRIPTEN" _TARGET_EMSCRIPTEN)
+if(NOT _TARGET_EMSCRIPTEN EQUAL -1)
+    set(CORRADE_TARGET_EMSCRIPTEN 1)
 endif()
 
 set(CORRADE_UTILITY_LIBRARIES ${CORRADE_UTILITY_LIBRARY})

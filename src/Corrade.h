@@ -76,8 +76,8 @@ shared libraries.
 /**
 @brief Google Chrome Native Client target
 
-`CORRADE_TARGET_NACL` is defined if the library is built for Google Chrome
-Native Client.
+`CORRADE_TARGET_NACL` is defined if the library is built for
+[Google Chrome Native Client](https://developers.google.com/native-client/).
 @see @ref building-corrade
 */
 #define CORRADE_TARGET_NACL_
@@ -99,6 +99,15 @@ Chrome Native Client with `glibc` toolchain.
 @see @ref building-corrade
 */
 #define CORRADE_TARGET_NACL_GLIBC_
+
+/**
+@brief Emscripten target
+
+`CORRADE_TARGET_EMSCRIPTEN` is defined if the library is built for
+[Emscripten](https://github.com/kripken/emscripten/wiki).
+@see @ref building-corrade
+*/
+#define CORRADE_TARGET_EMSCRIPTEN_
 
 #endif
 

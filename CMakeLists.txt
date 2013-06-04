@@ -23,7 +23,7 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.8)
 project(Corrade)
 
 include(CMakeDependentOption)
@@ -37,23 +37,34 @@ if(BUILD_TESTS)
     enable_testing()
 endif()
 
-if(BUILD_STATIC)
-    set(CORRADE_BUILD_STATIC 1)
-endif()
-
 if(CMAKE_SYSTEM_NAME STREQUAL NaCl)
     set(CORRADE_TARGET_NACL 1)
+    # Newlib toolchain supports only static linking
     if(NACL_TOOLCHAIN STREQUAL newlib)
         set(CORRADE_TARGET_NACL_NEWLIB 1)
+        set(BUILD_STATIC ON)
     else()
         set(CORRADE_TARGET_NACL_GLIBC 1)
     endif()
+elseif(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+    set(CORRADE_TARGET_EMSCRIPTEN 1)
+endif()
+
+if(BUILD_STATIC)
+    set(CORRADE_BUILD_STATIC 1)
 endif()
 
 # Initialize macros etc.
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
 set(CORRADE_UTILITY_LIBRARY CorradeUtility)
-set(CORRADE_RC_EXECUTABLE corrade-rc)
+if(NOT CMAKE_CROSSCOMPILING)
+    set(CORRADE_RC_EXECUTABLE corrade-rc)
+else()
+    find_program(CORRADE_RC_EXECUTABLE corrade-rc)
+    if(NOT CORRADE_RC_EXECUTABLE)
+        message(FATAL_ERROR "Native `corrade-rc` executable, which is needed when crosscompiling, was not found")
+    endif()
+endif()
 if(BUILD_TESTS)
     set(CORRADE_TESTSUITE_LIBRARIES CorradeTestSuite CorradeUtility)
 endif()

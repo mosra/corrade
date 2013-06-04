@@ -36,68 +36,40 @@ retrieved in the application.
 @section resource-management-compilation Resource compilation
 Imagine that you have e.g. a long license text with all these yelling words
 in all caps:
-
-    This application is copyright © John Doe et al. and the author IS NOT
-    RESPONSIBLE AT ALL FOR ANY PHYSICAL OR OTHER DAMAGES AND INJURIES WHICH
-    MAY LEAD TO DEATH OR EVEN APOCALYPSE AND CAN BE CAUSED BY THIS APPLICATION
-    ...
+@include resource/licenses/en.txt
 
 And for obvious reasons you don't want to put directly into the code, but
 in a separate file instead. But in the end you want it compiled directly into
 the executable, so your product is one compact file.
 
-`CorradeMacros.cmake` provides macro `corrade_add_resource`, which takes one
-or more files and produces C++ source file. The source file can be then passed
-among other source files to executable or library. First argument is name of
-resulting C++ source file, second argument is resource group name (explained
-below) and list of the files follows. The files can also have aliases for
-e.g. simplifying filenames.
-@code
-# Filename: CMakeLists.txt
+%Corrade's @ref corrade-cmake "CMake support" provides macro `corrade_add_resource()`,
+which takes resource configuration file and produces C++ source file. The
+source file can be then passed among other source files to executable or
+library. First argument is name of resulting C++ source file, second argument
+is configuration file name.
+@dontinclude resource/CMakeLists.txt
+@skipline corrade_add_resource
 
-corrade_add_resource(
-    Resources
-    data
-    licenses/en.txt ALIAS license.txt
-    icon.png
-)
-@endcode
+The configuration file contains group name (explained below) and list of all
+the files. The files can also have aliases for e.g. simplifying filenames.
+@include resource/resources.conf
 
 @section resource-management-management Resource management
-Now it's time to make an application, which will have these resources compiled
+Now it's time to make an application which will have these resources compiled
 in. The resources should be initialized automatically, if not (for example if
-they are compiled into static library), call RESOURCE_INITIALIZE() with
+they are compiled into static library), call CORRADE_RESOURCE_INITIALIZE() with
 resource name as argument before they are used, for example at the beginning
 of `main()` function.
 
 This example application will just print the license text and exit:
-@code
-// Filename: main.cpp
-#include <iostream>
+@dontinclude resource/main.cpp
+@skip int main
+@until }
 
-#include "Utility/Resource.h"
-
-int main(int argc, char** argv) {
-    // Initialize resources
-    RESOURCE_INITIALIZE(Resources);
-
-    // Initialize resource manager with name of resource group we are using
-    Corrade::Utility::Resource rs("data");
-
-    std::string license = rs.get("license.txt");
-
-    cout << license << endl;
-
-    return 0;
-}
-@endcode
 Compile the application with simple CMake `add_executable` command and don't
 forget to compile in the resource file created above:
-@code
-# Filename: CMakeLists.txt (continued from above)
-
-add_executable(ResourceTest main.cpp ${Resources})
-@endcode
+@dontinclude resource/CMakeLists.txt
+@skipline add_executable
 
 After successful compilation the application will print out the license text:
 
@@ -106,6 +78,12 @@ After successful compilation the application will print out the license text:
     RESPONSIBLE AT ALL FOR ANY PHYSICAL OR OTHER DAMAGES AND INJURIES WHICH
     MAY LEAD TO DEATH OR EVEN APOCALYPSE AND CAN BE CAUSED BY THIS APPLICATION
     ...
+
+See the whole example:
+ - @ref resource/licenses/en.txt
+ - @ref resource/resources.conf
+ - @ref resource/main.cpp
+ - @ref resource/CMakeLists.txt
 
 */
 }}

@@ -36,7 +36,7 @@
 
 #include "String.h"
 
-#include "corradeCompatibility.h"
+#include "corradeConfigure.h"
 
 namespace Corrade { namespace Utility {
 
@@ -120,10 +120,10 @@ bool Directory::fileExists(const std::string& filename) {
 }
 
 std::string Directory::home() {
-    #ifndef _WIN32
-    char* h = getenv("HOME");
-    if(!h) return {};
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    return {};
     #else
+    #ifdef _WIN32
     /** @bug Doesn't work at all */
     TCHAR h[MAX_PATH];
     #pragma GCC diagnostic push
@@ -131,9 +131,12 @@ std::string Directory::home() {
     if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, h)))
         return {};
     #pragma GCC diagnostic pop
+    #else
+    char* h = getenv("HOME");
+    if(!h) return {};
     #endif
-
     return h;
+    #endif
 }
 
 std::string Directory::configurationDir(const std::string& applicationName, bool createIfNotExists) {
@@ -165,18 +168,22 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     std::vector<std::string> list;
     dirent* entry;
     while((entry = readdir(directory)) != nullptr) {
-        #if !defined(_WIN32) && !defined(CORRADE_TARGET_NACL_NEWLIB)
         if((flags >= Flag::SkipDotAndDotDot) && (std::string(entry->d_name) == "." || std::string(entry->d_name) == ".."))
             continue;
+        #if !defined(_WIN32) && !defined(CORRADE_TARGET_NACL_NEWLIB)
         if((flags >= Flag::SkipDirectories) && entry->d_type == DT_DIR)
             continue;
+        #ifndef CORRADE_TARGET_EMSCRIPTEN
         if((flags >= Flag::SkipFiles) && entry->d_type == DT_REG)
             continue;
         if((flags >= Flag::SkipSpecial) && entry->d_type != DT_DIR && entry->d_type != DT_REG)
             continue;
+        #else
+        if((flags >= Flag::SkipFiles || flags >= Flag::SkipSpecial) && entry->d_type != DT_DIR)
+            continue;
+        #endif
         #endif
 
-        /** @todo On some systems dirent returns DT_UNKNOWN for everything */
         list.push_back(entry->d_name);
     }
 

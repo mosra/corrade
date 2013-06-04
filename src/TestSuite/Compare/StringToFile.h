@@ -55,7 +55,7 @@ class StringToFile {};
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::StringToFile> {
     public:
-        inline Comparator(): state(State::ReadError) {}
+        Comparator();
 
         bool operator()(const std::string& actualContents, const std::string& filename);
 

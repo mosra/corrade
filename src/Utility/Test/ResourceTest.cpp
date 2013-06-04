@@ -41,14 +41,26 @@ class ResourceTest: public TestSuite::Tester {
         ResourceTest();
 
         void compile();
+        void compileEmptyFile();
+        void compileFrom();
         void get();
         void getInexistent();
+        void overrideGroup();
+        void overrideGroupFallback();
+        void overrideInexistentGroup();
+        void overrideDifferentGroup();
 };
 
 ResourceTest::ResourceTest() {
     addTests({&ResourceTest::compile,
+              &ResourceTest::compileEmptyFile,
+              &ResourceTest::compileFrom,
               &ResourceTest::get,
-              &ResourceTest::getInexistent});
+              &ResourceTest::getInexistent,
+              &ResourceTest::overrideGroup,
+              &ResourceTest::overrideGroupFallback,
+              &ResourceTest::overrideInexistentGroup,
+              &ResourceTest::overrideDifferentGroup});
 }
 
 void ResourceTest::compile() {
@@ -59,26 +71,45 @@ void ResourceTest::compile() {
     CORRADE_VERIFY(consequenceIn.good());
 
     predispositionIn.seekg(0, std::ios::end);
-    std::string predisposition;
-    predisposition.reserve(predispositionIn.tellg());
+    std::string predisposition(predispositionIn.tellg(), '\0');
     predispositionIn.seekg(0, std::ios::beg);
+    predispositionIn.read(&predisposition[0], predisposition.size());
 
     consequenceIn.seekg(0, std::ios::end);
-    std::string consequence;
-    consequence.reserve(consequenceIn.tellg());
+    std::string consequence(consequenceIn.tellg(), '\0');
     consequenceIn.seekg(0, std::ios::beg);
+    consequenceIn.read(&consequence[0], consequence.size());
 
-    predisposition.assign((std::istreambuf_iterator<char>(predispositionIn)), std::istreambuf_iterator<char>());
-    consequence.assign((std::istreambuf_iterator<char>(consequenceIn)), std::istreambuf_iterator<char>());
-
-    Resource r("test");
-
-    std::map<std::string, std::string> input{
-        std::make_pair("predisposition.bin", std::string(predisposition.data(), predisposition.size())),
-        std::make_pair("consequence.bin", std::string(consequence.data(), consequence.size()))};
-    CORRADE_COMPARE_AS(r.compile("ResourceTestData", input),
+    std::vector<std::pair<std::string, std::string>> input{
+        {"predisposition.bin", predisposition},
+        {"consequence.bin", consequence}};
+    CORRADE_COMPARE_AS(Resource::compile("ResourceTestData", "test", input),
                        Directory::join(RESOURCE_TEST_DIR, "compiled.cpp"),
                        TestSuite::Compare::StringToFile);
+}
+
+void ResourceTest::compileEmptyFile() {
+    std::vector<std::pair<std::string, std::string>> input{
+        {"empty.bin", ""}};
+    CORRADE_COMPARE_AS(Resource::compile("ResourceTestData", "test", input),
+                       Directory::join(RESOURCE_TEST_DIR, "compiledEmpty.cpp"),
+                       TestSuite::Compare::StringToFile);
+}
+
+void ResourceTest::compileFrom() {
+    std::ostringstream out;
+    Debug::setOutput(&out);
+
+    const std::string compiled = Resource::compileFrom("ResourceTestData",
+        Directory::join(RESOURCE_TEST_DIR, "resources.conf"));
+    CORRADE_COMPARE_AS(compiled, Directory::join(RESOURCE_TEST_DIR, "compiled.cpp"),
+                       TestSuite::Compare::StringToFile);
+    CORRADE_COMPARE(out.str(),
+        "Reading file 1 of 2 in group 'test'\n"
+        "    ../ResourceTestFiles/predisposition.bin\n"
+        " -> predisposition.bin\n"
+        "Reading file 2 of 2 in group 'test'\n"
+        "    consequence.bin\n");
 }
 
 void ResourceTest::get() {
@@ -97,8 +128,7 @@ void ResourceTest::getInexistent() {
 
     {
         Resource r("inexistentGroup");
-        CORRADE_VERIFY(r.get("inexistentFile").empty());
-        CORRADE_COMPARE(out.str(), "Resource: group 'inexistentGroup' was not found\n");
+        CORRADE_COMPARE(out.str(), "Utility::Resource: group 'inexistentGroup' was not found\n");
     }
 
     out.str({});
@@ -106,15 +136,62 @@ void ResourceTest::getInexistent() {
     {
         Resource r("test");
         CORRADE_VERIFY(r.get("inexistentFile").empty());
-        CORRADE_COMPARE(out.str(), "Resource: file 'inexistentFile' was not found in group 'test'\n");
+        CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'inexistentFile' was not found in group 'test'\n");
     }
 
-    Resource r("inexistentGroup");
+    Resource r("test");
     const unsigned char* data;
     std::size_t size;
     std::tie(data, size) = r.getRaw("inexistentFile");
     CORRADE_VERIFY(!data);
     CORRADE_VERIFY(!size);
+}
+
+void ResourceTest::overrideGroup() {
+    std::ostringstream out;
+    Debug::setOutput(&out);
+
+    Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overriden.conf"));
+    Resource r("test");
+
+    CORRADE_COMPARE(out.str(), "Utility::Resource: group 'test' overriden with '" + Directory::join(RESOURCE_TEST_DIR, "resources-overriden.conf") + "'\n");
+    CORRADE_COMPARE(r.get("predisposition.bin"), "overriden predisposition\n");
+    CORRADE_COMPARE(r.get("consequence2.txt"), "overriden consequence\n");
+
+    /* Test that two subsequence r.getRaw() point to the same location */
+    const auto ptr = r.getRaw("predisposition.bin").first;
+    CORRADE_VERIFY(r.getRaw("predisposition.bin").first == ptr);
+}
+
+void ResourceTest::overrideGroupFallback() {
+    std::ostringstream out;
+    Warning::setOutput(&out);
+
+    Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overriden-none.conf"));
+    Resource r("test");
+
+    CORRADE_COMPARE_AS(r.get("consequence.bin"),
+                       Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
+                       TestSuite::Compare::StringToFile);
+    CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'consequence.bin' was not found in overriden group, fallback to compiled-in resources\n");
+}
+
+void ResourceTest::overrideInexistentGroup() {
+    std::ostringstream out;
+    Error::setOutput(&out);
+
+    /* Inexistent group */
+    Resource::overrideGroup("inexistentGroup", {});
+    CORRADE_COMPARE(out.str(), "Utility::Resource::overrideGroup(): group 'inexistentGroup' was not found\n");
+}
+
+void ResourceTest::overrideDifferentGroup() {
+    std::ostringstream out;
+    Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overriden-different.conf"));
+
+    Warning::setOutput(&out);
+    Resource r("test");
+    CORRADE_COMPARE(out.str(), "Utility::Resource: overriden with different group, found 'wat' but expected 'test'\n");
 }
 
 }}}

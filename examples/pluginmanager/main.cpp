@@ -23,7 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <PluginManager/PluginManager.h>
+#include <PluginManager/Manager.h>
 
 #include "AbstractAnimal.h"
 
@@ -31,7 +31,7 @@ using namespace Corrade;
 
 int main(int argc, char** argv) {
     /* Import static plugin using the same name as in Canary.cpp */
-    PLUGIN_IMPORT(Canary);
+    CORRADE_PLUGIN_IMPORT(Canary);
 
     if(argc != 2) {
         Utility::Debug() << "Usage:" << argv[0] << "animal_plugin_name";
@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
     }
 
     /* Initialize plugin manager with given directory */
-    PluginManager::PluginManager<Examples::AbstractAnimal> manager(".");
+    PluginManager::Manager<Examples::AbstractAnimal> manager(".");
 
     /* Try to load a plugin */
     if(!(manager.load(argv[1]) & (PluginManager::LoadState::Loaded|PluginManager::LoadState::Static))) {

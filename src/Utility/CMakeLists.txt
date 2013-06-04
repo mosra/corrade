@@ -32,13 +32,15 @@ set(CorradeUtility_SRCS
     ConfigurationGroup.cpp
     ConfigurationValue.cpp
     MurmurHash2.cpp
-    Resource.cpp
     Sha1.cpp
     String.cpp
     Translator.cpp
     TypeTraits.cpp
     Unicode.cpp
     utilities.cpp)
+
+set(CorradeUtility_GracefulAssert_SRCS
+    Resource.cpp)
 
 set(CorradeUtility_HEADERS
     AbstractHash.h
@@ -57,13 +59,17 @@ set(CorradeUtility_HEADERS
     TypeTraits.h
     Unicode.h
     utilities.h
+    Utility.h
     Visibility.h
 
     corradeUtilityVisibility.h)
 
-add_library(CorradeUtility ${SHARED_OR_STATIC} ${CorradeUtility_SRCS})
+add_library(CorradeUtilityObjects OBJECT ${CorradeUtility_SRCS})
+add_library(CorradeUtility ${SHARED_OR_STATIC} $<TARGET_OBJECTS:CorradeUtilityObjects> ${CorradeUtility_GracefulAssert_SRCS})
+
 if(NOT BUILD_STATIC)
-    set_target_properties(CorradeUtility PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
+    set_target_properties(CorradeUtilityObjects CorradeUtility PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
+    set_target_properties(CorradeUtilityObjects PROPERTIES COMPILE_FLAGS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS})
 elseif(BUILD_STATIC_PIC)
     # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
     set_target_properties(CorradeUtility PROPERTIES COMPILE_FLAGS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS})
@@ -78,5 +84,12 @@ if(NOT CMAKE_CROSSCOMPILING)
 endif()
 
 if(BUILD_TESTS)
+    add_library(CorradeUtilityTestLib ${SHARED_OR_STATIC} $<TARGET_OBJECTS:CorradeUtilityObjects> ${CorradeUtility_GracefulAssert_SRCS})
+    set_target_properties(CorradeUtilityTestLib PROPERTIES COMPILE_FLAGS "-DCORRADE_GRACEFUL_ASSERT")
+    if(BUILD_STATIC_PIC)
+        # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
+        set_target_properties(CorradeUtilityTestLib PROPERTIES COMPILE_FLAGS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS})
+    endif()
+
     add_subdirectory(Test)
 endif()

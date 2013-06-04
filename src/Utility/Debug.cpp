@@ -78,6 +78,8 @@ Debug Debug::operator<<(unsigned long value) { return print(value); }
 Debug Debug::operator<<(unsigned long long value) { return print(value); }
 Debug Debug::operator<<(float value) { return print(value); }
 Debug Debug::operator<<(double value) { return print(value); }
+#ifndef CORRADE_TARGET_EMSCRIPTEN
 Debug Debug::operator<<(long double value) { return print(value); }
+#endif
 
 }}

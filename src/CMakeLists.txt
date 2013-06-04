@@ -46,8 +46,11 @@ else()
     set(SHARED_OR_STATIC STATIC)
 endif()
 
-include(TestBigEndian)
-test_big_endian(CMAKE_BIG_ENDIAN)
+# Assume Emscripten is little-endian (TODO: better check?)
+if(NOT CORRADE_TARGET_EMSCRIPTEN)
+    include(TestBigEndian)
+    test_big_endian(CORRADE_BIG_ENDIAN)
+endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/corradeConfigure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/corradeConfigure.h)

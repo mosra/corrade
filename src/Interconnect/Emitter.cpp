@@ -30,6 +30,14 @@
 
 namespace Corrade { namespace Interconnect {
 
+namespace Implementation {
+
+AbstractConnectionData::~AbstractConnectionData() {}
+
+}
+
+Emitter::Emitter(): lastHandledSignal(0), connectionsChanged(false) {}
+
 Emitter::~Emitter() {
     for(auto it = connections.begin(); it != connections.end(); ++it) {
         /* Remove connection from receiver */

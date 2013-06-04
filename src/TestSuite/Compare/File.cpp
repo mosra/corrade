@@ -33,6 +33,8 @@ using Corrade::Utility::Directory;
 
 namespace Corrade { namespace TestSuite {
 
+Comparator<Compare::File>::Comparator(const std::string& pathPrefix): actualState(State::ReadError), expectedState(State::ReadError), pathPrefix(pathPrefix) {}
+
 bool Comparator<Compare::File>::operator()(const std::string& actualFilename, const std::string& expectedFilename) {
     this->actualFilename = Directory::join(pathPrefix, actualFilename);
     this->expectedFilename = Directory::join(pathPrefix, expectedFilename);
@@ -98,6 +100,16 @@ void Comparator<Compare::File>::printErrorMessage(Utility::Error& e, const std::
 
         break;
     }
+}
+
+namespace Compare {
+
+File::File(const std::string& pathPrefix): c(pathPrefix) {}
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+Comparator<File> File::comparator() { return c; }
+#endif
+
 }
 
 }}

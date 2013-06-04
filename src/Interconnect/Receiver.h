@@ -35,11 +35,9 @@
 
 namespace Corrade { namespace Interconnect {
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Implementation {
     class AbstractConnectionData;
 }
-#endif
 
 /**
 @brief %Receiver object
@@ -59,14 +57,13 @@ class CORRADE_INTERCONNECT_EXPORT Receiver {
 
     public:
         explicit Receiver();
-        virtual ~Receiver() = 0;
 
         /**
          * @brief Whether the receiver is connected to any signal
          *
          * @see Emitter::hasSignalConnections(), slotConnectionCount()
          */
-        inline bool hasSlotConnections() const {
+        bool hasSlotConnections() const {
             return !connections.empty();
         }
 
@@ -75,7 +72,7 @@ class CORRADE_INTERCONNECT_EXPORT Receiver {
          *
          * @see Emitter::signalConnectionCount(), hasSlotConnections()
          */
-        inline std::size_t slotConnectionCount() const { return connections.size(); }
+        std::size_t slotConnectionCount() const { return connections.size(); }
 
         /**
          * @brief Disconnect everything from this receiver slots
@@ -84,6 +81,11 @@ class CORRADE_INTERCONNECT_EXPORT Receiver {
          *      Emitter::disconnectSignal(), hasSlotConnections()
          */
         void disconnectAllSlots();
+
+    protected:
+        /* Nobody will need to have (and delete) Receiver*, thus this is faster
+           than public pure virtual destructor */
+        ~Receiver();
 
     private:
         std::vector<Implementation::AbstractConnectionData*> connections;

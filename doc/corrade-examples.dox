@@ -42,6 +42,10 @@ namespace Corrade {
 @example pluginmanager/Dog.conf
 @example pluginmanager/main.cpp
 @example pluginmanager/CMakeLists.txt
+@example resource/licenses/en.txt
+@example resource/resources.conf
+@example resource/main.cpp
+@example resource/CMakeLists.txt
 @example test/MyTest.cpp
 @example test/CMakeLists.txt
 

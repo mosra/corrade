@@ -79,7 +79,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          */
         typedef Corrade::Utility::Error Error;
 
-        inline explicit Tester(): logOutput(nullptr), errorOutput(nullptr), testCaseLine(0), checkCount(0), expectedFailure(nullptr) {}
+        explicit Tester();
 
         /**
          * @brief Execute the tester
@@ -111,14 +111,16 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                 testCases.push_back(static_cast<TestCase>(*it));
         }
 
-        #ifndef DOXYGEN_GENERATING_OUTPUT
+    #ifdef DOXYGEN_GENERATING_OUTPUT
+    private:
+    #endif
         /* Compare two identical types without explicit type specification */
-        template<class T> inline void compare(const std::string& actual, const T& actualValue, const std::string& expected, const T& expectedValue) {
+        template<class T> void compare(const std::string& actual, const T& actualValue, const std::string& expected, const T& expectedValue) {
             compareAs<T, T, T>(actual, actualValue, expected, expectedValue);
         }
 
         /* Compare two different types without explicit type specification */
-        template<class T, class U> inline void compare(const std::string& actual, const T& actualValue, const std::string& expected, const U& expectedValue) {
+        template<class T, class U> void compare(const std::string& actual, const T& actualValue, const std::string& expected, const U& expectedValue) {
             compareAs<typename std::common_type<T, U>::type, T, U>(actual, actualValue, expected, expectedValue);
         }
 
@@ -127,7 +129,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
            call only `CORRADE_COMPARE_AS(a, b, Compare::Containers)` without
            explicitly specifying the type, e.g.
            `CORRADE_COMPARE_AS(a, b, Compare::Containers<std::vector<int>>)` */
-        template<template<class> class T, class U, class V> inline void compareAs(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
+        template<template<class> class T, class U, class V> void compareAs(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
             compareAs<T<typename std::common_type<U, V>::type>, U, V>(actual, actualValue, expected, expectedValue);
         }
 
@@ -137,47 +139,24 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         }
 
         /* Compare two different types with explicit comparator specification */
-        template<class T, class U, class V> void compareWith(Comparator<T> comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
-            ++checkCount;
-
-            /* If the comparison succeeded or the failure is expected, done */
-            bool equal = comparator(actualValue, expectedValue);
-            if(!expectedFailure) {
-                if(equal) return;
-            } else if(!equal) {
-                Utility::Debug(logOutput) << " XFAIL:" << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       " << expectedFailure->message() << actual << "and" << expected << "are not equal.";
-                return;
-            }
-
-            /* Otherwise print message to error output and throw exception */
-            Utility::Error e(errorOutput);
-            e << (expectedFailure ? " XPASS:" : "  FAIL:") << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       ";
-            if(!expectedFailure) comparator.printErrorMessage(e, actual, expected);
-            else e << actual << "and" << expected << "are not expected to be equal.";
-            throw Exception();
-        }
+        template<class T, class U, class V> void compareWith(Comparator<T> comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue);
 
         void verify(const std::string& expression, bool expressionValue);
 
-        inline void registerTest(const std::string& filename, const std::string& name) {
-            testFilename = filename;
-            testName = name;
-        }
+        void registerTest(std::string filename, std::string name);
 
         void skip(const std::string& message);
 
+    #ifndef DOXYGEN_GENERATING_OUTPUT
     protected:
+    #endif
         class ExpectedFailure {
             public:
-                inline ExpectedFailure(Tester* instance, const std::string& message): instance(instance), _message(message) {
-                    instance->expectedFailure = this;
-                }
+                explicit ExpectedFailure(Tester* instance, std::string message);
 
-                inline ~ExpectedFailure() { instance->expectedFailure = nullptr; }
+                ~ExpectedFailure();
 
-                inline std::string message() const {
-                    return _message;
-                }
+                std::string message() const;
 
             private:
                 Tester* instance;
@@ -185,7 +164,6 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         };
 
         void registerTestCase(const std::string& name, int line);
-        #endif
 
     private:
         class Exception {};
@@ -332,6 +310,26 @@ if(!bigEndian) {
         _CORRADE_REGISTER_TEST_CASE();                                      \
         Tester::skip(message);                                              \
     } while(false)
+
+template<class T, class U, class V> void Tester::compareWith(Comparator<T> comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
+    ++checkCount;
+
+    /* If the comparison succeeded or the failure is expected, done */
+    bool equal = comparator(actualValue, expectedValue);
+    if(!expectedFailure) {
+        if(equal) return;
+    } else if(!equal) {
+        Utility::Debug(logOutput) << " XFAIL:" << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       " << expectedFailure->message() << actual << "and" << expected << "are not equal.";
+        return;
+    }
+
+    /* Otherwise print message to error output and throw exception */
+    Utility::Error e(errorOutput);
+    e << (expectedFailure ? " XPASS:" : "  FAIL:") << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       ";
+    if(!expectedFailure) comparator.printErrorMessage(e, actual, expected);
+    else e << actual << "and" << expected << "are not expected to be equal.";
+    throw Exception();
+}
 
 }}
 

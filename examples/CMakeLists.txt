@@ -27,4 +27,5 @@ cmake_minimum_required(VERSION 2.8)
 
 add_subdirectory(interconnect)
 add_subdirectory(pluginmanager)
+add_subdirectory(resource)
 add_subdirectory(test)

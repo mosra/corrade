@@ -30,7 +30,7 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class HotDog: public AbstractFood {
     public:
-        explicit HotDog(AbstractPluginManager* manager, std::string plugin): AbstractFood(manager, std::move(plugin)) {}
+        explicit HotDog(AbstractManager* manager, std::string plugin): AbstractFood(manager, std::move(plugin)) {}
 
         bool isTasty()
             { return dog.hasTail() ? false : true; }
@@ -43,5 +43,5 @@ class HotDog: public AbstractFood {
 
 }}}
 
-PLUGIN_REGISTER(HotDog, Corrade::PluginManager::Test::HotDog,
-                "cz.mosra.Corrade.PluginManager.Test.AbstractFood/1.0")
+CORRADE_PLUGIN_REGISTER(HotDog, Corrade::PluginManager::Test::HotDog,
+    "cz.mosra.Corrade.PluginManager.Test.AbstractFood/1.0")

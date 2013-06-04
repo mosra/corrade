@@ -46,7 +46,7 @@ class Endianness {
         Endianness() = delete;
 
         /** @brief Whether actual system is Big-Endian */
-        inline constexpr static bool isBigEndian() {
+        constexpr static bool isBigEndian() {
             #ifdef CORRADE_BIG_ENDIAN
             return true;
             #else
@@ -60,7 +60,7 @@ class Endianness {
          * @return Number as Big-Endian. On Big-Endian systems returns unchanged
          *      value.
          */
-        template<class T> inline static T bigEndian(T number) {
+        template<class T> static T bigEndian(T number) {
             #ifdef CORRADE_BIG_ENDIAN
             return number;
             #else
@@ -74,7 +74,7 @@ class Endianness {
          * @return Number as Little-Endian. On Little-Endian systems returns
          *      unchanged value.
          */
-        template<class T> inline static T littleEndian(T number) {
+        template<class T> static T littleEndian(T number) {
             #ifdef CORRADE_BIG_ENDIAN
             return swap<sizeof(T)>(bitCast<typename TypeFor<sizeof(T)>::Type>(number));
             #else

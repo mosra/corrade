@@ -1,5 +1,5 @@
-#ifndef Corrade_PluginManager_AbstractPluginManager_h
-#define Corrade_PluginManager_AbstractPluginManager_h
+#ifndef Corrade_PluginManager_AbstractManager_h
+#define Corrade_PluginManager_AbstractManager_h
 /*
     This file is part of Corrade.
 
@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::PluginManager::AbstractPluginManager
+ * @brief Class Corrade::PluginManager::AbstractManager
  */
 
 #include <vector>
@@ -38,35 +38,35 @@
 #undef interface
 #endif
 
-#include "Containers/EnumSet.h"
-#include "Utility/Resource.h"
-#include "Utility/Debug.h"
-#include "PluginMetadata.h"
 #include "corradeCompatibility.h"
+#include "Containers/EnumSet.h"
+#include "Utility/Configuration.h"
+#include "Utility/Debug.h"
+#include "Utility/Resource.h"
+#include "PluginManager/PluginMetadata.h"
+#include "PluginManager/PluginManager.h"
 
 namespace Corrade { namespace PluginManager {
 
-class AbstractPlugin;
-
-/** @relates AbstractPluginManager
+/** @relates AbstractManager
 @brief Plugin load state
 
-@see LoadStates, AbstractPluginManager::loadState(),
-    AbstractPluginManager::load(), AbstractPluginManager::unload(),
-    AbstractPluginManager::reload().
+@see LoadStates, AbstractManager::loadState(),
+    AbstractManager::load(), AbstractManager::unload(),
+    AbstractManager::reload().
 */
 enum class LoadState: unsigned short {
     /**
-     * The plugin cannot be found. Returned by AbstractPluginManager::loadState(),
-     * AbstractPluginManager::load() and AbstractPluginManager::reload().
+     * The plugin cannot be found. Returned by AbstractManager::loadState(),
+     * AbstractManager::load() and AbstractManager::reload().
      */
     NotFound = 1 << 0,
 
     #ifndef CORRADE_TARGET_NACL_NEWLIB
     /**
      * The plugin is build with different version of plugin manager and cannot
-     * be loaded. Returned by AbstractPluginManager::load() and
-     * AbstractPluginManager::reload().
+     * be loaded. Returned by AbstractManager::load() and
+     * AbstractManager::reload().
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
@@ -74,8 +74,8 @@ enum class LoadState: unsigned short {
 
     /**
      * The plugin uses different interface than the interface used by plugin
-     * manager and cannot be loaded. Returned by AbstractPluginManager::load()
-     * and AbstractPluginManager::reload().
+     * manager and cannot be loaded. Returned by AbstractManager::load()
+     * and AbstractManager::reload().
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
@@ -83,8 +83,8 @@ enum class LoadState: unsigned short {
 
     /**
      * The plugin doesn't have any metadata file or the metadata file contains
-     * errors. Returned by AbstractPluginManager::load() and
-     * AbstractPluginManager::reload().
+     * errors. Returned by AbstractManager::load() and
+     * AbstractManager::reload().
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
@@ -92,8 +92,8 @@ enum class LoadState: unsigned short {
 
     /**
      * The plugin depends on another plugin, which cannot be loaded (e.g. not
-     * found or wrong version). Returned by AbstractPluginManager::load() and
-     * AbstractPluginManager::reload().
+     * found or wrong version). Returned by AbstractManager::load() and
+     * AbstractManager::reload().
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
@@ -101,8 +101,8 @@ enum class LoadState: unsigned short {
 
     /**
      * The plugin failed to load for other reason (e.g. linking failure).
-     * Returned by AbstractPluginManager::load() and
-     * AbstractPluginManager::reload().
+     * Returned by AbstractManager::load() and
+     * AbstractManager::reload().
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
@@ -110,8 +110,8 @@ enum class LoadState: unsigned short {
 
     /**
      * The plugin is successfully loaded. Returned by
-     * AbstractPluginManager::loadState(), AbstractPluginManager::load() and
-     * AbstractPluginManager::reload().
+     * AbstractManager::loadState(), AbstractManager::load() and
+     * AbstractManager::reload().
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
@@ -120,16 +120,16 @@ enum class LoadState: unsigned short {
     /**
      * The plugin is not loaded. Plugin can be unloaded only if is dynamic and
      * is not required by any other plugin. Returned by
-     * AbstractPluginManager::loadState(), AbstractPluginManager::load() and
-     * AbstractPluginManager::reload().
+     * AbstractManager::loadState(), AbstractManager::load() and
+     * AbstractManager::reload().
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
     NotLoaded = 1 << 7,
 
     /**
-     * The plugin failed to unload. Returned by AbstractPluginManager::unload()
-     * and AbstractPluginManager::reload().
+     * The plugin failed to unload. Returned by AbstractManager::unload()
+     * and AbstractManager::reload().
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
@@ -138,7 +138,7 @@ enum class LoadState: unsigned short {
     /**
      * The plugin cannot be unloaded because another plugin is depending on it.
      * Unload that plugin first and try again. Returned by
-     * AbstractPluginManager::unload() and AbstractPluginManager::reload().
+     * AbstractManager::unload() and AbstractManager::reload().
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
@@ -146,9 +146,9 @@ enum class LoadState: unsigned short {
     #endif
 
     /**
-     * The plugin is static. Returned by AbstractPluginManager::loadState(),
-     * AbstractPluginManager::load(), AbstractPluginManager::reload() and
-     * AbstractPluginManager::unload().
+     * The plugin is static. Returned by AbstractManager::loadState(),
+     * AbstractManager::load(), AbstractManager::reload() and
+     * AbstractManager::unload().
      */
     Static = 1 << 10
 
@@ -156,8 +156,8 @@ enum class LoadState: unsigned short {
     ,
     /**
      * The plugin has active instance and cannot be unloaded. Destroy all
-     * instances and try again. Returned by AbstractPluginManager::unload()
-     * and AbstractPluginManager::reload().
+     * instances and try again. Returned by AbstractManager::unload()
+     * and AbstractManager::reload().
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
      */
@@ -165,7 +165,7 @@ enum class LoadState: unsigned short {
     #endif
 };
 
-/** @relates AbstractPluginManager
+/** @relates AbstractManager
 @brief Plugin load states
 
 Useful when checking whether LoadState in in given set of values, for example:
@@ -174,20 +174,19 @@ if(loadState & (LoadState::Loaded|LoadState::Static)) {
     // ...
 }
 @endcode
-@see AbstractPluginManager::loadState(), AbstractPluginManager::load(),
-    AbstractPluginManager::unload(), AbstractPluginManager::reload().
+@see AbstractManager::loadState(), AbstractManager::load(),
+    AbstractManager::unload(), AbstractManager::reload().
 */
 typedef Containers::EnumSet<LoadState, unsigned short> LoadStates;
 
 CORRADE_ENUMSET_OPERATORS(LoadStates)
 
 /**
- * @brief Non-templated base class of PluginManager
- *
- * Base abstract class for all PluginManager templated classes. See also
- * @ref plugin-management.
+@brief Non-templated base class of Manager
+
+See also @ref plugin-management.
  */
-class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
+class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
     friend class AbstractPlugin;
 
     public:
@@ -195,7 +194,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
         static const int Version;
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        typedef void* (*Instancer)(AbstractPluginManager*, const std::string&);
+        typedef void* (*Instancer)(AbstractManager*, const std::string&);
         static void importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, Instancer instancer, void(*initializer)(), void(*finalizer)());
         #endif
 
@@ -215,20 +214,19 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib" as only static
          *      plugins are supported.
          */
-        explicit AbstractPluginManager(std::string pluginDirectory);
+        explicit AbstractManager(std::string pluginDirectory);
 
-        AbstractPluginManager(const AbstractPluginManager&) = delete;
-        AbstractPluginManager(AbstractPluginManager&&) = delete;
+        /** @brief Copying is not allowed */
+        AbstractManager(const AbstractManager&) = delete;
 
-        /**
-         * @brief Destructor
-         *
-         * Destroys all plugin instances and unload all plugins.
-         */
-        virtual ~AbstractPluginManager();
+        /** @brief Moving is not allowed */
+        AbstractManager(AbstractManager&&) = delete;
 
-        AbstractPluginManager& operator=(const AbstractPluginManager&) = delete;
-        AbstractPluginManager& operator=(AbstractPluginManager&&) = delete;
+        /** @brief Copying is not allowed */
+        AbstractManager& operator=(const AbstractManager&) = delete;
+
+        /** @brief Moving is not allowed */
+        AbstractManager& operator=(AbstractManager&&) = delete;
 
         #ifndef CORRADE_TARGET_NACL_NEWLIB
         /**
@@ -315,6 +313,16 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
          */
         virtual LoadState unload(const std::string& plugin);
 
+    protected:
+        /**
+         * @brief Destructor
+         *
+         * Destroys all plugin instances and unloads all plugins.
+         */
+        /* Nobody will need to have (and delete) AbstractManager*, thus this is
+           faster than public virtual destructor */
+        ~AbstractManager();
+
     #ifdef DOXYGEN_GENERATING_OUTPUT
     private:
     #else
@@ -323,7 +331,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
         struct StaticPlugin {
             /* GCC 4.6 cannot create this via new and initializer list */
             #ifdef CORRADE_GCC46_COMPATIBILITY
-            inline StaticPlugin(std::string plugin, std::string interface, Instancer instancer, void(*initializer)(), void(*finalizer)()): plugin(std::move(plugin)), interface(std::move(interface)), instancer(instancer), initializer(initializer), finalizer(finalizer) {}
+            StaticPlugin(std::string plugin, std::string interface, Instancer instancer, void(*initializer)(), void(*finalizer)()): plugin(std::move(plugin)), interface(std::move(interface)), instancer(instancer), initializer(initializer), finalizer(finalizer) {}
             #endif
 
             std::string plugin;
@@ -344,7 +352,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
 
             /* If set to nullptr, the plugin has not any associated plugin
                manager and cannot be loaded. */
-            AbstractPluginManager* manager;
+            AbstractManager* manager;
 
             Instancer instancer;
 
@@ -366,7 +374,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
 
             #ifndef CORRADE_TARGET_NACL_NEWLIB
             /* Constructor for dynamic plugins */
-            explicit Plugin(const std::string& _metadata, AbstractPluginManager* _manager);
+            explicit Plugin(const std::string& _metadata, AbstractManager* _manager);
             #endif
 
             /* Constructor for static plugins */
@@ -407,7 +415,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
 
            The vector is accessible via function, not directly, because we don't
            know initialization order of static members and thus the vector could
-           be uninitalized when accessed from PLUGIN_REGISTER(). */
+           be uninitalized when accessed from CORRADE_PLUGIN_REGISTER(). */
         CORRADE_PLUGINMANAGER_LOCAL static std::vector<StaticPlugin*>*& staticPlugins();
 
         std::map<std::string, std::vector<AbstractPlugin*> > instances;
@@ -418,30 +426,31 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPluginManager {
 
 /** @hideinitializer
 @brief Import static plugin
-@param name      Static plugin name (defined with PLUGIN_REGISTER())
+@param name      Static plugin name (defined with CORRADE_PLUGIN_REGISTER())
 
 If static plugins are compiled into dynamic library or directly into the
 executable, they should be automatically loaded at startup thanks to
-AUTOMATIC_INITALIZER() and AUTOMATIC_FINALIZER() macros.
+AUTOMATIC_INITALIZER() and CORRADE_AUTOMATIC_FINALIZER() macros.
 
 If static plugins are compiled into static library, they are not
 automatically loaded at startup, so you need to load them explicitly by
-calling PLUGIN_IMPORT() at the beggining of main() function. You can also
-wrap these macro calls into another function (which will then be compiled
-into dynamic library or main executable) and use AUTOMATIC_INITIALIZER()
+calling CORRADE_PLUGIN_IMPORT() at the beggining of main() function. You can
+also wrap these macro calls into another function (which will then be compiled
+into dynamic library or main executable) and use CORRADE_AUTOMATIC_INITIALIZER()
 macro for automatic call.
 @attention This macro should be called outside of any namespace. If you are
     running into linker errors with `pluginImporter_*`, this could be the
-    problem. See RESOURCE_INITIALIZE() documentation for more information.
+    problem. See CORRADE_RESOURCE_INITIALIZE() documentation for more
+    information.
  */
-#define PLUGIN_IMPORT(name)                                                 \
+#define CORRADE_PLUGIN_IMPORT(name)                                         \
     extern int pluginImporter_##name();                                     \
     pluginImporter_##name();                                                \
-    RESOURCE_INITIALIZE(name)
+    CORRADE_RESOURCE_INITIALIZE(name)
 
 } namespace Utility {
 
-/** @debugoperator{Corrade::PluginManager::AbstractPluginManager} */
+/** @debugoperator{Corrade::PluginManager::AbstractManager} */
 Debug CORRADE_PLUGINMANAGER_EXPORT operator<<(Debug debug, PluginManager::LoadState value);
 
 }}
