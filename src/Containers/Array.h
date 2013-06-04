@@ -68,7 +68,12 @@ template<class T> class Array {
         ~Array() { delete[] _data; }
 
         /** @brief Copying is not allowed */
+        /* Special "copymove" constructor to work around issues with std::map */
+        #ifndef CORRADE_GCC45_COMPATIBILITY
         Array(const Array<T>&) = delete;
+        #else
+        Array(const Array<T>& other);
+        #endif
 
         /** @brief Move constructor */
         #ifndef CORRADE_GCC45_COMPATIBILITY
@@ -126,6 +131,14 @@ template<class T> inline Array<T>::Array(Array<T>&& other):
     other._data = nullptr;
     other._size = 0;
 }
+
+/* Special "copymove" constructor to work around issues with std::map */
+#ifdef CORRADE_GCC45_COMPATIBILITY
+template<class T> inline Array<T>::Array(const Array<T>& other): _data(other._data), _size(other._size) {
+    const_cast<Array<T>&>(other)._data = nullptr;
+    const_cast<Array<T>&>(other)._size = 0;
+}
+#endif
 
 #ifndef CORRADE_GCC45_COMPATIBILITY
 template<class T> inline Array<T>& Array<T>::operator=(Array<T>&& other) noexcept
