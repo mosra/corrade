@@ -175,6 +175,11 @@ std::string Resource::compile(const std::string& name, const std::string& group,
     if(!files.back().second.empty())
         data.resize(data.size()-1);
 
+    #ifdef CORRADE_TARGET_NACL_NEWLIB
+    std::ostringstream converter;
+    converter << files.size();
+    #endif
+
     /* Return C++ file. The functions have forward declarations to avoid warning
        about functions which don't have corresponding declarations (enabled by
        -Wmissing-declarations in GCC) */
@@ -193,8 +198,10 @@ std::string Resource::compile(const std::string& name, const std::string& group,
             /* This shouldn't be ambiguous. But is. */
             #ifndef CORRADE_GCC44_COMPATIBILITY
             std::to_string(files.size()) +
-            #else
+            #elif !defined(CORRADE_TARGET_NACL_NEWLIB)
             std::to_string(static_cast<unsigned long long int>(files.size())) +
+            #else
+            converter.str() +
             #endif
         ", resourcePositions, resourceFilenames, resourceData);\n"
         "    return 1;\n"
