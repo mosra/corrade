@@ -173,6 +173,11 @@ std::string Resource::compile(const std::string& name, const std::string& group,
     if(!files.back().second.empty())
         data.resize(data.size()-1);
 
+    #ifdef CORRADE_TARGET_NACL_NEWLIB
+    std::ostringstream converter;
+    converter << files.size();
+    #endif
+
     /* Return C++ file. The functions have forward declarations to avoid warning
        about functions which don't have corresponding declarations (enabled by
        -Wmissing-declarations in GCC) */
@@ -187,7 +192,12 @@ std::string Resource::compile(const std::string& name, const std::string& group,
         data +      "\n};\n\n"
         "int resourceInitializer_" + name + "();\n"
         "int resourceInitializer_" + name + "() {\n"
-        "    Corrade::Utility::Resource::registerData(\"" + group + "\", " + std::to_string(files.size()) + ", resourcePositions, resourceFilenames, resourceData);\n"
+        "    Corrade::Utility::Resource::registerData(\"" + group + "\", " +
+            #ifndef CORRADE_TARGET_NACL_NEWLIB
+            std::to_string(files.size()) +
+            #else
+            converter.str() +
+            #endif
         "    return 1;\n"
         "} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_" + name + ")\n\n"
         "int resourceFinalizer_" + name + "();\n"
