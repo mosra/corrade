@@ -207,25 +207,25 @@ See @ref EnumSet-out-of-class-operators "EnumSet documentation" for example
 usage.
 */
 #define CORRADE_ENUMSET_OPERATORS(class)                                    \
-    constexpr bool operator==(class::Type a, class b) {                     \
+    inline constexpr bool operator==(class::Type a, class b) {              \
         return class(a) == b;                                               \
     }                                                                       \
-    constexpr bool operator!=(class::Type a, class b) {                     \
+    inline constexpr bool operator!=(class::Type a, class b) {              \
         return class(a) != b;                                               \
     }                                                                       \
-    constexpr bool operator>=(class::Type a, class b) {                     \
+    inline constexpr bool operator>=(class::Type a, class b) {              \
         return class(a) >= b;                                               \
     }                                                                       \
-    constexpr bool operator<=(class::Type a, class b) {                     \
+    inline constexpr bool operator<=(class::Type a, class b) {              \
         return class(a) <= b;                                               \
     }                                                                       \
-    constexpr class operator|(class::Type a, class b) {                     \
+    inline constexpr class operator|(class::Type a, class b) {              \
         return b | a;                                                       \
     }                                                                       \
-    constexpr class operator&(class::Type a, class b) {                     \
+    inline constexpr class operator&(class::Type a, class b) {              \
         return b & a;                                                       \
     }                                                                       \
-    constexpr class operator~(class::Type a) {                              \
+    inline constexpr class operator~(class::Type a) {                       \
         return ~class(a);                                                   \
     }
 
