@@ -198,6 +198,7 @@ std::string Resource::compile(const std::string& name, const std::string& group,
             #else
             converter.str() +
             #endif
+        ", resourcePositions, resourceFilenames, resourceData);\n"
         "    return 1;\n"
         "} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_" + name + ")\n\n"
         "int resourceFinalizer_" + name + "();\n"
