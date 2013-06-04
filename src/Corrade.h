@@ -58,7 +58,7 @@ enabled.
 /**
 @brief Static library build
 
-`CORRADE_BUILD_STATIC` is defined if build as static libraries. Default are
+`CORRADE_BUILD_STATIC` is defined if built as static libraries. Default are
 shared libraries.
 @see @ref building-corrade
 */
