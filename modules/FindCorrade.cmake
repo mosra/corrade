@@ -21,6 +21,8 @@
 # Features of found Corrade library are exposed in these variables:
 #  CORRADE_GCC46_COMPATIBILITY  - Defined if compiled with compatibility
 #   mode for GCC 4.6
+#  CORRADE_GCC47_COMPATIBILITY  - Defined if compiled with compatibility
+#   mode for GCC 4.7
 #  CORRADE_BUILD_STATIC         - Defined if compiled as static libraries
 #  CORRADE_TARGET_NACL          - Defined if compiled for Google Chrome
 #   Native Client
@@ -145,6 +147,10 @@ file(READ ${CORRADE_INCLUDE_DIR}/corradeConfigure.h _corradeConfigure)
 string(FIND "${_corradeConfigure}" "#define CORRADE_GCC46_COMPATIBILITY" _GCC46_COMPATIBILITY)
 if(NOT _GCC46_COMPATIBILITY EQUAL -1)
     set(CORRADE_GCC46_COMPATIBILITY 1)
+endif()
+string(FIND "${_corradeConfigure}" "#define CORRADE_GCC47_COMPATIBILITY" _GCC47_COMPATIBILITY)
+if(NOT _GCC47_COMPATIBILITY EQUAL -1)
+    set(CORRADE_GCC47_COMPATIBILITY 1)
 endif()
 string(FIND "${_corradeConfigure}" "#define CORRADE_BUILD_STATIC" _BUILD_STATIC)
 if(NOT _BUILD_STATIC EQUAL -1)
