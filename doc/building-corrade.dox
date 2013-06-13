@@ -193,7 +193,7 @@ depending projects.
 @section building-nacl Compiling for Google Chrome Native Client
 
 You will need [Native Client SDK](https://developers.google.com/native-client/beta/sdk/download).
-Tested version is `pepper_22`.
+Minimal supported version is `pepper_25`.
 
 Make sure you have `toolchains` submodule updated, as
 @ref building-download "explained above". You can choose from either `glibc` or

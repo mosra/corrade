@@ -64,6 +64,14 @@ set(CorradeUtility_HEADERS
 
     corradeUtilityVisibility.h)
 
+# NaCl-specific functionality
+if(CORRADE_TARGET_NACL)
+    set(CorradeUtility_SRCS ${CorradeUtility_SRCS}
+        NaClStreamBuffer.cpp)
+    set(CorradeUtility_HEADERS ${CorradeUtility_HEADERS}
+        NaClStreamBuffer.h)
+endif()
+
 add_library(CorradeUtilityObjects OBJECT ${CorradeUtility_SRCS})
 add_library(CorradeUtility ${SHARED_OR_STATIC} $<TARGET_OBJECTS:CorradeUtilityObjects> ${CorradeUtility_GracefulAssert_SRCS})
 
