@@ -77,7 +77,7 @@ can be added by implementing function operator<<(Debug, const T&) for given
 type.
 
 @see Warning, Error, CORRADE_ASSERT(), CORRADE_INTERNAL_ASSERT(),
-    CORRADE_INTERNAL_ASSERT_OUTPUT()
+    CORRADE_INTERNAL_ASSERT_OUTPUT(), NaClConsoleStreamBuffer
 @todo Output to more ostreams at once
  */
 class CORRADE_UTILITY_EXPORT Debug {
