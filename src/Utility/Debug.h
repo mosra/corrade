@@ -57,7 +57,7 @@ Debug::setOutput(&o);
 Debug() << "the meaning of life, universe and everything is" << 42;
 
 // Mute debug output
-Debug::setOutput(0);
+Debug::setOutput(nullptr);
 Debug() << "noone should see my ebanking password" << password;
 
 // Reset debug output to default
@@ -94,8 +94,8 @@ class CORRADE_UTILITY_EXPORT Debug {
 
         /**
          * @brief Constructor
-         * @param _output       Stream where to put debug output. If set to 0,
-         *      no debug output will be written anywhere.
+         * @param _output       Stream where to put debug output. If set to
+         *      `nullptr`, no debug output will be written anywhere.
          *
          * Constructs debug object with given output.
          * @see setOutput()
