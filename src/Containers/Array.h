@@ -29,6 +29,7 @@
  * @brief Class Corrade::Containers::Array
  */
 
+#include <type_traits>
 #include <utility>
 
 namespace Corrade { namespace Containers {
@@ -85,17 +86,99 @@ template<class T> class Array {
 
         /** @brief Pointer to first element */
         T* begin() { return _data; }
-        const T* begin() const { return _data; }       /**< @overload */
-        const T* cbegin() const { return _data; }      /**< @overload */
+        const T* begin() const { return _data; }        /**< @overload */
+        const T* cbegin() const { return _data; }       /**< @overload */
 
         /** @brief Pointer to (one item after) last element */
         T* end() { return _data+_size; }
-        const T* end() const { return _data+_size; }   /**< @overload */
-        const T* cend() const { return _data+_size; }  /**< @overload */
+        const T* end() const { return _data+_size; }    /**< @overload */
+        const T* cend() const { return _data+_size; }   /**< @overload */
 
         /** @brief Conversion to array type */
         operator T*() { return _data; }
-        operator const T*() const { return _data; } /**< @overload */
+        operator const T*() const { return _data; }     /**< @overload */
+
+    private:
+        T* _data;
+        std::size_t _size;
+};
+
+/**
+@brief %Array reference wrapper with size information
+
+Immutable wrapper around plain C array. Unlike Array this class doesn't do any
+memory management. Main use case is passing array around along with size
+information. If @p T is `const` type, the class is implicitly constructible
+also from const references to Array and ArrayReference of non-const types.
+*/
+template<class T> class ArrayReference {
+    public:
+        typedef T Type;     /**< @brief Element type */
+
+        /**
+         * @brief Default constructor
+         *
+         * Creates zero-sized array. Move array with nonzero size onto the
+         * instance to make it useful.
+         */
+        constexpr explicit ArrayReference() noexcept: _data(nullptr), _size(0) {}
+
+        /**
+         * @brief Constructor
+         * @param data      Data pointer
+         * @param size      Data size
+         */
+        constexpr /*implicit*/ ArrayReference(T* data, std::size_t size) noexcept: _data(data), _size(size) {}
+
+        /**
+         * @brief Construct reference to fixed-size array
+         * @param data      Fixed-size array
+         */
+        template<std::size_t size> constexpr /*implicit*/ ArrayReference(T(&data)[size]) noexcept: _data(data), _size(size) {}
+
+        /** @brief Construct reference to Array */
+        constexpr /*implicit*/ ArrayReference(Array<T>& array) noexcept: _data(array), _size(array.size()) {}
+
+        /**
+         * @brief Construct const reference to Array
+         *
+         * Enabled only if @p T is `const U`.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class U>
+        #else
+        template<class U, class V = typename std::enable_if<std::is_same<const U, T>::value>::type>
+        #endif
+        constexpr /*implicit*/ ArrayReference(const Array<U>& array) noexcept: _data(array), _size(array.size()) {}
+
+        /**
+         * @brief Construct const reference from non-const reference
+         *
+         * Enabled only if @p T is `const U`.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class U>
+        #else
+        template<class U, class V = typename std::enable_if<std::is_same<const U, T>::value>::type>
+        #endif
+        constexpr /*implicit*/ ArrayReference(const ArrayReference<U>& array) noexcept: _data(array), _size(array.size()) {}
+
+        /** @brief Whether the array is empty */
+        constexpr bool empty() const { return !_size; }
+
+        /** @brief %Array size */
+        constexpr std::size_t size() const { return _size; }
+
+        /** @brief Pointer to first element */
+        constexpr T* begin() const { return _data; }
+        constexpr T* cbegin() const { return _data; }   /**< @overload */
+
+        /** @brief Pointer to (one item after) last element */
+        T* end() const { return _data+_size; }
+        T* cend() const { return _data+_size; }         /**< @overload */
+
+        /** @brief Conversion to array type */
+        constexpr operator T*() const { return _data; }
 
     private:
         T* _data;
