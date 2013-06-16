@@ -36,8 +36,12 @@ namespace Corrade { namespace Containers {
 /**
 @brief %Array wrapper with size information
 
-Provides moveable RAII wrapper around plain C array. Usable in STL algorithms
-in the same way as plain C array and additionally also in range-based for cycle.
+Provides movable RAII wrapper around plain C array. Main use case is storing
+binary data of unspecified type, where direct element access might be harmful.
+
+However, the class is usable also as lighter non-copyable alternative to
+`std::vector`, in STL algorithms in the same way as plain C array and
+additionally also in range-based for cycle.
 */
 template<class T> class Array {
     public:
@@ -92,10 +96,6 @@ template<class T> class Array {
         /** @brief Conversion to array type */
         operator T*() { return _data; }
         operator const T*() const { return _data; } /**< @overload */
-
-        /** @brief Element access */
-        T& operator[](std::size_t i) { return _data[i]; }
-        const T& operator[](std::size_t i) const { return _data[i]; } /**< @overload */
 
     private:
         T* _data;
