@@ -48,6 +48,9 @@ template<class T> class Array {
     public:
         typedef T Type;     /**< @brief Element type */
 
+        /** @brief Conversion from nullptr */
+        /*implicit*/ Array(std::nullptr_t) noexcept: _data(nullptr), _size(0) {}
+
         /**
          * @brief Default constructor
          *
@@ -60,7 +63,11 @@ template<class T> class Array {
          * @brief Constructor
          *
          * Creates array of given size, the values are default-initialized (i.e.
-         * builtin types are not initialized).
+         * builtin types are not initialized). If the size is zero, no
+         * allocation is done.
+         * @note Due to ambiguity you can't call directly `%Array(0)` because
+         *      it conflicts with Array(std::nullptr_t). You should call
+         *      `%Array(nullptr)` instead, which is also `noexcept`.
          */
         explicit Array(std::size_t size): _data(size ? new T[size] : nullptr), _size(size) {}
 
@@ -114,6 +121,9 @@ also from const references to Array and ArrayReference of non-const types.
 template<class T> class ArrayReference {
     public:
         typedef T Type;     /**< @brief Element type */
+
+        /** @brief Conversion from nullptr */
+        constexpr /*implicit*/ ArrayReference(std::nullptr_t) noexcept: _data(nullptr), _size(0) {}
 
         /**
          * @brief Default constructor
