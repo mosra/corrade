@@ -432,12 +432,11 @@ If static plugins are compiled into dynamic library or directly into the
 executable, they should be automatically loaded at startup thanks to
 AUTOMATIC_INITALIZER() and CORRADE_AUTOMATIC_FINALIZER() macros.
 
-If static plugins are compiled into static library, they are not
-automatically loaded at startup, so you need to load them explicitly by
-calling CORRADE_PLUGIN_IMPORT() at the beggining of main() function. You can
-also wrap these macro calls into another function (which will then be compiled
-into dynamic library or main executable) and use CORRADE_AUTOMATIC_INITIALIZER()
-macro for automatic call.
+If static plugins are compiled into static library, they are not automatically
+loaded at startup, so you need to load them explicitly by calling CORRADE_PLUGIN_IMPORT()
+at the beginning of `main()` function. You can also wrap these macro calls into
+another function (which will then be compiled into dynamic library or main
+executable) and use CORRADE_AUTOMATIC_INITIALIZER() macro for automatic call.
 @attention This macro should be called outside of any namespace. If you are
     running into linker errors with `pluginImporter_*`, this could be the
     problem. See CORRADE_RESOURCE_INITIALIZE() documentation for more
