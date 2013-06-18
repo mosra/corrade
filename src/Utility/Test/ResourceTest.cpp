@@ -27,6 +27,7 @@
 #include <sstream>
 #include <tuple>
 
+#include "Containers/Array.h"
 #include "TestSuite/Tester.h"
 #include "TestSuite/Compare/StringToFile.h"
 #include "Utility/Directory.h"
@@ -140,11 +141,9 @@ void ResourceTest::getInexistent() {
     }
 
     Resource r("test");
-    const unsigned char* data;
-    std::size_t size;
-    std::tie(data, size) = r.getRaw("inexistentFile");
+    const auto data = r.getRaw("inexistentFile");
     CORRADE_VERIFY(!data);
-    CORRADE_VERIFY(!size);
+    CORRADE_VERIFY(!data.size());
 }
 
 void ResourceTest::overrideGroup() {
@@ -159,8 +158,8 @@ void ResourceTest::overrideGroup() {
     CORRADE_COMPARE(r.get("consequence2.txt"), "overriden consequence\n");
 
     /* Test that two subsequence r.getRaw() point to the same location */
-    const auto ptr = r.getRaw("predisposition.bin").first;
-    CORRADE_VERIFY(r.getRaw("predisposition.bin").first == ptr);
+    const auto ptr = r.getRaw("predisposition.bin").begin();
+    CORRADE_VERIFY(r.getRaw("predisposition.bin").begin() == ptr);
 }
 
 void ResourceTest::overrideGroupFallback() {

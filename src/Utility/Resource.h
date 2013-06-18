@@ -128,7 +128,7 @@ class CORRADE_UTILITY_EXPORT Resource {
          * If the group does not exist, returns `{nullptr, 0}`. If the file was
          * not found, prints message to error output and returns `{nullptr, 0}`.
          */
-        std::pair<const unsigned char*, unsigned int> getRaw(const std::string& filename) const;
+        Containers::ArrayReference<const unsigned char> getRaw(const std::string& filename) const;
 
         /**
          * @brief Get data resource
@@ -150,15 +150,9 @@ class CORRADE_UTILITY_EXPORT Resource {
         static void unregisterData(const char* group);
 
     private:
-        struct CORRADE_UTILITY_LOCAL ResourceData {
-            unsigned int position;
-            unsigned int size;
-            const unsigned char* data;
-        };
-
         struct CORRADE_UTILITY_LOCAL GroupData {
             std::string overrideGroup;
-            std::map<std::string, ResourceData> resources;
+            std::map<std::string, Containers::ArrayReference<const unsigned char>> resources;
         };
 
         struct OverrideData;
