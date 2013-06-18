@@ -52,13 +52,15 @@ auto Resource::resources() -> std::map<std::string, GroupData>& {
 }
 
 void Resource::registerData(const char* group, unsigned int count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data) {
-    auto groupData = resources().find(group);
-    if(groupData == resources().end())
-        #ifndef CORRADE_GCC47_COMPATIBILITY
-        groupData = resources().emplace(group, GroupData()).first;
-        #else
-        groupData = resources().insert(std::make_pair(group, GroupData())).first;
-        #endif
+    /* Already registered */
+    /** @todo Fix and assert that this doesn't happen */
+    if(resources().find(group) != resources().end()) return;
+
+    #ifndef CORRADE_GCC47_COMPATIBILITY
+    const auto groupData = resources().emplace(group, GroupData()).first;
+    #else
+    const auto groupData = resources().insert(std::make_pair(group, GroupData())).first;
+    #endif
 
     /* Cast to type which can be eaten by std::string constructor */
     const char* _positions = reinterpret_cast<const char*>(positions);
@@ -88,23 +90,13 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
     }
 }
 
-void Resource::unregisterData(const char* group, const unsigned char* data) {
-    /** @todo redo and test this */
-    if(resources().find(group) == resources().end()) return;
+void Resource::unregisterData(const char* group) {
+    /** @todo test this */
+    auto it = resources().find(group);
+    CORRADE_ASSERT(it != resources().end(),
+        "Utility::Resource: resource group" << group << "is not registered", );
 
-    /* Positions which to remove */
-    std::vector<std::string> positions;
-
-    for(auto it = resources()[group].resources.begin(); it != resources()[group].resources.end(); ++it) {
-        if(it->second.data == data)
-            positions.push_back(it->first);
-    }
-
-    /** @todo wtf? this doesn't crash?? */
-    for(auto it = positions.cbegin(); it != positions.cend(); ++it)
-        resources()[group].resources.erase(*it);
-
-    if(resources()[group].resources.empty()) resources().erase(group);
+    resources().erase(it);
 }
 
 std::string Resource::compileFrom(const std::string& name, const std::string& configurationFile) {
@@ -203,7 +195,7 @@ std::string Resource::compile(const std::string& name, const std::string& group,
         "} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_" + name + ")\n\n"
         "int resourceFinalizer_" + name + "();\n"
         "int resourceFinalizer_" + name + "() {\n"
-        "    Corrade::Utility::Resource::unregisterData(\"" + group + "\", resourceData);\n"
+        "    Corrade::Utility::Resource::unregisterData(\"" + group + "\");\n"
         "    return 1;\n"
         "} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_" + name + ")\n";
 }

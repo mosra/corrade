@@ -35,6 +35,6 @@ int resourceInitializer_ResourceTestData() {
 
 int resourceFinalizer_ResourceTestData();
 int resourceFinalizer_ResourceTestData() {
-    Corrade::Utility::Resource::unregisterData("test", resourceData);
+    Corrade::Utility::Resource::unregisterData("test");
     return 1;
 } CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_ResourceTestData)

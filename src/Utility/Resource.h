@@ -147,7 +147,7 @@ class CORRADE_UTILITY_EXPORT Resource {
     #endif
         /* Internal use only. */
         static void registerData(const char* group, unsigned int count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data);
-        static void unregisterData(const char* group, const unsigned char* data);
+        static void unregisterData(const char* group);
 
     private:
         struct CORRADE_UTILITY_LOCAL ResourceData {
