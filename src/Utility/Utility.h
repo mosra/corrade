@@ -31,6 +31,7 @@
 
 #include <cstdint>
 
+#include "corradeConfigure.h"
 #include "Containers/Containers.h"
 
 namespace Corrade { namespace Utility {
@@ -51,6 +52,12 @@ template<class T> struct ConfigurationValue;
 /* Directory used only statically */
 /* Endianness used only statically */
 class MurmurHash2;
+
+#ifdef CORRADE_TARGET_NACL
+class NaClConsoleStreamBuffer;
+class NaClMessageStreamBuffer;
+#endif
+
 /* Resource doesn't need forward declaration */
 class Sha1;
 /* String used only statically */
