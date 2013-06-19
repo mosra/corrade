@@ -48,6 +48,23 @@ template<class T> class Array {
     public:
         typedef T Type;     /**< @brief Element type */
 
+        /**
+         * @brief Create zero-initialized array
+         *
+         * Creates array of given size, the values are value-initialized
+         * (i.e. builtin types are zero-initialized). For other than builtin
+         * types this is the same as Array(std::size_t). If the size is zero,
+         * no allocation is done.
+         */
+        static Array<T> zeroInitialized(std::size_t size) {
+            if(!size) return nullptr;
+
+            Array<T> array;
+            array._data = new T[size]();
+            array._size = size;
+            return array;
+        }
+
         /** @brief Conversion from nullptr */
         /*implicit*/ Array(std::nullptr_t) noexcept: _data(nullptr), _size(0) {}
 
@@ -68,6 +85,7 @@ template<class T> class Array {
          * @note Due to ambiguity you can't call directly `%Array(0)` because
          *      it conflicts with Array(std::nullptr_t). You should call
          *      `%Array(nullptr)` instead, which is also `noexcept`.
+         * @see zeroInitialized()
          */
         explicit Array(std::size_t size): _data(size ? new T[size] : nullptr), _size(size) {}
 
