@@ -277,7 +277,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
         return LoadState::LoadFailed;
     }
     if(_version() != Version) {
-        Error() << "PluginManager: wrong plugin version, expected" << Version << "but got" << _version;
+        Error() << "PluginManager: wrong plugin version, expected" << Version << "but got" << _version();
         dlclose(module);
         return LoadState::WrongPluginVersion;
     }
@@ -293,7 +293,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
         return LoadState::LoadFailed;
     }
     if(interface() != pluginInterface()) {
-        Error() << "PluginManager: wrong plugin interface, expected" << '\'' + pluginInterface() + "but got '" + interface() + "'";
+        Error() << "PluginManager: wrong interface version, expected" << '\'' + pluginInterface() + '\'' << "but got" << '\'' + std::string(interface()) + '\'';
         dlclose(module);
         return LoadState::WrongInterfaceVersion;
     }

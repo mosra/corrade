@@ -41,7 +41,6 @@
 #include "corradeCompatibility.h"
 #include "Containers/EnumSet.h"
 #include "Utility/Configuration.h"
-#include "Utility/Debug.h"
 #include "Utility/Resource.h"
 #include "PluginManager/PluginMetadata.h"
 #include "PluginManager/PluginManager.h"
