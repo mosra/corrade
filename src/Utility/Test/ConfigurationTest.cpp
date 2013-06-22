@@ -54,6 +54,9 @@ class ConfigurationTest: public TestSuite::Tester {
         void uniqueKeys();
         void stripComments();
 
+        void multiLineValue();
+        void multiLineValueCrlf();
+
         void autoCreation();
         void directValue();
 
@@ -78,10 +81,16 @@ ConfigurationTest::ConfigurationTest() {
               &ConfigurationTest::uniqueGroups,
               &ConfigurationTest::uniqueKeys,
               &ConfigurationTest::stripComments,
+
+              &ConfigurationTest::multiLineValue,
+              &ConfigurationTest::multiLineValueCrlf,
+
               &ConfigurationTest::autoCreation,
               &ConfigurationTest::directValue,
+
               &ConfigurationTest::hierarchic,
               &ConfigurationTest::hierarchicUnique,
+
               &ConfigurationTest::copy});
 
     /* Create testing dir */
@@ -431,6 +440,43 @@ void ConfigurationTest::directValue() {
     CORRADE_COMPARE(conf.value("inexistent"), "");
     CORRADE_COMPARE(conf.value<int>("inexistent"), 0);
     CORRADE_COMPARE(conf.value<double>("inexistent"), 0.0);
+}
+
+void ConfigurationTest::multiLineValue() {
+    /* Remove previous saved file */
+    Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf"));
+
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "multiLine.conf"));
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf"));
+    CORRADE_VERIFY(conf.isValid());
+
+    /* Check parsing */
+    CORRADE_COMPARE(conf.value("value"), " Hello\n people how\n are you?");
+    CORRADE_COMPARE(conf.value("empty"), "");
+
+    /* Expect change only in empty value */
+    CORRADE_VERIFY(conf.save());
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "multiLine-saved.conf"),
+                       TestSuite::Compare::File);
+}
+
+void ConfigurationTest::multiLineValueCrlf() {
+    /* Remove previous saved file */
+    Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf"));
+
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "multiLine-crlf.conf"));
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf"));
+    CORRADE_VERIFY(conf.isValid());
+
+    /* Check parsing */
+    CORRADE_COMPARE(conf.value("value"), " Hello\n people how\n are you?");
+
+    /* Expect change only in lines without CR */
+    CORRADE_VERIFY(conf.save());
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "multiLine-crlf-saved.conf"),
+                       TestSuite::Compare::File);
 }
 
 void ConfigurationTest::hierarchic() {

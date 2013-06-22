@@ -27,8 +27,9 @@
 
 #include <fstream>
 
-#include "Debug.h"
-#include "String.h"
+#include "Utility/Assert.h"
+#include "Utility/Debug.h"
+#include "Utility/String.h"
 
 namespace Corrade { namespace Utility {
 
@@ -105,12 +106,36 @@ std::string Configuration::parse(std::istream& file, ConfigurationGroup* group, 
     std::string buffer;
 
     /* Parse file */
+    bool multiLineValue = false;
     while(file.good()) {
         std::getline(file, buffer);
 
         /* Windows EOL */
-        if(buffer[buffer.size()-1] == '\r')
+        if(buffer.back() == '\r')
             flags |= InternalFlag::WindowsEol;
+
+        /* Multi-line value */
+        if(multiLineValue) {
+            /* End of multi-line value */
+            if(String::trim(buffer) == "\"\"\"") {
+                /* Remove trailing newline, if present */
+                if(!group->items.back().value.empty()) {
+                    CORRADE_INTERNAL_ASSERT(group->items.back().value.back() == '\n');
+                    group->items.back().value.resize(group->items.back().value.size()-1);
+                }
+
+                multiLineValue = false;
+                continue;
+            }
+
+            /* Remove Windows EOL, if present */
+            if(buffer.back() == '\r') buffer.resize(buffer.size()-1);
+
+            /* Append it (with newline) to current value */
+            group->items.back().value += buffer;
+            group->items.back().value += '\n';
+            continue;
+        }
 
         /* Trim buffer */
         buffer = String::trim(buffer);
@@ -173,9 +198,14 @@ std::string Configuration::parse(std::istream& file, ConfigurationGroup* group, 
             item.key = String::trim(buffer.substr(0, splitter));
             item.value = String::trim(buffer.substr(splitter+1));
 
+            /* Start of multi-line value */
+            if(item.value == "\"\"\"") {
+                item.value = "";
+                multiLineValue = true;
+
             /* Remove quotes, if present */
             /** @todo Check `"` characters better */
-            if(!item.value.empty() && item.value[0] == '"') {
+            } else if(!item.value.empty() && item.value[0] == '"') {
                 if(item.value.size() < 2 || item.value[item.value.size()-1] != '"')
                     throw std::string("Missing closing quotes in value!");
 
@@ -184,6 +214,8 @@ std::string Configuration::parse(std::istream& file, ConfigurationGroup* group, 
 
             /* If unique keys are set, check whether current key is unique */
             if(flags & InternalFlag::UniqueKeys) {
+                /** @todo fixme: get rid of this flag altogether */
+                CORRADE_INTERNAL_ASSERT(!multiLineValue);
                 bool contains = false;
                 for(auto it = group->items.cbegin(); it != group->items.cend(); ++it)
                     if(it->key == item.key) {
@@ -244,10 +276,25 @@ void Configuration::save(std::ofstream& file, const std::string& eol, Configurat
     for(auto it = group->items.cbegin(); it != group->items.cend(); ++it) {
         /* Key/value pair */
         if(!it->key.empty()) {
-            if(it->value.find_first_of(String::Whitespace) != std::string::npos)
+            /* Multi-line value */
+            if(it->value.find_first_of('\n') != std::string::npos) {
+                /* Replace \n with `eol` */
+                /** @todo fixme: ugly and slow */
+                std::string value = it->value;
+                std::size_t pos = 0;
+                while((pos = value.find_first_of('\n', pos)) != std::string::npos) {
+                    value.replace(pos, 1, eol);
+                    pos += eol.size();
+                }
+
+                buffer = it->key + "=\"\"\"" + eol + value + eol + "\"\"\"" + eol;
+
+            /* Value with spaces */
+            } else if(it->value.find_first_of(String::Whitespace) != std::string::npos)
                 buffer = it->key + "=\"" + it->value + '"' + eol;
-            else
-                buffer = it->key + '=' + it->value + eol;
+
+            /* Value without spaces */
+            else buffer = it->key + '=' + it->value + eol;
         }
 
         /* Comment / empty line */

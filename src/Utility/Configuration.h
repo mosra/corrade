@@ -73,14 +73,15 @@ conf.save();
 @endcode
 
 @section Configuration_Syntax File syntax
-File syntax is based on INI syntax. Every row can be of one type:
+File syntax is based on INI syntax, consisting of three basic elements:
 - group header
 - key/value pair
 - comment / empty line
 
-Rows can have leading/trailing whitespaces, they will be stripped on parsing and
-saving. Comments and empty lines are preserved, unless the comment is in group
-which was deleted.
+Elements can have leading/trailing whitespaces, they will be stripped on
+parsing and saving. Whitespace is preserved in values enclosed in `"` and
+multi-line values. Comments and empty lines are preserved, unless the comment
+is in group which was deleted.
 
 %Configuration group header is enclosed in `[` and `]`, hierarchic group names
 are separated with `/` character. No group name can be empty.
@@ -88,7 +89,15 @@ are separated with `/` character. No group name can be empty.
 Key/value pair consist of key name string, zero or more whitespaces, `=`
 character, zero or more whitespaces and value. Whitespaces around the value are
 stripped on parsing, if you want to preserve them, enclose the value in `"`
-characters. The value cannot span multiple lines.
+characters.
+
+Multi-line values are enclosed in `"""` alone on the line, first and last line
+break is ignored. The following value is parsed as two lines:
+
+    value="""
+    Here is the value.
+    Spanning multiple lines.
+    """
 
 Comments begin with `#` or `;` character and continue to the end of line. Each
 line of multiline comments must begin with these characters.
