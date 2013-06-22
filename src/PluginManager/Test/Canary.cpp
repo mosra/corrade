@@ -25,6 +25,7 @@
 
 #include "AbstractAnimal.h"
 #include "PluginManager/AbstractManager.h"
+#include "Utility/Debug.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 

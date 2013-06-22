@@ -25,6 +25,8 @@
 
 #include "Dog.h"
 
+#include "Utility/Debug.h"
+
 namespace Corrade { namespace PluginManager { namespace Test {
 
 void Dog::initialize() { Utility::Debug() << "Dog initialized"; }

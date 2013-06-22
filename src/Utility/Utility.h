@@ -45,9 +45,9 @@ enum class ConfigurationValueFlag: std::uint8_t;
 typedef Containers::EnumSet<ConfigurationValueFlag, std::uint8_t> ConfigurationValueFlags;
 template<class T> struct ConfigurationValue;
 
-/* Debug doesn't need forward declaration */
-/* Error doesn't need forward declaration */
-/* Warning doesn't need forward declaration */
+class Debug;
+class Warning;
+class Error;
 
 /* Directory used only statically */
 /* Endianness used only statically */
