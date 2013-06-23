@@ -45,7 +45,8 @@ corrade_add_test(UtilityUnicodeTest UnicodeTest.cpp)
 
 # Compiled-in resource test
 corrade_add_resource(ResourceTestData ResourceTestFiles/resources.conf)
-corrade_add_test(UtilityResourceTest ResourceTest.cpp ${ResourceTestData} LIBRARIES CorradeUtilityTestLib)
+corrade_add_resource(ResourceTestNothingData ResourceTestFiles/resourcesNothing.conf)
+corrade_add_test(UtilityResourceTest ResourceTest.cpp ${ResourceTestData} ${ResourceTestNothingData} LIBRARIES CorradeUtilityTestLib)
 
 # Static lib resource test
 add_library(ResourceTestDataLib STATIC ${ResourceTestData})

@@ -42,10 +42,14 @@ class ResourceTest: public TestSuite::Tester {
         ResourceTest();
 
         void compile();
+        void compileNothing();
         void compileEmptyFile();
         void compileFrom();
+
         void get();
         void getInexistent();
+        void getNothing();
+
         void overrideGroup();
         void overrideGroupFallback();
         void overrideInexistentGroup();
@@ -54,10 +58,14 @@ class ResourceTest: public TestSuite::Tester {
 
 ResourceTest::ResourceTest() {
     addTests({&ResourceTest::compile,
+              &ResourceTest::compileNothing,
               &ResourceTest::compileEmptyFile,
               &ResourceTest::compileFrom,
+
               &ResourceTest::get,
               &ResourceTest::getInexistent,
+              &ResourceTest::getNothing,
+
               &ResourceTest::overrideGroup,
               &ResourceTest::overrideGroupFallback,
               &ResourceTest::overrideInexistentGroup,
@@ -86,6 +94,12 @@ void ResourceTest::compile() {
         {"consequence.bin", consequence}};
     CORRADE_COMPARE_AS(Resource::compile("ResourceTestData", "test", input),
                        Directory::join(RESOURCE_TEST_DIR, "compiled.cpp"),
+                       TestSuite::Compare::StringToFile);
+}
+
+void ResourceTest::compileNothing() {
+    CORRADE_COMPARE_AS(Resource::compile("ResourceTestNothingData", "nothing", {}),
+                       Directory::join(RESOURCE_TEST_DIR, "compiledNothing.cpp"),
                        TestSuite::Compare::StringToFile);
 }
 
@@ -144,6 +158,15 @@ void ResourceTest::getInexistent() {
     const auto data = r.getRaw("inexistentFile");
     CORRADE_VERIFY(!data);
     CORRADE_VERIFY(!data.size());
+}
+
+void ResourceTest::getNothing() {
+    std::ostringstream out;
+    Error::setOutput(&out);
+
+    Resource r("nothing");
+    CORRADE_VERIFY(out.str().empty());
+    CORRADE_VERIFY(r.get("inexistentFile").empty());
 }
 
 void ResourceTest::overrideGroup() {

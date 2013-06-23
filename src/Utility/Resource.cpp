@@ -131,6 +131,23 @@ std::string Resource::compileFrom(const std::string& name, const std::string& co
 }
 
 std::string Resource::compile(const std::string& name, const std::string& group, const std::vector<std::pair<std::string, std::string>>& files) {
+    /* Special case for empty file list */
+    if(files.empty()) {
+        return "/* Compiled resource file. DO NOT EDIT! */\n\n"
+            "#include \"Utility/utilities.h\"\n"
+            "#include \"Utility/Resource.h\"\n\n"
+            "int resourceInitializer_" + name + "();\n"
+            "int resourceInitializer_" + name + "() {\n"
+            "    Corrade::Utility::Resource::registerData(\"" + group + "\", 0, nullptr, nullptr, nullptr);\n"
+            "    return 1;\n"
+            "} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_" + name + ")\n\n"
+            "int resourceFinalizer_" + name + "();\n"
+            "int resourceFinalizer_" + name + "() {\n"
+            "    Corrade::Utility::Resource::unregisterData(\"" + group + "\");\n"
+            "    return 1;\n"
+            "} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_" + name + ")\n";
+    }
+
     std::string positions, filenames, data;
     unsigned int filenamesLen = 0, dataLen = 0;
 
