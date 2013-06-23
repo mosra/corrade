@@ -111,7 +111,7 @@ std::string Resource::compileFrom(const std::string& name, const std::string& co
         Debug() << "Reading file" << fileData.size()+1 << "of" << files.size() << "in group" << '\'' + group + '\'';
 
         const std::string filename = file->value("filename");
-        const std::string alias = file->keyExists("alias") ? file->value("alias") : filename;
+        const std::string alias = file->hasValue("alias") ? file->value("alias") : filename;
         if(filename.empty() || alias.empty()) {
             Error() << "    Error: empty filename or alias!";
             return {};
@@ -239,7 +239,7 @@ Containers::ArrayReference<const unsigned char> Resource::getRaw(const std::stri
            issue, as this shouldn't be used in production code anyway. */
         std::vector<const ConfigurationGroup*> files = _overrideGroup->conf.groups("file");
         for(auto file: files) {
-            const std::string name = file->keyExists("alias") ? file->value("alias") : file->value("filename");
+            const std::string name = file->hasValue("alias") ? file->value("alias") : file->value("filename");
             if(name != filename) continue;
 
             /* Load the file */

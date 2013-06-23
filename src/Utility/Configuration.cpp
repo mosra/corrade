@@ -29,44 +29,47 @@
 
 #include "Utility/Assert.h"
 #include "Utility/Debug.h"
+#include "Utility/Directory.h"
 #include "Utility/String.h"
 
 namespace Corrade { namespace Utility {
 
-Configuration::Configuration(Configuration::Flags flags): ConfigurationGroup(this), flags(static_cast<InternalFlag>(std::uint32_t(flags))|InternalFlag::IsValid) {}
+Configuration::Configuration(const Flags flags): ConfigurationGroup(this), _flags(static_cast<InternalFlag>(std::uint32_t(flags))) {}
 
-Configuration::Configuration(const std::string& filename, Flags flags): ConfigurationGroup(this), _filename(filename), flags(static_cast<InternalFlag>(std::uint32_t(flags))) {
-    /* Open file with requested flags */
-    std::ifstream::openmode openmode = std::ifstream::in;
-    if(this->flags & InternalFlag::Truncate) openmode |= std::ifstream::trunc;
-    std::ifstream file(filename.c_str(), openmode);
+Configuration::Configuration(const std::string& filename, const Flags flags): ConfigurationGroup(this), _filename(flags & Flag::ReadOnly ? std::string() : filename), _flags(static_cast<InternalFlag>(std::uint32_t(flags))|InternalFlag::IsValid) {
+    /* File doesn't exist yet, nothing to do */
+    if(!Directory::fileExists(filename)) return;
 
-    /* File doesn't exist yet */
-    if(!file.is_open()) {
-        /** @todo check better */
-
-        /* It is error for readonly configurations */
-        /** @todo Similar check for istream constructor (?) */
-        if(this->flags & InternalFlag::ReadOnly) return;
-
-        this->flags |= InternalFlag::IsValid;
+    /* The user wants to truncate the file, mark it as changed and do nothing */
+    if(flags & Flag::Truncate) {
+        _flags |= InternalFlag::Changed;
         return;
     }
 
-    parse(file);
+    /* Open file */
+    std::ifstream in(filename.c_str(), std::ifstream::binary);
+    if(!in.good())
+        Error() << "Utility::Configuration::Configuration(): cannot open file" << filename;
 
-    /* Close file */
-    file.close();
+    /* Parsing succeded, done */
+    else if(parse(in)) return;
+
+    /* Error, reset everything back */
+    _filename = {};
+    _flags &= ~InternalFlag::IsValid;
 }
 
-Configuration::Configuration(std::istream& file, Flags flags): ConfigurationGroup(this), flags(static_cast<InternalFlag>(std::uint32_t(flags))) {
-    parse(file);
+Configuration::Configuration(std::istream& in, const Flags flags): ConfigurationGroup(this), _flags(static_cast<InternalFlag>(std::uint32_t(flags))) {
+    /* The user wants to truncate the file, mark it as changed and do nothing */
+    if(flags & Flag::Truncate) {
+        _flags |= (InternalFlag::Changed|InternalFlag::IsValid);
+        return;
+    }
 
-    /* Set readonly flag, because the configuration cannot be saved */
-    this->flags |= InternalFlag::ReadOnly;
+    if(parse(in)) _flags |= InternalFlag::IsValid;
 }
 
-Configuration::~Configuration() { if(flags & InternalFlag::Changed) save(); }
+Configuration::~Configuration() { if(_flags & InternalFlag::Changed) save(); }
 
 std::string Configuration::filename() const { return _filename; }
 
@@ -74,54 +77,52 @@ void Configuration::setFilename(std::string filename) {
     _filename = std::move(filename);
 }
 
-void Configuration::parse(std::istream& file) {
+bool Configuration::parse(std::istream& in) {
     try {
-        if(!file.good())
-            throw std::string("Cannot open configuration file.");
-
         /* It looks like BOM */
-        if(file.peek() == String::Bom[0]) {
-            char* bom = new char[4];
-            file.get(bom, 4);
+        if(in.peek() == String::Bom[0]) {
+            char bom[4];
+            in.get(bom, 4);
 
             /* This is not a BOM, rewind back */
-            if(bom != String::Bom) file.seekg(0);
+            if(bom != String::Bom) in.seekg(0);
 
             /* Or set flag */
-            else flags |= InternalFlag::HasBom;
-
-            delete[] bom;
+            else _flags |= InternalFlag::HasBom;
         }
 
         /* Parse file */
-        parse(file, this, {});
+        CORRADE_INTERNAL_ASSERT_OUTPUT(parse(in, this, {}).empty());
 
-        /* Everything went fine */
-        flags |= InternalFlag::IsValid;
+    } catch(std::string e) {
+        Error() << "Utility::Configuration::Configuration():" << e;
+        clear();
+        return false;
+    }
 
-    } catch(std::string e) { Error() << e; }
+    return true;
 }
 
-std::string Configuration::parse(std::istream& file, ConfigurationGroup* group, const std::string& fullPath) {
+std::string Configuration::parse(std::istream& in, ConfigurationGroup* group, const std::string& fullPath) {
     std::string buffer;
 
     /* Parse file */
     bool multiLineValue = false;
-    while(file.good()) {
-        std::getline(file, buffer);
+    while(in.good()) {
+        std::getline(in, buffer);
 
         /* Windows EOL */
-        if(buffer.back() == '\r')
-            flags |= InternalFlag::WindowsEol;
+        if(!buffer.empty() && buffer.back() == '\r')
+            _flags |= InternalFlag::WindowsEol;
 
         /* Multi-line value */
         if(multiLineValue) {
             /* End of multi-line value */
             if(String::trim(buffer) == "\"\"\"") {
                 /* Remove trailing newline, if present */
-                if(!group->items.back().value.empty()) {
-                    CORRADE_INTERNAL_ASSERT(group->items.back().value.back() == '\n');
-                    group->items.back().value.resize(group->items.back().value.size()-1);
+                if(!group->_values.back().value.empty()) {
+                    CORRADE_INTERNAL_ASSERT(group->_values.back().value.back() == '\n');
+                    group->_values.back().value.resize(group->_values.back().value.size()-1);
                 }
 
                 multiLineValue = false;
@@ -129,72 +130,61 @@ std::string Configuration::parse(std::istream& file, ConfigurationGroup* group, 
             }
 
             /* Remove Windows EOL, if present */
-            if(buffer.back() == '\r') buffer.resize(buffer.size()-1);
+            if(!buffer.empty() && buffer.back() == '\r') buffer.resize(buffer.size()-1);
 
             /* Append it (with newline) to current value */
-            group->items.back().value += buffer;
-            group->items.back().value += '\n';
+            group->_values.back().value += buffer;
+            group->_values.back().value += '\n';
             continue;
         }
 
         /* Trim buffer */
         buffer = String::trim(buffer);
 
+        /* Empty line */
+        if(buffer.empty()) {
+            if(_flags & InternalFlag::SkipComments) continue;
+
+            group->_values.push_back(ConfigurationGroup::Value());
+
         /* Group header */
-        if(buffer[0] == '[') {
+        } else if(buffer[0] == '[') {
 
             /* Check ending bracket */
             if(buffer[buffer.size()-1] != ']')
-                throw std::string("Missing closing bracket for group header!");
+                throw std::string("missing closing bracket for group header");
 
             std::string nextGroup = String::trim(buffer.substr(1, buffer.size()-2));
 
             if(nextGroup.empty())
-                throw std::string("Empty group name!");
+                throw std::string("empty group name");
 
             /* Next group is subgroup of current group, recursive call */
             while(!nextGroup.empty() && (fullPath.empty() || nextGroup.substr(0, fullPath.size()) == fullPath)) {
                 ConfigurationGroup::Group g;
                 g.name = nextGroup.substr(fullPath.size());
                 g.group = new ConfigurationGroup(configuration);
-                nextGroup = parse(file, g.group, nextGroup+'/');
-
-                /* If unique groups are set, check whether current group is unique */
-                bool save = true;
-                if(flags & InternalFlag::UniqueGroups) {
-                    /** @todo Do this in logarithmic time */
-                    for(auto it = group->_groups.cbegin(); it != group->_groups.cend(); ++it)
-                        if(it->name == g.name) {
-                            save = false;
-                            break;
-                        }
-                }
-                if(save) group->_groups.push_back(g);
+                nextGroup = parse(in, g.group, nextGroup+'/');
+                group->_groups.push_back(std::move(g));
             }
 
             return nextGroup;
 
-        /* Empty line */
-        } else if(buffer.empty()) {
-            if(flags & (InternalFlag::SkipComments|InternalFlag::ReadOnly)) continue;
-
-            group->items.push_back(ConfigurationGroup::Item());
-
         /* Comment */
         } else if(buffer[0] == '#' || buffer[0] == ';') {
-            if(flags & (InternalFlag::SkipComments|InternalFlag::ReadOnly)) continue;
+            if(_flags & InternalFlag::SkipComments) continue;
 
-            ConfigurationGroup::Item item;
+            ConfigurationGroup::Value item;
             item.value = buffer;
-            group->items.push_back(item);
+            group->_values.push_back(item);
 
         /* Key/value pair */
         } else {
             const std::size_t splitter = buffer.find_first_of('=');
             if(splitter == std::string::npos)
-                throw std::string("Key/value pair without '=' character!");
+                throw std::string("key/value pair without '=' character");
 
-            ConfigurationGroup::Item item;
+            ConfigurationGroup::Value item;
             item.key = String::trim(buffer.substr(0, splitter));
             item.value = String::trim(buffer.substr(splitter+1));
 
@@ -207,31 +197,18 @@ std::string Configuration::parse(std::istream& file, ConfigurationGroup* group, 
             /** @todo Check `"` characters better */
             } else if(!item.value.empty() && item.value[0] == '"') {
                 if(item.value.size() < 2 || item.value[item.value.size()-1] != '"')
-                    throw std::string("Missing closing quotes in value!");
+                    throw std::string("missing closing quotes in value");
 
                 item.value = item.value.substr(1, item.value.size()-2);
             }
 
-            /* If unique keys are set, check whether current key is unique */
-            if(flags & InternalFlag::UniqueKeys) {
-                /** @todo fixme: get rid of this flag altogether */
-                CORRADE_INTERNAL_ASSERT(!multiLineValue);
-                bool contains = false;
-                for(auto it = group->items.cbegin(); it != group->items.cend(); ++it)
-                    if(it->key == item.key) {
-                        contains = true;
-                        break;
-                    }
-                if(contains) continue;
-            }
-
-            group->items.push_back(item);
+            group->_values.push_back(item);
         }
     }
 
     /* Remove last empty line, if present (will be written automatically) */
-    if(!group->items.empty() && group->items.back().key.empty() && group->items.back().value.empty())
-        group->items.pop_back();
+    if(!group->_values.empty() && group->_values.back().key.empty() && group->_values.back().value.empty())
+        group->_values.pop_back();
 
     /* This was the last group */
     return {};
@@ -240,21 +217,22 @@ std::string Configuration::parse(std::istream& file, ConfigurationGroup* group, 
 bool Configuration::save(const std::string& filename) {
     std::ofstream out(filename.c_str(), std::ofstream::out|std::ofstream::trunc|std::ofstream::binary);
     if(!out.good()) {
-        /** @todo Error to stderr */
+        Error() << "Utility::Configuration::save(): cannot open file" << filename;
         return false;
     }
 
-    return save(out);
+    save(out);
+    return true;
 }
 
-bool Configuration::save(std::ostream& out) {
+void Configuration::save(std::ostream& out) {
     /* BOM, if user explicitly wants that crap */
-    if((flags & InternalFlag::PreserveBom) && (flags & InternalFlag::HasBom))
+    if((_flags & InternalFlag::PreserveBom) && (_flags & InternalFlag::HasBom))
         out.write(String::Bom.c_str(), 3);
 
     /* EOL character */
     std::string eol;
-    if(flags & (InternalFlag::ForceWindowsEol|InternalFlag::WindowsEol) && !(flags & InternalFlag::ForceUnixEol)) eol = "\r\n";
+    if(_flags & (InternalFlag::ForceWindowsEol|InternalFlag::WindowsEol) && !(_flags & InternalFlag::ForceUnixEol)) eol = "\r\n";
     else eol = "\n";
 
     std::string buffer;
@@ -264,21 +242,18 @@ bool Configuration::save(std::ostream& out) {
 
     /* Recursively save all groups */
     save(out, eol, this, {});
-    return true;
 }
 
 bool Configuration::save() {
-    /* File is readonly or invalid, don't save anything */
-    if(flags & InternalFlag::ReadOnly || !(flags & InternalFlag::IsValid)) return false;
-
+    if(_filename.empty()) return false;
     return save(_filename);
 }
 
-void Configuration::save(std::ostream& file, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const {
+void Configuration::save(std::ostream& out, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const {
     std::string buffer;
 
     /* Foreach all items in the group */
-    for(auto it = group->items.cbegin(); it != group->items.cend(); ++it) {
+    for(auto it = group->_values.cbegin(); it != group->_values.cend(); ++it) {
         /* Key/value pair */
         if(!it->key.empty()) {
             /* Multi-line value */
@@ -305,7 +280,7 @@ void Configuration::save(std::ostream& file, const std::string& eol, Configurati
         /* Comment / empty line */
         else buffer = it->value + eol;
 
-        file.write(buffer.c_str(), buffer.size());
+        out.write(buffer.c_str(), buffer.size());
     }
 
     /* Recursively process all subgroups */
@@ -315,9 +290,9 @@ void Configuration::save(std::ostream& file, const std::string& eol, Configurati
         if(!fullPath.empty()) name = fullPath + '/' + name;
 
         buffer = '[' + name + ']' + eol;
-        file.write(buffer.c_str(), buffer.size());
+        out.write(buffer.c_str(), buffer.size());
 
-        save(file, eol, git->group, name);
+        save(out, eol, git->group, name);
     }
 }
 

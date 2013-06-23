@@ -56,154 +56,162 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         /** @brief Assignment operator */
         ConfigurationGroup& operator=(const ConfigurationGroup& other);
 
+        /**
+         * @brief Whether the group is empty
+         *
+         * If the group is empty, there aren't any values, subgroups, empty
+         * lines or comments.
+         * @see hasGroups(), hasValues()
+         */
+        bool isEmpty() const { return _values.empty() && _groups.empty(); }
+
         /** @{ @name Group operations */
 
         /**
-         * @brief Group
-         * @param name      Name of the group
-         * @param number    Number of the group. Default is first found group.
-         * @return Pointer to group. If no group was found, returns null pointer.
-         */
-        ConfigurationGroup* group(const std::string& name, unsigned int number = 0);
-        const ConfigurationGroup* group(const std::string& name, unsigned int number = 0) const; /**< @overload */
-
-        /**
-         * @brief All groups
-         * @param name      Name of the group. If empty, returns all subgroups.
-         * @return Vector of groups. If no group is found, returns empty vector.
-         */
-        std::vector<ConfigurationGroup*> groups(const std::string& name = std::string());
-        std::vector<const ConfigurationGroup*> groups(const std::string& name = std::string()) const; /**< @overload */
-
-        /**
-         * @brief Count of groups with given name
-         * @param name      Name of the group. If empty, returns number of all
-         *      subgroups.
-         * @return Count
+         * @brief Whether this group has subgroups
          *
-         * More efficient than calling `groups(name).size()`.
-         * See also Configuration::UniqueGroups and Configuration::UniqueNames.
+         * @see isEmpty(), hasGroup(), groupCount(), hasValues()
          */
-        unsigned int groupCount(const std::string& name = std::string()) const;
+        bool hasGroups() const { return !_groups.empty(); }
+
+        /**
+         * @brief Count of all subgroups
+         *
+         * @see hasGroups(), valueCount()
+         */
+        unsigned int groupCount() const { return _groups.size(); }
 
         /**
          * @brief Whether given group exists
-         * @param name      Name of the group. If empty, returns true if there
-         *      are any subgroups.
+         * @param name      Name
+         * @param index     Group index. Default is first found group.
          *
-         * More efficient than calling `group(name) != nullptr`.
-         * @todo split out to hasSubgroups()?
+         * @see isEmpty(), hasGroups(), groupCount(), hasValue()
          */
-        bool groupExists(const std::string& name = std::string()) const;
+        bool hasGroup(const std::string& name, unsigned int index = 0) const;
+
+        /**
+         * @brief Count of groups with given name
+         *
+         * @see hasGroup(), valueCount()
+         */
+        unsigned int groupCount(const std::string& name) const;
+
+        /**
+         * @brief Group of given name
+         * @param name      Name
+         * @param index     Group index. Default is first found group.
+         *
+         * Returns pointer to group on success, `nullptr` otherwise.
+         * @see groups()
+         */
+        ConfigurationGroup* group(const std::string& name, unsigned int index = 0);
+        const ConfigurationGroup* group(const std::string& name, unsigned int index = 0) const; /**< @overload */
+
+        /** @brief All groups with given name */
+        std::vector<ConfigurationGroup*> groups(const std::string& name);
+        std::vector<const ConfigurationGroup*> groups(const std::string& name) const; /**< @overload */
 
         /**
          * @brief Add new group
-         * @param name      Name of the group. The name must not be empty and
-         *      must not contain '/' character.
+         * @param name      Name. The name must not be empty and must not
+         *      contain newline or any of `[]/` characters.
          * @param group     Existing group.
-         * @return False if the group cannot be added (see above or flags
-         *      Configuration::UniqueGroups and Configuration::ReadOnly), true
-         *      otherwise.
          *
-         * Adds existing group at the end of file. Note that the function
-         * doesn't check whether the same group already exists in the
+         * Adds existing group at the end of current group. Note that the
+         * function doesn't check whether the same group already exists in the
          * configuration - adding such group can result in infinite cycle when
          * saving.
          */
-        bool addGroup(const std::string& name, ConfigurationGroup* group);
+        void addGroup(const std::string& name, ConfigurationGroup* group);
 
         /**
          * @brief Add new group
-         * @param name      Name of the group. The name must not be empty and
-         *      must not contain '/' character.
-         * @return Newly created group or null pointer when new group cannot be
-         *      added (see above or flags Configuration::UniqueGroups and
-         *      Configuration::ReadOnly).
+         * @param name      Name. The name must not be empty and must not
+         *      contain newline or any of `[]/` characters.
          *
-         * Adds new group at the end of file.
+         * Adds new group at the end of file, returns newly created group.
          */
         ConfigurationGroup* addGroup(const std::string& name);
 
         /**
          * @brief Remove group
          * @param name      Name of the group
-         * @param number    Number of the group. Default is first found group.
-         * @return Whether the group was removed (see above or flag
-         *      Configuration::ReadOnly).
+         * @param index     Group index. Default is first found group.
          *
-         * @see clear()
+         * Returns `true` if given group was found and removed, `false`
+         * otherwise.
+         * @see removeAllGroups(), clear()
          */
-        bool removeGroup(const std::string& name, unsigned int number = 0);
+        bool removeGroup(const std::string& name, unsigned int index = 0);
 
         /**
          * @brief Remove group
-         * @param group     Pointer to the group
-         * @return Whether the group was removed (see above or flag
-         *      Configuration::ReadOnly).
          *
-         * @see clear()
+         * Returns `true` if given group was found and removed, `false`
+         * otherwise.
+         * @see removeAllGroups(), clear()
          */
         bool removeGroup(ConfigurationGroup* group);
 
         /**
          * @brief Remove all groups with given name
-         * @param name      Name of groups to remove
-         * @return True if all groups with the given name were removed (see
-         *      above or flag Connfiguration::ReadOnly).
+         *
+         * @see removeGroup(), clear()
          */
-        bool removeAllGroups(const std::string& name);
+        void removeAllGroups(const std::string& name);
 
         /*@}*/
 
         /** @{ @name Value operations */
 
         /**
-         * @brief String value
-         * @param key       Key name
-         * @param value     Pointer where to store value
-         * @param number    Number of the value. Default is first found value.
-         * @param flags     Flags (see ConfigurationGroup::Flags)
-         * @return Whether the value was found
+         * @brief Whether this group has any values
          *
-         * See also Configuration::automaticKeyCreation().
+         * @see isEmpty(), hasValue(), valueCount(), hasGroups()
          */
-        bool value(const std::string& key, std::string* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
-            return valueInternal(key, value, number, flags);
-        }
-
-        /** @overload */
-        bool value(const std::string& key, std::string* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const {
-            return valueInternal(key, value, number, flags);
-        }
+        bool hasValues() const;
 
         /**
-         * @brief Value converted to given type
+         * @brief Count of all values in the group
          *
-         * Uses ConfigurationValue to convert the value to given type. See
-         * value(const std::string&, std::string*, unsigned int, ConfigurationValueFlags)
-         * for more information.
+         * @see hasValues(), groupCount()
          */
-        template<class T> bool value(const std::string& key, T* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags());
-        template<class T> bool value(const std::string& key, T* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const; /**< @overload */
+        unsigned int valueCount() const;
 
         /**
-         * @brief Value (directly returned)
-         * @param key       Key name
-         * @param number    Number of the value. Default is first found value.
-         * @param flags     Flags (see ConfigurationGroup::Flags)
-         * @return Value
+         * @brief Whether value exists
+         * @param key       Key
+         * @param index     Value index. Default is first found value.
+         *
+         * @see isEmpty(), hasValues(), valueCount(), hasGroup()
+         */
+        bool hasValue(const std::string& key, unsigned int index = 0) const;
+
+        /**
+         * @brief Count of values with given key
+         *
+         * @see hasValue(), groupCount()
+         */
+        unsigned int valueCount(const std::string& key) const;
+
+        /**
+         * @brief Value
+         * @param key       Key
+         * @param index     Value index. Default is first found value.
+         * @param flags     Flags
          *
          * Directly returns the value. If the key is not found, returns
          * default constructed value. If @p T is not `std::string`, uses
          * ConfigurationValue::fromString() to convert the value to given type.
+         * @see hasValue()
          */
-        template<class T = std::string> T value(const std::string& key, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const;
+        template<class T = std::string> T value(const std::string& key, unsigned int index = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const;
 
         /**
-         * @brief All values with given key name
-         * @param key       Key name
-         * @param flags     Flags (see ConfigurationGroup::Flags)
-         * @return Vector with all found values
+         * @brief All values with given key
+         * @param key       Key
+         * @param flags     %Flags
          *
          * If @p T is not `std::string`, uses ConfigurationValue::fromString()
          * to convert the value to given type.
@@ -211,40 +219,24 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         template<class T = std::string> std::vector<T> values(const std::string& key, ConfigurationValueFlags flags = ConfigurationValueFlags()) const;
 
         /**
-         * @brief Count of keys with given name
-         * @param key       Key name
-         *
-         * See also Configuration::UniqueKeys and Configuration::UniqueNames.
-         */
-        unsigned int keyCount(const std::string& key) const;
-
-        /**
-         * @brief Whether given key exists
-         *
-         * More efficient than calling `valueCount(key) != 0`.
-         */
-        bool keyExists(const std::string& key) const;
-
-        /**
          * @brief Set string value
-         * @param key       Key name
+         * @param key       Key. The key must not be empty and must not contain
+         *      newline or `=` character.
          * @param value     Value
-         * @param number    Number of the value. Default is first found value.
-         * @param flags     Flags (see ConfigurationGroup::Flags)
-         * @return Whether the value was set. If the number is not 0 and the
-         *      value with given number doesn't exist, returns false. See also
-         *      Configuration::ReadOnly.
+         * @param index     Value index. Default is first found value.
+         * @param flags     Flags
          *
          * If the key already exists, changes it to new value. If the key
-         * doesn't exist, adds a new key with given name.
+         * doesn't exist, adds a new key with given name. Returns `false` if
+         * @p index is larger than actual value count, `true` otherwise.
          */
-        bool setValue(const std::string& key, std::string value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
-            return setValueInternal(key, std::move(value), number, flags);
+        bool setValue(const std::string& key, std::string value, unsigned int index = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
+            return setValueInternal(key, std::move(value), index, flags);
         }
 
         /** @overload */
-        bool setValue(const std::string& key, const char* value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
-            return setValueInternal(key, value, number, flags);
+        bool setValue(const std::string& key, const char* value, unsigned int index = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
+            return setValueInternal(key, value, index, flags);
         }
 
         /**
@@ -254,28 +246,27 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * type. See setValue(const std::string&, std::string, unsigned int, ConfigurationValueFlags)
          * for more information.
          */
-        template<class T> bool setValue(const std::string& key, const T& value, unsigned int number = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
-            return setValueInternal(key, ConfigurationValue<T>::toString(value, flags), number, flags);
+        template<class T> bool setValue(const std::string& key, const T& value, unsigned int index = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
+            return setValueInternal(key, ConfigurationValue<T>::toString(value, flags), index, flags);
         }
 
         /**
          * @brief Add new value
-         * @param key       Key name
+         * @param key       Key. The key must not be empty and must not contain
+         *      newline or `=` character.
          * @param value     Value
-         * @param flags     Flags (see ConfigurationGroup::Flags)
-         * @return Whether the value was added. See Configuration::ReadOnly,
-         *      Configuration::UniqueKeys and Configuration::UniqueNames.
+         * @param flags     Flags
          *
          * Adds new key/value pair at the end of current group (it means also
          * after all comments).
          */
-        bool addValue(std::string key, std::string value, const ConfigurationValueFlags flags = ConfigurationValueFlags()) {
-            return addValueInternal(std::move(key), std::move(value), flags);
+        void addValue(std::string key, std::string value, const ConfigurationValueFlags flags = ConfigurationValueFlags()) {
+            addValueInternal(std::move(key), std::move(value), flags);
         }
 
         /** @overload */
-        bool addValue(std::string key, const char* value, const ConfigurationValueFlags flags = ConfigurationValueFlags()) {
-            return addValueInternal(std::move(key), value, flags);
+        void addValue(std::string key, const char* value, const ConfigurationValueFlags flags = ConfigurationValueFlags()) {
+            addValueInternal(std::move(key), value, flags);
         }
 
         /**
@@ -285,111 +276,91 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * type. See addValue(const std::string&, std::string, ConfigurationValueFlags)
          * for more information.
          */
-        template<class T> bool addValue(std::string key, const T& value, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
-            return addValueInternal(std::move(key), ConfigurationValue<T>::toString(value, flags), flags);
+        template<class T> void addValue(std::string key, const T& value, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
+            addValueInternal(std::move(key), ConfigurationValue<T>::toString(value, flags), flags);
         }
 
         /**
          * @brief Remove value
-         * @param key       Key name
-         * @param number    Number of the value
-         * @return Whether the value was removed. If value with given number
-         *      doesn't exist, returns false. See also Configuration::ReadOnly.
+         * @param key       Key
+         * @param index     Value index. Default is first found value.
+         *
+         * Returns `true` if given value was found and removed, `false`
+         * otherwise.
+         * @see removeAllValues(), clear()
          */
-        bool removeValue(const std::string& key, unsigned int number = 0);
+        bool removeValue(const std::string& key, unsigned int index = 0);
 
         /**
          * @brief Remove all values with given key
-         * @param key       Key name
-         * @return True if all values with given key were removed. See also
-         *      Configuration::ReadOnly.
+         *
+         * @see removeValue(), clear()
          */
-        bool removeAllValues(const std::string& key);
+        void removeAllValues(const std::string& key);
 
         /*@}*/
 
         /**
          * @brief Clear group
-         * @return Whether the group was cleared (see above or flag
-         *      Configuration::ReadOnly).
          *
-         * Clears all values and subgroups. See also removeGroup().
+         * Removes all values and subgroups.
+         * @see removeAllValues(), removeAllGroups()
          */
-        bool clear();
+        void clear();
 
     private:
-        /** @brief Configuration item */
-        struct CORRADE_UTILITY_LOCAL Item {
-            std::string key,    /**< @brief Key name (only if item is key/value pair) */
-                value;          /**< @brief Value or comment, empty line */
+        struct CORRADE_UTILITY_LOCAL Value {
+            std::string key, value;
         };
 
-        /** @brief Configuration group */
         struct CORRADE_UTILITY_LOCAL Group {
-            std::string name;           /**< @brief Group name */
-            ConfigurationGroup* group;  /**< @brief Configuration group */
+            std::string name;
+            ConfigurationGroup* group;
         };
 
-        std::vector<Item> items;                    /**< @brief Values and comments */
-        std::vector<Group> _groups;                 /**< @brief Subgroups */
+        std::vector<Value> _values;
+        std::vector<Group> _groups;
 
         Configuration* configuration;
 
-        /** @brief Constructor */
         CORRADE_UTILITY_LOCAL explicit ConfigurationGroup(Configuration* _configuration): configuration(_configuration) {}
 
-        CORRADE_UTILITY_EXPORT bool valueInternal(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags);
-        CORRADE_UTILITY_EXPORT bool valueInternal(const std::string& key, std::string* _value, unsigned int number, ConfigurationValueFlags flags) const;
+        CORRADE_UTILITY_LOCAL std::vector<Group>::iterator findGroup(const std::string& name, unsigned int index);
+        CORRADE_UTILITY_LOCAL std::vector<Group>::const_iterator findGroup(const std::string& name, unsigned int index) const;
+        CORRADE_UTILITY_LOCAL std::vector<Value>::iterator findValue(const std::string& key, unsigned int index);
+        CORRADE_UTILITY_LOCAL std::vector<Value>::const_iterator findValue(const std::string& key, unsigned int index) const;
+
+        CORRADE_UTILITY_EXPORT std::string valueInternal(const std::string& key, unsigned int index, ConfigurationValueFlags flags) const;
         CORRADE_UTILITY_EXPORT std::vector<std::string> valuesInternal(const std::string& key, ConfigurationValueFlags flags) const;
         CORRADE_UTILITY_EXPORT bool setValueInternal(const std::string& key, std::string value, unsigned int number, ConfigurationValueFlags flags);
-        CORRADE_UTILITY_EXPORT bool addValueInternal(std::string key, std::string value, ConfigurationValueFlags flags);
+        CORRADE_UTILITY_EXPORT void addValueInternal(std::string key, std::string value, ConfigurationValueFlags flags);
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /* Shorthand template specialization for string values, delete unwanted ones */
-template<> bool ConfigurationGroup::value(const std::string&, std::string*, unsigned int, ConfigurationValueFlags) = delete;
-template<> bool ConfigurationGroup::value(const std::string&, std::string*, unsigned int, ConfigurationValueFlags) const = delete;
 template<> bool ConfigurationGroup::setValue(const std::string&, const std::string&, unsigned int, ConfigurationValueFlags) = delete;
-template<> bool ConfigurationGroup::addValue(std::string, const std::string&, ConfigurationValueFlags) = delete;
-template<> inline std::string ConfigurationGroup::value(const std::string& key, unsigned int number, const ConfigurationValueFlags flags) const {
-    std::string stringValue;
-    valueInternal(key, &stringValue, number, flags);
-    return std::move(stringValue);
+template<> void ConfigurationGroup::addValue(std::string, const std::string&, ConfigurationValueFlags) = delete;
+template<> inline std::string ConfigurationGroup::value(const std::string& key, unsigned int index, const ConfigurationValueFlags flags) const {
+    return valueInternal(key, index, flags);
 }
 template<> inline std::vector<std::string> ConfigurationGroup::values(const std::string& key, const ConfigurationValueFlags flags) const {
     return valuesInternal(key, flags);
 }
 #endif
 
-template<class T> bool ConfigurationGroup::value(const std::string& key, T* value, const unsigned int number, const ConfigurationValueFlags flags) {
-    std::string stringValue = ConfigurationValue<T>::toString(*value, flags);
-    const bool ret = valueInternal(key, &stringValue, number, flags);
-
-    *value = ConfigurationValue<T>::fromString(stringValue, flags);
-    return ret;
-}
-
-template<class T> bool ConfigurationGroup::value(const std::string& key, T* value, const unsigned int number, const ConfigurationValueFlags flags) const {
-    std::string stringValue;
-    const bool ret = valueInternal(key, &stringValue, number, flags);
-
-    *value = ConfigurationValue<T>::fromString(stringValue, flags);
-    return ret;
-}
-
-template<class T> T ConfigurationGroup::value(const std::string& key, const unsigned int number, const ConfigurationValueFlags flags) const {
-    T _value;
-    if(!value<T>(key, &_value, number, flags)) return T();
-    return std::move(_value);
+template<class T> inline T ConfigurationGroup::value(const std::string& key, const unsigned int index, const ConfigurationValueFlags flags) const {
+    std::string value = valueInternal(key, index, flags);
+    return value.empty() ? T() : ConfigurationValue<T>::fromString(value, flags);
 }
 
 template<class T> std::vector<T> ConfigurationGroup::values(const std::string& key, const ConfigurationValueFlags flags) const {
-    std::vector<T> _values;
     std::vector<std::string> stringValues = valuesInternal(key, flags);
+    std::vector<T> _values;
+    _values.reserve(stringValues.size());
     for(std::vector<std::string>::const_iterator it = stringValues.begin(); it != stringValues.end(); ++it)
         _values.push_back(ConfigurationValue<T>::fromString(*it, flags));
 
-    return _values;
+    return std::move(_values);
 }
 
 }}
