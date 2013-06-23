@@ -39,13 +39,13 @@ namespace Corrade { namespace Utility {
 class CORRADE_UTILITY_EXPORT Unicode {
     public:
         /**
-        * @brief Next UTF-8 character
-        *
-        * Returns %Unicode codepoint of character on the cursor and position of
-        * the following character. If an error occurs, returns position of next
-        * byte and `0xffffffffu` as codepoint.
-        */
-        static std::tuple<std::uint32_t, std::size_t> nextChar(const std::string& text, const std::size_t cursor);
+         * @brief Next UTF-8 character
+         *
+         * Returns %Unicode codepoint of character on the cursor and position
+         * of the following character. If an error occurs, returns position of
+         * next byte and `0xffffffffu` as codepoint.
+         */
+        static std::tuple<char32_t, std::size_t> nextChar(const std::string& text, const std::size_t cursor);
 };
 
 }}

@@ -31,7 +31,7 @@
 
 namespace Corrade { namespace Utility {
 
-std::tuple<std::uint32_t, std::size_t> Unicode::nextChar(const std::string& text, std::size_t cursor) {
+std::tuple<char32_t, std::size_t> Unicode::nextChar(const std::string& text, std::size_t cursor) {
     CORRADE_INTERNAL_ASSERT(cursor < text.length());
 
     std::uint32_t character = text[cursor];
@@ -60,7 +60,7 @@ std::tuple<std::uint32_t, std::size_t> Unicode::nextChar(const std::string& text
         return std::make_tuple(0xffffffffu, cursor+1);
 
     /* Compute the codepoint */
-    std::uint32_t result = character & mask;
+    char32_t result = character & mask;
     for(std::size_t i = cursor+1; i != end; ++i) {
         /* Garbage in the sequence */
         if((text[i] & 0xc0) != 0x80)
