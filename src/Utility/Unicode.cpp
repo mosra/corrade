@@ -73,4 +73,17 @@ std::tuple<char32_t, std::size_t> Unicode::nextChar(const std::string& text, std
     return std::make_tuple(result, end);
 }
 
+std::u32string Unicode::utf32(const std::string& text) {
+    std::u32string result;
+    result.reserve(text.size());
+
+    for(std::size_t i = 0; i != text.size(); ) {
+        char32_t unicode;
+        std::tie(unicode, i) = Utility::Unicode::nextChar(text, i);
+        result.push_back(unicode);
+    }
+
+    return std::move(result);
+}
+
 }}
