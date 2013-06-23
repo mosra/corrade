@@ -237,19 +237,20 @@ std::string Configuration::parse(std::istream& file, ConfigurationGroup* group, 
     return {};
 }
 
-bool Configuration::save() {
-    /* File is readonly or invalid, don't save anything */
-    if(flags & InternalFlag::ReadOnly || !(flags & InternalFlag::IsValid)) return false;
-
-    std::ofstream file(_filename.c_str(), std::ofstream::out|std::ofstream::trunc|std::ofstream::binary);
-    if(!file.good()) {
+bool Configuration::save(const std::string& filename) {
+    std::ofstream out(filename.c_str(), std::ofstream::out|std::ofstream::trunc|std::ofstream::binary);
+    if(!out.good()) {
         /** @todo Error to stderr */
         return false;
     }
 
+    return save(out);
+}
+
+bool Configuration::save(std::ostream& out) {
     /* BOM, if user explicitly wants that crap */
     if((flags & InternalFlag::PreserveBom) && (flags & InternalFlag::HasBom))
-        file.write(String::Bom.c_str(), 3);
+        out.write(String::Bom.c_str(), 3);
 
     /* EOL character */
     std::string eol;
@@ -262,14 +263,18 @@ bool Configuration::save() {
     /** @todo Backup file */
 
     /* Recursively save all groups */
-    save(file, eol, this, {});
-
-    file.close();
-
+    save(out, eol, this, {});
     return true;
 }
 
-void Configuration::save(std::ofstream& file, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const {
+bool Configuration::save() {
+    /* File is readonly or invalid, don't save anything */
+    if(flags & InternalFlag::ReadOnly || !(flags & InternalFlag::IsValid)) return false;
+
+    return save(_filename);
+}
+
+void Configuration::save(std::ostream& file, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const {
     std::string buffer;
 
     /* Foreach all items in the group */

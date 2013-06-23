@@ -331,15 +331,28 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         }
 
         /**
+         * @brief Save configuration to given file
+         *
+         * Returns `true` on success, `false` otherwise.
+         */
+        bool save(const std::string& filename);
+
+        /**
+         * @brief Save configuration to stream
+         *
+         * Returns `true` on success, `false` otherwise.
+         */
+        bool save(std::ostream& out);
+
+        /**
          * @brief Save configuration
          * @return Whether the file was saved successfully
          *
-         * Writes configuration back to the file (only if
-         * Configuration::ReadOnly flag wasn't set). Note that even if no change
-         * to the configuration was made, the file could differ after saving
-         * (see Configuration::Flags).
-         *
-         * @see filename(), setFilename()
+         * Writes configuration back to the file specified by filename() only
+         * if the filename is not empty only and @ref Flag "Flag::ReadOnly"
+         * wasn't set. Returns `true` on success, `false` otherwise. Note that
+         * even if no change to the configuration was made, the file could
+         * differ after saving (see Configuration::Flags).
          */
         bool save();
 
@@ -369,7 +382,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
 
         CORRADE_UTILITY_LOCAL void parse(std::istream& file);
         CORRADE_UTILITY_LOCAL std::string parse(std::istream& file, ConfigurationGroup* group, const std::string& fullPath);
-        CORRADE_UTILITY_LOCAL void save(std::ofstream& file, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const;
+        CORRADE_UTILITY_LOCAL void save(std::ostream& file, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const;
 
         std::string _filename;
         InternalFlags flags;
