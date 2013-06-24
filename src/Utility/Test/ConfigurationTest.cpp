@@ -318,19 +318,20 @@ void ConfigurationTest::types() {
     /* Double scientific */
     CORRADE_COMPARE(conf.value<double>("exp"), 2.1e7);
     CORRADE_COMPARE(conf.value<double>("expPos"), 2.1e+7);
-    CORRADE_VERIFY(conf.setValue("expPos", 2.1e+7, 0, ConfigurationValueFlag::Scientific));
+    conf.setValue("expPos", 2.1e+7, 0, ConfigurationValueFlag::Scientific);
     CORRADE_COMPARE(conf.value<double>("expNeg"), -2.1e7);
     CORRADE_COMPARE(conf.value<double>("expNeg2"), 2.1e-7);
     CORRADE_COMPARE(conf.value<double>("expBig"), 2.1E7);
+    conf.setValue<double>("expBig", 2.1E7, 0, ConfigurationValueFlag::Scientific|ConfigurationValueFlag::Uppercase);
 
     /* Flags */
     CORRADE_COMPARE(conf.value<int>("oct", 0, ConfigurationValueFlag::Oct), 0773);
-    CORRADE_VERIFY(conf.setValue("oct", 0773, 0, ConfigurationValueFlag::Oct));
+    conf.setValue("oct", 0773, 0, ConfigurationValueFlag::Oct);
     CORRADE_COMPARE(conf.value<int>("hex", 0, ConfigurationValueFlag::Hex), 0x6ecab);
-    CORRADE_VERIFY(conf.setValue("hex", 0x6ecab, 0, ConfigurationValueFlag::Hex));
+    conf.setValue("hex", 0x6ecab, 0, ConfigurationValueFlag::Hex);
     CORRADE_COMPARE(conf.value<int>("hex2", 0, ConfigurationValueFlag::Hex), 0x5462FF);
-    CORRADE_COMPARE(conf.value<int>("color", 0, ConfigurationValueFlag::Color), 0x34f85e);
-    CORRADE_VERIFY(conf.setValue("color", 0x34f85e, 0, ConfigurationValueFlag::Color));
+    CORRADE_COMPARE(conf.value<int>("hexUpper", 0, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase), 0xF00D);
+    conf.setValue("hexUpper", 0xF00D, 0, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase);
 
     /* Nothing should be changed after saving */
     CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types.conf")));

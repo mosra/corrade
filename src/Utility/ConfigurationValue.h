@@ -47,8 +47,8 @@ namespace Corrade { namespace Utility {
 enum class ConfigurationValueFlag: std::uint8_t {
     Oct = 1 << 0,           /**< Numeric value as octal */
     Hex = 1 << 1,           /**< Numeric value as hexadecimal */
-    Color = 1 << 2,         /**< Numeric value as color representation */
-    Scientific = 1 << 3     /**< Floating point values in scientific notation */
+    Scientific = 1 << 2,    /**< Floating point values in scientific notation */
+    Uppercase = 1 << 3      /**< Use uppercase characters for numeric output */
 };
 
 /** @relates ConfigurationGroup

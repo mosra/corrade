@@ -33,45 +33,39 @@ namespace Implementation {
     template<class T> std::string BasicConfigurationValue<T>::toString(const T& value, ConfigurationValueFlags flags) {
         std::ostringstream stream;
 
-        /* Hexadecimal / octal values */
-        if(flags & (ConfigurationValueFlag::Color|ConfigurationValueFlag::Hex))
+        /* Hexadecimal / octal values, scientific notation */
+        if(flags & ConfigurationValueFlag::Hex)
             stream.setf(std::istringstream::hex, std::istringstream::basefield);
-        if(flags & ConfigurationValueFlag::Oct)
+        else if(flags & ConfigurationValueFlag::Oct)
             stream.setf(std::istringstream::oct, std::istringstream::basefield);
-        if(flags & ConfigurationValueFlag::Scientific)
+        else if(flags & ConfigurationValueFlag::Scientific)
             stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
 
+        if(flags & ConfigurationValueFlag::Uppercase)
+            stream.setf(std::istringstream::uppercase);
+
         stream << value;
-
-        std::string stringValue = stream.str();
-
-        /* Strip initial # character, if user wants a color */
-        if(flags & ConfigurationValueFlag::Color)
-            stringValue = '#' + stringValue;
-
-        return stringValue;
+        return stream.str();
     }
 
     template<class T> T BasicConfigurationValue<T>::fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
         std::string _stringValue = stringValue;
 
-        /* Strip initial # character, if user wants a color */
-        if(flags & ConfigurationValueFlag::Color && !stringValue.empty() && stringValue[0] == '#')
-            _stringValue = stringValue.substr(1);
-
         std::istringstream stream(_stringValue);
 
         /* Hexadecimal / octal values, scientific notation */
-        if(flags & (ConfigurationValueFlag::Color|ConfigurationValueFlag::Hex))
+        if(flags & ConfigurationValueFlag::Hex)
             stream.setf(std::istringstream::hex, std::istringstream::basefield);
-        if(flags & ConfigurationValueFlag::Oct)
+        else if(flags & ConfigurationValueFlag::Oct)
             stream.setf(std::istringstream::oct, std::istringstream::basefield);
-        if(flags & ConfigurationValueFlag::Scientific)
+        else if(flags & ConfigurationValueFlag::Scientific)
             stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
+
+        if(flags & ConfigurationValueFlag::Uppercase)
+            stream.setf(std::istringstream::uppercase);
 
         T value;
         stream >> value;
-
         return value;
     }
 
