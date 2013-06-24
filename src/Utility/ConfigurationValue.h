@@ -187,6 +187,20 @@ template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<bool> {
     #endif
 };
 
+/**
+@brief %Configuration value parser and writer for `char32_t` type
+
+Reads and writes the value in hexadecimal.
+*/
+template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<char32_t> {
+    ConfigurationValue() = delete;
+
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    static char32_t fromString(const std::string& value, ConfigurationValueFlags);
+    static std::string toString(char32_t value, ConfigurationValueFlags);
+    #endif
+};
+
 }}
 
 #endif

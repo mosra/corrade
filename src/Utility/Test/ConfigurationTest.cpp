@@ -333,6 +333,10 @@ void ConfigurationTest::types() {
     CORRADE_COMPARE(conf.value<int>("hexUpper", 0, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase), 0xF00D);
     conf.setValue("hexUpper", 0xF00D, 0, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase);
 
+    /* Char32_t */
+    CORRADE_COMPARE(conf.value<char32_t>("unicode"), U'\xBEEF');
+    conf.setValue("unicode", U'\xBEEF');
+
     /* Nothing should be changed after saving */
     CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types.conf")));
     CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types.conf"),
