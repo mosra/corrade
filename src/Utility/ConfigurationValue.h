@@ -172,13 +172,18 @@ template<> struct ConfigurationValue<long double>: public Implementation::BasicC
 /** @brief %Configuration value parser and writer for `sd::string` type */
 template<> struct ConfigurationValue<std::string>: public Implementation::BasicConfigurationValue<std::string> {};
 
-/** @brief %Configuration value parser and writer for `bool` type */
+/**
+@brief %Configuration value parser and writer for `bool` type
+
+Reads `1`, `yes`, `y` or `true` as `true`, any other string as `false`. Writes
+`true` or `false`.
+*/
 template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<bool> {
     ConfigurationValue() = delete;
 
     #ifndef DOXYGEN_GENERATING_OUTPUT
     static bool fromString(const std::string& value, ConfigurationValueFlags flags);
-    static std::string toString(const bool& value, ConfigurationValueFlags flags);
+    static std::string toString(bool value, ConfigurationValueFlags flags);
     #endif
 };
 

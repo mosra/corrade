@@ -93,13 +93,10 @@ namespace Implementation {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 bool ConfigurationValue<bool>::fromString(const std::string& value, ConfigurationValueFlags) {
-    if(value == "1" || value == "yes" || value == "y" || value == "true") return true;
-    return false;
+    return value == "1" || value == "yes" || value == "y" || value == "true";
 }
-
-std::string ConfigurationValue<bool>::toString(const bool& value, ConfigurationValueFlags) {
-    if(value) return "true";
-    return "false";
+std::string ConfigurationValue<bool>::toString(const bool value, ConfigurationValueFlags) {
+    return value ? "true" : "false";
 }
 #endif
 
