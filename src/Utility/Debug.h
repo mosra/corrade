@@ -174,6 +174,21 @@ class CORRADE_UTILITY_EXPORT Debug {
         #endif
 
         /**
+         * @brief Print UTF-32 character to debug output
+         *
+         * Prints value as Unicode codepoint, i.e. `U+0061`.
+         */
+        Debug operator<<(char32_t value);
+
+        /**
+         * @brief Print UTF-32 character literal to debug output
+         *
+         * Prints value as list of Unicode codepoints, i.e.
+         * `[U+0061, U+0062, U+0063}`.
+         */
+        Debug operator<<(const char32_t* value);        /**< @overload */
+
+        /**
          * @brief Globally set output for newly created instances
          * @param _output       Stream where to put debug output. If set to 0,
          *      no debug output will be written anywhere.
