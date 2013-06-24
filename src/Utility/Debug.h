@@ -209,19 +209,36 @@ The function should convert the type to one of supported types (such as
 Debug::setFlag() for modifying newline and whitespace behavior.
  */
 template<class T> Debug operator<<(Debug debug, const T& value);
+#endif
+
+/** @relates Debug
+@brief Operator for printing iterable types to debug
+
+Prints the value as `{a, b, c}`.
+*/
+#ifdef DOXYGEN_GENERATING_OUTPUT
+template<class Iterable> Debug operator<<(Debug debug, const Iterable& value)
 #else
-template<class Iterable> Debug operator<<(typename std::enable_if<IsIterable<Iterable>::Value && !std::is_same<Iterable, std::string>::value, Debug>::type debug, const Iterable& value) {
-    debug << "[";
+template<class Iterable> Debug operator<<(typename std::enable_if<IsIterable<Iterable>::Value && !std::is_same<Iterable, std::string>::value, Debug>::type debug, const Iterable& value)
+#endif
+{
+    debug << "{";
     debug.setFlag(Debug::SpaceAfterEachValue, false);
     for(typename Iterable::const_iterator it = value.begin(); it != value.end(); ++it) {
         if(it != value.begin())
             debug << ", ";
         debug << *it;
     }
-    debug << "]";
+    debug << "}";
     debug.setFlag(Debug::SpaceAfterEachValue, true);
     return debug;
 }
+
+/** @relates Debug
+@brief Operator for printing pair types to debug
+
+Prints the value as `(first, second)`.
+*/
 template<class A, class B> Debug operator<<(Debug debug, const std::pair<A, B>& value) {
     debug << "(";
     debug.setFlag(Debug::SpaceAfterEachValue, false);
@@ -229,7 +246,6 @@ template<class A, class B> Debug operator<<(Debug debug, const std::pair<A, B>& 
     debug.setFlag(Debug::SpaceAfterEachValue, true);
     return debug;
 }
-#endif
 
 /**
  * @brief %Warning output handler

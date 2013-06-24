@@ -147,15 +147,15 @@ void DebugTest::iterable() {
     std::ostringstream out;
     Debug::setOutput(&out);
     Debug() << std::vector<int>{1, 2, 3};
-    CORRADE_COMPARE(out.str(), "[1, 2, 3]\n");
+    CORRADE_COMPARE(out.str(), "{1, 2, 3}\n");
 
-    out.str("");
+    out.str({});
     Debug() << std::set<std::string>{"a", "b", "c"};
-    CORRADE_COMPARE(out.str(), "[a, b, c]\n");
+    CORRADE_COMPARE(out.str(), "{a, b, c}\n");
 
-    out.str("");
+    out.str({});
     Debug() << std::map<int, std::string>{{1, "a"}, {2, "b"}, {3, "c"}};
-    CORRADE_COMPARE(out.str(), "[(1, a), (2, b), (3, c)]\n");
+    CORRADE_COMPARE(out.str(), "{(1, a), (2, b), (3, c)}\n");
 }
 
 }}}
