@@ -63,11 +63,10 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          */
         ConfigurationGroup(const ConfigurationGroup& other);
 
-        /** @brief Destructor */
         ~ConfigurationGroup();
 
         /**
-         * @brief Assignment operator
+         * @brief Copy assignment
          *
          * Pointer to enclosing configuration stays the same as in original
          * object.

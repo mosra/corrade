@@ -41,9 +41,6 @@ ConfigurationGroup::ConfigurationGroup(const ConfigurationGroup& other): _values
 }
 
 ConfigurationGroup& ConfigurationGroup::operator=(const ConfigurationGroup& other) {
-    if(&other == this)
-        return *this;
-
     /* Delete current groups */
     for(auto it = _groups.begin(); it != _groups.end(); ++it)
         delete it->group;
