@@ -163,7 +163,7 @@ std::string Configuration::parse(std::istream& in, ConfigurationGroup* group, co
             while(!nextGroup.empty() && (fullPath.empty() || nextGroup.substr(0, fullPath.size()) == fullPath)) {
                 ConfigurationGroup::Group g;
                 g.name = nextGroup.substr(fullPath.size());
-                g.group = new ConfigurationGroup(configuration);
+                g.group = new ConfigurationGroup(_configuration);
                 nextGroup = parse(in, g.group, nextGroup+'/');
                 group->_groups.push_back(std::move(g));
             }

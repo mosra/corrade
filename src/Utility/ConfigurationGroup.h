@@ -318,12 +318,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
             ConfigurationGroup* group;
         };
 
-        std::vector<Value> _values;
-        std::vector<Group> _groups;
-
-        Configuration* configuration;
-
-        CORRADE_UTILITY_LOCAL explicit ConfigurationGroup(Configuration* _configuration): configuration(_configuration) {}
+        CORRADE_UTILITY_LOCAL explicit ConfigurationGroup(Configuration* configuration): configuration(_configuration) {}
 
         CORRADE_UTILITY_LOCAL std::vector<Group>::iterator findGroup(const std::string& name, unsigned int index);
         CORRADE_UTILITY_LOCAL std::vector<Group>::const_iterator findGroup(const std::string& name, unsigned int index) const;
@@ -334,6 +329,11 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         CORRADE_UTILITY_EXPORT std::vector<std::string> valuesInternal(const std::string& key, ConfigurationValueFlags flags) const;
         CORRADE_UTILITY_EXPORT bool setValueInternal(const std::string& key, std::string value, unsigned int number, ConfigurationValueFlags flags);
         CORRADE_UTILITY_EXPORT void addValueInternal(std::string key, std::string value, ConfigurationValueFlags flags);
+
+        std::vector<Value> _values;
+        std::vector<Group> _groups;
+
+        Configuration* _configuration;
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT

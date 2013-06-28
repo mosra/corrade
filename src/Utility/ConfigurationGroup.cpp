@@ -117,18 +117,18 @@ std::vector<const ConfigurationGroup*> ConfigurationGroup::groups(const std::str
 
 void ConfigurationGroup::addGroup(const std::string& name, ConfigurationGroup* group) {
     /* Set configuration pointer to actual */
-    group->configuration = configuration;
+    group->_configuration = _configuration;
 
     CORRADE_ASSERT(!name.empty(), "Utility::ConfigurationGroup::addGroup(): empty group name", );
     CORRADE_ASSERT(name.find_first_of("\n/[]") == std::string::npos,
         "Utility::ConfigurationGroup::addGroup(): disallowed character in group name", );
 
-    configuration->_flags |= Configuration::InternalFlag::Changed;
+    _configuration->_flags |= Configuration::InternalFlag::Changed;
     _groups.push_back({name, group});
 }
 
 ConfigurationGroup* ConfigurationGroup::addGroup(const std::string& name) {
-    ConfigurationGroup* group = new ConfigurationGroup(configuration);
+    ConfigurationGroup* group = new ConfigurationGroup(_configuration);
     addGroup(name, group);
     return group;
 }
@@ -139,7 +139,7 @@ bool ConfigurationGroup::removeGroup(const std::string& name, unsigned int index
 
     delete it->group;
     _groups.erase(it);
-    configuration->_flags |= Configuration::InternalFlag::Changed;
+    _configuration->_flags |= Configuration::InternalFlag::Changed;
     return true;
 }
 
@@ -148,7 +148,7 @@ bool ConfigurationGroup::removeGroup(ConfigurationGroup* const group) {
         if(it->group == group) {
             delete it->group;
             _groups.erase(it);
-            configuration->_flags |= Configuration::InternalFlag::Changed;
+            _configuration->_flags |= Configuration::InternalFlag::Changed;
             return true;
         }
     }
@@ -163,7 +163,7 @@ void ConfigurationGroup::removeAllGroups(const std::string& name) {
         _groups.erase(_groups.begin()+i);
     }
 
-    configuration->_flags |= Configuration::InternalFlag::Changed;
+    _configuration->_flags |= Configuration::InternalFlag::Changed;
 }
 
 auto ConfigurationGroup::findValue(const std::string& key, const unsigned int index) const -> std::vector<Value>::const_iterator {
@@ -232,7 +232,7 @@ bool ConfigurationGroup::setValueInternal(const std::string& key, std::string va
     for(auto it = _values.begin(); it != _values.end(); ++it) {
         if(it->key == key && foundIndex++ == index) {
             it->value = std::move(value);
-            configuration->_flags |= Configuration::InternalFlag::Changed;
+            _configuration->_flags |= Configuration::InternalFlag::Changed;
             return true;
         }
     }
@@ -243,7 +243,7 @@ bool ConfigurationGroup::setValueInternal(const std::string& key, std::string va
     /* No value with that name was found, add new */
     _values.push_back({key, std::move(value)});
 
-    configuration->_flags |= Configuration::InternalFlag::Changed;
+    _configuration->_flags |= Configuration::InternalFlag::Changed;
     return true;
 }
 
@@ -254,7 +254,7 @@ void ConfigurationGroup::addValueInternal(std::string key, std::string value, Co
 
     _values.push_back({std::move(key), std::move(value)});
 
-    configuration->_flags |= Configuration::InternalFlag::Changed;
+    _configuration->_flags |= Configuration::InternalFlag::Changed;
 }
 
 bool ConfigurationGroup::removeValue(const std::string& key, const unsigned int index) {
@@ -264,7 +264,7 @@ bool ConfigurationGroup::removeValue(const std::string& key, const unsigned int 
     if(it == _values.end()) return false;
 
     _values.erase(it);
-    configuration->_flags |= Configuration::InternalFlag::Changed;
+    _configuration->_flags |= Configuration::InternalFlag::Changed;
     return true;
 }
 
@@ -276,7 +276,7 @@ void ConfigurationGroup::removeAllValues(const std::string& key) {
         if(_values[i].key == key) _values.erase(_values.begin()+i);
     }
 
-    configuration->_flags |= Configuration::InternalFlag::Changed;
+    _configuration->_flags |= Configuration::InternalFlag::Changed;
 }
 
 void ConfigurationGroup::clear() {
