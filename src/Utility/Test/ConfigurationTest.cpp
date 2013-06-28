@@ -268,8 +268,8 @@ void ConfigurationTest::truncate() {
     /* File is truncated on saving */
     CORRADE_VERIFY(conf.isValid());
     CORRADE_VERIFY(conf.isEmpty());
-    CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf")));
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"),
+    CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "truncate.conf")));
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "truncate.conf"),
                        "", TestSuite::Compare::FileToString);
 }
 
