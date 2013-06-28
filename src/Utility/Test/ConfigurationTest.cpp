@@ -61,8 +61,6 @@ class ConfigurationTest: public TestSuite::Tester {
         void multiLineValue();
         void multiLineValueCrlf();
 
-        /** @todo Merge into parse() and uniqueGroups() */
-
         void copy();
 };
 

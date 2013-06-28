@@ -121,7 +121,8 @@ void ConfigurationGroup::addGroup(const std::string& name, ConfigurationGroup* g
     /* Set configuration pointer to actual */
     group->_configuration = _configuration;
 
-    CORRADE_ASSERT(!name.empty(), "Utility::ConfigurationGroup::addGroup(): empty group name", );
+    CORRADE_ASSERT(!name.empty(),
+        "Utility::ConfigurationGroup::addGroup(): empty group name", );
     CORRADE_ASSERT(name.find_first_of("\n/[]") == std::string::npos,
         "Utility::ConfigurationGroup::addGroup(): disallowed character in group name", );
 
