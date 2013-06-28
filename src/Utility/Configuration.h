@@ -121,15 +121,10 @@ Example file:
     ; Another type of comment
 
 @todo Renaming, copying groups
-@todo Use some try/catch for parsing (avoid repeated code for group adding)
 @todo EOL autodetection according to system on unsure/new files (default is
     preserve)
 @todo Test that the configurationValueToString() isn't called with string type
     (e.g. value with spaces)
-@todo Support different syntax for hierarchic groups [g1][g2][...] along with
-    [g1/g2/...]
-@todo C++11: move constructor, creating readonly Configuration using static
-    function returning const object, then get rid of ReadOnly flag
 */
 class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
     friend class ConfigurationGroup;
@@ -214,8 +209,8 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         /** @brief Copying is not allowed */
         Configuration(const Configuration&) = delete;
 
-        /** @brief Moving is not allowed */
-        Configuration(Configuration&&) = delete;
+        /** @brief Move constructor */
+        Configuration(Configuration&& other);
 
         /**
          * @brief Destructor
@@ -227,8 +222,8 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         /** @brief Copying is not allowed */
         Configuration& operator=(const Configuration&) = delete;
 
-        /** @brief Moving is not allowed */
-        Configuration& operator=(Configuration&&) = delete;
+        /** @brief Move assignment */
+        Configuration& operator=(Configuration&& other);
 
         /** @brief Filename */
         std::string filename() const;
@@ -284,6 +279,8 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         CORRADE_UTILITY_LOCAL bool parse(std::istream& in);
         CORRADE_UTILITY_LOCAL std::string parse(std::istream& in, ConfigurationGroup* group, const std::string& fullPath);
         CORRADE_UTILITY_LOCAL void save(std::ostream& out, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const;
+
+        CORRADE_UTILITY_LOCAL void setConfigurationPointer(ConfigurationGroup* group);
 
         std::string _filename;
         InternalFlags _flags;

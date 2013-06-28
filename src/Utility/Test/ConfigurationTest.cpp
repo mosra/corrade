@@ -63,6 +63,7 @@ class ConfigurationTest: public TestSuite::Tester {
 
         void standaloneGroup();
         void copy();
+        void move();
 };
 
 ConfigurationTest::ConfigurationTest() {
@@ -88,7 +89,8 @@ ConfigurationTest::ConfigurationTest() {
               &ConfigurationTest::multiLineValueCrlf,
 
               &ConfigurationTest::standaloneGroup,
-              &ConfigurationTest::copy});
+              &ConfigurationTest::copy,
+              &ConfigurationTest::move});
 
     /* Create testing dir */
     Directory::mkpath(CONFIGURATION_WRITE_TEST_DIR);
@@ -471,6 +473,39 @@ void ConfigurationTest::copy() {
     CORRADE_COMPARE(original->group("descendent")->value<int>("value"), 666);
     CORRADE_COMPARE(constructedCopy->group("descendent")->value<int>("value"), 42);
     CORRADE_COMPARE(assignedCopy->group("descendent")->value<int>("value"), 42);
+}
+
+void ConfigurationTest::move() {
+    Configuration conf;
+    ConfigurationGroup* original = conf.addGroup("group");
+    original->addGroup("descendent")->setValue<int>("value", 42);
+
+    /* Move constructor for ConfigurationGroup */
+    ConfigurationGroup* constructedMove = new ConfigurationGroup(std::move(*original));
+    CORRADE_VERIFY(original->isEmpty());
+    CORRADE_VERIFY(!constructedMove->configuration());
+    CORRADE_VERIFY(!constructedMove->group("descendent")->configuration());
+
+    /* Move assignment for ConfigurationGroup */
+    ConfigurationGroup* assignedMove = conf.addGroup("another");
+    CORRADE_VERIFY(assignedMove->configuration() == &conf);
+    *assignedMove = std::move(*constructedMove);
+    CORRADE_VERIFY(constructedMove->isEmpty());
+    CORRADE_VERIFY(assignedMove->configuration() == &conf);
+    CORRADE_VERIFY(assignedMove->group("descendent")->configuration() == &conf);
+
+    /* Move constructor for Configuration */
+    Configuration confConstructedMove(std::move(conf));
+    CORRADE_VERIFY(conf.isEmpty());
+    CORRADE_VERIFY(confConstructedMove.configuration() == &confConstructedMove);
+    CORRADE_VERIFY(confConstructedMove.group("group")->configuration() == &confConstructedMove);
+
+    /* Move assignment for Configuration */
+    Configuration confAssignedMove;
+    confAssignedMove = std::move(confConstructedMove);
+    CORRADE_VERIFY(confConstructedMove.isEmpty());
+    CORRADE_VERIFY(confAssignedMove.configuration() == &confAssignedMove);
+    CORRADE_VERIFY(confAssignedMove.group("group")->configuration() == &confAssignedMove);
 }
 
 }}}

@@ -69,7 +69,29 @@ Configuration::Configuration(std::istream& in, const Flags flags): Configuration
     if(parse(in)) _flags |= InternalFlag::IsValid;
 }
 
+Configuration::Configuration(Configuration&& other): ConfigurationGroup(std::move(other)), _filename(std::move(other._filename)), _flags(std::move(other._flags)) {
+    /* Redirect configuration pointer to this instance */
+    setConfigurationPointer(this);
+}
+
 Configuration::~Configuration() { if(_flags & InternalFlag::Changed) save(); }
+
+Configuration& Configuration::operator=(Configuration&& other) {
+    ConfigurationGroup::operator=(std::move(other));
+    _filename = std::move(other._filename);
+    _flags = std::move(other._flags);
+
+    /* Redirect configuration pointer to this instance */
+    setConfigurationPointer(this);
+
+    return *this;
+}
+
+void Configuration::setConfigurationPointer(ConfigurationGroup* group) {
+    group->_configuration = this;
+
+    for(auto& g: group->_groups) setConfigurationPointer(g.group);
+}
 
 std::string Configuration::filename() const { return _filename; }
 

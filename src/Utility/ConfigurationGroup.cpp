@@ -40,6 +40,12 @@ ConfigurationGroup::ConfigurationGroup(const ConfigurationGroup& other): _values
         it->group = new ConfigurationGroup(*it->group);
 }
 
+ConfigurationGroup::ConfigurationGroup(ConfigurationGroup&& other): _values(std::move(other._values)), _groups(std::move(other._groups)), _configuration(nullptr) {
+    /* Reset configuration pointer for subgroups */
+    for(auto it = _groups.begin(); it != _groups.end(); ++it)
+        it->group->_configuration = nullptr;
+}
+
 ConfigurationGroup& ConfigurationGroup::operator=(const ConfigurationGroup& other) {
     /* Delete current groups */
     for(auto it = _groups.begin(); it != _groups.end(); ++it)
@@ -54,6 +60,22 @@ ConfigurationGroup& ConfigurationGroup::operator=(const ConfigurationGroup& othe
         it->group = new ConfigurationGroup(*it->group);
         it->group->_configuration = _configuration;
     }
+
+    return *this;
+}
+
+ConfigurationGroup& ConfigurationGroup::operator=(ConfigurationGroup&& other) {
+    /* Delete current groups */
+    for(auto it = _groups.begin(); it != _groups.end(); ++it)
+        delete it->group;
+
+    /* _configuration stays the same */
+    _values = std::move(other._values);
+    _groups = std::move(other._groups);
+
+    /* Redirect configuration pointer for subgroups */
+    for(auto it = _groups.begin(); it != _groups.end(); ++it)
+        it->group->_configuration = _configuration;
 
     return *this;
 }

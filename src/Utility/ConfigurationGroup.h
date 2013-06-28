@@ -63,6 +63,14 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          */
         ConfigurationGroup(const ConfigurationGroup& other);
 
+        /**
+         * @brief Move constructor
+         *
+         * Pointer to enclosing configuration is set to `nullptr`, call
+         * addGroup() to add it somewhere.
+         */
+        ConfigurationGroup(ConfigurationGroup&& other);
+
         ~ConfigurationGroup();
 
         /**
@@ -73,6 +81,15 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @see configuration()
          */
         ConfigurationGroup& operator=(const ConfigurationGroup& other);
+
+        /**
+         * @brief Move assignment
+         *
+         * Pointer to enclosing configuration stays the same as in original
+         * object.
+         * @see configuration()
+         */
+        ConfigurationGroup& operator=(ConfigurationGroup&& other);
 
         /**
          * @brief Enclosing configuration
