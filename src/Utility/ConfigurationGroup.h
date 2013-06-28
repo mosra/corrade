@@ -47,14 +47,42 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
     friend class Configuration;
 
     public:
-        /** @brief Copy constructor */
+        /**
+         * @brief Default constructor
+         *
+         * Pointer to enclosing configuration is set to `nullptr`, call
+         * addGroup() to add it somewhere.
+         */
+        explicit ConfigurationGroup();
+
+        /**
+         * @brief Copy constructor
+         *
+         * Pointer to enclosing configuration is set to `nullptr`, call
+         * addGroup() to add it somewhere.
+         */
         ConfigurationGroup(const ConfigurationGroup& other);
 
         /** @brief Destructor */
         ~ConfigurationGroup();
 
-        /** @brief Assignment operator */
+        /**
+         * @brief Assignment operator
+         *
+         * Pointer to enclosing configuration stays the same as in original
+         * object.
+         * @see configuration()
+         */
         ConfigurationGroup& operator=(const ConfigurationGroup& other);
+
+        /**
+         * @brief Enclosing configuration
+         *
+         * Returns `nullptr` if the group is not part of any configuration.
+         * @see addGroup(const std::string&, ConfigurationGroup*)
+         */
+        Configuration* configuration() { return _configuration; }
+        const Configuration* configuration() const { return _configuration; } /**< @overload */
 
         /**
          * @brief Whether the group is empty
@@ -118,10 +146,9 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          *      contain newline or any of `[]/` characters.
          * @param group     Existing group.
          *
-         * Adds existing group at the end of current group. Note that the
-         * function doesn't check whether the same group already exists in the
-         * configuration - adding such group can result in infinite cycle when
-         * saving.
+         * Adds given group at the end of current group. The group must not be
+         * part of any existing configuration.
+         * @see configuration()
          */
         void addGroup(const std::string& name, ConfigurationGroup* group);
 

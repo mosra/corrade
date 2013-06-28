@@ -250,6 +250,7 @@ bool Configuration::save() {
 }
 
 void Configuration::save(std::ostream& out, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const {
+    CORRADE_INTERNAL_ASSERT(group->configuration() == this);
     std::string buffer;
 
     /* Foreach all items in the group */

@@ -61,6 +61,7 @@ class ConfigurationTest: public TestSuite::Tester {
         void multiLineValue();
         void multiLineValueCrlf();
 
+        void standaloneGroup();
         void copy();
 };
 
@@ -86,6 +87,7 @@ ConfigurationTest::ConfigurationTest() {
               &ConfigurationTest::multiLineValue,
               &ConfigurationTest::multiLineValueCrlf,
 
+              &ConfigurationTest::standaloneGroup,
               &ConfigurationTest::copy});
 
     /* Create testing dir */
@@ -100,7 +102,7 @@ ConfigurationTest::ConfigurationTest() {
 void ConfigurationTest::parse() {
     Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "parse.conf"));
     conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"));
-
+    CORRADE_VERIFY(conf.configuration() == &conf);
     CORRADE_VERIFY(conf.isValid());
     CORRADE_VERIFY(!conf.isEmpty());
 
@@ -110,6 +112,7 @@ void ConfigurationTest::parse() {
     CORRADE_VERIFY(!conf.hasGroup("groupInexistent"));
     CORRADE_COMPARE(conf.groupCount("group"), 2);
     CORRADE_COMPARE(conf.groupCount("emptyGroup"), 1);
+    CORRADE_VERIFY(conf.group("group")->configuration() == &conf);
     CORRADE_COMPARE_AS(conf.groups("group"),
         (std::vector<ConfigurationGroup*>{conf.group("group", 0), conf.group("group", 1)}),
         TestSuite::Compare::Container);
@@ -436,15 +439,32 @@ void ConfigurationTest::multiLineValueCrlf() {
                        TestSuite::Compare::File);
 }
 
+void ConfigurationTest::standaloneGroup() {
+    ConfigurationGroup group;
+    CORRADE_VERIFY(!group.configuration());
+
+    group.setValue("value", "hello");
+    group.addGroup("group")->addValue("number", 42);
+
+    CORRADE_COMPARE(group.value("value"), "hello");
+    CORRADE_COMPARE(group.group("group")->value<int>("number"), 42);
+}
+
 void ConfigurationTest::copy() {
-    Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "copy.conf"));
+    Configuration conf;
 
     ConfigurationGroup* original = conf.addGroup("group");
     original->addGroup("descendent")->setValue<int>("value", 42);
 
     ConfigurationGroup* constructedCopy = new ConfigurationGroup(*original);
+    CORRADE_VERIFY(!constructedCopy->configuration());
+    CORRADE_VERIFY(!constructedCopy->group("descendent")->configuration());
+
     ConfigurationGroup* assignedCopy = conf.addGroup("another");
+    CORRADE_VERIFY(assignedCopy->configuration() == &conf);
     *assignedCopy = *original;
+    CORRADE_VERIFY(assignedCopy->configuration() == &conf);
+    CORRADE_VERIFY(assignedCopy->group("descendent")->configuration() == &conf);
 
     original->group("descendent")->setValue<int>("value", 666);
 
