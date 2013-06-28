@@ -318,7 +318,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
             ConfigurationGroup* group;
         };
 
-        CORRADE_UTILITY_LOCAL explicit ConfigurationGroup(Configuration* configuration): configuration(_configuration) {}
+        CORRADE_UTILITY_LOCAL explicit ConfigurationGroup(Configuration* configuration);
 
         CORRADE_UTILITY_LOCAL std::vector<Group>::iterator findGroup(const std::string& name, unsigned int index);
         CORRADE_UTILITY_LOCAL std::vector<Group>::const_iterator findGroup(const std::string& name, unsigned int index) const;

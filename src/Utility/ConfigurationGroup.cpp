@@ -30,6 +30,8 @@
 
 namespace Corrade { namespace Utility {
 
+ConfigurationGroup::ConfigurationGroup(Configuration* configuration): _configuration(configuration) {}
+
 ConfigurationGroup::ConfigurationGroup(const ConfigurationGroup& other): _values(other._values), _groups(other._groups) {
     /* Deep copy groups */
     for(auto it = _groups.begin(); it != _groups.end(); ++it)
