@@ -292,12 +292,13 @@ void Configuration::save(std::ostream& out, const std::string& eol, Configuratio
 
                 buffer = it->key + "=\"\"\"" + eol + value + eol + "\"\"\"" + eol;
 
-            /* Value with spaces */
-            } else if(it->value.find_first_of(String::Whitespace) != std::string::npos)
+            /* Value with leading/trailing spaces */
+            } else if(!it->value.empty() && (String::Whitespace.find(it->value.front()) != std::string::npos ||
+                                             String::Whitespace.find(it->value.back()) != std::string::npos)) {
                 buffer = it->key + "=\"" + it->value + '"' + eol;
 
             /* Value without spaces */
-            else buffer = it->key + '=' + it->value + eol;
+            } else buffer = it->key + '=' + it->value + eol;
         }
 
         /* Comment / empty line */
