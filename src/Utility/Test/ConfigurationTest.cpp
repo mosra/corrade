@@ -41,48 +41,56 @@ class ConfigurationTest: public TestSuite::Tester {
         ConfigurationTest();
 
         void parse();
-        void parseDirect();
-        void empty();
+        void parseHierarchic();
+
+        void groupIndex();
+        void valueIndex();
+
+        void names();
+
         void invalid();
         void readonly();
-        void readonlyWithoutFile();
+        void inexistentFile();
         void truncate();
+
         void whitespaces();
         void types();
         void eol();
-        void uniqueGroups();
-        void uniqueKeys();
         void stripComments();
 
-        void autoCreation();
-        void directValue();
+        void multiLineValue();
+        void multiLineValueCrlf();
 
-        /** @todo Merge into parse() and uniqueGroups() */
-        void hierarchic();
-        void hierarchicUnique();
-
+        void standaloneGroup();
         void copy();
+        void move();
 };
 
 ConfigurationTest::ConfigurationTest() {
     addTests({&ConfigurationTest::parse,
-              &ConfigurationTest::parseDirect,
-              &ConfigurationTest::empty,
+              &ConfigurationTest::parseHierarchic,
+
+              &ConfigurationTest::groupIndex,
+              &ConfigurationTest::valueIndex,
+
+              &ConfigurationTest::names,
+
               &ConfigurationTest::invalid,
               &ConfigurationTest::readonly,
-              &ConfigurationTest::readonlyWithoutFile,
+              &ConfigurationTest::inexistentFile,
               &ConfigurationTest::truncate,
+
               &ConfigurationTest::whitespaces,
               &ConfigurationTest::types,
               &ConfigurationTest::eol,
-              &ConfigurationTest::uniqueGroups,
-              &ConfigurationTest::uniqueKeys,
               &ConfigurationTest::stripComments,
-              &ConfigurationTest::autoCreation,
-              &ConfigurationTest::directValue,
-              &ConfigurationTest::hierarchic,
-              &ConfigurationTest::hierarchicUnique,
-              &ConfigurationTest::copy});
+
+              &ConfigurationTest::multiLineValue,
+              &ConfigurationTest::multiLineValueCrlf,
+
+              &ConfigurationTest::standaloneGroup,
+              &ConfigurationTest::copy,
+              &ConfigurationTest::move});
 
     /* Create testing dir */
     Directory::mkpath(CONFIGURATION_WRITE_TEST_DIR);
@@ -96,41 +104,50 @@ ConfigurationTest::ConfigurationTest() {
 void ConfigurationTest::parse() {
     Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "parse.conf"));
     conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"));
+    CORRADE_VERIFY(conf.configuration() == &conf);
     CORRADE_VERIFY(conf.isValid());
+    CORRADE_VERIFY(!conf.isEmpty());
 
     /* Groups */
+    CORRADE_VERIFY(conf.hasGroups());
     CORRADE_COMPARE(conf.groupCount(), 4);
-    CORRADE_COMPARE(conf.groups().size(), 4);
+    CORRADE_VERIFY(!conf.hasGroup("groupInexistent"));
     CORRADE_COMPARE(conf.groupCount("group"), 2);
-    CORRADE_COMPARE(conf.groupCount("empty_group"), 1);
-    CORRADE_VERIFY(!conf.groupExists("group_inexistent"));
-    CORRADE_COMPARE_AS((std::vector<ConfigurationGroup*>{conf.group("group", 0), conf.group("group", 1)}),
-        conf.groups("group"), TestSuite::Compare::Container);
+    CORRADE_COMPARE(conf.groupCount("emptyGroup"), 1);
+    CORRADE_VERIFY(conf.group("group")->configuration() == &conf);
+    CORRADE_COMPARE_AS(conf.groups("group"),
+        (std::vector<ConfigurationGroup*>{conf.group("group", 0), conf.group("group", 1)}),
+        TestSuite::Compare::Container);
 
     std::string tmp;
 
-    /* Keys */
-    CORRADE_VERIFY(conf.value("key", &tmp));
-    CORRADE_COMPARE(tmp, "value");
-    CORRADE_VERIFY(conf.group("group", 1)->value("c", &tmp, 1));
-    CORRADE_COMPARE(tmp, "value5");
+    /* Values */
+    CORRADE_VERIFY(conf.hasValues());
+    CORRADE_COMPARE(conf.valueCount(), 1);
+    CORRADE_VERIFY(conf.hasValue("key"));
+    CORRADE_VERIFY(!conf.hasValue("keyInexistent"));
+    CORRADE_COMPARE(conf.value("key"), "value");
+    CORRADE_COMPARE(conf.group("group", 1)->value("c", 1), "value5");
     CORRADE_COMPARE_AS(conf.group("group", 1)->values("c"),
         (std::vector<std::string>{"value4", "value5"}), TestSuite::Compare::Container);
-    CORRADE_VERIFY(conf.keyExists("key"));
-    CORRADE_VERIFY(!conf.keyExists("key_inexistent"));
+
+    /* Default-constructed inexistent values */
+    CORRADE_COMPARE(conf.value("inexistent"), "");
+    CORRADE_COMPARE(conf.value<int>("inexistent"), 0);
+    CORRADE_COMPARE(conf.value<double>("inexistent"), 0.0);
 
     /* Save file back - expecting no change */
     CORRADE_VERIFY(conf.save());
 
     /* Modify */
-    CORRADE_VERIFY(conf.addValue("new", "value"));
-    CORRADE_VERIFY(conf.removeAllGroups("group"));
-    CORRADE_VERIFY(conf.group("third_group")->clear());
-    CORRADE_VERIFY(conf.removeGroup("empty_group"));
-    CORRADE_VERIFY(conf.addGroup("new_group"));
-    CORRADE_VERIFY(conf.group("new_group")->addValue("another", "value"));
-    CORRADE_VERIFY(conf.addGroup("new_group_copy", new ConfigurationGroup(*conf.group("new_group"))));
-    CORRADE_VERIFY(conf.removeAllValues("key"));
+    conf.addValue("new", "value");
+    conf.removeAllGroups("group");
+    conf.group("thirdGroup")->clear();
+    CORRADE_VERIFY(conf.removeGroup("emptyGroup"));
+    CORRADE_VERIFY(conf.addGroup("newGroup"));
+    conf.group("newGroup")->addValue("another", "value");
+    conf.addGroup("newGroupCopy", new ConfigurationGroup(*conf.group("newGroup")));
+    conf.removeAllValues("key");
 
     /* Save again, verify changes */
     CORRADE_VERIFY(conf.save());
@@ -139,73 +156,125 @@ void ConfigurationTest::parse() {
                        TestSuite::Compare::File);
 }
 
-void ConfigurationTest::parseDirect() {
-    /* Configuration created directly from istream should be readonly */
-    std::istringstream contents("[group]\nkey=value");
-    Configuration conf(contents);
+void ConfigurationTest::parseHierarchic() {
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "hierarchic.conf"));
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"));
     CORRADE_VERIFY(conf.isValid());
-    CORRADE_VERIFY(!conf.addValue("key2", "value2"));
-    CORRADE_VERIFY(!conf.save());
+
+    /* Check parsing */
+    CORRADE_VERIFY(conf.hasGroup("z"));
+    CORRADE_COMPARE(conf.group("z")->group("x")->group("c")->group("v")->value("key1"), "val1");
+    CORRADE_COMPARE(conf.groupCount("a"), 2);
+    CORRADE_COMPARE(conf.group("a")->groupCount("b"), 2);
+    CORRADE_COMPARE(conf.group("a")->group("b", 0)->value("key2"), "val2");
+    CORRADE_COMPARE(conf.group("a")->group("b", 1)->value("key2"), "val3");
+    CORRADE_COMPARE(conf.group("a", 1)->value("key3"), "val4");
+    CORRADE_COMPARE(conf.group("a", 1)->group("b")->value("key2"), "val5");
+
+    /* Expect no change */
+    CORRADE_VERIFY(conf.save());
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "hierarchic.conf"),
+                       TestSuite::Compare::File);
+
+    /* Modify */
+    conf.group("z")->group("x")->clear();
+    conf.group("a", 1)->addGroup("b")->setValue("key2", "val6");
+    conf.addGroup("q")->addGroup("w")->addGroup("e")->addGroup("r")->setValue("key4", "val7");
+
+    /* Verify changes */
+    CORRADE_VERIFY(conf.save());
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "hierarchic-modified.conf"),
+                       TestSuite::Compare::File);
 }
 
-void ConfigurationTest::empty() {
-    Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "new.conf"));
-    CORRADE_VERIFY(conf.isValid());
-    CORRADE_VERIFY(conf.save());
+void ConfigurationTest::groupIndex() {
+    std::istringstream in("[a]\n[a]\n");
+    Configuration conf(in);
+
+    CORRADE_VERIFY(conf.hasGroup("a", 0));
+    CORRADE_VERIFY(conf.hasGroup("a", 1));
+    CORRADE_VERIFY(!conf.hasGroup("a", 2));
+}
+
+void ConfigurationTest::valueIndex() {
+    std::istringstream in("a=\na=\n");
+    Configuration conf(in);
+
+    CORRADE_VERIFY(conf.hasValue("a", 0));
+    CORRADE_VERIFY(conf.hasValue("a", 1));
+    CORRADE_VERIFY(!conf.hasValue("a", 2));
+
+    /* Setting third value when there are two present is the same as adding
+       another value. However, setting fourth value is not possible, as there
+       is no third one. */
+    CORRADE_VERIFY(!conf.setValue("a", "foo", 3));
+    CORRADE_VERIFY(conf.setValue("a", "foo", 2));
+}
+
+void ConfigurationTest::names() {
+    std::ostringstream out;
+    Error::setOutput(&out);
+    Configuration conf;
+
+    conf.addGroup("");
+    CORRADE_COMPARE(out.str(), "Utility::ConfigurationGroup::addGroup(): empty group name\n");
+
+    out.str({});
+    conf.addGroup("a/b/c");
+    CORRADE_COMPARE(out.str(), "Utility::ConfigurationGroup::addGroup(): disallowed character in group name\n");
+
+    out.str({});
+    conf.setValue("", "foo");
+    CORRADE_COMPARE(out.str(), "Utility::ConfigurationGroup::setValue(): empty key\n");
+
+    out.str({});
+    conf.addValue("a=", "foo");
+    CORRADE_COMPARE(out.str(), "Utility::ConfigurationGroup::addValue(): disallowed character in key\n");
 }
 
 void ConfigurationTest::invalid() {
     Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "invalid.conf"));
-    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "invalid.conf"));
 
-    /* The group is there */
-    {
-        CORRADE_EXPECT_FAIL("Currently on invalid row whole group is dropped");
-        CORRADE_COMPARE(conf.groupCount("group"), 1);
-        /* TODO: enable after fix of XFAIL */
-        // CORRADE_VERIFY(!conf.group("group")->setValue<string>("key", "newValue"));
-        // CORRADE_VERIFY(!conf.group("group")->removeValue("key"));
-        // CORRADE_VERIFY(!conf.group("group")->removeAllValues("key"));
-    }
-
-    /* Everything should be disabled */
+    /* Nothing remains, filename is empty and valid bit is not set */
     CORRADE_VERIFY(!conf.isValid());
-    CORRADE_VERIFY(!conf.addGroup("new"));
-    CORRADE_VERIFY(!conf.removeGroup("group"));
-    CORRADE_VERIFY(!conf.removeAllGroups("group"));
-    CORRADE_VERIFY(!conf.addValue("new", "value"));
-    CORRADE_VERIFY(!conf.save());
+    CORRADE_VERIFY(conf.isEmpty());
+    CORRADE_VERIFY(conf.filename().empty());
 }
 
 void ConfigurationTest::readonly() {
     Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "parse.conf"), Configuration::Flag::ReadOnly);
-    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"));
 
-    /* Everything should be disabled */
-    CORRADE_VERIFY(!conf.addGroup("new"));
-    CORRADE_VERIFY(!conf.removeGroup("group"));
-    CORRADE_VERIFY(!conf.removeAllGroups("group"));
-    CORRADE_VERIFY(!conf.group("third_group")->clear());
-    CORRADE_VERIFY(!conf.addValue("new", "value"));
-    CORRADE_VERIFY(!conf.group("group")->setValue("key", "newValue"));
-    CORRADE_VERIFY(!conf.group("group")->removeValue("b"));
-    CORRADE_VERIFY(!conf.group("group")->removeAllValues("b"));
-    CORRADE_VERIFY(!conf.save());
+    /* Filename for readonly configuration is empty */
+    CORRADE_VERIFY(conf.isValid());
+    CORRADE_VERIFY(!conf.isEmpty());
+    CORRADE_VERIFY(conf.filename().empty());
 }
 
-void ConfigurationTest::readonlyWithoutFile() {
-    Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "inexistent.conf"), Configuration::Flag::ReadOnly);
-    CORRADE_VERIFY(!conf.isValid());
+void ConfigurationTest::inexistentFile() {
+    Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "inexistent.conf"));
+    Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "inexistent.conf"));
+
+    /* Everything okay if the file doesn't exist */
+    CORRADE_VERIFY(conf.isValid());
+    CORRADE_VERIFY(conf.isEmpty());
+    CORRADE_COMPARE(conf.filename(), Directory::join(CONFIGURATION_WRITE_TEST_DIR, "inexistent.conf"));
+
+    conf.setValue("key", "value");
+    CORRADE_VERIFY(conf.save());
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "inexistent.conf"),
+                       "key=value\n", TestSuite::Compare::FileToString);
 }
 
 void ConfigurationTest::truncate() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "parse.conf"), Configuration::Flag::Truncate);
-    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"));
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "parse.conf"), Configuration::Flag::ReadOnly|Configuration::Flag::Truncate);
 
-    CORRADE_COMPARE(conf.keyCount("key"), 0);
-
-    CORRADE_VERIFY(conf.save());
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"),
+    /* File is truncated on saving */
+    CORRADE_VERIFY(conf.isValid());
+    CORRADE_VERIFY(conf.isEmpty());
+    CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "truncate.conf")));
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "truncate.conf"),
                        "", TestSuite::Compare::FileToString);
 }
 
@@ -220,77 +289,59 @@ void ConfigurationTest::whitespaces() {
 }
 
 void ConfigurationTest::types() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "types.conf"));
-    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types.conf"));
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "types.conf"), Configuration::Flag::ReadOnly);
 
-    std::string tmp;
-    CORRADE_VERIFY(conf.value("string", &tmp));
-    CORRADE_COMPARE(tmp, "value");
-    CORRADE_VERIFY(conf.setValue("string", tmp));
-    CORRADE_VERIFY(conf.value("quotes", &tmp));
-    CORRADE_COMPARE(tmp, " value ");
-    CORRADE_VERIFY(conf.setValue("quotes", tmp));
+    /* String */
+    CORRADE_COMPARE(conf.value("string"), "value");
+    CORRADE_VERIFY(conf.setValue("string", "value"));
+    CORRADE_COMPARE(conf.value("quotes"), " value ");
+    CORRADE_VERIFY(conf.setValue("quotes", " value "));
 
-    int intTmp;
-    CORRADE_VERIFY(conf.value("int", &intTmp));
-    CORRADE_COMPARE(intTmp, 5);
-    CORRADE_VERIFY(conf.setValue("int", intTmp));
-    CORRADE_VERIFY(conf.value("intNeg", &intTmp));
-    CORRADE_COMPARE(intTmp, -10);
-    CORRADE_VERIFY(conf.setValue("intNeg", intTmp));
+    /* Int */
+    CORRADE_COMPARE(conf.value<int>("int"), 5);
+    CORRADE_VERIFY(conf.setValue("int", 5));
+    CORRADE_COMPARE(conf.value<int>("intNeg"), -10);
+    CORRADE_VERIFY(conf.setValue("intNeg", -10));
 
-    bool boolTmp;
-    CORRADE_VERIFY(conf.value("bool", &boolTmp, 0));
-    CORRADE_VERIFY(boolTmp);
-    CORRADE_VERIFY(conf.setValue("bool", boolTmp, 0));
-    boolTmp = false;
-    CORRADE_VERIFY(conf.value("bool", &boolTmp, 1));
-    CORRADE_VERIFY(boolTmp);
-    boolTmp = false;
-    CORRADE_VERIFY(conf.value("bool", &boolTmp, 2));
-    CORRADE_VERIFY(boolTmp);
-    boolTmp = false;
-    CORRADE_VERIFY(conf.value("bool", &boolTmp, 3));
-    CORRADE_VERIFY(boolTmp);
-    CORRADE_VERIFY(conf.value("bool", &boolTmp, 4));
-    CORRADE_VERIFY(!boolTmp);
-    CORRADE_VERIFY(conf.setValue("bool", boolTmp, 4));
+    /* Bool */
+    CORRADE_COMPARE(conf.value<bool>("bool", 0), true);
+    CORRADE_VERIFY(conf.setValue("bool", true, 0));
+    CORRADE_COMPARE(conf.value<bool>("bool", 1), true);
+    CORRADE_COMPARE(conf.value<bool>("bool", 2), true);
+    CORRADE_COMPARE(conf.value<bool>("bool", 3), true);
+    CORRADE_COMPARE(conf.value<bool>("bool", 4), false);
+    CORRADE_VERIFY(conf.setValue("bool", false, 4));
 
-    double doubleTmp;
-    CORRADE_VERIFY(conf.value("double", &doubleTmp));
-    CORRADE_COMPARE(doubleTmp, 3.78);
-    CORRADE_VERIFY(conf.setValue("double", doubleTmp));
-    CORRADE_VERIFY(conf.value("doubleNeg", &doubleTmp));
-    CORRADE_COMPARE(doubleTmp, -2.14);
-    CORRADE_VERIFY(conf.setValue("doubleNeg", doubleTmp));
+    /* Double */
+    CORRADE_COMPARE(conf.value<double>("double"), 3.78);
+    CORRADE_VERIFY(conf.setValue("double", 3.78));
+    CORRADE_COMPARE(conf.value<double>("doubleNeg"), -2.14);
+    CORRADE_VERIFY(conf.setValue("doubleNeg", -2.14));
+
+    /* Double scientific */
+    CORRADE_COMPARE(conf.value<double>("exp"), 2.1e7);
+    CORRADE_COMPARE(conf.value<double>("expPos"), 2.1e+7);
+    conf.setValue("expPos", 2.1e+7, 0, ConfigurationValueFlag::Scientific);
+    CORRADE_COMPARE(conf.value<double>("expNeg"), -2.1e7);
+    CORRADE_COMPARE(conf.value<double>("expNeg2"), 2.1e-7);
+    CORRADE_COMPARE(conf.value<double>("expBig"), 2.1E7);
+    conf.setValue<double>("expBig", 2.1E7, 0, ConfigurationValueFlag::Scientific|ConfigurationValueFlag::Uppercase);
 
     /* Flags */
-    CORRADE_VERIFY(conf.value("exp", &doubleTmp));
-    CORRADE_COMPARE(doubleTmp, 2.1e7);
-    CORRADE_VERIFY(conf.value("expPos", &doubleTmp));
-    CORRADE_COMPARE(doubleTmp, 2.1e+7);
-    CORRADE_VERIFY(conf.setValue("expPos", doubleTmp, 0, ConfigurationValueFlag::Scientific));
-    CORRADE_VERIFY(conf.value("expNeg", &doubleTmp));
-    CORRADE_COMPARE(doubleTmp, -2.1e7);
-    CORRADE_VERIFY(conf.value("expNeg2", &doubleTmp));
-    CORRADE_COMPARE(doubleTmp, 2.1e-7);
-    CORRADE_VERIFY(conf.value("expBig", &doubleTmp));
-    CORRADE_COMPARE(doubleTmp, 2.1E7);
+    CORRADE_COMPARE(conf.value<int>("oct", 0, ConfigurationValueFlag::Oct), 0773);
+    conf.setValue("oct", 0773, 0, ConfigurationValueFlag::Oct);
+    CORRADE_COMPARE(conf.value<int>("hex", 0, ConfigurationValueFlag::Hex), 0x6ecab);
+    conf.setValue("hex", 0x6ecab, 0, ConfigurationValueFlag::Hex);
+    CORRADE_COMPARE(conf.value<int>("hex2", 0, ConfigurationValueFlag::Hex), 0x5462FF);
+    CORRADE_COMPARE(conf.value<int>("hexUpper", 0, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase), 0xF00D);
+    conf.setValue("hexUpper", 0xF00D, 0, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase);
 
-    CORRADE_VERIFY(conf.value("oct", &intTmp, 0, ConfigurationValueFlag::Oct));
-    CORRADE_COMPARE(intTmp, 0773);
-    CORRADE_VERIFY(conf.setValue("oct", intTmp, 0, ConfigurationValueFlag::Oct));
-    CORRADE_VERIFY(conf.value("hex", &intTmp, 0, ConfigurationValueFlag::Hex));
-    CORRADE_COMPARE(intTmp, 0x6ecab);
-    CORRADE_VERIFY(conf.setValue("hex", intTmp, 0, ConfigurationValueFlag::Hex));
-    CORRADE_VERIFY(conf.value("hex2", &intTmp, 0, ConfigurationValueFlag::Hex));
-    CORRADE_COMPARE(intTmp, 0x5462FF);
-    CORRADE_VERIFY(conf.value("color", &intTmp, 0, ConfigurationValueFlag::Color));
-    CORRADE_COMPARE(intTmp, 0x34f85e);
-    CORRADE_VERIFY(conf.setValue("color", intTmp, 0, ConfigurationValueFlag::Color));
+    /* Char32_t */
+    CORRADE_COMPARE(conf.value<char32_t>("unicode"), U'\xBEEF');
+    conf.setValue("unicode", U'\xBEEF');
 
-    /* Check saved values */
-    CORRADE_VERIFY(conf.save());
+    /* Nothing should be changed after saving */
+    CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types.conf")));
     CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types.conf"),
                        Directory::join(CONFIGURATION_TEST_DIR, "types.conf"),
                        TestSuite::Compare::File);
@@ -299,23 +350,20 @@ void ConfigurationTest::types() {
 void ConfigurationTest::eol() {
     {
         /* Autodetect Unix */
-        Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "eol-unix.conf"));
-        conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-unix.conf"));
-        CORRADE_VERIFY(conf.save());
+        Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "eol-unix.conf"), Configuration::Flag::ReadOnly);
+        CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-unix.conf")));
         CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-unix.conf"),
             "key=value\n", TestSuite::Compare::FileToString);
     } {
         /* Autodetect Windows */
-        Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "eol-windows.conf"));
-        conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-windows.conf"));
-        CORRADE_VERIFY(conf.save());
+        Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "eol-windows.conf"), Configuration::Flag::ReadOnly);
+        CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-windows.conf")));
         CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-windows.conf"),
             "key=value\r\n", TestSuite::Compare::FileToString);
     } {
         /* Autodetect mixed (both \r and \r\n) */
-        Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "eol-mixed.conf"));
-        conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-mixed.conf"));
-        CORRADE_VERIFY(conf.save());
+        Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "eol-mixed.conf"), Configuration::Flag::ReadOnly);
+        CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-mixed.conf")));
         CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-mixed.conf"),
             "key=value\r\nkey=value\r\n", TestSuite::Compare::FileToString);
     } {
@@ -345,34 +393,6 @@ void ConfigurationTest::eol() {
     }
 }
 
-void ConfigurationTest::uniqueGroups() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "unique-groups.conf"), Configuration::Flag::UniqueGroups);
-    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "unique-groups.conf"));
-
-    /* Verify that non-unique groups were removed */
-    CORRADE_VERIFY(conf.save());
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "unique-groups.conf"),
-                       Directory::join(CONFIGURATION_TEST_DIR, "unique-groups-saved.conf"),
-                       TestSuite::Compare::File);
-
-    /* Try to insert already existing group */
-    CORRADE_VERIFY(!conf.addGroup("group"));
-}
-
-void ConfigurationTest::uniqueKeys() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "unique-keys.conf"), Configuration::Flag::UniqueKeys);
-    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "unique-keys.conf"));
-
-    /* Verify that non-unique keys were removed */
-    CORRADE_VERIFY(conf.save());
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "unique-keys.conf"),
-                       Directory::join(CONFIGURATION_TEST_DIR, "unique-keys-saved.conf"),
-                       TestSuite::Compare::File);
-
-    /* Try to insert already existing key */
-    CORRADE_VERIFY(!conf.addValue("key", "val"));
-}
-
 void ConfigurationTest::stripComments() {
     Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "comments.conf"), Configuration::Flag::SkipComments);
     conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "comments.conf"));
@@ -384,116 +404,108 @@ void ConfigurationTest::stripComments() {
                        TestSuite::Compare::File);
 }
 
-void ConfigurationTest::autoCreation() {
-    Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "autoCreation.conf"), Configuration::Flag::Truncate);
+void ConfigurationTest::multiLineValue() {
+    /* Remove previous saved file */
+    Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf"));
 
-    CORRADE_VERIFY(!conf.group("newGroup"));
-    conf.setAutomaticGroupCreation(true);
-    CORRADE_VERIFY(conf.group("newGroup"));
-    conf.setAutomaticGroupCreation(false);
-    CORRADE_VERIFY(!conf.group("newGroup2"));
-
-    std::string value1 = "defaultValue1";
-    CORRADE_VERIFY(!conf.group("newGroup")->value("key", &value1));
-
-    conf.setAutomaticKeyCreation(true);
-    CORRADE_VERIFY(conf.group("newGroup")->value("key", &value1));
-    CORRADE_COMPARE(conf.group("newGroup")->keyCount("key"), 1);
-    CORRADE_COMPARE(value1, "defaultValue1");
-
-    conf.setAutomaticGroupCreation(true);
-    std::string value2 = "defaultValue2";
-    CORRADE_VERIFY(conf.group("group")->value("key", &value2));
-    CORRADE_COMPARE(conf.group("group")->keyCount("key"), 1);
-    CORRADE_COMPARE(value2, "defaultValue2");
-
-    /* Auto-creation of non-string values */
-    int value3 = 42;
-    CORRADE_VERIFY(conf.group("group")->value<int>("integer", &value3));
-    conf.setAutomaticKeyCreation(false);
-    value3 = 45;
-    CORRADE_VERIFY(conf.group("group")->value<int>("integer", &value3));
-    CORRADE_COMPARE(value3, 42);
-}
-
-void ConfigurationTest::directValue() {
-    Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "directValue.conf"), Configuration::Flag::Truncate);
-
-    /* Fill values */
-    conf.setValue("string", "value");
-    conf.setValue<int>("key", 23);
-
-    /* Test direct return */
-    CORRADE_COMPARE(conf.value("string"), "value");
-    CORRADE_COMPARE(conf.value<int>("key"), 23);
-
-    /* Default-constructed values */
-    CORRADE_COMPARE(conf.value("inexistent"), "");
-    CORRADE_COMPARE(conf.value<int>("inexistent"), 0);
-    CORRADE_COMPARE(conf.value<double>("inexistent"), 0.0);
-}
-
-void ConfigurationTest::hierarchic() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "hierarchic.conf"));
-    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"));
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "multiLine.conf"));
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf"));
     CORRADE_VERIFY(conf.isValid());
 
     /* Check parsing */
-    CORRADE_COMPARE(conf.group("z")->group("x")->group("c")->group("v")->value("key1"), "val1");
-    CORRADE_COMPARE(conf.groupCount("a"), 2);
-    CORRADE_COMPARE(conf.group("a")->groupCount("b"), 2);
-    CORRADE_COMPARE(conf.group("a")->group("b", 0)->value("key2"), "val2");
-    CORRADE_COMPARE(conf.group("a")->group("b", 1)->value("key2"), "val3");
-    CORRADE_COMPARE(conf.group("a", 1)->value("key3"), "val4");
-    CORRADE_COMPARE(conf.group("a", 1)->group("b")->value("key2"), "val5");
+    CORRADE_COMPARE(conf.value("value"), " Hello\n people how\n are you?");
+    CORRADE_COMPARE(conf.value("empty"), "");
 
-    /* Expect no change */
+    /* Expect change only in empty value */
     CORRADE_VERIFY(conf.save());
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"),
-                       Directory::join(CONFIGURATION_TEST_DIR, "hierarchic.conf"),
-                       TestSuite::Compare::File);
-
-    /* Modify */
-    conf.group("z")->group("x")->clear();
-    conf.group("a", 1)->addGroup("b")->setValue("key2", "val6");
-    conf.addGroup("q")->addGroup("w")->addGroup("e")->addGroup("r")->setValue("key4", "val7");
-
-    /* Cannot add group with '/' character */
-    CORRADE_VERIFY(!conf.addGroup("a/b/c"));
-
-    /* Verify changes */
-    CORRADE_VERIFY(conf.save());
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"),
-                       Directory::join(CONFIGURATION_TEST_DIR, "hierarchic-modified.conf"),
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "multiLine-saved.conf"),
                        TestSuite::Compare::File);
 }
 
-void ConfigurationTest::hierarchicUnique() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "hierarchic.conf"), Configuration::Flag::UniqueGroups);
-    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"));
+void ConfigurationTest::multiLineValueCrlf() {
+    /* Remove previous saved file */
+    Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf"));
 
-    /* Verify that non-unique groups were removed */
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "multiLine-crlf.conf"));
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf"));
+    CORRADE_VERIFY(conf.isValid());
+
+    /* Check parsing */
+    CORRADE_COMPARE(conf.value("value"), " Hello\n people how\n are you?");
+
+    /* Expect change only in lines without CR */
     CORRADE_VERIFY(conf.save());
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"),
-                       Directory::join(CONFIGURATION_TEST_DIR, "hierarchic-unique.conf"),
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "multiLine-crlf-saved.conf"),
                        TestSuite::Compare::File);
+}
+
+void ConfigurationTest::standaloneGroup() {
+    ConfigurationGroup group;
+    CORRADE_VERIFY(!group.configuration());
+
+    group.setValue("value", "hello");
+    group.addGroup("group")->addValue("number", 42);
+
+    CORRADE_COMPARE(group.value("value"), "hello");
+    CORRADE_COMPARE(group.group("group")->value<int>("number"), 42);
 }
 
 void ConfigurationTest::copy() {
-    Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "copy.conf"));
+    Configuration conf;
 
     ConfigurationGroup* original = conf.addGroup("group");
     original->addGroup("descendent")->setValue<int>("value", 42);
 
     ConfigurationGroup* constructedCopy = new ConfigurationGroup(*original);
+    CORRADE_VERIFY(!constructedCopy->configuration());
+    CORRADE_VERIFY(!constructedCopy->group("descendent")->configuration());
+
     ConfigurationGroup* assignedCopy = conf.addGroup("another");
+    CORRADE_VERIFY(assignedCopy->configuration() == &conf);
     *assignedCopy = *original;
+    CORRADE_VERIFY(assignedCopy->configuration() == &conf);
+    CORRADE_VERIFY(assignedCopy->group("descendent")->configuration() == &conf);
 
     original->group("descendent")->setValue<int>("value", 666);
 
     CORRADE_COMPARE(original->group("descendent")->value<int>("value"), 666);
     CORRADE_COMPARE(constructedCopy->group("descendent")->value<int>("value"), 42);
     CORRADE_COMPARE(assignedCopy->group("descendent")->value<int>("value"), 42);
+}
+
+void ConfigurationTest::move() {
+    Configuration conf;
+    ConfigurationGroup* original = conf.addGroup("group");
+    original->addGroup("descendent")->setValue<int>("value", 42);
+
+    /* Move constructor for ConfigurationGroup */
+    ConfigurationGroup* constructedMove = new ConfigurationGroup(std::move(*original));
+    CORRADE_VERIFY(original->isEmpty());
+    CORRADE_VERIFY(!constructedMove->configuration());
+    CORRADE_VERIFY(!constructedMove->group("descendent")->configuration());
+
+    /* Move assignment for ConfigurationGroup */
+    ConfigurationGroup* assignedMove = conf.addGroup("another");
+    CORRADE_VERIFY(assignedMove->configuration() == &conf);
+    *assignedMove = std::move(*constructedMove);
+    CORRADE_VERIFY(constructedMove->isEmpty());
+    CORRADE_VERIFY(assignedMove->configuration() == &conf);
+    CORRADE_VERIFY(assignedMove->group("descendent")->configuration() == &conf);
+
+    /* Move constructor for Configuration */
+    Configuration confConstructedMove(std::move(conf));
+    CORRADE_VERIFY(conf.isEmpty());
+    CORRADE_VERIFY(confConstructedMove.configuration() == &confConstructedMove);
+    CORRADE_VERIFY(confConstructedMove.group("group")->configuration() == &confConstructedMove);
+
+    /* Move assignment for Configuration */
+    Configuration confAssignedMove;
+    confAssignedMove = std::move(confConstructedMove);
+    CORRADE_VERIFY(confConstructedMove.isEmpty());
+    CORRADE_VERIFY(confAssignedMove.configuration() == &confAssignedMove);
+    CORRADE_VERIFY(confAssignedMove.group("group")->configuration() == &confAssignedMove);
 }
 
 }}}

@@ -73,14 +73,15 @@ conf.save();
 @endcode
 
 @section Configuration_Syntax File syntax
-File syntax is based on INI syntax. Every row can be of one type:
+File syntax is based on INI syntax, consisting of three basic elements:
 - group header
 - key/value pair
 - comment / empty line
 
-Rows can have leading/trailing whitespaces, they will be stripped on parsing and
-saving. Comments and empty lines are preserved, unless the comment is in group
-which was deleted.
+Elements can have leading/trailing whitespaces, they will be stripped on
+parsing and saving. Whitespace is preserved in values enclosed in `"` and
+multi-line values. Comments and empty lines are preserved, unless the comment
+is in group which was deleted.
 
 %Configuration group header is enclosed in `[` and `]`, hierarchic group names
 are separated with `/` character. No group name can be empty.
@@ -88,7 +89,15 @@ are separated with `/` character. No group name can be empty.
 Key/value pair consist of key name string, zero or more whitespaces, `=`
 character, zero or more whitespaces and value. Whitespaces around the value are
 stripped on parsing, if you want to preserve them, enclose the value in `"`
-characters. The value cannot span multiple lines.
+characters.
+
+Multi-line values are enclosed in `"""` alone on the line, first and last line
+break is ignored. The following value is parsed as two lines:
+
+    value="""
+    Here is the value.
+    Spanning multiple lines.
+    """
 
 Comments begin with `#` or `;` character and continue to the end of line. Each
 line of multiline comments must begin with these characters.
@@ -112,20 +121,10 @@ Example file:
     ; Another type of comment
 
 @todo Renaming, copying groups
-@todo Use find() and equal_range() for faster (log) access
-@todo Use some try/catch for parsing (avoid repeated code for group adding)
-@todo Don't throw out whole group on invalid row
 @todo EOL autodetection according to system on unsure/new files (default is
     preserve)
-@todo Join ReadOnly / IsValid flag checks
-@bug When value with number > 0 is not found, pointed integer is changed
-@bug Setting inexistent value with number > 0 creates new key/value pair
 @todo Test that the configurationValueToString() isn't called with string type
     (e.g. value with spaces)
-@todo Support different syntax for hierarchic groups [g1][g2][...] along with
-    [g1/g2/...]
-@todo C++11: move constructor, creating readonly Configuration using static
-    function returning const object, then get rid of ReadOnly flag
 */
 class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
     friend class ConfigurationGroup;
@@ -150,53 +149,27 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
              */
             ForceUnixEol    = 1 << 1,
 
-            /**
-             * Force Windows line endings (CR+LF).
-             */
+            /** Force Windows line endings (CR+LF). */
             ForceWindowsEol = 1 << 2,
 
             /**
-             * Truncate the file. Don't load any configuration from the file.
-             * On saving discards everything in the file and writes only newly
-             * created values.
+             * Don't load any configuration from the file. On saving writes
+             * only newly created values.
              */
             Truncate        = 1 << 3,
 
             /**
              * No comments or empty lines will be preserved on saving. Useful
-             * for memory saving. See also Configuration::ReadOnly.
+             * for memory saving and faster access. See also @ref Flag "Flag::ReadOnly".
              */
             SkipComments    = 1 << 4,
 
             /**
              * Open the file read-only, which means faster access to elements
-             * and less memory used. Sets also Configuration::SkipComments.
-             * Adding, changing and removing groups and keys will not be
-             * allowed.
+             * and less memory used. Filename is not saved to avoid overwriting
+             * the file with save(). See also @ref Flag "Flag::SkipComments".
              */
-            ReadOnly        = 1 << 5,
-
-            /**
-             * Force unique groups. When loading the file only first group with
-             * given name will be loaded, every other will be skipped and
-             * discarded on saving. Also doesn't allow adding new group with
-             * already existing name.
-             */
-            UniqueGroups    = 1 << 6,
-
-            /**
-             * Force unique keys. Only first value with given key (per group)
-             * will be loaded, every other will be skipped and discarded on
-             * saving. Also doesn't allow adding new value with the key name
-             * already existing in the group.
-             */
-            UniqueKeys      = 1 << 7,
-
-            /**
-             * Force unique groups and keys. Same as
-             * Configuration::UniqueGroups | Configuration::UniqueKeys .
-             */
-            UniqueNames     = 1 << 8
+            ReadOnly        = 1 << 5
         };
 
         /**
@@ -215,44 +188,42 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
 
         /**
          * @brief Constructor
-         * @param file      %Configuration file
-         * @param flags     Flags
+         * @param filename  Filename
+         * @param flags     %Flags
          *
          * Opens the file and loads it according to specified flags. If file
-         * cannot be opened, sets invalid flag (see isValid()).
+         * cannot be opened or parsed, the configuration is empty and filename
+         * is not saved to avoid overwriting the file with save().
          */
-        explicit Configuration(const std::string& file, Flags flags = Flags());
+        explicit Configuration(const std::string& filename, Flags flags = Flags());
 
         /**
          * @brief Constructor
-         * @param file      %Configuration file
-         * @param flags     Flags
+         * @param in        Input stream
+         * @param flags     %Flags
          *
-         * Creates configuration from given istream. Sets flag
-         * Configuration::ReadOnly, because the configuration cannot be saved
-         * anywhere.
+         * Creates configuration from given input stream.
          */
-        explicit Configuration(std::istream& file, Flags flags = Flags());
+        explicit Configuration(std::istream& in, Flags flags = Flags());
 
         /** @brief Copying is not allowed */
         Configuration(const Configuration&) = delete;
 
-        /** @brief Moving is not allowed */
-        Configuration(Configuration&&) = delete;
+        /** @brief Move constructor */
+        Configuration(Configuration&& other);
 
         /**
          * @brief Destructor
          *
-         * If the configuration has been changed, writes configuration back to
-         * the file. See also save().
+         * If the configuration has been changed, calls save().
          */
         ~Configuration();
 
         /** @brief Copying is not allowed */
         Configuration& operator=(const Configuration&) = delete;
 
-        /** @brief Moving is not allowed */
-        Configuration& operator=(Configuration&&) = delete;
+        /** @brief Move assignment */
+        Configuration& operator=(Configuration&& other);
 
         /** @brief Filename */
         std::string filename() const;
@@ -260,77 +231,29 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         /**
          * @brief Set filename
          *
-         * The configuration will be saved under this filename.
-         * @see save()
+         * The filename is used by save().
          */
         void setFilename(std::string filename);
 
+        /** @brief Whether the file was successfully parsed */
+        bool isValid() const { return bool(_flags & InternalFlag::IsValid); }
+
         /**
-         * @brief Whether the file is valid
-         * @return Returns false if the file has syntax errors or couldn't be
-         *      opened, true otherwise.
+         * @brief Save configuration to given file
          *
-         * Invalid files cannot be changed or saved back.
+         * Returns `true` on success, `false` otherwise.
          */
-        bool isValid() const { return bool(flags & InternalFlag::IsValid); }
+        bool save(const std::string& filename);
 
-        /**
-         * @brief Enable/disable automatic creation of inexistent groups
-         * @param enabled   Whether to enable or disable this feature
-         *
-         * By default, calling Configuration::group() with inexistent name
-         * returns null pointer. If this feature is enabled, the group is
-         * automatically created if doesn't exist. Note that this works only for
-         * first group with that name, not when requesting group with `number`
-         * parameter set to non-zero value.
-         * @todo Check readonly/isvalid
-         */
-        void setAutomaticGroupCreation(bool enabled) {
-            if(enabled) flags |= InternalFlag::AutoCreateGroups;
-            else flags &= ~InternalFlag::AutoCreateGroups;
-        }
-
-        /**
-         * @brief Whether automatic creation of inexistent groups is enabled
-         * @see setAutomaticGroupCreation().
-         */
-        bool automaticGroupCreation() const {
-            return bool(flags & InternalFlag::AutoCreateGroups);
-        }
-
-        /**
-         * @brief Enable/disable automatic creation of inexistent key/value pairs.
-         * @param enabled   Whether to enable or disable this feature
-         *
-         * By default, calling value() with inexistent key returns false and
-         * pointed variable is unchanged. If this feature is enabled, the
-         * key/value pair is automatically created from given key
-         * name and value in pointed variable.
-         * @todo Check readonly/isvalid
-         */
-        void setAutomaticKeyCreation(bool enabled) {
-            if(enabled) flags |= InternalFlag::AutoCreateKeys;
-            else flags &= ~InternalFlag::AutoCreateKeys;
-        }
-
-        /**
-         * @brief Whether automatic creation of inexistent keys is enabled
-         * @see setAutomaticKeyCreation().
-         */
-        bool automaticKeyCreation() const {
-            return bool(flags & InternalFlag::AutoCreateKeys);
-        }
+        /** @brief Save configuration to stream */
+        void save(std::ostream& out);
 
         /**
          * @brief Save configuration
          * @return Whether the file was saved successfully
          *
-         * Writes configuration back to the file (only if
-         * Configuration::ReadOnly flag wasn't set). Note that even if no change
-         * to the configuration was made, the file could differ after saving
-         * (see Configuration::Flags).
-         *
-         * @see filename(), setFilename()
+         * If filename() is not empty, writes configuration back to the file.
+         * Returns `true` on success, `false` otherwise.
          */
         bool save();
 
@@ -342,28 +265,25 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
             Truncate        = std::uint32_t(Flag::Truncate),
             SkipComments    = std::uint32_t(Flag::SkipComments),
             ReadOnly        = std::uint32_t(Flag::ReadOnly),
-            UniqueGroups    = std::uint32_t(Flag::UniqueGroups),
-            UniqueKeys      = std::uint32_t(Flag::UniqueKeys),
-            UniqueNames     = std::uint32_t(Flag::UniqueNames),
 
             IsValid = 1 << 16,
             HasBom = 1 << 17,
             WindowsEol = 1 << 18,
-            Changed = 1 << 19,
-            AutoCreateGroups = 1 << 20,
-            AutoCreateKeys = 1 << 21
+            Changed = 1 << 19
         };
 
         typedef Containers::EnumSet<InternalFlag, std::uint32_t> InternalFlags;
 
         CORRADE_ENUMSET_FRIEND_OPERATORS(InternalFlags)
 
-        CORRADE_UTILITY_LOCAL void parse(std::istream& file);
-        CORRADE_UTILITY_LOCAL std::string parse(std::istream& file, ConfigurationGroup* group, const std::string& fullPath);
-        CORRADE_UTILITY_LOCAL void save(std::ofstream& file, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const;
+        CORRADE_UTILITY_LOCAL bool parse(std::istream& in);
+        CORRADE_UTILITY_LOCAL std::string parse(std::istream& in, ConfigurationGroup* group, const std::string& fullPath);
+        CORRADE_UTILITY_LOCAL void save(std::ostream& out, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const;
+
+        CORRADE_UTILITY_LOCAL void setConfigurationPointer(ConfigurationGroup* group);
 
         std::string _filename;
-        InternalFlags flags;
+        InternalFlags _flags;
 };
 
 CORRADE_ENUMSET_OPERATORS(Configuration::Flags)

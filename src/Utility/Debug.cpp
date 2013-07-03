@@ -26,6 +26,8 @@
 #include "Debug.h"
 
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 
 namespace Corrade { namespace Utility {
 
@@ -81,5 +83,15 @@ Debug Debug::operator<<(double value) { return print(value); }
 #ifndef CORRADE_TARGET_EMSCRIPTEN
 Debug Debug::operator<<(long double value) { return print(value); }
 #endif
+
+Debug Debug::operator<<(char32_t value) {
+    std::ostringstream o;
+    o << "U+" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << value;
+    return print(o.str());
+}
+
+Debug Debug::operator<<(const char32_t* value) {
+    return *this << std::u32string(value);
+}
 
 }}

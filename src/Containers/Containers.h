@@ -32,6 +32,7 @@
 namespace Corrade { namespace Containers {
 
 template<class> class Array;
+template<class> class ArrayReference;
 template<class, class U, U fullValue = U(~0)> class EnumSet;
 template<class> class LinkedList;
 template<class Derived, class List = LinkedList<Derived>> class LinkedListItem;

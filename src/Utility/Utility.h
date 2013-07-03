@@ -31,6 +31,7 @@
 
 #include <cstdint>
 
+#include "corradeConfigure.h"
 #include "Containers/Containers.h"
 #include "corradeCompatibility.h"
 
@@ -47,13 +48,19 @@ typedef Containers::EnumSet<ConfigurationValueFlag, std::uint8_t> ConfigurationV
 #endif
 template<class T> struct ConfigurationValue;
 
-/* Debug doesn't need forward declaration */
-/* Error doesn't need forward declaration */
-/* Warning doesn't need forward declaration */
+class Debug;
+class Warning;
+class Error;
 
 /* Directory used only statically */
 /* Endianness used only statically */
 class MurmurHash2;
+
+#ifdef CORRADE_TARGET_NACL
+class NaClConsoleStreamBuffer;
+class NaClMessageStreamBuffer;
+#endif
+
 /* Resource doesn't need forward declaration */
 class Sha1;
 /* String used only statically */

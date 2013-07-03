@@ -29,6 +29,7 @@
  * @brief Class Corrade::Containers::Array
  */
 
+#include <type_traits>
 #include <utility>
 
 #include "corradeCompatibility.h"
@@ -38,12 +39,36 @@ namespace Corrade { namespace Containers {
 /**
 @brief %Array wrapper with size information
 
-Provides moveable RAII wrapper around plain C array. Usable in STL algorithms
-in the same way as plain C array and additionally also in range-based for cycle.
+Provides movable RAII wrapper around plain C array. Main use case is storing
+binary data of unspecified type, where direct element access might be harmful.
+
+However, the class is usable also as lighter non-copyable alternative to
+`std::vector`, in STL algorithms in the same way as plain C array and
+additionally also in range-based for cycle.
 */
 template<class T> class Array {
     public:
         typedef T Type;     /**< @brief Element type */
+
+        /**
+         * @brief Create zero-initialized array
+         *
+         * Creates array of given size, the values are value-initialized
+         * (i.e. builtin types are zero-initialized). For other than builtin
+         * types this is the same as Array(std::size_t). If the size is zero,
+         * no allocation is done.
+         */
+        static Array<T> zeroInitialized(std::size_t size) {
+            if(!size) return nullptr;
+
+            Array<T> array;
+            array._data = new T[size]();
+            array._size = size;
+            return array;
+        }
+
+        /** @brief Conversion from nullptr */
+        /*implicit*/ Array(std::nullptr_t) noexcept: _data(nullptr), _size(0) {}
 
         /**
          * @brief Default constructor
@@ -57,7 +82,12 @@ template<class T> class Array {
          * @brief Constructor
          *
          * Creates array of given size, the values are default-initialized (i.e.
-         * builtin types are not initialized).
+         * builtin types are not initialized). If the size is zero, no
+         * allocation is done.
+         * @note Due to ambiguity you can't call directly `%Array(0)` because
+         *      it conflicts with Array(std::nullptr_t). You should call
+         *      `%Array(nullptr)` instead, which is also `noexcept`.
+         * @see zeroInitialized()
          */
         explicit Array(std::size_t size): _data(size ? new T[size] : nullptr), _size(size) {}
 
@@ -88,21 +118,108 @@ template<class T> class Array {
 
         /** @brief Pointer to first element */
         T* begin() { return _data; }
-        const T* begin() const { return _data; }       /**< @overload */
-        const T* cbegin() const { return _data; }      /**< @overload */
+        const T* begin() const { return _data; }        /**< @overload */
+        const T* cbegin() const { return _data; }       /**< @overload */
 
         /** @brief Pointer to (one item after) last element */
         T* end() { return _data+_size; }
-        const T* end() const { return _data+_size; }   /**< @overload */
-        const T* cend() const { return _data+_size; }  /**< @overload */
+        const T* end() const { return _data+_size; }    /**< @overload */
+        const T* cend() const { return _data+_size; }   /**< @overload */
 
         /** @brief Conversion to array type */
         operator T*() { return _data; }
-        operator const T*() const { return _data; } /**< @overload */
+        operator const T*() const { return _data; }     /**< @overload */
 
-        /** @brief Element access */
-        T& operator[](std::size_t i) { return _data[i]; }
-        const T& operator[](std::size_t i) const { return _data[i]; } /**< @overload */
+    private:
+        T* _data;
+        std::size_t _size;
+};
+
+/**
+@brief %Array reference wrapper with size information
+
+Immutable wrapper around plain C array. Unlike Array this class doesn't do any
+memory management. Main use case is passing array around along with size
+information. If @p T is `const` type, the class is implicitly constructible
+also from const references to Array and ArrayReference of non-const types.
+*/
+template<class T> class ArrayReference {
+    public:
+        typedef T Type;     /**< @brief Element type */
+
+        /** @brief Conversion from nullptr */
+        constexpr /*implicit*/ ArrayReference(std::nullptr_t) noexcept: _data(nullptr), _size(0) {}
+
+        /**
+         * @brief Default constructor
+         *
+         * Creates zero-sized array. Move array with nonzero size onto the
+         * instance to make it useful.
+         */
+        constexpr explicit ArrayReference() noexcept: _data(nullptr), _size(0) {}
+
+        /**
+         * @brief Constructor
+         * @param data      Data pointer
+         * @param size      Data size
+         */
+        constexpr /*implicit*/ ArrayReference(T* data, std::size_t size) noexcept: _data(data), _size(size) {}
+
+        /**
+         * @brief Construct reference to fixed-size array
+         * @param data      Fixed-size array
+         */
+        #ifdef CORRADE_GCC46_COMPATIBILITY
+        #define size size_ /* With GCC 4.6 it conflicts with size(). WTF. */
+        #endif
+        template<std::size_t size> constexpr /*implicit*/ ArrayReference(T(&data)[size]) noexcept: _data(data), _size(size) {}
+        #ifdef CORRADE_GCC46_COMPATIBILITY
+        #undef size
+        #endif
+
+        /** @brief Construct reference to Array */
+        constexpr /*implicit*/ ArrayReference(Array<T>& array) noexcept: _data(array), _size(array.size()) {}
+
+        /**
+         * @brief Construct const reference to Array
+         *
+         * Enabled only if @p T is `const U`.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class U>
+        #else
+        template<class U, class V = typename std::enable_if<std::is_same<const U, T>::value>::type>
+        #endif
+        constexpr /*implicit*/ ArrayReference(const Array<U>& array) noexcept: _data(array), _size(array.size()) {}
+
+        /**
+         * @brief Construct const reference from non-const reference
+         *
+         * Enabled only if @p T is `const U`.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class U>
+        #else
+        template<class U, class V = typename std::enable_if<std::is_same<const U, T>::value>::type>
+        #endif
+        constexpr /*implicit*/ ArrayReference(const ArrayReference<U>& array) noexcept: _data(array), _size(array.size()) {}
+
+        /** @brief Whether the array is empty */
+        constexpr bool empty() const { return !_size; }
+
+        /** @brief %Array size */
+        constexpr std::size_t size() const { return _size; }
+
+        /** @brief Pointer to first element */
+        constexpr T* begin() const { return _data; }
+        constexpr T* cbegin() const { return _data; }   /**< @overload */
+
+        /** @brief Pointer to (one item after) last element */
+        T* end() const { return _data+_size; }
+        T* cend() const { return _data+_size; }         /**< @overload */
+
+        /** @brief Conversion to array type */
+        constexpr operator T*() const { return _data; }
 
     private:
         T* _data;

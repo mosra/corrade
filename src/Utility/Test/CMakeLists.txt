@@ -36,7 +36,7 @@ corrade_add_test(UtilityDirectoryTest DirectoryTest.cpp)
 corrade_add_test(UtilityEndianTest EndianTest.cpp)
 corrade_add_test(UtilityMurmurHash2Test MurmurHash2Test.cpp)
 corrade_add_test(UtilityUtilitiesTest UtilitiesTest.cpp)
-corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp)
+corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp LIBRARIES CorradeUtilityTestLib)
 corrade_add_test(UtilityDebugTest DebugTest.cpp)
 corrade_add_test(UtilitySha1Test Sha1Test.cpp)
 corrade_add_test(UtilityStringTest StringTest.cpp)
@@ -45,7 +45,8 @@ corrade_add_test(UtilityUnicodeTest UnicodeTest.cpp)
 
 # Compiled-in resource test
 corrade_add_resource(ResourceTestData ResourceTestFiles/resources.conf)
-corrade_add_test(UtilityResourceTest ResourceTest.cpp ${ResourceTestData} LIBRARIES CorradeUtilityTestLib)
+corrade_add_resource(ResourceTestNothingData ResourceTestFiles/resourcesNothing.conf)
+corrade_add_test(UtilityResourceTest ResourceTest.cpp ${ResourceTestData} ${ResourceTestNothingData} LIBRARIES CorradeUtilityTestLib)
 
 # Static lib resource test
 add_library(ResourceTestDataLib STATIC ${ResourceTestData})

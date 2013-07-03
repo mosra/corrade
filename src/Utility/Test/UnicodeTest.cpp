@@ -36,11 +36,15 @@ class UnicodeTest: public TestSuite::Tester {
 
         void nextUtf8();
         void nextUtf8Error();
+
+        void utf8utf32();
 };
 
 UnicodeTest::UnicodeTest() {
     addTests({&UnicodeTest::nextUtf8,
-              &UnicodeTest::nextUtf8Error});
+              &UnicodeTest::nextUtf8Error,
+
+              &UnicodeTest::utf8utf32});
 }
 
 void UnicodeTest::nextUtf8() {
@@ -86,6 +90,11 @@ void UnicodeTest::nextUtf8Error() {
     std::tie(codepoint, next) = Unicode::nextChar("   \xce", 3);
     CORRADE_COMPARE(next, 4);
     CORRADE_COMPARE(codepoint, 0xffffffffu);
+}
+
+void UnicodeTest::utf8utf32() {
+    CORRADE_COMPARE(Unicode::utf32("žluťoučký kůň"),
+                    U"\u017Elu\u0165ou\u010Dk\u00FD k\u016F\u0148");
 }
 
 }}}

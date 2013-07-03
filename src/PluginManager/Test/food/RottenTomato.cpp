@@ -23,4 +23,20 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#define PLUGINS_DIR "${PLUGINMANAGER_TEST_DIR}"
+#include "PluginManager/Test/AbstractFood.h"
+
+namespace Corrade { namespace PluginManager { namespace Test {
+
+class RottenTomato: public AbstractFood {
+    public:
+        explicit RottenTomato(AbstractManager* manager, std::string plugin): AbstractFood(manager, std::move(plugin)) {}
+
+        bool isTasty() { return false; }
+        int weight() { return 150; }
+};
+
+}}}
+
+/* Wrong plugin interface */
+CORRADE_PLUGIN_REGISTER(RottenTomato, Corrade::PluginManager::Test::RottenTomato,
+    "cz.mosra.Corrade.PluginManager.Test.AbstractFood/0.1")

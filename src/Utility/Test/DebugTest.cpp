@@ -40,6 +40,7 @@ class DebugTest: public TestSuite::Tester {
         void debug();
         void boolean();
         void chars();
+        void unicode();
         void custom();
         void flags();
 
@@ -50,6 +51,7 @@ DebugTest::DebugTest() {
     addTests({&DebugTest::debug,
               &DebugTest::boolean,
               &DebugTest::chars,
+              &DebugTest::unicode,
               &DebugTest::custom,
               &DebugTest::flags,
               &DebugTest::iterable});
@@ -95,6 +97,23 @@ void DebugTest::chars() {
     std::ostringstream o;
     Debug(&o) << 'a';
     CORRADE_COMPARE(o.str(), "97\n");
+}
+
+void DebugTest::unicode() {
+    /* Four-character hex values */
+    std::ostringstream o;
+    Debug(&o) << U'a';
+    CORRADE_COMPARE(o.str(), "U+0061\n");
+
+    /* Longer hex values */
+    o.str({});
+    Debug(&o) << U'\xBEEF3';
+    CORRADE_COMPARE(o.str(), "U+BEEF3\n");
+
+    /* UTF-32 string */
+    o.str({});
+    Debug(&o) << U"abc";
+    CORRADE_COMPARE(o.str(), "{U+0061, U+0062, U+0063}\n");
 }
 
 namespace {
@@ -148,15 +167,15 @@ void DebugTest::iterable() {
     std::ostringstream out;
     Debug::setOutput(&out);
     Debug() << std::vector<int>{1, 2, 3};
-    CORRADE_COMPARE(out.str(), "[1, 2, 3]\n");
+    CORRADE_COMPARE(out.str(), "{1, 2, 3}\n");
 
-    out.str("");
+    out.str({});
     Debug() << std::set<std::string>{"a", "b", "c"};
-    CORRADE_COMPARE(out.str(), "[a, b, c]\n");
+    CORRADE_COMPARE(out.str(), "{a, b, c}\n");
 
-    out.str("");
+    out.str({});
     Debug() << std::map<int, std::string>{{1, "a"}, {2, "b"}, {3, "c"}};
-    CORRADE_COMPARE(out.str(), "[(1, a), (2, b), (3, c)]\n");
+    CORRADE_COMPARE(out.str(), "{(1, a), (2, b), (3, c)}\n");
 }
 
 }}}

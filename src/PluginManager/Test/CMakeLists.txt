@@ -25,10 +25,8 @@
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-set(PLUGINMANAGER_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR})
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/TestConfigure.h.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/TestConfigure.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testConfigure.h.cmake
+               ${CMAKE_CURRENT_BINARY_DIR}/testConfigure.h)
 
 corrade_add_plugin(Snail ${CMAKE_CURRENT_BINARY_DIR} Snail.conf Snail.cpp)
 corrade_add_plugin(Dog ${CMAKE_CURRENT_BINARY_DIR} Dog.conf Dog.cpp)

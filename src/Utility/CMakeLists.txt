@@ -29,7 +29,6 @@ set(CorradeUtility_SRCS
     Debug.cpp
     Directory.cpp
     Configuration.cpp
-    ConfigurationGroup.cpp
     ConfigurationValue.cpp
     MurmurHash2.cpp
     Sha1.cpp
@@ -40,6 +39,7 @@ set(CorradeUtility_SRCS
     utilities.cpp)
 
 set(CorradeUtility_GracefulAssert_SRCS
+    ConfigurationGroup.cpp
     Resource.cpp)
 
 set(CorradeUtility_HEADERS

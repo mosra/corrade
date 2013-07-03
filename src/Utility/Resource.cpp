@@ -52,13 +52,15 @@ auto Resource::resources() -> std::map<std::string, GroupData>& {
 }
 
 void Resource::registerData(const char* group, unsigned int count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data) {
-    auto groupData = resources().find(group);
-    if(groupData == resources().end())
-        #ifndef CORRADE_GCC47_COMPATIBILITY
-        groupData = resources().emplace(group, GroupData()).first;
-        #else
-        groupData = resources().insert(std::make_pair(group, GroupData())).first;
-        #endif
+    /* Already registered */
+    /** @todo Fix and assert that this doesn't happen */
+    if(resources().find(group) != resources().end()) return;
+
+    #ifndef CORRADE_GCC47_COMPATIBILITY
+    const auto groupData = resources().emplace(group, GroupData()).first;
+    #else
+    const auto groupData = resources().insert(std::make_pair(group, GroupData())).first;
+    #endif
 
     /* Cast to type which can be eaten by std::string constructor */
     const char* _positions = reinterpret_cast<const char*>(positions);
@@ -72,10 +74,7 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
         unsigned int filenamePosition = *reinterpret_cast<const unsigned int*>(_positions+i);
         unsigned int dataPosition = *reinterpret_cast<const unsigned int*>(_positions+i+size);
 
-        ResourceData res{
-            oldDataPosition,
-            dataPosition-oldDataPosition,
-            data};
+        Containers::ArrayReference<const unsigned char> res(data+oldDataPosition, dataPosition-oldDataPosition);
 
         #ifndef CORRADE_GCC47_COMPATIBILITY
         groupData->second.resources.emplace(std::string(_filenames+oldFilenamePosition, filenamePosition-oldFilenamePosition), res);
@@ -88,23 +87,13 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
     }
 }
 
-void Resource::unregisterData(const char* group, const unsigned char* data) {
-    /** @todo redo and test this */
-    if(resources().find(group) == resources().end()) return;
+void Resource::unregisterData(const char* group) {
+    /** @todo test this */
+    auto it = resources().find(group);
+    CORRADE_ASSERT(it != resources().end(),
+        "Utility::Resource: resource group" << group << "is not registered", );
 
-    /* Positions which to remove */
-    std::vector<std::string> positions;
-
-    for(auto it = resources()[group].resources.begin(); it != resources()[group].resources.end(); ++it) {
-        if(it->second.data == data)
-            positions.push_back(it->first);
-    }
-
-    /** @todo wtf? this doesn't crash?? */
-    for(auto it = positions.cbegin(); it != positions.cend(); ++it)
-        resources()[group].resources.erase(*it);
-
-    if(resources()[group].resources.empty()) resources().erase(group);
+    resources().erase(it);
 }
 
 std::string Resource::compileFrom(const std::string& name, const std::string& configurationFile) {
@@ -124,7 +113,7 @@ std::string Resource::compileFrom(const std::string& name, const std::string& co
         Debug() << "Reading file" << fileData.size()+1 << "of" << files.size() << "in group" << '\'' + group + '\'';
 
         const std::string filename = file->value("filename");
-        const std::string alias = file->keyExists("alias") ? file->value("alias") : filename;
+        const std::string alias = file->hasValue("alias") ? file->value("alias") : filename;
         if(filename.empty() || alias.empty()) {
             Error() << "    Error: empty filename or alias!";
             return {};
@@ -144,6 +133,23 @@ std::string Resource::compileFrom(const std::string& name, const std::string& co
 }
 
 std::string Resource::compile(const std::string& name, const std::string& group, const std::vector<std::pair<std::string, std::string>>& files) {
+    /* Special case for empty file list */
+    if(files.empty()) {
+        return "/* Compiled resource file. DO NOT EDIT! */\n\n"
+            "#include \"Utility/utilities.h\"\n"
+            "#include \"Utility/Resource.h\"\n\n"
+            "int resourceInitializer_" + name + "();\n"
+            "int resourceInitializer_" + name + "() {\n"
+            "    Corrade::Utility::Resource::registerData(\"" + group + "\", 0, nullptr, nullptr, nullptr);\n"
+            "    return 1;\n"
+            "} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_" + name + ")\n\n"
+            "int resourceFinalizer_" + name + "();\n"
+            "int resourceFinalizer_" + name + "() {\n"
+            "    Corrade::Utility::Resource::unregisterData(\"" + group + "\");\n"
+            "    return 1;\n"
+            "} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_" + name + ")\n";
+    }
+
     std::string positions, filenames, data;
     unsigned int filenamesLen = 0, dataLen = 0;
 
@@ -208,7 +214,7 @@ std::string Resource::compile(const std::string& name, const std::string& group,
         "} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_" + name + ")\n\n"
         "int resourceFinalizer_" + name + "();\n"
         "int resourceFinalizer_" + name + "() {\n"
-        "    Corrade::Utility::Resource::unregisterData(\"" + group + "\", resourceData);\n"
+        "    Corrade::Utility::Resource::unregisterData(\"" + group + "\");\n"
         "    return 1;\n"
         "} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_" + name + ")\n";
 }
@@ -241,7 +247,7 @@ Resource::~Resource() {
     delete _overrideGroup;
 }
 
-std::pair<const unsigned char*, unsigned int> Resource::getRaw(const std::string& filename) const {
+Containers::ArrayReference<const unsigned char> Resource::getRaw(const std::string& filename) const {
     CORRADE_INTERNAL_ASSERT(_group != resources().end());
 
     /* The group is overriden with live data */
@@ -257,7 +263,7 @@ std::pair<const unsigned char*, unsigned int> Resource::getRaw(const std::string
         for(auto fit = files.begin(); fit != files.end(); ++fit) {
             const ConfigurationGroup* const file = *fit;
 
-            const std::string name = file->keyExists("alias") ? file->value("alias") : file->value("filename");
+            const std::string name = file->hasValue("alias") ? file->value("alias") : file->value("filename");
             if(name != filename) continue;
 
             /* Load the file */
@@ -267,7 +273,7 @@ std::pair<const unsigned char*, unsigned int> Resource::getRaw(const std::string
             /* No nullptr here -> issue */
             if(!success)
                 #ifndef CORRADE_GCC44_COMPATIBILITY
-                return {nullptr, 0};
+                return nullptr;
                 #else
                 return {};
                 #endif
@@ -289,16 +295,14 @@ std::pair<const unsigned char*, unsigned int> Resource::getRaw(const std::string
     /* If the filename doesn't exist, return empty string */
     const auto it = _group->second.resources.find(filename);
     CORRADE_ASSERT(it != _group->second.resources.end(),
-        "Utility::Resource::get(): file" << '\'' + filename + '\'' << "was not found in group" << '\'' + _group->first + '\'', {});
+        "Utility::Resource::get(): file" << '\'' + filename + '\'' << "was not found in group" << '\'' + _group->first + '\'', nullptr);
 
-    return {it->second.data+it->second.position, it->second.size};
+    return it->second;
 }
 
 std::string Resource::get(const std::string& filename) const {
-    const unsigned char* data;
-    unsigned int size;
-    std::tie(data, size) = getRaw(filename);
-    return data ? std::string(reinterpret_cast<const char*>(data), size) : std::string();
+    Containers::ArrayReference<const unsigned char> data = getRaw(filename);
+    return data ? std::string(reinterpret_cast<const char*>(data.begin()), data.size()) : std::string();
 }
 
 std::pair<bool, Containers::Array<unsigned char>> Resource::fileContents(const std::string& filename) {
@@ -306,11 +310,11 @@ std::pair<bool, Containers::Array<unsigned char>> Resource::fileContents(const s
 
     if(!file.good()) {
         Error() << "Cannot open file " << filename;
-        return {false, Containers::Array<unsigned char>()};
+        return {false, nullptr};
     }
 
     file.seekg(0, std::ios::end);
-    if(file.tellg() == 0) return {true, Containers::Array<unsigned char>()};
+    if(file.tellg() == 0) return {true, nullptr};
     Containers::Array<unsigned char> data(file.tellg());
     file.seekg(0, std::ios::beg);
     file.read(reinterpret_cast<char*>(data.begin()), data.size());

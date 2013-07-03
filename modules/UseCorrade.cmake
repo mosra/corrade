@@ -100,7 +100,8 @@ function(corrade_add_resource name configurationFile)
         message(FATAL_ERROR "Superfluous arguments to corrade_add_resource():" ${ARGN})
     endif()
 
-    # Parse dependencies from the file
+    # Add the file as dependency, parse more dependencies from the file
+    set(dependencies "${configurationFile}")
     set(filenameRegex "^[ \t]*filename[ \t]*=[ \t]*\"?([^\"]+)\"?[ \t]*$")
     get_filename_component(configurationFilePath ${configurationFile} PATH)
     file(STRINGS "${configurationFile}" files REGEX ${filenameRegex})

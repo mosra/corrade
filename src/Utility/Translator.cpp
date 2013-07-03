@@ -170,8 +170,9 @@ bool Translator::get(const std::string& key, std::string* text, int level) const
     }
 
     /* If not in current level, try next */
-    if(!g || !g->value(key, text)) return get(key, text, ++level);
+    if(!g || !g->hasValue(key)) return get(key, text, ++level);
 
+    *text = g->value(key);
     return true;
 }
 

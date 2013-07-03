@@ -33,45 +33,39 @@ namespace Implementation {
     template<class T> std::string BasicConfigurationValue<T>::toString(const T& value, ConfigurationValueFlags flags) {
         std::ostringstream stream;
 
-        /* Hexadecimal / octal values */
-        if(flags & (ConfigurationValueFlag::Color|ConfigurationValueFlag::Hex))
+        /* Hexadecimal / octal values, scientific notation */
+        if(flags & ConfigurationValueFlag::Hex)
             stream.setf(std::istringstream::hex, std::istringstream::basefield);
-        if(flags & ConfigurationValueFlag::Oct)
+        else if(flags & ConfigurationValueFlag::Oct)
             stream.setf(std::istringstream::oct, std::istringstream::basefield);
-        if(flags & ConfigurationValueFlag::Scientific)
+        else if(flags & ConfigurationValueFlag::Scientific)
             stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
 
+        if(flags & ConfigurationValueFlag::Uppercase)
+            stream.setf(std::istringstream::uppercase);
+
         stream << value;
-
-        std::string stringValue = stream.str();
-
-        /* Strip initial # character, if user wants a color */
-        if(flags & ConfigurationValueFlag::Color)
-            stringValue = '#' + stringValue;
-
-        return stringValue;
+        return stream.str();
     }
 
     template<class T> T BasicConfigurationValue<T>::fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
         std::string _stringValue = stringValue;
 
-        /* Strip initial # character, if user wants a color */
-        if(flags & ConfigurationValueFlag::Color && !stringValue.empty() && stringValue[0] == '#')
-            _stringValue = stringValue.substr(1);
-
         std::istringstream stream(_stringValue);
 
         /* Hexadecimal / octal values, scientific notation */
-        if(flags & (ConfigurationValueFlag::Color|ConfigurationValueFlag::Hex))
+        if(flags & ConfigurationValueFlag::Hex)
             stream.setf(std::istringstream::hex, std::istringstream::basefield);
-        if(flags & ConfigurationValueFlag::Oct)
+        else if(flags & ConfigurationValueFlag::Oct)
             stream.setf(std::istringstream::oct, std::istringstream::basefield);
-        if(flags & ConfigurationValueFlag::Scientific)
+        else if(flags & ConfigurationValueFlag::Scientific)
             stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
+
+        if(flags & ConfigurationValueFlag::Uppercase)
+            stream.setf(std::istringstream::uppercase);
 
         T value;
         stream >> value;
-
         return value;
     }
 
@@ -93,13 +87,17 @@ namespace Implementation {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 bool ConfigurationValue<bool>::fromString(const std::string& value, ConfigurationValueFlags) {
-    if(value == "1" || value == "yes" || value == "y" || value == "true") return true;
-    return false;
+    return value == "1" || value == "yes" || value == "y" || value == "true";
+}
+std::string ConfigurationValue<bool>::toString(const bool value, ConfigurationValueFlags) {
+    return value ? "true" : "false";
 }
 
-std::string ConfigurationValue<bool>::toString(const bool& value, ConfigurationValueFlags) {
-    if(value) return "true";
-    return "false";
+char32_t ConfigurationValue<char32_t>::fromString(const std::string& value, ConfigurationValueFlags) {
+    return ConfigurationValue<unsigned long long>::fromString(value, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase);
+}
+std::string ConfigurationValue<char32_t>::toString(const char32_t value, ConfigurationValueFlags) {
+    return ConfigurationValue<unsigned long long>::toString(value, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase);
 }
 #endif
 

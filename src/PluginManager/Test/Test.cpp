@@ -25,6 +25,7 @@
 
 #include <sstream>
 
+#include "PluginManager/corradePluginManagerConfigure.h"
 #include "PluginManager/Manager.h"
 #include "TestSuite/Tester.h"
 #include "TestSuite/Compare/Container.h"
@@ -33,9 +34,7 @@
 #include "AbstractAnimal.h"
 #include "AbstractFood.h"
 #include "AbstractDeletable.h"
-
-#include "TestConfigure.h"
-#include "corradePluginManagerConfigure.h"
+#include "testConfigure.h"
 
 using Corrade::Utility::Directory;
 
@@ -50,7 +49,9 @@ class Test: public TestSuite::Tester {
         Test();
 
         void nameList();
-        void errors();
+        void wrongPluginVersion();
+        void wrongPluginInterface();
+        void wrongMetadataFile();
 
         void staticPlugin();
         void dynamicPlugin();
@@ -69,7 +70,9 @@ class Test: public TestSuite::Tester {
 
 Test::Test() {
     addTests({&Test::nameList,
-              &Test::errors,
+              &Test::wrongPluginVersion,
+              &Test::wrongPluginInterface,
+              &Test::wrongMetadataFile,
 
               &Test::staticPlugin,
               &Test::dynamicPlugin,
@@ -102,13 +105,28 @@ void Test::nameList() {
         "Canary"}, TestSuite::Compare::Container);
 }
 
-void Test::errors() {
+void Test::wrongPluginVersion() {
+    std::ostringstream out;
+    Error::setOutput(&out);
+
+    PluginManager::Manager<AbstractFood> foodManager(Directory::join(PLUGINS_DIR, "food"));
+    CORRADE_COMPARE(foodManager.load("OldBread"), PluginManager::LoadState::WrongPluginVersion);
+    CORRADE_COMPARE(foodManager.loadState("OldBread"), PluginManager::LoadState::NotLoaded);
+    CORRADE_COMPARE(out.str(), "PluginManager: wrong plugin version, expected 3 but got 0\n");
+}
+
+void Test::wrongPluginInterface() {
+    std::ostringstream out;
+    Error::setOutput(&out);
+
+    PluginManager::Manager<AbstractFood> foodManager(Directory::join(PLUGINS_DIR, "food"));
+    CORRADE_COMPARE(foodManager.load("RottenTomato"), PluginManager::LoadState::WrongInterfaceVersion);
+    CORRADE_COMPARE(out.str(), "PluginManager: wrong interface version, expected 'cz.mosra.Corrade.PluginManager.Test.AbstractFood/1.0' but got 'cz.mosra.Corrade.PluginManager.Test.AbstractFood/0.1'\n");
+}
+
+void Test::wrongMetadataFile() {
     PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
 
-    /** @todo Wrong plugin version (it would be hard) */
-    /** @todo Wrong interface version */
-
-    /* Wrong metadata file */
     CORRADE_COMPARE(manager.loadState("Snail"), LoadState::WrongMetadataFile);
     CORRADE_COMPARE(manager.load("Snail"), LoadState::WrongMetadataFile);
 }

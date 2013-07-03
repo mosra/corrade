@@ -1,5 +1,3 @@
-#ifndef Corrade_Utility_Unicode_h
-#define Corrade_Utility_Unicode_h
 /*
     This file is part of Corrade.
 
@@ -25,33 +23,4 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-/** @file
- * @brief Class Corrade::Utility::Unicode
- */
-
-#include <string>
-#include <tuple>
-
-#include "Utility/corradeUtilityVisibility.h"
-
-namespace Corrade { namespace Utility {
-
-/** @brief %Unicode utilities */
-class CORRADE_UTILITY_EXPORT Unicode {
-    public:
-        /**
-         * @brief Next UTF-8 character
-         *
-         * Returns %Unicode codepoint of character on the cursor and position
-         * of the following character. If an error occurs, returns position of
-         * next byte and `0xffffffffu` as codepoint.
-         */
-        static std::tuple<char32_t, std::size_t> nextChar(const std::string& text, const std::size_t cursor);
-
-        /** @brief Convert UTF-8 to UTF-32 */
-        static std::u32string utf32(const std::string& text);
-};
-
-}}
-
-#endif
+#define PLUGINS_DIR "${CMAKE_CURRENT_BINARY_DIR}"

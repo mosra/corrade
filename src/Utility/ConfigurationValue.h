@@ -47,8 +47,8 @@ namespace Corrade { namespace Utility {
 enum class ConfigurationValueFlag: std::uint8_t {
     Oct = 1 << 0,           /**< Numeric value as octal */
     Hex = 1 << 1,           /**< Numeric value as hexadecimal */
-    Color = 1 << 2,         /**< Numeric value as color representation */
-    Scientific = 1 << 3     /**< Floating point values in scientific notation */
+    Scientific = 1 << 2,    /**< Floating point values in scientific notation */
+    Uppercase = 1 << 3      /**< Use uppercase characters for numeric output */
 };
 
 /** @relates ConfigurationGroup
@@ -172,13 +172,32 @@ template<> struct ConfigurationValue<long double>: public Implementation::BasicC
 /** @brief %Configuration value parser and writer for `sd::string` type */
 template<> struct ConfigurationValue<std::string>: public Implementation::BasicConfigurationValue<std::string> {};
 
-/** @brief %Configuration value parser and writer for `bool` type */
+/**
+@brief %Configuration value parser and writer for `bool` type
+
+Reads `1`, `yes`, `y` or `true` as `true`, any other string as `false`. Writes
+`true` or `false`.
+*/
 template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<bool> {
     ConfigurationValue() = delete;
 
     #ifndef DOXYGEN_GENERATING_OUTPUT
     static bool fromString(const std::string& value, ConfigurationValueFlags flags);
-    static std::string toString(const bool& value, ConfigurationValueFlags flags);
+    static std::string toString(bool value, ConfigurationValueFlags flags);
+    #endif
+};
+
+/**
+@brief %Configuration value parser and writer for `char32_t` type
+
+Reads and writes the value in hexadecimal.
+*/
+template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<char32_t> {
+    ConfigurationValue() = delete;
+
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    static char32_t fromString(const std::string& value, ConfigurationValueFlags);
+    static std::string toString(char32_t value, ConfigurationValueFlags);
     #endif
 };
 

@@ -57,15 +57,27 @@ void ArrayTest::constructEmpty() {
     CORRADE_COMPARE(a.size(), 0);
 
     /* Zero-length should not call new */
-    const Array b(0);
+    const std::size_t size = 0;
+    const Array b(size);
     CORRADE_VERIFY(b == nullptr);
     CORRADE_COMPARE(b.size(), 0);
+
+    /* Conversion from nullptr */
+    const Array c(nullptr);
+    CORRADE_VERIFY(c == nullptr);
+    CORRADE_COMPARE(c.size(), 0);
+
+    /* Implicit construction from nullptr should be allowed */
+    CORRADE_VERIFY((std::is_convertible<std::nullptr_t, Array>::value));
 }
 
 void ArrayTest::construct() {
     const Array a(5);
     CORRADE_VERIFY(a != nullptr);
     CORRADE_COMPARE(a.size(), 5);
+
+    /* Implicit construction from std::size_t is not allowed */
+    CORRADE_VERIFY(!(std::is_convertible<std::size_t, Array>::value));
 }
 
 void ArrayTest::constructMove() {
