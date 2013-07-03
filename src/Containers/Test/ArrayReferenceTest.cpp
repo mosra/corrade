@@ -38,7 +38,9 @@ class ArrayReferenceTest: public TestSuite::Tester {
         void constructArray();
         void emptyCheck();
         void access();
+        #ifndef CORRADE_GCC45_COMPATIBILITY
         void rangeBasedFor();
+        #endif
 
         void constReference();
 };
@@ -54,7 +56,10 @@ ArrayReferenceTest::ArrayReferenceTest() {
               &ArrayReferenceTest::constructArray,
               &ArrayReferenceTest::emptyCheck,
               &ArrayReferenceTest::access,
-              &ArrayReferenceTest::rangeBasedFor});
+              #ifndef CORRADE_GCC45_COMPATIBILITY
+              &ArrayReferenceTest::rangeBasedFor,
+              #endif
+              });
 }
 
 void ArrayReferenceTest::constructEmpty() {
@@ -118,6 +123,7 @@ void ArrayReferenceTest::access() {
     CORRADE_COMPARE(b.end()-b.begin(), b.size());
 }
 
+#ifndef CORRADE_GCC45_COMPATIBILITY
 void ArrayReferenceTest::rangeBasedFor() {
     int a[5];
     ArrayReference b = a;
@@ -130,6 +136,7 @@ void ArrayReferenceTest::rangeBasedFor() {
     CORRADE_COMPARE(b[3], 3);
     CORRADE_COMPARE(b[4], 3);
 }
+#endif
 
 void ArrayReferenceTest::constReference() {
     const int a[] = {3, 4, 7, 12, 0, -15};
