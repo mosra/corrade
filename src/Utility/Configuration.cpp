@@ -134,8 +134,8 @@ std::string Configuration::parse(std::istream& in, ConfigurationGroup* group, co
     while(in.good()) {
         std::getline(in, buffer);
 
-        /* Windows EOL */
-        if(!buffer.empty() && buffer.back() == '\r')
+        /* Windows EOL (GCC 4.5 doesn't have std::string::back()) */
+        if(!buffer.empty() && buffer[buffer.size()-1] == '\r')
             _flags |= InternalFlag::WindowsEol;
 
         /* Multi-line value */
@@ -144,7 +144,8 @@ std::string Configuration::parse(std::istream& in, ConfigurationGroup* group, co
             if(String::trim(buffer) == "\"\"\"") {
                 /* Remove trailing newline, if present */
                 if(!group->_values.back().value.empty()) {
-                    CORRADE_INTERNAL_ASSERT(group->_values.back().value.back() == '\n');
+                    /* GCC 4.5 doesn't have std::string::back() */
+                    CORRADE_INTERNAL_ASSERT(group->_values.back().value[group->_values.back().value.size()-1] == '\n');
                     group->_values.back().value.resize(group->_values.back().value.size()-1);
                 }
 
@@ -152,8 +153,9 @@ std::string Configuration::parse(std::istream& in, ConfigurationGroup* group, co
                 continue;
             }
 
-            /* Remove Windows EOL, if present */
-            if(!buffer.empty() && buffer.back() == '\r') buffer.resize(buffer.size()-1);
+            /* Remove Windows EOL, if present (GCC 4.5 doesn't have std::string::back()) */
+            if(!buffer.empty() && buffer[buffer.size()-1] == '\r')
+                buffer.resize(buffer.size()-1);
 
             /* Append it (with newline) to current value */
             group->_values.back().value += buffer;
@@ -293,9 +295,9 @@ void Configuration::save(std::ostream& out, const std::string& eol, Configuratio
 
                 buffer = it->key + "=\"\"\"" + eol + value + eol + "\"\"\"" + eol;
 
-            /* Value with leading/trailing spaces */
-            } else if(!it->value.empty() && (String::Whitespace.find(it->value.front()) != std::string::npos ||
-                                             String::Whitespace.find(it->value.back()) != std::string::npos)) {
+            /* Value with leading/trailing spaces (GCC 4.5 doesn't have std::string::back()) */
+            } else if(!it->value.empty() && (String::Whitespace.find(it->value[0]) != std::string::npos ||
+                                             String::Whitespace.find(it->value[it->value.size()-1]) != std::string::npos)) {
                 buffer = it->key + "=\"" + it->value + '"' + eol;
 
             /* Value without spaces */
