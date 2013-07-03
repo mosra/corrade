@@ -54,7 +54,9 @@ ArrayReferenceTest::ArrayReferenceTest() {
               &ArrayReferenceTest::constructArray,
               &ArrayReferenceTest::emptyCheck,
               &ArrayReferenceTest::access,
-              &ArrayReferenceTest::rangeBasedFor});
+              &ArrayReferenceTest::rangeBasedFor,
+
+              &ArrayReferenceTest::constReference});
 }
 
 void ArrayReferenceTest::constructEmpty() {
@@ -139,7 +141,7 @@ void ArrayReferenceTest::constReference() {
     int c[3];
     ArrayReference d = c;
     ConstArrayReference e = d;
-    CORRADE_VERIFY(e == a);
+    CORRADE_VERIFY(e == c);
     CORRADE_COMPARE(e.size(), 3);
 }
 
