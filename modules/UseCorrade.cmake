@@ -130,17 +130,13 @@ function(corrade_add_plugin plugin_name install_dir metadata_file)
 endfunction()
 
 function(corrade_add_static_plugin plugin_name metadata_file)
-    foreach(source ${ARGN})
-        set(sources ${sources} ${source})
-    endforeach()
-
     # Compile resources
     set(resource_file "${CMAKE_CURRENT_BINARY_DIR}/resources_${plugin_name}.conf")
     file(WRITE "${resource_file}" "group=CorradeStaticPlugin_${plugin_name}\n[file]\nfilename=\"${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file}\"\nalias=${plugin_name}.conf")
     corrade_add_resource(${plugin_name} "${resource_file}")
 
     # Create static library
-    add_library(${plugin_name} STATIC ${sources} ${${plugin_name}})
+    add_library(${plugin_name} STATIC ${ARGN} ${${plugin_name}})
     set_target_properties(${plugin_name} PROPERTIES COMPILE_FLAGS "-DCORRADE_STATIC_PLUGIN ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
 endfunction()
 
