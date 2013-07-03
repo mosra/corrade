@@ -29,6 +29,7 @@
  * @brief Forward declarations for Corrade::Utility namespace
  */
 
+#include <cstddef>
 #include <cstdint>
 
 #include "corradeConfigure.h"
