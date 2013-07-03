@@ -130,7 +130,7 @@ std::string Directory::home() {
     TCHAR h[MAX_PATH];
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wold-style-cast"
-    if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, h)))
+    if(!SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_PERSONAL, nullptr, 0, h)))
         return {};
     #pragma GCC diagnostic pop
     #else
@@ -150,7 +150,7 @@ std::string Directory::configurationDir(const std::string& applicationName, bool
     TCHAR path[MAX_PATH];
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wold-style-cast"
-    if(!SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path)))
+    if(!SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, path)))
         return {};
     #pragma GCC diagnostic pop
     std::string appdata = path;
