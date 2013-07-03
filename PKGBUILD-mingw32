@@ -19,7 +19,8 @@ build() {
     cmake .. \
         -DCMAKE_TOOLCHAIN_FILE=../toolchains/archlinux/basic-mingw32.cmake \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=/usr/i486-mingw32
+        -DCMAKE_INSTALL_PREFIX=/usr/i486-mingw32 \
+        -DCORRADE_GCC47_COMPATIBILITY=ON
     make
 }
 
