@@ -59,7 +59,8 @@ ArrayReferenceTest::ArrayReferenceTest() {
               #ifndef CORRADE_GCC45_COMPATIBILITY
               &ArrayReferenceTest::rangeBasedFor,
               #endif
-              });
+
+              &ArrayReferenceTest::constReference});
 }
 
 void ArrayReferenceTest::constructEmpty() {
@@ -148,7 +149,7 @@ void ArrayReferenceTest::constReference() {
     int c[3];
     ArrayReference d = c;
     ConstArrayReference e = d;
-    CORRADE_VERIFY(e == a);
+    CORRADE_VERIFY(e == c);
     CORRADE_COMPARE(e.size(), 3);
 }
 
