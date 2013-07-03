@@ -32,7 +32,8 @@
 namespace Corrade { namespace Utility {
 
 std::pair<char32_t, std::size_t> Unicode::nextChar(const std::string& text, std::size_t cursor) {
-    CORRADE_INTERNAL_ASSERT(cursor < text.length());
+    CORRADE_ASSERT(cursor < text.length(),
+        "Utility::Unicode::nextChar(): cursor out of range", {});
 
     std::uint32_t character = text[cursor];
     std::size_t end = cursor;

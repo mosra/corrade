@@ -35,12 +35,12 @@ set(CorradeUtility_SRCS
     String.cpp
     Translator.cpp
     TypeTraits.cpp
-    Unicode.cpp
     utilities.cpp)
 
 set(CorradeUtility_GracefulAssert_SRCS
     ConfigurationGroup.cpp
-    Resource.cpp)
+    Resource.cpp
+    Unicode.cpp)
 
 set(CorradeUtility_HEADERS
     AbstractHash.h

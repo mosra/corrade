@@ -23,6 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <sstream>
 #include <tuple>
 
 #include "TestSuite/Tester.h"
@@ -36,6 +37,7 @@ class UnicodeTest: public TestSuite::Tester {
 
         void nextUtf8();
         void nextUtf8Error();
+        void nextUtf8Empty();
 
         void utf8utf32();
 };
@@ -43,6 +45,7 @@ class UnicodeTest: public TestSuite::Tester {
 UnicodeTest::UnicodeTest() {
     addTests({&UnicodeTest::nextUtf8,
               &UnicodeTest::nextUtf8Error,
+              &UnicodeTest::nextUtf8Empty,
 
               &UnicodeTest::utf8utf32});
 }
@@ -92,9 +95,20 @@ void UnicodeTest::nextUtf8Error() {
     CORRADE_COMPARE(codepoint, 0xffffffffu);
 }
 
+void UnicodeTest::nextUtf8Empty() {
+    std::ostringstream out;
+    Error::setOutput(&out);
+    Unicode::nextChar("", 0);
+
+    CORRADE_COMPARE(out.str(), "Utility::Unicode::nextChar(): cursor out of range\n");
+}
+
 void UnicodeTest::utf8utf32() {
     CORRADE_COMPARE(Unicode::utf32("žluťoučký kůň"),
                     U"\u017Elu\u0165ou\u010Dk\u00FD k\u016F\u0148");
+
+    /* Empty string shouldn't crash */
+    CORRADE_COMPARE(Unicode::utf32(""), U"");
 }
 
 }}}
