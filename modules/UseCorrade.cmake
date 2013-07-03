@@ -106,6 +106,7 @@ function(corrade_add_resource name configurationFile)
 endfunction()
 
 function(corrade_add_plugin plugin_name install_dir metadata_file)
+    # Create dynamic library
     if(WIN32)
         add_library(${plugin_name} SHARED ${ARGN})
     else()
@@ -117,6 +118,8 @@ function(corrade_add_plugin plugin_name install_dir metadata_file)
         PREFIX ""
         COMPILE_FLAGS -DCORRADE_DYNAMIC_PLUGIN)
 
+    # Copy metadata next to the binary for testing purposes or install it both
+    # somewhere
     if(${install_dir} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
         add_custom_command(
             OUTPUT ${plugin_name}.conf
@@ -129,7 +132,7 @@ function(corrade_add_plugin plugin_name install_dir metadata_file)
     endif()
 endfunction()
 
-function(corrade_add_static_plugin plugin_name metadata_file)
+function(corrade_add_static_plugin plugin_name install_dir metadata_file)
     # Compile resources
     set(resource_file "${CMAKE_CURRENT_BINARY_DIR}/resources_${plugin_name}.conf")
     file(WRITE "${resource_file}" "group=CorradeStaticPlugin_${plugin_name}\n[file]\nfilename=\"${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file}\"\nalias=${plugin_name}.conf")
@@ -138,6 +141,11 @@ function(corrade_add_static_plugin plugin_name metadata_file)
     # Create static library
     add_library(${plugin_name} STATIC ${ARGN} ${${plugin_name}})
     set_target_properties(${plugin_name} PROPERTIES COMPILE_FLAGS "-DCORRADE_STATIC_PLUGIN ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
+
+    # Install, if not into the same place
+    if(NOT ${install_dir} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
+        install(TARGETS ${plugin_name} DESTINATION "${install_dir}")
+    endif()
 endfunction()
 
 set(_CORRADE_USE_INCLUDED TRUE)

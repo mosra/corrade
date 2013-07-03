@@ -65,10 +65,12 @@
 #
 #
 # Add static plugin.
-#  corrade_add_static_plugin(plugin_name metadata_file
+#  corrade_add_static_plugin(plugin_name install_dir metadata_file
 #                            sources...)
 # The macro adds preprocessor directive CORRADE_STATIC_PLUGIN. Additional
-# libraries can be linked in via target_link_libraries(plugin_name ...).
+# libraries can be linked in via target_link_libraries(plugin_name ...). If
+# install_dir is set to CMAKE_CURRENT_BINARY_DIR (e.g. for testing purposes),
+# no installation is performed.
 #
 #
 # Additionally these variables are defined for internal usage:
