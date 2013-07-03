@@ -32,6 +32,8 @@
 #include <type_traits>
 #include <utility>
 
+#include "corradeConfigure.h"
+
 namespace Corrade { namespace Containers {
 
 /**
@@ -162,7 +164,13 @@ template<class T> class ArrayReference {
          * @brief Construct reference to fixed-size array
          * @param data      Fixed-size array
          */
+        #ifdef CORRADE_GCC46_COMPATIBILITY
+        #define size size_ /* With GCC 4.6 it conflicts with size(). WTF. */
+        #endif
         template<std::size_t size> constexpr /*implicit*/ ArrayReference(T(&data)[size]) noexcept: _data(data), _size(size) {}
+        #ifdef CORRADE_GCC46_COMPATIBILITY
+        #undef size
+        #endif
 
         /** @brief Construct reference to Array */
         constexpr /*implicit*/ ArrayReference(Array<T>& array) noexcept: _data(array), _size(array.size()) {}
