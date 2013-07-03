@@ -48,27 +48,6 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     endif()
 endif()
 
-# Set variable for current and also parent scope, if parent scope exists.
-#  set_parent_scope(name value)
-# Workaround for ugly CMake bug.
-macro(set_parent_scope name)
-    if("${ARGN}" STREQUAL "")
-        set(${name} "")
-    else()
-        set(${name} ${ARGN})
-    endif()
-
-    # Set to parent scope only if parent exists
-    if(NOT ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-        if("${ARGN}" STREQUAL "")
-            # CMake bug: nothing is set in parent scope
-            set(${name} "" PARENT_SCOPE)
-        else()
-            set(${name} ${${name}} PARENT_SCOPE)
-        endif()
-    endif()
-endmacro()
-
 function(corrade_add_test test_name)
     # Get DLL and path lists
     foreach(arg ${ARGN})
@@ -150,7 +129,7 @@ function(corrade_add_plugin plugin_name install_dir metadata_file)
     endif()
 endfunction()
 
-macro(corrade_add_static_plugin static_plugins_variable plugin_name metadata_file)
+function(corrade_add_static_plugin plugin_name metadata_file)
     foreach(source ${ARGN})
         set(sources ${sources} ${source})
     endforeach()
@@ -163,11 +142,6 @@ macro(corrade_add_static_plugin static_plugins_variable plugin_name metadata_fil
     # Create static library
     add_library(${plugin_name} STATIC ${sources} ${${plugin_name}})
     set_target_properties(${plugin_name} PROPERTIES COMPILE_FLAGS "-DCORRADE_STATIC_PLUGIN ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
-
-    # Unset sources array (it's a macro, thus variables stay between calls)
-    unset(sources)
-
-    set_parent_scope(${static_plugins_variable} ${${static_plugins_variable}} ${plugin_name})
-endmacro()
+endfunction()
 
 set(_CORRADE_USE_INCLUDED TRUE)
