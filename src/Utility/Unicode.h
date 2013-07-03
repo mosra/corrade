@@ -45,7 +45,7 @@ class CORRADE_UTILITY_EXPORT Unicode {
          * of the following character. If an error occurs, returns position of
          * next byte and `0xffffffffu` as codepoint.
          */
-        static std::tuple<char32_t, std::size_t> nextChar(const std::string& text, const std::size_t cursor);
+        static std::pair<char32_t, std::size_t> nextChar(const std::string& text, const std::size_t cursor);
 
         /** @brief Convert UTF-8 to UTF-32 */
         static std::u32string utf32(const std::string& text);
