@@ -35,11 +35,16 @@ NaClConsoleStreamBuffer::NaClConsoleStreamBuffer(pp::Instance* const instance, c
 NaClConsoleStreamBuffer::~NaClConsoleStreamBuffer() = default;
 
 int NaClConsoleStreamBuffer::sync() {
+    std::string message = str();
+
+    /* Remove newline at the end, if present */
+    if(message.back() == '\n') message.resize(message.size()-1);
+
     /* Send buffer data to console */
     if(source.empty())
-        instance->LogToConsole(PP_LogLevel(level), str());
+        instance->LogToConsole(PP_LogLevel(level), message);
     else
-        instance->LogToConsoleWithSource(PP_LogLevel(level), source, str());
+        instance->LogToConsoleWithSource(PP_LogLevel(level), source, message);
 
     /* And clear them for next time so they aren't sent again every time */
     str({});
