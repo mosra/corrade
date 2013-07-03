@@ -153,7 +153,7 @@ void ConfigurationGroup::addGroup(const std::string& name, ConfigurationGroup* g
         "Utility::ConfigurationGroup::addGroup(): disallowed character in group name", );
 
     if(_configuration) _configuration->_flags |= Configuration::InternalFlag::Changed;
-    _groups.push_back({name, group});
+    _groups.push_back(Group{name, group});
 }
 
 ConfigurationGroup* ConfigurationGroup::addGroup(const std::string& name) {
@@ -270,7 +270,7 @@ bool ConfigurationGroup::setValueInternal(const std::string& key, std::string va
     if(index > foundIndex) return false;
 
     /* No value with that name was found, add new */
-    _values.push_back({key, std::move(value)});
+    _values.push_back(Value{key, std::move(value)});
 
     if(_configuration) _configuration->_flags |= Configuration::InternalFlag::Changed;
     return true;
@@ -281,7 +281,7 @@ void ConfigurationGroup::addValueInternal(std::string key, std::string value, Co
     CORRADE_ASSERT(key.find_first_of("\n=") == std::string::npos,
         "Utility::ConfigurationGroup::addValue(): disallowed character in key", );
 
-    _values.push_back({std::move(key), std::move(value)});
+    _values.push_back(Value{std::move(key), std::move(value)});
 
     if(_configuration) _configuration->_flags |= Configuration::InternalFlag::Changed;
 }
