@@ -62,6 +62,7 @@ void ArrayTest::constructEmpty() {
     CORRADE_VERIFY(b == nullptr);
     CORRADE_COMPARE(b.size(), 0);
 
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     /* Conversion from nullptr */
     const Array c(nullptr);
     CORRADE_VERIFY(c == nullptr);
@@ -69,6 +70,7 @@ void ArrayTest::constructEmpty() {
 
     /* Implicit construction from nullptr should be allowed */
     CORRADE_VERIFY((std::is_convertible<std::nullptr_t, Array>::value));
+    #endif
 }
 
 void ArrayTest::construct() {

@@ -2,6 +2,7 @@
 
 #include "Utility/utilities.h"
 #include "Utility/Resource.h"
+#include "corradeCompatibility.h"
 
 int resourceInitializer_ResourceTestNothingData();
 int resourceInitializer_ResourceTestNothingData() {

@@ -137,7 +137,8 @@ std::string Resource::compile(const std::string& name, const std::string& group,
     if(files.empty()) {
         return "/* Compiled resource file. DO NOT EDIT! */\n\n"
             "#include \"Utility/utilities.h\"\n"
-            "#include \"Utility/Resource.h\"\n\n"
+            "#include \"Utility/Resource.h\"\n"
+            "#include \"corradeCompatibility.h\"\n\n"
             "int resourceInitializer_" + name + "();\n"
             "int resourceInitializer_" + name + "() {\n"
             "    Corrade::Utility::Resource::registerData(\"" + group + "\", 0, nullptr, nullptr, nullptr);\n"
@@ -272,7 +273,7 @@ Containers::ArrayReference<const unsigned char> Resource::getRaw(const std::stri
             std::tie(success, data) = fileContents(Directory::join(Directory::path(_group->second.overrideGroup), file->value("filename")));
             /* No nullptr here -> issue */
             if(!success)
-                #ifndef CORRADE_GCC44_COMPATIBILITY
+                #ifndef CORRADE_GCC45_COMPATIBILITY
                 return nullptr;
                 #else
                 return {};
@@ -294,8 +295,13 @@ Containers::ArrayReference<const unsigned char> Resource::getRaw(const std::stri
 
     /* If the filename doesn't exist, return empty string */
     const auto it = _group->second.resources.find(filename);
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     CORRADE_ASSERT(it != _group->second.resources.end(),
         "Utility::Resource::get(): file" << '\'' + filename + '\'' << "was not found in group" << '\'' + _group->first + '\'', nullptr);
+    #else
+    CORRADE_ASSERT(it != _group->second.resources.end(),
+        "Utility::Resource::get(): file" << '\'' + filename + '\'' << "was not found in group" << '\'' + _group->first + '\'', {});
+    #endif
 
     return it->second;
 }
@@ -310,11 +316,20 @@ std::pair<bool, Containers::Array<unsigned char>> Resource::fileContents(const s
 
     if(!file.good()) {
         Error() << "Cannot open file " << filename;
+        #ifndef CORRADE_GCC45_COMPATIBILITY
         return {false, nullptr};
+        #else
+        return {false, {}};
+        #endif
     }
 
     file.seekg(0, std::ios::end);
-    if(file.tellg() == 0) return {true, nullptr};
+    if(file.tellg() == 0)
+        #ifndef CORRADE_GCC45_COMPATIBILITY
+        return {true, nullptr};
+        #else
+        return {true, {}};
+        #endif
     Containers::Array<unsigned char> data(file.tellg());
     file.seekg(0, std::ios::beg);
     file.read(reinterpret_cast<char*>(data.begin()), data.size());

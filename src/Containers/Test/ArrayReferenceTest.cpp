@@ -62,12 +62,14 @@ void ArrayReferenceTest::constructEmpty() {
     CORRADE_VERIFY(a == nullptr);
     CORRADE_COMPARE(a.size(), 0);
 
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     const ArrayReference b(nullptr);
     CORRADE_VERIFY(b == nullptr);
     CORRADE_COMPARE(b.size(), 0);
 
     /* Implicit construction from nullptr should be allowed */
     CORRADE_VERIFY((std::is_convertible<std::nullptr_t, ArrayReference>::value));
+    #endif
 }
 
 void ArrayReferenceTest::construct() {
