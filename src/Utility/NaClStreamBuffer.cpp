@@ -37,6 +37,9 @@ NaClConsoleStreamBuffer::~NaClConsoleStreamBuffer() = default;
 int NaClConsoleStreamBuffer::sync() {
     std::string message = str();
 
+    /* Nothing to do */
+    if(message.empty() || message == "\n") return 0;
+
     /* Remove newline at the end, if present (no std::string::back() in GCC 4.5) */
     if(message[message.size()-1] == '\n') message.resize(message.size()-1);
 
