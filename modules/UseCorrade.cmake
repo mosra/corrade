@@ -48,6 +48,13 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     endif()
 endif()
 
+# Disable `-pedantic` for GCC 4.4.3 on NaCl to avoid excessive warnings about
+# "comma at the end of enumeration list". My own GCC 4.4.7 doesn't emit these
+# warnings.
+if(CORRADE_GCC44_COMPATIBILITY AND CORRADE_TARGET_NACL)
+    string(REPLACE "-pedantic" "" CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS}")
+endif()
+
 function(corrade_add_test test_name)
     # Get DLL and path lists
     foreach(arg ${ARGN})
