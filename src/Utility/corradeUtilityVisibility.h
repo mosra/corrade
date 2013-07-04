@@ -27,7 +27,7 @@
 
 #include "Utility/Visibility.h"
 
-#ifdef CorradeUtility_EXPORTS
+#if defined(CorradeUtility_EXPORTS) || defined(CorradeUtilityObjects_EXPORTS)
     #define CORRADE_UTILITY_EXPORT CORRADE_VISIBILITY_EXPORT
 #else
     #define CORRADE_UTILITY_EXPORT CORRADE_VISIBILITY_IMPORT

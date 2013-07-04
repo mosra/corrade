@@ -111,33 +111,13 @@ the files are copied directly, without the need to run `make install`.
 
 ### Add static plugin
 
-    corrade_add_static_plugin(static_plugins_variable
-                              plugin_name metadata_file
+    corrade_add_static_plugin(plugin_name install_dir metadata_file
                               sources...)
 
 The macro adds preprocessor directive `CORRADE_STATIC_PLUGIN`. Additional
-libraries can be linked in via `target_link_libraries(plugin_name ...)`. Plugin
-library name will be appended to `static_plugins_variable` and the variable is
-meant to be used for linking plugins to main executable/library, e.g:
-
-    target_link_libraries(app lib1 lib2 ... ${static_plugins_variable})
-
-This variable is set with parent scope to be available in parent directory.
-If there are more intermediate directories between plugin directory and main
-executable directory, the variable can be propagated to parent scope like
-this:
-
-    set(static_plugins_variable ${static_plugins_variable} PARENT_SCOPE)
-
-### Find and install DLLs for bundling with Windows build
-
-    corrade_bundle_dlls(library_install_dir
-                        dlls...
-                        [PATHS paths...])
-
-It is possible to specify also additional paths for searching. DLL names can
-also contain paths, they will be installed into exact specified path. If an
-DLL is not found, fatal error message is printed.
+libraries can be linked in via `target_link_libraries(plugin_name ...)`. If
+`install_dir` is set to `CMAKE_CURRENT_BINARY_DIR` (e.g. for testing purposes),
+no installation is performed.
 
 */
 }

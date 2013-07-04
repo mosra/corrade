@@ -69,19 +69,13 @@
 #
 #
 # Add static plugin.
-#  corrade_add_static_plugin(static_plugins_variable
-#                            plugin_name metadata_file
+#  corrade_add_static_plugin(plugin_name install_dir metadata_file
 #                            sources...)
 # The macro adds preprocessor directive CORRADE_STATIC_PLUGIN. Additional
-# libraries can be linked in via target_link_libraries(plugin_name ...). Plugin
-# library name will be appended to static_plugins_variable and the variable is
-# meant to be used for linking plugins to main executable/library, e.g:
-#  target_link_libraries(app lib1 lib2 ... ${static_plugins_variable})
-# This variable is set with parent scope to be available in parent directory.
-# If there are more intermediate directories between plugin directory and main
-# executable directory, the variable can be propagated to parent scope like
-# this:
-#  set(static_plugins_variable ${static_plugins_variable} PARENT_SCOPE)
+# libraries can be linked in via target_link_libraries(plugin_name ...). If
+# install_dir is set to CMAKE_CURRENT_BINARY_DIR (e.g. for testing purposes),
+# no installation is performed.
+#
 #
 # Additionally these variables are defined for internal usage:
 #  CORRADE_INTERCONNECT_LIBRARY     - Interconnect library (w/o

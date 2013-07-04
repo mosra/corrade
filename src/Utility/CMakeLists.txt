@@ -35,12 +35,12 @@ set(CorradeUtility_SRCS
     String.cpp
     Translator.cpp
     TypeTraits.cpp
-    Unicode.cpp
     utilities.cpp)
 
 set(CorradeUtility_GracefulAssert_SRCS
     ConfigurationGroup.cpp
-    Resource.cpp)
+    Resource.cpp
+    Unicode.cpp)
 
 set(CorradeUtility_HEADERS
     AbstractHash.h
@@ -77,10 +77,10 @@ add_library(CorradeUtility ${SHARED_OR_STATIC} $<TARGET_OBJECTS:CorradeUtilityOb
 
 if(NOT BUILD_STATIC)
     set_target_properties(CorradeUtilityObjects CorradeUtility PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
-    set_target_properties(CorradeUtilityObjects PROPERTIES COMPILE_FLAGS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS})
+    set_target_properties(CorradeUtilityObjects PROPERTIES COMPILE_FLAGS "-DCorradeUtilityObjects_EXPORTS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
 elseif(BUILD_STATIC_PIC)
     # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
-    set_target_properties(CorradeUtility PROPERTIES COMPILE_FLAGS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS})
+    set_target_properties(CorradeUtility PROPERTIES COMPILE_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
 endif()
 install(TARGETS CorradeUtility DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 install(FILES ${CorradeUtility_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/Utility)

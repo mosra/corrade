@@ -422,7 +422,7 @@ LoadState AbstractManager::unload(const std::string& plugin) {
     #ifndef _WIN32
     if(dlclose(pluginObject.module) != 0) {
     #else
-    if(!FreeLibrary(plugin.module)) {
+    if(!FreeLibrary(pluginObject.module)) {
     #endif
         Error() << "PluginManager: cannot unload plugin" << '\'' + plugin + "':" << dlerror();
         pluginObject.loadState = LoadState::NotLoaded;
