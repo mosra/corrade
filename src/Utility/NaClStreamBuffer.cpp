@@ -39,7 +39,9 @@ NaClConsoleStreamBuffer::~NaClConsoleStreamBuffer() = default;
 int NaClConsoleStreamBuffer::sync() {
     /* Send buffer data to console line by line */
     std::vector<std::string> lines = String::split(str(), '\n', false);
-    for(const auto& line: lines) {
+    for(auto it = lines.begin(); it != lines.end(); ++it) {
+        const std::string& line = *it;
+
         if(source.empty())
             instance->LogToConsole(PP_LogLevel(level), line);
         else
