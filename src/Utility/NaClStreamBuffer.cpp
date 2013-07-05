@@ -28,6 +28,8 @@
 #include <ppapi/cpp/instance.h>
 #include <ppapi/cpp/var.h>
 
+#include "Utility/String.h"
+
 namespace Corrade { namespace Utility {
 
 NaClConsoleStreamBuffer::NaClConsoleStreamBuffer(pp::Instance* const instance, const LogLevel level, std::string source): std::stringbuf(std::ios_base::out), instance(instance), level(level), source(std::move(source)) {}
@@ -35,19 +37,15 @@ NaClConsoleStreamBuffer::NaClConsoleStreamBuffer(pp::Instance* const instance, c
 NaClConsoleStreamBuffer::~NaClConsoleStreamBuffer() = default;
 
 int NaClConsoleStreamBuffer::sync() {
-    std::string message = str();
 
-    /* Nothing to do */
-    if(message.empty() || message == "\n") return 0;
-
-    /* Remove newline at the end, if present */
-    if(message.back() == '\n') message.resize(message.size()-1);
-
-    /* Send buffer data to console */
-    if(source.empty())
-        instance->LogToConsole(PP_LogLevel(level), message);
-    else
-        instance->LogToConsoleWithSource(PP_LogLevel(level), source, message);
+    /* Send buffer data to console line by line */
+    std::vector<std::string> lines = String::split(str(), '\n', false);
+    for(const auto& line: lines) {
+        if(source.empty())
+            instance->LogToConsole(PP_LogLevel(level), line);
+        else
+            instance->LogToConsoleWithSource(PP_LogLevel(level), source, line);
+    }
 
     /* And clear them for next time so they aren't sent again every time */
     str({});

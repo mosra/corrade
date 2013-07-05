@@ -49,8 +49,9 @@ namespace Corrade { namespace Utility {
 @brief Stream buffer that sends the data to JavaScript console
 
 Usable in conjunction with `std::ostream` to redirect the output to JavaScript
-console. The data are written  on each `flush()` call and then the internal
-buffer is cleared. Example usage:
+console. The data are sent on each `flush()` call and then the internal
+buffer is cleared. The data are written line by line to avoid exceeding log
+message limit. Example usage:
 @code
 NaClConsoleStreamBuffer buffer(instance, NaClConsoleStreamBuffer::LogLevel::Log);
 
