@@ -34,10 +34,6 @@
 #endif
 #define CORRADE_PLUGINMANAGER_LOCAL CORRADE_VISIBILITY_LOCAL
 
-#ifdef _WIN32
-    #define CORRADE_PLUGIN_EXPORT
-#else
-    #define CORRADE_PLUGIN_EXPORT __attribute__ ((visibility ("default")))
-#endif
+#define CORRADE_PLUGIN_EXPORT CORRADE_VISIBILITY_EXPORT
 
 #endif
