@@ -40,6 +40,9 @@ class DirectoryTest: public Corrade::TestSuite::Tester {
         void path();
         void filename();
         void join();
+        #ifdef _WIN32
+        void joinWindows();
+        #endif
         void fileExists();
         void remove();
         void moveFile();
@@ -55,6 +58,9 @@ DirectoryTest::DirectoryTest() {
     addTests({&DirectoryTest::path,
               &DirectoryTest::filename,
               &DirectoryTest::join,
+              #ifdef _WIN32
+              &DirectoryTest::joinWindows,
+              #endif
               &DirectoryTest::fileExists,
               &DirectoryTest::remove,
               &DirectoryTest::moveFile,
@@ -104,6 +110,13 @@ void DirectoryTest::join() {
     /* Common case */
     CORRADE_COMPARE(Directory::join("/foo/bar", "file.txt"), "/foo/bar/file.txt");
 }
+
+#ifdef _WIN32
+void DirectoryTest::joinWindows() {
+    /* Drive letter */
+    CORRADE_COMPARE(Directory::join("/foo/bar", "X:/path/file.txt"), "X:/path/file.txt");
+}
+#endif
 
 void DirectoryTest::fileExists() {
     /* File */

@@ -65,8 +65,17 @@ std::string Directory::filename(const std::string& filename) {
 }
 
 std::string Directory::join(const std::string& path, const std::string& filename) {
-    /* Absolute filename or empty path, return filename */
-    if(path.empty() || (!filename.empty() && filename[0] == '/'))
+    /* Empty path */
+    if(path.empty()) return filename;
+
+    #ifdef _WIN32
+    /* Absolute filename on Windows */
+    if(filename.size() > 2 && filename[1] == ':' && filename[2] == '/')
+        return filename;
+    #endif
+
+    /* Absolute filename */
+    if(!filename.empty() && filename[0] == '/')
         return filename;
 
     /* Add leading slash to path, if not present */
