@@ -30,7 +30,6 @@
  */
 
 #include <string>
-#include <tuple>
 
 #include "Utility/corradeUtilityVisibility.h"
 
