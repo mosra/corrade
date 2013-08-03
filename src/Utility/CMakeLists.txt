@@ -96,7 +96,13 @@ if(BUILD_TESTS)
     set_target_properties(CorradeUtilityTestLib PROPERTIES COMPILE_FLAGS "-DCORRADE_GRACEFUL_ASSERT")
     if(BUILD_STATIC_PIC)
         # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
-        set_target_properties(CorradeUtilityTestLib PROPERTIES COMPILE_FLAGS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS})
+        set_target_properties(CorradeUtilityTestLib PROPERTIES COMPILE_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
+    endif()
+
+    # On Windows we need to install first and then run the tests to avoid "DLL
+    # not found" hell, thus we need to install this too
+    if(WIN32 AND NOT CMAKE_CROSSCOMPILING)
+        install(TARGETS CorradeUtilityTestLib DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
     endif()
 
     add_subdirectory(Test)

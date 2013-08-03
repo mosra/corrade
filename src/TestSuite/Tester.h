@@ -150,7 +150,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
     #ifndef DOXYGEN_GENERATING_OUTPUT
     protected:
     #endif
-        class ExpectedFailure {
+        class CORRADE_TESTSUITE_EXPORT ExpectedFailure {
             public:
                 explicit ExpectedFailure(Tester* instance, std::string message);
 

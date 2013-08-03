@@ -49,9 +49,9 @@ namespace Corrade { namespace Utility {
 @brief Stream buffer that sends the data to JavaScript console
 
 Usable in conjunction with `std::ostream` to redirect the output to JavaScript
-console. The data are sent on each `flush()` call and then the internal
-buffer is cleared. The data are written line by line to avoid exceeding log
-message limit. Example usage:
+console. The data are sent on each `flush()` call and then the internal buffer
+is cleared. The data are written line by line to avoid exceeding log message
+limit. Example usage:
 @code
 NaClConsoleStreamBuffer buffer(instance, NaClConsoleStreamBuffer::LogLevel::Log);
 
@@ -62,6 +62,7 @@ out << "Hello World!" << std::endl;
 The output stream can be also used with @ref Debug classes.
 @see @ref NaClMessageStreamBuffer
 @partialsupport Available only in @ref CORRADE_TARGET_NACL_ "NaCl".
+@todo Remove line-by-line when Chrome/NaCl SDK has this fixed
 */
 class CORRADE_UTILITY_EXPORT NaClConsoleStreamBuffer: public std::stringbuf {
     public:

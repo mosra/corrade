@@ -412,7 +412,7 @@ void Test::virtualSlot() {
     class TaxDodgingMailbox: public VirtualMailbox {
         public:
             void pay(int amount) override {
-                this->money -= amount/5;
+                money -= amount/5;
             }
     };
 
@@ -439,7 +439,7 @@ void Test::changeConnectionsInSlot() {
             PropagatingMailbox(Postman* postman, Mailbox* mailbox): postman(postman), mailbox(mailbox) {}
 
             void addMessage(int, const std::string& message) {
-                this->messages.push_back(message);
+                messages.push_back(message);
                 Emitter::connect(postman, &Postman::newMessage, mailbox, &Mailbox::addMessage);
                 Emitter::connect(postman, &Postman::paymentRequested, mailbox, &Mailbox::pay);
             }
