@@ -115,13 +115,13 @@ template<class T> void Comparator<Compare::Container<T>>::printErrorMessage(Util
 }
 
 template<class T> bool Comparator<Compare::SortedContainer<T>>::operator()(const T& actual, const T& expected) {
-    this->actualContents = actual;
-    this->expectedContents = expected;
+    Comparator<Compare::Container<T>>::actualContents = actual;
+    Comparator<Compare::Container<T>>::expectedContents = expected;
 
-    std::sort(this->actualContents.begin(), this->actualContents.end());
-    std::sort(this->expectedContents.begin(), this->expectedContents.end());
+    std::sort(Comparator<Compare::Container<T>>::actualContents.begin(), Comparator<Compare::Container<T>>::actualContents.end());
+    std::sort(Comparator<Compare::Container<T>>::expectedContents.begin(), Comparator<Compare::Container<T>>::expectedContents.end());
 
-    return this->actualContents == this->expectedContents;
+    return Comparator<Compare::Container<T>>::actualContents == Comparator<Compare::Container<T>>::expectedContents;
 }
 
 #endif
