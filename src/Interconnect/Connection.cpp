@@ -79,7 +79,7 @@ void Connection::destroy() {
     if(!connected) delete data;
 
     /* Else remove reference to itself from connection data */
-    if(data) {
+    else if(data) {
         CORRADE_INTERNAL_ASSERT(data->connection == this);
         data->connection = nullptr;
     }
