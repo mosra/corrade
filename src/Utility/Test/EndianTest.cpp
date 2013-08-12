@@ -34,10 +34,12 @@ class EndianTest: public TestSuite::Tester {
         EndianTest();
 
         void endianness();
+        void inPlace();
 };
 
 EndianTest::EndianTest() {
-    addTests({&EndianTest::endianness});
+    addTests({&EndianTest::endianness,
+              &EndianTest::inPlace});
 }
 
 void EndianTest::endianness() {
@@ -61,6 +63,33 @@ void EndianTest::endianness() {
 
     #undef current
     #undef other
+}
+
+void EndianTest::inPlace() {
+    #ifdef CORRADE_BIG_ENDIAN
+    #define currentInPlace bigEndianInPlace
+    #define otherInPlace littleEndianInPlace
+    #else
+    #define currentInPlace littleEndianInPlace
+    #define otherInPlace bigEndianInPlace
+    #endif
+
+    std::uint32_t a = 0x11223344;
+    std::int16_t b = 0x7F00;
+    std::uint64_t c = 0x1122334455667788ull;
+
+    Endianness::otherInPlace(a, b, c);
+    CORRADE_COMPARE(a, 0x44332211);
+    CORRADE_COMPARE(b, 0x007F);
+    CORRADE_COMPARE(c, 0x8877665544332211ull);
+
+    Endianness::otherInPlace(a, b, c);
+    CORRADE_COMPARE(a, 0x11223344);
+    CORRADE_COMPARE(b, 0x7F00);
+    CORRADE_COMPARE(c, 0x1122334455667788ull);
+
+    #undef currentInPlace
+    #undef otherInPlace
 }
 
 }}}

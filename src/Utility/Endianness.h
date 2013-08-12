@@ -68,6 +68,20 @@ class Endianness {
         }
 
         /**
+         * @brief Convert numbers from or to Big-Endian in-place
+         * @param numbers   Numbers to convert
+         *
+         * On Big-Endian systems does nothing.
+         */
+        #if defined(DOXYGEN_GENERATING_OUTPUT) || !defined(CORRADE_BIG_ENDIAN)
+        template<class ...T> static void bigEndianInPlace(T&... numbers) {
+            bigEndianInPlaceInternal(numbers...);
+        }
+        #else
+        template<class ...T> static void bigEndianInPlace(T&...) {}
+        #endif
+
+        /**
          * @brief Convert number from or to Little-Endian
          * @param number    Number to convert
          * @return Number as Little-Endian. On Little-Endian systems returns
@@ -81,10 +95,38 @@ class Endianness {
             #endif
         }
 
+        /**
+         * @brief Convert numbers from or to Little-Endian in-place
+         * @param numbers   Numbers to convert
+         *
+         * On Little-Endian systems does nothing.
+         */
+        #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_BIG_ENDIAN)
+        template<class ...T> static void littleEndianInPlace(T&... numbers) {
+            littleEndianInPlaceInternal(numbers...);
+        }
+        #else
+        template<class ...T> static void littleEndianInPlace(T&...) {}
+        #endif
+
     private:
         template<std::size_t size> struct TypeFor {};
 
         template<std::size_t size> static typename TypeFor<size>::Type swap(typename TypeFor<size>::Type value);
+
+        #ifndef CORRADE_BIG_ENDIAN
+        template<class T, class ...U> static void bigEndianInPlaceInternal(T& first, U&... next) {
+            first = bigEndian(first);
+            bigEndianInPlaceInternal(next...);
+        }
+        static void bigEndianInPlaceInternal() {}
+        #else
+        template<class T, class ...U> static void littleEndianInPlaceInternal(T& first, U&... next) {
+            first = littleEndian(first);
+            littleEndianInPlaceInternal(next...);
+        }
+        static void littleEndianInPlaceInternal() {}
+        #endif
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
