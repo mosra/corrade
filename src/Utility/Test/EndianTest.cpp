@@ -42,15 +42,15 @@ EndianTest::EndianTest() {
 
 void EndianTest::endianness() {
     #ifdef CORRADE_BIG_ENDIAN
-        CORRADE_VERIFY(Endianness::isBigEndian());
-        Debug() << "Big endian system";
-        #define current bigEndian
-        #define other littleEndian
+    CORRADE_VERIFY(Endianness::isBigEndian());
+    Debug() << "Big endian system";
+    #define current bigEndian
+    #define other littleEndian
     #else
-        CORRADE_VERIFY(!Endianness::isBigEndian());
-        Debug() << "Little endian system";
-        #define current littleEndian
-        #define other bigEndian
+    CORRADE_VERIFY(!Endianness::isBigEndian());
+    Debug() << "Little endian system";
+    #define current littleEndian
+    #define other bigEndian
     #endif
 
     CORRADE_COMPARE(Endianness::current<std::uint32_t>(0x11223344), 0x11223344);
@@ -58,6 +58,9 @@ void EndianTest::endianness() {
     CORRADE_COMPARE(Endianness::other<std::int32_t>(0x77665544), 0x44556677);
     CORRADE_COMPARE(Endianness::other<std::int16_t>(0x7F00), 0x007F);
     CORRADE_COMPARE(Endianness::other<std::uint64_t>(0x1122334455667788ull), 0x8877665544332211ull);
+
+    #undef current
+    #undef other
 }
 
 }}}

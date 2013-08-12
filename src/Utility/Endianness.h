@@ -38,8 +38,8 @@
 namespace Corrade { namespace Utility {
 
 /**
- * @brief %Endianness related functions
- */
+@brief %Endianness related functions
+*/
 class Endianness {
     public:
         Endianness() = delete;
