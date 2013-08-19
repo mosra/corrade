@@ -31,6 +31,16 @@ if(_CORRADE_USE_INCLUDED)
     return()
 endif()
 
+# Check compiler version
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.7.0" AND NOT CORRADE_GCC46_COMPATIBILITY)
+        message(FATAL_ERROR "To use Corrade with GCC 4.6, build it with GCC46_COMPATIBILITY enabled")
+    endif()
+    if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.8.1" AND NOT CORRADE_GCC47_COMPATIBILITY)
+        message(FATAL_ERROR "To use Corrade with GCC 4.7, build it with GCC47_COMPATIBILITY enabled")
+    endif()
+endif()
+
 # Mandatory C++ flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
