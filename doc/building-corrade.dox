@@ -67,17 +67,37 @@ The library can be built and installed using these four commands:
     cmake -DCMAKE_INSTALL_PREFIX=/usr .. && make
     make install
 
-The libraries are build as shared by default, pass `-DBUILD_STATIC=ON` to build
-them as static. If you plan them to use with shared libraries later, enable
-also position-independent code with `-DBUILD_STATIC_PIC=ON`. If you want to
-build with another compiler (e.g. Clang), pass `-DCMAKE_CXX_COMPILER=clang++`
-to CMake.
+@subsection building-features Enabling or disabling features
+
+The libraries are build as shared by default. If you are developing for
+platform which doesn't support shared libraries or if you just want to link
+them statically, enable `BUILD_STATIC` to build the libraries as static. If you
+plan to use them with shared libraries later, enable also position-independent
+code with `BUILD_STATIC_PIC`. If you want to build with another compiler (e.g.
+Clang), pass `-DCMAKE_CXX_COMPILER=clang++` to CMake.
+
+By default the library expects standards conforming compiler. However, for
+portability, compatibility mode for older compilers is provided:
+
+- `GCC46_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
+  4.6
+- `GCC47_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
+  4.7
+
+%Corrade will detect the compiler used and refuses to build (or be used) if
+some compatibility mode needs to be enabled. On the other hand, if any of these
+is enabled, Corrade will refuse to build (or be used) with any newer compiler.
+
+The features used can be conveniently detected in depending projects both in
+CMake and C++ sources, see @ref corrade-cmake and @ref src/Corrade.h for more
+information.
 
 @subsection building-tests Building and running unit tests
 
-If you want to build also unit tests (which are not built by default), pass
-`-DBUILD_TESTS=ON` to CMake. Unit tests use Corrade's own
-@ref Corrade::TestSuite "TestSuite" framework and can be run using
+If you want to build also unit tests (which are not built by default), enable
+`BUILD_TESTS` in CMake. Unit tests use Corrade's own @ref Corrade::TestSuite "TestSuite"
+framework and can be run either manually (the binaries are located in `Test/`
+subdirectories of build directory) or using
 
     ctest --output-on-failure
 
