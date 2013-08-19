@@ -39,7 +39,8 @@ Minimal set of tools required for building is:
 
 - C++ compiler with good C++11 support. Currently there are two compilers
   which are tested to support everything needed: **GCC** >= 4.6 and **Clang**
-  >= 3.1.
+  >= 3.1. On Windows you can use **MinGW**, Visual Studio compiler still lacks
+  some needed features.
 - **CMake** >= 2.8.8
 
 @section building-download Downloading the sources
@@ -60,12 +61,48 @@ subdirectory.
 
 @section building-compilation Compilation, installation
 
-The library can be built and installed using these four commands:
+@subsection building-linux Via command-line (on Linux/Unix)
+
+On Unix-based OSs, the library can be built and installed using these four
+commands:
 
     mkdir -p build
     cd build
     cmake -DCMAKE_INSTALL_PREFIX=/usr .. && make
     make install
+
+The library provides some useful CMake options (described in sections later).
+They can be passed to CMake either as `-Dname=value` parameters on command-line
+(like above) or set conveniently using `cmake-gui`:
+
+    cd build
+    cmake-gui .
+
+@subsection building-windows Using QtCreator and CMake GUI (on Windows)
+
+On Windows, if you don't want to touch the command-line, the easiest way is to
+install QtCreator (just QtCreator, you don't need the full Qt SDK), configure
+it to use MinGW and CMake and then just open project's root `CMakeLists.txt`
+file within it. QtCreator then asks you where to create build directory, allows
+you to specify initial CMake parameters and then you can just press Configure
+and everything is ready to be built. You might need to set some CMake
+parameters before configuring, they can be set with `-Dname=value`. See below
+for more information.
+
+After the initial import you might want to reconfigure some additional CMake
+variables. Start CMake GUI, point it to the recently created build dir, modify
+the variables and press Generate. QtCreator will detect the changes and reparse
+the project accordingly.
+
+For most convenient usage it's best to set `CMAKE_INSTALL_PREFIX` to directory
+where MinGW is installed (e.g. `C:/MinGW/`) and add `C:/MinGW/bin` and
+`C:/MinGW/lib` to `PATH`. Installation to given prefix can be then done from
+within QtCreator by adding new `make install` build rule.
+
+@subsubsection building-corrade-windows-troubleshooting Windows troubleshooting
+
+Until GCC 4.8 is available in MinGW, you need to enable `GCC47_COMPATIBILITY`
+for building Corrade on Windows. See below for more information.
 
 @subsection building-features Enabling or disabling features
 
@@ -101,7 +138,8 @@ subdirectories of build directory) or using
 
     ctest --output-on-failure
 
-in build directory. Everything should pass ;-)
+in build directory. On Windows the tests require the library to be installed
+with DLLs accessible through `PATH`. See above for more information.
 
 @subsection building-doc Building documentation
 
