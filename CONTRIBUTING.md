@@ -54,7 +54,8 @@ Code contribution
 Contact
 -------
 
-- Website - http://mosra.cz/blog/corrade.php
-- GitHub - https://github.com/mosra/corrade
-- E-mail - mosra@centrum.cz
-- Jabber - mosra@jabbim.cz
+*   Website - http://mosra.cz/blog/corrade.php
+*   GitHub - https://github.com/mosra/corrade
+*   Twitter - https://twitter.com/czmosra
+*   E-mail - mosra@centrum.cz
+*   Jabber - mosra@jabbim.cz

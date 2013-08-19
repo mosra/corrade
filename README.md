@@ -90,11 +90,11 @@ CONTACT
 Want to learn more about the library? Found a bug or want to tell me an
 awesome idea? Feel free to visit my website or contact me at:
 
- * Website - http://mosra.cz/blog/corrade.php
- * GitHub - http://github.com/mosra/corrade
- * Twitter - https://twitter.com/czmosra
- * E-mail - mosra@centrum.cz
- * Jabber - mosra@jabbim.cz
+*   Website - http://mosra.cz/blog/corrade.php
+*   GitHub - http://github.com/mosra/corrade
+*   Twitter - https://twitter.com/czmosra
+*   E-mail - mosra@centrum.cz
+*   Jabber - mosra@jabbim.cz
 
 LICENSE
 =======
