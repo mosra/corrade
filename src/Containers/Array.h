@@ -253,8 +253,10 @@ template<> class ArrayReference<const void> {
     public:
         typedef const void Type;     /**< @brief Element type */
 
+        #ifndef CORRADE_GCC45_COMPATIBILITY
         /** @brief Conversion from nullptr */
         constexpr /*implicit*/ ArrayReference(std::nullptr_t) noexcept: _data(nullptr), _size(0) {}
+        #endif
 
         /**
          * @brief Default constructor
@@ -262,7 +264,13 @@ template<> class ArrayReference<const void> {
          * Creates zero-sized array. Move array with nonzero size onto the
          * instance to make it useful.
          */
-        constexpr explicit ArrayReference() noexcept: _data(nullptr), _size(0) {}
+        constexpr
+        /* implicit where nullptr is not supported, as explicitly specifying
+           the type is much less convenient than simply typing nullptr */
+        #ifndef CORRADE_GCC45_COMPATIBILITY
+        explicit
+        #endif
+        ArrayReference() noexcept: _data(nullptr), _size(0) {}
 
         /**
          * @brief Constructor
