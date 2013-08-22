@@ -67,6 +67,16 @@ endif()
 if(BUILD_TESTS)
     set(CORRADE_TESTSUITE_LIBRARIES CorradeTestSuite CorradeUtility)
 endif()
+
+if(GCC46_COMPATIBILITY)
+    set(CORRADE_GCC46_COMPATIBILITY 1)
+    set(GCC47_COMPATIBILITY 1)
+endif()
+
+if(GCC47_COMPATIBILITY)
+    set(CORRADE_GCC47_COMPATIBILITY 1)
+endif()
+
 include(UseCorrade)
 
 # Installation paths
