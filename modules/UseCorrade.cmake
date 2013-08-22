@@ -31,6 +31,40 @@ if(_CORRADE_USE_INCLUDED)
     return()
 endif()
 
+# Check compiler version
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    # Don't allow to use compilers older than what compatibility mode allows
+    if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.4.0")
+        message(FATAL_ERROR "Corrade cannot be used with GCC 4.3")
+    endif()
+    if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.5.0" AND NOT CORRADE_GCC44_COMPATIBILITY)
+        message(FATAL_ERROR "To use Corrade with GCC 4.4, build it with GCC44_COMPATIBILITY enabled")
+    endif()
+    if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.6.0" AND NOT CORRADE_GCC45_COMPATIBILITY)
+        message(FATAL_ERROR "To use Corrade with GCC 4.5, build it with GCC45_COMPATIBILITY enabled")
+    endif()
+    if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.7.0" AND NOT CORRADE_GCC46_COMPATIBILITY)
+        message(FATAL_ERROR "To use Corrade with GCC 4.6, build it with GCC46_COMPATIBILITY enabled")
+    endif()
+    if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.8.1" AND NOT CORRADE_GCC47_COMPATIBILITY)
+        message(FATAL_ERROR "To use Corrade with GCC 4.7, build it with GCC47_COMPATIBILITY enabled")
+    endif()
+
+    # Don't allow to use compiler newer than what compatibility mode allows
+    if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.8.1" AND CORRADE_GCC47_COMPATIBILITY)
+        message(FATAL_ERROR "GCC >=4.8.1 cannot be used if Corrade is built with GCC47_COMPATIBILITY")
+    endif()
+    if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.7.0" AND CORRADE_GCC46_COMPATIBILITY)
+        message(FATAL_ERROR "GCC >=4.7 cannot be used if Corrade is built with GCC46_COMPATIBILITY")
+    endif()
+    if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.6.0" AND CORRADE_GCC45_COMPATIBILITY)
+        message(FATAL_ERROR "GCC >=4.6 cannot be used if Corrade is built with GCC45_COMPATIBILITY")
+    endif()
+    if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.5.0" AND CORRADE_GCC44_COMPATIBILITY)
+        message(FATAL_ERROR "GCC >=4.5 cannot be used if Corrade is built with GCC44_COMPATIBILITY")
+    endif()
+endif()
+
 # Mandatory C++ flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 

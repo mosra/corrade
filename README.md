@@ -33,10 +33,11 @@ crosscompiling.
 Minimal dependencies
 --------------------
 
- * C++ compiler with good C++11 support. Currently there are two compilers
-   which are tested to support everything needed: **GCC** >= 4.6 and **Clang**
-   >= 3.1.
- * **CMake** >= 2.8.8
+*   C++ compiler with good C++11 support. Currently there are two compilers
+    which are tested to support everything needed: **GCC** >= 4.6 and **Clang**
+    >= 3.1. On Windows you can use **MinGW**, Visual Studio compiler still
+    lacks some needed features.
+*   **CMake** >= 2.8.8
 
 Compilation, installation
 -------------------------
@@ -89,10 +90,11 @@ CONTACT
 Want to learn more about the library? Found a bug or want to tell me an
 awesome idea? Feel free to visit my website or contact me at:
 
- * Website - http://mosra.cz/blog/corrade.php
- * GitHub - http://github.com/mosra/corrade
- * E-mail - mosra@centrum.cz
- * Jabber - mosra@jabbim.cz
+*   Website - http://mosra.cz/blog/corrade.php
+*   GitHub - http://github.com/mosra/corrade
+*   Twitter - https://twitter.com/czmosra
+*   E-mail - mosra@centrum.cz
+*   Jabber - mosra@jabbim.cz
 
 LICENSE
 =======

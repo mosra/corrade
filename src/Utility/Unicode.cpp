@@ -74,8 +74,17 @@ std::pair<char32_t, std::size_t> Unicode::nextChar(const std::string& text, std:
     return {result, end};
 }
 
-std::u32string Unicode::utf32(const std::string& text) {
+#ifndef _WIN32
+std::u32string Unicode::utf32(const std::string& text)
+#else
+std::vector<char32_t> Unicode::utf32(const std::string& text)
+#endif
+{
+    #ifndef _WIN32
     std::u32string result;
+    #else
+    std::vector<char32_t> result;
+    #endif
     result.reserve(text.size());
 
     for(std::size_t i = 0; i != text.size(); ) {

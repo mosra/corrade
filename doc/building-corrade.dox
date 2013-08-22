@@ -39,7 +39,8 @@ Minimal set of tools required for building is:
 
 - C++ compiler with good C++11 support. Currently there are two compilers
   which are tested to support everything needed: **GCC** >= 4.6 and **Clang**
-  >= 3.1.
+  >= 3.1. On Windows you can use **MinGW**, Visual Studio compiler still lacks
+  some needed features.
 - **CMake** >= 2.8.8
 
 @section building-download Downloading the sources
@@ -60,28 +61,85 @@ subdirectory.
 
 @section building-compilation Compilation, installation
 
-The library can be built and installed using these four commands:
+@subsection building-linux Via command-line (on Linux/Unix)
+
+On Unix-based OSs, the library can be built and installed using these four
+commands:
 
     mkdir -p build
     cd build
     cmake -DCMAKE_INSTALL_PREFIX=/usr .. && make
     make install
 
-The libraries are build as shared by default, pass `-DBUILD_STATIC=ON` to build
-them as static. If you plan them to use with shared libraries later, enable
-also position-independent code with `-DBUILD_STATIC_PIC=ON`. If you want to
-build with another compiler (e.g. Clang), pass `-DCMAKE_CXX_COMPILER=clang++`
-to CMake.
+The library provides some useful CMake options (described in sections later).
+They can be passed to CMake either as `-Dname=value` parameters on command-line
+(like above) or set conveniently using `cmake-gui`:
+
+    cd build
+    cmake-gui .
+
+@subsection building-windows Using QtCreator and CMake GUI (on Windows)
+
+On Windows, if you don't want to touch the command-line, the easiest way is to
+install QtCreator (just QtCreator, you don't need the full Qt SDK), configure
+it to use MinGW and CMake and then just open project's root `CMakeLists.txt`
+file within it. QtCreator then asks you where to create build directory, allows
+you to specify initial CMake parameters and then you can just press Configure
+and everything is ready to be built. You might need to set some CMake
+parameters before configuring, they can be set with `-Dname=value`. See below
+for more information.
+
+After the initial import you might want to reconfigure some additional CMake
+variables. Start CMake GUI, point it to the recently created build dir, modify
+the variables and press Generate. QtCreator will detect the changes and reparse
+the project accordingly.
+
+For most convenient usage it's best to set `CMAKE_INSTALL_PREFIX` to directory
+where MinGW is installed (e.g. `C:/MinGW/`) and add `C:/MinGW/bin` and
+`C:/MinGW/lib` to `PATH`. Installation to given prefix can be then done from
+within QtCreator by adding new `make install` build rule.
+
+@subsubsection building-corrade-windows-troubleshooting Windows troubleshooting
+
+Until GCC 4.8 is available in MinGW, you need to enable `GCC47_COMPATIBILITY`
+for building Corrade on Windows. See below for more information.
+
+@subsection building-features Enabling or disabling features
+
+The libraries are build as shared by default. If you are developing for
+platform which doesn't support shared libraries or if you just want to link
+them statically, enable `BUILD_STATIC` to build the libraries as static. If you
+plan to use them with shared libraries later, enable also position-independent
+code with `BUILD_STATIC_PIC`. If you want to build with another compiler (e.g.
+Clang), pass `-DCMAKE_CXX_COMPILER=clang++` to CMake.
+
+By default the library expects standards conforming compiler. However, for
+portability, compatibility mode for older compilers is provided:
+
+- `GCC47_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
+  4.7
+- `GCC46_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
+  4.6
+
+%Corrade will detect the compiler used and refuses to build (or be used) if
+some compatibility mode needs to be enabled. On the other hand, if any of these
+is enabled, Corrade will refuse to build (or be used) with any newer compiler.
+
+The features used can be conveniently detected in depending projects both in
+CMake and C++ sources, see @ref corrade-cmake and @ref src/Corrade.h for more
+information.
 
 @subsection building-tests Building and running unit tests
 
-If you want to build also unit tests (which are not built by default), pass
-`-DBUILD_TESTS=ON` to CMake. Unit tests use Corrade's own
-@ref Corrade::TestSuite "TestSuite" framework and can be run using
+If you want to build also unit tests (which are not built by default), enable
+`BUILD_TESTS` in CMake. Unit tests use Corrade's own @ref Corrade::TestSuite "TestSuite"
+framework and can be run either manually (the binaries are located in `Test/`
+subdirectories of build directory) or using
 
     ctest --output-on-failure
 
-in build directory. Everything should pass ;-)
+in build directory. On Windows the tests require the library to be installed
+with DLLs accessible through `PATH`. See above for more information.
 
 @subsection building-doc Building documentation
 
@@ -112,17 +170,17 @@ In `package/archlinux` directory are three PKGBUILDs - one for stable version,
 one for Git development build and one for building under MinGW. The packages
 are also in AUR under the same names.
 
-There is also development PKGBUILD and MinGW development PKGBUILD in root,
-which allows you to build and install the package directly from source tree
-without downloading anything. The PKGBUILD also contains `check()` function
-which will run all unit tests before packaging.
+There are also a few development PKGBUILDs in project root, which allow you to
+build and install the package directly from source tree without downloading
+anything. The native PKGBUILD also contains `check()` function which will run
+all unit tests before packaging.
 
 If you want to build with another compiler (e.g. Clang), run makepkg this way:
 
     CXX=clang++ makepkg
 
-Development PKGBUILD can detect when Clang is used and removes unsupported
-CXX flags.
+Development PKGBUILDs can detect when Clang is used and remove unsupported CXX
+flags.
 
 @section building-rpm Building RPM packages
 

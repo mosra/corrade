@@ -34,23 +34,25 @@ class EndianTest: public TestSuite::Tester {
         EndianTest();
 
         void endianness();
+        void inPlace();
 };
 
 EndianTest::EndianTest() {
-    addTests({&EndianTest::endianness});
+    addTests({&EndianTest::endianness,
+              &EndianTest::inPlace});
 }
 
 void EndianTest::endianness() {
     #ifdef CORRADE_BIG_ENDIAN
-        CORRADE_VERIFY(Endianness::isBigEndian());
-        Debug() << "Big endian system";
-        #define current bigEndian
-        #define other littleEndian
+    CORRADE_VERIFY(Endianness::isBigEndian());
+    Debug() << "Big endian system";
+    #define current bigEndian
+    #define other littleEndian
     #else
-        CORRADE_VERIFY(!Endianness::isBigEndian());
-        Debug() << "Little endian system";
-        #define current littleEndian
-        #define other bigEndian
+    CORRADE_VERIFY(!Endianness::isBigEndian());
+    Debug() << "Little endian system";
+    #define current littleEndian
+    #define other bigEndian
     #endif
 
     CORRADE_COMPARE(Endianness::current<std::uint32_t>(0x11223344), 0x11223344);
@@ -58,6 +60,36 @@ void EndianTest::endianness() {
     CORRADE_COMPARE(Endianness::other<std::int32_t>(0x77665544), 0x44556677);
     CORRADE_COMPARE(Endianness::other<std::int16_t>(0x7F00), 0x007F);
     CORRADE_COMPARE(Endianness::other<std::uint64_t>(0x1122334455667788ull), 0x8877665544332211ull);
+
+    #undef current
+    #undef other
+}
+
+void EndianTest::inPlace() {
+    #ifdef CORRADE_BIG_ENDIAN
+    #define currentInPlace bigEndianInPlace
+    #define otherInPlace littleEndianInPlace
+    #else
+    #define currentInPlace littleEndianInPlace
+    #define otherInPlace bigEndianInPlace
+    #endif
+
+    std::uint32_t a = 0x11223344;
+    std::int16_t b = 0x7F00;
+    std::uint64_t c = 0x1122334455667788ull;
+
+    Endianness::otherInPlace(a, b, c);
+    CORRADE_COMPARE(a, 0x44332211);
+    CORRADE_COMPARE(b, 0x007F);
+    CORRADE_COMPARE(c, 0x8877665544332211ull);
+
+    Endianness::otherInPlace(a, b, c);
+    CORRADE_COMPARE(a, 0x11223344);
+    CORRADE_COMPARE(b, 0x7F00);
+    CORRADE_COMPARE(c, 0x1122334455667788ull);
+
+    #undef currentInPlace
+    #undef otherInPlace
 }
 
 }}}

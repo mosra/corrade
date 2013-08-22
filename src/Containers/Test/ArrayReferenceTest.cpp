@@ -43,6 +43,7 @@ class ArrayReferenceTest: public TestSuite::Tester {
         #endif
 
         void constReference();
+        void voidConversion();
 };
 
 typedef Containers::Array<int> Array;
@@ -60,7 +61,8 @@ ArrayReferenceTest::ArrayReferenceTest() {
               &ArrayReferenceTest::rangeBasedFor,
               #endif
 
-              &ArrayReferenceTest::constReference});
+              &ArrayReferenceTest::constReference,
+              &ArrayReferenceTest::voidConversion});
 }
 
 void ArrayReferenceTest::constructEmpty() {
@@ -151,6 +153,34 @@ void ArrayReferenceTest::constReference() {
     ConstArrayReference e = d;
     CORRADE_VERIFY(e == c);
     CORRADE_COMPARE(e.size(), 3);
+}
+
+void ArrayReferenceTest::voidConversion() {
+    int a[] = {3, 4, 7, 12, 0, -15};
+
+    /** @todo C++14: test that all the operations are really constexpr (C++11 doesn't allow void conversions IMHO) */
+
+    /* void reference to compile-time array */
+    Containers::ArrayReference<const void> b = a;
+    CORRADE_VERIFY(b == a);
+    CORRADE_COMPARE(b.size(), 6*sizeof(int));
+
+    /* void reference to runtime array */
+    Containers::ArrayReference<const void> c = {a, 6};
+    CORRADE_VERIFY(c == a);
+    CORRADE_COMPARE(c.size(), 6*sizeof(int));
+
+    /* void reference to Array */
+    Containers::Array<int> d(6);
+    Containers::ArrayReference<const void> e = d;
+    CORRADE_VERIFY(e == d);
+    CORRADE_COMPARE(e.size(), d.size()*sizeof(int));
+
+    /* void reference to ArrayReference */
+    Containers::ArrayReference<int> f = a;
+    Containers::ArrayReference<const void> g = f;
+    CORRADE_VERIFY(g == f);
+    CORRADE_COMPARE(g.size(), f.size()*sizeof(int));
 }
 
 }}}

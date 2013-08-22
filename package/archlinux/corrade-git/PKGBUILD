@@ -1,8 +1,8 @@
 # Author: mosra <mosra@centrum.cz>
 pkgname=corrade-git
-pkgver=20120206
+pkgver=20130819
 pkgrel=1
-pkgdesc="Multiplatform plugin management and utility library (Git version)"
+pkgdesc="C++11 multiplatform utility library (Git version)"
 arch=('i686' 'x86_64')
 url="http://mosra.cz/blog/corrade.php"
 license=('MIT')
@@ -12,6 +12,10 @@ conflicts=('corrade')
 
 _gitroot="git://github.com/mosra/corrade.git"
 _gitname="corrade"
+
+pkgver() {
+    date +%Y%m%d
+}
 
 build() {
     cd "$srcdir"

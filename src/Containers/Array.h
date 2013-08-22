@@ -162,8 +162,8 @@ template<class T> class ArrayReference {
         /**
          * @brief Default constructor
          *
-         * Creates zero-sized array. Move array with nonzero size onto the
-         * instance to make it useful.
+         * Creates empty reference. Copy non-empty Array/ArrayReference onto
+         * the instance to make it useful.
          */
         constexpr
         /* implicit where nullptr is not supported, as explicitly specifying
@@ -238,6 +238,68 @@ template<class T> class ArrayReference {
 
     private:
         T* _data;
+        std::size_t _size;
+};
+
+/**
+@brief Constant void array reference wrapper with size information
+
+Specialization of ArrayReference, which is convertible from Array or
+ArrayReference of any type, size for particular type is recalculated to size in
+bytes. This specialization doesn't provide any `begin()`/`end()` accessors,
+because it has no use for `void` type.
+*/
+template<> class ArrayReference<const void> {
+    public:
+        typedef const void Type;     /**< @brief Element type */
+
+        /** @brief Conversion from nullptr */
+        constexpr /*implicit*/ ArrayReference(std::nullptr_t) noexcept: _data(nullptr), _size(0) {}
+
+        /**
+         * @brief Default constructor
+         *
+         * Creates zero-sized array. Move array with nonzero size onto the
+         * instance to make it useful.
+         */
+        constexpr explicit ArrayReference() noexcept: _data(nullptr), _size(0) {}
+
+        /**
+         * @brief Constructor
+         * @param data      Data pointer
+         * @param size      Data size
+         */
+        template<class T> constexpr /*implicit*/ ArrayReference(const T* data, std::size_t size) noexcept: _data(data), _size(size*sizeof(T)) {}
+
+        /**
+         * @brief Construct reference to fixed-size array
+         * @param data      Fixed-size array
+         */
+        #ifdef CORRADE_GCC46_COMPATIBILITY
+        #define size size_ /* With GCC 4.6 it conflicts with size(). WTF. */
+        #endif
+        template<class T, std::size_t size> constexpr /*implicit*/ ArrayReference(T(&data)[size]) noexcept: _data(data), _size(size*sizeof(T)) {}
+        #ifdef CORRADE_GCC46_COMPATIBILITY
+        #undef size
+        #endif
+
+        /** @brief Construct const void reference to any Array */
+        template<class T> constexpr /*implicit*/ ArrayReference(const Array<T>& array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
+
+        /** @brief Construct const void reference to any ArrayReference */
+        template<class T> constexpr /*implicit*/ ArrayReference(const ArrayReference<T>& array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
+
+        /** @brief Whether the array is empty */
+        constexpr bool empty() const { return !_size; }
+
+        /** @brief %Array size */
+        constexpr std::size_t size() const { return _size; }
+
+        /** @brief Conversion to array type */
+        constexpr operator const void*() const { return _data; }
+
+    private:
+        const void* _data;
         std::size_t _size;
 };
 
