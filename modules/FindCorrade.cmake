@@ -19,10 +19,10 @@
 # hidden visibility by default.
 #
 # Features of found Corrade library are exposed in these variables:
-#  CORRADE_GCC46_COMPATIBILITY  - Defined if compiled with compatibility
-#   mode for GCC 4.6
 #  CORRADE_GCC47_COMPATIBILITY  - Defined if compiled with compatibility
 #   mode for GCC 4.7
+#  CORRADE_GCC46_COMPATIBILITY  - Defined if compiled with compatibility
+#   mode for GCC 4.6
 #  CORRADE_BUILD_STATIC         - Defined if compiled as static libraries
 #  CORRADE_TARGET_NACL          - Defined if compiled for Google Chrome
 #   Native Client

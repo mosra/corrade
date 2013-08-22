@@ -116,10 +116,10 @@ Clang), pass `-DCMAKE_CXX_COMPILER=clang++` to CMake.
 By default the library expects standards conforming compiler. However, for
 portability, compatibility mode for older compilers is provided:
 
-- `GCC46_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
-  4.6
 - `GCC47_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
   4.7
+- `GCC46_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
+  4.6
 
 %Corrade will detect the compiler used and refuses to build (or be used) if
 some compatibility mode needs to be enabled. On the other hand, if any of these
