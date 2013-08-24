@@ -58,8 +58,8 @@ class CORRADE_UTILITY_EXPORT Directory {
             /**
              * Skip regular files
              * @partialsupport Has no effect on Windows and in
-             *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib". In
-             *      @ref CORRADE_TARGET_EMSCRIPTEN_ "Emscripten" skips
+             *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib". In
+             *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" skips
              *      everything except directories.
              */
             SkipFiles = 1 << 1,
@@ -67,15 +67,15 @@ class CORRADE_UTILITY_EXPORT Directory {
             /**
              * Skip directories (including `.` and `..`)
              * @partialsupport Has no effect on Windows and in
-             *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
+             *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
              */
             SkipDirectories = 1 << 2,
 
             /**
              * Skip everything what is not a file or directory
              * @partialsupport Has no effect on Windows and in
-             *      @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib". In
-             *      @ref CORRADE_TARGET_EMSCRIPTEN_ "Emscripten" skips
+             *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib". In
+             *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" skips
              *      everything except directories.
              */
             SkipSpecial = 1 << 3,
@@ -144,7 +144,7 @@ class CORRADE_UTILITY_EXPORT Directory {
          * @return True if path was successfully created or false if an error
          * occured.
          *
-         * @partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
+         * @partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
          */
         static bool mkpath(const std::string& path);
 
@@ -154,7 +154,7 @@ class CORRADE_UTILITY_EXPORT Directory {
          * @return `True` if path is file or empty directory and was
          *      successfully removed, `false` otherwise.
          *
-         * @partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
+         * @partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
          */
         static bool rm(const std::string& path);
 
@@ -164,7 +164,7 @@ class CORRADE_UTILITY_EXPORT Directory {
          * @param newPath   New path
          * @return `True` on success, `false` otherwise.
          *
-         * @partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB_ "NaCl newlib".
+         * @partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
          */
         static bool move(const std::string& oldPath, const std::string& newPath);
         #endif
@@ -172,7 +172,7 @@ class CORRADE_UTILITY_EXPORT Directory {
         /**
          * @brief Current user's home directory
          *
-         * @partialsupport In @ref CORRADE_TARGET_EMSCRIPTEN_ "Emscripten"
+         * @partialsupport In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten"
          *      returns empty string.
          */
         static std::string home();

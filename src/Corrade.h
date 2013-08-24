@@ -31,75 +31,74 @@
 
 #include "corradeCompatibility.h"
 
-/** @todoc remove trailing underscores when Doxygen can handle `undef` */
-
 namespace Corrade {
 
 #ifdef DOXYGEN_GENERATING_OUTPUT
-
 /**
 @brief GCC 4.7 compatibility
 
-`CORRADE_GCC47_COMPATIBILITY` is defined if compatibility mode for GCC 4.7 is
-enabled.
+Defined if compatibility mode for GCC 4.7 is enabled.
 @see @ref building-corrade
 */
-#define CORRADE_GCC47_COMPATIBILITY_
+#define CORRADE_GCC47_COMPATIBILITY
+#undef CORRADE_GCC47_COMPATIBILITY
 
 /**
 @brief GCC 4.6 compatibility
 
-`CORRADE_GCC46_COMPATIBILITY` is defined if compatibility mode for GCC 4.6 is
-enabled.
+Defined if compatibility mode for GCC 4.6 is enabled.
 @see @ref building-corrade
 */
-#define CORRADE_GCC46_COMPATIBILITY_
+#define CORRADE_GCC46_COMPATIBILITY
+#undef CORRADE_GCC46_COMPATIBILITY
 
 /**
 @brief Static library build
 
-`CORRADE_BUILD_STATIC` is defined if built as static libraries. Default are
-shared libraries.
+Defined if built as static libraries. Default are shared libraries.
 @see @ref building-corrade
 */
-#define CORRADE_BUILD_STATIC_
+#define CORRADE_BUILD_STATIC
+#undef CORRADE_BUILD_STATIC
 
 /**
 @brief Google Chrome Native Client target
 
-`CORRADE_TARGET_NACL` is defined if the library is built for
+Defined if the library is built for
 [Google Chrome Native Client](https://developers.google.com/native-client/).
 @see @ref building-corrade
 */
-#define CORRADE_TARGET_NACL_
+#define CORRADE_TARGET_NACL
+#undef CORRADE_TARGET_NACL
 
 /**
 @brief Google Chrome Native Client target with `newlib` toolchain
 
-`CORRADE_TARGET_NACL_NEWLIB` is defined if the library is built for Google
-Chrome Native Client with `newlib` toolchain.
+Defined if the library is built for Google Chrome Native Client with `newlib`
+toolchain.
 @see @ref building-corrade
 */
-#define CORRADE_TARGET_NACL_NEWLIB_
+#define CORRADE_TARGET_NACL_NEWLIB
+#undef CORRADE_TARGET_NACL_NEWLIB
 
 /**
 @brief Google Chrome Native Client target with `glibc` toolchain
 
-`CORRADE_TARGET_NACL_GLIBC` is defined if the library is built for Google
-Chrome Native Client with `glibc` toolchain.
+Defined if the library is built for Google Chrome Native Client with `glibc`
+toolchain.
 @see @ref building-corrade
 */
-#define CORRADE_TARGET_NACL_GLIBC_
+#define CORRADE_TARGET_NACL_GLIBC
+#undef CORRADE_TARGET_NACL_GLIBC
 
 /**
 @brief Emscripten target
 
-`CORRADE_TARGET_EMSCRIPTEN` is defined if the library is built for
-[Emscripten](https://github.com/kripken/emscripten/wiki).
+Defined if the library is built for [Emscripten](https://github.com/kripken/emscripten/wiki).
 @see @ref building-corrade
 */
-#define CORRADE_TARGET_EMSCRIPTEN_
-
+#define CORRADE_TARGET_EMSCRIPTEN
+#undef CORRADE_TARGET_EMSCRIPTEN
 #endif
 
 }

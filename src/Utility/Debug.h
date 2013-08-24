@@ -167,7 +167,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         Debug operator<<(double value);                 /**< @overload */
         #ifndef CORRADE_TARGET_EMSCRIPTEN
         /** @overload
-         * @partialsupport Not available in @ref CORRADE_TARGET_EMSCRIPTEN_ "Emscripten"
+         * @partialsupport Not available in @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten"
          *      as JavaScript doesn't support doubles larger than 64 bits.
          */
         Debug operator<<(long double value);
