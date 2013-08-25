@@ -66,4 +66,9 @@ std::string String::lowercase(std::string str) {
     return std::move(str);
 }
 
+std::string String::uppercase(std::string str) {
+    std::transform(str.begin(), str.end(), str.begin(), static_cast<int (*)(int)>(std::toupper));
+    return std::move(str);
+}
+
 }}

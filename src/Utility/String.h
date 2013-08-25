@@ -100,6 +100,15 @@ class CORRADE_UTILITY_EXPORT String {
          * @attention Doesn't work with UTF-8.
          */
         static std::string lowercase(std::string str);
+
+        /**
+         * @brief Convert string to uppercase
+         * @param str               %String to be converted
+         * @return Uppercase version of the string
+         *
+         * @attention Doesn't work with UTF-8.
+         */
+        static std::string uppercase(std::string str);
 };
 
 }}
