@@ -32,6 +32,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testConfigure.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/testConfigure.h)
 
 corrade_add_test(UtilityAbstractHashTest AbstractHashTest.cpp)
+corrade_add_test(UtilityArgumentsTest ArgumentsTest.cpp LIBRARIES CorradeUtilityTestLib)
 corrade_add_test(UtilityDirectoryTest DirectoryTest.cpp)
 corrade_add_test(UtilityEndianTest EndianTest.cpp)
 corrade_add_test(UtilityMurmurHash2Test MurmurHash2Test.cpp)
