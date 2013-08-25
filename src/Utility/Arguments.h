@@ -291,6 +291,11 @@ class CORRADE_UTILITY_EXPORT Arguments {
          */
         void parse(int argc, const char** argv);
 
+        /** @overload */
+        void parse(int argc, char** argv) {
+            parse(argc, const_cast<const char**>(argv));
+        }
+
         /**
          * @brief Try parsing the arguments
          *
@@ -300,6 +305,11 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * returned.
          */
         bool tryParse(int argc, const char** argv);
+
+        /** @overload */
+        bool tryParse(int argc, char** argv) {
+            return tryParse(argc, const_cast<const char**>(argv));
+        }
 
         /**
          * @brief Usage string
