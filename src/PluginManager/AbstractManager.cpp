@@ -246,7 +246,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
            with it */
         auto foundDependency = plugins()->find(*it);
 
-        if(foundDependency == plugins()->end() || !foundDependency->second->manager || !(foundDependency->second->manager->load(*it) & (LoadState::Loaded|LoadState::Static)))
+        if(foundDependency == plugins()->end() || !foundDependency->second->manager || !(foundDependency->second->manager->load(*it) & LoadState::Loaded))
             return LoadState::UnresolvedDependency;
 
         dependencies.push_back(*foundDependency);
@@ -490,7 +490,7 @@ void* AbstractManager::instanceInternal(const std::string& plugin) {
 
     /* Plugin with given name doesn't exist or isn't successfully loaded */
     #ifndef CORRADE_TARGET_NACL_NEWLIB
-    if(foundPlugin == plugins()->end() || !(foundPlugin->second->loadState & (LoadState::Loaded|LoadState::Static)))
+    if(foundPlugin == plugins()->end() || !(foundPlugin->second->loadState & LoadState::Loaded))
     #else
     if(foundPlugin == plugins()->end())
     #endif

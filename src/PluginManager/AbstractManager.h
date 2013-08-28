@@ -106,16 +106,30 @@ enum class LoadState: unsigned short {
      *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
      */
     LoadFailed = 1 << 5,
+    #endif
+
+    /**
+     * The plugin is static. Returned by AbstractManager::loadState(),
+     * AbstractManager::load(), AbstractManager::reload() and
+     * AbstractManager::unload().
+     */
+    Static = 1 << 6,
 
     /**
      * The plugin is successfully loaded. Returned by
      * AbstractManager::loadState(), AbstractManager::load() and
-     * AbstractManager::reload().
-     * @partialsupport Only static plugins are supported in
-     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
+     * AbstractManager::reload(). The value includes value of @ref LoadState::Static,
+     * see @ref LoadStates for more information. On
+     * @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" the value is equivalent to
+     * @ref LoadState::Static.
      */
-    Loaded = 1 << 6,
+    #ifndef CORRADE_TARGET_NACL_NEWLIB
+    Loaded = (1 << 7) | LoadState::Static,
+    #else
+    Loaded = LoadState::Static,
+    #endif
 
+    #ifndef CORRADE_TARGET_NACL_NEWLIB
     /**
      * The plugin is not loaded. Plugin can be unloaded only if is dynamic and
      * is not required by any other plugin. Returned by
@@ -124,7 +138,7 @@ enum class LoadState: unsigned short {
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
      */
-    NotLoaded = 1 << 7,
+    NotLoaded = 1 << 8,
 
     /**
      * The plugin failed to unload. Returned by AbstractManager::unload()
@@ -132,7 +146,7 @@ enum class LoadState: unsigned short {
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
      */
-    UnloadFailed = 1 << 8,
+    UnloadFailed = 1 << 9,
 
     /**
      * The plugin cannot be unloaded because another plugin is depending on it.
@@ -141,18 +155,10 @@ enum class LoadState: unsigned short {
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
      */
-    Required = 1 << 9,
+    Required = 1 << 10,
     #endif
 
-    /**
-     * The plugin is static. Returned by AbstractManager::loadState(),
-     * AbstractManager::load(), AbstractManager::reload() and
-     * AbstractManager::unload().
-     */
-    Static = 1 << 10
-
     #ifndef CORRADE_TARGET_NACL_NEWLIB
-    ,
     /**
      * The plugin has active instance and cannot be unloaded. Destroy all
      * instances and try again. Returned by AbstractManager::unload()
@@ -169,10 +175,14 @@ enum class LoadState: unsigned short {
 
 Useful when checking whether LoadState in in given set of values, for example:
 @code
-if(loadState & (LoadState::Loaded|LoadState::Static)) {
+if(loadState & (LoadState::WrongPluginVersion|LoadState::WrongInterfaceVersion)) {
     // ...
 }
 @endcode
+
+Note that @ref LoadState::Loaded includes value of @ref LoadState::Static, so
+you can use `loadState & LoadState::Loaded` instead of much more verbose
+`state & (LoadState::Loaded|LoadState::Static)`.
 @see AbstractManager::loadState(), AbstractManager::load(),
     AbstractManager::unload(), AbstractManager::reload().
 */
