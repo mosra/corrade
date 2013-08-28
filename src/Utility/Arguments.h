@@ -47,7 +47,7 @@ arguments can be given in any order, it is possible to separate positional
 arguments from option list with `--`.
 
 The parsing is semi-autonomous, which means that the parser will exit with
-failure or print help text (and exit) on its own. If `-h` or `--help` is given
+failure or print help text (and exit) on its own: If `-h` or `--help` is given
 as first argument (the remaining ones are then ignored), the parser prints full
 help text to the output and exits. If parse error occurs (missing/unknown
 argument etc.), the parser prints short usage information and exits.
@@ -111,7 +111,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *      Usage:
          *        ./app argument
          *
-         *      Arguments and options:
+         *      Arguments:
          *        argument          help text
          *
          * If no help text is set, the argument is not displayed in argument
@@ -131,7 +131,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *      Usage:
          *        ./app -a|--argument ARGUMENT
          *
-         *      Arguments and options:
+         *      Arguments:
          *        --a, --argument   help text
          *
          * If no help text is set, the argument is not displayed in argument
@@ -149,7 +149,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *      Usage:
          *        ./app --argument ARGUMENT
          *
-         *      Arguments and options:
+         *      Arguments:
          *        --argument        help text
          */
         Arguments& addNamedArgument(std::string key) {
@@ -171,7 +171,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * default value is empty and no help text is set, the option is not
          * displayed in the list at all.
          *
-         *      Arguments and options:
+         *      Arguments:
          *        -o, --option      help text
          *                          (default: defaultValue)
          *
@@ -188,7 +188,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *      Usage:
          *        ./app [--option OPTION]
          *
-         *      Arguments and options:
+         *      Arguments:
          *        --option          help text
          *                          (default: defaultValue)
          */
@@ -207,17 +207,17 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *      Usage:
          *        ./app [-o|-option]
          *
-         *      Arguments and options:
+         *      Arguments:
          *        -o, --option      help text
          *
          * Option presence can be queried with @ref isSet(), @ref setHelpKey()
          * cannot be used with boolean options. Option for getting help (`-h`,
-         * `--help`) is handled internally and cannot be queried.
+         * `--help`) is added automatically.
          */
         Arguments& addBooleanOption(char shortKey, std::string key);
 
         /**
-         * @brief Add bool option with long key only
+         * @brief Add boolean option with long key only
          *
          * Similar to the above, the only difference is that the usage and help
          * text does not mention the short option:
@@ -225,7 +225,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *      Usage:
          *        ./app [--option]
          *
-         *      Arguments and options:
+         *      Arguments:
          *        --option          help text
          */
         Arguments& addBooleanOption(std::string key) {
