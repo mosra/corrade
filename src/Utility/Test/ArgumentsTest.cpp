@@ -95,13 +95,13 @@ void ArgumentsTest::helpArgumentsOnly() {
         .addArgument("bar").setHelpKey("bar", "output.bin")
         .setCommand("foobar");
 
-    const auto expected = R"text(Usage:
-  foobar [-h|--help] [--] foo output.bin
-
-Arguments:
-  foo         which foo to bar
-  -h, --help  display this help message and exit
-)text";
+    const auto expected =
+        "Usage:\n"
+        "  foobar [-h|--help] [--] foo output.bin\n"
+        "\n"
+        "Arguments:\n"
+        "  foo         which foo to bar\n"
+        "  -h, --help  display this help message and exit\n";
     CORRADE_COMPARE(args.help(), expected);
 }
 
@@ -113,16 +113,16 @@ void ArgumentsTest::helpNamedOnly() {
         .addBooleanOption("no-bare-foos").setHelp("no-bare-foos", "don't use bare foos")
         .setCommand("foobar");
 
-    const auto expected = R"text(Usage:
-  foobar [-h|--help] [-n|--bars BARS] -b|--baz LEVEL [--sanity SANITY] [--no-bare-foos]
-
-Arguments:
-  -h, --help       display this help message and exit
-  -n, --bars BARS  number of bars to foo
-                   (default: 42)
-  --sanity SANITY  (default: INSANE)
-  --no-bare-foos   don't use bare foos
-)text";
+    const auto expected =
+        "Usage:\n"
+        "  foobar [-h|--help] [-n|--bars BARS] -b|--baz LEVEL [--sanity SANITY] [--no-bare-foos]\n"
+        "\n"
+        "Arguments:\n"
+        "  -h, --help       display this help message and exit\n"
+        "  -n, --bars BARS  number of bars to foo\n"
+        "                   (default: 42)\n"
+        "  --sanity SANITY  (default: INSANE)\n"
+        "  --no-bare-foos   don't use bare foos\n";
     CORRADE_COMPARE(args.help(), expected);
 }
 
@@ -131,14 +131,14 @@ void ArgumentsTest::helpBoth() {
     args.addArgument("foo").setHelp("foo", "which foo to bar with")
         .addBooleanOption('B', "no-bars").setHelp("no-bars", "don't foo with bars");
 
-    const auto expected = R"text(Usage:
-  ./app [-h|--help] [-B|--no-bars] [--] foo
-
-Arguments:
-  foo            which foo to bar with
-  -h, --help     display this help message and exit
-  -B, --no-bars  don't foo with bars
-)text";
+    const auto expected =
+        "Usage:\n"
+        "  ./app [-h|--help] [-B|--no-bars] [--] foo\n"
+        "\n"
+        "Arguments:\n"
+        "  foo            which foo to bar with\n"
+        "  -h, --help     display this help message and exit\n"
+        "  -B, --no-bars  don't foo with bars\n";
     CORRADE_COMPARE(args.help(), expected);
 }
 
@@ -147,25 +147,25 @@ void ArgumentsTest::helpText() {
     args.addArgument("foo").setHelp("foo", "which foo to bar with")
         .setHelp("Bars with given foo.");
 
-    const auto expected = R"text(Usage:
-  ./app [-h|--help] [--] foo
-
-Bars with given foo.
-
-Arguments:
-  foo         which foo to bar with
-  -h, --help  display this help message and exit
-)text";
+    const auto expected =
+        "Usage:\n"
+        "  ./app [-h|--help] [--] foo\n"
+        "\n"
+        "Bars with given foo.\n"
+        "\n"
+        "Arguments:\n"
+        "  foo         which foo to bar with\n"
+        "  -h, --help  display this help message and exit\n";
     CORRADE_COMPARE(args.help(), expected);
 }
 
 void ArgumentsTest::helpEmpty() {
-    const auto expected = R"text(Usage:
-  ./app [-h|--help]
-
-Arguments:
-  -h, --help  display this help message and exit
-)text";
+    const auto expected =
+        "Usage:\n"
+        "  ./app [-h|--help]\n"
+        "\n"
+        "Arguments:\n"
+        "  -h, --help  display this help message and exit\n";
     CORRADE_COMPARE(Arguments().help(), expected);
 }
 
@@ -177,17 +177,17 @@ void ArgumentsTest::helpAfterParse() {
 
     /* Take command name from argv */
     CORRADE_VERIFY(args.tryParse(argc, argv));
-    const auto expected = R"text(Usage:
-  foobar [-h|--help]
-)text";
+    const auto expected =
+        "Usage:\n"
+        "  foobar [-h|--help]\n";
     CORRADE_COMPARE(args.usage(), expected);
 
     /* If set custom command name, don't override */
     args.setCommand("myFoobarApp");
     CORRADE_VERIFY(args.tryParse(argc, argv));
-    const auto expected2 = R"text(Usage:
-  myFoobarApp [-h|--help]
-)text";
+    const auto expected2 =
+        "Usage:\n"
+        "  myFoobarApp [-h|--help]\n";
     CORRADE_COMPARE(args.usage(), expected2);
 }
 
