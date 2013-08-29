@@ -171,7 +171,9 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
 
     /* Clear previously parsed values */
     for(auto it = _booleans.begin(); it != _booleans.end(); ++it) *it = false;
-    for(const Entry& entry: _entries) {
+    for(auto it = _entries.begin(); it != _entries.end(); ++it) {
+        const Entry& entry = *it;
+
         if(entry.type == Type::BooleanOption) continue;
 
         CORRADE_INTERNAL_ASSERT(entry.id < _values.size());
@@ -303,7 +305,9 @@ std::string Arguments::usage() const {
 
     /* Print all options and named argument first */
     bool hasArguments = false;
-    for(const Entry& entry: _entries) {
+    for(auto it = _entries.begin(); it != _entries.end(); ++it) {
+        const Entry& entry = *it;
+
         if(entry.type == Type::Argument) {
             hasArguments = true;
             continue;
@@ -330,7 +334,9 @@ std::string Arguments::usage() const {
     if(hasArguments) out << " [--]";
 
     /* Print all arguments second */
-    for(const Entry& entry: _entries) {
+    for(auto it = _entries.begin(); it != _entries.end(); ++it) {
+        const Entry& entry = *it;
+
         if(entry.type != Type::Argument) continue;
 
         out << ' ' << entry.helpKey;
@@ -352,7 +358,9 @@ std::string Arguments::help() const {
     /* Compute key column width. Minimal is to display `-h, --help` */
     constexpr std::size_t maxKeyColumnWidth = 27;
     std::size_t keyColumnWidth = 11;
-    for(const Entry& entry: _entries) {
+    for(auto it = _entries.begin(); it != _entries.end(); ++it) {
+        const Entry& entry = *it;
+
         /* Entry which will not be printed, skip */
         if(entry.help.empty() || (entry.type == Type::Option && entry.defaultValue.empty()))
             continue;
@@ -381,7 +389,9 @@ std::string Arguments::help() const {
     out << "\nArguments:\n";
 
     /* Print all arguments first */
-    for(const Entry& entry: _entries) {
+    for(auto it = _entries.begin(); it != _entries.end(); ++it) {
+        const Entry& entry = *it;
+
         /* Skip non-arguments and arguments without help text */
         if(entry.type != Type::Argument || entry.help.empty()) continue;
 
@@ -389,7 +399,9 @@ std::string Arguments::help() const {
     }
 
     /* Print all named arguments and options second */
-    for(const Entry& entry: _entries) {
+    for(auto it = _entries.begin(); it != _entries.end(); ++it) {
+        const Entry& entry = *it;
+
         /* Skip arguments and options without default value/help text */
         if(entry.type == Type::Argument || (entry.defaultValue.empty() && entry.help.empty()))
             continue;
