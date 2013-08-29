@@ -26,50 +26,42 @@
 /** @file
 @brief Utility for compiling data resources via command-line.
 
-Usage:
-
-    corrade-rc name resources.conf outfile.cpp
-
 Produces compiled C++ file with data in hexadecimal representation. Status
 messages are printed to standard output, errors are printed to error output.
-
-See @ref resource-management for brief introduction.
+See `corrade-rc --help` for command-line parameters, see @ref resource-management
+for brief introduction.
 */
 
 #include <fstream>
 
+#include "Utility/Arguments.h"
 #include "Utility/Debug.h"
 #include "Utility/Directory.h"
 #include "Utility/Resource.h"
 
-using Corrade::Utility::Debug;
-using Corrade::Utility::Error;
-
 #ifndef DOXYGEN_GENERATING_OUTPUT
 int main(int argc, char** argv) {
-    if(argc != 4) {
-        Debug() << "Resource compiler for Corrade.";
-        Debug() << "";
-        Debug() << "Usage:";
-        Debug() << "   " << argv[0] << "name resources.conf outfile.cpp";
-        Debug() << "";
-        if(argc == 0) return 0;
-        return 1;
-    }
+    Corrade::Utility::Arguments args;
+    args.addArgument("name")
+        .addArgument("conf").setHelpKey("conf", "resources.conf")
+        .addArgument("out").setHelpKey("out", "outfile.cpp")
+        .setCommand("corrade-rc")
+        .setHelp("Resource compiler for Corrade.")
+        .parse(argc, argv);
 
     /* Remove previous output file */
-    Corrade::Utility::Directory::rm(argv[3]);
+    Corrade::Utility::Directory::rm(args.value("out"));
 
     /* Compile file */
-    const std::string compiled = Corrade::Utility::Resource::compileFrom(argv[1], argv[2]);
+    const std::string compiled = Corrade::Utility::Resource::compileFrom(args.value("name"), args.value("conf"));
 
     /* Compilation failed */
     if(compiled.empty()) return 2;
 
     /* Save output */
-    std::ofstream out(argv[3], std::ofstream::binary);
+    std::ofstream out(args.value("out"), std::ofstream::binary);
     if(!out.good()) {
-        Error() << "Cannot open output file " << '\'' + std::string(argv[3]) + '\'';
+        Corrade::Utility::Error() << "Cannot open output file " << '\'' + args.value("out") + '\'';
         return 3;
     }
     out.write(compiled.data(), compiled.size());

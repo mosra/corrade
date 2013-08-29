@@ -38,6 +38,8 @@
 
 namespace Corrade { namespace Utility {
 
+class Arguments;
+
 template<std::size_t> class HashDigest;
 /* AbstractHash is not used directly */
 

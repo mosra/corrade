@@ -36,6 +36,7 @@ class StringTest: public TestSuite::Tester {
         void trim();
         void split();
         void lowercase();
+        void uppercase();
         void whitespace();
 };
 
@@ -43,6 +44,7 @@ StringTest::StringTest() {
     addTests({&StringTest::trim,
               &StringTest::split,
               &StringTest::lowercase,
+              &StringTest::uppercase,
               &StringTest::whitespace});
 }
 
@@ -99,6 +101,21 @@ void StringTest::lowercase() {
     /* UTF-8 */
     CORRADE_EXPECT_FAIL("UTF-8 lowercasing is not supported.");
     CORRADE_COMPARE(String::lowercase("ĚŠČŘŽÝÁÍÉÚŮĎŤŇ"), "ěščřžýáíéúůďťň");
+}
+
+void StringTest::uppercase() {
+    /* Lowecase */
+    CORRADE_COMPARE(String::uppercase("hello"), "HELLO");
+
+    /* Uppercase */
+    CORRADE_COMPARE(String::uppercase("QWERTZUIOP"), "QWERTZUIOP");
+
+    /* Special chars */
+    CORRADE_COMPARE(String::uppercase(".,?- \"!/(98765%"), ".,?- \"!/(98765%");
+
+    /* UTF-8 */
+    CORRADE_EXPECT_FAIL("UTF-8 uppercasing is not supported.");
+    CORRADE_COMPARE(String::uppercase("ěščřžýáíéúůďťň"), "ĚŠČŘŽÝÁÍÉÚŮĎŤŇ");
 }
 
 void StringTest::whitespace() {

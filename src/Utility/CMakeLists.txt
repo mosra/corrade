@@ -38,11 +38,13 @@ set(CorradeUtility_SRCS
     utilities.cpp)
 
 set(CorradeUtility_GracefulAssert_SRCS
+    Arguments.cpp
     ConfigurationGroup.cpp
     Resource.cpp
     Unicode.cpp)
 
 set(CorradeUtility_HEADERS
+    Arguments.h
     AbstractHash.h
     Assert.h
     Configuration.h

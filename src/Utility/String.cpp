@@ -63,7 +63,12 @@ std::vector<std::string> String::split(const std::string& str, char delim, bool 
 
 std::string String::lowercase(std::string str) {
     std::transform(str.begin(), str.end(), str.begin(), static_cast<int (*)(int)>(std::tolower));
-    return str;
+    return std::move(str);
+}
+
+std::string String::uppercase(std::string str) {
+    std::transform(str.begin(), str.end(), str.begin(), static_cast<int (*)(int)>(std::toupper));
+    return std::move(str);
 }
 
 }}

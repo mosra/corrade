@@ -163,8 +163,8 @@ template<> struct ConfigurationValue<double>: public Implementation::BasicConfig
 #ifndef CORRADE_TARGET_EMSCRIPTEN
 /**
 @brief %Configuration value parser and writer for `long double` type
-@partialsupport Not available in @ref CORRADE_TARGET_EMSCRIPTEN_ "Emscripten"
-    as JavaScript doesn't support doubles larger than 64 bits.
+@partialsupport Not available in @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" as
+    JavaScript doesn't support doubles larger than 64 bits.
 */
 template<> struct ConfigurationValue<long double>: public Implementation::BasicConfigurationValue<long double> {};
 #endif

@@ -129,7 +129,7 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          * @brief Plugins on which this plugin depend
          *
          * List of plugins which must be loaded before this plugin can be
-         * loaded. See also PluginMetadata::replaced.
+         * loaded. See also @ref PluginMetadata::replaces().
          * @note Thus field is constant during whole plugin lifetime.
          */
         const std::vector<std::string>& depends() const { return _depends; }
@@ -158,7 +158,7 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          *
          * List of plugins which can replace this plugin. Every plugin which
          * depends on this plugin would work also with these.
-         * @note This list is automatically created by plugin manage and can
+         * @note This list is automatically created by plugin manager and can
          *      change in plugin lifetime.
          */
         std::vector<std::string> replacedWith() const;
