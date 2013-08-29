@@ -173,7 +173,7 @@ void ArgumentsTest::helpAfterParse() {
     Arguments args;
 
     const char* argv[] = { "foobar" };
-    const int argc = std::extent<decltype(argv)>();
+    const int argc = std::extent<decltype(argv)>::value;
 
     /* Take command name from argv */
     CORRADE_VERIFY(args.tryParse(argc, argv));
@@ -234,7 +234,7 @@ void ArgumentsTest::parseHelp() {
     args.addBooleanOption("no-foo-bars");
 
     const char* argv[] = { "", "-h", "--no-foo-bars", "error" };
-    const int argc = std::extent<decltype(argv)>();
+    const int argc = std::extent<decltype(argv)>::value;
 
     CORRADE_VERIFY(args.tryParse(argc, argv));
     CORRADE_VERIFY(args.isSet("help"));
@@ -248,7 +248,7 @@ void ArgumentsTest::parseArguments() {
         .addArgument("output");
 
     const char* argv[] = { "", "hello", "in.txt", "out.bin" };
-    const int argc = std::extent<decltype(argv)>();
+    const int argc = std::extent<decltype(argv)>::value;
 
     CORRADE_VERIFY(args.tryParse(argc, argv));
     CORRADE_COMPARE(args.value("name"), "hello");
@@ -265,7 +265,7 @@ void ArgumentsTest::parseMixed() {
         .addBooleanOption('l', "loud");
 
     const char* argv[] = { "", "-o", "log.txt", "-v", "input.txt" };
-    const int argc = std::extent<decltype(argv)>();
+    const int argc = std::extent<decltype(argv)>::value;
 
     CORRADE_VERIFY(args.tryParse(argc, argv));
     CORRADE_VERIFY(!args.isSet("help"));
@@ -282,7 +282,7 @@ void ArgumentsTest::parseCustomType() {
     args.addNamedArgument("pi");
 
     const char* argv[] = { "", "--pi", "0.3141516e+1" };
-    const int argc = std::extent<decltype(argv)>();
+    const int argc = std::extent<decltype(argv)>::value;
 
     CORRADE_VERIFY(args.tryParse(argc, argv));
     CORRADE_COMPARE(args.value<float>("pi"), 3.141516f);
@@ -292,7 +292,7 @@ void ArgumentsTest::parseUnknownArgument() {
     Arguments args;
 
     const char* argv[] = { "", "--error" };
-    const int argc = std::extent<decltype(argv)>();
+    const int argc = std::extent<decltype(argv)>::value;
 
     std::ostringstream out;
     Error::setOutput(&out);
@@ -304,7 +304,7 @@ void ArgumentsTest::parseUnknownShortArgument() {
     Arguments args;
 
     const char* argv[] = { "", "-e" };
-    const int argc = std::extent<decltype(argv)>();
+    const int argc = std::extent<decltype(argv)>::value;
 
     std::ostringstream out;
     Error::setOutput(&out);
@@ -316,7 +316,7 @@ void ArgumentsTest::parseSuperfluousArgument() {
     Arguments args;
 
     const char* argv[] = { "", "error" };
-    const int argc = std::extent<decltype(argv)>();
+    const int argc = std::extent<decltype(argv)>::value;
 
     std::ostringstream out;
     Error::setOutput(&out);
@@ -329,7 +329,7 @@ void ArgumentsTest::parseArgumentAfterSeparator() {
     args.addBooleanOption('b', "bar");
 
     const char* argv[] = { "", "--", "-b" };
-    const int argc = std::extent<decltype(argv)>();
+    const int argc = std::extent<decltype(argv)>::value;
 
     std::ostringstream out;
     Error::setOutput(&out);
@@ -342,7 +342,7 @@ void ArgumentsTest::parseMissingValue() {
     args.addOption("output");
 
     const char* argv[] = { "", "--output" };
-    const int argc = std::extent<decltype(argv)>();
+    const int argc = std::extent<decltype(argv)>::value;
 
     std::ostringstream out;
     Error::setOutput(&out);
@@ -355,7 +355,7 @@ void ArgumentsTest::parseMissingOption() {
     args.addNamedArgument("output");
 
     const char* argv[] = { "" };
-    const int argc = std::extent<decltype(argv)>();
+    const int argc = std::extent<decltype(argv)>::value;
 
     std::ostringstream out;
     Error::setOutput(&out);
@@ -368,7 +368,7 @@ void ArgumentsTest::parseMissingArgument() {
     args.addArgument("file").setHelpKey("file", "file.dat");
 
     const char* argv[] = { "" };
-    const int argc = std::extent<decltype(argv)>();
+    const int argc = std::extent<decltype(argv)>::value;
 
     std::ostringstream out;
     Error::setOutput(&out);
