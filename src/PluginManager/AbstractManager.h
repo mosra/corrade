@@ -170,7 +170,7 @@ enum class LoadState: unsigned short {
     #endif
 };
 
-/** @relates AbstractManager
+/**
 @brief Plugin load states
 
 Useful when checking whether LoadState in in given set of values, for example:
@@ -182,7 +182,7 @@ if(loadState & (LoadState::WrongPluginVersion|LoadState::WrongInterfaceVersion))
 
 Note that @ref LoadState::Loaded includes value of @ref LoadState::Static, so
 you can use `loadState & LoadState::Loaded` instead of much more verbose
-`state & (LoadState::Loaded|LoadState::Static)`.
+`state & (%LoadState::Loaded|%LoadState::Static)`.
 @see AbstractManager::loadState(), AbstractManager::load(),
     AbstractManager::unload(), AbstractManager::reload().
 */
