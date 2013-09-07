@@ -170,6 +170,7 @@ class TesterTest: public Tester {
         void emptyTest();
 
         void compareAsOverload();
+        void verifyExplicitBool();
 };
 
 class EmptyTest: public Tester {};
@@ -177,7 +178,9 @@ class EmptyTest: public Tester {};
 TesterTest::TesterTest() {
     addTests({&TesterTest::test,
               &TesterTest::emptyTest,
-              &TesterTest::compareAsOverload});
+
+              &TesterTest::compareAsOverload,
+              &TesterTest::verifyExplicitBool});
 }
 
 void TesterTest::test() {
@@ -241,6 +244,23 @@ void TesterTest::compareAsOverload() {
     double b = 3.0f;
     CORRADE_COMPARE_AS(a, b, float);
     CORRADE_COMPARE_AS(a, b, double);
+}
+
+void TesterTest::verifyExplicitBool() {
+
+    struct ExplicitTrue { explicit operator bool() const { return true; } };
+    ExplicitTrue t;
+    CORRADE_VERIFY(t);
+    CORRADE_VERIFY(ExplicitTrue());
+
+    struct ExplicitTrueNonConst { explicit operator bool() { return true; } };
+    ExplicitTrueNonConst tc;
+    CORRADE_VERIFY(tc);
+    CORRADE_VERIFY(ExplicitTrueNonConst());
+
+    struct ExplicitFalse { explicit operator bool() const { return false; } };
+    ExplicitFalse f;
+    CORRADE_VERIFY(!f);
 }
 
 }}}
