@@ -141,7 +141,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         /* Compare two different types with explicit comparator specification */
         template<class T, class U, class V> void compareWith(Comparator<T> comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue);
 
-        void verify(const std::string& expression, bool expressionValue);
+        template<class T> void verify(const std::string& expression, T&& value);
 
         void registerTest(std::string filename, std::string name);
 
@@ -173,6 +173,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
         void addTests() {} /* Terminator function for addTests() */
 
+        void verifyInternal(const std::string& expression, bool value);
+
         std::ostream *logOutput, *errorOutput;
         std::vector<TestCase> testCases;
         std::string testFilename, testName, testCaseName, expectFailMessage;
@@ -203,6 +205,14 @@ test case is terminated. Example usage:
 @code
 string s("hello");
 CORRADE_VERIFY(!s.empty());
+@endcode
+
+It is possible to use CORRADE_VERIFY() also on objects with *explicit*
+`operator bool` without doing explicit conversion (e.g. using `!!`), for
+example:
+@code
+std::unique_ptr<T> t(new T);
+CORRADE_VERIFY(t);
 @endcode
 
 @see CORRADE_COMPARE(), CORRADE_COMPARE_AS()
@@ -329,6 +339,11 @@ template<class T, class U, class V> void Tester::compareWith(Comparator<T> compa
     if(!expectedFailure) comparator.printErrorMessage(e, actual, expected);
     else e << actual << "and" << expected << "are not expected to be equal.";
     throw Exception();
+}
+
+template<class T> void Tester::verify(const std::string& expression, T&& value) {
+    if(value) verifyInternal(expression, true);
+    else verifyInternal(expression, false);
 }
 
 }}

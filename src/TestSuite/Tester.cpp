@@ -85,7 +85,7 @@ int Tester::exec(std::ostream* logOutput, std::ostream* errorOutput) {
     return errorCount != 0 || noCheckCount != 0;
 }
 
-void Tester::verify(const std::string& expression, bool expressionValue) {
+void Tester::verifyInternal(const std::string& expression, bool expressionValue) {
     ++checkCount;
 
     /* If the expression is true or the failure is expected, done */
