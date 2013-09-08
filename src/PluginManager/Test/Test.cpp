@@ -139,7 +139,7 @@ void Test::staticPlugin() {
     CORRADE_COMPARE(manager.metadata("Canary")->authors()[0], "Vladimír Vondruš <mosra@centrum.cz>");
     CORRADE_COMPARE(manager.metadata("Canary")->version(), "1.0");
 
-    AbstractAnimal* animal = manager.instance("Canary");
+    std::unique_ptr<AbstractAnimal> animal = manager.instance("Canary");
     CORRADE_VERIFY(animal);
     CORRADE_VERIFY(animal->hasTail());
     CORRADE_COMPARE(animal->name(), "Achoo");
@@ -156,19 +156,20 @@ void Test::dynamicPlugin() {
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
     CORRADE_COMPARE(*manager.metadata("Dog")->name(), "A simple dog plugin");
 
-    AbstractAnimal* animal = manager.instance("Dog");
-    CORRADE_VERIFY(animal);
-    CORRADE_VERIFY(animal->hasTail());
-    CORRADE_COMPARE(animal->name(), "Doug");
-    CORRADE_COMPARE(animal->legCount(), 4);
+    {
+        std::unique_ptr<AbstractAnimal> animal = manager.instance("Dog");
+        CORRADE_VERIFY(animal);
+        CORRADE_VERIFY(animal->hasTail());
+        CORRADE_COMPARE(animal->name(), "Doug");
+        CORRADE_COMPARE(animal->legCount(), 4);
 
-    /* Try to unload plugin when instance is used */
-    CORRADE_COMPARE(manager.unload("Dog"), LoadState::Used);
-    CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
+        /* Try to unload plugin when instance is used */
+        CORRADE_COMPARE(manager.unload("Dog"), LoadState::Used);
+        CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
+    }
 
     /* Plugin can be unloaded after destroying all instances in which
        canBeDeleted() returns false. */
-    delete animal;
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotLoaded);
 }
@@ -219,7 +220,7 @@ void Test::deletable() {
 
     /* create an instance and connect it to local variable, which will be
        changed on destruction */
-    AbstractDeletable* deletable = deletableManager.instance("Deletable");
+    AbstractDeletable* deletable = deletableManager.instance("Deletable").release();
     deletable->set(&var);
 
     /* plugin destroys all instances on deletion => the variable will be changed */
@@ -239,17 +240,18 @@ void Test::hierarchy() {
     CORRADE_COMPARE(manager.metadata("Dog")->usedBy().size(), 1);
     CORRADE_COMPARE(manager.metadata("Dog")->usedBy()[0], "Chihuahua");
 
-    AbstractAnimal* animal = manager.instance("Chihuahua");
-    CORRADE_VERIFY(animal);
-    CORRADE_VERIFY(animal->hasTail()); // inherited from dog
-    CORRADE_COMPARE(animal->legCount(), 4); // this too
-    CORRADE_COMPARE(animal->name(), "Rodriguez");
+    {
+        std::unique_ptr<AbstractAnimal> animal = manager.instance("Chihuahua");
+        CORRADE_VERIFY(animal);
+        CORRADE_VERIFY(animal->hasTail()); // inherited from dog
+        CORRADE_COMPARE(animal->legCount(), 4); // this too
+        CORRADE_COMPARE(animal->name(), "Rodriguez");
 
-    /* Try to unload plugin when another is depending on it */
-    CORRADE_COMPARE(manager.unload("Dog"), LoadState::Required);
+        /* Try to unload plugin when another is depending on it */
+        CORRADE_COMPARE(manager.unload("Dog"), LoadState::Required);
+    }
 
-    /* Unload chihuahua plugin, then try again */
-    delete animal;
+    /* After deleting instance, unload chihuahua plugin, then try again */
     CORRADE_COMPARE(manager.unload("Chihuahua"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
     CORRADE_VERIFY(manager.metadata("Dog")->usedBy().empty());
@@ -267,16 +269,18 @@ void Test::crossManagerDependencies() {
     CORRADE_COMPARE(manager.metadata("Dog")->usedBy().size(), 1);
     CORRADE_COMPARE(manager.metadata("Dog")->usedBy()[0], "HotDog");
 
-    /* Verify hotdog */
-    AbstractFood* hotdog = foodManager.instance("HotDog");
-    CORRADE_VERIFY(!hotdog->isTasty());
-    CORRADE_COMPARE(hotdog->weight(), 6800);
+    {
+        /* Verify hotdog */
+        std::unique_ptr<AbstractFood> hotdog = foodManager.instance("HotDog");
+        CORRADE_VERIFY(hotdog);
+        CORRADE_VERIFY(!hotdog->isTasty());
+        CORRADE_COMPARE(hotdog->weight(), 6800);
 
-    /* Try to unload dog while dog is used in hotdog */
-    CORRADE_COMPARE(manager.unload("Dog"), LoadState::Required);
+        /* Try to unload dog while dog is used in hotdog */
+        CORRADE_COMPARE(manager.unload("Dog"), LoadState::Required);
+    }
 
-    /* Destroy hotdog, then try again */
-    delete hotdog;
+    /* After destroying hotdog try again */
     CORRADE_COMPARE(foodManager.unload("HotDog"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
     CORRADE_VERIFY(manager.metadata("Dog")->usedBy().empty());
