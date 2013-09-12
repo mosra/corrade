@@ -27,11 +27,13 @@ cmake_minimum_required(VERSION 2.8.8)
 project(Corrade)
 
 include(CMakeDependentOption)
+option(WITH_FIND_MODULE "Install FindCorrade.cmake module into CMake's module dir (might require admin privileges)" OFF)
 option(GCC46_COMPATIBILITY "Enable compatibility mode for GCC 4.6 (might disable some features)" OFF)
 option(GCC47_COMPATIBILITY "Enable compatibility mode for GCC 4.7 (might disable some features)" OFF)
 option(BUILD_STATIC "Build static libraries (default are shared)" OFF)
 cmake_dependent_option(BUILD_STATIC_PIC "Build static libraries with position-independent code" OFF "BUILD_STATIC" OFF)
 option(BUILD_TESTS "Build unit tests." OFF)
+
 if(BUILD_TESTS)
     enable_testing()
 endif()
@@ -83,7 +85,8 @@ include(UseCorrade)
 include(CorradeLibSuffix)
 set(CORRADE_BINARY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/bin)
 set(CORRADE_LIBRARY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
-set(CORRADE_CMAKE_MODULE_INSTALL_DIR ${CMAKE_ROOT}/Modules)
+set(CORRADE_CMAKE_MODULE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/cmake/Corrade)
+set(CORRADE_CMAKE_FIND_MODULE_INSTALL_DIR ${CMAKE_ROOT}/Modules)
 set(CORRADE_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/Corrade)
 
 # Library version
