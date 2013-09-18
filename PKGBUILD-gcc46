@@ -2,22 +2,23 @@
 pkgname=corrade
 pkgver=dev.gcc46
 pkgrel=1
-pkgdesc="Multiplatform plugin management and utility library"
+pkgdesc="Multiplatform plugin management and utility library (built with GCC 4.6)"
 arch=('i686' 'x86_64')
 url="http://mosra.cz/blog/corrade.php"
 license=('MIT')
-makedepends=('cmake')
+makedepends=('cmake' 'gcc46')
 options=(!strip)
 provides=('corrade-git')
 
 build() {
-    mkdir -p "$startdir/build-gcc46"
-    cd "$startdir/build-gcc46/"
+    if [ ! -d "$startdir/build-gcc46" ] ; then
+        mkdir "$startdir/build-gcc46"
+        cd "$startdir/build-gcc46"
 
-    if [ "$CXX" = clang++ ] ; then
-        newcxxflags=$(echo $CXXFLAGS | sed s/--param=ssp-buffer-size=4//g)
-        export CXXFLAGS="$newcxxflags"
+        cmake .. -DCMAKE_CXX_COMPILER=g++-4.6
     fi
+
+    cd "$startdir/build-gcc46"
 
     cmake .. \
         -DCMAKE_BUILD_TYPE=Debug \
