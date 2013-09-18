@@ -2,18 +2,22 @@
 pkgname=corrade
 pkgver=dev.gcc45
 pkgrel=1
-pkgdesc="Multiplatform plugin management and utility library"
+pkgdesc="Multiplatform plugin management and utility library (built with GCC 4.5)"
 arch=('i686' 'x86_64')
 url="http://mosra.cz/blog/corrade.php"
-license=('LGPLv3')
-makedepends=('gcc45' 'cmake')
+license=('MIT')
+makedepends=('cmake' 'gcc45')
 options=(!strip)
 provides=('corrade-git')
 
 build() {
-    if [ ! -d "$startdir/build-gcc45" ]; then
-        mkdir "$startdir/build-gcc45" && cd "$startdir/build-gcc45"
-        cmake .. -DCMAKE_CXX_COMPILER=g++-4.5
+    if [ ! -d "$startdir/build-gcc45" ] ; then
+        mkdir "$startdir/build-gcc45"
+        cd "$startdir/build-gcc45"
+
+        cmake .. \
+            -DCMAKE_CXX_COMPILER=g++-4.5 \
+            -DGCC45_COMPATIBILITY=ON
     fi
 
     cd "$startdir/build-gcc45"
@@ -21,7 +25,6 @@ build() {
     cmake .. \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=/usr \
-        -DGCC45_COMPATIBILITY=ON \
         -DBUILD_TESTS=ON
     make
 }

@@ -2,18 +2,22 @@
 pkgname=corrade
 pkgver=dev.gcc44
 pkgrel=1
-pkgdesc="Multiplatform plugin management and utility library"
+pkgdesc="Multiplatform plugin management and utility library (built with GCC 4.4)"
 arch=('i686' 'x86_64')
 url="http://mosra.cz/blog/corrade.php"
-license=('LGPLv3')
-makedepends=('gcc44' 'cmake')
+license=('MIT')
+makedepends=('cmake' 'gcc44')
 options=(!strip)
 provides=('corrade-git')
 
 build() {
-    if [ ! -d "$startdir/build-gcc44" ]; then
-        mkdir "$startdir/build-gcc44" && cd "$startdir/build-gcc44"
-        cmake .. -DCMAKE_CXX_COMPILER=g++-4.4
+    if [ ! -d "$startdir/build-gcc44" ] ; then
+        mkdir "$startdir/build-gcc44"
+        cd "$startdir/build-gcc44"
+
+        cmake .. \
+            -DCMAKE_CXX_COMPILER=g++-4.4 \
+            -DGCC44_COMPATIBILITY=ON
     fi
 
     cd "$startdir/build-gcc44"
@@ -21,7 +25,6 @@ build() {
     cmake .. \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=/usr \
-        -DGCC44_COMPATIBILITY=ON \
         -DBUILD_TESTS=ON
     make
 }
