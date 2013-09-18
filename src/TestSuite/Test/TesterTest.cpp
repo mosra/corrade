@@ -247,6 +247,9 @@ void TesterTest::compareAsOverload() {
 }
 
 void TesterTest::verifyExplicitBool() {
+    #ifdef CORRADE_GCC44_COMPATIBILITY
+    CORRADE_SKIP("GCC 4.4 doesn't have explicit conversion operators");
+    #else
     struct ExplicitTrue { explicit operator bool() const { return true; } };
     ExplicitTrue t;
     CORRADE_VERIFY(t);
@@ -260,6 +263,7 @@ void TesterTest::verifyExplicitBool() {
     struct ExplicitFalse { explicit operator bool() const { return false; } };
     ExplicitFalse f;
     CORRADE_VERIFY(!f);
+    #endif
 }
 
 }}}
