@@ -247,7 +247,6 @@ void TesterTest::compareAsOverload() {
 }
 
 void TesterTest::verifyExplicitBool() {
-
     struct ExplicitTrue { explicit operator bool() const { return true; } };
     ExplicitTrue t;
     CORRADE_VERIFY(t);
