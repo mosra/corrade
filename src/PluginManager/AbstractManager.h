@@ -34,8 +34,9 @@
 #include <map>
 
 #ifdef _WIN32
-#include <windows.h>
-#undef interface
+/* I didn't find a better way to circumvent the need for including windows.h */
+struct HINSTANCE__;
+typedef struct HINSTANCE__* HMODULE;
 #endif
 
 #include "corradeCompatibility.h"

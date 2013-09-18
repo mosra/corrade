@@ -29,6 +29,8 @@
  * @brief Class Corrade::PluginManager::Manager
  */
 
+#include <memory>
+
 #include "AbstractManager.h"
 
 #include "corradeCompatibility.h"
@@ -75,8 +77,9 @@ class Manager: public BaseManager {
          * plugin must be successfully loaded for the operation to succeed.
          * @see loadState(), load()
          */
-        T* instance(const std::string& plugin) {
-            return static_cast<T*>(BaseManager::instanceInternal(plugin));
+        std::unique_ptr<T> instance(const std::string& plugin) {
+            /** @todo C++14: `std::make_unique()` */
+            return std::unique_ptr<T>(static_cast<T*>(BaseManager::instanceInternal(plugin)));
         }
 };
 

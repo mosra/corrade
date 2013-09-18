@@ -24,6 +24,7 @@
 */
 
 #include <PluginManager/Manager.h>
+#include <Utility/Debug.h>
 
 #include "AbstractAnimal.h"
 
@@ -51,13 +52,11 @@ int main(int argc, char** argv) {
                      << "...\n";
 
     /* Instance of an animal */
-    Examples::AbstractAnimal* animal = manager.instance(argv[1]);
+    std::unique_ptr<Examples::AbstractAnimal> animal = manager.instance(argv[1]);
 
     Utility::Debug() << "Name:     " << animal->name();
     Utility::Debug() << "Leg count:" << animal->legCount();
     Utility::Debug() << "Has tail: " << (animal->hasTail() ? "yes" : "no");
 
-    /* Destruct the animal, so the plugin can be safely unloaded */
-    delete animal;
     return 0;
 }
