@@ -15,7 +15,9 @@ build() {
         mkdir "$startdir/build-gcc47"
         cd "$startdir/build-gcc47"
 
-        cmake .. -DCMAKE_CXX_COMPILER=g++-4.7
+        cmake .. \
+            -DCMAKE_CXX_COMPILER=g++-4.7 \
+            -DGCC47_COMPATIBILITY=ON
     fi
 
     cd "$startdir/build-gcc47"

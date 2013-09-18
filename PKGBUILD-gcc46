@@ -15,7 +15,9 @@ build() {
         mkdir "$startdir/build-gcc46"
         cd "$startdir/build-gcc46"
 
-        cmake .. -DCMAKE_CXX_COMPILER=g++-4.6
+        cmake .. \
+            -DCMAKE_CXX_COMPILER=g++-4.6 \
+            -DGCC46_COMPATIBILITY=ON
     fi
 
     cd "$startdir/build-gcc46"
@@ -23,7 +25,7 @@ build() {
     cmake .. \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=/usr \
-        -DBUILD_TESTS=TRUE
+        -DBUILD_TESTS=ON
     make
 }
 
