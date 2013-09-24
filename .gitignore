@@ -5,3 +5,4 @@ pkg
 *.kate-swp
 *.pkg.tar.xz
 CMakeLists.txt.user*
+.DS_Store

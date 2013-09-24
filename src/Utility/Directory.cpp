@@ -28,6 +28,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <cstdio>
+#include <cstdlib>
 #include <algorithm>
 
 #ifdef _WIN32
