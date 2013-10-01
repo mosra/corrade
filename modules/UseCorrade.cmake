@@ -155,8 +155,6 @@ function(corrade_add_plugin plugin_name install_dir metadata_file)
     # Create dynamic library
     if(WIN32)
         add_library(${plugin_name} SHARED ${ARGN})
-    #elseif(APPLE)
-    #    add_library(${plugin_name} SHARED ${ARGN})
     else()
         add_library(${plugin_name} MODULE ${ARGN})
     endif()
