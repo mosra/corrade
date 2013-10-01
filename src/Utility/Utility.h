@@ -30,6 +30,7 @@
  */
 
 #include <cstdint>
+#include <cstddef>
 
 #include "corradeConfigure.h"
 #include "Containers/Containers.h"
