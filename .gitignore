@@ -6,3 +6,5 @@ pkg
 *.pkg.tar.xz
 CMakeLists.txt.user*
 .DS_Store
+*.swp
+*~

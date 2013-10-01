@@ -155,6 +155,8 @@ function(corrade_add_plugin plugin_name install_dir metadata_file)
     # Create dynamic library
     if(WIN32)
         add_library(${plugin_name} SHARED ${ARGN})
+    #elseif(APPLE)
+    #    add_library(${plugin_name} SHARED ${ARGN})
     else()
         add_library(${plugin_name} MODULE ${ARGN})
     endif()
@@ -163,6 +165,12 @@ function(corrade_add_plugin plugin_name install_dir metadata_file)
     set_target_properties(${plugin_name} PROPERTIES
         PREFIX ""
         COMPILE_FLAGS -DCORRADE_DYNAMIC_PLUGIN)
+
+    # Enable incremental linking on the Mac OS X
+    if(APPLE)
+        set_target_properties(${plugin_name} PROPERTIES
+            LINK_FLAGS "-undefined dynamic_lookup")
+    endif()
 
     # Copy metadata next to the binary for testing purposes or install it both
     # somewhere
