@@ -56,6 +56,7 @@ class ArgumentsTest: public TestSuite::Tester {
         void parseUnknownShortArgument();
         void parseSuperfluousArgument();
         void parseArgumentAfterSeparator();
+        void parseInvalidLongArgument();
 
         void parseMissingValue();
         void parseMissingOption();
@@ -85,6 +86,7 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseUnknownShortArgument,
               &ArgumentsTest::parseSuperfluousArgument,
               &ArgumentsTest::parseArgumentAfterSeparator,
+              &ArgumentsTest::parseInvalidLongArgument,
 
               &ArgumentsTest::parseMissingValue,
               &ArgumentsTest::parseMissingOption,
@@ -350,6 +352,18 @@ void ArgumentsTest::parseArgumentAfterSeparator() {
     Error::setOutput(&out);
     CORRADE_VERIFY(!args.tryParse(argc, argv));
     CORRADE_COMPARE(out.str(), "Superfluous command-line argument -b\n");
+}
+
+void ArgumentsTest::parseInvalidLongArgument() {
+    Arguments args;
+
+    const char* argv[] = { "", "-long-argument" };
+    const int argc = std::extent<decltype(argv)>();
+
+    std::ostringstream out;
+    Error::setOutput(&out);
+    CORRADE_VERIFY(!args.tryParse(argc, argv));
+    CORRADE_COMPARE(out.str(), "Invalid command-line argument -long-argument (did you mean --long-argument?)\n");
 }
 
 void ArgumentsTest::parseMissingValue() {

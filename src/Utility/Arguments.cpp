@@ -231,17 +231,24 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                 }
 
             /* Long option */
-            } else if(len > 2 && std::strncmp(argv[i], "--", 2) == 0) {
-                const std::string key = argv[i]+2;
-                if(!verifyKey(key)) {
-                    Error() << "Invalid command-line argument" << std::string("--") + key;
-                    return false;
-                }
+            } else if(len > 2) {
+                if(std::strncmp(argv[i], "--", 2) == 0) {
+                    const std::string key = argv[i]+2;
+                    if(!verifyKey(key)) {
+                        Error() << "Invalid command-line argument" << std::string("--") + key;
+                        return false;
+                    }
 
-                /* Find the option */
-                found = find(key);
-                if(found == _entries.end()) {
-                    Error() << "Unknown command-line argument" << std::string("--") + key;
+                    /* Find the option */
+                    found = find(key);
+                    if(found == _entries.end()) {
+                        Error() << "Unknown command-line argument" << std::string("--") + key;
+                        return false;
+                    }
+
+                /* Typo (long option with only one dash) */
+                } else {
+                    Error() << "Invalid command-line argument" << argv[i] << std::string("(did you mean -") + argv[i] + "?)";
                     return false;
                 }
             }
