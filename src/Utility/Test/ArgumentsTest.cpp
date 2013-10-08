@@ -50,6 +50,7 @@ class ArgumentsTest: public TestSuite::Tester {
         void parseArguments();
         void parseMixed();
         void parseCustomType();
+        void parseDoubleArgument();
 
         void parseUnknownArgument();
         void parseUnknownShortArgument();
@@ -78,6 +79,7 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseArguments,
               &ArgumentsTest::parseMixed,
               &ArgumentsTest::parseCustomType,
+              &ArgumentsTest::parseDoubleArgument,
 
               &ArgumentsTest::parseUnknownArgument,
               &ArgumentsTest::parseUnknownShortArgument,
@@ -286,6 +288,19 @@ void ArgumentsTest::parseCustomType() {
 
     CORRADE_VERIFY(args.tryParse(argc, argv));
     CORRADE_COMPARE(args.value<float>("pi"), 3.141516f);
+}
+
+void ArgumentsTest::parseDoubleArgument() {
+    Arguments args;
+    args.addNamedArgument("arg")
+        .addBooleanOption('b', "bool");
+
+    const char* argv[] = { "", "--arg", "first", "-b", "--arg", "second", "-b" };
+    const int argc = std::extent<decltype(argv)>();
+
+    CORRADE_VERIFY(args.tryParse(argc, argv));
+    CORRADE_COMPARE(args.value("arg"), "second");
+    CORRADE_VERIFY(args.isSet("bool"));
 }
 
 void ArgumentsTest::parseUnknownArgument() {
