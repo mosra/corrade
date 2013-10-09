@@ -50,11 +50,13 @@ class ArgumentsTest: public TestSuite::Tester {
         void parseArguments();
         void parseMixed();
         void parseCustomType();
+        void parseDoubleArgument();
 
         void parseUnknownArgument();
         void parseUnknownShortArgument();
         void parseSuperfluousArgument();
         void parseArgumentAfterSeparator();
+        void parseInvalidLongArgument();
 
         void parseMissingValue();
         void parseMissingOption();
@@ -78,11 +80,13 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseArguments,
               &ArgumentsTest::parseMixed,
               &ArgumentsTest::parseCustomType,
+              &ArgumentsTest::parseDoubleArgument,
 
               &ArgumentsTest::parseUnknownArgument,
               &ArgumentsTest::parseUnknownShortArgument,
               &ArgumentsTest::parseSuperfluousArgument,
               &ArgumentsTest::parseArgumentAfterSeparator,
+              &ArgumentsTest::parseInvalidLongArgument,
 
               &ArgumentsTest::parseMissingValue,
               &ArgumentsTest::parseMissingOption,
@@ -288,6 +292,19 @@ void ArgumentsTest::parseCustomType() {
     CORRADE_COMPARE(args.value<float>("pi"), 3.141516f);
 }
 
+void ArgumentsTest::parseDoubleArgument() {
+    Arguments args;
+    args.addNamedArgument("arg")
+        .addBooleanOption('b', "bool");
+
+    const char* argv[] = { "", "--arg", "first", "-b", "--arg", "second", "-b" };
+    const int argc = std::extent<decltype(argv)>();
+
+    CORRADE_VERIFY(args.tryParse(argc, argv));
+    CORRADE_COMPARE(args.value("arg"), "second");
+    CORRADE_VERIFY(args.isSet("bool"));
+}
+
 void ArgumentsTest::parseUnknownArgument() {
     Arguments args;
 
@@ -335,6 +352,18 @@ void ArgumentsTest::parseArgumentAfterSeparator() {
     Error::setOutput(&out);
     CORRADE_VERIFY(!args.tryParse(argc, argv));
     CORRADE_COMPARE(out.str(), "Superfluous command-line argument -b\n");
+}
+
+void ArgumentsTest::parseInvalidLongArgument() {
+    Arguments args;
+
+    const char* argv[] = { "", "-long-argument" };
+    const int argc = std::extent<decltype(argv)>();
+
+    std::ostringstream out;
+    Error::setOutput(&out);
+    CORRADE_VERIFY(!args.tryParse(argc, argv));
+    CORRADE_COMPARE(out.str(), "Invalid command-line argument -long-argument (did you mean --long-argument?)\n");
 }
 
 void ArgumentsTest::parseMissingValue() {
