@@ -298,7 +298,7 @@ void ArgumentsTest::parseDoubleArgument() {
         .addBooleanOption('b', "bool");
 
     const char* argv[] = { "", "--arg", "first", "-b", "--arg", "second", "-b" };
-    const int argc = std::extent<decltype(argv)>();
+    const int argc = std::extent<decltype(argv)>::value;
 
     CORRADE_VERIFY(args.tryParse(argc, argv));
     CORRADE_COMPARE(args.value("arg"), "second");
@@ -358,7 +358,7 @@ void ArgumentsTest::parseInvalidLongArgument() {
     Arguments args;
 
     const char* argv[] = { "", "-long-argument" };
-    const int argc = std::extent<decltype(argv)>();
+    const int argc = std::extent<decltype(argv)>::value;
 
     std::ostringstream out;
     Error::setOutput(&out);
