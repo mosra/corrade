@@ -146,9 +146,8 @@ with DLLs accessible through `PATH`. See above for more information.
 @subsection building-doc Building documentation
 
 The documentation (which you are currently reading) is written in **Doxygen**
-(preferrably 1.8 with Markdown support, but older versions should do good job
-too) and additionally uses **Graphviz** for class diagrams. The documentation
-can be build by running
+(preferrably >=1.8 with Markdown support, but older versions should do good job
+too). The documentation can be build by running
 
     doxygen
 
