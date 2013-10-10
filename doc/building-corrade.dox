@@ -25,14 +25,6 @@
 
 /** @page building-corrade Downloading and building
 
-%Corrade can be built in many ways. You can either @ref building-compilation
-"compile it manually" or use already prepared packaging files, such as
-@ref building-arch "ArchLinux PKGBUILDs", @ref building-rpm "RPMs" (currently
-tested are openSUSE, Fedora, Mandriva), or @ref building-deb "DEBs" (currently
-tested are Debian and Ubuntu). Guide how to crosscompile for @ref building-win
-"Windows", @ref building-nacl "Google Chrome Native Client" and
-@ref building-emscripten "Emscripten" is also available.
-
 @tableofcontents
 
 Minimal set of tools required for building is:
