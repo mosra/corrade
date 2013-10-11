@@ -45,7 +45,10 @@ elseif(BUILD_STATIC_PIC)
 endif()
 target_link_libraries(CorradeInterconnect CorradeUtility)
 
-install(TARGETS CorradeInterconnect DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
+install(TARGETS CorradeInterconnect
+        RUNTIME DESTINATION ${CORRADE_BINARY_INSTALL_DIR}
+        LIBRARY DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR}
+        ARCHIVE DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 install(FILES ${CorradeInterconnect_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/Interconnect)
 
 if(BUILD_TESTS)
