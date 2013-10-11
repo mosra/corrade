@@ -54,9 +54,13 @@ class Test: public TestSuite::Tester {
         void wrongMetadataFile();
 
         void staticPlugin();
+        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
         void dynamicPlugin();
+        #endif
         void staticPluginInitFini();
+        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
         void dynamicPluginInitFini();
+        #endif
 
         void deletable();
         void hierarchy();
@@ -75,9 +79,13 @@ Test::Test() {
               &Test::wrongMetadataFile,
 
               &Test::staticPlugin,
+              #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
               &Test::dynamicPlugin,
+              #endif
               &Test::staticPluginInitFini,
+              #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
               &Test::dynamicPluginInitFini,
+              #endif
 
               &Test::deletable,
               &Test::hierarchy,
@@ -91,12 +99,14 @@ Test::Test() {
 }
 
 void Test::nameList() {
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
     {
         PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
 
         CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
             "Canary", "Chihuahua", "Dog", "Snail"}), TestSuite::Compare::Container);
     }
+    #endif
 
     /* Check if the list of dynamic plugins is cleared after destructing */
     PluginManager::Manager<AbstractAnimal> manager(Directory::join(PLUGINS_DIR, "inexistent"));
@@ -106,6 +116,9 @@ void Test::nameList() {
 }
 
 void Test::wrongPluginVersion() {
+    #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    CORRADE_SKIP("Can't test plugin version of static plugins");
+    #else
     std::ostringstream out;
     Error::setOutput(&out);
 
@@ -113,22 +126,31 @@ void Test::wrongPluginVersion() {
     CORRADE_COMPARE(foodManager.load("OldBread"), PluginManager::LoadState::WrongPluginVersion);
     CORRADE_COMPARE(foodManager.loadState("OldBread"), PluginManager::LoadState::NotLoaded);
     CORRADE_COMPARE(out.str(), "PluginManager: wrong plugin version, expected 3 but got 0\n");
+    #endif
 }
 
 void Test::wrongPluginInterface() {
+    #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    CORRADE_SKIP("Can't test plugin interface of static plugins");
+    #else
     std::ostringstream out;
     Error::setOutput(&out);
 
     PluginManager::Manager<AbstractFood> foodManager(Directory::join(PLUGINS_DIR, "food"));
     CORRADE_COMPARE(foodManager.load("RottenTomato"), PluginManager::LoadState::WrongInterfaceVersion);
     CORRADE_COMPARE(out.str(), "PluginManager: wrong interface version, expected 'cz.mosra.Corrade.PluginManager.Test.AbstractFood/1.0' but got 'cz.mosra.Corrade.PluginManager.Test.AbstractFood/0.1'\n");
+    #endif
 }
 
 void Test::wrongMetadataFile() {
+    #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    CORRADE_SKIP("Can't test metadata file of static plugins");
+    #else
     PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
 
     CORRADE_COMPARE(manager.loadState("Snail"), LoadState::WrongMetadataFile);
     CORRADE_COMPARE(manager.load("Snail"), LoadState::WrongMetadataFile);
+    #endif
 }
 
 void Test::staticPlugin() {
@@ -148,6 +170,7 @@ void Test::staticPlugin() {
     CORRADE_COMPARE(manager.unload("Canary"), LoadState::Static);
 }
 
+#if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
 void Test::dynamicPlugin() {
     PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
 
@@ -173,6 +196,7 @@ void Test::dynamicPlugin() {
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotLoaded);
 }
+#endif
 
 void Test::staticPluginInitFini() {
     std::ostringstream out;
@@ -193,6 +217,7 @@ void Test::staticPluginInitFini() {
     CORRADE_COMPARE(out.str(), "Canary finalized\n");
 }
 
+#if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
 void Test::dynamicPluginInitFini() {
     std::ostringstream out;
     Debug::setOutput(&out);
@@ -209,8 +234,12 @@ void Test::dynamicPluginInitFini() {
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
     CORRADE_COMPARE(out.str(), "Dog finalized\n");
 }
+#endif
 
 void Test::deletable() {
+    #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    CORRADE_SKIP("Can't test because static plugins can't be unloaded");
+    #else
     PluginManager::Manager<AbstractDeletable> deletableManager(Directory::join(PLUGINS_DIR, "deletable"));
 
     /* Load plugin where canBeDeleted() returns true */
@@ -227,9 +256,13 @@ void Test::deletable() {
     CORRADE_COMPARE(var, 0);
     CORRADE_COMPARE(deletableManager.unload("Deletable"), LoadState::NotLoaded);
     CORRADE_COMPARE(var, 0xDEADBEEF);
+    #endif
 }
 
 void Test::hierarchy() {
+    #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    CORRADE_SKIP("Dependency hierarchy is meaningful only for dynamic plugins");
+    #else
     PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
 
     CORRADE_COMPARE(manager.load("Chihuahua"), LoadState::Loaded);
@@ -255,9 +288,13 @@ void Test::hierarchy() {
     CORRADE_COMPARE(manager.unload("Chihuahua"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
     CORRADE_VERIFY(manager.metadata("Dog")->usedBy().empty());
+    #endif
 }
 
 void Test::crossManagerDependencies() {
+    #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    CORRADE_SKIP("Cross-manager dependencies are meaningful only for dynamic plugins");
+    #else
     PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
     PluginManager::Manager<AbstractFood> foodManager(Directory::join(PLUGINS_DIR, "food"));
 
@@ -284,9 +321,13 @@ void Test::crossManagerDependencies() {
     CORRADE_COMPARE(foodManager.unload("HotDog"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
     CORRADE_VERIFY(manager.metadata("Dog")->usedBy().empty());
+    #endif
 }
 
 void Test::usedByZombies() {
+    #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    CORRADE_SKIP("UsedBy list is irrelevant for static plugins");
+    #else
     PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
     PluginManager::Manager<AbstractFood> foodManager(Directory::join(PLUGINS_DIR, "food"));
 
@@ -297,9 +338,14 @@ void Test::usedByZombies() {
     CORRADE_COMPARE(foodManager.load("HotDogWithSnail"), LoadState::UnresolvedDependency);
     CORRADE_COMPARE(foodManager.loadState("HotDogWithSnail"), LoadState::NotLoaded);
     CORRADE_VERIFY(manager.metadata("Dog")->usedBy().empty());
+    #endif
 }
 
+
 void Test::reloadPluginDirectory() {
+    #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    CORRADE_SKIP("Plugin directory is irrelevant for static plugins");
+    #else
     PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
 
     /* Load Dog and rename the plugin */
@@ -344,13 +390,14 @@ void Test::reloadPluginDirectory() {
         "Canary", "Dog", "LostChihuahua", "LostDog", "Snail"}), TestSuite::Compare::Container);
     CORRADE_COMPARE_AS(actual2, (std::vector<std::string>{
         "Canary", "LostChihuahua", "LostDog", "Snail"}), TestSuite::Compare::Container);
+    #endif
 }
 
 void Test::debug() {
     std::ostringstream o;
 
-    Debug(&o) << LoadState::UnresolvedDependency;
-    CORRADE_COMPARE(o.str(), "PluginManager::LoadState::UnresolvedDependency\n");
+    Debug(&o) << LoadState::Static;
+    CORRADE_COMPARE(o.str(), "PluginManager::LoadState::Static\n");
 }
 
 }}}
