@@ -26,6 +26,7 @@
 namespace Corrade {
 
 /** @page building-corrade Downloading and building
+@brief Guide how to download and build %Corrade on different platforms.
 
 @tableofcontents
 
@@ -154,7 +155,8 @@ too). The documentation can be build by running
     doxygen
 
 in root directory (i.e. where `Doxyfile` is). Resulting HTML documentation
-will be in `build/doc/` directory.
+will be in `build/doc/` directory. You might need to create `build/` directory
+if it doesn't exist yet.
 
 @subsection Building-examples Building examples
 
@@ -187,7 +189,7 @@ If you want to build with another compiler (e.g. Clang), run makepkg this way:
 Development PKGBUILDs can detect when Clang is used and remove unsupported CXX
 flags.
 
-@subsection building-rpm RPM packages
+@subsection building-packages-rpm RPM packages
 
 Every package contains `spec` files for RPM-based distributions in
 `package/rpm/` directory. In addition you will need `rpm-build` package
@@ -212,7 +214,7 @@ When you have the sources, go to `package/rpm/` directory and run this:
 This will compile and generate library and development RPM for %Corrade in
 `%{_topdir}/RPMS`.
 
-@subsection building-deb DEB packages
+@subsection building-packages-deb DEB packages
 
 There is also `debian/` directory with all files needed for building Debian
 packages. In addition you will need `dpkg-dev` package. Building is easy,
