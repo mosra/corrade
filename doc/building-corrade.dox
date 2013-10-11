@@ -23,6 +23,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+namespace Corrade {
+
 /** @page building-corrade Downloading and building
 
 @tableofcontents
@@ -336,3 +338,5 @@ If you have Node.js installed, you can also build and run unit tests using
 `ctest`. See `BUILD_TESTS` above.
 
 */
+
+}
