@@ -249,11 +249,22 @@ template<> class ArrayReference<const void> {
          * @param data      Data pointer
          * @param size      Data size
          */
+        constexpr /*implicit*/ ArrayReference(const void* data, std::size_t size) noexcept: _data(data), _size(size) {}
+
+        /**
+         * @brief Constructor from any type
+         * @param data      Data pointer
+         * @param size      Data size
+         *
+         * Size is recalculated to size in bytes.
+         */
         template<class T> constexpr /*implicit*/ ArrayReference(const T* data, std::size_t size) noexcept: _data(data), _size(size*sizeof(T)) {}
 
         /**
          * @brief Construct reference to fixed-size array
          * @param data      Fixed-size array
+         *
+         * Size in bytes is calculated automatically.
          */
         #ifdef CORRADE_GCC46_COMPATIBILITY
         #define size size_ /* With GCC 4.6 it conflicts with size(). WTF. */
