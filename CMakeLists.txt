@@ -49,6 +49,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL NaCl)
     endif()
 elseif(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     set(CORRADE_TARGET_EMSCRIPTEN 1)
+    # It's meaningless to use dynamic libraries with Emscripten
+    set(BUILD_STATIC ON)
 endif()
 
 if(BUILD_STATIC)
