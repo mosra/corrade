@@ -53,6 +53,7 @@ class Test: public TestSuite::Tester {
         void receiverSubclass();
         void slotInReceiverBase();
         void virtualSlot();
+        void templatedSignal();
 
         void changeConnectionsInSlot();
         void deleteReceiverInSlot();
@@ -88,18 +89,24 @@ class Mailbox: public Interconnect::Receiver {
 
 Test::Test() {
     addTests({&Test::signalData,
+
               &Test::connect,
+
               &Test::disconnect,
               &Test::disconnectSignal,
               &Test::disconnectEmitter,
               &Test::disconnectReceiver,
+
               &Test::destroyEmitter,
               &Test::destroyReceiver,
+
               &Test::emit,
               &Test::emitterSubclass,
               &Test::receiverSubclass,
               &Test::slotInReceiverBase,
               &Test::virtualSlot,
+              &Test::templatedSignal,
+
               &Test::changeConnectionsInSlot,
               &Test::deleteReceiverInSlot});
 }
@@ -406,6 +413,28 @@ void Test::virtualSlot() {
     CORRADE_COMPARE(mailbox->money, -10);
 
     delete mailbox;
+}
+
+/* Local classes apparently cannot have templated methods */
+class TemplatedPostman: public Interconnect::Emitter {
+    public:
+        template<class T> Signal newMessage(int price, const std::string& message) {
+            return emit(&TemplatedPostman::newMessage<T>, price, message);
+        }
+};
+
+void Test::templatedSignal() {
+    TemplatedPostman postman;
+    Mailbox intMailbox, stringMailbox;
+
+    /* Connect different types to slots in different objects */
+    Emitter::connect(&postman, &TemplatedPostman::newMessage<std::int32_t>, &intMailbox, &Mailbox::addMessage);
+    Emitter::connect(&postman, &TemplatedPostman::newMessage<std::string>, &stringMailbox, &Mailbox::addMessage);
+
+    postman.newMessage<std::int32_t>(0, "integer");
+    postman.newMessage<std::string>(0, "string");
+    CORRADE_COMPARE(intMailbox.messages, std::vector<std::string>{"integer"});
+    CORRADE_COMPARE(stringMailbox.messages, std::vector<std::string>{"string"});
 }
 
 void Test::changeConnectionsInSlot() {
