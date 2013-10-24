@@ -50,46 +50,6 @@ class SignalDataHash {
         }
 };
 
-class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
-    template<class...> friend class MemberConnectionData;
-    friend class Interconnect::Connection;
-    friend class Interconnect::Emitter;
-    friend class Interconnect::Receiver;
-
-    AbstractConnectionData(const AbstractConnectionData&) = delete;
-    AbstractConnectionData(AbstractConnectionData&&) = delete;
-    AbstractConnectionData& operator=(const AbstractConnectionData&) = delete;
-    AbstractConnectionData& operator=(AbstractConnectionData&&) = delete;
-
-    public:
-        virtual ~AbstractConnectionData() = 0;
-
-    protected:
-        explicit AbstractConnectionData(Emitter* emitter, Receiver* receiver): connection(nullptr), emitter(emitter), receiver(receiver), lastHandledSignal(0) {}
-
-    private:
-        Connection* connection;
-        Emitter* emitter;
-        Receiver* receiver;
-        std::uint32_t lastHandledSignal;
-};
-
-template<class ...Args> class MemberConnectionData: public AbstractConnectionData {
-    friend class Interconnect::Emitter;
-
-    public:
-        typedef void(Receiver::*Slot)(Args...);
-
-        template<class Emitter, class Receiver> explicit MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): AbstractConnectionData(emitter, receiver), slot(static_cast<Slot>(slot)) {}
-
-    private:
-        void handle(Args... args) {
-            (receiver->*slot)(args...);
-        }
-
-        const Slot slot;
-};
-
 }
 
 /**
@@ -369,6 +329,50 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         std::uint32_t lastHandledSignal;
         bool connectionsChanged;
 };
+
+namespace Implementation {
+
+class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
+    template<class...> friend class MemberConnectionData;
+    friend class Interconnect::Connection;
+    friend class Interconnect::Emitter;
+    friend class Interconnect::Receiver;
+
+    AbstractConnectionData(const AbstractConnectionData&) = delete;
+    AbstractConnectionData(AbstractConnectionData&&) = delete;
+    AbstractConnectionData& operator=(const AbstractConnectionData&) = delete;
+    AbstractConnectionData& operator=(AbstractConnectionData&&) = delete;
+
+    public:
+        virtual ~AbstractConnectionData() = 0;
+
+    protected:
+        explicit AbstractConnectionData(Emitter* emitter, Receiver* receiver): connection(nullptr), emitter(emitter), receiver(receiver), lastHandledSignal(0) {}
+
+    private:
+        Connection* connection;
+        Emitter* emitter;
+        Receiver* receiver;
+        std::uint32_t lastHandledSignal;
+};
+
+template<class ...Args> class MemberConnectionData: public AbstractConnectionData {
+    friend class Interconnect::Emitter;
+
+    public:
+        typedef void(Receiver::*Slot)(Args...);
+
+        template<class Emitter, class Receiver> explicit MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): AbstractConnectionData(emitter, receiver), slot(static_cast<Slot>(slot)) {}
+
+    private:
+        void handle(Args... args) {
+            (receiver->*slot)(args...);
+        }
+
+        const Slot slot;
+};
+
+}
 
 /**
 @brief Connect signal to member function slot
