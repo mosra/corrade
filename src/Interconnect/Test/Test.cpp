@@ -133,13 +133,13 @@ void Test::connect() {
     Mailbox mailbox1, mailbox2;
 
     /* Verify returned connection */
-    Connection connection = Emitter::connect(&postman, &Postman::newMessage, &mailbox1, &Mailbox::addMessage);
+    Connection connection = Interconnect::connect(postman, &Postman::newMessage, mailbox1, &Mailbox::addMessage);
     CORRADE_VERIFY(connection.isConnectionPossible());
     CORRADE_VERIFY(connection.isConnected());
 
     /* Verify connection adding */
-    Emitter::connect(&postman, &Postman::paymentRequested, &mailbox1, &Mailbox::pay);
-    Emitter::connect(&postman, &Postman::newMessage, &mailbox2, &Mailbox::addMessage);
+    Interconnect::connect(postman, &Postman::paymentRequested, mailbox1, &Mailbox::pay);
+    Interconnect::connect(postman, &Postman::newMessage, mailbox2, &Mailbox::addMessage);
     CORRADE_VERIFY(postman.hasSignalConnections());
     CORRADE_COMPARE(postman.signalConnectionCount(), 3);
     CORRADE_VERIFY(postman.hasSignalConnections(&Postman::newMessage));
@@ -150,7 +150,7 @@ void Test::connect() {
     CORRADE_COMPARE(mailbox2.slotConnectionCount(), 1);
 
     /* Allow multiple connections */
-    Emitter::connect(&postman, &Postman::newMessage, &mailbox1, &Mailbox::addMessage);
+    Interconnect::connect(postman, &Postman::newMessage, mailbox1, &Mailbox::addMessage);
     CORRADE_COMPARE(postman.signalConnectionCount(), 4);
     CORRADE_COMPARE(postman.signalConnectionCount(&Postman::newMessage), 3);
     CORRADE_COMPARE(mailbox1.slotConnectionCount(), 3);
@@ -160,9 +160,9 @@ void Test::disconnect() {
     Postman postman;
     Mailbox mailbox1, mailbox2;
 
-    Connection connection = Emitter::connect(&postman, &Postman::newMessage, &mailbox1, &Mailbox::addMessage);
-    Emitter::connect(&postman, &Postman::paymentRequested, &mailbox1, &Mailbox::pay);
-    Emitter::connect(&postman, &Postman::newMessage, &mailbox2, &Mailbox::addMessage);
+    Connection connection = Interconnect::connect(postman, &Postman::newMessage, mailbox1, &Mailbox::addMessage);
+    Interconnect::connect(postman, &Postman::paymentRequested, mailbox1, &Mailbox::pay);
+    Interconnect::connect(postman, &Postman::newMessage, mailbox2, &Mailbox::addMessage);
 
     /* Verify disconnection response */
     connection.disconnect();
@@ -183,9 +183,9 @@ void Test::disconnectSignal() {
     Postman postman;
     Mailbox mailbox1, mailbox2;
 
-    Connection c1 = Emitter::connect(&postman, &Postman::newMessage, &mailbox1, &Mailbox::addMessage);
-    Connection c2 = Emitter::connect(&postman, &Postman::newMessage, &mailbox2, &Mailbox::addMessage);
-    Connection c3 = Emitter::connect(&postman, &Postman::paymentRequested, &mailbox1, &Mailbox::pay);
+    Connection c1 = Interconnect::connect(postman, &Postman::newMessage, mailbox1, &Mailbox::addMessage);
+    Connection c2 = Interconnect::connect(postman, &Postman::newMessage, mailbox2, &Mailbox::addMessage);
+    Connection c3 = Interconnect::connect(postman, &Postman::paymentRequested, mailbox1, &Mailbox::pay);
 
     postman.disconnectSignal(&Postman::newMessage);
     CORRADE_VERIFY(c1.isConnectionPossible());
@@ -204,9 +204,9 @@ void Test::disconnectEmitter() {
     Postman postman1, postman2;
     Mailbox mailbox;
 
-    Connection c1 = Emitter::connect(&postman1, &Postman::newMessage, &mailbox, &Mailbox::addMessage);
-    Connection c2 = Emitter::connect(&postman1, &Postman::paymentRequested, &mailbox, &Mailbox::pay);
-    Connection c3 = Emitter::connect(&postman2, &Postman::newMessage, &mailbox, &Mailbox::addMessage);
+    Connection c1 = Interconnect::connect(postman1, &Postman::newMessage, mailbox, &Mailbox::addMessage);
+    Connection c2 = Interconnect::connect(postman1, &Postman::paymentRequested, mailbox, &Mailbox::pay);
+    Connection c3 = Interconnect::connect(postman2, &Postman::newMessage, mailbox, &Mailbox::addMessage);
 
     postman1.disconnectAllSignals();
     CORRADE_VERIFY(c1.isConnectionPossible());
@@ -224,9 +224,9 @@ void Test::disconnectReceiver() {
     Postman postman;
     Mailbox mailbox1, mailbox2;
 
-    Connection c1 = Emitter::connect(&postman, &Postman::newMessage, &mailbox1, &Mailbox::addMessage);
-    Connection c2 = Emitter::connect(&postman, &Postman::paymentRequested, &mailbox1, &Mailbox::pay);
-    Connection c3 = Emitter::connect(&postman, &Postman::newMessage, &mailbox2, &Mailbox::addMessage);
+    Connection c1 = Interconnect::connect(postman, &Postman::newMessage, mailbox1, &Mailbox::addMessage);
+    Connection c2 = Interconnect::connect(postman, &Postman::paymentRequested, mailbox1, &Mailbox::pay);
+    Connection c3 = Interconnect::connect(postman, &Postman::newMessage, mailbox2, &Mailbox::addMessage);
 
     mailbox1.disconnectAllSlots();
     CORRADE_VERIFY(c1.isConnectionPossible());
@@ -244,9 +244,9 @@ void Test::destroyEmitter() {
     Postman postman2;
     Mailbox mailbox;
 
-    Connection c1 = Emitter::connect(postman1, &Postman::newMessage, &mailbox, &Mailbox::addMessage);
-    Connection c2 = Emitter::connect(postman1, &Postman::paymentRequested, &mailbox, &Mailbox::pay);
-    Connection c3 = Emitter::connect(&postman2, &Postman::newMessage, &mailbox, &Mailbox::addMessage);
+    Connection c1 = Interconnect::connect(*postman1, &Postman::newMessage, mailbox, &Mailbox::addMessage);
+    Connection c2 = Interconnect::connect(*postman1, &Postman::paymentRequested, mailbox, &Mailbox::pay);
+    Connection c3 = Interconnect::connect(postman2, &Postman::newMessage, mailbox, &Mailbox::addMessage);
 
     delete postman1;
     CORRADE_VERIFY(!c1.isConnectionPossible());
@@ -263,9 +263,9 @@ void Test::destroyReceiver() {
     Mailbox *mailbox1 = new Mailbox;
     Mailbox mailbox2;
 
-    Connection c1 = Emitter::connect(&postman, &Postman::newMessage, mailbox1, &Mailbox::addMessage);
-    Connection c2 = Emitter::connect(&postman, &Postman::paymentRequested, mailbox1, &Mailbox::pay);
-    Connection c3 = Emitter::connect(&postman, &Postman::newMessage, &mailbox2, &Mailbox::addMessage);
+    Connection c1 = Interconnect::connect(postman, &Postman::newMessage, *mailbox1, &Mailbox::addMessage);
+    Connection c2 = Interconnect::connect(postman, &Postman::paymentRequested, *mailbox1, &Mailbox::pay);
+    Connection c3 = Interconnect::connect(postman, &Postman::newMessage, mailbox2, &Mailbox::addMessage);
 
     delete mailbox1;
     CORRADE_VERIFY(!c1.isConnectionPossible());
@@ -280,11 +280,11 @@ void Test::destroyReceiver() {
 void Test::emit() {
     Postman postman;
     Mailbox mailbox1, mailbox2, mailbox3;
-    Emitter::connect(&postman, &Postman::newMessage, &mailbox1, &Mailbox::addMessage);
-    Emitter::connect(&postman, &Postman::newMessage, &mailbox2, &Mailbox::addMessage);
-    Emitter::connect(&postman, &Postman::paymentRequested, &mailbox1, &Mailbox::pay);
-    Emitter::connect(&postman, &Postman::paymentRequested, &mailbox2, &Mailbox::pay);
-    Emitter::connect(&postman, &Postman::paymentRequested, &mailbox3, &Mailbox::pay);
+    Interconnect::connect(postman, &Postman::newMessage, mailbox1, &Mailbox::addMessage);
+    Interconnect::connect(postman, &Postman::newMessage, mailbox2, &Mailbox::addMessage);
+    Interconnect::connect(postman, &Postman::paymentRequested, mailbox1, &Mailbox::pay);
+    Interconnect::connect(postman, &Postman::paymentRequested, mailbox2, &Mailbox::pay);
+    Interconnect::connect(postman, &Postman::paymentRequested, mailbox3, &Mailbox::pay);
 
     /* Verify signal handling */
     postman.newMessage(60, "hello");
@@ -309,8 +309,8 @@ void Test::emitterSubclass() {
     Mailbox mailbox;
 
     /* Test that this doesn't spit any compiler errors */
-    Emitter::connect(&postman, &BetterPostman::newRichTextMessage, &mailbox, &Mailbox::addMessage);
-    Emitter::connect(&postman, &BetterPostman::newMessage, &mailbox, &Mailbox::addMessage);
+    Interconnect::connect(postman, &BetterPostman::newRichTextMessage, mailbox, &Mailbox::addMessage);
+    Interconnect::connect(postman, &BetterPostman::newMessage, mailbox, &Mailbox::addMessage);
 
     /* Just to be sure */
     postman.newMessage(5, "hello");
@@ -338,8 +338,8 @@ void Test::receiverSubclass() {
     BlueMailbox mailbox;
 
     /* Test that this doesn't spit any compiler errors */
-    Emitter::connect(&postman, &Postman::newMessage, &mailbox, &BlueMailbox::addMessage);
-    Emitter::connect(&postman, &Postman::newMessage, &mailbox, &BlueMailbox::addBlueMessage);
+    Interconnect::connect(postman, &Postman::newMessage, mailbox, &BlueMailbox::addMessage);
+    Interconnect::connect(postman, &Postman::newMessage, mailbox, &BlueMailbox::addBlueMessage);
 
     /* Just to be sure */
     postman.newMessage(5, "hello");
@@ -368,7 +368,7 @@ void Test::slotInReceiverBase() {
     ModernMailbox mailbox;
 
     /* Test that this doesn't spit any compiler errors */
-    Emitter::connect(&postman, &Postman::newMessage, &mailbox, &VintageMailbox::addMessage);
+    Interconnect::connect(postman, &Postman::newMessage, mailbox, &VintageMailbox::addMessage);
 
     /* Just to be sure */
     postman.newMessage(5, "hello");
@@ -407,7 +407,7 @@ void Test::virtualSlot() {
     VirtualMailbox* mailbox = new TaxDodgingMailbox;
 
     /* It is important to connect to the original slot, not derived */
-    Emitter::connect(&postman, &Postman::paymentRequested, mailbox, &VirtualMailbox::pay);
+    Interconnect::connect(postman, &Postman::paymentRequested, *mailbox, &VirtualMailbox::pay);
 
     postman.paymentRequested(50);
     CORRADE_COMPARE(mailbox->money, -10);
@@ -428,8 +428,8 @@ void Test::templatedSignal() {
     Mailbox intMailbox, stringMailbox;
 
     /* Connect different types to slots in different objects */
-    Emitter::connect(&postman, &TemplatedPostman::newMessage<std::int32_t>, &intMailbox, &Mailbox::addMessage);
-    Emitter::connect(&postman, &TemplatedPostman::newMessage<std::string>, &stringMailbox, &Mailbox::addMessage);
+    Interconnect::connect(postman, &TemplatedPostman::newMessage<std::int32_t>, intMailbox, &Mailbox::addMessage);
+    Interconnect::connect(postman, &TemplatedPostman::newMessage<std::string>, stringMailbox, &Mailbox::addMessage);
 
     postman.newMessage<std::int32_t>(0, "integer");
     postman.newMessage<std::string>(0, "string");
@@ -447,8 +447,8 @@ void Test::changeConnectionsInSlot() {
 
             void addMessage(int, const std::string& message) {
                 messages.push_back(message);
-                Emitter::connect(postman, &Postman::newMessage, mailbox, &Mailbox::addMessage);
-                Emitter::connect(postman, &Postman::paymentRequested, mailbox, &Mailbox::pay);
+                Interconnect::connect(*postman, &Postman::newMessage, *mailbox, &Mailbox::addMessage);
+                Interconnect::connect(*postman, &Postman::paymentRequested, *mailbox, &Mailbox::pay);
             }
 
             std::vector<std::string> messages;
@@ -459,7 +459,7 @@ void Test::changeConnectionsInSlot() {
     };
 
     PropagatingMailbox propagatingMailbox(&postman, &mailbox);
-    Emitter::connect(&postman, &Postman::newMessage, &propagatingMailbox, &PropagatingMailbox::addMessage);
+    Interconnect::connect(postman, &Postman::newMessage, propagatingMailbox, &PropagatingMailbox::addMessage);
 
     /* Not connected to anything */
     postman.paymentRequested(50);
@@ -485,9 +485,9 @@ void Test::deleteReceiverInSlot() {
     SuicideMailbox* mailbox1 = new SuicideMailbox;
     Mailbox mailbox2, mailbox3;
 
-    Emitter::connect(&postman, &Postman::newMessage, mailbox1, &SuicideMailbox::addMessage);
-    Emitter::connect(&postman, &Postman::newMessage, &mailbox2, &Mailbox::addMessage);
-    Emitter::connect(&postman, &Postman::newMessage, &mailbox3, &Mailbox::addMessage);
+    Interconnect::connect(postman, &Postman::newMessage, *mailbox1, &SuicideMailbox::addMessage);
+    Interconnect::connect(postman, &Postman::newMessage, mailbox2, &Mailbox::addMessage);
+    Interconnect::connect(postman, &Postman::newMessage, mailbox3, &Mailbox::addMessage);
 
     /* Verify that the message is propagated to all slots */
     CORRADE_COMPARE(postman.signalConnectionCount(), 3);

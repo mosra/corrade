@@ -61,9 +61,9 @@ int main(int, char**) {
          *bomb2 = new Bomb,
          *bomb3 = new Bomb;
 
-    Interconnect::Emitter::connect(&rc, &RemoteControl::triggered, bomb1, &Bomb::launch);
-    Interconnect::Emitter::connect(&rc, &RemoteControl::triggered, bomb2, &Bomb::launch);
-    Interconnect::Emitter::connect(&rc, &RemoteControl::triggered, bomb3, &Bomb::launch);
+    Interconnect::connect(rc, &RemoteControl::triggered, *bomb1, &Bomb::launch);
+    Interconnect::connect(rc, &RemoteControl::triggered, *bomb2, &Bomb::launch);
+    Interconnect::connect(rc, &RemoteControl::triggered, *bomb3, &Bomb::launch);
 
     Utility::Debug() << "Successfully installed" << rc.signalConnectionCount() << "bombs.";
 
