@@ -122,6 +122,12 @@ portability, compatibility mode for older compilers is provided:
 some compatibility mode needs to be enabled. On the other hand, if any of these
 is enabled, Corrade will refuse to build (or be used) with any newer compiler.
 
+The library is constantly evolving and thus some APIs are deprecated and then
+later removed in favor of better ones. To preserve backwards compatibility,
+%Corrade is by default built with all deprecated APIs. However, to make your
+code more robust and future-proof, it's recommended to build the library with
+`BUILD_DEPRECATED` disabled.
+
 The features used can be conveniently detected in depending projects both in
 CMake and C++ sources, see @ref corrade-cmake and @ref src/Corrade.h for more
 information.

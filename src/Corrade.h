@@ -53,6 +53,17 @@ Defined if compatibility mode for GCC 4.6 is enabled.
 #undef CORRADE_GCC46_COMPATIBILITY
 
 /**
+@brief Build with deprecated API included
+
+Defined if the library contains deprecated API (which will be removed in the
+future). To preserve backward compatibility, %Corrade is by default built with
+deprecated API included.
+@see @ref building-corrade
+*/
+#define CORRADE_BUILD_DEPRECATED
+/* (enabled by default) */
+
+/**
 @brief Static library build
 
 Defined if built as static libraries. Default are shared libraries.
