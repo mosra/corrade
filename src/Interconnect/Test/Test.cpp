@@ -23,6 +23,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <sstream>
+
 #include "TestSuite/Tester.h"
 #include "TestSuite/Compare/Container.h"
 #include "Interconnect/Emitter.h"
@@ -57,6 +59,8 @@ class Test: public TestSuite::Tester {
 
         void changeConnectionsInSlot();
         void deleteReceiverInSlot();
+
+        void function();
 };
 
 class Postman: public Interconnect::Emitter {
@@ -108,7 +112,9 @@ Test::Test() {
               &Test::templatedSignal,
 
               &Test::changeConnectionsInSlot,
-              &Test::deleteReceiverInSlot});
+              &Test::deleteReceiverInSlot,
+
+              &Test::function});
 }
 
 void Test::signalData() {
@@ -495,6 +501,20 @@ void Test::deleteReceiverInSlot() {
     CORRADE_COMPARE(postman.signalConnectionCount(), 2);
     CORRADE_COMPARE(mailbox2.messages, std::vector<std::string>{"hello"});
     CORRADE_COMPARE(mailbox3.messages, std::vector<std::string>{"hello"});
+}
+
+void Test::function() {
+    std::ostringstream out;
+    Debug::setOutput(&out);
+
+    Postman postman;
+    Connection connection = Interconnect::connect(postman, &Postman::newMessage, [](int, const std::string& message) { Debug() << message; });
+
+    postman.newMessage(0, "hello");
+    CORRADE_COMPARE(out.str(), "hello\n");
+    connection.disconnect();
+    postman.newMessage(0, "heyy");
+    CORRADE_COMPARE(out.str(), "hello\n");
 }
 
 }}}

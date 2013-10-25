@@ -33,6 +33,7 @@
 #include <unordered_map>
 
 #include "Interconnect/Connection.h"
+#include "Utility/Assert.h"
 
 #include "corradeConfigure.h"
 
@@ -317,7 +318,8 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         template<class Emitter, class ...Args> Signal emit(Signal(Emitter::*signal)(Args...), typename std::common_type<Args>::type... args);
 
     private:
-        template<class EmitterObject, class Emitter_, class Receiver, class ReceiverObject, class ...Args> friend Connection connect(EmitterObject&, Signal(Emitter_::*)(Args...), ReceiverObject&, void(Receiver::*)(Args...));
+        template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> friend Connection connect(EmitterObject&, Signal(Emitter::*)(Args...), ReceiverObject&, void(Receiver::*)(Args...));
+        template<class EmitterObject, class Emitter, class ...Args> friend Connection connect(EmitterObject&, Signal(Emitter::*)(Args...), void(*)(Args...));
 
         static void connectInternal(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data);
         static void disconnectInternal(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data);
@@ -333,6 +335,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
 namespace Implementation {
 
 class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
+    template<class...> friend class FunctionConnectionData;
     template<class...> friend class MemberConnectionData;
     friend class Interconnect::Connection;
     friend class Interconnect::Emitter;
@@ -344,25 +347,37 @@ class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
     AbstractConnectionData& operator=(AbstractConnectionData&&) = delete;
 
     public:
+        enum class Type: std::uint8_t { Function, Member };
+
         virtual ~AbstractConnectionData() = 0;
 
     protected:
-        explicit AbstractConnectionData(Emitter* emitter, Receiver* receiver): connection(nullptr), emitter(emitter), receiver(receiver), lastHandledSignal(0) {}
+        explicit AbstractConnectionData(Emitter* emitter, Type type): connection(nullptr), emitter(emitter), lastHandledSignal(0), type(type) {}
 
     private:
         Connection* connection;
         Emitter* emitter;
-        Receiver* receiver;
         std::uint32_t lastHandledSignal;
+        Type type;
 };
 
-template<class ...Args> class MemberConnectionData: public AbstractConnectionData {
+class AbstractMemberConnectionData: public AbstractConnectionData {
+    friend class Interconnect::Emitter;
+
+    public:
+        template<class Emitter, class Receiver> explicit AbstractMemberConnectionData(Emitter* emitter, Receiver* receiver): AbstractConnectionData(emitter, Type::Member), receiver(receiver) {}
+
+    protected:
+        Receiver* receiver;
+};
+
+template<class ...Args> class MemberConnectionData: public AbstractMemberConnectionData {
     friend class Interconnect::Emitter;
 
     public:
         typedef void(Receiver::*Slot)(Args...);
 
-        template<class Emitter, class Receiver> explicit MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): AbstractConnectionData(emitter, receiver), slot(static_cast<Slot>(slot)) {}
+        template<class Emitter, class Receiver> explicit MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): AbstractMemberConnectionData(emitter, receiver), slot(static_cast<Slot>(slot)) {}
 
     private:
         void handle(Args... args) {
@@ -372,6 +387,57 @@ template<class ...Args> class MemberConnectionData: public AbstractConnectionDat
         const Slot slot;
 };
 
+template<class ...Args> class FunctionConnectionData: public AbstractConnectionData {
+    friend class Interconnect::Emitter;
+
+    public:
+        typedef void(*Slot)(Args...);
+
+        template<class Emitter> explicit FunctionConnectionData(Emitter* emitter, Slot slot): AbstractConnectionData(emitter, Type::Function), slot(slot) {}
+
+    private:
+        void handle(Args... args) { slot(args...); }
+
+        const Slot slot;
+};
+
+}
+
+/**
+@brief Connect signal to function slot
+@param emitter       %Emitter
+@param signal        %Signal
+@param receiver      %Receiver
+@param slot          Slot
+
+Connects given signal to compatible slot. @p emitter must be subclass of
+@ref Emitter, @p signal must be implemented signal and @p slot must be
+non-member function or non-capturing lambda with `void` as return type. The
+argument count and types must be exactly the same.
+
+See @ref Emitter-connections "Emitter class documentation" for more information
+about connections.
+
+@see @ref Emitter::hasSignalConnections(), @ref Connection::isConnected(),
+     @ref Emitter::signalConnectionCount()
+*/
+template<class EmitterObject, class Emitter, class ...Args> Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), void(*slot)(Args...)) {
+    static_assert(sizeof(Interconnect::Emitter::Signal(Emitter::*)(Args...)) <= 2*sizeof(void*),
+        "Size of member function pointer is incorrectly assumed to be smaller than 2*sizeof(void*)");
+    static_assert(std::is_base_of<Emitter, EmitterObject>::value,
+        "Emitter object doesn't have given signal");
+
+    Implementation::SignalData signalData(signal);
+    auto data = new Implementation::FunctionConnectionData<Args...>(&emitter, slot);
+    Interconnect::Emitter::connectInternal(signalData, data);
+    return Connection(signalData, data);
+}
+
+/** @overload
+@todo Why conversion of lambdas to function pointers is not done implicitly?
+*/
+template<class EmitterObject, class Emitter, class Lambda, class ...Args> Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), Lambda slot) {
+    return connect(emitter, signal, static_cast<void(*)(Args...)>(slot));
 }
 
 /**
@@ -393,7 +459,6 @@ about connections.
 @see @ref Emitter::hasSignalConnections(), @ref Connection::isConnected(),
      @ref Emitter::signalConnectionCount()
 @todo Connecting to signals
-@todo Connecting to non-member functions and lambda functions
 */
 template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), ReceiverObject& receiver, void(Receiver::*slot)(Args...)) {
     static_assert(sizeof(Interconnect::Emitter::Signal(Emitter::*)(Args...)) <= 2*sizeof(void*),
@@ -419,7 +484,16 @@ template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emi
         /* If not already handled, proceed and mark as such */
         if(it->second->lastHandledSignal != lastHandledSignal) {
             it->second->lastHandledSignal = lastHandledSignal;
-            static_cast<Implementation::MemberConnectionData<Args...>*>(it->second)->handle(args...);
+            switch(it->second->type) {
+                case Implementation::AbstractConnectionData::Type::Function:
+                    static_cast<Implementation::FunctionConnectionData<Args...>*>(it->second)->handle(args...);
+                    break;
+                case Implementation::AbstractConnectionData::Type::Member:
+                    static_cast<Implementation::MemberConnectionData<Args...>*>(it->second)->handle(args...);
+                    break;
+                default:
+                    CORRADE_ASSERT_UNREACHABLE();
+            }
 
             /* Connections changed by the slot, go through again */
             if(connectionsChanged) {

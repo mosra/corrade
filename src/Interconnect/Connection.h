@@ -104,8 +104,8 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
 
         /**
          * @brief Whether connection is possible
-         * @return `False` if either emitter or receiver object doesn't exist
-         *      anymore, `true` otherwise.
+         * @return `False` if either emitter or receiver object (if applicable)
+         *      doesn't exist anymore, `true` otherwise.
          *
          * @see isConnected()
          */
