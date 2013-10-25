@@ -33,6 +33,7 @@ set(CorradeInterconnect_HEADERS
     Emitter.h
     Interconnect.h
     Receiver.h
+    StateMachine.h
 
     corradeInterconnectVisibility.h)
 
