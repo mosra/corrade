@@ -6,7 +6,7 @@ pkgdesc="Multiplatform plugin management and utility library"
 arch=('i686' 'x86_64')
 url="http://mosra.cz/blog/corrade.php"
 license=('MIT')
-makedepends=('cmake')
+makedepends=('cmake' 'ninja')
 options=(!strip)
 provides=('corrade-git')
 
@@ -22,8 +22,10 @@ build() {
     cmake .. \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=/usr \
-        -DBUILD_TESTS=TRUE
-    make
+        -DBUILD_TESTS=TRUE \
+        -DWITH_FIND_MODULE=TRUE \
+        -G Ninja
+    ninja
 }
 
 check() {
@@ -33,5 +35,5 @@ check() {
 
 package() {
     cd "$startdir/build"
-    make DESTDIR="$pkgdir/" install
+    DESTDIR="$pkgdir/" ninja install
 }
