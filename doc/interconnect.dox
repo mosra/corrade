@@ -28,7 +28,7 @@ namespace Corrade { namespace Interconnect {
 
 Signal and slots are a technique introduced in Qt, which allows to intuitively
 pass events to arbitrary objects and methods without unnecessary boilerplate
-code (such as various EventListener interfaces in Java).
+code (such as various `EventListener` interfaces in Java).
 
 Basically there is an emitter with special functions called signals. Each
 signal function can have arbitrary number of parameters. The signals are
@@ -44,36 +44,38 @@ to given object.
 
 @section interconnect-signals Implementing signals
 
-Signals are implemented in Emitter subclass as public functions with Signal as
-return type. There are no limitations on argument types or argument count. The
-signal function calls Emitter::emit() internally, passes its own signature and
-all arguments to it and propagates the returned value.
+Signals are implemented in @ref Emitter subclass as public functions with
+@ref Emitter::Signal "Signal" as return type. There are no limitations on
+argument types or argument count. The signal function calls @ref Emitter::emit()
+internally, passes its own signature and all arguments to it and propagates the
+returned value.
 @dontinclude interconnect/main.cpp
 @skip class RemoteControl
 @until };
 
 @section interconnect-slots Implementing slots
 
-Any non-constant member function returning void can be connected to any signal
-if they have the same argument count and types. You just have to derive your
-class from Receiver base class to ensure that the connection is automatically
-removed when receiver is destroyed.
+Any free function, lambda function or non-constant member function returning
+void can be connected to any signal if they have the same argument count and
+types. If connecting to member function, you have to derive your class from
+@ref Receiver base class to ensure that the connection is automatically removed
+when receiver is destroyed.
 @skip class Bomb
 @until };
 
 @section interconnect-connecting Connecting signals to slots
 
 When you have instances of emitter and receiver objects, you can connect
-signals from emitters to slots in receivers. There are no connectivity
-limitations, you can connect any number of signals to one slot and any number
-of slots to one signal. See Emitter::connect() for more information about how
-to manage the connections.
-@skip RemoteControl rc
-@until Interconnect::Emitter::connect(&rc, &RemoteControl::triggered, bomb3
-
-See Emitter::connect(), Emitter::disconnectSignal(), Emitter::disconnectAllSignals()
-and Receiver::disconnectAllSlots() functions for information about removing
+signals from emitters to slots. There are no connectivity limitations, you can
+connect any number of signals to one slot and any number of slots to one
+signal. See @ref connect() for more information about how to manage the
 connections.
+@skip RemoteControl rc
+@until Interconnect::connect(&rc, &RemoteControl::triggered, bomb3
+
+See @ref connect(), @ref Emitter::disconnectSignal(), @ref Emitter::disconnectAllSignals()
+and @ref Receiver::disconnectAllSlots() functions for information about
+removing connections.
 
 @section interconnect-emitting Emitting signals
 
@@ -81,6 +83,15 @@ The implemented signal can be emitted simply by calling the function.
 @skipline rc.trigger
 
 @section interconnect-compiling Compiling and running the example
+
+After successful compilation the application will print out this text:
+
+    $ ./interconnect
+    Successfully installed 3 bombs.
+    Launching bomb in 60 seconds.
+    Launching bomb in 60 seconds.
+    Launching bomb in 60 seconds.
+    Mission succeeded!
 
 See the whole example:
  - @ref interconnect/CMakeLists.txt
