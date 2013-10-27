@@ -48,6 +48,56 @@ compressed archive or use the command line:
 
 @section building-compilation Compilation, installation
 
+@subsection building-cmake CMake primer
+
+%Corrade uses CMake as build system and expects it to be used also in depending
+projects. If you are familiar enough with it, you can skip this section and go
+straight to building. Otherwise be sure to read this so you don't get lost
+later.
+
+CMake is meta-build system, which means that it generates platform-specific
+build files which then need to be processed (e.g. on Linux it generates
+Makefiles which are then processed with `make`).
+
+The most straightforward way to use CMake is via command-line. First create
+build directory and then run `cmake` in it, with parameter specifying where
+root `CMakeLists.txt` is, so for example, on Unix-based OSs:
+
+    mkdir -p build
+    cd build
+    cmake ..
+
+Or you can use some IDE, for example QtCreator. Open project's root
+`CMakeLists.txt` file within it, QtCreator then asks you where to create build
+directory, allows you to specify initial CMake parameters and then you can just
+press Configure and everything is ready to be built.
+
+%Corrade build is controlled using plenty of configuration variables, which are
+@ref building-features "listed and described below". The variables can be
+specified either on command-line with `-Dname=value`, for example:
+
+    cmake -DBUILD_TESTS=ON ..
+
+Boolean variables accept `ON`, `OFF`, `True` or `False`. If using QtCreator,
+you can enter `-Dname=value` into *Arguments* field when running CMake. You can
+also use CMake GUI for more convenient variable specification. You can run it
+from command-line, pointing it to your build dir:
+
+    cd build
+    cmake-gui .
+
+Or you can start it as is common on your system and then point it to the build
+dir. It will then select the source dir automatically and populates list of
+available configuration variables. Each configuration variable provided by
+%Corrade is documented (hover on it to see the tooltip). After configuring,
+press *Configure* and *Generate* and you are ready to build the project using
+your platform's build system. If you are using QtCreator, it will detect the
+changes afterwards and reparse the project accordingly, so you don't need to
+re-run CMake from within it.
+
+The variables can also be modified directly by editing `CMakeCache.txt` in
+build dir, although that is the least recommended way.
+
 @subsection building-linux Via command-line (on Linux/Unix)
 
 On Unix-based OSs, the library can be built and installed using these four
@@ -58,12 +108,7 @@ commands:
     cmake -DCMAKE_INSTALL_PREFIX=/usr .. && make
     make install
 
-The library provides some useful CMake options (described in sections later).
-They can be passed to CMake either as `-Dname=value` parameters on command-line
-(like above) or set conveniently using `cmake-gui`:
-
-    cd build
-    cmake-gui .
+See @ref building-features "below" for additional configuration options.
 
 @subsection building-windows Using QtCreator and CMake GUI (on Windows)
 
@@ -72,14 +117,10 @@ install QtCreator (just QtCreator, you don't need the full Qt SDK), configure
 it to use MinGW and CMake and then just open project's root `CMakeLists.txt`
 file within it. QtCreator then asks you where to create build directory, allows
 you to specify initial CMake parameters and then you can just press Configure
-and everything is ready to be built. You might need to set some CMake
-parameters before configuring, they can be set with `-Dname=value`. See below
-for more information.
+and everything is ready to be built.
 
 After the initial import you might want to reconfigure some additional CMake
-variables. Start CMake GUI, point it to the recently created build dir, modify
-the variables and press Generate. QtCreator will detect the changes and reparse
-the project accordingly.
+variables, see @ref building-features "below" for more information.
 
 For most convenient usage it's best to set `CMAKE_INSTALL_PREFIX` to directory
 where MinGW is installed (e.g. `C:/MinGW/`) and add `C:/MinGW/bin` and
@@ -89,7 +130,7 @@ within QtCreator by adding new `make install` build rule.
 @subsubsection building-corrade-windows-troubleshooting Windows troubleshooting
 
 Until GCC 4.8 is available in MinGW, you need to enable `GCC47_COMPATIBILITY`
-for building Corrade on Windows. See below for more information.
+for building %Corrade on Windows, as described below.
 
 @subsection building-features Enabling or disabling features
 
