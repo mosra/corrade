@@ -116,11 +116,11 @@ On Windows, if you don't want to touch the command-line, the easiest way is to
 install QtCreator (just QtCreator, you don't need the full Qt SDK), configure
 it to use MinGW and CMake and then just open project's root `CMakeLists.txt`
 file within it. QtCreator then asks you where to create build directory, allows
-you to specify initial CMake parameters and then you can just press Configure
+you to specify initial CMake parameters and then you can just press *Configure*
 and everything is ready to be built.
 
-After the initial import you might want to reconfigure some additional CMake
-variables, see @ref building-features "below" for more information.
+After the initial import you might want to reconfigure some CMake variables,
+see @ref building-features "below" for more information.
 
 For most convenient usage it's best to set `CMAKE_INSTALL_PREFIX` to directory
 where MinGW is installed (e.g. `C:/MinGW/`) and add `C:/MinGW/bin` and
@@ -130,7 +130,8 @@ within QtCreator by adding new `make install` build rule.
 @subsubsection building-corrade-windows-troubleshooting Windows troubleshooting
 
 Until GCC 4.8 is available in MinGW, you need to enable `GCC47_COMPATIBILITY`
-for building %Corrade on Windows, as described below.
+for building %Corrade on Windows as described below, e.g. specify
+`-DGCC47_COMPATIBILITY=ON` CMake parameter.
 
 @subsection building-features Enabling or disabling features
 
@@ -183,7 +184,8 @@ subdirectories of build directory) or using
     ctest --output-on-failure
 
 in build directory. On Windows the tests require the library to be installed
-with DLLs accessible through `PATH`. See above for more information.
+with DLLs accessible through `PATH`. See
+@ref building-windows "above Windows documentation" for more information.
 
 @subsection building-doc Building documentation
 
