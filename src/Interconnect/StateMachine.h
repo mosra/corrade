@@ -38,6 +38,7 @@ template<class State, class Input> class StateTransition {
     template<std::size_t, std::size_t, class, class> friend class StateMachine;
 
     public:
+        /** @brief Constructor */
         constexpr /*implicit*/ StateTransition(State from, Input input, State to): from(from), input(input), to(to) {}
 
     private:

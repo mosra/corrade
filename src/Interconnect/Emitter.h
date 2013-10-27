@@ -407,7 +407,6 @@ template<class ...Args> class FunctionConnectionData: public AbstractConnectionD
 @brief Connect signal to function slot
 @param emitter       %Emitter
 @param signal        %Signal
-@param receiver      %Receiver
 @param slot          Slot
 
 Connects given signal to compatible slot. @p emitter must be subclass of
