@@ -73,6 +73,9 @@ also available as preprocessor variables if you include Corrade.h:
   Chrome Native Client with `glibc` toolchain
 - `CORRADE_TARGET_EMSCRIPTEN` -- Defined if the library is built for Emscripten
 
+Note that [each namespace](namespaces.html) contains more detailed guide how to
+use given library with CMake.
+
 %Corrade provides these macros and functions:
 
 ### Add unit test using %Corrade's TestSuite
