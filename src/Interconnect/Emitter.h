@@ -471,7 +471,7 @@ template<class EmitterObject, class Emitter, class Receiver, class ReceiverObjec
     return Connection(signalData, data);
 }
 
-#ifdef CORRADE_BUILD_DEPRECATED
+#if defined(CORRADE_BUILD_DEPRECATED) && !defined(DOXYGEN_GENERATING_OUTPUT)
 template<class EmitterObject, class _Emitter, class Receiver, class ReceiverObject, class ...Args> inline Connection Emitter::connect(EmitterObject* emitter, Signal(_Emitter::*signal)(Args...), ReceiverObject* receiver, void(Receiver::*slot)(Args...)) {
     return Interconnect::connect(*emitter, signal, *receiver, slot);
 }
