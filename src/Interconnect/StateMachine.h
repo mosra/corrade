@@ -181,6 +181,10 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
             return _transitions[std::size_t(current)*inputs+std::size_t(input)];
         }
 
+        #ifdef CORRADE_GCC46_COMPATIBILITY
+        #define current current_ /* With GCC 4.6 it conflicts with current(). WTF. */
+        #endif
+
         template<std::size_t current> Signal enteredInternal(State wanted, std::integral_constant<std::size_t, current>) {
             return State(current-1) == wanted ? entered<State(current-1)>() : enteredInternal(wanted, std::integral_constant<std::size_t, current-1>{});
         }
@@ -192,6 +196,10 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
         template<std::size_t current> Signal exitedInternal(State wanted, std::integral_constant<std::size_t, current>) {
             return State(current-1) == wanted ? exited<State(current-1)>() : exitedInternal(wanted, std::integral_constant<std::size_t, current - 1>{});
         }
+
+        #ifdef CORRADE_GCC46_COMPATIBILITY
+        #undef current
+        #endif
 
         Signal exitedInternal(State, std::integral_constant<std::size_t, 0>) {
             CORRADE_ASSERT_UNREACHABLE();
