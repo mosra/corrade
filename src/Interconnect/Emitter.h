@@ -233,9 +233,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * @deprecated Use @ref Corrade::Interconnect::connect() "Interconnect::connect()"
          *      instead.
          */
-        template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> static Connection connect(EmitterObject* emitter, Signal(Emitter::*signal)(Args...), ReceiverObject* receiver, void(Receiver::*slot)(Args...)) {
-            return connectInternal(*emitter, signal, *receiver, slot);
-        }
+        template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> static Connection connect(EmitterObject* emitter, Signal(Emitter::*signal)(Args...), ReceiverObject* receiver, void(Receiver::*slot)(Args...));
         #endif
 
         explicit Emitter();
@@ -472,6 +470,12 @@ template<class EmitterObject, class Emitter, class Receiver, class ReceiverObjec
     Interconnect::Emitter::connectInternal(signalData, data);
     return Connection(signalData, data);
 }
+
+#ifdef CORRADE_BUILD_DEPRECATED
+template<class EmitterObject, class _Emitter, class Receiver, class ReceiverObject, class ...Args> inline Connection Emitter::connect(EmitterObject* emitter, Signal(_Emitter::*signal)(Args...), ReceiverObject* receiver, void(Receiver::*slot)(Args...)) {
+    return Interconnect::connect(*emitter, signal, *receiver, slot);
+}
+#endif
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emitter_::*signal)(Args...), typename std::common_type<Args>::type... args) {
