@@ -114,7 +114,7 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
     public:
         enum: std::size_t {
             StateCount = states, /**< @brief Count of states in the machine */
-            InputCount = inputs, /**< @brief Count of inputs for the machine */
+            InputCount = inputs  /**< @brief Count of inputs for the machine */
         };
 
         /**
