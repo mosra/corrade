@@ -449,7 +449,7 @@ void Test::virtualSlot() { /* Local types are not allowed as template arguments 
 class TemplatedPostman: public Interconnect::Emitter {
     public:
         template<class T> Signal newMessage(int price, const std::string& message) {
-            return emit<TemplatedPostman, int, const std::string&>(&TemplatedPostman::newMessage<T>, price, message);
+            return emit(&TemplatedPostman::newMessage<T>, price, message);
         }
 };
 #endif
