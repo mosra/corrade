@@ -536,12 +536,22 @@ void Test::deleteReceiverInSlot() { /* Local types are not allowed as template a
     CORRADE_COMPARE(mailbox3.messages, std::vector<std::string>{"hello"});
 }
 
+#ifdef CORRADE_GCC44_COMPATIBILITY
+namespace {
+    void debugMessage(int, const std::string& message) { Utility::Debug() << message; }
+}
+#endif
+
 void Test::function() {
     std::ostringstream out;
     Debug::setOutput(&out);
 
     Postman postman;
+    #ifndef CORRADE_GCC44_COMPATIBILITY
     Connection connection = Interconnect::connect(postman, &Postman::newMessage, [](int, const std::string& message) { Debug() << message; });
+    #else
+    Connection connection = Interconnect::connect(postman, &Postman::newMessage, debugMessage);
+    #endif
 
     postman.newMessage(0, "hello");
     CORRADE_COMPARE(out.str(), "hello\n");

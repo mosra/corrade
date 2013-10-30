@@ -41,7 +41,9 @@ StateMachineTest::StateMachineTest() {
     addTests({&StateMachineTest::test});
 }
 
+#ifndef CORRADE_GCC44_COMPATIBILITY
 void StateMachineTest::test() {
+#endif
     enum class State: std::uint8_t {
         Start,
         End
@@ -54,6 +56,16 @@ void StateMachineTest::test() {
 
     typedef Interconnect::StateMachine<2, 2, State, Input> StateMachine;
 
+#ifdef CORRADE_GCC44_COMPATIBILITY
+namespace {
+    void startEntered() { Utility::Debug() << "start entered"; }
+    void startExited() { Utility::Debug() << "start exited"; }
+    void endEntered() { Utility::Debug() << "end entered"; }
+    void endExited() { Utility::Debug() << "end exited"; }
+}
+
+void StateMachineTest::test() {
+#endif
     StateMachine m;
     m.addTransitions({
         {State::Start,  Input::KeyA,    State::End},
@@ -63,10 +75,17 @@ void StateMachineTest::test() {
     std::ostringstream out;
     Debug::setOutput(&out);
 
+    #ifndef CORRADE_GCC44_COMPATIBILITY
     Interconnect::connect(m, &StateMachine::entered<State::Start>, []() { Debug() << "start entered"; });
     Interconnect::connect(m, &StateMachine::exited<State::Start>, []() { Debug() << "start exited"; });
     Interconnect::connect(m, &StateMachine::entered<State::End>, []() { Debug() << "end entered"; });
     Interconnect::connect(m, &StateMachine::exited<State::End>, []() { Debug() << "end exited"; });
+    #else
+    Interconnect::connect(m, &StateMachine::entered<State::Start>, startEntered);
+    Interconnect::connect(m, &StateMachine::exited<State::Start>, startExited);
+    Interconnect::connect(m, &StateMachine::entered<State::End>, endEntered);
+    Interconnect::connect(m, &StateMachine::exited<State::End>, endExited);
+    #endif
 
     m.step(Input::KeyA)
      .step(Input::KeyB);
