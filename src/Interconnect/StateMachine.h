@@ -209,7 +209,7 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
         State _current;
 };
 
-template<std::size_t states, std::size_t inputs, class State, class Input> StateMachine<states, inputs, State, Input>::StateMachine(): _transitions{}, _current{} {
+template<std::size_t states, std::size_t inputs, class State, class Input> StateMachine<states, inputs, State, Input>::StateMachine(): _transitions{}, _current() {
     /* Make input in all states a no-op */
     for(std::size_t i = 0; i != states; ++i)
         for(std::size_t j = 0; j != inputs; ++j)
