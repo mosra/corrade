@@ -444,15 +444,19 @@ void Test::virtualSlot() { /* Local types are not allowed as template arguments 
     delete mailbox;
 }
 
+#ifndef CORRADE_GCC44_COMPATIBILITY
 /* Local classes apparently cannot have templated methods */
 class TemplatedPostman: public Interconnect::Emitter {
     public:
         template<class T> Signal newMessage(int price, const std::string& message) {
-            return emit(&TemplatedPostman::newMessage<T>, price, message);
+            return emit<TemplatedPostman, int, const std::string&>(&TemplatedPostman::newMessage<T>, price, message);
         }
 };
+#endif
 
 void Test::templatedSignal() {
+    /** @todo Fix this for GCC 4.4 */
+    #ifndef CORRADE_GCC44_COMPATIBILITY
     TemplatedPostman postman;
     Mailbox intMailbox, stringMailbox;
 
@@ -464,6 +468,9 @@ void Test::templatedSignal() {
     postman.newMessage<std::string>(0, "string");
     CORRADE_COMPARE(intMailbox.messages, std::vector<std::string>{"integer"});
     CORRADE_COMPARE(stringMailbox.messages, std::vector<std::string>{"string"});
+    #else
+    CORRADE_SKIP("Somehow parametered templated slots doesn't work in GCC 4.4");
+    #endif
 }
 
 #ifndef CORRADE_GCC44_COMPATIBILITY
