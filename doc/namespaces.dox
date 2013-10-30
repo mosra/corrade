@@ -27,8 +27,15 @@
  * @brief Namespace Corrade
  */
 /** @namespace Corrade
- * @brief Root namespace
- */
+@brief Root namespace
+
+Root namespace alone doesn't contain any functionality, see subnamespaces for
+more information.
+
+To use any of the libraries, you need to add `${CORRADE_INCLUDE_DIRS}` to
+include path. See also @ref building-corrade and @ref corrade-cmake for more
+information.
+*/
 
 /** @dir src/Containers
  * @brief Namespace Corrade::Containers
@@ -37,6 +44,9 @@
 @brief Container implementations
 
 Implementations for various containers which don't have equivalents in STL.
+
+To use this library, you need to link to `${CORRADE_CONTAINERS_LIBRARIES}`. See
+also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir src/Utility
@@ -50,6 +60,9 @@ debug and error output (class Debug), directory listing (class Directory),
 access to configuration files (class Configuration), on which is based
 translation support (class Translator) or compiling data files into the
 executable (class Resource, see also @ref resource-management "tutorial").
+
+To use this library, you need to link to `${CORRADE_UTILITY_LIBRARIES}`. See
+also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir src/PluginManager
@@ -62,6 +75,9 @@ This library contains PluginManager, which takes care of loading, unloading
 and instancing plugins. There is also an AbstractPlugin class, which is the base
 of all plugins. See @ref plugin-management for a brief introduction to how
 plugins work.
+
+To use this library, you need to link to `${CORRADE_PLUGINMANAGER_LIBRARIES}`.
+See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir src/Interconnect
@@ -71,6 +87,9 @@ plugins work.
 @brief Signal/slot connections
 
 This library allows you to interconnect objects.
+
+To use this library, you need to link to `${CORRADE_INTERCONNECT_LIBRARIES}`.
+See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir src/TestSuite
@@ -80,6 +99,9 @@ This library allows you to interconnect objects.
 @brief Test suite
 
 Unit testing framework. See @ref unit-testing for more information.
+
+To use this library, you need to link to `${CORRADE_TESTSUITE_LIBRARIES}`.
+See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir src/TestSuite/Compare
@@ -88,6 +110,9 @@ Unit testing framework. See @ref unit-testing for more information.
 /** @namespace Corrade::TestSuite::Compare
 @brief Various test suite comparison helpers
 
-See CORRADE_COMPARE_AS(), CORRADE_COMPARE_WITH() and Comparator for more
-information.
+See @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH() and @ref Comparator
+for more information.
+
+To use this library, you need to link to `${CORRADE_TESTSUITE_LIBRARIES}`.
+See also @ref building-corrade and @ref corrade-cmake for more information.
 */

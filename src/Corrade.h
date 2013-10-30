@@ -55,20 +55,31 @@ Defined if compatibility mode for GCC 4.6 is enabled.
 /**
 @brief GCC 4.5 compatibility
 
-`CORRADE_GCC45_COMPATIBILITY` is defined if compatibility mode for GCC 4.5 is
-enabled.
+Defined if compatibility mode for GCC 4.5 is enabled.
 @see @ref building-corrade
 */
-#define CORRADE_GCC45_COMPATIBILITY_
+#define CORRADE_GCC45_COMPATIBILITY
+#undef CORRADE_GCC45_COMPATIBILITY
 
 /**
 @brief GCC 4.4 compatibility
 
-`CORRADE_GCC44_COMPATIBILITY` is defined if compatibility mode for GCC 4.4 is
-enabled.
+Defined if compatibility mode for GCC 4.4 is enabled.
 @see @ref building-corrade
 */
-#define CORRADE_GCC44_COMPATIBILITY_
+#define CORRADE_GCC44_COMPATIBILITY
+#undef CORRADE_GCC44_COMPATIBILITY
+
+/**
+@brief Build with deprecated API included
+
+Defined if the library contains deprecated API (which will be removed in the
+future). To preserve backward compatibility, %Corrade is by default built with
+deprecated API included.
+@see @ref building-corrade
+*/
+#define CORRADE_BUILD_DEPRECATED
+/* (enabled by default) */
 
 /**
 @brief Static library build

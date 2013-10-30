@@ -39,25 +39,30 @@ AbstractConnectionData::~AbstractConnectionData() {}
 Emitter::Emitter(): lastHandledSignal(0), connectionsChanged(false) {}
 
 Emitter::~Emitter() {
-    for(auto it = connections.begin(); it != connections.end(); ++it) {
-        /* Remove connection from receiver */
-        for(auto rit = it->second->receiver->connections.begin(); rit != it->second->receiver->connections.end(); ++rit) {
-            if(*rit != it->second) continue;
+    for(auto connection: connections) {
+        const Implementation::AbstractConnectionData* data = connection.second;
 
-            it->second->receiver->connections.erase(rit);
-            break;
+        /* Remove connection from receiver, if this is member function connection */
+        if(data->type == Implementation::AbstractConnectionData::Type::Member) {
+            auto& receiverConnections = static_cast<const Implementation::AbstractMemberConnectionData*>(data)->receiver->connections;
+            for(auto end = receiverConnections.end(), rit = receiverConnections.begin(); rit != end; ++rit) {
+                if(*rit != data) continue;
+
+                receiverConnections.erase(rit);
+                break;
+            }
         }
 
         /* If there is connection object, remove reference to connection data
            from it and mark it as disconnected */
-        if(it->second->connection) {
-            CORRADE_INTERNAL_ASSERT(it->second == it->second->connection->data);
-            it->second->connection->data = nullptr;
-            it->second->connection->connected = false;
+        if(data->connection) {
+            CORRADE_INTERNAL_ASSERT(data == data->connection->data);
+            data->connection->data = nullptr;
+            data->connection->connected = false;
         }
 
         /* Delete connection data (as they make no sense without emitter) */
-        delete it->second;
+        delete data;
     }
 }
 
@@ -66,8 +71,9 @@ void Emitter::connectInternal(const Implementation::SignalData& signal, Implemen
     data->emitter->connections.insert(std::make_pair(signal, data));
     data->emitter->connectionsChanged = true;
 
-    /* Add connection to receiver */
-    data->receiver->connections.push_back(data);
+    /* Add connection to receiver, if this is member function connection */
+    if(data->type == Implementation::AbstractConnectionData::Type::Member)
+        static_cast<Implementation::AbstractMemberConnectionData*>(data)->receiver->connections.push_back(data);
 
     /* If there is connection object, mark the connection as connected */
     if(data->connection) data->connection->connected = true;
@@ -109,12 +115,15 @@ void Emitter::disconnectAllSignals() {
 void Emitter::disconnectInternal(std::unordered_multimap<Implementation::SignalData, Implementation::AbstractConnectionData*, Implementation::SignalDataHash>::const_iterator it) {
     Implementation::AbstractConnectionData* data = it->second;
 
-    /* Remove connection from receiver */
-    for(auto end = data->receiver->connections.end(), rit = data->receiver->connections.begin(); rit != end; ++rit) {
-        if(*rit != data) continue;
+    /* Remove connection from receiver, if this is member function connection */
+    if(data->type == Implementation::AbstractConnectionData::Type::Member) {
+        auto& receiverConnections = static_cast<Implementation::AbstractMemberConnectionData*>(data)->receiver->connections;
+        for(auto end = receiverConnections.end(), rit = receiverConnections.begin(); rit != end; ++rit) {
+            if(*rit != data) continue;
 
-        data->receiver->connections.erase(rit);
-        break;
+            receiverConnections.erase(rit);
+            break;
+        }
     }
 
     /* If there is no connection object, destroy also connection data (as we

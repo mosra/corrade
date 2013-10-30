@@ -23,15 +23,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-/** @page building-corrade Downloading and building
+namespace Corrade {
 
-%Corrade can be built in many ways. You can either @ref building-compilation
-"compile it manually" or use already prepared packaging files, such as
-@ref building-arch "ArchLinux PKGBUILDs", @ref building-rpm "RPMs" (currently
-tested are openSUSE, Fedora, Mandriva), or @ref building-deb "DEBs" (currently
-tested are Debian and Ubuntu). Guide how to crosscompile for @ref building-win
-"Windows", @ref building-nacl "Google Chrome Native Client" and
-@ref building-emscripten "Emscripten" is also available.
+/** @page building-corrade Downloading and building
+@brief Guide how to download and build %Corrade on different platforms.
 
 @tableofcontents
 
@@ -51,15 +46,57 @@ compressed archive or use the command line:
 
     git clone git://github.com/mosra/corrade.git
 
-If you need toolchains for crosscompiling, run also the following commands, or,
-if you build from source archive, download snapshot of toolchains repository
-from https://github.com/mosra/toolchains and put them in `toolchains/`
-subdirectory.
-
-    git submodule init
-    git submodule update
-
 @section building-compilation Compilation, installation
+
+@subsection building-cmake CMake primer
+
+%Corrade uses CMake as build system and expects it to be used also in depending
+projects. If you are familiar enough with it, you can skip this section and go
+straight to building. Otherwise be sure to read this so you don't get lost
+later.
+
+CMake is meta-build system, which means that it generates platform-specific
+build files which then need to be processed (e.g. on Linux it generates
+Makefiles which are then processed with `make`).
+
+The most straightforward way to use CMake is via command-line. First create
+build directory and then run `cmake` in it, with parameter specifying where
+root `CMakeLists.txt` is, so for example, on Unix-based OSs:
+
+    mkdir -p build
+    cd build
+    cmake ..
+
+Or you can use some IDE, for example QtCreator. Open project's root
+`CMakeLists.txt` file within it, QtCreator then asks you where to create build
+directory, allows you to specify initial CMake parameters and then you can just
+press Configure and everything is ready to be built.
+
+%Corrade build is controlled using plenty of configuration variables, which are
+@ref building-features "listed and described below". The variables can be
+specified either on command-line with `-Dname=value`, for example:
+
+    cmake -DBUILD_TESTS=ON ..
+
+Boolean variables accept `ON`, `OFF`, `True` or `False`. If using QtCreator,
+you can enter `-Dname=value` into *Arguments* field when running CMake. You can
+also use CMake GUI for more convenient variable specification. You can run it
+from command-line, pointing it to your build dir:
+
+    cd build
+    cmake-gui .
+
+Or you can start it as is common on your system and then point it to the build
+dir. It will then select the source dir automatically and populates list of
+available configuration variables. Each configuration variable provided by
+%Corrade is documented (hover on it to see the tooltip). After configuring,
+press *Configure* and *Generate* and you are ready to build the project using
+your platform's build system. If you are using QtCreator, it will detect the
+changes afterwards and reparse the project accordingly, so you don't need to
+re-run CMake from within it.
+
+The variables can also be modified directly by editing `CMakeCache.txt` in
+build dir, although that is the least recommended way.
 
 @subsection building-linux Via command-line (on Linux/Unix)
 
@@ -71,12 +108,7 @@ commands:
     cmake -DCMAKE_INSTALL_PREFIX=/usr .. && make
     make install
 
-The library provides some useful CMake options (described in sections later).
-They can be passed to CMake either as `-Dname=value` parameters on command-line
-(like above) or set conveniently using `cmake-gui`:
-
-    cd build
-    cmake-gui .
+See @ref building-features "below" for additional configuration options.
 
 @subsection building-windows Using QtCreator and CMake GUI (on Windows)
 
@@ -84,15 +116,11 @@ On Windows, if you don't want to touch the command-line, the easiest way is to
 install QtCreator (just QtCreator, you don't need the full Qt SDK), configure
 it to use MinGW and CMake and then just open project's root `CMakeLists.txt`
 file within it. QtCreator then asks you where to create build directory, allows
-you to specify initial CMake parameters and then you can just press Configure
-and everything is ready to be built. You might need to set some CMake
-parameters before configuring, they can be set with `-Dname=value`. See below
-for more information.
+you to specify initial CMake parameters and then you can just press *Configure*
+and everything is ready to be built.
 
-After the initial import you might want to reconfigure some additional CMake
-variables. Start CMake GUI, point it to the recently created build dir, modify
-the variables and press Generate. QtCreator will detect the changes and reparse
-the project accordingly.
+After the initial import you might want to reconfigure some CMake variables,
+see @ref building-features "below" for more information.
 
 For most convenient usage it's best to set `CMAKE_INSTALL_PREFIX` to directory
 where MinGW is installed (e.g. `C:/MinGW/`) and add `C:/MinGW/bin` and
@@ -102,7 +130,8 @@ within QtCreator by adding new `make install` build rule.
 @subsubsection building-corrade-windows-troubleshooting Windows troubleshooting
 
 Until GCC 4.8 is available in MinGW, you need to enable `GCC47_COMPATIBILITY`
-for building Corrade on Windows. See below for more information.
+for building %Corrade on Windows as described below, e.g. specify
+`-DGCC47_COMPATIBILITY=ON` CMake parameter.
 
 @subsection building-features Enabling or disabling features
 
@@ -135,9 +164,18 @@ portability, compatibility mode for older compilers is provided:
 some compatibility mode needs to be enabled. On the other hand, if any of these
 is enabled, Corrade will refuse to build (or be used) with any newer compiler.
 
+The library is constantly evolving and thus some APIs are deprecated and then
+later removed in favor of better ones. To preserve backwards compatibility,
+%Corrade is by default built with all deprecated APIs. However, to make your
+code more robust and future-proof, it's recommended to build the library with
+`BUILD_DEPRECATED` disabled.
+
 The features used can be conveniently detected in depending projects both in
 CMake and C++ sources, see @ref corrade-cmake and @ref src/Corrade.h for more
 information.
+
+Note that [each namespace](namespaces.html) contains more detailed guide how to
+use given library with CMake.
 
 @subsection building-tests Building and running unit tests
 
@@ -149,19 +187,20 @@ subdirectories of build directory) or using
     ctest --output-on-failure
 
 in build directory. On Windows the tests require the library to be installed
-with DLLs accessible through `PATH`. See above for more information.
+with DLLs accessible through `PATH`. See
+@ref building-windows "above Windows documentation" for more information.
 
 @subsection building-doc Building documentation
 
 The documentation (which you are currently reading) is written in **Doxygen**
-(preferrably 1.8 with Markdown support, but older versions should do good job
-too) and additionally uses **Graphviz** for class diagrams. The documentation
-can be build by running
+(preferrably >=1.8 with Markdown support, but older versions should do good job
+too). The documentation can be build by running
 
     doxygen
 
 in root directory (i.e. where `Doxyfile` is). Resulting HTML documentation
-will be in `build/doc/` directory.
+will be in `build/doc/` directory. You might need to create `build/` directory
+if it doesn't exist yet.
 
 @subsection Building-examples Building examples
 
@@ -174,7 +213,9 @@ The examples require %Corrade to be installed and they are built separately:
     cmake ../examples
     make
 
-@section building-arch Building ArchLinux packages
+@section building-packages Prepared packages
+
+@subsection building-packages-arch ArchLinux packages
 
 In `package/archlinux` directory are three PKGBUILDs - one for stable version,
 one for Git development build and one for building under MinGW. The packages
@@ -192,7 +233,7 @@ If you want to build with another compiler (e.g. Clang), run makepkg this way:
 Development PKGBUILDs can detect when Clang is used and remove unsupported CXX
 flags.
 
-@section building-rpm Building RPM packages
+@subsection building-packages-rpm RPM packages
 
 Every package contains `spec` files for RPM-based distributions in
 `package/rpm/` directory. In addition you will need `rpm-build` package
@@ -217,7 +258,7 @@ When you have the sources, go to `package/rpm/` directory and run this:
 This will compile and generate library and development RPM for %Corrade in
 `%{_topdir}/RPMS`.
 
-@section building-deb Building DEB packages
+@subsection building-packages-deb DEB packages
 
 There is also `debian/` directory with all files needed for building Debian
 packages. In addition you will need `dpkg-dev` package. Building is easy,
@@ -230,7 +271,22 @@ and run `dpkg-buildpackage`:
 This will compile binary and development packages, which will then appear in
 parent directory.
 
-@section building-win Crosscompiling for Windows using MinGW
+@section building-crosscompiling Crosscompiling
+
+For crosscompiling you need to have native version of %Corrade installed,
+because %Corrade needs to run `corrade-rc` utility on the host system as part
+of the build process. If native version of `corrade-rc` is not found on the
+system, %Corrade will refuse to crosscompile.
+
+You also need to have the toolchains submodule updated. Either run the
+following commands, or, if you build from source archive, download snapshot of
+toolchains repository from https://github.com/mosra/toolchains and put the
+contents in `toolchains/` subdirectory.
+
+    git submodule init
+    git submodule update
+
+@subsection building-cross-win Crosscompiling for Windows using MinGW
 
 @note This guide is tailored mainly for crosscompiling from ArchLinux. For
 this system there are also prepared `mingw32-corrade` packages, one in
@@ -243,10 +299,9 @@ ArchLinux packages:
 - `mingw32-gcc`
 - `mingw32-runtime`
 
-Make sure you have `toolchains` submodule updated, as
-@ref building-download "explained above". Then create build directory and run
-cmake and make. You may need to modify the `basic-mingw32.cmake` file and
-`CMAKE_INSTALL_PREFIX` to suit your distribution filesystem hierarchy.
+Then create build directory and run cmake and make. You may need to modify the
+`basic-mingw32.cmake` file and `CMAKE_INSTALL_PREFIX` to suit your distribution
+filesystem hierarchy.
 
     mkdir build-win
     cd build-win
@@ -258,18 +313,17 @@ cmake and make. You may need to modify the `basic-mingw32.cmake` file and
 Then you can install the package using `make install` to make it available for
 depending projects.
 
-@section building-nacl Compiling for Google Chrome Native Client
+@subsection building-cross-nacl Crosscompiling for Google Chrome Native Client
 
 You will need [Native Client SDK](https://developers.google.com/native-client/beta/sdk/download).
 Minimal supported version is `pepper_25`.
 
-Make sure you have `toolchains` submodule updated, as
-@ref building-download "explained above". You can choose from either `glibc` or
-`newlib` toolchain. `Newlib` supports only static linking, thus `BUILD_STATIC`
-is implicitly enabled. Don't forget to adapt `NACL_PREFIX` variable in
-`generic/NaCl-*-x86-32.cmake` and `generic/NaCl-*-x86-64.cmake` to path where
-your SDK is installed. Default is `/usr/nacl`. You may need to adapt also
-`NACL_TOOLCHAIN_PATH` so CMake is able to find the compiler.
+You can choose from either `glibc` or `newlib` toolchain. `Newlib` supports
+only static linking, thus `BUILD_STATIC` is implicitly enabled. Don't forget to
+adapt `NACL_PREFIX` variable in `generic/NaCl-*-x86-32.cmake` and
+`generic/NaCl-*-x86-64.cmake` to path where your SDK is installed. Default is
+`/usr/nacl`. You may need to adapt also `NACL_TOOLCHAIN_PATH` so CMake is able
+to find the compiler.
 
 Then create build directories for x86-32 and x86-64 and run cmake and make in
 them. The toolchains need access to its platform file, so be sure to properly
@@ -302,22 +356,21 @@ for depending projects. The headers are shared by both versions.
 For ArchLinux there are also prepared package files in root, named
 `PKGBUILD-nacl-glibc` and `PKGBUILD-nacl-newlib`.
 
-@section building-emscripten Compiling for Emscripten
+@subsection building-cross-emscripten Crosscompiling for Emscripten
 
 You will need [Emscripten](https://github.com/kripken/emscripten/wiki/Tutorial)
 installed and configured.
 
-Make sure you have `toolchains` submodule updated, as
-@ref building-download "explained above". Don't forget to adapt
-`EMSCRIPTEN_PREFIX` variable in `generic/Emscripten.cmake` to path where
-Emscripten is installed. You might want to build static libraries, as they will
-be faster than dynamic libraries. See `BUILD_STATIC` above.
+Don't forget to adapt `EMSCRIPTEN_PREFIX` variable in `generic/Emscripten.cmake`
+to path where Emscripten is installed. Default is `/usr/emscripten`. Emscripten
+supports dynamic only to simplify porting and they are generally slower, thus
+`BUILD_STATIC` is implicitly enabled.
 
 Then create build directory and run cmake and make in it. The toolchain needs
 access to its platform file, so be sure to properly set **absolute** path to
 `modules/` directory containing `Platform/Emscripten.cmake`. Default is
-`/usr/emscripten`. Also set `CMAKE_INSTALL_PREFIX` to the same value as in
-`EMSCRIPTEN_TOOLCHAIN_PATH` in toolchain file.
+`/usr/emscripten`. Also set `CMAKE_INSTALL_PREFIX` to value which is contained
+in `CMAKE_FIND_ROOT_PATH` in toolchain file.
 
     mkdir -p build-emscripten
     cd build-emscripten
@@ -325,8 +378,7 @@ access to its platform file, so be sure to properly set **absolute** path to
         -DCMAKE_MODULE_PATH="/absolute/path/to/toolchains/modules" \
         -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/Emscripten.cmake" \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=/usr/emscripten/system \
-        -DBUILD_STATIC=ON
+        -DCMAKE_INSTALL_PREFIX=/usr/emscripten/system
     make
 
 Then you can install the library using `make install` to make it available for
@@ -336,3 +388,5 @@ If you have Node.js installed, you can also build and run unit tests using
 `ctest`. See `BUILD_TESTS` above.
 
 */
+
+}

@@ -34,6 +34,9 @@
 #include "Comparator.h"
 #include "Compare/FloatingPoint.h"
 
+#ifdef CORRADE_TARGET_EMSCRIPTEN
+#include <cstdlib>
+#endif
 #include "corradeTestSuiteVisibility.h"
 
 namespace Corrade { namespace TestSuite {
@@ -185,12 +188,29 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 /** @hideinitializer
 @brief Create `main()` function for given Tester subclass
 */
+#ifndef CORRADE_TARGET_EMSCRIPTEN
 #define CORRADE_TEST_MAIN(Class)                                            \
     int main(int, char**) {                                                 \
         Class t;                                                            \
         t.registerTest(__FILE__, #Class);                                   \
         return t.exec();                                                    \
     }
+#else
+/* In Emscripten, returning from main() with non-zero exit code won't
+   affect Node.js exit code, causing all tests to look like they passed.
+   Calling std::abort() causes Node.js to exit with non-zero code. The lambda
+   voodoo is done to have `t` properly destructed before aborting. */
+/** @todo Remove workaround when Emscripten can properly propagate exit codes */
+#define CORRADE_TEST_MAIN(Class)                                            \
+    int main(int, char**) {                                                 \
+        if([]() {                                                           \
+            Class t;                                                        \
+            t.registerTest(__FILE__, #Class);                               \
+            return t.exec();                                                \
+        }() != 0) std::abort();                                             \
+        return 0;                                                           \
+    }
+#endif
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 #define _CORRADE_REGISTER_TEST_CASE()                                       \

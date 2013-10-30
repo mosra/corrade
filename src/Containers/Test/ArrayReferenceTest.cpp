@@ -43,6 +43,7 @@ class ArrayReferenceTest: public TestSuite::Tester {
         #endif
 
         void constReference();
+        void voidConstruction();
         void voidConversion();
 };
 
@@ -62,6 +63,7 @@ ArrayReferenceTest::ArrayReferenceTest() {
               #endif
 
               &ArrayReferenceTest::constReference,
+              &ArrayReferenceTest::voidConstruction,
               &ArrayReferenceTest::voidConversion});
 }
 
@@ -153,6 +155,18 @@ void ArrayReferenceTest::constReference() {
     ConstArrayReference e = d;
     CORRADE_VERIFY(e == c);
     CORRADE_COMPARE(e.size(), 3);
+}
+
+void ArrayReferenceTest::voidConstruction() {
+    void* a = reinterpret_cast<void*>(0xdeadbeef);
+    Containers::ArrayReference<const void> b(a, 25);
+    CORRADE_VERIFY(b == a);
+    CORRADE_COMPARE(b.size(), 25);
+
+    int* c = reinterpret_cast<int*>(0xdeadbeef);
+    Containers::ArrayReference<const void> d(c, 25);
+    CORRADE_VERIFY(d == c);
+    CORRADE_COMPARE(d.size(), 100);
 }
 
 void ArrayReferenceTest::voidConversion() {

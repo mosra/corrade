@@ -84,7 +84,10 @@ elseif(BUILD_STATIC_PIC)
     # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
     set_target_properties(CorradeUtility PROPERTIES COMPILE_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
 endif()
-install(TARGETS CorradeUtility DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
+install(TARGETS CorradeUtility
+        RUNTIME DESTINATION ${CORRADE_BINARY_INSTALL_DIR}
+        LIBRARY DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR}
+        ARCHIVE DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 install(FILES ${CorradeUtility_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/Utility)
 
 if(NOT CMAKE_CROSSCOMPILING)
@@ -104,7 +107,10 @@ if(BUILD_TESTS)
     # On Windows we need to install first and then run the tests to avoid "DLL
     # not found" hell, thus we need to install this too
     if(WIN32 AND NOT CMAKE_CROSSCOMPILING)
-        install(TARGETS CorradeUtilityTestLib DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
+        install(TARGETS CorradeUtilityTestLib
+            RUNTIME DESTINATION ${CORRADE_BINARY_INSTALL_DIR}
+            LIBRARY DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR}
+            ARCHIVE DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
     endif()
 
     add_subdirectory(Test)

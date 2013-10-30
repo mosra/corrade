@@ -32,6 +32,12 @@ option(GCC44_COMPATIBILITY "Enable compatibility mode for GCC 4.4 (might disable
 option(GCC45_COMPATIBILITY "Enable compatibility mode for GCC 4.5 (might disable some features)" OFF)
 option(GCC46_COMPATIBILITY "Enable compatibility mode for GCC 4.6 (might disable some features)" OFF)
 option(GCC47_COMPATIBILITY "Enable compatibility mode for GCC 4.7 (might disable some features)" OFF)
+
+option(BUILD_DEPRECATED "Include deprecated API in the build" ON)
+if(BUILD_DEPRECATED)
+    set(CORRADE_BUILD_DEPRECATED 1)
+endif()
+
 option(BUILD_STATIC "Build static libraries (default are shared)" OFF)
 cmake_dependent_option(BUILD_STATIC_PIC "Build static libraries with position-independent code" OFF "BUILD_STATIC" OFF)
 option(BUILD_TESTS "Build unit tests." OFF)
@@ -51,6 +57,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL NaCl)
     endif()
 elseif(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     set(CORRADE_TARGET_EMSCRIPTEN 1)
+    # It's meaningless to use dynamic libraries with Emscripten
+    set(BUILD_STATIC ON)
 endif()
 
 if(BUILD_STATIC)

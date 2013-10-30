@@ -29,11 +29,15 @@
  * @brief Forward declarations for Corrade::Interconnect namespace
  */
 
+#include <cstddef>
+
 namespace Corrade { namespace Interconnect {
 
 class Connection;
 class Emitter;
 class Receiver;
+
+template<std::size_t, std::size_t, class, class> class StateMachine;
 
 }}
 

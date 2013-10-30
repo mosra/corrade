@@ -61,12 +61,13 @@ enum class LoadState: unsigned short {
      */
     NotFound = 1 << 0,
 
-    #ifndef CORRADE_TARGET_NACL_NEWLIB
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
     /**
      * The plugin is build with different version of plugin manager and cannot
      * be loaded. Returned by @ref AbstractManager::load().
      * @partialsupport Only static plugins are supported in
-     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
+     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
+     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
      */
     WrongPluginVersion = 1 << 1,
 
@@ -74,7 +75,8 @@ enum class LoadState: unsigned short {
      * The plugin uses different interface than the interface used by plugin
      * manager and cannot be loaded. Returned by @ref AbstractManager::load().
      * @partialsupport Only static plugins are supported in
-     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
+     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
+     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
      */
     WrongInterfaceVersion = 1 << 2,
 
@@ -82,7 +84,8 @@ enum class LoadState: unsigned short {
      * The plugin doesn't have any metadata file or the metadata file contains
      * errors. Returned by @ref AbstractManager::load().
      * @partialsupport Only static plugins are supported in
-     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
+     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
+     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
      */
     WrongMetadataFile = 1 << 3,
 
@@ -90,7 +93,8 @@ enum class LoadState: unsigned short {
      * The plugin depends on another plugin, which cannot be loaded (e.g. not
      * found or wrong version). Returned by @ref AbstractManager::load().
      * @partialsupport Only static plugins are supported in
-     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
+     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
+     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
      */
     UnresolvedDependency = 1 << 4,
 
@@ -98,7 +102,8 @@ enum class LoadState: unsigned short {
      * The plugin failed to load for other reason (e.g. linking failure).
      * Returned by @ref AbstractManager::load().
      * @partialsupport Only static plugins are supported in
-     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
+     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
+     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
      */
     LoadFailed = 1 << 5,
     #endif
@@ -113,28 +118,31 @@ enum class LoadState: unsigned short {
      * The plugin is successfully loaded. Returned by @ref AbstractManager::loadState()
      * and @ref AbstractManager::load(). The value includes value of @ref LoadState::Static,
      * see @ref LoadStates for more information. On @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib"
-     * the value is equivalent to @ref LoadState::Static.
+     * and @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" the value is equivalent
+     * to @ref LoadState::Static.
      */
-    #ifndef CORRADE_TARGET_NACL_NEWLIB
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
     Loaded = (1 << 7) | LoadState::Static,
     #else
     Loaded = LoadState::Static,
     #endif
 
-    #ifndef CORRADE_TARGET_NACL_NEWLIB
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
     /**
      * The plugin is not loaded. Plugin can be unloaded only if is dynamic and
      * is not required by any other plugin. Returned by
      * @ref AbstractManager::loadState() and @ref AbstractManager::load().
      * @partialsupport Only static plugins are supported in
-     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
+     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
+     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
      */
     NotLoaded = 1 << 8,
 
     /**
      * The plugin failed to unload. Returned by @ref AbstractManager::unload().
      * @partialsupport Only static plugins are supported in
-     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
+     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
+     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
      */
     UnloadFailed = 1 << 9,
 
@@ -142,17 +150,19 @@ enum class LoadState: unsigned short {
      * The plugin cannot be unloaded because another plugin is depending on it.
      * Unload that plugin first and try again. Returned by @ref AbstractManager::unload().
      * @partialsupport Only static plugins are supported in
-     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
+     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
+     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
      */
     Required = 1 << 10,
     #endif
 
-    #ifndef CORRADE_TARGET_NACL_NEWLIB
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
     /**
      * The plugin has active instance and cannot be unloaded. Destroy all
      * instances and try again. Returned by @ref AbstractManager::unload().
      * @partialsupport Only static plugins are supported in
-     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
+     *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
+     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
      */
     Used = 1 << 11
     #endif
@@ -208,7 +218,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          *      with the same name as another static plugin are skipped.
          * @see pluginList()
          * @partialsupport Parameter @p pluginDirectory has no effect on
-         *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" as only static
+         *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
+         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" as only static
          *      plugins are supported.
          */
         explicit AbstractManager(std::string pluginDirectory);
@@ -225,12 +236,13 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         /** @brief Moving is not allowed */
         AbstractManager& operator=(AbstractManager&&) = delete;
 
-        #ifndef CORRADE_TARGET_NACL_NEWLIB
+        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
         /**
          * @brief Plugin directory
          *
          * @partialsupport Only static plugins are supported in
-         *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
+         *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
+         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
          */
         std::string pluginDirectory() const;
 
@@ -240,7 +252,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * Keeps loaded plugins untouched, removes unloaded plugins which are
          * not existing anymore and adds newly found plugins.
          * @partialsupport Only static plugins are supported in
-         *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
+         *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
+         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
          */
         void setPluginDirectory(std::string directory);
 
@@ -249,7 +262,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          *
          * Convenience equivalent to `setPluginDirectory(pluginDirectory())`.
          * @partialsupport Only static plugins are supported in
-         *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
+         *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
+         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
          */
         void reloadPluginDirectory();
         #endif
@@ -290,7 +304,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          *
          * @see @ref unload(), @ref loadState()
          * @partialsupport Only static plugins are supported in
-         *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
+         *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
+         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
          */
         virtual LoadState load(const std::string& plugin);
 
@@ -304,7 +319,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          *
          * @see @ref load(), @ref loadState()
          * @partialsupport Only static plugins are supported in
-         *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
+         *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
+         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
          */
         virtual LoadState unload(const std::string& plugin);
 
@@ -337,7 +353,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         };
 
         struct Plugin {
-            #ifndef CORRADE_TARGET_NACL_NEWLIB
+            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
             LoadState loadState;
             #else
             const LoadState loadState;
@@ -351,13 +367,13 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
             Instancer instancer;
 
-            #ifndef CORRADE_TARGET_NACL_NEWLIB
+            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
             union {
             #endif
                 /* For static plugins */
                 StaticPlugin* staticPlugin;
 
-            #ifndef CORRADE_TARGET_NACL_NEWLIB
+            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
                 /* For dynamic plugins */
                 #ifndef _WIN32
                 void* module;
@@ -367,7 +383,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
             };
             #endif
 
-            #ifndef CORRADE_TARGET_NACL_NEWLIB
+            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
             /* Constructor for dynamic plugins */
             explicit Plugin(const std::string& _metadata, AbstractManager* _manager);
             #endif
@@ -378,7 +394,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
             ~Plugin();
         };
 
-        #ifndef CORRADE_TARGET_NACL_NEWLIB
+        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
         std::string _pluginDirectory;
         #endif
 
