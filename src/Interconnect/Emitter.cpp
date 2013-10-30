@@ -39,8 +39,8 @@ AbstractConnectionData::~AbstractConnectionData() {}
 Emitter::Emitter(): lastHandledSignal(0), connectionsChanged(false) {}
 
 Emitter::~Emitter() {
-    for(auto connection: connections) {
-        const Implementation::AbstractConnectionData* data = connection.second;
+    for(auto it = connections.begin(); it != connections.end(); ++it) {
+        const Implementation::AbstractConnectionData* data = it->second;
 
         /* Remove connection from receiver, if this is member function connection */
         if(data->type == Implementation::AbstractConnectionData::Type::Member) {

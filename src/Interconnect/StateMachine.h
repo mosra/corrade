@@ -217,7 +217,8 @@ template<std::size_t states, std::size_t inputs, class State, class Input> State
 }
 
 template<std::size_t states, std::size_t inputs, class State, class Input> void StateMachine<states, inputs, State, Input>::addTransitions(const std::initializer_list<StateTransition<State, Input>> transitions) {
-    for(const auto transition: transitions) {
+    for(auto it = transitions.begin(); it != transitions.end(); ++it) {
+        const auto transition = *it;
         CORRADE_ASSERT(std::size_t(transition.from) < states && std::size_t(transition.input) < inputs && std::size_t(transition.to) < states, "Interconnect::StateMachine: out-of-bounds state, from:" << std::size_t(transition.from) << "input:" << std::size_t(transition.input) << "to:" << std::size_t(transition.to), );
         at(transition.from, transition.input) = transition.to;
     }
