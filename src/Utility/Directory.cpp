@@ -30,6 +30,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <algorithm>
+#include <fstream>
 
 #ifdef _WIN32
 #include <shlobj.h>
@@ -125,10 +126,7 @@ bool Directory::move(const std::string& oldPath, const std::string& newPath) {
 #endif
 
 bool Directory::fileExists(const std::string& filename) {
-  struct stat fileInfo;
-
-  if(stat(filename.c_str(), &fileInfo) == 0) return true;
-  return false;
+    return std::ifstream(filename);
 }
 
 std::string Directory::home() {
