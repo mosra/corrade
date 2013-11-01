@@ -126,7 +126,7 @@ bool Directory::move(const std::string& oldPath, const std::string& newPath) {
 #endif
 
 bool Directory::fileExists(const std::string& filename) {
-    return std::ifstream(filename);
+    return std::ifstream(filename).good();
 }
 
 std::string Directory::home() {
