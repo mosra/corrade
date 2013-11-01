@@ -29,6 +29,7 @@
 
 #include "Containers/Array.h"
 #include "TestSuite/Tester.h"
+#include "TestSuite/Compare/Container.h"
 #include "TestSuite/Compare/StringToFile.h"
 #include "Utility/Directory.h"
 #include "Utility/Resource.h"
@@ -46,6 +47,7 @@ class ResourceTest: public TestSuite::Tester {
         void compileEmptyFile();
         void compileFrom();
 
+        void list();
         void get();
         void getInexistent();
         void getNothing();
@@ -62,6 +64,7 @@ ResourceTest::ResourceTest() {
               &ResourceTest::compileEmptyFile,
               &ResourceTest::compileFrom,
 
+              &ResourceTest::list,
               &ResourceTest::get,
               &ResourceTest::getInexistent,
               &ResourceTest::getNothing,
@@ -125,6 +128,13 @@ void ResourceTest::compileFrom() {
         " -> predisposition.bin\n"
         "Reading file 2 of 2 in group 'test'\n"
         "    consequence.bin\n");
+}
+
+void ResourceTest::list() {
+    Resource r("test");
+    CORRADE_COMPARE_AS(r.list(),
+                       (std::vector<std::string>{"consequence.bin", "predisposition.bin"}),
+                       TestSuite::Compare::Container);
 }
 
 void ResourceTest::get() {

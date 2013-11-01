@@ -242,6 +242,17 @@ Resource::~Resource() {
     delete _overrideGroup;
 }
 
+std::vector<std::string> Resource::list() const {
+    CORRADE_INTERNAL_ASSERT(_group != resources().end());
+
+    std::vector<std::string> result;
+    result.reserve(_group->second.resources.size());
+    for(const auto& filename: _group->second.resources)
+        result.push_back(filename.first);
+
+    return result;
+}
+
 Containers::ArrayReference<const unsigned char> Resource::getRaw(const std::string& filename) const {
     CORRADE_INTERNAL_ASSERT(_group != resources().end());
 
