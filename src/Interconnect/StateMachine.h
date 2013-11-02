@@ -74,7 +74,7 @@ enum class Input: std::uint8_t {
 Then `typedef` the state machine consisting of these two enums, count
 of all states and count of all inputs:
 @code
-typdef Interconnect::StateMachine<3, 2, State, Input> Printer;
+typedef Interconnect::StateMachine<3, 2, State, Input> Printer;
 @endcode
 
 Now add your state transitions, for each transition first original state, then
