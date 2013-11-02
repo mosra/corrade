@@ -40,7 +40,10 @@ unsigned int MurmurHash2Implementation<4>::operator()(const unsigned char* data,
 
     /* Mix 4 bytes at a time into the hash */
     for(std::size_t i = 0; i+4 <= size; i += 4) {
-        unsigned int k = *reinterpret_cast<const unsigned int*>(data+i);
+        /* Using *reinterpret_cast<const unsigned int*>(data+i) leads to
+           unaligned reads, causing Emscripten to behave strangely if
+           data % 4 != 0. May fail also on ARM. */
+        unsigned int k = data[i + 3] << 24 | data[i + 2] << 16 | data[i + 1] << 8 | data[i + 0];
 
         k *= m;
         k ^= k >> r;
