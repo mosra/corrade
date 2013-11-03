@@ -151,11 +151,23 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
         StateMachine<states, inputs, State, Input>& step(Input input);
 
         /**
+         * @brief The machine is switching states
+         *
+         * Emitted when machine goes from @p previous state to @p next state
+         * and they are different ones. Emitted after corresponding @ref exited()
+         * signal and before corresponding @ref entered() one.
+         * @see @ref step()
+         */
+        template<State previous, State next> Signal stepped() {
+            return emit(&StateMachine::stepped<previous, next>);
+        }
+
+        /**
          * @brief The machine entered given state
          * @param previous  State which was exited
          *
          * Emitted when machine goes to given @p state from different one,
-         * right after corresponding @ref exited() signal.
+         * right after corresponding @ref stepped() signal.
          * @see @ref step()
          */
         template<State state> Signal entered(State previous) {
@@ -167,7 +179,7 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
          * @param next      State which will be entered
          *
          * Emitted when machine leaves given @p state for different one. The
-         * corresponding @ref entered() signal is emitted after this one.
+         * corresponding @ref stepped() signal is emitted after this one.
          * @see @ref step()
          */
         template<State state> Signal exited(State next) {
@@ -192,6 +204,24 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
         }
 
         Signal enteredInternal(State, std::integral_constant<std::size_t, 0>, State) {
+            CORRADE_ASSERT_UNREACHABLE();
+        }
+
+        template<std::size_t current> Signal steppedInternal(State wantedPrevious, std::integral_constant<std::size_t, current>, State next) {
+            return State(current-1) == wantedPrevious ?
+                steppedNextInternal<State(current-1)>(next, std::integral_constant<std::size_t, states>{}) :
+                steppedInternal(wantedPrevious, std::integral_constant<std::size_t, current-1>{}, next);
+        }
+
+        Signal steppedInternal(State, std::integral_constant<std::size_t, 0>, State) {
+            CORRADE_ASSERT_UNREACHABLE();
+        }
+
+        template<State previous, std::size_t current> Signal steppedNextInternal(State wantedNext, std::integral_constant<std::size_t, current>) {
+            return State(current-1) == wantedNext ? stepped<previous, State(current-1)>() : steppedNextInternal<previous>(wantedNext, std::integral_constant<std::size_t, current-1>{});
+        }
+
+        template<State> Signal steppedNextInternal(State, std::integral_constant<std::size_t, 0>) {
             CORRADE_ASSERT_UNREACHABLE();
         }
 
@@ -230,6 +260,7 @@ template<std::size_t states, std::size_t inputs, class State, class Input> State
 
     if(next != _current) {
         exitedInternal(_current, std::integral_constant<std::size_t, states>{}, next);
+        steppedInternal(_current, std::integral_constant<std::size_t, states>{}, next);
         enteredInternal(next, std::integral_constant<std::size_t, states>{}, _current);
         _current = next;
     }
