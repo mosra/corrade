@@ -63,14 +63,21 @@ void StateMachineTest::test() {
     std::ostringstream out;
     Debug::setOutput(&out);
 
-    Interconnect::connect(m, &StateMachine::entered<State::Start>, []() { Debug() << "start entered"; });
-    Interconnect::connect(m, &StateMachine::exited<State::Start>, []() { Debug() << "start exited"; });
-    Interconnect::connect(m, &StateMachine::entered<State::End>, []() { Debug() << "end entered"; });
-    Interconnect::connect(m, &StateMachine::exited<State::End>, []() { Debug() << "end exited"; });
+    Interconnect::connect(m, &StateMachine::entered<State::Start>,
+        [](State s) { Debug() << "start entered, previous" << std::uint8_t(s); });
+    Interconnect::connect(m, &StateMachine::exited<State::Start>,
+        [](State s) { Debug() << "start exited, next" << std::uint8_t(s); });
+    Interconnect::connect(m, &StateMachine::entered<State::End>,
+        [](State s) { Debug() << "end entered, previous" << std::uint8_t(s); });
+    Interconnect::connect(m, &StateMachine::exited<State::End>,
+        [](State s) { Debug() << "end exited, next" << std::uint8_t(s); });
 
     m.step(Input::KeyA)
      .step(Input::KeyB);
-    CORRADE_COMPARE(out.str(), "start exited\nend entered\nend exited\nstart entered\n");
+    CORRADE_COMPARE(out.str(), "start exited, next 1\n"
+                               "end entered, previous 0\n"
+                               "end exited, next 0\n"
+                               "start entered, previous 1\n");
 }
 
 }}}
