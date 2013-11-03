@@ -91,10 +91,10 @@ p.addTransitions({
 Lastly connect transition signals to desired slots, so you can react to state
 changes:
 @code
-Interconnect::connect(p, &Printer::entered<State::Ready>, []() { Utility::Debug() << "Printer is ready."; });
-Interconnect::connect(p, &Printer::entered<State::Finished>, []() { Utility::Debug() << "Print finished. Please remove the document."; });
-Interconnect::connect(p, &Printer::entered<State::Printing>, []() { Utility::Debug() << "Starting the print..."; });
-Interconnect::connect(p, &Printer::exited<State::Printing>, []() { Utility::Debug() << "Finishing the print..."; });
+Interconnect::connect(p, &Printer::entered<State::Ready>, [](State) { Utility::Debug() << "Printer is ready."; });
+Interconnect::connect(p, &Printer::entered<State::Finished>, [](State) { Utility::Debug() << "Print finished. Please remove the document."; });
+Interconnect::connect(p, &Printer::entered<State::Printing>, [](State) { Utility::Debug() << "Starting the print..."; });
+Interconnect::connect(p, &Printer::exited<State::Printing>, [](State) { Utility::Debug() << "Finishing the print..."; });
 @endcode
 
 Stepping the machine will print the following output:
