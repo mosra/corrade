@@ -98,7 +98,7 @@ void Resource::unregisterData(const char* group) {
 
 std::string Resource::compileFrom(const std::string& name, const std::string& configurationFile) {
     const std::string path = Directory::path(configurationFile);
-    const Configuration conf(configurationFile);
+    const Configuration conf(configurationFile, Configuration::Flag::ReadOnly);
 
     /* Group name */
     const std::string group = conf.value("group");
