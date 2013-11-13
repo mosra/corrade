@@ -6,7 +6,7 @@ pkgdesc="Multiplatform plugin management and utility library (NaCl glibc version
 arch=('any')
 url="http://mosra.cz/blog/corrade.php"
 license=('MIT')
-makedepends=('nacl-sdk' 'cmake')
+makedepends=('nacl-sdk' 'cmake' 'ninja')
 options=(!buildflags !strip)
 
 build() {
@@ -20,8 +20,9 @@ build() {
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr/nacl \
         -DGCC44_COMPATIBILITY=ON \
-        -DLIB_SUFFIX=/32
-    make
+        -DLIB_SUFFIX=/32 \
+        -G Ninja
+    ninja
 
     # Build 64bit
     mkdir -p "$startdir/build-nacl-glibc-x86-64"
@@ -32,17 +33,18 @@ build() {
         -DCMAKE_TOOLCHAIN_FILE="$startdir/toolchains/generic/NaCl-glibc-x86-64.cmake" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr/nacl \
-        -DGCC44_COMPATIBILITY=ON
-    make
+        -DGCC44_COMPATIBILITY=ON \
+        -G Ninja
+    ninja
 }
 
 package() {
     # Install 32bit
     cd "$startdir/build-nacl-x86-32"
-    make DESTDIR="$pkgdir/" install
+    DESTDIR="$pkgdir/" ninja install
 
     # Install 64bit (the headers will be overwritten, but they are (and should
     # be) the same for both versions
     cd "$startdir/build-nacl-x86-64"
-    make DESTDIR="$pkgdir/" install
+    DESTDIR="$pkgdir/" ninja install
 }
