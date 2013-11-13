@@ -81,7 +81,8 @@ and third is name of used plugin interface.
 @dontinclude pluginmanager/Canary.cpp
 @skip class Canary
 @until };
-@skipline CORRADE_PLUGIN_REGISTER
+@skip CORRADE_PLUGIN_REGISTER
+@until )
 
 Configuration file for Canary plugin:
 @include pluginmanager/Canary.conf
@@ -95,7 +96,8 @@ plugin manager.
 @dontinclude pluginmanager/Dog.cpp
 @skip class Dog
 @until };
-@skipline CORRADE_PLUGIN_REGISTER
+@skip CORRADE_PLUGIN_REGISTER
+@until )
 
 Configuration file for Dog plugin:
 @include pluginmanager/Dog.conf
