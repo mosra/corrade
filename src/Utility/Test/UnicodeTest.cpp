@@ -104,7 +104,7 @@ void UnicodeTest::nextUtf8Empty() {
 }
 
 void UnicodeTest::utf8utf32() {
-    #ifndef _WIN32
+    #ifndef __MINGW32__
     CORRADE_COMPARE(Unicode::utf32("žluťoučký kůň"),
                     U"\u017Elu\u0165ou\u010Dk\u00FD k\u016F\u0148");
     #else
@@ -114,7 +114,7 @@ void UnicodeTest::utf8utf32() {
     #endif
 
     /* Empty string shouldn't crash */
-    #ifndef _WIN32
+    #ifndef __MINGW32__
     CORRADE_COMPARE(Unicode::utf32(""), U"");
     #else
     CORRADE_COMPARE(Unicode::utf32(""), std::vector<char32_t>());

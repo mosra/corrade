@@ -30,7 +30,7 @@
  */
 
 #include <string>
-#ifdef _WIN32
+#ifdef __MINGW32__
 #include <vector>
 #endif
 
@@ -53,13 +53,13 @@ class CORRADE_UTILITY_EXPORT Unicode {
         /**
          * @brief Convert UTF-8 to UTF-32
          *
-         * @note On Windows returns `std::vector<char32_t>` instead of
+         * @note On MinGW returns `std::vector<char32_t>` instead of
          *      `std::u32string` because MinGW on Windows somehow doesn't
          *      expect four-byte characters in a string and fails miserably
          *      while freeing memory.
          * @todo Test when there is something newer than MinGW32 GCC 4.7.2
          */
-        #ifndef _WIN32
+        #ifndef __MINGW32__
         static std::u32string utf32(const std::string& text);
         #else
         static std::vector<char32_t> utf32(const std::string& text);
