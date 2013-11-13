@@ -109,7 +109,7 @@ void Test::nameList() {
     #endif
 
     /* Check if the list of dynamic plugins is cleared after destructing */
-    PluginManager::Manager<AbstractAnimal> manager(Directory::join(PLUGINS_DIR, "inexistent"));
+    PluginManager::Manager<AbstractAnimal> manager(Directory::join(PLUGINS_DIR, "nonexistent"));
 
     CORRADE_COMPARE_AS(manager.pluginList(), std::vector<std::string>{
         "Canary"}, TestSuite::Compare::Container);

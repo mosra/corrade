@@ -62,8 +62,8 @@ void TranslatorTest::file() {
     t.setPrimary(nullptr);
     CORRADE_COMPARE(*s, "fallback translation");
 
-    /* Load inexistent primary localization */
-    t.setPrimary(Directory::join(TRANSLATOR_TEST_DIR, "inexistent.conf"));
+    /* Load nonexistent primary localization */
+    t.setPrimary(Directory::join(TRANSLATOR_TEST_DIR, "nonexistent.conf"));
     CORRADE_COMPARE(*s, "fallback translation");
 
     /* Load another fallback localization */

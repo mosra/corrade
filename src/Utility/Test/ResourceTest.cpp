@@ -49,12 +49,12 @@ class ResourceTest: public TestSuite::Tester {
 
         void list();
         void get();
-        void getInexistent();
+        void getNonexistent();
         void getNothing();
 
         void overrideGroup();
         void overrideGroupFallback();
-        void overrideInexistentGroup();
+        void overrideNonexistentGroup();
         void overrideDifferentGroup();
 };
 
@@ -66,12 +66,12 @@ ResourceTest::ResourceTest() {
 
               &ResourceTest::list,
               &ResourceTest::get,
-              &ResourceTest::getInexistent,
+              &ResourceTest::getNonexistent,
               &ResourceTest::getNothing,
 
               &ResourceTest::overrideGroup,
               &ResourceTest::overrideGroupFallback,
-              &ResourceTest::overrideInexistentGroup,
+              &ResourceTest::overrideNonexistentGroup,
               &ResourceTest::overrideDifferentGroup});
 }
 
@@ -147,25 +147,25 @@ void ResourceTest::get() {
                        TestSuite::Compare::StringToFile);
 }
 
-void ResourceTest::getInexistent() {
+void ResourceTest::getNonexistent() {
     std::ostringstream out;
     Error::setOutput(&out);
 
     {
-        Resource r("inexistentGroup");
-        CORRADE_COMPARE(out.str(), "Utility::Resource: group 'inexistentGroup' was not found\n");
+        Resource r("nonexistentGroup");
+        CORRADE_COMPARE(out.str(), "Utility::Resource: group 'nonexistentGroup' was not found\n");
     }
 
     out.str({});
 
     {
         Resource r("test");
-        CORRADE_VERIFY(r.get("inexistentFile").empty());
-        CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'inexistentFile' was not found in group 'test'\n");
+        CORRADE_VERIFY(r.get("nonexistentFile").empty());
+        CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'nonexistentFile' was not found in group 'test'\n");
     }
 
     Resource r("test");
-    const auto data = r.getRaw("inexistentFile");
+    const auto data = r.getRaw("nonexistentFile");
     CORRADE_VERIFY(!data);
     CORRADE_VERIFY(!data.size());
 }
@@ -176,7 +176,7 @@ void ResourceTest::getNothing() {
 
     Resource r("nothing");
     CORRADE_VERIFY(out.str().empty());
-    CORRADE_VERIFY(r.get("inexistentFile").empty());
+    CORRADE_VERIFY(r.get("nonexistentFile").empty());
 }
 
 void ResourceTest::overrideGroup() {
@@ -208,13 +208,13 @@ void ResourceTest::overrideGroupFallback() {
     CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'consequence.bin' was not found in overriden group, fallback to compiled-in resources\n");
 }
 
-void ResourceTest::overrideInexistentGroup() {
+void ResourceTest::overrideNonexistentGroup() {
     std::ostringstream out;
     Error::setOutput(&out);
 
-    /* Inexistent group */
-    Resource::overrideGroup("inexistentGroup", {});
-    CORRADE_COMPARE(out.str(), "Utility::Resource::overrideGroup(): group 'inexistentGroup' was not found\n");
+    /* Nonexistent group */
+    Resource::overrideGroup("nonexistentGroup", {});
+    CORRADE_COMPARE(out.str(), "Utility::Resource::overrideGroup(): group 'nonexistentGroup' was not found\n");
 }
 
 void ResourceTest::overrideDifferentGroup() {

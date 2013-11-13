@@ -50,7 +50,7 @@ class ConfigurationTest: public TestSuite::Tester {
 
         void invalid();
         void readonly();
-        void inexistentFile();
+        void nonexistentFile();
         void truncate();
 
         void whitespaces();
@@ -77,7 +77,7 @@ ConfigurationTest::ConfigurationTest() {
 
               &ConfigurationTest::invalid,
               &ConfigurationTest::readonly,
-              &ConfigurationTest::inexistentFile,
+              &ConfigurationTest::nonexistentFile,
               &ConfigurationTest::truncate,
 
               &ConfigurationTest::whitespaces,
@@ -111,7 +111,7 @@ void ConfigurationTest::parse() {
     /* Groups */
     CORRADE_VERIFY(conf.hasGroups());
     CORRADE_COMPARE(conf.groupCount(), 4);
-    CORRADE_VERIFY(!conf.hasGroup("groupInexistent"));
+    CORRADE_VERIFY(!conf.hasGroup("groupNonexistent"));
     CORRADE_COMPARE(conf.groupCount("group"), 2);
     CORRADE_COMPARE(conf.groupCount("emptyGroup"), 1);
     CORRADE_VERIFY(conf.group("group")->configuration() == &conf);
@@ -125,16 +125,16 @@ void ConfigurationTest::parse() {
     CORRADE_VERIFY(conf.hasValues());
     CORRADE_COMPARE(conf.valueCount(), 1);
     CORRADE_VERIFY(conf.hasValue("key"));
-    CORRADE_VERIFY(!conf.hasValue("keyInexistent"));
+    CORRADE_VERIFY(!conf.hasValue("keyNonexistent"));
     CORRADE_COMPARE(conf.value("key"), "value");
     CORRADE_COMPARE(conf.group("group", 1)->value("c", 1), "value5");
     CORRADE_COMPARE_AS(conf.group("group", 1)->values("c"),
         (std::vector<std::string>{"value4", "value5"}), TestSuite::Compare::Container);
 
-    /* Default-constructed inexistent values */
-    CORRADE_COMPARE(conf.value("inexistent"), "");
-    CORRADE_COMPARE(conf.value<int>("inexistent"), 0);
-    CORRADE_COMPARE(conf.value<double>("inexistent"), 0.0);
+    /* Default-constructed nonexistent values */
+    CORRADE_COMPARE(conf.value("nonexistent"), "");
+    CORRADE_COMPARE(conf.value<int>("nonexistent"), 0);
+    CORRADE_COMPARE(conf.value<double>("nonexistent"), 0.0);
 
     /* Save file back - expecting no change */
     CORRADE_VERIFY(conf.save());
@@ -252,18 +252,18 @@ void ConfigurationTest::readonly() {
     CORRADE_VERIFY(conf.filename().empty());
 }
 
-void ConfigurationTest::inexistentFile() {
-    Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "inexistent.conf"));
-    Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "inexistent.conf"));
+void ConfigurationTest::nonexistentFile() {
+    Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "nonexistent.conf"));
+    Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "nonexistent.conf"));
 
     /* Everything okay if the file doesn't exist */
     CORRADE_VERIFY(conf.isValid());
     CORRADE_VERIFY(conf.isEmpty());
-    CORRADE_COMPARE(conf.filename(), Directory::join(CONFIGURATION_WRITE_TEST_DIR, "inexistent.conf"));
+    CORRADE_COMPARE(conf.filename(), Directory::join(CONFIGURATION_WRITE_TEST_DIR, "nonexistent.conf"));
 
     conf.setValue("key", "value");
     CORRADE_VERIFY(conf.save());
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "inexistent.conf"),
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "nonexistent.conf"),
                        "key=value\n", TestSuite::Compare::FileToString);
 }
 
