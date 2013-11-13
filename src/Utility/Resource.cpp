@@ -97,10 +97,20 @@ void Resource::unregisterData(const char* group) {
 }
 
 std::string Resource::compileFrom(const std::string& name, const std::string& configurationFile) {
+    /* Resource file existence */
+    if(!Directory::fileExists(configurationFile)) {
+        Error() << "    Error: file" << configurationFile << "does not exist";
+        return {};
+    }
+
     const std::string path = Directory::path(configurationFile);
     const Configuration conf(configurationFile, Configuration::Flag::ReadOnly);
 
     /* Group name */
+    if(!conf.hasValue("group")) {
+        Error() << "    Error: group name is not specified";
+        return {};
+    }
     const std::string group = conf.value("group");
 
     /* Load all files */
@@ -113,7 +123,7 @@ std::string Resource::compileFrom(const std::string& name, const std::string& co
         const std::string filename = file->value("filename");
         const std::string alias = file->hasValue("alias") ? file->value("alias") : filename;
         if(filename.empty() || alias.empty()) {
-            Error() << "    Error: empty filename or alias!";
+            Error() << "    Error: filename or alias is empty";
             return {};
         }
 
@@ -307,7 +317,7 @@ std::pair<bool, Containers::Array<unsigned char>> Resource::fileContents(const s
     std::ifstream file(filename.data(), std::ifstream::binary);
 
     if(!file.good()) {
-        Error() << "Cannot open file " << filename;
+        Error() << "    Error: cannot open file" << filename;
         return {false, nullptr};
     }
 

@@ -45,7 +45,13 @@ class ResourceTest: public TestSuite::Tester {
         void compile();
         void compileNothing();
         void compileEmptyFile();
+
         void compileFrom();
+        void compileFromNonexistentResource();
+        void compileFromNonexistentFile();
+        void compileFromEmptyGroup();
+        void compileFromEmptyFilename();
+        void compileFromEmptyAlias();
 
         void list();
         void get();
@@ -62,7 +68,13 @@ ResourceTest::ResourceTest() {
     addTests({&ResourceTest::compile,
               &ResourceTest::compileNothing,
               &ResourceTest::compileEmptyFile,
+
               &ResourceTest::compileFrom,
+              &ResourceTest::compileFromNonexistentResource,
+              &ResourceTest::compileFromNonexistentFile,
+              &ResourceTest::compileFromEmptyGroup,
+              &ResourceTest::compileFromEmptyFilename,
+              &ResourceTest::compileFromEmptyAlias,
 
               &ResourceTest::list,
               &ResourceTest::get,
@@ -128,6 +140,56 @@ void ResourceTest::compileFrom() {
         " -> predisposition.bin\n"
         "Reading file 2 of 2 in group 'test'\n"
         "    consequence.bin\n");
+}
+
+void ResourceTest::compileFromNonexistentResource() {
+    std::ostringstream out;
+    Error::setOutput(&out);
+
+    CORRADE_VERIFY(Resource::compileFrom("ResourceTestData", "nonexistent.conf").empty());
+    CORRADE_COMPARE(out.str(), "    Error: file nonexistent.conf does not exist\n");
+}
+
+void ResourceTest::compileFromNonexistentFile() {
+    std::ostringstream out;
+    Error::setOutput(&out);
+
+    CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
+        Directory::join(RESOURCE_TEST_DIR, "resources-nonexistent.conf")).empty());
+    CORRADE_COMPARE(out.str(), "    Error: cannot open file /nonexistent.dat\n");
+}
+
+void ResourceTest::compileFromEmptyGroup() {
+    std::ostringstream out;
+    Error::setOutput(&out);
+
+    /* Empty group name is allowed */
+    CORRADE_VERIFY(!Resource::compileFrom("ResourceTestData",
+        Directory::join(RESOURCE_TEST_DIR, "resources-empty-group.conf")).empty());
+    CORRADE_COMPARE(out.str(), "");
+
+    /* Missing group entry is not allowed */
+    CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
+        Directory::join(RESOURCE_TEST_DIR, "resources-no-group.conf")).empty());
+    CORRADE_COMPARE(out.str(), "    Error: group name is not specified\n");
+}
+
+void ResourceTest::compileFromEmptyFilename() {
+    std::ostringstream out;
+    Error::setOutput(&out);
+
+    CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
+        Directory::join(RESOURCE_TEST_DIR, "resources-empty-filename.conf")).empty());
+    CORRADE_COMPARE(out.str(), "    Error: filename or alias is empty\n");
+}
+
+void ResourceTest::compileFromEmptyAlias() {
+    std::ostringstream out;
+    Error::setOutput(&out);
+
+    CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
+        Directory::join(RESOURCE_TEST_DIR, "resources-empty-alias.conf")).empty());
+    CORRADE_COMPARE(out.str(), "    Error: filename or alias is empty\n");
 }
 
 void ResourceTest::list() {
