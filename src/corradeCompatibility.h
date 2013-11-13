@@ -30,12 +30,12 @@
 #ifdef CORRADE_GCC45_COMPATIBILITY
 #define constexpr
 #define nullptr 0
+#define noexcept
 #endif
 
 #ifdef CORRADE_GCC46_COMPATIBILITY
 #define final
 #define override
-#define noexcept
 #endif
 
 #endif
