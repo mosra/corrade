@@ -488,12 +488,8 @@ void AbstractManager::removeUsedBy(const std::string& plugin, const std::string&
 void* AbstractManager::instanceInternal(const std::string& plugin) {
     auto foundPlugin = plugins()->find(plugin);
 
-    /* Plugin with given name doesn't exist or isn't successfully loaded */
-    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-    if(foundPlugin == plugins()->end() || !(foundPlugin->second->loadState & LoadState::Loaded))
-    #else
-    if(foundPlugin == plugins()->end())
-    #endif
+    /* Plugin with given name doesn't exist, isn't successfully loaded or belongs to different manager */
+    if(foundPlugin == plugins()->end() || !(foundPlugin->second->loadState & LoadState::Loaded) || foundPlugin->second->manager != this)
         return nullptr;
 
     return foundPlugin->second->instancer(this, plugin);
