@@ -42,7 +42,7 @@ And for obvious reasons you don't want to put directly into the code, but
 in a separate file instead. But in the end you want it compiled directly into
 the executable, so your product is one compact file.
 
-%Corrade's @ref corrade-cmake "CMake support" provides macro `corrade_add_resource()`,
+%Corrade's CMake support provides macro @ref corrade-cmake-add-resource "corrade_add_resource()",
 which takes resource configuration file and produces C++ source file. The
 source file can be then passed among other source files to executable or
 library. First argument is name of resulting C++ source file, second argument

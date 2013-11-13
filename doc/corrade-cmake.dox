@@ -79,6 +79,7 @@ use given library with CMake.
 %Corrade provides these macros and functions:
 
 ### Add unit test using %Corrade's TestSuite
+@anchor corrade-cmake-add-test
 
     corrade_add_test(test_name
                      sources...
@@ -90,6 +91,7 @@ linked automatically to each test. Note that the `enable_testing()` function
 must be called explicitly.
 
 ### Compile data resources into application binary
+@anchor corrade-cmake-add-resource
 
     corrade_add_resource(name resources.conf)
 
@@ -103,6 +105,7 @@ used for compiling library / executable. Example usage:
     add_executable(app source1 source2 ... ${app_resources})
 
 ### Add dynamic plugin
+@anchor corrade-cmake-add-plugin
 
     corrade_add_plugin(plugin_name install_dir metadata_file
                        sources...)
@@ -113,6 +116,7 @@ libraries can be linked in via `target_link_libraries(plugin_name ...)`. If
 the files are copied directly, without the need to run `make install`.
 
 ### Add static plugin
+@anchor corrade-cmake-add-static-plugin
 
     corrade_add_static_plugin(plugin_name install_dir metadata_file
                               sources...)
