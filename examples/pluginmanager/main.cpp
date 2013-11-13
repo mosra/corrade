@@ -24,6 +24,7 @@
 */
 
 #include <PluginManager/Manager.h>
+#include <Utility/Arguments.h>
 #include <Utility/Debug.h>
 
 #include "AbstractAnimal.h"
@@ -34,25 +35,26 @@ int main(int argc, char** argv) {
     /* Import static plugin using the same name as in Canary.cpp */
     CORRADE_PLUGIN_IMPORT(Canary);
 
-    if(argc != 2) {
-        Utility::Debug() << "Usage:" << argv[0] << "animal_plugin_name";
-        return 1;
-    }
+    Utility::Arguments args;
+    args.addArgument("plugin").setHelp("plugin", "animal plugin name")
+        .addOption("plugin-dir", ".").setHelpKey("plugin-dir", "DIR").setHelp("plugin-dir", "plugin directory to use")
+        .setHelp("Displays info about given animal.")
+        .parse(argc, argv);
 
     /* Initialize plugin manager with given directory */
-    PluginManager::Manager<Examples::AbstractAnimal> manager(".");
+    PluginManager::Manager<Examples::AbstractAnimal> manager(args.value("plugin-dir"));
 
     /* Try to load a plugin */
-    if(!(manager.load(argv[1]) & PluginManager::LoadState::Loaded)) {
-        Utility::Error() << "The requested plugin" << argv[1] << "cannot be loaded.";
+    if(!(manager.load(args.value("plugin")) & PluginManager::LoadState::Loaded)) {
+        Utility::Error() << "The requested plugin" << args.value("plugin") << "cannot be loaded.";
         return 2;
     }
 
-    Utility::Debug() << "Using plugin" << '\'' + *manager.metadata(argv[1])->name() + '\''
+    Utility::Debug() << "Using plugin" << '\'' + *manager.metadata(args.value("plugin"))->name() + '\''
                      << "...\n";
 
     /* Instance of an animal */
-    std::unique_ptr<Examples::AbstractAnimal> animal = manager.instance(argv[1]);
+    std::unique_ptr<Examples::AbstractAnimal> animal = manager.instance(args.value("plugin"));
 
     Utility::Debug() << "Name:     " << animal->name();
     Utility::Debug() << "Leg count:" << animal->legCount();

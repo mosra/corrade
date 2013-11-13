@@ -136,9 +136,9 @@ To make sure plugin manager will find the static plugins, we must import them
 with a macro CORRADE_PLUGIN_IMPORT() (for example at the beginning of main
 function), which takes plugin name as argument.
 
-This example application will take first argument passed on commandline and
-if a plugin is found and loaded successfully, displays brief info about a
-given animal.
+This example application will load plugin specified as command-line argument
+and then displays brief info about a given animal. For convenient argument
+parsing and usage documentation we used @ref Utility::Arguments.
 @dontinclude pluginmanager/main.cpp
 @skip int main
 @until }
@@ -153,6 +153,18 @@ forget to link in all the static plugins compiled above:
 
 After successfull compilation we can run the application with plugin name
 as argument:
+
+    <strong>$</strong> ./PluginTest --help
+    Usage:
+      ./PluginTest [-h|--help] [--plugin-dir DIR] [--] plugin
+
+    Displays info about given animal.
+
+    Arguments:
+      plugin            animal plugin name
+      -h, --help        display this help message and exit
+      --plugin-dir DIR  plugin directory to use
+                        (default: .)
 
     $ ./PluginTest Canary
     Using plugin 'I'm allergic to canaries!'
