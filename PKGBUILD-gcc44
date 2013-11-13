@@ -6,7 +6,7 @@ pkgdesc="Multiplatform plugin management and utility library (built with GCC 4.4
 arch=('i686' 'x86_64')
 url="http://mosra.cz/blog/corrade.php"
 license=('MIT')
-makedepends=('cmake' 'gcc44')
+makedepends=('cmake' 'ninja' 'gcc44')
 options=(!strip)
 provides=('corrade-git')
 
@@ -17,7 +17,8 @@ build() {
 
         cmake .. \
             -DCMAKE_CXX_COMPILER=g++-4.4 \
-            -DGCC44_COMPATIBILITY=ON
+            -DGCC44_COMPATIBILITY=ON \
+            -G Ninja
     fi
 
     cd "$startdir/build-gcc44"
@@ -26,7 +27,7 @@ build() {
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DBUILD_TESTS=ON
-    make
+    ninja
 }
 
 check() {
@@ -36,5 +37,5 @@ check() {
 
 package() {
     cd "$startdir/build-gcc44"
-    make DESTDIR="$pkgdir/" install
+    DESTDIR="$pkgdir/" ninja install
 }
