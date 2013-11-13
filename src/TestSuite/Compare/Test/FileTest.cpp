@@ -74,11 +74,11 @@ void FileTest::actualNotFound() {
     {
         Error e(&out);
         Comparator<Compare::File> compare;
-        CORRADE_VERIFY(!compare("inexistent.txt", Directory::join(FILETEST_DIR, "base.txt")));
+        CORRADE_VERIFY(!compare("nonexistent.txt", Directory::join(FILETEST_DIR, "base.txt")));
         compare.printErrorMessage(e, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Actual file a (inexistent.txt) cannot be read.\n");
+    CORRADE_COMPARE(out.str(), "Actual file a (nonexistent.txt) cannot be read.\n");
 }
 
 void FileTest::expectedNotFound() {
@@ -87,11 +87,11 @@ void FileTest::expectedNotFound() {
     {
         Error e(&out);
         Comparator<Compare::File> compare;
-        CORRADE_VERIFY(!compare(Directory::join(FILETEST_DIR, "base.txt"), "inexistent.txt"));
+        CORRADE_VERIFY(!compare(Directory::join(FILETEST_DIR, "base.txt"), "nonexistent.txt"));
         compare.printErrorMessage(e, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Expected file b (inexistent.txt) cannot be read.\n");
+    CORRADE_COMPARE(out.str(), "Expected file b (nonexistent.txt) cannot be read.\n");
 }
 
 void FileTest::outputActualSmaller() {

@@ -97,10 +97,20 @@ void Resource::unregisterData(const char* group) {
 }
 
 std::string Resource::compileFrom(const std::string& name, const std::string& configurationFile) {
+    /* Resource file existence */
+    if(!Directory::fileExists(configurationFile)) {
+        Error() << "    Error: file" << configurationFile << "does not exist";
+        return {};
+    }
+
     const std::string path = Directory::path(configurationFile);
-    const Configuration conf(configurationFile);
+    const Configuration conf(configurationFile, Configuration::Flag::ReadOnly);
 
     /* Group name */
+    if(!conf.hasValue("group")) {
+        Error() << "    Error: group name is not specified";
+        return {};
+    }
     const std::string group = conf.value("group");
 
     /* Load all files */
@@ -115,7 +125,7 @@ std::string Resource::compileFrom(const std::string& name, const std::string& co
         const std::string filename = file->value("filename");
         const std::string alias = file->hasValue("alias") ? file->value("alias") : filename;
         if(filename.empty() || alias.empty()) {
-            Error() << "    Error: empty filename or alias!";
+            Error() << "    Error: filename or alias is empty";
             return {};
         }
 
@@ -182,7 +192,7 @@ std::string Resource::compile(const std::string& name, const std::string& group,
     if(!files.back().second.empty())
         data.resize(data.size()-1);
 
-    #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(_WIN32)
+    #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(__MINGW32__)
     std::ostringstream converter;
     converter << files.size();
     #endif
@@ -203,7 +213,7 @@ std::string Resource::compile(const std::string& name, const std::string& group,
         "int resourceInitializer_" + name + "() {\n"
         "    Corrade::Utility::Resource::registerData(\"" + group + "\", " +
             /* This shouldn't be ambiguous. But is. */
-            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(_WIN32)
+            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(__MINGW32__)
             #ifndef CORRADE_GCC44_COMPATIBILITY
             std::to_string(files.size()) +
             #else
@@ -248,6 +258,17 @@ Resource::Resource(const std::string& group): _overrideGroup(nullptr) {
 
 Resource::~Resource() {
     delete _overrideGroup;
+}
+
+std::vector<std::string> Resource::list() const {
+    CORRADE_INTERNAL_ASSERT(_group != resources().end());
+
+    std::vector<std::string> result;
+    result.reserve(_group->second.resources.size());
+    for(const auto& filename: _group->second.resources)
+        result.push_back(filename.first);
+
+    return result;
 }
 
 Containers::ArrayReference<const unsigned char> Resource::getRaw(const std::string& filename) const {
@@ -317,7 +338,7 @@ std::pair<bool, Containers::Array<unsigned char>> Resource::fileContents(const s
     std::ifstream file(filename.data(), std::ifstream::binary);
 
     if(!file.good()) {
-        Error() << "Cannot open file " << filename;
+        Error() << "    Error: cannot open file" << filename;
         #ifndef CORRADE_GCC45_COMPATIBILITY
         return {false, nullptr};
         #else

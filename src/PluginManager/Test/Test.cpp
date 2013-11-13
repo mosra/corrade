@@ -109,7 +109,7 @@ void Test::nameList() {
     #endif
 
     /* Check if the list of dynamic plugins is cleared after destructing */
-    PluginManager::Manager<AbstractAnimal> manager(Directory::join(PLUGINS_DIR, "inexistent"));
+    PluginManager::Manager<AbstractAnimal> manager(Directory::join(PLUGINS_DIR, "nonexistent"));
 
     CORRADE_COMPARE_AS(manager.pluginList(), std::vector<std::string>{
         "Canary"}, TestSuite::Compare::Container);
@@ -292,12 +292,12 @@ void Test::hierarchy() {
 }
 
 void Test::crossManagerDependencies() {
-    #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    CORRADE_SKIP("Cross-manager dependencies are meaningful only for dynamic plugins");
-    #else
     PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
     PluginManager::Manager<AbstractFood> foodManager(Directory::join(PLUGINS_DIR, "food"));
 
+    #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    CORRADE_SKIP("Cross-manager dependencies are meaningful only for dynamic plugins");
+    #else
     /* Load HotDog */
     CORRADE_COMPARE(foodManager.load("HotDog"), LoadState::Loaded);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
@@ -322,6 +322,10 @@ void Test::crossManagerDependencies() {
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
     CORRADE_VERIFY(manager.metadata("Dog")->usedBy().empty());
     #endif
+
+    /* Verify that the plugin can be instanced only through its own manager */
+    CORRADE_VERIFY(manager.instance("Canary"));
+    CORRADE_VERIFY(!foodManager.instance("Canary"));
 }
 
 void Test::usedByZombies() {

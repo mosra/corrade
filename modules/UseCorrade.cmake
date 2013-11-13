@@ -161,7 +161,7 @@ function(corrade_add_plugin plugin_name install_dir metadata_file)
         add_library(${plugin_name} MODULE ${ARGN})
     endif()
 
-    # Plugins doesn't have any prefix (e.g. 'lib' on Linux)
+    # Plugins don't have any prefix (e.g. 'lib' on Linux)
     set_target_properties(${plugin_name} PROPERTIES
         PREFIX ""
         COMPILE_FLAGS -DCORRADE_DYNAMIC_PLUGIN)

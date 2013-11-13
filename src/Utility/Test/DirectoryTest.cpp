@@ -125,8 +125,8 @@ void DirectoryTest::fileExists() {
     /* Directory */
     CORRADE_VERIFY(Directory::fileExists(DIRECTORY_TEST_DIR));
 
-    /* Inexistent file */
-    CORRADE_VERIFY(!Directory::fileExists(Directory::join(DIRECTORY_TEST_DIR, "inexistentFile")));
+    /* Nonexistent file */
+    CORRADE_VERIFY(!Directory::fileExists(Directory::join(DIRECTORY_TEST_DIR, "nonexistentFile")));
 }
 
 void DirectoryTest::remove() {
@@ -146,10 +146,10 @@ void DirectoryTest::remove() {
     CORRADE_VERIFY(Directory::rm(file));
     CORRADE_VERIFY(!Directory::fileExists(file));
 
-    /* Inexistent file */
-    std::string inexistent = Directory::join(DIRECTORY_WRITE_TEST_DIR, "inexistent");
-    CORRADE_VERIFY(!Directory::fileExists(inexistent));
-    CORRADE_VERIFY(!Directory::rm(inexistent));
+    /* Nonexistent file */
+    std::string nonexistent = Directory::join(DIRECTORY_WRITE_TEST_DIR, "nonexistent");
+    CORRADE_VERIFY(!Directory::fileExists(nonexistent));
+    CORRADE_VERIFY(!Directory::rm(nonexistent));
 }
 
 void DirectoryTest::moveFile() {

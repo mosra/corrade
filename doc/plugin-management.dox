@@ -81,7 +81,8 @@ and third is name of used plugin interface.
 @dontinclude pluginmanager/Canary.cpp
 @skip class Canary
 @until };
-@skipline CORRADE_PLUGIN_REGISTER
+@skip CORRADE_PLUGIN_REGISTER
+@until )
 
 Configuration file for Canary plugin:
 @include pluginmanager/Canary.conf
@@ -95,7 +96,8 @@ plugin manager.
 @dontinclude pluginmanager/Dog.cpp
 @skip class Dog
 @until };
-@skipline CORRADE_PLUGIN_REGISTER
+@skip CORRADE_PLUGIN_REGISTER
+@until )
 
 Configuration file for Dog plugin:
 @include pluginmanager/Dog.conf
@@ -114,15 +116,15 @@ dynamic plugins:
 @skip corrade_add_plugin
 @until corrade_add_static_plugin
 
-`corrade_add_plugin()` macro takes plugin name as first argument, second
-argument is dir where to install the plugin files, third argument is name of
-configuration file and after that comes one or more source files. We use the
-build directory for storing the plugins to avoid the need for installation.
+@ref corrade-cmake-add-plugin "corrade_add_plugin()" macro takes plugin name as
+first argument, second argument is dir where to install the plugin files, third
+argument is name of configuration file and after that comes one or more source
+files. We use the build directory for storing the plugins to avoid the need for
+installation.
 
-`corrade_add_static_plugin()` macro compiles every static plugin as single
-static library. To make linking easier for you, first argument is variable
-where are stored names of all static plugins' libraries. The variable will be
-then used for linking the final executable, as you can see below.
+@ref corrade-cmake-add-static-plugin "corrade_add_static_plugin()" is similar
+to the above macro, except that it creates static plugin instead of dynamic
+one.
 
 @section plugin-management-management Plugin management
 
@@ -134,9 +136,9 @@ To make sure plugin manager will find the static plugins, we must import them
 with a macro CORRADE_PLUGIN_IMPORT() (for example at the beginning of main
 function), which takes plugin name as argument.
 
-This example application will take first argument passed on commandline and
-if a plugin is found and loaded successfully, displays brief info about a
-given animal.
+This example application will load plugin specified as command-line argument
+and then displays brief info about a given animal. For convenient argument
+parsing and usage documentation we used @ref Utility::Arguments.
 @dontinclude pluginmanager/main.cpp
 @skip int main
 @until }
@@ -151,6 +153,18 @@ forget to link in all the static plugins compiled above:
 
 After successfull compilation we can run the application with plugin name
 as argument:
+
+    <strong>$</strong> ./PluginTest --help
+    Usage:
+      ./PluginTest [-h|--help] [--plugin-dir DIR] [--] plugin
+
+    Displays info about given animal.
+
+    Arguments:
+      plugin            animal plugin name
+      -h, --help        display this help message and exit
+      --plugin-dir DIR  plugin directory to use
+                        (default: .)
 
     $ ./PluginTest Canary
     Using plugin 'I'm allergic to canaries!'

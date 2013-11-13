@@ -74,7 +74,7 @@ enum class Input: std::uint8_t {
 Then `typedef` the state machine consisting of these two enums, count
 of all states and count of all inputs:
 @code
-typdef Interconnect::StateMachine<3, 2, State, Input> Printer;
+typedef Interconnect::StateMachine<3, 2, State, Input> Printer;
 @endcode
 
 Now add your state transitions, for each transition first original state, then
@@ -91,10 +91,10 @@ p.addTransitions({
 Lastly connect transition signals to desired slots, so you can react to state
 changes:
 @code
-Interconnect::connect(p, &Printer::entered<State::Ready>, []() { Utility::Debug() << "Printer is ready."; });
-Interconnect::connect(p, &Printer::entered<State::Finished>, []() { Utility::Debug() << "Print finished. Please remove the document."; });
-Interconnect::connect(p, &Printer::entered<State::Printing>, []() { Utility::Debug() << "Starting the print..."; });
-Interconnect::connect(p, &Printer::exited<State::Printing>, []() { Utility::Debug() << "Finishing the print..."; });
+Interconnect::connect(p, &Printer::entered<State::Ready>, [](State) { Utility::Debug() << "Printer is ready."; });
+Interconnect::connect(p, &Printer::entered<State::Finished>, [](State) { Utility::Debug() << "Print finished. Please remove the document."; });
+Interconnect::connect(p, &Printer::entered<State::Printing>, [](State) { Utility::Debug() << "Starting the print..."; });
+Interconnect::connect(p, &Printer::exited<State::Printing>, [](State) { Utility::Debug() << "Finishing the print..."; });
 @endcode
 
 Stepping the machine will print the following output:
@@ -151,25 +151,39 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
         StateMachine<states, inputs, State, Input>& step(Input input);
 
         /**
-         * @brief The machine entered given state
+         * @brief The machine is switching states
          *
-         * Emitted when machine goes to given @p state from different one,
-         * right after corresponding @ref exited() signal.
+         * Emitted when machine goes from @p previous state to @p next state
+         * and they are different ones. Emitted after corresponding @ref exited()
+         * signal and before corresponding @ref entered() one.
          * @see @ref step()
          */
-        template<State state> Signal entered() {
-            return emit(&StateMachine::entered<state>);
+        template<State previous, State next> Signal stepped() {
+            return emit(&StateMachine::stepped<previous, next>);
+        }
+
+        /**
+         * @brief The machine entered given state
+         * @param previous  State which was exited
+         *
+         * Emitted when machine goes to given @p state from different one,
+         * right after corresponding @ref stepped() signal.
+         * @see @ref step()
+         */
+        template<State state> Signal entered(State previous) {
+            return emit(&StateMachine::entered<state>, previous);
         }
 
         /**
          * @brief The machine exited given state
+         * @param next      State which will be entered
          *
          * Emitted when machine leaves given @p state for different one. The
-         * corresponding @ref entered() signal is emitted after this one.
+         * corresponding @ref stepped() signal is emitted after this one.
          * @see @ref step()
          */
-        template<State state> Signal exited() {
-            return emit(&StateMachine::exited<state>);
+        template<State state> Signal exited(State next) {
+            return emit(&StateMachine::exited<state>, next);
         }
 
     private:
@@ -185,23 +199,41 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
         #define current current_ /* With GCC 4.6 it conflicts with current(). WTF. */
         #endif
 
-        template<std::size_t current> Signal enteredInternal(State wanted, std::integral_constant<std::size_t, current>) {
-            return State(current-1) == wanted ? entered<State(current-1)>() : enteredInternal(wanted, std::integral_constant<std::size_t, current-1>{});
+        template<std::size_t current> Signal enteredInternal(State wanted, std::integral_constant<std::size_t, current>, State previous) {
+            return State(current-1) == wanted ? entered<State(current-1)>(previous) : enteredInternal(wanted, std::integral_constant<std::size_t, current-1>{}, previous);
         }
 
-        Signal enteredInternal(State, std::integral_constant<std::size_t, 0>) {
+        Signal enteredInternal(State, std::integral_constant<std::size_t, 0>, State) {
             CORRADE_ASSERT_UNREACHABLE();
         }
 
-        template<std::size_t current> Signal exitedInternal(State wanted, std::integral_constant<std::size_t, current>) {
-            return State(current-1) == wanted ? exited<State(current-1)>() : exitedInternal(wanted, std::integral_constant<std::size_t, current - 1>{});
+        template<std::size_t current> Signal steppedInternal(State wantedPrevious, std::integral_constant<std::size_t, current>, State next) {
+            return State(current-1) == wantedPrevious ?
+                steppedNextInternal<State(current-1)>(next, std::integral_constant<std::size_t, states>{}) :
+                steppedInternal(wantedPrevious, std::integral_constant<std::size_t, current-1>{}, next);
+        }
+
+        Signal steppedInternal(State, std::integral_constant<std::size_t, 0>, State) {
+            CORRADE_ASSERT_UNREACHABLE();
+        }
+
+        template<State previous, std::size_t current> Signal steppedNextInternal(State wantedNext, std::integral_constant<std::size_t, current>) {
+            return State(current-1) == wantedNext ? stepped<previous, State(current-1)>() : steppedNextInternal<previous>(wantedNext, std::integral_constant<std::size_t, current-1>{});
+        }
+
+        template<State> Signal steppedNextInternal(State, std::integral_constant<std::size_t, 0>) {
+            CORRADE_ASSERT_UNREACHABLE();
+        }
+
+        template<std::size_t current> Signal exitedInternal(State wanted, std::integral_constant<std::size_t, current>, State next) {
+            return State(current-1) == wanted ? exited<State(current-1)>(next) : exitedInternal(wanted, std::integral_constant<std::size_t, current - 1>{}, next);
         }
 
         #ifdef CORRADE_GCC46_COMPATIBILITY
         #undef current
         #endif
 
-        Signal exitedInternal(State, std::integral_constant<std::size_t, 0>) {
+        Signal exitedInternal(State, std::integral_constant<std::size_t, 0>, State) {
             CORRADE_ASSERT_UNREACHABLE();
         }
 
@@ -228,8 +260,10 @@ template<std::size_t states, std::size_t inputs, class State, class Input> State
     const State next = at(_current, input);
 
     if(next != _current) {
-        exitedInternal(_current, std::integral_constant<std::size_t, states>{});
-        enteredInternal(_current = next, std::integral_constant<std::size_t, states>{});
+        exitedInternal(_current, std::integral_constant<std::size_t, states>{}, next);
+        steppedInternal(_current, std::integral_constant<std::size_t, states>{}, next);
+        enteredInternal(next, std::integral_constant<std::size_t, states>{}, _current);
+        _current = next;
     }
 
     return *this;

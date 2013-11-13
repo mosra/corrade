@@ -58,10 +58,12 @@ void StateMachineTest::test() {
 
 #ifdef CORRADE_GCC44_COMPATIBILITY
 namespace {
-    void startEntered() { Utility::Debug() << "start entered"; }
-    void startExited() { Utility::Debug() << "start exited"; }
-    void endEntered() { Utility::Debug() << "end entered"; }
-    void endExited() { Utility::Debug() << "end exited"; }
+    void startEntered(State s) { Utility::Debug() << "start entered, previous" << std::uint8_t(s); }
+    void startExited(State s) { Utility::Debug() << "start exited, next" << std::uint8_t(s); }
+    void endEntered(State s) { Utility::Debug() << "end entered, previous" << std::uint8_t(s); }
+    void endExited(State s) { Utility::Debug() << "end exited, next" << std::uint8_t(s); }
+    void endToStart() { Utility::Debug() << "going from end to start"; }
+    void startToEnd() { Utility::Debug() << "going from start to end"; }
 }
 
 void StateMachineTest::test() {
@@ -76,20 +78,35 @@ void StateMachineTest::test() {
     Debug::setOutput(&out);
 
     #ifndef CORRADE_GCC44_COMPATIBILITY
-    Interconnect::connect(m, &StateMachine::entered<State::Start>, []() { Debug() << "start entered"; });
-    Interconnect::connect(m, &StateMachine::exited<State::Start>, []() { Debug() << "start exited"; });
-    Interconnect::connect(m, &StateMachine::entered<State::End>, []() { Debug() << "end entered"; });
-    Interconnect::connect(m, &StateMachine::exited<State::End>, []() { Debug() << "end exited"; });
+    Interconnect::connect(m, &StateMachine::entered<State::Start>,
+        [](State s) { Debug() << "start entered, previous" << std::uint8_t(s); });
+    Interconnect::connect(m, &StateMachine::exited<State::Start>,
+        [](State s) { Debug() << "start exited, next" << std::uint8_t(s); });
+    Interconnect::connect(m, &StateMachine::entered<State::End>,
+        [](State s) { Debug() << "end entered, previous" << std::uint8_t(s); });
+    Interconnect::connect(m, &StateMachine::exited<State::End>,
+        [](State s) { Debug() << "end exited, next" << std::uint8_t(s); });
+    Interconnect::connect(m, &StateMachine::stepped<State::End, State::Start>,
+        []() { Debug() << "going from end to start"; });
+    Interconnect::connect(m, &StateMachine::stepped<State::Start, State::End>,
+        []() { Debug() << "going from start to end"; });
     #else
     Interconnect::connect(m, &StateMachine::entered<State::Start>, startEntered);
     Interconnect::connect(m, &StateMachine::exited<State::Start>, startExited);
     Interconnect::connect(m, &StateMachine::entered<State::End>, endEntered);
     Interconnect::connect(m, &StateMachine::exited<State::End>, endExited);
+    Interconnect::connect(m, &StateMachine::stepped<State::End, State::Start>, endToStart);
+    Interconnect::connect(m, &StateMachine::stepped<State::Start, State::End>, startToEnd);
     #endif
 
     m.step(Input::KeyA)
      .step(Input::KeyB);
-    CORRADE_COMPARE(out.str(), "start exited\nend entered\nend exited\nstart entered\n");
+    CORRADE_COMPARE(out.str(), "start exited, next 1\n"
+                               "going from start to end\n"
+                               "end entered, previous 0\n"
+                               "end exited, next 0\n"
+                               "going from end to start\n"
+                               "start entered, previous 1\n");
 }
 
 }}}

@@ -25,14 +25,12 @@
 
 #include "AbstractAnimal.h"
 
-#ifdef _WIN32
-    #ifdef Dog_EXPORTS
-        #define DOG_EXPORT __declspec(dllexport)
-    #else
-        #define DOG_EXPORT __declspec(dllimport)
-    #endif
+#include <Utility/Visibility.h>
+
+#ifdef Dog_EXPORTS
+    #define DOG_EXPORT CORRADE_VISIBILITY_EXPORT
 #else
-    #define DOG_EXPORT __attribute__ ((visibility ("default")))
+    #define DOG_EXPORT CORRADE_VISIBILITY_IMPORT
 #endif
 
 namespace Corrade { namespace PluginManager { namespace Test {

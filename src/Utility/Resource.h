@@ -121,6 +121,14 @@ class CORRADE_UTILITY_EXPORT Resource {
         ~Resource();
 
         /**
+         * @brief List of all resources in the group
+         *
+         * Note that the list contains only list of compiled-in files, no
+         * additional filenames from overriden group are incluuded.
+         */
+        std::vector<std::string> list() const;
+
+        /**
          * @brief Get pointer to raw resource data
          * @param filename      Filename
          *
