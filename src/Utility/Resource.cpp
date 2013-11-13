@@ -265,8 +265,8 @@ std::vector<std::string> Resource::list() const {
 
     std::vector<std::string> result;
     result.reserve(_group->second.resources.size());
-    for(const auto& filename: _group->second.resources)
-        result.push_back(filename.first);
+    for(auto it = _group->second.resources.begin(); it != _group->second.resources.end(); ++it)
+        result.push_back(it->first);
 
     return result;
 }
