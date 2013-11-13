@@ -59,7 +59,13 @@ template<class T> class Array {
          * no allocation is done.
          */
         static Array<T> zeroInitialized(std::size_t size) {
-            if(!size) return nullptr;
+            if(!size) {
+                #ifndef CORRADE_GCC45_COMPATIBILITY
+                return nullptr;
+                #else
+                return {};
+                #endif
+            }
 
             Array<T> array;
             array._data = new T[size]();
