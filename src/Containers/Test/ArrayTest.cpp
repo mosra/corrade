@@ -35,6 +35,8 @@ class ArrayTest: public TestSuite::Tester {
         void constructEmpty();
         void construct();
         void constructMove();
+        void constructZeroInitialized();
+
         void emptyCheck();
         void access();
         void rangeBasedFor();
@@ -46,6 +48,8 @@ ArrayTest::ArrayTest() {
     addTests({&ArrayTest::constructEmpty,
               &ArrayTest::construct,
               &ArrayTest::constructMove,
+              &ArrayTest::constructZeroInitialized,
+
               &ArrayTest::emptyCheck,
               &ArrayTest::access,
               &ArrayTest::rangeBasedFor});
@@ -99,6 +103,14 @@ void ArrayTest::constructMove() {
     CORRADE_VERIFY(c == ptr);
     CORRADE_COMPARE(b.size(), 0);
     CORRADE_COMPARE(c.size(), 5);
+}
+
+void ArrayTest::constructZeroInitialized() {
+    Array a = Array::zeroInitialized(2);
+    CORRADE_VERIFY(a);
+    CORRADE_COMPARE(a.size(), 2);
+    CORRADE_COMPARE(a[0], 0);
+    CORRADE_COMPARE(a[1], 0);
 }
 
 void ArrayTest::emptyCheck() {
