@@ -448,7 +448,9 @@ performance issues when using it for integers only. By explicitly calling
 `using namespace` keyword should be used only for root namespace, i.e.
 `using namespace %Corrade` and not `using namespace %Corrade::Utility`. If you
 are using some class from subnamespace in many places, use only that particular
-name, e.g. `using %Corrade::Utility::ConfigurationGroup`.
+name, e.g. `using %Corrade::Utility::ConfigurationGroup` and try to restrict
+it to as small block of code as possible (e.g. place the `using` only in
+function body).
 
 It's probably common practice, but repeating won't hurt: **headers shouldn't
 have `using` declarations at all** (unless there is good excuse for bringing
@@ -459,7 +461,9 @@ in the default namespace!).
 
 Don't use C-style casts, use C++-style `static_cast` and `reinterpret_cast`
 instead. %Corrade enables compiler warning about their usage in `CORRADE_CXX_FLAGS`
-CMake variable. You can also use "constructor cast" instead of `static_cast`:
+CMake variable. You can also use "constructor cast" instead of `static_cast`
+when doing non-harmful conversions, such as integer to float or strongly-typed
+enum to its underlying type.
 @code
 int a = 22;
 int b = 7;
