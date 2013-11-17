@@ -40,11 +40,28 @@ namespace Corrade { namespace Containers {
 @brief %Array wrapper with size information
 
 Provides movable RAII wrapper around plain C array. Main use case is storing
-binary data of unspecified type, where direct element access might be harmful.
+binary data of unspecified type, where addition/removal of elements is not
+needed or harmful.
 
 However, the class is usable also as lighter non-copyable alternative to
 `std::vector`, in STL algorithms in the same way as plain C array and
 additionally also in range-based for cycle.
+
+Usage example:
+@code
+// Create default-initialized array with 5 integers and set them to some value
+Containers::Array<int> a(5);
+int b = 0;
+for(auto& i: a) i = b++; // a = {0, 1, 2, 3, 4}
+
+// Create array from given values
+auto b = Containers::Array<int>::from(3, 18, -157, 0);
+b[3] = 25; // b = {3, 18, -157, 25}
+@endcode
+
+@todo Something like ArrayTuple to create more than one array with single
+    allocation and proper alignment for each type? How would non-POD types be
+    constructed in that? Will that be useful in more than one place?
 */
 template<class T> class Array {
     public:
@@ -151,10 +168,26 @@ template<class T> class Array {
 /**
 @brief %Array reference wrapper with size information
 
-Immutable wrapper around plain C array. Unlike Array this class doesn't do any
-memory management. Main use case is passing array around along with size
-information. If @p T is `const` type, the class is implicitly constructible
-also from const references to Array and ArrayReference of non-const types.
+Immutable wrapper around plain C array. Unlike @ref Array this class doesn't do
+any memory management. Main use case is passing array along with size
+information to functions etc. If @p T is `const` type, the class is implicitly
+constructible also from const references to @ref Array and @ref ArrayReference
+of non-const types.
+
+Usage example:
+@code
+// `a` gets implicitly converted to const array reference
+void printArray(Containers::ArrayReference<const float> values) { ... }
+Containers::Array<float> a;
+printArray(a);
+
+// Wrapping compile-time array with size information
+constexpr const int data[] = {5, 17, -36, 185};
+Containers::ArrayReference<const int> b =
+    {data, std::extent<decltype(data)>()}; // b.size() == 4
+@endcode
+
+@see @ref ArrayReference<const void>
 */
 template<class T> class ArrayReference {
     public:
@@ -242,10 +275,17 @@ template<class T> class ArrayReference {
 /**
 @brief Constant void array reference wrapper with size information
 
-Specialization of ArrayReference, which is convertible from Array or
-ArrayReference of any type, size for particular type is recalculated to size in
-bytes. This specialization doesn't provide any `begin()`/`end()` accessors,
-because it has no use for `void` type.
+Specialization of @ref ArrayReference which is convertible from @ref Array or
+@ref ArrayReference of any type. Size for particular type is recalculated to
+size in bytes. This specialization doesn't provide any `begin()`/`end()`
+accessors, because it has no use for `void` type.
+
+Usage example:
+@code
+Containers::Array<int> a(5);
+
+Containers::ArrayReference<const void> b(a); // b.size() == 20
+@endcode
 */
 template<> class ArrayReference<const void> {
     public:
