@@ -51,6 +51,15 @@ template<class T> class Array {
         typedef T Type;     /**< @brief Element type */
 
         /**
+         * @brief Create array from given values
+         *
+         * Zero argument count creates `nullptr` array.
+         */
+        template<class ...U> static Array<T> from(U&&... values) {
+            return fromInternal(std::forward<U>(values)...);
+        }
+
+        /**
          * @brief Create zero-initialized array
          *
          * Creates array of given size, the values are value-initialized
@@ -126,6 +135,15 @@ template<class T> class Array {
         operator const T*() const { return _data; }     /**< @overload */
 
     private:
+        template<class ...U> static Array<T> fromInternal(U&&... values) {
+            Array<T> array;
+            array._size = sizeof...(values);
+            array._data = new T[sizeof...(values)] { std::forward<U>(values)... };
+            return array;
+        }
+        /* Specialization for zero argument count */
+        static Array<T> fromInternal() { return nullptr; }
+
         T* _data;
         std::size_t _size;
 };
