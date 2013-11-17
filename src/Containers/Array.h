@@ -147,9 +147,25 @@ template<class T> class Array {
         const T* end() const { return _data+_size; }    /**< @overload */
         const T* cend() const { return _data+_size; }   /**< @overload */
 
+        /* `char* a = Containers::Array<char>(5); a[3] = 5;` would result in
+           instant segfault, disallowing it in the following conversion
+           operators */
+
         /** @brief Conversion to array type */
-        operator T*() { return _data; }
-        operator const T*() const { return _data; }     /**< @overload */
+        operator T*()
+        #ifndef CORRADE_GCC47_COMPATIBILITY
+        &
+        #endif
+        { return _data; }
+
+        /** @overload */
+        operator const T*()
+        #ifndef CORRADE_GCC47_COMPATIBILITY
+        const &
+        #else
+        const
+        #endif
+        { return _data; }
 
     private:
         template<class ...U> static Array<T> fromInternal(U&&... values) {
