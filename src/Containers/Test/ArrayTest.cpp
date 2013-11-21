@@ -76,7 +76,7 @@ void ArrayTest::constructEmpty() {
 }
 
 void ArrayTest::constructNullptr() {
-    #ifdef CORRADE_GCC45_COMPATIBILITY
+    #if defined(CORRADE_GCC45_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
     CORRADE_SKIP("Nullptr is not supported on this compiler.");
     #else
     const Array c(nullptr);
