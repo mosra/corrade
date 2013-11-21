@@ -33,6 +33,7 @@ class ArrayTest: public TestSuite::Tester {
         explicit ArrayTest();
 
         void constructEmpty();
+        void constructNullptr();
         void construct();
         void constructMove();
         void constructFrom();
@@ -49,6 +50,7 @@ typedef Containers::Array<int> Array;
 
 ArrayTest::ArrayTest() {
     addTests({&ArrayTest::constructEmpty,
+              &ArrayTest::constructNullptr,
               &ArrayTest::construct,
               &ArrayTest::constructMove,
               &ArrayTest::constructFrom,
@@ -71,8 +73,9 @@ void ArrayTest::constructEmpty() {
     const Array b(size);
     CORRADE_VERIFY(b == nullptr);
     CORRADE_COMPARE(b.size(), 0);
+}
 
-    /* Conversion from nullptr */
+void ArrayTest::constructNullptr() {
     const Array c(nullptr);
     CORRADE_VERIFY(c == nullptr);
     CORRADE_COMPARE(c.size(), 0);
