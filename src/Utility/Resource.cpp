@@ -340,25 +340,33 @@ std::pair<bool, Containers::Array<unsigned char>> Resource::fileContents(const s
 
     if(!file.good()) {
         Error() << "    Error: cannot open file" << filename;
-        #ifndef CORRADE_GCC45_COMPATIBILITY
+        #if !defined(CORRADE_GCC45_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
         return {false, nullptr};
-        #else
+        #elif !defined(CORRADE_MSVC2013_COMPATIBILITY)
         return {false, {}};
+        #else
+        return std::pair<bool, Containers::Array<unsigned char>&&>{false, Containers::Array<unsigned char>{}};
         #endif
     }
 
     file.seekg(0, std::ios::end);
     if(file.tellg() == std::streamoff{0})
-        #ifndef CORRADE_GCC45_COMPATIBILITY
+        #if !defined(CORRADE_GCC45_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
         return {true, nullptr};
-        #else
+        #elif !defined(CORRADE_MSVC2013_COMPATIBILITY)
         return {true, {}};
+        #else
+        return std::pair<bool, Containers::Array<unsigned char>&&>{true, Containers::Array<unsigned char>{}};
         #endif
     Containers::Array<unsigned char> data(file.tellg());
     file.seekg(0, std::ios::beg);
     file.read(reinterpret_cast<char*>(data.begin()), data.size());
 
+    #ifndef CORRADE_MSVC2013_COMPATIBILITY
     return {true, std::move(data)};
+    #else
+    return std::pair<bool, Containers::Array<unsigned char>&&>{true, std::move(data)};
+    #endif
 }
 
 std::string Resource::comment(const std::string& comment) {
