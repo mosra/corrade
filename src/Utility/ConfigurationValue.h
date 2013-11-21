@@ -187,6 +187,7 @@ template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<bool> {
     #endif
 };
 
+#ifndef CORRADE_MSVC2013_COMPATIBILITY
 /**
 @brief %Configuration value parser and writer for `char32_t` type
 
@@ -200,6 +201,7 @@ template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<char32_t> {
     static std::string toString(char32_t value, ConfigurationValueFlags);
     #endif
 };
+#endif
 
 }}
 

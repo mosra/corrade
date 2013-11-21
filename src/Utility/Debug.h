@@ -174,12 +174,14 @@ class CORRADE_UTILITY_EXPORT Debug {
         Debug operator<<(long double value);
         #endif
 
+        #ifndef CORRADE_MSVC2013_COMPATIBILITY
         /**
          * @brief Print UTF-32 character to debug output
          *
          * Prints value as Unicode codepoint, i.e. `U+0061`.
          */
         Debug operator<<(char32_t value);
+        #endif
 
         /**
          * @brief Print UTF-32 character literal to debug output

@@ -84,11 +84,13 @@ Debug Debug::operator<<(double value) { return print(value); }
 Debug Debug::operator<<(long double value) { return print(value); }
 #endif
 
+#ifndef CORRADE_MSVC2013_COMPATIBILITY
 Debug Debug::operator<<(char32_t value) {
     std::ostringstream o;
     o << "U+" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << value;
     return print(o.str());
 }
+#endif
 
 Debug Debug::operator<<(const char32_t* value) {
     return *this << std::u32string(value);
