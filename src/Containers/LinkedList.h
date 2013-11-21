@@ -120,6 +120,8 @@ class Object: private LinkedListItem<Object, ObjectGroup> {
     // ...
 };
 @endcode
+
+@todo Reduce branches (make the list circular internally)
 */
 template<class T> class LinkedList {
     public:
@@ -372,6 +374,7 @@ template<class T> inline void LinkedList<T>::erase(T* const item) {
 }
 
 template<class T> void LinkedList<T>::clear() {
+    /** @todo Make this simpler -- just deletion of all the items w/o any reconnecting */
     T* i = _first;
     while(i) {
         T* next = i->_next;

@@ -33,9 +33,13 @@ class ArrayTest: public TestSuite::Tester {
         explicit ArrayTest();
 
         void constructEmpty();
+        void constructNullptr();
         void construct();
         void constructMove();
+        void constructFrom();
         void constructZeroInitialized();
+
+        void pointerConversion();
 
         void emptyCheck();
         void access();
@@ -46,9 +50,13 @@ typedef Containers::Array<int> Array;
 
 ArrayTest::ArrayTest() {
     addTests({&ArrayTest::constructEmpty,
+              &ArrayTest::constructNullptr,
               &ArrayTest::construct,
               &ArrayTest::constructMove,
+              &ArrayTest::constructFrom,
               &ArrayTest::constructZeroInitialized,
+
+              &ArrayTest::pointerConversion,
 
               &ArrayTest::emptyCheck,
               &ArrayTest::access,
@@ -65,9 +73,12 @@ void ArrayTest::constructEmpty() {
     const Array b(size);
     CORRADE_VERIFY(b == nullptr);
     CORRADE_COMPARE(b.size(), 0);
+}
 
-    #ifndef CORRADE_GCC45_COMPATIBILITY
-    /* Conversion from nullptr */
+void ArrayTest::constructNullptr() {
+    #ifdef CORRADE_GCC45_COMPATIBILITY
+    CORRADE_SKIP("Nullptr is not supported on this compiler.");
+    #else
     const Array c(nullptr);
     CORRADE_VERIFY(c == nullptr);
     CORRADE_COMPARE(c.size(), 0);
@@ -105,12 +116,42 @@ void ArrayTest::constructMove() {
     CORRADE_COMPARE(c.size(), 5);
 }
 
+void ArrayTest::constructFrom() {
+    Array a = Array::from(1, 3, 127, -48);
+    CORRADE_VERIFY(a);
+    CORRADE_COMPARE(a.size(), 4);
+    CORRADE_COMPARE(a[0], 1);
+    CORRADE_COMPARE(a[1], 3);
+    CORRADE_COMPARE(a[2], 127);
+    CORRADE_COMPARE(a[3], -48);
+
+    Array b = Array::from();
+    CORRADE_VERIFY(!b);
+}
+
 void ArrayTest::constructZeroInitialized() {
     Array a = Array::zeroInitialized(2);
     CORRADE_VERIFY(a);
     CORRADE_COMPARE(a.size(), 2);
     CORRADE_COMPARE(a[0], 0);
     CORRADE_COMPARE(a[1], 0);
+}
+
+void ArrayTest::pointerConversion() {
+    Array a(2);
+    int* b = a;
+    CORRADE_COMPARE(b, a.begin());
+
+    const Array c(3);
+    const int* d = c;
+    CORRADE_COMPARE(d, c.begin());
+
+    {
+        #ifdef CORRADE_GCC47_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("Rvalue references for *this are not supported in GCC < 4.8.1.");
+        #endif
+        CORRADE_VERIFY(!(std::is_convertible<Array&&, int*>::value));
+    }
 }
 
 void ArrayTest::emptyCheck() {

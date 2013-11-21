@@ -50,8 +50,8 @@ elseif(BUILD_STATIC_PIC)
     set_target_properties(CorradePluginManager PROPERTIES COMPILE_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
 endif()
 target_link_libraries(CorradePluginManager CorradeUtility)
-if(UNIX OR ${CMAKE_SYSTEM_NAME} STREQUAL NaCl)
-    target_link_libraries(CorradePluginManager dl)
+if(UNIX OR CORRADE_TARGET_NACL_GLIBC)
+    target_link_libraries(CorradePluginManager ${CMAKE_DL_LIBS})
 endif()
 
 install(TARGETS CorradePluginManager
