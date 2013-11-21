@@ -58,15 +58,25 @@ std::pair<char32_t, std::size_t> Unicode::nextChar(const std::string& text, std:
     }
 
     /* Wrong sequence start */
-    if(cursor == end || text.size() < end)
+    if(cursor == end || text.size() < end) {
+        #ifndef CORRADE_MSVC2013_COMPATIBILITY
         return {U'\xffffffff', cursor+1};
+        #else
+        return {0xffffffffu, cursor+1};
+        #endif
+    }
 
     /* Compute the codepoint */
     char32_t result = character & mask;
     for(std::size_t i = cursor+1; i != end; ++i) {
         /* Garbage in the sequence */
-        if((text[i] & 0xc0) != 0x80)
+        if((text[i] & 0xc0) != 0x80) {
+            #ifndef CORRADE_MSVC2013_COMPATIBILITY
             return {U'\xffffffff', cursor+1};
+            #else
+            return {0xffffffffu, cursor+1};
+            #endif
+        }
 
         result <<= 6;
         result |= (text[i] & 0x3f);
