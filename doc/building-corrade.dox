@@ -159,6 +159,10 @@ portability, compatibility mode for older compilers is provided:
 - `GCC46_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
   4.6. You need to enable this also if you are building with Clang and don't
   have GCC 4.7 libs.
+- `GCC45_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
+  4.5.
+- `GCC44_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
+  4.4.
 
 %Corrade will detect the compiler used and refuses to build (or be used) if
 some compatibility mode needs to be enabled. On the other hand, if any of these
