@@ -28,8 +28,8 @@ project(Corrade)
 
 include(CMakeDependentOption)
 option(WITH_FIND_MODULE "Install FindCorrade.cmake module into CMake's module dir (might require admin privileges)" OFF)
-option(GCC46_COMPATIBILITY "Enable compatibility mode for GCC 4.6 (might disable some features)" OFF)
 option(GCC47_COMPATIBILITY "Enable compatibility mode for GCC 4.7 (might disable some features)" OFF)
+option(GCC46_COMPATIBILITY "Enable compatibility mode for GCC 4.6 (might disable some features)" OFF)
 
 option(BUILD_DEPRECATED "Include deprecated API in the build" ON)
 if(BUILD_DEPRECATED)
