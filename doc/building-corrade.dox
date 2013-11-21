@@ -163,6 +163,8 @@ portability, compatibility mode for older compilers is provided:
   4.5.
 - `GCC44_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
   4.4.
+- `MSVC2013_COMPATIBILITY` -- Enable for compiling with compatibility mode for
+  MSVC 2013
 
 %Corrade will detect the compiler used and refuses to build (or be used) if
 some compatibility mode needs to be enabled. On the other hand, if any of these

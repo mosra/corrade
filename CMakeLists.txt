@@ -32,6 +32,7 @@ option(GCC47_COMPATIBILITY "Enable compatibility mode for GCC 4.7 (might disable
 option(GCC46_COMPATIBILITY "Enable compatibility mode for GCC 4.6 (might disable some features)" OFF)
 option(GCC45_COMPATIBILITY "Enable compatibility mode for GCC 4.5 (might disable some features)" OFF)
 option(GCC44_COMPATIBILITY "Enable compatibility mode for GCC 4.4 (might disable some features)" OFF)
+option(MSVC2013_COMPATIBILITY "Enable compatibility mode for MSVC 2013 (might disable some features)" OFF)
 
 option(BUILD_DEPRECATED "Include deprecated API in the build" ON)
 if(BUILD_DEPRECATED)
@@ -97,6 +98,10 @@ endif()
 
 if(GCC47_COMPATIBILITY)
     set(CORRADE_GCC47_COMPATIBILITY 1)
+endif()
+
+if(MSVC2013_COMPATIBILITY)
+    set(CORRADE_MSVC2013_COMPATIBILITY 1)
 endif()
 
 include(UseCorrade)
