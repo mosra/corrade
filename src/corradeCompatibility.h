@@ -27,7 +27,12 @@
 
 #include "corradeConfigure.h"
 
-#ifdef CORRADE_GCC45_COMPATIBILITY
+#ifdef CORRADE_MSVC2013_COMPATIBILITY
+/* We NEED to work around unsupported keywords with macros! */
+#define _ALLOW_KEYWORD_MACROS
+#endif
+
+#if defined(CORRADE_GCC45_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
 #define constexpr
 #define nullptr 0
 #define noexcept
