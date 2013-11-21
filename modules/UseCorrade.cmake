@@ -65,28 +65,31 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     endif()
 endif()
 
-# Mandatory C++ flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+# GCC/Clang-specific compiler flags
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR CORRADE_TARGET_EMSCRIPTEN)
+    # Mandatory C++ flags
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
-# Optional C++ flags
-set(CORRADE_CXX_FLAGS "-Wall -Wextra -Wold-style-cast -Winit-self -Werror=return-type -Wmissing-declarations -pedantic -fvisibility=hidden")
+    # Optional C++ flags
+    set(CORRADE_CXX_FLAGS "-Wall -Wextra -Wold-style-cast -Winit-self -Werror=return-type -Wmissing-declarations -pedantic -fvisibility=hidden")
 
-# Some flags are not yet supported everywhere
-# TODO: do this with check_c_compiler_flags()
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.7.0")
-        set(CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS} -Wzero-as-null-pointer-constant")
+    # Some flags are not yet supported everywhere
+    # TODO: do this with check_c_compiler_flags()
+    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.7.0")
+            set(CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS} -Wzero-as-null-pointer-constant")
+        endif()
+        if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.6.0")
+            set(CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS} -Wdouble-promotion")
+        endif()
     endif()
-    if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.6.0")
-        set(CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS} -Wdouble-promotion")
-    endif()
-endif()
 
-# Disable `-pedantic` for GCC 4.4.3 on NaCl to avoid excessive warnings about
-# "comma at the end of enumeration list". My own GCC 4.4.7 doesn't emit these
-# warnings.
-if(CORRADE_GCC44_COMPATIBILITY AND CORRADE_TARGET_NACL)
-    string(REPLACE "-pedantic" "" CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS}")
+    # Disable `-pedantic` for GCC 4.4.3 on NaCl to avoid excessive warnings
+    # about "comma at the end of enumeration list". My own GCC 4.4.7 doesn't
+    # emit these warnings.
+    if(CORRADE_GCC44_COMPATIBILITY AND CORRADE_TARGET_NACL)
+        string(REPLACE "-pedantic" "" CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS}")
+    endif()
 endif()
 
 # Use C++11-enabled libcxx on OSX
