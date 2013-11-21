@@ -55,7 +55,11 @@ Configuration::Configuration(const std::string& filename, const Flags flags): Co
     else if(parse(in)) return;
 
     /* Error, reset everything back */
+    #ifndef CORRADE_MSVC2013_COMPATIBILITY
     _filename = {};
+    #else
+    _filename = std::string{};
+    #endif
     _flags &= ~InternalFlag::IsValid;
 }
 

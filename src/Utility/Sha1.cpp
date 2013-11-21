@@ -58,7 +58,13 @@ Sha1& Sha1::operator<<(const std::string& data) {
 
     /* Save last unfinished 512-bit chunk of data */
     if(data.size()%64 != 0) _buffer = data.substr((data.size()/64)*64);
-    else _buffer = {};
+    else {
+        #ifndef CORRADE_MSVC2013_COMPATIBILITY
+        _buffer = {};
+        #else
+        _buffer = std::string{};
+        #endif
+    }
 
     _dataSize += data.size();
     return *this;
