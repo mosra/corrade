@@ -348,7 +348,7 @@ std::pair<bool, Containers::Array<unsigned char>> Resource::fileContents(const s
     }
 
     file.seekg(0, std::ios::end);
-    if(file.tellg() == 0)
+    if(file.tellg() == std::streamoff{0})
         #ifndef CORRADE_GCC45_COMPATIBILITY
         return {true, nullptr};
         #else
