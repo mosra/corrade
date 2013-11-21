@@ -84,7 +84,11 @@ Sha1::Digest Sha1::digest() {
     Digest d = Digest::fromByteArray(reinterpret_cast<const char*>(digest));
 
     /* Clear data and return */
+    #ifndef CORRADE_MSVC2013_COMPATIBILITY
     std::copy(initialDigest, initialDigest+5, _digest);
+    #else
+    std::copy(initialDigest, initialDigest+5, _digest.data());
+    #endif
     _buffer.clear();
     _dataSize = 0;
     return d;
@@ -101,7 +105,11 @@ void Sha1::processChunk(const char* data) {
     /* Initialize value for this chunk */
     unsigned int d[5];
     unsigned int f, constant, temp;
+    #ifndef CORRADE_MSVC2013_COMPATIBILITY
     std::copy(_digest, _digest+5, d);
+    #else
+    std::copy(_digest.data(), _digest.data()+5, d);
+    #endif
 
     /* Main loop */
     for(int i = 0; i != 80; ++i) {

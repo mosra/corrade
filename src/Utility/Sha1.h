@@ -31,6 +31,10 @@
 
 #include "AbstractHash.h"
 
+#ifdef CORRADE_MSVC2013_COMPATIBILITY
+#include <array>
+#endif
+
 namespace Corrade { namespace Utility {
 
 /** @brief SHA-1 */
@@ -48,7 +52,13 @@ class CORRADE_UTILITY_EXPORT Sha1: public AbstractHash<20> {
             return (Sha1() << data).digest();
         }
 
-        explicit Sha1(): _dataSize(0), _digest{initialDigest[0], initialDigest[1], initialDigest[2], initialDigest[3], initialDigest[4]} {}
+        explicit Sha1(): _dataSize(0),
+            #ifndef CORRADE_MSVC2013_COMPATIBILITY
+            _digest{initialDigest[0], initialDigest[1], initialDigest[2], initialDigest[3], initialDigest[4]}
+            #else
+            _digest({initialDigest[0], initialDigest[1], initialDigest[2], initialDigest[3], initialDigest[4]})
+            #endif
+            {}
 
         /** @brief Add data for digesting */
         Sha1& operator<<(const std::string& data);
@@ -68,7 +78,11 @@ class CORRADE_UTILITY_EXPORT Sha1: public AbstractHash<20> {
 
         std::string _buffer;
         unsigned long long _dataSize;
+        #ifndef CORRADE_MSVC2013_COMPATIBILITY
         unsigned int _digest[5];
+        #else
+        std::array<unsigned int, 5> _digest;
+        #endif
 };
 
 }}
