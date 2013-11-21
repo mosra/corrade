@@ -25,6 +25,7 @@
 
 #include "FileToString.h"
 
+#include <algorithm> /* std::max(), needed by MSVC */
 #include <fstream>
 
 namespace Corrade { namespace TestSuite {

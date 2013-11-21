@@ -25,6 +25,7 @@
 
 #include "Resource.h"
 
+#include <algorithm> /* std::max(), needed by MSVC */
 #include <fstream>
 #include <iomanip>
 #include <sstream>

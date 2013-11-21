@@ -25,6 +25,7 @@
 
 #include "File.h"
 
+#include <algorithm> /* std::max(), needed by MSVC */
 #include <fstream>
 
 #include "Utility/Directory.h"

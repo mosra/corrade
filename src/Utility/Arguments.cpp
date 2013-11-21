@@ -25,6 +25,7 @@
 
 #include "Arguments.h"
 
+#include <algorithm> /* std::max(), needed by MSVC */
 #include <cstring>
 #include <iomanip>
 #include <iostream>

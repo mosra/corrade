@@ -25,6 +25,7 @@
 
 #include "String.h"
 
+#include <cctype>
 #include <algorithm>
 
 namespace Corrade { namespace Utility {
