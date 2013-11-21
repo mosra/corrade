@@ -249,7 +249,12 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * ConfigurationValue::fromString() to convert the value to given type.
          * @see hasValue()
          */
+        #ifndef CORRADE_MSVC2013_COMPATIBILITY
         template<class T = std::string> T value(const std::string& key, unsigned int index = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const;
+        #else
+        template<class T> T value(const std::string& key, unsigned int index = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const;
+        std::string value(const std::string& key, unsigned int index = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const;
+        #endif
 
         /**
          * @brief All values with given key
@@ -259,7 +264,12 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * If @p T is not `std::string`, uses ConfigurationValue::fromString()
          * to convert the value to given type.
          */
+        #ifndef CORRADE_MSVC2013_COMPATIBILITY
         template<class T = std::string> std::vector<T> values(const std::string& key, ConfigurationValueFlags flags = ConfigurationValueFlags()) const;
+        #else
+        template<class T> std::vector<T> values(const std::string& key, ConfigurationValueFlags flags = ConfigurationValueFlags()) const;
+        std::vector<std::string> values(const std::string& key, ConfigurationValueFlags flags = ConfigurationValueFlags()) const;
+        #endif
 
         /**
          * @brief Set string value
@@ -389,6 +399,14 @@ template<> inline std::string ConfigurationGroup::value(const std::string& key, 
 template<> inline std::vector<std::string> ConfigurationGroup::values(const std::string& key, const ConfigurationValueFlags flags) const {
     return valuesInternal(key, flags);
 }
+#ifdef CORRADE_MSVC2013_COMPATIBILITY
+inline std::string ConfigurationGroup::value(const std::string& key, unsigned int index, ConfigurationValueFlags flags) const {
+    return ConfigurationGroup::value<std::string>(key, index, flags);
+}
+inline std::vector<std::string> ConfigurationGroup::values(const std::string& key, ConfigurationValueFlags flags) const {
+    return ConfigurationGroup::values<std::string>(key, flags);
+}
+#endif
 #endif
 
 template<class T> inline T ConfigurationGroup::value(const std::string& key, const unsigned int index, const ConfigurationValueFlags flags) const {
