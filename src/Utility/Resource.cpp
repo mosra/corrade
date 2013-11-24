@@ -300,7 +300,6 @@ Containers::ArrayReference<const unsigned char> Resource::getRaw(const std::stri
                   << "was not found in overriden group, fallback to compiled-in resources";
     }
 
-    /* If the filename doesn't exist, return empty string */
     const auto it = _group->second.resources.find(filename);
     CORRADE_ASSERT(it != _group->second.resources.end(),
         "Utility::Resource::get(): file" << '\'' + filename + '\'' << "was not found in group" << '\'' + _group->first + '\'', nullptr);
