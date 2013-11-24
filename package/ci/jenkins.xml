@@ -26,7 +26,7 @@
     <submoduleCfg class="list"/>
     <extensions>
       <hudson.plugins.git.extensions.impl.CloneOption>
-        <shallow>false</shallow>
+        <shallow>true</shallow>
         <reference></reference>
       </hudson.plugins.git.extensions.impl.CloneOption>
     </extensions>
@@ -37,6 +37,7 @@
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers/>
   <concurrentBuild>false</concurrentBuild>
+  <customWorkspace>Corrade</customWorkspace>
   <axes>
     <hudson.matrix.TextAxis>
       <name>compiler</name>
@@ -59,6 +60,9 @@
     <hudson.tasks.Shell>
       <command>
 <![CDATA[
+mkdir -p build-${compiler}-${libraries}
+cd build-${compiler}-${libraries}
+
 compatibility_flag=""
 
 if [ ${compiler} = "g++-4.7" ] ; then
@@ -68,9 +72,6 @@ fi
 if [ ${compiler} = "g++-4.6" ] ; then
     compatibility_flag=-DGCC46_COMPATIBILITY=ON
 fi
-
-mkdir -p build
-cd build
 
 cmake .. \
     -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/${compiler}-${static_build} \
@@ -113,4 +114,5 @@ compiler == "g++" && static_build == "OFF"
       <completeBuild>true</completeBuild>
     </touchStoneResultCondition>
   </executionStrategy>
+  <childCustomWorkspace>.</childCustomWorkspace>
 </matrix-project>
