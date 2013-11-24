@@ -391,8 +391,8 @@ application from here:
 
     http://your-jenkins-server/cli
 
-Then add new job or update existing one (replace `<command>` with `add-job` or
-`update-job`). You might want to remove some `publishers/hudson.tasks.BuildTrigger`
+Then add new job or update existing one (replace `<command>` with `create-job`
+or `update-job`). You might want to remove some `publishers/hudson.tasks.BuildTrigger`
 entries from the XML file if given depending project doesn't exist yet.
 
     java -jar jenkins-cli.jar -s http://your-jenkins-server <command> Corrade < jenkins.xml
