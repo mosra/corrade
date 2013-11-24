@@ -55,6 +55,7 @@ class ResourceTest: public TestSuite::Tester {
 
         void list();
         void get();
+        void getEmptyFile();
         void getNonexistent();
         void getNothing();
 
@@ -78,6 +79,7 @@ ResourceTest::ResourceTest() {
 
               &ResourceTest::list,
               &ResourceTest::get,
+              &ResourceTest::getEmptyFile,
               &ResourceTest::getNonexistent,
               &ResourceTest::getNothing,
 
@@ -207,6 +209,12 @@ void ResourceTest::get() {
     CORRADE_COMPARE_AS(r.get("consequence.bin"),
                        Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
                        TestSuite::Compare::StringToFile);
+}
+
+void ResourceTest::getEmptyFile() {
+    Resource r("empty");
+    CORRADE_COMPARE(r.getRaw("empty.bin"), nullptr);
+    CORRADE_COMPARE(r.get("empty.bin"), "");
 }
 
 void ResourceTest::getNonexistent() {
