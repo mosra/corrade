@@ -84,7 +84,7 @@ cmake .. \
     -G Ninja
 
 ninja
-ctest --output-on-failure
+ctest --output-on-failure || true
 ninja install
 ]]>
       </command>
@@ -100,6 +100,12 @@ ninja install
         <completeBuild>true</completeBuild>
       </threshold>
     </hudson.tasks.BuildTrigger>
+    <hudson.plugins.textfinder.TextFinderPublisher plugin="text-finder@1.9">
+      <regexp>Errors while running CTest</regexp>
+      <succeedIfFound>false</succeedIfFound>
+      <unstableIfFound>true</unstableIfFound>
+      <alsoCheckConsoleOutput>true</alsoCheckConsoleOutput>
+    </hudson.plugins.textfinder.TextFinderPublisher>
   </publishers>
   <buildWrappers/>
   <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">

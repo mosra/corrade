@@ -386,8 +386,8 @@ If you have Node.js installed, you can also build and run unit tests using
 @section building-ci-jenkins Jenkins Continuous Integration
 
 In `package/ci/` there is `jenkins.xml` file containing job configuration.
-Setup your Jenkins server, enable the Git plugin and download the CLI
-application from here:
+Setup your Jenkins server, enable the **Git** and **Text-finder** plugin and
+download the CLI application from here:
 
     http://your-jenkins-server/cli
 
