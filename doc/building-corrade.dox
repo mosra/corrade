@@ -229,13 +229,6 @@ project root:
 
     makepkg -p package/archlinux/<file>
 
-If you want to build with another compiler (e.g. Clang), run makepkg this way:
-
-    CXX=clang++ makepkg
-
-Development PKGBUILDs can detect when Clang is used and remove unsupported CXX
-flags.
-
 @subsection building-packages-rpm RPM packages
 
 Every package contains `spec` files for RPM-based distributions in

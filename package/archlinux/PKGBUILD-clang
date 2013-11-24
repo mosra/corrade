@@ -1,0 +1,40 @@
+# Author: mosra <mosra@centrum.cz>
+pkgname=corrade
+pkgver=dev.clang
+pkgrel=1
+pkgdesc="Multiplatform plugin management and utility library (built with Clang)"
+arch=('i686' 'x86_64')
+url="http://mosra.cz/blog/corrade.php"
+license=('MIT')
+makedepends=('cmake' 'ninja' 'clang')
+options=(!strip)
+provides=('corrade-git')
+
+build() {
+    if [ ! -d "$startdir/build-clang" ] ; then
+        mkdir "$startdir/build-clang"
+        cd "$startdir/build-clang"
+
+        cmake .. \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -G Ninja
+    fi
+
+    cd "$startdir/build-clang"
+
+    cmake .. \
+        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DBUILD_TESTS=ON
+    ninja
+}
+
+check() {
+    cd "$startdir/build-clang"
+    ctest --output-on-failure
+}
+
+package() {
+    cd "$startdir/build-clang"
+    DESTDIR="$pkgdir/" ninja install
+}
