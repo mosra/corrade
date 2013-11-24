@@ -387,6 +387,25 @@ depending projects.
 If you have Node.js installed, you can also build and run unit tests using
 `ctest`. See `BUILD_TESTS` above.
 
+@section building-ci-jenkins Jenkins Continuous Integration
+
+In `package/ci/` there is `jenkins.xml` file containing job configuration.
+Setup your Jenkins server, enable the Git plugin and download the CLI
+application from here:
+
+    http://your-jenkins-server/cli
+
+Then add new job or update existing one (replace `<command>` with `add-job` or
+`update-job`). You might want to remove some `publishers/hudson.tasks.BuildTrigger`
+entries from the XML file if given depending project doesn't exist yet.
+
+    java -jar jenkins-cli.jar -s http://your-jenkins-server <command> Corrade < jenkins.xml
+
+Build is done using **Ninja** build system. It expects that **GCC** >=4.8.2,
+4.7, 4.6 and **Clang** are installed as it tries to compile the library with
+each one of them. You can add/remove the compilers in `axes/hudson.matrix.TextAxis`
+or via the web interface later.
+
 */
 
 }
