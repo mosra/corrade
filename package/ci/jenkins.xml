@@ -91,15 +91,6 @@ ninja install
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <hudson.tasks.BuildTrigger>
-      <childProjects>Magnum</childProjects>
-      <threshold>
-        <name>SUCCESS</name>
-        <ordinal>0</ordinal>
-        <color>BLUE</color>
-        <completeBuild>true</completeBuild>
-      </threshold>
-    </hudson.tasks.BuildTrigger>
     <hudson.plugins.textfinder.TextFinderPublisher plugin="text-finder@1.9">
       <regexp>Errors while running CTest</regexp>
       <succeedIfFound>false</succeedIfFound>
