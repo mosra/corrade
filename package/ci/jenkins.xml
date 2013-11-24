@@ -49,10 +49,10 @@
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.TextAxis>
-      <name>static_build</name>
+      <name>libraries</name>
       <values>
-        <string>ON</string>
-        <string>OFF</string>
+        <string>static</string>
+        <string>dynamic</string>
       </values>
     </hudson.matrix.TextAxis>
   </axes>
@@ -63,8 +63,6 @@
 mkdir -p build-${compiler}-${libraries}
 cd build-${compiler}-${libraries}
 
-compatibility_flag=""
-
 if [ ${compiler} = "g++-4.7" ] ; then
     compatibility_flag=-DGCC47_COMPATIBILITY=ON
 fi
@@ -73,11 +71,15 @@ if [ ${compiler} = "g++-4.6" ] ; then
     compatibility_flag=-DGCC46_COMPATIBILITY=ON
 fi
 
+if [ ${libraries} = "static" ] ; then
+    static_build_flag="-DBUILD_STATIC=ON -DBUILD_STATIC_PIC=ON"
+fi
+
 cmake .. \
-    -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/${compiler}-${static_build} \
+    -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/${compiler}-${libraries} \
     -DCMAKE_CXX_COMPILER=${compiler} \
     -DBUILD_TESTS=ON \
-    -DBUILD_STATIC=${static_build} \
+    ${static_build_flag} \
     ${compatibility_flag} \
     -G Ninja
 
@@ -104,7 +106,7 @@ ninja install
     <runSequentially>false</runSequentially>
     <touchStoneCombinationFilter>
 <![CDATA[
-compiler == "g++" && static_build == "OFF"
+compiler == "g++" && libraries == "dynamic"
 ]]>
     </touchStoneCombinationFilter>
     <touchStoneResultCondition>
