@@ -31,8 +31,6 @@
       </hudson.plugins.git.extensions.impl.CloneOption>
     </extensions>
   </scm>
-  <quietPeriod>5</quietPeriod>
-  <scmCheckoutRetryCount>3</scmCheckoutRetryCount>
   <canRoam>true</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
@@ -102,7 +100,7 @@ ninja install
   </publishers>
   <buildWrappers/>
   <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
-    <runSequentially>false</runSequentially>
+    <runSequentially>true</runSequentially>
     <touchStoneCombinationFilter>
 <![CDATA[
 compiler == "g++" && libraries == "dynamic"
