@@ -196,16 +196,17 @@ std::string Resource::compile(const std::string& name, const std::string& group,
 
     /* Return C++ file. The functions have forward declarations to avoid warning
        about functions which don't have corresponding declarations (enabled by
-       -Wmissing-declarations in GCC) */
+       -Wmissing-declarations in GCC). If we don't have any data, we don't
+       create the resourceData array, as zero-length arrays are not allowed. */
     return "/* Compiled resource file. DO NOT EDIT! */\n\n"
         "#include \"Utility/utilities.h\"\n"
         "#include \"Utility/Resource.h\"\n\n"
         "static const unsigned char resourcePositions[] = {" +
         positions + "\n};\n\n"
         "static const unsigned char resourceFilenames[] = {" +
-        filenames + "\n};\n\n"
-        "static const unsigned char resourceData[] = {" +
-        data +      "\n};\n\n"
+        filenames + "\n};\n\n" +
+        (dataLen ? "" : "// ") + "static const unsigned char resourceData[] = {" +
+        data + '\n' + (dataLen ? "" : "// ") + "};\n\n" +
         "int resourceInitializer_" + name + "();\n"
         "int resourceInitializer_" + name + "() {\n"
         "    Corrade::Utility::Resource::registerData(\"" + group + "\", " +
@@ -214,7 +215,7 @@ std::string Resource::compile(const std::string& name, const std::string& group,
             #else
             converter.str() +
             #endif
-        ", resourcePositions, resourceFilenames, resourceData);\n"
+        ", resourcePositions, resourceFilenames, " + (dataLen ? "resourceData" : "nullptr") + ");\n"
         "    return 1;\n"
         "} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_" + name + ")\n\n"
         "int resourceFinalizer_" + name + "();\n"

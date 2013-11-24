@@ -13,13 +13,13 @@ static const unsigned char resourceFilenames[] = {
     0x65,0x6d,0x70,0x74,0x79,0x2e,0x62,0x69,0x6e
 };
 
-static const unsigned char resourceData[] = {
+// static const unsigned char resourceData[] = {
     /* empty.bin */
-};
+// };
 
 int resourceInitializer_ResourceTestData();
 int resourceInitializer_ResourceTestData() {
-    Corrade::Utility::Resource::registerData("test", 1, resourcePositions, resourceFilenames, resourceData);
+    Corrade::Utility::Resource::registerData("test", 1, resourcePositions, resourceFilenames, nullptr);
     return 1;
 } CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_ResourceTestData)
 
