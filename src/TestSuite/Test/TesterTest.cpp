@@ -258,7 +258,7 @@ void TesterTest::compareAsVarargs() {
 
 }
 
-template<class, class> class Varargs;
+template<class, class> struct Varargs;
 
 template<class T, class U> struct Comparator<Varargs<T, U>> {
     bool operator()(int, int) { return true; }
