@@ -46,6 +46,7 @@
         <string>g++-4.7</string>
         <string>g++-4.6</string>
         <string>clang++</string>
+        <string>clang++-libc++</string>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.TextAxis>
@@ -60,9 +61,6 @@
     <hudson.tasks.Shell>
       <command>
 <![CDATA[
-mkdir -p build-${compiler}-${libraries}
-cd build-${compiler}-${libraries}
-
 if [ ${compiler} = "g++-4.7" ] ; then
     compatibility_flag=-DGCC47_COMPATIBILITY=ON
 fi
@@ -71,14 +69,25 @@ if [ ${compiler} = "g++-4.6" ] ; then
     compatibility_flag=-DGCC46_COMPATIBILITY=ON
 fi
 
+if [ ${compiler} = "clang++-libc++" ] ; then
+    compiler_binary=clang++
+    compiler_flags=(-DCMAKE_CXX_FLAGS="-std=c++11 -stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS=-lc++abi)
+else
+    compiler_binary=${compiler}
+fi
+
 if [ ${libraries} = "static" ] ; then
     static_build_flag="-DBUILD_STATIC=ON -DBUILD_STATIC_PIC=ON"
 fi
 
+mkdir -p build-${compiler}-${libraries}
+cd build-${compiler}-${libraries}
+
 cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/${compiler}-${libraries} \
-    -DCMAKE_CXX_COMPILER=${compiler} \
+    -DCMAKE_CXX_COMPILER=${compiler_binary} \
+    "${compiler_flags[@]}" \
     -DBUILD_TESTS=ON \
     ${static_build_flag} \
     ${compatibility_flag} \
