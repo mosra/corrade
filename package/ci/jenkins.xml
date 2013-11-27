@@ -86,6 +86,7 @@ cd build-${compiler}-${libraries}
 cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/${compiler}-${libraries} \
+    -DCMAKE_INSTALL_RPATH=${JENKINS_HOME}/filesystem/${compiler}-${libraries}/lib \
     -DCMAKE_CXX_COMPILER=${compiler_binary} \
     "${compiler_flags[@]}" \
     -DBUILD_TESTS=ON \
