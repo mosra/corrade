@@ -177,7 +177,7 @@ std::string Directory::configurationDir(const std::string& applicationName, bool
 std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     DIR* directory;
     directory = opendir(path.c_str());
-    if(directory == nullptr) return {};
+    if(directory == nullptr) return std::vector<std::string>{};
 
     std::vector<std::string> list;
     dirent* entry;

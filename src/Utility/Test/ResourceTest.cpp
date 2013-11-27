@@ -115,7 +115,7 @@ void ResourceTest::compile() {
 }
 
 void ResourceTest::compileNothing() {
-    CORRADE_COMPARE_AS(Resource::compile("ResourceTestNothingData", "nothing", {}),
+    CORRADE_COMPARE_AS(Resource::compile("ResourceTestNothingData", "nothing", (std::vector<std::pair<std::string, std::string>>{})),
                        Directory::join(RESOURCE_TEST_DIR, "compiledNothing.cpp"),
                        TestSuite::Compare::StringToFile);
 }
