@@ -76,6 +76,7 @@ if [ ${libraries} = "static" ] ; then
 fi
 
 cmake .. \
+    -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/${compiler}-${libraries} \
     -DCMAKE_CXX_COMPILER=${compiler} \
     -DBUILD_TESTS=ON \
