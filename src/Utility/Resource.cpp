@@ -144,7 +144,8 @@ std::string Resource::compile(const std::string& name, const std::string& group,
     if(files.empty()) {
         return "/* Compiled resource file. DO NOT EDIT! */\n\n"
             "#include \"Utility/Macros.h\"\n"
-            "#include \"Utility/Resource.h\"\n\n"
+            "#include \"Utility/Resource.h\"\n"
+            "#include \"corradeCompatibility.h\"\n\n"
             "int resourceInitializer_" + name + "();\n"
             "int resourceInitializer_" + name + "() {\n"
             "    Corrade::Utility::Resource::registerData(\"" + group + "\", 0, nullptr, nullptr, nullptr);\n"
@@ -196,10 +197,15 @@ std::string Resource::compile(const std::string& name, const std::string& group,
     /* Return C++ file. The functions have forward declarations to avoid warning
        about functions which don't have corresponding declarations (enabled by
        -Wmissing-declarations in GCC). If we don't have any data, we don't
-       create the resourceData array, as zero-length arrays are not allowed. */
+       create the resourceData array, as zero-length arrays are not allowed.
+       The corradeCompatibility.h must be included even if we don't need it in
+       master branch, because the user might want to compile resource file for
+       Corrade in compatibility branch with Corrade in master branch (i.e. x86
+       NaCl). */
     return "/* Compiled resource file. DO NOT EDIT! */\n\n"
         "#include \"Utility/Macros.h\"\n"
-        "#include \"Utility/Resource.h\"\n\n"
+        "#include \"Utility/Resource.h\"\n"
+        "#include \"corradeCompatibility.h\"\n\n"
         "static const unsigned char resourcePositions[] = {" +
         positions + "\n};\n\n"
         "static const unsigned char resourceFilenames[] = {" +

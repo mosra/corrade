@@ -2,6 +2,7 @@
 
 #include "Utility/Macros.h"
 #include "Utility/Resource.h"
+#include "corradeCompatibility.h"
 
 static const unsigned char resourcePositions[] = {
     0x09,0x00,0x00,0x00,
