@@ -437,20 +437,23 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
 /** @hideinitializer
 @brief Import static plugin
-@param name      Static plugin name (defined with CORRADE_PLUGIN_REGISTER())
+@param name      Static plugin name (the same as defined with
+    @ref CORRADE_PLUGIN_REGISTER())
 
 If static plugins are compiled into dynamic library or directly into the
 executable, they should be automatically loaded at startup thanks to
-AUTOMATIC_INITALIZER() and CORRADE_AUTOMATIC_FINALIZER() macros.
+@ref CORRADE_AUTOMATIC_INITALIZER() and @ref CORRADE_AUTOMATIC_FINALIZER()
+macros.
 
 If static plugins are compiled into static library, they are not automatically
-loaded at startup, so you need to load them explicitly by calling CORRADE_PLUGIN_IMPORT()
-at the beginning of `main()` function. You can also wrap these macro calls into
-another function (which will then be compiled into dynamic library or main
-executable) and use CORRADE_AUTOMATIC_INITIALIZER() macro for automatic call.
+loaded at startup, so you need to load them explicitly by calling
+@ref CORRADE_PLUGIN_IMPORT() at the beginning of `main()` function. You can
+also wrap these macro calls into another function (which will then be compiled
+into dynamic library or main executable) and use @ref CORRADE_AUTOMATIC_INITIALIZER()
+macro for automatic call.
 @attention This macro should be called outside of any namespace. If you are
     running into linker errors with `pluginImporter_*`, this could be the
-    problem. See CORRADE_RESOURCE_INITIALIZE() documentation for more
+    problem. See @ref CORRADE_RESOURCE_INITIALIZE() documentation for more
     information.
  */
 #define CORRADE_PLUGIN_IMPORT(name)                                         \
