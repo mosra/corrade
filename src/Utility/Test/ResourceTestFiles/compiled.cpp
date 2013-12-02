@@ -2,6 +2,7 @@
 
 #include "Utility/utilities.h"
 #include "Utility/Resource.h"
+#include "corradeCompatibility.h"
 
 static const unsigned char resourcePositions[] = {
     0x12,0x00,0x00,0x00,

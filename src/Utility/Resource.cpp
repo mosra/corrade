@@ -204,7 +204,8 @@ std::string Resource::compile(const std::string& name, const std::string& group,
        create the resourceData array, as zero-length arrays are not allowed. */
     return "/* Compiled resource file. DO NOT EDIT! */\n\n"
         "#include \"Utility/utilities.h\"\n"
-        "#include \"Utility/Resource.h\"\n\n"
+        "#include \"Utility/Resource.h\"\n"
+        "#include \"corradeCompatibility.h\"\n\n"
         "static const unsigned char resourcePositions[] = {" +
         positions + "\n};\n\n"
         "static const unsigned char resourceFilenames[] = {" +
