@@ -19,7 +19,7 @@
     </userRemoteConfigs>
     <branches>
       <hudson.plugins.git.BranchSpec>
-        <name>*/master</name>
+        <name>compatibility</name>
       </hudson.plugins.git.BranchSpec>
     </branches>
     <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
@@ -37,7 +37,7 @@
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers/>
   <concurrentBuild>false</concurrentBuild>
-  <customWorkspace>Corrade</customWorkspace>
+  <customWorkspace>Corrade-Compatibility</customWorkspace>
   <axes>
     <hudson.matrix.TextAxis>
       <name>compiler</name>
@@ -45,6 +45,8 @@
         <string>g++</string>
         <string>g++-4.7</string>
         <string>g++-4.6</string>
+        <string>g++-4.5</string>
+        <string>g++-4.4</string>
         <string>clang++</string>
         <string>clang++-libc++</string>
       </values>
@@ -69,6 +71,14 @@ if [ ${compiler} = "g++-4.6" ] ; then
     compatibility_flag=-DGCC46_COMPATIBILITY=ON
 fi
 
+if [ ${compiler} = "g++-4.5" ] ; then
+    compatibility_flag=-DGCC45_COMPATIBILITY=ON
+fi
+
+if [ ${compiler} = "g++-4.4" ] ; then
+    compatibility_flag=-DGCC44_COMPATIBILITY=ON
+fi
+
 if [ ${compiler} = "clang++-libc++" ] ; then
     compiler_binary=clang++
     compiler_flags=(-DCMAKE_CXX_FLAGS="-std=c++11 -stdlib=libc++" -DCMAKE_EXE_LINKER_FLAGS=-lc++abi)
@@ -85,8 +95,8 @@ cd build-${compiler}-${libraries}
 
 cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/${compiler}-${libraries} \
-    -DCMAKE_INSTALL_RPATH=${JENKINS_HOME}/filesystem/${compiler}-${libraries}/lib \
+    -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/compatibility-${compiler}-${libraries} \
+    -DCMAKE_INSTALL_RPATH=${JENKINS_HOME}/filesystem/compatibility-${compiler}-${libraries}/lib \
     -DCMAKE_CXX_COMPILER=${compiler_binary} \
     "${compiler_flags[@]}" \
     -DBUILD_TESTS=ON \
