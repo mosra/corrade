@@ -193,7 +193,13 @@ template<class T> class Array {
             return array;
         }
         /* Specialization for zero argument count */
-        static Array<T> fromInternal() { return nullptr; }
+        static Array<T> fromInternal() {
+            #ifndef CORRADE_GCC45_COMPATIBILITY
+            return nullptr;
+            #else
+            return {};
+            #endif
+        }
 
         T* _data;
         std::size_t _size;
