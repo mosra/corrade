@@ -213,7 +213,7 @@ void ResourceTest::get() {
 
 void ResourceTest::getEmptyFile() {
     Resource r("empty");
-    CORRADE_COMPARE(r.getRaw("empty.bin"), nullptr);
+    CORRADE_VERIFY(!r.getRaw("empty.bin"));
     CORRADE_COMPARE(r.get("empty.bin"), "");
 }
 
