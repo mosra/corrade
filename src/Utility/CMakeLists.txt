@@ -82,7 +82,7 @@ if(NOT BUILD_STATIC)
     set_target_properties(CorradeUtilityObjects PROPERTIES COMPILE_FLAGS "-DCorradeUtilityObjects_EXPORTS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
 elseif(BUILD_STATIC_PIC)
     # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
-    set_target_properties(CorradeUtility PROPERTIES COMPILE_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
+    set_target_properties(CorradeUtility CorradeUtilityObjects PROPERTIES COMPILE_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
 endif()
 install(TARGETS CorradeUtility
         RUNTIME DESTINATION ${CORRADE_BINARY_INSTALL_DIR}
@@ -101,7 +101,7 @@ if(BUILD_TESTS)
     set_target_properties(CorradeUtilityTestLib PROPERTIES COMPILE_FLAGS "-DCORRADE_GRACEFUL_ASSERT")
     if(BUILD_STATIC_PIC)
         # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
-        set_target_properties(CorradeUtilityTestLib PROPERTIES COMPILE_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
+        set_target_properties(CorradeUtilityTestLib PROPERTIES COMPILE_FLAGS "-DCORRADE_GRACEFUL_ASSERT ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
     endif()
 
     # On Windows we need to install first and then run the tests to avoid "DLL

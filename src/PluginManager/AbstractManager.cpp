@@ -448,7 +448,7 @@ void AbstractManager::registerInstance(std::string plugin, AbstractPlugin* insta
     auto foundInstance = instances.find(plugin);
 
     if(foundInstance == instances.end())
-        foundInstance = instances.insert({std::move(plugin), {}}).first;
+        foundInstance = instances.insert({std::move(plugin), std::vector<AbstractPlugin*>{}}).first;
 
     foundInstance->second.push_back(instance);
 

@@ -26,11 +26,16 @@
 */
 
 #include "Utility/Visibility.h"
+#include "corradeConfigure.h"
 
-#if defined(CorradeUtilityObjects_EXPORTS) || defined(CorradeUtility_EXPORTS) || defined(CorradeUtilityTestLib_EXPORTS)
-    #define CORRADE_UTILITY_EXPORT CORRADE_VISIBILITY_EXPORT
+#ifndef CORRADE_BUILD_STATIC
+    #if defined(CorradeUtilityObjects_EXPORTS) || defined(CorradeUtility_EXPORTS) || defined(CorradeUtilityTestLib_EXPORTS)
+        #define CORRADE_UTILITY_EXPORT CORRADE_VISIBILITY_EXPORT
+    #else
+        #define CORRADE_UTILITY_EXPORT CORRADE_VISIBILITY_IMPORT
+    #endif
 #else
-    #define CORRADE_UTILITY_EXPORT CORRADE_VISIBILITY_IMPORT
+    #define CORRADE_UTILITY_EXPORT CORRADE_VISIBILITY_STATIC
 #endif
 #define CORRADE_UTILITY_LOCAL CORRADE_VISIBILITY_LOCAL
 

@@ -274,11 +274,15 @@ for example of more involved comparisons.
 
 @see CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_WITH()
 */
-#define CORRADE_COMPARE_AS(actual, expected, Type)                          \
+#ifdef DOXYGEN_GENERATING_OUTPUT
+#define CORRADE_COMPARE_AS(actual, expected, Type...)
+#else
+#define CORRADE_COMPARE_AS(actual, expected, ...)                           \
     do {                                                                    \
         _CORRADE_REGISTER_TEST_CASE();                                      \
-        Tester::compareAs<Type>(#actual, actual, #expected, expected);      \
+        Tester::compareAs<__VA_ARGS__>(#actual, actual, #expected, expected); \
     } while(false)
+#endif
 
 /** @hideinitializer
 @brief %Compare two values in Tester subclass with explicitly specified comparator
@@ -293,11 +297,15 @@ more information.
 
 @see CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS()
 */
-#define CORRADE_COMPARE_WITH(actual, expected, comparatorInstance)          \
+#ifdef DOXYGEN_GENERATING_OUTPUT
+#define CORRADE_COMPARE_WITH(actual, expected, comparatorInstance...)
+#else
+#define CORRADE_COMPARE_WITH(actual, expected, ...)                         \
     do {                                                                    \
         _CORRADE_REGISTER_TEST_CASE();                                      \
-        Tester::compareWith(comparatorInstance.comparator(), #actual, actual, #expected, expected); \
+        Tester::compareWith((__VA_ARGS__).comparator(), #actual, actual, #expected, expected); \
     } while(false)
+#endif
 
 /** @hideinitializer
 @brief Expect failure in all following checks in the same scope

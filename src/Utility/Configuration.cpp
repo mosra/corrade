@@ -47,7 +47,7 @@ Configuration::Configuration(const std::string& filename, const Flags flags): Co
     }
 
     /* Open file */
-    std::ifstream in(filename.c_str(), std::ifstream::binary);
+    std::ifstream in(filename, std::ifstream::binary);
     if(!in.good())
         Error() << "Utility::Configuration::Configuration(): cannot open file" << filename;
 
@@ -244,7 +244,7 @@ std::string Configuration::parse(std::istream& in, ConfigurationGroup* group, co
 }
 
 bool Configuration::save(const std::string& filename) {
-    std::ofstream out(filename.c_str(), std::ofstream::out|std::ofstream::trunc|std::ofstream::binary);
+    std::ofstream out(filename, std::ofstream::out|std::ofstream::trunc|std::ofstream::binary);
     if(!out.good()) {
         Error() << "Utility::Configuration::save(): cannot open file" << filename;
         return false;

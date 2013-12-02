@@ -223,21 +223,17 @@ The examples require %Corrade to be installed and they are built separately:
 
 @subsection building-packages-arch ArchLinux packages
 
-In `package/archlinux` directory are three PKGBUILDs - one for stable version,
+In `package/archlinux` directory are three packages - one for stable version,
 one for Git development build and one for building under MinGW. The packages
 are also in AUR under the same names.
 
-There are also a few development PKGBUILDs in project root, which allow you to
-build and install the package directly from source tree without downloading
-anything. The native PKGBUILD also contains `check()` function which will run
-all unit tests before packaging.
+There are also a few development PKGBUILDs in `package/archlinux`, which allow
+you to build and install the package directly from source tree without
+downloading anything. The native PKGBUILDs also contain `check()` function
+which will run all unit tests before packaging. You need to build them from
+project root:
 
-If you want to build with another compiler (e.g. Clang), run makepkg this way:
-
-    CXX=clang++ makepkg
-
-Development PKGBUILDs can detect when Clang is used and remove unsupported CXX
-flags.
+    makepkg -p package/archlinux/<file>
 
 @subsection building-packages-rpm RPM packages
 
@@ -392,6 +388,32 @@ depending projects.
 
 If you have Node.js installed, you can also build and run unit tests using
 `ctest`. See `BUILD_TESTS` above.
+
+@section building-ci-jenkins Jenkins Continuous Integration
+
+In `package/ci/` there is `jenkins.xml` file containing job configuration.
+Setup your Jenkins server, enable the **Git** and **Text-finder** plugin and
+download the CLI application from here:
+
+    http://your-jenkins-server/cli
+
+Then add new job or update existing one (replace `<command>` with `create-job`
+or `update-job`).
+
+    java -jar jenkins-cli.jar -s http://your-jenkins-server <command> Corrade < jenkins.xml
+
+Build is done using **Ninja** build system. It expects that **GCC** >=4.8.2,
+4.7, 4.6 and **Clang** are installed as it tries to compile the library with
+each one of them. You can add/remove the compilers in `axes/hudson.matrix.TextAxis`
+or via the web interface later.
+
+There is also MinGW32 and Emscripten configuration, add or update them with the
+commands below. See @ref building-crosscompiling for more information about
+setting up the crosscompilers and `toolchains/` submodule. For Emscripten you
+need also **Node.js** installed to run the tests.
+
+    java -jar jenkins-cli.jar -s http://your-jenkins-server <command> Corrade-MinGW32 < jenkins-mingw32.xml
+    java -jar jenkins-cli.jar -s http://your-jenkins-server <command> Corrade-Emscripten < jenkins-emscripten.xml
 
 */
 

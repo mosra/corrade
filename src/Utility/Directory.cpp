@@ -25,14 +25,15 @@
 
 #include "Directory.h"
 
-#include <dirent.h>
-#include <sys/stat.h>
 #include <cstdio>
 #include <cstdlib>
 #include <algorithm>
 #include <fstream>
 
-#ifdef _WIN32
+#ifndef _WIN32
+#include <sys/stat.h>
+#include <dirent.h>
+#else
 #include <shlobj.h>
 #endif
 
@@ -44,7 +45,7 @@ namespace Corrade { namespace Utility {
 
 std::string Directory::path(const std::string& filename) {
     /* If filename is already a path, return it */
-    if(!filename.empty() && filename[filename.size()-1] == '/')
+    if(!filename.empty() && filename.back() == '/')
         return filename.substr(0, filename.size()-1);
 
     std::size_t pos = filename.find_last_of('/');
@@ -80,40 +81,32 @@ std::string Directory::join(const std::string& path, const std::string& filename
     if(!filename.empty() && filename[0] == '/')
         return filename;
 
-    /* Add leading slash to path, if not present */
-    if(path[path.size()-1] != '/')
+    /* Add trailing slash to path, if not present */
+    if(path.back() != '/')
         return path + '/' + filename;
 
     return path + filename;
 }
 
 #ifndef CORRADE_TARGET_NACL_NEWLIB
-bool Directory::mkpath(const std::string& _path) {
-    if(_path.empty()) return false;
+bool Directory::mkpath(const std::string& path) {
+    if(path.empty()) return false;
 
     /* If path contains trailing slash, strip it */
-    if(_path[_path.size()-1] == '/')
-        return mkpath(_path.substr(0, _path.size()-1));
+    if(path.back() == '/')
+        return mkpath(path.substr(0, path.size()-1));
 
     /* If parent directory doesn't exist, create it */
-    std::string parentPath = path(_path);
-    if(!parentPath.empty()) {
-        DIR* directory = opendir(parentPath.c_str());
-        if(directory == nullptr && !mkpath(parentPath)) return false;
-        closedir(directory);
-    }
+    const std::string parentPath = Directory::path(path);
+    if(!parentPath.empty() && !fileExists(parentPath) && !mkpath(parentPath)) return false;
 
-    /* Create directory */
+    /* Create directory, return true if successfully created or already exists */
     #ifndef _WIN32
-    int ret = mkdir(_path.c_str(), 0777);
+    const int ret = mkdir(path.c_str(), 0777);
+    return ret == 0 || ret == -1;
     #else
-    int ret = mkdir(_path.c_str());
+    return CreateDirectory(path.c_str(), nullptr) != 0 || GetLastError() == ERROR_ALREADY_EXISTS;
     #endif
-
-    /* Directory is successfully created or already exists */
-    if(ret == 0 || ret == -1) return true;
-
-    return false;
 }
 
 bool Directory::rm(const std::string& path) {
@@ -175,16 +168,16 @@ std::string Directory::configurationDir(const std::string& applicationName, bool
 }
 
 std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
+    std::vector<std::string> list;
+
+    #ifndef _WIN32
     DIR* directory;
     directory = opendir(path.c_str());
-    if(directory == nullptr) return {};
+    if(directory == nullptr) return std::vector<std::string>{};
 
-    std::vector<std::string> list;
     dirent* entry;
     while((entry = readdir(directory)) != nullptr) {
-        if((flags >= Flag::SkipDotAndDotDot) && (std::string(entry->d_name) == "." || std::string(entry->d_name) == ".."))
-            continue;
-        #if !defined(_WIN32) && !defined(CORRADE_TARGET_NACL_NEWLIB)
+        #ifndef CORRADE_TARGET_NACL_NEWLIB
         if((flags >= Flag::SkipDirectories) && entry->d_type == DT_DIR)
             continue;
         #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -198,10 +191,34 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
         #endif
         #endif
 
-        list.push_back(entry->d_name);
+        const std::string file{entry->d_name};
+        if((flags >= Flag::SkipDotAndDotDot) && (file == "." || file == ".."))
+            continue;
+
+        list.push_back(file);
     }
 
     closedir(directory);
+    #else
+    WIN32_FIND_DATA data;
+    HANDLE hFile = FindFirstFile(path.data(), &data);
+
+    if(hFile == INVALID_HANDLE_VALUE) return std::vector<std::string>{};
+
+    while(FindNextFile(hFile, &data) != 0 || GetLastError() != ERROR_NO_MORE_FILES) {
+        if((flags >= Flag::SkipDirectories) && (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+            continue;
+        if((flags >= Flag::SkipFiles) && !(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+            continue;
+        /** @todo are there any special files in WINAPI? */
+
+        const std::string file{data.cFileName};
+        if((flags >= Flag::SkipDotAndDotDot) && (file == "." || file == ".."))
+            continue;
+
+        list.push_back(file);
+    }
+    #endif
 
     if(flags >= Flag::SortAscending)
         std::sort(list.begin(), list.end());

@@ -114,7 +114,7 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @brief Constructor
          * @param group         Group name
          *
-         * If the group is not found, prints message to error output.
+         * The group must exist.
          */
         explicit Resource(const std::string& group);
 
@@ -132,21 +132,17 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @brief Get pointer to raw resource data
          * @param filename      Filename
          *
-         * Returns data of given file in the group as pair of pointer and size.
-         * If the group does not exist, returns `{nullptr, 0}`. If the file was
-         * not found, prints message to error output and returns `{nullptr, 0}`.
+         * Returns reference to data of given file in the group. The file must
+         * exist. If the file is empty, returns `nullptr`.
          */
         Containers::ArrayReference<const unsigned char> getRaw(const std::string& filename) const;
 
         /**
          * @brief Get data resource
          * @param filename      Filename
-         * @return Data of given group (specified in constructor) and filename.
-         *      Returns empty string if nothing was found.
          *
-         * Returns data of given file in the group. If the group does not
-         * exist, returns empty string. If the file was not found, prints
-         * message to error output and returns empty string.
+         * Returns data of given file in the group. The file must exist. If the
+         * file is empty, returns `nullptr`.
          */
         std::string get(const std::string& filename) const;
 

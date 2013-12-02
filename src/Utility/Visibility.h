@@ -26,35 +26,40 @@
 */
 
 /** @file
- * @brief Macros @ref CORRADE_VISIBILITY_EXPORT, @ref CORRADE_VISIBILITY_IMPORT, @ref CORRADE_VISIBILITY_LOCAL
+ * @brief Macros @ref CORRADE_VISIBILITY_EXPORT, @ref CORRADE_VISIBILITY_IMPORT, @ref CORRADE_VISIBILITY_STATIC, @ref CORRADE_VISIBILITY_LOCAL
  */
 
-/**
-@brief Export symbol
-
-The symbol name will be exported into shared library.
-*/
+/** @hideinitializer
+ * @brief Export symbol into shared library
+ */
 #ifdef _WIN32
 #define CORRADE_VISIBILITY_EXPORT __declspec(dllexport)
 #else
 #define CORRADE_VISIBILITY_EXPORT __attribute__ ((visibility ("default")))
 #endif
 
-/**
-@brief Import symbol
-
-The symbol name will be imported from shared library.
-*/
+/** @hideinitializer
+ * @brief Import symbol from shared library
+ */
 #ifdef _WIN32
 #define CORRADE_VISIBILITY_IMPORT __declspec(dllimport)
 #else
 #define CORRADE_VISIBILITY_IMPORT __attribute__ ((visibility ("default")))
 #endif
 
-/**
+/** @hideinitializer
+ * @brief Public symbol in static library
+ */
+#ifdef _WIN32
+#define CORRADE_VISIBILITY_STATIC
+#else
+#define CORRADE_VISIBILITY_STATIC __attribute__ ((visibility ("default")))
+#endif
+
+/** @hideinitializer
 @brief Local symbol
 
-The symbol name will not be exported into shared library.
+The symbol name will not be exported into shared or static library.
 */
 #ifdef _WIN32
 #define CORRADE_VISIBILITY_LOCAL
