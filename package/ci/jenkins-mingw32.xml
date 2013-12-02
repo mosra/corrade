@@ -67,6 +67,7 @@ cmake .. \
     -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/mingw32-${libraries} \
     -DCMAKE_INSTALL_RPATH=${JENKINS_HOME}/filesystem/mingw32-${libraries}/lib \
     ${static_build_flag} \
+    -DBUILD_TESTS=ON \
     -DGCC47_COMPATIBILITY=ON \
     -G Ninja
 
