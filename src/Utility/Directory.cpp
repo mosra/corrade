@@ -45,7 +45,7 @@ namespace Corrade { namespace Utility {
 
 std::string Directory::path(const std::string& filename) {
     /* If filename is already a path, return it */
-    if(!filename.empty() && filename.back() == '/')
+    if(!filename.empty() && filename[filename.size()-1] == '/')
         return filename.substr(0, filename.size()-1);
 
     std::size_t pos = filename.find_last_of('/');
@@ -82,7 +82,7 @@ std::string Directory::join(const std::string& path, const std::string& filename
         return filename;
 
     /* Add trailing slash to path, if not present */
-    if(path.back() != '/')
+    if(path[path.size()-1] != '/')
         return path + '/' + filename;
 
     return path + filename;
@@ -93,7 +93,7 @@ bool Directory::mkpath(const std::string& path) {
     if(path.empty()) return false;
 
     /* If path contains trailing slash, strip it */
-    if(path.back() == '/')
+    if(path[path.size()-1] == '/')
         return mkpath(path.substr(0, path.size()-1));
 
     /* If parent directory doesn't exist, create it */
