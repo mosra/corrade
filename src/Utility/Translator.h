@@ -230,8 +230,8 @@ class CORRADE_UTILITY_EXPORT Translator {
         const std::string* get(const std::string& key);
 
     private:
-        CORRADE_UTILITY_EXPORT static std::string* _locale();
-        CORRADE_UTILITY_EXPORT static std::set<Translator*>* instances();
+        static std::string* _locale();
+        static std::set<Translator*>* instances();
 
         std::string primaryDynamicFilename;
         const ConfigurationGroup* primaryDynamicGroup;

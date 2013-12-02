@@ -368,10 +368,10 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         CORRADE_UTILITY_LOCAL std::vector<Value>::iterator findValue(const std::string& key, unsigned int index);
         CORRADE_UTILITY_LOCAL std::vector<Value>::const_iterator findValue(const std::string& key, unsigned int index) const;
 
-        CORRADE_UTILITY_EXPORT std::string valueInternal(const std::string& key, unsigned int index, ConfigurationValueFlags flags) const;
-        CORRADE_UTILITY_EXPORT std::vector<std::string> valuesInternal(const std::string& key, ConfigurationValueFlags flags) const;
-        CORRADE_UTILITY_EXPORT bool setValueInternal(const std::string& key, std::string value, unsigned int number, ConfigurationValueFlags flags);
-        CORRADE_UTILITY_EXPORT void addValueInternal(std::string key, std::string value, ConfigurationValueFlags flags);
+        std::string valueInternal(const std::string& key, unsigned int index, ConfigurationValueFlags flags) const;
+        std::vector<std::string> valuesInternal(const std::string& key, ConfigurationValueFlags flags) const;
+        bool setValueInternal(const std::string& key, std::string value, unsigned int number, ConfigurationValueFlags flags);
+        void addValueInternal(std::string key, std::string value, ConfigurationValueFlags flags);
 
         std::vector<Value> _values;
         std::vector<Group> _groups;

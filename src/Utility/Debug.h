@@ -206,7 +206,7 @@ class CORRADE_UTILITY_EXPORT Debug {
     private:
         template<class T> Debug print(const T& value);
 
-        CORRADE_UTILITY_EXPORT static std::ostream* globalOutput;
+        static std::ostream* globalOutput;
         int flags;
 };
 
@@ -278,7 +278,7 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
             globalWarningOutput = _output; }
 
     private:
-        CORRADE_UTILITY_EXPORT static std::ostream* globalWarningOutput;
+        static std::ostream* globalWarningOutput;
 };
 
 /**
@@ -296,7 +296,7 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
             globalErrorOutput = _output; }
 
     private:
-        CORRADE_UTILITY_EXPORT static std::ostream* globalErrorOutput;
+        static std::ostream* globalErrorOutput;
 };
 
 }}
