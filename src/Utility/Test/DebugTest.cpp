@@ -100,6 +100,7 @@ void DebugTest::chars() {
 }
 
 void DebugTest::unicode() {
+    #ifndef CORRADE_MSVC2013_COMPATIBILITY
     /* Four-character hex values */
     std::ostringstream o;
     Debug(&o) << U'a';
@@ -114,6 +115,9 @@ void DebugTest::unicode() {
     o.str({});
     Debug(&o) << U"abc";
     CORRADE_COMPARE(o.str(), "{U+0061, U+0062, U+0063}\n");
+    #else
+    CORRADE_SKIP("Unicode character and string literals are not supported in MSVC 2013.");
+    #endif
 }
 
 namespace {

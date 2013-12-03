@@ -337,8 +337,13 @@ void ConfigurationTest::types() {
     conf.setValue("hexUpper", 0xF00D, 0, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase);
 
     /* Char32_t */
+    #ifndef CORRADE_MSVC2013_COMPATIBILITY
     CORRADE_COMPARE(conf.value<char32_t>("unicode"), U'\xBEEF');
     conf.setValue("unicode", U'\xBEEF');
+    #else
+    CORRADE_COMPARE(conf.value<char32_t>("unicode"), 0xBEEF);
+    conf.setValue("unicode", 0xBEEF);
+    #endif
 
     /* Nothing should be changed after saving */
     CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types.conf")));
