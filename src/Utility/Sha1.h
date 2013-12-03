@@ -73,8 +73,8 @@ class CORRADE_UTILITY_EXPORT Sha1: public AbstractHash<20> {
             return data << shift | data >> (32-shift);
         }
 
-        CORRADE_UTILITY_EXPORT static const unsigned int initialDigest[5];
-        CORRADE_UTILITY_LOCAL static const unsigned int constants[4];
+        static const unsigned int initialDigest[5];
+        static const unsigned int constants[4];
 
         std::string _buffer;
         unsigned long long _dataSize;
