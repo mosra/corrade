@@ -171,14 +171,14 @@ template<class T> class Array {
 
         /** @brief Conversion to array type */
         operator T*()
-        #ifndef CORRADE_GCC47_COMPATIBILITY
+        #if !defined(CORRADE_GCC47_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
         &
         #endif
         { return _data; }
 
         /** @overload */
         operator const T*()
-        #ifndef CORRADE_GCC47_COMPATIBILITY
+        #if !defined(CORRADE_GCC47_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
         const &
         #else
         const
