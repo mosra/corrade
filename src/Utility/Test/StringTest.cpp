@@ -23,6 +23,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <cctype>
+
 #include "TestSuite/Tester.h"
 #include "TestSuite/Compare/Container.h"
 #include "Utility/String.h"

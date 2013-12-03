@@ -23,6 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <cstdint>
 #include <sstream>
 #include <tuple>
 
