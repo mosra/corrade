@@ -48,7 +48,7 @@ class DebugTest: public TestSuite::Tester {
 };
 
 DebugTest::DebugTest() {
-    addTests({&DebugTest::debug,
+    addTests<DebugTest>({&DebugTest::debug,
               &DebugTest::boolean,
               &DebugTest::chars,
               &DebugTest::unicode,

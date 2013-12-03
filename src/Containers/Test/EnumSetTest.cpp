@@ -52,7 +52,7 @@ typedef EnumSet<Feature, int, 15> Features;
 CORRADE_ENUMSET_OPERATORS(Features)
 
 EnumSetTest::EnumSetTest() {
-    addTests({&EnumSetTest::construct,
+    addTests<EnumSetTest>({&EnumSetTest::construct,
               &EnumSetTest::operatorOr,
               &EnumSetTest::operatorAnd,
               &EnumSetTest::operatorBool,

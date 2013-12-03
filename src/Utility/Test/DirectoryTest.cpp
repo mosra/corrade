@@ -55,7 +55,7 @@ class DirectoryTest: public Corrade::TestSuite::Tester {
 };
 
 DirectoryTest::DirectoryTest() {
-    addTests({&DirectoryTest::path,
+    addTests<DirectoryTest>({&DirectoryTest::path,
               &DirectoryTest::filename,
               &DirectoryTest::join,
               #ifdef _WIN32

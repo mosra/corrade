@@ -50,7 +50,7 @@ class StringToFileTest: public Tester {
 };
 
 StringToFileTest::StringToFileTest() {
-    addTests({&StringToFileTest::same,
+    addTests<StringToFileTest>({&StringToFileTest::same,
               &StringToFileTest::empty,
               &StringToFileTest::notFound,
               &StringToFileTest::outputActualSmaller,

@@ -42,7 +42,7 @@ class ContainerTest: public Tester {
 };
 
 ContainerTest::ContainerTest() {
-    addTests({&ContainerTest::same,
+    addTests<ContainerTest>({&ContainerTest::same,
               &ContainerTest::outputActualSmaller,
               &ContainerTest::outputExpectedSmaller,
               &ContainerTest::output,

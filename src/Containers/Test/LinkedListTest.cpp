@@ -64,7 +64,7 @@ typedef Containers::LinkedList<Item> LinkedList;
 int Item::count = 0;
 
 LinkedListTest::LinkedListTest() {
-    addTests({&LinkedListTest::listBackReference,
+    addTests<LinkedListTest>({&LinkedListTest::listBackReference,
               &LinkedListTest::insert,
               &LinkedListTest::insertFromOtherList,
               &LinkedListTest::insertBeforeFromOtherList,

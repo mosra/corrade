@@ -44,7 +44,7 @@ class UnicodeTest: public TestSuite::Tester {
 };
 
 UnicodeTest::UnicodeTest() {
-    addTests({&UnicodeTest::nextUtf8,
+    addTests<UnicodeTest>({&UnicodeTest::nextUtf8,
               &UnicodeTest::nextUtf8Error,
               &UnicodeTest::nextUtf8Empty,
 

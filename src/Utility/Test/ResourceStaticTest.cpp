@@ -44,7 +44,7 @@ class ResourceStaticTest: public TestSuite::Tester {
 };
 
 ResourceStaticTest::ResourceStaticTest() {
-    addTests({&ResourceStaticTest::get});
+    addTests<ResourceStaticTest>({&ResourceStaticTest::get});
 
     initializeStaticResource();
 }

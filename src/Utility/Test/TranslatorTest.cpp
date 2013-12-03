@@ -42,7 +42,7 @@ class TranslatorTest: public TestSuite::Tester {
 };
 
 TranslatorTest::TranslatorTest() {
-    addTests({&TranslatorTest::file,
+    addTests<TranslatorTest>({&TranslatorTest::file,
               &TranslatorTest::group,
               &TranslatorTest::dynamic});
 }

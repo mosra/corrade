@@ -94,7 +94,7 @@ class Mailbox: public Interconnect::Receiver {
 };
 
 Test::Test() {
-    addTests({&Test::signalData,
+    addTests<Test>({&Test::signalData,
 
               &Test::connect,
 

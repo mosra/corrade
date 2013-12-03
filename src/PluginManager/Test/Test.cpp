@@ -73,7 +73,7 @@ class Test: public TestSuite::Tester {
 };
 
 Test::Test() {
-    addTests({&Test::nameList,
+    addTests<Test>({&Test::nameList,
               &Test::wrongPluginVersion,
               &Test::wrongPluginInterface,
               &Test::wrongMetadataFile,

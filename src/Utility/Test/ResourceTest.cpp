@@ -66,7 +66,7 @@ class ResourceTest: public TestSuite::Tester {
 };
 
 ResourceTest::ResourceTest() {
-    addTests({&ResourceTest::compile,
+    addTests<ResourceTest>({&ResourceTest::compile,
               &ResourceTest::compileNothing,
               &ResourceTest::compileEmptyFile,
 

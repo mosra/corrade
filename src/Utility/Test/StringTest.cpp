@@ -43,7 +43,7 @@ class StringTest: public TestSuite::Tester {
 };
 
 StringTest::StringTest() {
-    addTests({&StringTest::trim,
+    addTests<StringTest>({&StringTest::trim,
               &StringTest::split,
               &StringTest::lowercase,
               &StringTest::uppercase,

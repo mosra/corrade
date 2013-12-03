@@ -64,7 +64,7 @@ class ArgumentsTest: public TestSuite::Tester {
 };
 
 ArgumentsTest::ArgumentsTest() {
-    addTests({&ArgumentsTest::helpArgumentsOnly,
+    addTests<ArgumentsTest>({&ArgumentsTest::helpArgumentsOnly,
               &ArgumentsTest::helpNamedOnly,
               &ArgumentsTest::helpBoth,
               &ArgumentsTest::helpText,

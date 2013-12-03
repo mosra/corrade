@@ -52,7 +52,7 @@ typedef Containers::ArrayReference<int> ArrayReference;
 typedef Containers::ArrayReference<const int> ConstArrayReference;
 
 ArrayReferenceTest::ArrayReferenceTest() {
-    addTests({&ArrayReferenceTest::constructEmpty,
+    addTests<ArrayReferenceTest>({&ArrayReferenceTest::constructEmpty,
               &ArrayReferenceTest::construct,
               &ArrayReferenceTest::constructFixedSize,
               &ArrayReferenceTest::constructArray,

@@ -82,7 +82,7 @@ class Test: public Tester {
 };
 
 Test::Test() {
-    addTests({&Test::noChecks,
+    addTests<Test>({&Test::noChecks,
               &Test::trueExpression,
               &Test::falseExpression,
               &Test::equal,
@@ -178,7 +178,7 @@ class TesterTest: public Tester {
 class EmptyTest: public Tester {};
 
 TesterTest::TesterTest() {
-    addTests({&TesterTest::test,
+    addTests<TesterTest>({&TesterTest::test,
               &TesterTest::emptyTest,
 
               &TesterTest::compareAsOverload,

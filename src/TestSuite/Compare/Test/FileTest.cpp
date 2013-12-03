@@ -51,7 +51,7 @@ class FileTest: public Tester {
 };
 
 FileTest::FileTest() {
-    addTests({&FileTest::same,
+    addTests<FileTest>({&FileTest::same,
               &FileTest::empty,
               &FileTest::actualNotFound,
               &FileTest::expectedNotFound,

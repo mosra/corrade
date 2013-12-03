@@ -38,7 +38,7 @@ class MurmurHash2Test: public TestSuite::Tester {
 };
 
 MurmurHash2Test::MurmurHash2Test() {
-    addTests({&MurmurHash2Test::test32,
+    addTests<MurmurHash2Test>({&MurmurHash2Test::test32,
               &MurmurHash2Test::test64,
               &MurmurHash2Test::constructor});
 }

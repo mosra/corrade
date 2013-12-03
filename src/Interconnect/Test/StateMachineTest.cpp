@@ -38,7 +38,7 @@ class StateMachineTest: public TestSuite::Tester {
 };
 
 StateMachineTest::StateMachineTest() {
-    addTests({&StateMachineTest::test});
+    addTests<StateMachineTest>({&StateMachineTest::test});
 }
 
 #ifndef CORRADE_GCC44_COMPATIBILITY

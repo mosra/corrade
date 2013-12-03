@@ -40,7 +40,7 @@ class AbstractHashTest: public TestSuite::Tester {
 };
 
 AbstractHashTest::AbstractHashTest() {
-    addTests({&AbstractHashTest::toHexString,
+    addTests<AbstractHashTest>({&AbstractHashTest::toHexString,
               &AbstractHashTest::fromHexString,
               &AbstractHashTest::debug});
 }

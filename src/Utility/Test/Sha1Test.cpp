@@ -39,7 +39,7 @@ class Sha1Test: public TestSuite::Tester {
 };
 
 Sha1Test::Sha1Test() {
-    addTests({&Sha1Test::emptyString,
+    addTests<Sha1Test>({&Sha1Test::emptyString,
               &Sha1Test::exact64bytes,
               &Sha1Test::exactOneBlockPadding,
               &Sha1Test::twoBlockPadding});

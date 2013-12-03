@@ -42,7 +42,7 @@ class FloatingPointTest: public Tester {
 };
 
 FloatingPointTest::FloatingPointTest() {
-    addTests({&FloatingPointTest::smallDelta,
+    addTests<FloatingPointTest>({&FloatingPointTest::smallDelta,
               &FloatingPointTest::largeDelta,
               &FloatingPointTest::nan,
               &FloatingPointTest::infinity,

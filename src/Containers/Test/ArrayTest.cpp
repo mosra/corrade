@@ -49,7 +49,7 @@ class ArrayTest: public TestSuite::Tester {
 typedef Containers::Array<int> Array;
 
 ArrayTest::ArrayTest() {
-    addTests({&ArrayTest::constructEmpty,
+    addTests<ArrayTest>({&ArrayTest::constructEmpty,
               &ArrayTest::constructNullptr,
               &ArrayTest::construct,
               &ArrayTest::constructMove,

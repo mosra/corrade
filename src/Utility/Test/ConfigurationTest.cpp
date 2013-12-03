@@ -67,7 +67,7 @@ class ConfigurationTest: public TestSuite::Tester {
 };
 
 ConfigurationTest::ConfigurationTest() {
-    addTests({&ConfigurationTest::parse,
+    addTests<ConfigurationTest>({&ConfigurationTest::parse,
               &ConfigurationTest::parseHierarchic,
 
               &ConfigurationTest::groupIndex,
