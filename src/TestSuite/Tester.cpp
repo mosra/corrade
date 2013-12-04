@@ -116,7 +116,13 @@ void Tester::skip(const std::string& message) {
 }
 
 void Tester::registerTestCase(const std::string& name, int line) {
-    if(testCaseName.empty()) testCaseName = name + "()";
+    if(testCaseName.empty()) {
+        #ifndef CORRADE_MSVC2013_COMPATIBILITY
+        testCaseName = name + "()";
+        #else
+        testCaseName = name.substr(name.find_last_of(':') + 1) + "()";
+        #endif
+    }
     testCaseLine = line;
 }
 

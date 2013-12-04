@@ -213,8 +213,13 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 #endif
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
+#ifndef CORRADE_MSVC2013_COMPATIBILITY
 #define _CORRADE_REGISTER_TEST_CASE()                                       \
     Tester::registerTestCase(__func__, __LINE__);
+#else
+#define _CORRADE_REGISTER_TEST_CASE()                                       \
+    Tester::registerTestCase(__FUNCTION__, __LINE__);
+#endif
 #endif
 
 /** @hideinitializer
