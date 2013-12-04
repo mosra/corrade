@@ -35,6 +35,24 @@ std::ostream* Debug::globalOutput = &std::cout;
 std::ostream* Warning::globalWarningOutput = &std::cerr;
 std::ostream* Error::globalErrorOutput = &std::cerr;
 
+void Debug::setOutput(std::ostream* output) {
+    globalOutput = output;
+}
+
+void Warning::setOutput(std::ostream* output) {
+    globalWarningOutput = output;
+}
+
+void Error::setOutput(std::ostream* output) {
+    globalErrorOutput = output;
+}
+
+Debug::Debug(): output(globalOutput), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
+
+Warning::Warning(): Debug(globalWarningOutput) {}
+
+Error::Error(): Debug(globalErrorOutput) {}
+
 Debug::Debug(const Debug& other): output(other.output), flags(other.flags) {
     if(!(other.flags & 0x01))
         setFlag(NewLineAtTheEnd, false);

@@ -73,11 +73,12 @@ else
 // (newline character will be written to output on object destruction)
 @endcode
 Support for printing other types (which are not handled by `iostream` itself)
-can be added by implementing function operator<<(Debug, const T&) for given
-type.
+can be added by implementing function @ref operator<<(Debug, const T&) for
+given type.
 
-@see Warning, Error, CORRADE_ASSERT(), CORRADE_INTERNAL_ASSERT(),
-    CORRADE_INTERNAL_ASSERT_OUTPUT(), NaClConsoleStreamBuffer
+@see @ref Warning, @ref Error, @ref CORRADE_ASSERT(),
+    @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(),
+    @ref NaClConsoleStreamBuffer
 @todo Output to more ostreams at once
  */
 class CORRADE_UTILITY_EXPORT Debug {
@@ -94,13 +95,21 @@ class CORRADE_UTILITY_EXPORT Debug {
 
         /**
          * @brief Constructor
-         * @param _output       Stream where to put debug output. If set to
+         *
+         * Sets output to `std::cout`.
+         * @see @ref setOutput()
+         */
+        explicit Debug();
+
+        /**
+         * @brief Constructor
+         * @param output        Stream where to put debug output. If set to
          *      `nullptr`, no debug output will be written anywhere.
          *
          * Constructs debug object with given output.
-         * @see setOutput()
+         * @see @ref setOutput()
          */
-        explicit Debug(std::ostream* _output = globalOutput): output(_output), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
+        explicit Debug(std::ostream* output): output(output), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
 
         /**
          * @brief Copy constructor
@@ -190,18 +199,20 @@ class CORRADE_UTILITY_EXPORT Debug {
 
         /**
          * @brief Globally set output for newly created instances
-         * @param _output       Stream where to put debug output. If set to 0,
-         *      no debug output will be written anywhere.
+         * @param output       Stream where to put debug output. If set to
+         *      `nullptr`, no debug output will be written anywhere.
          *
-         * All successive Debug instances created with default constructor will
-         * be redirected to given stream.
+         * All successive @ref Debug instances created with default constructor
+         * will be redirected to given stream.
          */
-        static void setOutput(std::ostream* _output = globalOutput) {
-            globalOutput = _output;
-        }
+        static void setOutput(std::ostream* output);
 
+    #ifndef DOXYGEN_GENERATING_OUTPUT
     protected:
-        std::ostream* output;   /**< @brief Stream where to put the output */
+    #else
+    private:
+    #endif
+        std::ostream* output;
 
     private:
         template<class T> Debug print(const T& value);
@@ -263,40 +274,55 @@ template<class A, class B> Debug operator<<(Debug debug, const std::pair<A, B>& 
 }
 
 /**
- * @brief %Warning output handler
- *
- * Same as Debug, but by default writes output to standard error output. Thus
- * it is possible to separate / mute Debug, Warning and Error outputs.
- */
+@brief %Warning output handler
+
+Same as @ref Debug, but by default writes output to standard error output.
+Thus it is possible to separate / mute @ref Debug, @ref Warning and
+@ref Error outputs.
+*/
 class CORRADE_UTILITY_EXPORT Warning: public Debug {
     public:
-        /** @copydoc Debug::Debug() */
-        Warning(std::ostream* _output = globalWarningOutput): Debug(_output) {}
-
         /** @copydoc Debug::setOutput() */
-        static void setOutput(std::ostream* _output = globalWarningOutput) {
-            globalWarningOutput = _output; }
+        static void setOutput(std::ostream* output);
+
+        /**
+         * @brief Constructor
+         *
+         * Sets output to `std::cerr`.
+         * @see @ref setOutput()
+         */
+        explicit Warning();
+
+        /** @copydoc Debug::Debug() */
+        explicit Warning(std::ostream* output): Debug(output) {}
 
     private:
-        static std::ostream* globalWarningOutput;
+        static CORRADE_UTILITY_LOCAL std::ostream* globalWarningOutput;
 };
 
 /**
- * @brief %Error output handler
- *
- * @copydetails Warning
- */
+@brief %Error output handler
+
+@copydetails Warning
+*/
 class CORRADE_UTILITY_EXPORT Error: public Debug {
     public:
-        /** @copydoc Debug::Debug() */
-        Error(std::ostream* _output = globalErrorOutput): Debug(_output) {}
-
         /** @copydoc Debug::setOutput() */
-        static void setOutput(std::ostream* _output = globalErrorOutput) {
-            globalErrorOutput = _output; }
+        static void setOutput(std::ostream* _output);
+
+        /**
+         * @brief Constructor
+         *
+         * Sets output to `std::cerr`.
+         * @see @ref setOutput()
+         */
+        Error();
+
+        /** @copydoc Debug::Debug() */
+        Error(std::ostream* _output): Debug(_output) {}
 
     private:
-        static std::ostream* globalErrorOutput;
+        static CORRADE_UTILITY_LOCAL std::ostream* globalErrorOutput;
 };
 
 }}
