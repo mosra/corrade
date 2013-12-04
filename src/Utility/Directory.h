@@ -171,8 +171,11 @@ class CORRADE_UTILITY_EXPORT Directory {
         /**
          * @brief Current user's home directory
          *
-         * @partialsupport In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten"
-         *      returns empty string.
+         * On Unix, the directory is equivalent to `${HOME}` environment
+         * variable, on Windows to `%USERPROFILE%/Documents` or similar. If the
+         * directory can't be found, empty string is returned.
+         * @partialsupport In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" and
+         *      @ref CORRADE_TARGET_NACL returns empty string.
          */
         static std::string home();
 

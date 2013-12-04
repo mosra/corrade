@@ -133,11 +133,14 @@ bool Directory::fileExists(const std::string& filename) {
 }
 
 std::string Directory::home() {
-    #ifdef CORRADE_TARGET_EMSCRIPTEN
-    return {};
-    #else
-    #ifdef _WIN32
-    /** @bug Doesn't work at all */
+    /* Unix */
+    #ifdef __unix__
+    if(const char* const h = std::getenv("HOME"))
+        return h;
+    return std::string{};
+
+    /* Windows */
+    #elif defined(_WIN32)
     TCHAR h[MAX_PATH];
     #ifdef __MINGW32__
     #pragma GCC diagnostic push
@@ -148,11 +151,11 @@ std::string Directory::home() {
     #ifdef __MINGW32__
     #pragma GCC diagnostic pop
     #endif
-    #else
-    char* h = getenv("HOME");
-    if(!h) return {};
-    #endif
     return h;
+
+    /* Other */
+    #else
+    return {};
     #endif
 }
 

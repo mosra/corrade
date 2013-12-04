@@ -213,8 +213,26 @@ void DirectoryTest::mkpath() {
 }
 
 void DirectoryTest::home() {
-    CORRADE_EXPECT_FAIL("Don't know how to properly test without another well tested framework.");
-    CORRADE_COMPARE(Directory::home(), ""/*QDir::homePath()*/);
+    const std::string home = Directory::home();
+    Debug() << "Home dir found as:" << home;
+
+    /* On Linux verify that the home dir contains `.local` directory. Ugly and
+       hacky, but it's the best I came up with. Can't test for e.g. `/home/`
+       substring, as that can be overriden. */
+    #ifdef __linux__
+    CORRADE_VERIFY(Directory::fileExists(Directory::join(home, ".local")));
+
+    /* On Windows verify that the home dir contains `desktop.ini` file. Ugly
+       and hacky, but it's the best I came up with. Can't test for e.g.
+       `/Users/` substring, as that can be overriden. */
+    #elif defined(_WIN32)
+    CORRADE_VERIFY(Directory::fileExists(Directory::join(home, "desktop.ini")));
+
+    /* No idea elsewhere */
+    #else
+    CORRADE_EXPECT_FAIL("Not implemented yet.");
+    CORRADE_COMPARE(home, "");
+    #endif
 }
 
 void DirectoryTest::configurationDir() {
