@@ -395,7 +395,11 @@ void Test::slotInReceiverBase() { /* Local types are not allowed as template arg
     Interconnect::connect(postman, &Postman::newMessage, mailbox, &VintageMailbox::addMessage);
 
     /* Just to be sure */
+    #ifndef CORRADE_MSVC2013_COMPATIBILITY
     postman.newMessage(5, "hello");
+    #else
+    Error() << "Slots in receiver base cause crash on MSVC.";
+    #endif
     CORRADE_COMPARE(mailbox.messages, std::vector<std::string>{"hello"});
     CORRADE_COMPARE(mailbox.money, 5);
 }
@@ -438,7 +442,11 @@ void Test::virtualSlot() { /* Local types are not allowed as template arguments 
     /* It is important to connect to the original slot, not derived */
     Interconnect::connect(postman, &Postman::paymentRequested, *mailbox, &VirtualMailbox::pay);
 
+    #ifndef CORRADE_MSVC2013_COMPATIBILITY
     postman.paymentRequested(50);
+    #else
+    Error() << "Virtual slots cause crash on MSVC.";
+    #endif
     CORRADE_COMPARE(mailbox->money, -10);
 
     delete mailbox;
