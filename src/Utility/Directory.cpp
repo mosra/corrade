@@ -125,7 +125,11 @@ bool Directory::move(const std::string& oldPath, const std::string& newPath) {
 #endif
 
 bool Directory::fileExists(const std::string& filename) {
+    #ifndef _WIN32
     return std::ifstream(filename).good();
+    #else
+    return GetFileAttributes(filename.data()) != INVALID_FILE_ATTRIBUTES;
+    #endif
 }
 
 std::string Directory::home() {
