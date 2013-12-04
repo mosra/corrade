@@ -63,7 +63,10 @@
 # The macro adds preprocessor directive CORRADE_DYNAMIC_PLUGIN. Additional
 # libraries can be linked in via target_link_libraries(plugin_name ...). If
 # install_dir is set to CMAKE_CURRENT_BINARY_DIR (e.g. for testing purposes),
-# the files are copied directly, without need to run `make install`.
+# the files are copied directly, without the need to run `make install`. Note
+# that the files are actually put into configuration-based subdirectory, i.e.
+# ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}. See documentation of
+# CMAKE_CFG_INTDIR variable for more information.
 #
 #
 # Add static plugin.

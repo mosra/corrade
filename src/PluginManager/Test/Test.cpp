@@ -98,10 +98,22 @@ Test::Test() {
     initialize();
 }
 
+namespace {
+    #ifndef CMAKE_INTDIR
+    const std::string pluginsDir = PLUGINS_DIR;
+    const std::string foodPluginsDir = Directory::join(PLUGINS_DIR, "food");
+    const std::string deletablePluginsDir = Directory::join(PLUGINS_DIR, "deletable");
+    #else
+    const std::string pluginsDir = Directory::join(PLUGINS_DIR, CMAKE_INTDIR);
+    const std::string foodPluginsDir = Directory::join(Directory::join(PLUGINS_DIR, "food"), CMAKE_INTDIR);
+    const std::string deletablePluginsDir = Directory::join(Directory::join(PLUGINS_DIR, "deletable"), CMAKE_INTDIR);
+    #endif
+}
+
 void Test::nameList() {
     #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
     {
-        PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
+        PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
 
         CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
             "Canary", "Chihuahua", "Dog", "Snail"}), TestSuite::Compare::Container);
@@ -109,7 +121,7 @@ void Test::nameList() {
     #endif
 
     /* Check if the list of dynamic plugins is cleared after destructing */
-    PluginManager::Manager<AbstractAnimal> manager(Directory::join(PLUGINS_DIR, "nonexistent"));
+    PluginManager::Manager<AbstractAnimal> manager("nonexistent");
 
     CORRADE_COMPARE_AS(manager.pluginList(), std::vector<std::string>{
         "Canary"}, TestSuite::Compare::Container);
@@ -122,7 +134,7 @@ void Test::wrongPluginVersion() {
     std::ostringstream out;
     Error::setOutput(&out);
 
-    PluginManager::Manager<AbstractFood> foodManager(Directory::join(PLUGINS_DIR, "food"));
+    PluginManager::Manager<AbstractFood> foodManager(foodPluginsDir);
     CORRADE_COMPARE(foodManager.load("OldBread"), PluginManager::LoadState::WrongPluginVersion);
     CORRADE_COMPARE(foodManager.loadState("OldBread"), PluginManager::LoadState::NotLoaded);
     CORRADE_COMPARE(out.str(), "PluginManager: wrong plugin version, expected 3 but got 0\n");
@@ -136,7 +148,7 @@ void Test::wrongPluginInterface() {
     std::ostringstream out;
     Error::setOutput(&out);
 
-    PluginManager::Manager<AbstractFood> foodManager(Directory::join(PLUGINS_DIR, "food"));
+    PluginManager::Manager<AbstractFood> foodManager(foodPluginsDir);
     CORRADE_COMPARE(foodManager.load("RottenTomato"), PluginManager::LoadState::WrongInterfaceVersion);
     CORRADE_COMPARE(out.str(), "PluginManager: wrong interface version, expected 'cz.mosra.Corrade.PluginManager.Test.AbstractFood/1.0' but got 'cz.mosra.Corrade.PluginManager.Test.AbstractFood/0.1'\n");
     #endif
@@ -146,7 +158,7 @@ void Test::wrongMetadataFile() {
     #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
     CORRADE_SKIP("Can't test metadata file of static plugins");
     #else
-    PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
+    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
 
     CORRADE_COMPARE(manager.loadState("Snail"), LoadState::WrongMetadataFile);
     CORRADE_COMPARE(manager.load("Snail"), LoadState::WrongMetadataFile);
@@ -154,7 +166,7 @@ void Test::wrongMetadataFile() {
 }
 
 void Test::staticPlugin() {
-    PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
+    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
 
     CORRADE_COMPARE(manager.loadState("Canary"), LoadState::Static);
     CORRADE_COMPARE(*manager.metadata("Canary")->name(), "I'm allergic to canaries!");
@@ -172,7 +184,7 @@ void Test::staticPlugin() {
 
 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
 void Test::dynamicPlugin() {
-    PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
+    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
 
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.load("Dog"), LoadState::Loaded);
@@ -222,7 +234,7 @@ void Test::dynamicPluginInitFini() {
     std::ostringstream out;
     Debug::setOutput(&out);
 
-    PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
+    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
 
     /* Initialization is right after manager loads them */
     out.str({});
@@ -240,7 +252,7 @@ void Test::deletable() {
     #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
     CORRADE_SKIP("Can't test because static plugins can't be unloaded");
     #else
-    PluginManager::Manager<AbstractDeletable> deletableManager(Directory::join(PLUGINS_DIR, "deletable"));
+    PluginManager::Manager<AbstractDeletable> deletableManager(deletablePluginsDir);
 
     /* Load plugin where canBeDeleted() returns true */
     CORRADE_COMPARE(deletableManager.load("Deletable"), LoadState::Loaded);
@@ -263,7 +275,7 @@ void Test::hierarchy() {
     #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
     CORRADE_SKIP("Dependency hierarchy is meaningful only for dynamic plugins");
     #else
-    PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
+    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
 
     CORRADE_COMPARE(manager.load("Chihuahua"), LoadState::Loaded);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
@@ -292,8 +304,8 @@ void Test::hierarchy() {
 }
 
 void Test::crossManagerDependencies() {
-    PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
-    PluginManager::Manager<AbstractFood> foodManager(Directory::join(PLUGINS_DIR, "food"));
+    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+    PluginManager::Manager<AbstractFood> foodManager(foodPluginsDir);
 
     #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
     CORRADE_SKIP("Cross-manager dependencies are meaningful only for dynamic plugins");
@@ -332,8 +344,8 @@ void Test::usedByZombies() {
     #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
     CORRADE_SKIP("UsedBy list is irrelevant for static plugins");
     #else
-    PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
-    PluginManager::Manager<AbstractFood> foodManager(Directory::join(PLUGINS_DIR, "food"));
+    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+    PluginManager::Manager<AbstractFood> foodManager(foodPluginsDir);
 
     /* HotDogWithSnail depends on Dog and Snail, which cannot be loaded, so the
        loading fails too. Dog plugin then shouldn't have HotDogWithSnail in
@@ -350,20 +362,20 @@ void Test::reloadPluginDirectory() {
     #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
     CORRADE_SKIP("Plugin directory is irrelevant for static plugins");
     #else
-    PluginManager::Manager<AbstractAnimal> manager(PLUGINS_DIR);
+    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
 
     /* Load Dog and rename the plugin */
     CORRADE_COMPARE(manager.load("Dog"), LoadState::Loaded);
-    Directory::move(Directory::join(PLUGINS_DIR, std::string("Dog") + PLUGIN_FILENAME_SUFFIX),
-                    Directory::join(PLUGINS_DIR, std::string("LostDog") + PLUGIN_FILENAME_SUFFIX));
-    Directory::move(Directory::join(PLUGINS_DIR, "Dog.conf"),
-                    Directory::join(PLUGINS_DIR, "LostDog.conf"));
+    Directory::move(Directory::join(pluginsDir, std::string("Dog") + PLUGIN_FILENAME_SUFFIX),
+                    Directory::join(pluginsDir, std::string("LostDog") + PLUGIN_FILENAME_SUFFIX));
+    Directory::move(Directory::join(pluginsDir, "Dog.conf"),
+                    Directory::join(pluginsDir, "LostDog.conf"));
 
     /* Rename Chihuahua */
-    Directory::move(Directory::join(PLUGINS_DIR, std::string("Chihuahua") + PLUGIN_FILENAME_SUFFIX),
-                    Directory::join(PLUGINS_DIR, std::string("LostChihuahua") + PLUGIN_FILENAME_SUFFIX));
-    Directory::move(Directory::join(PLUGINS_DIR, "Chihuahua.conf"),
-                    Directory::join(PLUGINS_DIR, "LostChihuahua.conf"));
+    Directory::move(Directory::join(pluginsDir, std::string("Chihuahua") + PLUGIN_FILENAME_SUFFIX),
+                    Directory::join(pluginsDir, std::string("LostChihuahua") + PLUGIN_FILENAME_SUFFIX));
+    Directory::move(Directory::join(pluginsDir, "Chihuahua.conf"),
+                    Directory::join(pluginsDir, "LostChihuahua.conf"));
 
     /* Reload plugin dir and check new name list */
     manager.reloadPluginDirectory();
@@ -377,15 +389,15 @@ void Test::reloadPluginDirectory() {
     /** @todo Also test that "WrongMetadataFile" plugins are reloaded */
 
     /* Rename everything back and clean up */
-    Directory::move(Directory::join(PLUGINS_DIR, std::string("LostDog") + PLUGIN_FILENAME_SUFFIX),
-                    Directory::join(PLUGINS_DIR, std::string("Dog") + PLUGIN_FILENAME_SUFFIX));
-    Directory::move(Directory::join(PLUGINS_DIR, "LostDog.conf"),
-                    Directory::join(PLUGINS_DIR, "Dog.conf"));
+    Directory::move(Directory::join(pluginsDir, std::string("LostDog") + PLUGIN_FILENAME_SUFFIX),
+                    Directory::join(pluginsDir, std::string("Dog") + PLUGIN_FILENAME_SUFFIX));
+    Directory::move(Directory::join(pluginsDir, "LostDog.conf"),
+                    Directory::join(pluginsDir, "Dog.conf"));
 
-    Directory::move(Directory::join(PLUGINS_DIR, std::string("LostChihuahua") + PLUGIN_FILENAME_SUFFIX),
-                    Directory::join(PLUGINS_DIR, std::string("Chihuahua") + PLUGIN_FILENAME_SUFFIX));
-    Directory::move(Directory::join(PLUGINS_DIR, "LostChihuahua.conf"),
-                    Directory::join(PLUGINS_DIR, "Chihuahua.conf"));
+    Directory::move(Directory::join(pluginsDir, std::string("LostChihuahua") + PLUGIN_FILENAME_SUFFIX),
+                    Directory::join(pluginsDir, std::string("Chihuahua") + PLUGIN_FILENAME_SUFFIX));
+    Directory::move(Directory::join(pluginsDir, "LostChihuahua.conf"),
+                    Directory::join(pluginsDir, "Chihuahua.conf"));
 
     manager.reloadPluginDirectory();
 
