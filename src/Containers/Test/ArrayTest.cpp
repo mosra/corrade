@@ -147,7 +147,7 @@ void ArrayTest::pointerConversion() {
     CORRADE_COMPARE(d, c.begin());
 
     {
-        #ifdef CORRADE_GCC47_COMPATIBILITY
+        #if defined(CORRADE_GCC47_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
         CORRADE_EXPECT_FAIL("Rvalue references for *this are not supported in GCC < 4.8.1.");
         #endif
         CORRADE_VERIFY(!(std::is_convertible<Array&&, int*>::value));
