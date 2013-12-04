@@ -129,11 +129,15 @@ std::string Directory::home() {
     #ifdef _WIN32
     /** @bug Doesn't work at all */
     TCHAR h[MAX_PATH];
+    #ifdef __MINGW32__
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wold-style-cast"
+    #endif
     if(!SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_PERSONAL, nullptr, 0, h)))
         return {};
+    #ifdef __MINGW32__
     #pragma GCC diagnostic pop
+    #endif
     #else
     char* h = getenv("HOME");
     if(!h) return {};
@@ -149,11 +153,15 @@ std::string Directory::configurationDir(const std::string& applicationName, bool
     std::string dir = join(h, '.' + String::lowercase(applicationName));
     #else
     TCHAR path[MAX_PATH];
+    #ifdef __MINGW32__
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wold-style-cast"
+    #endif
     if(!SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, path)))
         return {};
+    #ifdef __MINGW32__
     #pragma GCC diagnostic pop
+    #endif
     std::string appdata = path;
     if(appdata.empty()) return {};
     std::string dir = join(appdata, applicationName);
