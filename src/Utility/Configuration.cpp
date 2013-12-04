@@ -257,8 +257,6 @@ void Configuration::save(std::ostream& out) {
     if(_flags & (InternalFlag::ForceWindowsEol|InternalFlag::WindowsEol) && !(_flags & InternalFlag::ForceUnixEol)) eol = "\r\n";
     else eol = "\n";
 
-    std::string buffer;
-
     /** @todo Checking file.good() after every operation */
     /** @todo Backup file */
 
