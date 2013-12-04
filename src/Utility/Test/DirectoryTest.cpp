@@ -236,8 +236,28 @@ void DirectoryTest::home() {
 }
 
 void DirectoryTest::configurationDir() {
-    CORRADE_EXPECT_FAIL("Don't know how to properly test without another well tested framework.");
-    CORRADE_COMPARE(Directory::configurationDir("Corrade", false), ""/*QDir::home().filePath(".corrade")*/);
+    const std::string dir = Directory::configurationDir("Corrade");
+    Debug() << "Configuration dir found as:" << dir;
+
+    /* On Linux verify that the parent dir contains `autostart` directory. Ugly
+       and hacky, but it's the best I came up with. Can't test for e.g.
+       `/home/` substring, as that can be overriden. */
+    #if __linux__
+    CORRADE_COMPARE(dir.substr(dir.size()-7), "corrade");
+    CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(dir), "autostart")));
+
+    /* On Windows verify that the parent dir contains `Microsoft` subdirectory.
+       Ugly and hacky, but it's the best I came up with. Can't test for e.g.
+       `/Users/` substring, as that can be overriden. */
+    #elif defined(_WIN32)
+    CORRADE_COMPARE(dir.substr(dir.size()-7), "Corrade");
+    CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(dir), "Microsoft")));
+
+    /* No idea elsewhere */
+    #else
+    CORRADE_EXPECT_FAIL("Not implemented yet.");
+    CORRADE_COMPARE(dir, "");
+    #endif
 }
 
 void DirectoryTest::list() {

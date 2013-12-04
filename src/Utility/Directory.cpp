@@ -159,12 +159,18 @@ std::string Directory::home() {
     #endif
 }
 
-std::string Directory::configurationDir(const std::string& applicationName, bool createIfNotExists) {
-    #ifndef _WIN32
-    std::string h = home();
-    if(h.empty()) return {};
-    std::string dir = join(h, '.' + String::lowercase(applicationName));
-    #else
+std::string Directory::configurationDir(const std::string& applicationName) {
+    /* XDG-compilant Unix */
+    #ifdef __unix__
+    const std::string lowercaseApplicationName = String::lowercase(applicationName);
+    if(const char* const config = std::getenv("XDG_CONFIG_HOME"))
+        return join(config, lowercaseApplicationName);
+
+    const std::string home = Directory::home();
+    return home.empty() ? std::string{} : join(home, ".config/" + lowercaseApplicationName);
+
+    /* Windows */
+    #elif defined(_WIN32)
     TCHAR path[MAX_PATH];
     #ifdef __MINGW32__
     #pragma GCC diagnostic push
@@ -175,17 +181,13 @@ std::string Directory::configurationDir(const std::string& applicationName, bool
     #ifdef __MINGW32__
     #pragma GCC diagnostic pop
     #endif
-    std::string appdata = path;
-    if(appdata.empty()) return {};
-    std::string dir = join(appdata, applicationName);
-    #endif
+    const std::string appdata(path);
+    return appdata.empty() ? std::string{} : join(appdata, applicationName);
 
-    #ifndef CORRADE_TARGET_NACL_NEWLIB
-    if(createIfNotExists) mkpath(dir);
+    /* Other not implemented */
     #else
-    static_cast<void>(createIfNotExists);
+    return {};
     #endif
-    return dir;
 }
 
 std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
