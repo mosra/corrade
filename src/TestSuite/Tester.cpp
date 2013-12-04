@@ -59,10 +59,10 @@ int Tester::exec(std::ostream* logOutput, std::ostream* errorOutput) {
         try {
             testCaseName.clear();
             (this->*i)();
-        } catch(Exception e) {
+        } catch(Exception) {
             ++errorCount;
             continue;
-        } catch(SkipException e) {
+        } catch(SkipException) {
             continue;
         }
 
