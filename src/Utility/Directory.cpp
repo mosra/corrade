@@ -110,6 +110,12 @@ bool Directory::mkpath(const std::string& path) {
 }
 
 bool Directory::rm(const std::string& path) {
+    #ifdef _WIN32
+    /* std::remove() can't remove directories on Windows */
+    if(GetFileAttributes(path.data()) & FILE_ATTRIBUTE_DIRECTORY)
+        return RemoveDirectory(path.data());
+    #endif
+
     return std::remove(path.c_str()) == 0;
 }
 
