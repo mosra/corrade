@@ -193,10 +193,10 @@ std::string Directory::configurationDir(const std::string& applicationName) {
 std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     std::vector<std::string> list;
 
-    #ifndef _WIN32
-    DIR* directory;
-    directory = opendir(path.c_str());
-    if(directory == nullptr) return std::vector<std::string>{};
+    /* POSIX-compilant Unix */
+    #ifdef __unix__
+    DIR* directory = opendir(path.c_str());
+    if(!directory) return list;
 
     dirent* entry;
     while((entry = readdir(directory)) != nullptr) {
@@ -222,11 +222,12 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     }
 
     closedir(directory);
-    #else
+
+    /* Windows */
+    #elif defined(_WIN32)
     WIN32_FIND_DATA data;
     HANDLE hFile = FindFirstFile(join(path, "*").data(), &data);
-
-    if(hFile == INVALID_HANDLE_VALUE) return std::vector<std::string>{};
+    if(hFile == INVALID_HANDLE_VALUE) return list;
 
     /* Explicitly add `.` for compatibility with other systems */
     if(!(flags & (Flag::SkipDotAndDotDot|Flag::SkipDirectories))) list.push_back(".");
@@ -244,6 +245,10 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
 
         list.push_back(file);
     }
+
+    /* Other not implemented */
+    #else
+    return list;
     #endif
 
     if(flags >= Flag::SortAscending)
