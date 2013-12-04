@@ -55,6 +55,7 @@ class ConfigurationTest: public TestSuite::Tester {
 
         void whitespaces();
         void types();
+        void typesScientific();
         void eol();
         void stripComments();
 
@@ -82,6 +83,7 @@ ConfigurationTest::ConfigurationTest() {
 
               &ConfigurationTest::whitespaces,
               &ConfigurationTest::types,
+              &ConfigurationTest::typesScientific,
               &ConfigurationTest::eol,
               &ConfigurationTest::stripComments,
 
@@ -318,15 +320,6 @@ void ConfigurationTest::types() {
     CORRADE_COMPARE(conf.value<double>("doubleNeg"), -2.14);
     CORRADE_VERIFY(conf.setValue("doubleNeg", -2.14));
 
-    /* Double scientific */
-    CORRADE_COMPARE(conf.value<double>("exp"), 2.1e7);
-    CORRADE_COMPARE(conf.value<double>("expPos"), 2.1e+7);
-    conf.setValue("expPos", 2.1e+7, 0, ConfigurationValueFlag::Scientific);
-    CORRADE_COMPARE(conf.value<double>("expNeg"), -2.1e7);
-    CORRADE_COMPARE(conf.value<double>("expNeg2"), 2.1e-7);
-    CORRADE_COMPARE(conf.value<double>("expBig"), 2.1E7);
-    conf.setValue<double>("expBig", 2.1E7, 0, ConfigurationValueFlag::Scientific|ConfigurationValueFlag::Uppercase);
-
     /* Flags */
     CORRADE_COMPARE(conf.value<int>("oct", 0, ConfigurationValueFlag::Oct), 0773);
     conf.setValue("oct", 0773, 0, ConfigurationValueFlag::Oct);
@@ -342,9 +335,35 @@ void ConfigurationTest::types() {
 
     /* Nothing should be changed after saving */
     CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types.conf")));
+
     CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types.conf"),
                        Directory::join(CONFIGURATION_TEST_DIR, "types.conf"),
                        TestSuite::Compare::File);
+}
+
+void ConfigurationTest::typesScientific() {
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "types-scientific.conf"), Configuration::Flag::ReadOnly);
+
+    CORRADE_COMPARE(conf.value<double>("exp"), 2.1e7);
+    CORRADE_COMPARE(conf.value<double>("expPos"), 2.1e+7);
+    conf.setValue("expPos", 2.1e+7, 0, ConfigurationValueFlag::Scientific);
+    CORRADE_COMPARE(conf.value<double>("expNeg"), -2.1e7);
+    CORRADE_COMPARE(conf.value<double>("expNeg2"), 2.1e-7);
+    CORRADE_COMPARE(conf.value<double>("expBig"), 2.1E7);
+    conf.setValue<double>("expBig", 2.1E7, 0, ConfigurationValueFlag::Scientific|ConfigurationValueFlag::Uppercase);
+
+    /* Nothing should be changed after saving */
+    CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types-scientific.conf")));
+
+    #ifndef _MSC_VER
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types-scientific.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "types-scientific.conf"),
+                       TestSuite::Compare::File);
+    #else
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types-scientific.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "types-scientific-msvc.conf"),
+                       TestSuite::Compare::File);
+    #endif
 }
 
 void ConfigurationTest::eol() {
