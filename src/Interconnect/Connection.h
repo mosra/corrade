@@ -46,10 +46,16 @@ namespace Implementation {
         public:
             static const std::size_t Size = 2*sizeof(void*)/sizeof(std::size_t);
 
+            #ifndef CORRADE_MSVC2013_COMPATIBILITY
             template<class Emitter, class ...Args> SignalData(typename Emitter::Signal(Emitter::*signal)(Args...)): data() {
                 typedef typename Emitter::Signal(Emitter::*Signal)(Args...);
                 *reinterpret_cast<Signal*>(data) = signal;
             }
+            #else
+            template<class F> SignalData(F signal): data() {
+               *reinterpret_cast<F*>(data) = signal;
+            }
+            #endif
 
             bool operator==(const SignalData& other) const {
                 for(std::size_t i = 0; i != Size; ++i)
