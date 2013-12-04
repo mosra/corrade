@@ -209,9 +209,12 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     closedir(directory);
     #else
     WIN32_FIND_DATA data;
-    HANDLE hFile = FindFirstFile(path.data(), &data);
+    HANDLE hFile = FindFirstFile(join(path, "*").data(), &data);
 
     if(hFile == INVALID_HANDLE_VALUE) return std::vector<std::string>{};
+
+    /* Explicitly add `.` for compatibility with other systems */
+    if(!(flags & (Flag::SkipDotAndDotDot|Flag::SkipDirectories))) list.push_back(".");
 
     while(FindNextFile(hFile, &data) != 0 || GetLastError() != ERROR_NO_MORE_FILES) {
         if((flags >= Flag::SkipDirectories) && (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
