@@ -83,7 +83,7 @@ class CORRADE_UTILITY_EXPORT Directory {
              * Sort items in ascending order. If specified both @ref Flag "Flag::SortAscending"
              * and @ref Flag "Flag::SortDescending", ascending order is used.
              */
-            SortAscending = 3 << 4,
+            SortAscending = (1 << 4) | (1 << 5),
 
             /**
              * Sort items in descending order. If specified both @ref Flag "Flag::SortAscending"
@@ -171,22 +171,26 @@ class CORRADE_UTILITY_EXPORT Directory {
         /**
          * @brief Current user's home directory
          *
-         * @partialsupport In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten"
-         *      returns empty string.
+         * On Unix, the directory is equivalent to `${HOME}` environment
+         * variable, on Windows to `%USERPROFILE%/Documents` or similar. If the
+         * directory can't be found, empty string is returned.
+         * @partialsupport In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" and
+         *      @ref CORRADE_TARGET_NACL returns empty string.
          */
         static std::string home();
 
         /**
-         * @brief Get application configuration dir
+         * @brief Application configuration dir
          * @param name              Application name
-         * @param createIfNotExists Create the directory, if not exists already
          *
-         * On Unix, the configuration dir is `~/.name` (*name* is lowercased),
-         * on Windows the configuration dir is somewhere in
-         * `C:/Document and Settings/user/Application Data/`name` (*name* is
-         * left as is).
+         * On Unix, the configuration dir is `${XDG_CONFIG_HOME}/name` or
+         * `${HOME}/.config/name` (@p name is lowercased), on Windows the
+         * configuration dir is in `%APPDATA%/`name` (*name* is left as is). If
+         * the directory can't be found, empty string is returned.
+         * @partialsupport In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" and
+         *      @ref CORRADE_TARGET_NACL returns empty string.
          */
-        static std::string configurationDir(const std::string& name, bool createIfNotExists = true);
+        static std::string configurationDir(const std::string& name);
 
         /**
          * @brief Check if the file exists

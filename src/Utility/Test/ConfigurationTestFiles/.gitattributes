@@ -1,0 +1,4 @@
+eol-unix.conf -text
+eol-windows.conf -text
+eol-mixed.conf -text
+multiLine-crlf.conf -text

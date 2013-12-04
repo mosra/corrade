@@ -110,6 +110,12 @@ bool Directory::mkpath(const std::string& path) {
 }
 
 bool Directory::rm(const std::string& path) {
+    #ifdef _WIN32
+    /* std::remove() can't remove directories on Windows */
+    if(GetFileAttributes(path.data()) & FILE_ATTRIBUTE_DIRECTORY)
+        return RemoveDirectory(path.data());
+    #endif
+
     return std::remove(path.c_str()) == 0;
 }
 
@@ -119,61 +125,78 @@ bool Directory::move(const std::string& oldPath, const std::string& newPath) {
 #endif
 
 bool Directory::fileExists(const std::string& filename) {
+    #ifndef _WIN32
     return std::ifstream(filename).good();
+    #else
+    return GetFileAttributes(filename.data()) != INVALID_FILE_ATTRIBUTES;
+    #endif
 }
 
 std::string Directory::home() {
-    #ifdef CORRADE_TARGET_EMSCRIPTEN
-    return {};
-    #else
-    #ifdef _WIN32
-    /** @bug Doesn't work at all */
+    /* Unix */
+    #ifdef __unix__
+    if(const char* const h = std::getenv("HOME"))
+        return h;
+    return std::string{};
+
+    /* Windows */
+    #elif defined(_WIN32)
     TCHAR h[MAX_PATH];
+    #ifdef __MINGW32__
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wold-style-cast"
+    #endif
     if(!SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_PERSONAL, nullptr, 0, h)))
         return {};
+    #ifdef __MINGW32__
     #pragma GCC diagnostic pop
-    #else
-    char* h = getenv("HOME");
-    if(!h) return {};
     #endif
     return h;
+
+    /* Other */
+    #else
+    return {};
     #endif
 }
 
-std::string Directory::configurationDir(const std::string& applicationName, bool createIfNotExists) {
-    #ifndef _WIN32
-    std::string h = home();
-    if(h.empty()) return {};
-    std::string dir = join(h, '.' + String::lowercase(applicationName));
-    #else
+std::string Directory::configurationDir(const std::string& applicationName) {
+    /* XDG-compilant Unix */
+    #ifdef __unix__
+    const std::string lowercaseApplicationName = String::lowercase(applicationName);
+    if(const char* const config = std::getenv("XDG_CONFIG_HOME"))
+        return join(config, lowercaseApplicationName);
+
+    const std::string home = Directory::home();
+    return home.empty() ? std::string{} : join(home, ".config/" + lowercaseApplicationName);
+
+    /* Windows */
+    #elif defined(_WIN32)
     TCHAR path[MAX_PATH];
+    #ifdef __MINGW32__
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wold-style-cast"
+    #endif
     if(!SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, path)))
         return {};
+    #ifdef __MINGW32__
     #pragma GCC diagnostic pop
-    std::string appdata = path;
-    if(appdata.empty()) return {};
-    std::string dir = join(appdata, applicationName);
     #endif
+    const std::string appdata(path);
+    return appdata.empty() ? std::string{} : join(appdata, applicationName);
 
-    #ifndef CORRADE_TARGET_NACL_NEWLIB
-    if(createIfNotExists) mkpath(dir);
+    /* Other not implemented */
     #else
-    static_cast<void>(createIfNotExists);
+    return {};
     #endif
-    return dir;
 }
 
 std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     std::vector<std::string> list;
 
-    #ifndef _WIN32
-    DIR* directory;
-    directory = opendir(path.c_str());
-    if(directory == nullptr) return std::vector<std::string>{};
+    /* POSIX-compilant Unix */
+    #ifdef __unix__
+    DIR* directory = opendir(path.c_str());
+    if(!directory) return list;
 
     dirent* entry;
     while((entry = readdir(directory)) != nullptr) {
@@ -199,11 +222,15 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     }
 
     closedir(directory);
-    #else
-    WIN32_FIND_DATA data;
-    HANDLE hFile = FindFirstFile(path.data(), &data);
 
-    if(hFile == INVALID_HANDLE_VALUE) return std::vector<std::string>{};
+    /* Windows */
+    #elif defined(_WIN32)
+    WIN32_FIND_DATA data;
+    HANDLE hFile = FindFirstFile(join(path, "*").data(), &data);
+    if(hFile == INVALID_HANDLE_VALUE) return list;
+
+    /* Explicitly add `.` for compatibility with other systems */
+    if(!(flags & (Flag::SkipDotAndDotDot|Flag::SkipDirectories))) list.push_back(".");
 
     while(FindNextFile(hFile, &data) != 0 || GetLastError() != ERROR_NO_MORE_FILES) {
         if((flags >= Flag::SkipDirectories) && (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
@@ -218,6 +245,10 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
 
         list.push_back(file);
     }
+
+    /* Other not implemented */
+    #else
+    return list;
     #endif
 
     if(flags >= Flag::SortAscending)
