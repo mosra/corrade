@@ -205,7 +205,7 @@ void Test::staticPluginInitFini() {
     {
         /* Initialization is right after manager assigns them to itself */
         out.str({});
-        PluginManager::Manager<AbstractAnimal> manager{std::string()};
+        PluginManager::Manager<AbstractAnimal> manager{"inexistentDir"};
         CORRADE_COMPARE_AS(manager.pluginList(), std::vector<std::string>{
             "Canary"}, TestSuite::Compare::Container);
         CORRADE_COMPARE(out.str(), "Canary initialized\n");
