@@ -341,8 +341,14 @@ void ConfigurationTest::types() {
     CORRADE_COMPARE(conf.value<char32_t>("unicode"), U'\xBEEF');
     conf.setValue("unicode", U'\xBEEF');
     #else
-    CORRADE_COMPARE(conf.value<char32_t>("unicode"), 0xBEEF);
-    conf.setValue("unicode", 0xBEEF);
+    {
+        CORRADE_EXPECT_FAIL("char32_t is not properly supported in MSVC 2013.");
+        CORRADE_COMPARE(conf.value<char32_t>("unicode"), 0xBEEF);
+        //conf.setValue("unicode", 0xBEEF);
+    }
+    /* We need to explicitly specify the flags to have the value properly converted */
+    CORRADE_COMPARE(conf.value<char32_t>("unicode", 0, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase), 0xBEEF);
+    conf.setValue("unicode", 0xBEEF, 0, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase);
     #endif
 
     /* Nothing should be changed after saving */
