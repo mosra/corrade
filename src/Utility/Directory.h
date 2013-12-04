@@ -83,7 +83,7 @@ class CORRADE_UTILITY_EXPORT Directory {
              * Sort items in ascending order. If specified both @ref Flag "Flag::SortAscending"
              * and @ref Flag "Flag::SortDescending", ascending order is used.
              */
-            SortAscending = 3 << 4,
+            SortAscending = (1 << 4) | (1 << 5),
 
             /**
              * Sort items in descending order. If specified both @ref Flag "Flag::SortAscending"
