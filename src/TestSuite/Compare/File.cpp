@@ -40,8 +40,8 @@ bool Comparator<Compare::File>::operator()(const std::string& actualFilename, co
     this->actualFilename = Directory::join(pathPrefix, actualFilename);
     this->expectedFilename = Directory::join(pathPrefix, expectedFilename);
 
-    std::ifstream actualIn(this->actualFilename);
-    std::ifstream expectedIn(this->expectedFilename);
+    std::ifstream actualIn(this->actualFilename, std::ifstream::binary);
+    std::ifstream expectedIn(this->expectedFilename, std::ifstream::binary);
 
     if(!actualIn.good())
         return false;

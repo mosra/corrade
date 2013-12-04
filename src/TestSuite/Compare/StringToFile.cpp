@@ -35,7 +35,7 @@ Comparator<Compare::StringToFile>::Comparator(): state(State::ReadError) {}
 bool Comparator<Compare::StringToFile>::operator()(const std::string& actualContents, const std::string& filename) {
     this->filename = filename;
 
-    std::ifstream in(filename);
+    std::ifstream in(filename, std::ifstream::binary);
 
     if(!in.good())
         return false;

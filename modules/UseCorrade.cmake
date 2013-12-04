@@ -179,7 +179,7 @@ function(corrade_add_plugin plugin_name install_dir metadata_file)
     if(${install_dir} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
         add_custom_command(
             OUTPUT ${plugin_name}.conf
-            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} ${CMAKE_CURRENT_BINARY_DIR}/${plugin_name}.conf
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${plugin_name}.conf
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
         add_custom_target(${plugin_name}-metadata ALL DEPENDS ${plugin_name}.conf)
     else()
