@@ -51,11 +51,11 @@ bool Comparator<Compare::File>::operator()(const std::string& actualFilename, co
     }
 
     actualIn.seekg(0, std::ios::end);
-    actualContents.reserve(actualIn.tellg());
+    actualContents.reserve(std::size_t(actualIn.tellg()));
     actualIn.seekg(0, std::ios::beg);
 
     expectedIn.seekg(0, std::ios::end);
-    actualContents.reserve(expectedIn.tellg());
+    actualContents.reserve(std::size_t(expectedIn.tellg()));
     expectedIn.seekg(0, std::ios::beg);
 
     actualContents.assign((std::istreambuf_iterator<char>(actualIn)), std::istreambuf_iterator<char>());

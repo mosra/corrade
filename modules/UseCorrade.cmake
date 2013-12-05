@@ -35,7 +35,7 @@ endif()
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     # Don't allow to use compilers older than what compatibility mode allows
     if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.4.0")
-        message(FATAL_ERROR "Corrade cannot be used with GCC 4.3")
+        message(FATAL_ERROR "Corrade cannot be used with GCC < 4.4")
     endif()
     if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.5.0" AND NOT CORRADE_GCC44_COMPATIBILITY)
         message(FATAL_ERROR "To use Corrade with GCC 4.4, build it with GCC44_COMPATIBILITY enabled")
@@ -62,6 +62,13 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     endif()
     if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.5.0" AND CORRADE_GCC44_COMPATIBILITY)
         message(FATAL_ERROR "GCC >=4.5 cannot be used if Corrade is built with GCC44_COMPATIBILITY")
+    endif()
+elseif(MSVC)
+    # Don't allow to use compilers older than what compatibility mode allows
+    if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "18.0")
+        message(FATAL_ERROR "Corrade cannot be used with MSVC < 2013")
+    elseif(NOT CORRADE_MSVC2013_COMPATIBILITY)
+        message(FATAL_ERROR "To use Corrade with MSVC 2013, build it with MSVC2013_COMPATIBILITY enabled")
     endif()
 endif()
 
@@ -90,6 +97,26 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQ
     if(CORRADE_GCC44_COMPATIBILITY AND CORRADE_TARGET_NACL)
         string(REPLACE "-pedantic" "" CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS}")
     endif()
+
+# MSVC-specific compiler flags
+elseif(MSVC)
+    # Optional C++ flags. Disabling these warnings:
+    # - C4127 "conditional expression is constant", fires in `do while(false)`,
+    #   i.e. in all assertions and tests. Does it look like I put that false
+    #   there by mistake?
+    # - C4251 "needs to have dll-interface to be used by clients", as the fix
+    #   for that would effectively prevent using STL completely.
+    # - C4351 "new behavior: elements of array will be default initialized".
+    #   YES. YES I KNOW WHAT I'M DOING.
+    # - C4373 "previous versions of the compiler did not override when
+    #   parameters only differed by const/volatile qualifiers". Okay. So you
+    #   had bugs. And?
+    # - C4512 "assignment operator could not be generated". Do I want one? NO I
+    #   DON'T.
+    # - C4910 "dllexport and extern are incompatible on an explicit
+    #   instantiation". Why the error is emitted only on classes? Functions are
+    #   okay with dllexport extern?!
+    set(CORRADE_CXX_FLAGS "/W4 /wd4127 /wd4251 /wd4351 /wd4373 /wd4512 /wd4910")
 endif()
 
 # Use C++11-enabled libcxx on OSX

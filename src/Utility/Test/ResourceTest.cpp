@@ -97,12 +97,12 @@ void ResourceTest::compile() {
     CORRADE_VERIFY(consequenceIn.good());
 
     predispositionIn.seekg(0, std::ios::end);
-    std::string predisposition(predispositionIn.tellg(), '\0');
+    std::string predisposition(std::size_t(predispositionIn.tellg()), '\0');
     predispositionIn.seekg(0, std::ios::beg);
     predispositionIn.read(&predisposition[0], predisposition.size());
 
     consequenceIn.seekg(0, std::ios::end);
-    std::string consequence(consequenceIn.tellg(), '\0');
+    std::string consequence(std::size_t(consequenceIn.tellg()), '\0');
     consequenceIn.seekg(0, std::ios::beg);
     consequenceIn.read(&consequence[0], consequence.size());
 

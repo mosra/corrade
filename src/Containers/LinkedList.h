@@ -386,8 +386,8 @@ template<class T> void LinkedList<T>::clear() {
 template<class Derived, class List> LinkedListItem<Derived, List>::LinkedListItem(LinkedListItem<Derived, List>&& other): _list(nullptr), _previous(nullptr), _next(nullptr) {
     /* Replace other with self in the list */
     if(other._list) {
-        other._list->insert(static_cast<Derived*>(this), other._next);
-        other._list->cut(static_cast<Derived*>(&other));
+        other._list->LinkedList<Derived>::insert(static_cast<Derived*>(this), other._next);
+        other._list->LinkedList<Derived>::cut(static_cast<Derived*>(&other));
     }
 }
 
@@ -397,12 +397,12 @@ template<class Derived, class List> LinkedListItem<Derived, List>::~LinkedListIt
 
 template<class Derived, class List> LinkedListItem<Derived, List>& LinkedListItem<Derived, List>::operator=(LinkedListItem<Derived, List>&& other) {
     /* Cut self from previous list */
-    if(_list) _list->cut(static_cast<Derived*>(this));
+    if(_list) _list->LinkedList<Derived>::cut(static_cast<Derived*>(this));
 
     /* Replace other with self in new list */
     if(other._list) {
-        other._list->insert(static_cast<Derived*>(this), other._next);
-        other._list->cut(static_cast<Derived*>(&other));
+        other._list->LinkedList<Derived>::insert(static_cast<Derived*>(this), other._next);
+        other._list->LinkedList<Derived>::cut(static_cast<Derived*>(&other));
     }
 
     return *this;

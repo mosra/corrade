@@ -359,7 +359,7 @@ std::pair<bool, Containers::Array<unsigned char>> Resource::fileContents(const s
         #else
         return std::pair<bool, Containers::Array<unsigned char>&&>{true, Containers::Array<unsigned char>{}};
         #endif
-    Containers::Array<unsigned char> data(file.tellg());
+    Containers::Array<unsigned char> data(std::size_t(file.tellg()));
     file.seekg(0, std::ios::beg);
     file.read(reinterpret_cast<char*>(data.begin()), data.size());
 

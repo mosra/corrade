@@ -41,7 +41,7 @@ bool Comparator<Compare::StringToFile>::operator()(const std::string& actualCont
         return false;
 
     in.seekg(0, std::ios::end);
-    expectedContents.reserve(in.tellg());
+    expectedContents.reserve(std::size_t(in.tellg()));
     in.seekg(0, std::ios::beg);
 
     expectedContents.assign((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
