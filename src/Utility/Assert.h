@@ -88,7 +88,7 @@ CORRADE_ASSERT(pos < size(), "Cannot access element" << pos << "in array of size
             Corrade::Utility::Error() << message;                           \
             return returnValue;                                             \
         }                                                                   \
-    } while(0)
+    } while(false)
 #else
 #ifdef CORRADE_NO_ASSERT
 #define CORRADE_ASSERT(condition, message, returnValue) do {} while(0)
@@ -100,7 +100,7 @@ CORRADE_ASSERT(pos < size(), "Cannot access element" << pos << "in array of size
             std::abort();                                                   \
             return returnValue;                                             \
         }                                                                   \
-    } while(0)
+    } while(false)
 #endif
 #endif
 
@@ -136,7 +136,7 @@ CORRADE_INTERNAL_ASSERT(!nullptr);
             Corrade::Utility::Error() << "Assertion" << #condition << "failed in" << __FILE__ << "on line" << __LINE__; \
             std::abort();                                                   \
         }                                                                   \
-    } while(0)
+    } while(false)
 #endif
 
 /** @hideinitializer
@@ -155,7 +155,7 @@ CORRADE_INTERNAL_ASSERT_OUTPUT(initialize());
 #define CORRADE_INTERNAL_ASSERT_OUTPUT(call)                                \
     do {                                                                    \
         call;                                                               \
-    } while(0)
+    } while(false)
 #else
 #define CORRADE_INTERNAL_ASSERT_OUTPUT(call)                                \
     do {                                                                    \
@@ -163,7 +163,7 @@ CORRADE_INTERNAL_ASSERT_OUTPUT(initialize());
             Corrade::Utility::Error() << "Assertion" << #call << "failed in" << __FILE__ << "on line" << __LINE__; \
             std::abort();                                                   \
         }                                                                   \
-    } while(0)
+    } while(false)
 #endif
 
 /** @hideinitializer
@@ -193,7 +193,7 @@ switch(flag) {
     do {                                                                    \
         Corrade::Utility::Error() << "Reached unreachable code in" << __FILE__ << "on line" << __LINE__; \
         std::abort();                                                       \
-    } while(0)
+    } while(false)
 #endif
 
 #endif
