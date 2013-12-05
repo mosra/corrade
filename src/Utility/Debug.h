@@ -73,8 +73,8 @@ else
 // (newline character will be written to output on object destruction)
 @endcode
 Support for printing other types (which are not handled by `iostream` itself)
-can be added by implementing function @ref operator<<(Debug, const T&) for
-given type.
+can be added by implementing function operator<<(Debug, const T&) for given
+type.
 
 @see @ref Warning, @ref Error, @ref CORRADE_ASSERT(),
     @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(),
@@ -308,7 +308,7 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
 class CORRADE_UTILITY_EXPORT Error: public Debug {
     public:
         /** @copydoc Debug::setOutput() */
-        static void setOutput(std::ostream* _output);
+        static void setOutput(std::ostream* output);
 
         /**
          * @brief Constructor
@@ -319,7 +319,7 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
         Error();
 
         /** @copydoc Debug::Debug() */
-        Error(std::ostream* _output): Debug(_output) {}
+        Error(std::ostream* output): Debug(output) {}
 
     private:
         static CORRADE_UTILITY_LOCAL std::ostream* globalErrorOutput;

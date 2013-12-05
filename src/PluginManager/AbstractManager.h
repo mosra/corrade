@@ -442,7 +442,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
 If static plugins are compiled into dynamic library or directly into the
 executable, they should be automatically loaded at startup thanks to
-@ref CORRADE_AUTOMATIC_INITALIZER() and @ref CORRADE_AUTOMATIC_FINALIZER()
+@ref CORRADE_AUTOMATIC_INITIALIZER() and @ref CORRADE_AUTOMATIC_FINALIZER()
 macros.
 
 If static plugins are compiled into static library, they are not automatically
