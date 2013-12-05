@@ -63,6 +63,13 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.5.0" AND CORRADE_GCC44_COMPATIBILITY)
         message(FATAL_ERROR "GCC >=4.5 cannot be used if Corrade is built with GCC44_COMPATIBILITY")
     endif()
+elseif(MSVC)
+    # Don't allow to use compilers older than what compatibility mode allows
+    if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "18.0")
+        message(FATAL_ERROR "Corrade cannot be used with MSVC < 2013")
+    elseif(NOT CORRADE_MSVC2013_COMPATIBILITY)
+        message(FATAL_ERROR "To use Corrade with MSVC 2013, build it with MSVC2013_COMPATIBILITY enabled")
+    endif()
 endif()
 
 # GCC/Clang-specific compiler flags
