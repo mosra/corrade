@@ -98,7 +98,6 @@ CORRADE_ASSERT(pos < size(), "Cannot access element" << pos << "in array of size
         if(!(condition)) {                                                  \
             Corrade::Utility::Error() << message;                           \
             std::abort();                                                   \
-            return returnValue;                                             \
         }                                                                   \
     } while(false)
 #endif
