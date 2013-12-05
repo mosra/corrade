@@ -35,7 +35,7 @@ endif()
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     # Don't allow to use compilers older than what compatibility mode allows
     if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.4.0")
-        message(FATAL_ERROR "Corrade cannot be used with GCC 4.3")
+        message(FATAL_ERROR "Corrade cannot be used with GCC < 4.4")
     endif()
     if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.5.0" AND NOT CORRADE_GCC44_COMPATIBILITY)
         message(FATAL_ERROR "To use Corrade with GCC 4.4, build it with GCC44_COMPATIBILITY enabled")
