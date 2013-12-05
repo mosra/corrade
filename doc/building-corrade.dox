@@ -32,11 +32,16 @@ namespace Corrade {
 
 Minimal set of tools required for building is:
 
-- C++ compiler with good C++11 support. Currently there are two compilers
-  which are tested to support everything needed: **GCC** >= 4.6 and **Clang**
-  >= 3.1. On Windows you can use **MinGW**, Visual Studio compiler still lacks
-  some needed features.
-- **CMake** >= 2.8.8
+-   C++ compiler with good C++11 support. Currently there are two compilers
+    which are tested to have everything needed: **GCC** >= 4.6 and **Clang**
+    >= 3.1. On Windows you can use **MinGW**. GCC 4.5, 4.4 and **MSVC** 2013
+    support involves some ugly workarounds and thus is available only in
+    `compatibility` branch.
+-   **CMake** >= 2.8.8
+
+Note that full feature set is available only on GCC 4.8.1 and Clang 3.1 and
+compatibility mode with reduced feature set must be enabled for other
+compilers.
 
 @section building-download Downloading the sources
 
@@ -45,6 +50,12 @@ repository with your favorite IDE or Git GUI, download currrent snapshot as
 compressed archive or use the command line:
 
     git clone git://github.com/mosra/corrade.git
+
+If you need to use the `compatibility` branch, check it out as following from
+the cloned repository or download the particular archive from
+https://github.com/mosra/corrade/tree/compatibility.
+
+    git checkout compatibility
 
 @section building-compilation Compilation, installation
 
@@ -108,7 +119,9 @@ commands:
     cmake -DCMAKE_INSTALL_PREFIX=/usr .. && make
     make install
 
-See @ref building-features "below" for additional configuration options.
+If using older compiler, you might need to enable compatibility mode to pass
+the CMake configuration step -- see @ref building-features "below" for
+additional configuration options.
 
 @subsection building-windows Using QtCreator and CMake GUI (on Windows)
 
@@ -126,12 +139,6 @@ For most convenient usage it's best to set `CMAKE_INSTALL_PREFIX` to directory
 where MinGW is installed (e.g. `C:/MinGW/`) and add `C:/MinGW/bin` and
 `C:/MinGW/lib` to `PATH`. Installation to given prefix can be then done from
 within QtCreator by adding new `make install` build rule.
-
-@subsubsection building-corrade-windows-troubleshooting Windows troubleshooting
-
-Until GCC 4.8 is available in MinGW, you need to enable `GCC47_COMPATIBILITY`
-for building %Corrade on Windows as described below, e.g. specify
-`-DGCC47_COMPATIBILITY=ON` CMake parameter.
 
 @subsection building-features Enabling or disabling features
 
@@ -159,6 +166,13 @@ portability, compatibility mode for older compilers is provided:
 - `GCC46_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
   4.6. You need to enable this also if you are building with Clang and don't
   have GCC 4.7 libs.
+- `GCC45_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
+  4.5. Note that GCC 4.5 support is maintained only in `compatibility` branch.
+- `GCC44_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
+  4.4. Note that GCC 4.4 support is maintained only in `compatibility` branch.
+- `MSVC2013_COMPATIBILITY` -- Enable for compiling with compatibility more for
+  Microsoft Visual C++ 2013. Note that MSVC 2013 support is maintained only in
+  `compatibility` branch.
 
 %Corrade will detect the compiler used and refuses to build (or be used) if
 some compatibility mode needs to be enabled. On the other hand, if any of these
