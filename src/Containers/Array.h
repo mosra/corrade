@@ -167,6 +167,11 @@ template<class T> class Array {
         #endif
         { return _data; }
 
+        #ifndef CORRADE_GCC47_COMPATIBILITY
+        /** @overload */
+        operator const T*() const && = delete;
+        #endif
+
         /**
          * @brief Release data storage
          *
