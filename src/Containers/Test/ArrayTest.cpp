@@ -144,11 +144,17 @@ void ArrayTest::pointerConversion() {
     const int* d = c;
     CORRADE_COMPARE(d, c.begin());
 
+    /* Verify that we can't convert rvalues */
+    CORRADE_VERIFY((std::is_convertible<Array&, int*>::value));
+    CORRADE_VERIFY((std::is_convertible<const Array&, const int*>::value));
     {
         #ifdef CORRADE_GCC47_COMPATIBILITY
         CORRADE_EXPECT_FAIL("Rvalue references for *this are not supported in GCC < 4.8.1.");
         #endif
+        CORRADE_VERIFY(!(std::is_convertible<Array, int*>::value));
         CORRADE_VERIFY(!(std::is_convertible<Array&&, int*>::value));
+        CORRADE_VERIFY(!(std::is_convertible<const Array, const int*>::value));
+        CORRADE_VERIFY(!(std::is_convertible<const Array&&, const int*>::value));
     }
 }
 
