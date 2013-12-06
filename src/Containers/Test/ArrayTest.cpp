@@ -44,6 +44,7 @@ class ArrayTest: public TestSuite::Tester {
         void emptyCheck();
         void access();
         void rangeBasedFor();
+        void release();
 };
 
 typedef Containers::Array<int> Array;
@@ -60,7 +61,8 @@ ArrayTest::ArrayTest() {
 
               &ArrayTest::emptyCheck,
               &ArrayTest::access,
-              &ArrayTest::rangeBasedFor});
+              &ArrayTest::rangeBasedFor,
+              &ArrayTest::release});
 }
 
 void ArrayTest::constructEmpty() {
@@ -180,6 +182,17 @@ void ArrayTest::rangeBasedFor() {
     CORRADE_COMPARE(a[2], 3);
     CORRADE_COMPARE(a[3], 3);
     CORRADE_COMPARE(a[4], 3);
+}
+
+void ArrayTest::release() {
+    Array a(5);
+    int* const data = a;
+    int* const released = a.release();
+    delete[] released;
+
+    CORRADE_COMPARE(data, released);
+    CORRADE_COMPARE(a.begin(), nullptr);
+    CORRADE_COMPARE(a.size(), 0);
 }
 
 }}}

@@ -167,6 +167,14 @@ template<class T> class Array {
         #endif
         { return _data; }
 
+        /**
+         * @brief Release data storage
+         *
+         * Returns the data pointer and resets internal state to default.
+         * Deleting the returned array is user responsibility.
+         */
+        T* release();
+
     private:
         template<class ...U> static Array<T> fromInternal(U&&... values) {
             Array<T> array;
@@ -377,6 +385,14 @@ template<class T> inline Array<T>& Array<T>::operator=(Array<T>&& other) noexcep
     std::swap(_data, other._data);
     std::swap(_size, other._size);
     return *this;
+}
+
+template<class T> inline T* Array<T>::release() {
+    /** @todo I need `std::exchange` NOW. */
+    T* const data = _data;
+    _data = nullptr;
+    _size = 0;
+    return data;
 }
 
 }}
