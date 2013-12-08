@@ -37,6 +37,10 @@
 
 #include "corradeConfigure.h"
 
+#ifdef CORRADE_BUILD_DEPRECATED
+#include "Utility/Macros.h"
+#endif
+
 namespace Corrade { namespace Interconnect {
 
 namespace Implementation {
@@ -233,7 +237,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * @deprecated Use @ref Corrade::Interconnect::connect() "Interconnect::connect()"
          *      instead.
          */
-        template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> static Connection connect(EmitterObject* emitter, Signal(Emitter::*signal)(Args...), ReceiverObject* receiver, void(Receiver::*slot)(Args...));
+        template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> static CORRADE_DEPRECATED("use Interconnect::connect() instead") Connection connect(EmitterObject* emitter, Signal(Emitter::*signal)(Args...), ReceiverObject* receiver, void(Receiver::*slot)(Args...));
         #endif
 
         explicit Emitter();
