@@ -36,7 +36,6 @@ corrade_add_test(UtilityArgumentsTest ArgumentsTest.cpp LIBRARIES CorradeUtility
 corrade_add_test(UtilityDirectoryTest DirectoryTest.cpp)
 corrade_add_test(UtilityEndianTest EndianTest.cpp)
 corrade_add_test(UtilityMurmurHash2Test MurmurHash2Test.cpp)
-corrade_add_test(UtilityUtilitiesTest UtilitiesTest.cpp)
 corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp LIBRARIES CorradeUtilityTestLib)
 corrade_add_test(UtilityDebugTest DebugTest.cpp)
 corrade_add_test(UtilitySha1Test Sha1Test.cpp)

@@ -53,21 +53,6 @@ template<class To, class From> inline To bitCast(const From& from) {
 
 /*@}*/
 
-/** @{ @name Numeric utilities */
-
-/** @brief Power of 2
- * @return 2^number
- */
-inline unsigned int pow2(unsigned int number) { return 1 << number; }
-
-/**
- * @brief Base-2 logarithm
- * @return log2(number)
- */
-CORRADE_UTILITY_EXPORT unsigned int log2(unsigned int number);
-
-/*@}*/
-
 /** @{ @name System utilities */
 
 /**
