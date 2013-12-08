@@ -1,6 +1,6 @@
 /* Compiled resource file. DO NOT EDIT! */
 
-#include "Utility/utilities.h"
+#include "Utility/Macros.h"
 #include "Utility/Resource.h"
 
 static const unsigned char resourcePositions[] = {

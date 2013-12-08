@@ -144,7 +144,7 @@ std::string Resource::compile(const std::string& name, const std::string& group,
     /* Special case for empty file list */
     if(files.empty()) {
         return "/* Compiled resource file. DO NOT EDIT! */\n\n"
-            "#include \"Utility/utilities.h\"\n"
+            "#include \"Utility/Macros.h\"\n"
             "#include \"Utility/Resource.h\"\n\n"
             "int resourceInitializer_" + name + "();\n"
             "int resourceInitializer_" + name + "() {\n"
@@ -199,7 +199,7 @@ std::string Resource::compile(const std::string& name, const std::string& group,
        -Wmissing-declarations in GCC). If we don't have any data, we don't
        create the resourceData array, as zero-length arrays are not allowed. */
     return "/* Compiled resource file. DO NOT EDIT! */\n\n"
-        "#include \"Utility/utilities.h\"\n"
+        "#include \"Utility/Macros.h\"\n"
         "#include \"Utility/Resource.h\"\n\n"
         "static const unsigned char resourcePositions[] = {" +
         positions + "\n};\n\n"
