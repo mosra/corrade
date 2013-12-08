@@ -26,8 +26,25 @@
 */
 
 /** @file
- * @brief Macros @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
+ * @brief Macros @ref CORRADE_DEPRECATED(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
+
+/** @hideinitializer
+@brief Deprecation mark
+
+Marked function or class will emit deprecation warning on supported compilers:
+@code
+class CORRADE_DEPRECATED("use Bar instead") Foo;
+CORRADE_DEPRECATED("use bar() instead") void foo();
+@endcode
+*/
+#if defined(__GNUC__) || defined(__clang__)
+#define CORRADE_DEPRECATED(message) __attribute((deprecated(message)))
+#elif defined(_MSC_VER)
+#define CORRADE_DEPRECATED(message) __declspec(deprecated(message))
+#else
+#define CORRADE_DEPRECATED(message)
+#endif
 
 /** @hideinitializer
 @brief Automatic initializer
