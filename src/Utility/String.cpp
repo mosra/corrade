@@ -32,16 +32,16 @@ namespace Corrade { namespace Utility {
 const std::string String::Whitespace(" \t\f\v\r\n");
 const std::string String::Bom("\xEF\xBB\xBF");
 
-std::string String::ltrim(std::string str, const std::string& characters) {
-    return str.erase(0, str.find_first_not_of(characters));
+std::string String::ltrim(std::string string, const std::string& characters) {
+    return string.erase(0, string.find_first_not_of(characters));
 }
 
-std::string String::rtrim(std::string str, const std::string& characters) {
-    return str.erase(str.find_last_not_of(characters)+1);
+std::string String::rtrim(std::string string, const std::string& characters) {
+    return string.erase(string.find_last_not_of(characters)+1);
 }
 
-std::string String::trim(std::string str, const std::string& characters) {
-    return ltrim(rtrim(std::move(str)), characters);
+std::string String::trim(std::string string, const std::string& characters) {
+    return ltrim(rtrim(std::move(string)), characters);
 }
 
 std::vector<std::string> String::split(const std::string& str, char delim, bool keepEmptyParts) {

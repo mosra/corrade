@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::String
+ * @brief Class @ref Corrade::Utility::String
  */
 
 #include <string>
@@ -58,30 +58,30 @@ class CORRADE_UTILITY_EXPORT String {
 
         /**
          * @brief Trim leading whitespace from string
-         * @param str           %String to be trimmed
+         * @param string        %String to be trimmed
          * @param characters    Characters which will be trimmed
          *
-         * @see rtrim(), trim()
+         * @see @ref rtrim(), @ref trim()
          */
-        static std::string ltrim(std::string str, const std::string& characters = Whitespace);
+        static std::string ltrim(std::string string, const std::string& characters = Whitespace);
 
         /**
          * @brief Trim trailing whitespace from string
-         * @param str           %String to be trimmed
+         * @param string        %String to be trimmed
          * @param characters    Characters which will be trimmed
          *
          * @see ltrim(), trim()
          */
-        static std::string rtrim(std::string str, const std::string& characters = Whitespace);
+        static std::string rtrim(std::string string, const std::string& characters = Whitespace);
 
         /**
          * @brief Trim leading and trailing whitespace from string
-         * @param str           %String to be trimmed
+         * @param string        %String to be trimmed
          * @param characters    Characters which will be trimmed
          *
-         * Equivalent to `ltrim(rtrim(str)`.
+         * Equivalent to `ltrim(rtrim(string))`.
          */
-        static std::string trim(std::string str, const std::string& characters = Whitespace);
+        static std::string trim(std::string string, const std::string& characters = Whitespace);
 
         /**
          * @brief Split string on given character
