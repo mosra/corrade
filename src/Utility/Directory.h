@@ -201,11 +201,11 @@ class CORRADE_UTILITY_EXPORT Directory {
         static bool fileExists(const std::string& filename);
 
         /**
-         * @brief Read whole file into string
+         * @brief Read file into array
          *
-         * Reads the file as binary (i.e. without newline conversion). Returns
-         * empty string if the file can't be read.
-         * @see @ref fileExists()
+         * Reads whole file as binary (i.e. without newline conversion).
+         * Returns `nullptr` if the file can't be read.
+         * @see @ref fileExists(), @ref write()
          */
         static Containers::Array<unsigned char> read(const std::string& filename);
 };
