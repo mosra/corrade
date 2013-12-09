@@ -194,9 +194,9 @@ class CORRADE_UTILITY_EXPORT Directory {
 
         /**
          * @brief Check if the file exists
-         * @param filename          Filename
-         * @return Whether the file exists and is accessible (e.g. user has
-         *      permission to open it).
+         *
+         * Returns `true` if the file exists and is accessible (e.g. user has
+         * permission to open it), `false` otherwise.
          */
         static bool fileExists(const std::string& filename);
 };
