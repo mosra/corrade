@@ -27,6 +27,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <array>
 #include <algorithm>
 #include <fstream>
 
