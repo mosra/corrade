@@ -33,6 +33,7 @@ class StringTest: public TestSuite::Tester {
     public:
         StringTest();
 
+        void fromArray();
         void trim();
         void split();
         void join();
@@ -42,12 +43,21 @@ class StringTest: public TestSuite::Tester {
 };
 
 StringTest::StringTest() {
-    addTests({&StringTest::trim,
+    addTests({&StringTest::fromArray,
+              &StringTest::trim,
               &StringTest::split,
               &StringTest::join,
               &StringTest::lowercase,
               &StringTest::uppercase,
               &StringTest::whitespace});
+}
+
+void StringTest::fromArray() {
+    CORRADE_COMPARE(String::fromArray(nullptr), "");
+    CORRADE_COMPARE(String::fromArray(nullptr, 37), "");
+
+    CORRADE_COMPARE(String::fromArray("abc\0def"), "abc");
+    CORRADE_COMPARE(String::fromArray("abc\0def", 7), std::string("abc\0def", 7));
 }
 
 void StringTest::trim() {

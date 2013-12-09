@@ -61,6 +61,25 @@ class CORRADE_UTILITY_EXPORT String {
         String() = delete;
 
         /**
+         * @brief Safely construct string from char array
+         *
+         * If @p string is `nullptr`, returns empty string.
+         */
+        static std::string fromArray(const char* string) {
+            return string ? std::string{string} : std::string{};
+        }
+
+        /**
+         * @brief Safely construct string from char array
+         *
+         * If @p string is `nullptr`, returns empty string. Otherwise takes
+         * also @p length into account.
+         */
+        static std::string fromArray(const char* string, std::size_t length) {
+            return string ? std::string{string, length} : std::string{};
+        }
+
+        /**
          * @brief Trim leading whitespace from string
          * @param string        %String to be trimmed
          * @param characters    Characters which will be trimmed
