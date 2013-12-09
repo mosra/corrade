@@ -25,6 +25,7 @@
 
 #include <fstream>
 
+#include "Containers/Array.h"
 #include "TestSuite/Tester.h"
 #include "TestSuite/Compare/Container.h"
 #include "Utility/Directory.h"
@@ -52,6 +53,8 @@ class DirectoryTest: public Corrade::TestSuite::Tester {
         void configurationDir();
         void list();
         void listSortPrecedence();
+        void read();
+        void readNonSeekable();
 };
 
 DirectoryTest::DirectoryTest() {
@@ -69,7 +72,9 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::home,
               &DirectoryTest::configurationDir,
               &DirectoryTest::list,
-              &DirectoryTest::listSortPrecedence});
+              &DirectoryTest::listSortPrecedence,
+              &DirectoryTest::read,
+              &DirectoryTest::readNonSeekable});
 }
 
 void DirectoryTest::path() {
@@ -300,6 +305,27 @@ void DirectoryTest::list() {
 
 void DirectoryTest::listSortPrecedence() {
     CORRADE_VERIFY((Directory::Flag::SortAscending|Directory::Flag::SortDescending) == Directory::Flag::SortAscending);
+}
+
+void DirectoryTest::read() {
+    /* Existing file, check if we are reading it as binary (CR+LF is not converted to LF) */
+    const auto data = Directory::read(Directory::join(DIRECTORY_TEST_DIR, "file"));
+    CORRADE_COMPARE(std::vector<unsigned char>(data.begin(), data.end()),
+        (std::vector<unsigned char>{0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0xDE, 0xAD, 0xBE, 0xEF}));
+
+    /* Nonexistent file */
+    const auto none = Directory::read("nonexistent");
+    CORRADE_VERIFY(!none);
+}
+
+void DirectoryTest::readNonSeekable() {
+    #ifdef __unix__
+    /** @todo Test more thoroughly than this */
+    const auto data = Directory::read("/proc/loadavg");
+    CORRADE_VERIFY(!data.empty());
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
 }
 
 }}}

@@ -199,6 +199,15 @@ class CORRADE_UTILITY_EXPORT Directory {
          * permission to open it), `false` otherwise.
          */
         static bool fileExists(const std::string& filename);
+
+        /**
+         * @brief Read whole file into string
+         *
+         * Reads the file as binary (i.e. without newline conversion). Returns
+         * empty string if the file can't be read.
+         * @see @ref fileExists()
+         */
+        static Containers::Array<unsigned char> read(const std::string& filename);
 };
 
 CORRADE_ENUMSET_OPERATORS(Directory::Flags)
