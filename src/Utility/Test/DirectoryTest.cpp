@@ -28,6 +28,7 @@
 #include "Containers/Array.h"
 #include "TestSuite/Tester.h"
 #include "TestSuite/Compare/Container.h"
+#include "TestSuite/Compare/File.h"
 #include "Utility/Directory.h"
 
 #include "testConfigure.h"
@@ -55,6 +56,7 @@ class DirectoryTest: public Corrade::TestSuite::Tester {
         void listSortPrecedence();
         void read();
         void readNonSeekable();
+        void write();
 };
 
 DirectoryTest::DirectoryTest() {
@@ -74,7 +76,8 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::list,
               &DirectoryTest::listSortPrecedence,
               &DirectoryTest::read,
-              &DirectoryTest::readNonSeekable});
+              &DirectoryTest::readNonSeekable,
+              &DirectoryTest::write});
 }
 
 void DirectoryTest::path() {
@@ -326,6 +329,14 @@ void DirectoryTest::readNonSeekable() {
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
+}
+
+void DirectoryTest::write() {
+    constexpr unsigned char data[] = {0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0xDE, 0xAD, 0xBE, 0xEF};
+    CORRADE_VERIFY(Directory::write(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file"), data));
+    CORRADE_COMPARE_AS(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file"),
+        Directory::join(DIRECTORY_TEST_DIR, "file"),
+        TestSuite::Compare::File);
 }
 
 }}}

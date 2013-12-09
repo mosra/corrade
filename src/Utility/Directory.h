@@ -208,6 +208,15 @@ class CORRADE_UTILITY_EXPORT Directory {
          * @see @ref fileExists(), @ref write()
          */
         static Containers::Array<unsigned char> read(const std::string& filename);
+
+        /**
+         * @brief Write array into file
+         *
+         * Writes array into file as binary (i.e. without newline conversion).
+         * Returns `false` if the file can't be written, `true` otherwise.
+         * @see @ref read()
+         */
+        static bool write(const std::string& filename, Containers::ArrayReference<const void> data);
 };
 
 CORRADE_ENUMSET_OPERATORS(Directory::Flags)

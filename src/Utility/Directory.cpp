@@ -290,4 +290,12 @@ Containers::Array<unsigned char> Directory::read(const std::string& filename) {
     return out;
 }
 
+bool Directory::write(const std::string& filename, const Containers::ArrayReference<const void> data) {
+    std::ofstream file(filename, std::ofstream::binary);
+    if(!file) return false;
+
+    file.write(reinterpret_cast<const char*>(data.data()), data.size());
+    return true;
+}
+
 }}
