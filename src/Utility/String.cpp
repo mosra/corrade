@@ -44,22 +44,78 @@ std::string String::trim(std::string string, const std::string& characters) {
     return ltrim(rtrim(std::move(string)), characters);
 }
 
-std::vector<std::string> String::split(const std::string& str, char delim, bool keepEmptyParts) {
+std::vector<std::string> String::split(const std::string& string, const char delimiter) {
     std::vector<std::string> parts;
     std::size_t oldpos = 0, pos = std::string::npos;
 
-    do {
-        pos = str.find(delim, oldpos);
-        std::string part = str.substr(oldpos, pos-oldpos);
-
-        if(!part.empty() || keepEmptyParts)
-            parts.push_back(part);
-
+    while((pos = string.find(delimiter, oldpos)) != std::string::npos) {
+        parts.push_back(string.substr(oldpos, pos-oldpos));
         oldpos = pos+1;
-    } while(pos != std::string::npos);
+    }
+
+    if(!string.empty())
+        parts.push_back(string.substr(oldpos));
 
     return parts;
 }
+
+std::vector<std::string> String::splitWithoutEmptyParts(const std::string& string, const char delimiter) {
+    std::vector<std::string> parts;
+    std::size_t oldpos = 0, pos = std::string::npos;
+
+    while((pos = string.find(delimiter, oldpos)) != std::string::npos) {
+        if(pos != oldpos)
+            parts.push_back(string.substr(oldpos, pos-oldpos));
+
+        oldpos = pos+1;
+    }
+
+    if(!string.empty() && (oldpos < string.size()))
+        parts.push_back(string.substr(oldpos));
+
+    return parts;
+}
+
+std::string String::join(const std::vector<std::string>& strings, const char delimiter) {
+    /* Compute size of resulting string, count also delimiters */
+    std::size_t size = 0;
+    for(const auto& s: strings) size += s.size() + 1;
+    if(size) --size;
+
+    /* Reserve memory for resulting string */
+    std::string result;
+    result.reserve(size);
+
+    /* Join strings */
+    for(const auto& s: strings) {
+        result += s;
+        if(result.size() != size) result += delimiter;
+    }
+
+    return result;
+}
+
+std::string String::joinWithoutEmptyParts(const std::vector<std::string>& strings, const char delimiter) {
+    /* Compute size of resulting string, count also delimiters */
+    std::size_t size = 0;
+    for(const auto& s: strings) if(!s.empty()) size += s.size() + 1;
+    if(size) --size;
+
+    /* Reserve memory for resulting string */
+    std::string result;
+    result.reserve(size);
+
+    /* Join strings */
+    for(const auto& s: strings) {
+        if(s.empty()) continue;
+
+        result += s;
+        if(result.size() != size) result += delimiter;
+    }
+
+    return result;
+}
+
 
 std::string String::lowercase(std::string str) {
     std::transform(str.begin(), str.end(), str.begin(), static_cast<int (*)(int)>(std::tolower));

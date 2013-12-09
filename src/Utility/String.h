@@ -34,6 +34,10 @@
 
 #include "corradeUtilityVisibility.h"
 
+#ifdef CORRADE_BUILD_DEPRECATED
+#include <Utility/Macros.h>
+#endif
+
 namespace Corrade { namespace Utility {
 
 /** @brief %String utilities */
@@ -85,12 +89,41 @@ class CORRADE_UTILITY_EXPORT String {
 
         /**
          * @brief Split string on given character
-         * @param str               %String to be splitted
-         * @param delim             Delimiter
-         * @param keepEmptyParts    Whether to keep empty parts
-         * @return Vector of splitted strings
+         * @param string            %String to split
+         * @param delimiter         Delimiter
          */
-        static std::vector<std::string> split(const std::string& str, char delim, bool keepEmptyParts = true);
+        static std::vector<std::string> split(const std::string& string, char delimiter);
+
+        /**
+         * @brief Split string on given character and remove empty parts
+         * @param string            %String to split
+         * @param delimiter         Delimiter
+         */
+        static std::vector<std::string> splitWithoutEmptyParts(const std::string& string, char delimiter);
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @copybrief splitWithoutEmptyParts()
+         * @deprecated Use @ref Corrade::Utility::String::splitWithoutEmptyParts() "splitWithoutEmptyParts()"
+         *      instead.
+         */
+        static CORRADE_DEPRECATED("use splitWithoutEmptyParts() instead") std::vector<std::string> split(const std::string& str, char delim, bool keepEmptyParts) {
+            return keepEmptyParts ? split(str, delim) : splitWithoutEmptyParts(str, delim);
+        }
+        #endif
+
+        /**
+         * @brief Join strings with given character
+         * @param strings           Strings to join
+         * @param delim             Delimiter
+         */
+        static std::string join(const std::vector<std::string>& strings, char delimiter);
+
+        /**
+         * @brief Join strings with given character and remove empty parts
+         * @param strings           Strings to join
+         * @param delim             Delimiter
+         */
+        static std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, char delimiter);
 
         /**
          * @brief Convert string to lowercase
