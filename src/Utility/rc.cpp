@@ -32,8 +32,7 @@ See `corrade-rc --help` for command-line parameters, see @ref resource-managemen
 for brief introduction.
 */
 
-#include <fstream>
-
+#include "Containers/Array.h"
 #include "Utility/Arguments.h"
 #include "Utility/Debug.h"
 #include "Utility/Directory.h"
@@ -59,12 +58,10 @@ int main(int argc, char** argv) {
     if(compiled.empty()) return 2;
 
     /* Save output */
-    std::ofstream out(args.value("out"), std::ofstream::binary);
-    if(!out.good()) {
-        Corrade::Utility::Error() << "Cannot open output file " << '\'' + args.value("out") + '\'';
+    if(!Corrade::Utility::Directory::write(args.value("out"), {compiled.data(), compiled.size()})) {
+        Corrade::Utility::Error() << "Cannot write output file " << '\'' + args.value("out") + '\'';
         return 3;
     }
-    out.write(compiled.data(), compiled.size());
 
     return 0;
 }

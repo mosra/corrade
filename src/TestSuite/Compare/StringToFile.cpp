@@ -25,7 +25,7 @@
 
 #include "StringToFile.h"
 
-#include <fstream>
+#include "Utility/Directory.h"
 
 namespace Corrade { namespace TestSuite {
 
@@ -34,16 +34,9 @@ Comparator<Compare::StringToFile>::Comparator(): state(State::ReadError) {}
 bool Comparator<Compare::StringToFile>::operator()(const std::string& actualContents, const std::string& filename) {
     this->filename = filename;
 
-    std::ifstream in(filename, std::ifstream::binary);
+    if(!Utility::Directory::fileExists(filename)) return false;
 
-    if(!in.good())
-        return false;
-
-    in.seekg(0, std::ios::end);
-    expectedContents.reserve(std::size_t(in.tellg()));
-    in.seekg(0, std::ios::beg);
-
-    expectedContents.assign((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+    expectedContents = Utility::Directory::readString(filename);
     this->actualContents = actualContents;
     state = State::Success;
 

@@ -25,7 +25,6 @@
 
 #include "Resource.h"
 
-#include <fstream>
 #include <iomanip>
 #include <sstream>
 #include <tuple>
@@ -314,20 +313,12 @@ std::string Resource::get(const std::string& filename) const {
 }
 
 std::pair<bool, Containers::Array<unsigned char>> Resource::fileContents(const std::string& filename) {
-    std::ifstream file(filename.data(), std::ifstream::binary);
-
-    if(!file.good()) {
+    if(!Directory::fileExists(filename)) {
         Error() << "    Error: cannot open file" << filename;
         return {false, nullptr};
     }
 
-    file.seekg(0, std::ios::end);
-    if(file.tellg() == 0) return {true, nullptr};
-    Containers::Array<unsigned char> data(std::size_t(file.tellg()));
-    file.seekg(0, std::ios::beg);
-    file.read(reinterpret_cast<char*>(data.begin()), data.size());
-
-    return {true, std::move(data)};
+    return {true, Directory::read(filename)};
 }
 
 std::string Resource::comment(const std::string& comment) {

@@ -23,7 +23,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <fstream>
 #include <sstream>
 #include <tuple>
 
@@ -91,24 +90,9 @@ ResourceTest::ResourceTest() {
 
 void ResourceTest::compile() {
     /* Testing also null bytes and signed overflow, don't change binaries */
-    std::ifstream predispositionIn(Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"));
-    std::ifstream consequenceIn(Directory::join(RESOURCE_TEST_DIR, "consequence.bin"));
-    CORRADE_VERIFY(predispositionIn.good());
-    CORRADE_VERIFY(consequenceIn.good());
-
-    predispositionIn.seekg(0, std::ios::end);
-    std::string predisposition(std::size_t(predispositionIn.tellg()), '\0');
-    predispositionIn.seekg(0, std::ios::beg);
-    predispositionIn.read(&predisposition[0], predisposition.size());
-
-    consequenceIn.seekg(0, std::ios::end);
-    std::string consequence(std::size_t(consequenceIn.tellg()), '\0');
-    consequenceIn.seekg(0, std::ios::beg);
-    consequenceIn.read(&consequence[0], consequence.size());
-
     std::vector<std::pair<std::string, std::string>> input{
-        {"predisposition.bin", predisposition},
-        {"consequence.bin", consequence}};
+        {"predisposition.bin", Directory::readString(Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"))},
+        {"consequence.bin", Directory::readString(Directory::join(RESOURCE_TEST_DIR, "consequence.bin"))}};
     CORRADE_COMPARE_AS(Resource::compile("ResourceTestData", "test", input),
                        Directory::join(RESOURCE_TEST_DIR, "compiled.cpp"),
                        TestSuite::Compare::StringToFile);

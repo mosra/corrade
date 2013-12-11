@@ -23,8 +23,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <fstream>
-
 #include "Containers/Array.h"
 #include "TestSuite/Tester.h"
 #include "TestSuite/Compare/Container.h"
@@ -141,16 +139,14 @@ void DirectoryTest::remove() {
     /* Directory */
     std::string directory = Directory::join(DIRECTORY_WRITE_TEST_DIR, "directory");
     CORRADE_VERIFY(Directory::mkpath(directory));
+    CORRADE_VERIFY(Directory::fileExists(directory));
     CORRADE_VERIFY(Directory::rm(directory));
     CORRADE_VERIFY(!Directory::fileExists(directory));
 
     /* File */
     std::string file = Directory::join(DIRECTORY_WRITE_TEST_DIR, "file.txt");
-    {
-        std::ofstream out(file);
-        CORRADE_VERIFY(out.good());
-        out.put('a');
-    }
+    CORRADE_VERIFY(Directory::writeString(file, "a"));
+    CORRADE_VERIFY(Directory::fileExists(file));
     CORRADE_VERIFY(Directory::rm(file));
     CORRADE_VERIFY(!Directory::fileExists(file));
 
@@ -161,19 +157,16 @@ void DirectoryTest::remove() {
 }
 
 void DirectoryTest::moveFile() {
-    /* Old file, create if not exists */
+    /* Old file */
     std::string oldFile = Directory::join(DIRECTORY_WRITE_TEST_DIR, "oldFile.txt");
-    if(!Directory::fileExists(oldFile)) {
-        std::ofstream out(oldFile);
-        CORRADE_VERIFY(out.good());
-        out.put('a');
-    }
+    CORRADE_VERIFY(Directory::writeString(oldFile, "a"));
 
     /* New file, remove if exists */
     std::string newFile = Directory::join(DIRECTORY_WRITE_TEST_DIR, "newFile.txt");
-    if(Directory::fileExists(newFile))
-        CORRADE_VERIFY(Directory::rm(newFile));
+    Directory::rm(newFile);
 
+    CORRADE_VERIFY(Directory::fileExists(oldFile));
+    CORRADE_VERIFY(!Directory::fileExists(newFile));
     CORRADE_VERIFY(Directory::move(oldFile, newFile));
     CORRADE_VERIFY(!Directory::fileExists(oldFile));
     CORRADE_VERIFY(Directory::fileExists(newFile));

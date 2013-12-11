@@ -25,42 +25,27 @@
 
 #include "File.h"
 
-#include <fstream>
-
+#include "Containers/Array.h"
 #include "Utility/Directory.h"
-
-using Corrade::Utility::Directory;
 
 namespace Corrade { namespace TestSuite {
 
 Comparator<Compare::File>::Comparator(const std::string& pathPrefix): actualState(State::ReadError), expectedState(State::ReadError), pathPrefix(pathPrefix) {}
 
 bool Comparator<Compare::File>::operator()(const std::string& actualFilename, const std::string& expectedFilename) {
-    this->actualFilename = Directory::join(pathPrefix, actualFilename);
-    this->expectedFilename = Directory::join(pathPrefix, expectedFilename);
+    this->actualFilename = Utility::Directory::join(pathPrefix, actualFilename);
+    this->expectedFilename = Utility::Directory::join(pathPrefix, expectedFilename);
 
-    std::ifstream actualIn(this->actualFilename, std::ifstream::binary);
-    std::ifstream expectedIn(this->expectedFilename, std::ifstream::binary);
-
-    if(!actualIn.good())
+    if(!Utility::Directory::fileExists(this->actualFilename))
         return false;
-    if(!expectedIn.good()) {
-        actualState = State::Success;
-        return false;
-    }
-
-    actualIn.seekg(0, std::ios::end);
-    actualContents.reserve(std::size_t(actualIn.tellg()));
-    actualIn.seekg(0, std::ios::beg);
-
-    expectedIn.seekg(0, std::ios::end);
-    actualContents.reserve(std::size_t(expectedIn.tellg()));
-    expectedIn.seekg(0, std::ios::beg);
-
-    actualContents.assign((std::istreambuf_iterator<char>(actualIn)), std::istreambuf_iterator<char>());
-    expectedContents.assign((std::istreambuf_iterator<char>(expectedIn)), std::istreambuf_iterator<char>());
 
     actualState = State::Success;
+
+    if(!Utility::Directory::fileExists(this->expectedFilename))
+        return false;
+
+    actualContents = Utility::Directory::readString(this->actualFilename);
+    expectedContents = Utility::Directory::readString(this->expectedFilename);
     expectedState = State::Success;
 
     return actualContents == expectedContents;
