@@ -173,9 +173,13 @@ void ArrayTest::access() {
     for(std::size_t i = 0; i != 7; ++i)
         a[i] = i;
 
+    CORRADE_COMPARE(a.data(), static_cast<int*>(a));
     CORRADE_COMPARE(*(a.begin()+2), 2);
     CORRADE_COMPARE(a[4], 4);
     CORRADE_COMPARE(a.end()-a.begin(), a.size());
+
+    const Array b(7);
+    CORRADE_COMPARE(b.data(), static_cast<const int*>(b));
 }
 
 void ArrayTest::rangeBasedFor() {

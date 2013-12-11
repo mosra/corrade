@@ -131,11 +131,15 @@ template<class T> class Array {
         /** @brief Move assignment */
         Array<T>& operator=(Array<T>&&) noexcept;
 
-        /** @brief Whether the array is empty */
-        bool empty() const { return !_size; }
+        /** @brief %Array data */
+        T* data() { return _data; }
+        const T* data() const { return _data; }         /**< @overload */
 
         /** @brief %Array size */
         std::size_t size() const { return _size; }
+
+        /** @brief Whether the array is empty */
+        bool empty() const { return !_size; }
 
         /** @brief Pointer to first element */
         T* begin() { return _data; }
@@ -279,11 +283,14 @@ template<class T> class ArrayReference {
         #endif
         constexpr /*implicit*/ ArrayReference(const ArrayReference<U>& array) noexcept: _data(array), _size(array.size()) {}
 
-        /** @brief Whether the array is empty */
-        constexpr bool empty() const { return !_size; }
+        /** @brief %Array data */
+        constexpr const T* data() const { return _data; }
 
         /** @brief %Array size */
         constexpr std::size_t size() const { return _size; }
+
+        /** @brief Whether the array is empty */
+        constexpr bool empty() const { return !_size; }
 
         /** @brief Pointer to first element */
         constexpr T* begin() const { return _data; }
@@ -367,11 +374,14 @@ template<> class ArrayReference<const void> {
         /** @brief Construct const void reference to any ArrayReference */
         template<class T> constexpr /*implicit*/ ArrayReference(const ArrayReference<T>& array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
 
-        /** @brief Whether the array is empty */
-        constexpr bool empty() const { return !_size; }
+        /** @brief %Array data */
+        constexpr const void* data() const { return _data; }
 
         /** @brief %Array size */
         constexpr std::size_t size() const { return _size; }
+
+        /** @brief Whether the array is empty */
+        constexpr bool empty() const { return !_size; }
 
         /** @brief Conversion to array type */
         constexpr operator const void*() const { return _data; }
