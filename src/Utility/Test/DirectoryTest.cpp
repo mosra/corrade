@@ -311,10 +311,11 @@ void DirectoryTest::listSortPrecedence() {
 }
 
 void DirectoryTest::read() {
-    /* Existing file, check if we are reading it as binary (CR+LF is not converted to LF) */
+    /* Existing file, check if we are reading it as binary (CR+LF is not
+       converted to LF) and nothing after \0 gets lost */
     const auto data = Directory::read(Directory::join(DIRECTORY_TEST_DIR, "file"));
     CORRADE_COMPARE(std::vector<unsigned char>(data.begin(), data.end()),
-        (std::vector<unsigned char>{0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0xDE, 0xAD, 0xBE, 0xEF}));
+        (std::vector<unsigned char>{0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF}));
 
     /* Nonexistent file */
     const auto none = Directory::read("nonexistent");
@@ -332,7 +333,7 @@ void DirectoryTest::readNonSeekable() {
 }
 
 void DirectoryTest::write() {
-    constexpr unsigned char data[] = {0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0xDE, 0xAD, 0xBE, 0xEF};
+    constexpr unsigned char data[] = {0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF};
     CORRADE_VERIFY(Directory::write(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file"), data));
     CORRADE_COMPARE_AS(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file"),
         Directory::join(DIRECTORY_TEST_DIR, "file"),
