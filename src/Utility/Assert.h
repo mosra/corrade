@@ -80,6 +80,8 @@ CORRADE_ASSERT(pos < size(), "Cannot access element" << pos << "in array of size
     possible solution.
 
 @see CORRADE_INTERNAL_ASSERT(), CORRADE_ASSERT_UNREACHABLE()
+@todo find a way that @p returnValue gets validated but doesn't get included in
+    the code unless CORRADE_GRACEFUL_ASSERT is used
 */
 #ifdef CORRADE_GRACEFUL_ASSERT
 #define CORRADE_ASSERT(condition, message, returnValue)                     \
@@ -98,6 +100,7 @@ CORRADE_ASSERT(pos < size(), "Cannot access element" << pos << "in array of size
         if(!(condition)) {                                                  \
             Corrade::Utility::Error() << message;                           \
             std::abort();                                                   \
+            return returnValue;                                             \
         }                                                                   \
     } while(false)
 #endif
