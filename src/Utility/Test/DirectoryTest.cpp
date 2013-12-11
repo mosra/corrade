@@ -320,6 +320,10 @@ void DirectoryTest::read() {
     /* Nonexistent file */
     const auto none = Directory::read("nonexistent");
     CORRADE_VERIFY(!none);
+
+    /* Read into string */
+    CORRADE_COMPARE(Directory::readString(Directory::join(DIRECTORY_TEST_DIR, "file")),
+        std::string("\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11));
 }
 
 void DirectoryTest::readNonSeekable() {
@@ -335,6 +339,12 @@ void DirectoryTest::readNonSeekable() {
 void DirectoryTest::write() {
     constexpr unsigned char data[] = {0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF};
     CORRADE_VERIFY(Directory::write(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file"), data));
+    CORRADE_COMPARE_AS(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file"),
+        Directory::join(DIRECTORY_TEST_DIR, "file"),
+        TestSuite::Compare::File);
+
+    CORRADE_VERIFY(Directory::writeString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file"),
+        std::string("\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11)));
     CORRADE_COMPARE_AS(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file"),
         Directory::join(DIRECTORY_TEST_DIR, "file"),
         TestSuite::Compare::File);

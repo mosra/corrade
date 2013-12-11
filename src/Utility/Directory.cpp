@@ -290,12 +290,23 @@ Containers::Array<unsigned char> Directory::read(const std::string& filename) {
     return out;
 }
 
+std::string Directory::readString(const std::string& filename) {
+    const auto data = read(filename);
+
+    return {reinterpret_cast<const char*>(data.begin()), data.size()};
+}
+
 bool Directory::write(const std::string& filename, const Containers::ArrayReference<const void> data) {
     std::ofstream file(filename, std::ofstream::binary);
     if(!file) return false;
 
     file.write(reinterpret_cast<const char*>(data.data()), data.size());
     return true;
+}
+
+bool Directory::writeString(const std::string& filename, const std::string& data) {
+    static_assert(sizeof(std::string::value_type) == 1, "std::string doesn't have 8-bit characters");
+    return write(filename, {data.data(), data.size()});
 }
 
 }}
