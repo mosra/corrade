@@ -80,7 +80,8 @@ std::vector<std::string> String::splitWithoutEmptyParts(const std::string& strin
 std::string String::join(const std::vector<std::string>& strings, const char delimiter) {
     /* Compute size of resulting string, count also delimiters */
     std::size_t size = 0;
-    for(const auto& s: strings) size += s.size() + 1;
+    for(auto it = strings.begin(); it != strings.end(); ++it)
+        size += it->size() + 1;
     if(size) --size;
 
     /* Reserve memory for resulting string */
@@ -88,8 +89,8 @@ std::string String::join(const std::vector<std::string>& strings, const char del
     result.reserve(size);
 
     /* Join strings */
-    for(const auto& s: strings) {
-        result += s;
+    for(auto it = strings.begin(); it != strings.end(); ++it) {
+        result += *it;
         if(result.size() != size) result += delimiter;
     }
 
@@ -99,7 +100,8 @@ std::string String::join(const std::vector<std::string>& strings, const char del
 std::string String::joinWithoutEmptyParts(const std::vector<std::string>& strings, const char delimiter) {
     /* Compute size of resulting string, count also delimiters */
     std::size_t size = 0;
-    for(const auto& s: strings) if(!s.empty()) size += s.size() + 1;
+    for(auto it = strings.begin(); it != strings.end(); ++it)
+        if(!it->empty()) size += it->size() + 1;
     if(size) --size;
 
     /* Reserve memory for resulting string */
@@ -107,10 +109,10 @@ std::string String::joinWithoutEmptyParts(const std::vector<std::string>& string
     result.reserve(size);
 
     /* Join strings */
-    for(const auto& s: strings) {
-        if(s.empty()) continue;
+    for(auto it = strings.begin(); it != strings.end(); ++it) {
+        if(it->empty()) continue;
 
-        result += s;
+        result += *it;
         if(result.size() != size) result += delimiter;
     }
 
