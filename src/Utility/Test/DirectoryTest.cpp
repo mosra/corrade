@@ -53,6 +53,7 @@ class DirectoryTest: public Corrade::TestSuite::Tester {
         void list();
         void listSortPrecedence();
         void read();
+        void readEmpty();
         void readNonSeekable();
         void write();
 };
@@ -74,6 +75,7 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::list,
               &DirectoryTest::listSortPrecedence,
               &DirectoryTest::read,
+              &DirectoryTest::readEmpty,
               &DirectoryTest::readNonSeekable,
               &DirectoryTest::write});
 }
@@ -317,6 +319,12 @@ void DirectoryTest::read() {
     /* Read into string */
     CORRADE_COMPARE(Directory::readString(Directory::join(DIRECTORY_TEST_DIR, "file")),
         std::string("\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11));
+}
+
+void DirectoryTest::readEmpty() {
+    const std::string empty = Directory::join(DIRECTORY_TEST_DIR, "dir/dummy");
+    CORRADE_VERIFY(Directory::fileExists(empty));
+    CORRADE_VERIFY(!Directory::read(empty));
 }
 
 void DirectoryTest::readNonSeekable() {
