@@ -39,6 +39,7 @@ class ArrayTest: public TestSuite::Tester {
         void constructFrom();
         void constructZeroInitialized();
 
+        void boolConversion();
         void pointerConversion();
 
         void emptyCheck();
@@ -57,6 +58,7 @@ ArrayTest::ArrayTest() {
               &ArrayTest::constructFrom,
               &ArrayTest::constructZeroInitialized,
 
+              &ArrayTest::boolConversion,
               &ArrayTest::pointerConversion,
 
               &ArrayTest::emptyCheck,
@@ -137,6 +139,14 @@ void ArrayTest::constructZeroInitialized() {
     CORRADE_COMPARE(a.size(), 2);
     CORRADE_COMPARE(a[0], 0);
     CORRADE_COMPARE(a[1], 0);
+}
+
+void ArrayTest::boolConversion() {
+    CORRADE_VERIFY(Array(2));
+    CORRADE_VERIFY(!Array());
+
+    /* The conversion is explicit (i.e. no Array(2) + 7) */
+    CORRADE_VERIFY(!(std::is_convertible<Array, int>::value));
 }
 
 void ArrayTest::pointerConversion() {
