@@ -23,10 +23,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <fstream>
-
+#include "Containers/Array.h"
 #include "TestSuite/Tester.h"
 #include "TestSuite/Compare/Container.h"
+#include "TestSuite/Compare/File.h"
 #include "Utility/Directory.h"
 
 #include "testConfigure.h"
@@ -52,6 +52,9 @@ class DirectoryTest: public Corrade::TestSuite::Tester {
         void configurationDir();
         void list();
         void listSortPrecedence();
+        void read();
+        void readNonSeekable();
+        void write();
 };
 
 DirectoryTest::DirectoryTest() {
@@ -69,7 +72,10 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::home,
               &DirectoryTest::configurationDir,
               &DirectoryTest::list,
-              &DirectoryTest::listSortPrecedence});
+              &DirectoryTest::listSortPrecedence,
+              &DirectoryTest::read,
+              &DirectoryTest::readNonSeekable,
+              &DirectoryTest::write});
 }
 
 void DirectoryTest::path() {
@@ -133,16 +139,14 @@ void DirectoryTest::remove() {
     /* Directory */
     std::string directory = Directory::join(DIRECTORY_WRITE_TEST_DIR, "directory");
     CORRADE_VERIFY(Directory::mkpath(directory));
+    CORRADE_VERIFY(Directory::fileExists(directory));
     CORRADE_VERIFY(Directory::rm(directory));
     CORRADE_VERIFY(!Directory::fileExists(directory));
 
     /* File */
     std::string file = Directory::join(DIRECTORY_WRITE_TEST_DIR, "file.txt");
-    {
-        std::ofstream out(file);
-        CORRADE_VERIFY(out.good());
-        out.put('a');
-    }
+    CORRADE_VERIFY(Directory::writeString(file, "a"));
+    CORRADE_VERIFY(Directory::fileExists(file));
     CORRADE_VERIFY(Directory::rm(file));
     CORRADE_VERIFY(!Directory::fileExists(file));
 
@@ -153,19 +157,16 @@ void DirectoryTest::remove() {
 }
 
 void DirectoryTest::moveFile() {
-    /* Old file, create if not exists */
+    /* Old file */
     std::string oldFile = Directory::join(DIRECTORY_WRITE_TEST_DIR, "oldFile.txt");
-    if(!Directory::fileExists(oldFile)) {
-        std::ofstream out(oldFile);
-        CORRADE_VERIFY(out.good());
-        out.put('a');
-    }
+    CORRADE_VERIFY(Directory::writeString(oldFile, "a"));
 
     /* New file, remove if exists */
     std::string newFile = Directory::join(DIRECTORY_WRITE_TEST_DIR, "newFile.txt");
-    if(Directory::fileExists(newFile))
-        CORRADE_VERIFY(Directory::rm(newFile));
+    Directory::rm(newFile);
 
+    CORRADE_VERIFY(Directory::fileExists(oldFile));
+    CORRADE_VERIFY(!Directory::fileExists(newFile));
     CORRADE_VERIFY(Directory::move(oldFile, newFile));
     CORRADE_VERIFY(!Directory::fileExists(oldFile));
     CORRADE_VERIFY(Directory::fileExists(newFile));
@@ -300,6 +301,46 @@ void DirectoryTest::list() {
 
 void DirectoryTest::listSortPrecedence() {
     CORRADE_VERIFY((Directory::Flag::SortAscending|Directory::Flag::SortDescending) == Directory::Flag::SortAscending);
+}
+
+void DirectoryTest::read() {
+    /* Existing file, check if we are reading it as binary (CR+LF is not
+       converted to LF) and nothing after \0 gets lost */
+    const auto data = Directory::read(Directory::join(DIRECTORY_TEST_DIR, "file"));
+    CORRADE_COMPARE(std::vector<unsigned char>(data.begin(), data.end()),
+        (std::vector<unsigned char>{0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF}));
+
+    /* Nonexistent file */
+    const auto none = Directory::read("nonexistent");
+    CORRADE_VERIFY(!none);
+
+    /* Read into string */
+    CORRADE_COMPARE(Directory::readString(Directory::join(DIRECTORY_TEST_DIR, "file")),
+        std::string("\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11));
+}
+
+void DirectoryTest::readNonSeekable() {
+    #ifdef __unix__
+    /** @todo Test more thoroughly than this */
+    const auto data = Directory::read("/proc/loadavg");
+    CORRADE_VERIFY(!data.empty());
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+
+void DirectoryTest::write() {
+    constexpr unsigned char data[] = {0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF};
+    CORRADE_VERIFY(Directory::write(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file"), data));
+    CORRADE_COMPARE_AS(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file"),
+        Directory::join(DIRECTORY_TEST_DIR, "file"),
+        TestSuite::Compare::File);
+
+    CORRADE_VERIFY(Directory::writeString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file"),
+        std::string("\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11)));
+    CORRADE_COMPARE_AS(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file"),
+        Directory::join(DIRECTORY_TEST_DIR, "file"),
+        TestSuite::Compare::File);
 }
 
 }}}

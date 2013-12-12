@@ -26,7 +26,6 @@
 #include "Resource.h"
 
 #include <algorithm> /* std::max(), needed by MSVC */
-#include <fstream>
 #include <iomanip>
 #include <sstream>
 #include <tuple>
@@ -147,7 +146,7 @@ std::string Resource::compile(const std::string& name, const std::string& group,
     /* Special case for empty file list */
     if(files.empty()) {
         return "/* Compiled resource file. DO NOT EDIT! */\n\n"
-            "#include \"Utility/utilities.h\"\n"
+            "#include \"Utility/Macros.h\"\n"
             "#include \"Utility/Resource.h\"\n"
             "#include \"corradeCompatibility.h\"\n\n"
             "int resourceInitializer_" + name + "();\n"
@@ -203,7 +202,7 @@ std::string Resource::compile(const std::string& name, const std::string& group,
        -Wmissing-declarations in GCC). If we don't have any data, we don't
        create the resourceData array, as zero-length arrays are not allowed. */
     return "/* Compiled resource file. DO NOT EDIT! */\n\n"
-        "#include \"Utility/utilities.h\"\n"
+        "#include \"Utility/Macros.h\"\n"
         "#include \"Utility/Resource.h\"\n"
         "#include \"corradeCompatibility.h\"\n\n"
         "static const unsigned char resourcePositions[] = {" +
@@ -337,9 +336,7 @@ std::string Resource::get(const std::string& filename) const {
 }
 
 std::pair<bool, Containers::Array<unsigned char>> Resource::fileContents(const std::string& filename) {
-    std::ifstream file(filename.data(), std::ifstream::binary);
-
-    if(!file.good()) {
+    if(!Directory::fileExists(filename)) {
         Error() << "    Error: cannot open file" << filename;
         #if !defined(CORRADE_GCC45_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
         return {false, nullptr};
@@ -350,24 +347,7 @@ std::pair<bool, Containers::Array<unsigned char>> Resource::fileContents(const s
         #endif
     }
 
-    file.seekg(0, std::ios::end);
-    if(file.tellg() == std::streamoff{0})
-        #if !defined(CORRADE_GCC45_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
-        return {true, nullptr};
-        #elif !defined(CORRADE_MSVC2013_COMPATIBILITY)
-        return {true, {}};
-        #else
-        return std::pair<bool, Containers::Array<unsigned char>&&>{true, Containers::Array<unsigned char>{}};
-        #endif
-    Containers::Array<unsigned char> data(std::size_t(file.tellg()));
-    file.seekg(0, std::ios::beg);
-    file.read(reinterpret_cast<char*>(data.begin()), data.size());
-
-    #ifndef CORRADE_MSVC2013_COMPATIBILITY
-    return {true, std::move(data)};
-    #else
-    return std::pair<bool, Containers::Array<unsigned char>&&>{true, std::move(data)};
-    #endif
+    return {true, Directory::read(filename)};
 }
 
 std::string Resource::comment(const std::string& comment) {

@@ -44,6 +44,7 @@ class ArrayTest: public TestSuite::Tester {
         void emptyCheck();
         void access();
         void rangeBasedFor();
+        void release();
 };
 
 typedef Containers::Array<int> Array;
@@ -60,7 +61,8 @@ ArrayTest::ArrayTest() {
 
               &ArrayTest::emptyCheck,
               &ArrayTest::access,
-              &ArrayTest::rangeBasedFor});
+              &ArrayTest::rangeBasedFor,
+              &ArrayTest::release});
 }
 
 void ArrayTest::constructEmpty() {
@@ -146,11 +148,17 @@ void ArrayTest::pointerConversion() {
     const int* d = c;
     CORRADE_COMPARE(d, c.begin());
 
+    /* Verify that we can't convert rvalues */
+    CORRADE_VERIFY((std::is_convertible<Array&, int*>::value));
+    CORRADE_VERIFY((std::is_convertible<const Array&, const int*>::value));
     {
         #if defined(CORRADE_GCC47_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
         CORRADE_EXPECT_FAIL("Rvalue references for *this are not supported in GCC < 4.8.1.");
         #endif
+        CORRADE_VERIFY(!(std::is_convertible<Array, int*>::value));
         CORRADE_VERIFY(!(std::is_convertible<Array&&, int*>::value));
+        CORRADE_VERIFY(!(std::is_convertible<const Array, const int*>::value));
+        CORRADE_VERIFY(!(std::is_convertible<const Array&&, const int*>::value));
     }
 }
 
@@ -169,9 +177,13 @@ void ArrayTest::access() {
     for(std::size_t i = 0; i != 7; ++i)
         a[i] = i;
 
+    CORRADE_COMPARE(a.data(), static_cast<int*>(a));
     CORRADE_COMPARE(*(a.begin()+2), 2);
     CORRADE_COMPARE(a[4], 4);
     CORRADE_COMPARE(a.end()-a.begin(), a.size());
+
+    const Array b(7);
+    CORRADE_COMPARE(b.data(), static_cast<const int*>(b));
 }
 
 void ArrayTest::rangeBasedFor() {
@@ -188,6 +200,17 @@ void ArrayTest::rangeBasedFor() {
     #else
     CORRADE_SKIP("Range-based for is not available in GCC 4.5");
     #endif
+}
+
+void ArrayTest::release() {
+    Array a(5);
+    int* const data = a;
+    int* const released = a.release();
+    delete[] released;
+
+    CORRADE_COMPARE(data, released);
+    CORRADE_COMPARE(a.begin(), nullptr);
+    CORRADE_COMPARE(a.size(), 0);
 }
 
 }}}

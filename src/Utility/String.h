@@ -26,13 +26,17 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::String
+ * @brief Class @ref Corrade::Utility::String
  */
 
 #include <string>
 #include <vector>
 
 #include "corradeUtilityVisibility.h"
+
+#ifdef CORRADE_BUILD_DEPRECATED
+#include <Utility/Macros.h>
+#endif
 
 namespace Corrade { namespace Utility {
 
@@ -57,40 +61,88 @@ class CORRADE_UTILITY_EXPORT String {
         String() = delete;
 
         /**
+         * @brief Safely construct string from char array
+         *
+         * If @p string is `nullptr`, returns empty string.
+         */
+        static std::string fromArray(const char* string) {
+            return string ? std::string{string} : std::string{};
+        }
+
+        /**
+         * @brief Safely construct string from char array
+         *
+         * If @p string is `nullptr`, returns empty string. Otherwise takes
+         * also @p length into account.
+         */
+        static std::string fromArray(const char* string, std::size_t length) {
+            return string ? std::string{string, length} : std::string{};
+        }
+
+        /**
          * @brief Trim leading whitespace from string
-         * @param str           %String to be trimmed
+         * @param string        %String to be trimmed
          * @param characters    Characters which will be trimmed
          *
-         * @see rtrim(), trim()
+         * @see @ref rtrim(), @ref trim()
          */
-        static std::string ltrim(std::string str, const std::string& characters = Whitespace);
+        static std::string ltrim(std::string string, const std::string& characters = Whitespace);
 
         /**
          * @brief Trim trailing whitespace from string
-         * @param str           %String to be trimmed
+         * @param string        %String to be trimmed
          * @param characters    Characters which will be trimmed
          *
          * @see ltrim(), trim()
          */
-        static std::string rtrim(std::string str, const std::string& characters = Whitespace);
+        static std::string rtrim(std::string string, const std::string& characters = Whitespace);
 
         /**
          * @brief Trim leading and trailing whitespace from string
-         * @param str           %String to be trimmed
+         * @param string        %String to be trimmed
          * @param characters    Characters which will be trimmed
          *
-         * Equivalent to `ltrim(rtrim(str)`.
+         * Equivalent to `ltrim(rtrim(string))`.
          */
-        static std::string trim(std::string str, const std::string& characters = Whitespace);
+        static std::string trim(std::string string, const std::string& characters = Whitespace);
 
         /**
          * @brief Split string on given character
-         * @param str               %String to be splitted
-         * @param delim             Delimiter
-         * @param keepEmptyParts    Whether to keep empty parts
-         * @return Vector of splitted strings
+         * @param string            %String to split
+         * @param delimiter         Delimiter
          */
-        static std::vector<std::string> split(const std::string& str, char delim, bool keepEmptyParts = true);
+        static std::vector<std::string> split(const std::string& string, char delimiter);
+
+        /**
+         * @brief Split string on given character and remove empty parts
+         * @param string            %String to split
+         * @param delimiter         Delimiter
+         */
+        static std::vector<std::string> splitWithoutEmptyParts(const std::string& string, char delimiter);
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @copybrief splitWithoutEmptyParts()
+         * @deprecated Use @ref Corrade::Utility::String::splitWithoutEmptyParts() "splitWithoutEmptyParts()"
+         *      instead.
+         */
+        static CORRADE_DEPRECATED("use splitWithoutEmptyParts() instead") std::vector<std::string> split(const std::string& str, char delim, bool keepEmptyParts) {
+            return keepEmptyParts ? split(str, delim) : splitWithoutEmptyParts(str, delim);
+        }
+        #endif
+
+        /**
+         * @brief Join strings with given character
+         * @param strings           Strings to join
+         * @param delim             Delimiter
+         */
+        static std::string join(const std::vector<std::string>& strings, char delimiter);
+
+        /**
+         * @brief Join strings with given character and remove empty parts
+         * @param strings           Strings to join
+         * @param delim             Delimiter
+         */
+        static std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, char delimiter);
 
         /**
          * @brief Convert string to lowercase

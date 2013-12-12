@@ -53,6 +53,7 @@ set(CorradeUtility_HEADERS
     Debug.h
     Directory.h
     Endianness.h
+    Macros.h
     MurmurHash2.h
     Resource.h
     Sha1.h

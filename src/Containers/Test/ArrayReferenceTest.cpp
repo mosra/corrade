@@ -123,9 +123,13 @@ void ArrayReferenceTest::access() {
     for(std::size_t i = 0; i != 7; ++i)
         b[i] = i;
 
+    CORRADE_COMPARE(b.data(), a);
     CORRADE_COMPARE(*(b.begin()+2), 2);
     CORRADE_COMPARE(b[4], 4);
     CORRADE_COMPARE(b.end()-b.begin(), b.size());
+
+    Containers::ArrayReference<const int> c = a;
+    CORRADE_COMPARE(c.data(), a);
 }
 
 #ifndef CORRADE_GCC45_COMPATIBILITY
@@ -177,6 +181,7 @@ void ArrayReferenceTest::voidConversion() {
     /* void reference to compile-time array */
     Containers::ArrayReference<const void> b = a;
     CORRADE_VERIFY(b == a);
+    CORRADE_VERIFY(b.data() == a);
     CORRADE_COMPARE(b.size(), 6*sizeof(int));
 
     /* void reference to runtime array */

@@ -27,6 +27,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <array>
 #include <algorithm>
 #include <fstream>
 
@@ -37,7 +38,8 @@
 #include <shlobj.h>
 #endif
 
-#include "String.h"
+#include "Containers/Array.h"
+#include "Utility/String.h"
 
 #include "corradeConfigure.h"
 
@@ -257,6 +259,54 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
         std::sort(list.rbegin(), list.rend());
 
     return std::move(list);
+}
+
+Containers::Array<unsigned char> Directory::read(const std::string& filename) {
+    std::ifstream file(filename, std::ifstream::binary);
+    if(!file) return nullptr;
+
+    file.seekg(0, std::ios::end);
+
+    /* Seekable file */
+    if(file) {
+        Containers::Array<unsigned char> data(std::size_t(file.tellg()));
+        file.seekg(0, std::ios::beg);
+        file.read(reinterpret_cast<char*>(data.begin()), data.size());
+        return data;
+    }
+
+    /* Non-seekable file, clear badbit and read by chunks */
+    file.clear();
+    std::string data;
+    std::array<char, 4096> buffer;
+    do {
+        file.read(buffer.begin(), buffer.size());
+        data.append(buffer.begin(), file.gcount());
+    } while(file);
+
+    Containers::Array<unsigned char> out(data.size());
+    std::copy(data.begin(), data.end(), out.begin());
+
+    return out;
+}
+
+std::string Directory::readString(const std::string& filename) {
+    const auto data = read(filename);
+
+    return {reinterpret_cast<const char*>(data.begin()), data.size()};
+}
+
+bool Directory::write(const std::string& filename, const Containers::ArrayReference<const void> data) {
+    std::ofstream file(filename, std::ofstream::binary);
+    if(!file) return false;
+
+    file.write(reinterpret_cast<const char*>(data.data()), data.size());
+    return true;
+}
+
+bool Directory::writeString(const std::string& filename, const std::string& data) {
+    static_assert(sizeof(std::string::value_type) == 1, "std::string doesn't have 8-bit characters");
+    return write(filename, {data.data(), data.size()});
 }
 
 }}

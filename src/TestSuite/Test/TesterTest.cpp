@@ -171,7 +171,6 @@ class TesterTest: public Tester {
 
         void compareAsOverload();
         void compareAsVarargs();
-        void compareWithVarargs();
         void verifyExplicitBool();
 };
 
@@ -183,7 +182,6 @@ TesterTest::TesterTest() {
 
               &TesterTest::compareAsOverload,
               &TesterTest::compareAsVarargs,
-              &TesterTest::compareWithVarargs,
               &TesterTest::verifyExplicitBool});
 }
 
@@ -254,25 +252,6 @@ void TesterTest::compareAsVarargs() {
     const std::pair<int, int> a(3, 5);
     const std::pair<float, float> b(3.2f, 5.7f);
     CORRADE_COMPARE_AS(a, b, std::pair<int, int>);
-}
-
-}
-
-template<class, class> struct Varargs;
-
-template<class T, class U> struct Comparator<Varargs<T, U>> {
-    bool operator()(int, int) { return true; }
-    void printErrorMessage(Utility::Error&, const std::string&, const std::string&) const {}
-};
-
-template<class T, class U> struct Varargs {
-    Comparator<Varargs<T, U>> comparator() { return Comparator<Varargs<T, U>>(); }
-};
-
-namespace Test {
-
-void TesterTest::compareWithVarargs() {
-    CORRADE_COMPARE_WITH(0, 0, Varargs<bool, float>());
 }
 
 void TesterTest::verifyExplicitBool() {

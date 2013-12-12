@@ -26,7 +26,8 @@
 #include "FileToString.h"
 
 #include <algorithm> /* std::max(), needed by MSVC */
-#include <fstream>
+
+#include "Utility/Directory.h"
 
 namespace Corrade { namespace TestSuite {
 
@@ -35,16 +36,9 @@ Comparator<Compare::FileToString>::Comparator(): state(State::ReadError) {}
 bool Comparator<Compare::FileToString>::operator()(const std::string& filename, const std::string& expectedContents) {
     this->filename = filename;
 
-    std::ifstream in(filename, std::ifstream::binary);
+    if(!Utility::Directory::fileExists(filename)) return false;
 
-    if(!in.good())
-        return false;
-
-    in.seekg(0, std::ios::end);
-    actualContents.reserve(std::size_t(in.tellg()));
-    in.seekg(0, std::ios::beg);
-
-    actualContents.assign((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+    actualContents = Utility::Directory::readString(filename);
     this->expectedContents = expectedContents;
     state = State::Success;
 

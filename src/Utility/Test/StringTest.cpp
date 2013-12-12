@@ -35,19 +35,31 @@ class StringTest: public TestSuite::Tester {
     public:
         StringTest();
 
+        void fromArray();
         void trim();
         void split();
+        void join();
         void lowercase();
         void uppercase();
         void whitespace();
 };
 
 StringTest::StringTest() {
-    addTests<StringTest>({&StringTest::trim,
+    addTests<StringTest>({&StringTest::fromArray,
+              &StringTest::trim,
               &StringTest::split,
+              &StringTest::join,
               &StringTest::lowercase,
               &StringTest::uppercase,
               &StringTest::whitespace});
+}
+
+void StringTest::fromArray() {
+    CORRADE_COMPARE(String::fromArray(nullptr), "");
+    CORRADE_COMPARE(String::fromArray(nullptr, 37), "");
+
+    CORRADE_COMPARE(String::fromArray("abc\0def"), "abc");
+    CORRADE_COMPARE(String::fromArray("abc\0def", 7), std::string("abc\0def", 7));
 }
 
 void StringTest::trim() {
@@ -73,21 +85,69 @@ void StringTest::trim() {
 }
 
 void StringTest::split() {
+    /* Empty */
+    CORRADE_COMPARE_AS(String::split({}, '/'),
+        std::vector<std::string>{}, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts({}, '/'),
+        std::vector<std::string>{}, TestSuite::Compare::Container);
+
+    /* Only delimiter */
+    CORRADE_COMPARE_AS(String::split("/", '/'),
+        (std::vector<std::string>{"", ""}), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("/", '/'),
+        std::vector<std::string>{}, TestSuite::Compare::Container);
+
     /* No delimiters */
     CORRADE_COMPARE_AS(String::split("abcdef", '/'),
+        std::vector<std::string>{"abcdef"}, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("abcdef", '/'),
         std::vector<std::string>{"abcdef"}, TestSuite::Compare::Container);
 
     /* Common case */
     CORRADE_COMPARE_AS(String::split("ab/c/def", '/'),
         (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("ab/c/def", '/'),
+        (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
 
     /* Empty parts */
     CORRADE_COMPARE_AS(String::split("ab//c/def//", '/'),
         (std::vector<std::string>{"ab", "", "c", "def", "", ""}), TestSuite::Compare::Container);
-
-    /* Skip empty parts */
-    CORRADE_COMPARE_AS(String::split("ab//c/def//", '/', false),
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("ab//c/def//", '/'),
         (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
+}
+
+void StringTest::join() {
+    /* Empty */
+    CORRADE_COMPARE(String::join({}, '/'), "");
+    CORRADE_COMPARE(String::joinWithoutEmptyParts({}, '/'), "");
+
+    /* One empty value */
+    CORRADE_COMPARE(String::join({""}, '/'), "");
+    CORRADE_COMPARE(String::joinWithoutEmptyParts({""}, '/'), "");
+
+    /* Two empty values */
+    CORRADE_COMPARE(String::join({"", ""}, '/'),
+        "/");
+    CORRADE_COMPARE(String::joinWithoutEmptyParts({"", ""}, '/'),
+        "");
+
+    /* One value */
+    CORRADE_COMPARE(String::join({"abcdef"}, '/'),
+        "abcdef");
+    CORRADE_COMPARE(String::joinWithoutEmptyParts({"abcdef"}, '/'),
+        "abcdef");
+
+    /* Common case */
+    CORRADE_COMPARE(String::join({"ab", "c", "def"}, '/'),
+        "ab/c/def");
+    CORRADE_COMPARE(String::joinWithoutEmptyParts({"ab", "c", "def"}, '/'),
+        "ab/c/def");
+
+    /* Empty parts */
+    CORRADE_COMPARE(String::join({"ab", "", "c", "def", "", ""}, '/'),
+        "ab//c/def//");
+    CORRADE_COMPARE(String::joinWithoutEmptyParts({"ab", "", "c", "def", "", ""}, '/'),
+        "ab/c/def");
 }
 
 void StringTest::lowercase() {

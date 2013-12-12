@@ -33,13 +33,6 @@
 
 namespace Corrade { namespace Utility {
 
-unsigned int log2(unsigned int number) {
-    int log = 0;
-    while(number >>= 1)
-        ++log;
-    return log;
-}
-
 void sleep(std::size_t ms) {
     #ifndef _WIN32
     usleep(ms*1000);

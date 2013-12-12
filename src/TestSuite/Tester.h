@@ -302,15 +302,11 @@ more information.
 
 @see CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS()
 */
-#ifdef DOXYGEN_GENERATING_OUTPUT
-#define CORRADE_COMPARE_WITH(actual, expected, comparatorInstance...)
-#else
-#define CORRADE_COMPARE_WITH(actual, expected, ...)                         \
+#define CORRADE_COMPARE_WITH(actual, expected, comparatorInstance)          \
     do {                                                                    \
         _CORRADE_REGISTER_TEST_CASE();                                      \
-        Tester::compareWith((__VA_ARGS__).comparator(), #actual, actual, #expected, expected); \
+        Tester::compareWith(comparatorInstance.comparator(), #actual, actual, #expected, expected); \
     } while(false)
-#endif
 
 /** @hideinitializer
 @brief Expect failure in all following checks in the same scope
