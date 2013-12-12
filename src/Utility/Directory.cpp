@@ -263,7 +263,11 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
 
 Containers::Array<unsigned char> Directory::read(const std::string& filename) {
     std::ifstream file(filename, std::ifstream::binary);
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     if(!file) return nullptr;
+    #else
+    if(!file) return {};
+    #endif
 
     file.seekg(0, std::ios::end);
 

@@ -209,7 +209,11 @@ void ArrayTest::release() {
     delete[] released;
 
     CORRADE_COMPARE(data, released);
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     CORRADE_COMPARE(a.begin(), nullptr);
+    #else
+    CORRADE_VERIFY(a.begin() == 0);
+    #endif
     CORRADE_COMPARE(a.size(), 0);
 }
 
