@@ -76,7 +76,7 @@ class CORRADE_UTILITY_EXPORT String {
          * also @p length into account.
          */
         static std::string fromArray(const char* string, std::size_t length) {
-            return string ? std::string{string, length} : std::string{};
+            return string ? std::string(string, length) : std::string{};
         }
 
         /**
