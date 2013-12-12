@@ -267,15 +267,22 @@ Containers::Array<unsigned char> Directory::read(const std::string& filename) {
 
     file.seekg(0, std::ios::end);
 
-    /* Seekable file */
-    if(file) {
+    /** @todo Better solution for non-seekable files */
+
+    /* Probably seekable file. GCC's libstdc++ returns (cast) -1 for
+       non-seekable files and sets badbit, Clang's libc++ returns 0 and doesn't
+       set badbit, thus zero-length files are indistinguishable from
+       non-seekable ones. */
+    if(file && file.tellg() != 0) {
         Containers::Array<unsigned char> data(std::size_t(file.tellg()));
         file.seekg(0, std::ios::beg);
         file.read(reinterpret_cast<char*>(data.begin()), data.size());
         return data;
     }
 
-    /* Non-seekable file, clear badbit and read by chunks */
+    /* Probably non-seekable (or empty) file, clear badbit and read by chunks.
+       Hopefully this juggling won't cause any needless memory allocations for
+       empty files. */
     file.clear();
     std::string data;
     std::array<char, 4096> buffer;
