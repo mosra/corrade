@@ -36,6 +36,10 @@ class ArrayReferenceTest: public TestSuite::Tester {
         void construct();
         void constructFixedSize();
         void constructArray();
+
+        void boolConversion();
+        void pointerConversion();
+
         void emptyCheck();
         void access();
         void rangeBasedFor();
@@ -55,6 +59,10 @@ ArrayReferenceTest::ArrayReferenceTest() {
               &ArrayReferenceTest::construct,
               &ArrayReferenceTest::constructFixedSize,
               &ArrayReferenceTest::constructArray,
+
+              &ArrayReferenceTest::boolConversion,
+              &ArrayReferenceTest::pointerConversion,
+
               &ArrayReferenceTest::emptyCheck,
               &ArrayReferenceTest::access,
               &ArrayReferenceTest::rangeBasedFor,
@@ -99,6 +107,33 @@ void ArrayReferenceTest::constructArray() {
     const ArrayReference b = a;
     CORRADE_VERIFY(b.begin() == a.begin());
     CORRADE_COMPARE(b.size(), 5);
+}
+
+void ArrayReferenceTest::boolConversion() {
+    int a[7];
+    CORRADE_VERIFY(ArrayReference(a));
+    CORRADE_VERIFY(!ArrayReference());
+    CORRADE_VERIFY(VoidArrayReference(a));
+    CORRADE_VERIFY(!VoidArrayReference());
+
+    /* The conversion is explicit (i.e. no ArrayReference(a) + 7) */
+    CORRADE_VERIFY(!(std::is_convertible<ArrayReference, int>::value));
+    CORRADE_VERIFY(!(std::is_convertible<VoidArrayReference, int>::value));
+}
+
+void ArrayReferenceTest::pointerConversion() {
+    int a[7];
+    ArrayReference b = a;
+    int* bp = b;
+    CORRADE_COMPARE(bp, static_cast<int*>(a));
+
+    const ArrayReference c = a;
+    const int* cp = c;
+    CORRADE_COMPARE(cp, static_cast<const int*>(a));
+
+    const VoidArrayReference d = a;
+    const void* dp = d;
+    CORRADE_COMPARE(dp, static_cast<const void*>(a));
 }
 
 void ArrayReferenceTest::emptyCheck() {
