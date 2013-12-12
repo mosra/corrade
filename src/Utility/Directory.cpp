@@ -297,7 +297,7 @@ Containers::Array<unsigned char> Directory::read(const std::string& filename) {
 std::string Directory::readString(const std::string& filename) {
     const auto data = read(filename);
 
-    return {reinterpret_cast<const char*>(data.begin()), data.size()};
+    return std::string(reinterpret_cast<const char*>(data.begin()), data.size());
 }
 
 bool Directory::write(const std::string& filename, const Containers::ArrayReference<const void> data) {
