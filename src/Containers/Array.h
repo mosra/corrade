@@ -224,6 +224,7 @@ Containers::ArrayReference<const int> b =
 @endcode
 
 @see @ref ArrayReference<const void>
+@todo What was the reason for no const-correctness at all?
 */
 template<class T> class ArrayReference {
     public:
