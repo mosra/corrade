@@ -48,6 +48,7 @@ class ArrayReferenceTest: public TestSuite::Tester {
 typedef Containers::Array<int> Array;
 typedef Containers::ArrayReference<int> ArrayReference;
 typedef Containers::ArrayReference<const int> ConstArrayReference;
+typedef Containers::ArrayReference<const void> VoidArrayReference;
 
 ArrayReferenceTest::ArrayReferenceTest() {
     addTests({&ArrayReferenceTest::constructEmpty,
@@ -155,12 +156,12 @@ void ArrayReferenceTest::constReference() {
 
 void ArrayReferenceTest::voidConstruction() {
     void* a = reinterpret_cast<void*>(0xdeadbeef);
-    Containers::ArrayReference<const void> b(a, 25);
+    VoidArrayReference b(a, 25);
     CORRADE_VERIFY(b == a);
     CORRADE_COMPARE(b.size(), 25);
 
     int* c = reinterpret_cast<int*>(0xdeadbeef);
-    Containers::ArrayReference<const void> d(c, 25);
+    VoidArrayReference d(c, 25);
     CORRADE_VERIFY(d == c);
     CORRADE_COMPARE(d.size(), 100);
 }
@@ -171,25 +172,25 @@ void ArrayReferenceTest::voidConversion() {
     /** @todo C++14: test that all the operations are really constexpr (C++11 doesn't allow void conversions IMHO) */
 
     /* void reference to compile-time array */
-    Containers::ArrayReference<const void> b = a;
+    VoidArrayReference b = a;
     CORRADE_VERIFY(b == a);
     CORRADE_VERIFY(b.data() == a);
     CORRADE_COMPARE(b.size(), 6*sizeof(int));
 
     /* void reference to runtime array */
-    Containers::ArrayReference<const void> c = {a, 6};
+    VoidArrayReference c = {a, 6};
     CORRADE_VERIFY(c == a);
     CORRADE_COMPARE(c.size(), 6*sizeof(int));
 
     /* void reference to Array */
-    Containers::Array<int> d(6);
-    Containers::ArrayReference<const void> e = d;
+    Array d(6);
+    VoidArrayReference e = d;
     CORRADE_VERIFY(e == d);
     CORRADE_COMPARE(e.size(), d.size()*sizeof(int));
 
     /* void reference to ArrayReference */
-    Containers::ArrayReference<int> f = a;
-    Containers::ArrayReference<const void> g = f;
+    ArrayReference f = a;
+    VoidArrayReference g = f;
     CORRADE_VERIFY(g == f);
     CORRADE_COMPARE(g.size(), f.size()*sizeof(int));
 }
