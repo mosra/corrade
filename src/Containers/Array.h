@@ -131,6 +131,31 @@ template<class T> class Array {
         /** @brief Move assignment */
         Array<T>& operator=(Array<T>&&) noexcept;
 
+        /* `char* a = Containers::Array<char>(5); a[3] = 5;` would result in
+           instant segfault, disallowing it in the following conversion
+           operators */
+
+        /** @brief Conversion to array type */
+        /*implicit*/ operator T*()
+        #ifndef CORRADE_GCC47_COMPATIBILITY
+        &
+        #endif
+        { return _data; }
+
+        /** @overload */
+        /*implicit*/ operator const T*()
+        #ifndef CORRADE_GCC47_COMPATIBILITY
+        const &
+        #else
+        const
+        #endif
+        { return _data; }
+
+        #ifndef CORRADE_GCC47_COMPATIBILITY
+        /** @overload */
+        /*implicit*/ operator const T*() const && = delete;
+        #endif
+
         /** @brief %Array data */
         T* data() { return _data; }
         const T* data() const { return _data; }         /**< @overload */
@@ -150,31 +175,6 @@ template<class T> class Array {
         T* end() { return _data+_size; }
         const T* end() const { return _data+_size; }    /**< @overload */
         const T* cend() const { return _data+_size; }   /**< @overload */
-
-        /* `char* a = Containers::Array<char>(5); a[3] = 5;` would result in
-           instant segfault, disallowing it in the following conversion
-           operators */
-
-        /** @brief Conversion to array type */
-        operator T*()
-        #ifndef CORRADE_GCC47_COMPATIBILITY
-        &
-        #endif
-        { return _data; }
-
-        /** @overload */
-        operator const T*()
-        #ifndef CORRADE_GCC47_COMPATIBILITY
-        const &
-        #else
-        const
-        #endif
-        { return _data; }
-
-        #ifndef CORRADE_GCC47_COMPATIBILITY
-        /** @overload */
-        operator const T*() const && = delete;
-        #endif
 
         /**
          * @brief Release data storage
@@ -283,6 +283,9 @@ template<class T> class ArrayReference {
         #endif
         constexpr /*implicit*/ ArrayReference(const ArrayReference<U>& array) noexcept: _data(array), _size(array.size()) {}
 
+        /** @brief Conversion to array type */
+        constexpr /*implicit*/ operator T*() const { return _data; }
+
         /** @brief %Array data */
         constexpr const T* data() const { return _data; }
 
@@ -299,9 +302,6 @@ template<class T> class ArrayReference {
         /** @brief Pointer to (one item after) last element */
         T* end() const { return _data+_size; }
         T* cend() const { return _data+_size; }         /**< @overload */
-
-        /** @brief Conversion to array type */
-        constexpr operator T*() const { return _data; }
 
     private:
         T* _data;
@@ -374,6 +374,9 @@ template<> class ArrayReference<const void> {
         /** @brief Construct const void reference to any ArrayReference */
         template<class T> constexpr /*implicit*/ ArrayReference(const ArrayReference<T>& array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
 
+        /** @brief Conversion to array type */
+        constexpr /*implicit*/ operator const void*() const { return _data; }
+
         /** @brief %Array data */
         constexpr const void* data() const { return _data; }
 
@@ -382,9 +385,6 @@ template<> class ArrayReference<const void> {
 
         /** @brief Whether the array is empty */
         constexpr bool empty() const { return !_size; }
-
-        /** @brief Conversion to array type */
-        constexpr operator const void*() const { return _data; }
 
     private:
         const void* _data;
