@@ -25,6 +25,7 @@
 
 #include <map>
 #include <string>
+#include <valarray>
 #include <vector>
 
 #include "Containers/Array.h"
@@ -69,9 +70,15 @@ void TypeTraitsTest::isIterable() {
     /* Non-iterable types */
     CORRADE_VERIFY(!IsIterable<int>{});
 
-    /* STL types */
+    /* STL types with begin()/end() members */
     CORRADE_VERIFY(IsIterable<std::vector<int>>{});
     CORRADE_VERIFY(IsIterable<std::string>{});
+
+    /* STL types with std::begin()/std::end() only */
+    CORRADE_VERIFY(IsIterable<std::valarray<int>>{});
+
+    /* Corrade types */
+    CORRADE_VERIFY(IsIterable<Containers::Array<int>>{});
 }
 
 }}}
