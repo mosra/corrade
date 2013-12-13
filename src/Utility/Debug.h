@@ -245,7 +245,7 @@ Prints the value as `{a, b, c}`.
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class Iterable> Debug operator<<(Debug debug, const Iterable& value)
 #else
-template<class Iterable> Debug operator<<(typename std::enable_if<IsIterable<Iterable>{} && !std::is_same<Iterable, std::string>{}, Debug>::type debug, const Iterable& value)
+template<class Iterable> Debug operator<<(typename std::enable_if<IsIterable<Iterable>() && !std::is_same<Iterable, std::string>(), Debug>::type debug, const Iterable& value)
 #endif
 {
     debug << "{";

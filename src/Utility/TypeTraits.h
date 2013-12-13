@@ -31,6 +31,8 @@
 
 #include <utility>
 
+#include "corradeCompatibility.h"
+
 namespace Corrade { namespace Utility {
 
 /** @hideinitializer
