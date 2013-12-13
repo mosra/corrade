@@ -23,6 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -36,20 +37,41 @@ class TypeTraitsTest: public TestSuite::Tester {
     public:
         explicit TypeTraitsTest();
 
+        void hasType();
+
         void isIterable();
 };
 
 TypeTraitsTest::TypeTraitsTest() {
-    addTests({&TypeTraitsTest::isIterable});
+    addTests({&TypeTraitsTest::hasType,
+              &TypeTraitsTest::isIterable});
+}
+
+CORRADE_HAS_TYPE(HasKeyType, typename T::key_type);
+CORRADE_HAS_TYPE(HasSize, decltype(std::declval<T>().size()));
+CORRADE_HAS_TYPE(HasBegin, decltype(std::begin(std::declval<T>())));
+
+void TypeTraitsTest::hasType() {
+    /* Member type */
+    CORRADE_VERIFY((HasKeyType<std::map<int, int>>{}));
+    CORRADE_VERIFY(!HasKeyType<std::vector<int>>{});
+
+    /* Member function */
+    CORRADE_VERIFY(HasSize<std::vector<int>>{});
+    CORRADE_VERIFY(!(HasSize<std::tuple<int, int>>{}));
+
+    /* Non-member function */
+    CORRADE_VERIFY(HasBegin<std::string>{});
+    CORRADE_VERIFY(!HasBegin<int*>{});
 }
 
 void TypeTraitsTest::isIterable() {
     /* Non-iterable types */
-    CORRADE_VERIFY(!IsIterable<int>::Value);
+    CORRADE_VERIFY(!IsIterable<int>{});
 
     /* STL types */
-    CORRADE_VERIFY(IsIterable<std::vector<int>>::Value);
-    CORRADE_VERIFY(IsIterable<std::string>::Value);
+    CORRADE_VERIFY(IsIterable<std::vector<int>>{});
+    CORRADE_VERIFY(IsIterable<std::string>{});
 }
 
 }}}

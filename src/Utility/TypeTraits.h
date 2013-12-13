@@ -26,43 +26,56 @@
 */
 
 /** @file Utility/TypeTraits.h
- * @brief Type traits
+ * @brief Macros @ref CORRADE_HAS_TYPE(), alias @ref Corrade::Utility::IsIterable
  */
+
+#include <utility>
 
 namespace Corrade { namespace Utility {
 
-/**
-@brief Macro for creating traits class for checking whether an class has given inner type
-@param type          Inner type to look for
-@param className     Resulting trait class name
+/** @hideinitializer
+@brief Macro for creating traits class that checks for type expression validity
+@param typeExpression   Type expression to check
+@param className        Resulting class name
 
-See @ref Corrade::Utility::IsIterable "IsIterable" class documentation for an example.
+Defines a traits class checking whether @p typeExpression is valid. You can use
+`T` to reference the type which is being checked. The defined class is then
+implicitly convertible to `bool` holding the result.
+
+Usage examples: checking for presence of `const_iterator` member type:
+@code
+CORRADE_HAS_TYPE(HasKeyType, typename T::key_type);
+
+static_assert(HasKeyType<std::map<int, int>>{}, "");
+static_assert(!HasKeyType<std::vector<int>>{}, "");
+@endcode
+
+Checking for presence of `size()` member function:
+@code
+CORRADE_HAS_TYPE(HasSize, decltype(std::declval<T>().size()));
+
+static_assert(HasSize<std::vector<int>>{}, "");
+static_assert(!HasSize<std::tuple<int, int>>{}, "");
+@endcode
 */
 /* Two overloaded get() functions return type of different size. Templated
    get() is used when T has given attribute, non-templated otherwise. Bool
    value then indicates whether the templated version was called or not. */
-#define HasType(type, className)                                            \
-template<class T> class className {                                         \
-    typedef char SmallType;                                                 \
-    typedef short LargeType;                                                \
-                                                                            \
-    className() = delete;                                                   \
-    template<class U> static SmallType get(U&, typename U::type* = nullptr);\
-    static LargeType get(...);                                              \
-    static T& reference();                                                  \
-                                                                            \
+#define CORRADE_HAS_TYPE(className, typeExpression)                         \
+template<class U> class className {                                         \
+    template<class T> static char get(T&&, typeExpression* = nullptr);      \
+    static short get(...);                                                  \
     public:                                                                 \
-        static const bool Value =                                           \
-            sizeof(get(reference())) == sizeof(SmallType);                  \
-};
+        constexpr operator bool() const { return sizeof(get(std::declval<U>())) == sizeof(char); } \
+}
 
 #ifdef DOXYGEN_GENERATING_OUTPUT
 /**
 @brief Traits class for checking whether given class is iterable (via const_iterator)
 
-Actually created using HasType macro:
+Actually created using CORRADE_HAS_TYPE macro:
 @code
-HasType(const_iterator, IsIterable)
+CORRADE_HAS_TYPE(IsIterable, const_iterator)
 @endcode
 */
 template<class T> struct IsIterable {
@@ -72,9 +85,9 @@ template<class T> struct IsIterable {
      * True when given class has const_iterator, false otherwise.
      */
     static const bool Value;
-}
+};
 #else
-HasType(const_iterator, IsIterable)
+CORRADE_HAS_TYPE(IsIterable, typename T::const_iterator);
 #endif
 
 }}
