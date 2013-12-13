@@ -29,6 +29,7 @@
  * @brief Macros @ref CORRADE_HAS_TYPE(), alias @ref Corrade::Utility::IsIterable
  */
 
+#include <iterator> /* for std::begin() in libc++ */
 #include <utility>
 
 #include "corradeCompatibility.h"
