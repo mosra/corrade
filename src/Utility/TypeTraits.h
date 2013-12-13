@@ -69,25 +69,24 @@ template<class U> class className {                                         \
         constexpr operator bool() const { return sizeof(get(std::declval<U>())) == sizeof(char); } \
 }
 
-#ifdef DOXYGEN_GENERATING_OUTPUT
-/**
-@brief Traits class for checking whether given class is iterable (via const_iterator)
+namespace Implementation {
+    CORRADE_HAS_TYPE(HasBegin, decltype(std::declval<T>().begin()));
+    CORRADE_HAS_TYPE(HasEnd, decltype(std::declval<T>().end()));
+    CORRADE_HAS_TYPE(HasStdBegin, decltype(std::begin(std::declval<T>())));
+    CORRADE_HAS_TYPE(HasStdEnd, decltype(std::end(std::declval<T>())));
+}
 
-Actually created using CORRADE_HAS_TYPE macro:
-@code
-CORRADE_HAS_TYPE(IsIterable, const_iterator)
-@endcode
+/**
+@brief Traits class for checking whether given class is iterable
+
+Equivalent to `std::true_type` if the class is has either `begin()` and `end()`
+members or is usable with `std::begin()` and `std::end()`. Otherwise equivalent
+to `std::false_type`.
 */
-template<class T> struct IsIterable {
-    /**
-     * @brief Whether given class is iterable
-     *
-     * True when given class has const_iterator, false otherwise.
-     */
-    static const bool Value;
-};
+#ifndef CORRADE_GCC46_COMPATIBILITY
+template<class T> using IsIterable = std::integral_constant<bool, (Implementation::HasBegin<T>{} || Implementation::HasStdBegin<T>{}) && (Implementation::HasEnd<T>{} || Implementation::HasStdEnd<T>{})>;
 #else
-CORRADE_HAS_TYPE(IsIterable, typename T::const_iterator);
+template<class T> struct IsIterable: public std::integral_constant<bool, (Implementation::HasBegin<T>{} || Implementation::HasStdBegin<T>{}) && (Implementation::HasEnd<T>{} || Implementation::HasStdEnd<T>{})> {};
 #endif
 
 }}

@@ -250,7 +250,7 @@ template<class Iterable> Debug operator<<(typename std::enable_if<IsIterable<Ite
 {
     debug << "{";
     debug.setFlag(Debug::SpaceAfterEachValue, false);
-    for(typename Iterable::const_iterator it = value.begin(); it != value.end(); ++it) {
+    for(auto it = value.begin(); it != value.end(); ++it) {
         if(it != value.begin())
             debug << ", ";
         debug << *it;
