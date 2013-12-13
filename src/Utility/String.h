@@ -133,14 +133,14 @@ class CORRADE_UTILITY_EXPORT String {
         /**
          * @brief Join strings with given character
          * @param strings           Strings to join
-         * @param delim             Delimiter
+         * @param delimiter         Delimiter
          */
         static std::string join(const std::vector<std::string>& strings, char delimiter);
 
         /**
          * @brief Join strings with given character and remove empty parts
          * @param strings           Strings to join
-         * @param delim             Delimiter
+         * @param delimiter         Delimiter
          */
         static std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, char delimiter);
 
