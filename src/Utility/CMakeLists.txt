@@ -34,7 +34,6 @@ set(CorradeUtility_SRCS
     Sha1.cpp
     String.cpp
     Translator.cpp
-    TypeTraits.cpp
     utilities.cpp)
 
 set(CorradeUtility_GracefulAssert_SRCS

@@ -23,14 +23,35 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "TypeTraits.h"
-
-#include <vector>
 #include <string>
+#include <vector>
 
-namespace Corrade { namespace Utility {
+#include "Containers/Array.h"
+#include "Utility/TypeTraits.h"
+#include "TestSuite/Tester.h"
 
-static_assert(IsIterable<std::vector<int>>::Value, "std::vector should be iterable");
-static_assert(IsIterable<std::string>::Value, "std::string should be iterable");
+namespace Corrade { namespace Utility { namespace Test {
 
-}}
+class TypeTraitsTest: public TestSuite::Tester {
+    public:
+        explicit TypeTraitsTest();
+
+        void isIterable();
+};
+
+TypeTraitsTest::TypeTraitsTest() {
+    addTests({&TypeTraitsTest::isIterable});
+}
+
+void TypeTraitsTest::isIterable() {
+    /* Non-iterable types */
+    CORRADE_VERIFY(!IsIterable<int>::Value);
+
+    /* STL types */
+    CORRADE_VERIFY(IsIterable<std::vector<int>>::Value);
+    CORRADE_VERIFY(IsIterable<std::string>::Value);
+}
+
+}}}
+
+CORRADE_TEST_MAIN(Corrade::Utility::Test::TypeTraitsTest)
