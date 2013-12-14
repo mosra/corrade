@@ -29,6 +29,8 @@
  * @brief Macros @ref CORRADE_DEPRECATED(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
+#include "corradeConfigure.h"
+
 /** @hideinitializer
 @brief Deprecation mark
 
@@ -39,7 +41,11 @@ CORRADE_DEPRECATED("use bar() instead") void foo();
 @endcode
 */
 #if defined(__GNUC__) || defined(__clang__)
+#ifndef CORRADE_GCC44_COMPATIBILITY
 #define CORRADE_DEPRECATED(message) __attribute((deprecated(message)))
+#else
+#define CORRADE_DEPRECATED(message) __attribute((deprecated))
+#endif
 #elif defined(_MSC_VER)
 #define CORRADE_DEPRECATED(message) __declspec(deprecated(message))
 #else
