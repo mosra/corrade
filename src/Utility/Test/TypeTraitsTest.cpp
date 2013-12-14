@@ -50,11 +50,17 @@ TypeTraitsTest::TypeTraitsTest() {
 }
 
 CORRADE_HAS_TYPE(HasKeyType, typename T::key_type);
+#ifndef CORRADE_GCC44_COMPATIBILITY
 CORRADE_HAS_TYPE(HasSize, decltype(std::declval<T>().size()));
+#else
+CORRADE_HAS_TYPE(HasSize, decltype((*static_cast<const T*>(nullptr)).size()));
+#endif
 #ifndef CORRADE_GCC45_COMPATIBILITY
 CORRADE_HAS_TYPE(HasBegin, decltype(std::begin(std::declval<T>())));
-#else
+#elif !defined(CORRADE_GCC44_COMPATIBILITY)
 CORRADE_HAS_TYPE(HasSin, decltype(std::sin(std::declval<T>())));
+#else
+CORRADE_HAS_TYPE(HasSin, decltype(std::sin(*static_cast<const T*>(nullptr))));
 #endif
 
 void TypeTraitsTest::hasType() {

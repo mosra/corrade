@@ -64,6 +64,7 @@ static_assert(!HasSize<std::tuple<int, int>>{}, "");
 /* Two overloaded get() functions return type of different size. Templated
    get() is used when T has given attribute, non-templated otherwise. Bool
    value then indicates whether the templated version was called or not. */
+#ifndef CORRADE_GCC44_COMPATIBILITY
 #define CORRADE_HAS_TYPE(className, typeExpression)                         \
 template<class U> class className {                                         \
     template<class T> static char get(T&&, typeExpression* = nullptr);      \
@@ -72,10 +73,26 @@ template<class U> class className {                                         \
         enum: bool { Value = sizeof(get(std::declval<U>())) == sizeof(char) }; \
         constexpr operator bool() const { return Value; } \
 }
+#else
+#define CORRADE_HAS_TYPE(className, typeExpression)                         \
+template<class U> class className {                                         \
+    template<class T> static char get(T&&, typeExpression* = nullptr);      \
+    static short get(...);                                                  \
+    static U&& reference();                                                 \
+    public:                                                                 \
+        enum: bool { Value = sizeof(get(reference())) == sizeof(char) };    \
+        constexpr operator bool() const { return Value; } \
+}
+#endif
 
 namespace Implementation {
+    #ifndef CORRADE_GCC44_COMPATIBILITY
     CORRADE_HAS_TYPE(HasBegin, decltype(std::declval<T>().begin()));
     CORRADE_HAS_TYPE(HasEnd, decltype(std::declval<T>().end()));
+    #else
+    CORRADE_HAS_TYPE(HasBegin, decltype((*static_cast<const T*>(nullptr)).begin()));
+    CORRADE_HAS_TYPE(HasEnd, decltype((*static_cast<const T*>(nullptr)).end()));
+    #endif
     #ifndef CORRADE_GCC45_COMPATIBILITY
     CORRADE_HAS_TYPE(HasStdBegin, decltype(std::begin(std::declval<T>())));
     CORRADE_HAS_TYPE(HasStdEnd, decltype(std::end(std::declval<T>())));
