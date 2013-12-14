@@ -123,6 +123,9 @@ void ArrayReferenceTest::boolConversion() {
     CORRADE_VERIFY(!VoidArrayReference());
 
     /* The conversion is explicit (i.e. no ArrayReference(a) + 7) */
+    #ifdef CORRADE_GCC44_COMPATIBILITY
+    CORRADE_EXPECT_FAIL("Explicit conversion operators are not supported in GCC 4.4.");
+    #endif
     CORRADE_VERIFY(!(std::is_convertible<ArrayReference, int>::value));
     CORRADE_VERIFY(!(std::is_convertible<VoidArrayReference, int>::value));
 }
@@ -228,13 +231,21 @@ void ArrayReferenceTest::voidConversion() {
     /* void reference to Array */
     Array d(6);
     VoidArrayReference e = d;
+    #ifndef CORRADE_GCC44_COMPATIBILITY
     CORRADE_VERIFY(e == d);
+    #else
+    CORRADE_VERIFY(e == static_cast<const void*>(d));
+    #endif
     CORRADE_COMPARE(e.size(), d.size()*sizeof(int));
 
     /* void reference to ArrayReference */
     ArrayReference f = a;
     VoidArrayReference g = f;
+    #ifndef CORRADE_GCC44_COMPATIBILITY
     CORRADE_VERIFY(g == f);
+    #else
+    CORRADE_VERIFY(g == static_cast<const void*>(f));
+    #endif
     CORRADE_COMPARE(g.size(), f.size()*sizeof(int));
 }
 

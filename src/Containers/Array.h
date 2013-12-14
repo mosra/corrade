@@ -150,7 +150,10 @@ template<class T> class Array {
         Array<T>& operator=(Array<T>&&) noexcept;
 
         /** @brief Whether the array is non-empty */
-        explicit operator bool() const { return _data; }
+        #ifndef CORRADE_GCC44_COMPATIBILITY
+        explicit
+        #endif
+        operator bool() const { return _data; }
 
         /* `char* a = Containers::Array<char>(5); a[3] = 5;` would result in
            instant segfault, disallowing it in the following conversion
@@ -320,7 +323,11 @@ template<class T> class ArrayReference {
         constexpr /*implicit*/ ArrayReference(const ArrayReference<U>& array) noexcept: _data(array), _size(array.size()) {}
 
         /** @brief Whether the array is non-empty */
-        constexpr explicit operator bool() const { return _data; }
+        constexpr
+        #ifndef CORRADE_GCC44_COMPATIBILITY
+        explicit
+        #endif
+        operator bool() const { return _data; }
 
         /** @brief Conversion to array type */
         constexpr /*implicit*/ operator T*() const { return _data; }
@@ -422,7 +429,11 @@ template<> class ArrayReference<const void> {
         template<class T> constexpr /*implicit*/ ArrayReference(const ArrayReference<T>& array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
 
         /** @brief Whether the array is non-empty */
-        constexpr explicit operator bool() const { return _data; }
+        constexpr
+        #ifndef CORRADE_GCC44_COMPATIBILITY
+        explicit
+        #endif
+        operator bool() const { return _data; }
 
         /** @brief Conversion to array type */
         constexpr /*implicit*/ operator const void*() const { return _data; }
