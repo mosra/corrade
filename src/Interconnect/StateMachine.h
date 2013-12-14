@@ -171,7 +171,8 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
          * @see @ref step()
          */
         template<State state> Signal entered(State previous) {
-            return emit(&StateMachine::entered<state>, previous);
+            return emit<StateMachine<states, inputs, State, Input>, State>(
+                static_cast<Signal(StateMachine<states, inputs, State, Input>::*)(State)>(&StateMachine::entered<state>), previous);
         }
 
         /**
@@ -183,7 +184,8 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
          * @see @ref step()
          */
         template<State state> Signal exited(State next) {
-            return emit(&StateMachine::exited<state>, next);
+            return emit<StateMachine<states, inputs, State, Input>, State>(
+                static_cast<Signal(StateMachine<states, inputs, State, Input>::*)(State)>(&StateMachine::exited<state>), next);
         }
 
     private:
