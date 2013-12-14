@@ -122,31 +122,31 @@ void StringTest::join() {
     CORRADE_COMPARE(String::joinWithoutEmptyParts({}, '/'), "");
 
     /* One empty value */
-    CORRADE_COMPARE(String::join({""}, '/'), "");
-    CORRADE_COMPARE(String::joinWithoutEmptyParts({""}, '/'), "");
+    CORRADE_COMPARE(String::join(std::vector<std::string>{""}, '/'), "");
+    CORRADE_COMPARE(String::joinWithoutEmptyParts(std::vector<std::string>{""}, '/'), "");
 
     /* Two empty values */
-    CORRADE_COMPARE(String::join({"", ""}, '/'),
+    CORRADE_COMPARE(String::join(std::vector<std::string>{"", ""}, '/'),
         "/");
-    CORRADE_COMPARE(String::joinWithoutEmptyParts({"", ""}, '/'),
+    CORRADE_COMPARE(String::joinWithoutEmptyParts(std::vector<std::string>{"", ""}, '/'),
         "");
 
     /* One value */
-    CORRADE_COMPARE(String::join({"abcdef"}, '/'),
+    CORRADE_COMPARE(String::join(std::vector<std::string>{"abcdef"}, '/'),
         "abcdef");
-    CORRADE_COMPARE(String::joinWithoutEmptyParts({"abcdef"}, '/'),
+    CORRADE_COMPARE(String::joinWithoutEmptyParts(std::vector<std::string>{"abcdef"}, '/'),
         "abcdef");
 
     /* Common case */
-    CORRADE_COMPARE(String::join({"ab", "c", "def"}, '/'),
+    CORRADE_COMPARE(String::join(std::vector<std::string>{"ab", "c", "def"}, '/'),
         "ab/c/def");
-    CORRADE_COMPARE(String::joinWithoutEmptyParts({"ab", "c", "def"}, '/'),
+    CORRADE_COMPARE(String::joinWithoutEmptyParts(std::vector<std::string>{"ab", "c", "def"}, '/'),
         "ab/c/def");
 
     /* Empty parts */
-    CORRADE_COMPARE(String::join({"ab", "", "c", "def", "", ""}, '/'),
+    CORRADE_COMPARE(String::join(std::vector<std::string>{"ab", "", "c", "def", "", ""}, '/'),
         "ab//c/def//");
-    CORRADE_COMPARE(String::joinWithoutEmptyParts({"ab", "", "c", "def", "", ""}, '/'),
+    CORRADE_COMPARE(String::joinWithoutEmptyParts(std::vector<std::string>{"ab", "", "c", "def", "", ""}, '/'),
         "ab/c/def");
 }
 
