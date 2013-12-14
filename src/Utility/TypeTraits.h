@@ -69,14 +69,17 @@ template<class U> class className {                                         \
     template<class T> static char get(T&&, typeExpression* = nullptr);      \
     static short get(...);                                                  \
     public:                                                                 \
-        constexpr operator bool() const { return sizeof(get(std::declval<U>())) == sizeof(char); } \
+        enum: bool { Value = sizeof(get(std::declval<U>())) == sizeof(char) }; \
+        constexpr operator bool() const { return Value; } \
 }
 
 namespace Implementation {
     CORRADE_HAS_TYPE(HasBegin, decltype(std::declval<T>().begin()));
     CORRADE_HAS_TYPE(HasEnd, decltype(std::declval<T>().end()));
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     CORRADE_HAS_TYPE(HasStdBegin, decltype(std::begin(std::declval<T>())));
     CORRADE_HAS_TYPE(HasStdEnd, decltype(std::end(std::declval<T>())));
+    #endif
 }
 
 /**
@@ -88,8 +91,10 @@ to `std::false_type`.
 */
 #ifndef CORRADE_GCC46_COMPATIBILITY
 template<class T> using IsIterable = std::integral_constant<bool, (Implementation::HasBegin<T>{} || Implementation::HasStdBegin<T>{}) && (Implementation::HasEnd<T>{} || Implementation::HasStdEnd<T>{})>;
-#else
+#elif !defined(CORRADE_GCC45_COMPATIBILITY)
 template<class T> struct IsIterable: public std::integral_constant<bool, (Implementation::HasBegin<T>{} || Implementation::HasStdBegin<T>{}) && (Implementation::HasEnd<T>{} || Implementation::HasStdEnd<T>{})> {};
+#else
+template<class T> struct IsIterable: public std::integral_constant<bool, Implementation::HasBegin<T>::Value && Implementation::HasEnd<T>::Value> {};
 #endif
 
 }}

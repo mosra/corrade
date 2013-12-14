@@ -50,7 +50,11 @@ TypeTraitsTest::TypeTraitsTest() {
 
 CORRADE_HAS_TYPE(HasKeyType, typename T::key_type);
 CORRADE_HAS_TYPE(HasSize, decltype(std::declval<T>().size()));
+#ifndef CORRADE_GCC45_COMPATIBILITY
 CORRADE_HAS_TYPE(HasBegin, decltype(std::begin(std::declval<T>())));
+#else
+CORRADE_HAS_TYPE(HasSin, decltype(std::sin(std::declval<T>())));
+#endif
 
 void TypeTraitsTest::hasType() {
     /* Member type */
@@ -62,23 +66,48 @@ void TypeTraitsTest::hasType() {
     CORRADE_VERIFY(!(HasSize<std::tuple<int, int>>{}));
 
     /* Non-member function */
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     CORRADE_VERIFY(HasBegin<std::string>{});
     CORRADE_VERIFY(!HasBegin<int*>{});
+    #else
+    CORRADE_VERIFY(HasSin<float>{});
+    CORRADE_VERIFY(!HasSin<std::string>{});
+    #endif
 }
 
 void TypeTraitsTest::isIterable() {
     /* Non-iterable types */
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     CORRADE_VERIFY(!IsIterable<int>{});
+    #else
+    CORRADE_VERIFY(!IsIterable<int>::value);
+    #endif
 
     /* STL types with begin()/end() members */
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     CORRADE_VERIFY(IsIterable<std::vector<int>>{});
     CORRADE_VERIFY(IsIterable<std::string>{});
+    #else
+    CORRADE_VERIFY(IsIterable<std::vector<int>>::value);
+    CORRADE_VERIFY(IsIterable<std::string>::value);
+    #endif
 
     /* STL types with std::begin()/std::end() only */
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     CORRADE_VERIFY(IsIterable<std::valarray<int>>{});
+    #else
+    {
+        CORRADE_EXPECT_FAIL("std::valarray isn't iterable in GCC 4.5 due to missing std::begin() etc overloads.");
+        CORRADE_VERIFY(IsIterable<std::valarray<int>>::value);
+    }
+    #endif
 
     /* Corrade types */
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     CORRADE_VERIFY(IsIterable<Containers::Array<int>>{});
+    #else
+    CORRADE_VERIFY(IsIterable<Containers::Array<int>>::value);
+    #endif
 }
 
 }}}
