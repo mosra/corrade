@@ -38,7 +38,7 @@ NaClConsoleStreamBuffer::~NaClConsoleStreamBuffer() = default;
 
 int NaClConsoleStreamBuffer::sync() {
     /* Send buffer data to console line by line */
-    std::vector<std::string> lines = String::split(str(), '\n', false);
+    std::vector<std::string> lines = String::splitWithoutEmptyParts(str(), '\n', false);
     for(auto it = lines.begin(); it != lines.end(); ++it) {
         const std::string& line = *it;
 
