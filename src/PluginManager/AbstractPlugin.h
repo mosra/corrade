@@ -98,7 +98,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * all your subclasses.
          * @see plugin(), metadata(), configuration()
          */
-        explicit AbstractPlugin(AbstractManager* manager, std::string plugin);
+        explicit AbstractPlugin(AbstractManager& manager, std::string plugin);
 
         /**
          * @brief Destructor
@@ -204,7 +204,7 @@ See @ref plugin-management for more information about plugin compilation.
 */
 #ifdef CORRADE_STATIC_PLUGIN
 #define CORRADE_PLUGIN_REGISTER(name, className, interface)                 \
-    inline void* pluginInstancer_##name(Corrade::PluginManager::AbstractManager* manager, const std::string& plugin) \
+    inline void* pluginInstancer_##name(Corrade::PluginManager::AbstractManager& manager, const std::string& plugin) \
         { return new className(manager, plugin); }                          \
     int pluginImporter_##name();                                            \
     int pluginImporter_##name() {                                           \
@@ -215,8 +215,8 @@ See @ref plugin-management for more information about plugin compilation.
 #define CORRADE_PLUGIN_REGISTER(name, className, interface)                 \
     extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion();                   \
     extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion() { return CORRADE_PLUGIN_VERSION; } \
-    extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractManager* manager, const std::string& plugin); \
-    extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractManager* manager, const std::string& plugin) \
+    extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractManager& manager, const std::string& plugin); \
+    extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractManager& manager, const std::string& plugin) \
         { return new className(manager, plugin); }                          \
     extern "C" CORRADE_PLUGIN_EXPORT void pluginInitializer();              \
     extern "C" CORRADE_PLUGIN_EXPORT void pluginInitializer()               \

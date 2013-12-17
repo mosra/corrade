@@ -201,7 +201,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         static const int Version;
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        typedef void* (*Instancer)(AbstractManager*, const std::string&);
+        typedef void* (*Instancer)(AbstractManager&, const std::string&);
         static void importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, Instancer instancer, void(*initializer)(), void(*finalizer)());
         #endif
 
@@ -431,8 +431,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
         std::map<std::string, std::vector<AbstractPlugin*> > instances;
 
-        CORRADE_PLUGINMANAGER_LOCAL void registerInstance(std::string plugin, AbstractPlugin* instance, const Utility::Configuration** configuration, const PluginMetadata** metadata);
-        CORRADE_PLUGINMANAGER_LOCAL void unregisterInstance(const std::string& plugin, AbstractPlugin* instance);
+        CORRADE_PLUGINMANAGER_LOCAL void registerInstance(std::string plugin, AbstractPlugin& instance, const Utility::Configuration*& configuration, const PluginMetadata*& metadata);
+        CORRADE_PLUGINMANAGER_LOCAL void unregisterInstance(const std::string& plugin, AbstractPlugin& instance);
 };
 
 /** @hideinitializer

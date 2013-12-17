@@ -30,7 +30,7 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class Deletable: public AbstractDeletable {
     public:
-        explicit Deletable(AbstractManager* manager, std::string plugin): AbstractDeletable(manager, std::move(plugin)) {}
+        explicit Deletable(AbstractManager& manager, std::string plugin): AbstractDeletable(manager, std::move(plugin)) {}
 
         ~Deletable() { *var = 0xDEADBEEF; }
 };

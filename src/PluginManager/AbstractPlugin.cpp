@@ -35,17 +35,22 @@ void AbstractPlugin::finalize() {}
 
 AbstractPlugin::AbstractPlugin(): _manager(nullptr), _configuration(nullptr), _metadata(nullptr) {}
 
-AbstractPlugin::AbstractPlugin(AbstractManager* manager, std::string plugin): _manager(manager), _plugin(std::move(plugin)) {
-    _manager->registerInstance(_plugin, this, &_configuration, &_metadata);
+AbstractPlugin::AbstractPlugin(AbstractManager& manager, std::string plugin): _manager(&manager), _plugin(std::move(plugin)) {
+    _manager->registerInstance(_plugin, *this, _configuration, _metadata);
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
+AbstractPlugin::AbstractPlugin(AbstractManager* manager, std::string plugin): _manager(manager), _plugin(std::move(plugin)) {
+    _manager->registerInstance(_plugin, *this, _configuration, _metadata);
+}
+#endif
+
 AbstractPlugin::~AbstractPlugin() {
-    if(_manager) _manager->unregisterInstance(_plugin, this);
+    if(_manager) _manager->unregisterInstance(_plugin, *this);
 }
 
 bool AbstractPlugin::canBeDeleted() { return false; }
 
 std::string AbstractPlugin::plugin() const { return _plugin; }
-
 
 }}
