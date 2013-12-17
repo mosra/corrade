@@ -33,7 +33,6 @@ set(CorradeUtility_SRCS
     MurmurHash2.cpp
     Sha1.cpp
     String.cpp
-    Translator.cpp
     utilities.cpp)
 
 set(CorradeUtility_GracefulAssert_SRCS
@@ -57,7 +56,6 @@ set(CorradeUtility_HEADERS
     Resource.h
     Sha1.h
     String.h
-    Translator.h
     TypeTraits.h
     Unicode.h
     utilities.h
