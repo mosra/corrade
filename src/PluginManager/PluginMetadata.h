@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::PluginManager::PluginMetadata
+ * @brief Class @ref Corrade::PluginManager::PluginMetadata
  */
 
 #include <string>
@@ -46,12 +46,12 @@ plugin binary in a filesystem or is compiled directly into executable with an
 static plugin. See @ref plugin-management for tutorial and brief introduction
 into how plugins work.
 
-The plugin configuration file has an simple syntax (see
-@ref Utility::Configuration "Configuration" class documentation for full
-specification). The file stores list of dependencies (if the plugin depends on
-another), list of replaced plugins (if the plugin can replace plugin and
-provide the same or better functionality) and optionally plugin-specific
-configuration. Example `Matrix.conf` file for `Matrix` plugin:
+The plugin configuration file has an simple syntax (see @ref Utility::Configuration
+class documentation for full specification). The file stores list of
+dependencies (if the plugin depends on another), list of replaced plugins (if
+the plugin can replace plugin and provide the same or better functionality) and
+optionally plugin-specific configuration. Example `Matrix.conf` file for
+`Matrix` plugin:
 
     # Dependencies
     depends=SomeRandomJohnDoesPlugin

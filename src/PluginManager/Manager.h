@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::PluginManager::Manager
+ * @brief Class @ref Corrade::PluginManager::Manager
  */
 
 #include <memory>
@@ -40,7 +40,7 @@ namespace Corrade { namespace PluginManager {
 /**
 @brief Plugin manager
 @tparam T               Plugin interface
-@tparam BaseManager     Base class, subclassed from AbstractManager
+@tparam BaseManager     Base class, subclassed from @ref AbstractManager
     (for example if you want to add some functionality to non-templated base,
     such as signals...)
 
@@ -58,7 +58,7 @@ class Manager: public BaseManager {
          * @brief Constructor
          *
          * Forwards arguments to @p BaseManager constructor. See
-         * AbstractManager::AbstractManager() for more information.
+         * @ref AbstractManager::AbstractManager() for more information.
          */
         template<class ...U> explicit Manager(U&&... args);
 
@@ -75,7 +75,7 @@ class Manager: public BaseManager {
          *
          * Returns new instance of given plugin or `nullptr` on error. The
          * plugin must be successfully loaded for the operation to succeed.
-         * @see loadState(), load()
+         * @see @ref loadState(), @ref load()
          */
         std::unique_ptr<T> instance(const std::string& plugin) {
             /** @todo C++14: `std::make_unique()` */

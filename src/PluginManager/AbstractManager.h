@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::PluginManager::AbstractManager
+ * @brief Class @ref Corrade::PluginManager::AbstractManager
  */
 
 #include <vector>
@@ -211,12 +211,12 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          *      recursive processing is done.
          *
          * First goes through list of static plugins and finds ones that use
-         * the same interface as this PluginManager instance. Then gets list of
-         * all dynamic plugins in given directory.
+         * the same interface as this manager instance. Then gets list of all
+         * dynamic plugins in given directory.
          * @note Dependencies of static plugins are skipped, as static plugins
          *      should have all dependencies present. Also, dynamic plugins
          *      with the same name as another static plugin are skipped.
-         * @see pluginList()
+         * @see @ref pluginList()
          * @partialsupport Parameter @p pluginDirectory has no effect on
          *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
          *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" as only static
@@ -276,6 +276,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          *
          * Returns pointer to plugin metadata or `nullptr`, if given plugin is
          * not found.
+         * @see @ref AbstractPlugin::metadata()
          */
         const PluginMetadata* metadata(const std::string& plugin) const;
 

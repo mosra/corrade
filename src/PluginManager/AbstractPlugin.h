@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::PluginManager::AbstractPlugin, macro CORRADE_PLUGIN_INTERFACE(), CORRADE_PLUGIN_REGISTER().
+ * @brief Class @ref Corrade::PluginManager::AbstractPlugin, macro @ref CORRADE_PLUGIN_INTERFACE(), @ref CORRADE_PLUGIN_REGISTER().
  */
 
 #include <string>
@@ -58,6 +58,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * Note that this function might be called subsequently more than once
          * (e.g. when loading derived plugin after the base plugin has been
          * already initialized).
+         * @see @ref finalize()
          */
         static void initialize();
 
@@ -78,6 +79,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * already initialized).
          * @bug ^ this will fail for base plugin if derived plugin is unloaded
          *      and base plugin is still used
+         * @see @ref initialize()
          */
         static void finalize();
 
@@ -95,7 +97,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          *
          * Used by plugin manager. Don't forget to redefine this constructor in
          * all your subclasses.
-         * @see plugin(), metadata(), configuration()
+         * @see @ref plugin(), @ref metadata(), @ref configuration()
          */
         explicit AbstractPlugin(AbstractManager& manager, std::string plugin);
 
@@ -123,6 +125,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          *
          * Metadata associated with given plugin. If the plugin was not
          * instantiated through plugin manager, returns `nullptr`.
+         * @see @ref AbstractManager::metadata()
          */
         const PluginMetadata* metadata() const { return _metadata; }
 
