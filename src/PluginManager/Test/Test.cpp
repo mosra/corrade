@@ -137,7 +137,7 @@ void Test::wrongPluginVersion() {
     PluginManager::Manager<AbstractFood> foodManager(foodPluginsDir);
     CORRADE_COMPARE(foodManager.load("OldBread"), PluginManager::LoadState::WrongPluginVersion);
     CORRADE_COMPARE(foodManager.loadState("OldBread"), PluginManager::LoadState::NotLoaded);
-    CORRADE_COMPARE(out.str(), "PluginManager: wrong plugin version, expected 3 but got 0\n");
+    CORRADE_COMPARE(out.str(), "PluginManager: wrong plugin version, expected 4 but got 0\n");
     #endif
 }
 
@@ -169,9 +169,7 @@ void Test::staticPlugin() {
     PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
 
     CORRADE_COMPARE(manager.loadState("Canary"), LoadState::Static);
-    CORRADE_COMPARE(*manager.metadata("Canary")->name(), "I'm allergic to canaries!");
-    CORRADE_COMPARE(manager.metadata("Canary")->authors()[0], "Vladimír Vondruš <mosra@centrum.cz>");
-    CORRADE_COMPARE(manager.metadata("Canary")->version(), "1.0");
+    CORRADE_COMPARE(manager.metadata("Canary")->data().value("description"), "I'm allergic to canaries!");
 
     std::unique_ptr<AbstractAnimal> animal = manager.instance("Canary");
     CORRADE_VERIFY(animal);
@@ -189,7 +187,7 @@ void Test::dynamicPlugin() {
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.load("Dog"), LoadState::Loaded);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
-    CORRADE_COMPARE(*manager.metadata("Dog")->name(), "A simple dog plugin");
+    CORRADE_COMPARE(manager.metadata("Dog")->data().value("description"), "A simple dog plugin.");
 
     {
         std::unique_ptr<AbstractAnimal> animal = manager.instance("Dog");
@@ -279,7 +277,7 @@ void Test::hierarchy() {
 
     CORRADE_COMPARE(manager.load("Chihuahua"), LoadState::Loaded);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
-    CORRADE_COMPARE(*manager.metadata("Chihuahua")->name(), "The smallest dog in the world.");
+    CORRADE_COMPARE(manager.metadata("Chihuahua")->data().value("description"), "The smallest dog in the world.");
     CORRADE_COMPARE(manager.metadata("Chihuahua")->depends().size(), 1);
     CORRADE_COMPARE(manager.metadata("Chihuahua")->depends()[0], "Dog");
     CORRADE_COMPARE(manager.metadata("Dog")->usedBy().size(), 1);

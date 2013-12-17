@@ -65,7 +65,7 @@ std::map<std::string, AbstractManager::Plugin*>* AbstractManager::plugins() {
             std::istringstream metadata(r.get(staticPlugin->plugin + ".conf"));
 
             /* Insert plugin to list */
-            CORRADE_INTERNAL_ASSERT_OUTPUT(_plugins->insert(std::make_pair(staticPlugin->plugin, new Plugin(metadata, staticPlugin))).second);
+            CORRADE_INTERNAL_ASSERT_OUTPUT(_plugins->insert(std::make_pair(staticPlugin->plugin, new Plugin(staticPlugin->plugin, metadata, staticPlugin))).second);
         }
 
         /** @todo Assert dependencies of static plugins */
@@ -180,7 +180,7 @@ void AbstractManager::setPluginDirectory(std::string directory) {
         if(plugins()->find(name) != plugins()->end()) continue;
 
         /* Insert plugin to list */
-        plugins()->insert({name, new Plugin(Directory::join(_pluginDirectory, name + ".conf"), this)});
+        plugins()->insert({name, new Plugin(name, Directory::join(_pluginDirectory, name + ".conf"), this)});
     }
 }
 
@@ -425,7 +425,7 @@ LoadState AbstractManager::unload(const std::string& plugin) {
     #endif
 }
 
-void AbstractManager::registerInstance(std::string plugin, AbstractPlugin& instance, const Configuration*& configuration, const PluginMetadata*& metadata) {
+void AbstractManager::registerInstance(std::string plugin, AbstractPlugin& instance, const PluginMetadata*& metadata) {
     /** @todo assert proper interface */
     auto foundPlugin = plugins()->find(plugin);
 
@@ -440,7 +440,6 @@ void AbstractManager::registerInstance(std::string plugin, AbstractPlugin& insta
 
     foundInstance->second.push_back(&instance);
 
-    configuration = &foundPlugin->second->configuration;
     metadata = &foundPlugin->second->metadata;
 }
 
@@ -497,12 +496,12 @@ void* AbstractManager::instanceInternal(const std::string& plugin) {
 }
 
 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-AbstractManager::Plugin::Plugin(const std::string& _metadata, AbstractManager* _manager): configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(_manager), instancer(nullptr), module(nullptr) {
+AbstractManager::Plugin::Plugin(std::string name, const std::string& _metadata, AbstractManager* _manager): configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(std::move(name), configuration), manager(_manager), instancer(nullptr), module(nullptr) {
     loadState = configuration.isValid() ? LoadState::NotLoaded : LoadState::WrongMetadataFile;
 }
 #endif
 
-AbstractManager::Plugin::Plugin(std::istream& _metadata, StaticPlugin* staticPlugin): loadState(LoadState::Static), configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(configuration), manager(nullptr), instancer(staticPlugin->instancer), staticPlugin(staticPlugin) {}
+AbstractManager::Plugin::Plugin(std::string name, std::istream& _metadata, StaticPlugin* staticPlugin): loadState(LoadState::Static), configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(std::move(name), configuration), manager(nullptr), instancer(staticPlugin->instancer), staticPlugin(staticPlugin) {}
 
 AbstractManager::Plugin::~Plugin() {
     #ifndef CORRADE_TARGET_NACL_NEWLIB

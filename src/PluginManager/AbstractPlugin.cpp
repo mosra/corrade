@@ -25,7 +25,8 @@
 
 #include "AbstractPlugin.h"
 
-#include "AbstractManager.h"
+#include "PluginManager/AbstractManager.h"
+#include "Utility/Assert.h"
 
 namespace Corrade { namespace PluginManager {
 
@@ -33,24 +34,19 @@ void AbstractPlugin::initialize() {}
 
 void AbstractPlugin::finalize() {}
 
-AbstractPlugin::AbstractPlugin(): _manager(nullptr), _configuration(nullptr), _metadata(nullptr) {}
+AbstractPlugin::AbstractPlugin(): _manager(nullptr), _metadata(nullptr) {}
 
-AbstractPlugin::AbstractPlugin(AbstractManager& manager, std::string plugin): _manager(&manager), _plugin(std::move(plugin)) {
-    _manager->registerInstance(_plugin, *this, _configuration, _metadata);
+AbstractPlugin::AbstractPlugin(AbstractManager& manager, std::string plugin): _manager(&manager) {
+    _manager->registerInstance(std::move(plugin), *this, _metadata);
 }
-
-#ifdef CORRADE_BUILD_DEPRECATED
-AbstractPlugin::AbstractPlugin(AbstractManager* manager, std::string plugin): _manager(manager), _plugin(std::move(plugin)) {
-    _manager->registerInstance(_plugin, *this, _configuration, _metadata);
-}
-#endif
 
 AbstractPlugin::~AbstractPlugin() {
-    if(_manager) _manager->unregisterInstance(_plugin, *this);
+    if(_manager) {
+        CORRADE_INTERNAL_ASSERT(_metadata);
+        _manager->unregisterInstance(_metadata->name(), *this);
+    }
 }
 
 bool AbstractPlugin::canBeDeleted() { return false; }
-
-std::string AbstractPlugin::plugin() const { return _plugin; }
 
 }}

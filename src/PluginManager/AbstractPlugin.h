@@ -119,14 +119,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
         virtual bool canBeDeleted();
 
         /**
-         * @brief Identifier string
-         *
-         * Name under which the plugin was instanced. If the plugin was not
-         * instantiated via plugin manager, returns empty string.
-         */
-        std::string plugin() const;
-
-        /**
          * @brief Metadata
          *
          * Metadata associated with given plugin. If the plugin was not
@@ -134,25 +126,13 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          */
         const PluginMetadata* metadata() const { return _metadata; }
 
-    protected:
-        /**
-         * @brief Configuration
-         *
-         * Configuration associated with given plugin. If the plugin was not
-         * instantiated through plugin manager, returns `nullptr`.
-         * @todo Make use of this, change to pointer to ConfigurationGroup
-         */
-        const Utility::Configuration* configuration() const { return _configuration; }
-
     private:
         AbstractManager* _manager;
-        std::string _plugin;
-        const Utility::Configuration* _configuration;
         const PluginMetadata* _metadata;
 };
 
 /** @brief Plugin version */
-#define CORRADE_PLUGIN_VERSION 3
+#define CORRADE_PLUGIN_VERSION 4
 
 /**
 @brief Define plugin interface

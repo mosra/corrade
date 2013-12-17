@@ -358,7 +358,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
             #else
             const LoadState loadState;
             #endif
-            const Utility::Configuration configuration;
+            Utility::Configuration configuration;
             PluginMetadata metadata;
 
             /* If set to nullptr, the plugin has not any associated plugin
@@ -385,11 +385,11 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
             #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
             /* Constructor for dynamic plugins */
-            explicit Plugin(const std::string& _metadata, AbstractManager* _manager);
+            explicit Plugin(std::string name, const std::string& _metadata, AbstractManager* _manager);
             #endif
 
             /* Constructor for static plugins */
-            explicit Plugin(std::istream& _metadata, StaticPlugin* staticPlugin);
+            explicit Plugin(std::string name, std::istream& _metadata, StaticPlugin* staticPlugin);
 
             ~Plugin();
         };
@@ -431,7 +431,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
         std::map<std::string, std::vector<AbstractPlugin*> > instances;
 
-        CORRADE_PLUGINMANAGER_LOCAL void registerInstance(std::string plugin, AbstractPlugin& instance, const Utility::Configuration*& configuration, const PluginMetadata*& metadata);
+        CORRADE_PLUGINMANAGER_LOCAL void registerInstance(std::string plugin, AbstractPlugin& instance, const PluginMetadata*& metadata);
         CORRADE_PLUGINMANAGER_LOCAL void unregisterInstance(const std::string& plugin, AbstractPlugin& instance);
 };
 
