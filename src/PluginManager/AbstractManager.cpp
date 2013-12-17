@@ -25,6 +25,7 @@
 
 #include "AbstractManager.h"
 
+#include <cstring>
 #include <algorithm>
 #include <sstream>
 

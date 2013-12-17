@@ -31,7 +31,6 @@
 
 #include <string>
 #include <vector>
-#include <map>
 
 #include "Utility/Translator.h"
 #include "corradePluginManagerVisibility.h"
