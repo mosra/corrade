@@ -50,11 +50,11 @@ int main(int argc, char** argv) {
         return 2;
     }
 
-    Utility::Debug() << "Using plugin" << '\'' + *manager.metadata(args.value("plugin"))->name() + '\''
-                     << "...\n";
-
     /* Instance of an animal */
     std::unique_ptr<Examples::AbstractAnimal> animal = manager.instance(args.value("plugin"));
+
+    Utility::Debug() << "Using plugin" << '\'' + animal->metadata()->data().value("name") + '\''
+                     << "...\n";
 
     Utility::Debug() << "Name:     " << animal->name();
     Utility::Debug() << "Leg count:" << animal->legCount();
