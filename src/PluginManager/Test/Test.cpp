@@ -278,10 +278,10 @@ void Test::hierarchy() {
     CORRADE_COMPARE(manager.load("Chihuahua"), LoadState::Loaded);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
     CORRADE_COMPARE(manager.metadata("Chihuahua")->data().value("description"), "The smallest dog in the world.");
-    CORRADE_COMPARE(manager.metadata("Chihuahua")->depends().size(), 1);
-    CORRADE_COMPARE(manager.metadata("Chihuahua")->depends()[0], "Dog");
-    CORRADE_COMPARE(manager.metadata("Dog")->usedBy().size(), 1);
-    CORRADE_COMPARE(manager.metadata("Dog")->usedBy()[0], "Chihuahua");
+    CORRADE_COMPARE(manager.metadata("Chihuahua")->depends(),
+        std::vector<std::string>{"Dog"});
+    CORRADE_COMPARE(manager.metadata("Dog")->usedBy(),
+        std::vector<std::string>{"Chihuahua"});
 
     {
         std::unique_ptr<AbstractAnimal> animal = manager.instance("Chihuahua");
@@ -311,10 +311,10 @@ void Test::crossManagerDependencies() {
     /* Load HotDog */
     CORRADE_COMPARE(foodManager.load("HotDog"), LoadState::Loaded);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
-    CORRADE_COMPARE(foodManager.metadata("HotDog")->depends().size(), 1);
-    CORRADE_COMPARE(foodManager.metadata("HotDog")->depends()[0], "Dog");
-    CORRADE_COMPARE(manager.metadata("Dog")->usedBy().size(), 1);
-    CORRADE_COMPARE(manager.metadata("Dog")->usedBy()[0], "HotDog");
+    CORRADE_COMPARE(foodManager.metadata("HotDog")->depends(),
+        std::vector<std::string>{"Dog"});
+    CORRADE_COMPARE(manager.metadata("Dog")->usedBy(),
+        std::vector<std::string>{"HotDog"});
 
     {
         /* Verify hotdog */
@@ -330,7 +330,8 @@ void Test::crossManagerDependencies() {
     /* After destroying hotdog try again */
     CORRADE_COMPARE(foodManager.unload("HotDog"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
-    CORRADE_VERIFY(manager.metadata("Dog")->usedBy().empty());
+    CORRADE_COMPARE(manager.metadata("Dog")->usedBy(),
+        std::vector<std::string>{});
     #endif
 
     /* Verify that the plugin can be instanced only through its own manager */
@@ -351,7 +352,8 @@ void Test::usedByZombies() {
 
     CORRADE_COMPARE(foodManager.load("HotDogWithSnail"), LoadState::UnresolvedDependency);
     CORRADE_COMPARE(foodManager.loadState("HotDogWithSnail"), LoadState::NotLoaded);
-    CORRADE_VERIFY(manager.metadata("Dog")->usedBy().empty());
+    CORRADE_COMPARE(manager.metadata("Dog")->usedBy(),
+        std::vector<std::string>{});
     #endif
 }
 
