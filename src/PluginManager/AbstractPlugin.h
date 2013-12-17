@@ -26,12 +26,11 @@
 */
 
 /** @file
- * @brief Class Corrade::PluginManager::AbstractPlugin, macro CORRADE_PLUGIN_INTERFACE(), CORRADE_PLUGIN_REGISTER().
+ * @brief Class @ref Corrade::PluginManager::AbstractPlugin, macro @ref CORRADE_PLUGIN_INTERFACE(), @ref CORRADE_PLUGIN_REGISTER().
  */
 
 #include <string>
 
-#include "Utility/utilities.h"
 #include "AbstractManager.h"
 
 namespace Corrade { namespace PluginManager {
@@ -59,6 +58,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * Note that this function might be called subsequently more than once
          * (e.g. when loading derived plugin after the base plugin has been
          * already initialized).
+         * @see @ref finalize()
          */
         static void initialize();
 
@@ -79,6 +79,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * already initialized).
          * @bug ^ this will fail for base plugin if derived plugin is unloaded
          *      and base plugin is still used
+         * @see @ref initialize()
          */
         static void finalize();
 
@@ -96,9 +97,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          *
          * Used by plugin manager. Don't forget to redefine this constructor in
          * all your subclasses.
-         * @see plugin(), metadata(), configuration()
+         * @see @ref plugin(), @ref metadata(), @ref configuration()
          */
-        explicit AbstractPlugin(AbstractManager* manager, std::string plugin);
+        explicit AbstractPlugin(AbstractManager& manager, std::string plugin);
 
         /**
          * @brief Destructor
@@ -120,40 +121,21 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
         virtual bool canBeDeleted();
 
         /**
-         * @brief Identifier string
-         *
-         * Name under which the plugin was instanced. If the plugin was not
-         * instantiated via plugin manager, returns empty string.
-         */
-        std::string plugin() const;
-
-        /**
          * @brief Metadata
          *
          * Metadata associated with given plugin. If the plugin was not
          * instantiated through plugin manager, returns `nullptr`.
+         * @see @ref AbstractManager::metadata()
          */
         const PluginMetadata* metadata() const { return _metadata; }
 
-    protected:
-        /**
-         * @brief Configuration
-         *
-         * Configuration associated with given plugin. If the plugin was not
-         * instantiated through plugin manager, returns `nullptr`.
-         * @todo Make use of this, change to pointer to ConfigurationGroup
-         */
-        const Utility::Configuration* configuration() const { return _configuration; }
-
     private:
         AbstractManager* _manager;
-        std::string _plugin;
-        const Utility::Configuration* _configuration;
         const PluginMetadata* _metadata;
 };
 
 /** @brief Plugin version */
-#define CORRADE_PLUGIN_VERSION 3
+#define CORRADE_PLUGIN_VERSION 4
 
 /**
 @brief Define plugin interface
@@ -204,7 +186,7 @@ See @ref plugin-management for more information about plugin compilation.
 */
 #ifdef CORRADE_STATIC_PLUGIN
 #define CORRADE_PLUGIN_REGISTER(name, className, interface)                 \
-    inline void* pluginInstancer_##name(Corrade::PluginManager::AbstractManager* manager, const std::string& plugin) \
+    inline void* pluginInstancer_##name(Corrade::PluginManager::AbstractManager& manager, const std::string& plugin) \
         { return new className(manager, plugin); }                          \
     int pluginImporter_##name();                                            \
     int pluginImporter_##name() {                                           \
@@ -215,8 +197,8 @@ See @ref plugin-management for more information about plugin compilation.
 #define CORRADE_PLUGIN_REGISTER(name, className, interface)                 \
     extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion();                   \
     extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion() { return CORRADE_PLUGIN_VERSION; } \
-    extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractManager* manager, const std::string& plugin); \
-    extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractManager* manager, const std::string& plugin) \
+    extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractManager& manager, const std::string& plugin); \
+    extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractManager& manager, const std::string& plugin) \
         { return new className(manager, plugin); }                          \
     extern "C" CORRADE_PLUGIN_EXPORT void pluginInitializer();              \
     extern "C" CORRADE_PLUGIN_EXPORT void pluginInitializer()               \

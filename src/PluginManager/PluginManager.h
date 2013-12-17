@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Forward declarations for Corrade::PluginManager namespace
+ * @brief Forward declarations for @ref Corrade::PluginManager namespace
  */
 
 #include "corradeCompatibility.h"

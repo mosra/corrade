@@ -366,13 +366,13 @@ void ConfigurationTest::typesScientific() {
     /* Nothing should be changed after saving */
     CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types-scientific.conf")));
 
-    #ifndef _MSC_VER
+    #if !defined(_MSC_VER) && !defined(__MINGW32__)
     CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types-scientific.conf"),
                        Directory::join(CONFIGURATION_TEST_DIR, "types-scientific.conf"),
                        TestSuite::Compare::File);
     #else
     CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types-scientific.conf"),
-                       Directory::join(CONFIGURATION_TEST_DIR, "types-scientific-msvc.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "types-scientific-win.conf"),
                        TestSuite::Compare::File);
     #endif
 }

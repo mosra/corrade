@@ -26,15 +26,14 @@
 */
 
 /** @file
- * @brief Class Corrade::PluginManager::PluginMetadata
+ * @brief Class @ref Corrade::PluginManager::PluginMetadata
  */
 
 #include <string>
 #include <vector>
-#include <map>
 
-#include "Utility/Translator.h"
-#include "corradePluginManagerVisibility.h"
+#include "PluginManager/corradePluginManagerVisibility.h"
+#include "Utility/Utility.h"
 
 namespace Corrade { namespace PluginManager {
 
@@ -47,21 +46,12 @@ plugin binary in a filesystem or is compiled directly into executable with an
 static plugin. See @ref plugin-management for tutorial and brief introduction
 into how plugins work.
 
-The plugin configuration file has an simple syntax (see
-@ref Utility::Configuration "Configuration" class documentation for full
-specification). The file stores plugin name, description, list of authors,
-plugin version, list of dependencies (if the plugin depends on another) and
-list of replaced plugins (if the plugin can replace plugin and provide the
-same or better functionality). Plugin name and description can be translated
-into more languages just by adding a new subgroup named after that language
-locale code. Full featured example:
-
-    # Plugin version
-    version=1.0
-
-    # List of authors
-    author=Vladimír Vondruš <mosra@centrum.cz>
-    author=Some Random John Doe <john@doe.net>
+The plugin configuration file has an simple syntax (see @ref Utility::Configuration
+class documentation for full specification). The file stores list of
+dependencies (if the plugin depends on another), list of replaced plugins (if
+the plugin can replace plugin and provide the same or better functionality) and
+optionally plugin-specific configuration. Example `Matrix.conf` file for
+`Matrix` plugin:
 
     # Dependencies
     depends=SomeRandomJohnDoesPlugin
@@ -72,16 +62,11 @@ locale code. Full featured example:
     replaces=CrashingMatrixPlugin
     replaces=AlphaMatrixPlugin
 
-    # Metadata for default language (English)
-    [metadata]
-    name=Good Matrix
+    # Optional plugin-specific data
+    [data]
     description=My first matrix without bugs
 
-    # Metadata in Czech
-    [metadata/cs_CZ]
-    name=Dobrý Matrix
-    description=Můj první Matrix bez chyb v Matrixu
- */
+*/
 class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
     friend class AbstractManager;
 
@@ -90,40 +75,10 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          * @brief Constructor
          * @param conf          Configuration file with plugin metadata
          */
-        explicit PluginMetadata(const Utility::Configuration& conf);
+        explicit PluginMetadata(std::string name, Utility::ConfigurationGroup& conf);
 
-        /**
-         * @brief Plugin name
-         *
-         * Descriptive name of plugin. Not to be confused with name under which
-         * the plugin is loaded. If translation for current Translator::locale()
-         * is present, returns the translated name.
-         * @note This field is constant during whole plugin lifetime.
-         */
-        const std::string* name() const { return _name; }
-
-        /**
-         * @brief Plugin description
-         *
-         * More detailed description of plugin. If translation for current
-         * Translator::locale() is present, returns the translated name.
-         * @note This field is constant during whole plugin lifetime.
-         */
-        const std::string* description() const { return _description; }
-
-        /**
-         * @brief Plugin author(s)
-         *
-         * @note This field is constant during whole plugin lifetime.
-         */
-        const std::vector<std::string>& authors() const { return _authors; }
-
-        /**
-         * @brief Plugin version
-         *
-         * @note This field is constant during whole plugin lifetime.
-         */
-        std::string version() const;
+        /** @brief Plugin name */
+        std::string name() const;
 
         /**
          * @brief Plugins on which this plugin depend
@@ -163,18 +118,23 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          */
         std::vector<std::string> replacedWith() const;
 
+        /**
+         * @brief Plugin-specific data
+         *
+         * Additional plugin-specific data, contained in `data` group of plugin
+         * configuration.
+         */
+        const Utility::ConfigurationGroup& data() const { return *_data; }
+
     private:
-        Utility::Translator translator;
+        std::string _name;
 
-        const std::string *_name,
-            *_description;
-        std::string _version;
-
-        std::vector<std::string> _authors,
-            _depends,
+        std::vector<std::string> _depends,
             _usedBy,
             _replaces,
             _replacedWith;
+
+        const Utility::ConfigurationGroup* _data;
 };
 
 }}

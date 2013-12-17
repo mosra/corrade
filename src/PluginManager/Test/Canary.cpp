@@ -34,7 +34,7 @@ class Canary: public AbstractAnimal {
         static void initialize() { Utility::Debug() << "Canary initialized"; }
         static void finalize() { Utility::Debug() << "Canary finalized"; }
 
-        explicit Canary(AbstractManager* manager, std::string plugin): AbstractAnimal(manager, std::move(plugin)) {}
+        explicit Canary(AbstractManager& manager, std::string plugin): AbstractAnimal(manager, std::move(plugin)) {}
 
         std::string name() { return "Achoo"; }
         int legCount() { return 2; }

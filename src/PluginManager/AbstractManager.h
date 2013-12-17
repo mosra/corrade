@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::PluginManager::AbstractManager
+ * @brief Class @ref Corrade::PluginManager::AbstractManager
  */
 
 #include <vector>
@@ -201,7 +201,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         static const int Version;
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        typedef void* (*Instancer)(AbstractManager*, const std::string&);
+        typedef void* (*Instancer)(AbstractManager&, const std::string&);
         static void importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, Instancer instancer, void(*initializer)(), void(*finalizer)());
         #endif
 
@@ -211,12 +211,12 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          *      recursive processing is done.
          *
          * First goes through list of static plugins and finds ones that use
-         * the same interface as this PluginManager instance. Then gets list of
-         * all dynamic plugins in given directory.
+         * the same interface as this manager instance. Then gets list of all
+         * dynamic plugins in given directory.
          * @note Dependencies of static plugins are skipped, as static plugins
          *      should have all dependencies present. Also, dynamic plugins
          *      with the same name as another static plugin are skipped.
-         * @see pluginList()
+         * @see @ref pluginList()
          * @partialsupport Parameter @p pluginDirectory has no effect on
          *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
          *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" as only static
@@ -276,6 +276,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          *
          * Returns pointer to plugin metadata or `nullptr`, if given plugin is
          * not found.
+         * @see @ref AbstractPlugin::metadata()
          */
         const PluginMetadata* metadata(const std::string& plugin) const;
 
@@ -358,7 +359,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
             #else
             const LoadState loadState;
             #endif
-            const Utility::Configuration configuration;
+            Utility::Configuration configuration;
             PluginMetadata metadata;
 
             /* If set to nullptr, the plugin has not any associated plugin
@@ -385,11 +386,11 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
             #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
             /* Constructor for dynamic plugins */
-            explicit Plugin(const std::string& _metadata, AbstractManager* _manager);
+            explicit Plugin(std::string name, const std::string& _metadata, AbstractManager* _manager);
             #endif
 
             /* Constructor for static plugins */
-            explicit Plugin(std::istream& _metadata, StaticPlugin* staticPlugin);
+            explicit Plugin(std::string name, std::istream& _metadata, StaticPlugin* staticPlugin);
 
             ~Plugin();
         };
@@ -431,8 +432,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
         std::map<std::string, std::vector<AbstractPlugin*> > instances;
 
-        CORRADE_PLUGINMANAGER_LOCAL void registerInstance(std::string plugin, AbstractPlugin* instance, const Utility::Configuration** configuration, const PluginMetadata** metadata);
-        CORRADE_PLUGINMANAGER_LOCAL void unregisterInstance(const std::string& plugin, AbstractPlugin* instance);
+        CORRADE_PLUGINMANAGER_LOCAL void registerInstance(std::string plugin, AbstractPlugin& instance, const PluginMetadata*& metadata);
+        CORRADE_PLUGINMANAGER_LOCAL void unregisterInstance(const std::string& plugin, AbstractPlugin& instance);
 };
 
 /** @hideinitializer
