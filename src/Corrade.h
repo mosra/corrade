@@ -77,7 +77,7 @@ Defined if built as static libraries. Default are shared libraries.
 
 Defined if the library is built for
 [Google Chrome Native Client](https://developers.google.com/native-client/).
-@see @ref building-corrade
+@see @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_TARGET_NACL
 #undef CORRADE_TARGET_NACL
@@ -87,7 +87,7 @@ Defined if the library is built for
 
 Defined if the library is built for Google Chrome Native Client with `newlib`
 toolchain.
-@see @ref building-corrade
+@see @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_TARGET_NACL_NEWLIB
 #undef CORRADE_TARGET_NACL_NEWLIB
@@ -97,7 +97,7 @@ toolchain.
 
 Defined if the library is built for Google Chrome Native Client with `glibc`
 toolchain.
-@see @ref building-corrade
+@see @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_TARGET_NACL_GLIBC
 #undef CORRADE_TARGET_NACL_GLIBC
@@ -106,7 +106,7 @@ toolchain.
 @brief Emscripten target
 
 Defined if the library is built for [Emscripten](https://github.com/kripken/emscripten/wiki).
-@see @ref building-corrade
+@see @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_TARGET_EMSCRIPTEN
 #undef CORRADE_TARGET_EMSCRIPTEN
