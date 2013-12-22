@@ -50,11 +50,11 @@ Sha1& Sha1::operator<<(const std::string& data) {
         }
 
         _buffer.append(data.substr(0, 64- _buffer.size()));
-        processChunk(_buffer.c_str());
+        processChunk(_buffer.data());
     }
 
     for(std::size_t i = _buffer.size(); i != data.size()/64; ++i)
-        processChunk(data.c_str()+i*64);
+        processChunk(data.data()+i*64);
 
     /* Save last unfinished 512-bit chunk of data */
     if(data.size()%64 != 0) _buffer = data.substr((data.size()/64)*64);
@@ -75,7 +75,7 @@ Sha1::Digest Sha1::digest() {
 
     /* Process remaining chunks */
     for(std::size_t i = 0; i != _buffer.size()/64; ++i)
-        processChunk(_buffer.c_str()+i*64);
+        processChunk(_buffer.data()+i*64);
 
     /* Convert digest from big endian */
     unsigned int digest[5];

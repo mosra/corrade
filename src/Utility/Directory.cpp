@@ -104,10 +104,10 @@ bool Directory::mkpath(const std::string& path) {
 
     /* Create directory, return true if successfully created or already exists */
     #ifndef _WIN32
-    const int ret = mkdir(path.c_str(), 0777);
+    const int ret = mkdir(path.data(), 0777);
     return ret == 0 || ret == -1;
     #else
-    return CreateDirectory(path.c_str(), nullptr) != 0 || GetLastError() == ERROR_ALREADY_EXISTS;
+    return CreateDirectory(path.data(), nullptr) != 0 || GetLastError() == ERROR_ALREADY_EXISTS;
     #endif
 }
 
@@ -118,11 +118,11 @@ bool Directory::rm(const std::string& path) {
         return RemoveDirectory(path.data());
     #endif
 
-    return std::remove(path.c_str()) == 0;
+    return std::remove(path.data()) == 0;
 }
 
 bool Directory::move(const std::string& oldPath, const std::string& newPath) {
-    return std::rename(oldPath.c_str(), newPath.c_str()) == 0;
+    return std::rename(oldPath.data(), newPath.data()) == 0;
 }
 #endif
 
@@ -197,7 +197,7 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
 
     /* POSIX-compilant Unix */
     #ifdef __unix__
-    DIR* directory = opendir(path.c_str());
+    DIR* directory = opendir(path.data());
     if(!directory) return list;
 
     dirent* entry;

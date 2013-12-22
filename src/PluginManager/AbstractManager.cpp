@@ -257,9 +257,9 @@ LoadState AbstractManager::load(const std::string& plugin) {
 
     /* Open plugin file, make symbols available for next libs (which depends on this) */
     #ifndef _WIN32
-    void* module = dlopen(filename.c_str(), RTLD_NOW|RTLD_GLOBAL);
+    void* module = dlopen(filename.data(), RTLD_NOW|RTLD_GLOBAL);
     #else
-    HMODULE module = LoadLibraryA(filename.c_str());
+    HMODULE module = LoadLibraryA(filename.data());
     #endif
     if(!module) {
         Error() << "PluginManager: cannot open plugin file"
