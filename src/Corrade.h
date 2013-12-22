@@ -73,6 +73,24 @@ Defined if built as static libraries. Default are shared libraries.
 #undef CORRADE_BUILD_STATIC
 
 /**
+@brief Unix target
+
+Defined if the library is built for some Unix flavor (Linux, BSD, OS X...).
+@see @ref corrade-cmake
+*/
+#define CORRADE_TARGET_UNIX
+#undef CORRADE_TARGET_UNIX
+
+/**
+@brief Windows target
+
+Defined if the library is built for Windows.
+@see @ref corrade-cmake
+*/
+#define CORRADE_TARGET_WINDOWS
+#undef CORRADE_TARGET_WINDOWS
+
+/**
 @brief Google Chrome Native Client target
 
 Defined if the library is built for
