@@ -31,10 +31,13 @@
 #include <algorithm>
 #include <fstream>
 
-#ifndef _WIN32
+/* Unix */
+#ifdef __unix__
 #include <sys/stat.h>
 #include <dirent.h>
-#else
+
+/* Windows */
+#elif defined(WIN32)
 #include <shlobj.h>
 #endif
 
