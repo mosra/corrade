@@ -328,7 +328,7 @@ void DirectoryTest::readEmpty() {
 }
 
 void DirectoryTest::readNonSeekable() {
-    #ifdef CORRADE_TARGET_UNIX
+    #ifdef __unix__ /* (OS X doesn't have /proc) */
     /** @todo Test more thoroughly than this */
     const auto data = Directory::read("/proc/loadavg");
     CORRADE_VERIFY(!data.empty());
