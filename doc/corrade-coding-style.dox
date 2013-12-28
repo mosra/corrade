@@ -273,6 +273,50 @@ void setProcessingDelay(int delay) { processingDelay = delay; }
 if(!initialized) return false;
 @endcode
 
+The only exceptions when opening braces are on the following line is when the
+`if` statement or constructor initializer list is spanning multiple lines:
+@code
+if(a_very_long_expression_spanning_whole_line ||
+    another_fairly_lengthy_expression ||
+    yet_another_overly_complicated_expression)
+{
+    // ...
+}
+@endcode
+@code
+MyClass::MyClass():
+    _oneMember(lengthy_member_initialization),
+    _anotherMember(another_fairly_lengthy_expression),
+    _thirdMember(more_code)
+{
+    // ...
+}
+@endcode
+
+The opening brace should be also on the following line when preprocessor
+branching is involved, as specifying it twice may confuse code folding in some
+editors:
+@code
+// Bad
+#ifndef CORRADE_TARGET_WINDOWS
+if(expression) {
+#else
+if(worked || around || expression) {
+#endif
+    // ...
+}
+
+// Good
+#ifndef CORRADE_TARGET_WINDOWS
+if(expression)
+#else
+if(worked || around || expression)
+#endif
+{
+    // ...
+}
+@endcode
+
 @subsubsection cpp-switches Switch statements
 
 Switch statements are usually very verbose and thus they are often subject of
