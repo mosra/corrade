@@ -71,12 +71,6 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
     friend class AbstractManager;
 
     public:
-        /**
-         * @brief Constructor
-         * @param conf          Configuration file with plugin metadata
-         */
-        explicit PluginMetadata(std::string name, Utility::ConfigurationGroup& conf);
-
         /** @brief Plugin name */
         std::string name() const;
 
@@ -127,6 +121,8 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
         const Utility::ConfigurationGroup& data() const { return *_data; }
 
     private:
+        explicit PluginMetadata(std::string name, Utility::ConfigurationGroup& conf);
+
         std::string _name;
 
         std::vector<std::string> _depends,
