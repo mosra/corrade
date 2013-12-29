@@ -257,7 +257,7 @@ bool Configuration::save(const std::string& filename) {
 void Configuration::save(std::ostream& out) {
     /* BOM, if user explicitly wants that crap */
     if((_flags & InternalFlag::PreserveBom) && (_flags & InternalFlag::HasBom))
-        out.write(String::Bom.c_str(), 3);
+        out.write(String::Bom.data(), 3);
 
     /* EOL character */
     std::string eol;
@@ -309,7 +309,7 @@ void Configuration::save(std::ostream& out, const std::string& eol, Configuratio
         /* Comment / empty line */
         else buffer = it->value + eol;
 
-        out.write(buffer.c_str(), buffer.size());
+        out.write(buffer.data(), buffer.size());
     }
 
     /* Recursively process all subgroups */
@@ -319,7 +319,7 @@ void Configuration::save(std::ostream& out, const std::string& eol, Configuratio
         if(!fullPath.empty()) name = fullPath + '/' + name;
 
         buffer = '[' + name + ']' + eol;
-        out.write(buffer.c_str(), buffer.size());
+        out.write(buffer.data(), buffer.size());
 
         save(out, eol, git->group, name);
     }

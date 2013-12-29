@@ -60,6 +60,11 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     set(CORRADE_TARGET_EMSCRIPTEN 1)
     # It's meaningless to use dynamic libraries with Emscripten
     set(BUILD_STATIC ON)
+elseif(UNIX)
+    # NaCl and Emscripten are Unix too, this selects only the other ones
+    set(CORRADE_TARGET_UNIX 1)
+elseif(WIN32)
+    set(CORRADE_TARGET_WINDOWS 1)
 endif()
 
 if(BUILD_STATIC)

@@ -75,7 +75,8 @@ class Manager: public BaseManager {
          *
          * Returns new instance of given plugin or `nullptr` on error. The
          * plugin must be successfully loaded for the operation to succeed.
-         * @see @ref loadState(), @ref load()
+         * @see @ref AbstractManager::loadState() "loadState()",
+         *      @ref AbstractManager::load() "load()"
          */
         std::unique_ptr<T> instance(const std::string& plugin) {
             /** @todo C++14: `std::make_unique()` */

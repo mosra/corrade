@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <sstream>
 
-#ifndef _WIN32
+#ifndef CORRADE_TARGET_WINDOWS
 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
 #include <dlfcn.h>
 #endif
@@ -269,10 +269,10 @@ LoadState AbstractManager::load(const std::string& plugin) {
     const std::string filename = Directory::join(_pluginDirectory, plugin + PLUGIN_FILENAME_SUFFIX);
 
     /* Open plugin file, make symbols available for next libs (which depends on this) */
-    #ifndef _WIN32
-    void* module = dlopen(filename.c_str(), RTLD_NOW|RTLD_GLOBAL);
+    #ifndef CORRADE_TARGET_WINDOWS
+    void* module = dlopen(filename.data(), RTLD_NOW|RTLD_GLOBAL);
     #else
-    HMODULE module = LoadLibraryA(filename.c_str());
+    HMODULE module = LoadLibraryA(filename.data());
     #endif
     if(!module) {
         Error() << "PluginManager: cannot open plugin file"
@@ -420,7 +420,7 @@ LoadState AbstractManager::unload(const std::string& plugin) {
     finalizer();
 
     /* Close the module */
-    #ifndef _WIN32
+    #ifndef CORRADE_TARGET_WINDOWS
     if(dlclose(pluginObject.module) != 0) {
     #else
     if(!FreeLibrary(pluginObject.module)) {

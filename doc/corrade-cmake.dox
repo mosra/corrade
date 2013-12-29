@@ -57,27 +57,31 @@ enable hidden visibility by default.
 Features of found %Corrade library are exposed in these variables, they are
 also available as preprocessor variables if you include Corrade.h:
 
-- `CORRADE_GCC47_COMPATIBILITY` -- Defined if compiled with compatibility mode
-  for GCC 4.7
-- `CORRADE_GCC46_COMPATIBILITY` -- Defined if compiled with compatibility mode
-  for GCC 4.6
-- `CORRADE_GCC45_COMPATIBILITY` -- Defined if compiled with compatibility mode
-  for GCC 4.5
-- `CORRADE_GCC44_COMPATIBILITY` -- Defined if compiled with compatibility mode
-  for GCC 4.4
-- `CORRADE_MSVC2013_COMPATIBILITY` -- Defined if compiled with compatibility
-  mode for MSVC 2013
-- `CORRADE_BUILD_DEPRECATED` -- Defined if compiled with deprecated APIs
-  included
-- `CORRADE_BUILD_STATIC` -- Defined if built as static libraries. Default are
-  shared libraries.
-- `CORRADE_TARGET_NACL` -- Defined if the library is built for Google
-  Chrome Native Client
-- `CORRADE_TARGET_NACL_NEWLIB` -- Defined if the library is built for Google
-  Chrome Native Client with `newlib` toolchain
-- `CORRADE_TARGET_NACL_GLIBC` -- Defined if the library is built for Google
-  Chrome Native Client with `glibc` toolchain
-- `CORRADE_TARGET_EMSCRIPTEN` -- Defined if the library is built for Emscripten
+-   `CORRADE_GCC47_COMPATIBILITY` -- Defined if compiled with compatibility
+    mode for GCC 4.7
+-   `CORRADE_GCC46_COMPATIBILITY` -- Defined if compiled with compatibility
+    mode for GCC 4.6
+-   `CORRADE_GCC45_COMPATIBILITY` -- Defined if compiled with compatibility
+    mode for GCC 4.5
+-   `CORRADE_GCC44_COMPATIBILITY` -- Defined if compiled with compatibility
+    mode for GCC 4.4
+-   `CORRADE_MSVC2013_COMPATIBILITY` -- Defined if compiled with compatibility
+    mode for MSVC 2013
+-   `CORRADE_BUILD_DEPRECATED` -- Defined if compiled with deprecated APIs
+    included
+-   `CORRADE_BUILD_STATIC` -- Defined if built as static libraries. Default are
+    shared libraries.
+-   `CORRADE_TARGET_UNIX` -- Defined if compiled for some Unix flavor (Linux,
+    BSD, OS X)
+-   `CORRADE_TARGET_WINDOWS` -- Defined if compiled for Windows
+-   `CORRADE_TARGET_NACL` -- Defined if the library is built for Google
+    Chrome Native Client
+-   `CORRADE_TARGET_NACL_NEWLIB` -- Defined if the library is built for Google
+    Chrome Native Client with `newlib` toolchain
+-   `CORRADE_TARGET_NACL_GLIBC` -- Defined if the library is built for Google
+    Chrome Native Client with `glibc` toolchain
+-   `CORRADE_TARGET_EMSCRIPTEN` -- Defined if the library is built for
+    Emscripten
 
 Note that [each namespace](namespaces.html) contains more detailed guide how to
 use given library with CMake.

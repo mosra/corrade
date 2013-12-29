@@ -31,10 +31,13 @@
 #include <algorithm>
 #include <fstream>
 
-#ifndef _WIN32
+/* Unix */
+#ifdef CORRADE_TARGET_UNIX
 #include <sys/stat.h>
 #include <dirent.h>
-#else
+
+/* Windows */
+#elif defined(CORRADE_TARGET_WINDOWS)
 #include <shlobj.h>
 #endif
 
@@ -73,7 +76,7 @@ std::string Directory::join(const std::string& path, const std::string& filename
     /* Empty path */
     if(path.empty()) return filename;
 
-    #ifdef _WIN32
+    #ifdef CORRADE_TARGET_WINDOWS
     /* Absolute filename on Windows */
     if(filename.size() > 2 && filename[1] == ':' && filename[2] == '/')
         return filename;
@@ -103,31 +106,39 @@ bool Directory::mkpath(const std::string& path) {
     if(!parentPath.empty() && !fileExists(parentPath) && !mkpath(parentPath)) return false;
 
     /* Create directory, return true if successfully created or already exists */
-    #ifndef _WIN32
-    const int ret = mkdir(path.c_str(), 0777);
+
+    /* Unix */
+    #ifdef CORRADE_TARGET_UNIX
+    const int ret = mkdir(path.data(), 0777);
     return ret == 0 || ret == -1;
+
+    /* Windows */
+    #elif defined(CORRADE_TARGET_WINDOWS)
+    return CreateDirectory(path.data(), nullptr) != 0 || GetLastError() == ERROR_ALREADY_EXISTS;
+
+    /* Not implemented elsewhere */
     #else
-    return CreateDirectory(path.c_str(), nullptr) != 0 || GetLastError() == ERROR_ALREADY_EXISTS;
+    return false;
     #endif
 }
 
 bool Directory::rm(const std::string& path) {
-    #ifdef _WIN32
+    #ifdef CORRADE_TARGET_WINDOWS
     /* std::remove() can't remove directories on Windows */
     if(GetFileAttributes(path.data()) & FILE_ATTRIBUTE_DIRECTORY)
         return RemoveDirectory(path.data());
     #endif
 
-    return std::remove(path.c_str()) == 0;
+    return std::remove(path.data()) == 0;
 }
 
 bool Directory::move(const std::string& oldPath, const std::string& newPath) {
-    return std::rename(oldPath.c_str(), newPath.c_str()) == 0;
+    return std::rename(oldPath.data(), newPath.data()) == 0;
 }
 #endif
 
 bool Directory::fileExists(const std::string& filename) {
-    #ifndef _WIN32
+    #ifndef CORRADE_TARGET_WINDOWS
     return std::ifstream(filename).good();
     #else
     return GetFileAttributes(filename.data()) != INVALID_FILE_ATTRIBUTES;
@@ -136,13 +147,13 @@ bool Directory::fileExists(const std::string& filename) {
 
 std::string Directory::home() {
     /* Unix */
-    #ifdef __unix__
+    #ifdef CORRADE_TARGET_UNIX
     if(const char* const h = std::getenv("HOME"))
         return h;
     return std::string{};
 
     /* Windows */
-    #elif defined(_WIN32)
+    #elif defined(CORRADE_TARGET_WINDOWS)
     TCHAR h[MAX_PATH];
     #ifdef __MINGW32__
     #pragma GCC diagnostic push
@@ -172,7 +183,7 @@ std::string Directory::configurationDir(const std::string& applicationName) {
     return home.empty() ? std::string{} : join(home, ".config/" + lowercaseApplicationName);
 
     /* Windows */
-    #elif defined(_WIN32)
+    #elif defined(CORRADE_TARGET_WINDOWS)
     TCHAR path[MAX_PATH];
     #ifdef __MINGW32__
     #pragma GCC diagnostic push
@@ -196,8 +207,8 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     std::vector<std::string> list;
 
     /* POSIX-compilant Unix */
-    #ifdef __unix__
-    DIR* directory = opendir(path.c_str());
+    #ifdef CORRADE_TARGET_UNIX
+    DIR* directory = opendir(path.data());
     if(!directory) return list;
 
     dirent* entry;
@@ -226,7 +237,7 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     closedir(directory);
 
     /* Windows */
-    #elif defined(_WIN32)
+    #elif defined(CORRADE_TARGET_WINDOWS)
     WIN32_FIND_DATA data;
     HANDLE hFile = FindFirstFile(join(path, "*").data(), &data);
     if(hFile == INVALID_HANDLE_VALUE) return list;
@@ -250,7 +261,7 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
 
     /* Other not implemented */
     #else
-    return list;
+    static_cast<void>(path);
     #endif
 
     if(flags >= Flag::SortAscending)

@@ -33,18 +33,18 @@
 #include <string>
 #include <map>
 
-#ifdef _WIN32
-/* I didn't find a better way to circumvent the need for including windows.h */
-struct HINSTANCE__;
-typedef struct HINSTANCE__* HMODULE;
-#endif
-
 #include "corradeCompatibility.h"
 #include "Containers/EnumSet.h"
 #include "Utility/Configuration.h"
 #include "Utility/Resource.h"
 #include "PluginManager/PluginMetadata.h"
 #include "PluginManager/PluginManager.h"
+
+#ifdef CORRADE_TARGET_WINDOWS
+/* I didn't find a better way to circumvent the need for including windows.h */
+struct HINSTANCE__;
+typedef struct HINSTANCE__* HMODULE;
+#endif
 
 namespace Corrade { namespace PluginManager {
 
@@ -376,7 +376,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
             #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
                 /* For dynamic plugins */
-                #ifndef _WIN32
+                #ifndef CORRADE_TARGET_WINDOWS
                 void* module;
                 #else
                 HMODULE module;

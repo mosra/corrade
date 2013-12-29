@@ -111,7 +111,7 @@ void Tester::registerTest(std::string filename, std::string name) {
 
 void Tester::skip(const std::string& message) {
     Utility::Debug e(logOutput);
-    e << "  SKIP:" << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       " << message;
+    e << "  SKIP:" << testCaseName << "\n       " << message;
     throw SkipException();
 }
 

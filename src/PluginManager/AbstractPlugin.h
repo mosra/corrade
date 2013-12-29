@@ -97,7 +97,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          *
          * Used by plugin manager. Don't forget to redefine this constructor in
          * all your subclasses.
-         * @see @ref plugin(), @ref metadata(), @ref configuration()
+         * @see @ref metadata()
          */
         explicit AbstractPlugin(AbstractManager& manager, std::string plugin);
 

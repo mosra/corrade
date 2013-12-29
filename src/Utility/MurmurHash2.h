@@ -104,7 +104,7 @@ class CORRADE_UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(std::size_t
 
         /** @brief Compute digest of given data */
         Digest operator()(const std::string& data) const {
-            return operator()(data.c_str(), data.size());
+            return operator()(data.data(), data.size());
         }
 
         /** @copydoc operator()(const std::string&) const */

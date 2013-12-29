@@ -220,7 +220,7 @@ void TesterTest::test() {
         "    OK: compareWith()\n"
         "  FAIL: compareWithFail() at here.cpp on line 157 \n"
         "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
-        "  SKIP: skip() at here.cpp on line 161 \n"
+        "  SKIP: skip() \n"
         "        This testcase is skipped.\n"
         "Finished TesterTest::Test with 6 errors out of 13 checks. 1 test cases didn't contain any checks!\n";
 

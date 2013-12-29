@@ -25,7 +25,7 @@
 
 #include "utilities.h"
 
-#ifndef _WIN32
+#ifndef CORRADE_TARGET_WINDOWS
 #include "unistd.h"
 #else
 #include <windows.h>
@@ -34,7 +34,7 @@
 namespace Corrade { namespace Utility {
 
 void sleep(std::size_t ms) {
-    #ifndef _WIN32
+    #ifndef CORRADE_TARGET_WINDOWS
     usleep(ms*1000);
     #else
     Sleep(ms);

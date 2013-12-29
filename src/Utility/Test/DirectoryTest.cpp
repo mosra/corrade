@@ -40,7 +40,7 @@ class DirectoryTest: public Corrade::TestSuite::Tester {
         void path();
         void filename();
         void join();
-        #ifdef _WIN32
+        #ifdef CORRADE_TARGET_WINDOWS
         void joinWindows();
         #endif
         void fileExists();
@@ -62,7 +62,7 @@ DirectoryTest::DirectoryTest() {
     addTests<DirectoryTest>({&DirectoryTest::path,
               &DirectoryTest::filename,
               &DirectoryTest::join,
-              #ifdef _WIN32
+              #ifdef CORRADE_TARGET_WINDOWS
               &DirectoryTest::joinWindows,
               #endif
               &DirectoryTest::fileExists,
@@ -119,7 +119,7 @@ void DirectoryTest::join() {
     CORRADE_COMPARE(Directory::join("/foo/bar", "file.txt"), "/foo/bar/file.txt");
 }
 
-#ifdef _WIN32
+#ifdef CORRADE_TARGET_WINDOWS
 void DirectoryTest::joinWindows() {
     /* Drive letter */
     CORRADE_COMPARE(Directory::join("/foo/bar", "X:/path/file.txt"), "X:/path/file.txt");
@@ -228,7 +228,7 @@ void DirectoryTest::home() {
     /* On Windows verify that the home dir contains `desktop.ini` file. Ugly
        and hacky, but it's the best I came up with. Can't test for e.g.
        `/Users/` substring, as that can be overriden. */
-    #elif defined(_WIN32)
+    #elif defined(CORRADE_TARGET_WINDOWS)
     CORRADE_VERIFY(Directory::fileExists(Directory::join(home, "desktop.ini")));
 
     /* No idea elsewhere */
@@ -252,7 +252,7 @@ void DirectoryTest::configurationDir() {
     /* On Windows verify that the parent dir contains `Microsoft` subdirectory.
        Ugly and hacky, but it's the best I came up with. Can't test for e.g.
        `/Users/` substring, as that can be overriden. */
-    #elif defined(_WIN32)
+    #elif defined(CORRADE_TARGET_WINDOWS)
     CORRADE_COMPARE(dir.substr(dir.size()-7), "Corrade");
     CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(dir), "Microsoft")));
 
@@ -328,7 +328,7 @@ void DirectoryTest::readEmpty() {
 }
 
 void DirectoryTest::readNonSeekable() {
-    #ifdef __unix__
+    #ifdef __unix__ /* (OS X doesn't have /proc) */
     /** @todo Test more thoroughly than this */
     const auto data = Directory::read("/proc/loadavg");
     CORRADE_VERIFY(!data.empty());
