@@ -37,7 +37,7 @@
 #include <dirent.h>
 
 /* Windows */
-#elif defined(WIN32)
+#elif defined(CORRADE_TARGET_WINDOWS)
 #include <shlobj.h>
 #endif
 

@@ -61,7 +61,7 @@ elseif(UNIX)
     # NaCl and Emscripten are Unix too, this selects only the other ones
     set(CORRADE_TARGET_UNIX 1)
 elseif(WIN32)
-    set(CORRADE_TARGET_WIN32 1)
+    set(CORRADE_TARGET_WINDOWS 1)
 endif()
 
 if(BUILD_STATIC)
