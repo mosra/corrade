@@ -261,7 +261,7 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
 
     /* Other not implemented */
     #else
-    return list;
+    static_cast<void>(path);
     #endif
 
     if(flags >= Flag::SortAscending)
