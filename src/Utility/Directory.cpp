@@ -106,11 +106,19 @@ bool Directory::mkpath(const std::string& path) {
     if(!parentPath.empty() && !fileExists(parentPath) && !mkpath(parentPath)) return false;
 
     /* Create directory, return true if successfully created or already exists */
-    #ifndef CORRADE_TARGET_WINDOWS
+
+    /* Unix */
+    #ifdef CORRADE_TARGET_UNIX
     const int ret = mkdir(path.data(), 0777);
     return ret == 0 || ret == -1;
-    #else
+
+    /* Windows */
+    #elif defined(CORRADE_TARGET_WINDOWS)
     return CreateDirectory(path.data(), nullptr) != 0 || GetLastError() == ERROR_ALREADY_EXISTS;
+
+    /* Not implemented elsewhere */
+    #else
+    return false;
     #endif
 }
 
