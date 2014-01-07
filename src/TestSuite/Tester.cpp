@@ -68,6 +68,8 @@ int Tester::exec(std::ostream* logOutput, std::ostream* errorOutput) {
 
         /* No testing macros called, don't print function name to output */
         if(testCaseName.empty()) {
+            Utility::Debug(logOutput) << "     ?: <unknown>()";
+
             ++noCheckCount;
             continue;
         }

@@ -196,6 +196,7 @@ void TesterTest::test() {
 
     std::string expected =
         "Starting TesterTest::Test with 13 test cases...\n"
+        "     ?: <unknown>()\n"
         "    OK: trueExpression()\n"
         "  FAIL: falseExpression() at here.cpp on line 111 \n"
         "        Expression 5 != 5 failed.\n"
