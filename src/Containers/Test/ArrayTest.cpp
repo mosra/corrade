@@ -44,6 +44,7 @@ class ArrayTest: public TestSuite::Tester {
 
         void emptyCheck();
         void access();
+        void rvalueArrayAccess();
         void rangeBasedFor();
         void release();
 };
@@ -63,6 +64,7 @@ ArrayTest::ArrayTest() {
 
               &ArrayTest::emptyCheck,
               &ArrayTest::access,
+              &ArrayTest::rvalueArrayAccess,
               &ArrayTest::rangeBasedFor,
               &ArrayTest::release});
 }
@@ -188,8 +190,13 @@ void ArrayTest::access() {
     CORRADE_COMPARE(a[4], 4);
     CORRADE_COMPARE(a.end()-a.begin(), a.size());
 
-    const Array b(7);
+    const auto b = Array::from(7, 3, 5, 4);
     CORRADE_COMPARE(b.data(), static_cast<const int*>(b));
+    CORRADE_COMPARE(b[2], 5);
+}
+
+void ArrayTest::rvalueArrayAccess() {
+    CORRADE_COMPARE(Array::from(1, 2, 3, 4)[2], 3);
 }
 
 void ArrayTest::rangeBasedFor() {
