@@ -165,6 +165,14 @@ void ArrayTest::pointerConversion() {
         #endif
         CORRADE_VERIFY(!(std::is_convertible<Array, int*>::value));
         CORRADE_VERIFY(!(std::is_convertible<Array&&, int*>::value));
+    }
+
+    /* Deleting const&& overload and leaving only const& one will not, in fact,
+       disable conversion of const Array&& to pointer, but rather make the
+       conversion ambiguous, which is not what we want, as it breaks e.g.
+       rvalueArrayAccess() test. */
+    {
+        CORRADE_EXPECT_FAIL("I don't know how to properly disable conversion of const Array&& to pointer.");
         CORRADE_VERIFY(!(std::is_convertible<const Array, const int*>::value));
         CORRADE_VERIFY(!(std::is_convertible<const Array&&, const int*>::value));
     }

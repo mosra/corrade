@@ -146,18 +146,7 @@ template<class T> class Array {
         { return _data; }
 
         /** @overload */
-        /*implicit*/ operator const T*()
-        #ifndef CORRADE_GCC47_COMPATIBILITY
-        const &
-        #else
-        const
-        #endif
-        { return _data; }
-
-        #ifndef CORRADE_GCC47_COMPATIBILITY
-        /** @overload */
-        /*implicit*/ operator const T*() const && = delete;
-        #endif
+        /*implicit*/ operator const T*() const { return _data; }
 
         /** @brief %Array data */
         T* data() { return _data; }
