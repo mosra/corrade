@@ -77,6 +77,10 @@ also available as preprocessor variables if you include Corrade.h:
 -   `CORRADE_TARGET_EMSCRIPTEN` -- Defined if the library is built for
     Emscripten
 
+If `CORRADE_BUILD_DEPRECATED` is defined, the `CORRADE_INCLUDE_DIR` variable
+also contains path directly to Corrade directory (i.e. for includes without
+`Corrade/` prefix).
+
 Note that [each namespace](namespaces.html) contains more detailed guide how to
 use given library with CMake.
 
