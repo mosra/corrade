@@ -41,7 +41,7 @@ Basic usage is:
 This module tries to find %Corrade library and then defines these variables:
 
 - `CORRADE_FOUND` -- Whether %Corrade was found
-- `CORRADE_INCLUDE_DIRS` -- Root include dir
+- `CORRADE_INCLUDE_DIR` -- Root include dir
 - `CORRADE_INTERCONNECT_LIBRARIES` -- Interconnect library and dependent
   libraries
 - `CORRADE_UTILITY_LIBRARIES` -- Utility library and dependent libraries
