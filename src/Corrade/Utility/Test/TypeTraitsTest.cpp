@@ -28,9 +28,9 @@
 #include <valarray>
 #include <vector>
 
-#include "Containers/Array.h"
-#include "Utility/TypeTraits.h"
-#include "TestSuite/Tester.h"
+#include "Corrade/Containers/Array.h"
+#include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/TypeTraits.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 

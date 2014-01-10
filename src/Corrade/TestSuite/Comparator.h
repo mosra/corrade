@@ -31,7 +31,7 @@
 
 #include <string>
 
-#include "Utility/Debug.h"
+#include "Corrade/Utility/Debug.h"
 
 namespace Corrade { namespace TestSuite {
 

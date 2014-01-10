@@ -25,8 +25,8 @@
 
 #include "File.h"
 
-#include "Containers/Array.h"
-#include "Utility/Directory.h"
+#include "Corrade/Containers/Array.h"
+#include "Corrade/Utility/Directory.h"
 
 namespace Corrade { namespace TestSuite {
 

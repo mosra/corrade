@@ -23,8 +23,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "TestSuite/Tester.h"
-#include "Utility/Sha1.h"
+#include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/Sha1.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 

@@ -28,7 +28,7 @@
 #include <ppapi/cpp/instance.h>
 #include <ppapi/cpp/var.h>
 
-#include "Utility/String.h"
+#include "Corrade/Utility/String.h"
 
 namespace Corrade { namespace Utility {
 

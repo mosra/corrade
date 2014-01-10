@@ -25,9 +25,9 @@
 
 #include "Connection.h"
 
-#include "Utility/Assert.h"
-#include "Emitter.h"
-#include "Receiver.h"
+#include "Corrade/Interconnect/Emitter.h"
+#include "Corrade/Interconnect/Receiver.h"
+#include "Corrade/Utility/Assert.h"
 
 namespace Corrade { namespace Interconnect {
 

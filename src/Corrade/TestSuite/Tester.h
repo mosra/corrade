@@ -31,13 +31,13 @@
 
 #include <vector>
 
-#include "Comparator.h"
-#include "Compare/FloatingPoint.h"
+#include "Corrade/TestSuite/Comparator.h"
+#include "Corrade/TestSuite/Compare/FloatingPoint.h"
 
 #ifdef CORRADE_TARGET_EMSCRIPTEN
 #include <cstdlib>
 #endif
-#include "corradeTestSuiteVisibility.h"
+#include "Corrade/TestSuite/corradeTestSuiteVisibility.h"
 
 namespace Corrade { namespace TestSuite {
 

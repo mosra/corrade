@@ -33,8 +33,8 @@
 #include <string>
 #include <vector>
 
-#include "Containers/Containers.h"
-#include "Utility/corradeUtilityVisibility.h"
+#include "Corrade/Containers/Containers.h"
+#include "Corrade/Utility/corradeUtilityVisibility.h"
 
 namespace Corrade { namespace Utility {
 

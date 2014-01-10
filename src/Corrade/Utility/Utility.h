@@ -32,8 +32,8 @@
 #include <cstdint>
 #include <cstddef>
 
-#include "corradeConfigure.h"
-#include "Containers/Containers.h"
+#include "Corrade/corradeConfigure.h"
+#include "Corrade/Containers/Containers.h"
 
 namespace Corrade { namespace Utility {
 

@@ -32,10 +32,10 @@
 #include <string>
 #include <vector>
 
-#include "corradeUtilityVisibility.h"
+#include "Corrade/Utility/corradeUtilityVisibility.h"
 
 #ifdef CORRADE_BUILD_DEPRECATED
-#include <Utility/Macros.h>
+#include "Corrade/Utility/Macros.h"
 #endif
 
 namespace Corrade { namespace Utility {

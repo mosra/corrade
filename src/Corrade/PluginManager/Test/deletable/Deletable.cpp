@@ -23,8 +23,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "PluginManager/Test/AbstractDeletable.h"
-#include "PluginManager/AbstractManager.h"
+#include "Corrade/PluginManager/AbstractManager.h"
+
+#include "../AbstractDeletable.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 

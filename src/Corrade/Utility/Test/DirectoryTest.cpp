@@ -23,11 +23,11 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Containers/Array.h"
-#include "TestSuite/Tester.h"
-#include "TestSuite/Compare/Container.h"
-#include "TestSuite/Compare/File.h"
-#include "Utility/Directory.h"
+#include "Corrade/Containers/Array.h"
+#include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
+#include "Corrade/TestSuite/Compare/File.h"
+#include "Corrade/Utility/Directory.h"
 
 #include "testConfigure.h"
 

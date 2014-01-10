@@ -29,7 +29,7 @@
  * @brief Class Corrade::Utility::MurmurHash2Implementation, Corrade::Utility::MurmurHash2
  */
 
-#include "AbstractHash.h"
+#include "Corrade/Utility/AbstractHash.h"
 
 namespace Corrade { namespace Utility {
 

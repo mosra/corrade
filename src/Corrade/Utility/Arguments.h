@@ -32,8 +32,8 @@
 #include <string>
 #include <vector>
 
-#include "Utility/ConfigurationValue.h"
-#include "Utility/corradeUtilityVisibility.h"
+#include "Corrade/Utility/ConfigurationValue.h"
+#include "Corrade/Utility/corradeUtilityVisibility.h"
 
 namespace Corrade { namespace Utility {
 

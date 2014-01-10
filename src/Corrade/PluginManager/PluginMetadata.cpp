@@ -25,7 +25,7 @@
 
 #include "PluginMetadata.h"
 
-#include "Utility/ConfigurationGroup.h"
+#include "Corrade/Utility/ConfigurationGroup.h"
 
 namespace Corrade { namespace PluginManager {
 

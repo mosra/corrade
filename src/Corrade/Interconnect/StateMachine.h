@@ -25,7 +25,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Interconnect/Emitter.h"
+#include "Corrade/Interconnect/Emitter.h"
 
 namespace Corrade { namespace Interconnect {
 

@@ -23,10 +23,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "TestSuite/Tester.h"
-#include "TestSuite/Compare/StringToFile.h"
-#include "Utility/Directory.h"
-#include "Utility/Resource.h"
+#include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/StringToFile.h"
+#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Resource.h"
 
 #include "testConfigure.h"
 

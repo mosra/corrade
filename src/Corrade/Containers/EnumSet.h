@@ -31,7 +31,7 @@
 
 #include <type_traits>
 
-#include "Containers/Containers.h"
+#include "Corrade/Containers/Containers.h"
 
 namespace Corrade { namespace Containers {
 

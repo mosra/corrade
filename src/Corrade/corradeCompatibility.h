@@ -25,7 +25,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "corradeConfigure.h"
+#include "Corrade/corradeConfigure.h"
 
 #ifdef CORRADE_GCC46_COMPATIBILITY
 #define final

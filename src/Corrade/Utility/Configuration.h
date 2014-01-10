@@ -34,7 +34,7 @@
 #include <map>
 #include <iosfwd>
 
-#include "ConfigurationGroup.h"
+#include "Corrade/Utility/ConfigurationGroup.h"
 
 namespace Corrade { namespace Utility {
 

@@ -23,9 +23,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <PluginManager/Manager.h>
-#include <Utility/Arguments.h>
-#include <Utility/Debug.h>
+#include <Corrade/PluginManager/Manager.h>
+#include <Corrade/Utility/Arguments.h>
+#include <Corrade/Utility/Debug.h>
 
 #include "AbstractAnimal.h"
 

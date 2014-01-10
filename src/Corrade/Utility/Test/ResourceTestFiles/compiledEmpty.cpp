@@ -1,8 +1,8 @@
 /* Compiled resource file. DO NOT EDIT! */
 
-#include "Utility/Macros.h"
-#include "Utility/Resource.h"
-#include "corradeCompatibility.h"
+#include "Corrade/corradeCompatibility.h"
+#include "Corrade/Utility/Macros.h"
+#include "Corrade/Utility/Resource.h"
 
 static const unsigned char resourcePositions[] = {
     0x09,0x00,0x00,0x00,

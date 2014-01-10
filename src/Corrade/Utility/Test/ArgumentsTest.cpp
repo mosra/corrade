@@ -25,8 +25,8 @@
 
 #include <sstream>
 
-#include "TestSuite/Tester.h"
-#include "Utility/Arguments.h"
+#include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/Arguments.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 

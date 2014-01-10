@@ -24,9 +24,9 @@
 */
 
 #include <string>
-#include <Interconnect/Emitter.h>
-#include <Interconnect/Receiver.h>
-#include <Utility/Debug.h>
+#include <Corrade/Interconnect/Emitter.h>
+#include <Corrade/Interconnect/Receiver.h>
+#include <Corrade/Utility/Debug.h>
 
 using namespace Corrade;
 

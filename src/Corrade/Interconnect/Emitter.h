@@ -32,13 +32,12 @@
 #include <cstdint>
 #include <unordered_map>
 
-#include "Interconnect/Connection.h"
-#include "Utility/Assert.h"
-
-#include "corradeConfigure.h"
+#include "Corrade/corradeConfigure.h"
+#include "Corrade/Interconnect/Connection.h"
+#include "Corrade/Utility/Assert.h"
 
 #ifdef CORRADE_BUILD_DEPRECATED
-#include "Utility/Macros.h"
+#include "Corrade/Utility/Macros.h"
 #endif
 
 namespace Corrade { namespace Interconnect {

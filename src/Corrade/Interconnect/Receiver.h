@@ -31,7 +31,7 @@
 
 #include <vector>
 
-#include "corradeInterconnectVisibility.h"
+#include "Corrade/Interconnect/corradeInterconnectVisibility.h"
 
 namespace Corrade { namespace Interconnect {
 

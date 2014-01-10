@@ -32,7 +32,7 @@
 #include <iterator> /* for std::begin() in libc++ */
 #include <utility>
 
-#include "corradeCompatibility.h"
+#include "Corrade/corradeCompatibility.h"
 
 namespace Corrade { namespace Utility {
 

@@ -23,8 +23,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "TestSuite/Tester.h"
-#include "Utility/MurmurHash2.h"
+#include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/MurmurHash2.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 

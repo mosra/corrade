@@ -31,9 +31,8 @@
 
 #include <cstdint>
 
-#include "utilities.h"
-
-#include "corradeConfigure.h"
+#include "Corrade/corradeConfigure.h"
+#include "Corrade/Utility/utilities.h"
 
 namespace Corrade { namespace Utility {
 

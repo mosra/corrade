@@ -25,7 +25,7 @@
 
 #include "FileToString.h"
 
-#include "Utility/Directory.h"
+#include "Corrade/Utility/Directory.h"
 
 namespace Corrade { namespace TestSuite {
 

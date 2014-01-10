@@ -29,9 +29,8 @@
  * @brief Class Corrade::TestSuite::Comparator specialized for floating-point values
  */
 
-#include "TestSuite/Comparator.h"
-
-#include "TestSuite/corradeTestSuiteVisibility.h"
+#include "Corrade/TestSuite/Comparator.h"
+#include "Corrade/TestSuite/corradeTestSuiteVisibility.h"
 
 namespace Corrade { namespace TestSuite {
 

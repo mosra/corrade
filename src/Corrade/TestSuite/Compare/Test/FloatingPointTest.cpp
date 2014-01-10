@@ -26,7 +26,7 @@
 #include <limits>
 #include <sstream>
 
-#include "TestSuite/Tester.h"
+#include "Corrade/TestSuite/Tester.h"
 
 namespace Corrade { namespace TestSuite { namespace Test {
 

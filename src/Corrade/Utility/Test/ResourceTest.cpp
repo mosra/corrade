@@ -26,12 +26,12 @@
 #include <sstream>
 #include <tuple>
 
-#include "Containers/Array.h"
-#include "TestSuite/Tester.h"
-#include "TestSuite/Compare/Container.h"
-#include "TestSuite/Compare/StringToFile.h"
-#include "Utility/Directory.h"
-#include "Utility/Resource.h"
+#include "Corrade/Containers/Array.h"
+#include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
+#include "Corrade/TestSuite/Compare/StringToFile.h"
+#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Resource.h"
 
 #include "testConfigure.h"
 

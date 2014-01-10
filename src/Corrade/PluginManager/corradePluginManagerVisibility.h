@@ -25,8 +25,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Utility/Visibility.h"
-#include "corradeConfigure.h"
+#include "Corrade/corradeConfigure.h"
+#include "Corrade/Utility/Visibility.h"
 
 #ifndef CORRADE_BUILD_STATIC
     #ifdef CorradePluginManager_EXPORTS

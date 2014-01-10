@@ -25,11 +25,11 @@
 
 #include <sstream>
 
-#include "PluginManager/corradePluginManagerConfigure.h"
-#include "PluginManager/Manager.h"
-#include "TestSuite/Tester.h"
-#include "TestSuite/Compare/Container.h"
-#include "Utility/Directory.h"
+#include "Corrade/PluginManager/corradePluginManagerConfigure.h"
+#include "Corrade/PluginManager/Manager.h"
+#include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
+#include "Corrade/Utility/Directory.h"
 
 #include "AbstractAnimal.h"
 #include "AbstractFood.h"

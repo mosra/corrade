@@ -25,12 +25,12 @@
 
 #include <sstream>
 
-#include "TestSuite/Tester.h"
-#include "TestSuite/Compare/Container.h"
-#include "TestSuite/Compare/File.h"
-#include "TestSuite/Compare/FileToString.h"
-#include "Utility/Configuration.h"
-#include "Utility/Directory.h"
+#include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
+#include "Corrade/TestSuite/Compare/File.h"
+#include "Corrade/TestSuite/Compare/FileToString.h"
+#include "Corrade/Utility/Configuration.h"
+#include "Corrade/Utility/Directory.h"
 
 #include "testConfigure.h"
 

@@ -31,7 +31,7 @@
 
 #include <cstring>
 
-#include "corradeUtilityVisibility.h"
+#include "Corrade/Utility/corradeUtilityVisibility.h"
 
 namespace Corrade { namespace Utility {
 

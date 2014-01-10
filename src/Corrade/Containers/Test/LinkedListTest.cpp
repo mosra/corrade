@@ -25,8 +25,8 @@
 
 #include <sstream>
 
-#include "Containers/LinkedList.h"
-#include "TestSuite/Tester.h"
+#include "Corrade/Containers/LinkedList.h"
+#include "Corrade/TestSuite/Tester.h"
 
 namespace Corrade { namespace Containers { namespace Test {
 

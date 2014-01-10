@@ -30,11 +30,11 @@
 #include <tuple>
 #include <vector>
 
-#include "Containers/Array.h"
-#include "Utility/Assert.h"
-#include "Utility/Configuration.h"
-#include "Utility/Debug.h"
-#include "Utility/Directory.h"
+#include "Corrade/Containers/Array.h"
+#include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/Configuration.h"
+#include "Corrade/Utility/Debug.h"
+#include "Corrade/Utility/Directory.h"
 
 namespace Corrade { namespace Utility {
 
@@ -143,9 +143,9 @@ std::string Resource::compile(const std::string& name, const std::string& group,
     /* Special case for empty file list */
     if(files.empty()) {
         return "/* Compiled resource file. DO NOT EDIT! */\n\n"
-            "#include \"Utility/Macros.h\"\n"
-            "#include \"Utility/Resource.h\"\n"
-            "#include \"corradeCompatibility.h\"\n\n"
+            "#include \"Corrade/corradeCompatibility.h\"\n"
+            "#include \"Corrade/Utility/Macros.h\"\n"
+            "#include \"Corrade/Utility/Resource.h\"\n\n"
             "int resourceInitializer_" + name + "();\n"
             "int resourceInitializer_" + name + "() {\n"
             "    Corrade::Utility::Resource::registerData(\"" + group + "\", 0, nullptr, nullptr, nullptr);\n"
@@ -203,9 +203,9 @@ std::string Resource::compile(const std::string& name, const std::string& group,
        Corrade in compatibility branch with Corrade in master branch (i.e. x86
        NaCl). */
     return "/* Compiled resource file. DO NOT EDIT! */\n\n"
-        "#include \"Utility/Macros.h\"\n"
-        "#include \"Utility/Resource.h\"\n"
-        "#include \"corradeCompatibility.h\"\n\n"
+        "#include \"Corrade/corradeCompatibility.h\"\n"
+        "#include \"Corrade/Utility/Macros.h\"\n"
+        "#include \"Corrade/Utility/Resource.h\"\n\n"
         "static const unsigned char resourcePositions[] = {" +
         positions + "\n};\n\n"
         "static const unsigned char resourceFilenames[] = {" +

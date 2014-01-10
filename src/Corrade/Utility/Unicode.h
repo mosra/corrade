@@ -34,7 +34,7 @@
 #include <vector>
 #endif
 
-#include "Utility/corradeUtilityVisibility.h"
+#include "Corrade/Utility/corradeUtilityVisibility.h"
 
 namespace Corrade { namespace Utility {
 

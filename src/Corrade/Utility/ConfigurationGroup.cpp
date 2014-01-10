@@ -25,8 +25,8 @@
 
 #include "ConfigurationGroup.h"
 
-#include "Utility/Assert.h"
-#include "Utility/Configuration.h"
+#include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/Configuration.h"
 
 namespace Corrade { namespace Utility {
 

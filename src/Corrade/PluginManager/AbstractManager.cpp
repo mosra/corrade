@@ -41,12 +41,11 @@
 #define dlclose FreeLibrary
 #endif
 
-#include "Utility/Assert.h"
-#include "Utility/Directory.h"
-#include "Utility/Configuration.h"
-#include "PluginManager/AbstractPlugin.h"
-
-#include "corradePluginManagerConfigure.h"
+#include "Corrade/PluginManager/AbstractPlugin.h"
+#include "Corrade/PluginManager/corradePluginManagerConfigure.h"
+#include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Configuration.h"
 
 using namespace Corrade::Utility;
 

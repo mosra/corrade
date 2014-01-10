@@ -26,8 +26,8 @@
 #include <sstream>
 #include <tuple>
 
-#include "TestSuite/Tester.h"
-#include "Utility/Unicode.h"
+#include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/Unicode.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 

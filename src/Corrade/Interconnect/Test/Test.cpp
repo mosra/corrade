@@ -25,12 +25,11 @@
 
 #include <sstream>
 
-#include "TestSuite/Tester.h"
-#include "TestSuite/Compare/Container.h"
-#include "Interconnect/Emitter.h"
-#include "Interconnect/Receiver.h"
-
-#include "corradeCompatibility.h"
+#include "Corrade/corradeCompatibility.h"
+#include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
+#include "Corrade/Interconnect/Emitter.h"
+#include "Corrade/Interconnect/Receiver.h"
 
 namespace Corrade { namespace Interconnect { namespace Test {
 

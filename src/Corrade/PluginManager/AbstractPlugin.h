@@ -31,7 +31,7 @@
 
 #include <string>
 
-#include "AbstractManager.h"
+#include "Corrade/PluginManager/AbstractManager.h"
 
 namespace Corrade { namespace PluginManager {
 

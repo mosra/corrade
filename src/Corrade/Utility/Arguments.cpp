@@ -30,8 +30,8 @@
 #include <iostream>
 #include <sstream>
 
-#include "Utility/Assert.h"
-#include "Utility/String.h"
+#include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/String.h"
 
 namespace Corrade { namespace Utility {
 

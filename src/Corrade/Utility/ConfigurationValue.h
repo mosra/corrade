@@ -32,10 +32,9 @@
 #include <cstdint>
 #include <string>
 
-#include "Containers/EnumSet.h"
-
-#include "corradeConfigure.h"
-#include "corradeUtilityVisibility.h"
+#include "Corrade/corradeConfigure.h"
+#include "Corrade/Containers/EnumSet.h"
+#include "Corrade/Utility/corradeUtilityVisibility.h"
 
 namespace Corrade { namespace Utility {
 

@@ -31,7 +31,7 @@
 
 #include <algorithm>
 
-#include "TestSuite/Comparator.h"
+#include "Corrade/TestSuite/Comparator.h"
 
 namespace Corrade { namespace TestSuite {
 

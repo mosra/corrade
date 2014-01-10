@@ -32,11 +32,11 @@ See `corrade-rc --help` for command-line parameters, see @ref resource-managemen
 for brief introduction.
 */
 
-#include "Containers/Array.h"
-#include "Utility/Arguments.h"
-#include "Utility/Debug.h"
-#include "Utility/Directory.h"
-#include "Utility/Resource.h"
+#include "Corrade/Containers/Array.h"
+#include "Corrade/Utility/Arguments.h"
+#include "Corrade/Utility/Debug.h"
+#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Resource.h"
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 int main(int argc, char** argv) {

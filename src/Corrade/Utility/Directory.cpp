@@ -41,10 +41,9 @@
 #include <shlobj.h>
 #endif
 
-#include "Containers/Array.h"
-#include "Utility/String.h"
-
-#include "corradeConfigure.h"
+#include "Corrade/corradeConfigure.h"
+#include "Corrade/Containers/Array.h"
+#include "Corrade/Utility/String.h"
 
 namespace Corrade { namespace Utility {
 

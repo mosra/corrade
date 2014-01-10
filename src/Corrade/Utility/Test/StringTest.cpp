@@ -23,9 +23,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "TestSuite/Tester.h"
-#include "TestSuite/Compare/Container.h"
-#include "Utility/String.h"
+#include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
+#include "Corrade/Utility/String.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 

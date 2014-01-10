@@ -23,9 +23,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "TestSuite/Tester.h"
-#include "Utility/Endianness.h"
-#include "Utility/Debug.h"
+#include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/Endianness.h"
+#include "Corrade/Utility/Debug.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 

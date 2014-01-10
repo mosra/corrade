@@ -24,7 +24,7 @@
 */
 
 #include <cmath>
-#include <TestSuite/Tester.h>
+#include <Corrade/TestSuite/Tester.h>
 
 namespace Corrade { namespace Examples {
 

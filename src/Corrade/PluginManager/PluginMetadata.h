@@ -32,8 +32,8 @@
 #include <string>
 #include <vector>
 
-#include "PluginManager/corradePluginManagerVisibility.h"
-#include "Utility/Utility.h"
+#include "Corrade/PluginManager/corradePluginManagerVisibility.h"
+#include "Corrade/Utility/Utility.h"
 
 namespace Corrade { namespace PluginManager {
 

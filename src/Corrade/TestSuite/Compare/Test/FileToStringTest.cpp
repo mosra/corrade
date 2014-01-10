@@ -25,9 +25,9 @@
 
 #include <sstream>
 
-#include "TestSuite/Tester.h"
-#include "TestSuite/Compare/FileToString.h"
-#include "Utility/Directory.h"
+#include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/FileToString.h"
+#include "Corrade/Utility/Directory.h"
 
 #include "configure.h"
 

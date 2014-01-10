@@ -33,12 +33,12 @@
 #include <string>
 #include <map>
 
-#include "corradeCompatibility.h"
-#include "Containers/EnumSet.h"
-#include "Utility/Configuration.h"
-#include "Utility/Resource.h"
-#include "PluginManager/PluginMetadata.h"
-#include "PluginManager/PluginManager.h"
+#include "Corrade/corradeCompatibility.h"
+#include "Corrade/Containers/EnumSet.h"
+#include "Corrade/PluginManager/PluginMetadata.h"
+#include "Corrade/PluginManager/PluginManager.h"
+#include "Corrade/Utility/Configuration.h"
+#include "Corrade/Utility/Resource.h"
 
 #ifdef CORRADE_TARGET_WINDOWS
 /* I didn't find a better way to circumvent the need for including windows.h */

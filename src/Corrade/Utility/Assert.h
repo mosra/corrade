@@ -32,7 +32,7 @@
 #ifndef CORRADE_NO_ASSERT
 #include <cstdlib>
 
-#include "Debug.h"
+#include "Corrade/Utility/Debug.h"
 #endif
 
 /** @hideinitializer

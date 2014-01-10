@@ -23,8 +23,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Containers/EnumSet.h"
-#include "TestSuite/Tester.h"
+#include "Corrade/Containers/EnumSet.h"
+#include "Corrade/TestSuite/Tester.h"
 
 namespace Corrade { namespace Containers { namespace Test {
 

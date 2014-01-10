@@ -23,8 +23,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <Utility/Resource.h>
-#include <Utility/Debug.h>
+#include <Corrade/Utility/Debug.h>
+#include <Corrade/Utility/Resource.h>
 
 using namespace Corrade;
 

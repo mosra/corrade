@@ -29,10 +29,10 @@
  * @brief Class Corrade::Interconnect::Connection
  */
 
-#include "Interconnect/Interconnect.h"
-#include "Interconnect/corradeInterconnectVisibility.h"
-
 #include <cstddef>
+
+#include "Corrade/Interconnect/Interconnect.h"
+#include "Corrade/Interconnect/corradeInterconnectVisibility.h"
 
 namespace Corrade { namespace Interconnect {
 

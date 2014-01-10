@@ -25,8 +25,8 @@
 
 #include <sstream>
 
-#include "Interconnect/StateMachine.h"
-#include "TestSuite/Tester.h"
+#include "Corrade/Interconnect/StateMachine.h"
+#include "Corrade/TestSuite/Tester.h"
 
 namespace Corrade { namespace Interconnect { namespace Test {
 

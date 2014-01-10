@@ -29,8 +29,8 @@
  * @brief Class Corrade::Containers::LinkedList, Corrade::Containers::LinkedListItem
  */
 
-#include "Containers/Containers.h"
-#include "Utility/Assert.h"
+#include "Corrade/Containers/Containers.h"
+#include "Corrade/Utility/Assert.h"
 
 namespace Corrade { namespace Containers {
 

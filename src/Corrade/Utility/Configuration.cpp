@@ -27,10 +27,10 @@
 
 #include <fstream>
 
-#include "Utility/Assert.h"
-#include "Utility/Debug.h"
-#include "Utility/Directory.h"
-#include "Utility/String.h"
+#include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/Debug.h"
+#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/String.h"
 
 namespace Corrade { namespace Utility {
 
