@@ -23,7 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-/** @dir src
+/** @dir Corrade
  * @brief Namespace Corrade
  */
 /** @namespace Corrade
@@ -37,7 +37,7 @@ include path. See also @ref building-corrade and @ref corrade-cmake for more
 information.
 */
 
-/** @dir src/Containers
+/** @dir Corrade/Containers
  * @brief Namespace Corrade::Containers
  */
 /** @namespace Corrade::Containers
@@ -49,7 +49,7 @@ To use this library, you need to link to `${CORRADE_CONTAINERS_LIBRARIES}`. See
 also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
-/** @dir src/Utility
+/** @dir Corrade/Utility
  * @brief Namespace Corrade::Utility
  */
 /** @namespace Corrade::Utility
@@ -65,7 +65,7 @@ To use this library, you need to link to `${CORRADE_UTILITY_LIBRARIES}`. See
 also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
-/** @dir src/PluginManager
+/** @dir Corrade/PluginManager
  * @brief Namespace Corrade::PluginManager
  */
 /** @namespace Corrade::PluginManager
@@ -80,7 +80,7 @@ To use this library, you need to link to `${CORRADE_PLUGINMANAGER_LIBRARIES}`.
 See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
-/** @dir src/Interconnect
+/** @dir Corrade/Interconnect
  * @brief Namespace Corrade::Interconnect
  */
 /** @namespace Corrade::Interconnect
@@ -92,7 +92,7 @@ To use this library, you need to link to `${CORRADE_INTERCONNECT_LIBRARIES}`.
 See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
-/** @dir src/TestSuite
+/** @dir Corrade/TestSuite
  * @brief Namespace Corrade::TestSuite
  */
 /** @namespace Corrade::TestSuite
@@ -104,7 +104,7 @@ To use this library, you need to link to `${CORRADE_TESTSUITE_LIBRARIES}`.
 See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
-/** @dir src/TestSuite/Compare
+/** @dir Corrade/TestSuite/Compare
  * @brief Namespace Corrade::TestSuite::Compare
  */
 /** @namespace Corrade::TestSuite::Compare
