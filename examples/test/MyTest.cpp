@@ -28,7 +28,7 @@
 
 namespace Corrade { namespace Examples {
 
-class MyTest: public Corrade::TestSuite::Tester {
+class MyTest: public TestSuite::Tester {
     public:
         MyTest();
 
