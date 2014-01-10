@@ -1,5 +1,5 @@
-#ifndef Corrade_Utility_Visibility_h
-#define Corrade_Utility_Visibility_h
+#ifndef Corrade_Utility_VisibilityMacros_h
+#define Corrade_Utility_VisibilityMacros_h
 /*
     This file is part of Corrade.
 

@@ -25,7 +25,7 @@
 
 #include "AbstractAnimal.h"
 
-#include "Corrade/Utility/Visibility.h"
+#include "Corrade/Utility/VisibilityMacros.h"
 
 #ifdef Dog_EXPORTS
     #define DOG_EXPORT CORRADE_VISIBILITY_EXPORT

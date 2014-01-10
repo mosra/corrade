@@ -26,7 +26,7 @@
 */
 
 #include "Corrade/corradeConfigure.h"
-#include "Corrade/Utility/Visibility.h"
+#include "Corrade/Utility/VisibilityMacros.h"
 
 #ifndef CORRADE_BUILD_STATIC
     #ifdef CorradeTestSuite_EXPORTS

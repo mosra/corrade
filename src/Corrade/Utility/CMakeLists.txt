@@ -60,7 +60,7 @@ set(CorradeUtility_HEADERS
     Unicode.h
     utilities.h
     Utility.h
-    Visibility.h
+    VisibilityMacros.h
 
     corradeUtilityVisibility.h)
 
