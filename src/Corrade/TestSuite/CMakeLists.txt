@@ -34,8 +34,7 @@ set(CorradeTestSuite_SRCS
 set(CorradeTestSuite_HEADERS
     Comparator.h
     Tester.h
-
-    corradeTestSuiteVisibility.h)
+    visibility.h)
 
 add_library(CorradeTestSuite ${SHARED_OR_STATIC} ${CorradeTestSuite_SRCS})
 if(NOT BUILD_STATIC)

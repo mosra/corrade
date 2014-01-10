@@ -1,5 +1,5 @@
-#ifndef Corrade_corradeCompatibility_h
-#define Corrade_corradeCompatibility_h
+#ifndef Corrade_Interconnect_visibility_h
+#define Corrade_Interconnect_visibility_h
 /*
     This file is part of Corrade.
 
@@ -25,11 +25,18 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/corradeConfigure.h"
+#include "Corrade/configure.h"
+#include "Corrade/Utility/VisibilityMacros.h"
 
-#ifdef CORRADE_GCC46_COMPATIBILITY
-#define final
-#define override
+#ifndef CORRADE_BUILD_STATIC
+    #ifdef CorradeInterconnect_EXPORTS
+        #define CORRADE_INTERCONNECT_EXPORT CORRADE_VISIBILITY_EXPORT
+    #else
+        #define CORRADE_INTERCONNECT_EXPORT CORRADE_VISIBILITY_IMPORT
+    #endif
+#else
+    #define CORRADE_INTERCONNECT_EXPORT CORRADE_VISIBILITY_STATIC
 #endif
+#define CORRADE_INTERCONNECT_LOCAL CORRADE_VISIBILITY_LOCAL
 
 #endif

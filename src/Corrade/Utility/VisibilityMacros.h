@@ -29,7 +29,7 @@
  * @brief Macros @ref CORRADE_VISIBILITY_EXPORT, @ref CORRADE_VISIBILITY_IMPORT, @ref CORRADE_VISIBILITY_STATIC, @ref CORRADE_VISIBILITY_LOCAL
  */
 
-#include "Corrade/corradeConfigure.h"
+#include "Corrade/configure.h"
 
 /** @hideinitializer
  * @brief Export symbol into shared library

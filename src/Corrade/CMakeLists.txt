@@ -37,15 +37,15 @@ if(NOT CORRADE_TARGET_EMSCRIPTEN)
     test_big_endian(CORRADE_BIG_ENDIAN)
 endif()
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/corradeConfigure.h.cmake
-               ${CMAKE_CURRENT_BINARY_DIR}/corradeConfigure.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
+               ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 
 set(Corrade_HEADERS
     Corrade.h
-    corradeCompatibility.h)
+    compatibility.h)
 
 install(FILES ${Corrade_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR})
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/corradeConfigure.h DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR})
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/configure.h DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR})
 
 add_subdirectory(Containers)
 add_subdirectory(Interconnect)

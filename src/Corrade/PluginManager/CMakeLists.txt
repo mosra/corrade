@@ -23,10 +23,10 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/corradePluginManagerConfigure.h.cmake
-               ${CMAKE_CURRENT_BINARY_DIR}/corradePluginManagerConfigure.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
+               ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 
 set(CorradePluginManager_SRCS
     AbstractPlugin.cpp
@@ -39,8 +39,7 @@ set(CorradePluginManager_HEADERS
     Manager.h
     PluginManager.h
     PluginMetadata.h
-
-    corradePluginManagerVisibility.h)
+    visibility.h)
 
 add_library(CorradePluginManager ${SHARED_OR_STATIC} ${CorradePluginManager_SRCS})
 if(NOT BUILD_STATIC)

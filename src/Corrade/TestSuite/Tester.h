@@ -37,7 +37,7 @@
 #ifdef CORRADE_TARGET_EMSCRIPTEN
 #include <cstdlib>
 #endif
-#include "Corrade/TestSuite/corradeTestSuiteVisibility.h"
+#include "Corrade/TestSuite/visibility.h"
 
 namespace Corrade { namespace TestSuite {
 

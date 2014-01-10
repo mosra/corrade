@@ -29,7 +29,7 @@
  * @brief Basic definitions
  */
 
-#include "Corrade/corradeCompatibility.h"
+#include "Corrade/compatibility.h"
 
 namespace Corrade {
 

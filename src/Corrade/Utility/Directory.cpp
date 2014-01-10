@@ -41,7 +41,7 @@
 #include <shlobj.h>
 #endif
 
-#include "Corrade/corradeConfigure.h"
+#include "Corrade/configure.h"
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Utility/String.h"
 

@@ -29,7 +29,7 @@
 #include "Corrade/TestSuite/Compare/File.h"
 #include "Corrade/Utility/Directory.h"
 
-#include "testConfigure.h"
+#include "configure.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 

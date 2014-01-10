@@ -33,7 +33,7 @@
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/Resource.h"
 
-#include "testConfigure.h"
+#include "configure.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 

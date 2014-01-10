@@ -1,5 +1,5 @@
-#ifndef Corrade_Utility_corradeTestSuiteVisibility_h
-#define Corrade_Utility_corradeTestSuiteVisibility_h
+#ifndef Corrade_TestSuite_visibility_h
+#define Corrade_TestSuite_visibility_h
 /*
     This file is part of Corrade.
 
@@ -25,7 +25,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/corradeConfigure.h"
+#include "Corrade/configure.h"
 #include "Corrade/Utility/VisibilityMacros.h"
 
 #ifndef CORRADE_BUILD_STATIC

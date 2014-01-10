@@ -61,8 +61,7 @@ set(CorradeUtility_HEADERS
     utilities.h
     Utility.h
     VisibilityMacros.h
-
-    corradeUtilityVisibility.h)
+    visibility.h)
 
 # NaCl-specific functionality
 if(CORRADE_TARGET_NACL)

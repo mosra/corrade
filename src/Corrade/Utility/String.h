@@ -32,7 +32,7 @@
 #include <string>
 #include <vector>
 
-#include "Corrade/Utility/corradeUtilityVisibility.h"
+#include "Corrade/Utility/visibility.h"
 
 #ifdef CORRADE_BUILD_DEPRECATED
 #include "Corrade/Utility/Macros.h"

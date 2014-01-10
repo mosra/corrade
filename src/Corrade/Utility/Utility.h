@@ -32,7 +32,7 @@
 #include <cstdint>
 #include <cstddef>
 
-#include "Corrade/corradeConfigure.h"
+#include "Corrade/configure.h"
 #include "Corrade/Containers/Containers.h"
 
 namespace Corrade { namespace Utility {

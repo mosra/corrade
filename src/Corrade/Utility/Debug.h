@@ -33,9 +33,9 @@
 #include <utility>
 #include <type_traits>
 
-#include "Corrade/corradeConfigure.h"
+#include "Corrade/configure.h"
 #include "Corrade/Utility/TypeTraits.h"
-#include "Corrade/Utility/corradeUtilityVisibility.h"
+#include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
 

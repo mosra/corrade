@@ -32,7 +32,7 @@
 #include <cstddef>
 
 #include "Corrade/Interconnect/Interconnect.h"
-#include "Corrade/Interconnect/corradeInterconnectVisibility.h"
+#include "Corrade/Interconnect/visibility.h"
 
 namespace Corrade { namespace Interconnect {
 

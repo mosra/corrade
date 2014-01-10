@@ -42,10 +42,11 @@
 #endif
 
 #include "Corrade/PluginManager/AbstractPlugin.h"
-#include "Corrade/PluginManager/corradePluginManagerConfigure.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/Configuration.h"
+
+#include "configure.h"
 
 using namespace Corrade::Utility;
 

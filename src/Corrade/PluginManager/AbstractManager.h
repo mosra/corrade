@@ -33,7 +33,7 @@
 #include <string>
 #include <map>
 
-#include "Corrade/corradeCompatibility.h"
+#include "Corrade/compatibility.h"
 #include "Corrade/Containers/EnumSet.h"
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/PluginManager/PluginManager.h"

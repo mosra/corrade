@@ -28,7 +28,7 @@
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/Resource.h"
 
-#include "testConfigure.h"
+#include "configure.h"
 
 static void initializeStaticResource() {
     CORRADE_RESOURCE_INITIALIZE(ResourceTestData)

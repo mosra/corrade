@@ -1,5 +1,5 @@
-#ifndef Corrade_PluginManager_corradePluginManagerVisibility_h
-#define Corrade_PluginManager_corradePluginManagerVisibility_h
+#ifndef Corrade_corradeCompatibility_h
+#define Corrade_corradeCompatibility_h
 /*
     This file is part of Corrade.
 
@@ -25,20 +25,11 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/corradeConfigure.h"
-#include "Corrade/Utility/VisibilityMacros.h"
+#include "Corrade/configure.h"
 
-#ifndef CORRADE_BUILD_STATIC
-    #ifdef CorradePluginManager_EXPORTS
-        #define CORRADE_PLUGINMANAGER_EXPORT CORRADE_VISIBILITY_EXPORT
-    #else
-        #define CORRADE_PLUGINMANAGER_EXPORT CORRADE_VISIBILITY_IMPORT
-    #endif
-#else
-    #define CORRADE_PLUGINMANAGER_EXPORT CORRADE_VISIBILITY_STATIC
+#ifdef CORRADE_GCC46_COMPATIBILITY
+#define final
+#define override
 #endif
-#define CORRADE_PLUGINMANAGER_LOCAL CORRADE_VISIBILITY_LOCAL
-
-#define CORRADE_PLUGIN_EXPORT CORRADE_VISIBILITY_EXPORT
 
 #endif

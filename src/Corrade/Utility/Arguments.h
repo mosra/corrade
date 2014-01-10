@@ -33,7 +33,6 @@
 #include <vector>
 
 #include "Corrade/Utility/ConfigurationValue.h"
-#include "Corrade/Utility/corradeUtilityVisibility.h"
 
 namespace Corrade { namespace Utility {
 

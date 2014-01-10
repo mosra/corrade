@@ -32,7 +32,7 @@
 #include <string>
 #include <vector>
 
-#include "Corrade/PluginManager/corradePluginManagerVisibility.h"
+#include "Corrade/PluginManager/visibility.h"
 #include "Corrade/Utility/Utility.h"
 
 namespace Corrade { namespace PluginManager {

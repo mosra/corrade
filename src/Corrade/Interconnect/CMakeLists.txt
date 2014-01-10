@@ -34,8 +34,7 @@ set(CorradeInterconnect_HEADERS
     Interconnect.h
     Receiver.h
     StateMachine.h
-
-    corradeInterconnectVisibility.h)
+    visibility.h)
 
 add_library(CorradeInterconnect ${SHARED_OR_STATIC} ${CorradeInterconnect_SRCS})
 if(NOT BUILD_STATIC)

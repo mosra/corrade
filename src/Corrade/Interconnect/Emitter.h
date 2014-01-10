@@ -32,7 +32,7 @@
 #include <cstdint>
 #include <unordered_map>
 
-#include "Corrade/corradeConfigure.h"
+#include "Corrade/configure.h"
 #include "Corrade/Interconnect/Connection.h"
 #include "Corrade/Utility/Assert.h"
 

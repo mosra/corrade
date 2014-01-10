@@ -25,7 +25,6 @@
 
 #include <sstream>
 
-#include "Corrade/PluginManager/corradePluginManagerConfigure.h"
 #include "Corrade/PluginManager/Manager.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
@@ -34,7 +33,9 @@
 #include "AbstractAnimal.h"
 #include "AbstractFood.h"
 #include "AbstractDeletable.h"
-#include "testConfigure.h"
+
+#include "../configure.h"
+#include "configure.h"
 
 using Corrade::Utility::Directory;
 

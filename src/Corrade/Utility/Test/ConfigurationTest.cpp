@@ -32,7 +32,7 @@
 #include "Corrade/Utility/Configuration.h"
 #include "Corrade/Utility/Directory.h"
 
-#include "testConfigure.h"
+#include "configure.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 

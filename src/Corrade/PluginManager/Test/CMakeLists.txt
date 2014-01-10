@@ -23,10 +23,10 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testConfigure.h.cmake
-               ${CMAKE_CURRENT_BINARY_DIR}/testConfigure.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
+               ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 
 if(NOT CORRADE_TARGET_NACL_NEWLIB AND NOT CORRADE_TARGET_EMSCRIPTEN)
     corrade_add_plugin(Snail ${CMAKE_CURRENT_BINARY_DIR} Snail.conf Snail.cpp)
