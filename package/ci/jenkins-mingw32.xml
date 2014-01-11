@@ -46,6 +46,13 @@
         <string>dynamic</string>
       </values>
     </hudson.matrix.TextAxis>
+    <hudson.matrix.TextAxis>
+      <name>compatibility</name>
+      <values>
+        <string></string>
+        <string>deprecated</string>
+      </values>
+    </hudson.matrix.TextAxis>
   </axes>
   <builders>
     <hudson.tasks.Shell>
@@ -58,16 +65,23 @@ if [ ${libraries} = "static" ] ; then
     static_build_flag="-DBUILD_STATIC=ON -DBUILD_STATIC_PIC=ON"
 fi
 
-mkdir -p build-mingw32-${libraries}
-cd build-mingw32-${libraries}
+if [ "${compatibility}" = "deprecated" ] ; then
+    deprecated_build_flag=ON
+else
+    deprecated_build_flag=OFF
+fi
+
+mkdir -p build-mingw32-${libraries}-${compatibility}
+cd build-mingw32-${libraries}-${compatibility}
 
 cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_TOOLCHAIN_FILE=../toolchains/archlinux/basic-mingw32.cmake \
-    -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/mingw32-${libraries} \
-    -DCMAKE_INSTALL_RPATH=${JENKINS_HOME}/filesystem/mingw32-${libraries}/lib \
+    -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/mingw32-${libraries}-${compatibility} \
+    -DCMAKE_INSTALL_RPATH=${JENKINS_HOME}/filesystem/mingw32-${libraries}-${compatibility}/lib \
     ${static_build_flag} \
     -DBUILD_TESTS=ON \
+    -DBUILD_DEPRECATED=${deprecated_build_flag} \
     -DGCC47_COMPATIBILITY=ON \
     -G Ninja
 
@@ -90,7 +104,7 @@ ninja install
     <runSequentially>true</runSequentially>
     <touchStoneCombinationFilter>
 <![CDATA[
-libraries == "dynamic"
+libraries == "dynamic" && compatibility == "deprecated"
 ]]>
     </touchStoneCombinationFilter>
     <touchStoneResultCondition>
