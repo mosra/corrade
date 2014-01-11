@@ -86,7 +86,8 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 /** @namespace Corrade::Interconnect
 @brief Signal/slot connections
 
-This library allows you to interconnect objects.
+This library allows you to interconnect objects. See @ref interconnect for more
+information.
 
 To use this library, you need to link to `${CORRADE_INTERCONNECT_LIBRARIES}`.
 See also @ref building-corrade and @ref corrade-cmake for more information.
