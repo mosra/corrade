@@ -72,7 +72,7 @@ cmake .. \
     -DBUILD_DEPRECATED=${deprecated_build_flag} \
     -G Ninja
 
-ninja
+ninja -j3
 ctest --output-on-failure || true
 ninja install
 ]]>
