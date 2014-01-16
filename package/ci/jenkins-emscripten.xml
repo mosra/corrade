@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<project>
+<matrix-project>
   <actions/>
   <description></description>
   <logRotator class="hudson.tasks.LogRotator">
@@ -38,6 +38,15 @@
   <triggers/>
   <concurrentBuild>false</concurrentBuild>
   <customWorkspace>Corrade</customWorkspace>
+  <axes>
+    <hudson.matrix.TextAxis>
+      <name>compatibility</name>
+      <values>
+        <string></string>
+        <string>deprecated</string>
+      </values>
+    </hudson.matrix.TextAxis>
+  </axes>
   <builders>
     <hudson.tasks.Shell>
       <command>
@@ -45,15 +54,22 @@
 git submodule init
 git submodule update
 
-mkdir -p build-emscripten
-cd build-emscripten
+if [ "${compatibility}" = "deprecated" ] ; then
+    deprecated_build_flag=ON
+else
+    deprecated_build_flag=OFF
+fi
+
+mkdir -p build-emscripten-${compatibility}
+cd build-emscripten-${compatibility}
 
 cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_MODULE_PATH="${WORKSPACE}/toolchains/modules" \
     -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/Emscripten.cmake" \
-    -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/emscripten \
+    -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/emscripten-${compatibility} \
     -DBUILD_TESTS=ON \
+    -DBUILD_DEPRECATED=${deprecated_build_flag} \
     -G Ninja
 
 ninja
@@ -72,4 +88,19 @@ ninja install
     </hudson.plugins.textfinder.TextFinderPublisher>
   </publishers>
   <buildWrappers/>
-</project>
+  <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
+    <runSequentially>true</runSequentially>
+    <touchStoneCombinationFilter>
+<![CDATA[
+compatibility == "deprecated"
+]]>
+    </touchStoneCombinationFilter>
+    <touchStoneResultCondition>
+      <name>UNSTABLE</name>
+      <ordinal>1</ordinal>
+      <color>YELLOW</color>
+      <completeBuild>true</completeBuild>
+    </touchStoneResultCondition>
+  </executionStrategy>
+  <childCustomWorkspace>.</childCustomWorkspace>
+</matrix-project>
