@@ -19,7 +19,7 @@
     </userRemoteConfigs>
     <branches>
       <hudson.plugins.git.BranchSpec>
-        <name>*/master</name>
+        <name>compatibility</name>
       </hudson.plugins.git.BranchSpec>
     </branches>
     <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
@@ -37,7 +37,7 @@
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers/>
   <concurrentBuild>false</concurrentBuild>
-  <customWorkspace>Corrade</customWorkspace>
+  <customWorkspace>Corrade-Compatibility</customWorkspace>
   <axes>
     <hudson.matrix.TextAxis>
       <name>toolchain</name>
@@ -76,6 +76,7 @@ cmake .. \
     -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/NaCl-${toolchain}.cmake" \
     -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/nacl-${toolchain}-${compatibility} \
     -DBUILD_DEPRECATED=${deprecated_build_flag} \
+    -DGCC44_COMPATIBILITY=ON \
     -G Ninja
 
 ninja
