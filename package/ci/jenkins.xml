@@ -58,6 +58,13 @@
         <string>dynamic</string>
       </values>
     </hudson.matrix.TextAxis>
+    <hudson.matrix.TextAxis>
+      <name>compatibility</name>
+      <values>
+        <string></string>
+        <string>deprecated</string>
+      </values>
+    </hudson.matrix.TextAxis>
   </axes>
   <builders>
     <hudson.tasks.Shell>
@@ -90,16 +97,23 @@ if [ ${libraries} = "static" ] ; then
     static_build_flag="-DBUILD_STATIC=ON -DBUILD_STATIC_PIC=ON"
 fi
 
-mkdir -p build-${compiler}-${libraries}
-cd build-${compiler}-${libraries}
+if [ "${compatibility}" = "deprecated" ] ; then
+    deprecated_build_flag=ON
+else
+    deprecated_build_flag=OFF
+fi
+
+mkdir -p build-${compiler}-${libraries}-${compatibility}
+cd build-${compiler}-${libraries}-${compatibility}
 
 cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/compatibility-${compiler}-${libraries} \
-    -DCMAKE_INSTALL_RPATH=${JENKINS_HOME}/filesystem/compatibility-${compiler}-${libraries}/lib \
+    -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/compatibility-${compiler}-${libraries}-${compatibility} \
+    -DCMAKE_INSTALL_RPATH=${JENKINS_HOME}/filesystem/compatibility-${compiler}-${libraries}-${compatibility}/lib \
     -DCMAKE_CXX_COMPILER=${compiler_binary} \
     "${compiler_flags[@]}" \
     -DBUILD_TESTS=ON \
+    -DBUILD_DEPRECATED=${deprecated_build_flag} \
     ${static_build_flag} \
     ${compatibility_flag} \
     -G Ninja
@@ -124,7 +138,7 @@ ninja install
     <runSequentially>true</runSequentially>
     <touchStoneCombinationFilter>
 <![CDATA[
-compiler == "g++" && libraries == "dynamic"
+compiler == "g++" && libraries == "dynamic" && compatibility == "deprecated"
 ]]>
     </touchStoneCombinationFilter>
     <touchStoneResultCondition>

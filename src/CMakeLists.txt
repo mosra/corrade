@@ -23,33 +23,6 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CORRADE_CXX_FLAGS}")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
-if(NOT BUILD_STATIC)
-    set(SHARED_OR_STATIC SHARED)
-else()
-    set(SHARED_OR_STATIC STATIC)
-endif()
-
-# Assume Emscripten is little-endian (TODO: better check?)
-if(NOT CORRADE_TARGET_EMSCRIPTEN)
-    include(TestBigEndian)
-    test_big_endian(CORRADE_BIG_ENDIAN)
-endif()
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/corradeConfigure.h.cmake
-               ${CMAKE_CURRENT_BINARY_DIR}/corradeConfigure.h)
-
-set(Corrade_HEADERS
-    Corrade.h
-    corradeCompatibility.h)
-
-install(FILES ${Corrade_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR})
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/corradeConfigure.h DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR})
-
-add_subdirectory(Containers)
-add_subdirectory(Interconnect)
-add_subdirectory(PluginManager)
-add_subdirectory(TestSuite)
-add_subdirectory(Utility)
+add_subdirectory(Corrade)

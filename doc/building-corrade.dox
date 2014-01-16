@@ -185,8 +185,8 @@ code more robust and future-proof, it's recommended to build the library with
 `BUILD_DEPRECATED` disabled.
 
 The features used can be conveniently detected in depending projects both in
-CMake and C++ sources, see @ref corrade-cmake and @ref src/Corrade.h for more
-information.
+CMake and C++ sources, see @ref corrade-cmake and @ref Corrade/Corrade.h for
+more information.
 
 Note that [each namespace](namespaces.html) contains more detailed guide how to
 use given library with CMake.
