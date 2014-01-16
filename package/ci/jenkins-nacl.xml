@@ -40,6 +40,13 @@
   <customWorkspace>Corrade</customWorkspace>
   <axes>
     <hudson.matrix.TextAxis>
+      <name>toolchain</name>
+      <values>
+        <string>newlib-x86-32</string>
+        <string>newlib-x86-64</string>
+      </values>
+    </hudson.matrix.TextAxis>
+    <hudson.matrix.TextAxis>
       <name>compatibility</name>
       <values>
         <string></string>
@@ -60,20 +67,18 @@ else
     deprecated_build_flag=OFF
 fi
 
-mkdir -p build-emscripten-${compatibility}
-cd build-emscripten-${compatibility}
+mkdir -p build-nacl-${toolchain}-${compatibility}
+cd build-nacl-${toolchain}-${compatibility}
 
 cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_MODULE_PATH="${WORKSPACE}/toolchains/modules" \
-    -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/Emscripten.cmake" \
-    -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/emscripten-${compatibility} \
-    -DBUILD_TESTS=ON \
+    -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/NaCl-${toolchain}.cmake" \
+    -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/nacl-${toolchain}-${compatibility} \
     -DBUILD_DEPRECATED=${deprecated_build_flag} \
     -G Ninja
 
-ninja -j3
-ctest --output-on-failure || true
+ninja
 ninja install
 ]]>
       </command>
@@ -92,7 +97,7 @@ ninja install
     <runSequentially>true</runSequentially>
     <touchStoneCombinationFilter>
 <![CDATA[
-compatibility == "deprecated"
+toolchain == "newlib-x86-64" && compatibility == "deprecated"
 ]]>
     </touchStoneCombinationFilter>
     <touchStoneResultCondition>

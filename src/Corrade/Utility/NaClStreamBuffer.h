@@ -32,8 +32,8 @@
 #include <sstream>
 #include <ppapi/c/ppb_console.h>
 
-#include "Corrade/corradeCompatibility.h"
-#include "Corrade/Utility/corradeUtilityVisibility.h"
+#include "Corrade/compatibility.h"
+#include "Corrade/Utility/visibility.h"
 
 #ifndef CORRADE_TARGET_NACL
 #error This file is available only in Google Chrome Native Client target
