@@ -45,7 +45,7 @@ class TypeTraitsTest: public TestSuite::Tester {
 };
 
 TypeTraitsTest::TypeTraitsTest() {
-    addTests({&TypeTraitsTest::hasType,
+    addTests<TypeTraitsTest>({&TypeTraitsTest::hasType,
               &TypeTraitsTest::isIterable});
 }
 
