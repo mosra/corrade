@@ -287,7 +287,7 @@ Containers::Array<unsigned char> Directory::read(const std::string& filename) {
        non-seekable files and sets badbit, Clang's libc++ returns 0 and doesn't
        set badbit, thus zero-length files are indistinguishable from
        non-seekable ones. */
-    if(file && file.tellg() != 0) {
+    if(file && file.tellg() != std::ios::pos_type{0}) {
         Containers::Array<unsigned char> data(std::size_t(file.tellg()));
         file.seekg(0, std::ios::beg);
         file.read(reinterpret_cast<char*>(data.begin()), data.size());
