@@ -113,10 +113,13 @@ elseif(MSVC)
     #   had bugs. And?
     # - C4512 "assignment operator could not be generated". Do I want one? NO I
     #   DON'T.
+    # - C4800 "forcing value to bool 'true' or 'false' (performance warning)".
+    #   So what. I won't wrap everything in bool(). This is a _language
+    #	feature_, dammit.
     # - C4910 "dllexport and extern are incompatible on an explicit
     #   instantiation". Why the error is emitted only on classes? Functions are
     #   okay with dllexport extern?!
-    set(CORRADE_CXX_FLAGS "/W4 /wd4127 /wd4251 /wd4351 /wd4373 /wd4512 /wd4910")
+    set(CORRADE_CXX_FLAGS "/W4 /wd4127 /wd4251 /wd4351 /wd4373 /wd4512 /wd4800 /wd4910")
 endif()
 
 # Use C++11-enabled libcxx on OSX
