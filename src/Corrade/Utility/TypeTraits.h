@@ -106,8 +106,10 @@ Equivalent to `std::true_type` if the class is has either `begin()` and `end()`
 members or is usable with `std::begin()` and `std::end()`. Otherwise equivalent
 to `std::false_type`.
 */
-#ifndef CORRADE_GCC46_COMPATIBILITY
-template<class T> using IsIterable = std::integral_constant<bool, (Implementation::HasBegin<T>{} || Implementation::HasStdBegin<T>{}) && (Implementation::HasEnd<T>{} || Implementation::HasStdEnd<T>{})>;
+#if !defined(CORRADE_GCC46_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
+template<class T> using IsIterable = std::integral_constant<bool, (Implementation::HasBegin<T>::Value || Implementation::HasStdBegin<T>::Value) && (Implementation::HasEnd<T>::Value || Implementation::HasStdEnd<T>::Value)>;
+#elif defined(CORRADE_MSVC2013_COMPATIBILITY)
+template<class T> struct IsIterable: public std::integral_constant<bool, (Implementation::HasBegin<T>::Value || Implementation::HasStdBegin<T>::Value) && (Implementation::HasEnd<T>::Value || Implementation::HasStdEnd<T>::Value)> {};
 #elif !defined(CORRADE_GCC45_COMPATIBILITY)
 template<class T> struct IsIterable: public std::integral_constant<bool, (Implementation::HasBegin<T>{} || Implementation::HasStdBegin<T>{}) && (Implementation::HasEnd<T>{} || Implementation::HasStdEnd<T>{})> {};
 #else
