@@ -80,7 +80,7 @@ ArrayReferenceTest::ArrayReferenceTest() {
 
 void ArrayReferenceTest::constructEmpty() {
     const ArrayReference a;
-    CORRADE_VERIFY(a == nullptr);
+    CORRADE_VERIFY(a == static_cast<int*>(nullptr));
     CORRADE_COMPARE(a.size(), 0);
 }
 
