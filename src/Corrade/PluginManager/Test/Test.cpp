@@ -329,10 +329,11 @@ void Test::crossManagerDependencies() {
     }
 
     /* After destroying hotdog try again */
+    /* MSVC 2013 has ICE when std::vector<std::string>{} is used. Meh. */
     CORRADE_COMPARE(foodManager.unload("HotDog"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.metadata("Dog")->usedBy(),
-        std::vector<std::string>{});
+        std::vector<std::string>());
     #endif
 
     /* Verify that the plugin can be instanced only through its own manager */
@@ -351,13 +352,13 @@ void Test::usedByZombies() {
        loading fails too. Dog plugin then shouldn't have HotDogWithSnail in
        usedBy list. */
 
+    /* MSVC 2013 has ICE when std::vector<std::string>{} is used. Meh. */
     CORRADE_COMPARE(foodManager.load("HotDogWithSnail"), LoadState::UnresolvedDependency);
     CORRADE_COMPARE(foodManager.loadState("HotDogWithSnail"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.metadata("Dog")->usedBy(),
-        std::vector<std::string>{});
+        std::vector<std::string>());
     #endif
 }
-
 
 void Test::reloadPluginDirectory() {
     #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)

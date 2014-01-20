@@ -66,7 +66,8 @@ class CORRADE_UTILITY_EXPORT String {
          * If @p string is `nullptr`, returns empty string.
          */
         static std::string fromArray(const char* string) {
-            return string ? std::string{string} : std::string{};
+            /* MSVC 2013 has ICE when {} is used. Meh. */
+            return string ? std::string{string} : std::string();
         }
 
         /**
@@ -76,7 +77,8 @@ class CORRADE_UTILITY_EXPORT String {
          * also @p length into account.
          */
         static std::string fromArray(const char* string, std::size_t length) {
-            return string ? std::string(string, length) : std::string{};
+            /* MSVC 2013 has ICE when {} is used. Meh. */
+            return string ? std::string(string, length) : std::string();
         }
 
         /**

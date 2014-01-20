@@ -85,17 +85,19 @@ void StringTest::trim() {
 }
 
 void StringTest::split() {
+    /* MSVC 2013 has ICE when std::vector<std::string>{} is used. Meh. */
+
     /* Empty */
     CORRADE_COMPARE_AS(String::split({}, '/'),
-        std::vector<std::string>{}, TestSuite::Compare::Container);
+        std::vector<std::string>(), TestSuite::Compare::Container);
     CORRADE_COMPARE_AS(String::splitWithoutEmptyParts({}, '/'),
-        std::vector<std::string>{}, TestSuite::Compare::Container);
+        std::vector<std::string>(), TestSuite::Compare::Container);
 
     /* Only delimiter */
     CORRADE_COMPARE_AS(String::split("/", '/'),
         (std::vector<std::string>{"", ""}), TestSuite::Compare::Container);
     CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("/", '/'),
-        std::vector<std::string>{}, TestSuite::Compare::Container);
+        std::vector<std::string>(), TestSuite::Compare::Container);
 
     /* No delimiters */
     CORRADE_COMPARE_AS(String::split("abcdef", '/'),
