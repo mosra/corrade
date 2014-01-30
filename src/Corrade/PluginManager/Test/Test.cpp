@@ -337,7 +337,11 @@ void Test::crossManagerDependencies() {
 
     /* Verify that the plugin can be instanced only through its own manager */
     CORRADE_VERIFY(manager.instance("Canary"));
+
+    std::ostringstream out;
+    Error::setOutput(&out);
     CORRADE_VERIFY(!foodManager.instance("Canary"));
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager::instance(): plugin Canary is not loaded\n");
 }
 
 void Test::usedByZombies() {

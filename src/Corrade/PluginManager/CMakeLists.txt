@@ -30,8 +30,10 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
 
 set(CorradePluginManager_SRCS
     AbstractPlugin.cpp
-    AbstractManager.cpp
     PluginMetadata.cpp)
+
+set(CorradePluginManager_GracefulAssert_SRCS
+    AbstractManager.cpp)
 
 set(CorradePluginManager_HEADERS
     AbstractPlugin.h
@@ -41,8 +43,12 @@ set(CorradePluginManager_HEADERS
     PluginMetadata.h
     visibility.h)
 
-add_library(CorradePluginManager ${SHARED_OR_STATIC} ${CorradePluginManager_SRCS})
+add_library(CorradePluginManagerObjects OBJECT ${CorradePluginManager_SRCS})
+add_library(CorradePluginManager ${SHARED_OR_STATIC}
+    $<TARGET_OBJECTS:CorradePluginManagerObjects>
+    ${CorradePluginManager_GracefulAssert_SRCS})
 if(NOT BUILD_STATIC)
+    set_target_properties(CorradePluginManagerObjects PROPERTIES COMPILE_FLAGS "-DPluginManagerObjects_EXPORTS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
     set_target_properties(CorradePluginManager PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
 elseif(BUILD_STATIC_PIC)
     # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
@@ -60,5 +66,28 @@ install(TARGETS CorradePluginManager
 install(FILES ${CorradePluginManager_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/PluginManager)
 
 if(BUILD_TESTS)
+    add_library(CorradePluginManagerTestLib ${SHARED_OR_STATIC}
+        $<TARGET_OBJECTS:CorradePluginManagerObjects>
+        ${CorradePluginManager_GracefulAssert_SRCS})
+    set_target_properties(CorradePluginManagerTestLib PROPERTIES COMPILE_FLAGS "-DCORRADE_GRACEFUL_ASSERT")
+    if(BUILD_STATIC_PIC)
+        # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
+        set_target_properties(CorradePluginManagerTestLib PROPERTIES COMPILE_FLAGS "-DCORRADE_GRACEFUL_ASSERT ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
+    endif()
+
+    target_link_libraries(CorradePluginManagerTestLib CorradeUtility)
+    if(CORRADE_TARGET_UNIX OR CORRADE_TARGET_NACL_GLIBC)
+        target_link_libraries(CorradePluginManagerTestLib ${CMAKE_DL_LIBS})
+    endif()
+
+    # On Windows we need to install first and then run the tests to avoid "DLL
+    # not found" hell, thus we need to install this too
+    if(WIN32 AND NOT CMAKE_CROSSCOMPILING)
+        install(TARGETS CorradePluginManagerTestLib
+            RUNTIME DESTINATION ${CORRADE_BINARY_INSTALL_DIR}
+            LIBRARY DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR}
+            ARCHIVE DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
+    endif()
+
     add_subdirectory(Test)
 endif()
