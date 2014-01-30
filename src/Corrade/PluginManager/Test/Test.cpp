@@ -53,6 +53,8 @@ class Test: public TestSuite::Tester {
         void wrongPluginVersion();
         void wrongPluginInterface();
         void wrongMetadataFile();
+        void loadNonexistent();
+        void unloadNonexistent();
 
         void staticPlugin();
         #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -66,7 +68,7 @@ class Test: public TestSuite::Tester {
         void deletable();
         void hierarchy();
         void crossManagerDependencies();
-        void usedByZombies();
+        void unresolvedDependencies();
 
         void reloadPluginDirectory();
 
@@ -78,6 +80,8 @@ Test::Test() {
               &Test::wrongPluginVersion,
               &Test::wrongPluginInterface,
               &Test::wrongMetadataFile,
+              &Test::loadNonexistent,
+              &Test::unloadNonexistent,
 
               &Test::staticPlugin,
               #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -91,7 +95,7 @@ Test::Test() {
               &Test::deletable,
               &Test::hierarchy,
               &Test::crossManagerDependencies,
-              &Test::usedByZombies,
+              &Test::unresolvedDependencies,
               &Test::reloadPluginDirectory,
 
               &Test::debug});
@@ -138,7 +142,7 @@ void Test::wrongPluginVersion() {
     PluginManager::Manager<AbstractFood> foodManager(foodPluginsDir);
     CORRADE_COMPARE(foodManager.load("OldBread"), PluginManager::LoadState::WrongPluginVersion);
     CORRADE_COMPARE(foodManager.loadState("OldBread"), PluginManager::LoadState::NotLoaded);
-    CORRADE_COMPARE(out.str(), "PluginManager: wrong plugin version, expected 4 but got 0\n");
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): wrong version of plugin OldBread, expected 4 but got 0\n");
     #endif
 }
 
@@ -151,7 +155,7 @@ void Test::wrongPluginInterface() {
 
     PluginManager::Manager<AbstractFood> foodManager(foodPluginsDir);
     CORRADE_COMPARE(foodManager.load("RottenTomato"), PluginManager::LoadState::WrongInterfaceVersion);
-    CORRADE_COMPARE(out.str(), "PluginManager: wrong interface version, expected 'cz.mosra.Corrade.PluginManager.Test.AbstractFood/1.0' but got 'cz.mosra.Corrade.PluginManager.Test.AbstractFood/0.1'\n");
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): wrong interface string of plugin RottenTomato, expected cz.mosra.Corrade.PluginManager.Test.AbstractFood/1.0 but got cz.mosra.Corrade.PluginManager.Test.AbstractFood/0.1\n");
     #endif
 }
 
@@ -159,11 +163,34 @@ void Test::wrongMetadataFile() {
     #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
     CORRADE_SKIP("Can't test metadata file of static plugins");
     #else
-    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+    std::ostringstream out;
+    Error::setOutput(&out);
 
+    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
     CORRADE_COMPARE(manager.loadState("Snail"), LoadState::WrongMetadataFile);
     CORRADE_COMPARE(manager.load("Snail"), LoadState::WrongMetadataFile);
+    CORRADE_COMPARE(out.str(),
+        "Utility::Configuration::Configuration(): key/value pair without '=' character\n"
+        "PluginManager::Manager::load(): plugin Snail is not ready to load: PluginManager::LoadState::WrongMetadataFile\n");
     #endif
+}
+
+void Test::loadNonexistent() {
+    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+
+    std::ostringstream out;
+    Error::setOutput(&out);
+    CORRADE_COMPARE(manager.load("Nonexistent"), LoadState::NotFound);
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): plugin Nonexistent is not static and was not found in " + pluginsDir + "\n");
+}
+
+void Test::unloadNonexistent() {
+    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+
+    std::ostringstream out;
+    Error::setOutput(&out);
+    CORRADE_COMPARE(manager.unload("Nonexistent"), LoadState::NotFound);
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager::unload(): plugin Nonexistent was not found\n");
 }
 
 void Test::staticPlugin() {
@@ -198,7 +225,10 @@ void Test::dynamicPlugin() {
         CORRADE_COMPARE(animal->legCount(), 4);
 
         /* Try to unload plugin when instance is used */
+        std::ostringstream out;
+        Error::setOutput(&out);
         CORRADE_COMPARE(manager.unload("Dog"), LoadState::Used);
+        CORRADE_COMPARE(out.str(), "PluginManager::Manager::unload(): plugin Dog is currently used and cannot be deleted\n");
         CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
     }
 
@@ -292,7 +322,10 @@ void Test::hierarchy() {
         CORRADE_COMPARE(animal->name(), "Rodriguez");
 
         /* Try to unload plugin when another is depending on it */
+        std::ostringstream out;
+        Error::setOutput(&out);
         CORRADE_COMPARE(manager.unload("Dog"), LoadState::Required);
+        CORRADE_COMPARE(out.str(), "PluginManager::Manager::unload(): plugin Dog is required by other plugins: {Chihuahua}\n");
     }
 
     /* After deleting instance, unload chihuahua plugin, then try again */
@@ -344,7 +377,7 @@ void Test::crossManagerDependencies() {
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::instance(): plugin Canary is not loaded\n");
 }
 
-void Test::usedByZombies() {
+void Test::unresolvedDependencies() {
     #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
     CORRADE_SKIP("UsedBy list is irrelevant for static plugins");
     #else
@@ -355,13 +388,17 @@ void Test::usedByZombies() {
        loading fails too. Dog plugin then shouldn't have HotDogWithSnail in
        usedBy list. */
 
+    std::ostringstream out;
+    Error::setOutput(&out);
     CORRADE_COMPARE(foodManager.load("HotDogWithSnail"), LoadState::UnresolvedDependency);
+    CORRADE_COMPARE(out.str(),
+        "PluginManager::Manager::load(): plugin Snail is not ready to load: PluginManager::LoadState::WrongMetadataFile\n"
+        "PluginManager::Manager::load(): unresolved dependency Snail of plugin HotDogWithSnail\n");
     CORRADE_COMPARE(foodManager.loadState("HotDogWithSnail"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.metadata("Dog")->usedBy(),
         std::vector<std::string>{});
     #endif
 }
-
 
 void Test::reloadPluginDirectory() {
     #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
