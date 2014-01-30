@@ -48,7 +48,7 @@ add_library(CorradePluginManager ${SHARED_OR_STATIC}
     $<TARGET_OBJECTS:CorradePluginManagerObjects>
     ${CorradePluginManager_GracefulAssert_SRCS})
 if(NOT BUILD_STATIC)
-    set_target_properties(CorradePluginManagerObjects PROPERTIES COMPILE_FLAGS "-DPluginManagerObjects_EXPORTS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
+    set_target_properties(CorradePluginManagerObjects PROPERTIES COMPILE_FLAGS "-DCorradePluginManagerObjects_EXPORTS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
     set_target_properties(CorradePluginManager PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
 elseif(BUILD_STATIC_PIC)
     # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
