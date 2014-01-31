@@ -270,16 +270,20 @@ This will compile and generate library and development RPM for %Corrade in
 
 @subsection building-packages-deb DEB packages
 
-There is also `debian/` directory with all files needed for building Debian
-packages. In addition you will need `dpkg-dev` package. Building is easy,
-just change directory to package root, copy `package/debian` directory there
-and run `dpkg-buildpackage`:
+There is also `package/debian/` directory with all files needed for building
+Debian packages. In addition you will need `dpkg-dev` package. Building is
+easy, just change directory to package root, copy `package/debian` directory
+there and run `dpkg-buildpackage`:
 
-    cp package/debian .
+    cp -r package/debian .
     dpkg-buildpackage
 
 This will compile binary and development packages, which will then appear in
-parent directory.
+parent directory. If you need to specify some additional CMake flags (enabling
+GCC 4.7 compatibility, for example), modify the last line in `debian/rules`,
+e.g.:
+
+    dh_auto_configure -- -DGCC47_COMPATIBILITY=ON
 
 @section building-crosscompiling Crosscompiling
 
