@@ -1,8 +1,8 @@
 Source: corrade
 Priority: optional
 Maintainer: Vladimír Vondruš <mosra@centrum.cz>
-Build-Depends: debhelper (>= 7.0.50~), cmake (>= 2.6.0)
-Standards-Version: 3.8.4
+Build-Depends: debhelper (>= 9), cmake (>= 2.8.8)
+Standards-Version: 3.9.2
 Section: libs
 Homepage: http://mosra.cz/blog/corrade.php
 Vcs-Git: git://github.com/mosra/corrade.git
