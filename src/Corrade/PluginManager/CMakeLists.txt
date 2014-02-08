@@ -50,11 +50,9 @@ add_library(CorradePluginManager ${SHARED_OR_STATIC}
 if(NOT BUILD_STATIC)
     set_target_properties(CorradePluginManagerObjects PROPERTIES COMPILE_FLAGS "-DCorradePluginManagerObjects_EXPORTS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
     set_target_properties(CorradePluginManager PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
-else()
-    # We need to have shared library flags even in static library to be able to
-    # use dynamic plugins
+elseif(BUILD_STATIC_PIC)
     # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
-    set_target_properties(CorradePluginManager PROPERTIES COMPILE_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
+    set_target_properties(CorradePluginManagerObjects CorradePluginManager PROPERTIES COMPILE_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
 endif()
 target_link_libraries(CorradePluginManager CorradeUtility)
 if(CORRADE_TARGET_UNIX OR CORRADE_TARGET_NACL_GLIBC)
