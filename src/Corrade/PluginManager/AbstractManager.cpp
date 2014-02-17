@@ -265,7 +265,8 @@ LoadState AbstractManager::load(const std::string& plugin) {
     std::vector<std::pair<std::string, Plugin*>> dependencies;
 
     /* Load dependencies and remember their names for later */
-    for(const std::string& dependency: pluginObject.metadata.depends()) {
+    for(auto it = pluginObject.metadata.depends().begin(); it != pluginObject.metadata.depends().end(); ++it) {
+        const std::string& dependency = *it;
         /* Find manager which is associated to this plugin and load the plugin
            with it */
         auto foundDependency = plugins()->find(dependency);
