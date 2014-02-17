@@ -82,7 +82,6 @@ cmake .. \
     ${static_build_flag} \
     -DBUILD_TESTS=ON \
     -DBUILD_DEPRECATED=${deprecated_build_flag} \
-    -DGCC47_COMPATIBILITY=ON \
     -G Ninja
 
 ninja
