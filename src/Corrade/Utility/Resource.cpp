@@ -117,22 +117,20 @@ std::string Resource::compileFrom(const std::string& name, const std::string& co
     std::vector<std::pair<std::string, std::string>> fileData;
     fileData.reserve(files.size());
     for(const auto file: files) {
-        Debug() << "Reading file" << fileData.size()+1 << "of" << files.size() << "in group" << '\'' + group + '\'';
-
         const std::string filename = file->value("filename");
         const std::string alias = file->hasValue("alias") ? file->value("alias") : filename;
         if(filename.empty() || alias.empty()) {
-            Error() << "    Error: filename or alias is empty";
+            Error() << "    Error: filename or alias of file" << fileData.size()+1 << "in group" << group << "is empty";
             return {};
         }
-
-        Debug() << "   " << filename;
-        if(alias != filename) Debug() << " ->" << alias;
 
         bool success;
         Containers::Array<unsigned char> contents;
         std::tie(success, contents) = fileContents(Directory::join(path, filename));
-        if(!success) return {};
+        if(!success) {
+            Error() << "    Error: cannot open file" << filename << "of file" << fileData.size()+1 << "in group" << group;
+            return {};
+        }
         fileData.emplace_back(std::move(alias), std::string(reinterpret_cast<char*>(contents.begin()), contents.size()));
     }
 
@@ -319,11 +317,7 @@ std::string Resource::get(const std::string& filename) const {
 }
 
 std::pair<bool, Containers::Array<unsigned char>> Resource::fileContents(const std::string& filename) {
-    if(!Directory::fileExists(filename)) {
-        Error() << "    Error: cannot open file" << filename;
-        return {false, nullptr};
-    }
-
+    if(!Directory::fileExists(filename)) return {false, nullptr};
     return {true, Directory::read(filename)};
 }
 

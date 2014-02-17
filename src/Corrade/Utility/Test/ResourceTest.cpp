@@ -113,19 +113,10 @@ void ResourceTest::compileEmptyFile() {
 }
 
 void ResourceTest::compileFrom() {
-    std::ostringstream out;
-    Debug::setOutput(&out);
-
     const std::string compiled = Resource::compileFrom("ResourceTestData",
         Directory::join(RESOURCE_TEST_DIR, "resources.conf"));
     CORRADE_COMPARE_AS(compiled, Directory::join(RESOURCE_TEST_DIR, "compiled.cpp"),
                        TestSuite::Compare::StringToFile);
-    CORRADE_COMPARE(out.str(),
-        "Reading file 1 of 2 in group 'test'\n"
-        "    ../ResourceTestFiles/predisposition.bin\n"
-        " -> predisposition.bin\n"
-        "Reading file 2 of 2 in group 'test'\n"
-        "    consequence.bin\n");
 }
 
 void ResourceTest::compileFromNonexistentResource() {
@@ -142,7 +133,7 @@ void ResourceTest::compileFromNonexistentFile() {
 
     CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
         Directory::join(RESOURCE_TEST_DIR, "resources-nonexistent.conf")).empty());
-    CORRADE_COMPARE(out.str(), "    Error: cannot open file /nonexistent.dat\n");
+    CORRADE_COMPARE(out.str(), "    Error: cannot open file /nonexistent.dat of file 1 in group name\n");
 }
 
 void ResourceTest::compileFromEmptyGroup() {
@@ -166,7 +157,7 @@ void ResourceTest::compileFromEmptyFilename() {
 
     CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
         Directory::join(RESOURCE_TEST_DIR, "resources-empty-filename.conf")).empty());
-    CORRADE_COMPARE(out.str(), "    Error: filename or alias is empty\n");
+    CORRADE_COMPARE(out.str(), "    Error: filename or alias of file 1 in group name is empty\n");
 }
 
 void ResourceTest::compileFromEmptyAlias() {
@@ -175,7 +166,7 @@ void ResourceTest::compileFromEmptyAlias() {
 
     CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
         Directory::join(RESOURCE_TEST_DIR, "resources-empty-alias.conf")).empty());
-    CORRADE_COMPARE(out.str(), "    Error: filename or alias is empty\n");
+    CORRADE_COMPARE(out.str(), "    Error: filename or alias of file 1 in group name is empty\n");
 }
 
 void ResourceTest::list() {
