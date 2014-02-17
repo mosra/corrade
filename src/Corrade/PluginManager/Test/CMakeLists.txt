@@ -35,7 +35,7 @@ if(NOT CORRADE_TARGET_NACL_NEWLIB AND NOT CORRADE_TARGET_EMSCRIPTEN)
 endif()
 corrade_add_static_plugin(Canary ${CMAKE_CURRENT_BINARY_DIR} Canary.conf Canary.cpp)
 
-corrade_add_test(PluginManagerTest Test.cpp LIBRARIES CorradePluginManager Canary)
+corrade_add_test(PluginManagerTest Test.cpp LIBRARIES CorradePluginManagerTestLib Canary)
 
 target_link_libraries(Canary CorradePluginManager)
 if(WIN32)

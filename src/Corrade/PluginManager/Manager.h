@@ -72,8 +72,8 @@ class Manager: public BaseManager {
         /**
          * @brief Plugin instance
          *
-         * Returns new instance of given plugin or `nullptr` on error. The
-         * plugin must be successfully loaded for the operation to succeed.
+         * Returns new instance of given plugin. The plugin must be
+         * already successfully loaded by this manager.
          * @see @ref AbstractManager::loadState() "loadState()",
          *      @ref AbstractManager::load() "load()"
          */

@@ -238,8 +238,15 @@ LoadState AbstractManager::load(const std::string& plugin) {
     auto foundPlugin = plugins()->find(plugin);
 
     /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
-    if(foundPlugin == plugins()->end() || foundPlugin->second->manager != this)
+    if(foundPlugin == plugins()->end() || foundPlugin->second->manager != this) {
+        Error() << "PluginManager::Manager::load(): plugin" << plugin
+            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+            << "is not static and was not found in" << _pluginDirectory;
+            #else
+            << "was not found";
+            #endif
         return LoadState::NotFound;
+    }
 
     Plugin& pluginObject = *foundPlugin->second;
 
@@ -247,21 +254,28 @@ LoadState AbstractManager::load(const std::string& plugin) {
     return pluginObject.loadState;
     #else
     /* Plugin is not ready to load */
-    if(pluginObject.loadState != LoadState::NotLoaded)
+    if(pluginObject.loadState != LoadState::NotLoaded) {
+        if(!(pluginObject.loadState & (LoadState::Static|LoadState::Loaded)))
+            Error() << "PluginManager::Manager::load(): plugin" << plugin << "is not ready to load:" << pluginObject.loadState;
         return pluginObject.loadState;
+    }
 
     /* Vector of found dependencies. If everything goes well, this plugin will
        be added to each dependency usedBy list. */
     std::vector<std::pair<std::string, Plugin*>> dependencies;
 
     /* Load dependencies and remember their names for later */
-    for(auto it = pluginObject.metadata.depends().cbegin(); it != pluginObject.metadata.depends().cend(); ++it) {
+    for(const std::string& dependency: pluginObject.metadata.depends()) {
         /* Find manager which is associated to this plugin and load the plugin
            with it */
-        auto foundDependency = plugins()->find(*it);
+        auto foundDependency = plugins()->find(dependency);
 
-        if(foundDependency == plugins()->end() || !foundDependency->second->manager || !(foundDependency->second->manager->load(*it) & LoadState::Loaded))
+        if(foundDependency == plugins()->end() || !foundDependency->second->manager ||
+           !(foundDependency->second->manager->load(dependency) & LoadState::Loaded))
+        {
+            Error() << "PluginManager::Manager::load(): unresolved dependency" << dependency << "of plugin" << plugin;
             return LoadState::UnresolvedDependency;
+        }
 
         dependencies.push_back(*foundDependency);
     }
@@ -275,8 +289,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
     HMODULE module = LoadLibraryA(filename.data());
     #endif
     if(!module) {
-        Error() << "PluginManager: cannot open plugin file"
-                << '"' + filename + "\":" << dlerror();
+        Error() << "PluginManager::Manager::load(): cannot open plugin file" << '"' + filename + "\":" << dlerror();
         return LoadState::LoadFailed;
     }
 
@@ -286,12 +299,12 @@ LoadState AbstractManager::load(const std::string& plugin) {
     #endif
     int (*_version)(void) = reinterpret_cast<int(*)()>(dlsym(module, "pluginVersion"));
     if(_version == nullptr) {
-        Error() << "PluginManager: cannot get version of plugin" << '\'' + plugin + "':" << dlerror();
+        Error() << "PluginManager::Manager::load(): cannot get version of plugin" << plugin + ":" << dlerror();
         dlclose(module);
         return LoadState::LoadFailed;
     }
     if(_version() != Version) {
-        Error() << "PluginManager: wrong plugin version, expected" << Version << "but got" << _version();
+        Error() << "PluginManager::Manager::load(): wrong version of plugin" << plugin + ", expected" << Version << "but got" << _version();
         dlclose(module);
         return LoadState::WrongPluginVersion;
     }
@@ -302,12 +315,12 @@ LoadState AbstractManager::load(const std::string& plugin) {
     #endif
     const char* (*interface)() = reinterpret_cast<const char* (*)()>(dlsym(module, "pluginInterface"));
     if(interface == nullptr) {
-        Error() << "PluginManager: cannot get interface string of plugin" << '\'' + plugin + "':" << dlerror();
+        Error() << "PluginManager::Manager::load(): cannot get interface string of plugin" << plugin + ":" << dlerror();
         dlclose(module);
         return LoadState::LoadFailed;
     }
     if(interface() != pluginInterface()) {
-        Error() << "PluginManager: wrong interface version, expected" << '\'' + pluginInterface() + '\'' << "but got" << '\'' + std::string(interface()) + '\'';
+        Error() << "PluginManager::Manager::load(): wrong interface string of plugin" << plugin + ", expected" << pluginInterface() << "but got" << interface();
         dlclose(module);
         return LoadState::WrongInterfaceVersion;
     }
@@ -318,7 +331,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
     #endif
     Instancer instancer = reinterpret_cast<Instancer>(dlsym(module, "pluginInstancer"));
     if(instancer == nullptr) {
-        Error() << "PluginManager: cannot get instancer of plugin" << '\'' + plugin + "':" << dlerror();
+        Error() << "PluginManager::Manager::load(): cannot get instancer of plugin" << plugin + ":" << dlerror();
         dlclose(module);
         return LoadState::LoadFailed;
     }
@@ -329,7 +342,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
     #endif
     void(*initializer)() = reinterpret_cast<void(*)()>(dlsym(module, "pluginInitializer"));
     if(initializer == nullptr) {
-        Error() << "PluginManager: cannot get initializer of plugin" << '\'' + plugin + "':" << dlerror();
+        Error() << "PluginManager::Manager::load(): cannot get initializer of plugin" << plugin + ":" << dlerror();
         dlclose(module);
         return LoadState::LoadFailed;
     }
@@ -358,8 +371,10 @@ LoadState AbstractManager::unload(const std::string& plugin) {
     auto foundPlugin = plugins()->find(plugin);
 
     /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
-    if(foundPlugin == plugins()->end() || foundPlugin->second->manager != this)
+    if(foundPlugin == plugins()->end() || foundPlugin->second->manager != this) {
+        Error() << "PluginManager::Manager::unload(): plugin" << plugin << "was not found";
         return LoadState::NotFound;
+    }
 
     Plugin& pluginObject = *foundPlugin->second;
 
@@ -367,20 +382,27 @@ LoadState AbstractManager::unload(const std::string& plugin) {
     return pluginObject.loadState;
     #else
     /* Plugin is not ready to unload, nothing to do */
-    if(pluginObject.loadState != LoadState::Loaded)
+    if(pluginObject.loadState != LoadState::Loaded) {
+        if(!(pluginObject.loadState & (LoadState::Static|LoadState::NotLoaded|LoadState::WrongMetadataFile)))
+            Error() << "PluginManager::Manager::unload(): plugin" << plugin << "is not ready to unload:" << pluginObject.loadState;
         return pluginObject.loadState;
+    }
 
     /* Plugin is used by another plugin, don't unload */
-    if(!pluginObject.metadata.usedBy().empty())
+    if(!pluginObject.metadata.usedBy().empty()) {
+        Error() << "PluginManager::Manager::unload(): plugin" << plugin << "is required by other plugins:" << pluginObject.metadata.usedBy();
         return LoadState::Required;
+    }
 
     /* Plugin has active instances */
     auto foundInstance = instances.find(plugin);
     if(foundInstance != instances.end()) {
         /* Check if all instances can be safely deleted */
         for(auto it = foundInstance->second.cbegin(); it != foundInstance->second.cend(); ++it)
-            if(!(*it)->canBeDeleted())
+            if(!(*it)->canBeDeleted()) {
+                Error() << "PluginManager::Manager::unload(): plugin" << plugin << "is currently used and cannot be deleted";
                 return LoadState::Used;
+            }
 
         /* If they can be, delete them. They remove itself from instances
            list on destruction, thus going backwards */
@@ -414,7 +436,7 @@ LoadState AbstractManager::unload(const std::string& plugin) {
     #endif
     void(*finalizer)() = reinterpret_cast<void(*)()>(dlsym(pluginObject.module, "pluginFinalizer"));
     if(finalizer == nullptr) {
-        Error() << "PluginManager: cannot get finalizer of plugin" << '\'' + plugin + "':" << dlerror();
+        Error() << "PluginManager::Manager::unload(): cannot get finalizer of plugin" << plugin + ":" << dlerror();
         /* Not fatal, continue with unloading */
     }
     finalizer();
@@ -425,7 +447,7 @@ LoadState AbstractManager::unload(const std::string& plugin) {
     #else
     if(!FreeLibrary(pluginObject.module)) {
     #endif
-        Error() << "PluginManager: cannot unload plugin" << '\'' + plugin + "':" << dlerror();
+        Error() << "PluginManager::Manager::unload(): cannot unload plugin" << plugin + ":" << dlerror();
         pluginObject.loadState = LoadState::NotLoaded;
         return LoadState::UnloadFailed;
     }
@@ -501,9 +523,8 @@ void AbstractManager::removeUsedBy(const std::string& plugin, const std::string&
 void* AbstractManager::instanceInternal(const std::string& plugin) {
     auto foundPlugin = plugins()->find(plugin);
 
-    /* Plugin with given name doesn't exist, isn't successfully loaded or belongs to different manager */
-    if(foundPlugin == plugins()->end() || !(foundPlugin->second->loadState & LoadState::Loaded) || foundPlugin->second->manager != this)
-        return nullptr;
+    CORRADE_ASSERT(foundPlugin != plugins()->end() && (foundPlugin->second->loadState & LoadState::Loaded) && foundPlugin->second->manager == this,
+        "PluginManager::Manager::instance(): plugin" << plugin << "is not loaded", nullptr);
 
     return foundPlugin->second->instancer(*this, plugin);
 }

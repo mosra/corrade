@@ -1,9 +1,10 @@
-Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=135
-Upstream-Name: corrade
-Upstream-Maintainer: Vladimír Vondruš <mosra@centrum.cz>
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Corrade
+Upstream-Contact: Vladimír Vondruš <mosra@centrum.cz>
 Source: https://github.com/mosra/corrade
 
-Copyright: 2007-2013 Vladimír Vondruš <mosra@centrum.cz>
+Files: *
+Copyright: 2007-2014 Vladimír Vondruš <mosra@centrum.cz>
 License: Expat
  Permission is hereby granted, free of charge, to any person obtaining a
  copy of this software and associated documentation files (the "Software"),

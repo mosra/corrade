@@ -30,9 +30,12 @@ namespace Corrade {
 %Corrade uses CMake build system for both building and integration into your
 projects. The logic is in module `FindCorrade.cmake` distributed with the
 library in `modules/` directory, you are encouraged to copy it into your
-project and add path to the files to `CMAKE_MODULE_PATH`. Otherwise, if
-CMake won't be able to find this file in predefined locations, it will error
-out even if %Corrade might be installed on the system.
+project and add path to the file to `CMAKE_MODULE_PATH`. Otherwise, if CMake
+won't be able to find this file in predefined locations, it will error out even
+if %Corrade might be installed on the system.
+
+Note that the module file is updated as the library evolves, you are encouraged
+to update your copy from time to time to avoid strange building issues.
 
 Basic usage is:
 

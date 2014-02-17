@@ -29,7 +29,7 @@
 #include "Corrade/Utility/VisibilityMacros.h"
 
 #ifndef CORRADE_BUILD_STATIC
-    #ifdef CorradePluginManager_EXPORTS
+    #if defined(CorradePluginManager_EXPORTS) || defined(CorradePluginManagerObjects_EXPORTS) || defined(CorradePluginManagerTestLib_EXPORTS)
         #define CORRADE_PLUGINMANAGER_EXPORT CORRADE_VISIBILITY_EXPORT
     #else
         #define CORRADE_PLUGINMANAGER_EXPORT CORRADE_VISIBILITY_IMPORT
