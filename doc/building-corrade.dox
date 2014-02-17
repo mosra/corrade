@@ -40,8 +40,7 @@ Minimal set of tools required for building is:
 -   **CMake** >= 2.8.8
 
 Note that full feature set is available only on GCC 4.8.1 and Clang 3.1 and
-compatibility mode with reduced feature set must be enabled for other
-compilers.
+compatibility mode with reduced feature set is used on other compilers.
 
 @section building-download Downloading the sources
 
@@ -149,7 +148,7 @@ Studio to load:
 
     mkdir build
     cd build
-    cmake -DCMAKE_INSTALL_PREFIX="C:/Sys" -DMSVC2013_COMPATIBILITY=ON ..
+    cmake -DCMAKE_INSTALL_PREFIX="C:/Sys" ..
     cmake --build .
     cmake --build --target install .
 
@@ -189,14 +188,16 @@ included modules easier and provide better CMake support, e.g. parsing targets
 from `corrade_add_test()` calls.
 
 By default the library expects standards conforming compiler. However, for
-portability, compatibility mode for older compilers is provided:
+portability, compatibility mode for older compilers is provided. The build
+system tries to autodect them, but in some rare cases you may need to enable
+them explicitly:
 
 - `GCC47_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
-  4.7. You need to enable this also if you are building with Clang and don't
-  have GCC 4.8 libs.
+  4.7. Note that ou need to enable this explicitly also if you are building
+  with Clang and use libstdc++ from GCC 4.7.
 - `GCC46_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
-  4.6. You need to enable this also if you are building with Clang and don't
-  have GCC 4.7 libs.
+  4.6. Note that ou need to enable this explicitly also if you are building
+  with Clang and use libstdc++ from GCC 4.6.
 - `GCC45_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
   4.5. Note that GCC 4.5 support is maintained only in `compatibility` branch.
 - `GCC44_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
