@@ -288,7 +288,10 @@ Containers::ArrayReference<const unsigned char> Resource::getRaw(const std::stri
             bool success;
             Containers::Array<unsigned char> data;
             std::tie(success, data) = fileContents(Directory::join(Directory::path(_group->second.overrideGroup), file->value("filename")));
-            if(!success) return nullptr;
+            if(!success) {
+                Error() << "Utility::Resource::get(): cannot open file" << file->value("filename") << "from overriden group";
+                break;
+            }
 
             /* Save the file for later use and return */
             #ifndef CORRADE_GCC47_COMPATIBILITY

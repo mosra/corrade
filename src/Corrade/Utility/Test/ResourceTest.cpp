@@ -60,6 +60,7 @@ class ResourceTest: public TestSuite::Tester {
 
         void overrideGroup();
         void overrideGroupFallback();
+        void overrideNonexistentFile();
         void overrideNonexistentGroup();
         void overrideDifferentGroup();
 };
@@ -84,6 +85,7 @@ ResourceTest::ResourceTest() {
 
               &ResourceTest::overrideGroup,
               &ResourceTest::overrideGroupFallback,
+              &ResourceTest::overrideNonexistentFile,
               &ResourceTest::overrideNonexistentGroup,
               &ResourceTest::overrideDifferentGroup});
 }
@@ -251,6 +253,22 @@ void ResourceTest::overrideGroupFallback() {
                        Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
                        TestSuite::Compare::StringToFile);
     CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'consequence.bin' was not found in overriden group, fallback to compiled-in resources\n");
+}
+
+void ResourceTest::overrideNonexistentFile() {
+    std::ostringstream out;
+    Error::setOutput(&out);
+    Warning::setOutput(&out);
+
+    Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overriden-nonexistent-file.conf"));
+    Resource r("test");
+
+    CORRADE_COMPARE_AS(r.get("consequence.bin"),
+                       Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
+                       TestSuite::Compare::StringToFile);
+    CORRADE_COMPARE(out.str(),
+        "Utility::Resource::get(): cannot open file path/to/nonexistent.bin from overriden group\n"
+        "Utility::Resource::get(): file 'consequence.bin' was not found in overriden group, fallback to compiled-in resources\n");
 }
 
 void ResourceTest::overrideNonexistentGroup() {
