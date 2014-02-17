@@ -76,7 +76,6 @@ cmake .. \
     -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/NaCl-${toolchain}.cmake" \
     -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/nacl-${toolchain}-${compatibility} \
     -DBUILD_DEPRECATED=${deprecated_build_flag} \
-    -DGCC44_COMPATIBILITY=ON \
     -G Ninja
 
 ninja
