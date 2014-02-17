@@ -17,7 +17,6 @@ build() {
 
         cmake .. \
             -DCMAKE_CXX_COMPILER=g++-4.4 \
-            -DGCC44_COMPATIBILITY=ON \
             -G Ninja
     fi
 
