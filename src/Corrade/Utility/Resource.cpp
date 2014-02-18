@@ -120,22 +120,20 @@ std::string Resource::compileFrom(const std::string& name, const std::string& co
     for(auto it = files.begin(); it != files.end(); ++it) {
         const ConfigurationGroup* const file = *it;
 
-        Debug() << "Reading file" << fileData.size()+1 << "of" << files.size() << "in group" << '\'' + group + '\'';
-
         const std::string filename = file->value("filename");
         const std::string alias = file->hasValue("alias") ? file->value("alias") : filename;
         if(filename.empty() || alias.empty()) {
-            Error() << "    Error: filename or alias is empty";
+            Error() << "    Error: filename or alias of file" << fileData.size()+1 << "in group" << group << "is empty";
             return {};
         }
-
-        Debug() << "   " << filename;
-        if(alias != filename) Debug() << " ->" << alias;
 
         bool success;
         Containers::Array<unsigned char> contents;
         std::tie(success, contents) = fileContents(Directory::join(path, filename));
-        if(!success) return {};
+        if(!success) {
+            Error() << "    Error: cannot open file" << filename << "of file" << fileData.size()+1 << "in group" << group;
+            return {};
+        }
         fileData.emplace_back(std::move(alias), std::string(reinterpret_cast<char*>(contents.begin()), contents.size()));
     }
 
@@ -300,13 +298,10 @@ Containers::ArrayReference<const unsigned char> Resource::getRaw(const std::stri
             bool success;
             Containers::Array<unsigned char> data;
             std::tie(success, data) = fileContents(Directory::join(Directory::path(_group->second.overrideGroup), file->value("filename")));
-            /* No nullptr here -> issue */
-            if(!success)
-                #ifndef CORRADE_GCC45_COMPATIBILITY
-                return nullptr;
-                #else
-                return {};
-                #endif
+            if(!success) {
+                Error() << "Utility::Resource::get(): cannot open file" << file->value("filename") << "from overriden group";
+                break;
+            }
 
             /* Save the file for later use and return */
             #ifndef CORRADE_GCC47_COMPATIBILITY
@@ -341,7 +336,6 @@ std::string Resource::get(const std::string& filename) const {
 
 std::pair<bool, Containers::Array<unsigned char>> Resource::fileContents(const std::string& filename) {
     if(!Directory::fileExists(filename)) {
-        Error() << "    Error: cannot open file" << filename;
         #if !defined(CORRADE_GCC45_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
         return {false, nullptr};
         #elif !defined(CORRADE_MSVC2013_COMPATIBILITY)

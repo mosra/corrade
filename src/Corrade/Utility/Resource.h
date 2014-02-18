@@ -141,8 +141,7 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @brief Get data resource
          * @param filename      Filename
          *
-         * Returns data of given file in the group. The file must exist. If the
-         * file is empty, returns `nullptr`.
+         * Returns data of given file in the group. The file must exist.
          */
         std::string get(const std::string& filename) const;
 

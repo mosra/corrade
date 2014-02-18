@@ -60,6 +60,7 @@ class ResourceTest: public TestSuite::Tester {
 
         void overrideGroup();
         void overrideGroupFallback();
+        void overrideNonexistentFile();
         void overrideNonexistentGroup();
         void overrideDifferentGroup();
 };
@@ -84,6 +85,7 @@ ResourceTest::ResourceTest() {
 
               &ResourceTest::overrideGroup,
               &ResourceTest::overrideGroupFallback,
+              &ResourceTest::overrideNonexistentFile,
               &ResourceTest::overrideNonexistentGroup,
               &ResourceTest::overrideDifferentGroup});
 }
@@ -113,19 +115,10 @@ void ResourceTest::compileEmptyFile() {
 }
 
 void ResourceTest::compileFrom() {
-    std::ostringstream out;
-    Debug::setOutput(&out);
-
     const std::string compiled = Resource::compileFrom("ResourceTestData",
         Directory::join(RESOURCE_TEST_DIR, "resources.conf"));
     CORRADE_COMPARE_AS(compiled, Directory::join(RESOURCE_TEST_DIR, "compiled.cpp"),
                        TestSuite::Compare::StringToFile);
-    CORRADE_COMPARE(out.str(),
-        "Reading file 1 of 2 in group 'test'\n"
-        "    ../ResourceTestFiles/predisposition.bin\n"
-        " -> predisposition.bin\n"
-        "Reading file 2 of 2 in group 'test'\n"
-        "    consequence.bin\n");
 }
 
 void ResourceTest::compileFromNonexistentResource() {
@@ -142,7 +135,7 @@ void ResourceTest::compileFromNonexistentFile() {
 
     CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
         Directory::join(RESOURCE_TEST_DIR, "resources-nonexistent.conf")).empty());
-    CORRADE_COMPARE(out.str(), "    Error: cannot open file /nonexistent.dat\n");
+    CORRADE_COMPARE(out.str(), "    Error: cannot open file /nonexistent.dat of file 1 in group name\n");
 }
 
 void ResourceTest::compileFromEmptyGroup() {
@@ -166,7 +159,7 @@ void ResourceTest::compileFromEmptyFilename() {
 
     CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
         Directory::join(RESOURCE_TEST_DIR, "resources-empty-filename.conf")).empty());
-    CORRADE_COMPARE(out.str(), "    Error: filename or alias is empty\n");
+    CORRADE_COMPARE(out.str(), "    Error: filename or alias of file 1 in group name is empty\n");
 }
 
 void ResourceTest::compileFromEmptyAlias() {
@@ -175,7 +168,7 @@ void ResourceTest::compileFromEmptyAlias() {
 
     CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
         Directory::join(RESOURCE_TEST_DIR, "resources-empty-alias.conf")).empty());
-    CORRADE_COMPARE(out.str(), "    Error: filename or alias is empty\n");
+    CORRADE_COMPARE(out.str(), "    Error: filename or alias of file 1 in group name is empty\n");
 }
 
 void ResourceTest::list() {
@@ -260,6 +253,22 @@ void ResourceTest::overrideGroupFallback() {
                        Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
                        TestSuite::Compare::StringToFile);
     CORRADE_COMPARE(out.str(), "Utility::Resource::get(): file 'consequence.bin' was not found in overriden group, fallback to compiled-in resources\n");
+}
+
+void ResourceTest::overrideNonexistentFile() {
+    std::ostringstream out;
+    Error::setOutput(&out);
+    Warning::setOutput(&out);
+
+    Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overriden-nonexistent-file.conf"));
+    Resource r("test");
+
+    CORRADE_COMPARE_AS(r.get("consequence.bin"),
+                       Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
+                       TestSuite::Compare::StringToFile);
+    CORRADE_COMPARE(out.str(),
+        "Utility::Resource::get(): cannot open file path/to/nonexistent.bin from overriden group\n"
+        "Utility::Resource::get(): file 'consequence.bin' was not found in overriden group, fallback to compiled-in resources\n");
 }
 
 void ResourceTest::overrideNonexistentGroup() {
