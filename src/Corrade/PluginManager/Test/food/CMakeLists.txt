@@ -29,8 +29,8 @@ corrade_add_plugin(OldBread ${CMAKE_CURRENT_BINARY_DIR} OldBread.conf OldBread.c
 corrade_add_plugin(RottenTomato ${CMAKE_CURRENT_BINARY_DIR} RottenTomato.conf RottenTomato.cpp)
 
 if(WIN32)
-    target_link_libraries(HotDog CorradePluginManager Dog)
-    target_link_libraries(HotDogWithSnail CorradePluginManager HotDog)
-    target_link_libraries(OldBread CorradePluginManager)
-    target_link_libraries(RottenTomato CorradePluginManager)
+    target_link_libraries(HotDog CorradePluginManagerTestLib Dog)
+    target_link_libraries(HotDogWithSnail CorradePluginManagerTestLib HotDog)
+    target_link_libraries(OldBread CorradePluginManagerTestLib)
+    target_link_libraries(RottenTomato CorradePluginManagerTestLib)
 endif()
