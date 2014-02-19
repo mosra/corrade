@@ -189,14 +189,14 @@ from `corrade_add_test()` calls.
 
 By default the library expects standards conforming compiler. However, for
 portability, compatibility mode for older compilers is provided. The build
-system tries to autodect them, but in some rare cases you may need to enable
-them explicitly:
+system tries to autodect it, but in some rare cases you may need to enable
+the compatibility mode explicitly:
 
 - `GCC47_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
-  4.7. Note that ou need to enable this explicitly also if you are building
+  4.7. Note that you need to enable this explicitly also if you are building
   with Clang and use libstdc++ from GCC 4.7.
 - `GCC46_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
-  4.6. Note that ou need to enable this explicitly also if you are building
+  4.6. Note that you need to enable this explicitly also if you are building
   with Clang and use libstdc++ from GCC 4.6.
 - `GCC45_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
   4.5. Note that GCC 4.5 support is maintained only in `compatibility` branch.
