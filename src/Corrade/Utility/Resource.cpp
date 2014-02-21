@@ -187,7 +187,7 @@ std::string Resource::compile(const std::string& name, const std::string& group,
     if(!files.back().second.empty())
         data.resize(data.size()-1);
 
-    #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(__MINGW32__)
+    #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_ANDROID) || defined(__MINGW32__)
     std::ostringstream converter;
     converter << files.size();
     #endif
@@ -213,7 +213,7 @@ std::string Resource::compile(const std::string& name, const std::string& group,
         "int resourceInitializer_" + name + "();\n"
         "int resourceInitializer_" + name + "() {\n"
         "    Corrade::Utility::Resource::registerData(\"" + group + "\", " +
-            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(__MINGW32__)
+            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_ANDROID) && !defined(__MINGW32__)
             std::to_string(files.size()) +
             #else
             converter.str() +
