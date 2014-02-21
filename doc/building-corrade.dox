@@ -432,7 +432,7 @@ depending projects.
 If you have Node.js installed, you can also build and run unit tests using
 `ctest`. See `BUILD_TESTS` above.
 
-@subsection building-cross-emscripten Crosscompiling for Android ARM and x86
+@subsection building-cross-android Crosscompiling for Android ARM and x86
 
 You will need [Android NDK](https://developer.android.com/tools/sdk/ndk/index.html)
 installed and configured.
