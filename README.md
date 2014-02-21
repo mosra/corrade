@@ -8,6 +8,7 @@ SUPPORTED PLATFORMS
 *   **Linux** and embedded Linux
 *   **Windows**
 *   **OS X** (ported by [David Lin](https://github.com/davll))
+*   **Android**
 *   **Google Chrome** (through [Native Client](https://developers.google.com/native-client/),
     both `newlib` and `glibc` toolchains are supported)
 *   **HTML5/JavaScript** (through [Emscripten](https://github.com/kripken/emscripten/wiki))
