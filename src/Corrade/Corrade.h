@@ -128,7 +128,6 @@ Defined if the library is built for [Emscripten](https://github.com/kripken/emsc
 */
 #define CORRADE_TARGET_EMSCRIPTEN
 #undef CORRADE_TARGET_EMSCRIPTEN
-#endif
 
 /**
 @brief Android target
