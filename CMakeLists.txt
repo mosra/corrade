@@ -59,6 +59,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     set(BUILD_STATIC ON)
 elseif(CMAKE_SYSTEM_NAME STREQUAL Android)
     set(CORRADE_TARGET_ANDROID 1)
+    # It's too inconvenient to manually load all shared libs using JNI
+    set(BUILD_STATIC ON)
 elseif(UNIX)
     # NaCl and Emscripten are Unix too, this selects only the other ones
     set(CORRADE_TARGET_UNIX 1)
