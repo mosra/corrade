@@ -79,6 +79,8 @@ also available as preprocessor variables if you include Corrade.h:
     Chrome Native Client with `glibc` toolchain
 -   `CORRADE_TARGET_EMSCRIPTEN` -- Defined if the library is built for
     Emscripten
+-   `CORRADE_TARGET_ANDROID` -- Defined if the library is built for
+    Android
 
 If `CORRADE_BUILD_DEPRECATED` is defined, the `CORRADE_INCLUDE_DIR` variable
 also contains path directly to Corrade directory (i.e. for includes without
