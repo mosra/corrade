@@ -69,6 +69,13 @@ if(CORRADE_TARGET_NACL)
         NaClStreamBuffer.cpp)
     set(CorradeUtility_HEADERS ${CorradeUtility_HEADERS}
         NaClStreamBuffer.h)
+
+# Android-specific functionality
+elseif(CORRADE_TARGET_ANDROID)
+    set(CorradeUtility_SRCS ${CorradeUtility_SRCS}
+        AndroidStreamBuffer.cpp)
+    set(CorradeUtility_HEADERS ${CorradeUtility_HEADERS}
+        AndroidStreamBuffer.h)
 endif()
 
 add_library(CorradeUtilityObjects OBJECT ${CorradeUtility_SRCS})

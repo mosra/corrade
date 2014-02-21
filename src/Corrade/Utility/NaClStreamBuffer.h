@@ -61,7 +61,9 @@ out << "Hello World!" << std::endl;
 @endcode
 The output stream can be also used with @ref Debug classes.
 @see @ref NaClMessageStreamBuffer
-@partialsupport Available only in @ref CORRADE_TARGET_NACL "NaCl".
+@partialsupport Available only in @ref CORRADE_TARGET_NACL "NaCl", see
+    @ref AndroidConsoleStreamBuffer for similar functionality in
+    @ref CORRADE_TARGET_ANDROID "Android".
 @todo Remove line-by-line when Chrome/NaCl SDK has this fixed
 */
 class CORRADE_UTILITY_EXPORT NaClConsoleStreamBuffer: public std::stringbuf {
