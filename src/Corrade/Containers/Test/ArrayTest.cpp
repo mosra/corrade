@@ -37,6 +37,7 @@ class ArrayTest: public TestSuite::Tester {
         void construct();
         void constructMove();
         void constructFrom();
+        void constructFromChar();
         void constructZeroInitialized();
 
         void boolConversion();
@@ -57,6 +58,7 @@ ArrayTest::ArrayTest() {
               &ArrayTest::construct,
               &ArrayTest::constructMove,
               &ArrayTest::constructFrom,
+              &ArrayTest::constructFromChar,
               &ArrayTest::constructZeroInitialized,
 
               &ArrayTest::boolConversion,
@@ -129,6 +131,13 @@ void ArrayTest::constructFrom() {
 
     Array b = Array::from();
     CORRADE_VERIFY(!b);
+}
+
+void ArrayTest::constructFromChar() {
+    /* Verify that this compiles without "narrowing from int to char" errors */
+    const auto a = Containers::Array<char>::from(0x11, 0x22, 0x33);
+    CORRADE_VERIFY(a);
+    CORRADE_COMPARE(a[1], 0x22);
 }
 
 void ArrayTest::constructZeroInitialized() {
