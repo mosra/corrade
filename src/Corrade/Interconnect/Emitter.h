@@ -36,10 +36,6 @@
 #include "Corrade/Interconnect/Connection.h"
 #include "Corrade/Utility/Assert.h"
 
-#ifdef CORRADE_BUILD_DEPRECATED
-#include "Corrade/Utility/Macros.h"
-#endif
-
 namespace Corrade { namespace Interconnect {
 
 namespace Implementation {
@@ -229,15 +225,6 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
             private:
                 constexpr explicit Signal() = default;
         };
-
-        #ifdef CORRADE_BUILD_DEPRECATED
-        /**
-         * @copybrief Interconnect::connect()
-         * @deprecated Use @ref Corrade::Interconnect::connect() "Interconnect::connect()"
-         *      instead.
-         */
-        template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> static CORRADE_DEPRECATED("use Interconnect::connect() instead") Connection connect(EmitterObject* emitter, Signal(Emitter::*signal)(Args...), ReceiverObject* receiver, void(Receiver::*slot)(Args...));
-        #endif
 
         explicit Emitter();
 
@@ -473,12 +460,6 @@ template<class EmitterObject, class Emitter, class Receiver, class ReceiverObjec
     Interconnect::Emitter::connectInternal(signalData, data);
     return Connection(signalData, data);
 }
-
-#if defined(CORRADE_BUILD_DEPRECATED) && !defined(DOXYGEN_GENERATING_OUTPUT)
-template<class EmitterObject, class _Emitter, class Receiver, class ReceiverObject, class ...Args> inline Connection Emitter::connect(EmitterObject* emitter, Signal(_Emitter::*signal)(Args...), ReceiverObject* receiver, void(Receiver::*slot)(Args...)) {
-    return Interconnect::connect(*emitter, signal, *receiver, slot);
-}
-#endif
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emitter_::*signal)(Args...), typename std::common_type<Args>::type... args) {
