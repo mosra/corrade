@@ -155,6 +155,15 @@ Defined if the library is built for [Emscripten](https://github.com/kripken/emsc
 */
 #define CORRADE_TARGET_EMSCRIPTEN
 #undef CORRADE_TARGET_EMSCRIPTEN
+
+/**
+@brief Android target
+
+Defined if the library is built for Android.
+@see @ref building-corrade, @ref corrade-cmake
+*/
+#define CORRADE_TARGET_ANDROID
+#undef CORRADE_TARGET_ANDROID
 #endif
 
 }

@@ -1,0 +1,34 @@
+# Author: mosra <mosra@centrum.cz>
+pkgname=android-arm-corrade
+pkgver=dev
+pkgrel=1
+pkgdesc="Multiplatform plugin management and utility library (Android ARM)"
+arch=('any')
+url="http://mosra.cz/blog/corrade.php"
+license=('MIT')
+makedepends=('cmake' 'ninja' 'android-ndk')
+options=(!strip !buildflags staticlibs)
+
+build() {
+    if [ ! -d "$startdir/build-android-arm" ] ; then
+        mkdir "$startdir/build-android-arm"
+        cd "$startdir/build-android-arm"
+
+        cmake .. \
+            -DCMAKE_MODULE_PATH="$startdir/toolchains/modules" \
+            -DCMAKE_TOOLCHAIN_FILE="$startdir/toolchains/generic/Android-ARM.cmake" \
+            -G Ninja
+    fi
+
+    cd "$startdir/build-android-arm"
+
+    cmake .. \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/opt/android-ndk/platforms/android-19/arch-arm/usr
+    ninja
+}
+
+package() {
+    cd "$startdir/build-android-arm"
+    DESTDIR="$pkgdir/" ninja install
+}

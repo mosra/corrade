@@ -201,7 +201,7 @@ template<class T> class Array {
         template<class ...U> static Array<T> fromInternal(U&&... values) {
             Array<T> array;
             array._size = sizeof...(values);
-            array._data = new T[sizeof...(values)] { std::forward<U>(values)... };
+            array._data = new T[sizeof...(values)] { T(std::forward<U>(values))... };
             return array;
         }
         /* Specialization for zero argument count */

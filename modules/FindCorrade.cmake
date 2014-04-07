@@ -42,6 +42,7 @@
 #  CORRADE_TARGET_NACL_GLIBC    - Defined if compiled for Google Chrome
 #   Native Client with `glibc` toolchain
 #  CORRADE_TARGET_EMSCRIPTEN    - Defined if compiled for Emscripten
+#  CORRADE_TARGET_ANDROID       - Defined if compiled for Android
 #
 # If CORRADE_BUILD_DEPRECATED is defined, the CORRADE_INCLUDE_DIR variable also
 # contains path directly to Corrade directory (i.e. for includes without
@@ -219,6 +220,10 @@ string(FIND "${_corradeConfigure}" "#define CORRADE_TARGET_EMSCRIPTEN" _TARGET_E
 if(NOT _TARGET_EMSCRIPTEN EQUAL -1)
     set(CORRADE_TARGET_EMSCRIPTEN 1)
 endif()
+string(FIND "${_corradeConfigure}" "#define CORRADE_TARGET_ANDROID" _TARGET_ANDROID)
+if(NOT _TARGET_ANDROID EQUAL -1)
+    set(CORRADE_TARGET_ANDROID 1)
+endif()
 
 set(CORRADE_UTILITY_LIBRARIES ${CORRADE_UTILITY_LIBRARY})
 set(CORRADE_INTERCONNECT_LIBRARIES ${CORRADE_INTERCONNECT_LIBRARY} ${CORRADE_UTILITY_LIBRARIES})
@@ -228,6 +233,11 @@ set(CORRADE_TESTSUITE_LIBRARIES ${CORRADE_TESTSUITE_LIBRARY} ${CORRADE_UTILITY_L
 # At least static build needs this
 if(CORRADE_TARGET_UNIX OR CORRADE_TARGET_NACL_GLIBC)
     set(CORRADE_PLUGINMANAGER_LIBRARIES ${CORRADE_PLUGINMANAGER_LIBRARIES} ${CMAKE_DL_LIBS})
+endif()
+
+# AndroidLogStreamBuffer class needs to be linked to log library
+if(CORRADE_TARGET_ANDROID)
+    set(CORRADE_UTILITY_LIBRARIES ${CORRADE_UTILITY_LIBRARIES} log)
 endif()
 
 mark_as_advanced(CORRADE_UTILITY_LIBRARY

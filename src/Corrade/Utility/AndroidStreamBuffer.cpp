@@ -23,20 +23,22 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#cmakedefine CORRADE_BIG_ENDIAN
-#cmakedefine CORRADE_GCC44_COMPATIBILITY
-#cmakedefine CORRADE_GCC45_COMPATIBILITY
-#cmakedefine CORRADE_GCC46_COMPATIBILITY
-#cmakedefine CORRADE_GCC47_COMPATIBILITY
-#cmakedefine CORRADE_MSVC2013_COMPATIBILITY
+#include "AndroidStreamBuffer.h"
 
-#cmakedefine CORRADE_BUILD_DEPRECATED
-#cmakedefine CORRADE_BUILD_STATIC
+namespace Corrade { namespace Utility {
 
-#cmakedefine CORRADE_TARGET_UNIX
-#cmakedefine CORRADE_TARGET_WINDOWS
-#cmakedefine CORRADE_TARGET_NACL
-#cmakedefine CORRADE_TARGET_NACL_NEWLIB
-#cmakedefine CORRADE_TARGET_NACL_GLIBC
-#cmakedefine CORRADE_TARGET_EMSCRIPTEN
-#cmakedefine CORRADE_TARGET_ANDROID
+AndroidLogStreamBuffer::AndroidLogStreamBuffer(const LogPriority priority, std::string tag): std::stringbuf(std::ios_base::out), _priority(priority), _tag(std::move(tag)) {}
+
+AndroidLogStreamBuffer::~AndroidLogStreamBuffer() = default;
+
+int AndroidLogStreamBuffer::sync() {
+    /* Write the data */
+    __android_log_write(std::int32_t(_priority), _tag.data(), str().data());
+
+    /* Reset internal buffer so the message doesn't get sent more than once */
+    str({});
+
+    return 0;
+}
+
+}}

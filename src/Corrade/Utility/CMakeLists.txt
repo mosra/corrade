@@ -69,6 +69,13 @@ if(CORRADE_TARGET_NACL)
         NaClStreamBuffer.cpp)
     set(CorradeUtility_HEADERS ${CorradeUtility_HEADERS}
         NaClStreamBuffer.h)
+
+# Android-specific functionality
+elseif(CORRADE_TARGET_ANDROID)
+    set(CorradeUtility_SRCS ${CorradeUtility_SRCS}
+        AndroidStreamBuffer.cpp)
+    set(CorradeUtility_HEADERS ${CorradeUtility_HEADERS}
+        AndroidStreamBuffer.h)
 endif()
 
 add_library(CorradeUtilityObjects OBJECT ${CorradeUtility_SRCS})
@@ -81,6 +88,12 @@ elseif(BUILD_STATIC_PIC)
     # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
     set_target_properties(CorradeUtility CorradeUtilityObjects PROPERTIES COMPILE_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
 endif()
+
+# AndroidLogStreamBuffer class needs to be linked to log library
+if(CORRADE_TARGET_ANDROID)
+    target_link_libraries(CorradeUtility log)
+endif()
+
 install(TARGETS CorradeUtility
         RUNTIME DESTINATION ${CORRADE_BINARY_INSTALL_DIR}
         LIBRARY DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR}
