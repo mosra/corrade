@@ -33,11 +33,11 @@ const std::string String::Whitespace(" \t\f\v\r\n");
 const std::string String::Bom("\xEF\xBB\xBF");
 
 std::string String::ltrim(std::string string, const std::string& characters) {
-    return string.erase(0, string.find_first_not_of(characters));
+    return std::move(string.erase(0, string.find_first_not_of(characters)));
 }
 
 std::string String::rtrim(std::string string, const std::string& characters) {
-    return string.erase(string.find_last_not_of(characters)+1);
+    return std::move(string.erase(string.find_last_not_of(characters)+1));
 }
 
 std::string String::trim(std::string string, const std::string& characters) {
