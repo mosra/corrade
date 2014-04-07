@@ -19,7 +19,6 @@ build() {
         -DCMAKE_TOOLCHAIN_FILE="$startdir/toolchains/generic/NaCl-glibc-x86-32.cmake" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr/nacl \
-        -DGCC44_COMPATIBILITY=ON \
         -DLIB_SUFFIX=/32 \
         -G Ninja
     ninja
@@ -33,7 +32,6 @@ build() {
         -DCMAKE_TOOLCHAIN_FILE="$startdir/toolchains/generic/NaCl-glibc-x86-64.cmake" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr/nacl \
-        -DGCC44_COMPATIBILITY=ON \
         -G Ninja
     ninja
 }
