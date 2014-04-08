@@ -80,7 +80,7 @@ endif()
 
 add_library(CorradeUtilityObjects OBJECT ${CorradeUtility_SRCS})
 add_library(CorradeUtility ${SHARED_OR_STATIC} $<TARGET_OBJECTS:CorradeUtilityObjects> ${CorradeUtility_GracefulAssert_SRCS})
-
+set_target_properties(CorradeUtility PROPERTIES DEBUG_POSTFIX "-d")
 if(NOT BUILD_STATIC)
     set_target_properties(CorradeUtilityObjects PROPERTIES COMPILE_FLAGS "-DCorradeUtilityObjects_EXPORTS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
     set_target_properties(CorradeUtility PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
@@ -108,7 +108,9 @@ endif()
 
 if(BUILD_TESTS)
     add_library(CorradeUtilityTestLib ${SHARED_OR_STATIC} ${CorradeUtility_GracefulAssert_SRCS})
-    set_target_properties(CorradeUtilityTestLib PROPERTIES COMPILE_FLAGS "-DCORRADE_GRACEFUL_ASSERT")
+    set_target_properties(CorradeUtilityTestLib PROPERTIES
+        COMPILE_FLAGS "-DCORRADE_GRACEFUL_ASSERT"
+        DEBUG_POSTFIX "-d")
     if(BUILD_STATIC_PIC)
         # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
         set_target_properties(CorradeUtilityTestLib PROPERTIES COMPILE_FLAGS "-DCORRADE_GRACEFUL_ASSERT ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")

@@ -53,6 +53,11 @@ This module tries to find %Corrade library and then defines these variables:
 - `CORRADE_TESTSUITE_LIBRARIES` -- TestSuite library and dependent libraries
 - `CORRADE_RC_EXECUTABLE` -- Resource compiler executable
 
+The package is found if either debug or release version of each library is
+found. If both debug and release libraries are found, proper version is chosen
+based on actual build configuration of the project (i.e. `Debug` build is
+linked to debug libraries, `Release` build to release libraries).
+
 %Corrade configures the compiler to use C++11 standard. Additionally you can
 use `CORRADE_CXX_FLAGS` to enable additional pedantic set of warnings and
 enable hidden visibility by default.
