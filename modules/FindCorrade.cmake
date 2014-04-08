@@ -3,7 +3,7 @@
 # Basic usage:
 #  find_package(Corrade [REQUIRED])
 # This module tries to find Corrade library and then defines:
-#  CORRADE_FOUND                    - True if Corrade library is found
+#  CORRADE_FOUND                    - True if Corrade is found
 #  CORRADE_INCLUDE_DIR              - Root include dir
 #  CORRADE_INTERCONNECT_LIBRARIES   - Interconnect library and dependent
 #   libraries
@@ -15,8 +15,8 @@
 #   libraries
 #  CORRADE_RC_EXECUTABLE            - Resource compiler executable
 # Corrade configures the compiler to use C++11 standard. Additionally you can
-# use CORRADE_CXX_FLAGS to enable additional pedantic set of warnings and enable
-# hidden visibility by default.
+# use CORRADE_CXX_FLAGS to enable additional pedantic set of warnings and
+# enable hidden visibility by default.
 #
 # Features of found Corrade library are exposed in these variables:
 #  CORRADE_GCC47_COMPATIBILITY  - Defined if compiled with compatibility
@@ -83,7 +83,7 @@
 # The macro adds preprocessor directive CORRADE_STATIC_PLUGIN. Additional
 # libraries can be linked in via target_link_libraries(plugin_name ...). If
 # install_dir is set to CMAKE_CURRENT_BINARY_DIR (e.g. for testing purposes),
-# no installation is performed.
+# no installation rules are added.
 #
 #
 # Additionally these variables are defined for internal usage:

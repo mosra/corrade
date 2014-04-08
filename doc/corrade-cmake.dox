@@ -43,7 +43,7 @@ Basic usage is:
 
 This module tries to find %Corrade library and then defines these variables:
 
-- `CORRADE_FOUND` -- Whether %Corrade was found
+- `CORRADE_FOUND` -- True if %Corrade is found
 - `CORRADE_INCLUDE_DIR` -- Root include dir
 - `CORRADE_INTERCONNECT_LIBRARIES` -- Interconnect library and dependent
   libraries
@@ -140,7 +140,7 @@ that the files are actually put into configuration-based subdirectory, i.e.
 The macro adds preprocessor directive `CORRADE_STATIC_PLUGIN`. Additional
 libraries can be linked in via `target_link_libraries(plugin_name ...)`. If
 `install_dir` is set to `CMAKE_CURRENT_BINARY_DIR` (e.g. for testing purposes),
-no installation is performed.
+no installation rules are added.
 
 */
 }
