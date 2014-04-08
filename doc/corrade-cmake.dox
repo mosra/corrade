@@ -125,13 +125,13 @@ used for compiling library / executable. Example usage:
 ### Add dynamic plugin
 @anchor corrade-cmake-add-plugin
 
-    corrade_add_plugin(plugin_name install_dir metadata_file
-                       sources...)
+    corrade_add_plugin(plugin_name debug_install_dir release_install_dir
+                       metadata_file sources...)
 
 The macro adds preprocessor directive `CORRADE_DYNAMIC_PLUGIN`. Additional
 libraries can be linked in via `target_link_libraries(plugin_name ...)`. If
-`install_dir` is set to `CMAKE_CURRENT_BINARY_DIR` (e.g. for testing purposes),
-the files are copied directly, without the need to run `make install`. Note
+`debug_install_dir` is set to `CMAKE_CURRENT_BINARY_DIR` (e.g. for testing purposes),
+the files are copied directly, without the need to perform install step. Note
 that the files are actually put into configuration-based subdirectory, i.e.
 `${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}`. See documentation of
 `CMAKE_CFG_INTDIR` variable for more information.
@@ -146,6 +146,9 @@ The macro adds preprocessor directive `CORRADE_STATIC_PLUGIN`. Additional
 libraries can be linked in via `target_link_libraries(plugin_name ...)`. If
 `install_dir` is set to `CMAKE_CURRENT_BINARY_DIR` (e.g. for testing purposes),
 no installation rules are added.
+@attention Plugins built in debug configuration (e.g. with `CMAKE_BUILD_TYPE`
+    set to `Debug`) have `-d` suffix to make it possible to have both debug and
+    release plugins installed alongside each other.
 
 */
 }
