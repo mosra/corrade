@@ -37,6 +37,7 @@ set(CorradeTestSuite_HEADERS
     visibility.h)
 
 add_library(CorradeTestSuite ${SHARED_OR_STATIC} ${CorradeTestSuite_SRCS})
+set_target_properties(CorradeTestSuite PROPERTIES DEBUG_POSTFIX "-d")
 if(NOT BUILD_STATIC)
     set_target_properties(CorradeTestSuite PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
 elseif(BUILD_STATIC_PIC)

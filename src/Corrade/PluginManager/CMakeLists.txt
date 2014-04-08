@@ -47,6 +47,7 @@ add_library(CorradePluginManagerObjects OBJECT ${CorradePluginManager_SRCS})
 add_library(CorradePluginManager ${SHARED_OR_STATIC}
     $<TARGET_OBJECTS:CorradePluginManagerObjects>
     ${CorradePluginManager_GracefulAssert_SRCS})
+set_target_properties(CorradePluginManager PROPERTIES DEBUG_POSTFIX "-d")
 if(NOT BUILD_STATIC)
     set_target_properties(CorradePluginManagerObjects PROPERTIES COMPILE_FLAGS "-DCorradePluginManagerObjects_EXPORTS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
     set_target_properties(CorradePluginManager PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
@@ -69,7 +70,9 @@ if(BUILD_TESTS)
     add_library(CorradePluginManagerTestLib ${SHARED_OR_STATIC}
         $<TARGET_OBJECTS:CorradePluginManagerObjects>
         ${CorradePluginManager_GracefulAssert_SRCS})
-    set_target_properties(CorradePluginManagerTestLib PROPERTIES COMPILE_FLAGS "-DCORRADE_GRACEFUL_ASSERT")
+    set_target_properties(CorradePluginManagerTestLib PROPERTIES
+        COMPILE_FLAGS "-DCORRADE_GRACEFUL_ASSERT"
+        DEBUG_POSTFIX "-d")
     if(BUILD_STATIC_PIC)
         # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
         set_target_properties(CorradePluginManagerTestLib PROPERTIES COMPILE_FLAGS "-DCORRADE_GRACEFUL_ASSERT ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")

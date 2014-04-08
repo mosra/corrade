@@ -187,7 +187,7 @@ function(corrade_add_resource name configurationFile)
     set(${name} "${out}" PARENT_SCOPE)
 endfunction()
 
-function(corrade_add_plugin plugin_name install_dir metadata_file)
+function(corrade_add_plugin plugin_name debug_install_dir release_install_dir metadata_file)
     # Create dynamic library
     if(WIN32)
         add_library(${plugin_name} SHARED ${ARGN})
@@ -208,15 +208,23 @@ function(corrade_add_plugin plugin_name install_dir metadata_file)
 
     # Copy metadata next to the binary for testing purposes or install it both
     # somewhere
-    if(${install_dir} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
+    if(${debug_install_dir} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
         add_custom_command(
             OUTPUT ${plugin_name}.conf
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${plugin_name}.conf
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
         add_custom_target(${plugin_name}-metadata ALL DEPENDS ${plugin_name}.conf)
     else()
-        install(TARGETS ${plugin_name} DESTINATION "${install_dir}")
-        install(FILES ${metadata_file} DESTINATION "${install_dir}" RENAME "${plugin_name}.conf")
+        install(TARGETS ${plugin_name} DESTINATION "${debug_install_dir}"
+            CONFIGURATIONS Debug)
+        install(TARGETS ${plugin_name} DESTINATION "${release_install_dir}"
+            CONFIGURATIONS "" None Release RelWithDebInfo MinSizeRel)
+        install(FILES ${metadata_file} DESTINATION "${debug_install_dir}"
+            RENAME "${plugin_name}.conf"
+            CONFIGURATIONS Debug)
+        install(FILES ${metadata_file} DESTINATION "${release_install_dir}"
+            RENAME "${plugin_name}.conf"
+            CONFIGURATIONS "" None Release RelWithDebInfo MinSizeRel)
     endif()
 endfunction()
 
@@ -228,7 +236,9 @@ function(corrade_add_static_plugin plugin_name install_dir metadata_file)
 
     # Create static library
     add_library(${plugin_name} STATIC ${ARGN} ${${plugin_name}})
-    set_target_properties(${plugin_name} PROPERTIES COMPILE_FLAGS "-DCORRADE_STATIC_PLUGIN ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
+    set_target_properties(${plugin_name} PROPERTIES
+        COMPILE_FLAGS "-DCORRADE_STATIC_PLUGIN ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}"
+        DEBUG_POSTFIX "-d")
 
     # Install, if not into the same place
     if(NOT ${install_dir} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
