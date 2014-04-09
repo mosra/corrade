@@ -7,7 +7,7 @@ arch=('any')
 url="http://mosra.cz/blog/corrade.php"
 license=('MIT')
 makedepends=('nacl-sdk' 'cmake' 'ninja')
-options=(!buildflags !strip)
+options=('!buildflags' '!strip' 'staticlibs')
 
 build() {
     # Build 32bit
