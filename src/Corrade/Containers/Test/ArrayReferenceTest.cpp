@@ -34,6 +34,7 @@ class ArrayReferenceTest: public TestSuite::Tester {
 
         void constructEmpty();
         void constructNullptr();
+        void constructNullptrSize();
         void construct();
         void constructFixedSize();
         void constructArray();
@@ -58,6 +59,7 @@ typedef Containers::ArrayReference<const void> VoidArrayReference;
 ArrayReferenceTest::ArrayReferenceTest() {
     addTests({&ArrayReferenceTest::constructEmpty,
               &ArrayReferenceTest::constructNullptr,
+              &ArrayReferenceTest::constructNullptrSize,
               &ArrayReferenceTest::construct,
               &ArrayReferenceTest::constructFixedSize,
               &ArrayReferenceTest::constructArray,
@@ -87,6 +89,14 @@ void ArrayReferenceTest::constructNullptr() {
 
     /* Implicit construction from nullptr should be allowed */
     CORRADE_VERIFY((std::is_convertible<std::nullptr_t, ArrayReference>::value));
+}
+
+void ArrayReferenceTest::constructNullptrSize() {
+    /* This should be allowed for e.g. just allocating memory in
+       Magnum::Buffer::setData() without passing any actual data */
+    const ArrayReference a(nullptr, 5);
+    CORRADE_VERIFY(a == nullptr);
+    CORRADE_COMPARE(a.size(), 5);
 }
 
 void ArrayReferenceTest::construct() {
