@@ -73,12 +73,14 @@ ArrayTest::ArrayTest() {
 
 void ArrayTest::constructEmpty() {
     const Array a;
+    /* MSVC 2013 complains about ambiguous operator== overload. WHAT. */
     CORRADE_VERIFY(a == static_cast<int*>(nullptr));
     CORRADE_COMPARE(a.size(), 0);
 
     /* Zero-length should not call new */
     const std::size_t size = 0;
     const Array b(size);
+    /* MSVC 2013 complains about ambiguous operator== overload. WHAT. */
     CORRADE_VERIFY(b == static_cast<int*>(nullptr));
     CORRADE_COMPARE(b.size(), 0);
 }
@@ -88,6 +90,7 @@ void ArrayTest::constructNullptr() {
     CORRADE_SKIP("Nullptr is not supported on this compiler.");
     #else
     const Array c(nullptr);
+    /* MSVC 2013 complains about ambiguous operator== overload. WHAT. */
     CORRADE_VERIFY(c == static_cast<int*>(nullptr));
     CORRADE_COMPARE(c.size(), 0);
 
@@ -98,6 +101,7 @@ void ArrayTest::constructNullptr() {
 
 void ArrayTest::construct() {
     const Array a(5);
+    /* MSVC 2013 complains about ambiguous operator== overload. WHAT. */
     CORRADE_VERIFY(a != static_cast<int*>(nullptr));
     CORRADE_COMPARE(a.size(), 5);
 
@@ -111,6 +115,7 @@ void ArrayTest::constructMove() {
     const int* const ptr = a;
 
     Array b(std::move(a));
+    /* MSVC 2013 complains about ambiguous operator== overload. WHAT. */
     CORRADE_VERIFY(a == static_cast<int*>(nullptr));
     CORRADE_VERIFY(b == ptr);
     CORRADE_COMPARE(a.size(), 0);
@@ -118,6 +123,7 @@ void ArrayTest::constructMove() {
 
     Array c;
     c = std::move(b);
+    /* MSVC 2013 complains about ambiguous operator== overload. WHAT. */
     CORRADE_VERIFY(b == static_cast<int*>(nullptr));
     CORRADE_VERIFY(c == ptr);
     CORRADE_COMPARE(b.size(), 0);

@@ -82,6 +82,7 @@ ArrayReferenceTest::ArrayReferenceTest() {
 
 void ArrayReferenceTest::constructEmpty() {
     const ArrayReference a;
+    /* MSVC 2013 complains about ambiguous operator== overload. WHAT. */
     CORRADE_VERIFY(a == static_cast<int*>(nullptr));
     CORRADE_COMPARE(a.size(), 0);
 }
@@ -103,7 +104,8 @@ void ArrayReferenceTest::constructNullptrSize() {
     /* This should be allowed for e.g. just allocating memory in
        Magnum::Buffer::setData() without passing any actual data */
     const ArrayReference a(nullptr, 5);
-    CORRADE_VERIFY(a == nullptr);
+    /* MSVC 2013 complains about ambiguous operator== overload. WHAT. */
+    CORRADE_VERIFY(a ==  static_cast<int*>(nullptr));
     CORRADE_COMPARE(a.size(), 5);
 }
 
