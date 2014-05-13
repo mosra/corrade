@@ -650,6 +650,25 @@ Corrade::Utility::Debug operator<<(Corrade::Utility::Debug debug, const Hash& va
 They will appear as related functions within documentation of class specified
 as the parameter and also crossreferenced from page @ref debugoperators.
 
+For non-class enums there is @c \@debugoperatorenum command and for in-class
+enums the @c \@debugoperatorclassenum command:
+@code
+enum class Flag: std::uint32_t;
+
+// @debugoperatorenum{Flag}
+Corrade::Utility::Debug operator<<(Corrade::Utility::Debug debug, Flag value);
+
+class Foo {
+    enum class Flag: std::uint32_t;
+};
+
+// @debugoperatorclassenum{Foo,Foo::Flag}
+Corrade::Utility::Debug operator<<(Corrade::Utility::Debug debug, Foo::Flag value);
+@endcode
+Debug operator for non-class enum will appear in documentation of surrounding
+namespace, debug operator for class enum will appear as related function in
+documentation of given class.
+
 @subsubsection documentation-commands-configurationvalue Configuration value parsers and writers
 
 Helper classes for parsing and writing configuration values should be marked

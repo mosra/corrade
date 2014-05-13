@@ -168,6 +168,9 @@ enum class LoadState: unsigned short {
     #endif
 };
 
+/** @debugoperatorenum{Corrade::PluginManager::LoadState} */
+Utility::Debug CORRADE_PLUGINMANAGER_EXPORT operator<<(Utility::Debug debug, PluginManager::LoadState value);
+
 /**
 @brief Plugin load states
 
@@ -461,11 +464,6 @@ macro for automatic call.
     extern int pluginImporter_##name();                                     \
     pluginImporter_##name();                                                \
     CORRADE_RESOURCE_INITIALIZE(name)
-
-} namespace Utility {
-
-/** @debugoperator{Corrade::PluginManager::AbstractManager} */
-Debug CORRADE_PLUGINMANAGER_EXPORT operator<<(Debug debug, PluginManager::LoadState value);
 
 }}
 

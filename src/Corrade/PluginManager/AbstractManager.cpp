@@ -531,10 +531,8 @@ AbstractManager::Plugin::~Plugin() {
         delete staticPlugin;
 }
 
-} namespace Utility {
-
 #ifndef DOXYGEN_GENERATING_OUTPUT
-Debug operator<<(Debug debug, PluginManager::LoadState value) {
+Utility::Debug operator<<(Utility::Debug debug, PluginManager::LoadState value) {
     switch(value) {
         #define ls(state) case PluginManager::LoadState::state: return debug << "PluginManager::LoadState::" #state;
         ls(NotFound)
