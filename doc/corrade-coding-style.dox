@@ -693,6 +693,16 @@ parameter and also crossreferenced from page `configurationvalues`.
 Features that are not supported on all platform should be marked with
 @c \@partialsupport, listing unsupported platforms and optionally reason why.
 
+@subsection corrade-coding-style-documentation-ordering Section ordering
+
+In detailed documentation the text should be always first, additional blocks
+are then ordered by their importance. Various @c \@note, @c \@attention and
+@c \@warning blocks to highlight some information are always first, then
+@c \@see block with links to related stuff, then various support information
+such as @c \@partialsupport, after that @c \@deprecated information and
+@c \@todo, @c \@todoc and @c \@bug always last, as they are the least important
+and in most cases only for internal use.
+
 @section corrade-coding-style-git Git commit messages, branch and tag format
 
 Each commit message should have short one-line explanation at the beginning,

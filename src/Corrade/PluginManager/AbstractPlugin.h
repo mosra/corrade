@@ -77,9 +77,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * Note that this function might be called subsequently more than once
          * (e.g. when loading derived plugin after the base plugin has been
          * already initialized).
+         * @see @ref initialize()
          * @bug ^ this will fail for base plugin if derived plugin is unloaded
          *      and base plugin is still used
-         * @see @ref initialize()
          */
         static void finalize();
 
