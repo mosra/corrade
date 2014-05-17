@@ -30,7 +30,7 @@ namespace Corrade {
 
 %Corrade is multiplatform utility library written in C++11.
 
-@section mainpage-platforms Supported platforms
+@section corrade-mainpage-platforms Supported platforms
 
 -   **Linux** and embedded Linux
 -   **Windows**
@@ -40,7 +40,7 @@ namespace Corrade {
     both `newlib` and `glibc` toolchains are supported)
 -   **HTML5/JavaScript** (through [Emscripten](https://github.com/kripken/emscripten/wiki))
 
-@section mainpage-features Features
+@section corrade-mainpage-features Features
 
 -   Signal/slot connection library with compile-time argument checking.
 -   Plugin management library with static and dynamic plugins and dependency
@@ -48,16 +48,16 @@ namespace Corrade {
 -   Easy-to-use unit test framework and extensible debugging output.
 -   Various utilities to ease multiplatform development.
 
-@section building-link Building Corrade
+@section corrade-mainpage-building Building Corrade
 
 Guide @ref building-corrade "how to build Corrade" on different platforms.
 
-@section getting-started Examples and tutorials
+@section corrade-mainpage-getting-started Examples and tutorials
 
 The best way to get started is to read some @ref corrade-example-index
 "examples and tutorials".
 
-@section hacking Hacking Corrade
+@section corrade-mainpage-hacking Hacking Corrade
 
 If you want to hack on this library, if you spotted a bug, need an feature or
 have an awesome idea, you can get a copy of the sources from GitHub and start
@@ -74,7 +74,7 @@ Feel free to get more information or contact the author at:
 - E-mail - mosra@centrum.cz
 - Jabber - mosra@jabbim.cz
 
-@section license License
+@section corrade-mainpage-license License
 
 %Corrade is licensed under MIT/Expat license:
 
