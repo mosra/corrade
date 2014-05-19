@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Containers::LinkedList, Corrade::Containers::LinkedListItem
+ * @brief Class @ref Corrade::Containers::LinkedList, @ref Corrade::Containers::LinkedListItem
  */
 
 #include "Corrade/Containers/Containers.h"
@@ -65,7 +65,8 @@ list.cut(&b);
 @endcode
 
 Traversing through the list is done like in the following code. It is also
-possible to go in reverse order using last() and LinkedListItem::previous().
+possible to go in reverse order using @ref last() and
+@ref LinkedListItem::previous().
 @code
 for(Object* i = list.first(); i; i = i->next()) {
     // ...
@@ -76,8 +77,9 @@ for(Object* i = list.first(); i; i = i->next()) {
 
 Each node stores pointer to the list, which you can take advantage of. For
 example, if you have group of some objects and want to access the group from
-each object, you can reuse the list() pointer, which will be cast to type you
-specify as @p List template parameter of LinkedListItem class:
+each object, you can reuse the @ref LinkedListItem::list() pointer, which will
+be cast to type you specify as @p List template parameter of
+@ref LinkedListItem class:
 @code
 class ObjectGroup: public LinkedList<Object> {
     // ...
@@ -93,9 +95,10 @@ class Object: public LinkedListItem<Object, ObjectGroup> {
 
 @section LinkedList-usage-private-inheritance Using private inheritance
 
-You might want to subclass LinkedList and LinkedListItem privately and for
+You might want to subclass %LinkedList and %LinkedListItem privately and for
 example provide wrapper functions with more descriptive names. In that case
-you need to friend both LinkedList and LinkedListItem in both your subclasses.
+you need to friend both %LinkedList and %LinkedListItem in both your
+subclasses.
 @code
 class ObjectGroup: private LinkedList<Object> {
     friend class LinkedList<Object>;
@@ -214,9 +217,9 @@ template<class T> class LinkedList {
 };
 
 /**
-@brief Item of LinkedList
-@param Derived  Dervied object type, i.e. type you want returned from previous() and next().
-@param List     List object type, i.e. type you want returned from list().
+@brief Item of @ref LinkedList
+@param Derived  Dervied object type, i.e. type you want returned from @ref previous() and @ref next().
+@param List     List object type, i.e. type you want returned from @ref list().
 
 This class is usually subclassed using [CRTP](http://en.wikipedia.org/wiki/Curiously_Recurring_Template_Pattern),
 e.g.:
