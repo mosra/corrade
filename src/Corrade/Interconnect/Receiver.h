@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Interconnect::Receiver
+ * @brief Class @ref Corrade::Interconnect::Receiver
  */
 
 #include <vector>
@@ -43,25 +43,33 @@ namespace Implementation {
 @brief %Receiver object
 
 Contains member function slots. See @ref interconnect for introduction.
-@see Emitter, Connection
+@see @ref Emitter, @ref Connection
 @todo Allow move
 */
 class CORRADE_INTERCONNECT_EXPORT Receiver {
     friend class Implementation::AbstractConnectionData;
     friend class Emitter;
 
-    Receiver(const Receiver&) = delete;
-    Receiver(Receiver&&) = delete;
-    Receiver& operator=(const Receiver&) = delete;
-    Receiver& operator=(Receiver&&) = delete;
-
     public:
         explicit Receiver();
+
+        /** @brief Copying is not allowed */
+        Receiver(const Receiver&) = delete;
+
+        /** @brief Moving is not allowed */
+        Receiver(Receiver&&) = delete;
+
+        /** @brief Copying is not allowed */
+        Receiver& operator=(const Receiver&) = delete;
+
+        /** @brief Moving is not allowed */
+        Receiver& operator=(Receiver&&) = delete;
 
         /**
          * @brief Whether the receiver is connected to any signal
          *
-         * @see Emitter::hasSignalConnections(), slotConnectionCount()
+         * @see @ref Emitter::hasSignalConnections(),
+         *      @ref slotConnectionCount()
          */
         bool hasSlotConnections() const {
             return !connections.empty();
@@ -70,15 +78,17 @@ class CORRADE_INTERCONNECT_EXPORT Receiver {
         /**
          * @brief Count of connections to this receiver slots
          *
-         * @see Emitter::signalConnectionCount(), hasSlotConnections()
+         * @see @ref Emitter::signalConnectionCount(),
+         *      @ref hasSlotConnections()
          */
         std::size_t slotConnectionCount() const { return connections.size(); }
 
         /**
          * @brief Disconnect everything from this receiver slots
          *
-         * @see Emitter::disconnectAllSignals(), Connection::disconnect(),
-         *      Emitter::disconnectSignal(), hasSlotConnections()
+         * @see @ref Emitter::disconnectAllSignals(),
+         *      @ref Connection::disconnect(),
+         *      @ref Emitter::disconnectSignal(), @ref hasSlotConnections()
          */
         void disconnectAllSlots();
 

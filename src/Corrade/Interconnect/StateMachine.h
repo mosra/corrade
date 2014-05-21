@@ -154,8 +154,8 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
          * @brief The machine is switching states
          *
          * Emitted when machine goes from @p previous state to @p next state
-         * and they are different ones. Emitted after corresponding @ref exited()
-         * signal and before corresponding @ref entered() one.
+         * and they are different ones. Emitted after corresponding
+         * @ref exited() signal and before corresponding @ref entered() one.
          * @see @ref step()
          */
         template<State previous, State next> Signal stepped() {
