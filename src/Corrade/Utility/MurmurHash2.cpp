@@ -27,7 +27,7 @@
 
 namespace Corrade { namespace Utility { namespace Implementation {
 
-unsigned int MurmurHash2<4>::operator()(const unsigned char* data, unsigned int size) const {
+unsigned int MurmurHash2<4>::operator()(const unsigned int seed, const unsigned char* const data, unsigned int size) const {
     /* m and r are mixing constants generated offline. They're not really
        magic, they just happen to work well. */
     const unsigned int m = 0x5bd1e995;
@@ -38,10 +38,13 @@ unsigned int MurmurHash2<4>::operator()(const unsigned char* data, unsigned int 
 
     /* Mix 4 bytes at a time into the hash */
     for(std::size_t i = 0; i+4 <= size; i += 4) {
-        /* Using *reinterpret_cast<const unsigned int*>(data+i) leads to
-           unaligned reads, causing Emscripten to behave strangely if
-           data % 4 != 0. May fail also on ARM. */
-        unsigned int k = data[i + 3] << 24 | data[i + 2] << 16 | data[i + 1] << 8 | data[i + 0];
+        /* Can't use *reinterpret_cast<const unsigned int*>(data+i), as it is
+           unaligned read (not supported on ARM or in Emscripten) */
+        unsigned int k =
+            data[i + 3] << 24 |
+            data[i + 2] << 16 |
+            data[i + 1] <<  8 |
+            data[i + 0];
 
         k *= m;
         k ^= k >> r;
@@ -67,7 +70,7 @@ unsigned int MurmurHash2<4>::operator()(const unsigned char* data, unsigned int 
     return h;
 }
 
-unsigned long long MurmurHash2<8>::operator()(const unsigned char* data, unsigned long long size) const {
+unsigned long long MurmurHash2<8>::operator()(const unsigned long long seed, const unsigned char* const data, unsigned long long size) const {
     /* m and r are mixing constants generated offline. They're not really
        magic, they just happen to work well. */
     const unsigned long long m = 0xc6a4a7935bd1e995ull;
@@ -78,7 +81,17 @@ unsigned long long MurmurHash2<8>::operator()(const unsigned char* data, unsigne
 
     /* Mix 8 bytes at a time into the hash */
     for(std::size_t i = 0; i+8 <= size; i += 8) {
-        unsigned long long k = *reinterpret_cast<const unsigned long long*>(data+i);
+        /* Can't use *reinterpret_cast<const unsigned int*>(data+i), as it is
+           unaligned read (not supported on ARM or in Emscripten) */
+        unsigned long long k =
+            static_cast<unsigned long long>(data[i + 7]) << 56 |
+            static_cast<unsigned long long>(data[i + 6]) << 48 |
+            static_cast<unsigned long long>(data[i + 5]) << 40 |
+            static_cast<unsigned long long>(data[i + 4]) << 32 |
+            static_cast<unsigned long long>(data[i + 3]) << 24 |
+            static_cast<unsigned long long>(data[i + 2]) << 16 |
+            static_cast<unsigned long long>(data[i + 1]) <<  8 |
+            static_cast<unsigned long long>(data[i + 0]);
 
         k *= m;
         k ^= k >> r;
