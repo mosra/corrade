@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::TestSuite::Compare::Container, Corrade::TestSuite::Compare::SortedContainer
+ * @brief Class @ref Corrade::TestSuite::Compare::Container, @ref Corrade::TestSuite::Compare::SortedContainer
  */
 
 #include <algorithm>

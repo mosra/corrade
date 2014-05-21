@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::TestSuite::Tester, macros CORRADE_TEST_MAIN(), CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS(), CORRADE_COMPARE_WITH(), CORRADE_SKIP().
+ * @brief Class @ref Corrade::TestSuite::Tester, macros @ref CORRADE_TEST_MAIN(), @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH(), @ref CORRADE_SKIP()
  */
 
 #include <vector>
@@ -46,8 +46,8 @@ namespace Corrade { namespace TestSuite {
 
 See @ref unit-testing for introduction.
 
-@see CORRADE_TEST_MAIN(), CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS(),
-    CORRADE_COMPARE_WITH(), CORRADE_SKIP()
+@see @ref CORRADE_TEST_MAIN(), @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(),
+    @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH(), @ref CORRADE_SKIP()
 @todo Data-driven tests
 */
 class CORRADE_TESTSUITE_EXPORT Tester {
@@ -64,7 +64,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          *     CORRADE_COMPARE(a + a, 8);
          * }
          * @endcode
-         * @see Warning, Error
+         * @see @ref Warning, @ref Error
          */
         typedef Corrade::Utility::Debug Debug;
 
@@ -106,7 +106,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         /**
          * @brief Add test cases
          *
-         * Adds one or more test cases to be executed when calling exec().
+         * Adds one or more test cases to be executed when calling @ref exec().
          */
         template<class Derived> void addTests(std::initializer_list<void(Derived::*)()> tests) {
             testCases.reserve(testCases.size() + tests.size());
@@ -218,7 +218,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 #endif
 
 /** @hideinitializer
-@brief Verify an expression in Tester subclass
+@brief Verify an expression in @ref Corrade::TestSuite::Tester "Tester" subclass
 
 If the expression is not true, the expression is printed and execution of given
 test case is terminated. Example usage:
@@ -227,7 +227,7 @@ string s("hello");
 CORRADE_VERIFY(!s.empty());
 @endcode
 
-It is possible to use CORRADE_VERIFY() also on objects with *explicit*
+It is possible to use @ref CORRADE_VERIFY() also on objects with *explicit*
 `operator bool` without doing explicit conversion (e.g. using `!!`), for
 example:
 @code
@@ -235,7 +235,7 @@ std::unique_ptr<T> t(new T);
 CORRADE_VERIFY(t);
 @endcode
 
-@see CORRADE_COMPARE(), CORRADE_COMPARE_AS()
+@see @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS()
 */
 #define CORRADE_VERIFY(expression)                                          \
     do {                                                                    \
@@ -244,7 +244,7 @@ CORRADE_VERIFY(t);
     } while(false)
 
 /** @hideinitializer
-@brief %Compare two values in Tester subclass
+@brief %Compare two values in @ref Corrade::TestSuite::Tester "Tester" subclass
 
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
@@ -253,7 +253,7 @@ int a = 5 + 3;
 CORRADE_COMPARE(a, 8);
 @endcode
 
-@see CORRADE_VERIFY(), CORRADE_COMPARE_AS()
+@see @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE_AS()
 */
 #define CORRADE_COMPARE(actual, expected)                                   \
     do {                                                                    \
@@ -262,7 +262,7 @@ CORRADE_COMPARE(a, 8);
     } while(false)
 
 /** @hideinitializer
-@brief %Compare two values in Tester subclass with explicitly specified type
+@brief %Compare two values in @ref Corrade::TestSuite::Tester "Tester" subclass with explicitly specified type
 
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
@@ -272,7 +272,7 @@ CORRADE_COMPARE_AS(std::sin(0.0), 0.0f, float);
 See also @ref Corrade::TestSuite::Comparator "Comparator" class documentation
 for example of more involved comparisons.
 
-@see CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_WITH()
+@see @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_WITH()
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 #define CORRADE_COMPARE_AS(actual, expected, Type...)
@@ -285,7 +285,7 @@ for example of more involved comparisons.
 #endif
 
 /** @hideinitializer
-@brief %Compare two values in Tester subclass with explicitly specified comparator
+@brief %Compare two values in @ref Corrade::TestSuite::Tester "Tester" subclass with explicitly specified comparator
 
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
@@ -295,7 +295,7 @@ CORRADE_COMPARE_WITH("actual.txt", "expected.txt", Compare::File("/common/path/p
 See @ref Corrade::TestSuite::Comparator "Comparator" class documentation for
 more information.
 
-@see CORRADE_VERIFY(), CORRADE_COMPARE(), CORRADE_COMPARE_AS()
+@see @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS()
 */
 #define CORRADE_COMPARE_WITH(actual, expected, comparatorInstance)          \
     do {                                                                    \
@@ -308,10 +308,10 @@ more information.
 @param message Message which will be printed into output as indication of
     expected failure
 
-Expects failure in all following CORRADE_VERIFY(), CORRADE_COMPARE() and
-CORRADE_COMPARE_AS() checks in the same scope. In most cases it will be until
-the end of the function, but you can limit the scope by placing relevant
-checks in a separate block:
+Expects failure in all following @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE()
+and @ref CORRADE_COMPARE_AS() checks in the same scope. In most cases it will
+be until the end of the function, but you can limit the scope by placing
+relevant checks in a separate block:
 @code
 {
     CORRADE_EXPECT_FAIL("Not implemented");

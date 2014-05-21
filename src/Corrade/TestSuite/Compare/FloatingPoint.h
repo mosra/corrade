@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::TestSuite::Comparator specialized for floating-point values
+ * @brief Class @ref Corrade::TestSuite::Comparator specialized for floating-point values
  */
 
 #include "Corrade/TestSuite/Comparator.h"
