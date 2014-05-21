@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::AbstractHash
+ * @brief Class @ref Corrade::Utility::AbstractHash
  */
 
 #include <string>
@@ -90,7 +90,7 @@ template<std::size_t size> class HashDigest {
 /**
 @brief Base template for hashing classes
 
-@see HashDigest
+@see @ref HashDigest
 */
 template<std::size_t digestSize> class AbstractHash {
     public:

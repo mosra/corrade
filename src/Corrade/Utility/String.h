@@ -93,7 +93,7 @@ class CORRADE_UTILITY_EXPORT String {
          * @param string        %String to be trimmed
          * @param characters    Characters which will be trimmed
          *
-         * @see ltrim(), trim()
+         * @see @ref ltrim(), @ref trim()
          */
         static std::string rtrim(std::string string, const std::string& characters = Whitespace);
 
@@ -125,8 +125,8 @@ class CORRADE_UTILITY_EXPORT String {
          * @deprecated Use @ref Corrade::Utility::String::splitWithoutEmptyParts() "splitWithoutEmptyParts()"
          *      instead.
          */
-        static CORRADE_DEPRECATED("use splitWithoutEmptyParts() instead") std::vector<std::string> split(const std::string& str, char delim, bool keepEmptyParts) {
-            return keepEmptyParts ? split(str, delim) : splitWithoutEmptyParts(str, delim);
+        static CORRADE_DEPRECATED("use splitWithoutEmptyParts() instead") std::vector<std::string> split(const std::string& string, char delim, bool keepEmptyParts) {
+            return keepEmptyParts ? split(string, delim) : splitWithoutEmptyParts(string, delim);
         }
         #endif
 
@@ -146,21 +146,17 @@ class CORRADE_UTILITY_EXPORT String {
 
         /**
          * @brief Convert string to lowercase
-         * @param str               %String to be converted
-         * @return Lowercase version of the string
          *
          * @attention Doesn't work with UTF-8.
          */
-        static std::string lowercase(std::string str);
+        static std::string lowercase(std::string string);
 
         /**
          * @brief Convert string to uppercase
-         * @param str               %String to be converted
-         * @return Uppercase version of the string
          *
          * @attention Doesn't work with UTF-8.
          */
-        static std::string uppercase(std::string str);
+        static std::string uppercase(std::string string);
 };
 
 }}

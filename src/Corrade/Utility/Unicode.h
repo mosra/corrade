@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::Unicode
+ * @brief Class @ref Corrade::Utility::Unicode
  */
 
 #include <string>

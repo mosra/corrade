@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Macros @ref CORRADE_DEPRECATED(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
+ * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
 /** @hideinitializer

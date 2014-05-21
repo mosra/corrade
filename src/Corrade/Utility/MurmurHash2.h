@@ -26,54 +26,32 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::MurmurHash2Implementation, Corrade::Utility::MurmurHash2
+ * @brief Class @ref Corrade::Utility::MurmurHash2
  */
 
 #include "Corrade/Utility/AbstractHash.h"
 
 namespace Corrade { namespace Utility {
 
-/**
-@brief MurmurHash implementation
+namespace Implementation {
+    template<std::size_t> class MurmurHash2;
+    template<> class CORRADE_UTILITY_EXPORT MurmurHash2<4> {
+        public:
+            constexpr explicit MurmurHash2(unsigned int seed): seed(seed) {}
+            unsigned int operator()(const unsigned char* data, unsigned int size) const;
 
-Specialized implementation for 32bit and 64bit `std::size_t`.
-*/
-template<std::size_t> class MurmurHash2Implementation {
-    #ifdef DOXYGEN_GENERATING_OUTPUT
-    public:
-        /**
-         * @brief Constructor
-         * @param seed      Seed to initialize the hash
-         */
-        explicit MurmurHash2Implementation(std::size_t seed);
+        private:
+            unsigned int seed;
+    };
+    template<> class CORRADE_UTILITY_EXPORT MurmurHash2<8> {
+        public:
+            constexpr explicit MurmurHash2(unsigned long long seed): seed(seed) {}
+            unsigned long long operator()(const unsigned char* data, unsigned long long size) const;
 
-        /** @brief Compute digest of given data */
-        std::size_t operator()(const char* data, std::size_t size);
-    #endif
-};
-
-/** @todo Export implementation symbols only for tests */
-
-#ifndef DOXYGEN_GENERATING_OUTPUT
-/** @todo Used only in unit test, export in only there? */
-template<> class CORRADE_UTILITY_EXPORT MurmurHash2Implementation<4> {
-    public:
-        constexpr explicit MurmurHash2Implementation(unsigned int seed): seed(seed) {}
-        unsigned int operator()(const unsigned char* data, unsigned int size) const;
-
-    private:
-        unsigned int seed;
-};
-/** @todo Used only in unit test, export in only there? */
-template<> class CORRADE_UTILITY_EXPORT MurmurHash2Implementation<8> {
-    public:
-        constexpr explicit MurmurHash2Implementation(unsigned long long seed): seed(seed) {}
-        unsigned long long operator()(const unsigned char* data, unsigned long long size) const;
-
-    private:
-        unsigned long long seed;
-};
-#endif
+        private:
+            unsigned long long seed;
+    };
+}
 
 /**
 @brief MurmurHash 2
@@ -90,7 +68,7 @@ class CORRADE_UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(std::size_t
          * @brief Digest of given data
          *
          * Computes digest using default zero seed. This function is here for
-         * consistency with other AbstractHash subclasses.
+         * consistency with other @ref AbstractHash subclasses.
          */
         static Digest digest(const std::string& data) {
             return MurmurHash2()(data);
@@ -120,7 +98,7 @@ class CORRADE_UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(std::size_t
         }
 
     private:
-        MurmurHash2Implementation<sizeof(std::size_t)> implementation;
+        Implementation::MurmurHash2<sizeof(std::size_t)> implementation;
 };
 
 }}

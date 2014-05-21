@@ -25,11 +25,9 @@
 
 #include "MurmurHash2.h"
 
-namespace Corrade { namespace Utility {
+namespace Corrade { namespace Utility { namespace Implementation {
 
-/* The algorithm is copyright Austin Appleby */
-
-unsigned int MurmurHash2Implementation<4>::operator()(const unsigned char* data, unsigned int size) const {
+unsigned int MurmurHash2<4>::operator()(const unsigned char* data, unsigned int size) const {
     /* m and r are mixing constants generated offline. They're not really
        magic, they just happen to work well. */
     const unsigned int m = 0x5bd1e995;
@@ -69,7 +67,7 @@ unsigned int MurmurHash2Implementation<4>::operator()(const unsigned char* data,
     return h;
 }
 
-unsigned long long MurmurHash2Implementation<8>::operator()(const unsigned char* data, unsigned long long size) const {
+unsigned long long MurmurHash2<8>::operator()(const unsigned char* data, unsigned long long size) const {
     /* m and r are mixing constants generated offline. They're not really
        magic, they just happen to work well. */
     const unsigned long long m = 0xc6a4a7935bd1e995ull;
@@ -106,4 +104,4 @@ unsigned long long MurmurHash2Implementation<8>::operator()(const unsigned char*
     return h;
 }
 
-}}
+}}}

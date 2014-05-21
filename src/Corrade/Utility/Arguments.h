@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::Arguments
+ * @brief Class @ref Corrade::Utility::Arguments
  */
 
 #include <string>
@@ -104,8 +104,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * @brief Add mandatory argument
          *
          * After calling <tt>addArgument("argument")</tt> the argument will be
-         * displayed in argument list like the following. Call @ref setHelpKey()
-         * to change the displayed key:
+         * displayed in argument list like the following. Call
+         * @ref setHelpKey() to change the displayed key:
          *
          *      Usage:
          *        ./app argument
@@ -200,8 +200,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * If the option is present, the option has `true` value, otherwise it
          * has `false` value. Unlike above functions, the usage text does not
-         * display option value and you need to set help text with @ref setHelp()
-         * to make it appear in option list:
+         * display option value and you need to set help text with
+         * @ref setHelp() to make it appear in option list:
          *
          *      Usage:
          *        ./app [-o|-option]

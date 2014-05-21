@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::ConfigurationGroup
+ * @brief Class @ref Corrade::Utility::ConfigurationGroup
  */
 
 #include <vector>
@@ -39,8 +39,8 @@ namespace Corrade { namespace Utility {
 /**
 @brief Group of values in configuration file
 
-Provides access to values and subgroups. See Configuration class documentation
-for usage example.
+Provides access to values and subgroups. See @ref Configuration class
+documentation for usage example.
 @todo Faster access to elements via multimap, find() and equal_range()
 */
 class CORRADE_UTILITY_EXPORT ConfigurationGroup {
@@ -51,7 +51,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @brief Default constructor
          *
          * Pointer to enclosing configuration is set to `nullptr`, call
-         * addGroup() to add it somewhere.
+         * @ref addGroup() to add it somewhere.
          */
         explicit ConfigurationGroup();
 
@@ -59,7 +59,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @brief Copy constructor
          *
          * Pointer to enclosing configuration is set to `nullptr`, call
-         * addGroup() to add it somewhere.
+         * @ref addGroup() to add it somewhere.
          */
         ConfigurationGroup(const ConfigurationGroup& other);
 
@@ -67,7 +67,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @brief Move constructor
          *
          * Pointer to enclosing configuration is set to `nullptr`, call
-         * addGroup() to add it somewhere.
+         * @ref addGroup() to add it somewhere.
          */
         ConfigurationGroup(ConfigurationGroup&& other);
 
@@ -78,7 +78,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          *
          * Pointer to enclosing configuration stays the same as in original
          * object.
-         * @see configuration()
+         * @see @ref configuration()
          */
         ConfigurationGroup& operator=(const ConfigurationGroup& other);
 
@@ -87,7 +87,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          *
          * Pointer to enclosing configuration stays the same as in original
          * object.
-         * @see configuration()
+         * @see @ref configuration()
          */
         ConfigurationGroup& operator=(ConfigurationGroup&& other);
 
@@ -95,7 +95,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @brief Enclosing configuration
          *
          * Returns `nullptr` if the group is not part of any configuration.
-         * @see addGroup(const std::string&, ConfigurationGroup*)
+         * @see @ref addGroup(const std::string&, ConfigurationGroup*)
          */
         Configuration* configuration() { return _configuration; }
         const Configuration* configuration() const { return _configuration; } /**< @overload */
@@ -105,7 +105,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          *
          * If the group is empty, there aren't any values, subgroups, empty
          * lines or comments.
-         * @see hasGroups(), hasValues()
+         * @see @ref hasGroups(), @ref hasValues()
          */
         bool isEmpty() const { return _values.empty() && _groups.empty(); }
 
@@ -114,14 +114,15 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         /**
          * @brief Whether this group has subgroups
          *
-         * @see isEmpty(), hasGroup(), groupCount(), hasValues()
+         * @see @ref isEmpty(), @ref hasGroup(), @ref groupCount(),
+         *      @ref hasValues()
          */
         bool hasGroups() const { return !_groups.empty(); }
 
         /**
          * @brief Count of all subgroups
          *
-         * @see hasGroups(), valueCount()
+         * @see @ref hasGroups(), @ref valueCount()
          */
         unsigned int groupCount() const { return _groups.size(); }
 
@@ -130,14 +131,15 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @param name      Name
          * @param index     Group index. Default is first found group.
          *
-         * @see isEmpty(), hasGroups(), groupCount(), hasValue()
+         * @see @ref isEmpty(), @ref hasGroups(), @ref groupCount(),
+         *      @ref hasValue()
          */
         bool hasGroup(const std::string& name, unsigned int index = 0) const;
 
         /**
          * @brief Count of groups with given name
          *
-         * @see hasGroup(), valueCount()
+         * @see @ref hasGroup(), @ref valueCount()
          */
         unsigned int groupCount(const std::string& name) const;
 
@@ -147,7 +149,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @param index     Group index. Default is first found group.
          *
          * Returns pointer to group on success, `nullptr` otherwise.
-         * @see groups()
+         * @see @ref groups()
          */
         ConfigurationGroup* group(const std::string& name, unsigned int index = 0);
         const ConfigurationGroup* group(const std::string& name, unsigned int index = 0) const; /**< @overload */
@@ -164,7 +166,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          *
          * Adds given group at the end of current group. The group must not be
          * part of any existing configuration.
-         * @see configuration()
+         * @see @ref configuration()
          */
         void addGroup(const std::string& name, ConfigurationGroup* group);
 
@@ -184,7 +186,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          *
          * Returns `true` if given group was found and removed, `false`
          * otherwise.
-         * @see removeAllGroups(), clear()
+         * @see @ref removeAllGroups(), @ref clear()
          */
         bool removeGroup(const std::string& name, unsigned int index = 0);
 
@@ -193,14 +195,14 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          *
          * Returns `true` if given group was found and removed, `false`
          * otherwise.
-         * @see removeAllGroups(), clear()
+         * @see @ref removeAllGroups(), @ref clear()
          */
         bool removeGroup(ConfigurationGroup* group);
 
         /**
          * @brief Remove all groups with given name
          *
-         * @see removeGroup(), clear()
+         * @see @ref removeGroup(), @ref clear()
          */
         void removeAllGroups(const std::string& name);
 
@@ -211,14 +213,15 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         /**
          * @brief Whether this group has any values
          *
-         * @see isEmpty(), hasValue(), valueCount(), hasGroups()
+         * @see @ref isEmpty(), @ref hasValue(), @ref valueCount(),
+         *      @ref hasGroups()
          */
         bool hasValues() const;
 
         /**
          * @brief Count of all values in the group
          *
-         * @see hasValues(), groupCount()
+         * @see @ref hasValues(), @ref groupCount()
          */
         unsigned int valueCount() const;
 
@@ -227,14 +230,15 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @param key       Key
          * @param index     Value index. Default is first found value.
          *
-         * @see isEmpty(), hasValues(), valueCount(), hasGroup()
+         * @see @ref isEmpty(), @ref hasValues(), @ref valueCount(),
+         *      @ref hasGroup()
          */
         bool hasValue(const std::string& key, unsigned int index = 0) const;
 
         /**
          * @brief Count of values with given key
          *
-         * @see hasValue(), groupCount()
+         * @see @ref hasValue(), @ref groupCount()
          */
         unsigned int valueCount(const std::string& key) const;
 
@@ -246,8 +250,9 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          *
          * Directly returns the value. If the key is not found, returns
          * default constructed value. If @p T is not `std::string`, uses
-         * ConfigurationValue::fromString() to convert the value to given type.
-         * @see hasValue()
+         * @ref ConfigurationValue::fromString() to convert the value to given
+         * type.
+         * @see @ref hasValue()
          */
         template<class T = std::string> T value(const std::string& key, unsigned int index = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const;
 
@@ -256,8 +261,9 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @param key       Key
          * @param flags     %Flags
          *
-         * If @p T is not `std::string`, uses ConfigurationValue::fromString()
-         * to convert the value to given type.
+         * If @p T is not `std::string`, uses
+         * @ref ConfigurationValue::fromString() to convert the value to given
+         * type.
          */
         template<class T = std::string> std::vector<T> values(const std::string& key, ConfigurationValueFlags flags = ConfigurationValueFlags()) const;
 
@@ -285,8 +291,8 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         /**
          * @brief Set value converted from given type
          *
-         * Uses ConfigurationValue::toString() to convert the value from given
-         * type. See setValue(const std::string&, std::string, unsigned int, ConfigurationValueFlags)
+         * Uses @ref ConfigurationValue::toString() to convert the value from
+         * given type. See @ref setValue(const std::string&, std::string, unsigned int, ConfigurationValueFlags)
          * for more information.
          */
         template<class T> bool setValue(const std::string& key, const T& value, unsigned int index = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
@@ -303,20 +309,20 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * Adds new key/value pair at the end of current group (it means also
          * after all comments).
          */
-        void addValue(std::string key, std::string value, const ConfigurationValueFlags flags = ConfigurationValueFlags()) {
+        void addValue(std::string key, std::string value, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
             addValueInternal(std::move(key), std::move(value), flags);
         }
 
         /** @overload */
-        void addValue(std::string key, const char* value, const ConfigurationValueFlags flags = ConfigurationValueFlags()) {
+        void addValue(std::string key, const char* value, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
             addValueInternal(std::move(key), value, flags);
         }
 
         /**
          * @brief Add new value
          *
-         * Uses ConfigurationValue::toString() to convert the value from given
-         * type. See addValue(const std::string&, std::string, ConfigurationValueFlags)
+         * Uses @ref ConfigurationValue::toString() to convert the value from
+         * given type. See @ref addValue(std::string, std::string, ConfigurationValueFlags)
          * for more information.
          */
         template<class T> void addValue(std::string key, const T& value, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
@@ -330,14 +336,14 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          *
          * Returns `true` if given value was found and removed, `false`
          * otherwise.
-         * @see removeAllValues(), clear()
+         * @see @ref removeAllValues(), @ref clear()
          */
         bool removeValue(const std::string& key, unsigned int index = 0);
 
         /**
          * @brief Remove all values with given key
          *
-         * @see removeValue(), clear()
+         * @see @ref removeValue(), @ref clear()
          */
         void removeAllValues(const std::string& key);
 
@@ -347,7 +353,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @brief Clear group
          *
          * Removes all values and subgroups.
-         * @see removeAllValues(), removeAllGroups()
+         * @see @ref removeAllValues(), @ref removeAllGroups()
          */
         void clear();
 

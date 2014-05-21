@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::Resource
+ * @brief Class @ref Corrade::Utility::Resource
  */
 
 #include <map>
@@ -50,12 +50,12 @@ Standalone resource compiler executable is implemented in @ref rc.cpp.
 
 @section UtilityResource-configuration Resource configuration file
 
-Function compileFrom() takes configuration file as parameter. The file allows
-you to specify filenames and filename aliases of resource files instead of
-passing the data manually to compile(). The file is used when compiling
-resources using @ref corrade-cmake "corrade_add_resource()" via CMake. The file
-can be also used when overriding compiled-in resources with live data using
-overrideGroup(). Example file:
+Function @ref compileFrom() takes configuration file as parameter. The file
+allows you to specify filenames and filename aliases of resource files instead
+of passing the data manually to @ref compile(). The file is used when compiling
+resources using @ref corrade-cmake-add-resource "corrade_add_resource()" via
+CMake. The file can be also used when overriding compiled-in resources with
+live data using @ref overrideGroup(). Example file:
 
     group=myGroup
 
@@ -77,7 +77,7 @@ class CORRADE_UTILITY_EXPORT Resource {
     public:
         /**
          * @brief Compile data resource file
-         * @param name          %Resource name (see CORRADE_RESOURCE_INITIALIZE())
+         * @param name          %Resource name (see @ref CORRADE_RESOURCE_INITIALIZE())
          * @param group         Group name
          * @param files         Files (pairs of filename, file data)
          *
@@ -87,7 +87,7 @@ class CORRADE_UTILITY_EXPORT Resource {
 
         /**
          * @brief Compile data resource file using configuration file
-         * @param name          %Resource name (see CORRADE_RESOURCE_INITIALIZE())
+         * @param name          %Resource name (see @ref CORRADE_RESOURCE_INITIALIZE())
          * @param configurationFile %Filename of configuration file
          *
          * Produces C++ file with hexadecimal data representation. See class
@@ -178,16 +178,17 @@ class CORRADE_UTILITY_EXPORT Resource {
 @brief Initialize resource
 
 If a resource is compiled into dynamic library or directly into executable, it
-will be initialized automatically thanks to CORRADE_AUTOMATIC_INITIALIZER()
-macros. However, if the resource is compiled into static library, it must be
-explicitly initialized via this macro, e.g. at the beginning of main(). You can
-also wrap these macro calls into another function (which will then be compiled
-into dynamic library or main executable) and use CORRADE_AUTOMATIC_INITIALIZER()
-macro for automatic call.
+will be initialized automatically thanks to
+@ref CORRADE_AUTOMATIC_INITIALIZER() macros. However, if the resource is
+compiled into static library, it must be explicitly initialized via this macro,
+e.g. at the beginning of `main()`. You can also wrap these macro calls into
+another function (which will then be compiled into dynamic library or main
+executable) and use @ref CORRADE_AUTOMATIC_INITIALIZER() macro for automatic
+call.
 
 @attention This macro should be called outside of any namespace. If you are
     running into linker errors with `resourceInitializer_*`, this could be the
-    problem. If you are in a namespace and cannot call this macro from main(),
+    problem. If you are in a namespace and cannot call this macro from `main()`,
     try this:
 @code
 static void initialize() {
@@ -203,7 +204,7 @@ namespace Foo {
 }
 @endcode
 
-@see CORRADE_RESOURCE_FINALIZE()
+@see @ref CORRADE_RESOURCE_FINALIZE()
 */
 #define CORRADE_RESOURCE_INITIALIZE(name)                                     \
     extern int resourceInitializer_##name();                                  \
@@ -213,10 +214,10 @@ namespace Foo {
 @brief Cleanup resource
 
 Cleans up resource previously (even automatically) initialized via
-CORRADE_RESOURCE_INITIALIZE().
+@ref CORRADE_RESOURCE_INITIALIZE().
 
 @attention This macro should be called outside of any namespace. See
-    CORRADE_RESOURCE_INITIALIZE() documentation for more information.
+    @ref CORRADE_RESOURCE_INITIALIZE() documentation for more information.
 */
 #define CORRADE_RESOURCE_FINALIZE(name)                                       \
     extern int resourceFinalizer_##name();                                    \

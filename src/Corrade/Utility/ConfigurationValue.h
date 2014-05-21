@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::ConfigurationValue, enum set Corrade::Utility::ConfigurationValueFlag, Corrade::Utility::ConfigurationValueFlags
+ * @brief Class @ref Corrade::Utility::ConfigurationValue, enum @ref Corrade::Utility::ConfigurationValueFlag, enum set @ref Corrade::Utility::ConfigurationValueFlags
  */
 
 #include <cstdint>
@@ -38,10 +38,10 @@
 
 namespace Corrade { namespace Utility {
 
-/** @relates ConfigurationGroup
+/**
 @brief %Configuration value conversion flag
 
-@see ConfigurationValueFlags
+@see @ref ConfigurationValueFlags
 */
 enum class ConfigurationValueFlag: std::uint8_t {
     Oct = 1 << 0,           /**< Numeric value as octal */
@@ -50,12 +50,12 @@ enum class ConfigurationValueFlag: std::uint8_t {
     Uppercase = 1 << 3      /**< Use uppercase characters for numeric output */
 };
 
-/** @relates ConfigurationGroup
+/**
 @brief %Configuration value conversion flags
 
-@see ConfigurationGroup::value(), ConfigurationGroup::values(),
-    ConfigurationGroup::setValue(), ConfigurationGroup::addValue(),
-    ConfigurationValue::toString(), ConfigurationValue::fromString()
+@see @ref ConfigurationGroup::value(), @ref ConfigurationGroup::values(),
+    @ref ConfigurationGroup::setValue(), @ref ConfigurationGroup::addValue(),
+    @ref ConfigurationValue::toString(), @ref ConfigurationValue::fromString()
 */
 typedef Containers::EnumSet<ConfigurationValueFlag, std::uint8_t> ConfigurationValueFlags;
 
@@ -64,12 +64,12 @@ CORRADE_ENUMSET_OPERATORS(ConfigurationValueFlags)
 /**
 @brief %Configuration value parser and writer
 
-Functions in this struct are called internally by ConfigurationGroup
+Functions in this struct are called internally by @ref ConfigurationGroup
 functions to convert values from and to templated types. Reimplement the
 structure with template specialization to allow saving and getting
 non-standard types into and from configuration files.
 
-@section ConfigurationValue_Example Example: custom structure
+@section Utility-ConfigurationValue-example Example: custom structure
 We have structure named `Foo` and want to store it in configuration file as a
 sequence of two integers separated by a space.
 @code

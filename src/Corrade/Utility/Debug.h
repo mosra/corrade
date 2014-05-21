@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::Debug, Corrade::Utility::Warning, Corrade::Utility::Error
+ * @brief Class @ref Corrade::Utility::Debug, @ref Corrade::Utility::Warning, @ref Corrade::Utility::Error
  */
 
 #include <iosfwd>
@@ -42,10 +42,10 @@ namespace Corrade { namespace Utility {
 /**
 @brief %Debug output handler
 
-Provides convenient stream interface for passing data to debug output
-(standard output). Data are separated with spaces and last value is enclosed
-with newline character.
-Example usage:
+Provides convenient stream interface for passing data to debug output (standard
+output). Data are separated with spaces and last value is enclosed with newline
+character. Example usage:
+
 @code
 // Common usage
 Debug() << "string" << 34 << 275.0f;
@@ -71,8 +71,9 @@ else
     d << "because of everything else.";
 // (newline character will be written to output on object destruction)
 @endcode
+
 Support for printing other types (which are not handled by `iostream` itself)
-can be added by implementing function operator<<(Debug, const T&) for given
+can be added by implementing function `operator<<(Debug, const T&)` for given
 type.
 
 @see @ref Warning, @ref Error, @ref CORRADE_ASSERT(),
@@ -88,8 +89,12 @@ class CORRADE_UTILITY_EXPORT Debug {
         /** @brief Output flags */
         enum Flag {
             /* 0x01 reserved for indicating that no value was yet written */
-            SpaceAfterEachValue = 0x02, /**< Put space after each value (enabled by default) */
-            NewLineAtTheEnd = 0x04      /**< Put newline at the end (enabled by default) */
+
+            /** Put space after each value (enabled by default) */
+            SpaceAfterEachValue = 0x02,
+
+            /** Put newline at the end (enabled by default) */
+            NewLineAtTheEnd = 0x04
         };
 
         /**
@@ -114,8 +119,8 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @brief Copy constructor
          *
          * When copied from class which already wrote anything on the output,
-         * disabling flag Debug::NewLineAtTheEnd, so there aren't excessive
-         * newlines in the output.
+         * disabling flag @ref Flag "Flag::NewLineAtTheEnd", so there aren't
+         * excessive newlines in the output.
          *
          * Called in this situation:
          * @code
@@ -129,7 +134,8 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * Marking original class like it have already written something on
          * the output, so it adds whitespace before next value, disabling flag
-         * Debug::NewLineAtTheEnd the same way as in Debug(const Debug& other).
+         * @ref Flag "Debug::NewLineAtTheEnd" the same way as in
+         * @ref Debug(const Debug&).
          *
          * Called in this situation:
          * @code
@@ -144,7 +150,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * Adds newline at the end of debug output, if it is enabled in flags
          * and the output is not empty.
-         * @see Flag
+         * @see @ref Flag
          */
         ~Debug();
 
@@ -159,7 +165,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * If there is already something on the output, puts space before
          * the value.
-         * @see operator<<(Debug, const T&)
+         * @see @ref operator<<(Debug, const T&)
          */
         Debug operator<<(const std::string& value);
         Debug operator<<(const char* value);            /**< @overload */
@@ -184,14 +190,14 @@ class CORRADE_UTILITY_EXPORT Debug {
         /**
          * @brief Print UTF-32 character to debug output
          *
-         * Prints value as Unicode codepoint, i.e. `U+0061`.
+         * Prints value as %Unicode codepoint, i.e. `U+0061`.
          */
         Debug operator<<(char32_t value);
 
         /**
          * @brief Print UTF-32 character literal to debug output
          *
-         * Prints value as list of Unicode codepoints, i.e.
+         * Prints value as list of %Unicode codepoints, i.e.
          * `[U+0061, U+0062, U+0063}`.
          */
         Debug operator<<(const char32_t* value);        /**< @overload */
@@ -230,8 +236,9 @@ Support for printing custom types (i.e. those not handled by `iostream`) can
 be added by implementing this function for given type.
 
 The function should convert the type to one of supported types (such as
-`std::string`) and then call Debug::operator<<() with it. You can also use
-Debug::setFlag() for modifying newline and whitespace behavior.
+`std::string`) and then call @ref Debug::operator<<(const std::string&) with
+it. You can also use @ref Debug::setFlag() for modifying newline and whitespace
+behavior.
  */
 template<class T> Debug operator<<(Debug debug, const T& value);
 #endif
@@ -276,8 +283,8 @@ template<class A, class B> Debug operator<<(Debug debug, const std::pair<A, B>& 
 @brief %Warning output handler
 
 Same as @ref Debug, but by default writes output to standard error output.
-Thus it is possible to separate / mute @ref Debug, @ref Warning and
-@ref Error outputs.
+Thus it is possible to separate / mute @ref Debug, @ref Warning and @ref Error
+outputs.
 */
 class CORRADE_UTILITY_EXPORT Warning: public Debug {
     public:

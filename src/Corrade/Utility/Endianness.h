@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::Endianness
+ * @brief Class @ref Corrade::Utility::Endianness
  */
 
 #include <cstdint>
@@ -55,8 +55,8 @@ class Endianness {
         /**
          * @brief Convert number from or to Big-Endian
          * @param number    Number to convert
-         * @return Number as Big-Endian. On Big-Endian systems returns unchanged
-         *      value.
+         * @return Number as Big-Endian. On Big-Endian systems returns
+         *      unchanged value.
          */
         template<class T> static T bigEndian(T number) {
             #ifdef CORRADE_BIG_ENDIAN

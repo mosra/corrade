@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Forward declarations for Corrade::Utility namespace
+ * @brief Forward declarations for @ref Corrade::Utility namespace
  */
 
 #include <cstdint>

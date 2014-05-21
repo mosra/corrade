@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::Sha1
+ * @brief Class @ref Corrade::Utility::Sha1
  */
 
 #include "AbstractHash.h"

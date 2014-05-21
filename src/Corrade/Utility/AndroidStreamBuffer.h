@@ -65,7 +65,7 @@ class CORRADE_UTILITY_EXPORT AndroidLogStreamBuffer: public std::stringbuf {
         /**
          * @brief Log level
          *
-         * @see NaClConsoleStreamBuffer()
+         * @see @ref AndroidLogStreamBuffer()
          */
         enum class LogPriority: std::int32_t {
             Verbose = ANDROID_LOG_VERBOSE,  /**< Verbose debug message */
