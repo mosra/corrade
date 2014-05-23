@@ -34,22 +34,12 @@
 namespace Corrade { namespace Utility {
 
 namespace Implementation {
-    template<std::size_t> class MurmurHash2;
-    template<> class CORRADE_UTILITY_EXPORT MurmurHash2<4> {
-        public:
-            constexpr explicit MurmurHash2(unsigned int seed): seed(seed) {}
-            unsigned int operator()(const unsigned char* data, unsigned int size) const;
-
-        private:
-            unsigned int seed;
+    template<std::size_t> struct MurmurHash2;
+    template<> struct CORRADE_UTILITY_EXPORT MurmurHash2<4> {
+        unsigned int operator()(unsigned int seed, const unsigned char* data, unsigned int size) const;
     };
-    template<> class CORRADE_UTILITY_EXPORT MurmurHash2<8> {
-        public:
-            constexpr explicit MurmurHash2(unsigned long long seed): seed(seed) {}
-            unsigned long long operator()(const unsigned char* data, unsigned long long size) const;
-
-        private:
-            unsigned long long seed;
+    template<> struct CORRADE_UTILITY_EXPORT MurmurHash2<8> {
+        unsigned long long operator()(unsigned long long seed, const unsigned char* data, unsigned long long size) const;
     };
 }
 
@@ -78,7 +68,7 @@ class CORRADE_UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(std::size_t
          * @brief Constructor
          * @param seed      Seed to initialize the hash
          */
-        constexpr explicit MurmurHash2(std::size_t seed = 0): implementation(seed) {}
+        constexpr explicit MurmurHash2(std::size_t seed = 0): _seed(seed) {}
 
         /** @brief Compute digest of given data */
         Digest operator()(const std::string& data) const {
@@ -87,18 +77,18 @@ class CORRADE_UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(std::size_t
 
         /** @copydoc operator()(const std::string&) const */
         template<std::size_t size> Digest operator()(const char(&data)[size]) const {
-            std::size_t d = implementation(reinterpret_cast<const unsigned char*>(data), size-1);
+            std::size_t d = Implementation::MurmurHash2<sizeof(std::size_t)>{}(_seed, reinterpret_cast<const unsigned char*>(data), size-1);
             return Digest::fromByteArray(reinterpret_cast<const char*>(&d));
         }
 
         /** @copydoc operator()(const std::string&) const */
         Digest operator()(const char* data, std::size_t size) const {
-            std::size_t d = implementation(reinterpret_cast<const unsigned char*>(data), size);
+            std::size_t d = Implementation::MurmurHash2<sizeof(std::size_t)>{}(_seed, reinterpret_cast<const unsigned char*>(data), size);
             return Digest::fromByteArray(reinterpret_cast<const char*>(&d));
         }
 
     private:
-        Implementation::MurmurHash2<sizeof(std::size_t)> implementation;
+        std::size_t _seed;
 };
 
 }}

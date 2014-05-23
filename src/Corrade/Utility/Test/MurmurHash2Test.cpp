@@ -44,12 +44,13 @@ MurmurHash2Test::MurmurHash2Test() {
 }
 
 void MurmurHash2Test::test32() {
-    CORRADE_COMPARE(Implementation::MurmurHash2<4>(23)(reinterpret_cast<const unsigned char*>("string"), 6), 3435905073u);
-    CORRADE_COMPARE(Implementation::MurmurHash2<4>(23)(reinterpret_cast<const unsigned char*>("four"), 4), 2072697618u);
+    CORRADE_COMPARE(Implementation::MurmurHash2<4>{}(23, reinterpret_cast<const unsigned char*>("string"), 6), 3435905073u);
+    CORRADE_COMPARE(Implementation::MurmurHash2<4>{}(23, reinterpret_cast<const unsigned char*>("four"), 4), 2072697618u);
 }
+
 void MurmurHash2Test::test64() {
-    CORRADE_COMPARE(Implementation::MurmurHash2<8>(23)(reinterpret_cast<const unsigned char*>("string"), 6), 7441339218310318127ull);
-    CORRADE_COMPARE(Implementation::MurmurHash2<8>(23)(reinterpret_cast<const unsigned char*>("eightbit"), 8), 14685337704530366946ull);
+    CORRADE_COMPARE(Implementation::MurmurHash2<8>{}(23, reinterpret_cast<const unsigned char*>("string"), 6), 7441339218310318127ull);
+    CORRADE_COMPARE(Implementation::MurmurHash2<8>{}(23, reinterpret_cast<const unsigned char*>("eightbit"), 8), 14685337704530366946ull);
 }
 
 void MurmurHash2Test::constructor() {
