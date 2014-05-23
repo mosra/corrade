@@ -30,39 +30,39 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class AbstractHashTest: public TestSuite::Tester {
+class HashDigestTest: public TestSuite::Tester {
     public:
-        AbstractHashTest();
+        HashDigestTest();
 
         void toHexString();
         void fromHexString();
         void debug();
 };
 
-AbstractHashTest::AbstractHashTest() {
-    addTests({&AbstractHashTest::toHexString,
-              &AbstractHashTest::fromHexString,
-              &AbstractHashTest::debug});
+HashDigestTest::HashDigestTest() {
+    addTests({&HashDigestTest::toHexString,
+              &HashDigestTest::fromHexString,
+              &HashDigestTest::debug});
 }
 
-void AbstractHashTest::toHexString() {
+void HashDigestTest::toHexString() {
     const unsigned char rawDigest[4] = { 0xCA, 0xFE, 0x90, 0xfa };
-    CORRADE_COMPARE(AbstractHash<4>::Digest::fromByteArray(reinterpret_cast<const char*>(rawDigest)).hexString(), "cafe90fa");
+    CORRADE_COMPARE(HashDigest<4>::fromByteArray(reinterpret_cast<const char*>(rawDigest)).hexString(), "cafe90fa");
 }
 
-void AbstractHashTest::fromHexString() {
-    CORRADE_COMPARE(AbstractHash<4>::Digest::fromHexString("cafe90fa").hexString(), "cafe90fa");
-    CORRADE_COMPARE(AbstractHash<4>::Digest::fromHexString("1234abcdef").hexString(), "00000000");
-    CORRADE_COMPARE(AbstractHash<4>::Digest::fromHexString("babe").hexString(), "00000000");
-    CORRADE_COMPARE(AbstractHash<4>::Digest::fromHexString("bullshit").hexString(), "00000000");
+void HashDigestTest::fromHexString() {
+    CORRADE_COMPARE(HashDigest<4>::fromHexString("cafe90fa").hexString(), "cafe90fa");
+    CORRADE_COMPARE(HashDigest<4>::fromHexString("1234abcdef").hexString(), "00000000");
+    CORRADE_COMPARE(HashDigest<4>::fromHexString("babe").hexString(), "00000000");
+    CORRADE_COMPARE(HashDigest<4>::fromHexString("bullshit").hexString(), "00000000");
 }
 
-void AbstractHashTest::debug() {
+void HashDigestTest::debug() {
     std::ostringstream out;
-    Debug(&out) << AbstractHash<4>::Digest::fromHexString("defeca7e");
+    Debug(&out) << HashDigest<4>::fromHexString("defeca7e");
     CORRADE_COMPARE(out.str(), "defeca7e\n");
 }
 
 }}}
 
-CORRADE_TEST_MAIN(Corrade::Utility::Test::AbstractHashTest)
+CORRADE_TEST_MAIN(Corrade::Utility::Test::HashDigestTest)
