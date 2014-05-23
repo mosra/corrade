@@ -34,23 +34,39 @@ class HashDigestTest: public TestSuite::Tester {
     public:
         HashDigestTest();
 
-        void toHexString();
-        void fromHexString();
+        void constructEmpty();
+        void constructBytes();
+        void constructByteArray();
+        void constructHexString();
+
         void debug();
 };
 
 HashDigestTest::HashDigestTest() {
-    addTests({&HashDigestTest::toHexString,
-              &HashDigestTest::fromHexString,
+    addTests({&HashDigestTest::constructEmpty,
+              &HashDigestTest::constructBytes,
+              &HashDigestTest::constructByteArray,
+              &HashDigestTest::constructHexString,
+
               &HashDigestTest::debug});
 }
 
-void HashDigestTest::toHexString() {
-    const unsigned char rawDigest[4] = { 0xCA, 0xFE, 0x90, 0xfa };
+void HashDigestTest::constructEmpty() {
+    constexpr HashDigest<8> digest;
+    CORRADE_COMPARE(digest.hexString(), "0000000000000000");
+}
+
+void HashDigestTest::constructBytes() {
+    constexpr HashDigest<4> digest{0xca, 0xfe, 0x90, 0xfa};
+    CORRADE_COMPARE(digest.hexString(), "cafe90fa");
+}
+
+void HashDigestTest::constructByteArray() {
+    const unsigned char rawDigest[] = { 0xca, 0xfe, 0x90, 0xfa };
     CORRADE_COMPARE(HashDigest<4>::fromByteArray(reinterpret_cast<const char*>(rawDigest)).hexString(), "cafe90fa");
 }
 
-void HashDigestTest::fromHexString() {
+void HashDigestTest::constructHexString() {
     CORRADE_COMPARE(HashDigest<4>::fromHexString("cafe90fa").hexString(), "cafe90fa");
     CORRADE_COMPARE(HashDigest<4>::fromHexString("1234abcdef").hexString(), "00000000");
     CORRADE_COMPARE(HashDigest<4>::fromHexString("babe").hexString(), "00000000");
