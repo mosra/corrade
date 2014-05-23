@@ -61,7 +61,7 @@ template<std::size_t size> class HashDigest {
          *
          * Creates zero digest.
          */
-        constexpr HashDigest(): _digest() {}
+        constexpr /*implicit*/ HashDigest(): _digest() {}
 
         /** @brief Equality operator */
         bool operator==(const HashDigest<size>& other) const {
