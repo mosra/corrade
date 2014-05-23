@@ -34,26 +34,41 @@ class MurmurHash2Test: public TestSuite::Tester {
 
         void test32();
         void test64();
+        void constexprCall();
         void constructor();
 };
 
 MurmurHash2Test::MurmurHash2Test() {
     addTests({&MurmurHash2Test::test32,
               &MurmurHash2Test::test64,
+              &MurmurHash2Test::constexprCall,
               &MurmurHash2Test::constructor});
 }
 
 void MurmurHash2Test::test32() {
-    CORRADE_COMPARE(Implementation::MurmurHash2<4>{}(23, reinterpret_cast<const unsigned char*>("string"), 6), 3435905073u);
-    CORRADE_COMPARE(Implementation::MurmurHash2<4>{}(23, reinterpret_cast<const unsigned char*>("four"), 4), 2072697618u);
+    constexpr const unsigned int digest1 = Implementation::MurmurHash2<4>{}(23, "string", 6);
+    constexpr const unsigned int digest2 = Implementation::MurmurHash2<4>{}(23, "four", 4);
+    CORRADE_COMPARE(digest1, 3435905073u);
+    CORRADE_COMPARE(digest2, 2072697618u);
 }
 
 void MurmurHash2Test::test64() {
-    CORRADE_COMPARE(Implementation::MurmurHash2<8>{}(23, reinterpret_cast<const unsigned char*>("string"), 6), 7441339218310318127ull);
-    CORRADE_COMPARE(Implementation::MurmurHash2<8>{}(23, reinterpret_cast<const unsigned char*>("eightbit"), 8), 14685337704530366946ull);
+    constexpr const unsigned long long digest1 = Implementation::MurmurHash2<8>{}(23, "string", 6);
+    constexpr const unsigned long long digest2 = Implementation::MurmurHash2<8>{}(23, "eightbit", 8);
+    CORRADE_COMPARE(digest1, 7441339218310318127ull);
+    CORRADE_COMPARE(digest2, 14685337704530366946ull);
+}
+
+void MurmurHash2Test::constexprCall() {
+    constexpr auto digest1 = MurmurHash2::digest("hello");
+    CORRADE_COMPARE(digest1, MurmurHash2{}("hello", 5));
+
+    constexpr auto digest2 = MurmurHash2{}("hello");
+    CORRADE_COMPARE(digest2, MurmurHash2{}("hello", 5));
 }
 
 void MurmurHash2Test::constructor() {
+
     /* All should give the same value */
     CORRADE_COMPARE(MurmurHash2()("hello"), MurmurHash2()("hello", 5));
     CORRADE_COMPARE(MurmurHash2()(std::string("hello")), MurmurHash2()("hello", 5));
