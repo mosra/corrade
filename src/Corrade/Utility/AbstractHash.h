@@ -88,14 +88,14 @@ template<std::size_t size> class HashDigest {
         }
 
         /** @brief Equality operator */
-        bool operator==(const HashDigest<size>& other) const {
+        constexpr bool operator==(const HashDigest<size>& other) const {
             for(int i = 0; i != size; ++i)
                 if(other._digest[i] != _digest[i]) return false;
             return true;
         }
 
         /** @brief Non-equality operator */
-        bool operator!=(const HashDigest<size>& other) const {
+        constexpr bool operator!=(const HashDigest<size>& other) const {
             return !operator==(other);
         }
 

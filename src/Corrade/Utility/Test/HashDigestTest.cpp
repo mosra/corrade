@@ -41,6 +41,8 @@ class HashDigestTest: public TestSuite::Tester {
         void constructByteArray();
         void constructHexString();
 
+        void comparison();
+
         void debug();
 };
 
@@ -51,6 +53,8 @@ HashDigestTest::HashDigestTest() {
               &HashDigestTest::constructOneByte,
               &HashDigestTest::constructByteArray,
               &HashDigestTest::constructHexString,
+
+              &HashDigestTest::comparison,
 
               &HashDigestTest::debug});
 }
@@ -89,6 +93,18 @@ void HashDigestTest::constructHexString() {
     CORRADE_COMPARE(HashDigest<4>::fromHexString("1234abcdef").hexString(), "00000000");
     CORRADE_COMPARE(HashDigest<4>::fromHexString("babe").hexString(), "00000000");
     CORRADE_COMPARE(HashDigest<4>::fromHexString("bullshit").hexString(), "00000000");
+}
+
+void HashDigestTest::comparison() {
+    constexpr HashDigest<4> a{0xca, 0xfe, 0x90, 0xfa};
+    constexpr HashDigest<4> b{0xca, 0xfe, 0x90, 0xfa};
+    constexpr HashDigest<4> c{0xca, 0xfe, 0x90, 0xf0};
+
+    constexpr bool aIsB = a == b;
+    constexpr bool aIsC = a == c;
+
+    CORRADE_VERIFY(aIsB);
+    CORRADE_VERIFY(!aIsC);
 }
 
 void HashDigestTest::debug() {
