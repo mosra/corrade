@@ -36,6 +36,8 @@ class HashDigestTest: public TestSuite::Tester {
 
         void constructEmpty();
         void constructBytes();
+        void constructData();
+        void constructOneByte();
         void constructByteArray();
         void constructHexString();
 
@@ -45,6 +47,8 @@ class HashDigestTest: public TestSuite::Tester {
 HashDigestTest::HashDigestTest() {
     addTests({&HashDigestTest::constructEmpty,
               &HashDigestTest::constructBytes,
+              &HashDigestTest::constructData,
+              &HashDigestTest::constructOneByte,
               &HashDigestTest::constructByteArray,
               &HashDigestTest::constructHexString,
 
@@ -59,6 +63,20 @@ void HashDigestTest::constructEmpty() {
 void HashDigestTest::constructBytes() {
     constexpr HashDigest<4> digest{0xca, 0xfe, 0x90, 0xfa};
     CORRADE_COMPARE(digest.hexString(), "cafe90fa");
+}
+
+void HashDigestTest::constructData() {
+    constexpr HashDigest<4> digest4{0xcafe90fa};
+    CORRADE_COMPARE(digest4.hexString(), "cafe90fa");
+
+    constexpr HashDigest<8> digest8{0xcafe90fadefeca7eull};
+    CORRADE_COMPARE(digest8.hexString(), "cafe90fadefeca7e");
+}
+
+void HashDigestTest::constructOneByte() {
+    /* Test that there is no ambiguous overload */
+    constexpr HashDigest<1> digest{0xca};
+    CORRADE_COMPARE(digest.hexString(), "ca");
 }
 
 void HashDigestTest::constructByteArray() {

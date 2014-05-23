@@ -35,6 +35,12 @@
 
 namespace Corrade { namespace Utility {
 
+namespace Implementation {
+    template<std::size_t byte, class T> inline constexpr char byteAt(const T& data) {
+        return (data >> (sizeof(T) - 1 - byte)*8) & 0xFF;
+    }
+}
+
 /** @brief Hash digest */
 template<std::size_t size> class HashDigest {
     public:
@@ -72,6 +78,15 @@ template<std::size_t size> class HashDigest {
             static_assert(sizeof...(values) == size, "Utility::HashDigest::HashDigest(): wrong data size");
         }
 
+        /**
+         * @brief Construct digest from single value
+         *
+         * The value must have the same size as `size`.
+         */
+        template<class T, std::size_t s = size, class = std::enable_if_t<s != 1>> constexpr HashDigest(const T& data): HashDigest{data, std::make_index_sequence<size>{}} {
+            static_assert(sizeof(data) == size, "Utility::HashDigest::HashDigest(): wrong data size");
+        }
+
         /** @brief Equality operator */
         bool operator==(const HashDigest<size>& other) const {
             for(int i = 0; i != size; ++i)
@@ -93,6 +108,8 @@ template<std::size_t size> class HashDigest {
         constexpr const char* byteArray() const { return _digest; }
 
     private:
+        template<class T, std::size_t... indices> constexpr explicit HashDigest(const T& data, std::index_sequence<indices...>): _digest{Implementation::byteAt<indices>(data)...} {}
+
         char _digest[size];
 };
 
