@@ -141,7 +141,7 @@ std::string Resource::compile(const std::string& name, const std::string& group,
     /* Special case for empty file list */
     if(files.empty()) {
         return "/* Compiled resource file. DO NOT EDIT! */\n\n"
-            "#include \"Corrade/compatibility.h\"\n"
+            "#include \"Corrade/Corrade.h\"\n"
             "#include \"Corrade/Utility/Macros.h\"\n"
             "#include \"Corrade/Utility/Resource.h\"\n\n"
             "int resourceInitializer_" + name + "();\n"
@@ -201,7 +201,7 @@ std::string Resource::compile(const std::string& name, const std::string& group,
        Corrade in compatibility branch with Corrade in master branch (i.e. x86
        NaCl). */
     return "/* Compiled resource file. DO NOT EDIT! */\n\n"
-        "#include \"Corrade/compatibility.h\"\n"
+        "#include \"Corrade/Corrade.h\"\n"
         "#include \"Corrade/Utility/Macros.h\"\n"
         "#include \"Corrade/Utility/Resource.h\"\n\n"
         "static const unsigned char resourcePositions[] = {" +

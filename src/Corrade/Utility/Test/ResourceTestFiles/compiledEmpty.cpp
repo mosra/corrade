@@ -1,6 +1,6 @@
 /* Compiled resource file. DO NOT EDIT! */
 
-#include "Corrade/compatibility.h"
+#include "Corrade/Corrade.h"
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Resource.h"
 

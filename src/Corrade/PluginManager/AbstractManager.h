@@ -33,7 +33,6 @@
 #include <string>
 #include <map>
 
-#include "Corrade/compatibility.h"
 #include "Corrade/Containers/EnumSet.h"
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/PluginManager/PluginManager.h"
@@ -347,11 +346,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
     protected:
     #endif
         struct StaticPlugin {
-            /* GCC 4.6 cannot create this via new and initializer list */
-            #ifdef CORRADE_GCC46_COMPATIBILITY
-            StaticPlugin(std::string plugin, std::string interface, Instancer instancer, void(*initializer)(), void(*finalizer)()): plugin(std::move(plugin)), interface(std::move(interface)), instancer(instancer), initializer(initializer), finalizer(finalizer) {}
-            #endif
-
             std::string plugin;
             std::string interface;
             Instancer instancer;

@@ -31,7 +31,6 @@
 
 #include <memory>
 
-#include "Corrade/compatibility.h"
 #include "Corrade/PluginManager/AbstractManager.h"
 
 namespace Corrade { namespace PluginManager {

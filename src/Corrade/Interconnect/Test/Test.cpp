@@ -25,7 +25,6 @@
 
 #include <sstream>
 
-#include "Corrade/compatibility.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Interconnect/Emitter.h"

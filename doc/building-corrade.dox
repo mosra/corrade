@@ -33,9 +33,9 @@ namespace Corrade {
 Minimal set of tools required for building is:
 
 -   C++ compiler with good C++11 support. Currently there are two compilers
-    which are tested to have everything needed: **GCC** >= 4.6 and **Clang**
-    >= 3.1. On Windows you can use **MinGW**. GCC 4.5, 4.4 and **MSVC** 2013
-    support involves some ugly workarounds and thus is available only in
+    which are tested to have everything needed: **GCC** >= 4.7 and **Clang**
+    >= 3.1. On Windows you can use **MinGW**. GCC 4.6, 4.5, 4.4 and **MSVC**
+    2013 support involves some ugly workarounds and thus is available only in
     `compatibility` branch.
 -   **CMake** >= 2.8.8
 
@@ -203,8 +203,7 @@ the compatibility mode explicitly:
   4.7. Note that you need to enable this explicitly also if you are building
   with Clang and use libstdc++ from GCC 4.7.
 - `GCC46_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
-  4.6. Note that you need to enable this explicitly also if you are building
-  with Clang and use libstdc++ from GCC 4.6.
+  4.6. Note that GCC 4.6 support is maintained only in `compatibility` branch.
 - `GCC45_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
   4.5. Note that GCC 4.5 support is maintained only in `compatibility` branch.
 - `GCC44_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
@@ -496,8 +495,8 @@ or `update-job`).
     java -jar jenkins-cli.jar -s http://your-jenkins-server <command> Corrade < jenkins.xml
 
 Build is done using **Ninja** build system. It expects that **GCC** >=4.8.2,
-4.7, 4.6 and **Clang** are installed as it tries to compile the library with
-each one of them. You can add/remove the compilers in `axes/hudson.matrix.TextAxis`
+4.7 and **Clang** are installed as it tries to compile the library with each
+one of them. You can add/remove the compilers in `axes/hudson.matrix.TextAxis`
 or via the web interface later.
 
 There is also MinGW32 and Emscripten configuration, add or update them with the

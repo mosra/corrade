@@ -241,13 +241,7 @@ template<class T> class ArrayReference {
          * @brief Construct reference to fixed-size array
          * @param data      Fixed-size array
          */
-        #ifdef CORRADE_GCC46_COMPATIBILITY
-        #define size size_ /* With GCC 4.6 it conflicts with size(). WTF. */
-        #endif
         template<std::size_t size> constexpr /*implicit*/ ArrayReference(T(&data)[size]) noexcept: _data(data), _size(size) {}
-        #ifdef CORRADE_GCC46_COMPATIBILITY
-        #undef size
-        #endif
 
         /** @brief Construct reference to @ref Array */
         constexpr /*implicit*/ ArrayReference(Array<T>& array) noexcept: _data(array), _size(array.size()) {}
@@ -356,13 +350,7 @@ template<> class ArrayReference<const void> {
          *
          * Size in bytes is calculated automatically.
          */
-        #ifdef CORRADE_GCC46_COMPATIBILITY
-        #define size size_ /* With GCC 4.6 it conflicts with size(). WTF. */
-        #endif
         template<class T, std::size_t size> constexpr /*implicit*/ ArrayReference(T(&data)[size]) noexcept: _data(data), _size(size*sizeof(T)) {}
-        #ifdef CORRADE_GCC46_COMPATIBILITY
-        #undef size
-        #endif
 
         /** @brief Construct const void reference to any @ref Array */
         template<class T> constexpr /*implicit*/ ArrayReference(const Array<T>& array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}

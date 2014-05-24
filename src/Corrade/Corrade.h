@@ -29,8 +29,6 @@
  * @brief Basic definitions
  */
 
-#include "Corrade/compatibility.h"
-
 namespace Corrade {
 
 #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -42,15 +40,6 @@ Defined if compatibility mode for GCC 4.7 is enabled.
 */
 #define CORRADE_GCC47_COMPATIBILITY
 #undef CORRADE_GCC47_COMPATIBILITY
-
-/**
-@brief GCC 4.6 compatibility
-
-Defined if compatibility mode for GCC 4.6 is enabled.
-@see @ref building-corrade
-*/
-#define CORRADE_GCC46_COMPATIBILITY
-#undef CORRADE_GCC46_COMPATIBILITY
 
 /**
 @brief Build with deprecated API included

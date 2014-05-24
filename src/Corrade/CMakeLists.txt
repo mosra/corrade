@@ -41,8 +41,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 
 set(Corrade_HEADERS
-    Corrade.h
-    compatibility.h)
+    Corrade.h)
 
 install(FILES ${Corrade_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/configure.h DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR})
