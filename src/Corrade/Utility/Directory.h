@@ -98,7 +98,7 @@ class CORRADE_UTILITY_EXPORT Directory {
          *
          * @see @ref list()
          */
-        typedef Containers::EnumSet<Flag, unsigned char> Flags;
+        typedef Containers::EnumSet<Flag> Flags;
 
         /**
          * @brief Extract path from filename

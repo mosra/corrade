@@ -57,7 +57,7 @@ enum class ConfigurationValueFlag: std::uint8_t {
     @ref ConfigurationGroup::setValue(), @ref ConfigurationGroup::addValue(),
     @ref ConfigurationValue::toString(), @ref ConfigurationValue::fromString()
 */
-typedef Containers::EnumSet<ConfigurationValueFlag, std::uint8_t> ConfigurationValueFlags;
+typedef Containers::EnumSet<ConfigurationValueFlag> ConfigurationValueFlags;
 
 CORRADE_ENUMSET_OPERATORS(ConfigurationValueFlags)
 

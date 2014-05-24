@@ -57,7 +57,7 @@ enum class Feature: unsigned int {
     Popular = 1 << 3
 };
 
-typedef EnumSet<Feature, unsigned int> Features;
+typedef EnumSet<Feature> Features;
 CORRADE_ENUMSET_OPERATORS(Features)
 @endcode
 
@@ -73,7 +73,7 @@ class Application {
             Exit = 1 << 1
         };
 
-        typedef EnumSet<Flag, unsigned int> Flags;
+        typedef EnumSet<Flag> Flags;
         CORRADE_ENUMSET_FRIEND_OPERATORS(Flags)
 };
 
@@ -91,7 +91,7 @@ namespace Implementation {
         Marked = 1 << 1
     };
 
-    typedef EnumSet<ObjectFlag, unsigned int> ObjectFlags;
+    typedef EnumSet<ObjectFlag> ObjectFlags;
     CORRADE_ENUMSET_OPERATORS(ObjectFlags)
 }
 
@@ -101,21 +101,20 @@ template<class T> class Object {
         typedef Implementation::ObjectFlags Flags;
 };
 @endcode
-
-@todo Replace `U` with `std::underlying_type<T>` when support for GCC 4.6 is
-    dropped
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
-template<class T, class U, U fullValue = U(~0)>
+template<class T, typename std::underlying_type<T>::type fullValue = typename std::underlying_type<T>::type(~0)>
 #else
-template<class T, class U, U fullValue>
+template<class T, typename std::underlying_type<T>::type fullValue>
 #endif
 class EnumSet {
-    static_assert(std::is_enum<T>::value && !std::is_convertible<T, U>::value, "EnumSet type must be strongly typed enum");
+    static_assert(std::is_enum<T>::value, "EnumSet type must be strongly typed enum");
 
     public:
-        typedef T Type;             /**< @brief Enum type */
-        typedef U UnderlyingType;   /**< @brief Underlying type of the enum */
+        typedef T Type; /**< @brief Enum type */
+
+        /** @brief Underlying type of the enum */
+        typedef typename std::underlying_type<T>::type UnderlyingType;
 
         /** @brief Create empty set */
         constexpr /*implicit*/ EnumSet(): value() {}
@@ -124,12 +123,12 @@ class EnumSet {
         constexpr /*implicit*/ EnumSet(T value): value(static_cast<UnderlyingType>(value)) {}
 
         /** @brief Equality operator */
-        constexpr bool operator==(EnumSet<T, U, fullValue> other) const {
+        constexpr bool operator==(EnumSet<T, fullValue> other) const {
             return value == other.value;
         }
 
         /** @brief Non-equality operator */
-        constexpr bool operator!=(EnumSet<T, U, fullValue> other) const {
+        constexpr bool operator!=(EnumSet<T, fullValue> other) const {
             return !operator==(other);
         }
 
@@ -138,7 +137,7 @@ class EnumSet {
          *
          * Equivalent to `a & other == other`
          */
-        constexpr bool operator>=(EnumSet<T, U, fullValue> other) const {
+        constexpr bool operator>=(EnumSet<T, fullValue> other) const {
             return (*this & other) == other;
         }
 
@@ -147,35 +146,35 @@ class EnumSet {
          *
          * Equivalent to `a & other == a`
          */
-        constexpr bool operator<=(EnumSet<T, U, fullValue> other) const {
+        constexpr bool operator<=(EnumSet<T, fullValue> other) const {
             return (*this & other) == *this;
         }
 
         /** @brief Union of two sets */
-        constexpr EnumSet<T, U, fullValue> operator|(EnumSet<T, U, fullValue> other) const {
-            return EnumSet<T, U, fullValue>(value | other.value);
+        constexpr EnumSet<T, fullValue> operator|(EnumSet<T, fullValue> other) const {
+            return EnumSet<T, fullValue>(value | other.value);
         }
 
         /** @brief Union two sets and assign */
-        EnumSet<T, U, fullValue>& operator|=(EnumSet<T, U, fullValue> other) {
+        EnumSet<T, fullValue>& operator|=(EnumSet<T, fullValue> other) {
             value |= other.value;
             return *this;
         }
 
         /** @brief Intersection of two sets */
-        constexpr EnumSet<T, U, fullValue> operator&(EnumSet<T, U, fullValue> other) const {
-            return EnumSet<T, U, fullValue>(value & other.value);
+        constexpr EnumSet<T, fullValue> operator&(EnumSet<T, fullValue> other) const {
+            return EnumSet<T, fullValue>(value & other.value);
         }
 
         /** @brief Intersect two sets and assign */
-        EnumSet<T, U, fullValue>& operator&=(EnumSet<T, U, fullValue> other) {
+        EnumSet<T, fullValue>& operator&=(EnumSet<T, fullValue> other) {
             value &= other.value;
             return *this;
         }
 
         /** @brief Set complement */
-        constexpr EnumSet<T, U, fullValue> operator~() const {
-            return EnumSet<T, U, fullValue>(fullValue & ~value);
+        constexpr EnumSet<T, fullValue> operator~() const {
+            return EnumSet<T, fullValue>(fullValue & ~value);
         }
 
         /** @brief Value as boolean */

@@ -45,7 +45,7 @@ template<std::size_t> class HashDigest;
 class Configuration;
 class ConfigurationGroup;
 enum class ConfigurationValueFlag: std::uint8_t;
-typedef Containers::EnumSet<ConfigurationValueFlag, std::uint8_t> ConfigurationValueFlags;
+typedef Containers::EnumSet<ConfigurationValueFlag> ConfigurationValueFlags;
 template<class T> struct ConfigurationValue;
 
 class Debug;

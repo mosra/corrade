@@ -29,11 +29,13 @@
  * @brief Forward declarations for @ref Corrade::Containers namespace
  */
 
+#include <type_traits>
+
 namespace Corrade { namespace Containers {
 
 template<class> class Array;
 template<class> class ArrayReference;
-template<class, class U, U fullValue = U(~0)> class EnumSet;
+template<class T, typename std::underlying_type<T>::type fullValue = typename std::underlying_type<T>::type(~0)> class EnumSet;
 template<class> class LinkedList;
 template<class Derived, class List = LinkedList<Derived>> class LinkedListItem;
 

@@ -180,7 +180,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          *
          * @see @ref Configuration::Configuration()
          */
-        typedef Containers::EnumSet<Flag, std::uint32_t> Flags;
+        typedef Containers::EnumSet<Flag> Flags;
 
         /**
          * @brief Default constructor
@@ -274,7 +274,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
             Changed = 1 << 19
         };
 
-        typedef Containers::EnumSet<InternalFlag, std::uint32_t> InternalFlags;
+        typedef Containers::EnumSet<InternalFlag> InternalFlags;
 
         CORRADE_ENUMSET_FRIEND_OPERATORS(InternalFlags)
 

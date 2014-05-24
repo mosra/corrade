@@ -47,7 +47,7 @@ enum class Feature: int {
     Popular = 1 << 3
 };
 
-typedef EnumSet<Feature, int, 15> Features;
+typedef EnumSet<Feature, 15> Features;
 
 CORRADE_ENUMSET_OPERATORS(Features)
 

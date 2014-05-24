@@ -187,7 +187,7 @@ you can use `loadState & %LoadState::Loaded` instead of much more verbose
 @see @ref AbstractManager::loadState(), @ref AbstractManager::load(),
     @ref AbstractManager::unload()
 */
-typedef Containers::EnumSet<LoadState, unsigned short> LoadStates;
+typedef Containers::EnumSet<LoadState> LoadStates;
 
 CORRADE_ENUMSET_OPERATORS(LoadStates)
 
