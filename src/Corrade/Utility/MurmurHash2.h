@@ -49,8 +49,6 @@ namespace Implementation {
 Based on algorithm copyright Austin Appleby, http://code.google.com/p/smhasher/ .
 The digest is 32bit or 64bit, depending on `sizeof(std::size_t)` and thus
 usable for hasing in e.g. `std::unordered_map`.
-
-@todo constexpr algorithm
 */
 class CORRADE_UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(std::size_t)> {
     public:
