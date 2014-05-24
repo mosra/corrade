@@ -48,7 +48,7 @@ typedef struct HINSTANCE__* HMODULE;
 
 namespace Corrade { namespace PluginManager {
 
-/** @relates AbstractManager
+/**
 @brief Plugin load state
 
 @see @ref LoadStates, @ref AbstractManager::loadState(),
@@ -168,10 +168,14 @@ enum class LoadState: unsigned short {
     #endif
 };
 
+/** @debugoperatorenum{Corrade::PluginManager::LoadState} */
+Utility::Debug CORRADE_PLUGINMANAGER_EXPORT operator<<(Utility::Debug debug, PluginManager::LoadState value);
+
 /**
 @brief Plugin load states
 
-Useful when checking whether LoadState in in given set of values, for example:
+Useful when checking whether @ref LoadState in in given set of values, for
+example:
 @code
 if(loadState & (LoadState::WrongPluginVersion|LoadState::WrongInterfaceVersion)) {
     // ...
@@ -179,7 +183,7 @@ if(loadState & (LoadState::WrongPluginVersion|LoadState::WrongInterfaceVersion))
 @endcode
 
 Note that @ref LoadState::Loaded includes value of @ref LoadState::Static, so
-you can use `loadState & LoadState::Loaded` instead of much more verbose
+you can use `loadState & %LoadState::Loaded` instead of much more verbose
 `state & (%LoadState::Loaded|%LoadState::Static)`.
 @see @ref AbstractManager::loadState(), @ref AbstractManager::load(),
     @ref AbstractManager::unload()
@@ -189,7 +193,7 @@ typedef Containers::EnumSet<LoadState, unsigned short> LoadStates;
 CORRADE_ENUMSET_OPERATORS(LoadStates)
 
 /**
-@brief Non-templated base class of Manager
+@brief Non-templated base class of @ref Manager
 
 See also @ref plugin-management.
  */
@@ -207,8 +211,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
         /**
          * @brief Constructor
-         * @param pluginDirectory   Directory where plugins will be searched. No
-         *      recursive processing is done.
+         * @param pluginDirectory   Directory where plugins will be searched.
+         *      No recursive processing is done.
          *
          * First goes through list of static plugins and finds ones that use
          * the same interface as this manager instance. Then gets list of all
@@ -295,10 +299,11 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * @brief Load a plugin
          *
          * Returns @ref LoadState::Loaded if the plugin is already loaded or if
-         * loading succeeded. For static plugins returns always @ref LoadState::Static.
-         * On failure returns @ref LoadState::NotFound, @ref LoadState::WrongPluginVersion,
-         * @ref LoadState::WrongInterfaceVersion, @ref LoadState::UnresolvedDependency
-         * or @ref LoadState::LoadFailed.
+         * loading succeeded. For static plugins returns always
+         * @ref LoadState::Static. On failure returns @ref LoadState::NotFound,
+         * @ref LoadState::WrongPluginVersion,
+         * @ref LoadState::WrongInterfaceVersion,
+         * @ref LoadState::UnresolvedDependency or @ref LoadState::LoadFailed.
          *
          * If the plugin has any dependencies, they are recursively processed
          * before loading given plugin.
@@ -314,9 +319,10 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * @brief Unload a plugin
          *
          * Returns @ref LoadState::NotLoaded if the plugin is not loaded or
-         * unloading succeeded. For static plugins always returns @ref LoadState::Static.
-         * On failure returns @ref LoadState::UnloadFailed, @ref LoadState::Required
-         * or @ref LoadState::Used.
+         * unloading succeeded. For static plugins always returns
+         * @ref LoadState::Static. On failure returns
+         * @ref LoadState::UnloadFailed, @ref LoadState::Required or
+         * @ref LoadState::Used.
          *
          * @see @ref load(), @ref loadState()
          * @partialsupport Only static plugins are supported in
@@ -461,11 +467,6 @@ macro for automatic call.
     extern int pluginImporter_##name();                                     \
     pluginImporter_##name();                                                \
     CORRADE_RESOURCE_INITIALIZE(name)
-
-} namespace Utility {
-
-/** @debugoperator{Corrade::PluginManager::AbstractManager} */
-Debug CORRADE_PLUGINMANAGER_EXPORT operator<<(Debug debug, PluginManager::LoadState value);
 
 }}
 

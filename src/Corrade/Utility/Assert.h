@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Macros CORRADE_ASSERT(), CORRADE_INTERNAL_ASSERT(), CORRADE_INTERNAL_ASSERT_OUTPUT(), CORRADE_ASSERT_UNREACHABLE()
+ * @brief Macro @ref CORRADE_ASSERT(), @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(), @ref CORRADE_ASSERT_UNREACHABLE()
  */
 
 #ifndef CORRADE_NO_ASSERT
@@ -79,9 +79,9 @@ CORRADE_ASSERT(pos < size(), "Cannot access element" << pos << "in array of size
     function gets never called. See CORRADE_INTERNAL_ASSERT_OUTPUT() for
     possible solution.
 
-@see CORRADE_INTERNAL_ASSERT(), CORRADE_ASSERT_UNREACHABLE()
+@see @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_ASSERT_UNREACHABLE()
 @todo find a way that @p returnValue gets validated but doesn't get included in
-    the code unless CORRADE_GRACEFUL_ASSERT is used
+    the code unless `CORRADE_GRACEFUL_ASSERT` is used
 */
 #ifdef CORRADE_GRACEFUL_ASSERT
 #define CORRADE_ASSERT(condition, message, returnValue)                     \
@@ -110,12 +110,12 @@ CORRADE_ASSERT(pos < size(), "Cannot access element" << pos << "in array of size
 @brief Internal assertion macro
 @param condition    Assert condition
 
-Unlike CORRADE_ASSERT() usable for sanity checks on internal state, as it
-prints what failed and where.
+Unlike @ref CORRADE_ASSERT() usable for sanity checks on internal state, as it
+prints what failed and where instead of user-friendly message.
 
 By default, if assertion fails, failed condition, file and line is printed to
-error output and the application aborts. If `CORRADE_NO_ASSERT` is defined, this
-macro does nothing. Example usage:
+error output and the application aborts. If `CORRADE_NO_ASSERT` is defined,
+this macro does nothing. Example usage:
 @code
 CORRADE_INTERNAL_ASSERT(!nullptr);
 @endcode
@@ -125,9 +125,10 @@ CORRADE_INTERNAL_ASSERT(!nullptr);
     CORRADE_INTERNAL_ASSERT(initialize());
     @endcode
     If `CORRADE_NO_ASSERT` is defined, the macro is not expanded and thus the
-    function gets never called. Use CORRADE_INTERNAL_ASSERT_OUTPUT() instead.
+    function gets never called. Use @ref CORRADE_INTERNAL_ASSERT_OUTPUT()
+    instead.
 
-@see CORRADE_ASSERT_UNREACHABLE()
+@see @ref CORRADE_ASSERT_UNREACHABLE()
 */
 #ifdef CORRADE_NO_ASSERT
 #define CORRADE_INTERNAL_ASSERT(condition) do {} while(0)
@@ -145,10 +146,10 @@ CORRADE_INTERNAL_ASSERT(!nullptr);
 @brief Internal call output assertion macro
 @param call         Assert call
 
-Unlike CORRADE_INTERNAL_ASSERT(), this macro performs the call even if
+Unlike @ref CORRADE_INTERNAL_ASSERT(), this macro performs the call even if
 `CORRADE_NO_ASSERT` is defined, making it usable for checking function output.
-Otherwise the behavior is the same as with CORRADE_INTERNAL_ASSERT(). Example
-usage:
+Otherwise the behavior is the same as with @ref CORRADE_INTERNAL_ASSERT().
+Example usage:
 @code
 CORRADE_INTERNAL_ASSERT_OUTPUT(initialize());
 @endcode
@@ -182,7 +183,7 @@ switch(flag) {
     default: CORRADE_ASSERT_UNREACHABLE();
 }
 @endcode
-@see CORRADE_ASSERT()
+@see @ref CORRADE_ASSERT()
 */
 #ifdef CORRADE_NO_ASSERT
 #if defined(__GNUC__) && !defined(CORRADE_GCC44_COMPATIBILITY)

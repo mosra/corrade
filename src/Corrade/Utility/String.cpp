@@ -120,14 +120,14 @@ std::string String::joinWithoutEmptyParts(const std::vector<std::string>& string
 }
 
 
-std::string String::lowercase(std::string str) {
-    std::transform(str.begin(), str.end(), str.begin(), static_cast<int (*)(int)>(std::tolower));
-    return std::move(str);
+std::string String::lowercase(std::string string) {
+    std::transform(string.begin(), string.end(), string.begin(), static_cast<int (*)(int)>(std::tolower));
+    return std::move(string);
 }
 
-std::string String::uppercase(std::string str) {
-    std::transform(str.begin(), str.end(), str.begin(), static_cast<int (*)(int)>(std::toupper));
-    return std::move(str);
+std::string String::uppercase(std::string string) {
+    std::transform(string.begin(), string.end(), string.begin(), static_cast<int (*)(int)>(std::toupper));
+    return std::move(string);
 }
 
 }}

@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Containers::Array
+ * @brief Class @ref Corrade::Containers::Array
  */
 
 #include <type_traits>
@@ -81,8 +81,8 @@ template<class T> class Array {
          *
          * Creates array of given size, the values are value-initialized
          * (i.e. builtin types are zero-initialized). For other than builtin
-         * types this is the same as Array(std::size_t). If the size is zero,
-         * no allocation is done.
+         * types this is the same as @ref Array(std::size_t). If the size is
+         * zero, no allocation is done.
          */
         static Array<T> zeroInitialized(std::size_t size) {
             if(!size) {
@@ -120,13 +120,13 @@ template<class T> class Array {
         /**
          * @brief Constructor
          *
-         * Creates array of given size, the values are default-initialized (i.e.
-         * builtin types are not initialized). If the size is zero, no
+         * Creates array of given size, the values are default-initialized
+         * (i.e. builtin types are not initialized). If the size is zero, no
          * allocation is done.
          * @note Due to ambiguity you can't call directly `%Array(0)` because
          *      it conflicts with Array(std::nullptr_t). You should call
          *      `%Array(nullptr)` instead, which is also `noexcept`.
-         * @see zeroInitialized()
+         * @see @ref zeroInitialized()
          */
         explicit Array(std::size_t size): _data(size ? new T[size] : nullptr), _size(size) {}
 
@@ -247,15 +247,15 @@ template<class T> class ArrayReference {
         typedef T Type;     /**< @brief Element type */
 
         #ifndef CORRADE_GCC45_COMPATIBILITY
-        /** @brief Conversion from nullptr */
+        /** @brief Conversion from `nullptr` */
         constexpr /*implicit*/ ArrayReference(std::nullptr_t) noexcept: _data(nullptr), _size(0) {}
         #endif
 
         /**
          * @brief Default constructor
          *
-         * Creates empty reference. Copy non-empty Array/ArrayReference onto
-         * the instance to make it useful.
+         * Creates empty reference. Copy non-empty @ref Array or
+         * @ref ArrayReference onto the instance to make it useful.
          */
         constexpr
         /* implicit where nullptr is not supported, as explicitly specifying
@@ -284,11 +284,11 @@ template<class T> class ArrayReference {
         #undef size
         #endif
 
-        /** @brief Construct reference to Array */
+        /** @brief Construct reference to @ref Array */
         constexpr /*implicit*/ ArrayReference(Array<T>& array) noexcept: _data(array), _size(array.size()) {}
 
         /**
-         * @brief Construct const reference to Array
+         * @brief Construct const reference to @ref Array
          *
          * Enabled only if @p T is `const U`.
          */
@@ -363,7 +363,7 @@ template<> class ArrayReference<const void> {
         typedef const void Type;     /**< @brief Element type */
 
         #ifndef CORRADE_GCC45_COMPATIBILITY
-        /** @brief Conversion from nullptr */
+        /** @brief Conversion from `nullptr` */
         constexpr /*implicit*/ ArrayReference(std::nullptr_t) noexcept: _data(nullptr), _size(0) {}
         #endif
 
@@ -411,10 +411,10 @@ template<> class ArrayReference<const void> {
         #undef size
         #endif
 
-        /** @brief Construct const void reference to any Array */
+        /** @brief Construct const void reference to any @ref Array */
         template<class T> constexpr /*implicit*/ ArrayReference(const Array<T>& array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
 
-        /** @brief Construct const void reference to any ArrayReference */
+        /** @brief Construct const void reference to any @ref ArrayReference */
         template<class T> constexpr /*implicit*/ ArrayReference(const ArrayReference<T>& array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
 
         /** @brief Whether the array is non-empty */

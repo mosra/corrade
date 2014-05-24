@@ -472,7 +472,7 @@ void AbstractManager::registerInstance(std::string plugin, AbstractPlugin& insta
     auto foundInstance = instances.find(plugin);
 
     if(foundInstance == instances.end())
-        foundInstance = instances.insert({std::move(plugin), std::vector<AbstractPlugin*>{}}).first;
+        foundInstance = instances.insert({std::move(plugin), {}}).first;
 
     foundInstance->second.push_back(&instance);
 
@@ -545,10 +545,8 @@ AbstractManager::Plugin::~Plugin() {
         delete staticPlugin;
 }
 
-} namespace Utility {
-
 #ifndef DOXYGEN_GENERATING_OUTPUT
-Debug operator<<(Debug debug, PluginManager::LoadState value) {
+Utility::Debug operator<<(Utility::Debug debug, PluginManager::LoadState value) {
     switch(value) {
         #define ls(state) case PluginManager::LoadState::state: return debug << "PluginManager::LoadState::" #state;
         ls(NotFound)

@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::TestSuite::Compare::StringToFile
+ * @brief Class @ref Corrade::TestSuite::Compare::StringToFile
  */
 
 #include "Corrade/TestSuite/Comparator.h"

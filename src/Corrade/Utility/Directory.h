@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::Directory
+ * @brief Class @ref Corrade::Utility::Directory
  */
 
 #include <string>
@@ -48,7 +48,7 @@ class CORRADE_UTILITY_EXPORT Directory {
         /**
          * @brief Listing flag
          *
-         * @see Flags, list()
+         * @see @ref Flags, @ref list()
          */
         enum class Flag: unsigned char {
             /** Skip `.` and `..` directories */
@@ -96,42 +96,37 @@ class CORRADE_UTILITY_EXPORT Directory {
         /**
          * @brief Listing flags
          *
-         * @see list()
+         * @see @ref list()
          */
         typedef Containers::EnumSet<Flag, unsigned char> Flags;
 
         /**
          * @brief Extract path from filename
-         * @param filename  Filename
-         * @return Path (everything before first slash). If the filename
-         * doesn't contain any path, returns empty string, if the filename is
-         * already a path (ends with slash), returns whole string without
-         * trailing slash.
+         *
+         * Returns everything before first slash. If the filename doesn't
+         * contain any path, returns empty string, if the filename is already a
+         * path (ends with slash), returns whole string without trailing slash.
          */
         static std::string path(const std::string& filename);
 
         /**
          * @brief Extract filename (without path) from filename
-         * @param filename  Filename
-         * @return File name without path. If the filename doesn't contain any
-         * slash, returns whole string, otherwise returns everything after last
-         * slash.
+         *
+         * If the filename doesn't contain any slash, returns whole string,
+         * otherwise returns everything after last slash.
          */
         static std::string filename(const std::string& filename);
 
         /**
          * @brief Join path and filename
-         * @param path      Path
-         * @param filename  Filename
-         * @return Joined path and filename. If the path is empty or the
-         * filename is absolute (with leading slash), returns filename.
+         *
+         * If the path is empty or the filename is absolute (with leading
+         * slash), returns @p filename.
          */
         static std::string join(const std::string& path, const std::string& filename);
 
         /**
          * @brief List directory contents
-         * @param path      Path
-         * @param flags     %Flags
          *
          * On failure returns empty vector.
          */
@@ -139,31 +134,26 @@ class CORRADE_UTILITY_EXPORT Directory {
 
         #ifndef CORRADE_TARGET_NACL_NEWLIB
         /**
-         * @brief Create given path
-         * @param path      Path
-         * @return True if path was successfully created or false if an error
-         * occured.
+         * @brief Create path
          *
+         * Returns `true` if path was successfully created, `false` otherwise.
          * @partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
          */
         static bool mkpath(const std::string& path);
 
         /**
-         * @brief Remove given file or directory
-         * @param path      Path
-         * @return `True` if path is file or empty directory and was
-         *      successfully removed, `false` otherwise.
+         * @brief Remove file or directory
          *
+         * Returns `true` if path is file or empty directory and was
+         * successfully removed, `false` otherwise.
          * @partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
          */
         static bool rm(const std::string& path);
 
         /**
          * @brief Move given file or directory
-         * @param oldPath   Old path
-         * @param newPath   New path
-         * @return `True` on success, `false` otherwise.
          *
+         * Returns `true` on success, `false` otherwise.
          * @partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
          */
         static bool move(const std::string& oldPath, const std::string& newPath);
@@ -186,8 +176,8 @@ class CORRADE_UTILITY_EXPORT Directory {
          *
          * On Unix, the configuration dir is `${XDG_CONFIG_HOME}/name` or
          * `${HOME}/.config/name` (@p name is lowercased), on Windows the
-         * configuration dir is in `%APPDATA%/`name` (*name* is left as is). If
-         * the directory can't be found, empty string is returned.
+         * configuration dir is in `%APPDATA%/`name` (@p name is left as is).
+         * If the directory can't be found, empty string is returned.
          * @partialsupport In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" and
          *      @ref CORRADE_TARGET_NACL returns empty string.
          */

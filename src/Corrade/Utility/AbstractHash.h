@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::AbstractHash
+ * @brief Class @ref Corrade::Utility::AbstractHash
  */
 
 #include <string>
@@ -61,7 +61,16 @@ template<std::size_t size> class HashDigest {
          *
          * Creates zero digest.
          */
-        constexpr HashDigest(): _digest() {}
+        constexpr /*implicit*/ HashDigest(): _digest() {}
+
+        /**
+         * @brief Construct digest from byte sequence
+         *
+         * Value count must be the same as `size`.
+         */
+        template<class ...T> constexpr explicit HashDigest(T... values): _digest{char(values)...} {
+            static_assert(sizeof...(values) == size, "Utility::HashDigest::HashDigest(): wrong data size");
+        }
 
         /** @brief Equality operator */
         bool operator==(const HashDigest<size>& other) const {
@@ -90,7 +99,7 @@ template<std::size_t size> class HashDigest {
 /**
 @brief Base template for hashing classes
 
-@see HashDigest
+@see @ref HashDigest
 */
 template<std::size_t digestSize> class AbstractHash {
     public:

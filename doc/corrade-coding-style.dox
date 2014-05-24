@@ -41,7 +41,7 @@ guidelines of large projects:
  - Qt: http://qt-project.org/wiki/Qt_Coding_Style
  - Chromium: http://dev.chromium.org/developers/coding-style/cpp-dos-and-donts
 
-@section text Text files in general
+@section corrade-coding-style-text Text files in general
 
 Each file must have one blank line at the end (Git will warn you in the
 diff if it's not the case), indentation is done exclusively with spaces (4
@@ -51,7 +51,7 @@ Git installation to warn about that).
 The text (and code) should be wrapped around 80th column, long single-line
 statements are allowed unless it hurts readability.
 
-@section cmake CMake code
+@section corrade-coding-style-cmake CMake code
 
 All cmake functions and macros (e.g. `add_executable()`, `set()`) are
 lowercase, keywords (e.g. `FILES`, `DESTINATION`) are uppercase. Variables are
@@ -72,9 +72,9 @@ set(CorradeUtility_SRCS
 
 Source and header lists should be ordered alphabetically.
 
-@section cpp C++ code
+@section corrade-coding-style-cpp C++ code
 
-@subsection cpp-files File and directory naming
+@subsection corrade-coding-style-cpp-filesystem File and directory naming
 
 All C++ header and source files are named after the class they contain with no
 case change. Thus there should be only one class per file, but if the classes
@@ -90,18 +90,19 @@ Code in the root Corrade namespace is in `src/` directory, each subnamespace is
 in its own subdirectory. Unit tests are in `Test` subnamespace (and
 subdirectory). Implementation details (helper classes etc.) which shouldn't be
 visible to end users should be in `Implementation` subnamespace in the same
-file as the class/function for which the implementation is. See @ref documentation
-section below for guide how to hide it also from Doxygen documentation.
+file as the class/function for which the implementation is. See
+@ref corrade-coding-style-documentation section below for guide how to hide it
+also from Doxygen documentation.
 
 Implementation details which are not referenced from any header should be either
-in anonymous namespace in source file (@ref cpp-anonymous-namespace "see below")
+in anonymous namespace in source file (@ref corrade-coding-style-cpp-anonymous-namespace "see below")
 or (if referenced from more than one source file, from tests etc.) in
 `Implementation` namespace in separate file in `Implementation` subdirectory.
 These subdirectories are treated as private implementation, thus they are by
 default excluded from documentation, their symbols shouldn't be exported and
 contents of these subdirectories shouldn't be installed anywhere.
 
-@subsection cpp-files File structure
+@subsection corrade-coding-style-cpp-files File structure
 
 Headers have an strict structure. Include guards are basically include path
 with slashes replaced with underscores to make refactoring as easy as possible.
@@ -122,9 +123,9 @@ includes from the library itself are in quotes. Includes should be sorted by
 (`&lt;string&gt;`) and those before dependencies (`&lt;dirent.h&gt;`)),
 then by path name.
 
-@subsection cpp-format Code format
+@subsection corrade-coding-style-cpp-format Code format
 
-@subsubsection cpp-naming Naming
+@subsubsection corrade-coding-style-cpp-naming Naming
 
 Namespaces, classes and structs, enums, type template names and static
 constants should be named with `CamelCase`, i.e. first letter of the name and
@@ -154,13 +155,13 @@ for internal usage by the C++ standard. Underscores before the name shouldn't
 be used in public API or function parameters, as it looks ugly in the
 documentation.
 
-@subsubsection cpp-forward-declarations Forward declarations and forward declaration headers
+@subsubsection corrade-coding-style-cpp-forward-declarations Forward declarations and forward declaration headers
 
 Use forward declarations in headers as much as possible, as it can significantly
 reduce time of compilation. If forward declarations are overly complex, consider
 adding forward declaration header containing all of them to save users' time.
 
-@subsubsection cpp-namespace Namespace declarations
+@subsubsection corrade-coding-style-cpp-namespace Namespace declarations
 
 Namespace declaration is on one line, separated with blank lines on both
 sides. The code inside the declaration is not indented to save horizontal
@@ -196,7 +197,7 @@ namespace TestSuite {
 }
 @endcode
 
-@subsubsection cpp-classes Class and structure declarations
+@subsubsection corrade-coding-style-cpp-classes Class and structure declarations
 
 Class and structure protection levels are ordered as following: first friend
 declarations, then public members, then protected members and finally private
@@ -208,7 +209,7 @@ assignment operators are first), then static variables, then non-static
 variables. Again, classes and methods are more important for user than
 variables, static members are more important than non-static.
 
-@subsubsection cpp-style Blocks, whitespace and indentation
+@subsubsection corrade-coding-style-cpp-style Blocks, whitespace and indentation
 
 The goal is to preserve readability with minimal amount of wasted vertical
 and horizontal space.
@@ -317,7 +318,7 @@ if(worked || around || expression)
 }
 @endcode
 
-@subsubsection cpp-switches Switch statements
+@subsubsection corrade-coding-style-cpp-switches Switch statements
 
 Switch statements are usually very verbose and thus they are often subject of
 various shortening and whitespace tricks. The goal is to make them as readable
@@ -334,7 +335,7 @@ switch(type) {
 }
 @endcode
 
-@subsubsection cpp-keywords Class member and function keywords
+@subsubsection corrade-coding-style-cpp-keywords Class member and function keywords
 
 Use keywords in this order: `template virtual inline constexpr explicit static`.
 When the function is fully defined in class body or when it is marked as
@@ -342,7 +343,7 @@ When the function is fully defined in class body or when it is marked as
 functions should have `virtual` keyword, the reimplementations should be marked
 with `override` instead.
 
-@subsubsection cpp-macros Preprocessor macros
+@subsubsection corrade-coding-style-cpp-macros Preprocessor macros
 
 Preprocessor macros should have the same indentation as surrounding code. If
 the macro is long or contains code which should be spanned or multiple lines,
@@ -350,7 +351,7 @@ it should be wrapped on multiple lines, each successive line indented and the
 line wrapping indicator `\` should be aligned around 80th column, preferably
 on some tab-stop.
 
-@subsection cpp-constructors Class constructors
+@subsection corrade-coding-style-cpp-constructors Class constructors
 
 All constructors (except copy and move constructors) should be `explicit` by
 default. Remove the keyword only if you want to allow implicit conversions
@@ -379,7 +380,7 @@ class UtilityClass {
 };
 @endcode
 
-@subsection cpp-constexpr Constant expressions and constants
+@subsection corrade-coding-style-cpp-constexpr Constant expressions and constants
 
 Use `constexpr` keyword where appropriate, mainly for getters, operators and
 static pure functions which will be heavily used with compile-time constants,
@@ -387,17 +388,17 @@ such as Containers::EnumSet::operator&().
 
 Traits class members and class constants which are not meant to be referenced
 or pointed to should be defined as `constexpr` function or using anonymous
-typed enum (@ref cpp-enums "see below"), because declaring them as
-`static const` variable will result in another (probably unwanted) symbol and
-the constant might not be always inlined.
+typed enum (@ref corrade-coding-style-cpp-enums "see below"), because declaring
+them as `static const` variable will result in another (probably unwanted)
+symbol and the constant might not be always inlined.
 
-@subsection cpp-assert Assertions
+@subsection corrade-coding-style-cpp-assert Assertions
 
 Use asserts as much as possible. Utility library has convenient CORRADE_ASSERT(),
 CORRADE_INTERNAL_ASSERT() and CORRADE_INTERNAL_ASSERT_OUTPUT() macros, see their
 documentation for more information.
 
-@subsection cpp-enum-inheritance Enums and inheritance
+@subsection corrade-coding-style-cpp-enum-inheritance Enums and inheritance
 
 Try to avoid having one enum accessible through more than one type, for
 example:
@@ -452,15 +453,15 @@ class BWImage {
 };
 @endcode
 
-@see @ref cpp-enums
+@see @ref corrade-coding-style-cpp-enums
 
-@subsection cpp-forbidden Forbidden and deprecated C/C++ features
+@subsection corrade-coding-style-cpp-forbidden Forbidden and deprecated C/C++ features
 
 Don't use RTTI (`dynamic_cast` and `std::typeinfo`) and exceptions, if you don't
 desperately need to. They violate C++ principle of "don't pay for what you don't
 use". Ideally the code should be compilable with `-fno-rtti -fno-exceptions`.
 
-@subsubsection cpp-heavy-headers Heavy STL headers
+@subsubsection corrade-coding-style-cpp-heavy-headers Heavy STL headers
 
 Don't add heavy STL includes in header files. Each of these
 <tt>#</tt><tt>include</tt>s brings >20k lines of source code which needs to be
@@ -480,7 +481,7 @@ numbers taken from `g++-4.8 -std=c++11 -E | wc -l`:
 Some other headers (e.g. the container ones) are heavy too, but in most cases
 they just need to be included.
 
-@subsubsection cpp-using using namespace keyword
+@subsubsection corrade-coding-style-cpp-using using namespace keyword
 
 `using namespace std` is not allowed. It brings many symbols into default
 namespace and can lead to unintended behavior. Consider `abs()` function. If
@@ -501,7 +502,7 @@ have `using` declarations at all** (unless there is good excuse for bringing
 some useful feature from different namespace into another namespace -- but not
 in the default namespace!).
 
-@subsubsection cpp-backward C-style casts
+@subsubsection corrade-coding-style-cpp-backward C-style casts
 
 Don't use C-style casts, use C++-style `static_cast` and `reinterpret_cast`
 instead. %Corrade enables compiler warning about their usage in `CORRADE_CXX_FLAGS`
@@ -516,22 +517,22 @@ float pi = static_cast<float>(a)/b; // good
 float pi = float(a)/b;              // even better here
 @endcode
 
-@subsubsection cpp-enums Unscoped and untyped enums
+@subsubsection corrade-coding-style-cpp-enums Unscoped and untyped enums
 
 Prefer to use C++11 `enum class`. Use Containers::EnumSet instead of integral
 bit masks. Always explicitly specify underlying type, it might save some memory
 and also allows for forward declaration of the enum, which is good if the enum
 is part of otherwise large header.
 
-@see @ref cpp-enum-inheritance
+@see @ref corrade-coding-style-cpp-enum-inheritance
 
-@subsubsection cpp-anonymous-namespace static keyword
+@subsubsection corrade-coding-style-cpp-anonymous-namespace static keyword
 
 Prefer to use anonymous namespaces instead of `static` keyword. Anonymous
 namespace ensures that the symbols won't be exported and unlike `static` keyword
 it can be used also for type declarations.
 
-@section comments Comments
+@section corrade-coding-style-comments Comments
 
 All comments should be in C-style (i.e. slash and asterisk, not two slashes).
 There should always be space after leading asterisk and before trailing
@@ -543,7 +544,7 @@ Multi-line comments should be done in a way which preserves block align (so
 when first line starts with slash, asterisk and space, the second line should
 be indented with three spaces to align the text).
 
-@section documentation Doxygen documentation
+@section corrade-coding-style-documentation Doxygen documentation
 
 Doxygen documentation uses C-style comments with two asterisks, each
 successive line should start with asterisk and space. However, documentation
@@ -629,15 +630,15 @@ template<class T> type std::enable_if<std::is_convertible<T, int>::value, void>:
 #endif
 @endcode
 
-@subsection documentation-commands Special documentation commands
+@subsection corrade-coding-style-documentation-commands Special documentation commands
 
-@subsubsection documentation-commands-todoc Documentation-related TODOs
+@subsubsection corrade-coding-style-documentation-commands-todoc Documentation-related TODOs
 
 TODOs about documentation (or about Doxygen workarounds) should be written
 with @c \@todoc instead of @c \@todo. They will appear on @ref todoc
 "separate page".
 
-@subsubsection documentation-commands-debugoperator Debugging operators
+@subsubsection corrade-coding-style-documentation-commands-debugoperator Debugging operators
 
 Operators for printing types on %Corrade's debug output should be marked with
 @c \@debugoperator, e.g.:
@@ -650,7 +651,26 @@ Corrade::Utility::Debug operator<<(Corrade::Utility::Debug debug, const Hash& va
 They will appear as related functions within documentation of class specified
 as the parameter and also crossreferenced from page @ref debugoperators.
 
-@subsubsection documentation-commands-configurationvalue Configuration value parsers and writers
+For non-class enums there is @c \@debugoperatorenum command and for in-class
+enums the @c \@debugoperatorclassenum command:
+@code
+enum class Flag: std::uint32_t;
+
+// @debugoperatorenum{Flag}
+Corrade::Utility::Debug operator<<(Corrade::Utility::Debug debug, Flag value);
+
+class Foo {
+    enum class Flag: std::uint32_t;
+};
+
+// @debugoperatorclassenum{Foo,Foo::Flag}
+Corrade::Utility::Debug operator<<(Corrade::Utility::Debug debug, Foo::Flag value);
+@endcode
+Debug operator for non-class enum will appear in documentation of surrounding
+namespace, debug operator for class enum will appear as related function in
+documentation of given class.
+
+@subsubsection corrade-coding-style-documentation-commands-configurationvalue Configuration value parsers and writers
 
 Helper classes for parsing and writing configuration values should be marked
 with @c \@configurationvalue, and referenced from the class using
@@ -668,12 +688,22 @@ namespace Corrade { namespace Utility {
 They will appear linked with documentation of class specified as the
 parameter and also crossreferenced from page `configurationvalues`.
 
-@subsubsection documentation-commands-partialsupport Partially supported features
+@subsubsection corrade-coding-style-documentation-commands-partialsupport Partially supported features
 
 Features that are not supported on all platform should be marked with
 @c \@partialsupport, listing unsupported platforms and optionally reason why.
 
-@section git Git commit messages, branch and tag format
+@subsection corrade-coding-style-documentation-ordering Section ordering
+
+In detailed documentation the text should be always first, additional blocks
+are then ordered by their importance. Various @c \@note, @c \@attention and
+@c \@warning blocks to highlight some information are always first, then
+@c \@see block with links to related stuff, then various support information
+such as @c \@partialsupport, after that @c \@deprecated information and
+@c \@todo, @c \@todoc and @c \@bug always last, as they are the least important
+and in most cases only for internal use.
+
+@section corrade-coding-style-git Git commit messages, branch and tag format
 
 Each commit message should have short one-line explanation at the beginning,
 formed as a sentence (i.e., first word capitalized and period at the end). If

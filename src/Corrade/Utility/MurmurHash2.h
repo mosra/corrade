@@ -26,54 +26,22 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::MurmurHash2Implementation, Corrade::Utility::MurmurHash2
+ * @brief Class @ref Corrade::Utility::MurmurHash2
  */
 
 #include "Corrade/Utility/AbstractHash.h"
 
 namespace Corrade { namespace Utility {
 
-/**
-@brief MurmurHash implementation
-
-Specialized implementation for 32bit and 64bit `std::size_t`.
-*/
-template<std::size_t> class MurmurHash2Implementation {
-    #ifdef DOXYGEN_GENERATING_OUTPUT
-    public:
-        /**
-         * @brief Constructor
-         * @param seed      Seed to initialize the hash
-         */
-        explicit MurmurHash2Implementation(std::size_t seed);
-
-        /** @brief Compute digest of given data */
-        std::size_t operator()(const char* data, std::size_t size);
-    #endif
-};
-
-/** @todo Export implementation symbols only for tests */
-
-#ifndef DOXYGEN_GENERATING_OUTPUT
-/** @todo Used only in unit test, export in only there? */
-template<> class CORRADE_UTILITY_EXPORT MurmurHash2Implementation<4> {
-    public:
-        constexpr explicit MurmurHash2Implementation(unsigned int seed): seed(seed) {}
-        unsigned int operator()(const unsigned char* data, unsigned int size) const;
-
-    private:
-        unsigned int seed;
-};
-/** @todo Used only in unit test, export in only there? */
-template<> class CORRADE_UTILITY_EXPORT MurmurHash2Implementation<8> {
-    public:
-        constexpr explicit MurmurHash2Implementation(unsigned long long seed): seed(seed) {}
-        unsigned long long operator()(const unsigned char* data, unsigned long long size) const;
-
-    private:
-        unsigned long long seed;
-};
-#endif
+namespace Implementation {
+    template<std::size_t> struct MurmurHash2;
+    template<> struct CORRADE_UTILITY_EXPORT MurmurHash2<4> {
+        unsigned int operator()(unsigned int seed, const unsigned char* data, unsigned int size) const;
+    };
+    template<> struct CORRADE_UTILITY_EXPORT MurmurHash2<8> {
+        unsigned long long operator()(unsigned long long seed, const unsigned char* data, unsigned long long size) const;
+    };
+}
 
 /**
 @brief MurmurHash 2
@@ -90,7 +58,7 @@ class CORRADE_UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(std::size_t
          * @brief Digest of given data
          *
          * Computes digest using default zero seed. This function is here for
-         * consistency with other AbstractHash subclasses.
+         * consistency with other @ref AbstractHash subclasses.
          */
         static Digest digest(const std::string& data) {
             return MurmurHash2()(data);
@@ -100,7 +68,7 @@ class CORRADE_UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(std::size_t
          * @brief Constructor
          * @param seed      Seed to initialize the hash
          */
-        constexpr explicit MurmurHash2(std::size_t seed = 0): implementation(seed) {}
+        constexpr explicit MurmurHash2(std::size_t seed = 0): _seed(seed) {}
 
         /** @brief Compute digest of given data */
         Digest operator()(const std::string& data) const {
@@ -109,18 +77,18 @@ class CORRADE_UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(std::size_t
 
         /** @copydoc operator()(const std::string&) const */
         template<std::size_t size> Digest operator()(const char(&data)[size]) const {
-            std::size_t d = implementation(reinterpret_cast<const unsigned char*>(data), size-1);
+            std::size_t d = Implementation::MurmurHash2<sizeof(std::size_t)>{}(_seed, reinterpret_cast<const unsigned char*>(data), size-1);
             return Digest::fromByteArray(reinterpret_cast<const char*>(&d));
         }
 
         /** @copydoc operator()(const std::string&) const */
         Digest operator()(const char* data, std::size_t size) const {
-            std::size_t d = implementation(reinterpret_cast<const unsigned char*>(data), size);
+            std::size_t d = Implementation::MurmurHash2<sizeof(std::size_t)>{}(_seed, reinterpret_cast<const unsigned char*>(data), size);
             return Digest::fromByteArray(reinterpret_cast<const char*>(&d));
         }
 
     private:
-        MurmurHash2Implementation<sizeof(std::size_t)> implementation;
+        std::size_t _seed;
 };
 
 }}

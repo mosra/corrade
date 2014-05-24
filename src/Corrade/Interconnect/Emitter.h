@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Interconnect::Emitter
+ * @brief Class @ref Corrade::Interconnect::Emitter
  */
 
 #include <cstdint>
@@ -92,9 +92,9 @@ called from outside the class.
 Signals implemented on %Emitter subclasses can be connected to slots using
 various @ref Interconnect::connect() "connect()" functions. The argument count
 and types of slot function must be exactly the same as of the signal function.
-When a connection is established, returned Connection object can be used to
-remove or reestablish given connection using @ref Connection::disconnect() or
-@ref Connection::connect():
+When a connection is established, returned @ref Connection object can be used
+to remove or reestablish given connection using @ref Connection::disconnect()
+or @ref Connection::connect():
 @code
 Connection c = Emitter::connect(...);
 // ...
@@ -208,11 +208,6 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
     friend class Connection;
     friend class Receiver;
 
-    Emitter(const Emitter&) = delete;
-    Emitter(Emitter&&) = delete;
-    Emitter& operator=(const Emitter&) = delete;
-    Emitter& operator=(Emitter&&) = delete;
-
     public:
         /**
          * @brief Signature for signals
@@ -228,11 +223,23 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
 
         explicit Emitter();
 
+        /** @brief Copying is not allowed */
+        Emitter(const Emitter&) = delete;
+
+        /** @brief Moving is not allowed */
+        Emitter(Emitter&&) = delete;
+
+        /** @brief Copying is not allowed */
+        Emitter& operator=(const Emitter&) = delete;
+
+        /** @brief Moving is not allowed */
+        Emitter& operator=(Emitter&&) = delete;
+
         /**
          * @brief Whether the emitter is connected to any slot
          *
-         * @see Receiver::hasSlotConnections(), Connection::isConnected(),
-         *      signalConnectionCount()
+         * @see @ref Receiver::hasSlotConnections(),
+         *      @ref Connection::isConnected(), @ref signalConnectionCount()
          */
         bool hasSignalConnections() const {
             return !connections.empty();
@@ -241,8 +248,8 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         /**
          * @brief Whether given signal is connected to any slot
          *
-         * @see Receiver::hasSlotConnections(), Connection::isConnected(),
-         *      signalConnectionCount()
+         * @see @ref Receiver::hasSlotConnections(),
+         *      @ref Connection::isConnected(), @ref signalConnectionCount()
          */
         template<class Emitter, class ...Args> bool hasSignalConnections(Signal(Emitter::*signal)(Args...)) const {
             return connections.count(Implementation::SignalData(signal)) != 0;
@@ -251,14 +258,16 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         /**
          * @brief Count of connections to this emitter signals
          *
-         * @see Receiver::slotConnectionCount(), hasSignalConnections()
+         * @see @ref Receiver::slotConnectionCount(),
+         *      @ref hasSignalConnections()
          */
         std::size_t signalConnectionCount() const { return connections.size(); }
 
         /**
          * @brief Count of slots connected to given signal
          *
-         * @see Receiver::slotConnectionCount(), hasSignalConnections()
+         * @see @ref Receiver::slotConnectionCount(),
+         *      @ref hasSignalConnections()
          */
         template<class Emitter, class ...Args> std::size_t signalConnectionCount(Signal(Emitter::*signal)(Args...)) const {
             return connections.count(Implementation::SignalData(signal));
@@ -275,8 +284,9 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * postman.disconnect(&postman, &Postman::messageDelivered);
          * @endcode
          *
-         * @see Connection::disconnect(), disconnectAllSignals(),
-         *      Receiver::disconnectAllSlots(), hasSignalConnections()
+         * @see @ref Connection::disconnect(), @ref disconnectAllSignals(),
+         *      @ref Receiver::disconnectAllSlots(),
+         *      @ref hasSignalConnections()
          */
         template<class Emitter, class ...Args> void disconnectSignal(Signal(Emitter::*signal)(Args...)) {
             disconnectInternal(Implementation::SignalData(signal));
@@ -285,8 +295,9 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         /**
          * @brief Disconnect everything from this emitter signals
          *
-         * @see Receiver::disconnectAllSlots(), Connection::disconnect(),
-         *      disconnectSignal(), hasSignalConnections()
+         * @see @ref Receiver::disconnectAllSlots(),
+         *      @ref Connection::disconnect(), @ref disconnectSignal(),
+         *      @ref hasSignalConnections()
          */
         void disconnectAllSignals();
 
@@ -331,15 +342,16 @@ class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
     friend class Interconnect::Emitter;
     friend class Interconnect::Receiver;
 
-    AbstractConnectionData(const AbstractConnectionData&) = delete;
-    AbstractConnectionData(AbstractConnectionData&&) = delete;
-    AbstractConnectionData& operator=(const AbstractConnectionData&) = delete;
-    AbstractConnectionData& operator=(AbstractConnectionData&&) = delete;
-
     public:
         enum class Type: std::uint8_t { Function, Member };
 
+        AbstractConnectionData(const AbstractConnectionData&) = delete;
+        AbstractConnectionData(AbstractConnectionData&&) = delete;
+
         virtual ~AbstractConnectionData() = 0;
+
+        AbstractConnectionData& operator=(const AbstractConnectionData&) = delete;
+        AbstractConnectionData& operator=(AbstractConnectionData&&) = delete;
 
     protected:
         explicit AbstractConnectionData(Emitter* emitter, Type type): connection(nullptr), emitter(emitter), lastHandledSignal(0), type(type) {}

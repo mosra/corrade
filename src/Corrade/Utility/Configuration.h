@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Utility::Configuration
+ * @brief Class @ref Corrade::Utility::Configuration
  */
 
 #include <string>
@@ -44,14 +44,14 @@ namespace Corrade { namespace Utility {
 Provides hierarchical configuration storage. The key/value pairs are stored in
 hierarchical groups, this class acts as an root configuration group. Supported
 are either non-unique or unique group and key names, uniqueness can be enforced
-via flag in constructor. See ConfigurationGroup class documentation for
+via flag in constructor. See @ref ConfigurationGroup class documentation for
 accessing, deleting, adding and setting groups and values.
 
 Values can be saved and retrieved using templated function, so it's possible to
-implement saving for any type. See ConfigurationValue documentation for an
+implement saving for any type. See @ref ConfigurationValue documentation for an
 example.
 
-@section Configuration_Example Example usage
+@section Utility-Configuration-example Example usage
 @code
 Configuration conf("my.conf");
 
@@ -72,8 +72,10 @@ conf.addValue<int>("a", 3);
 conf.save();
 @endcode
 
-@section Configuration_Syntax File syntax
+@section Utility-Configuration-syntax File syntax¨
+
 File syntax is based on INI syntax, consisting of three basic elements:
+
 - group header
 - key/value pair
 - comment / empty line
@@ -133,7 +135,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         /**
          * @brief Flag for opening configuration file
          *
-         * @see Flags
+         * @see @ref Flags
          */
         enum class Flag: std::uint32_t {
             /**
@@ -160,14 +162,15 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
 
             /**
              * No comments or empty lines will be preserved on saving. Useful
-             * for memory saving and faster access. See also @ref Flag "Flag::ReadOnly".
+             * for memory saving and faster access. See also
+             * @ref Flag::ReadOnly.
              */
             SkipComments    = 1 << 4,
 
             /**
              * Open the file read-only, which means faster access to elements
              * and less memory used. Filename is not saved to avoid overwriting
-             * the file with save(). See also @ref Flag "Flag::SkipComments".
+             * the file with @ref save(). See also @ref Flag::SkipComments.
              */
             ReadOnly        = 1 << 5
         };
@@ -175,7 +178,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         /**
          * @brief Flags for opening configuration file
          *
-         * @see Configuration::Configuration()
+         * @see @ref Configuration::Configuration()
          */
         typedef Containers::EnumSet<Flag, std::uint32_t> Flags;
 
@@ -193,7 +196,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          *
          * Opens the file and loads it according to specified flags. If file
          * cannot be opened or parsed, the configuration is empty and filename
-         * is not saved to avoid overwriting the file with save().
+         * is not saved to avoid overwriting the file with @ref save().
          */
         explicit Configuration(const std::string& filename, Flags flags = Flags());
 
@@ -215,7 +218,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         /**
          * @brief Destructor
          *
-         * If the configuration has been changed, calls save().
+         * If the configuration has been changed, calls @ref save().
          */
         ~Configuration();
 
@@ -231,7 +234,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         /**
          * @brief Set filename
          *
-         * The filename is used by save().
+         * The filename is used by @ref save().
          */
         void setFilename(std::string filename);
 
@@ -250,10 +253,9 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
 
         /**
          * @brief Save configuration
-         * @return Whether the file was saved successfully
          *
-         * If filename() is not empty, writes configuration back to the file.
-         * Returns `true` on success, `false` otherwise.
+         * If @ref filename() is not empty, writes configuration back to the
+         * file. Returns `true` on success, `false` otherwise.
          */
         bool save();
 

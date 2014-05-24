@@ -25,7 +25,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-/** @file Utility/TypeTraits.h
+/** @file
  * @brief Macros @ref CORRADE_HAS_TYPE(), alias @ref Corrade::Utility::IsIterable
  */
 

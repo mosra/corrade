@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Containers::EnumSet
+ * @brief Class @ref Corrade::Containers::EnumSet
  */
 
 #include <type_traits>
@@ -48,8 +48,8 @@ all the values must be binary exclusive.
 
 @anchor EnumSet-out-of-class-operators
 Desired usage is via typedef'ing. You should also call
-CORRADE_ENUMSET_OPERATORS() macro with the resulting type as parameter to have
-also out-of-class operators defined:
+@ref CORRADE_ENUMSET_OPERATORS() macro with the resulting type as parameter to
+have out-of-class operators defined:
 @code
 enum class Feature: unsigned int {
     Fast = 1 << 0,
@@ -63,9 +63,9 @@ CORRADE_ENUMSET_OPERATORS(Features)
 @endcode
 
 @anchor EnumSet-friend-operators
-If you have the EnumSet as private or protected member of any class, you have
+If you have the %EnumSet as private or protected member of any class, you have
 to declare the out-of-class operators as friends. It can be done with
-CORRADE_ENUMSET_FRIEND_OPERATORS() macro:
+@ref CORRADE_ENUMSET_FRIEND_OPERATORS() macro:
 @code
 class Application {
     private:
@@ -204,7 +204,7 @@ class EnumSet {
 };
 
 /** @hideinitializer
-@brief Define out-of-class operators for given EnumSet
+@brief Define out-of-class operators for given @ref Corrade::Containers::EnumSet "EnumSet"
 
 See @ref EnumSet-out-of-class-operators "EnumSet documentation" for example
 usage.
@@ -233,7 +233,7 @@ usage.
     }
 
 /** @hideinitializer
-@brief Define out-of-class operators for given EnumSet as friends of encapsulating class
+@brief Define out-of-class operators for given @ref Corrade::Containers::EnumSet "EnumSet" as friends of encapsulating class
 
 See @ref EnumSet-friend-operators "EnumSet documentation" for example usage.
 */

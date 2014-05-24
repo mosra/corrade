@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::TestSuite::Compare::File
+ * @brief Class @ref Corrade::TestSuite::Compare::File
  */
 
 #include "Corrade/TestSuite/Comparator.h"
@@ -70,7 +70,7 @@ and position of first different character in both files. Example usage:
 CORRADE_COMPARE_AS("actual.txt", "expected.txt", Compare::File);
 @endcode
 
-If the files have the same path prefix, you can use CORRADE_COMPARE_WITH()
+If the files have the same path prefix, you can use @ref CORRADE_COMPARE_WITH()
 macro and pass the prefix to the constructor:
 @code
 CORRADE_COMPARE_WITH("actual.txt", "expected.txt", Compare::File("/common/path"));

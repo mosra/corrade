@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Forward declarations for Corrade::Interconnect namespace
+ * @brief Forward declarations for @ref Corrade::Interconnect namespace
  */
 
 #include <cstddef>

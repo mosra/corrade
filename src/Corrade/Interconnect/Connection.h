@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class Corrade::Interconnect::Connection
+ * @brief Class @ref Corrade::Interconnect::Connection
  */
 
 #include <cstddef>
@@ -75,14 +75,15 @@ namespace Implementation {
 /**
 @brief %Connection
 
-Returned by Emitter::connect(), allows to remove or reestablish the connection.
-Destruction of %Connection object does not remove the connection, after that
-the only possibility to remove the connection is to disconnect whole emitter
-or receiver or disconnect everything connected to given signal using
-Emitter::disconnectSignal(), Emitter::disconnectAllSignals() or
-Receiver::disconnectAllSlots() or destroy either emitter or receiver object.
+Returned by @ref Emitter::connect(), allows to remove or reestablish the
+connection. Destruction of %Connection object does not remove the connection,
+after that the only possibility to remove the connection is to disconnect whole
+emitter or receiver or disconnect everything connected to given signal using
+@ref Emitter::disconnectSignal(), @ref Emitter::disconnectAllSignals() or
+@ref Receiver::disconnectAllSlots() or destroy either emitter or receiver
+object.
 
-@see @ref interconnect, Emitter, Receiver
+@see @ref interconnect, @ref Emitter, @ref Receiver
 */
 class CORRADE_INTERCONNECT_EXPORT Connection {
     friend class Emitter;
@@ -113,15 +114,16 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
          * @return `False` if either emitter or receiver object (if applicable)
          *      doesn't exist anymore, `true` otherwise.
          *
-         * @see isConnected()
+         * @see @ref isConnected()
          */
         bool isConnectionPossible() const { return data; }
 
         /**
          * @brief Whether the connection exists
          *
-         * @see isConnectionPossible(), Emitter::hasSignalConnections(),
-         *      Receiver::hasSlotConnections()
+         * @see @ref isConnectionPossible(),
+         *      @ref Emitter::hasSignalConnections(),
+         *      @ref Receiver::hasSlotConnections()
          */
         bool isConnected() const { return connected; }
 
@@ -130,7 +132,8 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
          *
          * If connection is not possible, returns `false`, otherwise creates
          * the connection (if not already connected) and returns `true`.
-         * @see isConnectionPossible(), isConnected(), Emitter::connect()
+         * @see @ref isConnectionPossible(), @ref isConnected(),
+         *      @ref Emitter::connect()
          */
         bool connect();
 
@@ -138,8 +141,9 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
          * @brief Remove the connection
          *
          * Disconnects if connection exists.
-         * @see isConnected(), Emitter::disconnectSignal(),
-         *      Emitter::disconnectAllSignals(), Receiver::disconnectAllSlots()
+         * @see @ref isConnected(), @ref Emitter::disconnectSignal(),
+         *      @ref Emitter::disconnectAllSignals(),
+         *      @ref Receiver::disconnectAllSlots()
          */
         void disconnect();
 

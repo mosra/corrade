@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Forward declarations for Corrade::Containers namespace
+ * @brief Forward declarations for @ref Corrade::Containers namespace
  */
 
 namespace Corrade { namespace Containers {

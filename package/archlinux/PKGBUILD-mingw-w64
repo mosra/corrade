@@ -1,0 +1,41 @@
+# Author: mosra <mosra@centrum.cz>
+pkgname=mingw-w64-corrade
+pkgver=dev
+pkgrel=1
+pkgdesc="Multiplatform plugin management and utility library (mingw-w64)"
+arch=('any')
+url="http://mosra.cz/blog/corrade.php"
+license=('MIT')
+depends=('mingw-w64-crt')
+makedepends=('mingw-w64-gcc' 'cmake' 'ninja' 'corrade')
+options=(!buildflags !strip)
+
+build() {
+    mkdir -p "$startdir/build-mingw-w64-32"
+    cd "$startdir/build-mingw-w64-32"
+
+    cmake .. \
+        -DCMAKE_TOOLCHAIN_FILE=../toolchains/archlinux/basic-mingw-w64-32.cmake \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr/i686-w64-mingw32 \
+        -G Ninja
+    ninja
+
+    mkdir -p "$startdir/build-mingw-w64-64"
+    cd "$startdir/build-mingw-w64-64"
+
+    cmake .. \
+        -DCMAKE_TOOLCHAIN_FILE=../toolchains/archlinux/basic-mingw-w64-64.cmake \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr/x86_64-w64-mingw32 \
+        -G Ninja
+    ninja
+}
+
+package() {
+    cd "$startdir/build-mingw-w64-32"
+    DESTDIR="$pkgdir/" ninja install/strip
+
+    cd "$startdir/build-mingw-w64-64"
+    DESTDIR="$pkgdir/" ninja install/strip
+}

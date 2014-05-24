@@ -40,7 +40,7 @@ namespace Corrade { namespace Utility {
 /**
  * @brief Cast type to another of the same size
  *
- * Unlike reinterpret_cast this doesn't break strict-aliasing rules.
+ * Unlike `reinterpret_cast` this doesn't break strict-aliasing rules.
  */
 template<class To, class From> inline To bitCast(const From& from) {
     /* Based on https://github.com/chromium/chromium/blob/trunk/base/basictypes.h#L306 */
