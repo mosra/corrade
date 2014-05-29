@@ -7,7 +7,7 @@ SUPPORTED PLATFORMS
 
 *   **Linux** and embedded Linux
 *   **Windows**
-*   **OS X** (ported by [David Lin](https://github.com/davll))
+*   **OS X**
 *   **Android** 1.5 (API Level 3) and higher
 *   **Google Chrome** (through [Native Client](https://developers.google.com/native-client/),
     both `newlib` and `glibc` toolchains are supported)
@@ -102,6 +102,12 @@ awesome idea? Feel free to visit my website or contact me at:
 *   Twitter - https://twitter.com/czmosra
 *   E-mail - mosra@centrum.cz
 *   Jabber - mosra@jabbim.cz
+
+CONTRIBUTORS
+============
+
+See [CONTRIBUTORS.md](CONTRIBUTORS.md) file for details. Big thanks to everyone
+involved!
 
 LICENSE
 =======
