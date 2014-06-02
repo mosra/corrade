@@ -71,7 +71,7 @@ connect any number of signals to one slot and any number of slots to one
 signal. See @ref connect() for more information about how to manage the
 connections.
 @skip RemoteControl rc
-@until Interconnect::connect(&rc, &RemoteControl::triggered, bomb3
+@until Interconnect::connect(rc, &RemoteControl::triggered, *bomb3
 
 See @ref connect(), @ref Emitter::disconnectSignal(), @ref Emitter::disconnectAllSignals()
 and @ref Receiver::disconnectAllSlots() functions for information about
