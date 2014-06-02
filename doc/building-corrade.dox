@@ -499,13 +499,15 @@ Build is done using **Ninja** build system. It expects that **GCC** >=4.8.2,
 one of them. You can add/remove the compilers in `axes/hudson.matrix.TextAxis`
 or via the web interface later.
 
-There is also MinGW32 and Emscripten configuration, add or update them with the
-commands below. See @ref building-corrade-cross for more information about
-setting up the crosscompilers and `toolchains/` submodule. For Emscripten you
-need also **Node.js** installed to run the tests.
+There is also MinGW32, MinGW-w64, Emscripten and NaCl configuration, add or
+update them with the commands below. See @ref building-corrade-cross for more
+information about setting up the crosscompilers and `toolchains/` submodule.
+For Emscripten you need also **Node.js** installed to run the tests.
 
     java -jar jenkins-cli.jar -s http://your-jenkins-server <command> Corrade-MinGW32 < jenkins-mingw32.xml
+    java -jar jenkins-cli.jar -s http://your-jenkins-server <command> Corrade-MinGW-w64 < jenkins-mingw-w64.xml
     java -jar jenkins-cli.jar -s http://your-jenkins-server <command> Corrade-Emscripten < jenkins-emscripten.xml
+    java -jar jenkins-cli.jar -s http://your-jenkins-server <command> Corrade-NaCl < jenkins-nacl.xml
 
 */
 
