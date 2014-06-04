@@ -132,6 +132,12 @@ if(APPLE AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lc++")
 endif()
 
+# Provide a way to distinguish between debug and release builds on
+# multi-configuration build systems
+if(NOT CMAKE_CFG_INTDIR STREQUAL ".")
+    set_property(GLOBAL APPEND COMPILE_DEFINITIONS_DEBUG "-DCORRADE_IS_DEBUG_BUILD")
+endif()
+
 function(corrade_add_test test_name)
     # Get DLL and path lists
     foreach(arg ${ARGN})
