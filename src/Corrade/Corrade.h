@@ -65,10 +65,19 @@ Defined if built as static libraries. Default are shared libraries.
 @brief Unix target
 
 Defined if the library is built for some Unix flavor (Linux, BSD, OS X...).
-@see @ref corrade-cmake
+@see @ref CORRADE_TARGET_APPLE, @ref corrade-cmake
 */
 #define CORRADE_TARGET_UNIX
 #undef CORRADE_TARGET_UNIX
+
+/**
+@brief Apple target
+
+Defined if the library is built for OS X.
+@see @ref CORRADE_TARGET_UNIX, @ref corrade-cmake
+*/
+#define CORRADE_TARGET_APPLE
+#undef CORRADE_TARGET_APPLE
 
 /**
 @brief Windows target

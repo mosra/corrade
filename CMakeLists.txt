@@ -61,6 +61,11 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL Android)
     # It's too inconvenient to manually load all shared libs using JNI
     set(BUILD_STATIC ON)
 elseif(UNIX)
+    # Both APPLE and UNIX are defined on OSX
+    if(APPLE)
+        set(CORRADE_TARGET_APPLE 1)
+    endif()
+
     # NaCl and Emscripten are Unix too, this selects only the other ones
     set(CORRADE_TARGET_UNIX 1)
 elseif(WIN32)

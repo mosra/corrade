@@ -80,6 +80,7 @@ also available as preprocessor variables if you include Corrade.h:
     shared libraries.
 -   `CORRADE_TARGET_UNIX` -- Defined if compiled for some Unix flavor (Linux,
     BSD, OS X)
+-   `CORRADE_TARGET_APPLE` -- Defined if compiled for OS X
 -   `CORRADE_TARGET_WINDOWS` -- Defined if compiled for Windows
 -   `CORRADE_TARGET_NACL` -- Defined if the library is built for Google Chrome
     Native Client
