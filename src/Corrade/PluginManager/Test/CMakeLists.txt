@@ -38,7 +38,7 @@ corrade_add_static_plugin(Canary ${CMAKE_CURRENT_BINARY_DIR} Canary.conf Canary.
 corrade_add_test(PluginManagerTest Test.cpp LIBRARIES CorradePluginManagerTestLib Canary)
 
 target_link_libraries(Canary CorradePluginManagerTestLib)
-if(WIN32)
+if(CORRADE_TARGET_WINDOWS)
     target_link_libraries(Snail CorradePluginManagerTestLib)
     target_link_libraries(Dog CorradePluginManagerTestLib)
     target_link_libraries(Chihuahua CorradePluginManagerTestLib Dog)

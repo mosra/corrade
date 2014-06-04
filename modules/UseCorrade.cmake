@@ -197,7 +197,7 @@ endfunction()
 
 function(corrade_add_plugin plugin_name debug_install_dir release_install_dir metadata_file)
     # Create dynamic library
-    if(WIN32)
+    if(CORRADE_TARGET_WINDOWS)
         add_library(${plugin_name} SHARED ${ARGN})
     else()
         add_library(${plugin_name} MODULE ${ARGN})
