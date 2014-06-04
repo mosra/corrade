@@ -33,6 +33,10 @@
 
 #include "Corrade/Utility/Debug.h"
 
+#ifdef CORRADE_MSVC2013_COMPATIBILITY
+#include <array>
+#endif
+
 namespace Corrade { namespace Utility {
 
 /** @brief Hash digest */
@@ -68,7 +72,13 @@ template<std::size_t size> class HashDigest {
          *
          * Value count must be the same as `size`.
          */
-        template<class ...T> constexpr explicit HashDigest(T... values): _digest{char(values)...} {
+        template<class ...T> constexpr explicit HashDigest(T... values):
+            #ifndef CORRADE_MSVC2013_COMPATIBILITY
+            _digest{char(values)...}
+            #else
+            _digest({char(values)...})
+            #endif
+        {
             static_assert(sizeof...(values) == size, "Utility::HashDigest::HashDigest(): wrong data size");
         }
 
@@ -90,10 +100,20 @@ template<std::size_t size> class HashDigest {
         std::string hexString() const;
 
         /** @brief Raw digest byte array */
-        constexpr const char* byteArray() const { return _digest; }
+        constexpr const char* byteArray() const {
+            #ifndef CORRADE_MSVC2013_COMPATIBILITY
+            return _digest;
+            #else
+            return &_digest[0];
+            #endif
+        }
 
     private:
+        #ifndef CORRADE_MSVC2013_COMPATIBILITY
         char _digest[size];
+        #else
+        std::array<char, size> _digest;
+        #endif
 };
 
 /**
