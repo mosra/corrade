@@ -135,7 +135,7 @@ endif()
 # Provide a way to distinguish between debug and release builds on
 # multi-configuration build systems
 if(NOT CMAKE_CFG_INTDIR STREQUAL ".")
-    set_property(GLOBAL APPEND COMPILE_DEFINITIONS_DEBUG "-DCORRADE_IS_DEBUG_BUILD")
+    set_property(GLOBAL APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG "-DCORRADE_IS_DEBUG_BUILD")
 endif()
 
 function(corrade_add_test test_name)
