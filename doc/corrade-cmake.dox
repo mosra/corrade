@@ -58,6 +58,13 @@ found. If both debug and release libraries are found, proper version is chosen
 based on actual build configuration of the project (i.e. `Debug` build is
 linked to debug libraries, `Release` build to release libraries).
 
+On multi-configuration build systems (such as Visual Studio or XCode) the
+preprocessor variable `CORRADE_IS_DEBUG_BUILD` is defined if given build
+configuration is Debug (not Corrade itself, but build configuration of the
+project using it). Useful e.g. for selecting proper plugin directory. On
+single-configuration build systems (such as Makefiles) this information is not
+needed and thus the variable is not defined in any case.
+
 %Corrade configures the compiler to use C++11 standard. Additionally you can
 use `CORRADE_CXX_FLAGS` to enable additional pedantic set of warnings and
 enable hidden visibility by default.
@@ -81,6 +88,7 @@ also available as preprocessor variables if you include Corrade.h:
     shared libraries.
 -   `CORRADE_TARGET_UNIX` -- Defined if compiled for some Unix flavor (Linux,
     BSD, OS X)
+-   `CORRADE_TARGET_APPLE` -- Defined if compiled for OS X
 -   `CORRADE_TARGET_WINDOWS` -- Defined if compiled for Windows
 -   `CORRADE_TARGET_NACL` -- Defined if the library is built for Google Chrome
     Native Client

@@ -125,9 +125,15 @@ elseif(MSVC)
 endif()
 
 # Use C++11-enabled libcxx on OSX
-if(APPLE AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if(CORRADE_TARGET_APPLE AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lc++")
+endif()
+
+# Provide a way to distinguish between debug and release builds on
+# multi-configuration build systems
+if(NOT CMAKE_CFG_INTDIR STREQUAL ".")
+    set_property(GLOBAL APPEND COMPILE_DEFINITIONS_DEBUG "-DCORRADE_IS_DEBUG_BUILD")
 endif()
 
 function(corrade_add_test test_name)
@@ -189,7 +195,7 @@ endfunction()
 
 function(corrade_add_plugin plugin_name debug_install_dir release_install_dir metadata_file)
     # Create dynamic library
-    if(WIN32)
+    if(CORRADE_TARGET_WINDOWS)
         add_library(${plugin_name} SHARED ${ARGN})
     else()
         add_library(${plugin_name} MODULE ${ARGN})
@@ -201,7 +207,7 @@ function(corrade_add_plugin plugin_name debug_install_dir release_install_dir me
         COMPILE_FLAGS -DCORRADE_DYNAMIC_PLUGIN)
 
     # Enable incremental linking on the Mac OS X
-    if(APPLE)
+    if(CORRADE_TARGET_APPLE)
         set_target_properties(${plugin_name} PROPERTIES
             LINK_FLAGS "-undefined dynamic_lookup")
     endif()
