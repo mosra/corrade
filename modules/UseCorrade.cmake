@@ -131,9 +131,10 @@ if(CORRADE_TARGET_APPLE AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 endif()
 
 # Provide a way to distinguish between debug and release builds on
-# multi-configuration build systems
+# multi-configuration build systems. When using GLOBAL, the property is not set
+# at all. Bug?
 if(NOT CMAKE_CFG_INTDIR STREQUAL ".")
-    set_property(GLOBAL APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG "-DCORRADE_IS_DEBUG_BUILD")
+    set_property(DIRECTORY PROPERTY COMPILE_DEFINITIONS_DEBUG "CORRADE_IS_DEBUG_BUILD")
 endif()
 
 function(corrade_add_test test_name)
