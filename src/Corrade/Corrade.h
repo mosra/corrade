@@ -29,6 +29,8 @@
  * @brief Basic definitions
  */
 
+#include "Corrade/configure.h"
+
 namespace Corrade {
 
 #ifdef DOXYGEN_GENERATING_OUTPUT
