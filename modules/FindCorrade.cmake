@@ -26,9 +26,9 @@
 # single-configuration build systems (such as Makefiles) this information is
 # not needed and thus the variable is not defined in any case.
 #
-# Corrade configures the compiler to use C++11 standard. Additionally you can
-# use CORRADE_CXX_FLAGS to enable additional pedantic set of warnings and
-# enable hidden visibility by default.
+# Corrade configures the compiler to use C++11 standard (if it is not already
+# configured to do so). Additionally you can use CORRADE_CXX_FLAGS to enable
+# additional pedantic set of warnings and enable hidden visibility by default.
 #
 # Features of found Corrade library are exposed in these variables:
 #  CORRADE_GCC47_COMPATIBILITY  - Defined if compiled with compatibility
