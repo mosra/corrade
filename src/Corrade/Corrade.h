@@ -38,7 +38,7 @@ namespace Corrade {
 @brief GCC 4.7 compatibility
 
 Defined if compatibility mode for GCC 4.7 is enabled.
-@see @ref building-corrade
+@see @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_GCC47_COMPATIBILITY
 #undef CORRADE_GCC47_COMPATIBILITY
@@ -85,7 +85,7 @@ Defined if compatibility mode for MSVC 2013 is enabled.
 Defined if the library contains deprecated API (which will be removed in the
 future). To preserve backward compatibility, %Corrade is by default built with
 deprecated API included.
-@see @ref building-corrade
+@see @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_BUILD_DEPRECATED
 /* (enabled by default) */
@@ -94,7 +94,7 @@ deprecated API included.
 @brief Static library build
 
 Defined if built as static libraries. Default are shared libraries.
-@see @ref building-corrade
+@see @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_BUILD_STATIC
 #undef CORRADE_BUILD_STATIC
