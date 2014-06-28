@@ -47,7 +47,7 @@ Defined if compatibility mode for GCC 4.7 is enabled.
 @brief GCC 4.6 compatibility
 
 Defined if compatibility mode for GCC 4.6 is enabled.
-@see @ref building-corrade
+@see @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_GCC46_COMPATIBILITY
 #undef CORRADE_GCC46_COMPATIBILITY
@@ -56,7 +56,7 @@ Defined if compatibility mode for GCC 4.6 is enabled.
 @brief GCC 4.5 compatibility
 
 Defined if compatibility mode for GCC 4.5 is enabled.
-@see @ref building-corrade
+@see @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_GCC45_COMPATIBILITY
 #undef CORRADE_GCC45_COMPATIBILITY
@@ -65,7 +65,7 @@ Defined if compatibility mode for GCC 4.5 is enabled.
 @brief GCC 4.4 compatibility
 
 Defined if compatibility mode for GCC 4.4 is enabled.
-@see @ref building-corrade
+@see @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_GCC44_COMPATIBILITY
 #undef CORRADE_GCC44_COMPATIBILITY
@@ -74,7 +74,7 @@ Defined if compatibility mode for GCC 4.4 is enabled.
 @brief MSVC 2013 compatibility
 
 Defined if compatibility mode for MSVC 2013 is enabled.
-@see @ref building-corrade
+@see @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_MSVC2013_COMPATIBILITY
 #undef CORRADE_MSVC2013_COMPATIBILITY
