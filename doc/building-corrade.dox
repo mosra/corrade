@@ -495,7 +495,7 @@ or `update-job`).
 
     java -jar jenkins-cli.jar -s http://your-jenkins-server <command> Corrade-Compatibility < jenkins.xml
 
-Build is done using **Ninja** build system. It expects that **GCC** >=4.8.2,
+Build is done using **Ninja** build system. It expects that **GCC** >= 4.8.1,
 4.7, 4.6, 4.5, 4.4 and **Clang** are installed as it tries to compile the
 library with each one of them. You can add/remove the compilers in
 `axes/hudson.matrix.TextAxis` or via the web interface later.

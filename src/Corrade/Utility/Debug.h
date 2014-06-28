@@ -254,6 +254,8 @@ Prints the value as `{a, b, c}`.
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class Iterable> Debug operator<<(Debug debug, const Iterable& value)
 #else
+/* libc++ from Apple's Clang "4.2" (3.2-svn) doesn't have constexpr operator
+   bool for std::integral_constant, thus we need to use ::value instead */
 template<class Iterable> Debug operator<<(typename std::enable_if<IsIterable<Iterable>::value && !std::is_same<Iterable, std::string>::value, Debug>::type debug, const Iterable& value)
 #endif
 {
