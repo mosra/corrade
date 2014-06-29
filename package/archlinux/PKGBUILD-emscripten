@@ -6,7 +6,7 @@ pkgdesc="Multiplatform plugin management and utility library (Emscripten)"
 arch=('any')
 url="http://mosra.cz/blog/corrade.php"
 license=('MIT')
-makedepends=('cmake' 'ninja')
+makedepends=('cmake' 'ninja' 'emscripten-git')
 options=(!strip !buildflags)
 
 build() {
@@ -24,7 +24,7 @@ build() {
 
     cmake .. \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=/usr/emscripten/system
+        -DCMAKE_INSTALL_PREFIX=/usr/lib/emscripten/system
     ninja
 }
 
