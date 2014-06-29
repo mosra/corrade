@@ -70,7 +70,8 @@ use `CORRADE_CXX_FLAGS` to enable additional pedantic set of warnings and
 enable hidden visibility by default.
 
 Features of found %Corrade library are exposed in these variables, they are
-also available as preprocessor variables if you include @ref Corrade.h:
+also available as preprocessor variables if you include
+@ref Corrade/Corrade.h "Corrade/Corrade.h":
 
 -   `CORRADE_GCC47_COMPATIBILITY` -- Defined if compiled with compatibility
     mode for GCC 4.7
