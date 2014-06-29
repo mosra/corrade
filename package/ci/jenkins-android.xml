@@ -40,10 +40,10 @@
   <customWorkspace>Corrade</customWorkspace>
   <axes>
     <hudson.matrix.TextAxis>
-      <name>libraries</name>
+      <name>toolchain</name>
       <values>
-        <string>static</string>
-        <string>dynamic</string>
+        <string>ARM</string>
+        <string>x86</string>
       </values>
     </hudson.matrix.TextAxis>
     <hudson.matrix.TextAxis>
@@ -61,26 +61,20 @@
 git submodule init
 git submodule update
 
-if [ ${libraries} = "static" ] ; then
-    static_build_flag="-DBUILD_STATIC=ON -DBUILD_STATIC_PIC=ON"
-fi
-
 if [ "${compatibility}" = "deprecated" ] ; then
     deprecated_build_flag=ON
 else
     deprecated_build_flag=OFF
 fi
 
-mkdir -p build-mingw32-${libraries}-${compatibility}
-cd build-mingw32-${libraries}-${compatibility}
+mkdir -p build-android-${toolchain}-${compatibility}
+cd build-android-${toolchain}-${compatibility}
 
 cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_TOOLCHAIN_FILE=../toolchains/archlinux/basic-mingw32.cmake \
-    -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/mingw32-${libraries}-${compatibility} \
-    -DCMAKE_INSTALL_RPATH=${JENKINS_HOME}/filesystem/mingw32-${libraries}-${compatibility}/lib \
-    ${static_build_flag} \
-    -DBUILD_TESTS=ON \
+    -DCMAKE_MODULE_PATH="${WORKSPACE}/toolchains/modules" \
+    -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/Android-${toolchain}.cmake" \
+    -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/android-${toolchain}-${compatibility} \
     -DBUILD_DEPRECATED=${deprecated_build_flag} \
     -G Ninja
 
@@ -103,7 +97,7 @@ ninja install/strip
     <runSequentially>true</runSequentially>
     <touchStoneCombinationFilter>
 <![CDATA[
-libraries == "dynamic" && compatibility == "deprecated"
+toolchain == "ARM" && compatibility == "deprecated"
 ]]>
     </touchStoneCombinationFilter>
     <touchStoneResultCondition>
