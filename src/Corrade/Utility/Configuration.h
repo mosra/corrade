@@ -51,7 +51,8 @@ Values can be saved and retrieved using templated function, so it's possible to
 implement saving for any type. See @ref ConfigurationValue documentation for an
 example.
 
-@section Utility-Configuration-example Example usage
+## Example usage
+
 @code
 Configuration conf("my.conf");
 
@@ -72,7 +73,7 @@ conf.addValue<int>("a", 3);
 conf.save();
 @endcode
 
-@section Utility-Configuration-syntax File syntax¨
+## File syntax¨
 
 File syntax is based on INI syntax, consisting of three basic elements:
 

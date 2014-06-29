@@ -52,7 +52,7 @@ It is also possible to sort the containers before comparison using SortedContain
 CORRADE_COMPARE_AS(a, b, Compare::SortedContainer);
 @endcode
 
-See @ref Comparator-pseudo-types for more information.
+See @ref TestSuite-Comparator-pseudo-types for more information.
 */
 template<class> class Container {};
 

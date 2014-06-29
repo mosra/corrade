@@ -41,7 +41,7 @@ namespace Corrade { namespace TestSuite {
 See @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH() for more information
 and @ref Compare namespace for pseudo-type comparator implementations.
 
-@section Comparator-subclassing Subclassing
+## Subclassing
 
 You can reimplement this class for your own data types and even pseudo types
 for providing different ways to compare the same type.
@@ -50,7 +50,8 @@ You have to implement `operator()()` for comparison of two values with
 arbitrary type and `%printErrorMessage()` for printing error message when the
 comparison failed.
 
-@subsection Comparator-pseudo-types Comparing with pseudo-types
+@anchor TestSuite-Comparator-pseudo-types
+### Comparing with pseudo-types
 
 Imagine you have two filenames and you want to compare their contents instead
 of comparing the filename strings. Because you want to also compare strings
@@ -88,7 +89,8 @@ would be like this:
 CORRADE_COMPARE_AS("/path/to/actual.dat", "/path/to/expected.dat", FileContents);
 @endcode
 
-@subsection Comparator-parameters Passing parameters to comparators
+@anchor TestSuite-Comparator-parameters
+### Passing parameters to comparators
 
 Sometimes you need to pass additional parameters to comparator class so you
 can then use it in @ref CORRADE_COMPARE_WITH() macro. In that case you need to

@@ -51,7 +51,7 @@ as first argument (the remaining ones are then ignored), the parser prints full
 help text to the output and exits. If parse error occurs (missing/unknown
 argument etc.), the parser prints short usage information and exits.
 
-@section Utility-Arguments-usage Example usage
+## Example usage
 
 Contrived example of command-line utility which prints given text given number
 of times, optionally redirecting the output to a file:

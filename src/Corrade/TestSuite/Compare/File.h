@@ -76,8 +76,8 @@ macro and pass the prefix to the constructor:
 CORRADE_COMPARE_WITH("actual.txt", "expected.txt", Compare::File("/common/path"));
 @endcode
 
-See @ref Comparator-pseudo-types and @ref Comparator-parameters for more
-information.
+See @ref TestSuite-Comparator-pseudo-types and @ref TestSuite-Comparator-parameters
+for more information.
 */
 class File {
     public:
