@@ -69,7 +69,8 @@ functions to convert values from and to templated types. Reimplement the
 structure with template specialization to allow saving and getting
 non-standard types into and from configuration files.
 
-@section Utility-ConfigurationValue-example Example: custom structure
+## Example: custom structure
+
 We have structure named `Foo` and want to store it in configuration file as a
 sequence of two integers separated by a space.
 @code

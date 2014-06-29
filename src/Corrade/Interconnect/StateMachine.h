@@ -54,7 +54,7 @@ Exploits the Interconnect library for a simple state machine. Information about
 state transitions is broadcasted through signals. The machine is meant to be
 defined and connected at compile time.
 
-@section Interconnect-StateMachine-usage Basic usage
+## Basic usage
 
 Define two enums for states and inputs. The enums should have consecutive
 values starting from `0`.

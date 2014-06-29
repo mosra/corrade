@@ -58,7 +58,8 @@ class SignalDataHash {
 Contains signals and manages connections between signals and slots. See
 @ref interconnect for introduction.
 
-@section Emitter-signals Implementing signals
+@anchor Interconnect-Emitter-signals
+## Implementing signals
 
 Signals are implemented as member functions with @ref Signal as return type,
 argument count and types are not limited. The body consists of single
@@ -87,7 +88,8 @@ postman.paymentRequired(245);
 If the signal is not declared as public function, it cannot be connected or
 called from outside the class.
 
-@section Emitter-connections Connecting signals to slots
+@anchor Interconnect-Emitter-connections
+## Connecting signals to slots
 
 Signals implemented on %Emitter subclasses can be connected to slots using
 various @ref Interconnect::connect() "connect()" functions. The argument count
@@ -137,7 +139,7 @@ Interconnect::connect(*b, &Derived::derivedSignal, ...); // ok
 
 There are a few slot types, each type has its particular use:
 
-@subsection Emitter-connections-member Member function slots
+### Member function slots
 
 When connecting to member function slot with @ref Interconnect::connect() "connect()",
 @p receiver must be subclass of @ref Receiver and @p slot must be non-constant
@@ -311,8 +313,8 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * @param signal        %Signal
          * @param args          Arguments
          *
-         * See @ref Emitter-signals "class documentation" for more information
-         * about implementing signals.
+         * See @ref Interconnect-Emitter-signals "class documentation" for more
+         * information about implementing signals.
          */
         template<class Emitter, class ...Args> Signal emit(Signal(Emitter::*signal)(Args...), typename std::common_type<Args>::type... args);
 
@@ -414,8 +416,8 @@ Connects given signal to compatible slot. @p emitter must be subclass of
 non-member function or non-capturing lambda with `void` as return type. The
 argument count and types must be exactly the same.
 
-See @ref Emitter-connections "Emitter class documentation" for more information
-about connections.
+See @ref Interconnect-Emitter-connections "Emitter class documentation" for
+more information about connections.
 
 @see @ref Emitter::hasSignalConnections(), @ref Connection::isConnected(),
      @ref Emitter::signalConnectionCount()
@@ -452,8 +454,8 @@ must be subclass of @ref Receiver and @p slot must be non-constant member
 function with `void` as return type. The argument count and types must be
 exactly the same.
 
-See @ref Emitter-connections "Emitter class documentation" for more information
-about connections.
+See @ref Interconnect-Emitter-connections "Emitter class documentation" for
+more information about connections.
 
 @see @ref Emitter::hasSignalConnections(), @ref Connection::isConnected(),
      @ref Emitter::signalConnectionCount()

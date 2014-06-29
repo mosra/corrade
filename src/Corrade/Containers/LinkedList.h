@@ -47,7 +47,7 @@ that the items or list cannot be copied (but they can be moved).
 method to get count of stored items, but you can traverse them and count them
 manually if desperately needed.
 
-@section LinkedList-usage Basic usage
+## Basic usage
 
 @code
 class Object: public LinkedListItem<Object> {
@@ -73,7 +73,7 @@ for(Object* i = list.first(); i; i = i->next()) {
 }
 @endcode
 
-@section LinkedList-usage-list-pointer Making advantage of pointer to the list
+## Making advantage of pointer to the list
 
 Each node stores pointer to the list, which you can take advantage of. For
 example, if you have group of some objects and want to access the group from
@@ -93,7 +93,7 @@ class Object: public LinkedListItem<Object, ObjectGroup> {
 };
 @endcode
 
-@section LinkedList-usage-private-inheritance Using private inheritance
+## Using private inheritance
 
 You might want to subclass %LinkedList and %LinkedListItem privately and for
 example provide wrapper functions with more descriptive names. In that case

@@ -45,7 +45,7 @@ and position of first different character in both files. Example usage:
 CORRADE_COMPARE_AS("actual file contents", "expected.txt", Compare::StringToFile);
 @endcode
 
-See @ref Comparator-pseudo-types for more information.
+See @ref TestSuite-Comparator-pseudo-types for more information.
 */
 class StringToFile {};
 

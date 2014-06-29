@@ -48,7 +48,7 @@ in given group has unique filename.
 See @ref resource-management for brief introduction and example usage.
 Standalone resource compiler executable is implemented in @ref rc.cpp.
 
-@section UtilityResource-configuration Resource configuration file
+## Resource configuration file
 
 Function @ref compileFrom() takes configuration file as parameter. The file
 allows you to specify filenames and filename aliases of resource files instead
