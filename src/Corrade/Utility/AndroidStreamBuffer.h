@@ -32,7 +32,6 @@
 #include <sstream>
 #include <android/log.h>
 
-#include "Corrade/compatibility.h"
 #include "Corrade/Utility/visibility.h"
 
 #ifndef CORRADE_TARGET_ANDROID
