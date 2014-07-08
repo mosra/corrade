@@ -44,6 +44,8 @@ class DebugTest: public TestSuite::Tester {
         void flags();
 
         void iterable();
+        void ostreamFallback();
+        void ostreamFallbackPriority();
 };
 
 DebugTest::DebugTest() {
@@ -53,7 +55,10 @@ DebugTest::DebugTest() {
               &DebugTest::unicode,
               &DebugTest::custom,
               &DebugTest::flags,
-              &DebugTest::iterable});
+
+              &DebugTest::iterable,
+              &DebugTest::ostreamFallback,
+              &DebugTest::ostreamFallbackPriority});
 }
 
 void DebugTest::debug() {
@@ -136,6 +141,44 @@ void DebugTest::custom() {
         Debug() << "The answer is" << f;
     }
     CORRADE_COMPARE(out.str(), "The answer is 42\n");
+}
+
+namespace {
+
+struct Bar {};
+struct Baz {};
+
+inline std::ostream& operator<<(std::ostream& o, const Bar&) {
+    return o << "bar";
+}
+
+inline std::ostream& operator<<(std::ostream& o, const Baz&) {
+    return o << "baz from ostream";
+}
+
+inline Debug operator<<(Debug debug, const Baz&) {
+    return debug << "baz from Debug";
+}
+
+}
+
+void DebugTest::ostreamFallback() {
+    std::ostringstream out;
+    Debug::setOutput(&out);
+
+    Debug() << Bar{};
+    CORRADE_COMPARE(out.str(), "bar\n");
+}
+
+void DebugTest::ostreamFallbackPriority() {
+    /* Suppress warning about unused function operator<<(std::ostream&, const Baz&) */
+    std::ostringstream{} << Baz{};
+
+    std::ostringstream out;
+    Debug::setOutput(&out);
+
+    Debug() << Baz{};
+    CORRADE_COMPARE(out.str(), "baz from Debug\n");
 }
 
 void DebugTest::flags() {

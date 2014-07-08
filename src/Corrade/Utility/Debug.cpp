@@ -31,6 +31,18 @@
 
 namespace Corrade { namespace Utility {
 
+namespace {
+
+template<class T> inline void toStream(std::ostream& s, const T& value) {
+    s << value;
+}
+
+template<> inline void toStream<Implementation::DebugOstreamFallback>(std::ostream& s, const Implementation::DebugOstreamFallback& value) {
+    value.apply(s);
+}
+
+}
+
 std::ostream* Debug::globalOutput = &std::cout;
 std::ostream* Warning::globalWarningOutput = &std::cerr;
 std::ostream* Error::globalErrorOutput = &std::cerr;
@@ -82,7 +94,7 @@ template<class T> Debug Debug::print(const T& value) {
     if(flags & 0x01) flags &= ~0x01;
     else if(flags & Debug::SpaceAfterEachValue) *output << " ";
 
-    *output << value;
+    toStream(*output, value);
     return *this;
 }
 
@@ -111,5 +123,11 @@ Debug Debug::operator<<(char32_t value) {
 Debug Debug::operator<<(const char32_t* value) {
     return *this << std::u32string(value);
 }
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+Debug Debug::operator<<(Implementation::DebugOstreamFallback&& value) {
+    return print(value);
+}
+#endif
 
 }}
