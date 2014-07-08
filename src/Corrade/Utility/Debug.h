@@ -29,6 +29,7 @@
  * @brief Class @ref Corrade::Utility::Debug, @ref Corrade::Utility::Warning, @ref Corrade::Utility::Error
  */
 
+#include <functional>
 #include <iosfwd>
 #include <utility>
 #include <type_traits>
@@ -201,6 +202,18 @@ class CORRADE_UTILITY_EXPORT Debug {
          * `[U+0061, U+0062, U+0063}`.
          */
         Debug operator<<(const char32_t* value);        /**< @overload */
+
+        struct Fallback {
+            // Implicit construction is desired.
+            template <class T>
+            Fallback(const T& t)
+                : apply([&] (std::ostream& s) { s << t; })
+            { }
+
+            std::function<void(std::ostream&)> apply;
+        };
+
+        Debug operator<<(Fallback value);
 
         /**
          * @brief Globally set output for newly created instances
