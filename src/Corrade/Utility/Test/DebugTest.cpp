@@ -41,6 +41,8 @@ class DebugTest: public TestSuite::Tester {
         void chars();
         void unicode();
         void custom();
+        void ostream_fallback();
+        void prefer_not_to_use_fallback();
         void flags();
 
         void iterable();
@@ -53,7 +55,9 @@ DebugTest::DebugTest() {
               &DebugTest::unicode,
               &DebugTest::custom,
               &DebugTest::flags,
-              &DebugTest::iterable});
+              &DebugTest::iterable,
+              &DebugTest::ostream_fallback,
+              &DebugTest::prefer_not_to_use_fallback});
 }
 
 void DebugTest::debug() {
@@ -136,6 +140,54 @@ void DebugTest::custom() {
         Debug() << "The answer is" << f;
     }
     CORRADE_COMPARE(out.str(), "The answer is 42\n");
+}
+
+namespace {
+
+struct Bar { };
+
+inline std::ostream& operator<<(std::ostream& o, const Bar&) {
+    return o << "bar";
+}
+
+}
+
+void DebugTest::ostream_fallback() {
+    std::ostringstream out;
+    Debug::setOutput(&out);
+
+    Bar bar;
+    Debug() << bar;
+
+    CORRADE_COMPARE(out.str(), "bar\n");
+}
+
+namespace {
+
+struct Baz { };
+
+inline std::ostream& operator<<(std::ostream& o, const Baz&) {
+    return o << "wrong baz";
+}
+
+inline Debug operator<<(Debug debug, const Baz&) {
+    return debug << "baz";
+}
+
+}
+
+void DebugTest::prefer_not_to_use_fallback() {
+    // Suppress unused function warning by using the otherwise-unused
+    // std::ostream overload.
+    std::ostringstream{} << Baz{};
+
+    std::ostringstream out;
+    Debug::setOutput(&out);
+
+    Baz baz;
+    Debug() << baz;
+
+    CORRADE_COMPARE(out.str(), "baz\n");
 }
 
 void DebugTest::flags() {
