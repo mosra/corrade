@@ -202,6 +202,30 @@ class CORRADE_UTILITY_EXPORT Debug {
          */
         Debug operator<<(const char32_t* value);        /**< @overload */
 
+        struct Fallback {
+            // Implicit construction is desired.
+            template<class T>
+            Fallback(const T& t)
+                : applier(&Fallback::applyImpl<T>), value(&t)
+            { }
+
+            void apply(std::ostream& s) const {
+                (this->*applier)(s);
+            }
+
+        private:
+            template<class T>
+            void applyImpl(std::ostream& s) const {
+                s << *static_cast<const T*>(value);
+            }
+
+            using ApplierFunc = void(Fallback::*)(std::ostream&) const;
+            const ApplierFunc applier;
+            const void* value;
+        };
+
+        Debug operator<<(Fallback&& value);
+
         /**
          * @brief Globally set output for newly created instances
          * @param output       Stream where to put debug output. If set to
