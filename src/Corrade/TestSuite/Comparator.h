@@ -29,6 +29,7 @@
  * @brief Class @ref Corrade::TestSuite::Comparator
  */
 
+#include <memory>
 #include <string>
 
 #include "Corrade/Utility/Debug.h"
@@ -137,6 +138,7 @@ CORRADE_COMPARE_WITH("actual.dat", "expected.dat", FileContents("/common/path/pr
 template<class T> class Comparator {
     public:
         explicit Comparator();
+        ~Comparator();
 
         /** @brief %Compare two values */
         bool operator()(const T& actual, const T& expected);
@@ -145,22 +147,48 @@ template<class T> class Comparator {
         void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const;
 
     private:
-        T actualValue, expectedValue;
+        T* actualValue;
+        T* expectedValue;
 };
 
-template<class T> Comparator<T>::Comparator(): actualValue(), expectedValue() {}
+template<class T> Comparator<T>::Comparator() : actualValue(nullptr), expectedValue(nullptr) {
+}
+
+template<class T> Comparator<T>::~Comparator() {
+    std::allocator<T> a;
+
+    if(expectedValue) {
+        a.destroy(expectedValue);
+    }
+
+    if(actualValue) {
+        a.destroy(actualValue);
+        a.deallocate(actualValue, 2);
+    }
+}
 
 template<class T> bool Comparator<T>::operator()(const T& actual, const T& expected) {
     if(actual == expected) return true;
 
-    actualValue = actual;
-    expectedValue = expected;
+    std::allocator<T> a;
+    auto storage = a.allocate(2);
+
+    try {
+        a.construct(storage, actual);
+        actualValue = storage;
+    } catch (...) {
+        a.deallocate(storage, 2);
+        throw;
+    }
+
+    a.construct(storage + 1, expected);
+    expectedValue = storage + 1;
     return false;
 }
 
 template<class T> void Comparator<T>::printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
     e << "Values" << actual << "and" << expected << "are not the same, actual is\n       "
-      << actualValue << "\n        but expected\n       " << expectedValue;
+      << *actualValue << "\n        but expected\n       " << *expectedValue;
 }
 
 }}
