@@ -73,7 +73,7 @@ elseif(MSVC)
 endif()
 
 # GCC/Clang-specific compiler flags
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR CORRADE_TARGET_EMSCRIPTEN)
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?Clang" OR CORRADE_TARGET_EMSCRIPTEN)
     # Mandatory C++ flags
     if(NOT CMAKE_CXX_FLAGS MATCHES "-std=c[+][+](0x|11|1y)")
         # TODO: use -std=c++11 when we don't have to maintain compatibility
@@ -129,7 +129,7 @@ elseif(MSVC)
 endif()
 
 # Use C++11-enabled libcxx on OSX
-if(CORRADE_TARGET_APPLE AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if(CORRADE_TARGET_APPLE AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lc++")
 endif()
