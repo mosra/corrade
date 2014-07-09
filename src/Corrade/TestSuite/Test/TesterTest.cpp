@@ -171,6 +171,7 @@ class TesterTest: public Tester {
 
         void compareAsOverload();
         void compareAsVarargs();
+        void compareNonCopyable();
         void verifyExplicitBool();
 };
 
@@ -182,6 +183,7 @@ TesterTest::TesterTest() {
 
               &TesterTest::compareAsOverload,
               &TesterTest::compareAsVarargs,
+              &TesterTest::compareNonCopyable,
               &TesterTest::verifyExplicitBool});
 }
 
@@ -253,6 +255,27 @@ void TesterTest::compareAsVarargs() {
     const std::pair<int, int> a(3, 5);
     const std::pair<float, float> b(3.2f, 5.7f);
     CORRADE_COMPARE_AS(a, b, std::pair<int, int>);
+}
+
+namespace {
+    struct NonCopyable {
+        explicit NonCopyable() = default;
+        NonCopyable(const NonCopyable&) = delete;
+        NonCopyable(NonCopyable&&) = delete;
+        NonCopyable& operator=(const NonCopyable&) = delete;
+        NonCopyable& operator=(NonCopyable&&) = delete;
+    };
+
+    inline bool operator==(const NonCopyable&, const NonCopyable&) { return true; }
+    inline Utility::Debug operator<<(Utility::Debug debug, const NonCopyable&) {
+        return debug << "NonCopyable";
+    }
+}
+
+void TesterTest::compareNonCopyable() {
+    /* Just to verify that there is no need to copy anything anywhere */
+    NonCopyable a, b;
+    CORRADE_COMPARE(a, b);
 }
 
 void TesterTest::verifyExplicitBool() {

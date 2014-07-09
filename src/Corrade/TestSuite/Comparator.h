@@ -145,7 +145,8 @@ template<class T> class Comparator {
         void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const;
 
     private:
-        T actualValue, expectedValue;
+        const T* actualValue;
+        const T* expectedValue;
 };
 
 template<class T> Comparator<T>::Comparator(): actualValue(), expectedValue() {}
@@ -153,14 +154,14 @@ template<class T> Comparator<T>::Comparator(): actualValue(), expectedValue() {}
 template<class T> bool Comparator<T>::operator()(const T& actual, const T& expected) {
     if(actual == expected) return true;
 
-    actualValue = actual;
-    expectedValue = expected;
+    actualValue = &actual;
+    expectedValue = &expected;
     return false;
 }
 
 template<class T> void Comparator<T>::printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
     e << "Values" << actual << "and" << expected << "are not the same, actual is\n       "
-      << actualValue << "\n        but expected\n       " << expectedValue;
+      << *actualValue << "\n        but expected\n       " << *expectedValue;
 }
 
 }}
