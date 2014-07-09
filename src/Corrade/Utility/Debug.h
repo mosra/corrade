@@ -203,7 +203,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * Prints value as list of %Unicode codepoints, i.e.
          * `[U+0061, U+0062, U+0063}`.
          */
-        Debug operator<<(const char32_t* value);        /**< @overload */
+        Debug operator<<(const char32_t* value);
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
         Debug operator<<(Implementation::DebugOstreamFallback&& value);
