@@ -23,6 +23,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <ios>
+
 #include <map>
 #include <set>
 #include <sstream>
@@ -46,6 +48,8 @@ class DebugTest: public TestSuite::Tester {
         void iterable();
         void ostreamFallback();
         void ostreamFallbackPriority();
+        void ostreamFallbackOperatorConvertible();
+        void ostreamFallbackCtorConvertible();
 };
 
 DebugTest::DebugTest() {
@@ -58,7 +62,9 @@ DebugTest::DebugTest() {
 
               &DebugTest::iterable,
               &DebugTest::ostreamFallback,
-              &DebugTest::ostreamFallbackPriority});
+              &DebugTest::ostreamFallbackPriority,
+              &DebugTest::ostreamFallbackOperatorConvertible,
+              &DebugTest::ostreamFallbackCtorConvertible});
 }
 
 void DebugTest::debug() {
@@ -147,6 +153,15 @@ namespace {
 
 struct Bar {};
 struct Baz {};
+struct Qux {
+    explicit Qux(int value) : value(value) {}
+    inline operator int() const { return value; }
+    int value;
+};
+struct Corge {};
+struct Grault {
+    Grault(Corge) {}
+};
 
 inline std::ostream& operator<<(std::ostream& o, const Bar&) {
     return o << "bar";
@@ -158,6 +173,10 @@ inline std::ostream& operator<<(std::ostream& o, const Baz&) {
 
 inline Debug operator<<(Debug debug, const Baz&) {
     return debug << "baz from Debug";
+}
+
+inline Debug operator<<(Debug debug, const Grault&) {
+    return debug << "grault";
 }
 
 }
@@ -179,6 +198,26 @@ void DebugTest::ostreamFallbackPriority() {
 
     Debug() << Baz{};
     CORRADE_COMPARE(out.str(), "baz from Debug\n");
+}
+
+void DebugTest::ostreamFallbackOperatorConvertible() {
+    std::ostringstream out;
+    Debug::setOutput(&out);
+
+    /* Qux has no operator<<(Debug), but is convertible to int, which does. */
+    Debug() << Qux{42};
+
+    CORRADE_COMPARE(out.str(), "42\n");
+}
+
+void DebugTest::ostreamFallbackCtorConvertible() {
+    std::ostringstream out;
+    Debug::setOutput(&out);
+
+    /* Corge has no operator<<(Debug), but is convertible Grault, which does. */
+    Debug() << Corge{};
+
+    CORRADE_COMPARE(out.str(), "grault\n");
 }
 
 void DebugTest::flags() {
