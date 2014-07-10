@@ -39,7 +39,10 @@
 
 namespace Corrade { namespace Utility {
 
-namespace Implementation { struct DebugOstreamFallback; }
+namespace Implementation {
+    struct DebugOstreamFallback;
+    struct DebugOstreamFallbackValue;
+}
 
 /**
 @brief %Debug output handler
@@ -206,7 +209,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         Debug operator<<(const char32_t* value);
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        Debug operator<<(Implementation::DebugOstreamFallback&& value);
+        friend Debug operator<<(Implementation::DebugOstreamFallback fallback, Implementation::DebugOstreamFallbackValue&& value);
         #endif
 
         /**
@@ -342,24 +345,45 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
 
 namespace Implementation {
 
-/* Used by Debug::operator<<(Implementation::DebugOstreamFallback&&) */
+/* Used by Debug operator<<(Implementation::DebugFallback fallback, Implementation::DebugOstreamFallbackValue&&)
+
+   Providing an operator<< that has implicit conversions for both the left and
+   right hand sides ensures that the fallback operator<< is ranked last (after
+   implicit conversions to other types with an operator<<(Debug, RHS) overload).
+
+   Without this technique, any type which is implicitly convertible to a type
+   with a matching operator<<(Debug, RHS) would result in an ambiguous overload
+   error, since the compiler can't determine whether it is better to convert to
+   DebugOStreamFallbackValue or the RHS type.
+*/
 struct DebugOstreamFallback {
-    template<class T> /*implicit*/ DebugOstreamFallback(const T& t): applier(&DebugOstreamFallback::applyImpl<T>), value(&t) {}
+    /*implicit*/ DebugOstreamFallback(Debug debug) : debug(debug) { }
 
-    void apply(std::ostream& s) const {
-        (this->*applier)(s);
+    Debug debug;
+};
+
+struct DebugOstreamFallbackValue {
+    template<class T> /*implicit*/ DebugOstreamFallbackValue(const T& t): applier(&DebugOstreamFallbackValue::applyImpl<T>), value(&t) {}
+
+    template<class T> std::ostream& applyImpl(std::ostream& o) const {
+        return o << *static_cast<const T*>(value);
     }
 
-    template<class T> void applyImpl(std::ostream& s) const {
-        s << *static_cast<const T*>(value);
-    }
-
-    using ApplierFunc = void(DebugOstreamFallback::*)(std::ostream&) const;
-    const ApplierFunc applier;
+    using ApplyFunc = std::ostream&(DebugOstreamFallbackValue::*)(std::ostream&) const;
+    const ApplyFunc applier;
     const void* value;
 };
 
+std::ostream& operator<<(std::ostream& o, const DebugOstreamFallbackValue& value);
+
 }
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/* The fallback operator<< must be in the Corrade::Utility namespace so
+   argument dependent resolution can find it.
+*/
+CORRADE_UTILITY_EXPORT Debug operator<<(Implementation::DebugOstreamFallback fallback, Implementation::DebugOstreamFallbackValue&& value);
+#endif
 
 }}
 
