@@ -51,7 +51,7 @@
 #
 # If CORRADE_BUILD_DEPRECATED is defined, the CORRADE_INCLUDE_DIR variable also
 # contains path directly to Corrade directory (i.e. for includes without
-# `Corrade/` prefix).
+# Corrade/ prefix).
 #
 # Corrade provides these macros and functions:
 #
