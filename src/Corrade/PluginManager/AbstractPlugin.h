@@ -40,8 +40,11 @@ namespace Corrade { namespace PluginManager {
 
 Connects every plugin instance to parent plugin manager to ensure the
 plugin can be unloaded only if there are no active instances.
+@see @ref AbstractManagingPlugin
 */
 class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
+    template<class, class> friend class AbstractManagingPlugin;
+
     public:
         /**
          * @brief Initialize plugin
@@ -86,9 +89,10 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
         /**
          * @brief Default constructor
          *
-         * Usable when using the plugin directly, without plugin manager. Define
-         * this constructor in your subclass only if you want to allow using the
-         * interface or plugin without plugin manager.
+         * Define this constructor in your subclass only if you want to allow
+         * using the interface or plugin without plugin manager.
+         *
+         * The @ref metadata() function will return `nullptr`.
          */
         explicit AbstractPlugin();
 

@@ -41,10 +41,10 @@ AbstractPlugin::AbstractPlugin(AbstractManager& manager, std::string plugin): _m
 }
 
 AbstractPlugin::~AbstractPlugin() {
-    if(_manager) {
-        CORRADE_INTERNAL_ASSERT(_metadata);
+    /* Unregister the instance only if the plugin was instantiated through
+       plugin manager */
+    if(_manager && _metadata)
         _manager->unregisterInstance(_metadata->name(), *this);
-    }
 }
 
 bool AbstractPlugin::canBeDeleted() { return false; }

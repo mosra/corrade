@@ -38,6 +38,7 @@ set(CorradePluginManager_GracefulAssert_SRCS
 set(CorradePluginManager_HEADERS
     AbstractPlugin.h
     AbstractManager.h
+    AbstractManagingPlugin.h
     Manager.h
     PluginManager.h
     PluginMetadata.h
