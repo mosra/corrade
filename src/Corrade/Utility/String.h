@@ -32,6 +32,7 @@
 #include <string>
 #include <vector>
 
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Utility/visibility.h"
 
 #ifdef CORRADE_BUILD_DEPRECATED
@@ -157,6 +158,30 @@ class CORRADE_UTILITY_EXPORT String {
          * @attention Doesn't work with UTF-8.
          */
         static std::string uppercase(std::string string);
+
+        /** @brief Whether the string has given prefix */
+        static bool beginsWith(const std::string& string, const std::string& prefix) {
+            return beginsWithInternal(string, {prefix.data(), prefix.size()});
+        }
+
+        /** @overload */
+        template<std::size_t size> static bool beginsWith(const std::string& string, const char(&prefix)[size]) {
+            return beginsWithInternal(string, {prefix, size - 1});
+        }
+
+        /** @brief Whether the string has given suffix */
+        static bool endsWith(const std::string& string, const std::string& suffix) {
+            return endsWithInternal(string, {suffix.data(), suffix.size()});
+        }
+
+        /** @overload */
+        template<std::size_t size> static bool endsWith(const std::string& string, const char(&suffix)[size]) {
+            return endsWithInternal(string, {suffix, size - 1});
+        }
+
+    private:
+        static bool beginsWithInternal(const std::string& string, Containers::ArrayReference<const char> prefix);
+        static bool endsWithInternal(const std::string& string, Containers::ArrayReference<const char> suffix);
 };
 
 }}

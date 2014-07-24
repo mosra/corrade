@@ -40,6 +40,9 @@ class StringTest: public TestSuite::Tester {
         void lowercase();
         void uppercase();
         void whitespace();
+
+        void beginsWith();
+        void endsWith();
 };
 
 StringTest::StringTest() {
@@ -49,7 +52,10 @@ StringTest::StringTest() {
               &StringTest::join,
               &StringTest::lowercase,
               &StringTest::uppercase,
-              &StringTest::whitespace});
+              &StringTest::whitespace,
+
+              &StringTest::beginsWith,
+              &StringTest::endsWith});
 }
 
 void StringTest::fromArray() {
@@ -181,6 +187,24 @@ void StringTest::uppercase() {
 void StringTest::whitespace() {
     for(char i: String::Whitespace)
         CORRADE_VERIFY(std::isspace(i));
+}
+
+void StringTest::beginsWith() {
+    CORRADE_VERIFY(String::beginsWith("overcomplicated", "over"));
+    CORRADE_VERIFY(String::beginsWith("overcomplicated", std::string{"over"}));
+
+    CORRADE_VERIFY(!String::beginsWith("overcomplicated", "oven"));
+    CORRADE_VERIFY(!String::beginsWith("overcomplicated", std::string{"oven"}));
+}
+
+void StringTest::endsWith() {
+    CORRADE_VERIFY(String::endsWith("overcomplicated", "complicated"));
+    CORRADE_VERIFY(String::endsWith("overcomplicated", std::string{"complicated"}));
+
+    CORRADE_VERIFY(!String::endsWith("overcomplicated", "somplicated"));
+    CORRADE_VERIFY(!String::endsWith("overcomplicated", std::string{"somplicated"}));
+
+    CORRADE_VERIFY(!String::endsWith("overcomplicated", "overcomplicated even more"));
 }
 
 }}}
