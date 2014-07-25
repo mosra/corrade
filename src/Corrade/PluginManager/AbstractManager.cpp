@@ -85,13 +85,13 @@ std::vector<AbstractManager::StaticPlugin*>*& AbstractManager::staticPlugins() {
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-void AbstractManager::importStaticPlugin(const std::string& plugin, int _version, const std::string& interface, Instancer instancer, void(*initializer)(), void(*finalizer)()) {
+void AbstractManager::importStaticPlugin(std::string plugin, int _version, std::string interface, Instancer instancer, void(*initializer)(), void(*finalizer)()) {
     CORRADE_ASSERT(_version == Version,
         "PluginManager: wrong version of static plugin" << plugin + ", got" << _version << "but expected" << Version, );
     CORRADE_ASSERT(staticPlugins(),
         "PluginManager: too late to import static plugin" << plugin, );
 
-    staticPlugins()->push_back(new StaticPlugin{plugin, interface, instancer, initializer, finalizer});
+    staticPlugins()->push_back(new StaticPlugin{std::move(plugin), std::move(interface), instancer, initializer, finalizer});
 }
 #endif
 
