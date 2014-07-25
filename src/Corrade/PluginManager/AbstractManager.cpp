@@ -451,9 +451,8 @@ void AbstractManager::registerInstance(std::string plugin, AbstractPlugin& insta
     /** @todo assert proper interface */
     auto foundPlugin = plugins()->find(plugin);
 
-    /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
-    if(foundPlugin == plugins()->end() || foundPlugin->second->manager != this)
-        return;
+    CORRADE_ASSERT(foundPlugin != plugins()->end() && foundPlugin->second->manager == this,
+        "PluginManager::AbstractPlugin::AbstractPlugin(): attempt to register instance of plugin not known to given manager", );
 
     auto foundInstance = instances.find(plugin);
 
@@ -468,16 +467,14 @@ void AbstractManager::registerInstance(std::string plugin, AbstractPlugin& insta
 void AbstractManager::unregisterInstance(const std::string& plugin, AbstractPlugin& instance) {
     auto foundPlugin = plugins()->find(plugin);
 
-    /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
-    if(foundPlugin == plugins()->end() || foundPlugin->second->manager != this)
-        return;
+    CORRADE_INTERNAL_ASSERT(foundPlugin != plugins()->end() && foundPlugin->second->manager == this);
 
     auto foundInstance = instances.find(plugin);
-    if(foundInstance == instances.end()) return;
+    CORRADE_INTERNAL_ASSERT(foundInstance != instances.end());
     std::vector<AbstractPlugin*>& _instances = foundInstance->second;
 
     auto pos = std::find(_instances.begin(), _instances.end(), &instance);
-    if(pos == _instances.end()) return;
+    CORRADE_INTERNAL_ASSERT(pos != _instances.end());
 
     _instances.erase(pos);
 
@@ -487,8 +484,7 @@ void AbstractManager::unregisterInstance(const std::string& plugin, AbstractPlug
 void AbstractManager::addUsedBy(const std::string& plugin, std::string usedBy) {
     auto foundPlugin = plugins()->find(plugin);
 
-    /* Given plugin doesn't exist, nothing to do */
-    if(foundPlugin == plugins()->end()) return;
+    CORRADE_INTERNAL_ASSERT(foundPlugin != plugins()->end());
 
     foundPlugin->second->metadata._usedBy.push_back(std::move(usedBy));
 }
@@ -496,8 +492,7 @@ void AbstractManager::addUsedBy(const std::string& plugin, std::string usedBy) {
 void AbstractManager::removeUsedBy(const std::string& plugin, const std::string& usedBy) {
     auto foundPlugin = plugins()->find(plugin);
 
-    /* Given plugin doesn't exist, nothing to do */
-    if(foundPlugin == plugins()->end()) return;
+    CORRADE_INTERNAL_ASSERT(foundPlugin != plugins()->end());
 
     for(auto it = foundPlugin->second->metadata._usedBy.begin(); it != foundPlugin->second->metadata._usedBy.end(); ++it) {
         if(*it == usedBy) {
