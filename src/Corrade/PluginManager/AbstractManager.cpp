@@ -109,31 +109,24 @@ AbstractManager::~AbstractManager() {
     std::vector<std::map<std::string, Plugin*>::iterator> removed;
     #endif
     for(auto it = plugins()->begin(); it != plugins()->end(); ++it) {
-
         /* Plugin doesn't belong to this manager */
         if(it->second->manager != this) continue;
 
-        /**
-         * @bug When two plugins depend on each other and the base is unloaded
-         *      first, it fails (but it shouldn't)
-         */
-
         #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-        /* Unload the plugin */
-        LoadState loadState = unload(it->first);
-        CORRADE_ASSERT(loadState & (LoadState::Static|LoadState::NotLoaded|LoadState::WrongMetadataFile),
-            "PluginManager: cannot unload plugin" << it->first << "on manager destruction:" << loadState, );
+        /* Try to unload the plugin (and all plugins that depend on it) */
+        const LoadState loadState = unloadRecursive(it->first);
 
         /* Schedule it for deletion, if it is not static, otherwise just
            disconnect this manager from the plugin and finalize it, so another
            manager can take over it in the future. */
         if(loadState == LoadState::Static) {
-        #endif
             it->second->manager = nullptr;
             it->second->staticPlugin->finalizer();
-        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-        } else
-            removed.push_back(it);
+        } else removed.push_back(it);
+        #else
+        /* In NaCl newlib and Emscripten there are only static plugins */
+        it->second->manager = nullptr;
+        it->second->staticPlugin->finalizer();
         #endif
     }
 
@@ -147,6 +140,28 @@ AbstractManager::~AbstractManager() {
 }
 
 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+LoadState AbstractManager::unloadRecursive(const std::string& plugin) {
+    const auto foundPlugin = plugins()->find(plugin);
+    CORRADE_INTERNAL_ASSERT(foundPlugin != plugins()->end());
+
+    /* Plugin doesn't belong to this manager, cannot do anything (will assert
+       on unload() in parent call) */
+    if(foundPlugin->second->manager != this) return LoadState::NotFound;
+
+    /* If the plugin is not static and is used by others, try to unload these
+       first so it can be unloaded too */
+    if(foundPlugin->second->loadState != LoadState::Static)
+        for(const std::string& plugin: foundPlugin->second->metadata.usedBy())
+            unloadRecursive(plugin);
+
+    /* Unload the plugin */
+    const LoadState after = unload(plugin);
+    CORRADE_ASSERT(after & (LoadState::Static|LoadState::NotLoaded|LoadState::WrongMetadataFile),
+        "PluginManager::Manager: cannot unload plugin" << plugin << "on manager destruction:" << after, {});
+
+    return after;
+}
+
 std::string AbstractManager::pluginDirectory() const {
     return _pluginDirectory;
 }
