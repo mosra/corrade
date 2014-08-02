@@ -221,8 +221,14 @@ function(corrade_add_plugin plugin_name debug_install_dir release_install_dir me
             OUTPUT ${plugin_name}.conf
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${plugin_name}.conf
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
-        add_custom_target(${plugin_name}-metadata ALL DEPENDS ${plugin_name}.conf)
+        add_custom_target(${plugin_name}-metadata ALL
+            DEPENDS ${plugin_name}.conf
+            # Force IDEs display also the metadata file in project view
+            SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
     else()
+        # Force IDEs display also the metadata file in project view
+        add_custom_target(${plugin_name}-metadata SOURCES ${metadata_file})
+
         install(TARGETS ${plugin_name} DESTINATION "${debug_install_dir}"
             CONFIGURATIONS Debug)
         install(TARGETS ${plugin_name} DESTINATION "${release_install_dir}"
