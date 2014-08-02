@@ -166,12 +166,6 @@ function(corrade_add_test test_name)
 endfunction()
 
 function(corrade_add_resource name configurationFile)
-    # TODO: remove this when backward compatibility is non-issue
-    list(LENGTH ARGN list_length)
-    if(NOT ${list_length} EQUAL 0)
-        message(FATAL_ERROR "Superfluous arguments to corrade_add_resource():" ${ARGN})
-    endif()
-
     # Add the file as dependency, parse more dependencies from the file
     set(dependencies "${configurationFile}")
     set(filenameRegex "^[ \t]*filename[ \t]*=[ \t]*\"?([^\"]+)\"?[ \t]*$")
