@@ -40,6 +40,8 @@
 
 namespace Corrade { namespace Utility {
 
+namespace Implementation { struct DebugOstreamFallback; }
+
 /**
 @brief %Debug output handler
 
@@ -73,9 +75,10 @@ else
 // (newline character will be written to output on object destruction)
 @endcode
 
-Support for printing other types (which are not handled by `iostream` itself)
-can be added by implementing function `operator<<(Debug, const T&)` for given
-type.
+Support for printing more types can be added by implementing function
+`operator<<(%Debug, const T&)` for given type. If there is no `operator<<`
+implemented for printing given type using %Debug class, suitable `std::ostream`
+`operator<<` overload is used as fallback, if found.
 
 @see @ref Warning, @ref Error, @ref CORRADE_ASSERT(),
     @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(),
@@ -203,7 +206,11 @@ class CORRADE_UTILITY_EXPORT Debug {
          * Prints value as list of %Unicode codepoints, i.e.
          * `[U+0061, U+0062, U+0063}`.
          */
-        Debug operator<<(const char32_t* value);        /**< @overload */
+        Debug operator<<(const char32_t* value);
+
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        Debug operator<<(Implementation::DebugOstreamFallback&& value);
+        #endif
 
         /**
          * @brief Globally set output for newly created instances
@@ -335,6 +342,27 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
     private:
         static CORRADE_UTILITY_LOCAL std::ostream* globalErrorOutput;
 };
+
+namespace Implementation {
+
+/* Used by Debug::operator<<(Implementation::DebugOstreamFallback&&) */
+struct DebugOstreamFallback {
+    template<class T> /*implicit*/ DebugOstreamFallback(const T& t): applier(&DebugOstreamFallback::applyImpl<T>), value(&t) {}
+
+    void apply(std::ostream& s) const {
+        (this->*applier)(s);
+    }
+
+    template<class T> void applyImpl(std::ostream& s) const {
+        s << *static_cast<const T*>(value);
+    }
+
+    using ApplierFunc = void(DebugOstreamFallback::*)(std::ostream&) const;
+    const ApplierFunc applier;
+    const void* value;
+};
+
+}
 
 }}
 

@@ -39,6 +39,7 @@ enum class LoadState: unsigned short;
 #endif
 
 class AbstractManager;
+template<class, class = AbstractManager> class AbstractManagingPlugin;
 class AbstractPlugin;
 template<class, class = AbstractManager> class Manager;
 class PluginMetadata;

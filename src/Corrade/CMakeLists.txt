@@ -44,6 +44,9 @@ set(Corrade_HEADERS
     Corrade.h
     compatibility.h)
 
+# Force IDEs to display all header files in project view
+add_custom_target(Corrade SOURCES ${Corrade_HEADERS})
+
 install(FILES ${Corrade_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/configure.h DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR})
 

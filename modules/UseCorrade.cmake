@@ -73,9 +73,11 @@ elseif(MSVC)
 endif()
 
 # GCC/Clang-specific compiler flags
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR CORRADE_TARGET_EMSCRIPTEN)
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?Clang" OR CORRADE_TARGET_EMSCRIPTEN)
     # Mandatory C++ flags
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+    if(NOT CMAKE_CXX_FLAGS MATCHES "-std=c[+][+](0x|11|1y)")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+    endif()
 
     # Optional C++ flags
     set(CORRADE_CXX_FLAGS "-Wall -Wextra -Wold-style-cast -Winit-self -Werror=return-type -Wmissing-declarations -pedantic -fvisibility=hidden")
@@ -125,7 +127,7 @@ elseif(MSVC)
 endif()
 
 # Use C++11-enabled libcxx on OSX
-if(CORRADE_TARGET_APPLE AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if(CORRADE_TARGET_APPLE AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lc++")
 endif()
@@ -162,12 +164,6 @@ function(corrade_add_test test_name)
 endfunction()
 
 function(corrade_add_resource name configurationFile)
-    # TODO: remove this when backward compatibility is non-issue
-    list(LENGTH ARGN list_length)
-    if(NOT ${list_length} EQUAL 0)
-        message(FATAL_ERROR "Superfluous arguments to corrade_add_resource():" ${ARGN})
-    endif()
-
     # Add the file as dependency, parse more dependencies from the file
     set(dependencies "${configurationFile}")
     set(filenameRegex "^[ \t]*filename[ \t]*=[ \t]*\"?([^\"]+)\"?[ \t]*$")
@@ -181,12 +177,15 @@ function(corrade_add_resource name configurationFile)
         list(APPEND dependencies "${filename}")
     endforeach()
 
+    # Force IDEs display also the resource files in project view
+    add_custom_target(${name}-dependencies SOURCES ${dependencies})
+
     # Run command
     set(out "${CMAKE_CURRENT_BINARY_DIR}/resource_${name}.cpp")
     add_custom_command(
         OUTPUT "${out}"
         COMMAND "${CORRADE_RC_EXECUTABLE}" ${name} "${configurationFile}" "${out}"
-        DEPENDS "${CORRADE_RC_EXECUTABLE}" ${dependencies}
+        DEPENDS "${CORRADE_RC_EXECUTABLE}" ${dependencies} ${name}-dependencies
         COMMENT "Compiling data resource file ${out}"
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -220,8 +219,14 @@ function(corrade_add_plugin plugin_name debug_install_dir release_install_dir me
             OUTPUT ${plugin_name}.conf
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${plugin_name}.conf
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
-        add_custom_target(${plugin_name}-metadata ALL DEPENDS ${plugin_name}.conf)
+        add_custom_target(${plugin_name}-metadata ALL
+            DEPENDS ${plugin_name}.conf
+            # Force IDEs display also the metadata file in project view
+            SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
     else()
+        # Force IDEs display also the metadata file in project view
+        add_custom_target(${plugin_name}-metadata SOURCES ${metadata_file})
+
         install(TARGETS ${plugin_name} DESTINATION "${debug_install_dir}"
             CONFIGURATIONS Debug)
         install(TARGETS ${plugin_name} DESTINATION "${release_install_dir}"

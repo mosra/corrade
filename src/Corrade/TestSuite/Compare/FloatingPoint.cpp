@@ -29,9 +29,24 @@
 
 namespace Corrade { namespace TestSuite { namespace Implementation {
 
+/* Adapted from http://floating-point-gui.de/errors/comparison/ */
 template<class T> bool FloatComparator<T>::operator()(T actual, T expected) {
-    if(actual == expected || (actual != actual && expected != expected) ||
-        std::abs(actual - expected) < FloatComparatorEpsilon<T>::epsilon()) return true;
+    /* Shortcut for binary equality, infinites and NaN */
+    if(actual == expected || (actual != actual && expected != expected)) return true;
+
+    const T absA = std::abs(actual);
+    const T absB = std::abs(expected);
+    const T difference = std::abs(actual - expected);
+
+    /* One of the numbers is zero or both are extremely close to it, relative
+       error is meaningless */
+    if((actual == T{} || expected == T{} || difference < FloatComparatorEpsilon<T>::epsilon())) {
+        if(difference < FloatComparatorEpsilon<T>::epsilon()) return true;
+    }
+
+    /* Relative error */
+    else if(difference/(absA + absB) < FloatComparatorEpsilon<T>::epsilon())
+        return true;
 
     actualValue = actual;
     expectedValue = expected;

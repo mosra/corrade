@@ -50,17 +50,17 @@ FloatingPointTest::FloatingPointTest() {
 }
 
 void FloatingPointTest::smallDelta() {
-    CORRADE_VERIFY(Comparator<float>()(3.2021220f,
-                                       3.2021225f));
-    CORRADE_VERIFY(Comparator<double>()(3.2021222324250,
-                                        3.2021222324255));
+    CORRADE_VERIFY(Comparator<float>()(3.202122f,
+                                       3.202123f));
+    CORRADE_VERIFY(Comparator<double>()(3.202122232425,
+                                        3.202122232426));
 }
 
 void FloatingPointTest::largeDelta() {
-    CORRADE_VERIFY(!Comparator<float>()(3.202120f,
-                                        3.202125f));
-    CORRADE_VERIFY(!Comparator<double>()(3.202122232420,
-                                         3.202122232425));
+    CORRADE_VERIFY(!Comparator<float>()(3.20212f,
+                                        3.20213f));
+    CORRADE_VERIFY(!Comparator<double>()(3.20212223242,
+                                         3.20212223243));
 }
 
 void FloatingPointTest::nan() {

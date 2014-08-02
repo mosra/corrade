@@ -130,4 +130,14 @@ std::string String::uppercase(std::string string) {
     return std::move(string);
 }
 
+bool String::beginsWithInternal(const std::string& string, const Containers::ArrayReference<const char> prefix) {
+    return string.compare(0, prefix.size(), prefix, prefix.size()) == 0;
+}
+
+bool String::endsWithInternal(const std::string& string, const Containers::ArrayReference<const char> suffix) {
+    if(string.size() < suffix.size()) return false;
+
+    return string.compare(string.size() - suffix.size(), suffix.size(), suffix, suffix.size()) == 0;
+}
+
 }}

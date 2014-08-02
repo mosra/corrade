@@ -30,6 +30,9 @@ set(CorradeTestSuiteCompare_HEADERS
     FloatingPoint.h
     StringToFile.h)
 
+# Force IDEs to display all header files in project view
+add_custom_target(CorradeTestSuiteCompare SOURCES ${CorradeTestSuiteCompare_HEADERS})
+
 install(FILES ${CorradeTestSuiteCompare_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/TestSuite/Compare)
 
 if(BUILD_TESTS)
