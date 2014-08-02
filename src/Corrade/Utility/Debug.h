@@ -357,7 +357,7 @@ struct DebugOstreamFallback {
         s << *static_cast<const T*>(value);
     }
 
-    using ApplierFunc = void(DebugOstreamFallback::*)(std::ostream&) const;
+    typedef void(DebugOstreamFallback::*ApplierFunc)(std::ostream&) const;
     const ApplierFunc applier;
     const void* value;
 };
