@@ -259,12 +259,15 @@ void TesterTest::compareAsVarargs() {
 
 namespace {
     struct NonCopyable {
-        explicit NonCopyable() = default;
+        explicit NonCopyable();
         NonCopyable(const NonCopyable&) = delete;
         NonCopyable(NonCopyable&&) = delete;
         NonCopyable& operator=(const NonCopyable&) = delete;
         NonCopyable& operator=(NonCopyable&&) = delete;
     };
+
+    /* GCC 4.5 cannot default explicit constructor in class body */
+    NonCopyable::NonCopyable() = default;
 
     inline bool operator==(const NonCopyable&, const NonCopyable&) { return true; }
     inline Utility::Debug operator<<(Utility::Debug debug, const NonCopyable&) {
