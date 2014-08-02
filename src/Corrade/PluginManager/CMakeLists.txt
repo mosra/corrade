@@ -44,7 +44,9 @@ set(CorradePluginManager_HEADERS
     PluginMetadata.h
     visibility.h)
 
-add_library(CorradePluginManagerObjects OBJECT ${CorradePluginManager_SRCS})
+add_library(CorradePluginManagerObjects OBJECT
+    ${CorradePluginManager_SRCS}
+    ${CorradePluginManager_HEADERS})
 add_library(CorradePluginManager ${SHARED_OR_STATIC}
     $<TARGET_OBJECTS:CorradePluginManagerObjects>
     ${CorradePluginManager_GracefulAssert_SRCS})

@@ -29,6 +29,9 @@ set(CorradeContainers_HEADERS
     EnumSet.h
     LinkedList.h)
 
+# Force IDEs to display all header files in project view
+add_custom_target(CorradeContainers SOURCES ${CorradeContainers_HEADERS})
+
 install(FILES ${CorradeContainers_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/Containers)
 
 if(BUILD_TESTS)

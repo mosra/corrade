@@ -78,7 +78,9 @@ elseif(CORRADE_TARGET_ANDROID)
         AndroidStreamBuffer.h)
 endif()
 
-add_library(CorradeUtilityObjects OBJECT ${CorradeUtility_SRCS})
+add_library(CorradeUtilityObjects OBJECT
+    ${CorradeUtility_SRCS}
+    ${CorradeUtility_HEADERS})
 add_library(CorradeUtility ${SHARED_OR_STATIC} $<TARGET_OBJECTS:CorradeUtilityObjects> ${CorradeUtility_GracefulAssert_SRCS})
 set_target_properties(CorradeUtility PROPERTIES DEBUG_POSTFIX "-d")
 if(NOT BUILD_STATIC)
