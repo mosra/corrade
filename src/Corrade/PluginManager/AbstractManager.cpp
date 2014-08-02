@@ -161,7 +161,7 @@ LoadState AbstractManager::unloadRecursive(const std::string& plugin) {
     /* Unload the plugin */
     const LoadState after = unload(plugin);
     CORRADE_ASSERT(after & (LoadState::Static|LoadState::NotLoaded|LoadState::WrongMetadataFile),
-        "PluginManager::Manager: cannot unload plugin" << plugin << "on manager destruction:" << after, {});
+        "PluginManager::Manager: cannot unload plugin" << plugin << "on manager destruction:" << after, LoadState());
 
     return after;
 }
