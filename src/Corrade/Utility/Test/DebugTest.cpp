@@ -172,7 +172,10 @@ void DebugTest::ostreamFallback() {
 
 void DebugTest::ostreamFallbackPriority() {
     /* Suppress warning about unused function operator<<(std::ostream&, const Baz&) */
-    std::ostringstream{} << Baz{};
+    {
+        std::ostringstream o;
+        o << Baz{};
+    }
 
     std::ostringstream out;
     Debug::setOutput(&out);
