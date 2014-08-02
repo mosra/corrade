@@ -179,12 +179,15 @@ function(corrade_add_resource name configurationFile)
         list(APPEND dependencies "${filename}")
     endforeach()
 
+    # Force IDEs display also the resource files in project view
+    add_custom_target(${name}-dependencies SOURCES ${dependencies})
+
     # Run command
     set(out "${CMAKE_CURRENT_BINARY_DIR}/resource_${name}.cpp")
     add_custom_command(
         OUTPUT "${out}"
         COMMAND "${CORRADE_RC_EXECUTABLE}" ${name} "${configurationFile}" "${out}"
-        DEPENDS "${CORRADE_RC_EXECUTABLE}" ${dependencies}
+        DEPENDS "${CORRADE_RC_EXECUTABLE}" ${dependencies} ${name}-dependencies
         COMMENT "Compiling data resource file ${out}"
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
