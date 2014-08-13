@@ -56,7 +56,7 @@ class AbstractManagingPlugin: public AbstractPlugin {
          * The @ref manager() and @ref metadata() functions will return
          * `nullptr`.
          */
-        explicit AbstractManagingPlugin() = default;
+        explicit AbstractManagingPlugin();
 
         /**
          * @brief Default constructor with access to plugin manager
@@ -97,6 +97,8 @@ class AbstractManagingPlugin: public AbstractPlugin {
             return static_cast<const Manager<Interface, BaseManager>*>(_manager);
         }
 };
+
+template<class Interface, class BaseManager> inline AbstractManagingPlugin<Interface, BaseManager>::AbstractManagingPlugin() = default;
 
 }}
 
