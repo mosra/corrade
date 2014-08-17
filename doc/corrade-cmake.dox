@@ -37,6 +37,10 @@ if %Corrade might be installed on the system.
 Note that the module file is updated as the library evolves, you are encouraged
 to update your copy from time to time to avoid strange building issues.
 
+If you installed the library to non-standard location (other than `/usr`, e.g.
+`/home/xyz/projects`), set `CMAKE_PREFIX_PATH` to that directory to help CMake
+find it.
+
 Basic usage is:
 
     find_package(Corrade REQUIRED)
