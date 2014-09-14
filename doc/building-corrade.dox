@@ -285,6 +285,10 @@ project root:
 
     makepkg -p package/archlinux/<file>
 
+@subsection building-corrade-packages-gentoo Gentoo ebuilds
+
+Gentoo Git ebuild is available in `package/gentoo` directory.
+
 @subsection building-corrade-packages-rpm RPM packages
 
 Every package contains `spec` files for RPM-based distributions in
