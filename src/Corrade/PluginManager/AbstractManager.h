@@ -402,10 +402,13 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         /* Defined in PluginManager */
         virtual std::string pluginInterface() const = 0;
 
-        /* Global storage of static, unloaded and loaded plugins. The map is
-           accessible via function, not directly, because we need to fill it
-           with data from staticPlugins() before first use. */
-        static std::map<std::string, Plugin*>* plugins();
+        /* Initialize global plugin map. On first run it creates the instance
+           and fills it with entries from staticPlugins(). The reference is
+           then in constructor stored in _plugins variable to avoid at least
+           some issues with duplicated static variables on static builds. */
+        static std::map<std::string, Plugin*>& initializeGlobalPluginMap();
+
+        std::map<std::string, Plugin*>& _plugins;
 
         /* Because the plugin manager must be noticed about adding the plugin to
            "used by" list, it must be done through this function. */
