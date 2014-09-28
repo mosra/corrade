@@ -27,6 +27,7 @@
 
 #include <cstring>
 #include <algorithm>
+#include <functional>
 #include <sstream>
 
 #ifndef CORRADE_TARGET_WINDOWS
@@ -114,7 +115,7 @@ AbstractManager::~AbstractManager() {
 
         #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
         /* Try to unload the plugin (and all plugins that depend on it) */
-        const LoadState loadState = unloadRecursive(it->first);
+        const LoadState loadState = unloadRecursiveInternal(*it->second);
 
         /* Schedule it for deletion, if it is not static, otherwise just
            disconnect this manager from the plugin and finalize it, so another
@@ -143,21 +144,24 @@ AbstractManager::~AbstractManager() {
 LoadState AbstractManager::unloadRecursive(const std::string& plugin) {
     const auto foundPlugin = _plugins.find(plugin);
     CORRADE_INTERNAL_ASSERT(foundPlugin != _plugins.end());
+    return unloadRecursiveInternal(*foundPlugin->second);
+}
 
+LoadState AbstractManager::unloadRecursiveInternal(Plugin& plugin) {
     /* Plugin doesn't belong to this manager, cannot do anything (will assert
        on unload() in parent call) */
-    if(foundPlugin->second->manager != this) return LoadState::NotFound;
+    if(plugin.manager != this) return LoadState::NotFound;
 
     /* If the plugin is not static and is used by others, try to unload these
        first so it can be unloaded too */
-    if(foundPlugin->second->loadState != LoadState::Static)
-        for(const std::string& plugin: foundPlugin->second->metadata.usedBy())
-            unloadRecursive(plugin);
+    if(plugin.loadState != LoadState::Static)
+        for(const std::string& usedBy: plugin.metadata._usedBy)
+            unloadRecursive(usedBy);
 
     /* Unload the plugin */
-    const LoadState after = unload(plugin);
+    const LoadState after = unloadInternal(plugin);
     CORRADE_ASSERT(after & (LoadState::Static|LoadState::NotLoaded|LoadState::WrongMetadataFile),
-        "PluginManager::Manager: cannot unload plugin" << plugin << "on manager destruction:" << after, {});
+        "PluginManager::Manager: cannot unload plugin" << plugin.metadata._name << "on manager destruction:" << after, {});
 
     return after;
 }
@@ -237,10 +241,10 @@ LoadState AbstractManager::loadState(const std::string& plugin) const {
 }
 
 LoadState AbstractManager::load(const std::string& plugin) {
-    auto foundPlugin = _plugins.find(plugin);
+    const auto found = _plugins.find(plugin);
 
     /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
-    if(foundPlugin == _plugins.end() || foundPlugin->second->manager != this) {
+    if(found == _plugins.end() || found->second->manager != this) {
         Error() << "PluginManager::Manager::load(): plugin" << plugin
             #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
             << "is not static and was not found in" << _pluginDirectory;
@@ -250,39 +254,42 @@ LoadState AbstractManager::load(const std::string& plugin) {
         return LoadState::NotFound;
     }
 
-    Plugin& pluginObject = *foundPlugin->second;
-
-    #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    return pluginObject.loadState;
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+    return loadInternal(*found->second);
     #else
+    return found->second->loadState;
+    #endif
+}
+
+#if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+LoadState AbstractManager::loadInternal(Plugin& plugin) {
     /* Plugin is not ready to load */
-    if(pluginObject.loadState != LoadState::NotLoaded) {
-        if(!(pluginObject.loadState & (LoadState::Static|LoadState::Loaded)))
-            Error() << "PluginManager::Manager::load(): plugin" << plugin << "is not ready to load:" << pluginObject.loadState;
-        return pluginObject.loadState;
+    if(plugin.loadState != LoadState::NotLoaded) {
+        if(!(plugin.loadState & (LoadState::Static|LoadState::Loaded)))
+            Error() << "PluginManager::Manager::load(): plugin" << plugin.metadata._name << "is not ready to load:" << plugin.loadState;
+        return plugin.loadState;
     }
 
-    /* Vector of found dependencies. If everything goes well, this plugin will
-       be added to each dependency usedBy list. */
-    std::vector<std::pair<std::string, Plugin*>> dependencies;
-
-    /* Load dependencies and remember their names for later */
-    for(const std::string& dependency: pluginObject.metadata.depends()) {
+    /* Load dependencies and remember their names for later. Their names will
+       be added to usedBy list only if everything goes well. */
+    std::vector<std::reference_wrapper<Plugin>> dependencies;
+    dependencies.reserve(plugin.metadata._depends.size());
+    for(const std::string& dependency: plugin.metadata._depends) {
         /* Find manager which is associated to this plugin and load the plugin
            with it */
-        auto foundDependency = _plugins.find(dependency);
+        const auto foundDependency = _plugins.find(dependency);
 
         if(foundDependency == _plugins.end() || !foundDependency->second->manager ||
-           !(foundDependency->second->manager->load(dependency) & LoadState::Loaded))
+           !(foundDependency->second->manager->loadInternal(*foundDependency->second) & LoadState::Loaded))
         {
-            Error() << "PluginManager::Manager::load(): unresolved dependency" << dependency << "of plugin" << plugin;
+            Error() << "PluginManager::Manager::load(): unresolved dependency" << dependency << "of plugin" << plugin.metadata._name;
             return LoadState::UnresolvedDependency;
         }
 
-        dependencies.push_back(*foundDependency);
+        dependencies.push_back(*foundDependency->second);
     }
 
-    const std::string filename = Directory::join(_pluginDirectory, plugin + PLUGIN_FILENAME_SUFFIX);
+    const std::string filename = Directory::join(_pluginDirectory, plugin.metadata._name + PLUGIN_FILENAME_SUFFIX);
 
     /* Open plugin file, make symbols available for next libs (which depends on this) */
     #ifndef CORRADE_TARGET_WINDOWS
@@ -301,12 +308,12 @@ LoadState AbstractManager::load(const std::string& plugin) {
     #endif
     int (*_version)(void) = reinterpret_cast<int(*)()>(dlsym(module, "pluginVersion"));
     if(_version == nullptr) {
-        Error() << "PluginManager::Manager::load(): cannot get version of plugin" << plugin + ":" << dlerror();
+        Error() << "PluginManager::Manager::load(): cannot get version of plugin" << plugin.metadata._name + ":" << dlerror();
         dlclose(module);
         return LoadState::LoadFailed;
     }
     if(_version() != Version) {
-        Error() << "PluginManager::Manager::load(): wrong version of plugin" << plugin + ", expected" << Version << "but got" << _version();
+        Error() << "PluginManager::Manager::load(): wrong version of plugin" << plugin.metadata._name + ", expected" << Version << "but got" << _version();
         dlclose(module);
         return LoadState::WrongPluginVersion;
     }
@@ -317,12 +324,12 @@ LoadState AbstractManager::load(const std::string& plugin) {
     #endif
     const char* (*interface)() = reinterpret_cast<const char* (*)()>(dlsym(module, "pluginInterface"));
     if(interface == nullptr) {
-        Error() << "PluginManager::Manager::load(): cannot get interface string of plugin" << plugin + ":" << dlerror();
+        Error() << "PluginManager::Manager::load(): cannot get interface string of plugin" << plugin.metadata._name + ":" << dlerror();
         dlclose(module);
         return LoadState::LoadFailed;
     }
     if(interface() != pluginInterface()) {
-        Error() << "PluginManager::Manager::load(): wrong interface string of plugin" << plugin + ", expected" << pluginInterface() << "but got" << interface();
+        Error() << "PluginManager::Manager::load(): wrong interface string of plugin" << plugin.metadata._name + ", expected" << pluginInterface() << "but got" << interface();
         dlclose(module);
         return LoadState::WrongInterfaceVersion;
     }
@@ -333,7 +340,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
     #endif
     Instancer instancer = reinterpret_cast<Instancer>(dlsym(module, "pluginInstancer"));
     if(instancer == nullptr) {
-        Error() << "PluginManager::Manager::load(): cannot get instancer of plugin" << plugin + ":" << dlerror();
+        Error() << "PluginManager::Manager::load(): cannot get instancer of plugin" << plugin.metadata._name + ":" << dlerror();
         dlclose(module);
         return LoadState::LoadFailed;
     }
@@ -344,65 +351,69 @@ LoadState AbstractManager::load(const std::string& plugin) {
     #endif
     void(*initializer)() = reinterpret_cast<void(*)()>(dlsym(module, "pluginInitializer"));
     if(initializer == nullptr) {
-        Error() << "PluginManager::Manager::load(): cannot get initializer of plugin" << plugin + ":" << dlerror();
+        Error() << "PluginManager::Manager::load(): cannot get initializer of plugin" << plugin.metadata._name + ":" << dlerror();
         dlclose(module);
         return LoadState::LoadFailed;
     }
     initializer();
 
     /* Everything is okay, add this plugin to usedBy list of each dependency */
-    for(auto it = dependencies.cbegin(); it != dependencies.cend(); ++it) {
+    for(Plugin& dependency: dependencies) {
         /* If the plugin is not static with no associated manager, use its
            manager for adding this plugin */
-        if(it->second->manager)
-            it->second->manager->addUsedBy(it->first, plugin);
+        if(dependency.manager)
+            dependency.manager->addUsedBy(dependency.metadata._name, plugin.metadata._name);
 
         /* Otherwise add this plugin manually */
-        else it->second->metadata._usedBy.push_back(plugin);
+        else dependency.metadata._usedBy.push_back(plugin.metadata._name);
     }
 
     /* Update plugin object, set state to loaded */
-    pluginObject.loadState = LoadState::Loaded;
-    pluginObject.module = module;
-    pluginObject.instancer = instancer;
+    plugin.loadState = LoadState::Loaded;
+    plugin.module = module;
+    plugin.instancer = instancer;
     return LoadState::Loaded;
-    #endif
 }
+#endif
 
 LoadState AbstractManager::unload(const std::string& plugin) {
-    auto foundPlugin = _plugins.find(plugin);
+    const auto found = _plugins.find(plugin);
 
     /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
-    if(foundPlugin == _plugins.end() || foundPlugin->second->manager != this) {
+    if(found == _plugins.end() || found->second->manager != this) {
         Error() << "PluginManager::Manager::unload(): plugin" << plugin << "was not found";
         return LoadState::NotFound;
     }
 
-    Plugin& pluginObject = *foundPlugin->second;
-
-    #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    return pluginObject.loadState;
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+    return unloadInternal(*found->second);
     #else
+    return found->second->loadState;
+    #endif
+}
+
+#if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+LoadState AbstractManager::unloadInternal(Plugin& plugin) {
     /* Plugin is not ready to unload, nothing to do */
-    if(pluginObject.loadState != LoadState::Loaded) {
-        if(!(pluginObject.loadState & (LoadState::Static|LoadState::NotLoaded|LoadState::WrongMetadataFile)))
-            Error() << "PluginManager::Manager::unload(): plugin" << plugin << "is not ready to unload:" << pluginObject.loadState;
-        return pluginObject.loadState;
+    if(plugin.loadState != LoadState::Loaded) {
+        if(!(plugin.loadState & (LoadState::Static|LoadState::NotLoaded|LoadState::WrongMetadataFile)))
+            Error() << "PluginManager::Manager::unload(): plugin" << plugin.metadata._name << "is not ready to unload:" << plugin.loadState;
+        return plugin.loadState;
     }
 
     /* Plugin is used by another plugin, don't unload */
-    if(!pluginObject.metadata.usedBy().empty()) {
-        Error() << "PluginManager::Manager::unload(): plugin" << plugin << "is required by other plugins:" << pluginObject.metadata.usedBy();
+    if(!plugin.metadata._usedBy.empty()) {
+        Error() << "PluginManager::Manager::unload(): plugin" << plugin.metadata._name << "is required by other plugins:" << plugin.metadata._usedBy;
         return LoadState::Required;
     }
 
     /* Plugin has active instances */
-    auto foundInstance = instances.find(plugin);
+    auto foundInstance = instances.find(plugin.metadata._name);
     if(foundInstance != instances.end()) {
         /* Check if all instances can be safely deleted */
         for(auto it = foundInstance->second.cbegin(); it != foundInstance->second.cend(); ++it)
             if(!(*it)->canBeDeleted()) {
-                Error() << "PluginManager::Manager::unload(): plugin" << plugin << "is currently used and cannot be deleted";
+                Error() << "PluginManager::Manager::unload(): plugin" << plugin.metadata._name << "is currently used and cannot be deleted";
                 return LoadState::Used;
             }
 
@@ -413,18 +424,18 @@ LoadState AbstractManager::unload(const std::string& plugin) {
     }
 
     /* Remove this plugin from "used by" list of dependencies */
-    for(auto it = pluginObject.metadata.depends().cbegin(); it != pluginObject.metadata.depends().cend(); ++it) {
+    for(auto it = plugin.metadata.depends().cbegin(); it != plugin.metadata.depends().cend(); ++it) {
         auto mit = _plugins.find(*it);
 
         if(mit != _plugins.end()) {
             /* If the plugin is not static with no associated manager, use
                its manager for removing this plugin */
             if(mit->second->manager)
-                mit->second->manager->removeUsedBy(mit->first, plugin);
+                mit->second->manager->removeUsedBy(mit->first, plugin.metadata._name);
 
             /* Otherwise remove this plugin manually */
             else for(auto it = mit->second->metadata._usedBy.begin(); it != mit->second->metadata._usedBy.end(); ++it) {
-                if(*it == plugin) {
+                if(*it == plugin.metadata._name) {
                     mit->second->metadata._usedBy.erase(it);
                     break;
                 }
@@ -436,31 +447,31 @@ LoadState AbstractManager::unload(const std::string& plugin) {
     #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
-    void(*finalizer)() = reinterpret_cast<void(*)()>(dlsym(pluginObject.module, "pluginFinalizer"));
+    void(*finalizer)() = reinterpret_cast<void(*)()>(dlsym(plugin.module, "pluginFinalizer"));
     if(finalizer == nullptr) {
-        Error() << "PluginManager::Manager::unload(): cannot get finalizer of plugin" << plugin + ":" << dlerror();
+        Error() << "PluginManager::Manager::unload(): cannot get finalizer of plugin" << plugin.metadata._name + ":" << dlerror();
         /* Not fatal, continue with unloading */
     }
     finalizer();
 
     /* Close the module */
     #ifndef CORRADE_TARGET_WINDOWS
-    if(dlclose(pluginObject.module) != 0) {
+    if(dlclose(plugin.module) != 0) {
     #else
     if(!FreeLibrary(pluginObject.module)) {
     #endif
-        Error() << "PluginManager::Manager::unload(): cannot unload plugin" << plugin + ":" << dlerror();
-        pluginObject.loadState = LoadState::NotLoaded;
+        Error() << "PluginManager::Manager::unload(): cannot unload plugin" << plugin.metadata._name + ":" << dlerror();
+        plugin.loadState = LoadState::NotLoaded;
         return LoadState::UnloadFailed;
     }
 
     /* Update plugin object, set state to not loaded */
-    pluginObject.loadState = LoadState::NotLoaded;
-    pluginObject.module = nullptr;
-    pluginObject.instancer = nullptr;
+    plugin.loadState = LoadState::NotLoaded;
+    plugin.module = nullptr;
+    plugin.instancer = nullptr;
     return LoadState::NotLoaded;
-    #endif
 }
+#endif
 
 void AbstractManager::registerInstance(std::string plugin, AbstractPlugin& instance, const PluginMetadata*& metadata) {
     /** @todo assert proper interface */
