@@ -538,12 +538,12 @@ void* AbstractManager::instanceInternal(const std::string& plugin) {
 }
 
 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-AbstractManager::Plugin::Plugin(std::string name, const std::string& _metadata, AbstractManager* _manager): configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(std::move(name), configuration), manager(_manager), instancer(nullptr), module(nullptr) {
+AbstractManager::Plugin::Plugin(std::string name, const std::string& metadata, AbstractManager* manager): configuration{metadata, Utility::Configuration::Flag::ReadOnly}, metadata{std::move(name), configuration}, manager{manager}, instancer{nullptr}, module{nullptr} {
     loadState = configuration.isValid() ? LoadState::NotLoaded : LoadState::WrongMetadataFile;
 }
 #endif
 
-AbstractManager::Plugin::Plugin(std::string name, std::istream& _metadata, StaticPlugin* staticPlugin): loadState(LoadState::Static), configuration(_metadata, Utility::Configuration::Flag::ReadOnly), metadata(std::move(name), configuration), manager(nullptr), instancer(staticPlugin->instancer), staticPlugin(staticPlugin) {}
+AbstractManager::Plugin::Plugin(std::string name, std::istream& metadata, StaticPlugin* staticPlugin): loadState{LoadState::Static}, configuration{metadata, Utility::Configuration::Flag::ReadOnly}, metadata{std::move(name), configuration}, manager{nullptr}, instancer{staticPlugin->instancer}, staticPlugin{staticPlugin} {}
 
 AbstractManager::Plugin::~Plugin() {
     #ifndef CORRADE_TARGET_NACL_NEWLIB

@@ -357,7 +357,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
             #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
             LoadState loadState;
             #else
-            const LoadState loadState;
+            const LoadState loadState; /* Always LoadState::Static */
             #endif
             Utility::Configuration configuration;
             PluginMetadata metadata;
@@ -370,11 +370,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
             #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
             union {
-            #endif
                 /* For static plugins */
                 StaticPlugin* staticPlugin;
 
-            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
                 /* For dynamic plugins */
                 #ifndef CORRADE_TARGET_WINDOWS
                 void* module;
@@ -382,15 +380,17 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
                 HMODULE module;
                 #endif
             };
+            #else
+            StaticPlugin* staticPlugin;
             #endif
 
             #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
             /* Constructor for dynamic plugins */
-            explicit Plugin(std::string name, const std::string& _metadata, AbstractManager* _manager);
+            explicit Plugin(std::string name, const std::string& metadata, AbstractManager* manager);
             #endif
 
             /* Constructor for static plugins */
-            explicit Plugin(std::string name, std::istream& _metadata, StaticPlugin* staticPlugin);
+            explicit Plugin(std::string name, std::istream& metadata, StaticPlugin* staticPlugin);
 
             ~Plugin();
         };
