@@ -186,7 +186,7 @@ LoadState AbstractManager::unloadRecursiveInternal(Plugin& plugin) {
     /* GCC 4.5 requires explicit type */
     const LoadState after = unloadInternal(plugin);
     CORRADE_ASSERT(after & (LoadState::Static|LoadState::NotLoaded|LoadState::WrongMetadataFile),
-        "PluginManager::Manager: cannot unload plugin" << plugin.metadata._name << "on manager destruction:" << after, LoadState{});
+        "PluginManager::Manager: cannot unload plugin" << plugin.metadata._name << "on manager destruction:" << after, LoadState());
 
     return after;
 }
