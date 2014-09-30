@@ -30,9 +30,9 @@
 namespace Corrade { namespace PluginManager {
 
 PluginMetadata::PluginMetadata(std::string name, Utility::ConfigurationGroup& conf): _name(std::move(name)) {
-    /* Dependencies, replacements */
+    /* Dependencies, aliases */
     _depends = conf.values("depends");
-    _replaces = conf.values("replaces");
+    _provides = conf.values("provides");
 
     /* Plugin configuration data */
     _data = conf.group("data");
@@ -42,7 +42,5 @@ PluginMetadata::PluginMetadata(std::string name, Utility::ConfigurationGroup& co
 std::string PluginMetadata::name() const { return _name; }
 
 std::vector<std::string> PluginMetadata::usedBy() const { return _usedBy; }
-
-std::vector<std::string> PluginMetadata::replacedWith() const { return _replacedWith; }
 
 }}

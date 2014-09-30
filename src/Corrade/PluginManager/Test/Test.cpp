@@ -72,6 +72,12 @@ class Test: public TestSuite::Tester {
 
         void reloadPluginDirectory();
 
+        void staticProvides();
+        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+        void dynamicProvides();
+        void dynamicProvidesDependency();
+        #endif
+
         void debug();
 };
 
@@ -98,6 +104,12 @@ Test::Test() {
               &Test::unresolvedDependencies,
               &Test::reloadPluginDirectory,
 
+              &Test::staticProvides,
+              #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+              &Test::dynamicProvides,
+              &Test::dynamicProvidesDependency,
+              #endif
+
               &Test::debug});
 
     initialize();
@@ -121,7 +133,7 @@ void Test::nameList() {
         PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
 
         CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
-            "Canary", "Chihuahua", "Dog", "Snail"}), TestSuite::Compare::Container);
+            "Bulldog", "Canary", "Chihuahua", "Dog", "Snail"}), TestSuite::Compare::Container);
     }
     #endif
 
@@ -447,11 +459,56 @@ void Test::reloadPluginDirectory() {
 
     /* And now we can safely compare */
     CORRADE_COMPARE_AS(actual1, (std::vector<std::string>{
-        "Canary", "Dog", "LostChihuahua", "LostDog", "Snail"}), TestSuite::Compare::Container);
+        "Bulldog", "Canary", "Dog", "LostChihuahua", "LostDog", "Snail"}), TestSuite::Compare::Container);
     CORRADE_COMPARE_AS(actual2, (std::vector<std::string>{
-        "Canary", "LostChihuahua", "LostDog", "Snail"}), TestSuite::Compare::Container);
+        "Bulldog", "Canary", "LostChihuahua", "LostDog", "Snail"}), TestSuite::Compare::Container);
     #endif
 }
+
+void Test::staticProvides() {
+    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+
+    CORRADE_COMPARE(manager.metadata("Canary")->provides(), std::vector<std::string>{"JustSomeBird"});
+
+    CORRADE_COMPARE(manager.loadState("JustSomeBird"), LoadState::Static);
+    CORRADE_VERIFY(manager.metadata("JustSomeBird"));
+    CORRADE_COMPARE(manager.metadata("JustSomeBird")->name(), "Canary");
+
+    const auto animal = manager.instance("JustSomeBird");
+    CORRADE_COMPARE(animal->metadata()->name(), "Canary");
+}
+
+#if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+void Test::dynamicProvides() {
+    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+
+    CORRADE_COMPARE(manager.metadata("Dog")->provides(), std::vector<std::string>{"JustSomeMammal"});
+
+    CORRADE_COMPARE(manager.loadState("JustSomeMammal"), LoadState::NotLoaded);
+    CORRADE_COMPARE(manager.load("JustSomeMammal"), LoadState::Loaded);
+    CORRADE_COMPARE(manager.loadState("JustSomeMammal"), LoadState::Loaded);
+    CORRADE_VERIFY(manager.metadata("JustSomeMammal"));
+    CORRADE_COMPARE(manager.metadata("JustSomeMammal")->name(), "Dog");
+
+    const auto animal = manager.instance("JustSomeMammal");
+    CORRADE_COMPARE(animal->metadata()->name(), "Dog");
+}
+
+void Test::dynamicProvidesDependency() {
+    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+
+    /* The plugin JustSomeMammal exists, but is an alias and cannot be used as
+       a dependency */
+    CORRADE_COMPARE(manager.loadState("JustSomeMammal"), LoadState::NotLoaded);
+    CORRADE_VERIFY(manager.metadata("Bulldog"));
+    CORRADE_COMPARE(manager.metadata("Bulldog")->depends(), std::vector<std::string>{"JustSomeMammal"});
+
+    std::ostringstream out;
+    Error::setOutput(&out);
+    CORRADE_COMPARE(manager.load("Bulldog"), LoadState::UnresolvedDependency);
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): unresolved dependency JustSomeMammal of plugin Bulldog\n");
+}
+#endif
 
 void Test::debug() {
     std::ostringstream o;

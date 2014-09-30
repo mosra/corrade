@@ -23,31 +23,22 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include "Corrade/PluginManager/AbstractManager.h"
+
 #include "AbstractAnimal.h"
-
-#include "Corrade/Utility/VisibilityMacros.h"
-
-#ifdef Dog_EXPORTS
-    #define DOG_EXPORT CORRADE_VISIBILITY_EXPORT
-#else
-    #define DOG_EXPORT CORRADE_VISIBILITY_IMPORT
-#endif
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-class DOG_EXPORT Dog: public AbstractAnimal {
+class Bulldog: public AbstractAnimal {
     public:
-        static void initialize();
-        static void finalize();
+        explicit Bulldog(AbstractManager& manager, std::string plugin): AbstractAnimal(manager, std::move(plugin)) {}
 
-        explicit Dog();
-        explicit Dog(AbstractManager& manager, std::string plugin): AbstractAnimal(manager, std::move(plugin)) {}
-
-        std::string name() override;
-        int legCount() override;
-        bool hasTail() override;
+        std::string name() override { return "Bulldog"; }
+        int legCount() override { return 0; }
+        bool hasTail() override { return false; }
 };
 
-inline Dog::Dog() = default;
-
 }}}
+
+CORRADE_PLUGIN_REGISTER(Bulldog, Corrade::PluginManager::Test::Bulldog,
+    "cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")

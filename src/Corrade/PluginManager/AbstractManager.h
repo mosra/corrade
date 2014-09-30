@@ -363,7 +363,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
             #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
             LoadState loadState;
             #else
-            const LoadState loadState;
+            const LoadState loadState; /* Always LoadState::Static */
             #endif
             Utility::Configuration configuration;
             PluginMetadata metadata;
@@ -376,11 +376,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
             #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
             union {
-            #endif
                 /* For static plugins */
                 StaticPlugin* staticPlugin;
 
-            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
                 /* For dynamic plugins */
                 #ifndef CORRADE_TARGET_WINDOWS
                 void* module;
@@ -388,17 +386,24 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
                 HMODULE module;
                 #endif
             };
+            #else
+            StaticPlugin* staticPlugin;
             #endif
 
             #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
             /* Constructor for dynamic plugins */
-            explicit Plugin(std::string name, const std::string& _metadata, AbstractManager* _manager);
+            explicit Plugin(std::string name, const std::string& metadata, AbstractManager* manager);
             #endif
 
             /* Constructor for static plugins */
-            explicit Plugin(std::string name, std::istream& _metadata, StaticPlugin* staticPlugin);
+            explicit Plugin(std::string name, std::istream& metadata, StaticPlugin* staticPlugin);
 
             ~Plugin();
+        };
+
+        struct GlobalPluginStorage {
+            std::map<std::string, Plugin*> plugins;
+            std::map<std::string, Plugin&> aliases;
         };
 
         #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -408,10 +413,13 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         /* Defined in PluginManager */
         virtual std::string pluginInterface() const = 0;
 
-        /* Global storage of static, unloaded and loaded plugins. The map is
-           accessible via function, not directly, because we need to fill it
-           with data from staticPlugins() before first use. */
-        static std::map<std::string, Plugin*>* plugins();
+        /* Initialize global plugin map. On first run it creates the instance
+           and fills it with entries from staticPlugins(). The reference is
+           then in constructor stored in _plugins variable to avoid at least
+           some issues with duplicated static variables on static builds. */
+        static GlobalPluginStorage& initializeGlobalPluginStorage();
+
+        GlobalPluginStorage& _plugins;
 
         /* Because the plugin manager must be noticed about adding the plugin to
            "used by" list, it must be done through this function. */
@@ -439,8 +447,14 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         CORRADE_PLUGINMANAGER_LOCAL void registerInstance(std::string plugin, AbstractPlugin& instance, const PluginMetadata*& metadata);
         CORRADE_PLUGINMANAGER_LOCAL void unregisterInstance(const std::string& plugin, AbstractPlugin& instance);
 
+        CORRADE_PLUGINMANAGER_LOCAL Plugin* findWithAlias(const std::string& plugin);
+        CORRADE_PLUGINMANAGER_LOCAL const Plugin* findWithAlias(const std::string& plugin) const;
+
         #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+        CORRADE_PLUGINMANAGER_LOCAL LoadState loadInternal(Plugin& plugin);
+        CORRADE_PLUGINMANAGER_LOCAL LoadState unloadInternal(Plugin& plugin);
         CORRADE_PLUGINMANAGER_LOCAL LoadState unloadRecursive(const std::string& plugin);
+        CORRADE_PLUGINMANAGER_LOCAL LoadState unloadRecursiveInternal(Plugin& plugin);
         #endif
 
         std::map<std::string, std::vector<AbstractPlugin*> > instances;
