@@ -150,9 +150,17 @@ AbstractManager::~AbstractManager() {
     /* GCC 4.5 cannot erase with const_iterator */
     auto ait = _plugins.aliases.begin();
     while(ait != _plugins.aliases.end()) {
-        if(ait->second.manager == this && ait->second.loadState != LoadState::Static)
+        if(ait->second.manager == this && ait->second.loadState != LoadState::Static) {
+            #ifndef CORRADE_GCC44_COMPATIBILITY
             ait = _plugins.aliases.erase(ait);
-        else ++ait;
+            #else
+            /* GCC 4.4 returns void from map::erase(), but other iterators
+               aren't invalidated, so it's safe */
+            auto erase = ait;
+            ++ait;
+            _plugins.aliases.erase(erase);
+            #endif
+        } else ++ait;
     }
 
     #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -203,9 +211,17 @@ void AbstractManager::setPluginDirectory(std::string directory) {
     /* GCC 4.5 cannot erase with const_iterator */
     auto ait = _plugins.aliases.begin();
     while(ait != _plugins.aliases.end()) {
-        if(ait->second.manager == this && ait->second.loadState & (LoadState::NotLoaded|LoadState::WrongMetadataFile))
+        if(ait->second.manager == this && ait->second.loadState & (LoadState::NotLoaded|LoadState::WrongMetadataFile)) {
+            #ifndef CORRADE_GCC44_COMPATIBILITY
             ait = _plugins.aliases.erase(ait);
-        else ++ait;
+            #else
+            /* GCC 4.4 returns void from map::erase(), but other iterators
+               aren't invalidated, so it's safe */
+            auto erase = ait;
+            ++ait;
+            _plugins.aliases.erase(erase);
+            #endif
+        } else ++ait;
     }
 
     /* Remove all unloaded plugins from the container */
@@ -222,7 +238,7 @@ void AbstractManager::setPluginDirectory(std::string directory) {
                aren't invalidated, so it's safe */
             auto erase = it;
             ++it;
-            plugins()->erase(erase);
+            _plugins.plugins.erase(erase);
             #endif
 
         } else ++it;
