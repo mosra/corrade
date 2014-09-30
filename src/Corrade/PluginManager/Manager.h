@@ -85,7 +85,7 @@ class Manager: public BaseManager {
 template<class T, class BaseManager> template<class ...U> Manager<T, BaseManager>::Manager(U&&... args): BaseManager(std::forward<U>(args)...) {
     /* Find static plugins which have the same interface and have not
         assigned manager to them */
-    for(typename std::map<std::string, typename BaseManager::Plugin*>::iterator it = BaseManager::_plugins.begin(); it != BaseManager::_plugins.end(); ++it) {
+    for(typename std::map<std::string, typename BaseManager::Plugin*>::iterator it = BaseManager::_plugins.plugins.begin(); it != BaseManager::_plugins.plugins.end(); ++it) {
         if(it->second->loadState != LoadState::Static || it->second->manager != nullptr || it->second->staticPlugin->interface != pluginInterface())
             continue;
 

@@ -43,9 +43,9 @@ class DOG_EXPORT Dog: public AbstractAnimal {
         explicit Dog() = default;
         explicit Dog(AbstractManager& manager, std::string plugin): AbstractAnimal(manager, std::move(plugin)) {}
 
-        std::string name();
-        int legCount();
-        bool hasTail();
+        std::string name() override;
+        int legCount() override;
+        bool hasTail() override;
 };
 
 }}}

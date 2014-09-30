@@ -31,7 +31,7 @@ class Chihuahua: public Dog {
     public:
         explicit Chihuahua(AbstractManager& manager, std::string plugin): Dog(manager, std::move(plugin)) {}
 
-        std::string name() { return "Rodriguez"; }
+        std::string name() override { return "Rodriguez"; }
 };
 
 }}}

@@ -55,8 +55,8 @@ namespace Corrade { namespace PluginManager {
 
 const int AbstractManager::Version = CORRADE_PLUGIN_VERSION;
 
-auto AbstractManager::initializeGlobalPluginMap() -> std::map<std::string, Plugin*>& {
-    static std::map<std::string, Plugin*>* const _plugins = new std::map<std::string, Plugin*>();
+auto AbstractManager::initializeGlobalPluginStorage() -> GlobalPluginStorage& {
+    static GlobalPluginStorage* const plugins = new GlobalPluginStorage;
 
     /* If there are unprocessed static plugins for this manager, add them */
     if(staticPlugins()) {
@@ -66,7 +66,13 @@ auto AbstractManager::initializeGlobalPluginMap() -> std::map<std::string, Plugi
             std::istringstream metadata(r.get(staticPlugin->plugin + ".conf"));
 
             /* Insert plugin to list */
-            CORRADE_INTERNAL_ASSERT_OUTPUT(_plugins->insert(std::make_pair(staticPlugin->plugin, new Plugin(staticPlugin->plugin, metadata, staticPlugin))).second);
+            const auto result = plugins->plugins.insert(std::make_pair(staticPlugin->plugin, new Plugin(staticPlugin->plugin, metadata, staticPlugin)));
+            CORRADE_INTERNAL_ASSERT(result.second);
+
+            /* Add aliases to the list (only the ones that aren't already there
+               are added) */
+            for(const std::string& alias: result.first->second->metadata._provides)
+                plugins->aliases.emplace(alias, *result.first->second);
         }
 
         /** @todo Assert dependencies of static plugins */
@@ -76,7 +82,7 @@ auto AbstractManager::initializeGlobalPluginMap() -> std::map<std::string, Plugi
         staticPlugins() = nullptr;
     }
 
-    return *_plugins;
+    return *plugins;
 }
 
 std::vector<AbstractManager::StaticPlugin*>*& AbstractManager::staticPlugins() {
@@ -97,11 +103,11 @@ void AbstractManager::importStaticPlugin(std::string plugin, int _version, std::
 #endif
 
 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-AbstractManager::AbstractManager(std::string pluginDirectory): _plugins(initializeGlobalPluginMap()) {
+AbstractManager::AbstractManager(std::string pluginDirectory): _plugins(initializeGlobalPluginStorage()) {
     setPluginDirectory(std::move(pluginDirectory));
 }
 #else
-AbstractManager::AbstractManager(std::string): _plugins(initializeGlobalPluginMap()) {}
+AbstractManager::AbstractManager(std::string): _plugins(initializeGlobalPluginStorage()) {}
 #endif
 
 AbstractManager::~AbstractManager() {
@@ -109,7 +115,7 @@ AbstractManager::~AbstractManager() {
     #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
     std::vector<std::map<std::string, Plugin*>::iterator> removed;
     #endif
-    for(auto it = _plugins.begin(); it != _plugins.end(); ++it) {
+    for(auto it = _plugins.plugins.begin(); it != _plugins.plugins.end(); ++it) {
         /* Plugin doesn't belong to this manager */
         if(it->second->manager != this) continue;
 
@@ -131,20 +137,30 @@ AbstractManager::~AbstractManager() {
         #endif
     }
 
+    /* Remove all non-static aliases associated with this manager. After the
+       previous step, the only plugins associated with this manager should now
+       be dynamic and unloaded. */
+    auto ait = _plugins.aliases.cbegin();
+    while(ait != _plugins.aliases.cend()) {
+        if(ait->second.manager == this && ait->second.loadState != LoadState::Static)
+            ait = _plugins.aliases.erase(ait);
+        else ++ait;
+    }
+
     #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
     /* Remove the plugins from global container */
     for(auto it = removed.cbegin(); it != removed.cend(); ++it) {
         delete (*it)->second;
-        _plugins.erase(*it);
+        _plugins.plugins.erase(*it);
     }
     #endif
 }
 
 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
 LoadState AbstractManager::unloadRecursive(const std::string& plugin) {
-    const auto foundPlugin = _plugins.find(plugin);
-    CORRADE_INTERNAL_ASSERT(foundPlugin != _plugins.end());
-    return unloadRecursiveInternal(*foundPlugin->second);
+    const auto found = _plugins.plugins.find(plugin);
+    CORRADE_INTERNAL_ASSERT(found != _plugins.plugins.end());
+    return unloadRecursiveInternal(*found->second);
 }
 
 LoadState AbstractManager::unloadRecursiveInternal(Plugin& plugin) {
@@ -173,12 +189,21 @@ std::string AbstractManager::pluginDirectory() const {
 void AbstractManager::setPluginDirectory(std::string directory) {
     _pluginDirectory = std::move(directory);
 
+    /* Remove aliases for unloaded plugins from the container. They need to be
+       removed before plugins themselves */
+    auto ait = _plugins.aliases.cbegin();
+    while(ait != _plugins.aliases.cend()) {
+        if(ait->second.manager == this && ait->second.loadState & (LoadState::NotLoaded|LoadState::WrongMetadataFile))
+            ait = _plugins.aliases.erase(ait);
+        else ++ait;
+    }
+
     /* Remove all unloaded plugins from the container */
-    auto it = _plugins.cbegin();
-    while(it != _plugins.cend()) {
+    auto it = _plugins.plugins.cbegin();
+    while(it != _plugins.plugins.cend()) {
         if(it->second->manager == this && it->second->loadState & (LoadState::NotLoaded|LoadState::WrongMetadataFile)) {
             delete it->second;
-            it = _plugins.erase(it);
+            it = _plugins.plugins.erase(it);
         } else ++it;
     }
 
@@ -196,10 +221,15 @@ void AbstractManager::setPluginDirectory(std::string directory) {
         const std::string name = filename.substr(0, end);
 
         /* Skip the plugin if it is among loaded */
-        if(_plugins.find(name) != _plugins.end()) continue;
+        if(_plugins.plugins.find(name) != _plugins.plugins.end()) continue;
 
         /* Insert plugin to list */
-        _plugins.insert({name, new Plugin(name, Directory::join(_pluginDirectory, name + ".conf"), this)});
+        const auto result = _plugins.plugins.insert({name, new Plugin(name, Directory::join(_pluginDirectory, name + ".conf"), this)});
+        CORRADE_INTERNAL_ASSERT(result.second);
+
+        /* Add aliases to the list */
+        for(const std::string& alias: result.first->second->metadata._provides)
+            _plugins.aliases.emplace(alias, *result.first->second);
     }
 }
 
@@ -210,7 +240,7 @@ void AbstractManager::reloadPluginDirectory() {
 
 std::vector<std::string> AbstractManager::pluginList() const {
     std::vector<std::string> names;
-    for(auto i = _plugins.cbegin(); i != _plugins.cend(); ++i) {
+    for(auto i = _plugins.plugins.cbegin(); i != _plugins.plugins.cend(); ++i) {
 
         /* Plugin doesn't belong to this manager */
         if(i->second->manager != this) continue;
@@ -220,45 +250,57 @@ std::vector<std::string> AbstractManager::pluginList() const {
     return names;
 }
 
+auto AbstractManager::findWithAlias(const std::string& plugin) -> Plugin* {
+    return const_cast<Plugin*>(const_cast<const AbstractManager&>(*this).findWithAlias(plugin));
+}
+
+auto AbstractManager::findWithAlias(const std::string& plugin) const -> const Plugin* {
+    const auto found = _plugins.plugins.find(plugin);
+
+    /* Not found, try aliases */
+    if(found == _plugins.plugins.end()) {
+        const auto aliasFound = _plugins.aliases.find(plugin);
+
+        /* Found alias which belongs to this manager, load */
+        if(aliasFound != _plugins.aliases.end() && aliasFound->second.manager == this)
+            return &aliasFound->second;
+
+    /* Found and belongs to this manager, load */
+    } else if(found->second->manager == this) return found->second;
+
+    /* Not found */
+    return nullptr;
+}
+
 const PluginMetadata* AbstractManager::metadata(const std::string& plugin) const {
-    auto foundPlugin = _plugins.find(plugin);
+    if(const Plugin* const found = findWithAlias(plugin)) return &found->metadata;
 
-    /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
-    if(foundPlugin == _plugins.end() || foundPlugin->second->manager != this)
-        return nullptr;
-
-    return &foundPlugin->second->metadata;
+    return nullptr;
 }
 
 LoadState AbstractManager::loadState(const std::string& plugin) const {
-    auto foundPlugin = _plugins.find(plugin);
+    if(const Plugin* const found = findWithAlias(plugin))
+        return found->loadState;
 
-    /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
-    if(foundPlugin == _plugins.end() || foundPlugin->second->manager != this)
-        return LoadState::NotFound;
-
-    return foundPlugin->second->loadState;
+    return LoadState::NotFound;
 }
 
 LoadState AbstractManager::load(const std::string& plugin) {
-    const auto found = _plugins.find(plugin);
-
-    /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
-    if(found == _plugins.end() || found->second->manager != this) {
-        Error() << "PluginManager::Manager::load(): plugin" << plugin
-            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-            << "is not static and was not found in" << _pluginDirectory;
-            #else
-            << "was not found";
-            #endif
-        return LoadState::NotFound;
+    if(Plugin* const found = findWithAlias(plugin)) {
+        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+        return loadInternal(*found);
+        #else
+        return found->loadState;
+        #endif
     }
 
-    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-    return loadInternal(*found->second);
-    #else
-    return found->second->loadState;
-    #endif
+    Error() << "PluginManager::Manager::load(): plugin" << plugin
+        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+        << "is not static and was not found in" << _pluginDirectory;
+        #else
+        << "was not found";
+        #endif
+    return LoadState::NotFound;
 }
 
 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -277,9 +319,9 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
     for(const std::string& dependency: plugin.metadata._depends) {
         /* Find manager which is associated to this plugin and load the plugin
            with it */
-        const auto foundDependency = _plugins.find(dependency);
+        const auto foundDependency = _plugins.plugins.find(dependency);
 
-        if(foundDependency == _plugins.end() || !foundDependency->second->manager ||
+        if(foundDependency == _plugins.plugins.end() || !foundDependency->second->manager ||
            !(foundDependency->second->manager->loadInternal(*foundDependency->second) & LoadState::Loaded))
         {
             Error() << "PluginManager::Manager::load(): unresolved dependency" << dependency << "of plugin" << plugin.metadata._name;
@@ -377,19 +419,16 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
 #endif
 
 LoadState AbstractManager::unload(const std::string& plugin) {
-    const auto found = _plugins.find(plugin);
-
-    /* Given plugin doesn't exist or doesn't belong to this manager, nothing to do */
-    if(found == _plugins.end() || found->second->manager != this) {
-        Error() << "PluginManager::Manager::unload(): plugin" << plugin << "was not found";
-        return LoadState::NotFound;
+    if(Plugin* const found = findWithAlias(plugin)) {
+        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+        return unloadInternal(*found);
+        #else
+        return found->loadState;
+        #endif
     }
 
-    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-    return unloadInternal(*found->second);
-    #else
-    return found->second->loadState;
-    #endif
+    Error() << "PluginManager::Manager::unload(): plugin" << plugin << "was not found";
+    return LoadState::NotFound;
 }
 
 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -425,9 +464,9 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
 
     /* Remove this plugin from "used by" list of dependencies */
     for(auto it = plugin.metadata.depends().cbegin(); it != plugin.metadata.depends().cend(); ++it) {
-        auto mit = _plugins.find(*it);
+        auto mit = _plugins.plugins.find(*it);
 
-        if(mit != _plugins.end()) {
+        if(mit != _plugins.plugins.end()) {
             /* If the plugin is not static with no associated manager, use
                its manager for removing this plugin */
             if(mit->second->manager)
@@ -475,9 +514,9 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
 
 void AbstractManager::registerInstance(std::string plugin, AbstractPlugin& instance, const PluginMetadata*& metadata) {
     /** @todo assert proper interface */
-    auto foundPlugin = _plugins.find(plugin);
+    auto foundPlugin = _plugins.plugins.find(plugin);
 
-    CORRADE_ASSERT(foundPlugin != _plugins.end() && foundPlugin->second->manager == this,
+    CORRADE_ASSERT(foundPlugin != _plugins.plugins.end() && foundPlugin->second->manager == this,
         "PluginManager::AbstractPlugin::AbstractPlugin(): attempt to register instance of plugin not known to given manager", );
 
     auto foundInstance = instances.find(plugin);
@@ -491,9 +530,9 @@ void AbstractManager::registerInstance(std::string plugin, AbstractPlugin& insta
 }
 
 void AbstractManager::unregisterInstance(const std::string& plugin, AbstractPlugin& instance) {
-    auto foundPlugin = _plugins.find(plugin);
+    auto foundPlugin = _plugins.plugins.find(plugin);
 
-    CORRADE_INTERNAL_ASSERT(foundPlugin != _plugins.end() && foundPlugin->second->manager == this);
+    CORRADE_INTERNAL_ASSERT(foundPlugin != _plugins.plugins.end() && foundPlugin->second->manager == this);
 
     auto foundInstance = instances.find(plugin);
     CORRADE_INTERNAL_ASSERT(foundInstance != instances.end());
@@ -508,33 +547,34 @@ void AbstractManager::unregisterInstance(const std::string& plugin, AbstractPlug
 }
 
 void AbstractManager::addUsedBy(const std::string& plugin, std::string usedBy) {
-    auto foundPlugin = _plugins.find(plugin);
+    auto found = _plugins.plugins.find(plugin);
 
-    CORRADE_INTERNAL_ASSERT(foundPlugin != _plugins.end());
+    CORRADE_INTERNAL_ASSERT(found != _plugins.plugins.end());
 
-    foundPlugin->second->metadata._usedBy.push_back(std::move(usedBy));
+    found->second->metadata._usedBy.push_back(std::move(usedBy));
 }
 
 void AbstractManager::removeUsedBy(const std::string& plugin, const std::string& usedBy) {
-    auto foundPlugin = _plugins.find(plugin);
+    auto found = _plugins.plugins.find(plugin);
 
-    CORRADE_INTERNAL_ASSERT(foundPlugin != _plugins.end());
+    CORRADE_INTERNAL_ASSERT(found != _plugins.plugins.end());
 
-    for(auto it = foundPlugin->second->metadata._usedBy.begin(); it != foundPlugin->second->metadata._usedBy.end(); ++it) {
+    for(auto it = found->second->metadata._usedBy.begin(); it != found->second->metadata._usedBy.end(); ++it) {
         if(*it == usedBy) {
-            foundPlugin->second->metadata._usedBy.erase(it);
+            found->second->metadata._usedBy.erase(it);
             return;
         }
     }
 }
 
 void* AbstractManager::instanceInternal(const std::string& plugin) {
-    auto foundPlugin = _plugins.find(plugin);
+    Plugin* const found = findWithAlias(plugin);
 
-    CORRADE_ASSERT(foundPlugin != _plugins.end() && (foundPlugin->second->loadState & LoadState::Loaded) && foundPlugin->second->manager == this,
+    CORRADE_ASSERT(found && (found->loadState & LoadState::Loaded),
         "PluginManager::Manager::instance(): plugin" << plugin << "is not loaded", nullptr);
 
-    return foundPlugin->second->instancer(*this, plugin);
+    /* Instance the plugin using its original (non-aliased) name */
+    return found->instancer(*this, found->metadata._name);
 }
 
 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)

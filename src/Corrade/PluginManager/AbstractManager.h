@@ -395,6 +395,11 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
             ~Plugin();
         };
 
+        struct GlobalPluginStorage {
+            std::map<std::string, Plugin*> plugins;
+            std::map<std::string, Plugin&> aliases;
+        };
+
         #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
         std::string _pluginDirectory;
         #endif
@@ -406,9 +411,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
            and fills it with entries from staticPlugins(). The reference is
            then in constructor stored in _plugins variable to avoid at least
            some issues with duplicated static variables on static builds. */
-        static std::map<std::string, Plugin*>& initializeGlobalPluginMap();
+        static GlobalPluginStorage& initializeGlobalPluginStorage();
 
-        std::map<std::string, Plugin*>& _plugins;
+        GlobalPluginStorage& _plugins;
 
         /* Because the plugin manager must be noticed about adding the plugin to
            "used by" list, it must be done through this function. */
@@ -435,6 +440,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
         CORRADE_PLUGINMANAGER_LOCAL void registerInstance(std::string plugin, AbstractPlugin& instance, const PluginMetadata*& metadata);
         CORRADE_PLUGINMANAGER_LOCAL void unregisterInstance(const std::string& plugin, AbstractPlugin& instance);
+
+        CORRADE_PLUGINMANAGER_LOCAL Plugin* findWithAlias(const std::string& plugin);
+        CORRADE_PLUGINMANAGER_LOCAL const Plugin* findWithAlias(const std::string& plugin) const;
 
         #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
         CORRADE_PLUGINMANAGER_LOCAL LoadState loadInternal(Plugin& plugin);

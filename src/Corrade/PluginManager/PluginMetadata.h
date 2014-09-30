@@ -48,19 +48,27 @@ into how plugins work.
 
 The plugin configuration file has an simple syntax (see
 @ref Utility::Configuration class documentation for full specification). The
-file stores list of dependencies (if the plugin depends on another) and
-optionally plugin-specific configuration. Example `Matrix.conf` file for
-`Matrix` plugin:
+file stores list of dependencies (if the plugin depends on another), list of
+aliases and optionally plugin-specific configuration. Example `Matrix.conf`
+file for `Matrix` plugin:
 
     # Dependencies
     depends=SomeRandomJohnDoesPlugin
     depends=BaseMatrixPlugin
     depends=SkyNetPlugin
 
+    # Aliases
+    provides=RealWorld
+    provides=RealButSlightlyTwistedWorld
+
     # Optional plugin-specific data
     [data]
     description=My first matrix without bugs
 
+According to the configuration file, the `Matrix` plugin can be loaded only if
+`SomeRandomJohnDoesPlugin`, `BaseMatrixPlugin` and `SkyNetPlugin` are found can
+be loaded. It will be also loaded when requesting `RealWorld` plugin, but only
+if this is the first plugin providing it.
 */
 class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
     friend class AbstractManager;
@@ -89,6 +97,17 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
         std::vector<std::string> usedBy() const;
 
         /**
+         * @brief Plugins which are provided by this plugin
+         *
+         * List of plugin names that are alias to this plugin when loading the
+         * plugin by name (not as dependency) if there is no plugin with that
+         * name. If there is more than one alias for given name, the first
+         * found is used.
+         * @note Thus field is constant during whole plugin lifetime.
+         */
+        const std::vector<std::string>& provides() const { return _provides; }
+
+        /**
          * @brief Plugin-specific data
          *
          * Additional plugin-specific data, contained in `data` group of plugin
@@ -102,7 +121,8 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
         std::string _name;
 
         std::vector<std::string> _depends,
-            _usedBy;
+            _usedBy,
+            _provides;
 
         const Utility::ConfigurationGroup* _data;
 };

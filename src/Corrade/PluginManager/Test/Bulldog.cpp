@@ -23,24 +23,22 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "PluginMetadata.h"
+#include "Corrade/PluginManager/AbstractManager.h"
 
-#include "Corrade/Utility/ConfigurationGroup.h"
+#include "AbstractAnimal.h"
 
-namespace Corrade { namespace PluginManager {
+namespace Corrade { namespace PluginManager { namespace Test {
 
-PluginMetadata::PluginMetadata(std::string name, Utility::ConfigurationGroup& conf): _name(std::move(name)) {
-    /* Dependencies, aliases */
-    _depends = conf.values("depends");
-    _provides = conf.values("provides");
+class Bulldog: public AbstractAnimal {
+    public:
+        explicit Bulldog(AbstractManager& manager, std::string plugin): AbstractAnimal(manager, std::move(plugin)) {}
 
-    /* Plugin configuration data */
-    _data = conf.group("data");
-    if(!_data) _data = conf.addGroup("data");
-}
+        std::string name() override { return "Bulldog"; }
+        int legCount() override { return 0; }
+        bool hasTail() override { return false; }
+};
 
-std::string PluginMetadata::name() const { return _name; }
+}}}
 
-std::vector<std::string> PluginMetadata::usedBy() const { return _usedBy; }
-
-}}
+CORRADE_PLUGIN_REGISTER(Bulldog, Corrade::PluginManager::Test::Bulldog,
+    "cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")
