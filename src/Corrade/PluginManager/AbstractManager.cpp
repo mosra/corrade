@@ -147,8 +147,9 @@ AbstractManager::~AbstractManager() {
     /* Remove all non-static aliases associated with this manager. After the
        previous step, the only plugins associated with this manager should now
        be dynamic and unloaded. */
-    auto ait = _plugins.aliases.cbegin();
-    while(ait != _plugins.aliases.cend()) {
+    /* GCC 4.5 cannot erase with const_iterator */
+    auto ait = _plugins.aliases.begin();
+    while(ait != _plugins.aliases.end()) {
         if(ait->second.manager == this && ait->second.loadState != LoadState::Static)
             ait = _plugins.aliases.erase(ait);
         else ++ait;
@@ -199,16 +200,18 @@ void AbstractManager::setPluginDirectory(std::string directory) {
 
     /* Remove aliases for unloaded plugins from the container. They need to be
        removed before plugins themselves */
-    auto ait = _plugins.aliases.cbegin();
-    while(ait != _plugins.aliases.cend()) {
+    /* GCC 4.5 cannot erase with const_iterator */
+    auto ait = _plugins.aliases.begin();
+    while(ait != _plugins.aliases.end()) {
         if(ait->second.manager == this && ait->second.loadState & (LoadState::NotLoaded|LoadState::WrongMetadataFile))
             ait = _plugins.aliases.erase(ait);
         else ++ait;
     }
 
     /* Remove all unloaded plugins from the container */
-    auto it = _plugins.plugins.cbegin();
-    while(it != _plugins.plugins.cend()) {
+    /* GCC 4.5 cannot erase with const_iterator */
+    auto it = _plugins.plugins.begin();
+    while(it != _plugins.plugins.end()) {
         if(it->second->manager == this && it->second->loadState & (LoadState::NotLoaded|LoadState::WrongMetadataFile)) {
             delete it->second;
 
