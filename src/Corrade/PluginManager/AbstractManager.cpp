@@ -73,11 +73,11 @@ auto AbstractManager::initializeGlobalPluginStorage() -> GlobalPluginStorage& {
 
             /* Add aliases to the list (only the ones that aren't already there
                are added) */
-            for(const std::string& alias: result.first->second->metadata._provides) {
+            for(auto it = result.first->second->metadata._provides.begin(); it != result.first->second->metadata._provides.end(); ++it) {
                 #ifndef CORRADE_GCC47_COMPATIBILITY
-                plugins->aliases.emplace(alias, *result.first->second);
+                plugins->aliases.emplace(*it, *result.first->second);
                 #else
-                plugins->aliases.insert({alias, *result.first->second});
+                plugins->aliases.insert({*it, *result.first->second});
                 #endif
             }
         }
@@ -247,11 +247,11 @@ void AbstractManager::setPluginDirectory(std::string directory) {
         CORRADE_INTERNAL_ASSERT(result.second);
 
         /* Add aliases to the list */
-        for(const std::string& alias: result.first->second->metadata._provides) {
+        for(auto it = result.first->second->metadata._provides.begin(); it != result.first->second->metadata._provides.end(); ++it) {
             #ifndef CORRADE_GCC47_COMPATIBILITY
-            _plugins.aliases.emplace(alias, *result.first->second);
+            _plugins.aliases.emplace(*it, *result.first->second);
             #else
-            _plugins.aliases.insert({alias, *result.first->second});
+            _plugins.aliases.insert({*it, *result.first->second});
             #endif
         }
     }
@@ -424,7 +424,9 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
     initializer();
 
     /* Everything is okay, add this plugin to usedBy list of each dependency */
-    for(Plugin& dependency: dependencies) {
+    for(auto it = dependencies.begin(); it != dependencies.end(); ++it) {
+        Plugin& dependency = *it;
+
         /* If the plugin is not static with no associated manager, use its
            manager for adding this plugin */
         if(dependency.manager)
