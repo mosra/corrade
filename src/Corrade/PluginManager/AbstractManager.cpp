@@ -71,8 +71,13 @@ auto AbstractManager::initializeGlobalPluginStorage() -> GlobalPluginStorage& {
 
             /* Add aliases to the list (only the ones that aren't already there
                are added) */
-            for(const std::string& alias: result.first->second->metadata._provides)
+            for(const std::string& alias: result.first->second->metadata._provides) {
+                #ifndef CORRADE_GCC47_COMPATIBILITY
                 plugins->aliases.emplace(alias, *result.first->second);
+                #else
+                plugins->aliases.insert({alias, *result.first->second});
+                #endif
+            }
         }
 
         /** @todo Assert dependencies of static plugins */
@@ -228,8 +233,13 @@ void AbstractManager::setPluginDirectory(std::string directory) {
         CORRADE_INTERNAL_ASSERT(result.second);
 
         /* Add aliases to the list */
-        for(const std::string& alias: result.first->second->metadata._provides)
+        for(const std::string& alias: result.first->second->metadata._provides) {
+            #ifndef CORRADE_GCC47_COMPATIBILITY
             _plugins.aliases.emplace(alias, *result.first->second);
+            #else
+            _plugins.aliases.insert({alias, *result.first->second});
+            #endif
+        }
     }
 }
 
