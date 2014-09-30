@@ -371,7 +371,8 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
             return LoadState::UnresolvedDependency;
         }
 
-        dependencies.push_back(*dependency->second);
+        /* GCC 4.4 has explicit std::reference_wrapper constructor */
+        dependencies.push_back(std::ref(*dependency->second));
     }
 
     const std::string filename = Directory::join(_pluginDirectory, plugin.metadata._name + PLUGIN_FILENAME_SUFFIX);
