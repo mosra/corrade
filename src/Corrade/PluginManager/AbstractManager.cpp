@@ -507,7 +507,7 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
     #ifndef CORRADE_TARGET_WINDOWS
     if(dlclose(plugin.module) != 0) {
     #else
-    if(!FreeLibrary(pluginObject.module)) {
+    if(!FreeLibrary(plugin.module)) {
     #endif
         Error() << "PluginManager::Manager::unload(): cannot unload plugin" << plugin.metadata._name + ":" << dlerror();
         plugin.loadState = LoadState::NotLoaded;
