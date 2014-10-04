@@ -42,6 +42,7 @@ target_link_libraries(Canary CorradePluginManagerTestLib)
 if(CORRADE_TARGET_WINDOWS)
     target_link_libraries(Snail CorradePluginManagerTestLib)
     target_link_libraries(Dog CorradePluginManagerTestLib)
+    target_link_libraries(Bulldog CorradePluginManagerTestLib)
     target_link_libraries(Chihuahua CorradePluginManagerTestLib Dog)
 endif()
 
