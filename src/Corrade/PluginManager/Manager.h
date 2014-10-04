@@ -37,36 +37,30 @@ namespace Corrade { namespace PluginManager {
 
 /**
 @brief Plugin manager
-@tparam T               Plugin interface
-@tparam BaseManager     Base class, subclassed from @ref AbstractManager
-    (for example if you want to add some functionality to non-templated base,
-    such as signals...)
 
 Manages loading, instancing and unloading plugins. See also
 @ref plugin-management.
  */
-#ifdef DOXYGEN_GENERATING_OUTPUT
-template<class T, class BaseManager = AbstractManager>
-#else
-template<class T, class BaseManager>
-#endif
-class Manager: public BaseManager {
+template<class T> class Manager: public AbstractManager {
     public:
         /**
          * @brief Constructor
+         * @param pluginDirectory   Directory where plugins will be searched.
+         *      No recursive processing is done.
          *
-         * Forwards arguments to @p BaseManager constructor. See
-         * @ref AbstractManager::AbstractManager() for more information.
+         * First goes through list of static plugins and finds ones that use
+         * the same interface as this manager instance. Then gets list of all
+         * dynamic plugins in given directory.
+         * @note Dependencies of static plugins are skipped, as static plugins
+         *      should have all dependencies present. Also, dynamic plugins
+         *      with the same name as another static plugin are skipped.
+         * @see @ref pluginList()
+         * @partialsupport Parameter @p pluginDirectory has no effect on
+         *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
+         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" as only static
+         *      plugins are supported.
          */
-        template<class ...U> explicit Manager(U&&... args);
-
-        /**
-         * @brief Plugin interface
-         *
-         * Only plugins with the same plugin interface string can be used
-         * in this plugin manager.
-         */
-        std::string pluginInterface() const override;
+        explicit Manager(std::string pluginDirectory): AbstractManager(T::pluginInterface(), std::move(pluginDirectory)) {}
 
         /**
          * @brief Plugin instance
@@ -78,26 +72,9 @@ class Manager: public BaseManager {
          */
         std::unique_ptr<T> instance(const std::string& plugin) {
             /** @todo C++14: `std::make_unique()` */
-            return std::unique_ptr<T>(static_cast<T*>(BaseManager::instanceInternal(plugin)));
+            return std::unique_ptr<T>(static_cast<T*>(instanceInternal(plugin)));
         }
 };
-
-template<class T, class BaseManager> template<class ...U> Manager<T, BaseManager>::Manager(U&&... args): BaseManager(std::forward<U>(args)...) {
-    /* Find static plugins which have the same interface and have not
-        assigned manager to them */
-    for(typename std::map<std::string, typename BaseManager::Plugin*>::iterator it = BaseManager::_plugins.plugins.begin(); it != BaseManager::_plugins.plugins.end(); ++it) {
-        if(it->second->loadState != LoadState::Static || it->second->manager != nullptr || it->second->staticPlugin->interface != pluginInterface())
-            continue;
-
-        /* Assign the plugin to this manager and initialize it */
-        it->second->manager = this;
-        it->second->staticPlugin->initializer();
-    }
-}
-
-template<class T, class BaseManager> std::string Manager<T, BaseManager>::pluginInterface() const {
-    return T::pluginInterface();
-}
 
 }}
 

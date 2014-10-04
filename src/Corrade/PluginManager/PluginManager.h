@@ -35,9 +35,9 @@ enum class LoadState: unsigned short;
 /* LoadStates won't be used without LoadState definition */
 
 class AbstractManager;
-template<class, class = AbstractManager> class AbstractManagingPlugin;
+template<class> class AbstractManagingPlugin;
 class AbstractPlugin;
-template<class, class = AbstractManager> class Manager;
+template<class> class Manager;
 class PluginMetadata;
 
 }}

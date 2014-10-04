@@ -40,12 +40,7 @@ namespace Corrade { namespace PluginManager {
 Useful for plugins which needs to access the manager (e.g. for loading and
 using other plugins).
 */
-#ifdef DOXYGEN_GENERATING_OUTPUT
-template<class Interface, class BaseManager = AbstractManager>
-#else
-template<class Interface, class BaseManager>
-#endif
-class AbstractManagingPlugin: public AbstractPlugin {
+template<class Interface> class AbstractManagingPlugin: public AbstractPlugin {
     public:
         /**
          * @brief Default constructor
@@ -67,7 +62,7 @@ class AbstractManagingPlugin: public AbstractPlugin {
          *
          * The @ref metadata() function will return `nullptr`.
          */
-        explicit AbstractManagingPlugin(Manager<Interface, BaseManager>& manager) {
+        explicit AbstractManagingPlugin(Manager<Interface>& manager) {
             _manager = &manager;
         }
 
@@ -88,13 +83,13 @@ class AbstractManagingPlugin: public AbstractPlugin {
          * Manager associated to given plugin. If the plugin was not
          * instantiated with access to plugin manager, returns `nullptr`.
          */
-        Manager<Interface, BaseManager>* manager() {
-            return static_cast<Manager<Interface, BaseManager>*>(_manager);
+        Manager<Interface>* manager() {
+            return static_cast<Manager<Interface>*>(_manager);
         }
 
         /** @overload */
-        const Manager<Interface, BaseManager>* manager() const {
-            return static_cast<const Manager<Interface, BaseManager>*>(_manager);
+        const Manager<Interface>* manager() const {
+            return static_cast<const Manager<Interface>*>(_manager);
         }
 };
 

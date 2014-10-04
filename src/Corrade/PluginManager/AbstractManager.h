@@ -208,25 +208,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         static void importStaticPlugin(std::string plugin, int _version, std::string interface, Instancer instancer, void(*initializer)(), void(*finalizer)());
         #endif
 
-        /**
-         * @brief Constructor
-         * @param pluginDirectory   Directory where plugins will be searched.
-         *      No recursive processing is done.
-         *
-         * First goes through list of static plugins and finds ones that use
-         * the same interface as this manager instance. Then gets list of all
-         * dynamic plugins in given directory.
-         * @note Dependencies of static plugins are skipped, as static plugins
-         *      should have all dependencies present. Also, dynamic plugins
-         *      with the same name as another static plugin are skipped.
-         * @see @ref pluginList()
-         * @partialsupport Parameter @p pluginDirectory has no effect on
-         *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
-         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" as only static
-         *      plugins are supported.
-         */
-        explicit AbstractManager(std::string pluginDirectory);
-
         /** @brief Copying is not allowed */
         AbstractManager(const AbstractManager&) = delete;
 
@@ -238,6 +219,14 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
         /** @brief Moving is not allowed */
         AbstractManager& operator=(AbstractManager&&) = delete;
+
+        /**
+         * @brief Plugin interface
+         *
+         * Only plugins with the same plugin interface string can be used
+         * in this plugin manager.
+         */
+        std::string pluginInterface() const;
 
         #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
         /**
@@ -312,7 +301,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
          *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
          */
-        virtual LoadState load(const std::string& plugin);
+        LoadState load(const std::string& plugin);
 
         /**
          * @brief Unload a plugin
@@ -328,7 +317,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
          *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
          */
-        virtual LoadState unload(const std::string& plugin);
+        LoadState unload(const std::string& plugin);
 
     protected:
         /**
@@ -400,12 +389,11 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
             std::map<std::string, Plugin&> aliases;
         };
 
+        explicit AbstractManager(std::string pluginInterface, std::string pluginDirectory);
+
         #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
         std::string _pluginDirectory;
         #endif
-
-        /* Defined in PluginManager */
-        virtual std::string pluginInterface() const = 0;
 
         /* Initialize global plugin map. On first run it creates the instance
            and fills it with entries from staticPlugins(). The reference is
@@ -414,14 +402,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         static GlobalPluginStorage& initializeGlobalPluginStorage();
 
         GlobalPluginStorage& _plugins;
-
-        /* Because the plugin manager must be noticed about adding the plugin to
-           "used by" list, it must be done through this function. */
-        virtual void addUsedBy(const std::string& plugin, std::string usedBy);
-
-        /* Because the plugin manager must be noticed about removing the plugin
-           from "used by" list, it must be done through this function. */
-        virtual void removeUsedBy(const std::string& plugin, const std::string& usedBy);
 
         void* instanceInternal(const std::string& plugin);
 
@@ -451,6 +431,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         CORRADE_PLUGINMANAGER_LOCAL LoadState unloadRecursiveInternal(Plugin& plugin);
         #endif
 
+        std::string _pluginInterface;
         std::map<std::string, std::vector<AbstractPlugin*> > instances;
 };
 

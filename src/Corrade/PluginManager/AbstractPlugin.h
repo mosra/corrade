@@ -43,7 +43,7 @@ plugin can be unloaded only if there are no active instances.
 @see @ref AbstractManagingPlugin
 */
 class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
-    template<class, class> friend class AbstractManagingPlugin;
+    template<class> friend class AbstractManagingPlugin;
 
     public:
         /**
