@@ -78,17 +78,26 @@ elseif(CORRADE_TARGET_ANDROID)
         AndroidStreamBuffer.h)
 endif()
 
+# Objects shared between main and test library
 add_library(CorradeUtilityObjects OBJECT
     ${CorradeUtility_SRCS}
     ${CorradeUtility_HEADERS})
-add_library(CorradeUtility ${SHARED_OR_STATIC} $<TARGET_OBJECTS:CorradeUtilityObjects> ${CorradeUtility_GracefulAssert_SRCS})
+if(NOT BUILD_STATIC)
+    set_target_properties(CorradeUtilityObjects PROPERTIES COMPILE_FLAGS "-DCorradeUtilityObjects_EXPORTS")
+endif()
+if(NOT BUILD_STATIC OR BUILD_STATIC_PIC)
+    set_target_properties(CorradeUtilityObjects PROPERTIES POSITION_INDEPENDENT_CODE ON)
+endif()
+
+# Main Utility library
+add_library(CorradeUtility ${SHARED_OR_STATIC}
+    $<TARGET_OBJECTS:CorradeUtilityObjects>
+    ${CorradeUtility_GracefulAssert_SRCS})
 set_target_properties(CorradeUtility PROPERTIES DEBUG_POSTFIX "-d")
 if(NOT BUILD_STATIC)
-    set_target_properties(CorradeUtilityObjects PROPERTIES COMPILE_FLAGS "-DCorradeUtilityObjects_EXPORTS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
     set_target_properties(CorradeUtility PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
 elseif(BUILD_STATIC_PIC)
-    # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
-    set_target_properties(CorradeUtility CorradeUtilityObjects PROPERTIES COMPILE_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
+    set_target_properties(CorradeUtility PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
 
 # AndroidLogStreamBuffer class needs to be linked to log library
@@ -109,13 +118,13 @@ if(NOT CMAKE_CROSSCOMPILING)
 endif()
 
 if(BUILD_TESTS)
+    # Library with graceful assert for testing
     add_library(CorradeUtilityTestLib ${SHARED_OR_STATIC} ${CorradeUtility_GracefulAssert_SRCS})
     set_target_properties(CorradeUtilityTestLib PROPERTIES
         COMPILE_FLAGS "-DCORRADE_GRACEFUL_ASSERT"
         DEBUG_POSTFIX "-d")
     if(BUILD_STATIC_PIC)
-        # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
-        set_target_properties(CorradeUtilityTestLib PROPERTIES COMPILE_FLAGS "-DCORRADE_GRACEFUL_ASSERT ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
+        set_target_properties(CorradeUtilityTestLib PROPERTIES POSITION_INDEPENDENT_CODE ON)
     endif()
 
     target_link_libraries(CorradeUtilityTestLib CorradeUtility)

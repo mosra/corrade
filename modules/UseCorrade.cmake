@@ -251,7 +251,8 @@ function(corrade_add_static_plugin plugin_name install_dir metadata_file)
     # Create static library
     add_library(${plugin_name} STATIC ${ARGN} ${${plugin_name}})
     set_target_properties(${plugin_name} PROPERTIES
-        COMPILE_FLAGS "-DCORRADE_STATIC_PLUGIN ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}"
+        COMPILE_FLAGS "-DCORRADE_STATIC_PLUGIN"
+        POSITION_INDEPENDENT_CODE ON
         DEBUG_POSTFIX "-d")
 
     # Install, if not into the same place

@@ -44,20 +44,28 @@ set(CorradePluginManager_HEADERS
     PluginMetadata.h
     visibility.h)
 
+# Objects shared between main and test library
 add_library(CorradePluginManagerObjects OBJECT
     ${CorradePluginManager_SRCS}
     ${CorradePluginManager_HEADERS})
+if(NOT BUILD_STATIC)
+    set_target_properties(CorradePluginManagerObjects PROPERTIES COMPILE_FLAGS "-DCorradePluginManagerObjects_EXPORTS")
+endif()
+if(NOT BUILD_STATIC OR BUILD_STATIC_PIC)
+    set_target_properties(CorradePluginManagerObjects PROPERTIES POSITION_INDEPENDENT_CODE ON)
+endif()
+
+# Main PluginManager library
 add_library(CorradePluginManager ${SHARED_OR_STATIC}
     $<TARGET_OBJECTS:CorradePluginManagerObjects>
     ${CorradePluginManager_GracefulAssert_SRCS})
 set_target_properties(CorradePluginManager PROPERTIES DEBUG_POSTFIX "-d")
 if(NOT BUILD_STATIC)
-    set_target_properties(CorradePluginManagerObjects PROPERTIES COMPILE_FLAGS "-DCorradePluginManagerObjects_EXPORTS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
     set_target_properties(CorradePluginManager PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
 elseif(BUILD_STATIC_PIC)
-    # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
-    set_target_properties(CorradePluginManagerObjects CorradePluginManager PROPERTIES COMPILE_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
+    set_target_properties(CorradePluginManager PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
+
 target_link_libraries(CorradePluginManager CorradeUtility)
 if(CORRADE_TARGET_UNIX OR CORRADE_TARGET_NACL_GLIBC)
     target_link_libraries(CorradePluginManager ${CMAKE_DL_LIBS})
@@ -70,6 +78,7 @@ install(TARGETS CorradePluginManager
 install(FILES ${CorradePluginManager_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/PluginManager)
 
 if(BUILD_TESTS)
+    # Library with graceful assert for testing
     add_library(CorradePluginManagerTestLib ${SHARED_OR_STATIC}
         $<TARGET_OBJECTS:CorradePluginManagerObjects>
         ${CorradePluginManager_GracefulAssert_SRCS})
@@ -77,8 +86,7 @@ if(BUILD_TESTS)
         COMPILE_FLAGS "-DCORRADE_GRACEFUL_ASSERT"
         DEBUG_POSTFIX "-d")
     if(BUILD_STATIC_PIC)
-        # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
-        set_target_properties(CorradePluginManagerTestLib PROPERTIES COMPILE_FLAGS "-DCORRADE_GRACEFUL_ASSERT ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
+        set_target_properties(CorradePluginManagerTestLib PROPERTIES POSITION_INDEPENDENT_CODE ON)
     endif()
 
     target_link_libraries(CorradePluginManagerTestLib CorradeUtility)
