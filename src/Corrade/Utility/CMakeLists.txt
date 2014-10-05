@@ -131,7 +131,7 @@ if(BUILD_TESTS)
 
     # On Windows we need to install first and then run the tests to avoid "DLL
     # not found" hell, thus we need to install this too
-    if(CORRADE_TARGET_WINDOWS AND NOT CMAKE_CROSSCOMPILING)
+    if(CORRADE_TARGET_WINDOWS AND NOT CMAKE_CROSSCOMPILING AND NOT BUILD_STATIC)
         install(TARGETS CorradeUtilityTestLib
             RUNTIME DESTINATION ${CORRADE_BINARY_INSTALL_DIR}
             LIBRARY DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR}
