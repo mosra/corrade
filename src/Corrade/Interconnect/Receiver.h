@@ -40,7 +40,7 @@ namespace Implementation {
 }
 
 /**
-@brief %Receiver object
+@brief Receiver object
 
 Contains member function slots. See @ref interconnect for introduction.
 @see @ref Emitter, @ref Connection

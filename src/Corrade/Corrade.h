@@ -47,7 +47,7 @@ Defined if compatibility mode for GCC 4.7 is enabled.
 @brief Build with deprecated API included
 
 Defined if the library contains deprecated API (which will be removed in the
-future). To preserve backward compatibility, %Corrade is by default built with
+future). To preserve backward compatibility, Corrade is by default built with
 deprecated API included.
 @see @ref building-corrade, @ref corrade-cmake
 */

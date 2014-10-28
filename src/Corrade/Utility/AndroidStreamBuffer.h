@@ -68,10 +68,10 @@ class CORRADE_UTILITY_EXPORT AndroidLogStreamBuffer: public std::stringbuf {
          */
         enum class LogPriority: std::int32_t {
             Verbose = ANDROID_LOG_VERBOSE,  /**< Verbose debug message */
-            Debug = ANDROID_LOG_DEBUG,      /**< %Debug message */
+            Debug = ANDROID_LOG_DEBUG,      /**< Debug message */
             Info = ANDROID_LOG_INFO,        /**< Information */
-            Warning = ANDROID_LOG_WARN,     /**< %Warning */
-            Error = ANDROID_LOG_ERROR,      /**< %Error */
+            Warning = ANDROID_LOG_WARN,     /**< Warning */
+            Error = ANDROID_LOG_ERROR,      /**< Error */
             Fatal = ANDROID_LOG_FATAL,      /**< Fatal error */
         };
 

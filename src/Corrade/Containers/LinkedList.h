@@ -95,10 +95,9 @@ class Object: public LinkedListItem<Object, ObjectGroup> {
 
 ## Using private inheritance
 
-You might want to subclass %LinkedList and %LinkedListItem privately and for
+You might want to subclass LinkedList and LinkedListItem privately and for
 example provide wrapper functions with more descriptive names. In that case
-you need to friend both %LinkedList and %LinkedListItem in both your
-subclasses.
+you need to friend both LinkedList and LinkedListItem in both your subclasses.
 @code
 class ObjectGroup: private LinkedList<Object> {
     friend class LinkedList<Object>;

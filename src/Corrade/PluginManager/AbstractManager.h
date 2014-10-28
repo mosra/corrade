@@ -182,8 +182,8 @@ if(loadState & (LoadState::WrongPluginVersion|LoadState::WrongInterfaceVersion))
 @endcode
 
 Note that @ref LoadState::Loaded includes value of @ref LoadState::Static, so
-you can use `loadState & %LoadState::Loaded` instead of much more verbose
-`state & (%LoadState::Loaded|%LoadState::Static)`.
+you can use `loadState & LoadState::Loaded` instead of much more verbose
+`state & (LoadState::Loaded|LoadState::Static)`.
 @see @ref AbstractManager::loadState(), @ref AbstractManager::load(),
     @ref AbstractManager::unload()
 */

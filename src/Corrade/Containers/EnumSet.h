@@ -62,7 +62,7 @@ CORRADE_ENUMSET_OPERATORS(Features)
 @endcode
 
 @anchor EnumSet-friend-operators
-If you have the %EnumSet as private or protected member of any class, you have
+If you have the EnumSet as private or protected member of any class, you have
 to declare the out-of-class operators as friends. It can be done with
 @ref CORRADE_ENUMSET_FRIEND_OPERATORS() macro:
 @code

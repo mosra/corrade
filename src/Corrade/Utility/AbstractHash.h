@@ -107,7 +107,7 @@ template<std::size_t digestSize> class AbstractHash {
         typedef HashDigest<digestSize> Digest;
 
         /**
-         * @brief %Digest size
+         * @brief Digest size
          *
          * Size of the raw digest in bytes. Hexadecimal string representation
          * has double size.

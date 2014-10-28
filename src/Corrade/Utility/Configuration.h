@@ -86,7 +86,7 @@ parsing and saving. Whitespace is preserved in values enclosed in `"` and
 multi-line values. Comments and empty lines are preserved, unless the comment
 is in group which was deleted.
 
-%Configuration group header is enclosed in `[` and `]`, hierarchic group names
+Configuration group header is enclosed in `[` and `]`, hierarchic group names
 are separated with `/` character. No group name can be empty.
 
 Key/value pair consist of key name string, zero or more whitespaces, `=`
@@ -193,7 +193,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         /**
          * @brief Constructor
          * @param filename  Filename
-         * @param flags     %Flags
+         * @param flags     Flags
          *
          * Opens the file and loads it according to specified flags. If file
          * cannot be opened or parsed, the configuration is empty and filename
@@ -204,7 +204,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         /**
          * @brief Constructor
          * @param in        Input stream
-         * @param flags     %Flags
+         * @param flags     Flags
          *
          * Creates configuration from given input stream.
          */

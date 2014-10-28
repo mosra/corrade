@@ -38,7 +38,7 @@
 namespace Corrade { namespace Utility {
 
 /**
-@brief %Directory utilities
+@brief Directory utilities
 @todo Unicode <-> UTF8 path conversion for Windows
 */
 class CORRADE_UTILITY_EXPORT Directory {

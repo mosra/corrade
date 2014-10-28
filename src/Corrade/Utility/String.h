@@ -41,7 +41,7 @@
 
 namespace Corrade { namespace Utility {
 
-/** @brief %String utilities */
+/** @brief String utilities */
 class CORRADE_UTILITY_EXPORT String {
     public:
         /**
@@ -82,7 +82,7 @@ class CORRADE_UTILITY_EXPORT String {
 
         /**
          * @brief Trim leading whitespace from string
-         * @param string        %String to be trimmed
+         * @param string        String to be trimmed
          * @param characters    Characters which will be trimmed
          *
          * @see @ref rtrim(), @ref trim()
@@ -91,7 +91,7 @@ class CORRADE_UTILITY_EXPORT String {
 
         /**
          * @brief Trim trailing whitespace from string
-         * @param string        %String to be trimmed
+         * @param string        String to be trimmed
          * @param characters    Characters which will be trimmed
          *
          * @see @ref ltrim(), @ref trim()
@@ -100,7 +100,7 @@ class CORRADE_UTILITY_EXPORT String {
 
         /**
          * @brief Trim leading and trailing whitespace from string
-         * @param string        %String to be trimmed
+         * @param string        String to be trimmed
          * @param characters    Characters which will be trimmed
          *
          * Equivalent to `ltrim(rtrim(string))`.
@@ -109,14 +109,14 @@ class CORRADE_UTILITY_EXPORT String {
 
         /**
          * @brief Split string on given character
-         * @param string            %String to split
+         * @param string            String to split
          * @param delimiter         Delimiter
          */
         static std::vector<std::string> split(const std::string& string, char delimiter);
 
         /**
          * @brief Split string on given character and remove empty parts
-         * @param string            %String to split
+         * @param string            String to split
          * @param delimiter         Delimiter
          */
         static std::vector<std::string> splitWithoutEmptyParts(const std::string& string, char delimiter);

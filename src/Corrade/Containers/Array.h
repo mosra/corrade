@@ -37,7 +37,7 @@
 namespace Corrade { namespace Containers {
 
 /**
-@brief %Array wrapper with size information
+@brief Array wrapper with size information
 
 Provides movable RAII wrapper around plain C array. Main use case is storing
 binary data of unspecified type, where addition/removal of elements is not
@@ -110,9 +110,9 @@ template<class T> class Array {
          * Creates array of given size, the values are default-initialized
          * (i.e. builtin types are not initialized). If the size is zero, no
          * allocation is done.
-         * @note Due to ambiguity you can't call directly `%Array(0)` because
+         * @note Due to ambiguity you can't call directly `Array(0)` because
          *      it conflicts with Array(std::nullptr_t). You should call
-         *      `%Array(nullptr)` instead, which is also `noexcept`.
+         *      `Array(nullptr)` instead, which is also `noexcept`.
          * @see @ref zeroInitialized()
          */
         explicit Array(std::size_t size): _data(size ? new T[size] : nullptr), _size(size) {}
@@ -148,11 +148,11 @@ template<class T> class Array {
         /** @overload */
         /*implicit*/ operator const T*() const { return _data; }
 
-        /** @brief %Array data */
+        /** @brief Array data */
         T* data() { return _data; }
         const T* data() const { return _data; }         /**< @overload */
 
-        /** @brief %Array size */
+        /** @brief Array size */
         std::size_t size() const { return _size; }
 
         /** @brief Whether the array is empty */
@@ -191,7 +191,7 @@ template<class T> class Array {
 };
 
 /**
-@brief %Array reference wrapper with size information
+@brief Array reference wrapper with size information
 
 Immutable wrapper around plain C array. Unlike @ref Array this class doesn't do
 any memory management. Main use case is passing array along with size
@@ -276,10 +276,10 @@ template<class T> class ArrayReference {
         /** @brief Conversion to array type */
         constexpr /*implicit*/ operator T*() const { return _data; }
 
-        /** @brief %Array data */
+        /** @brief Array data */
         constexpr const T* data() const { return _data; }
 
-        /** @brief %Array size */
+        /** @brief Array size */
         constexpr std::size_t size() const { return _size; }
 
         /** @brief Whether the array is empty */
@@ -364,10 +364,10 @@ template<> class ArrayReference<const void> {
         /** @brief Conversion to array type */
         constexpr /*implicit*/ operator const void*() const { return _data; }
 
-        /** @brief %Array data */
+        /** @brief Array data */
         constexpr const void* data() const { return _data; }
 
-        /** @brief %Array size */
+        /** @brief Array size */
         constexpr std::size_t size() const { return _size; }
 
         /** @brief Whether the array is empty */

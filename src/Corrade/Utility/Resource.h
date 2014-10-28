@@ -77,7 +77,7 @@ class CORRADE_UTILITY_EXPORT Resource {
     public:
         /**
          * @brief Compile data resource file
-         * @param name          %Resource name (see @ref CORRADE_RESOURCE_INITIALIZE())
+         * @param name          Resource name (see @ref CORRADE_RESOURCE_INITIALIZE())
          * @param group         Group name
          * @param files         Files (pairs of filename, file data)
          *
@@ -87,8 +87,8 @@ class CORRADE_UTILITY_EXPORT Resource {
 
         /**
          * @brief Compile data resource file using configuration file
-         * @param name          %Resource name (see @ref CORRADE_RESOURCE_INITIALIZE())
-         * @param configurationFile %Filename of configuration file
+         * @param name          Resource name (see @ref CORRADE_RESOURCE_INITIALIZE())
+         * @param configurationFile Filename of configuration file
          *
          * Produces C++ file with hexadecimal data representation. See class
          * documentation for configuration file syntax overview. The filenames
@@ -99,7 +99,7 @@ class CORRADE_UTILITY_EXPORT Resource {
         /**
          * @brief Override group
          * @param group         Group name
-         * @param configurationFile %Filename of configuration file. Empty
+         * @param configurationFile Filename of configuration file. Empty
          *      string will discard the override.
          *
          * Overrides compiled-in resources of given group with live data

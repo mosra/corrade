@@ -47,7 +47,7 @@ You can reimplement this class for your own data types and even pseudo types
 for providing different ways to compare the same type.
 
 You have to implement `operator()()` for comparison of two values with
-arbitrary type and `%printErrorMessage()` for printing error message when the
+arbitrary type and `printErrorMessage()` for printing error message when the
 comparison failed.
 
 @anchor TestSuite-Comparator-pseudo-types
@@ -138,7 +138,7 @@ template<class T> class Comparator {
     public:
         explicit Comparator();
 
-        /** @brief %Compare two values */
+        /** @brief Compare two values */
         bool operator()(const T& actual, const T& expected);
 
         /** @brief Print error message, assuming the two values are inequal */

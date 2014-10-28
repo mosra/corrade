@@ -28,7 +28,7 @@ namespace Corrade {
 
 *corrade* (v.) - "To scrape together, to gather together from various sources"
 
-%Corrade is multiplatform utility library written in C++11.
+Corrade is multiplatform utility library written in C++11.
 
 @section corrade-mainpage-platforms Supported platforms
 
@@ -76,7 +76,7 @@ Feel free to get more information or contact the author at:
 
 @section corrade-mainpage-license License
 
-%Corrade is licensed under MIT/Expat license:
+Corrade is licensed under MIT/Expat license:
 
 >
 >   Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014

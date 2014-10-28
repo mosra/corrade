@@ -259,7 +259,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         /**
          * @brief All values with given key
          * @param key       Key
-         * @param flags     %Flags
+         * @param flags     Flags
          *
          * If @p T is not `std::string`, uses
          * @ref ConfigurationValue::fromString() to convert the value to given

@@ -76,8 +76,8 @@ class CORRADE_UTILITY_EXPORT NaClConsoleStreamBuffer: public std::stringbuf {
         enum class LogLevel: std::uint32_t {
             Tip = PP_LOGLEVEL_TIP,          /**< Tip */
             Log = PP_LOGLEVEL_LOG,          /**< Log */
-            Warning = PP_LOGLEVEL_WARNING,  /**< %Warning */
-            Error = PP_LOGLEVEL_ERROR       /**< %Error */
+            Warning = PP_LOGLEVEL_WARNING,  /**< Warning */
+            Error = PP_LOGLEVEL_ERROR       /**< Error */
         };
 
         /**

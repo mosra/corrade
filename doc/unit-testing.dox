@@ -26,7 +26,7 @@
 namespace Corrade {
 /** @page unit-testing Unit testing with TestSuite
 
-%Corrade's test suite is inspired by QtTest framework, but without any need to
+Corrade's test suite is inspired by QtTest framework, but without any need to
 process code with meta compiler.
 
 @section unit-testing-class Tester class

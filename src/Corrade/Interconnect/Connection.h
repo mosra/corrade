@@ -67,10 +67,10 @@ namespace Implementation {
 }
 
 /**
-@brief %Connection
+@brief Connection
 
 Returned by @ref Emitter::connect(), allows to remove or reestablish the
-connection. Destruction of %Connection object does not remove the connection,
+connection. Destruction of Connection object does not remove the connection,
 after that the only possibility to remove the connection is to disconnect whole
 emitter or receiver or disconnect everything connected to given signal using
 @ref Emitter::disconnectSignal(), @ref Emitter::disconnectAllSignals() or

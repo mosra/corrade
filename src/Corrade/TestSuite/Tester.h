@@ -244,7 +244,7 @@ CORRADE_VERIFY(t);
     } while(false)
 
 /** @hideinitializer
-@brief %Compare two values in @ref Corrade::TestSuite::Tester "Tester" subclass
+@brief Compare two values in @ref Corrade::TestSuite::Tester "Tester" subclass
 
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
@@ -262,7 +262,7 @@ CORRADE_COMPARE(a, 8);
     } while(false)
 
 /** @hideinitializer
-@brief %Compare two values in @ref Corrade::TestSuite::Tester "Tester" subclass with explicitly specified type
+@brief Compare two values in @ref Corrade::TestSuite::Tester "Tester" subclass with explicitly specified type
 
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
@@ -285,7 +285,7 @@ for example of more involved comparisons.
 #endif
 
 /** @hideinitializer
-@brief %Compare two values in @ref Corrade::TestSuite::Tester "Tester" subclass with explicitly specified comparator
+@brief Compare two values in @ref Corrade::TestSuite::Tester "Tester" subclass with explicitly specified comparator
 
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:

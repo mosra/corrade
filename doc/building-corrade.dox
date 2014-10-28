@@ -26,7 +26,7 @@
 namespace Corrade {
 
 /** @page building-corrade Downloading and building
-@brief Guide how to download and build %Corrade on different platforms.
+@brief Guide how to download and build Corrade on different platforms.
 
 @tableofcontents
 
@@ -60,7 +60,7 @@ https://github.com/mosra/corrade/tree/compatibility.
 
 @subsection building-corrade-cmake CMake primer
 
-%Corrade uses CMake as build system and expects it to be used also in depending
+Corrade uses CMake as build system and expects it to be used also in depending
 projects. If you are familiar enough with it, you can skip this section and go
 straight to building. Otherwise be sure to read this so you don't get lost
 later.
@@ -83,7 +83,7 @@ Or you can use some IDE, for example QtCreator. Open project's root
 directory, allows you to specify initial CMake parameters and then you can just
 press Configure and everything is ready to be built.
 
-%Corrade build is controlled using plenty of configuration variables, which are
+Corrade build is controlled using plenty of configuration variables, which are
 @ref building-corrade-features "listed and described below". The variables can
 be specified either on command-line with `-Dname=value`, for example:
 
@@ -100,7 +100,7 @@ from command-line, pointing it to your build dir:
 Or you can start it as is common on your system and then point it to the build
 dir. It will then select the source dir automatically and populates list of
 available configuration variables. Each configuration variable provided by
-%Corrade is documented (hover on it to see the tooltip). After configuring,
+Corrade is documented (hover on it to see the tooltip). After configuring,
 press *Configure* and *Generate* and you are ready to build the project using
 your platform's build system. If you are using QtCreator, it will detect the
 changes afterwards and reparse the project accordingly, so you don't need to
@@ -190,7 +190,7 @@ libraries installed alongside each other. Headers and other files are the same
 for both. This distinction is handled automatically when using the library in
 depending projects, see @ref corrade-cmake for more information.
 
-%Corrade by default does not install `FindCorrade.cmake`, as you should bundle
+Corrade by default does not install `FindCorrade.cmake`, as you should bundle
 the module with your code instead of depending on it being in system location.
 You can install it by enabling `WITH_FIND_MODULE`. When this option is enabled,
 all the CMake modules are installed into root CMake path, which may require
@@ -216,13 +216,13 @@ the compatibility mode explicitly:
   Microsoft Visual C++ 2013. Note that MSVC 2013 support is maintained only in
   `compatibility` branch.
 
-%Corrade will detect the compiler used and refuses to build (or be used) if
+Corrade will detect the compiler used and refuses to build (or be used) if
 some compatibility mode needs to be enabled. On the other hand, if any of these
 is enabled, Corrade will refuse to build (or be used) with any newer compiler.
 
 The library is constantly evolving and thus some APIs are deprecated and then
 later removed in favor of better ones. To preserve backwards compatibility,
-%Corrade is by default built with all deprecated APIs. However, to make your
+Corrade is by default built with all deprecated APIs. However, to make your
 code more robust and future-proof, it's recommended to build the library with
 `BUILD_DEPRECATED` disabled.
 
@@ -263,7 +263,7 @@ if it doesn't exist yet.
 
 The library comes with handful of examples, contained in `examples/`
 directory. Documentation for them is available on page @ref corrade-example-index.
-The examples require %Corrade to be installed and they are built separately:
+The examples require Corrade to be installed and they are built separately:
 
     mkdir build-examples && cd build-examples
     cmake ../examples
@@ -295,9 +295,9 @@ Every package contains `spec` files for RPM-based distributions in
 `package/rpm/` directory. In addition you will need `rpm-build` package
 and `~/.rpmmacros` file, which contains at least this:
 
-    %%_topdir /directory/where/to/store/rpms
-    %%_tmppath /directory/where/to/do/compilation
-    %%packager Your Name <your@email.com>
+    %_topdir /directory/where/to/store/rpms
+    %_tmppath /directory/where/to/do/compilation
+    %packager Your Name <your@email.com>
 
 First you need to download or create source tarball. Source tarball can
 be downloaded from GitHub (URL is in spec file), or in subdirectory `package/`
@@ -311,7 +311,7 @@ When you have the sources, go to `package/rpm/` directory and run this:
 
     rpmbuild -bb corrade.spec
 
-This will compile and generate library and development RPM for %Corrade in
+This will compile and generate library and development RPM for Corrade in
 `%{_topdir}/RPMS`.
 
 @subsection building-corrade-packages-deb DEB packages
@@ -332,10 +332,10 @@ the last line in `debian/rules`, e.g.:
 
 @section building-corrade-cross Crosscompiling
 
-For crosscompiling you need to have native version of %Corrade installed,
-because %Corrade needs to run `corrade-rc` utility on the host system as part
+For crosscompiling you need to have native version of Corrade installed,
+because Corrade needs to run `corrade-rc` utility on the host system as part
 of the build process. If native version of `corrade-rc` is not found on the
-system, %Corrade will refuse to crosscompile.
+system, Corrade will refuse to crosscompile.
 
 You also need to have the toolchains submodule updated. Either run the
 following commands, or, if you build from source archive, download snapshot of

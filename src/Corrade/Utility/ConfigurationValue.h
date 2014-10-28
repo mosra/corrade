@@ -39,7 +39,7 @@
 namespace Corrade { namespace Utility {
 
 /**
-@brief %Configuration value conversion flag
+@brief Configuration value conversion flag
 
 @see @ref ConfigurationValueFlags
 */
@@ -51,7 +51,7 @@ enum class ConfigurationValueFlag: std::uint8_t {
 };
 
 /**
-@brief %Configuration value conversion flags
+@brief Configuration value conversion flags
 
 @see @ref ConfigurationGroup::value(), @ref ConfigurationGroup::values(),
     @ref ConfigurationGroup::setValue(), @ref ConfigurationGroup::addValue(),
@@ -62,7 +62,7 @@ typedef Containers::EnumSet<ConfigurationValueFlag> ConfigurationValueFlags;
 CORRADE_ENUMSET_OPERATORS(ConfigurationValueFlags)
 
 /**
-@brief %Configuration value parser and writer
+@brief Configuration value parser and writer
 
 Functions in this struct are called internally by @ref ConfigurationGroup
 functions to convert values from and to templated types. Reimplement the
@@ -139,41 +139,41 @@ namespace Implementation {
     };
 }
 
-/** @brief %Configuration value parser and writer for `short` type */
+/** @brief Configuration value parser and writer for `short` type */
 template<> struct ConfigurationValue<short>: public Implementation::BasicConfigurationValue<short> {};
-/** @brief %Configuration value parser and writer for `unsigned short` type */
+/** @brief Configuration value parser and writer for `unsigned short` type */
 template<> struct ConfigurationValue<unsigned short>: public Implementation::BasicConfigurationValue<unsigned short> {};
-/** @brief %Configuration value parser and writer for `int` type */
+/** @brief Configuration value parser and writer for `int` type */
 template<> struct ConfigurationValue<int>: public Implementation::BasicConfigurationValue<int> {};
-/** @brief %Configuration value parser and writer for `unsigned int` type */
+/** @brief Configuration value parser and writer for `unsigned int` type */
 template<> struct ConfigurationValue<unsigned int>: public Implementation::BasicConfigurationValue<unsigned int> {};
-/** @brief %Configuration value parser and writer for `long` type */
+/** @brief Configuration value parser and writer for `long` type */
 template<> struct ConfigurationValue<long>: public Implementation::BasicConfigurationValue<long> {};
-/** @brief %Configuration value parser and writer for `unsigned long` type */
+/** @brief Configuration value parser and writer for `unsigned long` type */
 template<> struct ConfigurationValue<unsigned long>: public Implementation::BasicConfigurationValue<unsigned long> {};
-/** @brief %Configuration value parser and writer for `long long` type */
+/** @brief Configuration value parser and writer for `long long` type */
 template<> struct ConfigurationValue<long long>: public Implementation::BasicConfigurationValue<long long> {};
-/** @brief %Configuration value parser and writer for `unsigned long long` type */
+/** @brief Configuration value parser and writer for `unsigned long long` type */
 template<> struct ConfigurationValue<unsigned long long>: public Implementation::BasicConfigurationValue<unsigned long long> {};
-/** @brief %Configuration value parser and writer for `float` type */
+/** @brief Configuration value parser and writer for `float` type */
 template<> struct ConfigurationValue<float>: public Implementation::BasicConfigurationValue<float> {};
-/** @brief %Configuration value parser and writer for `double` type */
+/** @brief Configuration value parser and writer for `double` type */
 template<> struct ConfigurationValue<double>: public Implementation::BasicConfigurationValue<double> {};
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN
 /**
-@brief %Configuration value parser and writer for `long double` type
+@brief Configuration value parser and writer for `long double` type
 @partialsupport Not available in @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" as
     JavaScript doesn't support doubles larger than 64 bits.
 */
 template<> struct ConfigurationValue<long double>: public Implementation::BasicConfigurationValue<long double> {};
 #endif
 
-/** @brief %Configuration value parser and writer for `sd::string` type */
+/** @brief Configuration value parser and writer for `sd::string` type */
 template<> struct ConfigurationValue<std::string>: public Implementation::BasicConfigurationValue<std::string> {};
 
 /**
-@brief %Configuration value parser and writer for `bool` type
+@brief Configuration value parser and writer for `bool` type
 
 Reads `1`, `yes`, `y` or `true` as `true`, any other string as `false`. Writes
 `true` or `false`.
@@ -188,7 +188,7 @@ template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<bool> {
 };
 
 /**
-@brief %Configuration value parser and writer for `char32_t` type
+@brief Configuration value parser and writer for `char32_t` type
 
 Reads and writes the value in hexadecimal.
 */

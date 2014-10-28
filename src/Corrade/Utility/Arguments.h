@@ -103,7 +103,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
         /**
          * @brief Add mandatory argument
          *
-         * After calling <tt>addArgument("argument")</tt> the argument will be
+         * After calling `addArgument("argument")` the argument will be
          * displayed in argument list like the following. Call
          * @ref setHelpKey() to change the displayed key:
          *
@@ -254,7 +254,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
         /**
          * @brief Set help text for given key
          *
-         * %Arguments, boolean options and options with empty default values
+         * Arguments, boolean options and options with empty default values
          * are not displayed in argument and option list unless they have help
          * text set.
          * @see @ref setHelpKey()
@@ -266,8 +266,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * For arguments the key is replaced with @p helpKey, for nonboolean
          * options the uppercased key name is replaced with @p helpKey. For
-         * example, calling <tt>setHelpKey("input", "file.bin")</tt> and
-         * <tt>setHelpKey("limit", "N")</tt> will transform the usage text in
+         * example, calling `setHelpKey("input", "file.bin")` and
+         * `setHelpKey("limit", "N")` will transform the usage text in
          * the following way. The displayed keys are changed also in argument
          * and option list.
          *
