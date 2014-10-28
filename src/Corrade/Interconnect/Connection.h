@@ -69,7 +69,7 @@ namespace Implementation {
 /**
 @brief Connection
 
-Returned by @ref Emitter::connect(), allows to remove or reestablish the
+Returned by @ref Interconnect::connect(), allows to remove or reestablish the
 connection. Destruction of Connection object does not remove the connection,
 after that the only possibility to remove the connection is to disconnect whole
 emitter or receiver or disconnect everything connected to given signal using
@@ -127,7 +127,7 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
          * If connection is not possible, returns `false`, otherwise creates
          * the connection (if not already connected) and returns `true`.
          * @see @ref isConnectionPossible(), @ref isConnected(),
-         *      @ref Emitter::connect()
+         *      @ref Interconnect::connect()
          */
         bool connect();
 
