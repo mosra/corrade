@@ -23,7 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-namespace Corrade { namespace Interconnect {
+namespace Corrade {
 /** @page interconnect Signals and slots
 
 Signal and slots are a technique introduced in Qt, which allows to intuitively
@@ -44,11 +44,11 @@ to given object.
 
 @section interconnect-signals Implementing signals
 
-Signals are implemented in @ref Emitter subclass as public functions with
-@ref Emitter::Signal "Signal" as return type. There are no limitations on
-argument types or argument count. The signal function calls @ref Emitter::emit()
-internally, passes its own signature and all arguments to it and propagates the
-returned value.
+Signals are implemented in @ref Interconnect::Emitter subclass as public
+functions with @ref Interconnect::Emitter::Signal "Signal" as return type.
+There are no limitations on argument types or argument count. The signal
+function calls @ref Interconnect::Emitter::emit() "emit()" internally, passes
+its own signature and all arguments to it and propagates the returned value.
 @dontinclude interconnect/main.cpp
 @skip class RemoteControl
 @until };
@@ -58,8 +58,8 @@ returned value.
 Any free function, lambda function or non-constant member function returning
 void can be connected to any signal if they have the same argument count and
 types. If connecting to member function, you have to derive your class from
-@ref Receiver base class to ensure that the connection is automatically removed
-when receiver is destroyed.
+@ref Interconnect::Receiver base class to ensure that the connection is
+automatically removed when receiver is destroyed.
 @skip class Bomb
 @until };
 
@@ -68,14 +68,15 @@ when receiver is destroyed.
 When you have instances of emitter and receiver objects, you can connect
 signals from emitters to slots. There are no connectivity limitations, you can
 connect any number of signals to one slot and any number of slots to one
-signal. See @ref connect() for more information about how to manage the
-connections.
+signal. See @ref Interconnect::connect() for more information about how to
+manage the connections.
 @skip RemoteControl rc
 @until Interconnect::connect(rc, &RemoteControl::triggered, *bomb3
 
-See @ref connect(), @ref Emitter::disconnectSignal(), @ref Emitter::disconnectAllSignals()
-and @ref Receiver::disconnectAllSlots() functions for information about
-removing connections.
+See @ref Interconnect::connect(), @ref Interconnect::Emitter::disconnectSignal(),
+    @ref Interconnect::Emitter::disconnectAllSignals() and
+    @ref Interconnect::Receiver::disconnectAllSlots() functions for information
+    about removing connections.
 
 @section interconnect-emitting Emitting signals
 
@@ -98,4 +99,4 @@ See the whole example:
  - @ref interconnect/main.cpp
 
 */
-}}
+}

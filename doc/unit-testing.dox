@@ -23,7 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-namespace Corrade { namespace TestSuite {
+namespace Corrade {
 /** @page unit-testing Unit testing with TestSuite
 
 %Corrade's test suite is inspired by QtTest framework, but without any need to
@@ -31,8 +31,8 @@ process code with meta compiler.
 
 @section unit-testing-class Tester class
 
-First step for creating unit test is to subclass Tester class and add tester
-functions to it.
+First step for creating unit test is to subclass @ref TestSuite::Tester class
+and add tester functions to it.
 @dontinclude test/MyTest.cpp
 @skip class MyTest
 @until };
@@ -41,40 +41,41 @@ In constructor we register our test cases:
 @skip MyTest::MyTest
 @until }
 
-Now we implement our test cases. The simplest macro is CORRADE_VERIFY(), which
-only verifies that expression is true, if not, it exits current test case
+Now we implement our test cases. The simplest macro is @ref CORRADE_VERIFY(),
+which only verifies that expression is true, if not, it exits current test case
 (i.e. skips processing the rest of the function) and prints error on error
 output:
 @skip MyTest::commutativity()
 @until }
 
-Next macro is CORRADE_COMPARE(), which takes two values and compares them for
-equality:
+Next macro is @ref CORRADE_COMPARE(), which takes two values and compares them
+for equality:
 @skip MyTest::associativity()
 @until }
 
 If both values have different type or if we want to force some type for
-comparison, we can use CORRADE_COMPARE_AS(). This macro can be used also for
-more involved comparison using "pseudo-types", see Comparator class
+comparison, we can use @ref CORRADE_COMPARE_AS(). This macro can be used also
+for more involved comparison using "pseudo-types", see Comparator class
 documentation for more information.
 @skip MyTest::sin()
 @until }
 
 If you have some unimplemented or broken functionality, but don't want the
-test to fail only because of that, you can use CORRADE_EXPECT_FAIL() macro,
-which expects all following checks until the end of the scope to fail:
+test to fail only because of that, you can use @ref CORRADE_EXPECT_FAIL()
+macro, which expects all following checks until the end of the scope to fail:
 @skip MyTest::pi()
 @until }
 
 For things that can't be tested on given platform (or are disabled) you can use
-CORRADE_SKIP() macro to indicate that the particular feature is not tested:
+@ref CORRADE_SKIP() macro to indicate that the particular feature is not
+tested:
 @skip MyTest::bigEndian()
 @until }
 
 @section unit-testing-compilation Compilation and running
 
-Lastly, we must not forget to create `main()` function using
-CORRADE_TEST_MAIN() macro:
+Lastly, we must not forget to create `main()` function using @ref CORRADE_TEST_MAIN()
+macro:
 @skipline CORRADE_TEST_MAIN
 
 Now we can compile and run our test using CMake and `corrade_add_test()` macro.

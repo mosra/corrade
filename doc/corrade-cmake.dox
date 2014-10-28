@@ -47,15 +47,16 @@ Basic usage is:
 
 This module tries to find %Corrade library and then defines these variables:
 
-- `CORRADE_FOUND` -- True if %Corrade is found
-- `CORRADE_INCLUDE_DIR` -- Root include dir
-- `CORRADE_INTERCONNECT_LIBRARIES` -- Interconnect library and dependent
-  libraries
-- `CORRADE_UTILITY_LIBRARIES` -- Utility library and dependent libraries
-- `CORRADE_PLUGINMANAGER_LIBRARIES` -- PluginManager library and dependent
-  libraries
-- `CORRADE_TESTSUITE_LIBRARIES` -- TestSuite library and dependent libraries
-- `CORRADE_RC_EXECUTABLE` -- Resource compiler executable
+-   `CORRADE_FOUND` -- True if %Corrade is found
+-   `CORRADE_INCLUDE_DIR` -- Root include dir
+-   `CORRADE_INTERCONNECT_LIBRARIES` -- @ref Interconnect library and dependent
+    libraries
+-   `CORRADE_UTILITY_LIBRARIES` -- @ref Utility library and dependent libraries
+-   `CORRADE_PLUGINMANAGER_LIBRARIES` -- @ref PluginManager library and
+    dependent libraries
+-   `CORRADE_TESTSUITE_LIBRARIES` -- @ref TestSuite library and dependent
+    libraries
+-   `CORRADE_RC_EXECUTABLE` -- Resource compiler executable
 
 The package is found if either debug or release version of each library is
 found. If both debug and release libraries are found, proper version is chosen
@@ -64,7 +65,7 @@ linked to debug libraries, `Release` build to release libraries).
 
 On multi-configuration build systems (such as Visual Studio or XCode) the
 preprocessor variable `CORRADE_IS_DEBUG_BUILD` is defined if given build
-configuration is Debug (not Corrade itself, but build configuration of the
+configuration is `Debug` (not Corrade itself, but build configuration of the
 project using it). Useful e.g. for selecting proper plugin directory. On
 single-configuration build systems (such as Makefiles) this information is not
 needed and thus the variable is not defined in any case.
