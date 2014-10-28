@@ -348,8 +348,14 @@ if(!bigEndian) {
 template<class T, class U, class V> void Tester::compareWith(Comparator<T> comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
     ++checkCount;
 
+    /* Store (references to) possibly implicitly-converted values,
+       otherwise the implicit conversion would when passing them to operator(),
+       causing dead memory access later in printErrorMessage() */
+    const typename Implementation::ComparatorTraits<T>::ActualType& actualValueInExpectedActualType = actualValue;
+    const typename Implementation::ComparatorTraits<T>::ExpectedType& expectedValueInExpectedExpectedType = expectedValue;
+
     /* If the comparison succeeded or the failure is expected, done */
-    bool equal = comparator(actualValue, expectedValue);
+    bool equal = comparator(actualValueInExpectedActualType, expectedValueInExpectedExpectedType);
     if(!expectedFailure) {
         if(equal) return;
     } else if(!equal) {

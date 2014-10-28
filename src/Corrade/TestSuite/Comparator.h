@@ -164,6 +164,19 @@ template<class T> void Comparator<T>::printErrorMessage(Utility::Error& e, const
       << *actualValue << "\n        but expected\n       " << *expectedValue;
 }
 
+namespace Implementation {
+
+template<class T> struct ComparatorOperatorTraits;
+
+template<class T, class U, class V> struct ComparatorOperatorTraits<bool(T::*)(U, V)> {
+    typedef typename std::decay<U>::type ActualType;
+    typedef typename std::decay<V>::type ExpectedType;
+};
+
+template<class T> struct ComparatorTraits: ComparatorOperatorTraits<decltype(&Comparator<T>::operator())> {};
+
+}
+
 }}
 
 #endif
