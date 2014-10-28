@@ -77,6 +77,7 @@ class Test: public Tester {
         void compareAsFail();
         void compareWith();
         void compareWithFail();
+        void compareImplicitConversionFail();
 
         void skip();
 };
@@ -95,6 +96,7 @@ Test::Test() {
               &Test::compareAsFail,
               &Test::compareWith,
               &Test::compareWithFail,
+              &Test::compareImplicitConversionFail,
 
               &Test::skip});
 }
@@ -157,6 +159,11 @@ void Test::compareWithFail() {
     CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(9)); // #13
 }
 
+void Test::compareImplicitConversionFail() {
+    std::string hello{"hello"};
+    CORRADE_COMPARE("holla", hello); // #14
+}
+
 void Test::skip() {
     CORRADE_SKIP("This testcase is skipped.");
     CORRADE_VERIFY(false); // (not called)
@@ -197,37 +204,42 @@ void TesterTest::test() {
     CORRADE_VERIFY(result == 1);
 
     std::string expected =
-        "Starting TesterTest::Test with 13 test cases...\n"
+        "Starting TesterTest::Test with 14 test cases...\n"
         "     ?: <unknown>()\n"
         "    OK: trueExpression()\n"
-        "  FAIL: falseExpression() at here.cpp on line 111 \n"
+        "  FAIL: falseExpression() at here.cpp on line 113 \n"
         "        Expression 5 != 5 failed.\n"
         "    OK: equal()\n"
-        "  FAIL: nonEqual() at here.cpp on line 121 \n"
+        "  FAIL: nonEqual() at here.cpp on line 123 \n"
         "        Values a and b are not the same, actual is\n"
         "        5 \n"
         "        but expected\n"
         "        3\n"
-        " XFAIL: expectFail() at here.cpp on line 127 \n"
+        " XFAIL: expectFail() at here.cpp on line 129 \n"
         "        The world is not mad yet. 2 + 2 and 5 are not equal.\n"
-        " XFAIL: expectFail() at here.cpp on line 128 \n"
+        " XFAIL: expectFail() at here.cpp on line 130 \n"
         "        The world is not mad yet. Expression false == true failed.\n"
         "    OK: expectFail()\n"
-        " XPASS: unexpectedPassExpression() at here.cpp on line 136 \n"
+        " XPASS: unexpectedPassExpression() at here.cpp on line 138 \n"
         "        Expression true == true was expected to fail.\n"
-        " XPASS: unexpectedPassEqual() at here.cpp on line 141 \n"
+        " XPASS: unexpectedPassEqual() at here.cpp on line 143 \n"
         "        2 + 2 and 4 are not expected to be equal.\n"
         "    OK: compareAs()\n"
-        "  FAIL: compareAsFail() at here.cpp on line 149 \n"
+        "  FAIL: compareAsFail() at here.cpp on line 151 \n"
         "        Length of actual \"meh\" doesn't match length of expected \"hello\" with epsilon 0\n"
         "    OK: compareWith()\n"
-        "  FAIL: compareWithFail() at here.cpp on line 157 \n"
+        "  FAIL: compareWithFail() at here.cpp on line 159 \n"
         "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
+        "  FAIL: compareImplicitConversionFail() at here.cpp on line 164 \n"
+        "        Values \"holla\" and hello are not the same, actual is\n"
+        "        holla \n"
+        "        but expected\n"
+        "        hello\n"
         "  SKIP: skip() \n"
         "        This testcase is skipped.\n"
-        "Finished TesterTest::Test with 6 errors out of 13 checks. 1 test cases didn't contain any checks!\n";
+        "Finished TesterTest::Test with 7 errors out of 14 checks. 1 test cases didn't contain any checks!\n";
 
-    CORRADE_COMPARE(out.str().length(), expected.length());
+    //CORRADE_COMPARE(out.str().length(), expected.length());
     CORRADE_COMPARE(out.str(), expected);
 }
 
