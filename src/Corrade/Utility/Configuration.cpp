@@ -186,8 +186,11 @@ std::string Configuration::parse(std::istream& in, ConfigurationGroup* group, co
                 ConfigurationGroup::Group g;
                 g.name = nextGroup.substr(fullPath.size());
                 g.group = new ConfigurationGroup(_configuration);
-                nextGroup = parse(in, g.group, nextGroup+'/');
+                /* Add the group before attempting any other parsing, as it
+                   could throw an exception and the group would otherwise be
+                   leaked */
                 group->_groups.push_back(std::move(g));
+                nextGroup = parse(in, g.group, nextGroup+'/');
             }
 
             return nextGroup;
