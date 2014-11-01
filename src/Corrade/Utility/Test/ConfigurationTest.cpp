@@ -220,12 +220,20 @@ void ConfigurationTest::names() {
     Error::setOutput(&out);
     Configuration conf;
 
-    conf.addGroup("");
-    CORRADE_COMPARE(out.str(), "Utility::ConfigurationGroup::addGroup(): empty group name\n");
+    {
+        /* With CORRADE_GRACEFUL_ASSERT the groups are leaked */
+        auto g = conf.addGroup("");
+        CORRADE_COMPARE(out.str(), "Utility::ConfigurationGroup::addGroup(): empty group name\n");
+        delete g;
+    }
 
-    out.str({});
-    conf.addGroup("a/b/c");
-    CORRADE_COMPARE(out.str(), "Utility::ConfigurationGroup::addGroup(): disallowed character in group name\n");
+    {
+        /* With CORRADE_GRACEFUL_ASSERT the groups are leaked */
+        out.str({});
+        auto g = conf.addGroup("a/b/c");
+        CORRADE_COMPARE(out.str(), "Utility::ConfigurationGroup::addGroup(): disallowed character in group name\n");
+        delete g;
+    }
 
     out.str({});
     conf.setValue("", "foo");
@@ -492,6 +500,8 @@ void ConfigurationTest::copy() {
     CORRADE_COMPARE(original->group("descendent")->value<int>("value"), 666);
     CORRADE_COMPARE(constructedCopy->group("descendent")->value<int>("value"), 42);
     CORRADE_COMPARE(assignedCopy->group("descendent")->value<int>("value"), 42);
+
+    delete constructedCopy;
 }
 
 void ConfigurationTest::move() {
@@ -512,6 +522,8 @@ void ConfigurationTest::move() {
     CORRADE_VERIFY(constructedMove->isEmpty());
     CORRADE_VERIFY(assignedMove->configuration() == &conf);
     CORRADE_VERIFY(assignedMove->group("descendent")->configuration() == &conf);
+
+    delete constructedMove;
 
     /* Move constructor for Configuration */
     Configuration confConstructedMove(std::move(conf));
