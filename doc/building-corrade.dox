@@ -509,6 +509,12 @@ Build is done using **Ninja** build system. It expects that **GCC** >=4.8.1,
 one of them. You can add/remove the compilers in `axes/hudson.matrix.TextAxis`
 or via the web interface later.
 
+Clang Analyzer and *Sanitizer checks are also available. They both require
+**Clang**, Analyzer job additionally requires **clang-analyzer** tool.
+
+    java -jar ~/jenkins-cli.jar -s http://localhost:8080 update-job Corrade-ClangAnalyzer < package/ci/jenkins-clang-analyzer.xml
+    java -jar ~/jenkins-cli.jar -s http://localhost:8080 update-job Corrade-ClangSanitizer < package/ci/jenkins-clang-sanitizer.xml
+
 There is also MinGW-w64, Emscripten, NaCl and Android configuration, add or
 update them with the commands below. See @ref building-corrade-cross for more
 information about setting up the crosscompilers and `toolchains/` submodule.
