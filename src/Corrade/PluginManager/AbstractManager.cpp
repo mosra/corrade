@@ -502,8 +502,7 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
     if(finalizer == nullptr) {
         Error() << "PluginManager::Manager::unload(): cannot get finalizer of plugin" << plugin.metadata._name + ":" << dlerror();
         /* Not fatal, continue with unloading */
-    }
-    finalizer();
+    } else finalizer();
 
     /* Close the module */
     #ifndef CORRADE_TARGET_WINDOWS
