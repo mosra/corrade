@@ -45,7 +45,7 @@ class Endianness {
 
         /** @brief Endian-swap bytes of given value */
         template<class T> static T swap(T value) {
-            return swap<sizeof(T)>(bitCast<typename TypeFor<sizeof(T)>::Type>(value));
+            return bitCast<T>(swap<sizeof(T)>(bitCast<typename TypeFor<sizeof(T)>::Type>(value)));
         }
 
         /** @brief Whether actual system is Big-Endian */
