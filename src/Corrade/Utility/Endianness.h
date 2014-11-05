@@ -129,10 +129,14 @@ class Endianness {
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
+template<> struct Endianness::TypeFor<1> { typedef std::uint8_t  Type; };
 template<> struct Endianness::TypeFor<2> { typedef std::uint16_t Type; };
 template<> struct Endianness::TypeFor<4> { typedef std::uint32_t Type; };
 template<> struct Endianness::TypeFor<8> { typedef std::uint64_t Type; };
 
+template<> inline std::uint8_t Endianness::swap<1>(std::uint8_t value) {
+    return value;
+}
 template<> inline std::uint16_t Endianness::swap<2>(std::uint16_t value) {
     return (value >> 8) |
            (value << 8);
