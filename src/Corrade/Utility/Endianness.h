@@ -43,6 +43,11 @@ class Endianness {
     public:
         Endianness() = delete;
 
+        /** @brief Endian-swap bytes of given value */
+        template<class T> static T swap(T value) {
+            return swap<sizeof(T)>(bitCast<typename TypeFor<sizeof(T)>::Type>(value));
+        }
+
         /** @brief Whether actual system is Big-Endian */
         constexpr static bool isBigEndian() {
             #ifdef CORRADE_BIG_ENDIAN
@@ -54,55 +59,53 @@ class Endianness {
 
         /**
          * @brief Convert number from or to Big-Endian
-         * @param number    Number to convert
-         * @return Number as Big-Endian. On Big-Endian systems returns
-         *      unchanged value.
+         *
+         * On Little-Endian systems calls @ref swap(), on Big-Endian systems
+         * returns unchanged value.
          */
-        template<class T> static T bigEndian(T number) {
+        template<class T> static T bigEndian(T value) {
             #ifdef CORRADE_BIG_ENDIAN
             return number;
             #else
-            return swap<sizeof(T)>(bitCast<typename TypeFor<sizeof(T)>::Type>(number));
+            return swap(value);
             #endif
         }
 
         /**
-         * @brief Convert numbers from or to Big-Endian in-place
-         * @param numbers   Numbers to convert
+         * @brief Convert values from or to Big-Endian in-place
          *
-         * On Big-Endian systems does nothing.
+         * Calls @ref bigEndian() for each value and saves the result back.
          */
         #if defined(DOXYGEN_GENERATING_OUTPUT) || !defined(CORRADE_BIG_ENDIAN)
-        template<class ...T> static void bigEndianInPlace(T&... numbers) {
-            bigEndianInPlaceInternal(numbers...);
+        template<class ...T> static void bigEndianInPlace(T&... values) {
+            bigEndianInPlaceInternal(values...);
         }
         #else
         template<class ...T> static void bigEndianInPlace(T&...) {}
         #endif
 
         /**
-         * @brief Convert number from or to Little-Endian
-         * @param number    Number to convert
-         * @return Number as Little-Endian. On Little-Endian systems returns
-         *      unchanged value.
+         * @brief Convert value from or to Little-Endian
+         *
+         * On Big-Endian systems calls @ref swap(), on Little-Endian systems
+         * returns unchanged value.
          */
         template<class T> static T littleEndian(T number) {
             #ifdef CORRADE_BIG_ENDIAN
-            return swap<sizeof(T)>(bitCast<typename TypeFor<sizeof(T)>::Type>(number));
+            return swap(number);
             #else
             return number;
             #endif
         }
 
         /**
-         * @brief Convert numbers from or to Little-Endian in-place
-         * @param numbers   Numbers to convert
+         * @brief Convert values from or to Little-Endian in-place
          *
-         * On Little-Endian systems does nothing.
+         * Calls @ref littleEndian() for each value and saves the result back.
          */
         #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_BIG_ENDIAN)
-        template<class ...T> static void littleEndianInPlace(T&... numbers) {
-            littleEndianInPlaceInternal(numbers...);
+        template<class ...T> static void littleEndianInPlace(T&... values) {
+            littleEndianInPlaceInternal(values...);
         }
         #else
         template<class ...T> static void littleEndianInPlace(T&...) {}
