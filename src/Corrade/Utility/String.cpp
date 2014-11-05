@@ -76,6 +76,23 @@ std::vector<std::string> String::splitWithoutEmptyParts(const std::string& strin
     return parts;
 }
 
+std::vector<std::string> String::splitWithoutEmptyParts(const std::string& string, const std::string& delimiters) {
+    std::vector<std::string> parts;
+    std::size_t oldpos = 0, pos = std::string::npos;
+
+    while((pos = string.find_first_of(delimiters, oldpos)) != std::string::npos) {
+        if(pos != oldpos)
+            parts.push_back(string.substr(oldpos, pos-oldpos));
+
+        oldpos = pos+1;
+    }
+
+    if(!string.empty() && (oldpos < string.size()))
+        parts.push_back(string.substr(oldpos));
+
+    return parts;
+}
+
 std::string String::join(const std::vector<std::string>& strings, const char delimiter) {
     /* Compute size of resulting string, count also delimiters */
     std::size_t size = 0;

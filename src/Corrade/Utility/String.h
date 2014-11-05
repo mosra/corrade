@@ -121,6 +121,13 @@ class CORRADE_UTILITY_EXPORT String {
          */
         static std::vector<std::string> splitWithoutEmptyParts(const std::string& string, char delimiter);
 
+        /**
+         * @brief Split string on any character from given set and remove empty parts
+         * @param string            String to split
+         * @param delimiters        Delimiter characters
+         */
+        static std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const std::string& delimiters = Whitespace);
+
         #ifdef CORRADE_BUILD_DEPRECATED
         /** @copybrief splitWithoutEmptyParts()
          * @deprecated Use @ref Corrade::Utility::String::splitWithoutEmptyParts() "splitWithoutEmptyParts()"

@@ -36,6 +36,7 @@ class StringTest: public TestSuite::Tester {
         void fromArray();
         void trim();
         void split();
+        void splitMultipleCharacters();
         void join();
         void lowercase();
         void uppercase();
@@ -49,6 +50,7 @@ StringTest::StringTest() {
     addTests({&StringTest::fromArray,
               &StringTest::trim,
               &StringTest::split,
+              &StringTest::splitMultipleCharacters,
               &StringTest::join,
               &StringTest::lowercase,
               &StringTest::uppercase,
@@ -117,6 +119,30 @@ void StringTest::split() {
     CORRADE_COMPARE_AS(String::split("ab//c/def//", '/'),
         (std::vector<std::string>{"ab", "", "c", "def", "", ""}), TestSuite::Compare::Container);
     CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("ab//c/def//", '/'),
+        (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
+}
+
+void StringTest::splitMultipleCharacters() {
+    const std::string delimiters = ".:;";
+
+    /* Empty */
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts({}, delimiters),
+        std::vector<std::string>{}, TestSuite::Compare::Container);
+
+    /* Only delimiters */
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(".::;", delimiters),
+        std::vector<std::string>{}, TestSuite::Compare::Container);
+
+    /* No delimiters */
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("abcdef", delimiters),
+        std::vector<std::string>{"abcdef"}, TestSuite::Compare::Container);
+
+    /* Common case */
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("ab:c;def", delimiters),
+        (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
+
+    /* Empty parts */
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("ab:c;;def.", delimiters),
         (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
 }
 
