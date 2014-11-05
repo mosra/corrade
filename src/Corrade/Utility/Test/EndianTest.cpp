@@ -34,11 +34,13 @@ class EndianTest: public TestSuite::Tester {
         EndianTest();
 
         void endianness();
+        void floats();
         void inPlace();
 };
 
 EndianTest::EndianTest() {
     addTests({&EndianTest::endianness,
+              &EndianTest::floats,
               &EndianTest::inPlace});
 }
 
@@ -64,6 +66,19 @@ void EndianTest::endianness() {
 
     #undef current
     #undef other
+}
+
+void EndianTest::floats() {
+    /* Verifies that the swapping operation doesn't involve any
+       information-losing type conversion */
+    float original = -456.7896713f;
+    float swapped = Endianness::swap(original);
+    float back = Endianness::swap(swapped);
+
+    /* Compare bitwise (as opposed to fuzzy compare), as the values should be
+       exactly the same */
+    CORRADE_VERIFY(swapped != original);
+    CORRADE_VERIFY(back == original);
 }
 
 void EndianTest::inPlace() {
