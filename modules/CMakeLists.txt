@@ -23,12 +23,12 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-set(Magnum_MODULES
+set(Corrade_MODULES
     CorradeLibSuffix.cmake
     UseCorrade.cmake)
 
 if(WITH_FIND_MODULE)
-    install(FILES FindCorrade.cmake ${Magnum_MODULES} DESTINATION ${CORRADE_CMAKE_FIND_MODULE_INSTALL_DIR})
+    install(FILES FindCorrade.cmake ${Corrade_MODULES} DESTINATION ${CORRADE_CMAKE_FIND_MODULE_INSTALL_DIR})
 else()
-    install(FILES ${Magnum_MODULES} DESTINATION ${CORRADE_CMAKE_MODULE_INSTALL_DIR})
+    install(FILES ${Corrade_MODULES} DESTINATION ${CORRADE_CMAKE_MODULE_INSTALL_DIR})
 endif()
