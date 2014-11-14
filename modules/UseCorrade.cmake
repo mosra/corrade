@@ -75,7 +75,7 @@ endif()
 # GCC/Clang-specific compiler flags
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?Clang" OR CORRADE_TARGET_EMSCRIPTEN)
     # Mandatory C++ flags
-    if(NOT CMAKE_CXX_FLAGS MATCHES "-std=c[+][+](0x|11|1y)")
+    if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
         # TODO: use -std=c++11 when we don't have to maintain compatibility
         # with anything older than GCC 4.7
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
