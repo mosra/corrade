@@ -27,7 +27,6 @@ cmake_minimum_required(VERSION 2.8.9)
 project(Corrade)
 
 include(CMakeDependentOption)
-option(WITH_FIND_MODULE "Install FindCorrade.cmake module into CMake's module dir (might require admin privileges)" OFF)
 option(GCC47_COMPATIBILITY "Enable compatibility mode for GCC 4.7 (might disable some features)" OFF)
 
 option(BUILD_DEPRECATED "Include deprecated API in the build" ON)
@@ -116,7 +115,6 @@ include(CorradeLibSuffix)
 set(CORRADE_BINARY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/bin)
 set(CORRADE_LIBRARY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
 set(CORRADE_CMAKE_MODULE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/cmake/Corrade)
-set(CORRADE_CMAKE_FIND_MODULE_INSTALL_DIR ${CMAKE_ROOT}/Modules)
 set(CORRADE_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/Corrade)
 
 # Library version

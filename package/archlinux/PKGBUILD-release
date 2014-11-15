@@ -18,7 +18,6 @@ build() {
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DBUILD_TESTS=TRUE \
-        -DWITH_FIND_MODULE=TRUE \
         -G Ninja
     ninja
 
@@ -29,7 +28,6 @@ build() {
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DBUILD_TESTS=TRUE \
-        -DWITH_FIND_MODULE=TRUE \
         -G Ninja
     ninja
 }

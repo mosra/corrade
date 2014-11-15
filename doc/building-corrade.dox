@@ -190,14 +190,6 @@ libraries installed alongside each other. Headers and other files are the same
 for both. This distinction is handled automatically when using the library in
 depending projects, see @ref corrade-cmake for more information.
 
-Corrade by default does not install `FindCorrade.cmake`, as you should bundle
-the module with your code instead of depending on it being in system location.
-You can install it by enabling `WITH_FIND_MODULE`. When this option is enabled,
-all the CMake modules are installed into root CMake path, which may require
-root privileges. This can also help some IDEs (namely KDevelop) to find the
-included modules easier and provide better CMake support, e.g. parsing targets
-from `corrade_add_test()` calls.
-
 By default the library expects standards conforming compiler. However, for
 portability, compatibility mode for older compilers is provided. The build
 system tries to autodect it, but in some rare cases you may need to enable

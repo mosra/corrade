@@ -14,6 +14,7 @@
 #  CORRADE_TESTSUITE_LIBRARIES      - TestSuite library and dependent
 #   libraries
 #  CORRADE_RC_EXECUTABLE            - Resource compiler executable
+#  CORRADE_LIB_SUFFIX_MODULE        - Path to CorradeLibSuffix.cmake module
 # The package is found if either debug or release version of each library is
 # found. If both debug and release libraries are found, proper version is
 # chosen based on actual build configuration of the project (i.e. Debug build
@@ -111,6 +112,8 @@
 #  CORRADE_*_LIBRARY_DEBUG          - Debug version of given library, if found
 #  CORRADE_*_LIBRARY_RELEASE        - Release version of given library, if
 #                                     found
+#  CORRADE_USE_MODULE               - Path to UseCorrade.cmake module (included
+#                                     automatically)
 #
 
 #
@@ -173,12 +176,6 @@ find_path(_CORRADE_INCLUDE_DIR
 find_path(_CORRADE_MODULE_DIR
     NAMES UseCorrade.cmake CorradeLibSuffix.cmake
     PATH_SUFFIXES share/cmake/Corrade)
-
-# If not found, try system module dir
-find_path(_CORRADE_MODULE_DIR
-    NAMES UseCorrade.cmake CorradeLibSuffix.cmake
-    PATHS ${CMAKE_ROOT}/Modules
-    NO_CMAKE_FIND_ROOT_PATH)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Corrade DEFAULT_MSG
@@ -247,6 +244,8 @@ set(CORRADE_UTILITY_LIBRARIES ${CORRADE_UTILITY_LIBRARY})
 set(CORRADE_INTERCONNECT_LIBRARIES ${CORRADE_INTERCONNECT_LIBRARY} ${CORRADE_UTILITY_LIBRARIES})
 set(CORRADE_PLUGINMANAGER_LIBRARIES ${CORRADE_PLUGINMANAGER_LIBRARY} ${CORRADE_UTILITY_LIBRARIES})
 set(CORRADE_TESTSUITE_LIBRARIES ${CORRADE_TESTSUITE_LIBRARY} ${CORRADE_UTILITY_LIBRARIES})
+set(CORRADE_USE_MODULE ${_CORRADE_MODULE_DIR}/UseCorrade.cmake)
+set(CORRADE_LIB_SUFFIX_MODULE ${_CORRADE_MODULE_DIR}/CorradeLibSuffix.cmake)
 
 # At least static build needs this
 if(CORRADE_TARGET_UNIX OR CORRADE_TARGET_NACL_GLIBC)
@@ -268,10 +267,5 @@ else()
     set(CORRADE_INCLUDE_DIR ${_CORRADE_INCLUDE_DIR})
 endif()
 
-# Include our module dir, if we have any
-if(NOT "${_CORRADE_MODULE_DIR}" STREQUAL "${CMAKE_ROOT}/Modules")
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${_CORRADE_MODULE_DIR}")
-endif()
-
 # Finalize the finding process
-include(UseCorrade)
+include(${CORRADE_USE_MODULE})

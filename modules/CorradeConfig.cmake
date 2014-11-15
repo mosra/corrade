@@ -23,10 +23,4 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-set(Corrade_MODULES
-    CorradeConfig.cmake
-    CorradeLibSuffix.cmake
-    FindCorrade.cmake
-    UseCorrade.cmake)
-
-install(FILES ${Corrade_MODULES} DESTINATION ${CORRADE_CMAKE_MODULE_INSTALL_DIR})
+include(${CMAKE_CURRENT_LIST_DIR}/FindCorrade.cmake)

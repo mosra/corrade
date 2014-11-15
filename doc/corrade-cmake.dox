@@ -57,6 +57,8 @@ This module tries to find Corrade library and then defines these variables:
 -   `CORRADE_TESTSUITE_LIBRARIES` -- @ref TestSuite library and dependent
     libraries
 -   `CORRADE_RC_EXECUTABLE` -- Resource compiler executable
+-   `CORRADE_LIB_SUFFIX_MODULE` -- Path to `CorradeLibSuffix.cmake` module,
+    which tries to autodetect value of `LIB_SUFFIX` variable.
 
 The package is found if either debug or release version of each library is
 found. If both debug and release libraries are found, proper version is chosen
