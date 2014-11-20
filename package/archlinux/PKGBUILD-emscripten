@@ -6,7 +6,7 @@ pkgdesc="Multiplatform plugin management and utility library (Emscripten)"
 arch=('any')
 url="http://mosra.cz/blog/corrade.php"
 license=('MIT')
-makedepends=('cmake' 'ninja' 'emscripten-git')
+makedepends=('cmake' 'ninja' 'emscripten')
 options=(!strip !buildflags)
 
 build() {
