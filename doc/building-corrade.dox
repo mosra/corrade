@@ -427,7 +427,7 @@ Also set `CMAKE_INSTALL_PREFIX` to path contained in `EMSCRIPTEN_TOOLCHAIN_PATH`
         -DCMAKE_MODULE_PATH="/absolute/path/to/toolchains/modules" \
         -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/Emscripten.cmake" \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=/usr/emscripten/system
+        -DCMAKE_INSTALL_PREFIX=/usr/lib/emscripten/system
     cmake --build .
 
 Then you can install the library using `cmake --build . --target install` to
