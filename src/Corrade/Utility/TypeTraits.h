@@ -75,7 +75,24 @@ namespace Implementation {
     CORRADE_HAS_TYPE(HasEnd, decltype(std::declval<T>().end()));
     CORRADE_HAS_TYPE(HasStdBegin, decltype(std::begin(std::declval<T>())));
     CORRADE_HAS_TYPE(HasStdEnd, decltype(std::end(std::declval<T>())));
+
+    template<class Target, class T>
+    inline static auto TestCanStreamInto(int) -> decltype(
+        std::declval<Target>() << std::declval<T>(),
+        std::true_type());
+
+     inline static auto TestCanStreamInto(...) -> std::false_type;
 }
+
+
+/**
+@brief Traits class for checking whether `Target` can accept `T` via `operator<<`.
+
+Equivalent to `std::true_type` if the there exists a viable
+`operator<<(Target, T)` overload.  Otherwise, equivalent to `std::false_type`.
+
+*/
+template<class Target, class T> using CanStreamInto = decltype(Implementation::TestCanStreamInto<Target, T>(0));
 
 /**
 @brief Traits class for checking whether given class is iterable

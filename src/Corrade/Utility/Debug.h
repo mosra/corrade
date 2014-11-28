@@ -39,7 +39,7 @@
 
 namespace Corrade { namespace Utility {
 
-namespace Implementation { struct DebugOstreamFallback; }
+namespace Implementation { struct DebugOstreamPassthrough; }
 
 /**
 @brief Debug output handler
@@ -206,7 +206,10 @@ class CORRADE_UTILITY_EXPORT Debug {
         Debug operator<<(const char32_t* value);
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        Debug operator<<(Implementation::DebugOstreamFallback&& value);
+        Debug operator<<(Implementation::DebugOstreamPassthrough&& value);
+
+        template<class T, class = typename std::enable_if<CanStreamInto<std::ostream&, T>::value && !std::is_integral<T>::value && !IsIterable<T>::value, Debug>::type>
+        Debug operator<<(const T& value);
         #endif
 
         /**
@@ -342,24 +345,28 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
 
 namespace Implementation {
 
-/* Used by Debug::operator<<(Implementation::DebugOstreamFallback&&) */
-struct DebugOstreamFallback {
-    template<class T> /*implicit*/ DebugOstreamFallback(const T& t): applier(&DebugOstreamFallback::applyImpl<T>), value(&t) {}
+/* Used by Debug operator<<(Implementation::DebugOstreamPassthrough&&) */
+struct DebugOstreamPassthrough {
+    template<class T> explicit DebugOstreamPassthrough(const T& t): applier(&DebugOstreamPassthrough::applyImpl<T>), value(&t) {}
 
-    void apply(std::ostream& s) const {
-        (this->*applier)(s);
+    template<class T> std::ostream& applyImpl(std::ostream& o) const {
+        return o << *static_cast<const T*>(value);
     }
 
-    template<class T> void applyImpl(std::ostream& s) const {
-        s << *static_cast<const T*>(value);
-    }
-
-    using ApplierFunc = void(DebugOstreamFallback::*)(std::ostream&) const;
-    const ApplierFunc applier;
+    using ApplyFunc = std::ostream&(DebugOstreamPassthrough::*)(std::ostream&) const;
+    const ApplyFunc applier;
     const void* value;
 };
 
+std::ostream& operator<<(std::ostream& o, const DebugOstreamPassthrough& value);
+
 }
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+template<class T, class> Debug Debug::operator<<(const T& value) {
+    return *this << Implementation::DebugOstreamPassthrough(value);
+}
+#endif
 
 }}
 
