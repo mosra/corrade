@@ -100,8 +100,8 @@ example provide wrapper functions with more descriptive names. In that case
 you need to friend both LinkedList and LinkedListItem in both your subclasses.
 @code
 class ObjectGroup: private LinkedList<Object> {
-    friend class LinkedList<Object>;
-    friend class LinkedListItem<Object, ObjectGroup>;
+    friend LinkedList<Object>;
+    friend LinkedListItem<Object, ObjectGroup>;
 
     public:
         Object* firstObject() { return first(); }
@@ -111,8 +111,8 @@ class ObjectGroup: private LinkedList<Object> {
 };
 
 class Object: private LinkedListItem<Object, ObjectGroup> {
-    friend class LinkedList<Object>;
-    friend class LinkedListItem<Object, ObjectGroup>;
+    friend LinkedList<Object>;
+    friend LinkedListItem<Object, ObjectGroup>;
 
     public:
         ObjectGroup* group() { return list(); }
@@ -234,7 +234,7 @@ template<class Derived, class List = LinkedList<Derived>>
 template<class Derived, class List>
 #endif
 class LinkedListItem {
-    friend class LinkedList<Derived>;
+    friend LinkedList<Derived>;
 
     public:
         /**

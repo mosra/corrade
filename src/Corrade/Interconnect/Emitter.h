@@ -207,8 +207,8 @@ Interconnect::connect(&foo, &Foo::signal, &b, &std::string::clear); // ok
 @todo Allow move
 */
 class CORRADE_INTERCONNECT_EXPORT Emitter {
-    friend class Connection;
-    friend class Receiver;
+    friend Connection;
+    friend Receiver;
 
     public:
         /**
@@ -217,7 +217,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * See @ref emit() for more information about implementing signals.
          */
         class Signal {
-            friend class Emitter;
+            friend Emitter;
 
             private:
                 constexpr explicit Signal() = default;
@@ -338,9 +338,9 @@ namespace Implementation {
 class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
     template<class...> friend class FunctionConnectionData;
     template<class...> friend class MemberConnectionData;
-    friend class Interconnect::Connection;
-    friend class Interconnect::Emitter;
-    friend class Interconnect::Receiver;
+    friend Interconnect::Connection;
+    friend Interconnect::Emitter;
+    friend Interconnect::Receiver;
 
     public:
         enum class Type: std::uint8_t { Function, Member };
@@ -364,7 +364,7 @@ class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
 };
 
 class AbstractMemberConnectionData: public AbstractConnectionData {
-    friend class Interconnect::Emitter;
+    friend Interconnect::Emitter;
 
     public:
         template<class Emitter, class Receiver> explicit AbstractMemberConnectionData(Emitter* emitter, Receiver* receiver): AbstractConnectionData(emitter, Type::Member), receiver(receiver) {}
@@ -374,7 +374,7 @@ class AbstractMemberConnectionData: public AbstractConnectionData {
 };
 
 template<class ...Args> class MemberConnectionData: public AbstractMemberConnectionData {
-    friend class Interconnect::Emitter;
+    friend Interconnect::Emitter;
 
     public:
         typedef void(Receiver::*Slot)(Args...);
@@ -390,7 +390,7 @@ template<class ...Args> class MemberConnectionData: public AbstractMemberConnect
 };
 
 template<class ...Args> class FunctionConnectionData: public AbstractConnectionData {
-    friend class Interconnect::Emitter;
+    friend Interconnect::Emitter;
 
     public:
         typedef void(*Slot)(Args...);

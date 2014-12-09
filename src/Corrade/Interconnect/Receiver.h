@@ -31,6 +31,7 @@
 
 #include <vector>
 
+#include "Corrade/Interconnect/Interconnect.h"
 #include "Corrade/Interconnect/visibility.h"
 
 namespace Corrade { namespace Interconnect {
@@ -47,8 +48,8 @@ Contains member function slots. See @ref interconnect for introduction.
 @todo Allow move
 */
 class CORRADE_INTERCONNECT_EXPORT Receiver {
-    friend class Implementation::AbstractConnectionData;
-    friend class Emitter;
+    friend Implementation::AbstractConnectionData;
+    friend Emitter;
 
     public:
         explicit Receiver();

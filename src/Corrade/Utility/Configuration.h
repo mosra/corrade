@@ -130,7 +130,7 @@ Example file:
     (e.g. value with spaces)
 */
 class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
-    friend class ConfigurationGroup;
+    friend ConfigurationGroup;
 
     public:
         /**

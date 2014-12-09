@@ -32,6 +32,7 @@
 #include <string>
 #include <vector>
 
+#include "Corrade/PluginManager/PluginManager.h"
 #include "Corrade/PluginManager/visibility.h"
 #include "Corrade/Utility/Utility.h"
 
@@ -71,7 +72,7 @@ be loaded. It will be also loaded when requesting `RealWorld` plugin, but only
 if this is the first plugin providing it.
 */
 class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
-    friend class AbstractManager;
+    friend AbstractManager;
 
     public:
         /** @brief Plugin name */

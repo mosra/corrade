@@ -38,10 +38,11 @@ namespace Corrade { namespace Interconnect {
 
 namespace Implementation {
     class AbstractConnectionData;
+    class SignalDataHash;
 
     class SignalData {
-        friend class Interconnect::Emitter;
-        friend class SignalDataHash;
+        friend Interconnect::Emitter;
+        friend SignalDataHash;
 
         public:
             static const std::size_t Size = 2*sizeof(void*)/sizeof(std::size_t);
@@ -80,8 +81,8 @@ object.
 @see @ref interconnect, @ref Emitter, @ref Receiver
 */
 class CORRADE_INTERCONNECT_EXPORT Connection {
-    friend class Emitter;
-    friend class Receiver;
+    friend Emitter;
+    friend Receiver;
 
     public:
         /** @brief Copying is not allowed */

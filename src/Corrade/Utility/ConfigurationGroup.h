@@ -44,7 +44,7 @@ documentation for usage example.
 @todo Faster access to elements via multimap, find() and equal_range()
 */
 class CORRADE_UTILITY_EXPORT ConfigurationGroup {
-    friend class Configuration;
+    friend Configuration;
 
     public:
         /**

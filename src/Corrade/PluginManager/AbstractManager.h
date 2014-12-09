@@ -197,7 +197,7 @@ CORRADE_ENUMSET_OPERATORS(LoadStates)
 See also @ref plugin-management.
  */
 class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
-    friend class AbstractPlugin;
+    friend AbstractPlugin;
 
     public:
         /** @brief Plugin version */
