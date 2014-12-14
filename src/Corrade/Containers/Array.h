@@ -33,6 +33,8 @@
 #include <utility>
 
 #include "Corrade/configure.h"
+#include "Corrade/Containers/Containers.h"
+#include "Corrade/Utility/Assert.h"
 
 namespace Corrade { namespace Containers {
 
@@ -169,6 +171,57 @@ template<class T> class Array {
         const T* cend() const { return _data+_size; }   /**< @overload */
 
         /**
+         * @brief Reference to array slice
+         *
+         * Equivalent to @ref ArrayReference::slice().
+         */
+        ArrayReference<T> slice(T* begin, T* end) {
+            return ArrayReference<T>{*this}.slice(begin, end);
+        }
+        /** @overload */
+        ArrayReference<const T> slice(const T* begin, const T* end) const {
+            return ArrayReference<const T>{*this}.slice(begin, end);
+        }
+        /** @overload */
+        ArrayReference<T> slice(std::size_t begin, std::size_t end) {
+            return slice(_data + begin, _data + end);
+        }
+        /** @overload */
+        ArrayReference<const T> slice(std::size_t begin, std::size_t end) const {
+            return slice(_data + begin, _data + end);
+        }
+
+        /**
+         * @brief Array prefix
+         *
+         * Equivalent to @ref ArrayReference::prefix().
+         */
+        ArrayReference<T> prefix(T* end) {
+            return ArrayReference<T>{*this}.prefix(end);
+        }
+        /** @overload */
+        ArrayReference<const T> prefix(const T* end) const {
+            return ArrayReference<const T>{*this}.prefix(end);
+        }
+        ArrayReference<T> prefix(std::size_t end) { return prefix(_data + end); } /**< @overload */
+        ArrayReference<const T> prefix(std::size_t end) const { return prefix(_data + end); } /**< @overload */
+
+        /**
+         * @brief Array suffix
+         *
+         * Equivalent to @ref ArrayReference::suffix().
+         */
+        ArrayReference<T> suffix(T* begin) {
+            return ArrayReference<T>{*this}.suffix(begin);
+        }
+        /** @overload */
+        ArrayReference<const T> suffix(const T* begin) const {
+            return ArrayReference<const T>{*this}.suffix(begin);
+        }
+        ArrayReference<T> suffix(std::size_t begin) { return suffix(_data + begin); } /**< @overload */
+        ArrayReference<const T> suffix(std::size_t begin) const { return suffix(_data + begin); } /**< @overload */
+
+        /**
          * @brief Release data storage
          *
          * Returns the data pointer and resets internal state to default.
@@ -293,6 +346,43 @@ template<class T> class ArrayReference {
         T* end() const { return _data+_size; }
         T* cend() const { return _data+_size; }         /**< @overload */
 
+        /**
+         * @brief Array slice
+         *
+         * Both arguments are expected to be in range.
+         */
+        ArrayReference<T> slice(T* begin, T* end) const;
+
+        /** @overload */
+        ArrayReference<T> slice(std::size_t begin, std::size_t end) {
+            return slice(_data + begin, _data + end);
+        }
+
+        /**
+         * @brief Array prefix
+         *
+         * Equivalent to `data.slice(data.begin(), end)`. If @p end is
+         * `nullptr`, returns zero-sized `nullptr` array.
+         */
+        ArrayReference<T> prefix(T* end) const {
+            if(!end) return nullptr;
+            return slice(_data, end);
+        }
+        ArrayReference<T> prefix(std::size_t end) const { return prefix(_data + end); } /**< @overload */
+
+        /**
+         * @brief Array suffix
+         *
+         * Equivalent to `data.slice(begin, data.end())`. If @p begin is
+         * `nullptr` and the original array isn't, returns zero-sized `nullptr`
+         * array.
+         */
+        ArrayReference<T> suffix(T* begin) const {
+            if(_data && !begin) return nullptr;
+            return slice(begin, _data + _size);
+        }
+        ArrayReference<T> suffix(std::size_t begin) const { return suffix(_data + begin); } /**< @overload */
+
     private:
         T* _data;
         std::size_t _size;
@@ -395,6 +485,12 @@ template<class T> inline T* Array<T>::release() {
     _data = nullptr;
     _size = 0;
     return data;
+}
+
+template<class T> ArrayReference<T> ArrayReference<T>::slice(T* begin, T* end) const {
+    CORRADE_ASSERT(_data <= begin && begin <= end && end <= _data + _size,
+        "Containers::ArrayReference::slice(): slice out of range", nullptr);
+    return ArrayReference<T>{begin, std::size_t(end - begin)};
 }
 
 }}

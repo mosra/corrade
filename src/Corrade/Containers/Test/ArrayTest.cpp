@@ -47,6 +47,8 @@ class ArrayTest: public TestSuite::Tester {
         void access();
         void rvalueArrayAccess();
         void rangeBasedFor();
+
+        void slice();
         void release();
 };
 
@@ -68,6 +70,8 @@ ArrayTest::ArrayTest() {
               &ArrayTest::access,
               &ArrayTest::rvalueArrayAccess,
               &ArrayTest::rangeBasedFor,
+
+              &ArrayTest::slice,
               &ArrayTest::release});
 }
 
@@ -226,6 +230,47 @@ void ArrayTest::rangeBasedFor() {
     CORRADE_COMPARE(a[2], 3);
     CORRADE_COMPARE(a[3], 3);
     CORRADE_COMPARE(a[4], 3);
+}
+
+void ArrayTest::slice() {
+    Array a = Array::from(1, 2, 3, 4, 5);
+    const Array ac = Array::from(1, 2, 3, 4, 5);
+
+    ArrayReference<int> b = a.slice(1, 4);
+    CORRADE_COMPARE(b.size(), 3);
+    CORRADE_COMPARE(b[0], 2);
+    CORRADE_COMPARE(b[1], 3);
+    CORRADE_COMPARE(b[2], 4);
+
+    ArrayReference<const int> bc = ac.slice(1, 4);
+    CORRADE_COMPARE(bc.size(), 3);
+    CORRADE_COMPARE(bc[0], 2);
+    CORRADE_COMPARE(bc[1], 3);
+    CORRADE_COMPARE(bc[2], 4);
+
+    ArrayReference<int> c = a.prefix(3);
+    CORRADE_COMPARE(c.size(), 3);
+    CORRADE_COMPARE(c[0], 1);
+    CORRADE_COMPARE(c[1], 2);
+    CORRADE_COMPARE(c[2], 3);
+
+    ArrayReference<const int> cc = ac.prefix(3);
+    CORRADE_COMPARE(cc.size(), 3);
+    CORRADE_COMPARE(cc[0], 1);
+    CORRADE_COMPARE(cc[1], 2);
+    CORRADE_COMPARE(cc[2], 3);
+
+    ArrayReference<int> d = a.suffix(2);
+    CORRADE_COMPARE(d.size(), 3);
+    CORRADE_COMPARE(d[0], 3);
+    CORRADE_COMPARE(d[1], 4);
+    CORRADE_COMPARE(d[2], 5);
+
+    ArrayReference<const int> dc = ac.suffix(2);
+    CORRADE_COMPARE(dc.size(), 3);
+    CORRADE_COMPARE(dc[0], 3);
+    CORRADE_COMPARE(dc[1], 4);
+    CORRADE_COMPARE(dc[2], 5);
 }
 
 void ArrayTest::release() {
