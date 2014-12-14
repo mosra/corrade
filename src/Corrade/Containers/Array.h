@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Containers::Array
+ * @brief Class @ref Corrade::Containers::Array, @ref Corrade::Containers::ArrayReference
  */
 
 #include <type_traits>
