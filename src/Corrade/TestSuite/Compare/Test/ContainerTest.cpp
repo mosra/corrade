@@ -25,6 +25,7 @@
 
 #include <sstream>
 
+#include "Corrade/Containers/Array.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 
@@ -39,6 +40,8 @@ class ContainerTest: public Tester {
         void outputExpectedSmaller();
         void output();
         void sorted();
+
+        void nonCopyableArray();
 };
 
 ContainerTest::ContainerTest() {
@@ -46,7 +49,9 @@ ContainerTest::ContainerTest() {
               &ContainerTest::outputActualSmaller,
               &ContainerTest::outputExpectedSmaller,
               &ContainerTest::output,
-              &ContainerTest::sorted});
+              &ContainerTest::sorted,
+
+              &ContainerTest::nonCopyableArray});
 }
 
 void ContainerTest::same() {
@@ -110,6 +115,16 @@ void ContainerTest::sorted() {
     CORRADE_VERIFY((Comparator<Compare::SortedContainer<std::vector<int>>>()(a, b)));
     CORRADE_VERIFY((Comparator<Compare::SortedContainer<std::vector<int>>>()(b, a)));
     CORRADE_VERIFY((!Comparator<Compare::SortedContainer<std::vector<int>>>()(a, c)));
+}
+
+void ContainerTest::nonCopyableArray() {
+    const auto a = Containers::Array<int>::from(1, 2, 3, 4, 5);
+    const auto b = Containers::Array<int>::from(1, 2, 3, 4, 5);
+    const auto c = Containers::Array<int>::from(1, 2, 3, 5, 5);
+
+    CORRADE_VERIFY(Comparator<Compare::Container<Containers::Array<int>>>()(a, a));
+    CORRADE_VERIFY(Comparator<Compare::Container<Containers::Array<int>>>()(a, b));
+    CORRADE_VERIFY(!Comparator<Compare::Container<Containers::Array<int>>>()(a, c));
 }
 
 }}}}
