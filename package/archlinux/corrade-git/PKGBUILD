@@ -1,6 +1,6 @@
 # Author: mosra <mosra@centrum.cz>
 pkgname=corrade-git
-pkgver=20130819
+pkgver=snapshot.2014.06.r67.g7d38a8a
 pkgrel=1
 pkgdesc="C++11 multiplatform utility library (Git version)"
 arch=('i686' 'x86_64')
@@ -9,32 +9,19 @@ license=('MIT')
 makedepends=('cmake' 'git')
 provides=('corrade')
 conflicts=('corrade')
-
-_gitroot="git://github.com/mosra/corrade.git"
-_gitname="corrade"
+source=("git+git://github.com/mosra/corrade.git")
+sha1sums=('SKIP')
 
 pkgver() {
-    date +%Y%m%d
+    cd "$srcdir/${pkgname%-git}"
+    git describe --long | sed -r 's/([^-]*-g)/r\1/;s/-/./g'
 }
 
 build() {
-    cd "$srcdir"
-    msg "Connecting to Git server..."
-
-    if [ -d $_gitname ] ; then
-        cd $_gitname && git pull origin
-        msg "The local files are updated."
-    else
-        git clone $_gitroot $_gitname
-    fi
-
-    msg "Git checkout done."
-    msg "Starting make..."
-
     mkdir -p "$srcdir/build"
     cd "$srcdir/build"
 
-    cmake ../$_gitname \
+    cmake "$srcdir/${pkgname%-git}" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr
     make
