@@ -43,6 +43,8 @@ class LinkedListTest: public TestSuite::Tester {
         void clear();
         void moveList();
         void moveItem();
+
+        void rangeBasedFor();
 };
 
 class Item: public LinkedListItem<Item> {
@@ -72,7 +74,9 @@ LinkedListTest::LinkedListTest() {
               &LinkedListTest::cutFromOtherList,
               &LinkedListTest::clear,
               &LinkedListTest::moveList,
-              &LinkedListTest::moveItem});
+              &LinkedListTest::moveItem,
+
+              &LinkedListTest::rangeBasedFor});
 }
 
 void LinkedListTest::listBackReference() {
@@ -376,6 +380,27 @@ void LinkedListTest::moveItem() {
     CORRADE_VERIFY(list.last() == &item5);
 
     list.cut(&item5);
+}
+
+void LinkedListTest::rangeBasedFor() {
+    LinkedList list;
+    Item item;
+    Item item2;
+    Item item3;
+    list.insert(&item);
+    list.insert(&item2);
+    list.insert(&item3);
+
+    {
+        std::vector<Item*> items;
+        for(auto&& i: list) items.push_back(&i);
+        CORRADE_COMPARE(items, (std::vector<Item*>{&item, &item2, &item3}));
+    } {
+        const LinkedList& clist = list;
+        std::vector<const Item*> items;
+        for(auto&& i: clist) items.push_back(&i);
+        CORRADE_COMPARE(items, (std::vector<const Item*>{&item, &item2, &item3}));
+    }
 }
 
 }}}

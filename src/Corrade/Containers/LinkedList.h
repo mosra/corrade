@@ -64,7 +64,14 @@ list.insert(&c);
 list.cut(&b);
 @endcode
 
-Traversing through the list is done like in the following code. It is also
+Traversing through the list can be done using range-based for:
+@code
+for(Object& o: list) {
+    // ...
+}
+@endcode
+
+Or, if you need more flexibility, like in the following code. It is also
 possible to go in reverse order using @ref last() and
 @ref LinkedListItem::previous().
 @code
@@ -127,6 +134,24 @@ class Object: private LinkedListItem<Object, ObjectGroup> {
 */
 template<class T> class LinkedList {
     public:
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        template<class U> class Iterator {
+            public:
+                constexpr /*implicit*/ Iterator(U* item): _item{item} {}
+
+                constexpr U& operator*() const { return *_item; }
+                constexpr bool operator!=(const Iterator& other) const { return _item != other._item; }
+
+                Iterator& operator++() {
+                    _item = _item->_next;
+                    return *this;
+                }
+
+            private:
+                U* _item;
+        };
+        #endif
+
         /**
          * @brief Default constructor
          *
@@ -409,6 +434,14 @@ template<class Derived, class List> LinkedListItem<Derived, List>& LinkedListIte
 
     return *this;
 }
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+template<class T> LinkedList<T>::Iterator<T> begin(LinkedList<T>& list) { return list.first(); }
+template<class T> constexpr LinkedList<T>::Iterator<const T> begin(const LinkedList<T>& list) { return list.first(); }
+
+template<class T> LinkedList<T>::Iterator<T> end(LinkedList<T>&) { return nullptr; }
+template<class T> constexpr LinkedList<T>::Iterator<const T> end(const LinkedList<T>&) { return nullptr; }
+#endif
 
 }}
 
