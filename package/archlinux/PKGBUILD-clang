@@ -10,17 +10,19 @@ makedepends=('cmake' 'ninja' 'clang')
 options=(!strip)
 provides=('corrade-git')
 
+_rootdir=$startdir/../../
+
 build() {
-    if [ ! -d "$startdir/build-clang" ] ; then
-        mkdir "$startdir/build-clang"
-        cd "$startdir/build-clang"
+    if [ ! -d "$_rootdir/build-clang" ] ; then
+        mkdir "$_rootdir/build-clang"
+        cd "$_rootdir/build-clang"
 
         cmake .. \
             -DCMAKE_CXX_COMPILER=clang++ \
             -G Ninja
     fi
 
-    cd "$startdir/build-clang"
+    cd "$_rootdir/build-clang"
 
     cmake .. \
         -DCMAKE_BUILD_TYPE=Debug \
@@ -30,11 +32,11 @@ build() {
 }
 
 check() {
-    cd "$startdir/build-clang"
+    cd "$_rootdir/build-clang"
     ctest --output-on-failure
 }
 
 package() {
-    cd "$startdir/build-clang"
+    cd "$_rootdir/build-clang"
     DESTDIR="$pkgdir/" ninja install
 }

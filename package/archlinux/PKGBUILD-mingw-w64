@@ -10,9 +10,11 @@ depends=('mingw-w64-crt')
 makedepends=('mingw-w64-gcc' 'cmake' 'ninja' 'corrade')
 options=(!buildflags !strip)
 
+_rootdir=$startdir/../../
+
 build() {
-    mkdir -p "$startdir/build-mingw-w64-32"
-    cd "$startdir/build-mingw-w64-32"
+    mkdir -p "$_rootdir/build-mingw-w64-32"
+    cd "$_rootdir/build-mingw-w64-32"
 
     cmake .. \
         -DCMAKE_TOOLCHAIN_FILE=../toolchains/archlinux/basic-mingw-w64-32.cmake \
@@ -22,8 +24,8 @@ build() {
         -G Ninja
     ninja
 
-    mkdir -p "$startdir/build-mingw-w64-64"
-    cd "$startdir/build-mingw-w64-64"
+    mkdir -p "$_rootdir/build-mingw-w64-64"
+    cd "$_rootdir/build-mingw-w64-64"
 
     cmake .. \
         -DCMAKE_TOOLCHAIN_FILE=../toolchains/archlinux/basic-mingw-w64-64.cmake \
@@ -35,9 +37,9 @@ build() {
 }
 
 package() {
-    cd "$startdir/build-mingw-w64-32"
+    cd "$_rootdir/build-mingw-w64-32"
     DESTDIR="$pkgdir/" ninja install/strip
 
-    cd "$startdir/build-mingw-w64-64"
+    cd "$_rootdir/build-mingw-w64-64"
     DESTDIR="$pkgdir/" ninja install/strip
 }
