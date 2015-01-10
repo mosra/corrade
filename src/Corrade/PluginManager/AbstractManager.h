@@ -296,7 +296,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * If the plugin has any dependencies, they are recursively processed
          * before loading given plugin.
          *
-         * @see @ref unload(), @ref loadState()
+         * @see @ref unload(), @ref loadState(), @ref Manager::instance(),
+         *      @ref Manager::loadAndInstantiate()
          * @partialsupport Only static plugins are supported in
          *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
          *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".

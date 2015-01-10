@@ -66,13 +66,26 @@ template<class T> class Manager: public AbstractManager {
          * @brief Plugin instance
          *
          * Returns new instance of given plugin. The plugin must be
-         * already successfully loaded by this manager.
-         * @see @ref AbstractManager::loadState() "loadState()",
+         * already successfully loaded by this manager. The returned value is
+         * never `nullptr`.
+         * @see @ref loadAndInstantiate(),
+         *      @ref AbstractManager::loadState() "loadState()",
          *      @ref AbstractManager::load() "load()"
          */
         std::unique_ptr<T> instance(const std::string& plugin) {
             /** @todo C++14: `std::make_unique()` */
             return std::unique_ptr<T>(static_cast<T*>(instanceInternal(plugin)));
+        }
+
+        /**
+         * @brief Load and instantiate plugin
+         *
+         * Convenience alternative to calling both @ref load() and
+         * @ref instance(). If loading fails, `nullptr` is returned.
+         */
+        std::unique_ptr<T> loadAndInstantiate(const std::string& plugin) {
+            if(!(load(plugin) & LoadState::Loaded)) return nullptr;
+            return instance(plugin);
         }
 };
 
