@@ -24,9 +24,7 @@ DEPEND="${RDEPEND}"
 src_configure() {
 	local mycmakeargs=(
 		-DCMAKE_INSTALL_PREFIX="${EPREFIX}/usr"
-		-DCMAKE_BUILD_TYPE=Debug \
-		-DBUILD_TESTS=TRUE \
-		-DWITH_FIND_MODULE=TRUE
+		-DCMAKE_BUILD_TYPE=Release
 	)
 	cmake-utils_src_configure
 }
