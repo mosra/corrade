@@ -40,6 +40,7 @@ and add tester functions to it.
 In constructor we register our test cases:
 @skip MyTest::MyTest
 @until }
+@until }
 
 Now we implement our test cases. The simplest macro is @ref CORRADE_VERIFY(),
 which only verifies that expression is true, if not, it exits current test case
