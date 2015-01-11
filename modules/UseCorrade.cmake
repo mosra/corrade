@@ -78,6 +78,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCH
     if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
         # TODO: use -std=c++11 when we don't have to maintain compatibility
         # with anything older than GCC 4.7
+        # TODO: CMake 3.1 has CMAKE_CXX_STANDARD and CMAKE_CXX_STANDARD_REQUIRED
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
     endif()
 
