@@ -130,7 +130,7 @@ elseif(MSVC)
 endif()
 
 # Use C++11-enabled libcxx on OSX
-if(CORRADE_TARGET_APPLE AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?Clang")
+if(CORRADE_TARGET_APPLE AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?Clang" AND NOT CMAKE_CXX_FLAGS MATCHES "-stdlib=")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lc++")
 endif()
