@@ -32,20 +32,19 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class DebugTest: public TestSuite::Tester {
-    public:
-        DebugTest();
+struct DebugTest: TestSuite::Tester {
+    explicit DebugTest();
 
-        void debug();
-        void boolean();
-        void chars();
-        void unicode();
-        void custom();
-        void flags();
+    void debug();
+    void boolean();
+    void chars();
+    void unicode();
+    void custom();
+    void flags();
 
-        void iterable();
-        void ostreamFallback();
-        void ostreamFallbackPriority();
+    void iterable();
+    void ostreamFallback();
+    void ostreamFallbackPriority();
 };
 
 DebugTest::DebugTest() {

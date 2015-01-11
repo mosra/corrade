@@ -30,16 +30,15 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class HashDigestTest: public TestSuite::Tester {
-    public:
-        HashDigestTest();
+struct HashDigestTest: TestSuite::Tester {
+    explicit HashDigestTest();
 
-        void constructEmpty();
-        void constructBytes();
-        void constructByteArray();
-        void constructHexString();
+    void constructEmpty();
+    void constructBytes();
+    void constructByteArray();
+    void constructHexString();
 
-        void debug();
+    void debug();
 };
 
 HashDigestTest::HashDigestTest() {

@@ -29,21 +29,20 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class StringTest: public TestSuite::Tester {
-    public:
-        StringTest();
+struct StringTest: TestSuite::Tester {
+    explicit StringTest();
 
-        void fromArray();
-        void trim();
-        void split();
-        void splitMultipleCharacters();
-        void join();
-        void lowercase();
-        void uppercase();
-        void whitespace();
+    void fromArray();
+    void trim();
+    void split();
+    void splitMultipleCharacters();
+    void join();
+    void lowercase();
+    void uppercase();
+    void whitespace();
 
-        void beginsWith();
-        void endsWith();
+    void beginsWith();
+    void endsWith();
 };
 
 StringTest::StringTest() {

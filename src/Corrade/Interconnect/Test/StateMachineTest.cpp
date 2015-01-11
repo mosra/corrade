@@ -30,11 +30,10 @@
 
 namespace Corrade { namespace Interconnect { namespace Test {
 
-class StateMachineTest: public TestSuite::Tester {
-    public:
-        explicit StateMachineTest();
+struct StateMachineTest: TestSuite::Tester {
+    explicit StateMachineTest();
 
-        void test();
+    void test();
 };
 
 StateMachineTest::StateMachineTest() {

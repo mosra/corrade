@@ -32,33 +32,32 @@
 
 namespace Corrade { namespace Interconnect { namespace Test {
 
-class Test: public TestSuite::Tester {
-    public:
-        Test();
+struct Test: TestSuite::Tester {
+    explicit Test();
 
-        void signalData();
+    void signalData();
 
-        void connect();
+    void connect();
 
-        void disconnect();
-        void disconnectSignal();
-        void disconnectEmitter();
-        void disconnectReceiver();
+    void disconnect();
+    void disconnectSignal();
+    void disconnectEmitter();
+    void disconnectReceiver();
 
-        void destroyEmitter();
-        void destroyReceiver();
+    void destroyEmitter();
+    void destroyReceiver();
 
-        void emit();
-        void emitterSubclass();
-        void receiverSubclass();
-        void slotInReceiverBase();
-        void virtualSlot();
-        void templatedSignal();
+    void emit();
+    void emitterSubclass();
+    void receiverSubclass();
+    void slotInReceiverBase();
+    void virtualSlot();
+    void templatedSignal();
 
-        void changeConnectionsInSlot();
-        void deleteReceiverInSlot();
+    void changeConnectionsInSlot();
+    void deleteReceiverInSlot();
 
-        void function();
+    void function();
 };
 
 class Postman: public Interconnect::Emitter {

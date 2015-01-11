@@ -34,13 +34,11 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class TypeTraitsTest: public TestSuite::Tester {
-    public:
-        explicit TypeTraitsTest();
+struct TypeTraitsTest: TestSuite::Tester {
+    explicit TypeTraitsTest();
 
-        void hasType();
-
-        void isIterable();
+    void hasType();
+    void isIterable();
 };
 
 TypeTraitsTest::TypeTraitsTest() {

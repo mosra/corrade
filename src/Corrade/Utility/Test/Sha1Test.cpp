@@ -28,14 +28,13 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class Sha1Test: public TestSuite::Tester {
-    public:
-        Sha1Test();
+struct Sha1Test: TestSuite::Tester {
+    explicit Sha1Test();
 
-        void emptyString();
-        void exact64bytes();
-        void exactOneBlockPadding();
-        void twoBlockPadding();
+    void emptyString();
+    void exact64bytes();
+    void exactOneBlockPadding();
+    void twoBlockPadding();
 };
 
 Sha1Test::Sha1Test() {

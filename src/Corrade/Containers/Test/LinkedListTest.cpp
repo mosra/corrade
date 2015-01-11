@@ -30,21 +30,20 @@
 
 namespace Corrade { namespace Containers { namespace Test {
 
-class LinkedListTest: public TestSuite::Tester {
-    public:
-        LinkedListTest();
+struct LinkedListTest: TestSuite::Tester {
+    explicit LinkedListTest();
 
-        void listBackReference();
-        void insert();
-        void insertFromOtherList();
-        void insertBeforeFromOtherList();
-        void cut();
-        void cutFromOtherList();
-        void clear();
-        void moveList();
-        void moveItem();
+    void listBackReference();
+    void insert();
+    void insertFromOtherList();
+    void insertBeforeFromOtherList();
+    void cut();
+    void cutFromOtherList();
+    void clear();
+    void moveList();
+    void moveItem();
 
-        void rangeBasedFor();
+    void rangeBasedFor();
 };
 
 class Item: public LinkedListItem<Item> {

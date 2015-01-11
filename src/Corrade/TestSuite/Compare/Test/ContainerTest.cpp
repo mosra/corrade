@@ -31,17 +31,16 @@
 
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test {
 
-class ContainerTest: public Tester {
-    public:
-        ContainerTest();
+struct ContainerTest: Tester {
+    explicit ContainerTest();
 
-        void same();
-        void outputActualSmaller();
-        void outputExpectedSmaller();
-        void output();
-        void sorted();
+    void same();
+    void outputActualSmaller();
+    void outputExpectedSmaller();
+    void output();
+    void sorted();
 
-        void nonCopyableArray();
+    void nonCopyableArray();
 };
 
 ContainerTest::ContainerTest() {

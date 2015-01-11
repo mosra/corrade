@@ -28,15 +28,14 @@
 
 namespace Corrade { namespace Examples {
 
-class MyTest: public TestSuite::Tester {
-    public:
-        MyTest();
+struct MyTest: TestSuite::Tester {
+    explicit MyTest();
 
-        void commutativity();
-        void associativity();
-        void pi();
-        void sin();
-        void bigEndian();
+    void commutativity();
+    void associativity();
+    void pi();
+    void sin();
+    void bigEndian();
 };
 
 MyTest::MyTest() {

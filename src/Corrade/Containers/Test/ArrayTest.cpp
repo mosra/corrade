@@ -28,28 +28,27 @@
 
 namespace Corrade { namespace Containers { namespace Test {
 
-class ArrayTest: public TestSuite::Tester {
-    public:
-        explicit ArrayTest();
+struct ArrayTest: TestSuite::Tester {
+    explicit ArrayTest();
 
-        void constructEmpty();
-        void constructNullptr();
-        void construct();
-        void constructMove();
-        void constructFrom();
-        void constructFromChar();
-        void constructZeroInitialized();
+    void constructEmpty();
+    void constructNullptr();
+    void construct();
+    void constructMove();
+    void constructFrom();
+    void constructFromChar();
+    void constructZeroInitialized();
 
-        void boolConversion();
-        void pointerConversion();
+    void boolConversion();
+    void pointerConversion();
 
-        void emptyCheck();
-        void access();
-        void rvalueArrayAccess();
-        void rangeBasedFor();
+    void emptyCheck();
+    void access();
+    void rvalueArrayAccess();
+    void rangeBasedFor();
 
-        void slice();
-        void release();
+    void slice();
+    void release();
 };
 
 typedef Containers::Array<int> Array;

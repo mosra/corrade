@@ -35,18 +35,17 @@ using Corrade::Utility::Directory;
 
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test {
 
-class FileToStringTest: public Tester {
-    public:
-        FileToStringTest();
+struct FileToStringTest: Tester {
+    explicit FileToStringTest();
 
-        void same();
-        void empty();
+    void same();
+    void empty();
 
-        void notFound();
+    void notFound();
 
-        void outputActualSmaller();
-        void outputExpectedSmaller();
-        void output();
+    void outputActualSmaller();
+    void outputExpectedSmaller();
+    void output();
 };
 
 FileToStringTest::FileToStringTest() {

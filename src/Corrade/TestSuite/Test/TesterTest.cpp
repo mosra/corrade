@@ -60,26 +60,25 @@ class StringLength {
 
 namespace Test {
 
-class Test: public Tester {
-    public:
-        Test();
+struct Test: Tester {
+    Test();
 
-        void noChecks();
-        void trueExpression();
-        void falseExpression();
-        void equal();
-        void nonEqual();
-        void expectFail();
-        void unexpectedPassExpression();
-        void unexpectedPassEqual();
+    void noChecks();
+    void trueExpression();
+    void falseExpression();
+    void equal();
+    void nonEqual();
+    void expectFail();
+    void unexpectedPassExpression();
+    void unexpectedPassEqual();
 
-        void compareAs();
-        void compareAsFail();
-        void compareWith();
-        void compareWithFail();
-        void compareImplicitConversionFail();
+    void compareAs();
+    void compareAsFail();
+    void compareWith();
+    void compareWithFail();
+    void compareImplicitConversionFail();
 
-        void skip();
+    void skip();
 };
 
 Test::Test() {
@@ -207,30 +206,30 @@ void TesterTest::test() {
         "Starting TesterTest::Test with 14 test cases...\n"
         "     ?: <unknown>()\n"
         "    OK: trueExpression()\n"
-        "  FAIL: falseExpression() at here.cpp on line 113 \n"
+        "  FAIL: falseExpression() at here.cpp on line 112 \n"
         "        Expression 5 != 5 failed.\n"
         "    OK: equal()\n"
-        "  FAIL: nonEqual() at here.cpp on line 123 \n"
+        "  FAIL: nonEqual() at here.cpp on line 122 \n"
         "        Values a and b are not the same, actual is\n"
         "        5 \n"
         "        but expected\n"
         "        3\n"
-        " XFAIL: expectFail() at here.cpp on line 129 \n"
+        " XFAIL: expectFail() at here.cpp on line 128 \n"
         "        The world is not mad yet. 2 + 2 and 5 are not equal.\n"
-        " XFAIL: expectFail() at here.cpp on line 130 \n"
+        " XFAIL: expectFail() at here.cpp on line 129 \n"
         "        The world is not mad yet. Expression false == true failed.\n"
         "    OK: expectFail()\n"
-        " XPASS: unexpectedPassExpression() at here.cpp on line 138 \n"
+        " XPASS: unexpectedPassExpression() at here.cpp on line 137 \n"
         "        Expression true == true was expected to fail.\n"
-        " XPASS: unexpectedPassEqual() at here.cpp on line 143 \n"
+        " XPASS: unexpectedPassEqual() at here.cpp on line 142 \n"
         "        2 + 2 and 4 are not expected to be equal.\n"
         "    OK: compareAs()\n"
-        "  FAIL: compareAsFail() at here.cpp on line 151 \n"
+        "  FAIL: compareAsFail() at here.cpp on line 150 \n"
         "        Length of actual \"meh\" doesn't match length of expected \"hello\" with epsilon 0\n"
         "    OK: compareWith()\n"
-        "  FAIL: compareWithFail() at here.cpp on line 159 \n"
+        "  FAIL: compareWithFail() at here.cpp on line 158 \n"
         "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
-        "  FAIL: compareImplicitConversionFail() at here.cpp on line 164 \n"
+        "  FAIL: compareImplicitConversionFail() at here.cpp on line 163 \n"
         "        Values \"holla\" and hello are not the same, actual is\n"
         "        holla \n"
         "        but expected\n"

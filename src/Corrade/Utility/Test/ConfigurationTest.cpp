@@ -36,35 +36,34 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class ConfigurationTest: public TestSuite::Tester {
-    public:
-        ConfigurationTest();
+struct ConfigurationTest: TestSuite::Tester {
+    explicit ConfigurationTest();
 
-        void parse();
-        void parseHierarchic();
+    void parse();
+    void parseHierarchic();
 
-        void groupIndex();
-        void valueIndex();
+    void groupIndex();
+    void valueIndex();
 
-        void names();
+    void names();
 
-        void invalid();
-        void readonly();
-        void nonexistentFile();
-        void truncate();
+    void invalid();
+    void readonly();
+    void nonexistentFile();
+    void truncate();
 
-        void whitespaces();
-        void types();
-        void typesScientific();
-        void eol();
-        void stripComments();
+    void whitespaces();
+    void types();
+    void typesScientific();
+    void eol();
+    void stripComments();
 
-        void multiLineValue();
-        void multiLineValueCrlf();
+    void multiLineValue();
+    void multiLineValueCrlf();
 
-        void standaloneGroup();
-        void copy();
-        void move();
+    void standaloneGroup();
+    void copy();
+    void move();
 };
 
 ConfigurationTest::ConfigurationTest() {

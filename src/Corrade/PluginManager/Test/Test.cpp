@@ -45,40 +45,39 @@ static void initialize() {
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-class Test: public TestSuite::Tester {
-    public:
-        Test();
+struct Test: TestSuite::Tester {
+    explicit Test();
 
-        void nameList();
-        void wrongPluginVersion();
-        void wrongPluginInterface();
-        void wrongMetadataFile();
-        void loadNonexistent();
-        void unloadNonexistent();
+    void nameList();
+    void wrongPluginVersion();
+    void wrongPluginInterface();
+    void wrongMetadataFile();
+    void loadNonexistent();
+    void unloadNonexistent();
 
-        void staticPlugin();
-        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-        void dynamicPlugin();
-        #endif
-        void staticPluginInitFini();
-        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-        void dynamicPluginInitFini();
-        #endif
+    void staticPlugin();
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+    void dynamicPlugin();
+    #endif
+    void staticPluginInitFini();
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+    void dynamicPluginInitFini();
+    #endif
 
-        void deletable();
-        void hierarchy();
-        void crossManagerDependencies();
-        void unresolvedDependencies();
+    void deletable();
+    void hierarchy();
+    void crossManagerDependencies();
+    void unresolvedDependencies();
 
-        void reloadPluginDirectory();
+    void reloadPluginDirectory();
 
-        void staticProvides();
-        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-        void dynamicProvides();
-        void dynamicProvidesDependency();
-        #endif
+    void staticProvides();
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+    void dynamicProvides();
+    void dynamicProvidesDependency();
+    #endif
 
-        void debug();
+    void debug();
 };
 
 Test::Test() {

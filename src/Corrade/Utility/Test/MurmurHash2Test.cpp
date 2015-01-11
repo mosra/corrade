@@ -28,13 +28,12 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class MurmurHash2Test: public TestSuite::Tester {
-    public:
-        MurmurHash2Test();
+struct MurmurHash2Test: TestSuite::Tester {
+    explicit MurmurHash2Test();
 
-        void test32();
-        void test64();
-        void constructor();
+    void test32();
+    void test64();
+    void constructor();
 };
 
 MurmurHash2Test::MurmurHash2Test() {

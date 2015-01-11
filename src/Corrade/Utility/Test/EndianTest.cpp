@@ -29,13 +29,12 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class EndianTest: public TestSuite::Tester {
-    public:
-        EndianTest();
+struct EndianTest: TestSuite::Tester {
+    explicit EndianTest();
 
-        void endianness();
-        void floats();
-        void inPlace();
+    void endianness();
+    void floats();
+    void inPlace();
 };
 
 EndianTest::EndianTest() {

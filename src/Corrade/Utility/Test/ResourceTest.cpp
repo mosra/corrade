@@ -37,32 +37,31 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class ResourceTest: public TestSuite::Tester {
-    public:
-        ResourceTest();
+struct ResourceTest: TestSuite::Tester {
+    explicit ResourceTest();
 
-        void compile();
-        void compileNothing();
-        void compileEmptyFile();
+    void compile();
+    void compileNothing();
+    void compileEmptyFile();
 
-        void compileFrom();
-        void compileFromNonexistentResource();
-        void compileFromNonexistentFile();
-        void compileFromEmptyGroup();
-        void compileFromEmptyFilename();
-        void compileFromEmptyAlias();
+    void compileFrom();
+    void compileFromNonexistentResource();
+    void compileFromNonexistentFile();
+    void compileFromEmptyGroup();
+    void compileFromEmptyFilename();
+    void compileFromEmptyAlias();
 
-        void list();
-        void get();
-        void getEmptyFile();
-        void getNonexistent();
-        void getNothing();
+    void list();
+    void get();
+    void getEmptyFile();
+    void getNonexistent();
+    void getNothing();
 
-        void overrideGroup();
-        void overrideGroupFallback();
-        void overrideNonexistentFile();
-        void overrideNonexistentGroup();
-        void overrideDifferentGroup();
+    void overrideGroup();
+    void overrideGroupFallback();
+    void overrideNonexistentFile();
+    void overrideNonexistentGroup();
+    void overrideDifferentGroup();
 };
 
 ResourceTest::ResourceTest() {

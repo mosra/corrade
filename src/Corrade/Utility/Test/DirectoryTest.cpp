@@ -33,29 +33,28 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class DirectoryTest: public Corrade::TestSuite::Tester {
-    public:
-        DirectoryTest();
+struct DirectoryTest: TestSuite::Tester {
+    explicit DirectoryTest();
 
-        void path();
-        void filename();
-        void join();
-        #ifdef CORRADE_TARGET_WINDOWS
-        void joinWindows();
-        #endif
-        void fileExists();
-        void remove();
-        void moveFile();
-        void moveDirectory();
-        void mkpath();
-        void home();
-        void configurationDir();
-        void list();
-        void listSortPrecedence();
-        void read();
-        void readEmpty();
-        void readNonSeekable();
-        void write();
+    void path();
+    void filename();
+    void join();
+    #ifdef CORRADE_TARGET_WINDOWS
+    void joinWindows();
+    #endif
+    void fileExists();
+    void remove();
+    void moveFile();
+    void moveDirectory();
+    void mkpath();
+    void home();
+    void configurationDir();
+    void list();
+    void listSortPrecedence();
+    void read();
+    void readEmpty();
+    void readNonSeekable();
+    void write();
 };
 
 DirectoryTest::DirectoryTest() {

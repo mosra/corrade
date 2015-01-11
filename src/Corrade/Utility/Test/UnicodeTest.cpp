@@ -31,15 +31,14 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class UnicodeTest: public TestSuite::Tester {
-    public:
-        explicit UnicodeTest();
+struct UnicodeTest: TestSuite::Tester {
+    explicit UnicodeTest();
 
-        void nextUtf8();
-        void nextUtf8Error();
-        void nextUtf8Empty();
+    void nextUtf8();
+    void nextUtf8Error();
+    void nextUtf8Empty();
 
-        void utf8utf32();
+    void utf8utf32();
 };
 
 UnicodeTest::UnicodeTest() {

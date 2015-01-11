@@ -34,7 +34,7 @@ process code with meta compiler.
 First step for creating unit test is to subclass @ref TestSuite::Tester class
 and add tester functions to it.
 @dontinclude test/MyTest.cpp
-@skip class MyTest
+@skip struct MyTest
 @until };
 
 In constructor we register our test cases:

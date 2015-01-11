@@ -28,16 +28,15 @@
 
 namespace Corrade { namespace Containers { namespace Test {
 
-class EnumSetTest: public TestSuite::Tester {
-    public:
-        EnumSetTest();
+struct EnumSetTest: TestSuite::Tester {
+    explicit EnumSetTest();
 
-        void construct();
-        void operatorOr();
-        void operatorAnd();
-        void operatorBool();
-        void operatorInverse();
-        void compare();
+    void construct();
+    void operatorOr();
+    void operatorAnd();
+    void operatorBool();
+    void operatorInverse();
+    void compare();
 };
 
 enum class Feature: int {

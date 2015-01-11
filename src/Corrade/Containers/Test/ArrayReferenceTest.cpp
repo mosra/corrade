@@ -30,31 +30,30 @@
 
 namespace Corrade { namespace Containers { namespace Test {
 
-class ArrayReferenceTest: public TestSuite::Tester {
-    public:
-        explicit ArrayReferenceTest();
+struct ArrayReferenceTest: TestSuite::Tester {
+    explicit ArrayReferenceTest();
 
-        void constructEmpty();
-        void constructNullptr();
-        void constructNullptrSize();
-        void construct();
-        void constructFixedSize();
-        void constructArray();
+    void constructEmpty();
+    void constructNullptr();
+    void constructNullptrSize();
+    void construct();
+    void constructFixedSize();
+    void constructArray();
 
-        void boolConversion();
-        void pointerConversion();
+    void boolConversion();
+    void pointerConversion();
 
-        void emptyCheck();
-        void access();
-        void rangeBasedFor();
+    void emptyCheck();
+    void access();
+    void rangeBasedFor();
 
-        void sliceInvalid();
-        void sliceNullptr();
-        void slice();
+    void sliceInvalid();
+    void sliceNullptr();
+    void slice();
 
-        void constReference();
-        void voidConstruction();
-        void voidConversion();
+    void constReference();
+    void voidConstruction();
+    void voidConversion();
 };
 
 typedef Containers::Array<int> Array;

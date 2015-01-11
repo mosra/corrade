@@ -36,11 +36,10 @@ static void initializeStaticResource() {
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class ResourceStaticTest: public TestSuite::Tester {
-    public:
-        ResourceStaticTest();
+struct ResourceStaticTest: TestSuite::Tester {
+    explicit ResourceStaticTest();
 
-        void get();
+    void get();
 };
 
 ResourceStaticTest::ResourceStaticTest() {
