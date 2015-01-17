@@ -261,9 +261,17 @@ printArray(a);
 
 // Wrapping compile-time array with size information
 constexpr const int data[] = {5, 17, -36, 185};
-Containers::ArrayReference<const int> b =
-    {data, std::extent<decltype(data)>()}; // b.size() == 4
+Containers::ArrayReference<const int> b = data; // b.size() == 4
+
+// Wrapping general array with size information
+const int* data2;
+Containers::ArrayReference<const int> c{data2, 3};
 @endcode
+
+@attention Note that when using `Containers::ArrayReference<const char>`, C
+    string literals (such as `"hello"`) are implicitly convertible to it and
+    the size includes also the zero-terminator (thus in case of `"hello"` the
+    size would be 6, not 5, as one might expect).
 
 @see @ref ArrayReference<const void>
 @todo What was the reason for no const-correctness at all?
