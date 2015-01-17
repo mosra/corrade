@@ -135,21 +135,8 @@ class Object: private LinkedListItem<Object, ObjectGroup> {
 template<class T> class LinkedList {
     public:
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<class U> class Iterator {
-            public:
-                constexpr /*implicit*/ Iterator(U* item): _item{item} {}
-
-                constexpr U& operator*() const { return *_item; }
-                constexpr bool operator!=(const Iterator& other) const { return _item != other._item; }
-
-                Iterator& operator++() {
-                    _item = _item->_next;
-                    return *this;
-                }
-
-            private:
-                U* _item;
-        };
+        class Iterator;
+        class ConstIterator;
         #endif
 
         /**
@@ -436,11 +423,43 @@ template<class Derived, class List> LinkedListItem<Derived, List>& LinkedListIte
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-template<class T> LinkedList<T>::Iterator<T> begin(LinkedList<T>& list) { return list.first(); }
-template<class T> constexpr LinkedList<T>::Iterator<const T> begin(const LinkedList<T>& list) { return list.first(); }
+template<class T> class LinkedList<T>::Iterator {
+    public:
+        constexpr /*implicit*/ Iterator(T* item): _item{item} {}
 
-template<class T> LinkedList<T>::Iterator<T> end(LinkedList<T>&) { return nullptr; }
-template<class T> constexpr LinkedList<T>::Iterator<const T> end(const LinkedList<T>&) { return nullptr; }
+        constexpr T& operator*() const { return *_item; }
+        constexpr bool operator!=(const Iterator& other) const { return _item != other._item; }
+
+        Iterator& operator++() {
+            _item = _item->_next;
+            return *this;
+        }
+
+    private:
+        T* _item;
+};
+
+template<class T> class LinkedList<T>::ConstIterator {
+    public:
+        constexpr /*implicit*/ ConstIterator(const T* item): _item{item} {}
+
+        constexpr const T& operator*() const { return *_item; }
+        constexpr bool operator!=(const ConstIterator& other) const { return _item != other._item; }
+
+        ConstIterator& operator++() {
+            _item = _item->_next;
+            return *this;
+        }
+
+    private:
+        const T* _item;
+};
+
+template<class T> typename LinkedList<T>::Iterator begin(LinkedList<T>& list) { return list.first(); }
+template<class T> constexpr typename LinkedList<T>::ConstIterator begin(const LinkedList<T>& list) { return list.first(); }
+
+template<class T> typename LinkedList<T>::Iterator end(LinkedList<T>&) { return nullptr; }
+template<class T> constexpr typename LinkedList<T>::ConstIterator end(const LinkedList<T>&) { return nullptr; }
 #endif
 
 }}
