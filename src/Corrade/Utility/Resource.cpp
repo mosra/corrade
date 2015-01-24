@@ -275,7 +275,7 @@ Containers::ArrayReference<const unsigned char> Resource::getRaw(const std::stri
         /* The file is already loaded */
         auto it = _overrideGroup->data.find(filename);
         if(it != _overrideGroup->data.end())
-            return {it->second.begin(), it->second.size()};
+            return it->second;
 
         /* Load the file and save it for later use. Linear search is not an
            issue, as this shouldn't be used in production code anyway. */
@@ -299,7 +299,7 @@ Containers::ArrayReference<const unsigned char> Resource::getRaw(const std::stri
             #else
             it = _overrideGroup->data.insert(std::make_pair(filename, std::move(data))).first;
             #endif
-            return {it->second.begin(), it->second.size()};
+            return it->second;
         }
 
         /* The file was not found, fallback to compiled-in ones */
