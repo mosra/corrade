@@ -271,7 +271,7 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     return std::move(list);
 }
 
-Containers::Array<unsigned char> Directory::read(const std::string& filename) {
+Containers::Array<char> Directory::read(const std::string& filename) {
     std::ifstream file(filename, std::ifstream::binary);
     if(!file) return nullptr;
 
@@ -284,9 +284,9 @@ Containers::Array<unsigned char> Directory::read(const std::string& filename) {
        set badbit, thus zero-length files are indistinguishable from
        non-seekable ones. */
     if(file && file.tellg() != 0) {
-        Containers::Array<unsigned char> data(std::size_t(file.tellg()));
+        Containers::Array<char> data(std::size_t(file.tellg()));
         file.seekg(0, std::ios::beg);
-        file.read(reinterpret_cast<char*>(data.begin()), data.size());
+        file.read(data, data.size());
         return data;
     }
 
@@ -301,7 +301,7 @@ Containers::Array<unsigned char> Directory::read(const std::string& filename) {
         data.append(buffer.begin(), file.gcount());
     } while(file);
 
-    Containers::Array<unsigned char> out(data.size());
+    Containers::Array<char> out(data.size());
     std::copy(data.begin(), data.end(), out.begin());
 
     return out;
@@ -310,7 +310,7 @@ Containers::Array<unsigned char> Directory::read(const std::string& filename) {
 std::string Directory::readString(const std::string& filename) {
     const auto data = read(filename);
 
-    return {reinterpret_cast<const char*>(data.begin()), data.size()};
+    return {data, data.size()};
 }
 
 bool Directory::write(const std::string& filename, const Containers::ArrayReference<const void> data) {

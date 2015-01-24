@@ -36,10 +36,10 @@ namespace Corrade { namespace Utility {
 namespace Implementation {
     template<std::size_t> struct MurmurHash2;
     template<> struct CORRADE_UTILITY_EXPORT MurmurHash2<4> {
-        unsigned int operator()(unsigned int seed, const unsigned char* data, unsigned int size) const;
+        unsigned int operator()(unsigned int seed, const char* data, unsigned int size) const;
     };
     template<> struct CORRADE_UTILITY_EXPORT MurmurHash2<8> {
-        unsigned long long operator()(unsigned long long seed, const unsigned char* data, unsigned long long size) const;
+        unsigned long long operator()(unsigned long long seed, const char* data, unsigned long long size) const;
     };
 }
 
@@ -77,13 +77,13 @@ class CORRADE_UTILITY_EXPORT MurmurHash2: public AbstractHash<sizeof(std::size_t
 
         /** @copydoc operator()(const std::string&) const */
         template<std::size_t size> Digest operator()(const char(&data)[size]) const {
-            std::size_t d = Implementation::MurmurHash2<sizeof(std::size_t)>{}(_seed, reinterpret_cast<const unsigned char*>(data), size-1);
+            std::size_t d = Implementation::MurmurHash2<sizeof(std::size_t)>{}(_seed, data, size-1);
             return Digest::fromByteArray(reinterpret_cast<const char*>(&d));
         }
 
         /** @copydoc operator()(const std::string&) const */
         Digest operator()(const char* data, std::size_t size) const {
-            std::size_t d = Implementation::MurmurHash2<sizeof(std::size_t)>{}(_seed, reinterpret_cast<const unsigned char*>(data), size);
+            std::size_t d = Implementation::MurmurHash2<sizeof(std::size_t)>{}(_seed, data, size);
             return Digest::fromByteArray(reinterpret_cast<const char*>(&d));
         }
 

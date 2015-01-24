@@ -135,7 +135,7 @@ class CORRADE_UTILITY_EXPORT Resource {
          * Returns reference to data of given file in the group. The file must
          * exist. If the file is empty, returns `nullptr`.
          */
-        Containers::ArrayReference<const unsigned char> getRaw(const std::string& filename) const;
+        Containers::ArrayReference<const char> getRaw(const std::string& filename) const;
 
         /**
          * @brief Get data resource
@@ -155,7 +155,7 @@ class CORRADE_UTILITY_EXPORT Resource {
     private:
         struct CORRADE_UTILITY_LOCAL GroupData {
             std::string overrideGroup;
-            std::map<std::string, Containers::ArrayReference<const unsigned char>> resources;
+            std::map<std::string, Containers::ArrayReference<const char>> resources;
         };
 
         struct OverrideData;
@@ -164,7 +164,7 @@ class CORRADE_UTILITY_EXPORT Resource {
            fiasco" which I think currently fails only in static build */
         CORRADE_UTILITY_LOCAL static std::map<std::string, GroupData>& resources();
 
-        CORRADE_UTILITY_LOCAL static std::pair<bool, Containers::Array<unsigned char>> fileContents(const std::string& filename);
+        CORRADE_UTILITY_LOCAL static std::pair<bool, Containers::Array<char>> fileContents(const std::string& filename);
         CORRADE_UTILITY_LOCAL static std::string comment(const std::string& comment);
         CORRADE_UTILITY_LOCAL static std::string hexcode(const std::string& data);
         template<class T> static std::string numberToString(const T& number);

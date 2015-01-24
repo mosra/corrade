@@ -198,7 +198,7 @@ class CORRADE_UTILITY_EXPORT Directory {
          * Returns `nullptr` if the file can't be read.
          * @see @ref readString(), @ref fileExists(), @ref write()
          */
-        static Containers::Array<unsigned char> read(const std::string& filename);
+        static Containers::Array<char> read(const std::string& filename);
 
         /**
          * @brief Read file into string

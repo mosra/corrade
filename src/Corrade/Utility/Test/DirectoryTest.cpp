@@ -307,9 +307,9 @@ void DirectoryTest::listSortPrecedence() {
 void DirectoryTest::read() {
     /* Existing file, check if we are reading it as binary (CR+LF is not
        converted to LF) and nothing after \0 gets lost */
-    const auto data = Directory::read(Directory::join(DIRECTORY_TEST_DIR, "file"));
-    CORRADE_COMPARE(std::vector<unsigned char>(data.begin(), data.end()),
-        (std::vector<unsigned char>{0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF}));
+    CORRADE_COMPARE_AS(Directory::read(Directory::join(DIRECTORY_TEST_DIR, "file")),
+        (Containers::Array<char>::from(0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF)),
+        TestSuite::Compare::Container);
 
     /* Nonexistent file */
     const auto none = Directory::read("nonexistent");

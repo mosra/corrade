@@ -40,7 +40,7 @@ namespace Corrade { namespace Utility {
 
 struct Resource::OverrideData {
     const Configuration conf;
-    std::map<std::string, Containers::Array<unsigned char>> data;
+    std::map<std::string, Containers::Array<char>> data;
 
     explicit OverrideData(const std::string& filename): conf(filename) {}
 };
@@ -73,7 +73,7 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
         unsigned int filenamePosition = *reinterpret_cast<const unsigned int*>(_positions+i);
         unsigned int dataPosition = *reinterpret_cast<const unsigned int*>(_positions+i+size);
 
-        Containers::ArrayReference<const unsigned char> res(data+oldDataPosition, dataPosition-oldDataPosition);
+        Containers::ArrayReference<const char> res(reinterpret_cast<const char*>(data)+oldDataPosition, dataPosition-oldDataPosition);
 
         #ifndef CORRADE_GCC47_COMPATIBILITY
         groupData->second.resources.emplace(std::string(_filenames+oldFilenamePosition, filenamePosition-oldFilenamePosition), res);
@@ -125,13 +125,13 @@ std::string Resource::compileFrom(const std::string& name, const std::string& co
         }
 
         bool success;
-        Containers::Array<unsigned char> contents;
+        Containers::Array<char> contents;
         std::tie(success, contents) = fileContents(Directory::join(path, filename));
         if(!success) {
             Error() << "    Error: cannot open file" << filename << "of file" << fileData.size()+1 << "in group" << group;
             return {};
         }
-        fileData.emplace_back(std::move(alias), std::string(reinterpret_cast<char*>(contents.begin()), contents.size()));
+        fileData.emplace_back(std::move(alias), std::string{contents, contents.size()});
     }
 
     return compile(name, group, fileData);
@@ -267,7 +267,7 @@ std::vector<std::string> Resource::list() const {
     return result;
 }
 
-Containers::ArrayReference<const unsigned char> Resource::getRaw(const std::string& filename) const {
+Containers::ArrayReference<const char> Resource::getRaw(const std::string& filename) const {
     CORRADE_INTERNAL_ASSERT(_group != resources().end());
 
     /* The group is overriden with live data */
@@ -286,7 +286,7 @@ Containers::ArrayReference<const unsigned char> Resource::getRaw(const std::stri
 
             /* Load the file */
             bool success;
-            Containers::Array<unsigned char> data;
+            Containers::Array<char> data;
             std::tie(success, data) = fileContents(Directory::join(Directory::path(_group->second.overrideGroup), file->value("filename")));
             if(!success) {
                 Error() << "Utility::Resource::get(): cannot open file" << file->value("filename") << "from overriden group";
@@ -315,11 +315,11 @@ Containers::ArrayReference<const unsigned char> Resource::getRaw(const std::stri
 }
 
 std::string Resource::get(const std::string& filename) const {
-    Containers::ArrayReference<const unsigned char> data = getRaw(filename);
-    return data ? std::string(reinterpret_cast<const char*>(data.begin()), data.size()) : std::string();
+    Containers::ArrayReference<const char> data = getRaw(filename);
+    return data ? std::string{data, data.size()} : std::string{};
 }
 
-std::pair<bool, Containers::Array<unsigned char>> Resource::fileContents(const std::string& filename) {
+std::pair<bool, Containers::Array<char>> Resource::fileContents(const std::string& filename) {
     if(!Directory::fileExists(filename)) return {false, nullptr};
     return {true, Directory::read(filename)};
 }
