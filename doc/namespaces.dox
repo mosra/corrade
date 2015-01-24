@@ -24,7 +24,7 @@
 */
 
 /** @dir Corrade
- * @brief Namespace Corrade
+ * @brief Namespace @ref Corrade
  */
 /** @namespace Corrade
 @brief Root namespace
@@ -38,7 +38,7 @@ information.
 */
 
 /** @dir Corrade/Containers
- * @brief Namespace Corrade::Containers
+ * @brief Namespace @ref Corrade::Containers
  */
 /** @namespace Corrade::Containers
 @brief Container implementations
@@ -50,7 +50,7 @@ also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir Corrade/Utility
- * @brief Namespace Corrade::Utility
+ * @brief Namespace @ref Corrade::Utility
  */
 /** @namespace Corrade::Utility
 @brief Simple utitlities
@@ -66,7 +66,7 @@ also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir Corrade/PluginManager
- * @brief Namespace Corrade::PluginManager
+ * @brief Namespace @ref Corrade::PluginManager
  */
 /** @namespace Corrade::PluginManager
 @brief Plugin management
@@ -81,7 +81,7 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir Corrade/Interconnect
- * @brief Namespace Corrade::Interconnect
+ * @brief Namespace @ref Corrade::Interconnect
  */
 /** @namespace Corrade::Interconnect
 @brief Signal/slot connections
@@ -94,7 +94,7 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir Corrade/TestSuite
- * @brief Namespace Corrade::TestSuite
+ * @brief Namespace @ref Corrade::TestSuite
  */
 /** @namespace Corrade::TestSuite
 @brief Test suite
@@ -106,7 +106,7 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir Corrade/TestSuite/Compare
- * @brief Namespace Corrade::TestSuite::Compare
+ * @brief Namespace @ref Corrade::TestSuite::Compare
  */
 /** @namespace Corrade::TestSuite::Compare
 @brief Various test suite comparison helpers
