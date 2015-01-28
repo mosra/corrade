@@ -1,6 +1,6 @@
 *corrade* (v.) - "To scrape together, to gather together from various sources"
 
-Corrade is multiplatform utility library written in C++11.
+Corrade is multiplatform utility library written in C++11/C++14.
 
 SUPPORTED PLATFORMS
 ===================
