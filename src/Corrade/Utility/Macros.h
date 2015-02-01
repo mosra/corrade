@@ -47,6 +47,27 @@ CORRADE_DEPRECATED("use bar() instead") void foo();
 #endif
 
 /** @hideinitializer
+@brief Enum deprecation mark
+
+Marked enum or enum value will emit deprecation warning on supported compilers
+(C++17 feature, currently Clang only):
+@code
+enum class CORRADE_DEPRECATED_ENUM("use Bar instead") Foo {};
+
+enum class Bar {
+    Fizz = 0,
+    Buzz = 1,
+    CORRADE_DEPRECATED_ENUM("use Bar::Buzz instead") Baz = 1
+};
+@endcode
+*/
+#if defined(__clang__)
+#define CORRADE_DEPRECATED_ENUM(message) __attribute((deprecated(message)))
+#else
+#define CORRADE_DEPRECATED_ENUM(message)
+#endif
+
+/** @hideinitializer
 @brief Automatic initializer
 @param function Initializer function name of type int(*)().
 
