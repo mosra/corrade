@@ -409,7 +409,7 @@ template<class T> std::vector<T> ConfigurationGroup::values(const std::string& k
     for(std::vector<std::string>::const_iterator it = stringValues.begin(); it != stringValues.end(); ++it)
         _values.push_back(ConfigurationValue<T>::fromString(*it, flags));
 
-    return std::move(_values);
+    return _values;
 }
 
 }}

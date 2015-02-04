@@ -268,7 +268,7 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     else if(flags >= Flag::SortDescending)
         std::sort(list.rbegin(), list.rend());
 
-    return std::move(list);
+    return list;
 }
 
 Containers::Array<char> Directory::read(const std::string& filename) {

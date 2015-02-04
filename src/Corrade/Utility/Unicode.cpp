@@ -93,7 +93,7 @@ std::vector<char32_t> Unicode::utf32(const std::string& text)
         result.push_back(unicode);
     }
 
-    return std::move(result);
+    return result;
 }
 
 }}
