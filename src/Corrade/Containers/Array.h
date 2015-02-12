@@ -482,8 +482,9 @@ template<class T> inline Array<T>::Array(Array<T>&& other) noexcept: _data(other
 }
 
 template<class T> inline Array<T>& Array<T>::operator=(Array<T>&& other) noexcept {
-    std::swap(_data, other._data);
-    std::swap(_size, other._size);
+    using std::swap;
+    swap(_data, other._data);
+    swap(_size, other._size);
     return *this;
 }
 
