@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/LinkedList.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/TypeTraits.h"
 
@@ -64,6 +65,13 @@ void TypeTraitsTest::hasType() {
     CORRADE_VERIFY(!HasBegin<int*>{});
 }
 
+namespace {
+    struct Type {};
+    int* begin(Type);
+    int* end(Type);
+    struct LinkedListItem: Containers::LinkedListItem<LinkedListItem> {};
+}
+
 void TypeTraitsTest::isIterable() {
     /* Non-iterable types */
     CORRADE_VERIFY(!IsIterable<int>{});
@@ -75,8 +83,12 @@ void TypeTraitsTest::isIterable() {
     /* STL types with std::begin()/std::end() only */
     CORRADE_VERIFY(IsIterable<std::valarray<int>>{});
 
+    /* Types with out-of-class begin()/end() */
+    CORRADE_VERIFY(IsIterable<Type>{});
+
     /* Corrade types */
     CORRADE_VERIFY(IsIterable<Containers::Array<int>>{});
+    CORRADE_VERIFY(IsIterable<Containers::LinkedList<LinkedListItem>>{});
 }
 
 }}}

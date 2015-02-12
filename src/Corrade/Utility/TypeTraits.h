@@ -71,8 +71,10 @@ template<class U> class className {                                         \
 }
 
 namespace Implementation {
-    CORRADE_HAS_TYPE(HasBegin, decltype(std::declval<T>().begin()));
-    CORRADE_HAS_TYPE(HasEnd, decltype(std::declval<T>().end()));
+    CORRADE_HAS_TYPE(HasMemberBegin, decltype(std::declval<T>().begin()));
+    CORRADE_HAS_TYPE(HasMemberEnd, decltype(std::declval<T>().end()));
+    CORRADE_HAS_TYPE(HasBegin, decltype(begin(std::declval<T>())));
+    CORRADE_HAS_TYPE(HasEnd, decltype(end(std::declval<T>())));
     CORRADE_HAS_TYPE(HasStdBegin, decltype(std::begin(std::declval<T>())));
     CORRADE_HAS_TYPE(HasStdEnd, decltype(std::end(std::declval<T>())));
 }
@@ -81,10 +83,11 @@ namespace Implementation {
 @brief Traits class for checking whether given class is iterable
 
 Equivalent to `std::true_type` if the class is has either `begin()` and `end()`
-members or is usable with `std::begin()` and `std::end()`. Otherwise equivalent
-to `std::false_type`.
+members, is usable with free `begin()`/`end()` functions or has
+`std::begin()`/`std::end()` overloads. Otherwise equivalent to
+`std::false_type`.
 */
-template<class T> using IsIterable = std::integral_constant<bool, (Implementation::HasBegin<T>{} || Implementation::HasStdBegin<T>{}) && (Implementation::HasEnd<T>{} || Implementation::HasStdEnd<T>{})>;
+template<class T> using IsIterable = std::integral_constant<bool, (Implementation::HasMemberBegin<T>{} || Implementation::HasBegin<T>{} || Implementation::HasStdBegin<T>{}) && (Implementation::HasMemberEnd<T>{} || Implementation::HasEnd<T>{} || Implementation::HasStdEnd<T>{})>;
 
 }}
 
