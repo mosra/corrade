@@ -28,7 +28,6 @@
 #include <iomanip>
 #include <sstream>
 #include <tuple>
-#include <utility>
 #include <vector>
 
 #include "Corrade/Utility/Assert.h"
@@ -45,6 +44,9 @@ struct Resource::OverrideData {
 
     explicit OverrideData(const std::string& filename): conf(filename) {}
 };
+
+Resource::GroupData::GroupData() = default;
+Resource::GroupData::~GroupData() = default;
 
 auto Resource::resources() -> std::map<std::string, GroupData>& {
     static std::map<std::string, GroupData> resources;

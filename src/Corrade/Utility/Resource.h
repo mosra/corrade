@@ -155,6 +155,9 @@ class CORRADE_UTILITY_EXPORT Resource {
 
     private:
         struct CORRADE_UTILITY_LOCAL GroupData {
+            explicit GroupData();
+            ~GroupData();
+
             std::string overrideGroup;
             std::map<std::string, Containers::ArrayReference<const char>> resources;
         };
