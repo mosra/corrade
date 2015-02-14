@@ -34,6 +34,7 @@ set(CorradeTestSuite_SRCS
 set(CorradeTestSuite_HEADERS
     Comparator.h
     Tester.h
+    TestSuite.h
     visibility.h)
 
 # TestSuite library
