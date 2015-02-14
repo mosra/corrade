@@ -65,7 +65,7 @@ Debug() << "noone should see my ebanking password" << password;
 Debug::setOutput();
 
 // Conditional debug output (avoid inserting newline where it's not desired)
-Debug d();
+Debug d;
 d << "Cannot foo";
 if(bar)
     d << "because of bar.";
