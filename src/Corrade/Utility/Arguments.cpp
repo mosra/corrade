@@ -28,10 +28,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>
-#include <iostream>
 #include <sstream>
 
 #include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/String.h"
 
 namespace Corrade { namespace Utility {
@@ -154,12 +154,12 @@ void Arguments::parse(const int argc, const char** const argv) {
     const bool status = tryParse(argc, argv);
 
     if(isSet("help")) {
-        std::cout << help();
+        Debug() << help();
         std::exit(0);
     }
 
     if(!status) {
-        std::cerr << usage();
+        Error() << usage();
         std::exit(1);
     }
 }
