@@ -30,10 +30,10 @@
  */
 
 #include <iosfwd>
+#include <string>
 #include <utility>
 #include <type_traits>
 
-#include "Corrade/configure.h"
 #include "Corrade/Utility/TypeTraits.h"
 #include "Corrade/Utility/visibility.h"
 
@@ -53,8 +53,8 @@ character. Example usage:
 Debug() << "string" << 34 << 275.0f;
 
 // Redirect debug output to string
-std::ostringstream output;
-Debug::setOutput(&o);
+std::ostringstream out;
+Debug::setOutput(&out);
 Debug() << "the meaning of life, universe and everything is" << 42;
 
 // Mute debug output

@@ -29,6 +29,7 @@
  * @brief Basic utilities
  */
 
+#include <cstddef>
 #include <cstring>
 
 #include "Corrade/Utility/visibility.h"

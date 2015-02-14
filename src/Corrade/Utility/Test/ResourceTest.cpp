@@ -24,7 +24,6 @@
 */
 
 #include <sstream>
-#include <tuple>
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/TestSuite/Tester.h"

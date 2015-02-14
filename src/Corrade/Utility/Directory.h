@@ -32,6 +32,7 @@
 #include <string>
 #include <vector>
 
+#include "Corrade/Containers/Containers.h"
 #include "Corrade/Containers/EnumSet.h"
 #include "Corrade/Utility/visibility.h"
 

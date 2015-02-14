@@ -31,9 +31,10 @@
 
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
-#include "Corrade/Containers/Containers.h"
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {

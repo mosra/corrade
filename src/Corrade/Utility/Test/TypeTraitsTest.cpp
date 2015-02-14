@@ -23,12 +23,16 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <iterator>
 #include <map>
 #include <string>
+#include <tuple>
+#include <type_traits>
 #include <valarray>
 #include <vector>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/Containers.h"
 #include "Corrade/Containers/LinkedList.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/TypeTraits.h"

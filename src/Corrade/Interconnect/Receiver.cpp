@@ -25,6 +25,9 @@
 
 #include "Receiver.h"
 
+#include <utility>
+
+#include "Corrade/Interconnect/Connection.h"
 #include "Corrade/Interconnect/Emitter.h"
 #include "Corrade/Utility/Assert.h"
 

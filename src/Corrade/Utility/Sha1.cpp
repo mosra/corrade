@@ -25,6 +25,8 @@
 
 #include "Sha1.h"
 
+#include <cstddef>
+
 #include "Corrade/Utility/Endianness.h"
 
 namespace Corrade { namespace Utility {

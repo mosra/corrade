@@ -29,14 +29,17 @@
  * @brief Class @ref Corrade::PluginManager::AbstractManager
  */
 
-#include <vector>
-#include <string>
+#include <iosfwd>
 #include <map>
+#include <string>
+#include <vector>
 
 #include "Corrade/Containers/EnumSet.h"
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/PluginManager/PluginManager.h"
+#include "Corrade/PluginManager/visibility.h"
 #include "Corrade/Utility/Configuration.h"
+#include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Resource.h"
 
 #ifdef CORRADE_TARGET_WINDOWS

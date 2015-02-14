@@ -25,6 +25,9 @@
 
 #include "StringToFile.h"
 
+#include <cstddef>
+
+#include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Directory.h"
 
 namespace Corrade { namespace TestSuite {

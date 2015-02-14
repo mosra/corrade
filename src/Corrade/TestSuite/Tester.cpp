@@ -26,6 +26,7 @@
 #include "Tester.h"
 
 #include <iostream>
+#include <utility>
 
 namespace Corrade { namespace TestSuite {
 

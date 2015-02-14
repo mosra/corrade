@@ -29,10 +29,8 @@
  * @brief Class @ref Corrade::Utility::ConfigurationValue, enum @ref Corrade::Utility::ConfigurationValueFlag, enum set @ref Corrade::Utility::ConfigurationValueFlags
  */
 
-#include <cstdint>
 #include <string>
 
-#include "Corrade/configure.h"
 #include "Corrade/Containers/EnumSet.h"
 #include "Corrade/Utility/visibility.h"
 

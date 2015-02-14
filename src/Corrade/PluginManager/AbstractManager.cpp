@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <functional>
 #include <sstream>
+#include <utility>
 
 #ifndef CORRADE_TARGET_WINDOWS
 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)

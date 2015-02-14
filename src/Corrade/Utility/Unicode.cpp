@@ -25,6 +25,7 @@
 
 #include "Unicode.h"
 
+#include <cstdint>
 #include <tuple>
 
 #include "Corrade/Utility/Assert.h"

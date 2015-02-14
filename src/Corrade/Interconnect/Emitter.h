@@ -29,10 +29,12 @@
  * @brief Class @ref Corrade::Interconnect::Emitter
  */
 
+#include <cstddef>
 #include <cstdint>
+#include <type_traits>
 #include <unordered_map>
+#include <utility>
 
-#include "Corrade/configure.h"
 #include "Corrade/Interconnect/Connection.h"
 #include "Corrade/Utility/Assert.h"
 

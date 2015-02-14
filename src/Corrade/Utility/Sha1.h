@@ -29,7 +29,10 @@
  * @brief Class @ref Corrade::Utility::Sha1
  */
 
-#include "AbstractHash.h"
+#include <string>
+
+#include "Corrade/Utility/AbstractHash.h"
+#include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
 

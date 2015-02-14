@@ -23,8 +23,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/PluginManager/AbstractManager.h"
-
 #include "AbstractAnimal.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {

@@ -25,8 +25,9 @@
 
 #include "AbstractPlugin.h"
 
-#include "Corrade/PluginManager/AbstractManager.h"
-#include "Corrade/Utility/Assert.h"
+#include <utility>
+
+#include "Corrade/PluginManager/PluginMetadata.h"
 
 namespace Corrade { namespace PluginManager {
 

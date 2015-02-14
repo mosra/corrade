@@ -28,11 +28,12 @@
 #include <iomanip>
 #include <sstream>
 #include <tuple>
+#include <utility>
 #include <vector>
 
-#include "Corrade/Containers/Array.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Configuration.h"
+#include "Corrade/Utility/ConfigurationGroup.h"
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Directory.h"
 

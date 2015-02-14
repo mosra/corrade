@@ -32,7 +32,8 @@ See `corrade-rc --help` for command-line parameters, see @ref resource-managemen
 for brief introduction.
 */
 
-#include "Corrade/Containers/Array.h"
+#include <string>
+
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Directory.h"
@@ -58,7 +59,7 @@ int main(int argc, char** argv) {
     if(compiled.empty()) return 2;
 
     /* Save output */
-    if(!Corrade::Utility::Directory::write(args.value("out"), {compiled.data(), compiled.size()})) {
+    if(!Corrade::Utility::Directory::writeString(args.value("out"), compiled)) {
         Corrade::Utility::Error() << "Cannot write output file " << '\'' + args.value("out") + '\'';
         return 3;
     }

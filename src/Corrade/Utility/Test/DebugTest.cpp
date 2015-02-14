@@ -26,6 +26,8 @@
 #include <map>
 #include <set>
 #include <sstream>
+#include <string>
+#include <vector>
 
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Debug.h"

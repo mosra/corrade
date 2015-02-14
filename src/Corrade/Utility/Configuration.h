@@ -29,12 +29,13 @@
  * @brief Class @ref Corrade::Utility::Configuration
  */
 
+#include <cstdint>
 #include <string>
-#include <vector>
-#include <map>
 #include <iosfwd>
 
+#include "Corrade/Containers/EnumSet.h"
 #include "Corrade/Utility/ConfigurationGroup.h"
+#include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
 

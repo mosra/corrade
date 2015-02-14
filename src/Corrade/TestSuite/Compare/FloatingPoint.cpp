@@ -27,6 +27,8 @@
 
 #include <cmath>
 
+#include "Corrade/Utility/Debug.h"
+
 namespace Corrade { namespace TestSuite { namespace Implementation {
 
 /* Adapted from http://floating-point-gui.de/errors/comparison/ */

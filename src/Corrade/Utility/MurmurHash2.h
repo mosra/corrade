@@ -29,7 +29,11 @@
  * @brief Class @ref Corrade::Utility::MurmurHash2
  */
 
+#include <cstddef>
+#include <string>
+
 #include "Corrade/Utility/AbstractHash.h"
+#include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
 

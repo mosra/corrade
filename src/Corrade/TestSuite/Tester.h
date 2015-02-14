@@ -29,15 +29,20 @@
  * @brief Class @ref Corrade::TestSuite::Tester, macros @ref CORRADE_TEST_MAIN(), @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH(), @ref CORRADE_SKIP()
  */
 
+#include <initializer_list>
+#include <iosfwd>
+#include <string>
+#include <type_traits>
 #include <vector>
 
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/TestSuite/Compare/FloatingPoint.h"
+#include "Corrade/TestSuite/visibility.h"
+#include "Corrade/Utility/Debug.h"
 
 #ifdef CORRADE_TARGET_EMSCRIPTEN
 #include <cstdlib>
 #endif
-#include "Corrade/TestSuite/visibility.h"
 
 namespace Corrade { namespace TestSuite {
 

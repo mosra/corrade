@@ -29,7 +29,9 @@
  * @brief Class @ref Corrade::Utility::Unicode
  */
 
+#include <cstddef>
 #include <string>
+#include <utility>
 #ifdef __MINGW32__
 #include <vector>
 #endif

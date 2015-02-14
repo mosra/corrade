@@ -29,14 +29,15 @@
  * @brief Class @ref Corrade::TestSuite::Compare::File
  */
 
-#include "Corrade/TestSuite/Comparator.h"
+#include <string>
+
+#include "Corrade/TestSuite/TestSuite.h"
 #include "Corrade/TestSuite/visibility.h"
+#include "Corrade/Utility/Utility.h"
 
 namespace Corrade { namespace TestSuite {
 
-namespace Compare {
-    class File;
-}
+namespace Compare { class File; }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::File> {

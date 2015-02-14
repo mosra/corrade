@@ -29,6 +29,7 @@
  * @brief Class @ref Corrade::Interconnect::Receiver
  */
 
+#include <cstddef>
 #include <vector>
 
 #include "Corrade/Interconnect/Interconnect.h"

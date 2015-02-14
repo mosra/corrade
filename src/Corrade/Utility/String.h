@@ -29,9 +29,11 @@
  * @brief Class @ref Corrade::Utility::String
  */
 
+#include <cstddef>
 #include <string>
 #include <vector>
 
+#include "Corrade/configure.h"
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Utility/visibility.h"
 

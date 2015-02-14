@@ -29,10 +29,13 @@
  * @brief Class @ref Corrade::Utility::ConfigurationGroup
  */
 
+#include <utility>
+#include <string>
 #include <vector>
 
 #include "Corrade/Utility/ConfigurationValue.h"
 #include "Corrade/Utility/Utility.h"
+#include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
 

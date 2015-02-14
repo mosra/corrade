@@ -26,6 +26,8 @@
 #include "Configuration.h"
 
 #include <fstream>
+#include <utility>
+#include <vector>
 
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Debug.h"

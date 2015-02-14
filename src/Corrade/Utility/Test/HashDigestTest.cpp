@@ -27,6 +27,7 @@
 
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/AbstractHash.h"
+#include "Corrade/Utility/Debug.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 
