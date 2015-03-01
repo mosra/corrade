@@ -101,15 +101,19 @@ void Configuration::setFilename(std::string filename) {
     _filename = std::move(filename);
 }
 
+namespace {
+    constexpr const char Bom[] = "\xEF\xBB\xBF";
+}
+
 bool Configuration::parse(std::istream& in) {
     try {
         /* It looks like BOM */
-        if(in.peek() == String::Bom[0]) {
+        if(in.peek() == Bom[0]) {
             char bom[4];
             in.get(bom, 4);
 
             /* This is not a BOM, rewind back */
-            if(bom != String::Bom) in.seekg(0);
+            if(bom[0] != Bom[0] || bom[1] != Bom[1] || bom[2] != Bom[2]) in.seekg(0);
 
             /* Or set flag */
             else _flags |= InternalFlag::HasBom;
@@ -255,7 +259,7 @@ bool Configuration::save(const std::string& filename) {
 void Configuration::save(std::ostream& out) {
     /* BOM, if user explicitly wants that crap */
     if((_flags & InternalFlag::PreserveBom) && (_flags & InternalFlag::HasBom))
-        out.write(String::Bom.data(), 3);
+        out.write(Bom, 3);
 
     /* EOL character */
     std::string eol;
@@ -272,6 +276,12 @@ void Configuration::save(std::ostream& out) {
 bool Configuration::save() {
     if(_filename.empty()) return false;
     return save(_filename);
+}
+
+namespace {
+    constexpr bool isWhitespace(char c) {
+        return c == ' ' || c == '\t' || c == '\f' || c == '\v' || c == '\r' || c == '\n';
+    }
 }
 
 void Configuration::save(std::ostream& out, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const {
@@ -296,8 +306,7 @@ void Configuration::save(std::ostream& out, const std::string& eol, Configuratio
                 buffer = it->key + "=\"\"\"" + eol + value + eol + "\"\"\"" + eol;
 
             /* Value with leading/trailing spaces */
-            } else if(!it->value.empty() && (String::Whitespace.find(it->value.front()) != std::string::npos ||
-                                             String::Whitespace.find(it->value.back()) != std::string::npos)) {
+            } else if(!it->value.empty() && (isWhitespace(it->value.front()) || isWhitespace(it->value.back()))) {
                 buffer = it->key + "=\"" + it->value + '"' + eol;
 
             /* Value without spaces */

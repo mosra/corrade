@@ -39,7 +39,6 @@ struct StringTest: TestSuite::Tester {
     void join();
     void lowercase();
     void uppercase();
-    void whitespace();
 
     void beginsWith();
     void endsWith();
@@ -53,7 +52,6 @@ StringTest::StringTest() {
               &StringTest::join,
               &StringTest::lowercase,
               &StringTest::uppercase,
-              &StringTest::whitespace,
 
               &StringTest::beginsWith,
               &StringTest::endsWith});
@@ -207,11 +205,6 @@ void StringTest::uppercase() {
     /* UTF-8 */
     CORRADE_EXPECT_FAIL("UTF-8 uppercasing is not supported.");
     CORRADE_COMPARE(String::uppercase("ěščřžýáíéúůďťň"), "ĚŠČŘŽÝÁÍÉÚŮĎŤŇ");
-}
-
-void StringTest::whitespace() {
-    for(char i: String::Whitespace)
-        CORRADE_VERIFY(std::isspace(i));
 }
 
 void StringTest::beginsWith() {
