@@ -88,11 +88,21 @@ void TypeTraitsTest::isIterable() {
     CORRADE_VERIFY(IsIterable<std::valarray<int>>{});
 
     /* Types with out-of-class begin()/end() */
-    CORRADE_VERIFY(IsIterable<Type>{});
+    {
+        #ifdef CORRADE_GCC47_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("GCC 4.7 has broken SFINAE in this case (results in compile error when not present)");
+        #endif
+        CORRADE_VERIFY(IsIterable<Type>{});
+    }
 
     /* Corrade types */
     CORRADE_VERIFY(IsIterable<Containers::Array<int>>{});
-    CORRADE_VERIFY(IsIterable<Containers::LinkedList<LinkedListItem>>{});
+    {
+        #ifdef CORRADE_GCC47_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("GCC 4.7 has broken SFINAE in this case (results in compile error when not present)");
+        #endif
+        CORRADE_VERIFY(IsIterable<Containers::LinkedList<LinkedListItem>>{});
+    }
 }
 
 }}}

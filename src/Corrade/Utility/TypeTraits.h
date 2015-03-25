@@ -32,6 +32,8 @@
 #include <iterator> /* for std::begin() in libc++ */
 #include <utility>
 
+#include "Corrade/configure.h"
+
 namespace Corrade { namespace Utility {
 
 /** @hideinitializer
@@ -73,8 +75,11 @@ template<class U> class className {                                         \
 namespace Implementation {
     CORRADE_HAS_TYPE(HasMemberBegin, decltype(std::declval<T>().begin()));
     CORRADE_HAS_TYPE(HasMemberEnd, decltype(std::declval<T>().end()));
+    /** @todo Re-enable these for GCC 4.7 when I find some workaround */
+    #ifndef CORRADE_GCC47_COMPATIBILITY
     CORRADE_HAS_TYPE(HasBegin, decltype(begin(std::declval<T>())));
     CORRADE_HAS_TYPE(HasEnd, decltype(end(std::declval<T>())));
+    #endif
     CORRADE_HAS_TYPE(HasStdBegin, decltype(std::begin(std::declval<T>())));
     CORRADE_HAS_TYPE(HasStdEnd, decltype(std::end(std::declval<T>())));
 }
@@ -87,7 +92,16 @@ members, is usable with free `begin()`/`end()` functions or has
 `std::begin()`/`std::end()` overloads. Otherwise equivalent to
 `std::false_type`.
 */
-template<class T> using IsIterable = std::integral_constant<bool, (Implementation::HasMemberBegin<T>{} || Implementation::HasBegin<T>{} || Implementation::HasStdBegin<T>{}) && (Implementation::HasMemberEnd<T>{} || Implementation::HasEnd<T>{} || Implementation::HasStdEnd<T>{})>;
+template<class T> using IsIterable = std::integral_constant<bool,
+    (Implementation::HasMemberBegin<T>{} ||
+    #ifndef CORRADE_GCC47_COMPATIBILITY
+    Implementation::HasBegin<T>{} ||
+    #endif
+    Implementation::HasStdBegin<T>{}) && (Implementation::HasMemberEnd<T>{} ||
+    #ifndef CORRADE_GCC47_COMPATIBILITY
+    Implementation::HasEnd<T>{} ||
+    #endif
+    Implementation::HasStdEnd<T>{})>;
 
 }}
 
