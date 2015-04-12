@@ -57,7 +57,7 @@ enum class CORRADE_DEPRECATED_ENUM("use Bar instead") Foo {};
 enum class Bar {
     Fizz = 0,
     Buzz = 1,
-    CORRADE_DEPRECATED_ENUM("use Bar::Buzz instead") Baz = 1
+    Baz CORRADE_DEPRECATED_ENUM("use Bar::Buzz instead") = 1
 };
 @endcode
 */
