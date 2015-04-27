@@ -392,12 +392,20 @@ void LinkedListTest::rangeBasedFor() {
 
     {
         std::vector<Item*> items;
+        #ifndef CORRADE_GCC45_COMPATIBILITY
         for(auto&& i: list) items.push_back(&i);
+        #else
+        for(auto it = begin(list); it != end(list); ++it) items.push_back(&*it);
+        #endif
         CORRADE_COMPARE(items, (std::vector<Item*>{&item, &item2, &item3}));
     } {
         const LinkedList& clist = list;
         std::vector<const Item*> items;
+        #ifndef CORRADE_GCC45_COMPATIBILITY
         for(auto&& i: clist) items.push_back(&i);
+        #else
+        for(auto it = begin(clist); it != end(clist); ++it) items.push_back(&*it);
+        #endif
         CORRADE_COMPARE(items, (std::vector<const Item*>{&item, &item2, &item3}));
     }
 }

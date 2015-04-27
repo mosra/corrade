@@ -114,7 +114,9 @@ void AbstractManager::importStaticPlugin(std::string plugin, int _version, std::
 AbstractManager::AbstractManager(std::string pluginInterface, std::string pluginDirectory): _plugins(initializeGlobalPluginStorage()), _pluginInterface{std::move(pluginInterface)} {
     /* Find static plugins which have the same interface and have not
         assigned manager to them */
-    for(auto p: _plugins.plugins) {
+    for(auto it = _plugins.plugins.begin(); it != _plugins.plugins.end(); ++it) {
+        auto&& p = *it;
+
         if(p.second->loadState != LoadState::Static || p.second->manager != nullptr || p.second->staticPlugin->interface != _pluginInterface)
             continue;
 
