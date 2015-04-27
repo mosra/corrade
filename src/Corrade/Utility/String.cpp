@@ -31,7 +31,11 @@
 namespace Corrade { namespace Utility {
 
 namespace {
-    constexpr const char Whitespace[] = " \t\f\v\r\n";
+    constexpr
+    #ifndef CORRADE_GCC46_COMPATIBILITY
+    const
+    #endif
+    char Whitespace[] = " \t\f\v\r\n";
 }
 
 std::string String::ltrim(std::string string) { return ltrim(std::move(string), Whitespace); }

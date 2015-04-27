@@ -107,7 +107,11 @@ void Configuration::setFilename(std::string filename) {
 }
 
 namespace {
-    constexpr const char Bom[] = "\xEF\xBB\xBF";
+    constexpr
+    #ifndef CORRADE_GCC46_COMPATIBILITY
+    const
+    #endif
+    char Bom[] = "\xEF\xBB\xBF";
 }
 
 bool Configuration::parse(std::istream& in) {
