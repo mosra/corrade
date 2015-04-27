@@ -123,7 +123,11 @@ void TypeTraitsTest::isIterable() {
         #ifdef CORRADE_GCC47_COMPATIBILITY
         CORRADE_EXPECT_FAIL("GCC 4.7 has broken SFINAE in this case (results in compile error when not present)");
         #endif
+        #ifndef CORRADE_GCC45_COMPATIBILITY
         CORRADE_VERIFY(IsIterable<Type>{});
+        #else
+        CORRADE_VERIFY(IsIterable<Type>::value);
+        #endif
     }
 
     /* Corrade types */
@@ -137,7 +141,11 @@ void TypeTraitsTest::isIterable() {
         #ifdef CORRADE_GCC47_COMPATIBILITY
         CORRADE_EXPECT_FAIL("GCC 4.7 has broken SFINAE in this case (results in compile error when not present)");
         #endif
+        #ifndef CORRADE_GCC45_COMPATIBILITY
         CORRADE_VERIFY(IsIterable<Containers::LinkedList<LinkedListItem>>{});
+        #else
+        CORRADE_VERIFY(IsIterable<Containers::LinkedList<LinkedListItem>>::value);
+        #endif
     }
 }
 
