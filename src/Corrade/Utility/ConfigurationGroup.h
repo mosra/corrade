@@ -47,7 +47,8 @@ documentation for usage example.
 @todo Faster access to elements via multimap, find() and equal_range()
 */
 class CORRADE_UTILITY_EXPORT ConfigurationGroup {
-    friend Configuration;
+    /* GCC 4.6 needs the class keyword */
+    friend class Configuration;
 
     public:
         /**

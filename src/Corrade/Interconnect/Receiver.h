@@ -49,8 +49,9 @@ Contains member function slots. See @ref interconnect for introduction.
 @todo Allow move
 */
 class CORRADE_INTERCONNECT_EXPORT Receiver {
-    friend Implementation::AbstractConnectionData;
-    friend Emitter;
+    /* GCC 4.6 needs the class keyword */
+    friend class Implementation::AbstractConnectionData;
+    friend class Emitter;
 
     public:
         explicit Receiver();

@@ -41,8 +41,9 @@ namespace Implementation {
     class SignalDataHash;
 
     class SignalData {
-        friend Interconnect::Emitter;
-        friend SignalDataHash;
+        /* GCC 4.6 needs the class keyword */
+        friend class Interconnect::Emitter;
+        friend class SignalDataHash;
 
         public:
             static const std::size_t Size = 2*sizeof(void*)/sizeof(std::size_t);
@@ -87,8 +88,9 @@ object.
 @see @ref interconnect, @ref Emitter, @ref Receiver
 */
 class CORRADE_INTERCONNECT_EXPORT Connection {
-    friend Emitter;
-    friend Receiver;
+    /* GCC 4.6 needs the class keyword */
+    friend class Emitter;
+    friend class Receiver;
 
     public:
         /** @brief Copying is not allowed */

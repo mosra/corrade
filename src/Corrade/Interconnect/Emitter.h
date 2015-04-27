@@ -210,8 +210,9 @@ Interconnect::connect(&foo, &Foo::signal, &b, &std::string::clear); // ok
 @todo Allow move
 */
 class CORRADE_INTERCONNECT_EXPORT Emitter {
-    friend Connection;
-    friend Receiver;
+    /* GCC 4.6 needs the class keyword */
+    friend class Connection;
+    friend class Receiver;
 
     public:
         /**
@@ -220,7 +221,8 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * See @ref emit() for more information about implementing signals.
          */
         class Signal {
-            friend Emitter;
+            /* GCC 4.6 needs the class keyword */
+            friend class Emitter;
 
             private:
                 constexpr explicit Signal();
@@ -343,9 +345,10 @@ namespace Implementation {
 class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
     template<class...> friend class FunctionConnectionData;
     template<class...> friend class MemberConnectionData;
-    friend Interconnect::Connection;
-    friend Interconnect::Emitter;
-    friend Interconnect::Receiver;
+    /* GCC 4.6 needs the class keyword */
+    friend class Interconnect::Connection;
+    friend class Interconnect::Emitter;
+    friend class Interconnect::Receiver;
 
     public:
         enum class Type: std::uint8_t { Function, Member };
@@ -369,7 +372,8 @@ class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
 };
 
 class AbstractMemberConnectionData: public AbstractConnectionData {
-    friend Interconnect::Emitter;
+    /* GCC 4.6 needs the class keyword */
+    friend class Interconnect::Emitter;
 
     public:
         template<class Emitter, class Receiver> explicit AbstractMemberConnectionData(Emitter* emitter, Receiver* receiver): AbstractConnectionData(emitter, Type::Member), receiver(receiver) {}
@@ -379,7 +383,8 @@ class AbstractMemberConnectionData: public AbstractConnectionData {
 };
 
 template<class ...Args> class MemberConnectionData: public AbstractMemberConnectionData {
-    friend Interconnect::Emitter;
+    /* GCC 4.6 needs the class keyword */
+    friend class Interconnect::Emitter;
 
     public:
         typedef void(Receiver::*Slot)(Args...);
@@ -395,7 +400,8 @@ template<class ...Args> class MemberConnectionData: public AbstractMemberConnect
 };
 
 template<class ...Args> class FunctionConnectionData: public AbstractConnectionData {
-    friend Interconnect::Emitter;
+    /* GCC 4.6 needs the class keyword */
+    friend class Interconnect::Emitter;
 
     public:
         typedef void(*Slot)(Args...);

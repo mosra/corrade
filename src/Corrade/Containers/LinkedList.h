@@ -246,7 +246,8 @@ template<class Derived, class List = LinkedList<Derived>>
 template<class Derived, class List>
 #endif
 class LinkedListItem {
-    friend LinkedList<Derived>;
+    /* GCC 4.6 needs the class keyword */
+    friend class LinkedList<Derived>;
 
     public:
         /**

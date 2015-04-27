@@ -72,7 +72,8 @@ be loaded. It will be also loaded when requesting `RealWorld` plugin, but only
 if this is the first plugin providing it.
 */
 class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
-    friend AbstractManager;
+    /* GCC 4.6 needs the class keyword */
+    friend class AbstractManager;
 
     public:
         /** @brief Plugin name */

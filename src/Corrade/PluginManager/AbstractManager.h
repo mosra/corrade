@@ -201,7 +201,8 @@ CORRADE_ENUMSET_OPERATORS(LoadStates)
 See also @ref plugin-management.
  */
 class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
-    friend AbstractPlugin;
+    /* GCC 4.6 needs the class keyword */
+    friend class AbstractPlugin;
 
     public:
         /** @brief Plugin version */

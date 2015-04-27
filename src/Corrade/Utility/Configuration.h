@@ -131,7 +131,8 @@ Example file:
     (e.g. value with spaces)
 */
 class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
-    friend ConfigurationGroup;
+    /* GCC 4.6 needs the class keyword */
+    friend class ConfigurationGroup;
 
     public:
         /**
