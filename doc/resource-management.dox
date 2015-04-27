@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -23,17 +23,18 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-namespace Corrade { namespace Utility {
+namespace Corrade {
 /** @page resource-management Resource management tutorial
 
-The Resource class provides management of resources compiled directly into the
-executable, such as icons, data files etc. This tutorial will give you a brief
-introduction into how resources are compiled into the executable and later
-retrieved in the application.
+The @ref Utility::Resource class provides management of resources compiled
+directly into the executable, such as icons, data files etc. This tutorial will
+give you a brief introduction into how resources are compiled into the
+executable and later retrieved in the application.
 
 @tableofcontents
 
 @section resource-management-compilation Resource compilation
+
 Imagine that you have e.g. a long license text with all these yelling words
 in all caps:
 @include resource/licenses/en.txt
@@ -42,7 +43,7 @@ And for obvious reasons you don't want to put directly into the code, but
 in a separate file instead. But in the end you want it compiled directly into
 the executable, so your product is one compact file.
 
-%Corrade's CMake support provides macro @ref corrade-cmake-add-resource "corrade_add_resource()",
+Corrade's CMake support provides macro @ref corrade-cmake-add-resource "corrade_add_resource()",
 which takes resource configuration file and produces C++ source file. The
 source file can be then passed among other source files to executable or
 library. First argument is name of resulting C++ source file, second argument
@@ -55,11 +56,12 @@ the files. The files can also have aliases for e.g. simplifying filenames.
 @include resource/resources.conf
 
 @section resource-management-management Resource management
+
 Now it's time to make an application which will have these resources compiled
 in. The resources should be initialized automatically, if not (for example if
-they are compiled into static library), call CORRADE_RESOURCE_INITIALIZE() with
-resource name as argument before they are used, for example at the beginning
-of `main()` function.
+they are compiled into static library), call @ref CORRADE_RESOURCE_INITIALIZE()
+with resource name as argument before they are used, for example at the
+beginning of `main()` function.
 
 This example application will just print the license text and exit:
 @dontinclude resource/main.cpp

@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -30,9 +30,11 @@
  */
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "Corrade/Utility/ConfigurationValue.h"
+#include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
 
@@ -103,7 +105,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
         /**
          * @brief Add mandatory argument
          *
-         * After calling <tt>addArgument("argument")</tt> the argument will be
+         * After calling `addArgument("argument")` the argument will be
          * displayed in argument list like the following. Call
          * @ref setHelpKey() to change the displayed key:
          *
@@ -254,7 +256,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
         /**
          * @brief Set help text for given key
          *
-         * %Arguments, boolean options and options with empty default values
+         * Arguments, boolean options and options with empty default values
          * are not displayed in argument and option list unless they have help
          * text set.
          * @see @ref setHelpKey()
@@ -266,8 +268,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * For arguments the key is replaced with @p helpKey, for nonboolean
          * options the uppercased key name is replaced with @p helpKey. For
-         * example, calling <tt>setHelpKey("input", "file.bin")</tt> and
-         * <tt>setHelpKey("limit", "N")</tt> will transform the usage text in
+         * example, calling `setHelpKey("input", "file.bin")` and
+         * `setHelpKey("limit", "N")` will transform the usage text in
          * the following way. The displayed keys are changed also in argument
          * and option list.
          *

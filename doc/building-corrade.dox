@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -26,7 +26,7 @@
 namespace Corrade {
 
 /** @page building-corrade Downloading and building
-@brief Guide how to download and build %Corrade on different platforms.
+@brief Guide how to download and build Corrade on different platforms.
 
 @tableofcontents
 
@@ -37,7 +37,7 @@ Minimal set of tools required for building is:
     >= 3.1. On Windows you can use **MinGW**. GCC 4.5, 4.4 and **MSVC** 2013
     support involves some ugly workarounds and thus is available only in
     `compatibility` branch.
--   **CMake** >= 2.8.8
+-   **CMake** >= 2.8.9
 
 Note that full feature set is available only on GCC 4.8.1 and Clang 3.1 and
 compatibility mode with reduced feature set is used on other compilers.
@@ -60,7 +60,7 @@ https://github.com/mosra/corrade/tree/compatibility.
 
 @subsection building-corrade-cmake CMake primer
 
-%Corrade uses CMake as build system and expects it to be used also in depending
+Corrade uses CMake as build system and expects it to be used also in depending
 projects. If you are familiar enough with it, you can skip this section and go
 straight to building. Otherwise be sure to read this so you don't get lost
 later.
@@ -83,7 +83,7 @@ Or you can use some IDE, for example QtCreator. Open project's root
 directory, allows you to specify initial CMake parameters and then you can just
 press Configure and everything is ready to be built.
 
-%Corrade build is controlled using plenty of configuration variables, which are
+Corrade build is controlled using plenty of configuration variables, which are
 @ref building-corrade-features "listed and described below". The variables can
 be specified either on command-line with `-Dname=value`, for example:
 
@@ -100,7 +100,7 @@ from command-line, pointing it to your build dir:
 Or you can start it as is common on your system and then point it to the build
 dir. It will then select the source dir automatically and populates list of
 available configuration variables. Each configuration variable provided by
-%Corrade is documented (hover on it to see the tooltip). After configuring,
+Corrade is documented (hover on it to see the tooltip). After configuring,
 press *Configure* and *Generate* and you are ready to build the project using
 your platform's build system. If you are using QtCreator, it will detect the
 changes afterwards and reparse the project accordingly, so you don't need to
@@ -190,14 +190,6 @@ libraries installed alongside each other. Headers and other files are the same
 for both. This distinction is handled automatically when using the library in
 depending projects, see @ref corrade-cmake for more information.
 
-%Corrade by default does not install `FindCorrade.cmake`, as you should bundle
-the module with your code instead of depending on it being in system location.
-You can install it by enabling `WITH_FIND_MODULE`. When this option is enabled,
-all the CMake modules are installed into root CMake path, which may require
-root privileges. This can also help some IDEs (namely KDevelop) to find the
-included modules easier and provide better CMake support, e.g. parsing targets
-from `corrade_add_test()` calls.
-
 By default the library expects standards conforming compiler. However, for
 portability, compatibility mode for older compilers is provided. The build
 system tries to autodect it, but in some rare cases you may need to enable
@@ -217,13 +209,13 @@ the compatibility mode explicitly:
   Microsoft Visual C++ 2013. Note that MSVC 2013 support is maintained only in
   `compatibility` branch.
 
-%Corrade will detect the compiler used and refuses to build (or be used) if
+Corrade will detect the compiler used and refuses to build (or be used) if
 some compatibility mode needs to be enabled. On the other hand, if any of these
 is enabled, Corrade will refuse to build (or be used) with any newer compiler.
 
 The library is constantly evolving and thus some APIs are deprecated and then
 later removed in favor of better ones. To preserve backwards compatibility,
-%Corrade is by default built with all deprecated APIs. However, to make your
+Corrade is by default built with all deprecated APIs. However, to make your
 code more robust and future-proof, it's recommended to build the library with
 `BUILD_DEPRECATED` disabled.
 
@@ -264,7 +256,7 @@ if it doesn't exist yet.
 
 The library comes with handful of examples, contained in `examples/`
 directory. Documentation for them is available on page @ref corrade-example-index.
-The examples require %Corrade to be installed and they are built separately:
+The examples require Corrade to be installed and they are built separately:
 
     mkdir build-examples && cd build-examples
     cmake ../examples
@@ -281,10 +273,7 @@ are also in AUR under the same names.
 There are also a few development PKGBUILDs in `package/archlinux`, which allow
 you to build and install the package directly from source tree without
 downloading anything. The native PKGBUILDs also contain `check()` function
-which will run all unit tests before packaging. You need to build them from
-project root:
-
-    makepkg -p package/archlinux/<file>
+which will run all unit tests before packaging.
 
 @subsection building-corrade-packages-gentoo Gentoo ebuilds
 
@@ -296,9 +285,9 @@ Every package contains `spec` files for RPM-based distributions in
 `package/rpm/` directory. In addition you will need `rpm-build` package
 and `~/.rpmmacros` file, which contains at least this:
 
-    %%_topdir /directory/where/to/store/rpms
-    %%_tmppath /directory/where/to/do/compilation
-    %%packager Your Name <your@email.com>
+    %_topdir /directory/where/to/store/rpms
+    %_tmppath /directory/where/to/do/compilation
+    %packager Your Name <your@email.com>
 
 First you need to download or create source tarball. Source tarball can
 be downloaded from GitHub (URL is in spec file), or in subdirectory `package/`
@@ -312,7 +301,7 @@ When you have the sources, go to `package/rpm/` directory and run this:
 
     rpmbuild -bb corrade.spec
 
-This will compile and generate library and development RPM for %Corrade in
+This will compile and generate library and development RPM for Corrade in
 `%{_topdir}/RPMS`.
 
 @subsection building-corrade-packages-deb DEB packages
@@ -333,10 +322,10 @@ the last line in `debian/rules`, e.g.:
 
 @section building-corrade-cross Crosscompiling
 
-For crosscompiling you need to have native version of %Corrade installed,
-because %Corrade needs to run `corrade-rc` utility on the host system as part
+For crosscompiling you need to have native version of Corrade installed,
+because Corrade needs to run `corrade-rc` utility on the host system as part
 of the build process. If native version of `corrade-rc` is not found on the
-system, %Corrade will refuse to crosscompile.
+system, Corrade will refuse to crosscompile.
 
 You also need to have the toolchains submodule updated. Either run the
 following commands, or, if you build from source archive, download snapshot of
@@ -422,9 +411,9 @@ You will need [Emscripten](https://github.com/kripken/emscripten/wiki/Tutorial)
 installed and configured.
 
 Don't forget to adapt `EMSCRIPTEN_PREFIX` variable in `generic/Emscripten.cmake`
-to path where Emscripten is installed. Default is `/usr/emscripten`. Emscripten
-supports dynamic libraries only to simplify porting and they are generally
-slower, thus `BUILD_STATIC` is implicitly enabled.
+to path where Emscripten is installed. Default is `/usr/lib/emscripten`.
+Emscripten supports dynamic libraries only to simplify porting and they are
+generally slower, thus `BUILD_STATIC` is implicitly enabled.
 
 Then create build directory and run cmake and build command in it. The
 toolchain needs access to its platform file, so be sure to properly set
@@ -436,7 +425,7 @@ Also set `CMAKE_INSTALL_PREFIX` to path contained in `EMSCRIPTEN_TOOLCHAIN_PATH`
         -DCMAKE_MODULE_PATH="/absolute/path/to/toolchains/modules" \
         -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/Emscripten.cmake" \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=/usr/emscripten/system
+        -DCMAKE_INSTALL_PREFIX=/usr/lib/emscripten/system
     cmake --build .
 
 Then you can install the library using `cmake --build . --target install` to
@@ -494,29 +483,37 @@ named `PKGBUILD-android-arm` and `PKGBUILD-android-x86`, see
 
 In `package/ci/` there is `jenkins.xml` file containing job configuration.
 Setup your Jenkins server, enable the **Git** and **Text-finder** plugin and
-download the CLI application from here:
+download the CLI application from here (replace `localhost:8080` with your
+server name):
 
-    http://your-jenkins-server/cli
+    http://localhost:8080/cli
 
-Then add new job or update existing one (replace `<command>` with `create-job`
-or `update-job`).
+Then add new job or update existing one (update path to the `*.jar` file,
+replace `localhost:8080` with your server name, replace `update-job` with
+`create-job` if the job doesn't exist yet).
 
-    java -jar jenkins-cli.jar -s http://your-jenkins-server <command> Corrade-Compatibility < jenkins.xml
+    java -jar ~/jenkins-cli.jar -s http://localhost:8080 update-job Corrade-Compatibility < package/ci/jenkins.xml
 
 Build is done using **Ninja** build system. It expects that **GCC** >= 4.8.1,
 4.7, 4.6, 4.5, 4.4 and **Clang** are installed as it tries to compile the
 library with each one of them. You can add/remove the compilers in
 `axes/hudson.matrix.TextAxis` or via the web interface later.
 
+Clang Analyzer and *Sanitizer checks are also available. They both require
+**Clang**, Analyzer job additionally requires **clang-analyzer** tool.
+
+    java -jar ~/jenkins-cli.jar -s http://localhost:8080 update-job Corrade-ClangAnalyzer < package/ci/jenkins-clang-analyzer.xml
+    java -jar ~/jenkins-cli.jar -s http://localhost:8080 update-job Corrade-ClangSanitizer < package/ci/jenkins-clang-sanitizer.xml
+
 There is also MinGW-w64, Emscripten, NaCl and Android configuration, add or
 update them with the commands below. See @ref building-corrade-cross for more
 information about setting up the crosscompilers and `toolchains/` submodule.
 For Emscripten you need also **Node.js** installed to run the tests.
 
-    java -jar jenkins-cli.jar -s http://your-jenkins-server <command> Corrade-MinGW-w64 < jenkins-mingw-w64.xml
-    java -jar jenkins-cli.jar -s http://your-jenkins-server <command> Corrade-Emscripten < jenkins-emscripten.xml
-    java -jar jenkins-cli.jar -s http://your-jenkins-server <command> Corrade-NaCl < jenkins-nacl.xml
-    java -jar jenkins-cli.jar -s http://your-jenkins-server <command> Corrade-Android < jenkins-android.xml
+    java -jar ~/jenkins-cli.jar -s http://localhost:8080 update-job Corrade-MinGW-w64 < package/ci/jenkins-mingw-w64.xml
+    java -jar ~/jenkins-cli.jar -s http://localhost:8080 update-job Corrade-Emscripten < package/ci/jenkins-emscripten.xml
+    java -jar ~/jenkins-cli.jar -s http://localhost:8080 update-job Corrade-NaCl < package/ci/jenkins-nacl.xml
+    java -jar ~/jenkins-cli.jar -s http://localhost:8080 update-job Corrade-Android < package/ci/jenkins-android.xml
 
 */
 

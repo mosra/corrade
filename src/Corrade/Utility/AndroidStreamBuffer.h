@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -68,10 +68,10 @@ class CORRADE_UTILITY_EXPORT AndroidLogStreamBuffer: public std::stringbuf {
          */
         enum class LogPriority: std::int32_t {
             Verbose = ANDROID_LOG_VERBOSE,  /**< Verbose debug message */
-            Debug = ANDROID_LOG_DEBUG,      /**< %Debug message */
+            Debug = ANDROID_LOG_DEBUG,      /**< Debug message */
             Info = ANDROID_LOG_INFO,        /**< Information */
-            Warning = ANDROID_LOG_WARN,     /**< %Warning */
-            Error = ANDROID_LOG_ERROR,      /**< %Error */
+            Warning = ANDROID_LOG_WARN,     /**< Warning */
+            Error = ANDROID_LOG_ERROR,      /**< Error */
             Fatal = ANDROID_LOG_FATAL,      /**< Fatal error */
         };
 

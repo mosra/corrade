@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -24,6 +24,9 @@
 */
 
 #include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
@@ -36,35 +39,34 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class ConfigurationTest: public TestSuite::Tester {
-    public:
-        ConfigurationTest();
+struct ConfigurationTest: TestSuite::Tester {
+    explicit ConfigurationTest();
 
-        void parse();
-        void parseHierarchic();
+    void parse();
+    void parseHierarchic();
 
-        void groupIndex();
-        void valueIndex();
+    void groupIndex();
+    void valueIndex();
 
-        void names();
+    void names();
 
-        void invalid();
-        void readonly();
-        void nonexistentFile();
-        void truncate();
+    void invalid();
+    void readonly();
+    void nonexistentFile();
+    void truncate();
 
-        void whitespaces();
-        void types();
-        void typesScientific();
-        void eol();
-        void stripComments();
+    void whitespaces();
+    void types();
+    void typesScientific();
+    void eol();
+    void stripComments();
 
-        void multiLineValue();
-        void multiLineValueCrlf();
+    void multiLineValue();
+    void multiLineValueCrlf();
 
-        void standaloneGroup();
-        void copy();
-        void move();
+    void standaloneGroup();
+    void copy();
+    void move();
 };
 
 ConfigurationTest::ConfigurationTest() {
@@ -220,12 +222,20 @@ void ConfigurationTest::names() {
     Error::setOutput(&out);
     Configuration conf;
 
-    conf.addGroup("");
-    CORRADE_COMPARE(out.str(), "Utility::ConfigurationGroup::addGroup(): empty group name\n");
+    {
+        /* With CORRADE_GRACEFUL_ASSERT the groups are leaked */
+        auto g = conf.addGroup("");
+        CORRADE_COMPARE(out.str(), "Utility::ConfigurationGroup::addGroup(): empty group name\n");
+        delete g;
+    }
 
-    out.str({});
-    conf.addGroup("a/b/c");
-    CORRADE_COMPARE(out.str(), "Utility::ConfigurationGroup::addGroup(): disallowed character in group name\n");
+    {
+        /* With CORRADE_GRACEFUL_ASSERT the groups are leaked */
+        out.str({});
+        auto g = conf.addGroup("a/b/c");
+        CORRADE_COMPARE(out.str(), "Utility::ConfigurationGroup::addGroup(): disallowed character in group name\n");
+        delete g;
+    }
 
     out.str({});
     conf.setValue("", "foo");
@@ -503,6 +513,8 @@ void ConfigurationTest::copy() {
     CORRADE_COMPARE(original->group("descendent")->value<int>("value"), 666);
     CORRADE_COMPARE(constructedCopy->group("descendent")->value<int>("value"), 42);
     CORRADE_COMPARE(assignedCopy->group("descendent")->value<int>("value"), 42);
+
+    delete constructedCopy;
 }
 
 void ConfigurationTest::move() {
@@ -523,6 +535,8 @@ void ConfigurationTest::move() {
     CORRADE_VERIFY(constructedMove->isEmpty());
     CORRADE_VERIFY(assignedMove->configuration() == &conf);
     CORRADE_VERIFY(assignedMove->group("descendent")->configuration() == &conf);
+
+    delete constructedMove;
 
     /* Move constructor for Configuration */
     Configuration confConstructedMove(std::move(conf));

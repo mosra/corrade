@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -76,8 +76,8 @@ class CORRADE_UTILITY_EXPORT NaClConsoleStreamBuffer: public std::stringbuf {
         enum class LogLevel: std::uint32_t {
             Tip = PP_LOGLEVEL_TIP,          /**< Tip */
             Log = PP_LOGLEVEL_LOG,          /**< Log */
-            Warning = PP_LOGLEVEL_WARNING,  /**< %Warning */
-            Error = PP_LOGLEVEL_ERROR       /**< %Error */
+            Warning = PP_LOGLEVEL_WARNING,  /**< Warning */
+            Error = PP_LOGLEVEL_ERROR       /**< Error */
         };
 
         /**

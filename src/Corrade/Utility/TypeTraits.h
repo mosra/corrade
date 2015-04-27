@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -33,6 +33,7 @@
 #include <utility>
 
 #include "Corrade/compatibility.h"
+#include "Corrade/configure.h"
 
 namespace Corrade { namespace Utility {
 
@@ -87,11 +88,16 @@ template<class U> class className {                                         \
 
 namespace Implementation {
     #ifndef CORRADE_GCC44_COMPATIBILITY
-    CORRADE_HAS_TYPE(HasBegin, decltype(std::declval<T>().begin()));
-    CORRADE_HAS_TYPE(HasEnd, decltype(std::declval<T>().end()));
+    CORRADE_HAS_TYPE(HasMemberBegin, decltype(std::declval<T>().begin()));
+    CORRADE_HAS_TYPE(HasMemberEnd, decltype(std::declval<T>().end()));
     #else
-    CORRADE_HAS_TYPE(HasBegin, decltype((*static_cast<const T*>(nullptr)).begin()));
-    CORRADE_HAS_TYPE(HasEnd, decltype((*static_cast<const T*>(nullptr)).end()));
+    CORRADE_HAS_TYPE(HasMemberBegin, decltype((*static_cast<const T*>(nullptr)).begin()));
+    CORRADE_HAS_TYPE(HasMemberEnd, decltype((*static_cast<const T*>(nullptr)).end()));
+    #endif
+    /** @todo Re-enable these for GCC 4.7 when I find some workaround */
+    #ifndef CORRADE_GCC47_COMPATIBILITY
+    CORRADE_HAS_TYPE(HasBegin, decltype(begin(std::declval<T>())));
+    CORRADE_HAS_TYPE(HasEnd, decltype(end(std::declval<T>())));
     #endif
     #ifndef CORRADE_GCC45_COMPATIBILITY
     CORRADE_HAS_TYPE(HasStdBegin, decltype(std::begin(std::declval<T>())));
@@ -103,17 +109,29 @@ namespace Implementation {
 @brief Traits class for checking whether given class is iterable
 
 Equivalent to `std::true_type` if the class is has either `begin()` and `end()`
-members or is usable with `std::begin()` and `std::end()`. Otherwise equivalent
-to `std::false_type`.
+members, is usable with free `begin()`/`end()` functions or has
+`std::begin()`/`std::end()` overloads. Otherwise equivalent to
+`std::false_type`.
 */
 #if !defined(CORRADE_GCC46_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
-template<class T> using IsIterable = std::integral_constant<bool, (Implementation::HasBegin<T>::Value || Implementation::HasStdBegin<T>::Value) && (Implementation::HasEnd<T>::Value || Implementation::HasStdEnd<T>::Value)>;
+template<class T> using IsIterable = std::integral_constant<bool,
+    (Implementation::HasMemberBegin<T>{} ||
+    #ifndef CORRADE_GCC47_COMPATIBILITY
+    Implementation::HasBegin<T>{} ||
+    #endif
+    Implementation::HasStdBegin<T>{}) && (Implementation::HasMemberEnd<T>{} ||
+    #ifndef CORRADE_GCC47_COMPATIBILITY
+    Implementation::HasEnd<T>{} ||
+    #endif
+    Implementation::HasStdEnd<T>{})>;
 #elif defined(CORRADE_MSVC2013_COMPATIBILITY)
-template<class T> struct IsIterable: public std::integral_constant<bool, (Implementation::HasBegin<T>::Value || Implementation::HasStdBegin<T>::Value) && (Implementation::HasEnd<T>::Value || Implementation::HasStdEnd<T>::Value)> {};
+template<class T> struct IsIterable: public std::integral_constant<bool,
+    (Implementation::HasMemberBegin<T>::Value || Implementation::HasBegin<T>::Value || Implementation::HasStdBegin<T>::Value) &&
+    (Implementation::HasMemberEnd<T>::Value || Implementation::HasEnd<T>::Value || Implementation::HasStdEnd<T>::Value)> {};
 #elif !defined(CORRADE_GCC45_COMPATIBILITY)
-template<class T> struct IsIterable: public std::integral_constant<bool, (Implementation::HasBegin<T>{} || Implementation::HasStdBegin<T>{}) && (Implementation::HasEnd<T>{} || Implementation::HasStdEnd<T>{})> {};
+template<class T> struct IsIterable: public std::integral_constant<bool, (Implementation::HasMemberBegin<T>{} || Implementation::HasStdBegin<T>{}) && (Implementation::HasMemberEnd<T>{} || Implementation::HasStdEnd<T>{})> {};
 #else
-template<class T> struct IsIterable: public std::integral_constant<bool, Implementation::HasBegin<T>::Value && Implementation::HasEnd<T>::Value> {};
+template<class T> struct IsIterable: public std::integral_constant<bool, Implementation::HasMemberBegin<T>::Value && Implementation::HasMemberEnd<T>::Value> {};
 #endif
 
 }}

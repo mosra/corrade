@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -34,7 +34,6 @@
 #include <utility>
 #include <type_traits>
 
-#include "Corrade/configure.h"
 #include "Corrade/Utility/TypeTraits.h"
 #include "Corrade/Utility/visibility.h"
 
@@ -43,7 +42,7 @@ namespace Corrade { namespace Utility {
 namespace Implementation { struct DebugOstreamFallback; }
 
 /**
-@brief %Debug output handler
+@brief Debug output handler
 
 Provides convenient stream interface for passing data to debug output (standard
 output). Data are separated with spaces and last value is enclosed with newline
@@ -54,8 +53,8 @@ character. Example usage:
 Debug() << "string" << 34 << 275.0f;
 
 // Redirect debug output to string
-std::ostringstream output;
-Debug::setOutput(&o);
+std::ostringstream out;
+Debug::setOutput(&out);
 Debug() << "the meaning of life, universe and everything is" << 42;
 
 // Mute debug output
@@ -66,7 +65,7 @@ Debug() << "noone should see my ebanking password" << password;
 Debug::setOutput();
 
 // Conditional debug output (avoid inserting newline where it's not desired)
-Debug d();
+Debug d;
 d << "Cannot foo";
 if(bar)
     d << "because of bar.";
@@ -76,8 +75,8 @@ else
 @endcode
 
 Support for printing more types can be added by implementing function
-`operator<<(%Debug, const T&)` for given type. If there is no `operator<<`
-implemented for printing given type using %Debug class, suitable `std::ostream`
+`operator<<(Debug, const T&)` for given type. If there is no `operator<<`
+implemented for printing given type using Debug class, suitable `std::ostream`
 `operator<<` overload is used as fallback, if found.
 
 @see @ref Warning, @ref Error, @ref CORRADE_ASSERT(),
@@ -195,7 +194,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         /**
          * @brief Print UTF-32 character to debug output
          *
-         * Prints value as %Unicode codepoint, i.e. `U+0061`.
+         * Prints value as Unicode codepoint, i.e. `U+0061`.
          */
         Debug operator<<(char32_t value);
         #endif
@@ -203,7 +202,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         /**
          * @brief Print UTF-32 character literal to debug output
          *
-         * Prints value as list of %Unicode codepoints, i.e.
+         * Prints value as list of Unicode codepoints, i.e.
          * `[U+0061, U+0062, U+0063}`.
          */
         Debug operator<<(const char32_t* value);
@@ -239,7 +238,7 @@ class CORRADE_UTILITY_EXPORT Debug {
 #ifdef DOXYGEN_GENERATING_OUTPUT
 /** @relates Debug
 @brief Operator for printing custom types to debug
-@param debug     %Debug class
+@param debug     Debug class
 @param value     Value to be printed
 
 Support for printing custom types (i.e. those not handled by `iostream`) can
@@ -292,7 +291,7 @@ template<class A, class B> Debug operator<<(Debug debug, const std::pair<A, B>& 
 }
 
 /**
-@brief %Warning output handler
+@brief Warning output handler
 
 Same as @ref Debug, but by default writes output to standard error output.
 Thus it is possible to separate / mute @ref Debug, @ref Warning and @ref Error
@@ -319,7 +318,7 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
 };
 
 /**
-@brief %Error output handler
+@brief Error output handler
 
 @copydetails Warning
 */

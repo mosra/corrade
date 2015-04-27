@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -23,16 +23,16 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-namespace Corrade { namespace PluginManager {
+namespace Corrade {
 /** @page plugin-management Plugin management tutorial
 
-The PluginManager class provides hierarchical plugin management functions.
-Main features:
+The @ref PluginManager::Manager class provides hierarchical plugin management
+functions. Main features:
 
 - Plugin manager version and plugin interface version checks to avoid
   unexpected behavior
 - Both static and dynamic plugin support
-- Plugin dependecies and conflicts
+- Plugin dependecies and aliases
 - Usage checks, manager doesn't allow plugin unload if there are any active
   plugin instances
 
@@ -46,18 +46,18 @@ compiled and managed.
 Plugin interface is class with well defined abstract public methods, which
 defines the way how to work with a particular plugin.
 
-Every plugin interface must be derived from AbstractPlugin class and must
-reimplement AbstractPlugin constructor. This is needed for instance use checks,
-as described above. Plugin classes derived from that interface must reimplement
-the constructor too, of course.
+Every plugin interface must be derived from @ref PluginManager::AbstractPlugin
+class and must reimplement @ref PluginManager::AbstractPlugin constructor. This
+is needed for instance use checks, as described above. Plugin classes derived
+from that interface must reimplement the constructor too, of course.
 
-Additionaly, interface must be defined with CORRADE_PLUGIN_INTERFACE() macro in
-header to make sure loaded plugins will use the same interface in the same
-version. One single argument is an string which uniquely names that particular
-interface. A good practice is to use "Java package name"-style syntax because
-this makes the name as unique as possible. The interface name should also
-contain version identifier to make sure the plugin will not be loaded with
-incompatible interface version.
+Additionaly, interface must be defined with @ref CORRADE_PLUGIN_INTERFACE()
+macro in header to make sure loaded plugins will use the same interface in the
+same version. One single argument is an string which uniquely names that
+particular interface. A good practice is to use "Java package name"-style
+syntax because this makes the name as unique as possible. The interface name
+should also contain version identifier to make sure the plugin will not be
+loaded with incompatible interface version.
 
 So, there is an example interface class:
 @dontinclude pluginmanager/AbstractAnimal.h
@@ -71,13 +71,13 @@ interface. The plugin class in then registered as static or dynamic plugin.
 Every plugin must also have its configuration file, which contains information
 about plugin dependencies and optionally also plugin-specific data. Full
 specification of plugin configuration file syntax can be found in
-PluginMetadata class documentation.
+@ref PluginManager::PluginMetadata class documentation.
 
 First we define one static plugin, which will be included in the application
 out-of-the-box. After declaring that plugin we register it with macro
-CORRADE_PLUGIN_REGISTER(). The first argument is plugin name (which will be
-used when instancing the plugin), second argument is name of the plugin class
-and third is name of used plugin interface.
+@ref CORRADE_PLUGIN_REGISTER(). The first argument is plugin name (which will
+be used when instancing the plugin), second argument is name of the plugin
+class and third is name of used plugin interface.
 @dontinclude pluginmanager/Canary.cpp
 @skip class Canary
 @until };
@@ -99,7 +99,7 @@ plugin manager.
 @skip CORRADE_PLUGIN_REGISTER
 @until )
 
-Configuration file for Dog plugin:
+Configuration file for `Dog` plugin:
 @include pluginmanager/Dog.conf
 
  - @ref pluginmanager/AbstractAnimal.h
@@ -128,12 +128,13 @@ one.
 
 @section plugin-management-management Plugin management
 
-Now it's time to initialize PluginManager class and make use of the plugins.
-PluginManager is templated class and that means it will load and make
-available only plugins with given interface specified as template.
+Now it's time to initialize @ref PluginManager::Manager class and make use of
+the plugins. @ref PluginManager::Manager is templated class and that means it
+will load and make available only plugins with the interface specified as
+template.
 
 To make sure plugin manager will find the static plugins, we must import them
-with a macro CORRADE_PLUGIN_IMPORT() (for example at the beginning of main
+with a macro @ref CORRADE_PLUGIN_IMPORT() (for example at the beginning of main
 function), which takes plugin name as argument.
 
 This example application will load plugin specified as command-line argument
@@ -181,4 +182,4 @@ as argument:
     Has tail:  yes
 
  */
-}}
+}

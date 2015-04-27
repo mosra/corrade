@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -25,6 +25,9 @@
 
 #include "Receiver.h"
 
+#include <utility>
+
+#include "Corrade/Interconnect/Connection.h"
 #include "Corrade/Interconnect/Emitter.h"
 #include "Corrade/Utility/Assert.h"
 

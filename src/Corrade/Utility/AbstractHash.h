@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -127,7 +127,7 @@ template<std::size_t digestSize> class AbstractHash {
         typedef HashDigest<digestSize> Digest;
 
         /**
-         * @brief %Digest size
+         * @brief Digest size
          *
          * Size of the raw digest in bytes. Hexadecimal string representation
          * has double size.

@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -27,19 +27,19 @@
 
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/AbstractHash.h"
+#include "Corrade/Utility/Debug.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class HashDigestTest: public TestSuite::Tester {
-    public:
-        HashDigestTest();
+struct HashDigestTest: TestSuite::Tester {
+    explicit HashDigestTest();
 
-        void constructEmpty();
-        void constructBytes();
-        void constructByteArray();
-        void constructHexString();
+    void constructEmpty();
+    void constructBytes();
+    void constructByteArray();
+    void constructHexString();
 
-        void debug();
+    void debug();
 };
 
 HashDigestTest::HashDigestTest() {

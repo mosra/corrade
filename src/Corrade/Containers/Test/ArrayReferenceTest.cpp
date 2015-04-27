@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -23,34 +23,39 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <sstream>
+
 #include "Corrade/Containers/Array.h"
 #include "Corrade/TestSuite/Tester.h"
 
 namespace Corrade { namespace Containers { namespace Test {
 
-class ArrayReferenceTest: public TestSuite::Tester {
-    public:
-        explicit ArrayReferenceTest();
+struct ArrayReferenceTest: TestSuite::Tester {
+    explicit ArrayReferenceTest();
 
-        void constructEmpty();
-        void constructNullptr();
-        void constructNullptrSize();
-        void construct();
-        void constructFixedSize();
-        void constructArray();
+    void constructEmpty();
+    void constructNullptr();
+    void constructNullptrSize();
+    void construct();
+    void constructFixedSize();
+    void constructArray();
 
-        void boolConversion();
-        void pointerConversion();
+    void boolConversion();
+    void pointerConversion();
 
-        void emptyCheck();
-        void access();
-        #ifndef CORRADE_GCC45_COMPATIBILITY
-        void rangeBasedFor();
-        #endif
+    void emptyCheck();
+    void access();
+    #ifndef CORRADE_GCC45_COMPATIBILITY
+    void rangeBasedFor();
+    #endif
 
-        void constReference();
-        void voidConstruction();
-        void voidConversion();
+    void sliceInvalid();
+    void sliceNullptr();
+    void slice();
+
+    void constReference();
+    void voidConstruction();
+    void voidConversion();
 };
 
 typedef Containers::Array<int> Array;
@@ -74,6 +79,10 @@ ArrayReferenceTest::ArrayReferenceTest() {
               #ifndef CORRADE_GCC45_COMPATIBILITY
               &ArrayReferenceTest::rangeBasedFor,
               #endif
+
+              &ArrayReferenceTest::sliceInvalid,
+              &ArrayReferenceTest::sliceNullptr,
+              &ArrayReferenceTest::slice,
 
               &ArrayReferenceTest::constReference,
               &ArrayReferenceTest::voidConstruction,
@@ -203,6 +212,68 @@ void ArrayReferenceTest::rangeBasedFor() {
     CORRADE_COMPARE(b[4], 3);
 }
 #endif
+
+void ArrayReferenceTest::sliceInvalid() {
+    int data[5] = {1, 2, 3, 4, 5};
+    ArrayReference a = data;
+
+    std::ostringstream out;
+    Error::setOutput(&out);
+
+    a.slice(a - 1, a);
+    a.slice(a + 5, a + 6);
+    a.slice(a + 2, a + 1);
+
+    CORRADE_COMPARE(out.str(), "Containers::ArrayReference::slice(): slice out of range\n"
+                               "Containers::ArrayReference::slice(): slice out of range\n"
+                               "Containers::ArrayReference::slice(): slice out of range\n");
+}
+
+void ArrayReferenceTest::sliceNullptr() {
+    ArrayReference a{nullptr, 5};
+
+    ArrayReference b = a.prefix(nullptr);
+    CORRADE_VERIFY(!b);
+    CORRADE_COMPARE(b.size(), 0);
+
+    ArrayReference c = a.suffix(nullptr);
+    CORRADE_VERIFY(!c);
+    CORRADE_COMPARE(c.size(), 5);
+
+    int data[5];
+    ArrayReference d{data};
+
+    ArrayReference e = d.prefix(nullptr);
+    CORRADE_VERIFY(!e);
+    CORRADE_COMPARE(e.size(), 0);
+
+    ArrayReference f = d.suffix(nullptr);
+    CORRADE_VERIFY(!f);
+    CORRADE_COMPARE(f.size(), 0);
+}
+
+void ArrayReferenceTest::slice() {
+    int data[5] = {1, 2, 3, 4, 5};
+    ArrayReference a = data;
+
+    ArrayReference b = a.slice(1, 4);
+    CORRADE_COMPARE(b.size(), 3);
+    CORRADE_COMPARE(b[0], 2);
+    CORRADE_COMPARE(b[1], 3);
+    CORRADE_COMPARE(b[2], 4);
+
+    ArrayReference c = a.prefix(3);
+    CORRADE_COMPARE(c.size(), 3);
+    CORRADE_COMPARE(c[0], 1);
+    CORRADE_COMPARE(c[1], 2);
+    CORRADE_COMPARE(c[2], 3);
+
+    ArrayReference d = a.suffix(2);
+    CORRADE_COMPARE(d.size(), 3);
+    CORRADE_COMPARE(d[0], 3);
+    CORRADE_COMPARE(d[1], 4);
+    CORRADE_COMPARE(d[2], 5);
+}
 
 void ArrayReferenceTest::constReference() {
     const int a[] = {3, 4, 7, 12, 0, -15};

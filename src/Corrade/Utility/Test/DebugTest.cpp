@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -26,6 +26,7 @@
 #include <map>
 #include <set>
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include "Corrade/TestSuite/Tester.h"
@@ -33,20 +34,19 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class DebugTest: public TestSuite::Tester {
-    public:
-        DebugTest();
+struct DebugTest: TestSuite::Tester {
+    explicit DebugTest();
 
-        void debug();
-        void boolean();
-        void chars();
-        void unicode();
-        void custom();
-        void flags();
+    void debug();
+    void boolean();
+    void chars();
+    void unicode();
+    void custom();
+    void flags();
 
-        void iterable();
-        void ostreamFallback();
-        void ostreamFallbackPriority();
+    void iterable();
+    void ostreamFallback();
+    void ostreamFallbackPriority();
 };
 
 DebugTest::DebugTest() {

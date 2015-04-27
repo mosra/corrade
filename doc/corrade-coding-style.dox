@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -108,7 +108,7 @@ Headers have an strict structure. Include guards are basically include path
 with slashes replaced with underscores to make refactoring as easy as possible.
 Directly after them is license block, blank line, then file documentation,
 blank line and after that the contents of the header. Include guard ending is
-only <tt>#</tt><tt>endif</tt>, without any additional comments.
+only `#``endif`, without any additional comments.
 
 Source file have similar structure as headers - first license block, then
 blank line, then the includes, then blank line, then contents of the file.
@@ -464,7 +464,7 @@ use". Ideally the code should be compilable with `-fno-rtti -fno-exceptions`.
 @subsubsection corrade-coding-style-cpp-heavy-headers Heavy STL headers
 
 Don't add heavy STL includes in header files. Each of these
-<tt>#</tt><tt>include</tt>s brings >20k lines of source code which needs to be
+`#``include`s brings >20k lines of source code which needs to be
 preprocessed and compiled even if majority of it is later tossed out. Prefer to
 include these only in source files. The following headers are the heaviest,
 numbers taken from `g++-4.8 -std=c++11 -E | wc -l`:
@@ -491,9 +491,9 @@ performance issues when using it for integers only. By explicitly calling
 `std::abs()` you ensure that proper overload is always selected.
 
 `using namespace` keyword should be used only for root namespace, i.e.
-`using namespace %Corrade` and not `using namespace %Corrade::Utility`. If you
+`using namespace Corrade` and not `using namespace Corrade::Utility`. If you
 are using some class from subnamespace in many places, use only that particular
-name, e.g. `using %Corrade::Utility::ConfigurationGroup` and try to restrict
+name, e.g. `using Corrade::Utility::ConfigurationGroup` and try to restrict
 it to as small block of code as possible (e.g. place the `using` only in
 function body).
 
@@ -505,7 +505,7 @@ in the default namespace!).
 @subsubsection corrade-coding-style-cpp-backward C-style casts
 
 Don't use C-style casts, use C++-style `static_cast` and `reinterpret_cast`
-instead. %Corrade enables compiler warning about their usage in `CORRADE_CXX_FLAGS`
+instead. Corrade enables compiler warning about their usage in `CORRADE_CXX_FLAGS`
 CMake variable. You can also use "constructor cast" instead of `static_cast`
 when doing non-harmful conversions, such as integer to float or strongly-typed
 enum to its underlying type.
@@ -640,7 +640,7 @@ with @c \@todoc instead of @c \@todo. They will appear on @ref todoc
 
 @subsubsection corrade-coding-style-documentation-commands-debugoperator Debugging operators
 
-Operators for printing types on %Corrade's debug output should be marked with
+Operators for printing types on Corrade's debug output should be marked with
 @c \@debugoperator, e.g.:
 @code
 // @debugoperator{Hash}

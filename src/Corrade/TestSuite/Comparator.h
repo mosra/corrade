@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -31,6 +31,7 @@
 
 #include <string>
 
+#include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Debug.h"
 
 namespace Corrade { namespace TestSuite {
@@ -47,7 +48,7 @@ You can reimplement this class for your own data types and even pseudo types
 for providing different ways to compare the same type.
 
 You have to implement `operator()()` for comparison of two values with
-arbitrary type and `%printErrorMessage()` for printing error message when the
+arbitrary type and `printErrorMessage()` for printing error message when the
 comparison failed.
 
 @anchor TestSuite-Comparator-pseudo-types
@@ -138,7 +139,7 @@ template<class T> class Comparator {
     public:
         explicit Comparator();
 
-        /** @brief %Compare two values */
+        /** @brief Compare two values */
         bool operator()(const T& actual, const T& expected);
 
         /** @brief Print error message, assuming the two values are inequal */
@@ -160,8 +161,22 @@ template<class T> bool Comparator<T>::operator()(const T& actual, const T& expec
 }
 
 template<class T> void Comparator<T>::printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
+    CORRADE_INTERNAL_ASSERT(actualValue && expectedValue);
     e << "Values" << actual << "and" << expected << "are not the same, actual is\n       "
       << *actualValue << "\n        but expected\n       " << *expectedValue;
+}
+
+namespace Implementation {
+
+template<class T> struct ComparatorOperatorTraits;
+
+template<class T, class U, class V> struct ComparatorOperatorTraits<bool(T::*)(U, V)> {
+    typedef typename std::decay<U>::type ActualType;
+    typedef typename std::decay<V>::type ExpectedType;
+};
+
+template<class T> struct ComparatorTraits: ComparatorOperatorTraits<decltype(&Comparator<T>::operator())> {};
+
 }
 
 }}

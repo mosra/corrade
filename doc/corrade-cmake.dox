@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -25,14 +25,14 @@
 
 namespace Corrade {
 /** @page corrade-cmake Usage with CMake
-@brief Guide how to find and use %Corrade with CMake build system
+@brief Guide how to find and use Corrade with CMake build system
 
-%Corrade uses CMake build system for both building and integration into your
+Corrade uses CMake build system for both building and integration into your
 projects. The logic is in module `FindCorrade.cmake` distributed with the
 library in `modules/` directory, you are encouraged to copy it into your
 project and add path to the file to `CMAKE_MODULE_PATH`. Otherwise, if CMake
 won't be able to find this file in predefined locations, it will error out even
-if %Corrade might be installed on the system.
+if Corrade might be installed on the system.
 
 Note that the module file is updated as the library evolves, you are encouraged
 to update your copy from time to time to avoid strange building issues.
@@ -45,17 +45,20 @@ Basic usage is:
 
     find_package(Corrade REQUIRED)
 
-This module tries to find %Corrade library and then defines these variables:
+This module tries to find Corrade library and then defines these variables:
 
-- `CORRADE_FOUND` -- True if %Corrade is found
-- `CORRADE_INCLUDE_DIR` -- Root include dir
-- `CORRADE_INTERCONNECT_LIBRARIES` -- Interconnect library and dependent
-  libraries
-- `CORRADE_UTILITY_LIBRARIES` -- Utility library and dependent libraries
-- `CORRADE_PLUGINMANAGER_LIBRARIES` -- PluginManager library and dependent
-  libraries
-- `CORRADE_TESTSUITE_LIBRARIES` -- TestSuite library and dependent libraries
-- `CORRADE_RC_EXECUTABLE` -- Resource compiler executable
+-   `CORRADE_FOUND` -- True if Corrade is found
+-   `CORRADE_INCLUDE_DIR` -- Root include dir
+-   `CORRADE_INTERCONNECT_LIBRARIES` -- @ref Interconnect library and dependent
+    libraries
+-   `CORRADE_UTILITY_LIBRARIES` -- @ref Utility library and dependent libraries
+-   `CORRADE_PLUGINMANAGER_LIBRARIES` -- @ref PluginManager library and
+    dependent libraries
+-   `CORRADE_TESTSUITE_LIBRARIES` -- @ref TestSuite library and dependent
+    libraries
+-   `CORRADE_RC_EXECUTABLE` -- Resource compiler executable
+-   `CORRADE_LIB_SUFFIX_MODULE` -- Path to `CorradeLibSuffix.cmake` module,
+    which tries to autodetect value of `LIB_SUFFIX` variable.
 
 The package is found if either debug or release version of each library is
 found. If both debug and release libraries are found, proper version is chosen
@@ -64,16 +67,16 @@ linked to debug libraries, `Release` build to release libraries).
 
 On multi-configuration build systems (such as Visual Studio or XCode) the
 preprocessor variable `CORRADE_IS_DEBUG_BUILD` is defined if given build
-configuration is Debug (not Corrade itself, but build configuration of the
+configuration is `Debug` (not Corrade itself, but build configuration of the
 project using it). Useful e.g. for selecting proper plugin directory. On
 single-configuration build systems (such as Makefiles) this information is not
 needed and thus the variable is not defined in any case.
 
-%Corrade configures the compiler to use C++11 standard (if it is not already
+Corrade configures the compiler to use C++11 standard (if it is not already
 configured to do so). Additionally you can use `CORRADE_CXX_FLAGS` to enable
 additional pedantic set of warnings and enable hidden visibility by default.
 
-Features of found %Corrade library are exposed in these variables, they are
+Features of found Corrade library are exposed in these variables, they are
 also available as preprocessor variables if you include
 @ref Corrade/Corrade.h "Corrade/Corrade.h":
 
@@ -104,16 +107,12 @@ also available as preprocessor variables if you include
 -   `CORRADE_TARGET_EMSCRIPTEN` -- Defined if compiled for Emscripten
 -   `CORRADE_TARGET_ANDROID` -- Defined if compiled for Android
 
-If `CORRADE_BUILD_DEPRECATED` is defined, the `CORRADE_INCLUDE_DIR` variable
-also contains path directly to Corrade directory (i.e. for includes without
-`Corrade/` prefix).
-
 Note that [each namespace](namespaces.html) contains more detailed guide how to
 use given library with CMake.
 
-%Corrade provides these macros and functions:
+Corrade provides these macros and functions:
 
-### Add unit test using %Corrade's TestSuite
+### Add unit test using Corrade's TestSuite
 @anchor corrade-cmake-add-test
 
     corrade_add_test(test_name
@@ -130,7 +129,7 @@ must be called explicitly.
 
     corrade_add_resource(name resources.conf)
 
-Depends on corrade-rc, which is part of %Corrade utilities. This command
+Depends on corrade-rc, which is part of Corrade utilities. This command
 generates resource data using given configuration file in current build
 directory. Argument name is name under which the resources can be explicitly
 loaded. Variable `name` contains compiled resource filename, which is then

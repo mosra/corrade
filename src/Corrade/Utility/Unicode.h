@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -29,7 +29,9 @@
  * @brief Class @ref Corrade::Utility::Unicode
  */
 
+#include <cstddef>
 #include <string>
+#include <utility>
 #ifdef __MINGW32__
 #include <vector>
 #endif
@@ -38,13 +40,13 @@
 
 namespace Corrade { namespace Utility {
 
-/** @brief %Unicode utilities */
+/** @brief Unicode utilities */
 class CORRADE_UTILITY_EXPORT Unicode {
     public:
         /**
          * @brief Next UTF-8 character
          *
-         * Returns %Unicode codepoint of character on the cursor and position
+         * Returns Unicode codepoint of character on the cursor and position
          * of the following character. If an error occurs, returns position of
          * next byte and `0xffffffffu` as codepoint.
          */

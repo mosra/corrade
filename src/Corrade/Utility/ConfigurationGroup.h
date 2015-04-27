@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -29,10 +29,13 @@
  * @brief Class @ref Corrade::Utility::ConfigurationGroup
  */
 
+#include <utility>
+#include <string>
 #include <vector>
 
 #include "Corrade/Utility/ConfigurationValue.h"
 #include "Corrade/Utility/Utility.h"
+#include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
 
@@ -44,7 +47,7 @@ documentation for usage example.
 @todo Faster access to elements via multimap, find() and equal_range()
 */
 class CORRADE_UTILITY_EXPORT ConfigurationGroup {
-    friend class Configuration;
+    friend Configuration;
 
     public:
         /**
@@ -264,7 +267,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         /**
          * @brief All values with given key
          * @param key       Key
-         * @param flags     %Flags
+         * @param flags     Flags
          *
          * If @p T is not `std::string`, uses
          * @ref ConfigurationValue::fromString() to convert the value to given
@@ -427,7 +430,7 @@ template<class T> std::vector<T> ConfigurationGroup::values(const std::string& k
     for(std::vector<std::string>::const_iterator it = stringValues.begin(); it != stringValues.end(); ++it)
         _values.push_back(ConfigurationValue<T>::fromString(*it, flags));
 
-    return std::move(_values);
+    return _values;
 }
 
 }}

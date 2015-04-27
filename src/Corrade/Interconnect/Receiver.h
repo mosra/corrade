@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -29,8 +29,10 @@
  * @brief Class @ref Corrade::Interconnect::Receiver
  */
 
+#include <cstddef>
 #include <vector>
 
+#include "Corrade/Interconnect/Interconnect.h"
 #include "Corrade/Interconnect/visibility.h"
 
 namespace Corrade { namespace Interconnect {
@@ -40,15 +42,15 @@ namespace Implementation {
 }
 
 /**
-@brief %Receiver object
+@brief Receiver object
 
 Contains member function slots. See @ref interconnect for introduction.
 @see @ref Emitter, @ref Connection
 @todo Allow move
 */
 class CORRADE_INTERCONNECT_EXPORT Receiver {
-    friend class Implementation::AbstractConnectionData;
-    friend class Emitter;
+    friend Implementation::AbstractConnectionData;
+    friend Emitter;
 
     public:
         explicit Receiver();

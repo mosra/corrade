@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <functional>
 #include <sstream>
+#include <utility>
 
 #ifndef CORRADE_TARGET_WINDOWS
 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -109,13 +110,25 @@ void AbstractManager::importStaticPlugin(std::string plugin, int _version, std::
 }
 #endif
 
-#if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-AbstractManager::AbstractManager(std::string pluginDirectory): _plugins(initializeGlobalPluginStorage()) {
+/* GCC 4.7 doesn't like initializing references with {} */
+AbstractManager::AbstractManager(std::string pluginInterface, std::string pluginDirectory): _plugins(initializeGlobalPluginStorage()), _pluginInterface{std::move(pluginInterface)} {
+    /* Find static plugins which have the same interface and have not
+        assigned manager to them */
+    for(auto p: _plugins.plugins) {
+        if(p.second->loadState != LoadState::Static || p.second->manager != nullptr || p.second->staticPlugin->interface != _pluginInterface)
+            continue;
+
+        /* Assign the plugin to this manager and initialize it */
+        p.second->manager = this;
+        p.second->staticPlugin->initializer();
+    }
+
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
     setPluginDirectory(std::move(pluginDirectory));
+    #else
+    static_cast<void>(pluginDirectory);
+    #endif
 }
-#else
-AbstractManager::AbstractManager(std::string): _plugins(initializeGlobalPluginStorage()) {}
-#endif
 
 AbstractManager::~AbstractManager() {
     /* Unload all plugins associated with this plugin manager */
@@ -197,6 +210,10 @@ LoadState AbstractManager::unloadRecursiveInternal(Plugin& plugin) {
         "PluginManager::Manager: cannot unload plugin" << plugin.metadata._name << "on manager destruction:" << after, LoadState());
 
     return after;
+}
+
+std::string AbstractManager::pluginInterface() const {
+    return _pluginInterface;
 }
 
 std::string AbstractManager::pluginDirectory() const {
@@ -444,17 +461,8 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
     initializer();
 
     /* Everything is okay, add this plugin to usedBy list of each dependency */
-    for(auto it = dependencies.begin(); it != dependencies.end(); ++it) {
-        Plugin& dependency = *it;
-
-        /* If the plugin is not static with no associated manager, use its
-           manager for adding this plugin */
-        if(dependency.manager)
-            dependency.manager->addUsedBy(dependency.metadata._name, plugin.metadata._name);
-
-        /* Otherwise add this plugin manually */
-        else dependency.metadata._usedBy.push_back(plugin.metadata._name);
-    }
+    for(auto it = dependencies.begin(); it != dependencies.end(); ++it)
+        it->get().metadata._usedBy.push_back(plugin.metadata._name);
 
     /* Update plugin object, set state to loaded */
     plugin.loadState = LoadState::Loaded;
@@ -511,20 +519,13 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
     /* Remove this plugin from "used by" list of dependencies */
     for(auto it = plugin.metadata.depends().cbegin(); it != plugin.metadata.depends().cend(); ++it) {
         auto mit = _plugins.plugins.find(*it);
+        if(mit == _plugins.plugins.end()) continue;
 
-        if(mit != _plugins.plugins.end()) {
-            /* If the plugin is not static with no associated manager, use
-               its manager for removing this plugin */
-            if(mit->second->manager)
-                mit->second->manager->removeUsedBy(mit->first, plugin.metadata._name);
+        for(auto it = mit->second->metadata._usedBy.begin(); it != mit->second->metadata._usedBy.end(); ++it) {
+            if(*it != plugin.metadata._name) continue;
 
-            /* Otherwise remove this plugin manually */
-            else for(auto it = mit->second->metadata._usedBy.begin(); it != mit->second->metadata._usedBy.end(); ++it) {
-                if(*it == plugin.metadata._name) {
-                    mit->second->metadata._usedBy.erase(it);
-                    break;
-                }
-            }
+            mit->second->metadata._usedBy.erase(it);
+            break;
         }
     }
 
@@ -536,8 +537,7 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
     if(finalizer == nullptr) {
         Error() << "PluginManager::Manager::unload(): cannot get finalizer of plugin" << plugin.metadata._name + ":" << dlerror();
         /* Not fatal, continue with unloading */
-    }
-    finalizer();
+    } else finalizer();
 
     /* Close the module */
     #ifndef CORRADE_TARGET_WINDOWS
@@ -590,27 +590,6 @@ void AbstractManager::unregisterInstance(const std::string& plugin, AbstractPlug
     _instances.erase(pos);
 
     if(_instances.empty()) instances.erase(plugin);
-}
-
-void AbstractManager::addUsedBy(const std::string& plugin, std::string usedBy) {
-    auto found = _plugins.plugins.find(plugin);
-
-    CORRADE_INTERNAL_ASSERT(found != _plugins.plugins.end());
-
-    found->second->metadata._usedBy.push_back(std::move(usedBy));
-}
-
-void AbstractManager::removeUsedBy(const std::string& plugin, const std::string& usedBy) {
-    auto found = _plugins.plugins.find(plugin);
-
-    CORRADE_INTERNAL_ASSERT(found != _plugins.plugins.end());
-
-    for(auto it = found->second->metadata._usedBy.begin(); it != found->second->metadata._usedBy.end(); ++it) {
-        if(*it == usedBy) {
-            found->second->metadata._usedBy.erase(it);
-            return;
-        }
-    }
 }
 
 void* AbstractManager::instanceInternal(const std::string& plugin) {

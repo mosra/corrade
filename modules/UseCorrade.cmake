@@ -4,7 +4,7 @@
 #
 #   This file is part of Corrade.
 #
-#   Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+#   Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
 #             Vladimír Vondruš <mosra@centrum.cz>
 #
 #   Permission is hereby granted, free of charge, to any person obtaining a
@@ -75,7 +75,10 @@ endif()
 # GCC/Clang-specific compiler flags
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?Clang" OR CORRADE_TARGET_EMSCRIPTEN)
     # Mandatory C++ flags
-    if(NOT CMAKE_CXX_FLAGS MATCHES "-std=c[+][+](0x|11|1y)")
+    if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
+        # TODO: use -std=c++11 when we don't have to maintain compatibility
+        # with anything older than GCC 4.7
+        # TODO: CMake 3.1 has CMAKE_CXX_STANDARD and CMAKE_CXX_STANDARD_REQUIRED
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
     endif()
 
@@ -127,7 +130,7 @@ elseif(MSVC)
 endif()
 
 # Use C++11-enabled libcxx on OSX
-if(CORRADE_TARGET_APPLE AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?Clang")
+if(CORRADE_TARGET_APPLE AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?Clang" AND NOT CMAKE_CXX_FLAGS MATCHES "-stdlib=")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lc++")
 endif()
@@ -249,7 +252,7 @@ function(corrade_add_static_plugin plugin_name install_dir metadata_file)
     # Create static library
     add_library(${plugin_name} STATIC ${ARGN} ${${plugin_name}})
     set_target_properties(${plugin_name} PROPERTIES
-        COMPILE_FLAGS "-DCORRADE_STATIC_PLUGIN ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}"
+        COMPILE_FLAGS "-DCORRADE_STATIC_PLUGIN"
         DEBUG_POSTFIX "-d")
 
     # Install, if not into the same place

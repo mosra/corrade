@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -38,10 +38,11 @@ namespace Corrade { namespace Interconnect {
 
 namespace Implementation {
     class AbstractConnectionData;
+    class SignalDataHash;
 
     class SignalData {
-        friend class Interconnect::Emitter;
-        friend class SignalDataHash;
+        friend Interconnect::Emitter;
+        friend SignalDataHash;
 
         public:
             static const std::size_t Size = 2*sizeof(void*)/sizeof(std::size_t);
@@ -73,10 +74,10 @@ namespace Implementation {
 }
 
 /**
-@brief %Connection
+@brief Connection
 
-Returned by @ref Emitter::connect(), allows to remove or reestablish the
-connection. Destruction of %Connection object does not remove the connection,
+Returned by @ref Interconnect::connect(), allows to remove or reestablish the
+connection. Destruction of Connection object does not remove the connection,
 after that the only possibility to remove the connection is to disconnect whole
 emitter or receiver or disconnect everything connected to given signal using
 @ref Emitter::disconnectSignal(), @ref Emitter::disconnectAllSignals() or
@@ -86,8 +87,8 @@ object.
 @see @ref interconnect, @ref Emitter, @ref Receiver
 */
 class CORRADE_INTERCONNECT_EXPORT Connection {
-    friend class Emitter;
-    friend class Receiver;
+    friend Emitter;
+    friend Receiver;
 
     public:
         /** @brief Copying is not allowed */
@@ -133,7 +134,7 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
          * If connection is not possible, returns `false`, otherwise creates
          * the connection (if not already connected) and returns `true`.
          * @see @ref isConnectionPossible(), @ref isConnected(),
-         *      @ref Emitter::connect()
+         *      @ref Interconnect::connect()
          */
         bool connect();
 

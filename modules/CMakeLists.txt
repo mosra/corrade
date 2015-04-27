@@ -1,7 +1,7 @@
 #
 #   This file is part of Corrade.
 #
-#   Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+#   Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
 #             Vladimír Vondruš <mosra@centrum.cz>
 #
 #   Permission is hereby granted, free of charge, to any person obtaining a
@@ -23,12 +23,10 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-set(Magnum_MODULES
+set(Corrade_MODULES
+    CorradeConfig.cmake
     CorradeLibSuffix.cmake
+    FindCorrade.cmake
     UseCorrade.cmake)
 
-if(WITH_FIND_MODULE)
-    install(FILES FindCorrade.cmake ${Magnum_MODULES} DESTINATION ${CORRADE_CMAKE_FIND_MODULE_INSTALL_DIR})
-else()
-    install(FILES ${Magnum_MODULES} DESTINATION ${CORRADE_CMAKE_MODULE_INSTALL_DIR})
-endif()
+install(FILES ${Corrade_MODULES} DESTINATION ${CORRADE_CMAKE_MODULE_INSTALL_DIR})

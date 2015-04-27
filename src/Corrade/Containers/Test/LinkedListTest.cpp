@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -30,19 +30,20 @@
 
 namespace Corrade { namespace Containers { namespace Test {
 
-class LinkedListTest: public TestSuite::Tester {
-    public:
-        LinkedListTest();
+struct LinkedListTest: TestSuite::Tester {
+    explicit LinkedListTest();
 
-        void listBackReference();
-        void insert();
-        void insertFromOtherList();
-        void insertBeforeFromOtherList();
-        void cut();
-        void cutFromOtherList();
-        void clear();
-        void moveList();
-        void moveItem();
+    void listBackReference();
+    void insert();
+    void insertFromOtherList();
+    void insertBeforeFromOtherList();
+    void cut();
+    void cutFromOtherList();
+    void clear();
+    void moveList();
+    void moveItem();
+
+    void rangeBasedFor();
 };
 
 class Item: public LinkedListItem<Item> {
@@ -72,7 +73,9 @@ LinkedListTest::LinkedListTest() {
               &LinkedListTest::cutFromOtherList,
               &LinkedListTest::clear,
               &LinkedListTest::moveList,
-              &LinkedListTest::moveItem});
+              &LinkedListTest::moveItem,
+
+              &LinkedListTest::rangeBasedFor});
 }
 
 void LinkedListTest::listBackReference() {
@@ -376,6 +379,27 @@ void LinkedListTest::moveItem() {
     CORRADE_VERIFY(list.last() == &item5);
 
     list.cut(&item5);
+}
+
+void LinkedListTest::rangeBasedFor() {
+    LinkedList list;
+    Item item;
+    Item item2;
+    Item item3;
+    list.insert(&item);
+    list.insert(&item2);
+    list.insert(&item3);
+
+    {
+        std::vector<Item*> items;
+        for(auto&& i: list) items.push_back(&i);
+        CORRADE_COMPARE(items, (std::vector<Item*>{&item, &item2, &item3}));
+    } {
+        const LinkedList& clist = list;
+        std::vector<const Item*> items;
+        for(auto&& i: clist) items.push_back(&i);
+        CORRADE_COMPARE(items, (std::vector<const Item*>{&item, &item2, &item3}));
+    }
 }
 
 }}}

@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -29,15 +29,18 @@
  * @brief Class @ref Corrade::PluginManager::AbstractManager
  */
 
-#include <vector>
-#include <string>
+#include <iosfwd>
 #include <map>
+#include <string>
+#include <vector>
 
 #include "Corrade/compatibility.h"
 #include "Corrade/Containers/EnumSet.h"
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/PluginManager/PluginManager.h"
+#include "Corrade/PluginManager/visibility.h"
 #include "Corrade/Utility/Configuration.h"
+#include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Resource.h"
 
 #ifdef CORRADE_TARGET_WINDOWS
@@ -183,8 +186,8 @@ if(loadState & (LoadState::WrongPluginVersion|LoadState::WrongInterfaceVersion))
 @endcode
 
 Note that @ref LoadState::Loaded includes value of @ref LoadState::Static, so
-you can use `loadState & %LoadState::Loaded` instead of much more verbose
-`state & (%LoadState::Loaded|%LoadState::Static)`.
+you can use `loadState & LoadState::Loaded` instead of much more verbose
+`state & (LoadState::Loaded|LoadState::Static)`.
 @see @ref AbstractManager::loadState(), @ref AbstractManager::load(),
     @ref AbstractManager::unload()
 */
@@ -198,7 +201,7 @@ CORRADE_ENUMSET_OPERATORS(LoadStates)
 See also @ref plugin-management.
  */
 class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
-    friend class AbstractPlugin;
+    friend AbstractPlugin;
 
     public:
         /** @brief Plugin version */
@@ -208,25 +211,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         typedef void* (*Instancer)(AbstractManager&, std::string);
         static void importStaticPlugin(std::string plugin, int _version, std::string interface, Instancer instancer, void(*initializer)(), void(*finalizer)());
         #endif
-
-        /**
-         * @brief Constructor
-         * @param pluginDirectory   Directory where plugins will be searched.
-         *      No recursive processing is done.
-         *
-         * First goes through list of static plugins and finds ones that use
-         * the same interface as this manager instance. Then gets list of all
-         * dynamic plugins in given directory.
-         * @note Dependencies of static plugins are skipped, as static plugins
-         *      should have all dependencies present. Also, dynamic plugins
-         *      with the same name as another static plugin are skipped.
-         * @see @ref pluginList()
-         * @partialsupport Parameter @p pluginDirectory has no effect on
-         *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
-         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" as only static
-         *      plugins are supported.
-         */
-        explicit AbstractManager(std::string pluginDirectory);
 
         /** @brief Copying is not allowed */
         AbstractManager(const AbstractManager&) = delete;
@@ -239,6 +223,14 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
         /** @brief Moving is not allowed */
         AbstractManager& operator=(AbstractManager&&) = delete;
+
+        /**
+         * @brief Plugin interface
+         *
+         * Only plugins with the same plugin interface string can be used
+         * in this plugin manager.
+         */
+        std::string pluginInterface() const;
 
         #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
         /**
@@ -308,12 +300,13 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * If the plugin has any dependencies, they are recursively processed
          * before loading given plugin.
          *
-         * @see @ref unload(), @ref loadState()
+         * @see @ref unload(), @ref loadState(), @ref Manager::instance(),
+         *      @ref Manager::loadAndInstantiate()
          * @partialsupport Only static plugins are supported in
          *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
          *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
          */
-        virtual LoadState load(const std::string& plugin);
+        LoadState load(const std::string& plugin);
 
         /**
          * @brief Unload a plugin
@@ -329,7 +322,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
          *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
          */
-        virtual LoadState unload(const std::string& plugin);
+        LoadState unload(const std::string& plugin);
 
     protected:
         /**
@@ -406,12 +399,11 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
             std::map<std::string, Plugin&> aliases;
         };
 
+        explicit AbstractManager(std::string pluginInterface, std::string pluginDirectory);
+
         #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
         std::string _pluginDirectory;
         #endif
-
-        /* Defined in PluginManager */
-        virtual std::string pluginInterface() const = 0;
 
         /* Initialize global plugin map. On first run it creates the instance
            and fills it with entries from staticPlugins(). The reference is
@@ -420,14 +412,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         static GlobalPluginStorage& initializeGlobalPluginStorage();
 
         GlobalPluginStorage& _plugins;
-
-        /* Because the plugin manager must be noticed about adding the plugin to
-           "used by" list, it must be done through this function. */
-        virtual void addUsedBy(const std::string& plugin, std::string usedBy);
-
-        /* Because the plugin manager must be noticed about removing the plugin
-           from "used by" list, it must be done through this function. */
-        virtual void removeUsedBy(const std::string& plugin, const std::string& usedBy);
 
         void* instanceInternal(const std::string& plugin);
 
@@ -457,6 +441,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         CORRADE_PLUGINMANAGER_LOCAL LoadState unloadRecursiveInternal(Plugin& plugin);
         #endif
 
+        std::string _pluginInterface;
         std::map<std::string, std::vector<AbstractPlugin*> > instances;
 };
 

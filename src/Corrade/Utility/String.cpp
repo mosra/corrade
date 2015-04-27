@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -30,19 +30,30 @@
 
 namespace Corrade { namespace Utility {
 
-const std::string String::Whitespace(" \t\f\v\r\n");
-const std::string String::Bom("\xEF\xBB\xBF");
-
-std::string String::ltrim(std::string string, const std::string& characters) {
-    return std::move(string.erase(0, string.find_first_not_of(characters)));
+namespace {
+    constexpr const char Whitespace[] = " \t\f\v\r\n";
 }
 
-std::string String::rtrim(std::string string, const std::string& characters) {
-    return std::move(string.erase(string.find_last_not_of(characters)+1));
+std::string String::ltrim(std::string string) { return ltrim(std::move(string), Whitespace); }
+
+std::string String::rtrim(std::string string) { return rtrim(std::move(string), Whitespace); }
+
+std::string String::trim(std::string string) { return trim(std::move(string), Whitespace); }
+
+std::vector<std::string> String::splitWithoutEmptyParts(const std::string& string) {
+    return splitWithoutEmptyParts(string, Whitespace);
 }
 
-std::string String::trim(std::string string, const std::string& characters) {
-    return ltrim(rtrim(std::move(string)), characters);
+std::string String::ltrimInternal(std::string string, const Containers::ArrayReference<const char> characters) {
+    return std::move(string.erase(0, string.find_first_not_of(characters, 0, characters.size())));
+}
+
+std::string String::rtrimInternal(std::string string, const Containers::ArrayReference<const char> characters) {
+    return std::move(string.erase(string.find_last_not_of(characters, std::string::npos, characters.size())+1));
+}
+
+std::string String::trimInternal(std::string string, const Containers::ArrayReference<const char> characters) {
+    return ltrimInternal(rtrimInternal(std::move(string), characters), characters);
 }
 
 std::vector<std::string> String::split(const std::string& string, const char delimiter) {
@@ -65,6 +76,23 @@ std::vector<std::string> String::splitWithoutEmptyParts(const std::string& strin
     std::size_t oldpos = 0, pos = std::string::npos;
 
     while((pos = string.find(delimiter, oldpos)) != std::string::npos) {
+        if(pos != oldpos)
+            parts.push_back(string.substr(oldpos, pos-oldpos));
+
+        oldpos = pos+1;
+    }
+
+    if(!string.empty() && (oldpos < string.size()))
+        parts.push_back(string.substr(oldpos));
+
+    return parts;
+}
+
+std::vector<std::string> String::splitWithoutEmptyPartsInternal(const std::string& string, const Containers::ArrayReference<const char> delimiters) {
+    std::vector<std::string> parts;
+    std::size_t oldpos = 0, pos = std::string::npos;
+
+    while((pos = string.find_first_of(delimiters, oldpos, delimiters.size())) != std::string::npos) {
         if(pos != oldpos)
             parts.push_back(string.substr(oldpos, pos-oldpos));
 

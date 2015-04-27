@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -64,7 +64,14 @@ list.insert(&c);
 list.cut(&b);
 @endcode
 
-Traversing through the list is done like in the following code. It is also
+Traversing through the list can be done using range-based for:
+@code
+for(Object& o: list) {
+    // ...
+}
+@endcode
+
+Or, if you need more flexibility, like in the following code. It is also
 possible to go in reverse order using @ref last() and
 @ref LinkedListItem::previous().
 @code
@@ -95,14 +102,13 @@ class Object: public LinkedListItem<Object, ObjectGroup> {
 
 ## Using private inheritance
 
-You might want to subclass %LinkedList and %LinkedListItem privately and for
+You might want to subclass LinkedList and LinkedListItem privately and for
 example provide wrapper functions with more descriptive names. In that case
-you need to friend both %LinkedList and %LinkedListItem in both your
-subclasses.
+you need to friend both LinkedList and LinkedListItem in both your subclasses.
 @code
 class ObjectGroup: private LinkedList<Object> {
-    friend class LinkedList<Object>;
-    friend class LinkedListItem<Object, ObjectGroup>;
+    friend LinkedList<Object>;
+    friend LinkedListItem<Object, ObjectGroup>;
 
     public:
         Object* firstObject() { return first(); }
@@ -112,8 +118,8 @@ class ObjectGroup: private LinkedList<Object> {
 };
 
 class Object: private LinkedListItem<Object, ObjectGroup> {
-    friend class LinkedList<Object>;
-    friend class LinkedListItem<Object, ObjectGroup>;
+    friend LinkedList<Object>;
+    friend LinkedListItem<Object, ObjectGroup>;
 
     public:
         ObjectGroup* group() { return list(); }
@@ -128,6 +134,11 @@ class Object: private LinkedListItem<Object, ObjectGroup> {
 */
 template<class T> class LinkedList {
     public:
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        class Iterator;
+        class ConstIterator;
+        #endif
+
         /**
          * @brief Default constructor
          *
@@ -235,7 +246,7 @@ template<class Derived, class List = LinkedList<Derived>>
 template<class Derived, class List>
 #endif
 class LinkedListItem {
-    friend class LinkedList<Derived>;
+    friend LinkedList<Derived>;
 
     public:
         /**
@@ -410,6 +421,46 @@ template<class Derived, class List> LinkedListItem<Derived, List>& LinkedListIte
 
     return *this;
 }
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+template<class T> class LinkedList<T>::Iterator {
+    public:
+        constexpr /*implicit*/ Iterator(T* item): _item{item} {}
+
+        constexpr T& operator*() const { return *_item; }
+        constexpr bool operator!=(const Iterator& other) const { return _item != other._item; }
+
+        Iterator& operator++() {
+            _item = _item->_next;
+            return *this;
+        }
+
+    private:
+        T* _item;
+};
+
+template<class T> class LinkedList<T>::ConstIterator {
+    public:
+        constexpr /*implicit*/ ConstIterator(const T* item): _item{item} {}
+
+        constexpr const T& operator*() const { return *_item; }
+        constexpr bool operator!=(const ConstIterator& other) const { return _item != other._item; }
+
+        ConstIterator& operator++() {
+            _item = _item->_next;
+            return *this;
+        }
+
+    private:
+        const T* _item;
+};
+
+template<class T> typename LinkedList<T>::Iterator begin(LinkedList<T>& list) { return list.first(); }
+template<class T> constexpr typename LinkedList<T>::ConstIterator begin(const LinkedList<T>& list) { return list.first(); }
+
+template<class T> typename LinkedList<T>::Iterator end(LinkedList<T>&) { return nullptr; }
+template<class T> constexpr typename LinkedList<T>::ConstIterator end(const LinkedList<T>&) { return nullptr; }
+#endif
 
 }}
 

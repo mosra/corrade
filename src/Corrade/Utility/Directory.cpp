@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -268,10 +268,10 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     else if(flags >= Flag::SortDescending)
         std::sort(list.rbegin(), list.rend());
 
-    return std::move(list);
+    return list;
 }
 
-Containers::Array<unsigned char> Directory::read(const std::string& filename) {
+Containers::Array<char> Directory::read(const std::string& filename) {
     std::ifstream file(filename, std::ifstream::binary);
     #ifndef CORRADE_GCC45_COMPATIBILITY
     if(!file) return nullptr;
@@ -288,9 +288,9 @@ Containers::Array<unsigned char> Directory::read(const std::string& filename) {
        set badbit, thus zero-length files are indistinguishable from
        non-seekable ones. */
     if(file && file.tellg() != std::ios::pos_type{0}) {
-        Containers::Array<unsigned char> data(std::size_t(file.tellg()));
+        Containers::Array<char> data(std::size_t(file.tellg()));
         file.seekg(0, std::ios::beg);
-        file.read(reinterpret_cast<char*>(data.begin()), data.size());
+        file.read(data, data.size());
         return data;
     }
 
@@ -305,7 +305,7 @@ Containers::Array<unsigned char> Directory::read(const std::string& filename) {
         data.append(&buffer[0], file.gcount());
     } while(file);
 
-    Containers::Array<unsigned char> out(data.size());
+    Containers::Array<char> out(data.size());
     std::copy(data.begin(), data.end(), out.begin());
 
     return out;
@@ -314,7 +314,8 @@ Containers::Array<unsigned char> Directory::read(const std::string& filename) {
 std::string Directory::readString(const std::string& filename) {
     const auto data = read(filename);
 
-    return std::string(reinterpret_cast<const char*>(data.begin()), data.size());
+    /* GCC 4.5 needs explicit type */
+    return std::string(data, data.size());
 }
 
 bool Directory::write(const std::string& filename, const Containers::ArrayReference<const void> data) {

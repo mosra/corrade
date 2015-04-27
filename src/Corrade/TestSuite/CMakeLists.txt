@@ -1,7 +1,7 @@
 #
 #   This file is part of Corrade.
 #
-#   Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+#   Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
 #             Vladimír Vondruš <mosra@centrum.cz>
 #
 #   Permission is hereby granted, free of charge, to any person obtaining a
@@ -34,8 +34,10 @@ set(CorradeTestSuite_SRCS
 set(CorradeTestSuite_HEADERS
     Comparator.h
     Tester.h
+    TestSuite.h
     visibility.h)
 
+# TestSuite library
 add_library(CorradeTestSuite ${SHARED_OR_STATIC}
     ${CorradeTestSuite_SRCS}
     ${CorradeTestSuite_HEADERS})
@@ -43,9 +45,9 @@ set_target_properties(CorradeTestSuite PROPERTIES DEBUG_POSTFIX "-d")
 if(NOT BUILD_STATIC)
     set_target_properties(CorradeTestSuite PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
 elseif(BUILD_STATIC_PIC)
-    # TODO: CMake 2.8.9 has this as POSITION_INDEPENDENT_CODE property
-    set_target_properties(CorradeTestSuite PROPERTIES COMPILE_FLAGS "${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
+    set_target_properties(CorradeTestSuite PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
+
 target_link_libraries(CorradeTestSuite CorradeUtility)
 
 install(TARGETS CorradeTestSuite

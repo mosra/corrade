@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -35,19 +35,18 @@ using Corrade::Utility::Directory;
 
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test {
 
-class FileTest: public Tester {
-    public:
-        FileTest();
+struct FileTest: Tester {
+    explicit FileTest();
 
-        void same();
-        void empty();
+    void same();
+    void empty();
 
-        void actualNotFound();
-        void expectedNotFound();
+    void actualNotFound();
+    void expectedNotFound();
 
-        void outputActualSmaller();
-        void outputExpectedSmaller();
-        void output();
+    void outputActualSmaller();
+    void outputExpectedSmaller();
+    void output();
 };
 
 FileTest::FileTest() {

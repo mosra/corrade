@@ -1,3 +1,5 @@
+#ifndef Corrade_TestSuite_TestSuite_h
+#define Corrade_TestSuite_TestSuite_h
 /*
     This file is part of Corrade.
 
@@ -23,19 +25,15 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Dog.h"
+/** @file
+ * @brief Forward declarations for @ref Corrade::TestSuite namespace
+ */
 
-#include "Corrade/Utility/Debug.h"
+namespace Corrade { namespace TestSuite {
 
-namespace Corrade { namespace PluginManager { namespace Test {
+template<class> class Comparator;
+/* Tester is always used through inheritance */
 
-void Dog::initialize() { Utility::Debug() << "Dog initialized"; }
-void Dog::finalize() { Utility::Debug() << "Dog finalized"; }
-std::string Dog::name() { return "Doug"; }
-bool Dog::hasTail() { return true; }
-int Dog::legCount() { return 4; }
+}}
 
-}}}
-
-CORRADE_PLUGIN_REGISTER(Dog, Corrade::PluginManager::Test::Dog,
-    "cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")
+#endif

@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -26,18 +26,21 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Containers::Array
+ * @brief Class @ref Corrade::Containers::Array, @ref Corrade::Containers::ArrayReference
  */
 
 #include <type_traits>
 #include <utility>
 
 #include "Corrade/compatibility.h"
+#include "Corrade/configure.h"
+#include "Corrade/Containers/Containers.h"
+#include "Corrade/Utility/Assert.h"
 
 namespace Corrade { namespace Containers {
 
 /**
-@brief %Array wrapper with size information
+@brief Array wrapper with size information
 
 Provides movable RAII wrapper around plain C array. Main use case is storing
 binary data of unspecified type, where addition/removal of elements is not
@@ -123,9 +126,9 @@ template<class T> class Array {
          * Creates array of given size, the values are default-initialized
          * (i.e. builtin types are not initialized). If the size is zero, no
          * allocation is done.
-         * @note Due to ambiguity you can't call directly `%Array(0)` because
+         * @note Due to ambiguity you can't call directly `Array(0)` because
          *      it conflicts with Array(std::nullptr_t). You should call
-         *      `%Array(nullptr)` instead, which is also `noexcept`.
+         *      `Array(nullptr)` instead, which is also `noexcept`.
          * @see @ref zeroInitialized()
          */
         explicit Array(std::size_t size): _data(size ? new T[size] : nullptr), _size(size) {}
@@ -169,11 +172,11 @@ template<class T> class Array {
         /** @overload */
         /*implicit*/ operator const T*() const { return _data; }
 
-        /** @brief %Array data */
+        /** @brief Array data */
         T* data() { return _data; }
         const T* data() const { return _data; }         /**< @overload */
 
-        /** @brief %Array size */
+        /** @brief Array size */
         std::size_t size() const { return _size; }
 
         /** @brief Whether the array is empty */
@@ -188,6 +191,57 @@ template<class T> class Array {
         T* end() { return _data+_size; }
         const T* end() const { return _data+_size; }    /**< @overload */
         const T* cend() const { return _data+_size; }   /**< @overload */
+
+        /**
+         * @brief Reference to array slice
+         *
+         * Equivalent to @ref ArrayReference::slice().
+         */
+        ArrayReference<T> slice(T* begin, T* end) {
+            return ArrayReference<T>{*this}.slice(begin, end);
+        }
+        /** @overload */
+        ArrayReference<const T> slice(const T* begin, const T* end) const {
+            return ArrayReference<const T>{*this}.slice(begin, end);
+        }
+        /** @overload */
+        ArrayReference<T> slice(std::size_t begin, std::size_t end) {
+            return slice(_data + begin, _data + end);
+        }
+        /** @overload */
+        ArrayReference<const T> slice(std::size_t begin, std::size_t end) const {
+            return slice(_data + begin, _data + end);
+        }
+
+        /**
+         * @brief Array prefix
+         *
+         * Equivalent to @ref ArrayReference::prefix().
+         */
+        ArrayReference<T> prefix(T* end) {
+            return ArrayReference<T>{*this}.prefix(end);
+        }
+        /** @overload */
+        ArrayReference<const T> prefix(const T* end) const {
+            return ArrayReference<const T>{*this}.prefix(end);
+        }
+        ArrayReference<T> prefix(std::size_t end) { return prefix(_data + end); } /**< @overload */
+        ArrayReference<const T> prefix(std::size_t end) const { return prefix(_data + end); } /**< @overload */
+
+        /**
+         * @brief Array suffix
+         *
+         * Equivalent to @ref ArrayReference::suffix().
+         */
+        ArrayReference<T> suffix(T* begin) {
+            return ArrayReference<T>{*this}.suffix(begin);
+        }
+        /** @overload */
+        ArrayReference<const T> suffix(const T* begin) const {
+            return ArrayReference<const T>{*this}.suffix(begin);
+        }
+        ArrayReference<T> suffix(std::size_t begin) { return suffix(_data + begin); } /**< @overload */
+        ArrayReference<const T> suffix(std::size_t begin) const { return suffix(_data + begin); } /**< @overload */
 
         /**
          * @brief Release data storage
@@ -218,7 +272,7 @@ template<class T> class Array {
 };
 
 /**
-@brief %Array reference wrapper with size information
+@brief Array reference wrapper with size information
 
 Immutable wrapper around plain C array. Unlike @ref Array this class doesn't do
 any memory management. Main use case is passing array along with size
@@ -235,9 +289,17 @@ printArray(a);
 
 // Wrapping compile-time array with size information
 constexpr const int data[] = {5, 17, -36, 185};
-Containers::ArrayReference<const int> b =
-    {data, std::extent<decltype(data)>()}; // b.size() == 4
+Containers::ArrayReference<const int> b = data; // b.size() == 4
+
+// Wrapping general array with size information
+const int* data2;
+Containers::ArrayReference<const int> c{data2, 3};
 @endcode
+
+@attention Note that when using `Containers::ArrayReference<const char>`, C
+    string literals (such as `"hello"`) are implicitly convertible to it and
+    the size includes also the zero-terminator (thus in case of `"hello"` the
+    size would be 6, not 5, as one might expect).
 
 @see @ref ArrayReference<const void>
 @todo What was the reason for no const-correctness at all?
@@ -321,10 +383,10 @@ template<class T> class ArrayReference {
         /** @brief Conversion to array type */
         constexpr /*implicit*/ operator T*() const { return _data; }
 
-        /** @brief %Array data */
+        /** @brief Array data */
         constexpr const T* data() const { return _data; }
 
-        /** @brief %Array size */
+        /** @brief Array size */
         constexpr std::size_t size() const { return _size; }
 
         /** @brief Whether the array is empty */
@@ -337,6 +399,43 @@ template<class T> class ArrayReference {
         /** @brief Pointer to (one item after) last element */
         T* end() const { return _data+_size; }
         T* cend() const { return _data+_size; }         /**< @overload */
+
+        /**
+         * @brief Array slice
+         *
+         * Both arguments are expected to be in range.
+         */
+        ArrayReference<T> slice(T* begin, T* end) const;
+
+        /** @overload */
+        ArrayReference<T> slice(std::size_t begin, std::size_t end) {
+            return slice(_data + begin, _data + end);
+        }
+
+        /**
+         * @brief Array prefix
+         *
+         * Equivalent to `data.slice(data.begin(), end)`. If @p end is
+         * `nullptr`, returns zero-sized `nullptr` array.
+         */
+        ArrayReference<T> prefix(T* end) const {
+            if(!end) return nullptr;
+            return slice(_data, end);
+        }
+        ArrayReference<T> prefix(std::size_t end) const { return prefix(_data + end); } /**< @overload */
+
+        /**
+         * @brief Array suffix
+         *
+         * Equivalent to `data.slice(begin, data.end())`. If @p begin is
+         * `nullptr` and the original array isn't, returns zero-sized `nullptr`
+         * array.
+         */
+        ArrayReference<T> suffix(T* begin) const {
+            if(_data && !begin) return nullptr;
+            return slice(begin, _data + _size);
+        }
+        ArrayReference<T> suffix(std::size_t begin) const { return suffix(_data + begin); } /**< @overload */
 
     private:
         T* _data;
@@ -427,10 +526,10 @@ template<> class ArrayReference<const void> {
         /** @brief Conversion to array type */
         constexpr /*implicit*/ operator const void*() const { return _data; }
 
-        /** @brief %Array data */
+        /** @brief Array data */
         constexpr const void* data() const { return _data; }
 
-        /** @brief %Array size */
+        /** @brief Array size */
         constexpr std::size_t size() const { return _size; }
 
         /** @brief Whether the array is empty */
@@ -455,8 +554,9 @@ template<class T> inline Array<T>::Array(const Array<T>& other): _data(other._da
 #endif
 
 template<class T> inline Array<T>& Array<T>::operator=(Array<T>&& other) noexcept {
-    std::swap(_data, other._data);
-    std::swap(_size, other._size);
+    using std::swap;
+    swap(_data, other._data);
+    swap(_size, other._size);
     return *this;
 }
 
@@ -466,6 +566,12 @@ template<class T> inline T* Array<T>::release() {
     _data = nullptr;
     _size = 0;
     return data;
+}
+
+template<class T> ArrayReference<T> ArrayReference<T>::slice(T* begin, T* end) const {
+    CORRADE_ASSERT(_data <= begin && begin <= end && end <= _data + _size,
+        "Containers::ArrayReference::slice(): slice out of range", nullptr);
+    return ArrayReference<T>{begin, std::size_t(end - begin)};
 }
 
 }}

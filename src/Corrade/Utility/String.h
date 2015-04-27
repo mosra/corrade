@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -29,36 +29,19 @@
  * @brief Class @ref Corrade::Utility::String
  */
 
+#include <cstddef>
 #include <string>
 #include <vector>
 
+#include "Corrade/configure.h"
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Utility/visibility.h"
 
-#ifdef CORRADE_BUILD_DEPRECATED
-#include "Corrade/Utility/Macros.h"
-#endif
-
 namespace Corrade { namespace Utility {
 
-/** @brief %String utilities */
+/** @brief String utilities */
 class CORRADE_UTILITY_EXPORT String {
     public:
-        /**
-         * @brief Whitespace characters
-         *
-         * Characters for which `std::isspace()` returns `true`. Equals to
-         * <tt>" \t\f\v\r\n"</tt>.
-         */
-        static const std::string Whitespace;
-
-        /**
-         * @brief Byte-order marker (UTF-8)
-         *
-         * Equals to <tt>"\xEF\xBB\xBF"</tt>.
-         */
-        static const std::string Bom;
-
         String() = delete;
 
         /**
@@ -83,55 +66,114 @@ class CORRADE_UTILITY_EXPORT String {
         }
 
         /**
-         * @brief Trim leading whitespace from string
-         * @param string        %String to be trimmed
+         * @brief Trim leading characters from string
+         * @param string        String to be trimmed
          * @param characters    Characters which will be trimmed
          *
          * @see @ref rtrim(), @ref trim()
          */
-        static std::string ltrim(std::string string, const std::string& characters = Whitespace);
+        static std::string ltrim(std::string string, const std::string& characters) {
+            return ltrimInternal(std::move(string), {characters.data(), characters.size()});
+        }
+
+        /** @overload */
+        template<std::size_t size> static std::string ltrim(std::string string, const char(&characters)[size]) {
+            return ltrimInternal(std::move(string), {characters, size - 1});
+        }
 
         /**
-         * @brief Trim trailing whitespace from string
-         * @param string        %String to be trimmed
+         * @brief Trim leading whitespace from string
+         *
+         * Equivalent to calling the above function with <tt>" \t\f\v\r\n"</tt>
+         * as second parameter.
+         * @see @ref rtrim(), @ref trim()
+         */
+        static std::string ltrim(std::string string);
+
+        /**
+         * @brief Trim trailing characters from string
+         * @param string        String to be trimmed
          * @param characters    Characters which will be trimmed
          *
          * @see @ref ltrim(), @ref trim()
          */
-        static std::string rtrim(std::string string, const std::string& characters = Whitespace);
+        static std::string rtrim(std::string string, const std::string& characters) {
+            return rtrimInternal(std::move(string), {characters.data(), characters.size()});
+        }
+
+        /** @overload */
+        template<std::size_t size> static std::string rtrim(std::string string, const char(&characters)[size]) {
+            return rtrimInternal(std::move(string), {characters, size - 1});
+        }
 
         /**
-         * @brief Trim leading and trailing whitespace from string
-         * @param string        %String to be trimmed
+         * @brief Trim trailing whitespace from string
+         *
+         * Equivalent to calling the above function with <tt>" \t\f\v\r\n"</tt>
+         * as second parameter.
+         * @see @ref ltrim(), @ref trim()
+         */
+        static std::string rtrim(std::string string);
+
+        /**
+         * @brief Trim leading and trailing characters from string
+         * @param string        String to be trimmed
          * @param characters    Characters which will be trimmed
          *
          * Equivalent to `ltrim(rtrim(string))`.
          */
-        static std::string trim(std::string string, const std::string& characters = Whitespace);
+        static std::string trim(std::string string, const std::string& characters) {
+            return trimInternal(std::move(string), {characters.data(), characters.size()});
+        }
+
+        /** @overload */
+        template<std::size_t size> static std::string trim(std::string string, const char(&characters)[size]) {
+            return trimInternal(std::move(string), {characters, size - 1});
+        }
+
+        /**
+         * @brief Trim leading and trailing whitespace from string
+         *
+         * Equivalent to calling the above function with <tt>" \t\f\v\r\n"</tt>
+         * as second parameter.
+         */
+        static std::string trim(std::string string);
 
         /**
          * @brief Split string on given character
-         * @param string            %String to split
+         * @param string            String to split
          * @param delimiter         Delimiter
          */
         static std::vector<std::string> split(const std::string& string, char delimiter);
 
         /**
          * @brief Split string on given character and remove empty parts
-         * @param string            %String to split
+         * @param string            String to split
          * @param delimiter         Delimiter
          */
         static std::vector<std::string> splitWithoutEmptyParts(const std::string& string, char delimiter);
 
-        #ifdef CORRADE_BUILD_DEPRECATED
-        /** @copybrief splitWithoutEmptyParts()
-         * @deprecated Use @ref Corrade::Utility::String::splitWithoutEmptyParts() "splitWithoutEmptyParts()"
-         *      instead.
+        /**
+         * @brief Split string on any character from given set and remove empty parts
+         * @param string            String to split
+         * @param delimiters        Delimiter characters
          */
-        static CORRADE_DEPRECATED("use splitWithoutEmptyParts() instead") std::vector<std::string> split(const std::string& string, char delim, bool keepEmptyParts) {
-            return keepEmptyParts ? split(string, delim) : splitWithoutEmptyParts(string, delim);
+        static std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const std::string& delimiters) {
+            return splitWithoutEmptyPartsInternal(string, {delimiters.data(), delimiters.size()});
         }
-        #endif
+
+        /** @overload */
+        template<std::size_t size> static std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const char(&delimiters)[size]) {
+            return splitWithoutEmptyPartsInternal(string, {delimiters, size - 1});
+        }
+
+        /**
+         * @brief Split string on whitespaces and remove empty parts
+         *
+         * Equivalent to calling the above function with <tt>" \t\f\v\r\n"</tt>
+         * as second parameter.
+         */
+        static std::vector<std::string> splitWithoutEmptyParts(const std::string& string);
 
         /**
          * @brief Join strings with given character
@@ -182,6 +224,12 @@ class CORRADE_UTILITY_EXPORT String {
         }
 
     private:
+        static std::string ltrimInternal(std::string string, Containers::ArrayReference<const char> characters);
+        static std::string rtrimInternal(std::string string, Containers::ArrayReference<const char> characters);
+        static std::string trimInternal(std::string string, Containers::ArrayReference<const char> characters);
+
+        static std::vector<std::string> splitWithoutEmptyPartsInternal(const std::string& string, Containers::ArrayReference<const char> delimiters);
+
         static bool beginsWithInternal(const std::string& string, Containers::ArrayReference<const char> prefix);
         static bool endsWithInternal(const std::string& string, Containers::ArrayReference<const char> suffix);
 };

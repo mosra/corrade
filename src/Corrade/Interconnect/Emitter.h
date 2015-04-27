@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -29,8 +29,11 @@
  * @brief Class @ref Corrade::Interconnect::Emitter
  */
 
+#include <cstddef>
 #include <cstdint>
+#include <type_traits>
 #include <unordered_map>
+#include <utility>
 
 #include "Corrade/compatibility.h"
 #include "Corrade/Interconnect/Connection.h"
@@ -53,7 +56,7 @@ class SignalDataHash {
 }
 
 /**
-@brief %Emitter object
+@brief Emitter object
 
 Contains signals and manages connections between signals and slots. See
 @ref interconnect for introduction.
@@ -91,7 +94,7 @@ called from outside the class.
 @anchor Interconnect-Emitter-connections
 ## Connecting signals to slots
 
-Signals implemented on %Emitter subclasses can be connected to slots using
+Signals implemented on Emitter subclasses can be connected to slots using
 various @ref Interconnect::connect() "connect()" functions. The argument count
 and types of slot function must be exactly the same as of the signal function.
 When a connection is established, returned @ref Connection object can be used
@@ -163,7 +166,7 @@ Mailbox mailbox;
 Interconnect::connect(&postman, &Postman::messageDelivered, &mailbox, &Mailbox::addMessage);
 @endcode
 
-You can connect to any member function, as long as %Receiver exists somewhere
+You can connect to any member function, as long as Receiver exists somewhere
 in given object type hierarchy:
 @code
 class Foo: public Interconnect::Emitter {
@@ -192,8 +195,8 @@ Interconnect::connect(&foo, &Foo::signal, b, &Derived::derivedSlot); // ok
 @endcode
 
 It is also possible to connect to member function of class which itself isn't
-subclass of %Receiver, just add %Receiver using multiple inheritance.
-Convoluted example:
+subclass of Receiver, just add Receiver using multiple inheritance. Convoluted
+example:
 @code
 class MyString: public std::string, public Receiver {};
 
@@ -207,8 +210,8 @@ Interconnect::connect(&foo, &Foo::signal, &b, &std::string::clear); // ok
 @todo Allow move
 */
 class CORRADE_INTERCONNECT_EXPORT Emitter {
-    friend class Connection;
-    friend class Receiver;
+    friend Connection;
+    friend Receiver;
 
     public:
         /**
@@ -217,7 +220,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * See @ref emit() for more information about implementing signals.
          */
         class Signal {
-            friend class Emitter;
+            friend Emitter;
 
             private:
                 constexpr explicit Signal();
@@ -310,7 +313,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
 
         /**
          * @brief Emit signal
-         * @param signal        %Signal
+         * @param signal        Signal
          * @param args          Arguments
          *
          * See @ref Interconnect-Emitter-signals "class documentation" for more
@@ -340,9 +343,9 @@ namespace Implementation {
 class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
     template<class...> friend class FunctionConnectionData;
     template<class...> friend class MemberConnectionData;
-    friend class Interconnect::Connection;
-    friend class Interconnect::Emitter;
-    friend class Interconnect::Receiver;
+    friend Interconnect::Connection;
+    friend Interconnect::Emitter;
+    friend Interconnect::Receiver;
 
     public:
         enum class Type: std::uint8_t { Function, Member };
@@ -366,7 +369,7 @@ class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
 };
 
 class AbstractMemberConnectionData: public AbstractConnectionData {
-    friend class Interconnect::Emitter;
+    friend Interconnect::Emitter;
 
     public:
         template<class Emitter, class Receiver> explicit AbstractMemberConnectionData(Emitter* emitter, Receiver* receiver): AbstractConnectionData(emitter, Type::Member), receiver(receiver) {}
@@ -376,7 +379,7 @@ class AbstractMemberConnectionData: public AbstractConnectionData {
 };
 
 template<class ...Args> class MemberConnectionData: public AbstractMemberConnectionData {
-    friend class Interconnect::Emitter;
+    friend Interconnect::Emitter;
 
     public:
         typedef void(Receiver::*Slot)(Args...);
@@ -392,7 +395,7 @@ template<class ...Args> class MemberConnectionData: public AbstractMemberConnect
 };
 
 template<class ...Args> class FunctionConnectionData: public AbstractConnectionData {
-    friend class Interconnect::Emitter;
+    friend Interconnect::Emitter;
 
     public:
         typedef void(*Slot)(Args...);
@@ -409,8 +412,8 @@ template<class ...Args> class FunctionConnectionData: public AbstractConnectionD
 
 /**
 @brief Connect signal to function slot
-@param emitter       %Emitter
-@param signal        %Signal
+@param emitter       Emitter
+@param signal        Signal
 @param slot          Slot
 
 Connects given signal to compatible slot. @p emitter must be subclass of
@@ -445,9 +448,9 @@ template<class EmitterObject, class Emitter, class Lambda, class ...Args> Connec
 
 /**
 @brief Connect signal to member function slot
-@param emitter       %Emitter
-@param signal        %Signal
-@param receiver      %Receiver
+@param emitter       Emitter
+@param signal        Signal
+@param receiver      Receiver
 @param slot          Slot
 
 Connects given signal to compatible slot in receiver object. @p emitter must be

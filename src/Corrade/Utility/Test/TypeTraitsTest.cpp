@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -23,25 +23,27 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <iterator>
 #include <map>
 #include <string>
 #include <tuple>
+#include <type_traits>
 #include <valarray>
 #include <vector>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/Containers.h"
+#include "Corrade/Containers/LinkedList.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/TypeTraits.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class TypeTraitsTest: public TestSuite::Tester {
-    public:
-        explicit TypeTraitsTest();
+struct TypeTraitsTest: TestSuite::Tester {
+    explicit TypeTraitsTest();
 
-        void hasType();
-
-        void isIterable();
+    void hasType();
+    void isIterable();
 };
 
 TypeTraitsTest::TypeTraitsTest() {
@@ -82,6 +84,13 @@ void TypeTraitsTest::hasType() {
     #endif
 }
 
+namespace {
+    struct Type {};
+    int* begin(Type);
+    int* end(Type);
+    struct LinkedListItem: Containers::LinkedListItem<LinkedListItem> {};
+}
+
 void TypeTraitsTest::isIterable() {
     /* Non-iterable types */
     #ifndef CORRADE_GCC45_COMPATIBILITY
@@ -109,12 +118,27 @@ void TypeTraitsTest::isIterable() {
     }
     #endif
 
+    /* Types with out-of-class begin()/end() */
+    {
+        #ifdef CORRADE_GCC47_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("GCC 4.7 has broken SFINAE in this case (results in compile error when not present)");
+        #endif
+        CORRADE_VERIFY(IsIterable<Type>{});
+    }
+
     /* Corrade types */
     #ifndef CORRADE_GCC45_COMPATIBILITY
     CORRADE_VERIFY(IsIterable<Containers::Array<int>>{});
     #else
     CORRADE_VERIFY(IsIterable<Containers::Array<int>>::value);
     #endif
+
+    {
+        #ifdef CORRADE_GCC47_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("GCC 4.7 has broken SFINAE in this case (results in compile error when not present)");
+        #endif
+        CORRADE_VERIFY(IsIterable<Containers::LinkedList<LinkedListItem>>{});
+    }
 }
 
 }}}

@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -27,7 +27,9 @@
 
 namespace Corrade { namespace Utility { namespace Implementation {
 
-unsigned int MurmurHash2<4>::operator()(const unsigned int seed, const unsigned char* const data, unsigned int size) const {
+unsigned int MurmurHash2<4>::operator()(const unsigned int seed, const char* const signedData, unsigned int size) const {
+    const unsigned char* const data = reinterpret_cast<const unsigned char*>(signedData);
+
     /* m and r are mixing constants generated offline. They're not really
        magic, they just happen to work well. */
     const unsigned int m = 0x5bd1e995;
@@ -70,7 +72,9 @@ unsigned int MurmurHash2<4>::operator()(const unsigned int seed, const unsigned 
     return h;
 }
 
-unsigned long long MurmurHash2<8>::operator()(const unsigned long long seed, const unsigned char* const data, unsigned long long size) const {
+unsigned long long MurmurHash2<8>::operator()(const unsigned long long seed, const char* const signedData, unsigned long long size) const {
+    const unsigned char* const data = reinterpret_cast<const unsigned char*>(signedData);
+
     /* m and r are mixing constants generated offline. They're not really
        magic, they just happen to work well. */
     const unsigned long long m = 0xc6a4a7935bd1e995ull;

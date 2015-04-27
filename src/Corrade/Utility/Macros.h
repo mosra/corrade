@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -50,6 +50,27 @@ CORRADE_DEPRECATED("use bar() instead") void foo();
 #define CORRADE_DEPRECATED(message) __declspec(deprecated(message))
 #else
 #define CORRADE_DEPRECATED(message)
+#endif
+
+/** @hideinitializer
+@brief Enum deprecation mark
+
+Marked enum or enum value will emit deprecation warning on supported compilers
+(C++17 feature, currently Clang only):
+@code
+enum class CORRADE_DEPRECATED_ENUM("use Bar instead") Foo {};
+
+enum class Bar {
+    Fizz = 0,
+    Buzz = 1,
+    Baz CORRADE_DEPRECATED_ENUM("use Bar::Buzz instead") = 1
+};
+@endcode
+*/
+#if defined(__clang__)
+#define CORRADE_DEPRECATED_ENUM(message) __attribute((deprecated(message)))
+#else
+#define CORRADE_DEPRECATED_ENUM(message)
 #endif
 
 /** @hideinitializer

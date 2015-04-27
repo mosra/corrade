@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -31,9 +31,10 @@
 
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
-#include "Corrade/Containers/Containers.h"
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
@@ -77,7 +78,7 @@ class CORRADE_UTILITY_EXPORT Resource {
     public:
         /**
          * @brief Compile data resource file
-         * @param name          %Resource name (see @ref CORRADE_RESOURCE_INITIALIZE())
+         * @param name          Resource name (see @ref CORRADE_RESOURCE_INITIALIZE())
          * @param group         Group name
          * @param files         Files (pairs of filename, file data)
          *
@@ -87,8 +88,8 @@ class CORRADE_UTILITY_EXPORT Resource {
 
         /**
          * @brief Compile data resource file using configuration file
-         * @param name          %Resource name (see @ref CORRADE_RESOURCE_INITIALIZE())
-         * @param configurationFile %Filename of configuration file
+         * @param name          Resource name (see @ref CORRADE_RESOURCE_INITIALIZE())
+         * @param configurationFile Filename of configuration file
          *
          * Produces C++ file with hexadecimal data representation. See class
          * documentation for configuration file syntax overview. The filenames
@@ -99,7 +100,7 @@ class CORRADE_UTILITY_EXPORT Resource {
         /**
          * @brief Override group
          * @param group         Group name
-         * @param configurationFile %Filename of configuration file. Empty
+         * @param configurationFile Filename of configuration file. Empty
          *      string will discard the override.
          *
          * Overrides compiled-in resources of given group with live data
@@ -135,7 +136,7 @@ class CORRADE_UTILITY_EXPORT Resource {
          * Returns reference to data of given file in the group. The file must
          * exist. If the file is empty, returns `nullptr`.
          */
-        Containers::ArrayReference<const unsigned char> getRaw(const std::string& filename) const;
+        Containers::ArrayReference<const char> getRaw(const std::string& filename) const;
 
         /**
          * @brief Get data resource
@@ -154,8 +155,11 @@ class CORRADE_UTILITY_EXPORT Resource {
 
     private:
         struct CORRADE_UTILITY_LOCAL GroupData {
+            explicit GroupData();
+            ~GroupData();
+
             std::string overrideGroup;
-            std::map<std::string, Containers::ArrayReference<const unsigned char>> resources;
+            std::map<std::string, Containers::ArrayReference<const char>> resources;
         };
 
         struct OverrideData;
@@ -164,7 +168,7 @@ class CORRADE_UTILITY_EXPORT Resource {
            fiasco" which I think currently fails only in static build */
         CORRADE_UTILITY_LOCAL static std::map<std::string, GroupData>& resources();
 
-        CORRADE_UTILITY_LOCAL static std::pair<bool, Containers::Array<unsigned char>> fileContents(const std::string& filename);
+        CORRADE_UTILITY_LOCAL static std::pair<bool, Containers::Array<char>> fileContents(const std::string& filename);
         CORRADE_UTILITY_LOCAL static std::string comment(const std::string& comment);
         CORRADE_UTILITY_LOCAL static std::string hexcode(const std::string& data);
         template<class T> static std::string numberToString(const T& number);

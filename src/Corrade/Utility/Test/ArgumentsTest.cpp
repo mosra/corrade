@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -24,43 +24,43 @@
 */
 
 #include <sstream>
+#include <type_traits>
 
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Arguments.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class ArgumentsTest: public TestSuite::Tester {
-    public:
-        explicit ArgumentsTest();
+struct ArgumentsTest: TestSuite::Tester {
+    explicit ArgumentsTest();
 
-        void helpArgumentsOnly();
-        void helpNamedOnly();
-        void helpBoth();
-        void helpText();
-        void helpEmpty();
-        void helpAfterParse();
+    void helpArgumentsOnly();
+    void helpNamedOnly();
+    void helpBoth();
+    void helpText();
+    void helpEmpty();
+    void helpAfterParse();
 
-        void duplicateKey();
-        void duplicateShortKey();
-        void disallowedCharacter();
-        void disallowedCharacterShort();
+    void duplicateKey();
+    void duplicateShortKey();
+    void disallowedCharacter();
+    void disallowedCharacterShort();
 
-        void parseHelp();
-        void parseArguments();
-        void parseMixed();
-        void parseCustomType();
-        void parseDoubleArgument();
+    void parseHelp();
+    void parseArguments();
+    void parseMixed();
+    void parseCustomType();
+    void parseDoubleArgument();
 
-        void parseUnknownArgument();
-        void parseUnknownShortArgument();
-        void parseSuperfluousArgument();
-        void parseArgumentAfterSeparator();
-        void parseInvalidLongArgument();
+    void parseUnknownArgument();
+    void parseUnknownShortArgument();
+    void parseSuperfluousArgument();
+    void parseArgumentAfterSeparator();
+    void parseInvalidLongArgument();
 
-        void parseMissingValue();
-        void parseMissingOption();
-        void parseMissingArgument();
+    void parseMissingValue();
+    void parseMissingOption();
+    void parseMissingArgument();
 };
 
 ArgumentsTest::ArgumentsTest() {

@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -32,7 +32,8 @@ See `corrade-rc --help` for command-line parameters, see @ref resource-managemen
 for brief introduction.
 */
 
-#include "Corrade/Containers/Array.h"
+#include <string>
+
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Directory.h"
@@ -58,7 +59,7 @@ int main(int argc, char** argv) {
     if(compiled.empty()) return 2;
 
     /* Save output */
-    if(!Corrade::Utility::Directory::write(args.value("out"), {compiled.data(), compiled.size()})) {
+    if(!Corrade::Utility::Directory::writeString(args.value("out"), compiled)) {
         Corrade::Utility::Error() << "Cannot write output file " << '\'' + args.value("out") + '\'';
         return 3;
     }

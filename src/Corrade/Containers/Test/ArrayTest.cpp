@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -28,26 +28,27 @@
 
 namespace Corrade { namespace Containers { namespace Test {
 
-class ArrayTest: public TestSuite::Tester {
-    public:
-        explicit ArrayTest();
+struct ArrayTest: TestSuite::Tester {
+    explicit ArrayTest();
 
-        void constructEmpty();
-        void constructNullptr();
-        void construct();
-        void constructMove();
-        void constructFrom();
-        void constructFromChar();
-        void constructZeroInitialized();
+    void constructEmpty();
+    void constructNullptr();
+    void construct();
+    void constructMove();
+    void constructFrom();
+    void constructFromChar();
+    void constructZeroInitialized();
 
-        void boolConversion();
-        void pointerConversion();
+    void boolConversion();
+    void pointerConversion();
 
-        void emptyCheck();
-        void access();
-        void rvalueArrayAccess();
-        void rangeBasedFor();
-        void release();
+    void emptyCheck();
+    void access();
+    void rvalueArrayAccess();
+    void rangeBasedFor();
+
+    void slice();
+    void release();
 };
 
 typedef Containers::Array<int> Array;
@@ -68,6 +69,8 @@ ArrayTest::ArrayTest() {
               &ArrayTest::access,
               &ArrayTest::rvalueArrayAccess,
               &ArrayTest::rangeBasedFor,
+
+              &ArrayTest::slice,
               &ArrayTest::release});
 }
 
@@ -243,6 +246,47 @@ void ArrayTest::rangeBasedFor() {
     #else
     CORRADE_SKIP("Range-based for is not available in GCC 4.5");
     #endif
+}
+
+void ArrayTest::slice() {
+    Array a = Array::from(1, 2, 3, 4, 5);
+    const Array ac = Array::from(1, 2, 3, 4, 5);
+
+    ArrayReference<int> b = a.slice(1, 4);
+    CORRADE_COMPARE(b.size(), 3);
+    CORRADE_COMPARE(b[0], 2);
+    CORRADE_COMPARE(b[1], 3);
+    CORRADE_COMPARE(b[2], 4);
+
+    ArrayReference<const int> bc = ac.slice(1, 4);
+    CORRADE_COMPARE(bc.size(), 3);
+    CORRADE_COMPARE(bc[0], 2);
+    CORRADE_COMPARE(bc[1], 3);
+    CORRADE_COMPARE(bc[2], 4);
+
+    ArrayReference<int> c = a.prefix(3);
+    CORRADE_COMPARE(c.size(), 3);
+    CORRADE_COMPARE(c[0], 1);
+    CORRADE_COMPARE(c[1], 2);
+    CORRADE_COMPARE(c[2], 3);
+
+    ArrayReference<const int> cc = ac.prefix(3);
+    CORRADE_COMPARE(cc.size(), 3);
+    CORRADE_COMPARE(cc[0], 1);
+    CORRADE_COMPARE(cc[1], 2);
+    CORRADE_COMPARE(cc[2], 3);
+
+    ArrayReference<int> d = a.suffix(2);
+    CORRADE_COMPARE(d.size(), 3);
+    CORRADE_COMPARE(d[0], 3);
+    CORRADE_COMPARE(d[1], 4);
+    CORRADE_COMPARE(d[2], 5);
+
+    ArrayReference<const int> dc = ac.suffix(2);
+    CORRADE_COMPARE(dc.size(), 3);
+    CORRADE_COMPARE(dc[0], 3);
+    CORRADE_COMPARE(dc[1], 4);
+    CORRADE_COMPARE(dc[2], 5);
 }
 
 void ArrayTest::release() {

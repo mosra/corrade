@@ -1,6 +1,6 @@
 *corrade* (v.) - "To scrape together, to gather together from various sources"
 
-Corrade is multiplatform utility library written in C++11.
+Corrade is multiplatform utility library written in C++11/C++14.
 
 SUPPORTED PLATFORMS
 ===================
@@ -40,7 +40,7 @@ Minimal dependencies
     >= 3.1. On Windows you can use **MinGW**. GCC 4.5, 4.4 and **MSVC** 2013
     support involves some ugly workarounds and thus is available only in
     `compatibility` branch.
--   **CMake** >= 2.8.8
+-   **CMake** >= 2.8.9
 
 Note that full feature set is available only on GCC 4.8.1 and Clang 3.1 and
 compatibility mode with reduced feature set must be enabled for other
@@ -97,11 +97,11 @@ CONTACT
 Want to learn more about the library? Found a bug or want to tell me an
 awesome idea? Feel free to visit my website or contact me at:
 
-*   Website - http://mosra.cz/blog/corrade.php
-*   GitHub - http://github.com/mosra/corrade
-*   Twitter - https://twitter.com/czmosra
-*   E-mail - mosra@centrum.cz
-*   Jabber - mosra@jabbim.cz
+*   Website -- http://mosra.cz/blog/corrade.php
+*   GitHub -- http://github.com/mosra/corrade
+*   Twitter -- https://twitter.com/czmosra
+*   E-mail -- mosra@centrum.cz
+*   Jabber -- mosra@jabbim.cz
 
 CREDITS
 =======

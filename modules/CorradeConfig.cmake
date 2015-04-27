@@ -23,18 +23,4 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 2.8.9)
-project(CorradePluginManagerExample)
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../../../modules")
-
-find_package(Corrade REQUIRED)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CORRADE_CXX_FLAGS}")
-include_directories(${CORRADE_INCLUDE_DIR})
-
-corrade_add_plugin(Dog ${CMAKE_CURRENT_BINARY_DIR} Dog.conf Dog.cpp)
-corrade_add_static_plugin(Canary ${CMAKE_CURRENT_BINARY_DIR} Canary.conf Canary.cpp)
-
-add_executable(PluginTest main.cpp)
-target_link_libraries(PluginTest Canary ${CORRADE_PLUGINMANAGER_LIBRARIES})
+include(${CMAKE_CURRENT_LIST_DIR}/FindCorrade.cmake)

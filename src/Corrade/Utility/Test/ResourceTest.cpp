@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -24,7 +24,6 @@
 */
 
 #include <sstream>
-#include <tuple>
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/TestSuite/Tester.h"
@@ -37,32 +36,31 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class ResourceTest: public TestSuite::Tester {
-    public:
-        ResourceTest();
+struct ResourceTest: TestSuite::Tester {
+    explicit ResourceTest();
 
-        void compile();
-        void compileNothing();
-        void compileEmptyFile();
+    void compile();
+    void compileNothing();
+    void compileEmptyFile();
 
-        void compileFrom();
-        void compileFromNonexistentResource();
-        void compileFromNonexistentFile();
-        void compileFromEmptyGroup();
-        void compileFromEmptyFilename();
-        void compileFromEmptyAlias();
+    void compileFrom();
+    void compileFromNonexistentResource();
+    void compileFromNonexistentFile();
+    void compileFromEmptyGroup();
+    void compileFromEmptyFilename();
+    void compileFromEmptyAlias();
 
-        void list();
-        void get();
-        void getEmptyFile();
-        void getNonexistent();
-        void getNothing();
+    void list();
+    void get();
+    void getEmptyFile();
+    void getNonexistent();
+    void getNothing();
 
-        void overrideGroup();
-        void overrideGroupFallback();
-        void overrideNonexistentFile();
-        void overrideNonexistentGroup();
-        void overrideDifferentGroup();
+    void overrideGroup();
+    void overrideGroupFallback();
+    void overrideNonexistentFile();
+    void overrideNonexistentGroup();
+    void overrideDifferentGroup();
 };
 
 ResourceTest::ResourceTest() {

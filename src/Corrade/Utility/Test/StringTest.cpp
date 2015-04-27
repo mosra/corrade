@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -31,30 +31,29 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class StringTest: public TestSuite::Tester {
-    public:
-        StringTest();
+struct StringTest: TestSuite::Tester {
+    explicit StringTest();
 
-        void fromArray();
-        void trim();
-        void split();
-        void join();
-        void lowercase();
-        void uppercase();
-        void whitespace();
+    void fromArray();
+    void trim();
+    void split();
+    void splitMultipleCharacters();
+    void join();
+    void lowercase();
+    void uppercase();
 
-        void beginsWith();
-        void endsWith();
+    void beginsWith();
+    void endsWith();
 };
 
 StringTest::StringTest() {
     addTests<StringTest>({&StringTest::fromArray,
               &StringTest::trim,
               &StringTest::split,
+              &StringTest::splitMultipleCharacters,
               &StringTest::join,
               &StringTest::lowercase,
               &StringTest::uppercase,
-              &StringTest::whitespace,
 
               &StringTest::beginsWith,
               &StringTest::endsWith});
@@ -124,6 +123,30 @@ void StringTest::split() {
         (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
 }
 
+void StringTest::splitMultipleCharacters() {
+    const std::string delimiters = ".:;";
+
+    /* Empty */
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts({}, delimiters),
+        std::vector<std::string>{}, TestSuite::Compare::Container);
+
+    /* Only delimiters */
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts(".::;", delimiters),
+        std::vector<std::string>{}, TestSuite::Compare::Container);
+
+    /* No delimiters */
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("abcdef", delimiters),
+        std::vector<std::string>{"abcdef"}, TestSuite::Compare::Container);
+
+    /* Common case */
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("ab:c;def", delimiters),
+        (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
+
+    /* Empty parts */
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("ab:c;;def.", delimiters),
+        (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
+}
+
 void StringTest::join() {
     /* Empty */
     CORRADE_COMPARE(String::join({}, '/'), "");
@@ -186,11 +209,6 @@ void StringTest::uppercase() {
     /* UTF-8 */
     CORRADE_EXPECT_FAIL("UTF-8 uppercasing is not supported.");
     CORRADE_COMPARE(String::uppercase("ěščřžýáíéúůďťň"), "ĚŠČŘŽÝÁÍÉÚŮĎŤŇ");
-}
-
-void StringTest::whitespace() {
-    for(auto it = String::Whitespace.begin(); it != String::Whitespace.end(); ++it)
-        CORRADE_VERIFY(std::isspace(*it));
 }
 
 void StringTest::beginsWith() {

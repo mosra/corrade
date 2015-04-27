@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -26,6 +26,8 @@
 #include "Configuration.h"
 
 #include <fstream>
+#include <utility>
+#include <vector>
 
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Debug.h"
@@ -104,15 +106,19 @@ void Configuration::setFilename(std::string filename) {
     _filename = std::move(filename);
 }
 
+namespace {
+    constexpr const char Bom[] = "\xEF\xBB\xBF";
+}
+
 bool Configuration::parse(std::istream& in) {
     try {
         /* It looks like BOM */
-        if(in.peek() == String::Bom[0]) {
+        if(in.peek() == Bom[0]) {
             char bom[4];
             in.get(bom, 4);
 
             /* This is not a BOM, rewind back */
-            if(bom != String::Bom) in.seekg(0);
+            if(bom[0] != Bom[0] || bom[1] != Bom[1] || bom[2] != Bom[2]) in.seekg(0);
 
             /* Or set flag */
             else _flags |= InternalFlag::HasBom;
@@ -193,8 +199,11 @@ std::string Configuration::parse(std::istream& in, ConfigurationGroup* group, co
                 ConfigurationGroup::Group g;
                 g.name = nextGroup.substr(fullPath.size());
                 g.group = new ConfigurationGroup(_configuration);
-                nextGroup = parse(in, g.group, nextGroup+'/');
+                /* Add the group before attempting any other parsing, as it
+                   could throw an exception and the group would otherwise be
+                   leaked */
                 group->_groups.push_back(std::move(g));
+                nextGroup = parse(in, g.group, nextGroup+'/');
             }
 
             return nextGroup;
@@ -257,7 +266,7 @@ bool Configuration::save(const std::string& filename) {
 void Configuration::save(std::ostream& out) {
     /* BOM, if user explicitly wants that crap */
     if((_flags & InternalFlag::PreserveBom) && (_flags & InternalFlag::HasBom))
-        out.write(String::Bom.data(), 3);
+        out.write(Bom, 3);
 
     /* EOL character */
     std::string eol;
@@ -274,6 +283,12 @@ void Configuration::save(std::ostream& out) {
 bool Configuration::save() {
     if(_filename.empty()) return false;
     return save(_filename);
+}
+
+namespace {
+    constexpr bool isWhitespace(char c) {
+        return c == ' ' || c == '\t' || c == '\f' || c == '\v' || c == '\r' || c == '\n';
+    }
 }
 
 void Configuration::save(std::ostream& out, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const {
@@ -298,8 +313,7 @@ void Configuration::save(std::ostream& out, const std::string& eol, Configuratio
                 buffer = it->key + "=\"\"\"" + eol + value + eol + "\"\"\"" + eol;
 
             /* Value with leading/trailing spaces (GCC 4.5 doesn't have std::string::back()) */
-            } else if(!it->value.empty() && (String::Whitespace.find(it->value[0]) != std::string::npos ||
-                                             String::Whitespace.find(it->value[it->value.size()-1]) != std::string::npos)) {
+            } else if(!it->value.empty() && (isWhitespace(it->value[0]) || isWhitespace(it->value[it->value.size()-1]))) {
                 buffer = it->key + "=\"" + it->value + '"' + eol;
 
             /* Value without spaces */

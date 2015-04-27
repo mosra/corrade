@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -23,18 +23,20 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <string>
+
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/AbstractHash.h"
 #include "Corrade/Utility/MurmurHash2.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class MurmurHash2Test: public TestSuite::Tester {
-    public:
-        MurmurHash2Test();
+struct MurmurHash2Test: TestSuite::Tester {
+    explicit MurmurHash2Test();
 
-        void test32();
-        void test64();
-        void constructor();
+    void test32();
+    void test64();
+    void constructor();
 };
 
 MurmurHash2Test::MurmurHash2Test() {
@@ -44,13 +46,13 @@ MurmurHash2Test::MurmurHash2Test() {
 }
 
 void MurmurHash2Test::test32() {
-    CORRADE_COMPARE(Implementation::MurmurHash2<4>{}(23, reinterpret_cast<const unsigned char*>("string"), 6), 3435905073u);
-    CORRADE_COMPARE(Implementation::MurmurHash2<4>{}(23, reinterpret_cast<const unsigned char*>("four"), 4), 2072697618u);
+    CORRADE_COMPARE(Implementation::MurmurHash2<4>{}(23, "string", 6), 3435905073u);
+    CORRADE_COMPARE(Implementation::MurmurHash2<4>{}(23, "four", 4), 2072697618u);
 }
 
 void MurmurHash2Test::test64() {
-    CORRADE_COMPARE(Implementation::MurmurHash2<8>{}(23, reinterpret_cast<const unsigned char*>("string"), 6), 7441339218310318127ull);
-    CORRADE_COMPARE(Implementation::MurmurHash2<8>{}(23, reinterpret_cast<const unsigned char*>("eightbit"), 8), 14685337704530366946ull);
+    CORRADE_COMPARE(Implementation::MurmurHash2<8>{}(23, "string", 6), 7441339218310318127ull);
+    CORRADE_COMPARE(Implementation::MurmurHash2<8>{}(23, "eightbit", 8), 14685337704530366946ull);
 }
 
 void MurmurHash2Test::constructor() {

@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -32,13 +32,14 @@
 #include <string>
 #include <vector>
 
+#include "Corrade/Containers/Containers.h"
 #include "Corrade/Containers/EnumSet.h"
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
 
 /**
-@brief %Directory utilities
+@brief Directory utilities
 @todo Unicode <-> UTF8 path conversion for Windows
 */
 class CORRADE_UTILITY_EXPORT Directory {
@@ -198,7 +199,7 @@ class CORRADE_UTILITY_EXPORT Directory {
          * Returns `nullptr` if the file can't be read.
          * @see @ref readString(), @ref fileExists(), @ref write()
          */
-        static Containers::Array<unsigned char> read(const std::string& filename);
+        static Containers::Array<char> read(const std::string& filename);
 
         /**
          * @brief Read file into string

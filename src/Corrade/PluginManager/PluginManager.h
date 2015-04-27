@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -39,9 +39,9 @@ enum class LoadState: unsigned short;
 #endif
 
 class AbstractManager;
-template<class, class = AbstractManager> class AbstractManagingPlugin;
+template<class> class AbstractManagingPlugin;
 class AbstractPlugin;
-template<class, class = AbstractManager> class Manager;
+template<class> class Manager;
 class PluginMetadata;
 
 }}

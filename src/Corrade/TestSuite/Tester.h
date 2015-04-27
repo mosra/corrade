@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -29,15 +29,20 @@
  * @brief Class @ref Corrade::TestSuite::Tester, macros @ref CORRADE_TEST_MAIN(), @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH(), @ref CORRADE_SKIP()
  */
 
+#include <initializer_list>
+#include <iosfwd>
+#include <string>
+#include <type_traits>
 #include <vector>
 
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/TestSuite/Compare/FloatingPoint.h"
+#include "Corrade/TestSuite/visibility.h"
+#include "Corrade/Utility/Debug.h"
 
 #ifdef CORRADE_TARGET_EMSCRIPTEN
 #include <cstdlib>
 #endif
-#include "Corrade/TestSuite/visibility.h"
 
 namespace Corrade { namespace TestSuite {
 
@@ -249,7 +254,7 @@ CORRADE_VERIFY(t);
     } while(false)
 
 /** @hideinitializer
-@brief %Compare two values in @ref Corrade::TestSuite::Tester "Tester" subclass
+@brief Compare two values in @ref Corrade::TestSuite::Tester "Tester" subclass
 
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
@@ -267,7 +272,7 @@ CORRADE_COMPARE(a, 8);
     } while(false)
 
 /** @hideinitializer
-@brief %Compare two values in @ref Corrade::TestSuite::Tester "Tester" subclass with explicitly specified type
+@brief Compare two values in @ref Corrade::TestSuite::Tester "Tester" subclass with explicitly specified type
 
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
@@ -290,7 +295,7 @@ for example of more involved comparisons.
 #endif
 
 /** @hideinitializer
-@brief %Compare two values in @ref Corrade::TestSuite::Tester "Tester" subclass with explicitly specified comparator
+@brief Compare two values in @ref Corrade::TestSuite::Tester "Tester" subclass with explicitly specified comparator
 
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
@@ -353,8 +358,14 @@ if(!bigEndian) {
 template<class T, class U, class V> void Tester::compareWith(Comparator<T> comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
     ++checkCount;
 
+    /* Store (references to) possibly implicitly-converted values,
+       otherwise the implicit conversion would when passing them to operator(),
+       causing dead memory access later in printErrorMessage() */
+    const typename Implementation::ComparatorTraits<T>::ActualType& actualValueInExpectedActualType = actualValue;
+    const typename Implementation::ComparatorTraits<T>::ExpectedType& expectedValueInExpectedExpectedType = expectedValue;
+
     /* If the comparison succeeded or the failure is expected, done */
-    bool equal = comparator(actualValue, expectedValue);
+    bool equal = comparator(actualValueInExpectedActualType, expectedValueInExpectedExpectedType);
     if(!expectedFailure) {
         if(equal) return;
     } else if(!equal) {

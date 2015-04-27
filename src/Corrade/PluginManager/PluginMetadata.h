@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -32,6 +32,7 @@
 #include <string>
 #include <vector>
 
+#include "Corrade/PluginManager/PluginManager.h"
 #include "Corrade/PluginManager/visibility.h"
 #include "Corrade/Utility/Utility.h"
 
@@ -71,7 +72,7 @@ be loaded. It will be also loaded when requesting `RealWorld` plugin, but only
 if this is the first plugin providing it.
 */
 class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
-    friend class AbstractManager;
+    friend AbstractManager;
 
     public:
         /** @brief Plugin name */

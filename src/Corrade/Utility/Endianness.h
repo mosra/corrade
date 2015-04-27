@@ -3,7 +3,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -37,11 +37,16 @@
 namespace Corrade { namespace Utility {
 
 /**
-@brief %Endianness related functions
+@brief Endianness related functions
 */
 class Endianness {
     public:
         Endianness() = delete;
+
+        /** @brief Endian-swap bytes of given value */
+        template<class T> static T swap(T value) {
+            return bitCast<T>(swap<sizeof(T)>(bitCast<typename TypeFor<sizeof(T)>::Type>(value)));
+        }
 
         /** @brief Whether actual system is Big-Endian */
         constexpr static bool isBigEndian() {
@@ -54,55 +59,53 @@ class Endianness {
 
         /**
          * @brief Convert number from or to Big-Endian
-         * @param number    Number to convert
-         * @return Number as Big-Endian. On Big-Endian systems returns
-         *      unchanged value.
+         *
+         * On Little-Endian systems calls @ref swap(), on Big-Endian systems
+         * returns unchanged value.
          */
-        template<class T> static T bigEndian(T number) {
+        template<class T> static T bigEndian(T value) {
             #ifdef CORRADE_BIG_ENDIAN
             return number;
             #else
-            return swap<sizeof(T)>(bitCast<typename TypeFor<sizeof(T)>::Type>(number));
+            return swap(value);
             #endif
         }
 
         /**
-         * @brief Convert numbers from or to Big-Endian in-place
-         * @param numbers   Numbers to convert
+         * @brief Convert values from or to Big-Endian in-place
          *
-         * On Big-Endian systems does nothing.
+         * Calls @ref bigEndian() for each value and saves the result back.
          */
         #if defined(DOXYGEN_GENERATING_OUTPUT) || !defined(CORRADE_BIG_ENDIAN)
-        template<class ...T> static void bigEndianInPlace(T&... numbers) {
-            bigEndianInPlaceInternal(numbers...);
+        template<class ...T> static void bigEndianInPlace(T&... values) {
+            bigEndianInPlaceInternal(values...);
         }
         #else
         template<class ...T> static void bigEndianInPlace(T&...) {}
         #endif
 
         /**
-         * @brief Convert number from or to Little-Endian
-         * @param number    Number to convert
-         * @return Number as Little-Endian. On Little-Endian systems returns
-         *      unchanged value.
+         * @brief Convert value from or to Little-Endian
+         *
+         * On Big-Endian systems calls @ref swap(), on Little-Endian systems
+         * returns unchanged value.
          */
         template<class T> static T littleEndian(T number) {
             #ifdef CORRADE_BIG_ENDIAN
-            return swap<sizeof(T)>(bitCast<typename TypeFor<sizeof(T)>::Type>(number));
+            return swap(number);
             #else
             return number;
             #endif
         }
 
         /**
-         * @brief Convert numbers from or to Little-Endian in-place
-         * @param numbers   Numbers to convert
+         * @brief Convert values from or to Little-Endian in-place
          *
-         * On Little-Endian systems does nothing.
+         * Calls @ref littleEndian() for each value and saves the result back.
          */
         #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_BIG_ENDIAN)
-        template<class ...T> static void littleEndianInPlace(T&... numbers) {
-            littleEndianInPlaceInternal(numbers...);
+        template<class ...T> static void littleEndianInPlace(T&... values) {
+            littleEndianInPlaceInternal(values...);
         }
         #else
         template<class ...T> static void littleEndianInPlace(T&...) {}
@@ -129,10 +132,14 @@ class Endianness {
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
+template<> struct Endianness::TypeFor<1> { typedef std::uint8_t  Type; };
 template<> struct Endianness::TypeFor<2> { typedef std::uint16_t Type; };
 template<> struct Endianness::TypeFor<4> { typedef std::uint32_t Type; };
 template<> struct Endianness::TypeFor<8> { typedef std::uint64_t Type; };
 
+template<> inline std::uint8_t Endianness::swap<1>(std::uint8_t value) {
+    return value;
+}
 template<> inline std::uint16_t Endianness::swap<2>(std::uint16_t value) {
     return (value >> 8) |
            (value << 8);

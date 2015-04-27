@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -33,29 +33,28 @@
 
 namespace Corrade { namespace Utility { namespace Test {
 
-class DirectoryTest: public Corrade::TestSuite::Tester {
-    public:
-        DirectoryTest();
+struct DirectoryTest: TestSuite::Tester {
+    explicit DirectoryTest();
 
-        void path();
-        void filename();
-        void join();
-        #ifdef CORRADE_TARGET_WINDOWS
-        void joinWindows();
-        #endif
-        void fileExists();
-        void remove();
-        void moveFile();
-        void moveDirectory();
-        void mkpath();
-        void home();
-        void configurationDir();
-        void list();
-        void listSortPrecedence();
-        void read();
-        void readEmpty();
-        void readNonSeekable();
-        void write();
+    void path();
+    void filename();
+    void join();
+    #ifdef CORRADE_TARGET_WINDOWS
+    void joinWindows();
+    #endif
+    void fileExists();
+    void remove();
+    void moveFile();
+    void moveDirectory();
+    void mkpath();
+    void home();
+    void configurationDir();
+    void list();
+    void listSortPrecedence();
+    void read();
+    void readEmpty();
+    void readNonSeekable();
+    void write();
 };
 
 DirectoryTest::DirectoryTest() {
@@ -308,9 +307,9 @@ void DirectoryTest::listSortPrecedence() {
 void DirectoryTest::read() {
     /* Existing file, check if we are reading it as binary (CR+LF is not
        converted to LF) and nothing after \0 gets lost */
-    const auto data = Directory::read(Directory::join(DIRECTORY_TEST_DIR, "file"));
-    CORRADE_COMPARE(std::vector<unsigned char>(data.begin(), data.end()),
-        (std::vector<unsigned char>{0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF}));
+    CORRADE_COMPARE_AS(Directory::read(Directory::join(DIRECTORY_TEST_DIR, "file")),
+        (Containers::Array<char>::from(0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF)),
+        TestSuite::Compare::Container);
 
     /* Nonexistent file */
     const auto none = Directory::read("nonexistent");

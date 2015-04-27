@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -26,12 +26,13 @@
 #include "Arguments.h"
 
 #include <algorithm> /* std::max(), needed by MSVC */
+#include <cstdlib>
 #include <cstring>
 #include <iomanip>
-#include <iostream>
 #include <sstream>
 
 #include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/String.h"
 
 namespace Corrade { namespace Utility {
@@ -154,12 +155,12 @@ void Arguments::parse(const int argc, const char** const argv) {
     const bool status = tryParse(argc, argv);
 
     if(isSet("help")) {
-        std::cout << help();
+        Debug() << help();
         std::exit(0);
     }
 
     if(!status) {
-        std::cerr << usage();
+        Error() << usage();
         std::exit(1);
     }
 }

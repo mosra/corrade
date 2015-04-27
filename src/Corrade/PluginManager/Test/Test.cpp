@@ -1,7 +1,7 @@
 /*
     This file is part of Corrade.
 
-    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
 
     Permission is hereby granted, free of charge, to any person obtaining a
@@ -45,40 +45,39 @@ static void initialize() {
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-class Test: public TestSuite::Tester {
-    public:
-        Test();
+struct Test: TestSuite::Tester {
+    explicit Test();
 
-        void nameList();
-        void wrongPluginVersion();
-        void wrongPluginInterface();
-        void wrongMetadataFile();
-        void loadNonexistent();
-        void unloadNonexistent();
+    void nameList();
+    void wrongPluginVersion();
+    void wrongPluginInterface();
+    void wrongMetadataFile();
+    void loadNonexistent();
+    void unloadNonexistent();
 
-        void staticPlugin();
-        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-        void dynamicPlugin();
-        #endif
-        void staticPluginInitFini();
-        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-        void dynamicPluginInitFini();
-        #endif
+    void staticPlugin();
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+    void dynamicPlugin();
+    #endif
+    void staticPluginInitFini();
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+    void dynamicPluginInitFini();
+    #endif
 
-        void deletable();
-        void hierarchy();
-        void crossManagerDependencies();
-        void unresolvedDependencies();
+    void deletable();
+    void hierarchy();
+    void crossManagerDependencies();
+    void unresolvedDependencies();
 
-        void reloadPluginDirectory();
+    void reloadPluginDirectory();
 
-        void staticProvides();
-        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-        void dynamicProvides();
-        void dynamicProvidesDependency();
-        #endif
+    void staticProvides();
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+    void dynamicProvides();
+    void dynamicProvidesDependency();
+    #endif
 
-        void debug();
+    void debug();
 };
 
 Test::Test() {
