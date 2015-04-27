@@ -137,7 +137,8 @@ std::string Resource::compileFrom(const std::string& name, const std::string& co
             Error() << "    Error: cannot open file" << filename << "of file" << fileData.size()+1 << "in group" << group;
             return {};
         }
-        fileData.emplace_back(std::move(alias), std::string{contents, contents.size()});
+        /* GCC 4.5 doesn't like {} here */
+        fileData.emplace_back(std::move(alias), std::string(contents, contents.size()));
     }
 
     return compile(name, group, fileData);
@@ -334,7 +335,8 @@ Containers::ArrayReference<const char> Resource::getRaw(const std::string& filen
 
 std::string Resource::get(const std::string& filename) const {
     Containers::ArrayReference<const char> data = getRaw(filename);
-    return data ? std::string{data, data.size()} : std::string{};
+    /* GCC 4.5 doesn't like {} here */
+    return data ? std::string(data, data.size()) : std::string{};
 }
 
 std::pair<bool, Containers::Array<char>> Resource::fileContents(const std::string& filename) {

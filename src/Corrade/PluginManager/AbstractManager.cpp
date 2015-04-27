@@ -111,7 +111,8 @@ void AbstractManager::importStaticPlugin(std::string plugin, int _version, std::
 #endif
 
 /* GCC 4.7 doesn't like initializing references with {} */
-AbstractManager::AbstractManager(std::string pluginInterface, std::string pluginDirectory): _plugins(initializeGlobalPluginStorage()), _pluginInterface{std::move(pluginInterface)} {
+/* GCC 4.5 doesn't like initializing string with {} */
+AbstractManager::AbstractManager(std::string pluginInterface, std::string pluginDirectory): _plugins(initializeGlobalPluginStorage()), _pluginInterface(std::move(pluginInterface)) {
     /* Find static plugins which have the same interface and have not
         assigned manager to them */
     for(auto it = _plugins.plugins.begin(); it != _plugins.plugins.end(); ++it) {
