@@ -419,7 +419,11 @@ template<class T> class ArrayReference {
          * `nullptr`, returns zero-sized `nullptr` array.
          */
         ArrayReference<T> prefix(T* end) const {
+            #ifndef CORRADE_GCC45_COMPATIBILITY
             if(!end) return nullptr;
+            #else
+            if(!end) return {};
+            #endif
             return slice(_data, end);
         }
         ArrayReference<T> prefix(std::size_t end) const { return prefix(_data + end); } /**< @overload */
@@ -432,7 +436,11 @@ template<class T> class ArrayReference {
          * array.
          */
         ArrayReference<T> suffix(T* begin) const {
+            #ifndef CORRADE_GCC45_COMPATIBILITY
             if(_data && !begin) return nullptr;
+            #else
+            if(_data && !begin) return {};
+            #endif
             return slice(begin, _data + _size);
         }
         ArrayReference<T> suffix(std::size_t begin) const { return suffix(_data + begin); } /**< @overload */
@@ -569,8 +577,13 @@ template<class T> inline T* Array<T>::release() {
 }
 
 template<class T> ArrayReference<T> ArrayReference<T>::slice(T* begin, T* end) const {
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     CORRADE_ASSERT(_data <= begin && begin <= end && end <= _data + _size,
         "Containers::ArrayReference::slice(): slice out of range", nullptr);
+    #else
+    CORRADE_ASSERT(_data <= begin && begin <= end && end <= _data + _size,
+        "Containers::ArrayReference::slice(): slice out of range", {});
+    #endif
     return ArrayReference<T>{begin, std::size_t(end - begin)};
 }
 

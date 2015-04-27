@@ -232,22 +232,22 @@ void ArrayReferenceTest::sliceInvalid() {
 void ArrayReferenceTest::sliceNullptr() {
     ArrayReference a{nullptr, 5};
 
-    ArrayReference b = a.prefix(nullptr);
+    ArrayReference b = a.prefix(static_cast<int*>(nullptr));
     CORRADE_VERIFY(!b);
     CORRADE_COMPARE(b.size(), 0);
 
-    ArrayReference c = a.suffix(nullptr);
+    ArrayReference c = a.suffix(static_cast<int*>(nullptr));
     CORRADE_VERIFY(!c);
     CORRADE_COMPARE(c.size(), 5);
 
     int data[5];
     ArrayReference d{data};
 
-    ArrayReference e = d.prefix(nullptr);
+    ArrayReference e = d.prefix(static_cast<int*>(nullptr));
     CORRADE_VERIFY(!e);
     CORRADE_COMPARE(e.size(), 0);
 
-    ArrayReference f = d.suffix(nullptr);
+    ArrayReference f = d.suffix(static_cast<int*>(nullptr));
     CORRADE_VERIFY(!f);
     CORRADE_COMPARE(f.size(), 0);
 }
