@@ -37,10 +37,6 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Utility/visibility.h"
 
-#ifdef CORRADE_BUILD_DEPRECATED
-#include "Corrade/Utility/Macros.h"
-#endif
-
 namespace Corrade { namespace Utility {
 
 /** @brief String utilities */
@@ -176,16 +172,6 @@ class CORRADE_UTILITY_EXPORT String {
          * as second parameter.
          */
         static std::vector<std::string> splitWithoutEmptyParts(const std::string& string);
-
-        #ifdef CORRADE_BUILD_DEPRECATED
-        /** @copybrief splitWithoutEmptyParts()
-         * @deprecated Use @ref Corrade::Utility::String::splitWithoutEmptyParts() "splitWithoutEmptyParts()"
-         *      instead.
-         */
-        static CORRADE_DEPRECATED("use splitWithoutEmptyParts() instead") std::vector<std::string> split(const std::string& string, char delim, bool keepEmptyParts) {
-            return keepEmptyParts ? split(string, delim) : splitWithoutEmptyParts(string, delim);
-        }
-        #endif
 
         /**
          * @brief Join strings with given character
