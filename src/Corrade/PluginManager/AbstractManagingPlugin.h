@@ -93,7 +93,7 @@ template<class Interface> class AbstractManagingPlugin: public AbstractPlugin {
         }
 };
 
-template<class Interface, class BaseManager> inline AbstractManagingPlugin<Interface, BaseManager>::AbstractManagingPlugin() = default;
+template<class Interface> inline AbstractManagingPlugin<Interface>::AbstractManagingPlugin() = default;
 
 }}
 
