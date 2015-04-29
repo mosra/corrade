@@ -55,10 +55,18 @@ std::pair<char32_t, std::size_t> Unicode::nextChar(const std::string& text, std:
     } else if((character & 0xf8) == 0xf0) {
         end += 4;
         mask = 0x07;
-    }
 
     /* Wrong sequence start */
-    if(cursor == end || text.size() < end) {
+    } else {
+        #ifndef CORRADE_MSVC2013_COMPATIBILITY
+        return {U'\xffffffff', cursor+1};
+        #else
+        return {0xffffffffu, cursor+1};
+        #endif
+    }
+
+    /* Unexpected end */
+    if(text.size() < end) {
         #ifndef CORRADE_MSVC2013_COMPATIBILITY
         return {U'\xffffffff', cursor+1};
         #else

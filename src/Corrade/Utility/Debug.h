@@ -41,6 +41,13 @@ namespace Corrade { namespace Utility {
 
 namespace Implementation { struct DebugOstreamFallback; }
 
+/* Disable warning about multiple copy constructors until I fix it properly */
+/** @todo fix properly */
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4521)
+#endif
+
 /**
 @brief Debug output handler
 
@@ -234,6 +241,12 @@ class CORRADE_UTILITY_EXPORT Debug {
         static std::ostream* globalOutput;
         int flags;
 };
+
+/* Disable warning about multiple copy constructors until I fix it properly */
+/** @todo fix properly */
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #ifdef DOXYGEN_GENERATING_OUTPUT
 /** @relates Debug

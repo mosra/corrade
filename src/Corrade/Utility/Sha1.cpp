@@ -74,7 +74,7 @@ Sha1& Sha1::operator<<(const std::string& data) {
 
 Sha1::Digest Sha1::digest() {
     /* Add '1' bit to the leftovers, pad to (n*64)+56 bytes */
-    _buffer.append(1, 0x80);
+    _buffer.append(1, '\x80');
     _buffer.append((_buffer.size() > 56 ? 120 : 56)- _buffer.size(), 0);
 
     /* Add size of data in bits in big endian */
