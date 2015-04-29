@@ -68,8 +68,8 @@ template<std::size_t size> class HashDigest {
          *
          * Value count must be the same as `size`.
          */
-        template<class ...T> constexpr explicit HashDigest(T... values): _digest{char(values)...} {
-            static_assert(sizeof...(values) == size, "Utility::HashDigest::HashDigest(): wrong data size");
+        template<class T, class ...U> constexpr explicit HashDigest(T firstValue, U... nextValues): _digest{char(firstValue), char(nextValues)...} {
+            static_assert(sizeof...(values) + 1 == size, "Utility::HashDigest::HashDigest(): wrong data size");
         }
 
         /** @brief Equality operator */
