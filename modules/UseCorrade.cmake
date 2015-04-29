@@ -118,15 +118,25 @@ elseif(MSVC)
     #   had bugs. And?
     # - C4512 "assignment operator could not be generated". Do I want one? NO I
     #   DON'T.
+    # - C4661 "no suitable definition for explicit template instantiation". No.
+    #   The problem is apparently that I'm having the definitions in *.cpp file
+    #   and instantiating them explicitly. Common practice here.
     # - C4702 "unreachable code". *Every* assertion has return after
     #   std::abort(). So?
+    # - C4706 "assignment within conditional expression". It's not my problem
+    #   that it doesn't get the hint with extra parentheses (`if((a = b))`).
     # - C4800 "forcing value to bool 'true' or 'false' (performance warning)".
     #   So what. I won't wrap everything in bool(). This is a _language
     #	feature_, dammit.
     # - C4910 "dllexport and extern are incompatible on an explicit
     #   instantiation". Why the error is emitted only on classes? Functions are
     #   okay with dllexport extern?!
-    set(CORRADE_CXX_FLAGS "/W4 /wd4127 /wd4251 /wd4351 /wd4373 /wd4512 /wd4702 /wd4800 /wd4910")
+    #
+    # Also:
+    # - disabling warning for not using "secure-but-not-standard" STL algos
+    # - disabling all minmax nonsense
+    # - disabling GDI and other mud in windows.h
+    set(CORRADE_CXX_FLAGS "/W4 /wd4127 /wd4251 /wd4351 /wd4373 /wd4512 /wd4661 /wd4702 /wd4706 /wd4800 /wd4910 -D_SCL_SECURE_NO_WARNINGS -DNOMINMAX -DWIN32_LEAN_AND_MEAN")
 endif()
 
 # Use C++11-enabled libcxx on OSX
