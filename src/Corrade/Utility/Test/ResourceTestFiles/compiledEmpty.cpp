@@ -1,8 +1,11 @@
 /* Compiled resource file. DO NOT EDIT! */
 
-#include "Corrade/compatibility.h"
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Resource.h"
+
+#ifdef CORRADE_GCC45_COMPATIBILITY
+#include "Corrade/compatibility.h"
+#endif
 
 static const unsigned char resourcePositions[] = {
     0x09,0x00,0x00,0x00,
