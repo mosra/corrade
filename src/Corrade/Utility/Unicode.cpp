@@ -55,11 +55,12 @@ std::pair<char32_t, std::size_t> Unicode::nextChar(const std::string& text, std:
     } else if((character & 0xf8) == 0xf0) {
         end += 4;
         mask = 0x07;
-    }
 
     /* Wrong sequence start */
-    if(cursor == end || text.size() < end)
-        return {U'\xffffffff', cursor+1};
+    } else return {U'\xffffffff', cursor+1};
+
+    /* Unexpected end */
+    if(text.size() < end) return {U'\xffffffff', cursor+1};
 
     /* Compute the codepoint */
     char32_t result = character & mask;
