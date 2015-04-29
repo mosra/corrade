@@ -91,10 +91,10 @@ if(BUILD_TESTS)
 endif()
 
 # Detect and auto-enable compiler compatibility
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.7.0")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0")
         message(FATAL_ERROR "Compatibility branch of Corrade is needed for use with GCC < 4.7. See the documentation for more information.")
-    elseif("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.8.1")
+    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.1")
         if(NOT GCC47_COMPATIBILITY)
             set(GCC47_COMPATIBILITY ON)
             message(WARNING "GCC < 4.8.1 detected, automatically enabling GCC47_COMPATIBILITY. Note that some features may not be available with this compiler.")

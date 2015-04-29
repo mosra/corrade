@@ -32,40 +32,40 @@ if(_CORRADE_USE_INCLUDED)
 endif()
 
 # Check compiler version
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # Don't allow to use compilers older than what compatibility mode allows
-    if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.4.0")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.4.0")
         message(FATAL_ERROR "Corrade cannot be used with GCC < 4.4")
     endif()
-    if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.5.0" AND NOT CORRADE_GCC44_COMPATIBILITY)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.5.0" AND NOT CORRADE_GCC44_COMPATIBILITY)
         message(FATAL_ERROR "To use Corrade with GCC 4.4, build it with GCC44_COMPATIBILITY enabled")
     endif()
-    if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.6.0" AND NOT CORRADE_GCC45_COMPATIBILITY)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6.0" AND NOT CORRADE_GCC45_COMPATIBILITY)
         message(FATAL_ERROR "To use Corrade with GCC 4.5, build it with GCC45_COMPATIBILITY enabled")
     endif()
-    if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.7.0" AND NOT CORRADE_GCC46_COMPATIBILITY)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" AND NOT CORRADE_GCC46_COMPATIBILITY)
         message(FATAL_ERROR "To use Corrade with GCC 4.6, build it with GCC46_COMPATIBILITY enabled")
     endif()
-    if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.8.1" AND NOT CORRADE_GCC47_COMPATIBILITY)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.1" AND NOT CORRADE_GCC47_COMPATIBILITY)
         message(FATAL_ERROR "To use Corrade with GCC 4.7, build it with GCC47_COMPATIBILITY enabled")
     endif()
 
     # Don't allow to use compiler newer than what compatibility mode allows
-    if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.8.1" AND CORRADE_GCC47_COMPATIBILITY)
+    if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.1" AND CORRADE_GCC47_COMPATIBILITY)
         message(FATAL_ERROR "GCC >=4.8.1 cannot be used if Corrade is built with GCC47_COMPATIBILITY")
     endif()
-    if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.7.0" AND CORRADE_GCC46_COMPATIBILITY)
+    if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" AND CORRADE_GCC46_COMPATIBILITY)
         message(FATAL_ERROR "GCC >=4.7 cannot be used if Corrade is built with GCC46_COMPATIBILITY")
     endif()
-    if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.6.0" AND CORRADE_GCC45_COMPATIBILITY)
+    if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6.0" AND CORRADE_GCC45_COMPATIBILITY)
         message(FATAL_ERROR "GCC >=4.6 cannot be used if Corrade is built with GCC45_COMPATIBILITY")
     endif()
-    if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.5.0" AND CORRADE_GCC44_COMPATIBILITY)
+    if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.5.0" AND CORRADE_GCC44_COMPATIBILITY)
         message(FATAL_ERROR "GCC >=4.5 cannot be used if Corrade is built with GCC44_COMPATIBILITY")
     endif()
 elseif(MSVC)
     # Don't allow to use compilers older than what compatibility mode allows
-    if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "18.0")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "18.0")
         message(FATAL_ERROR "Corrade cannot be used with MSVC < 2013")
     elseif(NOT CORRADE_MSVC2013_COMPATIBILITY)
         message(FATAL_ERROR "To use Corrade with MSVC 2013, build it with MSVC2013_COMPATIBILITY enabled")
@@ -73,7 +73,7 @@ elseif(MSVC)
 endif()
 
 # GCC/Clang-specific compiler flags
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?Clang" OR CORRADE_TARGET_EMSCRIPTEN)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" OR CORRADE_TARGET_EMSCRIPTEN)
     # Mandatory C++ flags
     if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
         # TODO: use -std=c++11 when we don't have to maintain compatibility
@@ -87,7 +87,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCH
 
     # Some flags are not yet supported everywhere
     # TODO: do this with check_c_compiler_flags()
-    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.7.0")
             set(CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS} -Wzero-as-null-pointer-constant")
         endif()
@@ -130,7 +130,7 @@ elseif(MSVC)
 endif()
 
 # Use C++11-enabled libcxx on OSX
-if(CORRADE_TARGET_APPLE AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?Clang" AND NOT CMAKE_CXX_FLAGS MATCHES "-stdlib=")
+if(CORRADE_TARGET_APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" AND NOT CMAKE_CXX_FLAGS MATCHES "-stdlib=")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lc++")
 endif()
