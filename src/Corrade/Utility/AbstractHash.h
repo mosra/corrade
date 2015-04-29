@@ -79,7 +79,7 @@ template<std::size_t size> class HashDigest {
             _digest({char(firstValue), char(nextValues)...})
             #endif
         {
-            static_assert(sizeof...(values) + 1 == size, "Utility::HashDigest::HashDigest(): wrong data size");
+            static_assert(sizeof...(nextValues) + 1 == size, "Utility::HashDigest::HashDigest(): wrong data size");
         }
 
         /** @brief Equality operator */
