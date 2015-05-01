@@ -102,9 +102,6 @@ template<class T> class Object {
         typedef Implementation::ObjectFlags Flags;
 };
 @endcode
-
-@todo Replace `U` with `std::underlying_type<T>` when support for GCC 4.6 is
-    dropped
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T, class U, U fullValue = U(~0)>
