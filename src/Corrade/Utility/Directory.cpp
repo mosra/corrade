@@ -37,7 +37,15 @@
 #include <dirent.h>
 
 /* Windows */
+/** @todo remove the superfluous includes when mingw is fixed (otherwise causes undefined EXTERN_C error) */
 #elif defined(CORRADE_TARGET_WINDOWS)
+#ifdef __MINGW32__
+#include <wtypesbase.h>
+#include <windef.h>
+#include <wincrypt.h>
+#include <ntdef.h>
+#include <basetyps.h>
+#endif
 #include <shlobj.h>
 #endif
 
