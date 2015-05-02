@@ -41,9 +41,9 @@ namespace Implementation {
     struct SignalDataHash;
 
     class SignalData {
-        /* GCC 4.6 needs the class keyword */
+        /* GCC 4.6 needs the class/struct keyword */
         friend class Interconnect::Emitter;
-        friend class SignalDataHash;
+        friend struct SignalDataHash;
 
         public:
             static const std::size_t Size = 2*sizeof(void*)/sizeof(std::size_t);
