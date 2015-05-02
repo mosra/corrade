@@ -75,11 +75,11 @@ auto AbstractManager::initializeGlobalPluginStorage() -> GlobalPluginStorage& {
             /* Add aliases to the list (only the ones that aren't already there
                are added) */
             for(auto it = result.first->second->metadata._provides.begin(); it != result.first->second->metadata._provides.end(); ++it) {
-                #ifndef CORRADE_GCC47_COMPATIBILITY
-                plugins->aliases.emplace(*it, *result.first->second);
-                #else
+                /* Libc++ frees the passed Plugin& reference when using
+                   emplace(), causing double-free memory corruption later.
+                   Everything is okay with insert(). */
+                /** @todo put back emplace() here when libc++ is fixed */
                 plugins->aliases.insert({*it, *result.first->second});
-                #endif
             }
         }
 
@@ -287,11 +287,11 @@ void AbstractManager::setPluginDirectory(std::string directory) {
 
         /* Add aliases to the list */
         for(auto it = result.first->second->metadata._provides.begin(); it != result.first->second->metadata._provides.end(); ++it) {
-            #ifndef CORRADE_GCC47_COMPATIBILITY
-            _plugins.aliases.emplace(*it, *result.first->second);
-            #else
+            /* Libc++ frees the passed Plugin& reference when using emplace(),
+               causing double-free memory corruption later. Everything is okay
+               with insert(). */
+            /** @todo put back emplace() here when libc++ is fixed */
             _plugins.aliases.insert({*it, *result.first->second});
-            #endif
         }
     }
 }
