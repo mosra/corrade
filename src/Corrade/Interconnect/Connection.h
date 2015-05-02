@@ -38,7 +38,7 @@ namespace Corrade { namespace Interconnect {
 
 namespace Implementation {
     class AbstractConnectionData;
-    class SignalDataHash;
+    struct SignalDataHash;
 
     class SignalData {
         /* GCC 4.6 needs the class keyword */

@@ -113,12 +113,7 @@ template<class T> class Array {
          * Creates zero-sized array. Move array with nonzero size onto the
          * instance to make it useful.
          */
-        /* implicit where nullptr is not supported, as explicitly specifying
-           the type is much less convenient than simply typing nullptr */
-        #ifndef CORRADE_GCC45_COMPATIBILITY
-        explicit
-        #endif
-        Array() noexcept: _data(nullptr), _size(0) {}
+        /*implicit*/ Array() noexcept: _data(nullptr), _size(0) {}
 
         /**
          * @brief Constructor
@@ -319,13 +314,7 @@ template<class T> class ArrayReference {
          * Creates empty reference. Copy non-empty @ref Array or
          * @ref ArrayReference onto the instance to make it useful.
          */
-        constexpr
-        /* implicit where nullptr is not supported, as explicitly specifying
-           the type is much less convenient than simply typing nullptr */
-        #ifndef CORRADE_GCC45_COMPATIBILITY
-        explicit
-        #endif
-        ArrayReference() noexcept: _data(nullptr), _size(0) {}
+        constexpr /*implicit*/ ArrayReference() noexcept: _data(nullptr), _size(0) {}
 
         /**
          * @brief Constructor
