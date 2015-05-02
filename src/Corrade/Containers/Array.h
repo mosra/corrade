@@ -104,7 +104,7 @@ template<class T> class Array {
          * Creates zero-sized array. Move array with nonzero size onto the
          * instance to make it useful.
          */
-        explicit Array() noexcept: _data(nullptr), _size(0) {}
+        /*implicit*/ Array() noexcept: _data(nullptr), _size(0) {}
 
         /**
          * @brief Constructor
@@ -289,7 +289,7 @@ template<class T> class ArrayReference {
          * Creates empty reference. Copy non-empty @ref Array or
          * @ref ArrayReference onto the instance to make it useful.
          */
-        constexpr explicit ArrayReference() noexcept: _data(nullptr), _size(0) {}
+        constexpr /*implicit*/ ArrayReference() noexcept: _data(nullptr), _size(0) {}
 
         /**
          * @brief Constructor
