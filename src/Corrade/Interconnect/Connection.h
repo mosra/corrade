@@ -38,7 +38,7 @@ namespace Corrade { namespace Interconnect {
 
 namespace Implementation {
     class AbstractConnectionData;
-    class SignalDataHash;
+    struct SignalDataHash;
 
     class SignalData {
         friend Interconnect::Emitter;

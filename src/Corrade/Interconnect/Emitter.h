@@ -42,14 +42,13 @@ namespace Corrade { namespace Interconnect {
 
 namespace Implementation {
 
-class SignalDataHash {
-    public:
-        std::size_t operator()(const SignalData& data) const {
-            std::size_t hash = 0;
-            for(std::size_t i = 0; i != SignalData::Size; ++i)
-                hash ^= data.data[i];
-            return hash;
-        }
+struct SignalDataHash {
+    std::size_t operator()(const SignalData& data) const {
+        std::size_t hash = 0;
+        for(std::size_t i = 0; i != SignalData::Size; ++i)
+            hash ^= data.data[i];
+        return hash;
+    }
 };
 
 }
