@@ -220,9 +220,10 @@ void ArrayReferenceTest::sliceInvalid() {
     std::ostringstream out;
     Error::setOutput(&out);
 
-    a.slice(a - 1, a);
-    a.slice(a + 5, a + 6);
-    a.slice(a + 2, a + 1);
+    /* GCC 4.4 needs begin() to work around implicit conversion to bool */
+    a.slice(a.begin() - 1, a.begin());
+    a.slice(a.begin() + 5, a.begin() + 6);
+    a.slice(a.begin() + 2, a.begin() + 1);
 
     CORRADE_COMPARE(out.str(), "Containers::ArrayReference::slice(): slice out of range\n"
                                "Containers::ArrayReference::slice(): slice out of range\n"
