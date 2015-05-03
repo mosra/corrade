@@ -85,7 +85,13 @@ template<class T> class Manager: public AbstractManager {
          * @ref instance(). If loading fails, `nullptr` is returned.
          */
         std::unique_ptr<T> loadAndInstantiate(const std::string& plugin) {
-            if(!(load(plugin) & LoadState::Loaded)) return nullptr;
+            if(!(load(plugin) & LoadState::Loaded)) {
+                #ifndef CORRADE_GCC45_COMPATIBILITY
+                return nullptr;
+                #else
+                return {};
+                #endif
+            }
             return instance(plugin);
         }
 };
