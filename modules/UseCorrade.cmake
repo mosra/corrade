@@ -136,7 +136,7 @@ elseif(MSVC)
     # - disabling warning for not using "secure-but-not-standard" STL algos
     # - disabling all minmax nonsense
     # - disabling GDI and other mud in windows.h
-    set(CORRADE_CXX_FLAGS "/W4 /wd4127 /wd4251 /wd4351 /wd4373 /wd4512 /wd4661 /wd4702 /wd4706 /wd4800 /wd4910 -D_SCL_SECURE_NO_WARNINGS -DNOMINMAX -DWIN32_LEAN_AND_MEAN")
+    set(CORRADE_CXX_FLAGS "/W4 /wd4127 /wd4251 /wd4351 /wd4373 /wd4512 /wd4661 /wd4702 /wd4706 /wd4800 /wd4910 -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS -DNOMINMAX -DWIN32_LEAN_AND_MEAN")
 endif()
 
 # Use C++11-enabled libcxx on OSX

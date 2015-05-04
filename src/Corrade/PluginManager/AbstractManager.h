@@ -392,6 +392,12 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
             /* Constructor for static plugins */
             explicit Plugin(std::string name, std::istream& metadata, StaticPlugin* staticPlugin);
 
+            /* Ensure that we don't delete staticPlugin twice */
+            Plugin(const Plugin&) = delete;
+            Plugin(Plugin&&) = delete;
+            Plugin& operator=(const Plugin&) = delete;
+            Plugin& operator=(Plugin&&) = delete;
+
             ~Plugin();
         };
 
