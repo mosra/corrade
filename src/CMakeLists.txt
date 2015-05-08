@@ -23,6 +23,13 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+# On MSVC remove /W3, as we are replacing it with /W4
+if(MSVC)
+    string(REPLACE "/W3" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CORRADE_CXX_FLAGS}")
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 add_subdirectory(Corrade)
