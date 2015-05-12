@@ -493,7 +493,7 @@ replace `localhost:8080` with your server name, replace `update-job` with
 
     java -jar ~/jenkins-cli.jar -s http://localhost:8080 update-job Corrade < package/ci/jenkins.xml
 
-Build is done using **Ninja** build system. It expects that **GCC** >=4.8.1,
+Build is done using **Ninja** build system. It expects that **GCC** >=4.9, 4.8,
 4.7 and **Clang** are installed as it tries to compile the library with each
 one of them. You can add/remove the compilers in `axes/hudson.matrix.TextAxis`
 or via the web interface later.
