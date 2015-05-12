@@ -111,11 +111,15 @@ class CORRADE_UTILITY_EXPORT Resource {
          */
         static void overrideGroup(const std::string& group, const std::string& configurationFile);
 
+        /** @brief Whether given group exists */
+        static bool hasGroup(const std::string& group);
+
         /**
          * @brief Constructor
          * @param group         Group name
          *
          * The group must exist.
+         * @see @ref hasGroup()
          */
         explicit Resource(const std::string& group);
 

@@ -50,6 +50,7 @@ struct ResourceTest: TestSuite::Tester {
     void compileFromEmptyFilename();
     void compileFromEmptyAlias();
 
+    void hasGroup();
     void list();
     void get();
     void getEmptyFile();
@@ -75,6 +76,7 @@ ResourceTest::ResourceTest() {
               &ResourceTest::compileFromEmptyFilename,
               &ResourceTest::compileFromEmptyAlias,
 
+              &ResourceTest::hasGroup,
               &ResourceTest::list,
               &ResourceTest::get,
               &ResourceTest::getEmptyFile,
@@ -167,6 +169,11 @@ void ResourceTest::compileFromEmptyAlias() {
     CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
         Directory::join(RESOURCE_TEST_DIR, "resources-empty-alias.conf")).empty());
     CORRADE_COMPARE(out.str(), "    Error: filename or alias of file 1 in group name is empty\n");
+}
+
+void ResourceTest::hasGroup() {
+    CORRADE_VERIFY(Resource::hasGroup("test"));
+    CORRADE_VERIFY(!Resource::hasGroup("nonexistent"));
 }
 
 void ResourceTest::list() {

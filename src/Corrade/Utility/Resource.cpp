@@ -238,6 +238,10 @@ void Resource::overrideGroup(const std::string& group, const std::string& config
     it->second.overrideGroup = configurationFile;
 }
 
+bool Resource::hasGroup(const std::string& group) {
+    return resources().find(group) != resources().end();
+}
+
 Resource::Resource(const std::string& group): _overrideGroup(nullptr) {
     _group = resources().find(group);
     CORRADE_ASSERT(_group != resources().end(),
