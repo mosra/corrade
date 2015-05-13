@@ -56,8 +56,8 @@ out << "Hello World!" << std::endl;
 @endcode
 The output stream can be also used with @ref Debug classes.
 @partialsupport Available only in @ref CORRADE_TARGET_ANDROID "Android", see
-    @ref Corrade::Utility::NaClConsoleStreamBuffer "NaClConsoleStreamBuffer"
-    for similar functionality in @ref CORRADE_TARGET_NACL "NaCl".
+    @ref NaClConsoleStreamBuffer for similar functionality in
+    @ref CORRADE_TARGET_NACL "NaCl".
 */
 class CORRADE_UTILITY_EXPORT AndroidLogStreamBuffer: public std::stringbuf {
     public:
