@@ -6,7 +6,7 @@ pkgdesc="C++11/C++14 multiplatform utility library (Emscripten)"
 arch=('any')
 url="http://mosra.cz/blog/corrade.php"
 license=('MIT')
-makedepends=('cmake' 'ninja' 'emscripten')
+makedepends=('cmake' 'emscripten')
 options=(!strip !buildflags)
 
 _rootdir=$startdir/../../
@@ -18,8 +18,7 @@ build() {
 
         cmake .. \
             -DCMAKE_MODULE_PATH="$_rootdir/toolchains/modules" \
-            -DCMAKE_TOOLCHAIN_FILE="$_rootdir/toolchains/generic/Emscripten.cmake" \
-            -G Ninja
+            -DCMAKE_TOOLCHAIN_FILE="$_rootdir/toolchains/generic/Emscripten.cmake"
     fi
 
     cd "$_rootdir/build-emscripten"
@@ -27,10 +26,10 @@ build() {
     cmake .. \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr/lib/emscripten/system
-    ninja
+    make
 }
 
 package() {
     cd "$_rootdir/build-emscripten"
-    DESTDIR="$pkgdir/" ninja install
+    DESTDIR="$pkgdir/" make install
 }

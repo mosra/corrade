@@ -68,11 +68,10 @@ cmake .. \
     -DCMAKE_MODULE_PATH="${WORKSPACE}/toolchains/modules" \
     -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/Emscripten.cmake" \
     -DCMAKE_INSTALL_PREFIX=${JENKINS_HOME}/filesystem/emscripten-${compatibility} \
-    -DBUILD_DEPRECATED=${deprecated_build_flag} \
-    -G Ninja
+    -DBUILD_DEPRECATED=${deprecated_build_flag}
 
-ninja
-ninja install
+make -j
+make -j install
 ]]>
       </command>
     </hudson.tasks.Shell>
