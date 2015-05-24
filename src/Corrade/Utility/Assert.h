@@ -29,7 +29,7 @@
  * @brief Macro @ref CORRADE_ASSERT(), @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(), @ref CORRADE_ASSERT_UNREACHABLE()
  */
 
-#ifndef CORRADE_NO_ASSERT
+#if !defined(CORRADE_NO_ASSERT) || defined(CORRADE_GRACEFUL_ASSERT)
 #include <cstdlib>
 
 #include "Corrade/Utility/Debug.h"
