@@ -30,16 +30,13 @@ if(NOT DEFINED LIB_SUFFIX)
     message(STATUS "LIB_SUFFIX variable is not defined. It will be autodetected now.")
     message(STATUS "You can set it manually with -DLIB_SUFFIX=<value> (64 for example)")
 
-    # All 32bit system have empty lib suffix
+    # All 32bit system have empty lib suffix, decide based on
+    # FIND_LIBRARY_USE_LIB64_PATHS on 64bit systems
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        # If there is /usr/lib64 and is not /usr/lib32, set suffix to 64
-        # Ubuntu 64bit symlinks /usr/lib64 to /usr/lib, install to /usr/lib there
-        if(IS_DIRECTORY /usr/lib64 AND NOT IS_SYMLINK /usr/lib64)
-            set(LIB_SUFFIX 64)
-        elseif(IS_DIRECTORY /usr/lib)
-            set(LIB_SUFFIX "")
+        get_property(LIB_SUFFIX GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
+        if(LIB_SUFFIX)
+            set(LIB_SUFFIX "64")
         else()
-            message(WARNING "LIB_SUFFIX cannot be autodetected. No /usr/lib neither /usr/lib64 found.")
             set(LIB_SUFFIX "")
         endif()
     else()
