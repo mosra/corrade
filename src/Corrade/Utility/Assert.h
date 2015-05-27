@@ -156,9 +156,7 @@ CORRADE_INTERNAL_ASSERT_OUTPUT(initialize());
 */
 #ifdef CORRADE_NO_ASSERT
 #define CORRADE_INTERNAL_ASSERT_OUTPUT(call)                                \
-    do {                                                                    \
-        static_cast<void>(call);                                            \
-    } while(false)
+    static_cast<void>(call);
 #else
 #define CORRADE_INTERNAL_ASSERT_OUTPUT(call)                                \
     do {                                                                    \
