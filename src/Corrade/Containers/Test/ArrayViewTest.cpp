@@ -30,8 +30,8 @@
 
 namespace Corrade { namespace Containers { namespace Test {
 
-struct ArrayReferenceTest: TestSuite::Tester {
-    explicit ArrayReferenceTest();
+struct ArrayViewTest: TestSuite::Tester {
+    explicit ArrayViewTest();
 
     void constructEmpty();
     void constructNullptr();
@@ -57,122 +57,122 @@ struct ArrayReferenceTest: TestSuite::Tester {
 };
 
 typedef Containers::Array<int> Array;
-typedef Containers::ArrayReference<int> ArrayReference;
-typedef Containers::ArrayReference<const int> ConstArrayReference;
-typedef Containers::ArrayReference<const void> VoidArrayReference;
+typedef Containers::ArrayView<int> ArrayView;
+typedef Containers::ArrayView<const int> ConstArrayView;
+typedef Containers::ArrayView<const void> VoidArrayView;
 
-ArrayReferenceTest::ArrayReferenceTest() {
-    addTests({&ArrayReferenceTest::constructEmpty,
-              &ArrayReferenceTest::constructNullptr,
-              &ArrayReferenceTest::constructNullptrSize,
-              &ArrayReferenceTest::construct,
-              &ArrayReferenceTest::constructFixedSize,
-              &ArrayReferenceTest::constructArray,
+ArrayViewTest::ArrayViewTest() {
+    addTests({&ArrayViewTest::constructEmpty,
+              &ArrayViewTest::constructNullptr,
+              &ArrayViewTest::constructNullptrSize,
+              &ArrayViewTest::construct,
+              &ArrayViewTest::constructFixedSize,
+              &ArrayViewTest::constructArray,
 
-              &ArrayReferenceTest::boolConversion,
-              &ArrayReferenceTest::pointerConversion,
+              &ArrayViewTest::boolConversion,
+              &ArrayViewTest::pointerConversion,
 
-              &ArrayReferenceTest::emptyCheck,
-              &ArrayReferenceTest::access,
-              &ArrayReferenceTest::rangeBasedFor,
+              &ArrayViewTest::emptyCheck,
+              &ArrayViewTest::access,
+              &ArrayViewTest::rangeBasedFor,
 
-              &ArrayReferenceTest::sliceInvalid,
-              &ArrayReferenceTest::sliceNullptr,
-              &ArrayReferenceTest::slice,
+              &ArrayViewTest::sliceInvalid,
+              &ArrayViewTest::sliceNullptr,
+              &ArrayViewTest::slice,
 
-              &ArrayReferenceTest::constReference,
-              &ArrayReferenceTest::voidConstruction,
-              &ArrayReferenceTest::voidConversion});
+              &ArrayViewTest::constReference,
+              &ArrayViewTest::voidConstruction,
+              &ArrayViewTest::voidConversion});
 }
 
-void ArrayReferenceTest::constructEmpty() {
-    const ArrayReference a;
+void ArrayViewTest::constructEmpty() {
+    const ArrayView a;
     CORRADE_VERIFY(a == nullptr);
     CORRADE_COMPARE(a.size(), 0);
 }
 
-void ArrayReferenceTest::constructNullptr() {
-    const ArrayReference a(nullptr);
+void ArrayViewTest::constructNullptr() {
+    const ArrayView a(nullptr);
     CORRADE_VERIFY(a == nullptr);
     CORRADE_COMPARE(a.size(), 0);
 
     /* Implicit construction from nullptr should be allowed */
-    CORRADE_VERIFY((std::is_convertible<std::nullptr_t, ArrayReference>::value));
+    CORRADE_VERIFY((std::is_convertible<std::nullptr_t, ArrayView>::value));
 }
 
-void ArrayReferenceTest::constructNullptrSize() {
+void ArrayViewTest::constructNullptrSize() {
     /* This should be allowed for e.g. just allocating memory in
        Magnum::Buffer::setData() without passing any actual data */
-    const ArrayReference a(nullptr, 5);
+    const ArrayView a(nullptr, 5);
     CORRADE_VERIFY(a == nullptr);
     CORRADE_COMPARE(a.size(), 5);
 }
 
-void ArrayReferenceTest::construct() {
+void ArrayViewTest::construct() {
     int a[30];
 
-    const ArrayReference b = {a, 20};
+    const ArrayView b = {a, 20};
     CORRADE_VERIFY(b == a);
     CORRADE_COMPARE(b.size(), 20);
 }
 
-void ArrayReferenceTest::constructFixedSize() {
+void ArrayViewTest::constructFixedSize() {
     int a[13];
 
-    const ArrayReference b = a;
+    const ArrayView b = a;
     CORRADE_VERIFY(b == a);
     CORRADE_COMPARE(b.size(), 13);
 }
 
-void ArrayReferenceTest::constructArray() {
+void ArrayViewTest::constructArray() {
     Array a(5);
 
-    const ArrayReference b = a;
+    const ArrayView b = a;
     CORRADE_VERIFY(b.begin() == a.begin());
     CORRADE_COMPARE(b.size(), 5);
 }
 
-void ArrayReferenceTest::boolConversion() {
+void ArrayViewTest::boolConversion() {
     int a[7];
-    CORRADE_VERIFY(ArrayReference(a));
-    CORRADE_VERIFY(!ArrayReference());
-    CORRADE_VERIFY(VoidArrayReference(a));
-    CORRADE_VERIFY(!VoidArrayReference());
+    CORRADE_VERIFY(ArrayView(a));
+    CORRADE_VERIFY(!ArrayView());
+    CORRADE_VERIFY(VoidArrayView(a));
+    CORRADE_VERIFY(!VoidArrayView());
 
-    /* The conversion is explicit (i.e. no ArrayReference(a) + 7) */
-    CORRADE_VERIFY(!(std::is_convertible<ArrayReference, int>::value));
-    CORRADE_VERIFY(!(std::is_convertible<VoidArrayReference, int>::value));
+    /* The conversion is explicit (i.e. no ArrayView(a) + 7) */
+    CORRADE_VERIFY(!(std::is_convertible<ArrayView, int>::value));
+    CORRADE_VERIFY(!(std::is_convertible<VoidArrayView, int>::value));
 }
 
-void ArrayReferenceTest::pointerConversion() {
+void ArrayViewTest::pointerConversion() {
     int a[7];
-    ArrayReference b = a;
+    ArrayView b = a;
     int* bp = b;
     CORRADE_COMPARE(bp, static_cast<int*>(a));
 
-    const ArrayReference c = a;
+    const ArrayView c = a;
     const int* cp = c;
     CORRADE_COMPARE(cp, static_cast<const int*>(a));
 
-    const VoidArrayReference d = a;
+    const VoidArrayView d = a;
     const void* dp = d;
     CORRADE_COMPARE(dp, static_cast<const void*>(a));
 }
 
-void ArrayReferenceTest::emptyCheck() {
-    ArrayReference a;
+void ArrayViewTest::emptyCheck() {
+    ArrayView a;
     CORRADE_VERIFY(!a);
     CORRADE_VERIFY(a.empty());
 
     int b[5];
-    ArrayReference c = {b, 5};
+    ArrayView c = {b, 5};
     CORRADE_VERIFY(c);
     CORRADE_VERIFY(!c.empty());
 }
 
-void ArrayReferenceTest::access() {
+void ArrayViewTest::access() {
     int a[7];
-    ArrayReference b = a;
+    ArrayView b = a;
     for(std::size_t i = 0; i != 7; ++i)
         b[i] = i;
 
@@ -181,13 +181,13 @@ void ArrayReferenceTest::access() {
     CORRADE_COMPARE(b[4], 4);
     CORRADE_COMPARE(b.end()-b.begin(), b.size());
 
-    Containers::ArrayReference<const int> c = a;
+    Containers::ArrayView<const int> c = a;
     CORRADE_COMPARE(c.data(), a);
 }
 
-void ArrayReferenceTest::rangeBasedFor() {
+void ArrayViewTest::rangeBasedFor() {
     int a[5];
-    ArrayReference b = a;
+    ArrayView b = a;
     for(auto& i: b)
         i = 3;
 
@@ -198,9 +198,9 @@ void ArrayReferenceTest::rangeBasedFor() {
     CORRADE_COMPARE(b[4], 3);
 }
 
-void ArrayReferenceTest::sliceInvalid() {
+void ArrayViewTest::sliceInvalid() {
     int data[5] = {1, 2, 3, 4, 5};
-    ArrayReference a = data;
+    ArrayView a = data;
 
     std::ostringstream out;
     Error::setOutput(&out);
@@ -209,112 +209,112 @@ void ArrayReferenceTest::sliceInvalid() {
     a.slice(a + 5, a + 6);
     a.slice(a + 2, a + 1);
 
-    CORRADE_COMPARE(out.str(), "Containers::ArrayReference::slice(): slice out of range\n"
-                               "Containers::ArrayReference::slice(): slice out of range\n"
-                               "Containers::ArrayReference::slice(): slice out of range\n");
+    CORRADE_COMPARE(out.str(), "Containers::ArrayView::slice(): slice out of range\n"
+                               "Containers::ArrayView::slice(): slice out of range\n"
+                               "Containers::ArrayView::slice(): slice out of range\n");
 }
 
-void ArrayReferenceTest::sliceNullptr() {
-    ArrayReference a{nullptr, 5};
+void ArrayViewTest::sliceNullptr() {
+    ArrayView a{nullptr, 5};
 
-    ArrayReference b = a.prefix(nullptr);
+    ArrayView b = a.prefix(nullptr);
     CORRADE_VERIFY(!b);
     CORRADE_COMPARE(b.size(), 0);
 
-    ArrayReference c = a.suffix(nullptr);
+    ArrayView c = a.suffix(nullptr);
     CORRADE_VERIFY(!c);
     CORRADE_COMPARE(c.size(), 5);
 
     int data[5];
-    ArrayReference d{data};
+    ArrayView d{data};
 
-    ArrayReference e = d.prefix(nullptr);
+    ArrayView e = d.prefix(nullptr);
     CORRADE_VERIFY(!e);
     CORRADE_COMPARE(e.size(), 0);
 
-    ArrayReference f = d.suffix(nullptr);
+    ArrayView f = d.suffix(nullptr);
     CORRADE_VERIFY(!f);
     CORRADE_COMPARE(f.size(), 0);
 }
 
-void ArrayReferenceTest::slice() {
+void ArrayViewTest::slice() {
     int data[5] = {1, 2, 3, 4, 5};
-    ArrayReference a = data;
+    ArrayView a = data;
 
-    ArrayReference b = a.slice(1, 4);
+    ArrayView b = a.slice(1, 4);
     CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(b[0], 2);
     CORRADE_COMPARE(b[1], 3);
     CORRADE_COMPARE(b[2], 4);
 
-    ArrayReference c = a.prefix(3);
+    ArrayView c = a.prefix(3);
     CORRADE_COMPARE(c.size(), 3);
     CORRADE_COMPARE(c[0], 1);
     CORRADE_COMPARE(c[1], 2);
     CORRADE_COMPARE(c[2], 3);
 
-    ArrayReference d = a.suffix(2);
+    ArrayView d = a.suffix(2);
     CORRADE_COMPARE(d.size(), 3);
     CORRADE_COMPARE(d[0], 3);
     CORRADE_COMPARE(d[1], 4);
     CORRADE_COMPARE(d[2], 5);
 }
 
-void ArrayReferenceTest::constReference() {
+void ArrayViewTest::constReference() {
     const int a[] = {3, 4, 7, 12, 0, -15};
 
-    ConstArrayReference b = a;
+    ConstArrayView b = a;
     CORRADE_COMPARE(b.size(), 6);
     CORRADE_COMPARE(b[2], 7);
 
     int c[3];
-    ArrayReference d = c;
-    ConstArrayReference e = d;
+    ArrayView d = c;
+    ConstArrayView e = d;
     CORRADE_VERIFY(e == c);
     CORRADE_COMPARE(e.size(), 3);
 }
 
-void ArrayReferenceTest::voidConstruction() {
+void ArrayViewTest::voidConstruction() {
     void* a = reinterpret_cast<void*>(0xdeadbeef);
-    VoidArrayReference b(a, 25);
+    VoidArrayView b(a, 25);
     CORRADE_VERIFY(b == a);
     CORRADE_COMPARE(b.size(), 25);
 
     int* c = reinterpret_cast<int*>(0xdeadbeef);
-    VoidArrayReference d(c, 25);
+    VoidArrayView d(c, 25);
     CORRADE_VERIFY(d == c);
     CORRADE_COMPARE(d.size(), 100);
 }
 
-void ArrayReferenceTest::voidConversion() {
+void ArrayViewTest::voidConversion() {
     int a[] = {3, 4, 7, 12, 0, -15};
 
     /** @todo C++14: test that all the operations are really constexpr (C++11 doesn't allow void conversions IMHO) */
 
     /* void reference to compile-time array */
-    VoidArrayReference b = a;
+    VoidArrayView b = a;
     CORRADE_VERIFY(b == a);
     CORRADE_VERIFY(b.data() == a);
     CORRADE_COMPARE(b.size(), 6*sizeof(int));
 
     /* void reference to runtime array */
-    VoidArrayReference c = {a, 6};
+    VoidArrayView c = {a, 6};
     CORRADE_VERIFY(c == a);
     CORRADE_COMPARE(c.size(), 6*sizeof(int));
 
     /* void reference to Array */
     Array d(6);
-    VoidArrayReference e = d;
+    VoidArrayView e = d;
     CORRADE_VERIFY(e == d);
     CORRADE_COMPARE(e.size(), d.size()*sizeof(int));
 
-    /* void reference to ArrayReference */
-    ArrayReference f = a;
-    VoidArrayReference g = f;
+    /* void reference to ArrayView */
+    ArrayView f = a;
+    VoidArrayView g = f;
     CORRADE_VERIFY(g == f);
     CORRADE_COMPARE(g.size(), f.size()*sizeof(int));
 }
 
 }}}
 
-CORRADE_TEST_MAIN(Corrade::Containers::Test::ArrayReferenceTest)
+CORRADE_TEST_MAIN(Corrade::Containers::Test::ArrayViewTest)

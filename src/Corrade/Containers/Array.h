@@ -26,15 +26,18 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Containers::Array, @ref Corrade::Containers::ArrayReference
+ * @brief Class @ref Corrade::Containers::Array
  */
 
 #include <type_traits>
 #include <utility>
 
 #include "Corrade/configure.h"
-#include "Corrade/Containers/Containers.h"
-#include "Corrade/Utility/Assert.h"
+#include "Corrade/Containers/ArrayView.h"
+
+#ifdef CORRADE_BUILD_DEPRECATED
+#include "Corrade/Utility/Macros.h"
+#endif
 
 namespace Corrade { namespace Containers {
 
@@ -173,53 +176,53 @@ template<class T> class Array {
         /**
          * @brief Reference to array slice
          *
-         * Equivalent to @ref ArrayReference::slice().
+         * Equivalent to @ref ArrayView::slice().
          */
-        ArrayReference<T> slice(T* begin, T* end) {
-            return ArrayReference<T>{*this}.slice(begin, end);
+        ArrayView<T> slice(T* begin, T* end) {
+            return ArrayView<T>{*this}.slice(begin, end);
         }
         /** @overload */
-        ArrayReference<const T> slice(const T* begin, const T* end) const {
-            return ArrayReference<const T>{*this}.slice(begin, end);
+        ArrayView<const T> slice(const T* begin, const T* end) const {
+            return ArrayView<const T>{*this}.slice(begin, end);
         }
         /** @overload */
-        ArrayReference<T> slice(std::size_t begin, std::size_t end) {
+        ArrayView<T> slice(std::size_t begin, std::size_t end) {
             return slice(_data + begin, _data + end);
         }
         /** @overload */
-        ArrayReference<const T> slice(std::size_t begin, std::size_t end) const {
+        ArrayView<const T> slice(std::size_t begin, std::size_t end) const {
             return slice(_data + begin, _data + end);
         }
 
         /**
          * @brief Array prefix
          *
-         * Equivalent to @ref ArrayReference::prefix().
+         * Equivalent to @ref ArrayView::prefix().
          */
-        ArrayReference<T> prefix(T* end) {
-            return ArrayReference<T>{*this}.prefix(end);
+        ArrayView<T> prefix(T* end) {
+            return ArrayView<T>{*this}.prefix(end);
         }
         /** @overload */
-        ArrayReference<const T> prefix(const T* end) const {
-            return ArrayReference<const T>{*this}.prefix(end);
+        ArrayView<const T> prefix(const T* end) const {
+            return ArrayView<const T>{*this}.prefix(end);
         }
-        ArrayReference<T> prefix(std::size_t end) { return prefix(_data + end); } /**< @overload */
-        ArrayReference<const T> prefix(std::size_t end) const { return prefix(_data + end); } /**< @overload */
+        ArrayView<T> prefix(std::size_t end) { return prefix(_data + end); } /**< @overload */
+        ArrayView<const T> prefix(std::size_t end) const { return prefix(_data + end); } /**< @overload */
 
         /**
          * @brief Array suffix
          *
-         * Equivalent to @ref ArrayReference::suffix().
+         * Equivalent to @ref ArrayView::suffix().
          */
-        ArrayReference<T> suffix(T* begin) {
-            return ArrayReference<T>{*this}.suffix(begin);
+        ArrayView<T> suffix(T* begin) {
+            return ArrayView<T>{*this}.suffix(begin);
         }
         /** @overload */
-        ArrayReference<const T> suffix(const T* begin) const {
-            return ArrayReference<const T>{*this}.suffix(begin);
+        ArrayView<const T> suffix(const T* begin) const {
+            return ArrayView<const T>{*this}.suffix(begin);
         }
-        ArrayReference<T> suffix(std::size_t begin) { return suffix(_data + begin); } /**< @overload */
-        ArrayReference<const T> suffix(std::size_t begin) const { return suffix(_data + begin); } /**< @overload */
+        ArrayView<T> suffix(std::size_t begin) { return suffix(_data + begin); } /**< @overload */
+        ArrayView<const T> suffix(std::size_t begin) const { return suffix(_data + begin); } /**< @overload */
 
         /**
          * @brief Release data storage
@@ -243,238 +246,12 @@ template<class T> class Array {
         std::size_t _size;
 };
 
-/**
-@brief Array reference wrapper with size information
-
-Immutable wrapper around plain C array. Unlike @ref Array this class doesn't do
-any memory management. Main use case is passing array along with size
-information to functions etc. If @p T is `const` type, the class is implicitly
-constructible also from const references to @ref Array and @ref ArrayReference
-of non-const types.
-
-Usage example:
-@code
-// `a` gets implicitly converted to const array reference
-void printArray(Containers::ArrayReference<const float> values) { ... }
-Containers::Array<float> a;
-printArray(a);
-
-// Wrapping compile-time array with size information
-constexpr const int data[] = {5, 17, -36, 185};
-Containers::ArrayReference<const int> b = data; // b.size() == 4
-
-// Wrapping general array with size information
-const int* data2;
-Containers::ArrayReference<const int> c{data2, 3};
-@endcode
-
-@attention Note that when using `Containers::ArrayReference<const char>`, C
-    string literals (such as `"hello"`) are implicitly convertible to it and
-    the size includes also the zero-terminator (thus in case of `"hello"` the
-    size would be 6, not 5, as one might expect).
-
-@see @ref ArrayReference<const void>
-@todo What was the reason for no const-correctness at all?
-*/
-template<class T> class ArrayReference {
-    public:
-        typedef T Type;     /**< @brief Element type */
-
-        /** @brief Conversion from `nullptr` */
-        constexpr /*implicit*/ ArrayReference(std::nullptr_t) noexcept: _data(nullptr), _size(0) {}
-
-        /**
-         * @brief Default constructor
-         *
-         * Creates empty reference. Copy non-empty @ref Array or
-         * @ref ArrayReference onto the instance to make it useful.
-         */
-        constexpr /*implicit*/ ArrayReference() noexcept: _data(nullptr), _size(0) {}
-
-        /**
-         * @brief Constructor
-         * @param data      Data pointer
-         * @param size      Data size
-         */
-        constexpr /*implicit*/ ArrayReference(T* data, std::size_t size) noexcept: _data(data), _size(size) {}
-
-        /**
-         * @brief Construct reference to fixed-size array
-         * @param data      Fixed-size array
-         */
-        template<std::size_t size> constexpr /*implicit*/ ArrayReference(T(&data)[size]) noexcept: _data(data), _size(size) {}
-
-        /** @brief Construct reference to @ref Array */
-        constexpr /*implicit*/ ArrayReference(Array<T>& array) noexcept: _data(array), _size(array.size()) {}
-
-        /**
-         * @brief Construct const reference to @ref Array
-         *
-         * Enabled only if @p T is `const U`.
-         */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class U>
-        #else
-        template<class U, class V = typename std::enable_if<std::is_same<const U, T>::value>::type>
-        #endif
-        constexpr /*implicit*/ ArrayReference(const Array<U>& array) noexcept: _data(array), _size(array.size()) {}
-
-        /**
-         * @brief Construct const reference from non-const reference
-         *
-         * Enabled only if @p T is `const U`.
-         */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class U>
-        #else
-        template<class U, class V = typename std::enable_if<std::is_same<const U, T>::value>::type>
-        #endif
-        constexpr /*implicit*/ ArrayReference(const ArrayReference<U>& array) noexcept: _data(array), _size(array.size()) {}
-
-        /** @brief Whether the array is non-empty */
-        constexpr explicit operator bool() const { return _data; }
-
-        /** @brief Conversion to array type */
-        constexpr /*implicit*/ operator T*() const { return _data; }
-
-        /** @brief Array data */
-        constexpr const T* data() const { return _data; }
-
-        /** @brief Array size */
-        constexpr std::size_t size() const { return _size; }
-
-        /** @brief Whether the array is empty */
-        constexpr bool empty() const { return !_size; }
-
-        /** @brief Pointer to first element */
-        constexpr T* begin() const { return _data; }
-        constexpr T* cbegin() const { return _data; }   /**< @overload */
-
-        /** @brief Pointer to (one item after) last element */
-        T* end() const { return _data+_size; }
-        T* cend() const { return _data+_size; }         /**< @overload */
-
-        /**
-         * @brief Array slice
-         *
-         * Both arguments are expected to be in range.
-         */
-        ArrayReference<T> slice(T* begin, T* end) const;
-
-        /** @overload */
-        ArrayReference<T> slice(std::size_t begin, std::size_t end) {
-            return slice(_data + begin, _data + end);
-        }
-
-        /**
-         * @brief Array prefix
-         *
-         * Equivalent to `data.slice(data.begin(), end)`. If @p end is
-         * `nullptr`, returns zero-sized `nullptr` array.
-         */
-        ArrayReference<T> prefix(T* end) const {
-            if(!end) return nullptr;
-            return slice(_data, end);
-        }
-        ArrayReference<T> prefix(std::size_t end) const { return prefix(_data + end); } /**< @overload */
-
-        /**
-         * @brief Array suffix
-         *
-         * Equivalent to `data.slice(begin, data.end())`. If @p begin is
-         * `nullptr` and the original array isn't, returns zero-sized `nullptr`
-         * array.
-         */
-        ArrayReference<T> suffix(T* begin) const {
-            if(_data && !begin) return nullptr;
-            return slice(begin, _data + _size);
-        }
-        ArrayReference<T> suffix(std::size_t begin) const { return suffix(_data + begin); } /**< @overload */
-
-    private:
-        T* _data;
-        std::size_t _size;
-};
-
-/**
-@brief Constant void array reference wrapper with size information
-
-Specialization of @ref ArrayReference which is convertible from @ref Array or
-@ref ArrayReference of any type. Size for particular type is recalculated to
-size in bytes. This specialization doesn't provide any `begin()`/`end()`
-accessors, because it has no use for `void` type.
-
-Usage example:
-@code
-Containers::Array<int> a(5);
-
-Containers::ArrayReference<const void> b(a); // b.size() == 20
-@endcode
-*/
-template<> class ArrayReference<const void> {
-    public:
-        typedef const void Type;     /**< @brief Element type */
-
-        /** @brief Conversion from `nullptr` */
-        constexpr /*implicit*/ ArrayReference(std::nullptr_t) noexcept: _data(nullptr), _size(0) {}
-
-        /**
-         * @brief Default constructor
-         *
-         * Creates zero-sized array. Move array with nonzero size onto the
-         * instance to make it useful.
-         */
-        constexpr explicit ArrayReference() noexcept: _data(nullptr), _size(0) {}
-
-        /**
-         * @brief Constructor
-         * @param data      Data pointer
-         * @param size      Data size
-         */
-        constexpr /*implicit*/ ArrayReference(const void* data, std::size_t size) noexcept: _data(data), _size(size) {}
-
-        /**
-         * @brief Constructor from any type
-         * @param data      Data pointer
-         * @param size      Data size
-         *
-         * Size is recalculated to size in bytes.
-         */
-        template<class T> constexpr /*implicit*/ ArrayReference(const T* data, std::size_t size) noexcept: _data(data), _size(size*sizeof(T)) {}
-
-        /**
-         * @brief Construct reference to fixed-size array
-         * @param data      Fixed-size array
-         *
-         * Size in bytes is calculated automatically.
-         */
-        template<class T, std::size_t size> constexpr /*implicit*/ ArrayReference(T(&data)[size]) noexcept: _data(data), _size(size*sizeof(T)) {}
-
-        /** @brief Construct const void reference to any @ref Array */
-        template<class T> constexpr /*implicit*/ ArrayReference(const Array<T>& array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
-
-        /** @brief Construct const void reference to any @ref ArrayReference */
-        template<class T> constexpr /*implicit*/ ArrayReference(const ArrayReference<T>& array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
-
-        /** @brief Whether the array is non-empty */
-        constexpr explicit operator bool() const { return _data; }
-
-        /** @brief Conversion to array type */
-        constexpr /*implicit*/ operator const void*() const { return _data; }
-
-        /** @brief Array data */
-        constexpr const void* data() const { return _data; }
-
-        /** @brief Array size */
-        constexpr std::size_t size() const { return _size; }
-
-        /** @brief Whether the array is empty */
-        constexpr bool empty() const { return !_size; }
-
-    private:
-        const void* _data;
-        std::size_t _size;
-};
+#ifdef CORRADE_BUILD_DEPRECATED
+/** @copybrief ArrayView
+ * @deprecated Use @ref ArrayView.h and @ref ArrayView instead.
+ */
+template<class T> using ArrayReference CORRADE_DEPRECATED("use ArrayView.h and ArrayView instead") = ArrayView<T>;
+#endif
 
 template<class T> inline Array<T>::Array(Array<T>&& other) noexcept: _data(other._data), _size(other._size) {
     other._data = nullptr;
@@ -494,12 +271,6 @@ template<class T> inline T* Array<T>::release() {
     _data = nullptr;
     _size = 0;
     return data;
-}
-
-template<class T> ArrayReference<T> ArrayReference<T>::slice(T* begin, T* end) const {
-    CORRADE_ASSERT(_data <= begin && begin <= end && end <= _data + _size,
-        "Containers::ArrayReference::slice(): slice out of range", nullptr);
-    return ArrayReference<T>{begin, std::size_t(end - begin)};
 }
 
 }}

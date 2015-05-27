@@ -34,7 +34,7 @@
 #include <vector>
 
 #include "Corrade/configure.h"
-#include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
@@ -222,14 +222,14 @@ class CORRADE_UTILITY_EXPORT String {
         }
 
     private:
-        static std::string ltrimInternal(std::string string, Containers::ArrayReference<const char> characters);
-        static std::string rtrimInternal(std::string string, Containers::ArrayReference<const char> characters);
-        static std::string trimInternal(std::string string, Containers::ArrayReference<const char> characters);
+        static std::string ltrimInternal(std::string string, Containers::ArrayView<const char> characters);
+        static std::string rtrimInternal(std::string string, Containers::ArrayView<const char> characters);
+        static std::string trimInternal(std::string string, Containers::ArrayView<const char> characters);
 
-        static std::vector<std::string> splitWithoutEmptyPartsInternal(const std::string& string, Containers::ArrayReference<const char> delimiters);
+        static std::vector<std::string> splitWithoutEmptyPartsInternal(const std::string& string, Containers::ArrayView<const char> delimiters);
 
-        static bool beginsWithInternal(const std::string& string, Containers::ArrayReference<const char> prefix);
-        static bool endsWithInternal(const std::string& string, Containers::ArrayReference<const char> suffix);
+        static bool beginsWithInternal(const std::string& string, Containers::ArrayView<const char> prefix);
+        static bool endsWithInternal(const std::string& string, Containers::ArrayView<const char> suffix);
 };
 
 }}

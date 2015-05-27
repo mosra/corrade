@@ -321,7 +321,7 @@ std::string Directory::readString(const std::string& filename) {
     return {data, data.size()};
 }
 
-bool Directory::write(const std::string& filename, const Containers::ArrayReference<const void> data) {
+bool Directory::write(const std::string& filename, const Containers::ArrayView<const void> data) {
     std::ofstream file(filename, std::ofstream::binary);
     if(!file) return false;
 

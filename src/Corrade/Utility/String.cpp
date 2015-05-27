@@ -44,15 +44,15 @@ std::vector<std::string> String::splitWithoutEmptyParts(const std::string& strin
     return splitWithoutEmptyParts(string, Whitespace);
 }
 
-std::string String::ltrimInternal(std::string string, const Containers::ArrayReference<const char> characters) {
+std::string String::ltrimInternal(std::string string, const Containers::ArrayView<const char> characters) {
     return std::move(string.erase(0, string.find_first_not_of(characters, 0, characters.size())));
 }
 
-std::string String::rtrimInternal(std::string string, const Containers::ArrayReference<const char> characters) {
+std::string String::rtrimInternal(std::string string, const Containers::ArrayView<const char> characters) {
     return std::move(string.erase(string.find_last_not_of(characters, std::string::npos, characters.size())+1));
 }
 
-std::string String::trimInternal(std::string string, const Containers::ArrayReference<const char> characters) {
+std::string String::trimInternal(std::string string, const Containers::ArrayView<const char> characters) {
     return ltrimInternal(rtrimInternal(std::move(string), characters), characters);
 }
 
@@ -88,7 +88,7 @@ std::vector<std::string> String::splitWithoutEmptyParts(const std::string& strin
     return parts;
 }
 
-std::vector<std::string> String::splitWithoutEmptyPartsInternal(const std::string& string, const Containers::ArrayReference<const char> delimiters) {
+std::vector<std::string> String::splitWithoutEmptyPartsInternal(const std::string& string, const Containers::ArrayView<const char> delimiters) {
     std::vector<std::string> parts;
     std::size_t oldpos = 0, pos = std::string::npos;
 
@@ -156,11 +156,11 @@ std::string String::uppercase(std::string string) {
     return std::move(string);
 }
 
-bool String::beginsWithInternal(const std::string& string, const Containers::ArrayReference<const char> prefix) {
+bool String::beginsWithInternal(const std::string& string, const Containers::ArrayView<const char> prefix) {
     return string.compare(0, prefix.size(), prefix, prefix.size()) == 0;
 }
 
-bool String::endsWithInternal(const std::string& string, const Containers::ArrayReference<const char> suffix) {
+bool String::endsWithInternal(const std::string& string, const Containers::ArrayView<const char> suffix) {
     if(string.size() < suffix.size()) return false;
 
     return string.compare(string.size() - suffix.size(), suffix.size(), suffix, suffix.size()) == 0;

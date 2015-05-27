@@ -216,7 +216,7 @@ class CORRADE_UTILITY_EXPORT Directory {
          * `false` if the file can't be written, `true` otherwise.
          * @see @ref writeString(), @ref read()
          */
-        static bool write(const std::string& filename, Containers::ArrayReference<const void> data);
+        static bool write(const std::string& filename, Containers::ArrayView<const void> data);
 
         /**
          * @brief Write string into file
