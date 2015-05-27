@@ -33,8 +33,11 @@ if(NOT DEFINED LIB_SUFFIX)
     # All 32bit system have empty lib suffix, decide based on
     # FIND_LIBRARY_USE_LIB64_PATHS on 64bit systems
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        # CMake might be right most of the time, but if /usr/lib64 is symlink
+        # to somewhere else, it means that we should *really* not install there
+        # (that's the case with ArchLinux)
         get_property(LIB_SUFFIX GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
-        if(LIB_SUFFIX)
+        if(LIB_SUFFIX AND NOT IS_SYMLINK /usr/lib64)
             set(LIB_SUFFIX "64")
         else()
             set(LIB_SUFFIX "")
