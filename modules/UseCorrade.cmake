@@ -116,6 +116,8 @@ elseif(MSVC)
     # - C4373 "previous versions of the compiler did not override when
     #   parameters only differed by const/volatile qualifiers". Okay. So you
     #   had bugs. And?
+    # - C4510, C4610 "default constructor could not be generated/can never be
+    #   instantiated". Apparently it can.
     # - C4512 "assignment operator could not be generated". Do I want one? NO I
     #   DON'T.
     # - C4661 "no suitable definition for explicit template instantiation". No.
@@ -136,7 +138,7 @@ elseif(MSVC)
     # - disabling warning for not using "secure-but-not-standard" STL algos
     # - disabling all minmax nonsense
     # - disabling GDI and other mud in windows.h
-    set(CORRADE_CXX_FLAGS "/W4 /wd4127 /wd4251 /wd4351 /wd4373 /wd4512 /wd4661 /wd4702 /wd4706 /wd4800 /wd4910 -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS -DNOMINMAX -DWIN32_LEAN_AND_MEAN")
+    set(CORRADE_CXX_FLAGS "/W4 /wd4127 /wd4251 /wd4351 /wd4373 /wd4510 /wd4512 /wd4610 /wd4661 /wd4702 /wd4706 /wd4800 /wd4910 -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS -DNOMINMAX -DWIN32_LEAN_AND_MEAN")
 endif()
 
 # Use C++11-enabled libcxx on OSX
