@@ -138,8 +138,6 @@ void ArrayViewTest::boolConversion() {
     CORRADE_VERIFY(!ArrayView());
     CORRADE_VERIFY(VoidArrayView(a));
     CORRADE_VERIFY(!VoidArrayView());
-
-    /* The conversion is explicit (i.e. no ArrayView(a) + 7) */
     CORRADE_VERIFY(!(std::is_convertible<ArrayView, int>::value));
     CORRADE_VERIFY(!(std::is_convertible<VoidArrayView, int>::value));
 }
