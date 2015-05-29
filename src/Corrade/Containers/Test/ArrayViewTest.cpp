@@ -157,6 +157,11 @@ void ArrayViewTest::pointerConversion() {
     const VoidArrayView d = a;
     const void* dp = d;
     CORRADE_COMPARE(dp, static_cast<const void*>(a));
+
+    /* Pointer arithmetic */
+    const ArrayView e = a;
+    const int* ep = e + std::size_t{2};
+    CORRADE_COMPARE(ep, &e[2]);
 }
 
 void ArrayViewTest::emptyCheck() {

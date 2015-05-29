@@ -168,6 +168,11 @@ void ArrayTest::pointerConversion() {
     const int* d = c;
     CORRADE_COMPARE(d, c.begin());
 
+    /* Pointer arithmetic */
+    const Array e(3);
+    const int* f = e + std::size_t{2};
+    CORRADE_COMPARE(f, &e[2]);
+
     /* Verify that we can't convert rvalues */
     CORRADE_VERIFY((std::is_convertible<Array&, int*>::value));
     CORRADE_VERIFY((std::is_convertible<const Array&, const int*>::value));
