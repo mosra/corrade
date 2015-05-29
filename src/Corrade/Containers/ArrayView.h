@@ -218,7 +218,7 @@ template<> class ArrayView<const void> {
          * Creates zero-sized array. Move array with nonzero size onto the
          * instance to make it useful.
          */
-        constexpr explicit ArrayView() noexcept: _data(nullptr), _size(0) {}
+        constexpr /*implicit*/ ArrayView() noexcept: _data(nullptr), _size(0) {}
 
         /**
          * @brief Constructor
