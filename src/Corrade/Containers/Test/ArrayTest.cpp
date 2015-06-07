@@ -34,6 +34,7 @@ struct ArrayTest: TestSuite::Tester {
     void constructEmpty();
     void constructNullptr();
     void construct();
+    void constructZero();
     void constructMove();
     void constructFrom();
     void constructFromChar();
@@ -57,6 +58,7 @@ ArrayTest::ArrayTest() {
     addTests({&ArrayTest::constructEmpty,
               &ArrayTest::constructNullptr,
               &ArrayTest::construct,
+              &ArrayTest::constructZero,
               &ArrayTest::constructMove,
               &ArrayTest::constructFrom,
               &ArrayTest::constructFromChar,
@@ -102,6 +104,13 @@ void ArrayTest::construct() {
 
     /* Implicit construction from std::size_t is not allowed */
     CORRADE_VERIFY(!(std::is_convertible<std::size_t, Array>::value));
+}
+
+void ArrayTest::constructZero() {
+    const Array a(0);
+
+    CORRADE_VERIFY(a == nullptr);
+    CORRADE_COMPARE(a.size(), 0);
 }
 
 void ArrayTest::constructMove() {

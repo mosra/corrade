@@ -99,7 +99,12 @@ template<class T> class Array {
         }
 
         /** @brief Conversion from nullptr */
-        /*implicit*/ Array(std::nullptr_t) noexcept: _data(nullptr), _size(0) {}
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        /*implicit*/ Array(std::nullptr_t) noexcept:
+        #else
+        template<class U, class V = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> /*implicit*/ Array(U) noexcept:
+        #endif
+            _data(nullptr), _size(0) {}
 
         /**
          * @brief Default constructor
@@ -115,9 +120,6 @@ template<class T> class Array {
          * Creates array of given size, the values are default-initialized
          * (i.e. builtin types are not initialized). If the size is zero, no
          * allocation is done.
-         * @note Due to ambiguity you can't call directly `Array(0)` because
-         *      it conflicts with Array(std::nullptr_t). You should call
-         *      `Array(nullptr)` instead, which is also `noexcept`.
          * @see @ref zeroInitialized()
          */
         explicit Array(std::size_t size): _data(size ? new T[size] : nullptr), _size(size) {}
