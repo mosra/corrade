@@ -34,6 +34,7 @@
 
 #include "Corrade/configure.h"
 #include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/Tags.h"
 
 #ifdef CORRADE_BUILD_DEPRECATED
 #include "Corrade/Utility/Macros.h"
@@ -81,22 +82,15 @@ template<class T> class Array {
             return fromInternal(std::forward<U>(values)...);
         }
 
+        #ifdef CORRADE_BUILD_DEPRECATED
         /**
-         * @brief Create zero-initialized array
-         *
-         * Creates array of given size, the values are value-initialized
-         * (i.e. builtin types are zero-initialized). For other than builtin
-         * types this is the same as @ref Array(std::size_t). If the size is
-         * zero, no allocation is done.
+         * @copybrief Array(ValueInitT, std::size_t)
+         * @deprecated Use @ref Array(ValueInitT, std::size_t) instead.
          */
-        static Array<T> zeroInitialized(std::size_t size) {
-            if(!size) return nullptr;
-
-            Array<T> array;
-            array._data = new T[size]();
-            array._size = size;
-            return array;
+        CORRADE_DEPRECATED("use Array(ValueInitT, std::size_t) instead") static Array<T> zeroInitialized(std::size_t size) {
+            return Array<T>{ValueInit, size};
         }
+        #endif
 
         /** @brief Conversion from nullptr */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -115,14 +109,36 @@ template<class T> class Array {
         /*implicit*/ Array() noexcept: _data(nullptr), _size(0) {}
 
         /**
-         * @brief Constructor
+         * @brief Construct default-initialized array
          *
-         * Creates array of given size, the values are default-initialized
+         * Creates array of given size, the contents are default-initialized
          * (i.e. builtin types are not initialized). If the size is zero, no
          * allocation is done.
-         * @see @ref zeroInitialized()
+         * @see @ref DefaultInit, @ref Array(ValueInitT, std::size_t)
          */
-        explicit Array(std::size_t size): _data(size ? new T[size] : nullptr), _size(size) {}
+        explicit Array(DefaultInitT, std::size_t size): _data{size ? new T[size] : nullptr}, _size{size} {}
+
+        /**
+         * @brief Construct value-initialized array
+         *
+         * Creates array of given size, the contents are value-initialized
+         * (i.e. builtin types are zero-initialized). For other than builtin
+         * types this is the same as @ref Array(std::size_t). If the size is
+         * zero, no allocation is done.
+         *
+         * Useful if you want to create an array of primitive types and sett
+         * them to zero.
+         * @see @ref ValueInit, @ref Array(DefaultInitT, std::size_t)
+         */
+        explicit Array(ValueInitT, std::size_t size): _data{size ? new T[size]() : nullptr}, _size{size} {}
+
+        /**
+         * @brief Construct default-initialized array
+         *
+         * Alias to @ref Array(DefaultInitT, std::size_t).
+         * @see @ref Array(ValueInitT, std::size_t)
+         */
+        explicit Array(std::size_t size): Array{DefaultInit, size} {}
 
         ~Array() { delete[] _data; }
 

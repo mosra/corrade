@@ -28,7 +28,8 @@ set(CorradeContainers_HEADERS
     ArrayView.h
     Containers.h
     EnumSet.h
-    LinkedList.h)
+    LinkedList.h
+    Tags.h)
 
 # Force IDEs to display all header files in project view
 add_custom_target(CorradeContainers SOURCES ${CorradeContainers_HEADERS})

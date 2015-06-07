@@ -33,12 +33,13 @@ struct ArrayTest: TestSuite::Tester {
 
     void constructEmpty();
     void constructNullptr();
+    void constructDefaultInit();
+    void constructValueInit();
     void construct();
-    void constructZero();
+    void constructZeroSize();
     void constructMove();
     void constructFrom();
     void constructFromChar();
-    void constructZeroInitialized();
 
     void boolConversion();
     void pointerConversion();
@@ -57,12 +58,13 @@ typedef Containers::Array<int> Array;
 ArrayTest::ArrayTest() {
     addTests({&ArrayTest::constructEmpty,
               &ArrayTest::constructNullptr,
+              &ArrayTest::constructDefaultInit,
+              &ArrayTest::constructValueInit,
               &ArrayTest::construct,
-              &ArrayTest::constructZero,
+              &ArrayTest::constructZeroSize,
               &ArrayTest::constructMove,
               &ArrayTest::constructFrom,
               &ArrayTest::constructFromChar,
-              &ArrayTest::constructZeroInitialized,
 
               &ArrayTest::boolConversion,
               &ArrayTest::pointerConversion,
@@ -106,7 +108,21 @@ void ArrayTest::construct() {
     CORRADE_VERIFY(!(std::is_convertible<std::size_t, Array>::value));
 }
 
-void ArrayTest::constructZero() {
+void ArrayTest::constructDefaultInit() {
+    const Array a{DefaultInit, 5};
+    CORRADE_VERIFY(a);
+    CORRADE_COMPARE(a.size(), 5);
+}
+
+void ArrayTest::constructValueInit() {
+    const Array a{ValueInit, 2};
+    CORRADE_VERIFY(a);
+    CORRADE_COMPARE(a.size(), 2);
+    CORRADE_COMPARE(a[0], 0);
+    CORRADE_COMPARE(a[1], 0);
+}
+
+void ArrayTest::constructZeroSize() {
     const Array a(0);
 
     CORRADE_VERIFY(a == nullptr);
@@ -150,14 +166,6 @@ void ArrayTest::constructFromChar() {
     const auto a = Containers::Array<char>::from(0x11, 0x22, 0x33);
     CORRADE_VERIFY(a);
     CORRADE_COMPARE(a[1], 0x22);
-}
-
-void ArrayTest::constructZeroInitialized() {
-    Array a = Array::zeroInitialized(2);
-    CORRADE_VERIFY(a);
-    CORRADE_COMPARE(a.size(), 2);
-    CORRADE_COMPARE(a[0], 0);
-    CORRADE_COMPARE(a[1], 0);
 }
 
 void ArrayTest::boolConversion() {
