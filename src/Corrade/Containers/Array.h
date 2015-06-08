@@ -147,6 +147,16 @@ template<class T> class Array {
         explicit Array(NoInitT, std::size_t size): _data{size ? reinterpret_cast<T*>(new char[size*sizeof(T)]) : nullptr}, _size{size} {}
 
         /**
+         * @brief Construct direct-initialized array
+         *
+         * Each element will be initialized using @p arguments instead of
+         * calling default constructor. Note that because the arguments may be
+         * used as a parameter in more than one constructor call, they are not
+         * forwarded (i.e. rvalue references are *not* preserved).
+         */
+        template<class... Args> explicit Array(DirectInitT, std::size_t size, Args... args);
+
+        /**
          * @brief Construct default-initialized array
          *
          * Alias to @ref Array(DefaultInitT, std::size_t).
@@ -288,6 +298,11 @@ template<class T> using ArrayReference CORRADE_DEPRECATED("use ArrayView.h and A
 template<class T> inline Array<T>::Array(Array<T>&& other) noexcept: _data(other._data), _size(other._size) {
     other._data = nullptr;
     other._size = 0;
+}
+
+template<class T> template<class ...Args> Array<T>::Array(DirectInitT, std::size_t size, Args... args): Array{NoInit, size} {
+    for(std::size_t i = 0; i != size; ++i)
+        new(_data + i) T{args...};
 }
 
 template<class T> inline Array<T>& Array<T>::operator=(Array<T>&& other) noexcept {

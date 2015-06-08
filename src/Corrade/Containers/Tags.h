@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Tag @ref Corrade::Containers::ValueInitT, @ref Corrade::Containers::DefaultInitT, @ref Corrade::Containers::NoInitT, constant @ref Corrade::Containers::ValueInit, @ref Corrade::Containers::DefaultInit, @ref Corrade::Containers::NoInit
+ * @brief Tag @ref Corrade::Containers::ValueInitT, @ref Corrade::Containers::DefaultInitT, @ref Corrade::Containers::NoInitT, @ref Corrade::Containers::DirectInitT, constant @ref Corrade::Containers::ValueInit, @ref Corrade::Containers::DefaultInit, @ref Corrade::Containers::NoInit, @ref Corrade::Containers::DirectInit
  */
 
 namespace Corrade { namespace Containers {
@@ -58,6 +58,14 @@ Used to distinguish construction with no initialization at all.
 struct NoInitT {};
 
 /**
+@brief Direct initialization tag type
+
+Used to distinguish construction with direct initialization.
+@see @ref DirectInit
+*/
+struct DirectInitT {};
+
+/**
 @brief Default initialization tag
 
 Use for construction using default initialization (builtin types are not
@@ -79,6 +87,13 @@ constexpr ValueInitT ValueInit{};
 Use for construction with no initialization at all.
 */
 constexpr NoInitT NoInit{};
+
+/**
+@brief Direct initialization tag
+
+Use for construction with direct initialization.
+*/
+constexpr DirectInitT DirectInit{};
 
 }}
 
