@@ -133,6 +133,20 @@ template<class T> class Array {
         explicit Array(ValueInitT, std::size_t size): _data{size ? new T[size]() : nullptr}, _size{size} {}
 
         /**
+         * @brief Construct the array without initializing its contents
+         *
+         * Creates array of given size, the contents are *not* initialized. If
+         * the size is zero, no allocation is done. Initialize the values using
+         * placement new.
+         *
+         * Useful if you will be overwriting all elements later anyway.
+         * @attention The destructor will be called on all values regardless of
+         *      whether they were properly initialized or not.
+         * @see @ref NoInit, @ref Array(NoInitT, std::size_t)
+         */
+        explicit Array(NoInitT, std::size_t size): _data{size ? reinterpret_cast<T*>(new char[size*sizeof(T)]) : nullptr}, _size{size} {}
+
+        /**
          * @brief Construct default-initialized array
          *
          * Alias to @ref Array(DefaultInitT, std::size_t).

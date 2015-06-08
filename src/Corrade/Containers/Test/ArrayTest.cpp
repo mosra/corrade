@@ -35,6 +35,7 @@ struct ArrayTest: TestSuite::Tester {
     void constructNullptr();
     void constructDefaultInit();
     void constructValueInit();
+    void constructNoInit();
     void construct();
     void constructZeroSize();
     void constructMove();
@@ -60,6 +61,7 @@ ArrayTest::ArrayTest() {
               &ArrayTest::constructNullptr,
               &ArrayTest::constructDefaultInit,
               &ArrayTest::constructValueInit,
+              &ArrayTest::constructNoInit,
               &ArrayTest::construct,
               &ArrayTest::constructZeroSize,
               &ArrayTest::constructMove,
@@ -120,6 +122,25 @@ void ArrayTest::constructValueInit() {
     CORRADE_COMPARE(a.size(), 2);
     CORRADE_COMPARE(a[0], 0);
     CORRADE_COMPARE(a[1], 0);
+}
+
+namespace {
+    struct Foo {
+        static int constructorCallCount;
+        Foo() { ++constructorCallCount; }
+    };
+
+    int Foo::constructorCallCount = 0;
+}
+
+void ArrayTest::constructNoInit() {
+    const Containers::Array<Foo> a{NoInit, 5};
+    CORRADE_VERIFY(a);
+    CORRADE_COMPARE(a.size(), 5);
+    CORRADE_COMPARE(Foo::constructorCallCount, 0);
+
+    const Containers::Array<Foo> b{DefaultInit, 7};
+    CORRADE_COMPARE(Foo::constructorCallCount, 7);
 }
 
 void ArrayTest::constructZeroSize() {
