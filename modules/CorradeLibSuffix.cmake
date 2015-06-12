@@ -30,9 +30,9 @@ if(NOT DEFINED LIB_SUFFIX)
     message(STATUS "LIB_SUFFIX variable is not defined. It will be autodetected now.")
     message(STATUS "You can set it manually with -DLIB_SUFFIX=<value> (64 for example)")
 
-    # All 32bit system have empty lib suffix, decide based on
-    # FIND_LIBRARY_USE_LIB64_PATHS on 64bit systems
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    # All 32bit systems and OSX have empty lib suffix, decide based on
+    # FIND_LIBRARY_USE_LIB64_PATHS on other 64bit systems
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND NOT APPLE)
         # CMake might be right most of the time, but if /usr/lib64 is symlink
         # to somewhere else, it means that we should *really* not install there
         # (that's the case with ArchLinux)
