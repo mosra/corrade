@@ -67,6 +67,30 @@ enum class Bar {
 #define CORRADE_DEPRECATED_ENUM(message)
 #endif
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
+#define CORRADE_HELPER_STR(X) #X
+#define CORRADE_HELPER_DEFER(M, ...) M(__VA_ARGS__)
+#endif
+
+/** @hideinitializer
+@brief File deprecation mark
+
+Putting this in a file will emit deprecation warning when given file is
+included or compiled:
+@code
+CORRADE_DEPRECATED_FILE("use Corrade/Containers/ArrayView.h instead")
+@endcode
+*/
+#if defined(__clang__)
+#define CORRADE_DEPRECATED_FILE(message) _Pragma(CORRADE_HELPER_STR(GCC warning ("this file is deprecated: " message)))
+#elif defined(__GNUC__)
+#define CORRADE_DEPRECATED_FILE(message) _Pragma(CORRADE_HELPER_STR(GCC warning message))
+#elif defined(_MSC_VER)
+#define CORRADE_DEPRECATED_FILE(message) _Pragma(CORRADE_HELPER_STR(message ("warning: " CORRADE_HELPER_DEFER(CORRADE_HELPER_STR, __FILE__) " is deprecated: " message)))
+#else
+#define CORRADE_DEPRECATED_FILE(message)
+#endif
+
 /** @hideinitializer
 @brief Automatic initializer
 @param function Initializer function name of type int(*)().
