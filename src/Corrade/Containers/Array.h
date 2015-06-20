@@ -56,13 +56,53 @@ additionally also in range-based for cycle.
 Usage example:
 @code
 // Create default-initialized array with 5 integers and set them to some value
-Containers::Array<int> a(5);
+Containers::Array<int> a{5};
 int b = 0;
 for(auto& i: a) i = b++; // a = {0, 1, 2, 3, 4}
 
 // Create array from given values
 auto b = Containers::Array<int>::from(3, 18, -157, 0);
 b[3] = 25; // b = {3, 18, -157, 25}
+@endcode
+
+## Array initialization
+
+The array is by default *default-initialized*, which means that trivial types
+are not initialized at all and default constructor is called on other types. It
+is possible to initialize the array in a different way using so-called *tags*:
+
+-   @ref Array(DefaultInitT, std::size_t) is equivalent to the default case
+    (useful when you want to make the choice appear explicit).
+-   @ref Array(ValueInitT, std::size_t) zero-initializes trivial types and
+    calls default constructor elsewhere.
+-   @ref Array(DirectInitT, std::size_t, Args...) constructs all elements of
+    the array using provided arguments.
+-   @ref Array(NoInitT, std::size_t) does not initialize anything and you need
+    to call the constructor on all elements manually using placement new. This
+    is the dangerous option.
+
+Example:
+@code
+// These are equivalent
+Containers::Array<int> a1{5};
+Containers::Array<int> a2{Containers::DefaultInit, 5};
+
+// Array of 100 zeros
+Containers::Array<int> b{Containers::ValueInit, 100};
+
+// Array of type with no default constructor
+struct Vec3 {
+    Vec3(float, float, float);
+};
+Containers::Array<Vec3> c{Containers::DirectInit, 5, 5.2f, 0.4f, 1.0f};
+
+// Manual construction of each element
+struct Foo {
+    Foo(int index);
+};
+Containers::Array<Foo> d{Containers::NoInit, 5};
+int index = 0;
+for(Foo& f: d) new(&f) Foo(index++);
 @endcode
 
 @todo Something like ArrayTuple to create more than one array with single
