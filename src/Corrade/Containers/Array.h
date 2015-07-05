@@ -78,8 +78,8 @@ is possible to initialize the array in a different way using so-called *tags*:
 -   @ref Array(DirectInitT, std::size_t, Args...) constructs all elements of
     the array using provided arguments.
 -   @ref Array(NoInitT, std::size_t) does not initialize anything and you need
-    to call the constructor on all elements manually using placement new. This
-    is the dangerous option.
+    to call the constructor on all elements manually using placement new,
+    `std::uninitialized_copy` or similar. This is the dangerous option.
 
 Example:
 @code
