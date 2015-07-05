@@ -544,7 +544,7 @@ Multi-line comments should be done in a way which preserves block align (so
 when first line starts with slash, asterisk and space, the second line should
 be indented with three spaces to align the text).
 
-@verbinclude codingstyle/comments.cpp
+@include codingstyle/comments.cpp
 
 @section corrade-coding-style-documentation Doxygen documentation
 
