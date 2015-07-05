@@ -106,13 +106,15 @@ template<std::size_t digestSize> class AbstractHash {
         /** @brief Hash digest */
         typedef HashDigest<digestSize> Digest;
 
-        /**
-         * @brief Digest size
-         *
-         * Size of the raw digest in bytes. Hexadecimal string representation
-         * has double size.
-         */
-        static const std::size_t DigestSize = digestSize;
+        enum: std::size_t {
+            /**
+             * @brief Digest size
+             *
+             * Size of the raw digest in bytes. Hexadecimal string
+             * representation has double size.
+             */
+            DigestSize = digestSize
+        };
 };
 
 /** @debugoperator{Corrade::Utility::HashDigest} */

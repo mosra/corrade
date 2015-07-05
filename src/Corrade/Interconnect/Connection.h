@@ -45,7 +45,7 @@ namespace Implementation {
         friend SignalDataHash;
 
         public:
-            static const std::size_t Size = 2*sizeof(void*)/sizeof(std::size_t);
+            enum: std::size_t { Size = 2*sizeof(void*)/sizeof(std::size_t) };
 
             template<class Emitter, class ...Args> SignalData(typename Emitter::Signal(Emitter::*signal)(Args...)): data() {
                 typedef typename Emitter::Signal(Emitter::*Signal)(Args...);
