@@ -95,35 +95,51 @@ template<class T> class ArrayView {
         /**
          * @brief Construct view of fixed-size array
          * @param data      Fixed-size array
+         *
+         * Enabled only if `U*` is implicitly convertible to `T*`.
          */
-        template<std::size_t size> constexpr /*implicit*/ ArrayView(T(&data)[size]) noexcept: _data(data), _size(size) {}
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class U, std::size_t size>
+        #else
+        template<class U, std::size_t size, class V = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
+        #endif
+        constexpr /*implicit*/ ArrayView(U(&data)[size]) noexcept: _data{data}, _size{size} {}
 
-        /** @brief Construct view of @ref Array */
-        constexpr /*implicit*/ ArrayView(Array<T>& array) noexcept: _data(array), _size(array.size()) {}
+        /**
+         * @brief Construct view of @ref Array
+         *
+         * Enabled only if `U*` is implicitly convertible to `T*`.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class U>
+        #else
+        template<class U, class V = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
+        #endif
+        constexpr /*implicit*/ ArrayView(Array<U>& array) noexcept: _data{array}, _size{array.size()} {}
 
         /**
          * @brief Construct const view of @ref Array
          *
-         * Enabled only if @p T is `const U`.
+         * Enabled only if `const U*` is implicitly convertible to `T*`.
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
         #else
-        template<class U, class V = typename std::enable_if<std::is_same<const U, T>::value>::type>
+        template<class U, class V = typename std::enable_if<std::is_convertible<const U*, T*>::value>::type>
         #endif
-        constexpr /*implicit*/ ArrayView(const Array<U>& array) noexcept: _data(array), _size(array.size()) {}
+        constexpr /*implicit*/ ArrayView(const Array<U>& array) noexcept: _data{array}, _size{array.size()} {}
 
         /**
-         * @brief Construct const view from non-const view
+         * @brief Construct view of @ref ArrayView
          *
-         * Enabled only if @p T is `const U`.
+         * Enabled only if `U*` is implicitly convertible to `T*`.
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
         #else
-        template<class U, class V = typename std::enable_if<std::is_same<const U, T>::value>::type>
+        template<class U, class V = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
         #endif
-        constexpr /*implicit*/ ArrayView(const ArrayView<U>& array) noexcept: _data(array), _size(array.size()) {}
+        constexpr /*implicit*/ ArrayView(ArrayView<U> array) noexcept: _data{array}, _size{array.size()} {}
 
         /** @brief Whether the array is non-empty */
         constexpr explicit operator bool() const { return _data; }

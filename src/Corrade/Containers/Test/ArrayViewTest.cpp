@@ -39,6 +39,7 @@ struct ArrayViewTest: TestSuite::Tester {
     void construct();
     void constructFixedSize();
     void constructArray();
+    void constructDerived();
 
     void boolConversion();
     void pointerConversion();
@@ -68,6 +69,7 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::construct,
               &ArrayViewTest::constructFixedSize,
               &ArrayViewTest::constructArray,
+              &ArrayViewTest::constructDerived,
 
               &ArrayViewTest::boolConversion,
               &ArrayViewTest::pointerConversion,
@@ -126,10 +128,32 @@ void ArrayViewTest::constructFixedSize() {
 
 void ArrayViewTest::constructArray() {
     Array a(5);
+    const Array ca(5);
 
     const ArrayView b = a;
+    const ConstArrayView cb = ca;
     CORRADE_VERIFY(b.begin() == a.begin());
+    CORRADE_VERIFY(cb.begin() == ca.begin());
     CORRADE_COMPARE(b.size(), 5);
+    CORRADE_COMPARE(cb.size(), 5);
+}
+
+void ArrayViewTest::constructDerived() {
+    struct A { int i; };
+    struct B: A {};
+
+    B b[5] {};
+    const Containers::ArrayView<A> a{b};
+    CORRADE_VERIFY(a.begin() == b);
+    CORRADE_VERIFY(a.size() == 5);
+
+    const B cb[5] {};
+    const Containers::ArrayView<const A> ca1 = b;
+    const Containers::ArrayView<const A> ca2 = cb;
+    CORRADE_VERIFY(ca1.begin() == b);
+    CORRADE_VERIFY(ca2.begin() == cb);
+    CORRADE_VERIFY(ca1.size() == 5);
+    CORRADE_VERIFY(ca2.size() == 5);
 }
 
 void ArrayViewTest::boolConversion() {
