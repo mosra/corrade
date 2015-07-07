@@ -48,7 +48,7 @@ implicitly constructible also from const references to @ref Array and
 
 Usage example:
 @code
-// `a` gets implicitly converted to const array reference
+// `a` gets implicitly converted to const array view
 void printArray(Containers::ArrayView<const float> values) { ... }
 Containers::Array<float> a;
 printArray(a);
@@ -80,8 +80,8 @@ template<class T> class ArrayView {
         /**
          * @brief Default constructor
          *
-         * Creates empty reference. Copy non-empty @ref Array or
-         * @ref ArrayView onto the instance to make it useful.
+         * Creates empty view. Copy non-empty @ref Array or @ref ArrayView onto
+         * the instance to make it useful.
          */
         constexpr /*implicit*/ ArrayView() noexcept: _data(nullptr), _size(0) {}
 
@@ -93,16 +93,16 @@ template<class T> class ArrayView {
         constexpr /*implicit*/ ArrayView(T* data, std::size_t size) noexcept: _data(data), _size(size) {}
 
         /**
-         * @brief Construct reference to fixed-size array
+         * @brief Construct view of fixed-size array
          * @param data      Fixed-size array
          */
         template<std::size_t size> constexpr /*implicit*/ ArrayView(T(&data)[size]) noexcept: _data(data), _size(size) {}
 
-        /** @brief Construct reference to @ref Array */
+        /** @brief Construct view of @ref Array */
         constexpr /*implicit*/ ArrayView(Array<T>& array) noexcept: _data(array), _size(array.size()) {}
 
         /**
-         * @brief Construct const reference to @ref Array
+         * @brief Construct const view of @ref Array
          *
          * Enabled only if @p T is `const U`.
          */
@@ -114,7 +114,7 @@ template<class T> class ArrayView {
         constexpr /*implicit*/ ArrayView(const Array<U>& array) noexcept: _data(array), _size(array.size()) {}
 
         /**
-         * @brief Construct const reference from non-const reference
+         * @brief Construct const view from non-const view
          *
          * Enabled only if @p T is `const U`.
          */
@@ -191,7 +191,7 @@ template<class T> class ArrayView {
 };
 
 /**
-@brief Constant void array reference wrapper with size information
+@brief Constant void array view with size information
 
 Specialization of @ref ArrayView which is convertible from @ref Array or
 @ref ArrayView of any type. Size for particular type is recalculated to
@@ -237,17 +237,17 @@ template<> class ArrayView<const void> {
         template<class T> constexpr /*implicit*/ ArrayView(const T* data, std::size_t size) noexcept: _data(data), _size(size*sizeof(T)) {}
 
         /**
-         * @brief Construct reference to fixed-size array
+         * @brief Construct view on fixed-size array
          * @param data      Fixed-size array
          *
          * Size in bytes is calculated automatically.
          */
         template<class T, std::size_t size> constexpr /*implicit*/ ArrayView(T(&data)[size]) noexcept: _data(data), _size(size*sizeof(T)) {}
 
-        /** @brief Construct const void reference to any @ref Array */
+        /** @brief Construct const void view on any @ref Array */
         template<class T> constexpr /*implicit*/ ArrayView(const Array<T>& array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
 
-        /** @brief Construct const void reference to any @ref ArrayView */
+        /** @brief Construct const void view on any @ref ArrayView */
         template<class T> constexpr /*implicit*/ ArrayView(const ArrayView<T>& array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
 
         /** @brief Whether the array is non-empty */
