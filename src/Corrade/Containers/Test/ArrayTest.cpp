@@ -42,6 +42,7 @@ struct ArrayTest: TestSuite::Tester {
     void constructMove();
     void constructFrom();
     void constructFromChar();
+    void constructWrap();
 
     void boolConversion();
     void pointerConversion();
@@ -69,6 +70,7 @@ ArrayTest::ArrayTest() {
               &ArrayTest::constructMove,
               &ArrayTest::constructFrom,
               &ArrayTest::constructFromChar,
+              &ArrayTest::constructWrap,
 
               &ArrayTest::boolConversion,
               &ArrayTest::pointerConversion,
@@ -197,6 +199,13 @@ void ArrayTest::constructFromChar() {
     const auto a = Containers::Array<char>::from(0x11, 0x22, 0x33);
     CORRADE_VERIFY(a);
     CORRADE_COMPARE(a[1], 0x22);
+}
+
+void ArrayTest::constructWrap() {
+    int* a = new int[25];
+    Array b = Array::wrap(a, 25);
+    CORRADE_COMPARE(b, a);
+    CORRADE_COMPARE(b.size(), 25);
 }
 
 void ArrayTest::boolConversion() {
