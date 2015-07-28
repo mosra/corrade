@@ -122,14 +122,6 @@ template<class T> class Array {
             return fromInternal(std::forward<U>(values)...);
         }
 
-        /** @brief Wrap existing array */
-        static Array<T> wrap(T* data, std::size_t size) {
-            Array<T> a;
-            a._data = data;
-            a._size = size;
-            return a;
-        }
-
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @copybrief Array(ValueInitT, std::size_t)
@@ -211,6 +203,13 @@ template<class T> class Array {
          * @see @ref Array(ValueInitT, std::size_t)
          */
         explicit Array(std::size_t size): Array{DefaultInit, size} {}
+
+        /**
+         * @brief Wrap existing array
+         *
+         * Note that the array will be deleted on destruction.
+         */
+        explicit Array(T* data, std::size_t size): _data{data}, _size{size} {}
 
         ~Array() { delete[] _data; }
 

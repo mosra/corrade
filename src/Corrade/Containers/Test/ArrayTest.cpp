@@ -38,11 +38,11 @@ struct ArrayTest: TestSuite::Tester {
     void constructNoInit();
     void constructDirectInit();
     void construct();
+    void constructFromExisting();
     void constructZeroSize();
     void constructMove();
     void constructFrom();
     void constructFromChar();
-    void constructWrap();
 
     void boolConversion();
     void pointerConversion();
@@ -66,11 +66,11 @@ ArrayTest::ArrayTest() {
               &ArrayTest::constructNoInit,
               &ArrayTest::constructDirectInit,
               &ArrayTest::construct,
+              &ArrayTest::constructFromExisting,
               &ArrayTest::constructZeroSize,
               &ArrayTest::constructMove,
               &ArrayTest::constructFrom,
               &ArrayTest::constructFromChar,
-              &ArrayTest::constructWrap,
 
               &ArrayTest::boolConversion,
               &ArrayTest::pointerConversion,
@@ -112,6 +112,13 @@ void ArrayTest::construct() {
 
     /* Implicit construction from std::size_t is not allowed */
     CORRADE_VERIFY(!(std::is_convertible<std::size_t, Array>::value));
+}
+
+void ArrayTest::constructFromExisting() {
+    int* a = new int[25];
+    Array b{a, 25};
+    CORRADE_COMPARE(b, a);
+    CORRADE_COMPARE(b.size(), 25);
 }
 
 void ArrayTest::constructDefaultInit() {
@@ -199,13 +206,6 @@ void ArrayTest::constructFromChar() {
     const auto a = Containers::Array<char>::from(0x11, 0x22, 0x33);
     CORRADE_VERIFY(a);
     CORRADE_COMPARE(a[1], 0x22);
-}
-
-void ArrayTest::constructWrap() {
-    int* a = new int[25];
-    Array b = Array::wrap(a, 25);
-    CORRADE_COMPARE(b, a);
-    CORRADE_COMPARE(b.size(), 25);
 }
 
 void ArrayTest::boolConversion() {
