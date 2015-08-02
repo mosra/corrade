@@ -109,7 +109,7 @@ CORRADE_DEPRECATED_FILE("use Bar.h instead")
 #elif defined(__GNUC__)
 #define CORRADE_DEPRECATED_FILE(message) _Pragma(CORRADE_HELPER_STR(GCC warning message))
 #elif defined(_MSC_VER)
-#define CORRADE_DEPRECATED_FILE(message) _Pragma(CORRADE_HELPER_STR(message ("warning: " CORRADE_HELPER_DEFER(CORRADE_HELPER_STR, __FILE__) " is deprecated: " message)))
+#define CORRADE_DEPRECATED_FILE(text) _Pragma(CORRADE_HELPER_STR(message ("warning: " CORRADE_HELPER_DEFER(CORRADE_HELPER_STR, __FILE__) " is deprecated: " text)))
 #else
 #define CORRADE_DEPRECATED_FILE(message)
 #endif
