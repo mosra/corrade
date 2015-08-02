@@ -117,7 +117,7 @@ void ArrayTest::construct() {
 void ArrayTest::constructFromExisting() {
     int* a = new int[25];
     Array b{a, 25};
-    CORRADE_COMPARE(b, a);
+    CORRADE_VERIFY(b == a);
     CORRADE_COMPARE(b.size(), 25);
 }
 
