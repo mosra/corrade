@@ -26,6 +26,9 @@
 #include "StringToFile.h"
 
 #include <cstddef>
+#ifdef _MSC_VER
+#include <algorithm> /* std::max() */
+#endif
 
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Directory.h"
