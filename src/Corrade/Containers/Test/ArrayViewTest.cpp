@@ -182,7 +182,7 @@ void ArrayViewTest::pointerConversion() {
 
     /* Pointer arithmetic */
     const ArrayView e = a;
-    const int* ep = e + std::size_t{2};
+    const int* ep = e + 2;
     CORRADE_COMPARE(ep, &e[2]);
 }
 
