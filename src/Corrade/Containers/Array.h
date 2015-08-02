@@ -366,7 +366,7 @@ template<class T> class Array {
 /** @copybrief ArrayView
  * @deprecated Use @ref ArrayView.h and @ref ArrayView instead.
  */
-template<class T> using ArrayReference CORRADE_DEPRECATED("use ArrayView.h and ArrayView instead") = ArrayView<T>;
+template<class T> using ArrayReference CORRADE_DEPRECATED_ALIAS("use ArrayView.h and ArrayView instead") = ArrayView<T>;
 #endif
 
 template<class T> inline Array<T>::Array(Array<T>&& other) noexcept: _data(other._data), _size(other._size) {

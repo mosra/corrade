@@ -26,17 +26,22 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
+ * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
 /** @hideinitializer
 @brief Deprecation mark
 
-Marked function or class will emit deprecation warning on supported compilers:
+Marked function, class or typedef will emit deprecation warning on supported
+compilers (GCC, Clang, MSVC):
 @code
 class CORRADE_DEPRECATED("use Bar instead") Foo;
 CORRADE_DEPRECATED("use bar() instead") void foo();
 @endcode
+
+Does not work on template aliases and enum values, use
+@ref CORRADE_DEPRECATED_ALIAS() and @ref CORRADE_DEPRECATED_ENUM() instead.
+@see @ref CORRADE_DEPRECATED_FILE()
 */
 #if defined(__GNUC__) || defined(__clang__)
 #define CORRADE_DEPRECATED(message) __attribute((deprecated(message)))
@@ -44,6 +49,22 @@ CORRADE_DEPRECATED("use bar() instead") void foo();
 #define CORRADE_DEPRECATED(message) __declspec(deprecated(message))
 #else
 #define CORRADE_DEPRECATED(message)
+#endif
+
+/** @hideinitializer
+@brief Alias deprecation mark
+
+Marked alias will emit deprecation warning on supported compilers (GCC, Clang):
+@code
+template<class T> using Foo CORRADE_DEPRECATED_ALIAS("use Bar instead") = Bar<T>;
+@endcode
+@see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ENUM(),
+    @ref CORRADE_DEPRECATED_FILE()
+*/
+#if defined(__GNUC__) || defined(__clang__)
+#define CORRADE_DEPRECATED_ALIAS(message) __attribute((deprecated(message)))
+#else
+#define CORRADE_DEPRECATED_ALIAS(message)
 #endif
 
 /** @hideinitializer
@@ -60,6 +81,8 @@ enum class Bar {
     Baz CORRADE_DEPRECATED_ENUM("use Bar::Buzz instead") = 1
 };
 @endcode
+@see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
+    @ref CORRADE_DEPRECATED_FILE()
 */
 #if defined(__clang__)
 #define CORRADE_DEPRECATED_ENUM(message) __attribute((deprecated(message)))
