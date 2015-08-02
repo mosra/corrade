@@ -99,7 +99,7 @@ enum class Bar {
 @brief File deprecation mark
 
 Putting this in a file will emit deprecation warning when given file is
-included or compiled:
+included or compiled (GCCC, Clang):
 @code
 CORRADE_DEPRECATED_FILE("use Bar.h instead")
 @endcode
@@ -108,8 +108,6 @@ CORRADE_DEPRECATED_FILE("use Bar.h instead")
 #define CORRADE_DEPRECATED_FILE(message) _Pragma(CORRADE_HELPER_STR(GCC warning ("this file is deprecated: " message)))
 #elif defined(__GNUC__)
 #define CORRADE_DEPRECATED_FILE(message) _Pragma(CORRADE_HELPER_STR(GCC warning message))
-#elif defined(_MSC_VER)
-#define CORRADE_DEPRECATED_FILE(text) _Pragma(CORRADE_HELPER_STR(message ("warning: " CORRADE_HELPER_DEFER(CORRADE_HELPER_STR, __FILE__) " is deprecated: " text)))
 #else
 #define CORRADE_DEPRECATED_FILE(message)
 #endif
