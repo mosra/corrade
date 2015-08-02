@@ -101,7 +101,7 @@ enum class Bar {
 Putting this in a file will emit deprecation warning when given file is
 included or compiled:
 @code
-CORRADE_DEPRECATED_FILE("use Corrade/Containers/ArrayView.h instead")
+CORRADE_DEPRECATED_FILE("use Bar.h instead")
 @endcode
 */
 #if defined(__clang__)
