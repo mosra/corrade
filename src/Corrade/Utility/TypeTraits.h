@@ -69,7 +69,7 @@ template<class U> class className {                                         \
     template<class T> static char get(T&&, typeExpression* = nullptr);      \
     static short get(...);                                                  \
     public:                                                                 \
-        constexpr operator bool() const { return sizeof(get(std::declval<U>())) == sizeof(char); } \
+        enum: bool { Value = sizeof(get(std::declval<U>())) == sizeof(char) }; \
 }
 
 namespace Implementation {
@@ -92,16 +92,18 @@ members, is usable with free `begin()`/`end()` functions or has
 `std::begin()`/`std::end()` overloads. Otherwise equivalent to
 `std::false_type`.
 */
+/* When using {}, MSVC 2015 complains that even the explicitly defaulted
+   constructor doesn't exist */
 template<class T> using IsIterable = std::integral_constant<bool,
-    (Implementation::HasMemberBegin<T>{} ||
+    (Implementation::HasMemberBegin<T>::Value ||
     #ifndef CORRADE_GCC47_COMPATIBILITY
-    Implementation::HasBegin<T>{} ||
+    Implementation::HasBegin<T>::Value ||
     #endif
-    Implementation::HasStdBegin<T>{}) && (Implementation::HasMemberEnd<T>{} ||
+    Implementation::HasStdBegin<T>::Value) && (Implementation::HasMemberEnd<T>::Value ||
     #ifndef CORRADE_GCC47_COMPATIBILITY
-    Implementation::HasEnd<T>{} ||
+    Implementation::HasEnd<T>::Value ||
     #endif
-    Implementation::HasStdEnd<T>{})>;
+    Implementation::HasStdEnd<T>::Value)>;
 
 }}
 

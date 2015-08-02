@@ -57,16 +57,16 @@ CORRADE_HAS_TYPE(HasBegin, decltype(std::begin(std::declval<T>())));
 
 void TypeTraitsTest::hasType() {
     /* Member type */
-    CORRADE_VERIFY((HasKeyType<std::map<int, int>>{}));
-    CORRADE_VERIFY(!HasKeyType<std::vector<int>>{});
+    CORRADE_VERIFY((HasKeyType<std::map<int, int>>::Value));
+    CORRADE_VERIFY(!HasKeyType<std::vector<int>>::Value);
 
     /* Member function */
-    CORRADE_VERIFY(HasSize<std::vector<int>>{});
-    CORRADE_VERIFY(!(HasSize<std::tuple<int, int>>{}));
+    CORRADE_VERIFY(HasSize<std::vector<int>>::Value);
+    CORRADE_VERIFY(!(HasSize<std::tuple<int, int>>::Value));
 
     /* Non-member function */
-    CORRADE_VERIFY(HasBegin<std::string>{});
-    CORRADE_VERIFY(!HasBegin<int*>{});
+    CORRADE_VERIFY(HasBegin<std::string>::Value);
+    CORRADE_VERIFY(!HasBegin<int*>::Value);
 }
 
 namespace {
