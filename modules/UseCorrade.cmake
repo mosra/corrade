@@ -67,7 +67,7 @@ elseif(MSVC)
     # Don't allow to use compilers older than what compatibility mode allows
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "18.0")
         message(FATAL_ERROR "Corrade cannot be used with MSVC < 2013")
-    elseif(NOT CORRADE_MSVC2013_COMPATIBILITY)
+    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.0" AND NOT CORRADE_MSVC2013_COMPATIBILITY)
         message(FATAL_ERROR "To use Corrade with MSVC 2013, build it with MSVC2013_COMPATIBILITY enabled")
     endif()
 endif()
