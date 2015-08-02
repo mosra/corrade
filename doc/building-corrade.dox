@@ -478,7 +478,14 @@ For ArchLinux there are also prepared package files in `package/archlinux`,
 named `PKGBUILD-android-arm` and `PKGBUILD-android-x86`, see
 @ref building-corrade-packages-arch "above" for more information.
 
-@section building-corrade-ci-jenkins Jenkins Continuous Integration
+@section building-corrade-ci Continuous Integration
+
+@subsection building-corrade-ci-appveyor AppVeyor
+
+In `package/ci/` there is `appveyor.yml` file with Windows MSVC configuration.
+Online at https://ci.appveyor.com/project/mosra/corrade.
+
+@subsection building-corrade-ci-jenkins Jenkins
 
 In `package/ci/` there is `jenkins.xml` file containing job configuration.
 Setup your Jenkins server, enable the **Git** and **Text-finder** plugin and
