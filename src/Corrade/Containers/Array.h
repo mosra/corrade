@@ -252,9 +252,6 @@ template<class T> class Array {
         #endif
         /*implicit*/ operator ArrayView<const U>() const noexcept { return {_data, _size}; }
 
-        /** @brief Convert to const void @ref ArrayView */
-        /*implicit*/ operator ArrayView<const void>() const noexcept { return {_data, _size*sizeof(T)}; }
-
         /* `char* a = Containers::Array<char>(5); a[3] = 5;` would result in
            instant segfault, disallowing it in the following conversion
            operators */
