@@ -305,8 +305,8 @@ Containers::Array<char> Directory::read(const std::string& filename) {
     std::string data;
     std::array<char, 4096> buffer;
     do {
-        file.read(buffer.begin(), buffer.size());
-        data.append(buffer.begin(), std::size_t(file.gcount()));
+        file.read(&buffer[0], buffer.size());
+        data.append(&buffer[0], std::size_t(file.gcount()));
     } while(file);
 
     Containers::Array<char> out(data.size());
