@@ -71,7 +71,7 @@ template<class T> using Foo CORRADE_DEPRECATED_ALIAS("use Bar instead") = Bar<T>
 @brief Enum deprecation mark
 
 Marked enum or enum value will emit deprecation warning on supported compilers
-(C++17 feature, currently Clang only):
+(C++17 feature, Clang and MSVC 2015):
 @code
 enum class CORRADE_DEPRECATED_ENUM("use Bar instead") Foo {};
 
@@ -86,6 +86,8 @@ enum class Bar {
 */
 #if defined(__clang__)
 #define CORRADE_DEPRECATED_ENUM(message) __attribute((deprecated(message)))
+#elif defined(_MSC_VER) && _MSC_VER >= 1900
+#define CORRADE_DEPRECATED_ENUM(message) __declspec(deprecated(message))
 #else
 #define CORRADE_DEPRECATED_ENUM(message)
 #endif
