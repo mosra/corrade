@@ -28,6 +28,7 @@ project(Corrade)
 
 include(CMakeDependentOption)
 option(GCC47_COMPATIBILITY "Enable compatibility mode for GCC 4.7 (might disable some features)" OFF)
+option(MSVC2015_COMPATIBILITY "Enable compatibility mode for MSVC 2015 (might disable some features)" OFF)
 
 option(BUILD_DEPRECATED "Include deprecated API in the build" ON)
 if(BUILD_DEPRECATED)
@@ -103,11 +104,20 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 elseif(MSVC)
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.0")
         message(FATAL_ERROR "Compatibility branch of Corrade is needed for use with MSVC < 2015. See the documentation for more information.")
+    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "20.0")
+        if(NOT MSVC2015_COMPATIBILITY)
+            set(MSVC2015_COMPATIBILITY ON)
+            message(WARNING "MSVC 2015 detected, automatically enabling MSVC2015_COMPATIBILITY. Note that some features may not be available with this compiler.")
+        endif()
     endif()
 endif()
 
 if(GCC47_COMPATIBILITY)
     set(CORRADE_GCC47_COMPATIBILITY 1)
+endif()
+
+if(MSVC2015_COMPATIBILITY)
+    set(CORRADE_MSVC2015_COMPATIBILITY 1)
 endif()
 
 include(UseCorrade)

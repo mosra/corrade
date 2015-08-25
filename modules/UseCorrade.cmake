@@ -69,6 +69,8 @@ elseif(MSVC)
         message(FATAL_ERROR "Corrade cannot be used with MSVC < 2013")
     elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.0" AND NOT CORRADE_MSVC2013_COMPATIBILITY)
         message(FATAL_ERROR "To use Corrade with MSVC 2013, build it with MSVC2013_COMPATIBILITY enabled")
+    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "20.0" AND NOT CORRADE_MSVC2015_COMPATIBILITY)
+        message(FATAL_ERROR "To use Corrade with MSVC 2015, build it with MSVC2015_COMPATIBILITY enabled")
     endif()
 endif()
 

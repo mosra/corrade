@@ -44,6 +44,15 @@ Defined if compatibility mode for GCC 4.7 is enabled.
 #undef CORRADE_GCC47_COMPATIBILITY
 
 /**
+@brief MSVC 2015 compatibility
+
+Defined if compatibility mode for MSVC 2015 is enabled.
+@see @ref building-corrade, @ref corrade-cmake
+*/
+#define CORRADE_MSVC2015_COMPATIBILITY
+#undef CORRADE_MSVC2015_COMPATIBILITY
+
+/**
 @brief Build with deprecated API included
 
 Defined if the library contains deprecated API (which will be removed in the
