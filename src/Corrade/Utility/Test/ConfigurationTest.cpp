@@ -365,7 +365,8 @@ void ConfigurationTest::typesScientific() {
     /* Nothing should be changed after saving */
     CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types-scientific.conf")));
 
-    #if !defined(_MSC_VER) && !defined(__MINGW32__)
+    /* MinGW32 has one zero more in scientific notation */
+    #if !defined(__MINGW32__)
     CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types-scientific.conf"),
                        Directory::join(CONFIGURATION_TEST_DIR, "types-scientific.conf"),
                        TestSuite::Compare::File);
