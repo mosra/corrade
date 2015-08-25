@@ -32,15 +32,15 @@ namespace Corrade {
 
 Minimal set of tools required for building is:
 
--   C++ compiler with good C++11 support. Currently there are two compilers
-    which are tested to have everything needed: **GCC** >= 4.7 and **Clang**
-    >= 3.1. On Windows you can use **MinGW**. GCC 4.6, 4.5, 4.4 and **MSVC**
-    2013 support involves some ugly workarounds and thus is available only in
+-   C++ compiler with good C++11 support. Compilers which are tested to have
+    everything needed are **GCC** >= 4.7, **Clang** >= 3.1 and **MSVC** 2015.
+    On Windows you can also use **MinGW**. GCC 4.6, 4.5, 4.4 and MSVC 2013
+    support involves some ugly workarounds and thus is available only in
     `compatibility` branch.
 -   **CMake** >= 2.8.9
 
-Note that full feature set is available only on GCC 4.8.1 and Clang 3.1 and
-compatibility mode with reduced feature set is used on other compilers.
+Note that full feature set is available only on GCC >= 4.8.1 and Clang >= 3.1
+and compatibility mode with reduced feature set is used on other compilers.
 
 @section building-corrade-download Downloading the sources
 
@@ -130,7 +130,7 @@ found at runtime.
 
 @subsection building-corrade-windows Building on Windows
 
-On Windows you can use either MinGW or MSVC 2013 compiler. It's then up to you
+On Windows you can use either MSVC or MinGW compiler. It's then up to you
 whether you will use QtCreator, Visual Studio or do the build from command-
 line. Note that for most convenient usage it's best use some dedicated
 directory (e.g. `C:/Sys`) for installing dependencies instead of putting each
@@ -144,8 +144,7 @@ Then, when running CMake, set `CMAKE_INSTALL_PREFIX` value to that directory
 
 @subsubsection building-corrade-windows-msvc Using Visual Studio
 
-On Windows CMake by default creates Visual Studio project files. You need to
-use `compatibility` branch to compile with MSVC 2013, as said above.
+On Windows CMake by default creates Visual Studio project files.
 
 The most straightforward way to build and install the library is again via the
 command-line. The bonus point is that you don't even need to wait for Visual
