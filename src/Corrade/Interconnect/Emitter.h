@@ -255,7 +255,13 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          *      @ref Connection::isConnected(), @ref signalConnectionCount()
          */
         template<class Emitter, class ...Args> bool hasSignalConnections(Signal(Emitter::*signal)(Args...)) const {
-            return connections.count(Implementation::SignalData(signal)) != 0;
+            return connections.count(
+                #ifndef CORRADE_MSVC2015_COMPATIBILITY
+                Implementation::SignalData(signal)
+                #else
+                Implementation::SignalData::create<Emitter, Args...>(signal)
+                #endif
+                ) != 0;
         }
 
         /**
@@ -273,7 +279,13 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          *      @ref hasSignalConnections()
          */
         template<class Emitter, class ...Args> std::size_t signalConnectionCount(Signal(Emitter::*signal)(Args...)) const {
-            return connections.count(Implementation::SignalData(signal));
+            return connections.count(
+                #ifndef CORRADE_MSVC2015_COMPATIBILITY
+                Implementation::SignalData(signal)
+                #else
+                Implementation::SignalData::create<Emitter, Args...>(signal)
+                #endif
+                );
         }
 
         /**
@@ -292,7 +304,13 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          *      @ref hasSignalConnections()
          */
         template<class Emitter, class ...Args> void disconnectSignal(Signal(Emitter::*signal)(Args...)) {
-            disconnectInternal(Implementation::SignalData(signal));
+            disconnectInternal(
+                #ifndef CORRADE_MSVC2015_COMPATIBILITY
+                Implementation::SignalData(signal)
+                #else
+                Implementation::SignalData::create<Emitter, Args...>(signal)
+                #endif
+                );
         }
 
         /**
@@ -429,7 +447,11 @@ template<class EmitterObject, class Emitter, class ...Args> Connection connect(E
     static_assert(std::is_base_of<Emitter, EmitterObject>::value,
         "Emitter object doesn't have given signal");
 
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
     Implementation::SignalData signalData(signal);
+    #else
+    auto signalData = Implementation::SignalData::create<EmitterObject, Args...>(signal);
+    #endif
     auto data = new Implementation::FunctionConnectionData<Args...>(&emitter, slot);
     Interconnect::Emitter::connectInternal(signalData, data);
     return Connection(signalData, data);
@@ -470,7 +492,11 @@ template<class EmitterObject, class Emitter, class Receiver, class ReceiverObjec
     static_assert(std::is_base_of<Receiver, ReceiverObject>::value,
         "Receiver object doesn't have given slot");
 
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
     Implementation::SignalData signalData(signal);
+    #else
+    auto signalData = Implementation::SignalData::create<EmitterObject, Args...>(signal);
+    #endif
     auto data = new Implementation::MemberConnectionData<Args...>(&emitter, &receiver, static_cast<void(ReceiverObject::*)(Args...)>(slot));
     Interconnect::Emitter::connectInternal(signalData, data);
     return Connection(signalData, data);
@@ -480,7 +506,13 @@ template<class EmitterObject, class Emitter, class Receiver, class ReceiverObjec
 template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emitter_::*signal)(Args...), typename std::common_type<Args>::type... args) {
     connectionsChanged = false;
     ++lastHandledSignal;
-    auto range = connections.equal_range(Implementation::SignalData(signal));
+    auto range = connections.equal_range(
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        Implementation::SignalData(signal)
+        #else
+        Implementation::SignalData::create<Emitter_, Args...>(signal)
+        #endif
+        );
     auto it = range.first;
     while(it != range.second) {
         /* If not already handled, proceed and mark as such */
@@ -499,7 +531,13 @@ template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emi
 
             /* Connections changed by the slot, go through again */
             if(connectionsChanged) {
-                range = connections.equal_range(Implementation::SignalData(signal));
+                range = connections.equal_range(
+                    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+                    Implementation::SignalData(signal)
+                    #else
+                    Implementation::SignalData::create<Emitter_, Args...>(signal)
+                    #endif
+                    );
                 it = range.first;
                 connectionsChanged = false;
                 continue;

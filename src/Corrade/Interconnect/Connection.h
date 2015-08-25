@@ -47,10 +47,22 @@ namespace Implementation {
         public:
             enum: std::size_t { Size = 2*sizeof(void*)/sizeof(std::size_t) };
 
-            template<class Emitter, class ...Args> SignalData(typename Emitter::Signal(Emitter::*signal)(Args...)): data() {
+            #ifndef CORRADE_MSVC2015_COMPATIBILITY
+            template<class Emitter, class ...Args> SignalData(const Emitter&, typename Emitter::Signal(Emitter::*signal)(Args...)): data() {
                 typedef typename Emitter::Signal(Emitter::*Signal)(Args...);
                 *reinterpret_cast<Signal*>(data) = signal;
             }
+            #else
+            /* MSVC 2015 is not able to detect template parameters, so I need
+               to shovel these in explicitly using "static constructor". MSVC
+               2013 had no problem with that! What the hell! */
+            template<class Emitter, class ...Args> static SignalData create(typename Emitter::Signal(Emitter::*signal)(Args...)) {
+                typedef typename Emitter::Signal(Emitter::*Signal)(Args...);
+                SignalData d;
+                *reinterpret_cast<Signal*>(d.data) = signal;
+                return d;
+            }
+            #endif
 
             bool operator==(const SignalData& other) const {
                 for(std::size_t i = 0; i != Size; ++i)
@@ -63,6 +75,10 @@ namespace Implementation {
             }
 
         private:
+            #ifndef CORRADE_MSVC2015_COMPATIBILITY
+            SignalData() {}
+            #endif
+
             std::size_t data[Size];
     };
 }

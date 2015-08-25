@@ -115,9 +115,15 @@ Test::Test() {
 }
 
 void Test::signalData() {
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
     Implementation::SignalData data1(&Postman::newMessage);
     Implementation::SignalData data2(&Postman::newMessage);
     Implementation::SignalData data3(&Postman::paymentRequested);
+    #else
+    auto data1 = Implementation::SignalData::create<Postman, int, const std::string&>(&Postman::newMessage);
+    auto data2 = Implementation::SignalData::create<Postman, int, const std::string&>(&Postman::newMessage);
+    auto data3 = Implementation::SignalData::create<Postman, int>(&Postman::paymentRequested);
+    #endif
 
     CORRADE_VERIFY(data1 == data1);
     CORRADE_VERIFY(data2 == data2);
