@@ -75,8 +75,8 @@ namespace Implementation {
             }
 
         private:
-            #ifndef CORRADE_MSVC2015_COMPATIBILITY
-            SignalData() {}
+            #ifdef CORRADE_MSVC2015_COMPATIBILITY
+            SignalData(): data() {}
             #endif
 
             std::size_t data[Size];
