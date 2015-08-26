@@ -46,7 +46,7 @@ Does not work on template aliases and enum values, use
 #if defined(__GNUC__) || defined(__clang__)
 #define CORRADE_DEPRECATED(message) __attribute((deprecated(message)))
 #elif defined(_MSC_VER)
-#define CORRADE_DEPRECATED(message) __declspec(deprecated(message))
+#define CORRADE_DEPRECATED(message) __declspec((deprecated(message)))
 #else
 #define CORRADE_DEPRECATED(message)
 #endif
@@ -87,7 +87,7 @@ enum class Bar {
 #if defined(__clang__)
 #define CORRADE_DEPRECATED_ENUM(message) __attribute((deprecated(message)))
 #elif defined(_MSC_VER) && _MSC_VER >= 1900
-#define CORRADE_DEPRECATED_ENUM(message) __declspec(deprecated(message))
+#define CORRADE_DEPRECATED_ENUM(message) [[deprecated(message)]]
 #else
 #define CORRADE_DEPRECATED_ENUM(message)
 #endif
