@@ -402,6 +402,14 @@ template<class ...Args> class BaseMemberConnectionData: public AbstractMemberCon
         virtual void handle(Args... args) = 0;
 };
 
+#if defined(__GNUC__) && !defined(__clang__)
+/* GCC complains that this function is used but never defined. Clang is sane.
+   MSVC too. WHAT THE FUCK, GCC? */
+template<class ...Args> void BaseMemberConnectionData<Args...>::handle(Args...) {
+    CORRADE_ASSERT_UNREACHABLE();
+}
+#endif
+
 template<class Receiver, class ...Args> class MemberConnectionData: public BaseMemberConnectionData<Args...> {
     friend Interconnect::Emitter;
 
