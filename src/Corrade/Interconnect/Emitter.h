@@ -356,7 +356,7 @@ namespace Implementation {
 
 class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
     template<class...> friend class FunctionConnectionData;
-    template<class...> friend class MemberConnectionData;
+    template<class, class...> friend class MemberConnectionData;
     friend Interconnect::Connection;
     friend Interconnect::Emitter;
     friend Interconnect::Receiver;
@@ -388,23 +388,34 @@ class AbstractMemberConnectionData: public AbstractConnectionData {
     public:
         template<class Emitter, class Receiver> explicit AbstractMemberConnectionData(Emitter* emitter, Receiver* receiver): AbstractConnectionData(emitter, Type::Member), receiver(receiver) {}
 
-    protected:
+    private:
         Receiver* receiver;
 };
 
-template<class ...Args> class MemberConnectionData: public AbstractMemberConnectionData {
+template<class ...Args> class BaseMemberConnectionData: public AbstractMemberConnectionData {
+    friend Interconnect::Emitter;
+
+    public:
+        template<class Emitter, class Receiver> explicit BaseMemberConnectionData(Emitter* emitter, Receiver* receiver): AbstractMemberConnectionData(emitter, receiver) {}
+
+    private:
+        virtual void handle(Args... args) = 0;
+};
+
+template<class Receiver, class ...Args> class MemberConnectionData: public BaseMemberConnectionData<Args...> {
     friend Interconnect::Emitter;
 
     public:
         typedef void(Receiver::*Slot)(Args...);
 
-        template<class Emitter, class Receiver> explicit MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): AbstractMemberConnectionData(emitter, receiver), slot(static_cast<Slot>(slot)) {}
+        template<class Emitter> explicit MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): BaseMemberConnectionData<Args...>(emitter, receiver), receiver(receiver), slot(slot) {}
 
     private:
-        void handle(Args... args) {
+        void handle(Args... args) override final {
             (receiver->*slot)(args...);
         }
 
+        Receiver* receiver;
         const Slot slot;
 };
 
@@ -497,7 +508,7 @@ template<class EmitterObject, class Emitter, class Receiver, class ReceiverObjec
     #else
     auto signalData = Implementation::SignalData::create<EmitterObject, Args...>(signal);
     #endif
-    auto data = new Implementation::MemberConnectionData<Args...>(&emitter, &receiver, static_cast<void(ReceiverObject::*)(Args...)>(slot));
+    auto data = new Implementation::MemberConnectionData<ReceiverObject, Args...>(&emitter, &receiver, slot);
     Interconnect::Emitter::connectInternal(signalData, data);
     return Connection(signalData, data);
 }
@@ -523,7 +534,7 @@ template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emi
                     static_cast<Implementation::FunctionConnectionData<Args...>*>(it->second)->handle(args...);
                     break;
                 case Implementation::AbstractConnectionData::Type::Member:
-                    static_cast<Implementation::MemberConnectionData<Args...>*>(it->second)->handle(args...);
+                    static_cast<Implementation::BaseMemberConnectionData<Args...>*>(it->second)->handle(args...);
                     break;
                 default:
                     CORRADE_ASSERT_UNREACHABLE();
