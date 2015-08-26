@@ -53,9 +53,8 @@ namespace Implementation {
                 *reinterpret_cast<Signal*>(data) = signal;
             }
             #else
-            /* MSVC 2015 is not able to detect template parameters, so I need
-               to shovel these in explicitly using "static constructor". MSVC
-               2013 had no problem with that! What the hell! */
+            /* MSVC is not able to detect template parameters, so I need to
+               shovel these in explicitly using "static constructor" */
             template<class Emitter, class ...Args> static SignalData create(typename Emitter::Signal(Emitter::*signal)(Args...)) {
                 typedef typename Emitter::Signal(Emitter::*Signal)(Args...);
                 SignalData d;
