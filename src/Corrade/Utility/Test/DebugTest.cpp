@@ -148,47 +148,6 @@ void DebugTest::custom() {
     CORRADE_COMPARE(out.str(), "The answer is 42\n");
 }
 
-namespace {
-
-struct Bar {};
-struct Baz {};
-
-inline std::ostream& operator<<(std::ostream& o, const Bar&) {
-    return o << "bar";
-}
-
-inline std::ostream& operator<<(std::ostream& o, const Baz&) {
-    return o << "baz from ostream";
-}
-
-inline Debug operator<<(Debug debug, const Baz&) {
-    return debug << "baz from Debug";
-}
-
-}
-
-void DebugTest::ostreamFallback() {
-    std::ostringstream out;
-    Debug::setOutput(&out);
-
-    Debug() << Bar{};
-    CORRADE_COMPARE(out.str(), "bar\n");
-}
-
-void DebugTest::ostreamFallbackPriority() {
-    /* Suppress warning about unused function operator<<(std::ostream&, const Baz&) */
-    {
-        std::ostringstream o;
-        o << Baz{};
-    }
-
-    std::ostringstream out;
-    Debug::setOutput(&out);
-
-    Debug() << Baz{};
-    CORRADE_COMPARE(out.str(), "baz from Debug\n");
-}
-
 void DebugTest::flags() {
     std::ostringstream out;
     Debug::setOutput(&out);
@@ -237,6 +196,47 @@ void DebugTest::tuple() {
     out.str({});
     Debug(&out) << std::make_tuple(3, 4.56, std::string{"hello"});
     CORRADE_COMPARE(out.str(), "(3, 4.56, hello)\n");
+}
+
+namespace {
+
+struct Bar {};
+struct Baz {};
+
+inline std::ostream& operator<<(std::ostream& o, const Bar&) {
+    return o << "bar";
+}
+
+inline std::ostream& operator<<(std::ostream& o, const Baz&) {
+    return o << "baz from ostream";
+}
+
+inline Debug operator<<(Debug debug, const Baz&) {
+    return debug << "baz from Debug";
+}
+
+}
+
+void DebugTest::ostreamFallback() {
+    std::ostringstream out;
+    Debug::setOutput(&out);
+
+    Debug() << Bar{};
+    CORRADE_COMPARE(out.str(), "bar\n");
+}
+
+void DebugTest::ostreamFallbackPriority() {
+    /* Suppress warning about unused function operator<<(std::ostream&, const Baz&) */
+    {
+        std::ostringstream o;
+        o << Baz{};
+    }
+
+    std::ostringstream out;
+    Debug::setOutput(&out);
+
+    Debug() << Baz{};
+    CORRADE_COMPARE(out.str(), "baz from Debug\n");
 }
 
 }}}
