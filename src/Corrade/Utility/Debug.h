@@ -31,7 +31,7 @@
 
 #include <iosfwd>
 #include <string>
-#include <utility>
+#include <tuple>
 #include <type_traits>
 
 #include "Corrade/Utility/TypeTraits.h"
@@ -288,17 +288,49 @@ template<class Iterable> Debug operator<<(typename std::enable_if<IsIterable<Ite
     return debug;
 }
 
-/** @relates Debug
-@brief Operator for printing pair types to debug
+namespace Implementation {
+    /** @todo C++14: use std::make_index_sequence and std::integer_sequence */
+    template<std::size_t ...> struct Sequence {};
 
-Prints the value as `(first, second)`.
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    /* E.g. GenerateSequence<3>::Type is Sequence<0, 1, 2> */
+    template<std::size_t N, std::size_t ...sequence> struct GenerateSequence:
+        GenerateSequence<N-1, N-1, sequence...> {};
+
+    template<std::size_t ...sequence> struct GenerateSequence<0, sequence...> {
+        typedef Sequence<sequence...> Type;
+    };
+    #endif
+
+    /* Used by operator<<(Debug, std::tuple<>...) */
+    template<class T> constexpr void tupleDebugOutput(Debug&, const T&, Sequence<>) {}
+    template<class T, std::size_t i, std::size_t ...sequence> void tupleDebugOutput(Debug& debug, const T& tuple, Sequence<i, sequence...>) {
+        debug << std::get<i>(tuple);
+        if(i + 1 != std::tuple_size<T>::value)
+            debug << ", ";
+        tupleDebugOutput(debug, tuple, Sequence<sequence...>{});
+    }
+}
+
+/** @relates Debug
+@brief Operator for printing tuple types to debug
+
+Prints the value as `(first, second, third...)`.
 */
-template<class A, class B> Debug operator<<(Debug debug, const std::pair<A, B>& value) {
+template<class ...Args> Debug operator<<(Debug debug, const std::tuple<Args...>& value) {
     debug << "(";
     debug.setFlag(Debug::SpaceAfterEachValue, false);
-    debug << value.first << ", " << value.second << ")";
+    Implementation::tupleDebugOutput(debug, value, typename Implementation::GenerateSequence<sizeof...(Args)>::Type{});
+    debug << ")";
     debug.setFlag(Debug::SpaceAfterEachValue, true);
     return debug;
+}
+
+/** @relates Debug
+ * @overload
+ */
+template<class T, class U> Debug operator<<(Debug debug, const std::pair<T, U>& value) {
+    return debug << std::tuple<T, U>(value);
 }
 
 /**

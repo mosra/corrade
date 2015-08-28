@@ -45,6 +45,8 @@ struct DebugTest: TestSuite::Tester {
     void flags();
 
     void iterable();
+    void tuple();
+
     void ostreamFallback();
     void ostreamFallbackPriority();
 };
@@ -58,6 +60,8 @@ DebugTest::DebugTest() {
               &DebugTest::flags,
 
               &DebugTest::iterable,
+              &DebugTest::tuple,
+
               &DebugTest::ostreamFallback,
               &DebugTest::ostreamFallbackPriority});
 }
@@ -222,6 +226,17 @@ void DebugTest::iterable() {
     out.str({});
     Debug() << std::map<int, std::string>{{1, "a"}, {2, "b"}, {3, "c"}};
     CORRADE_COMPARE(out.str(), "{(1, a), (2, b), (3, c)}\n");
+}
+
+void DebugTest::tuple() {
+    std::ostringstream out;
+
+    Debug(&out) << std::make_tuple();
+    CORRADE_COMPARE(out.str(), "()\n");
+
+    out.str({});
+    Debug(&out) << std::make_tuple(3, 4.56, std::string{"hello"});
+    CORRADE_COMPARE(out.str(), "(3, 4.56, hello)\n");
 }
 
 }}}
