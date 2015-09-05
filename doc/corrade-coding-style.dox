@@ -427,17 +427,17 @@ Better way would be to extract the enum out, now there is only one way to
 specify the format (and it's less typing). Also, when the user later decides to
 change the image type to another, the enum value doesn't need to be updated:
 @code
-enum class ColorFormat { RGB, RGBA };
+enum class PixelFormat { RGB, RGBA };
 
 class AbstractImage {
     public:
-        void setFormat(ColorFormat);
+        void setFormat(PPixelFormat);
 };
 class Image2D: public AbstractImage {};
 class ImageWrapper: public AbstractImage {};
 
 Image2D image;
-image.setFormat(ColorFormat::RGBA);
+image.setFormat(PixelFormat::RGBA);
 @endcode
 
 On the other hand, if each class has its own enum values, the original way is
