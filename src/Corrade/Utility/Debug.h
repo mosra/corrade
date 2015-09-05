@@ -303,7 +303,7 @@ namespace Implementation {
     #endif
 
     /* Used by operator<<(Debug, std::tuple<>...) */
-    template<class T> constexpr void tupleDebugOutput(Debug&, const T&, Sequence<>) {}
+    template<class T> inline void tupleDebugOutput(Debug&, const T&, Sequence<>) {}
     template<class T, std::size_t i, std::size_t ...sequence> void tupleDebugOutput(Debug& debug, const T& tuple, Sequence<i, sequence...>) {
         debug << std::get<i>(tuple);
         if(i + 1 != std::tuple_size<T>::value)
