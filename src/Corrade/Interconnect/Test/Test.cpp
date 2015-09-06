@@ -75,12 +75,29 @@ class Postman: public Interconnect::Emitter {
 class TemplatedPostman: public Interconnect::Emitter {
     public:
         template<class T> Signal newMessage(int price, const std::string& message) {
+            #ifdef _MSC_VER /* See _functionHash for explanation */
+            _functionHash = sizeof(T);
+            #endif
             return emit(&TemplatedPostman::newMessage<T>, price, message);
         }
 
         template<class T> Signal oldMessage(int price, const std::string& message) {
+            #ifdef _MSC_VER /* See _functionHash for explanation */
+            _functionHash = sizeof(T)*2;
+            #endif
             return emit(&TemplatedPostman::oldMessage<T>, price, message);
         }
+
+    private:
+        #ifdef _MSC_VER
+        /* MSVC has an optimization (/OPT:ICF) that merges functions with
+           identical instructions. That would prevent template signals from
+           working, thus we need to do some otherwise useless work to
+           differentiate them. Ugly as hell but better than disabling the
+           optimization globally. Details:
+           http://blogs.msdn.com/b/oldnewthing/archive/2005/03/22/400373.aspx */
+        int _functionHash;
+        #endif
 };
 
 class Mailbox: public Interconnect::Receiver {
