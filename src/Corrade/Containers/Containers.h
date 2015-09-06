@@ -41,7 +41,9 @@ namespace Corrade { namespace Containers {
 template<class> class Array;
 template<class> class ArrayView;
 #ifdef CORRADE_BUILD_DEPRECATED
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using ArrayReference CORRADE_DEPRECATED_ALIAS("use ArrayView.h and ArrayView instead") = ArrayView<T>;
+#endif
 #endif
 
 template<class T, typename std::underlying_type<T>::type fullValue = typename std::underlying_type<T>::type(~0)> class EnumSet;
