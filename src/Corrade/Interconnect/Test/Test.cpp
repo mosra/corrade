@@ -36,6 +36,7 @@ struct Test: TestSuite::Tester {
     explicit Test();
 
     void signalData();
+    void templatedSignalData();
 
     void connect();
 
@@ -71,6 +72,17 @@ class Postman: public Interconnect::Emitter {
         }
 };
 
+class TemplatedPostman: public Interconnect::Emitter {
+    public:
+        template<class T> Signal newMessage(int price, const std::string& message) {
+            return emit(&TemplatedPostman::newMessage<T>, price, message);
+        }
+
+        template<class T> Signal oldMessage(int price, const std::string& message) {
+            return emit(&TemplatedPostman::oldMessage<T>, price, message);
+        }
+};
+
 class Mailbox: public Interconnect::Receiver {
     public:
         Mailbox(): money(0) {}
@@ -90,6 +102,7 @@ class Mailbox: public Interconnect::Receiver {
 
 Test::Test() {
     addTests({&Test::signalData,
+              &Test::templatedSignalData,
 
               &Test::connect,
 
@@ -135,6 +148,22 @@ void Test::signalData() {
     CORRADE_VERIFY(Implementation::SignalDataHash()(data1) == Implementation::SignalDataHash()(data1));
     CORRADE_VERIFY(Implementation::SignalDataHash()(data1) == Implementation::SignalDataHash()(data2));
     CORRADE_VERIFY(Implementation::SignalDataHash()(data1) != Implementation::SignalDataHash()(data3));
+}
+
+void Test::templatedSignalData()
+{
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    Implementation::SignalData data1(&TemplatedPostman::newMessage<std::int32_t>);
+    Implementation::SignalData data2(&TemplatedPostman::newMessage<std::string>);
+    Implementation::SignalData data3(&TemplatedPostman::oldMessage2std::int32_t>);
+    #else
+    auto data1 = Implementation::SignalData::create<TemplatedPostman>(&TemplatedPostman::newMessage<std::int32_t>);
+    auto data2 = Implementation::SignalData::create<TemplatedPostman>(&TemplatedPostman::newMessage<std::string>);
+    auto data3 = Implementation::SignalData::create<TemplatedPostman>(&TemplatedPostman::oldMessage<std::int32_t>);
+    #endif
+
+    CORRADE_VERIFY(data1 != data2);
+    CORRADE_VERIFY(data1 != data3);
 }
 
 void Test::connect() {
@@ -423,14 +452,6 @@ void Test::virtualSlot() {
 
     delete mailbox;
 }
-
-/* Local classes apparently cannot have templated methods */
-class TemplatedPostman: public Interconnect::Emitter {
-    public:
-        template<class T> Signal newMessage(int price, const std::string& message) {
-            return emit(&TemplatedPostman::newMessage<T>, price, message);
-        }
-};
 
 void Test::templatedSignal() {
     TemplatedPostman postman;
