@@ -117,8 +117,12 @@ template<class T> class ArrayView {
         #endif
         constexpr /*implicit*/ ArrayView(ArrayView<U> array) noexcept: _data{array}, _size{array.size()} {}
 
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
         /** @brief Whether the array is non-empty */
-        constexpr explicit operator bool() const { return _data; }
+        /* Disabled on MSVC <= 2015 to avoid ambiguous operator+() when doing
+           pointer arithmetic. */
+        explicit operator bool() const { return _data; }
+        #endif
 
         /** @brief Conversion to array type */
         constexpr /*implicit*/ operator T*() const { return _data; }
