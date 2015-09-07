@@ -6,7 +6,7 @@ SUPPORTED PLATFORMS
 ===================
 
 *   **Linux** and embedded Linux
-*   **Windows**
+*   **Windows** [![Build status](https://ci.appveyor.com/api/projects/status/afjjlsgtk6jjxulp/branch/master?svg=true)](https://ci.appveyor.com/project/mosra/corrade/branch/master)
 *   **OS X**
 *   **Android** 1.5 (API Level 3) and higher
 *   **Google Chrome** (through [Native Client](https://developers.google.com/native-client/),
