@@ -32,9 +32,6 @@
 #include <cstddef>
 #include <string>
 #include <utility>
-#ifdef __MINGW32__
-#include <vector>
-#endif
 
 #include "Corrade/Utility/visibility.h"
 
@@ -52,20 +49,8 @@ class CORRADE_UTILITY_EXPORT Unicode {
          */
         static std::pair<char32_t, std::size_t> nextChar(const std::string& text, const std::size_t cursor);
 
-        /**
-         * @brief Convert UTF-8 to UTF-32
-         *
-         * @note On MinGW returns `std::vector<char32_t>` instead of
-         *      `std::u32string` because MinGW on Windows somehow doesn't
-         *      expect four-byte characters in a string and fails miserably
-         *      while freeing memory.
-         * @todo Test when there is something newer than MinGW32 GCC 4.7.2
-         */
-        #ifndef __MINGW32__
+        /** @brief Convert UTF-8 to UTF-32 */
         static std::u32string utf32(const std::string& text);
-        #else
-        static std::vector<char32_t> utf32(const std::string& text);
-        #endif
 };
 
 }}

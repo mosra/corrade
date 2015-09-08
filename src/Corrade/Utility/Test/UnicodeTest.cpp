@@ -103,21 +103,11 @@ void UnicodeTest::nextUtf8Empty() {
 }
 
 void UnicodeTest::utf8utf32() {
-    #ifndef __MINGW32__
     CORRADE_COMPARE(Unicode::utf32("žluťoučký kůň"),
                     U"\u017Elu\u0165ou\u010Dk\u00FD k\u016F\u0148");
-    #else
-    CORRADE_COMPARE(Unicode::utf32("žluťoučký kůň"), (std::vector<char32_t>{
-        U'\u017E', U'l', U'u', U'\u0165', U'o', U'u', U'\u010D', U'k',
-        U'\u00FD', U' ', U'k', U'\u016F', U'\u0148'}));
-    #endif
 
     /* Empty string shouldn't crash */
-    #ifndef __MINGW32__
     CORRADE_COMPARE(Unicode::utf32(""), U"");
-    #else
-    CORRADE_COMPARE(Unicode::utf32(""), std::vector<char32_t>());
-    #endif
 }
 
 }}}
