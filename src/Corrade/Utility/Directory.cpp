@@ -162,15 +162,8 @@ std::string Directory::home() {
     /* Windows */
     #elif defined(CORRADE_TARGET_WINDOWS)
     TCHAR h[MAX_PATH];
-    #ifdef __MINGW32__
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wold-style-cast"
-    #endif
     if(!SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_PERSONAL, nullptr, 0, h)))
         return {};
-    #ifdef __MINGW32__
-    #pragma GCC diagnostic pop
-    #endif
     return h;
 
     /* Other */
@@ -192,15 +185,8 @@ std::string Directory::configurationDir(const std::string& applicationName) {
     /* Windows */
     #elif defined(CORRADE_TARGET_WINDOWS)
     TCHAR path[MAX_PATH];
-    #ifdef __MINGW32__
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wold-style-cast"
-    #endif
     if(!SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, path)))
         return {};
-    #ifdef __MINGW32__
-    #pragma GCC diagnostic pop
-    #endif
     const std::string appdata(path);
     return appdata.empty() ? std::string{} : join(appdata, applicationName);
 
