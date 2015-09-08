@@ -61,7 +61,7 @@ void StateMachineTest::signalData() {
     Implementation::SignalData data3{&StateMachine::exited<State::Start>};
 
     Implementation::SignalData data4{&StateMachine::stepped<State::Start, State::End>};
-    Implementation::SignalData data5{&StateMachine::stepped<State::Start, State::End>};
+    Implementation::SignalData data5{&StateMachine::stepped<State::End, State::Start>};
     #else
     auto data1 = Implementation::SignalData::create<StateMachine>(&StateMachine::entered<State::Start>);
     auto data2 = Implementation::SignalData::create<StateMachine>(&StateMachine::entered<State::End>);

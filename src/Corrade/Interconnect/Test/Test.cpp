@@ -172,7 +172,7 @@ void Test::templatedSignalData()
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     Implementation::SignalData data1(&TemplatedPostman::newMessage<std::int32_t>);
     Implementation::SignalData data2(&TemplatedPostman::newMessage<std::string>);
-    Implementation::SignalData data3(&TemplatedPostman::oldMessage2std::int32_t>);
+    Implementation::SignalData data3(&TemplatedPostman::oldMessage<std::int32_t>);
     #else
     auto data1 = Implementation::SignalData::create<TemplatedPostman>(&TemplatedPostman::newMessage<std::int32_t>);
     auto data2 = Implementation::SignalData::create<TemplatedPostman>(&TemplatedPostman::newMessage<std::string>);
