@@ -38,7 +38,7 @@ Receiver::Receiver() = default;
 Receiver::~Receiver() {
     for(auto end = connections.end(), it = connections.begin(); it != end; ++it) {
         /* Remove connection from emitter */
-        for(auto end = (*it)->emitter->connections.end(), eit = (*it)->emitter->connections.begin(); eit != end; ++eit) {
+        for(auto eend = (*it)->emitter->connections.end(), eit = (*it)->emitter->connections.begin(); eit != eend; ++eit) {
             if(eit->second != *it) continue;
 
             (*it)->emitter->connections.erase(eit);
