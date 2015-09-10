@@ -30,26 +30,26 @@
 
 namespace Corrade { namespace TestSuite {
 
-Tester::Tester(): logOutput(nullptr), errorOutput(nullptr), testCaseLine(0), checkCount(0), expectedFailure(nullptr) {}
+Tester::Tester(): _logOutput{nullptr}, _errorOutput{nullptr}, _testCaseLine{0}, _checkCount{0}, _expectedFailure{nullptr} {}
 
 int Tester::exec() { return exec(&std::cout, &std::cerr); }
 
 int Tester::exec(std::ostream* logOutput, std::ostream* errorOutput) {
-    this->logOutput = logOutput;
-    this->errorOutput = errorOutput;
+    _logOutput = logOutput;
+    _errorOutput = errorOutput;
 
     /* Fail when we have nothing to test */
-    if(testCases.empty()) {
-        Utility::Error(errorOutput) << "In" << testName << "weren't found any test cases!";
+    if(_testCases.empty()) {
+        Utility::Error(errorOutput) << "In" << _testName << "weren't found any test cases!";
         return 2;
     }
 
-    Utility::Debug(logOutput) << "Starting" << testName << "with" << testCases.size() << "test cases...";
+    Utility::Debug(logOutput) << "Starting" << _testName << "with" << _testCases.size() << "test cases...";
 
     unsigned int errorCount = 0,
         noCheckCount = 0;
 
-    for(auto i: testCases) {
+    for(auto i: _testCases) {
         /* Reset output to stdout for each test case to prevent debug
             output segfaults */
         /** @todo Drop this when Debug has proper output scoping */
@@ -58,7 +58,7 @@ int Tester::exec(std::ostream* logOutput, std::ostream* errorOutput) {
         Utility::Warning::setOutput(&std::cerr);
 
         try {
-            testCaseName.clear();
+            _testCaseName.clear();
             (this->*i)();
         } catch(Exception) {
             ++errorCount;
@@ -68,7 +68,7 @@ int Tester::exec(std::ostream* logOutput, std::ostream* errorOutput) {
         }
 
         /* No testing macros called, don't print function name to output */
-        if(testCaseName.empty()) {
+        if(_testCaseName.empty()) {
             Utility::Debug(logOutput) << "     ?: <unknown>()";
 
             ++noCheckCount;
@@ -76,12 +76,12 @@ int Tester::exec(std::ostream* logOutput, std::ostream* errorOutput) {
         }
 
         Utility::Debug d(logOutput);
-        d << (expectedFailure ? " XFAIL:" : "    OK:") << testCaseName;
-        if(expectedFailure) d << "\n       " << expectedFailure->message();
+        d << (_expectedFailure ? " XFAIL:" : "    OK:") << _testCaseName;
+        if(_expectedFailure) d << "\n       " << _expectedFailure->message();
     }
 
     Utility::Debug d(logOutput);
-    d << "Finished" << testName << "with" << errorCount << "errors out of" << checkCount << "checks.";
+    d << "Finished" << _testName << "with" << errorCount << "errors out of" << _checkCount << "checks.";
     if(noCheckCount)
         d << noCheckCount << "test cases didn't contain any checks!";
 
@@ -89,46 +89,46 @@ int Tester::exec(std::ostream* logOutput, std::ostream* errorOutput) {
 }
 
 void Tester::verifyInternal(const std::string& expression, bool expressionValue) {
-    ++checkCount;
+    ++_checkCount;
 
     /* If the expression is true or the failure is expected, done */
-    if(!expectedFailure) {
+    if(!_expectedFailure) {
         if(expressionValue) return;
     } else if(!expressionValue) {
-        Utility::Debug(logOutput) << " XFAIL:" << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       " << expectedFailure->message() << "Expression" << expression << "failed.";
+        Utility::Debug{_logOutput} << " XFAIL:" << _testCaseName << "at" << _testFilename << "on line" << _testCaseLine << "\n       " << _expectedFailure->message() << "Expression" << expression << "failed.";
         return;
     }
 
     /* Otherwise print message to error output and throw exception */
-    Utility::Error e(errorOutput);
-    e << (expectedFailure ? " XPASS:" : "  FAIL:") << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n        Expression" << expression;
-    if(!expectedFailure) e << "failed.";
+    Utility::Error e(_errorOutput);
+    e << (_expectedFailure ? " XPASS:" : "  FAIL:") << _testCaseName << "at" << _testFilename << "on line" << _testCaseLine << "\n        Expression" << expression;
+    if(!_expectedFailure) e << "failed.";
     else e << "was expected to fail.";
     throw Exception();
 }
 
 void Tester::registerTest(std::string filename, std::string name) {
-    testFilename = std::move(filename);
-    testName = std::move(name);
+    _testFilename = std::move(filename);
+    _testName = std::move(name);
 }
 
 void Tester::skip(const std::string& message) {
-    Utility::Debug e(logOutput);
-    e << "  SKIP:" << testCaseName << "\n       " << message;
+    Utility::Debug e(_logOutput);
+    e << "  SKIP:" << _testCaseName << "\n       " << message;
     throw SkipException();
 }
 
 void Tester::registerTestCase(const std::string& name, int line) {
-    if(testCaseName.empty()) testCaseName = name + "()";
-    testCaseLine = line;
+    if(_testCaseName.empty()) _testCaseName = name + "()";
+    _testCaseLine = line;
 }
 
-Tester::ExpectedFailure::ExpectedFailure(Tester* instance, std::string message): instance(instance), _message(std::move(message)) {
-    instance->expectedFailure = this;
+Tester::ExpectedFailure::ExpectedFailure(Tester* instance, std::string message): _instance(instance), _message(std::move(message)) {
+    _instance->_expectedFailure = this;
 }
 
 Tester::ExpectedFailure::~ExpectedFailure() {
-    instance->expectedFailure = nullptr;
+    _instance->_expectedFailure = nullptr;
 }
 
 std::string Tester::ExpectedFailure::message() const { return _message; }

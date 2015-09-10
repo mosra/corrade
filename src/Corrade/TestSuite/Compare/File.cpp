@@ -35,53 +35,53 @@
 
 namespace Corrade { namespace TestSuite {
 
-Comparator<Compare::File>::Comparator(const std::string& pathPrefix): actualState(State::ReadError), expectedState(State::ReadError), pathPrefix(pathPrefix) {}
+Comparator<Compare::File>::Comparator(const std::string& pathPrefix): _actualState{State::ReadError}, _expectedState{State::ReadError}, _pathPrefix{pathPrefix} {}
 
 bool Comparator<Compare::File>::operator()(const std::string& actualFilename, const std::string& expectedFilename) {
-    this->actualFilename = Utility::Directory::join(pathPrefix, actualFilename);
-    this->expectedFilename = Utility::Directory::join(pathPrefix, expectedFilename);
+    _actualFilename = Utility::Directory::join(_pathPrefix, actualFilename);
+    _expectedFilename = Utility::Directory::join(_pathPrefix, expectedFilename);
 
-    if(!Utility::Directory::fileExists(this->actualFilename))
+    if(!Utility::Directory::fileExists(_actualFilename))
         return false;
 
-    actualState = State::Success;
+    _actualState = State::Success;
 
-    if(!Utility::Directory::fileExists(this->expectedFilename))
+    if(!Utility::Directory::fileExists(_expectedFilename))
         return false;
 
-    actualContents = Utility::Directory::readString(this->actualFilename);
-    expectedContents = Utility::Directory::readString(this->expectedFilename);
-    expectedState = State::Success;
+    _actualContents = Utility::Directory::readString(_actualFilename);
+    _expectedContents = Utility::Directory::readString(_expectedFilename);
+    _expectedState = State::Success;
 
-    return actualContents == expectedContents;
+    return _actualContents == _expectedContents;
 }
 
 void Comparator<Compare::File>::printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
-    if(actualState != State::Success) {
-        e << "Actual file" << actual << "(" + actualFilename + ")" << "cannot be read.";
+    if(_actualState != State::Success) {
+        e << "Actual file" << actual << "(" + _actualFilename + ")" << "cannot be read.";
         return;
     }
 
-    if(expectedState != State::Success) {
-        e << "Expected file" << expected << "(" + expectedFilename + ")" << "cannot be read.";
+    if(_expectedState != State::Success) {
+        e << "Expected file" << expected << "(" + _expectedFilename + ")" << "cannot be read.";
         return;
     }
 
     e << "Files" << actual << "and" << expected << "have different";
-    if(actualContents.size() != expectedContents.size())
-        e << "size, actual" << actualContents.size() << "but" << expectedContents.size() << "expected.";
+    if(_actualContents.size() != _expectedContents.size())
+        e << "size, actual" << _actualContents.size() << "but" << _expectedContents.size() << "expected.";
     else
         e << "contents.";
 
-    for(std::size_t i = 0, end = std::max(actualContents.size(), expectedContents.size()); i != end; ++i) {
-        if(actualContents.size() > i && expectedContents.size() > i && actualContents[i] == expectedContents[i]) continue;
+    for(std::size_t i = 0, end = std::max(_actualContents.size(), _expectedContents.size()); i != end; ++i) {
+        if(_actualContents.size() > i && _expectedContents.size() > i && _actualContents[i] == _expectedContents[i]) continue;
 
-        if(actualContents.size() <= i)
-            e << "Expected has character" << std::string() + expectedContents[i];
-        else if(expectedContents.size() <= i)
-            e << "Actual has character" << std::string() + actualContents[i];
+        if(_actualContents.size() <= i)
+            e << "Expected has character" << std::string() + _expectedContents[i];
+        else if(_expectedContents.size() <= i)
+            e << "Actual has character" << std::string() + _actualContents[i];
         else
-            e << "Actual character" << std::string() + actualContents[i] << "but" << std::string() + expectedContents[i] << "expected";
+            e << "Actual character" << std::string() + _actualContents[i] << "but" << std::string() + _expectedContents[i] << "expected";
 
         e << "on position" << i;
         e.setFlag(Utility::Debug::SpaceAfterEachValue, false);

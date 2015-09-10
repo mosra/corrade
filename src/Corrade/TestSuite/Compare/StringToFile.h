@@ -69,9 +69,9 @@ template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::StringToFile> {
             ReadError
         };
 
-        State state;
-        std::string filename,
-            actualContents, expectedContents;
+        State _state;
+        std::string _filename,
+            _actualContents, _expectedContents;
 };
 #endif
 

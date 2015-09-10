@@ -56,7 +56,7 @@ namespace Implementation {
             void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const;
 
         private:
-            T actualValue, expectedValue;
+            T _actualValue, _expectedValue;
     };
 }
 

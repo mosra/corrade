@@ -114,9 +114,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * Adds one or more test cases to be executed when calling @ref exec().
          */
         template<class Derived> void addTests(std::initializer_list<void(Derived::*)()> tests) {
-            testCases.reserve(testCases.size() + tests.size());
+            _testCases.reserve(_testCases.size() + tests.size());
             for(auto test: tests)
-                testCases.push_back(static_cast<TestCase>(test));
+                _testCases.push_back(static_cast<TestCase>(test));
         }
 
     #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -167,7 +167,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                 std::string message() const;
 
             private:
-                Tester* instance;
+                Tester* _instance;
                 std::string _message;
         };
 
@@ -183,11 +183,11 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
         void verifyInternal(const std::string& expression, bool value);
 
-        std::ostream *logOutput, *errorOutput;
-        std::vector<TestCase> testCases;
-        std::string testFilename, testName, testCaseName, expectFailMessage;
-        std::size_t testCaseLine, checkCount;
-        ExpectedFailure* expectedFailure;
+        std::ostream *_logOutput, *_errorOutput;
+        std::vector<TestCase> _testCases;
+        std::string _testFilename, _testName, _testCaseName, _expectFailMessage;
+        std::size_t _testCaseLine, _checkCount;
+        ExpectedFailure* _expectedFailure;
 };
 
 /** @hideinitializer
@@ -351,7 +351,7 @@ if(!bigEndian) {
     } while(false)
 
 template<class T, class U, class V> void Tester::compareWith(Comparator<T> comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
-    ++checkCount;
+    ++_checkCount;
 
     /* Store (references to) possibly implicitly-converted values,
        otherwise the implicit conversion would when passing them to operator(),
@@ -361,17 +361,17 @@ template<class T, class U, class V> void Tester::compareWith(Comparator<T> compa
 
     /* If the comparison succeeded or the failure is expected, done */
     bool equal = comparator(actualValueInExpectedActualType, expectedValueInExpectedExpectedType);
-    if(!expectedFailure) {
+    if(!_expectedFailure) {
         if(equal) return;
     } else if(!equal) {
-        Utility::Debug(logOutput) << " XFAIL:" << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       " << expectedFailure->message() << actual << "and" << expected << "are not equal.";
+        Utility::Debug(_logOutput) << " XFAIL:" << _testCaseName << "at" << _testFilename << "on line" << _testCaseLine << "\n       " << _expectedFailure->message() << actual << "and" << expected << "are not equal.";
         return;
     }
 
     /* Otherwise print message to error output and throw exception */
-    Utility::Error e(errorOutput);
-    e << (expectedFailure ? " XPASS:" : "  FAIL:") << testCaseName << "at" << testFilename << "on line" << testCaseLine << "\n       ";
-    if(!expectedFailure) comparator.printErrorMessage(e, actual, expected);
+    Utility::Error e(_errorOutput);
+    e << (_expectedFailure ? " XPASS:" : "  FAIL:") << _testCaseName << "at" << _testFilename << "on line" << _testCaseLine << "\n       ";
+    if(!_expectedFailure) comparator.printErrorMessage(e, actual, expected);
     else e << actual << "and" << expected << "are not expected to be equal.";
     throw Exception();
 }

@@ -35,41 +35,41 @@
 
 namespace Corrade { namespace TestSuite {
 
-Comparator<Compare::StringToFile>::Comparator(): state(State::ReadError) {}
+Comparator<Compare::StringToFile>::Comparator(): _state(State::ReadError) {}
 
 bool Comparator<Compare::StringToFile>::operator()(const std::string& actualContents, const std::string& filename) {
-    this->filename = filename;
+    _filename = filename;
 
     if(!Utility::Directory::fileExists(filename)) return false;
 
-    expectedContents = Utility::Directory::readString(filename);
-    this->actualContents = actualContents;
-    state = State::Success;
+    _expectedContents = Utility::Directory::readString(filename);
+    _actualContents = actualContents;
+    _state = State::Success;
 
-    return actualContents == expectedContents;
+    return actualContents == _expectedContents;
 }
 
 void Comparator<Compare::StringToFile>::printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
-    if(state != State::Success) {
-        e << "File" << expected << "(" + filename + ")" << "cannot be read.";
+    if(_state != State::Success) {
+        e << "File" << expected << "(" + _filename + ")" << "cannot be read.";
         return;
     }
 
     e << "Files" << actual << "and" << expected << "have different";
-    if(actualContents.size() != expectedContents.size())
-        e << "size, actual" << actualContents.size() << "but" << expectedContents.size() << "expected.";
+    if(_actualContents.size() != _expectedContents.size())
+        e << "size, actual" << _actualContents.size() << "but" << _expectedContents.size() << "expected.";
     else
         e << "contents.";
 
-    for(std::size_t i = 0, end = std::max(actualContents.size(), expectedContents.size()); i != end; ++i) {
-        if(actualContents.size() > i && expectedContents.size() > i && actualContents[i] == expectedContents[i]) continue;
+    for(std::size_t i = 0, end = std::max(_actualContents.size(), _expectedContents.size()); i != end; ++i) {
+        if(_actualContents.size() > i && _expectedContents.size() > i && _actualContents[i] == _expectedContents[i]) continue;
 
-        if(actualContents.size() <= i)
-            e << "Expected has character" << std::string() + expectedContents[i];
-        else if(expectedContents.size() <= i)
-            e << "Actual has character" << std::string() + actualContents[i];
+        if(_actualContents.size() <= i)
+            e << "Expected has character" << std::string() + _expectedContents[i];
+        else if(_expectedContents.size() <= i)
+            e << "Actual has character" << std::string() + _actualContents[i];
         else
-            e << "Actual character" << std::string() + actualContents[i] << "but" << std::string() + expectedContents[i] << "expected";
+            e << "Actual character" << std::string() + _actualContents[i] << "but" << std::string() + _expectedContents[i] << "expected";
 
         e << "on position" << i;
         e.setFlag(Utility::Debug::SpaceAfterEachValue, false);

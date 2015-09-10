@@ -50,15 +50,15 @@ template<class T> bool FloatComparator<T>::operator()(T actual, T expected) {
     else if(difference/(absA + absB) < FloatComparatorEpsilon<T>::epsilon())
         return true;
 
-    actualValue = actual;
-    expectedValue = expected;
+    _actualValue = actual;
+    _expectedValue = expected;
     return false;
 }
 
 template<class T> void FloatComparator<T>::printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
-    e << "Floating-point values" << actual << "and" << expected << "are not the same, actual" << actualValue << "but" << expectedValue << "expected";
+    e << "Floating-point values" << actual << "and" << expected << "are not the same, actual" << _actualValue << "but" << _expectedValue << "expected";
     e.setFlag(Utility::Debug::SpaceAfterEachValue, false);
-    e << " (delta " << actualValue-expectedValue << ").";
+    e << " (delta " << _actualValue - _expectedValue << ").";
     e.setFlag(Utility::Debug::SpaceAfterEachValue, true);
 }
 
