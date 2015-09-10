@@ -29,6 +29,12 @@
  * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/* Internal macro implementation */
+#define _CORRADE_HELPER_STR(X) #X
+#define _CORRADE_HELPER_DEFER(M, ...) M(__VA_ARGS__)
+#endif
+
 /** @hideinitializer
 @brief Deprecation mark
 
@@ -92,11 +98,6 @@ enum class Bar {
 #define CORRADE_DEPRECATED_ENUM(message)
 #endif
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
-#define CORRADE_HELPER_STR(X) #X
-#define CORRADE_HELPER_DEFER(M, ...) M(__VA_ARGS__)
-#endif
-
 /** @hideinitializer
 @brief File deprecation mark
 
@@ -107,9 +108,9 @@ CORRADE_DEPRECATED_FILE("use Bar.h instead")
 @endcode
 */
 #if defined(__clang__)
-#define CORRADE_DEPRECATED_FILE(message) _Pragma(CORRADE_HELPER_STR(GCC warning ("this file is deprecated: " message)))
+#define CORRADE_DEPRECATED_FILE(message) _Pragma(_CORRADE_HELPER_STR(GCC warning ("this file is deprecated: " message)))
 #elif defined(__GNUC__)
-#define CORRADE_DEPRECATED_FILE(message) _Pragma(CORRADE_HELPER_STR(GCC warning message))
+#define CORRADE_DEPRECATED_FILE(message) _Pragma(_CORRADE_HELPER_STR(GCC warning message))
 #else
 #define CORRADE_DEPRECATED_FILE(message)
 #endif
