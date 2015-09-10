@@ -487,10 +487,10 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
         auto mit = _plugins.plugins.find(*it);
         if(mit == _plugins.plugins.end()) continue;
 
-        for(auto it = mit->second->metadata._usedBy.begin(); it != mit->second->metadata._usedBy.end(); ++it) {
-            if(*it != plugin.metadata._name) continue;
+        for(auto uit = mit->second->metadata._usedBy.begin(); uit != mit->second->metadata._usedBy.end(); ++uit) {
+            if(*uit != plugin.metadata._name) continue;
 
-            mit->second->metadata._usedBy.erase(it);
+            mit->second->metadata._usedBy.erase(uit);
             break;
         }
     }
