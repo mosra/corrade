@@ -31,6 +31,8 @@
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /* Internal macro implementation */
+#define _CORRADE_HELPER_PASTE2(a, b) a ## b
+#define _CORRADE_HELPER_PASTE(a, b) _CORRADE_HELPER_PASTE2(a, b)
 #define _CORRADE_HELPER_STR(X) #X
 #define _CORRADE_HELPER_DEFER(M, ...) M(__VA_ARGS__)
 #endif

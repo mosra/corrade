@@ -329,7 +329,7 @@ CORRADE_COMPARE(i, 42);
 If any of the following checks passes, an error will be printed to output.
 */
 #define CORRADE_EXPECT_FAIL(message)                                        \
-    ExpectedFailure expectedFailure##__LINE__(this, message)
+    ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)(this, message)
 
 /** @hideinitializer
 @brief Skip test case
