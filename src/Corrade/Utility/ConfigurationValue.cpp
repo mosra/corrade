@@ -94,7 +94,7 @@ std::string ConfigurationValue<bool>::toString(const bool value, ConfigurationVa
 }
 
 char32_t ConfigurationValue<char32_t>::fromString(const std::string& value, ConfigurationValueFlags) {
-    return ConfigurationValue<unsigned long long>::fromString(value, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase);
+    return char32_t(ConfigurationValue<unsigned long long>::fromString(value, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase));
 }
 std::string ConfigurationValue<char32_t>::toString(const char32_t value, ConfigurationValueFlags) {
     return ConfigurationValue<unsigned long long>::toString(value, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase);
