@@ -31,7 +31,7 @@ class Deletable: public AbstractDeletable {
     public:
         explicit Deletable(AbstractManager& manager, std::string plugin): AbstractDeletable(manager, std::move(plugin)) {}
 
-        ~Deletable() { *var = 0xDEADBEEF; }
+        ~Deletable() { *_var = 0xDEADBEEF; }
 };
 
 }}}
