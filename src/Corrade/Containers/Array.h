@@ -42,8 +42,31 @@
 
 namespace Corrade { namespace Containers {
 
+namespace Implementation {
+    template<class T> void noInitDeleter(T* data, std::size_t size) {
+        if(data) for(T *it = data, *end = data + size; it != end; ++it)
+            it->~T();
+        delete[] reinterpret_cast<char*>(data);
+    }
+}
+
+/**
+@brief Default array deleter
+@param data     Array pointer
+@param size     Array element count
+
+Equivalent to calling `delete[]` on passed pointer, @p size is ignored.
+*/
+template<class T> void defaultDeleter(T* data, std::size_t size) {
+    static_cast<void>(size);
+    delete[] data;
+}
+
 /**
 @brief Array wrapper with size information
+@tparam T   Element type
+@tparam D   Deleter type, defaults to pointer to function of the same signature
+    as @ref defaultDeleter()
 
 Provides movable RAII wrapper around plain C array. Main use case is storing
 binary data of unspecified type, where addition/removal of elements is not
@@ -105,20 +128,64 @@ int index = 0;
 for(Foo& f: d) new(&f) Foo(index++);
 @endcode
 
+## Wrapping externally allocated arrays
+
+By default the class makes all allocations using `operator new[]` and
+deallocates using `operator delete[]` for given @p T, with some additional
+trickery done internally to make the @ref Array(NoInitT, std::size_t) and
+@ref Array(DirectInitT, std::size_t, ...) constructors work. When wrapping an
+externally allocated array using @ref Array(T*, std::size_t, D), it is possible
+to specify which function to use for deallocation. By default the
+@ref defaultDeleter() function is used, which is equivalent to the
+`operator delete[]`.
+
+For example, properly deallocating array allocated using `std::malloc()`:
+@code
+const int* data = reinterpret_cast<int*>(std::malloc(25*sizeof(int)));
+
+// Will call std::free() on destruction
+Containers::Array<int> array{data, 25, [](int* data, std::size_t) { std::free(data); }};
+@endcode
+
+By default, plain function pointers are used to avoid having the type affected
+by the deleter function. If the deleter needs to manage some state, a custom
+deleter type can be used:
+@code
+struct UnmapBuffer {
+    UnmapBuffer(GLuint id): _id{id} {}
+    void operator()(T*, std::size_t) { glUnmapNamedBuffer(_id); }
+
+private:
+    GLuint _id;
+};
+
+GLuint buffer;
+char* data = reinterpret_cast<char*>(glMapNamedBuffer(buffer, GL_READ_WRITE));
+
+// Will unmap the buffer on destruction
+Containers::Array<char, UnmapBuffer> array{data, bufferSize, UnmapBuffer{buffer}};
+@endcode
+
 @todo Something like ArrayTuple to create more than one array with single
     allocation and proper alignment for each type? How would non-POD types be
     constructed in that? Will that be useful in more than one place?
 */
-template<class T> class Array {
+#ifdef DOXYGEN_GENERATING_OUTPUT
+template<class T, class D = void(*)(T*, std::size_t)>
+#else
+template<class T, class D>
+#endif
+class Array {
     public:
         typedef T Type;     /**< @brief Element type */
+        typedef D Deleter;  /**< @brief Deleter type */
 
         /**
          * @brief Create array from given values
          *
          * Zero argument count creates `nullptr` array.
          */
-        template<class ...U> static Array<T> from(U&&... values) {
+        template<class ...U> static Array<T, D> from(U&&... values) {
             return fromInternal(std::forward<U>(values)...);
         }
 
@@ -127,7 +194,7 @@ template<class T> class Array {
          * @copybrief Array(ValueInitT, std::size_t)
          * @deprecated Use @ref Array(ValueInitT, std::size_t) instead.
          */
-        CORRADE_DEPRECATED("use Array(ValueInitT, std::size_t) instead") static Array<T> zeroInitialized(std::size_t size) {
+        CORRADE_DEPRECATED("use Array(ValueInitT, std::size_t) instead") static Array<T, D> zeroInitialized(std::size_t size) {
             return Array<T>{ValueInit, size};
         }
         #endif
@@ -138,7 +205,7 @@ template<class T> class Array {
         #else
         template<class U, class V = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> /*implicit*/ Array(U) noexcept:
         #endif
-            _data(nullptr), _size(0) {}
+            _data{nullptr}, _size{0}, _deleter{defaultDeleter} {}
 
         /**
          * @brief Default constructor
@@ -146,7 +213,7 @@ template<class T> class Array {
          * Creates zero-sized array. Move array with nonzero size onto the
          * instance to make it useful.
          */
-        /*implicit*/ Array() noexcept: _data(nullptr), _size(0) {}
+        /*implicit*/ Array() noexcept: _data(nullptr), _size(0), _deleter{defaultDeleter} {}
 
         /**
          * @brief Construct default-initialized array
@@ -156,7 +223,7 @@ template<class T> class Array {
          * allocation is done.
          * @see @ref DefaultInit, @ref Array(ValueInitT, std::size_t)
          */
-        explicit Array(DefaultInitT, std::size_t size): _data{size ? new T[size] : nullptr}, _size{size} {}
+        explicit Array(DefaultInitT, std::size_t size): _data{size ? new T[size] : nullptr}, _size{size}, _deleter{defaultDeleter} {}
 
         /**
          * @brief Construct value-initialized array
@@ -170,7 +237,7 @@ template<class T> class Array {
          * them to zero.
          * @see @ref ValueInit, @ref Array(DefaultInitT, std::size_t)
          */
-        explicit Array(ValueInitT, std::size_t size): _data{size ? new T[size]() : nullptr}, _size{size} {}
+        explicit Array(ValueInitT, std::size_t size): _data{size ? new T[size]() : nullptr}, _size{size}, _deleter{defaultDeleter} {}
 
         /**
          * @brief Construct the array without initializing its contents
@@ -180,21 +247,26 @@ template<class T> class Array {
          * placement new.
          *
          * Useful if you will be overwriting all elements later anyway.
-         * @attention The destructor will be called on all values regardless of
-         *      whether they were properly initialized or not.
-         * @see @ref NoInit, @ref Array(NoInitT, std::size_t)
+         * @attention Internally the data are allocated as `char` array and
+         *      destruction is done using custom deleter that explicitly calls
+         *      destructor on *all elements* regardless of whether they were
+         *      properly constructed or not and then deallocates the data as
+         *      `char` array.
+         * @see @ref NoInit, @ref Array(DirectInitT, std::size_t, Args...),
+         *      @ref deleter()
          */
-        explicit Array(NoInitT, std::size_t size): _data{size ? reinterpret_cast<T*>(new char[size*sizeof(T)]) : nullptr}, _size{size} {}
+        explicit Array(NoInitT, std::size_t size): _data{size ? reinterpret_cast<T*>(new char[size*sizeof(T)]) : nullptr}, _size{size}, _deleter{Implementation::noInitDeleter} {}
 
         /**
          * @brief Construct direct-initialized array
          *
-         * Each element will be initialized using @p arguments instead of
-         * calling default constructor. Note that because the arguments may be
-         * used as a parameter in more than one constructor call, they are not
-         * forwarded (i.e. rvalue references are *not* preserved).
+         * Allocates the array using the @ref Array(NoInitT, std::size_t)
+         * constructor and then initializes each element with placement new
+         * using @p arguments. Note that because the arguments may be used as a
+         * parameter in more than one constructor call, they are not forwarded
+         * (i.e. rvalue references are *not* preserved).
          */
-        template<class... Args> explicit Array(DirectInitT, std::size_t size, Args... args);
+        template<class... Args> explicit Array(DirectInitT, std::size_t size, Args ... args);
 
         /**
          * @brief Construct default-initialized array
@@ -207,23 +279,25 @@ template<class T> class Array {
         /**
          * @brief Wrap existing array
          *
-         * Note that the array will be deleted on destruction.
+         * Note that the array will be deleted on destruction using given
+         * @p deleter. See class documentation for more information about
+         * custom deleters and @ref ArrayView for non-owning array wrapper.
          */
-        explicit Array(T* data, std::size_t size): _data{data}, _size{size} {}
+        explicit Array(T* data, std::size_t size, D deleter = defaultDeleter): _data{data}, _size{size}, _deleter{deleter} {}
 
-        ~Array() { delete[] _data; }
+        ~Array() { _deleter(_data, _size); }
 
         /** @brief Copying is not allowed */
-        Array(const Array<T>&) = delete;
+        Array(const Array<T, D>&) = delete;
 
         /** @brief Move constructor */
-        Array(Array<T>&& other) noexcept;
+        Array(Array<T, D>&& other) noexcept;
 
         /** @brief Copying is not allowed */
-        Array<T>& operator=(const Array<T>&) = delete;
+        Array<T, D>& operator=(const Array<T, D>&) = delete;
 
         /** @brief Move assignment */
-        Array<T>& operator=(Array<T>&&) noexcept;
+        Array<T, D>& operator=(Array<T, D>&&) noexcept;
 
         #ifndef CORRADE_MSVC2015_COMPATIBILITY
         /** @brief Whether the array is non-empty */
@@ -277,6 +351,13 @@ template<class T> class Array {
         /** @brief Array data */
         T* data() { return _data; }
         const T* data() const { return _data; }         /**< @overload */
+
+        /**
+         * @brief Array deleter
+         *
+         * @see @ref Array(T*, std::size_t, D), @ref defaultDeleter()
+         */
+        D deleter() const { return _deleter; }
 
         /** @brief Array size */
         std::size_t size() const { return _size; }
@@ -354,17 +435,18 @@ template<class T> class Array {
         T* release();
 
     private:
-        template<class ...U> static Array<T> fromInternal(U&&... values) {
-            Array<T> array;
+        template<class ...U> static Array<T, D> fromInternal(U&&... values) {
+            Array<T, D> array;
             array._size = sizeof...(values);
             array._data = new T[sizeof...(values)] { T(std::forward<U>(values))... };
             return array;
         }
         /* Specialization for zero argument count */
-        static Array<T> fromInternal() { return nullptr; }
+        static Array<T, D> fromInternal() { return nullptr; }
 
         T* _data;
         std::size_t _size;
+        D _deleter;
 };
 
 #ifdef CORRADE_BUILD_DEPRECATED
@@ -376,24 +458,25 @@ template<class T> using ArrayReference CORRADE_DEPRECATED_ALIAS("use ArrayView.h
 #endif
 #endif
 
-template<class T> inline Array<T>::Array(Array<T>&& other) noexcept: _data(other._data), _size(other._size) {
+template<class T, class D> inline Array<T, D>::Array(Array<T, D>&& other) noexcept: _data{other._data}, _size{other._size}, _deleter{other._deleter} {
     other._data = nullptr;
     other._size = 0;
 }
 
-template<class T> template<class ...Args> Array<T>::Array(DirectInitT, std::size_t size, Args... args): Array{NoInit, size} {
+template<class T, class D> template<class ...Args> Array<T, D>::Array(DirectInitT, std::size_t size, Args... args): Array{NoInit, size} {
     for(std::size_t i = 0; i != size; ++i)
         new(_data + i) T{args...};
 }
 
-template<class T> inline Array<T>& Array<T>::operator=(Array<T>&& other) noexcept {
+template<class T, class D> inline Array<T, D>& Array<T, D>::operator=(Array<T, D>&& other) noexcept {
     using std::swap;
     swap(_data, other._data);
     swap(_size, other._size);
+    swap(_deleter, other._deleter);
     return *this;
 }
 
-template<class T> inline T* Array<T>::release() {
+template<class T, class D> inline T* Array<T, D>::release() {
     /** @todo I need `std::exchange` NOW. */
     T* const data = _data;
     _data = nullptr;
