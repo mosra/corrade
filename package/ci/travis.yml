@@ -1,10 +1,8 @@
 # kate: indent-width 2;
 
-language: cpp
-
-#branches:
-  #only:
-  #- master
+branches:
+  only:
+  - master
 
 os:
 - linux
