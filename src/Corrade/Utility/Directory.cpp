@@ -192,6 +192,7 @@ std::string Directory::configurationDir(const std::string& applicationName) {
 
     /* Other not implemented */
     #else
+    static_cast<void>(applicationName);
     return {};
     #endif
 }
