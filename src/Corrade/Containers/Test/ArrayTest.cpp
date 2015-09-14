@@ -358,7 +358,7 @@ void ArrayTest::customDeleter() {
 
     {
         Array a{data, 25, [](int*, std::size_t size) { CustomDeleterDeletedCount = size; }};
-        CORRADE_COMPARE(a, data);
+        CORRADE_VERIFY(a == data);
         CORRADE_COMPARE(a.size(), 25);
         CORRADE_COMPARE(CustomDeleterDeletedCount, 0);
     }
@@ -380,7 +380,7 @@ void ArrayTest::customDeleterType() {
 
     {
         Containers::Array<int, CustomDeleter> a{data, 25, CustomDeleter{deletedCount}};
-        CORRADE_COMPARE(a, data);
+        CORRADE_VERIFY(a == data);
         CORRADE_COMPARE(a.size(), 25);
         CORRADE_COMPARE(deletedCount, 0);
     }
