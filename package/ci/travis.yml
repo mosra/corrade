@@ -1,5 +1,7 @@
 # kate: indent-width 2;
 
+language: cpp
+
 #branches:
   #only:
   #- master
@@ -19,6 +21,9 @@ addons:
 
 install:
 - if [ "$TRAVIS_OS_NAME" == "linux" ]; then export CXX=g++-4.7; fi
+# so the directory tests pass
+- if [ "$TRAVIS_OS_NAME" == "linux" ]; then mkdir -p ~/.config/autostart; fi
+- if [ "$TRAVIS_OS_NAME" == "linux" ]; then mkdir -p ~/.local; fi
 
 script:
 - mkdir build && cd build
