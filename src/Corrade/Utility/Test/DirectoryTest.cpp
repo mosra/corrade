@@ -218,10 +218,15 @@ void DirectoryTest::home() {
     const std::string home = Directory::home();
     Debug() << "Home dir found as:" << home;
 
-    /* On Linux verify that the home dir contains `.local` directory. Ugly and
-       hacky, but it's the best I came up with. Can't test for e.g. `/home/`
-       substring, as that can be overriden. */
-    #ifdef __linux__
+    /* On OSX verify that the home dir contains `Desktop` directory. Hopefully
+       that's true on all language mutations. */
+    #ifdef CORRADE_TARGET_APPLE
+    CORRADE_VERIFY(Directory::fileExists(Directory::join(home, "Desktop")));
+
+    /* On other Unixes verify that the home dir contains `.local` directory.
+       Ugly and hacky, but it's the best I came up with. Can't test for e.g.
+       `/home/` substring, as that can be overriden. */
+    #elif defined(CORRADE_TARGET_UNIX)
     CORRADE_VERIFY(Directory::fileExists(Directory::join(home, ".local")));
 
     /* On Windows verify that the home dir contains `desktop.ini` file. Ugly
