@@ -1,0 +1,27 @@
+# kate: indent-width 2;
+
+#branches:
+  #only:
+  #- master
+
+os:
+- linux
+- osx
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    - kalakris-cmake
+    packages:
+    - g++-4.7
+    - cmake
+
+install:
+- if [ "$TRAVIS_OS_NAME" == "linux" ]; then export CXX=g++-4.7; fi
+
+script:
+- mkdir build && cd build
+- cmake -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release ..
+- cmake --build .
+- ctest --output-on-failure
