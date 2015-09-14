@@ -233,7 +233,7 @@ void DirectoryTest::home() {
     /* No idea elsewhere */
     #else
     CORRADE_EXPECT_FAIL("Not implemented yet.");
-    CORRADE_COMPARE(home, "");
+    CORRADE_COMPARE(home, "(not implemented)");
     #endif
 }
 
@@ -258,7 +258,7 @@ void DirectoryTest::configurationDir() {
     /* No idea elsewhere */
     #else
     CORRADE_EXPECT_FAIL("Not implemented yet.");
-    CORRADE_COMPARE(dir, "");
+    CORRADE_COMPARE(dir, "(not implemented)");
     #endif
 }
 
