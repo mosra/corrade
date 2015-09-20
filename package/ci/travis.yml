@@ -19,9 +19,10 @@ addons:
 
 install:
 - if [ "$TRAVIS_OS_NAME" == "linux" ]; then export CXX=g++-4.7; fi
-# so the directory tests pass
+# so the directory tests pass (and then some workaround for crazy filesystem issues)
 - if [ "$TRAVIS_OS_NAME" == "linux" ]; then mkdir -p ~/.config/autostart; fi
 - if [ "$TRAVIS_OS_NAME" == "linux" ]; then mkdir -p ~/.local; fi
+- if [ "$TRAVIS_OS_NAME" == "linux" ]; then export CXXFLAGS=-DTRAVIS_CI_HAS_CRAZY_FILESYSTEM_ON_LINUX; fi
 
 script:
 - mkdir build && cd build

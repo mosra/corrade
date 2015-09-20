@@ -273,10 +273,16 @@ void DirectoryTest::list() {
         (std::vector<std::string>{".", "..", "dir", "file"}),
         TestSuite::Compare::SortedContainer);
 
-    /* Skip special */
-    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SkipSpecial),
-        (std::vector<std::string>{".", "..", "dir", "file"}),
-        TestSuite::Compare::SortedContainer);
+    {
+        #ifdef TRAVIS_CI_HAS_CRAZY_FILESYSTEM_ON_LINUX
+        CORRADE_EXPECT_FAIL("Travis CI has crazy filesystem on Linux.");
+        #endif
+
+        /* Skip special */
+        CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SkipSpecial),
+            (std::vector<std::string>{".", "..", "dir", "file"}),
+            TestSuite::Compare::SortedContainer);
+    }
 
     /* All, sorted ascending */
     CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SortAscending),
