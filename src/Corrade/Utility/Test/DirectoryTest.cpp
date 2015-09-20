@@ -308,13 +308,12 @@ void DirectoryTest::list() {
         CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SkipDirectories),
             std::vector<std::string>{"file"},
             TestSuite::Compare::SortedContainer);
+
+        /* Skip files */
+        CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SkipFiles),
+            (std::vector<std::string>{".", "..", "dir"}),
+            TestSuite::Compare::SortedContainer);
     }
-
-    /* Skip files */
-    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SkipFiles),
-        (std::vector<std::string>{".", "..", "dir"}),
-        TestSuite::Compare::SortedContainer);
-
 }
 
 void DirectoryTest::listSortPrecedence() {
