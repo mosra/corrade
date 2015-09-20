@@ -13,6 +13,8 @@ install:
 - ps: cinst ninja
 build_script:
 - set PATH=C:/Sys/bin;C:/tools/ninja;%PATH%
+# https://github.com/appveyor/ci/issues/414
+- ren "C:\Program Files (x86)\Windows Kits\10\include\wdf" 00wdf
 - call "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/vcvarsall.bat"
 - mkdir build
 - cd build
