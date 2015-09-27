@@ -144,8 +144,10 @@ void DebugTest::custom() {
     Foo f = { 42 };
     {
         Debug() << "The answer is" << f;
+        Debug() << f << "is the answer";
     }
-    CORRADE_COMPARE(out.str(), "The answer is 42\n");
+    CORRADE_COMPARE(out.str(), "The answer is 42\n"
+                               "42 is the answer\n");
 }
 
 void DebugTest::flags() {
