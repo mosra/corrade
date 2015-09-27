@@ -93,11 +93,20 @@ Defined if the library is built for OS X.
 /**
 @brief Windows target
 
-Defined if the library is built for Windows.
-@see @ref corrade-cmake
+Defined if the library is built for Windows (desktop, Store or Phone).
+@see @ref CORRADE_TARGET_WINDOWS_RT, @ref corrade-cmake
 */
 #define CORRADE_TARGET_WINDOWS
 #undef CORRADE_TARGET_WINDOWS
+
+/**
+@brief Windows RT target
+
+Defined if the library is built for Windows Store or Phone.
+@see @ref CORRADE_TARGET_WINDOWS, @ref corrade-cmake
+*/
+#define CORRADE_TARGET_WINDOWS_RT
+#undef CORRADE_TARGET_WINDOWS_RT
 
 /**
 @brief Google Chrome Native Client target

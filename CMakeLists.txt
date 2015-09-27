@@ -70,6 +70,10 @@ elseif(UNIX)
     set(CORRADE_TARGET_UNIX 1)
 elseif(WIN32)
     set(CORRADE_TARGET_WINDOWS 1)
+
+    if(WINDOWS_PHONE OR WINDOWS_STORE)
+        set(CORRADE_TARGET_WINDOWS_RT 1)
+    endif()
 endif()
 
 if(BUILD_STATIC)
