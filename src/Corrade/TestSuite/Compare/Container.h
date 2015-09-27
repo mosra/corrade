@@ -91,9 +91,11 @@ template<class T> bool Comparator<Compare::Container<T>>::operator()(const T& ac
 template<class T> void Comparator<Compare::Container<T>>::printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
     e << "Containers" << actual << "and" << expected << "have different";
     if(_actualContents->size() != _expectedContents->size())
-        e << "size, actual" << _actualContents->size() << "but" << _expectedContents->size() << "expected.";
+        e << "size, actual" << _actualContents->size() << "but" << _expectedContents->size() << "expected. Actual contents:\n       ";
     else
-        e << "contents.";
+        e << "contents, actual:\n       ";
+
+    e << *_actualContents << "\n        but expected\n       " << *_expectedContents << "\n       ";
 
     for(std::size_t i = 0, end = std::max(_actualContents->size(), _expectedContents->size()); i != end; ++i) {
         if(_actualContents->size() > i && _expectedContents->size() > i && (*_actualContents)[i] == (*_expectedContents)[i]) continue;

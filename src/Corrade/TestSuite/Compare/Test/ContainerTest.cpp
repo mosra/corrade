@@ -71,7 +71,12 @@ void ContainerTest::outputActualSmaller() {
         compare.printErrorMessage(e, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Containers a and b have different size, actual 3 but 4 expected. Expected has 4 on position 3.\n");
+    CORRADE_COMPARE(out.str(),
+        "Containers a and b have different size, actual 3 but 4 expected. Actual contents:\n"
+        "        {1, 2, 3} \n"
+        "        but expected\n"
+        "        {1, 2, 3, 4} \n"
+        "        Expected has 4 on position 3.\n");
 }
 
 void ContainerTest::outputExpectedSmaller() {
@@ -87,7 +92,11 @@ void ContainerTest::outputExpectedSmaller() {
         compare.printErrorMessage(e, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Containers a and b have different size, actual 4 but 3 expected. Actual has 4 on position 3.\n");
+    CORRADE_COMPARE(out.str(), "Containers a and b have different size, actual 4 but 3 expected. Actual contents:\n"
+        "        {1, 2, 3, 4} \n"
+        "        but expected\n"
+        "        {1, 2, 3} \n"
+        "        Actual has 4 on position 3.\n");
 }
 
 void ContainerTest::output() {
@@ -103,7 +112,11 @@ void ContainerTest::output() {
         compare.printErrorMessage(e, "a", "b");
     }
 
-    CORRADE_COMPARE(out.str(), "Containers a and b have different contents. Actual 9 but 2 expected on position 1.\n");
+    CORRADE_COMPARE(out.str(), "Containers a and b have different contents, actual:\n"
+        "        {1, 9, 3, 4} \n"
+        "        but expected\n"
+        "        {1, 2, 3, 4} \n"
+        "        Actual 9 but 2 expected on position 1.\n");
 }
 
 void ContainerTest::sorted() {
