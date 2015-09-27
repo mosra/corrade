@@ -119,8 +119,8 @@ bool Directory::mkpath(const std::string& path) {
     const int ret = mkdir(path.data(), 0777);
     return ret == 0 || ret == -1;
 
-    /* Windows */
-    #elif defined(CORRADE_TARGET_WINDOWS)
+    /* Windows (not Store/Phone) */
+    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     return CreateDirectory(path.data(), nullptr) != 0 || GetLastError() == ERROR_ALREADY_EXISTS;
 
     /* Not implemented elsewhere */
@@ -130,7 +130,7 @@ bool Directory::mkpath(const std::string& path) {
 }
 
 bool Directory::rm(const std::string& path) {
-    #ifdef CORRADE_TARGET_WINDOWS
+    #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     /* std::remove() can't remove directories on Windows */
     if(GetFileAttributes(path.data()) & FILE_ATTRIBUTE_DIRECTORY)
         return RemoveDirectory(path.data());
@@ -145,10 +145,18 @@ bool Directory::move(const std::string& oldPath, const std::string& newPath) {
 #endif
 
 bool Directory::fileExists(const std::string& filename) {
+    /* Sane platforms */
     #ifndef CORRADE_TARGET_WINDOWS
     return std::ifstream(filename).good();
-    #else
+
+    /* Windows (not Store/Phone) */
+    #elif !defined(CORRADE_TARGET_WINDOWS_RT)
     return GetFileAttributes(filename.data()) != INVALID_FILE_ATTRIBUTES;
+
+    /* Windows Store/Phone not implemented */
+    #else
+    static_cast<void>(filename);
+    return false;
     #endif
 }
 
@@ -159,8 +167,8 @@ std::string Directory::home() {
         return h;
     return std::string{};
 
-    /* Windows */
-    #elif defined(CORRADE_TARGET_WINDOWS)
+    /* Windows (not Store/Phone) */
+    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     TCHAR h[MAX_PATH];
     if(!SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_PERSONAL, nullptr, 0, h)))
         return {};
@@ -182,8 +190,8 @@ std::string Directory::configurationDir(const std::string& applicationName) {
     const std::string home = Directory::home();
     return home.empty() ? std::string{} : join(home, ".config/" + lowercaseApplicationName);
 
-    /* Windows */
-    #elif defined(CORRADE_TARGET_WINDOWS)
+    /* Windows (not Store/Phone) */
+    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     TCHAR path[MAX_PATH];
     if(!SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, path)))
         return {};
@@ -230,8 +238,8 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
 
     closedir(directory);
 
-    /* Windows */
-    #elif defined(CORRADE_TARGET_WINDOWS)
+    /* Windows (not Store/Phone) */
+    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     WIN32_FIND_DATA data;
     HANDLE hFile = FindFirstFile(join(path, "*").data(), &data);
     if(hFile == INVALID_HANDLE_VALUE) return list;
