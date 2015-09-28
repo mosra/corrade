@@ -107,11 +107,7 @@ template<class T> void Comparator<Compare::Container<T>>::printErrorMessage(Util
         else
             e << "Actual" << (*_actualContents)[i] << "but" << (*_expectedContents)[i] << "expected";
 
-        e << "on position" << i;
-        e.setFlag(Utility::Debug::SpaceAfterEachValue, false);
-        e << ".";
-        e.setFlag(Utility::Debug::SpaceAfterEachValue, true);
-
+        e << "on position" << i << Utility::Debug::nospace << ".";
         break;
     }
 }

@@ -56,10 +56,7 @@ template<class T> bool FloatComparator<T>::operator()(T actual, T expected) {
 }
 
 template<class T> void FloatComparator<T>::printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
-    e << "Floating-point values" << actual << "and" << expected << "are not the same, actual" << _actualValue << "but" << _expectedValue << "expected";
-    e.setFlag(Utility::Debug::SpaceAfterEachValue, false);
-    e << " (delta " << _actualValue - _expectedValue << ").";
-    e.setFlag(Utility::Debug::SpaceAfterEachValue, true);
+    e << "Floating-point values" << actual << "and" << expected << "are not the same, actual" << _actualValue << "but" << _expectedValue << "expected (delta" << _actualValue - _expectedValue << Utility::Debug::nospace << ").";
 }
 
 template class FloatComparator<float>;

@@ -42,7 +42,9 @@ struct DebugTest: TestSuite::Tester {
     void chars();
     void unicode();
     void custom();
-    void flags();
+    void nospace();
+    void newline();
+    void noNewlineAtTheEnd();
 
     void iterable();
     void tuple();
@@ -57,7 +59,9 @@ DebugTest::DebugTest() {
               &DebugTest::chars,
               &DebugTest::unicode,
               &DebugTest::custom,
-              &DebugTest::flags,
+              &DebugTest::nospace,
+              &DebugTest::newline,
+              &DebugTest::noNewlineAtTheEnd,
 
               &DebugTest::iterable,
               &DebugTest::tuple,
@@ -150,28 +154,35 @@ void DebugTest::custom() {
                                "42 is the answer\n");
 }
 
-void DebugTest::flags() {
+void DebugTest::nospace() {
     std::ostringstream out;
-    Debug::setOutput(&out);
+    Debug(&out) << "Value:" << 16 << Debug::nospace << "," << 24;
 
-    {
-        /* Don't allow to set/reset the reserved flag */
-        Debug debug;
-        debug.setFlag(static_cast<Debug::Flag>(0x01), false);
-        CORRADE_VERIFY(debug.flag(static_cast<Debug::Flag>(0x01)));
-    } {
-        Debug debug;
-        debug.setFlag(Debug::SpaceAfterEachValue, false);
-        debug << "a" << "b" << "c";
-    }
-    CORRADE_COMPARE(out.str(), "abc\n");
-    out.str("");
-    {
-        Debug debug;
-        debug.setFlag(Debug::NewLineAtTheEnd, false);
-        debug << "a" << "b" << "c";
-    }
-    CORRADE_COMPARE(out.str(), "a b c");
+    CORRADE_COMPARE(out.str(), "Value: 16, 24\n");
+}
+
+void DebugTest::newline() {
+    std::ostringstream out;
+    Debug(&out) << "Value:" << Debug::newline << 16;
+
+    CORRADE_COMPARE(out.str(), "Value:\n16\n");
+}
+
+void DebugTest::noNewlineAtTheEnd() {
+    std::ostringstream out1, out2, out3;
+
+    Debug(&out1) << "Ahoy";
+    Debug::noNewlineAtTheEnd(&out1) << "Hello";
+
+    Warning(&out2) << "Ahoy";
+    Warning::noNewlineAtTheEnd(&out2) << "Hello";
+
+    Error(&out3) << "Ahoy";
+    Error::noNewlineAtTheEnd(&out3) << "Hello";
+
+    CORRADE_COMPARE(out1.str(), "Ahoy\nHello");
+    CORRADE_COMPARE(out2.str(), "Ahoy\nHello");
+    CORRADE_COMPARE(out3.str(), "Ahoy\nHello");
 }
 
 void DebugTest::iterable() {

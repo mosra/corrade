@@ -44,51 +44,59 @@ template<> inline void toStream<Implementation::DebugOstreamFallback>(std::ostre
 }
 
 std::ostream* Debug::_globalOutput = &std::cout;
-std::ostream* Warning::globalWarningOutput = &std::cerr;
-std::ostream* Error::globalErrorOutput = &std::cerr;
+std::ostream* Warning::_globalWarningOutput = &std::cerr;
+std::ostream* Error::_globalErrorOutput = &std::cerr;
+
+Debug Debug::noNewlineAtTheEnd() {
+    return noNewlineAtTheEnd(_globalOutput);
+}
+
+Warning Warning::noNewlineAtTheEnd() {
+    return noNewlineAtTheEnd(_globalWarningOutput);
+}
+
+Error Error::noNewlineAtTheEnd() {
+    return noNewlineAtTheEnd(_globalErrorOutput);
+}
 
 void Debug::setOutput(std::ostream* output) {
     _globalOutput = output;
 }
 
 void Warning::setOutput(std::ostream* output) {
-    globalWarningOutput = output;
+    _globalWarningOutput = output;
 }
 
 void Error::setOutput(std::ostream* output) {
-    globalErrorOutput = output;
+    _globalErrorOutput = output;
 }
 
-Debug::Debug(): _output(_globalOutput), _flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
-
-Warning::Warning(): Debug(globalWarningOutput) {}
-
-Error::Error(): Debug(globalErrorOutput) {}
+Debug::Debug(): Debug{_globalOutput} {}
+Warning::Warning(): Warning{_globalWarningOutput} {}
+Error::Error(): Error{_globalErrorOutput} {}
 
 Debug::Debug(const Debug& other): _output(other._output), _flags(other._flags) {
-    if(!(other._flags & 0x01))
-        setFlag(NewLineAtTheEnd, false);
+    /* If the other already wrote something on the output, disables newline at
+       the end */
+    if(other._flags & Flag::ValueWritten) _flags |= Flag::NoNewlineAtTheEnd;
 }
 
 Debug::~Debug() {
-    if(_output && !(_flags & 0x01) && (_flags & NewLineAtTheEnd))
+    if(_output && (_flags & Flag::ValueWritten) && !(_flags & Flag::NoNewlineAtTheEnd))
         *_output << std::endl;
-}
-
-void Debug::setFlag(Flag flag, bool value) {
-    flag = static_cast<Flag>(flag & ~0x01);
-    if(value) _flags |= flag;
-    else _flags &= ~flag;
 }
 
 template<class T> Debug& Debug::print(const T& value) {
     if(!_output) return *this;
 
     /* Separate values with spaces, if enabled */
-    if(_flags & 0x01) _flags &= ~0x01;
-    else if(_flags & Debug::SpaceAfterEachValue) *_output << " ";
+    if(_flags & Flag::NoSpaceBeforeNextValue)
+        _flags &= ~Flag::NoSpaceBeforeNextValue;
+    else *_output << ' ';
 
     toStream(*_output, value);
+
+    _flags |= Flag::ValueWritten;
     return *this;
 }
 

@@ -34,6 +34,7 @@
 #include <tuple>
 #include <type_traits>
 
+#include "Corrade/Containers/EnumSet.h"
 #include "Corrade/Utility/TypeTraits.h"
 #include "Corrade/Utility/visibility.h"
 
@@ -45,8 +46,8 @@ namespace Implementation { struct DebugOstreamFallback; }
 @brief Debug output handler
 
 Provides convenient stream interface for passing data to debug output (standard
-output). Data are separated with spaces and last value is enclosed with newline
-character. Example usage:
+output). Data are by default separated with spaces and last value is enclosed
+with newline character. Example usage:
 
 @code
 // Common usage
@@ -79,6 +80,21 @@ Support for printing more types can be added by implementing function
 implemented for printing given type using Debug class, suitable `std::ostream`
 `operator<<` overload is used as fallback, if found.
 
+## Advanced usage
+
+Sometimes you might not want to have everything separated by spaces or having
+newline at the end:
+@code
+// Prints "Value: 16, 24"
+Debug() << "Value:" << 16 << Debug::nospace << "," << 24;
+
+// Prints "Value\n16"
+Debug() << "Value:" << Debug::newline << 16;
+
+// Doesn't output newline at the end
+Debug::noNewlineAtTheEnd() << "Hello!";
+@endcode
+
 @see @ref Warning, @ref Error, @ref CORRADE_ASSERT(),
     @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(),
     @ref NaClConsoleStreamBuffer
@@ -89,22 +105,61 @@ class CORRADE_UTILITY_EXPORT Debug {
     Debug& operator=(Debug&& other) = delete;
 
     public:
-        /** @brief Output flags */
-        enum Flag {
-            /* 0x01 reserved for indicating that no value was yet written */
+        /**
+         * @brief Debug output without newline at the end
+         *
+         * Unline @ref Debug() doesn't put newline at the end on destruction.
+         * @see @ref noNewlineAtTheEnd(std::ostream*)
+         */
+        static Debug noNewlineAtTheEnd();
 
-            /** Put space after each value (enabled by default) */
-            SpaceAfterEachValue = 0x02,
+        /**
+         * @brief Debug output without newline at the end
+         *
+         * Unline @ref Debug(std::ostream*) doesn't put newline at the end on
+         * destruction.
+         * @see @ref noNewlineAtTheEnd()
+         */
+        static Debug noNewlineAtTheEnd(std::ostream* output);
 
-            /** Put newline at the end (enabled by default) */
-            NewLineAtTheEnd = 0x04
-        };
+        /**
+         * @brief Don't put space before next value
+         *
+         * Debug output by default separates values with space, this disables
+         * it for the immediately following value. The default behavior is
+         * then restored. The following line outputs `Value: 16, 24`:
+         * @code
+         * Debug() << "Value:" << 16 << Debug::nospace << "," << 24;
+         * @endcode
+         * @see @ref newline()
+         */
+        static void nospace(Debug& debug);
+
+        /**
+         * @brief Output a newline
+         *
+         * Puts a newline (not surrounded by spaces) to the output. The
+         * following two lines are equivalent:
+         * @code
+         * Debug() << "Value:" << Debug::newline << 16;
+         * Debug() << "Value:" << Debug::nospace << "\n" << Debug::nospace << 16;
+         * @endcode
+         * and their output is
+         *
+         *      Value:
+         *      16
+         *
+         * @see @ref nospace()
+         */
+        static void newline(Debug& debug) {
+            debug << nospace << "\n" << nospace;
+        }
 
         /**
          * @brief Constructor
          *
          * Sets output to `std::cout`.
-         * @see @ref setOutput()
+         * @see @ref noNewlineAtTheEnd(), @ref setOutput()
          */
         explicit Debug();
 
@@ -114,39 +169,30 @@ class CORRADE_UTILITY_EXPORT Debug {
          *      `nullptr`, no debug output will be written anywhere.
          *
          * Constructs debug object with given output.
-         * @see @ref setOutput()
+         * @see @ref noNewlineAtTheEnd(std::ostream*), @ref setOutput()
          */
-        explicit Debug(std::ostream* output): _output(output), _flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
+        explicit Debug(std::ostream* output);
 
         /**
          * @brief Copy constructor
          *
-         * When copied from class which already wrote anything on the output,
-         * disabling flag @ref Flag "Flag::NewLineAtTheEnd", so there aren't
-         * excessive newlines in the output.
+         * When copied from class which already wrote something on the output,
+         * disables newline at the end to avoid excessive whitespace.
          */
         Debug(const Debug& other);
 
         /**
          * @brief Destructor
          *
-         * Adds newline at the end of debug output, if it is enabled in flags
-         * and the output is not empty.
-         * @see @ref Flag
+         * If there was any output, adds newline at the end.
          */
         ~Debug();
-
-        /** @brief Flag */
-        bool flag(Flag flag) const { return _flags & flag; }
-
-        /** @brief Set flag */
-        void setFlag(Flag flag, bool value);
 
         /**
          * @brief Print string to debug output
          *
          * If there is already something on the output, puts space before
-         * the value.
+         * the value, unless @ref nospace() was set immediately before.
          * @see @ref operator<<(Debug&, const T&)
          */
         Debug& operator<<(const std::string& value);
@@ -184,6 +230,16 @@ class CORRADE_UTILITY_EXPORT Debug {
          */
         Debug& operator<<(const char32_t* value);
 
+        /**
+         * @brief Configure debug output
+         *
+         * See @ref nospace() and @ref newline() for more information.
+         */
+        Debug& operator<<(void(*f)(Debug&)) {
+            f(*this);
+            return *this;
+        }
+
         #ifndef DOXYGEN_GENERATING_OUTPUT
         Debug& operator<<(Implementation::DebugOstreamFallback&& value);
         #endif
@@ -205,12 +261,36 @@ class CORRADE_UTILITY_EXPORT Debug {
     #endif
         std::ostream* _output;
 
+        enum class Flag: unsigned char {
+            ValueWritten = 1 << 0,
+            NoSpaceBeforeNextValue = 1 << 1,
+            NoNewlineAtTheEnd = 1 << 2
+        };
+        typedef Containers::EnumSet<Flag> Flags;
+
+        CORRADE_ENUMSET_FRIEND_OPERATORS(Flags)
+
+        Flags _flags;
+
     private:
         template<class T> Debug& print(const T& value);
 
         static std::ostream* _globalOutput;
-        int _flags;
 };
+
+CORRADE_ENUMSET_OPERATORS(Debug::Flags)
+
+inline Debug Debug::noNewlineAtTheEnd(std::ostream* const output) {
+    Debug debug{output};
+    debug._flags |= Flag::NoNewlineAtTheEnd;
+    return debug;
+}
+
+inline Debug::Debug(std::ostream* output): _output{output}, _flags{Flag::NoSpaceBeforeNextValue} {}
+
+inline void Debug::nospace(Debug& debug) {
+    debug._flags |= Flag::NoSpaceBeforeNextValue;
+}
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /* so Debug() << value works */
@@ -230,8 +310,7 @@ be added by implementing this function for given type.
 
 The function should convert the type to one of supported types (such as
 `std::string`) and then call @ref Debug::operator<<(const std::string&) with
-it. You can also use @ref Debug::setFlag() for modifying newline and whitespace
-behavior.
+it. You can also use @ref Debug::nospace() and @ref Debug::newline().
  */
 template<class T> Debug& operator<<(Debug& debug, const T& value);
 #endif
@@ -249,16 +328,13 @@ template<class Iterable> Debug& operator<<(Debug& debug, const Iterable& value)
 template<class Iterable> Debug& operator<<(typename std::enable_if<IsIterable<Iterable>::value && !std::is_same<Iterable, std::string>::value, Debug&>::type debug, const Iterable& value)
 #endif
 {
-    const bool hadSpace = debug.flag(Debug::SpaceAfterEachValue);
-    debug << "{";
-    debug.setFlag(Debug::SpaceAfterEachValue, false);
+    debug << "{" << Debug::nospace;
     for(auto it = value.begin(); it != value.end(); ++it) {
         if(it != value.begin())
-            debug << ", ";
+            debug << Debug::nospace << ",";
         debug << *it;
     }
-    debug << "}";
-    debug.setFlag(Debug::SpaceAfterEachValue, hadSpace);
+    debug << Debug::nospace << "}";
     return debug;
 }
 
@@ -281,7 +357,7 @@ namespace Implementation {
     template<class T, std::size_t i, std::size_t ...sequence> void tupleDebugOutput(Debug& debug, const T& tuple, Sequence<i, sequence...>) {
         debug << std::get<i>(tuple);
         if(i + 1 != std::tuple_size<T>::value)
-            debug << ", ";
+            debug << Debug::nospace << ",";
         tupleDebugOutput(debug, tuple, Sequence<sequence...>{});
     }
 }
@@ -292,12 +368,9 @@ namespace Implementation {
 Prints the value as `(first, second, third...)`.
 */
 template<class ...Args> Debug& operator<<(Debug& debug, const std::tuple<Args...>& value) {
-    const bool hadSpace = debug.flag(Debug::SpaceAfterEachValue);
-    debug << "(";
-    debug.setFlag(Debug::SpaceAfterEachValue, false);
+    debug << "(" << Debug::nospace;
     Implementation::tupleDebugOutput(debug, value, typename Implementation::GenerateSequence<sizeof...(Args)>::Type{});
-    debug << ")";
-    debug.setFlag(Debug::SpaceAfterEachValue, hadSpace);
+    debug << Debug::nospace << ")";
     return debug;
 }
 
@@ -317,6 +390,23 @@ outputs.
 */
 class CORRADE_UTILITY_EXPORT Warning: public Debug {
     public:
+        /**
+         * @brief Warning output without newline at the end
+         *
+         * Unline @ref Warning() doesn't put newline at the end on destruction.
+         * @see @ref noNewlineAtTheEnd(std::ostream*)
+         */
+        static Warning noNewlineAtTheEnd();
+
+        /**
+         * @brief Warning output without newline at the end
+         *
+         * Unline @ref Warning(std::ostream*) doesn't put newline at the end on
+         * destruction.
+         * @see @ref noNewlineAtTheEnd()
+         */
+        static Warning noNewlineAtTheEnd(std::ostream* output);
+
         /** @copydoc Debug::setOutput() */
         static void setOutput(std::ostream* output);
 
@@ -324,16 +414,22 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
          * @brief Constructor
          *
          * Sets output to `std::cerr`.
-         * @see @ref setOutput()
+         * @see @ref noNewlineAtTheEnd(), @ref setOutput()
          */
         explicit Warning();
 
-        /** @copydoc Debug::Debug() */
+        /** @copydoc Debug::Debug(std::ostream*) */
         explicit Warning(std::ostream* output): Debug(output) {}
 
     private:
-        static CORRADE_UTILITY_LOCAL std::ostream* globalWarningOutput;
+        static CORRADE_UTILITY_LOCAL std::ostream* _globalWarningOutput;
 };
+
+inline Warning Warning::noNewlineAtTheEnd(std::ostream* const output) {
+    Warning warning{output};
+    warning._flags |= Flag::NoNewlineAtTheEnd;
+    return warning;
+}
 
 /**
 @brief Error output handler
@@ -342,6 +438,23 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
 */
 class CORRADE_UTILITY_EXPORT Error: public Debug {
     public:
+        /**
+         * @brief Error output without newline at the end
+         *
+         * Unline @ref Error() doesn't put newline at the end on destruction.
+         * @see @ref noNewlineAtTheEnd(std::ostream*)
+         */
+        static Error noNewlineAtTheEnd();
+
+        /**
+         * @brief Error output without newline at the end
+         *
+         * Unline @ref Error(std::ostream*) doesn't put newline at the end on
+         * destruction.
+         * @see @ref noNewlineAtTheEnd()
+         */
+        static Error noNewlineAtTheEnd(std::ostream* output);
+
         /** @copydoc Debug::setOutput() */
         static void setOutput(std::ostream* output);
 
@@ -349,16 +462,22 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
          * @brief Constructor
          *
          * Sets output to `std::cerr`.
-         * @see @ref setOutput()
+         * @see @ref noNewlineAtTheEnd(), @ref setOutput()
          */
         Error();
 
-        /** @copydoc Debug::Debug() */
+        /** @copydoc Debug::Debug(std::ostream*) */
         Error(std::ostream* output): Debug(output) {}
 
     private:
-        static CORRADE_UTILITY_LOCAL std::ostream* globalErrorOutput;
+        static CORRADE_UTILITY_LOCAL std::ostream* _globalErrorOutput;
 };
+
+inline Error Error::noNewlineAtTheEnd(std::ostream* const output) {
+    Error error{output};
+    error._flags |= Flag::NoNewlineAtTheEnd;
+    return error;
+}
 
 namespace Implementation {
 

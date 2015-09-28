@@ -71,11 +71,7 @@ void Comparator<Compare::StringToFile>::printErrorMessage(Utility::Error& e, con
         else
             e << "Actual character" << std::string() + _actualContents[i] << "but" << std::string() + _expectedContents[i] << "expected";
 
-        e << "on position" << i;
-        e.setFlag(Utility::Debug::SpaceAfterEachValue, false);
-        e << ".";
-        e.setFlag(Utility::Debug::SpaceAfterEachValue, true);
-
+        e << "on position" << i << Utility::Debug::nospace << ".";
         break;
     }
 
