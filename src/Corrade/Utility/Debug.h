@@ -75,7 +75,7 @@ else
 @endcode
 
 Support for printing more types can be added by implementing function
-`operator<<(Debug, const T&)` for given type. If there is no `operator<<`
+@ref operator<<(Debug&, const T&) for given type. If there is no `operator<<`
 implemented for printing given type using Debug class, suitable `std::ostream`
 `operator<<` overload is used as fallback, if found.
 
@@ -147,7 +147,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * If there is already something on the output, puts space before
          * the value.
-         * @see @ref operator<<(Debug, const T&)
+         * @see @ref operator<<(Debug&, const T&)
          */
         Debug& operator<<(const std::string& value);
         Debug& operator<<(const char* value);            /**< @overload */
@@ -276,7 +276,7 @@ namespace Implementation {
     };
     #endif
 
-    /* Used by operator<<(Debug, std::tuple<>...) */
+    /* Used by operator<<(Debug&, std::tuple<>...) */
     template<class T> inline void tupleDebugOutput(Debug&, const T&, Sequence<>) {}
     template<class T, std::size_t i, std::size_t ...sequence> void tupleDebugOutput(Debug& debug, const T& tuple, Sequence<i, sequence...>) {
         debug << std::get<i>(tuple);

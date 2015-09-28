@@ -213,7 +213,7 @@ inline std::ostream& operator<<(std::ostream& o, const Baz&) {
     return o << "baz from ostream";
 }
 
-inline Debug operator<<(Debug debug, const Baz&) {
+inline Debug& operator<<(Debug& debug, const Baz&) {
     return debug << "baz from Debug";
 }
 

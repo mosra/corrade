@@ -584,7 +584,7 @@ AbstractManager::Plugin::~Plugin() {
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-Utility::Debug operator<<(Utility::Debug debug, PluginManager::LoadState value) {
+Utility::Debug& operator<<(Utility::Debug& debug, PluginManager::LoadState value) {
     switch(value) {
         #define ls(state) case PluginManager::LoadState::state: return debug << "PluginManager::LoadState::" #state;
         ls(NotFound)

@@ -180,7 +180,7 @@ enum class LoadState: unsigned short {
 };
 
 /** @debugoperatorenum{Corrade::PluginManager::LoadState} */
-Utility::Debug CORRADE_PLUGINMANAGER_EXPORT operator<<(Utility::Debug debug, PluginManager::LoadState value);
+CORRADE_PLUGINMANAGER_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, PluginManager::LoadState value);
 
 /**
 @brief Plugin load states
