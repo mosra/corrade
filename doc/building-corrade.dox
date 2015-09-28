@@ -333,6 +333,20 @@ contents in `toolchains/` subdirectory.
     git submodule init
     git submodule update
 
+@subsection building-corrade-cross-winrt Crosscompiling for Windows RT
+
+You need at least Windows 8.1, Visual Studio 2013 and Windows 8.1 Store/Phone
+SDK installed.
+
+    mkdir build-winrt
+    cd build-winrt
+    cmake -DCMAKE_PREFIX_PATH="C:/Sys" -DCMAKE_INSTALL_PREFIX="C:/Sys-winrt" -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=8.1 -G "Visual Studio 14 2015" ..
+    cmake --build .
+
+Change `WindowsStore` to `WindowsPhone` if you want to build for Windows Phone
+instead. When done, you can install the package using `cmake --build . --target install`
+to make it available for depending projects.
+
 @subsection building-corrade-cross-win Crosscompiling for Windows using MinGW-w64
 
 @note This guide is tailored mainly for crosscompiling from ArchLinux. For
