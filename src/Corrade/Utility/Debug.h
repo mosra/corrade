@@ -41,13 +41,6 @@ namespace Corrade { namespace Utility {
 
 namespace Implementation { struct DebugOstreamFallback; }
 
-/* Disable warning about multiple copy constructors until I fix it properly */
-/** @todo fix properly */
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4521)
-#endif
-
 /**
 @brief Debug output handler
 
@@ -131,29 +124,8 @@ class CORRADE_UTILITY_EXPORT Debug {
          * When copied from class which already wrote anything on the output,
          * disabling flag @ref Flag "Flag::NewLineAtTheEnd", so there aren't
          * excessive newlines in the output.
-         *
-         * Called in this situation:
-         * @code
-         * Debug() << value;
-         * @endcode
          */
         Debug(const Debug& other);
-
-        /**
-         * @brief Reference copy constructor
-         *
-         * Marking original class like it have already written something on
-         * the output, so it adds whitespace before next value, disabling flag
-         * @ref Flag "Debug::NewLineAtTheEnd" the same way as in
-         * @ref Debug(const Debug&).
-         *
-         * Called in this situation:
-         * @code
-         * Debug debug;
-         * debug << value;
-         * @endcode
-         */
-        Debug(Debug& other);
 
         /**
          * @brief Destructor
@@ -177,24 +149,24 @@ class CORRADE_UTILITY_EXPORT Debug {
          * the value.
          * @see @ref operator<<(Debug, const T&)
          */
-        Debug operator<<(const std::string& value);
-        Debug operator<<(const char* value);            /**< @overload */
-        Debug operator<<(const void* value);            /**< @overload */
-        Debug operator<<(bool value);                   /**< @overload */
-        Debug operator<<(int value);                    /**< @overload */
-        Debug operator<<(long value);                   /**< @overload */
-        Debug operator<<(long long value);              /**< @overload */
-        Debug operator<<(unsigned value);               /**< @overload */
-        Debug operator<<(unsigned long value);          /**< @overload */
-        Debug operator<<(unsigned long long value);     /**< @overload */
-        Debug operator<<(float value);                  /**< @overload */
-        Debug operator<<(double value);                 /**< @overload */
+        Debug& operator<<(const std::string& value);
+        Debug& operator<<(const char* value);            /**< @overload */
+        Debug& operator<<(const void* value);            /**< @overload */
+        Debug& operator<<(bool value);                   /**< @overload */
+        Debug& operator<<(int value);                    /**< @overload */
+        Debug& operator<<(long value);                   /**< @overload */
+        Debug& operator<<(long long value);              /**< @overload */
+        Debug& operator<<(unsigned value);               /**< @overload */
+        Debug& operator<<(unsigned long value);          /**< @overload */
+        Debug& operator<<(unsigned long long value);     /**< @overload */
+        Debug& operator<<(float value);                  /**< @overload */
+        Debug& operator<<(double value);                 /**< @overload */
         #ifndef CORRADE_TARGET_EMSCRIPTEN
         /** @overload
          * @partialsupport Not available in @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten"
          *      as JavaScript doesn't support doubles larger than 64 bits.
          */
-        Debug operator<<(long double value);
+        Debug& operator<<(long double value);
         #endif
 
         /**
@@ -202,7 +174,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * Prints value as Unicode codepoint, i.e. `U+0061`.
          */
-        Debug operator<<(char32_t value);
+        Debug& operator<<(char32_t value);
 
         /**
          * @brief Print UTF-32 character literal to debug output
@@ -210,10 +182,10 @@ class CORRADE_UTILITY_EXPORT Debug {
          * Prints value as list of Unicode codepoints, i.e.
          * `[U+0061, U+0062, U+0063}`.
          */
-        Debug operator<<(const char32_t* value);
+        Debug& operator<<(const char32_t* value);
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        Debug operator<<(Implementation::DebugOstreamFallback&& value);
+        Debug& operator<<(Implementation::DebugOstreamFallback&& value);
         #endif
 
         /**
@@ -234,16 +206,17 @@ class CORRADE_UTILITY_EXPORT Debug {
         std::ostream* output;
 
     private:
-        template<class T> Debug print(const T& value);
+        template<class T> Debug& print(const T& value);
 
         static std::ostream* globalOutput;
         int flags;
 };
 
-/* Disable warning about multiple copy constructors until I fix it properly */
-/** @todo fix properly */
-#ifdef _MSC_VER
-#pragma warning(pop)
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/* so Debug() << value works */
+template<class T> inline Debug& operator<<(Debug&& debug, const T& value) {
+    return debug << value;
+}
 #endif
 
 #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -260,7 +233,7 @@ The function should convert the type to one of supported types (such as
 it. You can also use @ref Debug::setFlag() for modifying newline and whitespace
 behavior.
  */
-template<class T> Debug operator<<(Debug debug, const T& value);
+template<class T> Debug& operator<<(Debug& debug, const T& value);
 #endif
 
 /** @relates Debug
@@ -269,13 +242,14 @@ template<class T> Debug operator<<(Debug debug, const T& value);
 Prints the value as `{a, b, c}`.
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
-template<class Iterable> Debug operator<<(Debug debug, const Iterable& value)
+template<class Iterable> Debug& operator<<(Debug& debug, const Iterable& value)
 #else
 /* libc++ from Apple's Clang "4.2" (3.2-svn) doesn't have constexpr operator
    bool for std::integral_constant, thus we need to use ::value instead */
-template<class Iterable> Debug operator<<(typename std::enable_if<IsIterable<Iterable>::value && !std::is_same<Iterable, std::string>::value, Debug>::type debug, const Iterable& value)
+template<class Iterable> Debug& operator<<(typename std::enable_if<IsIterable<Iterable>::value && !std::is_same<Iterable, std::string>::value, Debug&>::type debug, const Iterable& value)
 #endif
 {
+    const bool hadSpace = debug.flag(Debug::SpaceAfterEachValue);
     debug << "{";
     debug.setFlag(Debug::SpaceAfterEachValue, false);
     for(auto it = value.begin(); it != value.end(); ++it) {
@@ -284,7 +258,7 @@ template<class Iterable> Debug operator<<(typename std::enable_if<IsIterable<Ite
         debug << *it;
     }
     debug << "}";
-    debug.setFlag(Debug::SpaceAfterEachValue, true);
+    debug.setFlag(Debug::SpaceAfterEachValue, hadSpace);
     return debug;
 }
 
@@ -317,19 +291,20 @@ namespace Implementation {
 
 Prints the value as `(first, second, third...)`.
 */
-template<class ...Args> Debug operator<<(Debug debug, const std::tuple<Args...>& value) {
+template<class ...Args> Debug& operator<<(Debug& debug, const std::tuple<Args...>& value) {
+    const bool hadSpace = debug.flag(Debug::SpaceAfterEachValue);
     debug << "(";
     debug.setFlag(Debug::SpaceAfterEachValue, false);
     Implementation::tupleDebugOutput(debug, value, typename Implementation::GenerateSequence<sizeof...(Args)>::Type{});
     debug << ")";
-    debug.setFlag(Debug::SpaceAfterEachValue, true);
+    debug.setFlag(Debug::SpaceAfterEachValue, hadSpace);
     return debug;
 }
 
 /** @relates Debug
  * @overload
  */
-template<class T, class U> Debug operator<<(Debug debug, const std::pair<T, U>& value) {
+template<class T, class U> Debug& operator<<(Debug& debug, const std::pair<T, U>& value) {
     return debug << std::tuple<T, U>(value);
 }
 

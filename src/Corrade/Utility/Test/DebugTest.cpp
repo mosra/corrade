@@ -131,7 +131,7 @@ struct Foo {
     int value;
 };
 
-Debug operator<<(Debug debug, const Foo& value) {
+Debug& operator<<(Debug& debug, const Foo& value) {
     return debug << value.value;
 }
 

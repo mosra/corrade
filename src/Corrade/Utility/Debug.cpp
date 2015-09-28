@@ -70,12 +70,6 @@ Debug::Debug(const Debug& other): output(other.output), flags(other.flags) {
         setFlag(NewLineAtTheEnd, false);
 }
 
-Debug::Debug(Debug& other): output(other.output), flags(other.flags) {
-    other.flags &= ~0x01;
-
-    setFlag(NewLineAtTheEnd, false);
-}
-
 Debug::~Debug() {
     if(output && !(flags & 0x01) && (flags & NewLineAtTheEnd))
         *output << std::endl;
@@ -87,7 +81,7 @@ void Debug::setFlag(Flag flag, bool value) {
     else flags &= ~flag;
 }
 
-template<class T> Debug Debug::print(const T& value) {
+template<class T> Debug& Debug::print(const T& value) {
     if(!output) return *this;
 
     /* Separate values with spaces, if enabled */
@@ -98,34 +92,34 @@ template<class T> Debug Debug::print(const T& value) {
     return *this;
 }
 
-Debug Debug::operator<<(const std::string& value) { return print(value); }
-Debug Debug::operator<<(const void* value) { return print(value); }
-Debug Debug::operator<<(const char* value) { return print(value); }
-Debug Debug::operator<<(bool value) { return print(value ? "true" : "false"); }
-Debug Debug::operator<<(int value) { return print(value); }
-Debug Debug::operator<<(long value) { return print(value); }
-Debug Debug::operator<<(long long value) { return print(value); }
-Debug Debug::operator<<(unsigned value) { return print(value); }
-Debug Debug::operator<<(unsigned long value) { return print(value); }
-Debug Debug::operator<<(unsigned long long value) { return print(value); }
-Debug Debug::operator<<(float value) { return print(value); }
-Debug Debug::operator<<(double value) { return print(value); }
+Debug& Debug::operator<<(const std::string& value) { return print(value); }
+Debug& Debug::operator<<(const void* value) { return print(value); }
+Debug& Debug::operator<<(const char* value) { return print(value); }
+Debug& Debug::operator<<(bool value) { return print(value ? "true" : "false"); }
+Debug& Debug::operator<<(int value) { return print(value); }
+Debug& Debug::operator<<(long value) { return print(value); }
+Debug& Debug::operator<<(long long value) { return print(value); }
+Debug& Debug::operator<<(unsigned value) { return print(value); }
+Debug& Debug::operator<<(unsigned long value) { return print(value); }
+Debug& Debug::operator<<(unsigned long long value) { return print(value); }
+Debug& Debug::operator<<(float value) { return print(value); }
+Debug& Debug::operator<<(double value) { return print(value); }
 #ifndef CORRADE_TARGET_EMSCRIPTEN
-Debug Debug::operator<<(long double value) { return print(value); }
+Debug& Debug::operator<<(long double value) { return print(value); }
 #endif
 
-Debug Debug::operator<<(char32_t value) {
+Debug& Debug::operator<<(char32_t value) {
     std::ostringstream o;
     o << "U+" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << value;
     return print(o.str());
 }
 
-Debug Debug::operator<<(const char32_t* value) {
+Debug& Debug::operator<<(const char32_t* value) {
     return *this << std::u32string(value);
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-Debug Debug::operator<<(Implementation::DebugOstreamFallback&& value) {
+Debug& Debug::operator<<(Implementation::DebugOstreamFallback&& value) {
     return print(value);
 }
 #endif
