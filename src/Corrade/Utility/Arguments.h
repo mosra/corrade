@@ -63,13 +63,13 @@ int main(int argc, char** argv) {
     args.addArgument("text").setHelp("text", "the text to print")
         .addNamedArgument('n', "repeat").setHelp("repeat", "repeat count")
         .addBooleanOption('v', "verbose").setHelp("verbose", "log verbosely")
-        .addOption("log", "log.txt").setHelp("save verbose log to given file")
+        .addOption("log", "log.txt").setHelp("log", "save verbose log to given file")
         .setHelp("Repeats the text given number of times.")
         .parse(argc, argv);
 
     std::ofstream logOutput(args.value("log"));
     for(int i = 0; i < args.value<int>("repeat"); ++i) {
-        if(args.isSet("vebose")) {
+        if(args.isSet("verbose")) {
             logOutput << "Printing instance " << i << " of text " << args.value("text");
         }
 
@@ -269,13 +269,15 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * For arguments the key is replaced with @p helpKey, for nonboolean
          * options the uppercased key name is replaced with @p helpKey. For
          * example, calling `setHelpKey("input", "file.bin")` and
-         * `setHelpKey("limit", "N")` will transform the usage text in
-         * the following way. The displayed keys are changed also in argument
-         * and option list.
+         * `setHelpKey("limit", "N")` will transform the following usage text:
          *
          *      ./app --limit LIMIT input
+         *
+         * to:
+         *
          *      ./app --limit N file.bin
          *
+         * The displayed keys are changed also in argument and option list.
          * @see @ref setHelp()
          */
         Arguments& setHelpKey(const std::string& key, std::string helpKey);
