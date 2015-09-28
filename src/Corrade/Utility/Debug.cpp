@@ -43,12 +43,12 @@ template<> inline void toStream<Implementation::DebugOstreamFallback>(std::ostre
 
 }
 
-std::ostream* Debug::globalOutput = &std::cout;
+std::ostream* Debug::_globalOutput = &std::cout;
 std::ostream* Warning::globalWarningOutput = &std::cerr;
 std::ostream* Error::globalErrorOutput = &std::cerr;
 
 void Debug::setOutput(std::ostream* output) {
-    globalOutput = output;
+    _globalOutput = output;
 }
 
 void Warning::setOutput(std::ostream* output) {
@@ -59,36 +59,36 @@ void Error::setOutput(std::ostream* output) {
     globalErrorOutput = output;
 }
 
-Debug::Debug(): output(globalOutput), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
+Debug::Debug(): _output(_globalOutput), _flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
 
 Warning::Warning(): Debug(globalWarningOutput) {}
 
 Error::Error(): Debug(globalErrorOutput) {}
 
-Debug::Debug(const Debug& other): output(other.output), flags(other.flags) {
-    if(!(other.flags & 0x01))
+Debug::Debug(const Debug& other): _output(other._output), _flags(other._flags) {
+    if(!(other._flags & 0x01))
         setFlag(NewLineAtTheEnd, false);
 }
 
 Debug::~Debug() {
-    if(output && !(flags & 0x01) && (flags & NewLineAtTheEnd))
-        *output << std::endl;
+    if(_output && !(_flags & 0x01) && (_flags & NewLineAtTheEnd))
+        *_output << std::endl;
 }
 
 void Debug::setFlag(Flag flag, bool value) {
     flag = static_cast<Flag>(flag & ~0x01);
-    if(value) flags |= flag;
-    else flags &= ~flag;
+    if(value) _flags |= flag;
+    else _flags &= ~flag;
 }
 
 template<class T> Debug& Debug::print(const T& value) {
-    if(!output) return *this;
+    if(!_output) return *this;
 
     /* Separate values with spaces, if enabled */
-    if(flags & 0x01) flags &= ~0x01;
-    else if(flags & Debug::SpaceAfterEachValue) *output << " ";
+    if(_flags & 0x01) _flags &= ~0x01;
+    else if(_flags & Debug::SpaceAfterEachValue) *_output << " ";
 
-    toStream(*output, value);
+    toStream(*_output, value);
     return *this;
 }
 

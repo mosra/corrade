@@ -116,7 +116,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * Constructs debug object with given output.
          * @see @ref setOutput()
          */
-        explicit Debug(std::ostream* output): output(output), flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
+        explicit Debug(std::ostream* output): _output(output), _flags(0x01 | SpaceAfterEachValue | NewLineAtTheEnd) {}
 
         /**
          * @brief Copy constructor
@@ -137,7 +137,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         ~Debug();
 
         /** @brief Flag */
-        bool flag(Flag flag) const { return flags & flag; }
+        bool flag(Flag flag) const { return _flags & flag; }
 
         /** @brief Set flag */
         void setFlag(Flag flag, bool value);
@@ -203,13 +203,13 @@ class CORRADE_UTILITY_EXPORT Debug {
     #else
     private:
     #endif
-        std::ostream* output;
+        std::ostream* _output;
 
     private:
         template<class T> Debug& print(const T& value);
 
-        static std::ostream* globalOutput;
-        int flags;
+        static std::ostream* _globalOutput;
+        int _flags;
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
