@@ -8,7 +8,7 @@ SUPPORTED PLATFORMS
 ===================
 
 *   **Linux** and embedded Linux [![Build Status](https://travis-ci.org/mosra/corrade.svg?branch=master)](https://travis-ci.org/mosra/corrade)
-*   **Windows** desktop and RT (Store/Phone) [![Build status](https://ci.appveyor.com/api/projects/status/afjjlsgtk6jjxulp/branch/master?svg=true)](https://ci.appveyor.com/project/mosra/corrade/branch/master)
+*   **Windows** desktop and RT (Store/Phone) [![Build Status](https://ci.appveyor.com/api/projects/status/afjjlsgtk6jjxulp/branch/master?svg=true)](https://ci.appveyor.com/project/mosra/corrade/branch/master)
 *   **OS X** [![Build Status](https://travis-ci.org/mosra/corrade.svg?branch=master)](https://travis-ci.org/mosra/corrade)
 *   **Android** 1.5 (API Level 3) and higher
 *   **Google Chrome** (through [Native Client](https://developers.google.com/native-client/),
