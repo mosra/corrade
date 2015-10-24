@@ -49,16 +49,16 @@ Usage examples: checking for presence of `const_iterator` member type:
 @code
 CORRADE_HAS_TYPE(HasKeyType, typename T::key_type);
 
-static_assert(HasKeyType<std::map<int, int>>{}, "");
-static_assert(!HasKeyType<std::vector<int>>{}, "");
+static_assert(HasKeyType<std::map<int, int>>::value, "");
+static_assert(!HasKeyType<std::vector<int>>::value, "");
 @endcode
 
 Checking for presence of `size()` member function:
 @code
 CORRADE_HAS_TYPE(HasSize, decltype(std::declval<T>().size()));
 
-static_assert(HasSize<std::vector<int>>{}, "");
-static_assert(!HasSize<std::tuple<int, int>>{}, "");
+static_assert(HasSize<std::vector<int>>::value, "");
+static_assert(!HasSize<std::tuple<int, int>>::value, "");
 @endcode
 */
 /* Two overloaded get() functions return type of different size. Templated
@@ -69,7 +69,7 @@ template<class U> class className {                                         \
     template<class T> static char get(T&&, typeExpression* = nullptr);      \
     static short get(...);                                                  \
     public:                                                                 \
-        enum: bool { Value = sizeof(get(std::declval<U>())) == sizeof(char) }; \
+        enum: bool { value = sizeof(get(std::declval<U>())) == sizeof(char) }; \
 }
 
 namespace Implementation {
@@ -85,7 +85,7 @@ namespace Implementation {
 }
 
 /**
-@brief Traits class for checking whether given class is iterable
+@brief Traits class for checking whether given type is iterable
 
 Equivalent to `std::true_type` if the class is has either `begin()` and `end()`
 members, is usable with free `begin()`/`end()` functions or has
@@ -95,15 +95,15 @@ members, is usable with free `begin()`/`end()` functions or has
 /* When using {}, MSVC 2015 complains that even the explicitly defaulted
    constructor doesn't exist */
 template<class T> using IsIterable = std::integral_constant<bool,
-    (Implementation::HasMemberBegin<T>::Value ||
+    (Implementation::HasMemberBegin<T>::value ||
     #ifndef CORRADE_GCC47_COMPATIBILITY
-    Implementation::HasBegin<T>::Value ||
+    Implementation::HasBegin<T>::value ||
     #endif
-    Implementation::HasStdBegin<T>::Value) && (Implementation::HasMemberEnd<T>::Value ||
+    Implementation::HasStdBegin<T>::value) && (Implementation::HasMemberEnd<T>::value ||
     #ifndef CORRADE_GCC47_COMPATIBILITY
-    Implementation::HasEnd<T>::Value ||
+    Implementation::HasEnd<T>::value ||
     #endif
-    Implementation::HasStdEnd<T>::Value)>;
+    Implementation::HasStdEnd<T>::value)>;
 
 }}
 
