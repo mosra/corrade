@@ -148,12 +148,12 @@ std::string String::joinWithoutEmptyParts(const std::vector<std::string>& string
 
 std::string String::lowercase(std::string string) {
     std::transform(string.begin(), string.end(), string.begin(), static_cast<int (*)(int)>(std::tolower));
-    return std::move(string);
+    return string;
 }
 
 std::string String::uppercase(std::string string) {
     std::transform(string.begin(), string.end(), string.begin(), static_cast<int (*)(int)>(std::toupper));
-    return std::move(string);
+    return string;
 }
 
 bool String::beginsWithInternal(const std::string& string, const Containers::ArrayView<const char> prefix) {
