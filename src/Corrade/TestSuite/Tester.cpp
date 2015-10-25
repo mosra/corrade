@@ -123,8 +123,8 @@ void Tester::registerTestCase(const std::string& name, int line) {
     _testCaseLine = line;
 }
 
-Tester::ExpectedFailure::ExpectedFailure(Tester* instance, std::string message): _instance(instance), _message(std::move(message)) {
-    _instance->_expectedFailure = this;
+Tester::ExpectedFailure::ExpectedFailure(Tester* const instance, std::string message, const bool enabled): _instance(instance), _message(std::move(message)) {
+    if(enabled) _instance->_expectedFailure = this;
 }
 
 Tester::ExpectedFailure::~ExpectedFailure() {

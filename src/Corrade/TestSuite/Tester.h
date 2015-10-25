@@ -161,7 +161,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
     #endif
         class CORRADE_TESTSUITE_EXPORT ExpectedFailure {
             public:
-                explicit ExpectedFailure(Tester* instance, std::string message);
+                explicit ExpectedFailure(Tester* instance, std::string message, bool enabled = true);
 
                 ~ExpectedFailure();
 
@@ -320,7 +320,7 @@ be until the end of the function, but you can limit the scope by placing
 relevant checks in a separate block:
 @code
 {
-    CORRADE_EXPECT_FAIL("Not implemented");
+    CORRADE_EXPECT_FAIL("Not implemented.");
     CORRADE_VERIFY(isFutureClear());
 }
 
@@ -328,9 +328,40 @@ int i = 6*7;
 CORRADE_COMPARE(i, 42);
 @endcode
 If any of the following checks passes, an error will be printed to output.
+@see @ref CORRADE_EXPECT_FAIL_IF()
 */
 #define CORRADE_EXPECT_FAIL(message)                                        \
     ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)(this, message)
+
+/** @hideinitializer
+@brief Conditionally expect failure in all following checks in the same scope
+@param message      Message which will be printed into output as indication of
+    expected failure
+@param condition    The failure is expected only if the condition evaluates to
+    `true`
+
+With @ref CORRADE_EXPECT_FAIL() it's not possible to write code such as this,
+because the scope of expected failure will end at the end of the `if` block:
+@code
+{
+    if(answer != 42)
+        CORRADE_EXPECT_FAIL("This is not our universe.");
+
+    CORRADE_VERIFY(6*7, 49); // always fails
+}
+@endcode
+
+The solution is to use `CORRADE_EXPECT_FAIL_IF()`:
+@code
+{
+    CORRADE_EXPECT_FAIL_IF("This is not our universe.", answer != 42);
+
+    CORRADE_VERIFY(6*7, 49); // expect the failure if answer is not 42
+}
+@endcode
+*/
+#define CORRADE_EXPECT_FAIL_IF(message, condition)                          \
+    ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)(this, message, condition)
 
 /** @hideinitializer
 @brief Skip test case
