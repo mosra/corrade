@@ -71,8 +71,8 @@ void TypeTraitsTest::hasType() {
 
 namespace {
     struct Type {};
-    int* begin(Type);
-    int* end(Type);
+    int* begin(Type) { return nullptr; }
+    int* end(Type) { return nullptr; }
     struct LinkedListItem: Containers::LinkedListItem<LinkedListItem> {};
 }
 
