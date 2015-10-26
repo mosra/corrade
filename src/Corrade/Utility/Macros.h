@@ -127,7 +127,10 @@ resources without forcing the user to write additional code in `main()`.
 @attention This macro does nothing in static libraries.
 */
 #define CORRADE_AUTOMATIC_INITIALIZER(function)                             \
-    static const int initializer_##function = function();
+    namespace {                                                             \
+        struct Initializer_##function { static const int i; };              \
+        const int Initializer_##function::i = function();                   \
+    }
 
 /** @hideinitializer
 @brief Automatic initializer
