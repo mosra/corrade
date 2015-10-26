@@ -120,7 +120,8 @@ class CORRADE_UTILITY_EXPORT Debug {
          * destruction.
          * @see @ref noNewlineAtTheEnd()
          */
-        static Debug noNewlineAtTheEnd(std::ostream* output);
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline static Debug noNewlineAtTheEnd(std::ostream* output);
 
         /**
          * @brief Don't put space before next value
@@ -133,7 +134,8 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @endcode
          * @see @ref newline()
          */
-        static void nospace(Debug& debug);
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline static void nospace(Debug& debug);
 
         /**
          * @brief Output a newline
@@ -171,7 +173,8 @@ class CORRADE_UTILITY_EXPORT Debug {
          * Constructs debug object with given output.
          * @see @ref noNewlineAtTheEnd(std::ostream*), @ref setOutput()
          */
-        explicit Debug(std::ostream* output);
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline explicit Debug(std::ostream* output);
 
         /**
          * @brief Copy constructor
@@ -405,7 +408,8 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
          * destruction.
          * @see @ref noNewlineAtTheEnd()
          */
-        static Warning noNewlineAtTheEnd(std::ostream* output);
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline static Warning noNewlineAtTheEnd(std::ostream* output);
 
         /** @copydoc Debug::setOutput() */
         static void setOutput(std::ostream* output);
@@ -453,7 +457,8 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
          * destruction.
          * @see @ref noNewlineAtTheEnd()
          */
-        static Error noNewlineAtTheEnd(std::ostream* output);
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline static Error noNewlineAtTheEnd(std::ostream* output);
 
         /** @copydoc Debug::setOutput() */
         static void setOutput(std::ostream* output);
