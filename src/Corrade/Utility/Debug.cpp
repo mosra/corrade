@@ -86,6 +86,10 @@ Debug::~Debug() {
         *_output << std::endl;
 }
 
+Fatal::~Fatal() {
+    std::exit(_exitCode);
+}
+
 template<class T> Debug& Debug::print(const T& value) {
     if(!_output) return *this;
 

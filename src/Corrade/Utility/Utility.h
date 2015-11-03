@@ -51,6 +51,7 @@ template<class T> struct ConfigurationValue;
 class Debug;
 class Warning;
 class Error;
+class Fatal;
 
 /* Directory used only statically */
 /* Endianness used only statically */

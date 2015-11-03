@@ -36,6 +36,7 @@
 
 #include "Corrade/Containers/EnumSet.h"
 #include "Corrade/Utility/TypeTraits.h"
+#include "Corrade/Utility/Utility.h"
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
@@ -95,7 +96,7 @@ Debug() << "Value:" << Debug::newline << 16;
 Debug::noNewlineAtTheEnd() << "Hello!";
 @endcode
 
-@see @ref Warning, @ref Error, @ref CORRADE_ASSERT(),
+@see @ref Warning, @ref Error, @ref Fatal, @ref CORRADE_ASSERT(),
     @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(),
     @ref NaClConsoleStreamBuffer
 @todo Output to more ostreams at once
@@ -439,8 +440,11 @@ inline Warning Warning::noNewlineAtTheEnd(std::ostream* const output) {
 @brief Error output handler
 
 @copydetails Warning
+@see @ref Fatal
 */
 class CORRADE_UTILITY_EXPORT Error: public Debug {
+    friend Fatal;
+
     public:
         /**
          * @brief Error output without newline at the end
@@ -483,6 +487,61 @@ inline Error Error::noNewlineAtTheEnd(std::ostream* const output) {
     error._flags |= Flag::NoNewlineAtTheEnd;
     return error;
 }
+
+/**
+@brief Warning output handler
+
+Equivalent to @ref Error, but exits with defined exit code on destruction. So
+instead of this:
+@code
+if(stuff.broken()) {
+    Error() << "Everything's broken, exiting.";
+    std::exit(42);
+}
+@endcode
+You can write just this:
+@code
+if(stuff.broken())
+    Fatal(42) << "Everything's broken, exiting.";
+@endcode
+
+As the message produced by this class is the last that the program writes,
+there is no need for ability to disable the newline at the end (it also made
+the implementation much simpler).
+*/
+class CORRADE_UTILITY_EXPORT Fatal: public Error {
+    public:
+        /**
+         * @brief Constructor
+         *
+         * Sets output to `std::cerr`. The @p exitcode is passed to `std::exit()`
+         * on destruction.
+         * @see @ref noNewlineAtTheEnd(), @ref setOutput()
+         */
+        Fatal(int exitCode = 1): _exitCode{exitCode} {}
+
+        /**
+         * @brief Constructor
+         * @param output        Stream where to put debug output. If set to
+         *      `nullptr`, no debug output will be written anywhere.
+         * @param exitCode      Application exit code to be used on destruction
+         *
+         * @see @ref setOutput()
+         */
+        Fatal(std::ostream* output, int exitCode = 1): Error{output}, _exitCode{exitCode} {}
+
+        /**
+         * @brief Destructor
+         *
+         * Exits the application with exit code specified in constructor.
+         */
+        ~Fatal();
+
+    private:
+        using Error::noNewlineAtTheEnd;
+
+        int _exitCode;
+};
 
 namespace Implementation {
 
