@@ -108,7 +108,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         /**
          * @brief Debug output without newline at the end
          *
-         * Unline @ref Debug() doesn't put newline at the end on destruction.
+         * Unlike @ref Debug() doesn't put newline at the end on destruction.
          * @see @ref noNewlineAtTheEnd(std::ostream*)
          */
         static Debug noNewlineAtTheEnd();
@@ -116,7 +116,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         /**
          * @brief Debug output without newline at the end
          *
-         * Unline @ref Debug(std::ostream*) doesn't put newline at the end on
+         * Unlike @ref Debug(std::ostream*) doesn't put newline at the end on
          * destruction.
          * @see @ref noNewlineAtTheEnd()
          */
@@ -396,7 +396,7 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
         /**
          * @brief Warning output without newline at the end
          *
-         * Unline @ref Warning() doesn't put newline at the end on destruction.
+         * Unlike @ref Warning() doesn't put newline at the end on destruction.
          * @see @ref noNewlineAtTheEnd(std::ostream*)
          */
         static Warning noNewlineAtTheEnd();
@@ -404,7 +404,7 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
         /**
          * @brief Warning output without newline at the end
          *
-         * Unline @ref Warning(std::ostream*) doesn't put newline at the end on
+         * Unlike @ref Warning(std::ostream*) doesn't put newline at the end on
          * destruction.
          * @see @ref noNewlineAtTheEnd()
          */
@@ -445,7 +445,7 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
         /**
          * @brief Error output without newline at the end
          *
-         * Unline @ref Error() doesn't put newline at the end on destruction.
+         * Unlike @ref Error() doesn't put newline at the end on destruction.
          * @see @ref noNewlineAtTheEnd(std::ostream*)
          */
         static Error noNewlineAtTheEnd();
@@ -453,7 +453,7 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
         /**
          * @brief Error output without newline at the end
          *
-         * Unline @ref Error(std::ostream*) doesn't put newline at the end on
+         * Unlike @ref Error(std::ostream*) doesn't put newline at the end on
          * destruction.
          * @see @ref noNewlineAtTheEnd()
          */
