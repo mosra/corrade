@@ -246,12 +246,15 @@ void DirectoryTest::configurationDir() {
     const std::string dir = Directory::configurationDir("Corrade");
     Debug() << "Configuration dir found as:" << dir;
 
-    /* On Linux verify that the parent dir contains `autostart` directory. Ugly
-       and hacky, but it's the best I came up with. Can't test for e.g.
-       `/home/` substring, as that can be overriden. */
+    /* On Linux verify that the parent dir contains `autostart` directory,
+       something from GTK or something from Qt. Ugly and hacky, but it's the
+       best I could come up with. Can't test for e.g. `/home/` substring, as
+       that can be overriden. */
     #if __linux__
     CORRADE_COMPARE(dir.substr(dir.size()-7), "corrade");
-    CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(dir), "autostart")));
+    CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(dir), "autostart")) ||
+                   Directory::fileExists(Directory::join(Directory::path(dir), "dconf")) ||
+                   Directory::fileExists(Directory::join(Directory::path(dir), "Trolltech.conf")));
 
     /* On Windows verify that the parent dir contains `Microsoft` subdirectory.
        Ugly and hacky, but it's the best I came up with. Can't test for e.g.
