@@ -118,7 +118,7 @@ Arguments& Arguments::addBooleanOption(char shortKey, std::string key) {
     CORRADE_ASSERT((!shortKey || find(shortKey) == _entries.end()) && find(key) == _entries.end(),
         "Utility::Arguments::addBooleanOption(): the key" << key << "or its short version is already used", *this);
 
-    _entries.emplace_back(Type::BooleanOption, shortKey, key, std::string(), _booleans.size());
+    _entries.emplace_back(Type::BooleanOption, shortKey, std::move(key), std::string(), _booleans.size());
     _booleans.push_back(false);
     return *this;
 }
