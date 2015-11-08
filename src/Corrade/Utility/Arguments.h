@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
 Upon requesting help, the utility prints the following:
 
     Usage
-      ./printer [-h|--help] -n|--repeat REPEAT [-v|--verbose] [--log LOG] text
+      ./printer [-h|--help] -n|--repeat REPEAT [-v|--verbose] [--log LOG] [--] text
 
     Repeats the text given number of times.
 
