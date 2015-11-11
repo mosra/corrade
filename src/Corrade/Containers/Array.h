@@ -63,6 +63,18 @@ template<class T> void defaultDeleter(T* data, std::size_t size) {
 }
 
 /**
+@brief `std::free()` array deleter
+@param data     Array pointer
+@param size     Array element count
+
+Equivalent to calling `std::free()` on passed pointer, @p size is ignored.
+*/
+template<class T> void freeDeleter(T* data, std::size_t size) {
+    static_cast<void>(size);
+    std::free(data);
+}
+
+/**
 @brief Array wrapper with size information
 @tparam T   Element type
 @tparam D   Deleter type, defaults to pointer to function of the same signature
