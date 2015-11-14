@@ -335,12 +335,16 @@ contents in `toolchains/` subdirectory.
 
 @subsection building-corrade-cross-winrt Crosscompiling for Windows RT
 
-You need at least Windows 8.1, Visual Studio 2013 and Windows 8.1 Store/Phone
-SDK installed.
+As said above, you need native build of `corrade-rc` executable. The below
+script assumes that native Corrade build is installed in `C:/Sys` and the
+installation path for WinRT is in `C:/Sys-winrt`. You need at least Windows
+8.1, Visual Studio 2013 and Windows 8.1 Store/Phone SDK installed. Because
+WinRT applications run in a sandbox, it's recommended to build the library as
+static so you don't have to bundle all the DLLs. Example:
 
     mkdir build-winrt
     cd build-winrt
-    cmake -DCMAKE_PREFIX_PATH="C:/Sys" -DCMAKE_INSTALL_PREFIX="C:/Sys-winrt" -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=8.1 -G "Visual Studio 14 2015" ..
+    cmake -DCORRADE_RC_EXECUTABLE="C:/Sys/bin/corrade-rc.exe" -DCMAKE_INSTALL_PREFIX="C:/Sys-winrt" -DBUILD_STATIC=ON -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=8.1 -G "Visual Studio 14 2015" ..
     cmake --build .
 
 Change `WindowsStore` to `WindowsPhone` if you want to build for Windows Phone
