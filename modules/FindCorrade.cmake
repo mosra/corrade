@@ -101,6 +101,12 @@
 # release plugins installed alongside each other.
 #
 #
+# Find corresponding DLLs for library files.
+#  corrade_find_dlls_for_libs(<VAR> libs...)
+# Available only on Windows, for all *.lib files tries to find corresponding
+# DLL file. Useful for bundling dependencies for e.g. WinRT packages.
+#
+#
 # Additionally these variables are defined for internal usage:
 #  CORRADE_INTERCONNECT_LIBRARY     - Interconnect library (w/o
 #   dependencies)

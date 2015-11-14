@@ -161,5 +161,13 @@ no installation rules are added.
     set to `Debug`) have `-d` suffix to make it possible to have both debug and
     release plugins installed alongside each other.
 
+### Find corresponding DLLs for library files
+@anchor corrade-find-dlls-for-libs
+
+    corrade_find_dlls_for_libs(<VAR> libs...)
+
+Available only on Windows, for all `*.lib` files tries to find corresponding
+DLL file. Useful for bundling dependencies for e.g. WinRT packages.
+
 */
 }
