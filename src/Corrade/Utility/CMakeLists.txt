@@ -111,6 +111,12 @@ install(TARGETS CorradeUtility
         ARCHIVE DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 install(FILES ${CorradeUtility_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/Utility)
 
+# TODO: In the future it might be possible to not require external corrade-rc
+# when generating WinRT targets by setting
+#  set_target_properties(corrade-rc PROPERTIES VS_WINRT_COMPONENT OFF)
+# Then the condition would be if(NOT CMAKE_CROSSCOMPILING OR CORRADE_TARGET_WINDOWS_RT)
+# and similar change would be in UseCorrade.cmake. More info in this thread:
+#  https://cmake.org/pipermail/cmake-developers/2015-January/024242.html
 if(NOT CMAKE_CROSSCOMPILING)
     add_executable(corrade-rc rc.cpp)
     target_link_libraries(corrade-rc CorradeUtility)
