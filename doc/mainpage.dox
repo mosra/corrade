@@ -33,9 +33,10 @@ Corrade is multiplatform utility library written in C++11/C++14.
 @section corrade-mainpage-platforms Supported platforms
 
 -   **Linux** and embedded Linux
--   **Windows** desktop and RT (Store/Phone)
+-   **Windows**
 -   **OS X** (ported by [David Lin](https://github.com/davll))
 -   **Android** 1.5 (API Level 3) and higher
+-   **Windows RT** (Store/Phone)
 -   **Google Chrome** (through [Native Client](https://developers.google.com/native-client/),
     both `newlib` and `glibc` toolchains are supported)
 -   **HTML5/JavaScript** (through [Emscripten](https://github.com/kripken/emscripten/wiki))
