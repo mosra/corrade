@@ -113,19 +113,19 @@ void ArgumentsTest::helpNamedOnly() {
     Arguments args;
     args.addOption('n', "bars", "42").setHelp("bars", "number of bars to foo")
         .addNamedArgument('b', "baz").setHelpKey("baz", "LEVEL")
-        .addOption("sanity", "INSANE")
+        .addOption("sanity-level", "INSANE").setHelpKey("sanity-level", "SANITY")
         .addBooleanOption("no-bare-foos").setHelp("no-bare-foos", "don't use bare foos")
         .setCommand("foobar");
 
     const auto expected = R"text(Usage:
-  foobar [-h|--help] [-n|--bars BARS] -b|--baz LEVEL [--sanity SANITY] [--no-bare-foos]
+  foobar [-h|--help] [-n|--bars BARS] -b|--baz LEVEL [--sanity-level SANITY] [--no-bare-foos]
 
 Arguments:
-  -h, --help       display this help message and exit
-  -n, --bars BARS  number of bars to foo
-                   (default: 42)
-  --sanity SANITY  (default: INSANE)
-  --no-bare-foos   don't use bare foos
+  -h, --help             display this help message and exit
+  -n, --bars BARS        number of bars to foo
+                         (default: 42)
+  --sanity-level SANITY  (default: INSANE)
+  --no-bare-foos         don't use bare foos
 )text";
     CORRADE_COMPARE(args.help(), expected);
 }
