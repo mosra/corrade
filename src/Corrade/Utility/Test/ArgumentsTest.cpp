@@ -46,6 +46,7 @@ struct ArgumentsTest: TestSuite::Tester {
     void disallowedCharacter();
     void disallowedCharacterShort();
 
+    void parseNullptr();
     void parseHelp();
     void parseArguments();
     void parseMixed();
@@ -85,6 +86,7 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::disallowedCharacter,
               &ArgumentsTest::disallowedCharacterShort,
 
+              &ArgumentsTest::parseNullptr,
               &ArgumentsTest::parseHelp,
               &ArgumentsTest::parseArguments,
               &ArgumentsTest::parseMixed,
@@ -249,6 +251,12 @@ void ArgumentsTest::disallowedCharacterShort() {
     args.addOption(' ', "bar");
 
     CORRADE_COMPARE(out.str(), "Utility::Arguments::addOption(): invalid key bar or its short variant\n");
+}
+
+void ArgumentsTest::parseNullptr() {
+    Arguments args;
+
+    CORRADE_VERIFY(args.tryParse(0, nullptr));
 }
 
 void ArgumentsTest::parseHelp() {

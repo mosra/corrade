@@ -231,10 +231,8 @@ void Arguments::parse(const int argc, const char** const argv) {
 }
 
 bool Arguments::tryParse(const int argc, const char** const argv) {
-    CORRADE_INTERNAL_ASSERT(argc >= 1);
-
     /* Save command name */
-    if(_command.empty()) _command = argv[0];
+    if(_command.empty() && argv && argc >= 1) _command = argv[0];
 
     /* Clear previously parsed values */
     for(auto it = _booleans.begin(); it != _booleans.end(); ++it) *it = false;

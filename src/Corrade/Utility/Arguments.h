@@ -403,6 +403,11 @@ class CORRADE_UTILITY_EXPORT Arguments {
             parse(argc, const_cast<const char**>(argv));
         }
 
+        /** @overload */
+        void parse(int argc, std::nullptr_t argv) {
+            parse(argc, static_cast<const char**>(argv));
+        }
+
         /**
          * @brief Try parsing the arguments
          *
@@ -416,6 +421,11 @@ class CORRADE_UTILITY_EXPORT Arguments {
         /** @overload */
         bool tryParse(int argc, char** argv) {
             return tryParse(argc, const_cast<const char**>(argv));
+        }
+
+        /** @overload */
+        bool tryParse(int argc, std::nullptr_t argv) {
+            return tryParse(argc, static_cast<const char**>(argv));
         }
 
         /**
