@@ -61,6 +61,15 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseMissingValue();
     void parseMissingOption();
     void parseMissingArgument();
+
+    void prefixedParse();
+    void prefixedParseHelpArgument();
+    void prefixedHelpWithoutPrefix();
+    void prefixedHelpWithPrefix();
+    void prefixedDisallowedCalls();
+    void prefixedDisallowedWithPrefix();
+    void prefixedDisallowedWithPrefixAfterSkipPrefix();
+    void prefixedUnknownWithPrefix();
 };
 
 ArgumentsTest::ArgumentsTest() {
@@ -90,7 +99,16 @@ ArgumentsTest::ArgumentsTest() {
 
               &ArgumentsTest::parseMissingValue,
               &ArgumentsTest::parseMissingOption,
-              &ArgumentsTest::parseMissingArgument});
+              &ArgumentsTest::parseMissingArgument,
+
+              &ArgumentsTest::prefixedParse,
+              &ArgumentsTest::prefixedParseHelpArgument,
+              &ArgumentsTest::prefixedHelpWithoutPrefix,
+              &ArgumentsTest::prefixedHelpWithPrefix,
+              &ArgumentsTest::prefixedDisallowedCalls,
+              &ArgumentsTest::prefixedDisallowedWithPrefix,
+              &ArgumentsTest::prefixedDisallowedWithPrefixAfterSkipPrefix,
+              &ArgumentsTest::prefixedUnknownWithPrefix});
 }
 
 void ArgumentsTest::helpArgumentsOnly() {
@@ -403,6 +421,139 @@ void ArgumentsTest::parseMissingArgument() {
     Error::setOutput(&out);
     CORRADE_VERIFY(!args.tryParse(argc, argv));
     CORRADE_COMPARE(out.str(), "Missing command-line argument file.dat\n");
+}
+
+void ArgumentsTest::prefixedParse() {
+    Arguments arg1;
+    arg1.addArgument("file")
+        .addBooleanOption('b', "binary")
+        .addOption("speed")
+        .addSkippedPrefix("read");
+
+    Arguments arg2{"read"};
+    arg2.addOption("behavior")
+        .addOption("buffer-size");
+
+    const char* argv[] = { "", "-b", "--read-behavior", "buffered", "--speed", "fast", "--binary", "--read-buffer-size", "4K", "file.dat" };
+    const int argc = std::extent<decltype(argv)>();
+
+    CORRADE_VERIFY(arg1.tryParse(argc, argv));
+    CORRADE_VERIFY(arg1.isSet("binary"));
+    CORRADE_COMPARE(arg1.value("speed"), "fast");
+    CORRADE_COMPARE(arg1.value("file"), "file.dat");
+
+    CORRADE_VERIFY(arg2.tryParse(argc, argv));
+    CORRADE_COMPARE(arg2.value("behavior"), "buffered");
+    CORRADE_COMPARE(arg2.value("buffer-size"), "4K");
+}
+
+void ArgumentsTest::prefixedParseHelpArgument() {
+    /* Prefixed can be only non-boolean options except for help, test that the
+       actual argument doesn't get skipped if immediately after the help
+       boolean option */
+
+    Arguments arg1;
+    arg1.addBooleanOption('b', "binary")
+        .addSkippedPrefix("reader");
+
+    const char* argv[] = { "", "--reader-help", "-b" };
+    const int argc = std::extent<decltype(argv)>();
+
+    CORRADE_VERIFY(arg1.tryParse(argc, argv));
+    CORRADE_VERIFY(arg1.isSet("binary"));
+}
+
+void ArgumentsTest::prefixedHelpWithoutPrefix() {
+    Arguments args;
+    args.addArgument("file").setHelp("file", "file to read")
+        .addBooleanOption('b', "binary").setHelp("binary", "read as binary")
+        .addSkippedPrefix("read", "reader options")
+        .addSkippedPrefix("write");
+
+    const auto expected = R"text(Usage:
+  ./app [--read-...] [--write-...] [-h|--help] [-b|--binary] [--] file
+
+Arguments:
+  file          file to read
+  -h, --help    display this help message and exit
+  -b, --binary  read as binary
+  --read-...    reader options
+                (see --read-help for details)
+  --write-...   (see --write-help for details)
+)text";
+    CORRADE_COMPARE(args.help(), expected);
+}
+
+void ArgumentsTest::prefixedHelpWithPrefix() {
+    Arguments args{"read"};
+    args.addOption("behavior", "buffered").setHelp("behavior", "reader behavior")
+        .addOption("buffer-size").setHelpKey("buffer-size", "SIZE").setHelp("buffer-size", "buffer size");
+
+    const auto expected = R"text(Usage:
+  ./app [--read-help] [--read-behavior BEHAVIOR] [--read-buffer-size SIZE] ...
+
+Arguments:
+  ...                       main application arguments
+                            (see -h or --help for details)
+  --read-help               display this help message and exit
+  --read-behavior BEHAVIOR  reader behavior
+                            (default: buffered)
+  --read-buffer-size SIZE   buffer size
+)text";
+    CORRADE_COMPARE(args.help(), expected);
+}
+
+void ArgumentsTest::prefixedDisallowedCalls() {
+    std::ostringstream out;
+    Error::setOutput(&out);
+    Arguments args{"reader"};
+    args.addArgument("foo")
+        .addNamedArgument("bar")
+        .addOption('a', "baz")
+        .addBooleanOption("eh")
+        .setHelp("global help");
+
+    CORRADE_COMPARE(out.str(),
+        "Utility::Arguments::addArgument(): argument foo not allowed in prefixed version\n"
+        "Utility::Arguments::addNamedArgument(): argument bar not allowed in prefixed version\n"
+        "Utility::Arguments::addOption(): short option a not allowed in prefixed version\n"
+        "Utility::Arguments::addBooleanOption(): boolean option eh not allowed in prefixed version\n"
+        "Utility::Arguments::setHelp(): global help text only allowed in unprefixed version\n");
+}
+
+void ArgumentsTest::prefixedDisallowedWithPrefix() {
+    std::ostringstream out;
+    Error::setOutput(&out);
+    Arguments args;
+    args.addOption("reader-flush")
+        .addSkippedPrefix("reader");
+
+    CORRADE_COMPARE(out.str(),
+        "Utility::Arguments::addSkippedPrefix(): skipped prefix reader conflicts with existing keys\n");
+}
+
+void ArgumentsTest::prefixedDisallowedWithPrefixAfterSkipPrefix() {
+    std::ostringstream out;
+    Error::setOutput(&out);
+    Arguments args;
+    args.addSkippedPrefix("reader")
+        .addOption("reader-flush");
+
+    CORRADE_COMPARE(out.str(),
+        "Utility::Arguments::addOption(): key reader-flush conflicts with skipped prefixes\n");
+}
+
+void ArgumentsTest::prefixedUnknownWithPrefix() {
+    std::ostringstream out;
+    Error::setOutput(&out);
+    Arguments args{"reader"};
+    args.addOption("bar");
+
+    const char* argv[] = { "", "--reader-foo", "hello", "--something", "other" };
+    const int argc = std::extent<decltype(argv)>();
+
+    CORRADE_VERIFY(!args.tryParse(argc, argv));
+    CORRADE_COMPARE(out.str(), "Unknown command-line argument --reader-foo\n");
 }
 
 }}}

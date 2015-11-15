@@ -95,10 +95,86 @@ Upon requesting help, the utility prints the following:
       --log LOG            save verbose log to given file
                            (default: log.txt)
 
+## Delegating arguments to different parts of the application
+
+Sometimes you want to have some set of arguments for the application and some
+for the underlying library (or libraries) without one interfering with another
+and without writing code that would delegate the options from one to another.
+It is possible to do it using prefixed arguments. The library would use (and
+verify) only options with given prefix and on the other hand, the application
+would skip those instead of reporting them as unknown. The prefixed arguments
+are restricted to non-boolean options with long names to keep the usage simple
+both for the application author and users. Example:
+
+@code
+{
+    // the underlying library
+    Arguments args{"formatter"};
+    args.addOption("width", "80").setHelp("width", "number of columns")
+        .addOption("color", "auto").setHelp("color", "output color")
+        .parse(argc, argv);
+}
+
+// the application
+Arguments args;
+args.addArgument("text").setHelp("text", "the text to print")
+    .addNamedArgument('n', "repeat").setHelp("repeat", "repeat count")
+    .addSkippedPrefix("formatter", "formatter options")
+    .setHelp("Repeats the text given number of times.")
+    .parse(argc, argv);
+@endcode
+
+The application can be then called like the following, the prefixed and
+unprefixed options and named arguments can be mixed without restriction:
+
+    ./printer --repeat 30 --formatter-width 80 --formatter-color ff3366 "hello there"
+
+Upon calling `-h` or `--help` the application prints the following:
+
+    Usage
+      ./printer [-h|--help] [--formatter-...] -n|--repeat REPEAT [--] text
+
+    Repeats the text given number of times.
+
+    Arguments:
+      text                 the text to print
+      -h, --help           display this help message and exit
+      -n, --repeat REPEAT  repeat count
+      --formatter-...      formatter options
+                           (see --formatter-help for details)
+
+Upon calling `--formatter-help` the application prints the following:
+
+    Usage
+      ./printer [--formatter-help] [--formatter-width WIDTH] [--formatter-color COLOR] ...
+
+    Arguments:
+      ...                      main application arguments
+                               (see -h or --help for details)
+      --formatter-help         display this help message and exit
+      --formatter-width WIDTH  number of columns
+                               (default: 80)
+      --formatter-color COLOR  output color
+                               (default: auto)
+
 */
 class CORRADE_UTILITY_EXPORT Arguments {
     public:
+        /** @brief Default constructor */
         explicit Arguments();
+
+        /**
+         * @brief Construct prefixed arguments
+         *
+         * Prefixed arguments are useful for example when you have some options
+         * related to the application and some to the underlying library and
+         * you want to handle them in separate steps. Prefixed version can have
+         * only named arguments and long options.
+         *
+         * See class documentation for example.
+         * @see @ref addSkippedPrefix()
+         */
+        explicit Arguments(std::string prefix);
 
         ~Arguments();
 
@@ -118,6 +194,9 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * If no help text is set, the argument is not displayed in argument
          * list. Call @ref setHelp() to set it. Argument value can be retrieved
          * using @ref value().
+         *
+         * Only non-boolean options are allowed in the prefixed version, use
+         * @ref addOption() instead.
          */
         Arguments& addArgument(std::string key);
 
@@ -138,6 +217,9 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * If no help text is set, the argument is not displayed in argument
          * list. Call @ref setHelp() to set it. Argument value can be retrieved
          * using @ref value().
+         *
+         * Only non-boolean options are allowed in the prefixed version, use
+         * @ref addOption() instead.
          */
         Arguments& addNamedArgument(char shortKey, std::string key);
 
@@ -152,6 +234,9 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          *      Arguments:
          *        --argument        help text
+         *
+         * Only non-boolean options are allowed in the prefixed version, use
+         * @ref addOption() instead.
          */
         Arguments& addNamedArgument(std::string key) {
             return addNamedArgument('\0', std::move(key));
@@ -177,6 +262,9 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *                          (default: defaultValue)
          *
          * Option value can be retrieved using @ref value().
+         *
+         * Short key is not allowed in the prefixed version, use
+         * @ref addOption(std::string, std::string) instead.
          */
         Arguments& addOption(char shortKey, std::string key, std::string defaultValue = std::string());
 
@@ -214,6 +302,9 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * Option presence can be queried with @ref isSet(), @ref setHelpKey()
          * cannot be used with boolean options. Option for getting help (`-h`,
          * `--help`) is added automatically.
+         *
+         * Only non-boolean options are allowed in the prefixed version, use
+         * @ref addOption() instead.
          */
         Arguments& addBooleanOption(char shortKey, std::string key);
 
@@ -228,10 +319,21 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          *      Arguments:
          *        --option          help text
+         *
+         * Only non-boolean options are allowed in the prefixed version, use
+         * @ref addOption() instead.
          */
         Arguments& addBooleanOption(std::string key) {
             return addBooleanOption('\0', std::move(key));
         }
+
+        /**
+         * @brief Skip given prefix
+         *
+         * Ignores all options with given prefix. See class documentation for
+         * details.
+         */
+        Arguments& addSkippedPrefix(std::string prefix, std::string help = {});
 
         /**
          * @brief Set command name
@@ -249,6 +351,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * If nonempty, the text is printed between usage text and argument and
          * option list. Default is none.
+         *
+         * Help text can be set only in the unprefixed version.
          * @see @ref setCommand()
          */
         Arguments& setHelp(std::string help);
@@ -356,6 +460,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
     private:
         struct CORRADE_UTILITY_LOCAL Entry;
 
+        bool CORRADE_UTILITY_LOCAL skippedPrefix(const std::string& key) const;
         bool CORRADE_UTILITY_LOCAL verifyKey(const std::string& key) const;
         bool CORRADE_UTILITY_LOCAL verifyKey(char shortKey) const;
         std::vector<Entry>::iterator CORRADE_UTILITY_LOCAL find(const std::string& key);
@@ -368,10 +473,12 @@ class CORRADE_UTILITY_EXPORT Arguments {
 
         std::string valueInternal(const std::string& key) const;
 
+        std::string _prefix;
         std::string _command;
         std::string _help;
         std::vector<Entry> _entries;
         std::vector<std::string> _values;
+        std::vector<std::pair<std::string, std::string>> _skippedPrefixes;
         std::vector<bool> _booleans;
 };
 

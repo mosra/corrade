@@ -49,7 +49,7 @@ namespace {
 }
 
 struct Arguments::Entry {
-    Entry(Type type, char shortKey, std::string key, std::string defaultValue, std::size_t id);
+    Entry(Type type, char shortKey, std::string key, std::string helpKey, std::string defaultValue, std::size_t id);
 
     Type type;
     char shortKey;
@@ -57,12 +57,18 @@ struct Arguments::Entry {
     std::size_t id;
 };
 
-Arguments::Entry::Entry(Type type, char shortKey, std::string key, std::string defaultValue, std::size_t id): type(type), shortKey(shortKey), key(std::move(key)), defaultValue(std::move(defaultValue)), id(id) {
+Arguments::Entry::Entry(Type type, char shortKey, std::string key, std::string helpKey, std::string defaultValue, std::size_t id): type(type), shortKey(shortKey), key(std::move(key)), defaultValue(std::move(defaultValue)), id(id) {
     if(type == Type::NamedArgument || type == Type::Option)
-        helpKey = this->key + ' ' + String::uppercase(this->key);
-    else helpKey = this->key;
+        this->helpKey = this->key + ' ' + String::uppercase(helpKey);
+    else this->helpKey = std::move(helpKey);
 
     CORRADE_INTERNAL_ASSERT(type == Type::Option || this->defaultValue.empty());
+}
+
+Arguments::Arguments(std::string prefix): _prefix{prefix + '-'} {
+    /* Add help option */
+    addBooleanOption("help");
+    setHelp("help", "display this help message and exit");
 }
 
 Arguments::Arguments() {
@@ -74,12 +80,16 @@ Arguments::Arguments() {
 Arguments::~Arguments() = default;
 
 Arguments& Arguments::addArgument(std::string key) {
+    CORRADE_ASSERT(_prefix.empty(),
+        "Utility::Arguments::addArgument(): argument" << key << "not allowed in prefixed version", *this);
+
     CORRADE_ASSERT(!key.empty(), "Utility::Arguments::addArgument(): key must not be empty", *this);
 
     /* Verify that the argument has unique key */
     CORRADE_ASSERT(find(key) == _entries.end(), "Utility::Arguments::addArgument(): the key" << key << "is already used", *this);
 
-    _entries.emplace_back(Type::Argument, '\0', std::move(key), std::string(), _values.size());
+    std::string helpKey = key;
+    _entries.emplace_back(Type::Argument, '\0', std::move(key), std::move(helpKey), std::string(), _values.size());
     _values.emplace_back();
     return *this;
 }
@@ -88,11 +98,14 @@ Arguments& Arguments::addNamedArgument(char shortKey, std::string key) {
     CORRADE_ASSERT(verifyKey(shortKey) && verifyKey(key),
         "Utility::Arguments::addNamedArgument(): invalid key" << key << "or its short variant", *this);
 
-    /* Verify that the option has unique key */
-    CORRADE_ASSERT((!shortKey || find(shortKey) == _entries.end()) && find(key) == _entries.end(),
+    CORRADE_ASSERT((!shortKey || find(shortKey) == _entries.end()) && find(_prefix + key) == _entries.end(),
         "Utility::Arguments::addNamedArgument(): the key" << key << "or its short version is already used", *this);
 
-    _entries.emplace_back(Type::NamedArgument, shortKey, std::move(key), std::string(), _values.size());
+    CORRADE_ASSERT(_prefix.empty(),
+        "Utility::Arguments::addNamedArgument(): argument" << key << "not allowed in prefixed version", *this);
+
+    std::string helpKey = key;
+    _entries.emplace_back(Type::NamedArgument, shortKey, std::move(key), std::move(helpKey), std::string(), _values.size());
     _values.emplace_back();
     return *this;
 }
@@ -101,11 +114,23 @@ Arguments& Arguments::addOption(char shortKey, std::string key, std::string defa
     CORRADE_ASSERT(verifyKey(shortKey) && verifyKey(key),
         "Utility::Arguments::addOption(): invalid key" << key << "or its short variant", *this);
 
-    /* Verify that the option has unique key */
-    CORRADE_ASSERT((!shortKey || find(shortKey) == _entries.end()) && find(key) == _entries.end(),
+    CORRADE_ASSERT((!shortKey || find(shortKey) == _entries.end()) && find(_prefix + key) == _entries.end(),
         "Utility::Arguments::addOption(): the key" << key << "or its short version is already used", *this);
 
-    _entries.emplace_back(Type::Option, shortKey, std::move(key), std::move(defaultValue), _values.size());
+    CORRADE_ASSERT(_prefix.empty() || shortKey == '\0',
+        "Utility::Arguments::addOption(): short option" << std::string{shortKey} << "not allowed in prefixed version", *this);
+    CORRADE_ASSERT(!skippedPrefix(key),
+        "Utility::Arguments::addOption(): key" << key << "conflicts with skipped prefixes", *this);
+
+    std::string helpKey;
+    if(_prefix.empty())
+        helpKey = key;
+    else {
+        std::string tmp = std::move(key);
+        key = _prefix + tmp;
+        helpKey = std::move(tmp);
+    }
+    _entries.emplace_back(Type::Option, shortKey, std::move(key), std::move(helpKey), std::move(defaultValue), _values.size());
     _values.emplace_back();
     return *this;
 }
@@ -114,12 +139,47 @@ Arguments& Arguments::addBooleanOption(char shortKey, std::string key) {
     CORRADE_ASSERT(verifyKey(shortKey) && verifyKey(key),
         "Utility::Arguments::addBooleanOption(): invalid key" << key << "or its short variant", *this);
 
-    /* Verify that the option has unique key */
     CORRADE_ASSERT((!shortKey || find(shortKey) == _entries.end()) && find(key) == _entries.end(),
         "Utility::Arguments::addBooleanOption(): the key" << key << "or its short version is already used", *this);
 
-    _entries.emplace_back(Type::BooleanOption, shortKey, std::move(key), std::string(), _booleans.size());
+    CORRADE_ASSERT(_prefix.empty() || key == "help",
+        "Utility::Arguments::addBooleanOption(): boolean option" << key << "not allowed in prefixed version", *this);
+    CORRADE_ASSERT(!skippedPrefix(key),
+        "Utility::Arguments::addBooleanOption(): key" << key << "conflicts with skipped prefixes", *this);
+
+    /* The prefix addition is here only for --prefix-help, which is the only
+       allowed boolean option */
+    std::string helpKey;
+    if(_prefix.empty())
+        helpKey = key;
+    else
+        helpKey = key = _prefix + std::move(key);
+    _entries.emplace_back(Type::BooleanOption, shortKey, std::move(key), std::move(helpKey), std::string(), _booleans.size());
     _booleans.push_back(false);
+    return *this;
+}
+
+namespace {
+    inline bool keyHasPrefix(const std::string& key, const std::string& prefix) {
+        if(key.size() < prefix.size()) return false;
+        return std::equal(prefix.begin(), prefix.end(), key.begin());
+    }
+}
+
+Arguments& Arguments::addSkippedPrefix(std::string prefix, std::string help) {
+    CORRADE_ASSERT(!skippedPrefix(prefix),
+        "Utility::Arguments::addSkippedPrefix(): prefix" << prefix << "already added", *this);
+
+    /* Verify that no already added option conflicts with this */
+    for(const Entry& entry: _entries)
+        CORRADE_ASSERT(!keyHasPrefix(entry.key, prefix),
+            "Utility::Arguments::addSkippedPrefix(): skipped prefix" << prefix << "conflicts with existing keys", *this);
+
+    /* Add `-` to the end so we always compare with `--prefix-` and not just
+       `--prefix` */
+    prefix += '-';
+
+    _skippedPrefixes.emplace_back(std::move(prefix), std::move(help));
     return *this;
 }
 
@@ -129,25 +189,28 @@ Arguments& Arguments::setCommand(std::string name) {
 }
 
 Arguments& Arguments::setHelp(std::string help) {
+    CORRADE_ASSERT(_prefix.empty(),
+        "Utility::Arguments::setHelp(): global help text only allowed in unprefixed version", *this);
+
     _help = std::move(help);
     return *this;
 }
 
 Arguments& Arguments::setHelp(const std::string& key, std::string help) {
-    auto found = find(key);
+    auto found = find(_prefix + key);
     CORRADE_ASSERT(found != _entries.end(), "Utility::Arguments::setHelp(): key" << key << "doesn't exist", *this);
     found->help = std::move(help);
     return *this;
 }
 
 Arguments& Arguments::setHelpKey(const std::string& key, std::string helpKey) {
-    auto found = find(key);
+    auto found = find(_prefix + key);
     CORRADE_ASSERT(found != _entries.end(), "Utility::Arguments::setHelp(): key" << key << "doesn't exist", *this);
     CORRADE_ASSERT(found->type != Type::BooleanOption,
         "Utility::Arguments::setHelpKey(): help key can't be set for boolean option", *this);
 
     if(found->type == Type::NamedArgument || found->type == Type::Option)
-        found->helpKey = key + ' ' + std::move(helpKey);
+        found->helpKey = _prefix + key + ' ' + std::move(helpKey);
     else found->helpKey = std::move(helpKey);
 
     return *this;
@@ -194,7 +257,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
     std::vector<Entry>::iterator nextArgument = _entries.begin();
     std::vector<bool> parsedArguments(_entries.size());
 
-    for(int i = 1; i != argc; ++i) {
+    for(int i = 1; i < argc; ++i) {
         /* Value for given argument */
         if(valueFor != _entries.end()) {
             CORRADE_INTERNAL_ASSERT(valueFor->type != Type::BooleanOption);
@@ -214,6 +277,9 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
 
             /* Short option */
             if(len == 2) {
+                /* Ignore if this is the prefixed version */
+                if(!_prefix.empty()) continue;
+
                 const char key = argv[i][1];
 
                 /* Option / argument separator */
@@ -243,6 +309,24 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                         return false;
                     }
 
+                    /* If this is prefixed version and the option does not have
+                       the prefix, ignore */
+                    if(!_prefix.empty() && !keyHasPrefix(key, _prefix))
+                        continue;
+
+                    /* If skipped prefix, ignore the option and its value */
+                    bool ignore = false;
+                    for(auto&& prefix: _skippedPrefixes) {
+                        if(!keyHasPrefix(key, prefix.first)) continue;
+
+                        /* Ignore the option and also its value (except for
+                           help, which is the only allowed boolean option) */
+                        ignore = true;
+                        if(key != prefix.first + "help") ++i;
+                        break;
+                    }
+                    if(ignore) continue;
+
                     /* Find the option */
                     found = find(key);
                     if(found == _entries.end()) {
@@ -269,6 +353,9 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
 
         /* Argument */
         } else {
+            /* Ignore if this is the prefixed version */
+            if(!_prefix.empty()) continue;
+
             /* Find next argument */
             const auto found = findNextArgument(nextArgument);
             if(found == _entries.end()) {
@@ -312,7 +399,11 @@ std::string Arguments::usage() const {
     std::ostringstream out;
     out << "Usage:\n  " << (_command.empty() ? "./app" : _command);
 
-    /* Print all options and named argument first */
+    /* Print all skipped prefixes */
+    for(auto&& prefix: _skippedPrefixes)
+        out << " [--" << prefix.first << "...]";
+
+    /* Print all options and named argument */
     bool hasArguments = false;
     for(const Entry& entry: _entries) {
         if(entry.type == Type::Argument) {
@@ -347,6 +438,10 @@ std::string Arguments::usage() const {
         out << ' ' << entry.helpKey;
     }
 
+    /* Print ellipsis for main application arguments, if this is an prefixed
+       version */
+    if(!_prefix.empty()) out << " ...";
+
     out << '\n';
 
     return out.str();
@@ -363,6 +458,17 @@ std::string Arguments::help() const {
     /* Compute key column width. Minimal is to display `-h, --help` */
     constexpr std::size_t maxKeyColumnWidth = 27;
     std::size_t keyColumnWidth = 11;
+    for(auto&& prefix: _skippedPrefixes) {
+        /* Add space for `--` at the beginning and `...` at the end */
+        keyColumnWidth = std::max(prefix.first.size() + 5, keyColumnWidth);
+
+        /* If the key width is larger than maximum, cut it. Also no need to
+           process more entries, as no key width can be larger than this */
+        if(keyColumnWidth >= maxKeyColumnWidth) {
+            keyColumnWidth = maxKeyColumnWidth;
+            break;
+        }
+    }
     for(const Entry& entry: _entries) {
         /* Entry which will not be printed, skip */
         if(entry.help.empty() && (entry.type == Type::Option && entry.defaultValue.empty()))
@@ -390,6 +496,12 @@ std::string Arguments::help() const {
 
     /* Argument and option list */
     out << "\nArguments:\n";
+
+    /* If prefixed, print the info about unprefixed arguments */
+    if(!_prefix.empty()) {
+        out << "  " << std::left << std::setw(keyColumnWidth) << "..." << " main application arguments\n"
+            << std::string(keyColumnWidth + 3, ' ') << "(see -h or --help for details)\n";
+    }
 
     /* Print all arguments first */
     for(const Entry& entry: _entries) {
@@ -423,11 +535,18 @@ std::string Arguments::help() const {
         }
     }
 
+    /* Print references to skipped prefies last */
+    for(auto&& prefix: _skippedPrefixes) {
+        out << "  --" << std::left << std::setw(keyColumnWidth - 1) << prefix.first + "... ";
+        if(!prefix.second.empty()) out << prefix.second << '\n' << std::string(keyColumnWidth + 3, ' ');
+        out << "(see --" << prefix.first << "help for details)\n";
+    }
+
     return out.str();
 }
 
 std::string Arguments::valueInternal(const std::string& key) const {
-    const auto found = find(key);
+    const auto found = find(_prefix + key);
     CORRADE_ASSERT(found != _entries.end(), "Utility::Arguments::value(): key" << key << "not found", {});
     CORRADE_ASSERT(found->type != Type::BooleanOption,
         "Utility::Arguments::value(): cannot use this function for boolean option" << key, {});
@@ -436,12 +555,19 @@ std::string Arguments::valueInternal(const std::string& key) const {
 }
 
 bool Arguments::isSet(const std::string& key) const {
-    const auto found = find(key);
+    const auto found = find(_prefix + key);
     CORRADE_ASSERT(found != _entries.end(), "Utility::Arguments::value(): key" << key << "not found", false);
     CORRADE_ASSERT(found->type == Type::BooleanOption,
         "Utility::Arguments::isSet(): cannot use this function for non-boolean value" << key, false);
     CORRADE_INTERNAL_ASSERT(found->id < _booleans.size());
     return _booleans[found->id];
+}
+
+bool Arguments::skippedPrefix(const std::string& key) const {
+    for(auto&& prefix: _skippedPrefixes)
+        if(keyHasPrefix(key, prefix.first)) return true;
+
+    return false;
 }
 
 bool Arguments::verifyKey(const std::string& key) const {
