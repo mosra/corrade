@@ -365,7 +365,7 @@ std::string Arguments::help() const {
     std::size_t keyColumnWidth = 11;
     for(const Entry& entry: _entries) {
         /* Entry which will not be printed, skip */
-        if(entry.help.empty() || (entry.type == Type::Option && entry.defaultValue.empty()))
+        if(entry.help.empty() && (entry.type == Type::Option && entry.defaultValue.empty()))
             continue;
 
         /* Compute size of current key column. Make it so the key name is
