@@ -1,0 +1,10 @@
+corrade-dev.debhelper.log
+corrade-dev.substvars
+corrade-dev/
+corrade.debhelper.log
+corrade.postinst.debhelper
+corrade.postrm.debhelper
+corrade.substvars
+corrade/
+files
+tmp/
