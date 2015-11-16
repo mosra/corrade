@@ -306,10 +306,10 @@ This will compile and generate library and development RPM for Corrade in
 
 There is also `package/debian/` directory with all files needed for building
 Debian packages. In addition you will need `dpkg-dev` and `debhelper` packages.
-Building is easy, just change directory to package root, copy `package/debian`
-directory there and run `dpkg-buildpackage`:
+Building is easy, just change directory to package root, link or copy
+`package/debian` directory there and run `dpkg-buildpackage`:
 
-    cp -r package/debian .
+    ln -s package/debian .
     dpkg-buildpackage
 
 This will compile binary and development packages, which will then appear in
