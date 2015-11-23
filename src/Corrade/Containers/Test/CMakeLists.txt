@@ -27,5 +27,6 @@ corrade_add_test(ContainersArrayTest ArrayTest.cpp)
 corrade_add_test(ContainersArrayViewTest ArrayViewTest.cpp)
 corrade_add_test(ContainersEnumSetTest EnumSetTest.cpp)
 corrade_add_test(ContainersLinkedListTest LinkedListTest.cpp)
+corrade_add_test(ContainersTagsTest TagsTest.cpp)
 
 set_target_properties(ContainersLinkedListTest ContainersArrayViewTest PROPERTIES COMPILE_FLAGS -DCORRADE_GRACEFUL_ASSERT)

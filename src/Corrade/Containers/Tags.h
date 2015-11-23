@@ -38,7 +38,13 @@ Used to distinguish construction using default initialization (builtin types
 are not initialized, others are default-constructed).
 @see @ref DefaultInit
 */
-struct DefaultInitT {};
+/* Explicit constructor to avoid ambiguous calls when using {} */
+struct DefaultInitT {
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    struct Init{};
+    constexpr explicit DefaultInitT(Init) {}
+    #endif
+};
 
 /**
 @brief Value initialization tag type
@@ -47,7 +53,13 @@ Used to distinguish construction using value initialization (builtin types are
 zeroed out, others are default-constructed).
 @see @ref ValueInit
 */
-struct ValueInitT {};
+/* Explicit constructor to avoid ambiguous calls when using {} */
+struct ValueInitT {
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    struct Init{};
+    constexpr explicit ValueInitT(Init) {}
+    #endif
+};
 
 /**
 @brief No initialization tag type
@@ -55,7 +67,13 @@ struct ValueInitT {};
 Used to distinguish construction with no initialization at all.
 @see @ref NoInit
 */
-struct NoInitT {};
+/* Explicit constructor to avoid ambiguous calls when using {} */
+struct NoInitT {
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    struct Init{};
+    constexpr explicit NoInitT(Init) {}
+    #endif
+};
 
 /**
 @brief Direct initialization tag type
@@ -63,7 +81,13 @@ struct NoInitT {};
 Used to distinguish construction with direct initialization.
 @see @ref DirectInit
 */
-struct DirectInitT {};
+/* Explicit constructor to avoid ambiguous calls when using {} */
+struct DirectInitT {
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    struct Init{};
+    constexpr explicit DirectInitT(Init) {}
+    #endif
+};
 
 /**
 @brief Default initialization tag
@@ -71,7 +95,7 @@ struct DirectInitT {};
 Use for construction using default initialization (builtin types are not
 initialized, others are default-constructed).
 */
-constexpr DefaultInitT DefaultInit{};
+constexpr DefaultInitT DefaultInit{DefaultInitT::Init{}};
 
 /**
 @brief Value initialization tag
@@ -79,21 +103,21 @@ constexpr DefaultInitT DefaultInit{};
 Use for construction using value initialization (builtin types are zeroed out,
 others are default-constructed).
 */
-constexpr ValueInitT ValueInit{};
+constexpr ValueInitT ValueInit{ValueInitT::Init{}};
 
 /**
 @brief No initialization tag
 
 Use for construction with no initialization at all.
 */
-constexpr NoInitT NoInit{};
+constexpr NoInitT NoInit{NoInitT::Init{}};
 
 /**
 @brief Direct initialization tag
 
 Use for construction with direct initialization.
 */
-constexpr DirectInitT DirectInit{};
+constexpr DirectInitT DirectInit{DirectInitT::Init{}};
 
 }}
 
