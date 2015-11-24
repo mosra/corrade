@@ -60,7 +60,7 @@ template<class T> class Manager: public AbstractManager {
          *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" as only static
          *      plugins are supported.
          */
-        explicit Manager(std::string pluginDirectory): AbstractManager(T::pluginInterface(), std::move(pluginDirectory)) {}
+        explicit Manager(std::string pluginDirectory = {}): AbstractManager(T::pluginInterface(), std::move(pluginDirectory)) {}
 
         /**
          * @brief Plugin instance
