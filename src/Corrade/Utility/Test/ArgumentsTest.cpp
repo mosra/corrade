@@ -266,9 +266,11 @@ void ArgumentsTest::parseHelp() {
     const char* argv[] = { "", "-h", "--no-foo-bars", "error" };
     const int argc = std::extent<decltype(argv)>();
 
-    CORRADE_VERIFY(args.tryParse(argc, argv));
+    /* The parse() will not exit if help is set, but tryParse() should indicate
+       the error */
+    CORRADE_VERIFY(!args.tryParse(argc, argv));
     CORRADE_VERIFY(args.isSet("help"));
-    CORRADE_VERIFY(!args.isSet("no-foo-bars"));
+    CORRADE_VERIFY(args.isSet("no-foo-bars"));
 }
 
 void ArgumentsTest::parseArguments() {

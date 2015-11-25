@@ -243,13 +243,6 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
         _values[entry.id] = entry.defaultValue;
     }
 
-    /* Check for --help first, exit if found */
-    if(argc >= 2 && (std::strcmp(argv[1], "-h") == 0 || std::strcmp(argv[1], "--help") == 0)) {
-        CORRADE_INTERNAL_ASSERT(_entries[0].shortKey == 'h' && _entries[0].id == 0);
-        _booleans[0] = true;
-        return true;
-    }
-
     std::vector<Entry>::iterator valueFor = _entries.end();
     bool optionsAllowed = true;
     std::vector<Entry>::iterator nextArgument = _entries.begin();
