@@ -181,8 +181,8 @@ function(corrade_add_test test_name)
 endfunction()
 
 function(corrade_add_resource name configurationFile)
-    # Add the file as dependency, parse more dependencies from the file
-    set(dependencies "${configurationFile}")
+    # Parse dependencies from the file
+    set(dependencies )
     set(filenameRegex "^[ \t]*filename[ \t]*=[ \t]*\"?([^\"]+)\"?[ \t]*$")
     get_filename_component(configurationFilePath ${configurationFile} PATH)
     file(STRINGS "${configurationFile}" files REGEX ${filenameRegex})
@@ -197,12 +197,21 @@ function(corrade_add_resource name configurationFile)
     # Force IDEs display also the resource files in project view
     add_custom_target(${name}-dependencies SOURCES ${dependencies})
 
-    # Run command
+    # Output file name
     set(out "${CMAKE_CURRENT_BINARY_DIR}/resource_${name}.cpp")
+    set(outDepends "${CMAKE_CURRENT_BINARY_DIR}/resource_${name}.depends")
+
+    # Use configure_file() to trick CMake to re-run and update the dependency
+    # list when the resource list file changes (otherwise it parses the file
+    # only during the explicit configure step and never again, thus additions/
+    # deletions are not recognized automatically)
+    configure_file(${configurationFile} ${outDepends} COPYONLY)
+
+    # Run command
     add_custom_command(
         OUTPUT "${out}"
         COMMAND "${CORRADE_RC_EXECUTABLE}" ${name} "${configurationFile}" "${out}"
-        DEPENDS "${CORRADE_RC_EXECUTABLE}" ${dependencies} ${name}-dependencies
+        DEPENDS "${CORRADE_RC_EXECUTABLE}" ${outDepends} ${dependencies} ${name}-dependencies
         COMMENT "Compiling data resource file ${out}"
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
