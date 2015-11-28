@@ -171,9 +171,11 @@ Arguments& Arguments::addSkippedPrefix(std::string prefix, std::string help) {
         "Utility::Arguments::addSkippedPrefix(): prefix" << prefix << "already added", *this);
 
     /* Verify that no already added option conflicts with this */
+    #ifndef CORRADE_NO_ASSERT
     for(const Entry& entry: _entries)
         CORRADE_ASSERT(!keyHasPrefix(entry.key, prefix),
             "Utility::Arguments::addSkippedPrefix(): skipped prefix" << prefix << "conflicts with existing keys", *this);
+    #endif
 
     /* Add `-` to the end so we always compare with `--prefix-` and not just
        `--prefix` */
