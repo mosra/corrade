@@ -81,7 +81,7 @@ if(BUILD_STATIC)
 endif()
 
 # Initialize macros etc.
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
 set(CORRADE_UTILITY_LIBRARY CorradeUtility)
 if(NOT CMAKE_CROSSCOMPILING)
     set(CORRADE_RC_EXECUTABLE corrade-rc)
