@@ -146,3 +146,7 @@ if(BUILD_TESTS)
 
     add_subdirectory(Test)
 endif()
+
+# Corrade Utility library and rc executable for superprojects
+set(CORRADE_UTILITY_LIBRARY CorradeUtility CACHE INTERNAL "")
+set(CORRADE_RC_EXECUTABLE corrade-rc CACHE INTERNAL "")

@@ -58,3 +58,6 @@ install(FILES ${CorradeInterconnect_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTA
 if(BUILD_TESTS)
     add_subdirectory(Test)
 endif()
+
+# Corrade Interconnect library for superprojects
+set(CORRADE_INTERCONNECT_LIBRARY CorradeInterconnect CACHE INTERNAL "")

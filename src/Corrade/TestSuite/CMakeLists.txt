@@ -61,3 +61,6 @@ add_subdirectory(Compare)
 if(BUILD_TESTS)
     add_subdirectory(Test)
 endif()
+
+# Corrade TestSuite library for superprojects
+set(CORRADE_TESTSUITE_LIBRARY CorradeTestSuite CACHE INTERNAL "")

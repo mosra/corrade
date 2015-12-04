@@ -30,3 +30,6 @@ set(Corrade_MODULES
     UseCorrade.cmake)
 
 install(FILES ${Corrade_MODULES} DESTINATION ${CORRADE_CMAKE_MODULE_INSTALL_DIR})
+
+# Corrade module dir for superprojects
+set(_CORRADE_MODULE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "")

@@ -105,3 +105,6 @@ if(BUILD_TESTS)
 
     add_subdirectory(Test)
 endif()
+
+# Corrade PluginManager library for superprojects
+set(CORRADE_PLUGINMANAGER_LIBRARY CorradePluginManager CACHE INTERNAL "")

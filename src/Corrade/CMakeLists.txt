@@ -52,3 +52,6 @@ add_subdirectory(Interconnect)
 add_subdirectory(PluginManager)
 add_subdirectory(TestSuite)
 add_subdirectory(Utility)
+
+# Corrade configure file for superprojects
+set(_CORRADE_CONFIGURE_FILE ${CMAKE_CURRENT_BINARY_DIR}/configure.h CACHE INTERNAL "")
