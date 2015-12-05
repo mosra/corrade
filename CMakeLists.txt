@@ -36,8 +36,8 @@ if(BUILD_DEPRECATED)
 endif()
 
 option(BUILD_STATIC "Build static libraries (default are shared)" OFF)
-cmake_dependent_option(BUILD_STATIC_PIC "Build static libraries with position-independent code" OFF "BUILD_STATIC" OFF)
-option(BUILD_TESTS "Build unit tests." OFF)
+cmake_dependent_option(BUILD_STATIC_PIC "Build static libraries with position-independent code" ON "BUILD_STATIC" OFF)
+option(BUILD_TESTS "Build unit tests" OFF)
 
 if(BUILD_TESTS)
     enable_testing()
