@@ -23,7 +23,11 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-set(FILETEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/FileTestFiles)
+if(CORRADE_TARGET_EMSCRIPTEN)
+    set(FILETEST_DIR /FileTestFiles)
+else()
+    set(FILETEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/FileTestFiles)
+endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
@@ -35,3 +39,9 @@ corrade_add_test(TestSuiteCompareFileTest FileTest.cpp)
 corrade_add_test(TestSuiteCompareFileToStringTest FileToStringTest.cpp)
 corrade_add_test(TestSuiteCompareFloatingPointTest FloatingPointTest.cpp)
 corrade_add_test(TestSuiteCompareStringToFileTest StringToFileTest.cpp)
+
+if(CORRADE_TARGET_EMSCRIPTEN)
+    emscripten_embed_file(TestSuiteCompareFileTest FileTestFiles "/FileTestFiles")
+    emscripten_embed_file(TestSuiteCompareFileToStringTest FileTestFiles "/FileTestFiles")
+    emscripten_embed_file(TestSuiteCompareStringToFileTest FileTestFiles "/FileTestFiles")
+endif()

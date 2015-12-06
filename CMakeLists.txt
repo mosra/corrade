@@ -126,6 +126,10 @@ endif()
 
 include(UseCorrade)
 
+if(CORRADE_TARGET_EMSCRIPTEN)
+    include(UseEmscripten)
+endif()
+
 # Installation paths
 include(CorradeLibSuffix)
 set(CORRADE_BINARY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/bin)

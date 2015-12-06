@@ -25,8 +25,13 @@
 
 include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 
-set(UTILITY_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(UTILITY_BINARY_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR})
+if(CORRADE_TARGET_EMSCRIPTEN)
+    set(UTILITY_TEST_DIR "")
+    set(UTILITY_BINARY_TEST_DIR "/write")
+else()
+    set(UTILITY_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+    set(UTILITY_BINARY_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR})
+endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
@@ -57,3 +62,11 @@ corrade_add_test(UtilityResourceTest
 # Static lib resource test
 add_library(ResourceTestDataLib STATIC ${ResourceTestData})
 corrade_add_test(UtilityResourceStaticTest ResourceStaticTest.cpp LIBRARIES ResourceTestDataLib)
+
+if(CORRADE_TARGET_EMSCRIPTEN)
+    emscripten_embed_file(UtilityConfigurationTest ConfigurationTestFiles "/ConfigurationTestFiles")
+    emscripten_embed_file(UtilityConfigurationTest ConfigurationTestFiles "/write/ConfigurationTestFiles")
+    emscripten_embed_file(UtilityDirectoryTest DirectoryTestFiles "/DirectoryTestFiles")
+    emscripten_embed_file(UtilityDirectoryTest DirectoryTestFiles "/write/DirectoryTestFiles")
+    emscripten_embed_file(UtilityResourceTest ResourceTestFiles "/ResourceTestFiles")
+endif()
