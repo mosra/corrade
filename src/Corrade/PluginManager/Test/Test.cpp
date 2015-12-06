@@ -192,7 +192,11 @@ void Test::loadNonexistent() {
     std::ostringstream out;
     Error::setOutput(&out);
     CORRADE_COMPARE(manager.load("Nonexistent"), LoadState::NotFound);
+    #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_NACL_NEWLIB)
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): plugin Nonexistent was not found\n");
+    #else
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): plugin Nonexistent is not static and was not found in " + pluginsDir + "\n");
+    #endif
 }
 
 void Test::unloadNonexistent() {
