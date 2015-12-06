@@ -164,6 +164,7 @@ void ConfigurationTest::parseHierarchic() {
     Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "hierarchic.conf"));
     conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"));
     CORRADE_VERIFY(conf.isValid());
+    CORRADE_VERIFY(!conf.isEmpty());
 
     /* Check parsing */
     CORRADE_VERIFY(conf.hasGroup("z"));
@@ -196,6 +197,8 @@ void ConfigurationTest::parseHierarchic() {
 void ConfigurationTest::groupIndex() {
     std::istringstream in("[a]\n[a]\n");
     Configuration conf(in);
+    CORRADE_VERIFY(conf.isValid());
+    CORRADE_VERIFY(!conf.isEmpty());
 
     CORRADE_VERIFY(conf.hasGroup("a", 0));
     CORRADE_VERIFY(conf.hasGroup("a", 1));
@@ -205,6 +208,8 @@ void ConfigurationTest::groupIndex() {
 void ConfigurationTest::valueIndex() {
     std::istringstream in("a=\na=\n");
     Configuration conf(in);
+    CORRADE_VERIFY(conf.isValid());
+    CORRADE_VERIFY(!conf.isEmpty());
 
     CORRADE_VERIFY(conf.hasValue("a", 0));
     CORRADE_VERIFY(conf.hasValue("a", 1));
@@ -302,6 +307,8 @@ void ConfigurationTest::whitespaces() {
 
 void ConfigurationTest::types() {
     Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "types.conf"), Configuration::Flag::ReadOnly);
+    CORRADE_VERIFY(conf.isValid());
+    CORRADE_VERIFY(!conf.isEmpty());
 
     /* String */
     CORRADE_COMPARE(conf.value("string"), "value");
@@ -353,6 +360,8 @@ void ConfigurationTest::types() {
 
 void ConfigurationTest::typesScientific() {
     Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "types-scientific.conf"), Configuration::Flag::ReadOnly);
+    CORRADE_VERIFY(conf.isValid());
+    CORRADE_VERIFY(!conf.isEmpty());
 
     CORRADE_COMPARE(conf.value<double>("exp"), 2.1e7);
     CORRADE_COMPARE(conf.value<double>("expPos"), 2.1e+7);
@@ -381,18 +390,24 @@ void ConfigurationTest::eol() {
     {
         /* Autodetect Unix */
         Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "eol-unix.conf"), Configuration::Flag::ReadOnly);
+        CORRADE_VERIFY(conf.isValid());
+        CORRADE_VERIFY(!conf.isEmpty());
         CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-unix.conf")));
         CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-unix.conf"),
             "key=value\n", TestSuite::Compare::FileToString);
     } {
         /* Autodetect Windows */
         Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "eol-windows.conf"), Configuration::Flag::ReadOnly);
+        CORRADE_VERIFY(conf.isValid());
+        CORRADE_VERIFY(!conf.isEmpty());
         CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-windows.conf")));
         CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-windows.conf"),
             "key=value\r\n", TestSuite::Compare::FileToString);
     } {
         /* Autodetect mixed (both \r and \r\n) */
         Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "eol-mixed.conf"), Configuration::Flag::ReadOnly);
+        CORRADE_VERIFY(conf.isValid());
+        CORRADE_VERIFY(!conf.isEmpty());
         CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-mixed.conf")));
         CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-mixed.conf"),
             "key=value\r\nkey=value\r\n", TestSuite::Compare::FileToString);
@@ -400,6 +415,7 @@ void ConfigurationTest::eol() {
         /* Force Unix */
         Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
             Configuration::Flag::Truncate|Configuration::Flag::ForceUnixEol);
+        CORRADE_VERIFY(conf.isValid());
         CORRADE_VERIFY(conf.setValue("key", "value"));
         CORRADE_VERIFY(conf.save());
         CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
@@ -408,6 +424,7 @@ void ConfigurationTest::eol() {
         /* Force Windows */
         Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
             Configuration::Flag::Truncate|Configuration::Flag::ForceWindowsEol);
+        CORRADE_VERIFY(conf.isValid());
         CORRADE_VERIFY(conf.setValue("key", "value"));
         CORRADE_VERIFY(conf.save());
         CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
@@ -416,6 +433,7 @@ void ConfigurationTest::eol() {
         /* Default */
         Configuration conf(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
             Configuration::Flag::Truncate);
+        CORRADE_VERIFY(conf.isValid());
         CORRADE_VERIFY(conf.setValue("key", "value"));
         CORRADE_VERIFY(conf.save());
         CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "eol-temp.conf"),
@@ -425,6 +443,9 @@ void ConfigurationTest::eol() {
 
 void ConfigurationTest::stripComments() {
     Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "comments.conf"), Configuration::Flag::SkipComments);
+    CORRADE_VERIFY(conf.isValid());
+    CORRADE_VERIFY(!conf.isEmpty());
+
     conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "comments.conf"));
 
     /* Verify that comments were removed */
@@ -441,6 +462,7 @@ void ConfigurationTest::multiLineValue() {
     Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "multiLine.conf"));
     conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine.conf"));
     CORRADE_VERIFY(conf.isValid());
+    CORRADE_VERIFY(!conf.isEmpty());
 
     /* Check parsing */
     CORRADE_COMPARE(conf.value("value"), " Hello\n people how\n are you?");
@@ -460,6 +482,7 @@ void ConfigurationTest::multiLineValueCrlf() {
     Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "multiLine-crlf.conf"));
     conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "multiLine-crlf.conf"));
     CORRADE_VERIFY(conf.isValid());
+    CORRADE_VERIFY(!conf.isEmpty());
 
     /* Check parsing */
     CORRADE_COMPARE(conf.value("value"), " Hello\n people how\n are you?");
