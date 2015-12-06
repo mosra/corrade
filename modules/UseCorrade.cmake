@@ -173,6 +173,9 @@ function(corrade_add_test test_name)
     add_executable(${test_name} ${sources})
     target_link_libraries(${test_name} ${libraries} ${CORRADE_TESTSUITE_LIBRARIES})
     if(CORRADE_TARGET_EMSCRIPTEN)
+        # Emscripten needs to have exceptions enabled for TestSuite to work
+        # properly
+        set_target_properties(${test_name} PROPERTIES LINK_FLAGS "-s DISABLE_EXCEPTION_CATCHING=0")
         find_package(NodeJs REQUIRED)
         add_test(NAME ${test_name} COMMAND ${NODEJS_EXECUTABLE} --stack-trace-limit=0 $<TARGET_FILE:${test_name}>)
     else()
