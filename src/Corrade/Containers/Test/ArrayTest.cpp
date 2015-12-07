@@ -53,6 +53,7 @@ struct ArrayTest: TestSuite::Tester {
     void rangeBasedFor();
 
     void slice();
+    void sliceToStatic();
     void release();
 
     void customDeleter();
@@ -84,6 +85,7 @@ ArrayTest::ArrayTest() {
               &ArrayTest::rangeBasedFor,
 
               &ArrayTest::slice,
+              &ArrayTest::sliceToStatic,
               &ArrayTest::release,
 
               &ArrayTest::customDeleter,
@@ -336,6 +338,21 @@ void ArrayTest::slice() {
     CORRADE_COMPARE(dc[0], 3);
     CORRADE_COMPARE(dc[1], 4);
     CORRADE_COMPARE(dc[2], 5);
+}
+
+void ArrayTest::sliceToStatic() {
+    Array a = Array::from(1, 2, 3, 4, 5);
+    const Array ac = Array::from(1, 2, 3, 4, 5);
+
+    StaticArrayView<3, int> b = a.slice<3>(1);
+    CORRADE_COMPARE(b[0], 2);
+    CORRADE_COMPARE(b[1], 3);
+    CORRADE_COMPARE(b[2], 4);
+
+    StaticArrayView<3, const int> bc = ac.slice<3>(1);
+    CORRADE_COMPARE(b[0], 2);
+    CORRADE_COMPARE(b[1], 3);
+    CORRADE_COMPARE(b[2], 4);
 }
 
 void ArrayTest::release() {

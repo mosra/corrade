@@ -51,6 +51,7 @@ struct ArrayViewTest: TestSuite::Tester {
     void sliceInvalid();
     void sliceNullptr();
     void slice();
+    void sliceToStatic();
 
     void constView();
     void voidConstruction();
@@ -81,6 +82,7 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::sliceInvalid,
               &ArrayViewTest::sliceNullptr,
               &ArrayViewTest::slice,
+              &ArrayViewTest::sliceToStatic,
 
               &ArrayViewTest::constView,
               &ArrayViewTest::voidConstruction,
@@ -230,8 +232,10 @@ void ArrayViewTest::sliceInvalid() {
     a.slice(a - 1, a);
     a.slice(a + 5, a + 6);
     a.slice(a + 2, a + 1);
+    a.slice<5>(1);
 
     CORRADE_COMPARE(out.str(), "Containers::ArrayView::slice(): slice out of range\n"
+                               "Containers::ArrayView::slice(): slice out of range\n"
                                "Containers::ArrayView::slice(): slice out of range\n"
                                "Containers::ArrayView::slice(): slice out of range\n");
 }
@@ -280,6 +284,16 @@ void ArrayViewTest::slice() {
     CORRADE_COMPARE(d[0], 3);
     CORRADE_COMPARE(d[1], 4);
     CORRADE_COMPARE(d[2], 5);
+}
+
+void ArrayViewTest::sliceToStatic() {
+    int data[5] = {1, 2, 3, 4, 5};
+    ArrayView a = data;
+
+    StaticArrayView<3, int> b = a.slice<3>(1);
+    CORRADE_COMPARE(b[0], 2);
+    CORRADE_COMPARE(b[1], 3);
+    CORRADE_COMPARE(b[2], 4);
 }
 
 void ArrayViewTest::constView() {

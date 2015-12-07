@@ -1,0 +1,217 @@
+/*
+    This file is part of Corrade.
+
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015
+              Vladimír Vondruš <mosra@centrum.cz>
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
+*/
+
+#include <sstream>
+
+#include "Corrade/Containers/ArrayView.h"
+#include "Corrade/TestSuite/Tester.h"
+
+namespace Corrade { namespace Containers { namespace Test {
+
+struct StaticArrayViewTest: TestSuite::Tester {
+    explicit StaticArrayViewTest();
+
+    void constructEmpty();
+    void constructNullptr();
+    void constructNullptrSize();
+    void construct();
+    void constructFixedSize();
+
+    void boolConversion();
+    void pointerConversion();
+
+    void access();
+    void rangeBasedFor();
+
+    void slice();
+    void sliceToStatic();
+
+    void constView();
+    void voidConversion();
+};
+
+typedef Containers::ArrayView<int> ArrayView;
+typedef Containers::ArrayView<const int> ConstArrayView;
+template<std::size_t size> using StaticArrayView = Containers::StaticArrayView<size, int>;
+template<std::size_t size> using ConstStaticArrayView = Containers::StaticArrayView<size, const int>;
+typedef Containers::ArrayView<const void> VoidArrayView;
+
+StaticArrayViewTest::StaticArrayViewTest() {
+    addTests({&StaticArrayViewTest::constructEmpty,
+              &StaticArrayViewTest::constructNullptr,
+              &StaticArrayViewTest::construct,
+              &StaticArrayViewTest::constructFixedSize,
+
+              &StaticArrayViewTest::boolConversion,
+              &StaticArrayViewTest::pointerConversion,
+
+              &StaticArrayViewTest::access,
+              &StaticArrayViewTest::rangeBasedFor,
+
+              &StaticArrayViewTest::slice,
+              &StaticArrayViewTest::sliceToStatic,
+
+              &StaticArrayViewTest::constView,
+              &StaticArrayViewTest::voidConversion});
+}
+
+void StaticArrayViewTest::constructEmpty() {
+    const StaticArrayView<5> a;
+    CORRADE_VERIFY(a == nullptr);
+}
+
+void StaticArrayViewTest::constructNullptr() {
+    const StaticArrayView<5> a = nullptr;
+    CORRADE_VERIFY(a == nullptr);
+}
+
+void StaticArrayViewTest::construct() {
+    int a[30];
+
+    const StaticArrayView<5> b{a};
+    CORRADE_VERIFY(b == a);
+
+    /* Implicit construction from pointer should not be allowed */
+    CORRADE_VERIFY(!(std::is_convertible<int*, StaticArrayView<5>>::value));
+}
+
+void StaticArrayViewTest::constructFixedSize() {
+    int a[13];
+
+    const StaticArrayView<13> b = a;
+    CORRADE_VERIFY(b == a);
+}
+
+void StaticArrayViewTest::boolConversion() {
+    int a[7];
+    CORRADE_VERIFY(StaticArrayView<5>{a});
+    CORRADE_VERIFY(!StaticArrayView<5>{});
+    CORRADE_VERIFY(!(std::is_convertible<StaticArrayView<5>, int>::value));
+}
+
+void StaticArrayViewTest::pointerConversion() {
+    int a[7];
+    StaticArrayView<7> b = a;
+    int* bp = b;
+    CORRADE_COMPARE(bp, static_cast<int*>(a));
+
+    const StaticArrayView<7> c = a;
+    const int* cp = c;
+    CORRADE_COMPARE(cp, static_cast<const int*>(a));
+
+    /* Pointer arithmetic */
+    const StaticArrayView<7> e = a;
+    const int* ep = e + 2;
+    CORRADE_COMPARE(ep, &e[2]);
+}
+
+void StaticArrayViewTest::access() {
+    int a[7];
+    StaticArrayView<7> b = a;
+    for(std::size_t i = 0; i != 7; ++i)
+        b[i] = i;
+
+    CORRADE_COMPARE(b.data(), a);
+    CORRADE_COMPARE(*(b.begin()+2), 2);
+    CORRADE_COMPARE(b[4], 4);
+    CORRADE_COMPARE(b.end()-b.begin(), 7);
+
+    ConstStaticArrayView<7> c = a;
+    CORRADE_COMPARE(c.data(), a);
+}
+
+void StaticArrayViewTest::rangeBasedFor() {
+    int a[5];
+    StaticArrayView<5> b = a;
+    for(auto& i: b)
+        i = 3;
+
+    CORRADE_COMPARE(b[0], 3);
+    CORRADE_COMPARE(b[1], 3);
+    CORRADE_COMPARE(b[2], 3);
+    CORRADE_COMPARE(b[3], 3);
+    CORRADE_COMPARE(b[4], 3);
+}
+
+void StaticArrayViewTest::slice() {
+    int data[5] = {1, 2, 3, 4, 5};
+    StaticArrayView<5> a = data;
+
+    ArrayView b = a.slice(1, 4);
+    CORRADE_COMPARE(b.size(), 3);
+    CORRADE_COMPARE(b[0], 2);
+    CORRADE_COMPARE(b[1], 3);
+    CORRADE_COMPARE(b[2], 4);
+
+    ArrayView c = a.prefix(3);
+    CORRADE_COMPARE(c.size(), 3);
+    CORRADE_COMPARE(c[0], 1);
+    CORRADE_COMPARE(c[1], 2);
+    CORRADE_COMPARE(c[2], 3);
+
+    ArrayView d = a.suffix(2);
+    CORRADE_COMPARE(d.size(), 3);
+    CORRADE_COMPARE(d[0], 3);
+    CORRADE_COMPARE(d[1], 4);
+    CORRADE_COMPARE(d[2], 5);
+}
+
+void StaticArrayViewTest::sliceToStatic() {
+    int data[5] = {1, 2, 3, 4, 5};
+    StaticArrayView<5> a = data;
+
+    StaticArrayView<3> b = a.slice<3>(1);
+    CORRADE_COMPARE(b[0], 2);
+    CORRADE_COMPARE(b[1], 3);
+    CORRADE_COMPARE(b[2], 4);
+}
+
+void StaticArrayViewTest::constView() {
+    const int a[] = {3, 4, 7, 12, 0, -15};
+
+    ConstStaticArrayView<6> b = a;
+    CORRADE_COMPARE(b[2], 7);
+
+    int c[3];
+    StaticArrayView<3> d = c;
+    ConstArrayView e = d;
+    CORRADE_VERIFY(e == c);
+}
+
+void StaticArrayViewTest::voidConversion() {
+    int a[] = {3, 4, 7, 12, 0, -15};
+
+    /** @todo C++14: test that all the operations are really constexpr (C++11 doesn't allow void conversions IMHO) */
+
+    /* void reference to ArrayView */
+    StaticArrayView<6> b = a;
+    VoidArrayView c = b;
+    CORRADE_VERIFY(c == b);
+    CORRADE_COMPARE(c.size(), 6*sizeof(int));
+}
+
+}}}
+
+CORRADE_TEST_MAIN(Corrade::Containers::Test::StaticArrayViewTest)
