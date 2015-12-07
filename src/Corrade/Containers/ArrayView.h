@@ -362,11 +362,11 @@ template<std::size_t size, class T> class StaticArrayView {
 
         /** @copydoc ArrayView::slice(T*) const */
         template<std::size_t count> StaticArrayView<count, T> slice(T* begin) const {
-            return ArrayView<T>(*this).slice<count>(begin);
+            return ArrayView<T>(*this).template slice<count>(begin);
         }
         /** @overload */
         template<std::size_t count> StaticArrayView<count, T> slice(std::size_t begin) const {
-            return ArrayView<T>(*this).slice<count>(begin);
+            return ArrayView<T>(*this).template slice<count>(begin);
         }
 
         /** @copydoc ArrayView::prefix(T*) const */
