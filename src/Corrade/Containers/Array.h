@@ -383,11 +383,11 @@ class Array {
          * Both @p begin and `begin + size` are expected to be in range.
          */
         template<std::size_t size> StaticArrayView<size, T> slice(T* begin) {
-            return ArrayView<T>(*this).slice<size>(begin);
+            return ArrayView<T>(*this).template slice<size>(begin);
         }
         /** @overload */
         template<std::size_t size> StaticArrayView<size, const T> slice(const T* begin) const {
-            return ArrayView<const T>(*this).slice<size>(begin);
+            return ArrayView<const T>(*this).template slice<size>(begin);
         }
         /** @overload */
         template<std::size_t size> StaticArrayView<size, T> slice(std::size_t begin) {
