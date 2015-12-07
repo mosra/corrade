@@ -152,7 +152,7 @@ template<class T> class ArrayView {
         ArrayView<T> slice(T* begin, T* end) const;
 
         /** @overload */
-        ArrayView<T> slice(std::size_t begin, std::size_t end) {
+        ArrayView<T> slice(std::size_t begin, std::size_t end) const {
             return slice(_data + begin, _data + end);
         }
 
