@@ -140,20 +140,15 @@ void ArrayViewTest::constructArray() {
 
 void ArrayViewTest::constructDerived() {
     struct A { int i; };
-    struct B: A {};
+    struct B: A { int b; };
 
-    B b[5] {};
-    const Containers::ArrayView<A> a{b};
-    CORRADE_VERIFY(a.begin() == b);
-    CORRADE_VERIFY(a.size() == 5);
+    /* Array of 5 Bs has larger size than array of 5 As so it shouldn't be
+       possible to create the view from it. However, explicitly creating the
+       view from pair of B* and std::size_t is still supported so the users can
+       shoot themselves in the foot. */
 
-    const B cb[5] {};
-    const Containers::ArrayView<const A> ca1 = b;
-    const Containers::ArrayView<const A> ca2 = cb;
-    CORRADE_VERIFY(ca1.begin() == b);
-    CORRADE_VERIFY(ca2.begin() == cb);
-    CORRADE_VERIFY(ca1.size() == 5);
-    CORRADE_VERIFY(ca2.size() == 5);
+    CORRADE_VERIFY(!(std::is_convertible<B(&)[5], Containers::ArrayView<A>>::value));
+    CORRADE_VERIFY(!(std::is_convertible<Containers::Array<B>, Containers::ArrayView<A>>::value));
 }
 
 void ArrayViewTest::boolConversion() {
