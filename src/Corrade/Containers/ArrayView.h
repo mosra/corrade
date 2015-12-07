@@ -95,25 +95,18 @@ template<class T> class ArrayView {
         /**
          * @brief Construct view of fixed-size array
          * @param data      Fixed-size array
-         *
-         * Enabled only if `U*` is implicitly convertible to `T*`.
          */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class U, std::size_t size>
-        #else
-        template<class U, std::size_t size, class V = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
-        #endif
-        constexpr /*implicit*/ ArrayView(U(&data)[size]) noexcept: _data{data}, _size{size} {}
+        template<std::size_t size> constexpr /*implicit*/ ArrayView(T(&data)[size]) noexcept: _data{data}, _size{size} {}
 
         /**
-         * @brief Construct view of @ref ArrayView
+         * @brief Construct view on @ref ArrayView
          *
-         * Enabled only if `U*` is implicitly convertible to `T*`.
+         * Enabled only if `U` or `const U` is `T`.
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
         #else
-        template<class U, class V = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
+        template<class U, class = typename std::enable_if<std::is_same<U, T>::value || std::is_same<const U, T>::value>::type>
         #endif
         constexpr /*implicit*/ ArrayView(ArrayView<U> array) noexcept: _data{array}, _size{array.size()} {}
 
