@@ -52,7 +52,7 @@ struct ArrayViewTest: TestSuite::Tester {
     void sliceNullptr();
     void slice();
 
-    void constReference();
+    void constView();
     void voidConstruction();
     void voidConversion();
 };
@@ -82,7 +82,7 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::sliceNullptr,
               &ArrayViewTest::slice,
 
-              &ArrayViewTest::constReference,
+              &ArrayViewTest::constView,
               &ArrayViewTest::voidConstruction,
               &ArrayViewTest::voidConversion});
 }
@@ -287,7 +287,7 @@ void ArrayViewTest::slice() {
     CORRADE_COMPARE(d[2], 5);
 }
 
-void ArrayViewTest::constReference() {
+void ArrayViewTest::constView() {
     const int a[] = {3, 4, 7, 12, 0, -15};
 
     ConstArrayView b = a;
