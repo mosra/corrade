@@ -454,7 +454,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * @ref ConfigurationValue::fromString() to convert the value to given
          * type.
          */
-        template<class T = std::string> T value(const std::string& key) const;
+        template<class T = std::string> T value(const std::string& key, ConfigurationValueFlags flags = {}) const;
 
         /**
          * @brief Whether boolean option is set
@@ -493,14 +493,14 @@ class CORRADE_UTILITY_EXPORT Arguments {
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-template<> inline std::string Arguments::value(const std::string& key) const {
+template<> inline std::string Arguments::value(const std::string& key, ConfigurationValueFlags) const {
     return valueInternal(key);
 }
 #endif
 
-template<class T> T Arguments::value(const std::string& key) const {
+template<class T> T Arguments::value(const std::string& key, ConfigurationValueFlags flags) const {
     std::string value = valueInternal(key);
-    return value.empty() ? T() : ConfigurationValue<T>::fromString(value, {});
+    return value.empty() ? T() : ConfigurationValue<T>::fromString(value, flags);
 }
 
 }}

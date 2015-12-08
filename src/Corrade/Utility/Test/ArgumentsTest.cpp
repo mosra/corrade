@@ -51,6 +51,7 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseArguments();
     void parseMixed();
     void parseCustomType();
+    void parseCustomTypeFlags();
     void parseDoubleArgument();
 
     void parseUnknownArgument();
@@ -91,6 +92,7 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseArguments,
               &ArgumentsTest::parseMixed,
               &ArgumentsTest::parseCustomType,
+              &ArgumentsTest::parseCustomTypeFlags,
               &ArgumentsTest::parseDoubleArgument,
 
               &ArgumentsTest::parseUnknownArgument,
@@ -318,6 +320,17 @@ void ArgumentsTest::parseCustomType() {
 
     CORRADE_VERIFY(args.tryParse(argc, argv));
     CORRADE_COMPARE(args.value<float>("pi"), 3.141516f);
+}
+
+void ArgumentsTest::parseCustomTypeFlags() {
+    Arguments args;
+    args.addNamedArgument("key");
+
+    const char* argv[] = { "", "--key", "0xdeadbeef" };
+    const int argc = std::extent<decltype(argv)>();
+
+    CORRADE_VERIFY(args.tryParse(argc, argv));
+    CORRADE_COMPARE(args.value<unsigned int>("key", ConfigurationValueFlag::Hex), 0xdeadbeef);
 }
 
 void ArgumentsTest::parseDoubleArgument() {
