@@ -350,9 +350,9 @@ void ArrayTest::sliceToStatic() {
     CORRADE_COMPARE(b[2], 4);
 
     StaticArrayView<3, const int> bc = ac.slice<3>(1);
-    CORRADE_COMPARE(b[0], 2);
-    CORRADE_COMPARE(b[1], 3);
-    CORRADE_COMPARE(b[2], 4);
+    CORRADE_COMPARE(bc[0], 2);
+    CORRADE_COMPARE(bc[1], 3);
+    CORRADE_COMPARE(bc[2], 4);
 }
 
 void ArrayTest::release() {
