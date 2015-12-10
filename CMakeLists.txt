@@ -27,7 +27,9 @@ cmake_minimum_required(VERSION 2.8.9)
 project(Corrade)
 
 # CMake policies: enable MACOSX_RPATH by default
-cmake_policy(SET CMP0042 NEW)
+if(POLICY CMP0042)
+    cmake_policy(SET CMP0042 NEW)
+endif()
 
 include(CMakeDependentOption)
 option(GCC47_COMPATIBILITY "Enable compatibility mode for GCC 4.7 (might disable some features)" OFF)
