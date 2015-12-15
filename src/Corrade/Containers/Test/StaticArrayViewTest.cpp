@@ -38,6 +38,7 @@ struct StaticArrayViewTest: TestSuite::Tester {
     void constructNullptrSize();
     void construct();
     void constructFixedSize();
+    void constructDerived();
 
     void boolConversion();
     void pointerConversion();
@@ -63,6 +64,7 @@ StaticArrayViewTest::StaticArrayViewTest() {
               &StaticArrayViewTest::constructNullptr,
               &StaticArrayViewTest::construct,
               &StaticArrayViewTest::constructFixedSize,
+              &StaticArrayViewTest::constructDerived,
 
               &StaticArrayViewTest::boolConversion,
               &StaticArrayViewTest::pointerConversion,
@@ -102,6 +104,25 @@ void StaticArrayViewTest::constructFixedSize() {
 
     const StaticArrayView<13> b = a;
     CORRADE_VERIFY(b == a);
+}
+
+void StaticArrayViewTest::constructDerived() {
+    struct A { int i; };
+    struct B: A {};
+
+    /* See ArrayViewTest for comments */
+
+    CORRADE_VERIFY((std::is_convertible<B(&)[5], Containers::StaticArrayView<5, A>>::value));
+
+    {
+        CORRADE_EXPECT_FAIL("Intentionally not forbidding construction of base array from larger derived type to stay compatible with raw arrays");
+
+        struct C: A { int b; };
+
+        /* See ArrayViewTest for comments */
+
+        CORRADE_VERIFY(!(std::is_convertible<C(&)[5], Containers::StaticArrayView<5, A>>::value));
+    }
 }
 
 void StaticArrayViewTest::boolConversion() {

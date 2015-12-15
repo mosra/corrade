@@ -142,15 +142,27 @@ void ArrayViewTest::constructArray() {
 
 void ArrayViewTest::constructDerived() {
     struct A { int i; };
-    struct B: A { int b; };
+    struct B: A {};
 
-    /* Array of 5 Bs has larger size than array of 5 As so it shouldn't be
-       possible to create the view from it. However, explicitly creating the
-       view from pair of B* and std::size_t is still supported so the users can
-       shoot themselves in the foot. */
+    /* Valid use case: constructing Containers::ArrayView<Math::Vector<3, Float>>
+       from Containers::ArrayView<Color3> because the data have the same size
+       and data layout */
 
-    CORRADE_VERIFY(!(std::is_convertible<B(&)[5], Containers::ArrayView<A>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Containers::Array<B>, Containers::ArrayView<A>>::value));
+    CORRADE_VERIFY((std::is_convertible<B(&)[5], Containers::ArrayView<A>>::value));
+    CORRADE_VERIFY((std::is_convertible<Containers::Array<B>, Containers::ArrayView<A>>::value));
+
+    {
+        CORRADE_EXPECT_FAIL("Intentionally not forbidding construction of base array from larger derived type to stay compatible with raw arrays");
+
+        struct C: A { int b; };
+
+        /* Array of 5 Cs has larger size than array of 5 As so it does not make
+           sense to create the view from it, but we are keeping compatibility with
+           raw arrays and thus allow the users to shoot themselves in a foot. */
+
+        CORRADE_VERIFY(!(std::is_convertible<C(&)[5], Containers::ArrayView<A>>::value));
+        CORRADE_VERIFY(!(std::is_convertible<Containers::Array<C>, Containers::ArrayView<A>>::value));
+    }
 }
 
 void ArrayViewTest::boolConversion() {

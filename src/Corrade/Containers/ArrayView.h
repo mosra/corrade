@@ -95,30 +95,43 @@ template<class T> class ArrayView {
         /**
          * @brief Construct view of fixed-size array
          * @param data      Fixed-size array
+         *
+         * Enabled only if `const T*` is implicitly convertible to `U*`. Note
+         * that, similarly as with raw pointers, you need to ensure that both
+         * types have the same size.
          */
-        template<std::size_t size> constexpr /*implicit*/ ArrayView(T(&data)[size]) noexcept: _data{data}, _size{size} {}
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class U, std::size_t size>
+        #else
+        template<class U, std::size_t size, class V = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
+        #endif
+        constexpr /*implicit*/ ArrayView(U(&data)[size]) noexcept: _data{data}, _size{size} {}
 
         /**
          * @brief Construct view on @ref ArrayView
          *
-         * Enabled only if `U` or `const U` is `T`.
+         * Enabled only if `const T*` is implicitly convertible to `U*`. Note
+         * that, similarly as with raw pointers, you need to ensure that both
+         * types have the same size.
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
         #else
-        template<class U, class = typename std::enable_if<std::is_same<U, T>::value || std::is_same<const U, T>::value>::type>
+        template<class U, class V = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
         #endif
         constexpr /*implicit*/ ArrayView(ArrayView<U> array) noexcept: _data{array}, _size{array.size()} {}
 
         /**
          * @brief Construct view on @ref StaticArrayView
          *
-         * Enabled only if `U` or `const U` is `T`.
+         * Enabled only if `const T*` is implicitly convertible to `U*`. Note
+         * that, similarly as with raw pointers, you need to ensure that both
+         * types have the same size.
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<std::size_t size, class U>
         #else
-        template<std::size_t size, class U, class = typename std::enable_if<std::is_same<U, T>::value || std::is_same<const U, T>::value>::type>
+        template<std::size_t size, class U, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
         #endif
         constexpr /*implicit*/ ArrayView(StaticArrayView<size, U> array) noexcept: _data{array}, _size{size} {}
 
@@ -327,8 +340,17 @@ template<std::size_t size, class T> class StaticArrayView {
         /**
          * @brief Construct view of fixed-size array
          * @param data      Fixed-size array
+         *
+         * Enabled only if `const T*` is implicitly convertible to `U*`. Note
+         * that, similarly as with raw pointers, you need to ensure that both
+         * types have the same size.
          */
-        constexpr /*implicit*/ StaticArrayView(T(&data)[size]) noexcept: _data{data} {}
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class U>
+        #else
+        template<class U, class V = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
+        #endif
+        constexpr /*implicit*/ StaticArrayView(U(&data)[size]) noexcept: _data{data} {}
 
         #ifndef CORRADE_MSVC2015_COMPATIBILITY
         /** @brief Whether the array is non-empty */

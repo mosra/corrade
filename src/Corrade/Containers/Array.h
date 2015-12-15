@@ -306,10 +306,33 @@ class Array {
         explicit operator bool() const { return _data; }
         #endif
 
-        /** @brief Convert to @ref ArrayView */
-        /*implicit*/ operator ArrayView<T>() noexcept { return {_data, _size}; }
-        /*implicit*/ operator ArrayView<const T>() const noexcept { return {_data, _size}; } /**< @overload */
-        /*implicit*/ operator ArrayView<const void>() const noexcept { return {_data, _size}; } /**< @overload */
+        /**
+         * @brief Convert to @ref ArrayView
+         *
+         * Enabled only if `T*` is implicitly convertible to `U*`. Note
+         * that, similarly as with raw pointers, you need to ensure that both
+         * types have the same size.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class U>
+        #else
+        template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value>::type>
+        #endif
+        /*implicit*/ operator ArrayView<U>() noexcept { return {_data, _size}; }
+
+        /**
+         * @brief Convert to const @ref ArrayView
+         *
+         * Enabled only if `const T*` is implicitly convertible to `U*`. Note
+         * that, similarly as with raw pointers, you need to ensure that both
+         * types have the same size.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class U>
+        #else
+        template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value>::type>
+        #endif
+        /*implicit*/ operator ArrayView<const U>() const noexcept { return {_data, _size}; }
 
         /* `char* a = Containers::Array<char>(5); a[3] = 5;` would result in
            instant segfault, disallowing it in the following conversion
