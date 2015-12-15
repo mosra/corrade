@@ -35,7 +35,6 @@ struct StaticArrayViewTest: TestSuite::Tester {
 
     void constructEmpty();
     void constructNullptr();
-    void constructNullptrSize();
     void construct();
     void constructFixedSize();
     void constructDerived();
