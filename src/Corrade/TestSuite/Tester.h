@@ -355,13 +355,13 @@ because the scope of expected failure will end at the end of the `if` block:
 The solution is to use `CORRADE_EXPECT_FAIL_IF()`:
 @code
 {
-    CORRADE_EXPECT_FAIL_IF("This is not our universe.", answer != 42);
+    CORRADE_EXPECT_FAIL_IF(answer != 42, "This is not our universe.");
 
     CORRADE_VERIFY(6*7, 49); // expect the failure if answer is not 42
 }
 @endcode
 */
-#define CORRADE_EXPECT_FAIL_IF(message, condition)                          \
+#define CORRADE_EXPECT_FAIL_IF(condition, message)                          \
     ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)(this, message, condition)
 
 /** @hideinitializer

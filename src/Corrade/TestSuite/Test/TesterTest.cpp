@@ -132,7 +132,7 @@ void Test::expectFail() {
     CORRADE_VERIFY(true); // #7
 
     {
-        CORRADE_EXPECT_FAIL_IF("This is not our universe", 6*7 == 49);
+        CORRADE_EXPECT_FAIL_IF(6*7 == 49, "This is not our universe");
         CORRADE_VERIFY(true); // #8
     }
 }
