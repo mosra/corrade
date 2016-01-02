@@ -53,7 +53,7 @@ struct Arguments::Entry {
 
     Type type;
     char shortKey;
-    std::string key, help, helpKey, defaultValue;
+    std::string key, help, helpKey, defaultValue, environment;
     std::size_t id;
 };
 
@@ -185,6 +185,28 @@ Arguments& Arguments::addSkippedPrefix(std::string prefix, std::string help) {
     return *this;
 }
 
+Arguments& Arguments::setFromEnvironment(const std::string& key, std::string environmentVariable) {
+    auto found = find(_prefix + key);
+    CORRADE_ASSERT(found != _entries.end(), "Utility::Arguments::setFromEnvironment(): key" << key << "doesn't exist", *this);
+    CORRADE_ASSERT(found->type == Type::Option || found->type == Type::BooleanOption,
+        "Utility::Arguments::setFromEnvironment(): only options can be set from environment", *this);
+
+    found->environment = std::move(environmentVariable);
+    return *this;
+}
+
+Arguments& Arguments::setFromEnvironment(const std::string& key) {
+    std::string environmentVariable{_prefix + key};
+    for(char& i: environmentVariable) {
+        if(i >= 'a' && i <= 'z')
+            i = 'A' + i - 'a';
+        else if(i == '-')
+            i = '_';
+    }
+
+    return setFromEnvironment(key, std::move(environmentVariable));
+}
+
 Arguments& Arguments::setCommand(std::string name) {
     _command = std::move(name);
     return *this;
@@ -249,6 +271,22 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
 
         CORRADE_INTERNAL_ASSERT(entry.id < _values.size());
         _values[entry.id] = entry.defaultValue;
+    }
+
+    /* Get options from environment */
+    for(const Entry& entry: _entries) {
+        if(entry.environment.empty()) continue;
+
+        const char* const env = std::getenv(entry.environment.data());
+        if(!env) continue;
+
+        if(entry.type == Type::BooleanOption) {
+            CORRADE_INTERNAL_ASSERT(entry.id < _booleans.size());
+            _booleans[entry.id] = env;
+        } else {
+            CORRADE_INTERNAL_ASSERT(entry.id < _values.size());
+            _values[entry.id] = env;
+        }
     }
 
     std::vector<Entry>::iterator valueFor = _entries.end();
@@ -470,7 +508,7 @@ std::string Arguments::help() const {
     }
     for(const Entry& entry: _entries) {
         /* Entry which will not be printed, skip */
-        if(entry.help.empty() && (entry.type == Type::Option && entry.defaultValue.empty()))
+        if(entry.help.empty() && (entry.type == Type::Option && entry.defaultValue.empty()) && entry.environment.empty())
             continue;
 
         /* Compute size of current key column. Make it so the key name is
@@ -512,8 +550,9 @@ std::string Arguments::help() const {
 
     /* Print all named arguments and options second */
     for(const Entry& entry: _entries) {
-        /* Skip arguments and options without default value/help text */
-        if(entry.type == Type::Argument || (entry.defaultValue.empty() && entry.help.empty()))
+        /* Skip arguments and options without default value, environment or
+           help text (no additional info to show) */
+        if(entry.type == Type::Argument || (entry.defaultValue.empty() && entry.environment.empty() && entry.help.empty()))
             continue;
 
         /* Key name */
@@ -525,9 +564,15 @@ std::string Arguments::help() const {
         /* Help text */
         if(!entry.help.empty()) out << entry.help << '\n';
 
+        /* Value taken from environment */
+        if(!entry.environment.empty()) {
+            if(!entry.help.empty()) out << std::string(keyColumnWidth + 3, ' ');
+            out << "(environment: " << entry.environment << ")\n";
+        }
+
         /* Default value, put it on new indented line (two spaces from the
-            left and one from the right additionaly to key column width), if
-            help text is also present */
+           left and one from the right additionaly to key column width), if
+           help text is also present */
         if(!entry.defaultValue.empty()) {
             if(!entry.help.empty()) out << std::string(keyColumnWidth + 3, ' ');
             out << "(default: " << entry.defaultValue << ")\n";

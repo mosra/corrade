@@ -336,6 +336,28 @@ class CORRADE_UTILITY_EXPORT Arguments {
         Arguments& addSkippedPrefix(std::string prefix, std::string help = {});
 
         /**
+         * @brief Set option from environment
+         *
+         * Allows the option to be taken from environment variable if it is not
+         * specified on command line. If @p environmentVariable is not set,
+         * uppercase @p key value with dashes converted to underscores is used
+         * by default. For example, on Unix-based systems, calling
+         * `setFromEnvironment("some-option")` allows you to specify that
+         * option either using
+         *
+         *      ./app --some-option 42
+         *
+         * or
+         *
+         *      SOME_OPTION=42 ./app
+         *
+         * Boolean options are set to `true` when environment value is present
+         * (not depending on its value).
+         */
+        Arguments& setFromEnvironment(const std::string& key, std::string environmentVariable);
+        Arguments& setFromEnvironment(const std::string& key); /**< @overload */
+
+        /**
          * @brief Set command name
          *
          * If empty, the command name is extracted from arguments passed to

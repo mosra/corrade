@@ -39,6 +39,8 @@ struct ArgumentsTest: TestSuite::Tester {
     void helpBoth();
     void helpText();
     void helpEmpty();
+    void helpEnvironment();
+    void helpEnvironmentPrefixed();
     void helpAfterParse();
 
     void duplicateKey();
@@ -80,6 +82,8 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::helpBoth,
               &ArgumentsTest::helpText,
               &ArgumentsTest::helpEmpty,
+              &ArgumentsTest::helpEnvironment,
+              &ArgumentsTest::helpEnvironmentPrefixed,
               &ArgumentsTest::helpAfterParse,
 
               &ArgumentsTest::duplicateKey,
@@ -193,6 +197,37 @@ Arguments:
   -h, --help  display this help message and exit
 )text";
     CORRADE_COMPARE(Arguments().help(), expected);
+}
+
+void ArgumentsTest::helpEnvironment() {
+    Arguments args;
+    args.addOption("use-FOO").setFromEnvironment("use-FOO");
+
+    const auto expected = R"text(Usage:
+  ./app [-h|--help] [--use-FOO USE-FOO]
+
+Arguments:
+  -h, --help         display this help message and exit
+  --use-FOO USE-FOO  (environment: USE_FOO)
+)text";
+    CORRADE_COMPARE(args.help(), expected);
+}
+
+void ArgumentsTest::helpEnvironmentPrefixed() {
+    Arguments args{"well"};
+    args.addOption("use-foo").setHelp("use-foo", "well, use foo", "BAR").setFromEnvironment("use-foo");
+
+    const auto expected = R"text(Usage:
+  ./app [--well-help] [--well-use-foo BAR] ...
+
+Arguments:
+  ...                 main application arguments
+                      (see -h or --help for details)
+  --well-help         display this help message and exit
+  --well-use-foo BAR  well, use foo
+                      (environment: WELL_USE_FOO)
+)text";
+    CORRADE_COMPARE(args.help(), expected);
 }
 
 void ArgumentsTest::helpAfterParse() {
