@@ -208,7 +208,7 @@ void ArgumentsTest::helpEnvironment() {
 
 Arguments:
   -h, --help         display this help message and exit
-  --use-FOO USE-FOO  (environment: USE_FOO)
+  --use-FOO USE_FOO  (environment: USE_FOO)
 )text";
     CORRADE_COMPARE(args.help(), expected);
 }
