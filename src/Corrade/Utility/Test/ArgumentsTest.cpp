@@ -204,7 +204,7 @@ void ArgumentsTest::helpEnvironment() {
     args.addOption("use-FOO").setFromEnvironment("use-FOO");
 
     const auto expected = R"text(Usage:
-  ./app [-h|--help] [--use-FOO USE-FOO]
+  ./app [-h|--help] [--use-FOO USE_FOO]
 
 Arguments:
   -h, --help         display this help message and exit

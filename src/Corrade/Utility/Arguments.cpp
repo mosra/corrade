@@ -35,7 +35,6 @@
 
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Debug.h"
-#include "Corrade/Utility/String.h"
 
 namespace Corrade { namespace Utility {
 
@@ -46,6 +45,17 @@ namespace {
         Option,
         BooleanOption
     };
+
+    inline std::string uppercaseKey(std::string key) {
+        for(char& i: key) {
+            if(i >= 'a' && i <= 'z')
+                i = 'A' + i - 'a';
+            else if(i == '-')
+                i = '_';
+        }
+
+        return std::move(key);
+    }
 }
 
 struct Arguments::Entry {
@@ -59,7 +69,7 @@ struct Arguments::Entry {
 
 Arguments::Entry::Entry(Type type, char shortKey, std::string key, std::string helpKey, std::string defaultValue, std::size_t id): type(type), shortKey(shortKey), key(std::move(key)), defaultValue(std::move(defaultValue)), id(id) {
     if(type == Type::NamedArgument || type == Type::Option)
-        this->helpKey = this->key + ' ' + String::uppercase(helpKey);
+        this->helpKey = this->key + ' ' + uppercaseKey(helpKey);
     else this->helpKey = std::move(helpKey);
 
     CORRADE_INTERNAL_ASSERT(type == Type::Option || this->defaultValue.empty());
@@ -196,15 +206,7 @@ Arguments& Arguments::setFromEnvironment(const std::string& key, std::string env
 }
 
 Arguments& Arguments::setFromEnvironment(const std::string& key) {
-    std::string environmentVariable{_prefix + key};
-    for(char& i: environmentVariable) {
-        if(i >= 'a' && i <= 'z')
-            i = 'A' + i - 'a';
-        else if(i == '-')
-            i = '_';
-    }
-
-    return setFromEnvironment(key, std::move(environmentVariable));
+    return setFromEnvironment(key, uppercaseKey(_prefix + key));
 }
 
 Arguments& Arguments::setCommand(std::string name) {
