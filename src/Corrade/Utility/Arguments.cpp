@@ -198,25 +198,31 @@ Arguments& Arguments::setHelp(std::string help) {
     return *this;
 }
 
-Arguments& Arguments::setHelp(const std::string& key, std::string help) {
+Arguments& Arguments::setHelp(const std::string& key, std::string help, std::string helpKey) {
     auto found = find(_prefix + key);
     CORRADE_ASSERT(found != _entries.end(), "Utility::Arguments::setHelp(): key" << key << "doesn't exist", *this);
+
     found->help = std::move(help);
+
+    if(!helpKey.empty()) {
+        CORRADE_ASSERT(found->type != Type::BooleanOption,
+            "Utility::Arguments::setHelpKey(): help key can't be set for boolean option", *this);
+
+        if(found->type == Type::NamedArgument || found->type == Type::Option)
+            found->helpKey = _prefix + key + ' ' + std::move(helpKey);
+        else found->helpKey = std::move(helpKey);
+    }
+
     return *this;
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 Arguments& Arguments::setHelpKey(const std::string& key, std::string helpKey) {
     auto found = find(_prefix + key);
     CORRADE_ASSERT(found != _entries.end(), "Utility::Arguments::setHelp(): key" << key << "doesn't exist", *this);
-    CORRADE_ASSERT(found->type != Type::BooleanOption,
-        "Utility::Arguments::setHelpKey(): help key can't be set for boolean option", *this);
-
-    if(found->type == Type::NamedArgument || found->type == Type::Option)
-        found->helpKey = _prefix + key + ' ' + std::move(helpKey);
-    else found->helpKey = std::move(helpKey);
-
-    return *this;
+    return setHelp(key, found->help, std::move(helpKey));
 }
+#endif
 
 void Arguments::parse(const int argc, const char** const argv) {
     const bool status = tryParse(argc, argv);

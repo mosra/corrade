@@ -43,8 +43,8 @@ for brief introduction.
 int main(int argc, char** argv) {
     Corrade::Utility::Arguments args;
     args.addArgument("name")
-        .addArgument("conf").setHelpKey("conf", "resources.conf")
-        .addArgument("out").setHelpKey("out", "outfile.cpp")
+        .addArgument("conf").setHelp("conf", "resource configuration file", "resources.conf")
+        .addArgument("out").setHelp("out", "output file", "outfile.cpp")
         .setCommand("corrade-rc")
         .setHelp("Resource compiler for Corrade.")
         .parse(argc, argv);

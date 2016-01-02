@@ -363,17 +363,12 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * Arguments, boolean options and options with empty default values
          * are not displayed in argument and option list unless they have help
          * text set.
-         * @see @ref setHelpKey()
-         */
-        Arguments& setHelp(const std::string& key, std::string help);
-
-        /**
-         * @brief Set key name displayed in help text
          *
-         * For arguments the key is replaced with @p helpKey, for nonboolean
-         * options the uppercased key name is replaced with @p helpKey. For
-         * example, calling `setHelpKey("input", "file.bin")` and
-         * `setHelpKey("limit", "N")` will transform the following usage text:
+         * If @p helpKey is set, it replaces the placeholder for arguments and
+         * uppercased placeholder in named arguments and nonboolean options.
+         * For example, calling `setHelp("input", "...", "file.bin")` and
+         * `setHelp("limit", "...", "N")` will transform the following usage
+         * text:
          *
          *      ./app --limit LIMIT input
          *
@@ -382,9 +377,15 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *      ./app --limit N file.bin
          *
          * The displayed keys are changed also in argument and option list.
-         * @see @ref setHelp()
          */
-        Arguments& setHelpKey(const std::string& key, std::string helpKey);
+        Arguments& setHelp(const std::string& key, std::string help, std::string helpKey = {});
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @copybrief setHelp(const std::string&, std::string, std::string)
+         * @deprecated Use @ref setHelp(const std::string&, std::string, std::string) instead.
+         */
+        CORRADE_DEPRECATED("use setHelp() instead") Arguments& setHelpKey(const std::string& key, std::string helpKey);
+        #endif
 
         /**
          * @brief Parse the arguments and exit on failure

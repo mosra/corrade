@@ -118,7 +118,7 @@ ArgumentsTest::ArgumentsTest() {
 void ArgumentsTest::helpArgumentsOnly() {
     Arguments args;
     args.addArgument("foo").setHelp("foo", "which foo to bar")
-        .addArgument("bar").setHelpKey("bar", "output.bin")
+        .addArgument("bar").setHelp("bar", {}, "output.bin")
         .setCommand("foobar");
 
     const auto expected = R"text(Usage:
@@ -134,8 +134,8 @@ Arguments:
 void ArgumentsTest::helpNamedOnly() {
     Arguments args;
     args.addOption('n', "bars", "42").setHelp("bars", "number of bars to foo")
-        .addNamedArgument('b', "baz").setHelpKey("baz", "LEVEL")
-        .addOption("sanity-level", "INSANE").setHelpKey("sanity-level", "SANITY")
+        .addNamedArgument('b', "baz").setHelp("baz", {}, "LEVEL")
+        .addOption("sanity-level", "INSANE").setHelp("sanity-level", {}, "SANITY")
         .addBooleanOption("no-bare-foos").setHelp("no-bare-foos", "don't use bare foos")
         .setCommand("foobar");
 
@@ -435,7 +435,7 @@ void ArgumentsTest::parseMissingOption() {
 
 void ArgumentsTest::parseMissingArgument() {
     Arguments args;
-    args.addArgument("file").setHelpKey("file", "file.dat");
+    args.addArgument("file").setHelp("file", "", "file.dat");
 
     const char* argv[] = { "" };
     const int argc = std::extent<decltype(argv)>();
@@ -510,7 +510,7 @@ Arguments:
 void ArgumentsTest::prefixedHelpWithPrefix() {
     Arguments args{"read"};
     args.addOption("behavior", "buffered").setHelp("behavior", "reader behavior")
-        .addOption("buffer-size").setHelpKey("buffer-size", "SIZE").setHelp("buffer-size", "buffer size");
+        .addOption("buffer-size").setHelp("buffer-size", "buffer size", "SIZE");
 
     const auto expected = R"text(Usage:
   ./app [--read-help] [--read-behavior BEHAVIOR] [--read-buffer-size SIZE] ...
