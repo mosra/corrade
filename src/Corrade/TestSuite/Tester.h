@@ -164,6 +164,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
             public:
                 explicit ExpectedFailure(Tester* instance, std::string message, bool enabled = true);
 
+                /* For types with explicit bool conversion */
+                template<class T> explicit ExpectedFailure(Tester* instance, std::string message, T&& enabled): ExpectedFailure{instance, message, enabled ? true : false} {}
+
                 ~ExpectedFailure();
 
                 std::string message() const;
@@ -360,6 +363,10 @@ The solution is to use `CORRADE_EXPECT_FAIL_IF()`:
     CORRADE_VERIFY(6*7, 49); // expect the failure if answer is not 42
 }
 @endcode
+
+Similarly to @ref CORRADE_VERIFY(), it is possible to use
+@ref CORRADE_EXPECT_FAIL_IF() also on objects with *explicit* `operator bool`
+without doing explicit conversion (e.g. using `!!`).
 */
 #define CORRADE_EXPECT_FAIL_IF(condition, message)                          \
     ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)(this, message, condition)

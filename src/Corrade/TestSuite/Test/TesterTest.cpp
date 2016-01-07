@@ -184,6 +184,7 @@ class TesterTest: public Tester {
         void compareAsVarargs();
         void compareNonCopyable();
         void verifyExplicitBool();
+        void expectFailIfExplicitBool();
 };
 
 class EmptyTest: public Tester {};
@@ -195,7 +196,8 @@ TesterTest::TesterTest() {
               &TesterTest::compareAsOverload,
               &TesterTest::compareAsVarargs,
               &TesterTest::compareNonCopyable,
-              &TesterTest::verifyExplicitBool});
+              &TesterTest::verifyExplicitBool,
+              &TesterTest::expectFailIfExplicitBool});
 }
 
 void TesterTest::test() {
@@ -308,6 +310,30 @@ void TesterTest::verifyExplicitBool() {
     struct ExplicitFalse { explicit operator bool() const { return false; } };
     ExplicitFalse f;
     CORRADE_VERIFY(!f);
+}
+
+void TesterTest::expectFailIfExplicitBool() {
+    struct ExplicitFalse { explicit operator bool() const { return false; } };
+    {
+        ExplicitFalse t;
+        CORRADE_EXPECT_FAIL_IF(t, "");
+        CORRADE_EXPECT_FAIL_IF(ExplicitFalse{}, "");
+        CORRADE_VERIFY(true);
+    }
+
+    struct ExplicitFalseNonConst { explicit operator bool() { return false; } };
+    {
+        ExplicitFalseNonConst t;
+        CORRADE_EXPECT_FAIL_IF(t, "");
+        CORRADE_EXPECT_FAIL_IF(ExplicitFalseNonConst{}, "");
+        CORRADE_VERIFY(true);
+    }
+
+    struct ExplicitTrue { explicit operator bool() const { return true; } };
+    {
+        CORRADE_EXPECT_FAIL_IF(ExplicitTrue{}, "");
+        CORRADE_VERIFY(false);
+    }
 }
 
 }}}
