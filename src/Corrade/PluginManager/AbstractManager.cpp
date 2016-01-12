@@ -113,7 +113,7 @@ AbstractManager::AbstractManager(std::string pluginInterface, std::string plugin
     /* Find static plugins which have the same interface and have not
         assigned manager to them */
     for(auto p: _plugins.plugins) {
-        if(p.second->loadState != LoadState::Static || p.second->manager != nullptr || p.second->staticPlugin->interface != _pluginInterface)
+        if(p.second->loadState != LoadState::Static || p.second->manager != nullptr || p.second->staticPlugin->interfaceName != _pluginInterface)
             continue;
 
         /* Assign the plugin to this manager and initialize it */
