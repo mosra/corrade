@@ -224,7 +224,7 @@ void ConfigurationTest::valueIndex() {
 
 void ConfigurationTest::names() {
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     Configuration conf;
 
     {

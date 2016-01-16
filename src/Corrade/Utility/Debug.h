@@ -56,15 +56,10 @@ Debug() << "string" << 34 << 275.0f;
 
 // Redirect debug output to string
 std::ostringstream out;
-Debug::setOutput(&out);
-Debug() << "the meaning of life, universe and everything is" << 42;
+Debug(&out) << "the meaning of life, universe and everything is" << 42;
 
 // Mute debug output
-Debug::setOutput(nullptr);
-Debug() << "noone should see my ebanking password" << password;
-
-// Reset debug output to default
-Debug::setOutput();
+Debug(nullptr) << "no one should see my ebanking password" << password;
 
 // Conditional debug output (avoid inserting newline where it's not desired)
 Debug d;
@@ -94,6 +89,31 @@ Debug() << "Value:" << Debug::newline << 16;
 
 // Doesn't output newline at the end
 Debug::noNewlineAtTheEnd() << "Hello!";
+@endcode
+
+## Scoped output redirection
+
+Output specified in class constructor is used for all instances created during
+that instance lifetime. @ref Debug, @ref Warning and @ref Error classes outputs
+can be controlled separately:
+
+@code
+std::ostringstream debugOut, errorOut;
+
+Error() << "this is printed into std::cerr";
+
+Error redirectError(&errorOut);
+
+{
+    Debug redirectDebug(&debugOut);
+
+    Debug() << "this is printed into debugOut";
+    Error() << "this is printed into errorOut";
+    Debug() << "this is also printed into debugOut";
+}
+
+Debug() << "this is printed into std::cout again";
+Error() << "this is still printed into errorOut";
 @endcode
 
 @see @ref Warning, @ref Error, @ref Fatal, @ref CORRADE_ASSERT(),
@@ -155,10 +175,18 @@ class CORRADE_UTILITY_EXPORT Debug {
             debug << nospace << "\n" << nospace;
         }
 
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @brief Set output for instances in this scope.
+         * @deprecated Use @ref Debug(std::ostream*) instead.
+         */
+        CORRADE_DEPRECATED("use Debug(std::ostream*) instead") static void setOutput(std::ostream* output);
+        #endif
+
         /**
-         * @brief Constructor
+         * @brief Default constructor
          *
-         * Sets output to `std::cout`.
+         * Uses output of enclosing `Debug` instance or uses `std::cout` if
+         * there isn't any.
          * @see @ref noNewlineAtTheEnd(), @ref setOutput()
          */
         explicit Debug();
@@ -168,11 +196,12 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @param output        Stream where to put debug output. If set to
          *      `nullptr`, no debug output will be written anywhere.
          *
-         * Constructs debug object with given output.
+         * All new instances created using the default @ref Debug() constructor
+         * during lifetime of this instance will inherit the output set in
+         * @p output.
          * @see @ref noNewlineAtTheEnd(std::ostream*), @ref setOutput()
          */
-        /* MinGW complains loudly if the declaration doesn't also have inline */
-        inline explicit Debug(std::ostream* output);
+        explicit Debug(std::ostream* output);
 
         /** @brief Copying is not allowed */
         Debug(const Debug&) = delete;
@@ -183,7 +212,8 @@ class CORRADE_UTILITY_EXPORT Debug {
         /**
          * @brief Destructor
          *
-         * If there was any output, adds newline at the end.
+         * Resets the output back to the output of enclosing scope. If there
+         * was any output, adds newline at the end.
          */
         ~Debug();
 
@@ -249,16 +279,6 @@ class CORRADE_UTILITY_EXPORT Debug {
         Debug& operator<<(Implementation::DebugOstreamFallback&& value);
         #endif
 
-        /**
-         * @brief Globally set output for newly created instances
-         * @param output       Stream where to put debug output. If set to
-         *      `nullptr`, no debug output will be written anywhere.
-         *
-         * All successive @ref Debug instances created with default constructor
-         * will be redirected to given stream.
-         */
-        static void setOutput(std::ostream* output);
-
     #ifndef DOXYGEN_GENERATING_OUTPUT
     protected:
     #else
@@ -278,9 +298,11 @@ class CORRADE_UTILITY_EXPORT Debug {
         Flags _flags;
 
     private:
+        static std::ostream* _globalOutput;
+
         template<class T> Debug& print(const T& value);
 
-        static std::ostream* _globalOutput;
+        std::ostream* _previousGlobalOutput;
 };
 
 CORRADE_ENUMSET_OPERATORS(Debug::Flags)
@@ -290,8 +312,6 @@ inline Debug Debug::noNewlineAtTheEnd(std::ostream* const output) {
     debug._flags |= Flag::NoNewlineAtTheEnd;
     return debug;
 }
-
-inline Debug::Debug(std::ostream* output): _output{output}, _flags{Flag::NoSpaceBeforeNextValue} {}
 
 inline void Debug::nospace(Debug& debug) {
     debug._flags |= Flag::NoSpaceBeforeNextValue;
@@ -413,28 +433,63 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
         /* MinGW complains loudly if the declaration doesn't also have inline */
         inline static Warning noNewlineAtTheEnd(std::ostream* output);
 
-        /** @copydoc Debug::setOutput() */
-        static void setOutput(std::ostream* output);
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @brief Set output for instances in this scope.
+         * @deprecated Use @ref Warrning(std::ostream*) instead.
+         */
+        CORRADE_DEPRECATED("use Debug(std::ostream*) instead") static void setOutput(std::ostream* output);
+        #endif
 
         /**
-         * @brief Constructor
+         * @brief Default constructor
          *
-         * Sets output to `std::cerr`.
-         * @see @ref noNewlineAtTheEnd(), @ref setOutput()
+         * Inherits output of enclosing `Warning` instance or uses `std::cerr`
+         * if there isn't any.
+         * @see @ref noNewlineAtTheEnd()
          */
         explicit Warning();
 
-        /** @copydoc Debug::Debug(std::ostream*) */
-        explicit Warning(std::ostream* output): Debug(output) {}
+        /**
+         * @brief Constructor
+         * @param output        Stream where to put warning output. If set to
+         *      `nullptr`, no warning output will be written anywhere.
+         *
+         * All new instances created using the default @ref Warning()
+         * constructor during lifetime of this instance will inherit the output
+         * set in @p output.
+         * @see @ref noNewlineAtTheEnd(std::ostream*)
+         */
+        explicit Warning(std::ostream* output);
+
+        /** @brief Copying is not allowed */
+        Warning(const Warning&) = delete;
+
+        /** @brief Move constructor */
+        Warning(Warning&&) = default;
+
+        /**
+         * @brief Destructor
+         *
+         * Resets the output back to the output of enclosing scope. If there
+         * was any output, adds newline at the end.
+         */
+        ~Warning();
+
+        /** @brief Copying is not allowed */
+        Warning& operator=(const Warning&) = delete;
+
+        /** @brief Move assignment is not allowed */
+        Warning& operator=(Warning&&) = delete;
 
     private:
         static CORRADE_UTILITY_LOCAL std::ostream* _globalWarningOutput;
+        std::ostream* _previousGlobalWarningOutput;
 };
 
 inline Warning Warning::noNewlineAtTheEnd(std::ostream* const output) {
     Warning warning{output};
     warning._flags |= Flag::NoNewlineAtTheEnd;
-    return warning;
+    return std::move(warning);
 }
 
 /**
@@ -465,28 +520,63 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
         /* MinGW complains loudly if the declaration doesn't also have inline */
         inline static Error noNewlineAtTheEnd(std::ostream* output);
 
-        /** @copydoc Debug::setOutput() */
-        static void setOutput(std::ostream* output);
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @brief Set output for instances in this scope.
+         * @deprecated Use @ref Error(std::ostream*) instead.
+         */
+        CORRADE_DEPRECATED("use Error(std::ostream*) instead") static void setOutput(std::ostream* output);
+        #endif
+
+        /**
+         * @brief Default constructor
+         *
+         * Inherits output of enclosing `Error` instance or uses `std::cerr` if
+         * there isn't any.
+         * @see @ref noNewlineAtTheEnd()
+         */
+        explicit Error();
 
         /**
          * @brief Constructor
+         * @param output        Stream where to put error output. If set to
+         *      `nullptr`, no error output will be written anywhere.
          *
-         * Sets output to `std::cerr`.
-         * @see @ref noNewlineAtTheEnd(), @ref setOutput()
+         * All new instances created using the default @ref Error()
+         * constructor during lifetime of this instance will inherit the output
+         * set in @p output.
+         * @see @ref noNewlineAtTheEnd(std::ostream*)
          */
-        Error();
+        explicit Error(std::ostream* output);
 
-        /** @copydoc Debug::Debug(std::ostream*) */
-        Error(std::ostream* output): Debug(output) {}
+        /** @brief Copying is not allowed */
+        Error(const Error&) = delete;
+
+        /** @brief Move constructor */
+        Error(Error&&) = default;
+
+        /**
+         * @brief Destructor
+         *
+         * Resets the output back to the output of enclosing scope. If there
+         * was any output, adds newline at the end.
+         */
+        ~Error();
+
+        /** @brief Copying is not allowed */
+        Error& operator=(const Error&) = delete;
+
+        /** @brief Move assignment is not allowed */
+        Error& operator=(Error&&) = delete;
 
     private:
         static CORRADE_UTILITY_LOCAL std::ostream* _globalErrorOutput;
+        std::ostream* _previousGlobalErrorOutput;
 };
 
 inline Error Error::noNewlineAtTheEnd(std::ostream* const output) {
     Error error{output};
     error._flags |= Flag::NoNewlineAtTheEnd;
-    return error;
+    return std::move(error);
 }
 
 /**
@@ -517,7 +607,7 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
          *
          * Sets output to `std::cerr`. The @p exitcode is passed to `std::exit()`
          * on destruction.
-         * @see @ref noNewlineAtTheEnd(), @ref setOutput()
+         * @see @ref noNewlineAtTheEnd()
          */
         Fatal(int exitCode = 1): _exitCode{exitCode} {}
 
@@ -526,8 +616,6 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
          * @param output        Stream where to put debug output. If set to
          *      `nullptr`, no debug output will be written anywhere.
          * @param exitCode      Application exit code to be used on destruction
-         *
-         * @see @ref setOutput()
          */
         Fatal(std::ostream* output, int exitCode = 1): Error{output}, _exitCode{exitCode} {}
 

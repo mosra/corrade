@@ -50,14 +50,14 @@ int Tester::exec(std::ostream* logOutput, std::ostream* errorOutput) {
         noCheckCount = 0;
 
     for(auto i: _testCases) {
-        /* Reset output to stdout for each test case to prevent debug
-            output segfaults */
-        /** @todo Drop this when Debug has proper output scoping */
-        Utility::Debug::setOutput(&std::cout);
-        Utility::Error::setOutput(&std::cerr);
-        Utility::Warning::setOutput(&std::cerr);
-
         try {
+            /* Reset output to stdout for each test case to prevent debug
+               output segfaults */
+            /** @todo Drop this when Debug::setOutput() is removed */
+            Utility::Debug resetDebugRedirect{&std::cout};
+            Utility::Error resetErrorRedirect{&std::cerr};
+            Utility::Warning resetWarningRedirect{&std::cerr};
+
             _testCaseName.clear();
             (this->*i)();
         } catch(Exception) {

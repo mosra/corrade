@@ -51,6 +51,8 @@ struct DebugTest: TestSuite::Tester {
 
     void ostreamFallback();
     void ostreamFallbackPriority();
+
+    void scopedOutput();
 };
 
 DebugTest::DebugTest() {
@@ -67,18 +69,17 @@ DebugTest::DebugTest() {
               &DebugTest::tuple,
 
               &DebugTest::ostreamFallback,
-              &DebugTest::ostreamFallbackPriority});
+              &DebugTest::ostreamFallbackPriority,
+
+              &DebugTest::scopedOutput});
 }
 
 void DebugTest::debug() {
     std::ostringstream debug, warning, error;
 
-    Debug::setOutput(&debug);
-    Warning::setOutput(&warning);
-    Error::setOutput(&error);
-    Debug() << "a" << 33 << 0.567f;
-    Warning() << "w" << 42 << "meh";
-    Error() << "e";
+    Debug(&debug) << "a" << 33 << 0.567f;
+    Warning(&warning) << "w" << 42 << "meh";
+    Error(&error) << "e";
 
     CORRADE_COMPARE(debug.str(), "a 33 0.567\n");
     CORRADE_COMPARE(warning.str(), "w 42 meh\n");
@@ -87,7 +88,7 @@ void DebugTest::debug() {
     /* Multiple times used instance */
     debug.str("");
     {
-        Debug d;
+        Debug d{&debug};
         d << "a";
         d << 33;
         d << 0.567f;
@@ -96,7 +97,7 @@ void DebugTest::debug() {
 
     /* Don't add newline at the end of empty output */
     debug.str("");
-    Debug();
+    Debug{&debug};
     CORRADE_COMPARE(debug.str(), "");
 }
 
@@ -143,12 +144,11 @@ Debug& operator<<(Debug& debug, const Foo& value) {
 
 void DebugTest::custom() {
     std::ostringstream out;
-    Debug::setOutput(&out);
 
     Foo f = { 42 };
     {
-        Debug() << "The answer is" << f;
-        Debug() << f << "is the answer";
+        Debug(&out) << "The answer is" << f;
+        Debug(&out) << f << "is the answer";
     }
     CORRADE_COMPARE(out.str(), "The answer is 42\n"
                                "42 is the answer\n");
@@ -187,16 +187,15 @@ void DebugTest::noNewlineAtTheEnd() {
 
 void DebugTest::iterable() {
     std::ostringstream out;
-    Debug::setOutput(&out);
-    Debug() << std::vector<int>{1, 2, 3};
+    Debug(&out) << std::vector<int>{1, 2, 3};
     CORRADE_COMPARE(out.str(), "{1, 2, 3}\n");
 
     out.str({});
-    Debug() << std::set<std::string>{"a", "b", "c"};
+    Debug(&out) << std::set<std::string>{"a", "b", "c"};
     CORRADE_COMPARE(out.str(), "{a, b, c}\n");
 
     out.str({});
-    Debug() << std::map<int, std::string>{{1, "a"}, {2, "b"}, {3, "c"}};
+    Debug(&out) << std::map<int, std::string>{{1, "a"}, {2, "b"}, {3, "c"}};
     CORRADE_COMPARE(out.str(), "{(1, a), (2, b), (3, c)}\n");
 }
 
@@ -232,9 +231,7 @@ inline Debug& operator<<(Debug& debug, const Baz&) {
 
 void DebugTest::ostreamFallback() {
     std::ostringstream out;
-    Debug::setOutput(&out);
-
-    Debug() << Bar{};
+    Debug(&out) << Bar{};
     CORRADE_COMPARE(out.str(), "bar\n");
 }
 
@@ -246,10 +243,52 @@ void DebugTest::ostreamFallbackPriority() {
     }
 
     std::ostringstream out;
-    Debug::setOutput(&out);
-
-    Debug() << Baz{};
+    Debug(&out) << Baz{};
     CORRADE_COMPARE(out.str(), "baz from Debug\n");
+}
+
+void DebugTest::scopedOutput() {
+    std::ostringstream debug1, debug2, warning1, warning2, error1, error2;
+
+    Debug muteD{nullptr};
+    Warning muteW{nullptr};
+    Error muteE{nullptr};
+
+    {
+        Debug redirectD1{&debug1};
+        Warning redirectW1{&warning1};
+        Error redirectE1{&error1};
+
+        Debug() << "hello";
+        Warning() << "crazy";
+        Error() << "world";
+
+        {
+            Debug redirectD2{&debug2};
+            Warning redirectW2{&warning2};
+            Error redirectE2{&error2};
+
+            Debug() << "well";
+            Warning() << "that";
+            Error() << "smells";
+        }
+
+        Debug() << "how";
+        Warning() << "are";
+        Error() << "you?";
+    }
+
+    Debug() << "anyone";
+    Warning() << "hears";
+    Error() << "me?";
+
+    CORRADE_COMPARE(debug1.str(), "hello\nhow\n");
+    CORRADE_COMPARE(warning1.str(), "crazy\nare\n");
+    CORRADE_COMPARE(error1.str(), "world\nyou?\n");
+
+    CORRADE_COMPARE(debug2.str(), "well\n");
+    CORRADE_COMPARE(warning2.str(), "that\n");
+    CORRADE_COMPARE(error2.str(), "smells\n");
 }
 
 }}}

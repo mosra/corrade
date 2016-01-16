@@ -148,7 +148,7 @@ void Test::wrongPluginVersion() {
     CORRADE_SKIP("Can't test plugin version of static plugins");
     #else
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
 
     PluginManager::Manager<AbstractFood> foodManager(foodPluginsDir);
     CORRADE_COMPARE(foodManager.load("OldBread"), PluginManager::LoadState::WrongPluginVersion);
@@ -162,7 +162,7 @@ void Test::wrongPluginInterface() {
     CORRADE_SKIP("Can't test plugin interface of static plugins");
     #else
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
 
     PluginManager::Manager<AbstractFood> foodManager(foodPluginsDir);
     CORRADE_COMPARE(foodManager.load("RottenTomato"), PluginManager::LoadState::WrongInterfaceVersion);
@@ -175,7 +175,7 @@ void Test::wrongMetadataFile() {
     CORRADE_SKIP("Can't test metadata file of static plugins");
     #else
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
 
     PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
     CORRADE_COMPARE(manager.loadState("Snail"), LoadState::WrongMetadataFile);
@@ -190,7 +190,7 @@ void Test::loadNonexistent() {
     PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
 
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     CORRADE_COMPARE(manager.load("Nonexistent"), LoadState::NotFound);
     #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_NACL_NEWLIB)
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): plugin Nonexistent was not found\n");
@@ -203,7 +203,7 @@ void Test::unloadNonexistent() {
     PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
 
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     CORRADE_COMPARE(manager.unload("Nonexistent"), LoadState::NotFound);
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::unload(): plugin Nonexistent was not found\n");
 }
@@ -241,7 +241,7 @@ void Test::dynamicPlugin() {
 
         /* Try to unload plugin when instance is used */
         std::ostringstream out;
-        Error::setOutput(&out);
+        Error redirectError{&out};
         CORRADE_COMPARE(manager.unload("Dog"), LoadState::Used);
         CORRADE_COMPARE(out.str(), "PluginManager::Manager::unload(): plugin Dog is currently used and cannot be deleted\n");
         CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
@@ -256,7 +256,7 @@ void Test::dynamicPlugin() {
 
 void Test::staticPluginInitFini() {
     std::ostringstream out;
-    Debug::setOutput(&out);
+    Debug redirectDebug{&out};
 
     {
         /* Initialization is right after manager assigns them to itself */
@@ -276,7 +276,7 @@ void Test::staticPluginInitFini() {
 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
 void Test::dynamicPluginInitFini() {
     std::ostringstream out;
-    Debug::setOutput(&out);
+    Debug redirectDebug{&out};
 
     PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
 
@@ -338,7 +338,7 @@ void Test::hierarchy() {
 
         /* Try to unload plugin when another is depending on it */
         std::ostringstream out;
-        Error::setOutput(&out);
+        Error redirectError{&out};
         CORRADE_COMPARE(manager.unload("Dog"), LoadState::Required);
         CORRADE_COMPARE(out.str(), "PluginManager::Manager::unload(): plugin Dog is required by other plugins: {Chihuahua}\n");
     }
@@ -387,7 +387,7 @@ void Test::crossManagerDependencies() {
     CORRADE_VERIFY(manager.instance("Canary"));
 
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     CORRADE_VERIFY(!foodManager.instance("Canary"));
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::instance(): plugin Canary is not loaded\n");
 }
@@ -404,7 +404,7 @@ void Test::unresolvedDependencies() {
        usedBy list. */
 
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     CORRADE_COMPARE(foodManager.load("HotDogWithSnail"), LoadState::UnresolvedDependency);
     CORRADE_COMPARE(out.str(),
         "PluginManager::Manager::load(): plugin Snail is not ready to load: PluginManager::LoadState::WrongMetadataFile\n"
@@ -505,7 +505,7 @@ void Test::dynamicProvidesDependency() {
     CORRADE_COMPARE(manager.metadata("Bulldog")->depends(), std::vector<std::string>{"JustSomeMammal"});
 
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     CORRADE_COMPARE(manager.load("Bulldog"), LoadState::UnresolvedDependency);
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): unresolved dependency JustSomeMammal of plugin Bulldog\n");
 }

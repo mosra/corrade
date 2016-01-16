@@ -156,7 +156,7 @@ void LinkedListTest::insert() {
 
 void LinkedListTest::insertFromOtherList() {
     std::stringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
 
     LinkedList list;
     Item item;
@@ -169,7 +169,7 @@ void LinkedListTest::insertFromOtherList() {
 
 void LinkedListTest::insertBeforeFromOtherList() {
     std::stringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
 
     LinkedList list;
     Item item;
@@ -183,7 +183,7 @@ void LinkedListTest::insertBeforeFromOtherList() {
 
 void LinkedListTest::cutFromOtherList() {
     std::stringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
 
     LinkedList list;
     Item item;

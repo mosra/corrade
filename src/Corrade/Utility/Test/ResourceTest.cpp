@@ -122,7 +122,7 @@ void ResourceTest::compileFrom() {
 
 void ResourceTest::compileFromNonexistentResource() {
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
 
     CORRADE_VERIFY(Resource::compileFrom("ResourceTestData", "nonexistent.conf").empty());
     CORRADE_COMPARE(out.str(), "    Error: file nonexistent.conf does not exist\n");
@@ -130,7 +130,7 @@ void ResourceTest::compileFromNonexistentResource() {
 
 void ResourceTest::compileFromNonexistentFile() {
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
 
     CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
         Directory::join(RESOURCE_TEST_DIR, "resources-nonexistent.conf")).empty());
@@ -139,7 +139,7 @@ void ResourceTest::compileFromNonexistentFile() {
 
 void ResourceTest::compileFromEmptyGroup() {
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
 
     /* Empty group name is allowed */
     CORRADE_VERIFY(!Resource::compileFrom("ResourceTestData",
@@ -154,7 +154,7 @@ void ResourceTest::compileFromEmptyGroup() {
 
 void ResourceTest::compileFromEmptyFilename() {
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
 
     CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
         Directory::join(RESOURCE_TEST_DIR, "resources-empty-filename.conf")).empty());
@@ -163,7 +163,7 @@ void ResourceTest::compileFromEmptyFilename() {
 
 void ResourceTest::compileFromEmptyAlias() {
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
 
     CORRADE_VERIFY(Resource::compileFrom("ResourceTestData",
         Directory::join(RESOURCE_TEST_DIR, "resources-empty-alias.conf")).empty());
@@ -200,7 +200,7 @@ void ResourceTest::getEmptyFile() {
 
 void ResourceTest::getNonexistent() {
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
 
     {
         Resource r("nonexistentGroup");
@@ -223,7 +223,7 @@ void ResourceTest::getNonexistent() {
 
 void ResourceTest::getNothing() {
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
 
     Resource r("nothing");
     CORRADE_VERIFY(out.str().empty());
@@ -232,7 +232,7 @@ void ResourceTest::getNothing() {
 
 void ResourceTest::overrideGroup() {
     std::ostringstream out;
-    Debug::setOutput(&out);
+    Debug redirectDebug{&out};
 
     Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overriden.conf"));
     Resource r("test");
@@ -248,7 +248,7 @@ void ResourceTest::overrideGroup() {
 
 void ResourceTest::overrideGroupFallback() {
     std::ostringstream out;
-    Warning::setOutput(&out);
+    Warning redirectWarning{&out};
 
     Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overriden-none.conf"));
     Resource r("test");
@@ -261,8 +261,8 @@ void ResourceTest::overrideGroupFallback() {
 
 void ResourceTest::overrideNonexistentFile() {
     std::ostringstream out;
-    Error::setOutput(&out);
-    Warning::setOutput(&out);
+    Error redirectError{&out};
+    Warning redirectWarning(&out);
 
     Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overriden-nonexistent-file.conf"));
     Resource r("test");
@@ -277,7 +277,7 @@ void ResourceTest::overrideNonexistentFile() {
 
 void ResourceTest::overrideNonexistentGroup() {
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
 
     /* Nonexistent group */
     Resource::overrideGroup("nonexistentGroup", {});
@@ -288,7 +288,7 @@ void ResourceTest::overrideDifferentGroup() {
     std::ostringstream out;
     Resource::overrideGroup("test", Directory::join(RESOURCE_TEST_DIR, "resources-overriden-different.conf"));
 
-    Warning::setOutput(&out);
+    Warning redirectWarning{&out};
     Resource r("test");
     CORRADE_COMPARE(out.str(), "Utility::Resource: overriden with different group, found 'wat' but expected 'test'\n");
 }

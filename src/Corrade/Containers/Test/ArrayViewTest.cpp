@@ -239,7 +239,7 @@ void ArrayViewTest::sliceInvalid() {
     ArrayView a = data;
 
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
 
     a.slice(a - 1, a);
     a.slice(a + 5, a + 6);

@@ -96,7 +96,7 @@ void UnicodeTest::nextUtf8Error() {
 
 void UnicodeTest::nextUtf8Empty() {
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     Unicode::nextChar("", 0);
 
     CORRADE_COMPARE(out.str(), "Utility::Unicode::nextChar(): cursor out of range\n");

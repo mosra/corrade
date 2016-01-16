@@ -254,7 +254,7 @@ void ArgumentsTest::helpAfterParse() {
 
 void ArgumentsTest::duplicateKey() {
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     Arguments args;
     args.addArgument("foo")
         .addOption("foo");
@@ -264,7 +264,7 @@ void ArgumentsTest::duplicateKey() {
 
 void ArgumentsTest::duplicateShortKey() {
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     Arguments args;
     args.addNamedArgument('b', "bar")
         .addBooleanOption('b', "foo");
@@ -274,7 +274,7 @@ void ArgumentsTest::duplicateShortKey() {
 
 void ArgumentsTest::disallowedCharacter() {
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     Arguments args;
     args.addNamedArgument('b', "a mistake");
 
@@ -283,7 +283,7 @@ void ArgumentsTest::disallowedCharacter() {
 
 void ArgumentsTest::disallowedCharacterShort() {
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     Arguments args;
     args.addOption(' ', "bar");
 
@@ -388,7 +388,7 @@ void ArgumentsTest::parseUnknownArgument() {
     const int argc = std::extent<decltype(argv)>();
 
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(argc, argv));
     CORRADE_COMPARE(out.str(), "Unknown command-line argument --error\n");
 }
@@ -400,7 +400,7 @@ void ArgumentsTest::parseUnknownShortArgument() {
     const int argc = std::extent<decltype(argv)>();
 
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(argc, argv));
     CORRADE_COMPARE(out.str(), "Unknown command-line argument -e\n");
 }
@@ -412,7 +412,7 @@ void ArgumentsTest::parseSuperfluousArgument() {
     const int argc = std::extent<decltype(argv)>();
 
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(argc, argv));
     CORRADE_COMPARE(out.str(), "Superfluous command-line argument error\n");
 }
@@ -425,7 +425,7 @@ void ArgumentsTest::parseArgumentAfterSeparator() {
     const int argc = std::extent<decltype(argv)>();
 
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(argc, argv));
     CORRADE_COMPARE(out.str(), "Superfluous command-line argument -b\n");
 }
@@ -437,7 +437,7 @@ void ArgumentsTest::parseInvalidLongArgument() {
     const int argc = std::extent<decltype(argv)>();
 
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(argc, argv));
     CORRADE_COMPARE(out.str(), "Invalid command-line argument -long-argument (did you mean --long-argument?)\n");
 }
@@ -450,7 +450,7 @@ void ArgumentsTest::parseMissingValue() {
     const int argc = std::extent<decltype(argv)>();
 
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(argc, argv));
     CORRADE_COMPARE(out.str(), "Missing value for command-line argument --output\n");
 }
@@ -463,7 +463,7 @@ void ArgumentsTest::parseMissingOption() {
     const int argc = std::extent<decltype(argv)>();
 
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(argc, argv));
     CORRADE_COMPARE(out.str(), "Missing command-line argument --output\n");
 }
@@ -476,7 +476,7 @@ void ArgumentsTest::parseMissingArgument() {
     const int argc = std::extent<decltype(argv)>();
 
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(argc, argv));
     CORRADE_COMPARE(out.str(), "Missing command-line argument file.dat\n");
 }
@@ -563,7 +563,7 @@ Arguments:
 
 void ArgumentsTest::prefixedDisallowedCalls() {
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     Arguments args{"reader"};
     args.addArgument("foo")
         .addNamedArgument("bar")
@@ -581,7 +581,7 @@ void ArgumentsTest::prefixedDisallowedCalls() {
 
 void ArgumentsTest::prefixedDisallowedWithPrefix() {
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     Arguments args;
     args.addOption("reader-flush")
         .addSkippedPrefix("reader");
@@ -592,7 +592,7 @@ void ArgumentsTest::prefixedDisallowedWithPrefix() {
 
 void ArgumentsTest::prefixedDisallowedWithPrefixAfterSkipPrefix() {
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     Arguments args;
     args.addSkippedPrefix("reader")
         .addOption("reader-flush");
@@ -603,7 +603,7 @@ void ArgumentsTest::prefixedDisallowedWithPrefixAfterSkipPrefix() {
 
 void ArgumentsTest::prefixedUnknownWithPrefix() {
     std::ostringstream out;
-    Error::setOutput(&out);
+    Error redirectError{&out};
     Arguments args{"reader"};
     args.addOption("bar");
 

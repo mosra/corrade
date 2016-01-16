@@ -60,6 +60,7 @@ Error Error::noNewlineAtTheEnd() {
     return noNewlineAtTheEnd(_globalErrorOutput);
 }
 
+#ifdef CORRADE_BUILD_DEPRECATED
 void Debug::setOutput(std::ostream* output) {
     _globalOutput = output;
 }
@@ -71,6 +72,25 @@ void Warning::setOutput(std::ostream* output) {
 void Error::setOutput(std::ostream* output) {
     _globalErrorOutput = output;
 }
+#endif
+
+Debug::Debug(std::ostream* output): _flags{Flag::NoSpaceBeforeNextValue} {
+    /* Save previous global output and replace it with current one */
+    _previousGlobalOutput = _globalOutput;
+    _globalOutput = _output = output;
+}
+
+Warning::Warning(std::ostream* output) {
+    /* Save previous global output and replace it with current one */
+    _previousGlobalWarningOutput = _globalWarningOutput;
+    _globalWarningOutput = _output = output;
+}
+
+Error::Error(std::ostream* output) {
+    /* Save previous global output and replace it with current one */
+    _previousGlobalErrorOutput = _globalErrorOutput;
+    _globalErrorOutput = _output = output;
+}
 
 Debug::Debug(): Debug{_globalOutput} {}
 Warning::Warning(): Warning{_globalWarningOutput} {}
@@ -79,6 +99,16 @@ Error::Error(): Error{_globalErrorOutput} {}
 Debug::~Debug() {
     if(_output && (_flags & Flag::ValueWritten) && !(_flags & Flag::NoNewlineAtTheEnd))
         *_output << std::endl;
+
+    _globalOutput = _previousGlobalOutput;
+}
+
+Warning::~Warning() {
+    _globalWarningOutput = _previousGlobalWarningOutput;
+}
+
+Error::~Error() {
+    _globalErrorOutput = _previousGlobalErrorOutput;
 }
 
 Fatal::~Fatal() {

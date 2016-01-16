@@ -85,7 +85,7 @@ void StateMachineTest::test() {
     });
 
     std::ostringstream out;
-    Debug::setOutput(&out);
+    Debug redirectDebug{&out};
 
     Interconnect::connect(m, &StateMachine::entered<State::Start>,
         [](State s) { Debug() << "start entered, previous" << std::uint8_t(s); });

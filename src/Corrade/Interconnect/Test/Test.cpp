@@ -546,7 +546,7 @@ void Test::deleteReceiverInSlot() {
 
 void Test::function() {
     std::ostringstream out;
-    Debug::setOutput(&out);
+    Debug redirectDebug{&out};
 
     Postman postman;
     Connection connection = Interconnect::connect(postman, &Postman::newMessage, [](int, const std::string& message) { Debug() << message; });
