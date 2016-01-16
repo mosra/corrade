@@ -76,12 +76,6 @@ Debug::Debug(): Debug{_globalOutput} {}
 Warning::Warning(): Warning{_globalWarningOutput} {}
 Error::Error(): Error{_globalErrorOutput} {}
 
-Debug::Debug(const Debug& other): _output(other._output), _flags(other._flags) {
-    /* If the other already wrote something on the output, disables newline at
-       the end */
-    if(other._flags & Flag::ValueWritten) _flags |= Flag::NoNewlineAtTheEnd;
-}
-
 Debug::~Debug() {
     if(_output && (_flags & Flag::ValueWritten) && !(_flags & Flag::NoNewlineAtTheEnd))
         *_output << std::endl;

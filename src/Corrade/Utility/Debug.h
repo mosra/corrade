@@ -102,9 +102,6 @@ Debug::noNewlineAtTheEnd() << "Hello!";
 @todo Output to more ostreams at once
  */
 class CORRADE_UTILITY_EXPORT Debug {
-    Debug& operator=(const Debug& other) = delete;
-    Debug& operator=(Debug&& other) = delete;
-
     public:
         /**
          * @brief Debug output without newline at the end
@@ -177,13 +174,11 @@ class CORRADE_UTILITY_EXPORT Debug {
         /* MinGW complains loudly if the declaration doesn't also have inline */
         inline explicit Debug(std::ostream* output);
 
-        /**
-         * @brief Copy constructor
-         *
-         * When copied from class which already wrote something on the output,
-         * disables newline at the end to avoid excessive whitespace.
-         */
-        Debug(const Debug& other);
+        /** @brief Copying is not allowed */
+        Debug(const Debug&) = delete;
+
+        /** @brief Move constructor */
+        Debug(Debug&&) = default;
 
         /**
          * @brief Destructor
@@ -191,6 +186,12 @@ class CORRADE_UTILITY_EXPORT Debug {
          * If there was any output, adds newline at the end.
          */
         ~Debug();
+
+        /** @brief Copying is not allowed */
+        Debug& operator=(const Debug&) = delete;
+
+        /** @brief Move assignment is not allowed */
+        Debug& operator=(Debug&&) = delete;
 
         /**
          * @brief Print string to debug output
