@@ -135,6 +135,16 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          */
         int exec(int argc, const char** argv, std::ostream* logOutput, std::ostream* errorOutput);
 
+        /** @overload */
+        int exec(int argc, char** argv, std::ostream* logOutput, std::ostream* errorOutput) {
+            return exec(argc, const_cast<const char**>(argv), logOutput, errorOutput);
+        }
+
+        /** @overload */
+        int exec(int argc, std::nullptr_t argv, std::ostream* logOutput, std::ostream* errorOutput) {
+            return exec(argc, static_cast<const char**>(argv), logOutput, errorOutput);
+        }
+
         /**
          * @brief Execute the tester
          * @param argc          Main function argument count
@@ -146,6 +156,16 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * output to `std::cerr`.
          */
         int exec(int argc, const char** argv);
+
+        /** @overload */
+        int exec(int argc, char** argv) {
+            return exec(argc, const_cast<const char**>(argv));
+        }
+
+        /** @overload */
+        int exec(int argc, std::nullptr_t argv) {
+            return exec(argc, static_cast<const char**>(argv));
+        }
 
         /**
          * @brief Add test cases
