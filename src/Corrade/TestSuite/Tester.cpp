@@ -25,7 +25,9 @@
 
 #include "Tester.h"
 
+#include <algorithm>
 #include <iostream>
+#include <random>
 #include <utility>
 
 #include "Corrade/Utility/Arguments.h"
@@ -53,6 +55,8 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
         args.addSkippedPrefix(prefix);
     args.addOption("skip").setHelp("skip", "skip test cases with given numbers", "\"N1 N2...\"")
         .addOption("only").setHelp("only", "run only test cases with given numbers (in that order)", "\"N1 N2...\"")
+        .addBooleanOption("shuffle").setHelp("shuffle", "randomly shuffle test case order")
+            .setFromEnvironment("shuffle", "CORRADE_TEST_SHUFFLE")
         .setHelp("Corrade TestSuite executable. By default runs test cases in order in which they\n"
                  "were added and exits with non-zero code if any of them failed.")
         .parse(argc, argv);
@@ -86,6 +90,10 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
         if(!_testCases[i]) continue;
         usedTestCases.emplace_back(i + 1, _testCases[i]);
     }
+
+    /* Shuffle the test cases, if requested */
+    if(args.isSet("shuffle"))
+        std::shuffle(usedTestCases.begin(), usedTestCases.end(), std::minstd_rand{std::random_device{}()});
 
     unsigned int errorCount = 0,
         noCheckCount = 0;
