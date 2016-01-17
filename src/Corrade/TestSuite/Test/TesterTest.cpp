@@ -205,7 +205,7 @@ void TesterTest::test() {
 
     Test t;
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(&out, &out);
+    int result = t.exec(0, nullptr, &out, &out);
 
     CORRADE_VERIFY(result == 1);
 
@@ -254,7 +254,7 @@ void TesterTest::emptyTest() {
 
     EmptyTest t;
     t.registerTest("here.cpp", "TesterTest::EmptyTest");
-    int result = t.exec(&out, &out);
+    int result = t.exec(0, nullptr, &out, &out);
 
     CORRADE_VERIFY(result == 2);
 

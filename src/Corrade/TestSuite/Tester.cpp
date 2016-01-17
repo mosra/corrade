@@ -28,13 +28,22 @@
 #include <iostream>
 #include <utility>
 
+#include "Corrade/Utility/Arguments.h"
+
 namespace Corrade { namespace TestSuite {
 
-Tester::Tester(): _logOutput{nullptr}, _errorOutput{nullptr}, _testCaseLine{0}, _checkCount{0}, _expectedFailure{nullptr} {}
+Tester::Tester(const TesterConfiguration& configuration): _logOutput{nullptr}, _errorOutput{nullptr}, _testCaseLine{0}, _checkCount{0}, _expectedFailure{nullptr}, _configuration{configuration} {}
 
-int Tester::exec() { return exec(&std::cout, &std::cerr); }
+int Tester::exec(const int argc, const char** const argv) { return exec(argc, argv, &std::cout, &std::cerr); }
 
-int Tester::exec(std::ostream* logOutput, std::ostream* errorOutput) {
+int Tester::exec(const int argc, const char** const argv, std::ostream* const logOutput, std::ostream* const errorOutput) {
+    Utility::Arguments args;
+    for(auto&& prefix: _configuration.skippedArgumentPrefixes())
+        args.addSkippedPrefix(prefix);
+    args.setHelp("Corrade TestSuite executable. By default runs test cases in order in which they\n"
+                 "were added and exits with non-zero code if any of them failed.")
+        .parse(argc, argv);
+
     _logOutput = logOutput;
     _errorOutput = errorOutput;
 
@@ -122,6 +131,8 @@ void Tester::registerTestCase(const std::string& name, int line) {
     if(_testCaseName.empty()) _testCaseName = name + "()";
     _testCaseLine = line;
 }
+
+Tester::TesterConfiguration::TesterConfiguration() = default;
 
 Tester::ExpectedFailure::ExpectedFailure(Tester* const instance, std::string message, const bool enabled): _instance(instance), _message(std::move(message)) {
     if(enabled) _instance->_expectedFailure = this;

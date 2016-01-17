@@ -60,6 +60,35 @@ See @ref unit-testing for introduction.
 class CORRADE_TESTSUITE_EXPORT Tester {
     public:
         /**
+         * @brief Tester configuration
+         *
+         * @see @ref Tester::Tester()
+         */
+        class CORRADE_TESTSUITE_EXPORT TesterConfiguration {
+            public:
+                explicit TesterConfiguration();
+
+                /** @brief Skipped argument prefixes */
+                const std::vector<std::string>& skippedArgumentPrefixes() const {
+                    return _skippedArgumentPrefixes;
+                }
+
+                /**
+                 * @brief Set skipped argument prefixes
+                 *
+                 * Useful to allow passing command-line arguments elsewhere
+                 * without having the tester complaining about them.
+                 */
+                TesterConfiguration& setSkippedArgumentPrefixes(std::initializer_list<std::string> prefixes) {
+                    _skippedArgumentPrefixes.insert(_skippedArgumentPrefixes.end(), prefixes);
+                    return *this;
+                }
+
+            private:
+                std::vector<std::string> _skippedArgumentPrefixes;
+        };
+
+        /**
          * @brief Alias for debug output
          *
          * For convenient debug output inside test cases (instead of using
@@ -89,26 +118,34 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          */
         typedef Corrade::Utility::Error Error;
 
-        explicit Tester();
+        /**
+         * @brief Constructor
+         * @param configuration     Optional configuration
+         */
+        explicit Tester(const TesterConfiguration& configuration = TesterConfiguration{});
 
         /**
          * @brief Execute the tester
+         * @param argc          Main function argument count
+         * @param argv          Main function argument values
          * @param logOutput     Output stream for log messages
          * @param errorOutput   Output stream for error messages
          * @return Non-zero if there are no test cases, if any test case fails
          *      or doesn't contain any checking macros, zero otherwise.
          */
-        int exec(std::ostream* logOutput, std::ostream* errorOutput);
+        int exec(int argc, const char** argv, std::ostream* logOutput, std::ostream* errorOutput);
 
         /**
          * @brief Execute the tester
+         * @param argc          Main function argument count
+         * @param argv          Main function argument values
          * @return Non-zero if there are no test cases, if any test case fails
          *      or doesn't contain any checking macros, zero otherwise.
          *
          * The same as above, redirects log output to `std::cout` and error
          * output to `std::cerr`.
          */
-        int exec();
+        int exec(int argc, const char** argv);
 
         /**
          * @brief Add test cases
@@ -193,6 +230,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         std::string _testFilename, _testName, _testCaseName, _expectFailMessage;
         std::size_t _testCaseLine, _checkCount;
         ExpectedFailure* _expectedFailure;
+        TesterConfiguration _configuration;
 };
 
 /** @hideinitializer
@@ -200,10 +238,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 */
 #ifndef CORRADE_TARGET_EMSCRIPTEN
 #define CORRADE_TEST_MAIN(Class)                                            \
-    int main(int, char**) {                                                 \
+    int main(int argc, const char** argv) {                                 \
         Class t;                                                            \
         t.registerTest(__FILE__, #Class);                                   \
-        return t.exec();                                                    \
+        return t.exec(argc, argv);                                          \
     }
 #else
 /* In Emscripten, returning from main() with non-zero exit code won't
@@ -212,11 +250,11 @@ class CORRADE_TESTSUITE_EXPORT Tester {
    voodoo is done to have `t` properly destructed before aborting. */
 /** @todo Remove workaround when Emscripten can properly propagate exit codes */
 #define CORRADE_TEST_MAIN(Class)                                            \
-    int main(int, char**) {                                                 \
+    int main(int argc, const char** argv) {                                 \
         if([]() {                                                           \
             Class t;                                                        \
             t.registerTest(__FILE__, #Class);                               \
-            return t.exec();                                                \
+            return t.exec(argc, argv);                                      \
         }() != 0) std::abort();                                             \
         return 0;                                                           \
     }
