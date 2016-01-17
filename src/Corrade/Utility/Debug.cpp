@@ -48,18 +48,6 @@ std::ostream* Debug::_globalOutput = &std::cout;
 std::ostream* Warning::_globalWarningOutput = &std::cerr;
 std::ostream* Error::_globalErrorOutput = &std::cerr;
 
-Debug Debug::noNewlineAtTheEnd() {
-    return noNewlineAtTheEnd(_globalOutput);
-}
-
-Warning Warning::noNewlineAtTheEnd() {
-    return noNewlineAtTheEnd(_globalWarningOutput);
-}
-
-Error Error::noNewlineAtTheEnd() {
-    return noNewlineAtTheEnd(_globalErrorOutput);
-}
-
 #ifdef CORRADE_BUILD_DEPRECATED
 void Debug::setOutput(std::ostream* output) {
     _globalOutput = output;
@@ -74,27 +62,27 @@ void Error::setOutput(std::ostream* output) {
 }
 #endif
 
-Debug::Debug(std::ostream* output): _flags{InternalFlag::NoSpaceBeforeNextValue} {
+Debug::Debug(std::ostream* const output, const Flags flags): _flags{InternalFlag(static_cast<unsigned char>(flags))|InternalFlag::NoSpaceBeforeNextValue} {
     /* Save previous global output and replace it with current one */
     _previousGlobalOutput = _globalOutput;
     _globalOutput = _output = output;
 }
 
-Warning::Warning(std::ostream* output) {
+Warning::Warning(std::ostream* const output, const Flags flags): Debug{flags} {
     /* Save previous global output and replace it with current one */
     _previousGlobalWarningOutput = _globalWarningOutput;
     _globalWarningOutput = _output = output;
 }
 
-Error::Error(std::ostream* output) {
+Error::Error(std::ostream* const output, const Flags flags): Debug{flags} {
     /* Save previous global output and replace it with current one */
     _previousGlobalErrorOutput = _globalErrorOutput;
     _globalErrorOutput = _output = output;
 }
 
-Debug::Debug(): Debug{_globalOutput} {}
-Warning::Warning(): Warning{_globalWarningOutput} {}
-Error::Error(): Error{_globalErrorOutput} {}
+Debug::Debug(const Flags flags): Debug{_globalOutput, flags} {}
+Warning::Warning(const Flags flags): Warning{_globalWarningOutput, flags} {}
+Error::Error(const Flags flags): Error{_globalErrorOutput, flags} {}
 
 Debug::~Debug() {
     if(_output && (_flags & InternalFlag::ValueWritten) && !(_flags & InternalFlag::NoNewlineAtTheEnd))

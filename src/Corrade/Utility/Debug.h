@@ -88,7 +88,7 @@ Debug() << "Value:" << 16 << Debug::nospace << "," << 24;
 Debug() << "Value:" << Debug::newline << 16;
 
 // Doesn't output newline at the end
-Debug::noNewlineAtTheEnd() << "Hello!";
+Debug{Debug::Flag::NoNewlineAtTheEnd} << "Hello!";
 @endcode
 
 ## Scoped output redirection
@@ -131,22 +131,39 @@ class CORRADE_UTILITY_EXPORT Debug {
         typedef void(*Modifier)(Debug&);
 
         /**
-         * @brief Debug output without newline at the end
+         * @brief Debug output flag
          *
-         * Unlike @ref Debug() doesn't put newline at the end on destruction.
-         * @see @ref noNewlineAtTheEnd(std::ostream*)
+         * @see @ref Flags, @ref Debug(Flags)
          */
-        static Debug noNewlineAtTheEnd();
+        enum class Flag: unsigned char {
+            /** Don't put newline at the end on destruction. */
+            NoNewlineAtTheEnd = 1 << 0
+        };
+
+        /**
+         * @brief Debug output flags
+         *
+         * @see @ref Debug(Flags)
+         */
+        typedef Containers::EnumSet<Flag> Flags;
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /**
+         * @brief Debug output without newline at the end
+         * @deprecated Use @ref Debug(Flags) instead.
+         */
+        CORRADE_DEPRECATED("use Debug(Flags) instead") static Debug noNewlineAtTheEnd() {
+            return Debug{Flag::NoNewlineAtTheEnd};
+        }
 
         /**
          * @brief Debug output without newline at the end
-         *
-         * Unlike @ref Debug(std::ostream*) doesn't put newline at the end on
-         * destruction.
-         * @see @ref noNewlineAtTheEnd()
+         * @deprecated Use @ref Debug(std::ostream*, Flags) instead.
          */
-        /* MinGW complains loudly if the declaration doesn't also have inline */
-        inline static Debug noNewlineAtTheEnd(std::ostream* output);
+        CORRADE_DEPRECATED("use Debug(std::ostream*, Flags) instead") static Debug noNewlineAtTheEnd(std::ostream* output) {
+            return Debug{output, Flag::NoNewlineAtTheEnd};
+        }
+        #endif
 
         /**
          * @brief Don't put space before next value
@@ -185,31 +202,31 @@ class CORRADE_UTILITY_EXPORT Debug {
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Set output for instances in this scope
-         * @deprecated Use @ref Debug(std::ostream*) instead.
+         * @deprecated Use @ref Debug(std::ostream*, Flags) instead.
          */
-        CORRADE_DEPRECATED("use Debug(std::ostream*) instead") static void setOutput(std::ostream* output);
+        CORRADE_DEPRECATED("use Debug(std::ostream*, Flags) instead") static void setOutput(std::ostream* output);
         #endif
 
         /**
          * @brief Default constructor
+         * @param flags         Output flags
          *
          * Uses output of enclosing `Debug` instance or uses `std::cout` if
          * there isn't any.
-         * @see @ref noNewlineAtTheEnd()
          */
-        explicit Debug();
+        explicit Debug(Flags flags = {});
 
         /**
          * @brief Constructor
          * @param output        Stream where to put debug output. If set to
          *      `nullptr`, no debug output will be written anywhere.
+         * @param flags         Output flags
          *
-         * All new instances created using the default @ref Debug() constructor
-         * during lifetime of this instance will inherit the output set in
-         * @p output.
-         * @see @ref noNewlineAtTheEnd(std::ostream*)
+         * All new instances created using the default @ref Debug() "Debug()"
+         * constructor during lifetime of this instance will inherit the output
+         * set in @p output.
          */
-        explicit Debug(std::ostream* output);
+        explicit Debug(std::ostream* output, Flags flags = {});
 
         /** @brief Copying is not allowed */
         Debug(const Debug&) = delete;
@@ -295,9 +312,10 @@ class CORRADE_UTILITY_EXPORT Debug {
         std::ostream* _output;
 
         enum class InternalFlag: unsigned char {
-            ValueWritten = 1 << 0,
+            /* Values compatible with Flag enum */
+            NoNewlineAtTheEnd = 1 << 0,
             NoSpaceBeforeNextValue = 1 << 1,
-            NoNewlineAtTheEnd = 1 << 2
+            ValueWritten = 1 << 2
         };
         typedef Containers::EnumSet<InternalFlag> InternalFlags;
 
@@ -313,13 +331,8 @@ class CORRADE_UTILITY_EXPORT Debug {
         std::ostream* _previousGlobalOutput;
 };
 
+CORRADE_ENUMSET_OPERATORS(Debug::Flags)
 CORRADE_ENUMSET_OPERATORS(Debug::InternalFlags)
-
-inline Debug Debug::noNewlineAtTheEnd(std::ostream* const output) {
-    Debug debug{output};
-    debug._flags |= InternalFlag::NoNewlineAtTheEnd;
-    return debug;
-}
 
 inline void Debug::nospace(Debug& debug) {
     debug._flags |= InternalFlag::NoSpaceBeforeNextValue;
@@ -423,52 +436,50 @@ outputs.
 */
 class CORRADE_UTILITY_EXPORT Warning: public Debug {
     public:
-        /**
-         * @brief Warning output without newline at the end
-         *
-         * Unlike @ref Warning() doesn't put newline at the end on destruction.
-         * @see @ref noNewlineAtTheEnd(std::ostream*)
-         */
-        static Warning noNewlineAtTheEnd();
-
-        /**
-         * @brief Warning output without newline at the end
-         *
-         * Unlike @ref Warning(std::ostream*) doesn't put newline at the end on
-         * destruction.
-         * @see @ref noNewlineAtTheEnd()
-         */
-        /* MinGW complains loudly if the declaration doesn't also have inline */
-        inline static Warning noNewlineAtTheEnd(std::ostream* output);
-
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
-         * @brief Set output for instances in this scope
-         * @deprecated Use @ref Warning(std::ostream*) instead.
+         * @brief Warning output without newline at the end
+         * @deprecated Use @ref Warning(Flags) instead.
          */
-        CORRADE_DEPRECATED("use Warning(std::ostream*) instead") static void setOutput(std::ostream* output);
+        CORRADE_DEPRECATED("use Warning(Flags) instead") static Warning noNewlineAtTheEnd() {
+            return Warning{Flag::NoNewlineAtTheEnd};
+        }
+
+        /**
+         * @brief Warning output without newline at the end
+         * @deprecated Use @ref Warning(std::ostream*, Flags) instead.
+         */
+        CORRADE_DEPRECATED("use Warning(std::ostream*, Flags) instead") static Warning noNewlineAtTheEnd(std::ostream* output) {
+            return Warning{output, Flag::NoNewlineAtTheEnd};
+        }
+
+        /**
+         * @brief Set output for instances in this scope
+         * @deprecated Use @ref Warning(std::ostream*, Flags) instead.
+         */
+        CORRADE_DEPRECATED("use Warning(std::ostream*, Flags) instead") static void setOutput(std::ostream* output);
         #endif
 
         /**
          * @brief Default constructor
+         * @param flags         Output flags
          *
          * Inherits output of enclosing `Warning` instance or uses `std::cerr`
          * if there isn't any.
-         * @see @ref noNewlineAtTheEnd()
          */
-        explicit Warning();
+        explicit Warning(Flags flags = {});
 
         /**
          * @brief Constructor
          * @param output        Stream where to put warning output. If set to
          *      `nullptr`, no warning output will be written anywhere.
+         * @param flags         Output flags
          *
          * All new instances created using the default @ref Warning()
          * constructor during lifetime of this instance will inherit the output
          * set in @p output.
-         * @see @ref noNewlineAtTheEnd(std::ostream*)
          */
-        explicit Warning(std::ostream* output);
+        explicit Warning(std::ostream* output, Flags flags = {});
 
         /** @brief Copying is not allowed */
         Warning(const Warning&) = delete;
@@ -495,12 +506,6 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
         std::ostream* _previousGlobalWarningOutput;
 };
 
-inline Warning Warning::noNewlineAtTheEnd(std::ostream* const output) {
-    Warning warning{output};
-    warning._flags |= InternalFlag::NoNewlineAtTheEnd;
-    return std::move(warning);
-}
-
 /**
 @brief Error output handler
 
@@ -511,52 +516,50 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
     friend Fatal;
 
     public:
-        /**
-         * @brief Error output without newline at the end
-         *
-         * Unlike @ref Error() doesn't put newline at the end on destruction.
-         * @see @ref noNewlineAtTheEnd(std::ostream*)
-         */
-        static Error noNewlineAtTheEnd();
-
-        /**
-         * @brief Error output without newline at the end
-         *
-         * Unlike @ref Error(std::ostream*) doesn't put newline at the end on
-         * destruction.
-         * @see @ref noNewlineAtTheEnd()
-         */
-        /* MinGW complains loudly if the declaration doesn't also have inline */
-        inline static Error noNewlineAtTheEnd(std::ostream* output);
-
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
-         * @brief Set output for instances in this scope
-         * @deprecated Use @ref Error(std::ostream*) instead.
+         * @brief Error output without newline at the end
+         * @deprecated Use @ref Error(Flags) instead.
          */
-        CORRADE_DEPRECATED("use Error(std::ostream*) instead") static void setOutput(std::ostream* output);
+        CORRADE_DEPRECATED("use Error(Flags) instead") static Error noNewlineAtTheEnd() {
+            return Error{Flag::NoNewlineAtTheEnd};
+        }
+
+        /**
+         * @brief Error output without newline at the end
+         * @deprecated Use @ref Error(std::ostream*, Flags) instead.
+         */
+        CORRADE_DEPRECATED("use Error(std::ostream*, Flags) instead") static Error noNewlineAtTheEnd(std::ostream* output) {
+            return Error{output, Flag::NoNewlineAtTheEnd};
+        }
+
+        /**
+         * @brief Set output for instances in this scope
+         * @deprecated Use @ref Error(std::ostream*, Flags) instead.
+         */
+        CORRADE_DEPRECATED("use Error(std::ostream*, Flags) instead") static void setOutput(std::ostream* output);
         #endif
 
         /**
          * @brief Default constructor
+         * @param flags         Output flags
          *
          * Inherits output of enclosing `Error` instance or uses `std::cerr` if
          * there isn't any.
-         * @see @ref noNewlineAtTheEnd()
          */
-        explicit Error();
+        explicit Error(Flags flags = {});
 
         /**
          * @brief Constructor
          * @param output        Stream where to put error output. If set to
          *      `nullptr`, no error output will be written anywhere.
+         * @param flags         Output flags
          *
          * All new instances created using the default @ref Error()
          * constructor during lifetime of this instance will inherit the output
          * set in @p output.
-         * @see @ref noNewlineAtTheEnd(std::ostream*)
          */
-        explicit Error(std::ostream* output);
+        explicit Error(std::ostream* output, Flags flags = {});
 
         /** @brief Copying is not allowed */
         Error(const Error&) = delete;
@@ -583,12 +586,6 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
         std::ostream* _previousGlobalErrorOutput;
 };
 
-inline Error Error::noNewlineAtTheEnd(std::ostream* const output) {
-    Error error{output};
-    error._flags |= InternalFlag::NoNewlineAtTheEnd;
-    return std::move(error);
-}
-
 /**
 @brief Warning output handler
 
@@ -614,19 +611,28 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
     public:
         /**
          * @brief Constructor
+         * @param exitCode      Application exit code to be used on destruction
+         * @param flags         Output flags
          *
          * Sets output to `std::cerr`. The @p exitcode is passed to `std::exit()`
          * on destruction.
          */
-        Fatal(int exitCode = 1): _exitCode{exitCode} {}
+        Fatal(int exitCode = 1, Flags flags = {}): Error{flags}, _exitCode{exitCode} {}
+
+        /** @overload */
+        Fatal(Flags flags = {}): Fatal{1, flags} {}
 
         /**
          * @brief Constructor
          * @param output        Stream where to put debug output. If set to
          *      `nullptr`, no debug output will be written anywhere.
          * @param exitCode      Application exit code to be used on destruction
+         * @param flags         Output flags
          */
-        Fatal(std::ostream* output, int exitCode = 1): Error{output}, _exitCode{exitCode} {}
+        Fatal(std::ostream* output, int exitCode = 1, Flags flags = {}): Error{output, flags}, _exitCode{exitCode} {}
+
+        /** @overload */
+        Fatal(std::ostream* output, Flags flags = {}): Fatal{output, 1, flags} {}
 
         /**
          * @brief Destructor
@@ -636,7 +642,9 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
         ~Fatal();
 
     private:
+        #ifdef CORRADE_BUILD_DEPRECATED
         using Error::noNewlineAtTheEnd;
+        #endif
 
         int _exitCode;
 };

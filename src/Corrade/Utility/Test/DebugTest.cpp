@@ -172,13 +172,13 @@ void DebugTest::noNewlineAtTheEnd() {
     std::ostringstream out1, out2, out3;
 
     Debug(&out1) << "Ahoy";
-    Debug::noNewlineAtTheEnd(&out1) << "Hello";
+    Debug{&out1, Debug::Flag::NoNewlineAtTheEnd} << "Hello";
 
     Warning(&out2) << "Ahoy";
-    Warning::noNewlineAtTheEnd(&out2) << "Hello";
+    Warning{&out2, Debug::Flag::NoNewlineAtTheEnd} << "Hello";
 
     Error(&out3) << "Ahoy";
-    Error::noNewlineAtTheEnd(&out3) << "Hello";
+    Error{&out3, Debug::Flag::NoNewlineAtTheEnd} << "Hello";
 
     CORRADE_COMPARE(out1.str(), "Ahoy\nHello");
     CORRADE_COMPARE(out2.str(), "Ahoy\nHello");
