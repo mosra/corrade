@@ -91,6 +91,26 @@ Debug() << "Value:" << Debug::newline << 16;
 Debug{Debug::Flag::NoNewlineAtTheEnd} << "Hello!";
 @endcode
 
+## Colored output
+
+It is possible to color the output with ANSI color escape codes using
+@ref color() and @ref boldColor(). The color is automatically reset on
+destruction to avoid messing up the terminal, you can also use @ref resetColor()
+to reset it explicitly.
+@code
+Debug() << Debug::boldColor(Debug::Color::Green) << "Success!"
+    << Debug::resetColor << "Everything is fine.";
+@endcode
+
+Note that ANSI color escape codes make sense only when outputting to terminal
+and not when redirecting output to file. This is not autodetected, but you can
+set @ref Flag::DisableColors based on value of POSIX `isatty()` command, for
+example:
+@code
+Debug::Flags flags = isatty(1) ? Debug::Flags{} : Debug::Flag::DisableColors;
+Debug(flags) << Debug::boldColor(Debug::Color::Green) << "Success!";
+@endcode
+
 ## Scoped output redirection
 
 Output specified in class constructor is used for all instances created during
@@ -137,7 +157,11 @@ class CORRADE_UTILITY_EXPORT Debug {
          */
         enum class Flag: unsigned char {
             /** Don't put newline at the end on destruction. */
-            NoNewlineAtTheEnd = 1 << 0
+            NoNewlineAtTheEnd = 1 << 0,
+
+            /** Disable ANSI color escape sequences from @ref color(),
+                @ref boldColor() and @ref resetColor() */
+            DisableColors = 1 << 1
         };
 
         /**
@@ -146,6 +170,23 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @see @ref Debug(Flags)
          */
         typedef Containers::EnumSet<Flag> Flags;
+
+        /**
+         * @brief Output color
+         *
+         * @see @ref color(), @ref boldColor()
+         */
+        enum class Color: char {
+            Black = '0',    /**< Black */
+            Red = '1',      /**< Red */
+            Green = '2',    /**< Green */
+            Yellow = '3',   /**< Yellow */
+            Blue = '4',     /**< Blue */
+            Magenta = '5',  /**< Magenta */
+            Cyan = '6',     /**< Cyan */
+            White = '7',    /**< White */
+            Default = '9'   /**< Default (implementation/style-defined) */
+        };
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
@@ -199,6 +240,35 @@ class CORRADE_UTILITY_EXPORT Debug {
             debug << nospace << "\n" << nospace;
         }
 
+        /**
+         * @brief Set output color
+         *
+         * Inserts ANSI escape sequence to the output. Resets previous
+         * @ref color() or @ref boldColor() setting. The color is also
+         * automatically reset on object destruction. If @ref Flag::DisableColors
+         * was set, this function does nothing.
+         */
+        static Modifier color(Color color);
+
+        /**
+         * @brief Set bold output color
+         *
+         * Inserts ANSI escape sequence to the output. Resets previous
+         * @ref color() or @ref boldColor() setting. The color is also
+         * automatically reset on object destruction. If @ref Flag::DisableColors
+         * was set, this function does nothing.
+         */
+        static Modifier boldColor(Color color);
+
+        /**
+         * @brief Reset output color
+         *
+         * Resets any previous @ref color() or @ref boldColor() setting. The
+         * color is also automatically reset on object destruction. If
+         * @ref Flag::DisableColors was set, this function does nothing.
+         */
+        static void resetColor(Debug& debug);
+
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Set output for instances in this scope
@@ -237,8 +307,10 @@ class CORRADE_UTILITY_EXPORT Debug {
         /**
          * @brief Destructor
          *
-         * Resets the output back to the output of enclosing scope. If there
-         * was any output, adds newline at the end.
+         * Resets the output redirection back to the output of enclosing scope.
+         * If there was any output, adds newline at the end. Also resets output
+         * color modifier, if there was any.
+         * @see @ref resetColor()
          */
         ~Debug();
 
@@ -314,8 +386,10 @@ class CORRADE_UTILITY_EXPORT Debug {
         enum class InternalFlag: unsigned char {
             /* Values compatible with Flag enum */
             NoNewlineAtTheEnd = 1 << 0,
-            NoSpaceBeforeNextValue = 1 << 1,
-            ValueWritten = 1 << 2
+            DisableColors = 1 << 1,
+            NoSpaceBeforeNextValue = 1 << 2,
+            ValueWritten = 1 << 3,
+            ColorWritten = 1 << 4
         };
         typedef Containers::EnumSet<InternalFlag> InternalFlags;
 
@@ -324,6 +398,9 @@ class CORRADE_UTILITY_EXPORT Debug {
         InternalFlags _flags;
 
     private:
+        template<Color c> CORRADE_UTILITY_LOCAL static Modifier colorInternal();
+        template<Color c> CORRADE_UTILITY_LOCAL static Modifier boldColorInternal();
+
         static std::ostream* _globalOutput;
 
         template<class T> CORRADE_UTILITY_LOCAL Debug& print(const T& value);
@@ -490,8 +567,10 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
         /**
          * @brief Destructor
          *
-         * Resets the output back to the output of enclosing scope. If there
-         * was any output, adds newline at the end.
+         * Resets the output redirection back to the output of enclosing scope.
+         * If there was any output, adds newline at the end. Also resets output
+         * color modifier, if there was any.
+         * @see @ref resetColor()
          */
         ~Warning();
 
@@ -570,8 +649,10 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
         /**
          * @brief Destructor
          *
-         * Resets the output back to the output of enclosing scope. If there
-         * was any output, adds newline at the end.
+         * Resets the output redirection back to the output of enclosing scope.
+         * If there was any output, adds newline at the end. Also resets output
+         * color modifier, if there was any.
+         * @see @ref resetColor()
          */
         ~Error();
 

@@ -45,6 +45,8 @@ struct DebugTest: TestSuite::Tester {
     void nospace();
     void newline();
     void noNewlineAtTheEnd();
+    void colors();
+    void colorsNospace();
 
     void iterable();
     void tuple();
@@ -64,6 +66,8 @@ DebugTest::DebugTest() {
               &DebugTest::nospace,
               &DebugTest::newline,
               &DebugTest::noNewlineAtTheEnd,
+              &DebugTest::colors,
+              &DebugTest::colorsNospace,
 
               &DebugTest::iterable,
               &DebugTest::tuple,
@@ -183,6 +187,47 @@ void DebugTest::noNewlineAtTheEnd() {
     CORRADE_COMPARE(out1.str(), "Ahoy\nHello");
     CORRADE_COMPARE(out2.str(), "Ahoy\nHello");
     CORRADE_COMPARE(out3.str(), "Ahoy\nHello");
+}
+
+void DebugTest::colors() {
+    {
+        /* Auto-reset at the end */
+        std::ostringstream out;
+        Debug{&out} << "Hello" << Debug::color(Debug::Color::Green) << "world";
+        CORRADE_COMPARE(out.str(), "Hello\033[0;32m world\033[0m\n");
+    } {
+        /* Don't reset twice */
+        std::ostringstream out;
+        Debug{&out} << Debug::boldColor(Debug::Color::Red) << "Hello"
+            << Debug::resetColor << "world";
+        CORRADE_COMPARE(out.str(), "\033[1;31mHello\033[0m world\n");
+    } {
+        /* Disabled globally */
+        std::ostringstream out;
+        Debug{&out, Debug::Flag::DisableColors}
+            << Debug::boldColor(Debug::Color::Default) << "Hello"
+            << Debug::color(Debug::Color::Cyan) << "world"
+            << Debug::resetColor;
+        CORRADE_COMPARE(out.str(), "Hello world\n");
+    }
+}
+
+void DebugTest::colorsNospace() {
+    std::ostringstream out1, out2;
+
+    /* Order of nospace and color modifiers shouldn't matter and give the same
+       output */
+    Debug{&out1} << "H"
+        << Debug::color(Debug::Color::Blue) << Debug::nospace << "e"
+        << Debug::boldColor(Debug::Color::Yellow) << Debug::nospace << "ll"
+        << Debug::resetColor << Debug::nospace << "o";
+    Debug{&out2} << "H"
+        << Debug::nospace << Debug::color(Debug::Color::Blue) << "e"
+        << Debug::nospace << Debug::boldColor(Debug::Color::Yellow) << "ll"
+        << Debug::nospace << Debug::resetColor << "o";
+
+    CORRADE_COMPARE(out1.str(), "H\033[0;34me\033[1;33mll\033[0mo\n");
+    CORRADE_COMPARE(out2.str(), "H\033[0;34me\033[1;33mll\033[0mo\n");
 }
 
 void DebugTest::iterable() {

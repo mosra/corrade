@@ -48,6 +48,85 @@ std::ostream* Debug::_globalOutput = &std::cout;
 std::ostream* Warning::_globalWarningOutput = &std::cerr;
 std::ostream* Error::_globalErrorOutput = &std::cerr;
 
+template<Debug::Color c> Debug::Modifier Debug::colorInternal() {
+    return [](Debug& debug) {
+        if(debug._flags & InternalFlag::DisableColors) return;
+
+        constexpr const char code[] = { '\033', '[', '0', ';', '3', char(c), 'm', '\0' };
+        debug._flags |= InternalFlag::ColorWritten;
+
+        const bool noSpaceBefore = !!(debug._flags & InternalFlag::NoSpaceBeforeNextValue);
+        if(!noSpaceBefore) debug << Debug::nospace;
+        debug << code;
+        if(noSpaceBefore) debug << Debug::nospace;
+    };
+}
+
+template<Debug::Color c> Debug::Modifier Debug::boldColorInternal() {
+    return [](Debug& debug) {
+        if(debug._flags & InternalFlag::DisableColors) return;
+
+        constexpr const char code[] = { '\033', '[', '1', ';', '3', char(c), 'm', '\0' };
+        debug._flags |= InternalFlag::ColorWritten;
+
+        const bool noSpaceBefore = !!(debug._flags & InternalFlag::NoSpaceBeforeNextValue);
+        if(!noSpaceBefore) debug << Debug::nospace;
+        debug << code;
+        if(noSpaceBefore) debug << Debug::nospace;
+    };
+}
+
+auto Debug::color(Color color) -> Modifier {
+    /* Crazy but working solution to work around the need for capturing lambda
+       which disallows converting it to function pointer */
+    switch(color) {
+        #define _c(color) case Color::color: return colorInternal<Color::color>();
+        _c(Black)
+        _c(Red)
+        _c(Green)
+        _c(Yellow)
+        _c(Blue)
+        _c(Magenta)
+        _c(Cyan)
+        _c(White)
+        _c(Default)
+        #undef _c
+    }
+
+    return [](Debug&) {};
+}
+
+auto Debug::boldColor(Color color) -> Modifier {
+    /* Crazy but working solution to work around the need for capturing lambda
+       which disallows converting it to function pointer */
+    switch(color) {
+        #define _c(color) case Color::color: return boldColorInternal<Color::color>();
+        _c(Black)
+        _c(Red)
+        _c(Green)
+        _c(Yellow)
+        _c(Blue)
+        _c(Magenta)
+        _c(Cyan)
+        _c(White)
+        _c(Default)
+        #undef _c
+    }
+
+    return [](Debug&) {};
+}
+
+void Debug::resetColor(Debug& debug) {
+    if(debug._flags & InternalFlag::DisableColors) return;
+
+    debug._flags &= ~InternalFlag::ColorWritten;
+
+    const bool noSpaceBefore = !!(debug._flags & InternalFlag::NoSpaceBeforeNextValue);
+    if(!noSpaceBefore) debug << Debug::nospace;
+    debug << "\033[0m";
+    if(noSpaceBefore) debug << Debug::nospace;
+}
+
 #ifdef CORRADE_BUILD_DEPRECATED
 void Debug::setOutput(std::ostream* output) {
     _globalOutput = output;
@@ -85,8 +164,15 @@ Warning::Warning(const Flags flags): Warning{_globalWarningOutput, flags} {}
 Error::Error(const Flags flags): Error{_globalErrorOutput, flags} {}
 
 Debug::~Debug() {
-    if(_output && (_flags & InternalFlag::ValueWritten) && !(_flags & InternalFlag::NoNewlineAtTheEnd))
-        *_output << std::endl;
+    if(_output && (_flags & InternalFlag::ValueWritten)) {
+        /* Reset output color */
+        if(_flags & InternalFlag::ColorWritten)
+            *_output << "\033[0m";
+
+        /* Newline at the end */
+        if(!(_flags & InternalFlag::NoNewlineAtTheEnd))
+            *_output << std::endl;
+    }
 
     _globalOutput = _previousGlobalOutput;
 }
