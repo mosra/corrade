@@ -701,7 +701,7 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
         Fatal(int exitCode = 1, Flags flags = {}): Error{flags}, _exitCode{exitCode} {}
 
         /** @overload */
-        Fatal(Flags flags = {}): Fatal{1, flags} {}
+        Fatal(Flags flags): Fatal{1, flags} {}
 
         /**
          * @brief Constructor
