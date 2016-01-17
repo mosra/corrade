@@ -617,7 +617,6 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
          *
          * Sets output to `std::cerr`. The @p exitcode is passed to `std::exit()`
          * on destruction.
-         * @see @ref noNewlineAtTheEnd()
          */
         Fatal(int exitCode = 1): _exitCode{exitCode} {}
 
