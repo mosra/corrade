@@ -100,19 +100,19 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
 
     /* Fail when we have nothing to test */
     if(usedTestCases.empty()) {
-        Utility::Error(errorOutput) << "No tests to run in" << _testName << Debug::nospace << "!";
+        Error(errorOutput) << "No tests to run in" << _testName << Debug::nospace << "!";
         return 2;
     }
 
-    Utility::Debug(logOutput) << "Starting" << _testName << "with" << usedTestCases.size() << "test cases...";
+    Debug(logOutput) << "Starting" << _testName << "with" << usedTestCases.size() << "test cases...";
 
     for(auto i: usedTestCases) {
         try {
             /* Reset output to stdout for each test case to prevent debug
                output segfaults */
             /** @todo Drop this when Debug::setOutput() is removed */
-            Utility::Debug resetDebugRedirect{&std::cout};
-            Utility::Error resetErrorRedirect{&std::cerr};
+            Debug resetDebugRedirect{&std::cout};
+            Error resetErrorRedirect{&std::cerr};
             Utility::Warning resetWarningRedirect{&std::cerr};
 
             _testCaseId = i.first;
@@ -127,7 +127,7 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
 
         /* No testing macros called, don't print function name to output */
         if(_testCaseName.empty()) {
-            Utility::Debug(logOutput) << "     ? ["
+            Debug(logOutput) << "     ? ["
                 << Debug::nospace << padding(_testCaseId, _testCases.size())
                 << Debug::nospace << _testCaseId << Debug::nospace << "] <unknown>()";
 
@@ -135,14 +135,14 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
             continue;
         }
 
-        Utility::Debug d(logOutput);
+        Debug d(logOutput);
         d << (_expectedFailure ? " XFAIL [" : "    OK [")
             << Debug::nospace << padding(_testCaseId, _testCases.size())
             << Debug::nospace << _testCaseId << Debug::nospace << "]" << _testCaseName;
         if(_expectedFailure) d << "\n       " << _expectedFailure->message();
     }
 
-    Utility::Debug d(logOutput);
+    Debug d(logOutput);
     d << "Finished" << _testName << "with" << errorCount << "errors out of" << _checkCount << "checks.";
     if(noCheckCount)
         d << noCheckCount << "test cases didn't contain any checks!";
@@ -157,7 +157,7 @@ void Tester::verifyInternal(const std::string& expression, bool expressionValue)
     if(!_expectedFailure) {
         if(expressionValue) return;
     } else if(!expressionValue) {
-        Utility::Debug{_logOutput} << " XFAIL ["
+        Debug{_logOutput} << " XFAIL ["
             << Debug::nospace << padding(_testCaseId, _testCases.size())
             << Debug::nospace << _testCaseId << Debug::nospace << "]" << _testCaseName
             << "at" << _testFilename << "on line" << _testCaseLine << "\n       " << _expectedFailure->message() << "Expression" << expression << "failed.";
@@ -165,7 +165,7 @@ void Tester::verifyInternal(const std::string& expression, bool expressionValue)
     }
 
     /* Otherwise print message to error output and throw exception */
-    Utility::Error e(_errorOutput);
+    Error e(_errorOutput);
     e << (_expectedFailure ? " XPASS [" : "  FAIL [")
         << Debug::nospace << padding(_testCaseId, _testCases.size())
         << Debug::nospace << _testCaseId << Debug::nospace << "]" << _testCaseName
@@ -181,7 +181,7 @@ void Tester::registerTest(std::string filename, std::string name) {
 }
 
 void Tester::skip(const std::string& message) {
-    Utility::Debug e(_logOutput);
+    Debug e(_logOutput);
     e << "  SKIP ["
         << Debug::nospace << padding(_testCaseId, _testCases.size())
         << Debug::nospace << _testCaseId << Debug::nospace << "]" << _testCaseName << "\n       " << message;
