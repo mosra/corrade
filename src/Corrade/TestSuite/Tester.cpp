@@ -29,8 +29,19 @@
 #include <utility>
 
 #include "Corrade/Utility/Arguments.h"
+#include "Corrade/Utility/String.h"
 
 namespace Corrade { namespace TestSuite {
+
+namespace {
+    inline int digitCount(int number) {
+        int digits = 0;
+        while(number != 0) number /= 10, digits++;
+        return digits;
+    }
+
+    constexpr const char PaddingString[] = "0000000000";
+}
 
 Tester::Tester(const TesterConfiguration& configuration): _logOutput{nullptr}, _errorOutput{nullptr}, _testCaseLine{0}, _checkCount{0}, _expectedFailure{nullptr}, _configuration{configuration} {}
 
@@ -40,25 +51,54 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
     Utility::Arguments args;
     for(auto&& prefix: _configuration.skippedArgumentPrefixes())
         args.addSkippedPrefix(prefix);
-    args.setHelp("Corrade TestSuite executable. By default runs test cases in order in which they\n"
+    args.addOption("skip").setHelp("skip", "skip test cases with given numbers", "\"N1 N2...\"")
+        .addOption("only").setHelp("only", "run only test cases with given numbers (in that order)", "\"N1 N2...\"")
+        .setHelp("Corrade TestSuite executable. By default runs test cases in order in which they\n"
                  "were added and exits with non-zero code if any of them failed.")
         .parse(argc, argv);
 
     _logOutput = logOutput;
     _errorOutput = errorOutput;
 
-    /* Fail when we have nothing to test */
-    if(_testCases.empty()) {
-        Utility::Error(errorOutput) << "In" << _testName << "weren't found any test cases!";
-        return 2;
+    std::vector<std::pair<int, TestCase>> usedTestCases;
+
+    /* Remove skipped test cases */
+    if(!args.value("skip").empty()) {
+        const std::vector<std::string> skip = Utility::String::split(args.value("skip"), ' ');
+        for(auto&& n: skip) {
+            std::size_t index = std::stoi(n);
+            if(index - 1 >= _testCases.size()) continue;
+            _testCases[index - 1] = nullptr;
+        }
     }
 
-    Utility::Debug(logOutput) << "Starting" << _testName << "with" << _testCases.size() << "test cases...";
+    /* Extract only whitelisted test cases if requested (and skip skipped) */
+    if(!args.value("only").empty()) {
+        const std::vector<std::string> only = Utility::String::split(args.value("only"), ' ');
+        for(auto&& n: only) {
+            std::size_t index = std::stoi(n);
+            if(index - 1 >= _testCases.size() || !_testCases[index - 1]) continue;
+            usedTestCases.emplace_back(index, _testCases[index - 1]);
+        }
+
+    /* Otherwise extract all (and skip skipped) */
+    } else for(std::size_t i = 0; i != _testCases.size(); ++i) {
+        if(!_testCases[i]) continue;
+        usedTestCases.emplace_back(i + 1, _testCases[i]);
+    }
 
     unsigned int errorCount = 0,
         noCheckCount = 0;
 
-    for(auto i: _testCases) {
+    /* Fail when we have nothing to test */
+    if(usedTestCases.empty()) {
+        Utility::Error(errorOutput) << "No tests to run in" << _testName << Debug::nospace << "!";
+        return 2;
+    }
+
+    Utility::Debug(logOutput) << "Starting" << _testName << "with" << usedTestCases.size() << "test cases...";
+
+    for(auto i: usedTestCases) {
         try {
             /* Reset output to stdout for each test case to prevent debug
                output segfaults */
@@ -67,8 +107,9 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
             Utility::Error resetErrorRedirect{&std::cerr};
             Utility::Warning resetWarningRedirect{&std::cerr};
 
+            _testCaseId = i.first;
             _testCaseName.clear();
-            (this->*i)();
+            (this->*i.second)();
         } catch(Exception) {
             ++errorCount;
             continue;
@@ -78,14 +119,18 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
 
         /* No testing macros called, don't print function name to output */
         if(_testCaseName.empty()) {
-            Utility::Debug(logOutput) << "     ?: <unknown>()";
+            Utility::Debug(logOutput) << "     ? ["
+                << Debug::nospace << padding(_testCaseId, _testCases.size())
+                << Debug::nospace << _testCaseId << Debug::nospace << "] <unknown>()";
 
             ++noCheckCount;
             continue;
         }
 
         Utility::Debug d(logOutput);
-        d << (_expectedFailure ? " XFAIL:" : "    OK:") << _testCaseName;
+        d << (_expectedFailure ? " XFAIL [" : "    OK [")
+            << Debug::nospace << padding(_testCaseId, _testCases.size())
+            << Debug::nospace << _testCaseId << Debug::nospace << "]" << _testCaseName;
         if(_expectedFailure) d << "\n       " << _expectedFailure->message();
     }
 
@@ -104,13 +149,19 @@ void Tester::verifyInternal(const std::string& expression, bool expressionValue)
     if(!_expectedFailure) {
         if(expressionValue) return;
     } else if(!expressionValue) {
-        Utility::Debug{_logOutput} << " XFAIL:" << _testCaseName << "at" << _testFilename << "on line" << _testCaseLine << "\n       " << _expectedFailure->message() << "Expression" << expression << "failed.";
+        Utility::Debug{_logOutput} << " XFAIL ["
+            << Debug::nospace << padding(_testCaseId, _testCases.size())
+            << Debug::nospace << _testCaseId << Debug::nospace << "]" << _testCaseName
+            << "at" << _testFilename << "on line" << _testCaseLine << "\n       " << _expectedFailure->message() << "Expression" << expression << "failed.";
         return;
     }
 
     /* Otherwise print message to error output and throw exception */
     Utility::Error e(_errorOutput);
-    e << (_expectedFailure ? " XPASS:" : "  FAIL:") << _testCaseName << "at" << _testFilename << "on line" << _testCaseLine << "\n        Expression" << expression;
+    e << (_expectedFailure ? " XPASS [" : "  FAIL [")
+        << Debug::nospace << padding(_testCaseId, _testCases.size())
+        << Debug::nospace << _testCaseId << Debug::nospace << "]" << _testCaseName
+        << "at" << _testFilename << "on line" << _testCaseLine << "\n        Expression" << expression;
     if(!_expectedFailure) e << "failed.";
     else e << "was expected to fail.";
     throw Exception();
@@ -123,13 +174,19 @@ void Tester::registerTest(std::string filename, std::string name) {
 
 void Tester::skip(const std::string& message) {
     Utility::Debug e(_logOutput);
-    e << "  SKIP:" << _testCaseName << "\n       " << message;
+    e << "  SKIP ["
+        << Debug::nospace << padding(_testCaseId, _testCases.size())
+        << Debug::nospace << _testCaseId << Debug::nospace << "]" << _testCaseName << "\n       " << message;
     throw SkipException();
 }
 
 void Tester::registerTestCase(const std::string& name, int line) {
     if(_testCaseName.empty()) _testCaseName = name + "()";
     _testCaseLine = line;
+}
+
+const char* Tester::padding(const int number, const int max) {
+    return PaddingString + sizeof(PaddingString) - digitCount(max) + digitCount(number) - 1;
 }
 
 Tester::TesterConfiguration::TesterConfiguration() = default;

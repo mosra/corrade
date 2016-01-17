@@ -179,6 +179,7 @@ class TesterTest: public Tester {
 
         void test();
         void emptyTest();
+        void skipOnly();
 
         void compareAsOverload();
         void compareAsVarargs();
@@ -192,6 +193,7 @@ class EmptyTest: public Tester {};
 TesterTest::TesterTest() {
     addTests({&TesterTest::test,
               &TesterTest::emptyTest,
+              &TesterTest::skipOnly,
 
               &TesterTest::compareAsOverload,
               &TesterTest::compareAsVarargs,
@@ -211,37 +213,37 @@ void TesterTest::test() {
 
     std::string expected =
         "Starting TesterTest::Test with 14 test cases...\n"
-        "     ?: <unknown>()\n"
-        "    OK: trueExpression()\n"
-        "  FAIL: falseExpression() at here.cpp on line 112 \n"
+        "     ? [01] <unknown>()\n"
+        "    OK [02] trueExpression()\n"
+        "  FAIL [03] falseExpression() at here.cpp on line 112 \n"
         "        Expression 5 != 5 failed.\n"
-        "    OK: equal()\n"
-        "  FAIL: nonEqual() at here.cpp on line 122 \n"
+        "    OK [04] equal()\n"
+        "  FAIL [05] nonEqual() at here.cpp on line 122 \n"
         "        Values a and b are not the same, actual is\n"
         "        5 \n"
         "        but expected\n"
         "        3\n"
-        " XFAIL: expectFail() at here.cpp on line 128 \n"
+        " XFAIL [06] expectFail() at here.cpp on line 128 \n"
         "        The world is not mad yet. 2 + 2 and 5 are not equal.\n"
-        " XFAIL: expectFail() at here.cpp on line 129 \n"
+        " XFAIL [06] expectFail() at here.cpp on line 129 \n"
         "        The world is not mad yet. Expression false == true failed.\n"
-        "    OK: expectFail()\n"
-        " XPASS: unexpectedPassExpression() at here.cpp on line 142 \n"
+        "    OK [06] expectFail()\n"
+        " XPASS [07] unexpectedPassExpression() at here.cpp on line 142 \n"
         "        Expression true == true was expected to fail.\n"
-        " XPASS: unexpectedPassEqual() at here.cpp on line 147 \n"
+        " XPASS [08] unexpectedPassEqual() at here.cpp on line 147 \n"
         "        2 + 2 and 4 are not expected to be equal.\n"
-        "    OK: compareAs()\n"
-        "  FAIL: compareAsFail() at here.cpp on line 155 \n"
+        "    OK [09] compareAs()\n"
+        "  FAIL [10] compareAsFail() at here.cpp on line 155 \n"
         "        Length of actual \"meh\" doesn't match length of expected \"hello\" with epsilon 0\n"
-        "    OK: compareWith()\n"
-        "  FAIL: compareWithFail() at here.cpp on line 163 \n"
+        "    OK [11] compareWith()\n"
+        "  FAIL [12] compareWithFail() at here.cpp on line 163 \n"
         "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
-        "  FAIL: compareImplicitConversionFail() at here.cpp on line 168 \n"
+        "  FAIL [13] compareImplicitConversionFail() at here.cpp on line 168 \n"
         "        Values \"holla\" and hello are not the same, actual is\n"
         "        holla \n"
         "        but expected\n"
         "        hello\n"
-        "  SKIP: skip() \n"
+        "  SKIP [14] skip() \n"
         "        This testcase is skipped.\n"
         "Finished TesterTest::Test with 7 errors out of 15 checks. 1 test cases didn't contain any checks!\n";
 
@@ -258,7 +260,28 @@ void TesterTest::emptyTest() {
 
     CORRADE_VERIFY(result == 2);
 
-    CORRADE_COMPARE(out.str(), "In TesterTest::EmptyTest weren't found any test cases!\n");
+    CORRADE_COMPARE(out.str(), "No tests to run in TesterTest::EmptyTest!\n");
+}
+
+void TesterTest::skipOnly() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--only", "11 14 4 9", "--skip", "14" };
+    const int argc = std::extent<decltype(argv)>();
+
+    Test t;
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(argc, argv, &out, &out);
+
+    CORRADE_VERIFY(result == 0);
+
+    std::string expected =
+        "Starting TesterTest::Test with 3 test cases...\n"
+        "    OK [11] compareWith()\n"
+        "    OK [04] equal()\n"
+        "    OK [09] compareAs()\n"
+        "Finished TesterTest::Test with 0 errors out of 3 checks.\n";
+    CORRADE_COMPARE(out.str(), expected);
 }
 
 void TesterTest::compareAsOverload() {

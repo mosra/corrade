@@ -222,11 +222,12 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         typedef void (Tester::*TestCase)();
 
         void verifyInternal(const std::string& expression, bool value);
+        const char* padding(int number, int max);
 
         std::ostream *_logOutput, *_errorOutput;
         std::vector<TestCase> _testCases;
         std::string _testFilename, _testName, _testCaseName, _expectFailMessage;
-        std::size_t _testCaseLine, _checkCount;
+        std::size_t _testCaseId, _testCaseLine, _checkCount;
         ExpectedFailure* _expectedFailure;
         TesterConfiguration _configuration;
 };
@@ -440,13 +441,19 @@ template<class T, class U, class V> void Tester::compareWith(Comparator<T> compa
     if(!_expectedFailure) {
         if(equal) return;
     } else if(!equal) {
-        Utility::Debug(_logOutput) << " XFAIL:" << _testCaseName << "at" << _testFilename << "on line" << _testCaseLine << "\n       " << _expectedFailure->message() << actual << "and" << expected << "are not equal.";
+        Utility::Debug(_logOutput) << " XFAIL ["
+            << Debug::nospace << padding(_testCaseId, _testCases.size())
+            << Debug::nospace << _testCaseId << Debug::nospace << "]" << _testCaseName
+            << "at" << _testFilename << "on line" << _testCaseLine << "\n       " << _expectedFailure->message() << actual << "and" << expected << "are not equal.";
         return;
     }
 
     /* Otherwise print message to error output and throw exception */
     Utility::Error e(_errorOutput);
-    e << (_expectedFailure ? " XPASS:" : "  FAIL:") << _testCaseName << "at" << _testFilename << "on line" << _testCaseLine << "\n       ";
+    e << (_expectedFailure ? " XPASS [" : "  FAIL [")
+        << Debug::nospace << padding(_testCaseId, _testCases.size())
+        << Debug::nospace << _testCaseId << Debug::nospace << "]" << _testCaseName
+        << "at" << _testFilename << "on line" << _testCaseLine << "\n       ";
     if(!_expectedFailure) comparator.printErrorMessage(e, actual, expected);
     else e << actual << "and" << expected << "are not expected to be equal.";
     throw Exception();
