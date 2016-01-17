@@ -1956,7 +1956,8 @@ INCLUDE_FILE_PATTERNS  =
 
 PREDEFINED             = DOXYGEN_GENERATING_OUTPUT \
     CORRADE_BUILD_DEPRECATED CORRADE_DEPRECATED(message)= \
-    CORRADE_DEPRECATED_ALIAS(message)= CORRADE_DEPRECATED_ENUM(message)=
+    CORRADE_DEPRECATED_ALIAS(message)= CORRADE_DEPRECATED_ENUM(message)= \
+    CORRADE_UTILITY_LOCAL=
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The

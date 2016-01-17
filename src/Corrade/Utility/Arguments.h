@@ -469,7 +469,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
 
         /**
          * @brief Value of given argument or option
-         * @param key   Long argument or option key
+         * @param key       Long argument or option key
+         * @param flags     Configuration value flags
          *
          * Expects that the key exists. Use @ref isSet() for boolean options.
          * If the arguments weren't parsed yet, returns empty string or
