@@ -221,8 +221,6 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
         typedef void (Tester::*TestCase)();
 
-        void addTests() {} /* Terminator function for addTests() */
-
         void verifyInternal(const std::string& expression, bool value);
 
         std::ostream *_logOutput, *_errorOutput;
