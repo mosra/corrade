@@ -293,16 +293,16 @@ class CORRADE_UTILITY_EXPORT Debug {
     #endif
         std::ostream* _output;
 
-        enum class Flag: unsigned char {
+        enum class InternalFlag: unsigned char {
             ValueWritten = 1 << 0,
             NoSpaceBeforeNextValue = 1 << 1,
             NoNewlineAtTheEnd = 1 << 2
         };
-        typedef Containers::EnumSet<Flag> Flags;
+        typedef Containers::EnumSet<InternalFlag> InternalFlags;
 
-        CORRADE_ENUMSET_FRIEND_OPERATORS(Flags)
+        CORRADE_ENUMSET_FRIEND_OPERATORS(InternalFlags)
 
-        Flags _flags;
+        InternalFlags _flags;
 
     private:
         static std::ostream* _globalOutput;
@@ -312,16 +312,16 @@ class CORRADE_UTILITY_EXPORT Debug {
         std::ostream* _previousGlobalOutput;
 };
 
-CORRADE_ENUMSET_OPERATORS(Debug::Flags)
+CORRADE_ENUMSET_OPERATORS(Debug::InternalFlags)
 
 inline Debug Debug::noNewlineAtTheEnd(std::ostream* const output) {
     Debug debug{output};
-    debug._flags |= Flag::NoNewlineAtTheEnd;
+    debug._flags |= InternalFlag::NoNewlineAtTheEnd;
     return debug;
 }
 
 inline void Debug::nospace(Debug& debug) {
-    debug._flags |= Flag::NoSpaceBeforeNextValue;
+    debug._flags |= InternalFlag::NoSpaceBeforeNextValue;
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -495,7 +495,7 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
 
 inline Warning Warning::noNewlineAtTheEnd(std::ostream* const output) {
     Warning warning{output};
-    warning._flags |= Flag::NoNewlineAtTheEnd;
+    warning._flags |= InternalFlag::NoNewlineAtTheEnd;
     return std::move(warning);
 }
 
@@ -582,7 +582,7 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
 
 inline Error Error::noNewlineAtTheEnd(std::ostream* const output) {
     Error error{output};
-    error._flags |= Flag::NoNewlineAtTheEnd;
+    error._flags |= InternalFlag::NoNewlineAtTheEnd;
     return std::move(error);
 }
 

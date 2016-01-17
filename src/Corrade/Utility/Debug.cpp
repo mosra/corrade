@@ -74,7 +74,7 @@ void Error::setOutput(std::ostream* output) {
 }
 #endif
 
-Debug::Debug(std::ostream* output): _flags{Flag::NoSpaceBeforeNextValue} {
+Debug::Debug(std::ostream* output): _flags{InternalFlag::NoSpaceBeforeNextValue} {
     /* Save previous global output and replace it with current one */
     _previousGlobalOutput = _globalOutput;
     _globalOutput = _output = output;
@@ -97,7 +97,7 @@ Warning::Warning(): Warning{_globalWarningOutput} {}
 Error::Error(): Error{_globalErrorOutput} {}
 
 Debug::~Debug() {
-    if(_output && (_flags & Flag::ValueWritten) && !(_flags & Flag::NoNewlineAtTheEnd))
+    if(_output && (_flags & InternalFlag::ValueWritten) && !(_flags & InternalFlag::NoNewlineAtTheEnd))
         *_output << std::endl;
 
     _globalOutput = _previousGlobalOutput;
@@ -119,13 +119,13 @@ template<class T> Debug& Debug::print(const T& value) {
     if(!_output) return *this;
 
     /* Separate values with spaces, if enabled */
-    if(_flags & Flag::NoSpaceBeforeNextValue)
-        _flags &= ~Flag::NoSpaceBeforeNextValue;
+    if(_flags & InternalFlag::NoSpaceBeforeNextValue)
+        _flags &= ~InternalFlag::NoSpaceBeforeNextValue;
     else *_output << ' ';
 
     toStream(*_output, value);
 
-    _flags |= Flag::ValueWritten;
+    _flags |= InternalFlag::ValueWritten;
     return *this;
 }
 
