@@ -183,7 +183,8 @@ class CORRADE_UTILITY_EXPORT Debug {
         }
 
         #ifdef CORRADE_BUILD_DEPRECATED
-        /** @brief Set output for instances in this scope.
+        /**
+         * @brief Set output for instances in this scope
          * @deprecated Use @ref Debug(std::ostream*) instead.
          */
         CORRADE_DEPRECATED("use Debug(std::ostream*) instead") static void setOutput(std::ostream* output);
@@ -194,7 +195,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * Uses output of enclosing `Debug` instance or uses `std::cout` if
          * there isn't any.
-         * @see @ref noNewlineAtTheEnd(), @ref setOutput()
+         * @see @ref noNewlineAtTheEnd()
          */
         explicit Debug();
 
@@ -206,7 +207,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * All new instances created using the default @ref Debug() constructor
          * during lifetime of this instance will inherit the output set in
          * @p output.
-         * @see @ref noNewlineAtTheEnd(std::ostream*), @ref setOutput()
+         * @see @ref noNewlineAtTheEnd(std::ostream*)
          */
         explicit Debug(std::ostream* output);
 
@@ -441,10 +442,11 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
         inline static Warning noNewlineAtTheEnd(std::ostream* output);
 
         #ifdef CORRADE_BUILD_DEPRECATED
-        /** @brief Set output for instances in this scope.
-         * @deprecated Use @ref Warrning(std::ostream*) instead.
+        /**
+         * @brief Set output for instances in this scope
+         * @deprecated Use @ref Warning(std::ostream*) instead.
          */
-        CORRADE_DEPRECATED("use Debug(std::ostream*) instead") static void setOutput(std::ostream* output);
+        CORRADE_DEPRECATED("use Warning(std::ostream*) instead") static void setOutput(std::ostream* output);
         #endif
 
         /**
@@ -528,7 +530,8 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
         inline static Error noNewlineAtTheEnd(std::ostream* output);
 
         #ifdef CORRADE_BUILD_DEPRECATED
-        /** @brief Set output for instances in this scope.
+        /**
+         * @brief Set output for instances in this scope
          * @deprecated Use @ref Error(std::ostream*) instead.
          */
         CORRADE_DEPRECATED("use Error(std::ostream*) instead") static void setOutput(std::ostream* output);
