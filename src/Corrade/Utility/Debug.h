@@ -124,6 +124,13 @@ Error() << "this is still printed into errorOut";
 class CORRADE_UTILITY_EXPORT Debug {
     public:
         /**
+         * @brief Debug output modifier
+         *
+         * @see @ref nospace(), @ref newline(), @ref operator<<(Modifier)
+         */
+        typedef void(*Modifier)(Debug&);
+
+        /**
          * @brief Debug output without newline at the end
          *
          * Unlike @ref Debug() doesn't put newline at the end on destruction.
@@ -266,11 +273,11 @@ class CORRADE_UTILITY_EXPORT Debug {
         Debug& operator<<(const char32_t* value);
 
         /**
-         * @brief Configure debug output
+         * @brief Debug output modification
          *
          * See @ref nospace() and @ref newline() for more information.
          */
-        Debug& operator<<(void(*f)(Debug&)) {
+        Debug& operator<<(Modifier f) {
             f(*this);
             return *this;
         }
