@@ -308,7 +308,7 @@ class CORRADE_UTILITY_EXPORT Debug {
     private:
         static std::ostream* _globalOutput;
 
-        template<class T> Debug& print(const T& value);
+        template<class T> CORRADE_UTILITY_LOCAL Debug& print(const T& value);
 
         std::ostream* _previousGlobalOutput;
 };
