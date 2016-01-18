@@ -25,6 +25,9 @@
 
 #include "Tester.h"
 
+#ifdef CORRADE_TARGET_UNIX
+#include <unistd.h>
+#endif
 #include <algorithm>
 #include <iostream>
 #include <random>
@@ -53,7 +56,9 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
     Utility::Arguments args;
     for(auto&& prefix: _configuration.skippedArgumentPrefixes())
         args.addSkippedPrefix(prefix);
-    args.addOption("skip").setHelp("skip", "skip test cases with given numbers", "\"N1 N2...\"")
+    args.addOption('c', "color", "auto").setHelp("color", "colored output", "on|off|auto")
+            .setFromEnvironment("color", "CORRADE_TEST_COLOR")
+        .addOption("skip").setHelp("skip", "skip test cases with given numbers", "\"N1 N2...\"")
         .addOption("only").setHelp("only", "run only test cases with given numbers (in that order)", "\"N1 N2...\"")
         .addBooleanOption("shuffle").setHelp("shuffle", "randomly shuffle test case order")
             .setFromEnvironment("shuffle", "CORRADE_TEST_SHUFFLE")
@@ -63,6 +68,12 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
 
     _logOutput = logOutput;
     _errorOutput = errorOutput;
+
+    /* Decide about color */
+    if(args.value("color") == "on") _useColor = Debug::Flags{};
+    else if(args.value("color") == "off") _useColor = Debug::Flag::DisableColors;
+    else _useColor = logOutput == &std::cout && errorOutput == &std::cerr && isatty(1) && isatty(2) ?
+        Debug::Flags{} : Debug::Flag::DisableColors;
 
     std::vector<std::pair<int, TestCase>> usedTestCases;
 
@@ -100,11 +111,11 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
 
     /* Fail when we have nothing to test */
     if(usedTestCases.empty()) {
-        Error(errorOutput) << "No tests to run in" << _testName << Debug::nospace << "!";
+        Error(errorOutput, _useColor) << Debug::boldColor(Debug::Color::Red) << "No tests to run in" << _testName << Debug::nospace << "!";
         return 2;
     }
 
-    Debug(logOutput) << "Starting" << _testName << "with" << usedTestCases.size() << "test cases...";
+    Debug(logOutput, _useColor) << Debug::boldColor(Debug::Color::Default) << "Starting" << _testName << "with" << usedTestCases.size() << "test cases...";
 
     for(auto i: usedTestCases) {
         try {
@@ -127,25 +138,39 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
 
         /* No testing macros called, don't print function name to output */
         if(_testCaseName.empty()) {
-            Debug(logOutput) << "     ? ["
-                << Debug::nospace << padding(_testCaseId, _testCases.size())
-                << Debug::nospace << _testCaseId << Debug::nospace << "] <unknown>()";
+            Debug(logOutput, _useColor)
+                << Debug::boldColor(Debug::Color::Yellow) << "     ?"
+                << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
+                << Debug::boldColor(Debug::Color::Cyan) << padding(_testCaseId, _testCases.size())
+                << Debug::nospace << _testCaseId << Debug::nospace
+                << Debug::color(Debug::Color::Blue) << "]"
+                << Debug::boldColor(Debug::Color::Yellow) << "<unknown>()"
+                << Debug::resetColor;
 
             ++noCheckCount;
             continue;
         }
 
-        Debug d(logOutput);
-        d << (_expectedFailure ? " XFAIL [" : "    OK [")
-            << Debug::nospace << padding(_testCaseId, _testCases.size())
-            << Debug::nospace << _testCaseId << Debug::nospace << "]" << _testCaseName;
+        Debug d(logOutput, _useColor);
+        if(_expectedFailure) d << Debug::boldColor(Debug::Color::Yellow) << " XFAIL";
+        else d << Debug::boldColor(Debug::Color::Default) << "    OK";
+        d << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
+            << Debug::boldColor(Debug::Color::Cyan) << padding(_testCaseId, _testCases.size())
+            << Debug::nospace << _testCaseId << Debug::nospace
+            << Debug::color(Debug::Color::Blue) << "]"
+            << Debug::boldColor(Debug::Color::Default) << _testCaseName
+            << Debug::resetColor;
         if(_expectedFailure) d << "\n       " << _expectedFailure->message();
     }
 
-    Debug d(logOutput);
-    d << "Finished" << _testName << "with" << errorCount << "errors out of" << _checkCount << "checks.";
+    Debug d(logOutput, _useColor);
+    d << Debug::boldColor(Debug::Color::Default) << "Finished" << _testName << "with";
+    if(errorCount) d << Debug::boldColor(Debug::Color::Red);
+    d << errorCount << "errors";
+    if(errorCount) d << Debug::boldColor(Debug::Color::Default);
+    d << "out of" << _checkCount << "checks.";
     if(noCheckCount)
-        d << noCheckCount << "test cases didn't contain any checks!";
+        d << Debug::boldColor(Debug::Color::Yellow) << noCheckCount << "test cases didn't contain any checks!";
 
     return errorCount != 0 || noCheckCount != 0;
 }
@@ -157,19 +182,28 @@ void Tester::verifyInternal(const std::string& expression, bool expressionValue)
     if(!_expectedFailure) {
         if(expressionValue) return;
     } else if(!expressionValue) {
-        Debug{_logOutput} << " XFAIL ["
-            << Debug::nospace << padding(_testCaseId, _testCases.size())
-            << Debug::nospace << _testCaseId << Debug::nospace << "]" << _testCaseName
-            << "at" << _testFilename << "on line" << _testCaseLine << "\n       " << _expectedFailure->message() << "Expression" << expression << "failed.";
+        Debug{_logOutput, _useColor} << Debug::boldColor(Debug::Color::Yellow)
+            << " XFAIL" << Debug::color(Debug::Color::Blue) << "["
+            << Debug::nospace << Debug::boldColor(Debug::Color::Cyan)
+            << padding(_testCaseId, _testCases.size()) << Debug::nospace
+            << _testCaseId << Debug::nospace << Debug::color(Debug::Color::Blue)
+            << "]" << Debug::boldColor(Debug::Color::Default) << _testCaseName
+            << Debug::resetColor << "at" << _testFilename << "on line"
+            << _testCaseLine << "\n       " << _expectedFailure->message()
+            << "Expression" << expression << "failed.";
         return;
     }
 
     /* Otherwise print message to error output and throw exception */
-    Error e(_errorOutput);
-    e << (_expectedFailure ? " XPASS [" : "  FAIL [")
-        << Debug::nospace << padding(_testCaseId, _testCases.size())
-        << Debug::nospace << _testCaseId << Debug::nospace << "]" << _testCaseName
-        << "at" << _testFilename << "on line" << _testCaseLine << "\n        Expression" << expression;
+    Error e{_errorOutput, _useColor};
+    e << Debug::boldColor(Debug::Color::Red) << (_expectedFailure ? " XPASS" : "  FAIL")
+        << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
+        << Debug::boldColor(Debug::Color::Cyan) << padding(_testCaseId, _testCases.size())
+        << Debug::nospace << _testCaseId << Debug::nospace
+        << Debug::color(Debug::Color::Blue) << "]"
+        << Debug::boldColor(Debug::Color::Default) << _testCaseName
+        << Debug::resetColor << "at" << _testFilename << "on line"
+        << _testCaseLine << "\n        Expression" << expression;
     if(!_expectedFailure) e << "failed.";
     else e << "was expected to fail.";
     throw Exception();
@@ -181,10 +215,14 @@ void Tester::registerTest(std::string filename, std::string name) {
 }
 
 void Tester::skip(const std::string& message) {
-    Debug e(_logOutput);
-    e << "  SKIP ["
-        << Debug::nospace << padding(_testCaseId, _testCases.size())
-        << Debug::nospace << _testCaseId << Debug::nospace << "]" << _testCaseName << "\n       " << message;
+    Debug e(_logOutput, _useColor);
+    e << Debug::boldColor(Debug::Color::Default) << "  SKIP"
+        << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
+        << Debug::boldColor(Debug::Color::Cyan) << padding(_testCaseId, _testCases.size())
+        << Debug::nospace << _testCaseId << Debug::nospace
+        << Debug::color(Debug::Color::Blue) << "]"
+        << Debug::boldColor(Debug::Color::Default) << _testCaseName
+        << Debug::resetColor << "\n       " << message;
     throw SkipException();
 }
 
