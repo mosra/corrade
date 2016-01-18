@@ -24,10 +24,6 @@
 */
 
 #include "Tester.h"
-
-#ifdef CORRADE_TARGET_UNIX
-#include <unistd.h>
-#endif
 #include <algorithm>
 #include <iostream>
 #include <random>
@@ -35,6 +31,16 @@
 
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/String.h"
+
+#ifdef CORRADE_TARGET_UNIX
+#include <unistd.h>
+#endif
+
+#ifdef CORRADE_TARGET_WINDOWS
+#define WIN32_LEAN_AND_MEAN 1
+#define VC_EXTRALEAN
+#include <windows.h>
+#endif
 
 namespace Corrade { namespace TestSuite {
 
