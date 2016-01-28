@@ -318,6 +318,13 @@ the last line in `debian/rules`, e.g.:
 
     dh_auto_configure -- -DBUILD_STATIC=ON
 
+@subsection building-corrade-packages-brew Homebrew formulas
+
+OS X Homebrew formulas are in `package/homebrew` directory. Download the `*.rb`
+file and install it using the following command:
+
+    brew install --HEAD corrade.rb
+
 @section building-corrade-cross Crosscompiling
 
 For crosscompiling you need to have native version of Corrade installed,
