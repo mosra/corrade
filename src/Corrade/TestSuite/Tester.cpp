@@ -76,8 +76,10 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
     _errorOutput = errorOutput;
 
     /* Decide about color */
-    if(args.value("color") == "on") _useColor = Debug::Flags{};
-    else if(args.value("color") == "off") _useColor = Debug::Flag::DisableColors;
+    if(args.value("color") == "on" || args.value("color") == "ON")
+        _useColor = Debug::Flags{};
+    else if(args.value("color") == "off" || args.value("color") == "OFF")
+        _useColor = Debug::Flag::DisableColors;
     else _useColor = logOutput == &std::cout && errorOutput == &std::cerr && isatty(1) && isatty(2) ?
         Debug::Flags{} : Debug::Flag::DisableColors;
 
