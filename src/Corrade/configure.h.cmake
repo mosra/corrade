@@ -31,6 +31,7 @@
 #cmakedefine CORRADE_BUILD_STATIC
 
 #cmakedefine CORRADE_TARGET_APPLE
+#cmakedefine CORRADE_TARGET_IOS
 #cmakedefine CORRADE_TARGET_UNIX
 #cmakedefine CORRADE_TARGET_WINDOWS
 #cmakedefine CORRADE_TARGET_WINDOWS_RT

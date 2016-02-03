@@ -84,11 +84,20 @@ Defined if the library is built for some Unix flavor (Linux, BSD, OS X...).
 /**
 @brief Apple target
 
-Defined if the library is built for OS X.
-@see @ref CORRADE_TARGET_UNIX, @ref corrade-cmake
+Defined if the library is built for Apple platforms.
+@see @ref CORRADE_TARGET_UNIX, @ref CORRADE_TARGET_IOS, @ref corrade-cmake
 */
 #define CORRADE_TARGET_APPLE
 #undef CORRADE_TARGET_APPLE
+
+/**
+@brief iOS target
+
+Defined if the library is built for iOS.
+@see @ref CORRADE_TARGET_UNIX, @ref CORRADE_TARGET_APPLE, @ref corrade-cmake
+*/
+#define CORRADE_TARGET_IOS
+#undef CORRADE_TARGET_IOS
 
 /**
 @brief Windows target

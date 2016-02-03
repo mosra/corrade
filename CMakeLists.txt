@@ -69,6 +69,10 @@ elseif(UNIX)
     # Both APPLE and UNIX are defined on OSX
     if(APPLE)
         set(CORRADE_TARGET_APPLE 1)
+
+        if(CMAKE_OSX_SYSROOT MATCHES "/iPhoneOS\\.sdk")
+            set(CORRADE_TARGET_IOS 1)
+        endif()
     endif()
 
     # NaCl and Emscripten are Unix too, this selects only the other ones
