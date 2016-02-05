@@ -444,9 +444,9 @@ Emscripten supports dynamic libraries only to simplify porting and they are
 generally slower, thus `BUILD_STATIC` is implicitly enabled.
 
 Then create build directory and run cmake and build command in it. The
-toolchain needs access to its platform file, so be sure to properly set
-**absolute** path to `modules/` directory containing `Platform/Emscripten.cmake`.
-Also set `CMAKE_INSTALL_PREFIX` to path contained in `EMSCRIPTEN_TOOLCHAIN_PATH`.
+toolchain needs access to its platform file, so be sure to properly set **absolute**
+path to `modules/` directory containing `Platform/Emscripten.cmake`. Also set
+`CMAKE_INSTALL_PREFIX` to path contained in `EMSCRIPTEN_TOOLCHAIN_PATH`.
 
     mkdir build-emscripten && cd build-emscripten
     cmake .. \
