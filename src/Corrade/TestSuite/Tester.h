@@ -271,7 +271,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 /** @todo Remove workaround when Emscripten can properly propagate exit codes */
 #define CORRADE_TEST_MAIN(Class)                                            \
     int main(int argc, const char** argv) {                                 \
-        if([]() {                                                           \
+        if([&argc, argv]() {                                                \
             Class t;                                                        \
             t.registerTest(__FILE__, #Class);                               \
             return t.exec(argc, argv);                                      \
