@@ -54,7 +54,7 @@ namespace {
                 i = '_';
         }
 
-        return std::move(key);
+        return key;
     }
 }
 
