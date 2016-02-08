@@ -47,6 +47,17 @@
 
 namespace Corrade { namespace TestSuite {
 
+namespace Implementation {
+    /* First try to convert the actual type to expected, if that fails, try
+       std::common_type */
+    template<class Actual, class Expected, bool = std::is_convertible<Actual, Expected>::value> struct CommonType {
+        typedef Expected Type;
+    };
+    template<class Actual, class Expected> struct CommonType<Actual, Expected, false> {
+        typedef typename std::common_type<Actual, Expected>::type Type;
+    };
+}
+
 /**
 @brief Base class for unit tests
 
@@ -187,8 +198,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         }
 
         /* Compare two different types without explicit type specification */
-        template<class T, class U> void compare(const std::string& actual, const T& actualValue, const std::string& expected, const U& expectedValue) {
-            compareAs<typename std::common_type<T, U>::type, T, U>(actual, actualValue, expected, expectedValue);
+        template<class Actual, class Expected> void compare(const std::string& actual, const Actual& actualValue, const std::string& expected, const Expected& expectedValue) {
+            compareAs<typename Implementation::CommonType<Actual, Expected>::Type, Actual, Expected>(actual, actualValue, expected, expectedValue);
         }
 
         /* Compare two different types with explicit templated type
@@ -196,8 +207,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
            call only `CORRADE_COMPARE_AS(a, b, Compare::Containers)` without
            explicitly specifying the type, e.g.
            `CORRADE_COMPARE_AS(a, b, Compare::Containers<std::vector<int>>)` */
-        template<template<class> class T, class U, class V> void compareAs(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
-            compareAs<T<typename std::common_type<U, V>::type>, U, V>(actual, actualValue, expected, expectedValue);
+        template<template<class> class T, class Actual, class Expected> void compareAs(const std::string& actual, const Actual& actualValue, const std::string& expected, const Expected& expectedValue) {
+            compareAs<T<typename Implementation::CommonType<Actual, Expected>::Type>, Actual, Expected>(actual, actualValue, expected, expectedValue);
         }
 
         /* Compare two different types with explicit type specification */
