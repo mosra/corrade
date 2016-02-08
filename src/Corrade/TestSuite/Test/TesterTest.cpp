@@ -202,12 +202,18 @@ TesterTest::TesterTest() {
               &TesterTest::expectFailIfExplicitBool});
 }
 
+namespace {
+    /* Disable automatic colors to ensure we have the same behavior everywhere */
+    const char* noColorArgv[] = { "", "--color", "off" };
+    const int noColorArgc = std::extent<decltype(noColorArgv)>();
+}
+
 void TesterTest::test() {
     std::stringstream out;
 
     Test t;
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(0, nullptr, &out, &out);
+    int result = t.exec(noColorArgc, noColorArgv, &out, &out);
 
     CORRADE_VERIFY(result == 1);
 
@@ -256,7 +262,7 @@ void TesterTest::emptyTest() {
 
     EmptyTest t;
     t.registerTest("here.cpp", "TesterTest::EmptyTest");
-    int result = t.exec(0, nullptr, &out, &out);
+    int result = t.exec(noColorArgc, noColorArgv, &out, &out);
 
     CORRADE_VERIFY(result == 2);
 
@@ -266,7 +272,7 @@ void TesterTest::emptyTest() {
 void TesterTest::skipOnly() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--only", "11 14 4 9", "--skip", "14" };
+    const char* argv[] = { "", "--color", "off", "--only", "11 14 4 9", "--skip", "14" };
     const int argc = std::extent<decltype(argv)>();
 
     Test t;
