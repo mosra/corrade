@@ -181,6 +181,7 @@ class TesterTest: public Tester {
         void emptyTest();
         void skipOnly();
 
+        void compareNoCommonType();
         void compareAsOverload();
         void compareAsVarargs();
         void compareNonCopyable();
@@ -195,6 +196,7 @@ TesterTest::TesterTest() {
               &TesterTest::emptyTest,
               &TesterTest::skipOnly,
 
+              &TesterTest::compareNoCommonType,
               &TesterTest::compareAsOverload,
               &TesterTest::compareAsVarargs,
               &TesterTest::compareNonCopyable,
@@ -288,6 +290,16 @@ void TesterTest::skipOnly() {
         "    OK [09] compareAs()\n"
         "Finished TesterTest::Test with 0 errors out of 3 checks.\n";
     CORRADE_COMPARE(out.str(), expected);
+}
+
+void TesterTest::compareNoCommonType() {
+    /* Test that this compiles well */
+    struct A {
+        /*implicit*/ A(int value): value(value) {}
+        /*implicit*/ operator int() const { return value; }
+        int value;
+    };
+    CORRADE_COMPARE(A{5}, 5);
 }
 
 void TesterTest::compareAsOverload() {
