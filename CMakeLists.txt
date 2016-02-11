@@ -70,7 +70,7 @@ elseif(UNIX)
     if(APPLE)
         set(CORRADE_TARGET_APPLE 1)
 
-        if(CMAKE_OSX_SYSROOT MATCHES "/iPhoneOS\\.sdk")
+        if(CMAKE_OSX_SYSROOT MATCHES "/iPhoneOS[0-9.]*\\.sdk")
             set(CORRADE_TARGET_IOS 1)
         endif()
     endif()
