@@ -476,13 +476,18 @@ platform file, so be sure to properly set **absolute** path to `modules/`
 directory containing `Platform/iOS.cmake`. Set `CMAKE_INSTALL_PREFIX` to prefix
 where you want to store your iOS dependencies for other projects.
 
+As every application is in its own sandbox, it doesn't make sense to build
+shared libraries (although it is supported). Enable `BUILD_STATIC` to build
+static libraries.
+
     mkdir build-ios && cd build-ios
     cmake .. \
         -DCMAKE_MODULE_PATH=/absolute/path/to/toolchains/modules/ \
         -DCMAKE_TOOLCHAIN_FILE=../toolchains/generic/iOS.cmake \
         -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk \
         -DCMAKE_OSX_ARCHITECTURES="arm64;armv7;armv7s" \
-        -DCMAKE_INSTALL_PREFIX=~/ios-libs -G Xcode
+        -DCMAKE_INSTALL_PREFIX=~/ios-libs \
+        -DBUILD_STATIC=ON -G Xcode
     cmake --build .
 
 Then you can install the library using `cmake --build . --target install` to
