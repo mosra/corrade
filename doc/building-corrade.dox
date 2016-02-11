@@ -466,6 +466,28 @@ For ArchLinux there is also prepared package file in `package/archlinux`,
 named `PKGBUILD-emscripten`, see @ref building-corrade-packages-arch "above"
 for more information.
 
+@subsection building-corrade-cross-ios Crosscompiling for iOS
+
+You will need OSX and Xcode installed.
+
+Set `CMAKE_OSX_ROOT` to SDK you want to target and enable all desired
+architectures in `CMAKE_OSX_ARCHITECTURES`. The toolchain needs access to its
+platform file, so be sure to properly set **absolute** path to `modules/`
+directory containing `Platform/iOS.cmake`. Set `CMAKE_INSTALL_PREFIX` to prefix
+where you want to store your iOS dependencies for other projects.
+
+    mkdir build-ios && cd build-ios
+    cmake .. \
+        -DCMAKE_MODULE_PATH=/absolute/path/to/toolchains/modules/ \
+        -DCMAKE_TOOLCHAIN_FILE=../toolchains/generic/iOS.cmake \
+        -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk \
+        -DCMAKE_OSX_ARCHITECTURES="arm64;armv7;armv7s" \
+        -DCMAKE_INSTALL_PREFIX=~/ios-libs -G Xcode
+    cmake --build .
+
+Then you can install the library using `cmake --build . --target install` to
+make it available for depending projects.
+
 @subsection building-corrade-cross-android Crosscompiling for Android ARM and x86
 
 You will need [Android NDK](https://developer.android.com/tools/sdk/ndk/index.html)
