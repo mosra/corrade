@@ -61,6 +61,7 @@ corrade_add_test(UtilityResourceTest
 
 # Static lib resource test
 add_library(ResourceTestDataLib STATIC ${ResourceTestData})
+target_link_libraries(ResourceTestDataLib CorradeUtility)
 corrade_add_test(UtilityResourceStaticTest ResourceStaticTest.cpp LIBRARIES ResourceTestDataLib)
 
 if(CORRADE_TARGET_EMSCRIPTEN)
