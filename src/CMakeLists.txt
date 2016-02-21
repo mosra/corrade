@@ -28,9 +28,9 @@ if(MSVC)
     string(REPLACE "/W3" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CORRADE_CXX_FLAGS}")
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+set_directory_properties(PROPERTIES
+    CORRADE_CXX_STANDARD 11
+    CORRADE_USE_PEDANTIC_FLAGS ON)
 
 add_subdirectory(Corrade)
 

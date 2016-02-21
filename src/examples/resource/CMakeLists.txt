@@ -28,12 +28,10 @@ project(CorradeResourceExample)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../../../modules")
 
-find_package(Corrade REQUIRED)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CORRADE_CXX_FLAGS}")
-include_directories(${CORRADE_INCLUDE_DIR})
+find_package(Corrade REQUIRED Utility)
+set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
 corrade_add_resource(Resources resources.conf)
 
 add_executable(ResourceTest main.cpp ${Resources})
-target_link_libraries(ResourceTest ${CORRADE_UTILITY_LIBRARY})
+target_link_libraries(ResourceTest Corrade::Utility)

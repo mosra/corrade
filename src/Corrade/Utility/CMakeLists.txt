@@ -23,8 +23,6 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
 set(CorradeUtility_SRCS
     Debug.cpp
     Directory.cpp
@@ -82,8 +80,9 @@ endif()
 add_library(CorradeUtilityObjects OBJECT
     ${CorradeUtility_SRCS}
     ${CorradeUtility_HEADERS})
+target_include_directories(CorradeUtilityObjects PUBLIC $<TARGET_PROPERTY:CorradeUtility,INTERFACE_INCLUDE_DIRECTORIES>)
 if(NOT BUILD_STATIC)
-    set_target_properties(CorradeUtilityObjects PROPERTIES COMPILE_FLAGS "-DCorradeUtilityObjects_EXPORTS")
+    target_compile_definitions(CorradeUtilityObjects PRIVATE "-DCorradeUtilityObjects_EXPORTS")
 endif()
 if(NOT BUILD_STATIC OR BUILD_STATIC_PIC)
     set_target_properties(CorradeUtilityObjects PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -93,6 +92,23 @@ endif()
 add_library(CorradeUtility ${SHARED_OR_STATIC}
     $<TARGET_OBJECTS:CorradeUtilityObjects>
     ${CorradeUtility_GracefulAssert_SRCS})
+target_include_directories(CorradeUtility PUBLIC
+    ${PROJECT_SOURCE_DIR}/src
+    ${PROJECT_BINARY_DIR}/src)
+# Require (at least) C++11 for users
+if(NOT CMAKE_VERSION VERSION_LESS 3.0.0)
+    set_property(TARGET CorradeUtility PROPERTY
+        INTERFACE_CORRADE_CXX_STANDARD 11)
+    set_property(TARGET CorradeUtility APPEND PROPERTY
+        COMPATIBLE_INTERFACE_NUMBER_MAX CORRADE_CXX_STANDARD)
+else()
+    # See FindCorrade.cmake for juicy rant about 2.8.12 and why can't I use
+    # single property name to cover all cases. AAAAAAAAARGH.
+    set_property(TARGET CorradeUtility PROPERTY
+        INTERFACE_CORRADE_CXX_STANDARD_ 11)
+    set_property(TARGET CorradeUtility APPEND PROPERTY
+        COMPATIBLE_INTERFACE_STRING CORRADE_CXX_STANDARD_)
+endif()
 set_target_properties(CorradeUtility PROPERTIES DEBUG_POSTFIX "-d")
 if(NOT BUILD_STATIC)
     set_target_properties(CorradeUtility PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
@@ -126,9 +142,8 @@ endif()
 if(BUILD_TESTS)
     # Library with graceful assert for testing
     add_library(CorradeUtilityTestLib ${SHARED_OR_STATIC} ${CorradeUtility_GracefulAssert_SRCS})
-    set_target_properties(CorradeUtilityTestLib PROPERTIES
-        COMPILE_FLAGS "-DCORRADE_GRACEFUL_ASSERT"
-        DEBUG_POSTFIX "-d")
+    target_compile_definitions(CorradeUtilityTestLib PRIVATE "CORRADE_GRACEFUL_ASSERT")
+    set_target_properties(CorradeUtilityTestLib PROPERTIES DEBUG_POSTFIX "-d")
     if(BUILD_STATIC_PIC)
         set_target_properties(CorradeUtilityTestLib PROPERTIES POSITION_INDEPENDENT_CODE ON)
     endif()
@@ -147,8 +162,8 @@ if(BUILD_TESTS)
     add_subdirectory(Test)
 endif()
 
-# Corrade Utility library and rc executable for superprojects
-set(CORRADE_UTILITY_LIBRARY CorradeUtility CACHE INTERNAL "")
+# Corrade::Utility and Corrade::rc target alias for superprojects
+add_library(Corrade::Utility ALIAS CorradeUtility)
 if(NOT CMAKE_CROSSCOMPILING)
-    set(CORRADE_RC_EXECUTABLE corrade-rc CACHE INTERNAL "")
+    add_executable(Corrade::rc ALIAS corrade-rc)
 endif()

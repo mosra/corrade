@@ -59,5 +59,5 @@ if(BUILD_TESTS)
     add_subdirectory(Test)
 endif()
 
-# Corrade Interconnect library for superprojects
-set(CORRADE_INTERCONNECT_LIBRARY CorradeInterconnect CACHE INTERNAL "")
+# Corrade::Interconnect target alias for superprojects
+add_library(Corrade::Interconnect ALIAS CorradeInterconnect)

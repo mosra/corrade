@@ -32,13 +32,15 @@ endif()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 
-include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 
 corrade_add_test(TestSuiteCompareContainerTest ContainerTest.cpp)
 corrade_add_test(TestSuiteCompareFileTest FileTest.cpp)
+target_include_directories(TestSuiteCompareFileTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 corrade_add_test(TestSuiteCompareFileToStringTest FileToStringTest.cpp)
+target_include_directories(TestSuiteCompareFileToStringTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 corrade_add_test(TestSuiteCompareFloatingPointTest FloatingPointTest.cpp)
 corrade_add_test(TestSuiteCompareStringToFileTest StringToFileTest.cpp)
+target_include_directories(TestSuiteCompareStringToFileTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 if(CORRADE_TARGET_EMSCRIPTEN)
     emscripten_embed_file(TestSuiteCompareFileTest FileTestFiles "/FileTestFiles")
