@@ -30,6 +30,10 @@ project(Corrade)
 if(POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
 endif()
+# Don't treat imported targets with :: as files
+if(POLICY CMP0028)
+    cmake_policy(SET CMP0028 NEW)
+endif()
 
 include(CMakeDependentOption)
 option(GCC47_COMPATIBILITY "Enable compatibility mode for GCC 4.7 (might disable some features)" OFF)
