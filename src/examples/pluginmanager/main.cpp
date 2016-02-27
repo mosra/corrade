@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
 
     Utility::Arguments args;
     args.addArgument("plugin").setHelp("plugin", "animal plugin name")
-        .addOption("plugin-dir", ".").setHelpKey("plugin-dir", "DIR").setHelp("plugin-dir", "plugin directory to use")
+        .addOption("plugin-dir", ".").setHelp("plugin-dir", "plugin directory to use", "DIR")
         .setHelp("Displays info about given animal.")
         .parse(argc, argv);
 
