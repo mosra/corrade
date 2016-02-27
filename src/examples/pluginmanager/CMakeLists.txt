@@ -35,7 +35,7 @@ include_directories(${CORRADE_INCLUDE_DIR})
 
 corrade_add_plugin(Dog ${CMAKE_CURRENT_BINARY_DIR} "" Dog.conf Dog.cpp)
 if(CORRADE_TARGET_WINDOWS)
-    target_link_libraries(Dog Corrade::PluginManager)
+    target_link_libraries(Dog ${CORRADE_PLUGINMANAGER_LIBRARIES})
 endif()
 corrade_add_static_plugin(Canary ${CMAKE_CURRENT_BINARY_DIR} Canary.conf Canary.cpp)
 
