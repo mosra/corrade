@@ -39,6 +39,12 @@ build_script:
 - cmake --build . --target install
 - cd ../Deploy
 - 7z a ../corrade.zip *
+# Examples
+- cd %APPVEYOR_BUILD_FOLDER%
+- mkdir build-examples
+- cd build-examples
+- cmake ../src/examples -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:/Sys -G Ninja
+- cmake --build .
 
 test_script:
 - cd %APPVEYOR_BUILD_FOLDER%/build
