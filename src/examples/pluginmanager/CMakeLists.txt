@@ -34,6 +34,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CORRADE_CXX_FLAGS}")
 include_directories(${CORRADE_INCLUDE_DIR})
 
 corrade_add_plugin(Dog ${CMAKE_CURRENT_BINARY_DIR} "" Dog.conf Dog.cpp)
+if(CORRADE_TARGET_WINDOWS)
+    target_link_libraries(Dog Corrade::PluginManager)
+endif()
 corrade_add_static_plugin(Canary ${CMAKE_CURRENT_BINARY_DIR} Canary.conf Canary.cpp)
 
 add_executable(PluginTest main.cpp)
