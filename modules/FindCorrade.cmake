@@ -20,12 +20,10 @@
 # chosen based on actual build configuration of the project (i.e. Debug build
 # is linked to debug libraries, Release build to release libraries).
 #
-# On multi-configuration build systems (such as Visual Studio or XCode) the
-# preprocessor variable CORRADE_IS_DEBUG_BUILD is defined if given build
-# configuration is Debug (not Corrade itself, but build configuration of the
-# project using it). Useful e.g. for selecting proper plugin directory. On
-# single-configuration build systems (such as Makefiles) this information is
-# not needed and thus the variable is not defined in any case.
+# Corrade conditionally defines CORRADE_IS_DEBUG_BUILD preprocessor variable in
+# case build configuration is Debug (not Corrade itself, but build
+# configuration of the project using it). Useful e.g. for selecting proper
+# plugin directory.
 #
 # Corrade configures the compiler to use C++11 standard (if it is not already
 # configured to do so). Additionally you can use CORRADE_CXX_FLAGS to enable

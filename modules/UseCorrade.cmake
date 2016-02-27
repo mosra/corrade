@@ -149,12 +149,9 @@ if(CORRADE_TARGET_APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" AND NO
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lc++")
 endif()
 
-# Provide a way to distinguish between debug and release builds on
-# multi-configuration build systems. When using GLOBAL, the property is not set
-# at all. Bug?
-if(NOT CMAKE_CFG_INTDIR STREQUAL ".")
-    set_property(DIRECTORY PROPERTY COMPILE_DEFINITIONS_DEBUG "CORRADE_IS_DEBUG_BUILD")
-endif()
+# Provide a way to distinguish between debug and release builds via
+# preprocessor define
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "$<$<CONFIG:Debug>:CORRADE_IS_DEBUG_BUILD>")
 
 function(corrade_add_test test_name)
     # Get DLL and path lists
