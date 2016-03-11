@@ -194,12 +194,18 @@ void DebugTest::colors() {
         /* Auto-reset at the end */
         std::ostringstream out;
         Debug{&out} << "Hello" << Debug::color(Debug::Color::Green) << "world";
+        #ifdef CORRADE_TARGET_WINDOWS
+        CORRADE_EXPECT_FAIL("ANSI escape codes for colors are suppressed for now.");
+        #endif
         CORRADE_COMPARE(out.str(), "Hello\033[0;32m world\033[0m\n");
     } {
         /* Don't reset twice */
         std::ostringstream out;
         Debug{&out} << Debug::boldColor(Debug::Color::Red) << "Hello"
             << Debug::resetColor << "world";
+        #ifdef CORRADE_TARGET_WINDOWS
+        CORRADE_EXPECT_FAIL("ANSI escape codes for colors are suppressed for now.");
+        #endif
         CORRADE_COMPARE(out.str(), "\033[1;31mHello\033[0m world\n");
     } {
         /* Disabled globally */
@@ -226,6 +232,9 @@ void DebugTest::colorsNospace() {
         << Debug::nospace << Debug::boldColor(Debug::Color::Yellow) << "ll"
         << Debug::nospace << Debug::resetColor << "o";
 
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_EXPECT_FAIL("ANSI escape codes for colors are suppressed for now.");
+    #endif
     CORRADE_COMPARE(out1.str(), "H\033[0;34me\033[1;33mll\033[0mo\n");
     CORRADE_COMPARE(out2.str(), "H\033[0;34me\033[1;33mll\033[0mo\n");
 }
