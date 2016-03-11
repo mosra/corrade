@@ -30,6 +30,13 @@
 #include <iomanip>
 #include <sstream>
 
+#ifdef CORRADE_TARGET_WINDOWS
+#   define WIN32_LEAN_AND_MEAN 1
+#   define VC_EXTRALEAN
+#   include <windows.h>
+#   include <wincon.h>
+#endif
+
 namespace Corrade { namespace Utility {
 
 namespace {
@@ -42,6 +49,46 @@ template<> inline void toStream<Implementation::DebugOstreamFallback>(std::ostre
     value.apply(s);
 }
 
+#ifdef CORRADE_TARGET_WINDOWS
+HANDLE getStdHandle(const std::ostream* s) {
+    if(!s) return INVALID_HANDLE_VALUE;
+
+    return s == &std::cout ? ::GetStdHandle(STD_OUTPUT_HANDLE)
+         : s == &std::cerr ? ::GetStdHandle(STD_ERROR_HANDLE)
+         : INVALID_HANDLE_VALUE;
+}
+
+template<Debug::Color c> WORD mapConsoleColor() {
+    switch(c) {
+        case Debug::Color::Black:   return 0;
+        case Debug::Color::Red:     return FOREGROUND_RED;
+        case Debug::Color::Green:   return FOREGROUND_GREEN;
+        case Debug::Color::Yellow:  return FOREGROUND_RED|FOREGROUND_GREEN;
+        case Debug::Color::Blue:    return FOREGROUND_BLUE;
+        case Debug::Color::Magenta: return FOREGROUND_RED|FOREGROUND_BLUE;
+        case Debug::Color::Cyan:    return FOREGROUND_GREEN|FOREGROUND_BLUE;
+        case Debug::Color::White:   return FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE;
+        case Debug::Color::Default: return 0;
+    }
+    return 0;
+}
+
+template<Debug::Color c, bool bold> void setConsoleColor(const std::ostream* s) {
+    HANDLE h = getStdHandle(s);
+    if(h == INVALID_HANDLE_VALUE) return;
+
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    ::GetConsoleScreenBufferInfo(h, &csbi);
+    WORD attr = csbi.wAttributes;
+    attr &= ~(FOREGROUND_BLUE|FOREGROUND_GREEN|FOREGROUND_RED|FOREGROUND_INTENSITY);
+
+    attr |= mapConsoleColor<c>();
+    if(bold) attr |= FOREGROUND_INTENSITY;
+
+    ::SetConsoleTextAttribute(h, attr);
+ }
+#endif
+
 }
 
 std::ostream* Debug::_globalOutput = &std::cout;
@@ -51,7 +98,9 @@ std::ostream* Error::_globalErrorOutput = &std::cerr;
 template<Debug::Color c> Debug::Modifier Debug::colorInternal() {
     return [](Debug& debug) {
         if(debug._flags & InternalFlag::DisableColors) return;
-
+#ifdef CORRADE_TARGET_WINDOWS
+        setConsoleColor<c, false>(debug._output);
+#else
         constexpr const char code[] = { '\033', '[', '0', ';', '3', char(c), 'm', '\0' };
         debug._flags |= InternalFlag::ColorWritten;
 
@@ -59,13 +108,16 @@ template<Debug::Color c> Debug::Modifier Debug::colorInternal() {
         if(!noSpaceBefore) debug << Debug::nospace;
         debug << code;
         if(noSpaceBefore) debug << Debug::nospace;
+#endif
     };
 }
 
 template<Debug::Color c> Debug::Modifier Debug::boldColorInternal() {
     return [](Debug& debug) {
         if(debug._flags & InternalFlag::DisableColors) return;
-
+#ifdef CORRADE_TARGET_WINDOWS
+        setConsoleColor<c, true>(debug._output);
+#else
         constexpr const char code[] = { '\033', '[', '1', ';', '3', char(c), 'm', '\0' };
         debug._flags |= InternalFlag::ColorWritten;
 
@@ -73,6 +125,7 @@ template<Debug::Color c> Debug::Modifier Debug::boldColorInternal() {
         if(!noSpaceBefore) debug << Debug::nospace;
         debug << code;
         if(noSpaceBefore) debug << Debug::nospace;
+#endif
     };
 }
 
@@ -120,11 +173,12 @@ void Debug::resetColor(Debug& debug) {
     if(debug._flags & InternalFlag::DisableColors) return;
 
     debug._flags &= ~InternalFlag::ColorWritten;
-
+#ifndef CORRADE_TARGET_WINDOWS
     const bool noSpaceBefore = !!(debug._flags & InternalFlag::NoSpaceBeforeNextValue);
     if(!noSpaceBefore) debug << Debug::nospace;
     debug << "\033[0m";
     if(noSpaceBefore) debug << Debug::nospace;
+#endif
 }
 
 #ifdef CORRADE_BUILD_DEPRECATED
@@ -165,10 +219,11 @@ Error::Error(const Flags flags): Error{_globalErrorOutput, flags} {}
 
 Debug::~Debug() {
     if(_output && (_flags & InternalFlag::ValueWritten)) {
+#ifndef CORRADE_TARGET_WINDOWS
         /* Reset output color */
         if(_flags & InternalFlag::ColorWritten)
             *_output << "\033[0m";
-
+#endif
         /* Newline at the end */
         if(!(_flags & InternalFlag::NoNewlineAtTheEnd))
             *_output << std::endl;
