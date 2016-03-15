@@ -267,14 +267,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 /** @hideinitializer
 @brief Create `main()` function for given Tester subclass
 */
-#ifndef CORRADE_TARGET_EMSCRIPTEN
-#define CORRADE_TEST_MAIN(Class)                                            \
-    int main(int argc, const char** argv) {                                 \
-        Class t;                                                            \
-        t.registerTest(__FILE__, #Class);                                   \
-        return t.exec(argc, argv);                                          \
-    }
-#else
+#ifdef CORRADE_TARGET_EMSCRIPTEN
 /* In Emscripten, returning from main() with non-zero exit code won't
    affect Node.js exit code, causing all tests to look like they passed.
    Calling std::abort() causes Node.js to exit with non-zero code. The lambda
@@ -288,6 +281,13 @@ class CORRADE_TESTSUITE_EXPORT Tester {
             return t.exec(argc, argv);                                      \
         }() != 0) std::abort();                                             \
         return 0;                                                           \
+    }
+#else
+#define CORRADE_TEST_MAIN(Class)                                            \
+    int main(int argc, const char** argv) {                                 \
+        Class t;                                                            \
+        t.registerTest(__FILE__, #Class);                                   \
+        return t.exec(argc, argv);                                          \
     }
 #endif
 
