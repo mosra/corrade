@@ -85,8 +85,16 @@ elseif(WIN32)
     endif()
 endif()
 
+if(CORRADE_TARGET_APPLE)
+    option(TESTSUITE_TARGET_XCTEST "Build TestSuite tests compatible with Xcode XCTest" OFF)
+endif()
+
 if(BUILD_STATIC)
     set(CORRADE_BUILD_STATIC 1)
+endif()
+
+if(TESTSUITE_TARGET_XCTEST)
+    set(CORRADE_TESTSUITE_TARGET_XCTEST 1)
 endif()
 
 # Initialize macros etc.
@@ -102,6 +110,9 @@ else()
 endif()
 if(BUILD_TESTS)
     set(CORRADE_TESTSUITE_LIBRARIES CorradeTestSuite CorradeUtility)
+endif()
+if(CORRADE_TESTSUITE_TARGET_XCTEST)
+    set(CORRADE_TESTSUITE_XCTEST_RUNNER ${PROJECT_SOURCE_DIR}/src/Corrade/TestSuite/XCTestRunner.mm.in)
 endif()
 
 # Detect and auto-enable compiler compatibility
@@ -133,6 +144,10 @@ if(MSVC2015_COMPATIBILITY)
     set(CORRADE_MSVC2015_COMPATIBILITY 1)
 endif()
 
+if(TESTSUITE_TARGET_XCTEST)
+    set(CORRADE_TESTSUITE_TARGET_XCTEST 1)
+endif()
+
 include(UseCorrade)
 
 if(CORRADE_TARGET_EMSCRIPTEN)
@@ -143,6 +158,7 @@ endif()
 include(CorradeLibSuffix)
 set(CORRADE_BINARY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/bin)
 set(CORRADE_LIBRARY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
+set(CORRADE_DATA_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/corrade)
 set(CORRADE_CMAKE_MODULE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/cmake/Corrade)
 set(CORRADE_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/Corrade)
 

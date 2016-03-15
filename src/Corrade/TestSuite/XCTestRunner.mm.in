@@ -1,0 +1,18 @@
+#import <XCTest/XCTest.h>
+
+extern int corradeTestMain(int, const char**);
+
+@interface ${test_name} : XCTestCase
+
+@end
+
+@implementation ${test_name}
+
+- (void)test {
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wgnu"
+    XCTAssertEqual(corradeTestMain(0, nullptr), 0);
+    #pragma GCC diagnostic pop
+}
+
+@end

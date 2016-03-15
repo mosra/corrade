@@ -153,6 +153,10 @@ endif()
 # preprocessor define
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "$<$<CONFIG:Debug>:CORRADE_IS_DEBUG_BUILD>")
 
+if(CORRADE_TESTSUITE_TARGET_XCTEST)
+    find_package(XCTest)
+endif()
+
 function(corrade_add_test test_name)
     # Get DLL and path lists
     foreach(arg ${ARGN})
@@ -167,16 +171,29 @@ function(corrade_add_test test_name)
         endif()
     endforeach()
 
-    add_executable(${test_name} ${sources})
-    target_link_libraries(${test_name} ${libraries} ${CORRADE_TESTSUITE_LIBRARIES})
-    if(CORRADE_TARGET_EMSCRIPTEN)
-        # Emscripten needs to have exceptions enabled for TestSuite to work
-        # properly
-        set_target_properties(${test_name} PROPERTIES LINK_FLAGS "-s DISABLE_EXCEPTION_CATCHING=0")
-        find_package(NodeJs REQUIRED)
-        add_test(NAME ${test_name} COMMAND ${NODEJS_EXECUTABLE} --stack-trace-limit=0 $<TARGET_FILE:${test_name}>)
+    if(CORRADE_TESTSUITE_TARGET_XCTEST)
+        add_library(${test_name} SHARED ${sources})
+        set_target_properties(${test_name} PROPERTIES FRAMEWORK TRUE)
+        target_link_libraries(${test_name} ${libraries} ${CORRADE_TESTSUITE_LIBRARIES})
+
+        set(test_runner_file ${CMAKE_CURRENT_BINARY_DIR}/${test_name}.mm)
+        configure_file(${CORRADE_TESTSUITE_XCTEST_RUNNER}
+                       ${test_runner_file})
+        xctest_add_bundle(${test_name}Runner ${test_name} ${test_runner_file})
+        xctest_add_test(${test_name} ${test_name}Runner)
+
     else()
-        add_test(${test_name} ${test_name})
+        add_executable(${test_name} ${sources})
+        target_link_libraries(${test_name} ${libraries} ${CORRADE_TESTSUITE_LIBRARIES})
+        if(CORRADE_TARGET_EMSCRIPTEN)
+            # Emscripten needs to have exceptions enabled for TestSuite to work
+            # properly
+            set_target_properties(${test_name} PROPERTIES LINK_FLAGS "-s DISABLE_EXCEPTION_CATCHING=0")
+            find_package(NodeJs REQUIRED)
+            add_test(NAME ${test_name} COMMAND ${NODEJS_EXECUTABLE} --stack-trace-limit=0 $<TARGET_FILE:${test_name}>)
+        else()
+            add_test(${test_name} ${test_name})
+        endif()
     endif()
 endfunction()
 

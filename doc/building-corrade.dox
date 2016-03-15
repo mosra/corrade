@@ -217,6 +217,10 @@ Corrade is by default built with all deprecated APIs. However, to make your
 code more robust and future-proof, it's recommended to build the library with
 `BUILD_DEPRECATED` disabled.
 
+If building for Xcode on OSX or iOS, `TESTSUITE_TARGET_XCTEST` option can be
+used to build unit tests compatible with the XCTest framework and thus runnable
+directly from Xcode and also in iOS simulator.
+
 The features used can be conveniently detected in depending projects both in
 CMake and C++ sources, see @ref corrade-cmake and @ref Corrade/Corrade.h for
 more information.
