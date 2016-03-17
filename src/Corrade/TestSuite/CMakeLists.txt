@@ -37,6 +37,9 @@ set(CorradeTestSuite_HEADERS
     TestSuite.h
     visibility.h)
 
+set(CorradeTestSuite_DATA
+    XCTestRunner.mm.in)
+
 # TestSuite library
 add_library(CorradeTestSuite ${SHARED_OR_STATIC}
     ${CorradeTestSuite_SRCS}
@@ -55,6 +58,9 @@ install(TARGETS CorradeTestSuite
         LIBRARY DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR}
         ARCHIVE DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 install(FILES ${CorradeTestSuite_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/TestSuite)
+if(CORRADE_TESTSUITE_TARGET_XCTEST)
+    install(FILES ${CorradeTestSuite_DATA} DESTINATION ${CORRADE_DATA_INSTALL_DIR}/TestSuite)
+endif()
 
 add_subdirectory(Compare)
 

@@ -91,6 +91,16 @@ Defined if the library is built for Apple platforms.
 #undef CORRADE_TARGET_APPLE
 
 /**
+@brief Target XCTest with TestSuite
+
+Defined if the @ref TestSuite library is targeting Xcode XCTest. Available only
+on Apple platforms.
+@see @ref CORRADE_TARGET_APPLE, @ref corrade-cmake
+*/
+#define CORRADE_TESTSUITE_TARGET_XCTEST
+#undef CORRADE_TESTSUITE_TARGET_XCTEST
+
+/**
 @brief iOS target
 
 Defined if the library is built for iOS.
