@@ -91,7 +91,7 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
         for(auto&& n: skip) {
             std::size_t index = std::stoi(n);
             if(index - 1 >= _testCases.size()) continue;
-            _testCases[index - 1] = nullptr;
+            _testCases[index - 1].test = nullptr;
         }
     }
 
@@ -100,13 +100,13 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
         const std::vector<std::string> only = Utility::String::split(args.value("only"), ' ');
         for(auto&& n: only) {
             std::size_t index = std::stoi(n);
-            if(index - 1 >= _testCases.size() || !_testCases[index - 1]) continue;
+            if(index - 1 >= _testCases.size() || !_testCases[index - 1].test) continue;
             usedTestCases.emplace_back(index, _testCases[index - 1]);
         }
 
     /* Otherwise extract all (and skip skipped) */
     } else for(std::size_t i = 0; i != _testCases.size(); ++i) {
-        if(!_testCases[i]) continue;
+        if(!_testCases[i].test) continue;
         usedTestCases.emplace_back(i + 1, _testCases[i]);
     }
 
@@ -126,49 +126,58 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
     Debug(logOutput, _useColor) << Debug::boldColor(Debug::Color::Default) << "Starting" << _testName << "with" << usedTestCases.size() << "test cases...";
 
     for(auto i: usedTestCases) {
-        try {
-            /* Reset output to stdout for each test case to prevent debug
-               output segfaults */
-            /** @todo Drop this when Debug::setOutput() is removed */
-            Debug resetDebugRedirect{&std::cout};
-            Error resetErrorRedirect{&std::cerr};
-            Utility::Warning resetWarningRedirect{&std::cerr};
+        /* Reset output to stdout for each test case to prevent debug
+            output segfaults */
+        /** @todo Drop this when Debug::setOutput() is removed */
+        Debug resetDebugRedirect{&std::cout};
+        Error resetErrorRedirect{&std::cerr};
+        Utility::Warning resetWarningRedirect{&std::cerr};
 
-            _testCaseId = i.first;
-            _testCaseName.clear();
-            (this->*i.second)();
-        } catch(Exception) {
-            ++errorCount;
-            continue;
-        } catch(SkipException) {
-            continue;
+        _testCaseId = i.first;
+
+        if(i.second.setup) {
+            _testCaseName = "<setup>()";
+            (this->*i.second.setup)();
         }
 
-        /* No testing macros called, don't print function name to output */
-        if(_testCaseName.empty()) {
-            Debug(logOutput, _useColor)
-                << Debug::boldColor(Debug::Color::Yellow) << "     ?"
-                << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
+        try {
+            _testCaseName.clear();
+            (this->*i.second.test)();
+
+            /* No testing macros called, don't print function name to output */
+            if(_testCaseName.empty()) {
+                Debug(logOutput, _useColor)
+                    << Debug::boldColor(Debug::Color::Yellow) << "     ?"
+                    << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
+                    << Debug::boldColor(Debug::Color::Cyan) << padding(_testCaseId, _testCases.size())
+                    << Debug::nospace << _testCaseId << Debug::nospace
+                    << Debug::color(Debug::Color::Blue) << "]"
+                    << Debug::boldColor(Debug::Color::Yellow) << "<unknown>()"
+                    << Debug::resetColor;
+
+                ++noCheckCount;
+                continue;
+            }
+
+            Debug d(logOutput, _useColor);
+            if(_expectedFailure) d << Debug::boldColor(Debug::Color::Yellow) << " XFAIL";
+            else d << Debug::boldColor(Debug::Color::Default) << "    OK";
+            d << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
                 << Debug::boldColor(Debug::Color::Cyan) << padding(_testCaseId, _testCases.size())
                 << Debug::nospace << _testCaseId << Debug::nospace
                 << Debug::color(Debug::Color::Blue) << "]"
-                << Debug::boldColor(Debug::Color::Yellow) << "<unknown>()"
+                << Debug::boldColor(Debug::Color::Default) << _testCaseName
                 << Debug::resetColor;
+            if(_expectedFailure) d << "\n       " << _expectedFailure->message();
 
-            ++noCheckCount;
-            continue;
+        } catch(Exception) {
+            ++errorCount;
+        } catch(SkipException) {}
+
+        if(i.second.teardown) {
+            _testCaseName = "<teardown>()";
+            (this->*i.second.teardown)();
         }
-
-        Debug d(logOutput, _useColor);
-        if(_expectedFailure) d << Debug::boldColor(Debug::Color::Yellow) << " XFAIL";
-        else d << Debug::boldColor(Debug::Color::Default) << "    OK";
-        d << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
-            << Debug::boldColor(Debug::Color::Cyan) << padding(_testCaseId, _testCases.size())
-            << Debug::nospace << _testCaseId << Debug::nospace
-            << Debug::color(Debug::Color::Blue) << "]"
-            << Debug::boldColor(Debug::Color::Default) << _testCaseName
-            << Debug::resetColor;
-        if(_expectedFailure) d << "\n       " << _expectedFailure->message();
     }
 
     Debug d(logOutput, _useColor);
@@ -235,6 +244,9 @@ void Tester::skip(const std::string& message) {
 }
 
 void Tester::registerTestCase(const std::string& name, int line) {
+    CORRADE_ASSERT(_testCaseName != "<setup>()" && _testCaseName != "<teardown>()",
+        "TestSuite::Tester: using verification macros inside setup or teardown functions is not allowed", );
+
     if(_testCaseName.empty()) _testCaseName = name + "()";
     _testCaseLine = line;
 }

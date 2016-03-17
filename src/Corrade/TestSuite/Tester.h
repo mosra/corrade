@@ -186,8 +186,36 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         template<class Derived> void addTests(std::initializer_list<void(Derived::*)()> tests) {
             _testCases.reserve(_testCases.size() + tests.size());
             for(auto test: tests)
-                _testCases.push_back(static_cast<TestCase>(test));
+                _testCases.emplace_back(static_cast<TestCase::Function>(test), nullptr, nullptr);
         }
+
+        /**
+         * @brief Add test cases with explicit setup and teardown functions
+         * @param tests         List of test cases to run
+         * @param setup         Setup function
+         * @param teardown      Teardown function
+         *
+         * Adds one or more test cases to be executed when calling @ref exec().
+         * The @p setup function is called before every test case in the list,
+         * the @p teardown function is called after every test case in the
+         * list, regardless whether it passed, failed or was skipped. Using
+         * verification macros in @p setup or @p teardown function is not
+         * allowed.
+         */
+        template<class Derived> void addTests(std::initializer_list<void(Derived::*)()> tests, void(Derived::*setup)(), void(Derived::*teardown)()) {
+            _testCases.reserve(_testCases.size() + tests.size());
+            for(auto test: tests)
+                _testCases.emplace_back(static_cast<TestCase::Function>(test), static_cast<TestCase::Function>(setup), static_cast<TestCase::Function>(teardown));
+        }
+
+        /**
+         * @brief Test case ID
+         *
+         * Returns ID of the test case that is currently executing. Value is
+         * undefined if called  outside of test cases and setup/teardown
+         * functions.
+         */
+        std::size_t testCaseId() const { return _testCaseId; }
 
     #ifdef DOXYGEN_GENERATING_OUTPUT
     private:
@@ -250,7 +278,13 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         class Exception {};
         class SkipException {};
 
-        typedef void (Tester::*TestCase)();
+        struct TestCase {
+            typedef void (Tester::*Function)();
+
+            explicit TestCase(Function test, Function setup, Function teardown): test{test}, setup{setup}, teardown{teardown} {}
+
+            Function test, setup, teardown;
+        };
 
         void verifyInternal(const std::string& expression, bool value);
         const char* padding(int number, int max);
