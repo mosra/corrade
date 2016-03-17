@@ -45,11 +45,11 @@
 #  CORRADE_CXX_STANDARD         - C++ standard to require when compiling given
 #   target. Does nothing if :variable:`CMAKE_CXX_FLAGS` already contains
 #   particular standard setting flag or if given target contains
-#   :prop_tgt:`CMAKE_CXX_STANDARD` property. Allowed value is 11.
+#   :prop_tgt:`CMAKE_CXX_STANDARD` property. Allowed value is 11, 14 or 17.
 #  INTERFACE_CORRADE_CXX_STANDARD - C++ standard to require when using given
 #   target. Does nothing if :variable:`CMAKE_CXX_FLAGS` already contains
 #   particular standard setting flag or if given target contains
-#   :prop_tgt:`CMAKE_CXX_STANDARD` property. Allowed value is 11.
+#   :prop_tgt:`CMAKE_CXX_STANDARD` property. Allowed value is 11, 14 or 17.
 #  CORRADE_USE_PEDANTIC_FLAGS   - Enable additional compiler/linker flags.
 #   Boolean.
 #
