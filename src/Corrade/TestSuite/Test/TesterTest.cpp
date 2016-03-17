@@ -212,20 +212,19 @@ void Test::setupTeardownSkip() {
     CORRADE_SKIP("Skipped.");
 }
 
-class TesterTest: public Tester {
-    public:
-        TesterTest();
+struct TesterTest: Tester {
+    explicit TesterTest();
 
-        void test();
-        void emptyTest();
-        void skipOnly();
+    void test();
+    void emptyTest();
+    void skipOnly();
 
-        void compareNoCommonType();
-        void compareAsOverload();
-        void compareAsVarargs();
-        void compareNonCopyable();
-        void verifyExplicitBool();
-        void expectFailIfExplicitBool();
+    void compareNoCommonType();
+    void compareAsOverload();
+    void compareAsVarargs();
+    void compareNonCopyable();
+    void verifyExplicitBool();
+    void expectFailIfExplicitBool();
 };
 
 class EmptyTest: public Tester {};
