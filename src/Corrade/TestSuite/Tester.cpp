@@ -153,7 +153,8 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
                     << Debug::boldColor(Debug::Color::Cyan) << padding(_testCaseId, _testCases.size())
                     << Debug::nospace << _testCaseId << Debug::nospace
                     << Debug::color(Debug::Color::Blue) << "]"
-                    << Debug::boldColor(Debug::Color::Yellow) << "<unknown>()"
+                    << Debug::boldColor(Debug::Color::Yellow)
+                    << (_testCaseName.empty() ? "<unknown>()" : _testCaseName)
                     << Debug::resetColor;
 
                 ++noCheckCount;

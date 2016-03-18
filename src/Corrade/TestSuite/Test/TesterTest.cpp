@@ -305,7 +305,7 @@ void TesterTest::test() {
         "        but expected\n"
         "        hello\n"
         "    OK [14] testCaseName<15>()\n"
-        "     ? [15] <unknown>()\n"
+        "     ? [15] testCaseName<27>()\n"
         "  SKIP [16] skip() \n"
         "        This testcase is skipped.\n"
         "       [17] setting up...\n"
