@@ -134,6 +134,7 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
         Utility::Warning resetWarningRedirect{&std::cerr};
 
         _testCaseId = i.first;
+        _testCaseLine = 0;
 
         if(i.second.setup) {
             _testCaseName = "<setup>()";
@@ -145,7 +146,7 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
             (this->*i.second.test)();
 
             /* No testing macros called, don't print function name to output */
-            if(_testCaseName.empty()) {
+            if(!_testCaseLine) {
                 Debug(logOutput, _useColor)
                     << Debug::boldColor(Debug::Color::Yellow) << "     ?"
                     << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
@@ -241,6 +242,14 @@ void Tester::skip(const std::string& message) {
         << Debug::boldColor(Debug::Color::Default) << _testCaseName
         << Debug::resetColor << "\n       " << message;
     throw SkipException();
+}
+
+void Tester::setTestCaseName(const std::string& name) {
+    _testCaseName = name;
+}
+
+void Tester::setTestCaseName(std::string&& name) {
+    _testCaseName = std::move(name);
 }
 
 void Tester::registerTestCase(const std::string& name, int line) {

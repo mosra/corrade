@@ -217,6 +217,15 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          */
         std::size_t testCaseId() const { return _testCaseId; }
 
+        /**
+         * @brief Set custom test case name
+         *
+         * Calling this function as a first thing inside a test case will use
+         * provided name instead of test case function name.
+         */
+        void setTestCaseName(const std::string& name);
+        void setTestCaseName(std::string&& name); /** @overload */
+
     #ifdef DOXYGEN_GENERATING_OUTPUT
     private:
     #endif
