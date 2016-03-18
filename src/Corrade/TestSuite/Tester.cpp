@@ -253,11 +253,11 @@ void Tester::setTestCaseName(std::string&& name) {
     _testCaseName = std::move(name) + "()";
 }
 
-void Tester::registerTestCase(const std::string& name, int line) {
+void Tester::registerTestCase(std::string&& name, int line) {
     CORRADE_ASSERT(_testCaseName != "<setup>()" && _testCaseName != "<teardown>()",
         "TestSuite::Tester: using verification macros inside setup or teardown functions is not allowed", );
 
-    if(_testCaseName.empty()) _testCaseName = name + "()";
+    if(_testCaseName.empty()) setTestCaseName(std::move(name));
     _testCaseLine = line;
 }
 

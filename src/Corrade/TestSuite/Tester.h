@@ -285,7 +285,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                 std::string _message;
         };
 
-        void registerTestCase(const std::string& name, int line);
+        void registerTestCase(std::string&& name, int line);
 
     private:
         class Exception {};
