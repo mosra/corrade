@@ -157,19 +157,20 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
                     << Debug::resetColor;
 
                 ++noCheckCount;
-                continue;
-            }
 
-            Debug d(logOutput, _useColor);
-            if(_expectedFailure) d << Debug::boldColor(Debug::Color::Yellow) << " XFAIL";
-            else d << Debug::boldColor(Debug::Color::Default) << "    OK";
-            d << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
-                << Debug::boldColor(Debug::Color::Cyan) << padding(_testCaseId, _testCases.size())
-                << Debug::nospace << _testCaseId << Debug::nospace
-                << Debug::color(Debug::Color::Blue) << "]"
-                << Debug::boldColor(Debug::Color::Default) << _testCaseName
-                << Debug::resetColor;
-            if(_expectedFailure) d << "\n       " << _expectedFailure->message();
+            /* Common path */
+            } else {
+                Debug d(logOutput, _useColor);
+                if(_expectedFailure) d << Debug::boldColor(Debug::Color::Yellow) << " XFAIL";
+                else d << Debug::boldColor(Debug::Color::Default) << "    OK";
+                d << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
+                    << Debug::boldColor(Debug::Color::Cyan) << padding(_testCaseId, _testCases.size())
+                    << Debug::nospace << _testCaseId << Debug::nospace
+                    << Debug::color(Debug::Color::Blue) << "]"
+                    << Debug::boldColor(Debug::Color::Default) << _testCaseName
+                    << Debug::resetColor;
+                if(_expectedFailure) d << "\n       " << _expectedFailure->message();
+            }
 
         } catch(Exception) {
             ++errorCount;

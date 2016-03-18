@@ -313,6 +313,7 @@ void TesterTest::test() {
         "       [17] tearing down...\n"
         "       [18] setting up...\n"
         "     ? [18] <unknown>()\n"
+        "       [18] tearing down...\n"
         "       [19] setting up...\n"
         "  FAIL [19] setupTeardownError() at here.cpp on line 223 \n"
         "        Expression false failed.\n"
