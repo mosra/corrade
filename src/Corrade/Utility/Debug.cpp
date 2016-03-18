@@ -108,11 +108,11 @@ template<Debug::Color c> Debug::Modifier Debug::colorInternal() {
     return [](Debug& debug) {
         if(debug._flags & InternalFlag::DisableColors) return;
 
+        debug._flags |= InternalFlag::ColorWritten;
         #ifdef CORRADE_TARGET_WINDOWS
         setConsoleColor<c, false>(debug._output);
         #else
         constexpr const char code[] = { '\033', '[', '0', ';', '3', char(c), 'm', '\0' };
-        debug._flags |= InternalFlag::ColorWritten;
 
         const bool noSpaceBefore = !!(debug._flags & InternalFlag::NoSpaceBeforeNextValue);
         if(!noSpaceBefore) debug << Debug::nospace;
@@ -126,11 +126,11 @@ template<Debug::Color c> Debug::Modifier Debug::boldColorInternal() {
     return [](Debug& debug) {
         if(debug._flags & InternalFlag::DisableColors) return;
 
+        debug._flags |= InternalFlag::ColorWritten;
         #ifdef CORRADE_TARGET_WINDOWS
         setConsoleColor<c, true>(debug._output);
         #else
         constexpr const char code[] = { '\033', '[', '1', ';', '3', char(c), 'm', '\0' };
-        debug._flags |= InternalFlag::ColorWritten;
 
         const bool noSpaceBefore = !!(debug._flags & InternalFlag::NoSpaceBeforeNextValue);
         if(!noSpaceBefore) debug << Debug::nospace;
