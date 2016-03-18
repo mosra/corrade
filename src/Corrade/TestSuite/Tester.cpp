@@ -170,7 +170,7 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
                     << Debug::color(Debug::Color::Blue) << "]"
                     << Debug::boldColor(Debug::Color::Default) << _testCaseName
                     << Debug::resetColor;
-                if(_expectedFailure) d << "\n       " << _expectedFailure->message();
+                if(_expectedFailure) d << Debug::newline << "       " << _expectedFailure->message();
             }
 
         } catch(Exception) {
@@ -209,7 +209,7 @@ void Tester::verifyInternal(const std::string& expression, bool expressionValue)
             << _testCaseId << Debug::nospace << Debug::color(Debug::Color::Blue)
             << "]" << Debug::boldColor(Debug::Color::Default) << _testCaseName
             << Debug::resetColor << "at" << _testFilename << "on line"
-            << _testCaseLine << "\n       " << _expectedFailure->message()
+            << _testCaseLine << Debug::newline << "       " << _expectedFailure->message()
             << "Expression" << expression << "failed.";
         return;
     }
@@ -223,7 +223,7 @@ void Tester::verifyInternal(const std::string& expression, bool expressionValue)
         << Debug::color(Debug::Color::Blue) << "]"
         << Debug::boldColor(Debug::Color::Default) << _testCaseName
         << Debug::resetColor << "at" << _testFilename << "on line"
-        << _testCaseLine << "\n        Expression" << expression;
+        << _testCaseLine << Debug::newline << "        Expression" << expression;
     if(!_expectedFailure) e << "failed.";
     else e << "was expected to fail.";
     throw Exception();
@@ -242,7 +242,7 @@ void Tester::skip(const std::string& message) {
         << Debug::nospace << _testCaseId << Debug::nospace
         << Debug::color(Debug::Color::Blue) << "]"
         << Debug::boldColor(Debug::Color::Default) << _testCaseName
-        << Debug::resetColor << "\n       " << message;
+        << Debug::resetColor << Debug::newline << "       " << message;
     throw SkipException();
 }
 

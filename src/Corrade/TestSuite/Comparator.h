@@ -163,7 +163,7 @@ template<class T> bool Comparator<T>::operator()(const T& actual, const T& expec
 template<class T> void Comparator<T>::printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
     CORRADE_INTERNAL_ASSERT(actualValue && expectedValue);
     e << "Values" << actual << "and" << expected << "are not the same, actual is\n       "
-      << *actualValue << "\n        but expected\n       " << *expectedValue;
+      << *actualValue << Utility::Debug::newline << "        but expected\n       " << *expectedValue;
 }
 
 namespace Implementation {

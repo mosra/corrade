@@ -95,7 +95,7 @@ template<class T> void Comparator<Compare::Container<T>>::printErrorMessage(Util
     else
         e << "contents, actual:\n       ";
 
-    e << *_actualContents << "\n        but expected\n       " << *_expectedContents << "\n       ";
+    e << *_actualContents << Utility::Debug::newline << "        but expected\n       " << *_expectedContents << Utility::Debug::newline << "       ";
 
     for(std::size_t i = 0, end = std::max(_actualContents->size(), _expectedContents->size()); i != end; ++i) {
         if(_actualContents->size() > i && _expectedContents->size() > i && (*_actualContents)[i] == (*_expectedContents)[i]) continue;

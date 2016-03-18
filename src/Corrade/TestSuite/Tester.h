@@ -534,7 +534,7 @@ template<class T, class U, class V> void Tester::compareWith(Comparator<T> compa
             << _testCaseId << Debug::nospace << Debug::color(Debug::Color::Blue)
             << "]" << Debug::boldColor(Debug::Color::Default) << _testCaseName
             << Debug::resetColor << "at" << _testFilename << "on line"
-            << _testCaseLine << "\n       " << _expectedFailure->message()
+            << _testCaseLine << Debug::newline << "       " << _expectedFailure->message()
             << actual << "and" << expected << "are not equal.";
         return;
     }
@@ -548,7 +548,7 @@ template<class T, class U, class V> void Tester::compareWith(Comparator<T> compa
         << Debug::color(Debug::Color::Blue) << "]"
         << Debug::boldColor(Debug::Color::Default) << _testCaseName
         << Debug::resetColor << "at" << _testFilename << "on line"
-        << _testCaseLine << "\n       ";
+        << _testCaseLine << Debug::newline << "       ";
     if(!_expectedFailure) comparator.printErrorMessage(e, actual, expected);
     else e << actual << "and" << expected << "are not expected to be equal.";
     throw Exception();
