@@ -246,11 +246,11 @@ void Tester::skip(const std::string& message) {
 }
 
 void Tester::setTestCaseName(const std::string& name) {
-    _testCaseName = name;
+    _testCaseName = name + "()";
 }
 
 void Tester::setTestCaseName(std::string&& name) {
-    _testCaseName = std::move(name);
+    _testCaseName = std::move(name) + "()";
 }
 
 void Tester::registerTestCase(const std::string& name, int line) {

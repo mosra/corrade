@@ -192,12 +192,12 @@ void Test::compareImplicitConversionFail() {
 }
 
 void Test::testCaseName() {
-    setTestCaseName("testCaseName<15>()");
+    setTestCaseName("testCaseName<15>");
     CORRADE_VERIFY(true);
 }
 
 void Test::testCaseNameNoChecks() {
-    setTestCaseName("testCaseName<27>()");
+    setTestCaseName("testCaseName<27>");
 }
 
 void Test::skip() {

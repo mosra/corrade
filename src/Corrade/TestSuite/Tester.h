@@ -221,7 +221,11 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @brief Set custom test case name
          *
          * Calling this function as a first thing inside a test case will use
-         * provided name instead of test case function name.
+         * provided name. By default the test case name is gathered in the
+         * check macros and is equivalent to the following:
+         * @code
+         * setTestCaseName(__func__);
+         * @endcode
          */
         void setTestCaseName(const std::string& name);
         void setTestCaseName(std::string&& name); /** @overload */
