@@ -30,4 +30,8 @@ corrade_add_test(ContainersLinkedListTest LinkedListTest.cpp)
 corrade_add_test(ContainersStaticArrayViewTest StaticArrayViewTest.cpp)
 corrade_add_test(ContainersTagsTest TagsTest.cpp)
 
-set_target_properties(ContainersLinkedListTest ContainersArrayViewTest ContainersStaticArrayViewTest PROPERTIES COMPILE_FLAGS -DCORRADE_GRACEFUL_ASSERT)
+set_property(TARGET
+    ContainersLinkedListTest
+    ContainersArrayViewTest
+    ContainersStaticArrayViewTest
+    APPEND PROPERTY COMPILE_DEFINITIONS "CORRADE_GRACEFUL_ASSERT")

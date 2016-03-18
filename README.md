@@ -44,7 +44,7 @@ Minimal dependencies
     On Windows you can also use **MinGW-w64**. GCC 4.6, 4.5, 4.4 and MSVC 2013
     support involves some ugly workarounds and thus is available only in
     `compatibility` branch.
--   **CMake** >= 2.8.9
+-   **CMake** >= 2.8.12
 
 Note that full feature set is available only on GCC >= 4.8.1 and Clang >= 3.1
 and compatibility mode with reduced feature set must be enabled for other

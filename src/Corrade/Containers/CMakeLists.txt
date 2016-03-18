@@ -32,10 +32,17 @@ set(CorradeContainers_HEADERS
     Tags.h)
 
 # Force IDEs to display all header files in project view
-add_custom_target(CorradeContainers SOURCES ${CorradeContainers_HEADERS})
+add_custom_target(CorradeContainers-headers SOURCES ${CorradeContainers_HEADERS})
 
 install(FILES ${CorradeContainers_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/Containers)
 
 if(BUILD_TESTS)
     add_subdirectory(Test)
+endif()
+
+# Corrade::Containers target alias for superprojects
+if(NOT CMAKE_VERSION VERSION_LESS 3.0.0)
+    add_library(CorradeContainers INTERFACE)
+    target_link_libraries(CorradeContainers INTERFACE CorradeUtility)
+    add_library(Corrade::Containers ALIAS CorradeContainers)
 endif()

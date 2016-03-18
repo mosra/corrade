@@ -23,8 +23,6 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
-
 if(CORRADE_TARGET_EMSCRIPTEN)
     set(UTILITY_TEST_DIR "")
     set(UTILITY_BINARY_TEST_DIR "/write")
@@ -38,13 +36,16 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
 
 corrade_add_test(UtilityArgumentsTest ArgumentsTest.cpp LIBRARIES CorradeUtilityTestLib)
 corrade_add_test(UtilityDirectoryTest DirectoryTest.cpp)
+target_include_directories(UtilityDirectoryTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 corrade_add_test(UtilityEndianTest EndianTest.cpp)
 corrade_add_test(UtilityMurmurHash2Test MurmurHash2Test.cpp)
 corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp LIBRARIES CorradeUtilityTestLib)
+target_include_directories(UtilityConfigurationTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 corrade_add_test(UtilityDebugTest DebugTest.cpp)
 corrade_add_test(UtilityHashDigestTest HashDigestTest.cpp)
 corrade_add_test(UtilitySha1Test Sha1Test.cpp)
 corrade_add_test(UtilityStringTest StringTest.cpp)
+target_include_directories(UtilityStringTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 corrade_add_test(UtilityTypeTraitsTest TypeTraitsTest.cpp)
 corrade_add_test(UtilityUnicodeTest UnicodeTest.cpp LIBRARIES CorradeUtilityTestLib)
 
@@ -58,11 +59,13 @@ corrade_add_test(UtilityResourceTest
     ${ResourceTestEmptyFileData}
     ${ResourceTestNothingData}
     LIBRARIES CorradeUtilityTestLib)
+target_include_directories(UtilityResourceTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # Static lib resource test
 add_library(ResourceTestDataLib STATIC ${ResourceTestData})
 target_link_libraries(ResourceTestDataLib CorradeUtility)
 corrade_add_test(UtilityResourceStaticTest ResourceStaticTest.cpp LIBRARIES ResourceTestDataLib)
+target_include_directories(UtilityResourceStaticTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 if(CORRADE_TARGET_EMSCRIPTEN)
     emscripten_embed_file(UtilityConfigurationTest ConfigurationTestFiles "/ConfigurationTestFiles")

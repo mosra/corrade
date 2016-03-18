@@ -23,12 +23,16 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 2.8.9)
+cmake_minimum_required(VERSION 2.8.12)
 project(Corrade)
 
 # CMake policies: enable MACOSX_RPATH by default
 if(POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
+endif()
+# Don't treat imported targets with :: as files
+if(POLICY CMP0028)
+    cmake_policy(SET CMP0028 NEW)
 endif()
 
 include(CMakeDependentOption)
@@ -99,17 +103,13 @@ endif()
 
 # Initialize macros etc.
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
-set(CORRADE_UTILITY_LIBRARY CorradeUtility)
-if(NOT CMAKE_CROSSCOMPILING)
-    set(CORRADE_RC_EXECUTABLE corrade-rc)
-else()
+if(CMAKE_CROSSCOMPILING)
     find_program(CORRADE_RC_EXECUTABLE corrade-rc)
     if(NOT CORRADE_RC_EXECUTABLE)
         message(FATAL_ERROR "Native `corrade-rc` executable, which is needed when crosscompiling, was not found")
     endif()
-endif()
-if(BUILD_TESTS)
-    set(CORRADE_TESTSUITE_LIBRARIES CorradeTestSuite CorradeUtility)
+    add_executable(Corrade::rc IMPORTED)
+    set_property(TARGET Corrade::rc PROPERTY IMPORTED_LOCATION ${CORRADE_RC_EXECUTABLE})
 endif()
 if(CORRADE_TESTSUITE_TARGET_XCTEST)
     set(CORRADE_TESTSUITE_XCTEST_RUNNER ${PROJECT_SOURCE_DIR}/src/Corrade/TestSuite/XCTestRunner.mm.in)
@@ -149,7 +149,6 @@ if(TESTSUITE_TARGET_XCTEST)
 endif()
 
 include(UseCorrade)
-
 if(CORRADE_TARGET_EMSCRIPTEN)
     include(UseEmscripten)
 endif()

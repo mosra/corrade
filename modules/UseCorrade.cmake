@@ -76,25 +76,23 @@ endif()
 
 # GCC/Clang-specific compiler flags
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" OR CORRADE_TARGET_EMSCRIPTEN)
-    # Mandatory C++ flags
-    if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
-        # TODO: use -std=c++11 when we don't have to maintain compatibility
-        # with anything older than GCC 4.7
-        # TODO: CMake 3.1 has CMAKE_CXX_STANDARD and CMAKE_CXX_STANDARD_REQUIRED
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-    endif()
-
-    # Optional C++ flags
-    set(CORRADE_CXX_FLAGS "-Wall -Wextra -Wold-style-cast -Winit-self -Werror=return-type -Wmissing-declarations -pedantic -fvisibility=hidden")
+    set(CORRADE_PEDANTIC_COMPILER_OPTIONS
+        "-Wall" "-Wextra"
+        "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-Wold-style-cast>"
+        "-Winit-self"
+        "-Werror=return-type"
+        "-Wmissing-declarations"
+        "-pedantic"
+        "-fvisibility=hidden")
 
     # Some flags are not yet supported everywhere
     # TODO: do this with check_c_compiler_flags()
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.7.0")
-            set(CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS} -Wzero-as-null-pointer-constant")
+            list(APPEND CORRADE_PEDANTIC_COMPILER_OPTIONS "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-Wzero-as-null-pointer-constant>")
         endif()
         if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.6.0")
-            set(CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS} -Wdouble-promotion")
+            list(APPEND CORRADE_PEDANTIC_COMPILER_OPTIONS "-Wdouble-promotion")
         endif()
     endif()
 
@@ -102,51 +100,129 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "(Apple
     # about "comma at the end of enumeration list". My own GCC 4.4.7 doesn't
     # emit these warnings.
     if(CORRADE_GCC44_COMPATIBILITY AND CORRADE_TARGET_NACL)
-        string(REPLACE "-pedantic" "" CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS}")
+        list(REMOVE_ITEM CORRADE_PEDANTIC_COMPILER_OPTIONS "-pedantic")
     endif()
 
 # MSVC-specific compiler flags
 elseif(MSVC)
-    # Optional C++ flags. Disabling these warnings:
-    # - C4127 "conditional expression is constant", fires in `do while(false)`,
-    #   i.e. in all assertions and tests. Does it look like I put that false
-    #   there by mistake?
-    # - C4251 "needs to have dll-interface to be used by clients", as the fix
-    #   for that would effectively prevent using STL completely.
-    # - C4351 "new behavior: elements of array will be default initialized".
-    #   YES. YES I KNOW WHAT I'M DOING.
-    # - C4373 "previous versions of the compiler did not override when
-    #   parameters only differed by const/volatile qualifiers". Okay. So you
-    #   had bugs. And?
-    # - C4510, C4610 "default constructor could not be generated/can never be
-    #   instantiated". Apparently it can.
-    # - C4512 "assignment operator could not be generated". Do I want one? NO I
-    #   DON'T.
-    # - C4661 "no suitable definition for explicit template instantiation". No.
-    #   The problem is apparently that I'm having the definitions in *.cpp file
-    #   and instantiating them explicitly. Common practice here.
-    # - C4702 "unreachable code". *Every* assertion has return after
-    #   std::abort(). So?
-    # - C4706 "assignment within conditional expression". It's not my problem
-    #   that it doesn't get the hint with extra parentheses (`if((a = b))`).
-    # - C4800 "forcing value to bool 'true' or 'false' (performance warning)".
-    #   So what. I won't wrap everything in bool(). This is a _language
-    #	feature_, dammit.
-    # - C4910 "dllexport and extern are incompatible on an explicit
-    #   instantiation". Why the error is emitted only on classes? Functions are
-    #   okay with dllexport extern?!
-    #
-    # Also:
-    # - disabling warning for not using "secure-but-not-standard" STL algos
-    # - disabling all minmax nonsense
-    # - disabling GDI and other mud in windows.h
-    set(CORRADE_CXX_FLAGS "/W4 /wd4127 /wd4251 /wd4351 /wd4373 /wd4510 /wd4512 /wd4610 /wd4661 /wd4702 /wd4706 /wd4800 /wd4910 -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS -DNOMINMAX -DWIN32_LEAN_AND_MEAN")
+    set(CORRADE_PEDANTIC_COMPILER_OPTIONS
+        # Enable extra warnings (similar to -Wall)
+        "/W4"
+
+        # "conditional expression is constant", fires in `do while(false)`,
+        # i.e. in all assertions and tests. Does it look like I put that false
+        # there by mistake?
+        "/wd4127"
+
+        # "needs to have dll-interface to be used by clients", as the fix for
+        # that would effectively prevent using STL completely.
+        "/wd4251"
+
+        # "new behavior: elements of array will be default initialized".
+        # YES. YES I KNOW WHAT I'M DOING.
+        "/wd4351"
+
+        # "previous versions of the compiler did not override when parameters
+        # only differed by const/volatile qualifiers". Okay. So you had bugs.
+        # And?
+        "/wd4373"
+
+        # "default constructor could not be generated/can never be
+        # instantiated". Apparently it can.
+        "/wd4510"
+        "/wd4610"
+
+        # "assignment operator could not be generated". Do I want one? NO I
+        # DON'T.
+        "/wd4512"
+
+        # "no suitable definition for explicit template instantiation". No. The
+        # problem is apparently that I'm having the definitions in *.cpp file
+        # and instantiating them explicitly. Common practice here.
+        "/wd4661"
+
+        # "unreachable code". *Every* assertion has return after std::abort().
+        # So?
+        "/wd4702"
+
+        # "assignment within conditional expression". It's not my problem that
+        # it doesn't get the hint with extra parentheses (`if((a = b))`).
+        "/wd4706"
+
+        # "forcing value to bool 'true' or 'false' (performance warning)". So
+        # what. I won't wrap everything in bool(). This is a _language feature_,
+        # dammit.
+        "/wd4800"
+
+        # "dllexport and extern are incompatible on an explicit instantiation".
+        # Why the error is emitted only on classes? Functions are okay with
+        # dllexport extern?!
+        "/wd4910")
+    set(CORRADE_PEDANTIC_COMPILER_DEFINITIONS
+        # Disabling warning for not using "secure-but-not-standard" STL algos
+        "_CRT_SECURE_NO_WARNINGS" "_SCL_SECURE_NO_WARNINGS"
+
+        # Disabling all minmax nonsense macros
+        "NOMINMAX"
+
+        # Disabling GDI and other mud in windows.h
+        "WIN32_LEAN_AND_MEAN")
 endif()
 
-# Use C++11-enabled libcxx on OSX
-if(CORRADE_TARGET_APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" AND NOT CMAKE_CXX_FLAGS MATCHES "-stdlib=")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lc++")
+define_property(TARGET PROPERTY CORRADE_CXX_STANDARD INHERITED
+    BRIEF_DOCS "C++ standard to require for given target"
+    FULL_DOCS "Sets compiler-specific flags to enable C++11 or later standard
+        when building given target or targets in given directory. Set in
+        combination with INTERFACE_CORRADE_CXX_STANDARD to force the standard
+        also on users of given target.")
+define_property(TARGET PROPERTY INTERFACE_CORRADE_CXX_STANDARD INHERITED
+    BRIEF_DOCS "C++ standard to require for users of given target"
+    FULL_DOCS "Sets compiler-specific flags to enable C++11 or later standard
+        when using given target or targets in given directory.")
+define_property(TARGET PROPERTY CORRADE_USE_PEDANTIC_FLAGS INHERITED
+    BRIEF_DOCS "Use pedantic compiler/linker flags"
+    FULL_DOCS "Enables additional pedantic C, C++ and linker flags on given
+        targets or directories.")
+
+# Enable C++11 on GCC/Clang if CORRADE_CXX_STANDARD is set to 11 on the target.
+# Does nothing in case the user specified CXX_STANDARD property or put "-std="
+# in CMAKE_CXX_FLAGS nothing would be added. It doesn't cover adding flags
+# using target_compile_options(), though.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" OR CORRADE_TARGET_EMSCRIPTEN AND NOT CMAKE_CXX_FLAGS MATCHES "-std=")
+    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9) OR ((CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" OR CORRADE_TARGET_EMSCRIPTEN) AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.5))
+        set(_CORRADE_CXX14_STANDARD_FLAG "-std=c++14")
+    else()
+        set(_CORRADE_CXX14_STANDARD_FLAG "-std=c++1y")
+    endif()
+
+    set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS
+        "$<$<AND:$<NOT:$<BOOL:$<TARGET_PROPERTY:CXX_STANDARD>>>,$<STREQUAL:$<TARGET_PROPERTY:CORRADE_CXX_STANDARD>,11>>:-std=c++11>"
+        "$<$<AND:$<NOT:$<BOOL:$<TARGET_PROPERTY:CXX_STANDARD>>>,$<STREQUAL:$<TARGET_PROPERTY:CORRADE_CXX_STANDARD>,14>>:${_CORRADE_CXX14_STANDARD_FLAG}>"
+        "$<$<AND:$<NOT:$<BOOL:$<TARGET_PROPERTY:CXX_STANDARD>>>,$<STREQUAL:$<TARGET_PROPERTY:CORRADE_CXX_STANDARD>,17>>:-std=c++1z>")
+
+    # See FindCorrade.cmake for a juicy rant about why I have to use *also*
+    # CORRADE_CXX_STANDARD_ on 2.8.12. GODDAMIT.
+    if(CMAKE_VERSION VERSION_LESS 3.0.0)
+        set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS
+            "$<$<AND:$<NOT:$<BOOL:$<TARGET_PROPERTY:CXX_STANDARD>>>,$<STREQUAL:$<TARGET_PROPERTY:CORRADE_CXX_STANDARD_>,11>>:-std=c++11>"
+            "$<$<AND:$<NOT:$<BOOL:$<TARGET_PROPERTY:CXX_STANDARD>>>,$<STREQUAL:$<TARGET_PROPERTY:CORRADE_CXX_STANDARD_>,14>>:${_CORRADE_CXX14_STANDARD_FLAG}>"
+            "$<$<AND:$<NOT:$<BOOL:$<TARGET_PROPERTY:CXX_STANDARD>>>,$<STREQUAL:$<TARGET_PROPERTY:CORRADE_CXX_STANDARD_>,17>>:-std=c++1z>")
+    endif()
+endif()
+
+# On-demand pedantic compiler flags
+set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "$<$<BOOL:$<TARGET_PROPERTY:CORRADE_USE_PEDANTIC_FLAGS>>:${CORRADE_PEDANTIC_COMPILER_OPTIONS}>")
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "$<$<BOOL:$<TARGET_PROPERTY:CORRADE_USE_PEDANTIC_FLAGS>>:${CORRADE_PEDANTIC_COMPILER_DEFINITIONS}>")
+
+# Provide CORRADE_CXX_FLAGS for backwards compatibility
+if(CORRADE_BUILD_DEPRECATED)
+    if(CORRADE_PEDANTIC_COMPILER_DEFINITIONS)
+        string(REPLACE ";" " -D" CORRADE_CXX_FLAGS "-D${CORRADE_PEDANTIC_COMPILER_DEFINITIONS}")
+    endif()
+    string(REPLACE ";" " " CORRADE_CXX_FLAGS "${CORRADE_CXX_FLAGS}${CORRADE_PEDANTIC_COMPILER_OPTIONS}")
+
+    # Remove generator expressions that distinct between C and C++
+    string(REGEX REPLACE "\\$<\\$<STREQUAL:\\$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:([^>]+)>" "\\1" CORRADE_CXX_FLAGS ${CORRADE_CXX_FLAGS})
 endif()
 
 # Provide a way to distinguish between debug and release builds via
@@ -181,16 +257,15 @@ function(corrade_add_test test_name)
                        ${test_runner_file})
         xctest_add_bundle(${test_name}Runner ${test_name} ${test_runner_file})
         xctest_add_test(${test_name} ${test_name}Runner)
-
     else()
         add_executable(${test_name} ${sources})
-        target_link_libraries(${test_name} ${libraries} ${CORRADE_TESTSUITE_LIBRARIES})
+        target_link_libraries(${test_name} ${libraries} Corrade::TestSuite)
         if(CORRADE_TARGET_EMSCRIPTEN)
             # Emscripten needs to have exceptions enabled for TestSuite to work
             # properly
             set_target_properties(${test_name} PROPERTIES LINK_FLAGS "-s DISABLE_EXCEPTION_CATCHING=0")
             find_package(NodeJs REQUIRED)
-            add_test(NAME ${test_name} COMMAND ${NODEJS_EXECUTABLE} --stack-trace-limit=0 $<TARGET_FILE:${test_name}>)
+            add_test(NAME ${test_name} COMMAND NodeJs::NodeJs --stack-trace-limit=0 $<TARGET_FILE:${test_name}>)
         else()
             add_test(${test_name} ${test_name})
         endif()
@@ -227,8 +302,8 @@ function(corrade_add_resource name configurationFile)
     # Run command
     add_custom_command(
         OUTPUT "${out}"
-        COMMAND "${CORRADE_RC_EXECUTABLE}" ${name} "${configurationFile}" "${out}"
-        DEPENDS "${CORRADE_RC_EXECUTABLE}" ${outDepends} ${dependencies} ${name}-dependencies
+        COMMAND Corrade::rc ${name} "${configurationFile}" "${out}"
+        DEPENDS Corrade::rc ${outDepends} ${dependencies} ${name}-dependencies
         COMMENT "Compiling data resource file ${out}"
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -237,17 +312,18 @@ function(corrade_add_resource name configurationFile)
 endfunction()
 
 function(corrade_add_plugin plugin_name debug_install_dir release_install_dir metadata_file)
-    # Create dynamic library
+    # Create dynamic library and bring all needed options along
     if(CORRADE_TARGET_WINDOWS)
         add_library(${plugin_name} SHARED ${ARGN})
     else()
         add_library(${plugin_name} MODULE ${ARGN})
     endif()
+    set_target_properties(${plugin_name} PROPERTIES CORRADE_CXX_STANDARD 11)
+    target_compile_definitions(${plugin_name} PRIVATE "CORRADE_DYNAMIC_PLUGIN")
+    target_include_directories(${plugin_name} PUBLIC $<TARGET_PROPERTY:Corrade::PluginManager,INTERFACE_INCLUDE_DIRECTORIES>)
 
     # Plugins don't have any prefix (e.g. 'lib' on Linux)
-    set_target_properties(${plugin_name} PROPERTIES
-        PREFIX ""
-        COMPILE_FLAGS -DCORRADE_DYNAMIC_PLUGIN)
+    set_target_properties(${plugin_name} PROPERTIES PREFIX "")
 
     # Enable incremental linking on the Mac OS X
     if(CORRADE_TARGET_APPLE)
@@ -289,11 +365,13 @@ function(corrade_add_static_plugin plugin_name install_dir metadata_file)
     file(WRITE "${resource_file}" "group=CorradeStaticPlugin_${plugin_name}\n[file]\nfilename=\"${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file}\"\nalias=${plugin_name}.conf")
     corrade_add_resource(${plugin_name} "${resource_file}")
 
-    # Create static library
+    # Create static library and bring all needed options along
     add_library(${plugin_name} STATIC ${ARGN} ${${plugin_name}})
-    set_target_properties(${plugin_name} PROPERTIES
-        COMPILE_FLAGS "-DCORRADE_STATIC_PLUGIN"
-        DEBUG_POSTFIX "-d")
+    set_target_properties(${plugin_name} PROPERTIES CORRADE_CXX_STANDARD 11)
+    target_compile_definitions(${plugin_name} PRIVATE "CORRADE_STATIC_PLUGIN")
+    target_include_directories(${plugin_name} PUBLIC $<TARGET_PROPERTY:Corrade::PluginManager,INTERFACE_INCLUDE_DIRECTORIES>)
+
+    set_target_properties(${plugin_name} PROPERTIES DEBUG_POSTFIX "-d")
 
     # Install, if not into the same place
     if(NOT ${install_dir} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})

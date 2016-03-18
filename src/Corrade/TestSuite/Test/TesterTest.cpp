@@ -61,7 +61,7 @@ class StringLength {
 namespace Test {
 
 struct Test: Tester {
-    Test();
+    Test(std::ostream* out);
 
     void noChecks();
     void trueExpression();
@@ -79,9 +79,19 @@ struct Test: Tester {
     void compareImplicitConversionFail();
 
     void skip();
+
+    void setupTeardown();
+    void setupTeardownEmpty();
+    void setupTeardownError();
+    void setupTeardownSkip();
+
+    void setup();
+    void teardown();
+
+    std::ostream* _out;
 };
 
-Test::Test() {
+Test::Test(std::ostream* const out): _out{out} {
     addTests({&Test::noChecks,
               &Test::trueExpression,
               &Test::falseExpression,
@@ -98,6 +108,13 @@ Test::Test() {
               &Test::compareImplicitConversionFail,
 
               &Test::skip});
+
+    addTests({&Test::setupTeardown,
+              &Test::setupTeardownEmpty,
+              &Test::setupTeardownError,
+              &Test::setupTeardownSkip},
+              &Test::setup,
+              &Test::teardown);
 }
 
 void Test::noChecks() {
@@ -173,20 +190,41 @@ void Test::skip() {
     CORRADE_VERIFY(false); // (not called)
 }
 
-class TesterTest: public Tester {
-    public:
-        TesterTest();
+void Test::setup() {
+    Debug{_out} << "       [" << Debug::nospace << testCaseId() << Debug::nospace << "] setting up...";
+}
 
-        void test();
-        void emptyTest();
-        void skipOnly();
+void Test::teardown() {
+    Debug{_out} << "       [" << Debug::nospace << testCaseId() << Debug::nospace << "] tearing down...";
+}
 
-        void compareNoCommonType();
-        void compareAsOverload();
-        void compareAsVarargs();
-        void compareNonCopyable();
-        void verifyExplicitBool();
-        void expectFailIfExplicitBool();
+void Test::setupTeardown() {
+    CORRADE_VERIFY(true);
+}
+
+void Test::setupTeardownEmpty() {}
+
+void Test::setupTeardownError() {
+    CORRADE_VERIFY(false);
+}
+
+void Test::setupTeardownSkip() {
+    CORRADE_SKIP("Skipped.");
+}
+
+struct TesterTest: Tester {
+    explicit TesterTest();
+
+    void test();
+    void emptyTest();
+    void skipOnly();
+
+    void compareNoCommonType();
+    void compareAsOverload();
+    void compareAsVarargs();
+    void compareNonCopyable();
+    void verifyExplicitBool();
+    void expectFailIfExplicitBool();
 };
 
 class EmptyTest: public Tester {};
@@ -213,47 +251,60 @@ namespace {
 void TesterTest::test() {
     std::stringstream out;
 
-    Test t;
+    Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
     int result = t.exec(noColorArgc, noColorArgv, &out, &out);
 
     CORRADE_VERIFY(result == 1);
 
     std::string expected =
-        "Starting TesterTest::Test with 14 test cases...\n"
+        "Starting TesterTest::Test with 18 test cases...\n"
         "     ? [01] <unknown>()\n"
         "    OK [02] trueExpression()\n"
-        "  FAIL [03] falseExpression() at here.cpp on line 112 \n"
+        "  FAIL [03] falseExpression() at here.cpp on line 129 \n"
         "        Expression 5 != 5 failed.\n"
         "    OK [04] equal()\n"
-        "  FAIL [05] nonEqual() at here.cpp on line 122 \n"
+        "  FAIL [05] nonEqual() at here.cpp on line 139 \n"
         "        Values a and b are not the same, actual is\n"
         "        5 \n"
         "        but expected\n"
         "        3\n"
-        " XFAIL [06] expectFail() at here.cpp on line 128 \n"
+        " XFAIL [06] expectFail() at here.cpp on line 145 \n"
         "        The world is not mad yet. 2 + 2 and 5 are not equal.\n"
-        " XFAIL [06] expectFail() at here.cpp on line 129 \n"
+        " XFAIL [06] expectFail() at here.cpp on line 146 \n"
         "        The world is not mad yet. Expression false == true failed.\n"
         "    OK [06] expectFail()\n"
-        " XPASS [07] unexpectedPassExpression() at here.cpp on line 142 \n"
+        " XPASS [07] unexpectedPassExpression() at here.cpp on line 159 \n"
         "        Expression true == true was expected to fail.\n"
-        " XPASS [08] unexpectedPassEqual() at here.cpp on line 147 \n"
+        " XPASS [08] unexpectedPassEqual() at here.cpp on line 164 \n"
         "        2 + 2 and 4 are not expected to be equal.\n"
         "    OK [09] compareAs()\n"
-        "  FAIL [10] compareAsFail() at here.cpp on line 155 \n"
+        "  FAIL [10] compareAsFail() at here.cpp on line 172 \n"
         "        Length of actual \"meh\" doesn't match length of expected \"hello\" with epsilon 0\n"
         "    OK [11] compareWith()\n"
-        "  FAIL [12] compareWithFail() at here.cpp on line 163 \n"
+        "  FAIL [12] compareWithFail() at here.cpp on line 180 \n"
         "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
-        "  FAIL [13] compareImplicitConversionFail() at here.cpp on line 168 \n"
+        "  FAIL [13] compareImplicitConversionFail() at here.cpp on line 185 \n"
         "        Values \"holla\" and hello are not the same, actual is\n"
         "        holla \n"
         "        but expected\n"
         "        hello\n"
         "  SKIP [14] skip() \n"
         "        This testcase is skipped.\n"
-        "Finished TesterTest::Test with 7 errors out of 15 checks. 1 test cases didn't contain any checks!\n";
+        "       [15] setting up...\n"
+        "    OK [15] setupTeardown()\n"
+        "       [15] tearing down...\n"
+        "       [16] setting up...\n"
+        "     ? [16] <unknown>()\n"
+        "       [17] setting up...\n"
+        "  FAIL [17] setupTeardownError() at here.cpp on line 208 \n"
+        "        Expression false failed.\n"
+        "       [17] tearing down...\n"
+        "       [18] setting up...\n"
+        "  SKIP [18] setupTeardownSkip() \n"
+        "        Skipped.\n"
+        "       [18] tearing down...\n"
+        "Finished TesterTest::Test with 8 errors out of 17 checks. 2 test cases didn't contain any checks!\n";
 
     //CORRADE_COMPARE(out.str().length(), expected.length());
     CORRADE_COMPARE(out.str(), expected);
@@ -277,7 +328,7 @@ void TesterTest::skipOnly() {
     const char* argv[] = { "", "--color", "off", "--only", "11 14 4 9", "--skip", "14" };
     const int argc = std::extent<decltype(argv)>();
 
-    Test t;
+    Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
     int result = t.exec(argc, argv, &out, &out);
 

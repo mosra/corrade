@@ -28,10 +28,8 @@ project(CorradeInterconnectExample)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../../../modules")
 
-find_package(Corrade REQUIRED)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CORRADE_CXX_FLAGS}")
-include_directories(${CORRADE_INCLUDE_DIR})
+find_package(Corrade REQUIRED Interconnect)
+set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
 add_executable(interconnect main.cpp)
-target_link_libraries(interconnect ${CORRADE_INTERCONNECT_LIBRARIES})
+target_link_libraries(interconnect Corrade::Interconnect)

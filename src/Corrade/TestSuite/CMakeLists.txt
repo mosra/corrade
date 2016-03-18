@@ -50,7 +50,6 @@ if(NOT BUILD_STATIC)
 elseif(BUILD_STATIC_PIC)
     set_target_properties(CorradeTestSuite PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
-
 target_link_libraries(CorradeTestSuite CorradeUtility)
 
 install(TARGETS CorradeTestSuite
@@ -68,5 +67,5 @@ if(BUILD_TESTS)
     add_subdirectory(Test)
 endif()
 
-# Corrade TestSuite library for superprojects
-set(CORRADE_TESTSUITE_LIBRARY CorradeTestSuite CACHE INTERNAL "")
+# Corrade::TestSuite target alias for superprojects
+add_library(Corrade::TestSuite ALIAS CorradeTestSuite)

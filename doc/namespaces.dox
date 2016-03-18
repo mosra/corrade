@@ -30,11 +30,8 @@
 @brief Root namespace
 
 Root namespace alone doesn't contain any functionality, see subnamespaces for
+more information. See also @ref building-corrade and @ref corrade-cmake for
 more information.
-
-To use any of the libraries, you need to add `${CORRADE_INCLUDE_DIRS}` to
-include path. See also @ref building-corrade and @ref corrade-cmake for more
-information.
 */
 
 /** @dir Corrade/Containers
@@ -45,8 +42,9 @@ information.
 
 Implementations for various containers which don't have equivalents in STL.
 
-To use this library, you need to link to `${CORRADE_CONTAINERS_LIBRARIES}`. See
-also @ref building-corrade and @ref corrade-cmake for more information.
+To use this library, you need to request `Containers` component of `Corrade`
+package in CMake and link to `Corrade::Containers` target. See also
+@ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir Corrade/Utility
@@ -61,8 +59,9 @@ access to configuration files (class Configuration), on which is based
 translation support (class Translator) or compiling data files into the
 executable (class Resource, see also @ref resource-management "tutorial").
 
-To use this library, you need to link to `${CORRADE_UTILITY_LIBRARIES}`. See
-also @ref building-corrade and @ref corrade-cmake for more information.
+To use this library, you need to request `Utility` component of `Corrade`
+package in CMake and link to `Corrade::Utility` target. See also
+@ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir Corrade/PluginManager
@@ -76,8 +75,9 @@ and instancing plugins. There is also an AbstractPlugin class, which is the base
 of all plugins. See @ref plugin-management for a brief introduction to how
 plugins work.
 
-To use this library, you need to link to `${CORRADE_PLUGINMANAGER_LIBRARIES}`.
-See also @ref building-corrade and @ref corrade-cmake for more information.
+To use this library, you need to request `PluginManager` component of `Corrade`
+package in CMake and link to `Corrade::PluginManager` target. See also
+@ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir Corrade/Interconnect
@@ -89,8 +89,9 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 This library allows you to interconnect objects. See @ref interconnect for more
 information.
 
-To use this library, you need to link to `${CORRADE_INTERCONNECT_LIBRARIES}`.
-See also @ref building-corrade and @ref corrade-cmake for more information.
+To use this library, you need to request `Interconnect` component of `Corrade`
+package in CMake and link to `Corrade::Interconnect` target. See also
+@ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir Corrade/TestSuite
@@ -101,8 +102,9 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 
 Unit testing framework. See @ref unit-testing for more information.
 
-To use this library, you need to link to `${CORRADE_TESTSUITE_LIBRARIES}`.
-See also @ref building-corrade and @ref corrade-cmake for more information.
+To use this library, you need to request `TestSuite` component of `Corrade`
+package in CMake and link to `Corrade::TestSuite` target. See also
+@ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir Corrade/TestSuite/Compare
@@ -114,6 +116,7 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 See @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH() and @ref Comparator
 for more information.
 
-To use this library, you need to link to `${CORRADE_TESTSUITE_LIBRARIES}`.
-See also @ref building-corrade and @ref corrade-cmake for more information.
+To use this library, you need to request `TestSuite` component of `Corrade`
+package in CMake and link to `Corrade::TestSuite` target. See also
+@ref building-corrade and @ref corrade-cmake for more information.
 */
