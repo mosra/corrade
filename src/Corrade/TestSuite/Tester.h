@@ -414,6 +414,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
             _testCaseDescription, _expectFailMessage;
         std::size_t _testCaseId, _testCaseInstanceId, _testCaseRepeatId,
             _testCaseLine, _checkCount;
+        bool _testCaseRunning = false;
         ExpectedFailure* _expectedFailure;
         TesterConfiguration _configuration;
 };

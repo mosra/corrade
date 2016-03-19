@@ -139,20 +139,19 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
         _testCaseId = testCase.first;
         _testCaseInstanceId = testCase.second.instanceId;
         _testCaseDescription = testCase.second.instanceId == ~std::size_t{} ? std::string{} : std::to_string(testCase.second.instanceId);
-        _testCaseLine = 0;
 
         bool aborted = false;
         for(std::size_t i = 0; i != testCase.second.repeatCount && !aborted; ++i) {
+            if(testCase.second.setup)
+                (this->*testCase.second.setup)();
+
             /* Print the repeat ID only if we are repeating */
             _testCaseRepeatId = testCase.second.repeatCount == 1 ? 0 : i + 1;
-
-            if(testCase.second.setup) {
-                _testCaseName = "<setup>";
-                (this->*testCase.second.setup)();
-            }
+            _testCaseLine = 0;
+            _testCaseName.clear();
+            _testCaseRunning = true;
 
             try {
-                _testCaseName.clear();
                 (this->*testCase.second.test)();
 
                 /* Print the output only once */
@@ -181,10 +180,10 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
                 aborted = true;
             }
 
-            if(testCase.second.teardown) {
-                _testCaseName = "<teardown>";
+            _testCaseRunning = false;
+
+            if(testCase.second.teardown)
                 (this->*testCase.second.teardown)();
-            }
         }
     }
 
@@ -281,8 +280,8 @@ void Tester::setTestCaseDescription(std::string&& description) {
 }
 
 void Tester::registerTestCase(std::string&& name, int line) {
-    CORRADE_ASSERT(_testCaseName != "<setup>" && _testCaseName != "<teardown>",
-        "TestSuite::Tester: using verification macros inside setup or teardown functions is not allowed", );
+    CORRADE_ASSERT(_testCaseRunning,
+        "TestSuite::Tester: using verification macros outside of test cases is not allowed", );
 
     if(_testCaseName.empty()) _testCaseName = std::move(name);
     _testCaseLine = line;
