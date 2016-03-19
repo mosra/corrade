@@ -151,36 +151,18 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
 
             /* No testing macros called, don't print function name to output */
             if(!_testCaseLine) {
-                Debug(logOutput, _useColor)
-                    << Debug::boldColor(Debug::Color::Yellow) << "     ?"
-                    << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
-                    << Debug::boldColor(Debug::Color::Cyan) << padding(_testCaseId, _testCases.size())
-                    << Debug::nospace << _testCaseId << Debug::nospace
-                    << Debug::color(Debug::Color::Blue) << "]"
-                    << Debug::boldColor(Debug::Color::Yellow)
-                    << (_testCaseName.empty() ? "<unknown>" : _testCaseName)
-                    << Debug::nospace << "(" << Debug::nospace
-                    << Debug::resetColor << _testCaseDescription
-                    << Debug::nospace << Debug::boldColor(Debug::Color::Yellow)
-                    << ")" << Debug::resetColor;
-
+                Debug out{logOutput, _useColor};
+                printTestCaseLabel(out, "     ?", Debug::Color::Yellow, Debug::Color::Yellow);
                 ++noCheckCount;
 
             /* Common path */
             } else {
-                Debug d(logOutput, _useColor);
-                if(_expectedFailure) d << Debug::boldColor(Debug::Color::Yellow) << " XFAIL";
-                else d << Debug::boldColor(Debug::Color::Default) << "    OK";
-                d << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
-                    << Debug::boldColor(Debug::Color::Cyan) << padding(_testCaseId, _testCases.size())
-                    << Debug::nospace << _testCaseId << Debug::nospace
-                    << Debug::color(Debug::Color::Blue) << "]"
-                    << Debug::boldColor(Debug::Color::Default) << _testCaseName
-                    << Debug::nospace << "(" << Debug::nospace
-                    << Debug::resetColor << _testCaseDescription
-                    << Debug::nospace << Debug::boldColor(Debug::Color::Default)
-                    << ")" << Debug::resetColor;
-                if(_expectedFailure) d << Debug::newline << "       " << _expectedFailure->message();
+                Debug out{logOutput, _useColor};
+                printTestCaseLabel(out,
+                    _expectedFailure ? " XFAIL" : "    OK",
+                    _expectedFailure ? Debug::Color::Yellow : Debug::Color::Default,
+                    Debug::Color::Default);
+                if(_expectedFailure) out << Debug::newline << "       " << _expectedFailure->message();
             }
 
         } catch(Exception) {
@@ -205,6 +187,30 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
     return errorCount != 0 || noCheckCount != 0;
 }
 
+void Tester::printTestCaseLabel(Debug& out, const char* const status, const Debug::Color statusColor, const Debug::Color labelColor) {
+    const char* padding = PaddingString + sizeof(PaddingString) - digitCount(_testCases.size()) + digitCount(_testCaseId) - 1;
+
+    out << Debug::boldColor(statusColor) << status
+        << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
+        << Debug::boldColor(Debug::Color::Cyan) << padding
+        << Debug::nospace << _testCaseId << Debug::nospace
+        << Debug::color(Debug::Color::Blue) << "]"
+        << Debug::boldColor(labelColor)
+        << (_testCaseName.empty() ? "<unknown>" : _testCaseName)
+        << Debug::nospace;
+
+    /* Optional test case description */
+    if(!_testCaseDescription.empty()) {
+        out << "("
+            << Debug::nospace
+            << Debug::resetColor << _testCaseDescription
+            << Debug::nospace << Debug::boldColor(labelColor)
+            << ")";
+    } else out << "()";
+
+    out << Debug::resetColor;
+}
+
 void Tester::verifyInternal(const std::string& expression, bool expressionValue) {
     ++_checkCount;
 
@@ -212,36 +218,21 @@ void Tester::verifyInternal(const std::string& expression, bool expressionValue)
     if(!_expectedFailure) {
         if(expressionValue) return;
     } else if(!expressionValue) {
-        Debug{_logOutput, _useColor} << Debug::boldColor(Debug::Color::Yellow)
-            << " XFAIL" << Debug::color(Debug::Color::Blue) << "["
-            << Debug::nospace << Debug::boldColor(Debug::Color::Cyan)
-            << padding(_testCaseId, _testCases.size()) << Debug::nospace
-            << _testCaseId << Debug::nospace << Debug::color(Debug::Color::Blue)
-            << "]" << Debug::boldColor(Debug::Color::Default) << _testCaseName
-            << Debug::nospace << "(" << Debug::nospace << Debug::resetColor
-            << _testCaseDescription << Debug::nospace
-            << Debug::boldColor(Debug::Color::Default) << ")"
-            << Debug::resetColor << "at" << _testFilename << "on line"
-            << _testCaseLine << Debug::newline << "       " << _expectedFailure->message()
+        Debug out{_logOutput, _useColor};
+        printTestCaseLabel(out, " XFAIL", Debug::Color::Yellow, Debug::Color::Default);
+        out << "at" << _testFilename << "on line" << _testCaseLine
+            << Debug::newline << "       " << _expectedFailure->message()
             << "Expression" << expression << "failed.";
         return;
     }
 
     /* Otherwise print message to error output and throw exception */
-    Error e{_errorOutput, _useColor};
-    e << Debug::boldColor(Debug::Color::Red) << (_expectedFailure ? " XPASS" : "  FAIL")
-        << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
-        << Debug::boldColor(Debug::Color::Cyan) << padding(_testCaseId, _testCases.size())
-        << Debug::nospace << _testCaseId << Debug::nospace
-        << Debug::color(Debug::Color::Blue) << "]"
-        << Debug::boldColor(Debug::Color::Default) << _testCaseName
-        << Debug::nospace << "(" << Debug::nospace << Debug::resetColor
-        << _testCaseDescription << Debug::nospace
-        << Debug::boldColor(Debug::Color::Default) << ")"
-        << Debug::resetColor << "at" << _testFilename << "on line"
-        << _testCaseLine << Debug::newline << "        Expression" << expression;
-    if(!_expectedFailure) e << "failed.";
-    else e << "was expected to fail.";
+    Error out{_errorOutput, _useColor};
+    printTestCaseLabel(out, _expectedFailure ? " XPASS" : "  FAIL", Debug::Color::Red, Debug::Color::Default);
+    out << "at" << _testFilename << "on line" << _testCaseLine
+        << Debug::newline << "        Expression" << expression;
+    if(!_expectedFailure) out << "failed.";
+    else out << "was expected to fail.";
     throw Exception();
 }
 
@@ -251,17 +242,9 @@ void Tester::registerTest(std::string filename, std::string name) {
 }
 
 void Tester::skip(const std::string& message) {
-    Debug e(_logOutput, _useColor);
-    e << Debug::boldColor(Debug::Color::Default) << "  SKIP"
-        << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
-        << Debug::boldColor(Debug::Color::Cyan) << padding(_testCaseId, _testCases.size())
-        << Debug::nospace << _testCaseId << Debug::nospace
-        << Debug::color(Debug::Color::Blue) << "]"
-        << Debug::boldColor(Debug::Color::Default) << _testCaseName
-        << Debug::nospace << "(" << Debug::nospace << Debug::resetColor
-        << _testCaseDescription << Debug::nospace
-        << Debug::boldColor(Debug::Color::Default) << ")"
-        << Debug::resetColor << Debug::newline << "       " << message;
+    Debug out{_logOutput, _useColor};
+    printTestCaseLabel(out, "  SKIP", Debug::Color::Default, Debug::Color::Default);
+    out << Debug::newline << "       " << message;
     throw SkipException();
 }
 
@@ -287,10 +270,6 @@ void Tester::registerTestCase(std::string&& name, int line) {
 
     if(_testCaseName.empty()) _testCaseName = std::move(name);
     _testCaseLine = line;
-}
-
-const char* Tester::padding(const int number, const int max) {
-    return PaddingString + sizeof(PaddingString) - digitCount(max) + digitCount(number) - 1;
 }
 
 Tester::TesterConfiguration::TesterConfiguration() = default;

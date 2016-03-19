@@ -351,7 +351,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         };
 
         void verifyInternal(const std::string& expression, bool value);
-        const char* padding(int number, int max);
+        void printTestCaseLabel(Debug& out, const char* status, Debug::Color statusColor, Debug::Color labelColor);
 
         Debug::Flags _useColor;
         std::ostream *_logOutput, *_errorOutput;
@@ -579,36 +579,21 @@ template<class T, class U, class V> void Tester::compareWith(Comparator<T> compa
     if(!_expectedFailure) {
         if(equal) return;
     } else if(!equal) {
-        Debug{_logOutput, _useColor} << Debug::boldColor(Debug::Color::Yellow)
-            << " XFAIL" << Debug::color(Debug::Color::Blue) << "["
-            << Debug::nospace << Debug::boldColor(Debug::Color::Cyan)
-            << padding(_testCaseId, _testCases.size()) << Debug::nospace
-            << _testCaseId << Debug::nospace << Debug::color(Debug::Color::Blue)
-            << "]" << Debug::boldColor(Debug::Color::Default) << _testCaseName
-            << Debug::nospace << "(" << Debug::nospace << Debug::resetColor
-            << _testCaseDescription << Debug::nospace
-            << Debug::boldColor(Debug::Color::Default) << ")"
-            << Debug::resetColor << "at" << _testFilename << "on line"
+        Debug out{_logOutput, _useColor};
+        printTestCaseLabel(out, " XFAIL", Debug::Color::Yellow, Debug::Color::Default);
+        out << "at" << _testFilename << "on line"
             << _testCaseLine << Debug::newline << "       " << _expectedFailure->message()
             << actual << "and" << expected << "are not equal.";
         return;
     }
 
     /* Otherwise print message to error output and throw exception */
-    Error e{_errorOutput, _useColor};
-    e << Debug::boldColor(Debug::Color::Red) << (_expectedFailure ? " XPASS" : "  FAIL")
-        << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
-        << Debug::boldColor(Debug::Color::Cyan) << padding(_testCaseId, _testCases.size())
-        << Debug::nospace << _testCaseId << Debug::nospace
-        << Debug::color(Debug::Color::Blue) << "]"
-        << Debug::boldColor(Debug::Color::Default) << _testCaseName
-        << Debug::nospace << "(" << Debug::nospace << Debug::resetColor
-        << _testCaseDescription << Debug::nospace
-        << Debug::boldColor(Debug::Color::Default) << ")"
-        << Debug::resetColor << "at" << _testFilename << "on line"
+    Error out{_errorOutput, _useColor};
+    printTestCaseLabel(out, _expectedFailure ? " XPASS" : "  FAIL", Debug::Color::Red, Debug::Color::Default);
+    out << "at" << _testFilename << "on line"
         << _testCaseLine << Debug::newline << "       ";
-    if(!_expectedFailure) comparator.printErrorMessage(e, actual, expected);
-    else e << actual << "and" << expected << "are not expected to be equal.";
+    if(!_expectedFailure) comparator.printErrorMessage(out, actual, expected);
+    else out << actual << "and" << expected << "are not expected to be equal.";
     throw Exception();
 }
 

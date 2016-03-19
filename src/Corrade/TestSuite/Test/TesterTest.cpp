@@ -23,6 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <iostream>
 #include <cstdlib>
 #include <sstream>
 
@@ -83,10 +84,6 @@ struct Test: Tester {
     void testCaseName();
     void testCaseNameNoChecks();
     void testCaseDescription();
-    void testCaseDescriptionNoChecks();
-    void testCaseDescriptionFailVerify();
-    void testCaseDescriptionFailCompare();
-    void testCaseDescriptionSkip();
 
     void setupTeardown();
     void setupTeardownEmpty();
@@ -121,11 +118,7 @@ Test::Test(std::ostream* const out): _out{out} {
 
               &Test::testCaseName,
               &Test::testCaseNameNoChecks,
-              &Test::testCaseDescription,
-              &Test::testCaseDescriptionNoChecks,
-              &Test::testCaseDescriptionFailVerify,
-              &Test::testCaseDescriptionFailCompare,
-              &Test::testCaseDescriptionSkip});
+              &Test::testCaseDescription});
 
     addTests({&Test::setupTeardown,
               &Test::setupTeardownEmpty,
@@ -224,25 +217,6 @@ void Test::testCaseDescription() {
     CORRADE_VERIFY(true);
 }
 
-void Test::testCaseDescriptionNoChecks() {
-    setTestCaseDescription("hello");
-}
-
-void Test::testCaseDescriptionFailVerify() {
-    setTestCaseDescription("hello");
-    CORRADE_VERIFY(false);
-}
-
-void Test::testCaseDescriptionFailCompare() {
-    setTestCaseDescription("hello");
-    CORRADE_COMPARE(4, 5);
-}
-
-void Test::testCaseDescriptionSkip() {
-    setTestCaseDescription("hello");
-    CORRADE_SKIP("No!");
-}
-
 void Test::setup() {
     Debug{_out} << "       [" << Debug::nospace << testCaseId() << Debug::nospace << "] setting up...";
 }
@@ -323,8 +297,16 @@ namespace {
 }
 
 void TesterTest::test() {
-    std::stringstream out;
+    /* Print to visually verify coloring */
+    {
+        Debug{} << "======================== visual color verification start =======================";
+        Test t{&std::cout};
+        t.registerTest("here.cpp", "TesterTest::Test");
+        t.exec(0, nullptr);
+        Debug{} << "======================== visual color verification end =========================";
+    }
 
+    std::stringstream out;
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
     int result = t.exec(noColorArgc, noColorArgv, &out, &out);
@@ -332,33 +314,33 @@ void TesterTest::test() {
     CORRADE_VERIFY(result == 1);
 
     std::string expected =
-        "Starting TesterTest::Test with 30 test cases...\n"
+        "Starting TesterTest::Test with 26 test cases...\n"
         "     ? [01] <unknown>()\n"
         "    OK [02] trueExpression()\n"
-        "  FAIL [03] falseExpression() at here.cpp on line 149\n"
+        "  FAIL [03] falseExpression() at here.cpp on line 142\n"
         "        Expression 5 != 5 failed.\n"
         "    OK [04] equal()\n"
-        "  FAIL [05] nonEqual() at here.cpp on line 159\n"
+        "  FAIL [05] nonEqual() at here.cpp on line 152\n"
         "        Values a and b are not the same, actual is\n"
         "        5\n"
         "        but expected\n"
         "        3\n"
-        " XFAIL [06] expectFail() at here.cpp on line 165\n"
+        " XFAIL [06] expectFail() at here.cpp on line 158\n"
         "        The world is not mad yet. 2 + 2 and 5 are not equal.\n"
-        " XFAIL [06] expectFail() at here.cpp on line 166\n"
+        " XFAIL [06] expectFail() at here.cpp on line 159\n"
         "        The world is not mad yet. Expression false == true failed.\n"
         "    OK [06] expectFail()\n"
-        " XPASS [07] unexpectedPassExpression() at here.cpp on line 179\n"
+        " XPASS [07] unexpectedPassExpression() at here.cpp on line 172\n"
         "        Expression true == true was expected to fail.\n"
-        " XPASS [08] unexpectedPassEqual() at here.cpp on line 184\n"
+        " XPASS [08] unexpectedPassEqual() at here.cpp on line 177\n"
         "        2 + 2 and 4 are not expected to be equal.\n"
         "    OK [09] compareAs()\n"
-        "  FAIL [10] compareAsFail() at here.cpp on line 192\n"
+        "  FAIL [10] compareAsFail() at here.cpp on line 185\n"
         "        Length of actual \"meh\" doesn't match length of expected \"hello\" with epsilon 0\n"
         "    OK [11] compareWith()\n"
-        "  FAIL [12] compareWithFail() at here.cpp on line 200\n"
+        "  FAIL [12] compareWithFail() at here.cpp on line 193\n"
         "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
-        "  FAIL [13] compareImplicitConversionFail() at here.cpp on line 205\n"
+        "  FAIL [13] compareImplicitConversionFail() at here.cpp on line 198\n"
         "        Values \"holla\" and hello are not the same, actual is\n"
         "        holla\n"
         "        but expected\n"
@@ -368,40 +350,30 @@ void TesterTest::test() {
         "    OK [15] testCaseName<15>()\n"
         "     ? [16] testCaseName<27>()\n"
         "    OK [17] testCaseDescription(hello)\n"
-        "     ? [18] <unknown>(hello)\n"
-        "  FAIL [19] testCaseDescriptionFailVerify(hello) at here.cpp on line 233\n"
+        "       [18] setting up...\n"
+        "    OK [18] setupTeardown()\n"
+        "       [18] tearing down...\n"
+        "       [19] setting up...\n"
+        "     ? [19] <unknown>()\n"
+        "       [19] tearing down...\n"
+        "       [20] setting up...\n"
+        "  FAIL [20] setupTeardownError() at here.cpp on line 235\n"
         "        Expression false failed.\n"
-        "  FAIL [20] testCaseDescriptionFailCompare(hello) at here.cpp on line 238\n"
-        "        Values 4 and 5 are not the same, actual is\n"
-        "        4\n"
-        "        but expected\n"
-        "        5\n"
-        "  SKIP [21] testCaseDescriptionSkip(hello)\n"
-        "        No!\n"
-        "       [22] setting up...\n"
-        "    OK [22] setupTeardown()\n"
-        "       [22] tearing down...\n"
-        "       [23] setting up...\n"
-        "     ? [23] <unknown>()\n"
-        "       [23] tearing down...\n"
-        "       [24] setting up...\n"
-        "  FAIL [24] setupTeardownError() at here.cpp on line 261\n"
-        "        Expression false failed.\n"
-        "       [24] tearing down...\n"
-        "       [25] setting up...\n"
-        "  SKIP [25] setupTeardownSkip()\n"
+        "       [20] tearing down...\n"
+        "       [21] setting up...\n"
+        "  SKIP [21] setupTeardownSkip()\n"
         "        Skipped.\n"
-        "       [25] tearing down...\n"
-        "    OK [26] instancedTest(zero)\n"
-        "    OK [27] instancedTest(1)\n"
-        "  FAIL [28] instancedTest(two) at here.cpp on line 286\n"
+        "       [21] tearing down...\n"
+        "    OK [22] instancedTest(zero)\n"
+        "    OK [23] instancedTest(1)\n"
+        "  FAIL [24] instancedTest(two) at here.cpp on line 260\n"
         "        Values data.value*data.value*data.value and data.result are not the same, actual is\n"
         "        125\n"
         "        but expected\n"
         "        122\n"
-        "    OK [29] instancedTest(3)\n"
-        "    OK [30] instancedTest(last)\n"
-        "Finished TesterTest::Test with 11 errors out of 26 checks. 4 test cases didn't contain any checks!\n";
+        "    OK [25] instancedTest(3)\n"
+        "    OK [26] instancedTest(last)\n"
+        "Finished TesterTest::Test with 9 errors out of 24 checks. 3 test cases didn't contain any checks!\n";
 
     //CORRADE_COMPARE(out.str().length(), expected.length());
     CORRADE_COMPARE(out.str(), expected);
