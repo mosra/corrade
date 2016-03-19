@@ -36,7 +36,7 @@
 #include <unistd.h>
 #endif
 
-#ifdef CORRADE_TARGET_WINDOWS
+#if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
 #define WIN32_LEAN_AND_MEAN 1
 #define VC_EXTRALEAN
 #include <io.h>
@@ -80,8 +80,10 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
         _useColor = Debug::Flags{};
     else if(args.value("color") == "off" || args.value("color") == "OFF")
         _useColor = Debug::Flag::DisableColors;
+    #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
     else _useColor = logOutput == &std::cout && errorOutput == &std::cerr && isatty(1) && isatty(2) ?
         Debug::Flags{} : Debug::Flag::DisableColors;
+    #endif
 
     std::vector<std::pair<int, TestCase>> usedTestCases;
 
