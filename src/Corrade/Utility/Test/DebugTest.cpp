@@ -53,6 +53,7 @@ struct DebugTest: TestSuite::Tester {
     void colorsDisabled();
     void colorsNospace();
     void colorsNoOutput();
+    void colorsScoped();
 
     void iterable();
     void tuple();
@@ -82,6 +83,7 @@ DebugTest::DebugTest() {
         &DebugTest::colorsDisabled,
         &DebugTest::colorsNospace,
         &DebugTest::colorsNoOutput,
+        &DebugTest::colorsScoped,
 
         &DebugTest::iterable,
         &DebugTest::tuple,
@@ -334,6 +336,43 @@ void DebugTest::colorsNospace() {
     fn(out1, out2);
     CORRADE_COMPARE(out1.str(), "H\033[1;34me\033[0;33mll\033[0mo\n");
     CORRADE_COMPARE(out2.str(), "H\033[1;34me\033[0;33mll\033[0mo\n");
+    #endif
+}
+
+void DebugTest::colorsScoped() {
+    auto fn = [](std::ostream& out) {
+        Debug{&out} << "This should have default color.";
+
+        {
+            Debug d{&out, Debug::Flag::NoNewlineAtTheEnd};
+            d << Debug::color(Debug::Color::Cyan) << "This should be cyan." << Debug::newline;
+
+            Debug{&out} << "This also" << Debug::boldColor(Debug::Color::Blue) << "and this blue.";
+
+            Debug{&out} << "This should be cyan again.";
+
+            Debug{&out, Debug::Flag::DisableColors} << "Disabling colors shouldn't affect outer scope, so also cyan.";
+        }
+
+        Debug{&out} << "And this resets back to default color.";
+    };
+
+    /* Print it for visual verification */
+    fn(std::cout);
+
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_SKIP("Only possible to test visually on Windows.");
+    #else
+    std::ostringstream out;
+    fn(out);
+    CORRADE_COMPARE(out.str(),
+        "This should have default color.\n"
+        "\033[0;36mThis should be cyan.\n"
+        "This also\033[1;34m and this blue.\033[0;36m\n"
+        "This should be cyan again.\n"
+        "Disabling colors shouldn't affect outer scope, so also cyan.\n"
+        "\033[0m"
+        "And this resets back to default color.\n");
     #endif
 }
 

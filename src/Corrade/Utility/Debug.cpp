@@ -64,6 +64,11 @@ std::ostream* Debug::_globalOutput = &std::cout;
 std::ostream* Warning::_globalWarningOutput = &std::cerr;
 std::ostream* Error::_globalErrorOutput = &std::cerr;
 
+#ifndef CORRADE_TARGET_WINDOWS
+Debug::Color Debug::_globalColor = Debug::Color::Default;
+bool Debug::_globalColorBold = false;
+#endif
+
 template<Debug::Color c, bool bold> Debug::Modifier Debug::colorInternal() {
     return [](Debug& debug) {
         if(!debug._output || (debug._flags & InternalFlag::DisableColors)) return;
@@ -76,6 +81,8 @@ template<Debug::Color c, bool bold> Debug::Modifier Debug::colorInternal() {
             char(c) |
             (bold ? FOREGROUND_INTENSITY : 0));
         #else
+        _globalColor = c;
+        _globalColorBold = bold;
         constexpr const char code[] = { '\033', '[', bold ? '1' : '0', ';', '3', '0' + char(c), 'm', '\0' };
         *debug._output << code;
         #endif
@@ -92,7 +99,13 @@ inline void Debug::resetColorInternal() {
     if(h != INVALID_HANDLE_VALUE)
         SetConsoleTextAttribute(h, _previousColorAttributes);
     #else
-    *_output << "\033[0m";
+    if(_previousColor != Color::Default || _previousColorBold) {
+        const char code[] = { '\033', '[', _previousColorBold ? '1' : '0', ';', '3', char('0' + char(_previousColor)), 'm', '\0' };
+        *_output << code;
+    } else *_output << "\033[0m";
+
+    _globalColor = _previousColor;
+    _globalColorBold = _previousColorBold;
     #endif
 }
 
@@ -171,6 +184,9 @@ Debug::Debug(std::ostream* const output, const Flags flags): _flags{InternalFlag
         GetConsoleScreenBufferInfo(h, &csbi);
         _previousColorAttributes = csbi.wAttributes;
     }
+    #else
+    _previousColor = _globalColor;
+    _previousColorBold = _globalColorBold;
     #endif
 }
 

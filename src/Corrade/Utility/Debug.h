@@ -438,6 +438,10 @@ class CORRADE_UTILITY_EXPORT Debug {
         template<Color c, bool bold> CORRADE_UTILITY_LOCAL static Modifier colorInternal();
 
         static std::ostream* _globalOutput;
+        #ifndef CORRADE_TARGET_WINDOWS
+        static Color _globalColor;
+        static bool _globalColorBold;
+        #endif
 
         template<class T> CORRADE_UTILITY_LOCAL Debug& print(const T& value);
         CORRADE_UTILITY_LOCAL void resetColorInternal();
@@ -445,6 +449,9 @@ class CORRADE_UTILITY_EXPORT Debug {
         std::ostream* _previousGlobalOutput;
         #ifdef CORRADE_TARGET_WINDOWS
         unsigned short _previousColorAttributes = 0xffff;
+        #else
+        Color _previousColor;
+        bool _previousColorBold;
         #endif
 };
 
