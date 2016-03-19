@@ -229,6 +229,15 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         void setTestCaseName(const std::string& name);
         void setTestCaseName(std::string&& name); /**< @overload */
 
+        /**
+         * @brief Set test case description
+         *
+         * Additional text displayed after the test case name. By default
+         * the description is empty.
+         */
+        void setTestCaseDescription(const std::string& description);
+        void setTestCaseDescription(std::string&& description); /**< @overload */
+
     #ifdef DOXYGEN_GENERATING_OUTPUT
     private:
     #endif
@@ -304,7 +313,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         Debug::Flags _useColor;
         std::ostream *_logOutput, *_errorOutput;
         std::vector<TestCase> _testCases;
-        std::string _testFilename, _testName, _testCaseName, _expectFailMessage;
+        std::string _testFilename, _testName, _testCaseName,
+            _testCaseDescription, _expectFailMessage;
         std::size_t _testCaseId, _testCaseLine, _checkCount;
         ExpectedFailure* _expectedFailure;
         TesterConfiguration _configuration;
@@ -532,6 +542,9 @@ template<class T, class U, class V> void Tester::compareWith(Comparator<T> compa
             << padding(_testCaseId, _testCases.size()) << Debug::nospace
             << _testCaseId << Debug::nospace << Debug::color(Debug::Color::Blue)
             << "]" << Debug::boldColor(Debug::Color::Default) << _testCaseName
+            << Debug::nospace << "(" << Debug::nospace << Debug::resetColor
+            << _testCaseDescription << Debug::nospace
+            << Debug::boldColor(Debug::Color::Default) << ")"
             << Debug::resetColor << "at" << _testFilename << "on line"
             << _testCaseLine << Debug::newline << "       " << _expectedFailure->message()
             << actual << "and" << expected << "are not equal.";
@@ -546,6 +559,9 @@ template<class T, class U, class V> void Tester::compareWith(Comparator<T> compa
         << Debug::nospace << _testCaseId << Debug::nospace
         << Debug::color(Debug::Color::Blue) << "]"
         << Debug::boldColor(Debug::Color::Default) << _testCaseName
+        << Debug::nospace << "(" << Debug::nospace << Debug::resetColor
+        << _testCaseDescription << Debug::nospace
+        << Debug::boldColor(Debug::Color::Default) << ")"
         << Debug::resetColor << "at" << _testFilename << "on line"
         << _testCaseLine << Debug::newline << "       ";
     if(!_expectedFailure) comparator.printErrorMessage(e, actual, expected);

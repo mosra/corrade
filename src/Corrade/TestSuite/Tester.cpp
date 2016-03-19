@@ -134,10 +134,11 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
         Utility::Warning resetWarningRedirect{&std::cerr};
 
         _testCaseId = i.first;
+        _testCaseDescription = {};
         _testCaseLine = 0;
 
         if(i.second.setup) {
-            _testCaseName = "<setup>()";
+            _testCaseName = "<setup>";
             (this->*i.second.setup)();
         }
 
@@ -154,8 +155,11 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
                     << Debug::nospace << _testCaseId << Debug::nospace
                     << Debug::color(Debug::Color::Blue) << "]"
                     << Debug::boldColor(Debug::Color::Yellow)
-                    << (_testCaseName.empty() ? "<unknown>()" : _testCaseName)
-                    << Debug::resetColor;
+                    << (_testCaseName.empty() ? "<unknown>" : _testCaseName)
+                    << Debug::nospace << "(" << Debug::nospace
+                    << Debug::resetColor << _testCaseDescription
+                    << Debug::nospace << Debug::boldColor(Debug::Color::Yellow)
+                    << ")" << Debug::resetColor;
 
                 ++noCheckCount;
 
@@ -169,7 +173,10 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
                     << Debug::nospace << _testCaseId << Debug::nospace
                     << Debug::color(Debug::Color::Blue) << "]"
                     << Debug::boldColor(Debug::Color::Default) << _testCaseName
-                    << Debug::resetColor;
+                    << Debug::nospace << "(" << Debug::nospace
+                    << Debug::resetColor << _testCaseDescription
+                    << Debug::nospace << Debug::boldColor(Debug::Color::Default)
+                    << ")" << Debug::resetColor;
                 if(_expectedFailure) d << Debug::newline << "       " << _expectedFailure->message();
             }
 
@@ -178,7 +185,7 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
         } catch(SkipException) {}
 
         if(i.second.teardown) {
-            _testCaseName = "<teardown>()";
+            _testCaseName = "<teardown>";
             (this->*i.second.teardown)();
         }
     }
@@ -208,6 +215,9 @@ void Tester::verifyInternal(const std::string& expression, bool expressionValue)
             << padding(_testCaseId, _testCases.size()) << Debug::nospace
             << _testCaseId << Debug::nospace << Debug::color(Debug::Color::Blue)
             << "]" << Debug::boldColor(Debug::Color::Default) << _testCaseName
+            << Debug::nospace << "(" << Debug::nospace << Debug::resetColor
+            << _testCaseDescription << Debug::nospace
+            << Debug::boldColor(Debug::Color::Default) << ")"
             << Debug::resetColor << "at" << _testFilename << "on line"
             << _testCaseLine << Debug::newline << "       " << _expectedFailure->message()
             << "Expression" << expression << "failed.";
@@ -222,6 +232,9 @@ void Tester::verifyInternal(const std::string& expression, bool expressionValue)
         << Debug::nospace << _testCaseId << Debug::nospace
         << Debug::color(Debug::Color::Blue) << "]"
         << Debug::boldColor(Debug::Color::Default) << _testCaseName
+        << Debug::nospace << "(" << Debug::nospace << Debug::resetColor
+        << _testCaseDescription << Debug::nospace
+        << Debug::boldColor(Debug::Color::Default) << ")"
         << Debug::resetColor << "at" << _testFilename << "on line"
         << _testCaseLine << Debug::newline << "        Expression" << expression;
     if(!_expectedFailure) e << "failed.";
@@ -242,23 +255,34 @@ void Tester::skip(const std::string& message) {
         << Debug::nospace << _testCaseId << Debug::nospace
         << Debug::color(Debug::Color::Blue) << "]"
         << Debug::boldColor(Debug::Color::Default) << _testCaseName
+        << Debug::nospace << "(" << Debug::nospace << Debug::resetColor
+        << _testCaseDescription << Debug::nospace
+        << Debug::boldColor(Debug::Color::Default) << ")"
         << Debug::resetColor << Debug::newline << "       " << message;
     throw SkipException();
 }
 
 void Tester::setTestCaseName(const std::string& name) {
-    _testCaseName = name + "()";
+    _testCaseName = name;
 }
 
 void Tester::setTestCaseName(std::string&& name) {
-    _testCaseName = std::move(name) + "()";
+    _testCaseName = std::move(name);
+}
+
+void Tester::setTestCaseDescription(const std::string& description) {
+    _testCaseDescription = description;
+}
+
+void Tester::setTestCaseDescription(std::string&& description) {
+    _testCaseDescription = std::move(description);
 }
 
 void Tester::registerTestCase(std::string&& name, int line) {
-    CORRADE_ASSERT(_testCaseName != "<setup>()" && _testCaseName != "<teardown>()",
+    CORRADE_ASSERT(_testCaseName != "<setup>" && _testCaseName != "<teardown>",
         "TestSuite::Tester: using verification macros inside setup or teardown functions is not allowed", );
 
-    if(_testCaseName.empty()) setTestCaseName(std::move(name));
+    if(_testCaseName.empty()) _testCaseName = std::move(name);
     _testCaseLine = line;
 }
 

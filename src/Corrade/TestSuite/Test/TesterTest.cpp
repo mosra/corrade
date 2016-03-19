@@ -78,10 +78,15 @@ struct Test: Tester {
     void compareWithFail();
     void compareImplicitConversionFail();
 
+    void skip();
+
     void testCaseName();
     void testCaseNameNoChecks();
-
-    void skip();
+    void testCaseDescription();
+    void testCaseDescriptionNoChecks();
+    void testCaseDescriptionFailVerify();
+    void testCaseDescriptionFailCompare();
+    void testCaseDescriptionSkip();
 
     void setupTeardown();
     void setupTeardownEmpty();
@@ -110,10 +115,15 @@ Test::Test(std::ostream* const out): _out{out} {
               &Test::compareWithFail,
               &Test::compareImplicitConversionFail,
 
+              &Test::skip,
+
               &Test::testCaseName,
               &Test::testCaseNameNoChecks,
-
-              &Test::skip});
+              &Test::testCaseDescription,
+              &Test::testCaseDescriptionNoChecks,
+              &Test::testCaseDescriptionFailVerify,
+              &Test::testCaseDescriptionFailCompare,
+              &Test::testCaseDescriptionSkip});
 
     addTests({&Test::setupTeardown,
               &Test::setupTeardownEmpty,
@@ -191,6 +201,11 @@ void Test::compareImplicitConversionFail() {
     CORRADE_COMPARE("holla", hello); // #15
 }
 
+void Test::skip() {
+    CORRADE_SKIP("This testcase is skipped.");
+    CORRADE_VERIFY(false); // (not called)
+}
+
 void Test::testCaseName() {
     setTestCaseName("testCaseName<15>");
     CORRADE_VERIFY(true);
@@ -200,9 +215,28 @@ void Test::testCaseNameNoChecks() {
     setTestCaseName("testCaseName<27>");
 }
 
-void Test::skip() {
-    CORRADE_SKIP("This testcase is skipped.");
-    CORRADE_VERIFY(false); // (not called)
+void Test::testCaseDescription() {
+    setTestCaseDescription("hello");
+    CORRADE_VERIFY(true);
+}
+
+void Test::testCaseDescriptionNoChecks() {
+    setTestCaseDescription("hello");
+}
+
+void Test::testCaseDescriptionFailVerify() {
+    setTestCaseDescription("hello");
+    CORRADE_VERIFY(false);
+}
+
+void Test::testCaseDescriptionFailCompare() {
+    setTestCaseDescription("hello");
+    CORRADE_COMPARE(4, 5);
+}
+
+void Test::testCaseDescriptionSkip() {
+    setTestCaseDescription("hello");
+    CORRADE_SKIP("No!");
 }
 
 void Test::setup() {
@@ -273,56 +307,67 @@ void TesterTest::test() {
     CORRADE_VERIFY(result == 1);
 
     std::string expected =
-        "Starting TesterTest::Test with 20 test cases...\n"
+        "Starting TesterTest::Test with 25 test cases...\n"
         "     ? [01] <unknown>()\n"
         "    OK [02] trueExpression()\n"
-        "  FAIL [03] falseExpression() at here.cpp on line 135\n"
+        "  FAIL [03] falseExpression() at here.cpp on line 145\n"
         "        Expression 5 != 5 failed.\n"
         "    OK [04] equal()\n"
-        "  FAIL [05] nonEqual() at here.cpp on line 145\n"
+        "  FAIL [05] nonEqual() at here.cpp on line 155\n"
         "        Values a and b are not the same, actual is\n"
         "        5\n"
         "        but expected\n"
         "        3\n"
-        " XFAIL [06] expectFail() at here.cpp on line 151\n"
+        " XFAIL [06] expectFail() at here.cpp on line 161\n"
         "        The world is not mad yet. 2 + 2 and 5 are not equal.\n"
-        " XFAIL [06] expectFail() at here.cpp on line 152\n"
+        " XFAIL [06] expectFail() at here.cpp on line 162\n"
         "        The world is not mad yet. Expression false == true failed.\n"
         "    OK [06] expectFail()\n"
-        " XPASS [07] unexpectedPassExpression() at here.cpp on line 165\n"
+        " XPASS [07] unexpectedPassExpression() at here.cpp on line 175\n"
         "        Expression true == true was expected to fail.\n"
-        " XPASS [08] unexpectedPassEqual() at here.cpp on line 170\n"
+        " XPASS [08] unexpectedPassEqual() at here.cpp on line 180\n"
         "        2 + 2 and 4 are not expected to be equal.\n"
         "    OK [09] compareAs()\n"
-        "  FAIL [10] compareAsFail() at here.cpp on line 178\n"
+        "  FAIL [10] compareAsFail() at here.cpp on line 188\n"
         "        Length of actual \"meh\" doesn't match length of expected \"hello\" with epsilon 0\n"
         "    OK [11] compareWith()\n"
-        "  FAIL [12] compareWithFail() at here.cpp on line 186\n"
+        "  FAIL [12] compareWithFail() at here.cpp on line 196\n"
         "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
-        "  FAIL [13] compareImplicitConversionFail() at here.cpp on line 191\n"
+        "  FAIL [13] compareImplicitConversionFail() at here.cpp on line 201\n"
         "        Values \"holla\" and hello are not the same, actual is\n"
         "        holla\n"
         "        but expected\n"
         "        hello\n"
-        "    OK [14] testCaseName<15>()\n"
-        "     ? [15] testCaseName<27>()\n"
-        "  SKIP [16] skip()\n"
+        "  SKIP [14] skip()\n"
         "        This testcase is skipped.\n"
-        "       [17] setting up...\n"
-        "    OK [17] setupTeardown()\n"
-        "       [17] tearing down...\n"
-        "       [18] setting up...\n"
-        "     ? [18] <unknown>()\n"
-        "       [18] tearing down...\n"
-        "       [19] setting up...\n"
-        "  FAIL [19] setupTeardownError() at here.cpp on line 223\n"
+        "    OK [15] testCaseName<15>()\n"
+        "     ? [16] testCaseName<27>()\n"
+        "    OK [17] testCaseDescription(hello)\n"
+        "     ? [18] <unknown>(hello)\n"
+        "  FAIL [19] testCaseDescriptionFailVerify(hello) at here.cpp on line 229\n"
         "        Expression false failed.\n"
-        "       [19] tearing down...\n"
-        "       [20] setting up...\n"
-        "  SKIP [20] setupTeardownSkip()\n"
+        "  FAIL [20] testCaseDescriptionFailCompare(hello) at here.cpp on line 234\n"
+        "        Values 4 and 5 are not the same, actual is\n"
+        "        4\n"
+        "        but expected\n"
+        "        5\n"
+        "  SKIP [21] testCaseDescriptionSkip(hello)\n"
+        "        No!\n"
+        "       [22] setting up...\n"
+        "    OK [22] setupTeardown()\n"
+        "       [22] tearing down...\n"
+        "       [23] setting up...\n"
+        "     ? [23] <unknown>()\n"
+        "       [23] tearing down...\n"
+        "       [24] setting up...\n"
+        "  FAIL [24] setupTeardownError() at here.cpp on line 257\n"
+        "        Expression false failed.\n"
+        "       [24] tearing down...\n"
+        "       [25] setting up...\n"
+        "  SKIP [25] setupTeardownSkip()\n"
         "        Skipped.\n"
-        "       [20] tearing down...\n"
-        "Finished TesterTest::Test with 8 errors out of 18 checks. 3 test cases didn't contain any checks!\n";
+        "       [25] tearing down...\n"
+        "Finished TesterTest::Test with 10 errors out of 21 checks. 4 test cases didn't contain any checks!\n";
 
     //CORRADE_COMPARE(out.str().length(), expected.length());
     CORRADE_COMPARE(out.str(), expected);
