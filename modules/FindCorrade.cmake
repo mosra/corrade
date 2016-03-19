@@ -248,7 +248,8 @@ set(_corradeFlags
     TARGET_NACL_GLIBC
     TARGET_EMSCRIPTEN
     TARGET_ANDROID
-    TESTSUITE_TARGET_XCTEST)
+    TESTSUITE_TARGET_XCTEST
+    UTILITY_USE_ANSI_COLORS)
 foreach(_corradeFlag ${_corradeFlags})
     string(FIND "${_corradeConfigure}" "#define CORRADE_${_corradeFlag}" _corrade_${_corradeFlag})
     if(NOT _corrade_${_corradeFlag} EQUAL -1)

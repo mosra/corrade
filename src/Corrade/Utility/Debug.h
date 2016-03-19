@@ -218,7 +218,7 @@ class CORRADE_UTILITY_EXPORT Debug {
             White = 7,
 
             /** Default (implementation/style-defined) */
-            #ifndef CORRADE_TARGET_WINDOWS
+            #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
             Default = 9
             #else
             Default = 7
@@ -438,7 +438,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         template<Color c, bool bold> CORRADE_UTILITY_LOCAL static Modifier colorInternal();
 
         static std::ostream* _globalOutput;
-        #ifndef CORRADE_TARGET_WINDOWS
+        #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
         static Color _globalColor;
         static bool _globalColorBold;
         #endif
@@ -447,7 +447,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         CORRADE_UTILITY_LOCAL void resetColorInternal();
 
         std::ostream* _previousGlobalOutput;
-        #ifdef CORRADE_TARGET_WINDOWS
+        #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
         unsigned short _previousColorAttributes = 0xffff;
         #else
         Color _previousColor;

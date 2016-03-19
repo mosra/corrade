@@ -31,7 +31,7 @@
 #include <sstream>
 
 /* For colored output */
-#ifdef CORRADE_TARGET_WINDOWS
+#if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
 #define WIN32_LEAN_AND_MEAN 1
 #define VC_EXTRALEAN
 #include <windows.h>
@@ -50,7 +50,7 @@ template<> inline void toStream<Implementation::DebugOstreamFallback>(std::ostre
     value.apply(s);
 }
 
-#ifdef CORRADE_TARGET_WINDOWS
+#if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
 HANDLE streamOutputHandle(const std::ostream* s) {
     return s == &std::cout ? GetStdHandle(STD_OUTPUT_HANDLE) :
            s == &std::cerr ? GetStdHandle(STD_ERROR_HANDLE) :
@@ -64,7 +64,7 @@ std::ostream* Debug::_globalOutput = &std::cout;
 std::ostream* Warning::_globalWarningOutput = &std::cerr;
 std::ostream* Error::_globalErrorOutput = &std::cerr;
 
-#ifndef CORRADE_TARGET_WINDOWS
+#if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
 Debug::Color Debug::_globalColor = Debug::Color::Default;
 bool Debug::_globalColorBold = false;
 #endif
@@ -74,7 +74,7 @@ template<Debug::Color c, bool bold> Debug::Modifier Debug::colorInternal() {
         if(!debug._output || (debug._flags & InternalFlag::DisableColors)) return;
 
         debug._flags |= InternalFlag::ColorWritten|InternalFlag::ValueWritten;
-        #ifdef CORRADE_TARGET_WINDOWS
+        #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
         HANDLE h = streamOutputHandle(debug._output);
         if(h != INVALID_HANDLE_VALUE) SetConsoleTextAttribute(h,
             (debug._previousColorAttributes & ~(FOREGROUND_BLUE|FOREGROUND_GREEN|FOREGROUND_RED|FOREGROUND_INTENSITY)) |
@@ -94,7 +94,7 @@ inline void Debug::resetColorInternal() {
 
     _flags &= ~InternalFlag::ColorWritten;
     _flags |= InternalFlag::ValueWritten;
-    #ifdef CORRADE_TARGET_WINDOWS
+    #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
     HANDLE h = streamOutputHandle(_output);
     if(h != INVALID_HANDLE_VALUE)
         SetConsoleTextAttribute(h, _previousColorAttributes);
@@ -122,7 +122,7 @@ auto Debug::color(Color color) -> Modifier {
         _c(Magenta)
         _c(Cyan)
         _c(White)
-        #ifndef CORRADE_TARGET_WINDOWS
+        #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
         _c(Default)
         #endif
         #undef _c
@@ -144,7 +144,7 @@ auto Debug::boldColor(Color color) -> Modifier {
         _c(Magenta)
         _c(Cyan)
         _c(White)
-        #ifndef CORRADE_TARGET_WINDOWS
+        #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
         _c(Default)
         #endif
         #undef _c
@@ -177,7 +177,7 @@ Debug::Debug(std::ostream* const output, const Flags flags): _flags{InternalFlag
     _globalOutput = _output = output;
 
     /* Save previous global color */
-    #ifdef CORRADE_TARGET_WINDOWS
+    #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
     HANDLE h = streamOutputHandle(_output);
     if(h != INVALID_HANDLE_VALUE) {
         CONSOLE_SCREEN_BUFFER_INFO csbi;

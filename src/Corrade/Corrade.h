@@ -166,6 +166,20 @@ Defined if the library is built for Android.
 #undef CORRADE_TARGET_ANDROID
 
 /**
+@brief Use ANSI escape sequences for colored Debug output on Windows
+
+By default colored output using @ref Corrade::Utility::Debug "Utility::Debug"
+on Windows is done using WINAPI that has a limited functionality, because ANSI
+escape sequences are supported only on Windows 10 or when using non-standard
+console emulators. Available only on Windows, all other platforms use ANSI
+sequences implicitly. Enabled using `UTILITY_USE_ANSI_COLORS` CMake option when
+building Corrade.
+@see @ref CORRADE_TARGET_WINDOWS, @ref building-corrade, @ref corrade-cmake
+*/
+#define CORRADE_UTILITY_USE_ANSI_COLORS
+#undef CORRADE_UTILITY_USE_ANSI_COLORS
+
+/**
 @brief Target XCTest with TestSuite
 
 Defined if the @ref Corrade::TestSuite "TestSuite" library is targeting Xcode

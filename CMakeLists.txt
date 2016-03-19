@@ -90,6 +90,12 @@ elseif(WIN32)
 endif()
 
 # Platform-specific options
+if(CORRADE_TARGET_WINDOWS)
+    option(UTILITY_USE_ANSI_COLORS "Use ANSI escape sequences for colored Debug output on Windows" OFF)
+    if(UTILITY_USE_ANSI_COLORS)
+        set(CORRADE_UTILITY_USE_ANSI_COLORS 1)
+    endif()
+endif()
 if(CORRADE_TARGET_APPLE)
     option(TESTSUITE_TARGET_XCTEST "Build TestSuite tests compatible with Xcode XCTest" OFF)
     if(TESTSUITE_TARGET_XCTEST)
