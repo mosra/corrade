@@ -127,7 +127,7 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
 
     Debug(logOutput, _useColor) << Debug::boldColor(Debug::Color::Default) << "Starting" << _testName << "with" << usedTestCases.size() << "test cases...";
 
-    for(auto i: usedTestCases) {
+    for(auto testCase: usedTestCases) {
         /* Reset output to stdout for each test case to prevent debug
             output segfaults */
         /** @todo Drop this when Debug::setOutput() is removed */
@@ -135,19 +135,19 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
         Error resetErrorRedirect{&std::cerr};
         Utility::Warning resetWarningRedirect{&std::cerr};
 
-        _testCaseId = i.first;
-        _testCaseInstanceId = i.second.instanceId;
-        _testCaseDescription = i.second.instanceId == ~std::size_t{} ? std::string{} : std::to_string(i.second.instanceId);
+        _testCaseId = testCase.first;
+        _testCaseInstanceId = testCase.second.instanceId;
+        _testCaseDescription = testCase.second.instanceId == ~std::size_t{} ? std::string{} : std::to_string(testCase.second.instanceId);
         _testCaseLine = 0;
 
-        if(i.second.setup) {
+        if(testCase.second.setup) {
             _testCaseName = "<setup>";
-            (this->*i.second.setup)();
+            (this->*testCase.second.setup)();
         }
 
         try {
             _testCaseName.clear();
-            (this->*i.second.test)();
+            (this->*testCase.second.test)();
 
             /* No testing macros called, don't print function name to output */
             if(!_testCaseLine) {
@@ -169,9 +169,9 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
             ++errorCount;
         } catch(SkipException) {}
 
-        if(i.second.teardown) {
+        if(testCase.second.teardown) {
             _testCaseName = "<teardown>";
-            (this->*i.second.teardown)();
+            (this->*testCase.second.teardown)();
         }
     }
 
