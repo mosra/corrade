@@ -96,6 +96,8 @@ struct Test: Tester {
     void setup();
     void teardown();
 
+    void instancedTest();
+
     std::ostream* _out;
 };
 
@@ -131,6 +133,8 @@ Test::Test(std::ostream* const out): _out{out} {
               &Test::setupTeardownSkip},
               &Test::setup,
               &Test::teardown);
+
+    addInstancedTests({&Test::instancedTest}, 5);
 }
 
 void Test::noChecks() {
@@ -261,6 +265,27 @@ void Test::setupTeardownSkip() {
     CORRADE_SKIP("Skipped.");
 }
 
+namespace {
+    constexpr struct {
+        const char* desc;
+        int value;
+        int result;
+    } InstanceData[] = {
+        {"zero",   3,   27},
+        {nullptr,  1,    1},
+        {"two",    5,  122},
+        {nullptr, -6, -216},
+        {"last",   0,    0}
+    };
+}
+
+void Test::instancedTest() {
+    const auto& data = InstanceData[testCaseInstanceId()];
+    if(data.desc) setTestCaseDescription(data.desc);
+
+    CORRADE_COMPARE(data.value*data.value*data.value, data.result);
+}
+
 struct TesterTest: Tester {
     explicit TesterTest();
 
@@ -307,33 +332,33 @@ void TesterTest::test() {
     CORRADE_VERIFY(result == 1);
 
     std::string expected =
-        "Starting TesterTest::Test with 25 test cases...\n"
+        "Starting TesterTest::Test with 30 test cases...\n"
         "     ? [01] <unknown>()\n"
         "    OK [02] trueExpression()\n"
-        "  FAIL [03] falseExpression() at here.cpp on line 145\n"
+        "  FAIL [03] falseExpression() at here.cpp on line 149\n"
         "        Expression 5 != 5 failed.\n"
         "    OK [04] equal()\n"
-        "  FAIL [05] nonEqual() at here.cpp on line 155\n"
+        "  FAIL [05] nonEqual() at here.cpp on line 159\n"
         "        Values a and b are not the same, actual is\n"
         "        5\n"
         "        but expected\n"
         "        3\n"
-        " XFAIL [06] expectFail() at here.cpp on line 161\n"
+        " XFAIL [06] expectFail() at here.cpp on line 165\n"
         "        The world is not mad yet. 2 + 2 and 5 are not equal.\n"
-        " XFAIL [06] expectFail() at here.cpp on line 162\n"
+        " XFAIL [06] expectFail() at here.cpp on line 166\n"
         "        The world is not mad yet. Expression false == true failed.\n"
         "    OK [06] expectFail()\n"
-        " XPASS [07] unexpectedPassExpression() at here.cpp on line 175\n"
+        " XPASS [07] unexpectedPassExpression() at here.cpp on line 179\n"
         "        Expression true == true was expected to fail.\n"
-        " XPASS [08] unexpectedPassEqual() at here.cpp on line 180\n"
+        " XPASS [08] unexpectedPassEqual() at here.cpp on line 184\n"
         "        2 + 2 and 4 are not expected to be equal.\n"
         "    OK [09] compareAs()\n"
-        "  FAIL [10] compareAsFail() at here.cpp on line 188\n"
+        "  FAIL [10] compareAsFail() at here.cpp on line 192\n"
         "        Length of actual \"meh\" doesn't match length of expected \"hello\" with epsilon 0\n"
         "    OK [11] compareWith()\n"
-        "  FAIL [12] compareWithFail() at here.cpp on line 196\n"
+        "  FAIL [12] compareWithFail() at here.cpp on line 200\n"
         "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
-        "  FAIL [13] compareImplicitConversionFail() at here.cpp on line 201\n"
+        "  FAIL [13] compareImplicitConversionFail() at here.cpp on line 205\n"
         "        Values \"holla\" and hello are not the same, actual is\n"
         "        holla\n"
         "        but expected\n"
@@ -344,9 +369,9 @@ void TesterTest::test() {
         "     ? [16] testCaseName<27>()\n"
         "    OK [17] testCaseDescription(hello)\n"
         "     ? [18] <unknown>(hello)\n"
-        "  FAIL [19] testCaseDescriptionFailVerify(hello) at here.cpp on line 229\n"
+        "  FAIL [19] testCaseDescriptionFailVerify(hello) at here.cpp on line 233\n"
         "        Expression false failed.\n"
-        "  FAIL [20] testCaseDescriptionFailCompare(hello) at here.cpp on line 234\n"
+        "  FAIL [20] testCaseDescriptionFailCompare(hello) at here.cpp on line 238\n"
         "        Values 4 and 5 are not the same, actual is\n"
         "        4\n"
         "        but expected\n"
@@ -360,14 +385,23 @@ void TesterTest::test() {
         "     ? [23] <unknown>()\n"
         "       [23] tearing down...\n"
         "       [24] setting up...\n"
-        "  FAIL [24] setupTeardownError() at here.cpp on line 257\n"
+        "  FAIL [24] setupTeardownError() at here.cpp on line 261\n"
         "        Expression false failed.\n"
         "       [24] tearing down...\n"
         "       [25] setting up...\n"
         "  SKIP [25] setupTeardownSkip()\n"
         "        Skipped.\n"
         "       [25] tearing down...\n"
-        "Finished TesterTest::Test with 10 errors out of 21 checks. 4 test cases didn't contain any checks!\n";
+        "    OK [26] instancedTest(zero)\n"
+        "    OK [27] instancedTest(1)\n"
+        "  FAIL [28] instancedTest(two) at here.cpp on line 286\n"
+        "        Values data.value*data.value*data.value and data.result are not the same, actual is\n"
+        "        125\n"
+        "        but expected\n"
+        "        122\n"
+        "    OK [29] instancedTest(3)\n"
+        "    OK [30] instancedTest(last)\n"
+        "Finished TesterTest::Test with 11 errors out of 26 checks. 4 test cases didn't contain any checks!\n";
 
     //CORRADE_COMPARE(out.str().length(), expected.length());
     CORRADE_COMPARE(out.str(), expected);

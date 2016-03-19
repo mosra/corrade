@@ -66,7 +66,6 @@ See @ref unit-testing for introduction.
 @see @ref CORRADE_TEST_MAIN(), @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(),
     @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH(), @ref CORRADE_SKIP(),
     @ref CORRADE_EXPECT_FAIL(), @ref CORRADE_EXPECT_FAIL_IF()
-@todo Data-driven tests
 */
 class CORRADE_TESTSUITE_EXPORT Tester {
     public:
@@ -182,11 +181,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @brief Add test cases
          *
          * Adds one or more test cases to be executed when calling @ref exec().
+         * @see @ref addInstancedTests()
          */
         template<class Derived> void addTests(std::initializer_list<void(Derived::*)()> tests) {
-            _testCases.reserve(_testCases.size() + tests.size());
-            for(auto test: tests)
-                _testCases.emplace_back(static_cast<TestCase::Function>(test), nullptr, nullptr);
+            addTests<Derived>(tests, nullptr, nullptr);
         }
 
         /**
@@ -201,21 +199,64 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * list, regardless whether it passed, failed or was skipped. Using
          * verification macros in @p setup or @p teardown function is not
          * allowed.
+         * @see @ref addInstancedTests()
          */
         template<class Derived> void addTests(std::initializer_list<void(Derived::*)()> tests, void(Derived::*setup)(), void(Derived::*teardown)()) {
             _testCases.reserve(_testCases.size() + tests.size());
             for(auto test: tests)
-                _testCases.emplace_back(static_cast<TestCase::Function>(test), static_cast<TestCase::Function>(setup), static_cast<TestCase::Function>(teardown));
+                _testCases.emplace_back(~std::size_t{}, static_cast<TestCase::Function>(test), static_cast<TestCase::Function>(setup), static_cast<TestCase::Function>(teardown));
+        }
+
+        /**
+         * @brief Add instanced test cases
+         *
+         * Unlike @ref addTests(), this function runs each of the test cases
+         * @p instanceCount times. Useful for data-driven tests.
+         * @see @ref testCaseInstanceId(), @ref setTestCaseDescription()
+         */
+        template<class Derived> void addInstancedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t instanceCount) {
+            addInstancedTests<Derived>(tests, instanceCount, nullptr, nullptr);
+        }
+
+        /**
+         * @brief Add instanced test cases with explicit setup and teardown functions
+         * @param tests         List of test cases to run
+         * @param instanceCount Instance count
+         * @param setup         Setup function
+         * @param teardown      Teardown function
+         *
+         * Unlike @ref addTests(), this function runs each of the test cases
+         * @p instanceCount times. Useful for data-driven tests. The @p setup
+         * function is called before every test case in the list, the
+         * @p teardown function is called after every test case in the list,
+         * regardless whether it passed, failed or was skipped. Using
+         * verification macros in @p setup or @p teardown function is not
+         * allowed.
+         */
+        template<class Derived> void addInstancedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t instanceCount, void(Derived::*setup)(), void(Derived::*teardown)()) {
+            _testCases.reserve(_testCases.size() + tests.size());
+            for(auto test: tests) for(std::size_t i = 0; i != instanceCount; ++i)
+                _testCases.emplace_back(i, static_cast<TestCase::Function>(test), static_cast<TestCase::Function>(setup), static_cast<TestCase::Function>(teardown));
         }
 
         /**
          * @brief Test case ID
          *
-         * Returns ID of the test case that is currently executing. Value is
-         * undefined if called  outside of test cases and setup/teardown
-         * functions.
+         * Returns ID of the test case that is currently executing, starting
+         * from `1`. Value is undefined if called  outside of test cases and
+         * setup/teardown functions.
          */
         std::size_t testCaseId() const { return _testCaseId; }
+
+        /**
+         * @brief Test case instance ID
+         *
+         * Returns instance ID of the instanced test case that is currently
+         * executing, starting from `0`. Value is undefined if called outside
+         * of *instanced* test cases and setup/teardown functions.
+         * @see @ref addInstancedTests()
+         */
+        std::size_t testCaseInstanceId() const { return _testCaseInstanceId; }
 
         /**
          * @brief Set custom test case name
@@ -233,7 +274,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @brief Set test case description
          *
          * Additional text displayed after the test case name. By default
-         * the description is empty.
+         * the description is empty for non-instanced test cases and instance
+         * ID for instanced test cases.
          */
         void setTestCaseDescription(const std::string& description);
         void setTestCaseDescription(std::string&& description); /**< @overload */
@@ -302,8 +344,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         struct TestCase {
             typedef void (Tester::*Function)();
 
-            explicit TestCase(Function test, Function setup, Function teardown): test{test}, setup{setup}, teardown{teardown} {}
+            explicit TestCase(std::size_t instanceId, Function test, Function setup, Function teardown): instanceId{instanceId}, test{test}, setup{setup}, teardown{teardown} {}
 
+            std::size_t instanceId;
             Function test, setup, teardown;
         };
 
@@ -315,7 +358,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         std::vector<TestCase> _testCases;
         std::string _testFilename, _testName, _testCaseName,
             _testCaseDescription, _expectFailMessage;
-        std::size_t _testCaseId, _testCaseLine, _checkCount;
+        std::size_t _testCaseId, _testCaseInstanceId, _testCaseLine, _checkCount;
         ExpectedFailure* _expectedFailure;
         TesterConfiguration _configuration;
 };

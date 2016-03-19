@@ -134,7 +134,8 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
         Utility::Warning resetWarningRedirect{&std::cerr};
 
         _testCaseId = i.first;
-        _testCaseDescription = {};
+        _testCaseInstanceId = i.second.instanceId;
+        _testCaseDescription = i.second.instanceId == ~std::size_t{} ? std::string{} : std::to_string(i.second.instanceId);
         _testCaseLine = 0;
 
         if(i.second.setup) {
