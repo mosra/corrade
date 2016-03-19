@@ -87,7 +87,7 @@ struct Test: Tester {
 
     void setupTeardown();
     void setupTeardownEmpty();
-    void setupTeardownError();
+    void setupTeardownFail();
     void setupTeardownSkip();
 
     void setup();
@@ -122,7 +122,7 @@ Test::Test(std::ostream* const out): _out{out} {
 
     addTests({&Test::setupTeardown,
               &Test::setupTeardownEmpty,
-              &Test::setupTeardownError,
+              &Test::setupTeardownFail,
               &Test::setupTeardownSkip},
               &Test::setup,
               &Test::teardown);
@@ -231,7 +231,7 @@ void Test::setupTeardown() {
 
 void Test::setupTeardownEmpty() {}
 
-void Test::setupTeardownError() {
+void Test::setupTeardownFail() {
     CORRADE_VERIFY(false);
 }
 
@@ -357,7 +357,7 @@ void TesterTest::test() {
         "     ? [19] <unknown>()\n"
         "       [19] tearing down...\n"
         "       [20] setting up...\n"
-        "  FAIL [20] setupTeardownError() at here.cpp on line 235\n"
+        "  FAIL [20] setupTeardownFail() at here.cpp on line 235\n"
         "        Expression false failed.\n"
         "       [20] tearing down...\n"
         "       [21] setting up...\n"
