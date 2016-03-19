@@ -184,7 +184,20 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @see @ref addInstancedTests()
          */
         template<class Derived> void addTests(std::initializer_list<void(Derived::*)()> tests) {
-            addTests<Derived>(tests, nullptr, nullptr);
+            addRepeatedTests<Derived>(tests, 1);
+        }
+
+        /**
+         * @brief Add repeated test cases
+         *
+         * Unlike the above function repeats each of the test cases until it
+         * fails or @ref repeatCount is reached. Useful for stability or
+         * resource leak checking. Each test case appears in the output log
+         * only once.
+         * @see @ref addInstancedTests(), @ref addRepeatedInstancedTests()
+         */
+        template<class Derived> void addRepeatedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t repeatCount) {
+            addRepeatedTests<Derived>(tests, repeatCount, nullptr, nullptr);
         }
 
         /**
@@ -202,20 +215,48 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @see @ref addInstancedTests()
          */
         template<class Derived> void addTests(std::initializer_list<void(Derived::*)()> tests, void(Derived::*setup)(), void(Derived::*teardown)()) {
+            addRepeatedTests<Derived>(tests, 1, setup, teardown);
+        }
+
+        /**
+         * @brief Add repeated test cases with explicit setup and teardown functions
+         *
+         * Unlike the above function repeats each of the test cases until it
+         * fails or @ref repeatCount is reached. Useful for stability or
+         * resource leak checking. The @p setup and @p teardown functions are
+         * called again for each repeat of each test case. Each test case
+         * appears in the output log only once.
+         * @see @ref addInstancedTests(), @ref addRepeatedInstancedTests()
+         */
+        template<class Derived> void addRepeatedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t repeatCount, void(Derived::*setup)(), void(Derived::*teardown)()) {
             _testCases.reserve(_testCases.size() + tests.size());
             for(auto test: tests)
-                _testCases.emplace_back(~std::size_t{}, static_cast<TestCase::Function>(test), static_cast<TestCase::Function>(setup), static_cast<TestCase::Function>(teardown));
+                _testCases.emplace_back(~std::size_t{}, repeatCount, static_cast<TestCase::Function>(test), static_cast<TestCase::Function>(setup), static_cast<TestCase::Function>(teardown));
         }
 
         /**
          * @brief Add instanced test cases
          *
          * Unlike @ref addTests(), this function runs each of the test cases
-         * @p instanceCount times. Useful for data-driven tests.
+         * @p instanceCount times. Useful for data-driven tests. Each test case
+         * appears in the output once for each instance.
          * @see @ref testCaseInstanceId(), @ref setTestCaseDescription()
          */
         template<class Derived> void addInstancedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t instanceCount) {
-            addInstancedTests<Derived>(tests, instanceCount, nullptr, nullptr);
+            addRepeatedInstancedTests<Derived>(tests, 1, instanceCount);
+        }
+
+        /**
+         * @brief Add repeated instanced test cases
+         *
+         * Unlike the above function repeats each of the test case instances
+         * until it fails or @ref repeatCount is reached. Useful for stability
+         * or resource leak checking. Each test case appears in the output once
+         * for each instance.
+         * @see @ref addInstancedTests(), @ref addRepeatedInstancedTests()
+         */
+        template<class Derived> void addRepeatedInstancedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t repeatCount, std::size_t instanceCount) {
+            addRepeatedInstancedTests<Derived>(tests, repeatCount, instanceCount, nullptr, nullptr);
         }
 
         /**
@@ -227,16 +268,30 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          *
          * Unlike @ref addTests(), this function runs each of the test cases
          * @p instanceCount times. Useful for data-driven tests. The @p setup
-         * function is called before every test case in the list, the
-         * @p teardown function is called after every test case in the list,
-         * regardless whether it passed, failed or was skipped. Using
-         * verification macros in @p setup or @p teardown function is not
-         * allowed.
+         * function is called before every instance of every test case in the
+         * list, the @p teardown function is called after every instance of
+         * every test case in the list, regardless whether it passed, failed or
+         * was skipped. Using verification macros in @p setup or @p teardown
+         * function is not allowed.
          */
         template<class Derived> void addInstancedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t instanceCount, void(Derived::*setup)(), void(Derived::*teardown)()) {
+            addRepeatedInstancedTests<Derived>(tests, 1, instanceCount, setup, teardown);
+        }
+
+        /**
+         * @brief Add repeated instanced test cases with explicit setup and teardown functions
+         *
+         * Unlike the above function repeats each of the test case instances
+         * until it fails or @ref repeatCount is reached. Useful for stability
+         * or resource leak checking. The @p setup and @p teardown functions
+         * are called again for each repeat of each instance of each test case.
+         * The test case appears in the output once for each instance.
+         * @see @ref addInstancedTests(), @ref addRepeatedInstancedTests()
+         */
+        template<class Derived> void addRepeatedInstancedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t repeatCount, std::size_t instanceCount, void(Derived::*setup)(), void(Derived::*teardown)()) {
             _testCases.reserve(_testCases.size() + tests.size());
             for(auto test: tests) for(std::size_t i = 0; i != instanceCount; ++i)
-                _testCases.emplace_back(i, static_cast<TestCase::Function>(test), static_cast<TestCase::Function>(setup), static_cast<TestCase::Function>(teardown));
+                _testCases.emplace_back(i, repeatCount, static_cast<TestCase::Function>(test), static_cast<TestCase::Function>(setup), static_cast<TestCase::Function>(teardown));
         }
 
         /**
@@ -344,9 +399,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         struct TestCase {
             typedef void (Tester::*Function)();
 
-            explicit TestCase(std::size_t instanceId, Function test, Function setup, Function teardown): instanceId{instanceId}, test{test}, setup{setup}, teardown{teardown} {}
+            explicit TestCase(std::size_t instanceId, std::size_t repeatCount, Function test, Function setup, Function teardown): instanceId{instanceId}, repeatCount{repeatCount}, test{test}, setup{setup}, teardown{teardown} {}
 
-            std::size_t instanceId;
+            std::size_t instanceId, repeatCount;
             Function test, setup, teardown;
         };
 
@@ -358,7 +413,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         std::vector<TestCase> _testCases;
         std::string _testFilename, _testName, _testCaseName,
             _testCaseDescription, _expectFailMessage;
-        std::size_t _testCaseId, _testCaseInstanceId, _testCaseLine, _checkCount;
+        std::size_t _testCaseId, _testCaseInstanceId, _testCaseRepeatId,
+            _testCaseLine, _checkCount;
         ExpectedFailure* _expectedFailure;
         TesterConfiguration _configuration;
 };

@@ -140,38 +140,50 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
         _testCaseDescription = testCase.second.instanceId == ~std::size_t{} ? std::string{} : std::to_string(testCase.second.instanceId);
         _testCaseLine = 0;
 
-        if(testCase.second.setup) {
-            _testCaseName = "<setup>";
-            (this->*testCase.second.setup)();
-        }
+        bool aborted = false;
+        for(std::size_t i = 0; i != testCase.second.repeatCount && !aborted; ++i) {
+            /* Print the repeat ID only if we are repeating */
+            _testCaseRepeatId = testCase.second.repeatCount == 1 ? 0 : i + 1;
 
-        try {
-            _testCaseName.clear();
-            (this->*testCase.second.test)();
-
-            /* No testing macros called, don't print function name to output */
-            if(!_testCaseLine) {
-                Debug out{logOutput, _useColor};
-                printTestCaseLabel(out, "     ?", Debug::Color::Yellow, Debug::Color::Yellow);
-                ++noCheckCount;
-
-            /* Common path */
-            } else {
-                Debug out{logOutput, _useColor};
-                printTestCaseLabel(out,
-                    _expectedFailure ? " XFAIL" : "    OK",
-                    _expectedFailure ? Debug::Color::Yellow : Debug::Color::Default,
-                    Debug::Color::Default);
-                if(_expectedFailure) out << Debug::newline << "       " << _expectedFailure->message();
+            if(testCase.second.setup) {
+                _testCaseName = "<setup>";
+                (this->*testCase.second.setup)();
             }
 
-        } catch(Exception) {
-            ++errorCount;
-        } catch(SkipException) {}
+            try {
+                _testCaseName.clear();
+                (this->*testCase.second.test)();
 
-        if(testCase.second.teardown) {
-            _testCaseName = "<teardown>";
-            (this->*testCase.second.teardown)();
+                /* Print the output only once */
+                if(i == testCase.second.repeatCount - 1) {
+                    /* No testing macros called */
+                    if(!_testCaseLine) {
+                        Debug out{logOutput, _useColor};
+                        printTestCaseLabel(out, "     ?", Debug::Color::Yellow, Debug::Color::Yellow);
+                        ++noCheckCount;
+
+                    /* Common path */
+                    } else {
+                        Debug out{logOutput, _useColor};
+                        printTestCaseLabel(out,
+                            _expectedFailure ? " XFAIL" : "    OK",
+                            _expectedFailure ? Debug::Color::Yellow : Debug::Color::Default,
+                            Debug::Color::Default);
+                        if(_expectedFailure) out << Debug::newline << "       " << _expectedFailure->message();
+                    }
+                }
+
+            } catch(Exception) {
+                ++errorCount;
+                aborted = true;
+            } catch(SkipException) {
+                aborted = true;
+            }
+
+            if(testCase.second.teardown) {
+                _testCaseName = "<teardown>";
+                (this->*testCase.second.teardown)();
+            }
         }
     }
 
@@ -207,6 +219,9 @@ void Tester::printTestCaseLabel(Debug& out, const char* const status, const Debu
             << Debug::nospace << Debug::boldColor(labelColor)
             << ")";
     } else out << "()";
+
+    if(_testCaseRepeatId)
+        out << Debug::nospace << "@" << Debug::nospace << _testCaseRepeatId;
 
     out << Debug::resetColor;
 }
