@@ -177,15 +177,52 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @see @ref color(), @ref boldColor()
          */
         enum class Color: char {
-            Black = '0',    /**< Black */
-            Red = '1',      /**< Red */
-            Green = '2',    /**< Green */
-            Yellow = '3',   /**< Yellow */
-            Blue = '4',     /**< Blue */
-            Magenta = '5',  /**< Magenta */
-            Cyan = '6',     /**< Cyan */
-            White = '7',    /**< White */
-            Default = '9'   /**< Default (implementation/style-defined) */
+            /** Black */
+            Black = 0,
+
+            /** Red */
+            #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+            Red = 1,
+            #else
+            Red = 4,
+            #endif
+
+            /** Green */
+            Green = 2,
+
+            /** Yellow */
+            #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+            Yellow = 3,
+            #else
+            Yellow = 6,
+            #endif
+
+            /** Blue */
+            #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+            Blue = 4,
+            #else
+            Blue = 1,
+            #endif
+
+            /** Magenta */
+            Magenta = 5,
+
+            /** Cyan */
+            #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+            Cyan = 6,
+            #else
+            Cyan = 3,
+            #endif
+
+            /** White */
+            White = 7,
+
+            /** Default (implementation/style-defined) */
+            #ifndef CORRADE_TARGET_WINDOWS
+            Default = 9
+            #else
+            Default = 7
+            #endif
         };
 
         #ifdef CORRADE_BUILD_DEPRECATED
@@ -398,14 +435,17 @@ class CORRADE_UTILITY_EXPORT Debug {
         InternalFlags _flags;
 
     private:
-        template<Color c> CORRADE_UTILITY_LOCAL static Modifier colorInternal();
-        template<Color c> CORRADE_UTILITY_LOCAL static Modifier boldColorInternal();
+        template<Color c, bool bold> CORRADE_UTILITY_LOCAL static Modifier colorInternal();
 
         static std::ostream* _globalOutput;
 
         template<class T> CORRADE_UTILITY_LOCAL Debug& print(const T& value);
+        CORRADE_UTILITY_LOCAL void resetColorInternal();
 
         std::ostream* _previousGlobalOutput;
+        #ifdef CORRADE_TARGET_WINDOWS
+        unsigned short _previousColorAttributes = 0xffff;
+        #endif
 };
 
 CORRADE_ENUMSET_OPERATORS(Debug::Flags)

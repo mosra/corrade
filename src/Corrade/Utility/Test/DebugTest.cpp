@@ -23,6 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <iostream>
 #include <map>
 #include <set>
 #include <sstream>
@@ -45,8 +46,13 @@ struct DebugTest: TestSuite::Tester {
     void nospace();
     void newline();
     void noNewlineAtTheEnd();
+
     void colors();
+    void colorsAutoReset();
+    void colorsExplicitReset();
+    void colorsDisabled();
     void colorsNospace();
+    void colorsNoOutput();
 
     void iterable();
     void tuple();
@@ -58,24 +64,32 @@ struct DebugTest: TestSuite::Tester {
 };
 
 DebugTest::DebugTest() {
-    addTests({&DebugTest::debug,
-              &DebugTest::boolean,
-              &DebugTest::chars,
-              &DebugTest::unicode,
-              &DebugTest::custom,
-              &DebugTest::nospace,
-              &DebugTest::newline,
-              &DebugTest::noNewlineAtTheEnd,
-              &DebugTest::colors,
-              &DebugTest::colorsNospace,
+    addTests({
+        &DebugTest::debug,
+        &DebugTest::boolean,
+        &DebugTest::chars,
+        &DebugTest::unicode,
+        &DebugTest::custom,
+        &DebugTest::nospace,
+        &DebugTest::newline,
+        &DebugTest::noNewlineAtTheEnd});
 
-              &DebugTest::iterable,
-              &DebugTest::tuple,
+    addInstancedTests({&DebugTest::colors}, 9);
 
-              &DebugTest::ostreamFallback,
-              &DebugTest::ostreamFallbackPriority,
+    addTests({
+        &DebugTest::colorsAutoReset,
+        &DebugTest::colorsExplicitReset,
+        &DebugTest::colorsDisabled,
+        &DebugTest::colorsNospace,
+        &DebugTest::colorsNoOutput,
 
-              &DebugTest::scopedOutput});
+        &DebugTest::iterable,
+        &DebugTest::tuple,
+
+        &DebugTest::ostreamFallback,
+        &DebugTest::ostreamFallbackPriority,
+
+        &DebugTest::scopedOutput});
 }
 
 void DebugTest::debug() {
@@ -189,54 +203,138 @@ void DebugTest::noNewlineAtTheEnd() {
     CORRADE_COMPARE(out3.str(), "Ahoy\nHello");
 }
 
+namespace {
+    constexpr const struct {
+        const char* desc;
+        Debug::Color color;
+        char c;
+    } ColorsData[] = {
+        #define _c(color) {#color, Debug::Color::color, char('0' + char(Debug::Color::color))},
+        _c(Black)
+        _c(Red)
+        _c(Green)
+        _c(Yellow)
+        _c(Blue)
+        _c(Magenta)
+        _c(Cyan)
+        _c(White)
+        _c(Default)
+        #undef _c
+    };
+}
+
 void DebugTest::colors() {
-    {
-        /* Auto-reset at the end */
-        std::ostringstream out;
-        Debug{&out} << "Hello" << Debug::color(Debug::Color::Green) << "world";
-        #ifdef CORRADE_TARGET_WINDOWS
-        CORRADE_EXPECT_FAIL("ANSI escape codes for colors are suppressed for now.");
-        #endif
-        CORRADE_COMPARE(out.str(), "Hello\033[0;32m world\033[0m\n");
-    } {
-        /* Don't reset twice */
-        std::ostringstream out;
-        Debug{&out} << Debug::boldColor(Debug::Color::Red) << "Hello"
-            << Debug::resetColor << "world";
-        #ifdef CORRADE_TARGET_WINDOWS
-        CORRADE_EXPECT_FAIL("ANSI escape codes for colors are suppressed for now.");
-        #endif
-        CORRADE_COMPARE(out.str(), "\033[1;31mHello\033[0m world\n");
-    } {
-        /* Disabled globally */
-        std::ostringstream out;
+    auto&& data = ColorsData[testCaseInstanceId()];
+    setTestCaseDescription(data.desc);
+    auto fn = [&data](std::ostream& out) {
+        Debug{&out} << Debug::color(data.color) << data.desc << Debug::boldColor(data.color) << "bold";
+    };
+
+    fn(std::cout);
+
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_SKIP("Only possible to test visually on Windows.");
+    #else
+    std::ostringstream out;
+    fn(out);
+    CORRADE_COMPARE(out.str(), (std::string{"\033[0;3" + std::string{data.c} + "m" + data.desc + "\033[1;3" + std::string{data.c} + "m bold\033[0m\n"}));
+    #endif
+}
+
+void DebugTest::colorsAutoReset() {
+    /* Auto-reset at the end */
+    auto fn = [](std::ostream& out) {
+        Debug{&out} << "Default" << Debug::color(Debug::Color::Green) << "Green";
+    };
+
+    /* Print it for visual verification */
+    fn(std::cout);
+
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_SKIP("Only possible to test visually on Windows.");
+    #else
+    std::ostringstream out;
+    fn(out);
+    CORRADE_COMPARE(out.str(), "Default\033[0;32m Green\033[0m\n");
+    #endif
+}
+
+void DebugTest::colorsExplicitReset() {
+    /* Don't reset twice */
+    auto fn = [](std::ostream& out) {
+        Debug{&out} << Debug::color(Debug::Color::Red) << "Red"
+            << Debug::resetColor << "Default";
+    };
+
+    /* Print it for visual verification */
+    fn(std::cout);
+
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_SKIP("Only possible to test visually on Windows.");
+    #else
+    std::ostringstream out;
+    fn(out);
+    CORRADE_COMPARE(out.str(), "\033[0;31mRed\033[0m Default\n");
+    #endif
+}
+
+void DebugTest::colorsDisabled() {
+    /* Disabled globally */
+    auto fn = [](std::ostream& out) {
         Debug{&out, Debug::Flag::DisableColors}
-            << Debug::boldColor(Debug::Color::Default) << "Hello"
-            << Debug::color(Debug::Color::Cyan) << "world"
+            << Debug::color(Debug::Color::Default) << "Default"
+            << Debug::color(Debug::Color::Cyan) << "Default"
             << Debug::resetColor;
-        CORRADE_COMPARE(out.str(), "Hello world\n");
+    };
+
+    /* Print it for visual verification */
+    fn(std::cout);
+
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_SKIP("Only possible to test visually on Windows.");
+    #else
+    std::ostringstream out;
+    fn(out);
+    CORRADE_COMPARE(out.str(), "Default Default\n");
+    #endif
+}
+
+void DebugTest::colorsNoOutput() {
+    {
+        Debug out{nullptr, Debug::Flag::DisableColors};
+        out << Debug::color(Debug::Color::Red);
+
+        Debug{&std::cout} << "This shouldn't be red.";
     }
+
+    CORRADE_SKIP("Only possible to test visually.");
 }
 
 void DebugTest::colorsNospace() {
-    std::ostringstream out1, out2;
-
     /* Order of nospace and color modifiers shouldn't matter and give the same
        output */
-    Debug{&out1} << "H"
-        << Debug::color(Debug::Color::Blue) << Debug::nospace << "e"
-        << Debug::boldColor(Debug::Color::Yellow) << Debug::nospace << "ll"
-        << Debug::resetColor << Debug::nospace << "o";
-    Debug{&out2} << "H"
-        << Debug::nospace << Debug::color(Debug::Color::Blue) << "e"
-        << Debug::nospace << Debug::boldColor(Debug::Color::Yellow) << "ll"
-        << Debug::nospace << Debug::resetColor << "o";
+    auto fn = [](std::ostream& out1, std::ostream& out2) {
+        Debug{&out1} << "H"
+            << Debug::boldColor(Debug::Color::Blue) << Debug::nospace << "e"
+            << Debug::color(Debug::Color::Yellow) << Debug::nospace << "ll"
+            << Debug::resetColor << Debug::nospace << "o";
+        Debug{&out2} << "H"
+            << Debug::nospace << Debug::boldColor(Debug::Color::Blue) << "e"
+            << Debug::nospace << Debug::color(Debug::Color::Yellow) << "ll"
+            << Debug::nospace << Debug::resetColor << "o";
+    };
+
+    /* Print it for visual verification */
+    fn(std::cout, std::cout);
 
     #ifdef CORRADE_TARGET_WINDOWS
-    CORRADE_EXPECT_FAIL("ANSI escape codes for colors are suppressed for now.");
+    CORRADE_SKIP("Only possible to test visually on Windows.");
+    #else
+    std::ostringstream out1, out2;
+    fn(out1, out2);
+    CORRADE_COMPARE(out1.str(), "H\033[1;34me\033[0;33mll\033[0mo\n");
+    CORRADE_COMPARE(out2.str(), "H\033[1;34me\033[0;33mll\033[0mo\n");
     #endif
-    CORRADE_COMPARE(out1.str(), "H\033[0;34me\033[1;33mll\033[0mo\n");
-    CORRADE_COMPARE(out2.str(), "H\033[0;34me\033[1;33mll\033[0mo\n");
 }
 
 void DebugTest::iterable() {

@@ -30,11 +30,12 @@
 #include <iomanip>
 #include <sstream>
 
+/* For colored output */
 #ifdef CORRADE_TARGET_WINDOWS
-#   define WIN32_LEAN_AND_MEAN 1
-#   define VC_EXTRALEAN
-#   include <windows.h>
-#   include <wincon.h>
+#define WIN32_LEAN_AND_MEAN 1
+#define VC_EXTRALEAN
+#include <windows.h>
+#include <wincon.h>
 #endif
 
 namespace Corrade { namespace Utility {
@@ -50,51 +51,10 @@ template<> inline void toStream<Implementation::DebugOstreamFallback>(std::ostre
 }
 
 #ifdef CORRADE_TARGET_WINDOWS
-HANDLE getStdHandle(const std::ostream* s) {
-    return s == &std::cout ? ::GetStdHandle(STD_OUTPUT_HANDLE)
-         : s == &std::cerr ? ::GetStdHandle(STD_ERROR_HANDLE)
-         : INVALID_HANDLE_VALUE;
-}
-
-template<Debug::Color c> WORD mapConsoleColor() {
-    switch(c) {
-        case Debug::Color::Black:   return 0;
-        case Debug::Color::Red:     return FOREGROUND_RED;
-        case Debug::Color::Green:   return FOREGROUND_GREEN;
-        case Debug::Color::Yellow:  return FOREGROUND_RED|FOREGROUND_GREEN;
-        case Debug::Color::Blue:    return FOREGROUND_BLUE;
-        case Debug::Color::Magenta: return FOREGROUND_RED|FOREGROUND_BLUE;
-        case Debug::Color::Cyan:    return FOREGROUND_GREEN|FOREGROUND_BLUE;
-        case Debug::Color::White:   return FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE;
-        case Debug::Color::Default: return 0;
-    }
-    return 0;
-}
-
-WORD defaultAttributes{0xffff};
-
-template<Debug::Color c, bool bold> void setConsoleColor(const std::ostream* s) {
-    HANDLE h = getStdHandle(s);
-    if(h == INVALID_HANDLE_VALUE) return;
-
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    ::GetConsoleScreenBufferInfo(h, &csbi);
-    WORD attr = csbi.wAttributes;
-    if(defaultAttributes == 0xffff) defaultAttributes = attr;
-
-    attr &= ~(FOREGROUND_BLUE|FOREGROUND_GREEN|FOREGROUND_RED|FOREGROUND_INTENSITY);
-    attr |= mapConsoleColor<c>();
-    if(bold) attr |= FOREGROUND_INTENSITY;
-
-    ::SetConsoleTextAttribute(h, attr);
- }
-
-void resetConsoleColor(const std::ostream* s) {
-    HANDLE h = getStdHandle(s);
-    if(h == INVALID_HANDLE_VALUE ||
-       defaultAttributes == 0xffff) return;
-
-    ::SetConsoleTextAttribute(h, defaultAttributes);
+HANDLE streamOutputHandle(const std::ostream* s) {
+    return s == &std::cout ? GetStdHandle(STD_OUTPUT_HANDLE) :
+           s == &std::cerr ? GetStdHandle(STD_ERROR_HANDLE) :
+           INVALID_HANDLE_VALUE;
 }
 #endif
 
@@ -104,47 +64,43 @@ std::ostream* Debug::_globalOutput = &std::cout;
 std::ostream* Warning::_globalWarningOutput = &std::cerr;
 std::ostream* Error::_globalErrorOutput = &std::cerr;
 
-template<Debug::Color c> Debug::Modifier Debug::colorInternal() {
+template<Debug::Color c, bool bold> Debug::Modifier Debug::colorInternal() {
     return [](Debug& debug) {
-        if(debug._flags & InternalFlag::DisableColors) return;
+        if(!debug._output || (debug._flags & InternalFlag::DisableColors)) return;
 
-        debug._flags |= InternalFlag::ColorWritten;
+        debug._flags |= InternalFlag::ColorWritten|InternalFlag::ValueWritten;
         #ifdef CORRADE_TARGET_WINDOWS
-        setConsoleColor<c, false>(debug._output);
+        HANDLE h = streamOutputHandle(debug._output);
+        if(h != INVALID_HANDLE_VALUE) SetConsoleTextAttribute(h,
+            (debug._previousColorAttributes & ~(FOREGROUND_BLUE|FOREGROUND_GREEN|FOREGROUND_RED|FOREGROUND_INTENSITY)) |
+            char(c) |
+            (bold ? FOREGROUND_INTENSITY : 0));
         #else
-        constexpr const char code[] = { '\033', '[', '0', ';', '3', char(c), 'm', '\0' };
-
-        const bool noSpaceBefore = !!(debug._flags & InternalFlag::NoSpaceBeforeNextValue);
-        if(!noSpaceBefore) debug << Debug::nospace;
-        debug << code;
-        if(noSpaceBefore) debug << Debug::nospace;
+        constexpr const char code[] = { '\033', '[', bold ? '1' : '0', ';', '3', '0' + char(c), 'm', '\0' };
+        *debug._output << code;
         #endif
     };
 }
 
-template<Debug::Color c> Debug::Modifier Debug::boldColorInternal() {
-    return [](Debug& debug) {
-        if(debug._flags & InternalFlag::DisableColors) return;
+inline void Debug::resetColorInternal() {
+    if(!_output || !(_flags & InternalFlag::ColorWritten)) return;
 
-        debug._flags |= InternalFlag::ColorWritten;
-        #ifdef CORRADE_TARGET_WINDOWS
-        setConsoleColor<c, true>(debug._output);
-        #else
-        constexpr const char code[] = { '\033', '[', '1', ';', '3', char(c), 'm', '\0' };
-
-        const bool noSpaceBefore = !!(debug._flags & InternalFlag::NoSpaceBeforeNextValue);
-        if(!noSpaceBefore) debug << Debug::nospace;
-        debug << code;
-        if(noSpaceBefore) debug << Debug::nospace;
-        #endif
-    };
+    _flags &= ~InternalFlag::ColorWritten;
+    _flags |= InternalFlag::ValueWritten;
+    #ifdef CORRADE_TARGET_WINDOWS
+    HANDLE h = streamOutputHandle(_output);
+    if(h != INVALID_HANDLE_VALUE)
+        SetConsoleTextAttribute(h, _previousColorAttributes);
+    #else
+    *_output << "\033[0m";
+    #endif
 }
 
 auto Debug::color(Color color) -> Modifier {
     /* Crazy but working solution to work around the need for capturing lambda
        which disallows converting it to function pointer */
     switch(color) {
-        #define _c(color) case Color::color: return colorInternal<Color::color>();
+        #define _c(color) case Color::color: return colorInternal<Color::color, false>();
         _c(Black)
         _c(Red)
         _c(Green)
@@ -153,7 +109,9 @@ auto Debug::color(Color color) -> Modifier {
         _c(Magenta)
         _c(Cyan)
         _c(White)
+        #ifndef CORRADE_TARGET_WINDOWS
         _c(Default)
+        #endif
         #undef _c
     }
 
@@ -164,7 +122,7 @@ auto Debug::boldColor(Color color) -> Modifier {
     /* Crazy but working solution to work around the need for capturing lambda
        which disallows converting it to function pointer */
     switch(color) {
-        #define _c(color) case Color::color: return boldColorInternal<Color::color>();
+        #define _c(color) case Color::color: return colorInternal<Color::color, true>();
         _c(Black)
         _c(Red)
         _c(Green)
@@ -173,7 +131,9 @@ auto Debug::boldColor(Color color) -> Modifier {
         _c(Magenta)
         _c(Cyan)
         _c(White)
+        #ifndef CORRADE_TARGET_WINDOWS
         _c(Default)
+        #endif
         #undef _c
     }
 
@@ -181,17 +141,7 @@ auto Debug::boldColor(Color color) -> Modifier {
 }
 
 void Debug::resetColor(Debug& debug) {
-    if(debug._flags & InternalFlag::DisableColors) return;
-
-    debug._flags &= ~InternalFlag::ColorWritten;
-    #ifdef CORRADE_TARGET_WINDOWS
-    resetConsoleColor(debug._output);
-    #else
-    const bool noSpaceBefore = !!(debug._flags & InternalFlag::NoSpaceBeforeNextValue);
-    if(!noSpaceBefore) debug << Debug::nospace;
-    debug << "\033[0m";
-    if(noSpaceBefore) debug << Debug::nospace;
-    #endif
+    debug.resetColorInternal();
 }
 
 #ifdef CORRADE_BUILD_DEPRECATED
@@ -212,6 +162,16 @@ Debug::Debug(std::ostream* const output, const Flags flags): _flags{InternalFlag
     /* Save previous global output and replace it with current one */
     _previousGlobalOutput = _globalOutput;
     _globalOutput = _output = output;
+
+    /* Save previous global color */
+    #ifdef CORRADE_TARGET_WINDOWS
+    HANDLE h = streamOutputHandle(_output);
+    if(h != INVALID_HANDLE_VALUE) {
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        GetConsoleScreenBufferInfo(h, &csbi);
+        _previousColorAttributes = csbi.wAttributes;
+    }
+    #endif
 }
 
 Warning::Warning(std::ostream* const output, const Flags flags): Debug{flags} {
@@ -231,21 +191,14 @@ Warning::Warning(const Flags flags): Warning{_globalWarningOutput, flags} {}
 Error::Error(const Flags flags): Error{_globalErrorOutput, flags} {}
 
 Debug::~Debug() {
-    if(_output && (_flags & InternalFlag::ValueWritten)) {
-        /* Reset output color */
-        if(_flags & InternalFlag::ColorWritten) {
-            #ifdef CORRADE_TARGET_WINDOWS
-            resetConsoleColor(_output);
-            #else
-            *_output << "\033[0m";
-            #endif
-        }
+    /* Reset output color */
+    resetColorInternal();
 
-        /* Newline at the end */
-        if(!(_flags & InternalFlag::NoNewlineAtTheEnd))
-            *_output << std::endl;
-    }
+    /* Newline at the end */
+    if(_output && (_flags & InternalFlag::ValueWritten) && !(_flags & InternalFlag::NoNewlineAtTheEnd))
+        *_output << std::endl;
 
+    /* Reset previous global output */
     _globalOutput = _previousGlobalOutput;
 }
 
