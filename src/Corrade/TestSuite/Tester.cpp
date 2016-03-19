@@ -36,7 +36,7 @@
 #include <unistd.h>
 #endif
 
-#if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+#if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_UTILITY_USE_ANSI_COLORS)
 #define WIN32_LEAN_AND_MEAN 1
 #define VC_EXTRALEAN
 #include <io.h>
