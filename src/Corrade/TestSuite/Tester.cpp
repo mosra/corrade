@@ -153,26 +153,6 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
 
             try {
                 (this->*testCase.second.test)();
-
-                /* Print the output only once */
-                if(i == testCase.second.repeatCount - 1) {
-                    /* No testing macros called */
-                    if(!_testCaseLine) {
-                        Debug out{logOutput, _useColor};
-                        printTestCaseLabel(out, "     ?", Debug::Color::Yellow, Debug::Color::Yellow);
-                        ++noCheckCount;
-
-                    /* Common path */
-                    } else {
-                        Debug out{logOutput, _useColor};
-                        printTestCaseLabel(out,
-                            _expectedFailure ? " XFAIL" : "    OK",
-                            _expectedFailure ? Debug::Color::Yellow : Debug::Color::Default,
-                            Debug::Color::Default);
-                        if(_expectedFailure) out << Debug::newline << "       " << _expectedFailure->message();
-                    }
-                }
-
             } catch(Exception) {
                 ++errorCount;
                 aborted = true;
@@ -184,6 +164,25 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
 
             if(testCase.second.teardown)
                 (this->*testCase.second.teardown)();
+        }
+
+        /* Print success message if the test case wasn't failed/skipped */
+        if(!aborted) {
+            /* No testing macros called */
+            if(!_testCaseLine) {
+                Debug out{logOutput, _useColor};
+                printTestCaseLabel(out, "     ?", Debug::Color::Yellow, Debug::Color::Yellow);
+                ++noCheckCount;
+
+            /* Common path */
+            } else {
+                Debug out{logOutput, _useColor};
+                printTestCaseLabel(out,
+                    _expectedFailure ? " XFAIL" : "    OK",
+                    _expectedFailure ? Debug::Color::Yellow : Debug::Color::Default,
+                    Debug::Color::Default);
+                if(_expectedFailure) out << Debug::newline << "       " << _expectedFailure->message();
+            }
         }
     }
 
