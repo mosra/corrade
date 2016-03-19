@@ -89,16 +89,16 @@ elseif(WIN32)
     endif()
 endif()
 
+# Platform-specific options
 if(CORRADE_TARGET_APPLE)
     option(TESTSUITE_TARGET_XCTEST "Build TestSuite tests compatible with Xcode XCTest" OFF)
+    if(TESTSUITE_TARGET_XCTEST)
+        set(CORRADE_TESTSUITE_TARGET_XCTEST 1)
+    endif()
 endif()
 
 if(BUILD_STATIC)
     set(CORRADE_BUILD_STATIC 1)
-endif()
-
-if(TESTSUITE_TARGET_XCTEST)
-    set(CORRADE_TESTSUITE_TARGET_XCTEST 1)
 endif()
 
 # Initialize macros etc.

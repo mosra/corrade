@@ -84,6 +84,8 @@
 #   Client with `glibc` toolchain
 #  CORRADE_TARGET_EMSCRIPTEN    - Defined if compiled for Emscripten
 #  CORRADE_TARGET_ANDROID       - Defined if compiled for Android
+#  CORRADE_TESTSUITE_TARGET_XCTEST - Defined if TestSuite is targetting Xcode
+#   XCTest
 #
 # Additionally these variables are defined for internal usage:
 #

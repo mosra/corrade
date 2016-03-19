@@ -126,6 +126,8 @@ also available as preprocessor variables if you include
     Client with `glibc` toolchain
 -   `CORRADE_TARGET_EMSCRIPTEN` -- Defined if compiled for Emscripten
 -   `CORRADE_TARGET_ANDROID` -- Defined if compiled for Android
+-   `CORRADE_TESTSUITE_TARGET_XCTEST` -- Defined if @ref TestSuite is
+    targetting Xcode XCTest
 
 Workflows without imported targets are deprecated and the following variables
 are included just for backwards compatibility and only if

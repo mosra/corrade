@@ -91,16 +91,6 @@ Defined if the library is built for Apple platforms.
 #undef CORRADE_TARGET_APPLE
 
 /**
-@brief Target XCTest with TestSuite
-
-Defined if the @ref TestSuite library is targeting Xcode XCTest. Available only
-on Apple platforms.
-@see @ref CORRADE_TARGET_APPLE, @ref corrade-cmake
-*/
-#define CORRADE_TESTSUITE_TARGET_XCTEST
-#undef CORRADE_TESTSUITE_TARGET_XCTEST
-
-/**
 @brief iOS target
 
 Defined if the library is built for iOS.
@@ -174,6 +164,17 @@ Defined if the library is built for Android.
 */
 #define CORRADE_TARGET_ANDROID
 #undef CORRADE_TARGET_ANDROID
+
+/**
+@brief Target XCTest with TestSuite
+
+Defined if the @ref Corrade::TestSuite "TestSuite" library is targeting Xcode
+XCTest. Available only on Apple platforms. Enabled using `TESTSUITE_TARGET_XCTEST`
+CMake option when building Corrade.
+@see @ref CORRADE_TARGET_APPLE, @ref building-corrade, @ref corrade-cmake
+*/
+#define CORRADE_TESTSUITE_TARGET_XCTEST
+#undef CORRADE_TESTSUITE_TARGET_XCTEST
 #endif
 
 }
