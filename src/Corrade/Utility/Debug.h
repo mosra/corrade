@@ -91,26 +91,6 @@ Debug() << "Value:" << Debug::newline << 16;
 Debug{Debug::Flag::NoNewlineAtTheEnd} << "Hello!";
 @endcode
 
-## Colored output
-
-It is possible to color the output with ANSI color escape codes using
-@ref color() and @ref boldColor(). The color is automatically reset on
-destruction to avoid messing up the terminal, you can also use @ref resetColor()
-to reset it explicitly.
-@code
-Debug() << Debug::boldColor(Debug::Color::Green) << "Success!"
-    << Debug::resetColor << "Everything is fine.";
-@endcode
-
-Note that ANSI color escape codes make sense only when outputting to terminal
-and not when redirecting output to file. This is not autodetected, but you can
-set @ref Flag::DisableColors based on value of POSIX `isatty()` command, for
-example:
-@code
-Debug::Flags flags = isatty(1) ? Debug::Flags{} : Debug::Flag::DisableColors;
-Debug(flags) << Debug::boldColor(Debug::Color::Green) << "Success!";
-@endcode
-
 ## Scoped output redirection
 
 Output specified in class constructor is used for all instances created during
@@ -136,6 +116,46 @@ Debug() << "this is printed into std::cout again";
 Error() << "this is still printed into errorOut";
 @endcode
 
+## Colored output
+
+It is possible to color the output using @ref color() and @ref boldColor(). The
+color is automatically reset to previous value on destruction to avoid messing
+up the terminal, you can also use @ref resetColor() to reset it explicitly.
+@code
+Debug() << Debug::boldColor(Debug::Color::Green) << "Success!"
+    << Debug::resetColor << "Everything is fine.";
+@endcode
+
+On POSIX the coloring is done using ANSI color escape sequences and works both
+when outputting to a terminal or any other stream. On Windows, by default due
+to a platform limitation, the colored output works only when outputting
+directly to a terminal without any intermediate buffer. See
+@ref CORRADE_UTILITY_USE_ANSI_COLORS for possible alternative.
+
+Note that colors make sense only when they finally appear in a terminal and not
+when redirecting output to file. You can control this by setting
+@ref Flag::DisableColors based on value of POSIX `isatty()` command, for
+example:
+@code
+Debug::Flags flags = isatty(1) ? Debug::Flags{} : Debug::Flag::DisableColors;
+Debug(flags) << Debug::boldColor(Debug::Color::Green) << "Success!";
+@endcode
+
+Similarly as with scoped output redirection, colors can be also scoped:
+@code
+Debug{} << "this has default color";
+
+{
+    Debug d;
+    if(errorHappened) d << Debug::color(Debug::Color::Red);
+
+    Debug{} << "if an error happened, this will be printed red";
+    Debug{} << "this also" << Debug::boldColor(Debug::Color::Blue) << "and this blue";
+}
+
+Debug{} << "this has default color again";
+@endcode
+
 @see @ref Warning, @ref Error, @ref Fatal, @ref CORRADE_ASSERT(),
     @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(),
     @ref NaClConsoleStreamBuffer
@@ -156,11 +176,16 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @see @ref Flags, @ref Debug(Flags)
          */
         enum class Flag: unsigned char {
-            /** Don't put newline at the end on destruction. */
+            /** Don't put newline at the end on destruction */
             NoNewlineAtTheEnd = 1 << 0,
 
-            /** Disable ANSI color escape sequences from @ref color(),
-                @ref boldColor() and @ref resetColor() */
+            /**
+             * Disable colored output in @ref color(), @ref boldColor() and
+             * @ref resetColor().
+             * @note Note that on @ref CORRADE_TARGET_WINDOWS "Windows" the
+             *      colored output by default works only if outputting directly
+             *      to the console. See also @ref CORRADE_UTILITY_USE_ANSI_COLORS.
+             */
             DisableColors = 1 << 1
         };
 
@@ -280,29 +305,31 @@ class CORRADE_UTILITY_EXPORT Debug {
         /**
          * @brief Set output color
          *
-         * Inserts ANSI escape sequence to the output. Resets previous
-         * @ref color() or @ref boldColor() setting. The color is also
-         * automatically reset on object destruction. If @ref Flag::DisableColors
-         * was set, this function does nothing.
+         * Resets previous @ref color() or @ref boldColor() setting. The color
+         * is also automatically reset on object destruction to a value that
+         * was active in outer scope. If @ref Flag::DisableColors was set, this
+         * function does nothing.
          */
         static Modifier color(Color color);
 
         /**
          * @brief Set bold output color
          *
-         * Inserts ANSI escape sequence to the output. Resets previous
-         * @ref color() or @ref boldColor() setting. The color is also
-         * automatically reset on object destruction. If @ref Flag::DisableColors
-         * was set, this function does nothing.
+         * Resets previous @ref color() or @ref boldColor() setting. The color
+         * is also automatically reset on object destruction to a value that
+         * was active in outer scope. If @ref Flag::DisableColors was set, this
+         * function does nothing.
          */
         static Modifier boldColor(Color color);
 
         /**
          * @brief Reset output color
          *
-         * Resets any previous @ref color() or @ref boldColor() setting. The
-         * color is also automatically reset on object destruction. If
-         * @ref Flag::DisableColors was set, this function does nothing.
+         * Resets any previous @ref color() or @ref boldColor() setting to a
+         * value that was active in outer scope. The same is also automatically
+         * done on object destruction. If the color was not changed by this
+         * instance or @ref Flag::DisableColors was set, this function does
+         * nothing.
          */
         static void resetColor(Debug& debug);
 
