@@ -180,7 +180,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         /**
          * @brief Add test cases
          *
-         * Adds one or more test cases to be executed when calling @ref exec().
+         * Adds one or more test cases to be executed.
          * @see @ref addInstancedTests()
          */
         template<class Derived> void addTests(std::initializer_list<void(Derived::*)()> tests) {
@@ -206,10 +206,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @param setup         Setup function
          * @param teardown      Teardown function
          *
-         * Adds one or more test cases to be executed when calling @ref exec().
-         * The @p setup function is called before every test case in the list,
-         * the @p teardown function is called after every test case in the
-         * list, regardless whether it passed, failed or was skipped. Using
+         * In addition to the behavior of @ref addTests() above, the @p setup
+         * function is called before every test case in the list and the
+         * @p teardown function is called after every test case in the list,
+         * regardless of whether it passed, failed or was skipped. Using
          * verification macros in @p setup or @p teardown function is not
          * allowed.
          * @see @ref addInstancedTests()
@@ -266,13 +266,12 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @param setup         Setup function
          * @param teardown      Teardown function
          *
-         * Unlike @ref addTests(), this function runs each of the test cases
-         * @p instanceCount times. Useful for data-driven tests. The @p setup
-         * function is called before every instance of every test case in the
-         * list, the @p teardown function is called after every instance of
-         * every test case in the list, regardless whether it passed, failed or
-         * was skipped. Using verification macros in @p setup or @p teardown
-         * function is not allowed.
+         * In addition to the behavior of @ref addInstancedTests() above, the
+         * @p setup function is called before every instance of every test case
+         * in the list and the @p teardown function is called after every
+         * instance of every test case in the list, regardless of whether it
+         * passed, failed or was skipped. Using verification macros in @p setup
+         * or @p teardown function is not allowed.
          */
         template<class Derived> void addInstancedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t instanceCount, void(Derived::*setup)(), void(Derived::*teardown)()) {
             addRepeatedInstancedTests<Derived>(tests, 1, instanceCount, setup, teardown);
