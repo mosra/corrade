@@ -250,7 +250,7 @@ function(corrade_add_test test_name)
     if(CORRADE_TESTSUITE_TARGET_XCTEST)
         add_library(${test_name} SHARED ${sources})
         set_target_properties(${test_name} PROPERTIES FRAMEWORK TRUE)
-        target_link_libraries(${test_name} ${libraries} ${CORRADE_TESTSUITE_LIBRARIES})
+        target_link_libraries(${test_name} ${libraries} Corrade::TestSuite)
 
         set(test_runner_file ${CMAKE_CURRENT_BINARY_DIR}/${test_name}.mm)
         configure_file(${CORRADE_TESTSUITE_XCTEST_RUNNER}
