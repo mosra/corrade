@@ -290,12 +290,12 @@ void Tester::registerTestCase(std::string&& name, int line) {
 
 Tester::TesterConfiguration::TesterConfiguration() = default;
 
-Tester::ExpectedFailure::ExpectedFailure(Tester* const instance, std::string message, const bool enabled): _instance(instance), _message(std::move(message)) {
-    if(enabled) _instance->_expectedFailure = this;
+Tester::ExpectedFailure::ExpectedFailure(Tester& instance, std::string message, const bool enabled): _instance(instance), _message(std::move(message)) {
+    if(enabled) _instance._expectedFailure = this;
 }
 
 Tester::ExpectedFailure::~ExpectedFailure() {
-    _instance->_expectedFailure = nullptr;
+    _instance._expectedFailure = nullptr;
 }
 
 std::string Tester::ExpectedFailure::message() const { return _message; }

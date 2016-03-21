@@ -375,17 +375,17 @@ class CORRADE_TESTSUITE_EXPORT Tester {
     #endif
         class CORRADE_TESTSUITE_EXPORT ExpectedFailure {
             public:
-                explicit ExpectedFailure(Tester* instance, std::string message, bool enabled = true);
+                explicit ExpectedFailure(Tester& instance, std::string message, bool enabled = true);
 
                 /* For types with explicit bool conversion */
-                template<class T> explicit ExpectedFailure(Tester* instance, std::string message, T&& enabled): ExpectedFailure{instance, message, enabled ? true : false} {}
+                template<class T> explicit ExpectedFailure(Tester& instance, std::string message, T&& enabled): ExpectedFailure{instance, message, enabled ? true : false} {}
 
                 ~ExpectedFailure();
 
                 std::string message() const;
 
             private:
-                Tester* _instance;
+                Tester& _instance;
                 std::string _message;
         };
 
@@ -565,7 +565,7 @@ If any of the following checks passes, an error will be printed to output.
 @see @ref CORRADE_EXPECT_FAIL_IF()
 */
 #define CORRADE_EXPECT_FAIL(message)                                        \
-    ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)(this, message)
+    Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)(*this, message)
 
 /** @hideinitializer
 @brief Conditionally expect failure in all following checks in the same scope
@@ -599,7 +599,7 @@ Similarly to @ref CORRADE_VERIFY(), it is possible to use
 without doing explicit conversion (e.g. using `!!`).
 */
 #define CORRADE_EXPECT_FAIL_IF(condition, message)                          \
-    ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)(this, message, condition)
+    Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)(*this, message, condition)
 
 /** @hideinitializer
 @brief Skip test case
