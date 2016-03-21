@@ -231,6 +231,15 @@ set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "$<$<CONFIG:Debug>:CO
 
 if(CORRADE_TESTSUITE_TARGET_XCTEST)
     find_package(XCTest)
+
+    # Workaround for CMake iOS generator expression bug, see below
+    if(CORRADE_TARGET_IOS)
+        if(CMAKE_OSX_SYSROOT MATCHES "iPhoneOS")
+            set(_CORRADE_EFFECTIVE_PLATFORM_NAME "-iphoneos")
+        elseif(CMAKE_OSX_SYSROOT MATCHES "iPhoneSimulator")
+            set(_CORRADE_EFFECTIVE_PLATFORM_NAME "-iphonesimulator")
+        endif()
+    endif()
 endif()
 
 function(corrade_add_test test_name)
@@ -256,7 +265,14 @@ function(corrade_add_test test_name)
         configure_file(${CORRADE_TESTSUITE_XCTEST_RUNNER}
                        ${test_runner_file})
         xctest_add_bundle(${test_name}Runner ${test_name} ${test_runner_file})
-        xctest_add_test(${test_name} ${test_name}Runner)
+        if(CORRADE_TARGET_IOS)
+            # The EFFECTIVE_PLATFORM_NAME variable is not expanded when using
+            # TARGET_* generator expressions on iOS, we need to hardcode it
+            # manually. See http://public.kitware.com/pipermail/cmake/2016-March/063049.html
+            add_test(NAME ${test_name} COMMAND ${XCTest_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>${_CORRADE_EFFECTIVE_PLATFORM_NAME}/${test_name}Runner.xctest)
+        else()
+            xctest_add_test(${test_name} ${test_name}Runner)
+        endif()
     else()
         add_executable(${test_name} ${sources})
         target_link_libraries(${test_name} ${libraries} Corrade::TestSuite)
