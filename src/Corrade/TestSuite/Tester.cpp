@@ -24,6 +24,7 @@
 */
 
 #include "Tester.h"
+
 #include <algorithm>
 #include <iostream>
 #include <random>
@@ -127,7 +128,7 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
 
     Debug(logOutput, _useColor) << Debug::boldColor(Debug::Color::Default) << "Starting" << _testName << "with" << usedTestCases.size() << "test cases...";
 
-    for(auto testCase: usedTestCases) {
+    for(std::pair<int, TestCase> testCase: usedTestCases) {
         /* Reset output to stdout for each test case to prevent debug
             output segfaults */
         /** @todo Drop this when Debug::setOutput() is removed */
