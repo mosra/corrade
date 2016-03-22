@@ -44,8 +44,11 @@ struct ArrayTest: TestSuite::Tester {
     void constructFrom();
     void constructFromChar();
 
-    void boolConversion();
-    void pointerConversion();
+    void convertBool();
+    void convertPointer();
+    void convertView();
+    void convertViewDerived();
+    void convertVoid();
 
     void emptyCheck();
     void access();
@@ -61,6 +64,9 @@ struct ArrayTest: TestSuite::Tester {
 };
 
 typedef Containers::Array<int> Array;
+typedef Containers::ArrayView<int> ArrayView;
+typedef Containers::ArrayView<const int> ConstArrayView;
+typedef Containers::ArrayView<const void> VoidArrayView;
 
 ArrayTest::ArrayTest() {
     addTests({&ArrayTest::constructEmpty,
@@ -76,8 +82,11 @@ ArrayTest::ArrayTest() {
               &ArrayTest::constructFrom,
               &ArrayTest::constructFromChar,
 
-              &ArrayTest::boolConversion,
-              &ArrayTest::pointerConversion,
+              &ArrayTest::convertBool,
+              &ArrayTest::convertPointer,
+              &ArrayTest::convertView,
+              &ArrayTest::convertViewDerived,
+              &ArrayTest::convertVoid,
 
               &ArrayTest::emptyCheck,
               &ArrayTest::access,
@@ -216,13 +225,13 @@ void ArrayTest::constructFromChar() {
     CORRADE_COMPARE(a[1], 0x22);
 }
 
-void ArrayTest::boolConversion() {
+void ArrayTest::convertBool() {
     CORRADE_VERIFY(Array(2));
     CORRADE_VERIFY(!Array());
     CORRADE_VERIFY(!(std::is_convertible<Array, int>::value));
 }
 
-void ArrayTest::pointerConversion() {
+void ArrayTest::convertPointer() {
     Array a(2);
     int* b = a;
     CORRADE_COMPARE(b, a.begin());
@@ -256,6 +265,49 @@ void ArrayTest::pointerConversion() {
         CORRADE_VERIFY(!(std::is_convertible<const Array, const int*>::value));
         CORRADE_VERIFY(!(std::is_convertible<const Array&&, const int*>::value));
     }
+}
+
+void ArrayTest::convertView() {
+    Array a(5);
+    const Array ca(5);
+
+    const ArrayView b = a;
+    const ConstArrayView cb = ca;
+    CORRADE_VERIFY(b.begin() == a.begin());
+    CORRADE_VERIFY(cb.begin() == ca.begin());
+    CORRADE_COMPARE(b.size(), 5);
+    CORRADE_COMPARE(cb.size(), 5);
+}
+
+void ArrayTest::convertViewDerived() {
+    struct A { int i; };
+    struct B: A {};
+
+    /* Valid use case: constructing Containers::ArrayView<Math::Vector<3, Float>>
+       from Containers::ArrayView<Color3> because the data have the same size
+       and data layout */
+
+    CORRADE_VERIFY((std::is_convertible<Containers::Array<B>, Containers::ArrayView<A>>::value));
+
+    {
+        CORRADE_EXPECT_FAIL("Intentionally not forbidding construction of base array from larger derived type to stay compatible with raw arrays");
+
+        struct C: A { int b; };
+
+        /* Array of 5 Cs has larger size than array of 5 As so it does not make
+           sense to create the view from it, but we are keeping compatibility with
+           raw arrays and thus allow the users to shoot themselves in a foot. */
+
+        CORRADE_VERIFY(!(std::is_convertible<Containers::Array<C>, Containers::ArrayView<A>>::value));
+    }
+}
+
+void ArrayTest::convertVoid() {
+    /* void reference to Array */
+    Array a(6);
+    VoidArrayView b = a;
+    CORRADE_VERIFY(b == a);
+    CORRADE_COMPARE(b.size(), a.size()*sizeof(int));
 }
 
 void ArrayTest::emptyCheck() {
@@ -303,37 +355,37 @@ void ArrayTest::slice() {
     Array a = Array::from(1, 2, 3, 4, 5);
     const Array ac = Array::from(1, 2, 3, 4, 5);
 
-    ArrayView<int> b = a.slice(1, 4);
+    ArrayView b = a.slice(1, 4);
     CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(b[0], 2);
     CORRADE_COMPARE(b[1], 3);
     CORRADE_COMPARE(b[2], 4);
 
-    ArrayView<const int> bc = ac.slice(1, 4);
+    ConstArrayView bc = ac.slice(1, 4);
     CORRADE_COMPARE(bc.size(), 3);
     CORRADE_COMPARE(bc[0], 2);
     CORRADE_COMPARE(bc[1], 3);
     CORRADE_COMPARE(bc[2], 4);
 
-    ArrayView<int> c = a.prefix(3);
+    ArrayView c = a.prefix(3);
     CORRADE_COMPARE(c.size(), 3);
     CORRADE_COMPARE(c[0], 1);
     CORRADE_COMPARE(c[1], 2);
     CORRADE_COMPARE(c[2], 3);
 
-    ArrayView<const int> cc = ac.prefix(3);
+    ConstArrayView cc = ac.prefix(3);
     CORRADE_COMPARE(cc.size(), 3);
     CORRADE_COMPARE(cc[0], 1);
     CORRADE_COMPARE(cc[1], 2);
     CORRADE_COMPARE(cc[2], 3);
 
-    ArrayView<int> d = a.suffix(2);
+    ArrayView d = a.suffix(2);
     CORRADE_COMPARE(d.size(), 3);
     CORRADE_COMPARE(d[0], 3);
     CORRADE_COMPARE(d[1], 4);
     CORRADE_COMPARE(d[2], 5);
 
-    ArrayView<const int> dc = ac.suffix(2);
+    ConstArrayView dc = ac.suffix(2);
     CORRADE_COMPARE(dc.size(), 3);
     CORRADE_COMPARE(dc[0], 3);
     CORRADE_COMPARE(dc[1], 4);

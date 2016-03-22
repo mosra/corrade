@@ -38,18 +38,18 @@ struct StaticArrayViewTest: TestSuite::Tester {
     void construct();
     void constructFixedSize();
     void constructDerived();
+    void constructConst();
 
-    void boolConversion();
-    void pointerConversion();
+    void convertBool();
+    void convertPointer();
+    void convertConst();
+    void convertVoid();
 
     void access();
     void rangeBasedFor();
 
     void slice();
     void sliceToStatic();
-
-    void constView();
-    void voidConversion();
 };
 
 typedef Containers::ArrayView<int> ArrayView;
@@ -64,18 +64,18 @@ StaticArrayViewTest::StaticArrayViewTest() {
               &StaticArrayViewTest::construct,
               &StaticArrayViewTest::constructFixedSize,
               &StaticArrayViewTest::constructDerived,
+              &StaticArrayViewTest::constructConst,
 
-              &StaticArrayViewTest::boolConversion,
-              &StaticArrayViewTest::pointerConversion,
+              &StaticArrayViewTest::convertBool,
+              &StaticArrayViewTest::convertPointer,
+              &StaticArrayViewTest::convertConst,
+              &StaticArrayViewTest::convertVoid,
 
               &StaticArrayViewTest::access,
               &StaticArrayViewTest::rangeBasedFor,
 
               &StaticArrayViewTest::slice,
-              &StaticArrayViewTest::sliceToStatic,
-
-              &StaticArrayViewTest::constView,
-              &StaticArrayViewTest::voidConversion});
+              &StaticArrayViewTest::sliceToStatic});
 }
 
 void StaticArrayViewTest::constructEmpty() {
@@ -124,14 +124,21 @@ void StaticArrayViewTest::constructDerived() {
     }
 }
 
-void StaticArrayViewTest::boolConversion() {
+void StaticArrayViewTest::constructConst() {
+    const int a[] = {3, 4, 7, 12, 0, -15};
+
+    ConstStaticArrayView<6> b = a;
+    CORRADE_COMPARE(b[2], 7);
+}
+
+void StaticArrayViewTest::convertBool() {
     int a[7];
     CORRADE_VERIFY(StaticArrayView<5>{a});
     CORRADE_VERIFY(!StaticArrayView<5>{});
     CORRADE_VERIFY(!(std::is_convertible<StaticArrayView<5>, int>::value));
 }
 
-void StaticArrayViewTest::pointerConversion() {
+void StaticArrayViewTest::convertPointer() {
     int a[7];
     StaticArrayView<7> b = a;
     int* bp = b;
@@ -145,6 +152,25 @@ void StaticArrayViewTest::pointerConversion() {
     const StaticArrayView<7> e = a;
     const int* ep = e + 2;
     CORRADE_COMPARE(ep, &e[2]);
+}
+
+void StaticArrayViewTest::convertConst() {
+    int a[3];
+    StaticArrayView<3> b = a;
+    ConstArrayView c = b;
+    CORRADE_VERIFY(c == a);
+}
+
+void StaticArrayViewTest::convertVoid() {
+    int a[] = {3, 4, 7, 12, 0, -15};
+
+    /** @todo C++14: test that all the operations are really constexpr (C++11 doesn't allow void conversions IMHO) */
+
+    /* void reference to ArrayView */
+    StaticArrayView<6> b = a;
+    VoidArrayView c = b;
+    CORRADE_VERIFY(c == b);
+    CORRADE_COMPARE(c.size(), 6*sizeof(int));
 }
 
 void StaticArrayViewTest::access() {
@@ -206,30 +232,6 @@ void StaticArrayViewTest::sliceToStatic() {
     CORRADE_COMPARE(b[0], 2);
     CORRADE_COMPARE(b[1], 3);
     CORRADE_COMPARE(b[2], 4);
-}
-
-void StaticArrayViewTest::constView() {
-    const int a[] = {3, 4, 7, 12, 0, -15};
-
-    ConstStaticArrayView<6> b = a;
-    CORRADE_COMPARE(b[2], 7);
-
-    int c[3];
-    StaticArrayView<3> d = c;
-    ConstArrayView e = d;
-    CORRADE_VERIFY(e == c);
-}
-
-void StaticArrayViewTest::voidConversion() {
-    int a[] = {3, 4, 7, 12, 0, -15};
-
-    /** @todo C++14: test that all the operations are really constexpr (C++11 doesn't allow void conversions IMHO) */
-
-    /* void reference to ArrayView */
-    StaticArrayView<6> b = a;
-    VoidArrayView c = b;
-    CORRADE_VERIFY(c == b);
-    CORRADE_COMPARE(c.size(), 6*sizeof(int));
 }
 
 }}}

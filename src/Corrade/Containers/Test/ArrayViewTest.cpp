@@ -25,7 +25,7 @@
 
 #include <sstream>
 
-#include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/ArrayView.h"
 #include "Corrade/TestSuite/Tester.h"
 
 namespace Corrade { namespace Containers { namespace Test {
@@ -38,11 +38,14 @@ struct ArrayViewTest: TestSuite::Tester {
     void constructNullptrSize();
     void construct();
     void constructFixedSize();
-    void constructArray();
     void constructDerived();
+    void constructConst();
+    void constructVoid();
 
-    void boolConversion();
-    void pointerConversion();
+    void convertBool();
+    void convertPointer();
+    void convertConst();
+    void convertVoid();
 
     void emptyCheck();
     void access();
@@ -52,13 +55,8 @@ struct ArrayViewTest: TestSuite::Tester {
     void sliceNullptr();
     void slice();
     void sliceToStatic();
-
-    void constView();
-    void voidConstruction();
-    void voidConversion();
 };
 
-typedef Containers::Array<int> Array;
 typedef Containers::ArrayView<int> ArrayView;
 typedef Containers::ArrayView<const int> ConstArrayView;
 typedef Containers::ArrayView<const void> VoidArrayView;
@@ -69,11 +67,14 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::constructNullptrSize,
               &ArrayViewTest::construct,
               &ArrayViewTest::constructFixedSize,
-              &ArrayViewTest::constructArray,
               &ArrayViewTest::constructDerived,
+              &ArrayViewTest::constructConst,
+              &ArrayViewTest::constructVoid,
 
-              &ArrayViewTest::boolConversion,
-              &ArrayViewTest::pointerConversion,
+              &ArrayViewTest::convertBool,
+              &ArrayViewTest::convertPointer,
+              &ArrayViewTest::convertConst,
+              &ArrayViewTest::convertVoid,
 
               &ArrayViewTest::emptyCheck,
               &ArrayViewTest::access,
@@ -82,11 +83,7 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::sliceInvalid,
               &ArrayViewTest::sliceNullptr,
               &ArrayViewTest::slice,
-              &ArrayViewTest::sliceToStatic,
-
-              &ArrayViewTest::constView,
-              &ArrayViewTest::voidConstruction,
-              &ArrayViewTest::voidConversion});
+              &ArrayViewTest::sliceToStatic});
 }
 
 void ArrayViewTest::constructEmpty() {
@@ -128,18 +125,6 @@ void ArrayViewTest::constructFixedSize() {
     CORRADE_COMPARE(b.size(), 13);
 }
 
-void ArrayViewTest::constructArray() {
-    Array a(5);
-    const Array ca(5);
-
-    const ArrayView b = a;
-    const ConstArrayView cb = ca;
-    CORRADE_VERIFY(b.begin() == a.begin());
-    CORRADE_VERIFY(cb.begin() == ca.begin());
-    CORRADE_COMPARE(b.size(), 5);
-    CORRADE_COMPARE(cb.size(), 5);
-}
-
 void ArrayViewTest::constructDerived() {
     struct A { int i; };
     struct B: A {};
@@ -149,7 +134,6 @@ void ArrayViewTest::constructDerived() {
        and data layout */
 
     CORRADE_VERIFY((std::is_convertible<B(&)[5], Containers::ArrayView<A>>::value));
-    CORRADE_VERIFY((std::is_convertible<Containers::Array<B>, Containers::ArrayView<A>>::value));
 
     {
         CORRADE_EXPECT_FAIL("Intentionally not forbidding construction of base array from larger derived type to stay compatible with raw arrays");
@@ -161,11 +145,30 @@ void ArrayViewTest::constructDerived() {
            raw arrays and thus allow the users to shoot themselves in a foot. */
 
         CORRADE_VERIFY(!(std::is_convertible<C(&)[5], Containers::ArrayView<A>>::value));
-        CORRADE_VERIFY(!(std::is_convertible<Containers::Array<C>, Containers::ArrayView<A>>::value));
     }
 }
 
-void ArrayViewTest::boolConversion() {
+void ArrayViewTest::constructConst() {
+    const int a[] = {3, 4, 7, 12, 0, -15};
+
+    ConstArrayView b = a;
+    CORRADE_COMPARE(b.size(), 6);
+    CORRADE_COMPARE(b[2], 7);
+}
+
+void ArrayViewTest::constructVoid() {
+    void* a = reinterpret_cast<void*>(0xdeadbeef);
+    VoidArrayView b(a, 25);
+    CORRADE_VERIFY(b == a);
+    CORRADE_COMPARE(b.size(), 25);
+
+    int* c = reinterpret_cast<int*>(0xdeadbeef);
+    VoidArrayView d(c, 25);
+    CORRADE_VERIFY(d == c);
+    CORRADE_COMPARE(d.size(), 100);
+}
+
+void ArrayViewTest::convertBool() {
     int a[7];
     CORRADE_VERIFY(ArrayView(a));
     CORRADE_VERIFY(!ArrayView());
@@ -175,7 +178,7 @@ void ArrayViewTest::boolConversion() {
     CORRADE_VERIFY(!(std::is_convertible<VoidArrayView, int>::value));
 }
 
-void ArrayViewTest::pointerConversion() {
+void ArrayViewTest::convertPointer() {
     int a[7];
     ArrayView b = a;
     int* bp = b;
@@ -193,6 +196,37 @@ void ArrayViewTest::pointerConversion() {
     const ArrayView e = a;
     const int* ep = e + 2;
     CORRADE_COMPARE(ep, &e[2]);
+}
+
+void ArrayViewTest::convertConst() {
+    int a[3];
+    ArrayView b = a;
+    ConstArrayView c = b;
+    CORRADE_VERIFY(c == a);
+    CORRADE_COMPARE(c.size(), 3);
+}
+
+void ArrayViewTest::convertVoid() {
+    int a[] = {3, 4, 7, 12, 0, -15};
+
+    /** @todo C++14: test that all the operations are really constexpr (C++11 doesn't allow void conversions IMHO) */
+
+    /* void reference to compile-time array */
+    VoidArrayView b = a;
+    CORRADE_VERIFY(b == a);
+    CORRADE_VERIFY(b.data() == a);
+    CORRADE_COMPARE(b.size(), 6*sizeof(int));
+
+    /* void reference to runtime array */
+    VoidArrayView c = {a, 6};
+    CORRADE_VERIFY(c == a);
+    CORRADE_COMPARE(c.size(), 6*sizeof(int));
+
+    /* void reference to ArrayView */
+    ArrayView f = a;
+    VoidArrayView g = f;
+    CORRADE_VERIFY(g == f);
+    CORRADE_COMPARE(g.size(), f.size()*sizeof(int));
 }
 
 void ArrayViewTest::emptyCheck() {
@@ -306,61 +340,6 @@ void ArrayViewTest::sliceToStatic() {
     CORRADE_COMPARE(b[0], 2);
     CORRADE_COMPARE(b[1], 3);
     CORRADE_COMPARE(b[2], 4);
-}
-
-void ArrayViewTest::constView() {
-    const int a[] = {3, 4, 7, 12, 0, -15};
-
-    ConstArrayView b = a;
-    CORRADE_COMPARE(b.size(), 6);
-    CORRADE_COMPARE(b[2], 7);
-
-    int c[3];
-    ArrayView d = c;
-    ConstArrayView e = d;
-    CORRADE_VERIFY(e == c);
-    CORRADE_COMPARE(e.size(), 3);
-}
-
-void ArrayViewTest::voidConstruction() {
-    void* a = reinterpret_cast<void*>(0xdeadbeef);
-    VoidArrayView b(a, 25);
-    CORRADE_VERIFY(b == a);
-    CORRADE_COMPARE(b.size(), 25);
-
-    int* c = reinterpret_cast<int*>(0xdeadbeef);
-    VoidArrayView d(c, 25);
-    CORRADE_VERIFY(d == c);
-    CORRADE_COMPARE(d.size(), 100);
-}
-
-void ArrayViewTest::voidConversion() {
-    int a[] = {3, 4, 7, 12, 0, -15};
-
-    /** @todo C++14: test that all the operations are really constexpr (C++11 doesn't allow void conversions IMHO) */
-
-    /* void reference to compile-time array */
-    VoidArrayView b = a;
-    CORRADE_VERIFY(b == a);
-    CORRADE_VERIFY(b.data() == a);
-    CORRADE_COMPARE(b.size(), 6*sizeof(int));
-
-    /* void reference to runtime array */
-    VoidArrayView c = {a, 6};
-    CORRADE_VERIFY(c == a);
-    CORRADE_COMPARE(c.size(), 6*sizeof(int));
-
-    /* void reference to Array */
-    Array d(6);
-    VoidArrayView e = d;
-    CORRADE_VERIFY(e == d);
-    CORRADE_COMPARE(e.size(), d.size()*sizeof(int));
-
-    /* void reference to ArrayView */
-    ArrayView f = a;
-    VoidArrayView g = f;
-    CORRADE_VERIFY(g == f);
-    CORRADE_COMPARE(g.size(), f.size()*sizeof(int));
 }
 
 }}}
