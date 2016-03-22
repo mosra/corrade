@@ -90,6 +90,20 @@ struct DirectInitT {
 };
 
 /**
+@brief In-place initialization tag type
+
+Used to distinguish construction with in-place initialization.
+@see @ref DirectInit
+*/
+/* Explicit constructor to avoid ambiguous calls when using {} */
+struct InPlaceInitT {
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    struct Init{};
+    constexpr explicit InPlaceInitT(Init) {}
+    #endif
+};
+
+/**
 @brief Default initialization tag
 
 Use for construction using default initialization (builtin types are not
@@ -118,6 +132,13 @@ constexpr NoInitT NoInit{NoInitT::Init{}};
 Use for construction with direct initialization.
 */
 constexpr DirectInitT DirectInit{DirectInitT::Init{}};
+
+/**
+@brief In-place initialization tag
+
+Use for construction in-place.
+*/
+constexpr InPlaceInitT InPlaceInit{InPlaceInitT::Init{}};
 
 }}
 
