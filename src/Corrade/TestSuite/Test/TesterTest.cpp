@@ -316,6 +316,8 @@ struct TesterTest: Tester {
     void test();
     void emptyTest();
     void skipOnly();
+    void repeatEvery();
+    void repeatAll();
 
     void compareNoCommonType();
     void compareAsOverload();
@@ -331,6 +333,8 @@ TesterTest::TesterTest() {
     addTests({&TesterTest::test,
               &TesterTest::emptyTest,
               &TesterTest::skipOnly,
+              &TesterTest::repeatEvery,
+              &TesterTest::repeatAll,
 
               &TesterTest::compareNoCommonType,
               &TesterTest::compareAsOverload,
@@ -483,6 +487,48 @@ void TesterTest::skipOnly() {
         "    OK [04] equal()\n"
         "    OK [09] compareAs()\n"
         "Finished TesterTest::Test with 0 errors out of 3 checks.\n";
+    CORRADE_COMPARE(out.str(), expected);
+}
+
+void TesterTest::repeatEvery() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "27 4", "--repeat-every", "2" };
+    const int argc = std::extent<decltype(argv)>();
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(argc, argv, &out, &out);
+
+    CORRADE_VERIFY(result == 0);
+
+    std::string expected =
+        "Starting TesterTest::Test with 2 test cases...\n"
+        "    OK [27] repeatedTest()@100\n"
+        "    OK [04] equal()@2\n"
+        "Finished TesterTest::Test with 0 errors out of 102 checks.\n";
+    CORRADE_COMPARE(out.str(), expected);
+}
+
+void TesterTest::repeatAll() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "27 4", "--repeat-all", "2" };
+    const int argc = std::extent<decltype(argv)>();
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(argc, argv, &out, &out);
+
+    CORRADE_VERIFY(result == 0);
+
+    std::string expected =
+        "Starting TesterTest::Test with 4 test cases...\n"
+        "    OK [27] repeatedTest()@50\n"
+        "    OK [04] equal()\n"
+        "    OK [27] repeatedTest()@50\n"
+        "    OK [04] equal()\n"
+        "Finished TesterTest::Test with 0 errors out of 102 checks.\n";
     CORRADE_COMPARE(out.str(), expected);
 }
 

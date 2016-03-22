@@ -69,6 +69,10 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
         .addOption("only").setHelp("only", "run only test cases with given numbers (in that order)", "\"N1 N2...\"")
         .addBooleanOption("shuffle").setHelp("shuffle", "randomly shuffle test case order")
             .setFromEnvironment("shuffle", "CORRADE_TEST_SHUFFLE")
+        .addOption("repeat-every", "1").setHelp("repeat-every", "repeat every test case N times", "N")
+            .setFromEnvironment("repeat-every", "CORRADE_TEST_REPEAT_EVERY")
+        .addOption("repeat-all", "1").setHelp("repeat-all", "repeat all test cases N times", "N")
+            .setFromEnvironment("repeat-all", "CORRADE_TEST_REPEAT_ALL")
         .setHelp("Corrade TestSuite executable. By default runs test cases in order in which they\n"
                  "were added and exits with non-zero code if any of them failed.")
         .parse(argc, argv);
@@ -113,6 +117,17 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
         usedTestCases.emplace_back(i + 1, _testCases[i]);
     }
 
+    const std::size_t repeatAllCount = args.value<std::size_t>("repeat-all");
+    const std::size_t repeatEveryCount = args.value<std::size_t>("repeat-every");
+    if(!repeatAllCount || !repeatEveryCount)
+        Utility::Fatal() << "You have to repeat at least once";
+
+    /* Repeat the test cases, if requested */
+    const std::size_t originalTestCaseCount = usedTestCases.size();
+    usedTestCases.reserve(usedTestCases.size()*repeatAllCount);
+    for(std::size_t i = 0; i != repeatAllCount - 1; ++i)
+        usedTestCases.insert(usedTestCases.end(), usedTestCases.begin(), usedTestCases.begin() + originalTestCaseCount);
+
     /* Shuffle the test cases, if requested */
     if(args.isSet("shuffle"))
         std::shuffle(usedTestCases.begin(), usedTestCases.end(), std::minstd_rand{std::random_device{}()});
@@ -140,13 +155,16 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
         _testCaseInstanceId = testCase.second.instanceId;
         _testCaseDescription = testCase.second.instanceId == ~std::size_t{} ? std::string{} : std::to_string(testCase.second.instanceId);
 
+        /* Final combined repeat count */
+        const std::size_t repeatCount = testCase.second.repeatCount*repeatEveryCount;
+
         bool aborted = false;
-        for(std::size_t i = 0; i != testCase.second.repeatCount && !aborted; ++i) {
+        for(std::size_t i = 0; i != repeatCount && !aborted; ++i) {
             if(testCase.second.setup)
                 (this->*testCase.second.setup)();
 
             /* Print the repeat ID only if we are repeating */
-            _testCaseRepeatId = testCase.second.repeatCount == 1 ? 0 : i + 1;
+            _testCaseRepeatId = repeatCount == 1 ? 0 : i + 1;
             _testCaseLine = 0;
             _testCaseName.clear();
             _testCaseRunning = true;
