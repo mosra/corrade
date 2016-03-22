@@ -29,6 +29,7 @@ set(CorradeContainers_HEADERS
     Containers.h
     EnumSet.h
     LinkedList.h
+    StaticArray.h
     Tags.h)
 
 # Force IDEs to display all header files in project view
