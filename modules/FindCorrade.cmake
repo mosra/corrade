@@ -289,6 +289,13 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
         set(_CORRADE_${_COMPONENT}_DEPENDENCIES Containers rc)
     endif()
 
+    # Mark the dependencies as required if the component is also required
+    if(Corrade_FIND_REQUIRED_${_component})
+        foreach(_dependency ${_CORRADE_${_COMPONENT}_DEPENDENCIES})
+            set(Corrade_FIND_REQUIRED_${_dependency} TRUE)
+        endforeach()
+    endif()
+
     list(APPEND _CORRADE_ADDITIONAL_COMPONENTS ${_CORRADE_${_COMPONENT}_DEPENDENCIES})
 endforeach()
 
