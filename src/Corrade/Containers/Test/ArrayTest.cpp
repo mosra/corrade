@@ -43,6 +43,7 @@ struct ArrayTest: TestSuite::Tester {
     void constructMove();
     void constructFrom();
     void constructFromChar();
+    void constructDirectReferences();
 
     void convertBool();
     void convertPointer();
@@ -81,6 +82,7 @@ ArrayTest::ArrayTest() {
               &ArrayTest::constructMove,
               &ArrayTest::constructFrom,
               &ArrayTest::constructFromChar,
+              &ArrayTest::constructDirectReferences,
 
               &ArrayTest::convertBool,
               &ArrayTest::convertPointer,
@@ -223,6 +225,23 @@ void ArrayTest::constructFromChar() {
     const auto a = Containers::Array<char>::from(0x11, 0x22, 0x33);
     CORRADE_VERIFY(a);
     CORRADE_COMPARE(a[1], 0x22);
+}
+
+void ArrayTest::constructDirectReferences() {
+    struct NonCopyable {
+        NonCopyable(const NonCopyable&) = delete;
+        NonCopyable(NonCopyable&&) = delete;
+        NonCopyable& operator=(const NonCopyable&) = delete;
+        NonCopyable& operator=(NonCopyable&&) = delete;
+        NonCopyable() = default;
+    } a;
+
+    struct Reference {
+        Reference(NonCopyable&) {}
+    };
+
+    const Containers::Array<Reference> b{Containers::DirectInit, 5, a};
+    CORRADE_COMPARE(b.size(), 5);
 }
 
 void ArrayTest::convertBool() {

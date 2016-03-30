@@ -262,11 +262,9 @@ class Array {
          *
          * Allocates the array using the @ref Array(NoInitT, std::size_t)
          * constructor and then initializes each element with placement new
-         * using @p arguments. Note that because the arguments may be used as a
-         * parameter in more than one constructor call, they are not forwarded
-         * (i.e. rvalue references are *not* preserved).
+         * using forwarded @p arguments.
          */
-        template<class... Args> explicit Array(DirectInitT, std::size_t size, Args ... args);
+        template<class... Args> explicit Array(DirectInitT, std::size_t size, Args&&... args);
 
         /**
          * @brief Construct default-initialized array
@@ -488,9 +486,9 @@ template<class T, class D> inline Array<T, D>::Array(Array<T, D>&& other) noexce
     other._size = 0;
 }
 
-template<class T, class D> template<class ...Args> Array<T, D>::Array(DirectInitT, std::size_t size, Args... args): Array{NoInit, size} {
+template<class T, class D> template<class ...Args> Array<T, D>::Array(DirectInitT, std::size_t size, Args&&... args): Array{NoInit, size} {
     for(std::size_t i = 0; i != size; ++i)
-        new(_data + i) T{args...};
+        new(_data + i) T{std::forward<Args>(args)...};
 }
 
 template<class T, class D> inline Array<T, D>& Array<T, D>::operator=(Array<T, D>&& other) noexcept {
