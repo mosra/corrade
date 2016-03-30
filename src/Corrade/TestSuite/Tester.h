@@ -191,9 +191,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @brief Add repeated test cases
          *
          * Unlike the above function repeats each of the test cases until it
-         * fails or @ref repeatCount is reached. Useful for stability or
-         * resource leak checking. Each test case appears in the output log
-         * only once.
+         * fails or @p repeatCount is reached. Useful for stability or resource
+         * leak checking. Each test case appears in the output log only once.
          * @see @ref addInstancedTests(), @ref addRepeatedInstancedTests()
          */
         template<class Derived> void addRepeatedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t repeatCount) {
@@ -222,10 +221,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @brief Add repeated test cases with explicit setup and teardown functions
          *
          * Unlike the above function repeats each of the test cases until it
-         * fails or @ref repeatCount is reached. Useful for stability or
-         * resource leak checking. The @p setup and @p teardown functions are
-         * called again for each repeat of each test case. Each test case
-         * appears in the output log only once.
+         * fails or @p repeatCount is reached. Useful for stability or resource
+         * leak checking. The @p setup and @p teardown functions are called
+         * again for each repeat of each test case. Each test case appears in
+         * the output log only once.
          * @see @ref addInstancedTests(), @ref addRepeatedInstancedTests()
          */
         template<class Derived> void addRepeatedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t repeatCount, void(Derived::*setup)(), void(Derived::*teardown)()) {
@@ -250,8 +249,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @brief Add repeated instanced test cases
          *
          * Unlike the above function repeats each of the test case instances
-         * until it fails or @ref repeatCount is reached. Useful for stability
-         * or resource leak checking. Each test case appears in the output once
+         * until it fails or @p repeatCount is reached. Useful for stability or
+         * resource leak checking. Each test case appears in the output once
          * for each instance.
          * @see @ref addInstancedTests(), @ref addRepeatedInstancedTests()
          */
@@ -281,10 +280,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @brief Add repeated instanced test cases with explicit setup and teardown functions
          *
          * Unlike the above function repeats each of the test case instances
-         * until it fails or @ref repeatCount is reached. Useful for stability
-         * or resource leak checking. The @p setup and @p teardown functions
-         * are called again for each repeat of each instance of each test case.
-         * The test case appears in the output once for each instance.
+         * until it fails or @p repeatCount is reached. Useful for stability or
+         * resource leak checking. The @p setup and @p teardown functions are
+         * called again for each repeat of each instance of each test case. The
+         * test case appears in the output once for each instance.
          * @see @ref addInstancedTests(), @ref addRepeatedInstancedTests()
          */
         template<class Derived> void addRepeatedInstancedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t repeatCount, std::size_t instanceCount, void(Derived::*setup)(), void(Derived::*teardown)()) {
