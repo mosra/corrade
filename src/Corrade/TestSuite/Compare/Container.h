@@ -47,7 +47,8 @@ std::vector<int> a, b;
 CORRADE_COMPARE_AS(a, b, Compare::Container);
 @endcode
 
-It is also possible to sort the containers before comparison using SortedContainer:
+It is also possible to sort the containers before comparison using
+@ref SortedContainer:
 @code
 CORRADE_COMPARE_AS(a, b, Compare::SortedContainer);
 @endcode
@@ -59,7 +60,7 @@ template<class> class Container {};
 /**
 @brief Pseudo-type for comparing sorted container contents
 
-See Container for more information.
+See @ref Container for more information.
 */
 template<class T> class SortedContainer: public Container<T> {};
 
