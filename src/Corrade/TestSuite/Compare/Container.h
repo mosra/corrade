@@ -83,8 +83,11 @@ template<class T> bool Comparator<Compare::Container<T>>::operator()(const T& ac
     _expectedContents = &expected;
 
     if(_actualContents->size() != _expectedContents->size()) return false;
+
+    /* Recursively use comparator on the values */
+    Comparator<typename std::decay<decltype((*_actualContents)[0])>::type> comparator;
     for(std::size_t i = 0; i != _actualContents->size(); ++i)
-        if((*_actualContents)[i] != (*_expectedContents)[i]) return false;
+        if(!comparator((*_actualContents)[i], (*_expectedContents)[i])) return false;
 
     return true;
 }

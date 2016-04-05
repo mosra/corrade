@@ -39,6 +39,7 @@ struct ContainerTest: Tester {
     void outputExpectedSmaller();
     void output();
     void sorted();
+    void floatingPoint();
 
     void nonCopyableArray();
 };
@@ -49,6 +50,7 @@ ContainerTest::ContainerTest() {
               &ContainerTest::outputExpectedSmaller,
               &ContainerTest::output,
               &ContainerTest::sorted,
+              &ContainerTest::floatingPoint,
 
               &ContainerTest::nonCopyableArray});
 }
@@ -127,6 +129,15 @@ void ContainerTest::sorted() {
     CORRADE_VERIFY((Comparator<Compare::SortedContainer<std::vector<int>>>()(a, b)));
     CORRADE_VERIFY((Comparator<Compare::SortedContainer<std::vector<int>>>()(b, a)));
     CORRADE_VERIFY((!Comparator<Compare::SortedContainer<std::vector<int>>>()(a, c)));
+}
+
+void ContainerTest::floatingPoint() {
+    std::vector<float> a{3.202122f};
+    std::vector<float> b{3.202123f};
+    std::vector<float> c{3.202130f};
+
+    CORRADE_VERIFY(Comparator<Compare::Container<std::vector<float>>>{}(a, b));
+    CORRADE_VERIFY(!Comparator<Compare::Container<std::vector<float>>>{}(a, c));
 }
 
 void ContainerTest::nonCopyableArray() {
