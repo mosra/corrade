@@ -46,14 +46,21 @@ guidelines of large projects:
 Each file must have one blank line at the end (Git will warn you in the
 diff if it's not the case), indentation is done exclusively with spaces (4
 spaces). Trailing whitespaces are not permitted (and you should set up your
-Git installation to warn about that).
+Git installation to warn about that). Files in the repository should be with LF
+line ending by default. If CR+LF line endings are required for particular
+files, they have to be explicitly listed in `.gitattributes` file.
 
-The text (and code) should be wrapped around 80th column, long single-line
-statements are allowed unless it hurts readability.
+Logic sections of the code and documentation paragraphs are always separated
+with not more than one empty line to save vertical space. Sentences are always
+separated with only one space.
+
+The text (and code) should be wrapped around 80th column to make it possible to
+view more files alongside each other without breaking their layout, long
+single-line statements are allowed unless it hurts readability.
 
 @section corrade-coding-style-cmake CMake code
 
-All cmake functions and macros (e.g. `add_executable()`, `set()`) are
+All CMake functions and macros (e.g. `add_executable()`, `set()`) are
 lowercase, keywords (e.g. `FILES`, `DESTINATION`) are uppercase. Variables are
 mostly uppercase with underscores between words, except for variables with
 direct relation to any named target - then they have the target name as prefix
@@ -70,7 +77,13 @@ set(CorradeUtility_SRCS
     Directory.cpp)
 @endcode
 
-Source and header lists should be ordered alphabetically.
+Source and header lists should be ordered alphabetically, subdirectories last,
+preferably separated by a single empty line.
+
+Prefer to use the new, non-global CMake workflow, so `target_include_directories()`,
+`target_compile_definitions()` and `target_compile_options()` instead of
+`include_directories()`, `add_definitions()` and modifying the global
+`CMAKE_CXX_FLAGS`.
 
 @section corrade-coding-style-cpp C++ code
 
@@ -78,37 +91,37 @@ Source and header lists should be ordered alphabetically.
 
 All C++ header and source files are named after the class they contain with no
 case change. Thus there should be only one class per file, but if the classes
-are closely related and small enough, you can make an exception (see
-Utility/Debug.h or Utility/TypeTraits.h for example).
+are closely related and not very large, you can make an exception (see
+Utility/Debug.h or Utility/TypeTraits.h for example). That might also help with
+compilation times.
 
 Supporting headers (not relevant to end user), such as various `configure.h`,
 `visibility.h` etc., which are used only internally and don't contain any
-code, should have first letter of the name lowercased to distinguish them from
-API headers.
+publicly documented APIs should have first letter of the name lowercased to
+distinguish them from API headers.
 
-Code in the root Corrade namespace is in `src/` directory, each subnamespace is
-in its own subdirectory. Unit tests are in `Test` subnamespace (and
-subdirectory). Implementation details (helper classes etc.) which shouldn't be
-visible to end users should be in `Implementation` subnamespace in the same
-file as the class/function for which the implementation is. See
-@ref corrade-coding-style-documentation section below for guide how to hide it
-also from Doxygen documentation.
+Code in the root Corrade namespace is in `src/Corrade` directory, each
+subnamespace is in its own subdirectory. Unit tests are in `Test` subnamespace
+(and subdirectory). Implementation details (helper classes etc.) which
+shouldn't be visible to end users should be in `Implementation` subnamespace in
+the same file as the class/function for which the implementation is.
 
-Implementation details which are not referenced from any header should be either
-in anonymous namespace in source file (@ref corrade-coding-style-cpp-anonymous-namespace "see below")
-or (if referenced from more than one source file, from tests etc.) in
-`Implementation` namespace in separate file in `Implementation` subdirectory.
-These subdirectories are treated as private implementation, thus they are by
-default excluded from documentation, their symbols shouldn't be exported and
-contents of these subdirectories shouldn't be installed anywhere.
+Implementation details which are not referenced from any header should be
+either in anonymous namespace in source file
+(@ref corrade-coding-style-cpp-anonymous-namespace "see below") or (if
+referenced from more than one source file, from tests etc.) in `Implementation`
+namespace in separate file in `Implementation` subdirectory. These
+subdirectories are treated as private implementation, thus they are by default
+excluded from documentation, their symbols shouldn't be exported and contents
+of these subdirectories shouldn't be installed anywhere.
 
 @subsection corrade-coding-style-cpp-files File structure
 
 Headers have an strict structure. Include guards are basically include path
 with slashes replaced with underscores to make refactoring as easy as possible.
-Directly after them is license block, blank line, then file documentation,
-blank line and after that the contents of the header. Include guard ending is
-only `#``endif`, without any additional comments.
+Directly after them is license block, blank line, then Doxygen file
+documentation block, blank line and after that the contents of the header.
+Include guard ending is only `#``endif`, without any additional comments.
 
 Source file have similar structure as headers - first license block, then
 blank line, then the includes, then blank line, then contents of the file.
@@ -117,11 +130,11 @@ Includes should be organized into separate groups separated with blank line -
 first header belonging to the particular source file (if the file is source
 file), then system includes, then includes from the engine itself and then
 internal includes used only in the particular file (e.g. `configure.h`).
-Includes from system libraries and dependencies are in angle brackets,
-includes from the library itself are in quotes. Includes should be sorted by
-"level" (e.g. C includes (`&lt;cstdlib&gt;`) before C++ includes
-(`&lt;string&gt;`) and those before dependencies (`&lt;dirent.h&gt;`)),
-then by path name.
+Inter-project includes should be relative to the `src/` directory. Includes
+from system libraries and dependencies are in angle brackets, includes from the
+library itself are in quotes. Includes should be sorted by "level" (e.g. C
+includes (`&lt;cstdlib&gt;`) before C++ includes (`&lt;string&gt;`) and those
+before dependencies (`&lt;dirent.h&gt;`)), then by path name.
 
 @subsection corrade-coding-style-cpp-format Code format
 
@@ -131,16 +144,16 @@ Namespaces, classes and structs, enums, type template names and static
 constants should be named with `CamelCase`, i.e. first letter of the name and
 each successive word uppercase, other lowercase. E.g. `ConfigurationGroup`.
 Classes with pure virtual methods or base classes which are not meant to be
-used directly should be prefixed with `Abstract`. If the class is not meant
-to be instanced directly and doesn't have any pure virtual methods, consider
-using pure virtual destructor.
+used directly should be prefixed with `Abstract`.
 
 Functions, function parameters, non-type template names and variables should
 be named with `camelCase`, i.e. first letter of the name lowercase, each
 successive word starting with uppercase. E.g. `trimLeadingSpaces()`.
 
 Preprocessor macros should be written in uppercase with underscores between
-words, e.g. `CORRADE_EXPORT`.
+words, e.g. `CORRADE_EXPORT` and prefixed with project name. Exceptions are
+tiny one-short macros that are undefined right after they are used (switch case
+helpers etc.), in that case they are lowercase and prefixed with underscore.
 
 Redundant information and abbrevations in names are not recommended (use
 `determinant`, `inverse` and `attribute` instead of `det`, `inv` and `attr`).
@@ -345,18 +358,19 @@ with `override` instead.
 
 @subsubsection corrade-coding-style-cpp-macros Preprocessor macros
 
-Preprocessor macros should have the same indentation as surrounding code. If
-the macro is long or contains code which should be spanned or multiple lines,
-it should be wrapped on multiple lines, each successive line indented and the
-line wrapping indicator `\` should be aligned around 80th column, preferably
-on some tab-stop.
+Preprocessor macros should have the same indentation as surrounding code. Not
+indenting or indenting between `#` and the macro breaks visual flow and thus is
+not allowed. If the macro is long or contains code which should be spanned or
+multiple lines, it should be wrapped on multiple lines, each successive line
+indented and the line wrapping indicator `\` should be aligned around 80th
+column, preferably on some tab-stop.
 
-@subsection corrade-coding-style-cpp-constructors Class constructors
+@subsection corrade-coding-style-cpp-constructors Class constructors and destructors
 
 All constructors (except copy and move constructors) should be `explicit` by
 default. Remove the keyword only if you want to allow implicit conversions
 or want to construct the class with brace initializer (e.g. vector and matrix
-classes). If the class has no constructor, add explicit default-created one:
+classes) If the class has no constructor, add explicit default-created one:
 @code
 class MyClass {
     public:
@@ -380,6 +394,11 @@ class UtilityClass {
 };
 @endcode
 
+If the class is not meant to be instantiated directly and doesn't have any pure
+virtual methods, consider using protected destructor. Only if that is not
+possible (because you need to be able to call `delete` on the `Abstract*`
+class), use virtual destructor.
+
 @subsection corrade-coding-style-cpp-constexpr Constant expressions and constants
 
 Use `constexpr` keyword where appropriate, mainly for getters, operators and
@@ -394,9 +413,10 @@ symbol and the constant might not be always inlined.
 
 @subsection corrade-coding-style-cpp-assert Assertions
 
-Use asserts as much as possible. Utility library has convenient CORRADE_ASSERT(),
-CORRADE_INTERNAL_ASSERT() and CORRADE_INTERNAL_ASSERT_OUTPUT() macros, see their
-documentation for more information.
+Use asserts as much as possible. Utility library has convenient @ref CORRADE_ASSERT(),
+@ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT() and
+@ref CORRADE_ASSERT_UNREACHABLE() macros, see their documentation for more
+information.
 
 @subsection corrade-coding-style-cpp-enum-inheritance Enums and inheritance
 
@@ -454,6 +474,20 @@ class BWImage {
 @endcode
 
 @see @ref corrade-coding-style-cpp-enums
+
+@subsection corrade-coding-style-cpp-pointers Naked pointers
+
+Prefer to use references instead of pointers in function parameters and class
+members. Use raw pointers only as non-owning optional references, use
+@ref Containers::ArrayView and @ref Containers::StaticArrayView to pass array
+references around. If you need to hold or transfer ownership, use
+`std::unique_ptr` or @ref Containers::Array. If you need given class to be
+copyable/movable, use `std::reference_wrapper` instead of a reference.
+
+Avoid to use `std::shared_ptr`, if possible. Unlike `std::unique_ptr` and
+@ref Containers::Array, which are just zero-cost wrappers checked at
+compile-time, shared pointers have serious runtime penalty due to reference
+counting.
 
 @subsection corrade-coding-style-cpp-forbidden Forbidden and deprecated C/C++ features
 
@@ -577,26 +611,46 @@ extension. Documentation pages, page sections and documentation files should be
 named in lowercase with dashes between words, e.g. `corrade-coding-style`,
 filename corresponds to name of documentation page it contains.
 
-File documentation block (@c \@file) is after license block, it explains only
-in @c \@brief what content given header contains:
+Each file has a file documentation block (@c \@file) which right after license
+block. It explains only in @c \@brief what content given header contains so the
+user is able to go to given type documentation right from the file list:
 @verbinclude codingstyle/doxygen-file.cpp
 
-Namespace documentation is only in file `namespaces.dox` inside `doc/`
-directory.
+Namespace documentation is only in the `namespaces.dox` file inside `doc/`
+directory. Exception is in case given namespace appears only in one file, is
+tightly tied to some class or function and does not make sense outside of it.
+In that case the documentation should be directly in the file.
 
-Class and function documentation block nearly always starts with an @c \@brief
-description (the only exception is enum value documentation). After that is
-documentation of template parameters, function parameters and return value.
-These are documented only if it's not obvious from the description or
-function/parameter name (i.e. it's not needed for getters and setters).
+Class, function and enum documentation block always starts with an @c \@brief
+description, which is on a single line and doesn't end with a period. Doxygen's
+"autobrief" functionality has various drawbacks, bugs and limitations because
+and thus @c \@brief should be used explicitly. After that is documentation of
+template parameters, function parameters and return value. These are documented
+only if it's not obvious from the description or function/parameter name (i.e.
+it's not needed for getters and setters). If needed, follows an empty line and
+paragraphs of longer description, not prefixed with @c \@note or anything
+(these are used only to further highlight content inside those paragraphs).
+Last are various @c \@see, @c \@todo sections and other special commands.
+
+It is often the case that you already have some indentation from the left side
+and you need to fit the documentation into quite a narrow block. Try to use the
+available horizontal space to the maximum, so indent only as strictly necessary
+and don't be afraid to make exceptions for overly long identifiers that would
+otherwise case excessive blank space. Example:
+
+@verbinclude codingstyle/doxygen-function.cpp
 
 Trivial function overloads (e.g. `const` overloads) are marked only with
 @c \@overload keyword and are always *after* the original documented function:
 @verbinclude codingstyle/doxygen-overload.cpp
 
+Enum value and trivial C structure documentation is without the @c \@brief
+section because it only adds unnecessary padding and the brief section does not
+have any other visual difference.
+
 If the documentation is short enough, it can be placed after the documented
-element only if it doesn't exceed 80 character limit too much (e.g. enum value
-documentation):
+element, but only if it doesn't exceed the 80 character limit too much (e.g.
+enum value documentation):
 @verbinclude codingstyle/doxygen-short.cpp
 
 For hiding implementation details from documentation or for working around
@@ -605,6 +659,16 @@ Doxygen parsing issues (and false positive warnings), preprocessor define
 generates the documentation. If that works around some Doxygen parsing bug,
 don't forget to mark it with @c \@todoc (see below). Example:
 @verbinclude codingstyle/doxygen-macro.cpp
+
+@subsection corrade-coding-style-documentation-ordering Section ordering
+
+In detailed documentation the text should be always first, additional blocks
+are then ordered by their importance. Various @c \@note, @c \@attention and
+@c \@warning blocks to highlight some information are always first, then
+@c \@see block with links to related stuff, then various support information
+such as @c \@partialsupport, after that @c \@deprecated information and
+@c \@todo, @c \@todoc and @c \@bug always last, as they are the least important
+and in most cases only for internal use.
 
 @subsection corrade-coding-style-documentation-commands Special documentation commands
 
@@ -645,16 +709,6 @@ parameter and also crossreferenced from page `configurationvalues`.
 
 Features that are not supported on all platform should be marked with
 @c \@partialsupport, listing unsupported platforms and optionally reason why.
-
-@subsection corrade-coding-style-documentation-ordering Section ordering
-
-In detailed documentation the text should be always first, additional blocks
-are then ordered by their importance. Various @c \@note, @c \@attention and
-@c \@warning blocks to highlight some information are always first, then
-@c \@see block with links to related stuff, then various support information
-such as @c \@partialsupport, after that @c \@deprecated information and
-@c \@todo, @c \@todoc and @c \@bug always last, as they are the least important
-and in most cases only for internal use.
 
 @section corrade-coding-style-git Git commit messages, branch and tag format
 
