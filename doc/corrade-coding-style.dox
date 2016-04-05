@@ -636,7 +636,7 @@ It is often the case that you already have some indentation from the left side
 and you need to fit the documentation into quite a narrow block. Try to use the
 available horizontal space to the maximum, so indent only as strictly necessary
 and don't be afraid to make exceptions for overly long identifiers that would
-otherwise case excessive blank space. Example:
+otherwise cause excessive blank space. Example:
 
 @verbinclude codingstyle/doxygen-function.cpp
 
