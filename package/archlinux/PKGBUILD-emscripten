@@ -17,7 +17,6 @@ build() {
         cd "$_rootdir/build-emscripten"
 
         cmake .. \
-            -DCMAKE_MODULE_PATH="$_rootdir/toolchains/modules" \
             -DCMAKE_TOOLCHAIN_FILE="$_rootdir/toolchains/generic/Emscripten.cmake"
     fi
 

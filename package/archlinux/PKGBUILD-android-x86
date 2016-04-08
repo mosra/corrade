@@ -17,7 +17,6 @@ build() {
         cd "$_rootdir/build-android-x86"
 
         cmake .. \
-            -DCMAKE_MODULE_PATH="$_rootdir/toolchains/modules" \
             -DCMAKE_TOOLCHAIN_FILE="$_rootdir/toolchains/generic/Android-x86.cmake" \
             -G Ninja
     fi
@@ -25,7 +24,6 @@ build() {
     cd "$_rootdir/build-android-x86"
 
    cmake .. \
-       -DCMAKE_MODULE_PATH="$_rootdir/toolchains/modules" \
        -DCMAKE_TOOLCHAIN_FILE="$_rootdir/toolchains/generic/Android-x86.cmake" \
        -DCMAKE_BUILD_TYPE=Release \
        -DCMAKE_INSTALL_PREFIX=/opt/android-ndk/platforms/android-19/arch-x86/usr

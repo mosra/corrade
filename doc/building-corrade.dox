@@ -417,7 +417,6 @@ in `NACL_PREFIX` in toolchain file.
 
     mkdir build-nacl-x86-32 && cd build-nacl-x86-32
     cmake .. \
-        -DCMAKE_MODULE_PATH="/absolute/path/to/toolchains/modules" \
         -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/NaCl-newlib-x86-32.cmake" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr/nacl \
@@ -426,7 +425,6 @@ in `NACL_PREFIX` in toolchain file.
 
     mkdir build-nacl-x86-64 && cd build-nacl-x86-64
     cmake .. \
-        -DCMAKE_MODULE_PATH="/absolute/path/to/toolchains/modules" \
         -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/NaCl-newlib-x86-64.cmake" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr/nacl
@@ -457,7 +455,6 @@ path to `modules/` directory containing `Platform/Emscripten.cmake`. Also set
 
     mkdir build-emscripten && cd build-emscripten
     cmake .. \
-        -DCMAKE_MODULE_PATH="/absolute/path/to/toolchains/modules" \
         -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/Emscripten.cmake" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr/lib/emscripten/system
@@ -489,7 +486,6 @@ static libraries.
 
     mkdir build-ios && cd build-ios
     cmake .. \
-        -DCMAKE_MODULE_PATH=/absolute/path/to/toolchains/modules/ \
         -DCMAKE_TOOLCHAIN_FILE=../toolchains/generic/iOS.cmake \
         -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk \
         -DCMAKE_OSX_ARCHITECTURES="arm64;armv7;armv7s" \
@@ -520,7 +516,6 @@ depending shared libraries using JNI would be too inconvenient.
 
     mkdir build-android-arm && cd build-android-arm
     cmake .. \
-        -DCMAKE_MODULE_PATH="/absolute/path/to/toolchains/modules" \
         -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/Android-ARM.cmake" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/opt/android-ndk/platforms/android-19/arch-arm/usr
@@ -528,7 +523,6 @@ depending shared libraries using JNI would be too inconvenient.
 
     mkdir build-android-x86 && cd build-android-x86
     cmake .. \
-        -DCMAKE_MODULE_PATH="/absolute/path/to/toolchains/modules" \
         -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/Android-x86.cmake" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/opt/android-ndk/platforms/android-19/arch-x86/usr
