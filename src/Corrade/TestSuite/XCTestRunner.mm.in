@@ -1,6 +1,6 @@
 #import <XCTest/XCTest.h>
 
-extern int corradeTestMain(int, const char**);
+extern int corradeTestMain(int, char**);
 
 @interface ${test_name} : XCTestCase
 

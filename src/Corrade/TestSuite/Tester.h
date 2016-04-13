@@ -438,7 +438,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
     }
 #elif defined(CORRADE_TESTSUITE_TARGET_XCTEST)
 #define CORRADE_TEST_MAIN(Class)                                            \
-    int CORRADE_VISIBILITY_EXPORT corradeTestMain(int argc, const char** argv) { \
+    int CORRADE_VISIBILITY_EXPORT corradeTestMain(int argc, char** argv) {  \
         Class t;                                                            \
         t.registerTest(__FILE__, #Class);                                   \
         return t.exec(argc, argv);                                          \
