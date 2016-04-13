@@ -86,8 +86,14 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
     else if(args.value("color") == "off" || args.value("color") == "OFF")
         _useColor = Debug::Flag::DisableColors;
     #if (!defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)) && !defined(CORRADE_TARGET_ANDROID)
-    else _useColor = logOutput == &std::cout && errorOutput == &std::cerr && isatty(1) && isatty(2) ?
-        Debug::Flags{} : Debug::Flag::DisableColors;
+    else _useColor = logOutput == &std::cout && errorOutput == &std::cerr && isatty(1) && isatty(2)
+        #ifdef CORRADE_TARGET_APPLE
+        /* Xcode's console reports that it is a TTY, but it doesn't support
+           colors. We have to check for the following undocumented environment
+           variable instead. If set, then don't use colors. */
+        && !std::getenv("XPC_SERVICE_NAME")
+        #endif
+        ? Debug::Flags{} : Debug::Flag::DisableColors;
     #endif
 
     std::vector<std::pair<int, TestCase>> usedTestCases;
