@@ -154,9 +154,14 @@ Corrade provides these macros and functions:
                      [LIBRARIES <libraries>...])
 
 Test name is also executable name. You can also specify libraries to link with
-instead of using target_link_libraries(). `Corrade::TestSuite` targer is linked
+instead of using target_link_libraries(). `Corrade::TestSuite` target is linked
 automatically to each test. Note that the `enable_testing()` function must be
 called explicitly.
+
+Unless @ref CORRADE_TESTSUITE_TARGET_XCTEST is set, test cases run on an
+@ref CORRADE_TARGET_IOS "iOS" device are created as bundles with bundle
+identifier set to CMake project name by default. Use the cache variable
+`CORRADE_TESTSUITE_BUNDLE_IDENTIFIER_PREFIX` to change it to something else.
 
 ### Compile data resources into application binary
 @anchor corrade-cmake-add-resource

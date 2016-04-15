@@ -245,6 +245,11 @@ if(CORRADE_TESTSUITE_TARGET_XCTEST)
     endif()
 endif()
 
+if(CORRADE_TARGET_IOS AND NOT CORRADE_TESTSUITE_TARGET_XCTEST)
+    set(CORRADE_TESTSUITE_BUNDLE_IDENTIFIER_PREFIX ${PROJECT_NAME} CACHE STRING
+        "Bundle identifier prefix for tests ran on iOS device")
+endif()
+
 function(corrade_add_test test_name)
     # Get DLL and path lists
     foreach(arg ${ARGN})
@@ -287,6 +292,12 @@ function(corrade_add_test test_name)
             add_test(NAME ${test_name} COMMAND NodeJs::NodeJs --stack-trace-limit=0 $<TARGET_FILE:${test_name}>)
         else()
             add_test(${test_name} ${test_name})
+        endif()
+        if(CORRADE_TARGET_IOS)
+            set_target_properties(${test_name} PROPERTIES
+                MACOSX_BUNDLE ON
+                MACOSX_BUNDLE_GUI_IDENTIFIER ${CORRADE_TESTSUITE_BUNDLE_IDENTIFIER_PREFIX}.${test_name}
+                XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "YES")
         endif()
     endif()
 endfunction()
