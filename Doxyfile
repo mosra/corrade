@@ -235,7 +235,8 @@ ALIASES                = \
     "configurationvalueref{1}=@see @ref configurationvalues \"Corrade::Utility::ConfigurationValue<\1>\"" \
     "configurationvalue{1}=@brief %Configuration value parser and writer @xrefitem configurationvalues \"Configuration value parser and writer\" \"Configuration value parsers and writers for custom types\" Allows parsing and writing \1 from and to Corrade::Utility::Configuration." \
     "partialsupport=@xrefitem partialsupport \"Partially supported\" \"List of partially supported features\"" \
-    "todoc=@xrefitem todoc \"Documentation todo\" \"Documentation-related todo list\""
+    "todoc=@xrefitem todoc \"Documentation todo\" \"Documentation-related todo list\"" \
+    "experimental=@note This functionality is still experimental and may change in the future without keeping full backwards compatibility."
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only).
 # A mapping has the form "name=value". For example adding "class=itcl::class"

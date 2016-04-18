@@ -710,6 +710,17 @@ parameter and also crossreferenced from page `configurationvalues`.
 Features that are not supported on all platform should be marked with
 @c \@partialsupport, listing unsupported platforms and optionally reason why.
 
+@subsubsection corrade-coding-style-documentation-commands-experimental Backwards compatibility and experimental features
+
+Common practice is to keep backwards compatibility when refactoring APIs -- if
+given feature is present for a considerable amount of time or is already part
+of some release, any change that breaks source compatibility should be
+complemented with backwards-compatible function or type alias that is marked as
+deprecated using @c \@deprecated and one of @ref CORRADE_DEPRECATED() macros.
+If given feature is still in experimental stage, maintaining backwards
+compatibility might hurt innovation -- in that case the feature should be
+marked with @c \@experimental.
+
 @section corrade-coding-style-git Git commit messages, branch and tag format
 
 Each commit message should have short one-line explanation at the beginning,
