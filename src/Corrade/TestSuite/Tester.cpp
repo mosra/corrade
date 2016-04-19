@@ -116,7 +116,7 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
     args.addOption('c', "color", "auto").setHelp("color", "colored output", "on|off|auto")
             .setFromEnvironment("color", "CORRADE_TEST_COLOR")
         .addOption("skip").setHelp("skip", "skip test cases with given numbers", "\"N1 N2...\"")
-        .addOption("only").setHelp("only", "run only test cases with given numbers (in that order)", "\"N1 N2...\"")
+        .addOption("only").setHelp("only", "run only test cases with given numbers", "\"N1 N2...\"")
         .addBooleanOption("shuffle").setHelp("shuffle", "randomly shuffle test case order")
             .setFromEnvironment("shuffle", "CORRADE_TEST_SHUFFLE")
         .addOption("repeat-every", "1").setHelp("repeat-every", "repeat every test case N times", "N")
