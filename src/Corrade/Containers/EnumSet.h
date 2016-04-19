@@ -32,6 +32,7 @@
 #include <type_traits>
 
 #include "Corrade/Containers/Containers.h"
+#include "Corrade/Containers/Tags.h"
 
 namespace Corrade { namespace Containers {
 
@@ -121,6 +122,13 @@ class EnumSet {
 
         /** @brief Create set from one value */
         constexpr /*implicit*/ EnumSet(T value): value(static_cast<UnderlyingType>(value)) {}
+
+        /**
+         * @brief Create uninitialized set
+         *
+         * The contents are left in undefined state.
+         */
+        explicit EnumSet(NoInitT) {}
 
         /** @brief Equality operator */
         constexpr bool operator==(EnumSet<T, fullValue> other) const {

@@ -32,6 +32,8 @@ struct EnumSetTest: TestSuite::Tester {
     explicit EnumSetTest();
 
     void construct();
+    void constructNoInit();
+
     void operatorOr();
     void operatorAnd();
     void operatorBool();
@@ -52,6 +54,8 @@ CORRADE_ENUMSET_OPERATORS(Features)
 
 EnumSetTest::EnumSetTest() {
     addTests({&EnumSetTest::construct,
+              &EnumSetTest::constructNoInit,
+
               &EnumSetTest::operatorOr,
               &EnumSetTest::operatorAnd,
               &EnumSetTest::operatorBool,
@@ -65,6 +69,18 @@ void EnumSetTest::construct() {
 
     Features features = Feature::Cheap;
     CORRADE_COMPARE(int(features), 2);
+}
+
+void EnumSetTest::constructNoInit() {
+    {
+        Features features{Feature::Tested};
+        new(&features)Features{};
+        CORRADE_COMPARE(int(features), 0);
+    } {
+        Features features{Feature::Tested};
+        new(&features)Features{NoInit};
+        CORRADE_COMPARE(int(features), 4);
+    }
 }
 
 void EnumSetTest::operatorOr() {
