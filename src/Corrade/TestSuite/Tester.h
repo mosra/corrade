@@ -631,7 +631,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
     #endif
         class CORRADE_TESTSUITE_EXPORT BenchmarkRunner {
             public:
-                explicit BenchmarkRunner(Tester& instance, TestCase::BenchmarkBegin begin, TestCase::BenchmarkEnd end): _instance{instance}, _end{end} {
+                explicit BenchmarkRunner(Tester& instance, TestCase::BenchmarkBegin begin, TestCase::BenchmarkEnd end): _instance(instance), _end{end} {
                     (_instance.*begin)();
                 }
 
