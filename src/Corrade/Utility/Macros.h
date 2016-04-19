@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
+ * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_UNUSED, @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -114,6 +114,21 @@ CORRADE_DEPRECATED_FILE("use Bar.h instead")
 #define CORRADE_DEPRECATED_FILE(message) _Pragma(_CORRADE_HELPER_STR(GCC warning message))
 #else
 #define CORRADE_DEPRECATED_FILE(message)
+#endif
+
+/** @hideinitializer
+@brief Unused variable mark
+
+Putting this before unused variable will suppress compiler warning about it
+being unused. If possible, use `static_cast<void>(var)` or nameless function
+parameters instead.
+*/
+#if defined(__GNUC__)
+#define CORRADE_UNUSED __attribute__((__unused__))
+#elif defined(_MSC_VER)
+#define CORRRADE_UNUSED __pragma(warning(suppress:4100))
+#else
+#define CORRADE_UNUSED
 #endif
 
 /** @hideinitializer
