@@ -34,6 +34,7 @@
 #include <string>
 #include <type_traits>
 #include <vector>
+#include <chrono>
 
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/TestSuite/Compare/FloatingPoint.h"
@@ -65,7 +66,8 @@ See @ref unit-testing for introduction.
 
 @see @ref CORRADE_TEST_MAIN(), @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(),
     @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH(), @ref CORRADE_SKIP(),
-    @ref CORRADE_EXPECT_FAIL(), @ref CORRADE_EXPECT_FAIL_IF()
+    @ref CORRADE_EXPECT_FAIL(), @ref CORRADE_EXPECT_FAIL_IF(),
+    @ref CORRADE_BENCHMARK()
 */
 class CORRADE_TESTSUITE_EXPORT Tester {
     public:
@@ -127,6 +129,40 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * See @ref Debug for more information.
          */
         typedef Corrade::Utility::Error Error;
+
+        /**
+         * @brief Benchmark type
+         *
+         * @see @ref addBenchmarks(), @ref addInstancedBenchmarks()
+         */
+        enum class BenchmarkType {
+            /* 0 reserved for test cases */
+
+            /**
+             * Default. Set to wall clock, but can be overriden on command-line
+             * using the `--benchmark` option.
+             */
+            Default = 1,
+
+            /** Wall clock */
+            WallClock = 2
+        };
+
+        /**
+         * @brief Custom benchmark units
+         *
+         * Unit of measurements outputted from custom benchmarks.
+         * @see @ref addCustomBenchmarks(), @ref addCustomInstancedBenchmarks()
+         */
+        enum class BenchmarkUnits {
+            /* Values should not overlap with BenchmarkType */
+
+            Time = 100,             /**< Time (in nanoseconds) */
+            Cycles = 101,           /**< Processor cycle count */
+            Instructions = 102,     /**< Processor instruction count */
+            Memory = 103,           /**< Memory (in bytes) */
+            Count = 104             /**< Generic count */
+        };
 
         /**
          * @brief Constructor
@@ -293,6 +329,165 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         }
 
         /**
+         * @brief Add benchmarks
+         * @param benchmarks        List of benchmarks to run
+         * @param batchCount        Batch count
+         * @param benchmarkType     Benchmark type
+         *
+         * For each added benchmark measures the time spent executing code
+         * inside a statement or block denoted by @ref CORRADE_BENCHMARK(). It
+         * is possible to use all verification macros inside the benchmark. The
+         * @p batchCount parameter specifies how many batches will be run to
+         * make the measurement more precise, while the batch size parameter
+         * passed to @ref CORRADE_BENCHMARK() specifies how many iterations
+         * will be done in each batch to minimize overhead.
+         * @see @ref addInstancedBenchmarks()
+         */
+        template<class Derived> void addBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, BenchmarkType benchmarkType = BenchmarkType::Default) {
+            addBenchmarks<Derived>(benchmarks, batchCount, nullptr, nullptr, benchmarkType);
+        }
+
+        /**
+         * @brief Add benchmarks with explicit setup and teardown functions
+         * @param benchmarks        List of benchmarks to run
+         * @param batchCount        Batch count
+         * @param setup             Setup function
+         * @param teardown          Teardown function
+         * @param benchmarkType     Benchmark type
+         *
+         * In addition to the behavior of @ref addBenchmarks() above, the
+         * @p setup function is called before every batch of every benchmark in
+         * the list and the @p teardown function is called after every batch of
+         * every benchmark in the list, regardless of whether it passed, failed
+         * or was skipped. Using verification macros in @p setup or @p teardown
+         * function is not allowed.
+         * @see @ref addInstancedBenchmarks()
+         */
+        template<class Derived> void addBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, void(Derived::*setup)(), void(Derived::*teardown)(), BenchmarkType benchmarkType = BenchmarkType::Default) {
+            addCustomBenchmarks<Derived>(benchmarks, batchCount, setup, teardown, nullptr, nullptr, BenchmarkUnits(int(benchmarkType)));
+        }
+
+        /**
+         * @brief Add custom benchmarks
+         * @param benchmarks        List of benchmarks to run
+         * @param batchCount        Batch count
+         * @param benchmarkBegin    Benchmark begin function
+         * @param benchmarkEnd      Benchmark end function
+         * @param benchmarkUnits    Benchmark units
+         *
+         * Unlike the above functions uses user-supplied measurement functions.
+         * The @p benchmarkBegin parameter starts the measurement, the
+         * @p benchmarkEnd parameter ends the measurement and returns measured
+         * value, which is in @p units.
+         * @see @ref addCustomInstancedBenchmarks()
+         */
+        template<class Derived> void addCustomBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, void(Derived::*benchmarkBegin)(), std::uint64_t(Derived::*benchmarkEnd)(), BenchmarkUnits benchmarkUnits) {
+            addCustomBenchmarks<Derived>(benchmarks, batchCount, nullptr, nullptr, static_cast<TestCase::BenchmarkBegin>(benchmarkBegin), static_cast<TestCase::BenchmarkEnd>(benchmarkEnd), benchmarkUnits);
+        }
+
+        /**
+         * @brief Add custom benchmarks with explicit setup and teardown functions
+         * @param benchmarks        List of benchmarks to run
+         * @param batchCount        Batch count
+         * @param setup             Setup function
+         * @param teardown          Teardown function
+         * @param benchmarkBegin    Benchmark begin function
+         * @param benchmarkEnd      Benchmark end function
+         * @param benchmarkUnits    Benchmark units
+         *
+         * In addition to the behavior of @ref addCustomBenchmarks() above, the
+         * @p setup function is called before every batch of every benchmark in
+         * the list and the @p teardown function is called after every batch of
+         * every benchmark in the list, regardless of whether it passed, failed
+         * or was skipped. Using verification macros in @p setup or @p teardown
+         * function is not allowed.
+         * @see @ref addCustomInstancedBenchmarks()
+         */
+        template<class Derived> void addCustomBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, void(Derived::*setup)(), void(Derived::*teardown)(), void(Derived::*benchmarkBegin)(), std::uint64_t(Derived::*benchmarkEnd)(), BenchmarkUnits benchmarkUnits) {
+            _testCases.reserve(_testCases.size() + benchmarks.size());
+            for(auto benchmark: benchmarks)
+                _testCases.emplace_back(~std::size_t{}, batchCount, static_cast<TestCase::Function>(benchmark), static_cast<TestCase::Function>(setup), static_cast<TestCase::Function>(teardown), static_cast<TestCase::BenchmarkBegin>(benchmarkBegin), static_cast<TestCase::BenchmarkEnd>(benchmarkEnd), TestCaseType(int(benchmarkUnits)));
+        }
+
+        /**
+         * @brief Add instanced benchmarks
+         * @param benchmarks        List of benchmarks to run
+         * @param batchCount        Batch count
+         * @param instanceCount     Instance count
+         * @param benchmarkType     Benchmark type
+         *
+         * Unlike @ref addBenchmarks(), this function runs each of the
+         * benchmarks @p instanceCount times. Useful for data-driven tests.
+         * Each test case appears in the output once for each instance.
+         * @see @ref testCaseInstanceId(), @ref setTestCaseDescription()
+         */
+        template<class Derived> void addInstancedBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, std::size_t instanceCount, BenchmarkType benchmarkType = BenchmarkType::Default) {
+            addInstancedBenchmarks<Derived>(benchmarks, batchCount, instanceCount, nullptr, nullptr, benchmarkType);
+        }
+
+        /**
+         * @brief Add instanced benchmarks with explicit setup and teardown functions
+         * @param benchmarks        List of benchmarks to run
+         * @param batchCount        Batch count
+         * @param instanceCount     Instance count
+         * @param setup             Setup function
+         * @param teardown          Teardown function
+         * @param benchmarkType     Benchmark type
+         *
+         * In addition to the behavior of above function, the @p setup function
+         * is called before every instance of every batch of every benchmark in
+         * the list and the @p teardown function is called after every instance
+         * of every batch of every benchmark in the list, regardless of whether
+         * it passed, failed or was skipped. Using verification macros in
+         * @p setup or @p teardown function is not allowed.
+         */
+        template<class Derived> void addInstancedBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, std::size_t instanceCount, void(Derived::*setup)(), void(Derived::*teardown)(), BenchmarkType benchmarkType = BenchmarkType::Default) {
+            addCustomInstancedBenchmarks<Derived>(benchmarks, batchCount, instanceCount, setup, teardown, nullptr, nullptr, benchmarkType);
+        }
+
+        /**
+         * @brief Add custom instanced benchmarks
+         * @param benchmarks        List of benchmarks to run
+         * @param batchCount        Batch count
+         * @param instanceCount     Instance count
+         * @param benchmarkBegin    Benchmark begin function
+         * @param benchmarkEnd      Benchmark end function
+         * @param benchmarkUnits    Benchmark units
+         *
+         * Unlike the above functions uses user-supplied measurement functions.
+         * The @p benchmarkBegin parameter starts the measurement, the
+         * @p benchmarkEnd parameter ends the measurement and returns measured
+         * value, which is in @p units.
+         */
+        template<class Derived> void addCustomInstancedBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, std::size_t instanceCount, void(Derived::*benchmarkBegin)(), std::uint64_t(Derived::*benchmarkEnd)(), BenchmarkUnits benchmarkUnits) {
+            addCustomInstancedBenchmarks<Derived>(benchmarks, batchCount, nullptr, nullptr, benchmarkBegin, benchmarkEnd, benchmarkUnits);
+        }
+
+        /**
+         * @brief Add custom instanced benchmarks with explicit setup and teardown functions
+         * @param benchmarks        List of benchmarks to run
+         * @param batchCount        Batch count
+         * @param instanceCount     Batch count
+         * @param setup             Setup function
+         * @param teardown          Teardown function
+         * @param benchmarkBegin    Benchmark begin function
+         * @param benchmarkEnd      Benchmark end function
+         * @param benchmarkUnits    Benchmark units
+         *
+         * In addition to the behavior of @ref addCustomBenchmarks() above, the
+         * @p setup function is called before every batch of every benchmark in
+         * the list and the @p teardown function is called after every batch of
+         * every benchmark in the list, regardless of whether it passed, failed
+         * or was skipped. Using verification macros in @p setup or @p teardown
+         * function is not allowed.
+         */
+        template<class Derived> void addCustomInstancedBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, std::size_t instanceCount, void(Derived::*setup)(), void(Derived::*teardown)(), void(Derived::*benchmarkBegin)(), std::uint64_t(Derived::*benchmarkEnd)(), BenchmarkUnits benchmarkUnits) {
+            _testCases.reserve(_testCases.size() + benchmarks.size());
+            for(auto benchmark: benchmarks) for(std::size_t i = 0; i != instanceCount; ++i)
+                _testCases.emplace_back(i, batchCount, static_cast<TestCase::Function>(benchmark), static_cast<TestCase::Function>(setup), static_cast<TestCase::Function>(teardown), static_cast<TestCase::BenchmarkBegin>(benchmarkBegin), static_cast<TestCase::BenchmarkEnd>(benchmarkEnd), TestCaseType(int(benchmarkUnits)));
+        }
+
+        /**
          * @brief Test case ID
          *
          * Returns ID of the test case that is currently executing, starting
@@ -332,6 +527,16 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          */
         void setTestCaseDescription(const std::string& description);
         void setTestCaseDescription(std::string&& description); /**< @overload */
+
+        /**
+         * @brief Set benchmark name
+         *
+         * In case of @ref addCustomBenchmarks() and @ref addCustomInstancedBenchmarks()
+         * provides the name for the unit measured, for example
+         * `"Wall clock time"`.
+         */
+        void setBenchmarkName(const std::string& name);
+        void setBenchmarkName(std::string&& name); /**< @overload */
 
     #ifdef DOXYGEN_GENERATING_OUTPUT
     private:
@@ -394,26 +599,73 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         class Exception {};
         class SkipException {};
 
+        enum class TestCaseType {
+            Test = 0,
+            DefaultBenchmark = int(BenchmarkType::Default),
+            WallClockBenchmark = int(BenchmarkType::WallClock),
+            CustomTimeBenchmark = int(BenchmarkUnits::Time),
+            CustomCycleBenchmark = int(BenchmarkUnits::Cycles),
+            CustomInstructionBenchmark = int(BenchmarkUnits::Instructions),
+            CustomMemoryBenchmark = int(BenchmarkUnits::Memory),
+            CustomCountBenchmark = int(BenchmarkUnits::Count)
+        };
+
         struct TestCase {
             typedef void (Tester::*Function)();
+            typedef void (Tester::*BenchmarkBegin)();
+            typedef std::uint64_t (Tester::*BenchmarkEnd)();
 
-            explicit TestCase(std::size_t instanceId, std::size_t repeatCount, Function test, Function setup, Function teardown): instanceId{instanceId}, repeatCount{repeatCount}, test{test}, setup{setup}, teardown{teardown} {}
+            explicit TestCase(std::size_t instanceId, std::size_t repeatCount, Function test, Function setup, Function teardown): instanceId{instanceId}, repeatCount{repeatCount}, test{test}, setup{setup}, teardown{teardown}, benchmarkBegin{}, benchmarkEnd{}, type{TestCaseType::Test} {}
+
+            explicit TestCase(std::size_t instanceId, std::size_t repeatCount, Function test, Function setup, Function teardown, BenchmarkBegin benchmarkBegin, BenchmarkEnd benchmarkEnd, TestCaseType type): instanceId{instanceId}, repeatCount{repeatCount}, test{test}, setup{setup}, teardown{teardown}, benchmarkBegin{benchmarkBegin}, benchmarkEnd{benchmarkEnd}, type{type} {}
 
             std::size_t instanceId, repeatCount;
             Function test, setup, teardown;
+            BenchmarkBegin benchmarkBegin;
+            BenchmarkEnd benchmarkEnd;
+            TestCaseType type;
         };
 
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    protected:
+    #endif
+        class CORRADE_TESTSUITE_EXPORT BenchmarkRunner {
+            public:
+                explicit BenchmarkRunner(Tester& instance, TestCase::BenchmarkBegin begin, TestCase::BenchmarkEnd end): _instance{instance}, _end{end} {
+                    (_instance.*begin)();
+                }
+
+                ~BenchmarkRunner() {
+                    _instance._benchmarkResult = (_instance.*_end)();
+                }
+
+                const char* begin() const { return nullptr; }
+                const char* end() const { return reinterpret_cast<char*>(_instance._benchmarkBatchSize); }
+
+            private:
+                Tester& _instance;
+                TestCase::BenchmarkEnd _end;
+        };
+
+        BenchmarkRunner createBenchmarkRunner(std::size_t batchSize);
+
+    private:
         void verifyInternal(const std::string& expression, bool value);
         void printTestCaseLabel(Debug& out, const char* status, Debug::Color statusColor, Debug::Color labelColor);
+
+        void wallClockBenchmarkBegin();
+        std::uint64_t wallClockBenchmarkEnd();
 
         Debug::Flags _useColor;
         std::ostream *_logOutput, *_errorOutput;
         std::vector<TestCase> _testCases;
         std::string _testFilename, _testName, _testCaseName,
-            _testCaseDescription, _expectFailMessage;
+            _testCaseDescription, _benchmarkName, _expectFailMessage;
         std::size_t _testCaseId, _testCaseInstanceId, _testCaseRepeatId,
-            _testCaseLine, _checkCount;
-        bool _testCaseRunning = false;
+            _benchmarkBatchSize, _testCaseLine, _checkCount;
+        std::chrono::time_point<std::chrono::high_resolution_clock> _wallClockBenchmarkBegin;
+        std::uint64_t _benchmarkResult;
+        TestCase* _testCase = nullptr;
         ExpectedFailure* _expectedFailure;
         TesterConfiguration _configuration;
 };
@@ -619,6 +871,26 @@ if(!bigEndian) {
         _CORRADE_REGISTER_TEST_CASE();                                      \
         Tester::skip(message);                                              \
     } while(false)
+
+/** @hideinitializer
+@brief Run a benchmark
+@param batchSize Number of iterations
+
+Benchmarks the following block or expression. Use in conjunction with
+@ref Corrade::TestSuite::Tester::addBenchmarks() "addBenchmarks()". Only one
+such loop can be in a function to achieve proper result.
+@code
+void benchmark() {
+    std::string a = "hello", b = "world";
+    CORRADE_BENCHMARK(20) {
+        std::string c = a + b;
+    }
+}
+@endcode
+*/
+#define CORRADE_BENCHMARK(batchSize)                                        \
+    _CORRADE_REGISTER_TEST_CASE();                                          \
+    for(CORRADE_UNUSED auto&& _CORRADE_HELPER_PASTE(benchmarkIteration, __func__): Tester::createBenchmarkRunner(batchSize))
 
 template<class T, class U, class V> void Tester::compareWith(Comparator<T> comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
     ++_checkCount;

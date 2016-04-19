@@ -27,9 +27,12 @@
 
 #include <algorithm>
 #include <iostream>
+#include <iomanip>
 #include <random>
+#include <sstream>
 #include <utility>
 
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/String.h"
 
@@ -53,6 +56,53 @@ namespace {
     }
 
     constexpr const char PaddingString[] = "0000000000";
+
+    inline std::string formatTime(std::chrono::nanoseconds ns, std::chrono::nanoseconds max, std::size_t batchSize) {
+        std::ostringstream out;
+        out << std::right << std::fixed << std::setprecision(2) << std::setw(6);
+
+        if(max >= std::chrono::seconds{1})
+            out << std::chrono::duration<float>(ns).count()/batchSize << "  s      ";
+        else if(max >= std::chrono::milliseconds{1})
+            out << std::chrono::duration<float, std::milli>(ns).count()/batchSize << " ms      ";
+        else if(max >= std::chrono::microseconds{1})
+            out << std::chrono::duration<float, std::micro>(ns).count()/batchSize << " µs      ";
+        else out << std::chrono::duration<float, std::nano>(ns).count()/batchSize << " ns      ";
+
+        return out.str();
+    }
+
+    inline std::string formatCount(std::uint64_t count, std::uint64_t max, std::size_t batchSize, const char* unit) {
+        std::ostringstream out;
+        out << std::right << std::fixed << std::setprecision(2) << std::setw(6);
+
+        if(max >= 1000000000)
+            out << float(count)/(1000000000.0f*batchSize) << " G" << unit;
+        if(max >= 1000000)
+            out << float(count)/(1000000.0f*batchSize) << " M" << unit;
+        else if(max >= 1000)
+            out << float(count)/(1000000.0f*batchSize) << " k" << unit;
+        else out << float(count)/batchSize << "  " << unit;
+
+        return out.str();
+    }
+
+    std::string formatMeasurement(std::uint64_t count, std::uint64_t max, Tester::BenchmarkUnits unit, std::size_t batchSize) {
+        switch(unit) {
+            case Tester::BenchmarkUnits::Time:
+                return formatTime(std::chrono::nanoseconds(count), std::chrono::nanoseconds(max), batchSize);
+            case Tester::BenchmarkUnits::Cycles:
+                return formatCount(count, max, batchSize, "cycles ");
+            case Tester::BenchmarkUnits::Instructions:
+                return formatCount(count, max, batchSize, "instrs ");
+            case Tester::BenchmarkUnits::Memory:
+                return formatCount(count, max, batchSize, "B      ");
+            case Tester::BenchmarkUnits::Count:
+                return formatCount(count, max, batchSize, "       ");
+        }
+
+        CORRADE_ASSERT(false, "TestSuite::Tester: invalid benchmark unit", {});
+    }
 }
 
 Tester::Tester(const TesterConfiguration& configuration): _logOutput{nullptr}, _errorOutput{nullptr}, _testCaseLine{0}, _checkCount{0}, _expectedFailure{nullptr}, _configuration{configuration} {}
@@ -73,8 +123,11 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
             .setFromEnvironment("repeat-every", "CORRADE_TEST_REPEAT_EVERY")
         .addOption("repeat-all", "1").setHelp("repeat-all", "repeat all test cases N times", "N")
             .setFromEnvironment("repeat-all", "CORRADE_TEST_REPEAT_ALL")
-        .setHelp("Corrade TestSuite executable. By default runs test cases in order in which they\n"
-                 "were added and exits with non-zero code if any of them failed.")
+        .addOption("benchmark", "wall-clock").setHelp("benchmark", "default benchmark type", "TYPE")
+        .setHelp(R"(Corrade TestSuite executable. By default runs test cases in order in which they
+were added and exits with non-zero code if any of them failed. Supported
+benchmark types:
+  wall-clock    uses high-precision clock to measure time spent)")
         .parse(argc, argv);
 
     _logOutput = logOutput;
@@ -95,6 +148,12 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
         #endif
         ? Debug::Flags{} : Debug::Flag::DisableColors;
     #endif
+
+    /* Decide about default benchmark type */
+    TestCaseType defaultBenchmarkType;
+    if(args.value("benchmark") == "wall-clock")
+        defaultBenchmarkType = TestCaseType::WallClockBenchmark;
+    else Utility::Fatal() << "Unknown benchmark type" << args.value("benchmark");
 
     std::vector<std::pair<int, TestCase>> usedTestCases;
 
@@ -157,12 +216,45 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
         Error resetErrorRedirect{&std::cerr};
         Utility::Warning resetWarningRedirect{&std::cerr};
 
+        /* Select default benchmark */
+        if(testCase.second.type == TestCaseType::DefaultBenchmark)
+            testCase.second.type = defaultBenchmarkType;
+
+        /* Select benchmark function */
+        BenchmarkUnits benchmarkUnits = BenchmarkUnits::Count;
+        switch(testCase.second.type) {
+            case TestCaseType::DefaultBenchmark:
+                CORRADE_ASSERT_UNREACHABLE();
+
+            case TestCaseType::Test:
+                break;
+
+            case TestCaseType::WallClockBenchmark:
+                testCase.second.benchmarkBegin = &Tester::wallClockBenchmarkBegin;
+                testCase.second.benchmarkEnd = &Tester::wallClockBenchmarkEnd;
+                benchmarkUnits = BenchmarkUnits::Time;
+                break;
+
+            /* These have begin/end provided by the user */
+            case TestCaseType::CustomTimeBenchmark:
+            case TestCaseType::CustomCycleBenchmark:
+            case TestCaseType::CustomInstructionBenchmark:
+            case TestCaseType::CustomMemoryBenchmark:
+            case TestCaseType::CustomCountBenchmark:
+                benchmarkUnits = BenchmarkUnits(int(testCase.second.type));
+                _benchmarkName = "Custom benchmark";
+                break;
+        }
+
         _testCaseId = testCase.first;
         _testCaseInstanceId = testCase.second.instanceId;
         _testCaseDescription = testCase.second.instanceId == ~std::size_t{} ? std::string{} : std::to_string(testCase.second.instanceId);
 
         /* Final combined repeat count */
         const std::size_t repeatCount = testCase.second.repeatCount*repeatEveryCount;
+
+        /* Array with benchmark measurements */
+        Containers::Array<std::uint64_t> measurements{testCase.second.type != TestCaseType::Test ? repeatCount : 0};
 
         bool aborted = false;
         for(std::size_t i = 0; i != repeatCount && !aborted; ++i) {
@@ -173,7 +265,8 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
             _testCaseRepeatId = repeatCount == 1 ? 0 : i + 1;
             _testCaseLine = 0;
             _testCaseName.clear();
-            _testCaseRunning = true;
+            _testCase = &testCase.second;
+            _benchmarkResult = 0;
 
             try {
                 (this->*testCase.second.test)();
@@ -184,28 +277,52 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
                 aborted = true;
             }
 
-            _testCaseRunning = false;
+            _testCase = nullptr;
 
             if(testCase.second.teardown)
                 (this->*testCase.second.teardown)();
+
+            if(testCase.second.benchmarkEnd)
+                measurements[i] = _benchmarkResult;
         }
 
         /* Print success message if the test case wasn't failed/skipped */
         if(!aborted) {
-            /* No testing macros called */
+            /* No testing/benchmark macros called */
             if(!_testCaseLine) {
                 Debug out{logOutput, _useColor};
                 printTestCaseLabel(out, "     ?", Debug::Color::Yellow, Debug::Color::Yellow);
                 ++noCheckCount;
 
-            /* Common path */
-            } else {
+            /* Test case or benchmark with expected failure inside */
+            } else if(testCase.second.type == TestCaseType::Test || _expectedFailure) {
                 Debug out{logOutput, _useColor};
                 printTestCaseLabel(out,
                     _expectedFailure ? " XFAIL" : "    OK",
                     _expectedFailure ? Debug::Color::Yellow : Debug::Color::Default,
                     Debug::Color::Default);
                 if(_expectedFailure) out << Debug::newline << "       " << _expectedFailure->message();
+
+            /* Benchmark */
+            } else {
+                Debug out{logOutput, _useColor};
+                printTestCaseLabel(out, " BENCH", Debug::Color::Default, Debug::Color::Default);
+
+                const std::uint64_t min = *std::min_element(measurements.begin(), measurements.end());
+                const std::uint64_t max = *std::max_element(measurements.begin(), measurements.end());
+                std::uint64_t avg{};
+                for(std::uint64_t v: measurements) avg += v;
+                avg /= measurements.size();
+
+                out << Debug::newline << "       "
+                    << Debug::boldColor(Debug::Color::Default)
+                    << _benchmarkBatchSize << "iterations per repeat." << _benchmarkName << "per iteration:"
+                    << Debug::newline << "        Min:"
+                    << Debug::resetColor << formatMeasurement(min, max, benchmarkUnits, _benchmarkBatchSize)
+                    << Debug::boldColor(Debug::Color::Default) << "Max:"
+                    << Debug::resetColor << formatMeasurement(max, max, benchmarkUnits, _benchmarkBatchSize)
+                    << Debug::boldColor(Debug::Color::Default) << "Avg:"
+                    << Debug::resetColor << formatMeasurement(avg, max, benchmarkUnits, _benchmarkBatchSize);
             }
         }
     }
@@ -302,12 +419,38 @@ void Tester::setTestCaseDescription(std::string&& description) {
     _testCaseDescription = std::move(description);
 }
 
+void Tester::setBenchmarkName(const std::string& name) {
+    _benchmarkName = name;
+}
+
+void Tester::setBenchmarkName(std::string&& name) {
+    _benchmarkName = std::move(name);
+}
+
 void Tester::registerTestCase(std::string&& name, int line) {
-    CORRADE_ASSERT(_testCaseRunning,
+    CORRADE_ASSERT(_testCase,
         "TestSuite::Tester: using verification macros outside of test cases is not allowed", );
 
     if(_testCaseName.empty()) _testCaseName = std::move(name);
     _testCaseLine = line;
+}
+
+Tester::BenchmarkRunner Tester::createBenchmarkRunner(const std::size_t batchSize) {
+    CORRADE_ASSERT(_testCase,
+        "TestSuite::Tester: using benchmark macros outside of test cases is not allowed",
+        (BenchmarkRunner{*this, nullptr, nullptr}));
+
+    _benchmarkBatchSize = batchSize;
+    return BenchmarkRunner{*this, _testCase->benchmarkBegin, _testCase->benchmarkEnd};
+}
+
+void Tester::wallClockBenchmarkBegin() {
+    _benchmarkName = "Wall clock time";
+    _wallClockBenchmarkBegin = std::chrono::high_resolution_clock::now();
+}
+
+std::uint64_t Tester::wallClockBenchmarkEnd() {
+    return (std::chrono::high_resolution_clock::now() - _wallClockBenchmarkBegin).count();
 }
 
 Tester::TesterConfiguration::TesterConfiguration() = default;
