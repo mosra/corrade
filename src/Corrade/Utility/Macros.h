@@ -126,7 +126,7 @@ parameters instead.
 #if defined(__GNUC__)
 #define CORRADE_UNUSED __attribute__((__unused__))
 #elif defined(_MSC_VER)
-#define CORRRADE_UNUSED __pragma(warning(suppress:4100))
+#define CORRADE_UNUSED __pragma(warning(suppress:4100))
 #else
 #define CORRADE_UNUSED
 #endif
