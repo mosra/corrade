@@ -416,7 +416,9 @@ symbol and the constant might not be always inlined.
 Use asserts as much as possible. Utility library has convenient @ref CORRADE_ASSERT(),
 @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT() and
 @ref CORRADE_ASSERT_UNREACHABLE() macros, see their documentation for more
-information.
+information. When documenting assertions in Doxygen documentation blocks (see
+@ref corrade-coding-style-documentation "below", use the word "expects" to
+describe a condition that is covered by an assert macro).
 
 @subsection corrade-coding-style-cpp-enum-inheritance Enums and inheritance
 
