@@ -76,6 +76,46 @@ std::pair<char32_t, std::size_t> Unicode::nextChar(const Containers::ArrayView<c
     return {result, end};
 }
 
+std::pair<char32_t, std::size_t> Unicode::prevChar(const Containers::ArrayView<const char> text, std::size_t cursor) {
+    CORRADE_ASSERT(cursor > 0,
+        "Utility::Unicode::prevChar(): cursor already at the beginning", {});
+
+    std::size_t begin;
+    std::uint32_t mask;
+
+    if(std::uint32_t(text[cursor - 1]) < 0x80) {
+        begin = cursor - 1;
+        mask = 0x7f;
+    } else if(cursor > 1 && (text[cursor - 1] & 0xc0) == 0x80) {
+        if((text[cursor - 2] & 0xe0) == 0xc0) {
+            begin = cursor - 2;
+            mask = 0x1f;
+        } else if(cursor > 2 && (text[cursor - 2] & 0xc0) == 0x80) {
+            if((text[cursor - 3] & 0xf0) == 0xe0) {
+                begin = cursor - 3;
+                mask = 0x0f;
+            } else if(cursor > 3 && (text[cursor - 3] & 0xc0) == 0x80) {
+                if((text[cursor - 4] & 0xf8) == 0xf0) {
+                    begin = cursor - 4;
+                    mask = 0x07;
+
+                /* Sequence too short, wrong cursor position or garbage in the
+                   sequence */
+                } else return {U'\xffffffff', cursor - 1};
+            } else return {U'\xffffffff', cursor - 1};
+        } else return {U'\xffffffff', cursor - 1};
+    } else return {U'\xffffffff', cursor - 1};
+
+    /* Compute the codepoint */
+    char32_t result = text[begin] & mask;
+    for(std::size_t i = begin + 1; i != cursor; ++i) {
+        result <<= 6;
+        result |= (text[i] & 0x3f);
+    }
+
+    return {result, begin};
+}
+
 std::u32string Unicode::utf32(const std::string& text) {
     std::u32string result;
     result.reserve(text.size());

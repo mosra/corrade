@@ -61,6 +61,26 @@ class CORRADE_UTILITY_EXPORT Unicode {
             return nextChar(Containers::ArrayView<const char>{text, size - 1}, cursor);
         }
 
+        /**
+         * @brief Previous UTF-8 character
+         *
+         * Returns Unicode codepoint of character before the cursor and
+         * its position. If an error occurs, returns position of previous byte
+         * and `0xffffffffu` as codepoint.
+         */
+        static std::pair<char32_t, std::size_t> prevChar(Containers::ArrayView<const char> text, std::size_t cursor);
+
+        /** @overload */
+        static std::pair<char32_t, std::size_t> prevChar(const std::string& text, const std::size_t cursor) {
+            return prevChar(Containers::ArrayView<const char>{text.data(), text.size()}, cursor);
+        }
+
+        /** @overload */
+        /* to fix ambiguity when passing char array in */
+        template<std::size_t size> static std::pair<char32_t, std::size_t> prevChar(const char(&text)[size], const std::size_t cursor) {
+            return prevChar(Containers::ArrayView<const char>{text, size - 1}, cursor);
+        }
+
         /** @brief Convert UTF-8 to UTF-32 */
         static std::u32string utf32(const std::string& text);
 };
