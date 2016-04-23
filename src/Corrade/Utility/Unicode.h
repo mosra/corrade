@@ -33,6 +33,7 @@
 #include <string>
 #include <utility>
 
+#include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
@@ -47,7 +48,18 @@ class CORRADE_UTILITY_EXPORT Unicode {
          * of the following character. If an error occurs, returns position of
          * next byte and `0xffffffffu` as codepoint.
          */
-        static std::pair<char32_t, std::size_t> nextChar(const std::string& text, const std::size_t cursor);
+        static std::pair<char32_t, std::size_t> nextChar(Containers::ArrayView<const char> text, std::size_t cursor);
+
+        /** @overload */
+        static std::pair<char32_t, std::size_t> nextChar(const std::string& text, const std::size_t cursor) {
+            return nextChar(Containers::ArrayView<const char>{text.data(), text.size()}, cursor);
+        }
+
+        /** @overload */
+        /* to fix ambiguity when passing char array in */
+        template<std::size_t size> static std::pair<char32_t, std::size_t> nextChar(const char(&text)[size], const std::size_t cursor) {
+            return nextChar(Containers::ArrayView<const char>{text, size - 1}, cursor);
+        }
 
         /** @brief Convert UTF-8 to UTF-32 */
         static std::u32string utf32(const std::string& text);
