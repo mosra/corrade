@@ -460,7 +460,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * value, which is in @p units.
          */
         template<class Derived> void addCustomInstancedBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, std::size_t instanceCount, void(Derived::*benchmarkBegin)(), std::uint64_t(Derived::*benchmarkEnd)(), BenchmarkUnits benchmarkUnits) {
-            addCustomInstancedBenchmarks<Derived>(benchmarks, batchCount, nullptr, nullptr, benchmarkBegin, benchmarkEnd, benchmarkUnits);
+            addCustomInstancedBenchmarks<Derived>(benchmarks, batchCount, instanceCount, nullptr, nullptr, benchmarkBegin, benchmarkEnd, benchmarkUnits);
         }
 
         /**
