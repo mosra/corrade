@@ -108,6 +108,9 @@ bool Directory::mkpath(const std::string& path) {
     if(path.back() == '/')
         return mkpath(path.substr(0, path.size()-1));
 
+    /* If the directory exists, done */
+    if(fileExists(path)) return true;
+
     /* If parent directory doesn't exist, create it */
     const std::string parentPath = Directory::path(path);
     if(!parentPath.empty() && !fileExists(parentPath) && !mkpath(parentPath)) return false;
@@ -117,7 +120,7 @@ bool Directory::mkpath(const std::string& path) {
     /* Unix */
     #ifdef CORRADE_TARGET_UNIX
     const int ret = mkdir(path.data(), 0777);
-    return ret == 0 || ret == -1;
+    return ret == 0;
 
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
