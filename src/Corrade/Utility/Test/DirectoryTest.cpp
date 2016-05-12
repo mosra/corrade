@@ -47,6 +47,7 @@ struct DirectoryTest: TestSuite::Tester {
     void moveFile();
     void moveDirectory();
     void mkpath();
+    void mkpathNoPermission();
     void home();
     void configurationDir();
     void list();
@@ -69,6 +70,7 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::moveFile,
               &DirectoryTest::moveDirectory,
               &DirectoryTest::mkpath,
+              &DirectoryTest::mkpathNoPermission,
               &DirectoryTest::home,
               &DirectoryTest::configurationDir,
               &DirectoryTest::list,
@@ -212,6 +214,20 @@ void DirectoryTest::mkpath() {
 
     CORRADE_VERIFY(Directory::mkpath(leaf));
     CORRADE_VERIFY(Directory::fileExists(leaf));
+}
+
+void DirectoryTest::mkpathNoPermission() {
+    #ifndef CORRADE_TARGET_WINDOWS
+    if(Directory::fileExists("/nope"))
+        CORRADE_SKIP("Can't test because the destination might be writeable");
+
+    CORRADE_VERIFY(!Directory::mkpath("/nope/never"));
+    #else
+    if(Directory::fileExists("W:/"))
+        CORRADE_SKIP("Can't test because the destination might be writeable");
+
+    CORRADE_VERIFY(!Directory::mkpath("W:/nope"));
+    #endif
 }
 
 void DirectoryTest::home() {
