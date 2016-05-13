@@ -8,10 +8,6 @@ clone_depth: 1
 
 os: Visual Studio 2015
 
-environment:
-  matrix:
-  - BUILD_STATIC: OFF
-
 notifications:
 - provider: Webhook
   url: https://webhooks.gitter.im/e/415ae90928ba0dbd3df4
@@ -29,7 +25,7 @@ install:
 build_script:
 - mkdir build
 - cd build
-- cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=C:/Sys -DBUILD_STATIC=%BUILD_STATIC% -DBUILD_TESTS=ON -G Ninja
+- cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=C:/Sys -DBUILD_TESTS=ON -G Ninja
 - cmake --build .
 - cmake --build . --target install
 - cmake . -DCMAKE_INSTALL_PREFIX=%APPVEYOR_BUILD_FOLDER%/Deploy -DBUILD_TESTS=OFF
