@@ -175,11 +175,12 @@ class CORRADE_UTILITY_EXPORT Directory {
         /**
          * @brief Current user's home directory
          *
-         * On Unix, the directory is equivalent to `${HOME}` environment
-         * variable, on Windows to `%USERPROFILE%/Documents` or similar. If the
-         * directory can't be found, empty string is returned.
-         * @partialsupport In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" and
-         *      @ref CORRADE_TARGET_NACL returns empty string.
+         * On Unix and non-sandboxed OSX, the directory is equivalent to
+         * `${HOME}` environment variable. On sandboxed OSX and iOS the
+         * directory is equivalent to what's returned by `NSHomeDirectory()`.
+         * On Windows the directory is equivalent to `%USERPROFILE%/Documents`
+         * or similar. On other systems or if the directory can't be found,
+         * empty string is returned.
          */
         static std::string home();
 
@@ -187,12 +188,12 @@ class CORRADE_UTILITY_EXPORT Directory {
          * @brief Application configuration dir
          * @param name              Application name
          *
-         * On Unix, the configuration dir is `${XDG_CONFIG_HOME}/name` or
-         * `${HOME}/.config/name` (@p name is lowercased), on Windows the
-         * configuration dir is in `%APPDATA%/`name` (@p name is left as is).
-         * If the directory can't be found, empty string is returned.
-         * @partialsupport In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" and
-         *      @ref CORRADE_TARGET_NACL returns empty string.
+         * On Unix (except for OSX), the configuration dir is
+         * `${XDG_CONFIG_HOME}/name` or `${HOME}/.config/name` (@p name is
+         * lowercased), on Windows the configuration dir is in `%APPDATA%/`name`
+         * (@p name is left as is). On OSX and iOS the configuration dir
+         * is `${HOME}/Library/Application Support/name`. On other systems or
+         * if the directory can't be found, empty string is returned.
          */
         static std::string configurationDir(const std::string& name);
 

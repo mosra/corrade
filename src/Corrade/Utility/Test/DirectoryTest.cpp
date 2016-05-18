@@ -244,13 +244,9 @@ void DirectoryTest::home() {
     const std::string home = Directory::home();
     Debug() << "Home dir found as:" << home;
 
-    /* On OSX and iOS verify that the home dir contains `Library` directory,
-       or, in case of a sandboxed app, the *.app directory */
+    /* On OSX and iOS verify that the home dir contains `Library` directory */
     #ifdef CORRADE_TARGET_APPLE
-    if(Directory::isSandboxed())
-        CORRADE_VERIFY(Directory::fileExists(Directory::join(home, "UtilityDirectoryTest.app")));
-    else
-        CORRADE_VERIFY(Directory::fileExists(Directory::join(home, "Library")));
+    CORRADE_VERIFY(Directory::fileExists(Directory::join(home, "Library")));
 
     /* On other Unixes verify that the home dir contains `.local` directory.
        Ugly and hacky, but it's the best I came up with. Can't test for e.g.
@@ -278,7 +274,7 @@ void DirectoryTest::configurationDir() {
     #ifdef CORRADE_TARGET_APPLE
     CORRADE_COMPARE(dir.substr(dir.size() - 7), "Corrade");
     if(Directory::isSandboxed())
-        CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(Directory::path(Directory::path(dir))), "UtilityDirectoryTest.app")));
+        CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(Directory::path(dir)), "Caches")));
     else
         CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(dir), "App Store")));
 

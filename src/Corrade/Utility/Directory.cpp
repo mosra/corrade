@@ -35,9 +35,6 @@
 #ifdef CORRADE_TARGET_UNIX
 #include <sys/stat.h>
 #include <dirent.h>
-#ifdef CORRADE_TARGET_APPLE
-#include <CoreFoundation/CFBundle.h>
-#endif
 
 /* Windows */
 /** @todo remove the superfluous includes when mingw is fixed (otherwise causes undefined EXTERN_C error) */
@@ -179,20 +176,6 @@ bool Directory::isSandboxed() {
 std::string Directory::home() {
     /* Unix */
     #ifdef CORRADE_TARGET_UNIX
-    /* Sandboxed OSX, iOS */
-    #ifdef CORRADE_TARGET_APPLE
-    if(isSandboxed()) {
-        CFBundleRef appBundle = CFBundleGetMainBundle();
-        if(appBundle) {
-            CFURLRef url = CFBundleCopyExecutableURL(appBundle);
-            std::string urlString(PATH_MAX, '\0');
-            CFURLGetFileSystemRepresentation(url, true, reinterpret_cast<UInt8*>(&urlString[0]), urlString.size());
-            CFRelease(url);
-            urlString.resize(std::strlen(urlString.data()));
-            return path(path(urlString));
-        }
-    }
-    #endif
     if(const char* const h = std::getenv("HOME"))
         return h;
     return std::string{};
