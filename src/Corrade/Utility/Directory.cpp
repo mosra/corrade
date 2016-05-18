@@ -163,6 +163,16 @@ bool Directory::fileExists(const std::string& filename) {
     #endif
 }
 
+bool Directory::isSandboxed() {
+    #if defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID) || defined(CORRADE_TARGET_NACL) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT)
+    return true;
+    #elif defined(CORRADE_TARGET_APPLE)
+    return std::getenv("APP_SANDBOX_CONTAINER_ID");
+    #else
+    return false;
+    #endif
+}
+
 std::string Directory::home() {
     /* Unix */
     #ifdef CORRADE_TARGET_UNIX

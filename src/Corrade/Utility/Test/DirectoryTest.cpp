@@ -48,6 +48,7 @@ struct DirectoryTest: TestSuite::Tester {
     void moveDirectory();
     void mkpath();
     void mkpathNoPermission();
+    void isSandboxed();
     void home();
     void configurationDir();
     void list();
@@ -71,6 +72,7 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::moveDirectory,
               &DirectoryTest::mkpath,
               &DirectoryTest::mkpathNoPermission,
+              &DirectoryTest::isSandboxed,
               &DirectoryTest::home,
               &DirectoryTest::configurationDir,
               &DirectoryTest::list,
@@ -227,6 +229,14 @@ void DirectoryTest::mkpathNoPermission() {
         CORRADE_SKIP("Can't test because the destination might be writeable");
 
     CORRADE_VERIFY(!Directory::mkpath("W:/nope"));
+    #endif
+}
+
+void DirectoryTest::isSandboxed() {
+    #if defined(CORRADE_TARGET_ANDROID) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_NACL) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    CORRADE_VERIFY(Directory::isSandboxed());
+    #else
+    CORRADE_VERIFY(!Directory::isSandboxed());
     #endif
 }
 

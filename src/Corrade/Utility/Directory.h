@@ -161,6 +161,18 @@ class CORRADE_UTILITY_EXPORT Directory {
         #endif
 
         /**
+         * @brief Whether the application runs in a sandboxed environment
+         *
+         * Returns `true` if running on @ref CORRADE_TARGET_IOS "iOS",
+         * @ref CORRADE_TARGET_ANDROID "Android", as a
+         * @ref CORRADE_TARGET_APPLE "Mac OS X" app bundle,
+         * @ref CORRADE_TARGET_WINDOWS_RT "Windows Phone/Store" application or
+         * in a browser through @ref CORRADE_TARGET_NACL "NaCl" or
+         * @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", `false` otherwise.
+         */
+        static bool isSandboxed();
+
+        /**
          * @brief Current user's home directory
          *
          * On Unix, the directory is equivalent to `${HOME}` environment
