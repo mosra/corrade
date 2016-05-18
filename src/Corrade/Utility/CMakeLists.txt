@@ -121,6 +121,11 @@ if(CORRADE_TARGET_ANDROID)
     target_link_libraries(CorradeUtility log)
 endif()
 
+# Directory class needs CoreFoundation on Apple platforms
+if(CORRADE_TARGET_APPLE)
+    target_link_libraries(CorradeUtility "-framework CoreFoundation")
+endif()
+
 install(TARGETS CorradeUtility
         RUNTIME DESTINATION ${CORRADE_BINARY_INSTALL_DIR}
         LIBRARY DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR}

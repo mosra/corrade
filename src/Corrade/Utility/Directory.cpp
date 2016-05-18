@@ -35,6 +35,9 @@
 #ifdef CORRADE_TARGET_UNIX
 #include <sys/stat.h>
 #include <dirent.h>
+#ifdef CORRADE_TARGET_APPLE
+#include <CoreFoundation/CFBundle.h>
+#endif
 
 /* Windows */
 /** @todo remove the superfluous includes when mingw is fixed (otherwise causes undefined EXTERN_C error) */
@@ -176,6 +179,20 @@ bool Directory::isSandboxed() {
 std::string Directory::home() {
     /* Unix */
     #ifdef CORRADE_TARGET_UNIX
+    /* Sandboxed OSX, iOS */
+    #ifdef CORRADE_TARGET_APPLE
+    if(isSandboxed()) {
+        CFBundleRef appBundle = CFBundleGetMainBundle();
+        if(appBundle) {
+            CFURLRef url = CFBundleCopyExecutableURL(appBundle);
+            std::string urlString(PATH_MAX, '\0');
+            CFURLGetFileSystemRepresentation(url, true, reinterpret_cast<UInt8*>(&urlString[0]), urlString.size());
+            CFRelease(url);
+            urlString.resize(std::strlen(urlString.data()));
+            return path(path(urlString));
+        }
+    }
+    #endif
     if(const char* const h = std::getenv("HOME"))
         return h;
     return std::string{};
@@ -194,8 +211,12 @@ std::string Directory::home() {
 }
 
 std::string Directory::configurationDir(const std::string& applicationName) {
-    /* XDG-compilant Unix */
-    #ifdef __unix__
+    #ifdef CORRADE_TARGET_APPLE
+    return join(home(), "Library/Application Support/" + applicationName);
+
+    /* XDG-compilant Unix (not using CORRADE_TARGET_UNIX, because that is a
+       superset) */
+    #elif defined(__unix__)
     const std::string lowercaseApplicationName = String::lowercase(applicationName);
     if(const char* const config = std::getenv("XDG_CONFIG_HOME"))
         return join(config, lowercaseApplicationName);

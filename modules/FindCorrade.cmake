@@ -418,6 +418,12 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
                 set_property(TARGET Corrade::${_component} APPEND PROPERTY
                     INTERFACE_LINK_LIBRARIES "log")
             endif()
+
+            # Directory class needs CoreFoundation on Apple platforms
+            if(CORRADE_TARGET_APPLE)
+                set_property(TARGET Corrade::${_component} APPEND PROPERTY
+                    INTERFACE_LINK_LIBRARIES "-framework CoreFoundation")
+            endif()
         endif()
 
         # Find library includes

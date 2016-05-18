@@ -244,10 +244,13 @@ void DirectoryTest::home() {
     const std::string home = Directory::home();
     Debug() << "Home dir found as:" << home;
 
-    /* On OSX verify that the home dir contains `Desktop` directory. Hopefully
-       that's true on all language mutations. */
+    /* On OSX and iOS verify that the home dir contains `Library` directory,
+       or, in case of a sandboxed app, the *.app directory */
     #ifdef CORRADE_TARGET_APPLE
-    CORRADE_VERIFY(Directory::fileExists(Directory::join(home, "Desktop")));
+    if(Directory::isSandboxed())
+        CORRADE_VERIFY(Directory::fileExists(Directory::join(home, "UtilityDirectoryTest.app")));
+    else
+        CORRADE_VERIFY(Directory::fileExists(Directory::join(home, "Library")));
 
     /* On other Unixes verify that the home dir contains `.local` directory.
        Ugly and hacky, but it's the best I came up with. Can't test for e.g.
@@ -272,11 +275,18 @@ void DirectoryTest::configurationDir() {
     const std::string dir = Directory::configurationDir("Corrade");
     Debug() << "Configuration dir found as:" << dir;
 
+    #ifdef CORRADE_TARGET_APPLE
+    CORRADE_COMPARE(dir.substr(dir.size() - 7), "Corrade");
+    if(Directory::isSandboxed())
+        CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(Directory::path(Directory::path(dir))), "UtilityDirectoryTest.app")));
+    else
+        CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(dir), "App Store")));
+
     /* On Linux verify that the parent dir contains `autostart` directory,
        something from GTK or something from Qt. Ugly and hacky, but it's the
        best I could come up with. Can't test for e.g. `/home/` substring, as
        that can be overriden. */
-    #if __linux__
+    #elif __linux__
     CORRADE_COMPARE(dir.substr(dir.size()-7), "corrade");
     CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(dir), "autostart")) ||
                    Directory::fileExists(Directory::join(Directory::path(dir), "dconf")) ||
