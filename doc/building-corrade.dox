@@ -219,6 +219,10 @@ code more robust and future-proof, it's recommended to build the library with
 
 Platform-specific options:
 
+-   `UTILITY_USE_ANSI_COLORS` -- if building for Windows, this will use ANSI
+    escape codes in @ref Utility::Debug instead of WINAPI functions. Note that
+    you need at least Windows 10 or non-standard console emulator to display
+    them properly.
 -   `TESTSUITE_TARGET_XCTEST` -- if building for Xcode on OSX or iOS, this will
     make the @ref TestSuite tests compatible with the XCTest framework and thus
     runnable directly from Xcode and also directly on iOS.
