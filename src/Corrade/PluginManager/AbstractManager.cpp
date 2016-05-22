@@ -35,7 +35,7 @@
 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN)
 #include <dlfcn.h>
 #endif
-#else
+#elif !defined(CORRADE_TARGET_WINDOWS_RT)
 #include <windows.h>
 #undef interface
 #define dlsym GetProcAddress
@@ -121,7 +121,7 @@ AbstractManager::AbstractManager(std::string pluginInterface, std::string plugin
         p.second->staticPlugin->initializer();
     }
 
-    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
     setPluginDirectory(std::move(pluginDirectory));
     #else
     static_cast<void>(pluginDirectory);
@@ -130,14 +130,14 @@ AbstractManager::AbstractManager(std::string pluginInterface, std::string plugin
 
 AbstractManager::~AbstractManager() {
     /* Unload all plugins associated with this plugin manager */
-    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
     std::vector<std::map<std::string, Plugin*>::iterator> removed;
     #endif
     for(auto it = _plugins.plugins.begin(); it != _plugins.plugins.end(); ++it) {
         /* Plugin doesn't belong to this manager */
         if(it->second->manager != this) continue;
 
-        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT)
+        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
         /* Try to unload the plugin (and all plugins that depend on it) */
         const LoadState loadState = unloadRecursiveInternal(*it->second);
 
@@ -165,7 +165,7 @@ AbstractManager::~AbstractManager() {
         else ++ait;
     }
 
-    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
     /* Remove the plugins from global container */
     for(auto it = removed.cbegin(); it != removed.cend(); ++it) {
         delete (*it)->second;
@@ -174,7 +174,7 @@ AbstractManager::~AbstractManager() {
     #endif
 }
 
-#if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT)
+#if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
 LoadState AbstractManager::unloadRecursive(const std::string& plugin) {
     const auto found = _plugins.plugins.find(plugin);
     CORRADE_INTERNAL_ASSERT(found != _plugins.plugins.end());
@@ -314,7 +314,7 @@ LoadState AbstractManager::loadState(const std::string& plugin) const {
 
 LoadState AbstractManager::load(const std::string& plugin) {
     if(Plugin* const found = findWithAlias(plugin)) {
-        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT)
+        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
         return loadInternal(*found);
         #else
         return found->loadState;
@@ -322,7 +322,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
     }
 
     Error() << "PluginManager::Manager::load(): plugin" << plugin
-        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT)
+        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
         << "is not static and was not found in" << _pluginDirectory;
         #else
         << "was not found";
@@ -330,7 +330,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
     return LoadState::NotFound;
 }
 
-#if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT)
+#if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
 LoadState AbstractManager::loadInternal(Plugin& plugin) {
     /* Plugin is not ready to load */
     if(plugin.loadState != LoadState::NotLoaded) {
@@ -440,7 +440,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
 
 LoadState AbstractManager::unload(const std::string& plugin) {
     if(Plugin* const found = findWithAlias(plugin)) {
-        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT)
+        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
         return unloadInternal(*found);
         #else
         return found->loadState;
@@ -451,7 +451,7 @@ LoadState AbstractManager::unload(const std::string& plugin) {
     return LoadState::NotFound;
 }
 
-#if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT)
+#if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
 LoadState AbstractManager::unloadInternal(Plugin& plugin) {
     /* Plugin is not ready to unload, nothing to do */
     if(plugin.loadState != LoadState::Loaded) {
@@ -568,7 +568,7 @@ void* AbstractManager::instanceInternal(const std::string& plugin) {
     return found->instancer(*this, found->metadata._name);
 }
 
-#if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT)
+#if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
 AbstractManager::Plugin::Plugin(std::string name, const std::string& metadata, AbstractManager* manager): configuration{metadata, Utility::Configuration::Flag::ReadOnly}, metadata{std::move(name), configuration}, manager{manager}, instancer{nullptr}, module{nullptr} {
     loadState = configuration.isValid() ? LoadState::NotLoaded : LoadState::WrongMetadataFile;
 }
@@ -577,7 +577,7 @@ AbstractManager::Plugin::Plugin(std::string name, const std::string& metadata, A
 AbstractManager::Plugin::Plugin(std::string name, std::istream& metadata, StaticPlugin* staticPlugin): loadState{LoadState::Static}, configuration{metadata, Utility::Configuration::Flag::ReadOnly}, metadata{std::move(name), configuration}, manager{nullptr}, instancer{staticPlugin->instancer}, staticPlugin{staticPlugin} {}
 
 AbstractManager::Plugin::~Plugin() {
-    #ifndef CORRADE_TARGET_NACL_NEWLIB
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
     if(loadState == LoadState::Static)
     #endif
         delete staticPlugin;
@@ -588,7 +588,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, PluginManager::LoadState value
     switch(value) {
         #define ls(state) case PluginManager::LoadState::state: return debug << "PluginManager::LoadState::" #state;
         ls(NotFound)
-        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT)
+        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
         ls(WrongPluginVersion)
         ls(WrongInterfaceVersion)
         ls(WrongMetadataFile)
@@ -600,7 +600,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, PluginManager::LoadState value
         ls(Required)
         #endif
         ls(Static)
-        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT)
+        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
         ls(Used)
         #endif
         #undef ls

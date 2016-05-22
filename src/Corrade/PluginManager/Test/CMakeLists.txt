@@ -26,7 +26,7 @@
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 
-if(NOT CORRADE_TARGET_NACL_NEWLIB AND NOT CORRADE_TARGET_EMSCRIPTEN)
+if(NOT CORRADE_TARGET_NACL_NEWLIB AND NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET_IOS)
     corrade_add_plugin(Snail ${CMAKE_CURRENT_BINARY_DIR} "" Snail.conf Snail.cpp)
     corrade_add_plugin(Dog ${CMAKE_CURRENT_BINARY_DIR} "" Dog.conf Dog.cpp)
     corrade_add_plugin(Bulldog ${CMAKE_CURRENT_BINARY_DIR} "" Bulldog.conf Bulldog.cpp)
@@ -45,5 +45,7 @@ if(CORRADE_TARGET_WINDOWS)
     target_link_libraries(Chihuahua CorradePluginManagerTestLib Dog)
 endif()
 
-add_subdirectory(deletable)
-add_subdirectory(food)
+if(NOT CORRADE_TARGET_NACL_NEWLIB AND NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET_IOS)
+    add_subdirectory(deletable)
+    add_subdirectory(food)
+endif()
