@@ -243,6 +243,7 @@ std::string Directory::home() {
 }
 
 std::string Directory::configurationDir(const std::string& applicationName) {
+    /* OSX, iOS */
     #ifdef CORRADE_TARGET_APPLE
     return join(home(), "Library/Application Support/" + applicationName);
 
