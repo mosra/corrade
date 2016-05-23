@@ -89,7 +89,7 @@ DirectoryTest::DirectoryTest() {
 
     #ifdef CORRADE_TARGET_APPLE
     if(Directory::isSandboxed()
-        #ifdef CORRADE_TARGET_IOS
+        #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
         /** @todo Fix this once I persuade CMake to run XCTest tests properly */
         && std::getenv("SIMULATOR_UDID")
         #endif
