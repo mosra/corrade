@@ -1,12 +1,18 @@
 # kate: indent-width 2;
 
-version: '{branch}-{build}'
-
-skip_tags: true
 shallow_clone: true
 clone_depth: 1
 
 os: Visual Studio 2015
+
+environment:
+  matrix:
+  - TARGET: desktop
+    ANSI_COLORS: ON
+  - TARGET: desktop
+    ANSI_COLORS: OFF
+  - TARGET: rt
+  - TARGET: desktop-mingw
 
 notifications:
 - provider: Webhook
@@ -16,33 +22,11 @@ notifications:
   on_build_status_changed: true
 
 install:
-- call "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/vcvarsall.bat"
-- set PATH=C:/Sys/bin;C:/tools/ninja;%PATH%
-
-# Ninja
 - cinst ninja
+- set PATH=C:/tools/ninja;%PATH%
+- IF "%TARGET%" == "desktop-mingw" cinst mingw /f >nul
 
 build_script:
-- mkdir build
-- cd build
-- cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=C:/Sys -DBUILD_TESTS=ON -G Ninja
-- cmake --build .
-- cmake --build . --target install
-- cmake . -DCMAKE_INSTALL_PREFIX=%APPVEYOR_BUILD_FOLDER%/Deploy -DBUILD_TESTS=OFF
-- cmake --build . --target install
-- cd ../Deploy
-- 7z a ../corrade.zip *
-# Examples
-- cd %APPVEYOR_BUILD_FOLDER%
-- mkdir build-examples
-- cd build-examples
-- cmake ../src/examples -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:/Sys -G Ninja
-- cmake --build .
-
-test_script:
-- cd %APPVEYOR_BUILD_FOLDER%/build
-- SET fail=0
-- ctest --output-on-failure || SET fail=1 & ver > nul
-- cd %APPVEYOR_BUILD_FOLDER%
-- appveyor PushArtifact corrade.zip
-- exit %fail%
+- IF "%TARGET%" == "desktop" call package\ci\appveyor-desktop.bat
+- IF "%TARGET%" == "desktop-mingw" call package\ci\appveyor-desktop-mingw.bat
+- IF "%TARGET%" == "rt" call package\ci\appveyor-rt.bat
