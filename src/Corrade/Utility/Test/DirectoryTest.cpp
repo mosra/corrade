@@ -58,6 +58,9 @@ struct DirectoryTest: TestSuite::Tester {
     void readEmpty();
     void readNonSeekable();
     void write();
+
+    std::string _testDir,
+        _writeTestDir;
 };
 
 DirectoryTest::DirectoryTest() {
@@ -83,6 +86,22 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::readEmpty,
               &DirectoryTest::readNonSeekable,
               &DirectoryTest::write});
+
+    #ifdef CORRADE_TARGET_APPLE
+    if(Directory::isSandboxed()
+        #ifdef CORRADE_TARGET_IOS
+        /** @todo Fix this once I persuade CMake to run XCTest tests properly */
+        && std::getenv("SIMULATOR_UDID")
+        #endif
+    ) {
+        _testDir = Directory::join(Directory::path(Directory::executableLocation()), "DirectoryTestFiles");
+        _writeTestDir = Directory::join(Directory::home(), "Library/Caches");
+    } else
+    #endif
+    {
+        _testDir = DIRECTORY_TEST_DIR;
+        _writeTestDir = DIRECTORY_WRITE_TEST_DIR;
+    }
 }
 
 void DirectoryTest::path() {
@@ -133,43 +152,43 @@ void DirectoryTest::joinWindows() {
 
 void DirectoryTest::fileExists() {
     /* File */
-    CORRADE_VERIFY(Directory::fileExists(Directory::join(DIRECTORY_TEST_DIR, "file")));
+    CORRADE_VERIFY(Directory::fileExists(Directory::join(_testDir, "file")));
 
     /* Directory */
-    CORRADE_VERIFY(Directory::fileExists(DIRECTORY_TEST_DIR));
+    CORRADE_VERIFY(Directory::fileExists(_testDir));
 
     /* Nonexistent file */
-    CORRADE_VERIFY(!Directory::fileExists(Directory::join(DIRECTORY_TEST_DIR, "nonexistentFile")));
+    CORRADE_VERIFY(!Directory::fileExists(Directory::join(_testDir, "nonexistentFile")));
 }
 
 void DirectoryTest::remove() {
     /* Directory */
-    std::string directory = Directory::join(DIRECTORY_WRITE_TEST_DIR, "directory");
+    std::string directory = Directory::join(_writeTestDir, "directory");
     CORRADE_VERIFY(Directory::mkpath(directory));
     CORRADE_VERIFY(Directory::fileExists(directory));
     CORRADE_VERIFY(Directory::rm(directory));
     CORRADE_VERIFY(!Directory::fileExists(directory));
 
     /* File */
-    std::string file = Directory::join(DIRECTORY_WRITE_TEST_DIR, "file.txt");
+    std::string file = Directory::join(_writeTestDir, "file.txt");
     CORRADE_VERIFY(Directory::writeString(file, "a"));
     CORRADE_VERIFY(Directory::fileExists(file));
     CORRADE_VERIFY(Directory::rm(file));
     CORRADE_VERIFY(!Directory::fileExists(file));
 
     /* Nonexistent file */
-    std::string nonexistent = Directory::join(DIRECTORY_WRITE_TEST_DIR, "nonexistent");
+    std::string nonexistent = Directory::join(_writeTestDir, "nonexistent");
     CORRADE_VERIFY(!Directory::fileExists(nonexistent));
     CORRADE_VERIFY(!Directory::rm(nonexistent));
 }
 
 void DirectoryTest::moveFile() {
     /* Old file */
-    std::string oldFile = Directory::join(DIRECTORY_WRITE_TEST_DIR, "oldFile.txt");
+    std::string oldFile = Directory::join(_writeTestDir, "oldFile.txt");
     CORRADE_VERIFY(Directory::writeString(oldFile, "a"));
 
     /* New file, remove if exists */
-    std::string newFile = Directory::join(DIRECTORY_WRITE_TEST_DIR, "newFile.txt");
+    std::string newFile = Directory::join(_writeTestDir, "newFile.txt");
     Directory::rm(newFile);
 
     CORRADE_VERIFY(Directory::fileExists(oldFile));
@@ -181,12 +200,12 @@ void DirectoryTest::moveFile() {
 
 void DirectoryTest::moveDirectory() {
     /* Old directory, create if not exists */
-    std::string oldDirectory = Directory::join(DIRECTORY_WRITE_TEST_DIR, "oldDirectory");
+    std::string oldDirectory = Directory::join(_writeTestDir, "oldDirectory");
     if(!Directory::fileExists(oldDirectory))
         CORRADE_VERIFY(Directory::mkpath(oldDirectory));
 
     /* New directory, remove if exists */
-    std::string newDirectory = Directory::join(DIRECTORY_WRITE_TEST_DIR, "newDirectory");
+    std::string newDirectory = Directory::join(_writeTestDir, "newDirectory");
     if(Directory::fileExists(newDirectory))
         CORRADE_VERIFY(Directory::rm(newDirectory));
 
@@ -197,24 +216,24 @@ void DirectoryTest::moveDirectory() {
 
 void DirectoryTest::mkpath() {
     /* Existing */
-    CORRADE_VERIFY(Directory::fileExists(DIRECTORY_WRITE_TEST_DIR));
-    CORRADE_VERIFY(Directory::mkpath(DIRECTORY_WRITE_TEST_DIR));
+    CORRADE_VERIFY(Directory::fileExists(_writeTestDir));
+    CORRADE_VERIFY(Directory::mkpath(_writeTestDir));
 
     /* Leaf */
-    std::string leaf = Directory::join(DIRECTORY_WRITE_TEST_DIR, "leaf");
+    std::string leaf = Directory::join(_writeTestDir, "leaf");
     if(Directory::fileExists(leaf)) CORRADE_VERIFY(Directory::rm(leaf));
     CORRADE_VERIFY(Directory::mkpath(leaf));
     CORRADE_VERIFY(Directory::fileExists(leaf));
 
     /* Path */
-    std::string path = Directory::join(DIRECTORY_WRITE_TEST_DIR, "path/to/new/dir");
+    std::string path = Directory::join(_writeTestDir, "path/to/new/dir");
     if(Directory::fileExists(path)) CORRADE_VERIFY(Directory::rm(path));
-    if(Directory::fileExists(Directory::join(DIRECTORY_WRITE_TEST_DIR, "path/to/new")))
-        CORRADE_VERIFY(Directory::rm(Directory::join(DIRECTORY_WRITE_TEST_DIR, "path/to/new")));
-    if(Directory::fileExists(Directory::join(DIRECTORY_WRITE_TEST_DIR, "path/to")))
-        CORRADE_VERIFY(Directory::rm(Directory::join(DIRECTORY_WRITE_TEST_DIR, "path/to")));
-    if(Directory::fileExists(Directory::join(DIRECTORY_WRITE_TEST_DIR, "path")))
-        CORRADE_VERIFY(Directory::rm(Directory::join(DIRECTORY_WRITE_TEST_DIR, "path")));
+    if(Directory::fileExists(Directory::join(_writeTestDir, "path/to/new")))
+        CORRADE_VERIFY(Directory::rm(Directory::join(_writeTestDir, "path/to/new")));
+    if(Directory::fileExists(Directory::join(_writeTestDir, "path/to")))
+        CORRADE_VERIFY(Directory::rm(Directory::join(_writeTestDir, "path/to")));
+    if(Directory::fileExists(Directory::join(_writeTestDir, "path")))
+        CORRADE_VERIFY(Directory::rm(Directory::join(_writeTestDir, "path")));
 
     CORRADE_VERIFY(Directory::mkpath(leaf));
     CORRADE_VERIFY(Directory::fileExists(leaf));
@@ -332,8 +351,13 @@ void DirectoryTest::configurationDir() {
 }
 
 void DirectoryTest::list() {
+    #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        "CTest is not able to run XCTest executables properly in the simulator.");
+    #endif
+
     /* All */
-    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR),
+    CORRADE_COMPARE_AS(Directory::list(_testDir),
         (std::vector<std::string>{".", "..", "dir", "file"}),
         TestSuite::Compare::SortedContainer);
 
@@ -343,23 +367,23 @@ void DirectoryTest::list() {
         #endif
 
         /* Skip special */
-        CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SkipSpecial),
+        CORRADE_COMPARE_AS(Directory::list(_testDir, Directory::Flag::SkipSpecial),
             (std::vector<std::string>{".", "..", "dir", "file"}),
             TestSuite::Compare::SortedContainer);
     }
 
     /* All, sorted ascending */
-    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SortAscending),
+    CORRADE_COMPARE_AS(Directory::list(_testDir, Directory::Flag::SortAscending),
         (std::vector<std::string>{".", "..", "dir", "file"}),
         TestSuite::Compare::Container);
 
     /* All, sorted descending */
-    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SortDescending),
+    CORRADE_COMPARE_AS(Directory::list(_testDir, Directory::Flag::SortDescending),
         (std::vector<std::string>{"file", "dir", "..", "."}),
         TestSuite::Compare::Container);
 
     /* Skip . and .. */
-    CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SkipDotAndDotDot),
+    CORRADE_COMPARE_AS(Directory::list(_testDir, Directory::Flag::SkipDotAndDotDot),
         (std::vector<std::string>{"dir", "file"}),
         TestSuite::Compare::SortedContainer);
 
@@ -369,12 +393,12 @@ void DirectoryTest::list() {
         #endif
 
         /* Skip directories */
-        CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SkipDirectories),
+        CORRADE_COMPARE_AS(Directory::list(_testDir, Directory::Flag::SkipDirectories),
             std::vector<std::string>{"file"},
             TestSuite::Compare::SortedContainer);
 
         /* Skip files */
-        CORRADE_COMPARE_AS(Directory::list(DIRECTORY_TEST_DIR, Directory::Flag::SkipFiles),
+        CORRADE_COMPARE_AS(Directory::list(_testDir, Directory::Flag::SkipFiles),
             (std::vector<std::string>{".", "..", "dir"}),
             TestSuite::Compare::SortedContainer);
     }
@@ -387,7 +411,7 @@ void DirectoryTest::listSortPrecedence() {
 void DirectoryTest::read() {
     /* Existing file, check if we are reading it as binary (CR+LF is not
        converted to LF) and nothing after \0 gets lost */
-    CORRADE_COMPARE_AS(Directory::read(Directory::join(DIRECTORY_TEST_DIR, "file")),
+    CORRADE_COMPARE_AS(Directory::read(Directory::join(_testDir, "file")),
         (Containers::Array<char>::from(0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF)),
         TestSuite::Compare::Container);
 
@@ -396,12 +420,12 @@ void DirectoryTest::read() {
     CORRADE_VERIFY(!none);
 
     /* Read into string */
-    CORRADE_COMPARE(Directory::readString(Directory::join(DIRECTORY_TEST_DIR, "file")),
+    CORRADE_COMPARE(Directory::readString(Directory::join(_testDir, "file")),
         std::string("\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11));
 }
 
 void DirectoryTest::readEmpty() {
-    const std::string empty = Directory::join(DIRECTORY_TEST_DIR, "dir/dummy");
+    const std::string empty = Directory::join(_testDir, "dir/dummy");
     CORRADE_VERIFY(Directory::fileExists(empty));
     CORRADE_VERIFY(!Directory::read(empty));
 }
@@ -418,15 +442,15 @@ void DirectoryTest::readNonSeekable() {
 
 void DirectoryTest::write() {
     constexpr unsigned char data[] = {0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF};
-    CORRADE_VERIFY(Directory::write(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file"), data));
-    CORRADE_COMPARE_AS(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file"),
-        Directory::join(DIRECTORY_TEST_DIR, "file"),
+    CORRADE_VERIFY(Directory::write(Directory::join(_writeTestDir, "file"), data));
+    CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "file"),
+        Directory::join(_testDir, "file"),
         TestSuite::Compare::File);
 
-    CORRADE_VERIFY(Directory::writeString(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file"),
+    CORRADE_VERIFY(Directory::writeString(Directory::join(_writeTestDir, "file"),
         std::string("\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11)));
-    CORRADE_COMPARE_AS(Directory::join(DIRECTORY_WRITE_TEST_DIR, "file"),
-        Directory::join(DIRECTORY_TEST_DIR, "file"),
+    CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "file"),
+        Directory::join(_testDir, "file"),
         TestSuite::Compare::File);
 }
 
