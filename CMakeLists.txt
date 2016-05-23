@@ -91,7 +91,11 @@ endif()
 
 # Platform-specific options
 if(CORRADE_TARGET_WINDOWS)
-    option(UTILITY_USE_ANSI_COLORS "Use ANSI escape sequences for colored Debug output on Windows" OFF)
+    if(CORRADE_TARGET_WINDOWS_RT)
+        set(UTILITY_USE_ANSI_COLORS 1)
+    else()
+        option(UTILITY_USE_ANSI_COLORS "Use ANSI escape sequences for colored Debug output on Windows" OFF)
+    endif()
     if(UTILITY_USE_ANSI_COLORS)
         set(CORRADE_UTILITY_USE_ANSI_COLORS 1)
     endif()
