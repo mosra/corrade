@@ -139,7 +139,16 @@ benchmark types:
     else if(args.value("color") == "off" || args.value("color") == "OFF")
         _useColor = Debug::Flag::DisableColors;
     #if (!defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)) && !defined(CORRADE_TARGET_ANDROID)
-    else _useColor = logOutput == &std::cout && errorOutput == &std::cerr && isatty(1) && isatty(2)
+    else _useColor = logOutput == &std::cout &&
+        /* Windows RT projects have C4996 treated as error by default. WHY */
+        #ifdef _MSC_VER
+        #pragma warning(push)
+        #pragma warning(disable: 4996)
+        #endif
+        errorOutput == &std::cerr && isatty(1) && isatty(2)
+        #ifdef _MSC_VER
+        #pragma warning(pop)
+        #endif
         #ifdef CORRADE_TARGET_APPLE
         /* Xcode's console reports that it is a TTY, but it doesn't support
            colors. We have to check for the following undocumented environment
