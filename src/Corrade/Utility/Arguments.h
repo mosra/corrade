@@ -353,9 +353,19 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * Boolean options are set to `true` when environment value is present
          * (not depending on its value).
+         * @partialsupport Does nothing on @ref CORRADE_TARGET_WINDOWS_RT "Windows RT".
          */
+        #ifndef CORRADE_TARGET_WINDOWS_RT
         Arguments& setFromEnvironment(const std::string& key, std::string environmentVariable);
         Arguments& setFromEnvironment(const std::string& key); /**< @overload */
+        #else
+        template<class T, class U> Arguments& setFromEnvironment(T&&, U&&) {
+            return *this;
+        }
+        template<class T> Arguments& setFromEnvironment(T&&) {
+            return *this;
+        }
+        #endif
 
         /**
          * @brief Set command name

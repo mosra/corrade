@@ -63,7 +63,10 @@ struct Arguments::Entry {
 
     Type type;
     char shortKey;
-    std::string key, help, helpKey, defaultValue, environment;
+    std::string key, help, helpKey, defaultValue;
+    #ifndef CORRADE_TARGET_WINDOWS_RT
+    std::string environment;
+    #endif
     std::size_t id;
 };
 
@@ -195,6 +198,7 @@ Arguments& Arguments::addSkippedPrefix(std::string prefix, std::string help) {
     return *this;
 }
 
+#ifndef CORRADE_TARGET_WINDOWS_RT
 Arguments& Arguments::setFromEnvironment(const std::string& key, std::string environmentVariable) {
     auto found = find(_prefix + key);
     CORRADE_ASSERT(found != _entries.end(), "Utility::Arguments::setFromEnvironment(): key" << key << "doesn't exist", *this);
@@ -208,6 +212,7 @@ Arguments& Arguments::setFromEnvironment(const std::string& key, std::string env
 Arguments& Arguments::setFromEnvironment(const std::string& key) {
     return setFromEnvironment(key, uppercaseKey(_prefix + key));
 }
+#endif
 
 Arguments& Arguments::setCommand(std::string name) {
     _command = std::move(name);
@@ -276,6 +281,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
     }
 
     /* Get options from environment */
+    #ifndef CORRADE_TARGET_WINDOWS_RT
     for(const Entry& entry: _entries) {
         if(entry.environment.empty()) continue;
 
@@ -290,6 +296,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
             _values[entry.id] = env;
         }
     }
+    #endif
 
     std::vector<Entry>::iterator valueFor = _entries.end();
     bool optionsAllowed = true;
@@ -510,7 +517,11 @@ std::string Arguments::help() const {
     }
     for(const Entry& entry: _entries) {
         /* Entry which will not be printed, skip */
-        if(entry.help.empty() && (entry.type == Type::Option && entry.defaultValue.empty()) && entry.environment.empty())
+        if(entry.help.empty() && (entry.type == Type::Option && entry.defaultValue.empty())
+            #ifndef CORRADE_TARGET_WINDOWS_RT
+            && entry.environment.empty()
+            #endif
+        )
             continue;
 
         /* Compute size of current key column. Make it so the key name is
@@ -554,7 +565,11 @@ std::string Arguments::help() const {
     for(const Entry& entry: _entries) {
         /* Skip arguments and options without default value, environment or
            help text (no additional info to show) */
-        if(entry.type == Type::Argument || (entry.defaultValue.empty() && entry.environment.empty() && entry.help.empty()))
+        if(entry.type == Type::Argument || (entry.defaultValue.empty() && entry.help.empty()
+            #ifndef CORRADE_TARGET_WINDOWS_RT
+            && entry.environment.empty()
+            #endif
+        ))
             continue;
 
         /* Key name */
@@ -567,10 +582,12 @@ std::string Arguments::help() const {
         if(!entry.help.empty()) out << entry.help << '\n';
 
         /* Value taken from environment */
+        #ifndef CORRADE_TARGET_WINDOWS_RT
         if(!entry.environment.empty()) {
             if(!entry.help.empty()) out << std::string(keyColumnWidth + 3, ' ');
             out << "(environment: " << entry.environment << ")\n";
         }
+        #endif
 
         /* Default value, put it on new indented line (two spaces from the
            left and one from the right additionaly to key column width), if
