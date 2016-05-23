@@ -35,6 +35,12 @@
 #ifdef CORRADE_TARGET_UNIX
 #include <sys/stat.h>
 #include <dirent.h>
+#ifdef __linux__
+#include <unistd.h>
+#endif
+#ifdef CORRADE_TARGET_APPLE
+#include <mach-o/dyld.h>
+#endif
 
 /* Windows */
 /** @todo remove the superfluous includes when mingw is fixed (otherwise causes undefined EXTERN_C error) */
@@ -170,6 +176,49 @@ bool Directory::isSandboxed() {
     return std::getenv("APP_SANDBOX_CONTAINER_ID");
     #else
     return false;
+    #endif
+}
+
+std::string Directory::executableLocation() {
+    /* Linux */
+    #ifdef __linux__
+    /* Reallocate like hell until we have enough place to store the path. Can't
+       use lstat because the /proc/self/exe symlink is not a real symlink and
+       so stat::st_size returns 0. POSIX, WHAT THE HELL. */
+    constexpr const char self[]{"/proc/self/exe"};
+    std::string path(4, '\0');
+    ssize_t size;
+    while((size = readlink(self, &path[0], path.size())) == ssize_t(path.size()))
+        path.resize(path.size()*2);
+
+    CORRADE_INTERNAL_ASSERT(size > 0);
+
+    path.resize(size);
+    return path;
+
+    /* OSX, iOS */
+    #elif defined(CORRADE_TARGET_APPLE)
+    /* Get path size (need to set it to 0 to avoid filling nullptr with random
+       data and crashing) */
+    std::uint32_t size = 0;
+    CORRADE_INTERNAL_ASSERT_OUTPUT(_NSGetExecutablePath(nullptr, &size) == -1);
+
+    /* Allocate proper size and get the path */
+    std::string path(size, '\0');
+    CORRADE_INTERNAL_ASSERT_OUTPUT(_NSGetExecutablePath(&path[0], &size) == 0);
+    return path;
+
+    /* Windows (not RT) */
+    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    HMODULE module = GetModuleHandle(nullptr);
+    std::string path(MAX_PATH, '\0');
+    std::size_t size = GetModuleFileName(module, &path[0], path.size());
+    path.resize(size);
+    return path;
+
+    /* Not implemented */
+    #else
+    return std::string{};
     #endif
 }
 

@@ -173,6 +173,15 @@ class CORRADE_UTILITY_EXPORT Directory {
         static bool isSandboxed();
 
         /**
+         * @brief Executable location
+         *
+         * Returns location of the executable on Linux, Windows, non-sandboxed
+         * and sandboxed OSX and iOS. On other systems or if the directory
+         * can't be found, empty string is returned.
+         */
+        static std::string executableLocation();
+
+        /**
          * @brief Current user's home directory
          *
          * On Unix and non-sandboxed OSX, the directory is equivalent to

@@ -49,6 +49,7 @@ struct DirectoryTest: TestSuite::Tester {
     void mkpath();
     void mkpathNoPermission();
     void isSandboxed();
+    void executableLocation();
     void home();
     void configurationDir();
     void list();
@@ -73,6 +74,7 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::mkpath,
               &DirectoryTest::mkpathNoPermission,
               &DirectoryTest::isSandboxed,
+              &DirectoryTest::executableLocation,
               &DirectoryTest::home,
               &DirectoryTest::configurationDir,
               &DirectoryTest::list,
@@ -238,6 +240,33 @@ void DirectoryTest::isSandboxed() {
     #else
     CORRADE_VERIFY(!Directory::isSandboxed());
     #endif
+}
+
+void DirectoryTest::executableLocation() {
+    const std::string executableLocation = Directory::executableLocation();
+    Debug() << "Executable location found as:" << executableLocation;
+
+    /* On sandboxed OSX and iOS verify that the directory contains Info.plist
+       file */
+    #ifdef CORRADE_TARGET_APPLE
+    if(Directory::isSandboxed()) {
+        #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+            "CTest is not able to run XCTest executables properly in the simulator.");
+        #endif
+
+        CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(executableLocation), "Info.plist")));
+    } else
+    #endif
+
+    /* Otherwise it should contain CMake build files */
+    {
+        #ifdef CMAKE_CFG_INTDIR
+        CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(Directory::path(executableLocation)), "CMakeFiles")));
+        #else
+        CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(executableLocation), "CMakeFiles")));
+        #endif
+    }
 }
 
 void DirectoryTest::home() {
