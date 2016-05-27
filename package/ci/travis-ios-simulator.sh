@@ -8,6 +8,9 @@ mkdir build && cd build
 cmake .. \
     -DCMAKE_INSTALL_PREFIX=$HOME/deps \
     -DCMAKE_INSTALL_RPATH=$HOME/deps/lib \
+    -DWITH_INTERCONNECT=OFF \
+    -DWITH_PLUGINMANAGER=OFF \
+    -DWITH_TESTSUITE=OFF \
     -DCMAKE_BUILD_TYPE=Release
 make -j install
 cd ..

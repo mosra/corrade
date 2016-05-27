@@ -39,6 +39,11 @@ include(CMakeDependentOption)
 option(GCC47_COMPATIBILITY "Enable compatibility mode for GCC 4.7 (might disable some features)" OFF)
 option(MSVC2015_COMPATIBILITY "Enable compatibility mode for MSVC 2015 (might disable some features)" OFF)
 
+option(WITH_INTERCONNECT "Build Interconnect library" ON)
+option(WITH_PLUGINMANAGER "Build PluginManager library" ON)
+option(WITH_TESTSUITE "Build TestSuite library" ON)
+cmake_dependent_option(WITH_UTILITY "Build Utility library" ON "NOT WITH_INTERCONNECT;NOT WITH_PLUGINMANAGER;NOT WITH_TESTSUITE" ON)
+
 option(BUILD_DEPRECATED "Include deprecated API in the build" ON)
 if(BUILD_DEPRECATED)
     set(CORRADE_BUILD_DEPRECATED 1)

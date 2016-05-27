@@ -47,11 +47,25 @@ add_custom_target(Corrade SOURCES ${Corrade_HEADERS})
 install(FILES ${Corrade_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/configure.h DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR})
 
-add_subdirectory(Containers)
-add_subdirectory(Interconnect)
-add_subdirectory(PluginManager)
-add_subdirectory(TestSuite)
-add_subdirectory(Utility)
+if(WITH_UTILITY) # Cyclic dependency of Containers and Utility
+    add_subdirectory(Containers)
+endif()
+
+if(WITH_INTERCONNECT)
+    add_subdirectory(Interconnect)
+endif()
+
+if(WITH_PLUGINMANAGER)
+    add_subdirectory(PluginManager)
+endif()
+
+if(WITH_TESTSUITE)
+    add_subdirectory(TestSuite)
+endif()
+
+if(WITH_UTILITY)
+    add_subdirectory(Utility)
+endif()
 
 # Corrade configure file for superprojects
 set(_CORRADE_CONFIGURE_FILE ${CMAKE_CURRENT_BINARY_DIR}/configure.h CACHE INTERNAL "")

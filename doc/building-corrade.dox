@@ -217,6 +217,20 @@ Corrade is by default built with all deprecated APIs. However, to make your
 code more robust and future-proof, it's recommended to build the library with
 `BUILD_DEPRECATED` disabled.
 
+By default the library is built with everything. Using `WITH_*` CMake
+parameters you can specify which parts will be built and which not:
+
+-   `WITH_INTERCONNECT` -- @ref Interconnect library. Enables also building of
+    Utility library.
+-   `WITH_PLUGINMANAGER` -- @ref PluginManager library. Enables also building
+    of Utility library.
+-   `WITH_TESTSUITE` -- @ref TestSuite library. Enables also building of
+    Utility library.
+-   `WITH_UTILITY` -- @ref Utility library. Enabled automatically if
+    `WITH_INTERCONNECT`, `WITH_PLUGINMANAGER` or `WITH_TESTSUITE` is enabled.
+    The @ref Containers library and `corrade-rc` executable is built along with
+    this library.
+
 Platform-specific options:
 
 -   `UTILITY_USE_ANSI_COLORS` -- if building for Windows, this will use ANSI
