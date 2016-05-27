@@ -342,6 +342,10 @@ function(corrade_add_resource name configurationFile)
 endfunction()
 
 function(corrade_add_plugin plugin_name debug_install_dir release_install_dir metadata_file)
+    if(CORRADE_TARGET_NACL_NEWLIB OR CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_WINDOWS_RT OR CORRADE_TARGET_IOS)
+        message(SEND_ERROR "Dynamic plugins are not available on this platform, use corrade_add_static_plugin() instead")
+    endif()
+
     # Create dynamic library and bring all needed options along
     if(CORRADE_TARGET_WINDOWS)
         add_library(${plugin_name} SHARED ${ARGN})
