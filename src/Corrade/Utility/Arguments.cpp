@@ -36,6 +36,14 @@
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Debug.h"
 
+/* For Arguments::environment() */
+#ifdef CORRADE_TARGET_UNIX
+#include <cstdio>
+extern char **environ;
+#elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+#include <windows.h>
+#endif
+
 namespace Corrade { namespace Utility {
 
 namespace {
@@ -76,6 +84,20 @@ Arguments::Entry::Entry(Type type, char shortKey, std::string key, std::string h
     else this->helpKey = std::move(helpKey);
 
     CORRADE_INTERNAL_ASSERT(type == Type::Option || this->defaultValue.empty());
+}
+
+std::vector<std::string> Arguments::environment() {
+    std::vector<std::string> list;
+    #ifdef CORRADE_TARGET_UNIX
+    for(char** e = environ; *e; ++e)
+        list.push_back(*e);
+    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    char* const env = GetEnvironmentStrings();
+    for(char* e = env; *e; e += std::strlen(e) + 1)
+        list.push_back(e);
+    FreeEnvironmentStrings(env);
+    #endif
+    return list;
 }
 
 Arguments::Arguments(std::string prefix): _prefix{prefix + '-'} {

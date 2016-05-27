@@ -160,6 +160,16 @@ Upon calling `--formatter-help` the application prints the following:
 */
 class CORRADE_UTILITY_EXPORT Arguments {
     public:
+        /**
+         * @brief Environment values
+         *
+         * Returns list of all environment values for information purposes.
+         * @see @ref setFromEnvironment()
+         * @partialsupport Returns empty vector on
+         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT".
+         */
+        static std::vector<std::string> environment();
+
         /** @brief Default constructor */
         explicit Arguments();
 
@@ -353,6 +363,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * Boolean options are set to `true` when environment value is present
          * (not depending on its value).
+         * @see @ref environment()
          * @partialsupport Does nothing on @ref CORRADE_TARGET_WINDOWS_RT "Windows RT".
          */
         #ifndef CORRADE_TARGET_WINDOWS_RT

@@ -34,6 +34,8 @@ namespace Corrade { namespace Utility { namespace Test {
 struct ArgumentsTest: TestSuite::Tester {
     explicit ArgumentsTest();
 
+    void environment();
+
     void helpArgumentsOnly();
     void helpNamedOnly();
     void helpBoth();
@@ -77,7 +79,9 @@ struct ArgumentsTest: TestSuite::Tester {
 };
 
 ArgumentsTest::ArgumentsTest() {
-    addTests({&ArgumentsTest::helpArgumentsOnly,
+    addTests({&ArgumentsTest::environment,
+
+              &ArgumentsTest::helpArgumentsOnly,
               &ArgumentsTest::helpNamedOnly,
               &ArgumentsTest::helpBoth,
               &ArgumentsTest::helpText,
@@ -117,6 +121,16 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::prefixedDisallowedWithPrefix,
               &ArgumentsTest::prefixedDisallowedWithPrefixAfterSkipPrefix,
               &ArgumentsTest::prefixedUnknownWithPrefix});
+}
+
+void ArgumentsTest::environment() {
+    /* Verify that it doesn't crash, at least */
+    std::vector<std::string> list = Arguments::environment();
+    if(!list.empty()) Debug()
+        << "Environment variables found:" << list.size() << Debug::newline
+        << "One environment variable:" << list[list.size()/2];
+
+    CORRADE_VERIFY(!list.empty());
 }
 
 void ArgumentsTest::helpArgumentsOnly() {
