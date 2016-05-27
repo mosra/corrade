@@ -666,6 +666,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         std::chrono::time_point<std::chrono::high_resolution_clock> _wallClockBenchmarkBegin;
         std::uint64_t _benchmarkResult;
         TestCase* _testCase = nullptr;
+        bool _expectedFailuresDisabled;
         ExpectedFailure* _expectedFailure;
         TesterConfiguration _configuration;
 };

@@ -396,6 +396,8 @@ struct TesterTest: Tester {
     void repeatEvery();
     void repeatAll();
 
+    void noXfail();
+
     void compareNoCommonType();
     void compareAsOverload();
     void compareAsVarargs();
@@ -420,6 +422,8 @@ TesterTest::TesterTest() {
 
               &TesterTest::repeatEvery,
               &TesterTest::repeatAll,
+
+              &TesterTest::noXfail,
 
               &TesterTest::compareNoCommonType,
               &TesterTest::compareAsOverload,
@@ -740,6 +744,29 @@ void TesterTest::repeatAll() {
         "    OK [27] repeatedTest()@50\n"
         "    OK [04] equal()\n"
         "Finished TesterTest::Test with 0 errors out of 102 checks.\n";
+    CORRADE_COMPARE(out.str(), expected);
+}
+
+void TesterTest::noXfail() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "6", "--no-xfail" };
+    const int argc = std::extent<decltype(argv)>();
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(argc, argv, &out, &out);
+
+    CORRADE_COMPARE(result, 1);
+
+    std::string expected =
+        "Starting TesterTest::Test with 1 test cases...\n"
+        "  FAIL [06] expectFail() at here.cpp on line 204\n"
+        "        Values 2 + 2 and 5 are not the same, actual is\n"
+        "        4\n"
+        "        but expected\n"
+        "        5\n"
+        "Finished TesterTest::Test with 1 errors out of 1 checks.\n";
     CORRADE_COMPARE(out.str(), expected);
 }
 

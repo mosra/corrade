@@ -127,6 +127,8 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
             .setFromEnvironment("repeat-every", "CORRADE_TEST_REPEAT_EVERY")
         .addOption("repeat-all", "1").setHelp("repeat-all", "repeat all test cases N times", "N")
             .setFromEnvironment("repeat-all", "CORRADE_TEST_REPEAT_ALL")
+        .addBooleanOption("no-xfail").setHelp("no-xfail", "disallow expected failures")
+            .setFromEnvironment("no-xfail", "CORRADE_TEST_NO_XFAIL")
         .addOption("benchmark", "wall-clock").setHelp("benchmark", "default benchmark type", "TYPE")
         .setHelp(R"(Corrade TestSuite executable. By default runs test cases in order in which they
 were added and exits with non-zero code if any of them failed. Supported
@@ -169,6 +171,9 @@ benchmark types:
     else Utility::Fatal() << "Unknown benchmark type" << args.value("benchmark");
 
     std::vector<std::pair<int, TestCase>> usedTestCases;
+
+    /* Disable expected failures, if requested */
+    _expectedFailuresDisabled = args.isSet("no-xfail");
 
     /* Skip test cases, if requested */
     if(args.isSet("skip-tests"))
@@ -495,7 +500,7 @@ std::uint64_t Tester::wallClockBenchmarkEnd() {
 Tester::TesterConfiguration::TesterConfiguration() = default;
 
 Tester::ExpectedFailure::ExpectedFailure(Tester& instance, std::string message, const bool enabled): _instance(instance), _message(std::move(message)) {
-    if(enabled) _instance._expectedFailure = this;
+    if(enabled && !instance._expectedFailuresDisabled) _instance._expectedFailure = this;
 }
 
 Tester::ExpectedFailure::~ExpectedFailure() {
