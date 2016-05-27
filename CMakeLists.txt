@@ -49,6 +49,9 @@ cmake_dependent_option(BUILD_STATIC_PIC "Build static libraries with position-in
 option(BUILD_TESTS "Build unit tests" OFF)
 
 if(BUILD_TESTS)
+    if(CORRADE_TARGET_IOS)
+        set(CORRADE_TESTSUITE_BUNDLE_IDENTIFIER_PREFIX "cz.mosra.corrade")
+    endif()
     enable_testing()
 endif()
 
