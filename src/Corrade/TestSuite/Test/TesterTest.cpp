@@ -384,7 +384,15 @@ struct TesterTest: Tester {
 
     void test();
     void emptyTest();
+
     void skipOnly();
+    void skipAll();
+    void skipTests();
+    void skipBenchmarks();
+    void skipTestsNothingElse();
+    void skipBenchmarksNothingElse();
+    void skipTestsBenchmarks();
+
     void repeatEvery();
     void repeatAll();
 
@@ -401,7 +409,15 @@ class EmptyTest: public Tester {};
 TesterTest::TesterTest() {
     addTests({&TesterTest::test,
               &TesterTest::emptyTest,
+
               &TesterTest::skipOnly,
+              &TesterTest::skipAll,
+              &TesterTest::skipTests,
+              &TesterTest::skipBenchmarks,
+              &TesterTest::skipTestsNothingElse,
+              &TesterTest::skipBenchmarksNothingElse,
+              &TesterTest::skipTestsBenchmarks,
+
               &TesterTest::repeatEvery,
               &TesterTest::repeatAll,
 
@@ -558,9 +574,8 @@ void TesterTest::emptyTest() {
     t.registerTest("here.cpp", "TesterTest::EmptyTest");
     int result = t.exec(noColorArgc, noColorArgv, &out, &out);
 
-    CORRADE_VERIFY(result == 2);
-
-    CORRADE_COMPARE(out.str(), "No tests to run in TesterTest::EmptyTest!\n");
+    CORRADE_COMPARE(result, 2);
+    CORRADE_COMPARE(out.str(), "No test cases to run in TesterTest::EmptyTest!\n");
 }
 
 void TesterTest::skipOnly() {
@@ -573,7 +588,7 @@ void TesterTest::skipOnly() {
     t.registerTest("here.cpp", "TesterTest::Test");
     int result = t.exec(argc, argv, &out, &out);
 
-    CORRADE_VERIFY(result == 0);
+    CORRADE_COMPARE(result, 0);
 
     std::string expected =
         "Starting TesterTest::Test with 3 test cases...\n"
@@ -582,6 +597,108 @@ void TesterTest::skipOnly() {
         "    OK [09] compareAs()\n"
         "Finished TesterTest::Test with 0 errors out of 3 checks.\n";
     CORRADE_COMPARE(out.str(), expected);
+}
+
+void TesterTest::skipAll() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "14", "--skip", "14" };
+    const int argc = std::extent<decltype(argv)>();
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(argc, argv, &out, &out);
+
+    CORRADE_COMPARE(result, 2);
+    CORRADE_COMPARE(out.str(), "No test cases to run in TesterTest::Test!\n");
+}
+
+void TesterTest::skipTests() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "11 36 9", "--skip-tests" };
+    const int argc = std::extent<decltype(argv)>();
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(argc, argv, &out, &out);
+
+    CORRADE_COMPARE(result, 0);
+
+    std::string expected =
+        "Starting TesterTest::Test with 1 test cases...\n"
+        "Benchmark end: 5\n"
+        "Benchmark end: 10\n"
+        "Benchmark end: 15\n"
+        "Benchmark end: 20\n"
+        "Benchmark end: 25\n"
+        " BENCH [36] benchmarkCount()@5\n"
+        "        100 iterations per repeat. CPU cycles per iteration:\n"
+        "        Min:   0.05  cycles  Max:   0.25  cycles  Avg:   0.15  cycles \n"
+        "Finished TesterTest::Test with 0 errors out of 0 checks.\n";
+    CORRADE_COMPARE(out.str(), expected);
+}
+
+void TesterTest::skipBenchmarks() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "11 36 9", "--skip-benchmarks" };
+    const int argc = std::extent<decltype(argv)>();
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(argc, argv, &out, &out);
+
+    CORRADE_COMPARE(result, 0);
+
+    std::string expected =
+        "Starting TesterTest::Test with 2 test cases...\n"
+        "    OK [11] compareWith()\n"
+        "    OK [09] compareAs()\n"
+        "Finished TesterTest::Test with 0 errors out of 2 checks.\n";
+    CORRADE_COMPARE(out.str(), expected);
+}
+
+void TesterTest::skipTestsNothingElse() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "11 9", "--skip-tests" };
+    const int argc = std::extent<decltype(argv)>();
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(argc, argv, &out, &out);
+
+    CORRADE_COMPARE(result, 0);
+    CORRADE_COMPARE(out.str(), "No remaining benchmarks to run in TesterTest::Test.\n");
+}
+
+void TesterTest::skipBenchmarksNothingElse() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "36", "--skip-benchmarks" };
+    const int argc = std::extent<decltype(argv)>();
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(argc, argv, &out, &out);
+
+    CORRADE_COMPARE(result, 0);
+    CORRADE_COMPARE(out.str(), "No remaining tests to run in TesterTest::Test.\n");
+}
+
+void TesterTest::skipTestsBenchmarks() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--skip-tests", "--skip-benchmarks" };
+    const int argc = std::extent<decltype(argv)>();
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(argc, argv, &out, &out);
+
+    CORRADE_COMPARE(result, 2);
+    CORRADE_COMPARE(out.str(), "No test cases to run in TesterTest::Test!\n");
 }
 
 void TesterTest::repeatEvery() {

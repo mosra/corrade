@@ -116,6 +116,10 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
     args.addOption('c', "color", "auto").setHelp("color", "colored output", "on|off|auto")
             .setFromEnvironment("color", "CORRADE_TEST_COLOR")
         .addOption("skip").setHelp("skip", "skip test cases with given numbers", "\"N1 N2...\"")
+        .addBooleanOption("skip-tests").setHelp("skip-tests", "skip all tests")
+            .setFromEnvironment("skip-tests", "CORRADE_SKIP_TESTS")
+        .addBooleanOption("skip-benchmarks").setHelp("skip-benchmarks", "skip all benchmarks")
+            .setFromEnvironment("skip-benchmarks", "CORRADE_SKIP_BENCHMARKS")
         .addOption("only").setHelp("only", "run only test cases with given numbers", "\"N1 N2...\"")
         .addBooleanOption("shuffle").setHelp("shuffle", "randomly shuffle test case order")
             .setFromEnvironment("shuffle", "CORRADE_TEST_SHUFFLE")
@@ -166,6 +170,16 @@ benchmark types:
 
     std::vector<std::pair<int, TestCase>> usedTestCases;
 
+    /* Skip test cases, if requested */
+    if(args.isSet("skip-tests"))
+        for(TestCase& testCase: _testCases)
+            if(testCase.type == TestCaseType::Test) testCase.test = nullptr;
+
+    /* Skip benchmarks, if requested */
+    if(args.isSet("skip-benchmarks"))
+        for(TestCase& testCase: _testCases)
+            if(testCase.type != TestCaseType::Test) testCase.test = nullptr;
+
     /* Remove skipped test cases */
     if(!args.value("skip").empty()) {
         const std::vector<std::string> skip = Utility::String::split(args.value("skip"), ' ');
@@ -209,9 +223,25 @@ benchmark types:
     unsigned int errorCount = 0,
         noCheckCount = 0;
 
-    /* Fail when we have nothing to test */
+    /* Nothing to test */
     if(usedTestCases.empty()) {
-        Error(errorOutput, _useColor) << Debug::boldColor(Debug::Color::Red) << "No tests to run in" << _testName << Debug::nospace << "!";
+        /* Not an error if we're skipping either tests or benchmarks (but not
+           both) */
+        if(args.isSet("skip-tests") && !args.isSet("skip-benchmarks")) {
+            Debug(logOutput, _useColor)
+                << Debug::boldColor(Debug::Color::Default) << "No remaining benchmarks to run in"
+                << _testName << Debug::nospace << ".";
+            return 0;
+        }
+
+        if(!args.isSet("skip-tests") && args.isSet("skip-benchmarks")) {
+            Debug(logOutput, _useColor)
+                << Debug::boldColor(Debug::Color::Default) << "No remaining tests to run in"
+                << _testName << Debug::nospace << ".";
+            return 0;
+        }
+
+        Error(errorOutput, _useColor) << Debug::boldColor(Debug::Color::Red) << "No test cases to run in" << _testName << Debug::nospace << "!";
         return 2;
     }
 
