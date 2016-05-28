@@ -144,7 +144,12 @@ benchmark types:
         _useColor = Debug::Flags{};
     else if(args.value("color") == "off" || args.value("color") == "OFF")
         _useColor = Debug::Flag::DisableColors;
-    #if (!defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)) && !defined(CORRADE_TARGET_ANDROID)
+    /* The autodetection is done in Debug class on Windows with WINAPI colors */
+    #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+    else _useColor = Debug::Flags{};
+    /* We can autodetect via isatty() on Unix-like systems and Windows with
+       ANSI colors enabled */
+    #elif !defined(CORRADE_TARGET_ANDROID) && !defined(CORRADE_TARGET_EMSCRIPTEN)
     else _useColor = logOutput == &std::cout &&
         /* Windows RT projects have C4996 treated as error by default. WHY */
         #ifdef _MSC_VER
@@ -162,6 +167,9 @@ benchmark types:
         && !std::getenv("XPC_SERVICE_NAME")
         #endif
         ? Debug::Flags{} : Debug::Flag::DisableColors;
+    /* Otherwise can't be autodetected, thus disable by default */
+    #else
+    else _useColor = Debug::Flag::DisableColors;
     #endif
 
     /* Decide about default benchmark type */
