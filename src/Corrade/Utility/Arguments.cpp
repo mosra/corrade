@@ -37,7 +37,7 @@
 #include "Corrade/Utility/Debug.h"
 
 /* For Arguments::environment() */
-#ifdef CORRADE_TARGET_UNIX
+#if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include <cstdio>
 extern char **environ;
 #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
@@ -88,7 +88,7 @@ Arguments::Entry::Entry(Type type, char shortKey, std::string key, std::string h
 
 std::vector<std::string> Arguments::environment() {
     std::vector<std::string> list;
-    #ifdef CORRADE_TARGET_UNIX
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     for(char** e = environ; *e; ++e)
         list.push_back(*e);
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
