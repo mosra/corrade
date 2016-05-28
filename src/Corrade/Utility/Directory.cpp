@@ -35,7 +35,7 @@
 #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include <sys/stat.h>
 #include <dirent.h>
-#ifdef __linux__
+#if defined(__linux__) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include <unistd.h>
 #endif
 #ifdef CORRADE_TARGET_APPLE
@@ -144,6 +144,13 @@ bool Directory::rm(const std::string& path) {
     /* std::remove() can't remove directories on Windows */
     if(GetFileAttributes(path.data()) & FILE_ATTRIBUTE_DIRECTORY)
         return RemoveDirectory(path.data());
+    #endif
+
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    /* std::remove() can't remove directories on Emscripten */
+    struct stat st;
+    if(lstat(path.data(), &st) == 0 && S_ISDIR(st.st_mode))
+        return rmdir(path.data()) == 0;
     #endif
 
     return std::remove(path.data()) == 0;
