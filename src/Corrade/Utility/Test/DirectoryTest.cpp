@@ -245,7 +245,9 @@ void DirectoryTest::mkpath() {
 }
 
 void DirectoryTest::mkpathNoPermission() {
-    #ifndef CORRADE_TARGET_WINDOWS
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    CORRADE_SKIP("Everything is writeable under Emscripten");
+    #elif !defined(CORRADE_TARGET_WINDOWS)
     if(Directory::fileExists("/nope"))
         CORRADE_SKIP("Can't test because the destination might be writeable");
 
@@ -436,7 +438,7 @@ void DirectoryTest::readEmpty() {
 }
 
 void DirectoryTest::readNonSeekable() {
-    #ifdef __unix__ /* (OS X doesn't have /proc) */
+    #if defined(__unix__) && !defined(CORRADE_TARGET_EMSCRIPTEN) /* (OS X doesn't have /proc) */
     /** @todo Test more thoroughly than this */
     const auto data = Directory::read("/proc/loadavg");
     CORRADE_VERIFY(!data.empty());
