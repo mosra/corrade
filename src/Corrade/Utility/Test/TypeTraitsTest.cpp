@@ -71,8 +71,15 @@ void TypeTraitsTest::hasType() {
 
 namespace {
     struct Type {};
+    #ifdef __clang__
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wunneeded-internal-declaration"
+    #endif
     int* begin(Type) { return nullptr; }
     int* end(Type) { return nullptr; }
+    #ifdef __clang__
+    #pragma GCC diagnostic pop
+    #endif
     struct LinkedListItem: Containers::LinkedListItem<LinkedListItem> {};
 }
 
