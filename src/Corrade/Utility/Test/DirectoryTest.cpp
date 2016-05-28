@@ -53,8 +53,15 @@ struct DirectoryTest: TestSuite::Tester {
     void executableLocation();
     void home();
     void configurationDir();
+
     void list();
+    void listSkipDirectories();
+    void listSkipFiles();
+    void listSkipSpecial();
+    void listSkipDotAndDotDot();
+    void listSort();
     void listSortPrecedence();
+
     void read();
     void readEmpty();
     void readNonSeekable();
@@ -82,8 +89,15 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::executableLocation,
               &DirectoryTest::home,
               &DirectoryTest::configurationDir,
+
               &DirectoryTest::list,
+              &DirectoryTest::listSkipDirectories,
+              &DirectoryTest::listSkipFiles,
+              &DirectoryTest::listSkipSpecial,
+              &DirectoryTest::listSkipDotAndDotDot,
+              &DirectoryTest::listSort,
               &DirectoryTest::listSortPrecedence,
+
               &DirectoryTest::read,
               &DirectoryTest::readEmpty,
               &DirectoryTest::readNonSeekable,
@@ -377,52 +391,77 @@ void DirectoryTest::list() {
         "CTest is not able to run XCTest executables properly in the simulator.");
     #endif
 
-    /* All */
     CORRADE_COMPARE_AS(Directory::list(_testDir),
         (std::vector<std::string>{".", "..", "dir", "file"}),
         TestSuite::Compare::SortedContainer);
+}
 
-    {
-        #ifdef TRAVIS_CI_HAS_CRAZY_FILESYSTEM_ON_LINUX
-        CORRADE_EXPECT_FAIL("Travis CI has crazy filesystem on Linux.");
-        #endif
+void DirectoryTest::listSkipDirectories() {
+    #ifdef TRAVIS_CI_HAS_CRAZY_FILESYSTEM_ON_LINUX
+    CORRADE_EXPECT_FAIL("Travis CI has crazy filesystem on Linux.");
+    #endif
+    #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        "CTest is not able to run XCTest executables properly in the simulator.");
+    #endif
 
-        /* Skip special */
-        CORRADE_COMPARE_AS(Directory::list(_testDir, Directory::Flag::SkipSpecial),
-            (std::vector<std::string>{".", "..", "dir", "file"}),
-            TestSuite::Compare::SortedContainer);
-    }
+    CORRADE_COMPARE_AS(Directory::list(_testDir, Directory::Flag::SkipDirectories),
+        std::vector<std::string>{"file"},
+        TestSuite::Compare::SortedContainer);
+}
 
-    /* All, sorted ascending */
+void DirectoryTest::listSkipFiles() {
+    #ifdef TRAVIS_CI_HAS_CRAZY_FILESYSTEM_ON_LINUX
+    CORRADE_EXPECT_FAIL("Travis CI has crazy filesystem on Linux.");
+    #endif
+    #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        "CTest is not able to run XCTest executables properly in the simulator.");
+    #endif
+
+    CORRADE_COMPARE_AS(Directory::list(_testDir, Directory::Flag::SkipFiles),
+        (std::vector<std::string>{".", "..", "dir"}),
+        TestSuite::Compare::SortedContainer);
+}
+
+void DirectoryTest::listSkipSpecial() {
+    #ifdef TRAVIS_CI_HAS_CRAZY_FILESYSTEM_ON_LINUX
+    CORRADE_EXPECT_FAIL("Travis CI has crazy filesystem on Linux.");
+    #endif
+    #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        "CTest is not able to run XCTest executables properly in the simulator.");
+    #endif
+
+    CORRADE_COMPARE_AS(Directory::list(_testDir, Directory::Flag::SkipSpecial),
+        (std::vector<std::string>{".", "..", "dir", "file"}),
+        TestSuite::Compare::SortedContainer);
+}
+
+void DirectoryTest::listSkipDotAndDotDot() {
+    #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        "CTest is not able to run XCTest executables properly in the simulator.");
+    #endif
+
+    CORRADE_COMPARE_AS(Directory::list(_testDir, Directory::Flag::SkipDotAndDotDot),
+        (std::vector<std::string>{"dir", "file"}),
+        TestSuite::Compare::SortedContainer);
+}
+
+void DirectoryTest::listSort() {
+    #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        "CTest is not able to run XCTest executables properly in the simulator.");
+    #endif
+
     CORRADE_COMPARE_AS(Directory::list(_testDir, Directory::Flag::SortAscending),
         (std::vector<std::string>{".", "..", "dir", "file"}),
         TestSuite::Compare::Container);
 
-    /* All, sorted descending */
     CORRADE_COMPARE_AS(Directory::list(_testDir, Directory::Flag::SortDescending),
         (std::vector<std::string>{"file", "dir", "..", "."}),
         TestSuite::Compare::Container);
-
-    /* Skip . and .. */
-    CORRADE_COMPARE_AS(Directory::list(_testDir, Directory::Flag::SkipDotAndDotDot),
-        (std::vector<std::string>{"dir", "file"}),
-        TestSuite::Compare::SortedContainer);
-
-    {
-        #ifdef TRAVIS_CI_HAS_CRAZY_FILESYSTEM_ON_LINUX
-        CORRADE_EXPECT_FAIL("Travis CI has crazy filesystem on Linux.");
-        #endif
-
-        /* Skip directories */
-        CORRADE_COMPARE_AS(Directory::list(_testDir, Directory::Flag::SkipDirectories),
-            std::vector<std::string>{"file"},
-            TestSuite::Compare::SortedContainer);
-
-        /* Skip files */
-        CORRADE_COMPARE_AS(Directory::list(_testDir, Directory::Flag::SkipFiles),
-            (std::vector<std::string>{".", "..", "dir"}),
-            TestSuite::Compare::SortedContainer);
-    }
 }
 
 void DirectoryTest::listSortPrecedence() {
