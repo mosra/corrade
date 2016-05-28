@@ -19,7 +19,7 @@ build() {
     cmake .. \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_PREFIX=/usr \
-        -DBUILD_TESTS=TRUE \
+        -DBUILD_TESTS=ON \
         -G Ninja
     ninja
 }
