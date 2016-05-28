@@ -250,7 +250,7 @@ std::string Directory::configurationDir(const std::string& applicationName) {
     #ifdef CORRADE_TARGET_APPLE
     return join(home(), "Library/Application Support/" + applicationName);
 
-    /* XDG-compilant Unix (not using CORRADE_TARGET_UNIX, because that is a
+    /* XDG-compliant Unix (not using CORRADE_TARGET_UNIX, because that is a
        superset) */
     #elif defined(__unix__)
     const std::string lowercaseApplicationName = String::lowercase(applicationName);
@@ -279,7 +279,7 @@ std::string Directory::configurationDir(const std::string& applicationName) {
 std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     std::vector<std::string> list;
 
-    /* POSIX-compilant Unix, Emscripten */
+    /* POSIX-compliant Unix, Emscripten */
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     DIR* directory = opendir(path.data());
     if(!directory) return list;
