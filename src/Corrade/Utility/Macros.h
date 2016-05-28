@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_UNUSED, @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
+ * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_UNUSED, @ref CORRADE_ALIGNAS(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -129,6 +129,18 @@ parameters instead.
 #define CORRADE_UNUSED __pragma(warning(suppress:4100))
 #else
 #define CORRADE_UNUSED
+#endif
+
+/** @hideinitializer
+@brief Type alignment specifier
+
+Expands to C++11 `alignas()` specifier on supported compilers, otherwise falls
+back to compiler-specific attribute.
+*/
+#if defined(__GNUC__) && __GNUC__*100 + __GNUC_MINOR__ < 408
+#define CORRADE_ALIGNAS(alignment) __attribute__((aligned(alignment)))
+#else
+#define CORRADE_ALIGNAS(alignment) alignas(alignment)
 #endif
 
 /** @hideinitializer

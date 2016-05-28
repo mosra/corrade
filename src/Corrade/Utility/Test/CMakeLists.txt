@@ -53,6 +53,7 @@ corrade_add_test(UtilityDirectoryTest ${UtilityDirectoryTest_SRCS})
 target_include_directories(UtilityDirectoryTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 corrade_add_test(UtilityHashDigestTest HashDigestTest.cpp)
+corrade_add_test(UtilityMacrosTest MacrosTest.cpp)
 corrade_add_test(UtilitySha1Test Sha1Test.cpp)
 corrade_add_test(UtilityStringTest StringTest.cpp)
 target_include_directories(UtilityStringTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
