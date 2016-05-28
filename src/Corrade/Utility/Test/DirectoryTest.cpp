@@ -285,7 +285,12 @@ void DirectoryTest::executableLocation() {
     } else
     #endif
 
+    /* On Emscripten we should have access to the bundled files */
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(executableLocation), "DirectoryTestFiles")));
+
     /* Otherwise it should contain CMake build files */
+    #else
     {
         #ifdef CMAKE_CFG_INTDIR
         CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(Directory::path(executableLocation)), "CMakeFiles")));
@@ -293,6 +298,7 @@ void DirectoryTest::executableLocation() {
         CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(executableLocation), "CMakeFiles")));
         #endif
     }
+    #endif
 }
 
 void DirectoryTest::home() {

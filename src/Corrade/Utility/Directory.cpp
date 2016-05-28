@@ -225,6 +225,10 @@ std::string Directory::executableLocation() {
     path.resize(size);
     return path;
 
+    /* hardcoded for Emscripten */
+    #elif defined(CORRADE_TARGET_EMSCRIPTEN)
+    return "/app.js";
+
     /* Not implemented */
     #else
     return std::string{};
