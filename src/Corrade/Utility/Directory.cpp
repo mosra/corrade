@@ -31,8 +31,8 @@
 #include <algorithm>
 #include <fstream>
 
-/* Unix */
-#ifdef CORRADE_TARGET_UNIX
+/* Unix, Emscripten */
+#if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include <sys/stat.h>
 #include <dirent.h>
 #ifdef __linux__
@@ -123,8 +123,8 @@ bool Directory::mkpath(const std::string& path) {
 
     /* Create directory, return true if successfully created or already exists */
 
-    /* Unix */
-    #ifdef CORRADE_TARGET_UNIX
+    /* Unix, Emscripten */
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     const int ret = mkdir(path.data(), 0777);
     return ret == 0;
 
@@ -279,8 +279,8 @@ std::string Directory::configurationDir(const std::string& applicationName) {
 std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     std::vector<std::string> list;
 
-    /* POSIX-compilant Unix */
-    #ifdef CORRADE_TARGET_UNIX
+    /* POSIX-compilant Unix, Emscripten */
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     DIR* directory = opendir(path.data());
     if(!directory) return list;
 
