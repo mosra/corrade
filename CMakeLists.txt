@@ -135,6 +135,9 @@ endif()
 if(CORRADE_TESTSUITE_TARGET_XCTEST)
     set(CORRADE_TESTSUITE_XCTEST_RUNNER ${PROJECT_SOURCE_DIR}/src/Corrade/TestSuite/XCTestRunner.mm.in)
 endif()
+if(CORRADE_TARGET_ANDROID)
+    set(CORRADE_TESTSUITE_ADB_RUNNER ${PROJECT_SOURCE_DIR}/src/Corrade/TestSuite/AdbRunner.sh)
+endif()
 
 # Detect and auto-enable compiler compatibility
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

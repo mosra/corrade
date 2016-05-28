@@ -97,6 +97,7 @@
 #  CORRADE_USE_MODULE           - Path to UseCorrade.cmake module (included
 #   automatically)
 #  CORRADE_TESTSUITE_XCTEST_RUNNER - Path to XCTestRunner.mm.in file
+#  CORRADE_TESTSUITE_ADB_RUNNER - Path to AdbRunner.sh file
 #  CORRADE_PEDANTIC_COMPILER_OPTIONS - List of pedantic compiler options used
 #   for targets with :prop_tgt:`CORRADE_USE_PEDANTIC_FLAGS` enabled
 #  CORRADE_PEDANTIC_COMPILER_DEFINITIONS - List of pedantic compiler
@@ -269,6 +270,13 @@ if(CORRADE_TESTSUITE_TARGET_XCTEST)
     find_file(CORRADE_TESTSUITE_XCTEST_RUNNER XCTestRunner.mm.in
         PATH_SUFFIXES share/corrade/TestSuite)
     set(CORRADE_TESTSUITE_XCTEST_RUNNER_NEEDED CORRADE_TESTSUITE_XCTEST_RUNNER)
+endif()
+
+# ADB runner file
+if(CORRADE_TARGET_ANDROID)
+    find_file(CORRADE_TESTSUITE_ADB_RUNNER AdbRunner.sh
+        PATH_SUFFIXES share/corrade/TestSuite)
+    set(CORRADE_TESTSUITE_ADB_RUNNER_NEEDED CORRADE_TESTSUITE_ADB_RUNNER)
 endif()
 
 # CMake module dir
@@ -459,6 +467,7 @@ find_package_handle_standard_args(Corrade REQUIRED_VARS
     _CORRADE_MODULE_DIR
     _CORRADE_CONFIGURE_FILE
     ${CORRADE_TESTSUITE_XCTEST_RUNNER_NEEDED}
+    ${CORRADE_TESTSUITE_ADB_RUNNER_NEEDED}
     HANDLE_COMPONENTS)
 
 # Finalize the finding process

@@ -37,9 +37,6 @@ set(CorradeTestSuite_HEADERS
     TestSuite.h
     visibility.h)
 
-set(CorradeTestSuite_DATA
-    XCTestRunner.mm.in)
-
 # TestSuite library
 add_library(CorradeTestSuite ${SHARED_OR_STATIC}
     ${CorradeTestSuite_SRCS}
@@ -58,7 +55,9 @@ install(TARGETS CorradeTestSuite
         ARCHIVE DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
 install(FILES ${CorradeTestSuite_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/TestSuite)
 if(CORRADE_TESTSUITE_TARGET_XCTEST)
-    install(FILES ${CorradeTestSuite_DATA} DESTINATION ${CORRADE_DATA_INSTALL_DIR}/TestSuite)
+    install(FILES XCTestRunner.mm.in DESTINATION ${CORRADE_DATA_INSTALL_DIR}/TestSuite)
+elseif(CORRADE_TARGET_ANDROID)
+    install(PROGRAMS AdbRunner.sh DESTINATION ${CORRADE_DATA_INSTALL_DIR}/TestSuite)
 endif()
 
 add_subdirectory(Compare)

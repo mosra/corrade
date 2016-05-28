@@ -284,15 +284,28 @@ function(corrade_add_test test_name)
     else()
         add_executable(${test_name} ${sources})
         target_link_libraries(${test_name} ${libraries} Corrade::TestSuite)
+
+        # Run tests using Node.js on Emscripten
         if(CORRADE_TARGET_EMSCRIPTEN)
             # Emscripten needs to have exceptions enabled for TestSuite to work
             # properly
             set_property(TARGET ${test_name} APPEND_STRING PROPERTY LINK_FLAGS "-s DISABLE_EXCEPTION_CATCHING=0")
             find_package(NodeJs REQUIRED)
             add_test(NAME ${test_name} COMMAND NodeJs::NodeJs --stack-trace-limit=0 $<TARGET_FILE:${test_name}>)
+
+        # Run tests using ADB on Android
+        elseif(CORRADE_TARGET_ANDROID)
+            # The executables need to be PIE
+            target_compile_options(${test_name} PRIVATE "-fPIE")
+            set_property(TARGET ${test_name} APPEND_STRING PROPERTY LINK_FLAGS "-fPIE -pie")
+            add_test(NAME ${test_name} COMMAND ${CORRADE_TESTSUITE_ADB_RUNNER} $<TARGET_FILE:${test_name}> $<TARGET_FILE_NAME:${test_name}>)
+
+        # Run tests natively elsewhere
         else()
             add_test(${test_name} ${test_name})
         endif()
+
+        # iOS-specific
         if(CORRADE_TARGET_IOS)
             set_target_properties(${test_name} PROPERTIES
                 MACOSX_BUNDLE ON
