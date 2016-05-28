@@ -134,6 +134,7 @@ bool Directory::mkpath(const std::string& path) {
 
     /* Not implemented elsewhere */
     #else
+    Warning() << "Utility::Directory::mkdir(): not implemented on this platform";
     return false;
     #endif
 }
@@ -165,6 +166,7 @@ bool Directory::fileExists(const std::string& filename) {
     /* Windows Store/Phone not implemented */
     #else
     static_cast<void>(filename);
+    Warning() << "Utility::Directory::fileExists(): not implemented on this platform";
     return false;
     #endif
 }
@@ -238,6 +240,7 @@ std::string Directory::home() {
 
     /* Other */
     #else
+    Warning() << "Utility::Directory::home(): not implemented on this platform";
     return {};
     #endif
 }
@@ -268,6 +271,7 @@ std::string Directory::configurationDir(const std::string& applicationName) {
     /* Other not implemented */
     #else
     static_cast<void>(applicationName);
+    Warning() << "Utility::Directory::configurationDir(): not implemented on this platform";
     return {};
     #endif
 }
@@ -330,6 +334,7 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
 
     /* Other not implemented */
     #else
+    Warning() << "Utility::Directory::list(): not implemented on this platform";
     static_cast<void>(path);
     #endif
 
