@@ -180,8 +180,8 @@ bool Directory::isSandboxed() {
 }
 
 std::string Directory::executableLocation() {
-    /* Linux */
-    #ifdef __linux__
+    /* Linux, not Android */
+    #if defined(__linux__) && !defined(CORRADE_TARGET_ANDROID)
     /* Reallocate like hell until we have enough place to store the path. Can't
        use lstat because the /proc/self/exe symlink is not a real symlink and
        so stat::st_size returns 0. POSIX, WHAT THE HELL. */
