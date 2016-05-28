@@ -4,7 +4,7 @@
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Resource.h"
 
-static const unsigned char resourcePositions[] = {
+CORRADE_ALIGNAS(4) static const unsigned char resourcePositions[] = {
     0x09,0x00,0x00,0x00,
     0x00,0x00,0x00,0x00
 };

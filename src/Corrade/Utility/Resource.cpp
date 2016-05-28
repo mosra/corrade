@@ -62,6 +62,8 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
     /** @todo Fix and assert that this doesn't happen */
     if(resources().find(group) != resources().end()) return;
 
+    CORRADE_INTERNAL_ASSERT(reinterpret_cast<std::uintptr_t>(positions) % 4 == 0);
+
     #ifndef CORRADE_GCC47_COMPATIBILITY
     const auto groupData = resources().emplace(group, GroupData()).first;
     #else
@@ -211,7 +213,7 @@ std::string Resource::compile(const std::string& name, const std::string& group,
         "#include \"Corrade/Corrade.h\"\n"
         "#include \"Corrade/Utility/Macros.h\"\n"
         "#include \"Corrade/Utility/Resource.h\"\n\n"
-        "static const unsigned char resourcePositions[] = {" +
+        "CORRADE_ALIGNAS(4) static const unsigned char resourcePositions[] = {" +
         positions + "\n};\n\n"
         "static const unsigned char resourceFilenames[] = {" +
         filenames + "\n};\n\n" +
