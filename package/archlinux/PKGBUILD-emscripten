@@ -24,8 +24,14 @@ build() {
 
     cmake .. \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=/usr/lib/emscripten/system
-    make
+        -DCMAKE_INSTALL_PREFIX=/usr/lib/emscripten/system \
+        -DBUILD_TESTS=ON
+    make -j4
+}
+
+check() {
+    cd "$_rootdir/build-emscripten"
+    CORRADE_TEST_COLOR=ON ctest --output-on-failure
 }
 
 package() {
