@@ -315,6 +315,10 @@ void DirectoryTest::home() {
     #elif defined(CORRADE_TARGET_UNIX)
     CORRADE_VERIFY(Directory::fileExists(Directory::join(home, ".local")));
 
+    /* On Emscripten verify that the directory exists (it's empty by default) */
+    #elif defined(CORRADE_TARGET_EMSCRIPTEN)
+    CORRADE_VERIFY(Directory::fileExists(home));
+
     /* On Windows verify that the home dir contains `desktop.ini` file. Ugly
        and hacky, but it's the best I came up with. Can't test for e.g.
        `/Users/` substring, as that can be overriden. */
@@ -343,11 +347,15 @@ void DirectoryTest::configurationDir() {
        something from GTK or something from Qt. Ugly and hacky, but it's the
        best I could come up with. Can't test for e.g. `/home/` substring, as
        that can be overriden. */
-    #elif __linux__
+    #elif defined(__linux__)
     CORRADE_COMPARE(dir.substr(dir.size()-7), "corrade");
     CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(dir), "autostart")) ||
                    Directory::fileExists(Directory::join(Directory::path(dir), "dconf")) ||
                    Directory::fileExists(Directory::join(Directory::path(dir), "Trolltech.conf")));
+
+    /* Emscripten -- just compare to hardcoded value */
+    #elif defined(CORRADE_TARGET_EMSCRIPTEN)
+    CORRADE_COMPARE(Directory::path(dir), "/home/web_user/.config");
 
     /* On Windows verify that the parent dir contains `Microsoft` subdirectory.
        Ugly and hacky, but it's the best I came up with. Can't test for e.g.

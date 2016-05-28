@@ -236,8 +236,8 @@ std::string Directory::executableLocation() {
 }
 
 std::string Directory::home() {
-    /* Unix */
-    #ifdef CORRADE_TARGET_UNIX
+    /* Unix, Emscripten */
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     if(const char* const h = std::getenv("HOME"))
         return h;
     return std::string{};
@@ -262,8 +262,8 @@ std::string Directory::configurationDir(const std::string& applicationName) {
     return join(home(), "Library/Application Support/" + applicationName);
 
     /* XDG-compliant Unix (not using CORRADE_TARGET_UNIX, because that is a
-       superset) */
-    #elif defined(__unix__)
+       superset), Emscripten */
+    #elif defined(__unix__) || defined(CORRADE_TARGET_EMSCRIPTEN)
     const std::string lowercaseApplicationName = String::lowercase(applicationName);
     if(const char* const config = std::getenv("XDG_CONFIG_HOME"))
         return join(config, lowercaseApplicationName);
