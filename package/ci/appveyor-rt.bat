@@ -17,9 +17,10 @@ cd .. || exit /b
 @rem Crosscompile
 mkdir build-rt && cd build-rt || exit /b
 cmake .. ^
-    -DCORRADE_RC_EXECUTABLE=%APPVEYOR_BUILD_FOLDER%/deps/bin/corrade-rc.exe ^
-    -DBUILD_STATIC=ON ^
+    -DCMAKE_BUILD_TYPE=Release ^
     -DCMAKE_SYSTEM_NAME=WindowsStore ^
     -DCMAKE_SYSTEM_VERSION=10.0 ^
+    -DCORRADE_RC_EXECUTABLE=%APPVEYOR_BUILD_FOLDER%/deps/bin/corrade-rc.exe ^
+    -DBUILD_STATIC=ON ^
     -G "Visual Studio 14 2015" || exit /b
 cmake --build . --config Release || exit /b
