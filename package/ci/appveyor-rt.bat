@@ -1,7 +1,6 @@
-call "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/vcvarsall.bat"
-@echo ON
+call "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/vcvarsall.bat" || exit /b
 
-@rem Build native corrade-rc
+rem Build native corrade-rc
 mkdir build && cd build || exit /b
 cmake .. ^
     -DCMAKE_BUILD_TYPE=Release ^
@@ -14,7 +13,7 @@ cmake --build . || exit /b
 cmake --build . --target install || exit /b
 cd .. || exit /b
 
-@rem Crosscompile
+rem Crosscompile
 mkdir build-rt && cd build-rt || exit /b
 cmake .. ^
     -DCMAKE_BUILD_TYPE=Release ^
