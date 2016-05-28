@@ -124,6 +124,10 @@ ArgumentsTest::ArgumentsTest() {
 }
 
 void ArgumentsTest::environment() {
+    #ifdef CORRADE_TARGET_WINDOWS_RT
+    CORRADE_SKIP("No environment on this platform.");
+    #endif
+
     /* Verify that it doesn't crash, at least */
     std::vector<std::string> list = Arguments::environment();
     if(!list.empty()) Debug()
