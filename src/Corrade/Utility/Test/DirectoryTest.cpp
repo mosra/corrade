@@ -43,7 +43,8 @@ struct DirectoryTest: TestSuite::Tester {
     void joinWindows();
     #endif
     void fileExists();
-    void remove();
+    void removeFile();
+    void removeDirectory();
     void moveFile();
     void moveDirectory();
     void mkpath();
@@ -71,7 +72,8 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::joinWindows,
               #endif
               &DirectoryTest::fileExists,
-              &DirectoryTest::remove,
+              &DirectoryTest::removeFile,
+              &DirectoryTest::removeDirectory,
               &DirectoryTest::moveFile,
               &DirectoryTest::moveDirectory,
               &DirectoryTest::mkpath,
@@ -161,16 +163,10 @@ void DirectoryTest::fileExists() {
     CORRADE_VERIFY(!Directory::fileExists(Directory::join(_testDir, "nonexistentFile")));
 }
 
-void DirectoryTest::remove() {
-    /* Directory */
-    std::string directory = Directory::join(_writeTestDir, "directory");
-    CORRADE_VERIFY(Directory::mkpath(directory));
-    CORRADE_VERIFY(Directory::fileExists(directory));
-    CORRADE_VERIFY(Directory::rm(directory));
-    CORRADE_VERIFY(!Directory::fileExists(directory));
-
+void DirectoryTest::removeFile() {
     /* File */
     std::string file = Directory::join(_writeTestDir, "file.txt");
+    CORRADE_VERIFY(Directory::mkpath(_writeTestDir));
     CORRADE_VERIFY(Directory::writeString(file, "a"));
     CORRADE_VERIFY(Directory::fileExists(file));
     CORRADE_VERIFY(Directory::rm(file));
@@ -180,6 +176,15 @@ void DirectoryTest::remove() {
     std::string nonexistent = Directory::join(_writeTestDir, "nonexistent");
     CORRADE_VERIFY(!Directory::fileExists(nonexistent));
     CORRADE_VERIFY(!Directory::rm(nonexistent));
+}
+
+void DirectoryTest::removeDirectory() {
+    /* Directory */
+    std::string directory = Directory::join(_writeTestDir, "directory");
+    CORRADE_VERIFY(Directory::mkpath(directory));
+    CORRADE_VERIFY(Directory::fileExists(directory));
+    CORRADE_VERIFY(Directory::rm(directory));
+    CORRADE_VERIFY(!Directory::fileExists(directory));
 }
 
 void DirectoryTest::moveFile() {
