@@ -31,6 +31,7 @@
 #include <random>
 #include <sstream>
 #include <utility>
+#include <cstdlib>
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Utility/Arguments.h"
@@ -197,7 +198,11 @@ benchmark types:
     if(!args.value("skip").empty()) {
         const std::vector<std::string> skip = Utility::String::split(args.value("skip"), ' ');
         for(auto&& n: skip) {
-            std::size_t index = std::stoi(n);
+            #ifndef CORRADE_TARGET_ANDROID
+            const std::size_t index = std::stoi(n);
+            #else
+            const std::size_t index = std::strtoul(n.data(), nullptr, 10);
+            #endif
             if(index - 1 >= _testCases.size()) continue;
             _testCases[index - 1].test = nullptr;
         }
@@ -207,7 +212,11 @@ benchmark types:
     if(!args.value("only").empty()) {
         const std::vector<std::string> only = Utility::String::split(args.value("only"), ' ');
         for(auto&& n: only) {
-            std::size_t index = std::stoi(n);
+            #ifndef CORRADE_TARGET_ANDROID
+            const std::size_t index = std::stoi(n);
+            #else
+            const std::size_t index = std::strtoul(n.data(), nullptr, 10);
+            #endif
             if(index - 1 >= _testCases.size() || !_testCases[index - 1].test) continue;
             usedTestCases.emplace_back(index, _testCases[index - 1]);
         }
@@ -300,7 +309,17 @@ benchmark types:
 
         _testCaseId = testCase.first;
         _testCaseInstanceId = testCase.second.instanceId;
-        _testCaseDescription = testCase.second.instanceId == ~std::size_t{} ? std::string{} : std::to_string(testCase.second.instanceId);
+        if(testCase.second.instanceId == ~std::size_t{})
+            _testCaseDescription = {};
+        else {
+            #ifndef CORRADE_TARGET_ANDROID
+            _testCaseDescription = std::to_string(testCase.second.instanceId);
+            #else
+            std::ostringstream out;
+            out << testCase.second.instanceId;
+            _testCaseDescription = out.str();
+            #endif
+        }
 
         /* Final combined repeat count */
         const std::size_t repeatCount = testCase.second.repeatCount*repeatEveryCount;
