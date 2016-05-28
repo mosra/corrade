@@ -425,6 +425,9 @@ void DirectoryTest::listSkipFiles() {
 }
 
 void DirectoryTest::listSkipSpecial() {
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    CORRADE_EXPECT_FAIL("Files are treated as special in Emscripten.");
+    #endif
     #ifdef TRAVIS_CI_HAS_CRAZY_FILESYSTEM_ON_LINUX
     CORRADE_EXPECT_FAIL("Travis CI has crazy filesystem on Linux.");
     #endif
