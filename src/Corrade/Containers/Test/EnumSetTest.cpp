@@ -79,6 +79,9 @@ void EnumSetTest::constructNoInit() {
     } {
         Features features{Feature::Tested};
         new(&features)Features{NoInit};
+        #if defined(__GNUC__) && __GNUC__*100 + __GNUC_MINOR__ == 601 && __OPTIMIZE__
+        CORRADE_EXPECT_FAIL("GCC 6.1 misoptimizes and overwrites the value.");
+        #endif
         CORRADE_COMPARE(int(features), 4);
     }
 }
