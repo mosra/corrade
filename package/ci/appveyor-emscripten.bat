@@ -25,6 +25,8 @@ cmake .. ^
     -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/Emscripten.cmake" ^
     -DEMSCRIPTEN_PREFIX="C:/emscripten/emscripten/1.35.0" ^
     -DCMAKE_BUILD_TYPE=Release ^
+    -DCMAKE_CXX_FLAGS_RELEASE="-DNDEBUG -O1" ^
+    -DCMAKE_EXE_LINKER_FLAGS_RELEASE="-O1" ^
     -DBUILD_TESTS=ON ^
     -G "MinGW Makefiles" || exit /b
 cmake --build . -- -j2 || exit /b
