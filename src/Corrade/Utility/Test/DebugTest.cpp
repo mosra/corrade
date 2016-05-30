@@ -234,7 +234,7 @@ void DebugTest::colors() {
 
     fn(std::cout);
 
-    #ifdef CORRADE_TARGET_WINDOWS
+    #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
     CORRADE_SKIP("Only possible to test visually on Windows.");
     #else
     std::ostringstream out;
@@ -252,7 +252,7 @@ void DebugTest::colorsAutoReset() {
     /* Print it for visual verification */
     fn(std::cout);
 
-    #ifdef CORRADE_TARGET_WINDOWS
+    #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
     CORRADE_SKIP("Only possible to test visually on Windows.");
     #else
     std::ostringstream out;
@@ -271,7 +271,7 @@ void DebugTest::colorsExplicitReset() {
     /* Print it for visual verification */
     fn(std::cout);
 
-    #ifdef CORRADE_TARGET_WINDOWS
+    #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
     CORRADE_SKIP("Only possible to test visually on Windows.");
     #else
     std::ostringstream out;
@@ -292,7 +292,7 @@ void DebugTest::colorsDisabled() {
     /* Print it for visual verification */
     fn(std::cout);
 
-    #ifdef CORRADE_TARGET_WINDOWS
+    #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
     CORRADE_SKIP("Only possible to test visually on Windows.");
     #else
     std::ostringstream out;
@@ -329,7 +329,7 @@ void DebugTest::colorsNospace() {
     /* Print it for visual verification */
     fn(std::cout, std::cout);
 
-    #ifdef CORRADE_TARGET_WINDOWS
+    #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
     CORRADE_SKIP("Only possible to test visually on Windows.");
     #else
     std::ostringstream out1, out2;
@@ -360,7 +360,7 @@ void DebugTest::colorsScoped() {
     /* Print it for visual verification */
     fn(std::cout);
 
-    #ifdef CORRADE_TARGET_WINDOWS
+    #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
     CORRADE_SKIP("Only possible to test visually on Windows.");
     #else
     std::ostringstream out;
