@@ -75,8 +75,9 @@ Defined if built as static libraries. Default are shared libraries.
 /**
 @brief Unix target
 
-Defined if the library is built for some Unix flavor (Linux, BSD, OS X...).
-@see @ref CORRADE_TARGET_APPLE, @ref corrade-cmake
+Defined if the library is built for some Unix flavor (Linux, BSD, OS X, iOS,
+Android...).
+@see @ref CORRADE_TARGET_APPLE, @ref CORRADE_TARGET_ANDROID, @ref corrade-cmake
 */
 #define CORRADE_TARGET_UNIX
 #undef CORRADE_TARGET_UNIX
@@ -160,7 +161,7 @@ Defined if the library is built for [Emscripten](https://github.com/kripken/emsc
 @brief Android target
 
 Defined if the library is built for Android.
-@see @ref building-corrade, @ref corrade-cmake
+@see @ref CORRADE_TARGET_UNIX, @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_TARGET_ANDROID
 #undef CORRADE_TARGET_ANDROID

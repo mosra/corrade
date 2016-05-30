@@ -73,10 +73,6 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     set(CORRADE_TARGET_EMSCRIPTEN 1)
     # It's meaningless to use dynamic libraries with Emscripten
     set(BUILD_STATIC ON)
-elseif(CMAKE_SYSTEM_NAME STREQUAL Android)
-    set(CORRADE_TARGET_ANDROID 1)
-    # It's too inconvenient to manually load all shared libs using JNI
-    set(BUILD_STATIC ON)
 elseif(UNIX)
     # Both APPLE and UNIX are defined on OSX
     if(APPLE)
@@ -85,6 +81,13 @@ elseif(UNIX)
         if(CMAKE_OSX_SYSROOT MATCHES "/(iPhoneOS|iPhoneSimulator)[0-9.]*\\.sdk")
             set(CORRADE_TARGET_IOS 1)
         endif()
+    endif()
+
+    # UNIX is also defined on Android
+    if(CMAKE_SYSTEM_NAME STREQUAL Android)
+        set(CORRADE_TARGET_ANDROID 1)
+        # It's too inconvenient to manually load all shared libs using JNI
+        set(BUILD_STATIC ON)
     endif()
 
     # NaCl and Emscripten are Unix too, this selects only the other ones
