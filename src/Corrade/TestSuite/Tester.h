@@ -706,8 +706,16 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 #endif
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
+#ifndef CORRADE_TARGET_ANDROID
 #define _CORRADE_REGISTER_TEST_CASE()                                       \
     Tester::registerTestCase(__func__, __LINE__);
+#else
+/* C++11 standard __func__ on Android behaves like GCC's __PRETTY_FUNCTION__,
+   while GCC's __FUNCTION__ does the right thing.. I wonder -- do they have
+   *any* tests for libc at all?! */
+#define _CORRADE_REGISTER_TEST_CASE()                                       \
+    Tester::registerTestCase(__FUNCTION__, __LINE__);
+#endif
 #endif
 
 /** @hideinitializer
