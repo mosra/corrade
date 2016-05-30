@@ -40,6 +40,9 @@
 #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include <cstdio>
 extern char **environ;
+#ifdef CORRADE_TARGET_EMSCRIPTEN
+#include <emscripten.h>
+#endif
 #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
 #include <windows.h>
 #endif
@@ -88,15 +91,49 @@ Arguments::Entry::Entry(Type type, char shortKey, std::string key, std::string h
 
 std::vector<std::string> Arguments::environment() {
     std::vector<std::string> list;
+
+    /* Standard Unix and local Emscripten environment */
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     for(char** e = environ; *e; ++e)
         list.push_back(*e);
+
+    /* System environment provided by Node.js. Hopefully nobody uses \b in
+       environment variables. (Can't use \0 because Emscripten chokes on it.) */
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    #ifdef __clang__
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Winvalid-pp-token"
+    #endif
+    char* const env = reinterpret_cast<char*>(EM_ASM_INT_V({
+        var env = '';
+        for(var key in process.env)
+            env += key + '=' + process.env[key] + '\b';
+        env += '\b';
+        return allocate(intArrayFromString(env), 'i8', ALLOC_NORMAL);
+    }));
+    #ifdef __clang__
+    #pragma GCC diagnostic pop
+    #endif
+    char* e = env;
+    while(*e != '\b') {
+        char* end = std::strchr(e, '\b');
+        list.push_back({e, std::size_t(end - e)});
+        e = end + 1;
+    }
+    std::free(env);
+    #endif
+
+    /* Windows (not RT) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     char* const env = GetEnvironmentStrings();
     for(char* e = env; *e; e += std::strlen(e) + 1)
         list.push_back(e);
     FreeEnvironmentStrings(env);
+
+    /* Other platforms not implemented */
+    #else
     #endif
+
     return list;
 }
 
@@ -308,15 +345,49 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
         if(entry.environment.empty()) continue;
 
         const char* const env = std::getenv(entry.environment.data());
+        #ifdef CORRADE_TARGET_EMSCRIPTEN
+        #ifdef __clang__
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wdollar-in-identifier-extension"
+        #endif
+        char* const systemEnv = reinterpret_cast<char*>(EM_ASM_INT({
+            var name = UTF8ToString($0);
+            return name in process.env ? allocate(intArrayFromString(process.env[name]), 'i8', ALLOC_NORMAL) : 0;
+        }, entry.environment.data()));
+        #ifdef __clang__
+        #pragma GCC diagnostic pop
+        #endif
+        #endif
+
+        #ifndef CORRADE_TARGET_EMSCRIPTEN
         if(!env) continue;
+        #else
+        if(!env && !systemEnv) continue;
+        #endif
 
         if(entry.type == Type::BooleanOption) {
             CORRADE_INTERNAL_ASSERT(entry.id < _booleans.size());
-            _booleans[entry.id] = env;
+            _booleans[entry.id] =
+                #ifndef CORRADE_TARGET_EMSCRIPTEN
+                env
+                #else
+                env ? env : systemEnv;
+                #endif
+                ;
         } else {
             CORRADE_INTERNAL_ASSERT(entry.id < _values.size());
-            _values[entry.id] = env;
+            _values[entry.id] =
+                #ifndef CORRADE_TARGET_EMSCRIPTEN
+                env
+                #else
+                env ? env : systemEnv;
+                #endif
+                ;
         }
+
+        #ifdef CORRADE_TARGET_EMSCRIPTEN
+        std::free(systemEnv);
+        #endif
     }
     #endif
 

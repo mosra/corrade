@@ -163,7 +163,11 @@ class CORRADE_UTILITY_EXPORT Arguments {
         /**
          * @brief Environment values
          *
-         * Returns list of all environment values for information purposes.
+         * Returns list of all environment values for information and debugging
+         * purposes.
+         * @note In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" the environment
+         *      list is concatenated from local Emscripten environment and
+         *      system environment provided by Node.js.
          * @see @ref setFromEnvironment()
          * @partialsupport Returns empty vector on
          *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT".
@@ -363,6 +367,10 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * Boolean options are set to `true` when environment value is present
          * (not depending on its value).
+         * @note In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" the environment
+         *      is combined from local Emscripten environment and system
+         *      environment provided by Node.js. If a variable is in both
+         *      environments, the local environment is preferred.
          * @see @ref environment()
          * @partialsupport Does nothing on @ref CORRADE_TARGET_WINDOWS_RT "Windows RT".
          */
