@@ -150,7 +150,7 @@ benchmark types:
     else _useColor = Debug::Flags{};
     /* We can autodetect via isatty() on Unix-like systems and Windows with
        ANSI colors enabled */
-    #elif !defined(CORRADE_TARGET_ANDROID) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+    #elif !defined(CORRADE_TARGET_EMSCRIPTEN)
     else _useColor = logOutput == &std::cout &&
         /* Windows RT projects have C4996 treated as error by default. WHY */
         #ifdef _MSC_VER
