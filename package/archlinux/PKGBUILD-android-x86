@@ -6,7 +6,7 @@ pkgdesc="C++11/C++14 multiplatform utility library (Android x86)"
 arch=('any')
 url="http://mosra.cz/blog/corrade.php"
 license=('MIT')
-makedepends=('cmake' 'ninja')
+makedepends=('cmake' 'ninja' 'android-ndk')
 options=(!strip !buildflags staticlibs)
 
 _rootdir=$startdir/../../
@@ -23,10 +23,9 @@ build() {
 
     cd "$_rootdir/build-android-x86"
 
-   cmake .. \
-       -DCMAKE_TOOLCHAIN_FILE="$_rootdir/toolchains/generic/Android-x86.cmake" \
-       -DCMAKE_BUILD_TYPE=Release \
-       -DCMAKE_INSTALL_PREFIX=/opt/android-ndk/platforms/android-19/arch-x86/usr
+    cmake .. \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/opt/android-ndk/platforms/android-19/arch-x86/usr
     ninja
 }
 
