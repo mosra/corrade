@@ -15,7 +15,7 @@ set PATH=%APPVEYOR_BUILD_FOLDER%/install/bin;%PATH%
 
 rem Test
 cd %APPVEYOR_BUILD_FOLDER%/build || exit /b
-set CORRADE_TEST_COLOR=ON || exit /b
+set CORRADE_TEST_COLOR=ON
 ctest -V || exit /b
 
 rem Examples
