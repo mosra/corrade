@@ -63,15 +63,16 @@ enum class LoadState: unsigned short {
      */
     NotFound = 1 << 0,
 
-    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
     /**
      * The plugin is build with different version of plugin manager and cannot
      * be loaded. Returned by @ref AbstractManager::load().
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib",
      *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT" and
-     *      @ref CORRADE_TARGET_IOS "iOS".
+     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
+     *      @ref CORRADE_TARGET_IOS "iOS" and
+     *      @ref CORRADE_TARGET_ANDROID "Android.
      */
     WrongPluginVersion = 1 << 1,
 
@@ -81,8 +82,9 @@ enum class LoadState: unsigned short {
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib",
      *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT" and
-     *      @ref CORRADE_TARGET_IOS "iOS".
+     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
+     *      @ref CORRADE_TARGET_IOS "iOS" and
+     *      @ref CORRADE_TARGET_ANDROID "Android.
      */
     WrongInterfaceVersion = 1 << 2,
 
@@ -92,8 +94,9 @@ enum class LoadState: unsigned short {
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib",
      *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT" and
-     *      @ref CORRADE_TARGET_IOS "iOS".
+     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
+     *      @ref CORRADE_TARGET_IOS "iOS" and
+     *      @ref CORRADE_TARGET_ANDROID "Android.
      */
     WrongMetadataFile = 1 << 3,
 
@@ -103,8 +106,9 @@ enum class LoadState: unsigned short {
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib",
      *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT" and
-     *      @ref CORRADE_TARGET_IOS "iOS".
+     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
+     *      @ref CORRADE_TARGET_IOS "iOS" and
+     *      @ref CORRADE_TARGET_ANDROID "Android.
      */
     UnresolvedDependency = 1 << 4,
 
@@ -114,8 +118,9 @@ enum class LoadState: unsigned short {
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib",
      *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT" and
-     *      @ref CORRADE_TARGET_IOS "iOS".
+     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
+     *      @ref CORRADE_TARGET_IOS "iOS" and
+     *      @ref CORRADE_TARGET_ANDROID "Android.
      */
     LoadFailed = 1 << 5,
     #endif
@@ -130,16 +135,17 @@ enum class LoadState: unsigned short {
      * The plugin is successfully loaded. Returned by @ref AbstractManager::loadState()
      * and @ref AbstractManager::load(). The value includes value of @ref LoadState::Static,
      * see @ref LoadStates for more information. In @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib",
-     * @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",  @ref CORRADE_TARGET_WINDOWS_RT "Windows RT"
-     * and @ref CORRADE_TARGET_IOS "iOS" the value is equivalent to @ref LoadState::Static.
+     * @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",  @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
+     * @ref CORRADE_TARGET_IOS "iOS" and @ref CORRADE_TARGET_ANDROID the value
+     * is equivalent to @ref LoadState::Static.
      */
-    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
     Loaded = (1 << 7) | LoadState::Static,
     #else
     Loaded = LoadState::Static,
     #endif
 
-    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
     /**
      * The plugin is not loaded. Plugin can be unloaded only if is dynamic and
      * is not required by any other plugin. Returned by
@@ -147,8 +153,9 @@ enum class LoadState: unsigned short {
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib",
      *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT" and
-     *      @ref CORRADE_TARGET_IOS "iOS".
+     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
+     *      @ref CORRADE_TARGET_IOS "iOS" and
+     *      @ref CORRADE_TARGET_ANDROID "Android.
      */
     NotLoaded = 1 << 8,
 
@@ -157,8 +164,9 @@ enum class LoadState: unsigned short {
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib",
      *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT" and
-     *      @ref CORRADE_TARGET_IOS "iOS".
+     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
+     *      @ref CORRADE_TARGET_IOS "iOS" and
+     *      @ref CORRADE_TARGET_ANDROID "Android.
      */
     UnloadFailed = 1 << 9,
 
@@ -168,21 +176,23 @@ enum class LoadState: unsigned short {
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib",
      *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT" and
-     *      @ref CORRADE_TARGET_IOS "iOS".
+     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
+     *      @ref CORRADE_TARGET_IOS "iOS" and
+     *      @ref CORRADE_TARGET_ANDROID "Android.
      */
     Required = 1 << 10,
     #endif
 
-    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
     /**
      * The plugin has active instance and cannot be unloaded. Destroy all
      * instances and try again. Returned by @ref AbstractManager::unload().
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib",
      *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT" and
-     *      @ref CORRADE_TARGET_IOS "iOS".
+     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
+     *      @ref CORRADE_TARGET_IOS "iOS" and
+     *      @ref CORRADE_TARGET_ANDROID "Android.
      */
     Used = 1 << 11
     #endif
@@ -249,15 +259,16 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          */
         std::string pluginInterface() const;
 
-        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
+        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
         /**
          * @brief Plugin directory
          *
          * @partialsupport Only static plugins are supported in
          *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib,
          *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT" and
-         *      @ref CORRADE_TARGET_IOS "iOS".
+         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
+         *      @ref CORRADE_TARGET_IOS "iOS" and
+         *      @ref CORRADE_TARGET_ANDROID "Android.
          */
         std::string pluginDirectory() const;
 
@@ -269,8 +280,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * @partialsupport Only static plugins are supported in
          *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib",
          *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT" and
-         *      @ref CORRADE_TARGET_IOS "iOS".
+         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
+         *      @ref CORRADE_TARGET_IOS "iOS" and
+         *      @ref CORRADE_TARGET_ANDROID "Android.
          */
         void setPluginDirectory(std::string directory);
 
@@ -281,8 +293,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * @partialsupport Only static plugins are supported in
          *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib",
          *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT" and
-         *      @ref CORRADE_TARGET_IOS "iOS".
+         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
+         *      @ref CORRADE_TARGET_IOS "iOS" and
+         *      @ref CORRADE_TARGET_ANDROID "Android.
          */
         void reloadPluginDirectory();
         #endif
@@ -328,8 +341,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * @partialsupport Only static plugins are supported in
          *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib",
          *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT" and
-         *      @ref CORRADE_TARGET_IOS "iOS".
+         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
+         *      @ref CORRADE_TARGET_IOS "iOS" and
+         *      @ref CORRADE_TARGET_ANDROID "Android.
          */
         LoadState load(const std::string& plugin);
 
@@ -346,8 +360,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * @partialsupport Only static plugins are supported in
          *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib",
          *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT" and
-         *      @ref CORRADE_TARGET_IOS "iOS".
+         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
+         *      @ref CORRADE_TARGET_IOS "iOS" and
+         *      @ref CORRADE_TARGET_ANDROID "Android.
          */
         LoadState unload(const std::string& plugin);
 
@@ -375,7 +390,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         };
 
         struct Plugin {
-            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
+            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
             LoadState loadState;
             #else
             const LoadState loadState; /* Always LoadState::Static */
@@ -389,7 +404,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
             Instancer instancer;
 
-            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
+            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
             union {
                 /* For static plugins */
                 StaticPlugin* staticPlugin;
@@ -405,7 +420,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
             StaticPlugin* staticPlugin;
             #endif
 
-            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
+            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
             /* Constructor for dynamic plugins */
             explicit Plugin(std::string name, const std::string& metadata, AbstractManager* manager);
             #endif
@@ -429,7 +444,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
         explicit AbstractManager(std::string pluginInterface, std::string pluginDirectory);
 
-        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
+        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
         std::string _pluginDirectory;
         #endif
 
@@ -462,7 +477,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         CORRADE_PLUGINMANAGER_LOCAL Plugin* findWithAlias(const std::string& plugin);
         CORRADE_PLUGINMANAGER_LOCAL const Plugin* findWithAlias(const std::string& plugin) const;
 
-        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS)
+        #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
         CORRADE_PLUGINMANAGER_LOCAL LoadState loadInternal(Plugin& plugin);
         CORRADE_PLUGINMANAGER_LOCAL LoadState unloadInternal(Plugin& plugin);
         CORRADE_PLUGINMANAGER_LOCAL LoadState unloadRecursive(const std::string& plugin);

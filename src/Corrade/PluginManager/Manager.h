@@ -56,9 +56,12 @@ template<class T> class Manager: public AbstractManager {
          *      with the same name as another static plugin are skipped.
          * @see @ref pluginList()
          * @partialsupport Parameter @p pluginDirectory has no effect on
-         *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib" and
-         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" as only static
-         *      plugins are supported.
+         *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib",
+         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
+         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
+         *      @ref CORRADE_TARGET_IOS "iOS" and
+         *      @ref CORRADE_TARGET_ANDROID "Android" as only static plugins
+         *      are supported.
          */
         explicit Manager(std::string pluginDirectory = {}): AbstractManager(T::pluginInterface(), std::move(pluginDirectory)) {}
 
