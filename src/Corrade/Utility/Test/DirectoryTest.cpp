@@ -361,7 +361,7 @@ void DirectoryTest::configurationDir() {
        something from GTK or something from Qt. Ugly and hacky, but it's the
        best I could come up with. Can't test for e.g. `/home/` substring, as
        that can be overriden. */
-    #elif defined(__linux__)
+    #elif defined(__linux__) && !defined(CORRADE_TARGET_ANDROID)
     CORRADE_COMPARE(dir.substr(dir.size()-7), "corrade");
     CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(dir), "autostart")) ||
                    Directory::fileExists(Directory::join(Directory::path(dir), "dconf")) ||
