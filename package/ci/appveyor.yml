@@ -11,7 +11,6 @@ environment:
   - TARGET: desktop
     ANSI_COLORS: OFF
   - TARGET: desktop-mingw
-  - TARGET: emscripten
   - TARGET: rt
 
 notifications:
@@ -25,14 +24,8 @@ install:
 - cinst ninja
 - set PATH=C:/tools/ninja;%PATH%
 - IF "%TARGET%" == "desktop-mingw" cinst mingw /f >nul
-- IF "%TARGET%" == "emscripten" IF NOT EXIST %APPVEYOR_BUILD_FOLDER%\emsdk-1.35.0-full-64bit.exe appveyor DownloadFile https://s3.amazonaws.com/mozilla-games/emscripten/releases/emsdk-1.35.0-full-64bit.exe
-- IF "%TARGET%" == "emscripten" emsdk-1.35.0-full-64bit.exe /S /D=C:\emscripten
 
 build_script:
 - IF "%TARGET%" == "desktop" call package\ci\appveyor-desktop.bat
 - IF "%TARGET%" == "desktop-mingw" call package\ci\appveyor-desktop-mingw.bat
-- IF "%TARGET%" == "emscripten" call package\ci\appveyor-emscripten.bat
 - IF "%TARGET%" == "rt" call package\ci\appveyor-rt.bat
-
-cache:
-- emsdk-1.35.0-full-64bit.exe
