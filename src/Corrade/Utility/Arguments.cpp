@@ -727,15 +727,15 @@ bool Arguments::skippedPrefix(const std::string& key) const {
 }
 
 bool Arguments::verifyKey(const std::string& key) const {
-    static const std::string allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-";
+    static constexpr const char allowed[] { "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-" };
 
     return key.size() > 1 && key.find_first_not_of(allowed) == std::string::npos;
 }
 
 bool Arguments::verifyKey(char shortKey) const {
-    static const std::string allowedShort = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    static constexpr const char allowedShort[] { "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" };
 
-    return !shortKey || allowedShort.find(shortKey) != std::string::npos;
+    return !shortKey || std::strchr(allowedShort, shortKey) != nullptr;
 }
 
 auto Arguments::find(const std::string& key) -> std::vector<Entry>::iterator {
