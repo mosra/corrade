@@ -886,8 +886,8 @@ if(!bigEndian) {
 @param batchSize Number of iterations
 
 Benchmarks the following block or expression. Use in conjunction with
-@ref Corrade::TestSuite::Tester::addBenchmarks() "addBenchmarks()". Only one
-such loop can be in a function to achieve proper result.
+@ref Corrade::TestSuite::Tester::addBenchmarks() "addBenchmarks()" and others.
+Only one such loop can be in a function to achieve proper result.
 @code
 void benchmark() {
     std::string a = "hello", b = "world";
