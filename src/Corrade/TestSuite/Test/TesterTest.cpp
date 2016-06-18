@@ -396,6 +396,7 @@ struct TesterTest: Tester {
     void repeatEvery();
     void repeatAll();
 
+    void abortOnFail();
     void noXfail();
 
     void compareNoCommonType();
@@ -423,6 +424,7 @@ TesterTest::TesterTest() {
               &TesterTest::repeatEvery,
               &TesterTest::repeatAll,
 
+              &TesterTest::abortOnFail,
               &TesterTest::noXfail,
 
               &TesterTest::compareNoCommonType,
@@ -744,6 +746,28 @@ void TesterTest::repeatAll() {
         "    OK [27] repeatedTest()@50\n"
         "    OK [04] equal()\n"
         "Finished TesterTest::Test with 0 errors out of 102 checks.\n";
+    CORRADE_COMPARE(out.str(), expected);
+}
+
+void TesterTest::abortOnFail() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "1 2 3 4", "--abort-on-fail" };
+    const int argc = std::extent<decltype(argv)>();
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(argc, argv, &out, &out);
+
+    CORRADE_VERIFY(result == 1);
+
+    std::string expected =
+        "Starting TesterTest::Test with 4 test cases...\n"
+        "     ? [01] <unknown>()\n"
+        "    OK [02] trueExpression()\n"
+        "  FAIL [03] falseExpression() at here.cpp on line 188\n"
+        "        Expression 5 != 5 failed.\n"
+        "Aborted TesterTest::Test after first failure out of 2 checks so far. 1 test cases didn't contain any checks!\n";
     CORRADE_COMPARE(out.str(), expected);
 }
 

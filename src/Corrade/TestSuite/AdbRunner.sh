@@ -28,6 +28,9 @@ fi
 if [ ! -z ${CORRADE_TEST_REPEAT_EVERY+x} ]; then
     test_env="$test_env CORRADE_TEST_REPEAT_EVERY=$CORRADE_TEST_REPEAT_EVERY"
 fi
+if [ ! -z ${CORRADE_TEST_ABORT_ON_FAIL+x} ]; then
+    test_env="$test_env CORRADE_TEST_ABORT_ON_FAIL=$CORRADE_TEST_ABORT_ON_FAIL"
+fi
 if [ ! -z ${CORRADE_TEST_NO_XFAIL+x} ]; then
     test_env="$test_env CORRADE_TEST_NO_XFAIL=$CORRADE_TEST_NO_XFAIL"
 fi

@@ -128,6 +128,8 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
             .setFromEnvironment("repeat-every", "CORRADE_TEST_REPEAT_EVERY")
         .addOption("repeat-all", "1").setHelp("repeat-all", "repeat all test cases N times", "N")
             .setFromEnvironment("repeat-all", "CORRADE_TEST_REPEAT_ALL")
+        .addBooleanOption("abort-on-fail").setHelp("abort after first failure")
+            .setFromEnvironment("abort-on-fail", "CORRADE_TEST_ABORT_ON_FAIL")
         .addBooleanOption("no-xfail").setHelp("no-xfail", "disallow expected failures")
             .setFromEnvironment("no-xfail", "CORRADE_TEST_NO_XFAIL")
         .addOption("benchmark", "wall-clock").setHelp("benchmark", "default benchmark type", "TYPE")
@@ -395,6 +397,19 @@ benchmark types:
                     << Debug::boldColor(Debug::Color::Default) << "Avg:"
                     << Debug::resetColor << formatMeasurement(avg, max, benchmarkUnits, _benchmarkBatchSize);
             }
+
+        /* Abort on first failure */
+        } else if(args.isSet("abort-on-fail")) {
+            Debug out{logOutput, _useColor};
+            out << Debug::boldColor(Debug::Color::Red) << "Aborted"
+                << Debug::boldColor(Debug::Color::Default) << _testName
+                << Debug::boldColor(Debug::Color::Red) << "after first failure"
+                << Debug::boldColor(Debug::Color::Default) << "out of"
+                << _checkCount << "checks so far.";
+            if(noCheckCount)
+                out << Debug::boldColor(Debug::Color::Yellow) << noCheckCount << "test cases didn't contain any checks!";
+
+            return 1;
         }
     }
 
