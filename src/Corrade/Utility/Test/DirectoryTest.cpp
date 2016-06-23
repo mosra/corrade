@@ -313,6 +313,11 @@ void DirectoryTest::executableLocation() {
         #endif
     }
     #endif
+
+    /* On Windows it shouldn't contain backslashes */
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_COMPARE(executableLocation.find('\\'), std::string::npos);
+    #endif
 }
 
 void DirectoryTest::home() {
@@ -338,6 +343,9 @@ void DirectoryTest::home() {
        `/Users/` substring, as that can be overriden. */
     #elif defined(CORRADE_TARGET_WINDOWS)
     CORRADE_VERIFY(Directory::fileExists(Directory::join(home, "desktop.ini")));
+
+    /* On Windows it also shouldn't contain backslashes */
+    CORRADE_COMPARE(home.find('\\'), std::string::npos);
 
     /* No idea elsewhere */
     #else
@@ -377,6 +385,9 @@ void DirectoryTest::configurationDir() {
     #elif defined(CORRADE_TARGET_WINDOWS)
     CORRADE_COMPARE(dir.substr(dir.size()-7), "Corrade");
     CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(dir), "Microsoft")));
+
+    /* On Windows it also shouldn't contain backslashes */
+    CORRADE_COMPARE(dir.find('\\'), std::string::npos);
 
     /* No idea elsewhere */
     #else
