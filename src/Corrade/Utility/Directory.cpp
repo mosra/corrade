@@ -237,7 +237,7 @@ std::string Directory::executableLocation() {
     std::string path(MAX_PATH, '\0');
     std::size_t size = GetModuleFileName(module, &path[0], path.size());
     path.resize(size);
-    return path;
+    return fromNativeSeparators(path);
 
     /* hardcoded for Emscripten */
     #elif defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -261,7 +261,7 @@ std::string Directory::home() {
     TCHAR h[MAX_PATH];
     if(!SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_PERSONAL, nullptr, 0, h)))
         return {};
-    return h;
+    return fromNativeSeparators(h);
 
     /* Other */
     #else
@@ -290,7 +290,7 @@ std::string Directory::configurationDir(const std::string& applicationName) {
     TCHAR path[MAX_PATH];
     if(!SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, path)))
         return {};
-    const std::string appdata(path);
+    const std::string appdata{fromNativeSeparators(path)};
     return appdata.empty() ? std::string{} : join(appdata, applicationName);
 
     /* Other not implemented */

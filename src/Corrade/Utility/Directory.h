@@ -203,6 +203,9 @@ class CORRADE_UTILITY_EXPORT Directory {
          * Returns location of the executable on Linux, Windows, non-sandboxed
          * and sandboxed OSX and iOS. On other systems or if the directory
          * can't be found, empty string is returned.
+         * @note The path is returned with forward slashes on all platforms.
+         *      Use @ref toNativeSeparators() to convert it to
+         *      platform-specific format, if needed.
          */
         static std::string executableLocation();
 
@@ -215,6 +218,9 @@ class CORRADE_UTILITY_EXPORT Directory {
          * On Windows the directory is equivalent to `%USERPROFILE%/Documents`
          * or similar. On other systems or if the directory can't be found,
          * empty string is returned.
+         * @note The path is returned with forward slashes on all platforms.
+         *      Use @ref toNativeSeparators() to convert it to
+         *      platform-specific format, if needed.
          */
         static std::string home();
 
@@ -228,6 +234,9 @@ class CORRADE_UTILITY_EXPORT Directory {
          * (@p name is left as is). On OSX and iOS the configuration dir
          * is `${HOME}/Library/Application Support/name`. On other systems or
          * if the directory can't be found, empty string is returned.
+         * @note The path is returned with forward slashes on all platforms.
+         *      Use @ref toNativeSeparators() to convert it to
+         *      platform-specific format, if needed.
          */
         static std::string configurationDir(const std::string& name);
 
