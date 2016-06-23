@@ -61,6 +61,20 @@
 
 namespace Corrade { namespace Utility {
 
+std::string Directory::fromNativeSeparators(std::string path) {
+    #ifdef CORRADE_TARGET_WINDOWS
+    std::replace(path.begin(), path.end(), '\\', '/');
+    #endif
+    return path;
+}
+
+std::string Directory::toNativeSeparators(std::string path) {
+    #ifdef CORRADE_TARGET_WINDOWS
+    std::replace(path.begin(), path.end(), '/', '\\');
+    #endif
+    return path;
+}
+
 std::string Directory::path(const std::string& filename) {
     /* If filename is already a path, return it */
     if(!filename.empty() && filename.back() == '/')

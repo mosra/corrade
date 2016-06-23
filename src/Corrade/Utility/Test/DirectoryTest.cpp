@@ -36,6 +36,8 @@ namespace Corrade { namespace Utility { namespace Test {
 struct DirectoryTest: TestSuite::Tester {
     explicit DirectoryTest();
 
+    void fromNativeSeparators();
+    void toNativeSeparators();
     void path();
     void filename();
     void join();
@@ -72,7 +74,9 @@ struct DirectoryTest: TestSuite::Tester {
 };
 
 DirectoryTest::DirectoryTest() {
-    addTests({&DirectoryTest::path,
+    addTests({&DirectoryTest::fromNativeSeparators,
+              &DirectoryTest::toNativeSeparators,
+              &DirectoryTest::path,
               &DirectoryTest::filename,
               &DirectoryTest::join,
               #ifdef CORRADE_TARGET_WINDOWS
@@ -118,6 +122,24 @@ DirectoryTest::DirectoryTest() {
         _testDir = DIRECTORY_TEST_DIR;
         _writeTestDir = DIRECTORY_WRITE_TEST_DIR;
     }
+}
+
+void DirectoryTest::fromNativeSeparators() {
+    const std::string nativeSeparators = Directory::fromNativeSeparators("put\\ that/somewhere\\ else");
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_COMPARE(nativeSeparators, "put/ that/somewhere/ else");
+    #else
+    CORRADE_COMPARE(nativeSeparators, "put\\ that/somewhere\\ else");
+    #endif
+}
+
+void DirectoryTest::toNativeSeparators() {
+    const std::string nativeSeparators = Directory::toNativeSeparators("this\\is a weird/system\\right");
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_COMPARE(nativeSeparators, "this\\is a weird\\system\\right");
+    #else
+    CORRADE_COMPARE(nativeSeparators, "this\\is a weird/system\\right");
+    #endif
 }
 
 void DirectoryTest::path() {

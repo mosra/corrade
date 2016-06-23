@@ -102,11 +102,30 @@ class CORRADE_UTILITY_EXPORT Directory {
         typedef Containers::EnumSet<Flag> Flags;
 
         /**
+         * @brief Convert path from native separators
+         *
+         * On Windows converts backward slashes to forward slashes, on all
+         * other platforms returns the input argument untouched.
+         */
+        static std::string fromNativeSeparators(std::string path);
+
+        /**
+         * @brief Convert path to native separators
+         *
+         * On Windows converts forward slashes to backward slashes, on all
+         * other platforms returns the input argument untouched.
+         */
+        static std::string toNativeSeparators(std::string path);
+
+        /**
          * @brief Extract path from filename
          *
          * Returns everything before first slash. If the filename doesn't
          * contain any path, returns empty string, if the filename is already a
          * path (ends with slash), returns whole string without trailing slash.
+         * @attention The implementation expects forward slashes as directory
+         *      separators. Use @ref fromNativeSeparators() to convert from
+         *      platform-specific format.
          */
         static std::string path(const std::string& filename);
 
@@ -115,6 +134,9 @@ class CORRADE_UTILITY_EXPORT Directory {
          *
          * If the filename doesn't contain any slash, returns whole string,
          * otherwise returns everything after last slash.
+         * @attention The implementation expects forward slashes as directory
+         *      separators. Use @ref fromNativeSeparators() to convert from
+         *      platform-specific format.
          */
         static std::string filename(const std::string& filename);
 
@@ -123,6 +145,9 @@ class CORRADE_UTILITY_EXPORT Directory {
          *
          * If the path is empty or the filename is absolute (with leading
          * slash), returns @p filename.
+         * @attention The implementation expects forward slashes as directory
+         *      separators. Use @ref fromNativeSeparators() to convert from
+         *      platform-specific format.
          */
         static std::string join(const std::string& path, const std::string& filename);
 
