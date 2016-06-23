@@ -117,6 +117,10 @@ class EnumSet {
         /** @brief Underlying type of the enum */
         typedef typename std::underlying_type<T>::type UnderlyingType;
 
+        enum: UnderlyingType {
+            FullValue = fullValue /**< All enum values together */
+        };
+
         /** @brief Create empty set */
         constexpr /*implicit*/ EnumSet(): value() {}
 
