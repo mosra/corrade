@@ -31,7 +31,7 @@ set(CorradeUtility_SRCS
     MurmurHash2.cpp
     Sha1.cpp
     String.cpp
-    utilities.cpp)
+    System.cpp)
 
 set(CorradeUtility_GracefulAssert_SRCS
     Arguments.cpp
@@ -54,6 +54,7 @@ set(CorradeUtility_HEADERS
     Resource.h
     Sha1.h
     String.h
+    System.h
     TypeTraits.h
     Unicode.h
     utilities.h

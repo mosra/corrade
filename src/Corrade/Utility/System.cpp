@@ -1,5 +1,3 @@
-#ifndef Corrade_Utility_utilities_h
-#define Corrade_Utility_utilities_h
 /*
     This file is part of Corrade.
 
@@ -25,48 +23,22 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-/** @file
- * @brief Basic utilities
- */
+#include "System.h"
 
-#include <cstddef>
-#include <cstring>
-
-#include "Corrade/Utility/visibility.h"
-#include "Corrade/configure.h"
-#ifdef CORRADE_BUILD_DEPRECATED
-#include "Corrade/Utility/Macros.h"
-#include "Corrade/Utility/System.h"
+#ifndef CORRADE_TARGET_WINDOWS
+#include "unistd.h"
+#else
+#include <windows.h>
 #endif
 
-namespace Corrade { namespace Utility {
+namespace Corrade { namespace Utility { namespace System {
 
-/** @{ @name Type utilities */
-
-/**
- * @brief Cast type to another of the same size
- *
- * Unlike `reinterpret_cast` this doesn't break strict-aliasing rules.
- */
-template<class To, class From> inline To bitCast(const From& from) {
-    /* Based on https://github.com/chromium/chromium/blob/trunk/base/basictypes.h#L306 */
-    static_assert(sizeof(From) == sizeof(To), "Utility::bitCast(): resulting type must have the same size");
-
-    To to;
-    std::memcpy(&to, &from, sizeof(To));
-    return to;
+void sleep(const std::size_t ms) {
+    #ifndef CORRADE_TARGET_WINDOWS
+    usleep(ms*1000);
+    #else
+    Sleep(ms);
+    #endif
 }
 
-/*@}*/
-
-/**
- * @copybrief System::sleep()
- * @deprecated Use @ref System::sleep() instead.
- */
-inline CORRADE_DEPRECATED("Use System::sleep() instead") void sleep(std::size_t ms) {
-    return System::sleep(ms);
-}
-
-}}
-
-#endif
+}}}

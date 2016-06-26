@@ -1,3 +1,5 @@
+#ifndef Corrade_Utility_System_h
+#define Corrade_Utility_System_h
 /*
     This file is part of Corrade.
 
@@ -23,22 +25,19 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "utilities.h"
+/** @file
+ * @brief Namespace @ref Corrade::Utility::System
+ */
 
-#ifndef CORRADE_TARGET_WINDOWS
-#include "unistd.h"
-#else
-#include <windows.h>
+#include <cstddef>
+
+#include "Corrade/Utility/visibility.h"
+
+namespace Corrade { namespace Utility { namespace System {
+
+/** @brief Sleep for given time */
+CORRADE_UTILITY_EXPORT void sleep(std::size_t ms);
+
+}}}
+
 #endif
-
-namespace Corrade { namespace Utility {
-
-void sleep(std::size_t ms) {
-    #ifndef CORRADE_TARGET_WINDOWS
-    usleep(ms*1000);
-    #else
-    Sleep(ms);
-    #endif
-}
-
-}}

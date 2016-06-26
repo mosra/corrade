@@ -49,7 +49,7 @@ package in CMake and link to `Corrade::Containers` target. See also
 */
 
 /** @dir Corrade/Utility
- * @brief Namespace @ref Corrade::Utility
+ * @brief Namespace @ref Corrade::Utility, @ref Corrade::Utility::System
  */
 /** @namespace Corrade::Utility
 @brief Utitlities
@@ -59,6 +59,15 @@ debug and error output (class @ref Debug), directory listing (class
 @ref Directory), access to configuration files (class Configuration) or
 compiling data files into the executable (class @ref Resource, see also
 @ref resource-management "tutorial").
+
+This library is built if `WITH_UTILITY` is enabled when building Corrade. To
+use this library, you need to request `Utility` component of `Corrade` package
+in CMake and link to `Corrade::Utility` target. See also @ref building-corrade
+and @ref corrade-cmake for more information.
+*/
+
+/** @namespace Corrade::Utility::System
+@brief System utilities
 
 This library is built if `WITH_UTILITY` is enabled when building Corrade. To
 use this library, you need to request `Utility` component of `Corrade` package
