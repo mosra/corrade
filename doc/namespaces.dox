@@ -52,13 +52,13 @@ package in CMake and link to `Corrade::Containers` target. See also
  * @brief Namespace @ref Corrade::Utility
  */
 /** @namespace Corrade::Utility
-@brief Simple utitlities
+@brief Utitlities
 
 This library contains utility classes used by all other Corrade parts, like
-debug and error output (class Debug), directory listing (class Directory),
-access to configuration files (class Configuration), on which is based
-translation support (class Translator) or compiling data files into the
-executable (class Resource, see also @ref resource-management "tutorial").
+debug and error output (class @ref Debug), directory listing (class
+@ref Directory), access to configuration files (class Configuration) or
+compiling data files into the executable (class @ref Resource, see also
+@ref resource-management "tutorial").
 
 This library is built if `WITH_UTILITY` is enabled when building Corrade. To
 use this library, you need to request `Utility` component of `Corrade` package
