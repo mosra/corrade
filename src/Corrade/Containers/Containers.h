@@ -44,6 +44,7 @@ template<class> class ArrayView;
 template<class T> using ArrayReference CORRADE_DEPRECATED_ALIAS("use ArrayView.h and ArrayView instead") = ArrayView<T>;
 #endif
 template<std::size_t, class> class StaticArrayView;
+template<std::size_t, class> class StaticArray;
 
 template<class T, typename std::underlying_type<T>::type fullValue = typename std::underlying_type<T>::type(~0)> class EnumSet;
 template<class> class LinkedList;
