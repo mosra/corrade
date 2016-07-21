@@ -69,6 +69,8 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseMissingArgument();
 
     void prefixedParse();
+    void prefixedParseMinus();
+    void prefixedParseMinusMinus();
     void prefixedParseHelpArgument();
     void prefixedHelpWithoutPrefix();
     void prefixedHelpWithPrefix();
@@ -114,6 +116,8 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseMissingArgument,
 
               &ArgumentsTest::prefixedParse,
+              &ArgumentsTest::prefixedParseMinus,
+              &ArgumentsTest::prefixedParseMinusMinus,
               &ArgumentsTest::prefixedParseHelpArgument,
               &ArgumentsTest::prefixedHelpWithoutPrefix,
               &ArgumentsTest::prefixedHelpWithPrefix,
@@ -521,6 +525,44 @@ void ArgumentsTest::prefixedParse() {
     CORRADE_VERIFY(arg2.tryParse(argc, argv));
     CORRADE_COMPARE(arg2.value("behavior"), "buffered");
     CORRADE_COMPARE(arg2.value("buffer-size"), "4K");
+}
+
+void ArgumentsTest::prefixedParseMinus() {
+    Arguments arg1;
+    arg1.addNamedArgument("offset")
+        .addSkippedPrefix("read");
+
+    Arguments arg2{"read"};
+    arg2.addOption("behavior")
+        .addOption("buffer-size");
+
+    const char* argv[] = { "", "--read-behavior", "buffered", "--offset", "-50" };
+    const int argc = std::extent<decltype(argv)>();
+
+    CORRADE_VERIFY(arg1.tryParse(argc, argv));
+    CORRADE_COMPARE(arg1.value("offset"), "-50");
+
+    CORRADE_VERIFY(arg2.tryParse(argc, argv));
+    CORRADE_COMPARE(arg2.value("behavior"), "buffered");
+}
+
+void ArgumentsTest::prefixedParseMinusMinus() {
+    Arguments arg1;
+    arg1.addNamedArgument("offset")
+        .addSkippedPrefix("read");
+
+    Arguments arg2{"read"};
+    arg2.addOption("behavior")
+        .addOption("buffer-size");
+
+    const char* argv[] = { "", "--read-behavior", "buffered", "--offset", "--50" };
+    const int argc = std::extent<decltype(argv)>();
+
+    CORRADE_VERIFY(arg1.tryParse(argc, argv));
+    CORRADE_COMPARE(arg1.value("offset"), "--50");
+
+    CORRADE_VERIFY(arg2.tryParse(argc, argv));
+    CORRADE_COMPARE(arg2.value("behavior"), "buffered");
 }
 
 void ArgumentsTest::prefixedParseHelpArgument() {
