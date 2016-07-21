@@ -473,8 +473,12 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                         return false;
                     }
 
-                /* Typo (long option with only one dash) */
+                /* Typo (long option with only one dash). Ignore them if this
+                   is prefixed version because they can actually be values of
+                   some long options. */
                 } else {
+                    if(!_prefix.empty()) continue;
+
                     Error() << "Invalid command-line argument" << argv[i] << std::string("(did you mean -") + argv[i] + "?)";
                     return false;
                 }
