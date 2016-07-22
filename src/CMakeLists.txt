@@ -25,7 +25,7 @@
 
 # On MSVC remove /W3, as we are replacing it with /W4
 if(MSVC)
-    string(REPLACE "/W3" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+    string(REPLACE "/W3" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 endif()
 
 set_directory_properties(PROPERTIES
