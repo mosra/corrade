@@ -259,7 +259,7 @@ Whitespace **should be** around operators with low precedence (namely `+`, `-`,
 `<<`, `>>` but not on unary `-`), around all boolean and comparison operators
 (`&&`, `||`, `==`, `!=`, `<`, `<=`, `>=`, `>`), around `=` and related operators
 and around ternary operator. Whitespace **shouldn't be** around `/`, `*`, `%` to
-indicate they have precedence before addition and substraction. Whitespace can
+indicate they have precedence before addition and subtraction. Whitespace can
 or need not to be around binary operators (`&`, `|`, `^`), whichever looks
 better in particular content.
 @code
