@@ -33,6 +33,8 @@ notifications:
     on_start: never
 
 install:
+- if [ "$TRAVIS_OS_NAME" == "linux" ]; then pip install --user cpp-coveralls; fi
+
 - if [ "$TRAVIS_OS_NAME" == "linux" ]; then export CXX=g++-4.7; fi
 # so the directory tests pass (and then some workaround for crazy filesystem issues)
 - if [ "$TRAVIS_OS_NAME" == "linux" ]; then mkdir -p ~/.config/autostart; fi
@@ -50,3 +52,6 @@ script:
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "emscripten" ]; then ./package/ci/travis-emscripten.sh; fi
 # Travis somehow is not able to gather all output, try to force it using this
 - sync
+
+after_success:
+- if [ "$TRAVIS_OS_NAME" == "linux" ]; then coveralls --gcov /usr/bin/gcov-4.7 -E ".*/Test/.*" --gcov-options '\-lp'; fi
