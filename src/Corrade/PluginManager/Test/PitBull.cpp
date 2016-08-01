@@ -27,14 +27,14 @@
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-class Chihuahua: public Dog {
+class PitBull: public Dog {
     public:
-        explicit Chihuahua(AbstractManager& manager, std::string plugin): Dog(manager, std::move(plugin)) {}
+        explicit PitBull(AbstractManager& manager, std::string plugin): Dog(manager, std::move(plugin)) {}
 
         std::string name() override { return "Rodriguez"; }
 };
 
 }}}
 
-CORRADE_PLUGIN_REGISTER(Chihuahua, Corrade::PluginManager::Test::Chihuahua,
+CORRADE_PLUGIN_REGISTER(PitBull, Corrade::PluginManager::Test::PitBull,
                 "cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")

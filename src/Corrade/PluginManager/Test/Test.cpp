@@ -132,7 +132,7 @@ void Test::nameList() {
         PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
 
         CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
-            "Bulldog", "Canary", "Chihuahua", "Dog", "Snail"}), TestSuite::Compare::Container);
+            "Bulldog", "Canary", "Dog", "PitBull", "Snail"}), TestSuite::Compare::Container);
     }
     #endif
 
@@ -321,16 +321,16 @@ void Test::hierarchy() {
     #else
     PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
 
-    CORRADE_COMPARE(manager.load("Chihuahua"), LoadState::Loaded);
+    CORRADE_COMPARE(manager.load("PitBull"), LoadState::Loaded);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
-    CORRADE_COMPARE(manager.metadata("Chihuahua")->data().value("description"), "The smallest dog in the world.");
-    CORRADE_COMPARE(manager.metadata("Chihuahua")->depends(),
+    CORRADE_COMPARE(manager.metadata("PitBull")->data().value("description"), "I'M ANGRY!!");
+    CORRADE_COMPARE(manager.metadata("PitBull")->depends(),
         std::vector<std::string>{"Dog"});
     CORRADE_COMPARE(manager.metadata("Dog")->usedBy(),
-        std::vector<std::string>{"Chihuahua"});
+        std::vector<std::string>{"PitBull"});
 
     {
-        std::unique_ptr<AbstractAnimal> animal = manager.instance("Chihuahua");
+        std::unique_ptr<AbstractAnimal> animal = manager.instance("PitBull");
         CORRADE_VERIFY(animal);
         CORRADE_VERIFY(animal->hasTail()); // inherited from dog
         CORRADE_COMPARE(animal->legCount(), 4); // this too
@@ -340,11 +340,11 @@ void Test::hierarchy() {
         std::ostringstream out;
         Error redirectError{&out};
         CORRADE_COMPARE(manager.unload("Dog"), LoadState::Required);
-        CORRADE_COMPARE(out.str(), "PluginManager::Manager::unload(): plugin Dog is required by other plugins: {Chihuahua}\n");
+        CORRADE_COMPARE(out.str(), "PluginManager::Manager::unload(): plugin Dog is required by other plugins: {PitBull}\n");
     }
 
     /* After deleting instance, unload chihuahua plugin, then try again */
-    CORRADE_COMPARE(manager.unload("Chihuahua"), LoadState::NotLoaded);
+    CORRADE_COMPARE(manager.unload("PitBull"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
     CORRADE_VERIFY(manager.metadata("Dog")->usedBy().empty());
     #endif
@@ -428,11 +428,11 @@ void Test::reloadPluginDirectory() {
     Directory::move(Directory::join(pluginsDir, "Dog.conf"),
                     Directory::join(pluginsDir, "LostDog.conf"));
 
-    /* Rename Chihuahua */
-    Directory::move(Directory::join(pluginsDir, std::string("Chihuahua") + PLUGIN_FILENAME_SUFFIX),
-                    Directory::join(pluginsDir, std::string("LostChihuahua") + PLUGIN_FILENAME_SUFFIX));
-    Directory::move(Directory::join(pluginsDir, "Chihuahua.conf"),
-                    Directory::join(pluginsDir, "LostChihuahua.conf"));
+    /* Rename PitBull */
+    Directory::move(Directory::join(pluginsDir, std::string("PitBull") + PLUGIN_FILENAME_SUFFIX),
+                    Directory::join(pluginsDir, std::string("LostPitBull") + PLUGIN_FILENAME_SUFFIX));
+    Directory::move(Directory::join(pluginsDir, "PitBull.conf"),
+                    Directory::join(pluginsDir, "LostPitBull.conf"));
 
     /* Reload plugin dir and check new name list */
     manager.reloadPluginDirectory();
@@ -451,18 +451,18 @@ void Test::reloadPluginDirectory() {
     Directory::move(Directory::join(pluginsDir, "LostDog.conf"),
                     Directory::join(pluginsDir, "Dog.conf"));
 
-    Directory::move(Directory::join(pluginsDir, std::string("LostChihuahua") + PLUGIN_FILENAME_SUFFIX),
-                    Directory::join(pluginsDir, std::string("Chihuahua") + PLUGIN_FILENAME_SUFFIX));
-    Directory::move(Directory::join(pluginsDir, "LostChihuahua.conf"),
-                    Directory::join(pluginsDir, "Chihuahua.conf"));
+    Directory::move(Directory::join(pluginsDir, std::string("LostPitBull") + PLUGIN_FILENAME_SUFFIX),
+                    Directory::join(pluginsDir, std::string("PitBull") + PLUGIN_FILENAME_SUFFIX));
+    Directory::move(Directory::join(pluginsDir, "LostPitBull.conf"),
+                    Directory::join(pluginsDir, "PitBull.conf"));
 
     manager.reloadPluginDirectory();
 
     /* And now we can safely compare */
     CORRADE_COMPARE_AS(actual1, (std::vector<std::string>{
-        "Bulldog", "Canary", "Dog", "LostChihuahua", "LostDog", "Snail"}), TestSuite::Compare::Container);
+        "Bulldog", "Canary", "Dog", "LostDog", "LostPitBull", "Snail"}), TestSuite::Compare::Container);
     CORRADE_COMPARE_AS(actual2, (std::vector<std::string>{
-        "Bulldog", "Canary", "LostChihuahua", "LostDog", "Snail"}), TestSuite::Compare::Container);
+        "Bulldog", "Canary", "LostDog", "LostPitBull", "Snail"}), TestSuite::Compare::Container);
     #endif
 }
 
