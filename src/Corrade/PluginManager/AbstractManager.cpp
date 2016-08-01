@@ -587,6 +587,7 @@ AbstractManager::Plugin::~Plugin() {
 #ifndef DOXYGEN_GENERATING_OUTPUT
 Utility::Debug& operator<<(Utility::Debug& debug, PluginManager::LoadState value) {
     switch(value) {
+        /* LCOV_EXCL_START */
         #define ls(state) case PluginManager::LoadState::state: return debug << "PluginManager::LoadState::" #state;
         ls(NotFound)
         #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
@@ -605,6 +606,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, PluginManager::LoadState value
         ls(Used)
         #endif
         #undef ls
+        /* LCOV_EXCL_END */
     }
 
     return debug << "PluginManager::LoadState::(invalid)";
