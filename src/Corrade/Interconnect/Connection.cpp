@@ -32,7 +32,7 @@
 
 namespace Corrade { namespace Interconnect {
 
-Connection::Connection(Connection&& other): signal(other.signal), data(other.data), connected(other.connected) {
+Connection::Connection(Connection&& other): _signal{other._signal}, _data{other._data}, _connected{other._connected} {
     move(std::move(other));
 }
 
@@ -43,9 +43,9 @@ Connection::~Connection() {
 Connection& Connection::operator=(Connection&& other) {
     destroy();
 
-    signal = other.signal;
-    data = other.data;
-    connected = other.connected;
+    _signal = other._signal;
+    _data = other._data;
+    _connected = other._connected;
 
     move(std::move(other));
     return *this;
@@ -53,43 +53,43 @@ Connection& Connection::operator=(Connection&& other) {
 
 bool Connection::connect() {
     /* The connection is not possible anymore */
-    if(!data) return false;
+    if(!_data) return false;
 
     /* Already connected */
-    if(connected) return true;
+    if(_connected) return true;
 
     /* Create the connection */
-    Emitter::connectInternal(signal, data);
+    Emitter::connectInternal(_signal, _data);
     return true;
 }
 
 void Connection::disconnect() {
     /* Already disconnected or the connection doesn't exist anymore */
-    if(!connected || !data) return;
+    if(!_connected || !_data) return;
 
-    Emitter::disconnectInternal(signal, data);
+    Emitter::disconnectInternal(_signal, _data);
 }
 
-Connection::Connection(Implementation::SignalData signal, Implementation::AbstractConnectionData* data): signal(signal), data(data), connected(true) {
-    data->connection = this;
+Connection::Connection(Implementation::SignalData signal, Implementation::AbstractConnectionData* data): _signal{signal}, _data{data}, _connected{true} {
+    _data->_connection = this;
 }
 
 void Connection::destroy() {
     /* If disconnected, delete connection data (as we are the last remaining
        owner) */
-    if(!connected) delete data;
+    if(!_connected) delete _data;
 
     /* Else remove reference to itself from connection data */
-    else if(data) {
-        CORRADE_INTERNAL_ASSERT(data->connection == this);
-        data->connection = nullptr;
+    else if(_data) {
+        CORRADE_INTERNAL_ASSERT(_data->_connection == this);
+        _data->_connection = nullptr;
     }
 }
 
 void Connection::move(Connection&& other) {
-    if(data) data->connection = this;
-    other.data = nullptr;
-    other.connected = false;
+    if(_data) _data->_connection = this;
+    other._data = nullptr;
+    other._connected = false;
 }
 
 }}

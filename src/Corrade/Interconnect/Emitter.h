@@ -245,7 +245,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          *      @ref Connection::isConnected(), @ref signalConnectionCount()
          */
         bool hasSignalConnections() const {
-            return !connections.empty();
+            return !_connections.empty();
         }
 
         /**
@@ -255,7 +255,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          *      @ref Connection::isConnected(), @ref signalConnectionCount()
          */
         template<class Emitter, class ...Args> bool hasSignalConnections(Signal(Emitter::*signal)(Args...)) const {
-            return connections.count(
+            return _connections.count(
                 #ifndef CORRADE_MSVC2015_COMPATIBILITY
                 Implementation::SignalData(signal)
                 #else
@@ -270,7 +270,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * @see @ref Receiver::slotConnectionCount(),
          *      @ref hasSignalConnections()
          */
-        std::size_t signalConnectionCount() const { return connections.size(); }
+        std::size_t signalConnectionCount() const { return _connections.size(); }
 
         /**
          * @brief Count of slots connected to given signal
@@ -279,7 +279,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          *      @ref hasSignalConnections()
          */
         template<class Emitter, class ...Args> std::size_t signalConnectionCount(Signal(Emitter::*signal)(Args...)) const {
-            return connections.count(
+            return _connections.count(
                 #ifndef CORRADE_MSVC2015_COMPATIBILITY
                 Implementation::SignalData(signal)
                 #else
@@ -347,9 +347,9 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         void disconnectInternal(const Implementation::SignalData& signal);
         void disconnectInternal(std::unordered_multimap<Implementation::SignalData, Implementation::AbstractConnectionData*, Implementation::SignalDataHash>::const_iterator it);
 
-        std::unordered_multimap<Implementation::SignalData, Implementation::AbstractConnectionData*, Implementation::SignalDataHash> connections;
-        std::uint32_t lastHandledSignal;
-        bool connectionsChanged;
+        std::unordered_multimap<Implementation::SignalData, Implementation::AbstractConnectionData*, Implementation::SignalDataHash> _connections;
+        std::uint32_t _lastHandledSignal;
+        bool _connectionsChanged;
 };
 
 namespace Implementation {
@@ -373,30 +373,30 @@ class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
         AbstractConnectionData& operator=(AbstractConnectionData&&) = delete;
 
     protected:
-        explicit AbstractConnectionData(Emitter* emitter, Type type): connection(nullptr), emitter(emitter), lastHandledSignal(0), type(type) {}
+        explicit AbstractConnectionData(Emitter* emitter, Type type): _connection{nullptr}, _emitter{emitter}, _lastHandledSignal{0}, _type{type} {}
 
     private:
-        Connection* connection;
-        Emitter* emitter;
-        std::uint32_t lastHandledSignal;
-        Type type;
+        Connection* _connection;
+        Emitter* _emitter;
+        std::uint32_t _lastHandledSignal;
+        Type _type;
 };
 
 class AbstractMemberConnectionData: public AbstractConnectionData {
     friend Interconnect::Emitter;
 
     public:
-        template<class Emitter, class Receiver> explicit AbstractMemberConnectionData(Emitter* emitter, Receiver* receiver): AbstractConnectionData(emitter, Type::Member), receiver(receiver) {}
+        template<class Emitter, class Receiver> explicit AbstractMemberConnectionData(Emitter* emitter, Receiver* receiver): AbstractConnectionData{emitter, Type::Member}, _receiver{receiver} {}
 
     private:
-        Receiver* receiver;
+        Receiver* _receiver;
 };
 
 template<class ...Args> class BaseMemberConnectionData: public AbstractMemberConnectionData {
     friend Interconnect::Emitter;
 
     public:
-        template<class Emitter, class Receiver> explicit BaseMemberConnectionData(Emitter* emitter, Receiver* receiver): AbstractMemberConnectionData(emitter, receiver) {}
+        template<class Emitter, class Receiver> explicit BaseMemberConnectionData(Emitter* emitter, Receiver* receiver): AbstractMemberConnectionData{emitter, receiver} {}
 
     private:
         virtual void handle(Args... args) = 0;
@@ -416,15 +416,15 @@ template<class Receiver, class ...Args> class MemberConnectionData: public BaseM
     public:
         typedef void(Receiver::*Slot)(Args...);
 
-        template<class Emitter> explicit MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): BaseMemberConnectionData<Args...>(emitter, receiver), receiver(receiver), slot(slot) {}
+        template<class Emitter> explicit MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): BaseMemberConnectionData<Args...>{emitter, receiver}, _receiver{receiver}, _slot{slot} {}
 
     private:
         void handle(Args... args) override final {
-            (receiver->*slot)(args...);
+            (_receiver->*_slot)(args...);
         }
 
-        Receiver* receiver;
-        const Slot slot;
+        Receiver* _receiver;
+        const Slot _slot;
 };
 
 template<class ...Args> class FunctionConnectionData: public AbstractConnectionData {
@@ -433,12 +433,12 @@ template<class ...Args> class FunctionConnectionData: public AbstractConnectionD
     public:
         typedef void(*Slot)(Args...);
 
-        template<class Emitter> explicit FunctionConnectionData(Emitter* emitter, Slot slot): AbstractConnectionData(emitter, Type::Function), slot(slot) {}
+        template<class Emitter> explicit FunctionConnectionData(Emitter* emitter, Slot slot): AbstractConnectionData{emitter, Type::Function}, _slot{slot} {}
 
     private:
-        void handle(Args... args) { slot(args...); }
+        void handle(Args... args) { _slot(args...); }
 
-        const Slot slot;
+        const Slot _slot;
 };
 
 }
@@ -523,9 +523,9 @@ template<class EmitterObject, class Emitter, class Receiver, class ReceiverObjec
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emitter_::*signal)(Args...), typename std::common_type<Args>::type... args) {
-    connectionsChanged = false;
-    ++lastHandledSignal;
-    auto range = connections.equal_range(
+    _connectionsChanged = false;
+    ++_lastHandledSignal;
+    auto range = _connections.equal_range(
         #ifndef CORRADE_MSVC2015_COMPATIBILITY
         Implementation::SignalData(signal)
         #else
@@ -535,9 +535,9 @@ template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emi
     auto it = range.first;
     while(it != range.second) {
         /* If not already handled, proceed and mark as such */
-        if(it->second->lastHandledSignal != lastHandledSignal) {
-            it->second->lastHandledSignal = lastHandledSignal;
-            switch(it->second->type) {
+        if(it->second->_lastHandledSignal != _lastHandledSignal) {
+            it->second->_lastHandledSignal = _lastHandledSignal;
+            switch(it->second->_type) {
                 case Implementation::AbstractConnectionData::Type::Function:
                     static_cast<Implementation::FunctionConnectionData<Args...>*>(it->second)->handle(args...);
                     break;
@@ -549,8 +549,8 @@ template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emi
             }
 
             /* Connections changed by the slot, go through again */
-            if(connectionsChanged) {
-                range = connections.equal_range(
+            if(_connectionsChanged) {
+                range = _connections.equal_range(
                     #ifndef CORRADE_MSVC2015_COMPATIBILITY
                     Implementation::SignalData(signal)
                     #else
@@ -558,7 +558,7 @@ template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emi
                     #endif
                     );
                 it = range.first;
-                connectionsChanged = false;
+                _connectionsChanged = false;
                 continue;
             }
         }

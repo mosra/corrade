@@ -74,7 +74,7 @@ class CORRADE_INTERCONNECT_EXPORT Receiver {
          *      @ref slotConnectionCount()
          */
         bool hasSlotConnections() const {
-            return !connections.empty();
+            return !_connections.empty();
         }
 
         /**
@@ -83,7 +83,7 @@ class CORRADE_INTERCONNECT_EXPORT Receiver {
          * @see @ref Emitter::signalConnectionCount(),
          *      @ref hasSlotConnections()
          */
-        std::size_t slotConnectionCount() const { return connections.size(); }
+        std::size_t slotConnectionCount() const { return _connections.size(); }
 
         /**
          * @brief Disconnect everything from this receiver slots
@@ -100,7 +100,7 @@ class CORRADE_INTERCONNECT_EXPORT Receiver {
         ~Receiver();
 
     private:
-        std::vector<Implementation::AbstractConnectionData*> connections;
+        std::vector<Implementation::AbstractConnectionData*> _connections;
 };
 
 }}

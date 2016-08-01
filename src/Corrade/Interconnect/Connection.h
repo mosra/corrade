@@ -126,7 +126,7 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
          *
          * @see @ref isConnected()
          */
-        bool isConnectionPossible() const { return data; }
+        bool isConnectionPossible() const { return _data; }
 
         /**
          * @brief Whether the connection exists
@@ -135,7 +135,7 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
          *      @ref Emitter::hasSignalConnections(),
          *      @ref Receiver::hasSlotConnections()
          */
-        bool isConnected() const { return connected; }
+        bool isConnected() const { return _connected; }
 
         /**
          * @brief Establish the connection
@@ -166,9 +166,9 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
         void destroy();
         void move(Connection&& other);
 
-        Implementation::SignalData signal;
-        Implementation::AbstractConnectionData* data;
-        bool connected;
+        Implementation::SignalData _signal;
+        Implementation::AbstractConnectionData* _data;
+        bool _connected;
 };
 
 }}
