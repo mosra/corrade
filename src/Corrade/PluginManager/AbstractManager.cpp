@@ -188,9 +188,10 @@ LoadState AbstractManager::unloadRecursiveInternal(Plugin& plugin) {
 
     /* If the plugin is not static and is used by others, try to unload these
        first so it can be unloaded too */
-    if(plugin.loadState != LoadState::Static)
-        for(const std::string& usedBy: plugin.metadata._usedBy)
-            unloadRecursive(usedBy);
+    if(plugin.loadState != LoadState::Static) {
+        while(!plugin.metadata._usedBy.empty())
+            unloadRecursive(plugin.metadata._usedBy.front());
+    }
 
     /* Unload the plugin */
     const LoadState after = unloadInternal(plugin);
