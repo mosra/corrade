@@ -32,22 +32,31 @@
 
 namespace Corrade { namespace Interconnect {
 
-Connection::Connection(Connection&& other): _signal{other._signal}, _data{other._data}, _connected{other._connected} {
-    move(std::move(other));
+Connection::Connection(Connection&& other) noexcept: _signal{std::move(other._signal)}, _data{std::move(other._data)}, _connected{std::move(other._connected)} {
+    if(_data) _data->_connection = this;
+    other._data = nullptr;
+    other._connected = false;
 }
 
 Connection::~Connection() {
-    destroy();
+    /* If disconnected, delete connection data (as we are the last remaining
+       owner) */
+    if(!_connected) delete _data;
+
+    /* Else remove reference to itself from connection data */
+    else if(_data) {
+        CORRADE_INTERNAL_ASSERT(_data->_connection == this);
+        _data->_connection = nullptr;
+    }
 }
 
-Connection& Connection::operator=(Connection&& other) {
-    destroy();
-
-    _signal = other._signal;
-    _data = other._data;
-    _connected = other._connected;
-
-    move(std::move(other));
+Connection& Connection::operator=(Connection&& other) noexcept {
+    using std::swap;
+    swap(other._signal, _signal);
+    swap(other._data, _data);
+    swap(other._connected, _connected);
+    if(_data) _data->_connection = this;
+    if(other._data) other._data->_connection = &other;
     return *this;
 }
 
@@ -72,24 +81,6 @@ void Connection::disconnect() {
 
 Connection::Connection(Implementation::SignalData signal, Implementation::AbstractConnectionData* data): _signal{signal}, _data{data}, _connected{true} {
     _data->_connection = this;
-}
-
-void Connection::destroy() {
-    /* If disconnected, delete connection data (as we are the last remaining
-       owner) */
-    if(!_connected) delete _data;
-
-    /* Else remove reference to itself from connection data */
-    else if(_data) {
-        CORRADE_INTERNAL_ASSERT(_data->_connection == this);
-        _data->_connection = nullptr;
-    }
-}
-
-void Connection::move(Connection&& other) {
-    if(_data) _data->_connection = this;
-    other._data = nullptr;
-    other._connected = false;
 }
 
 }}

@@ -39,6 +39,7 @@ struct Test: TestSuite::Tester {
     void templatedSignalData();
 
     void connect();
+    void connectMoveConnection();
 
     void disconnect();
     void disconnectSignal();
@@ -122,6 +123,7 @@ Test::Test() {
               &Test::templatedSignalData,
 
               &Test::connect,
+              &Test::connectMoveConnection,
 
               &Test::disconnect,
               &Test::disconnectSignal,
@@ -209,6 +211,35 @@ void Test::connect() {
     CORRADE_COMPARE(postman.signalConnectionCount(), 4);
     CORRADE_COMPARE(postman.signalConnectionCount(&Postman::newMessage), 3);
     CORRADE_COMPARE(mailbox1.slotConnectionCount(), 3);
+}
+
+void Test::connectMoveConnection() {
+    Postman postman;
+    Mailbox mailbox1, mailbox2;
+
+    Connection connection1 = Interconnect::connect(postman, &Postman::newMessage, mailbox1, &Mailbox::addMessage);
+    Connection connection2 = Interconnect::connect(postman, &Postman::newMessage, mailbox2, &Mailbox::addMessage);
+    connection2.disconnect();
+
+    /* Move construction */
+    CORRADE_VERIFY(connection1.isConnectionPossible());
+    CORRADE_VERIFY(connection1.isConnected());
+    Connection connection3{std::move(connection1)};
+    CORRADE_VERIFY(!connection1.isConnectionPossible());
+    CORRADE_VERIFY(connection3.isConnectionPossible());
+    CORRADE_VERIFY(!connection1.isConnected());
+    CORRADE_VERIFY(connection3.isConnected());
+
+    /* Move assignment */
+    CORRADE_VERIFY(connection3.isConnected());
+    CORRADE_VERIFY(!connection2.isConnected());
+    CORRADE_VERIFY(connection2.isConnectionPossible());
+    CORRADE_VERIFY(connection3.isConnectionPossible());
+    connection2 = std::move(connection3);
+    CORRADE_VERIFY(connection2.isConnected());
+    CORRADE_VERIFY(!connection3.isConnected());
+    CORRADE_VERIFY(connection2.isConnectionPossible());
+    CORRADE_VERIFY(connection3.isConnectionPossible());
 }
 
 void Test::disconnect() {

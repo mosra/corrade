@@ -104,13 +104,13 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
         Connection(const Connection&) = delete;
 
         /** @brief Move constructor */
-        Connection(Connection&& other);
+        Connection(Connection&& other) noexcept;
 
         /** @brief Copying is not allowed */
         Connection& operator=(const Connection&) = delete;
 
         /** @brief Move assignment */
-        Connection& operator=(Connection&& other);
+        Connection& operator=(Connection&& other) noexcept;
 
         /**
          * @brief Destructor
@@ -163,9 +163,6 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
         explicit Connection(Implementation::SignalData signal, Implementation::AbstractConnectionData* data);
 
     private:
-        void destroy();
-        void move(Connection&& other);
-
         Implementation::SignalData _signal;
         Implementation::AbstractConnectionData* _data;
         bool _connected;
