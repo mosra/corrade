@@ -606,7 +606,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, PluginManager::LoadState value
         ls(Used)
         #endif
         #undef ls
-        /* LCOV_EXCL_END */
+        /* LCOV_EXCL_STOP */
     }
 
     return debug << "PluginManager::LoadState::(invalid)";
