@@ -57,6 +57,7 @@ corrade_add_test(UtilityMacrosTest MacrosTest.cpp)
 corrade_add_test(UtilitySha1Test Sha1Test.cpp)
 corrade_add_test(UtilityStringTest StringTest.cpp)
 target_include_directories(UtilityStringTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+corrade_add_test(UtilitySystemTest SystemTest.cpp)
 corrade_add_test(UtilityTypeTraitsTest TypeTraitsTest.cpp)
 corrade_add_test(UtilityUnicodeTest UnicodeTest.cpp LIBRARIES CorradeUtilityTestLib)
 
