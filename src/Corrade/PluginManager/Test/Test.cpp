@@ -66,6 +66,7 @@ struct Test: TestSuite::Tester {
 
     void deletable();
     void hierarchy();
+    void destructionHierarchy();
     void crossManagerDependencies();
     void unresolvedDependencies();
 
@@ -99,6 +100,7 @@ Test::Test() {
 
               &Test::deletable,
               &Test::hierarchy,
+              &Test::destructionHierarchy,
               &Test::crossManagerDependencies,
               &Test::unresolvedDependencies,
               &Test::reloadPluginDirectory,
@@ -347,6 +349,26 @@ void Test::hierarchy() {
     CORRADE_COMPARE(manager.unload("PitBull"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
     CORRADE_VERIFY(manager.metadata("Dog")->usedBy().empty());
+    #endif
+}
+
+void Test::destructionHierarchy() {
+    #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
+    CORRADE_SKIP("Dependency hierarchy is meaningful only for dynamic plugins");
+    #else
+    /* Dog needs to be ordered first in the map for this test case to work.
+       Basically I'm testing that the unload of plugins happens in the
+       right order and that I'm not using invalid iterators at any point. */
+    CORRADE_VERIFY(std::string{"Dog"} < std::string{"PitBull"});
+
+    {
+        PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+        CORRADE_COMPARE(manager.load("PitBull"), LoadState::Loaded);
+        CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
+    }
+
+    /* It should not crash, assert or fire an exception on destruction */
+    CORRADE_VERIFY(true);
     #endif
 }
 
