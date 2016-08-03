@@ -39,7 +39,7 @@ install:
 # so the directory tests pass (and then some workaround for crazy filesystem issues)
 - if [ "$TRAVIS_OS_NAME" == "linux" ]; then mkdir -p ~/.config/autostart; fi
 - if [ "$TRAVIS_OS_NAME" == "linux" ]; then mkdir -p ~/.local; fi
-- if [ "$TRAVIS_OS_NAME" == "linux" ]; then export CXXFLAGS=-DTRAVIS_CI_HAS_CRAZY_FILESYSTEM_ON_LINUX; fi
+- if [ "$TRAVIS_OS_NAME" == "linux" ]; then export CXXFLAGS="-DTRAVIS_CI_HAS_CRAZY_FILESYSTEM_ON_LINUX --coverage"; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "ios-simulator" ]; then gem install xcpretty; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "ios-simulator" ]; then brew update && brew upgrade cmake; fi

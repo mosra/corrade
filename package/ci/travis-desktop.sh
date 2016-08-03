@@ -6,8 +6,7 @@ cmake .. \
     -DCMAKE_INSTALL_PREFIX=$HOME/deps \
     -DCMAKE_INSTALL_RPATH=$HOME/deps/lib \
     -DBUILD_TESTS=ON \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_CXX_FLAGS="--coverage $CXXFLAGS"
+    -DCMAKE_BUILD_TYPE=Release
 make -j install
 CORRADE_TEST_COLOR=ON ctest -V
 cd ..
