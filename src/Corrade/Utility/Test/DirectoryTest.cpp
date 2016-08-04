@@ -23,10 +23,13 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <sstream>
+
 #include "Corrade/Containers/Array.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/File.h"
+#include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/Utility/Directory.h"
 
 #include "configure.h"
@@ -69,6 +72,11 @@ struct DirectoryTest: TestSuite::Tester {
     void readNonSeekable();
     void write();
 
+    void map();
+    void mapNoPermission();
+    void mapRead();
+    void mapReadNonexistent();
+
     std::string _testDir,
         _writeTestDir;
 };
@@ -105,7 +113,12 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::read,
               &DirectoryTest::readEmpty,
               &DirectoryTest::readNonSeekable,
-              &DirectoryTest::write});
+              &DirectoryTest::write,
+
+              &DirectoryTest::map,
+              &DirectoryTest::mapNoPermission,
+              &DirectoryTest::mapRead,
+              &DirectoryTest::mapReadNonexistent});
 
     #ifdef CORRADE_TARGET_APPLE
     if(Directory::isSandboxed()
@@ -548,6 +561,64 @@ void DirectoryTest::write() {
     CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "file"),
         Directory::join(_testDir, "file"),
         TestSuite::Compare::File);
+}
+
+void DirectoryTest::map() {
+    #ifdef CORRADE_TARGET_UNIX
+    std::string data{"\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11};
+    {
+        auto mappedFile = Directory::map(Directory::join(_writeTestDir, "mappedFile"), data.size());
+        CORRADE_VERIFY(mappedFile);
+        CORRADE_COMPARE(mappedFile.size(), data.size());
+        std::copy(std::begin(data), std::end(data), mappedFile.begin());
+    }
+    CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "mappedFile"),
+        data,
+        TestSuite::Compare::FileToString);
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+
+void DirectoryTest::mapNoPermission() {
+    #ifdef CORRADE_TARGET_UNIX
+    {
+        std::ostringstream out;
+        Error err{&out};
+        auto mappedFile = Directory::map("/root/mappedFile", 64);
+        CORRADE_VERIFY(!mappedFile);
+        CORRADE_COMPARE(out.str(), "Utility::Directory::map(): can't open the file\n");
+    }
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+
+void DirectoryTest::mapRead() {
+    #ifdef CORRADE_TARGET_UNIX
+    {
+        const auto mappedFile = Directory::mapRead(Directory::join(_testDir, "file"));
+        CORRADE_COMPARE_AS(Containers::ArrayView<const char>(mappedFile),
+            (Containers::Array<char>::from(0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF)),
+            TestSuite::Compare::Container);
+    }
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+
+void DirectoryTest::mapReadNonexistent() {
+    #ifdef CORRADE_TARGET_UNIX
+    {
+        std::ostringstream out;
+        Error err{&out};
+        const auto mappedFile = Directory::mapRead(Directory::join(_testDir, "nonexistentFile"));
+        CORRADE_VERIFY(!mappedFile);
+        CORRADE_COMPARE(out.str(), "Utility::Directory::mapRead(): can't open the file\n");
+    }
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
 }
 
 }}}

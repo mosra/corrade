@@ -31,20 +31,25 @@
 #include <algorithm>
 #include <fstream>
 
-/* Unix, Emscripten */
+/* Unix memory mapping */
+#ifdef CORRADE_TARGET_UNIX
+#include <fcntl.h>
+#include <sys/mman.h>
+#endif
+
+/* Unix, Emscripten directory access */
 #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include <sys/stat.h>
 #include <dirent.h>
-#if defined(__linux__) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include <unistd.h>
-#endif
 #ifdef CORRADE_TARGET_APPLE
 #include <mach-o/dyld.h>
+#endif
 #endif
 
 /* Windows */
 /** @todo remove the superfluous includes when mingw is fixed (otherwise causes undefined EXTERN_C error) */
-#elif defined(CORRADE_TARGET_WINDOWS)
+#ifdef CORRADE_TARGET_WINDOWS
 #ifdef __MINGW32__
 #include <wtypes.h>
 #include <windef.h>
@@ -425,5 +430,71 @@ bool Directory::writeString(const std::string& filename, const std::string& data
     static_assert(sizeof(std::string::value_type) == 1, "std::string doesn't have 8-bit characters");
     return write(filename, {data.data(), data.size()});
 }
+
+#ifdef CORRADE_TARGET_UNIX
+void Directory::MapDeleter::operator()(const char* const data, const std::size_t size) {
+    if(data && munmap(const_cast<char*>(data), size) == -1)
+        Error() << "Utility::Directory: can't unmap memory-mapped file";
+    if(_fd) close(_fd);
+}
+
+Containers::Array<char, Directory::MapDeleter> Directory::map(const std::string& filename, std::size_t size) {
+    /* Open the file for writing. Create if it doesn't exist, truncate it if it
+       does. */
+    const int fd = open(filename.data(), O_RDWR|O_CREAT|O_TRUNC, mode_t(0600));
+    if(fd == -1) {
+        Error() << "Utility::Directory::map(): can't open the file";
+        return nullptr;
+    }
+
+    /* Resize the file to requested size by seeking one byte before */
+    if(lseek(fd, size - 1, SEEK_SET) == -1) {
+        close(fd);
+        Error() << "Utility::Directory::map(): can't seek to resize the file";
+        return nullptr;
+    }
+
+    /* And then writing a zero byte on that position */
+    if(::write(fd, "", 1) != 1) {
+        close(fd);
+        Error() << "Utility::Directory::map(): can't write to resize the file";
+        return nullptr;
+    }
+
+    /* Map the file */
+    char* data = reinterpret_cast<char*>(mmap(nullptr, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0));
+    if(data == MAP_FAILED) {
+        close(fd);
+        Error() << "Utility::Directory::map(): can't map the file";
+        return nullptr;
+    }
+
+    return Containers::Array<char, MapDeleter>{data, size, MapDeleter{fd}};
+}
+
+Containers::Array<const char, Directory::MapDeleter> Directory::mapRead(const std::string& filename) {
+    /* Open the file for reading */
+    const int fd = open(filename.data(), O_RDONLY);
+    if(fd == -1) {
+        Error() << "Utility::Directory::mapRead(): can't open the file";
+        return nullptr;
+    }
+
+    /* Get file size */
+    const off_t currentPos = lseek(fd, 0, SEEK_CUR);
+    const std::size_t size = lseek(fd, 0, SEEK_END);
+    lseek(fd, currentPos, SEEK_SET);
+
+    /* Map the file */
+    const char* data = reinterpret_cast<const char*>(mmap(nullptr, size, PROT_READ, MAP_SHARED, fd, 0));
+    if(data == MAP_FAILED) {
+        close(fd);
+        Error() << "Utility::Directory::map(): can't map the file";
+        return nullptr;
+    }
+
+    return Containers::Array<const char, MapDeleter>{data, size, MapDeleter{fd}};
+}
+#endif
 
 }}

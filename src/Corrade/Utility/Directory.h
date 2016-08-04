@@ -46,6 +46,17 @@ class CORRADE_UTILITY_EXPORT Directory {
     public:
         Directory() = delete;
 
+        #ifdef CORRADE_TARGET_UNIX
+        /**
+         * @brief Memory-mapped file deleter
+         *
+         * @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix"
+         *      platforms.
+         * @see @ref map(), @ref mapRead()
+         */
+        class MapDeleter;
+        #endif
+
         /**
          * @brief Listing flag
          *
@@ -253,7 +264,8 @@ class CORRADE_UTILITY_EXPORT Directory {
          *
          * Reads whole file as binary (i.e. without newline conversion).
          * Returns `nullptr` if the file can't be read.
-         * @see @ref readString(), @ref fileExists(), @ref write()
+         * @see @ref readString(), @ref fileExists(), @ref write(),
+         *      @ref mapRead()
          */
         static Containers::Array<char> read(const std::string& filename);
 
@@ -270,7 +282,7 @@ class CORRADE_UTILITY_EXPORT Directory {
          *
          * Writes the file as binary (i.e. without newline conversion). Returns
          * `false` if the file can't be written, `true` otherwise.
-         * @see @ref writeString(), @ref read()
+         * @see @ref writeString(), @ref read(), @ref map()
          */
         static bool write(const std::string& filename, Containers::ArrayView<const void> data);
 
@@ -281,7 +293,49 @@ class CORRADE_UTILITY_EXPORT Directory {
          * @see @ref write(), @ref readString()
          */
         static bool writeString(const std::string& filename, const std::string& data);
+
+        #ifdef CORRADE_TARGET_UNIX
+        /**
+         * @brief Map file for reading and writing
+         *
+         * Maps the file as read-write memory and enlarges it to @p size. If
+         * the file does not exist yet, it is created, if it exists, it's
+         * truncated. The array deleter takes care of unmapping, however the
+         * file is not deleted after unmapping. If an error occurs, `nullptr`
+         * is returned and an error message is printed to output.
+         * @see @ref mapRead(), @ref read(), @ref write()
+         * @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix"
+         *      platforms.
+         */
+        static Containers::Array<char, MapDeleter> map(const std::string& filename, std::size_t size);
+
+        /**
+         * @brief Map file for reading
+         *
+         * Maps the file as read-only memory. The array deleter takes care of
+         * unmapping. If the file doesn't exist or an error occurs while
+         * mapping, `nullptr` is returned and an error message is printed to
+         * output.
+         * @see @ref map(), @ref read()
+         * @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix"
+         *      platforms.
+         */
+        static Containers::Array<const char, MapDeleter> mapRead(const std::string& filename);
+        #endif
 };
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+#ifdef CORRADE_TARGET_UNIX
+class CORRADE_UTILITY_EXPORT Directory::MapDeleter {
+    public:
+        constexpr explicit MapDeleter(): _fd{} {}
+        constexpr explicit MapDeleter(int fd) noexcept: _fd{fd} {}
+        void operator()(const char* data, std::size_t size);
+    private:
+        int _fd;
+};
+#endif
+#endif
 
 CORRADE_ENUMSET_OPERATORS(Directory::Flags)
 
