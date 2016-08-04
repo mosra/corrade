@@ -62,6 +62,7 @@ struct ArrayTest: TestSuite::Tester {
 
     void customDeleter();
     void customDeleterType();
+    void customDeleterTypeConstruct();
 };
 
 typedef Containers::Array<int> Array;
@@ -100,7 +101,8 @@ ArrayTest::ArrayTest() {
               &ArrayTest::release,
 
               &ArrayTest::customDeleter,
-              &ArrayTest::customDeleterType});
+              &ArrayTest::customDeleterType,
+              &ArrayTest::customDeleterTypeConstruct});
 }
 
 void ArrayTest::constructEmpty() {
@@ -482,6 +484,19 @@ void ArrayTest::customDeleterType() {
     }
 
     CORRADE_COMPARE(deletedCount, 25);
+}
+
+void ArrayTest::customDeleterTypeConstruct() {
+    struct CustomImplicitDeleter {
+        void operator()(int*, std::size_t) {}
+    };
+
+    /* Just verify that this compiles */
+    Containers::Array<int, CustomImplicitDeleter> a;
+    Containers::Array<int, CustomImplicitDeleter> b{nullptr};
+    int c;
+    Containers::Array<int, CustomImplicitDeleter> d{&c, 1};
+    CORRADE_VERIFY(true);
 }
 
 }}}
