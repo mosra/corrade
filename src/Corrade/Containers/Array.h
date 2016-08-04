@@ -321,14 +321,14 @@ class Array {
         /**
          * @brief Convert to const @ref ArrayView
          *
-         * Enabled only if `const T*` is implicitly convertible to `U*`. Note
-         * that, similarly as with raw pointers, you need to ensure that both
-         * types have the same size.
+         * Enabled only if `T*` or `const T*` is implicitly convertible to `U*`.
+         * Note that, similarly as with raw pointers, you need to ensure that
+         * both types have the same size.
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
         #else
-        template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value>::type>
+        template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value || std::is_convertible<T*, const U*>::value>::type>
         #endif
         /*implicit*/ operator ArrayView<const U>() const noexcept { return {_data, _size}; }
 
