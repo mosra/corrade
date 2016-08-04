@@ -289,13 +289,21 @@ void ArrayTest::convertPointer() {
 void ArrayTest::convertView() {
     Array a(5);
     const Array ca(5);
+    Containers::Array<const int> ac{a.data(), a.size(), [](const int*, std::size_t){}};
+    const Containers::Array<const int> cac{a.data(), a.size(), [](const int*, std::size_t){}};
 
     const ArrayView b = a;
     const ConstArrayView cb = ca;
+    const ConstArrayView bc = ac;
+    const ConstArrayView cbc = cac;
     CORRADE_VERIFY(b.begin() == a.begin());
+    CORRADE_VERIFY(bc.begin() == ac.begin());
     CORRADE_VERIFY(cb.begin() == ca.begin());
+    CORRADE_VERIFY(cbc.begin() == cac.begin());
     CORRADE_COMPARE(b.size(), 5);
     CORRADE_COMPARE(cb.size(), 5);
+    CORRADE_COMPARE(bc.size(), 5);
+    CORRADE_COMPARE(cbc.size(), 5);
 }
 
 void ArrayTest::convertViewDerived() {
