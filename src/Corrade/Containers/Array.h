@@ -42,14 +42,6 @@
 
 namespace Corrade { namespace Containers {
 
-namespace Implementation {
-    template<class T> void noInitDeleter(T* data, std::size_t size) {
-        if(data) for(T *it = data, *end = data + size; it != end; ++it)
-            it->~T();
-        delete[] reinterpret_cast<char*>(data);
-    }
-}
-
 /**
 @brief Default array deleter
 @param data     Array pointer
@@ -60,6 +52,21 @@ Equivalent to calling `delete[]` on passed pointer, @p size is ignored.
 template<class T> void defaultDeleter(T* data, std::size_t size) {
     static_cast<void>(size);
     delete[] data;
+}
+
+namespace Implementation {
+    template<class T> struct DefaultDeleter {
+        T operator()() const { return T{}; }
+    };
+    template<class T> struct DefaultDeleter<void(*)(T*, std::size_t)> {
+        void(*operator()() const)(T*, std::size_t) { return defaultDeleter; }
+    };
+
+    template<class T> void noInitDeleter(T* data, std::size_t size) {
+        if(data) for(T *it = data, *end = data + size; it != end; ++it)
+            it->~T();
+        delete[] reinterpret_cast<char*>(data);
+    }
 }
 
 /**
@@ -205,7 +212,8 @@ class Array {
         #else
         template<class U, class V = typename std::enable_if<std::is_same<std::nullptr_t, U>::value>::type> /*implicit*/ Array(U) noexcept:
         #endif
-            _data{nullptr}, _size{0}, _deleter{defaultDeleter} {}
+            /* GCC <=4.8 breaks on _deleter{} */
+            _data{nullptr}, _size{0}, _deleter(Implementation::DefaultDeleter<D>{}()) {}
 
         /**
          * @brief Default constructor
@@ -213,7 +221,8 @@ class Array {
          * Creates zero-sized array. Move array with nonzero size onto the
          * instance to make it useful.
          */
-        /*implicit*/ Array() noexcept: _data(nullptr), _size(0), _deleter{defaultDeleter} {}
+        /* GCC <=4.8 breaks on _deleter{} */
+        /*implicit*/ Array() noexcept: _data(nullptr), _size(0), _deleter(Implementation::DefaultDeleter<D>{}()) {}
 
         /**
          * @brief Construct default-initialized array
@@ -281,7 +290,8 @@ class Array {
          * @p deleter. See class documentation for more information about
          * custom deleters and @ref ArrayView for non-owning array wrapper.
          */
-        explicit Array(T* data, std::size_t size, D deleter = defaultDeleter): _data{data}, _size{size}, _deleter{deleter} {}
+        /* GCC <=4.8 breaks on _deleter{} */
+        explicit Array(T* data, std::size_t size, D deleter = Implementation::DefaultDeleter<D>{}()): _data{data}, _size{size}, _deleter(deleter) {}
 
         ~Array() { _deleter(_data, _size); }
 
