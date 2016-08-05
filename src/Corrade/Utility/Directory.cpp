@@ -57,9 +57,6 @@
 #include <ntdef.h>
 #include <basetyps.h>
 #endif
-#define WIN32_LEAN_AND_MEAN 1
-#define VC_EXTRALEAN
-#include <windows.h>
 #include <shlobj.h>
 #endif
 
@@ -498,7 +495,7 @@ Containers::Array<const char, Directory::MapDeleter> Directory::mapRead(const st
 
     return Containers::Array<const char, MapDeleter>{data, size, MapDeleter{fd}};
 }
-#elif defined(CORRADE_TARGET_WINDOWS)
+#elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
 void Directory::MapDeleter::operator()(const char* const data, const std::size_t) {
     if(data) UnmapViewOfFile(data);
     if(_hMap) CloseHandle(_hMap);

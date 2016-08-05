@@ -46,12 +46,12 @@ class CORRADE_UTILITY_EXPORT Directory {
     public:
         Directory() = delete;
 
-        #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_WINDOWS)
+        #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
         /**
          * @brief Memory-mapped file deleter
          *
          * @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix"
-         *      and @ref CORRADE_TARGET_WINDOWS "Windows" platforms.
+         *      and @ref CORRADE_TARGET_WINDOWS "Windows" non-RT platforms.
          * @see @ref map(), @ref mapRead()
          */
         class MapDeleter;
@@ -294,7 +294,7 @@ class CORRADE_UTILITY_EXPORT Directory {
          */
         static bool writeString(const std::string& filename, const std::string& data);
 
-        #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_WINDOWS)
+        #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
         /**
          * @brief Map file for reading and writing
          *
@@ -305,7 +305,7 @@ class CORRADE_UTILITY_EXPORT Directory {
          * is returned and an error message is printed to output.
          * @see @ref mapRead(), @ref read(), @ref write()
          * @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix"
-         *      platforms.
+         *      and @ref CORRADE_TARGET_WINDOWS "Windows" non-RT platforms.
          */
         static Containers::Array<char, MapDeleter> map(const std::string& filename, std::size_t size);
 
@@ -318,7 +318,7 @@ class CORRADE_UTILITY_EXPORT Directory {
          * output.
          * @see @ref map(), @ref read()
          * @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix"
-         *      platforms.
+         *      and @ref CORRADE_TARGET_WINDOWS "Windows" non-RT platforms.
          */
         static Containers::Array<const char, MapDeleter> mapRead(const std::string& filename);
         #endif
@@ -334,7 +334,7 @@ class CORRADE_UTILITY_EXPORT Directory::MapDeleter {
     private:
         int _fd;
 };
-#elif defined CORRADE_TARGET_WINDOWS
+#elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
 class CORRADE_UTILITY_EXPORT Directory::MapDeleter {
     public:
         constexpr explicit MapDeleter(): _hFile{}, _hMap{} {}
