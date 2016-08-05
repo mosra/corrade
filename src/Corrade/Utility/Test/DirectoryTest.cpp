@@ -343,7 +343,7 @@ void DirectoryTest::executableLocation() {
     /* Otherwise it should contain CMake build files */
     #else
     {
-        #ifdef CMAKE_CFG_INTDIR
+        #ifdef CMAKE_INTDIR
         CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(Directory::path(executableLocation)), "CMakeFiles")));
         #else
         CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(executableLocation), "CMakeFiles")));
