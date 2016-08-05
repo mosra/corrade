@@ -306,6 +306,36 @@ std::string Directory::configurationDir(const std::string& applicationName) {
     #endif
 }
 
+std::string Directory::tmp() {
+    #ifdef CORRADE_TARGET_UNIX
+    /* Sandboxed OSX, iOS */
+    #ifdef CORRADE_TARGET_APPLE
+    if(isSandboxed()) return join(path(path(executableLocation())), "tmp");
+    #endif
+
+    /* Common Unix */
+    return "/tmp";
+
+    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    /* Windows */
+
+    /* Get path size */
+    char c;
+    const std::size_t size = GetTempPath(1, &c);
+
+    /* Get the path, remove the trailing slash (and zero terminator) */
+    std::string path(size, '\0');
+    GetTempPath(size, &path[0]);
+    if(path.size()) path.resize(path.size() - 2);
+
+    /* Convert to forward slashes */
+    return fromNativeSeparators(path);
+    #else
+    Warning() << "Utility::Directory::tmp(): not implemented on this platform";
+    return {};
+    #endif
+}
+
 std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     std::vector<std::string> list;
 

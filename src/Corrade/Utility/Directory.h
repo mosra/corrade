@@ -252,6 +252,20 @@ class CORRADE_UTILITY_EXPORT Directory {
         static std::string configurationDir(const std::string& name);
 
         /**
+         * @brief Temporary dir
+         *
+         * On Unix and non-sandboxed OSX, the directory is equivalent to `/tmp`.
+         * On sandboxed OSX and iOS the directory is the `/tmp` subfolder of
+         * the app sandbox. On non-RT Windows the directory is equivalent to
+         * `%TEMP%`. On other systems or if the directory can't be found, empty
+         * string is returned.
+         * @note The path is returned with forward slashes on all platforms.
+         *      Use @ref toNativeSeparators() to convert it to
+         *      platform-specific format, if needed.
+         */
+        static std::string tmp();
+
+        /**
          * @brief Check if the file exists
          *
          * Returns `true` if the file exists and is accessible (e.g. user has

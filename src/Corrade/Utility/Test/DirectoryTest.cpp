@@ -58,6 +58,7 @@ struct DirectoryTest: TestSuite::Tester {
     void executableLocation();
     void home();
     void configurationDir();
+    void tmp();
 
     void list();
     void listSkipDirectories();
@@ -101,6 +102,7 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::executableLocation,
               &DirectoryTest::home,
               &DirectoryTest::configurationDir,
+              &DirectoryTest::tmp,
 
               &DirectoryTest::list,
               &DirectoryTest::listSkipDirectories,
@@ -420,6 +422,34 @@ void DirectoryTest::configurationDir() {
     #elif defined(CORRADE_TARGET_WINDOWS)
     CORRADE_COMPARE(dir.substr(dir.size()-7), "Corrade");
     CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(dir), "Microsoft")));
+
+    /* On Windows it also shouldn't contain backslashes */
+    CORRADE_COMPARE(dir.find('\\'), std::string::npos);
+
+    /* No idea elsewhere */
+    #else
+    CORRADE_EXPECT_FAIL("Not implemented yet.");
+    CORRADE_COMPARE(dir, "(not implemented)");
+    #endif
+}
+
+void DirectoryTest::tmp() {
+    const std::string dir = Directory::tmp();
+    Debug() << "Temporary dir found as:" << dir;
+
+    #ifdef CORRADE_TARGET_UNIX
+    {
+        #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+            "CTest is not able to run XCTest executables properly in the simulator.");
+        #endif
+        CORRADE_VERIFY(Directory::fileExists(dir));
+    }
+    CORRADE_VERIFY(dir.find("tmp") != std::string::npos);
+
+    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    CORRADE_VERIFY(Directory::fileExists(dir));
+    CORRADE_VERIFY(dir.find("Temp") != std::string::npos);
 
     /* On Windows it also shouldn't contain backslashes */
     CORRADE_COMPARE(dir.find('\\'), std::string::npos);
