@@ -46,12 +46,12 @@ class CORRADE_UTILITY_EXPORT Directory {
     public:
         Directory() = delete;
 
-        #ifdef CORRADE_TARGET_UNIX
+        #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_WINDOWS)
         /**
          * @brief Memory-mapped file deleter
          *
          * @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix"
-         *      platforms.
+         *      and @ref CORRADE_TARGET_WINDOWS "Windows" platforms.
          * @see @ref map(), @ref mapRead()
          */
         class MapDeleter;
@@ -294,7 +294,7 @@ class CORRADE_UTILITY_EXPORT Directory {
          */
         static bool writeString(const std::string& filename, const std::string& data);
 
-        #ifdef CORRADE_TARGET_UNIX
+        #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_WINDOWS)
         /**
          * @brief Map file for reading and writing
          *
@@ -333,6 +333,16 @@ class CORRADE_UTILITY_EXPORT Directory::MapDeleter {
         void operator()(const char* data, std::size_t size);
     private:
         int _fd;
+};
+#elif defined CORRADE_TARGET_WINDOWS
+class CORRADE_UTILITY_EXPORT Directory::MapDeleter {
+    public:
+        constexpr explicit MapDeleter(): _hFile{}, _hMap{} {}
+        constexpr explicit MapDeleter(void* hFile, void* hMap) noexcept: _hFile{hFile}, _hMap{hMap} {}
+        void operator()(const char* data, std::size_t size);
+    private:
+        void* _hFile;
+        void* _hMap;
 };
 #endif
 #endif

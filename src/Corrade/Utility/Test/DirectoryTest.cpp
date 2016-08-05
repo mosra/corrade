@@ -564,7 +564,7 @@ void DirectoryTest::write() {
 }
 
 void DirectoryTest::map() {
-    #ifdef CORRADE_TARGET_UNIX
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_WINDOWS)
     std::string data{"\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11};
     {
         auto mappedFile = Directory::map(Directory::join(_writeTestDir, "mappedFile"), data.size());
@@ -581,7 +581,7 @@ void DirectoryTest::map() {
 }
 
 void DirectoryTest::mapNoPermission() {
-    #ifdef CORRADE_TARGET_UNIX
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_WINDOWS)
     {
         std::ostringstream out;
         Error err{&out};
@@ -595,7 +595,7 @@ void DirectoryTest::mapNoPermission() {
 }
 
 void DirectoryTest::mapRead() {
-    #ifdef CORRADE_TARGET_UNIX
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_WINDOWS)
     {
         const auto mappedFile = Directory::mapRead(Directory::join(_testDir, "file"));
         CORRADE_COMPARE_AS(Containers::ArrayView<const char>(mappedFile),
@@ -608,7 +608,7 @@ void DirectoryTest::mapRead() {
 }
 
 void DirectoryTest::mapReadNonexistent() {
-    #ifdef CORRADE_TARGET_UNIX
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_WINDOWS)
     {
         std::ostringstream out;
         Error err{&out};

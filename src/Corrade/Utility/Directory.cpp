@@ -489,11 +489,79 @@ Containers::Array<const char, Directory::MapDeleter> Directory::mapRead(const st
     const char* data = reinterpret_cast<const char*>(mmap(nullptr, size, PROT_READ, MAP_SHARED, fd, 0));
     if(data == MAP_FAILED) {
         close(fd);
-        Error() << "Utility::Directory::map(): can't map the file";
+        Error() << "Utility::Directory::mapRead(): can't map the file";
         return nullptr;
     }
 
     return Containers::Array<const char, MapDeleter>{data, size, MapDeleter{fd}};
+}
+#elif defined(CORRADE_TARGET_WINDOWS)
+void Directory::MapDeleter::operator()(const char* const data, const std::size_t) {
+    if(data) UnmapViewOfFile(data);
+    if(_hMap) CloseHandle(_hMap);
+    if(_hFile) CloseHandle(_hFile);
+}
+
+Containers::Array<char, Directory::MapDeleter> Directory::map(const std::string& filename, std::size_t size) {
+    /* Open the file for writing. Create if it doesn't exist, truncate it if it
+       does. */
+    HANDLE hFile = CreateFileA(filename.data(),
+        GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS, 0, nullptr);
+    if (hFile == INVALID_HANDLE_VALUE) {
+        Error() << "Utility::Directory::map(): can't open the file";
+        return nullptr;
+    }
+
+    /* Create the file mapping */
+    HANDLE hMap = CreateFileMappingW(hFile, nullptr, PAGE_READWRITE, 0, size, nullptr);
+    if (!hMap) {
+        Error() << "Utility::Directory::map(): can't create the file mapping:" << GetLastError();
+        CloseHandle(hFile);
+        return nullptr;
+    }
+
+    /* Map the file */
+    char* data = reinterpret_cast<char*>(::MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0));
+    if(!data) {
+        Error() << "Utility::Directory::map(): can't map the file:" << GetLastError();
+        CloseHandle(hMap);
+        CloseHandle(hFile);
+        return nullptr;
+    }
+
+    return Containers::Array<char, MapDeleter>{data, size, MapDeleter{hFile, hMap}};
+}
+
+Containers::Array<const char, Directory::MapDeleter> Directory::mapRead(const std::string& filename) {
+    /* Open the file for reading */
+    HANDLE hFile = CreateFileA(filename.data(),
+        GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
+    if (hFile == INVALID_HANDLE_VALUE) {
+        Error() << "Utility::Directory::mapRead(): can't open the file";
+        return nullptr;
+    }
+
+    /* Create the file mapping */
+    HANDLE hMap = CreateFileMappingW(hFile, nullptr, PAGE_READONLY, 0, 0, nullptr);
+    if (!hMap) {
+        Error() << "Utility::Directory::mapRead(): can't create the file mapping:" << GetLastError();
+        CloseHandle(hFile);
+        return nullptr;
+    }
+
+    /* Get file size */
+    const size_t size = GetFileSize(hFile, nullptr);
+
+    /* Map the file */
+    char* data = reinterpret_cast<char*>(::MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0));
+    if(!data) {
+        Error() << "Utility::Directory::mapRead(): can't map the file:" << GetLastError();
+        CloseHandle(hMap);
+        CloseHandle(hFile);
+        return nullptr;
+    }
+
+    return Containers::Array<const char, MapDeleter>{data, size, MapDeleter{hFile, hMap}};
 }
 #endif
 
