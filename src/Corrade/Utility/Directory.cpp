@@ -310,7 +310,7 @@ std::string Directory::tmp() {
     #ifdef CORRADE_TARGET_UNIX
     /* Sandboxed OSX, iOS */
     #ifdef CORRADE_TARGET_APPLE
-    if(isSandboxed()) return join(path(path(executableLocation())), "tmp");
+    if(isSandboxed()) return join(home(), "tmp");
     #endif
 
     /* Common Unix */
