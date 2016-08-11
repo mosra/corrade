@@ -416,7 +416,7 @@ template<class Receiver, class ...Args> class MemberConnectionData: public BaseM
     public:
         typedef void(Receiver::*Slot)(Args...);
 
-        template<class Emitter> explicit MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): BaseMemberConnectionData<Args...>{emitter, receiver}, _receiver{receiver}, _slot{slot} {}
+        template<class Emitter> explicit MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): BaseMemberConnectionData<Args...>(emitter, receiver), _receiver{receiver}, _slot{slot} {}
 
     private:
         void handle(Args... args) override final {
