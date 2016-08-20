@@ -42,24 +42,24 @@
 
 namespace Corrade { namespace Containers {
 
-/**
-@brief Default array deleter
-@param data     Array pointer
-@param size     Array element count
-
-Equivalent to calling `delete[]` on passed pointer, @p size is ignored.
-*/
-template<class T> void defaultDeleter(T* data, std::size_t size) {
-    static_cast<void>(size);
-    delete[] data;
-}
-
 namespace Implementation {
     template<class T> struct DefaultDeleter {
         T operator()() const { return T{}; }
     };
     template<class T> struct DefaultDeleter<void(*)(T*, std::size_t)> {
-        void(*operator()() const)(T*, std::size_t) { return defaultDeleter; }
+        void(*operator()() const)(T*, std::size_t) { return nullptr; }
+    };
+
+    template<class T, class D> struct CallDeleter {
+        void operator()(D deleter, T* data, std::size_t size) const {
+            deleter(data, size);
+        }
+    };
+    template<class T> struct CallDeleter<T, void(*)(T*, std::size_t)> {
+        void operator()(void(*deleter)(T*, std::size_t), T* data, std::size_t size) const {
+            if(deleter) deleter(data, size);
+            else delete[] data;
+        }
     };
 
     template<class T> void noInitDeleter(T* data, std::size_t size) {
@@ -72,8 +72,8 @@ namespace Implementation {
 /**
 @brief Array wrapper with size information
 @tparam T   Element type
-@tparam D   Deleter type, defaults to pointer to function of the same signature
-    as @ref defaultDeleter()
+@tparam D   Deleter type. Defaults to pointer to `void(T*, std::size_t)`
+    function, where first is array pointer and second array size
 
 Provides movable RAII wrapper around plain C array. Main use case is storing
 binary data of unspecified type, where addition/removal of elements is not
@@ -142,8 +142,8 @@ deallocates using `operator delete[]` for given @p T, with some additional
 trickery done internally to make the @ref Array(NoInitT, std::size_t) and
 @ref Array(DirectInitT, std::size_t, ...) constructors work. When wrapping an
 externally allocated array using @ref Array(T*, std::size_t, D), it is possible
-to specify which function to use for deallocation. By default the
-@ref defaultDeleter() function is used, which is equivalent to the
+to specify which function to use for deallocation. By default the deleter is
+set to `nullptr`, which is equivalent to deleting the contents using
 `operator delete[]`.
 
 For example, properly deallocating array allocated using `std::malloc()`:
@@ -232,7 +232,7 @@ class Array {
          * allocation is done.
          * @see @ref DefaultInit, @ref Array(ValueInitT, std::size_t)
          */
-        explicit Array(DefaultInitT, std::size_t size): _data{size ? new T[size] : nullptr}, _size{size}, _deleter{defaultDeleter} {}
+        explicit Array(DefaultInitT, std::size_t size): _data{size ? new T[size] : nullptr}, _size{size}, _deleter{nullptr} {}
 
         /**
          * @brief Construct value-initialized array
@@ -246,7 +246,7 @@ class Array {
          * them to zero.
          * @see @ref ValueInit, @ref Array(DefaultInitT, std::size_t)
          */
-        explicit Array(ValueInitT, std::size_t size): _data{size ? new T[size]() : nullptr}, _size{size}, _deleter{defaultDeleter} {}
+        explicit Array(ValueInitT, std::size_t size): _data{size ? new T[size]() : nullptr}, _size{size}, _deleter{nullptr} {}
 
         /**
          * @brief Construct the array without initializing its contents
@@ -293,7 +293,7 @@ class Array {
         /* GCC <=4.8 breaks on _deleter{} */
         explicit Array(T* data, std::size_t size, D deleter = Implementation::DefaultDeleter<D>{}()): _data{data}, _size{size}, _deleter(deleter) {}
 
-        ~Array() { _deleter(_data, _size); }
+        ~Array() { Implementation::CallDeleter<T, D>{}(_deleter, _data, _size); }
 
         /** @brief Copying is not allowed */
         Array(const Array<T, D>&) = delete;
@@ -367,7 +367,9 @@ class Array {
         /**
          * @brief Array deleter
          *
-         * @see @ref Array(T*, std::size_t, D), @ref defaultDeleter()
+         * If set to `nullptr`, the contents are deleted using standard
+         * `operator delete[]`.
+         * @see @ref Array(T*, std::size_t, D)
          */
         D deleter() const { return _deleter; }
 

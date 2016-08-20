@@ -60,6 +60,7 @@ struct ArrayTest: TestSuite::Tester {
     void sliceToStatic();
     void release();
 
+    void defaultDeleter();
     void customDeleter();
     void customDeleterType();
     void customDeleterTypeConstruct();
@@ -100,6 +101,7 @@ ArrayTest::ArrayTest() {
               &ArrayTest::sliceToStatic,
               &ArrayTest::release,
 
+              &ArrayTest::defaultDeleter,
               &ArrayTest::customDeleter,
               &ArrayTest::customDeleterType,
               &ArrayTest::customDeleterTypeConstruct});
@@ -445,6 +447,11 @@ void ArrayTest::release() {
     CORRADE_COMPARE(data, released);
     CORRADE_COMPARE(a.begin(), nullptr);
     CORRADE_COMPARE(a.size(), 0);
+}
+
+void ArrayTest::defaultDeleter() {
+    Array a{5};
+    CORRADE_COMPARE(a.deleter(), nullptr);
 }
 
 namespace {
