@@ -308,7 +308,7 @@ class CORRADE_UTILITY_EXPORT Directory {
          */
         static bool writeString(const std::string& filename, const std::string& data);
 
-        #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+        #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
         /**
          * @brief Map file for reading and writing
          *
