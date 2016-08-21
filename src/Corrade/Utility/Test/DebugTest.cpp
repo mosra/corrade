@@ -41,6 +41,7 @@ struct DebugTest: TestSuite::Tester {
     void debug();
     void boolean();
     void chars();
+    void pointer();
     void unicode();
     void custom();
     void nospace();
@@ -69,6 +70,7 @@ DebugTest::DebugTest() {
         &DebugTest::debug,
         &DebugTest::boolean,
         &DebugTest::chars,
+        &DebugTest::pointer,
         &DebugTest::unicode,
         &DebugTest::custom,
         &DebugTest::nospace,
@@ -131,6 +133,12 @@ void DebugTest::chars() {
     std::ostringstream o;
     Debug(&o) << 'a';
     CORRADE_COMPARE(o.str(), "97\n");
+}
+
+void DebugTest::pointer() {
+    std::ostringstream out;
+    Debug{&out} << reinterpret_cast<void*>(0xdeadbabe);
+    CORRADE_COMPARE(out.str(), "0xdeadbabe\n");
 }
 
 void DebugTest::unicode() {
