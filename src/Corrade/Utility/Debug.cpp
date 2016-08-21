@@ -245,7 +245,13 @@ template<class T> Debug& Debug::print(const T& value) {
 }
 
 Debug& Debug::operator<<(const std::string& value) { return print(value); }
-Debug& Debug::operator<<(const void* value) { return print(value); }
+
+Debug& Debug::operator<<(const void* const value) {
+    std::ostringstream o;
+    o << "0x" << std::hex << reinterpret_cast<std::uintptr_t>(value);
+    return print(o.str());
+}
+
 Debug& Debug::operator<<(const char* value) { return print(value); }
 Debug& Debug::operator<<(bool value) { return print(value ? "true" : "false"); }
 Debug& Debug::operator<<(int value) { return print(value); }
