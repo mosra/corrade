@@ -39,6 +39,7 @@ struct DebugTest: TestSuite::Tester {
     explicit DebugTest();
 
     void debug();
+    template<class T> void floats();
     void boolean();
     void chars();
     void pointer();
@@ -67,8 +68,10 @@ struct DebugTest: TestSuite::Tester {
 
 DebugTest::DebugTest() {
     addTests({
-        &DebugTest::debug,
         &DebugTest::boolean,
+        &DebugTest::floats<float>,
+        &DebugTest::floats<double>,
+        &DebugTest::floats<long double>,
         &DebugTest::chars,
         &DebugTest::pointer,
         &DebugTest::unicode,
@@ -121,6 +124,31 @@ void DebugTest::debug() {
     debug.str("");
     Debug{&debug};
     CORRADE_COMPARE(debug.str(), "");
+}
+
+namespace {
+    template<class> struct FloatsData;
+    template<> struct FloatsData<float> {
+        static const char* name() { return "floats<float>"; }
+        static const char* expected() { return "3.14159 -12345.7 1.23457e-12 3.14159\n"; }
+    };
+    template<> struct FloatsData<double> {
+        static const char* name() { return "floats<double>"; }
+        static const char* expected() { return "3.14159265358979 -12345.6789012346 1.23456789012346e-12 3.14159\n"; }
+    };
+    template<> struct FloatsData<long double> {
+        static const char* name() { return "floats<long double>"; }
+        static const char* expected() { return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-12 3.14159\n"; }
+    };
+}
+
+template<class T> void DebugTest::floats() {
+    setTestCaseName(FloatsData<T>::name());
+
+    std::ostringstream o;
+    /* The last float value is to verify that the precision gets reset back */
+    Debug(&o) << T(3.1415926535897932384626l) << T(-12345.67890123456789l) << T(1.234567890123456789e-12l) << 3.141592653589793f;
+    CORRADE_COMPARE(o.str(), FloatsData<T>::expected());
 }
 
 void DebugTest::boolean() {
