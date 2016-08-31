@@ -406,7 +406,7 @@ template<class ...Args> class BaseMemberConnectionData: public AbstractMemberCon
 /* GCC complains that this function is used but never defined. Clang is sane.
    MSVC too. WHAT THE FUCK, GCC? */
 template<class ...Args> void BaseMemberConnectionData<Args...>::handle(Args...) {
-    CORRADE_ASSERT_UNREACHABLE();
+    CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 }
 #endif
 
@@ -545,7 +545,7 @@ template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emi
                     static_cast<Implementation::BaseMemberConnectionData<Args...>*>(it->second)->handle(args...);
                     break;
                 default:
-                    CORRADE_ASSERT_UNREACHABLE();
+                    CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
             }
 
             /* Connections changed by the slot, go through again */

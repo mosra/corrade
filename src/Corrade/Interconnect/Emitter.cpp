@@ -92,7 +92,7 @@ void Emitter::disconnectInternal(const Implementation::SignalData& signal, Imple
     }
 
     /* The connection must be found */
-    CORRADE_ASSERT_UNREACHABLE();
+    CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 }
 
 void Emitter::disconnectInternal(const Implementation::SignalData& signal) {

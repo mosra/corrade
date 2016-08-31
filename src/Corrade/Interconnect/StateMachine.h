@@ -209,7 +209,7 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
         }
 
         Signal enteredInternal(State, std::integral_constant<std::size_t, 0>, State) {
-            CORRADE_ASSERT_UNREACHABLE();
+            CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
         }
 
         template<std::size_t current> Signal steppedInternal(State wantedPrevious, std::integral_constant<std::size_t, current>, State next) {
@@ -219,7 +219,7 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
         }
 
         Signal steppedInternal(State, std::integral_constant<std::size_t, 0>, State) {
-            CORRADE_ASSERT_UNREACHABLE();
+            CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
         }
 
         template<State previous, std::size_t current> Signal steppedNextInternal(State wantedNext, std::integral_constant<std::size_t, current>) {
@@ -227,7 +227,7 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
         }
 
         template<State> Signal steppedNextInternal(State, std::integral_constant<std::size_t, 0>) {
-            CORRADE_ASSERT_UNREACHABLE();
+            CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
         }
 
         template<std::size_t current> Signal exitedInternal(State wanted, std::integral_constant<std::size_t, current>, State next) {
@@ -235,7 +235,7 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
         }
 
         Signal exitedInternal(State, std::integral_constant<std::size_t, 0>, State) {
-            CORRADE_ASSERT_UNREACHABLE();
+            CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
         }
 
         State _transitions[states*inputs];

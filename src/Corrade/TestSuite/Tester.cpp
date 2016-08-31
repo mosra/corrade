@@ -287,7 +287,7 @@ benchmark types:
         BenchmarkUnits benchmarkUnits = BenchmarkUnits::Count;
         switch(testCase.second.type) {
             case TestCaseType::DefaultBenchmark:
-                CORRADE_ASSERT_UNREACHABLE();
+                CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 
             case TestCaseType::Test:
                 break;
