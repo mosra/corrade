@@ -401,10 +401,26 @@ class CORRADE_UTILITY_EXPORT Debug {
         Debug& operator<<(unsigned value);               /**< @overload */
         Debug& operator<<(unsigned long value);          /**< @overload */
         Debug& operator<<(unsigned long long value);     /**< @overload */
-        Debug& operator<<(float value);                  /**< @overload */
-        Debug& operator<<(double value);                 /**< @overload */
+
+        /**
+         * @brief Print `float` value to debug output
+         *
+         * Prints the value with 6 significant digits.
+         */
+        Debug& operator<<(float value);
+
+        /**
+         * @brief Print `double` value to debug output
+         *
+         * Prints the value with 15 significant digits.
+         */
+        Debug& operator<<(double value);
+
         #ifndef CORRADE_TARGET_EMSCRIPTEN
-        /** @overload
+        /**
+         * @brief Print `long double` value to debug output
+         *
+         * Prints the value with 18 significant digits.
          * @partialsupport Not available in @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten"
          *      as JavaScript doesn't support doubles larger than 64 bits.
          */
