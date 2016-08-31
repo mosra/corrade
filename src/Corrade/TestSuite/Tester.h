@@ -507,6 +507,15 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         std::size_t testCaseInstanceId() const { return _testCaseInstanceId; }
 
         /**
+         * @brief Test case repeat ID
+         *
+         * Returns repeat ID of the repeated test case that is currently
+         * executing, starting from `0`. Value is undefined if called outside
+         * of *repeated* test cases and setup/teardown functions.
+         */
+        std::size_t testCaseRepeatId() const { return _testCaseRepeatId; }
+
+        /**
          * @brief Set custom test case name
          *
          * By default the test case name is gathered in the check macros and is

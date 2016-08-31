@@ -152,8 +152,9 @@ Test::Test(std::ostream* const out): _out{out} {
 
     addInstancedTests({&Test::instancedTest}, 5);
 
-    addRepeatedTests({&Test::repeatedTest,
-                      &Test::repeatedTestEmpty,
+    addRepeatedTests({&Test::repeatedTest}, 5);
+
+    addRepeatedTests({&Test::repeatedTestEmpty,
                       &Test::repeatedTestFail,
                       &Test::repeatedTestSkip}, 50);
 
@@ -307,6 +308,7 @@ void Test::instancedTest() {
 }
 
 void Test::repeatedTest() {
+    Debug{_out} << testCaseRepeatId();
     CORRADE_VERIFY(true);
 }
 
@@ -462,30 +464,30 @@ void TesterTest::test() {
         "Starting TesterTest::Test with 37 test cases...\n"
         "     ? [01] <unknown>()\n"
         "    OK [02] trueExpression()\n"
-        "  FAIL [03] falseExpression() at here.cpp on line 188\n"
+        "  FAIL [03] falseExpression() at here.cpp on line 189\n"
         "        Expression 5 != 5 failed.\n"
         "    OK [04] equal()\n"
-        "  FAIL [05] nonEqual() at here.cpp on line 198\n"
+        "  FAIL [05] nonEqual() at here.cpp on line 199\n"
         "        Values a and b are not the same, actual is\n"
         "        5\n"
         "        but expected\n"
         "        3\n"
-        " XFAIL [06] expectFail() at here.cpp on line 204\n"
-        "        The world is not mad yet. 2 + 2 and 5 are not equal.\n"
         " XFAIL [06] expectFail() at here.cpp on line 205\n"
+        "        The world is not mad yet. 2 + 2 and 5 are not equal.\n"
+        " XFAIL [06] expectFail() at here.cpp on line 206\n"
         "        The world is not mad yet. Expression false == true failed.\n"
         "    OK [06] expectFail()\n"
-        " XPASS [07] unexpectedPassExpression() at here.cpp on line 218\n"
+        " XPASS [07] unexpectedPassExpression() at here.cpp on line 219\n"
         "        Expression true == true was expected to fail.\n"
-        " XPASS [08] unexpectedPassEqual() at here.cpp on line 223\n"
+        " XPASS [08] unexpectedPassEqual() at here.cpp on line 224\n"
         "        2 + 2 and 4 are not expected to be equal.\n"
         "    OK [09] compareAs()\n"
-        "  FAIL [10] compareAsFail() at here.cpp on line 231\n"
+        "  FAIL [10] compareAsFail() at here.cpp on line 232\n"
         "        Length of actual \"meh\" doesn't match length of expected \"hello\" with epsilon 0\n"
         "    OK [11] compareWith()\n"
-        "  FAIL [12] compareWithFail() at here.cpp on line 239\n"
+        "  FAIL [12] compareWithFail() at here.cpp on line 240\n"
         "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
-        "  FAIL [13] compareImplicitConversionFail() at here.cpp on line 244\n"
+        "  FAIL [13] compareImplicitConversionFail() at here.cpp on line 245\n"
         "        Values \"holla\" and hello are not the same, actual is\n"
         "        holla\n"
         "        but expected\n"
@@ -502,7 +504,7 @@ void TesterTest::test() {
         "       [19] tearing down...\n"
         "     ? [19] <unknown>()\n"
         "       [20] setting up...\n"
-        "  FAIL [20] setupTeardownFail() at here.cpp on line 281\n"
+        "  FAIL [20] setupTeardownFail() at here.cpp on line 282\n"
         "        Expression false failed.\n"
         "       [20] tearing down...\n"
         "       [21] setting up...\n"
@@ -511,16 +513,21 @@ void TesterTest::test() {
         "       [21] tearing down...\n"
         "    OK [22] instancedTest(zero)\n"
         "    OK [23] instancedTest(1)\n"
-        "  FAIL [24] instancedTest(two) at here.cpp on line 306\n"
+        "  FAIL [24] instancedTest(two) at here.cpp on line 307\n"
         "        Values data.value*data.value*data.value and data.result are not the same, actual is\n"
         "        125\n"
         "        but expected\n"
         "        122\n"
         "    OK [25] instancedTest(3)\n"
         "    OK [26] instancedTest(last)\n"
-        "    OK [27] repeatedTest()@50\n"
+        "0\n"
+        "1\n"
+        "2\n"
+        "3\n"
+        "4\n"
+        "    OK [27] repeatedTest()@5\n"
         "     ? [28] <unknown>()@50\n"
-        "  FAIL [29] repeatedTestFail()@18 at here.cpp on line 316\n"
+        "  FAIL [29] repeatedTestFail()@18 at here.cpp on line 318\n"
         "        Expression _i++ < 17 failed.\n"
         "  SKIP [30] repeatedTestSkip()@29\n"
         "        Too late.\n"
@@ -535,7 +542,7 @@ void TesterTest::test() {
         "       [32] tearing down...\n"
         "     ? [32] <unknown>()@2\n"
         "       [33] setting up...\n"
-        "  FAIL [33] repeatedTestSetupTeardownFail()@1 at here.cpp on line 330\n"
+        "  FAIL [33] repeatedTestSetupTeardownFail()@1 at here.cpp on line 332\n"
         "        Expression false failed.\n"
         "       [33] tearing down...\n"
         "       [34] setting up...\n"
@@ -567,7 +574,7 @@ void TesterTest::test() {
         "        Min:   0.20  cycles  Max:   0.40  cycles  Avg:   0.30  cycles \n"
         "  SKIP [37] benchmarkSkip()@1\n"
         "        Can't verify the measurements anyway.\n"
-        "Finished TesterTest::Test with 11 errors out of 95 checks. 5 test cases didn't contain any checks!\n";
+        "Finished TesterTest::Test with 11 errors out of 50 checks. 5 test cases didn't contain any checks!\n";
 
     //CORRADE_COMPARE(out.str().length(), expected.length());
     CORRADE_COMPARE(out.str(), expected);
@@ -721,9 +728,19 @@ void TesterTest::repeatEvery() {
 
     std::string expected =
         "Starting TesterTest::Test with 2 test cases...\n"
-        "    OK [27] repeatedTest()@100\n"
+        "0\n"
+        "1\n"
+        "2\n"
+        "3\n"
+        "4\n"
+        "5\n"
+        "6\n"
+        "7\n"
+        "8\n"
+        "9\n"
+        "    OK [27] repeatedTest()@10\n"
         "    OK [04] equal()@2\n"
-        "Finished TesterTest::Test with 0 errors out of 102 checks.\n";
+        "Finished TesterTest::Test with 0 errors out of 12 checks.\n";
     CORRADE_COMPARE(out.str(), expected);
 }
 
@@ -741,11 +758,21 @@ void TesterTest::repeatAll() {
 
     std::string expected =
         "Starting TesterTest::Test with 4 test cases...\n"
-        "    OK [27] repeatedTest()@50\n"
+        "0\n"
+        "1\n"
+        "2\n"
+        "3\n"
+        "4\n"
+        "    OK [27] repeatedTest()@5\n"
         "    OK [04] equal()\n"
-        "    OK [27] repeatedTest()@50\n"
+        "0\n"
+        "1\n"
+        "2\n"
+        "3\n"
+        "4\n"
+        "    OK [27] repeatedTest()@5\n"
         "    OK [04] equal()\n"
-        "Finished TesterTest::Test with 0 errors out of 102 checks.\n";
+        "Finished TesterTest::Test with 0 errors out of 12 checks.\n";
     CORRADE_COMPARE(out.str(), expected);
 }
 
@@ -765,7 +792,7 @@ void TesterTest::abortOnFail() {
         "Starting TesterTest::Test with 4 test cases...\n"
         "     ? [01] <unknown>()\n"
         "    OK [02] trueExpression()\n"
-        "  FAIL [03] falseExpression() at here.cpp on line 188\n"
+        "  FAIL [03] falseExpression() at here.cpp on line 189\n"
         "        Expression 5 != 5 failed.\n"
         "Aborted TesterTest::Test after first failure out of 2 checks so far. 1 test cases didn't contain any checks!\n";
     CORRADE_COMPARE(out.str(), expected);
@@ -785,7 +812,7 @@ void TesterTest::noXfail() {
 
     std::string expected =
         "Starting TesterTest::Test with 1 test cases...\n"
-        "  FAIL [06] expectFail() at here.cpp on line 204\n"
+        "  FAIL [06] expectFail() at here.cpp on line 205\n"
         "        Values 2 + 2 and 5 are not the same, actual is\n"
         "        4\n"
         "        but expected\n"

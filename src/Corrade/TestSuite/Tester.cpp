@@ -335,7 +335,7 @@ benchmark types:
                 (this->*testCase.second.setup)();
 
             /* Print the repeat ID only if we are repeating */
-            _testCaseRepeatId = repeatCount == 1 ? 0 : i + 1;
+            _testCaseRepeatId = repeatCount == 1 ? ~std::size_t{} : i;
             _testCaseLine = 0;
             _testCaseName.clear();
             _testCase = &testCase.second;
@@ -446,8 +446,8 @@ void Tester::printTestCaseLabel(Debug& out, const char* const status, const Debu
             << ")";
     } else out << "()";
 
-    if(_testCaseRepeatId)
-        out << Debug::nospace << "@" << Debug::nospace << _testCaseRepeatId;
+    if(_testCaseRepeatId != ~std::size_t{})
+        out << Debug::nospace << "@" << Debug::nospace << _testCaseRepeatId + 1;
 
     out << Debug::resetColor;
 }
