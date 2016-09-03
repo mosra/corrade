@@ -54,4 +54,4 @@ script:
 - sync
 
 after_success:
-- if [ "$TRAVIS_OS_NAME" == "linux" ]; then coveralls --gcov /usr/bin/gcov-4.7 -E ".*/(Test|corrade/build|corrade/build-examples)/.*" --gcov-options '\-lp'; fi
+- if [ "$TRAVIS_OS_NAME" == "linux" ]; then coveralls --gcov /usr/bin/gcov-4.7 -i src/ -E ".*/(Test)/.*" --gcov-options '\-lp'; fi
