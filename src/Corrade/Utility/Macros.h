@@ -45,6 +45,7 @@ compilers (GCC, Clang, MSVC):
 @code
 class CORRADE_DEPRECATED("use Bar instead") Foo;
 CORRADE_DEPRECATED("use bar() instead") void foo();
+typedef CORRADE_DEPRECATED("use Fizz instead") Output<5> Buzz;
 @endcode
 
 Does not work on template aliases and enum values, use
