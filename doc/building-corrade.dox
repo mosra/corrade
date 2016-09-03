@@ -278,12 +278,12 @@ if it doesn't exist yet.
 
 @subsection building-corrade-examples Building examples
 
-The library comes with handful of examples, contained in `examples/`
+The library comes with handful of examples, contained in `src/examples/`
 directory. Documentation for them is available on page @ref corrade-example-index.
 The examples require Corrade to be installed and they are built separately:
 
     mkdir build-examples && cd build-examples
-    cmake ../examples
+    cmake ../src/examples
     cmake --build .
 
 @section building-corrade-packages Prepared packages

@@ -86,13 +86,13 @@ will be in `build/doc/` directory.
 Building examples
 -----------------
 
-The library comes with handful of examples, contained in `examples/`
+The library comes with handful of examples, contained in `src/examples/`
 directory. Each example is thoroughly explained in documentation. The examples
 require Corrade to be installed and they are built separately:
 
     mkdir -p build-examples
     cd build-examples
-    cmake ../examples
+    cmake ../src/examples
     make
 
 CONTACT
