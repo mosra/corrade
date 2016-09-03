@@ -1,3 +1,5 @@
+#ifndef Corrade_PluginManager_Test_Dog_h
+#define Corrade_PluginManager_Test_Dog_h
 /*
     This file is part of Corrade.
 
@@ -49,3 +51,5 @@ class DOG_EXPORT Dog: public AbstractAnimal {
 };
 
 }}}
+
+#endif

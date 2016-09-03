@@ -1,3 +1,5 @@
+#ifndef Corrade_configure_h
+#define Corrade_configure_h
 /*
     This file is part of Corrade.
 
@@ -43,3 +45,5 @@
 
 #cmakedefine CORRADE_TESTSUITE_TARGET_XCTEST
 #cmakedefine CORRADE_UTILITY_USE_ANSI_COLORS
+
+#endif
