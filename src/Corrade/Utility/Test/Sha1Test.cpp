@@ -23,6 +23,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifdef _MSC_VER
+#include <algorithm> /* std::min() */
+#endif
+
 #include "Corrade/Containers/Array.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/AbstractHash.h"
