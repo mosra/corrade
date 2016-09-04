@@ -102,7 +102,7 @@ namespace {
                 return formatCount(count, max, batchSize, "       ");
         }
 
-        CORRADE_ASSERT(false, "TestSuite::Tester: invalid benchmark unit", {});
+        CORRADE_ASSERT(false, "TestSuite::Tester: invalid benchmark unit", {}); /* LCOV_EXCL_LINE */
     }
 }
 

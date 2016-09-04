@@ -208,9 +208,11 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
             return State(current-1) == wanted ? entered<State(current-1)>(previous) : enteredInternal(wanted, std::integral_constant<std::size_t, current-1>{}, previous);
         }
 
+        /* LCOV_EXCL_START */
         Signal enteredInternal(State, std::integral_constant<std::size_t, 0>, State) {
-            CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+            CORRADE_ASSERT_UNREACHABLE();
         }
+        /* LCOV_EXCL_STOP */
 
         template<std::size_t current> Signal steppedInternal(State wantedPrevious, std::integral_constant<std::size_t, current>, State next) {
             return State(current-1) == wantedPrevious ?
@@ -218,25 +220,31 @@ template<std::size_t states, std::size_t inputs, class State, class Input> class
                 steppedInternal(wantedPrevious, std::integral_constant<std::size_t, current-1>{}, next);
         }
 
+        /* LCOV_EXCL_START */
         Signal steppedInternal(State, std::integral_constant<std::size_t, 0>, State) {
-            CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+            CORRADE_ASSERT_UNREACHABLE();
         }
+        /* LCOV_EXCL_STOP */
 
         template<State previous, std::size_t current> Signal steppedNextInternal(State wantedNext, std::integral_constant<std::size_t, current>) {
             return State(current-1) == wantedNext ? stepped<previous, State(current-1)>() : steppedNextInternal<previous>(wantedNext, std::integral_constant<std::size_t, current-1>{});
         }
 
+        /* LCOV_EXCL_START */
         template<State> Signal steppedNextInternal(State, std::integral_constant<std::size_t, 0>) {
-            CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+            CORRADE_ASSERT_UNREACHABLE();
         }
+        /* LCOV_EXCL_STOP */
 
         template<std::size_t current> Signal exitedInternal(State wanted, std::integral_constant<std::size_t, current>, State next) {
             return State(current-1) == wanted ? exited<State(current-1)>(next) : exitedInternal(wanted, std::integral_constant<std::size_t, current - 1>{}, next);
         }
 
+        /* LCOV_EXCL_START */
         Signal exitedInternal(State, std::integral_constant<std::size_t, 0>, State) {
-            CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+            CORRADE_ASSERT_UNREACHABLE();
         }
+        /* LCOV_EXCL_STOP */
 
         State _transitions[states*inputs];
         State _current;
