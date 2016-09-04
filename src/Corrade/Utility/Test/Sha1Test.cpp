@@ -39,6 +39,7 @@ struct Sha1Test: TestSuite::Tester {
     void twoBlockPadding();
 
     void iterative();
+    void reuse();
 };
 
 Sha1Test::Sha1Test() {
@@ -48,6 +49,8 @@ Sha1Test::Sha1Test() {
               &Sha1Test::twoBlockPadding});
 
     addRepeatedTests({&Sha1Test::iterative}, 128);
+
+    addTests({&Sha1Test::reuse});
 }
 
 void Sha1Test::emptyString() {
@@ -70,8 +73,8 @@ void Sha1Test::twoBlockPadding() {
                     Sha1::Digest::fromHexString("40e94c62ada5dc762f3e9c472001ca64a67d2cbb"));
 }
 
-void Sha1Test::iterative() {
-    constexpr const char data[] =
+namespace {
+    constexpr const char Data[] =
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
         "eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim "
         "ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut "
@@ -79,14 +82,30 @@ void Sha1Test::iterative() {
         "reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla "
         "pariatur. Excepteur sint occaecat cupidatat non proident, sunt in "
         "culpa qui officia deserunt mollit anim id est laborum.";
-    const Containers::ArrayView<const char> string{data, sizeof(data) - 1};
 
+    const Containers::ArrayView<const char> String{Data, sizeof(Data) - 1};
+}
+
+void Sha1Test::iterative() {
     Sha1 hasher;
-    for(std::size_t offset = 0; offset < string.size(); offset += testCaseRepeatId() + 1) {
-        const auto slice = string.slice(offset, std::min(offset + testCaseRepeatId() + 1, string.size()));
+    for(std::size_t offset = 0; offset < String.size(); offset += testCaseRepeatId() + 1) {
+        const auto slice = String.slice(offset, std::min(offset + testCaseRepeatId() + 1, String.size()));
         hasher << std::string{slice.data(), slice.size()};
     }
 
+    CORRADE_COMPARE(hasher.digest(), Sha1::Digest::fromHexString("cd36b370758a259b34845084a6cc38473cb95e27"));
+}
+
+void Sha1Test::reuse() {
+    Sha1 hasher;
+    hasher << std::string{String.data(), String.size()};
+    CORRADE_COMPARE(hasher.digest(), Sha1::Digest::fromHexString("cd36b370758a259b34845084a6cc38473cb95e27"));
+
+    /* Second time the hash equals to hash to empty string */
+    CORRADE_COMPARE(hasher.digest(), Sha1::Digest::fromHexString("da39a3ee5e6b4b0d3255bfef95601890afd80709"));
+
+    /* Filling again, it gives the same output */
+    hasher << std::string{String.data(), String.size()};
     CORRADE_COMPARE(hasher.digest(), Sha1::Digest::fromHexString("cd36b370758a259b34845084a6cc38473cb95e27"));
 }
 
