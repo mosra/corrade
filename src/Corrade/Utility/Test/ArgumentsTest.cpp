@@ -62,7 +62,9 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseUnknownShortArgument();
     void parseSuperfluousArgument();
     void parseArgumentAfterSeparator();
+    void parseInvalidShortArgument();
     void parseInvalidLongArgument();
+    void parseInvalidLongArgumentDashes();
 
     void parseMissingValue();
     void parseMissingOption();
@@ -109,7 +111,9 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseUnknownShortArgument,
               &ArgumentsTest::parseSuperfluousArgument,
               &ArgumentsTest::parseArgumentAfterSeparator,
+              &ArgumentsTest::parseInvalidShortArgument,
               &ArgumentsTest::parseInvalidLongArgument,
+              &ArgumentsTest::parseInvalidLongArgumentDashes,
 
               &ArgumentsTest::parseMissingValue,
               &ArgumentsTest::parseMissingOption,
@@ -452,7 +456,31 @@ void ArgumentsTest::parseArgumentAfterSeparator() {
     CORRADE_COMPARE(out.str(), "Superfluous command-line argument -b\n");
 }
 
+void ArgumentsTest::parseInvalidShortArgument() {
+    Arguments args;
+
+    const char* argv[] = { "", "-?" };
+    const int argc = std::extent<decltype(argv)>();
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!args.tryParse(argc, argv));
+    CORRADE_COMPARE(out.str(), "Invalid command-line argument -?\n");
+}
+
 void ArgumentsTest::parseInvalidLongArgument() {
+    Arguments args;
+
+    const char* argv[] = { "", "--?" };
+    const int argc = std::extent<decltype(argv)>();
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!args.tryParse(argc, argv));
+    CORRADE_COMPARE(out.str(), "Invalid command-line argument --?\n");
+}
+
+void ArgumentsTest::parseInvalidLongArgumentDashes() {
     Arguments args;
 
     const char* argv[] = { "", "-long-argument" };
