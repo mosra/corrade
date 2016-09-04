@@ -43,24 +43,27 @@ const unsigned int Sha1::constants[4] = { 0x5A827999,
                                           0xCA62C1D6 };
 
 Sha1& Sha1::operator<<(const std::string& data) {
+    const std::size_t dataOffset = _buffer.empty() ? 0 : 64 - _buffer.size();
+
     /* Process leftovers */
     if(!_buffer.empty()) {
-        /* Not enough large, try it next time */
-        if(data.size()+ _buffer.size() < 64) {
+        /* Not large enough, try it next time */
+        if(data.size() + _buffer.size() < 64) {
             _buffer.append(data);
+            _dataSize += data.size();
             return *this;
         }
 
-        _buffer.append(data.substr(0, 64- _buffer.size()));
+        /* Append few last bytes to have the buffer at 64 bytes */
+        _buffer.append(data.substr(0, dataOffset));
         processChunk(_buffer.data());
     }
 
-    for(std::size_t i = _buffer.size(); i != data.size()/64; ++i)
-        processChunk(data.data()+i*64);
+    for(std::size_t i = dataOffset; i + 64 <= data.size(); i += 64)
+        processChunk(data.data() + i);
 
     /* Save last unfinished 512-bit chunk of data */
-    if(data.size()%64 != 0) _buffer = data.substr((data.size()/64)*64);
-    else _buffer = {};
+    _buffer = data.substr(dataOffset + ((data.size() - dataOffset)/64)*64);
 
     _dataSize += data.size();
     return *this;
@@ -69,7 +72,7 @@ Sha1& Sha1::operator<<(const std::string& data) {
 Sha1::Digest Sha1::digest() {
     /* Add '1' bit to the leftovers, pad to (n*64)+56 bytes */
     _buffer.append(1, '\x80');
-    _buffer.append((_buffer.size() > 56 ? 120 : 56)- _buffer.size(), 0);
+    _buffer.append((_buffer.size() > 56 ? 120 : 56) - _buffer.size(), 0);
 
     /* Add size of data in bits in big endian */
     unsigned long long dataSizeBigEndian = Endianness::bigEndian<unsigned long long>(_dataSize*8);
