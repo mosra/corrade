@@ -1,6 +1,14 @@
 #!/bin/bash
 set -e
 
+# Usage:
+#  ./AdbRunner.sh /path/to/test/source/dir /path/to/test/binary/dir executable-name additional files...
+source_dir=$1
+binary_dir=$2
+filename=$3
+# So the additional files are available in $@
+shift && shift && shift
+
 if [ "$(adb get-state | tr -d '\r\n')" != "device" ]; then
     echo "ERROR: no device connected"
     exit 1
@@ -35,7 +43,35 @@ if [ ! -z ${CORRADE_TEST_NO_XFAIL+x} ]; then
     test_env="$test_env CORRADE_TEST_NO_XFAIL=$CORRADE_TEST_NO_XFAIL"
 fi
 
-adb push $1 /data/local/tmp
+# Create a local temporary directory. Android doesn't have mktemp, so we have
+# to assume that there is ever only one computer connected to a device /
+# emulator and so mktemp always returns unique value.
+tmpdir=$(mktemp -d /tmp/corrade-testsuite-XXXXX)
+remote_tmpdir=/data/local$tmpdir
+
+# The device / emulator might have stale temporary directories that could clash
+# with the newly created one. But given the above they should not be used
+# anymore so we remove them and then recreate the directory.
+adb shell 'rm -rf '$remote_tmpdir'; mkdir '$remote_tmpdir
+
+# Push the test executable and also all required files to the remote temporary
+# directory, preserving directory structure
+adb push "$binary_dir/$filename" $remote_tmpdir | tail -n 1
+for file in "$@"; do
+    dir=$(dirname $file)
+    adb shell "mkdir -p $remote_tmpdir/$dir"
+    adb push "$source_dir/$file" "$remote_tmpdir/$dir" | tail -n 1
+done
+
 # No comment. https://code.google.com/p/android/issues/detail?id=3254
-adb shell $test_env' /data/local/tmp/'$2'; echo -n ADB_IS_SHIT:$?; rm /data/local/tmp/'$2 | tee /tmp/adb.retval | grep -v ADB_IS_SHIT
-exit $(grep ADB_IS_SHIT /tmp/adb.retval | cut -d':' -f2)
+adb shell $test_env' cd '$remote_tmpdir' && ./'$filename'; echo -n ADB_IS_SHIT:$?' | tee $tmpdir/adb.retval | grep -v ADB_IS_SHIT
+returncode=$(grep ADB_IS_SHIT $tmpdir/adb.retval | cut -d':' -f2)
+
+# Clean up after ourselves -- remove the temporary directories both on local
+# machine and device / emulator. This is not done if any of the above fails,
+# but that's okay -- it should stay there to be able to debug the problems
+adb shell 'rm -r '$remote_tmpdir
+rm -r $tmpdir
+
+# Propagate the return code
+exit $returncode

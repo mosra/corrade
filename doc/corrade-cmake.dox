@@ -161,12 +161,19 @@ The `modules/` directory contains more useful CMake modules:
 
     corrade_add_test(<test name>
                      <sources>...
-                     [LIBRARIES <libraries>...])
+                     [LIBRARIES <libraries>...]
+                     [FILES <files>...])
 
 Test name is also executable name. You can also specify libraries to link with
-instead of using target_link_libraries(). `Corrade::TestSuite` target is linked
-automatically to each test. Note that the `enable_testing()` function must be
-called explicitly.
+instead of using `target_link_libraries()`. `Corrade::TestSuite` target is
+linked automatically to each test. Note that the `enable_testing()` function
+must be called explicitly.
+
+You can list files needed by the test in the `FILES` section. The filenames are
+treated relatively to `CMAKE_CURRENT_SOURCE_DIR`. On desktop platforms the
+files are added to the `REQUIRED_FILES` test property. On Emscripten they are
+bundled to the executable and available in the virtual filesystem root. On
+Android they are copied along the executable to the target.
 
 Unless @ref CORRADE_TESTSUITE_TARGET_XCTEST is set, test cases run on an
 @ref CORRADE_TARGET_IOS "iOS" device are created as bundles with bundle

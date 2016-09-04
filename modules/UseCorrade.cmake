@@ -245,6 +245,11 @@ if(CORRADE_TESTSUITE_TARGET_XCTEST)
     endif()
 endif()
 
+if(CORRADE_TARGET_EMSCRIPTEN)
+    # For bundling files to the tests
+    include(UseEmscripten)
+endif()
+
 if(CORRADE_TARGET_IOS AND NOT CORRADE_TESTSUITE_TARGET_XCTEST)
     set(CORRADE_TESTSUITE_BUNDLE_IDENTIFIER_PREFIX ${PROJECT_NAME} CACHE STRING
         "Bundle identifier prefix for tests ran on iOS device")
@@ -253,13 +258,19 @@ endif()
 function(corrade_add_test test_name)
     # Get DLL and path lists
     foreach(arg ${ARGN})
-        if(${arg} STREQUAL LIBRARIES)
-            set(__DOING_LIBRARIES ON)
+        if(arg STREQUAL LIBRARIES)
+            set(_DOING_LIBRARIES ON)
+        elseif(arg STREQUAL FILES)
+            set(_DOING_LIBRARIES OFF)
+            set(_DOING_FILES ON)
         else()
-            if(__DOING_LIBRARIES)
-                set(libraries ${libraries} ${arg})
+            if(_DOING_LIBRARIES)
+                list(APPEND libraries ${arg})
+            elseif(_DOING_FILES)
+                list(APPEND files ${arg})
+                list(APPEND absolute_files ${CMAKE_CURRENT_SOURCE_DIR}/${arg})
             else()
-                set(sources ${sources} ${arg})
+                list(APPEND sources ${arg})
             endif()
         endif()
     endforeach()
@@ -293,12 +304,18 @@ function(corrade_add_test test_name)
             find_package(NodeJs REQUIRED)
             add_test(NAME ${test_name} COMMAND NodeJs::NodeJs --stack-trace-limit=0 $<TARGET_FILE:${test_name}>)
 
+            # Embed all files
+            foreach(file ${files})
+                emscripten_embed_file(${test_name} ${file} "/${file}")
+            endforeach()
+
         # Run tests using ADB on Android
         elseif(CORRADE_TARGET_ANDROID)
             # The executables need to be PIE
             target_compile_options(${test_name} PRIVATE "-fPIE")
             set_property(TARGET ${test_name} APPEND_STRING PROPERTY LINK_FLAGS "-fPIE -pie")
-            add_test(NAME ${test_name} COMMAND ${CORRADE_TESTSUITE_ADB_RUNNER} $<TARGET_FILE:${test_name}> $<TARGET_FILE_NAME:${test_name}>)
+            # All files will be copied to the target when the test is run
+            add_test(NAME ${test_name} COMMAND ${CORRADE_TESTSUITE_ADB_RUNNER} ${CMAKE_CURRENT_SOURCE_DIR} $<TARGET_FILE_DIR:${test_name}> $<TARGET_FILE_NAME:${test_name}> ${files})
 
         # Run tests natively elsewhere
         else()
@@ -313,6 +330,9 @@ function(corrade_add_test test_name)
                 XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "YES")
         endif()
     endif()
+
+    # Add the file to list of required files for given test case
+    set_tests_properties(${test_name} PROPERTIES REQUIRED_FILES "${absolute_files}")
 endfunction()
 
 function(corrade_add_resource name configurationFile)

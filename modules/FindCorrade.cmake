@@ -121,12 +121,20 @@
 #
 #  corrade_add_test(<test name>
 #                   <sources>...
-#                   [LIBRARIES <libraries>...])
+#                   [LIBRARIES <libraries>...]
+#                   [FILES <files>...])
 #
 # Test name is also executable name. You can also specify libraries to link
 # with instead of using :command:`target_link_libraries()`.
 # ``Corrade::TestSuite`` target is linked automatically to each test. Note
 # that the :command:`enable_testing()` function must be called explicitly.
+#
+# You can list files needed by the test in the `FILES` section. The filenames
+# are treated relatively to `CMAKE_CURRENT_SOURCE_DIR`. On desktop platforms
+# the files are added to the :prop_test:`REQUIRED_FILES` target property. On
+# Emscripten they are bundled to the executable and available in the virtual
+# filesystem root. On Android they are copied along the executable to the
+# target.
 #
 # Unless :variable:`CORRADE_TESTSUITE_TARGET_XCTEST` is set, test cases on iOS
 # targets are created as bundles with bundle identifier set to CMake project
