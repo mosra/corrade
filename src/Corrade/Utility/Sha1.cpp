@@ -31,16 +31,26 @@
 
 namespace Corrade { namespace Utility {
 
-const unsigned int Sha1::initialDigest[5] = { 0x67452301,
-                                              0xEFCDAB89,
-                                              0x98BADCFE,
-                                              0x10325476,
-                                              0xC3D2E1F0 };
+namespace {
 
-const unsigned int Sha1::constants[4] = { 0x5A827999,
-                                          0x6ED9EBA1,
-                                          0x8F1BBCDC,
-                                          0xCA62C1D6 };
+constexpr const unsigned int InitialDigest[5] = { 0x67452301,
+                                                  0xEFCDAB89,
+                                                  0x98BADCFE,
+                                                  0x10325476,
+                                                  0xC3D2E1F0 };
+
+constexpr const unsigned int Constants[4] = { 0x5A827999,
+                                              0x6ED9EBA1,
+                                              0x8F1BBCDC,
+                                              0xCA62C1D6 };
+
+unsigned int leftrotate(unsigned int data, unsigned int shift) {
+    return data << shift | data >> (32 - shift);
+}
+
+}
+
+Sha1::Sha1(): _dataSize(0), _digest{InitialDigest[0], InitialDigest[1], InitialDigest[2], InitialDigest[3], InitialDigest[4]} {}
 
 Sha1& Sha1::operator<<(const std::string& data) {
     const std::size_t dataOffset = _buffer.empty() ? 0 : 64 - _buffer.size();
@@ -89,7 +99,7 @@ Sha1::Digest Sha1::digest() {
     Digest d = Digest::fromByteArray(reinterpret_cast<const char*>(digest));
 
     /* Clear data and return */
-    std::copy(initialDigest, initialDigest+5, _digest);
+    std::copy(InitialDigest, InitialDigest+5, _digest);
     _buffer.clear();
     _dataSize = 0;
     return d;
@@ -112,16 +122,16 @@ void Sha1::processChunk(const char* data) {
     for(int i = 0; i != 80; ++i) {
         if(i < 20) {
             f = d[3] ^ (d[1] & (d[2] ^ d[3]));
-            constant = constants[0];
+            constant = Constants[0];
         } else if(i < 40) {
             f = d[1] ^ d[2] ^ d[3];
-            constant = constants[1];
+            constant = Constants[1];
         } else if(i < 60) {
             f = (d[1] & d[2]) | (d[3] & (d[1] | d[2]));
-            constant = constants[2];
+            constant = Constants[2];
         } else {
             f = d[1] ^ d[2] ^ d[3];
-            constant = constants[3];
+            constant = Constants[3];
         }
 
         temp =

@@ -51,7 +51,7 @@ class CORRADE_UTILITY_EXPORT Sha1: public AbstractHash<20> {
             return (Sha1() << data).digest();
         }
 
-        explicit Sha1(): _dataSize(0), _digest{initialDigest[0], initialDigest[1], initialDigest[2], initialDigest[3], initialDigest[4]} {}
+        explicit Sha1();
 
         /** @brief Add data for digesting */
         Sha1& operator<<(const std::string& data);
@@ -61,13 +61,6 @@ class CORRADE_UTILITY_EXPORT Sha1: public AbstractHash<20> {
 
     private:
         CORRADE_UTILITY_LOCAL void processChunk(const char* data);
-
-        unsigned int leftrotate(unsigned int data, unsigned int shift) {
-            return data << shift | data >> (32-shift);
-        }
-
-        static const unsigned int initialDigest[5];
-        static const unsigned int constants[4];
 
         std::string _buffer;
         unsigned long long _dataSize;
