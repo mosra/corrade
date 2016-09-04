@@ -340,6 +340,13 @@ void DirectoryTest::executableLocation() {
     #ifdef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(executableLocation), "DirectoryTestFiles")));
 
+    /* On Android we can't be sure about anything, so just test that the
+       executable exists and it has access to the bundled files */
+    #elif defined(CORRADE_TARGET_ANDROID)
+    CORRADE_VERIFY(Directory::fileExists(executableLocation));
+    CORRADE_VERIFY(executableLocation.find("UtilityDirectoryTest") != std::string::npos);
+    CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(executableLocation), "DirectoryTestFiles")));
+
     /* Otherwise it should contain CMake build files */
     #else
     {
