@@ -23,8 +23,8 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-if(CORRADE_TARGET_EMSCRIPTEN)
-    set(FILETEST_DIR /FileTestFiles)
+if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
+    set(FILETEST_DIR FileTestFiles)
 else()
     set(FILETEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/FileTestFiles)
 endif()
@@ -32,18 +32,26 @@ endif()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 
-
 corrade_add_test(TestSuiteCompareContainerTest ContainerTest.cpp)
-corrade_add_test(TestSuiteCompareFileTest FileTest.cpp)
+corrade_add_test(TestSuiteCompareFileTest FileTest.cpp
+    FILES
+        FileTestFiles/base.txt
+        FileTestFiles/different.txt
+        FileTestFiles/empty.txt
+        FileTestFiles/smaller.txt)
 target_include_directories(TestSuiteCompareFileTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-corrade_add_test(TestSuiteCompareFileToStringTest FileToStringTest.cpp)
+corrade_add_test(TestSuiteCompareFileToStringTest FileToStringTest.cpp
+    FILES
+        FileTestFiles/base.txt
+        FileTestFiles/different.txt
+        FileTestFiles/empty.txt
+        FileTestFiles/smaller.txt)
 target_include_directories(TestSuiteCompareFileToStringTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 corrade_add_test(TestSuiteCompareFloatingPointTest FloatingPointTest.cpp)
-corrade_add_test(TestSuiteCompareStringToFileTest StringToFileTest.cpp)
+corrade_add_test(TestSuiteCompareStringToFileTest StringToFileTest.cpp
+    FILES
+        FileTestFiles/base.txt
+        FileTestFiles/different.txt
+        FileTestFiles/empty.txt
+        FileTestFiles/smaller.txt)
 target_include_directories(TestSuiteCompareStringToFileTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-
-if(CORRADE_TARGET_EMSCRIPTEN)
-    emscripten_embed_file(TestSuiteCompareFileTest FileTestFiles "/FileTestFiles")
-    emscripten_embed_file(TestSuiteCompareFileToStringTest FileTestFiles "/FileTestFiles")
-    emscripten_embed_file(TestSuiteCompareStringToFileTest FileTestFiles "/FileTestFiles")
-endif()

@@ -23,9 +23,9 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-if(CORRADE_TARGET_EMSCRIPTEN)
-    set(UTILITY_TEST_DIR "")
-    set(UTILITY_BINARY_TEST_DIR "/write")
+if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
+    set(UTILITY_TEST_DIR ".")
+    set(UTILITY_BINARY_TEST_DIR "./write")
 else()
     set(UTILITY_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
     set(UTILITY_BINARY_TEST_DIR ${CMAKE_CURRENT_BINARY_DIR})
@@ -37,7 +37,28 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
 corrade_add_test(UtilityArgumentsTest ArgumentsTest.cpp LIBRARIES CorradeUtilityTestLib)
 corrade_add_test(UtilityEndianTest EndianTest.cpp)
 corrade_add_test(UtilityMurmurHash2Test MurmurHash2Test.cpp)
-corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp LIBRARIES CorradeUtilityTestLib)
+corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp
+    LIBRARIES CorradeUtilityTestLib
+    FILES
+        ConfigurationTestFiles/comments.conf
+        ConfigurationTestFiles/comments-saved.conf
+        ConfigurationTestFiles/eol-mixed.conf
+        ConfigurationTestFiles/eol-unix.conf
+        ConfigurationTestFiles/eol-windows.conf
+        ConfigurationTestFiles/hierarchic.conf
+        ConfigurationTestFiles/hierarchic-modified.conf
+        ConfigurationTestFiles/invalid.conf
+        ConfigurationTestFiles/multiLine.conf
+        ConfigurationTestFiles/multiLine-crlf.conf
+        ConfigurationTestFiles/multiLine-crlf-saved.conf
+        ConfigurationTestFiles/multiLine-saved.conf
+        ConfigurationTestFiles/parse.conf
+        ConfigurationTestFiles/parse-modified.conf
+        ConfigurationTestFiles/types.conf
+        ConfigurationTestFiles/types-scientific.conf
+        ConfigurationTestFiles/types-scientific-win.conf
+        ConfigurationTestFiles/whitespaces.conf
+        ConfigurationTestFiles/whitespaces-saved.conf)
 target_include_directories(UtilityConfigurationTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 corrade_add_test(UtilityDebugTest DebugTest.cpp)
 
@@ -49,7 +70,10 @@ if(CORRADE_TARGET_IOS)
         MACOSX_PACKAGE_LOCATION Resources)
     list(APPEND UtilityDirectoryTest_SRCS DirectoryTestFiles)
 endif()
-corrade_add_test(UtilityDirectoryTest ${UtilityDirectoryTest_SRCS})
+corrade_add_test(UtilityDirectoryTest ${UtilityDirectoryTest_SRCS}
+    FILES
+        DirectoryTestFiles/dir/dummy
+        DirectoryTestFiles/file)
 target_include_directories(UtilityDirectoryTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 corrade_add_test(UtilityHashDigestTest HashDigestTest.cpp)
@@ -70,20 +94,36 @@ corrade_add_test(UtilityResourceTest
     ${ResourceTestData}
     ${ResourceTestEmptyFileData}
     ${ResourceTestNothingData}
-    LIBRARIES CorradeUtilityTestLib)
+    LIBRARIES CorradeUtilityTestLib
+    FILES
+        ResourceTestFiles/compiled.cpp
+        ResourceTestFiles/compiledEmpty.cpp
+        ResourceTestFiles/compiledNothing.cpp
+        ResourceTestFiles/consequence.bin
+        ResourceTestFiles/consequence2.txt
+        ResourceTestFiles/empty.bin
+        ResourceTestFiles/predisposition.bin
+        ResourceTestFiles/predisposition2.txt
+        ResourceTestFiles/resources.conf
+        ResourceTestFiles/resources-empty-alias.conf
+        ResourceTestFiles/resources-empty-file.conf
+        ResourceTestFiles/resources-empty-filename.conf
+        ResourceTestFiles/resources-empty-group.conf
+        ResourceTestFiles/resources-no-group.conf
+        ResourceTestFiles/resources-nonexistent.conf
+        ResourceTestFiles/resources-nothing.conf
+        ResourceTestFiles/resources-overriden.conf
+        ResourceTestFiles/resources-overriden-different.conf
+        ResourceTestFiles/resources-overriden-none.conf
+        ResourceTestFiles/resources-overriden-nonexistent-file.conf)
 target_include_directories(UtilityResourceTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # Static lib resource test
 add_library(ResourceTestDataLib STATIC ${ResourceTestData})
 target_link_libraries(ResourceTestDataLib CorradeUtility)
-corrade_add_test(UtilityResourceStaticTest ResourceStaticTest.cpp LIBRARIES ResourceTestDataLib)
+corrade_add_test(UtilityResourceStaticTest ResourceStaticTest.cpp
+    LIBRARIES ResourceTestDataLib
+    FILES
+        ResourceTestFiles/consequence.bin
+        ResourceTestFiles/predisposition.bin)
 target_include_directories(UtilityResourceStaticTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-
-if(CORRADE_TARGET_EMSCRIPTEN)
-    emscripten_embed_file(UtilityConfigurationTest ConfigurationTestFiles "/ConfigurationTestFiles")
-    emscripten_embed_file(UtilityConfigurationTest ConfigurationTestFiles "/write/ConfigurationTestFiles")
-    emscripten_embed_file(UtilityDirectoryTest DirectoryTestFiles "/DirectoryTestFiles")
-    emscripten_embed_file(UtilityDirectoryTest DirectoryTestFiles "/write/DirectoryTestFiles")
-    emscripten_embed_file(UtilityResourceTest ResourceTestFiles "/ResourceTestFiles")
-    emscripten_embed_file(UtilityResourceStaticTest ResourceTestFiles "/ResourceTestFiles")
-endif()
