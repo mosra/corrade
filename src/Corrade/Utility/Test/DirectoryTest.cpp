@@ -372,10 +372,10 @@ void DirectoryTest::home() {
     #ifdef CORRADE_TARGET_APPLE
     CORRADE_VERIFY(Directory::fileExists(Directory::join(home, "Library")));
 
-    /* On other Unixes verify that the home dir contains `.local` directory.
-       Ugly and hacky, but it's the best I came up with. Can't test for e.g.
-       `/home/` substring, as that can be overriden. */
-    #elif defined(CORRADE_TARGET_UNIX)
+    /* On other Unixes (except Android, which is shit) verify that the home dir
+       contains `.local` directory. Ugly and hacky, but it's the best I came up
+       with. Can't test for e.g. `/home/` substring, as that can be overriden. */
+    #elif defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_ANDROID)
     CORRADE_VERIFY(Directory::fileExists(Directory::join(home, ".local")));
 
     /* On Emscripten verify that the directory exists (it's empty by default) */
