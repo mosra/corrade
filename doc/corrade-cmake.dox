@@ -27,6 +27,8 @@ namespace Corrade {
 /** @page corrade-cmake Usage with CMake
 @brief Guide how to find and use Corrade with CMake build system
 
+@tableofcontents
+
 Corrade uses CMake build system for both building and integration into your
 projects. The logic is in module `FindCorrade.cmake` distributed with the
 library in `modules/` directory, you are encouraged to copy it into your
@@ -144,7 +146,15 @@ are included just for backwards compatibility and only if
 Note that [each namespace](namespaces.html) contains more detailed guide how to
 use given library with CMake.
 
-Corrade provides these macros and functions:
+@section corrade-cmake-modules Other CMake modules
+
+The `modules/` directory contains more useful CMake modules:
+
+-   `FindNodeJs.cmake` -- CMake module for finding Node.js. Copy this to your
+    module directory if you want to run @ref TestSuite unit tests when building
+    for @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
+
+@section corrade-cmake-functions Macros and functions
 
 ### Add unit test using Corrade's TestSuite
 @anchor corrade-cmake-add-test
