@@ -136,7 +136,10 @@ parameters instead.
 @brief Type alignment specifier
 
 Expands to C++11 `alignas()` specifier on supported compilers, otherwise falls
-back to compiler-specific attribute.
+back to compiler-specific attribute. Example usage:
+@code
+CORRADE_ALIGNAS(4) char data[16]; // so it can be read as 32-bit integers
+@endcode
 */
 #if defined(__GNUC__) && __GNUC__*100 + __GNUC_MINOR__ < 408
 #define CORRADE_ALIGNAS(alignment) __attribute__((aligned(alignment)))
