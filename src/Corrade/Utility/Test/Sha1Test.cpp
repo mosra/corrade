@@ -23,6 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include "Corrade/Containers/Array.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/AbstractHash.h"
 #include "Corrade/Utility/Sha1.h"
@@ -36,6 +37,8 @@ struct Sha1Test: TestSuite::Tester {
     void exact64bytes();
     void exactOneBlockPadding();
     void twoBlockPadding();
+
+    void iterative();
 };
 
 Sha1Test::Sha1Test() {
@@ -43,6 +46,8 @@ Sha1Test::Sha1Test() {
               &Sha1Test::exact64bytes,
               &Sha1Test::exactOneBlockPadding,
               &Sha1Test::twoBlockPadding});
+
+    addRepeatedTests({&Sha1Test::iterative}, 128);
 }
 
 void Sha1Test::emptyString() {
@@ -63,6 +68,26 @@ void Sha1Test::exactOneBlockPadding() {
 void Sha1Test::twoBlockPadding() {
     CORRADE_COMPARE(Sha1::digest("123456789a123456789b123456789c123456789d123456789e123456"),
                     Sha1::Digest::fromHexString("40e94c62ada5dc762f3e9c472001ca64a67d2cbb"));
+}
+
+void Sha1Test::iterative() {
+    constexpr const char data[] =
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
+        "eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim "
+        "ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut "
+        "aliquip ex ea commodo consequat. Duis aute irure dolor in "
+        "reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla "
+        "pariatur. Excepteur sint occaecat cupidatat non proident, sunt in "
+        "culpa qui officia deserunt mollit anim id est laborum.";
+    const Containers::ArrayView<const char> string{data, sizeof(data) - 1};
+
+    Sha1 hasher;
+    for(std::size_t offset = 0; offset < string.size(); offset += testCaseRepeatId() + 1) {
+        const auto slice = string.slice(offset, std::min(offset + testCaseRepeatId() + 1, string.size()));
+        hasher << std::string{slice.data(), slice.size()};
+    }
+
+    CORRADE_COMPARE(hasher.digest(), Sha1::Digest::fromHexString("cd36b370758a259b34845084a6cc38473cb95e27"));
 }
 
 }}}
