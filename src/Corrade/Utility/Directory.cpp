@@ -313,6 +313,11 @@ std::string Directory::tmp() {
     if(isSandboxed()) return join(home(), "tmp");
     #endif
 
+    /* Android, you had to be special, right? */
+    #ifdef CORRADE_TARGET_ANDROID
+    return "/data/local/tmp";
+    #endif
+
     /* Common Unix */
     return "/tmp";
 
