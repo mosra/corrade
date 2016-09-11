@@ -175,6 +175,10 @@ template<class T> void DebugTest::floats() {
         /* Source: https://msdn.microsoft.com/en-us/library/9cx8xs15.aspx */
         CORRADE_EXPECT_FAIL_IF((std::is_same<T, long double>::value), "MSVC treats long double as double.");
         #endif
+
+        #ifdef CORRADE_TARGET_ANDROID
+        CORRADE_EXPECT_FAIL_IF((std::is_same<T, long double>::value), "Android probably also treats long double as double.");
+        #endif
         CORRADE_COMPARE(o.str(), FloatsData<T>::expected());
     }
 }
