@@ -146,7 +146,7 @@ template<class T> class ArrayView {
         constexpr /*implicit*/ operator T*() const { return _data; }
 
         /** @brief Array data */
-        constexpr const T* data() const { return _data; }
+        constexpr T* data() const { return _data; }
 
         /** @brief Array size */
         constexpr std::size_t size() const { return _size; }
@@ -363,7 +363,7 @@ template<std::size_t size, class T> class StaticArrayView {
         constexpr /*implicit*/ operator T*() const { return _data; }
 
         /** @brief Array data */
-        constexpr const T* data() const { return _data; }
+        constexpr T* data() const { return _data; }
 
         /** @brief Pointer to first element */
         constexpr T* begin() const { return _data; }

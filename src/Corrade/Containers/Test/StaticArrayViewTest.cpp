@@ -179,7 +179,7 @@ void StaticArrayViewTest::access() {
     for(std::size_t i = 0; i != 7; ++i)
         b[i] = i;
 
-    CORRADE_COMPARE(b.data(), a);
+    CORRADE_VERIFY(b.data() == a);
     CORRADE_COMPARE(*(b.begin()+2), 2);
     CORRADE_COMPARE(b[4], 4);
     CORRADE_COMPARE(b.end()-b.begin(), 7);
