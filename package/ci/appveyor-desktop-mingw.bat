@@ -8,6 +8,7 @@ cmake .. ^
     -DCMAKE_CXX_FLAGS="--coverage" ^
     -DCMAKE_BUILD_TYPE=Debug ^
     -DCMAKE_INSTALL_PREFIX=%APPVEYOR_BUILD_FOLDER%/deps ^
+    -DUTILITY_USE_ANSI_COLORS=ON ^
     -DBUILD_TESTS=ON ^
     -G Ninja || exit /b
 cmake --build . || exit /b
@@ -15,6 +16,7 @@ cmake --build . --target install || exit /b
 
 rem Test
 cd %APPVEYOR_BUILD_FOLDER%/build || exit /b
+set CORRADE_TEST_COLOR=ON
 ctest -V || exit /b
 
 rem Examples
