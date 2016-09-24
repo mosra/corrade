@@ -37,12 +37,14 @@ struct EndianTest: TestSuite::Tester {
     void endianness();
     void floats();
     void inPlace();
+    void enumClass();
 };
 
 EndianTest::EndianTest() {
     addTests({&EndianTest::endianness,
               &EndianTest::floats,
-              &EndianTest::inPlace});
+              &EndianTest::inPlace,
+              &EndianTest::enumClass});
 }
 
 void EndianTest::endianness() {
@@ -109,6 +111,33 @@ void EndianTest::inPlace() {
     CORRADE_COMPARE(d, 0x1122334455667788ull);
 
     #undef currentInPlace
+    #undef otherInPlace
+}
+
+void EndianTest::enumClass() {
+    #ifdef CORRADE_BIG_ENDIAN
+    #define other littleEndian
+    #define otherInPlace littleEndianInPlace
+    #else
+    #define other bigEndian
+    #define otherInPlace bigEndianInPlace
+    #endif
+
+    enum class FileType: std::uint32_t {
+        PlainText = 0xcafebabe,
+        Binary = 0xdeadbeef
+    };
+
+    FileType a = FileType(0xbebafeca);
+    const FileType b = FileType(0xefbeadde);
+
+    Endianness::otherInPlace(a);
+    const FileType c = Endianness::other(b);
+
+    CORRADE_VERIFY(a == FileType::PlainText);
+    CORRADE_VERIFY(c == FileType::Binary);
+
+    #undef other
     #undef otherInPlace
 }
 
