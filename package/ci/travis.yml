@@ -43,6 +43,14 @@ notifications:
     on_failure: always
     on_start: never
 
+# If I don't put this blurb here, the OSX image crashes deep inside RVM while
+# executing gem install xcpretty. I don't know why and, from what I guess, I
+# don't even want to know, so I just keep this meaningless piece of random
+# commands here, have another drink and move on with my life.
+cache:
+  directories:
+  - $HOME/lets-summon-the-black-demons-to-stop-travis-from-crashing
+
 install:
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "desktop" ]; then pip install --user cpp-coveralls; fi
 
