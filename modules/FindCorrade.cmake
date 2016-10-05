@@ -73,7 +73,9 @@
 #  CORRADE_TARGET_UNIX          - Defined if compiled for some Unix flavor
 #   (Linux, BSD, OS X)
 #  CORRADE_TARGET_APPLE         - Defined if compiled for Apple platforms
-#  CORRADE_TARGET_IOS           - Defined if compiled for iOS
+#  CORRADE_TARGET_IOS           - Defined if compiled for iOS (device or
+#   simulator)
+#  CORRADE_TARGET_IOS_SIMULATOR - Defined if compiled for iOS Simulator
 #  CORRADE_TARGET_WINDOWS       - Defined if compiled for Windows
 #  CORRADE_TARGET_WINDOWS_RT    - Defined if compiled for Windows RT
 #  CORRADE_TARGET_NACL          - Defined if compiled for Google Chrome Native
@@ -257,6 +259,7 @@ set(_corradeFlags
     TARGET_UNIX
     TARGET_APPLE
     TARGET_IOS
+    TARGET_IOS_SIMULATOR
     TARGET_WINDOWS
     TARGET_WINDOWS_RT
     TARGET_NACL

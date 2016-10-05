@@ -78,8 +78,11 @@ elseif(UNIX)
     if(APPLE)
         set(CORRADE_TARGET_APPLE 1)
 
-        if(CMAKE_OSX_SYSROOT MATCHES "/(iPhoneOS|iPhoneSimulator)[0-9.]*\\.sdk")
+        if(CMAKE_OSX_SYSROOT MATCHES "/iPhoneOS[0-9.]*\\.sdk")
             set(CORRADE_TARGET_IOS 1)
+        elseif(CMAKE_OSX_SYSROOT MATCHES "/iPhoneSimulator[0-9.]*\\.sdk")
+            set(CORRADE_TARGET_IOS 1)
+            set(CORRADE_TARGET_IOS_SIMULATOR 1)
         endif()
     endif()
 

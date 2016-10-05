@@ -85,7 +85,7 @@ Android...).
 /**
 @brief Apple target
 
-Defined if the library is built for Apple platforms.
+Defined if the library is built for Apple platforms (OS X, iOS).
 @see @ref CORRADE_TARGET_UNIX, @ref CORRADE_TARGET_IOS, @ref corrade-cmake
 */
 #define CORRADE_TARGET_APPLE
@@ -94,11 +94,22 @@ Defined if the library is built for Apple platforms.
 /**
 @brief iOS target
 
-Defined if the library is built for iOS.
-@see @ref CORRADE_TARGET_UNIX, @ref CORRADE_TARGET_APPLE, @ref corrade-cmake
+Defined if the library is built for iOS (device or simulator)
+@see @ref CORRADE_TARGET_IOS_SIMULATOR, @ref CORRADE_TARGET_UNIX,
+    @ref CORRADE_TARGET_APPLE, @ref corrade-cmake
 */
 #define CORRADE_TARGET_IOS
 #undef CORRADE_TARGET_IOS
+
+/**
+@brief iOS Simulator target
+
+Defined if the library is built for iOS Simulator.
+@see @ref CORRADE_TARGET_IOS, @ref CORRADE_TARGET_UNIX,
+    @ref CORRADE_TARGET_APPLE, @ref corrade-cmake
+*/
+#define CORRADE_TARGET_IOS_SIMULATOR
+#undef CORRADE_TARGET_IOS_SIMULATOR
 
 /**
 @brief Windows target
