@@ -106,7 +106,7 @@ std::vector<std::string> Arguments::environment() {
     #endif
     char* const env = reinterpret_cast<char*>(EM_ASM_INT_V({
         var env = '';
-        for(var key in process.env)
+        if(typeof process !== 'undefined') for(var key in process.env)
             env += key + '=' + process.env[key] + '\b';
         env += '\b';
         return allocate(intArrayFromString(env), 'i8', ALLOC_NORMAL);
@@ -352,7 +352,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
         #endif
         char* const systemEnv = reinterpret_cast<char*>(EM_ASM_INT({
             var name = UTF8ToString($0);
-            return name in process.env ? allocate(intArrayFromString(process.env[name]), 'i8', ALLOC_NORMAL) : 0;
+            return typeof process !== 'undefined' && name in process.env ? allocate(intArrayFromString(process.env[name]), 'i8', ALLOC_NORMAL) : 0;
         }, entry.environment.data()));
         #ifdef __clang__
         #pragma GCC diagnostic pop
