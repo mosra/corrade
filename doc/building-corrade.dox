@@ -33,10 +33,8 @@ namespace Corrade {
 Minimal set of tools required for building is:
 
 -   C++ compiler with good C++11 support. Compilers which are tested to have
-    everything needed are **GCC** >= 4.7, **Clang** >= 3.1 and **MSVC** 2015.
-    On Windows you can also use **MinGW-w64**. GCC 4.6, 4.5, 4.4 and MSVC 2013
-    support involves some ugly workarounds and thus is available only in
-    `compatibility` branch.
+    everything needed are **GCC** >= 4.7, **Clang** >= 3.1 and **MSVC** >=
+    2015. On Windows you can also use **MinGW-w64**.
 -   **CMake** >= 2.8.12
 
 Note that full feature set is available only on GCC >= 4.8.1 and Clang >= 3.1
@@ -49,12 +47,6 @@ repository with your favorite IDE or Git GUI, download currrent snapshot as
 compressed archive or use the command line:
 
     git clone git://github.com/mosra/corrade.git
-
-If you need to use the `compatibility` branch, check it out as following from
-the cloned repository or download the particular archive from
-https://github.com/mosra/corrade/tree/compatibility.
-
-    git checkout compatibility
 
 @section building-corrade-compilation Compilation, installation
 
@@ -197,15 +189,8 @@ the compatibility mode explicitly:
 - `GCC47_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
   4.7. Note that you need to enable this explicitly also if you are building
   with Clang and use libstdc++ from GCC 4.7.
-- `GCC46_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
-  4.6. Note that GCC 4.6 support is maintained only in `compatibility` branch.
-- `GCC45_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
-  4.5. Note that GCC 4.5 support is maintained only in `compatibility` branch.
-- `GCC44_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
-  4.4. Note that GCC 4.4 support is maintained only in `compatibility` branch.
-- `MSVC2013_COMPATIBILITY` -- Enable for compiling with compatibility more for
-  Microsoft Visual C++ 2013. Note that MSVC 2013 support is maintained only in
-  `compatibility` branch.
+- `MSVC2015_COMPATIBILITY` -- Enable for compiling with compatibility mode for
+  Microsoft Visual C++ 2015.
 
 Corrade will detect the compiler used and refuses to build (or be used) if
 some compatibility mode needs to be enabled. On the other hand, if any of these

@@ -34,19 +34,9 @@ endif()
 # Check compiler version
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # Don't allow to use compilers older than what compatibility mode allows
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.4.0")
-        message(FATAL_ERROR "Corrade cannot be used with GCC < 4.4")
-    endif()
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.5.0" AND NOT CORRADE_GCC44_COMPATIBILITY)
-        message(FATAL_ERROR "To use Corrade with GCC 4.4, build it with GCC44_COMPATIBILITY enabled")
-    endif()
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6.0" AND NOT CORRADE_GCC45_COMPATIBILITY)
-        message(FATAL_ERROR "To use Corrade with GCC 4.5, build it with GCC45_COMPATIBILITY enabled")
-    endif()
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" AND NOT CORRADE_GCC46_COMPATIBILITY)
-        message(FATAL_ERROR "To use Corrade with GCC 4.6, build it with GCC46_COMPATIBILITY enabled")
-    endif()
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.1" AND NOT CORRADE_GCC47_COMPATIBILITY)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0")
+        message(FATAL_ERROR "Corrade cannot be used with GCC < 4.7. Sorry.")
+    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.1" AND NOT CORRADE_GCC47_COMPATIBILITY)
         message(FATAL_ERROR "To use Corrade with GCC 4.7, build it with GCC47_COMPATIBILITY enabled")
     endif()
 
@@ -54,21 +44,10 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.1" AND CORRADE_GCC47_COMPATIBILITY)
         message(FATAL_ERROR "GCC >=4.8.1 cannot be used if Corrade is built with GCC47_COMPATIBILITY")
     endif()
-    if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" AND CORRADE_GCC46_COMPATIBILITY)
-        message(FATAL_ERROR "GCC >=4.7 cannot be used if Corrade is built with GCC46_COMPATIBILITY")
-    endif()
-    if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6.0" AND CORRADE_GCC45_COMPATIBILITY)
-        message(FATAL_ERROR "GCC >=4.6 cannot be used if Corrade is built with GCC45_COMPATIBILITY")
-    endif()
-    if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.5.0" AND CORRADE_GCC44_COMPATIBILITY)
-        message(FATAL_ERROR "GCC >=4.5 cannot be used if Corrade is built with GCC44_COMPATIBILITY")
-    endif()
 elseif(MSVC)
     # Don't allow to use compilers older than what compatibility mode allows
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "18.0")
-        message(FATAL_ERROR "Corrade cannot be used with MSVC < 2013")
-    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.0" AND NOT CORRADE_MSVC2013_COMPATIBILITY)
-        message(FATAL_ERROR "To use Corrade with MSVC 2013, build it with MSVC2013_COMPATIBILITY enabled")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.0")
+        message(FATAL_ERROR "Corrade cannot be used with MSVC < 2015. Sorry.")
     elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "20.0" AND NOT CORRADE_MSVC2015_COMPATIBILITY)
         message(FATAL_ERROR "To use Corrade with MSVC 2015, build it with MSVC2015_COMPATIBILITY enabled")
     endif()
@@ -88,19 +67,9 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "(Apple
     # Some flags are not yet supported everywhere
     # TODO: do this with check_c_compiler_flags()
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.7.0")
-            list(APPEND CORRADE_PEDANTIC_COMPILER_OPTIONS "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-Wzero-as-null-pointer-constant>")
-        endif()
-        if(NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.6.0")
-            list(APPEND CORRADE_PEDANTIC_COMPILER_OPTIONS "-Wdouble-promotion")
-        endif()
-    endif()
-
-    # Disable `-pedantic` for GCC 4.4.3 on NaCl to avoid excessive warnings
-    # about "comma at the end of enumeration list". My own GCC 4.4.7 doesn't
-    # emit these warnings.
-    if(CORRADE_GCC44_COMPATIBILITY AND CORRADE_TARGET_NACL)
-        list(REMOVE_ITEM CORRADE_PEDANTIC_COMPILER_OPTIONS "-pedantic")
+        list(APPEND CORRADE_PEDANTIC_COMPILER_OPTIONS
+            "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-Wzero-as-null-pointer-constant>"
+            "-Wdouble-promotion")
     endif()
 
 # MSVC-specific compiler flags
