@@ -48,6 +48,7 @@ corrade_add_test(TestSuiteCompareFileToStringTest FileToStringTest.cpp
         FileTestFiles/smaller.txt)
 target_include_directories(TestSuiteCompareFileToStringTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 corrade_add_test(TestSuiteCompareFloatingPointTest FloatingPointTest.cpp)
+corrade_add_test(TestSuiteCompareNumericTest NumericTest.cpp)
 corrade_add_test(TestSuiteCompareStringToFileTest StringToFileTest.cpp
     FILES
         FileTestFiles/base.txt
