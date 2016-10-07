@@ -56,8 +56,8 @@ for equality:
 
 If both values have different type or if we want to force some type for
 comparison, we can use @ref CORRADE_COMPARE_AS(). This macro can be used also
-for more involved comparison using "pseudo-types", see Comparator class
-documentation for more information.
+for more involved comparison using "pseudo-types", see the @ref Comparator
+class documentation for more information.
 @skip MyTest::sin()
 @until }
 
@@ -79,9 +79,9 @@ Lastly, we must not forget to create `main()` function using @ref CORRADE_TEST_M
 macro:
 @skipline CORRADE_TEST_MAIN
 
-Now we can compile and run our test using CMake and `corrade_add_test()` macro.
-Don't forget to call also `enable_testing()` so `ctest` is able to collect and
-run all the tests.
+Now we can compile and run our test using CMake and
+@ref corrade-cmake-add-test "corrade_add_test()" macro. Don't forget to call
+also `enable_testing()` so `ctest` is able to collect and run all the tests.
 @dontinclude test/CMakeLists.txt
 @skip enable_testing
 @until corrade_add_test
@@ -90,14 +90,14 @@ The test can be run either manually or using `ctest`. When executed, it
 produces output similar to this:
 
     Starting Corrade::Examples::MyTest with 5 test cases...
-      FAIL: commutativity() at examples/test/MyTest.cpp on line 52
+      FAIL [1] commutativity() at examples/test/MyTest.cpp on line 51
             Expression 15/3 == 3/15 failed.
-        OK: associativity()
-        OK: sin()
-     XFAIL: pi() at examples/test/MyTest.cpp on line 67
+        OK [2] associativity()
+        OK [3] sin()
+     XFAIL [4] pi() at examples/test/MyTest.cpp on line 66
             Need better approximation. pi and 3.14 are not equal.
-        OK: pi()
-      SKIP: bigEndian() at examples/test/MyTest.cpp on line 72
+        OK [4] pi()
+      SKIP [5] bigEndian()
             No affordable big endian machines exist to test this properly.
     Finished Corrade::Examples::MyTest with 1 errors out of 5 checks.
 

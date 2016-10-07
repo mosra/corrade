@@ -30,15 +30,14 @@
 
 namespace Corrade { namespace TestSuite { namespace Test {
 
-class FloatingPointTest: public Tester {
-    public:
-        FloatingPointTest();
+struct FloatingPointTest: Tester {
+    explicit FloatingPointTest();
 
-        void smallDelta();
-        void largeDelta();
-        void nan();
-        void infinity();
-        void output();
+    void smallDelta();
+    void largeDelta();
+    void nan();
+    void infinity();
+    void output();
 };
 
 FloatingPointTest::FloatingPointTest() {

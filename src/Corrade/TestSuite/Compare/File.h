@@ -79,6 +79,7 @@ CORRADE_COMPARE_WITH("actual.txt", "expected.txt", Compare::File("/common/path")
 
 See @ref TestSuite-Comparator-pseudo-types and @ref TestSuite-Comparator-parameters
 for more information.
+@see @ref Compare::FileToString, @ref Compare::StringToFile
 */
 class File {
     public:

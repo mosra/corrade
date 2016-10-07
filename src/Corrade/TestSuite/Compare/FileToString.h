@@ -49,6 +49,7 @@ CORRADE_COMPARE_AS("actual.txt", "expected file contents", Compare::FileToString
 @endcode
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
+@see @ref Compare::File, @ref Compare::StringToFile
 */
 class FileToString {};
 

@@ -67,17 +67,17 @@ namespace Corrade { namespace TestSuite { // the namespace is important
 template<> class Comparator<FileContents> {
     public:
         bool operator()(const std::string& actual, const std::string& expected) {
-            actualContents = ...;
-            expectedContents = ...;
-            return actualContents == expectedContents;
+            _actualContents = ...;
+            _expectedContents = ...;
+            return _actualContents == _expectedContents;
         }
 
         void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
-            e << "Files" << actual << "and" << expected << "are not the same, actual:" << actualContents << "vs. expected:" << expectedContents;
+            e << "Files" << actual << "and" << expected << "are not the same, actual" << _actualContents << "but expected" << _expectedContents;
         }
 
     private:
-        std::string actualContents, expectedContents;
+        std::string _actualContents, _expectedContents;
 };
 
 }}
@@ -105,7 +105,7 @@ namespace Corrade { namespace TestSuite { // the namespace is important
 
 template<> class Comparator<FileContents> {
     public:
-        Comparator(const std::string& pathPrefix = std::string());
+        Comparator(const std::string& pathPrefix = {});
         bool operator()(const std::string& actual, const std::string& expected);
         void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const;
 
@@ -116,14 +116,14 @@ template<> class Comparator<FileContents> {
 
 class FileContents {
     public:
-        FileContents(const std::string& pathPrefix = std::string()): c(pathPrefix) {}
+        FileContents(const std::string& pathPrefix = {}): _c{pathPrefix} {}
 
         Comparator<FileContents>& comparator() {
-            return c;
+            return _c;
         }
 
     private:
-        Comparator<FileContents> c;
+        Comparator<FileContents> _c;
 };
 @endcode
 
