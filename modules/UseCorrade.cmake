@@ -343,9 +343,38 @@ function(corrade_add_resource name configurationFile)
     set(${name} "${out}" PARENT_SCOPE)
 endfunction()
 
-function(corrade_add_plugin plugin_name debug_install_dir release_install_dir metadata_file)
+function(corrade_add_plugin plugin_name debug_install_dirs release_install_dirs metadata_file)
     if(CORRADE_TARGET_NACL_NEWLIB OR CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_WINDOWS_RT OR CORRADE_TARGET_IOS)
-        message(SEND_ERROR "Dynamic plugins are not available on this platform, use corrade_add_static_plugin() instead")
+        message(SEND_ERROR "corrade_add_plugin(): dynamic plugins are not available on this platform, use corrade_add_static_plugin() instead")
+    endif()
+
+    # Populate {debug,release}_{binary,library,conf}_install_dir variables
+    if(NOT debug_install_dirs STREQUAL CMAKE_CURRENT_BINARY_DIR)
+        list(LENGTH debug_install_dirs debug_install_dir_count)
+        list(LENGTH release_install_dirs release_install_dir_count)
+        if(NOT debug_install_dir_count EQUAL release_install_dir_count)
+            message(FATAL_ERROR "corrade_add_plugin(): either none or both install dirs must contain binary location")
+        elseif(debug_install_dir_count EQUAL 1)
+            set(debug_binary_install_dir ${debug_install_dirs})
+            set(debug_library_install_dir ${debug_install_dirs})
+            set(release_binary_install_dir ${release_install_dirs})
+            set(release_library_install_dir ${release_install_dirs})
+        elseif(debug_install_dir_count EQUAL 2)
+            list(GET debug_install_dirs 0 debug_binary_install_dir)
+            list(GET debug_install_dirs 1 debug_library_install_dir)
+            list(GET release_install_dirs 0 release_binary_install_dir)
+            list(GET release_install_dirs 1 release_library_install_dir)
+        else()
+            message(FATAL_ERROR "corrade_add_plugin(): install dirs must contain either just library location or both binary and library location")
+        endif()
+
+        if(CORRADE_TARGET_WINDOWS)
+            set(debug_conf_install_dir ${debug_binary_install_dir})
+            set(release_conf_install_dir ${release_binary_install_dir})
+        else()
+            set(debug_conf_install_dir ${debug_library_install_dir})
+            set(release_conf_install_dir ${release_library_install_dir})
+        endif()
     endif()
 
     # Create dynamic library and bring all needed options along
@@ -369,7 +398,7 @@ function(corrade_add_plugin plugin_name debug_install_dir release_install_dir me
 
     # Copy metadata next to the binary for testing purposes or install it both
     # somewhere
-    if(${debug_install_dir} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
+    if(debug_install_dirs STREQUAL CMAKE_CURRENT_BINARY_DIR)
         add_custom_command(
             OUTPUT ${plugin_name}.conf
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${plugin_name}.conf
@@ -382,20 +411,39 @@ function(corrade_add_plugin plugin_name debug_install_dir release_install_dir me
         # Force IDEs display also the metadata file in project view
         add_custom_target(${plugin_name}-metadata SOURCES ${metadata_file})
 
-        install(TARGETS ${plugin_name} DESTINATION "${debug_install_dir}"
-            CONFIGURATIONS Debug)
-        install(TARGETS ${plugin_name} DESTINATION "${release_install_dir}"
-            CONFIGURATIONS "" None Release RelWithDebInfo MinSizeRel)
-        install(FILES ${metadata_file} DESTINATION "${debug_install_dir}"
+        # CONFIGURATIONS must be first in order to not be ignored when having
+        # multiple destinations.
+        # https://gitlab.kitware.com/cmake/cmake/issues/16361
+        install(TARGETS ${plugin_name}
+            CONFIGURATIONS Debug
+            RUNTIME DESTINATION ${debug_binary_install_dir}
+            LIBRARY DESTINATION ${debug_library_install_dir}
+            ARCHIVE DESTINATION ${debug_library_install_dir})
+        install(TARGETS ${plugin_name}
+            CONFIGURATIONS "" None Release RelWithDebInfo MinSizeRel
+            RUNTIME DESTINATION ${release_binary_install_dir}
+            LIBRARY DESTINATION ${release_library_install_dir}
+            ARCHIVE DESTINATION ${release_library_install_dir})
+        install(FILES ${metadata_file} DESTINATION ${debug_conf_install_dir}
             RENAME "${plugin_name}.conf"
             CONFIGURATIONS Debug)
-        install(FILES ${metadata_file} DESTINATION "${release_install_dir}"
+        install(FILES ${metadata_file} DESTINATION ${release_conf_install_dir}
             RENAME "${plugin_name}.conf"
             CONFIGURATIONS "" None Release RelWithDebInfo MinSizeRel)
     endif()
 endfunction()
 
-function(corrade_add_static_plugin plugin_name install_dir metadata_file)
+function(corrade_add_static_plugin plugin_name install_dirs metadata_file)
+    # Populate library_install_dir variable
+    list(LENGTH install_dirs install_dir_count)
+    if(install_dir_count EQUAL 1)
+        set(library_install_dir ${install_dirs})
+    elseif(install_dir_count EQUAL 2)
+        list(GET install_dirs 1 library_install_dir)
+    else()
+        message(FATAL_ERROR "corrade_add_static_plugin(): install dir must contain either just library location or both library and binary location")
+    endif()
+
     # Compile resources
     set(resource_file "${CMAKE_CURRENT_BINARY_DIR}/resources_${plugin_name}.conf")
     file(WRITE "${resource_file}" "group=CorradeStaticPlugin_${plugin_name}\n[file]\nfilename=\"${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file}\"\nalias=${plugin_name}.conf")
@@ -410,8 +458,8 @@ function(corrade_add_static_plugin plugin_name install_dir metadata_file)
     set_target_properties(${plugin_name} PROPERTIES DEBUG_POSTFIX "-d")
 
     # Install, if not into the same place
-    if(NOT ${install_dir} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
-        install(TARGETS ${plugin_name} DESTINATION "${install_dir}")
+    if(NOT install_dirs STREQUAL CMAKE_CURRENT_BINARY_DIR)
+        install(TARGETS ${plugin_name} DESTINATION ${library_install_dir})
     endif()
 endfunction()
 

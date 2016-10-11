@@ -163,36 +163,59 @@
 # Add dynamic plugin::
 #
 #  corrade_add_plugin(<plugin name>
-#                     <debug install dir> <release install dir>
+#                     "<debug binary install dir>;<debug library install dir>"
+#                     "<release binary install dir>;<release library install dir>"
 #                     <metadata file>
 #                     <sources>...)
 #
 # The macro adds preprocessor directive ``CORRADE_DYNAMIC_PLUGIN``. Additional
 # libraries can be linked in via :command:`target_link_libraries(plugin_name ...) <target_link_libraries>`.
-# If ``<debug install dir>`` is set to :variable:`CMAKE_CURRENT_BINARY_DIR`
-# (e.g. for testing purposes), the files are copied directly, without the need
-# to perform install step. Note that the files are actually put into
-# configuration-based subdirectory, i.e. ``${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}``.
-# See documentation of :variable:`CMAKE_CFG_INTDIR` variable for more
-# information.
+# On DLL platforms, the plugin DLLs and metadata files are put into
+# ``<debug binary install dir>``/``<release binary install dir>`` and the
+# ``*.lib`` files into ``<debug library install dir>``/``<release library install dir>``.
+# On non-DLL platforms everything is put into ``<debug library install dir>``/
+# ``<release library install dir>``.
+#
+#  corrade_add_plugin(<plugin name>
+#                     <debug install dir>
+#                     <release install dir>
+#                     <metadata file>
+#                     <sources>...)
+#
+# Unline the above version this puts everything into ``<debug install dir>`` on
+# both DLL and non-DLL platforms. If ``<debug install dir>`` is set to
+# :variable:`CMAKE_CURRENT_BINARY_DIR` (e.g. for testing purposes), the files
+# are copied directly, without the need to perform install step. Note that the
+# files are actually put into configuration-based subdirectory, i.e.
+# ``${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}``. See documentation of
+# :variable:`CMAKE_CFG_INTDIR` variable for more information.
 #
 # .. command:: corrade_add_static_plugin
 #
 # Add static plugin::
 #
 #  corrade_add_static_plugin(<plugin name>
-#                            <install dir>
+#                            "<binary install dir>;<library install dir>"
 #                            <metadata file>
 #                            <sources>...)
 #
 # The macro adds preprocessor directive ``CORRADE_STATIC_PLUGIN``. Additional
 # libraries can be linked in via :command:`target_link_libraries(plugin_name ...) <target_link_libraries>`.
+# The ``<binary install dir>`` is ignored and included just for compatibility
+# with the :command:`corrade_add_plugin` command, everything is installed into
+# ``<library install dir>``. Note that plugins built in debug configuration
+# (e.g. with :variable:`CMAKE_BUILD_TYPE` set to ``Debug``) have ``"-d"``
+# suffix to make it possible to have both debug and release plugins installed
+# alongside each other.
+#
+#  corrade_add_static_plugin(<plugin name>
+#                            <install dir>
+#                            <metadata file>
+#                            <sources>...)
+#
+# Equivalent to the above with ``<library install dir>`` set to ``<install dir>``.
 # If ``<install dir>`` is set to :variable:`CMAKE_CURRENT_BINARY_DIR` (e.g. for
 # testing purposes), no installation rules are added.
-#
-# Note that plugins built in debug configuration (e.g. with :variable:`CMAKE_BUILD_TYPE`
-# set to ``Debug``) have ``"-d"`` suffix to make it possible to have both debug
-# and release plugins installed alongside each other.
 #
 # .. command:: corrade_find_dlls_for_libs
 #
