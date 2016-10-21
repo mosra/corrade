@@ -72,6 +72,14 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "(Apple
             "-Wdouble-promotion")
     endif()
 
+    if(CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" OR CORRADE_TARGET_EMSCRIPTEN)
+        list(APPEND CORRADE_PEDANTIC_COMPILER_OPTIONS
+            # Clang's -Wmissing-declarations does something else and the
+            # behavior we want is under -Wmissing-prototypes. See
+            # https://llvm.org/bugs/show_bug.cgi?id=16286.
+            "-Wmissing-prototypes")
+    endif()
+
 # MSVC-specific compiler flags
 elseif(MSVC)
     set(CORRADE_PEDANTIC_COMPILER_OPTIONS
