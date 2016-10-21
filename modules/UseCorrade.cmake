@@ -69,6 +69,9 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "(Apple
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         list(APPEND CORRADE_PEDANTIC_COMPILER_OPTIONS
             "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-Wzero-as-null-pointer-constant>"
+
+            # TODO: enable when this gets to Clang (not in 3.9, but in master
+            # since https://github.com/llvm-mirror/clang/commit/0a022661c797356e9c28e4999b6ec3881361371e)
             "-Wdouble-promotion")
     endif()
 
