@@ -99,7 +99,7 @@ template<class T> class Comparator<Compare::Less<T>> {
         bool operator()(const T& actual, const T& expected) {
             _actualValue = &actual;
             _expectedValue = &expected;
-            return *_actualValue < *_expectedValue;
+            return bool(*_actualValue < *_expectedValue);
         }
 
         void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
@@ -118,7 +118,7 @@ template<class T> class Comparator<Compare::LessOrEqual<T>> {
         bool operator()(const T& actual, const T& expected) {
             _actualValue = &actual;
             _expectedValue = &expected;
-            return *_actualValue <= *_expectedValue;
+            return bool(*_actualValue <= *_expectedValue);
         }
 
         void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
@@ -137,7 +137,7 @@ template<class T> class Comparator<Compare::GreaterOrEqual<T>> {
         bool operator()(const T& actual, const T& expected) {
             _actualValue = &actual;
             _expectedValue = &expected;
-            return *_actualValue >= *_expectedValue;
+            return bool(*_actualValue >= *_expectedValue);
         }
 
         void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
@@ -156,7 +156,7 @@ template<class T> class Comparator<Compare::Greater<T>> {
         bool operator()(const T& actual, const T& expected) {
             _actualValue = &actual;
             _expectedValue = &expected;
-            return *_actualValue > *_expectedValue;
+            return bool(*_actualValue > *_expectedValue);
         }
 
         void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {

@@ -37,13 +37,17 @@ struct NumericTest: Tester {
     void lessOrEqual();
     void greaterOrEqual();
     void greater();
+
+    void explicitBoolConversion();
 };
 
 NumericTest::NumericTest() {
     addTests({&NumericTest::less,
               &NumericTest::lessOrEqual,
               &NumericTest::greaterOrEqual,
-              &NumericTest::greater});
+              &NumericTest::greater,
+
+              &NumericTest::explicitBoolConversion});
 }
 
 void NumericTest::less() {
@@ -128,6 +132,24 @@ void NumericTest::greater() {
     }
 
     CORRADE_COMPARE(out.str(), "Value a is not greater than b, actual is 9.27 but expected > 9.28\n");
+}
+
+void NumericTest::explicitBoolConversion() {
+    struct ExplicitBool {
+        explicit operator bool() const { return true; }
+    };
+
+    struct Foo {
+        ExplicitBool operator<(const Foo&) const { return ExplicitBool{}; }
+        ExplicitBool operator<=(const Foo&) const { return ExplicitBool{}; }
+        ExplicitBool operator>=(const Foo&) const { return ExplicitBool{}; }
+        ExplicitBool operator>(const Foo&) const { return ExplicitBool{}; }
+    };
+
+    CORRADE_VERIFY(Comparator<Compare::Less<Foo>>{}({}, {}));
+    CORRADE_VERIFY(Comparator<Compare::LessOrEqual<Foo>>{}({}, {}));
+    CORRADE_VERIFY(Comparator<Compare::GreaterOrEqual<Foo>>{}({}, {}));
+    CORRADE_VERIFY(Comparator<Compare::Greater<Foo>>{}({}, {}));
 }
 
 }}}}
