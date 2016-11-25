@@ -20,7 +20,7 @@ matrix:
     compiler: clang
     env:
     - TARGET=desktop-sanitizers
-    - CMAKE_CXX_FLAGS="-fsanitize=address"
+    - CMAKE_CXX_FLAGS="-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
     addons:
       apt:
         sources:
