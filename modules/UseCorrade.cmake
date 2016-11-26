@@ -236,6 +236,9 @@ if(CORRADE_TARGET_IOS AND NOT CORRADE_TESTSUITE_TARGET_XCTEST)
 endif()
 
 function(corrade_add_test test_name)
+    set(_corrade_file_pair_match "^(.+)@([^@]+)$")
+    set(_corrade_file_pair_replace "\\1;\\2")
+
     # Get DLL and path lists
     foreach(arg ${ARGN})
         if(arg STREQUAL LIBRARIES)
@@ -247,8 +250,37 @@ function(corrade_add_test test_name)
             if(_DOING_LIBRARIES)
                 list(APPEND libraries ${arg})
             elseif(_DOING_FILES)
-                list(APPEND files ${arg})
-                list(APPEND absolute_files ${CMAKE_CURRENT_SOURCE_DIR}/${arg})
+                # If the file is already a pair of file and destination, just
+                # extract them
+                if(${arg} MATCHES ${_corrade_file_pair_match})
+                    set(input_filename ${CMAKE_MATCH_1})
+                    set(output_filename ${CMAKE_MATCH_2})
+
+                # Otherwise create the output filename from the input
+                else()
+                    set(input_filename ${arg})
+
+                    # Extract only the leaf component from absolute filename
+                    # (applies also to paths with ..)
+                    if(IS_ABSOLUTE ${arg} OR ${arg} MATCHES "\\.\\.[\\\\/]")
+                        get_filename_component(output_filename ${arg} NAME)
+
+                    # Otherwise use the full relative path as output filename
+                    else()
+                        set(output_filename ${arg})
+                    endif()
+                endif()
+
+                # Sanity checks
+                if(${output_filename} MATCHES "(\\.\\.[\\\\/]|@)" OR IS_ABSOLUTE ${output_filename})
+                    message(SEND_ERROR "Names of files added to corrade_add_test() can't contain .., @ or be absolute")
+                endif()
+
+                # Convert input to absolute, concatenate the files back and
+                # add to the list
+                get_filename_component(input_filename ${input_filename} ABSOLUTE)
+                list(APPEND files ${input_filename}@${output_filename})
+                list(APPEND absolute_files ${absolute_input_filename})
             else()
                 list(APPEND sources ${arg})
             endif()
@@ -286,7 +318,10 @@ function(corrade_add_test test_name)
 
             # Embed all files
             foreach(file ${files})
-                emscripten_embed_file(${test_name} ${file} "/${file}")
+                string(REGEX REPLACE ${_corrade_file_pair_match} "${_corrade_file_pair_replace}" file_pair ${file})
+                list(GET file_pair 0 input_filename)
+                list(GET file_pair 1 output_filename)
+                emscripten_embed_file(${test_name} ${input_filename} "/${output_filename}")
             endforeach()
 
         # Run tests using ADB on Android
@@ -295,7 +330,7 @@ function(corrade_add_test test_name)
             target_compile_options(${test_name} PRIVATE "-fPIE")
             set_property(TARGET ${test_name} APPEND_STRING PROPERTY LINK_FLAGS "-fPIE -pie")
             # All files will be copied to the target when the test is run
-            add_test(NAME ${test_name} COMMAND ${CORRADE_TESTSUITE_ADB_RUNNER} ${CMAKE_CURRENT_SOURCE_DIR} $<TARGET_FILE_DIR:${test_name}> $<TARGET_FILE_NAME:${test_name}> ${files})
+            add_test(NAME ${test_name} COMMAND ${CORRADE_TESTSUITE_ADB_RUNNER} $<TARGET_FILE_DIR:${test_name}> $<TARGET_FILE_NAME:${test_name}> ${files})
 
         # Run tests natively elsewhere
         else()

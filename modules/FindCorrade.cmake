@@ -131,12 +131,17 @@
 # ``Corrade::TestSuite`` target is linked automatically to each test. Note
 # that the :command:`enable_testing()` function must be called explicitly.
 #
-# You can list files needed by the test in the `FILES` section. The filenames
-# are treated relatively to `CMAKE_CURRENT_SOURCE_DIR`. On desktop platforms
-# the files are added to the :prop_test:`REQUIRED_FILES` target property. On
+# You can list files needed by the test in the ``FILES`` section. If given
+# filename is relative, it is treated relatively to `CMAKE_CURRENT_SOURCE_DIR`.
+# The files are added to the :prop_test:`REQUIRED_FILES` target property. On
 # Emscripten they are bundled to the executable and available in the virtual
 # filesystem root. On Android they are copied along the executable to the
-# target.
+# target. In case of Emscripten and Android, if the file is absolute or
+# contains ``..``, only the leaf name is used. Alternatively you can have a
+# filename formatted as ``<input>@<output>``, in which case the ``<input>`` is
+# treated as local filesystem location and ``<output>`` as remote/virtual
+# filesystem location. The remote location can't be absolute or contain ``..``
+# / ``@`` characters.
 #
 # Unless :variable:`CORRADE_TESTSUITE_TARGET_XCTEST` is set, test cases on iOS
 # targets are created as bundles with bundle identifier set to CMake project

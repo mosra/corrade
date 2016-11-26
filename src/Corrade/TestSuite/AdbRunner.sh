@@ -2,12 +2,11 @@
 set -e
 
 # Usage:
-#  ./AdbRunner.sh /path/to/test/source/dir /path/to/test/binary/dir executable-name additional files...
-source_dir=$1
-binary_dir=$2
-filename=$3
+#  ./AdbRunner.sh /path/to/test/binary/dir executable-name additional files...
+binary_dir=$1
+filename=$2
 # So the additional files are available in $@
-shift && shift && shift
+shift && shift
 
 if [ "$(adb get-state | tr -d '\r\n')" != "device" ]; then
     echo "ERROR: no device connected"
@@ -58,9 +57,13 @@ adb shell 'rm -rf '$remote_tmpdir'; mkdir '$remote_tmpdir
 # directory, preserving directory structure
 adb push "$binary_dir/$filename" $remote_tmpdir | tail -n 1
 for file in "$@"; do
-    dir=$(dirname $file)
+    # TODO: this will probably break horribly when the filenames contain spaces
+    # and/or multiple @ characters (only the last should be taken). Sorry about
+    # that, if you fix it and provide a patch, I'll be *very* happy.
+    file_pair=(${file//@/ })
+    dir=$(dirname ${file_pair[1]})
     adb shell "mkdir -p $remote_tmpdir/$dir"
-    adb push "$source_dir/$file" "$remote_tmpdir/$dir" | tail -n 1
+    adb push "${file_pair[0]}" "$remote_tmpdir/${file_pair[1]}" | tail -n 1
 done
 
 # No comment. https://code.google.com/p/android/issues/detail?id=3254

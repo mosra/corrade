@@ -24,3 +24,22 @@
 #
 
 corrade_add_test(TestSuiteTesterTest TesterTest.cpp)
+
+if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
+    set(RELATIVE_TEST_DIR ".")
+    set(ABSOLUTE_TEST_DIR ".")
+else()
+    set(RELATIVE_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+    set(ABSOLUTE_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/BundledFilesTestFiles)
+endif()
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
+               ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
+
+corrade_add_test(TestSuiteBundledFilesTest BundledFilesTest.cpp
+    FILES
+        BundledFilesTestFiles/a.txt
+        ../Test/BundledFilesTestFiles/b.txt
+        ${CMAKE_CURRENT_SOURCE_DIR}/BundledFilesTestFiles/c.txt
+        ${CMAKE_CURRENT_SOURCE_DIR}/BundledFilesTestFiles/../BundledFilesTestFiles/d.txt@BundledFilesTestFiles/d.txt)
+target_include_directories(TestSuiteBundledFilesTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})

@@ -170,11 +170,16 @@ instead of using `target_link_libraries()`. `Corrade::TestSuite` target is
 linked automatically to each test. Note that the `enable_testing()` function
 must be called explicitly.
 
-You can list files needed by the test in the `FILES` section. The filenames are
-treated relatively to `CMAKE_CURRENT_SOURCE_DIR`. On desktop platforms the
-files are added to the `REQUIRED_FILES` test property. On Emscripten they are
-bundled to the executable and available in the virtual filesystem root. On
-Android they are copied along the executable to the target.
+You can list files needed by the test in the `FILES` section. If given
+filename is relative, it is treated relatively to `CMAKE_CURRENT_SOURCE_DIR`.
+The files are added to the `REQUIRED_FILES` target property. On Emscripten they
+are bundled to the executable and available in the virtual filesystem root. On
+Android they are copied along the executable to the target. In case of
+Emscripten and Android, if the file is absolute or contains `..`, only the leaf
+name is used. Alternatively you can have a filename formatted as `<input>@<output>`,
+in which case the `<input>` is treated as local filesystem location and
+`<output>` as remote/virtual filesystem location. The remote location can't be
+absolute or contain `..` / `@` characters.
 
 Unless @ref CORRADE_TESTSUITE_TARGET_XCTEST is set, test cases run on an
 @ref CORRADE_TARGET_IOS "iOS" device are created as bundles with bundle
