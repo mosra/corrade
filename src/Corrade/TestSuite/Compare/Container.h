@@ -133,7 +133,6 @@ template<class T> bool Comparator<Compare::SortedContainer<T>>::operator()(const
 
     return Comparator<Compare::Container<T>>::operator()(_actualSorted, _expectedSorted);
 }
-
 #endif
 
 }}

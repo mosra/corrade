@@ -94,6 +94,7 @@ template<class T> class Greater {};
 
 }
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 template<class T> class Comparator<Compare::Less<T>> {
     public:
         bool operator()(const T& actual, const T& expected) {
@@ -169,6 +170,7 @@ template<class T> class Comparator<Compare::Greater<T>> {
         const T* _actualValue;
         const T* _expectedValue;
 };
+#endif
 
 }}
 
