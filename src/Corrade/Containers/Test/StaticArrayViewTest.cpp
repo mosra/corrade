@@ -33,7 +33,7 @@ namespace Corrade { namespace Containers { namespace Test {
 struct StaticArrayViewTest: TestSuite::Tester {
     explicit StaticArrayViewTest();
 
-    void constructEmpty();
+    void constructDefault();
     void constructNullptr();
     void construct();
     void constructFixedSize();
@@ -59,7 +59,7 @@ template<std::size_t size> using ConstStaticArrayView = Containers::StaticArrayV
 typedef Containers::ArrayView<const void> VoidArrayView;
 
 StaticArrayViewTest::StaticArrayViewTest() {
-    addTests({&StaticArrayViewTest::constructEmpty,
+    addTests({&StaticArrayViewTest::constructDefault,
               &StaticArrayViewTest::constructNullptr,
               &StaticArrayViewTest::construct,
               &StaticArrayViewTest::constructFixedSize,
@@ -78,9 +78,12 @@ StaticArrayViewTest::StaticArrayViewTest() {
               &StaticArrayViewTest::sliceToStatic});
 }
 
-void StaticArrayViewTest::constructEmpty() {
+void StaticArrayViewTest::constructDefault() {
     const StaticArrayView<5> a;
     CORRADE_VERIFY(a == nullptr);
+    CORRADE_VERIFY(!a.empty());
+    CORRADE_COMPARE(a.size(), StaticArrayView<5>::Size);
+    CORRADE_COMPARE(a.size(), 5);
 }
 
 void StaticArrayViewTest::constructNullptr() {

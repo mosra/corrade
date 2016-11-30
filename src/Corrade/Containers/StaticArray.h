@@ -102,10 +102,12 @@ int index = 0;
 for(Foo& f: d) new(&f) Foo(index++);
 @endcode
 */
-template<std::size_t size, class T> class StaticArray {
+/* Underscore at the end to avoid conflict with member size(). It's ugly, but
+   having count instead of size_ would make the naming horribly inconsistent. */
+template<std::size_t size_, class T> class StaticArray {
     public:
         enum: std::size_t {
-            Size = size     /**< Array size */
+            Size = size_    /**< Array size */
         };
         typedef T Type;     /**< @brief Element type */
 
@@ -172,18 +174,18 @@ template<std::size_t size, class T> class StaticArray {
         explicit StaticArray(): StaticArray{DefaultInit} {}
 
         /** @brief Copying is not allowed */
-        StaticArray(const StaticArray<size, T>&) = delete;
+        StaticArray(const StaticArray<size_, T>&) = delete;
 
         /** @brief Moving is not allowed */
-        StaticArray(StaticArray<size, T>&&) = delete;
+        StaticArray(StaticArray<size_, T>&&) = delete;
 
         ~StaticArray();
 
         /** @brief Copying is not allowed */
-        StaticArray<size, T>& operator=(const StaticArray<size, T>&) = delete;
+        StaticArray<size_, T>& operator=(const StaticArray<size_, T>&) = delete;
 
         /** @brief Moving is not allowed */
-        StaticArray<size, T>& operator=(StaticArray<size, T>&&) = delete;
+        StaticArray<size_, T>& operator=(StaticArray<size_, T>&&) = delete;
 
         /**
          * @brief Convert to @ref ArrayView
@@ -197,7 +199,7 @@ template<std::size_t size, class T> class StaticArray {
         #else
         template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value>::type>
         #endif
-        /*implicit*/ operator ArrayView<U>() noexcept { return {_data, size}; }
+        /*implicit*/ operator ArrayView<U>() noexcept { return {_data, size_}; }
 
         /**
          * @brief Convert to const @ref ArrayView
@@ -211,7 +213,7 @@ template<std::size_t size, class T> class StaticArray {
         #else
         template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value>::type>
         #endif
-        /*implicit*/ operator ArrayView<const U>() const noexcept { return {_data, size}; }
+        /*implicit*/ operator ArrayView<const U>() const noexcept { return {_data, size_}; }
 
         /**
          * @brief Convert to @ref StaticArrayView
@@ -225,8 +227,8 @@ template<std::size_t size, class T> class StaticArray {
         #else
         template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value>::type>
         #endif
-        /*implicit*/ operator StaticArrayView<size, U>() noexcept {
-            return StaticArrayView<size, U>{_data};
+        /*implicit*/ operator StaticArrayView<size_, U>() noexcept {
+            return StaticArrayView<size_, U>{_data};
         }
 
         /**
@@ -241,8 +243,8 @@ template<std::size_t size, class T> class StaticArray {
         #else
         template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value>::type>
         #endif
-        /*implicit*/ operator StaticArrayView<size, const U>() const noexcept {
-            return StaticArrayView<size, const U>{_data};
+        /*implicit*/ operator StaticArrayView<size_, const U>() const noexcept {
+            return StaticArrayView<size_, const U>{_data};
         }
 
         /* `char* a = Containers::Array<char>(5); a[3] = 5;` would result in
@@ -267,15 +269,29 @@ template<std::size_t size, class T> class StaticArray {
         T* data() { return _data; }
         const T* data() const { return _data; }             /**< @overload */
 
+        /**
+         * @brief Array size
+         *
+         * Equivalent to @ref Size.
+         */
+        constexpr std::size_t size() const { return size_; }
+
+        /**
+         * @brief Whether the array is empty
+         *
+         * Always true (it's not possible to create zero-sized C array).
+         */
+        constexpr bool empty() const { return !size_; }
+
         /** @brief Pointer to first element */
         T* begin() { return _data; }
         const T* begin() const { return _data; }            /**< @overload */
         const T* cbegin() const { return _data; }           /**< @overload */
 
         /** @brief Pointer to (one item after) last element */
-        T* end() { return _data + size; }
-        const T* end() const { return _data + size; }       /**< @overload */
-        const T* cend() const { return _data + size; }      /**< @overload */
+        T* end() { return _data + size_; }
+        const T* end() const { return _data + size_; }      /**< @overload */
+        const T* cend() const { return _data + size_; }     /**< @overload */
 
         /**
          * @brief Reference to array slice
@@ -363,18 +379,18 @@ template<std::size_t size, class T> class StaticArray {
         #endif
 
         union {
-            T _data[size];
+            T _data[size_];
         };
 };
 
-template<std::size_t size, class T> template<class ...Args> StaticArray<size, T>::StaticArray(DirectInitT, Args&&... args): StaticArray{NoInit} {
+template<std::size_t size_, class T> template<class ...Args> StaticArray<size_, T>::StaticArray(DirectInitT, Args&&... args): StaticArray{NoInit} {
     for(T& i: _data) {
         /* MSVC 2015 needs the braces around */
         new(&i) T{std::forward<Args>(args)...};
     }
 }
 
-template<std::size_t size, class T> StaticArray<size, T>::~StaticArray() {
+template<std::size_t size_, class T> StaticArray<size_, T>::~StaticArray() {
     for(T& i: _data) i.~T();
 }
 

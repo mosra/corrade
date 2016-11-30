@@ -177,13 +177,13 @@ template<class T> class ArrayView {
         /**
          * @brief Fixed-size array slice
          *
-         * Both @p begin and `begin + count` are expected to be in range.
+         * Both @p begin and `begin + size` are expected to be in range.
          */
-        template<std::size_t count> StaticArrayView<count, T> slice(T* begin) const;
+        template<std::size_t size> StaticArrayView<size, T> slice(T* begin) const;
 
         /** @overload */
-        template<std::size_t count> StaticArrayView<count, T> slice(std::size_t begin) const {
-            return slice<count>(_data + begin);
+        template<std::size_t size> StaticArrayView<size, T> slice(std::size_t begin) const {
+            return slice<size>(_data + begin);
         }
 
         /**
@@ -312,12 +312,14 @@ Containers::ArrayView<int> fiveInts2 = data; // fiveInts2.size() == 5
 Containers::ArrayView<int> threeInts = data.slice(2, 5);
 @endcode
 */
-template<std::size_t size, class T> class StaticArrayView {
+/* Underscore at the end to avoid conflict with member size(). It's ugly, but
+   having count instead of size_ would make the naming horribly inconsistent. */
+template<std::size_t size_, class T> class StaticArrayView {
     public:
         typedef T Type;     /**< @brief Element type */
 
         enum: std::size_t {
-            Size = size     /**< Array view size */
+            Size = size_    /**< Array view size */
         };
 
         /** @brief Conversion from `nullptr` */
@@ -335,7 +337,12 @@ template<std::size_t size, class T> class StaticArrayView {
          * @brief Constructor
          * @param data      Data pointer
          */
-        template<class U, class = typename std::enable_if<!std::is_same<U, T(&)[size]>::value>::type> constexpr explicit StaticArrayView(U data) noexcept: _data(data) {}
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        constexpr explicit StaticArrayView(T* data)
+        #else
+        template<class U, class = typename std::enable_if<!std::is_same<U, T(&)[size_]>::value>::type> constexpr explicit StaticArrayView(U data)
+        #endif
+        noexcept: _data(data) {}
 
         /**
          * @brief Construct view of fixed-size array
@@ -350,7 +357,7 @@ template<std::size_t size, class T> class StaticArrayView {
         #else
         template<class U, class V = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
         #endif
-        constexpr /*implicit*/ StaticArrayView(U(&data)[size]) noexcept: _data{data} {}
+        constexpr /*implicit*/ StaticArrayView(U(&data)[size_]) noexcept: _data{data} {}
 
         #ifndef CORRADE_MSVC2015_COMPATIBILITY
         /** @brief Whether the array is non-empty */
@@ -365,13 +372,19 @@ template<std::size_t size, class T> class StaticArrayView {
         /** @brief Array data */
         constexpr T* data() const { return _data; }
 
+        /** @brief Array size */
+        constexpr std::size_t size() const { return size_; }
+
+        /** @brief Whether the array is empty */
+        constexpr bool empty() const { return !size_; }
+
         /** @brief Pointer to first element */
         constexpr T* begin() const { return _data; }
         constexpr T* cbegin() const { return _data; }   /**< @overload */
 
         /** @brief Pointer to (one item after) last element */
-        T* end() const { return _data+size; }
-        T* cend() const { return _data+size; }         /**< @overload */
+        T* end() const { return _data + size_; }
+        T* cend() const { return _data + size_; }       /**< @overload */
 
         /** @copydoc ArrayView::slice(T*, T*) const */
         ArrayView<T> slice(T* begin, T* end) const {
@@ -383,12 +396,12 @@ template<std::size_t size, class T> class StaticArrayView {
         }
 
         /** @copydoc ArrayView::slice(T*) const */
-        template<std::size_t count> StaticArrayView<count, T> slice(T* begin) const {
-            return ArrayView<T>(*this).template slice<count>(begin);
+        template<std::size_t viewSize> StaticArrayView<viewSize, T> slice(T* begin) const {
+            return ArrayView<T>(*this).template slice<viewSize>(begin);
         }
         /** @overload */
-        template<std::size_t count> StaticArrayView<count, T> slice(std::size_t begin) const {
-            return ArrayView<T>(*this).template slice<count>(begin);
+        template<std::size_t viewSize> StaticArrayView<viewSize, T> slice(std::size_t begin) const {
+            return ArrayView<T>(*this).template slice<viewSize>(begin);
         }
 
         /** @copydoc ArrayView::prefix(T*) const */
@@ -419,10 +432,10 @@ template<class T> ArrayView<T> ArrayView<T>::slice(T* begin, T* end) const {
     return ArrayView<T>{begin, std::size_t(end - begin)};
 }
 
-template<class T> template<std::size_t count> StaticArrayView<count, T> ArrayView<T>::slice(T* begin) const {
-    CORRADE_ASSERT(_data <= begin && begin + count <= _data + _size,
+template<class T> template<std::size_t size> StaticArrayView<size, T> ArrayView<T>::slice(T* begin) const {
+    CORRADE_ASSERT(_data <= begin && begin + size <= _data + _size,
         "Containers::ArrayView::slice(): slice out of range", nullptr);
-    return StaticArrayView<count, T>{begin};
+    return StaticArrayView<size, T>{begin};
 }
 
 }}

@@ -94,6 +94,9 @@ StaticArrayTest::StaticArrayTest() {
 void StaticArrayTest::construct() {
     const StaticArray a;
     CORRADE_VERIFY(a);
+    CORRADE_VERIFY(!a.empty());
+    CORRADE_COMPARE(a.size(), StaticArray::Size);
+    CORRADE_COMPARE(a.size(), 5);
 }
 
 void StaticArrayTest::constructDefaultInit() {
