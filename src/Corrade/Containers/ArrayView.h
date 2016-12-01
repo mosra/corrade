@@ -177,13 +177,13 @@ template<class T> class ArrayView {
         /**
          * @brief Fixed-size array slice
          *
-         * Both @p begin and `begin + size` are expected to be in range.
+         * Both @p begin and `begin + viewSize` are expected to be in range.
          */
-        template<std::size_t size> StaticArrayView<size, T> slice(T* begin) const;
+        template<std::size_t viewSize> StaticArrayView<viewSize, T> slice(T* begin) const;
 
         /** @overload */
-        template<std::size_t size> StaticArrayView<size, T> slice(std::size_t begin) const {
-            return slice<size>(_data + begin);
+        template<std::size_t viewSize> StaticArrayView<viewSize, T> slice(std::size_t begin) const {
+            return slice<viewSize>(_data + begin);
         }
 
         /**
@@ -432,10 +432,10 @@ template<class T> ArrayView<T> ArrayView<T>::slice(T* begin, T* end) const {
     return ArrayView<T>{begin, std::size_t(end - begin)};
 }
 
-template<class T> template<std::size_t size> StaticArrayView<size, T> ArrayView<T>::slice(T* begin) const {
-    CORRADE_ASSERT(_data <= begin && begin + size <= _data + _size,
+template<class T> template<std::size_t viewSize> StaticArrayView<viewSize, T> ArrayView<T>::slice(T* begin) const {
+    CORRADE_ASSERT(_data <= begin && begin + viewSize <= _data + _size,
         "Containers::ArrayView::slice(): slice out of range", nullptr);
-    return StaticArrayView<size, T>{begin};
+    return StaticArrayView<viewSize, T>{begin};
 }
 
 }}
