@@ -31,8 +31,6 @@
 
 #include "configure.h"
 
-using Corrade::Utility::Directory;
-
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test {
 
 struct FileTest: Tester {
@@ -73,7 +71,7 @@ void FileTest::actualNotFound() {
     {
         Error e(&out);
         Comparator<Compare::File> compare;
-        CORRADE_VERIFY(!compare("nonexistent.txt", Directory::join(FILETEST_DIR, "base.txt")));
+        CORRADE_VERIFY(!compare("nonexistent.txt", Utility::Directory::join(FILETEST_DIR, "base.txt")));
         compare.printErrorMessage(e, "a", "b");
     }
 
@@ -86,7 +84,7 @@ void FileTest::expectedNotFound() {
     {
         Error e(&out);
         Comparator<Compare::File> compare;
-        CORRADE_VERIFY(!compare(Directory::join(FILETEST_DIR, "base.txt"), "nonexistent.txt"));
+        CORRADE_VERIFY(!compare(Utility::Directory::join(FILETEST_DIR, "base.txt"), "nonexistent.txt"));
         compare.printErrorMessage(e, "a", "b");
     }
 

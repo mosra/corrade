@@ -37,8 +37,6 @@
 #include "../configure.h"
 #include "configure.h"
 
-using Corrade::Utility::Directory;
-
 static void initialize() {
     CORRADE_PLUGIN_IMPORT(Canary)
 }
@@ -119,12 +117,12 @@ Test::Test() {
 namespace {
     #ifndef CMAKE_INTDIR
     const std::string pluginsDir = PLUGINS_DIR;
-    const std::string foodPluginsDir = Directory::join(PLUGINS_DIR, "food");
-    const std::string deletablePluginsDir = Directory::join(PLUGINS_DIR, "deletable");
+    const std::string foodPluginsDir = Utility::Directory::join(PLUGINS_DIR, "food");
+    const std::string deletablePluginsDir = Utility::Directory::join(PLUGINS_DIR, "deletable");
     #else
-    const std::string pluginsDir = Directory::join(PLUGINS_DIR, CMAKE_INTDIR);
-    const std::string foodPluginsDir = Directory::join(Directory::join(PLUGINS_DIR, "food"), CMAKE_INTDIR);
-    const std::string deletablePluginsDir = Directory::join(Directory::join(PLUGINS_DIR, "deletable"), CMAKE_INTDIR);
+    const std::string pluginsDir = Utility::Directory::join(PLUGINS_DIR, CMAKE_INTDIR);
+    const std::string foodPluginsDir = Utility::Directory::join(Utility::Directory::join(PLUGINS_DIR, "food"), CMAKE_INTDIR);
+    const std::string deletablePluginsDir = Utility::Directory::join(Utility::Directory::join(PLUGINS_DIR, "deletable"), CMAKE_INTDIR);
     #endif
 }
 
@@ -445,16 +443,16 @@ void Test::reloadPluginDirectory() {
 
     /* Load Dog and rename the plugin */
     CORRADE_COMPARE(manager.load("Dog"), LoadState::Loaded);
-    Directory::move(Directory::join(pluginsDir, std::string("Dog") + PLUGIN_FILENAME_SUFFIX),
-                    Directory::join(pluginsDir, std::string("LostDog") + PLUGIN_FILENAME_SUFFIX));
-    Directory::move(Directory::join(pluginsDir, "Dog.conf"),
-                    Directory::join(pluginsDir, "LostDog.conf"));
+    Utility::Directory::move(Utility::Directory::join(pluginsDir, std::string("Dog") + PLUGIN_FILENAME_SUFFIX),
+                             Utility::Directory::join(pluginsDir, std::string("LostDog") + PLUGIN_FILENAME_SUFFIX));
+    Utility::Directory::move(Utility::Directory::join(pluginsDir, "Dog.conf"),
+                             Utility::Directory::join(pluginsDir, "LostDog.conf"));
 
     /* Rename PitBull */
-    Directory::move(Directory::join(pluginsDir, std::string("PitBull") + PLUGIN_FILENAME_SUFFIX),
-                    Directory::join(pluginsDir, std::string("LostPitBull") + PLUGIN_FILENAME_SUFFIX));
-    Directory::move(Directory::join(pluginsDir, "PitBull.conf"),
-                    Directory::join(pluginsDir, "LostPitBull.conf"));
+    Utility::Directory::move(Utility::Directory::join(pluginsDir, std::string("PitBull") + PLUGIN_FILENAME_SUFFIX),
+                             Utility::Directory::join(pluginsDir, std::string("LostPitBull") + PLUGIN_FILENAME_SUFFIX));
+    Utility::Directory::move(Utility::Directory::join(pluginsDir, "PitBull.conf"),
+                             Utility::Directory::join(pluginsDir, "LostPitBull.conf"));
 
     /* Reload plugin dir and check new name list */
     manager.reloadPluginDirectory();
@@ -468,15 +466,15 @@ void Test::reloadPluginDirectory() {
     /** @todo Also test that "WrongMetadataFile" plugins are reloaded */
 
     /* Rename everything back and clean up */
-    Directory::move(Directory::join(pluginsDir, std::string("LostDog") + PLUGIN_FILENAME_SUFFIX),
-                    Directory::join(pluginsDir, std::string("Dog") + PLUGIN_FILENAME_SUFFIX));
-    Directory::move(Directory::join(pluginsDir, "LostDog.conf"),
-                    Directory::join(pluginsDir, "Dog.conf"));
+    Utility::Directory::move(Utility::Directory::join(pluginsDir, std::string("LostDog") + PLUGIN_FILENAME_SUFFIX),
+                             Utility::Directory::join(pluginsDir, std::string("Dog") + PLUGIN_FILENAME_SUFFIX));
+    Utility::Directory::move(Utility::Directory::join(pluginsDir, "LostDog.conf"),
+                             Utility::Directory::join(pluginsDir, "Dog.conf"));
 
-    Directory::move(Directory::join(pluginsDir, std::string("LostPitBull") + PLUGIN_FILENAME_SUFFIX),
-                    Directory::join(pluginsDir, std::string("PitBull") + PLUGIN_FILENAME_SUFFIX));
-    Directory::move(Directory::join(pluginsDir, "LostPitBull.conf"),
-                    Directory::join(pluginsDir, "PitBull.conf"));
+    Utility::Directory::move(Utility::Directory::join(pluginsDir, std::string("LostPitBull") + PLUGIN_FILENAME_SUFFIX),
+                             Utility::Directory::join(pluginsDir, std::string("PitBull") + PLUGIN_FILENAME_SUFFIX));
+    Utility::Directory::move(Utility::Directory::join(pluginsDir, "LostPitBull.conf"),
+                             Utility::Directory::join(pluginsDir, "PitBull.conf"));
 
     manager.reloadPluginDirectory();
 

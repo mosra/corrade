@@ -31,8 +31,6 @@
 
 #include "configure.h"
 
-using Corrade::Utility::Directory;
-
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test {
 
 struct FileToStringTest: Tester {
@@ -58,11 +56,11 @@ FileToStringTest::FileToStringTest() {
 }
 
 void FileToStringTest::same() {
-    CORRADE_VERIFY(Comparator<Compare::FileToString>()(Directory::join(FILETEST_DIR, "base.txt"), "Hello World!"));
+    CORRADE_VERIFY(Comparator<Compare::FileToString>()(Utility::Directory::join(FILETEST_DIR, "base.txt"), "Hello World!"));
 }
 
 void FileToStringTest::empty() {
-    CORRADE_VERIFY(Comparator<Compare::FileToString>()(Directory::join(FILETEST_DIR, "empty.txt"), ""));
+    CORRADE_VERIFY(Comparator<Compare::FileToString>()(Utility::Directory::join(FILETEST_DIR, "empty.txt"), ""));
 }
 
 void FileToStringTest::notFound() {
@@ -84,7 +82,7 @@ void FileToStringTest::outputActualSmaller() {
     {
         Error e(&out);
         Comparator<Compare::FileToString> compare;
-        CORRADE_VERIFY(!compare(Directory::join(FILETEST_DIR, "smaller.txt"), "Hello World!"));
+        CORRADE_VERIFY(!compare(Utility::Directory::join(FILETEST_DIR, "smaller.txt"), "Hello World!"));
         compare.printErrorMessage(e, "a", "b");
     }
 
@@ -97,7 +95,7 @@ void FileToStringTest::outputExpectedSmaller() {
     {
         Error e(&out);
         Comparator<Compare::FileToString> compare;
-        CORRADE_VERIFY(!compare(Directory::join(FILETEST_DIR, "base.txt"), "Hello W"));
+        CORRADE_VERIFY(!compare(Utility::Directory::join(FILETEST_DIR, "base.txt"), "Hello W"));
         compare.printErrorMessage(e, "a", "b");
     }
 
@@ -110,7 +108,7 @@ void FileToStringTest::output() {
     {
         Error e(&out);
         Comparator<Compare::FileToString> compare;
-        CORRADE_VERIFY(!compare(Directory::join(FILETEST_DIR, "different.txt"), "Hello World!"));
+        CORRADE_VERIFY(!compare(Utility::Directory::join(FILETEST_DIR, "different.txt"), "Hello World!"));
         compare.printErrorMessage(e, "a", "b");
     }
 

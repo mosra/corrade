@@ -64,23 +64,23 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Utility/String.h"
 
-namespace Corrade { namespace Utility {
+namespace Corrade { namespace Utility { namespace Directory {
 
-std::string Directory::fromNativeSeparators(std::string path) {
+std::string fromNativeSeparators(std::string path) {
     #ifdef CORRADE_TARGET_WINDOWS
     std::replace(path.begin(), path.end(), '\\', '/');
     #endif
     return path;
 }
 
-std::string Directory::toNativeSeparators(std::string path) {
+std::string toNativeSeparators(std::string path) {
     #ifdef CORRADE_TARGET_WINDOWS
     std::replace(path.begin(), path.end(), '/', '\\');
     #endif
     return path;
 }
 
-std::string Directory::path(const std::string& filename) {
+std::string path(const std::string& filename) {
     /* If filename is already a path, return it */
     if(!filename.empty() && filename.back() == '/')
         return filename.substr(0, filename.size()-1);
@@ -94,7 +94,7 @@ std::string Directory::path(const std::string& filename) {
     return filename.substr(0, pos);
 }
 
-std::string Directory::filename(const std::string& filename) {
+std::string filename(const std::string& filename) {
     std::size_t pos = filename.find_last_of('/');
 
     /* Return whole filename if it doesn't contain slash */
@@ -104,7 +104,7 @@ std::string Directory::filename(const std::string& filename) {
     return filename.substr(pos+1);
 }
 
-std::string Directory::join(const std::string& path, const std::string& filename) {
+std::string join(const std::string& path, const std::string& filename) {
     /* Empty path */
     if(path.empty()) return filename;
 
@@ -126,7 +126,7 @@ std::string Directory::join(const std::string& path, const std::string& filename
 }
 
 #ifndef CORRADE_TARGET_NACL_NEWLIB
-bool Directory::mkpath(const std::string& path) {
+bool mkpath(const std::string& path) {
     if(path.empty()) return false;
 
     /* If path contains trailing slash, strip it */
@@ -158,7 +158,7 @@ bool Directory::mkpath(const std::string& path) {
     #endif
 }
 
-bool Directory::rm(const std::string& path) {
+bool rm(const std::string& path) {
     #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     /* std::remove() can't remove directories on Windows */
     if(GetFileAttributes(path.data()) & FILE_ATTRIBUTE_DIRECTORY)
@@ -175,12 +175,12 @@ bool Directory::rm(const std::string& path) {
     return std::remove(path.data()) == 0;
 }
 
-bool Directory::move(const std::string& oldPath, const std::string& newPath) {
+bool move(const std::string& oldPath, const std::string& newPath) {
     return std::rename(oldPath.data(), newPath.data()) == 0;
 }
 #endif
 
-bool Directory::fileExists(const std::string& filename) {
+bool fileExists(const std::string& filename) {
     /* Sane platforms */
     #ifndef CORRADE_TARGET_WINDOWS
     return std::ifstream(filename).good();
@@ -197,7 +197,7 @@ bool Directory::fileExists(const std::string& filename) {
     #endif
 }
 
-bool Directory::isSandboxed() {
+bool isSandboxed() {
     #if defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID) || defined(CORRADE_TARGET_NACL) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT)
     return true;
     #elif defined(CORRADE_TARGET_APPLE)
@@ -207,7 +207,7 @@ bool Directory::isSandboxed() {
     #endif
 }
 
-std::string Directory::executableLocation() {
+std::string executableLocation() {
     /* Linux */
     #if defined(__linux__)
     /* Reallocate like hell until we have enough place to store the path. Can't
@@ -254,7 +254,7 @@ std::string Directory::executableLocation() {
     #endif
 }
 
-std::string Directory::home() {
+std::string home() {
     /* Unix, Emscripten */
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     if(const char* const h = std::getenv("HOME"))
@@ -275,7 +275,7 @@ std::string Directory::home() {
     #endif
 }
 
-std::string Directory::configurationDir(const std::string& applicationName) {
+std::string configurationDir(const std::string& applicationName) {
     /* OSX, iOS */
     #ifdef CORRADE_TARGET_APPLE
     return join(home(), "Library/Application Support/" + applicationName);
@@ -306,7 +306,7 @@ std::string Directory::configurationDir(const std::string& applicationName) {
     #endif
 }
 
-std::string Directory::tmp() {
+std::string tmp() {
     #ifdef CORRADE_TARGET_UNIX
     /* Sandboxed OSX, iOS */
     #ifdef CORRADE_TARGET_APPLE
@@ -341,7 +341,7 @@ std::string Directory::tmp() {
     #endif
 }
 
-std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
+std::vector<std::string> list(const std::string& path, Flags flags) {
     std::vector<std::string> list;
 
     /* POSIX-compliant Unix, Emscripten */
@@ -411,7 +411,7 @@ std::vector<std::string> Directory::list(const std::string& path, Flags flags) {
     return list;
 }
 
-Containers::Array<char> Directory::read(const std::string& filename) {
+Containers::Array<char> read(const std::string& filename) {
     std::ifstream file(filename, std::ifstream::binary);
     if(!file) return nullptr;
 
@@ -447,13 +447,13 @@ Containers::Array<char> Directory::read(const std::string& filename) {
     return out;
 }
 
-std::string Directory::readString(const std::string& filename) {
+std::string readString(const std::string& filename) {
     const auto data = read(filename);
 
     return {data, data.size()};
 }
 
-bool Directory::write(const std::string& filename, const Containers::ArrayView<const void> data) {
+bool write(const std::string& filename, const Containers::ArrayView<const void> data) {
     std::ofstream file(filename, std::ofstream::binary);
     if(!file) return false;
 
@@ -461,19 +461,19 @@ bool Directory::write(const std::string& filename, const Containers::ArrayView<c
     return true;
 }
 
-bool Directory::writeString(const std::string& filename, const std::string& data) {
+bool writeString(const std::string& filename, const std::string& data) {
     static_assert(sizeof(std::string::value_type) == 1, "std::string doesn't have 8-bit characters");
     return write(filename, {data.data(), data.size()});
 }
 
 #ifdef CORRADE_TARGET_UNIX
-void Directory::MapDeleter::operator()(const char* const data, const std::size_t size) {
+void MapDeleter::operator()(const char* const data, const std::size_t size) {
     if(data && munmap(const_cast<char*>(data), size) == -1)
         Error() << "Utility::Directory: can't unmap memory-mapped file";
     if(_fd) close(_fd);
 }
 
-Containers::Array<char, Directory::MapDeleter> Directory::map(const std::string& filename, std::size_t size) {
+Containers::Array<char, MapDeleter> map(const std::string& filename, std::size_t size) {
     /* Open the file for writing. Create if it doesn't exist, truncate it if it
        does. */
     const int fd = open(filename.data(), O_RDWR|O_CREAT|O_TRUNC, mode_t(0600));
@@ -507,7 +507,7 @@ Containers::Array<char, Directory::MapDeleter> Directory::map(const std::string&
     return Containers::Array<char, MapDeleter>{data, size, MapDeleter{fd}};
 }
 
-Containers::Array<const char, Directory::MapDeleter> Directory::mapRead(const std::string& filename) {
+Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
     /* Open the file for reading */
     const int fd = open(filename.data(), O_RDONLY);
     if(fd == -1) {
@@ -531,13 +531,13 @@ Containers::Array<const char, Directory::MapDeleter> Directory::mapRead(const st
     return Containers::Array<const char, MapDeleter>{data, size, MapDeleter{fd}};
 }
 #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-void Directory::MapDeleter::operator()(const char* const data, const std::size_t) {
+void MapDeleter::operator()(const char* const data, const std::size_t) {
     if(data) UnmapViewOfFile(data);
     if(_hMap) CloseHandle(_hMap);
     if(_hFile) CloseHandle(_hFile);
 }
 
-Containers::Array<char, Directory::MapDeleter> Directory::map(const std::string& filename, std::size_t size) {
+Containers::Array<char, MapDeleter> map(const std::string& filename, std::size_t size) {
     /* Open the file for writing. Create if it doesn't exist, truncate it if it
        does. */
     HANDLE hFile = CreateFileA(filename.data(),
@@ -567,7 +567,7 @@ Containers::Array<char, Directory::MapDeleter> Directory::map(const std::string&
     return Containers::Array<char, MapDeleter>{data, size, MapDeleter{hFile, hMap}};
 }
 
-Containers::Array<const char, Directory::MapDeleter> Directory::mapRead(const std::string& filename) {
+Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
     /* Open the file for reading */
     HANDLE hFile = CreateFileA(filename.data(),
         GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
@@ -600,4 +600,4 @@ Containers::Array<const char, Directory::MapDeleter> Directory::mapRead(const st
 }
 #endif
 
-}}
+}}}

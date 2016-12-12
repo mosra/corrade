@@ -31,8 +31,6 @@
 
 #include "configure.h"
 
-using Corrade::Utility::Directory;
-
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test {
 
 class StringToFileTest: public Tester {
@@ -59,11 +57,11 @@ StringToFileTest::StringToFileTest() {
 }
 
 void StringToFileTest::same() {
-    CORRADE_VERIFY(Comparator<Compare::StringToFile>()("Hello World!", Directory::join(FILETEST_DIR, "base.txt")));
+    CORRADE_VERIFY(Comparator<Compare::StringToFile>()("Hello World!", Utility::Directory::join(FILETEST_DIR, "base.txt")));
 }
 
 void StringToFileTest::empty() {
-    CORRADE_VERIFY(Comparator<Compare::StringToFile>()("", Directory::join(FILETEST_DIR, "empty.txt")));
+    CORRADE_VERIFY(Comparator<Compare::StringToFile>()("", Utility::Directory::join(FILETEST_DIR, "empty.txt")));
 }
 
 void StringToFileTest::notFound() {
@@ -85,7 +83,7 @@ void StringToFileTest::outputActualSmaller() {
     {
         Error e(&out);
         Comparator<Compare::StringToFile> compare;
-        CORRADE_VERIFY(!compare("Hello W", Directory::join(FILETEST_DIR, "base.txt")));
+        CORRADE_VERIFY(!compare("Hello W", Utility::Directory::join(FILETEST_DIR, "base.txt")));
         compare.printErrorMessage(e, "a", "b");
     }
 
@@ -98,7 +96,7 @@ void StringToFileTest::outputExpectedSmaller() {
     {
         Error e(&out);
         Comparator<Compare::StringToFile> compare;
-        CORRADE_VERIFY(!compare("Hello World!", Directory::join(FILETEST_DIR, "smaller.txt")));
+        CORRADE_VERIFY(!compare("Hello World!", Utility::Directory::join(FILETEST_DIR, "smaller.txt")));
         compare.printErrorMessage(e, "a", "b");
     }
 
@@ -111,7 +109,7 @@ void StringToFileTest::output() {
     {
         Error e(&out);
         Comparator<Compare::StringToFile> compare;
-        CORRADE_VERIFY(!compare("Hello world?", Directory::join(FILETEST_DIR, "base.txt")));
+        CORRADE_VERIFY(!compare("Hello world?", Utility::Directory::join(FILETEST_DIR, "base.txt")));
         compare.printErrorMessage(e, "a", "b");
     }
 
