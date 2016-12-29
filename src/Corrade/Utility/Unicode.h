@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Utility::Unicode
+ * @brief Namespace @ref Corrade::Utility::Unicode
  */
 
 #include <cstddef>
@@ -36,55 +36,51 @@
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Utility/visibility.h"
 
-namespace Corrade { namespace Utility {
+namespace Corrade { namespace Utility { namespace Unicode {
 
-/** @brief Unicode utilities */
-class CORRADE_UTILITY_EXPORT Unicode {
-    public:
-        /**
-         * @brief Next UTF-8 character
-         *
-         * Returns Unicode codepoint of character on the cursor and position
-         * of the following character. If an error occurs, returns position of
-         * next byte and `0xffffffffu` as codepoint.
-         */
-        static std::pair<char32_t, std::size_t> nextChar(Containers::ArrayView<const char> text, std::size_t cursor);
+/**
+@brief Next UTF-8 character
 
-        /** @overload */
-        static std::pair<char32_t, std::size_t> nextChar(const std::string& text, const std::size_t cursor) {
-            return nextChar(Containers::ArrayView<const char>{text.data(), text.size()}, cursor);
-        }
+Returns Unicode codepoint of character on the cursor and position of the
+following character. If an error occurs, returns position of next byte and
+`0xffffffffu` as codepoint.
+*/
+CORRADE_UTILITY_EXPORT std::pair<char32_t, std::size_t> nextChar(Containers::ArrayView<const char> text, std::size_t cursor);
 
-        /** @overload */
-        /* to fix ambiguity when passing char array in */
-        template<std::size_t size> static std::pair<char32_t, std::size_t> nextChar(const char(&text)[size], const std::size_t cursor) {
-            return nextChar(Containers::ArrayView<const char>{text, size - 1}, cursor);
-        }
+/** @overload */
+inline std::pair<char32_t, std::size_t> nextChar(const std::string& text, const std::size_t cursor) {
+    return nextChar(Containers::ArrayView<const char>{text.data(), text.size()}, cursor);
+}
 
-        /**
-         * @brief Previous UTF-8 character
-         *
-         * Returns Unicode codepoint of character before the cursor and
-         * its position. If an error occurs, returns position of previous byte
-         * and `0xffffffffu` as codepoint.
-         */
-        static std::pair<char32_t, std::size_t> prevChar(Containers::ArrayView<const char> text, std::size_t cursor);
+/** @overload */
+/* to fix ambiguity when passing char array in */
+template<std::size_t size> inline std::pair<char32_t, std::size_t> nextChar(const char(&text)[size], const std::size_t cursor) {
+    return nextChar(Containers::ArrayView<const char>{text, size - 1}, cursor);
+}
 
-        /** @overload */
-        static std::pair<char32_t, std::size_t> prevChar(const std::string& text, const std::size_t cursor) {
-            return prevChar(Containers::ArrayView<const char>{text.data(), text.size()}, cursor);
-        }
+/**
+@brief Previous UTF-8 character
 
-        /** @overload */
-        /* to fix ambiguity when passing char array in */
-        template<std::size_t size> static std::pair<char32_t, std::size_t> prevChar(const char(&text)[size], const std::size_t cursor) {
-            return prevChar(Containers::ArrayView<const char>{text, size - 1}, cursor);
-        }
+Returns Unicode codepoint of character before the cursor and its position. If
+an error occurs, returns position of previous byte and `0xffffffffu` as
+codepoint.
+*/
+CORRADE_UTILITY_EXPORT std::pair<char32_t, std::size_t> prevChar(Containers::ArrayView<const char> text, std::size_t cursor);
 
-        /** @brief Convert UTF-8 to UTF-32 */
-        static std::u32string utf32(const std::string& text);
-};
+/** @overload */
+inline std::pair<char32_t, std::size_t> prevChar(const std::string& text, const std::size_t cursor) {
+    return prevChar(Containers::ArrayView<const char>{text.data(), text.size()}, cursor);
+}
 
-}}
+/** @overload */
+/* to fix ambiguity when passing char array in */
+template<std::size_t size> inline std::pair<char32_t, std::size_t> prevChar(const char(&text)[size], const std::size_t cursor) {
+    return prevChar(Containers::ArrayView<const char>{text, size - 1}, cursor);
+}
+
+/** @brief Convert UTF-8 to UTF-32 */
+CORRADE_UTILITY_EXPORT std::u32string utf32(const std::string& text);
+
+}}}
 
 #endif

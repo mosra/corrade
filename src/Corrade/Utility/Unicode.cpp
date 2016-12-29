@@ -30,9 +30,9 @@
 
 #include "Corrade/Utility/Assert.h"
 
-namespace Corrade { namespace Utility {
+namespace Corrade { namespace Utility { namespace Unicode {
 
-std::pair<char32_t, std::size_t> Unicode::nextChar(const Containers::ArrayView<const char> text, std::size_t cursor) {
+std::pair<char32_t, std::size_t> nextChar(const Containers::ArrayView<const char> text, std::size_t cursor) {
     CORRADE_ASSERT(cursor < text.size(),
         "Utility::Unicode::nextChar(): cursor out of range", {});
 
@@ -76,7 +76,7 @@ std::pair<char32_t, std::size_t> Unicode::nextChar(const Containers::ArrayView<c
     return {result, end};
 }
 
-std::pair<char32_t, std::size_t> Unicode::prevChar(const Containers::ArrayView<const char> text, std::size_t cursor) {
+std::pair<char32_t, std::size_t> prevChar(const Containers::ArrayView<const char> text, std::size_t cursor) {
     CORRADE_ASSERT(cursor > 0,
         "Utility::Unicode::prevChar(): cursor already at the beginning", {});
 
@@ -116,7 +116,7 @@ std::pair<char32_t, std::size_t> Unicode::prevChar(const Containers::ArrayView<c
     return {result, begin};
 }
 
-std::u32string Unicode::utf32(const std::string& text) {
+std::u32string utf32(const std::string& text) {
     std::u32string result;
     result.reserve(text.size());
 
@@ -129,4 +129,4 @@ std::u32string Unicode::utf32(const std::string& text) {
     return result;
 }
 
-}}
+}}}

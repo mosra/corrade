@@ -37,201 +37,196 @@
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Utility/visibility.h"
 
-namespace Corrade { namespace Utility {
+namespace Corrade { namespace Utility { namespace String {
 
-/** @brief String utilities */
-class CORRADE_UTILITY_EXPORT String {
-    public:
-        String() = delete;
+namespace Implementation {
+    CORRADE_UTILITY_EXPORT std::string ltrim(std::string string, Containers::ArrayView<const char> characters);
+    CORRADE_UTILITY_EXPORT std::string rtrim(std::string string, Containers::ArrayView<const char> characters);
+    CORRADE_UTILITY_EXPORT std::string trim(std::string string, Containers::ArrayView<const char> characters);
 
-        /**
-         * @brief Safely construct string from char array
-         *
-         * If @p string is `nullptr`, returns empty string.
-         */
-        static std::string fromArray(const char* string) {
-            return string ? std::string{string} : std::string{};
-        }
+    CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std::string& string, Containers::ArrayView<const char> delimiters);
 
-        /**
-         * @brief Safely construct string from char array
-         *
-         * If @p string is `nullptr`, returns empty string. Otherwise takes
-         * also @p length into account.
-         */
-        static std::string fromArray(const char* string, std::size_t length) {
-            return string ? std::string{string, length} : std::string{};
-        }
+    CORRADE_UTILITY_EXPORT bool beginsWith(const std::string& string, Containers::ArrayView<const char> prefix);
+    CORRADE_UTILITY_EXPORT bool endsWith(const std::string& string, Containers::ArrayView<const char> suffix);
+}
 
-        /**
-         * @brief Trim leading characters from string
-         * @param string        String to be trimmed
-         * @param characters    Characters which will be trimmed
-         *
-         * @see @ref rtrim(), @ref trim()
-         */
-        static std::string ltrim(std::string string, const std::string& characters) {
-            return ltrimInternal(std::move(string), {characters.data(), characters.size()});
-        }
+/**
+@brief Safely construct string from char array
 
-        /** @overload */
-        template<std::size_t size> static std::string ltrim(std::string string, const char(&characters)[size]) {
-            return ltrimInternal(std::move(string), {characters, size - 1});
-        }
+If @p string is `nullptr`, returns empty string.
+*/
+inline std::string fromArray(const char* string) {
+    return string ? std::string{string} : std::string{};
+}
 
-        /**
-         * @brief Trim leading whitespace from string
-         *
-         * Equivalent to calling the above function with <tt>" \t\f\v\r\n"</tt>
-         * as second parameter.
-         * @see @ref rtrim(), @ref trim()
-         */
-        static std::string ltrim(std::string string);
+/**
+@brief Safely construct string from char array with explicit length
 
-        /**
-         * @brief Trim trailing characters from string
-         * @param string        String to be trimmed
-         * @param characters    Characters which will be trimmed
-         *
-         * @see @ref ltrim(), @ref trim()
-         */
-        static std::string rtrim(std::string string, const std::string& characters) {
-            return rtrimInternal(std::move(string), {characters.data(), characters.size()});
-        }
+If @p string is `nullptr`, returns empty string. Otherwise takes also @p length
+into account.
+*/
+inline std::string fromArray(const char* string, std::size_t length) {
+    return string ? std::string{string, length} : std::string{};
+}
 
-        /** @overload */
-        template<std::size_t size> static std::string rtrim(std::string string, const char(&characters)[size]) {
-            return rtrimInternal(std::move(string), {characters, size - 1});
-        }
+/**
+@brief Trim leading characters from string
+@param string       String to be trimmed
+@param characters   Characters which will be trimmed
 
-        /**
-         * @brief Trim trailing whitespace from string
-         *
-         * Equivalent to calling the above function with <tt>" \t\f\v\r\n"</tt>
-         * as second parameter.
-         * @see @ref ltrim(), @ref trim()
-         */
-        static std::string rtrim(std::string string);
+@see @ref rtrim(), @ref trim()
+*/
+inline std::string ltrim(std::string string, const std::string& characters) {
+    return Implementation::ltrim(std::move(string), {characters.data(), characters.size()});
+}
 
-        /**
-         * @brief Trim leading and trailing characters from string
-         * @param string        String to be trimmed
-         * @param characters    Characters which will be trimmed
-         *
-         * Equivalent to `ltrim(rtrim(string))`.
-         */
-        static std::string trim(std::string string, const std::string& characters) {
-            return trimInternal(std::move(string), {characters.data(), characters.size()});
-        }
+/** @overload */
+template<std::size_t size> inline std::string ltrim(std::string string, const char(&characters)[size]) {
+    return Implementation::ltrim(std::move(string), {characters, size - 1});
+}
 
-        /** @overload */
-        template<std::size_t size> static std::string trim(std::string string, const char(&characters)[size]) {
-            return trimInternal(std::move(string), {characters, size - 1});
-        }
+/**
+@brief Trim leading whitespace from string
 
-        /**
-         * @brief Trim leading and trailing whitespace from string
-         *
-         * Equivalent to calling the above function with <tt>" \t\f\v\r\n"</tt>
-         * as second parameter.
-         */
-        static std::string trim(std::string string);
+Equivalent to calling the above function with <tt>" \t\f\v\r\n"</tt> as second
+parameter.
+@see @ref rtrim(), @ref trim()
+*/
+CORRADE_UTILITY_EXPORT std::string ltrim(std::string string);
 
-        /**
-         * @brief Split string on given character
-         * @param string            String to split
-         * @param delimiter         Delimiter
-         */
-        static std::vector<std::string> split(const std::string& string, char delimiter);
+/**
+@brief Trim trailing characters from string
+@param string       String to be trimmed
+@param characters   Characters which will be trimmed
 
-        /**
-         * @brief Split string on given character and remove empty parts
-         * @param string            String to split
-         * @param delimiter         Delimiter
-         */
-        static std::vector<std::string> splitWithoutEmptyParts(const std::string& string, char delimiter);
+@see @ref ltrim(), @ref trim()
+*/
+inline std::string rtrim(std::string string, const std::string& characters) {
+    return Implementation::rtrim(std::move(string), {characters.data(), characters.size()});
+}
 
-        /**
-         * @brief Split string on any character from given set and remove empty parts
-         * @param string            String to split
-         * @param delimiters        Delimiter characters
-         */
-        static std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const std::string& delimiters) {
-            return splitWithoutEmptyPartsInternal(string, {delimiters.data(), delimiters.size()});
-        }
+/** @overload */
+template<std::size_t size> inline std::string rtrim(std::string string, const char(&characters)[size]) {
+    return Implementation::rtrim(std::move(string), {characters, size - 1});
+}
 
-        /** @overload */
-        template<std::size_t size> static std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const char(&delimiters)[size]) {
-            return splitWithoutEmptyPartsInternal(string, {delimiters, size - 1});
-        }
+/**
+@brief Trim trailing whitespace from string
 
-        /**
-         * @brief Split string on whitespaces and remove empty parts
-         *
-         * Equivalent to calling the above function with <tt>" \t\f\v\r\n"</tt>
-         * as second parameter.
-         */
-        static std::vector<std::string> splitWithoutEmptyParts(const std::string& string);
+Equivalent to calling the above function with <tt>" \t\f\v\r\n"</tt> as second
+parameter.
+@see @ref ltrim(), @ref trim()
+*/
+CORRADE_UTILITY_EXPORT std::string rtrim(std::string string);
 
-        /**
-         * @brief Join strings with given character
-         * @param strings           Strings to join
-         * @param delimiter         Delimiter
-         */
-        static std::string join(const std::vector<std::string>& strings, char delimiter);
+/**
+@brief Trim leading and trailing characters from string
+@param string       String to be trimmed
+@param characters   Characters which will be trimmed
 
-        /**
-         * @brief Join strings with given character and remove empty parts
-         * @param strings           Strings to join
-         * @param delimiter         Delimiter
-         */
-        static std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, char delimiter);
+Equivalent to `ltrim(rtrim(string))`.
+*/
+inline std::string trim(std::string string, const std::string& characters) {
+    return Implementation::trim(std::move(string), {characters.data(), characters.size()});
+}
 
-        /**
-         * @brief Convert string to lowercase
-         *
-         * @attention Doesn't work with UTF-8.
-         */
-        static std::string lowercase(std::string string);
+/** @overload */
+template<std::size_t size> inline std::string trim(std::string string, const char(&characters)[size]) {
+    return Implementation::trim(std::move(string), {characters, size - 1});
+}
 
-        /**
-         * @brief Convert string to uppercase
-         *
-         * @attention Doesn't work with UTF-8.
-         */
-        static std::string uppercase(std::string string);
+/**
+@brief Trim leading and trailing whitespace from string
 
-        /** @brief Whether the string has given prefix */
-        static bool beginsWith(const std::string& string, const std::string& prefix) {
-            return beginsWithInternal(string, {prefix.data(), prefix.size()});
-        }
+Equivalent to calling the above function with <tt>" \t\f\v\r\n"</tt> as second
+parameter.
+*/
+CORRADE_UTILITY_EXPORT std::string trim(std::string string);
 
-        /** @overload */
-        template<std::size_t size> static bool beginsWith(const std::string& string, const char(&prefix)[size]) {
-            return beginsWithInternal(string, {prefix, size - 1});
-        }
+/**
+@brief Split string on given character
+@param string       String to split
+@param delimiter    Delimiter
+*/
+CORRADE_UTILITY_EXPORT std::vector<std::string> split(const std::string& string, char delimiter);
 
-        /** @brief Whether the string has given suffix */
-        static bool endsWith(const std::string& string, const std::string& suffix) {
-            return endsWithInternal(string, {suffix.data(), suffix.size()});
-        }
+/**
+@brief Split string on given character and remove empty parts
+@param string       String to split
+@param delimiter    Delimiter
+*/
+CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std::string& string, char delimiter);
 
-        /** @overload */
-        template<std::size_t size> static bool endsWith(const std::string& string, const char(&suffix)[size]) {
-            return endsWithInternal(string, {suffix, size - 1});
-        }
+/**
+@brief Split string on any character from given set and remove empty parts
+@param string       String to split
+@param delimiters   Delimiter characters
+*/
+inline std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const std::string& delimiters) {
+    return Implementation::splitWithoutEmptyParts(string, {delimiters.data(), delimiters.size()});
+}
 
-    private:
-        static std::string ltrimInternal(std::string string, Containers::ArrayView<const char> characters);
-        static std::string rtrimInternal(std::string string, Containers::ArrayView<const char> characters);
-        static std::string trimInternal(std::string string, Containers::ArrayView<const char> characters);
+/** @overload */
+template<std::size_t size> inline std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const char(&delimiters)[size]) {
+    return Implementation::splitWithoutEmptyParts(string, {delimiters, size - 1});
+}
 
-        static std::vector<std::string> splitWithoutEmptyPartsInternal(const std::string& string, Containers::ArrayView<const char> delimiters);
+/**
+@brief Split string on whitespaces and remove empty parts
 
-        static bool beginsWithInternal(const std::string& string, Containers::ArrayView<const char> prefix);
-        static bool endsWithInternal(const std::string& string, Containers::ArrayView<const char> suffix);
-};
+Equivalent to calling the above function with <tt>" \t\f\v\r\n"</tt> as second
+parameter.
+*/
+CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std::string& string);
 
-}}
+/**
+@brief Join strings with given character
+@param strings      Strings to join
+@param delimiter    Delimiter
+*/
+CORRADE_UTILITY_EXPORT std::string join(const std::vector<std::string>& strings, char delimiter);
+
+/**
+@brief Join strings with given character and remove empty parts
+@param strings      Strings to join
+@param delimiter    Delimiter
+*/
+CORRADE_UTILITY_EXPORT std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, char delimiter);
+
+/**
+@brief Convert string to lowercase
+
+@attention Doesn't work with UTF-8.
+*/
+CORRADE_UTILITY_EXPORT std::string lowercase(std::string string);
+
+/**
+@brief Convert string to uppercase
+
+@attention Doesn't work with UTF-8.
+*/
+CORRADE_UTILITY_EXPORT std::string uppercase(std::string string);
+
+/** @brief Whether the string has given prefix */
+inline bool beginsWith(const std::string& string, const std::string& prefix) {
+    return Implementation::beginsWith(string, {prefix.data(), prefix.size()});
+}
+
+/** @overload */
+template<std::size_t size> inline bool beginsWith(const std::string& string, const char(&prefix)[size]) {
+    return Implementation::beginsWith(string, {prefix, size - 1});
+}
+
+/** @brief Whether the string has given suffix */
+inline bool endsWith(const std::string& string, const std::string& suffix) {
+    return Implementation::endsWith(string, {suffix.data(), suffix.size()});
+}
+
+/** @overload */
+template<std::size_t size> inline bool endsWith(const std::string& string, const char(&suffix)[size]) {
+    return Implementation::endsWith(string, {suffix, size - 1});
+}
+
+}}}
 
 #endif

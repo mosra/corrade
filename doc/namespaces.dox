@@ -74,8 +74,26 @@ in CMake and link to `Corrade::Utility` target. See also @ref building-corrade
 and @ref corrade-cmake for more information.
 */
 
+/** @namespace Corrade::Utility::String
+@brief String utilities
+
+This library is built if `WITH_UTILITY` is enabled when building Corrade. To
+use this library, you need to request `Utility` component of `Corrade` package
+in CMake and link to `Corrade::Utility` target. See also @ref building-corrade
+and @ref corrade-cmake for more information.
+*/
+
 /** @namespace Corrade::Utility::System
 @brief System utilities
+
+This library is built if `WITH_UTILITY` is enabled when building Corrade. To
+use this library, you need to request `Utility` component of `Corrade` package
+in CMake and link to `Corrade::Utility` target. See also @ref building-corrade
+and @ref corrade-cmake for more information.
+*/
+
+/** @namespace Corrade::Utility::Unicode
+@brief Unicode utilities
 
 This library is built if `WITH_UTILITY` is enabled when building Corrade. To
 use this library, you need to request `Utility` component of `Corrade` package
