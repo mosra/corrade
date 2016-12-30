@@ -404,13 +404,13 @@ std::uint64_t Test::benchmarkUnitsEnd() {
 }
 
 void Test::Test::benchmarkSkip() {
-    CORRADE_SKIP("Can't verify the measurements anyway.");
-
     const std::string a = "hello";
     const std::string b = "world";
     CORRADE_BENCHMARK(100) {
         std::string c = a + b + b + a + a + b;
     }
+
+    CORRADE_SKIP("Can't verify the measurements anyway.");
 }
 
 struct TesterTest: Tester {
