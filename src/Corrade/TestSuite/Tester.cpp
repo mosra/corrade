@@ -82,7 +82,7 @@ namespace {
         else if(max >= 1000000)
             out << float(count)/(1000000.0f*batchSize) << " M" << unit;
         else if(max >= 1000)
-            out << float(count)/(1000000.0f*batchSize) << " k" << unit;
+            out << float(count)/(1000.0f*batchSize) << " k" << unit;
         else out << float(count)/batchSize << "  " << unit;
 
         return out.str();
