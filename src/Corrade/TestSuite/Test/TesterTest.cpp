@@ -23,8 +23,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <iostream>
+#include <cmath>
 #include <cstdlib>
+#include <iostream>
 #include <sstream>
 
 #include "Corrade/TestSuite/Tester.h"
@@ -105,20 +106,22 @@ struct Test: Tester {
     void repeatedTestSetupTeardownFail();
     void repeatedTestSetupTeardownSkip();
 
-    void benchmarkTime();
-    void benchmarkCount();
+    void benchmark();
+    void benchmarkBegin();
+    std::uint64_t benchmarkEnd();
 
-    void benchmarkTimeBegin();
-    std::uint64_t benchmarkTimeEnd();
-
+    void benchmarkUnits();
     void benchmarkCountBegin();
-    std::uint64_t benchmarkCountEnd();
+    void benchmarkTimeBegin();
+    void benchmarkCyclesBegin();
+    void benchmarkInstructionsBegin();
+    void benchmarkMemoryBegin();
+    std::uint64_t benchmarkUnitsEnd();
 
     void benchmarkSkip();
 
     std::ostream* _out;
     int _i = 0;
-    int _benchmarkMultiplier = 0;
 };
 
 Test::Test(std::ostream* const out): _out{out} {
@@ -164,15 +167,35 @@ Test::Test(std::ostream* const out): _out{out} {
                       &Test::repeatedTestSetupTeardownSkip}, 2,
                       &Test::setup, &Test::teardown);
 
-    addCustomBenchmarks({&Test::benchmarkTime}, 3,
-                         &Test::benchmarkTimeBegin,
-                         &Test::benchmarkTimeEnd,
+    addCustomBenchmarks({&Test::benchmark}, 3,
+                         &Test::benchmarkBegin,
+                         &Test::benchmarkEnd,
                          BenchmarkUnits::Time);
 
-    addCustomBenchmarks({&Test::benchmarkCount}, 5,
+    addCustomInstancedBenchmarks({&Test::benchmarkUnits}, 10, 4,
                          &Test::benchmarkCountBegin,
-                         &Test::benchmarkCountEnd,
+                         &Test::benchmarkUnitsEnd,
+                         BenchmarkUnits::Count);
+
+    addCustomInstancedBenchmarks({&Test::benchmarkUnits}, 10, 4,
+                         &Test::benchmarkTimeBegin,
+                         &Test::benchmarkUnitsEnd,
+                         BenchmarkUnits::Time);
+
+    addCustomInstancedBenchmarks({&Test::benchmarkUnits}, 10, 4,
+                         &Test::benchmarkCyclesBegin,
+                         &Test::benchmarkUnitsEnd,
                          BenchmarkUnits::Cycles);
+
+    addCustomInstancedBenchmarks({&Test::benchmarkUnits}, 10, 4,
+                         &Test::benchmarkInstructionsBegin,
+                         &Test::benchmarkUnitsEnd,
+                         BenchmarkUnits::Instructions);
+
+    addCustomInstancedBenchmarks({&Test::benchmarkUnits}, 10, 4,
+                         &Test::benchmarkMemoryBegin,
+                         &Test::benchmarkUnitsEnd,
+                         BenchmarkUnits::Memory);
 
     addBenchmarks({&Test::benchmarkSkip}, 3);
 }
@@ -336,39 +359,48 @@ void Test::repeatedTestSetupTeardownSkip() {
     CORRADE_SKIP("Skipped.");
 }
 
-void Test::benchmarkTime() {
+void Test::benchmark() {
     CORRADE_BENCHMARK(2) {
         Debug{_out} << "Benchmark iteration";
     }
 }
 
-void Test::benchmarkTimeBegin() {
-    setBenchmarkName("Wall clock time");
+void Test::benchmarkBegin() {
+    setBenchmarkName("Space clock time");
     Debug{_out} << "Benchmark begin";
 }
 
-std::uint64_t Test::benchmarkTimeEnd() {
-    std::uint64_t time = 300 + _benchmarkMultiplier++*100;
+std::uint64_t Test::benchmarkEnd() {
+    std::uint64_t time = 300 + testCaseRepeatId()*100;
     Debug{_out} << "Benchmark end:" << time;
     return time;
 }
 
-void Test::benchmarkCount() {
-    const std::string a = "hello";
-    const std::string b = "world";
-    CORRADE_BENCHMARK(100) {
-        std::string c = a + b + b + a + a + b;
-    }
+namespace {
+    struct {
+        const char* name;
+    } BenchmarkUnitsData[4]{
+        {"ones"},
+        {"thousands"},
+        {"millions"},
+        {"billions"}
+    };
 }
 
-void Test::benchmarkCountBegin() {
-    setBenchmarkName("CPU cycles");
+void Test::benchmarkUnits() {
+    setTestCaseDescription(BenchmarkUnitsData[testCaseInstanceId()].name);
+
+    CORRADE_BENCHMARK(100) {}
 }
 
-std::uint64_t Test::benchmarkCountEnd() {
-    std::uint64_t count = 5 + _benchmarkMultiplier++*5;
-    Debug{_out} << "Benchmark end:" << count;
-    return count;
+void Test::benchmarkCountBegin() {}
+void Test::benchmarkTimeBegin() { setBenchmarkName("Time"); }
+void Test::benchmarkCyclesBegin() { setBenchmarkName("Cycles"); }
+void Test::benchmarkInstructionsBegin() { setBenchmarkName("Instructions"); }
+void Test::benchmarkMemoryBegin() { setBenchmarkName("Memory"); }
+
+std::uint64_t Test::benchmarkUnitsEnd() {
+    return (15 + testCaseRepeatId()*10)*std::pow(1000, testCaseInstanceId());
 }
 
 void Test::Test::benchmarkSkip() {
@@ -461,33 +493,33 @@ void TesterTest::test() {
     CORRADE_VERIFY(result == 1);
 
     std::string expected =
-        "Starting TesterTest::Test with 37 test cases...\n"
+        "Starting TesterTest::Test with 56 test cases...\n"
         "     ? [01] <unknown>()\n"
         "    OK [02] trueExpression()\n"
-        "  FAIL [03] falseExpression() at here.cpp on line 189\n"
+        "  FAIL [03] falseExpression() at here.cpp on line 212\n"
         "        Expression 5 != 5 failed.\n"
         "    OK [04] equal()\n"
-        "  FAIL [05] nonEqual() at here.cpp on line 199\n"
+        "  FAIL [05] nonEqual() at here.cpp on line 222\n"
         "        Values a and b are not the same, actual is\n"
         "        5\n"
         "        but expected\n"
         "        3\n"
-        " XFAIL [06] expectFail() at here.cpp on line 205\n"
+        " XFAIL [06] expectFail() at here.cpp on line 228\n"
         "        The world is not mad yet. 2 + 2 and 5 are not equal.\n"
-        " XFAIL [06] expectFail() at here.cpp on line 206\n"
+        " XFAIL [06] expectFail() at here.cpp on line 229\n"
         "        The world is not mad yet. Expression false == true failed.\n"
         "    OK [06] expectFail()\n"
-        " XPASS [07] unexpectedPassExpression() at here.cpp on line 219\n"
+        " XPASS [07] unexpectedPassExpression() at here.cpp on line 242\n"
         "        Expression true == true was expected to fail.\n"
-        " XPASS [08] unexpectedPassEqual() at here.cpp on line 224\n"
+        " XPASS [08] unexpectedPassEqual() at here.cpp on line 247\n"
         "        2 + 2 and 4 are not expected to be equal.\n"
         "    OK [09] compareAs()\n"
-        "  FAIL [10] compareAsFail() at here.cpp on line 232\n"
+        "  FAIL [10] compareAsFail() at here.cpp on line 255\n"
         "        Length of actual \"meh\" doesn't match length of expected \"hello\" with epsilon 0\n"
         "    OK [11] compareWith()\n"
-        "  FAIL [12] compareWithFail() at here.cpp on line 240\n"
+        "  FAIL [12] compareWithFail() at here.cpp on line 263\n"
         "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
-        "  FAIL [13] compareImplicitConversionFail() at here.cpp on line 245\n"
+        "  FAIL [13] compareImplicitConversionFail() at here.cpp on line 268\n"
         "        Values \"holla\" and hello are not the same, actual is\n"
         "        holla\n"
         "        but expected\n"
@@ -504,7 +536,7 @@ void TesterTest::test() {
         "       [19] tearing down...\n"
         "     ? [19] <unknown>()\n"
         "       [20] setting up...\n"
-        "  FAIL [20] setupTeardownFail() at here.cpp on line 282\n"
+        "  FAIL [20] setupTeardownFail() at here.cpp on line 305\n"
         "        Expression false failed.\n"
         "       [20] tearing down...\n"
         "       [21] setting up...\n"
@@ -513,7 +545,7 @@ void TesterTest::test() {
         "       [21] tearing down...\n"
         "    OK [22] instancedTest(zero)\n"
         "    OK [23] instancedTest(1)\n"
-        "  FAIL [24] instancedTest(two) at here.cpp on line 307\n"
+        "  FAIL [24] instancedTest(two) at here.cpp on line 330\n"
         "        Values data.value*data.value*data.value and data.result are not the same, actual is\n"
         "        125\n"
         "        but expected\n"
@@ -527,7 +559,7 @@ void TesterTest::test() {
         "4\n"
         "    OK [27] repeatedTest()@5\n"
         "     ? [28] <unknown>()@50\n"
-        "  FAIL [29] repeatedTestFail()@18 at here.cpp on line 318\n"
+        "  FAIL [29] repeatedTestFail()@18 at here.cpp on line 341\n"
         "        Expression _i++ < 17 failed.\n"
         "  SKIP [30] repeatedTestSkip()@29\n"
         "        Too late.\n"
@@ -542,7 +574,7 @@ void TesterTest::test() {
         "       [32] tearing down...\n"
         "     ? [32] <unknown>()@2\n"
         "       [33] setting up...\n"
-        "  FAIL [33] repeatedTestSetupTeardownFail()@1 at here.cpp on line 332\n"
+        "  FAIL [33] repeatedTestSetupTeardownFail()@1 at here.cpp on line 355\n"
         "        Expression false failed.\n"
         "       [33] tearing down...\n"
         "       [34] setting up...\n"
@@ -561,18 +593,70 @@ void TesterTest::test() {
         "Benchmark iteration\n"
         "Benchmark iteration\n"
         "Benchmark end: 500\n"
-        " BENCH [35] benchmarkTime()@3\n"
-        "        2 iterations per repeat. Wall clock time per iteration:\n"
+        " BENCH [35] benchmark()@3\n"
+        "        2 iterations per repeat. Space clock time per iteration:\n"
         "        Min: 150.00 ns       Max: 250.00 ns       Avg: 200.00 ns      \n"
-        "Benchmark end: 20\n"
-        "Benchmark end: 25\n"
-        "Benchmark end: 30\n"
-        "Benchmark end: 35\n"
-        "Benchmark end: 40\n"
-        " BENCH [36] benchmarkCount()@5\n"
-        "        100 iterations per repeat. CPU cycles per iteration:\n"
-        "        Min:   0.20  cycles  Max:   0.40  cycles  Avg:   0.30  cycles \n"
-        "  SKIP [37] benchmarkSkip()@1\n"
+        " BENCH [36] benchmarkUnits(ones)@10\n"
+        "        100 iterations per repeat. Custom benchmark per iteration:\n"
+        "        Min:   0.15          Max:   1.05          Avg:   0.60         \n"
+        " BENCH [37] benchmarkUnits(thousands)@10\n"
+        "        100 iterations per repeat. Custom benchmark per iteration:\n"
+        "        Min:   0.15 k        Max:   1.05 k        Avg:   0.60 k       \n"
+        " BENCH [38] benchmarkUnits(millions)@10\n"
+        "        100 iterations per repeat. Custom benchmark per iteration:\n"
+        "        Min:   0.15 M        Max:   1.05 M        Avg:   0.60 M       \n"
+        " BENCH [39] benchmarkUnits(billions)@10\n"
+        "        100 iterations per repeat. Custom benchmark per iteration:\n"
+        "        Min:   0.15 G        Max:   1.05 G        Avg:   0.60 G       \n"
+        " BENCH [40] benchmarkUnits(ones)@10\n"
+        "        100 iterations per repeat. Time per iteration:\n"
+        "        Min:   0.15 ns       Max:   1.05 ns       Avg:   0.60 ns      \n"
+        " BENCH [41] benchmarkUnits(thousands)@10\n"
+        "        100 iterations per repeat. Time per iteration:\n"
+        "        Min:   0.15 µs       Max:   1.05 µs       Avg:   0.60 µs      \n"
+        " BENCH [42] benchmarkUnits(millions)@10\n"
+        "        100 iterations per repeat. Time per iteration:\n"
+        "        Min:   0.15 ms       Max:   1.05 ms       Avg:   0.60 ms      \n"
+        " BENCH [43] benchmarkUnits(billions)@10\n"
+        "        100 iterations per repeat. Time per iteration:\n"
+        "        Min:   0.15  s       Max:   1.05  s       Avg:   0.60  s      \n"
+        " BENCH [44] benchmarkUnits(ones)@10\n"
+        "        100 iterations per repeat. Cycles per iteration:\n"
+        "        Min:   0.15  cycles  Max:   1.05  cycles  Avg:   0.60  cycles \n"
+        " BENCH [45] benchmarkUnits(thousands)@10\n"
+        "        100 iterations per repeat. Cycles per iteration:\n"
+        "        Min:   0.15 kcycles  Max:   1.05 kcycles  Avg:   0.60 kcycles \n"
+        " BENCH [46] benchmarkUnits(millions)@10\n"
+        "        100 iterations per repeat. Cycles per iteration:\n"
+        "        Min:   0.15 Mcycles  Max:   1.05 Mcycles  Avg:   0.60 Mcycles \n"
+        " BENCH [47] benchmarkUnits(billions)@10\n"
+        "        100 iterations per repeat. Cycles per iteration:\n"
+        "        Min:   0.15 Gcycles  Max:   1.05 Gcycles  Avg:   0.60 Gcycles \n"
+        " BENCH [48] benchmarkUnits(ones)@10\n"
+        "        100 iterations per repeat. Instructions per iteration:\n"
+        "        Min:   0.15  instrs  Max:   1.05  instrs  Avg:   0.60  instrs \n"
+        " BENCH [49] benchmarkUnits(thousands)@10\n"
+        "        100 iterations per repeat. Instructions per iteration:\n"
+        "        Min:   0.15 kinstrs  Max:   1.05 kinstrs  Avg:   0.60 kinstrs \n"
+        " BENCH [50] benchmarkUnits(millions)@10\n"
+        "        100 iterations per repeat. Instructions per iteration:\n"
+        "        Min:   0.15 Minstrs  Max:   1.05 Minstrs  Avg:   0.60 Minstrs \n"
+        " BENCH [51] benchmarkUnits(billions)@10\n"
+        "        100 iterations per repeat. Instructions per iteration:\n"
+        "        Min:   0.15 Ginstrs  Max:   1.05 Ginstrs  Avg:   0.60 Ginstrs \n"
+        " BENCH [52] benchmarkUnits(ones)@10\n"
+        "        100 iterations per repeat. Memory per iteration:\n"
+        "        Min:   0.15  B       Max:   1.05  B       Avg:   0.60  B      \n"
+        " BENCH [53] benchmarkUnits(thousands)@10\n"
+        "        100 iterations per repeat. Memory per iteration:\n"
+        "        Min:   0.15 kB       Max:   1.05 kB       Avg:   0.60 kB      \n"
+        " BENCH [54] benchmarkUnits(millions)@10\n"
+        "        100 iterations per repeat. Memory per iteration:\n"
+        "        Min:   0.15 MB       Max:   1.05 MB       Avg:   0.60 MB      \n"
+        " BENCH [55] benchmarkUnits(billions)@10\n"
+        "        100 iterations per repeat. Memory per iteration:\n"
+        "        Min:   0.15 GB       Max:   1.05 GB       Avg:   0.60 GB      \n"
+        "  SKIP [56] benchmarkSkip()@1\n"
         "        Can't verify the measurements anyway.\n"
         "Finished TesterTest::Test with 11 errors out of 50 checks. 5 test cases didn't contain any checks!\n";
 
@@ -640,14 +724,9 @@ void TesterTest::skipTests() {
 
     std::string expected =
         "Starting TesterTest::Test with 1 test cases...\n"
-        "Benchmark end: 5\n"
-        "Benchmark end: 10\n"
-        "Benchmark end: 15\n"
-        "Benchmark end: 20\n"
-        "Benchmark end: 25\n"
-        " BENCH [36] benchmarkCount()@5\n"
-        "        100 iterations per repeat. CPU cycles per iteration:\n"
-        "        Min:   0.05  cycles  Max:   0.25  cycles  Avg:   0.15  cycles \n"
+        " BENCH [36] benchmarkUnits(ones)@10\n"
+        "        100 iterations per repeat. Custom benchmark per iteration:\n"
+        "        Min:   0.15          Max:   1.05          Avg:   0.60         \n"
         "Finished TesterTest::Test with 0 errors out of 0 checks.\n";
     CORRADE_COMPARE(out.str(), expected);
 }
@@ -792,7 +871,7 @@ void TesterTest::abortOnFail() {
         "Starting TesterTest::Test with 4 test cases...\n"
         "     ? [01] <unknown>()\n"
         "    OK [02] trueExpression()\n"
-        "  FAIL [03] falseExpression() at here.cpp on line 189\n"
+        "  FAIL [03] falseExpression() at here.cpp on line 212\n"
         "        Expression 5 != 5 failed.\n"
         "Aborted TesterTest::Test after first failure out of 2 checks so far. 1 test cases didn't contain any checks!\n";
     CORRADE_COMPARE(out.str(), expected);
@@ -812,7 +891,7 @@ void TesterTest::noXfail() {
 
     std::string expected =
         "Starting TesterTest::Test with 1 test cases...\n"
-        "  FAIL [06] expectFail() at here.cpp on line 205\n"
+        "  FAIL [06] expectFail() at here.cpp on line 228\n"
         "        Values 2 + 2 and 5 are not the same, actual is\n"
         "        4\n"
         "        but expected\n"
