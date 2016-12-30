@@ -47,4 +47,28 @@
 #cmakedefine CORRADE_TESTSUITE_TARGET_XCTEST
 #cmakedefine CORRADE_UTILITY_USE_ANSI_COLORS
 
+/* Cherry-picked from https://sourceforge.net/p/predef/wiki/Architectures/.
+   Can't detect this stuff directly from CMake because of (for example) OSX and
+   fat binaries. */
+
+/* First two is GCC/Clang for 32/64 bit, second two is MSVC 32/64bit */
+#if defined(__i386) || defined(__x86_64) || defined(_M_IX86) || defined(_M_X64)
+#define CORRADE_TARGET_X86
+
+/* First two is GCC/Clang for 32/64 bit, second two is MSVC 32/64bit. MSVC
+   doesn't have AArch64 support in the compiler yet, though there are some
+   signs of it in headers (http://stackoverflow.com/a/37251625/6108877). */
+#elif defined(__arm__) || defined(__aarch64__) || defined(_M_ARM) || defined(_M_ARM64)
+#define CORRADE_TARGET_ARM
+
+/* Otherwise one should expect CORRADE_TARGET_EMSCRIPTEN or
+   CORRADE_TARGET_NACL. No other platforms are currently tested for, but that's
+   okay -- a runtime test for this is in Utility/Test/SystemTest.cpp */
+#endif
+
+/* Sanity checks */
+#if (defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_NACL)) && (defined(CORRADE_TARGET_X86) || defined(CORRADE_TARGET_ARM))
+#error CORRADE_TARGET_X86 or CORRADE_TARGET_ARM defined on Emscripten/NaCl
+#endif
+
 #endif

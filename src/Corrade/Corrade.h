@@ -94,7 +94,7 @@ Defined if the library is built for Apple platforms (OS X, iOS).
 /**
 @brief iOS target
 
-Defined if the library is built for iOS (device or simulator)
+Defined if the library is built for iOS (device or simulator).
 @see @ref CORRADE_TARGET_IOS_SIMULATOR, @ref CORRADE_TARGET_UNIX,
     @ref CORRADE_TARGET_APPLE, @ref corrade-cmake
 */
@@ -176,6 +176,34 @@ Defined if the library is built for Android.
 */
 #define CORRADE_TARGET_ANDROID
 #undef CORRADE_TARGET_ANDROID
+
+/**
+@brief x86 target
+
+Defined if the library is built for x86 platforms (32 or 64-bit). Note that
+unlike other `CORRADE_TARGET_*` variables, this variable and
+@ref CORRADE_TARGET_ARM are not exposed in CMake because the meaning is unclear
+on platforms with multi-architecture binaries. If neither
+@ref CORRADE_TARGET_X86 nor @ref CORRADE_TARGET_ARM is defined, the platform
+might be either @ref CORRADE_TARGET_EMSCRIPTEN, @ref CORRADE_TARGET_NACL or any
+other that the library doesn't know about yet.
+*/
+#define CORRADE_TARGET_X86
+#undef CORRADE_TARGET_X86
+
+/**
+@brief ARM target
+
+Defined if the library is built for ARM platforms (32 or 64-bit). Note that
+unlike other `CORRADE_TARGET_*` variables, this variable and
+@ref CORRADE_TARGET_X86 are not exposed in CMake because the meaning is unclear
+on platforms with multi-architecture binaries. If neither
+@ref CORRADE_TARGET_X86 nor @ref CORRADE_TARGET_ARM is defined, the platform
+might be either @ref CORRADE_TARGET_EMSCRIPTEN, @ref CORRADE_TARGET_NACL or any
+other that the library doesn't know about yet.
+*/
+#define CORRADE_TARGET_ARM
+#undef CORRADE_TARGET_ARM
 
 /**
 @brief Use ANSI escape sequences for colored Debug output on Windows
