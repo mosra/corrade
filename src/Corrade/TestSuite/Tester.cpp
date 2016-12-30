@@ -47,6 +47,15 @@
 #include <io.h>
 #endif
 
+/* For __rdtsc() */
+#ifdef CORRADE_TARGET_X86
+#ifdef __GNUC__
+#include <x86intrin.h>
+#elif defined(_MSC_VER)
+#include <intrin.h>
+#endif
+#endif
+
 namespace Corrade { namespace TestSuite {
 
 namespace {
@@ -136,7 +145,8 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
         .setHelp(R"(Corrade TestSuite executable. By default runs test cases in order in which they
 were added and exits with non-zero code if any of them failed. Supported
 benchmark types:
-  wall-clock    uses high-precision clock to measure time spent)")
+  wall-clock    uses high-precision clock to measure time spent
+  cycle-count   measures cycles spent (x86 only, gives zero result elsewhere))")
         .parse(argc, argv);
 
     _logOutput = logOutput;
@@ -176,9 +186,11 @@ benchmark types:
     #endif
 
     /* Decide about default benchmark type */
-    TestCaseType defaultBenchmarkType;
+    TestCaseType defaultBenchmarkType{};
     if(args.value("benchmark") == "wall-clock")
         defaultBenchmarkType = TestCaseType::WallClockBenchmark;
+    else if(args.value("benchmark") == "cycle-count")
+        defaultBenchmarkType = TestCaseType::CycleCountBenchmark;
     else Utility::Fatal() << "Unknown benchmark type" << args.value("benchmark");
 
     std::vector<std::pair<int, TestCase>> usedTestCases;
@@ -296,6 +308,12 @@ benchmark types:
                 testCase.second.benchmarkBegin = &Tester::wallClockBenchmarkBegin;
                 testCase.second.benchmarkEnd = &Tester::wallClockBenchmarkEnd;
                 benchmarkUnits = BenchmarkUnits::Time;
+                break;
+
+            case TestCaseType::CycleCountBenchmark:
+                testCase.second.benchmarkBegin = &Tester::cycleCountBenchmarkBegin;
+                testCase.second.benchmarkEnd = &Tester::cycleCountBenchmarkEnd;
+                benchmarkUnits = BenchmarkUnits::Cycles;
                 break;
 
             /* These have begin/end provided by the user */
@@ -537,6 +555,21 @@ void Tester::wallClockBenchmarkBegin() {
 
 std::uint64_t Tester::wallClockBenchmarkEnd() {
     return (std::chrono::high_resolution_clock::now() - _wallClockBenchmarkBegin).count();
+}
+
+void Tester::cycleCountBenchmarkBegin() {
+    _benchmarkName = "Cycle count";
+    #if defined(CORRADE_TARGET_X86) && (defined(__GNUC__) || defined(_MSC_VER))
+    _cycleCountBenchmarkBegin = __rdtsc();
+    #endif
+}
+
+std::uint64_t Tester::cycleCountBenchmarkEnd() {
+    #if defined(CORRADE_TARGET_X86) && (defined(__GNUC__) || defined(_MSC_VER))
+    return (__rdtsc() - _cycleCountBenchmarkBegin);
+    #else
+    return 0;
+    #endif
 }
 
 Tester::TesterConfiguration::TesterConfiguration() = default;

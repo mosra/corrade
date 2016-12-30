@@ -145,7 +145,20 @@ class CORRADE_TESTSUITE_EXPORT Tester {
             Default = 1,
 
             /** Wall clock */
-            WallClock = 2
+            WallClock = 2,
+
+            /**
+             * Cycle count
+             *
+             * Note that the measured value might be affected by system load,
+             * hyperthreading/overclocking and other factors. See for example
+             * https://randomascii.wordpress.com/2011/07/29/rdtsc-in-the-age-of-sandybridge/
+             * for more information.
+             * @partialsupport Supported only on @ref CORRADE_TARGET_X86 "x86"
+             *      and GCC/Clang or MSVC, on other platforms gives zero
+             *      result.
+             */
+            CycleCount = 3
         };
 
         /**
@@ -612,6 +625,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
             Test = 0,
             DefaultBenchmark = int(BenchmarkType::Default),
             WallClockBenchmark = int(BenchmarkType::WallClock),
+            CycleCountBenchmark = int(BenchmarkType::CycleCount),
             CustomTimeBenchmark = int(BenchmarkUnits::Time),
             CustomCycleBenchmark = int(BenchmarkUnits::Cycles),
             CustomInstructionBenchmark = int(BenchmarkUnits::Instructions),
@@ -665,6 +679,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         void wallClockBenchmarkBegin();
         std::uint64_t wallClockBenchmarkEnd();
 
+        void cycleCountBenchmarkBegin();
+        std::uint64_t cycleCountBenchmarkEnd();
+
         Debug::Flags _useColor;
         std::ostream *_logOutput, *_errorOutput;
         std::vector<TestCase> _testCases;
@@ -672,7 +689,14 @@ class CORRADE_TESTSUITE_EXPORT Tester {
             _testCaseDescription, _benchmarkName, _expectFailMessage;
         std::size_t _testCaseId, _testCaseInstanceId, _testCaseRepeatId,
             _benchmarkBatchSize, _testCaseLine, _checkCount;
-        std::chrono::time_point<std::chrono::high_resolution_clock> _wallClockBenchmarkBegin;
+
+        union {
+            std::chrono::time_point<std::chrono::high_resolution_clock> _wallClockBenchmarkBegin;
+            #ifdef CORRADE_TARGET_X86
+            std::uint64_t _cycleCountBenchmarkBegin;
+            #endif
+        };
+
         std::uint64_t _benchmarkResult;
         TestCase* _testCase = nullptr;
         bool _expectedFailuresDisabled;
