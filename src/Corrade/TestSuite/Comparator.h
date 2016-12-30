@@ -49,7 +49,10 @@ for providing different ways to compare the same type.
 
 You have to implement `operator()()` for comparison of two values with
 arbitrary type and `printErrorMessage()` for printing error message when the
-comparison failed.
+comparison failed. The reason for having those two separated is allowing the
+user to use colored output -- due to a limitation of Windows console API, where
+it's only possible to specify text color when writing directly to the output
+without any intermediate buffer.
 
 @anchor TestSuite-Comparator-pseudo-types
 ### Comparing with pseudo-types
