@@ -391,7 +391,7 @@ namespace {
 void Test::benchmarkUnits() {
     setTestCaseDescription(BenchmarkUnitsData[testCaseInstanceId()].name);
 
-    CORRADE_BENCHMARK(100) {}
+    CORRADE_BENCHMARK(10000) {}
 }
 
 void Test::benchmarkCountBegin() {}
@@ -401,7 +401,7 @@ void Test::benchmarkInstructionsBegin() { setBenchmarkName("Instructions"); }
 void Test::benchmarkMemoryBegin() { setBenchmarkName("Memory"); }
 
 std::uint64_t Test::benchmarkUnitsEnd() {
-    return (15 + testCaseRepeatId()*10)*std::pow(1000, testCaseInstanceId());
+    return 100*(15 + testCaseRepeatId()*10)*std::pow(1000, testCaseInstanceId());
 }
 
 void Test::Test::benchmarkSkip() {
@@ -598,64 +598,64 @@ void TesterTest::test() {
         "        2 iterations per repeat. Space clock time per iteration:\n"
         "        Min: 150.00 ns       Max: 250.00 ns       Avg: 200.00 ns      \n"
         " BENCH [36] benchmarkUnits(ones)@10\n"
-        "        100 iterations per repeat. Custom benchmark per iteration:\n"
+        "        10000 iterations per repeat. Custom benchmark per iteration:\n"
         "        Min:   0.15          Max:   1.05          Avg:   0.60         \n"
         " BENCH [37] benchmarkUnits(thousands)@10\n"
-        "        100 iterations per repeat. Custom benchmark per iteration:\n"
+        "        10000 iterations per repeat. Custom benchmark per iteration:\n"
         "        Min:   0.15 k        Max:   1.05 k        Avg:   0.60 k       \n"
         " BENCH [38] benchmarkUnits(millions)@10\n"
-        "        100 iterations per repeat. Custom benchmark per iteration:\n"
+        "        10000 iterations per repeat. Custom benchmark per iteration:\n"
         "        Min:   0.15 M        Max:   1.05 M        Avg:   0.60 M       \n"
         " BENCH [39] benchmarkUnits(billions)@10\n"
-        "        100 iterations per repeat. Custom benchmark per iteration:\n"
+        "        10000 iterations per repeat. Custom benchmark per iteration:\n"
         "        Min:   0.15 G        Max:   1.05 G        Avg:   0.60 G       \n"
         " BENCH [40] benchmarkUnits(ones)@10\n"
-        "        100 iterations per repeat. Time per iteration:\n"
+        "        10000 iterations per repeat. Time per iteration:\n"
         "        Min:   0.15 ns       Max:   1.05 ns       Avg:   0.60 ns      \n"
         " BENCH [41] benchmarkUnits(thousands)@10\n"
-        "        100 iterations per repeat. Time per iteration:\n"
+        "        10000 iterations per repeat. Time per iteration:\n"
         "        Min:   0.15 µs       Max:   1.05 µs       Avg:   0.60 µs      \n"
         " BENCH [42] benchmarkUnits(millions)@10\n"
-        "        100 iterations per repeat. Time per iteration:\n"
+        "        10000 iterations per repeat. Time per iteration:\n"
         "        Min:   0.15 ms       Max:   1.05 ms       Avg:   0.60 ms      \n"
         " BENCH [43] benchmarkUnits(billions)@10\n"
-        "        100 iterations per repeat. Time per iteration:\n"
+        "        10000 iterations per repeat. Time per iteration:\n"
         "        Min:   0.15  s       Max:   1.05  s       Avg:   0.60  s      \n"
         " BENCH [44] benchmarkUnits(ones)@10\n"
-        "        100 iterations per repeat. Cycles per iteration:\n"
+        "        10000 iterations per repeat. Cycles per iteration:\n"
         "        Min:   0.15  cycles  Max:   1.05  cycles  Avg:   0.60  cycles \n"
         " BENCH [45] benchmarkUnits(thousands)@10\n"
-        "        100 iterations per repeat. Cycles per iteration:\n"
+        "        10000 iterations per repeat. Cycles per iteration:\n"
         "        Min:   0.15 kcycles  Max:   1.05 kcycles  Avg:   0.60 kcycles \n"
         " BENCH [46] benchmarkUnits(millions)@10\n"
-        "        100 iterations per repeat. Cycles per iteration:\n"
+        "        10000 iterations per repeat. Cycles per iteration:\n"
         "        Min:   0.15 Mcycles  Max:   1.05 Mcycles  Avg:   0.60 Mcycles \n"
         " BENCH [47] benchmarkUnits(billions)@10\n"
-        "        100 iterations per repeat. Cycles per iteration:\n"
+        "        10000 iterations per repeat. Cycles per iteration:\n"
         "        Min:   0.15 Gcycles  Max:   1.05 Gcycles  Avg:   0.60 Gcycles \n"
         " BENCH [48] benchmarkUnits(ones)@10\n"
-        "        100 iterations per repeat. Instructions per iteration:\n"
+        "        10000 iterations per repeat. Instructions per iteration:\n"
         "        Min:   0.15  instrs  Max:   1.05  instrs  Avg:   0.60  instrs \n"
         " BENCH [49] benchmarkUnits(thousands)@10\n"
-        "        100 iterations per repeat. Instructions per iteration:\n"
+        "        10000 iterations per repeat. Instructions per iteration:\n"
         "        Min:   0.15 kinstrs  Max:   1.05 kinstrs  Avg:   0.60 kinstrs \n"
         " BENCH [50] benchmarkUnits(millions)@10\n"
-        "        100 iterations per repeat. Instructions per iteration:\n"
+        "        10000 iterations per repeat. Instructions per iteration:\n"
         "        Min:   0.15 Minstrs  Max:   1.05 Minstrs  Avg:   0.60 Minstrs \n"
         " BENCH [51] benchmarkUnits(billions)@10\n"
-        "        100 iterations per repeat. Instructions per iteration:\n"
+        "        10000 iterations per repeat. Instructions per iteration:\n"
         "        Min:   0.15 Ginstrs  Max:   1.05 Ginstrs  Avg:   0.60 Ginstrs \n"
         " BENCH [52] benchmarkUnits(ones)@10\n"
-        "        100 iterations per repeat. Memory per iteration:\n"
+        "        10000 iterations per repeat. Memory per iteration:\n"
         "        Min:   0.15  B       Max:   1.05  B       Avg:   0.60  B      \n"
         " BENCH [53] benchmarkUnits(thousands)@10\n"
-        "        100 iterations per repeat. Memory per iteration:\n"
+        "        10000 iterations per repeat. Memory per iteration:\n"
         "        Min:   0.15 kB       Max:   1.05 kB       Avg:   0.60 kB      \n"
         " BENCH [54] benchmarkUnits(millions)@10\n"
-        "        100 iterations per repeat. Memory per iteration:\n"
+        "        10000 iterations per repeat. Memory per iteration:\n"
         "        Min:   0.15 MB       Max:   1.05 MB       Avg:   0.60 MB      \n"
         " BENCH [55] benchmarkUnits(billions)@10\n"
-        "        100 iterations per repeat. Memory per iteration:\n"
+        "        10000 iterations per repeat. Memory per iteration:\n"
         "        Min:   0.15 GB       Max:   1.05 GB       Avg:   0.60 GB      \n"
         "  SKIP [56] benchmarkSkip()@1\n"
         "        Can't verify the measurements anyway.\n"
@@ -728,7 +728,7 @@ void TesterTest::skipTests() {
     std::string expected =
         "Starting TesterTest::Test with 1 test cases...\n"
         " BENCH [36] benchmarkUnits(ones)@10\n"
-        "        100 iterations per repeat. Custom benchmark per iteration:\n"
+        "        10000 iterations per repeat. Custom benchmark per iteration:\n"
         "        Min:   0.15          Max:   1.05          Avg:   0.60         \n"
         "Finished TesterTest::Test with 0 errors out of 0 checks.\n";
     CORRADE_COMPARE(out.str(), expected);
