@@ -71,11 +71,11 @@ namespace {
         std::ostringstream out;
         out << std::right << std::fixed << std::setprecision(2) << std::setw(6);
 
-        if(max >= std::chrono::seconds{1})
+        if(max/batchSize >= std::chrono::seconds{1})
             out << std::chrono::duration<float>(ns).count()/batchSize << "  s      ";
-        else if(max >= std::chrono::milliseconds{1})
+        else if(max/batchSize >= std::chrono::milliseconds{1})
             out << std::chrono::duration<float, std::milli>(ns).count()/batchSize << " ms      ";
-        else if(max >= std::chrono::microseconds{1})
+        else if(max/batchSize >= std::chrono::microseconds{1})
             out << std::chrono::duration<float, std::micro>(ns).count()/batchSize << " µs      ";
         else out << std::chrono::duration<float, std::nano>(ns).count()/batchSize << " ns      ";
 
@@ -86,11 +86,11 @@ namespace {
         std::ostringstream out;
         out << std::right << std::fixed << std::setprecision(2) << std::setw(6);
 
-        if(max >= 1000000000)
+        if(max/batchSize >= 1000000000)
             out << float(count)/(1000000000.0f*batchSize) << " G" << unit;
-        else if(max >= 1000000)
+        else if(max/batchSize >= 1000000)
             out << float(count)/(1000000.0f*batchSize) << " M" << unit;
-        else if(max >= 1000)
+        else if(max/batchSize >= 1000)
             out << float(count)/(1000.0f*batchSize) << " k" << unit;
         else out << float(count)/batchSize << "  " << unit;
 
