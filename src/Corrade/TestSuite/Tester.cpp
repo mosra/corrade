@@ -138,6 +138,7 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
 were added and exits with non-zero code if any of them failed. Supported
 benchmark types:
   wall-clock    uses high-precision clock to measure time spent
+  cpu-clock     measures CPU time spent
   cycle-count   measures cycles spent (x86 only, gives zero result elsewhere))")
         .parse(argc, argv);
 
@@ -181,6 +182,8 @@ benchmark types:
     TestCaseType defaultBenchmarkType{};
     if(args.value("benchmark") == "wall-clock")
         defaultBenchmarkType = TestCaseType::WallClockBenchmark;
+    else if(args.value("benchmark") == "cpu-clock")
+        defaultBenchmarkType = TestCaseType::CpuClockBenchmark;
     else if(args.value("benchmark") == "cycle-count")
         defaultBenchmarkType = TestCaseType::CycleCountBenchmark;
     else Utility::Fatal() << "Unknown benchmark type" << args.value("benchmark");
@@ -299,6 +302,12 @@ benchmark types:
             case TestCaseType::WallClockBenchmark:
                 testCase.second.benchmarkBegin = &Tester::wallClockBenchmarkBegin;
                 testCase.second.benchmarkEnd = &Tester::wallClockBenchmarkEnd;
+                benchmarkUnits = BenchmarkUnits::Time;
+                break;
+
+            case TestCaseType::CpuClockBenchmark:
+                testCase.second.benchmarkBegin = &Tester::cpuClockBenchmarkBegin;
+                testCase.second.benchmarkEnd = &Tester::cpuClockBenchmarkEnd;
                 benchmarkUnits = BenchmarkUnits::Time;
                 break;
 
@@ -547,6 +556,15 @@ void Tester::wallClockBenchmarkBegin() {
 
 std::uint64_t Tester::wallClockBenchmarkEnd() {
     return Implementation::wallClock() - _benchmarkBegin;
+}
+
+void Tester::cpuClockBenchmarkBegin() {
+    _benchmarkName = "CPU clock time";
+    _benchmarkBegin = Implementation::cpuClock();
+}
+
+std::uint64_t Tester::cpuClockBenchmarkEnd() {
+    return Implementation::cpuClock() - _benchmarkBegin;
 }
 
 void Tester::cycleCountBenchmarkBegin() {

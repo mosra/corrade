@@ -146,18 +146,22 @@ class CORRADE_TESTSUITE_EXPORT Tester {
             /** Wall clock */
             WallClock = 2,
 
+            /** CPU clock */
+            CpuClock = 3,
+
             /**
              * Cycle count
              *
-             * Note that the measured value might be affected by system load,
-             * hyperthreading/overclocking and other factors. See for example
+             * Note that on newer architectures the measured value is
+             * independent on the CPU frequency, so it in fact measures time
+             * and not actual cycles spent. See for example
              * https://randomascii.wordpress.com/2011/07/29/rdtsc-in-the-age-of-sandybridge/
              * for more information.
              * @partialsupport Supported only on @ref CORRADE_TARGET_X86 "x86"
-             *      and GCC/Clang or MSVC, on other platforms gives zero
-             *      result.
+             *      and GCC/Clang or MSVC (using RDTSC), on other platforms
+             *      gives zero result.
              */
-            CycleCount = 3
+            CycleCount = 4
         };
 
         /**
@@ -624,6 +628,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
             Test = 0,
             DefaultBenchmark = int(BenchmarkType::Default),
             WallClockBenchmark = int(BenchmarkType::WallClock),
+            CpuClockBenchmark = int(BenchmarkType::CpuClock),
             CycleCountBenchmark = int(BenchmarkType::CycleCount),
             CustomTimeBenchmark = int(BenchmarkUnits::Time),
             CustomCycleBenchmark = int(BenchmarkUnits::Cycles),
@@ -677,6 +682,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
         void wallClockBenchmarkBegin();
         std::uint64_t wallClockBenchmarkEnd();
+
+        void cpuClockBenchmarkBegin();
+        std::uint64_t cpuClockBenchmarkEnd();
 
         void cycleCountBenchmarkBegin();
         std::uint64_t cycleCountBenchmarkEnd();
