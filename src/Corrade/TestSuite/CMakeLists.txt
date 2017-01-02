@@ -37,10 +37,14 @@ set(CorradeTestSuite_HEADERS
     TestSuite.h
     visibility.h)
 
+set(CorradeTestSuite_PRIVATE_HEADERS
+    Implementation/BenchmarkCounters.h)
+
 # TestSuite library
 add_library(CorradeTestSuite ${SHARED_OR_STATIC}
     ${CorradeTestSuite_SRCS}
-    ${CorradeTestSuite_HEADERS})
+    ${CorradeTestSuite_HEADERS}
+    ${CorradeTestSuite_PRIVATE_HEADERS})
 set_target_properties(CorradeTestSuite PROPERTIES DEBUG_POSTFIX "-d")
 if(NOT BUILD_STATIC)
     set_target_properties(CorradeTestSuite PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})

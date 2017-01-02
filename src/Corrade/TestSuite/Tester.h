@@ -34,7 +34,6 @@
 #include <string>
 #include <type_traits>
 #include <vector>
-#include <chrono>
 
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/TestSuite/Compare/FloatingPoint.h"
@@ -690,13 +689,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         std::size_t _testCaseId, _testCaseInstanceId, _testCaseRepeatId,
             _benchmarkBatchSize, _testCaseLine, _checkCount;
 
-        union {
-            std::chrono::time_point<std::chrono::high_resolution_clock> _wallClockBenchmarkBegin;
-            #ifdef CORRADE_TARGET_X86
-            std::uint64_t _cycleCountBenchmarkBegin;
-            #endif
-        };
-
+        std::uint64_t _benchmarkBegin;
         std::uint64_t _benchmarkResult;
         TestCase* _testCase = nullptr;
         bool _expectedFailuresDisabled;

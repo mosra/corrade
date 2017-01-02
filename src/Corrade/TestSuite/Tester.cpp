@@ -34,6 +34,7 @@
 #include <cstdlib>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/TestSuite/Implementation/BenchmarkCounters.h"
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/String.h"
 
@@ -45,15 +46,6 @@
 #define WIN32_LEAN_AND_MEAN 1
 #define VC_EXTRALEAN
 #include <io.h>
-#endif
-
-/* For __rdtsc() */
-#ifdef CORRADE_TARGET_X86
-#ifdef __GNUC__
-#include <x86intrin.h>
-#elif defined(_MSC_VER)
-#include <intrin.h>
-#endif
 #endif
 
 namespace Corrade { namespace TestSuite {
@@ -550,26 +542,20 @@ Tester::BenchmarkRunner Tester::createBenchmarkRunner(const std::size_t batchSiz
 
 void Tester::wallClockBenchmarkBegin() {
     _benchmarkName = "Wall clock time";
-    _wallClockBenchmarkBegin = std::chrono::high_resolution_clock::now();
+    _benchmarkBegin = Implementation::wallClock();
 }
 
 std::uint64_t Tester::wallClockBenchmarkEnd() {
-    return (std::chrono::high_resolution_clock::now() - _wallClockBenchmarkBegin).count();
+    return Implementation::wallClock() - _benchmarkBegin;
 }
 
 void Tester::cycleCountBenchmarkBegin() {
     _benchmarkName = "Cycle count";
-    #if defined(CORRADE_TARGET_X86) && (defined(__GNUC__) || defined(_MSC_VER))
-    _cycleCountBenchmarkBegin = __rdtsc();
-    #endif
+    _benchmarkBegin = Implementation::rdtsc();
 }
 
 std::uint64_t Tester::cycleCountBenchmarkEnd() {
-    #if defined(CORRADE_TARGET_X86) && (defined(__GNUC__) || defined(_MSC_VER))
-    return (__rdtsc() - _cycleCountBenchmarkBegin);
-    #else
-    return 0;
-    #endif
+    return Implementation::rdtsc() - _benchmarkBegin;
 }
 
 Tester::TesterConfiguration::TesterConfiguration() = default;
