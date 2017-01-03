@@ -56,8 +56,8 @@ for equality:
 
 If both values have different type or if we want to force some type for
 comparison, we can use @ref CORRADE_COMPARE_AS(). This macro can be used also
-for more involved comparison using "pseudo-types", see the @ref Comparator
-class documentation for more information.
+for more involved comparison using "pseudo-types", see the
+@ref TestSuite::Comparator class documentation for more information.
 @skip MyTest::sin()
 @until }
 
