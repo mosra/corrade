@@ -129,7 +129,7 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
             .setFromEnvironment("repeat-every", "CORRADE_TEST_REPEAT_EVERY")
         .addOption("repeat-all", "1").setHelp("repeat-all", "repeat all test cases N times", "N")
             .setFromEnvironment("repeat-all", "CORRADE_TEST_REPEAT_ALL")
-        .addBooleanOption("abort-on-fail").setHelp("abort after first failure")
+        .addBooleanOption("abort-on-fail").setHelp("abort-on-fail", "abort after first failure")
             .setFromEnvironment("abort-on-fail", "CORRADE_TEST_ABORT_ON_FAIL")
         .addBooleanOption("no-xfail").setHelp("no-xfail", "disallow expected failures")
             .setFromEnvironment("no-xfail", "CORRADE_TEST_NO_XFAIL")
