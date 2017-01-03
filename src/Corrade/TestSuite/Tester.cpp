@@ -38,7 +38,7 @@
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/String.h"
 
-#ifdef CORRADE_TARGET_UNIX
+#if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include <unistd.h>
 #endif
 
@@ -153,9 +153,9 @@ benchmark types:
     /* The autodetection is done in Debug class on Windows with WINAPI colors */
     #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
     else _useColor = Debug::Flags{};
-    /* We can autodetect via isatty() on Unix-like systems and Windows with
-       ANSI colors enabled */
-    #elif !defined(CORRADE_TARGET_EMSCRIPTEN)
+    /* We can autodetect via isatty() on Unix-like systems, Emscripten and
+       Windows with ANSI colors enabled */
+    #elif defined(CORRADE_UTILITY_USE_ANSI_COLORS) || defined(CORRADE_TARGET_UNIX) ||defined(CORRADE_TARGET_EMSCRIPTEN)
     else _useColor = logOutput == &std::cout &&
         /* Windows RT projects have C4996 treated as error by default. WHY */
         #ifdef _MSC_VER
