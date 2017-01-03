@@ -60,10 +60,22 @@ namespace Implementation {
     };
 }
 
-/** @brief Fuzzy-compare for float values */
+/**
+@brief Fuzzy-compare for float values
+
+Uses comparison algorithm from http://floating-point-gui.de/errors/comparison/
+with epsilon equal to `1.0e-6f`. Unlike the standard floating-point comparison,
+comparing two  NaN values gives a `true` result.
+*/
 template<> class Comparator<float>: public Implementation::FloatComparator<float> {};
 
-/** @brief Fuzzy-compare for double values */
+/**
+@brief Fuzzy-compare for double values
+
+Uses comparison algorithm from http://floating-point-gui.de/errors/comparison/
+with epsilon equal to `1.0e-12`. Unlike the standard floating-point comparison,
+comparing two  NaN values gives a `true` result.
+*/
 template<> class Comparator<double>: public Implementation::FloatComparator<double> {};
 
 }}

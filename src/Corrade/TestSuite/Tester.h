@@ -788,6 +788,9 @@ int a = 5 + 3;
 CORRADE_COMPARE(a, 8);
 @endcode
 
+Comparison of floating-point types is by default done as a fuzzy-compare, see
+@ref Corrade::TestSuite::Comparator<float> "Comparator<float>" and
+@ref Corrade::TestSuite::Comparator<double> "Comparator<double>" for details.
 @see @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE_AS()
 */
 #define CORRADE_COMPARE(actual, expected)                                   \

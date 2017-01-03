@@ -48,10 +48,14 @@ CORRADE_COMPARE_AS(a, b, Compare::Container);
 @endcode
 
 It is also possible to sort the containers before comparison using
-@ref SortedContainer:
+@ref SortedContainer :
 @code
 CORRADE_COMPARE_AS(a, b, Compare::SortedContainer);
 @endcode
+
+Comparison of containers of floating-point types is by default done as a
+fuzzy-compare, see @ref Comparator<float> and @ref Comparator<double> for
+details.
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
 */
