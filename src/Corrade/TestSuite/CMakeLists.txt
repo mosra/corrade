@@ -38,7 +38,8 @@ set(CorradeTestSuite_HEADERS
     visibility.h)
 
 set(CorradeTestSuite_PRIVATE_HEADERS
-    Implementation/BenchmarkCounters.h)
+    Implementation/BenchmarkCounters.h
+    Implementation/BenchmarkStats.h)
 
 # TestSuite library
 add_library(CorradeTestSuite ${SHARED_OR_STATIC}

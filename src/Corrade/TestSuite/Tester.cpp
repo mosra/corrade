@@ -25,18 +25,21 @@
 
 #include "Tester.h"
 
+#include <cstdlib>
 #include <algorithm>
 #include <iostream>
-#include <iomanip>
 #include <random>
-#include <sstream>
 #include <utility>
-#include <cstdlib>
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/TestSuite/Implementation/BenchmarkCounters.h"
+#include "Corrade/TestSuite/Implementation/BenchmarkStats.h"
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/String.h"
+
+#ifdef CORRADE_TARGET_ANDROID
+#include <sstream>
+#endif
 
 #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include <unistd.h>
@@ -58,53 +61,6 @@ namespace {
     }
 
     constexpr const char PaddingString[] = "0000000000";
-
-    inline std::string formatTime(std::chrono::nanoseconds ns, std::chrono::nanoseconds max, std::size_t batchSize) {
-        std::ostringstream out;
-        out << std::right << std::fixed << std::setprecision(2) << std::setw(6);
-
-        if(max/batchSize >= std::chrono::seconds{1})
-            out << std::chrono::duration<float>(ns).count()/batchSize << "  s      ";
-        else if(max/batchSize >= std::chrono::milliseconds{1})
-            out << std::chrono::duration<float, std::milli>(ns).count()/batchSize << " ms      ";
-        else if(max/batchSize >= std::chrono::microseconds{1})
-            out << std::chrono::duration<float, std::micro>(ns).count()/batchSize << " µs      ";
-        else out << std::chrono::duration<float, std::nano>(ns).count()/batchSize << " ns      ";
-
-        return out.str();
-    }
-
-    inline std::string formatCount(std::uint64_t count, std::uint64_t max, std::size_t batchSize, const char* unit) {
-        std::ostringstream out;
-        out << std::right << std::fixed << std::setprecision(2) << std::setw(6);
-
-        if(max/batchSize >= 1000000000)
-            out << float(count)/(1000000000.0f*batchSize) << " G" << unit;
-        else if(max/batchSize >= 1000000)
-            out << float(count)/(1000000.0f*batchSize) << " M" << unit;
-        else if(max/batchSize >= 1000)
-            out << float(count)/(1000.0f*batchSize) << " k" << unit;
-        else out << float(count)/batchSize << "  " << unit;
-
-        return out.str();
-    }
-
-    std::string formatMeasurement(std::uint64_t count, std::uint64_t max, Tester::BenchmarkUnits unit, std::size_t batchSize) {
-        switch(unit) {
-            case Tester::BenchmarkUnits::Time:
-                return formatTime(std::chrono::nanoseconds(count), std::chrono::nanoseconds(max), batchSize);
-            case Tester::BenchmarkUnits::Cycles:
-                return formatCount(count, max, batchSize, "cycles ");
-            case Tester::BenchmarkUnits::Instructions:
-                return formatCount(count, max, batchSize, "instrs ");
-            case Tester::BenchmarkUnits::Memory:
-                return formatCount(count, max, batchSize, "B      ");
-            case Tester::BenchmarkUnits::Count:
-                return formatCount(count, max, batchSize, "       ");
-        }
-
-        CORRADE_ASSERT(false, "TestSuite::Tester: invalid benchmark unit", {}); /* LCOV_EXCL_LINE */
-    }
 }
 
 Tester::Tester(const TesterConfiguration& configuration): _logOutput{nullptr}, _errorOutput{nullptr}, _testCaseLine{0}, _checkCount{0}, _expectedFailure{nullptr}, _configuration{configuration} {}
@@ -133,13 +89,20 @@ int Tester::exec(const int argc, const char** const argv, std::ostream* const lo
             .setFromEnvironment("abort-on-fail", "CORRADE_TEST_ABORT_ON_FAIL")
         .addBooleanOption("no-xfail").setHelp("no-xfail", "disallow expected failures")
             .setFromEnvironment("no-xfail", "CORRADE_TEST_NO_XFAIL")
-        .addOption("benchmark", "wall-clock").setHelp("benchmark", "default benchmark type", "TYPE")
+        .addOption("benchmark", "wall-time").setHelp("benchmark", "default benchmark type", "TYPE")
+            .setFromEnvironment("benchmark", "CORRADE_BENCHMARK")
+        .addOption("benchmark-discard", "1").setHelp("benchmark-discard", "discard first N measurements of each benchmark", "N")
+            .setFromEnvironment("benchmark-discard", "CORRADE_BENCHMARK_DISCARD")
+        .addOption("benchmark-yellow", "0.05").setHelp("benchmark-yellow", "deviation threshold for marking benchmark yellow", "N")
+            .setFromEnvironment("benchmark-yellow", "CORRADE_BENCHMARK_YELLOW")
+        .addOption("benchmark-red", "0.25").setHelp("benchmark-red", "deviation threshold for marking benchmark red", "N")
+            .setFromEnvironment("benchmark-red", "CORRADE_BENCHMARK_RED")
         .setHelp(R"(Corrade TestSuite executable. By default runs test cases in order in which they
 were added and exits with non-zero code if any of them failed. Supported
 benchmark types:
-  wall-clock    uses high-precision clock to measure time spent
-  cpu-clock     measures CPU time spent
-  cycle-count   measures cycles spent (x86 only, gives zero result elsewhere))")
+  wall-time     wall time spent
+  cpu-time      CPU time spent
+  cpu-cycles    CPU cycles spent (x86 only, gives zero result elsewhere))")
         .parse(argc, argv);
 
     _logOutput = logOutput;
@@ -180,12 +143,12 @@ benchmark types:
 
     /* Decide about default benchmark type */
     TestCaseType defaultBenchmarkType{};
-    if(args.value("benchmark") == "wall-clock")
-        defaultBenchmarkType = TestCaseType::WallClockBenchmark;
-    else if(args.value("benchmark") == "cpu-clock")
-        defaultBenchmarkType = TestCaseType::CpuClockBenchmark;
-    else if(args.value("benchmark") == "cycle-count")
-        defaultBenchmarkType = TestCaseType::CycleCountBenchmark;
+    if(args.value("benchmark") == "wall-time")
+        defaultBenchmarkType = TestCaseType::WallTimeBenchmark;
+    else if(args.value("benchmark") == "cpu-time")
+        defaultBenchmarkType = TestCaseType::CpuTimeBenchmark;
+    else if(args.value("benchmark") == "cpu-cycles")
+        defaultBenchmarkType = TestCaseType::CpuCyclesBenchmark;
     else Utility::Fatal() << "Unknown benchmark type" << args.value("benchmark");
 
     std::vector<std::pair<int, TestCase>> usedTestCases;
@@ -299,19 +262,19 @@ benchmark types:
             case TestCaseType::Test:
                 break;
 
-            case TestCaseType::WallClockBenchmark:
+            case TestCaseType::WallTimeBenchmark:
                 testCase.second.benchmarkBegin = &Tester::wallClockBenchmarkBegin;
                 testCase.second.benchmarkEnd = &Tester::wallClockBenchmarkEnd;
-                benchmarkUnits = BenchmarkUnits::Time;
+                benchmarkUnits = BenchmarkUnits::Nanoseconds;
                 break;
 
-            case TestCaseType::CpuClockBenchmark:
+            case TestCaseType::CpuTimeBenchmark:
                 testCase.second.benchmarkBegin = &Tester::cpuClockBenchmarkBegin;
                 testCase.second.benchmarkEnd = &Tester::cpuClockBenchmarkEnd;
-                benchmarkUnits = BenchmarkUnits::Time;
+                benchmarkUnits = BenchmarkUnits::Nanoseconds;
                 break;
 
-            case TestCaseType::CycleCountBenchmark:
+            case TestCaseType::CpuCyclesBenchmark:
                 testCase.second.benchmarkBegin = &Tester::cycleCountBenchmarkBegin;
                 testCase.second.benchmarkEnd = &Tester::cycleCountBenchmarkEnd;
                 benchmarkUnits = BenchmarkUnits::Cycles;
@@ -324,7 +287,7 @@ benchmark types:
             case TestCaseType::CustomMemoryBenchmark:
             case TestCaseType::CustomCountBenchmark:
                 benchmarkUnits = BenchmarkUnits(int(testCase.second.type));
-                _benchmarkName = "Custom benchmark";
+                _benchmarkName = "";
                 break;
         }
 
@@ -358,6 +321,7 @@ benchmark types:
             _testCaseLine = 0;
             _testCaseName.clear();
             _testCase = &testCase.second;
+            _benchmarkBatchSize = 0;
             _benchmarkResult = 0;
 
             try {
@@ -395,26 +359,49 @@ benchmark types:
                     Debug::Color::Default);
                 if(_expectedFailure) out << Debug::newline << "       " << _expectedFailure->message();
 
-            /* Benchmark */
+            /* Benchmark. Completely custom printing. */
             } else {
                 Debug out{logOutput, _useColor};
-                printTestCaseLabel(out, " BENCH", Debug::Color::Default, Debug::Color::Default);
 
-                const std::uint64_t min = *std::min_element(measurements.begin(), measurements.end());
-                const std::uint64_t max = *std::max_element(measurements.begin(), measurements.end());
-                std::uint64_t avg{};
-                for(std::uint64_t v: measurements) avg += v;
-                avg /= measurements.size();
+                const char* padding = PaddingString + sizeof(PaddingString) - digitCount(_testCases.size()) + digitCount(_testCaseId) - 1;
 
-                out << Debug::newline << "       "
-                    << Debug::boldColor(Debug::Color::Default)
-                    << _benchmarkBatchSize << "iterations per repeat." << _benchmarkName << "per iteration:"
-                    << Debug::newline << "        Min:"
-                    << Debug::resetColor << formatMeasurement(min, max, benchmarkUnits, _benchmarkBatchSize)
-                    << Debug::boldColor(Debug::Color::Default) << "Max:"
-                    << Debug::resetColor << formatMeasurement(max, max, benchmarkUnits, _benchmarkBatchSize)
-                    << Debug::boldColor(Debug::Color::Default) << "Avg:"
-                    << Debug::resetColor << formatMeasurement(avg, max, benchmarkUnits, _benchmarkBatchSize);
+                out << Debug::boldColor(Debug::Color::Default) << " BENCH"
+                    << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
+                    << Debug::boldColor(Debug::Color::Cyan) << padding
+                    << Debug::nospace << _testCaseId << Debug::nospace
+                    << Debug::color(Debug::Color::Blue) << "]";
+
+                /* Gather measurements. There needs to be at least one
+                   measurememnt left even if the discard count says otherwise. */
+                const std::size_t discardMeasurements = measurements.empty() ? 0 :
+                        std::min(measurements.size() - 1, args.value<std::size_t>("benchmark-discard"));
+
+                double mean, stddev;
+                Utility::Debug::Color color;
+                std::tie(mean, stddev, color) = Implementation::calculateStats(measurements.suffix(discardMeasurements), _benchmarkBatchSize, args.value<double>("benchmark-yellow"), args.value<double>("benchmark-red"));
+
+                Implementation::printStats(out, mean, stddev, color, benchmarkUnits);
+
+                out << Debug::boldColor(Debug::Color::Default)
+                    << (_testCaseName.empty() ? "<unknown>" : _testCaseName)
+                    << Debug::nospace;
+
+                /* Optional test case description */
+                if(!_testCaseDescription.empty()) {
+                    out << "("
+                        << Debug::nospace
+                        << Debug::resetColor << _testCaseDescription
+                        << Debug::nospace << Debug::boldColor(Debug::Color::Default)
+                        << ")";
+                } else out << "()";
+
+                out << Debug::nospace << "@" << Debug::nospace
+                    << measurements.size() - discardMeasurements
+                    << Debug::nospace << "x" << Debug::nospace << _benchmarkBatchSize
+                    << Debug::resetColor;
+                if(!_benchmarkName.empty())
+                    out << "(" << Utility::Debug::nospace << _benchmarkName
+                        << Utility::Debug::nospace << ")";
             }
 
         /* Abort on first failure */
@@ -550,7 +537,7 @@ Tester::BenchmarkRunner Tester::createBenchmarkRunner(const std::size_t batchSiz
 }
 
 void Tester::wallClockBenchmarkBegin() {
-    _benchmarkName = "Wall clock time";
+    _benchmarkName = "wall time";
     _benchmarkBegin = Implementation::wallClock();
 }
 
@@ -559,7 +546,7 @@ std::uint64_t Tester::wallClockBenchmarkEnd() {
 }
 
 void Tester::cpuClockBenchmarkBegin() {
-    _benchmarkName = "CPU clock time";
+    _benchmarkName = "CPU time";
     _benchmarkBegin = Implementation::cpuClock();
 }
 
@@ -568,7 +555,7 @@ std::uint64_t Tester::cpuClockBenchmarkEnd() {
 }
 
 void Tester::cycleCountBenchmarkBegin() {
-    _benchmarkName = "Cycle count";
+    _benchmarkName = "CPU cycles";
     _benchmarkBegin = Implementation::rdtsc();
 }
 

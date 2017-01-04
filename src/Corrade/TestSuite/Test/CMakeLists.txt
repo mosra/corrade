@@ -36,6 +36,8 @@ endif()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 
+corrade_add_test(TestSuiteBenchmarkStatsTest BenchmarkStatsTest.cpp)
+
 corrade_add_test(TestSuiteBundledFilesTest BundledFilesTest.cpp
     FILES
         BundledFilesTestFiles/a.txt

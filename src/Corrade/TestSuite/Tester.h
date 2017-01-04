@@ -138,30 +138,52 @@ class CORRADE_TESTSUITE_EXPORT Tester {
             /* 0 reserved for test cases */
 
             /**
-             * Default. Set to wall clock, but can be overriden on command-line
-             * using the `--benchmark` option.
+             * Default. Equivalent to @ref BenchmarkType::WallTime, but can be
+             * overriden on command-line using the `--benchmark` option.
              */
             Default = 1,
 
-            /** Wall clock */
-            WallClock = 2,
+            /**
+             * Wall time. Suitable for measuring events in microseconds and up.
+             * While the reported time is in nanoseconds, the actual timer
+             * granularity may differ from platform to platform. To measure
+             * shorter events, increase number of iterations passed to
+             * @ref CORRADE_BENCHMARK() to amortize the error or use a
+             * different benchmark type.
+             */
+            WallTime = 2,
 
-            /** CPU clock */
-            CpuClock = 3,
+            #ifdef CORRADE_BUILD_DEPRECATED
+            /** @copybrief BenchmarkType::WallTime
+             * @deprecated Use @ref BenchmarkType::WallTime instead.
+             */
+            WallClock CORRADE_DEPRECATED_ENUM("use BenchmarkType::WallTime instead") = int(WallTime),
+            #endif
 
             /**
-             * Cycle count
-             *
-             * Note that on newer architectures the measured value is
-             * independent on the CPU frequency, so it in fact measures time
-             * and not actual cycles spent. See for example
+             * CPU time. Suitable for measuring most events (microseconds and
+             * up). While the reported time is in nanoseconds, the actual timer
+             * granularity may differ from platform to platform (for example on
+             * Windows the CPU clock is reported in multiples of 100 ns). To
+             * measure shorter events, increase number of iterations passed to
+             * @ref CORRADE_BENCHMARK() to amortize the error or use a
+             * different clock.
+             */
+            CpuTime = 3,
+
+            /**
+             * CPU cycle count. Suitable for measuring sub-millisecond events,
+             * but note that on newer architectures the cycle counter frequency
+             * is constant and thus measured value is independent on CPU
+             * frequency, so it in fact measures time and not the actual cycles
+             * spent. See for example
              * https://randomascii.wordpress.com/2011/07/29/rdtsc-in-the-age-of-sandybridge/
              * for more information.
              * @partialsupport Supported only on @ref CORRADE_TARGET_X86 "x86"
              *      and GCC/Clang or MSVC (using RDTSC), on other platforms
              *      gives zero result.
              */
-            CycleCount = 4
+            CpuCycles = 4
         };
 
         /**
@@ -173,10 +195,26 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         enum class BenchmarkUnits {
             /* Values should not overlap with BenchmarkType */
 
-            Time = 100,             /**< Time (in nanoseconds) */
+            Nanoseconds = 100,      /**< Time in nanoseconds */
+
+            #ifdef CORRADE_BUILD_DEPRECATED
+            /** @copybrief BenchmarkUnits::Nanoseconds
+             * @deprecated Use @ref BenchmarkUnits::Nanoseconds instead.
+             */
+            Time CORRADE_DEPRECATED_ENUM("use Nanoseconds instead") = int(Nanoseconds),
+            #endif
+
             Cycles = 101,           /**< Processor cycle count */
             Instructions = 102,     /**< Processor instruction count */
-            Memory = 103,           /**< Memory (in bytes) */
+            Bytes = 103,            /**< Memory (in bytes) */
+
+            #ifdef CORRADE_BUILD_DEPRECATED
+            /** @copybrief BenchmarkUnits::Bytes
+             * @deprecated Use @ref BenchmarkUnits::Bytes instead.
+             */
+            Memory CORRADE_DEPRECATED_ENUM("use Bytes instead") = int(Bytes),
+            #endif
+
             Count = 104             /**< Generic count */
         };
 
@@ -557,8 +595,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @brief Set benchmark name
          *
          * In case of @ref addCustomBenchmarks() and @ref addCustomInstancedBenchmarks()
-         * provides the name for the unit measured, for example
-         * `"Wall clock time"`.
+         * provides the name for the unit measured, for example `"wall time"`.
          */
         void setBenchmarkName(const std::string& name);
         void setBenchmarkName(std::string&& name); /**< @overload */
@@ -627,13 +664,13 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         enum class TestCaseType {
             Test = 0,
             DefaultBenchmark = int(BenchmarkType::Default),
-            WallClockBenchmark = int(BenchmarkType::WallClock),
-            CpuClockBenchmark = int(BenchmarkType::CpuClock),
-            CycleCountBenchmark = int(BenchmarkType::CycleCount),
-            CustomTimeBenchmark = int(BenchmarkUnits::Time),
+            WallTimeBenchmark = int(BenchmarkType::WallTime),
+            CpuTimeBenchmark = int(BenchmarkType::CpuTime),
+            CpuCyclesBenchmark = int(BenchmarkType::CpuCycles),
+            CustomTimeBenchmark = int(BenchmarkUnits::Nanoseconds),
             CustomCycleBenchmark = int(BenchmarkUnits::Cycles),
             CustomInstructionBenchmark = int(BenchmarkUnits::Instructions),
-            CustomMemoryBenchmark = int(BenchmarkUnits::Memory),
+            CustomMemoryBenchmark = int(BenchmarkUnits::Bytes),
             CustomCountBenchmark = int(BenchmarkUnits::Count)
         };
 
@@ -920,19 +957,25 @@ if(!bigEndian) {
 
 /** @hideinitializer
 @brief Run a benchmark
-@param batchSize Number of iterations
 
-Benchmarks the following block or expression. Use in conjunction with
+Benchmarks the following block or expression by measuring @p batchSize
+iterations of given block. Use in conjunction with
 @ref Corrade::TestSuite::Tester::addBenchmarks() "addBenchmarks()" and others.
-Only one such loop can be in a function to achieve proper result.
+Only one such loop can be in a function to achieve proper result. Please note
+that there need to be additional measures in order to prevent the optimizer
+from removing the benchmark code such as assigning to a `volatile` variable or
+combining all the results to a variable, which is then being used outside of
+the loop.
 @code
 void benchmark() {
     std::string a = "hello", b = "world";
-    CORRADE_BENCHMARK(20) {
-        std::string c = a + b;
+    CORRADE_BENCHMARK(1000) {
+        volatile std::string c = a + b;
     }
 }
 @endcode
+The resulting measured value is divided by @p batchSize to represent cost of
+one iteration.
 */
 #define CORRADE_BENCHMARK(batchSize)                                        \
     _CORRADE_REGISTER_TEST_CASE();                                          \
