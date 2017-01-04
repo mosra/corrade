@@ -820,6 +820,9 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
         int _exitCode;
 };
 
+/** @debugoperatorenum{Corrade::Utility::Debug::Color} */
+CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, Debug::Color value);
+
 namespace Implementation {
 
 /* Used by Debug::operator<<(Implementation::DebugOstreamFallback&&) */

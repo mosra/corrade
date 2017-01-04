@@ -64,6 +64,8 @@ struct DebugTest: TestSuite::Tester {
     void ostreamFallbackPriority();
 
     void scopedOutput();
+
+    void debugColor();
 };
 
 DebugTest::DebugTest() {
@@ -98,7 +100,9 @@ DebugTest::DebugTest() {
         &DebugTest::ostreamFallback,
         &DebugTest::ostreamFallbackPriority,
 
-        &DebugTest::scopedOutput});
+        &DebugTest::scopedOutput,
+
+        &DebugTest::debugColor});
 }
 
 void DebugTest::debug() {
@@ -548,6 +552,13 @@ void DebugTest::scopedOutput() {
     CORRADE_COMPARE(debug2.str(), "well\n");
     CORRADE_COMPARE(warning2.str(), "that\n");
     CORRADE_COMPARE(error2.str(), "smells\n");
+}
+
+void DebugTest::debugColor() {
+    std::ostringstream out;
+
+    Debug(&out) << Debug::Color::White << Debug::Color(0xde);
+    CORRADE_COMPARE(out.str(), "Debug::Color::White Debug::Color(0xde)\n");
 }
 
 }}}

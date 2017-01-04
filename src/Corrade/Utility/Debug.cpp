@@ -295,4 +295,26 @@ Debug& Debug::operator<<(Implementation::DebugOstreamFallback&& value) {
 }
 #endif
 
+Debug& operator<<(Debug& debug, Debug::Color value) {
+    switch(value) {
+        /* LCOV_EXCL_START */
+        #define _c(value) case Debug::Color::value: return debug << "Debug::Color::" #value;
+        _c(Black)
+        _c(Red)
+        _c(Green)
+        _c(Yellow)
+        _c(Blue)
+        _c(Magenta)
+        _c(Cyan)
+        _c(White)
+        #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+        _c(Default) /* Alias to White on Windows */
+        #endif
+        #undef _c
+        /* LCOV_EXCL_STOP */
+    }
+
+    return debug << "Debug::Color(" << Debug::nospace << reinterpret_cast<void*>(static_cast<unsigned char>(char(value))) << Debug::nospace << ")";
+}
+
 }}
