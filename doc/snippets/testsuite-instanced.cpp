@@ -28,7 +28,7 @@
 
 using namespace Corrade;
 
-float round(float value) { return std::round(value); }
+using std::round;
 
 /** [0] */
 struct RoundTest: TestSuite::Tester {
