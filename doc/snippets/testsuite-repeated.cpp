@@ -23,31 +23,42 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-namespace Corrade {
-/** @page corrade-example-index Examples and tutorials
+#include <atomic>
+#include <thread>
+#include <Corrade/TestSuite/Tester.h>
 
- - @subpage interconnect
- - @subpage plugin-management
- - @subpage resource-management
- - @subpage testsuite
+using namespace Corrade;
 
-@todoc Rename (merge) to page `examples` when doxygen treats it as regular page.
+/** [0] */
+struct RaceTest: TestSuite::Tester {
+    explicit RaceTest();
 
-@example interconnect/main.cpp
-@example interconnect/CMakeLists.txt
-@example pluginmanager/AbstractAnimal.h
-@example pluginmanager/Canary.cpp
-@example pluginmanager/Canary.conf
-@example pluginmanager/Dog.cpp
-@example pluginmanager/Dog.conf
-@example pluginmanager/main.cpp
-@example pluginmanager/CMakeLists.txt
-@example resource/licenses/en.txt
-@example resource/resources.conf
-@example resource/main.cpp
-@example resource/CMakeLists.txt
-@example testsuite/MyTest.cpp
-@example testsuite/CMakeLists.txt
+    template<class T> void threadedIncrement();
+};
 
-*/
+RaceTest::RaceTest() {
+    addRepeatedTests<RaceTest>({
+        &RaceTest::threadedIncrement<int>,
+        &RaceTest::threadedIncrement<std::atomic_int>}, 10000);
 }
+
+template<class T> void RaceTest::threadedIncrement() {
+    setTestCaseName(std::is_same<T, int>::value ?
+        "threadedIncrement<int>" : "threadedIncrement<std::atomic_int>");
+
+    T x{0};
+    int y = 1;
+    auto fun = [&x, &y] {
+        for(std::size_t i = 0; i != 500; ++i) x += y;
+    };
+    std::thread a{fun}, b{fun}, c{fun};
+
+    a.join();
+    b.join();
+    c.join();
+
+    CORRADE_COMPARE(x, 1500);
+}
+
+CORRADE_TEST_MAIN(RaceTest)
+/** [0] */

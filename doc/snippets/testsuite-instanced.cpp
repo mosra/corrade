@@ -23,31 +23,46 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-namespace Corrade {
-/** @page corrade-example-index Examples and tutorials
+#include <cmath>
+#include <Corrade/TestSuite/Tester.h>
 
- - @subpage interconnect
- - @subpage plugin-management
- - @subpage resource-management
- - @subpage testsuite
+using namespace Corrade;
 
-@todoc Rename (merge) to page `examples` when doxygen treats it as regular page.
+float round(float value) { return std::round(value); }
 
-@example interconnect/main.cpp
-@example interconnect/CMakeLists.txt
-@example pluginmanager/AbstractAnimal.h
-@example pluginmanager/Canary.cpp
-@example pluginmanager/Canary.conf
-@example pluginmanager/Dog.cpp
-@example pluginmanager/Dog.conf
-@example pluginmanager/main.cpp
-@example pluginmanager/CMakeLists.txt
-@example resource/licenses/en.txt
-@example resource/resources.conf
-@example resource/main.cpp
-@example resource/CMakeLists.txt
-@example testsuite/MyTest.cpp
-@example testsuite/CMakeLists.txt
+/** [0] */
+struct RoundTest: TestSuite::Tester {
+    explicit RoundTest();
 
-*/
+    void test();
+};
+
+namespace {
+    enum: std::size_t { RoundDataCount = 5 };
+
+    constexpr const struct {
+        const char* name;
+        float input;
+        float expected;
+    } RoundData[RoundDataCount] {
+        {"positive down", 3.3f, 3.0f},
+        {"positive up", 3.5f, 4.0f},
+        {"zero", 0.0f, 0.0f},
+        {"negative down", -3.5f, -4.0f},
+        {"negative up", -3.3f, -3.0f}
+    };
 }
+
+RoundTest::RoundTest() {
+    addInstancedTests({&RoundTest::test}, RoundDataCount);
+}
+
+void RoundTest::test() {
+    setTestCaseDescription(RoundData[testCaseInstanceId()].name);
+
+    CORRADE_COMPARE(round(RoundData[testCaseInstanceId()].input),
+        RoundData[testCaseInstanceId()].expected);
+}
+
+CORRADE_TEST_MAIN(RoundTest)
+/** [0] */

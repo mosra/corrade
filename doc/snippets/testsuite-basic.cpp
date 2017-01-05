@@ -23,31 +23,32 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-namespace Corrade {
-/** @page corrade-example-index Examples and tutorials
+#include <Corrade/TestSuite/Tester.h>
 
- - @subpage interconnect
- - @subpage plugin-management
- - @subpage resource-management
- - @subpage testsuite
+using namespace Corrade;
 
-@todoc Rename (merge) to page `examples` when doxygen treats it as regular page.
+/** [0] */
+struct MyTest: TestSuite::Tester {
+    explicit MyTest();
 
-@example interconnect/main.cpp
-@example interconnect/CMakeLists.txt
-@example pluginmanager/AbstractAnimal.h
-@example pluginmanager/Canary.cpp
-@example pluginmanager/Canary.conf
-@example pluginmanager/Dog.cpp
-@example pluginmanager/Dog.conf
-@example pluginmanager/main.cpp
-@example pluginmanager/CMakeLists.txt
-@example resource/licenses/en.txt
-@example resource/resources.conf
-@example resource/main.cpp
-@example resource/CMakeLists.txt
-@example testsuite/MyTest.cpp
-@example testsuite/CMakeLists.txt
+    void addTwo();
+    void subtractThree();
+};
 
-*/
+MyTest::MyTest() {
+    addTests({&MyTest::addTwo,
+              &MyTest::subtractThree});
 }
+
+void MyTest::addTwo() {
+    int a = 3;
+    CORRADE_COMPARE(a + 2, 5);
+}
+
+void MyTest::subtractThree() {
+    int b = 5;
+    CORRADE_COMPARE(b - 3, 2);
+}
+
+CORRADE_TEST_MAIN(MyTest)
+/** [0] */

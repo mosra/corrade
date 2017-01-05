@@ -1,0 +1,128 @@
+/*
+    This file is part of Corrade.
+
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016
+              Vladimír Vondruš <mosra@centrum.cz>
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
+*/
+
+namespace Corrade {
+/** @page testsuite Testing and benchmarking with TestSuite
+
+Corrade's @ref TestSuite took its initial inspiration in QtTest framework.
+Unlike most other test libraries out there, it is not designed around opaque
+macros but rather tries to make use of standard C++ features to manage most of
+the test code. At first it may seem that this involves more typing, but it
+allows for much greater flexibility, easier debugging and more predictable
+control flow with real-world cases of data-driven testing and benchmarking.
+
+Below is a simple introduction into writing tests and benchmarks, you can find
+more detailed information about all the features in @ref TestSuite::Tester
+class documentation.
+
+@section testsuite-class Tester class
+
+First step for creating unit test is to subclass @ref TestSuite::Tester class
+and add test cases and benchmarks to it.
+@dontinclude testsuite/MyTest.cpp
+@skip struct MyTest
+@until };
+
+In constructor we register our test cases and benchmarks using
+@ref TestSuite::Tester::addTests() "addTests()" and
+@ref TestSuite::Tester::addBenchmarks() "addBenchmarks()":
+@skip MyTest::MyTest
+@until }
+@until }
+@until }
+
+Now we implement our test cases. The simplest macro is @ref CORRADE_VERIFY(),
+which only verifies that given expression is `true`; if not, it exits current
+test case (i.e. skips processing the rest of the function) and prints error on
+error output:
+@skip MyTest::commutativity()
+@until }
+
+Next macro is @ref CORRADE_COMPARE(), which takes two values and compares them
+for equality. Its advantage over @ref CORRADE_VERIFY() is that it prints
+contents of both arguments via @ref Utility::Debug if the comparison fails:
+@skip MyTest::associativity()
+@until }
+
+If both values have different type or if we want to force some type for
+comparison, we can use @ref CORRADE_COMPARE_AS(). This macro can be used also
+for more involved comparison using "pseudo-types", see the
+@ref TestSuite::Comparator class documentation for more information.
+@skip MyTest::sin()
+@until }
+
+If you have some unimplemented or broken functionality and you want to document
+that fact in the test instead of just ignoring it, you can use
+@ref CORRADE_EXPECT_FAIL() macro, which expects all following checks until the
+end of the scope to fail. An important property of this macro is that if some
+of the checks unexpectedly starts passing again, it makes the test case fail
+and the test code needs to be updated to avoid stale assumptions.
+@skip MyTest::pi()
+@until }
+
+For things that can't be tested on given platform you can use @ref CORRADE_SKIP()
+macro to indicate that the particular feature can't be tested:
+@skip MyTest::bigEndian()
+@until }
+@until }
+
+Besides test cases providing a clear passed/failed result, it's possible to
+create benchmarks where the results are left up to user interpretation. The
+most valuable benchmarks are ones that are comparing various approaches against
+each other so one can immediatelly see the difference:
+@skip MyTest::prepend1kItemsVector()
+@until }
+@until }
+@until }
+@until }
+@until }
+@until }
+
+@section testsuite-compilation Compilation and running
+
+Lastly, we must not forget to create `main()` function using @ref CORRADE_TEST_MAIN()
+macro:
+@skipline CORRADE_TEST_MAIN
+
+Now we can compile and run our test using CMake and
+@ref corrade-cmake-add-test "corrade_add_test()" macro. Don't forget to call
+`enable_testing()` first so `ctest` is able to collect and run all the tests.
+@dontinclude testsuite/CMakeLists.txt
+@skip enable_testing
+@until corrade_add_test
+
+The test can be run either manually or in batch with all other tests using
+`ctest`. When executed, it produces output similar to this:
+
+@image html testsuite.png
+
+The test executable accepts various arguments to control the test and benchmark
+execution, pass `--help` to it to see all the options.
+
+ - @ref testsuite/MyTest.cpp
+ - @ref testsuite/CMakeLists.txt
+
+*/
+}}

@@ -23,31 +23,30 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-namespace Corrade {
-/** @page corrade-example-index Examples and tutorials
+#include <Corrade/TestSuite/Tester.h>
 
- - @subpage interconnect
- - @subpage plugin-management
- - @subpage resource-management
- - @subpage testsuite
+using namespace Corrade;
 
-@todoc Rename (merge) to page `examples` when doxygen treats it as regular page.
+template<class T> T calculatePi() { return T(3.141592653589793); }
 
-@example interconnect/main.cpp
-@example interconnect/CMakeLists.txt
-@example pluginmanager/AbstractAnimal.h
-@example pluginmanager/Canary.cpp
-@example pluginmanager/Canary.conf
-@example pluginmanager/Dog.cpp
-@example pluginmanager/Dog.conf
-@example pluginmanager/main.cpp
-@example pluginmanager/CMakeLists.txt
-@example resource/licenses/en.txt
-@example resource/resources.conf
-@example resource/main.cpp
-@example resource/CMakeLists.txt
-@example testsuite/MyTest.cpp
-@example testsuite/CMakeLists.txt
+/** [0] */
+struct PiTest: TestSuite::Tester {
+    explicit PiTest();
 
-*/
+    template<class T> void calculate();
+};
+
+PiTest::PiTest() {
+    addTests<PiTest>({
+        &PiTest::calculate<float>,
+        &PiTest::calculate<double>});
 }
+
+template<class T> void PiTest::calculate() {
+    setTestCaseName(std::is_same<T, float>::value ? "calculate<float>" : "calculate<double>");
+
+    CORRADE_COMPARE(calculatePi<T>(), T(3.141592653589793));
+}
+
+CORRADE_TEST_MAIN(PiTest)
+/** [0] */

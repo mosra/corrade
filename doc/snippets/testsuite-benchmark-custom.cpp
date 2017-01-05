@@ -23,31 +23,52 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-namespace Corrade {
-/** @page corrade-example-index Examples and tutorials
+#include <Corrade/TestSuite/Tester.h>
 
- - @subpage interconnect
- - @subpage plugin-management
- - @subpage resource-management
- - @subpage testsuite
+using namespace Corrade;
 
-@todoc Rename (merge) to page `examples` when doxygen treats it as regular page.
+/** [0] */
+struct VectorBenchmark: TestSuite::Tester {
+    explicit VectorBenchmark();
 
-@example interconnect/main.cpp
-@example interconnect/CMakeLists.txt
-@example pluginmanager/AbstractAnimal.h
-@example pluginmanager/Canary.cpp
-@example pluginmanager/Canary.conf
-@example pluginmanager/Dog.cpp
-@example pluginmanager/Dog.conf
-@example pluginmanager/main.cpp
-@example pluginmanager/CMakeLists.txt
-@example resource/licenses/en.txt
-@example resource/resources.conf
-@example resource/main.cpp
-@example resource/CMakeLists.txt
-@example testsuite/MyTest.cpp
-@example testsuite/CMakeLists.txt
+    void copyCountInsert10k();
+    void copyCountInsert10kBegin();
+    std::uint64_t copyCountInsert10kEnd();
+};
 
-*/
+VectorBenchmark::VectorBenchmark() {
+    addCustomBenchmarks({&VectorBenchmark::copyCountInsert10k}, 1,
+        &VectorBenchmark::copyCountInsert10kBegin,
+        &VectorBenchmark::copyCountInsert10kEnd,
+        BenchmarkUnits::Count);
 }
+
+namespace {
+    std::uint64_t count = 0;
+
+    struct CopyCounter {
+        CopyCounter() = default;
+        CopyCounter(const CopyCounter&) {
+            ++count;
+        }
+    };
+}
+
+void VectorBenchmark::copyCountInsert10k() {
+    std::vector<CopyCounter> data;
+    CORRADE_BENCHMARK(1)
+        for(std::size_t i = 0; i != 10000; ++i)
+            data.push_back({});
+}
+
+void VectorBenchmark::copyCountInsert10kBegin() {
+    count = 0;
+}
+
+std::uint64_t VectorBenchmark::copyCountInsert10kEnd() {
+    return count;
+}
+
+CORRADE_TEST_MAIN(VectorBenchmark)
+/** [0] */
+

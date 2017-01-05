@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::TestSuite::Tester, macros @ref CORRADE_TEST_MAIN(), @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH(), @ref CORRADE_SKIP()
+ * @brief Class @ref Corrade::TestSuite::Tester, macros @ref CORRADE_TEST_MAIN(), @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH(), @ref CORRADE_EXPECT_FAIL(), @ref CORRADE_EXPECT_FAIL_IF(), @ref CORRADE_SKIP(), @ref CORRADE_BENCHMARK()
  */
 
 #include <initializer_list>
@@ -59,14 +59,323 @@ namespace Implementation {
 }
 
 /**
-@brief Base class for unit tests
+@brief Base class for tests and benchmarks
 
-See @ref unit-testing for introduction.
+Supports colored output, instanced (or data-driven) tests, repeated tests (e.g.
+for testing race conditions) and benchmarks, which can either use one of the
+builtin measurement functions (such as wall time, CPU time or CPU cycle count)
+or any user-provided custom measurement function (for example measuring
+allocations, memory usage, GPU timings etc.). In addition, the behavior of the
+test execution can be configured  via many command-line and environment
+options.
 
-@see @ref CORRADE_TEST_MAIN(), @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(),
-    @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH(), @ref CORRADE_SKIP(),
-    @ref CORRADE_EXPECT_FAIL(), @ref CORRADE_EXPECT_FAIL_IF(),
-    @ref CORRADE_BENCHMARK()
+Make sure to first go through the @ref testsuite tutorial for initial overview
+and step-by-step introduction. Below is a more detailed description of all
+provided functionality.
+
+## Basic testing workflow
+
+A test starts with deriving the @ref Tester class. The test cases are
+parameter-less `void` member functions that are added using @ref addTests() in
+the constructor and the `main()` function is created using
+@ref CORRADE_TEST_MAIN(). The goal is to have as little boilerplate as
+possible, thus the test usually  consists of only one `*.cpp` file with no
+header and the derived type is a `struct` to avoid having to write `public`
+keywords.
+
+@snippet testsuite-basic.cpp 0
+
+The above gives the following output:
+
+@image html testsuite-basic.png
+
+Actual testing is done via various @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(),
+@ref CORRADE_COMPARE_AS() and @ref CORRADE_COMPARE_WITH() macros. If some
+comparison in given test case fails, a `FAIL` with concrete file, line and
+additional diagnostic is printed to the output and the test case is exited
+without executing the remaining statements. Otherwise, if all comparisons in
+given test case pass, an `OK` is printed. The main difference between these
+macros is the kind of diagnostic output they print when comparison fails --
+for example a simple expression failure reported by @ref CORRADE_VERIFY() is
+enough when checking for non-`nullptr` value, but for comparing a 1000-element
+array you might want to use @ref CORRADE_COMPARE_AS() with @ref Compare::Container
+instead.
+
+Additionally there are @ref CORRADE_SKIP(), @ref CORRADE_EXPECT_FAIL() and
+@ref CORRADE_EXPECT_FAIL_IF() control flow helpers that allow you to say for
+example that a particular test was skipped due to missing functionality on
+given platform (printing a `SKIP` on output and exiting the test case right
+after the statement) or documenting that some algorithm produces incorrect
+result due to a bug, printing an `XFAIL`. Passing a test while failure is
+expected is treated as an error (`XPASS`), which can be helpful to ensure the
+assumptions in the tests don't get stale. Expected failures can be also
+disabled globally via a command-line option `--no-xfail` or via environment
+variable, @ref TestSuite-Tester-command-line "see below".
+
+The only reason why those are macros and not member functions is the ability to
+gather class/function/file/line/expression information via the preprocessor for
+printing the test output and exact location of possible test failure. If none
+of these macros is encountered when running the test case, the test case is
+reported as invalid, with `?` on output.
+
+The test cases are numbered on the output and those numbers can be used on the
+command-line to whitelist/blacklist the test cases with `--only`/`--skip`,
+randomly reorder them using `--shuffle` and more,
+@ref TestSuite-Tester-command-line "see below" for details. In total, when all
+test cases pass, the executable exits with `0` return code, in case of failure
+or invalid test case it exits with `1` to make it possible to run the tests in
+batch (such as CMake CTest). By default, after a failure, the testing continues
+with the other test cases, you can abort after first failure using
+`--abort-on-fail` command-line option.
+
+Useful but not immediately obvious is the possibility to use templated member
+functions as test cases, for example when testing a certain algorithm on
+different data types:
+
+@snippet testsuite-templated.cpp 0
+
+And the corresponding output:
+
+@image html testsuite-templated.png
+
+This works with all `add*()` functions though please note that current C++11
+compilers (at least GCC and Clang) are not able to properly detect class type
+when passing only templated functions to it, so you may need to specify the
+type explicitly. Also, there is no easy and portable way to get function name
+with template parameters so by default it will be just the function name, but
+you can call @ref setTestCaseName() to specify a full name.
+
+## Instanced tests
+
+Often you have an algorithm which you need to test on a variety of inputs or
+corner cases. One solution is to use a for-cycle inside the test case to test
+on all inputs, but then the diagnostic on error will not report which input is
+to blame. Another solution is to duplicate the test case multiple times for all
+the different inputs, but that becomes a maintenance nightmare pretty quickly.
+Making the function with a non-type template parameter is also a solution, but
+that's not possible to do for all types and with huge input sizes it is often
+not worth the increased compilation times. Fortunately, there is an
+@ref addInstancedTests() that comes for the rescue:
+
+@snippet testsuite-instanced.cpp 0
+
+Corresponding output:
+
+@image html testsuite-instanced.png
+
+The tester class just gives you an instance index via @ref testCaseInstanceId()
+and it's up to you whether you use it as an offset to some data array or
+generate an input using it, the above example is just a hint how one might use
+it. Each instance is printed to the output separately and if one instance
+fails, it doesn't stop the other instances from being executed. Similarly to
+the templated tests, @ref setTestCaseDescription() allows you to set a
+human-readable description of given instance. If not called, the instances are
+just numbered in the output.
+
+## Repeated tests
+
+A complementary feature to instanced tests are repeated tests using
+@ref addRepeatedTests(), useful for example to repeatedly call one function
+10000 times to increase probability of potential race conditions. The
+difference from instanced tests is that all repeats are treated as executing
+the same code and thus only the overall result is reported in the output. Also
+unlike instanced tests, if a particular repeat fails, no further repeats are
+executed. The test output contains number of executed repeats after the test
+case name, prefixed by `@`. Example of testing race conditions with multiple
+threads accessing the same variable:
+
+@snippet testsuite-repeated.cpp 0
+
+Depending on various factors, here is one possible output:
+
+@image html testsuite-repeated.png
+
+Similarly to @ref testCaseInstanceId() there is @ref testCaseRepeatId() which
+gives repeat index. Use with care, however, as the repeated tests are assumed
+to execute the same code every time. On
+@ref TestSuite-Tester-command-line "the command-line" it is possible to
+increase repeat count via `--repeat-every`. In addition there is `--repeat-all`
+which behaves as like all `add*()` functions in the constructor were called
+multiple times in a loop. Combined with `--shuffle` this can be used to run the
+test cases multiple times in a random order to uncover potential unwanted
+interactions and order-dependent bugs.
+
+It's also possible to combine instanced and repeated tests using
+@ref addRepeatedInstancedTests().
+
+## Benchmarks
+
+Besides verifying code correctness, it's possible to measure code performance.
+Unlike correctness tests, the benchmark results are hard to reason about using
+only automated means, so there are no macros for verifying benchmark results
+and instead the measured values are just printed to the output for users to
+see. Benchmarks can be added using @ref addBenchmarks(), the actual benchmark
+loop is marked by @ref CORRADE_BENCHMARK() and the results are printed to
+output with `BENCH` identifier. Example benchmark comparing performance of
+inverse square root implementations:
+
+@snippet testsuite-benchmark.cpp 0
+
+Note that it's not an error to add one test/benchmark multiple times -- here it
+is used to have the same code benchmarked with different timers. Possible
+output:
+
+@image html testsuite-benchmark.png
+
+The number passed to @ref addBenchmarks() is equivalent to repeat count passed
+to @ref addRepeatedTests() and specifies measurement sample count. The number
+passed to @ref CORRADE_BENCHMARK() is number of iterations of the inner loop in
+one sample measurement to amortize the overhead and error caused by clock
+precision -- the faster the measured code is the more iterations it needs. The
+measured value is then divided by that number to represent cost of a single
+iteration. The @ref testCaseRepeatId() returns current sample index and can be
+used to give some input variation to the test. By default the benchmarks
+measure wall clock time, see @ref BenchmarkType for other types of builtin
+benchmarks. The default benchmark type can be also overriden
+@ref TestSuite-Tester-command-line "on the command-line" via `--benchmark`.
+
+It's possible to use all @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE() etc.
+verification macros inside the benchmark to check pre/post-conditions. If one
+of them fails, the benchmark is treated on output just like failing test, with
+no benchmark results being printed out. Keep in mind, however, that those
+macros have some overhead, so try to not use them inside the benchmark loop.
+
+The benchmark output is calculated from all samples except the first discarded
+samples. By default that's one sample, `--benchmark-discard` and `--repeat-every`
+@ref TestSuite-Tester-command-line "command-line options" can be used to
+override how many samples are taken and how many of them are discarded at
+first. In the output, the used sample count and sample size is printed after
+test case name, prefixed with `@`. The output contains mean value and a sample
+standard deviation, calculated as: @f[
+    \begin{array}{rcl}
+        \bar{x} & = & \dfrac{1}{N} \sum\limits_{i=1}^N x_i \\ \\
+        \sigma_x & = & \sqrt{\dfrac{1}{N-1} \sum\limits_{i=1}^N \left( x_i - \bar{x} \right)^2}
+    \end{array}
+@f]
+
+Different benchmark type have different units, time values are displayed in
+`ns`, `µs`, `ms` and `s`, dimensionless count is suffixed by `k`, `M` or `G`
+indicating thousands, millions and billions, instructions with `I`, `kI`, `MI`
+and `GI`, cycles with `C`, `kC`, `MC` and `GC` and memory in `B`, `kB`, `MB`
+and `GB`. In case of memory the prefixes are multiples of 1024 instead of 1000.
+For easier visual recognition of the values, by default the sample standard
+deviation is colored yellow if it is larger than 5% of the absolute value of
+the mean and red if it is larger than 25% of the absolute value of the mean.
+This can be overriden @ref TestSuite-Tester-command-line "on the command-line"
+via `--benchmark-yellow` and `--benchmark-red`.
+
+It's possible to have instanced benchmarks as well, see
+@ref addInstancedBenchmarks().
+
+## Custom benchmarks
+
+It's possible to specify a custom pair of functions for intiating the benchmark
+and returning the result using @ref addCustomBenchmarks(). The benchmark end
+function returns an unsigned 64-bit integer indicating measured amount in units
+given by @ref BenchmarkUnits. Contrived example of benchmarking number of
+copies when using `std::vector::push_back()`:
+
+@snippet testsuite-benchmark-custom.cpp 0
+
+Running the benchmark shows that adding calling `push_back()` for 10 thousand
+elements actually causes the copy constructor to be called 26 thousand times:
+
+@image html testsuite-benchmark-custom.png
+
+## Specifying setup/teardown routines
+
+While the common practice in C++ is to use RTTI for resource lifetime
+management, sometimes you may need to execute arbitrary code at the beginning
+and end of each test case. For this, all @ref addTests(),
+@ref addInstancedTests(), @ref addRepeatedTests(), @ref addRepeatedInstancedTests(),
+@ref addBenchmarks(), @ref addInstancedBenchmarks(), @ref addCustomBenchmarks()
+and @ref addCustomInstancedBenchmarks() have an overload that is additionally
+taking a pair of parameter-less `void` functions for setup and teardown. Both
+functions are called before and after each test case run, independently on
+whether the test case passed or failed.
+
+@anchor TestSuite-Tester-command-line
+## Command-line options
+
+Command-line options that make sense to be set globally for multiple test cases
+are also configurable via environment variables for greater flexibility when
+for example running the tests in a batch via `ctest`.
+
+Usage:
+
+    ./my-test [-h|--help] [-c|--color on|off|auto] [--skip "N1 N2..."]
+        [--skip-tests] [--skip-benchmarks] [--only "N1 N2..."] [--shuffle]
+        [--repeat-every N] [--repeat-all N] [--abort-on-fail] [--no-xfail]
+        [--benchmark TYPE] [--benchmark-discard N] [--benchmark-yellow N]
+        [--benchmark-red N]
+
+Arguments:
+
+-   `-h`, `--help` -- display this help message and exit
+-   `-c`, `--color on|off|auto` -- colored output (environment:
+    `CORRADE_TEST_COLOR`, default: `auto`). The `auto` option enables color
+    output in case an interactive terminal is detected. Note that on Windows it
+    is possible to output colors only directly to an interactive terminal
+    unless @ref CORRADE_UTILITY_USE_ANSI_COLORS is defined.
+-   `--skip "N1 N2..."` -- skip test cases with given numbers
+-   `--skip-tests` -- skip all tests (environment:
+    `CORRADE_TEST_SKIP_TESTS=ON|OFF`)
+-   `--skip-benchmarks` -- skip all benchmarks (environment:
+    `CORRADE_TEST_SKIP_BENCHMARKS=ON|OFF`)
+-   `--only "N1 N2..."` -- run only test cases with given numbers
+-   `--shuffle` -- randomly shuffle test case order (environment:
+    `CORRADE_TEST_SHUFFLE=ON|OFF`)
+-   `--repeat-every N` -- repeat every test case N times (environment:
+    `CORRADE_TEST_REPEAT_EVERY`, default: `1`)
+-   `--repeat-all N` -- repeat all test cases N times (environment:
+    `CORRADE_TEST_REPEAT_ALL`, default: `1`)
+-   `--abort-on-fail` -- abort after first failure (environment:
+    `CORRADE_TEST_ABORT_ON_FAIL=ON|OFF`)
+-   `--no-xfail` -- disallow expected failures (environment:
+    `CORRADE_TEST_NO_XFAIL=ON|OFF`)
+-   `--benchmark TYPE` -- default benchmark type (environment:
+    `CORRADE_BENCHMARK`). Supported benchmark types:
+    -   `wall-time` -- wall time spent
+    -   `cpu-time` -- CPU time spent
+    -   `cpu-cycles` -- CPU cycles spent (x86 only, gives zero result
+        elsewhere)
+-   `--benchmark-discard N` -- discard first N measurements of each benchmark
+    (environment: `CORRADE_BENCHMARK_DISCARD`, default: `1`)
+-   `--benchmark-yellow N` -- deviation threshold for marking benchmark yellow
+    (environment: `CORRADE_BENCHMARK_YELLOW`, default: `0.05`)
+-   `--benchmark-red N` -- deviation threshold for marking benchmark red
+    (environment: `CORRADE_BENCHMARK_RED`, default: `0.25`)
+
+## CMake support and platform-specific goodies
+
+While the test executables can be created in any way you want, there's also an
+@ref corrade-cmake-add-test "corrade_add_test()" CMake macro that creates the
+executable, links `Corrade::TestSuite` library to it and adds it to CTest.
+Besides that it is able to link other arbitrary libraries to the executable
+and specify a list of files that the tests used. It provides additional useful
+features on various platforms:
+
+-   If compiling for Emscripten, using @ref corrade-cmake-add-test "corrade_add_test()"
+    makes CTest run the resulting `*.js` file via Node.js. Also it is able to
+    bundle all files specified in `FILES` into the virtual Emscripten
+    filesystem, making it easy to run file-based tests on this platform; all
+    environment options are passed through as well.
+-   If Xcode projects are generated via CMake and @ref CORRADE_TESTSUITE_TARGET_XCTEST
+    is enabled, @ref corrade-cmake-add-test "corrade_add_test()" makes the test
+    executables in a way compatible with XCTest, making it easy to run them
+    directly from Xcode. Running the tests via `ctest` will also use XCTest.
+-   If building for Android, using @ref corrade-cmake-add-test "corrade_add_test()"
+    will make CTest upload the test executables and all files specified in `FILES`
+    onto the device or emulator via `adb`, run it there with all environment
+    options passed through as well and transfers test results back to the host.
+
+Example of using the @ref corrade-cmake-add-test "corrade_add_test()" macro is
+below. The test executable will get built from the specified source with the
+libJPEG library linked and the `*.jpg` files will be available on desktop,
+Emscripten and Android in path specified in `JPEG_TEST_DIR` that was saved into
+the `configure.h` file inside current build directory:
+
+@snippet testsuite.cmake 0
 */
 class CORRADE_TESTSUITE_EXPORT Tester {
     public:
@@ -270,7 +579,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         /**
          * @brief Add test cases
          *
-         * Adds one or more test cases to be executed.
+         * Adds one or more test cases to be executed. It's not an error to
+         * call this function multiple times or add one test case more than
+         * once.
          * @see @ref addInstancedTests()
          */
         template<class Derived> void addTests(std::initializer_list<void(Derived::*)()> tests) {
@@ -283,6 +594,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * Unlike the above function repeats each of the test cases until it
          * fails or @p repeatCount is reached. Useful for stability or resource
          * leak checking. Each test case appears in the output log only once.
+         * It's not an error to call this function multiple times or add a
+         * particular test case more than once -- in that case it will appear
+         * in the output log once for each occurence in the list.
          * @see @ref addInstancedTests(), @ref addRepeatedInstancedTests()
          */
         template<class Derived> void addRepeatedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t repeatCount) {
@@ -300,7 +614,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @p teardown function is called after every test case in the list,
          * regardless of whether it passed, failed or was skipped. Using
          * verification macros in @p setup or @p teardown function is not
-         * allowed.
+         * allowed. It's not an error to call this function multiple times or
+         * add one test case more than once.
          * @see @ref addInstancedTests()
          */
         template<class Derived> void addTests(std::initializer_list<void(Derived::*)()> tests, void(Derived::*setup)(), void(Derived::*teardown)()) {
@@ -314,7 +629,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * fails or @p repeatCount is reached. Useful for stability or resource
          * leak checking. The @p setup and @p teardown functions are called
          * again for each repeat of each test case. Each test case appears in
-         * the output log only once.
+         * the output log only once. It's not an error to call this function
+         * multiple times or add a particular test case more than once -- in
+         * that case it will appear in the output log once for each occurence
+         * in the list.
          * @see @ref addInstancedTests(), @ref addRepeatedInstancedTests()
          */
         template<class Derived> void addRepeatedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t repeatCount, void(Derived::*setup)(), void(Derived::*teardown)()) {
@@ -328,7 +646,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          *
          * Unlike @ref addTests(), this function runs each of the test cases
          * @p instanceCount times. Useful for data-driven tests. Each test case
-         * appears in the output once for each instance.
+         * appears in the output once for each instance. It's not an error to
+         * call this function multiple times or add one test case more than
+         * once -- in that case it will appear once for each instance of each
+         * occurence in the list.
          * @see @ref testCaseInstanceId(), @ref setTestCaseDescription()
          */
         template<class Derived> void addInstancedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t instanceCount) {
@@ -341,7 +662,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * Unlike the above function repeats each of the test case instances
          * until it fails or @p repeatCount is reached. Useful for stability or
          * resource leak checking. Each test case appears in the output once
-         * for each instance.
+         * for each instance. It's not an error to call this function multiple
+         * times or add one test case more than once -- in that case it will
+         * appear once for each instance of each occurence in the list.
          * @see @ref addInstancedTests(), @ref addRepeatedInstancedTests()
          */
         template<class Derived> void addRepeatedInstancedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t repeatCount, std::size_t instanceCount) {
@@ -360,7 +683,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * in the list and the @p teardown function is called after every
          * instance of every test case in the list, regardless of whether it
          * passed, failed or was skipped. Using verification macros in @p setup
-         * or @p teardown function is not allowed.
+         * or @p teardown function is not allowed. It's not an error to call
+         * this function multiple times or add one test case more than once --
+         * in that case it will appear once for each instance of each occurence
+         * in the list.
          */
         template<class Derived> void addInstancedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t instanceCount, void(Derived::*setup)(), void(Derived::*teardown)()) {
             addRepeatedInstancedTests<Derived>(tests, 1, instanceCount, setup, teardown);
@@ -373,7 +699,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * until it fails or @p repeatCount is reached. Useful for stability or
          * resource leak checking. The @p setup and @p teardown functions are
          * called again for each repeat of each instance of each test case. The
-         * test case appears in the output once for each instance.
+         * test case appears in the output once for each instance. It's not an
+         * error to call this function multiple times or add one test case more
+         * than once -- in that case it will appear once for each instance of
+         * each occurence in the list.
          * @see @ref addInstancedTests(), @ref addRepeatedInstancedTests()
          */
         template<class Derived> void addRepeatedInstancedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t repeatCount, std::size_t instanceCount, void(Derived::*setup)(), void(Derived::*teardown)()) {
@@ -394,7 +723,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @p batchCount parameter specifies how many batches will be run to
          * make the measurement more precise, while the batch size parameter
          * passed to @ref CORRADE_BENCHMARK() specifies how many iterations
-         * will be done in each batch to minimize overhead.
+         * will be done in each batch to minimize overhead. It's not an error
+         * to call this function multiple times or add one benchmark more than
+         * once.
          * @see @ref addInstancedBenchmarks()
          */
         template<class Derived> void addBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, BenchmarkType benchmarkType = BenchmarkType::Default) {
@@ -414,7 +745,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * the list and the @p teardown function is called after every batch of
          * every benchmark in the list, regardless of whether it passed, failed
          * or was skipped. Using verification macros in @p setup or @p teardown
-         * function is not allowed.
+         * function is not allowed. It's not an error to call this function
+         * multiple times or add one benchmark more than once.
          * @see @ref addInstancedBenchmarks()
          */
         template<class Derived> void addBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, void(Derived::*setup)(), void(Derived::*teardown)(), BenchmarkType benchmarkType = BenchmarkType::Default) {
@@ -432,7 +764,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * Unlike the above functions uses user-supplied measurement functions.
          * The @p benchmarkBegin parameter starts the measurement, the
          * @p benchmarkEnd parameter ends the measurement and returns measured
-         * value, which is in @p units.
+         * value, which is in @p units. It's not an error to call this function
+         * multiple times or add one benchmark more than once.
          * @see @ref addCustomInstancedBenchmarks()
          */
         template<class Derived> void addCustomBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, void(Derived::*benchmarkBegin)(), std::uint64_t(Derived::*benchmarkEnd)(), BenchmarkUnits benchmarkUnits) {
@@ -454,7 +787,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * the list and the @p teardown function is called after every batch of
          * every benchmark in the list, regardless of whether it passed, failed
          * or was skipped. Using verification macros in @p setup or @p teardown
-         * function is not allowed.
+         * function is not allowed. It's not an error to call this function
+         * multiple times or add one benchmark more than once.
          * @see @ref addCustomInstancedBenchmarks()
          */
         template<class Derived> void addCustomBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, void(Derived::*setup)(), void(Derived::*teardown)(), void(Derived::*benchmarkBegin)(), std::uint64_t(Derived::*benchmarkEnd)(), BenchmarkUnits benchmarkUnits) {
@@ -472,7 +806,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          *
          * Unlike @ref addBenchmarks(), this function runs each of the
          * benchmarks @p instanceCount times. Useful for data-driven tests.
-         * Each test case appears in the output once for each instance.
+         * Each test case appears in the output once for each instance. It's
+         * not an error to call this function multiple times or add one
+         * benchmark more than once -- in that case it will appear once for
+         * each instance of each occurence in the list.
          * @see @ref testCaseInstanceId(), @ref setTestCaseDescription()
          */
         template<class Derived> void addInstancedBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, std::size_t instanceCount, BenchmarkType benchmarkType = BenchmarkType::Default) {
@@ -493,7 +830,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * the list and the @p teardown function is called after every instance
          * of every batch of every benchmark in the list, regardless of whether
          * it passed, failed or was skipped. Using verification macros in
-         * @p setup or @p teardown function is not allowed.
+         * @p setup or @p teardown function is not allowed. It's not an error
+         * to call this function multiple times or add one benchmark more than
+         * once -- in that case it will appear once for each instance of each
+         * occurence in the list.
          */
         template<class Derived> void addInstancedBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, std::size_t instanceCount, void(Derived::*setup)(), void(Derived::*teardown)(), BenchmarkType benchmarkType = BenchmarkType::Default) {
             addCustomInstancedBenchmarks<Derived>(benchmarks, batchCount, instanceCount, setup, teardown, nullptr, nullptr, benchmarkType);
@@ -511,7 +851,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * Unlike the above functions uses user-supplied measurement functions.
          * The @p benchmarkBegin parameter starts the measurement, the
          * @p benchmarkEnd parameter ends the measurement and returns measured
-         * value, which is in @p units.
+         * value, which is in @p units. It's not an error to call this function
+         * multiple times or add one benchmark more than once -- in that case
+         * it will appear once for each instance of each occurence in the list.
          */
         template<class Derived> void addCustomInstancedBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, std::size_t instanceCount, void(Derived::*benchmarkBegin)(), std::uint64_t(Derived::*benchmarkEnd)(), BenchmarkUnits benchmarkUnits) {
             addCustomInstancedBenchmarks<Derived>(benchmarks, batchCount, instanceCount, nullptr, nullptr, benchmarkBegin, benchmarkEnd, benchmarkUnits);
@@ -533,7 +875,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * the list and the @p teardown function is called after every batch of
          * every benchmark in the list, regardless of whether it passed, failed
          * or was skipped. Using verification macros in @p setup or @p teardown
-         * function is not allowed.
+         * function is not allowed. It's not an error to call this function
+         * multiple times or add one benchmark more than once -- in that case
+         * it will appear once for each instance of each occurence in the list.
          */
         template<class Derived> void addCustomInstancedBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, std::size_t instanceCount, void(Derived::*setup)(), void(Derived::*teardown)(), void(Derived::*benchmarkBegin)(), std::uint64_t(Derived::*benchmarkEnd)(), BenchmarkUnits benchmarkUnits) {
             _testCases.reserve(_testCases.size() + benchmarks.size());
@@ -744,6 +1088,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
 /** @hideinitializer
 @brief Create `main()` function for given Tester subclass
+
+This macro has to be used outside of any namespace.
 */
 #ifdef CORRADE_TARGET_EMSCRIPTEN
 /* In Emscripten, returning from main() with non-zero exit code won't
@@ -828,6 +1174,9 @@ CORRADE_COMPARE(a, 8);
 Comparison of floating-point types is by default done as a fuzzy-compare, see
 @ref Corrade::TestSuite::Comparator<float> "Comparator<float>" and
 @ref Corrade::TestSuite::Comparator<double> "Comparator<double>" for details.
+
+Note that this macro is usable only if given type implements equality
+comparison operators and is printable via @ref Corrade::Utility::Debug "Utility::Debug".
 @see @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE_AS()
 */
 #define CORRADE_COMPARE(actual, expected)                                   \
@@ -847,6 +1196,9 @@ CORRADE_COMPARE_AS(std::sin(0.0), 0.0f, float);
 See also @ref Corrade::TestSuite::Comparator "Comparator" class documentation
 for example of more involved comparisons.
 
+Note that this macro is usable only if the type passed to it is printable via
+@ref Corrade::Utility::Debug "Utility::Debug" and is convertible to / usable
+with given comparator type.
 @see @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_WITH()
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -870,6 +1222,9 @@ CORRADE_COMPARE_WITH("actual.txt", "expected.txt", Compare::File("/common/path/p
 See @ref Corrade::TestSuite::Comparator "Comparator" class documentation for
 more information.
 
+Note that this macro is usable only if the type passed to it is printable via
+@ref Corrade::Utility::Debug "Utility::Debug" and is usable with given
+comparator type.
 @see @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS()
 */
 #define CORRADE_COMPARE_WITH(actual, expected, comparatorInstance)          \

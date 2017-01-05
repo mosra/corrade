@@ -26,51 +26,49 @@
 #include <cmath>
 #include <Corrade/TestSuite/Tester.h>
 
-namespace Corrade { namespace Examples {
+using namespace Corrade;
 
-struct MyTest: TestSuite::Tester {
-    explicit MyTest();
+/* Taken from https://en.wikipedia.org/wiki/Fast_inverse_square_root */
+float fastinvsqrt(float number) {
+    int i;
+    float x2, y;
+    const float threehalfs = 1.5f;
 
-    void commutativity();
-    void associativity();
-    void pi();
-    void sin();
-    void bigEndian();
+    x2 = number*0.5f;
+    y = number;
+    i = *reinterpret_cast<int*>(&y);
+    i = 0x5f3759df - (i >> 1);
+    y = *reinterpret_cast<float*>(&i);
+    y = y*(threehalfs - (x2*y*y));
+    return y;
+}
+
+/** [0] */
+struct InvSqrtBenchmark: TestSuite::Tester {
+    explicit InvSqrtBenchmark();
+
+    void naive();
+    void fast();
 };
 
-MyTest::MyTest() {
-    addTests({&MyTest::commutativity,
-              &MyTest::associativity,
-              &MyTest::sin,
-              &MyTest::pi,
-              &MyTest::bigEndian});
+InvSqrtBenchmark::InvSqrtBenchmark() {
+    for(auto fn: {&InvSqrtBenchmark::naive, &InvSqrtBenchmark::fast}) {
+        addBenchmarks({fn}, 500, BenchmarkType::WallTime);
+        addBenchmarks({fn}, 500, BenchmarkType::CpuTime);
+    }
 }
 
-void MyTest::commutativity() {
-    CORRADE_VERIFY(5*3 == 3*5);
-    CORRADE_VERIFY(15/3 == 3/15);
+void InvSqrtBenchmark::naive() {
+    volatile float a; /* to avoid optimizers removing the benchmark code */
+    CORRADE_BENCHMARK(1000000)
+        a = 1.0f/std::sqrt(float(testCaseRepeatId()));
 }
 
-void MyTest::associativity() {
-    int result = (42/(2*3))*191;
-    CORRADE_COMPARE(result, 1337);
+void InvSqrtBenchmark::fast() {
+    volatile float a; /* to avoid optimizers removing the benchmark code */
+    CORRADE_BENCHMARK(1000000)
+        a = fastinvsqrt(float(testCaseRepeatId()));
 }
 
-void MyTest::sin() {
-    CORRADE_COMPARE_AS(std::sin(0), 0.0f, float);
-}
-
-void MyTest::pi() {
-    CORRADE_EXPECT_FAIL("Need better approximation.");
-    double pi = 22/7.0;
-    CORRADE_COMPARE(pi, 3.14);
-}
-
-void MyTest::bigEndian() {
-    if(!false)
-        CORRADE_SKIP("No affordable big endian machines exist to test this properly.");
-}
-
-}}
-
-CORRADE_TEST_MAIN(Corrade::Examples::MyTest)
+CORRADE_TEST_MAIN(InvSqrtBenchmark)
+/** [0] */

@@ -139,7 +139,7 @@ package in CMake and link to `Corrade::Interconnect` target. See also
 /** @namespace Corrade::TestSuite
 @brief Test suite
 
-Unit testing framework. See @ref unit-testing for more information.
+Testing and benchmarking framework. See @ref testsuite for more information.
 
 This library is built if `WITH_TESTSUITE` is enabled when building Corrade. To
 use this library, you need to request `TestSuite` component of `Corrade`

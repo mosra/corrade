@@ -194,3 +194,8 @@ set(CORRADE_LIBRARY_SOVERSION 0)
 
 add_subdirectory(modules)
 add_subdirectory(src)
+
+# Build snippets as part of testing
+if(BUILD_TESTS)
+    add_subdirectory(doc/snippets)
+endif()
