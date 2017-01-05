@@ -33,7 +33,7 @@
 /* For CPU clock */
 #ifndef CORRADE_TARGET_WINDOWS
 #include <ctime>
-#else
+#elif !defined(CORRADE_TARGET_WINDOWS_RT)
 #include <windows.h>
 #endif
 
@@ -60,12 +60,14 @@ inline std::uint64_t wallClock() {
 inline std::uint64_t cpuClock() {
     #ifndef CORRADE_TARGET_WINDOWS
     return std::clock()*1000000000/CLOCKS_PER_SEC;
-    #else
+    #elif !defined(CORRADE_TARGET_WINDOWS_RT)
     /* FILETIME returns multiples of 100 nanoseconds */
     FILETIME a, b, c, d;
     if(!GetProcessTimes(GetCurrentProcess(), &a, &b, &c, &d))
         return 0;
     return ((std::uint64_t(d.dwHighDateTime) << 32)|std::uint64_t(d.dwLowDateTime))*100;
+    #else
+    return 0;
     #endif
 }
 

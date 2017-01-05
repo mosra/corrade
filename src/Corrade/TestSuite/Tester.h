@@ -477,6 +477,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
              * measure shorter events, increase number of iterations passed to
              * @ref CORRADE_BENCHMARK() to amortize the error or use a
              * different clock.
+             * @partialsupport On @ref CORRADE_TARGET_WINDOWS_RT "Windows RT"
+             *      gives zero result.
              */
             CpuTime = 3,
 
