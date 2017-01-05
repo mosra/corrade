@@ -682,7 +682,9 @@ std::string Arguments::help() const {
         #ifndef CORRADE_TARGET_WINDOWS_RT
         if(!entry.environment.empty()) {
             if(!entry.help.empty()) out << std::string(keyColumnWidth + 3, ' ');
-            out << "(environment: " << entry.environment << ")\n";
+            out << "(environment: " << entry.environment;
+            if(entry.type == Type::BooleanOption) out << "=ON|OFF";
+            out << ")\n";
         }
         #endif
 

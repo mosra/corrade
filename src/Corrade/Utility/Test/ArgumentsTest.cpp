@@ -227,14 +227,16 @@ Arguments:
 
 void ArgumentsTest::helpEnvironment() {
     Arguments args;
-    args.addOption("use-FOO").setFromEnvironment("use-FOO");
+    args.addOption("use-FOO").setFromEnvironment("use-FOO")
+        .addBooleanOption("avoid-bars").setFromEnvironment("avoid-bars");
 
     const auto expected = R"text(Usage:
-  ./app [-h|--help] [--use-FOO USE_FOO]
+  ./app [-h|--help] [--use-FOO USE_FOO] [--avoid-bars]
 
 Arguments:
   -h, --help         display this help message and exit
   --use-FOO USE_FOO  (environment: USE_FOO)
+  --avoid-bars       (environment: AVOID_BARS=ON|OFF)
 )text";
     CORRADE_COMPARE(args.help(), expected);
 }
