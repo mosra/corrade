@@ -469,8 +469,8 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
     }
 
     /* Plugin has active instances */
-    auto foundInstance = instances.find(plugin.metadata._name);
-    if(foundInstance != instances.end()) {
+    auto foundInstance = _instances.find(plugin.metadata._name);
+    if(foundInstance != _instances.end()) {
         /* Check if all instances can be safely deleted */
         for(auto it = foundInstance->second.cbegin(); it != foundInstance->second.cend(); ++it)
             if(!(*it)->canBeDeleted()) {
@@ -533,10 +533,10 @@ void AbstractManager::registerInstance(const std::string& plugin, AbstractPlugin
     CORRADE_ASSERT(foundPlugin != _plugins.plugins.end() && foundPlugin->second->manager == this,
         "PluginManager::AbstractPlugin::AbstractPlugin(): attempt to register instance of plugin not known to given manager", );
 
-    auto foundInstance = instances.find(plugin);
+    auto foundInstance = _instances.find(plugin);
 
-    if(foundInstance == instances.end())
-        foundInstance = instances.insert({plugin, {}}).first;
+    if(foundInstance == _instances.end())
+        foundInstance = _instances.insert({plugin, {}}).first;
 
     foundInstance->second.push_back(&instance);
 
@@ -548,16 +548,16 @@ void AbstractManager::unregisterInstance(const std::string& plugin, AbstractPlug
 
     CORRADE_INTERNAL_ASSERT(foundPlugin != _plugins.plugins.end() && foundPlugin->second->manager == this);
 
-    auto foundInstance = instances.find(plugin);
-    CORRADE_INTERNAL_ASSERT(foundInstance != instances.end());
-    std::vector<AbstractPlugin*>& _instances = foundInstance->second;
+    auto foundInstance = _instances.find(plugin);
+    CORRADE_INTERNAL_ASSERT(foundInstance != _instances.end());
+    std::vector<AbstractPlugin*>& instancesForPlugin = foundInstance->second;
 
-    auto pos = std::find(_instances.begin(), _instances.end(), &instance);
-    CORRADE_INTERNAL_ASSERT(pos != _instances.end());
+    auto pos = std::find(instancesForPlugin.begin(), instancesForPlugin.end(), &instance);
+    CORRADE_INTERNAL_ASSERT(pos != instancesForPlugin.end());
 
-    _instances.erase(pos);
+    instancesForPlugin.erase(pos);
 
-    if(_instances.empty()) instances.erase(foundInstance);
+    if(instancesForPlugin.empty()) _instances.erase(foundInstance);
 }
 
 void* AbstractManager::instanceInternal(const std::string& plugin) {

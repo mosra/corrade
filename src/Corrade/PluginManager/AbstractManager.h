@@ -485,7 +485,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         #endif
 
         std::string _pluginInterface;
-        std::map<std::string, std::vector<AbstractPlugin*> > instances;
+        std::map<std::string, std::vector<AbstractPlugin*>> _instances;
 };
 
 /** @hideinitializer
