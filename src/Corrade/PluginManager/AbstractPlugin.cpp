@@ -35,9 +35,9 @@ void AbstractPlugin::initialize() {}
 
 void AbstractPlugin::finalize() {}
 
-AbstractPlugin::AbstractPlugin(): _manager(nullptr), _metadata(nullptr) {}
+AbstractPlugin::AbstractPlugin(): _manager{nullptr}, _metadata{nullptr} {}
 
-AbstractPlugin::AbstractPlugin(AbstractManager& manager, std::string plugin): _manager(&manager) {
+AbstractPlugin::AbstractPlugin(AbstractManager& manager, std::string plugin): _manager{&manager} {
     _manager->registerInstance(std::move(plugin), *this, _metadata);
 }
 

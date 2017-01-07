@@ -361,7 +361,8 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
 
     const std::string filename = Directory::join(_pluginDirectory, plugin.metadata._name + PLUGIN_FILENAME_SUFFIX);
 
-    /* Open plugin file, make symbols available for next libs (which depends on this) */
+    /* Open plugin file, make symbols globally available for next libs (which
+       may depend on this) */
     #ifndef CORRADE_TARGET_WINDOWS
     void* module = dlopen(filename.data(), RTLD_NOW|RTLD_GLOBAL);
     #else

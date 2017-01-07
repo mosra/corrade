@@ -196,8 +196,7 @@ See @ref plugin-management for more information about plugin compilation.
     int pluginImporter_##name() {                                           \
         Corrade::PluginManager::AbstractManager::importStaticPlugin(#name, CORRADE_PLUGIN_VERSION, interface, pluginInstancer_##name, className::initialize, className::finalize); return 1; \
     }
-#else
-#ifdef CORRADE_DYNAMIC_PLUGIN
+#elif defined(CORRADE_DYNAMIC_PLUGIN)
 #define CORRADE_PLUGIN_REGISTER(name, className, interface)                 \
     extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion();                   \
     extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion() { return CORRADE_PLUGIN_VERSION; } \
@@ -214,7 +213,6 @@ See @ref plugin-management for more information about plugin compilation.
     extern "C" CORRADE_PLUGIN_EXPORT const char* pluginInterface() { return interface; }
 #else
 #define CORRADE_PLUGIN_REGISTER(name, className, interface)
-#endif
 #endif
 
 }}
