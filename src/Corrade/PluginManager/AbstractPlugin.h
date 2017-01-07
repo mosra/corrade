@@ -161,7 +161,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
 };
 
 /** @brief Plugin version */
-#define CORRADE_PLUGIN_VERSION 4
+#define CORRADE_PLUGIN_VERSION 5
 
 /**
 @brief Define plugin interface
