@@ -496,6 +496,7 @@ void Test::staticProvides() {
     CORRADE_COMPARE(manager.metadata("JustSomeBird")->name(), "Canary");
 
     const auto animal = manager.instance("JustSomeBird");
+    CORRADE_COMPARE(animal->plugin(), "JustSomeBird");
     CORRADE_COMPARE(animal->metadata()->name(), "Canary");
 }
 
@@ -512,6 +513,7 @@ void Test::dynamicProvides() {
     CORRADE_COMPARE(manager.metadata("JustSomeMammal")->name(), "Dog");
 
     const auto animal = manager.instance("JustSomeMammal");
+    CORRADE_COMPARE(animal->plugin(), "JustSomeMammal");
     CORRADE_COMPARE(animal->metadata()->name(), "Dog");
 
     /* Trying to unload the plugin via any name has to fail as there is an

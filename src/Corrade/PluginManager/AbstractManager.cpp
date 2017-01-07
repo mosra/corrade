@@ -528,27 +528,27 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
 
 void AbstractManager::registerInstance(const std::string& plugin, AbstractPlugin& instance, const PluginMetadata*& metadata) {
     /** @todo assert proper interface */
-    auto foundPlugin = _plugins.plugins.find(plugin);
+    Plugin* const foundPlugin = findWithAlias(plugin);
 
-    CORRADE_ASSERT(foundPlugin != _plugins.plugins.end() && foundPlugin->second->manager == this,
+    CORRADE_ASSERT(foundPlugin && foundPlugin->manager == this,
         "PluginManager::AbstractPlugin::AbstractPlugin(): attempt to register instance of plugin not known to given manager", );
 
     auto foundInstance = _instances.find(plugin);
 
     if(foundInstance == _instances.end())
-        foundInstance = _instances.insert({plugin, {}}).first;
+        foundInstance = _instances.insert({foundPlugin->metadata.name(), {}}).first;
 
     foundInstance->second.push_back(&instance);
 
-    metadata = &foundPlugin->second->metadata;
+    metadata = &foundPlugin->metadata;
 }
 
 void AbstractManager::unregisterInstance(const std::string& plugin, AbstractPlugin& instance) {
-    auto foundPlugin = _plugins.plugins.find(plugin);
+    Plugin* const foundPlugin = findWithAlias(plugin);
 
-    CORRADE_INTERNAL_ASSERT(foundPlugin != _plugins.plugins.end() && foundPlugin->second->manager == this);
+    CORRADE_INTERNAL_ASSERT(foundPlugin && foundPlugin->manager == this);
 
-    auto foundInstance = _instances.find(plugin);
+    auto foundInstance = _instances.find(foundPlugin->metadata.name());
     CORRADE_INTERNAL_ASSERT(foundInstance != _instances.end());
     std::vector<AbstractPlugin*>& instancesForPlugin = foundInstance->second;
 
@@ -567,7 +567,7 @@ void* AbstractManager::instanceInternal(const std::string& plugin) {
         "PluginManager::Manager::instance(): plugin" << plugin << "is not loaded", nullptr);
 
     /* Instance the plugin using its original (non-aliased) name */
-    return found->instancer(*this, found->metadata._name);
+    return found->instancer(*this, plugin);
 }
 
 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)

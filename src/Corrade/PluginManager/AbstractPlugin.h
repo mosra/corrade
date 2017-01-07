@@ -101,7 +101,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          *
          * Used by plugin manager. Don't forget to redefine this constructor in
          * all your subclasses.
-         * @see @ref metadata()
+         * @see @ref plugin(), @ref metadata()
          */
         explicit AbstractPlugin(AbstractManager& manager, const std::string& plugin);
 
@@ -137,6 +137,15 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
         virtual bool canBeDeleted();
 
         /**
+         * @brief Identifier string
+         *
+         * Name under which the plugin was instantiated, either its true name
+         * or an alias. If the plugin was not instantiated via plugin manager,
+         * returns empty string.
+         */
+        const std::string& plugin() const { return _plugin; }
+
+        /**
          * @brief Metadata
          *
          * Metadata associated with given plugin. If the plugin was not
@@ -147,6 +156,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
 
     private:
         AbstractManager* _manager;
+        const std::string _plugin;
         const PluginMetadata* _metadata;
 };
 

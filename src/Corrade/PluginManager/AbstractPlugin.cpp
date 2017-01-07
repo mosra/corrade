@@ -37,15 +37,18 @@ void AbstractPlugin::finalize() {}
 
 AbstractPlugin::AbstractPlugin(): _manager{nullptr}, _metadata{nullptr} {}
 
-AbstractPlugin::AbstractPlugin(AbstractManager& manager, const std::string& plugin): _manager{&manager} {
-    _manager->registerInstance(plugin, *this, _metadata);
+AbstractPlugin::AbstractPlugin(AbstractManager& manager, const std::string& plugin): _manager{&manager}, _plugin{plugin} {
+    manager.registerInstance(plugin, *this, _metadata);
 }
 
 AbstractPlugin::~AbstractPlugin() {
     /* Unregister the instance only if the plugin was instantiated through
-       plugin manager */
+       plugin manager. Note that instantiating using
+       AbstractManagingPlugin::AbstractManagingPlugin(AbstractManager&) is
+       *not* instantiating through the manager, in that case the _metadata
+       field would be nullptr */
     if(_manager && _metadata)
-        _manager->unregisterInstance(_metadata->name(), *this);
+        _manager->unregisterInstance(_plugin, *this);
 }
 
 bool AbstractPlugin::canBeDeleted() { return false; }
