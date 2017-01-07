@@ -1356,7 +1356,7 @@ template<class T, class U, class V> void Tester::compareWith(Comparator<T> compa
         printTestCaseLabel(out, " XFAIL", Debug::Color::Yellow, Debug::Color::Default);
         out << "at" << _testFilename << "on line"
             << _testCaseLine << Debug::newline << "       " << _expectedFailure->message()
-            << actual << "and" << expected << "are not equal.";
+            << actual << "and" << expected << "failed the comparison.";
         return;
     }
 
@@ -1366,7 +1366,7 @@ template<class T, class U, class V> void Tester::compareWith(Comparator<T> compa
     out << "at" << _testFilename << "on line"
         << _testCaseLine << Debug::newline << "       ";
     if(!_expectedFailure) comparator.printErrorMessage(out, actual, expected);
-    else out << actual << "and" << expected << "are not expected to be equal.";
+    else out << actual << "and" << expected << "were expected to fail the comparison.";
     throw Exception();
 }
 
