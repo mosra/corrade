@@ -33,7 +33,7 @@ class AbstractFood: public AbstractPlugin {
     CORRADE_PLUGIN_INTERFACE("cz.mosra.Corrade.PluginManager.Test.AbstractFood/1.0")
 
     public:
-        explicit AbstractFood(AbstractManager& manager, std::string plugin): AbstractPlugin(manager, std::move(plugin)) {}
+        explicit AbstractFood(AbstractManager& manager, const std::string& plugin): AbstractPlugin{manager, plugin} {}
 
         virtual int weight() = 0;
         virtual bool isTasty() = 0;

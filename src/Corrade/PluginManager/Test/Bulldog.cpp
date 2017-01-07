@@ -29,7 +29,7 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class Bulldog: public AbstractAnimal {
     public:
-        explicit Bulldog(AbstractManager& manager, std::string plugin): AbstractAnimal(manager, std::move(plugin)) {}
+        explicit Bulldog(AbstractManager& manager, const std::string& plugin): AbstractAnimal{manager, plugin} {}
 
         std::string name() override { return "Bulldog"; }
         int legCount() override { return 0; }

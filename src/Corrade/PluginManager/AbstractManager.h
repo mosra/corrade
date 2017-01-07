@@ -471,7 +471,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
            be uninitalized when accessed from CORRADE_PLUGIN_REGISTER(). */
         CORRADE_PLUGINMANAGER_LOCAL static std::vector<StaticPlugin*>*& staticPlugins();
 
-        CORRADE_PLUGINMANAGER_LOCAL void registerInstance(std::string plugin, AbstractPlugin& instance, const PluginMetadata*& metadata);
+        CORRADE_PLUGINMANAGER_LOCAL void registerInstance(const std::string& plugin, AbstractPlugin& instance, const PluginMetadata*& metadata);
         CORRADE_PLUGINMANAGER_LOCAL void unregisterInstance(const std::string& plugin, AbstractPlugin& instance);
 
         CORRADE_PLUGINMANAGER_LOCAL Plugin* findWithAlias(const std::string& plugin);

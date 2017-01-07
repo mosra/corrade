@@ -29,7 +29,7 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class PitBull: public Dog {
     public:
-        explicit PitBull(AbstractManager& manager, std::string plugin): Dog(manager, std::move(plugin)) {}
+        explicit PitBull(AbstractManager& manager, const std::string& plugin): Dog{manager, plugin} {}
 
         std::string name() override { return "Rodriguez"; }
 };

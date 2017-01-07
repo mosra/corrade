@@ -73,8 +73,8 @@ template<class Interface> class AbstractManagingPlugin: public AbstractPlugin {
          * all your subclasses.
          * @see @ref manager(), @ref metadata()
          */
-        explicit AbstractManagingPlugin(AbstractManager& manager, std::string plugin):
-            AbstractPlugin{manager, std::move(plugin)} {}
+        explicit AbstractManagingPlugin(AbstractManager& manager, const std::string& plugin):
+            AbstractPlugin{manager, plugin} {}
 
     protected:
         /**

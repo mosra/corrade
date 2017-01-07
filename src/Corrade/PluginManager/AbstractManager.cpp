@@ -526,7 +526,7 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
 }
 #endif
 
-void AbstractManager::registerInstance(std::string plugin, AbstractPlugin& instance, const PluginMetadata*& metadata) {
+void AbstractManager::registerInstance(const std::string& plugin, AbstractPlugin& instance, const PluginMetadata*& metadata) {
     /** @todo assert proper interface */
     auto foundPlugin = _plugins.plugins.find(plugin);
 
@@ -536,7 +536,7 @@ void AbstractManager::registerInstance(std::string plugin, AbstractPlugin& insta
     auto foundInstance = instances.find(plugin);
 
     if(foundInstance == instances.end())
-        foundInstance = instances.insert({std::move(plugin), {}}).first;
+        foundInstance = instances.insert({plugin, {}}).first;
 
     foundInstance->second.push_back(&instance);
 

@@ -33,8 +33,8 @@ class AbstractAnimal: public PluginManager::AbstractPlugin {
     CORRADE_PLUGIN_INTERFACE("cz.mosra.Corrade.Examples.AbstractAnimal/1.0")
 
     public:
-        AbstractAnimal(PluginManager::AbstractManager& manager, std::string plugin):
-            AbstractPlugin(manager, std::move(plugin)) {}
+        AbstractAnimal(PluginManager::AbstractManager& manager, const std::string& plugin):
+            AbstractPlugin{manager, plugin} {}
 
         virtual std::string name() const = 0;
         virtual int legCount() const = 0;

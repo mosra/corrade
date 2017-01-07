@@ -33,7 +33,7 @@ class AbstractDeletable: public AbstractPlugin {
     CORRADE_PLUGIN_INTERFACE("cz.mosra.Corrade.PluginManager.Test.AbstractDeletable/1.0")
 
     public:
-        explicit AbstractDeletable(AbstractManager& manager, std::string plugin): AbstractPlugin(manager, std::move(plugin)) {}
+        explicit AbstractDeletable(AbstractManager& manager, const std::string& plugin): AbstractPlugin{manager, plugin} {}
 
         void set(unsigned int* var) { _var = var; }
 

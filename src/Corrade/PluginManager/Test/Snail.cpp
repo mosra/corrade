@@ -29,7 +29,7 @@ namespace Corrade { namespace PluginManager { namespace Test {
 
 class Snail: public AbstractAnimal {
     public:
-        explicit Snail(AbstractManager& manager, std::string plugin): AbstractAnimal(manager, std::move(plugin)) {}
+        explicit Snail(AbstractManager& manager, const std::string& plugin): AbstractAnimal{manager, plugin} {}
 
         std::string name() { return "Hmlllghh"; }
         int legCount() { return 0; }
