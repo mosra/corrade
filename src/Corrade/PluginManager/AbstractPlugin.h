@@ -105,6 +105,12 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          */
         explicit AbstractPlugin(AbstractManager& manager, const std::string& plugin);
 
+        /** @brief Copying is not allowed */
+        AbstractPlugin(const AbstractPlugin&) = delete;
+
+        /** @brief Moving is not allowed */
+        AbstractPlugin(AbstractPlugin&&) = delete;
+
         /**
          * @brief Destructor
          *
@@ -113,6 +119,12 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          */
         /* This is needed to be public virtual as AbstractPlugin* are deleted */
         virtual ~AbstractPlugin() = 0;
+
+        /** @brief Copying is not allowed */
+        AbstractPlugin& operator=(const AbstractPlugin&) = delete;
+
+        /** @brief Moving is not allowed */
+        AbstractPlugin& operator=(AbstractPlugin&&) = delete;
 
         /**
          * @brief Whether the plugin can be deleted
