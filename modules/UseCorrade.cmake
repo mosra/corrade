@@ -89,11 +89,6 @@ elseif(MSVC)
         # Enable extra warnings (similar to -Wall)
         "/W4"
 
-        # "conditional expression is constant", fires in `do while(false)`,
-        # i.e. in all assertions and tests. Does it look like I put that false
-        # there by mistake?
-        "/wd4127"
-
         # "needs to have dll-interface to be used by clients", as the fix for
         # that would effectively prevent using STL completely.
         "/wd4251"
