@@ -513,6 +513,11 @@ void Test::dynamicProvides() {
 
     const auto animal = manager.instance("JustSomeMammal");
     CORRADE_COMPARE(animal->metadata()->name(), "Dog");
+
+    /* Trying to unload the plugin via any name has to fail as there is an
+       instance active */
+    CORRADE_COMPARE(manager.unload("JustSomeMammal"), LoadState::Used);
+    CORRADE_COMPARE(manager.unload("Dog"), LoadState::Used);
 }
 
 void Test::dynamicProvidesDependency() {
