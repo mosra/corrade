@@ -557,7 +557,7 @@ void AbstractManager::unregisterInstance(const std::string& plugin, AbstractPlug
 
     _instances.erase(pos);
 
-    if(_instances.empty()) instances.erase(plugin);
+    if(_instances.empty()) instances.erase(foundInstance);
 }
 
 void* AbstractManager::instanceInternal(const std::string& plugin) {
