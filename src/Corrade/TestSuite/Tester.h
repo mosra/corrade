@@ -284,7 +284,7 @@ elements actually causes the copy constructor to be called 26 thousand times:
 
 ## Specifying setup/teardown routines
 
-While the common practice in C++ is to use RTTI for resource lifetime
+While the common practice in C++ is to use RAII for resource lifetime
 management, sometimes you may need to execute arbitrary code at the beginning
 and end of each test case. For this, all @ref addTests(),
 @ref addInstancedTests(), @ref addRepeatedTests(), @ref addRepeatedInstancedTests(),
