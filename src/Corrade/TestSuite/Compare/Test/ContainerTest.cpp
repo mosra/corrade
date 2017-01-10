@@ -132,12 +132,27 @@ void ContainerTest::sorted() {
 }
 
 void ContainerTest::floatingPoint() {
-    std::vector<float> a{3.202122f};
-    std::vector<float> b{3.202123f};
-    std::vector<float> c{3.202130f};
+    std::stringstream out;
+
+    std::vector<float> a{3.202122f, 3.202122f};
+    std::vector<float> b{3.202123f, 3.202123f};
+    std::vector<float> c{3.202123f, 3.202130f};
 
     CORRADE_VERIFY(Comparator<Compare::Container<std::vector<float>>>{}(a, b));
-    CORRADE_VERIFY(!Comparator<Compare::Container<std::vector<float>>>{}(a, c));
+
+    {
+        Error e(&out);
+        Comparator<Compare::Container<std::vector<float>>> compare;
+        CORRADE_VERIFY(!compare(a, c));
+        compare.printErrorMessage(e, "a", "b");
+    }
+
+    /* It should report the second element, not the first */
+    CORRADE_COMPARE(out.str(), "Containers a and b have different contents, actual:\n"
+        "        {3.20212, 3.20212}\n"
+        "        but expected\n"
+        "        {3.20212, 3.20213}\n"
+        "        Actual 3.20212 but 3.20213 expected on position 1.\n");
 }
 
 void ContainerTest::nonCopyableArray() {
