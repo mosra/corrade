@@ -119,7 +119,7 @@ template<> class Comparator<FileContents> {
 
 class FileContents {
     public:
-        FileContents(const std::string& pathPrefix = {}): _c{pathPrefix} {}
+        explicit FileContents(const std::string& pathPrefix = {}): _c{pathPrefix} {}
 
         Comparator<FileContents>& comparator() {
             return _c;
