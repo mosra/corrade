@@ -105,8 +105,10 @@ template<class T> void Comparator<Compare::Container<T>>::printErrorMessage(Util
 
     e << *_actualContents << Utility::Debug::newline << "        but expected\n       " << *_expectedContents << Utility::Debug::newline << "       ";
 
+    Comparator<typename std::decay<decltype((*_actualContents)[0])>::type> comparator;
     for(std::size_t i = 0, end = std::max(_actualContents->size(), _expectedContents->size()); i != end; ++i) {
-        if(_actualContents->size() > i && _expectedContents->size() > i && (*_actualContents)[i] == (*_expectedContents)[i]) continue;
+        if(_actualContents->size() > i && _expectedContents->size() > i &&
+            comparator((*_actualContents)[i], (*_expectedContents)[i])) continue;
 
         if(_actualContents->size() <= i)
             e << "Expected has" << (*_expectedContents)[i];
