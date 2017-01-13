@@ -978,8 +978,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
         template<class T> void verify(const std::string& expression, T&& value);
 
+        /* Called from CORRADE_TEST_MAIN() */
         void registerTest(std::string filename, std::string name);
 
+        /* Called from CORRADE_SKIP() */
         void skip(const std::string& message);
 
     #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -1001,6 +1003,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                 std::string _message;
         };
 
+        /* Called from all CORRADE_*() verification/skip/xfail macros through
+           _CORRADE_REGISTER_TEST_CASE() */
         void registerTestCase(std::string&& name, int line);
 
     private:
@@ -1057,6 +1061,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                 TestCase::BenchmarkEnd _end;
         };
 
+        /* Called from CORRADE_BENCHMARK() */
         BenchmarkRunner createBenchmarkRunner(std::size_t batchSize);
 
     private:
