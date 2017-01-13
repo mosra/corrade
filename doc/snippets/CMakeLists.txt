@@ -23,24 +23,27 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-find_package(Threads REQUIRED)
+if(WITH_TESTSUITE)
+    find_package(Threads REQUIRED)
 
-# TestSuite documentation snippets. I need them executable so I can copy&paste
-# the output to the documentation. Also mot using corrade_add_test() because
-# these tests shouldn't be run as part of CTest
-add_executable(testsuite-basic testsuite-basic.cpp)
-add_executable(testsuite-templated testsuite-templated.cpp)
-add_executable(testsuite-repeated testsuite-repeated.cpp)
-add_executable(testsuite-benchmark testsuite-benchmark.cpp)
-add_executable(testsuite-benchmark-custom testsuite-benchmark-custom.cpp)
+    # TestSuite documentation snippets. I need them executable so I can
+    # copy&paste the output to the documentation. Also mot using
+    # corrade_add_test() because these tests shouldn't be run as part of CTest
+    # -- some of them fail on purpose
+    add_executable(testsuite-basic testsuite-basic.cpp)
+    add_executable(testsuite-templated testsuite-templated.cpp)
+    add_executable(testsuite-repeated testsuite-repeated.cpp)
+    add_executable(testsuite-benchmark testsuite-benchmark.cpp)
+    add_executable(testsuite-benchmark-custom testsuite-benchmark-custom.cpp)
 
-target_link_libraries(testsuite-basic CorradeTestSuite)
-target_link_libraries(testsuite-templated CorradeTestSuite)
-target_link_libraries(testsuite-repeated CorradeTestSuite ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(testsuite-benchmark CorradeTestSuite)
-target_link_libraries(testsuite-benchmark-custom CorradeTestSuite)
+    target_link_libraries(testsuite-basic CorradeTestSuite)
+    target_link_libraries(testsuite-templated CorradeTestSuite)
+    target_link_libraries(testsuite-repeated CorradeTestSuite ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries(testsuite-benchmark CorradeTestSuite)
+    target_link_libraries(testsuite-benchmark-custom CorradeTestSuite)
 
-if(NOT CORRADE_TARGET_ANDROID)
-    add_executable(testsuite-instanced testsuite-instanced.cpp)
-    target_link_libraries(testsuite-instanced CorradeTestSuite)
+    if(NOT CORRADE_TARGET_ANDROID)
+        add_executable(testsuite-instanced testsuite-instanced.cpp)
+        target_link_libraries(testsuite-instanced CorradeTestSuite)
+    endif()
 endif()
