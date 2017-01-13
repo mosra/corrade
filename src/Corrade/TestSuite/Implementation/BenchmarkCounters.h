@@ -50,14 +50,14 @@
 
 namespace Corrade { namespace TestSuite { namespace Implementation {
 
-/* Wall clock in nanoseconds */
-inline std::uint64_t wallClock() {
+/* Wall time in nanoseconds */
+inline std::uint64_t wallTime() {
     /* OH GOD WHY SO COMPLICATED */
     return  std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 }
 
-/* CPU clock in nanoseconds */
-inline std::uint64_t cpuClock() {
+/* CPU time in nanoseconds */
+inline std::uint64_t cpuTime() {
     #ifndef CORRADE_TARGET_WINDOWS
     return std::clock()*1000000000/CLOCKS_PER_SEC;
     #elif !defined(CORRADE_TARGET_WINDOWS_RT)

@@ -263,20 +263,20 @@ benchmark types:
                 break;
 
             case TestCaseType::WallTimeBenchmark:
-                testCase.second.benchmarkBegin = &Tester::wallClockBenchmarkBegin;
-                testCase.second.benchmarkEnd = &Tester::wallClockBenchmarkEnd;
+                testCase.second.benchmarkBegin = &Tester::wallTimeBenchmarkBegin;
+                testCase.second.benchmarkEnd = &Tester::wallTimeBenchmarkEnd;
                 benchmarkUnits = BenchmarkUnits::Nanoseconds;
                 break;
 
             case TestCaseType::CpuTimeBenchmark:
-                testCase.second.benchmarkBegin = &Tester::cpuClockBenchmarkBegin;
-                testCase.second.benchmarkEnd = &Tester::cpuClockBenchmarkEnd;
+                testCase.second.benchmarkBegin = &Tester::cpuTimeBenchmarkBegin;
+                testCase.second.benchmarkEnd = &Tester::cpuTimeBenchmarkEnd;
                 benchmarkUnits = BenchmarkUnits::Nanoseconds;
                 break;
 
             case TestCaseType::CpuCyclesBenchmark:
-                testCase.second.benchmarkBegin = &Tester::cycleCountBenchmarkBegin;
-                testCase.second.benchmarkEnd = &Tester::cycleCountBenchmarkEnd;
+                testCase.second.benchmarkBegin = &Tester::cpuCyclesBenchmarkBegin;
+                testCase.second.benchmarkEnd = &Tester::cpuCyclesBenchmarkEnd;
                 benchmarkUnits = BenchmarkUnits::Cycles;
                 break;
 
@@ -536,30 +536,30 @@ Tester::BenchmarkRunner Tester::createBenchmarkRunner(const std::size_t batchSiz
     return BenchmarkRunner{*this, _testCase->benchmarkBegin, _testCase->benchmarkEnd};
 }
 
-void Tester::wallClockBenchmarkBegin() {
+void Tester::wallTimeBenchmarkBegin() {
     _benchmarkName = "wall time";
-    _benchmarkBegin = Implementation::wallClock();
+    _benchmarkBegin = Implementation::wallTime();
 }
 
-std::uint64_t Tester::wallClockBenchmarkEnd() {
-    return Implementation::wallClock() - _benchmarkBegin;
+std::uint64_t Tester::wallTimeBenchmarkEnd() {
+    return Implementation::wallTime() - _benchmarkBegin;
 }
 
-void Tester::cpuClockBenchmarkBegin() {
+void Tester::cpuTimeBenchmarkBegin() {
     _benchmarkName = "CPU time";
-    _benchmarkBegin = Implementation::cpuClock();
+    _benchmarkBegin = Implementation::cpuTime();
 }
 
-std::uint64_t Tester::cpuClockBenchmarkEnd() {
-    return Implementation::cpuClock() - _benchmarkBegin;
+std::uint64_t Tester::cpuTimeBenchmarkEnd() {
+    return Implementation::cpuTime() - _benchmarkBegin;
 }
 
-void Tester::cycleCountBenchmarkBegin() {
+void Tester::cpuCyclesBenchmarkBegin() {
     _benchmarkName = "CPU cycles";
     _benchmarkBegin = Implementation::rdtsc();
 }
 
-std::uint64_t Tester::cycleCountBenchmarkEnd() {
+std::uint64_t Tester::cpuCyclesBenchmarkEnd() {
     return Implementation::rdtsc() - _benchmarkBegin;
 }
 

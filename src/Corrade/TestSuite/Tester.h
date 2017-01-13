@@ -1068,14 +1068,14 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         void verifyInternal(const std::string& expression, bool value);
         void printTestCaseLabel(Debug& out, const char* status, Debug::Color statusColor, Debug::Color labelColor);
 
-        void wallClockBenchmarkBegin();
-        std::uint64_t wallClockBenchmarkEnd();
+        void wallTimeBenchmarkBegin();
+        std::uint64_t wallTimeBenchmarkEnd();
 
-        void cpuClockBenchmarkBegin();
-        std::uint64_t cpuClockBenchmarkEnd();
+        void cpuTimeBenchmarkBegin();
+        std::uint64_t cpuTimeBenchmarkEnd();
 
-        void cycleCountBenchmarkBegin();
-        std::uint64_t cycleCountBenchmarkEnd();
+        void cpuCyclesBenchmarkBegin();
+        std::uint64_t cpuCyclesBenchmarkEnd();
 
         Debug::Flags _useColor;
         std::ostream *_logOutput, *_errorOutput;
