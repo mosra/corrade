@@ -461,26 +461,28 @@ TesterTest::TesterTest() {
               &TesterTest::expectFailIfExplicitBool});
 }
 
-namespace {
-    /* Disable automatic colors to ensure we have the same behavior everywhere */
-    const char* noColorArgv[] = { "", "--color", "off" };
-    const int noColorArgc = std::extent<decltype(noColorArgv)>();
-}
-
 void TesterTest::test() {
     /* Print to visually verify coloring */
     {
         Debug{} << "======================== visual color verification start =======================";
+        const char* argv = "";
+        int argc = 1;
+        Tester::registerArguments(argc, &argv);
         Test t{&std::cout};
         t.registerTest("here.cpp", "TesterTest::Test");
-        t.exec(0, nullptr);
+        t.exec();
         Debug{} << "======================== visual color verification end =========================";
     }
 
     std::stringstream out;
+
+    /* Disable automatic colors to ensure we have the same behavior everywhere */
+    const char* argv[] = { "", "--color", "off" };
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(noColorArgc, noColorArgv, &out, &out);
+    int result = t.exec(&out, &out);
 
     CORRADE_VERIFY(result == 1);
 
@@ -601,9 +603,13 @@ void TesterTest::test() {
 void TesterTest::emptyTest() {
     std::stringstream out;
 
+    /* Disable automatic colors to ensure we have the same behavior everywhere */
+    const char* argv[] = { "", "--color", "off" };
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
     EmptyTest t;
     t.registerTest("here.cpp", "TesterTest::EmptyTest");
-    int result = t.exec(noColorArgc, noColorArgv, &out, &out);
+    int result = t.exec(&out, &out);
 
     CORRADE_COMPARE(result, 2);
     CORRADE_COMPARE(out.str(), "No test cases to run in TesterTest::EmptyTest!\n");
@@ -613,11 +619,12 @@ void TesterTest::skipOnly() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "11 14 4 9", "--skip", "14" };
-    const int argc = std::extent<decltype(argv)>();
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(argc, argv, &out, &out);
+    int result = t.exec(&out, &out);
 
     CORRADE_COMPARE(result, 0);
 
@@ -634,11 +641,12 @@ void TesterTest::skipAll() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "14", "--skip", "14" };
-    const int argc = std::extent<decltype(argv)>();
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(argc, argv, &out, &out);
+    int result = t.exec(&out, &out);
 
     CORRADE_COMPARE(result, 2);
     CORRADE_COMPARE(out.str(), "No test cases to run in TesterTest::Test!\n");
@@ -648,11 +656,12 @@ void TesterTest::skipTests() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "11 37 9", "--skip-tests" };
-    const int argc = std::extent<decltype(argv)>();
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(argc, argv, &out, &out);
+    int result = t.exec(&out, &out);
 
     CORRADE_COMPARE(result, 0);
 
@@ -667,11 +676,12 @@ void TesterTest::skipBenchmarks() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "11 36 9", "--skip-benchmarks" };
-    const int argc = std::extent<decltype(argv)>();
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(argc, argv, &out, &out);
+    int result = t.exec(&out, &out);
 
     CORRADE_COMPARE(result, 0);
 
@@ -687,11 +697,12 @@ void TesterTest::skipTestsNothingElse() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "11 9", "--skip-tests" };
-    const int argc = std::extent<decltype(argv)>();
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(argc, argv, &out, &out);
+    int result = t.exec(&out, &out);
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE(out.str(), "No remaining benchmarks to run in TesterTest::Test.\n");
@@ -701,11 +712,12 @@ void TesterTest::skipBenchmarksNothingElse() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "36", "--skip-benchmarks" };
-    const int argc = std::extent<decltype(argv)>();
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(argc, argv, &out, &out);
+    int result = t.exec(&out, &out);
 
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE(out.str(), "No remaining tests to run in TesterTest::Test.\n");
@@ -715,11 +727,12 @@ void TesterTest::skipTestsBenchmarks() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--skip-tests", "--skip-benchmarks" };
-    const int argc = std::extent<decltype(argv)>();
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(argc, argv, &out, &out);
+    int result = t.exec(&out, &out);
 
     CORRADE_COMPARE(result, 2);
     CORRADE_COMPARE(out.str(), "No test cases to run in TesterTest::Test!\n");
@@ -729,11 +742,12 @@ void TesterTest::repeatEvery() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "27 4", "--repeat-every", "2" };
-    const int argc = std::extent<decltype(argv)>();
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(argc, argv, &out, &out);
+    int result = t.exec(&out, &out);
 
     CORRADE_VERIFY(result == 0);
 
@@ -759,11 +773,12 @@ void TesterTest::repeatAll() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "27 4", "--repeat-all", "2" };
-    const int argc = std::extent<decltype(argv)>();
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(argc, argv, &out, &out);
+    int result = t.exec(&out, &out);
 
     CORRADE_VERIFY(result == 0);
 
@@ -791,11 +806,12 @@ void TesterTest::abortOnFail() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "1 2 3 4", "--abort-on-fail" };
-    const int argc = std::extent<decltype(argv)>();
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(argc, argv, &out, &out);
+    int result = t.exec(&out, &out);
 
     CORRADE_VERIFY(result == 1);
 
@@ -813,11 +829,12 @@ void TesterTest::noXfail() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "6", "--no-xfail" };
-    const int argc = std::extent<decltype(argv)>();
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(argc, argv, &out, &out);
+    int result = t.exec(&out, &out);
 
     CORRADE_COMPARE(result, 1);
 
@@ -836,11 +853,12 @@ void TesterTest::benchmarkWallClock() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "35 37", "--benchmark", "wall-time" };
-    const int argc = std::extent<decltype(argv)>();
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(argc, argv, &out, &out);
+    int result = t.exec(&out, &out);
 
     CORRADE_COMPARE(result, 0);
 
@@ -856,11 +874,12 @@ void TesterTest::benchmarkCpuClock() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "35 37", "--benchmark", "cpu-time" };
-    const int argc = std::extent<decltype(argv)>();
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(argc, argv, &out, &out);
+    int result = t.exec(&out, &out);
 
     CORRADE_COMPARE(result, 0);
 
@@ -876,11 +895,12 @@ void TesterTest::benchmarkCpuCycles() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "35 37", "--benchmark", "cpu-cycles" };
-    const int argc = std::extent<decltype(argv)>();
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(argc, argv, &out, &out);
+    int result = t.exec(&out, &out);
 
     CORRADE_COMPARE(result, 0);
 
@@ -896,11 +916,12 @@ void TesterTest::benchmarkDiscardAll() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "35 37", "--benchmark-discard", "100" };
-    const int argc = std::extent<decltype(argv)>();
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
 
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
-    int result = t.exec(argc, argv, &out, &out);
+    int result = t.exec(&out, &out);
 
     CORRADE_COMPARE(result, 0);
 

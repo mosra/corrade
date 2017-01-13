@@ -63,11 +63,27 @@ namespace {
     constexpr const char PaddingString[] = "0000000000";
 }
 
-Tester::Tester(const TesterConfiguration& configuration): _logOutput{nullptr}, _errorOutput{nullptr}, _testCaseLine{0}, _checkCount{0}, _expectedFailure{nullptr}, _configuration{configuration} {}
+int* Tester::_argc = nullptr;
+char** Tester::_argv = nullptr;
 
-int Tester::exec(const int argc, const char** const argv) { return exec(argc, argv, &std::cout, &std::cerr); }
+void Tester::registerArguments(int& argc, char** const argv) {
+    _argc = &argc;
+    _argv = argv;
+}
 
-int Tester::exec(const int argc, const char** const argv, std::ostream* const logOutput, std::ostream* const errorOutput) {
+Tester::Tester(const TesterConfiguration& configuration): _logOutput{nullptr}, _errorOutput{nullptr}, _testCaseLine{0}, _checkCount{0}, _expectedFailure{nullptr}, _configuration{configuration} {
+    CORRADE_ASSERT(_argc, "TestSuite::Tester: command-line arguments not available", );
+}
+
+Tester::~Tester() {
+    /* Reset argument pointers to avoid accidentally forgotten calls to registerArguments() */
+    _argc = nullptr;
+    _argv = nullptr;
+}
+
+int Tester::exec() { return exec(&std::cout, &std::cerr); }
+
+int Tester::exec(std::ostream* const logOutput, std::ostream* const errorOutput) {
     Utility::Arguments args;
     for(auto&& prefix: _configuration.skippedArgumentPrefixes())
         args.addSkippedPrefix(prefix);
@@ -103,7 +119,7 @@ benchmark types:
   wall-time     wall time spent
   cpu-time      CPU time spent
   cpu-cycles    CPU cycles spent (x86 only, gives zero result elsewhere))")
-        .parse(argc, argv);
+        .parse(*_argc, _argv);
 
     _logOutput = logOutput;
     _errorOutput = errorOutput;

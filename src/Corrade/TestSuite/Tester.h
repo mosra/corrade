@@ -398,6 +398,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                  *
                  * Useful to allow passing command-line arguments elsewhere
                  * without having the tester complaining about them.
+                 * @see @ref arguments()
                  */
                 TesterConfiguration& setSkippedArgumentPrefixes(std::initializer_list<std::string> prefixes) {
                     _skippedArgumentPrefixes.insert(_skippedArgumentPrefixes.end(), prefixes);
@@ -530,53 +531,17 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         };
 
         /**
+         * @brief Command-line arguments
+         *
+         * Populated by @ref CORRADE_TEST_MAIN().
+         */
+        std::pair<int&, char**> arguments() { return {*_argc, _argv}; }
+
+        /**
          * @brief Constructor
          * @param configuration     Optional configuration
          */
         explicit Tester(const TesterConfiguration& configuration = TesterConfiguration{});
-
-        /**
-         * @brief Execute the tester
-         * @param argc          Main function argument count
-         * @param argv          Main function argument values
-         * @param logOutput     Output stream for log messages
-         * @param errorOutput   Output stream for error messages
-         * @return Non-zero if there are no test cases, if any test case fails
-         *      or doesn't contain any checking macros, zero otherwise.
-         */
-        int exec(int argc, const char** argv, std::ostream* logOutput, std::ostream* errorOutput);
-
-        /** @overload */
-        int exec(int argc, char** argv, std::ostream* logOutput, std::ostream* errorOutput) {
-            return exec(argc, const_cast<const char**>(argv), logOutput, errorOutput);
-        }
-
-        /** @overload */
-        int exec(int argc, std::nullptr_t argv, std::ostream* logOutput, std::ostream* errorOutput) {
-            return exec(argc, static_cast<const char**>(argv), logOutput, errorOutput);
-        }
-
-        /**
-         * @brief Execute the tester
-         * @param argc          Main function argument count
-         * @param argv          Main function argument values
-         * @return Non-zero if there are no test cases, if any test case fails
-         *      or doesn't contain any checking macros, zero otherwise.
-         *
-         * The same as above, redirects log output to `std::cout` and error
-         * output to `std::cerr`.
-         */
-        int exec(int argc, const char** argv);
-
-        /** @overload */
-        int exec(int argc, char** argv) {
-            return exec(argc, const_cast<const char**>(argv));
-        }
-
-        /** @overload */
-        int exec(int argc, std::nullptr_t argv) {
-            return exec(argc, static_cast<const char**>(argv));
-        }
 
         /**
          * @brief Add test cases
@@ -946,9 +911,30 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         void setBenchmarkName(const std::string& name);
         void setBenchmarkName(std::string&& name); /**< @overload */
 
+    protected:
+        ~Tester();
+
     #ifdef DOXYGEN_GENERATING_OUTPUT
     private:
+    #else
+    public:
     #endif
+        /* Called from CORRADE_TEST_MAIN(). argc is grabbed via a mutable
+           reference and argv is grabbed as non-const in order to allow the
+           users modifying the argument list (and GLUT requires that) */
+        static void registerArguments(int& argc, char** argv);
+
+        /* Overload needed for testing */
+        static void registerArguments(int& argc, const char** argv) {
+            registerArguments(argc, const_cast<char**>(argv));
+        }
+
+        /* Called from CORRADE_TEST_MAIN() */
+        int exec();
+
+        /* Overload needed for testing */
+        int exec(std::ostream* logOutput, std::ostream* errorOutput);
+
         /* Compare two identical types without explicit type specification */
         template<class T> void compare(const std::string& actual, const T& actualValue, const std::string& expected, const T& expectedValue) {
             compareAs<T, T, T>(actual, actualValue, expected, expectedValue);
@@ -1065,6 +1051,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         BenchmarkRunner createBenchmarkRunner(std::size_t batchSize);
 
     private:
+        static int* _argc;
+        static char** _argv;
+
         void verifyInternal(const std::string& expression, bool value);
         void printTestCaseLabel(Debug& out, const char* status, Debug::Color statusColor, Debug::Color labelColor);
 
@@ -1096,7 +1085,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 /** @hideinitializer
 @brief Create `main()` function for given Tester subclass
 
-This macro has to be used outside of any namespace.
+Populates @ref Corrade::TestSuite::Tester::arguments() "Tester::arguments()",
+instantiates @p Class, executes the test cases and returns from `main()` with
+code based on the test results. This macro has to be used outside of any
+namespace.
 */
 #ifdef CORRADE_TARGET_EMSCRIPTEN
 /* In Emscripten, returning from main() with non-zero exit code won't
@@ -1105,27 +1097,30 @@ This macro has to be used outside of any namespace.
    voodoo is done to have `t` properly destructed before aborting. */
 /** @todo Remove workaround when Emscripten can properly propagate exit codes */
 #define CORRADE_TEST_MAIN(Class)                                            \
-    int main(int argc, const char** argv) {                                 \
+    int main(int argc, char** argv) {                                       \
         if([&argc, argv]() {                                                \
+            Corrade::TestSuite::Tester::registerArguments(argc, argv);      \
             Class t;                                                        \
             t.registerTest(__FILE__, #Class);                               \
-            return t.exec(argc, argv);                                      \
+            return t.exec();                                                \
         }() != 0) std::abort();                                             \
         return 0;                                                           \
     }
 #elif defined(CORRADE_TESTSUITE_TARGET_XCTEST)
 #define CORRADE_TEST_MAIN(Class)                                            \
     int CORRADE_VISIBILITY_EXPORT corradeTestMain(int argc, char** argv) {  \
+        Corrade::TestSuite::Tester::registerArguments(argc, argv);          \
         Class t;                                                            \
         t.registerTest(__FILE__, #Class);                                   \
-        return t.exec(argc, argv);                                          \
+        return t.exec();                                                    \
     }
 #else
 #define CORRADE_TEST_MAIN(Class)                                            \
-    int main(int argc, const char** argv) {                                 \
+    int main(int argc, char** argv) {                                       \
+        Corrade::TestSuite::Tester::registerArguments(argc, argv);          \
         Class t;                                                            \
         t.registerTest(__FILE__, #Class);                                   \
-        return t.exec(argc, argv);                                          \
+        return t.exec();                                                    \
     }
 #endif
 
