@@ -272,8 +272,9 @@ It's possible to have instanced benchmarks as well, see
 It's possible to specify a custom pair of functions for intiating the benchmark
 and returning the result using @ref addCustomBenchmarks(). The benchmark end
 function returns an unsigned 64-bit integer indicating measured amount in units
-given by @ref BenchmarkUnits. Contrived example of benchmarking number of
-copies when using `std::vector::push_back()`:
+given by @ref BenchmarkUnits. To further describe the value being measured you
+can call @ref setBenchmarkName() in the benchmark begin function. Contrived
+example of benchmarking number of copies when using `std::vector::push_back()`:
 
 @snippet testsuite-benchmark-custom.cpp 0
 

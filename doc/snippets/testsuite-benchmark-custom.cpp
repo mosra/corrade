@@ -31,17 +31,11 @@ using namespace Corrade;
 struct VectorBenchmark: TestSuite::Tester {
     explicit VectorBenchmark();
 
-    void copyCountInsert10k();
-    void copyCountInsert10kBegin();
-    std::uint64_t copyCountInsert10kEnd();
-};
+    void insert();
 
-VectorBenchmark::VectorBenchmark() {
-    addCustomBenchmarks({&VectorBenchmark::copyCountInsert10k}, 1,
-        &VectorBenchmark::copyCountInsert10kBegin,
-        &VectorBenchmark::copyCountInsert10kEnd,
-        BenchmarkUnits::Count);
-}
+    void copyCountBegin();
+    std::uint64_t copyCountEnd();
+};
 
 namespace {
     std::uint64_t count = 0;
@@ -52,20 +46,41 @@ namespace {
             ++count;
         }
     };
+
+    enum: std::size_t { InsertDataCount = 3 };
+
+    constexpr const struct {
+        const char* name;
+        std::size_t count;
+    } InsertData[InsertDataCount]{
+        {"100", 100},
+        {"1k", 1000},
+        {"10k", 10000}
+    };
 }
 
-void VectorBenchmark::copyCountInsert10k() {
+VectorBenchmark::VectorBenchmark() {
+    addCustomInstancedBenchmarks({&VectorBenchmark::insert}, 1, InsertDataCount,
+        &VectorBenchmark::copyCountBegin,
+        &VectorBenchmark::copyCountEnd,
+        BenchmarkUnits::Count);
+}
+
+void VectorBenchmark::insert() {
+    setTestCaseDescription(InsertData[testCaseInstanceId()].name);
+
     std::vector<CopyCounter> data;
     CORRADE_BENCHMARK(1)
-        for(std::size_t i = 0; i != 10000; ++i)
+        for(std::size_t i = 0, end = InsertData[testCaseInstanceId()].count; i != end; ++i)
             data.push_back({});
 }
 
-void VectorBenchmark::copyCountInsert10kBegin() {
+void VectorBenchmark::copyCountBegin() {
+    setBenchmarkName("copy count");
     count = 0;
 }
 
-std::uint64_t VectorBenchmark::copyCountInsert10kEnd() {
+std::uint64_t VectorBenchmark::copyCountEnd() {
     return count;
 }
 
