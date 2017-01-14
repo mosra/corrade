@@ -36,8 +36,8 @@
 #include <dlfcn.h>
 #endif
 #elif !defined(CORRADE_TARGET_WINDOWS_RT)
+#define WIN32_LEAN_AND_MEAN /* Otherwise `#define interface struct` breaks everything */
 #include <windows.h>
-#undef interface
 #define dlsym GetProcAddress
 #define dlerror GetLastError
 #define dlclose FreeLibrary

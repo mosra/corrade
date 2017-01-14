@@ -46,6 +46,12 @@
 /* I didn't find a better way to circumvent the need for including windows.h */
 struct HINSTANCE__;
 typedef struct HINSTANCE__* HMODULE;
+
+/* combaseapi.h in Windows does this insane thing. Can be worked around by
+   defining WIN32_LEAN_AND_MEAN but not everybody does that. */
+#ifdef interface
+#undef interface
+#endif
 #endif
 
 namespace Corrade { namespace PluginManager {
