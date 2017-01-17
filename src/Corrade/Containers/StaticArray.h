@@ -53,12 +53,12 @@ as more featureful alternative to plain C arrays or `std::array`.
 Usage example:
 @code
 // Create default-initialized array with 5 integers and set them to some value
-Containers::Array<int> a{5};
+Containers::StaticArray<5, int> a;
 int b = 0;
 for(auto& i: a) i = b++; // a = {0, 1, 2, 3, 4}
 
 // Create array from given values
-auto b = Containers::Array<int>::from(3, 18, -157, 0);
+Containers::StaticArray<4, int> b{3, 18, -157, 0};
 b[3] = 25; // b = {3, 18, -157, 25}
 @endcode
 
@@ -68,38 +68,45 @@ The array is by default *default-initialized*, which means that trivial types
 are not initialized at all and default constructor is called on other types. It
 is possible to initialize the array in a different way using so-called *tags*:
 
--   @ref StaticArray(DefaultInitT) is equivalent to the default case (useful
-    when you want to make the choice appear explicit).
+-   @ref StaticArray(DefaultInitT) is equivalent to the implicit parameterless
+    constructor (useful when you want to make the choice appear explicit).
+-   @ref StaticArray(InPlaceInitT, Args...) is equivalent to the implicit
+    parameteric constructor (again useful when you want to make the choice
+    appear explicit).
 -   @ref StaticArray(ValueInitT) zero-initializes trivial types and calls
     default constructor elsewhere.
--   @ref StaticArray(DirectInitT, Args...) constructs all elements of the array
-    using provided arguments.
+-   @ref StaticArray(DirectInitT, Args...) constructs every element of the
+    array using provided arguments.
 -   @ref StaticArray(NoInitT) does not initialize anything and you need to call
     the constructor on all elements manually using placement new,
     `std::uninitialized_copy` or similar. This is the dangerous option.
 
 Example:
 @code
-// These are equivalent
-Containers::StaticArray<5, int> a1{5};
+// These two are equivalent
+Containers::StaticArray<5, int> a1;
 Containers::StaticArray<5, int> a2{Containers::DefaultInit};
 
 // Array of 100 zeros
 Containers::StaticArray<100, int> b{Containers::ValueInit};
 
+// Array of 4 values initialized in-place (these two are equivalent)
+Containers::StaticArray<4, int> c1{3, 18, -157, 0};
+Containers::StaticArray<4, int> c2{Containers::InPlaceInit, 3, 18, -157, 0};
+
 // Array of type with no default constructor
 struct Vec3 {
     Vec3(float, float, float);
 };
-Containers::StaticArray<5, Vec3> c{Containers::DirectInit, 5.2f, 0.4f, 1.0f};
+Containers::StaticArray<5, Vec3> d{Containers::DirectInit, 5.2f, 0.4f, 1.0f};
 
 // Manual construction of each element
 struct Foo {
     Foo(int index);
 };
-Containers::StaticArray<5, Foo> d{Containers::NoInit};
+Containers::StaticArray<5, Foo> e{Containers::NoInit};
 int index = 0;
-for(Foo& f: d) new(&f) Foo(index++);
+for(Foo& f: e) new(&f) Foo(index++);
 @endcode
 */
 /* Underscore at the end to avoid conflict with member size(). It's ugly, but
@@ -158,7 +165,7 @@ template<std::size_t size_, class T> class StaticArray {
         template<class ...Args> explicit StaticArray(DirectInitT, Args&&... args);
 
         /**
-         * @brief Construct array in-place
+         * @brief Construct in-place-initialized array
          *
          * The arguments are forwarded to the array constructor.
          * @see @ref StaticArray(DirectInitT, Args&&...)
@@ -174,6 +181,18 @@ template<std::size_t size_, class T> class StaticArray {
          * @see @ref StaticArray(ValueInitT)
          */
         explicit StaticArray(): StaticArray{DefaultInit} {}
+
+        /**
+         * @brief Construct in-place-initialized array
+         *
+         * Alias to @ref StaticArray(InPlaceInitT, Args&&...).
+         * @see @ref StaticArray(DirectInitT, Args&&...)
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class ...Args> explicit StaticArray(Args&&... args)
+        #else
+        template<class First, class ...Next> explicit StaticArray(First&& first, Next&&... next): StaticArray{InPlaceInit, std::forward<First>(first), std::forward<Next>(next)...} {}
+        #endif
 
         /** @brief Copying is not allowed */
         StaticArray(const StaticArray<size_, T>&) = delete;

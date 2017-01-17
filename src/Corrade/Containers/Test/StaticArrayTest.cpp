@@ -32,11 +32,11 @@ struct StaticArrayTest: TestSuite::Tester {
     explicit StaticArrayTest();
 
     void construct();
-    void constructDefaultInit();
+    void constructInPlace();
+    void constructInPlaceOneArgument();
     void constructValueInit();
     void constructNoInit();
     void constructDirectInit();
-    void constructInPlaceInit();
     void constructNonCopyable();
     void constructNoImplicitConstructor();
     void constructDirectReferences();
@@ -66,11 +66,11 @@ typedef Containers::StaticArrayView<5, const int> ConstStaticArrayView;
 
 StaticArrayTest::StaticArrayTest() {
     addTests({&StaticArrayTest::construct,
-              &StaticArrayTest::constructDefaultInit,
+              &StaticArrayTest::constructInPlace,
+              &StaticArrayTest::constructInPlaceOneArgument,
               &StaticArrayTest::constructValueInit,
               &StaticArrayTest::constructNoInit,
               &StaticArrayTest::constructDirectInit,
-              &StaticArrayTest::constructInPlaceInit,
               &StaticArrayTest::constructNonCopyable,
               &StaticArrayTest::constructNoImplicitConstructor,
               &StaticArrayTest::constructDirectReferences,
@@ -93,15 +93,36 @@ StaticArrayTest::StaticArrayTest() {
 
 void StaticArrayTest::construct() {
     const StaticArray a;
+    const StaticArray b{DefaultInit};
     CORRADE_VERIFY(a);
+    CORRADE_VERIFY(b);
     CORRADE_VERIFY(!a.empty());
+    CORRADE_VERIFY(!b.empty());
     CORRADE_COMPARE(a.size(), StaticArray::Size);
+    CORRADE_COMPARE(b.size(), StaticArray::Size);
     CORRADE_COMPARE(a.size(), 5);
+    CORRADE_COMPARE(b.size(), 5);
 }
 
-void StaticArrayTest::constructDefaultInit() {
-    const StaticArray a{DefaultInit};
-    CORRADE_VERIFY(a);
+void StaticArrayTest::constructInPlace() {
+    const StaticArray a{1, 2, 3, 4, 5};
+    const StaticArray b{InPlaceInit, 1, 2, 3, 4, 5};
+
+    CORRADE_COMPARE(a[0], 1);
+    CORRADE_COMPARE(b[0], 1);
+    CORRADE_COMPARE(a[1], 2);
+    CORRADE_COMPARE(b[1], 2);
+    CORRADE_COMPARE(a[2], 3);
+    CORRADE_COMPARE(b[2], 3);
+    CORRADE_COMPARE(a[3], 4);
+    CORRADE_COMPARE(b[3], 4);
+    CORRADE_COMPARE(a[4], 5);
+    CORRADE_COMPARE(b[4], 5);
+}
+
+void StaticArrayTest::constructInPlaceOneArgument() {
+    const Containers::StaticArray<1, int> a{17};
+    CORRADE_COMPARE(a[0], 17);
 }
 
 void StaticArrayTest::constructValueInit() {
@@ -145,15 +166,6 @@ void StaticArrayTest::constructDirectInit() {
     CORRADE_COMPARE(a[2], -37);
     CORRADE_COMPARE(a[3], -37);
     CORRADE_COMPARE(a[4], -37);
-}
-
-void StaticArrayTest::constructInPlaceInit() {
-    const StaticArray a{InPlaceInit, 1, 2, 3, 4, 5};
-    CORRADE_COMPARE(a[0], 1);
-    CORRADE_COMPARE(a[1], 2);
-    CORRADE_COMPARE(a[2], 3);
-    CORRADE_COMPARE(a[3], 4);
-    CORRADE_COMPARE(a[4], 5);
 }
 
 void StaticArrayTest::constructNonCopyable() {
