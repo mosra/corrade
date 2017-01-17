@@ -184,6 +184,17 @@ class EnumSet {
             return *this;
         }
 
+        /** @brief XOR of two sets */
+        constexpr EnumSet<T, fullValue> operator^(EnumSet<T, fullValue> other) const {
+            return EnumSet<T, fullValue>(value ^ other.value);
+        }
+
+        /** @brief XOR two sets and assign */
+        EnumSet<T, fullValue>& operator^=(EnumSet<T, fullValue> other) {
+            value ^= other.value;
+            return *this;
+        }
+
         /** @brief Set complement */
         constexpr EnumSet<T, fullValue> operator~() const {
             return EnumSet<T, fullValue>(fullValue & ~value);
@@ -230,6 +241,9 @@ usage.
     constexpr class operator&(class::Type a, class b) {                     \
         return b & a;                                                       \
     }                                                                       \
+    constexpr class operator^(class::Type a, class b) {                     \
+        return b ^ a;                                                       \
+    }                                                                       \
     constexpr class operator~(class::Type a) {                              \
         return ~class(a);                                                   \
     }
@@ -246,6 +260,7 @@ See @ref EnumSet-friend-operators "EnumSet documentation" for example usage.
     friend constexpr bool operator<=(class::Type, class);                   \
     friend constexpr class operator&(class::Type, class);                   \
     friend constexpr class operator|(class::Type, class);                   \
+    friend constexpr class operator^(class::Type, class);                   \
     friend constexpr class operator~(class::Type);
 
 }}

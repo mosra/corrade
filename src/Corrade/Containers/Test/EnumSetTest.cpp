@@ -36,6 +36,7 @@ struct EnumSetTest: TestSuite::Tester {
 
     void operatorOr();
     void operatorAnd();
+    void operatorXor();
     void operatorBool();
     void operatorInverse();
     void compare();
@@ -58,6 +59,7 @@ EnumSetTest::EnumSetTest() {
 
               &EnumSetTest::operatorOr,
               &EnumSetTest::operatorAnd,
+              &EnumSetTest::operatorXor,
               &EnumSetTest::operatorBool,
               &EnumSetTest::operatorInverse,
               &EnumSetTest::compare});
@@ -111,6 +113,23 @@ void EnumSetTest::operatorAnd() {
 
     features &= features2;
     CORRADE_COMPARE(int(features), 9);
+}
+
+void EnumSetTest::operatorXor() {
+    CORRADE_COMPARE(int(Feature::Cheap ^ Feature::Cheap), 0);
+    CORRADE_COMPARE(int(Feature::Cheap ^ Feature::Fast), 3);
+
+    Features features = Feature::Popular|Feature::Fast|Feature::Cheap;
+    CORRADE_COMPARE(int(features ^ Feature::Tested), 15);
+    CORRADE_COMPARE(int(Feature::Tested ^ features), 15);
+
+    CORRADE_COMPARE(int(features ^ Feature::Popular), 3);
+
+    Features features2 = Feature::Popular|Feature::Fast|Feature::Tested;
+    CORRADE_COMPARE(int(features ^ features2), 6);
+
+    features ^= features2;
+    CORRADE_COMPARE(int(features), 6);
 }
 
 void EnumSetTest::operatorBool() {
