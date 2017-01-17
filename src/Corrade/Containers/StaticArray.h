@@ -163,7 +163,9 @@ template<std::size_t size_, class T> class StaticArray {
          * The arguments are forwarded to the array constructor.
          * @see @ref StaticArray(DirectInitT, Args&&...)
          */
-        template<class ...Args> explicit StaticArray(InPlaceInitT, Args&&... args): _data{std::forward<Args>(args)...} {}
+        template<class ...Args> explicit StaticArray(InPlaceInitT, Args&&... args): _data{std::forward<Args>(args)...} {
+            static_assert(sizeof...(args) == size_, "Containers::StaticArray: wrong number of initializers");
+        }
 
         /**
          * @brief Construct default-initialized array
