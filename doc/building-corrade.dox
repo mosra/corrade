@@ -531,6 +531,16 @@ For ArchLinux there are also prepared package files in `package/archlinux`,
 named `PKGBUILD-android-arm` and `PKGBUILD-android-x86`, see
 @ref building-corrade-packages-arch "above" for more information.
 
+On Windows it's possible that you get the following CMake error when
+configuring the project:
+
+> CMAKE_SYSTEM_NAME is 'Android' but 'NVIDIA Nsight Tegra Visual Studio
+> Edition' is not installed.
+
+This is because MSVC as the default generator on Windows is not able to
+build arbitrary Android project. To fix it, use a different generator (for
+example Ninja, by passing `-G Ninja` to CMake).
+
 @section building-corrade-ci Continuous Integration
 
 @subsection building-corrade-ci-travis Travis
