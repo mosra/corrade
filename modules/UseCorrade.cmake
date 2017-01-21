@@ -80,7 +80,10 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "(Apple
             # Clang's -Wmissing-declarations does something else and the
             # behavior we want is under -Wmissing-prototypes. See
             # https://llvm.org/bugs/show_bug.cgi?id=16286.
-            "-Wmissing-prototypes")
+            "-Wmissing-prototypes"
+
+            # Fixing it in all places would add too much noise to the code.
+            "-Wno-shorten-64-to-32")
     endif()
 
 # MSVC-specific compiler flags
@@ -92,6 +95,11 @@ elseif(MSVC)
         # "needs to have dll-interface to be used by clients", as the fix for
         # that would effectively prevent using STL completely.
         "/wd4251"
+
+        # "conversion from '<bigger int type>' to '<smaller int type>',
+        # possible loss of data", fixing this would add too much noise.
+        # Equivalent to -Wshorten-64-to-32 on Clang.
+        "/wd4267"
 
         # "new behavior: elements of array will be default initialized".
         # YES. YES I KNOW WHAT I'M DOING.
