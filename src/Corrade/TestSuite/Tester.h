@@ -1108,8 +1108,11 @@ namespace.
         return 0;                                                           \
     }
 #elif defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+/* Needs to have a separate definiton to silence the -Wmissing-prototypes
+   warning */
 #define CORRADE_TEST_MAIN(Class)                                            \
-    int CORRADE_VISIBILITY_EXPORT corradeTestMain(int argc, char** argv) {  \
+    int CORRADE_VISIBILITY_EXPORT corradeTestMain(int, char**);             \
+    int corradeTestMain(int argc, char** argv) {                            \
         Corrade::TestSuite::Tester::registerArguments(argc, argv);          \
         Class t;                                                            \
         t.registerTest(__FILE__, #Class);                                   \
