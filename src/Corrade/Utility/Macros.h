@@ -80,7 +80,7 @@ template<class T> using Foo CORRADE_DEPRECATED_ALIAS("use Bar instead") = Bar<T>
 @brief Enum deprecation mark
 
 Marked enum or enum value will emit deprecation warning on supported compilers
-(C++17 feature, Clang and GCC 6+):
+(C++17 feature, MSVC 2015, Clang and GCC 6+):
 @code
 enum class CORRADE_DEPRECATED_ENUM("use Bar instead") Foo {};
 
@@ -93,9 +93,10 @@ enum class Bar {
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
     @ref CORRADE_DEPRECATED_FILE()
 */
-/** @todo Why this worked with [[deprecated]] before MSVC 2015 Update 1? */
 #if defined(__clang__) || (defined(__GNUC__) && __GNUC__ >= 6)
 #define CORRADE_DEPRECATED_ENUM(message) __attribute((deprecated(message)))
+#elif defined(_MSC_VER)
+#define CORRADE_DEPRECATED_ENUM(message) [[deprecated(message)]]
 #else
 #define CORRADE_DEPRECATED_ENUM(message)
 #endif
