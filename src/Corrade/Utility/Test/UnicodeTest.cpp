@@ -185,7 +185,7 @@ void UnicodeTest::prevUtf8Empty() {
 
 void UnicodeTest::utf8utf32() {
     CORRADE_COMPARE(Unicode::utf32("žluťoučký kůň"),
-                    U"\u017Elu\u0165ou\u010Dk\u00FD k\u016F\u0148");
+                    U"\U0000017Elu\U00000165ou\U0000010Dk\U000000FD k\U0000016F\U00000148");
 
     /* Empty string shouldn't crash */
     CORRADE_COMPARE(Unicode::utf32(""), U"");
