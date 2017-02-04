@@ -28,6 +28,10 @@
 #include <cstdint>
 #include <tuple>
 
+#ifdef CORRADE_TARGET_WINDOWS
+#include <windows.h>
+#endif
+
 #include "Corrade/Utility/Assert.h"
 
 namespace Corrade { namespace Utility { namespace Unicode {
@@ -128,5 +132,27 @@ std::u32string utf32(const std::string& text) {
 
     return result;
 }
+
+#ifdef CORRADE_TARGET_WINDOWS
+namespace Implementation {
+
+std::wstring widen(const char* const text, const int size) {
+    if(!size) return {};
+    /* WCtoMB counts the trailing \0 into size, which we have to cut */
+    std::wstring result(MultiByteToWideChar(CP_UTF8, 0, text, size, nullptr, 0) - (size == -1 ? 1 : 0), 0);
+    MultiByteToWideChar(CP_UTF8, 0, text, size, &result[0], result.size());
+    return result;
+}
+
+std::string narrow(const wchar_t* const text, const int size) {
+    if(!size) return {};
+    /* WCtoMB counts the trailing \0 into size, which we have to cut */
+    std::string result(WideCharToMultiByte(CP_UTF8, 0, text, size, nullptr, 0, nullptr, nullptr) - (size == -1 ? 1 : 0), 0);
+    WideCharToMultiByte(CP_UTF8, 0, text, size, &result[0], result.size(), nullptr, nullptr);
+    return result;
+}
+
+}
+#endif
 
 }}}

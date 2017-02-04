@@ -81,6 +81,67 @@ template<std::size_t size> inline std::pair<char32_t, std::size_t> prevChar(cons
 /** @brief Convert UTF-8 to UTF-32 */
 CORRADE_UTILITY_EXPORT std::u32string utf32(const std::string& text);
 
+#if defined(CORRADE_TARGET_WINDOWS) || defined(DOXYGEN_GENERATING_OUTPUT)
+namespace Implementation {
+    CORRADE_UTILITY_EXPORT std::wstring widen(const char* text, int length);
+    CORRADE_UTILITY_EXPORT std::string narrow(const wchar_t* text, int length);
+}
+
+/**
+@brief Widen UTF-8 string for use with Windows Unicode APIs
+
+Converts UTF-8 string to wide-string (UTF-16) representation. Primary purpose
+is easy interaction with Windows Unicode APIs, thus the function doesn't
+return `std::u16string` but a `std::wstring`.
+@partialsupport Available only on @ref CORRADE_TARGET_WINDOWS "Windows" to be
+    used when dealing directly with Windows Unicode APIs. Other code should
+    always use UTF-8, see http://utf8everywhere.org for more information.
+*/
+/* Not named utf16() in order to avoid clashes with potential portable
+   std::u16string utf16(const std::string&) implementation in the future */
+inline std::wstring widen(const std::string& text) {
+    return Implementation::widen(text.data(), text.size());
+}
+
+/** @overload */
+inline std::wstring widen(Containers::ArrayView<const char> text) {
+    return Implementation::widen(text.data(), text.size());
+}
+
+/** @overload
+Expects that @p text is null-terminated.
+*/
+inline std::wstring widen(const char* text) {
+    return Implementation::widen(text, -1);
+}
+
+/**
+@brief Narrow string to UTF-8 for use with Windows Unicode APIs
+
+Converts wide-string (UTF-16) to UTF-8 representation. Primary purpose
+is easy interaction with Windows Unicode APIs, thus the function doesn't
+accept `std::u16string` but a `std::wstring`.
+@partialsupport Available only on @ref CORRADE_TARGET_WINDOWS "Windows" to be
+    used when dealing directly with Windows Unicode APIs. Other code should
+    always use UTF-8, see http://utf8everywhere.org for more information.
+*/
+inline std::string narrow(const std::wstring& text) {
+    return Implementation::narrow(text.data(), text.size());
+}
+
+/** @overload */
+inline std::string narrow(Containers::ArrayView<const wchar_t> text) {
+    return Implementation::narrow(text.data(), text.size());
+}
+
+/** @overload
+Expects that @p text is null-terminated.
+*/
+inline std::string narrow(const wchar_t* text) {
+    return Implementation::narrow(text, -1);
+}
+#endif
+
 }}}
 
 #endif

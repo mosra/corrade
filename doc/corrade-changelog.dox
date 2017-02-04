@@ -83,6 +83,8 @@ namespace Corrade {
     systems
 -   Added @ref Utility::Resource::hasGroup()
 -   Added @ref Utility::Unicode::prevChar()
+-   Added @ref Utility::Unicode::widen() and @ref Utility::Unicode::narrow()
+    helpers for interacting with Unicode Windows APIs
 -   Added @ref CORRADE_TARGET_IOS and @ref CORRADE_TARGET_IOS_SIMULATOR
     macros and CMake variables
 -   Added @ref CORRADE_TARGET_X86 and @ref CORRADE_TARGET_ARM macros

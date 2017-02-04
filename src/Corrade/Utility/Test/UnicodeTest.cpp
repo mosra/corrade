@@ -43,6 +43,11 @@ struct UnicodeTest: TestSuite::Tester {
     void prevUtf8Empty();
 
     void utf8utf32();
+
+    #ifdef CORRADE_TARGET_WINDOWS
+    void widen();
+    void narrow();
+    #endif
 };
 
 UnicodeTest::UnicodeTest() {
@@ -54,7 +59,13 @@ UnicodeTest::UnicodeTest() {
               &UnicodeTest::prevUtf8Error,
               &UnicodeTest::prevUtf8Empty,
 
-              &UnicodeTest::utf8utf32});
+              &UnicodeTest::utf8utf32,
+
+              #ifdef CORRADE_TARGET_WINDOWS
+              &UnicodeTest::widen,
+              &UnicodeTest::narrow
+              #endif
+              });
 }
 
 void UnicodeTest::nextUtf8() {
@@ -185,11 +196,43 @@ void UnicodeTest::prevUtf8Empty() {
 
 void UnicodeTest::utf8utf32() {
     CORRADE_COMPARE(Unicode::utf32("žluťoučký kůň"),
-                    U"\U0000017Elu\U00000165ou\U0000010Dk\U000000FD k\U0000016F\U00000148");
+                    U"\U0000017elu\U00000165ou\U0000010dk\U000000fd k\U0000016f\U00000148");
 
     /* Empty string shouldn't crash */
     CORRADE_COMPARE(Unicode::utf32(""), U"");
 }
+
+#ifdef CORRADE_TARGET_WINDOWS
+void UnicodeTest::widen() {
+    const char text[] = "žluťoučký kůň\0hýždě";
+    const wchar_t result[] = L"\u017elu\u0165ou\u010dk\u00fd k\u016f\u0148\u0000h\u00fd\u017ed\u011b";
+
+    CORRADE_COMPARE(Unicode::widen(text),
+                    result);
+    CORRADE_COMPARE(Unicode::widen(std::string{text, sizeof(text)}),
+                    (std::wstring{result, sizeof(result)/sizeof(wchar_t)}));
+    CORRADE_COMPARE(Unicode::widen(Containers::ArrayView<const char>{text, sizeof(text)}),
+                    (std::wstring{result, sizeof(result)/sizeof(wchar_t)}));
+
+    /* Empty string shouldn't crash */
+    CORRADE_COMPARE(Unicode::widen(""), L"");
+}
+
+void UnicodeTest::narrow() {
+    const wchar_t text[] = L"\u017elu\u0165ou\u010dk\u00fd k\u016f\u0148\u0000h\u00fd\u017ed\u011b";
+    const char result[] = "žluťoučký kůň\0hýždě";
+
+    CORRADE_COMPARE(Unicode::narrow(text),
+                    result);
+    CORRADE_COMPARE(Unicode::narrow(std::wstring{text, sizeof(text)/sizeof(wchar_t)}),
+                    (std::string{result, sizeof(result)}));
+    CORRADE_COMPARE(Unicode::narrow(Containers::ArrayView<const wchar_t>{text, sizeof(text)/sizeof(wchar_t)}),
+                    (std::string{result, sizeof(result)}));
+
+    /* Empty string shouldn't crash */
+    CORRADE_COMPARE(Unicode::narrow(L""), "");
+}
+#endif
 
 }}}
 
