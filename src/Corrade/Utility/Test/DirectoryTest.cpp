@@ -215,7 +215,6 @@ void DirectoryTest::fileExists() {
 }
 
 void DirectoryTest::removeFile() {
-    /* File */
     std::string file = Directory::join(_writeTestDir, "file.txt");
     CORRADE_VERIFY(Directory::mkpath(_writeTestDir));
     CORRADE_VERIFY(Directory::writeString(file, "a"));
@@ -230,7 +229,6 @@ void DirectoryTest::removeFile() {
 }
 
 void DirectoryTest::removeDirectory() {
-    /* Directory */
     std::string directory = Directory::join(_writeTestDir, "directory");
     CORRADE_VERIFY(Directory::mkpath(directory));
     CORRADE_VERIFY(Directory::fileExists(directory));

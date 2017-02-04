@@ -24,7 +24,6 @@
 */
 
 #include <sstream>
-#include <type_traits>
 
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Arguments.h"
