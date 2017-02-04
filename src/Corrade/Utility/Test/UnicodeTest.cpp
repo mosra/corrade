@@ -131,7 +131,7 @@ void UnicodeTest::prevUtf8() {
 
     /* Four-byte sequence */
     std::tie(codepoint, prev) = Unicode::prevChar("   \xf6\x85\x98\x80", 7);
-//     CORRADE_COMPARE(prev, 3);
+    CORRADE_COMPARE(prev, 3);
     CORRADE_COMPARE(codepoint, 1594880u);
 }
 
