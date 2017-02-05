@@ -38,6 +38,7 @@ struct FileTest: Tester {
 
     void same();
     void empty();
+    void utf8Filename();
 
     void actualNotFound();
     void expectedNotFound();
@@ -50,6 +51,8 @@ struct FileTest: Tester {
 FileTest::FileTest() {
     addTests({&FileTest::same,
               &FileTest::empty,
+              &FileTest::utf8Filename,
+
               &FileTest::actualNotFound,
               &FileTest::expectedNotFound,
               &FileTest::outputActualSmaller,
@@ -63,6 +66,11 @@ void FileTest::same() {
 
 void FileTest::empty() {
     CORRADE_VERIFY(Comparator<Compare::File>(FILETEST_DIR)("empty.txt", "empty.txt"));
+}
+
+void FileTest::utf8Filename() {
+    CORRADE_VERIFY(Comparator<Compare::File>(FILETEST_DIR)("hýždě.txt", "base.txt"));
+    CORRADE_VERIFY(Comparator<Compare::File>(FILETEST_DIR)("base.txt", "hýždě.txt"));
 }
 
 void FileTest::actualNotFound() {

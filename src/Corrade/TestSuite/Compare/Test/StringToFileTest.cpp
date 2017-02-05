@@ -39,6 +39,7 @@ class StringToFileTest: public Tester {
 
         void same();
         void empty();
+        void utf8Filename();
 
         void notFound();
 
@@ -50,7 +51,10 @@ class StringToFileTest: public Tester {
 StringToFileTest::StringToFileTest() {
     addTests({&StringToFileTest::same,
               &StringToFileTest::empty,
+              &StringToFileTest::utf8Filename,
+
               &StringToFileTest::notFound,
+
               &StringToFileTest::outputActualSmaller,
               &StringToFileTest::outputExpectedSmaller,
               &StringToFileTest::output});
@@ -62,6 +66,10 @@ void StringToFileTest::same() {
 
 void StringToFileTest::empty() {
     CORRADE_VERIFY(Comparator<Compare::StringToFile>()("", Utility::Directory::join(FILETEST_DIR, "empty.txt")));
+}
+
+void StringToFileTest::utf8Filename() {
+    CORRADE_VERIFY(Comparator<Compare::StringToFile>()("Hello World!", Utility::Directory::join(FILETEST_DIR, "hýždě.txt")));
 }
 
 void StringToFileTest::notFound() {

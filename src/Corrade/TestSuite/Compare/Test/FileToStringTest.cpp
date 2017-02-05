@@ -38,6 +38,7 @@ struct FileToStringTest: Tester {
 
     void same();
     void empty();
+    void utf8Filename();
 
     void notFound();
 
@@ -49,7 +50,10 @@ struct FileToStringTest: Tester {
 FileToStringTest::FileToStringTest() {
     addTests({&FileToStringTest::same,
               &FileToStringTest::empty,
+              &FileToStringTest::utf8Filename,
+
               &FileToStringTest::notFound,
+
               &FileToStringTest::outputActualSmaller,
               &FileToStringTest::outputExpectedSmaller,
               &FileToStringTest::output});
@@ -61,6 +65,10 @@ void FileToStringTest::same() {
 
 void FileToStringTest::empty() {
     CORRADE_VERIFY(Comparator<Compare::FileToString>()(Utility::Directory::join(FILETEST_DIR, "empty.txt"), ""));
+}
+
+void FileToStringTest::utf8Filename() {
+    CORRADE_VERIFY(Comparator<Compare::FileToString>()(Utility::Directory::join(FILETEST_DIR, "hýždě.txt"), "Hello World!"));
 }
 
 void FileToStringTest::notFound() {
