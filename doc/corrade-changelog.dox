@@ -101,6 +101,8 @@ namespace Corrade {
 
 ### PluginManager library
 
+-   @ref PluginManager::Manager now properly loads plugins from UTF-8 encoded
+    paths also on Windows
 -   @ref PluginManager::Manager can now be constructed without specifying
     plugin directory
 

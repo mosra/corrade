@@ -282,7 +282,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * @brief Set another plugin directory
          *
          * Keeps loaded plugins untouched, removes unloaded plugins which are
-         * not existing anymore and adds newly found plugins.
+         * not existing anymore and adds newly found plugins. The directory is
+         * expected to be in UTF-8.
          * @partialsupport Only static plugins are supported in
          *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib",
          *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",

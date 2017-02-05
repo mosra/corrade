@@ -31,6 +31,11 @@
 #include <sstream>
 #include <utility>
 
+#include "Corrade/PluginManager/AbstractPlugin.h"
+#include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Configuration.h"
+
 #ifndef CORRADE_TARGET_WINDOWS
 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
 #include <dlfcn.h>
@@ -41,12 +46,9 @@
 #define dlsym GetProcAddress
 #define dlerror GetLastError
 #define dlclose FreeLibrary
+#include "Corrade/Utility/Unicode.h"
+using Corrade::Utility::Unicode::widen;
 #endif
-
-#include "Corrade/PluginManager/AbstractPlugin.h"
-#include "Corrade/Utility/Assert.h"
-#include "Corrade/Utility/Directory.h"
-#include "Corrade/Utility/Configuration.h"
 
 #include "configure.h"
 
@@ -366,7 +368,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
     #ifndef CORRADE_TARGET_WINDOWS
     void* module = dlopen(filename.data(), RTLD_NOW|RTLD_GLOBAL);
     #else
-    HMODULE module = LoadLibraryA(filename.data());
+    HMODULE module = LoadLibraryW(widen(filename).data());
     #endif
     if(!module) {
         Error() << "PluginManager::Manager::load(): cannot open plugin file" << '"' + filename + "\":" << dlerror();

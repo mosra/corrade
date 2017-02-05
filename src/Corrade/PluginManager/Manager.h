@@ -45,8 +45,8 @@ template<class T> class Manager: public AbstractManager {
     public:
         /**
          * @brief Constructor
-         * @param pluginDirectory   Directory where plugins will be searched.
-         *      No recursive processing is done.
+         * @param pluginDirectory   Directory where plugins will be searched,
+         *      encoded in UTF-8. No recursive processing is done.
          *
          * First goes through list of static plugins and finds ones that use
          * the same interface as this manager instance. Then gets list of all
