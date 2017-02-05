@@ -365,11 +365,11 @@ std::vector<std::string> list(const std::string& path, Flags flags) {
         #endif
         #endif
 
-        const std::string file{entry->d_name};
+        std::string file{entry->d_name};
         if((flags >= Flag::SkipDotAndDotDot) && (file == "." || file == ".."))
             continue;
 
-        list.push_back(file);
+        list.push_back(std::move(file));
     }
 
     closedir(directory);
@@ -390,11 +390,11 @@ std::vector<std::string> list(const std::string& path, Flags flags) {
             continue;
         /** @todo are there any special files in WINAPI? */
 
-        const std::string file{data.cFileName};
+        std::string file{data.cFileName};
         if((flags >= Flag::SkipDotAndDotDot) && (file == "." || file == ".."))
             continue;
 
-        list.push_back(file);
+        list.push_back(std::move(file));
     }
 
     /* Other not implemented */
