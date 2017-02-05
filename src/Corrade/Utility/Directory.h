@@ -180,6 +180,7 @@ CORRADE_UTILITY_EXPORT bool rm(const std::string& path);
 @brief Move given file or directory
 
 Returns `true` on success, `false` otherwise.
+@see @ref read(), @ref write()
 @partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
 */
 CORRADE_UTILITY_EXPORT bool move(const std::string& oldPath, const std::string& newPath);
