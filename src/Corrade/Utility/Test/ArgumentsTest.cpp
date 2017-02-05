@@ -43,6 +43,8 @@ struct ArgumentsTest: TestSuite::Tester {
     void helpEnvironment();
     void helpEnvironmentPrefixed();
     void helpAfterParse();
+    void helpLongKeys();
+    void helpLongKeyNotPrinted();
 
     void duplicateKey();
     void duplicateShortKey();
@@ -75,6 +77,7 @@ struct ArgumentsTest: TestSuite::Tester {
     void prefixedParseHelpArgument();
     void prefixedHelpWithoutPrefix();
     void prefixedHelpWithPrefix();
+    void prefixedHelpLongPrefix();
     void prefixedDisallowedCalls();
     void prefixedDisallowedWithPrefix();
     void prefixedDisallowedWithPrefixAfterSkipPrefix();
@@ -92,6 +95,8 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::helpEnvironment,
               &ArgumentsTest::helpEnvironmentPrefixed,
               &ArgumentsTest::helpAfterParse,
+              &ArgumentsTest::helpLongKeys,
+              &ArgumentsTest::helpLongKeyNotPrinted,
 
               &ArgumentsTest::duplicateKey,
               &ArgumentsTest::duplicateShortKey,
@@ -124,6 +129,7 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::prefixedParseHelpArgument,
               &ArgumentsTest::prefixedHelpWithoutPrefix,
               &ArgumentsTest::prefixedHelpWithPrefix,
+              &ArgumentsTest::prefixedHelpLongPrefix,
               &ArgumentsTest::prefixedDisallowedCalls,
               &ArgumentsTest::prefixedDisallowedWithPrefix,
               &ArgumentsTest::prefixedDisallowedWithPrefixAfterSkipPrefix,
@@ -277,6 +283,37 @@ void ArgumentsTest::helpAfterParse() {
   myFoobarApp [-h|--help]
 )text";
     CORRADE_COMPARE(args.usage(), expected2);
+}
+
+void ArgumentsTest::helpLongKeys() {
+    Arguments args;
+    args.addArgument("some-insanely-long-argument").setHelp("some-insanely-long-argument", "this is long, right?")
+        .addBooleanOption("some-crazy-long-option-ya").setHelp("some-crazy-long-option-ya", "long is the new short")
+        .addOption('X', "another-long-option").setHelp("another-long-option", "loooong", "F");
+
+    const auto expected = R"text(Usage:
+  ./app [-h|--help] [--some-crazy-long-option-ya] [-X|--another-long-option F] [--] some-insanely-long-argument
+
+Arguments:
+  some-insanely-long-argument  this is long, right?
+  -h, --help                  display this help message and exit
+  --some-crazy-long-option-ya  long is the new short
+  -X, --another-long-option F  loooong
+)text";
+    CORRADE_COMPARE(args.help(), expected);
+}
+
+void ArgumentsTest::helpLongKeyNotPrinted() {
+    Arguments args;
+    args.addArgument("some-really-long-option-that-will-not-get-printed-anyway");
+
+    const auto expected = R"text(Usage:
+  ./app [-h|--help] [--] some-really-long-option-that-will-not-get-printed-anyway
+
+Arguments:
+  -h, --help  display this help message and exit
+)text";
+    CORRADE_COMPARE(args.help(), expected);
 }
 
 void ArgumentsTest::duplicateKey() {
@@ -646,6 +683,21 @@ Arguments:
   --read-behavior BEHAVIOR  reader behavior
                             (default: buffered)
   --read-buffer-size SIZE   buffer size
+)text";
+    CORRADE_COMPARE(args.help(), expected);
+}
+
+void ArgumentsTest::prefixedHelpLongPrefix() {
+    Arguments args;
+    args.addSkippedPrefix("a-kinda-longer-prefix", "this is long, right?");
+
+    const auto expected = R"text(Usage:
+  ./app [--a-kinda-longer-prefix-...] [-h|--help]
+
+Arguments:
+  -h, --help                  display this help message and exit
+  --a-kinda-longer-prefix-...  this is long, right?
+                              (see --a-kinda-longer-prefix-help for details)
 )text";
     CORRADE_COMPARE(args.help(), expected);
 }
