@@ -46,6 +46,9 @@ extern char **environ;
 #endif
 #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
 #include <windows.h>
+#include "Corrade/Utility/Unicode.h"
+using Corrade::Utility::Unicode::widen;
+using Corrade::Utility::Unicode::narrow;
 #endif
 
 namespace Corrade { namespace Utility {
@@ -126,9 +129,9 @@ std::vector<std::string> Arguments::environment() {
 
     /* Windows (not RT) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    char* const env = GetEnvironmentStrings();
-    for(char* e = env; *e; e += std::strlen(e) + 1)
-        list.push_back(e);
+    wchar_t* const env = GetEnvironmentStringsW();
+    for(wchar_t* e = env; *e; e += std::wcslen(e) + 1)
+        list.push_back(narrow(e));
     FreeEnvironmentStrings(env);
 
     /* Other platforms not implemented */
@@ -345,6 +348,8 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
     for(const Entry& entry: _entries) {
         if(entry.environment.empty()) continue;
 
+        /* UTF-8 handling on sane platforms */
+        #ifndef CORRADE_TARGET_WINDOWS
         const char* const env = std::getenv(entry.environment.data());
         #ifdef CORRADE_TARGET_EMSCRIPTEN
         #ifdef __clang__
@@ -364,6 +369,13 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
         if(!env) continue;
         #else
         if(!env && !systemEnv) continue;
+        #endif
+
+        /* Mess with UTF-16 on Windows */
+        #else
+        const wchar_t* const wenv = _wgetenv(widen(entry.environment).data());
+        if(!wenv) continue;
+        std::string env{narrow(wenv)};
         #endif
 
         if(entry.type == Type::BooleanOption) {

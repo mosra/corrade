@@ -67,7 +67,7 @@ namespace Corrade {
 -   Added @ref Utility::Arguments::setFromEnvironment(), making it possible to
     pass options via environment variables. List of all environment options is
     also available through @ref Utility::Arguments::environment() for debugging
-    purposes.
+    purposes, environment values are UTF-8 encoded on all platforms
 -   Scoped output redirection in @ref Utility::Debug
 -   Colored output in @ref Utility::Debug with scoping and both ANSI and
     Windows console API support; @ref Utility::Debug::isTty() for detecting

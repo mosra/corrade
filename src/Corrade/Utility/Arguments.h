@@ -164,7 +164,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * @brief Environment values
          *
          * Returns list of all environment values for information and debugging
-         * purposes.
+         * purposes, encoded in UTF-8.
          * @note In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" the environment
          *      list is concatenated from local Emscripten environment and
          *      system environment provided by Node.js.
@@ -366,7 +366,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *      SOME_OPTION=42 ./app
          *
          * Boolean options are set to `true` if the environment value is set to
-         * `ON` (case-insensitive).
+         * `ON` (case-insensitive). Values are encoded in UTF-8.
          * @note In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" the environment
          *      is combined from local Emscripten environment and system
          *      environment provided by Node.js. If a variable is in both
