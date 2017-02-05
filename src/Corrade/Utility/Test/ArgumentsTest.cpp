@@ -23,10 +23,12 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <algorithm>
 #include <sstream>
 
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Arguments.h"
+#include "Corrade/Utility/String.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 
@@ -34,6 +36,7 @@ struct ArgumentsTest: TestSuite::Tester {
     explicit ArgumentsTest();
 
     void environment();
+    void environmentUtf8();
 
     void helpArgumentsOnly();
     void helpNamedOnly();
@@ -67,6 +70,7 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseInvalidLongArgument();
     void parseInvalidLongArgumentDashes();
     void parseEnvironment();
+    void parseEnvironmentUtf8();
 
     void parseMissingValue();
     void parseMissingOption();
@@ -87,6 +91,7 @@ struct ArgumentsTest: TestSuite::Tester {
 
 ArgumentsTest::ArgumentsTest() {
     addTests({&ArgumentsTest::environment,
+              &ArgumentsTest::environmentUtf8,
 
               &ArgumentsTest::helpArgumentsOnly,
               &ArgumentsTest::helpNamedOnly,
@@ -112,6 +117,7 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseCustomTypeFlags,
               &ArgumentsTest::parseDoubleArgument,
               &ArgumentsTest::parseEnvironment,
+              &ArgumentsTest::parseEnvironmentUtf8,
 
               &ArgumentsTest::parseUnknownArgument,
               &ArgumentsTest::parseUnknownShortArgument,
@@ -150,6 +156,22 @@ void ArgumentsTest::environment() {
         << "One environment variable:" << list[list.size()/2];
 
     CORRADE_VERIFY(!list.empty());
+}
+
+void ArgumentsTest::environmentUtf8() {
+    #ifdef CORRADE_TARGET_WINDOWS_RT
+    CORRADE_SKIP("No environment on this platform.");
+    #endif
+
+    if(!std::getenv("ARGUMENTSTEST_UNICODE"))
+        CORRADE_SKIP("Environment not set. Call the test with ARGUMENTSTEST_UNICODE=hýždě to enable this test case.");
+
+    /* Verify that it doesn't crash, at least */
+    std::vector<std::string> list = Arguments::environment();
+    auto found = std::find_if(list.begin(), list.end(),
+        [](const std::string& v){ return String::beginsWith(v, "ARGUMENTSTEST_UNICODE="); });
+    CORRADE_VERIFY(found != list.end());
+    CORRADE_COMPARE(*found, "ARGUMENTSTEST_UNICODE=hýždě");
 }
 
 void ArgumentsTest::helpArgumentsOnly() {
@@ -591,6 +613,24 @@ void ArgumentsTest::parseEnvironment() {
     CORRADE_COMPARE(args.value("size"), "1337");
     CORRADE_VERIFY(args.isSet("verbose"));
     CORRADE_VERIFY(!args.isSet("color"));
+    #endif
+}
+
+void ArgumentsTest::parseEnvironmentUtf8() {
+    #ifdef CORRADE_TARGET_WINDOWS_RT
+    CORRADE_SKIP("No environment on this platform.");
+    #else
+    if(!std::getenv("ARGUMENTSTEST_UNICODE"))
+        CORRADE_SKIP("Environment not set. Call the test with ARGUMENTSTEST_UNICODE=hýždě to enable this test case.");
+
+    Arguments args;
+    args.addOption("unicode").setFromEnvironment("unicode", "ARGUMENTSTEST_UNICODE");
+
+    const char* argv[] = { "" };
+    const int argc = std::extent<decltype(argv)>();
+
+    CORRADE_VERIFY(args.tryParse(argc, argv));
+    CORRADE_COMPARE(args.value("unicode"), "hýždě");
     #endif
 }
 
