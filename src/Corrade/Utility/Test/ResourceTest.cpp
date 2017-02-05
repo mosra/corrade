@@ -101,7 +101,7 @@ void ResourceTest::compile() {
 
 void ResourceTest::compileNothing() {
     CORRADE_COMPARE_AS(Resource::compile("ResourceTestNothingData", "nothing", {}),
-                       Directory::join(RESOURCE_TEST_DIR, "compiledNothing.cpp"),
+                       Directory::join(RESOURCE_TEST_DIR, "compiled-nothing.cpp"),
                        TestSuite::Compare::StringToFile);
 }
 
@@ -109,7 +109,7 @@ void ResourceTest::compileEmptyFile() {
     std::vector<std::pair<std::string, std::string>> input{
         {"empty.bin", ""}};
     CORRADE_COMPARE_AS(Resource::compile("ResourceTestData", "test", input),
-                       Directory::join(RESOURCE_TEST_DIR, "compiledEmpty.cpp"),
+                       Directory::join(RESOURCE_TEST_DIR, "compiled-empty.cpp"),
                        TestSuite::Compare::StringToFile);
 }
 

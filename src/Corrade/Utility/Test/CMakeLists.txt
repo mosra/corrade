@@ -99,8 +99,8 @@ corrade_add_test(UtilityResourceTest
     LIBRARIES CorradeUtilityTestLib
     FILES
         ResourceTestFiles/compiled.cpp
-        ResourceTestFiles/compiledEmpty.cpp
-        ResourceTestFiles/compiledNothing.cpp
+        ResourceTestFiles/compiled-empty.cpp
+        ResourceTestFiles/compiled-nothing.cpp
         ResourceTestFiles/consequence.bin
         ResourceTestFiles/consequence2.txt
         ResourceTestFiles/empty.bin
