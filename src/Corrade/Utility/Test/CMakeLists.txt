@@ -49,6 +49,7 @@ corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp
         ConfigurationTestFiles/eol-windows.conf
         ConfigurationTestFiles/hierarchic.conf
         ConfigurationTestFiles/hierarchic-modified.conf
+        ConfigurationTestFiles/hýždě.conf
         ConfigurationTestFiles/invalid.conf
         ConfigurationTestFiles/multiLine.conf
         ConfigurationTestFiles/multiLine-crlf.conf

@@ -44,6 +44,7 @@ struct ConfigurationTest: TestSuite::Tester {
 
     void parse();
     void parseHierarchic();
+    void utf8Filename();
 
     void groupIndex();
     void valueIndex();
@@ -72,6 +73,7 @@ struct ConfigurationTest: TestSuite::Tester {
 ConfigurationTest::ConfigurationTest() {
     addTests({&ConfigurationTest::parse,
               &ConfigurationTest::parseHierarchic,
+              &ConfigurationTest::utf8Filename,
 
               &ConfigurationTest::groupIndex,
               &ConfigurationTest::valueIndex,
@@ -191,6 +193,18 @@ void ConfigurationTest::parseHierarchic() {
     CORRADE_VERIFY(conf.save());
     CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"),
                        Directory::join(CONFIGURATION_TEST_DIR, "hierarchic-modified.conf"),
+                       TestSuite::Compare::File);
+}
+
+void ConfigurationTest::utf8Filename() {
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "hýždě.conf"));
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hýždě.conf"));
+    CORRADE_VERIFY(conf.isValid());
+    CORRADE_VERIFY(!conf.isEmpty());
+    CORRADE_COMPARE(conf.value("unicode"), "supported");
+    CORRADE_VERIFY(conf.save());
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hýždě.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "hýždě.conf"),
                        TestSuite::Compare::File);
 }
 
