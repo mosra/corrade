@@ -47,18 +47,35 @@ struct DirectoryTest: TestSuite::Tester {
     #ifdef CORRADE_TARGET_WINDOWS
     void joinWindows();
     #endif
+
     void fileExists();
+    void fileExistsUtf8();
+
     void removeFile();
     void removeDirectory();
+    void removeUtf8();
+
     void moveFile();
     void moveDirectory();
+    void moveUtf8();
+
     void mkpath();
     void mkpathNoPermission();
+    void mkpathUtf8();
+
     void isSandboxed();
+
     void executableLocation();
+    void executableLocationUtf8();
+
     void home();
+    void homeUtf8();
+
     void configurationDir();
+    void configurationDirUtf8();
+
     void tmp();
+    void tmpUtf8();
 
     void list();
     void listSkipDirectories();
@@ -67,18 +84,25 @@ struct DirectoryTest: TestSuite::Tester {
     void listSkipDotAndDotDot();
     void listSort();
     void listSortPrecedence();
+    void listUtf8();
 
     void read();
     void readEmpty();
     void readNonSeekable();
+    void readUtf8();
     void write();
+    void writeUtf8();
 
     void map();
     void mapNoPermission();
+    void mapUtf8();
+
     void mapRead();
     void mapReadNonexistent();
+    void mapReadUtf8();
 
     std::string _testDir,
+        _testDirUtf8,
         _writeTestDir;
 };
 
@@ -91,18 +115,35 @@ DirectoryTest::DirectoryTest() {
               #ifdef CORRADE_TARGET_WINDOWS
               &DirectoryTest::joinWindows,
               #endif
+
               &DirectoryTest::fileExists,
+              &DirectoryTest::fileExistsUtf8,
+
               &DirectoryTest::removeFile,
               &DirectoryTest::removeDirectory,
+              &DirectoryTest::removeUtf8,
+
               &DirectoryTest::moveFile,
               &DirectoryTest::moveDirectory,
+              &DirectoryTest::moveUtf8,
+
               &DirectoryTest::mkpath,
               &DirectoryTest::mkpathNoPermission,
+              &DirectoryTest::mkpathUtf8,
+
               &DirectoryTest::isSandboxed,
+
               &DirectoryTest::executableLocation,
+              &DirectoryTest::executableLocationUtf8,
+
               &DirectoryTest::home,
+              &DirectoryTest::homeUtf8,
+
               &DirectoryTest::configurationDir,
+              &DirectoryTest::configurationDirUtf8,
+
               &DirectoryTest::tmp,
+              &DirectoryTest::tmpUtf8,
 
               &DirectoryTest::list,
               &DirectoryTest::listSkipDirectories,
@@ -111,16 +152,23 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::listSkipDotAndDotDot,
               &DirectoryTest::listSort,
               &DirectoryTest::listSortPrecedence,
+              &DirectoryTest::listUtf8,
 
               &DirectoryTest::read,
               &DirectoryTest::readEmpty,
               &DirectoryTest::readNonSeekable,
+              &DirectoryTest::readUtf8,
+
               &DirectoryTest::write,
+              &DirectoryTest::writeUtf8,
 
               &DirectoryTest::map,
               &DirectoryTest::mapNoPermission,
+              &DirectoryTest::mapUtf8,
+
               &DirectoryTest::mapRead,
-              &DirectoryTest::mapReadNonexistent});
+              &DirectoryTest::mapReadNonexistent,
+              &DirectoryTest::mapReadUtf8});
 
     #ifdef CORRADE_TARGET_APPLE
     if(Directory::isSandboxed()
@@ -130,11 +178,13 @@ DirectoryTest::DirectoryTest() {
         #endif
     ) {
         _testDir = Directory::join(Directory::path(Directory::executableLocation()), "DirectoryTestFiles");
+        _testDirUtf8 = Directory::join(Directory::path(Directory::executableLocation()), "DirectoryTestFilesUtf8");
         _writeTestDir = Directory::join(Directory::home(), "Library/Caches");
     } else
     #endif
     {
         _testDir = DIRECTORY_TEST_DIR;
+        _testDirUtf8 = DIRECTORY_TEST_DIR_UTF8;
         _writeTestDir = DIRECTORY_WRITE_TEST_DIR;
     }
 }
@@ -214,6 +264,10 @@ void DirectoryTest::fileExists() {
     CORRADE_VERIFY(!Directory::fileExists(Directory::join(_testDir, "nonexistentFile")));
 }
 
+void DirectoryTest::fileExistsUtf8() {
+    CORRADE_VERIFY(Directory::fileExists(Directory::join(_testDirUtf8, "hýždě")));
+}
+
 void DirectoryTest::removeFile() {
     std::string file = Directory::join(_writeTestDir, "file.txt");
     CORRADE_VERIFY(Directory::mkpath(_writeTestDir));
@@ -234,6 +288,15 @@ void DirectoryTest::removeDirectory() {
     CORRADE_VERIFY(Directory::fileExists(directory));
     CORRADE_VERIFY(Directory::rm(directory));
     CORRADE_VERIFY(!Directory::fileExists(directory));
+}
+
+void DirectoryTest::removeUtf8() {
+    std::string file = Directory::join(_writeTestDir, "hýždě.txt");
+    CORRADE_VERIFY(Directory::mkpath(_writeTestDir));
+    CORRADE_VERIFY(Directory::writeString(file, "a"));
+    CORRADE_VERIFY(Directory::fileExists(file));
+    CORRADE_VERIFY(Directory::rm(file));
+    CORRADE_VERIFY(!Directory::fileExists(file));
 }
 
 void DirectoryTest::moveFile() {
@@ -266,6 +329,22 @@ void DirectoryTest::moveDirectory() {
     CORRADE_VERIFY(Directory::move(oldDirectory, newDirectory));
     CORRADE_VERIFY(!Directory::fileExists(oldDirectory));
     CORRADE_VERIFY(Directory::fileExists(newDirectory));
+}
+
+void DirectoryTest::moveUtf8() {
+    /* Old file */
+    std::string oldFile = Directory::join(_writeTestDir, "starý hýždě.txt");
+    CORRADE_VERIFY(Directory::writeString(oldFile, "a"));
+
+    /* New file, remove if exists */
+    std::string newFile = Directory::join(_writeTestDir, "nový hýždě.txt");
+    Directory::rm(newFile);
+
+    CORRADE_VERIFY(Directory::fileExists(oldFile));
+    CORRADE_VERIFY(!Directory::fileExists(newFile));
+    CORRADE_VERIFY(Directory::move(oldFile, newFile));
+    CORRADE_VERIFY(!Directory::fileExists(oldFile));
+    CORRADE_VERIFY(Directory::fileExists(newFile));
 }
 
 void DirectoryTest::mkpath() {
@@ -307,6 +386,13 @@ void DirectoryTest::mkpathNoPermission() {
 
     CORRADE_VERIFY(!Directory::mkpath("W:/nope"));
     #endif
+}
+
+void DirectoryTest::mkpathUtf8() {
+    std::string leaf = Directory::join(_writeTestDir, "šňůra");
+    if(Directory::fileExists(leaf)) CORRADE_VERIFY(Directory::rm(leaf));
+    CORRADE_VERIFY(Directory::mkpath(leaf));
+    CORRADE_VERIFY(Directory::fileExists(leaf));
 }
 
 void DirectoryTest::isSandboxed() {
@@ -362,6 +448,10 @@ void DirectoryTest::executableLocation() {
     #endif
 }
 
+void DirectoryTest::executableLocationUtf8() {
+    CORRADE_SKIP("Not sure how to test this.");
+}
+
 void DirectoryTest::home() {
     const std::string home = Directory::home();
     Debug() << "Home dir found as:" << home;
@@ -394,6 +484,10 @@ void DirectoryTest::home() {
     CORRADE_EXPECT_FAIL("Not implemented yet.");
     CORRADE_COMPARE(home, "(not implemented)");
     #endif
+}
+
+void DirectoryTest::homeUtf8() {
+    CORRADE_SKIP("Not sure how to test this.");
 }
 
 void DirectoryTest::configurationDir() {
@@ -438,6 +532,10 @@ void DirectoryTest::configurationDir() {
     #endif
 }
 
+void DirectoryTest::configurationDirUtf8() {
+    CORRADE_SKIP("Not sure how to test this.");
+}
+
 void DirectoryTest::tmp() {
     const std::string dir = Directory::tmp();
     Debug() << "Temporary dir found as:" << dir;
@@ -468,6 +566,10 @@ void DirectoryTest::tmp() {
     /* Verify that it's possible to write stuff there */
     CORRADE_VERIFY(Directory::writeString(Directory::join(Directory::tmp(), "a"), "hello"));
     CORRADE_VERIFY(Directory::rm(Directory::join(Directory::tmp(), "a")));
+}
+
+void DirectoryTest::tmpUtf8() {
+    CORRADE_SKIP("Not sure how to test this.");
 }
 
 void DirectoryTest::list() {
@@ -556,6 +658,26 @@ void DirectoryTest::listSortPrecedence() {
     CORRADE_VERIFY((Directory::Flag::SortAscending|Directory::Flag::SortDescending) == Directory::Flag::SortAscending);
 }
 
+void DirectoryTest::listUtf8() {
+    #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+        "CTest is not able to run XCTest executables properly in the simulator.");
+    #endif
+
+    std::vector<std::string> list{".", "..",
+        #ifdef CORRADE_TARGET_APPLE
+        /* Apple HFS+ stores filenames in a decomposed normalized form to avoid
+           e.g. `e` + `ˇ` and `ě` being treated differently. That makes sense.
+           I wonder why neither Linux nor Windows do this. */
+        "šňůra", "hýždě",
+        #else
+        "šňůra", "hýždě"
+        #endif
+        };
+    CORRADE_COMPARE_AS(Directory::list(_testDirUtf8), list,
+        TestSuite::Compare::SortedContainer);
+}
+
 void DirectoryTest::read() {
     /* Existing file, check if we are reading it as binary (CR+LF is not
        converted to LF) and nothing after \0 gets lost */
@@ -588,6 +710,14 @@ void DirectoryTest::readNonSeekable() {
     #endif
 }
 
+void DirectoryTest::readUtf8() {
+    /* Existing file, check if we are reading it as binary (CR+LF is not
+       converted to LF) and nothing after \0 gets lost */
+    CORRADE_COMPARE_AS(Directory::read(Directory::join(_testDirUtf8, "hýždě")),
+        (Containers::Array<char>::from(0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF)),
+        TestSuite::Compare::Container);
+}
+
 void DirectoryTest::write() {
     constexpr unsigned char data[] = {0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF};
     CORRADE_VERIFY(Directory::write(Directory::join(_writeTestDir, "file"), data));
@@ -599,6 +729,14 @@ void DirectoryTest::write() {
         std::string("\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11)));
     CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "file"),
         Directory::join(_testDir, "file"),
+        TestSuite::Compare::File);
+}
+
+void DirectoryTest::writeUtf8() {
+    constexpr unsigned char data[] = {0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF};
+    CORRADE_VERIFY(Directory::write(Directory::join(_writeTestDir, "hýždě"), data));
+    CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "hýždě"),
+        Directory::join(_testDirUtf8, "hýždě"),
         TestSuite::Compare::File);
 }
 
@@ -633,6 +771,23 @@ void DirectoryTest::mapNoPermission() {
     #endif
 }
 
+void DirectoryTest::mapUtf8() {
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    std::string data{"\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11};
+    {
+        auto mappedFile = Directory::map(Directory::join(_writeTestDir, "hýždě chlípníka"), data.size());
+        CORRADE_VERIFY(mappedFile);
+        CORRADE_COMPARE(mappedFile.size(), data.size());
+        std::copy(std::begin(data), std::end(data), mappedFile.begin());
+    }
+    CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "hýždě chlípníka"),
+        data,
+        TestSuite::Compare::FileToString);
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+
 void DirectoryTest::mapRead() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     {
@@ -654,6 +809,19 @@ void DirectoryTest::mapReadNonexistent() {
         const auto mappedFile = Directory::mapRead(Directory::join(_testDir, "nonexistentFile"));
         CORRADE_VERIFY(!mappedFile);
         CORRADE_COMPARE(out.str(), "Utility::Directory::mapRead(): can't open the file\n");
+    }
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+
+void DirectoryTest::mapReadUtf8() {
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    {
+        const auto mappedFile = Directory::mapRead(Directory::join(_testDirUtf8, "hýždě"));
+        CORRADE_COMPARE_AS(Containers::ArrayView<const char>(mappedFile),
+            (Containers::Array<char>::from(0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF)),
+            TestSuite::Compare::Container);
     }
     #else
     CORRADE_SKIP("Not implemented on this platform.");

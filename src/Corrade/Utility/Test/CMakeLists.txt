@@ -75,7 +75,9 @@ endif()
 corrade_add_test(UtilityDirectoryTest ${UtilityDirectoryTest_SRCS}
     FILES
         DirectoryTestFiles/dir/dummy
-        DirectoryTestFiles/file)
+        DirectoryTestFiles/file
+        DirectoryTestFilesUtf8/šňůra/dummy
+        DirectoryTestFilesUtf8/hýždě)
 target_include_directories(UtilityDirectoryTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 corrade_add_test(UtilityHashDigestTest HashDigestTest.cpp)
