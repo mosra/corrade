@@ -162,7 +162,8 @@ CORRADE_UTILITY_EXPORT std::vector<std::string> list(const std::string& path, Fl
 /**
 @brief Create path
 
-Returns `true` if path was successfully created, `false` otherwise.
+Returns `true` if path was successfully created, `false` otherwise. Expects
+that the path is in UTF-8.
 @partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
 */
 CORRADE_UTILITY_EXPORT bool mkpath(const std::string& path);
@@ -171,7 +172,7 @@ CORRADE_UTILITY_EXPORT bool mkpath(const std::string& path);
 @brief Remove file or directory
 
 Returns `true` if path is file or empty directory and was successfully removed,
-`false` otherwise.
+`false` otherwise. Expects that the path is in UTF-8.
 @partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
 */
 CORRADE_UTILITY_EXPORT bool rm(const std::string& path);
@@ -179,7 +180,8 @@ CORRADE_UTILITY_EXPORT bool rm(const std::string& path);
 /**
 @brief Move given file or directory
 
-Returns `true` on success, `false` otherwise.
+Returns `true` on success, `false` otherwise. Expects that the paths are in
+UTF-8.
 @see @ref read(), @ref write()
 @partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
 */
@@ -203,7 +205,7 @@ CORRADE_UTILITY_EXPORT bool isSandboxed();
 
 Returns location of the executable on Linux, Windows, non-sandboxed and
 sandboxed OSX and iOS. On other systems or if the directory can't be found,
-empty string is returned.
+empty string is returned. Returned value is encoded in UTF-8.
 @note The path is returned with forward slashes on all platforms. Use
     @ref toNativeSeparators() to convert it to platform-specific format, if
     needed.
@@ -217,7 +219,7 @@ On Unix and non-sandboxed OSX, the directory is equivalent to `${HOME}`
 environment variable. On sandboxed OSX and iOS the directory is equivalent to
 what's returned by `NSHomeDirectory()`. On Windows the directory is equivalent
 to `%%USERPROFILE%/Documents` or similar. On other systems or if the directory
-can't be found, empty string is returned.
+can't be found, empty string is returned. Returned value is encoded in UTF-8.
 @note The path is returned with forward slashes on all platforms. Use
     @ref toNativeSeparators() to convert it to platform-specific format, if
     needed.
@@ -232,7 +234,8 @@ On Unix (except for OSX), the configuration dir is `${XDG_CONFIG_HOME}/name` or
 `${HOME}/.config/name` (@p name is lowercased), on Windows the configuration
 dir is in `%%APPDATA%/name` (@p name is left as is). On OSX and iOS the
 configuration dir is `${HOME}/Library/Application Support/name`. On other
-systems or if the directory can't be found, empty string is returned.
+systems or if the directory can't be found, empty string is returned. Returned
+value is encoded in UTF-8.
 @note The path is returned with forward slashes on all platforms. Use
     @ref toNativeSeparators() to convert it to platform-specific format, if
     needed.
@@ -245,7 +248,8 @@ CORRADE_UTILITY_EXPORT std::string configurationDir(const std::string& name);
 On Unix and non-sandboxed OSX, the directory is equivalent to `/tmp`. On
 sandboxed OSX and iOS the directory is the `/tmp` subfolder of the app sandbox.
 On non-RT Windows the directory is equivalent to `%%TEMP%`. On other systems or
-if the directory can't be found, empty string is returned.
+if the directory can't be found, empty string is returned. Returned value is
+encoded in UTF-8.
 @note The path is returned with forward slashes on all platforms. Use
     @ref toNativeSeparators() to convert it to platform-specific format, if
     needed.
@@ -256,7 +260,7 @@ CORRADE_UTILITY_EXPORT std::string tmp();
 @brief Check if the file exists
 
 Returns `true` if the file exists and is accessible (e.g. user has permission
-to open it), `false` otherwise.
+to open it), `false` otherwise. Expects that the filename is in UTF-8.
 */
 CORRADE_UTILITY_EXPORT bool fileExists(const std::string& filename);
 
@@ -264,7 +268,7 @@ CORRADE_UTILITY_EXPORT bool fileExists(const std::string& filename);
 @brief Read file into array
 
 Reads whole file as binary (i.e. without newline conversion). Returns `nullptr`
-if the file can't be read.
+if the file can't be read. Expects that the filename is in UTF-8.
 @see @ref readString(), @ref fileExists(), @ref write(), @ref mapRead()
 */
 CORRADE_UTILITY_EXPORT Containers::Array<char> read(const std::string& filename);
@@ -281,7 +285,8 @@ CORRADE_UTILITY_EXPORT std::string readString(const std::string& filename);
 @brief Write array into file
 
 Writes the file as binary (i.e. without newline conversion). Returns `false` if
-the file can't be written, `true` otherwise.
+the file can't be written, `true` otherwise. Expects that the filename is in
+UTF-8.
 @see @ref writeString(), @ref read(), @ref map()
 */
 CORRADE_UTILITY_EXPORT bool write(const std::string& filename, Containers::ArrayView<const void> data);
@@ -302,6 +307,7 @@ Maps the file as read-write memory and enlarges it to @p size. If the file does
 not exist yet, it is created, if it exists, it's truncated. The array deleter
 takes care of unmapping, however the file is not deleted after unmapping. If an
 error occurs, `nullptr` is returned and an error message is printed to output.
+Expects that the filename is in UTF-8.
 @see @ref mapRead(), @ref read(), @ref write()
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
     @ref CORRADE_TARGET_WINDOWS "Windows" platforms.
@@ -313,7 +319,8 @@ CORRADE_UTILITY_EXPORT Containers::Array<char, MapDeleter> map(const std::string
 
 Maps the file as read-only memory. The array deleter takes care of unmapping.
 If the file doesn't exist or an error occurs while mapping, `nullptr` is
-returned and an error message is printed to output.
+returned and an error message is printed to output. Expects that the filename
+is in UTF-8.
 @see @ref map(), @ref read()
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
     @ref CORRADE_TARGET_WINDOWS "Windows" platforms.

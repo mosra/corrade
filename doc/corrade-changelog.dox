@@ -108,6 +108,9 @@ namespace Corrade {
 
 -   @ref TestSuite::Compare::Container now prints contents of whole container
     instead of just the first difference
+-   @ref TestSuite::Compare::File, @ref TestSuite::Compare::FileToString and
+    @ref TestSuite::Compare::StringToFile now properly handles UTF-8 encoded
+    filenames also on Windows
 -   @ref CORRADE_EXPECT_FAIL_IF() now works also on types with explicit bool
     conversion
 
@@ -124,9 +127,13 @@ namespace Corrade {
     consistently on all platforms
 -   Ensuring that floating-point values printed by @ref Utility::Debug have
     enough digits of precision based on their type
+-   All @ref Utility::Directory functions now properly take and return UTF-8
+    encoded paths on Windows
 -   Implemented @ref Utility::Directory::configurationDir() and
     @ref Utility::Directory::home() on Emscripten, OSX and iOS with proper
     handling of sandboxed apps
+-   @ref Utility::Resource and @ref corrade-cmake-add-resource "corrade_add_resource()"
+    CMake macro now properly handle UTF-8 filenames on all platforms
 -   Removed global constructors from @ref Utility::String internals
 -   Added @ref Utility::Unicode::nextChar() overload that takes a char array
     view instead of a `std::string`

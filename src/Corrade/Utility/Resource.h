@@ -56,7 +56,8 @@ allows you to specify filenames and filename aliases of resource files instead
 of passing the data manually to @ref compile(). The file is used when compiling
 resources using @ref corrade-cmake-add-resource "corrade_add_resource()" via
 CMake. The file can be also used when overriding compiled-in resources with
-live data using @ref overrideGroup(). Example file:
+live data using @ref overrideGroup(). All filenames are expected to be in
+UTF-8. Example file:
 
     group=myGroup
 
@@ -135,7 +136,7 @@ class CORRADE_UTILITY_EXPORT Resource {
 
         /**
          * @brief Get pointer to raw resource data
-         * @param filename      Filename
+         * @param filename      Filename in UTF-8
          *
          * Returns reference to data of given file in the group. The file must
          * exist. If the file is empty, returns `nullptr`.
@@ -144,7 +145,7 @@ class CORRADE_UTILITY_EXPORT Resource {
 
         /**
          * @brief Get data resource
-         * @param filename      Filename
+         * @param filename      Filename in UTF-8
          *
          * Returns data of given file in the group. The file must exist.
          */

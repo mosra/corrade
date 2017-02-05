@@ -64,6 +64,17 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Utility/String.h"
 
+/* Unicode helpers for Windows */
+#ifdef CORRADE_TARGET_WINDOWS
+#include "Corrade/Utility/Unicode.h"
+#ifdef __MINGW32__
+#include <fcntl.h>
+#include <ext/stdio_filebuf.h>
+#endif
+using Corrade::Utility::Unicode::widen;
+using Corrade::Utility::Unicode::narrow;
+#endif
+
 namespace Corrade { namespace Utility { namespace Directory {
 
 std::string fromNativeSeparators(std::string path) {
@@ -149,7 +160,7 @@ bool mkpath(const std::string& path) {
 
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    return CreateDirectory(path.data(), nullptr) != 0 || GetLastError() == ERROR_ALREADY_EXISTS;
+    return CreateDirectoryW(widen(path).data(), nullptr) != 0 || GetLastError() == ERROR_ALREADY_EXISTS;
 
     /* Not implemented elsewhere */
     #else
@@ -161,10 +172,14 @@ bool mkpath(const std::string& path) {
 bool rm(const std::string& path) {
     #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     /* std::remove() can't remove directories on Windows */
-    if(GetFileAttributes(path.data()) & FILE_ATTRIBUTE_DIRECTORY)
-        return RemoveDirectory(path.data());
-    #endif
+    auto wpath = widen(path);
+    if(GetFileAttributesW(wpath.data()) & FILE_ATTRIBUTE_DIRECTORY)
+        return RemoveDirectoryW(wpath.data());
 
+    /* Need to use nonstandard _wremove in order to handle Unicode properly */
+    return _wremove(wpath.data()) == 0;
+
+    #else
     #ifdef CORRADE_TARGET_EMSCRIPTEN
     /* std::remove() can't remove directories on Emscripten */
     struct stat st;
@@ -173,10 +188,17 @@ bool rm(const std::string& path) {
     #endif
 
     return std::remove(path.data()) == 0;
+    #endif
 }
 
 bool move(const std::string& oldPath, const std::string& newPath) {
-    return std::rename(oldPath.data(), newPath.data()) == 0;
+    return
+        #ifndef CORRADE_TARGET_WINDOWS
+        std::rename(oldPath.data(), newPath.data())
+        #else
+        _wrename(widen(oldPath).data(), widen(newPath).data())
+        #endif
+        == 0;
 }
 #endif
 
@@ -187,7 +209,7 @@ bool fileExists(const std::string& filename) {
 
     /* Windows (not Store/Phone) */
     #elif !defined(CORRADE_TARGET_WINDOWS_RT)
-    return GetFileAttributes(filename.data()) != INVALID_FILE_ATTRIBUTES;
+    return GetFileAttributesW(widen(filename).data()) != INVALID_FILE_ATTRIBUTES;
 
     /* Windows Store/Phone not implemented */
     #else
@@ -239,10 +261,10 @@ std::string executableLocation() {
     /* Windows (not RT) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     HMODULE module = GetModuleHandle(nullptr);
-    std::string path(MAX_PATH, '\0');
-    std::size_t size = GetModuleFileName(module, &path[0], path.size());
+    std::wstring path(MAX_PATH, L'\0');
+    std::size_t size = GetModuleFileNameW(module, &path[0], path.size());
     path.resize(size);
-    return fromNativeSeparators(path);
+    return fromNativeSeparators(narrow(path));
 
     /* hardcoded for Emscripten */
     #elif defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -263,10 +285,10 @@ std::string home() {
 
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    TCHAR h[MAX_PATH];
-    if(!SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_PERSONAL, nullptr, 0, h)))
+    wchar_t h[MAX_PATH];
+    if(!SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_PERSONAL, nullptr, 0, h)))
         return {};
-    return fromNativeSeparators(h);
+    return fromNativeSeparators(narrow(h));
 
     /* Other */
     #else
@@ -292,10 +314,10 @@ std::string configurationDir(const std::string& applicationName) {
 
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    TCHAR path[MAX_PATH];
-    if(!SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, path)))
+    wchar_t path[MAX_PATH];
+    if(!SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_APPDATA, nullptr, 0, path)))
         return {};
-    const std::string appdata{fromNativeSeparators(path)};
+    const std::string appdata{fromNativeSeparators(narrow(path))};
     return appdata.empty() ? std::string{} : join(appdata, applicationName);
 
     /* Other not implemented */
@@ -325,16 +347,16 @@ std::string tmp() {
     /* Windows */
 
     /* Get path size */
-    char c;
-    const std::size_t size = GetTempPath(1, &c);
+    wchar_t c;
+    const std::size_t size = GetTempPathW(1, &c);
 
     /* Get the path, remove the trailing slash (and zero terminator) */
-    std::string path(size, '\0');
-    GetTempPath(size, &path[0]);
+    std::wstring path(size, '\0');
+    GetTempPathW(size, &path[0]);
     if(path.size()) path.resize(path.size() - 2);
 
     /* Convert to forward slashes */
-    return fromNativeSeparators(path);
+    return fromNativeSeparators(narrow(path));
     #else
     Warning() << "Utility::Directory::tmp(): not implemented on this platform";
     return {};
@@ -376,21 +398,21 @@ std::vector<std::string> list(const std::string& path, Flags flags) {
 
     /* Windows (not Store/Phone) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    WIN32_FIND_DATA data;
-    HANDLE hFile = FindFirstFile(join(path, "*").data(), &data);
+    WIN32_FIND_DATAW data;
+    HANDLE hFile = FindFirstFileW(widen(join(path, "*")).data(), &data);
     if(hFile == INVALID_HANDLE_VALUE) return list;
 
     /* Explicitly add `.` for compatibility with other systems */
     if(!(flags & (Flag::SkipDotAndDotDot|Flag::SkipDirectories))) list.push_back(".");
 
-    while(FindNextFile(hFile, &data) != 0 || GetLastError() != ERROR_NO_MORE_FILES) {
+    while(FindNextFileW(hFile, &data) != 0 || GetLastError() != ERROR_NO_MORE_FILES) {
         if((flags >= Flag::SkipDirectories) && (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
             continue;
         if((flags >= Flag::SkipFiles) && !(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
             continue;
         /** @todo are there any special files in WINAPI? */
 
-        std::string file{data.cFileName};
+        std::string file{narrow(data.cFileName)};
         /* Not testing for dot, as it is not listed on Windows */
         if((flags >= Flag::SkipDotAndDotDot) && file == "..")
             continue;
@@ -413,9 +435,26 @@ std::vector<std::string> list(const std::string& path, Flags flags) {
 }
 
 Containers::Array<char> read(const std::string& filename) {
-    std::ifstream file(filename, std::ifstream::binary);
-    if(!file) return nullptr;
+    /* Sane platforms */
+    #ifndef CORRADE_TARGET_WINDOWS
+    std::ifstream file{filename, std::ifstream::binary};
 
+    /* MSVC */
+    #elif !defined(__MINGW32__)
+    std::ifstream file{widen(filename), std::ifstream::binary};
+
+    /* MinGW */
+    #else
+    /* http://stackoverflow.com/q/6524821, http://stackoverflow.com/a/30263811,
+       but I'm not sure if filebuf should be stack- or heap-allocated */
+    /* https://gcc.gnu.org/onlinedocs/gcc-4.6.2/libstdc++/api/a00069.html#a1dcd5a3e751c566a4b9b3e851ce92b30
+       says that the file descriptor returned by _wopen will be closed
+       automatically on destruction */
+    __gnu_cxx::stdio_filebuf<char> filebuf{_wopen(widen(filename).data(), _O_RDONLY|_O_BINARY, 0666), std::ifstream::in|std::ifstream::binary};
+    std::istream file{&filebuf};
+    #endif
+
+    if(!file) return nullptr;
     file.seekg(0, std::ios::end);
 
     /** @todo Better solution for non-seekable files */
@@ -455,9 +494,26 @@ std::string readString(const std::string& filename) {
 }
 
 bool write(const std::string& filename, const Containers::ArrayView<const void> data) {
-    std::ofstream file(filename, std::ofstream::binary);
-    if(!file) return false;
+    /* Sane platforms */
+    #ifndef CORRADE_TARGET_WINDOWS
+    std::ofstream file{filename, std::ofstream::binary};
 
+    /* MSVC */
+    #elif !defined(__MINGW32__)
+    std::ofstream file{widen(filename), std::ifstream::binary};
+
+    /* MinGW */
+    #else
+    /* http://stackoverflow.com/q/6524821, http://stackoverflow.com/a/30263811,
+       but I'm not sure if filebuf should be stack- or heap-allocated */
+    /* https://gcc.gnu.org/onlinedocs/gcc-4.6.2/libstdc++/api/a00069.html#a1dcd5a3e751c566a4b9b3e851ce92b30
+       says that the file descriptor returned by _wopen will be closed
+       automatically on destruction */
+    __gnu_cxx::stdio_filebuf<char> filebuf{_wopen(widen(filename).data(), _O_CREAT|_O_TRUNC|_O_WRONLY|_O_BINARY, 0666), std::ofstream::out|std::ofstream::binary};
+    std::ostream file{&filebuf};
+    #endif
+
+    if(!file) return false;
     file.write(reinterpret_cast<const char*>(data.data()), data.size());
     return true;
 }
@@ -541,7 +597,7 @@ void MapDeleter::operator()(const char* const data, const std::size_t) {
 Containers::Array<char, MapDeleter> map(const std::string& filename, std::size_t size) {
     /* Open the file for writing. Create if it doesn't exist, truncate it if it
        does. */
-    HANDLE hFile = CreateFileA(filename.data(),
+    HANDLE hFile = CreateFileW(widen(filename).data(),
         GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS, 0, nullptr);
     if (hFile == INVALID_HANDLE_VALUE) {
         Error() << "Utility::Directory::map(): can't open the file";
@@ -570,7 +626,7 @@ Containers::Array<char, MapDeleter> map(const std::string& filename, std::size_t
 
 Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
     /* Open the file for reading */
-    HANDLE hFile = CreateFileA(filename.data(),
+    HANDLE hFile = CreateFileW(widen(filename).data(),
         GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
     if (hFile == INVALID_HANDLE_VALUE) {
         Error() << "Utility::Directory::mapRead(): can't open the file";

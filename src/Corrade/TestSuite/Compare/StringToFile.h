@@ -43,7 +43,8 @@ namespace Compare {
 @brief Pseudo-type for comparing string to file contents
 
 Prints the length of both files (if they are different) and prints value
-and position of first different character in both files. Example usage:
+and position of first different character in both files. Filename is expected
+to be in UTF-8. Example usage:
 @code
 CORRADE_COMPARE_AS("actual file contents", "expected.txt", Compare::StringToFile);
 @endcode
