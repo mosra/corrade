@@ -103,9 +103,12 @@ corrade_add_test(UtilityResourceTest
         ResourceTestFiles/compiled.cpp
         ResourceTestFiles/compiled-empty.cpp
         ResourceTestFiles/compiled-nothing.cpp
+        ResourceTestFiles/compiled-unicode.cpp
         ResourceTestFiles/consequence.bin
         ResourceTestFiles/consequence2.txt
         ResourceTestFiles/empty.bin
+        ResourceTestFiles/hýždě.bin
+        ResourceTestFiles/hýždě.conf
         ResourceTestFiles/predisposition.bin
         ResourceTestFiles/predisposition2.txt
         ResourceTestFiles/resources.conf

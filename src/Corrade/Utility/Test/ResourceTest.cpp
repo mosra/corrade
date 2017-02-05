@@ -43,6 +43,7 @@ struct ResourceTest: TestSuite::Tester {
     void compileEmptyFile();
 
     void compileFrom();
+    void compileFromUtf8Filenames();
     void compileFromNonexistentResource();
     void compileFromNonexistentFile();
     void compileFromEmptyGroup();
@@ -69,6 +70,7 @@ ResourceTest::ResourceTest() {
               &ResourceTest::compileEmptyFile,
 
               &ResourceTest::compileFrom,
+              &ResourceTest::compileFromUtf8Filenames,
               &ResourceTest::compileFromNonexistentResource,
               &ResourceTest::compileFromNonexistentFile,
               &ResourceTest::compileFromEmptyGroup,
@@ -117,6 +119,13 @@ void ResourceTest::compileFrom() {
     const std::string compiled = Resource::compileFrom("ResourceTestData",
         Directory::join(RESOURCE_TEST_DIR, "resources.conf"));
     CORRADE_COMPARE_AS(compiled, Directory::join(RESOURCE_TEST_DIR, "compiled.cpp"),
+                       TestSuite::Compare::StringToFile);
+}
+
+void ResourceTest::compileFromUtf8Filenames() {
+    const std::string compiled = Resource::compileFrom("ResourceTestUtf8Data",
+        Directory::join(RESOURCE_TEST_DIR, "hýždě.conf"));
+    CORRADE_COMPARE_AS(compiled, Directory::join(RESOURCE_TEST_DIR, "compiled-unicode.cpp"),
                        TestSuite::Compare::StringToFile);
 }
 
