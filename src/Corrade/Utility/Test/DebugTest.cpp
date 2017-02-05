@@ -38,6 +38,8 @@ namespace Corrade { namespace Utility { namespace Test {
 struct DebugTest: TestSuite::Tester {
     explicit DebugTest();
 
+    void isTty();
+
     void debug();
     template<class T> void floats();
     void boolean();
@@ -70,6 +72,8 @@ struct DebugTest: TestSuite::Tester {
 
 DebugTest::DebugTest() {
     addTests({
+        &DebugTest::isTty,
+
         &DebugTest::boolean,
         &DebugTest::floats<float>,
         &DebugTest::floats<double>,
@@ -166,6 +170,17 @@ namespace {
         }
     };
     #endif
+}
+
+void DebugTest::isTty() {
+    Debug{} << "Debug output is a TTY?  " << (Debug::isTty() ? "yes" : "no");
+    Debug{} << "Warning output is a TTY?" << (Warning::isTty() ? "yes" : "no");
+    Debug{} << "Error output is a TTY?  " << (Error::isTty() ? "yes" : "no");
+
+    CORRADE_VERIFY(!Debug::isTty(nullptr));
+
+    std::ostringstream o;
+    CORRADE_VERIFY(!Debug::isTty(&o));
 }
 
 template<class T> void DebugTest::floats() {

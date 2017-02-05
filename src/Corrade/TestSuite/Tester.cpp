@@ -41,16 +41,6 @@
 #include <sstream>
 #endif
 
-#if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-#include <unistd.h>
-#endif
-
-#if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_UTILITY_USE_ANSI_COLORS)
-#define WIN32_LEAN_AND_MEAN 1
-#define VC_EXTRALEAN
-#include <io.h>
-#endif
-
 namespace Corrade { namespace TestSuite {
 
 namespace {
@@ -129,33 +119,8 @@ benchmark types:
         _useColor = Debug::Flags{};
     else if(args.value("color") == "off" || args.value("color") == "OFF")
         _useColor = Debug::Flag::DisableColors;
-    /* The autodetection is done in Debug class on Windows with WINAPI colors */
-    #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
-    else _useColor = Debug::Flags{};
-    /* We can autodetect via isatty() on Unix-like systems, Emscripten and
-       Windows with ANSI colors enabled */
-    #elif defined(CORRADE_UTILITY_USE_ANSI_COLORS) || defined(CORRADE_TARGET_UNIX) ||defined(CORRADE_TARGET_EMSCRIPTEN)
-    else _useColor = logOutput == &std::cout &&
-        /* Windows RT projects have C4996 treated as error by default. WHY */
-        #ifdef _MSC_VER
-        #pragma warning(push)
-        #pragma warning(disable: 4996)
-        #endif
-        errorOutput == &std::cerr && isatty(1) && isatty(2)
-        #ifdef _MSC_VER
-        #pragma warning(pop)
-        #endif
-        #ifdef CORRADE_TARGET_APPLE
-        /* Xcode's console reports that it is a TTY, but it doesn't support
-           colors. We have to check for the following undocumented environment
-           variable instead. If set, then don't use colors. */
-        && !std::getenv("XPC_SERVICE_NAME")
-        #endif
-        ? Debug::Flags{} : Debug::Flag::DisableColors;
-    /* Otherwise can't be autodetected, thus disable by default */
-    #else
-    else _useColor = Debug::Flag::DisableColors;
-    #endif
+    else _useColor = Debug::isTty(logOutput) && Debug::isTty(errorOutput) ?
+            Debug::Flags{} : Debug::Flag::DisableColors;
 
     /* Decide about default benchmark type */
     TestCaseType defaultBenchmarkType{};

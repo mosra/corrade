@@ -134,11 +134,10 @@ directly to a terminal without any intermediate buffer. See
 
 Note that colors make sense only when they finally appear in a terminal and not
 when redirecting output to file. You can control this by setting
-@ref Flag::DisableColors based on value of POSIX `isatty()` command, for
-example:
+@ref Flag::DisableColors based on value of @ref isTty(), for example:
 @code
-Debug::Flags flags = isatty(1) ? Debug::Flags{} : Debug::Flag::DisableColors;
-Debug(flags) << Debug::boldColor(Debug::Color::Green) << "Success!";
+Debug::Flags flags = Debug::isTty() ? Debug::Flags{} : Debug::Flag::DisableColors;
+Debug{flags} << Debug::boldColor(Debug::Color::Green) << "Success!";
 @endcode
 
 Similarly as with scoped output redirection, colors can be also scoped:
@@ -182,6 +181,7 @@ class CORRADE_UTILITY_EXPORT Debug {
             /**
              * Disable colored output in @ref color(), @ref boldColor() and
              * @ref resetColor().
+             * @see @ref isTty()
              * @note Note that on @ref CORRADE_TARGET_WINDOWS "Windows" the
              *      colored output by default works only if outputting directly
              *      to the console. See also @ref CORRADE_UTILITY_USE_ANSI_COLORS.
@@ -340,6 +340,35 @@ class CORRADE_UTILITY_EXPORT Debug {
          */
         CORRADE_DEPRECATED("use Debug(std::ostream*, Flags) instead") static void setOutput(std::ostream* output);
         #endif
+
+        /**
+         * @brief Whether given output is a TTY
+         *
+         * Useful for deciding whether to use ANSI colored output using
+         * @ref Flag::DisableColors. Returns `true` if @p output is a pointer
+         * to `std::cout`/`std::cerr` and the stream is not redirected to a
+         * file, `false` otherwise. Calls `isatty()` on Unix-like systems and
+         * Windows with @ref CORRADE_UTILITY_USE_ANSI_COLORS enabled, calls
+         * Windows APIs if @ref CORRADE_UTILITY_USE_ANSI_COLORS is disabled. On
+         * platforms without `isatty()` equivalent returns always `false`.
+         *
+         * @note Returns `false` when running inside Xcode even though
+         *      `isatty()` reports a positive value, because Xcode is not able
+         *      to handle ANSI colors inside the output view.
+         * @note Uses Node.js `process.stdout.isTTY`/`process.stderr.isTTY`
+         *      instead of `isatty()` on @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten"
+         *      because `isatty()` is not able to detect file redirection.
+         */
+        static bool isTty(std::ostream* output);
+
+        /**
+         * @brief Whether current debug output is a TTY
+         *
+         * Calls @ref isTty(std::ostream*) with output of enclosing `Debug`
+         * instance or with `std::cerr` if there isn't any.
+         * @see @ref Warning::isTty(), @ref Error::isTty()
+         */
+        static bool isTty();
 
         /**
          * @brief Default constructor
@@ -628,6 +657,15 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
         #endif
 
         /**
+         * @brief Whether current warning output is a TTY
+         *
+         * Calls @ref isTty(std::ostream*) with output of enclosing `Warning`
+         * instance or with `std::cerr` if there isn't any.
+         * @see @ref Debug::isTty(), @ref Error::isTty()
+         */
+        static bool isTty();
+
+        /**
          * @brief Default constructor
          * @param flags         Output flags
          *
@@ -708,6 +746,15 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
          */
         CORRADE_DEPRECATED("use Error(std::ostream*, Flags) instead") static void setOutput(std::ostream* output);
         #endif
+
+        /**
+         * @brief Whether current error output is a TTY
+         *
+         * Calls @ref isTty(std::ostream*) with output of enclosing `Error`
+         * instance or with `std::cerr` if there isn't any.
+         * @see @ref Debug::isTty(), @ref Warning::isTty()
+         */
+        static bool isTty();
 
         /**
          * @brief Default constructor

@@ -30,12 +30,27 @@
 #include <iomanip>
 #include <sstream>
 
-/* For colored output */
-#if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+/* For isatty() on Unix-like systems */
+#ifdef CORRADE_TARGET_UNIX
+#include <unistd.h>
+
+/* Node.js alternative to isatty() on Emscripten */
+#elif defined(CORRADE_TARGET_EMSCRIPTEN)
+#include <emscripten.h>
+
+#elif defined(CORRADE_TARGET_WINDOWS)
 #define WIN32_LEAN_AND_MEAN 1
 #define VC_EXTRALEAN
+
+/* For isatty() on Windows */
+#ifdef CORRADE_UTILITY_USE_ANSI_COLORS
+#include <io.h>
+
+/* WINAPI-based colored output on Windows */
+#else
 #include <windows.h>
 #include <wincon.h>
+#endif
 #endif
 
 namespace Corrade { namespace Utility {
@@ -170,6 +185,58 @@ void Error::setOutput(std::ostream* output) {
     _globalErrorOutput = output;
 }
 #endif
+
+bool Debug::isTty(std::ostream* const output) {
+    /* On Windows with WINAPI colors check the stream output handle */
+    #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+    return streamOutputHandle(output) != INVALID_HANDLE_VALUE;
+
+    /* We can autodetect via isatty() on Unix-like systems and Windows with
+       ANSI colors enabled */
+    #elif defined(CORRADE_UTILITY_USE_ANSI_COLORS) || defined(CORRADE_TARGET_UNIX)
+    return
+        /* Windows RT projects have C4996 treated as error by default. WHY */
+        #ifdef _MSC_VER
+        #pragma warning(push)
+        #pragma warning(disable: 4996)
+        #endif
+        ((output == &std::cout && isatty(1)) ||
+         (output == &std::cerr && isatty(2)))
+        #ifdef _MSC_VER
+        #pragma warning(pop)
+        #endif
+        #ifdef CORRADE_TARGET_APPLE
+        /* Xcode's console reports that it is a TTY, but it doesn't support
+           colors. We have to check for the following undocumented environment
+           variable instead. If set, then don't use colors. */
+        && !std::getenv("XPC_SERVICE_NAME")
+        #endif
+        ;
+
+    /* Emscripten isatty() is kinda broken ATM (1.37.1), until fixed we have to
+       call into Node.js: https://github.com/kripken/emscripten/issues/4920 */
+    #elif defined(CORRADE_TARGET_EMSCRIPTEN)
+    if(output == &std::cout) return EM_ASM_INT_V({
+            if(typeof process !== 'undefined')
+                return process.stdout.isTTY;
+            return false;
+        });
+    if(output == &std::cerr) return EM_ASM_INT_V({
+            if(typeof process !== 'undefined')
+                return process.stderr.isTTY;
+            return false;
+        });
+    return false;
+
+    /* Otherwise can't be autodetected, thus disable colkors by default */
+    #else
+    return false;
+    #endif
+}
+
+bool Debug::isTty() { return isTty(_globalOutput); }
+bool Warning::isTty() { return Debug::isTty(_globalWarningOutput); }
+bool Error::isTty() { return Debug::isTty(_globalErrorOutput); }
 
 Debug::Debug(std::ostream* const output, const Flags flags): _flags{InternalFlag(static_cast<unsigned char>(flags))|InternalFlag::NoSpaceBeforeNextValue} {
     /* Save previous global output and replace it with current one */

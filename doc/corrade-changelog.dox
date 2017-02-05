@@ -70,7 +70,8 @@ namespace Corrade {
     purposes.
 -   Scoped output redirection in @ref Utility::Debug
 -   Colored output in @ref Utility::Debug with scoping and both ANSI and
-    Windows console API support
+    Windows console API support; @ref Utility::Debug::isTty() for detecting
+    whether colored output can be used
 -   Added @ref Utility::Fatal output. Similar to @ref Utility::Error but exits
     with defined return code right after printing the message.
 -   Added @ref Utility::Directory::isSandboxed(),
