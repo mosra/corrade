@@ -664,6 +664,11 @@ void DirectoryTest::listUtf8() {
         "CTest is not able to run XCTest executables properly in the simulator.");
     #endif
 
+    #ifdef CORRADE_TARGET_EMSCRIPTEN
+    /* https://github.com/kripken/emscripten/issues/4922 */
+    CORRADE_EXPECT_FAIL("UTF-8 in readdir() is broken on Emscripten (as of 1.37.1)");
+    #endif
+
     std::vector<std::string> list{".", "..",
         #ifdef CORRADE_TARGET_APPLE
         /* Apple HFS+ stores filenames in a decomposed normalized form to avoid
