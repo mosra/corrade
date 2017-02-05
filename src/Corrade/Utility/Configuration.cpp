@@ -25,7 +25,7 @@
 
 #include "Configuration.h"
 
-#include <fstream>
+#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -48,13 +48,13 @@ Configuration::Configuration(const std::string& filename, const Flags flags): Co
         return;
     }
 
-    /* Open file */
-    std::ifstream in(filename, std::ifstream::binary);
-    if(!in.good())
+    /* Read full contents of a file and then pass it via stringstream to the
+       parser. Doing it this way to avoid Unicode filename issues on Windows. */
+    /** @todo get rid of streams altogether */
+    if(!Directory::fileExists(filename))
         Error() << "Utility::Configuration::Configuration(): cannot open file" << filename;
-
-    /* Parsing succeded, done */
-    else if(parse(in)) return;
+    std::istringstream in{Directory::readString(filename)};
+    if(parse(in)) return;
 
     /* Error, reset everything back */
     _filename = {};
@@ -246,14 +246,16 @@ std::string Configuration::parse(std::istream& in, ConfigurationGroup* group, co
 }
 
 bool Configuration::save(const std::string& filename) {
-    std::ofstream out(filename, std::ofstream::out|std::ofstream::trunc|std::ofstream::binary);
-    if(!out.good()) {
-        Error() << "Utility::Configuration::save(): cannot open file" << filename;
-        return false;
-    }
-
+    /* Save to a stringstream and then write it as a string to the file. Doing
+       it this way to avoid issues with Unicode filenames on Windows. */
+    /** @todo get rid of streams altogether */
+    std::ostringstream out;
     save(out);
-    return true;
+    if(Directory::writeString(filename, out.str()))
+        return true;
+
+    Error() << "Utility::Configuration::save(): cannot open file" << filename;
+    return false;
 }
 
 void Configuration::save(std::ostream& out) {

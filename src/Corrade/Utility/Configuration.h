@@ -193,7 +193,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
 
         /**
          * @brief Constructor
-         * @param filename  Filename
+         * @param filename  Filename in UTF-8
          * @param flags     Flags
          *
          * Opens the file and loads it according to specified flags. If file
@@ -230,13 +230,14 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         /** @brief Move assignment */
         Configuration& operator=(Configuration&& other);
 
-        /** @brief Filename */
+        /** @brief Filename in UTF-8 */
         std::string filename() const;
 
         /**
          * @brief Set filename
          *
-         * The filename is used by @ref save().
+         * The filename is used by @ref save() and is expected to be UTF-8
+         * encoded.
          */
         void setFilename(std::string filename);
 
@@ -245,6 +246,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
 
         /**
          * @brief Save configuration to given file
+         * @param filename  Filename in UTF-8
          *
          * Returns `true` on success, `false` otherwise.
          */

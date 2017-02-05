@@ -121,6 +121,8 @@ namespace Corrade {
 -   @ref Utility::Arguments::value() now takes
     @ref Utility::ConfigurationValueFlags for easier parsing of hexadecimal
     and other values
+-   @ref Utilitc::Configuration is now able to properly load and save
+    configuration files from UTF-8 encoded filenames also on Windows
 -   Simpler implementation of @ref Utility::Debug operators, they now take the
     class by reference instead of by value
 -   Ensuring that pointer values are printed by @ref Utility::Debug
