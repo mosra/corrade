@@ -104,6 +104,44 @@ void Resource::unregisterData(const char* group) {
     resources().erase(it);
 }
 
+namespace {
+
+std::pair<bool, Containers::Array<char>> fileContents(const std::string& filename) {
+    if(!Directory::fileExists(filename)) return {false, nullptr};
+    return {true, Directory::read(filename)};
+}
+
+std::string comment(const std::string& comment) {
+    return "\n    /* " + comment + " */";
+}
+
+std::string hexcode(const std::string& data) {
+    std::ostringstream out;
+    out << std::hex;
+
+    /* Each row is indented by four spaces and has newline at the end */
+    for(std::size_t row = 0; row < data.size(); row += 15) {
+        out << "\n    ";
+
+        /* Convert all characters on a row to hex "0xab,0x01,..." */
+        for(std::size_t end = std::min(row + 15, data.size()), i = row; i != end; ++i) {
+            out << "0x" << std::setw(2) << std::setfill('0')
+                << static_cast<unsigned int>(static_cast<unsigned char>(data[i]))
+                << ",";
+        }
+    }
+
+    return out.str();
+}
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+template<class T> std::string numberToString(const T& number) {
+    return std::string(reinterpret_cast<const char*>(&number), sizeof(T));
+}
+#endif
+
+}
+
 std::string Resource::compileFrom(const std::string& name, const std::string& configurationFile) {
     /* Resource file existence */
     if(!Directory::fileExists(configurationFile)) {
@@ -331,39 +369,5 @@ std::string Resource::get(const std::string& filename) const {
     Containers::ArrayView<const char> data = getRaw(filename);
     return data ? std::string{data, data.size()} : std::string{};
 }
-
-std::pair<bool, Containers::Array<char>> Resource::fileContents(const std::string& filename) {
-    if(!Directory::fileExists(filename)) return {false, nullptr};
-    return {true, Directory::read(filename)};
-}
-
-std::string Resource::comment(const std::string& comment) {
-    return "\n    /* " + comment + " */";
-}
-
-std::string Resource::hexcode(const std::string& data) {
-    std::ostringstream out;
-    out << std::hex;
-
-    /* Each row is indented by four spaces and has newline at the end */
-    for(std::size_t row = 0; row < data.size(); row += 15) {
-        out << "\n    ";
-
-        /* Convert all characters on a row to hex "0xab,0x01,..." */
-        for(std::size_t end = std::min(row + 15, data.size()), i = row; i != end; ++i) {
-            out << "0x" << std::setw(2) << std::setfill('0')
-                << static_cast<unsigned int>(static_cast<unsigned char>(data[i]))
-                << ",";
-        }
-    }
-
-    return out.str();
-}
-
-#ifndef DOXYGEN_GENERATING_OUTPUT
-template<class T> std::string Resource::numberToString(const T& number) {
-    return std::string(reinterpret_cast<const char*>(&number), sizeof(T));
-}
-#endif
 
 }}

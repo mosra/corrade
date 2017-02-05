@@ -172,13 +172,7 @@ class CORRADE_UTILITY_EXPORT Resource {
            fiasco" which I think currently fails only in static build */
         CORRADE_UTILITY_LOCAL static std::map<std::string, GroupData>& resources();
 
-        CORRADE_UTILITY_LOCAL static std::pair<bool, Containers::Array<char>> fileContents(const std::string& filename);
-        CORRADE_UTILITY_LOCAL static std::string comment(const std::string& comment);
-        CORRADE_UTILITY_LOCAL static std::string hexcode(const std::string& data);
-        template<class T> static std::string numberToString(const T& number);
-
         std::map<std::string, GroupData>::const_iterator _group;
-
         OverrideData* _overrideGroup;
 };
 
