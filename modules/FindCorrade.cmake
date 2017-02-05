@@ -158,7 +158,8 @@
 # generates resource data using given configuration file in current build
 # directory. Argument name is name under which the resources can be explicitly
 # loaded. Variable ``<name>`` contains compiled resource filename, which is
-# then used for compiling library / executable. Example usage::
+# then used for compiling library / executable. On CMake >= 3.1 the
+# `resources.conf` file can contain UTF-8-encoded filenames. Example usage::
 #
 #  corrade_add_resource(app_resources resources.conf)
 #  add_executable(app source1 source2 ... ${app_resources})
