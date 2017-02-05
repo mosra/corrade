@@ -144,6 +144,16 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::prefixedUnknownWithPrefix});
 }
 
+namespace {
+    bool hasEnv(const std::string& value) {
+        if(std::getenv(value.data())) return true;
+
+        std::vector<std::string> list = Arguments::environment();
+        return std::find_if(list.begin(), list.end(),
+        [&value](const std::string& v){ return String::beginsWith(v, value); }) != list.end();
+    }
+}
+
 void ArgumentsTest::environment() {
     #ifdef CORRADE_TARGET_WINDOWS_RT
     CORRADE_SKIP("No environment on this platform.");
@@ -163,7 +173,7 @@ void ArgumentsTest::environmentUtf8() {
     CORRADE_SKIP("No environment on this platform.");
     #endif
 
-    if(!std::getenv("ARGUMENTSTEST_UNICODE"))
+    if(!hasEnv("ARGUMENTSTEST_UNICODE"))
         CORRADE_SKIP("Environment not set. Call the test with ARGUMENTSTEST_UNICODE=hýždě to enable this test case.");
 
     /* Verify that it doesn't crash, at least */
@@ -597,7 +607,7 @@ void ArgumentsTest::parseEnvironment() {
     #ifdef CORRADE_TARGET_WINDOWS_RT
     CORRADE_SKIP("No environment on this platform.");
     #else
-    if(!std::getenv("ARGUMENTSTEST_SIZE") || !std::getenv("ARGUMENTSTEST_VERBOSE") || !std::getenv("ARGUMENTSTEST_COLOR"))
+    if(!hasEnv("ARGUMENTSTEST_SIZE") || !hasEnv("ARGUMENTSTEST_VERBOSE") || !hasEnv("ARGUMENTSTEST_COLOR"))
         CORRADE_SKIP("Environment not set. Call the test with ARGUMENTSTEST_SIZE=1337 ARGUMENTSTEST_VERBOSE=ON ARGUMENTTEST_COLOR=OFF to enable this test case.");
 
     Arguments args;
@@ -620,7 +630,7 @@ void ArgumentsTest::parseEnvironmentUtf8() {
     #ifdef CORRADE_TARGET_WINDOWS_RT
     CORRADE_SKIP("No environment on this platform.");
     #else
-    if(!std::getenv("ARGUMENTSTEST_UNICODE"))
+    if(!hasEnv("ARGUMENTSTEST_UNICODE"))
         CORRADE_SKIP("Environment not set. Call the test with ARGUMENTSTEST_UNICODE=hýždě to enable this test case.");
 
     Arguments args;
