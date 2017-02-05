@@ -464,6 +464,10 @@ void DirectoryTest::tmp() {
     CORRADE_EXPECT_FAIL("Not implemented yet.");
     CORRADE_COMPARE(dir, "(not implemented)");
     #endif
+
+    /* Verify that it's possible to write stuff there */
+    CORRADE_VERIFY(Directory::writeString(Directory::join(Directory::tmp(), "a"), "hello"));
+    CORRADE_VERIFY(Directory::rm(Directory::join(Directory::tmp(), "a")));
 }
 
 void DirectoryTest::list() {
