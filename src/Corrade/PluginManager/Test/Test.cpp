@@ -25,6 +25,7 @@
 
 #include <sstream>
 
+#include "Corrade/Containers/Array.h"
 #include "Corrade/PluginManager/Manager.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
@@ -76,6 +77,10 @@ struct Test: TestSuite::Tester {
     void dynamicProvidesDependency();
     #endif
 
+    #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    void utf8Path();
+    #endif
+
     void debug();
 };
 
@@ -107,6 +112,10 @@ Test::Test() {
               #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
               &Test::dynamicProvides,
               &Test::dynamicProvidesDependency,
+              #endif
+
+              #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+              &Test::utf8Path,
               #endif
 
               &Test::debug});
@@ -535,6 +544,34 @@ void Test::dynamicProvidesDependency() {
     Error redirectError{&out};
     CORRADE_COMPARE(manager.load("Bulldog"), LoadState::UnresolvedDependency);
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): unresolved dependency JustSomeMammal of plugin Bulldog\n");
+}
+
+void Test::utf8Path() {
+    /* Copy the dog plugin to a new UTF-8 path */
+    const std::string utf8PluginsDir = Utility::Directory::join(pluginsDir, "hýždě");
+    CORRADE_VERIFY(Utility::Directory::mkpath(utf8PluginsDir));
+    Utility::Directory::write(
+        Utility::Directory::join(utf8PluginsDir, std::string("Dog") + PLUGIN_FILENAME_SUFFIX),
+        Utility::Directory::mapRead(Utility::Directory::join(pluginsDir, std::string("Dog") + PLUGIN_FILENAME_SUFFIX)));
+    Utility::Directory::write(
+        Utility::Directory::join(utf8PluginsDir, "Dog.conf"),
+        Utility::Directory::mapRead(Utility::Directory::join(pluginsDir, "Dog.conf")));
+
+    PluginManager::Manager<AbstractAnimal> manager{utf8PluginsDir};
+    /* One static plugin always present */
+    CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"Canary", "Dog"}));
+    CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotLoaded);
+    CORRADE_COMPARE(manager.load("Dog"), LoadState::Loaded);
+
+    {
+        std::unique_ptr<AbstractAnimal> animal = manager.instance("Dog");
+        CORRADE_VERIFY(animal);
+        CORRADE_VERIFY(animal->hasTail());
+        CORRADE_COMPARE(animal->name(), "Doug");
+        CORRADE_COMPARE(animal->legCount(), 4);
+    }
+
+    CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
 }
 #endif
 
