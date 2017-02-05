@@ -442,7 +442,7 @@ void DirectoryTest::tmp() {
     const std::string dir = Directory::tmp();
     Debug() << "Temporary dir found as:" << dir;
 
-    #ifdef CORRADE_TARGET_UNIX
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     {
         #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
         CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),

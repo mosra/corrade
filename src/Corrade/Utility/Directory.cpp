@@ -307,7 +307,7 @@ std::string configurationDir(const std::string& applicationName) {
 }
 
 std::string tmp() {
-    #ifdef CORRADE_TARGET_UNIX
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     /* Sandboxed OSX, iOS */
     #ifdef CORRADE_TARGET_APPLE
     if(isSandboxed()) return join(home(), "tmp");
@@ -318,7 +318,7 @@ std::string tmp() {
     return "/data/local/tmp";
     #endif
 
-    /* Common Unix */
+    /* Common Unix, Emscripten */
     return "/tmp";
 
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
