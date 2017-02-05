@@ -35,6 +35,7 @@
 
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Debug.h"
+#include "Corrade/Utility/String.h"
 
 /* For Arguments::environment() */
 #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -367,13 +368,13 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
 
         if(entry.type == Type::BooleanOption) {
             CORRADE_INTERNAL_ASSERT(entry.id < _booleans.size());
-            _booleans[entry.id] =
+            _booleans[entry.id] = String::uppercase(
                 #ifndef CORRADE_TARGET_EMSCRIPTEN
                 env
                 #else
-                env ? env : systemEnv;
+                env ? env : systemEnv
                 #endif
-                ;
+                ) == "ON";
         } else {
             CORRADE_INTERNAL_ASSERT(entry.id < _values.size());
             _values[entry.id] =

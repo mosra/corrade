@@ -365,8 +365,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          *      SOME_OPTION=42 ./app
          *
-         * Boolean options are set to `true` when environment value is present
-         * (not depending on its value).
+         * Boolean options are set to `true` if the environment value is set to
+         * `ON` (case-insensitive).
          * @note In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" the environment
          *      is combined from local Emscripten environment and system
          *      environment provided by Node.js. If a variable is in both

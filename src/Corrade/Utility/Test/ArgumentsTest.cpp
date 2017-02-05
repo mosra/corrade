@@ -575,20 +575,22 @@ void ArgumentsTest::parseEnvironment() {
     #ifdef CORRADE_TARGET_WINDOWS_RT
     CORRADE_SKIP("No environment on this platform.");
     #else
-    if(!std::getenv("ARGUMENTSTEST_SIZE") || !std::getenv("ARGUMENTSTEST_VERBOSE"))
-        CORRADE_SKIP("Environment not set. Call the test with ARGUMENTSTEST_SIZE=1337 ARGUMENTSTEST_VERBOSE=ON to enable this test case.");
+    if(!std::getenv("ARGUMENTSTEST_SIZE") || !std::getenv("ARGUMENTSTEST_VERBOSE") || !std::getenv("ARGUMENTSTEST_COLOR"))
+        CORRADE_SKIP("Environment not set. Call the test with ARGUMENTSTEST_SIZE=1337 ARGUMENTSTEST_VERBOSE=ON ARGUMENTTEST_COLOR=OFF to enable this test case.");
 
     Arguments args;
     args.addOption("size").setFromEnvironment("size", "ARGUMENTSTEST_SIZE")
-        .addBooleanOption("verbose").setFromEnvironment("verbose", "ARGUMENTSTEST_VERBOSE");
+        .addBooleanOption("verbose").setFromEnvironment("verbose", "ARGUMENTSTEST_VERBOSE")
+        .addBooleanOption("color").setFromEnvironment("color", "ARGUMENTSTEST_COLOR");
 
     const char* argv[] = { "" };
     const int argc = std::extent<decltype(argv)>();
 
     /* Set from environment by CTest */
     CORRADE_VERIFY(args.tryParse(argc, argv));
-    CORRADE_VERIFY(args.isSet("verbose"));
     CORRADE_COMPARE(args.value("size"), "1337");
+    CORRADE_VERIFY(args.isSet("verbose"));
+    CORRADE_VERIFY(!args.isSet("color"));
     #endif
 }
 
