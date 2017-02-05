@@ -32,6 +32,12 @@ set_directory_properties(PROPERTIES
     CORRADE_CXX_STANDARD 11
     CORRADE_USE_PEDANTIC_FLAGS ON)
 
+# On Windows enable UNICODE/_UNICODE macros to avoid accidentally passing UTF-8
+# values to ANSI functions
+if(CORRADE_TARGET_WINDOWS)
+    add_definitions("-DUNICODE" "-D_UNICODE")
+endif()
+
 add_subdirectory(Corrade)
 
 # Corrade include dir for superprojects
