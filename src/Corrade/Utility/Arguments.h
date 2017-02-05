@@ -529,7 +529,6 @@ class CORRADE_UTILITY_EXPORT Arguments {
         std::vector<Entry>::iterator CORRADE_UTILITY_LOCAL find(const std::string& key);
         std::vector<Entry>::const_iterator CORRADE_UTILITY_LOCAL find(const std::string& key) const;
         std::vector<Entry>::iterator CORRADE_UTILITY_LOCAL find(char shortKey);
-        std::vector<Entry>::const_iterator CORRADE_UTILITY_LOCAL find(char shortKey) const;
         std::vector<Entry>::iterator CORRADE_UTILITY_LOCAL findNextArgument(std::vector<Entry>::iterator start);
 
         std::string CORRADE_UTILITY_LOCAL keyName(const Entry& entry) const;

@@ -767,13 +767,6 @@ auto Arguments::find(const char shortKey) -> std::vector<Entry>::iterator {
     return _entries.end();
 }
 
-auto Arguments::find(const char shortKey) const -> std::vector<Entry>::const_iterator {
-    for(auto it = _entries.begin(); it != _entries.end(); ++it)
-        if(it->shortKey == shortKey) return it;
-
-    return _entries.end();
-}
-
 auto Arguments::findNextArgument(const std::vector<Entry>::iterator start) -> std::vector<Entry>::iterator {
     for(auto it = start; it != _entries.end(); ++it)
         if(it->type == Type::Argument) return it;
