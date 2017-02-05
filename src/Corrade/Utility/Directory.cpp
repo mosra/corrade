@@ -391,7 +391,8 @@ std::vector<std::string> list(const std::string& path, Flags flags) {
         /** @todo are there any special files in WINAPI? */
 
         std::string file{data.cFileName};
-        if((flags >= Flag::SkipDotAndDotDot) && (file == "." || file == ".."))
+        /* Not testing for dot, as it is not listed on Windows */
+        if((flags >= Flag::SkipDotAndDotDot) && file == "..")
             continue;
 
         list.push_back(std::move(file));
