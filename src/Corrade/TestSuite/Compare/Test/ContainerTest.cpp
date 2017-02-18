@@ -156,9 +156,9 @@ void ContainerTest::floatingPoint() {
 }
 
 void ContainerTest::nonCopyableArray() {
-    const auto a = Containers::Array<int>::from(1, 2, 3, 4, 5);
-    const auto b = Containers::Array<int>::from(1, 2, 3, 4, 5);
-    const auto c = Containers::Array<int>::from(1, 2, 3, 5, 5);
+    Containers::Array<int> a{Containers::InPlaceInit, {1, 2, 3, 4, 5}};
+    Containers::Array<int> b{Containers::InPlaceInit, {1, 2, 3, 4, 5}};
+    Containers::Array<int> c{Containers::InPlaceInit, {1, 2, 3, 5, 5}};
 
     CORRADE_VERIFY(Comparator<Compare::Container<Containers::Array<int>>>()(a, a));
     CORRADE_VERIFY(Comparator<Compare::Container<Containers::Array<int>>>()(a, b));

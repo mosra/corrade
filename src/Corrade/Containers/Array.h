@@ -187,16 +187,15 @@ class Array {
         typedef T Type;     /**< @brief Element type */
         typedef D Deleter;  /**< @brief Deleter type */
 
+        #ifdef CORRADE_BUILD_DEPRECATED
         /**
-         * @brief Create array from given values
-         *
-         * Zero argument count creates `nullptr` array.
+         * @copybrief Array(InPlaceInitT, std::initializer_list<T>)
+         * @deprecated Use @ref Array(InPlaceInitT, std::size_t) instead.
          */
-        template<class ...U> static Array<T, D> from(U&&... values) {
-            return fromInternal(std::forward<U>(values)...);
+        template<class ...U> CORRADE_DEPRECATED("use Array(InPlaceInitT, std::initializer_list<T>) instead") static Array<T, D> from(U&&... values) {
+            return Array<T, D>{InPlaceInit, {T(std::forward<U>(values))...}};
         }
 
-        #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @copybrief Array(ValueInitT, std::size_t)
          * @deprecated Use @ref Array(ValueInitT, std::size_t) instead.
@@ -274,6 +273,18 @@ class Array {
          * using forwarded @p arguments.
          */
         template<class... Args> explicit Array(DirectInitT, std::size_t size, Args&&... args);
+
+        /**
+         * @brief Construct list-initialized array
+         *
+         * Allocates the array using the @ref Array(NoInitT, std::size_t)
+         * constructor and then copy-initializes each element with placement
+         * new using values from @p list.
+         */
+        /* There is no initializer-list constructor because it would make
+           Containers::Array<std::size_t>{5} behave differently (and that would
+           break things *badly* as this is a *very* common use-case) */
+        explicit Array(InPlaceInitT, std::initializer_list<T> list);
 
         /**
          * @brief Construct default-initialized array
@@ -470,15 +481,6 @@ class Array {
         T* release();
 
     private:
-        template<class ...U> static Array<T, D> fromInternal(U&&... values) {
-            Array<T, D> array;
-            array._size = sizeof...(values);
-            array._data = new T[sizeof...(values)] { T(std::forward<U>(values))... };
-            return array;
-        }
-        /* Specialization for zero argument count */
-        static Array<T, D> fromInternal() { return nullptr; }
-
         T* _data;
         std::size_t _size;
         D _deleter;
@@ -501,6 +503,11 @@ template<class T, class D> inline Array<T, D>::Array(Array<T, D>&& other) noexce
 template<class T, class D> template<class ...Args> Array<T, D>::Array(DirectInitT, std::size_t size, Args&&... args): Array{NoInit, size} {
     for(std::size_t i = 0; i != size; ++i)
         new(_data + i) T{std::forward<Args>(args)...};
+}
+
+template<class T, class D> Array<T, D>::Array(InPlaceInitT, std::initializer_list<T> list): Array{NoInit, list.size()} {
+    std::size_t i = 0;
+    for(const T& item: list) new(_data + i++) T{item};
 }
 
 template<class T, class D> inline Array<T, D>& Array<T, D>::operator=(Array<T, D>&& other) noexcept {

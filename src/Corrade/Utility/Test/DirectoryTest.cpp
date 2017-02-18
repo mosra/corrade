@@ -692,7 +692,8 @@ void DirectoryTest::read() {
     /* Existing file, check if we are reading it as binary (CR+LF is not
        converted to LF) and nothing after \0 gets lost */
     CORRADE_COMPARE_AS(Directory::read(Directory::join(_testDir, "file")),
-        (Containers::Array<char>::from(0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF)),
+        (Containers::Array<char>{Containers::InPlaceInit,
+            {'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}}),
         TestSuite::Compare::Container);
 
     /* Read into string */
@@ -730,12 +731,13 @@ void DirectoryTest::readUtf8() {
     /* Existing file, check if we are reading it as binary (CR+LF is not
        converted to LF) and nothing after \0 gets lost */
     CORRADE_COMPARE_AS(Directory::read(Directory::join(_testDirUtf8, "hýždě")),
-        (Containers::Array<char>::from(0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF)),
+        (Containers::Array<char>{Containers::InPlaceInit,
+            {'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}}),
         TestSuite::Compare::Container);
 }
 
 void DirectoryTest::write() {
-    constexpr unsigned char data[] = {0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF};
+    constexpr char data[] = {'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'};
     CORRADE_VERIFY(Directory::write(Directory::join(_writeTestDir, "file"), data));
     CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "file"),
         Directory::join(_testDir, "file"),
@@ -816,7 +818,8 @@ void DirectoryTest::mapRead() {
     {
         const auto mappedFile = Directory::mapRead(Directory::join(_testDir, "file"));
         CORRADE_COMPARE_AS(Containers::ArrayView<const char>(mappedFile),
-            (Containers::Array<char>::from(0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF)),
+            (Containers::Array<char>{Containers::InPlaceInit,
+                {'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}}),
             TestSuite::Compare::Container);
     }
     #else
@@ -842,7 +845,8 @@ void DirectoryTest::mapReadUtf8() {
     {
         const auto mappedFile = Directory::mapRead(Directory::join(_testDirUtf8, "hýždě"));
         CORRADE_COMPARE_AS(Containers::ArrayView<const char>(mappedFile),
-            (Containers::Array<char>::from(0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF)),
+            (Containers::Array<char>{Containers::InPlaceInit,
+                {'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}}),
             TestSuite::Compare::Container);
     }
     #else

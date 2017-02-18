@@ -37,12 +37,11 @@ struct ArrayTest: TestSuite::Tester {
     void constructValueInit();
     void constructNoInit();
     void constructDirectInit();
+    void constructInPlaceInit();
     void construct();
     void constructFromExisting();
     void constructZeroSize();
     void constructMove();
-    void constructFrom();
-    void constructFromChar();
     void constructDirectReferences();
 
     void convertBool();
@@ -78,12 +77,11 @@ ArrayTest::ArrayTest() {
               &ArrayTest::constructValueInit,
               &ArrayTest::constructNoInit,
               &ArrayTest::constructDirectInit,
+              &ArrayTest::constructInPlaceInit,
               &ArrayTest::construct,
               &ArrayTest::constructFromExisting,
               &ArrayTest::constructZeroSize,
               &ArrayTest::constructMove,
-              &ArrayTest::constructFrom,
-              &ArrayTest::constructFromChar,
               &ArrayTest::constructDirectReferences,
 
               &ArrayTest::convertBool,
@@ -185,6 +183,19 @@ void ArrayTest::constructDirectInit() {
     CORRADE_COMPARE(a[1], -37);
 }
 
+void ArrayTest::constructInPlaceInit() {
+    Array a{InPlaceInit, {1, 3, 127, -48}};
+    CORRADE_VERIFY(a);
+    CORRADE_COMPARE(a.size(), 4);
+    CORRADE_COMPARE(a[0], 1);
+    CORRADE_COMPARE(a[1], 3);
+    CORRADE_COMPARE(a[2], 127);
+    CORRADE_COMPARE(a[3], -48);
+
+    Array b{InPlaceInit, {}};
+    CORRADE_VERIFY(!b);
+}
+
 void ArrayTest::constructZeroSize() {
     const Array a(0);
 
@@ -209,26 +220,6 @@ void ArrayTest::constructMove() {
     CORRADE_VERIFY(c == ptr);
     CORRADE_COMPARE(b.size(), 0);
     CORRADE_COMPARE(c.size(), 5);
-}
-
-void ArrayTest::constructFrom() {
-    Array a = Array::from(1, 3, 127, -48);
-    CORRADE_VERIFY(a);
-    CORRADE_COMPARE(a.size(), 4);
-    CORRADE_COMPARE(a[0], 1);
-    CORRADE_COMPARE(a[1], 3);
-    CORRADE_COMPARE(a[2], 127);
-    CORRADE_COMPARE(a[3], -48);
-
-    Array b = Array::from();
-    CORRADE_VERIFY(!b);
-}
-
-void ArrayTest::constructFromChar() {
-    /* Verify that this compiles without "narrowing from int to char" errors */
-    const auto a = Containers::Array<char>::from(0x11, 0x22, 0x33);
-    CORRADE_VERIFY(a);
-    CORRADE_COMPARE(a[1], 0x22);
 }
 
 void ArrayTest::constructDirectReferences() {
@@ -361,13 +352,13 @@ void ArrayTest::access() {
     CORRADE_COMPARE(a[4], 4);
     CORRADE_COMPARE(a.end()-a.begin(), a.size());
 
-    const auto b = Array::from(7, 3, 5, 4);
+    const Array b{InPlaceInit, {7, 3, 5, 4}};
     CORRADE_COMPARE(b.data(), static_cast<const int*>(b));
     CORRADE_COMPARE(b[2], 5);
 }
 
 void ArrayTest::rvalueArrayAccess() {
-    CORRADE_COMPARE(Array::from(1, 2, 3, 4)[2], 3);
+    CORRADE_COMPARE((Array{InPlaceInit, {1, 2, 3, 4}}[2]), 3);
 }
 
 void ArrayTest::rangeBasedFor() {
@@ -383,8 +374,8 @@ void ArrayTest::rangeBasedFor() {
 }
 
 void ArrayTest::slice() {
-    Array a = Array::from(1, 2, 3, 4, 5);
-    const Array ac = Array::from(1, 2, 3, 4, 5);
+    Array a{InPlaceInit, {1, 2, 3, 4, 5}};
+    const Array ac{InPlaceInit, {1, 2, 3, 4, 5}};
 
     ArrayView b = a.slice(1, 4);
     CORRADE_COMPARE(b.size(), 3);
@@ -424,8 +415,8 @@ void ArrayTest::slice() {
 }
 
 void ArrayTest::sliceToStatic() {
-    Array a = Array::from(1, 2, 3, 4, 5);
-    const Array ac = Array::from(1, 2, 3, 4, 5);
+    Array a{InPlaceInit, {1, 2, 3, 4, 5}};
+    const Array ac{InPlaceInit, {1, 2, 3, 4, 5}};
 
     StaticArrayView<3, int> b = a.slice<3>(1);
     CORRADE_COMPARE(b[0], 2);

@@ -27,11 +27,11 @@ namespace Corrade {
 -   New @ref Containers::StaticArrayView class, similar to @ref Containers::ArrayView
     but with compile-time size information
 -   Added @ref Containers::NoInit, @ref Containers::DirectInit,
-    @ref Containers::DefaultInit and @ref Containers::ValueInit tags for better
-    control over initialization of @ref Containers::Array and
-    @ref Containers::StaticArray
--   Added @ref Containers::Array::from() to create @ref Containers::Array from
-    an initializer list
+    @ref Containers::DefaultInit, @ref Containers::ValueInit and
+    @ref Containers::InPlaceInit tags for better control over initialization of
+    @ref Containers::Array and @ref Containers::StaticArray
+-   Added @ref Containers::Array::Array(InPlaceInit, std::initializer_list<T>)
+    to create @ref Containers::Array from an initializer list
 -   New @ref Containers::Array::Array(T*, std::size_t, D) "Containers::Array::Array(T*, std::size_t, D)"
     constructor that allows wrapping externally allocated array with custom
     deleter function
@@ -195,6 +195,9 @@ namespace Corrade {
     @ref Containers::ArrayView name instead
 -   @ref Containers::Array::zeroInitialized() is deprecated, use
     @ref Containers::Array::Array(ValueInitT, std::size_t) instead
+-   @ref Containers::Array::from() is deprecated, use
+    @ref Containers::Array::Array(InPlaceInit, std::initializer_list<T>)
+    instead
 -   @ref Utility::Arguments::setHelpKey() is deprecated as its functionality
     was merged into @ref Utility::Arguments::setHelp()
 -   @ref Utility::Debug::setOutput() is deprecated and superseded by scoped
