@@ -65,6 +65,10 @@ corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp
 target_include_directories(UtilityConfigurationTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 corrade_add_test(UtilityDebugTest DebugTest.cpp)
 
+# It should return with a non-zero exit code
+corrade_add_test(UtilityFatalTest FatalTest.cpp)
+set_tests_properties(UtilityFatalTest PROPERTIES WILL_FAIL ON)
+
 set(UtilityDirectoryTest_SRCS DirectoryTest.cpp)
 if(CORRADE_TARGET_IOS)
     set(UtilityDirectoryTest_RESOURCES

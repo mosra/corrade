@@ -504,6 +504,8 @@ class CORRADE_UTILITY_EXPORT Debug {
 
         CORRADE_ENUMSET_FRIEND_OPERATORS(InternalFlags)
 
+        CORRADE_UTILITY_LOCAL void cleanupOnDestruction(); /* Needed for Fatal */
+
         InternalFlags _flags;
 
     private:
@@ -799,6 +801,13 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
         /** @brief Move assignment is not allowed */
         Error& operator=(Error&&) = delete;
 
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    protected:
+    #else
+    private:
+    #endif
+        CORRADE_UTILITY_LOCAL void cleanupOnDestruction(); /* Needed for Fatal */
+
     private:
         static CORRADE_UTILITY_LOCAL std::ostream* _globalErrorOutput;
         std::ostream* _previousGlobalErrorOutput;
@@ -820,10 +829,6 @@ You can write just this:
 if(stuff.broken())
     Fatal(42) << "Everything's broken, exiting.";
 @endcode
-
-As the message produced by this class is the last that the program writes,
-there is no need for ability to disable the newline at the end (it also made
-the implementation much simpler).
 */
 class CORRADE_UTILITY_EXPORT Fatal: public Error {
     public:
@@ -857,7 +862,7 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
          *
          * Exits the application with exit code specified in constructor.
          */
-        ~Fatal();
+        CORRADE_NORETURN ~Fatal();
 
     private:
         #ifdef CORRADE_BUILD_DEPRECATED

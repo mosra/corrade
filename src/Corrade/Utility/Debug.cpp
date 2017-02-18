@@ -273,7 +273,7 @@ Debug::Debug(const Flags flags): Debug{_globalOutput, flags} {}
 Warning::Warning(const Flags flags): Warning{_globalWarningOutput, flags} {}
 Error::Error(const Flags flags): Error{_globalErrorOutput, flags} {}
 
-Debug::~Debug() {
+void Debug::cleanupOnDestruction() {
     /* Reset output color */
     resetColorInternal();
 
@@ -285,15 +285,28 @@ Debug::~Debug() {
     _globalOutput = _previousGlobalOutput;
 }
 
+Debug::~Debug() {
+    cleanupOnDestruction();
+}
+
 Warning::~Warning() {
     _globalWarningOutput = _previousGlobalWarningOutput;
 }
 
-Error::~Error() {
+void Error::cleanupOnDestruction() {
     _globalErrorOutput = _previousGlobalErrorOutput;
 }
 
+Error::~Error() {
+    cleanupOnDestruction();
+}
+
 Fatal::~Fatal() {
+    /* Manually call cleanup of Error and Debug superclasses because their
+       destructor will never be called */
+    Error::cleanupOnDestruction();
+    Debug::cleanupOnDestruction();
+
     std::exit(_exitCode);
 }
 
