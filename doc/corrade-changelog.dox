@@ -88,8 +88,8 @@ namespace Corrade {
 -   Added @ref CORRADE_TARGET_IOS and @ref CORRADE_TARGET_IOS_SIMULATOR
     macros and CMake variables
 -   Added @ref CORRADE_TARGET_X86 and @ref CORRADE_TARGET_ARM macros
--   Added @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_ALIAS() and
-    @ref CORRADE_ALIGNAS() macros
+-   Added @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_ALIAS(),
+    @ref CORRADE_ALIGNAS() and @ref CORRADE_NORETURN macros
 
 ## Changes and improvements
 

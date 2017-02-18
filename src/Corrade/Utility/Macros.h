@@ -149,6 +149,21 @@ CORRADE_ALIGNAS(4) char data[16]; // so it can be read as 32-bit integers
 #endif
 
 /** @hideinitializer
+@brief Noreturn fuction attribute
+
+Expands to C++11 `[[noreturn]]` attribute on supported compilers, otherwise
+falls back to compiler-specific attribute. Example usage:
+@code
+CORRADE_NORETURN void exit42() { std::exit(42); }
+@endcode
+*/
+#if defined(__GNUC__) && __GNUC__*100 + __GNUC_MINOR__ < 408
+#define CORRADE_NORETURN __attribute__((noreturn))
+#else
+#define CORRADE_NORETURN [[noreturn]]
+#endif
+
+/** @hideinitializer
 @brief Automatic initializer
 @param function Initializer function name of type int(*)().
 

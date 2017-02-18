@@ -32,6 +32,7 @@ struct MacrosTest: TestSuite::Tester {
 
     void alignAs();
     void deprecated();
+    void noreturn();
 };
 
 MacrosTest::MacrosTest() {
@@ -83,6 +84,15 @@ void MacrosTest::deprecated() {
 #pragma warning(pop)
 #endif
 #endif
+
+namespace {
+    CORRADE_NORETURN void foo() { std::exit(42); }
+}
+
+void MacrosTest::noreturn() {
+    if(false) foo();
+    CORRADE_VERIFY(true);
+}
 
 }}}
 
