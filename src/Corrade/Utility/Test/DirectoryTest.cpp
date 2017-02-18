@@ -89,8 +89,11 @@ struct DirectoryTest: TestSuite::Tester {
     void read();
     void readEmpty();
     void readNonSeekable();
+    void readNonexistent();
     void readUtf8();
+
     void write();
+    void writeNoPermission();
     void writeUtf8();
 
     void map();
@@ -157,9 +160,11 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::read,
               &DirectoryTest::readEmpty,
               &DirectoryTest::readNonSeekable,
+              &DirectoryTest::readNonexistent,
               &DirectoryTest::readUtf8,
 
               &DirectoryTest::write,
+              &DirectoryTest::writeNoPermission,
               &DirectoryTest::writeUtf8,
 
               &DirectoryTest::map,
@@ -690,10 +695,6 @@ void DirectoryTest::read() {
         (Containers::Array<char>::from(0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF)),
         TestSuite::Compare::Container);
 
-    /* Nonexistent file */
-    const auto none = Directory::read("nonexistent");
-    CORRADE_VERIFY(!none);
-
     /* Read into string */
     CORRADE_COMPARE(Directory::readString(Directory::join(_testDir, "file")),
         std::string("\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11));
@@ -713,6 +714,16 @@ void DirectoryTest::readNonSeekable() {
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
+}
+
+void DirectoryTest::readNonexistent() {
+    std::ostringstream out;
+    Error err{&out};
+    CORRADE_VERIFY(!Directory::read("nonexistent"));
+    CORRADE_COMPARE(out.str(), "Utility::Directory::read(): can't open nonexistent\n");
+
+    /* Nonexistent file into string shouldn't throw on nullptr */
+    CORRADE_VERIFY(Directory::readString("nonexistent").empty());
 }
 
 void DirectoryTest::readUtf8() {
@@ -735,6 +746,13 @@ void DirectoryTest::write() {
     CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "file"),
         Directory::join(_testDir, "file"),
         TestSuite::Compare::File);
+}
+
+void DirectoryTest::writeNoPermission() {
+    std::ostringstream out;
+    Error err{&out};
+    CORRADE_VERIFY(!Directory::write("/root/writtenFile", nullptr));
+    CORRADE_COMPARE(out.str(), "Utility::Directory::write(): can't open /root/writtenFile\n");
 }
 
 void DirectoryTest::writeUtf8() {
@@ -769,7 +787,7 @@ void DirectoryTest::mapNoPermission() {
         Error err{&out};
         auto mappedFile = Directory::map("/root/mappedFile", 64);
         CORRADE_VERIFY(!mappedFile);
-        CORRADE_COMPARE(out.str(), "Utility::Directory::map(): can't open the file\n");
+        CORRADE_COMPARE(out.str(), "Utility::Directory::map(): can't open /root/mappedFile\n");
     }
     #else
     CORRADE_SKIP("Not implemented on this platform.");
@@ -811,9 +829,8 @@ void DirectoryTest::mapReadNonexistent() {
     {
         std::ostringstream out;
         Error err{&out};
-        const auto mappedFile = Directory::mapRead(Directory::join(_testDir, "nonexistentFile"));
-        CORRADE_VERIFY(!mappedFile);
-        CORRADE_COMPARE(out.str(), "Utility::Directory::mapRead(): can't open the file\n");
+        CORRADE_VERIFY(!Directory::mapRead("nonexistent"));
+        CORRADE_COMPARE(out.str(), "Utility::Directory::mapRead(): can't open nonexistent\n");
     }
     #else
     CORRADE_SKIP("Not implemented on this platform.");

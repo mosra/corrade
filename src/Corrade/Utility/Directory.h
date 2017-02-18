@@ -268,7 +268,8 @@ CORRADE_UTILITY_EXPORT bool fileExists(const std::string& filename);
 @brief Read file into array
 
 Reads whole file as binary (i.e. without newline conversion). Returns `nullptr`
-if the file can't be read. Expects that the filename is in UTF-8.
+and prints message to @ref Error if the file can't be read. Expects that the
+filename is in UTF-8.
 @see @ref readString(), @ref fileExists(), @ref write(), @ref mapRead()
 */
 CORRADE_UTILITY_EXPORT Containers::Array<char> read(const std::string& filename);
@@ -284,9 +285,9 @@ CORRADE_UTILITY_EXPORT std::string readString(const std::string& filename);
 /**
 @brief Write array into file
 
-Writes the file as binary (i.e. without newline conversion). Returns `false` if
-the file can't be written, `true` otherwise. Expects that the filename is in
-UTF-8.
+Writes the file as binary (i.e. without newline conversion). Returns `false`
+and prints message to @ref Error if the file can't be written, `true`
+otherwise. Expects that the filename is in UTF-8.
 @see @ref writeString(), @ref read(), @ref map()
 */
 CORRADE_UTILITY_EXPORT bool write(const std::string& filename, Containers::ArrayView<const void> data);
@@ -306,7 +307,7 @@ CORRADE_UTILITY_EXPORT bool writeString(const std::string& filename, const std::
 Maps the file as read-write memory and enlarges it to @p size. If the file does
 not exist yet, it is created, if it exists, it's truncated. The array deleter
 takes care of unmapping, however the file is not deleted after unmapping. If an
-error occurs, `nullptr` is returned and an error message is printed to output.
+error occurs, `nullptr` is returned and a message is printed to @ref Error.
 Expects that the filename is in UTF-8.
 @see @ref mapRead(), @ref read(), @ref write()
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
@@ -319,8 +320,8 @@ CORRADE_UTILITY_EXPORT Containers::Array<char, MapDeleter> map(const std::string
 
 Maps the file as read-only memory. The array deleter takes care of unmapping.
 If the file doesn't exist or an error occurs while mapping, `nullptr` is
-returned and an error message is printed to output. Expects that the filename
-is in UTF-8.
+returned and a message is printed to @ref Error. Expects that the filename is
+in UTF-8.
 @see @ref map(), @ref read()
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
     @ref CORRADE_TARGET_WINDOWS "Windows" platforms.

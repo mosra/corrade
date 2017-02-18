@@ -454,7 +454,10 @@ Containers::Array<char> read(const std::string& filename) {
     std::istream file{&filebuf};
     #endif
 
-    if(!file) return nullptr;
+    if(!file) {
+        Error{} << "Utility::Directory::read(): can't open" << filename;
+        return nullptr;
+    }
     file.seekg(0, std::ios::end);
 
     /** @todo Better solution for non-seekable files */
@@ -513,7 +516,11 @@ bool write(const std::string& filename, const Containers::ArrayView<const void> 
     std::ostream file{&filebuf};
     #endif
 
-    if(!file) return false;
+    if(!file) {
+        Error{} << "Utility::Directory::write(): can't open" << filename;
+        return false;
+    }
+
     file.write(reinterpret_cast<const char*>(data.data()), data.size());
     return true;
 }
@@ -535,7 +542,7 @@ Containers::Array<char, MapDeleter> map(const std::string& filename, std::size_t
        does. */
     const int fd = open(filename.data(), O_RDWR|O_CREAT|O_TRUNC, mode_t(0600));
     if(fd == -1) {
-        Error() << "Utility::Directory::map(): can't open the file";
+        Error() << "Utility::Directory::map(): can't open" << filename;
         return nullptr;
     }
 
@@ -568,7 +575,7 @@ Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
     /* Open the file for reading */
     const int fd = open(filename.data(), O_RDONLY);
     if(fd == -1) {
-        Error() << "Utility::Directory::mapRead(): can't open the file";
+        Error() << "Utility::Directory::mapRead(): can't open" << filename;
         return nullptr;
     }
 
@@ -600,7 +607,7 @@ Containers::Array<char, MapDeleter> map(const std::string& filename, std::size_t
     HANDLE hFile = CreateFileW(widen(filename).data(),
         GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS, 0, nullptr);
     if (hFile == INVALID_HANDLE_VALUE) {
-        Error() << "Utility::Directory::map(): can't open the file";
+        Error() << "Utility::Directory::map(): can't open" << filename;
         return nullptr;
     }
 
@@ -629,7 +636,7 @@ Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
     HANDLE hFile = CreateFileW(widen(filename).data(),
         GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
     if (hFile == INVALID_HANDLE_VALUE) {
-        Error() << "Utility::Directory::mapRead(): can't open the file";
+        Error() << "Utility::Directory::mapRead(): can't open" << filename;
         return nullptr;
     }
 
