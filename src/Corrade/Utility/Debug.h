@@ -862,7 +862,11 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
          *
          * Exits the application with exit code specified in constructor.
          */
-        CORRADE_NORETURN ~Fatal();
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        /* http://stackoverflow.com/questions/38378693/did-visual-studio-2015-update-3-break-constructor-attributes */
+        CORRADE_NORETURN
+        #endif
+        ~Fatal();
 
     private:
         #ifdef CORRADE_BUILD_DEPRECATED
