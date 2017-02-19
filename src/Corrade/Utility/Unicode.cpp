@@ -120,6 +120,37 @@ std::pair<char32_t, std::size_t> prevChar(const Containers::ArrayView<const char
     return {result, begin};
 }
 
+std::size_t utf8(const char32_t character, const Containers::StaticArrayView<4, char> result) {
+    if(character < U'\x00000080') {
+        result[0] = 0x00 | ((character >>  0) & 0x7f);
+        return 1;
+    }
+
+    if(character < U'\x00000800') {
+        result[0] = 0xc0 | ((character >>  6) & 0x1f);
+        result[1] = 0x80 | ((character >>  0) & 0x3f);
+        return 2;
+    }
+
+    if(character < U'\x00010000') {
+        result[0] = 0xe0 | ((character >> 12) & 0x0f);
+        result[1] = 0x80 | ((character >>  6) & 0x3f);
+        result[2] = 0x80 | ((character >>  0) & 0x3f);
+        return 3;
+    }
+
+    if(character < U'\x00110000') {
+        result[0] = 0xf0 | ((character >> 18) & 0x07);
+        result[1] = 0x80 | ((character >> 12) & 0x3f);
+        result[2] = 0x80 | ((character >>  6) & 0x3f);
+        result[3] = 0x80 | ((character >>  0) & 0x3f);
+        return 4;
+    }
+
+    /* Value outside of UTF-32 range */
+    return 0;
+}
+
 std::u32string utf32(const std::string& text) {
     std::u32string result;
     result.reserve(text.size());

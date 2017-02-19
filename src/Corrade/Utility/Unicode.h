@@ -44,6 +44,7 @@ namespace Corrade { namespace Utility { namespace Unicode {
 Returns Unicode codepoint of character on the cursor and position of the
 following character. If an error occurs, returns position of next byte and
 `0xffffffffu` as codepoint.
+@see @ref utf8()
 */
 CORRADE_UTILITY_EXPORT std::pair<char32_t, std::size_t> nextChar(Containers::ArrayView<const char> text, std::size_t cursor);
 
@@ -64,6 +65,7 @@ template<std::size_t size> inline std::pair<char32_t, std::size_t> nextChar(cons
 Returns Unicode codepoint of character before the cursor and its position. If
 an error occurs, returns position of previous byte and `0xffffffffu` as
 codepoint.
+@see @ref utf8()
 */
 CORRADE_UTILITY_EXPORT std::pair<char32_t, std::size_t> prevChar(Containers::ArrayView<const char> text, std::size_t cursor);
 
@@ -80,6 +82,17 @@ template<std::size_t size> inline std::pair<char32_t, std::size_t> prevChar(cons
 
 /** @brief Convert UTF-8 to UTF-32 */
 CORRADE_UTILITY_EXPORT std::u32string utf32(const std::string& text);
+
+/**
+@brief Convert UTF-32 character to UTF-8
+@param[in]  character   UTF-32 character to convert
+@param[out] result      Where to put the UTF-8 result
+
+Returns length of the encoding (1, 2, 3 or 4). If @p character is outside of
+UTF-32 range, returns 0.
+@see @ref nextChar(), @ref prevChar(), @ref utf32()
+*/
+CORRADE_UTILITY_EXPORT std::size_t utf8(char32_t character, Containers::StaticArrayView<4, char> result);
 
 #if defined(CORRADE_TARGET_WINDOWS) || defined(DOXYGEN_GENERATING_OUTPUT)
 namespace Implementation {

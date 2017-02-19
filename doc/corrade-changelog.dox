@@ -82,7 +82,7 @@ namespace Corrade {
     mapping files into memory, works on non-RT Windows and all Unix-like
     systems
 -   Added @ref Utility::Resource::hasGroup()
--   Added @ref Utility::Unicode::prevChar()
+-   Added @ref Utility::Unicode::prevChar(), @ref Utility::Unicode::utf8()
 -   Added @ref Utility::Unicode::widen() and @ref Utility::Unicode::narrow()
     helpers for interacting with Unicode Windows APIs
 -   Added @ref CORRADE_TARGET_IOS and @ref CORRADE_TARGET_IOS_SIMULATOR

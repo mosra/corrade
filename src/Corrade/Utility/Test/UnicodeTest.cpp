@@ -43,6 +43,8 @@ struct UnicodeTest: TestSuite::Tester {
     void prevUtf8Empty();
 
     void utf8utf32();
+    void utf32utf8();
+    void utf32utf8Error();
 
     #ifdef CORRADE_TARGET_WINDOWS
     void widen();
@@ -60,6 +62,8 @@ UnicodeTest::UnicodeTest() {
               &UnicodeTest::prevUtf8Empty,
 
               &UnicodeTest::utf8utf32,
+              &UnicodeTest::utf32utf8,
+              &UnicodeTest::utf32utf8Error,
 
               #ifdef CORRADE_TARGET_WINDOWS
               &UnicodeTest::widen,
@@ -200,6 +204,36 @@ void UnicodeTest::utf8utf32() {
 
     /* Empty string shouldn't crash */
     CORRADE_COMPARE(Unicode::utf32(""), U"");
+}
+
+void UnicodeTest::utf32utf8() {
+    char result[4];
+    std::size_t size;
+
+    /* One-byte sequence */
+    size = Unicode::utf8(127, result);
+    CORRADE_COMPARE(size, 1);
+    CORRADE_COMPARE((std::string{result, size}), "\x7f");
+
+    /* Two-byte sequence */
+    size = Unicode::utf8(940, result);
+    CORRADE_COMPARE(size, 2);
+    CORRADE_COMPARE((std::string{result, size}), "\xce\xac");
+
+    /* Three-byte sequence */
+    size = Unicode::utf8(44553, result);
+    CORRADE_COMPARE(size, 3);
+    CORRADE_COMPARE((std::string{result, size}), "\xea\xb8\x89");
+
+    /* Four-byte sequence */
+    size = Unicode::utf8(1070592, result);
+    CORRADE_COMPARE(size, 4);
+    CORRADE_COMPARE((std::string{result, size}), "\xf4\x85\x98\x80");
+}
+
+void UnicodeTest::utf32utf8Error() {
+    /* Codepoint outside of the range */
+    CORRADE_VERIFY(!Unicode::utf8(1594880, nullptr));
 }
 
 #ifdef CORRADE_TARGET_WINDOWS
