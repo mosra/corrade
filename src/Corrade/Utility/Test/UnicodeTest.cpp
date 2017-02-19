@@ -88,9 +88,9 @@ void UnicodeTest::nextUtf8() {
     CORRADE_COMPARE(codepoint, 44553);
 
     /* Four-byte sequence */
-    std::tie(codepoint, next) = Unicode::nextChar("   \xf6\x85\x98\x80", 3);
+    std::tie(codepoint, next) = Unicode::nextChar("   \xf4\x85\x98\x80", 3);
     CORRADE_COMPARE(next, 7);
-    CORRADE_COMPARE(codepoint, 1594880);
+    CORRADE_COMPARE(codepoint, 1070592);
 }
 
 void UnicodeTest::nextUtf8Error() {
@@ -141,9 +141,9 @@ void UnicodeTest::prevUtf8() {
     CORRADE_COMPARE(codepoint, 44553);
 
     /* Four-byte sequence */
-    std::tie(codepoint, prev) = Unicode::prevChar("   \xf6\x85\x98\x80", 7);
+    std::tie(codepoint, prev) = Unicode::prevChar("   \xf4\x85\x98\x80", 7);
     CORRADE_COMPARE(prev, 3);
-    CORRADE_COMPARE(codepoint, 1594880u);
+    CORRADE_COMPARE(codepoint, 1070592);
 }
 
 void UnicodeTest::prevUtf8Error() {
