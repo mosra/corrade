@@ -450,7 +450,12 @@ Containers::Array<char> read(const std::string& filename) {
     /* https://gcc.gnu.org/onlinedocs/gcc-4.6.2/libstdc++/api/a00069.html#a1dcd5a3e751c566a4b9b3e851ce92b30
        says that the file descriptor returned by _wopen will be closed
        automatically on destruction */
-    __gnu_cxx::stdio_filebuf<char> filebuf{_wopen(widen(filename).data(), _O_RDONLY|_O_BINARY, 0666), std::ifstream::in|std::ifstream::binary};
+    const int fd = _wopen(widen(filename).data(), _O_RDONLY|_O_BINARY, 0666);
+    if(fd == -1) {
+        Error{} << "Utility::Directory::read(): can't open" << filename;
+        return nullptr;
+    }
+    __gnu_cxx::stdio_filebuf<char> filebuf{fd, std::ifstream::in|std::ifstream::binary};
     std::istream file{&filebuf};
     #endif
 
@@ -512,7 +517,12 @@ bool write(const std::string& filename, const Containers::ArrayView<const void> 
     /* https://gcc.gnu.org/onlinedocs/gcc-4.6.2/libstdc++/api/a00069.html#a1dcd5a3e751c566a4b9b3e851ce92b30
        says that the file descriptor returned by _wopen will be closed
        automatically on destruction */
-    __gnu_cxx::stdio_filebuf<char> filebuf{_wopen(widen(filename).data(), _O_CREAT|_O_TRUNC|_O_WRONLY|_O_BINARY, 0666), std::ofstream::out|std::ofstream::binary};
+    const int fd = _wopen(widen(filename).data(), _O_CREAT|_O_TRUNC|_O_WRONLY|_O_BINARY, 0666);
+    if(fd == -1) {
+        Error{} << "Utility::Directory::write(): can't open" << filename;
+        return false;
+    }
+    __gnu_cxx::stdio_filebuf<char> filebuf{fd, std::ofstream::out|std::ofstream::binary};
     std::ostream file{&filebuf};
     #endif
 
