@@ -39,7 +39,9 @@ namespace Compare {
 /**
 @brief Pseudo-type for verifying that value is less than expected
 
-Prints both values if the first is not less than the second. Example usage:
+Prints both values if the first is not less than the second. Compared type
+needs to implement at least an `operator<` (explicitly) convertible to `bool`.
+Example usage:
 @code
 float a;
 CORRADE_COMPARE_AS(a, 9.28f, Compare::Less);
@@ -53,7 +55,9 @@ template<class T> class Less {};
 /**
 @brief Pseudo-type for verifying that value is less than expected
 
-Prints both values if the first is not less than the second. Example usage:
+Prints both values if the first is not less than the second. Compared type
+needs to implement at least an `operator<=` (explicitly) convertible to `bool`.
+Example usage:
 @code
 float a;
 CORRADE_COMPARE_AS(a, 9.28f, Compare::LessOrEqual);
@@ -67,7 +71,9 @@ template<class T> class LessOrEqual {};
 /**
 @brief Pseudo-type for verifying that value is less than expected
 
-Prints both values if the first is not less than the second. Example usage:
+Prints both values if the first is not less than the second.  Compared type
+needs to implement at least an `operator>=` (explicitly) convertible to `bool`.
+Example usage:
 @code
 float a;
 CORRADE_COMPARE_AS(a, 9.28f, Compare::GreaterOrEqual);
@@ -81,7 +87,9 @@ template<class T> class GreaterOrEqual {};
 /**
 @brief Pseudo-type for verifying that value is less than expected
 
-Prints both values if the first is not less than the second. Example usage:
+Prints both values if the first is not less than the second. Compared type
+needs to implement at least an `operator>` (explicitly) convertible to `bool`.
+Example usage:
 @code
 float a;
 CORRADE_COMPARE_AS(a, 9.28f, Compare::Greater);
