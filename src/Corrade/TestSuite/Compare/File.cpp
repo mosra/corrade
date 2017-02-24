@@ -90,10 +90,10 @@ void Comparator<Compare::File>::printErrorMessage(Utility::Error& e, const std::
 
 namespace Compare {
 
-File::File(const std::string& pathPrefix): c(pathPrefix) {}
+File::File(const std::string& pathPrefix): _c{pathPrefix} {}
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-Comparator<File> File::comparator() { return c; }
+Comparator<File> File::comparator() { return _c; }
 #endif
 
 }
