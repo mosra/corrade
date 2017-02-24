@@ -100,6 +100,33 @@ See @ref TestSuite-Comparator-pseudo-types for more information.
 */
 template<class T> class Greater {};
 
+/**
+@brief Pseudo-type for verifying that value is in given bounds
+
+Prints both values if `actual < expected - epsilon` or
+`expected + epsilon < actual`. Compared type needs to implement at least an
+`operator-`, `operator+` and `operator<`. Example usage:
+@code
+float a;
+CORRADE_COMPARE_WITH(a, 9.28f, Compare::Around<float>{0.1f});
+@endcode
+*/
+template<class T> class Around {
+    public:
+        /**
+         * @brief Constructor
+         * @param epsilon   Epsilon value for comparison
+         */
+        explicit Around(T epsilon): _c{epsilon} {}
+
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        Comparator<Compare::Around<T>> comparator() { return _c; }
+        #endif
+
+    private:
+        Comparator<Compare::Around<T>> _c;
+};
+
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -175,6 +202,30 @@ template<class T> class Comparator<Compare::Greater<T>> {
         }
 
     private:
+        const T* _actualValue;
+        const T* _expectedValue;
+};
+
+template<class T> class Comparator<Compare::Around<T>> {
+    public:
+        explicit Comparator(T epsilon): _epsilon{epsilon} {}
+
+        bool operator()(const T& actual, const T& expected) {
+            _actualValue = &actual;
+            _expectedValue = &expected;
+            return !(*_actualValue < *_expectedValue - _epsilon ||
+                     *_expectedValue + _epsilon < *_actualValue);
+        }
+
+        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
+            e << "Value" << actual << "is not around" << expected
+              << Utility::Debug::nospace << ", actual is" << *_actualValue
+              << "but" << *_expectedValue - _epsilon << "<= expected <="
+              << *_expectedValue + _epsilon;
+        }
+
+    private:
+        T _epsilon;
         const T* _actualValue;
         const T* _expectedValue;
 };

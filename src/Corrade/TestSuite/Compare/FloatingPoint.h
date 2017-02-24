@@ -66,6 +66,7 @@ namespace Implementation {
 Uses comparison algorithm from http://floating-point-gui.de/errors/comparison/
 with epsilon equal to `1.0e-6f`. Unlike the standard floating-point comparison,
 comparing two  NaN values gives a `true` result.
+@see @ref Compare::Around
 */
 template<> class Comparator<float>: public Implementation::FloatComparator<float> {};
 
@@ -75,6 +76,7 @@ template<> class Comparator<float>: public Implementation::FloatComparator<float
 Uses comparison algorithm from http://floating-point-gui.de/errors/comparison/
 with epsilon equal to `1.0e-12`. Unlike the standard floating-point comparison,
 comparing two  NaN values gives a `true` result.
+@see @ref Compare::Around
 */
 template<> class Comparator<double>: public Implementation::FloatComparator<double> {};
 

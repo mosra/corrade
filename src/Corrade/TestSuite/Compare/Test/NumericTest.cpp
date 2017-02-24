@@ -37,6 +37,7 @@ struct NumericTest: Tester {
     void lessOrEqual();
     void greaterOrEqual();
     void greater();
+    void around();
 
     void explicitBoolConversion();
 };
@@ -46,6 +47,7 @@ NumericTest::NumericTest() {
               &NumericTest::lessOrEqual,
               &NumericTest::greaterOrEqual,
               &NumericTest::greater,
+              &NumericTest::around,
 
               &NumericTest::explicitBoolConversion});
 }
@@ -134,22 +136,52 @@ void NumericTest::greater() {
     CORRADE_COMPARE(out.str(), "Value a is not greater than b, actual is 9.27 but expected > 9.28\n");
 }
 
+void NumericTest::around() {
+    float b = 9.28f;
+    float a = 9.25f;
+    float c = 9.31f;
+    float d = 9.29f;
+    float e = 9.27f;
+    CORRADE_VERIFY(!Comparator<Compare::Around<float>>{0.02f}(a, b));
+    CORRADE_VERIFY(!Comparator<Compare::Around<float>>{0.02f}(c, b));
+    CORRADE_VERIFY(Comparator<Compare::Around<float>>{0.02f}(d, b));
+    CORRADE_VERIFY(Comparator<Compare::Around<float>>{0.02f}(e, b));
+
+    std::stringstream out;
+
+    {
+        Error e(&out);
+        Comparator<Around<float>> compare{0.02f};
+        CORRADE_VERIFY(!compare(a, b));
+        compare.printErrorMessage(e, "a", "b");
+    }
+
+    CORRADE_COMPARE(out.str(), "Value a is not around b, actual is 9.25 but 9.26 <= expected <= 9.3\n");
+}
+
 void NumericTest::explicitBoolConversion() {
     struct ExplicitBool {
         explicit operator bool() const { return true; }
     };
 
     struct Foo {
-        ExplicitBool operator<(const Foo&) const { return ExplicitBool{}; }
-        ExplicitBool operator<=(const Foo&) const { return ExplicitBool{}; }
-        ExplicitBool operator>=(const Foo&) const { return ExplicitBool{}; }
-        ExplicitBool operator>(const Foo&) const { return ExplicitBool{}; }
+        ExplicitBool operator<(const Foo&) const { return {}; }
+        ExplicitBool operator<=(const Foo&) const { return {}; }
+        ExplicitBool operator>=(const Foo&) const { return {}; }
+        ExplicitBool operator>(const Foo&) const { return {}; }
+    };
+
+    struct Bar {
+        ExplicitBool operator<(const Bar&) const { return {}; }
+        Bar operator-(const Bar&) const { return {}; }
+        Bar operator+(const Bar&) const { return {}; }
     };
 
     CORRADE_VERIFY(Comparator<Compare::Less<Foo>>{}({}, {}));
     CORRADE_VERIFY(Comparator<Compare::LessOrEqual<Foo>>{}({}, {}));
     CORRADE_VERIFY(Comparator<Compare::GreaterOrEqual<Foo>>{}({}, {}));
     CORRADE_VERIFY(Comparator<Compare::Greater<Foo>>{}({}, {}));
+    CORRADE_VERIFY(!Comparator<Compare::Around<Bar>>{{}}({}, {}));
 }
 
 }}}}
