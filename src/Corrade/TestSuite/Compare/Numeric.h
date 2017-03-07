@@ -110,6 +110,7 @@ Prints both values if `actual < expected - epsilon` or
 float a;
 CORRADE_COMPARE_WITH(a, 9.28f, Compare::Around<float>{0.1f});
 @endcode
+@see @ref around()
 */
 template<class T> class Around {
     public:
@@ -126,6 +127,18 @@ template<class T> class Around {
     private:
         Comparator<Compare::Around<T>> _c;
 };
+
+/**
+@brief Make a pseudo-type for verifying that value is in given bounds
+
+Convenience wrapper around @ref Around::Around(T). These two lines are
+equivalent:
+@code
+CORRADE_COMPARE_WITH(a, 9.28f, Compare::Around<float>{0.1f});
+CORRADE_COMPARE_WITH(a, 9.28f, Compare::around(0.1f));
+@endcode
+*/
+template<class T> inline Around<T> around(T epsilon) { return Around<T>{epsilon}; }
 
 }
 

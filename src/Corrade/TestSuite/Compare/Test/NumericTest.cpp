@@ -157,6 +157,9 @@ void NumericTest::around() {
     }
 
     CORRADE_COMPARE(out.str(), "Value a is not around b, actual is 9.25 but 9.26 <= expected <= 9.3\n");
+
+    /* Verify that the helper works */
+    CORRADE_COMPARE_WITH(d, b, Compare::around(0.02f));
 }
 
 void NumericTest::explicitBoolConversion() {
