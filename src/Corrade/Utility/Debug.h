@@ -34,6 +34,7 @@
 #include <tuple>
 #include <type_traits>
 
+#include "Corrade/Utility/Macros.h"
 #include "Corrade/Containers/EnumSet.h"
 #include "Corrade/Utility/TypeTraits.h"
 #include "Corrade/Utility/Utility.h"
