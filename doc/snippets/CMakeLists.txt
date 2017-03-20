@@ -23,7 +23,8 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-if(WITH_TESTSUITE)
+# TODO: causes spurious linker errors on Travis iOS build, so I'm disabling it
+if(WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
     find_package(Threads REQUIRED)
 
     # TestSuite documentation snippets. I need them executable so I can
