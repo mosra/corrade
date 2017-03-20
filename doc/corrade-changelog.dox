@@ -30,7 +30,7 @@ namespace Corrade {
     @ref Containers::DefaultInit, @ref Containers::ValueInit and
     @ref Containers::InPlaceInit tags for better control over initialization of
     @ref Containers::Array and @ref Containers::StaticArray
--   Added @ref Containers::Array::Array(InPlaceInit, std::initializer_list<T>)
+-   Added @ref Containers::Array::Array(InPlaceInitT, std::initializer_list<T>)
     to create @ref Containers::Array from an initializer list
 -   New @ref Containers::Array::Array(T*, std::size_t, D) "Containers::Array::Array(T*, std::size_t, D)"
     constructor that allows wrapping externally allocated array with custom
@@ -58,7 +58,8 @@ namespace Corrade {
     environment variables propagated to the device/emulator
 -   Ability to run @ref TestSuite tests from within Xcode via XCTest
 -   Added @ref TestSuite::Compare::Less, @ref TestSuite::Compare::LessOrEqual,
-    @ref TestSuite::Compare::Greater and @ref TestSuite::Compare::GreaterOrEqual
+    @ref TestSuite::Compare::Greater, @ref TestSuite::Compare::GreaterOrEqual
+    and @ref TestSuite::Compare::Around
 -   Ability to bundle files with @ref corrade-cmake-add-test "corrade_add_test()"
     CMake macro for Android and Emscripten tests
 
@@ -123,7 +124,7 @@ namespace Corrade {
 -   @ref Utility::Arguments::value() now takes
     @ref Utility::ConfigurationValueFlags for easier parsing of hexadecimal
     and other values
--   @ref Utilitc::Configuration is now able to properly load and save
+-   @ref Utility::Configuration is now able to properly load and save
     configuration files from UTF-8 encoded filenames also on Windows
 -   Simpler implementation of @ref Utility::Debug operators, they now take the
     class by reference instead of by value
@@ -196,7 +197,7 @@ namespace Corrade {
 -   @ref Containers::Array::zeroInitialized() is deprecated, use
     @ref Containers::Array::Array(ValueInitT, std::size_t) instead
 -   @ref Containers::Array::from() is deprecated, use
-    @ref Containers::Array::Array(InPlaceInit, std::initializer_list<T>)
+    @ref Containers::Array::Array(InPlaceInitT, std::initializer_list<T>)
     instead
 -   @ref Utility::Arguments::setHelpKey() is deprecated as its functionality
     was merged into @ref Utility::Arguments::setHelp()

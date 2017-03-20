@@ -190,7 +190,7 @@ class Array {
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @copybrief Array(InPlaceInitT, std::initializer_list<T>)
-         * @deprecated Use @ref Array(InPlaceInitT, std::size_t) instead.
+         * @deprecated Use @ref Array(InPlaceInitT, std::initializer_list<T>) instead.
          */
         template<class ...U> CORRADE_DEPRECATED("use Array(InPlaceInitT, std::initializer_list<T>) instead") static Array<T, D> from(U&&... values) {
             return Array<T, D>{InPlaceInit, {T(std::forward<U>(values))...}};
