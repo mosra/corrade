@@ -17,6 +17,12 @@ matrix:
     env: TARGET=desktop
   - language: cpp
     os: linux
+    compiler: gcc
+    env:
+    - TARGET=desktop
+    - BUILD_DEPRECATED=OFF
+  - language: cpp
+    os: linux
     compiler: clang
     env:
     - TARGET=desktop-sanitizers
@@ -71,6 +77,7 @@ install:
 
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ ! "$TARGET" == "desktop-sanitizers" ]; then export CXX=g++-4.7; fi
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "desktop-sanitizers" ]; then export CXX=clang++-3.8; fi
+- if [ "$BUILD_DEPRECATED" != "OFF" ]; then export BUILD_DEPRECATED=ON; fi
 # so the directory tests pass (and then some workaround for crazy filesystem issues)
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && ( [ "$TARGET" == "desktop" ] || [ "$TARGET" == "desktop-sanitizers" ] ); then mkdir -p ~/.config/autostart; fi
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && ( [ "$TARGET" == "desktop" ] || [ "$TARGET" == "desktop-sanitizers" ] ); then mkdir -p ~/.local; fi
