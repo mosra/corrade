@@ -26,5 +26,5 @@ cmake .. \
     -DBUILD_TESTS=ON \
     -DTESTSUITE_TARGET_XCTEST=ON \
     -G Xcode
-cmake --build . --config Release | xcpretty
+cmake --build . --config Release | xcpretty && exit ${PIPESTATUS[0]}
 CORRADE_TEST_COLOR=ON ctest -V -C Release
