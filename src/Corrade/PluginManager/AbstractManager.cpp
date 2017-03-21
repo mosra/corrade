@@ -41,7 +41,9 @@
 #include <dlfcn.h>
 #endif
 #elif !defined(CORRADE_TARGET_WINDOWS_RT)
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN /* Otherwise `#define interface struct` breaks everything */
+#endif
 #include <windows.h>
 #define dlsym GetProcAddress
 #define dlerror GetLastError
