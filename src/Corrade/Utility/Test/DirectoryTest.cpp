@@ -569,8 +569,14 @@ void DirectoryTest::tmp() {
     #endif
 
     /* Verify that it's possible to write stuff there */
-    CORRADE_VERIFY(Directory::writeString(Directory::join(Directory::tmp(), "a"), "hello"));
-    CORRADE_VERIFY(Directory::rm(Directory::join(Directory::tmp(), "a")));
+    {
+        #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+            "CTest is not able to run XCTest executables properly in the simulator.");
+        #endif
+        CORRADE_VERIFY(Directory::writeString(Directory::join(Directory::tmp(), "a"), "hello"));
+        CORRADE_VERIFY(Directory::rm(Directory::join(Directory::tmp(), "a")));
+    }
 }
 
 void DirectoryTest::tmpUtf8() {
