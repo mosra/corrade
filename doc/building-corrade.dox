@@ -545,51 +545,15 @@ example Ninja, by passing `-G Ninja` to CMake).
 
 @subsection building-corrade-ci-travis Travis
 
-In `package/ci/` there is `travis.yml` file with Linux GCC 4.7, OSX Clang, iOS
-and Emscripten configuration. Online at https://travis-ci.org/mosra/corrade.
-The Linux build has code coverage reports available online at
-https://coveralls.io/github/mosra/corrade.
+In `package/ci/` there is a `travis.yml` file with Linux GCC 4.7, OSX Clang,
+iOS, Emscripten, Android, AddressSanitizer and ThreadSanitizer configuration.
+Online at https://travis-ci.org/mosra/corrade. The Linux build has code
+coverage reports available online at https://coveralls.io/github/mosra/corrade.
 
 @subsection building-corrade-ci-appveyor AppVeyor
 
-In `package/ci/` there is `appveyor.yml` file with Windows desktop MSVC, MinGW
-and Windows RT configuration. Online at https://ci.appveyor.com/project/mosra/corrade.
-
-@subsection building-corrade-ci-jenkins Jenkins
-
-In `package/ci/` there is `jenkins.xml` file containing job configuration.
-Setup your Jenkins server, enable the **Git** and **Text-finder** plugin and
-download the CLI application from here (replace `localhost:8080` with your
-server name):
-
-    http://localhost:8080/cli
-
-Then add new job or update existing one (update path to the `*.jar` file,
-replace `localhost:8080` with your server name, replace `update-job` with
-`create-job` if the job doesn't exist yet).
-
-    java -jar ~/jenkins-cli.jar -s http://localhost:8080 update-job Corrade < package/ci/jenkins.xml
-
-Build is done using **Ninja** build system. It expects that **GCC** >=4.9, 4.8,
-4.7 and **Clang** are installed as it tries to compile the library with each
-one of them. You can add/remove the compilers in `axes/hudson.matrix.TextAxis`
-or via the web interface later.
-
-Clang Analyzer and *Sanitizer checks are also available. They both require
-**Clang**, Analyzer job additionally requires **clang-analyzer** tool.
-
-    java -jar ~/jenkins-cli.jar -s http://localhost:8080 update-job Corrade-ClangAnalyzer < package/ci/jenkins-clang-analyzer.xml
-    java -jar ~/jenkins-cli.jar -s http://localhost:8080 update-job Corrade-ClangSanitizer < package/ci/jenkins-clang-sanitizer.xml
-
-There is also MinGW-w64, Emscripten, NaCl and Android configuration, add or
-update them with the commands below. See @ref building-corrade-cross for more
-information about setting up the crosscompilers and `toolchains/` submodule.
-For Emscripten you need also **Node.js** installed to run the tests.
-
-    java -jar ~/jenkins-cli.jar -s http://localhost:8080 update-job Corrade-MinGW-w64 < package/ci/jenkins-mingw-w64.xml
-    java -jar ~/jenkins-cli.jar -s http://localhost:8080 update-job Corrade-Emscripten < package/ci/jenkins-emscripten.xml
-    java -jar ~/jenkins-cli.jar -s http://localhost:8080 update-job Corrade-NaCl < package/ci/jenkins-nacl.xml
-    java -jar ~/jenkins-cli.jar -s http://localhost:8080 update-job Corrade-Android < package/ci/jenkins-android.xml
+In `package/ci/` there is an `appveyor.yml` file with Windows desktop MSVC,
+MinGW and Windows RT configuration. Online at https://ci.appveyor.com/project/mosra/corrade.
 
 */
 
