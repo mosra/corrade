@@ -50,6 +50,8 @@ struct StaticArrayViewTest: TestSuite::Tester {
 
     void slice();
     void sliceToStatic();
+
+    void cast();
 };
 
 typedef Containers::ArrayView<int> ArrayView;
@@ -75,7 +77,9 @@ StaticArrayViewTest::StaticArrayViewTest() {
               &StaticArrayViewTest::rangeBasedFor,
 
               &StaticArrayViewTest::slice,
-              &StaticArrayViewTest::sliceToStatic});
+              &StaticArrayViewTest::sliceToStatic,
+
+              &StaticArrayViewTest::cast});
 }
 
 void StaticArrayViewTest::constructDefault() {
@@ -254,6 +258,19 @@ void StaticArrayViewTest::sliceToStatic() {
     CORRADE_COMPARE(b[1], 3);
     CORRADE_COMPARE(b[2], 4);
 }
+
+void StaticArrayViewTest::cast() {
+    std::uint32_t data[6]{};
+    Containers::StaticArrayView<6, std::uint32_t> a = data;
+    auto b = Containers::arrayCast<std::uint64_t>(a);
+    auto c = Containers::arrayCast<std::uint16_t>(a);
+
+    CORRADE_VERIFY((std::is_same<decltype(b), Containers::StaticArrayView<3, std::uint64_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(c), Containers::StaticArrayView<12, std::uint16_t>>::value));
+    CORRADE_COMPARE(reinterpret_cast<void*>(b.begin()), reinterpret_cast<void*>(a.begin()));
+    CORRADE_COMPARE(reinterpret_cast<void*>(c.begin()), reinterpret_cast<void*>(a.begin()));
+}
+
 
 }}}
 

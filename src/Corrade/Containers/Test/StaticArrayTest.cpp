@@ -55,6 +55,8 @@ struct StaticArrayTest: TestSuite::Tester {
 
     void slice();
     void sliceToStatic();
+
+    void cast();
 };
 
 typedef Containers::StaticArray<5, int> StaticArray;
@@ -88,7 +90,9 @@ StaticArrayTest::StaticArrayTest() {
               &StaticArrayTest::rangeBasedFor,
 
               &StaticArrayTest::slice,
-              &StaticArrayTest::sliceToStatic});
+              &StaticArrayTest::sliceToStatic,
+
+              &StaticArrayTest::cast});
 }
 
 void StaticArrayTest::construct() {
@@ -481,6 +485,43 @@ void StaticArrayTest::sliceToStatic() {
     CORRADE_COMPARE(bc[0], 2);
     CORRADE_COMPARE(bc[1], 3);
     CORRADE_COMPARE(bc[2], 4);
+}
+
+void StaticArrayTest::cast() {
+    Containers::StaticArray<6, std::uint32_t> a;
+    const Containers::StaticArray<6, std::uint32_t> ca;
+    Containers::StaticArray<6, const std::uint32_t> ac;
+    const Containers::StaticArray<6, const std::uint32_t> cac;
+
+    auto b = Containers::arrayCast<std::uint64_t>(a);
+    auto bc = Containers::arrayCast<const std::uint64_t>(ac);
+    auto cb = Containers::arrayCast<const std::uint64_t>(ca);
+    auto cbc = Containers::arrayCast<const std::uint64_t>(cac);
+
+    auto d = Containers::arrayCast<std::uint16_t>(a);
+    auto dc = Containers::arrayCast<const std::uint16_t>(ac);
+    auto cd = Containers::arrayCast<const std::uint16_t>(ca);
+    auto cdc = Containers::arrayCast<const std::uint16_t>(cac);
+
+    CORRADE_VERIFY((std::is_same<decltype(b), Containers::StaticArrayView<3, std::uint64_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(bc), Containers::StaticArrayView<3, const std::uint64_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(cb), Containers::StaticArrayView<3, const std::uint64_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(cbc), Containers::StaticArrayView<3, const std::uint64_t>>::value));
+
+    CORRADE_VERIFY((std::is_same<decltype(d), Containers::StaticArrayView<12,  std::uint16_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(cd), Containers::StaticArrayView<12, const std::uint16_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(dc), Containers::StaticArrayView<12, const std::uint16_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(cdc), Containers::StaticArrayView<12, const std::uint16_t>>::value));
+
+    CORRADE_COMPARE(reinterpret_cast<void*>(b.begin()), reinterpret_cast<void*>(a.begin()));
+    CORRADE_COMPARE(reinterpret_cast<const void*>(cb.begin()), reinterpret_cast<const void*>(ca.begin()));
+    CORRADE_COMPARE(reinterpret_cast<const void*>(bc.begin()), reinterpret_cast<const void*>(ac.begin()));
+    CORRADE_COMPARE(reinterpret_cast<const void*>(cbc.begin()), reinterpret_cast<const void*>(cac.begin()));
+
+    CORRADE_COMPARE(reinterpret_cast<void*>(d.begin()), reinterpret_cast<void*>(a.begin()));
+    CORRADE_COMPARE(reinterpret_cast<const void*>(cd.begin()), reinterpret_cast<const void*>(ca.begin()));
+    CORRADE_COMPARE(reinterpret_cast<const void*>(dc.begin()), reinterpret_cast<const void*>(ac.begin()));
+    CORRADE_COMPARE(reinterpret_cast<const void*>(cdc.begin()), reinterpret_cast<const void*>(cac.begin()));
 }
 
 }}}

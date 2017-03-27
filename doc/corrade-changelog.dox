@@ -39,6 +39,8 @@ namespace Corrade {
     helper functions to make @ref Containers::ArrayView / @ref Containers::StaticArrayView
     instances without needing to fully specify the type (similarly to what
     `std::make_tuple()` is to `std::tuple`)
+-   New @ref Containers::arrayCast() function to `reinterpret_cast` arrays with
+    correct size recalculation
 -   Added XOR operators to @ref Containers::EnumSet
 
 ### PluginManager library

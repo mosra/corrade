@@ -108,6 +108,8 @@ Containers::StaticArray<5, Foo> e{Containers::NoInit};
 int index = 0;
 for(Foo& f: e) new(&f) Foo(index++);
 @endcode
+
+@see @ref arrayCast(StaticArray<size, T>&)
 */
 /* Underscore at the end to avoid conflict with member size(). It's ugly, but
    having count instead of size_ would make the naming horribly inconsistent. */
@@ -474,6 +476,20 @@ auto b = Containers::staticArrayView(data);
 */
 template<std::size_t size, class T> constexpr StaticArrayView<size, const T> staticArrayView(const StaticArray<size, T>& array) {
     return StaticArrayView<size, const T>{array};
+}
+
+/** @relatesalso StaticArrayView
+@brief Reinterpret-cast a static array
+
+See @ref arrayCast(StaticArrayView<size, T>) for more information.
+*/
+template<class U, std::size_t size, class T> StaticArrayView<size*sizeof(T)/sizeof(U), U> arrayCast(StaticArray<size, T>& array) {
+    return arrayCast<U>(staticArrayView(array));
+}
+
+/** @overload */
+template<class U, std::size_t size, class T> StaticArrayView<size*sizeof(T)/sizeof(U), const U> arrayCast(const StaticArray<size, T>& array) {
+    return arrayCast<const U>(staticArrayView(array));
 }
 
 template<std::size_t size_, class T> template<class ...Args> StaticArray<size_, T>::StaticArray(DirectInitT, Args&&... args): StaticArray{NoInit} {

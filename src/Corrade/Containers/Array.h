@@ -173,6 +173,8 @@ char* data = reinterpret_cast<char*>(glMapNamedBuffer(buffer, GL_READ_WRITE));
 Containers::Array<char, UnmapBuffer> array{data, bufferSize, UnmapBuffer{buffer}};
 @endcode
 
+@see @ref arrayCast(Array<T>&)
+
 @todo Something like ArrayTuple to create more than one array with single
     allocation and proper alignment for each type? How would non-POD types be
     constructed in that? Will that be useful in more than one place?
@@ -518,6 +520,20 @@ auto b = Containers::arrayView(data);
 */
 template<class T> constexpr ArrayView<const T> arrayView(const Array<T>& array) {
     return ArrayView<const T>{array};
+}
+
+/** @relatesalso Array
+@brief Reinterpret-cast an array
+
+See @ref arrayCast(ArrayView<T>) for more information.
+*/
+template<class U, class T> ArrayView<U> arrayCast(Array<T>& array) {
+    return arrayCast<U>(arrayView(array));
+}
+
+/** @overload */
+template<class U, class T> ArrayView<const U> arrayCast(const Array<T>& array) {
+    return arrayCast<const U>(arrayView(array));
 }
 
 #ifdef CORRADE_BUILD_DEPRECATED

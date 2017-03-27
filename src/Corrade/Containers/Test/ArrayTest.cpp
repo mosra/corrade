@@ -63,6 +63,8 @@ struct ArrayTest: TestSuite::Tester {
     void customDeleter();
     void customDeleterType();
     void customDeleterTypeConstruct();
+
+    void cast();
 };
 
 typedef Containers::Array<int> Array;
@@ -102,7 +104,9 @@ ArrayTest::ArrayTest() {
               &ArrayTest::defaultDeleter,
               &ArrayTest::customDeleter,
               &ArrayTest::customDeleterType,
-              &ArrayTest::customDeleterTypeConstruct});
+              &ArrayTest::customDeleterTypeConstruct,
+
+              &ArrayTest::cast});
 }
 
 void ArrayTest::constructEmpty() {
@@ -514,6 +518,58 @@ void ArrayTest::customDeleterTypeConstruct() {
     int c;
     Containers::Array<int, CustomImplicitDeleter> d{&c, 1};
     CORRADE_VERIFY(true);
+}
+
+void ArrayTest::cast() {
+    Containers::Array<std::uint32_t> a{6};
+    const Containers::Array<std::uint32_t> ca{6};
+    Containers::Array<const std::uint32_t> ac{a.data(), a.size(), [](const std::uint32_t*, std::size_t){}};
+    const Containers::Array<const std::uint32_t> cac{a.data(), a.size(), [](const std::uint32_t*, std::size_t){}};
+
+    auto b = Containers::arrayCast<std::uint64_t>(a);
+    auto bc = Containers::arrayCast<const std::uint64_t>(ac);
+    auto cb = Containers::arrayCast<const std::uint64_t>(ca);
+    auto cbc = Containers::arrayCast<const std::uint64_t>(cac);
+
+    auto d = Containers::arrayCast<std::uint16_t>(a);
+    auto dc = Containers::arrayCast<const std::uint16_t>(ac);
+    auto cd = Containers::arrayCast<const std::uint16_t>(ca);
+    auto cdc = Containers::arrayCast<const std::uint16_t>(cac);
+
+    CORRADE_VERIFY((std::is_same<decltype(b), Containers::ArrayView<std::uint64_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(bc), Containers::ArrayView<const std::uint64_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(cb), Containers::ArrayView<const std::uint64_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(cbc), Containers::ArrayView<const std::uint64_t>>::value));
+
+    CORRADE_VERIFY((std::is_same<decltype(d), Containers::ArrayView<std::uint16_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(cd), Containers::ArrayView<const std::uint16_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(dc), Containers::ArrayView<const std::uint16_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(cdc), Containers::ArrayView<const std::uint16_t>>::value));
+
+    CORRADE_COMPARE(reinterpret_cast<void*>(b.begin()), reinterpret_cast<void*>(a.begin()));
+    CORRADE_COMPARE(reinterpret_cast<const void*>(cb.begin()), reinterpret_cast<const void*>(ca.begin()));
+    CORRADE_COMPARE(reinterpret_cast<const void*>(bc.begin()), reinterpret_cast<const void*>(ac.begin()));
+    CORRADE_COMPARE(reinterpret_cast<const void*>(cbc.begin()), reinterpret_cast<const void*>(cac.begin()));
+
+    CORRADE_COMPARE(reinterpret_cast<void*>(d.begin()), reinterpret_cast<void*>(a.begin()));
+    CORRADE_COMPARE(reinterpret_cast<const void*>(cd.begin()), reinterpret_cast<const void*>(ca.begin()));
+    CORRADE_COMPARE(reinterpret_cast<const void*>(dc.begin()), reinterpret_cast<const void*>(ac.begin()));
+    CORRADE_COMPARE(reinterpret_cast<const void*>(cdc.begin()), reinterpret_cast<const void*>(cac.begin()));
+
+    CORRADE_COMPARE(a.size(), 6);
+    CORRADE_COMPARE(ca.size(), 6);
+    CORRADE_COMPARE(ac.size(), 6);
+    CORRADE_COMPARE(cac.size(), 6);
+
+    CORRADE_COMPARE(b.size(), 3);
+    CORRADE_COMPARE(cb.size(), 3);
+    CORRADE_COMPARE(bc.size(), 3);
+    CORRADE_COMPARE(cbc.size(), 3);
+
+    CORRADE_COMPARE(d.size(), 12);
+    CORRADE_COMPARE(cd.size(), 12);
+    CORRADE_COMPARE(dc.size(), 12);
+    CORRADE_COMPARE(cdc.size(), 12);
 }
 
 }}}

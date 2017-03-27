@@ -55,6 +55,8 @@ struct ArrayViewTest: TestSuite::Tester {
     void sliceNullptr();
     void slice();
     void sliceToStatic();
+
+    void cast();
 };
 
 typedef Containers::ArrayView<int> ArrayView;
@@ -83,7 +85,9 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::sliceInvalid,
               &ArrayViewTest::sliceNullptr,
               &ArrayViewTest::slice,
-              &ArrayViewTest::sliceToStatic});
+              &ArrayViewTest::sliceToStatic,
+
+              &ArrayViewTest::cast});
 }
 
 void ArrayViewTest::constructEmpty() {
@@ -361,6 +365,21 @@ void ArrayViewTest::sliceToStatic() {
     CORRADE_COMPARE(b[0], 2);
     CORRADE_COMPARE(b[1], 3);
     CORRADE_COMPARE(b[2], 4);
+}
+
+void ArrayViewTest::cast() {
+    std::uint32_t data[6]{};
+    Containers::ArrayView<std::uint32_t> a = data;
+    auto b = Containers::arrayCast<std::uint64_t>(a);
+    auto c = Containers::arrayCast<std::uint16_t>(a);
+
+    CORRADE_VERIFY((std::is_same<decltype(b), Containers::ArrayView<std::uint64_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(c), Containers::ArrayView<std::uint16_t>>::value));
+    CORRADE_COMPARE(reinterpret_cast<void*>(b.begin()), reinterpret_cast<void*>(a.begin()));
+    CORRADE_COMPARE(reinterpret_cast<void*>(c.begin()), reinterpret_cast<void*>(a.begin()));
+    CORRADE_COMPARE(a.size(), 6);
+    CORRADE_COMPARE(b.size(), 3);
+    CORRADE_COMPARE(c.size(), 12);
 }
 
 }}}

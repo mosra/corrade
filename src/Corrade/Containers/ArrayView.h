@@ -67,7 +67,8 @@ Containers::ArrayView<const int> c{data2, 3};
     includes also the zero-terminator (thus in case of `"hello"` the size would
     be 6, not 5, as one might expect).
 
-@see @ref ArrayView<const void>, @ref StaticArrayView, @ref arrayView()
+@see @ref ArrayView<const void>, @ref StaticArrayView, @ref arrayView(),
+    @ref arrayCast(ArrayView<T>)
 @todo What was the reason for no const-correctness at all?
 */
 template<class T> class ArrayView {
@@ -348,6 +349,27 @@ template<std::size_t size, class T> constexpr ArrayView<T> arrayView(StaticArray
     return ArrayView<T>{view};
 }
 
+/** @relatesalso ArrayView
+@brief Reinterpret-cast an array view
+
+Size of the new array is calculated as `view.size()*sizeof(T)/sizeof(U)`.
+Expects that both types are [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
+and the total byte size doesn't change. Example usage:
+@code
+std::int32_t data[15];
+auto a = Containers::arrayView(data); // a.size() == 15
+auto b = Containers::arrayCast<char>(a); // b.size() == 60
+@endcode
+*/
+template<class U, class T> ArrayView<U> arrayCast(ArrayView<T> view) {
+    static_assert(std::is_standard_layout<T>::value, "the source type is not standard layout");
+    static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
+    const std::size_t size = view.size()*sizeof(T)/sizeof(U);
+    CORRADE_ASSERT(size*sizeof(U) == view.size()*sizeof(T),
+        "Containers::arrayCast(): type sizes are not compatible", {});
+    return {reinterpret_cast<U*>(view.begin()), size};
+}
+
 /**
 @brief Fixed-size array view
 
@@ -364,7 +386,7 @@ Containers::ArrayView<int> fiveInts2 = data; // fiveInts2.size() == 5
 Containers::ArrayView<int> threeInts = data.slice(2, 5);
 @endcode
 
-@see @ref staticArrayView()
+@see @ref staticArrayView(), @ref arrayCast(StaticArrayView<size, T>)
 */
 /* Underscore at the end to avoid conflict with member size(). It's ugly, but
    having count instead of size_ would make the naming horribly inconsistent. */
@@ -513,6 +535,27 @@ auto b = Containers::staticArrayView(data);
 */
 template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArrayView(T(&data)[size]) {
     return StaticArrayView<size, T>{data};
+}
+
+/** @relatesalso StaticArrayView
+@brief Reinterpret-cast a static array view
+
+Size of the new array is calculated as `view.size()*sizeof(T)/sizeof(U)`.
+Expects that both types are [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
+and the total byte size doesn't change. Example usage:
+@code
+std::int32_t data[15];
+auto a = Containers::staticArrayView(data); // a.size() == 15
+Containers::StaticArrayView<60, char> b = Containers::arrayCast<char>(a);
+@endcode
+*/
+template<class U, std::size_t size, class T> StaticArrayView<size*sizeof(T)/sizeof(U), U> arrayCast(StaticArrayView<size, T> view) {
+    static_assert(std::is_standard_layout<T>::value, "the source type is not standard layout");
+    static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
+    constexpr const std::size_t newSize = size*sizeof(T)/sizeof(U);
+    static_assert(newSize*sizeof(U) == size*sizeof(T),
+        "type sizes are not compatible");
+    return StaticArrayView<newSize, U>{reinterpret_cast<U*>(view.begin())};
 }
 
 template<class T> ArrayView<T> ArrayView<T>::slice(T* begin, T* end) const {
