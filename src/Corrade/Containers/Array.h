@@ -331,6 +331,7 @@ class Array {
          * Enabled only if `T*` is implicitly convertible to `U*`. Note
          * that, similarly as with raw pointers, you need to ensure that both
          * types have the same size.
+         * @see @ref arrayView(Array<T>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
@@ -345,6 +346,7 @@ class Array {
          * Enabled only if `T*` or `const T*` is implicitly convertible to `U*`.
          * Note that, similarly as with raw pointers, you need to ensure that
          * both types have the same size.
+         * @see @ref arrayView(const Array<T>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
@@ -485,6 +487,38 @@ class Array {
         std::size_t _size;
         D _deleter;
 };
+
+/** @relatesalso ArrayView
+@brief Make view on @ref Array
+
+Convenience alternative to calling @ref Array::operator ArrayView<U>()
+explicitly. The following two lines are equivalent:
+@code
+Containers::Array<std::uint32_t> data;
+
+Containers::ArrayView<std::uint32_t> a{data};
+auto b = Containers::arrayView(data);
+@endcode
+*/
+template<class T> constexpr ArrayView<T> arrayView(Array<T>& array) {
+    return ArrayView<T>{array};
+}
+
+/** @relatesalso ArrayView
+@brief Make view on const @ref Array
+
+Convenience alternative to calling @ref Array::operator ArrayView<U>()
+explicitly. The following two lines are equivalent:
+@code
+const Containers::Array<std::uint32_t> data;
+
+Containers::ArrayView<const std::uint32_t> a{data};
+auto b = Containers::arrayView(data);
+@endcode
+*/
+template<class T> constexpr ArrayView<const T> arrayView(const Array<T>& array) {
+    return ArrayView<const T>{array};
+}
 
 #ifdef CORRADE_BUILD_DEPRECATED
 /** @copybrief ArrayView

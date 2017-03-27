@@ -67,7 +67,7 @@ Containers::ArrayView<const int> c{data2, 3};
     includes also the zero-terminator (thus in case of `"hello"` the size would
     be 6, not 5, as one might expect).
 
-@see @ref ArrayView<const void>, @ref StaticArrayView
+@see @ref ArrayView<const void>, @ref StaticArrayView, @ref arrayView()
 @todo What was the reason for no const-correctness at all?
 */
 template<class T> class ArrayView {
@@ -89,6 +89,8 @@ template<class T> class ArrayView {
          * @brief Construct view on an array with explicit length
          * @param data      Data pointer
          * @param size      Data size
+         *
+         * @see @ref arrayView(T*, std::size_t)
          */
         constexpr /*implicit*/ ArrayView(T* data, std::size_t size) noexcept: _data(data), _size(size) {}
 
@@ -99,6 +101,7 @@ template<class T> class ArrayView {
          * Enabled only if `const T*` is implicitly convertible to `U*`. Note
          * that, similarly as with raw pointers, you need to ensure that both
          * types have the same size.
+         * @see @ref arrayView(T(&)[size])
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U, std::size_t size>
@@ -127,6 +130,7 @@ template<class T> class ArrayView {
          * Enabled only if `const T*` is implicitly convertible to `U*`. Note
          * that, similarly as with raw pointers, you need to ensure that both
          * types have the same size.
+         * @see @ref arrayView(StaticArrayView<size, T>)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<std::size_t size, class U>
@@ -296,6 +300,54 @@ template<> class ArrayView<const void> {
         std::size_t _size;
 };
 
+/** @relatesalso ArrayView
+@brief Make view on an array of specific length
+
+Convenience alternative to @ref ArrayView::ArrayView(T*, std::size_t). The
+following two lines are equivalent:
+@code
+std::uint32_t* data;
+
+Containers::ArrayView<std::uint32_t> a{data, 5};
+auto b = Containers::arrayView(data, 5);
+@endcode
+*/
+template<class T> constexpr ArrayView<T> arrayView(T* data, std::size_t size) {
+    return ArrayView<T>{data, size};
+}
+
+/** @relatesalso ArrayView
+@brief Make view on fixed-size array
+
+Convenience alternative to @ref ArrayView::ArrayView(U(&)[size]). The following
+two lines are equivalent:
+@code
+std::uint32_t data[15];
+
+Containers::ArrayView<std::uint32_t> a{data};
+auto b = Containers::arrayView(data);
+@endcode
+*/
+template<std::size_t size, class T> constexpr ArrayView<T> arrayView(T(&data)[size]) {
+    return ArrayView<T>{data};
+}
+
+/** @relatesalso ArrayView
+@brief Make view on @ref StaticArrayView
+
+Convenience alternative to @ref ArrayView::ArrayView(StaticArrayView<size, U>).
+The following two lines are equivalent:
+@code
+std::uint32_t data[15];
+
+Containers::ArrayView<std::uint32_t> a{data};
+auto b = Containers::arrayView(data);
+@endcode
+*/
+template<std::size_t size, class T> constexpr ArrayView<T> arrayView(StaticArrayView<size, T> view) {
+    return ArrayView<T>{view};
+}
+
 /**
 @brief Fixed-size array view
 
@@ -311,6 +363,8 @@ Containers::StaticArrayView<5, int> fiveInts = data.slice<5>(7);
 Containers::ArrayView<int> fiveInts2 = data; // fiveInts2.size() == 5
 Containers::ArrayView<int> threeInts = data.slice(2, 5);
 @endcode
+
+@see @ref staticArrayView()
 */
 /* Underscore at the end to avoid conflict with member size(). It's ugly, but
    having count instead of size_ would make the naming horribly inconsistent. */
@@ -336,11 +390,13 @@ template<std::size_t size_, class T> class StaticArrayView {
         /**
          * @brief Construct static view on an array
          * @param data      Data pointer
+         *
+         * @see @ref staticArrayView(T*)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         constexpr explicit StaticArrayView(T* data)
         #else
-        template<class U, class = typename std::enable_if<!std::is_same<U, T(&)[size_]>::value>::type> constexpr explicit StaticArrayView(U data)
+        template<class U, class = typename std::enable_if<std::is_pointer<U>::value && !std::is_same<U, T(&)[size_]>::value>::type> constexpr explicit StaticArrayView(U data)
         #endif
         noexcept: _data(data) {}
 
@@ -351,6 +407,7 @@ template<std::size_t size_, class T> class StaticArrayView {
          * Enabled only if `const T*` is implicitly convertible to `U*`. Note
          * that, similarly as with raw pointers, you need to ensure that both
          * types have the same size.
+         * @see @ref staticArrayView(T(&)[size])
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
@@ -425,6 +482,38 @@ template<std::size_t size_, class T> class StaticArrayView {
     private:
         T* _data;
 };
+
+/** @relatesalso StaticArrayView
+@brief Make static view on an array
+
+Convenience alternative to @ref StaticArrayView::StaticArrayView(T*). The
+following two lines are equivalent:
+@code
+std::uint32_t* data;
+
+Containers::StaticArrayView<5, std::uint32_t> a{data};
+auto b = Containers::staticArrayView<5>(data);
+@endcode
+*/
+template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArrayView(T* data) {
+    return StaticArrayView<size, T>{data};
+}
+
+/** @relatesalso StaticArrayView
+@brief Make static view on a fixed-size array
+
+Convenience alternative to @ref StaticArrayView::StaticArrayView(U(&)[size_]).
+The following two lines are equivalent:
+@code
+std::uint32_t data[15];
+
+Containers::StaticArrayView<15, std::uint32_t> a{data};
+auto b = Containers::staticArrayView(data);
+@endcode
+*/
+template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArrayView(T(&data)[size]) {
+    return StaticArrayView<size, T>{data};
+}
 
 template<class T> ArrayView<T> ArrayView<T>::slice(T* begin, T* end) const {
     CORRADE_ASSERT(_data <= begin && begin <= end && end <= _data + _size,

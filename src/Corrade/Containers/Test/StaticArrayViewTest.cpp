@@ -94,8 +94,14 @@ void StaticArrayViewTest::constructNullptr() {
 void StaticArrayViewTest::construct() {
     int a[30];
 
-    const StaticArrayView<5> b{a};
-    CORRADE_VERIFY(b == a);
+    {
+        const StaticArrayView<5> b{a};
+        CORRADE_VERIFY(b == a);
+    } {
+        const auto b = staticArrayView<5>(a);
+        CORRADE_VERIFY((std::is_same<decltype(b), const StaticArrayView<5>>::value));
+        CORRADE_VERIFY(b == a);
+    }
 
     /* Implicit construction from pointer should not be allowed */
     CORRADE_VERIFY(!(std::is_convertible<int*, StaticArrayView<5>>::value));
@@ -104,8 +110,14 @@ void StaticArrayViewTest::construct() {
 void StaticArrayViewTest::constructFixedSize() {
     int a[13];
 
-    const StaticArrayView<13> b = a;
-    CORRADE_VERIFY(b == a);
+    {
+        const StaticArrayView<13> b = a;
+        CORRADE_VERIFY(b == a);
+    } {
+        const auto b = staticArrayView(a);
+        CORRADE_VERIFY((std::is_same<decltype(b), const StaticArrayView<13>>::value));
+        CORRADE_VERIFY(b == a);
+    }
 }
 
 void StaticArrayViewTest::constructDerived() {
@@ -130,8 +142,14 @@ void StaticArrayViewTest::constructDerived() {
 void StaticArrayViewTest::constructConst() {
     const int a[] = {3, 4, 7, 12, 0, -15};
 
-    ConstStaticArrayView<6> b = a;
-    CORRADE_COMPARE(b[2], 7);
+    {
+        ConstStaticArrayView<6> b = a;
+        CORRADE_COMPARE(b[2], 7);
+    } {
+        const auto b = staticArrayView(a);
+        CORRADE_VERIFY((std::is_same<decltype(b), const ConstStaticArrayView<6>>::value));
+        CORRADE_COMPARE(b[2], 7);
+    }
 }
 
 void StaticArrayViewTest::convertBool() {

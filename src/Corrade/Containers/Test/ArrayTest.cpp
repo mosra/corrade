@@ -287,18 +287,37 @@ void ArrayTest::convertView() {
     Containers::Array<const int> ac{a.data(), a.size(), [](const int*, std::size_t){}};
     const Containers::Array<const int> cac{a.data(), a.size(), [](const int*, std::size_t){}};
 
-    const ArrayView b = a;
-    const ConstArrayView cb = ca;
-    const ConstArrayView bc = ac;
-    const ConstArrayView cbc = cac;
-    CORRADE_VERIFY(b.begin() == a.begin());
-    CORRADE_VERIFY(bc.begin() == ac.begin());
-    CORRADE_VERIFY(cb.begin() == ca.begin());
-    CORRADE_VERIFY(cbc.begin() == cac.begin());
-    CORRADE_COMPARE(b.size(), 5);
-    CORRADE_COMPARE(cb.size(), 5);
-    CORRADE_COMPARE(bc.size(), 5);
-    CORRADE_COMPARE(cbc.size(), 5);
+    {
+        const ArrayView b = a;
+        const ConstArrayView cb = ca;
+        const ConstArrayView bc = ac;
+        const ConstArrayView cbc = cac;
+        CORRADE_VERIFY(b.begin() == a.begin());
+        CORRADE_VERIFY(bc.begin() == ac.begin());
+        CORRADE_VERIFY(cb.begin() == ca.begin());
+        CORRADE_VERIFY(cbc.begin() == cac.begin());
+        CORRADE_COMPARE(b.size(), 5);
+        CORRADE_COMPARE(cb.size(), 5);
+        CORRADE_COMPARE(bc.size(), 5);
+        CORRADE_COMPARE(cbc.size(), 5);
+    } {
+        const auto b = arrayView(a);
+        const auto cb = arrayView(ca);
+        const auto bc = arrayView(ac);
+        const auto cbc = arrayView(cac);
+        CORRADE_VERIFY((std::is_same<decltype(b), const ArrayView>::value));
+        CORRADE_VERIFY((std::is_same<decltype(cb), const ConstArrayView>::value));
+        CORRADE_VERIFY((std::is_same<decltype(bc), const ConstArrayView>::value));
+        CORRADE_VERIFY((std::is_same<decltype(cbc), const ConstArrayView>::value));
+        CORRADE_VERIFY(b.begin() == a.begin());
+        CORRADE_VERIFY(bc.begin() == ac.begin());
+        CORRADE_VERIFY(cb.begin() == ca.begin());
+        CORRADE_VERIFY(cbc.begin() == cac.begin());
+        CORRADE_COMPARE(b.size(), 5);
+        CORRADE_COMPARE(cb.size(), 5);
+        CORRADE_COMPARE(bc.size(), 5);
+        CORRADE_COMPARE(cbc.size(), 5);
+    }
 }
 
 void ArrayTest::convertViewDerived() {

@@ -35,6 +35,10 @@ namespace Corrade {
 -   New @ref Containers::Array::Array(T*, std::size_t, D) "Containers::Array::Array(T*, std::size_t, D)"
     constructor that allows wrapping externally allocated array with custom
     deleter function
+-   New @ref Containers::arrayView() and @ref Containers::staticArrayView()
+    helper functions to make @ref Containers::ArrayView / @ref Containers::StaticArrayView
+    instances without needing to fully specify the type (similarly to what
+    `std::make_tuple()` is to `std::tuple`)
 -   Added XOR operators to @ref Containers::EnumSet
 
 ### PluginManager library

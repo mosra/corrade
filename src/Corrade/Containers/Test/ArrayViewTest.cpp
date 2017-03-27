@@ -112,17 +112,31 @@ void ArrayViewTest::constructNullptrSize() {
 void ArrayViewTest::construct() {
     int a[30];
 
-    const ArrayView b = {a, 20};
-    CORRADE_VERIFY(b == a);
-    CORRADE_COMPARE(b.size(), 20);
+    {
+        const ArrayView b = {a, 20};
+        CORRADE_VERIFY(b == a);
+        CORRADE_COMPARE(b.size(), 20);
+    } {
+        const auto b = arrayView(a, 20);
+        CORRADE_VERIFY((std::is_same<decltype(b), const ArrayView>::value));
+        CORRADE_VERIFY(b == a);
+        CORRADE_COMPARE(b.size(), 20);
+    }
 }
 
 void ArrayViewTest::constructFixedSize() {
     int a[13];
 
-    const ArrayView b = a;
-    CORRADE_VERIFY(b == a);
-    CORRADE_COMPARE(b.size(), 13);
+    {
+        const ArrayView b = a;
+        CORRADE_VERIFY(b == a);
+        CORRADE_COMPARE(b.size(), 13);
+    } {
+        const auto b = arrayView(a);
+        CORRADE_VERIFY((std::is_same<decltype(b), const ArrayView>::value));
+        CORRADE_VERIFY(b == a);
+        CORRADE_COMPARE(b.size(), 13);
+    }
 }
 
 void ArrayViewTest::constructDerived() {
@@ -151,9 +165,16 @@ void ArrayViewTest::constructDerived() {
 void ArrayViewTest::constructConst() {
     const int a[] = {3, 4, 7, 12, 0, -15};
 
-    ConstArrayView b = a;
-    CORRADE_COMPARE(b.size(), 6);
-    CORRADE_COMPARE(b[2], 7);
+    {
+        ConstArrayView b = a;
+        CORRADE_COMPARE(b.size(), 6);
+        CORRADE_COMPARE(b[2], 7);
+    } {
+        ConstArrayView b = a;
+        CORRADE_VERIFY((std::is_same<decltype(b), ConstArrayView>::value));
+        CORRADE_COMPARE(b.size(), 6);
+        CORRADE_COMPARE(b[2], 7);
+    }
 }
 
 void ArrayViewTest::constructVoid() {

@@ -214,6 +214,7 @@ template<std::size_t size_, class T> class StaticArray {
          * Enabled only if `T*` is implicitly convertible to `U*`. Note
          * that, similarly as with raw pointers, you need to ensure that both
          * types have the same size.
+         * @see @ref arrayView(StaticArray<size, T>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
@@ -228,6 +229,7 @@ template<std::size_t size_, class T> class StaticArray {
          * Enabled only if `const T*` is implicitly convertible to `U*`. Note
          * that, similarly as with raw pointers, you need to ensure that both
          * types have the same size.
+         * @see @ref arrayView(const StaticArray<size, T>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
@@ -242,6 +244,7 @@ template<std::size_t size_, class T> class StaticArray {
          * Enabled only if `T*` is implicitly convertible to `U*`. Note
          * that, similarly as with raw pointers, you need to ensure that both
          * types have the same size.
+         * @see @ref staticArrayView(StaticArray<size, T>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
@@ -258,6 +261,7 @@ template<std::size_t size_, class T> class StaticArray {
          * Enabled only if `const T*` is implicitly convertible to `U*`. Note
          * that, similarly as with raw pointers, you need to ensure that both
          * types have the same size.
+         * @see @ref staticArrayView(const StaticArray<size, T>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
@@ -403,6 +407,74 @@ template<std::size_t size_, class T> class StaticArray {
             T _data[size_];
         };
 };
+
+/** @relatesalso ArrayView
+@brief Make view on @ref StaticArray
+
+Convenience alternative to calling @ref StaticArray::operator ArrayView<U>()
+explicitly. The following two lines are equivalent:
+@code
+Containers::StaticArray<5, std::uint32_t> data;
+
+Containers::ArrayView<std::uint32_t> a{data};
+auto b = Containers::arrayView(data);
+@endcode
+*/
+template<std::size_t size, class T> constexpr ArrayView<T> arrayView(StaticArray<size, T>& array) {
+    return ArrayView<T>{array};
+}
+
+/** @relatesalso ArrayView
+@brief Make view on const @ref StaticArray
+
+Convenience alternative to calling @ref StaticArray::operator ArrayView<U>()
+explicitly. The following two lines are equivalent:
+@code
+const Containers::StaticArray<5, std::uint32_t> data;
+
+Containers::ArrayView<const std::uint32_t> a{data};
+auto b = Containers::arrayView(data);
+@endcode
+*/
+template<std::size_t size, class T> constexpr ArrayView<const T> arrayView(const StaticArray<size, T>& array) {
+    return ArrayView<const T>{array};
+}
+
+/** @relatesalso StaticArrayView
+@brief Make static view on @ref StaticArray
+
+Convenience alternative to calling `StaticArray::operator StaticArrayView<size_,U>()`
+explicitly. The following two lines are equivalent:
+@code
+Containers::StaticArray<5, std::uint32_t> data;
+
+Containers::StaticArrayView<5, std::uint32_t> a{data};
+auto b = Containers::staticArrayView(data);
+@endcode
+
+@todoc Make it a real reference once Doxygen is sane
+*/
+template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArrayView(StaticArray<size, T>& array) {
+    return StaticArrayView<size, T>{array};
+}
+
+/** @relatesalso StaticArrayView
+@brief Make static view on const @ref StaticArray
+
+Convenience alternative to calling `StaticArray::operator StaticArrayView<size_, U>()`
+explicitly. The following two lines are equivalent:
+@code
+const Containers::StaticArray<5, std::uint32_t> data;
+
+Containers::StaticArrayView<5, const std::uint32_t> a{data};
+auto b = Containers::staticArrayView(data);
+@endcode
+
+@todoc Make it a real reference once Doxygen is sane
+*/
+template<std::size_t size, class T> constexpr StaticArrayView<size, const T> staticArrayView(const StaticArray<size, T>& array) {
+    return StaticArrayView<size, const T>{array};
+}
 
 template<std::size_t size_, class T> template<class ...Args> StaticArray<size_, T>::StaticArray(DirectInitT, Args&&... args): StaticArray{NoInit} {
     for(T& i: _data) {
