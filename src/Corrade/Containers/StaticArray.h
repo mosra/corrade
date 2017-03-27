@@ -232,7 +232,7 @@ template<std::size_t size_, class T> class StaticArray {
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
         #else
-        template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value>::type>
+        template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value || std::is_convertible<T*, const U*>::value>::type>
         #endif
         /*implicit*/ operator ArrayView<const U>() const noexcept { return {_data, size_}; }
 
@@ -253,7 +253,7 @@ template<std::size_t size_, class T> class StaticArray {
         }
 
         /**
-         * @brief Convert to const @ref ArrayView
+         * @brief Convert to const @ref StaticArrayView
          *
          * Enabled only if `const T*` is implicitly convertible to `U*`. Note
          * that, similarly as with raw pointers, you need to ensure that both
@@ -262,7 +262,7 @@ template<std::size_t size_, class T> class StaticArray {
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
         #else
-        template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value>::type>
+        template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value || std::is_convertible<T*, const U*>::value>::type>
         #endif
         /*implicit*/ operator StaticArrayView<size_, const U>() const noexcept {
             return StaticArrayView<size_, const U>{_data};

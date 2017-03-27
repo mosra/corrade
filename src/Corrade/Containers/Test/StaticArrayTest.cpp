@@ -271,13 +271,21 @@ void StaticArrayTest::convertPointer() {
 void StaticArrayTest::convertView() {
     StaticArray a;
     const StaticArray ca;
+    Containers::StaticArray<5, const int> ac;
+    const Containers::StaticArray<5, const int> cac;
 
     const ArrayView b = a;
     const ConstArrayView cb = ca;
+    const ConstArrayView bc = ac;
+    const ConstArrayView cbc = cac;
     CORRADE_VERIFY(b.begin() == a.begin());
+    CORRADE_VERIFY(bc.begin() == ac.begin());
     CORRADE_VERIFY(cb.begin() == ca.begin());
+    CORRADE_VERIFY(cbc.begin() == cac.begin());
     CORRADE_COMPARE(b.size(), 5);
     CORRADE_COMPARE(cb.size(), 5);
+    CORRADE_COMPARE(bc.size(), 5);
+    CORRADE_COMPARE(cbc.size(), 5);
 }
 
 void StaticArrayTest::convertViewDerived() {
@@ -306,11 +314,17 @@ void StaticArrayTest::convertViewDerived() {
 void StaticArrayTest::convertStaticView() {
     StaticArray a;
     const StaticArray ca;
+    Containers::StaticArray<5, const int> ac;
+    const Containers::StaticArray<5, const int> cac;
 
     const StaticArrayView b = a;
     const ConstStaticArrayView cb = ca;
+    const ConstStaticArrayView bc = ac;
+    const ConstStaticArrayView cbc = cac;
     CORRADE_VERIFY(b.begin() == a.begin());
+    CORRADE_VERIFY(bc.begin() == ac.begin());
     CORRADE_VERIFY(cb.begin() == ca.begin());
+    CORRADE_VERIFY(cbc.begin() == cac.begin());
 }
 
 void StaticArrayTest::convertStaticViewDerived() {
