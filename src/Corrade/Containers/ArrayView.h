@@ -119,7 +119,7 @@ template<class T> class ArrayView {
         #else
         template<class U, class V = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
         #endif
-        constexpr /*implicit*/ ArrayView(ArrayView<U> array) noexcept: _data{array}, _size{array.size()} {}
+        constexpr /*implicit*/ ArrayView(ArrayView<U> view) noexcept: _data{view}, _size{view.size()} {}
 
         /**
          * @brief Construct view on @ref StaticArrayView
@@ -133,7 +133,7 @@ template<class T> class ArrayView {
         #else
         template<std::size_t size, class U, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
         #endif
-        constexpr /*implicit*/ ArrayView(StaticArrayView<size, U> array) noexcept: _data{array}, _size{size} {}
+        constexpr /*implicit*/ ArrayView(StaticArrayView<size, U> view) noexcept: _data{view}, _size{size} {}
 
         #ifndef CORRADE_MSVC2015_COMPATIBILITY
         /** @brief Whether the array is non-empty */
