@@ -86,14 +86,14 @@ template<class T> class ArrayView {
         constexpr /*implicit*/ ArrayView() noexcept: _data(nullptr), _size(0) {}
 
         /**
-         * @brief Constructor
+         * @brief Construct view on an array with explicit length
          * @param data      Data pointer
          * @param size      Data size
          */
         constexpr /*implicit*/ ArrayView(T* data, std::size_t size) noexcept: _data(data), _size(size) {}
 
         /**
-         * @brief Construct view of fixed-size array
+         * @brief Construct view on a fixed-size array
          * @param data      Fixed-size array
          *
          * Enabled only if `const T*` is implicitly convertible to `U*`. Note
@@ -247,7 +247,7 @@ template<> class ArrayView<const void> {
         constexpr /*implicit*/ ArrayView() noexcept: _data(nullptr), _size(0) {}
 
         /**
-         * @brief Constructor
+         * @brief Construct view on array of explicit length
          * @param data      Data pointer
          * @param size      Data size
          */
@@ -334,7 +334,7 @@ template<std::size_t size_, class T> class StaticArrayView {
         constexpr /*implicit*/ StaticArrayView() noexcept: _data(nullptr) {}
 
         /**
-         * @brief Constructor
+         * @brief Construct static view on an array
          * @param data      Data pointer
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -345,7 +345,7 @@ template<std::size_t size_, class T> class StaticArrayView {
         noexcept: _data(data) {}
 
         /**
-         * @brief Construct view of fixed-size array
+         * @brief Construct static view on a fixed-size array
          * @param data      Fixed-size array
          *
          * Enabled only if `const T*` is implicitly convertible to `U*`. Note
