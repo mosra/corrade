@@ -154,7 +154,7 @@ void ArrayViewTest::constructDerived() {
     CORRADE_VERIFY((std::is_convertible<B(&)[5], Containers::ArrayView<A>>::value));
 
     {
-        CORRADE_EXPECT_FAIL("Intentionally not forbidding construction of base array from larger derived type to stay compatible with raw arrays");
+        CORRADE_EXPECT_FAIL("Intentionally not forbidding construction of base array from larger derived type to stay compatible with raw arrays.");
 
         struct C: A { int b; };
 
