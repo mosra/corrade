@@ -305,10 +305,11 @@ void ArrayViewTest::sliceInvalid() {
     a.slice(a + 2, a + 1);
     a.slice<5>(1);
 
-    CORRADE_COMPARE(out.str(), "Containers::ArrayView::slice(): slice out of range\n"
-                               "Containers::ArrayView::slice(): slice out of range\n"
-                               "Containers::ArrayView::slice(): slice out of range\n"
-                               "Containers::ArrayView::slice(): slice out of range\n");
+    CORRADE_COMPARE(out.str(),
+        "Containers::ArrayView::slice(): slice [-1:0] out of range for 5 elements\n"
+        "Containers::ArrayView::slice(): slice [5:6] out of range for 5 elements\n"
+        "Containers::ArrayView::slice(): slice [2:1] out of range for 5 elements\n"
+        "Containers::ArrayView::slice(): slice [1:6] out of range for 5 elements\n");
 }
 
 void ArrayViewTest::sliceNullptr() {

@@ -560,13 +560,19 @@ template<class U, std::size_t size, class T> StaticArrayView<size*sizeof(T)/size
 
 template<class T> ArrayView<T> ArrayView<T>::slice(T* begin, T* end) const {
     CORRADE_ASSERT(_data <= begin && begin <= end && end <= _data + _size,
-        "Containers::ArrayView::slice(): slice out of range", nullptr);
+        "Containers::ArrayView::slice(): slice [" << Utility::Debug::nospace
+        << begin - _data << Utility::Debug::nospace << ":"
+        << Utility::Debug::nospace << end - _data << Utility::Debug::nospace
+        << "] out of range for" << _size << "elements", nullptr);
     return ArrayView<T>{begin, std::size_t(end - begin)};
 }
 
 template<class T> template<std::size_t viewSize> StaticArrayView<viewSize, T> ArrayView<T>::slice(T* begin) const {
     CORRADE_ASSERT(_data <= begin && begin + viewSize <= _data + _size,
-        "Containers::ArrayView::slice(): slice out of range", nullptr);
+        "Containers::ArrayView::slice(): slice [" << Utility::Debug::nospace
+        << begin - _data << Utility::Debug::nospace << ":"
+        << Utility::Debug::nospace << begin + viewSize - _data << Utility::Debug::nospace
+        << "] out of range for" << _size << "elements", nullptr);
     return StaticArrayView<viewSize, T>{begin};
 }
 
