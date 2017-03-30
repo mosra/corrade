@@ -558,6 +558,20 @@ template<class U, std::size_t size, class T> StaticArrayView<size*sizeof(T)/size
     return StaticArrayView<newSize, U>{reinterpret_cast<U*>(view.begin())};
 }
 
+/** @relatesalso StaticArrayView
+@brief Reinterpret-cast a statically sized array
+
+Calls @ref arrayCast(StaticArrayView<size, T>) with the argument converted to
+@ref StaticArrayView of the same type and size. Example usage:
+@code
+std::int32_t data[15];
+a = Containers::arrayCast<char>(data); // a.size() == 60
+@endcode
+*/
+template<class U, std::size_t size, class T> StaticArrayView<size*sizeof(T)/sizeof(U), U> arrayCast(T(&data)[size]) {
+    return arrayCast<U>(StaticArrayView<size, T>{data});
+}
+
 template<class T> ArrayView<T> ArrayView<T>::slice(T* begin, T* end) const {
     CORRADE_ASSERT(_data <= begin && begin <= end && end <= _data + _size,
         "Containers::ArrayView::slice(): slice [" << Utility::Debug::nospace

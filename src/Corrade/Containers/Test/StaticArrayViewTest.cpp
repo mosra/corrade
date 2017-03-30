@@ -264,11 +264,14 @@ void StaticArrayViewTest::cast() {
     Containers::StaticArrayView<6, std::uint32_t> a = data;
     auto b = Containers::arrayCast<std::uint64_t>(a);
     auto c = Containers::arrayCast<std::uint16_t>(a);
+    auto d = Containers::arrayCast<std::uint16_t>(data);
 
     CORRADE_VERIFY((std::is_same<decltype(b), Containers::StaticArrayView<3, std::uint64_t>>::value));
     CORRADE_VERIFY((std::is_same<decltype(c), Containers::StaticArrayView<12, std::uint16_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(d), Containers::StaticArrayView<12, std::uint16_t>>::value));
     CORRADE_COMPARE(reinterpret_cast<void*>(b.begin()), reinterpret_cast<void*>(a.begin()));
     CORRADE_COMPARE(reinterpret_cast<void*>(c.begin()), reinterpret_cast<void*>(a.begin()));
+    CORRADE_COMPARE(reinterpret_cast<void*>(d.begin()), reinterpret_cast<void*>(a.begin()));
 }
 
 
