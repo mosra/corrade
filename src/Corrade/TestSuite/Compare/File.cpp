@@ -26,6 +26,7 @@
 #include "File.h"
 
 #include <cstddef>
+#include <utility>
 #ifdef _MSC_VER
 #include <algorithm> /* std::max() */
 #endif
@@ -35,7 +36,7 @@
 
 namespace Corrade { namespace TestSuite {
 
-Comparator<Compare::File>::Comparator(const std::string& pathPrefix): _actualState{State::ReadError}, _expectedState{State::ReadError}, _pathPrefix{pathPrefix} {}
+Comparator<Compare::File>::Comparator(std::string  pathPrefix): _actualState{State::ReadError}, _expectedState{State::ReadError}, _pathPrefix{std::move(pathPrefix)} {}
 
 bool Comparator<Compare::File>::operator()(const std::string& actualFilename, const std::string& expectedFilename) {
     _actualFilename = Utility::Directory::join(_pathPrefix, actualFilename);

@@ -36,29 +36,29 @@ ConfigurationGroup::ConfigurationGroup(Configuration* configuration): _configura
 
 ConfigurationGroup::ConfigurationGroup(const ConfigurationGroup& other): _values(other._values), _groups(other._groups), _configuration(nullptr) {
     /* Deep copy groups */
-    for(auto it = _groups.begin(); it != _groups.end(); ++it)
-        it->group = new ConfigurationGroup(*it->group);
+    for(auto & _group : _groups)
+        _group.group = new ConfigurationGroup(*_group.group);
 }
 
 ConfigurationGroup::ConfigurationGroup(ConfigurationGroup&& other): _values(std::move(other._values)), _groups(std::move(other._groups)), _configuration(nullptr) {
     /* Reset configuration pointer for subgroups */
-    for(auto it = _groups.begin(); it != _groups.end(); ++it)
-        it->group->_configuration = nullptr;
+    for(auto & _group : _groups)
+        _group.group->_configuration = nullptr;
 }
 
 ConfigurationGroup& ConfigurationGroup::operator=(const ConfigurationGroup& other) {
     /* Delete current groups */
-    for(auto it = _groups.begin(); it != _groups.end(); ++it)
-        delete it->group;
+    for(auto & _group : _groups)
+        delete _group.group;
 
     /* _configuration stays the same */
     _values = other._values;
     _groups = other._groups;
 
     /* Deep copy groups */
-    for(auto it = _groups.begin(); it != _groups.end(); ++it) {
-        it->group = new ConfigurationGroup(*it->group);
-        it->group->_configuration = _configuration;
+    for(auto & _group : _groups) {
+        _group.group = new ConfigurationGroup(*_group.group);
+        _group.group->_configuration = _configuration;
     }
 
     return *this;
@@ -66,23 +66,23 @@ ConfigurationGroup& ConfigurationGroup::operator=(const ConfigurationGroup& othe
 
 ConfigurationGroup& ConfigurationGroup::operator=(ConfigurationGroup&& other) {
     /* Delete current groups */
-    for(auto it = _groups.begin(); it != _groups.end(); ++it)
-        delete it->group;
+    for(auto & _group : _groups)
+        delete _group.group;
 
     /* _configuration stays the same */
     _values = std::move(other._values);
     _groups = std::move(other._groups);
 
     /* Redirect configuration pointer for subgroups */
-    for(auto it = _groups.begin(); it != _groups.end(); ++it)
-        it->group->_configuration = _configuration;
+    for(auto & _group : _groups)
+        _group.group->_configuration = _configuration;
 
     return *this;
 }
 
 ConfigurationGroup::~ConfigurationGroup() {
-    for(auto it = _groups.begin(); it != _groups.end(); ++it)
-        delete it->group;
+    for(auto & _group : _groups)
+        delete _group.group;
 }
 
 auto ConfigurationGroup::findGroup(const std::string& name, const unsigned int index) -> std::vector<Group>::iterator {
@@ -107,8 +107,8 @@ bool ConfigurationGroup::hasGroup(const std::string& name, const unsigned int in
 
 unsigned int ConfigurationGroup::groupCount(const std::string& name) const {
     unsigned int count = 0;
-    for(auto it = _groups.begin(); it != _groups.end(); ++it)
-        if(it->name == name) ++count;
+    for(const auto & _group : _groups)
+        if(_group.name == name) ++count;
 
     return count;
 }
@@ -126,8 +126,8 @@ const ConfigurationGroup* ConfigurationGroup::group(const std::string& name, uns
 std::vector<ConfigurationGroup*> ConfigurationGroup::groups(const std::string& name) {
     std::vector<ConfigurationGroup*> found;
 
-    for(auto it = _groups.begin(); it != _groups.end(); ++it)
-        if(it->name == name) found.push_back(it->group);
+    for(auto & _group : _groups)
+        if(_group.name == name) found.push_back(_group.group);
 
     return found;
 }
@@ -135,8 +135,8 @@ std::vector<ConfigurationGroup*> ConfigurationGroup::groups(const std::string& n
 std::vector<const ConfigurationGroup*> ConfigurationGroup::groups(const std::string& name) const {
     std::vector<const ConfigurationGroup*> found;
 
-    for(auto it = _groups.cbegin(); it != _groups.cend(); ++it)
-        if(it->name == name) found.push_back(it->group);
+    for(const auto & _group : _groups)
+        if(_group.name == name) found.push_back(_group.group);
 
     return found;
 }
@@ -212,16 +212,16 @@ auto ConfigurationGroup::findValue(const std::string& key, const unsigned int in
 }
 
 bool ConfigurationGroup::hasValues() const {
-    for(auto it = _values.cbegin(); it != _values.cend(); ++it)
-        if(!it->key.empty()) return true;
+    for(const auto & _value : _values)
+        if(!_value.key.empty()) return true;
 
     return false;
 }
 
 unsigned int ConfigurationGroup::valueCount() const {
     unsigned int count = 0;
-    for(auto it = _values.cbegin(); it != _values.cend(); ++it)
-        if(!it->key.empty()) ++count;
+    for(const auto & _value : _values)
+        if(!_value.key.empty()) ++count;
 
     return count;
 }
@@ -232,8 +232,8 @@ bool ConfigurationGroup::hasValue(const std::string& key, const unsigned int ind
 
 unsigned int ConfigurationGroup::valueCount(const std::string& key) const {
     unsigned int count = 0;
-    for(auto it = _values.cbegin(); it != _values.cend(); ++it)
-        if(it->key == key) ++count;
+    for(const auto & _value : _values)
+        if(_value.key == key) ++count;
 
     return count;
 }
@@ -246,8 +246,8 @@ std::string ConfigurationGroup::valueInternal(const std::string& key, const unsi
 std::vector<std::string> ConfigurationGroup::valuesInternal(const std::string& key, ConfigurationValueFlags) const {
     std::vector<std::string> found;
 
-    for(auto it = _values.cbegin(); it != _values.cend(); ++it)
-        if(it->key == key) found.push_back(it->value);
+    for(const auto & _value : _values)
+        if(_value.key == key) found.push_back(_value.value);
 
     return found;
 }
@@ -258,9 +258,9 @@ bool ConfigurationGroup::setValueInternal(const std::string& key, std::string va
         "Utility::ConfigurationGroup::setValue(): disallowed character in key", false);
 
     unsigned int foundIndex = 0;
-    for(auto it = _values.begin(); it != _values.end(); ++it) {
-        if(it->key == key && foundIndex++ == index) {
-            it->value = std::move(value);
+    for(auto & _value : _values) {
+        if(_value.key == key && foundIndex++ == index) {
+            _value.value = std::move(value);
             if(_configuration) _configuration->_flags |= Configuration::InternalFlag::Changed;
             return true;
         }
@@ -311,8 +311,8 @@ void ConfigurationGroup::removeAllValues(const std::string& key) {
 void ConfigurationGroup::clear() {
     _values.clear();
 
-    for(auto it = _groups.begin(); it != _groups.end(); ++it)
-        delete it->group;
+    for(auto & _group : _groups)
+        delete _group.group;
     _groups.clear();
 }
 

@@ -32,7 +32,7 @@ namespace Corrade { namespace Interconnect {
 
 namespace Implementation {
 
-AbstractConnectionData::~AbstractConnectionData() {}
+AbstractConnectionData::~AbstractConnectionData() = default;
 
 }
 

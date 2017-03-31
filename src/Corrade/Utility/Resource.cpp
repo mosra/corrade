@@ -178,7 +178,7 @@ std::string Resource::compileFrom(const std::string& name, const std::string& co
             Error() << "    Error: cannot open file" << filename << "of file" << fileData.size()+1 << "in group" << group;
             return {};
         }
-        fileData.emplace_back(std::move(alias), std::string{contents, contents.size()});
+        fileData.emplace_back(alias, std::string{contents, contents.size()});
     }
 
     return compile(name, group, fileData);

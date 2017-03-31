@@ -49,7 +49,7 @@ namespace Implementation {
     }
 
     template<class T> T BasicConfigurationValue<T>::fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
-        std::string _stringValue = stringValue;
+        const std::string& _stringValue = stringValue;
 
         std::istringstream stream(_stringValue);
 

@@ -32,7 +32,7 @@
 
 namespace Corrade { namespace Interconnect {
 
-Connection::Connection(Connection&& other) noexcept: _signal{std::move(other._signal)}, _data{std::move(other._data)}, _connected{std::move(other._connected)} {
+Connection::Connection(Connection&& other) noexcept: _signal{other._signal}, _data{other._data}, _connected{other._connected} {
     if(_data) _data->_connection = this;
     other._data = nullptr;
     other._connected = false;
