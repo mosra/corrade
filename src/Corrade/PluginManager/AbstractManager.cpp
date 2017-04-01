@@ -359,7 +359,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
             return LoadState::UnresolvedDependency;
         }
 
-        dependencies.push_back(*foundDependency->second);
+        dependencies.emplace_back(*foundDependency->second);
     }
 
     const std::string filename = Directory::join(_pluginDirectory, plugin.metadata._name + PLUGIN_FILENAME_SUFFIX);

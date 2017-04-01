@@ -99,7 +99,7 @@ std::vector<std::string> Arguments::environment() {
     /* Standard Unix and local Emscripten environment */
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     for(char** e = environ; *e; ++e)
-        list.push_back(*e);
+        list.emplace_back(*e);
 
     /* System environment provided by Node.js. Hopefully nobody uses \b in
        environment variables. (Can't use \0 because Emscripten chokes on it.) */
