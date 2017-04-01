@@ -99,7 +99,7 @@ std::vector<std::string> Arguments::environment() {
     /* Standard Unix and local Emscripten environment */
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     for(char** e = environ; *e; ++e)
-        list.push_back(*e);
+        list.emplace_back(*e);
 
     /* System environment provided by Node.js. Hopefully nobody uses \b in
        environment variables. (Can't use \0 because Emscripten chokes on it.) */
@@ -141,7 +141,7 @@ std::vector<std::string> Arguments::environment() {
     return list;
 }
 
-Arguments::Arguments(std::string prefix): _prefix{prefix + '-'} {
+Arguments::Arguments(const std::string& prefix): _prefix{prefix + '-'} {
     /* Add help option */
     addBooleanOption("help");
     setHelp("help", "display this help message and exit");
@@ -335,7 +335,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
     if(_command.empty() && argv && argc >= 1) _command = argv[0];
 
     /* Clear previously parsed values */
-    for(auto it = _booleans.begin(); it != _booleans.end(); ++it) *it = false;
+    for(auto && _boolean : _booleans) _boolean = false;
     for(const Entry& entry: _entries) {
         if(entry.type == Type::BooleanOption) continue;
 

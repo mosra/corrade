@@ -71,7 +71,7 @@ Configuration::Configuration(std::istream& in, const Flags flags): Configuration
     if(parse(in)) _flags |= InternalFlag::IsValid;
 }
 
-Configuration::Configuration(Configuration&& other): ConfigurationGroup(std::move(other)), _filename(std::move(other._filename)), _flags(std::move(other._flags)) {
+Configuration::Configuration(Configuration&& other): ConfigurationGroup(std::move(other)), _filename(std::move(other._filename)), _flags(other._flags) {
     /* Redirect configuration pointer to this instance */
     setConfigurationPointer(this);
 }
@@ -81,7 +81,7 @@ Configuration::~Configuration() { if(_flags & InternalFlag::Changed) save(); }
 Configuration& Configuration::operator=(Configuration&& other) {
     ConfigurationGroup::operator=(std::move(other));
     _filename = std::move(other._filename);
-    _flags = std::move(other._flags);
+    _flags = other._flags;
 
     /* Redirect configuration pointer to this instance */
     setConfigurationPointer(this);
@@ -173,7 +173,7 @@ std::string Configuration::parse(std::istream& in, ConfigurationGroup* group, co
         if(buffer.empty()) {
             if(_flags & InternalFlag::SkipComments) continue;
 
-            group->_values.push_back(ConfigurationGroup::Value());
+            group->_values.emplace_back();
 
         /* Group header */
         } else if(buffer[0] == '[') {
@@ -291,46 +291,46 @@ void Configuration::save(std::ostream& out, const std::string& eol, Configuratio
     std::string buffer;
 
     /* Foreach all items in the group */
-    for(auto it = group->_values.cbegin(); it != group->_values.cend(); ++it) {
+    for(const auto & _value : group->_values) {
         /* Key/value pair */
-        if(!it->key.empty()) {
+        if(!_value.key.empty()) {
             /* Multi-line value */
-            if(it->value.find_first_of('\n') != std::string::npos) {
+            if(_value.value.find_first_of('\n') != std::string::npos) {
                 /* Replace \n with `eol` */
                 /** @todo fixme: ugly and slow */
-                std::string value = it->value;
+                std::string value = _value.value;
                 std::size_t pos = 0;
                 while((pos = value.find_first_of('\n', pos)) != std::string::npos) {
                     value.replace(pos, 1, eol);
                     pos += eol.size();
                 }
 
-                buffer = it->key + "=\"\"\"" + eol + value + eol + "\"\"\"" + eol;
+                buffer = _value.key + "=\"\"\"" + eol + value + eol + "\"\"\"" + eol;
 
             /* Value with leading/trailing spaces */
-            } else if(!it->value.empty() && (isWhitespace(it->value.front()) || isWhitespace(it->value.back()))) {
-                buffer = it->key + "=\"" + it->value + '"' + eol;
+            } else if(!_value.value.empty() && (isWhitespace(_value.value.front()) || isWhitespace(_value.value.back()))) {
+                buffer = _value.key + "=\"" + _value.value + '"' + eol;
 
             /* Value without spaces */
-            } else buffer = it->key + '=' + it->value + eol;
+            } else buffer = _value.key + '=' + _value.value + eol;
         }
 
         /* Comment / empty line */
-        else buffer = it->value + eol;
+        else buffer = _value.value + eol;
 
         out.write(buffer.data(), buffer.size());
     }
 
     /* Recursively process all subgroups */
-    for(auto git = group->_groups.cbegin(); git != group->_groups.cend(); ++git) {
+    for(const auto & _group : group->_groups) {
         /* Subgroup name */
-        std::string name = git->name;
+        std::string name = _group.name;
         if(!fullPath.empty()) name = fullPath + '/' + name;
 
         buffer = '[' + name + ']' + eol;
         out.write(buffer.data(), buffer.size());
 
-        save(out, eol, git->group, name);
+        save(out, eol, _group.group, name);
     }
 }
 

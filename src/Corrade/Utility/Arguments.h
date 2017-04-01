@@ -188,7 +188,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * See class documentation for example.
          * @see @ref addSkippedPrefix()
          */
-        explicit Arguments(std::string prefix);
+        explicit Arguments(const std::string& prefix);
 
         ~Arguments();
 

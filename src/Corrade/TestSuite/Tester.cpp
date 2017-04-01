@@ -61,7 +61,7 @@ void Tester::registerArguments(int& argc, char** const argv) {
     _argv = argv;
 }
 
-Tester::Tester(const TesterConfiguration& configuration): _logOutput{nullptr}, _errorOutput{nullptr}, _testCaseLine{0}, _checkCount{0}, _expectedFailure{nullptr}, _configuration{configuration} {
+Tester::Tester(TesterConfiguration  configuration): _logOutput{nullptr}, _errorOutput{nullptr}, _testCaseLine{0}, _checkCount{0}, _expectedFailure{nullptr}, _configuration{std::move(configuration)} {
     CORRADE_ASSERT(_argc, "TestSuite::Tester: command-line arguments not available", );
 }
 
