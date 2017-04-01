@@ -173,7 +173,7 @@ std::string Configuration::parse(std::istream& in, ConfigurationGroup* group, co
         if(buffer.empty()) {
             if(_flags & InternalFlag::SkipComments) continue;
 
-            group->_values.push_back(ConfigurationGroup::Value());
+            group->_values.emplace_back();
 
         /* Group header */
         } else if(buffer[0] == '[') {
