@@ -542,7 +542,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @brief Constructor
          * @param configuration     Optional configuration
          */
-        explicit Tester(const TesterConfiguration& configuration = TesterConfiguration{});
+        explicit Tester(TesterConfiguration configuration = TesterConfiguration{});
 
         /**
          * @brief Add test cases

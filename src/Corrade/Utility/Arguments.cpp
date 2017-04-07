@@ -141,7 +141,7 @@ std::vector<std::string> Arguments::environment() {
     return list;
 }
 
-Arguments::Arguments(std::string prefix): _prefix{prefix + '-'} {
+Arguments::Arguments(const std::string& prefix): _prefix{prefix + '-'} {
     /* Add help option */
     addBooleanOption("help");
     setHelp("help", "display this help message and exit");
@@ -335,7 +335,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
     if(_command.empty() && argv && argc >= 1) _command = argv[0];
 
     /* Clear previously parsed values */
-    for(auto it = _booleans.begin(); it != _booleans.end(); ++it) *it = false;
+    for(auto&& boolean: _booleans) boolean = false;
     for(const Entry& entry: _entries) {
         if(entry.type == Type::BooleanOption) continue;
 

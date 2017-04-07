@@ -42,7 +42,7 @@ namespace Compare { class File; }
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::File> {
     public:
-        explicit Comparator(const std::string& pathPrefix = {});
+        explicit Comparator(std::string pathPrefix = {});
 
         bool operator()(const std::string& actualFilename, const std::string& expectedFilename);
 

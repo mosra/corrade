@@ -60,22 +60,22 @@ Receiver::~Receiver() {
 }
 
 void Receiver::disconnectAllSlots() {
-    for(auto it = _connections.begin(); it != _connections.end(); ++it) {
+    for(Implementation::AbstractConnectionData* const connection: _connections) {
         /* Remove connection from emitter */
-        for(auto end = (*it)->_emitter->_connections.end(), eit = (*it)->_emitter->_connections.begin(); eit != end; ++eit) {
-            if(eit->second != *it) continue;
+        for(auto end = connection->_emitter->_connections.end(), eit = connection->_emitter->_connections.begin(); eit != end; ++eit) {
+            if(eit->second != connection) continue;
 
-            (*it)->_emitter->_connections.erase(eit);
-            (*it)->_emitter->_connectionsChanged = true;
+            connection->_emitter->_connections.erase(eit);
+            connection->_emitter->_connectionsChanged = true;
             break;
         }
 
         /* If there is no connection object, destroy also connection data (as we
            are the last remaining owner) */
-        if(!(*it)->_connection) delete *it;
+        if(!connection->_connection) delete connection;
 
         /* Else mark the connection as disconnected */
-        else (*it)->_connection->_connected = false;
+        else connection->_connection->_connected = false;
     }
 
     _connections.clear();

@@ -171,9 +171,9 @@ AbstractManager::~AbstractManager() {
 
     #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
     /* Remove the plugins from global container */
-    for(auto it = removed.cbegin(); it != removed.cend(); ++it) {
-        delete (*it)->second;
-        _plugins.plugins.erase(*it);
+    for(auto it: removed) {
+        delete it->second;
+        _plugins.plugins.erase(it);
     }
     #endif
 }
@@ -272,12 +272,11 @@ void AbstractManager::reloadPluginDirectory() {
 
 std::vector<std::string> AbstractManager::pluginList() const {
     std::vector<std::string> names;
-    for(auto i = _plugins.plugins.cbegin(); i != _plugins.plugins.cend(); ++i) {
-
+    for(const std::pair<std::string, Plugin*>& plugin: _plugins.plugins) {
         /* Plugin doesn't belong to this manager */
-        if(i->second->manager != this) continue;
+        if(plugin.second->manager != this) continue;
 
-        names.push_back(i->first);
+        names.push_back(plugin.first);
     }
     return names;
 }
@@ -381,7 +380,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
     #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
-    int (*_version)(void) = reinterpret_cast<int(*)()>(dlsym(module, "pluginVersion"));
+    int (*_version)() = reinterpret_cast<int(*)()>(dlsym(module, "pluginVersion"));
     if(_version == nullptr) {
         Error() << "PluginManager::Manager::load(): cannot get version of plugin" << plugin.metadata._name + ":" << dlerror();
         dlclose(module);
@@ -476,8 +475,8 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
     auto foundInstance = _instances.find(plugin.metadata._name);
     if(foundInstance != _instances.end()) {
         /* Check if all instances can be safely deleted */
-        for(auto it = foundInstance->second.cbegin(); it != foundInstance->second.cend(); ++it)
-            if(!(*it)->canBeDeleted()) {
+        for(AbstractPlugin* const instance: foundInstance->second)
+            if(!instance->canBeDeleted()) {
                 Error() << "PluginManager::Manager::unload(): plugin" << plugin.metadata._name << "is currently used and cannot be deleted";
                 return LoadState::Used;
             }
