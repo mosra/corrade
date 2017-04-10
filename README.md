@@ -21,7 +21,7 @@ FEATURES
 ========
 
 *   Actively maintained Doxygen documentation with tutorials and examples.
-    Snapshot is available at http://mosra.cz/blog/corrade-doc/.
+    Snapshot is available at http://doc.magnum.graphics/corrade/.
 *   Signal/slot connection library with compile-time argument checking.
 *   Plugin management library with static and dynamic plugins and dependency
     handling.
