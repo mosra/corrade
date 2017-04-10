@@ -259,6 +259,13 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          */
         template<class T = std::string> T value(const std::string& key, unsigned int index = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) const;
 
+        /** @overload
+         * Calls the above with @p index set to `0`.
+         */
+        template<class T = std::string> T value(const std::string& key, ConfigurationValueFlags flags) const {
+            return value<T>(key, 0, flags);
+        }
+
         /**
          * @brief All values with given key
          * @param key       Key
@@ -291,6 +298,20 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
             return setValueInternal(key, value, index, flags);
         }
 
+        /** @overload
+         * Calls the above with @p index set to `0`.
+         */
+        bool setValue(const std::string& key, std::string value, ConfigurationValueFlags flags) {
+            return setValue(key, std::move(value), 0, flags);
+        }
+
+        /** @overload
+         * Calls the above with @p index set to `0`.
+         */
+        bool setValue(const std::string& key, const char* value, ConfigurationValueFlags flags) {
+            return setValue(key, value, 0, flags);
+        }
+
         /**
          * @brief Set value converted from given type
          *
@@ -300,6 +321,13 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          */
         template<class T> bool setValue(const std::string& key, const T& value, unsigned int index = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
             return setValueInternal(key, ConfigurationValue<T>::toString(value, flags), index, flags);
+        }
+
+        /** @overload
+         * Calls the above with @p index set to `0`.
+         */
+        template<class T> bool setValue(const std::string& key, const T& value, ConfigurationValueFlags flags) {
+            return setValue<T>(key, value, 0, flags);
         }
 
         /**
