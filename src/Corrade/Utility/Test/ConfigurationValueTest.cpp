@@ -39,6 +39,8 @@ struct ConfigurationValueTest: TestSuite::Tester {
     void floatingPointScientific();
     void unicodeCharLiteral();
     void boolean();
+
+    void container();
 };
 
 ConfigurationValueTest::ConfigurationValueTest() {
@@ -49,7 +51,9 @@ ConfigurationValueTest::ConfigurationValueTest() {
               &ConfigurationValueTest::floatingPoint,
               &ConfigurationValueTest::floatingPointScientific,
               &ConfigurationValueTest::unicodeCharLiteral,
-              &ConfigurationValueTest::boolean});
+              &ConfigurationValueTest::boolean,
+
+              &ConfigurationValueTest::container});
 }
 
 void ConfigurationValueTest::string() {

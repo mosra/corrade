@@ -32,8 +32,9 @@
 #include <cstdint>
 #include <string>
 
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/EnumSet.h"
-#include "Corrade/Utility/visibility.h"
+#include "Corrade/Utility/String.h"
 
 namespace Corrade { namespace Utility {
 
@@ -199,6 +200,44 @@ template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<char32_t> {
     static std::string toString(char32_t value, ConfigurationValueFlags);
     #endif
 };
+
+/**
+@brief Configuration value parser and writer for array of values
+
+Splits input string using @ref String::splitWithoutEmptyParts() and then
+processes each part via @ref ConfigurationValue for given @p T, propagating
+@ref ConfigurationValueFlags to it. Underflown entries are default-constructed,
+overflown entries are ignored.
+
+On output the array values are joined using a single space character.
+*/
+template<class T> struct ConfigurationValue<std::vector<T>> {
+    ConfigurationValue() = delete;
+
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    static std::vector<T> fromString(const std::string& value, ConfigurationValueFlags flags);
+    static std::string toString(const std::vector<T>& value, ConfigurationValueFlags flags);
+    #endif
+};
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+template<class T> std::vector<T> ConfigurationValue<std::vector<T>>::fromString(const std::string& value, const ConfigurationValueFlags flags) {
+    const std::vector<std::string> values = String::splitWithoutEmptyParts(value);
+    std::vector<T> out;
+    out.reserve(values.size());
+    for(std::size_t i = 0, max = std::min(size, values.size()); i != max; ++i)
+        out.emplace_back(ConfigurationValue<T>::fromString(values[i], flags));
+    return out;
+}
+
+template<class T> std::string ConfigurationValue<std::vector<T>>::toString(const std::vector<T>& value, ConfigurationValueFlags flags) {
+    std::string out;
+    for(std::size_t i = 0; i != size; ++i) {
+        if(!out.empty()) out += ' ';
+        out +=
+    }
+}
+#endif
 
 }}
 
