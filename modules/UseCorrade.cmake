@@ -96,9 +96,11 @@ elseif(MSVC)
         # that would effectively prevent using STL completely.
         "/wd4251"
 
-        # "conversion from '<bigger int type>' to '<smaller int type>',
-        # possible loss of data", fixing this would add too much noise.
-        # Equivalent to -Wshorten-64-to-32 on Clang.
+        # "conversion from '<bigger int type>' to '<smaller int type>'",
+        # "conversion from 'size_t' to '<smaller int type>', possible loss of
+        # data", fixing this would add too much noise. Equivalent to
+        # -Wshorten-64-to-32 on Clang.
+        "/wd4244"
         "/wd4267"
 
         # "new behavior: elements of array will be default initialized".
