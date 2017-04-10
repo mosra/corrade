@@ -57,12 +57,10 @@ corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp
         ConfigurationTestFiles/multiLine-saved.conf
         ConfigurationTestFiles/parse.conf
         ConfigurationTestFiles/parse-modified.conf
-        ConfigurationTestFiles/types.conf
-        ConfigurationTestFiles/types-scientific.conf
-        ConfigurationTestFiles/types-scientific-win.conf
         ConfigurationTestFiles/whitespaces.conf
         ConfigurationTestFiles/whitespaces-saved.conf)
 target_include_directories(UtilityConfigurationTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+corrade_add_test(UtilityConfigurationValueTest ConfigurationValueTest.cpp)
 corrade_add_test(UtilityDebugTest DebugTest.cpp)
 
 # It should return with a non-zero exit code

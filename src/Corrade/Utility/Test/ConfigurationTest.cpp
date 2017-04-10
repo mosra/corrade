@@ -57,8 +57,6 @@ struct ConfigurationTest: TestSuite::Tester {
     void truncate();
 
     void whitespaces();
-    void types();
-    void typesScientific();
     void eol();
     void stripComments();
 
@@ -86,8 +84,6 @@ ConfigurationTest::ConfigurationTest() {
               &ConfigurationTest::truncate,
 
               &ConfigurationTest::whitespaces,
-              &ConfigurationTest::types,
-              &ConfigurationTest::typesScientific,
               &ConfigurationTest::eol,
               &ConfigurationTest::stripComments,
 
@@ -104,7 +100,6 @@ ConfigurationTest::ConfigurationTest() {
     /* Remove everything there */
     Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"));
     Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "new.conf"));
-    Directory::rm(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types.conf"));
 }
 
 void ConfigurationTest::parse() {
@@ -317,87 +312,6 @@ void ConfigurationTest::whitespaces() {
     CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "whitespaces.conf"),
                        Directory::join(CONFIGURATION_TEST_DIR, "whitespaces-saved.conf"),
                        TestSuite::Compare::File);
-}
-
-void ConfigurationTest::types() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "types.conf"), Configuration::Flag::ReadOnly);
-    CORRADE_VERIFY(conf.isValid());
-    CORRADE_VERIFY(!conf.isEmpty());
-
-    /* String */
-    CORRADE_COMPARE(conf.value("string"), "value");
-    CORRADE_VERIFY(conf.setValue("string", "value"));
-    CORRADE_COMPARE(conf.value("quotes"), " value ");
-    CORRADE_VERIFY(conf.setValue("quotes", " value "));
-
-    /* Int */
-    CORRADE_COMPARE(conf.value<int>("int"), 5);
-    CORRADE_VERIFY(conf.setValue("int", 5));
-    CORRADE_COMPARE(conf.value<int>("intNeg"), -10);
-    CORRADE_VERIFY(conf.setValue("intNeg", -10));
-
-    /* Bool */
-    CORRADE_COMPARE(conf.value<bool>("bool", 0), true);
-    CORRADE_VERIFY(conf.setValue("bool", true, 0));
-    CORRADE_COMPARE(conf.value<bool>("bool", 1), true);
-    CORRADE_COMPARE(conf.value<bool>("bool", 2), true);
-    CORRADE_COMPARE(conf.value<bool>("bool", 3), true);
-    CORRADE_COMPARE(conf.value<bool>("bool", 4), false);
-    CORRADE_VERIFY(conf.setValue("bool", false, 4));
-
-    /* Double */
-    CORRADE_COMPARE(conf.value<double>("double"), 3.78);
-    CORRADE_VERIFY(conf.setValue("double", 3.78));
-    CORRADE_COMPARE(conf.value<double>("doubleNeg"), -2.14);
-    CORRADE_VERIFY(conf.setValue("doubleNeg", -2.14));
-
-    /* Flags */
-    CORRADE_COMPARE(conf.value<int>("oct", 0, ConfigurationValueFlag::Oct), 0773);
-    conf.setValue("oct", 0773, 0, ConfigurationValueFlag::Oct);
-    CORRADE_COMPARE(conf.value<int>("hex", 0, ConfigurationValueFlag::Hex), 0x6ecab);
-    conf.setValue("hex", 0x6ecab, 0, ConfigurationValueFlag::Hex);
-    CORRADE_COMPARE(conf.value<int>("hex2", 0, ConfigurationValueFlag::Hex), 0x5462FF);
-    CORRADE_COMPARE(conf.value<int>("hexUpper", 0, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase), 0xF00D);
-    conf.setValue("hexUpper", 0xF00D, 0, ConfigurationValueFlag::Hex|ConfigurationValueFlag::Uppercase);
-
-    /* Char32_t */
-    CORRADE_COMPARE(conf.value<char32_t>("unicode"), U'\xBEEF');
-    conf.setValue("unicode", U'\xBEEF');
-
-    /* Nothing should be changed after saving */
-    CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types.conf")));
-
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types.conf"),
-                       Directory::join(CONFIGURATION_TEST_DIR, "types.conf"),
-                       TestSuite::Compare::File);
-}
-
-void ConfigurationTest::typesScientific() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "types-scientific.conf"), Configuration::Flag::ReadOnly);
-    CORRADE_VERIFY(conf.isValid());
-    CORRADE_VERIFY(!conf.isEmpty());
-
-    CORRADE_COMPARE(conf.value<double>("exp"), 2.1e7);
-    CORRADE_COMPARE(conf.value<double>("expPos"), 2.1e+7);
-    conf.setValue("expPos", 2.1e+7, 0, ConfigurationValueFlag::Scientific);
-    CORRADE_COMPARE(conf.value<double>("expNeg"), -2.1e7);
-    CORRADE_COMPARE(conf.value<double>("expNeg2"), 2.1e-7);
-    CORRADE_COMPARE(conf.value<double>("expBig"), 2.1E7);
-    conf.setValue<double>("expBig", 2.1E7, 0, ConfigurationValueFlag::Scientific|ConfigurationValueFlag::Uppercase);
-
-    /* Nothing should be changed after saving */
-    CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types-scientific.conf")));
-
-    /* MinGW32 has one zero more in scientific notation */
-    #if !defined(__MINGW32__)
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types-scientific.conf"),
-                       Directory::join(CONFIGURATION_TEST_DIR, "types-scientific.conf"),
-                       TestSuite::Compare::File);
-    #else
-    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "types-scientific.conf"),
-                       Directory::join(CONFIGURATION_TEST_DIR, "types-scientific-win.conf"),
-                       TestSuite::Compare::File);
-    #endif
 }
 
 void ConfigurationTest::eol() {
