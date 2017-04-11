@@ -292,7 +292,7 @@ benchmark types:
         /* Array with benchmark measurements */
         Containers::Array<std::uint64_t> measurements{testCase.second.type != TestCaseType::Test ? repeatCount : 0};
 
-        bool aborted = false;
+        bool aborted = false, skipped = false;
         for(std::size_t i = 0; i != repeatCount && !aborted; ++i) {
             if(testCase.second.setup)
                 (this->*testCase.second.setup)();
@@ -312,6 +312,7 @@ benchmark types:
                 aborted = true;
             } catch(SkipException) {
                 aborted = true;
+                skipped = true;
             }
 
             _testCase = nullptr;
@@ -386,7 +387,7 @@ benchmark types:
             }
 
         /* Abort on first failure */
-        } else if(args.isSet("abort-on-fail")) {
+        } else if(args.isSet("abort-on-fail") && !skipped) {
             Debug out{logOutput, _useColor};
             out << Debug::boldColor(Debug::Color::Red) << "Aborted"
                 << Debug::boldColor(Debug::Color::Default) << _testName
