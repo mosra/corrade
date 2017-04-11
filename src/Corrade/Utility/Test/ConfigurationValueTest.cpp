@@ -140,14 +140,18 @@ void ConfigurationValueTest::floatingPoint() {
         c.setValue("double", a);
         CORRADE_COMPARE(c.value("double"), value);
         CORRADE_COMPARE(c.value<double>("double"), a);
-    } {
+    }
+
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    {
         long double a = 0.13156;
         std::string value{"0.13156"};
 
         c.setValue("ld", a);
         CORRADE_COMPARE(c.value("ld"), value);
-        CORRADE_COMPARE(c.value<double>("ld"), a);
+        CORRADE_COMPARE(c.value<long double>("ld"), a);
     }
+    #endif
 }
 
 void ConfigurationValueTest::floatingPointScientific() {
