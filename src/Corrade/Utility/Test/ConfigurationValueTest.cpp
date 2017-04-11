@@ -144,8 +144,8 @@ void ConfigurationValueTest::floatingPoint() {
 
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     {
-        long double a = 0.13156;
-        std::string value{"0.13156"};
+        long double a = 0.125;
+        std::string value{"0.125"};
 
         c.setValue("ld", a);
         CORRADE_COMPARE(c.value("ld"), value);
