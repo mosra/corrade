@@ -413,6 +413,7 @@ struct TesterTest: Tester {
     void repeatAll();
 
     void abortOnFail();
+    void abortOnFailSkip();
     void noXfail();
 
     void benchmarkWallClock();
@@ -446,6 +447,7 @@ TesterTest::TesterTest() {
               &TesterTest::repeatAll,
 
               &TesterTest::abortOnFail,
+              &TesterTest::abortOnFailSkip,
               &TesterTest::noXfail,
 
               &TesterTest::benchmarkWallClock,
@@ -822,6 +824,30 @@ void TesterTest::abortOnFail() {
         "  FAIL [03] falseExpression() at here.cpp on line 196\n"
         "        Expression 5 != 5 failed.\n"
         "Aborted TesterTest::Test after first failure out of 2 checks so far. 1 test cases didn't contain any checks!\n";
+    CORRADE_COMPARE(out.str(), expected);
+}
+
+void TesterTest::abortOnFailSkip() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "14 2 3 4", "--abort-on-fail" };
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(&out, &out);
+
+    CORRADE_VERIFY(result == 1);
+
+    std::string expected =
+        "Starting TesterTest::Test with 4 test cases...\n"
+        "  SKIP [14] skip()\n"
+        "        This testcase is skipped.\n"
+        "    OK [02] trueExpression()\n"
+        "  FAIL [03] falseExpression() at here.cpp on line 196\n"
+        "        Expression 5 != 5 failed.\n"
+        "Aborted TesterTest::Test after first failure out of 2 checks so far.\n";
     CORRADE_COMPARE(out.str(), expected);
 }
 
