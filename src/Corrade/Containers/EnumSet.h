@@ -102,6 +102,8 @@ template<class T> class Object {
         typedef Implementation::ObjectFlags Flags;
 };
 @endcode
+
+@see @ref enumSetDebugOutput()
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T, typename std::underlying_type<T>::type fullValue = typename std::underlying_type<T>::type(~0)>

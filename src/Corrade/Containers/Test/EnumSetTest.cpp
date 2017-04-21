@@ -23,7 +23,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/Containers/EnumSet.h"
+#include <sstream>
+
+#include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/TestSuite/Tester.h"
 
 namespace Corrade { namespace Containers { namespace Test {
@@ -40,7 +42,11 @@ struct EnumSetTest: TestSuite::Tester {
     void operatorBool();
     void operatorInverse();
     void compare();
+
+    void debug();
 };
+
+namespace {
 
 enum class Feature: int {
     Fast = 1 << 0,
@@ -49,9 +55,32 @@ enum class Feature: int {
     Popular = 1 << 3
 };
 
+Utility::Debug& operator<<(Utility::Debug& debug, Feature value) {
+    switch(value) {
+        #define _c(value) case Feature::value: return debug << "Feature::" #value;
+        _c(Fast)
+        _c(Cheap)
+        _c(Tested)
+        _c(Popular)
+        #undef _c
+    }
+
+    return debug << "Feature(" << Utility::Debug::nospace << reinterpret_cast<void*>(int(value)) << Utility::Debug::nospace << ")";
+}
+
 typedef EnumSet<Feature, 15> Features;
 
 CORRADE_ENUMSET_OPERATORS(Features)
+
+Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
+    return enumSetDebugOutput(debug, value, "Features{}", {
+        Feature::Fast,
+        Feature::Cheap,
+        Feature::Tested,
+        Feature::Popular});
+}
+
+}
 
 EnumSetTest::EnumSetTest() {
     addTests({&EnumSetTest::construct,
@@ -62,7 +91,9 @@ EnumSetTest::EnumSetTest() {
               &EnumSetTest::operatorXor,
               &EnumSetTest::operatorBool,
               &EnumSetTest::operatorInverse,
-              &EnumSetTest::compare});
+              &EnumSetTest::compare,
+
+              &EnumSetTest::debug});
 }
 
 void EnumSetTest::construct() {
@@ -164,6 +195,13 @@ void EnumSetTest::compare() {
 
     CORRADE_VERIFY(features <= (Feature::Popular|Feature::Fast|Feature::Cheap|Feature::Tested));
     CORRADE_VERIFY(!(features >= (Feature::Popular|Feature::Fast|Feature::Cheap|Feature::Tested)));
+}
+
+void EnumSetTest::debug() {
+    std::stringstream out;
+
+    Utility::Debug{&out} << Features{} << (Feature::Fast|Feature::Cheap) << (Feature(0xdead000)|Feature::Popular);
+    CORRADE_COMPARE(out.str(), "Features{} Feature::Fast|Feature::Cheap Feature::Popular|Feature(0xdead000)\n");
 }
 
 }}}
