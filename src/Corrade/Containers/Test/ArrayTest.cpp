@@ -374,6 +374,8 @@ void ArrayTest::access() {
     CORRADE_COMPARE(*(a.begin()+2), 2);
     CORRADE_COMPARE(a[4], 4);
     CORRADE_COMPARE(a.end()-a.begin(), a.size());
+    CORRADE_COMPARE(a.cbegin(), a.begin());
+    CORRADE_COMPARE(a.cend(), a.end());
 
     const Array b{InPlaceInit, {7, 3, 5, 4}};
     CORRADE_COMPARE(b.data(), static_cast<const int*>(b));
@@ -394,6 +396,11 @@ void ArrayTest::rangeBasedFor() {
     CORRADE_COMPARE(a[2], 3);
     CORRADE_COMPARE(a[3], 3);
     CORRADE_COMPARE(a[4], 3);
+
+    /* To verify the constant begin()/end() accessors */
+    const Array& ca = a;
+    for(auto&& i: ca)
+        CORRADE_COMPARE(i, 3);
 }
 
 void ArrayTest::slice() {

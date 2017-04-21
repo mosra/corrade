@@ -208,6 +208,8 @@ void StaticArrayViewTest::access() {
     CORRADE_COMPARE(*(b.begin()+2), 2);
     CORRADE_COMPARE(b[4], 4);
     CORRADE_COMPARE(b.end()-b.begin(), 7);
+    CORRADE_COMPARE(b.cbegin(), b.begin());
+    CORRADE_COMPARE(b.cend(), b.end());
 
     ConstStaticArrayView<7> c = a;
     CORRADE_COMPARE(c.data(), a);

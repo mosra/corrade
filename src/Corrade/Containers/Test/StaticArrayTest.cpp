@@ -413,6 +413,8 @@ void StaticArrayTest::access() {
     CORRADE_COMPARE(*(a.begin()+2), 2);
     CORRADE_COMPARE(a[4], 4);
     CORRADE_COMPARE(a.end()-a.begin(), 5);
+    CORRADE_COMPARE(a.cbegin(), a.begin());
+    CORRADE_COMPARE(a.cend(), a.end());
 }
 
 void StaticArrayTest::rvalueArrayAccess() {
@@ -429,6 +431,11 @@ void StaticArrayTest::rangeBasedFor() {
     CORRADE_COMPARE(a[2], 3);
     CORRADE_COMPARE(a[3], 3);
     CORRADE_COMPARE(a[4], 3);
+
+    /* To verify the constant begin()/end() accessors */
+    const StaticArray& ca = a;
+    for(auto&& i: ca)
+        CORRADE_COMPARE(i, 3);
 }
 
 void StaticArrayTest::slice() {

@@ -275,6 +275,8 @@ void ArrayViewTest::access() {
     CORRADE_COMPARE(*(b.begin()+2), 2);
     CORRADE_COMPARE(b[4], 4);
     CORRADE_COMPARE(b.end()-b.begin(), b.size());
+    CORRADE_COMPARE(b.cbegin(), b.begin());
+    CORRADE_COMPARE(b.cend(), b.end());
 
     Containers::ArrayView<const int> c = a;
     CORRADE_COMPARE(c.data(), a);
