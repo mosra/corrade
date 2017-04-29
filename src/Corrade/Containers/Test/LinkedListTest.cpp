@@ -39,6 +39,8 @@ struct LinkedListTest: TestSuite::Tester {
     void insertBeforeFromOtherList();
     void cut();
     void cutFromOtherList();
+    void move();
+    void moveBeforeItself();
     void clear();
     void moveList();
     void moveItem();
@@ -71,6 +73,8 @@ LinkedListTest::LinkedListTest() {
               &LinkedListTest::insertBeforeFromOtherList,
               &LinkedListTest::cut,
               &LinkedListTest::cutFromOtherList,
+              &LinkedListTest::move,
+              &LinkedListTest::moveBeforeItself,
               &LinkedListTest::clear,
               &LinkedListTest::moveList,
               &LinkedListTest::moveItem,
@@ -252,6 +256,41 @@ void LinkedListTest::cut() {
     CORRADE_VERIFY(item4.next() == nullptr);
 
     CORRADE_VERIFY(list.isEmpty());
+}
+
+void LinkedListTest::move() {
+    LinkedList list;
+    Item item;
+    Item item2;
+    Item item3;
+    Item item4;
+    list.insert(&item);
+    list.insert(&item2);
+    list.insert(&item3);
+    list.insert(&item4);
+
+    list.move(&item3, &item2);
+
+    CORRADE_COMPARE(item.next(), &item3);
+    CORRADE_COMPARE(item3.next(), &item2);
+    CORRADE_COMPARE(item2.next(), &item4);
+}
+
+void LinkedListTest::moveBeforeItself() {
+    LinkedList list;
+    Item item;
+    Item item2;
+    Item item3;
+    Item item4;
+    list.insert(&item);
+    list.insert(&item2);
+    list.insert(&item3);
+    list.insert(&item4);
+
+    list.move(&item3, &item3);
+
+    CORRADE_COMPARE(item2.next(), &item3);
+    CORRADE_COMPARE(item3.next(), &item4);
 }
 
 void LinkedListTest::clear() {
