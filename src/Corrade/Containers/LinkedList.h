@@ -200,10 +200,12 @@ template<class T> class LinkedList {
          * @param before    Item before which to move or `nullptr`, if moving
          *      at the end.
          *
-         * Equivalent to:
+         * Equivalent to the following:
          * @code
-         * list.cut(item);
-         * list.move(item, before);
+         * if(item != before) {
+         *     list.cut(item);
+         *     list.move(item, before);
+         * }
          * @endcode
          */
         void move(T* item, T* before);
@@ -378,6 +380,7 @@ template<class T> void LinkedList<T>::cut(T* const item) {
 }
 
 template<class T> inline void LinkedList<T>::move(T* const item, T* const before) {
+    if(item == before) return;
     cut(item);
     insert(item, before);
 }
