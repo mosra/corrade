@@ -714,7 +714,10 @@ void DirectoryTest::readEmpty() {
 }
 
 void DirectoryTest::readNonSeekable() {
-    #if defined(__unix__) && !defined(CORRADE_TARGET_EMSCRIPTEN) /* (OS X doesn't have /proc) */
+    /* OS X or BSD doesn't have /proc */
+    #if defined(__unix__) && !defined(CORRADE_TARGET_EMSCRIPTEN) && \
+        !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__bsdi__) && \
+        !defined(__NetBSD__) && !defined(__DragonFly__)
     /** @todo Test more thoroughly than this */
     const auto data = Directory::read("/proc/loadavg");
     CORRADE_VERIFY(!data.empty());
