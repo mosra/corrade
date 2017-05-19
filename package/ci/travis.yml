@@ -2,40 +2,36 @@
 
 addons:
   apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    - kubuntu-backports
     packages:
     - g++-4.7
-    - cmake
 
 matrix:
   include:
   - language: cpp
     os: linux
+    dist: trusty
     compiler: gcc
     env: TARGET=desktop
   - language: cpp
     os: linux
     compiler: gcc
+    dist: trusty
     env:
     - TARGET=desktop
     - BUILD_DEPRECATED=OFF
   - language: cpp
     os: linux
     compiler: clang
+    dist: trusty
     env:
     - TARGET=desktop-sanitizers
     - CMAKE_CXX_FLAGS="-fsanitize=address"
     addons:
       apt:
         sources:
-        - ubuntu-toolchain-r-test
-        - llvm-toolchain-precise-3.8
-        - kubuntu-backports
+        - llvm-toolchain-trusty
         packages:
         - clang-3.8
-        - cmake
   - language: cpp
     os: osx
     compiler: clang
@@ -49,7 +45,16 @@ matrix:
     env: TARGET=emscripten
   - language: android
     os: linux
+    # 14.04 doesn't know Android yet so we have to use 12.04 with all the
+    # annoyances: https://github.com/travis-ci/travis-ci/issues/5370
+    dist: precise
     env: TARGET=android
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-4.7
     android:
       components:
       - build-tools-19.0.0
@@ -64,13 +69,9 @@ notifications:
     on_failure: always
     on_start: never
 
-# If I don't put this blurb here, the OSX image crashes deep inside RVM while
-# executing gem install xcpretty. I don't know why and, from what I guess, I
-# don't even want to know, so I just keep this meaningless piece of random
-# commands here, have another drink and move on with my life.
 cache:
   directories:
-  - $HOME/lets-summon-the-black-demons-to-stop-travis-from-crashing
+  - $HOME/cmake
 
 install:
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "desktop" ] && [ "$BUILD_DEPRECATED" != "OFF" ]; then pip install --user urllib3[secure] && pip install --user cpp-coveralls && export CMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS --coverage"; fi
@@ -83,6 +84,11 @@ install:
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && ( [ "$TARGET" == "desktop" ] || [ "$TARGET" == "desktop-sanitizers" ] ); then mkdir -p ~/.local; fi
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && ( [ "$TARGET" == "desktop" ] || [ "$TARGET" == "desktop-sanitizers" ] ); then export CMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS -DTRAVIS_CI_HAS_CRAZY_FILESYSTEM_ON_LINUX"; fi
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "android" ]; then wget -nc http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bin && chmod +x android-*.bin && ./android-*.bin -y | grep -v Extracting; fi
+# Because Android build has to use 12.04 and CMake 2.8.12 stopped working there
+# since May 2017, I have to manually download a prebuilt version. Also, the
+# PATH setting can't be cached, so it's separate (bit me two times already)
+- if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "android" ] && [ ! -e "$HOME/cmake/bin" ]; then cd $HOME ; wget -nc --no-check-certificate https://cmake.org/files/v2.8/cmake-2.8.12.2-Linux-i386.tar.gz && mkdir -p cmake && cd cmake && tar --strip-components=1 -xzvf ../cmake-2.8.12.2-Linux-i386.tar.gz && cd $TRAVIS_BUILD_DIR ; fi
+- if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "android" ]; then export PATH=$HOME/cmake/bin:$PATH; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "ios-simulator" ]; then gem install xcpretty; fi
 # Emscripten 1.37.10 is broken (crashes during optimization), using 1.37.1
