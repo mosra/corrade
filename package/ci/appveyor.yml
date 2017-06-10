@@ -2,19 +2,27 @@
 
 clone_depth: 1
 
-os: Visual Studio 2015
-
 environment:
   matrix:
   - TARGET: desktop
     COMPILER: msvc
     ANSI_COLORS: ON
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  - TARGET: desktop
+    COMPILER: msvc
+    ANSI_COLORS: ON
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
   - TARGET: desktop
     COMPILER: msvc
     ANSI_COLORS: OFF
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
   - TARGET: desktop
     COMPILER: mingw
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
   - TARGET: rt
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  - TARGET: rt
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
 
 notifications:
 - provider: Webhook
