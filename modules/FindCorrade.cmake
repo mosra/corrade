@@ -305,20 +305,6 @@ foreach(_corradeFlag ${_corradeFlags})
     endif()
 endforeach()
 
-# XCTest runner file
-if(CORRADE_TESTSUITE_TARGET_XCTEST)
-    find_file(CORRADE_TESTSUITE_XCTEST_RUNNER XCTestRunner.mm.in
-        PATH_SUFFIXES share/corrade/TestSuite)
-    set(CORRADE_TESTSUITE_XCTEST_RUNNER_NEEDED CORRADE_TESTSUITE_XCTEST_RUNNER)
-endif()
-
-# ADB runner file
-if(CORRADE_TARGET_ANDROID)
-    find_file(CORRADE_TESTSUITE_ADB_RUNNER AdbRunner.sh
-        PATH_SUFFIXES share/corrade/TestSuite)
-    set(CORRADE_TESTSUITE_ADB_RUNNER_NEEDED CORRADE_TESTSUITE_ADB_RUNNER)
-endif()
-
 # CMake module dir
 find_path(_CORRADE_MODULE_DIR
     NAMES UseCorrade.cmake CorradeLibSuffix.cmake
@@ -431,7 +417,21 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
                     INTERFACE_LINK_LIBRARIES ${CMAKE_DL_LIBS})
             endif()
 
-        # No special setup for TestSuite library
+        # TestSuite library has some additional files
+        elseif(_component STREQUAL TestSuite)
+            # XCTest runner file
+            if(CORRADE_TESTSUITE_TARGET_XCTEST)
+                find_file(CORRADE_TESTSUITE_XCTEST_RUNNER XCTestRunner.mm.in
+                    PATH_SUFFIXES share/corrade/TestSuite)
+                set(CORRADE_TESTSUITE_XCTEST_RUNNER_NEEDED CORRADE_TESTSUITE_XCTEST_RUNNER)
+            endif()
+
+            # ADB runner file
+            if(CORRADE_TARGET_ANDROID)
+                find_file(CORRADE_TESTSUITE_ADB_RUNNER AdbRunner.sh
+                    PATH_SUFFIXES share/corrade/TestSuite)
+                set(CORRADE_TESTSUITE_ADB_RUNNER_NEEDED CORRADE_TESTSUITE_ADB_RUNNER)
+            endif()
 
         # Utility library (contains all setup that is used by others)
         elseif(_component STREQUAL Utility)
