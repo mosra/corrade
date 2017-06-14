@@ -47,7 +47,7 @@ namespace Implementation {
         public:
             enum: std::size_t { Size = 2*sizeof(void*)/sizeof(std::size_t) };
 
-            #ifndef CORRADE_MSVC2015_COMPATIBILITY
+            #ifndef CORRADE_MSVC2017_COMPATIBILITY
             template<class Emitter, class ...Args> SignalData(typename Emitter::Signal(Emitter::*signal)(Args...)): data() {
                 typedef typename Emitter::Signal(Emitter::*Signal)(Args...);
                 *reinterpret_cast<Signal*>(data) = signal;
@@ -74,7 +74,7 @@ namespace Implementation {
             }
 
         private:
-            #ifdef CORRADE_MSVC2015_COMPATIBILITY
+            #ifdef CORRADE_MSVC2017_COMPATIBILITY
             SignalData(): data() {}
             #endif
 

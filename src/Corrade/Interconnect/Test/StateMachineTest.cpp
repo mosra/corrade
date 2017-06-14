@@ -55,7 +55,7 @@ enum class Input: std::uint8_t {
 typedef Interconnect::StateMachine<2, 2, State, Input> StateMachine;
 
 void StateMachineTest::signalData() {
-    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    #ifndef CORRADE_MSVC2017_COMPATIBILITY
     Implementation::SignalData data1{&StateMachine::entered<State::Start>};
     Implementation::SignalData data2{&StateMachine::entered<State::End>};
     Implementation::SignalData data3{&StateMachine::exited<State::Start>};
