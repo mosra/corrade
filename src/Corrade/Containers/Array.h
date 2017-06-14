@@ -320,9 +320,9 @@ class Array {
         /** @brief Move assignment */
         Array<T, D>& operator=(Array<T, D>&&) noexcept;
 
-        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        #ifndef CORRADE_MSVC2017_COMPATIBILITY
         /** @brief Whether the array is non-empty */
-        /* Disabled on MSVC <= 2015 to avoid ambiguous operator+() when doing
+        /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
            pointer arithmetic. */
         explicit operator bool() const { return _data; }
         #endif

@@ -140,9 +140,9 @@ template<class T> class ArrayView {
         #endif
         constexpr /*implicit*/ ArrayView(StaticArrayView<size, U> view) noexcept: _data{view}, _size{size} {}
 
-        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        #ifndef CORRADE_MSVC2017_COMPATIBILITY
         /** @brief Whether the array is non-empty */
-        /* Disabled on MSVC <= 2015 to avoid ambiguous operator+() when doing
+        /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
            pointer arithmetic. */
         explicit operator bool() const { return _data; }
         #endif
@@ -281,8 +281,12 @@ template<> class ArrayView<const void> {
         /** @brief Construct const void view on any @ref StaticArrayView */
         template<std::size_t size, class T> constexpr /*implicit*/ ArrayView(const StaticArrayView<size, T>& array) noexcept: _data{array}, _size{size*sizeof(T)} {}
 
+        #ifndef CORRADE_MSVC2017_COMPATIBILITY
         /** @brief Whether the array is non-empty */
+        /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
+           pointer arithmetic. */
         constexpr explicit operator bool() const { return _data; }
+        #endif
 
         /** @brief Conversion to array type */
         constexpr /*implicit*/ operator const void*() const { return _data; }
@@ -438,9 +442,9 @@ template<std::size_t size_, class T> class StaticArrayView {
         #endif
         constexpr /*implicit*/ StaticArrayView(U(&data)[size_]) noexcept: _data{data} {}
 
-        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        #ifndef CORRADE_MSVC2017_COMPATIBILITY
         /** @brief Whether the array is non-empty */
-        /* Disabled on MSVC <= 2015 to avoid ambiguous operator+() when doing
+        /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
            pointer arithmetic. */
         explicit operator bool() const { return _data; }
         #endif
