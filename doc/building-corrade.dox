@@ -189,6 +189,8 @@ the compatibility mode explicitly:
 - `GCC47_COMPATIBILITY` -- Enable for compiling with compatibility mode for GCC
   4.7. Note that you need to enable this explicitly also if you are building
   with Clang and use libstdc++ from GCC 4.7.
+- `MSVC2017_COMPATIBILITY` -- Enable for compiling with compatibility mode for
+  Microsoft Visual C++ 2017.
 - `MSVC2015_COMPATIBILITY` -- Enable for compiling with compatibility mode for
   Microsoft Visual C++ 2015.
 
