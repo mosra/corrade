@@ -24,7 +24,12 @@
 #
 
 cmake_minimum_required(VERSION 2.8.12)
-project(Corrade)
+
+# Configuration fails on < 3.9 if only C++ is enabled (TestBigEndian macro)
+if(NOT CMAKE_VERSION VERSION_LESS 3.9.0)
+    set(LANG CXX)
+endif()
+project(Corrade ${LANG})
 
 # CMake policies: enable MACOSX_RPATH by default
 if(POLICY CMP0042)
