@@ -88,6 +88,7 @@ endif()
 if(NOT BUILD_STATIC OR BUILD_STATIC_PIC)
     set_target_properties(CorradeUtilityObjects PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
+set_target_properties(CorradeUtilityObjects PROPERTIES FOLDER "Corrade/Utility")
 
 # Main Utility library
 add_library(CorradeUtility ${SHARED_OR_STATIC}
@@ -110,7 +111,9 @@ else()
     set_property(TARGET CorradeUtility APPEND PROPERTY
         COMPATIBLE_INTERFACE_STRING CORRADE_CXX_STANDARD_)
 endif()
-set_target_properties(CorradeUtility PROPERTIES DEBUG_POSTFIX "-d")
+set_target_properties(CorradeUtility PROPERTIES
+    DEBUG_POSTFIX "-d"
+    FOLDER "Corrade/Utility")
 if(NOT BUILD_STATIC)
     set_target_properties(CorradeUtility PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
 elseif(BUILD_STATIC_PIC)
@@ -136,6 +139,7 @@ install(FILES ${CorradeUtility_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DI
 #  https://cmake.org/pipermail/cmake-developers/2015-January/024242.html
 if(NOT CMAKE_CROSSCOMPILING)
     add_executable(corrade-rc rc.cpp)
+    set_target_properties(corrade-rc PROPERTIES FOLDER "Corrade/Utility")
     target_link_libraries(corrade-rc CorradeUtility)
     install(TARGETS corrade-rc DESTINATION ${CORRADE_BINARY_INSTALL_DIR})
 endif()
@@ -144,7 +148,9 @@ if(BUILD_TESTS)
     # Library with graceful assert for testing
     add_library(CorradeUtilityTestLib ${SHARED_OR_STATIC} ${CorradeUtility_GracefulAssert_SRCS})
     target_compile_definitions(CorradeUtilityTestLib PRIVATE "CORRADE_GRACEFUL_ASSERT")
-    set_target_properties(CorradeUtilityTestLib PROPERTIES DEBUG_POSTFIX "-d")
+    set_target_properties(CorradeUtilityTestLib PROPERTIES
+        DEBUG_POSTFIX "-d"
+        FOLDER "Corrade/Utility")
     if(BUILD_STATIC_PIC)
         set_target_properties(CorradeUtilityTestLib PROPERTIES POSITION_INDEPENDENT_CODE ON)
     endif()

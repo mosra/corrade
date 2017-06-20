@@ -59,3 +59,12 @@ corrade_add_test(TestSuiteCompareStringToFileTest StringToFileTest.cpp
         FileTestFiles/hýždě.txt
         FileTestFiles/smaller.txt)
 target_include_directories(TestSuiteCompareStringToFileTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+set_target_properties(
+    TestSuiteCompareContainerTest
+    TestSuiteCompareFileTest
+    TestSuiteCompareFileToStringTest
+    TestSuiteCompareFloatingPointTest
+    TestSuiteCompareNumericTest
+    TestSuiteCompareStringToFileTest
+    PROPERTIES FOLDER "Corrade/TestSuite/Compare/Test")

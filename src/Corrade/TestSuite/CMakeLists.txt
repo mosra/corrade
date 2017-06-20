@@ -46,7 +46,9 @@ add_library(CorradeTestSuite ${SHARED_OR_STATIC}
     ${CorradeTestSuite_SRCS}
     ${CorradeTestSuite_HEADERS}
     ${CorradeTestSuite_PRIVATE_HEADERS})
-set_target_properties(CorradeTestSuite PROPERTIES DEBUG_POSTFIX "-d")
+set_target_properties(CorradeTestSuite PROPERTIES
+    DEBUG_POSTFIX "-d"
+    FOLDER "Corrade/TestSuite")
 if(NOT BUILD_STATIC)
     set_target_properties(CorradeTestSuite PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
 elseif(BUILD_STATIC_PIC)

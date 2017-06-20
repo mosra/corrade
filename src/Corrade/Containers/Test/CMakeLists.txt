@@ -36,3 +36,13 @@ set_property(TARGET
     ContainersArrayViewTest
     ContainersStaticArrayViewTest
     APPEND PROPERTY COMPILE_DEFINITIONS "CORRADE_GRACEFUL_ASSERT")
+
+set_target_properties(
+    ContainersArrayTest
+    ContainersArrayViewTest
+    ContainersEnumSetTest
+    ContainersLinkedListTest
+    ContainersStaticArrayTest
+    ContainersStaticArrayViewTest
+    ContainersTagsTest
+    PROPERTIES FOLDER "Corrade/Containers/Test")

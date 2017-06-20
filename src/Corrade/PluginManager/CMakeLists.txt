@@ -53,19 +53,21 @@ endif()
 if(NOT BUILD_STATIC OR BUILD_STATIC_PIC)
     set_target_properties(CorradePluginManagerObjects PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
+set_target_properties(CorradePluginManagerObjects PROPERTIES FOLDER "Corrade/PluginManager")
 
 # Main PluginManager library
 add_library(CorradePluginManager ${SHARED_OR_STATIC}
     $<TARGET_OBJECTS:CorradePluginManagerObjects>
     ${CorradePluginManager_GracefulAssert_SRCS})
 target_include_directories(CorradePluginManager PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-set_target_properties(CorradePluginManager PROPERTIES DEBUG_POSTFIX "-d")
+set_target_properties(CorradePluginManager PROPERTIES
+    DEBUG_POSTFIX "-d"
+    FOLDER "Corrade/PluginManager")
 if(NOT BUILD_STATIC)
     set_target_properties(CorradePluginManager PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
 elseif(BUILD_STATIC_PIC)
     set_target_properties(CorradePluginManager PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
-
 target_link_libraries(CorradePluginManager CorradeUtility)
 if(CORRADE_TARGET_UNIX OR CORRADE_TARGET_NACL_GLIBC)
     target_link_libraries(CorradePluginManager ${CMAKE_DL_LIBS})
@@ -84,11 +86,12 @@ if(BUILD_TESTS)
         ${CorradePluginManager_GracefulAssert_SRCS})
     target_include_directories(CorradePluginManagerTestLib PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
     target_compile_definitions(CorradePluginManagerTestLib PRIVATE "CORRADE_GRACEFUL_ASSERT")
-    set_target_properties(CorradePluginManagerTestLib PROPERTIES DEBUG_POSTFIX "-d")
+    set_target_properties(CorradePluginManagerTestLib PROPERTIES
+        DEBUG_POSTFIX "-d"
+        FOLDER "Corrade/PluginManager")
     if(BUILD_STATIC_PIC)
         set_target_properties(CorradePluginManagerTestLib PROPERTIES POSITION_INDEPENDENT_CODE ON)
     endif()
-
     target_link_libraries(CorradePluginManagerTestLib CorradeUtility)
     if(CORRADE_TARGET_UNIX OR CORRADE_TARGET_NACL_GLIBC)
         target_link_libraries(CorradePluginManagerTestLib ${CMAKE_DL_LIBS})

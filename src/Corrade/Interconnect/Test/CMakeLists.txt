@@ -25,3 +25,8 @@
 
 corrade_add_test(InterconnectTest Test.cpp LIBRARIES CorradeInterconnect)
 corrade_add_test(InterconnectStateMachineTest StateMachineTest.cpp LIBRARIES CorradeInterconnect)
+
+set_target_properties(
+    InterconnectTest
+    InterconnectStateMachineTest
+    PROPERTIES FOLDER "Corrade/Interconnect/Test")

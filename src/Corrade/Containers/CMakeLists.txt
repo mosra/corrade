@@ -35,6 +35,7 @@ set(CorradeContainers_HEADERS
 
 # Force IDEs to display all header files in project view
 add_custom_target(CorradeContainers-headers SOURCES ${CorradeContainers_HEADERS})
+set_target_properties(CorradeContainers-headers PROPERTIES FOLDER "Corrade/Containers")
 
 install(FILES ${CorradeContainers_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/Containers)
 

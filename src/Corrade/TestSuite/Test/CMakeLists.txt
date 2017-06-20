@@ -45,3 +45,9 @@ corrade_add_test(TestSuiteBundledFilesTest BundledFilesTest.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/BundledFilesTestFiles/c.txt
         ${CMAKE_CURRENT_SOURCE_DIR}/BundledFilesTestFiles/../BundledFilesTestFiles/d.txt@BundledFilesTestFiles/d.txt)
 target_include_directories(TestSuiteBundledFilesTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+set_target_properties(
+    TestSuiteTesterTest
+    TestSuiteBenchmarkStatsTest
+    TestSuiteBundledFilesTest
+    PROPERTIES FOLDER "Corrade/TestSuite/Test")

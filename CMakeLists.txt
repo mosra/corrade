@@ -40,6 +40,9 @@ if(POLICY CMP0028)
     cmake_policy(SET CMP0028 NEW)
 endif()
 
+# Use folders for nice tree in Visual Studio and XCode
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 include(CMakeDependentOption)
 option(GCC47_COMPATIBILITY "Enable compatibility mode for GCC 4.7 (might disable some features)" OFF)
 option(MSVC2017_COMPATIBILITY "Enable compatibility mode for MSVC 2017 (might disable some features)" OFF)

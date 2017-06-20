@@ -40,7 +40,9 @@ set(CorradeInterconnect_HEADERS
 add_library(CorradeInterconnect ${SHARED_OR_STATIC}
     ${CorradeInterconnect_SRCS}
     ${CorradeInterconnect_HEADERS})
-set_target_properties(CorradeInterconnect PROPERTIES DEBUG_POSTFIX "-d")
+set_target_properties(CorradeInterconnect PROPERTIES
+    DEBUG_POSTFIX "-d"
+    FOLDER "Corrade/Interconnect")
 if(NOT BUILD_STATIC)
     set_target_properties(CorradeInterconnect PROPERTIES VERSION ${CORRADE_LIBRARY_VERSION} SOVERSION ${CORRADE_LIBRARY_SOVERSION})
 elseif(BUILD_STATIC_PIC)

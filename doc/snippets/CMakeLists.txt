@@ -36,6 +36,13 @@ if(WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
     add_executable(testsuite-repeated testsuite-repeated.cpp)
     add_executable(testsuite-benchmark testsuite-benchmark.cpp)
     add_executable(testsuite-benchmark-custom testsuite-benchmark-custom.cpp)
+    set_target_properties(
+        testsuite-basic
+        testsuite-templated
+        testsuite-repeated
+        testsuite-benchmark
+        testsuite-benchmark-custom
+        PROPERTIES FOLDER "Corrade/doc/snippets")
 
     target_link_libraries(testsuite-basic CorradeTestSuite)
     target_link_libraries(testsuite-templated CorradeTestSuite)
@@ -46,5 +53,6 @@ if(WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
     if(NOT CORRADE_TARGET_ANDROID)
         add_executable(testsuite-instanced testsuite-instanced.cpp)
         target_link_libraries(testsuite-instanced CorradeTestSuite)
+        set_target_properties(testsuite-instanced PROPERTIES FOLDER "Corrade/doc/snippets")
     endif()
 endif()

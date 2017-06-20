@@ -33,6 +33,7 @@ set(CorradeTestSuiteCompare_HEADERS
 
 # Force IDEs to display all header files in project view
 add_custom_target(CorradeTestSuiteCompare SOURCES ${CorradeTestSuiteCompare_HEADERS})
+set_target_properties(CorradeTestSuiteCompare PROPERTIES FOLDER "Corrade/TestSuite/Compare")
 
 install(FILES ${CorradeTestSuiteCompare_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DIR}/TestSuite/Compare)
 

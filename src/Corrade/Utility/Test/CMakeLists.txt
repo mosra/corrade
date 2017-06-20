@@ -137,3 +137,28 @@ corrade_add_test(UtilityResourceStaticTest ResourceStaticTest.cpp
         ResourceTestFiles/consequence.bin
         ResourceTestFiles/predisposition.bin)
 target_include_directories(UtilityResourceStaticTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+set_target_properties(
+    UtilityArgumentsTest
+    UtilityEndianTest
+    UtilityMurmurHash2Test
+    UtilityConfigurationTest
+    UtilityConfigurationValueTest
+    UtilityDebugTest
+    UtilityFatalTest
+    UtilityDirectoryTest
+    UtilityHashDigestTest
+    UtilityMacrosTest
+    UtilityResourceTest
+    UtilityResourceStaticTest
+    UtilitySha1Test
+    UtilityStringTest
+    UtilitySystemTest
+    UtilityTypeTraitsTest
+    UtilityUnicodeTest
+
+    ResourceTestDataLib
+    ResourceTestData-dependencies
+    ResourceTestEmptyFileData-dependencies
+    ResourceTestNothingData-dependencies
+    PROPERTIES FOLDER "Corrade/Utility/Test")

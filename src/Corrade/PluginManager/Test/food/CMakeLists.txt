@@ -28,6 +28,13 @@ corrade_add_plugin(HotDogWithSnail ${CMAKE_CURRENT_BINARY_DIR} "" HotDogWithSnai
 corrade_add_plugin(OldBread ${CMAKE_CURRENT_BINARY_DIR} "" OldBread.conf OldBread.cpp)
 corrade_add_plugin(RottenTomato ${CMAKE_CURRENT_BINARY_DIR} "" RottenTomato.conf RottenTomato.cpp)
 
+set_target_properties(
+    HotDog HotDog-metadata
+    HotDogWithSnail HotDogWithSnail-metadata
+    OldBread OldBread-metadata
+    RottenTomato RottenTomato-metadata
+    PROPERTIES FOLDER "Corrade/PluginManager/Test")
+
 if(CORRADE_TARGET_WINDOWS)
     target_link_libraries(HotDog CorradePluginManagerTestLib Dog)
     target_link_libraries(HotDogWithSnail CorradePluginManagerTestLib HotDog)

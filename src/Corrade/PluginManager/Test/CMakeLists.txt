@@ -31,10 +31,19 @@ if(NOT CORRADE_TARGET_NACL_NEWLIB AND NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORR
     corrade_add_plugin(Dog ${CMAKE_CURRENT_BINARY_DIR} "" Dog.conf Dog.cpp)
     corrade_add_plugin(Bulldog ${CMAKE_CURRENT_BINARY_DIR} "" Bulldog.conf Bulldog.cpp)
     corrade_add_plugin(PitBull ${CMAKE_CURRENT_BINARY_DIR} "" PitBull.conf PitBull.cpp)
+
+    set_target_properties(
+        Snail Snail-metadata
+        Dog Dog-metadata
+        Bulldog Bulldog-metadata
+        PitBull PitBull-metadata
+        PROPERTIES FOLDER "Corrade/PluginManager/Test")
 endif()
 corrade_add_static_plugin(Canary ${CMAKE_CURRENT_BINARY_DIR} Canary.conf Canary.cpp)
+set_target_properties(Canary Canary-dependencies PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
 corrade_add_test(PluginManagerTest Test.cpp LIBRARIES CorradePluginManagerTestLib Canary)
+set_target_properties(PluginManagerTest PROPERTIES FOLDER "Corrade/PluginManager/Test")
 target_include_directories(PluginManagerTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(Canary CorradePluginManagerTestLib)
