@@ -247,27 +247,27 @@ namespace Corrade {
 
 @section corrade-changelog-2015-05 2015-05 snapshot
 
-See the [release notes and full changelog](http://mosra.cz/blog/article.php?a=32-may-2015-updates-to-magnum).
+See the [release notes and full changelog](http://blog.magnum.graphics/announcements/may-2015-updates/).
 
 @section corrade-changelog-2014-06 2014-06 snapshot
 
-See the [release notes and full changelog](http://mosra.cz/blog/article.php?a=31-june-updates-to-magnum).
+See the [release notes and full changelog](http://blog.magnum.graphics/announcements/june-2014-updates/).
 
 @section corrade-changelog-2014-01 2014-01 snapshot
 
-See the [release notes and full changelog](http://mosra.cz/blog/article.php?a=28-january-updates-to-magnum).
+See the [release notes and full changelog](http://blog.magnum.graphics/announcements/january-2014-updates/).
 
 @section corrade-changelog-2013-10 2013-10 snapshot
 
-See the [release notes and full changelog](http://mosra.cz/blog/article.php?a=26-october-updates-to-magnum).
+See the [release notes and full changelog](http://blog.magnum.graphics/announcements/october-2013-updates/).
 
 @section corrade-changelog-2013-08 2013-08 snapshot
 
-See the [Magnum project announcement](http://mosra.cz/blog/article.php?a=22-introducing-magnum-a-multiplatform-2d-3d-graphics-engine).
+See the [Magnum project announcement](http://blog.magnum.graphics/announcements/introducing-magnum/).
 
 @section corrade-changelog-initial Initial release
 
-See the [project announcement](http://mosra.cz/blog/article.php?a=20-introducing-corrade-an-plugin-management-and-utility-library).
+See the [project announcement](http://blog.magnum.graphics/announcements/introducing-corrade/).
 
 */
 }
