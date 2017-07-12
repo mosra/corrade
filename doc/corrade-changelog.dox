@@ -195,6 +195,8 @@ namespace Corrade {
     looking for it in system-wide locations.
 -   Reworked CMake buildsystem to use the new imported target workflow, see
     @ref corrade-cmake for more information
+-   CMake targets are now organized in folders for better development
+    experience in IDEs such as Visual Studio or Xcode
 -   Enabling `-Wmissing-prototypes` warning on Clang when
     `CORRADE_USE_PEDANTIC_FLAGS` property is enabled
 -   It's now possible to build only parts of the library using `WITH_*` CMake
@@ -207,6 +209,8 @@ namespace Corrade {
 -   Added @ref corrade-cmake-find-dlls-for-libs "corrade_find_dlls_for_libs()"
     CMake macro
 -   `MACOSX_RPATH` is now enabled by default on CMake 3.0+
+-   Enabling only C++ in CMake `project()` call, if possible, to speed up
+    initial CMake run
 
 ## Bug fixes
 
@@ -273,19 +277,19 @@ namespace Corrade {
 
 @section corrade-changelog-2015-05 2015-05 snapshot
 
-See the [release notes and full changelog](http://blog.magnum.graphics/announcements/may-2015-updates/).
+See the [release notes and full changelog](http://blog.magnum.graphics/announcements/may-2015-updates/#corrade).
 
 @section corrade-changelog-2014-06 2014-06 snapshot
 
-See the [release notes and full changelog](http://blog.magnum.graphics/announcements/june-2014-updates/).
+See the [release notes and full changelog](http://blog.magnum.graphics/announcements/june-2014-updates/#corrade).
 
 @section corrade-changelog-2014-01 2014-01 snapshot
 
-See the [release notes and full changelog](http://blog.magnum.graphics/announcements/january-2014-updates/).
+See the [release notes and full changelog](http://blog.magnum.graphics/announcements/january-2014-updates/#corrade).
 
 @section corrade-changelog-2013-10 2013-10 snapshot
 
-See the [release notes and full changelog](http://blog.magnum.graphics/announcements/october-2013-updates/).
+See the [release notes and full changelog](http://blog.magnum.graphics/announcements/october-2013-updates/#corrade).
 
 @section corrade-changelog-2013-08 2013-08 snapshot
 
