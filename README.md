@@ -96,8 +96,8 @@ require Corrade to be installed and they are built separately:
 CONTACT
 =======
 
-Want to learn more about the library? Found a bug or want to tell me an
-awesome idea? Feel free to visit my website or contact me at:
+Want to learn more about the library? Found a bug or want to share an awesome
+idea? Feel free to visit the project website or contact the team at:
 
 *   Website -- http://magnum.graphics/corrade/
 *   GitHub -- http://github.com/mosra/corrade
