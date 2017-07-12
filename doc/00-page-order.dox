@@ -1,0 +1,15 @@
+/* This is here just to order the pages in some reasonable way. */
+
+/**
+
+@page building-corrade Downloading and building
+@page corrade-cmake Usage with CMake
+@page corrade-example-index Examples and tutorials
+@page partialsupport List of partially supported features
+@page debugoperators Debug output operators for custom types
+@page deprecated Deprecated list
+@page corrade-coding-style Coding style
+
+@page corrade-changelog Changelog
+
+*/
