@@ -1,4 +1,30 @@
+/*
+    This file is part of Corrade.
+
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
+                2017 Vladimír Vondruš <mosra@centrum.cz>
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
+*/
+
 namespace Corrade {
+
 /** @page corrade-changelog Changelog
 
 @tableofcontents
@@ -158,6 +184,11 @@ namespace Corrade {
 
 ## Build system
 
+-   Continuous testing for Linux, OSX, Windows MSVC, Windows MinGW, Windows RT,
+    iOS, Android and Emscripten on [Travis CI](https://travis-ci.org/mosra/corrade)
+    and [AppVeyor CI](https://ci.appveyor.com/project/mosra/corrade), with code
+    coverage on [coveralls.io](https://coveralls.io/github/mosra/corrade);
+    replacing the unmaintained and outdated Jenkins configuration
 -   Support for CMake subprojects. You can now clone Corrade into a
     subdirectory in your project and add it using `add_subdirectory()`. The
     `find_package()` command will then use the CMake subproject instead of
@@ -176,11 +207,6 @@ namespace Corrade {
 -   Added @ref corrade-cmake-find-dlls-for-libs "corrade_find_dlls_for_libs()"
     CMake macro
 -   `MACOSX_RPATH` is now enabled by default on CMake 3.0+
--   Continuous testing for Linux, OSX, Windows MSVC, Windows MinGW, Windows RT,
-    iOS, Android and Emscripten on [Travis CI](https://travis-ci.org/mosra/corrade)
-    and [AppVeyor CI](https://ci.appveyor.com/project/mosra/corrade), with code
-    coverage on [coveralls.io](https://coveralls.io/github/mosra/corrade);
-    replacing the unmaintained and outdated Jenkins configuration
 
 ## Bug fixes
 
@@ -270,4 +296,5 @@ See the [Magnum project announcement](http://blog.magnum.graphics/announcements/
 See the [project announcement](http://blog.magnum.graphics/announcements/introducing-corrade/).
 
 */
+
 }
