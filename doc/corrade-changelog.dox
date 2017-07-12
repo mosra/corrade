@@ -5,20 +5,25 @@ namespace Corrade {
 
 @section corrade-changelog-latest Changes since 2015-05 snapshot
 
+## Dependency changes
+
+-   Dropped support for the old MinGW32 (only MinGW-w64 is supported now)
+-   Bumped minimal CMake version to 2.8.12
+-   Removed support for OSX 10.8 and older
+-   Dropped the `compatibility` branch and all support for MSVC 2013 and GCC <
+    4.7
+
 ## New features
 
--   MSVC 2015 support in `master` branch. It needs some workarounds, thus the
-    compatibility is controlled using `MSVC2015_COMPATIBILITY` CMake option,
-    which is then exposed as @ref CORRADE_MSVC2015_COMPATIBILITY CMake variable
-    and preprocessor macro.
+-   MSVC 2015 and 2017 support in `master` branch. It needs some workarounds,
+    thus the compatibility is controlled using `MSVC2015_COMPATIBILITY` /
+    `MSVC2017_COMPATIBILITY` CMake option, which is then exposed as
+    @ref CORRADE_MSVC2015_COMPATIBILITY / @ref CORRADE_MSVC2017_COMPATIBILITY
+    CMake variable and preprocessor macro.
 -   Windows RT (Store/Phone) support. Builds for that platform have
     @ref CORRADE_TARGET_WINDOWS_RT CMake variable and preprocessor macro
     defined.
 -   iOS support, integration of @ref TestSuite with Xcode XCTest
--   Continuous testing for Linux, OSX, Windows MSVC, Windows MinGW, Windows RT,
-    iOS, Android and Emscripten on [Travis CI](https://travis-ci.org/mosra/corrade)
-    and [AppVeyor CI](https://ci.appveyor.com/project/mosra/magnum), with code
-    coverage on [coveralls.io](https://coveralls.io/github/mosra/corrade)
 
 ### Containers library
 
@@ -167,14 +172,15 @@ namespace Corrade {
     more information
 -   @ref corrade-cmake-add-plugin "corrade_add_plugin()" now properly installs
     plugin *.dll to `bin/` and *.lib to `lib/` on Windows
--   Bumped minimal CMake version to 2.8.12
--   Removed support for OSX 10.8 and older
--   Dropped the `compatibility` branch and all support for MSVC 2013 and GCC <
-    4.7
 -   Added @ref building-corrade-packages-brew "Homebrew package"
 -   Added @ref corrade-cmake-find-dlls-for-libs "corrade_find_dlls_for_libs()"
     CMake macro
 -   `MACOSX_RPATH` is now enabled by default on CMake 3.0+
+-   Continuous testing for Linux, OSX, Windows MSVC, Windows MinGW, Windows RT,
+    iOS, Android and Emscripten on [Travis CI](https://travis-ci.org/mosra/corrade)
+    and [AppVeyor CI](https://ci.appveyor.com/project/mosra/corrade), with code
+    coverage on [coveralls.io](https://coveralls.io/github/mosra/corrade);
+    replacing the unmaintained and outdated Jenkins configuration
 
 ## Bug fixes
 
@@ -197,6 +203,7 @@ namespace Corrade {
 -   Properly re-running CMake and updating dependencies when resource
     configuration file added by @ref corrade-cmake-add-resource "corrade_add_resource()"
     changes
+-   Fixed @ref Containers::LinkedList::move() called on an item itself
 
 ## Deprecated APIs
 
