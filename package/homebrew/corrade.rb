@@ -2,7 +2,7 @@
 
 class Corrade < Formula
   desc "C++11/C++14 multiplatform utility library"
-  homepage "https://github.com/mosra/corrade"
+  homepage "http://magnum.graphics/corrade/"
   head "git://github.com/mosra/corrade.git"
 
   depends_on "cmake"

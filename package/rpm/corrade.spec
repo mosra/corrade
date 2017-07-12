@@ -1,5 +1,5 @@
 Name: corrade
-URL: http://mosra.cz/blog/corrade.php
+URL: http://magnum.graphics/corrade/
 Version: 0.2
 Release: 1
 License: MIT

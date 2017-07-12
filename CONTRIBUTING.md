@@ -11,10 +11,10 @@ Reporting bugs, requesting features
 Code contribution
 -----------------
 
-*   Building and installing Corrade is described in the [documentation](http://mosra.cz/blog/corrade-doc/building-corrade.html).
+*   Building and installing Corrade is described in the [documentation](http://doc.magnum.graphics/corrade/building-corrade.html).
 *   Follow the project coding guidelines. In short -- try to match style of the
     surrounding code and avoid any trailing whitespace. When in doubt, consult
-    coding guidelines, which are available also [online](http://mosra.cz/blog/corrade-doc/corrade-coding-style.html).
+    coding guidelines, which are available also [online](http://doc.magnum.graphics/corrade/corrade-coding-style.html).
 *   Document your code. When updating or adding new API, make sure that Doxygen
     documentation is up to date. Run
 
@@ -29,7 +29,7 @@ Code contribution
 
     in build directory. All tests should *always* pass. Add new tests or modify
     the existing to make sure new code is properly covered (if possible). Here
-    is a [short tutorial](http://mosra.cz/blog/corrade-doc/unit-testing.html)
+    is a [short tutorial](http://doc.magnum.graphics/corrade/unit-testing.html)
     to help you with creating unit tests.
 *   Best way to contribute is by using GitHub [pull requests](https://github.com/mosra/corrade/pulls)
     -- fork the repository and make pull request from feature branch. You can
@@ -54,7 +54,7 @@ Code contribution
 Contact
 -------
 
-*   Website - http://mosra.cz/blog/corrade.php
+*   Website - http://magnum.graphics/corrade/
 *   GitHub - https://github.com/mosra/corrade
 *   Twitter - https://twitter.com/czmosra
 *   E-mail - mosra@centrum.cz
