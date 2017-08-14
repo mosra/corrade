@@ -57,6 +57,7 @@ struct StaticArrayTest: TestSuite::Tester {
     void sliceToStatic();
 
     void cast();
+    void size();
 };
 
 typedef Containers::StaticArray<5, int> StaticArray;
@@ -92,7 +93,8 @@ StaticArrayTest::StaticArrayTest() {
               &StaticArrayTest::slice,
               &StaticArrayTest::sliceToStatic,
 
-              &StaticArrayTest::cast});
+              &StaticArrayTest::cast,
+              &StaticArrayTest::size});
 }
 
 void StaticArrayTest::construct() {
@@ -529,6 +531,12 @@ void StaticArrayTest::cast() {
     CORRADE_COMPARE(reinterpret_cast<const void*>(cd.begin()), reinterpret_cast<const void*>(ca.begin()));
     CORRADE_COMPARE(reinterpret_cast<const void*>(dc.begin()), reinterpret_cast<const void*>(ac.begin()));
     CORRADE_COMPARE(reinterpret_cast<const void*>(cdc.begin()), reinterpret_cast<const void*>(cac.begin()));
+}
+
+void StaticArrayTest::size() {
+    StaticArray a;
+
+    CORRADE_COMPARE(Containers::arraySize(a), 5);
 }
 
 }}}

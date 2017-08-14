@@ -72,6 +72,8 @@ namespace Corrade {
     `std::make_tuple()` is to `std::tuple`)
 -   New @ref Containers::arrayCast() function to `reinterpret_cast` arrays with
     correct size recalculation
+-   New @ref Containers::arraySize() helper function for easier size queries
+    on array-like types
 -   Added XOR operators to @ref Containers::EnumSet
 -   New @ref Containers::enumSetDebugOutput() utility to help with implementing
     debug operators for @ref Containers::EnumSet types

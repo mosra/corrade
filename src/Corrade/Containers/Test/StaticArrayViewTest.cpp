@@ -52,6 +52,7 @@ struct StaticArrayViewTest: TestSuite::Tester {
     void sliceToStatic();
 
     void cast();
+    void size();
 };
 
 typedef Containers::ArrayView<int> ArrayView;
@@ -79,7 +80,8 @@ StaticArrayViewTest::StaticArrayViewTest() {
               &StaticArrayViewTest::slice,
               &StaticArrayViewTest::sliceToStatic,
 
-              &StaticArrayViewTest::cast});
+              &StaticArrayViewTest::cast,
+              &StaticArrayViewTest::size});
 }
 
 void StaticArrayViewTest::constructDefault() {
@@ -276,6 +278,12 @@ void StaticArrayViewTest::cast() {
     CORRADE_COMPARE(reinterpret_cast<void*>(d.begin()), reinterpret_cast<void*>(a.begin()));
 }
 
+void StaticArrayViewTest::size() {
+    int a[6]{};
+    StaticArrayView<3> b{a};
+
+    CORRADE_COMPARE(Containers::arraySize(b), 3);
+}
 
 }}}
 

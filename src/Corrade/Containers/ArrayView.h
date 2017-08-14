@@ -377,6 +377,30 @@ template<class U, class T> ArrayView<U> arrayCast(ArrayView<T> view) {
     return {reinterpret_cast<U*>(view.begin()), size};
 }
 
+/** @relatesalso ArrayView
+@brief Array view size
+
+Alias to @ref ArrayView::size(), useful as a shorthand in cases like this:
+@code
+std::int32_t a[5];
+
+std::size_t size = Containers::size(a);
+@endcode
+*/
+template<class T> std::size_t arraySize(ArrayView<T> view) {
+    return view.size();
+}
+
+/** @overload */
+template<std::size_t size_, class T> constexpr std::size_t arraySize(StaticArrayView<size_, T>) {
+    return size_;
+}
+
+/** @overload */
+template<std::size_t size_, class T> constexpr std::size_t arraySize(T(&)[size_]) {
+    return size_;
+}
+
 /**
 @brief Fixed-size array view
 

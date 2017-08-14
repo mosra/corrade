@@ -492,6 +492,15 @@ template<class U, std::size_t size, class T> StaticArrayView<size*sizeof(T)/size
     return arrayCast<const U>(staticArrayView(array));
 }
 
+/** @relatesalso StaticArray
+@brief Static array size
+
+See @ref arraySize(ArrayView<T>) for more information.
+*/
+template<std::size_t size_, class T> constexpr std::size_t arraySize(const StaticArray<size_, T>&) {
+    return size_;
+}
+
 template<std::size_t size_, class T> template<class ...Args> StaticArray<size_, T>::StaticArray(DirectInitT, Args&&... args): StaticArray{NoInit} {
     for(T& i: _data) {
         /* MSVC 2015 needs the braces around */

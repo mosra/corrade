@@ -546,6 +546,15 @@ template<class U, class T> ArrayView<const U> arrayCast(const Array<T>& array) {
     return arrayCast<const U>(arrayView(array));
 }
 
+/** @relatesalso Array
+@brief Array size
+
+See @ref arraySize(ArrayView<T>) for more information.
+*/
+template<class T> std::size_t arraySize(const Array<T>& view) {
+    return view.size();
+}
+
 #ifdef CORRADE_BUILD_DEPRECATED
 /** @copybrief ArrayView
  * @deprecated Use @ref ArrayView.h and @ref ArrayView instead.

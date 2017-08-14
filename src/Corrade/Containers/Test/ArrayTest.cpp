@@ -65,6 +65,7 @@ struct ArrayTest: TestSuite::Tester {
     void customDeleterTypeConstruct();
 
     void cast();
+    void size();
 };
 
 typedef Containers::Array<int> Array;
@@ -106,7 +107,8 @@ ArrayTest::ArrayTest() {
               &ArrayTest::customDeleterType,
               &ArrayTest::customDeleterTypeConstruct,
 
-              &ArrayTest::cast});
+              &ArrayTest::cast,
+              &ArrayTest::size});
 }
 
 void ArrayTest::constructEmpty() {
@@ -577,6 +579,12 @@ void ArrayTest::cast() {
     CORRADE_COMPARE(cd.size(), 12);
     CORRADE_COMPARE(dc.size(), 12);
     CORRADE_COMPARE(cdc.size(), 12);
+}
+
+void ArrayTest::size() {
+    ArrayView a{3};
+
+    CORRADE_COMPARE(Containers::arraySize(a), 3);
 }
 
 }}}
