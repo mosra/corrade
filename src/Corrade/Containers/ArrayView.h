@@ -106,7 +106,7 @@ template<class T> class ArrayView {
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U, std::size_t size>
         #else
-        template<class U, std::size_t size, class V = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
+        template<class U, std::size_t size, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
         #endif
         constexpr /*implicit*/ ArrayView(U(&data)[size]) noexcept: _data{data}, _size{size} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
@@ -121,7 +121,7 @@ template<class T> class ArrayView {
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
         #else
-        template<class U, class V = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
+        template<class U, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
         #endif
         constexpr /*implicit*/ ArrayView(ArrayView<U> view) noexcept: _data{view}, _size{view.size()} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
