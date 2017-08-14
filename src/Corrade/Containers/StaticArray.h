@@ -410,7 +410,7 @@ template<std::size_t size_, class T> class StaticArray {
         };
 };
 
-/** @relatesalso ArrayView
+/** @relatesalso StaticArray
 @brief Make view on @ref StaticArray
 
 Convenience alternative to calling @ref StaticArray::operator ArrayView<U>()
@@ -426,7 +426,7 @@ template<std::size_t size, class T> constexpr ArrayView<T> arrayView(StaticArray
     return ArrayView<T>{array};
 }
 
-/** @relatesalso ArrayView
+/** @relatesalso StaticArray
 @brief Make view on const @ref StaticArray
 
 Convenience alternative to calling @ref StaticArray::operator ArrayView<U>()
@@ -442,7 +442,7 @@ template<std::size_t size, class T> constexpr ArrayView<const T> arrayView(const
     return ArrayView<const T>{array};
 }
 
-/** @relatesalso StaticArrayView
+/** @relatesalso StaticArray
 @brief Make static view on @ref StaticArray
 
 Convenience alternative to calling `StaticArray::operator StaticArrayView<size_,U>()`
@@ -460,7 +460,7 @@ template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArr
     return StaticArrayView<size, T>{array};
 }
 
-/** @relatesalso StaticArrayView
+/** @relatesalso StaticArray
 @brief Make static view on const @ref StaticArray
 
 Convenience alternative to calling `StaticArray::operator StaticArrayView<size_, U>()`
@@ -478,7 +478,7 @@ template<std::size_t size, class T> constexpr StaticArrayView<size, const T> sta
     return StaticArrayView<size, const T>{array};
 }
 
-/** @relatesalso StaticArrayView
+/** @relatesalso StaticArray
 @brief Reinterpret-cast a static array
 
 See @ref arrayCast(StaticArrayView<size, T>) for more information.

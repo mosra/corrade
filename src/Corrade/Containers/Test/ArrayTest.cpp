@@ -582,7 +582,7 @@ void ArrayTest::cast() {
 }
 
 void ArrayTest::size() {
-    ArrayView a{3};
+    Array a{3};
 
     CORRADE_COMPARE(Containers::arraySize(a), 3);
 }
