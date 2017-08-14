@@ -99,9 +99,8 @@ template<class T> class ArrayView {
          * @brief Construct view on a fixed-size array
          * @param data      Fixed-size array
          *
-         * Enabled only if `const T*` is implicitly convertible to `U*`. Note
-         * that, similarly as with raw pointers, you need to ensure that both
-         * types have the same size.
+         * Enabled only if `T*` is implicitly convertible to `U*`. Expects that
+         * both types have the same size.
          * @see @ref arrayView(T(&)[size])
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -109,28 +108,30 @@ template<class T> class ArrayView {
         #else
         template<class U, std::size_t size, class V = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
         #endif
-        constexpr /*implicit*/ ArrayView(U(&data)[size]) noexcept: _data{data}, _size{size} {}
+        constexpr /*implicit*/ ArrayView(U(&data)[size]) noexcept: _data{data}, _size{size} {
+            static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
+        }
 
         /**
          * @brief Construct view on @ref ArrayView
          *
-         * Enabled only if `const T*` is implicitly convertible to `U*`. Note
-         * that, similarly as with raw pointers, you need to ensure that both
-         * types have the same size.
+         * Enabled only if `T*` is implicitly convertible to `U*`. Expects that
+         * both types have the same size.
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
         #else
         template<class U, class V = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
         #endif
-        constexpr /*implicit*/ ArrayView(ArrayView<U> view) noexcept: _data{view}, _size{view.size()} {}
+        constexpr /*implicit*/ ArrayView(ArrayView<U> view) noexcept: _data{view}, _size{view.size()} {
+            static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
+        }
 
         /**
          * @brief Construct view on @ref StaticArrayView
          *
-         * Enabled only if `const T*` is implicitly convertible to `U*`. Note
-         * that, similarly as with raw pointers, you need to ensure that both
-         * types have the same size.
+         * Enabled only if `T*` is implicitly convertible to `U*`. Expects that
+         * both types have the same size.
          * @see @ref arrayView(StaticArrayView<size, T>)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -138,7 +139,9 @@ template<class T> class ArrayView {
         #else
         template<std::size_t size, class U, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
         #endif
-        constexpr /*implicit*/ ArrayView(StaticArrayView<size, U> view) noexcept: _data{view}, _size{size} {}
+        constexpr /*implicit*/ ArrayView(StaticArrayView<size, U> view) noexcept: _data{view}, _size{size} {
+            static_assert(sizeof(U) == sizeof(T), "type sizes are not compatible");
+        }
 
         #ifndef CORRADE_MSVC2017_COMPATIBILITY
         /** @brief Whether the array is non-empty */

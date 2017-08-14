@@ -152,18 +152,6 @@ void ArrayViewTest::constructDerived() {
        and data layout */
 
     CORRADE_VERIFY((std::is_convertible<B(&)[5], Containers::ArrayView<A>>::value));
-
-    {
-        CORRADE_EXPECT_FAIL("Intentionally not forbidding construction of base array from larger derived type to stay compatible with raw arrays.");
-
-        struct C: A { int b; };
-
-        /* Array of 5 Cs has larger size than array of 5 As so it does not make
-           sense to create the view from it, but we are keeping compatibility with
-           raw arrays and thus allow the users to shoot themselves in a foot. */
-
-        CORRADE_VERIFY(!(std::is_convertible<C(&)[5], Containers::ArrayView<A>>::value));
-    }
 }
 
 void ArrayViewTest::constructConst() {

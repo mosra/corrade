@@ -330,9 +330,8 @@ class Array {
         /**
          * @brief Convert to @ref ArrayView
          *
-         * Enabled only if `T*` is implicitly convertible to `U*`. Note
-         * that, similarly as with raw pointers, you need to ensure that both
-         * types have the same size.
+         * Enabled only if `T*` is implicitly convertible to `U*`. Expects that
+         * both types have the same size.
          * @see @ref arrayView(Array<T>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -340,14 +339,16 @@ class Array {
         #else
         template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value>::type>
         #endif
-        /*implicit*/ operator ArrayView<U>() noexcept { return {_data, _size}; }
+        /*implicit*/ operator ArrayView<U>() noexcept {
+            static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
+            return {_data, _size};
+        }
 
         /**
          * @brief Convert to const @ref ArrayView
          *
          * Enabled only if `T*` or `const T*` is implicitly convertible to `U*`.
-         * Note that, similarly as with raw pointers, you need to ensure that
-         * both types have the same size.
+         * Expects that both types have the same size.
          * @see @ref arrayView(const Array<T>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -355,7 +356,16 @@ class Array {
         #else
         template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value || std::is_convertible<T*, const U*>::value>::type>
         #endif
-        /*implicit*/ operator ArrayView<const U>() const noexcept { return {_data, _size}; }
+        /*implicit*/ operator ArrayView<const U>() const noexcept {
+            static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
+            return {_data, _size};
+        }
+
+        /** @overload */
+        /*implicit*/ operator ArrayView<const void>() noexcept {
+            /* Yes, the size is properly multiplied by sizeof(T) by the constructor */
+            return {_data, _size};
+        }
 
         /* `char* a = Containers::Array<char>(5); a[3] = 5;` would result in
            instant segfault, disallowing it in the following conversion
