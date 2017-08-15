@@ -352,9 +352,13 @@ void ArrayTest::convertViewDerived() {
 void ArrayTest::convertVoid() {
     /* void reference to Array */
     Array a(6);
+    const Array ca(6);
     VoidArrayView b = a;
+    VoidArrayView cb = ca;
     CORRADE_VERIFY(b == a);
+    CORRADE_VERIFY(cb == ca);
     CORRADE_COMPARE(b.size(), a.size()*sizeof(int));
+    CORRADE_COMPARE(cb.size(), ca.size()*sizeof(int));
 }
 
 void ArrayTest::emptyCheck() {
