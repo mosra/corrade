@@ -337,7 +337,7 @@ class Array {
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
         #else
-        template<class U, class = typename std::enable_if<std::is_convertible<T*, U*>::value>::type>
+        template<class U, class = typename std::enable_if<!std::is_void<U>::value && std::is_convertible<T*, U*>::value>::type>
         #endif
         /*implicit*/ operator ArrayView<U>() noexcept {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
@@ -362,7 +362,7 @@ class Array {
         }
 
         /** @overload */
-        /*implicit*/ operator ArrayView<const void>() noexcept {
+        /*implicit*/ operator ArrayView<const void>() const noexcept {
             /* Yes, the size is properly multiplied by sizeof(T) by the constructor */
             return {_data, _size};
         }
