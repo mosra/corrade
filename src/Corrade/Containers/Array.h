@@ -512,7 +512,7 @@ Containers::ArrayView<std::uint32_t> a{data};
 auto b = Containers::arrayView(data);
 @endcode
 */
-template<class T> constexpr ArrayView<T> arrayView(Array<T>& array) {
+template<class T, class D> inline ArrayView<T> arrayView(Array<T, D>& array) {
     return ArrayView<T>{array};
 }
 
@@ -528,7 +528,7 @@ Containers::ArrayView<const std::uint32_t> a{data};
 auto b = Containers::arrayView(data);
 @endcode
 */
-template<class T> constexpr ArrayView<const T> arrayView(const Array<T>& array) {
+template<class T, class D> inline ArrayView<const T> arrayView(const Array<T, D>& array) {
     return ArrayView<const T>{array};
 }
 
@@ -537,12 +537,12 @@ template<class T> constexpr ArrayView<const T> arrayView(const Array<T>& array) 
 
 See @ref arrayCast(ArrayView<T>) for more information.
 */
-template<class U, class T> ArrayView<U> arrayCast(Array<T>& array) {
+template<class U, class T, class D> inline ArrayView<U> arrayCast(Array<T, D>& array) {
     return arrayCast<U>(arrayView(array));
 }
 
 /** @overload */
-template<class U, class T> ArrayView<const U> arrayCast(const Array<T>& array) {
+template<class U, class T, class D> inline ArrayView<const U> arrayCast(const Array<T, D>& array) {
     return arrayCast<const U>(arrayView(array));
 }
 
