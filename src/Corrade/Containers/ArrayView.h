@@ -457,15 +457,15 @@ template<std::size_t size_, class T> class StaticArrayView {
          * @brief Construct static view on a fixed-size array
          * @param data      Fixed-size array
          *
-         * Enabled only if `const T*` is implicitly convertible to `U*`. Note
-         * that, similarly as with raw pointers, you need to ensure that both
-         * types have the same size.
+         * Enabled only if `T*` is implicitly convertible to `U*`. Note that,
+         * similarly as with raw pointers, you need to ensure that both types
+         * have the same size.
          * @see @ref staticArrayView(T(&)[size])
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
         #else
-        template<class U, class V = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
+        template<class U, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
         #endif
         constexpr /*implicit*/ StaticArrayView(U(&data)[size_]) noexcept: _data{data} {}
 
