@@ -213,24 +213,25 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief Convert to @ref ArrayView
          *
-         * Enabled only if `T*` is implicitly convertible to `U*`. Note
-         * that, similarly as with raw pointers, you need to ensure that both
-         * types have the same size.
+         * Enabled only if `T*` is implicitly convertible to `U*`. Expects that
+         * both types have the same size.
          * @see @ref arrayView(StaticArray<size, T>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
         #else
-        template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value>::type>
+        template<class U, class V = typename std::enable_if<!std::is_void<U>::value && std::is_convertible<T*, U*>::value>::type>
         #endif
-        /*implicit*/ operator ArrayView<U>() noexcept { return {_data, size_}; }
+        /*implicit*/ operator ArrayView<U>() noexcept {
+            static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
+            return {_data, size_};
+        }
 
         /**
          * @brief Convert to const @ref ArrayView
          *
-         * Enabled only if `const T*` is implicitly convertible to `U*`. Note
-         * that, similarly as with raw pointers, you need to ensure that both
-         * types have the same size.
+         * Enabled only if `T*` or `const T*` is implicitly convertible to `U*`.
+         * Expects that both types have the same size.
          * @see @ref arrayView(const StaticArray<size, T>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -238,14 +239,22 @@ template<std::size_t size_, class T> class StaticArray {
         #else
         template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value || std::is_convertible<T*, const U*>::value>::type>
         #endif
-        /*implicit*/ operator ArrayView<const U>() const noexcept { return {_data, size_}; }
+        /*implicit*/ operator ArrayView<const U>() const noexcept {
+            static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
+            return {_data, size_};
+        }
+
+        /** @overload */
+        /*implicit*/ operator ArrayView<const void>() const noexcept {
+            /* Yes, the size is properly multiplied by sizeof(T) by the constructor */
+            return {_data, size_};
+        }
 
         /**
          * @brief Convert to @ref StaticArrayView
          *
-         * Enabled only if `T*` is implicitly convertible to `U*`. Note
-         * that, similarly as with raw pointers, you need to ensure that both
-         * types have the same size.
+         * Enabled only if `T*` is implicitly convertible to `U*`. Expects that
+         * both types have the same size.
          * @see @ref staticArrayView(StaticArray<size, T>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -254,15 +263,15 @@ template<std::size_t size_, class T> class StaticArray {
         template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value>::type>
         #endif
         /*implicit*/ operator StaticArrayView<size_, U>() noexcept {
+            static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
             return StaticArrayView<size_, U>{_data};
         }
 
         /**
          * @brief Convert to const @ref StaticArrayView
          *
-         * Enabled only if `const T*` is implicitly convertible to `U*`. Note
-         * that, similarly as with raw pointers, you need to ensure that both
-         * types have the same size.
+         * Enabled only if `T*` or `const T*` is implicitly convertible to `U*`.
+         * Expects that both types have the same size.
          * @see @ref staticArrayView(const StaticArray<size, T>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -271,6 +280,7 @@ template<std::size_t size_, class T> class StaticArray {
         template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value || std::is_convertible<T*, const U*>::value>::type>
         #endif
         /*implicit*/ operator StaticArrayView<size_, const U>() const noexcept {
+            static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
             return StaticArrayView<size_, const U>{_data};
         }
 

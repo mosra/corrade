@@ -469,6 +469,21 @@ template<std::size_t size_, class T> class StaticArrayView {
         #endif
         constexpr /*implicit*/ StaticArrayView(U(&data)[size_]) noexcept: _data{data} {}
 
+        /**
+         * @brief Construct static view on @ref StaticArrayView
+         *
+         * Enabled only if `T*` is implicitly convertible to `U*`. Expects that
+         * both types have the same size.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class U>
+        #else
+        template<class U, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
+        #endif
+        constexpr /*implicit*/ StaticArrayView(StaticArrayView<size_, U> view) noexcept: _data{view} {
+            static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
+        }
+
         #ifndef CORRADE_MSVC2017_COMPATIBILITY
         /** @brief Whether the array is non-empty */
         /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing

@@ -321,19 +321,11 @@ void StaticArrayTest::convertViewDerived() {
        from Containers::ArrayView<Color3> because the data have the same size
        and data layout */
 
-    CORRADE_VERIFY((std::is_convertible<Containers::StaticArray<5, B>, Containers::ArrayView<A>>::value));
+    Containers::StaticArray<5, B> b;
+    Containers::ArrayView<A> a = b;
 
-    {
-        CORRADE_EXPECT_FAIL("Intentionally not forbidding construction of base array from larger derived type to stay compatible with raw arrays");
-
-        struct C: A { int b; };
-
-        /* Array of 5 Cs has larger size than array of 5 As so it does not make
-           sense to create the view from it, but we are keeping compatibility with
-           raw arrays and thus allow the users to shoot themselves in a foot. */
-
-        CORRADE_VERIFY(!(std::is_convertible<Containers::StaticArray<5, C>, Containers::ArrayView<A>>::value));
-    }
+    CORRADE_VERIFY(a == b);
+    CORRADE_COMPARE(a.size(), 5);
 }
 
 void StaticArrayTest::convertStaticView() {
@@ -383,27 +375,23 @@ void StaticArrayTest::convertStaticViewDerived() {
        from Containers::ArrayView<Color3> because the data have the same size
        and data layout */
 
-    CORRADE_VERIFY((std::is_convertible<Containers::StaticArray<5, B>, Containers::StaticArrayView<5, A>>::value));
+    Containers::StaticArray<5, B> b;
+    Containers::StaticArrayView<5, A> a = b;
 
-    {
-        CORRADE_EXPECT_FAIL("Intentionally not forbidding construction of base array from larger derived type to stay compatible with raw arrays");
-
-        struct C: A { int b; };
-
-        /* Array of 5 Cs has larger size than array of 5 As so it does not make
-           sense to create the view from it, but we are keeping compatibility with
-           raw arrays and thus allow the users to shoot themselves in a foot. */
-
-        CORRADE_VERIFY(!(std::is_convertible<Containers::StaticArray<5, C>, Containers::StaticArrayView<5, A>>::value));
-    }
+    CORRADE_VERIFY(a == b);
+    CORRADE_COMPARE(a.size(), 5);
 }
 
 void StaticArrayTest::convertVoid() {
     /* void reference to Array */
     StaticArray a;
+    const StaticArray ca;
     VoidArrayView b = a;
+    VoidArrayView cb = ca;
     CORRADE_VERIFY(b == a);
+    CORRADE_VERIFY(cb == ca);
     CORRADE_COMPARE(b.size(), 5*sizeof(int));
+    CORRADE_COMPARE(cb.size(), 5*sizeof(int));
 }
 
 void StaticArrayTest::access() {

@@ -153,7 +153,16 @@ void ArrayViewTest::constructDerived() {
        from Containers::ArrayView<Color3> because the data have the same size
        and data layout */
 
-    CORRADE_VERIFY((std::is_convertible<B(&)[5], Containers::ArrayView<A>>::value));
+    B b[5];
+    Containers::ArrayView<B> bv{b};
+
+    Containers::ArrayView<A> a{b};
+    Containers::ArrayView<A> av{bv};
+
+    CORRADE_VERIFY(a == &b[0]);
+    CORRADE_VERIFY(av == &b[0]);
+    CORRADE_COMPARE(a.size(), 5);
+    CORRADE_COMPARE(av.size(), 5);
 }
 
 void ArrayViewTest::constructConst() {
@@ -239,9 +248,13 @@ void ArrayViewTest::convertVoid() {
 
     /* void reference to ArrayView */
     ArrayView f = a;
+    const ArrayView cf = a;
     VoidArrayView g = f;
+    VoidArrayView cg = cf;
     CORRADE_VERIFY(g == f);
+    CORRADE_VERIFY(cg == cf);
     CORRADE_COMPARE(g.size(), f.size()*sizeof(int));
+    CORRADE_COMPARE(cg.size(), cf.size()*sizeof(int));
 }
 
 void ArrayViewTest::emptyCheck() {

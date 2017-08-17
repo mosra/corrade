@@ -132,17 +132,14 @@ void StaticArrayViewTest::constructDerived() {
 
     /* See ArrayViewTest for comments */
 
-    CORRADE_VERIFY((std::is_convertible<B(&)[5], Containers::StaticArrayView<5, A>>::value));
+    B b[5];
+    Containers::StaticArrayView<5, B> bv{b};
 
-    {
-        CORRADE_EXPECT_FAIL("Intentionally not forbidding construction of base array from larger derived type to stay compatible with raw arrays");
+    Containers::StaticArrayView<5, A> a{b};
+    Containers::StaticArrayView<5, A> av{bv};
 
-        struct C: A { int b; };
-
-        /* See ArrayViewTest for comments */
-
-        CORRADE_VERIFY(!(std::is_convertible<C(&)[5], Containers::StaticArrayView<5, A>>::value));
-    }
+    CORRADE_VERIFY(a == &b[0]);
+    CORRADE_VERIFY(av == &b[0]);
 }
 
 void StaticArrayViewTest::constructConst() {
@@ -195,9 +192,13 @@ void StaticArrayViewTest::convertVoid() {
 
     /* void reference to ArrayView */
     StaticArrayView<6> b = a;
+    const StaticArrayView<6> cb = a;
     VoidArrayView c = b;
+    VoidArrayView cc = cb;
     CORRADE_VERIFY(c == b);
+    CORRADE_VERIFY(cc == cb);
     CORRADE_COMPARE(c.size(), 6*sizeof(int));
+    CORRADE_COMPARE(cc.size(), 6*sizeof(int));
 }
 
 void StaticArrayViewTest::access() {
