@@ -33,6 +33,7 @@ namespace Corrade {
 
 ## Dependency changes
 
+-   Completely removed NaCl support (see https://blog.chromium.org/2017/05/goodbye-pnacl-hello-webassembly.html)
 -   Dropped support for the old MinGW32 (only MinGW-w64 is supported now)
 -   Bumped minimal CMake version to 2.8.12
 -   Removed support for OSX 10.8 and older

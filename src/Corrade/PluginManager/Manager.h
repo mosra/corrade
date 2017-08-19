@@ -56,7 +56,6 @@ template<class T> class Manager: public AbstractManager {
          *      with the same name as another static plugin are skipped.
          * @see @ref pluginList()
          * @partialsupport Parameter @p pluginDirectory has no effect on
-         *      @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib",
          *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
          *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
          *      @ref CORRADE_TARGET_IOS "iOS" and

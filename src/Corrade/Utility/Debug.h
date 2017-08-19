@@ -158,7 +158,7 @@ Debug{} << "this has default color again";
 
 @see @ref Warning, @ref Error, @ref Fatal, @ref CORRADE_ASSERT(),
     @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(),
-    @ref NaClConsoleStreamBuffer
+    @ref AndroidLogStreamBuffer
 @todo Output to more ostreams at once
  */
 class CORRADE_UTILITY_EXPORT Debug {

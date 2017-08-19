@@ -62,15 +62,8 @@ set(CorradeUtility_HEADERS
     VisibilityMacros.h
     visibility.h)
 
-# NaCl-specific functionality
-if(CORRADE_TARGET_NACL)
-    set(CorradeUtility_SRCS ${CorradeUtility_SRCS}
-        NaClStreamBuffer.cpp)
-    set(CorradeUtility_HEADERS ${CorradeUtility_HEADERS}
-        NaClStreamBuffer.h)
-
 # Android-specific functionality
-elseif(CORRADE_TARGET_ANDROID)
+if(CORRADE_TARGET_ANDROID)
     set(CorradeUtility_SRCS ${CorradeUtility_SRCS}
         AndroidStreamBuffer.cpp)
     set(CorradeUtility_HEADERS ${CorradeUtility_HEADERS}

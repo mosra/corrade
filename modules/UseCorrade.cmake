@@ -418,7 +418,7 @@ function(corrade_add_resource name configurationFile)
 endfunction()
 
 function(corrade_add_plugin plugin_name debug_install_dirs release_install_dirs metadata_file)
-    if(CORRADE_TARGET_NACL_NEWLIB OR CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_WINDOWS_RT OR CORRADE_TARGET_IOS)
+    if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_WINDOWS_RT OR CORRADE_TARGET_IOS)
         message(SEND_ERROR "corrade_add_plugin(): dynamic plugins are not available on this platform, use corrade_add_static_plugin() instead")
     endif()
 

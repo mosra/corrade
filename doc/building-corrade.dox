@@ -403,45 +403,6 @@ hierarchy.
 Then you can install the package using `cmake --build . --target install` to
 make it available for depending projects.
 
-@subsection building-corrade-cross-nacl Crosscompiling for Google Chrome Native Client
-
-You will need [Native Client SDK](https://developers.google.com/native-client/beta/sdk/download).
-Minimal supported version is `pepper_25`.
-
-You can choose from either `glibc` or `newlib` toolchain. `Newlib` supports
-only static linking, thus `BUILD_STATIC` is implicitly enabled. Don't forget to
-adapt `NACL_PREFIX` variable in `generic/NaCl-*-x86-32.cmake` and
-`generic/NaCl-*-x86-64.cmake` to path where your SDK is installed. Default is
-`/usr/nacl`. You may need to adapt also `NACL_TOOLCHAIN_PATH` so CMake is able
-to find the compiler.
-
-Then create build directories for x86-32 and x86-64 and run cmake and build
-command in them. Be sure to adapt `CMAKE_INSTALL_PREFIX` to the same value as
-in `NACL_PREFIX` in toolchain file.
-
-    mkdir build-nacl-x86-32 && cd build-nacl-x86-32
-    cmake .. \
-        -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/NaCl-newlib-x86-32.cmake" \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=/usr/nacl \
-        -DLIB_SUFFIX=/32
-    cmake --build .
-
-    mkdir build-nacl-x86-64 && cd build-nacl-x86-64
-    cmake .. \
-        -DCMAKE_TOOLCHAIN_FILE="../toolchains/generic/NaCl-newlib-x86-64.cmake" \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=/usr/nacl
-    cmake --build .
-
-Then you can install both versions using `cmake --build . --target install` to
-make them available for depending projects. The headers are shared by both
-versions.
-
-For ArchLinux there are also prepared package files in `package/archlinux`,
-named `PKGBUILD-nacl-glibc` and `PKGBUILD-nacl-newlib`, see
-@ref building-corrade-packages-arch "above" for more information.
-
 @subsection building-corrade-cross-emscripten Crosscompiling for Emscripten
 
 You will need [Emscripten](https://github.com/kripken/emscripten/wiki/Tutorial)
@@ -468,9 +429,12 @@ make it available for depending projects.
 If you have Node.js installed, you can also build and run unit tests using
 `ctest`. See `BUILD_TESTS` above.
 
-For ArchLinux there is also prepared package file in `package/archlinux`,
-named `PKGBUILD-emscripten`, see @ref building-corrade-packages-arch "above"
-for more information.
+For ArchLinux there are also prepared package files in `package/archlinux`,
+named `PKGBUILD-emscripten`, `PKGBUILD-emscripten-noopt` and
+`PKGBUILD-emscripten-wasm`, see @ref building-corrade-packages-arch "above"
+for more information. The first file is for optimized asm.js build (*slow* to
+compile), the second for unoptimized build (faster to compile) and the third
+for WebAssembly build.
 
 @subsection building-corrade-cross-ios Crosscompiling for iOS
 

@@ -39,9 +39,6 @@
 #cmakedefine CORRADE_TARGET_UNIX
 #cmakedefine CORRADE_TARGET_WINDOWS
 #cmakedefine CORRADE_TARGET_WINDOWS_RT
-#cmakedefine CORRADE_TARGET_NACL
-#cmakedefine CORRADE_TARGET_NACL_NEWLIB
-#cmakedefine CORRADE_TARGET_NACL_GLIBC
 #cmakedefine CORRADE_TARGET_EMSCRIPTEN
 #cmakedefine CORRADE_TARGET_ANDROID
 
@@ -62,14 +59,14 @@
 #elif defined(__arm__) || defined(__aarch64__) || defined(_M_ARM) || defined(_M_ARM64)
 #define CORRADE_TARGET_ARM
 
-/* Otherwise one should expect CORRADE_TARGET_EMSCRIPTEN or
-   CORRADE_TARGET_NACL. No other platforms are currently tested for, but that's
-   okay -- a runtime test for this is in Utility/Test/SystemTest.cpp */
+/* Otherwise one should expect CORRADE_TARGET_EMSCRIPTEN. No other platforms
+   are currently tested for, but that's okay -- a runtime test for this is in
+   Utility/Test/SystemTest.cpp */
 #endif
 
 /* Sanity checks */
-#if (defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_NACL)) && (defined(CORRADE_TARGET_X86) || defined(CORRADE_TARGET_ARM))
-#error CORRADE_TARGET_X86 or CORRADE_TARGET_ARM defined on Emscripten/NaCl
+#if defined(CORRADE_TARGET_EMSCRIPTEN) && (defined(CORRADE_TARGET_X86) || defined(CORRADE_TARGET_ARM))
+#error CORRADE_TARGET_X86 or CORRADE_TARGET_ARM defined on Emscripten
 #endif
 
 #endif

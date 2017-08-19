@@ -60,25 +60,20 @@ enum class Flag: unsigned char {
 
     /**
      * Skip regular files
-     * @partialsupport Has no effect in @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
-     *      On @ref CORRADE_TARGET_WINDOWS "Windows" and in
+     * @partialsupport On @ref CORRADE_TARGET_WINDOWS "Windows" and in
      *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" skips everything except
      *      directories.
      */
     SkipFiles = 1 << 1,
 
-    /**
-     * Skip directories (including `.` and `..`)
-     * @partialsupport Has no effect in @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
-     */
+    /** Skip directories (including `.` and `..`) */
     SkipDirectories = 1 << 2,
 
     /**
      * Skip everything what is not a file or directory
-     * @partialsupport Has no effect on @ref CORRADE_TARGET_WINDOWS "Windows"
-     *      and in @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib". In
-     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" skips everything except
-     *      directories.
+     * @partialsupport Has no effect on @ref CORRADE_TARGET_WINDOWS "Windows".
+     *      In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" skips everything
+     *      except directories.
      */
     SkipSpecial = 1 << 3,
 
@@ -158,13 +153,11 @@ On failure returns empty vector.
 */
 CORRADE_UTILITY_EXPORT std::vector<std::string> list(const std::string& path, Flags flags = Flags());
 
-#ifndef CORRADE_TARGET_NACL_NEWLIB
 /**
 @brief Create path
 
 Returns `true` if path was successfully created, `false` otherwise. Expects
 that the path is in UTF-8.
-@partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
 */
 CORRADE_UTILITY_EXPORT bool mkpath(const std::string& path);
 
@@ -173,7 +166,6 @@ CORRADE_UTILITY_EXPORT bool mkpath(const std::string& path);
 
 Returns `true` if path is file or empty directory and was successfully removed,
 `false` otherwise. Expects that the path is in UTF-8.
-@partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
 */
 CORRADE_UTILITY_EXPORT bool rm(const std::string& path);
 
@@ -183,10 +175,8 @@ CORRADE_UTILITY_EXPORT bool rm(const std::string& path);
 Returns `true` on success, `false` otherwise. Expects that the paths are in
 UTF-8.
 @see @ref read(), @ref write()
-@partialsupport Not available in @ref CORRADE_TARGET_NACL_NEWLIB "NaCl newlib".
 */
 CORRADE_UTILITY_EXPORT bool move(const std::string& oldPath, const std::string& newPath);
-#endif
 
 /**
 @brief Whether the application runs in a sandboxed environment
@@ -195,8 +185,7 @@ Returns `true` if running on @ref CORRADE_TARGET_IOS "iOS",
 @ref CORRADE_TARGET_ANDROID "Android", as a
 @ref CORRADE_TARGET_APPLE "Mac OS X" app bundle,
 @ref CORRADE_TARGET_WINDOWS_RT "Windows Phone/Store" application or in a
-browser through @ref CORRADE_TARGET_NACL "NaCl" or
-@ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", `false` otherwise.
+browser through @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", `false` otherwise.
 */
 CORRADE_UTILITY_EXPORT bool isSandboxed();
 

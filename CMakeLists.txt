@@ -69,16 +69,7 @@ if(BUILD_TESTS)
     enable_testing()
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL NaCl)
-    set(CORRADE_TARGET_NACL 1)
-    # Newlib toolchain supports only static linking
-    if(NACL_TOOLCHAIN STREQUAL newlib)
-        set(CORRADE_TARGET_NACL_NEWLIB 1)
-        set(BUILD_STATIC ON)
-    else()
-        set(CORRADE_TARGET_NACL_GLIBC 1)
-    endif()
-elseif(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     set(CORRADE_TARGET_EMSCRIPTEN 1)
     # It's meaningless to use dynamic libraries with Emscripten
     set(BUILD_STATIC ON)
@@ -102,7 +93,7 @@ elseif(UNIX)
         set(BUILD_STATIC ON)
     endif()
 
-    # NaCl and Emscripten are Unix too, this selects only the other ones
+    # Emscripten is Unix too, this selects only the other ones
     set(CORRADE_TARGET_UNIX 1)
 elseif(WIN32)
     set(CORRADE_TARGET_WINDOWS 1)

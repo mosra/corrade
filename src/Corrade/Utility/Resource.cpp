@@ -234,7 +234,7 @@ std::string Resource::compile(const std::string& name, const std::string& group,
     if(!files.back().second.empty())
         data.resize(data.size()-1);
 
-    #if defined(CORRADE_TARGET_NACL_NEWLIB) || defined(CORRADE_TARGET_ANDROID)
+    #if defined(CORRADE_TARGET_ANDROID)
     std::ostringstream converter;
     converter << files.size();
     #endif
@@ -242,11 +242,7 @@ std::string Resource::compile(const std::string& name, const std::string& group,
     /* Return C++ file. The functions have forward declarations to avoid warning
        about functions which don't have corresponding declarations (enabled by
        -Wmissing-declarations in GCC). If we don't have any data, we don't
-       create the resourceData array, as zero-length arrays are not allowed.
-       The corradeCompatibility.h must be included even if we don't need it in
-       master branch, because the user might want to compile resource file for
-       Corrade in compatibility branch with Corrade in master branch (i.e. x86
-       NaCl). */
+       create the resourceData array, as zero-length arrays are not allowed. */
     return "/* Compiled resource file. DO NOT EDIT! */\n\n"
         "#include \"Corrade/Corrade.h\"\n"
         "#include \"Corrade/Utility/Macros.h\"\n"
@@ -260,7 +256,7 @@ std::string Resource::compile(const std::string& name, const std::string& group,
         "int resourceInitializer_" + name + "();\n"
         "int resourceInitializer_" + name + "() {\n"
         "    Corrade::Utility::Resource::registerData(\"" + group + "\", " +
-            #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_ANDROID)
+            #if !defined(CORRADE_TARGET_ANDROID)
             std::to_string(files.size()) +
             #else
             converter.str() +

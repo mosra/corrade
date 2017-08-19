@@ -136,7 +136,6 @@ std::string join(const std::string& path, const std::string& filename) {
     return path + filename;
 }
 
-#ifndef CORRADE_TARGET_NACL_NEWLIB
 bool mkpath(const std::string& path) {
     if(path.empty()) return false;
 
@@ -200,7 +199,6 @@ bool move(const std::string& oldPath, const std::string& newPath) {
         #endif
         == 0;
 }
-#endif
 
 bool fileExists(const std::string& filename) {
     /* Sane platforms */
@@ -220,7 +218,7 @@ bool fileExists(const std::string& filename) {
 }
 
 bool isSandboxed() {
-    #if defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID) || defined(CORRADE_TARGET_NACL) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT)
+    #if defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT)
     return true;
     #elif defined(CORRADE_TARGET_APPLE)
     return std::getenv("APP_SANDBOX_CONTAINER_ID");
@@ -373,7 +371,6 @@ std::vector<std::string> list(const std::string& path, Flags flags) {
 
     dirent* entry;
     while((entry = readdir(directory)) != nullptr) {
-        #ifndef CORRADE_TARGET_NACL_NEWLIB
         if((flags >= Flag::SkipDirectories) && entry->d_type == DT_DIR)
             continue;
         #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -384,7 +381,6 @@ std::vector<std::string> list(const std::string& path, Flags flags) {
         #else
         if((flags >= Flag::SkipFiles || flags >= Flag::SkipSpecial) && entry->d_type != DT_DIR)
             continue;
-        #endif
         #endif
 
         std::string file{entry->d_name};

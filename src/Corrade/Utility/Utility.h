@@ -57,11 +57,6 @@ class Fatal;
 /* Endianness used only statically */
 class MurmurHash2;
 
-#ifdef CORRADE_TARGET_NACL
-class NaClConsoleStreamBuffer;
-class NaClMessageStreamBuffer;
-#endif
-
 /* Resource doesn't need forward declaration */
 class Sha1;
 /* String used only statically */

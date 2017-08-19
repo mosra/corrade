@@ -139,36 +139,6 @@ Defined if the library is built for Windows Store or Phone.
 #undef CORRADE_TARGET_WINDOWS_RT
 
 /**
-@brief Google Chrome Native Client target
-
-Defined if the library is built for
-[Google Chrome Native Client](https://developers.google.com/native-client/).
-@see @ref building-corrade, @ref corrade-cmake
-*/
-#define CORRADE_TARGET_NACL
-#undef CORRADE_TARGET_NACL
-
-/**
-@brief Google Chrome Native Client target with `newlib` toolchain
-
-Defined if the library is built for Google Chrome Native Client with `newlib`
-toolchain.
-@see @ref building-corrade, @ref corrade-cmake
-*/
-#define CORRADE_TARGET_NACL_NEWLIB
-#undef CORRADE_TARGET_NACL_NEWLIB
-
-/**
-@brief Google Chrome Native Client target with `glibc` toolchain
-
-Defined if the library is built for Google Chrome Native Client with `glibc`
-toolchain.
-@see @ref building-corrade, @ref corrade-cmake
-*/
-#define CORRADE_TARGET_NACL_GLIBC
-#undef CORRADE_TARGET_NACL_GLIBC
-
-/**
 @brief Emscripten target
 
 Defined if the library is built for [Emscripten](https://github.com/kripken/emscripten/wiki).
@@ -194,8 +164,8 @@ unlike other `CORRADE_TARGET_*` variables, this variable and
 @ref CORRADE_TARGET_ARM are not exposed in CMake because the meaning is unclear
 on platforms with multi-architecture binaries. If neither
 @ref CORRADE_TARGET_X86 nor @ref CORRADE_TARGET_ARM is defined, the platform
-might be either @ref CORRADE_TARGET_EMSCRIPTEN, @ref CORRADE_TARGET_NACL or any
-other that the library doesn't know about yet.
+might be either @ref CORRADE_TARGET_EMSCRIPTEN or any other that the library
+doesn't know about yet.
 */
 #define CORRADE_TARGET_X86
 #undef CORRADE_TARGET_X86
@@ -208,8 +178,8 @@ unlike other `CORRADE_TARGET_*` variables, this variable and
 @ref CORRADE_TARGET_X86 are not exposed in CMake because the meaning is unclear
 on platforms with multi-architecture binaries. If neither
 @ref CORRADE_TARGET_X86 nor @ref CORRADE_TARGET_ARM is defined, the platform
-might be either @ref CORRADE_TARGET_EMSCRIPTEN, @ref CORRADE_TARGET_NACL or any
-other that the library doesn't know about yet.
+might be either @ref CORRADE_TARGET_EMSCRIPTEN or any other that the library
+doesn't know about yet.
 */
 #define CORRADE_TARGET_ARM
 #undef CORRADE_TARGET_ARM

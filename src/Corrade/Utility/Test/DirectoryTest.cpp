@@ -401,7 +401,7 @@ void DirectoryTest::mkpathUtf8() {
 }
 
 void DirectoryTest::isSandboxed() {
-    #if defined(CORRADE_TARGET_ANDROID) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_NACL) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+    #if defined(CORRADE_TARGET_ANDROID) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TESTSUITE_TARGET_XCTEST)
     CORRADE_VERIFY(Directory::isSandboxed());
     #else
     CORRADE_VERIFY(!Directory::isSandboxed());

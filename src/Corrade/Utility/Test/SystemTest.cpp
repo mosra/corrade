@@ -41,7 +41,7 @@ SystemTest::SystemTest() {
 }
 
 void SystemTest::target() {
-    #if !defined(CORRADE_TARGET_X86) && !defined(CORRADE_TARGET_ARM) && !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #if !defined(CORRADE_TARGET_X86) && !defined(CORRADE_TARGET_ARM) && !defined(CORRADE_TARGET_EMSCRIPTEN)
     CORRADE_VERIFY(!"No suitable CORRADE_TARGET_* defined on this platform");
     #else
     CORRADE_VERIFY(true);
