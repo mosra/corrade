@@ -1091,23 +1091,7 @@ instantiates @p Class, executes the test cases and returns from `main()` with
 code based on the test results. This macro has to be used outside of any
 namespace.
 */
-#ifdef CORRADE_TARGET_EMSCRIPTEN
-/* In Emscripten, returning from main() with non-zero exit code won't
-   affect Node.js exit code, causing all tests to look like they passed.
-   Calling std::abort() causes Node.js to exit with non-zero code. The lambda
-   voodoo is done to have `t` properly destructed before aborting. */
-/** @todo Remove workaround when Emscripten can properly propagate exit codes */
-#define CORRADE_TEST_MAIN(Class)                                            \
-    int main(int argc, char** argv) {                                       \
-        if([&argc, argv]() {                                                \
-            Corrade::TestSuite::Tester::registerArguments(argc, argv);      \
-            Class t;                                                        \
-            t.registerTest(__FILE__, #Class);                               \
-            return t.exec();                                                \
-        }() != 0) std::abort();                                             \
-        return 0;                                                           \
-    }
-#elif defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+#ifdef CORRADE_TESTSUITE_TARGET_XCTEST
 /* Needs to have a separate definiton to silence the -Wmissing-prototypes
    warning */
 #define CORRADE_TEST_MAIN(Class)                                            \
