@@ -23,6 +23,9 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+corrade_add_test(TestSuiteFailingTest FailingTest.cpp)
+set_tests_properties(TestSuiteFailingTest PROPERTIES WILL_FAIL ON)
+
 corrade_add_test(TestSuiteTesterTest TesterTest.cpp)
 
 if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
@@ -47,6 +50,7 @@ corrade_add_test(TestSuiteBundledFilesTest BundledFilesTest.cpp
 target_include_directories(TestSuiteBundledFilesTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 set_target_properties(
+    TestSuiteFailingTest
     TestSuiteTesterTest
     TestSuiteBenchmarkStatsTest
     TestSuiteBundledFilesTest
