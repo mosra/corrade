@@ -141,7 +141,7 @@ Defined if the library is built for Windows Store or Phone.
 /**
 @brief Emscripten target
 
-Defined if the library is built for [Emscripten](https://github.com/kripken/emscripten/wiki).
+Defined if the library is built for [Emscripten](http://kripken.github.io/emscripten-site/).
 @see @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_TARGET_EMSCRIPTEN

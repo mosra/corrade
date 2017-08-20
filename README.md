@@ -13,7 +13,7 @@ SUPPORTED PLATFORMS
 *   **iOS** [![Build Status](https://travis-ci.org/mosra/corrade.svg?branch=master)](https://travis-ci.org/mosra/corrade)
 *   **Android** 1.5 (API Level 3) and higher
 *   **Windows RT** (Store/Phone) [![Build Status](https://ci.appveyor.com/api/projects/status/afjjlsgtk6jjxulp/branch/master?svg=true)](https://ci.appveyor.com/project/mosra/corrade/branch/master)
-*   **HTML5/JavaScript** (through [Emscripten](https://github.com/kripken/emscripten/wiki)) [![Build Status](https://travis-ci.org/mosra/corrade.svg?branch=master)](https://travis-ci.org/mosra/corrade)
+*   **Web** (asm.js or WebAssembly), through [Emscripten](http://kripken.github.io/emscripten-site/) [![Build Status](https://travis-ci.org/mosra/corrade.svg?branch=master)](https://travis-ci.org/mosra/corrade)
 
 FEATURES
 ========

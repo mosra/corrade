@@ -51,6 +51,7 @@ namespace Corrade {
     @ref CORRADE_TARGET_WINDOWS_RT CMake variable and preprocessor macro
     defined.
 -   iOS support, integration of @ref TestSuite with Xcode XCTest
+-   WebAssembly support when building for Emscripten
 
 ### Containers library
 
