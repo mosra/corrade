@@ -89,7 +89,6 @@ install:
 # PATH setting can't be cached, so it's separate (bit me two times already)
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "android" ] && [ ! -e "$HOME/cmake/bin" ]; then cd $HOME ; wget -nc --no-check-certificate https://cmake.org/files/v2.8/cmake-2.8.12.2-Linux-i386.tar.gz && mkdir -p cmake && cd cmake && tar --strip-components=1 -xzvf ../cmake-2.8.12.2-Linux-i386.tar.gz && cd $TRAVIS_BUILD_DIR ; fi
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "android" ]; then export PATH=$HOME/cmake/bin:$PATH; fi
-- if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "ios-simulator" ]; then gem install xcpretty; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "emscripten" ]; then brew install emscripten && export LLVM=/usr/local/opt/emscripten/libexec/llvm/bin && emcc; fi
 
