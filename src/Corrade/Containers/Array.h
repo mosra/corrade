@@ -173,7 +173,7 @@ char* data = reinterpret_cast<char*>(glMapNamedBuffer(buffer, GL_READ_WRITE));
 Containers::Array<char, UnmapBuffer> array{data, bufferSize, UnmapBuffer{buffer}};
 @endcode
 
-@see @ref arrayCast(Array<T>&)
+@see @ref arrayCast(Array<T, D>&)
 
 @todo Something like ArrayTuple to create more than one array with single
     allocation and proper alignment for each type? How would non-POD types be
@@ -332,7 +332,7 @@ class Array {
          *
          * Enabled only if `T*` is implicitly convertible to `U*`. Expects that
          * both types have the same size.
-         * @see @ref arrayView(Array<T>&)
+         * @see @ref arrayView(Array<T, D>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
@@ -349,7 +349,7 @@ class Array {
          *
          * Enabled only if `T*` or `const T*` is implicitly convertible to `U*`.
          * Expects that both types have the same size.
-         * @see @ref arrayView(const Array<T>&)
+         * @see @ref arrayView(const Array<T, D>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
