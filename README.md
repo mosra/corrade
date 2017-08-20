@@ -9,7 +9,7 @@ SUPPORTED PLATFORMS
 
 *   **Linux** and embedded Linux [![Build Status](https://travis-ci.org/mosra/corrade.svg?branch=master)](https://travis-ci.org/mosra/corrade) [![Coverage Status](https://coveralls.io/repos/github/mosra/corrade/badge.svg?branch=master)](https://coveralls.io/github/mosra/corrade?branch=master)
 *   **Windows** [![Build Status](https://ci.appveyor.com/api/projects/status/afjjlsgtk6jjxulp/branch/master?svg=true)](https://ci.appveyor.com/project/mosra/corrade/branch/master)
-*   **OS X** [![Build Status](https://travis-ci.org/mosra/corrade.svg?branch=master)](https://travis-ci.org/mosra/corrade)
+*   **macOS** [![Build Status](https://travis-ci.org/mosra/corrade.svg?branch=master)](https://travis-ci.org/mosra/corrade)
 *   **iOS** [![Build Status](https://travis-ci.org/mosra/corrade.svg?branch=master)](https://travis-ci.org/mosra/corrade)
 *   **Android** 1.5 (API Level 3) and higher
 *   **Windows RT** (Store/Phone) [![Build Status](https://ci.appveyor.com/api/projects/status/afjjlsgtk6jjxulp/branch/master?svg=true)](https://ci.appveyor.com/project/mosra/corrade/branch/master)

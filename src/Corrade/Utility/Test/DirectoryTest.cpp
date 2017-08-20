@@ -412,7 +412,7 @@ void DirectoryTest::executableLocation() {
     const std::string executableLocation = Directory::executableLocation();
     Debug() << "Executable location found as:" << executableLocation;
 
-    /* On sandboxed OSX and iOS verify that the directory contains Info.plist
+    /* On sandboxed macOS and iOS verify that the directory contains Info.plist
        file */
     #ifdef CORRADE_TARGET_APPLE
     if(Directory::isSandboxed()) {
@@ -461,7 +461,7 @@ void DirectoryTest::home() {
     const std::string home = Directory::home();
     Debug() << "Home dir found as:" << home;
 
-    /* On OSX and iOS verify that the home dir contains `Library` directory */
+    /* On macOS and iOS verify that the home dir contains `Library` directory */
     #ifdef CORRADE_TARGET_APPLE
     CORRADE_VERIFY(Directory::fileExists(Directory::join(home, "Library")));
 
@@ -714,7 +714,7 @@ void DirectoryTest::readEmpty() {
 }
 
 void DirectoryTest::readNonSeekable() {
-    /* OS X or BSD doesn't have /proc */
+    /* macOS or BSD doesn't have /proc */
     #if defined(__unix__) && !defined(CORRADE_TARGET_EMSCRIPTEN) && \
         !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__bsdi__) && \
         !defined(__NetBSD__) && !defined(__DragonFly__)

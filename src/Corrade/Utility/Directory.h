@@ -183,7 +183,7 @@ CORRADE_UTILITY_EXPORT bool move(const std::string& oldPath, const std::string& 
 
 Returns `true` if running on @ref CORRADE_TARGET_IOS "iOS",
 @ref CORRADE_TARGET_ANDROID "Android", as a
-@ref CORRADE_TARGET_APPLE "Mac OS X" app bundle,
+@ref CORRADE_TARGET_APPLE "macOS" app bundle,
 @ref CORRADE_TARGET_WINDOWS_RT "Windows Phone/Store" application or in a
 browser through @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", `false` otherwise.
 */
@@ -193,7 +193,7 @@ CORRADE_UTILITY_EXPORT bool isSandboxed();
 @brief Executable location
 
 Returns location of the executable on Linux, Windows, non-sandboxed and
-sandboxed OSX and iOS. On other systems or if the directory can't be found,
+sandboxed macOS and iOS. On other systems or if the directory can't be found,
 empty string is returned. Returned value is encoded in UTF-8.
 @note The path is returned with forward slashes on all platforms. Use
     @ref toNativeSeparators() to convert it to platform-specific format, if
@@ -204,8 +204,8 @@ CORRADE_UTILITY_EXPORT std::string executableLocation();
 /**
 @brief Current user's home directory
 
-On Unix and non-sandboxed OSX, the directory is equivalent to `${HOME}`
-environment variable. On sandboxed OSX and iOS the directory is equivalent to
+On Unix and non-sandboxed macOS, the directory is equivalent to `${HOME}`
+environment variable. On sandboxed macOS and iOS the directory is equivalent to
 what's returned by `NSHomeDirectory()`. On Windows the directory is equivalent
 to `%%USERPROFILE%/Documents` or similar. On other systems or if the directory
 can't be found, empty string is returned. Returned value is encoded in UTF-8.
@@ -219,9 +219,9 @@ CORRADE_UTILITY_EXPORT std::string home();
 @brief Application configuration dir
 @param name     Application name
 
-On Unix (except for OSX), the configuration dir is `${XDG_CONFIG_HOME}/name` or
+On Unix (except for macOS), the configuration dir is `${XDG_CONFIG_HOME}/name` or
 `${HOME}/.config/name` (@p name is lowercased), on Windows the configuration
-dir is in `%%APPDATA%/name` (@p name is left as is). On OSX and iOS the
+dir is in `%%APPDATA%/name` (@p name is left as is). On macOS and iOS the
 configuration dir is `${HOME}/Library/Application Support/name`. On other
 systems or if the directory can't be found, empty string is returned. Returned
 value is encoded in UTF-8.
@@ -234,8 +234,8 @@ CORRADE_UTILITY_EXPORT std::string configurationDir(const std::string& name);
 /**
 @brief Temporary dir
 
-On Unix and non-sandboxed OSX, the directory is equivalent to `/tmp`. On
-sandboxed OSX and iOS the directory is the `/tmp` subfolder of the app sandbox.
+On Unix and non-sandboxed macOS, the directory is equivalent to `/tmp`. On
+sandboxed macOS and iOS the directory is the `/tmp` subfolder of the app sandbox.
 On non-RT Windows the directory is equivalent to `%%TEMP%`. On other systems or
 if the directory can't be found, empty string is returned. Returned value is
 encoded in UTF-8.

@@ -464,7 +464,7 @@ function(corrade_add_plugin plugin_name debug_install_dirs release_install_dirs 
     # Plugins don't have any prefix (e.g. 'lib' on Linux)
     set_target_properties(${plugin_name} PROPERTIES PREFIX "")
 
-    # Enable incremental linking on the Mac OS X
+    # Enable incremental linking on the Mac macOS
     if(CORRADE_TARGET_APPLE)
         set_target_properties(${plugin_name} PROPERTIES
             LINK_FLAGS "-undefined dynamic_lookup")

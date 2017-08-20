@@ -84,7 +84,7 @@ Defined if built as static libraries. Default are shared libraries.
 /**
 @brief Unix target
 
-Defined if the library is built for some Unix flavor (Linux, BSD, OS X, iOS,
+Defined if the library is built for some Unix flavor (Linux, BSD, macOS, iOS,
 Android...).
 @see @ref CORRADE_TARGET_APPLE, @ref CORRADE_TARGET_ANDROID, @ref corrade-cmake
 */
@@ -94,7 +94,7 @@ Android...).
 /**
 @brief Apple target
 
-Defined if the library is built for Apple platforms (OS X, iOS).
+Defined if the library is built for Apple platforms (macOS, iOS).
 @see @ref CORRADE_TARGET_UNIX, @ref CORRADE_TARGET_IOS, @ref corrade-cmake
 */
 #define CORRADE_TARGET_APPLE

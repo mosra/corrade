@@ -46,8 +46,8 @@
 #cmakedefine CORRADE_UTILITY_USE_ANSI_COLORS
 
 /* Cherry-picked from https://sourceforge.net/p/predef/wiki/Architectures/.
-   Can't detect this stuff directly from CMake because of (for example) OSX and
-   fat binaries. */
+   Can't detect this stuff directly from CMake because of (for example) macOS
+   and fat binaries. */
 
 /* First two is GCC/Clang for 32/64 bit, second two is MSVC 32/64bit */
 #if defined(__i386) || defined(__x86_64) || defined(_M_IX86) || defined(_M_X64)
