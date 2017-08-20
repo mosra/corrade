@@ -41,7 +41,7 @@ matrix:
     env: TARGET=ios-simulator
   - language: cpp
     os: osx
-    osx_image: xcode7.3
+    osx_image: xcode8.3
     env: TARGET=emscripten
   - language: android
     os: linux
