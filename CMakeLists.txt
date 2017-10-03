@@ -31,13 +31,13 @@ if(NOT CMAKE_VERSION VERSION_LESS 3.9.0)
 endif()
 project(Corrade ${LANG})
 
-# CMake policies: enable MACOSX_RPATH by default
-if(POLICY CMP0042)
-    cmake_policy(SET CMP0042 NEW)
-endif()
-# Don't treat imported targets with :: as files
+# CMake policies: don't treat imported targets with :: as files
 if(POLICY CMP0028)
     cmake_policy(SET CMP0028 NEW)
+endif()
+# Enable MACOSX_RPATH by default
+if(POLICY CMP0042)
+    cmake_policy(SET CMP0042 NEW)
 endif()
 
 # Use folders for nice tree in Visual Studio and XCode
