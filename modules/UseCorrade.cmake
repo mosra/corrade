@@ -48,7 +48,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
             message(FATAL_ERROR "GCC >= 4.8.1 cannot be used if Corrade is built with GCC47_COMPATIBILITY")
         endif()
     endif()
-elseif(MSVC)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Don't allow to use compilers older than what compatibility mode allows
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.0")
         message(FATAL_ERROR "Corrade cannot be used with MSVC < 2015. Sorry.")
@@ -71,7 +71,7 @@ elseif(MSVC)
 endif()
 
 # GCC/Clang-specific compiler flags
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" OR CORRADE_TARGET_EMSCRIPTEN)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" AND NOT CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC") OR CORRADE_TARGET_EMSCRIPTEN)
     set(CORRADE_PEDANTIC_COMPILER_OPTIONS
         "-Wall" "-Wextra"
         "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:-Wold-style-cast>"
@@ -104,7 +104,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "(Apple
     endif()
 
 # MSVC-specific compiler flags
-elseif(MSVC)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
     set(CORRADE_PEDANTIC_COMPILER_OPTIONS
         # Enable extra warnings (similar to -Wall)
         "/W4"
@@ -190,7 +190,7 @@ define_property(TARGET PROPERTY CORRADE_USE_PEDANTIC_FLAGS INHERITED
 # Does nothing in case the user specified CXX_STANDARD property or put "-std="
 # in CMAKE_CXX_FLAGS nothing would be added. It doesn't cover adding flags
 # using target_compile_options(), though.
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" OR CORRADE_TARGET_EMSCRIPTEN AND NOT CMAKE_CXX_FLAGS MATCHES "-std=")
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" AND NOT CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC") OR CORRADE_TARGET_EMSCRIPTEN) AND NOT CMAKE_CXX_FLAGS MATCHES "-std=")
     if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9) OR ((CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" OR CORRADE_TARGET_EMSCRIPTEN) AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.5))
         set(_CORRADE_CXX14_STANDARD_FLAG "-std=c++14")
     else()
