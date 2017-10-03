@@ -26,6 +26,19 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(CorradeTestExample)
 
+# CMake policies: don't treat imported targets with :: as files
+if(POLICY CMP0028)
+    cmake_policy(SET CMP0028 NEW)
+endif()
+# Enable MACOSX_RPATH by default
+if(POLICY CMP0042)
+    cmake_policy(SET CMP0042 NEW)
+endif()
+# Quoted variables should not be dereferenced
+if(POLICY CMP0054)
+    cmake_policy(SET CMP0054 NEW)
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../../../modules")
 
 find_package(Corrade REQUIRED TestSuite)
