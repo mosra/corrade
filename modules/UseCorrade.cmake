@@ -31,6 +31,11 @@ if(_CORRADE_USE_INCLUDED)
     return()
 endif()
 
+# Quoted variables should not be dereferenced (affects the "MSVC" string)
+if(POLICY CMP0054)
+    cmake_policy(SET CMP0054 NEW)
+endif()
+
 # Check compiler version
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # Don't allow to use compilers older than what compatibility mode allows
