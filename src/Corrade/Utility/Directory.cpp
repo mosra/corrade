@@ -23,6 +23,12 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+/* Otherwise _wrename() and _wremove() is not defined on TDM-GCC 5.1. This has
+   to be undefined before including any other header or it doesn't work. */
+#ifdef __MINGW32__
+#undef __STRICT_ANSI__
+#endif
+
 #include "Directory.h"
 
 #include <cstdio>
