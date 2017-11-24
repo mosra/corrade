@@ -8,21 +8,27 @@ environment:
     COMPILER: msvc
     ANSI_COLORS: ON
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    APPVEYOR_JOB_NAME: windows-msvc2015
   - TARGET: desktop
     COMPILER: msvc
     ANSI_COLORS: ON
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    APPVEYOR_JOB_NAME: windows-msvc2017
   - TARGET: desktop
     COMPILER: msvc
     ANSI_COLORS: OFF
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    APPVEYOR_JOB_NAME: windows-noansi-msvc2015
   - TARGET: desktop
     COMPILER: mingw
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    APPVEYOR_JOB_NAME: windows-mingw
   - TARGET: rt
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    APPVEYOR_JOB_NAME: windows-rt-msvc2015
   - TARGET: rt
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    APPVEYOR_JOB_NAME: windows-rt-msvc2017
 
 notifications:
 - provider: Webhook

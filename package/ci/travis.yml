@@ -11,12 +11,15 @@ matrix:
     os: linux
     dist: trusty
     compiler: gcc
-    env: TARGET=desktop
+    env:
+    - JOBID=linux
+    - TARGET=desktop
   - language: cpp
     os: linux
     compiler: gcc
     dist: trusty
     env:
+    - JOBID=linux-nondeprecated
     - TARGET=desktop
     - BUILD_DEPRECATED=OFF
   - language: cpp
@@ -24,6 +27,7 @@ matrix:
     compiler: clang
     dist: trusty
     env:
+    - JOBID=linux-sanitizers
     - TARGET=desktop-sanitizers
     - CMAKE_CXX_FLAGS="-fsanitize=address"
     addons:
@@ -35,20 +39,28 @@ matrix:
   - language: cpp
     os: osx
     compiler: clang
-    env: TARGET=desktop
+    env:
+    - JOBID=macos
+    - TARGET=desktop
   - language: cpp
     os: osx
-    env: TARGET=ios-simulator
+    env:
+    - JOBID=ios
+    - TARGET=ios-simulator
   - language: cpp
     os: osx
     osx_image: xcode8.3
-    env: TARGET=emscripten
+    env:
+    - JOBID=emscripten
+    - TARGET=emscripten
   - language: android
     os: linux
     # 14.04 doesn't know Android yet so we have to use 12.04 with all the
     # annoyances: https://github.com/travis-ci/travis-ci/issues/5370
     dist: precise
-    env: TARGET=android
+    env:
+    - JOBID=android
+    - TARGET=android
     addons:
       apt:
         sources:
