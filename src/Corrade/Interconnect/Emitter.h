@@ -544,8 +544,7 @@ template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emi
                 case Implementation::AbstractConnectionData::Type::Member:
                     static_cast<Implementation::BaseMemberConnectionData<Args...>*>(it->second)->handle(args...);
                     break;
-                default:
-                    CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+                default: CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
             }
 
             /* Connections changed by the slot, go through again */
