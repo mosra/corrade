@@ -228,6 +228,8 @@ TAB_SIZE               = 4
 # "Side Effects:". You can put \n's in the value part of an alias to insert
 # newlines.
 
+## Important: keep this in sync with Doxyfile-mcss and Doxyfile-public!
+
 ALIASES                = \
     "debugoperator{1}=@relates \1\n@brief %Debug output operator @xrefitem debugoperators \"Debug output operator\" \"Debug output operators for custom types\" Allows printing @ref \1 with Corrade::Utility::Debug and friends." \
     "debugoperatorenum{1}=\n@brief Debug output operator @xrefitem debugoperators \"Debug output operator\" \"Debug output operators for custom types\" Allows printing @ref \1 with @ref Corrade::Utility::Debug and friends." \

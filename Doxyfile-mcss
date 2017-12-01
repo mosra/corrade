@@ -1,0 +1,33 @@
+@INCLUDE = Doxyfile
+
+## Patches for the m.css-generated docs. Just need to generate XML, that's it.
+
+OUTPUT_DIRECTORY       = build/doc-mcss/
+PROJECT_BRIEF          = docs
+GENERATE_HTML          = NO
+GENERATE_XML           = YES
+XML_PROGRAMLISTING     = NO
+GENERATE_TAGFILE       = build/doc-mcss/corrade.tag
+
+## Aliases copied from Doxyfile, with @cb, @cpp, @cmake and @ce modified for
+## inline code snippet support. Keep it in sync, please.
+
+ALIASES                = \
+    "debugoperator{1}=@relates \1\n@brief %Debug output operator @xrefitem debugoperators \"Debug output operator\" \"Debug output operators for custom types\" Allows printing @ref \1 with Corrade::Utility::Debug and friends." \
+    "debugoperatorenum{1}=\n@brief Debug output operator @xrefitem debugoperators \"Debug output operator\" \"Debug output operators for custom types\" Allows printing @ref \1 with @ref Corrade::Utility::Debug and friends." \
+    "debugoperatorclassenum{2}=@relates \1\n@brief Debug output operator @xrefitem debugoperators \"Debug output operator\" \"Debug output operators for custom types\" Allows printing @ref \2 with @ref Corrade::Utility::Debug and friends." \
+    "configurationvalueref{1}=@see @ref configurationvalues \"Corrade::Utility::ConfigurationValue<\1>\"" \
+    "configurationvalue{1}=@brief %Configuration value parser and writer @xrefitem configurationvalues \"Configuration value parser and writer\" \"Configuration value parsers and writers for custom types\" Allows parsing and writing \1 from and to Corrade::Utility::Configuration." \
+    "partialsupport=@xrefitem partialsupport \"Partially supported\" \"List of partially supported features\"" \
+    "todoc=@xrefitem todoc \"Documentation todo\" \"Documentation-related todo list\"" \
+    "experimental=@attention This functionality is still experimental and may change in the future without keeping full backwards compatibility." \
+    "cb{1}=@code{\1}" \
+    "cpp=@code{.cpp}" \
+    "cmake=@code{.cmake}" \
+    "ce=@endcode"
+
+HTML_EXTRA_STYLESHEET = \
+    https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600&subset=latin-ext \
+    ../css/m-dark+doxygen.compiled.css
+
+M_PAGE_HEADER = "<div class=\"m-note m-danger\"><h3>No need to panic</h3><p>This is a testing snapshot of a work-in-progress Doxygen theme. If you feel lost, miss something, or want to see the stock Doxygen theme instead, head over to the <a href="../../doc/html/{filename}">stable version of this documentation page</a>.</div>"

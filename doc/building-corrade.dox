@@ -268,8 +268,7 @@ information.
 @subsection building-corrade-doc Building documentation
 
 The documentation (which you are currently reading) is written in **Doxygen**
-(preferrably >=1.8 with Markdown support, but older versions should do good job
-too). The documentation can be build by running
+Documentation using the stock HTML theme can be build by running
 
 @code{.sh}
 doxygen
@@ -278,6 +277,10 @@ doxygen
 in root directory (i.e. where `Doxyfile` is). Resulting HTML documentation
 will be in `build/doc/` directory. You might need to create `build/` directory
 if it doesn't exist yet.
+
+The documentation can be also generated using the [m.css Doxygen theme](http://mcss.mosra.cz/doxygen/).
+Use `Doxyfile-mcss` for local build, the `Doxyfile-public` is meant for the
+publicly available documentation at http://doc.magnum.graphics/corrade/.
 
 @subsection building-corrade-examples Building examples
 
