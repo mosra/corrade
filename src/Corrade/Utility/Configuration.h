@@ -52,9 +52,9 @@ Values can be saved and retrieved using templated function, so it's possible to
 implement saving for any type. See @ref ConfigurationValue documentation for an
 example.
 
-## Example usage
+@section Utility-Configuration-example Example usage
 
-@code
+@code{.cpp}
 Configuration conf("my.conf");
 
 // Get value of third occurence of the key from some deep group
@@ -74,7 +74,7 @@ conf.addValue<int>("a", 3);
 conf.save();
 @endcode
 
-## File syntax¨
+@section Utility-Configuration-syntax File syntax
 
 File syntax is based on INI syntax, consisting of three basic elements:
 
@@ -98,31 +98,35 @@ characters.
 Multi-line values are enclosed in `"""` alone on the line, first and last line
 break is ignored. The following value is parsed as two lines:
 
-    value="""
-    Here is the value.
-    Spanning multiple lines.
-    """
+@code{.py}
+value="""
+Here is the value.
+Spanning multiple lines.
+"""
+@endcode
 
 Comments begin with `#` or `;` character and continue to the end of line. Each
 line of multiline comments must begin with these characters.
 
 Example file:
 
-    # Hierarchic group
-    [foo/bar]
-    myKey=myValue
+@code{.ini}
+# Hierarchic group
+[foo/bar]
+myKey=myValue
 
-    # Multiple groups with the same name
-    [group]
-    a = 35.3
-    [group]
-    [group]
-    a = 19
+# Multiple groups with the same name
+[group]
+a = 35.3
+[group]
+[group]
+a = 19
 
-    # Value of custom type
-    vec = -3 2 17 0
+# Value of custom type
+vec = -3 2 17 0
 
-    ; Another type of comment
+; Another type of comment
+@endcode
 
 @todo Renaming, copying groups
 @todo EOL autodetection according to system on unsure/new files (default is
@@ -245,10 +249,11 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         bool isValid() const { return bool(_flags & InternalFlag::IsValid); }
 
         /**
-         * @brief Save configuration to given file
+         * @brief Save copy of the configuration to another file
          * @param filename  Filename in UTF-8
          *
-         * Returns `true` on success, `false` otherwise.
+         * The original @ref filename() is left untouched. Returns
+         * @cpp true @ce on success, @cpp false @ce otherwise.
          */
         bool save(const std::string& filename);
 
@@ -259,7 +264,7 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
          * @brief Save configuration
          *
          * If @ref filename() is not empty, writes configuration back to the
-         * file. Returns `true` on success, `false` otherwise.
+         * file. Returns @cpp true @ce on success, @cpp false @ce otherwise.
          */
         bool save();
 

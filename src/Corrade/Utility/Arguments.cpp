@@ -425,7 +425,6 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
         /* Option or named argument */
         if(optionsAllowed && len != 0 && argv[i][0] == '-') {
             std::vector<Entry>::iterator found = _entries.end();
-            /** @todo Option merging (-aBcd) */
 
             /* Short option */
             if(len == 2) {

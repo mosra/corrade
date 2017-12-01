@@ -53,11 +53,12 @@ as first argument (the remaining ones are then ignored), the parser prints full
 help text to the output and exits. If parse error occurs (missing/unknown
 argument etc.), the parser prints short usage information and exits.
 
-## Example usage
+@section Utility-Arguments-usage Example usage
 
 Contrived example of command-line utility which prints given text given number
 of times, optionally redirecting the output to a file:
-@code
+
+@code{.cpp}
 int main(int argc, char** argv) {
     Arguments args;
     args.addArgument("text").setHelp("text", "the text to print")
@@ -82,20 +83,22 @@ int main(int argc, char** argv) {
 
 Upon requesting help, the utility prints the following:
 
-    Usage
-      ./printer [-h|--help] -n|--repeat REPEAT [-v|--verbose] [--log LOG] [--] text
+@code{.shell-session}
+Usage
+  ./printer [-h|--help] -n|--repeat REPEAT [-v|--verbose] [--log LOG] [--] text
 
-    Repeats the text given number of times.
+Repeats the text given number of times.
 
-    Arguments:
-      text                 the text to print
-      -h, --help           display this help message and exit
-      -n, --repeat REPEAT  repeat count
-      -v, --verbose        log verbosely
-      --log LOG            save verbose log to given file
-                           (default: log.txt)
+Arguments:
+  text                 the text to print
+  -h, --help           display this help message and exit
+  -n, --repeat REPEAT  repeat count
+  -v, --verbose        log verbosely
+  --log LOG            save verbose log to given file
+                       (default: log.txt)
+@endcode
 
-## Delegating arguments to different parts of the application
+@section Utility-Arguments-delegating Delegating arguments to different parts of the application
 
 Sometimes you want to have some set of arguments for the application and some
 for the underlying library (or libraries) without one interfering with another
@@ -106,7 +109,7 @@ would skip those instead of reporting them as unknown. The prefixed arguments
 are restricted to non-boolean options with long names to keep the usage simple
 both for the application author and users. Example:
 
-@code
+@code{.cpp}
 {
     // the underlying library
     Arguments args{"formatter"};
@@ -127,36 +130,41 @@ args.addArgument("text").setHelp("text", "the text to print")
 The application can be then called like the following, the prefixed and
 unprefixed options and named arguments can be mixed without restriction:
 
-    ./printer --repeat 30 --formatter-width 80 --formatter-color ff3366 "hello there"
+@code{.sh}
+./printer --repeat 30 --formatter-width 80 --formatter-color ff3366 "hello there"
+@endcode
 
 Upon calling `-h` or `--help` the application prints the following:
 
-    Usage
-      ./printer [-h|--help] [--formatter-...] -n|--repeat REPEAT [--] text
+@code{.shell-session}
+Usage
+  ./printer [-h|--help] [--formatter-...] -n|--repeat REPEAT [--] text
 
-    Repeats the text given number of times.
+Repeats the text given number of times.
 
-    Arguments:
-      text                 the text to print
-      -h, --help           display this help message and exit
-      -n, --repeat REPEAT  repeat count
-      --formatter-...      formatter options
-                           (see --formatter-help for details)
+Arguments:
+  text                 the text to print
+  -h, --help           display this help message and exit
+  -n, --repeat REPEAT  repeat count
+  --formatter-...      formatter options
+                       (see --formatter-help for details)
+@endcode
 
 Upon calling `--formatter-help` the application prints the following:
 
-    Usage
-      ./printer [--formatter-help] [--formatter-width WIDTH] [--formatter-color COLOR] ...
+@code{.shell-session}
+Usage
+  ./printer [--formatter-help] [--formatter-width WIDTH] [--formatter-color COLOR] ...
 
-    Arguments:
-      ...                      main application arguments
-                               (see -h or --help for details)
-      --formatter-help         display this help message and exit
-      --formatter-width WIDTH  number of columns
-                               (default: 80)
-      --formatter-color COLOR  output color
-                               (default: auto)
-
+Arguments:
+  ...                      main application arguments
+                           (see -h or --help for details)
+  --formatter-help         display this help message and exit
+  --formatter-width WIDTH  number of columns
+                           (default: 80)
+  --formatter-color COLOR  output color
+                           (default: auto)
+@endcode
 */
 class CORRADE_UTILITY_EXPORT Arguments {
     public:
@@ -174,7 +182,6 @@ class CORRADE_UTILITY_EXPORT Arguments {
          */
         static std::vector<std::string> environment();
 
-        /** @brief Default constructor */
         explicit Arguments();
 
         /**
@@ -195,15 +202,17 @@ class CORRADE_UTILITY_EXPORT Arguments {
         /**
          * @brief Add mandatory argument
          *
-         * After calling `addArgument("argument")` the argument will be
+         * After calling @cpp addArgument("argument") @ce the argument will be
          * displayed in argument list like the following. Call
          * @ref setHelpKey() to change the displayed key:
          *
-         *      Usage:
-         *        ./app argument
+         * @code{.shell-session}
+         * Usage:
+         *   ./app argument
          *
-         *      Arguments:
-         *        argument          help text
+         * Arguments:
+         *   argument          help text
+         * @endcode
          *
          * If no help text is set, the argument is not displayed in argument
          * list. Call @ref setHelp() to set it. Argument value can be retrieved
@@ -217,16 +226,18 @@ class CORRADE_UTILITY_EXPORT Arguments {
         /**
          * @brief Add named mandatory argument with both short and long key alternative
          *
-         * After calling <tt>addNamedArgument('a', "argument")</tt> the
+         * After calling @cpp addNamedArgument('a', "argument") @ce the
          * argument will be displayed in help text like the following. Argument
          * value is just uppercased key value, call @ref setHelpKey() to change
          * it:
          *
-         *      Usage:
-         *        ./app -a|--argument ARGUMENT
+         * @code{.shell-session}
+         * Usage:
+         *   ./app -a|--argument ARGUMENT
          *
-         *      Arguments:
-         *        --a, --argument   help text
+         * Arguments:
+         *   --a, --argument   help text
+         * @endcode
          *
          * If no help text is set, the argument is not displayed in argument
          * list. Call @ref setHelp() to set it. Argument value can be retrieved
@@ -243,11 +254,13 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * Similar to the above, the only difference is that the usage and help
          * text does not mention the short option:
          *
-         *      Usage:
-         *        ./app --argument ARGUMENT
+         * @code{.shell-session}
+         * Usage:
+         *   ./app --argument ARGUMENT
          *
-         *      Arguments:
-         *        --argument        help text
+         * Arguments:
+         *   --argument        help text
+         * @endcode
          *
          * Only non-boolean options are allowed in the prefixed version, use
          * @ref addOption() instead.
@@ -259,21 +272,25 @@ class CORRADE_UTILITY_EXPORT Arguments {
         /**
          * @brief Add option with both short and long key alternative
          *
-         * After calling <tt>addOption('o', "option")</tt> the option will be
+         * After calling @cpp addOption('o', "option") @ce the option will be
          * displayed in help text like the following. Option value is just
          * uppercased key value, call @ref setHelpKey() to change it:
          *
-         *      Usage:
-         *        ./app [-o|--option OPTION]
+         * @code{.shell-session}
+         * Usage:
+         *   ./app [-o|--option OPTION]
+         * @endcode
          *
          * Default value, if nonempty, is displayed in option list like the
          * following, call @ref setHelp() to add descriptional help text. If
          * default value is empty and no help text is set, the option is not
          * displayed in the list at all.
          *
-         *      Arguments:
-         *        -o, --option      help text
-         *                          (default: defaultValue)
+         * @code{.shell-session}
+         * Arguments:
+         *   -o, --option      help text
+         *                     (default: defaultValue)
+         * @endcode
          *
          * Option value can be retrieved using @ref value().
          *
@@ -288,12 +305,14 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * Similar to the above, the only difference is that the usage and help
          * text does not mention the short option:
          *
-         *      Usage:
-         *        ./app [--option OPTION]
+         * @code{.shell-session}
+         * Usage:
+         *   ./app [--option OPTION]
          *
-         *      Arguments:
-         *        --option          help text
-         *                          (default: defaultValue)
+         * Arguments:
+         *   --option          help text
+         *                     (default: defaultValue)
+         * @endcode
          */
         Arguments& addOption(std::string key, std::string defaultValue = std::string()) {
             return addOption('\0', std::move(key), std::move(defaultValue));
@@ -307,11 +326,13 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * display option value and you need to set help text with
          * @ref setHelp() to make it appear in option list:
          *
-         *      Usage:
-         *        ./app [-o|-option]
+         * @code{.shell-session}
+         * Usage:
+         *   ./app [-o|-option]
          *
-         *      Arguments:
-         *        -o, --option      help text
+         * Arguments:
+         *   -o, --option      help text
+         * @endcode
          *
          * Option presence can be queried with @ref isSet(), @ref setHelpKey()
          * cannot be used with boolean options. Option for getting help (`-h`,
@@ -328,11 +349,13 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * Similar to the above, the only difference is that the usage and help
          * text does not mention the short option:
          *
-         *      Usage:
-         *        ./app [--option]
+         * @code{.shell-session}
+         * Usage:
+         *   ./app [--option]
          *
-         *      Arguments:
-         *        --option          help text
+         * Arguments:
+         *   --option          help text
+         * @endcode
          *
          * Only non-boolean options are allowed in the prefixed version, use
          * @ref addOption() instead.
@@ -356,17 +379,21 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * specified on command line. If @p environmentVariable is not set,
          * uppercase @p key value with dashes converted to underscores is used
          * by default. For example, on Unix-based systems, calling
-         * `setFromEnvironment("some-option")` allows you to specify that
-         * option either using
+         * @cpp setFromEnvironment("some-option") @ce allows you to specify
+         * that option either using
          *
-         *      ./app --some-option 42
+         * @code{.sh}
+         * ./app --some-option 42
+         * @endcode
          *
          * or
          *
-         *      SOME_OPTION=42 ./app
+         * @code{.sh}
+         * SOME_OPTION=42 ./app
+         * @endcode
          *
-         * Boolean options are set to `true` if the environment value is set to
-         * `ON` (case-insensitive). Values are encoded in UTF-8.
+         * Boolean options are set to @cpp true @ce if the environment value is
+         * set to `ON` (case-insensitive). Values are encoded in UTF-8.
          * @note In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" the environment
          *      is combined from local Emscripten environment and system
          *      environment provided by Node.js. If a variable is in both
@@ -390,9 +417,9 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * @brief Set command name
          *
          * If empty, the command name is extracted from arguments passed to
-         * @ref parse() on parsing, or set to `./app` if not parsed yet. The
-         * command name is then used in @ref usage() and @ref help(). Default
-         * is empty.
+         * @ref parse() on parsing, or set to @cb{.sh} ./app @ce if not parsed
+         * yet. The command name is then used in @ref usage() and @ref help().
+         * Default is empty.
          * @see @ref setHelp()
          */
         Arguments& setCommand(std::string name);
@@ -417,15 +444,19 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * If @p helpKey is set, it replaces the placeholder for arguments and
          * uppercased placeholder in named arguments and nonboolean options.
-         * For example, calling `setHelp("input", "...", "file.bin")` and
-         * `setHelp("limit", "...", "N")` will transform the following usage
-         * text:
+         * For example, calling @cpp setHelp("input", "...", "file.bin") @ce
+         * and @cpp setHelp("limit", "...", "N") @ce will transform the
+         * following usage text:
          *
-         *      ./app --limit LIMIT input
+         * @code{.shell-session}
+         * ./app --limit LIMIT input
+         * @endcode
          *
          * to:
          *
-         *      ./app --limit N file.bin
+         * @code{.shell-session}
+         * ./app --limit N file.bin
+         * @endcode
          *
          * The displayed keys are changed also in argument and option list.
          */
@@ -464,9 +495,9 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * @brief Try parsing the arguments
          *
          * Unlike @ref parse() the function does not exit on failure, but
-         * returns `false` instead. If the user requested help, no additional
-         * arguments are parsed, only `--help` option is set and `true` is
-         * returned.
+         * returns @cpp false @ce instead. If the user requested help, no
+         * additional arguments are parsed, only `--help` option is set and
+         * @cpp true @ce is returned.
          */
         bool tryParse(int argc, const char** argv);
 
@@ -503,7 +534,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * Expects that the key exists. Use @ref isSet() for boolean options.
          * If the arguments weren't parsed yet, returns empty string or
-         * default-constructed value. If @p T is not `std::string`, uses
+         * default-constructed value. If @p T is not @ref std::string, uses
          * @ref ConfigurationValue::fromString() to convert the value to given
          * type.
          */

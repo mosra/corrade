@@ -51,16 +51,16 @@ Provides convenient stream interface for passing data to debug output (standard
 output). Data are by default separated with spaces and last value is enclosed
 with newline character. Example usage:
 
-@code
+@code{.cpp}
 // Common usage
-Debug() << "string" << 34 << 275.0f;
+Debug{} << "string" << 34 << 275.0f;
 
 // Redirect debug output to string
 std::ostringstream out;
-Debug(&out) << "the meaning of life, universe and everything is" << 42;
+Debug{&out} << "the meaning of life, universe and everything is" << 42;
 
 // Mute debug output
-Debug(nullptr) << "no one should see my ebanking password" << password;
+Debug{nullptr} << "no one should see my ebanking password" << password;
 
 // Conditional debug output (avoid inserting newline where it's not desired)
 Debug d;
@@ -73,58 +73,66 @@ else
 @endcode
 
 Support for printing more types can be added by implementing function
-@ref operator<<(Debug&, const T&) for given type. If there is no `operator<<`
-implemented for printing given type using Debug class, suitable `std::ostream`
-`operator<<` overload is used as fallback, if found.
+@ref operator<<(Debug&, const T&) for given type. If there is no
+@cpp operator<<() @ce implemented for printing given type using the @ref Debug
+class, suitable @ref std::ostream @cpp operator<<() @ce overload is used as
+fallback, if found.
 
-## Advanced usage
-
-Sometimes you might not want to have everything separated by spaces or having
-newline at the end:
-@code
-// Prints "Value: 16, 24"
-Debug() << "Value:" << 16 << Debug::nospace << "," << 24;
-
-// Prints "Value\n16"
-Debug() << "Value:" << Debug::newline << 16;
-
-// Doesn't output newline at the end
-Debug{Debug::Flag::NoNewlineAtTheEnd} << "Hello!";
-@endcode
-
-## Scoped output redirection
+@section Utility-Debug-scoped-output Scoped output redirection
 
 Output specified in class constructor is used for all instances created during
 that instance lifetime. @ref Debug, @ref Warning and @ref Error classes outputs
 can be controlled separately:
 
-@code
+@code{.cpp}
 std::ostringstream debugOut, errorOut;
 
-Error() << "this is printed into std::cerr";
+Error{} << "this is printed into std::cerr";
 
-Error redirectError(&errorOut);
+Error redirectError{&errorOut};
 
 {
-    Debug redirectDebug(&debugOut);
+    Debug redirectDebug{&debugOut};
 
-    Debug() << "this is printed into debugOut";
-    Error() << "this is printed into errorOut";
-    Debug() << "this is also printed into debugOut";
+    Debug{} << "this is printed into debugOut";
+    Error{} << "this is printed into errorOut";
+    Debug{} << "this is also printed into debugOut";
 }
 
-Debug() << "this is printed into std::cout again";
-Error() << "this is still printed into errorOut";
+Debug{} << "this is printed into std::cout again";
+Error{} << "this is still printed into errorOut";
 @endcode
 
-## Colored output
+@section Utility-Debug-modifiers Output modifiers
+
+It's possible to modify the debug output by passing a special function to the
+output stream.
+
+@subsection Utility-Debug-modifiers-whitespace Explicit whitespace control
+
+Sometimes you might not want to have everything separated by spaces or having
+newline at the end:
+
+@code{.cpp}
+// Prints "Value: 16, 24"
+Debug{} << "Value:" << 16 << Debug::nospace << "," << 24;
+
+// Prints "Value\n16"
+Debug{} << "Value:" << Debug::newline << 16;
+
+// Doesn't output newline at the end
+Debug{Debug::Flag::NoNewlineAtTheEnd} << "Hello!";
+@endcode
+
+@subsection Utility-Debug-modifiers-colors Colored output
 
 It is possible to color the output using @ref color() and @ref boldColor(). The
 color is automatically reset to previous value on destruction to avoid messing
 up the terminal, you can also use @ref resetColor() to reset it explicitly.
-@code
-Debug() << Debug::boldColor(Debug::Color::Green) << "Success!"
-    << Debug::resetColor << "Everything is fine.";
+
+@code{.cpp}
+Debug{} << Debug::boldColor(Debug::Color::Green) << "Success!"
+        << Debug::resetColor << "Everything is fine.";
 @endcode
 
 On POSIX the coloring is done using ANSI color escape sequences and works both
@@ -136,13 +144,15 @@ directly to a terminal without any intermediate buffer. See
 Note that colors make sense only when they finally appear in a terminal and not
 when redirecting output to file. You can control this by setting
 @ref Flag::DisableColors based on value of @ref isTty(), for example:
-@code
+
+@code{.cpp}
 Debug::Flags flags = Debug::isTty() ? Debug::Flags{} : Debug::Flag::DisableColors;
 Debug{flags} << Debug::boldColor(Debug::Color::Green) << "Success!";
 @endcode
 
 Similarly as with scoped output redirection, colors can be also scoped:
-@code
+
+@code{.cpp}
 Debug{} << "this has default color";
 
 {
@@ -163,13 +173,6 @@ Debug{} << "this has default color again";
  */
 class CORRADE_UTILITY_EXPORT Debug {
     public:
-        /**
-         * @brief Debug output modifier
-         *
-         * @see @ref nospace(), @ref newline(), @ref operator<<(Modifier)
-         */
-        typedef void(*Modifier)(Debug&);
-
         /**
          * @brief Debug output flag
          *
@@ -196,6 +199,44 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @see @ref Debug(Flags)
          */
         typedef Containers::EnumSet<Flag> Flags;
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /**
+         * @brief Debug output without newline at the end
+         * @deprecated Use @ref Debug(Flags) instead.
+         */
+        CORRADE_DEPRECATED("use Debug(Flags) instead") static Debug noNewlineAtTheEnd() {
+            return Debug{Flag::NoNewlineAtTheEnd};
+        }
+
+        /**
+         * @brief Debug output without newline at the end
+         * @deprecated Use @ref Debug(std::ostream*, Flags) instead.
+         */
+        CORRADE_DEPRECATED("use Debug(std::ostream*, Flags) instead") static Debug noNewlineAtTheEnd(std::ostream* output) {
+            return Debug{output, Flag::NoNewlineAtTheEnd};
+        }
+        #endif
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /**
+         * @brief Set output for instances in this scope
+         * @deprecated Use @ref Debug(std::ostream*, Flags) instead.
+         */
+        CORRADE_DEPRECATED("use Debug(std::ostream*, Flags) instead") static void setOutput(std::ostream* output);
+        #endif
+
+        /** @{ @name Output modifiers
+         *
+         * See @ref Utility-Debug-modifiers for more information.
+         */
+
+        /**
+         * @brief Debug output modifier
+         *
+         * @see @ref nospace(), @ref newline(), @ref operator<<(Modifier)
+         */
+        typedef void(*Modifier)(Debug&);
 
         /**
          * @brief Output color
@@ -251,33 +292,18 @@ class CORRADE_UTILITY_EXPORT Debug {
             #endif
         };
 
-        #ifdef CORRADE_BUILD_DEPRECATED
-        /**
-         * @brief Debug output without newline at the end
-         * @deprecated Use @ref Debug(Flags) instead.
-         */
-        CORRADE_DEPRECATED("use Debug(Flags) instead") static Debug noNewlineAtTheEnd() {
-            return Debug{Flag::NoNewlineAtTheEnd};
-        }
-
-        /**
-         * @brief Debug output without newline at the end
-         * @deprecated Use @ref Debug(std::ostream*, Flags) instead.
-         */
-        CORRADE_DEPRECATED("use Debug(std::ostream*, Flags) instead") static Debug noNewlineAtTheEnd(std::ostream* output) {
-            return Debug{output, Flag::NoNewlineAtTheEnd};
-        }
-        #endif
-
         /**
          * @brief Don't put space before next value
          *
          * Debug output by default separates values with space, this disables
          * it for the immediately following value. The default behavior is
-         * then restored. The following line outputs `Value: 16, 24`:
-         * @code
+         * then restored. The following line outputs
+         * @cb{.shell-session} Value: 16, 24 @ce:
+         *
+         * @code{.cpp}
          * Debug() << "Value:" << 16 << Debug::nospace << "," << 24;
          * @endcode
+         *
          * @see @ref newline()
          */
         /* MinGW complains loudly if the declaration doesn't also have inline */
@@ -288,14 +314,18 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * Puts a newline (not surrounded by spaces) to the output. The
          * following two lines are equivalent:
-         * @code
+         *
+         * @code{.cpp}
          * Debug() << "Value:" << Debug::newline << 16;
          * Debug() << "Value:" << Debug::nospace << "\n" << Debug::nospace << 16;
          * @endcode
+         *
          * and their output is
          *
-         *      Value:
-         *      16
+         * @code{.shell-session}
+         * Value:
+         * 16
+         * @endcode
          *
          * @see @ref nospace()
          */
@@ -334,39 +364,45 @@ class CORRADE_UTILITY_EXPORT Debug {
          */
         static void resetColor(Debug& debug);
 
-        #ifdef CORRADE_BUILD_DEPRECATED
         /**
-         * @brief Set output for instances in this scope
-         * @deprecated Use @ref Debug(std::ostream*, Flags) instead.
+         * @brief Debug output modification
+         *
+         * See @ref Utility-Debug-modifiers for more information.
          */
-        CORRADE_DEPRECATED("use Debug(std::ostream*, Flags) instead") static void setOutput(std::ostream* output);
-        #endif
+        Debug& operator<<(Modifier f) {
+            f(*this);
+            return *this;
+        }
+
+        /*@}*/
 
         /**
          * @brief Whether given output is a TTY
          *
          * Useful for deciding whether to use ANSI colored output using
-         * @ref Flag::DisableColors. Returns `true` if @p output is a pointer
-         * to `std::cout`/`std::cerr` and the stream is not redirected to a
-         * file, `false` otherwise. Calls `isatty()` on Unix-like systems and
-         * Windows with @ref CORRADE_UTILITY_USE_ANSI_COLORS enabled, calls
-         * Windows APIs if @ref CORRADE_UTILITY_USE_ANSI_COLORS is disabled. On
-         * platforms without `isatty()` equivalent returns always `false`.
+         * @ref Flag::DisableColors. Returns @cpp true @ce if @p output is a
+         * pointer to @ref std::cout / @ref std::cerr and the stream is not
+         * redirected to a file, @cpp false @ce otherwise. Calls @cpp isatty() @ce
+         * on Unix-like systems and Windows with @ref CORRADE_UTILITY_USE_ANSI_COLORS
+         * enabled, calls Windows APIs if @ref CORRADE_UTILITY_USE_ANSI_COLORS
+         * is disabled. On platforms without @cpp isatty() @ce equivalent
+         * returns always @cpp false @ce.
          *
-         * @note Returns `false` when running inside Xcode even though
-         *      `isatty()` reports a positive value, because Xcode is not able
-         *      to handle ANSI colors inside the output view.
-         * @note Uses Node.js `process.stdout.isTTY`/`process.stderr.isTTY`
-         *      instead of `isatty()` on @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten"
-         *      because `isatty()` is not able to detect file redirection.
+         * @note Returns @cpp false @ce when running inside Xcode even though
+         *      @cpp isatty() @ce reports a positive value, because Xcode is
+         *      not able to handle ANSI colors inside the output view.
+         * @note Uses Node.js @cb{.js} process.stdout.isTTY @ce /
+         *      @cb{.js} process.stderr.isTTY @ce instead of @cpp isatty() @ce
+         *      on @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" because
+         *      @cpp isatty() @ce is not able to detect file redirection.
          */
         static bool isTty(std::ostream* output);
 
         /**
          * @brief Whether current debug output is a TTY
          *
-         * Calls @ref isTty(std::ostream*) with output of enclosing `Debug`
-         * instance or with `std::cerr` if there isn't any.
+         * Calls @ref isTty(std::ostream*) with output of enclosing @ref Debug
+         * instance or with @ref std::cerr if there isn't any.
          * @see @ref Warning::isTty(), @ref Error::isTty()
          */
         static bool isTty();
@@ -375,20 +411,20 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @brief Default constructor
          * @param flags         Output flags
          *
-         * Uses output of enclosing `Debug` instance or uses `std::cout` if
-         * there isn't any.
+         * Uses output of enclosing @ref Debug instance or uses @ref std::cout
+         * if there isn't any.
          */
         explicit Debug(Flags flags = {});
 
         /**
          * @brief Constructor
          * @param output        Stream where to put debug output. If set to
-         *      `nullptr`, no debug output will be written anywhere.
+         *      @cpp nullptr @ce, no debug output will be written anywhere.
          * @param flags         Output flags
          *
-         * All new instances created using the default @ref Debug() "Debug()"
-         * constructor during lifetime of this instance will inherit the output
-         * set in @p output.
+         * All new instances created using the default @ref Debug() constructor
+         * during lifetime of this instance will inherit the output set in
+         * @p output.
          */
         explicit Debug(std::ostream* output, Flags flags = {});
 
@@ -460,7 +496,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         /**
          * @brief Print UTF-32 character to debug output
          *
-         * Prints value as Unicode codepoint, i.e. `U+0061`.
+         * Prints value as Unicode codepoint, i.e. @cb{.shell-session} U+0061 @ce.
          */
         Debug& operator<<(char32_t value);
 
@@ -468,19 +504,9 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @brief Print UTF-32 character literal to debug output
          *
          * Prints value as list of Unicode codepoints, i.e.
-         * `[U+0061, U+0062, U+0063}`.
+         * @cb{.shell-session} [U+0061, U+0062, U+0063} @ce.
          */
         Debug& operator<<(const char32_t* value);
-
-        /**
-         * @brief Debug output modification
-         *
-         * See @ref nospace() and @ref newline() for more information.
-         */
-        Debug& operator<<(Modifier f) {
-            f(*this);
-            return *this;
-        }
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
         Debug& operator<<(Implementation::DebugOstreamFallback&& value);
@@ -550,11 +576,11 @@ template<class T> inline Debug& operator<<(Debug&& debug, const T& value) {
 @param debug     Debug class
 @param value     Value to be printed
 
-Support for printing custom types (i.e. those not handled by `iostream`) can
-be added by implementing this function for given type.
+Support for printing custom types (i.e. those not handled by @ref std::iostream)
+can be added by implementing this function for given type.
 
 The function should convert the type to one of supported types (such as
-`std::string`) and then call @ref Debug::operator<<(const std::string&) with
+@ref std::string) and then call @ref Debug::operator<<(const std::string&) with
 it. You can also use @ref Debug::nospace() and @ref Debug::newline().
  */
 template<class T> Debug& operator<<(Debug& debug, const T& value);
@@ -563,7 +589,7 @@ template<class T> Debug& operator<<(Debug& debug, const T& value);
 /** @relates Debug
 @brief Operator for printing iterable types to debug
 
-Prints the value as `{a, b, c}`.
+Prints the value as @cb{.shell-session} {a, b, c} @ce.
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class Iterable> Debug& operator<<(Debug& debug, const Iterable& value)
@@ -610,7 +636,7 @@ namespace Implementation {
 /** @relates Debug
 @brief Operator for printing tuple types to debug
 
-Prints the value as `(first, second, third...)`.
+Prints the value as @cb{.shell-session} (first, second, third...) @ce.
 */
 template<class ...Args> Debug& operator<<(Debug& debug, const std::tuple<Args...>& value) {
     debug << "(" << Debug::nospace;
@@ -662,8 +688,8 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
         /**
          * @brief Whether current warning output is a TTY
          *
-         * Calls @ref isTty(std::ostream*) with output of enclosing `Warning`
-         * instance or with `std::cerr` if there isn't any.
+         * Calls @ref isTty(std::ostream*) with output of enclosing
+         * @ref Warning instance or with @ref std::cerr if there isn't any.
          * @see @ref Debug::isTty(), @ref Error::isTty()
          */
         static bool isTty();
@@ -672,15 +698,15 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
          * @brief Default constructor
          * @param flags         Output flags
          *
-         * Inherits output of enclosing `Warning` instance or uses `std::cerr`
-         * if there isn't any.
+         * Inherits output of enclosing @ref Warning instance or uses
+         * @ref std::cerr if there isn't any.
          */
         explicit Warning(Flags flags = {});
 
         /**
          * @brief Constructor
          * @param output        Stream where to put warning output. If set to
-         *      `nullptr`, no warning output will be written anywhere.
+         *      @cpp nullptr @ce, no warning output will be written anywhere.
          * @param flags         Output flags
          *
          * All new instances created using the default @ref Warning()
@@ -753,8 +779,8 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
         /**
          * @brief Whether current error output is a TTY
          *
-         * Calls @ref isTty(std::ostream*) with output of enclosing `Error`
-         * instance or with `std::cerr` if there isn't any.
+         * Calls @ref isTty(std::ostream*) with output of enclosing @ref Error
+         * instance or with @ref std::cerr if there isn't any.
          * @see @ref Debug::isTty(), @ref Warning::isTty()
          */
         static bool isTty();
@@ -763,15 +789,15 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
          * @brief Default constructor
          * @param flags         Output flags
          *
-         * Inherits output of enclosing `Error` instance or uses `std::cerr` if
-         * there isn't any.
+         * Inherits output of enclosing @ref Error instance or uses
+         * @ref std::cerr if there isn't any.
          */
         explicit Error(Flags flags = {});
 
         /**
          * @brief Constructor
          * @param output        Stream where to put error output. If set to
-         *      `nullptr`, no error output will be written anywhere.
+         *      @cpp nullptr @ce, no error output will be written anywhere.
          * @param flags         Output flags
          *
          * All new instances created using the default @ref Error()
@@ -819,16 +845,19 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
 
 Equivalent to @ref Error, but exits with defined exit code on destruction. So
 instead of this:
-@code
+
+@code{.cpp}
 if(stuff.broken()) {
-    Error() << "Everything's broken, exiting.";
+    Error{} << "Everything's broken, exiting.";
     std::exit(42);
 }
 @endcode
+
 You can write just this:
-@code
+
+@code{.cpp}
 if(stuff.broken())
-    Fatal(42) << "Everything's broken, exiting.";
+    Fatal{42} << "Everything's broken, exiting.";
 @endcode
 */
 class CORRADE_UTILITY_EXPORT Fatal: public Error {
@@ -838,8 +867,8 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
          * @param exitCode      Application exit code to be used on destruction
          * @param flags         Output flags
          *
-         * Sets output to `std::cerr`. The @p exitcode is passed to `std::exit()`
-         * on destruction.
+         * Sets output to @ref std::cerr. The @p exitCode is passed to
+         * @ref std::exit() on destruction.
          */
         Fatal(int exitCode = 1, Flags flags = {}): Error{flags}, _exitCode{exitCode} {}
 
@@ -849,7 +878,7 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
         /**
          * @brief Constructor
          * @param output        Stream where to put debug output. If set to
-         *      `nullptr`, no debug output will be written anywhere.
+         *      @cpp nullptr @ce, no debug output will be written anywhere.
          * @param exitCode      Application exit code to be used on destruction
          * @param flags         Output flags
          */

@@ -43,19 +43,21 @@ namespace Corrade { namespace Utility {
 /**
 @brief Stream buffer that sends the data to Android log
 
-Usable in conjunction with `std::ostream` to redirect the output to Android log
-buffer, which can later be accessed through the `logcat` utility. The data are
-sent on each `flush()` call and then the internal buffer is cleared. Example
-usage:
-@code
+Usable in conjunction with @ref std::ostream to redirect the output to Android
+log buffer, which can later be accessed through the `logcat` utility. The data
+are sent on each `flush()` call and then the internal buffer is cleared.
+Example usage:
+
+@code{.cpp}
 AndroidLogStreamBuffer buffer(AndroidLogStreamBuffer::LogPriority::Info, "native-app");
 
 std::ostream out(&buffer);
 
 out << "Hello World!" << std::endl;
 @endcode
+
 The output stream can be also used with @ref Debug classes.
-@partialsupport Available only in @ref CORRADE_TARGET_ANDROID "Android".
+@partialsupport Available only on @ref CORRADE_TARGET_ANDROID "Android".
 */
 class CORRADE_UTILITY_EXPORT AndroidLogStreamBuffer: public std::stringbuf {
     public:

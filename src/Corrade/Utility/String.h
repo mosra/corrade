@@ -53,7 +53,7 @@ namespace Implementation {
 /**
 @brief Safely construct string from char array
 
-If @p string is `nullptr`, returns empty string.
+If @p string is @cpp nullptr @ce, returns empty string.
 */
 inline std::string fromArray(const char* string) {
     return string ? std::string{string} : std::string{};
@@ -62,8 +62,8 @@ inline std::string fromArray(const char* string) {
 /**
 @brief Safely construct string from char array with explicit length
 
-If @p string is `nullptr`, returns empty string. Otherwise takes also @p length
-into account.
+If @p string is @cpp nullptr @ce, returns empty string. Otherwise takes also
+@p length into account.
 */
 inline std::string fromArray(const char* string, std::size_t length) {
     return string ? std::string{string, length} : std::string{};
@@ -88,8 +88,8 @@ template<std::size_t size> inline std::string ltrim(std::string string, const ch
 /**
 @brief Trim leading whitespace from string
 
-Equivalent to calling the above function with <tt>" \t\f\v\r\n"</tt> as second
-parameter.
+Equivalent to calling @ref ltrim(std::string, const char(&)[size]) with
+@cpp " \t\f\v\r\n" @ce as second parameter.
 @see @ref rtrim(), @ref trim()
 */
 CORRADE_UTILITY_EXPORT std::string ltrim(std::string string);
@@ -113,8 +113,8 @@ template<std::size_t size> inline std::string rtrim(std::string string, const ch
 /**
 @brief Trim trailing whitespace from string
 
-Equivalent to calling the above function with <tt>" \t\f\v\r\n"</tt> as second
-parameter.
+Equivalent to calling @ref rtrim(std::string, const char(&)[size] with
+@cpp " \t\f\v\r\n" @ce as second parameter.
 @see @ref ltrim(), @ref trim()
 */
 CORRADE_UTILITY_EXPORT std::string rtrim(std::string string);
@@ -124,7 +124,7 @@ CORRADE_UTILITY_EXPORT std::string rtrim(std::string string);
 @param string       String to be trimmed
 @param characters   Characters which will be trimmed
 
-Equivalent to `ltrim(rtrim(string))`.
+Equivalent to @cpp ltrim(rtrim(string)) @ce.
 */
 inline std::string trim(std::string string, const std::string& characters) {
     return Implementation::trim(std::move(string), {characters.data(), characters.size()});
@@ -138,8 +138,8 @@ template<std::size_t size> inline std::string trim(std::string string, const cha
 /**
 @brief Trim leading and trailing whitespace from string
 
-Equivalent to calling the above function with <tt>" \t\f\v\r\n"</tt> as second
-parameter.
+Equivalent to calling @ref trim(std::string, const char(&)[size]) with
+@cpp " \t\f\v\r\n" @ce as second parameter.
 */
 CORRADE_UTILITY_EXPORT std::string trim(std::string string);
 
@@ -174,8 +174,8 @@ template<std::size_t size> inline std::vector<std::string> splitWithoutEmptyPart
 /**
 @brief Split string on whitespaces and remove empty parts
 
-Equivalent to calling the above function with <tt>" \t\f\v\r\n"</tt> as second
-parameter.
+Equivalent to calling @ref splitWithoutEmptyParts(const std::string&, const char(&)[size])
+with @cpp " \t\f\v\r\n" @ce as second parameter.
 */
 CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std::string& string);
 

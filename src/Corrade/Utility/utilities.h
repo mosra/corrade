@@ -44,10 +44,10 @@ namespace Corrade { namespace Utility {
 /** @{ @name Type utilities */
 
 /**
- * @brief Cast type to another of the same size
- *
- * Unlike `reinterpret_cast` this doesn't break strict-aliasing rules.
- */
+@brief Cast type to another of the same size
+
+Unlike @cpp reinterpret_cast @ce this doesn't break strict-aliasing rules.
+*/
 template<class To, class From> inline To bitCast(const From& from) {
     /* Based on https://github.com/chromium/chromium/blob/trunk/base/basictypes.h#L306 */
     static_assert(sizeof(From) == sizeof(To), "Utility::bitCast(): resulting type must have the same size");

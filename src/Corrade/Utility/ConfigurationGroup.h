@@ -53,7 +53,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         /**
          * @brief Default constructor
          *
-         * Pointer to enclosing configuration is set to `nullptr`, call
+         * Pointer to enclosing configuration is set to @cpp nullptr @ce, call
          * @ref addGroup() to add it somewhere.
          */
         explicit ConfigurationGroup();
@@ -61,7 +61,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         /**
          * @brief Copy constructor
          *
-         * Pointer to enclosing configuration is set to `nullptr`, call
+         * Pointer to enclosing configuration is set to @cpp nullptr @ce, call
          * @ref addGroup() to add it somewhere.
          */
         ConfigurationGroup(const ConfigurationGroup& other);
@@ -69,7 +69,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         /**
          * @brief Move constructor
          *
-         * Pointer to enclosing configuration is set to `nullptr`, call
+         * Pointer to enclosing configuration is set to @cpp nullptr @ce, call
          * @ref addGroup() to add it somewhere.
          */
         ConfigurationGroup(ConfigurationGroup&& other);
@@ -97,7 +97,8 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         /**
          * @brief Enclosing configuration
          *
-         * Returns `nullptr` if the group is not part of any configuration.
+         * Returns @cpp nullptr @ce if the group is not part of any
+         * configuration.
          * @see @ref addGroup(const std::string&, ConfigurationGroup*)
          */
         Configuration* configuration() { return _configuration; }
@@ -151,7 +152,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @param name      Name
          * @param index     Group index. Default is first found group.
          *
-         * Returns pointer to group on success, `nullptr` otherwise.
+         * Returns pointer to group on success, @cpp nullptr @ce otherwise.
          * @see @ref groups()
          */
         ConfigurationGroup* group(const std::string& name, unsigned int index = 0);
@@ -187,8 +188,8 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @param name      Name of the group
          * @param index     Group index. Default is first found group.
          *
-         * Returns `true` if given group was found and removed, `false`
-         * otherwise.
+         * Returns @cpp true @ce if given group was found and removed,
+         * @cpp false @ce otherwise.
          * @see @ref removeAllGroups(), @ref clear()
          */
         bool removeGroup(const std::string& name, unsigned int index = 0);
@@ -196,8 +197,8 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
         /**
          * @brief Remove group
          *
-         * Returns `true` if given group was found and removed, `false`
-         * otherwise.
+         * Returns @cpp true @ce if given group was found and removed,
+         * @cpp false @ce otherwise.
          * @see @ref removeAllGroups(), @ref clear()
          */
         bool removeGroup(ConfigurationGroup* group);
@@ -252,7 +253,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @param flags     Flags
          *
          * Directly returns the value. If the key is not found, returns
-         * default constructed value. If @p T is not `std::string`, uses
+         * default constructed value. If @p T is not @ref std::string, uses
          * @ref ConfigurationValue::fromString() to convert the value to given
          * type.
          * @see @ref hasValue()
@@ -271,7 +272,7 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @param key       Key
          * @param flags     Flags
          *
-         * If @p T is not `std::string`, uses
+         * If @p T is not @ref std::string, uses
          * @ref ConfigurationValue::fromString() to convert the value to given
          * type.
          */
@@ -286,8 +287,9 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @param flags     Flags
          *
          * If the key already exists, changes it to new value. If the key
-         * doesn't exist, adds a new key with given name. Returns `false` if
-         * @p index is larger than actual value count, `true` otherwise.
+         * doesn't exist, adds a new key with given name. Returns
+         * @cpp false @ce if @p index is larger than actual value count,
+         * @cpp true @ce otherwise.
          */
         bool setValue(const std::string& key, std::string value, unsigned int index = 0, ConfigurationValueFlags flags = ConfigurationValueFlags()) {
             return setValueInternal(key, std::move(value), index, flags);
@@ -365,8 +367,8 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @param key       Key
          * @param index     Value index. Default is first found value.
          *
-         * Returns `true` if given value was found and removed, `false`
-         * otherwise.
+         * Returns @cpp true @ce if given value was found and removed,
+         * @cpp false @ce otherwise.
          * @see @ref removeAllValues(), @ref clear()
          */
         bool removeValue(const std::string& key, unsigned int index = 0);

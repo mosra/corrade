@@ -108,10 +108,8 @@ template<std::size_t digestSize> class AbstractHash {
 
         enum: std::size_t {
             /**
-             * @brief Digest size
-             *
              * Size of the raw digest in bytes. Hexadecimal string
-             * representation has double size.
+             * representation has double the size.
              */
             DigestSize = digestSize
         };

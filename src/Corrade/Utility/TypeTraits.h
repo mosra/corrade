@@ -42,19 +42,21 @@ namespace Corrade { namespace Utility {
 @param className        Resulting class name
 
 Defines a traits class checking whether @p typeExpression is valid. You can use
-`T` to reference the type which is being checked. The defined class is then
-implicitly convertible to `bool` holding the result.
+@cpp T @ce to reference the type which is being checked. The defined class is
+then implicitly convertible to `bool` holding the result.
 
-Usage examples: checking for presence of `const_iterator` member type:
-@code
+Usage examples: checking for presence of @cpp const_iterator @ce member type:
+
+@code{.cpp}
 CORRADE_HAS_TYPE(HasKeyType, typename T::key_type);
 
 static_assert(HasKeyType<std::map<int, int>>::value, "");
 static_assert(!HasKeyType<std::vector<int>>::value, "");
 @endcode
 
-Checking for presence of `size()` member function:
-@code
+Checking for presence of @cpp size() @ce member function:
+
+@code{.cpp}
 CORRADE_HAS_TYPE(HasSize, decltype(std::declval<T>().size()));
 
 static_assert(HasSize<std::vector<int>>::value, "");
@@ -87,10 +89,10 @@ namespace Implementation {
 /**
 @brief Traits class for checking whether given type is iterable
 
-Equivalent to `std::true_type` if the class is has either `begin()` and `end()`
-members, is usable with free `begin()`/`end()` functions or has
-`std::begin()`/`std::end()` overloads. Otherwise equivalent to
-`std::false_type`.
+Equivalent to @ref std::true_type if the class is has either @cpp begin() @ce /
+@cpp end() @ce members, is usable with free @cpp begin() @ce / @cpp end() @ce
+functions or has @ref std::begin() / @ref std::end() overloads. Otherwise
+equivalent to @ref std::false_type.
 */
 /* When using {}, MSVC 2015 complains that even the explicitly defaulted
    constructor doesn't exist */

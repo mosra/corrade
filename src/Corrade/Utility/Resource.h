@@ -49,7 +49,7 @@ in given group has unique filename.
 See @ref resource-management for brief introduction and example usage.
 Standalone resource compiler executable is implemented in @ref rc.cpp.
 
-## Resource configuration file
+@section Utility-Resource-conf Resource configuration file
 
 Function @ref compileFrom() takes configuration file as parameter. The file
 allows you to specify filenames and filename aliases of resource files instead
@@ -59,18 +59,20 @@ CMake. The file can be also used when overriding compiled-in resources with
 live data using @ref overrideGroup(). All filenames are expected to be in
 UTF-8. Example file:
 
-    group=myGroup
+@code{.ini}
+group=myGroup
 
-    [file]
-    filename=../resources/intro-new-final.ogg
-    alias=intro.ogg
+[file]
+filename=../resources/intro-new-final.ogg
+alias=intro.ogg
 
-    [file]
-    filename=license.txt
+[file]
+filename=license.txt
 
-    [file]
-    filename=levels-insane.conf
-    alias=levels-easy.conf
+[file]
+filename=levels-insane.conf
+alias=levels-easy.conf
+@endcode
 
 @todo Ad-hoc resources
 @todo Test data unregistering
@@ -139,7 +141,7 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @param filename      Filename in UTF-8
          *
          * Returns reference to data of given file in the group. The file must
-         * exist. If the file is empty, returns `nullptr`.
+         * exist. If the file is empty, returns @cpp nullptr @ce.
          */
         Containers::ArrayView<const char> getRaw(const std::string& filename) const;
 
@@ -184,8 +186,8 @@ If a resource is compiled into dynamic library or directly into executable, it
 will be initialized automatically thanks to
 @ref CORRADE_AUTOMATIC_INITIALIZER() macros. However, if the resource is
 compiled into static library, it must be explicitly initialized via this macro,
-e.g. at the beginning of `main()`. You can also wrap these macro calls into
-another function (which will then be compiled into dynamic library or main
+e.g. at the beginning of @cpp main() @ce. You can also wrap these macro calls
+into another function (which will then be compiled into dynamic library or main
 executable) and use @ref CORRADE_AUTOMATIC_INITIALIZER() macro for automatic
 call.
 
@@ -193,19 +195,20 @@ call.
     running into linker errors with `resourceInitializer_*`, this could be the
     problem. If you are in a namespace and cannot call this macro from `main()`,
     try this:
-@code
-static void initialize() {
-    CORRADE_RESOURCE_INITIALIZE(res)
-}
-
-namespace Foo {
-    void bar() {
-        initialize();
-
-        //...
+@attention
+    @code{.cpp}
+    static void initialize() {
+        CORRADE_RESOURCE_INITIALIZE(res)
     }
-}
-@endcode
+
+    namespace Foo {
+        void bar() {
+            initialize();
+
+            //...
+        }
+    }
+    @endcode
 
 @see @ref CORRADE_RESOURCE_FINALIZE()
 */

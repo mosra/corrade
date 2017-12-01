@@ -51,8 +51,8 @@ namespace Implementation {
 @brief MurmurHash 2
 
 Based on algorithm copyright Austin Appleby, http://code.google.com/p/smhasher/ .
-The digest is 32bit or 64bit, depending on `sizeof(std::size_t)` and thus
-usable for hasing in e.g. `std::unordered_map`.
+The digest is 32bit or 64bit, depending on @cpp sizeof(std::size_t) @ce and
+thus usable for hasing in e.g. @ref std::unordered_map.
 
 @todo constexpr algorithm
 */

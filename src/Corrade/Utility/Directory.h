@@ -156,24 +156,24 @@ CORRADE_UTILITY_EXPORT std::vector<std::string> list(const std::string& path, Fl
 /**
 @brief Create path
 
-Returns `true` if path was successfully created, `false` otherwise. Expects
-that the path is in UTF-8.
+Returns @cpp true @ce if path was successfully created, @cpp false @ce
+otherwise. Expects that the path is in UTF-8.
 */
 CORRADE_UTILITY_EXPORT bool mkpath(const std::string& path);
 
 /**
 @brief Remove file or directory
 
-Returns `true` if path is file or empty directory and was successfully removed,
-`false` otherwise. Expects that the path is in UTF-8.
+Returns @cpp true @ce if path is file or empty directory and was successfully
+removed, @cpp false @ce otherwise. Expects that the path is in UTF-8.
 */
 CORRADE_UTILITY_EXPORT bool rm(const std::string& path);
 
 /**
 @brief Move given file or directory
 
-Returns `true` on success, `false` otherwise. Expects that the paths are in
-UTF-8.
+Returns @cpp true @ce on success, @cpp false @ce otherwise. Expects that the
+paths are in UTF-8.
 @see @ref read(), @ref write()
 */
 CORRADE_UTILITY_EXPORT bool move(const std::string& oldPath, const std::string& newPath);
@@ -181,11 +181,12 @@ CORRADE_UTILITY_EXPORT bool move(const std::string& oldPath, const std::string& 
 /**
 @brief Whether the application runs in a sandboxed environment
 
-Returns `true` if running on @ref CORRADE_TARGET_IOS "iOS",
+Returns @cpp true @ce if running on @ref CORRADE_TARGET_IOS "iOS",
 @ref CORRADE_TARGET_ANDROID "Android", as a
 @ref CORRADE_TARGET_APPLE "macOS" app bundle,
 @ref CORRADE_TARGET_WINDOWS_RT "Windows Phone/Store" application or in a
-browser through @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", `false` otherwise.
+browser through @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", @cpp false @ce
+otherwise.
 */
 CORRADE_UTILITY_EXPORT bool isSandboxed();
 
@@ -204,11 +205,12 @@ CORRADE_UTILITY_EXPORT std::string executableLocation();
 /**
 @brief Current user's home directory
 
-On Unix and non-sandboxed macOS, the directory is equivalent to `${HOME}`
-environment variable. On sandboxed macOS and iOS the directory is equivalent to
-what's returned by `NSHomeDirectory()`. On Windows the directory is equivalent
-to `%%USERPROFILE%/Documents` or similar. On other systems or if the directory
-can't be found, empty string is returned. Returned value is encoded in UTF-8.
+On Unix and non-sandboxed macOS, the directory is equivalent to
+@cb{.sh} ${HOME} @ce environment variable. On sandboxed macOS and iOS the
+directory is equivalent to what's returned by @cpp NSHomeDirectory() @ce. On
+Windows the directory is equivalent to @cb{.bat} %USERPROFILE%/Documents @ce
+or similar. On other systems or if the directory can't be found, empty string
+is returned. Returned value is encoded in UTF-8.
 @note The path is returned with forward slashes on all platforms. Use
     @ref toNativeSeparators() to convert it to platform-specific format, if
     needed.
@@ -219,12 +221,13 @@ CORRADE_UTILITY_EXPORT std::string home();
 @brief Application configuration dir
 @param name     Application name
 
-On Unix (except for macOS), the configuration dir is `${XDG_CONFIG_HOME}/name` or
-`${HOME}/.config/name` (@p name is lowercased), on Windows the configuration
-dir is in `%%APPDATA%/name` (@p name is left as is). On macOS and iOS the
-configuration dir is `${HOME}/Library/Application Support/name`. On other
-systems or if the directory can't be found, empty string is returned. Returned
-value is encoded in UTF-8.
+On Unix (except for macOS), the configuration dir is
+@cb{.sh} ${XDG_CONFIG_HOME}/name @ce or @cb{.sh} ${HOME}/.config/name @ce
+(@p name is lowercased), on Windows the configuration dir is in
+@cb{.bat} %APPDATA%/name @ce (@p name is left as is). On macOS and iOS the
+configuration dir is @cb{.sh} ${HOME}/Library/Application Support/name @ce. On
+other systems or if the directory can't be found, empty string is returned.
+Returned value is encoded in UTF-8.
 @note The path is returned with forward slashes on all platforms. Use
     @ref toNativeSeparators() to convert it to platform-specific format, if
     needed.
@@ -235,10 +238,10 @@ CORRADE_UTILITY_EXPORT std::string configurationDir(const std::string& name);
 @brief Temporary dir
 
 On Unix and non-sandboxed macOS, the directory is equivalent to `/tmp`. On
-sandboxed macOS and iOS the directory is the `/tmp` subfolder of the app sandbox.
-On non-RT Windows the directory is equivalent to `%%TEMP%`. On other systems or
-if the directory can't be found, empty string is returned. Returned value is
-encoded in UTF-8.
+sandboxed macOS and iOS the directory is the `/tmp` subfolder of the app
+sandbox. On non-RT Windows the directory is equivalent to @cb{.bat} %TEMP% @ce.
+On other systems or if the directory can't be found, empty string is returned.
+Returned value is encoded in UTF-8.
 @note The path is returned with forward slashes on all platforms. Use
     @ref toNativeSeparators() to convert it to platform-specific format, if
     needed.
@@ -248,17 +251,18 @@ CORRADE_UTILITY_EXPORT std::string tmp();
 /**
 @brief Check if the file exists
 
-Returns `true` if the file exists and is accessible (e.g. user has permission
-to open it), `false` otherwise. Expects that the filename is in UTF-8.
+Returns @cpp true @ce if the file exists and is accessible (e.g. user has
+permission to open it), @cpp false @ce otherwise. Expects that the filename is
+in UTF-8.
 */
 CORRADE_UTILITY_EXPORT bool fileExists(const std::string& filename);
 
 /**
 @brief Read file into array
 
-Reads whole file as binary (i.e. without newline conversion). Returns `nullptr`
-and prints message to @ref Error if the file can't be read. Expects that the
-filename is in UTF-8.
+Reads whole file as binary (i.e. without newline conversion). Returns
+@cpp nullptr @ce and prints message to @ref Error if the file can't be read.
+Expects that the filename is in UTF-8.
 @see @ref readString(), @ref fileExists(), @ref write(), @ref mapRead()
 */
 CORRADE_UTILITY_EXPORT Containers::Array<char> read(const std::string& filename);
@@ -274,9 +278,9 @@ CORRADE_UTILITY_EXPORT std::string readString(const std::string& filename);
 /**
 @brief Write array into file
 
-Writes the file as binary (i.e. without newline conversion). Returns `false`
-and prints message to @ref Error if the file can't be written, `true`
-otherwise. Expects that the filename is in UTF-8.
+Writes the file as binary (i.e. without newline conversion). Returns
+@cpp false @ce and prints message to @ref Error if the file can't be written,
+@cpp true @ce otherwise. Expects that the filename is in UTF-8.
 @see @ref writeString(), @ref read(), @ref map()
 */
 CORRADE_UTILITY_EXPORT bool write(const std::string& filename, Containers::ArrayView<const void> data);
@@ -296,8 +300,8 @@ CORRADE_UTILITY_EXPORT bool writeString(const std::string& filename, const std::
 Maps the file as read-write memory and enlarges it to @p size. If the file does
 not exist yet, it is created, if it exists, it's truncated. The array deleter
 takes care of unmapping, however the file is not deleted after unmapping. If an
-error occurs, `nullptr` is returned and a message is printed to @ref Error.
-Expects that the filename is in UTF-8.
+error occurs, @cpp nullptr @ce is returned and a message is printed to
+@ref Error. Expects that the filename is in UTF-8.
 @see @ref mapRead(), @ref read(), @ref write()
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
     @ref CORRADE_TARGET_WINDOWS "Windows" platforms.
@@ -308,7 +312,7 @@ CORRADE_UTILITY_EXPORT Containers::Array<char, MapDeleter> map(const std::string
 @brief Map file for reading
 
 Maps the file as read-only memory. The array deleter takes care of unmapping.
-If the file doesn't exist or an error occurs while mapping, `nullptr` is
+If the file doesn't exist or an error occurs while mapping, @cpp nullptr @ce is
 returned and a message is printed to @ref Error. Expects that the filename is
 in UTF-8.
 @see @ref map(), @ref read()

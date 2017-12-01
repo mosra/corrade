@@ -43,7 +43,7 @@ namespace Corrade { namespace Utility { namespace Unicode {
 
 Returns Unicode codepoint of character on the cursor and position of the
 following character. If an error occurs, returns position of next byte and
-`0xffffffffu` as codepoint.
+@cpp 0xffffffffu @ce as codepoint.
 @see @ref utf8()
 */
 CORRADE_UTILITY_EXPORT std::pair<char32_t, std::size_t> nextChar(Containers::ArrayView<const char> text, std::size_t cursor);
@@ -63,7 +63,7 @@ template<std::size_t size> inline std::pair<char32_t, std::size_t> nextChar(cons
 @brief Previous UTF-8 character
 
 Returns Unicode codepoint of character before the cursor and its position. If
-an error occurs, returns position of previous byte and `0xffffffffu` as
+an error occurs, returns position of previous byte and @cpp 0xffffffffu @ce as
 codepoint.
 @see @ref utf8()
 */
@@ -105,7 +105,7 @@ namespace Implementation {
 
 Converts UTF-8 string to wide-string (UTF-16) representation. Primary purpose
 is easy interaction with Windows Unicode APIs, thus the function doesn't
-return `std::u16string` but a `std::wstring`.
+return @ref std::u16string but a @ref std::wstring.
 @partialsupport Available only on @ref CORRADE_TARGET_WINDOWS "Windows" to be
     used when dealing directly with Windows Unicode APIs. Other code should
     always use UTF-8, see http://utf8everywhere.org for more information.
@@ -133,7 +133,7 @@ inline std::wstring widen(const char* text) {
 
 Converts wide-string (UTF-16) to UTF-8 representation. Primary purpose
 is easy interaction with Windows Unicode APIs, thus the function doesn't
-accept `std::u16string` but a `std::wstring`.
+accept @ref std::u16string but a @ref std::wstring.
 @partialsupport Available only on @ref CORRADE_TARGET_WINDOWS "Windows" to be
     used when dealing directly with Windows Unicode APIs. Other code should
     always use UTF-8, see http://utf8everywhere.org for more information.

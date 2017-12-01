@@ -45,19 +45,21 @@ Usable for sanity checks on user input, as it prints explanational message on
 error.
 
 By default, if assertion fails, @p message is printed to error output and the
-application aborts. If `CORRADE_GRACEFUL_ASSERT` is defined, the message is
-printed and the function returns with @p returnValue. If `CORRADE_NO_ASSERT` is
-defined, this macro does nothing. Example usage:
-@code
+application aborts. If @cpp CORRADE_GRACEFUL_ASSERT @ce is defined, the message
+is printed and the function returns with @p returnValue. If
+@cpp CORRADE_NO_ASSERT @ce is defined, this macro does nothing. Example usage:
+
+@code{.cpp}
 T operator[](std::size_t pos) const {
     CORRADE_ASSERT(pos < size(), "Index out of range", T());
     return data[pos];
 }
 @endcode
 
-If the function has return type `void`, just use empty parameter (allowed in
-C++11):
-@code
+If the function has return type @cpp void @ce, just use empty parameter
+(allowed in C++11):
+
+@code{.cpp}
 void compile() {
     CORRADE_ASSERT(!sources.empty(), "No sources added", );
 
@@ -66,18 +68,24 @@ void compile() {
 @endcode
 
 You can use stream output operators for formatting just like when printing to
-Debug output:
-@code
-CORRADE_ASSERT(pos < size(), "Cannot access element" << pos << "in array of size" << size(), );
+@ref Corrade::Utility::Debug output:
+
+@code{.cpp}
+CORRADE_ASSERT(pos < size(),
+    "Cannot access element" << pos << "in array of size" << size(), );
 @endcode
 
-@attention Don't use this function for checking function output like this:
-    @code
-    CORRADE_ASSERT(initialize(userParam), "Initialization failed: wrong parameter" << userParam, );
+@attention
+    Don't use this function for checking function output like this:
+@attention
+    @code{.cpp}
+    CORRADE_ASSERT(initialize(userParam),
+        "Initialization failed: wrong parameter" << userParam, );
     @endcode
-    If `CORRADE_NO_ASSERT` is defined, the macro is not expanded and thus the
-    function gets never called. See CORRADE_INTERNAL_ASSERT_OUTPUT() for
-    possible solution.
+@attention
+    If @cpp CORRADE_NO_ASSERT @ce is defined, the macro is not expanded and
+    thus the function gets never called. See @ref CORRADE_INTERNAL_ASSERT_OUTPUT()
+    for possible solution.
 
 @see @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_ASSERT_UNREACHABLE()
 @todo find a way that @p returnValue gets validated but doesn't get included in
@@ -116,14 +124,18 @@ prints what failed and where instead of user-friendly message.
 By default, if assertion fails, failed condition, file and line is printed to
 error output and the application aborts. If `CORRADE_NO_ASSERT` is defined,
 this macro does nothing. Example usage:
-@code
+
+@code{.cpp}
 CORRADE_INTERNAL_ASSERT(!nullptr);
 @endcode
 
-@attention Don't use this function for checking function output like this:
-    @code
+@attention
+    Don't use this function for checking function output like this:
+@attention
+    @code{.cpp}
     CORRADE_INTERNAL_ASSERT(initialize());
     @endcode
+@attention
     If `CORRADE_NO_ASSERT` is defined, the macro is not expanded and thus the
     function gets never called. Use @ref CORRADE_INTERNAL_ASSERT_OUTPUT()
     instead.
@@ -147,10 +159,11 @@ CORRADE_INTERNAL_ASSERT(!nullptr);
 @param call         Assert call
 
 Unlike @ref CORRADE_INTERNAL_ASSERT(), this macro performs the call even if
-`CORRADE_NO_ASSERT` is defined, making it usable for checking function output.
-Otherwise the behavior is the same as with @ref CORRADE_INTERNAL_ASSERT().
+@cpp CORRADE_NO_ASSERT @ce is defined, making it usable for checking function
+output. Otherwise the behavior is the same as with @ref CORRADE_INTERNAL_ASSERT().
 Example usage:
-@code
+
+@code{.cpp}
 CORRADE_INTERNAL_ASSERT_OUTPUT(initialize());
 @endcode
 */
@@ -172,15 +185,18 @@ CORRADE_INTERNAL_ASSERT_OUTPUT(initialize());
 
 By default, if code marked with this macro is reached, message with file and
 line is printed to error output and the application aborts. If
-`CORRADE_NO_ASSERT` is defined, this macro hints to the compiler that given
-code is not reachable, possibly improving performance. Example usage:
-@code
+@cpp CORRADE_NO_ASSERT @ce is defined, this macro hints to the compiler that
+given code is not reachable, possibly improving performance. Example usage:
+
+@code{.cpp}
 switch(flag) {
     case Flag::A: return foo;
     case Flag::B: return bar;
-    default: CORRADE_ASSERT_UNREACHABLE();
 }
+
+CORRADE_ASSERT_UNREACHABLE();
 @endcode
+
 @see @ref CORRADE_ASSERT()
 */
 #ifdef CORRADE_NO_ASSERT

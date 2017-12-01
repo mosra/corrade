@@ -68,12 +68,13 @@ functions to convert values from and to templated types. Reimplement the
 structure with template specialization to allow saving and getting
 non-standard types into and from configuration files.
 
-## Example: custom structure
+@section Utility-ConfigurationValue-example Example: custom structure
 
 We have structure named `Foo` and want to store it in configuration file as a
 sequence of two integers separated by a space.
-@code
-#include "Utility/ConfigurationGroup.h"
+
+@code{.cpp}
+#include <Corrade/Utility/ConfigurationGroup.h>
 
 struct Foo {
     int a, b;
@@ -101,11 +102,14 @@ template<> struct ConfigurationValue<Foo> {
 
 }}
 @endcode
-When saving the structure into configuration file using e.g.
-`configuration->addValue("fooValue", Foo{6, 7});`, the result will look like
-this:
 
-    fooValue=6 7
+When saving the structure into configuration file using e.g.
+@cpp configuration->addValue("fooValue", Foo{6, 7}); @ce, the result will look
+like this:
+
+@code{.ini}
+fooValue=6 7
+@endcode
 */
 template<class T> struct ConfigurationValue {
     ConfigurationValue() = delete;
@@ -168,14 +172,14 @@ template<> struct ConfigurationValue<double>: public Implementation::BasicConfig
 template<> struct ConfigurationValue<long double>: public Implementation::BasicConfigurationValue<long double> {};
 #endif
 
-/** @brief Configuration value parser and writer for `sd::string` type */
+/** @brief Configuration value parser and writer for @ref std::string type */
 template<> struct ConfigurationValue<std::string>: public Implementation::BasicConfigurationValue<std::string> {};
 
 /**
 @brief Configuration value parser and writer for `bool` type
 
-Reads `1`, `yes`, `y` or `true` as `true`, any other string as `false`. Writes
-`true` or `false`.
+Reads `1`, `yes`, `y` or `true` as @cpp true @ce, any other string as
+@cpp false @ce. Writes `true` or `false`.
 */
 template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<bool> {
     ConfigurationValue() = delete;

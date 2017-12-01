@@ -42,7 +42,8 @@
 
 Marked function, class or typedef will emit deprecation warning on supported
 compilers (GCC, Clang, MSVC):
-@code
+
+@code{.cpp}
 class CORRADE_DEPRECATED("use Bar instead") Foo;
 CORRADE_DEPRECATED("use bar() instead") void foo();
 typedef CORRADE_DEPRECATED("use Fizz instead") Output<5> Buzz;
@@ -64,9 +65,11 @@ Does not work on template aliases and enum values, use
 @brief Alias deprecation mark
 
 Marked alias will emit deprecation warning on supported compilers (GCC, Clang):
-@code
+
+@code{.cpp}
 template<class T> using Foo CORRADE_DEPRECATED_ALIAS("use Bar instead") = Bar<T>;
 @endcode
+
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ENUM(),
     @ref CORRADE_DEPRECATED_FILE()
 */
@@ -81,7 +84,8 @@ template<class T> using Foo CORRADE_DEPRECATED_ALIAS("use Bar instead") = Bar<T>
 
 Marked enum or enum value will emit deprecation warning on supported compilers
 (C++17 feature, MSVC 2015, Clang and GCC 6+):
-@code
+
+@code{.cpp}
 enum class CORRADE_DEPRECATED_ENUM("use Bar instead") Foo {};
 
 enum class Bar {
@@ -90,6 +94,7 @@ enum class Bar {
     Baz CORRADE_DEPRECATED_ENUM("use Bar::Buzz instead") = 1
 };
 @endcode
+
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
     @ref CORRADE_DEPRECATED_FILE()
 */
@@ -106,7 +111,8 @@ enum class Bar {
 
 Putting this in a file will emit deprecation warning when given file is
 included or compiled (GCCC, Clang):
-@code
+
+@code{.cpp}
 CORRADE_DEPRECATED_FILE("use Bar.h instead")
 @endcode
 */
@@ -122,8 +128,8 @@ CORRADE_DEPRECATED_FILE("use Bar.h instead")
 @brief Unused variable mark
 
 Putting this before unused variable will suppress compiler warning about it
-being unused. If possible, use `static_cast<void>(var)` or nameless function
-parameters instead.
+being unused. If possible, use @cpp static_cast<void>(var) @ce or nameless
+function parameters instead.
 */
 #if defined(__GNUC__)
 #define CORRADE_UNUSED __attribute__((__unused__))
@@ -136,9 +142,10 @@ parameters instead.
 /** @hideinitializer
 @brief Type alignment specifier
 
-Expands to C++11 `alignas()` specifier on supported compilers, otherwise falls
-back to compiler-specific attribute. Example usage:
-@code
+Expands to C++11 @cpp alignas() @ce specifier on supported compilers, otherwise
+falls back to compiler-specific attribute. Example usage:
+
+@code{.cpp}
 CORRADE_ALIGNAS(4) char data[16]; // so it can be read as 32-bit integers
 @endcode
 */
@@ -151,9 +158,10 @@ CORRADE_ALIGNAS(4) char data[16]; // so it can be read as 32-bit integers
 /** @hideinitializer
 @brief Noreturn fuction attribute
 
-Expands to C++11 `[[noreturn]]` attribute on supported compilers, otherwise
-falls back to compiler-specific attribute. Example usage:
-@code
+Expands to C++11 @cpp [[noreturn]] @ce attribute on supported compilers,
+otherwise falls back to compiler-specific attribute. Example usage:
+
+@code{.cpp}
 CORRADE_NORETURN void exit42() { std::exit(42); }
 @endcode
 */
@@ -165,11 +173,11 @@ CORRADE_NORETURN void exit42() { std::exit(42); }
 
 /** @hideinitializer
 @brief Automatic initializer
-@param function Initializer function name of type int(*)().
+@param function Initializer function name of type @cpp int(*)() @ce.
 
-Function passed as argument will be called even before entering `main()`
+Function passed as argument will be called even before entering @cpp main() @ce
 function. This is usable when e.g. automatically registering plugins or data
-resources without forcing the user to write additional code in `main()`.
+resources without forcing the user to write additional code in @cpp main() @ce.
 @attention This macro does nothing in static libraries.
 */
 #define CORRADE_AUTOMATIC_INITIALIZER(function)                             \
@@ -180,10 +188,10 @@ resources without forcing the user to write additional code in `main()`.
 
 /** @hideinitializer
 @brief Automatic initializer
-@param function Finalizer function name of type int(*)().
+@param function Finalizer function name of type @cpp int(*)() @ce.
 
-Function passed as argument will be called even before entering `main()`
-function. This is usable in conjuction with CORRADE_AUTOMATIC_INITIALIZER()
+Function passed as argument will be called even before entering @cpp main() @ce
+function. This is usable in conjuction with @ref CORRADE_AUTOMATIC_INITIALIZER()
 when there is need to properly discard initialized data.
 @attention This macro does nothing in static libraries.
 */
