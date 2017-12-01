@@ -203,15 +203,16 @@ CORRADE_PLUGINMANAGER_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, P
 
 Useful when checking whether @ref LoadState in in given set of values, for
 example:
-@code
+
+@code{.cpp}
 if(loadState & (LoadState::WrongPluginVersion|LoadState::WrongInterfaceVersion)) {
     // ...
 }
 @endcode
 
 Note that @ref LoadState::Loaded includes value of @ref LoadState::Static, so
-you can use `loadState & LoadState::Loaded` instead of much more verbose
-`state & (LoadState::Loaded|LoadState::Static)`.
+you can use @cpp loadState & LoadState::Loaded @ce instead of much more verbose
+@cpp state & (LoadState::Loaded|LoadState::Static) @ce.
 @see @ref AbstractManager::loadState(), @ref AbstractManager::load(),
     @ref AbstractManager::unload()
 */
@@ -285,7 +286,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         /**
          * @brief Reload plugin directory
          *
-         * Convenience equivalent to `setPluginDirectory(pluginDirectory())`.
+         * Convenience equivalent to @cpp setPluginDirectory(pluginDirectory()) @ce.
          * @partialsupport Only static plugins are supported in
          *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
          *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
@@ -301,8 +302,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         /**
          * @brief Plugin metadata
          *
-         * Returns pointer to plugin metadata or `nullptr`, if given plugin is
-         * not found.
+         * Returns pointer to plugin metadata or @cpp nullptr @ce, if given
+         * plugin is not found.
          * @see @ref AbstractPlugin::metadata()
          */
         const PluginMetadata* metadata(const std::string& plugin) const;

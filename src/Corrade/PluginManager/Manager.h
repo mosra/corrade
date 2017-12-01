@@ -69,7 +69,7 @@ template<class T> class Manager: public AbstractManager {
          *
          * Returns new instance of given plugin. The plugin must be
          * already successfully loaded by this manager. The returned value is
-         * never `nullptr`.
+         * never @cpp nullptr @ce.
          * @see @ref loadAndInstantiate(),
          *      @ref AbstractManager::loadState() "loadState()",
          *      @ref AbstractManager::load() "load()"
@@ -83,7 +83,7 @@ template<class T> class Manager: public AbstractManager {
          * @brief Load and instantiate plugin
          *
          * Convenience alternative to calling both @ref load() and
-         * @ref instance(). If loading fails, `nullptr` is returned.
+         * @ref instance(). If loading fails, @cpp nullptr @ce is returned.
          */
         std::unique_ptr<T> loadAndInstantiate(const std::string& plugin) {
             if(!(load(plugin) & LoadState::Loaded)) return nullptr;

@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::PluginManager::AbstractPlugin, macro @ref CORRADE_PLUGIN_INTERFACE(), @ref CORRADE_PLUGIN_REGISTER().
+ * @brief Class @ref Corrade::PluginManager::AbstractPlugin, macro @ref CORRADE_PLUGIN_VERSION, @ref CORRADE_PLUGIN_INTERFACE(), @ref CORRADE_PLUGIN_REGISTER().
  */
 
 #include <string>
@@ -40,7 +40,8 @@ namespace Corrade { namespace PluginManager {
 
 Connects every plugin instance to parent plugin manager to ensure the
 plugin can be unloaded only if there are no active instances.
-@see @ref AbstractManagingPlugin
+@see @ref AbstractManagingPlugin, @ref CORRADE_PLUGIN_INTERFACE(),
+    @ref CORRADE_PLUGIN_REGISTER()
 */
 class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
     template<class> friend class AbstractManagingPlugin;
@@ -92,7 +93,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * Define this constructor in your subclass only if you want to allow
          * using the interface or plugin without plugin manager.
          *
-         * The @ref metadata() function will return `nullptr`.
+         * The @ref metadata() function will return @cpp nullptr @ce.
          */
         explicit AbstractPlugin();
 
@@ -130,9 +131,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * @brief Whether the plugin can be deleted
          *
          * Called from PluginManager on all active instances before the plugin
-         * is unloaded. Returns `true` if it is safe to delete the instance from
-         * the manager, `false` if not. If any instance returns `false`, the
-         * plugin is not unloaded.
+         * is unloaded. Returns @cpp true @ce if it is safe to delete the
+         * instance from the manager, @cpp false @ce if not. If any instance
+         * returns @cpp false @ce, the plugin is not unloaded.
          */
         virtual bool canBeDeleted();
 
@@ -141,7 +142,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          *
          * Name under which the plugin was instantiated, either its true name
          * or an alias. If the plugin was not instantiated via plugin manager,
-         * returns empty string.
+         * returns empty string. Use @cpp metadata()->name() @ce to get plugin
+         * true name unconditionally.
          */
         const std::string& plugin() const { return _plugin; }
 
@@ -149,7 +151,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * @brief Metadata
          *
          * Metadata associated with given plugin. If the plugin was not
-         * instantiated through plugin manager, returns `nullptr`.
+         * instantiated through plugin manager, returns @cpp nullptr @ce.
          * @see @ref AbstractManager::metadata()
          */
         const PluginMetadata* metadata() const { return _metadata; }
@@ -189,20 +191,22 @@ incompatible interface version.
 @hideinitializer
 
 If the plugin is built as **static** (using CMake command
-`corrade_add_static_plugin`), registers it, so it will be loaded automatically
-when PluginManager instance with corresponding interface is created. When
-building as static plugin, `CORRADE_STATIC_PLUGIN` preprocessor directive is
-defined.
+@ref corrade-cmake-add-static-plugin "corrade_add_static_plugin()"), registers
+it, so it will be loaded automatically when PluginManager instance with
+corresponding interface is created. When building as static plugin,
+`CORRADE_STATIC_PLUGIN` preprocessor directive is defined.
 
 If the plugin is built as **dynamic** (using CMake command
-`corrade_add_plugin`), registers it, so it can be dynamically loaded via
-PluginManager by supplying a name of the plugin. When building as dynamic
-plugin, `CORRADE_DYNAMIC_PLUGIN` preprocessor directive is defined.
+@ref corrade-cmake-add-plugin "corrade_add_plugin()"), registers it, so it can
+be dynamically loaded via @ref Corrade::PluginManager::Manager by supplying a
+name of the plugin. When building as dynamic plugin, `CORRADE_DYNAMIC_PLUGIN`
+preprocessor directive is defined.
 
 If the plugin is built as dynamic or static **library or executable** (not as
-plugin, using e.g. CMake command `add_library` / `add_executable`), this macro
-won't do anything to prevent linker issues when linking more plugins together.
-No plugin-related preprocessor directive is defined.
+plugin, using e.g. CMake command @cmake add_library() @ce /
+@cmake add_executable() @ce), this macro won't do anything to prevent linker
+issues when linking more plugins together. No plugin-related preprocessor
+directive is defined.
 
 See @ref plugin-management for more information about plugin compilation.
 

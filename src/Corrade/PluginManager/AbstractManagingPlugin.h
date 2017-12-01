@@ -49,7 +49,7 @@ template<class Interface> class AbstractManagingPlugin: public AbstractPlugin {
          * using the interface or plugin without any access to plugin manager.
          *
          * The @ref manager() and @ref metadata() functions will return
-         * `nullptr`.
+         * @cpp nullptr @ce.
          */
         explicit AbstractManagingPlugin() = default;
 
@@ -60,7 +60,7 @@ template<class Interface> class AbstractManagingPlugin: public AbstractPlugin {
          * using the plugin directly and the plugin needs access to its plugin
          * manager.
          *
-         * The @ref metadata() function will return `nullptr`.
+         * The @ref metadata() function will return @cpp nullptr @ce.
          */
         explicit AbstractManagingPlugin(Manager<Interface>& manager) {
             _manager = &manager;
@@ -81,7 +81,7 @@ template<class Interface> class AbstractManagingPlugin: public AbstractPlugin {
          * @brief Manager
          *
          * Manager associated to given plugin. If the plugin was not
-         * instantiated with access to plugin manager, returns `nullptr`.
+         * instantiated with access to plugin manager, returns @cpp nullptr @ce.
          */
         Manager<Interface>* manager() {
             return static_cast<Manager<Interface>*>(_manager);

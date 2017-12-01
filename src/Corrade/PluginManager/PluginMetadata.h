@@ -53,18 +53,20 @@ file stores list of dependencies (if the plugin depends on another), list of
 aliases and optionally plugin-specific configuration. Example `Matrix.conf`
 file for `Matrix` plugin:
 
-    # Dependencies
-    depends=SomeRandomJohnDoesPlugin
-    depends=BaseMatrixPlugin
-    depends=SkyNetPlugin
+@code{.ini}
+# Dependencies
+depends=SomeRandomJohnDoesPlugin
+depends=BaseMatrixPlugin
+depends=SkyNetPlugin
 
-    # Aliases
-    provides=RealWorld
-    provides=RealButSlightlyTwistedWorld
+# Aliases
+provides=RealWorld
+provides=RealButSlightlyTwistedWorld
 
-    # Optional plugin-specific data
-    [data]
-    description=My first matrix without bugs
+# Optional plugin-specific data
+[data]
+description=My first matrix without bugs
+@endcode
 
 According to the configuration file, the `Matrix` plugin can be loaded only if
 `SomeRandomJohnDoesPlugin`, `BaseMatrixPlugin` and `SkyNetPlugin` are found can
@@ -111,8 +113,8 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
         /**
          * @brief Plugin-specific data
          *
-         * Additional plugin-specific data, contained in `data` group of plugin
-         * configuration.
+         * Additional plugin-specific data, contained in the
+         * @cb{.ini} [data] @ce group of plugin configuration.
          */
         const Utility::ConfigurationGroup& data() const { return *_data; }
 
