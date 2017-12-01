@@ -30,6 +30,7 @@ set(CorradeContainers_HEADERS
     EnumSet.h
     EnumSet.hpp
     LinkedList.h
+    Optional.h
     StaticArray.h
     Tags.h)
 

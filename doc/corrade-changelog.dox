@@ -59,6 +59,8 @@ namespace Corrade {
     but with stack-allocated storage of compile-time size
 -   New @ref Containers::StaticArrayView class, similar to @ref Containers::ArrayView
     but with compile-time size information
+-   New @ref Containers::Optional class, providing a subset of functionality
+    from C++17 `std::optional`
 -   Added @ref Containers::NoInit, @ref Containers::DirectInit,
     @ref Containers::DefaultInit, @ref Containers::ValueInit and
     @ref Containers::InPlaceInit tags for better control over initialization of

@@ -50,6 +50,8 @@ template<class T, typename std::underlying_type<T>::type fullValue = typename st
 template<class> class LinkedList;
 template<class Derived, class List = LinkedList<Derived>> class LinkedListItem;
 
+template<class T> class Optional;
+
 }}
 
 #endif
