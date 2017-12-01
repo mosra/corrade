@@ -36,7 +36,7 @@ namespace Corrade { namespace Containers {
 
 /**
 @brief Linked list
-@tparam T   Item type, derived from LinkedListItem
+@tparam T   Item type, derived from @ref LinkedListItem
 
 The list stores pointers to items which contain iterators in itself, not the
 other way around, so it is possible to operate directly with pointers to the
@@ -47,9 +47,9 @@ that the items or list cannot be copied (but they can be moved).
 method to get count of stored items, but you can traverse them and count them
 manually if desperately needed.
 
-## Basic usage
+@section Containers-LinkedList-basic-usage Basic usage
 
-@code
+@code{.cpp}
 class Object: public LinkedListItem<Object> {
     // ...
 };
@@ -65,7 +65,8 @@ list.cut(&b);
 @endcode
 
 Traversing through the list can be done using range-based for:
-@code
+
+@code{.cpp}
 for(Object& o: list) {
     // ...
 }
@@ -74,20 +75,22 @@ for(Object& o: list) {
 Or, if you need more flexibility, like in the following code. It is also
 possible to go in reverse order using @ref last() and
 @ref LinkedListItem::previous().
-@code
+
+@code{.cpp}
 for(Object* i = list.first(); i; i = i->next()) {
     // ...
 }
 @endcode
 
-## Making advantage of pointer to the list
+@section Containers-LinkedList-list-pointer Making advantage of pointer to the list
 
 Each node stores pointer to the list, which you can take advantage of. For
 example, if you have group of some objects and want to access the group from
 each object, you can reuse the @ref LinkedListItem::list() pointer, which will
 be cast to type you specify as @p List template parameter of
 @ref LinkedListItem class:
-@code
+
+@code{.cpp}
 class ObjectGroup: public LinkedList<Object> {
     // ...
 };
@@ -100,12 +103,13 @@ class Object: public LinkedListItem<Object, ObjectGroup> {
 };
 @endcode
 
-## Using private inheritance
+@section Containers-LinkedList-private-inheritance Using private inheritance
 
 You might want to subclass LinkedList and LinkedListItem privately and for
 example provide wrapper functions with more descriptive names. In that case
 you need to friend both LinkedList and LinkedListItem in both your subclasses.
-@code
+
+@code{.cpp}
 class ObjectGroup: private LinkedList<Object> {
     friend LinkedList<Object>;
     friend LinkedListItem<Object, ObjectGroup>;
@@ -179,7 +183,7 @@ template<class T> class LinkedList {
         /**
          * @brief Insert item
          * @param item      Item to insert
-         * @param before    Item before which to insert or `nullptr`, if
+         * @param before    Item before which to insert or @cpp nullptr @ce, if
          *      inserting at the end.
          *
          * @attention The item must not be connected to any list.
@@ -197,11 +201,12 @@ template<class T> class LinkedList {
         /**
          * @brief Move item before another
          * @param item      Item to move
-         * @param before    Item before which to move or `nullptr`, if moving
-         *      at the end.
+         * @param before    Item before which to move or @cpp nullptr @ce, if
+         *      moving at the end.
          *
          * Equivalent to the following:
-         * @code
+         *
+         * @code{.cpp}
          * if(item != before) {
          *     list.cut(item);
          *     list.move(item, before);
@@ -215,7 +220,8 @@ template<class T> class LinkedList {
          * @param item      Item to erase
          *
          * Equivalent to:
-         * @code
+         *
+         * @code{.cpp}
          * list.cut(item);
          * delete item;
          * @endcode
@@ -231,12 +237,13 @@ template<class T> class LinkedList {
 
 /**
 @brief Item of @ref LinkedList
-@param Derived  Dervied object type, i.e. type you want returned from @ref previous() and @ref next().
-@param List     List object type, i.e. type you want returned from @ref list().
+@tparam Derived Dervied object type, i.e. type you want returned from @ref previous() and @ref next().
+@tparam List    List object type, i.e. type you want returned from @ref list().
 
 This class is usually subclassed using [CRTP](http://en.wikipedia.org/wiki/Curiously_Recurring_Template_Pattern),
 e.g.:
-@code
+
+@code{.cpp}
 class Item: public LinkedListItem<Item> {
     // ...
 };
@@ -265,7 +272,7 @@ class LinkedListItem {
         LinkedListItem(LinkedListItem<Derived, List>&& other);
 
         /** @brief Copying is not allowed */
-        LinkedListItem& operator=(const LinkedListItem<Derived, List>&) = delete;
+        LinkedListItem<Derived, List>& operator=(const LinkedListItem<Derived, List>&) = delete;
 
         /** @brief Move assignment */
         LinkedListItem<Derived, List>& operator=(LinkedListItem<Derived, List>&& other);
@@ -391,7 +398,7 @@ template<class T> inline void LinkedList<T>::erase(T* const item) {
 }
 
 template<class T> void LinkedList<T>::clear() {
-    /** @todo Make this simpler -- just deletion of all the items w/o any reconnecting */
+    /** @todo Make this simpler --- just deletion of all the items w/o any reconnecting */
     T* i = _first;
     while(i) {
         T* next = i->_next;

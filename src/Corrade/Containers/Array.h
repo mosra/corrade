@@ -72,19 +72,20 @@ namespace Implementation {
 /**
 @brief Array wrapper with size information
 @tparam T   Element type
-@tparam D   Deleter type. Defaults to pointer to `void(T*, std::size_t)`
+@tparam D   Deleter type. Defaults to pointer to @cpp void(T*, std::size_t) @ce
     function, where first is array pointer and second array size
 
 Provides movable RAII wrapper around plain C array. Main use case is storing
 binary data of unspecified type, where addition/removal of elements is not
 needed or harmful.
 
-However, the class is usable also as lighter non-copyable alternative to
-`std::vector`, in STL algorithms in the same way as plain C array and
-additionally also in range-based for cycle.
+However, the class is usable also as a lighter non-copyable alternative to
+@ref std::vector; usable in STL algorithms in the same way as plain C array and
+additionally also in range-for cycle.
 
 Usage example:
-@code
+
+@code{.cpp}
 // Create default-initialized array with 5 integers and set them to some value
 Containers::Array<int> a{5};
 int b = 0;
@@ -95,7 +96,7 @@ auto b = Containers::Array<int>::from(3, 18, -157, 0);
 b[3] = 25; // b = {3, 18, -157, 25}
 @endcode
 
-## Array initialization
+@section Containers-Array-initialization Array initialization
 
 The array is by default *default-initialized*, which means that trivial types
 are not initialized at all and default constructor is called on other types. It
@@ -109,10 +110,11 @@ is possible to initialize the array in a different way using so-called *tags*:
     the array using provided arguments.
 -   @ref Array(NoInitT, std::size_t) does not initialize anything and you need
     to call the constructor on all elements manually using placement new,
-    `std::uninitialized_copy` or similar. This is the dangerous option.
+    @ref std::uninitialized_copy or similar. This is the dangerous option.
 
 Example:
-@code
+
+@code{.cpp}
 // These are equivalent
 Containers::Array<int> a1{5};
 Containers::Array<int> a2{Containers::DefaultInit, 5};
@@ -135,19 +137,20 @@ int index = 0;
 for(Foo& f: d) new(&f) Foo(index++);
 @endcode
 
-## Wrapping externally allocated arrays
+@section Containers-Array-wrapping Wrapping externally allocated arrays
 
-By default the class makes all allocations using `operator new[]` and
-deallocates using `operator delete[]` for given @p T, with some additional
-trickery done internally to make the @ref Array(NoInitT, std::size_t) and
-@ref Array(DirectInitT, std::size_t, ...) constructors work. When wrapping an
-externally allocated array using @ref Array(T*, std::size_t, D), it is possible
-to specify which function to use for deallocation. By default the deleter is
-set to `nullptr`, which is equivalent to deleting the contents using
-`operator delete[]`.
+By default the class makes all allocations using @cpp operator new[] @ce and
+deallocates using @cpp operator delete[] @ce for given @p T, with some
+additional trickery done internally to make the @ref Array(NoInitT, std::size_t)
+and @ref Array(DirectInitT, std::size_t, ...) constructors work. When wrapping
+an externally allocated array using @ref Array(T*, std::size_t, D), it is
+possible to specify which function to use for deallocation. By default the
+deleter is set to @cpp nullptr @ce, which is equivalent to deleting the
+contents using @cpp operator delete[] @ce.
 
-For example, properly deallocating array allocated using `std::malloc()`:
-@code
+For example, properly deallocating array allocated using @ref std::malloc():
+
+@code{.cpp}
 const int* data = reinterpret_cast<int*>(std::malloc(25*sizeof(int)));
 
 // Will call std::free() on destruction
@@ -157,7 +160,8 @@ Containers::Array<int> array{data, 25, [](int* data, std::size_t) { std::free(da
 By default, plain function pointers are used to avoid having the type affected
 by the deleter function. If the deleter needs to manage some state, a custom
 deleter type can be used:
-@code
+
+@code{.cpp}
 struct UnmapBuffer {
     UnmapBuffer(GLuint id): _id{id} {}
     void operator()(T*, std::size_t) { glUnmapNamedBuffer(_id); }
@@ -257,11 +261,11 @@ class Array {
          * placement new.
          *
          * Useful if you will be overwriting all elements later anyway.
-         * @attention Internally the data are allocated as `char` array and
-         *      destruction is done using custom deleter that explicitly calls
-         *      destructor on *all elements* regardless of whether they were
-         *      properly constructed or not and then deallocates the data as
-         *      `char` array.
+         * @attention Internally the data are allocated as @cpp char @ce array
+         *      and destruction is done using custom deleter that explicitly
+         *      calls destructor on *all elements* regardless of whether they
+         *      were properly constructed or not and then deallocates the data
+         *      as @cpp char @ce array.
          * @see @ref NoInit, @ref Array(DirectInitT, std::size_t, Args...),
          *      @ref deleter()
          */
@@ -272,7 +276,7 @@ class Array {
          *
          * Allocates the array using the @ref Array(NoInitT, std::size_t)
          * constructor and then initializes each element with placement new
-         * using forwarded @p arguments.
+         * using forwarded @p args.
          */
         template<class... Args> explicit Array(DirectInitT, std::size_t size, Args&&... args);
 
@@ -330,8 +334,8 @@ class Array {
         /**
          * @brief Convert to @ref ArrayView
          *
-         * Enabled only if `T*` is implicitly convertible to `U*`. Expects that
-         * both types have the same size.
+         * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
+         * Expects that both types have the same size.
          * @see @ref arrayView(Array<T, D>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -347,8 +351,9 @@ class Array {
         /**
          * @brief Convert to const @ref ArrayView
          *
-         * Enabled only if `T*` or `const T*` is implicitly convertible to `U*`.
-         * Expects that both types have the same size.
+         * Enabled only if @cpp T* @ce or @cpp const T* @ce is implicitly
+         * convertible to @cpp U* @ce. Expects that both types have the same
+         * size.
          * @see @ref arrayView(const Array<T, D>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -392,8 +397,8 @@ class Array {
         /**
          * @brief Array deleter
          *
-         * If set to `nullptr`, the contents are deleted using standard
-         * `operator delete[]`.
+         * If set to @cpp nullptr @ce, the contents are deleted using standard
+         * @cpp operator delete[] @ce.
          * @see @ref Array(T*, std::size_t, D)
          */
         D deleter() const { return _deleter; }
@@ -438,7 +443,8 @@ class Array {
         /**
          * @brief Fixed-size array slice
          *
-         * Both @p begin and `begin + size` are expected to be in range.
+         * Both @cpp begin @ce and @cpp begin + size @ce are expected to be in
+         * range.
          */
         template<std::size_t size> StaticArrayView<size, T> slice(T* begin) {
             return ArrayView<T>(*this).template slice<size>(begin);
@@ -505,7 +511,8 @@ class Array {
 
 Convenience alternative to calling @ref Array::operator ArrayView<U>()
 explicitly. The following two lines are equivalent:
-@code
+
+@code{.cpp}
 Containers::Array<std::uint32_t> data;
 
 Containers::ArrayView<std::uint32_t> a{data};
@@ -521,7 +528,8 @@ template<class T, class D> inline ArrayView<T> arrayView(Array<T, D>& array) {
 
 Convenience alternative to calling @ref Array::operator ArrayView<U>()
 explicitly. The following two lines are equivalent:
-@code
+
+@code{.cpp}
 const Containers::Array<std::uint32_t> data;
 
 Containers::ArrayView<const std::uint32_t> a{data};

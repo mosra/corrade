@@ -42,12 +42,13 @@ namespace Corrade { namespace Containers {
 
 Immutable wrapper around continuous range of data. Unlike @ref Array this class
 doesn't do any memory management. Main use case is passing array along with
-size information to functions etc. If @p T is `const` type, the class is
+size information to functions etc. If @p T is @cpp const @ce type, the class is
 implicitly constructible also from const references to @ref Array and
 @ref ArrayView of non-const types.
 
 Usage example:
-@code
+
+@code{.cpp}
 // `a` gets implicitly converted to const array view
 void printArray(Containers::ArrayView<const float> values) { ... }
 Containers::Array<float> a;
@@ -62,15 +63,15 @@ const int* data2;
 Containers::ArrayView<const int> c{data2, 3};
 @endcode
 
-@attention Note that when using `Containers::ArrayView<const char>`, C string
-    literals (such as `"hello"`) are implicitly convertible to it and the size
-    includes also the zero-terminator (thus in case of `"hello"` the size would
-    be 6, not 5, as one might expect).
+@attention Note that when using @cpp Containers::ArrayView<const char> @ce, C
+    string literals (such as @cpp "hello" @ce) are implicitly convertible to it
+    and the size includes also the zero-terminator (thus in case of
+    @cpp "hello" @ce the size would be 6, not 5, as one might expect).
 
 @see @ref ArrayView<const void>, @ref StaticArrayView, @ref arrayView(),
     @ref arrayCast(ArrayView<T>)
-@todo What was the reason for no const-correctness at all?
 */
+/* All member functions are const because the view doesn't own the data */
 template<class T> class ArrayView {
     public:
         typedef T Type;     /**< @brief Element type */
@@ -99,8 +100,8 @@ template<class T> class ArrayView {
          * @brief Construct view on a fixed-size array
          * @param data      Fixed-size array
          *
-         * Enabled only if `T*` is implicitly convertible to `U*`. Expects that
-         * both types have the same size.
+         * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
+         * Expects that both types have the same size.
          * @see @ref arrayView(T(&)[size])
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -115,8 +116,8 @@ template<class T> class ArrayView {
         /**
          * @brief Construct view on @ref ArrayView
          *
-         * Enabled only if `T*` is implicitly convertible to `U*`. Expects that
-         * both types have the same size.
+         * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
+         * Expects that both types have the same size.
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
@@ -130,8 +131,8 @@ template<class T> class ArrayView {
         /**
          * @brief Construct view on @ref StaticArrayView
          *
-         * Enabled only if `T*` is implicitly convertible to `U*`. Expects that
-         * both types have the same size.
+         * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
+         * Expects that both types have the same size.
          * @see @ref arrayView(StaticArrayView<size, T>)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -185,7 +186,8 @@ template<class T> class ArrayView {
         /**
          * @brief Fixed-size array slice
          *
-         * Both @p begin and `begin + viewSize` are expected to be in range.
+         * Both @p begin and @cpp begin + viewSize @ce are expected to be in
+         * range.
          */
         template<std::size_t viewSize> StaticArrayView<viewSize, T> slice(T* begin) const;
 
@@ -197,8 +199,8 @@ template<class T> class ArrayView {
         /**
          * @brief Array prefix
          *
-         * Equivalent to `data.slice(data.begin(), end)`. If @p end is
-         * `nullptr`, returns zero-sized `nullptr` array.
+         * Equivalent to @cpp data.slice(data.begin(), end) @ce. If @p end is
+         * @cpp nullptr @ce, returns zero-sized @cpp nullptr @ce array.
          */
         ArrayView<T> prefix(T* end) const {
             if(!end) return nullptr;
@@ -209,9 +211,9 @@ template<class T> class ArrayView {
         /**
          * @brief Array suffix
          *
-         * Equivalent to `data.slice(begin, data.end())`. If @p begin is
-         * `nullptr` and the original array isn't, returns zero-sized `nullptr`
-         * array.
+         * Equivalent to @cpp data.slice(begin, data.end()) @ce. If @p begin is
+         * @cpp nullptr @ce and the original array isn't, returns zero-sized
+         * @cpp nullptr @ce array.
          */
         ArrayView<T> suffix(T* begin) const {
             if(_data && !begin) return nullptr;
@@ -229,11 +231,12 @@ template<class T> class ArrayView {
 
 Specialization of @ref ArrayView which is convertible from @ref Array or
 @ref ArrayView of any type. Size for particular type is recalculated to
-size in bytes. This specialization doesn't provide any `begin()`/`end()`
-accessors, because it has no use for `void` type.
+size in bytes. This specialization doesn't provide any @cpp begin() @ce /
+@cpp end() @ce accessors, because it has no use for @cpp void @ce type.
 
 Usage example:
-@code
+
+@code{.cpp}
 Containers::Array<int> a(5);
 
 Containers::ArrayView<const void> b(a); // b.size() == 20
@@ -313,7 +316,8 @@ template<> class ArrayView<const void> {
 
 Convenience alternative to @ref ArrayView::ArrayView(T*, std::size_t). The
 following two lines are equivalent:
-@code
+
+@code{.cpp}
 std::uint32_t* data;
 
 Containers::ArrayView<std::uint32_t> a{data, 5};
@@ -329,7 +333,8 @@ template<class T> constexpr ArrayView<T> arrayView(T* data, std::size_t size) {
 
 Convenience alternative to @ref ArrayView::ArrayView(U(&)[size]). The following
 two lines are equivalent:
-@code
+
+@code{.cpp}
 std::uint32_t data[15];
 
 Containers::ArrayView<std::uint32_t> a{data};
@@ -345,7 +350,8 @@ template<std::size_t size, class T> constexpr ArrayView<T> arrayView(T(&data)[si
 
 Convenience alternative to @ref ArrayView::ArrayView(StaticArrayView<size, U>).
 The following two lines are equivalent:
-@code
+
+@code{.cpp}
 std::uint32_t data[15];
 
 Containers::ArrayView<std::uint32_t> a{data};
@@ -359,10 +365,11 @@ template<std::size_t size, class T> constexpr ArrayView<T> arrayView(StaticArray
 /** @relatesalso ArrayView
 @brief Reinterpret-cast an array view
 
-Size of the new array is calculated as `view.size()*sizeof(T)/sizeof(U)`.
+Size of the new array is calculated as @cpp view.size()*sizeof(T)/sizeof(U) @ce.
 Expects that both types are [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
 and the total byte size doesn't change. Example usage:
-@code
+
+@code{.cpp}
 std::int32_t data[15];
 auto a = Containers::arrayView(data); // a.size() == 15
 auto b = Containers::arrayCast<char>(a); // b.size() == 60
@@ -381,10 +388,11 @@ template<class U, class T> ArrayView<U> arrayCast(ArrayView<T> view) {
 @brief Array view size
 
 Alias to @ref ArrayView::size(), useful as a shorthand in cases like this:
-@code
+
+@code{.cpp}
 std::int32_t a[5];
 
-std::size_t size = Containers::size(a);
+std::size_t size = Containers::arraySize(a);
 @endcode
 */
 template<class T> std::size_t arraySize(ArrayView<T> view) {
@@ -406,7 +414,8 @@ template<std::size_t size_, class T> constexpr std::size_t arraySize(T(&)[size_]
 
 Equivalent to @ref ArrayView, but with compile-time size information.
 Convertible from and to @ref ArrayView. Example usage:
-@code
+
+@code{.cpp}
 Containers::ArrayView<int> data;
 
 // Take elements 7 to 11
@@ -457,9 +466,9 @@ template<std::size_t size_, class T> class StaticArrayView {
          * @brief Construct static view on a fixed-size array
          * @param data      Fixed-size array
          *
-         * Enabled only if `T*` is implicitly convertible to `U*`. Note that,
-         * similarly as with raw pointers, you need to ensure that both types
-         * have the same size.
+         * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
+         * Note that, similarly as with raw pointers, you need to ensure that
+         * both types have the same size.
          * @see @ref staticArrayView(T(&)[size])
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -472,8 +481,8 @@ template<std::size_t size_, class T> class StaticArrayView {
         /**
          * @brief Construct static view on @ref StaticArrayView
          *
-         * Enabled only if `T*` is implicitly convertible to `U*`. Expects that
-         * both types have the same size.
+         * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
+         * Expects that both types have the same size.
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>
@@ -556,7 +565,8 @@ template<std::size_t size_, class T> class StaticArrayView {
 
 Convenience alternative to @ref StaticArrayView::StaticArrayView(T*). The
 following two lines are equivalent:
-@code
+
+@code{.cpp}
 std::uint32_t* data;
 
 Containers::StaticArrayView<5, std::uint32_t> a{data};
@@ -572,7 +582,8 @@ template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArr
 
 Convenience alternative to @ref StaticArrayView::StaticArrayView(U(&)[size_]).
 The following two lines are equivalent:
-@code
+
+@code{.cpp}
 std::uint32_t data[15];
 
 Containers::StaticArrayView<15, std::uint32_t> a{data};
@@ -586,10 +597,11 @@ template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArr
 /** @relatesalso StaticArrayView
 @brief Reinterpret-cast a static array view
 
-Size of the new array is calculated as `view.size()*sizeof(T)/sizeof(U)`.
+Size of the new array is calculated as @cpp view.size()*sizeof(T)/sizeof(U) @ce.
 Expects that both types are [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
 and the total byte size doesn't change. Example usage:
-@code
+
+@code{.cpp}
 std::int32_t data[15];
 auto a = Containers::staticArrayView(data); // a.size() == 15
 Containers::StaticArrayView<60, char> b = Containers::arrayCast<char>(a);
@@ -609,7 +621,8 @@ template<class U, std::size_t size, class T> StaticArrayView<size*sizeof(T)/size
 
 Calls @ref arrayCast(StaticArrayView<size, T>) with the argument converted to
 @ref StaticArrayView of the same type and size. Example usage:
-@code
+
+@code{.cpp}
 std::int32_t data[15];
 a = Containers::arrayCast<char>(data); // a.size() == 60
 @endcode

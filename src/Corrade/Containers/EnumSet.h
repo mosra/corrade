@@ -39,7 +39,6 @@ namespace Corrade { namespace Containers {
 /**
 @brief Set of enum values
 @tparam T           Enum type
-@tparam U           Underlying type of the enum
 @tparam fullValue   All enum values together. Defaults to all bits set to `1`.
 
 Provides strongly-typed set-like functionality for strongly typed enums, such
@@ -47,10 +46,11 @@ as binary OR and AND operations. The only requirement for enum type is that
 all the values must be binary exclusive.
 
 @anchor EnumSet-out-of-class-operators
-Desired usage is via typedef'ing. You should also call
+Desired usage is via @cpp typedef @ce'ing. You should also call
 @ref CORRADE_ENUMSET_OPERATORS() macro with the resulting type as parameter to
 have out-of-class operators defined:
-@code
+
+@code{.cpp}
 enum class Feature: unsigned int {
     Fast = 1 << 0,
     Cheap = 1 << 1,
@@ -66,7 +66,8 @@ CORRADE_ENUMSET_OPERATORS(Features)
 If you have the EnumSet as private or protected member of any class, you have
 to declare the out-of-class operators as friends. It can be done with
 @ref CORRADE_ENUMSET_FRIEND_OPERATORS() macro:
-@code
+
+@code{.cpp}
 class Application {
     private:
         enum class Flag: unsigned int {
@@ -85,7 +86,8 @@ One thing these macros cannot do is to provide operators for enum sets inside
 templated classes. If the enum values are not depending on the template, you
 can work around the issue by declaring the enum in some hidden namespace
 outside the class and then typedef'ing it back into the class:
-@code
+
+@code{.cpp}
 namespace Implementation {
     enum class ObjectFlag: unsigned int {
         Dirty = 1 << 0,
@@ -149,7 +151,7 @@ class EnumSet {
         /**
          * @brief Whether @p other is subset of this
          *
-         * Equivalent to `a & other == other`
+         * Equivalent to @cpp (a & other) == other @ce.
          */
         constexpr bool operator>=(EnumSet<T, fullValue> other) const {
             return (*this & other) == other;
@@ -158,7 +160,7 @@ class EnumSet {
         /**
          * @brief Whether @p other is superset of this
          *
-         * Equivalent to `a & other == a`
+         * Equivalent to @cpp (a & other) == a @ce.
          */
         constexpr bool operator<=(EnumSet<T, fullValue> other) const {
             return (*this & other) == *this;

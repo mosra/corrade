@@ -44,14 +44,15 @@ namespace Corrade { namespace Containers {
 
 /**
 @brief Static array wrapper
+@tparam size_   Array size
 @tparam T       Element type
-@tparam size    Array size
 
 Provides statically-sized array wrapper with API similar to @ref Array. Useful
-as more featureful alternative to plain C arrays or `std::array`.
+as more featureful alternative to plain C arrays or @ref std::array.
 
 Usage example:
-@code
+
+@code{.cpp}
 // Create default-initialized array with 5 integers and set them to some value
 Containers::StaticArray<5, int> a;
 int b = 0;
@@ -62,7 +63,7 @@ Containers::StaticArray<4, int> b{3, 18, -157, 0};
 b[3] = 25; // b = {3, 18, -157, 25}
 @endcode
 
-## Array initialization
+@section Containers-StaticArray-initialization Array initialization
 
 The array is by default *default-initialized*, which means that trivial types
 are not initialized at all and default constructor is called on other types. It
@@ -79,10 +80,11 @@ is possible to initialize the array in a different way using so-called *tags*:
     array using provided arguments.
 -   @ref StaticArray(NoInitT) does not initialize anything and you need to call
     the constructor on all elements manually using placement new,
-    `std::uninitialized_copy` or similar. This is the dangerous option.
+    @ref std::uninitialized_copy or similar. This is the dangerous option.
 
 Example:
-@code
+
+@code{.cpp}
 // These two are equivalent
 Containers::StaticArray<5, int> a1;
 Containers::StaticArray<5, int> a2{Containers::DefaultInit};
@@ -159,9 +161,9 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief Construct direct-initialized array
          *
-         * Constructs the array using the @ref StaticArray(NoInitT) "StaticArray(NoInitT)"
-         * constructor and then initializes each element with placement new
-         * using forwarded @p arguments.
+         * Constructs the array using the @ref StaticArray(NoInitT) constructor
+         * and then initializes each element with placement new using forwarded
+         * @p args.
          * @see @ref StaticArray(InPlaceInitT, Args&&...)
          */
         template<class ...Args> explicit StaticArray(DirectInitT, Args&&... args);
@@ -191,7 +193,7 @@ template<std::size_t size_, class T> class StaticArray {
          * @see @ref StaticArray(DirectInitT, Args&&...)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class ...Args> explicit StaticArray(Args&&... args)
+        template<class ...Args> explicit StaticArray(Args&&... args);
         #else
         template<class First, class ...Next> explicit StaticArray(First&& first, Next&&... next): StaticArray{InPlaceInit, std::forward<First>(first), std::forward<Next>(next)...} {}
         #endif
@@ -213,8 +215,8 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief Convert to @ref ArrayView
          *
-         * Enabled only if `T*` is implicitly convertible to `U*`. Expects that
-         * both types have the same size.
+         * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
+         * Expects that both types have the same size.
          * @see @ref arrayView(StaticArray<size, T>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -230,8 +232,9 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief Convert to const @ref ArrayView
          *
-         * Enabled only if `T*` or `const T*` is implicitly convertible to `U*`.
-         * Expects that both types have the same size.
+         * Enabled only if @cpp T* @ce or @cpp const T* @ce is implicitly
+         * convertible to @cpp U* @ce. Expects that both types have the same
+         * size.
          * @see @ref arrayView(const StaticArray<size, T>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -253,8 +256,8 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief Convert to @ref StaticArrayView
          *
-         * Enabled only if `T*` is implicitly convertible to `U*`. Expects that
-         * both types have the same size.
+         * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
+         * Expects that both types have the same size.
          * @see @ref staticArrayView(StaticArray<size, T>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -270,8 +273,9 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief Convert to const @ref StaticArrayView
          *
-         * Enabled only if `T*` or `const T*` is implicitly convertible to `U*`.
-         * Expects that both types have the same size.
+         * Enabled only if @cpp T* @ce or @cpp const T* @ce is implicitly
+         * convertible to @cpp U* @ce. Expects that both types have the same
+         * size.
          * @see @ref staticArrayView(const StaticArray<size, T>&)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
@@ -354,7 +358,8 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief Fixed-size array slice
          *
-         * Both @p begin and `begin + viewSize` are expected to be in range.
+         * Both @cpp begin @ce and @cpp begin + viewSize @ce are expected to be
+         * in range.
          */
         template<std::size_t viewSize> StaticArrayView<viewSize, T> slice(T* begin) {
             return ArrayView<T>(*this).template slice<viewSize>(begin);
@@ -425,7 +430,8 @@ template<std::size_t size_, class T> class StaticArray {
 
 Convenience alternative to calling @ref StaticArray::operator ArrayView<U>()
 explicitly. The following two lines are equivalent:
-@code
+
+@code{.cpp}
 Containers::StaticArray<5, std::uint32_t> data;
 
 Containers::ArrayView<std::uint32_t> a{data};
@@ -441,7 +447,8 @@ template<std::size_t size, class T> constexpr ArrayView<T> arrayView(StaticArray
 
 Convenience alternative to calling @ref StaticArray::operator ArrayView<U>()
 explicitly. The following two lines are equivalent:
-@code
+
+@code{.cpp}
 const Containers::StaticArray<5, std::uint32_t> data;
 
 Containers::ArrayView<const std::uint32_t> a{data};
@@ -455,9 +462,10 @@ template<std::size_t size, class T> constexpr ArrayView<const T> arrayView(const
 /** @relatesalso StaticArray
 @brief Make static view on @ref StaticArray
 
-Convenience alternative to calling `StaticArray::operator StaticArrayView<size_,U>()`
+Convenience alternative to calling @cpp StaticArray::operator StaticArrayView<size_, U>() @ce
 explicitly. The following two lines are equivalent:
-@code
+
+@code{.cpp}
 Containers::StaticArray<5, std::uint32_t> data;
 
 Containers::StaticArrayView<5, std::uint32_t> a{data};
@@ -473,9 +481,10 @@ template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArr
 /** @relatesalso StaticArray
 @brief Make static view on const @ref StaticArray
 
-Convenience alternative to calling `StaticArray::operator StaticArrayView<size_, U>()`
+Convenience alternative to calling @cpp StaticArray::operator StaticArrayView<size_, U>() @ce
 explicitly. The following two lines are equivalent:
-@code
+
+@code{.cpp}
 const Containers::StaticArray<5, std::uint32_t> data;
 
 Containers::StaticArrayView<5, const std::uint32_t> a{data};

@@ -38,13 +38,14 @@ namespace Corrade { namespace Containers {
 @brief Print enum set to debug output
 @param debug    Debug output
 @param value    Value to be printed
-@param enums    Recognized enum values
 @param empty    What to print in case of an empty enum set
+@param enums    Recognized enum values
 
 Assuming underlying enum type has already implemented `operator<<` for
 @ref Utility::Debug, this function is able to print value of given enum set.
 Example usage:
-@code
+
+@code{.cpp}
 enum class Feature: unsigned int {
     Fast = 1 << 0,
     Cheap = 1 << 1,
