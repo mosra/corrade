@@ -45,8 +45,10 @@ namespace Compare {
 Prints the length of both files (if they are different) and prints value
 and position of first different character in both files. Filename is expected
 to be in UTF-8. Example usage:
-@code
-CORRADE_COMPARE_AS("actual.txt", "expected file contents", Compare::FileToString);
+
+@code{.cpp}
+CORRADE_COMPARE_AS("actual.txt", "expected file contents",
+    TestSuite::Compare::FileToString);
 @endcode
 
 See @ref TestSuite-Comparator-pseudo-types for more information.

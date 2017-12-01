@@ -42,27 +42,27 @@ namespace Corrade { namespace TestSuite {
 See @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH() for more information
 and @ref Compare namespace for pseudo-type comparator implementations.
 
-## Subclassing
+@section TestSuite-Comparator-subclassing Subclassing
 
 You can reimplement this class for your own data types and even pseudo types
 for providing different ways to compare the same type.
 
-You have to implement `operator()()` for comparison of two values with
-arbitrary type and `printErrorMessage()` for printing error message when the
-comparison failed. The reason for having those two separated is allowing the
-user to use colored output -- due to a limitation of Windows console API, where
-it's only possible to specify text color when writing directly to the output
-without any intermediate buffer.
+You have to implement @cpp operator()() @ce for comparison of two values with
+arbitrary type and @cpp printErrorMessage() @ce for printing error message when
+the comparison failed. The reason for having those two separated is allowing
+the user to use colored output --- due to a limitation of Windows console API,
+where it's only possible to specify text color when writing directly to the
+output without any intermediate buffer.
 
-@anchor TestSuite-Comparator-pseudo-types
-### Comparing with pseudo-types
+@section TestSuite-Comparator-pseudo-types Comparing with pseudo-types
 
 Imagine you have two filenames and you want to compare their contents instead
 of comparing the filename strings. Because you want to also compare strings
 elsewhere, you cannot override its behavior. The solution is to have some
 "pseudo type", for which you create the Comparator template specialization, but
 the actual comparison operator will still take strings as parameters:
-@code
+
+@code{.cpp}
 class FileContents {};
 
 namespace Corrade { namespace TestSuite { // the namespace is important
@@ -86,22 +86,24 @@ template<> class Comparator<FileContents> {
 }}
 @endcode
 
-You can add more overloads for `operator()()` in one class, e.g. for comparing
-file contents with string or input stream etc. The actual use in unit test
-would be like this:
-@code
-CORRADE_COMPARE_AS("/path/to/actual.dat", "/path/to/expected.dat", FileContents);
+You can add more overloads for @cpp operator()() @ce in one class, e.g. for
+comparing file contents with string or input stream etc. The actual use in unit
+test would be like this:
+
+@code{.cpp}
+CORRADE_COMPARE_AS("/path/to/actual.dat", "/path/to/expected.dat",
+    FileContents);
 @endcode
 
-@anchor TestSuite-Comparator-parameters
-### Passing parameters to comparators
+@section TestSuite-Comparator-parameters Passing parameters to comparators
 
 Sometimes you need to pass additional parameters to comparator class so you
 can then use it in @ref CORRADE_COMPARE_WITH() macro. In that case you need to
-implement constructor and `comparator()` function in your pseudo-type. Function
-`comparator()` returns reference to existing configured @ref Comparator
-instance. Example:
-@code
+implement constructor and @cpp comparator() @ce function in your pseudo-type.
+Function @cpp comparator() @ce returns reference to existing configured
+@ref Comparator instance. Example:
+
+@code{.cpp}
 class FileContents;
 
 namespace Corrade { namespace TestSuite { // the namespace is important
@@ -134,8 +136,10 @@ Don't forget to allow default construction of @ref Comparator, if you want to
 be able to use it also with @ref CORRADE_COMPARE_AS().
 
 The actual use in unit test would be like this:
-@code
-CORRADE_COMPARE_WITH("actual.dat", "expected.dat", FileContents("/common/path/prefix"));
+
+@code{.cpp}
+CORRADE_COMPARE_WITH("actual.dat", "expected.dat",
+    FileContents{"/common/path/prefix"});
 @endcode
 */
 template<class T> class Comparator {

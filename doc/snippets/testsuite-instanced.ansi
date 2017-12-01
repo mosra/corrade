@@ -1,0 +1,7 @@
+[1;39mStarting RoundTest with 5 test cases...[0m
+[1;39m    OK[0;34m [[1;36m1[0;34m][1;39m test([0mpositive down[1;39m)[0m
+[1;39m    OK[0;34m [[1;36m2[0;34m][1;39m test([0mpositive up[1;39m)[0m
+[1;39m    OK[0;34m [[1;36m3[0;34m][1;39m test([0mzero[1;39m)[0m
+[1;39m    OK[0;34m [[1;36m4[0;34m][1;39m test([0mnegative down[1;39m)[0m
+[1;39m    OK[0;34m [[1;36m5[0;34m][1;39m test([0mnegative up[1;39m)[0m
+[1;39mFinished RoundTest with 0 errors out of 5 checks.[0m

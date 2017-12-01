@@ -42,15 +42,17 @@ namespace Compare {
 
 Prints the length of both containers (if they are different) and prints value
 of first different item in both containers. Example usage:
-@code
+
+@code{.cpp}
 std::vector<int> a, b;
-CORRADE_COMPARE_AS(a, b, Compare::Container);
+CORRADE_COMPARE_AS(a, b, TestSuite::Compare::Container);
 @endcode
 
 It is also possible to sort the containers before comparison using
 @ref SortedContainer :
-@code
-CORRADE_COMPARE_AS(a, b, Compare::SortedContainer);
+
+@code{.cpp}
+CORRADE_COMPARE_AS(a, b, TestSuite::Compare::SortedContainer);
 @endcode
 
 Comparison of containers of floating-point types is by default done as a

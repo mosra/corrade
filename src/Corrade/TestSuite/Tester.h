@@ -73,44 +73,45 @@ Make sure to first go through the @ref testsuite tutorial for initial overview
 and step-by-step introduction. Below is a more detailed description of all
 provided functionality.
 
-## Basic testing workflow
+@section TestSuite-Tester-basic Basic testing workflow
 
 A test starts with deriving the @ref Tester class. The test cases are
-parameter-less `void` member functions that are added using @ref addTests() in
-the constructor and the `main()` function is created using
+parameter-less @cpp void @ce member functions that are added using @ref addTests()
+in the constructor and the @cpp main() @ce function is created using
 @ref CORRADE_TEST_MAIN(). The goal is to have as little boilerplate as
 possible, thus the test usually  consists of only one `*.cpp` file with no
-header and the derived type is a `struct` to avoid having to write `public`
-keywords.
+header and the derived type is a @cpp struct @ce to avoid having to write
+@cpp public @ce keywords.
 
 @snippet testsuite-basic.cpp 0
 
 The above gives the following output:
 
-@image html testsuite-basic.png
+@include testsuite-basic.ansi
 
 Actual testing is done via various @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE(),
 @ref CORRADE_COMPARE_AS() and @ref CORRADE_COMPARE_WITH() macros. If some
-comparison in given test case fails, a `FAIL` with concrete file, line and
-additional diagnostic is printed to the output and the test case is exited
-without executing the remaining statements. Otherwise, if all comparisons in
-given test case pass, an `OK` is printed. The main difference between these
-macros is the kind of diagnostic output they print when comparison fails --
-for example a simple expression failure reported by @ref CORRADE_VERIFY() is
-enough when checking for non-`nullptr` value, but for comparing a 1000-element
-array you might want to use @ref CORRADE_COMPARE_AS() with @ref Compare::Container
-instead.
+comparison in given test case fails, a @cb{.ansi} [1;31mFAIL @ce with
+concrete file, line and additional diagnostic is printed to the output and the
+test case is exited without executing the remaining statements. Otherwise, if
+all comparisons in given test case pass, an @cb{.ansi} [1;39mOK @ce is
+printed. The main difference between these macros is the kind of diagnostic
+output they print when comparison fails --- for example a simple expression
+failure reported by @ref CORRADE_VERIFY() is enough when checking for
+non-@cpp nullptr @ce value, but for comparing a 1000-element array you might
+want to use @ref CORRADE_COMPARE_AS() with @ref Compare::Container instead.
 
 Additionally there are @ref CORRADE_SKIP(), @ref CORRADE_EXPECT_FAIL() and
 @ref CORRADE_EXPECT_FAIL_IF() control flow helpers that allow you to say for
 example that a particular test was skipped due to missing functionality on
-given platform (printing a `SKIP` on output and exiting the test case right
-after the statement) or documenting that some algorithm produces incorrect
-result due to a bug, printing an `XFAIL`. Passing a test while failure is
-expected is treated as an error (`XPASS`), which can be helpful to ensure the
-assumptions in the tests don't get stale. Expected failures can be also
-disabled globally via a command-line option `--no-xfail` or via environment
-variable, @ref TestSuite-Tester-command-line "see below".
+given platform (printing a @cb{.ansi} [1;39mSKIP @ce on output and exiting the
+test case right after the statement) or documenting that some algorithm
+produces incorrect result due to a bug, printing an @cb{.ansi} [1;33mXFAIL @ce.
+Passing a test while failure is expected is treated as an error
+(@cb{.ansi} [1;31mXPASS @ce), which can be helpful to ensure the assumptions
+in the tests don't get stale. Expected failures can be also disabled globally
+via a command-line option `--no-xfail` or via environment variable,
+@ref TestSuite-Tester-command-line "see below".
 
 The only reason why those are macros and not member functions is the ability to
 gather class/function/file/line/expression information via the preprocessor for
@@ -136,7 +137,7 @@ different data types:
 
 And the corresponding output:
 
-@image html testsuite-templated.png
+@include testsuite-templated.ansi
 
 This works with all `add*()` functions though please note that current C++11
 compilers (at least GCC and Clang) are not able to properly detect class type
@@ -145,7 +146,7 @@ type explicitly. Also, there is no easy and portable way to get function name
 with template parameters so by default it will be just the function name, but
 you can call @ref setTestCaseName() to specify a full name.
 
-## Instanced tests
+@section TestSuite-Tester-instanced Instanced tests
 
 Often you have an algorithm which you need to test on a variety of inputs or
 corner cases. One solution is to use a for-cycle inside the test case to test
@@ -161,7 +162,7 @@ not worth the increased compilation times. Fortunately, there is an
 
 Corresponding output:
 
-@image html testsuite-instanced.png
+@include testsuite-instanced.ansi
 
 The tester class just gives you an instance index via @ref testCaseInstanceId()
 and it's up to you whether you use it as an offset to some data array or
@@ -172,7 +173,7 @@ the templated tests, @ref setTestCaseDescription() allows you to set a
 human-readable description of given instance. If not called, the instances are
 just numbered in the output.
 
-## Repeated tests
+@section TestSuite-Tester-repeated Repeated tests
 
 A complementary feature to instanced tests are repeated tests using
 @ref addRepeatedTests(), useful for example to repeatedly call one function
@@ -188,7 +189,7 @@ threads accessing the same variable:
 
 Depending on various factors, here is one possible output:
 
-@image html testsuite-repeated.png
+@include testsuite-repeated.ansi
 
 Similarly to @ref testCaseInstanceId() there is @ref testCaseRepeatId() which
 gives repeat index. Use with care, however, as the repeated tests are assumed
@@ -203,7 +204,7 @@ interactions and order-dependent bugs.
 It's also possible to combine instanced and repeated tests using
 @ref addRepeatedInstancedTests().
 
-## Benchmarks
+@section TestSuite-Tester-benchmark Benchmarks
 
 Besides verifying code correctness, it's possible to measure code performance.
 Unlike correctness tests, the benchmark results are hard to reason about using
@@ -211,22 +212,22 @@ only automated means, so there are no macros for verifying benchmark results
 and instead the measured values are just printed to the output for users to
 see. Benchmarks can be added using @ref addBenchmarks(), the actual benchmark
 loop is marked by @ref CORRADE_BENCHMARK() and the results are printed to
-output with `BENCH` identifier. Example benchmark comparing performance of
-inverse square root implementations:
+output with @cb{.ansi} [1;39mBENCH @ce identifier. Example benchmark comparing
+performance of inverse square root implementations:
 
 @snippet testsuite-benchmark.cpp 0
 
-Note that it's not an error to add one test/benchmark multiple times -- here it
-is used to have the same code benchmarked with different timers. Possible
+Note that it's not an error to add one test/benchmark multiple times --- here
+it is used to have the same code benchmarked with different timers. Possible
 output:
 
-@image html testsuite-benchmark.png
+@include testsuite-benchmark.ansi
 
 The number passed to @ref addBenchmarks() is equivalent to repeat count passed
 to @ref addRepeatedTests() and specifies measurement sample count. The number
 passed to @ref CORRADE_BENCHMARK() is number of iterations of the inner loop in
 one sample measurement to amortize the overhead and error caused by clock
-precision -- the faster the measured code is the more iterations it needs. The
+precision --- the faster the measured code is the more iterations it needs. The
 measured value is then divided by that number to represent cost of a single
 iteration. The @ref testCaseRepeatId() returns current sample index and can be
 used to give some input variation to the test. By default the benchmarks
@@ -267,23 +268,24 @@ via `--benchmark-yellow` and `--benchmark-red`.
 It's possible to have instanced benchmarks as well, see
 @ref addInstancedBenchmarks().
 
-## Custom benchmarks
+@section TestSuite-Tester-benchmark-custom Custom benchmarks
 
 It's possible to specify a custom pair of functions for intiating the benchmark
 and returning the result using @ref addCustomBenchmarks(). The benchmark end
 function returns an unsigned 64-bit integer indicating measured amount in units
 given by @ref BenchmarkUnits. To further describe the value being measured you
 can call @ref setBenchmarkName() in the benchmark begin function. Contrived
-example of benchmarking number of copies when using `std::vector::push_back()`:
+example of benchmarking number of copies when using @ref std::vector::push_back():
 
 @snippet testsuite-benchmark-custom.cpp 0
 
-Running the benchmark shows that adding calling `push_back()` for 10 thousand
-elements actually causes the copy constructor to be called 26 thousand times:
+Running the benchmark shows that calling @ref std::vector::push_back() "push_back()"
+for 10 thousand elements actually causes the copy constructor to be called 26
+thousand times:
 
-@image html testsuite-benchmark-custom.png
+@include testsuite-benchmark-custom.ansi
 
-## Specifying setup/teardown routines
+@section TestSuite-Tester-setup-teardown Specifying setup/teardown routines
 
 While the common practice in C++ is to use RAII for resource lifetime
 management, sometimes you may need to execute arbitrary code at the beginning
@@ -291,12 +293,11 @@ and end of each test case. For this, all @ref addTests(),
 @ref addInstancedTests(), @ref addRepeatedTests(), @ref addRepeatedInstancedTests(),
 @ref addBenchmarks(), @ref addInstancedBenchmarks(), @ref addCustomBenchmarks()
 and @ref addCustomInstancedBenchmarks() have an overload that is additionally
-taking a pair of parameter-less `void` functions for setup and teardown. Both
-functions are called before and after each test case run, independently on
+taking a pair of parameter-less @cpp void @ce functions for setup and teardown.
+Both functions are called before and after each test case run, independently on
 whether the test case passed or failed.
 
-@anchor TestSuite-Tester-command-line
-## Command-line options
+@section TestSuite-Tester-command-line Command-line options
 
 Command-line options that make sense to be set globally for multiple test cases
 are also configurable via environment variables for greater flexibility when
@@ -312,42 +313,42 @@ Usage:
 
 Arguments:
 
--   `-h`, `--help` -- display this help message and exit
--   `-c`, `--color on|off|auto` -- colored output (environment:
+-   `-h`, `--help` --- display this help message and exit
+-   `-c`, `--color on|off|auto` --- colored output (environment:
     `CORRADE_TEST_COLOR`, default: `auto`). The `auto` option enables color
     output in case an interactive terminal is detected. Note that on Windows it
     is possible to output colors only directly to an interactive terminal
     unless @ref CORRADE_UTILITY_USE_ANSI_COLORS is defined.
--   `--skip "N1 N2..."` -- skip test cases with given numbers
--   `--skip-tests` -- skip all tests (environment:
+-   `--skip "N1 N2..."` --- skip test cases with given numbers
+-   `--skip-tests` --- skip all tests (environment:
     `CORRADE_TEST_SKIP_TESTS=ON|OFF`)
--   `--skip-benchmarks` -- skip all benchmarks (environment:
+-   `--skip-benchmarks` --- skip all benchmarks (environment:
     `CORRADE_TEST_SKIP_BENCHMARKS=ON|OFF`)
--   `--only "N1 N2..."` -- run only test cases with given numbers
--   `--shuffle` -- randomly shuffle test case order (environment:
+-   `--only "N1 N2..."` --- run only test cases with given numbers
+-   `--shuffle` --- randomly shuffle test case order (environment:
     `CORRADE_TEST_SHUFFLE=ON|OFF`)
--   `--repeat-every N` -- repeat every test case N times (environment:
+-   `--repeat-every N` --- repeat every test case N times (environment:
     `CORRADE_TEST_REPEAT_EVERY`, default: `1`)
--   `--repeat-all N` -- repeat all test cases N times (environment:
+-   `--repeat-all N` --- repeat all test cases N times (environment:
     `CORRADE_TEST_REPEAT_ALL`, default: `1`)
--   `--abort-on-fail` -- abort after first failure (environment:
+-   `--abort-on-fail` --- abort after first failure (environment:
     `CORRADE_TEST_ABORT_ON_FAIL=ON|OFF`)
--   `--no-xfail` -- disallow expected failures (environment:
+-   `--no-xfail` --- disallow expected failures (environment:
     `CORRADE_TEST_NO_XFAIL=ON|OFF`)
--   `--benchmark TYPE` -- default benchmark type (environment:
+-   `--benchmark TYPE` --- default benchmark type (environment:
     `CORRADE_BENCHMARK`). Supported benchmark types:
-    -   `wall-time` -- wall time spent
-    -   `cpu-time` -- CPU time spent
-    -   `cpu-cycles` -- CPU cycles spent (x86 only, gives zero result
+    -   `wall-time` --- wall time spent
+    -   `cpu-time` --- CPU time spent
+    -   `cpu-cycles` --- CPU cycles spent (x86 only, gives zero result
         elsewhere)
--   `--benchmark-discard N` -- discard first N measurements of each benchmark
+-   `--benchmark-discard N` --- discard first N measurements of each benchmark
     (environment: `CORRADE_BENCHMARK_DISCARD`, default: `1`)
--   `--benchmark-yellow N` -- deviation threshold for marking benchmark yellow
+-   `--benchmark-yellow N` --- deviation threshold for marking benchmark yellow
     (environment: `CORRADE_BENCHMARK_YELLOW`, default: `0.05`)
--   `--benchmark-red N` -- deviation threshold for marking benchmark red
+-   `--benchmark-red N` --- deviation threshold for marking benchmark red
     (environment: `CORRADE_BENCHMARK_RED`, default: `0.25`)
 
-## CMake support and platform-specific goodies
+@section TestSuite-Tester-cmake CMake support and platform-specific goodies
 
 While the test executables can be created in any way you want, there's also an
 @ref corrade-cmake-add-test "corrade_add_test()" CMake macro that creates the
@@ -415,13 +416,15 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          *
          * For convenient debug output inside test cases (instead of using
          * fully qualified name):
-         * @code
+         *
+         * @code{.cpp}
          * void myTestCase() {
          *     int a = 4;
          *     Debug() << a;
          *     CORRADE_COMPARE(a + a, 8);
          * }
          * @endcode
+         *
          * @see @ref Warning, @ref Error
          */
         typedef Corrade::Utility::Debug Debug;
@@ -532,17 +535,17 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         };
 
         /**
+         * @brief Constructor
+         * @param configuration     Optional configuration
+         */
+        explicit Tester(TesterConfiguration configuration = TesterConfiguration{});
+
+        /**
          * @brief Command-line arguments
          *
          * Populated by @ref CORRADE_TEST_MAIN().
          */
         std::pair<int&, char**> arguments() { return {*_argc, _argv}; }
-
-        /**
-         * @brief Constructor
-         * @param configuration     Optional configuration
-         */
-        explicit Tester(TesterConfiguration configuration = TesterConfiguration{});
 
         /**
          * @brief Add test cases
@@ -563,7 +566,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * fails or @p repeatCount is reached. Useful for stability or resource
          * leak checking. Each test case appears in the output log only once.
          * It's not an error to call this function multiple times or add a
-         * particular test case more than once -- in that case it will appear
+         * particular test case more than once --- in that case it will appear
          * in the output log once for each occurence in the list.
          * @see @ref addInstancedTests(), @ref addRepeatedInstancedTests()
          */
@@ -598,7 +601,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * leak checking. The @p setup and @p teardown functions are called
          * again for each repeat of each test case. Each test case appears in
          * the output log only once. It's not an error to call this function
-         * multiple times or add a particular test case more than once -- in
+         * multiple times or add a particular test case more than once --- in
          * that case it will appear in the output log once for each occurence
          * in the list.
          * @see @ref addInstancedTests(), @ref addRepeatedInstancedTests()
@@ -616,7 +619,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @p instanceCount times. Useful for data-driven tests. Each test case
          * appears in the output once for each instance. It's not an error to
          * call this function multiple times or add one test case more than
-         * once -- in that case it will appear once for each instance of each
+         * once --- in that case it will appear once for each instance of each
          * occurence in the list.
          * @see @ref testCaseInstanceId(), @ref setTestCaseDescription()
          */
@@ -631,7 +634,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * until it fails or @p repeatCount is reached. Useful for stability or
          * resource leak checking. Each test case appears in the output once
          * for each instance. It's not an error to call this function multiple
-         * times or add one test case more than once -- in that case it will
+         * times or add one test case more than once --- in that case it will
          * appear once for each instance of each occurence in the list.
          * @see @ref addInstancedTests(), @ref addRepeatedInstancedTests()
          */
@@ -652,7 +655,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * instance of every test case in the list, regardless of whether it
          * passed, failed or was skipped. Using verification macros in @p setup
          * or @p teardown function is not allowed. It's not an error to call
-         * this function multiple times or add one test case more than once --
+         * this function multiple times or add one test case more than once ---
          * in that case it will appear once for each instance of each occurence
          * in the list.
          */
@@ -669,7 +672,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * called again for each repeat of each instance of each test case. The
          * test case appears in the output once for each instance. It's not an
          * error to call this function multiple times or add one test case more
-         * than once -- in that case it will appear once for each instance of
+         * than once --- in that case it will appear once for each instance of
          * each occurence in the list.
          * @see @ref addInstancedTests(), @ref addRepeatedInstancedTests()
          */
@@ -776,7 +779,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * benchmarks @p instanceCount times. Useful for data-driven tests.
          * Each test case appears in the output once for each instance. It's
          * not an error to call this function multiple times or add one
-         * benchmark more than once -- in that case it will appear once for
+         * benchmark more than once --- in that case it will appear once for
          * each instance of each occurence in the list.
          * @see @ref testCaseInstanceId(), @ref setTestCaseDescription()
          */
@@ -800,7 +803,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * it passed, failed or was skipped. Using verification macros in
          * @p setup or @p teardown function is not allowed. It's not an error
          * to call this function multiple times or add one benchmark more than
-         * once -- in that case it will appear once for each instance of each
+         * once --- in that case it will appear once for each instance of each
          * occurence in the list.
          */
         template<class Derived> void addInstancedBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, std::size_t instanceCount, void(Derived::*setup)(), void(Derived::*teardown)(), BenchmarkType benchmarkType = BenchmarkType::Default) {
@@ -820,7 +823,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * The @p benchmarkBegin parameter starts the measurement, the
          * @p benchmarkEnd parameter ends the measurement and returns measured
          * value, which is in @p units. It's not an error to call this function
-         * multiple times or add one benchmark more than once -- in that case
+         * multiple times or add one benchmark more than once --- in that case
          * it will appear once for each instance of each occurence in the list.
          */
         template<class Derived> void addCustomInstancedBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, std::size_t instanceCount, void(Derived::*benchmarkBegin)(), std::uint64_t(Derived::*benchmarkEnd)(), BenchmarkUnits benchmarkUnits) {
@@ -844,7 +847,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * every benchmark in the list, regardless of whether it passed, failed
          * or was skipped. Using verification macros in @p setup or @p teardown
          * function is not allowed. It's not an error to call this function
-         * multiple times or add one benchmark more than once -- in that case
+         * multiple times or add one benchmark more than once --- in that case
          * it will appear once for each instance of each occurence in the list.
          */
         template<class Derived> void addCustomInstancedBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, std::size_t instanceCount, void(Derived::*setup)(), void(Derived::*teardown)(), void(Derived::*benchmarkBegin)(), std::uint64_t(Derived::*benchmarkEnd)(), BenchmarkUnits benchmarkUnits) {
@@ -878,6 +881,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * Returns repeat ID of the repeated test case that is currently
          * executing, starting from `0`. Value is undefined if called outside
          * of *repeated* test cases and setup/teardown functions.
+         * @see @ref addRepeatedTests()
          */
         std::size_t testCaseRepeatId() const { return _testCaseRepeatId; }
 
@@ -886,7 +890,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          *
          * By default the test case name is gathered in the check macros and is
          * equivalent to the following:
-         * @code
+         *
+         * @code{.cpp}
          * setTestCaseName(__func__);
          * @endcode
          */
@@ -907,7 +912,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @brief Set benchmark name
          *
          * In case of @ref addCustomBenchmarks() and @ref addCustomInstancedBenchmarks()
-         * provides the name for the unit measured, for example `"wall time"`.
+         * provides the name for the unit measured, for example @cpp "wall time" @ce.
          */
         void setBenchmarkName(const std::string& name);
         void setBenchmarkName(std::string&& name); /**< @overload */
@@ -1084,11 +1089,11 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 };
 
 /** @hideinitializer
-@brief Create `main()` function for given Tester subclass
+@brief Create `main()` function for given @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass
 
-Populates @ref Corrade::TestSuite::Tester::arguments() "Tester::arguments()",
-instantiates @p Class, executes the test cases and returns from `main()` with
-code based on the test results. This macro has to be used outside of any
+Populates @ref Corrade::TestSuite::Tester::arguments() "TestSuite::Tester::arguments()",
+instantiates @p Class, executes the test cases and returns from @cpp main() @ce
+with code based on the test results. This macro has to be used outside of any
 namespace.
 */
 #ifdef CORRADE_TESTSUITE_TARGET_XCTEST
@@ -1126,19 +1131,21 @@ namespace.
 #endif
 
 /** @hideinitializer
-@brief Verify an expression in @ref Corrade::TestSuite::Tester "Tester" subclass
+@brief Verify an expression in @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass
 
 If the expression is not true, the expression is printed and execution of given
 test case is terminated. Example usage:
-@code
+
+@code{.cpp}
 string s("hello");
 CORRADE_VERIFY(!s.empty());
 @endcode
 
-It is possible to use @ref CORRADE_VERIFY() also on objects with *explicit*
-`operator bool` without doing explicit conversion (e.g. using `!!`), for
-example:
-@code
+It is possible to use @ref CORRADE_VERIFY() also on objects with
+@cpp explicit operator bool() @ce without doing explicit conversion (e.g. using
+@cpp !! @ce), for example:
+
+@code{.cpp}
 std::unique_ptr<T> t(new T);
 CORRADE_VERIFY(t);
 @endcode
@@ -1152,18 +1159,20 @@ CORRADE_VERIFY(t);
     } while(false)
 
 /** @hideinitializer
-@brief Compare two values in @ref Corrade::TestSuite::Tester "Tester" subclass
+@brief Compare two values in @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass
 
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
-@code
+
+@code{.cpp}
 int a = 5 + 3;
 CORRADE_COMPARE(a, 8);
 @endcode
 
 Comparison of floating-point types is by default done as a fuzzy-compare, see
-@ref Corrade::TestSuite::Comparator<float> "Comparator<float>" and
-@ref Corrade::TestSuite::Comparator<double> "Comparator<double>" for details.
+@ref Corrade::TestSuite::Comparator<float> "TestSuite::Comparator<float>" and
+@ref Corrade::TestSuite::Comparator<double> "TestSuite::Comparator<double>" for
+details.
 
 Note that this macro is usable only if given type implements equality
 comparison operators and is printable via @ref Corrade::Utility::Debug "Utility::Debug".
@@ -1176,14 +1185,16 @@ comparison operators and is printable via @ref Corrade::Utility::Debug "Utility:
     } while(false)
 
 /** @hideinitializer
-@brief Compare two values in @ref Corrade::TestSuite::Tester "Tester" subclass with explicitly specified type
+@brief Compare two values in @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass with explicitly specified type
 
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
-@code
+
+@code{.cpp}
 CORRADE_COMPARE_AS(std::sin(0.0), 0.0f, float);
 @endcode
-See also @ref Corrade::TestSuite::Comparator "Comparator" class documentation
+
+See also @ref Corrade::TestSuite::Comparator "TestSuite::Comparator" class documentation
 for example of more involved comparisons.
 
 Note that this macro is usable only if the type passed to it is printable via
@@ -1202,15 +1213,17 @@ with given comparator type.
 #endif
 
 /** @hideinitializer
-@brief Compare two values in @ref Corrade::TestSuite::Tester "Tester" subclass with explicitly specified comparator
+@brief Compare two values in @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass with explicitly specified comparator
 
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
-@code
+
+@code{.cpp}
 CORRADE_COMPARE_WITH("actual.txt", "expected.txt", Compare::File("/common/path/prefix"));
 @endcode
-See @ref Corrade::TestSuite::Comparator "Comparator" class documentation for
-more information.
+
+See @ref Corrade::TestSuite::Comparator "TestSuite::Comparator" class
+documentation for more information.
 
 Note that this macro is usable only if the type passed to it is printable via
 @ref Corrade::Utility::Debug "Utility::Debug" and is usable with given
@@ -1232,7 +1245,8 @@ Expects failure in all following @ref CORRADE_VERIFY(), @ref CORRADE_COMPARE()
 and @ref CORRADE_COMPARE_AS() checks in the same scope. In most cases it will
 be until the end of the function, but you can limit the scope by placing
 relevant checks in a separate block:
-@code
+
+@code{.cpp}
 {
     CORRADE_EXPECT_FAIL("Not implemented.");
     CORRADE_VERIFY(isFutureClear());
@@ -1241,6 +1255,7 @@ relevant checks in a separate block:
 int i = 6*7;
 CORRADE_COMPARE(i, 42);
 @endcode
+
 If any of the following checks passes, an error will be printed to output.
 @see @ref CORRADE_EXPECT_FAIL_IF()
 */
@@ -1252,11 +1267,13 @@ If any of the following checks passes, an error will be printed to output.
 @param message      Message which will be printed into output as indication of
     expected failure
 @param condition    The failure is expected only if the condition evaluates to
-    `true`
+    @cpp true @ce
 
 With @ref CORRADE_EXPECT_FAIL() it's not possible to write code such as this,
-because the scope of expected failure will end at the end of the `if` block:
-@code
+because the scope of expected failure will end at the end of the @cpp if @ce
+block:
+
+@code{.cpp}
 {
     if(answer != 42)
         CORRADE_EXPECT_FAIL("This is not our universe.");
@@ -1265,8 +1282,9 @@ because the scope of expected failure will end at the end of the `if` block:
 }
 @endcode
 
-The solution is to use `CORRADE_EXPECT_FAIL_IF()`:
-@code
+The solution is to use @cpp CORRADE_EXPECT_FAIL_IF() @ce:
+
+@code{.cpp}
 {
     CORRADE_EXPECT_FAIL_IF(answer != 42, "This is not our universe.");
 
@@ -1275,8 +1293,8 @@ The solution is to use `CORRADE_EXPECT_FAIL_IF()`:
 @endcode
 
 Similarly to @ref CORRADE_VERIFY(), it is possible to use
-@ref CORRADE_EXPECT_FAIL_IF() also on objects with *explicit* `operator bool`
-without doing explicit conversion (e.g. using `!!`).
+@ref CORRADE_EXPECT_FAIL_IF() also on objects with @cpp explicit operator bool @ce
+without doing explicit conversion (e.g. using @cpp !! @ce).
 */
 #define CORRADE_EXPECT_FAIL_IF(condition, message)                          \
     Tester::ExpectedFailure _CORRADE_HELPER_PASTE(expectedFailure, __LINE__)(*this, message, condition)
@@ -1288,7 +1306,8 @@ without doing explicit conversion (e.g. using `!!`).
 
 Skips all following checks in given test case. Useful for e.g. indicating that
 given feature can't be tested on given platform:
-@code
+
+@code{.cpp}
 if(!bigEndian) {
     CORRADE_SKIP("Big endian compatibility can't be tested on this system.");
 }
@@ -1305,13 +1324,14 @@ if(!bigEndian) {
 
 Benchmarks the following block or expression by measuring @p batchSize
 iterations of given block. Use in conjunction with
-@ref Corrade::TestSuite::Tester::addBenchmarks() "addBenchmarks()" and others.
-Only one such loop can be in a function to achieve proper result. Please note
-that there need to be additional measures in order to prevent the optimizer
-from removing the benchmark code such as assigning to a `volatile` variable or
-combining all the results to a variable, which is then being used outside of
-the loop.
-@code
+@ref Corrade::TestSuite::Tester::addBenchmarks() "TestSuite::Tester::addBenchmarks()"
+and others. Only one such loop can be in a function to achieve proper result.
+Please note that there need to be additional measures in order to prevent the
+optimizer from removing the benchmark code such as assigning to a
+@cpp volatile @ce variable or combining all the results to a variable, which is
+then being used outside of the loop.
+
+@code{.cpp}
 void benchmark() {
     std::string a = "hello", b = "world";
     CORRADE_BENCHMARK(1000) {
@@ -1319,6 +1339,7 @@ void benchmark() {
     }
 }
 @endcode
+
 The resulting measured value is divided by @p batchSize to represent cost of
 one iteration.
 */

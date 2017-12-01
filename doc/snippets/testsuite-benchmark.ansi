@@ -1,0 +1,6 @@
+[1;39mStarting InvSqrtBenchmark with 4 test cases...[0m
+[1;39m BENCH[0;34m [[1;36m1[0;34m][1;32m   8.24 ±[1;39m 0.19  [0m ns[1;39m naive()@499x1000000[0m (wall time)
+[1;39m BENCH[0;34m [[1;36m2[0;34m][1;32m   8.27 ±[1;39m 0.19  [0m ns[1;39m naive()@499x1000000[0m (CPU time)
+[1;39m BENCH[0;34m [[1;36m3[0;34m][1;32m   0.31 ±[1;39m 0.01  [0m ns[1;39m fast()@499x1000000[0m (wall time)
+[1;39m BENCH[0;34m [[1;36m4[0;34m][1;32m   0.31 ±[1;39m 0.01  [0m ns[1;39m fast()@499x1000000[0m (CPU time)
+[1;39mFinished InvSqrtBenchmark with 0 errors out of 0 checks.[0m

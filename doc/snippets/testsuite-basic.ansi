@@ -1,0 +1,4 @@
+[1;39mStarting MyTest with 2 test cases...[0m
+[1;39m    OK[0;34m [[1;36m1[0;34m][1;39m addTwo()[0m
+[1;39m    OK[0;34m [[1;36m2[0;34m][1;39m subtractThree()[0m
+[1;39mFinished MyTest with 0 errors out of 2 checks.[0m

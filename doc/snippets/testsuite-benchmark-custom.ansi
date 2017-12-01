@@ -1,0 +1,5 @@
+[1;39mStarting VectorBenchmark with 3 test cases...[0m
+[1;39m BENCH[0;34m [[1;36m1[0;34m][1;32m 227.00[0m            [1;39m insert([0m100[1;39m)@1x1[0m (copy count)
+[1;39m BENCH[0;34m [[1;36m2[0;34m][1;32m   2.02[0m          k [1;39m insert([0m1k[1;39m)@1x1[0m (copy count)
+[1;39m BENCH[0;34m [[1;36m3[0;34m][1;32m  26.38[0m          k [1;39m insert([0m10k[1;39m)@1x1[0m (copy count)
+[1;39mFinished VectorBenchmark with 0 errors out of 0 checks.[0m

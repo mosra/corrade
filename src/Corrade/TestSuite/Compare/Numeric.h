@@ -40,9 +40,10 @@ namespace Compare {
 @brief Pseudo-type for verifying that value is less than expected
 
 Prints both values if the first is not less than the second. Compared type
-needs to implement at least an `operator<` (explicitly) convertible to `bool`.
-Example usage:
-@code
+needs to implement at least an @cpp operator<() @ce (explicitly) convertible to
+@cpp bool @ce. Example usage:
+
+@code{.cpp}
 float a;
 CORRADE_COMPARE_AS(a, 9.28f, Compare::Less);
 @endcode
@@ -56,9 +57,10 @@ template<class T> class Less {};
 @brief Pseudo-type for verifying that value is less than expected
 
 Prints both values if the first is not less than the second. Compared type
-needs to implement at least an `operator<=` (explicitly) convertible to `bool`.
-Example usage:
-@code
+needs to implement at least an @cpp operator<=() @ce (explicitly) convertible
+to @cpp bool @ce. Example usage:
+
+@code{.cpp}
 float a;
 CORRADE_COMPARE_AS(a, 9.28f, Compare::LessOrEqual);
 @endcode
@@ -72,9 +74,10 @@ template<class T> class LessOrEqual {};
 @brief Pseudo-type for verifying that value is less than expected
 
 Prints both values if the first is not less than the second.  Compared type
-needs to implement at least an `operator>=` (explicitly) convertible to `bool`.
-Example usage:
-@code
+needs to implement at least an @cpp operator>=() @ce (explicitly) convertible
+to @cpp bool @ce. Example usage:
+
+@code{.cpp}
 float a;
 CORRADE_COMPARE_AS(a, 9.28f, Compare::GreaterOrEqual);
 @endcode
@@ -88,9 +91,10 @@ template<class T> class GreaterOrEqual {};
 @brief Pseudo-type for verifying that value is less than expected
 
 Prints both values if the first is not less than the second. Compared type
-needs to implement at least an `operator>` (explicitly) convertible to `bool`.
-Example usage:
-@code
+needs to implement at least an @cpp operator>() @ce (explicitly) convertible to
+@cpp bool @ce. Example usage:
+
+@code{.cpp}
 float a;
 CORRADE_COMPARE_AS(a, 9.28f, Compare::Greater);
 @endcode
@@ -103,13 +107,16 @@ template<class T> class Greater {};
 /**
 @brief Pseudo-type for verifying that value is in given bounds
 
-Prints both values if `actual < expected - epsilon` or
-`expected + epsilon < actual`. Compared type needs to implement at least an
-`operator-`, `operator+` and `operator<`. Example usage:
-@code
+Prints both values if @cpp actual < expected - epsilon @ce or
+@cpp expected + epsilon < actual @ce. Compared type needs to implement at least
+an @cpp operator-() @ce, @cpp operator+() @ce and @cpp operator<() @ce. Example
+usage:
+
+@code{.cpp}
 float a;
-CORRADE_COMPARE_WITH(a, 9.28f, Compare::Around<float>{0.1f});
+CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::Around<float>{0.1f});
 @endcode
+
 @see @ref around()
 */
 template<class T> class Around {
@@ -133,9 +140,10 @@ template<class T> class Around {
 
 Convenience wrapper around @ref Around::Around(T). These two lines are
 equivalent:
-@code
-CORRADE_COMPARE_WITH(a, 9.28f, Compare::Around<float>{0.1f});
-CORRADE_COMPARE_WITH(a, 9.28f, Compare::around(0.1f));
+
+@code{.cpp}
+CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::Around<float>{0.1f});
+CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::around(0.1f));
 @endcode
 */
 template<class T> inline Around<T> around(T epsilon) { return Around<T>{epsilon}; }
