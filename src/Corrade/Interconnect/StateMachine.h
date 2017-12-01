@@ -54,11 +54,12 @@ Exploits the Interconnect library for a simple state machine. Information about
 state transitions is broadcasted through signals. The machine is meant to be
 defined and connected at compile time.
 
-## Basic usage
+@section Interconnect-StateMachine-usage Basic usage
 
 Define two enums for states and inputs. The enums should have consecutive
-values starting from `0`.
-@code
+values starting from @cpp 0 @ce.
+
+@code{.cpp}
 enum class State: std::uint8_t {
     Ready,
     Printing,
@@ -71,15 +72,17 @@ enum class Input: std::uint8_t {
 };
 @endcode
 
-Then `typedef` the state machine consisting of these two enums, count
+Then @cpp typedef @ce the state machine consisting of these two enums, count
 of all states and count of all inputs:
-@code
+
+@code{.cpp}
 typedef Interconnect::StateMachine<3, 2, State, Input> Printer;
 @endcode
 
 Now add your state transitions, for each transition first original state, then
 input, and then state after transition. Everything else is implicitly a no-op.
-@code
+
+@code{.cpp}
 Printer p;
 p.addTransitions({
     {State::Ready,      Input::Operate,         State::Printing},
@@ -90,7 +93,8 @@ p.addTransitions({
 
 Lastly connect transition signals to desired slots, so you can react to state
 changes:
-@code
+
+@code{.cpp}
 Interconnect::connect(p, &Printer::entered<State::Ready>, [](State) { Utility::Debug() << "Printer is ready."; });
 Interconnect::connect(p, &Printer::entered<State::Finished>, [](State) { Utility::Debug() << "Print finished. Please remove the document."; });
 Interconnect::connect(p, &Printer::entered<State::Printing>, [](State) { Utility::Debug() << "Starting the print..."; });
@@ -98,23 +102,26 @@ Interconnect::connect(p, &Printer::exited<State::Printing>, [](State) { Utility:
 @endcode
 
 Stepping the machine will print the following output:
-@code
+
+@code{.cpp}
 p.step(Input::Operate);
 p.step(Input::Operate);
 p.step(Input::Remove);
 @endcode
 
-    Starting the print...
-    Finishing the print...
-    Print finished. Please remove the document.
-    Printer is ready.
+@code{.shell-session}
+Starting the print...
+Finishing the print...
+Print finished. Please remove the document.
+Printer is ready.
+@endcode
 
 */
 template<std::size_t states, std::size_t inputs, class State, class Input> class StateMachine: public Emitter {
     public:
         enum: std::size_t {
-            StateCount = states, /**< @brief Count of states in the machine */
-            InputCount = inputs  /**< @brief Count of inputs for the machine */
+            StateCount = states, /**< Count of states in the machine */
+            InputCount = inputs  /**< Count of inputs for the machine */
         };
 
         /**

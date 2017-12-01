@@ -59,14 +59,14 @@ struct SignalDataHash {
 Contains signals and manages connections between signals and slots. See
 @ref interconnect for introduction.
 
-@anchor Interconnect-Emitter-signals
-## Implementing signals
+@section Interconnect-Emitter-signals Implementing signals
 
 Signals are implemented as member functions with @ref Signal as return type,
 argument count and types are not limited. The body consists of single
 @ref emit() call, to which you pass pointer to the function and forward all
 arguments. Example signal implementations:
-@code
+
+@code{.cpp}
 class Postman: public Interconnect::Emitter {
     public:
         Signal messageDelivered(const std::string& message, int price = 0) {
@@ -80,7 +80,8 @@ class Postman: public Interconnect::Emitter {
 @endcode
 
 The implemented signal can be emitted simply by calling the function:
-@code
+
+@code{.cpp}
 Postman postman;
 postman.messageDelivered("hello");
 postman.paymentRequired(245);
@@ -89,16 +90,16 @@ postman.paymentRequired(245);
 If the signal is not declared as public function, it cannot be connected or
 called from outside the class.
 
-@anchor Interconnect-Emitter-connections
-## Connecting signals to slots
+@section Interconnect-Emitter-connections Connecting signals to slots
 
 Signals implemented on Emitter subclasses can be connected to slots using
-various @ref Interconnect::connect() "connect()" functions. The argument count
-and types of slot function must be exactly the same as of the signal function.
-When a connection is established, returned @ref Connection object can be used
-to remove or reestablish given connection using @ref Connection::disconnect()
-or @ref Connection::connect():
-@code
+various @ref connect() functions. The argument count and types of slot function
+must be exactly the same as of the signal function. When a connection is
+established, returned @ref Connection object can be used to remove or
+reestablish given connection using @ref Connection::disconnect() or
+@ref Connection::connect():
+
+@code{.cpp}
 Connection c = Emitter::connect(...);
 // ...
 c.disconnect();
@@ -119,7 +120,8 @@ removed when emitter object is destroyed.
     delete the emitter object, as it would lead to undefined behavior.
 
 You can connect any signal, as long as the emitter object is of proper type:
-@code
+
+@code{.cpp}
 class Base: public Interconnect::Emitter {
     public:
         Slot baseSignal();
@@ -140,11 +142,11 @@ Interconnect::connect(*b, &Derived::derivedSignal, ...); // ok
 
 There are a few slot types, each type has its particular use:
 
-### Member function slots
+@section Interconnect-Emitter-member-slots Member function slots
 
-When connecting to member function slot with @ref Interconnect::connect() "connect()",
-@p receiver must be subclass of @ref Receiver and @p slot must be non-constant
-member function with `void` as return type.
+When connecting to member function slot with @ref connect(), @p receiver must
+be subclass of @ref Receiver and @p slot must be non-constant member function
+with @cpp void @ce as return type.
 
 In addition to the cases mentioned above, the connection is automatically
 removed also when receiver object is destroyed. You can also use
@@ -153,7 +155,8 @@ removed also when receiver object is destroyed. You can also use
 @note It is perfectly safe to delete receiver object in its own slot.
 
 Example usage:
-@code
+
+@code{.cpp}
 class Mailbox: public Interconnect::Receiver {
     public:
         void addMessage(const std::string& message, int price);
@@ -166,7 +169,8 @@ Interconnect::connect(&postman, &Postman::messageDelivered, &mailbox, &Mailbox::
 
 You can connect to any member function, as long as Receiver exists somewhere
 in given object type hierarchy:
-@code
+
+@code{.cpp}
 class Foo: public Interconnect::Emitter {
     public:
         Signal signal();
@@ -193,9 +197,10 @@ Interconnect::connect(&foo, &Foo::signal, b, &Derived::derivedSlot); // ok
 @endcode
 
 It is also possible to connect to member function of class which itself isn't
-subclass of Receiver, just add Receiver using multiple inheritance. Convoluted
-example:
-@code
+subclass of @ref Receiver, just add @ref Receiver using multiple inheritance.
+Convoluted example:
+
+@code{.cpp}
 class MyString: public std::string, public Receiver {};
 
 std::string a;
@@ -294,7 +299,8 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * Disconnects all slots connected to given signal.
          *
          * Example usage:
-         * @code
+         *
+         * @code{.cpp}
          * Postman postman;
          * postman.disconnect(&postman, &Postman::messageDelivered);
          * @endcode
@@ -443,7 +449,7 @@ template<class ...Args> class FunctionConnectionData: public AbstractConnectionD
 
 }
 
-/**
+/** @relatesalso Emitter
 @brief Connect signal to function slot
 @param emitter       Emitter
 @param signal        Signal
@@ -476,14 +482,15 @@ template<class EmitterObject, class Emitter, class ...Args> Connection connect(E
     return Connection(signalData, data);
 }
 
-/** @overload
+/** @relatesalso Emitter
+@overload
 @todo Why conversion of lambdas to function pointers is not done implicitly?
 */
 template<class EmitterObject, class Emitter, class Lambda, class ...Args> Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), Lambda slot) {
     return connect(emitter, signal, static_cast<void(*)(Args...)>(slot));
 }
 
-/**
+/** @relatesalso Emitter
 @brief Connect signal to member function slot
 @param emitter       Emitter
 @param signal        Signal

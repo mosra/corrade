@@ -121,8 +121,8 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
 
         /**
          * @brief Whether connection is possible
-         * @return `False` if either emitter or receiver object (if applicable)
-         *      doesn't exist anymore, `true` otherwise.
+         * @return @cpp false @ce if either emitter or receiver object (if
+         *      applicable) doesn't exist anymore, @cpp true @ce otherwise.
          *
          * @see @ref isConnected()
          */
@@ -140,8 +140,9 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
         /**
          * @brief Establish the connection
          *
-         * If connection is not possible, returns `false`, otherwise creates
-         * the connection (if not already connected) and returns `true`.
+         * If connection is not possible, returns @cpp false @ce, otherwise
+         * creates the connection (if not already connected) and returns
+         * @cpp true @ce.
          * @see @ref isConnectionPossible(), @ref isConnected(),
          *      @ref Interconnect::connect()
          */
