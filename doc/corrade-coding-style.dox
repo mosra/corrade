@@ -60,17 +60,18 @@ single-line statements are allowed unless it hurts readability.
 
 @section corrade-coding-style-cmake CMake code
 
-All CMake functions and macros (e.g. `add_executable()`, `set()`) are
-lowercase, keywords (e.g. `FILES`, `DESTINATION`) are uppercase. Variables are
-mostly uppercase with underscores between words, except for variables with
-direct relation to any named target - then they have the target name as prefix
-with no case change, followed with underscore, the rest of variable name is
-uppercase, e.g. variable holding all sources for target `CorradePluginManager`
-will be named `CorradePluginManager_SRCS`.
+All CMake functions and macros (e.g. @cmake add_executable() @ce,
+@cmake set() @ce) are lowercase, keywords (e.g. `FILES`, `DESTINATION`)
+are uppercase. Variables are mostly uppercase with underscores between words,
+except for variables with direct relation to any named target --- then they
+have the target name as prefix with no case change, followed with underscore,
+the rest of variable name is uppercase, e.g. variable holding all sources for
+target `CorradePluginManager` will be named `CorradePluginManager_SRCS`.
 
-Multi-line calls (i.e. `set()`) have trailing parenthesis on the same line as
-last parameter, *not* on separate line:
-@code
+Multi-line calls (i.e. @cmake set() @ce) have trailing parenthesis on the
+same line as last parameter, *not* on separate line:
+
+@code{.cmake}
 set(CorradeUtility_SRCS
     Configuration.cpp
     CpnfigurationGroup.cpp
@@ -80,10 +81,12 @@ set(CorradeUtility_SRCS
 Source and header lists should be ordered alphabetically, subdirectories last,
 preferably separated by a single empty line.
 
-Prefer to use the new, non-global CMake workflow, so `target_include_directories()`,
-`target_compile_definitions()` and `target_compile_options()` instead of
-`include_directories()`, `add_definitions()` and modifying the global
-`CMAKE_CXX_FLAGS`.
+Prefer to use the new, non-global CMake workflow, so
+@cmake target_include_directories() @ce,
+@cmake target_compile_definitions() @ce and
+@cmake target_compile_options() @ce instead of
+@cmake include_directories() @ce, @cmake add_definitions() @ce and
+modifying the global `CMAKE_CXX_FLAGS`.
 
 @section corrade-coding-style-cpp C++ code
 
@@ -92,8 +95,8 @@ Prefer to use the new, non-global CMake workflow, so `target_include_directories
 All C++ header and source files are named after the class they contain with no
 case change. Thus there should be only one class per file, but if the classes
 are closely related and not very large, you can make an exception (see
-Utility/Debug.h or Utility/TypeTraits.h for example). That might also help with
-compilation times.
+@ref Corrade/Utility/Debug.h or @ref Corrade/Utility/TypeTraits.h for example).
+That might also help with compilation times.
 
 Supporting headers (not relevant to end user), such as various `configure.h`,
 `visibility.h` etc., which are used only internally and don't contain any
@@ -121,7 +124,7 @@ Headers have an strict structure. Include guards are basically include path
 with slashes replaced with underscores to make refactoring as easy as possible.
 Directly after them is license block, blank line, then Doxygen file
 documentation block, blank line and after that the contents of the header.
-Include guard ending is only `#``endif`, without any additional comments.
+Include guard ending is only @cpp #endif @ce, without any additional comments.
 
 Source file have similar structure as headers - first license block, then
 blank line, then the includes, then blank line, then contents of the file.
@@ -179,7 +182,8 @@ adding forward declaration header containing all of them to save users' time.
 Namespace declaration is on one line, separated with blank lines on both
 sides. The code inside the declaration is not indented to save horizontal
 space.
-@code
+
+@code{.cpp}
 namespace Corrade { namespace Utility { namespace Test {
 
 // ...
@@ -189,12 +193,14 @@ namespace Corrade { namespace Utility { namespace Test {
 
 The only exception is with forward declarations: use indentation where it
 improves readability, e.g.:
-@code
+
+@code{.cpp}
 namespace Corrade { namespace Utility {
     class Configuration;
 }}
 @endcode
-@code
+
+@code{.cpp}
 namespace Corrade {
 
 namespace TestSuite {
@@ -228,10 +234,11 @@ The goal is to preserve readability with minimal amount of wasted vertical
 and horizontal space.
 
 Indented is everything except namespace declarations (as specified above) -
-blocks, class protection levels, `case` statements. Overlong line breaks are
-indented also with 4 spaces (or any other value if it makes more sense, e.g. for
-aligning similar code).
-@code
+blocks, class protection levels, @cpp case @ce statements. Overlong line breaks
+are indented also with 4 spaces (or any other value if it makes more sense,
+e.g. for aligning similar code).
+
+@code{.cpp}
 class Foo {
     public:
         void bar() {
@@ -245,31 +252,34 @@ class Foo {
 };
 @endcode
 
-Whitespace is **not allowed** inside parentheses and between function name or
+Whitespace is *not allowed* inside parentheses and between function name or
 branch/loop statement and left parenthesis (or between constructed variable
-name and left brace) and before semicolon. It **must be** around block braces
-if the block is not empty. It **must not** be space before, but after the
+name and left brace) and before semicolon. It *must be* around block braces
+if the block is not empty. It *must not be* space before, but after the
 comma.
-@code
+
+@code{.cpp}
 if ( statement ){foo ( a ,b ) ;} // awful! (_everything_ is misplaced)
 if(statement) { foo(a, b); }     // perfect
 @endcode
 
-Whitespace **should be** around operators with low precedence (namely `+`, `-`,
+Whitespace *should be* around operators with low precedence (namely `+`, `-`,
 `<<`, `>>` but not on unary `-`), around all boolean and comparison operators
 (`&&`, `||`, `==`, `!=`, `<`, `<=`, `>=`, `>`), around `=` and related operators
-and around ternary operator. Whitespace **shouldn't be** around `/`, `*`, `%` to
+and around ternary operator. Whitespace *shouldn't be* around `/`, `*`, `%` to
 indicate they have precedence before addition and subtraction. Whitespace can
 or need not to be around binary operators (`&`, `|`, `^`), whichever looks
 better in particular content.
-@code
+
+@code{.cpp}
 a += b*5 - 3*(c != 0 ? 64/c : 1);
 @endcode
 
-Block opening braces start on the same line as corresponding statement (class/
-function declaration, branch and loop statement), `else` and `else if`
-statements have both braces on the same line too:
-@code
+Block opening braces start on the same line as corresponding statement (class /
+function declaration, branch and loop statement), @cpp else @ce and
+@cpp else if @ce statements have both braces on the same line too:
+
+@code{.cpp}
 if(expression) {
     // ...
 } else if(another || expression) {
@@ -280,16 +290,20 @@ if(expression) {
 @endcode
 
 If the block is only one statement and short enough, it can be on the same line:
-@code
+
+@code{.cpp}
 void setProcessingDelay(int delay) { processingDelay = delay; }
 @endcode
-@code
+
+@code{.cpp}
 if(!initialized) return false;
 @endcode
 
 The only exceptions when opening braces are on the following line is when the
-`if` statement or constructor initializer list is spanning multiple lines:
-@code
+@cpp if @ce statement or constructor initializer list is spanning multiple
+lines:
+
+@code{.cpp}
 if(a_very_long_expression_spanning_whole_line ||
     another_fairly_lengthy_expression ||
     yet_another_overly_complicated_expression)
@@ -297,7 +311,8 @@ if(a_very_long_expression_spanning_whole_line ||
     // ...
 }
 @endcode
-@code
+
+@code{.cpp}
 MyClass::MyClass():
     _oneMember(lengthy_member_initialization),
     _anotherMember(another_fairly_lengthy_expression),
@@ -310,7 +325,8 @@ MyClass::MyClass():
 The opening brace should be also on the following line when preprocessor
 branching is involved, as specifying it twice may confuse code folding in some
 editors:
-@code
+
+@code{.cpp}
 // Bad
 #ifndef CORRADE_TARGET_WINDOWS
 if(expression) {
@@ -336,7 +352,8 @@ if(worked || around || expression)
 Switch statements are usually very verbose and thus they are often subject of
 various shortening and whitespace tricks. The goal is to make them as readable
 as possible without wasting too much vertical space, for example:
-@code
+
+@code{.cpp}
 switch(type) {
     case Byte:      size = 8;   break;
     case Short:     size = 16;  break;
@@ -350,28 +367,29 @@ switch(type) {
 
 @subsubsection corrade-coding-style-cpp-keywords Class member and function keywords
 
-Use keywords in this order: `template virtual inline constexpr explicit static`.
+Use keywords in this order: @cpp template virtual inline constexpr explicit static @ce.
 When the function is fully defined in class body or when it is marked as
-`constexpr`, don't mark it as `inline`, it's redundant. Only base virtual
-functions should have `virtual` keyword, the reimplementations should be marked
-with `override` instead.
+@cpp constexpr @ce, don't mark it as @cpp inline @ce, it's redundant. Only base
+virtual functions should have @cpp virtual @ce keyword, the reimplementations
+should be marked with @cpp override @ce instead.
 
 @subsubsection corrade-coding-style-cpp-macros Preprocessor macros
 
 Preprocessor macros should have the same indentation as surrounding code. Not
-indenting or indenting between `#` and the macro breaks visual flow and thus is
-not allowed. If the macro is long or contains code which should be spanned or
-multiple lines, it should be wrapped on multiple lines, each successive line
-indented and the line wrapping indicator `\` should be aligned around 80th
-column, preferably on some tab-stop.
+indenting or indenting between @cpp # @ce and the macro breaks visual flow and
+thus is not allowed. If the macro is long or contains code which should be
+spanned or multiple lines, it should be wrapped on multiple lines, each
+successive line indented and the line wrapping indicator `\` should be aligned
+around 80th column, preferably on some tab-stop.
 
 @subsection corrade-coding-style-cpp-constructors Class constructors and destructors
 
-All constructors (except copy and move constructors) should be `explicit` by
-default. Remove the keyword only if you want to allow implicit conversions
+All constructors (except copy and move constructors) should be @cpp explicit @ce
+by default. Remove the keyword only if you want to allow implicit conversions
 or want to construct the class with brace initializer (e.g. vector and matrix
 classes) If the class has no constructor, add explicit default-created one:
-@code
+
+@code{.cpp}
 class MyClass {
     public:
         explicit MyClass() = default;
@@ -385,7 +403,8 @@ If the constructor is intentionally implicit, mark it with appropriate comment.
 If the class has only static members (e.g. various utility classes, traits
 classes), delete the constructor to prevent instantiating the class by
 mistake:
-@code
+
+@code{.cpp}
 class UtilityClass {
     public:
         UtilityClass() = delete;
@@ -396,20 +415,20 @@ class UtilityClass {
 
 If the class is not meant to be instantiated directly and doesn't have any pure
 virtual methods, consider using protected destructor. Only if that is not
-possible (because you need to be able to call `delete` on the `Abstract*`
-class), use virtual destructor.
+possible (because you need to be able to call @cpp delete @ce on the
+@cpp Abstract* @ce class), use virtual destructor.
 
 @subsection corrade-coding-style-cpp-constexpr Constant expressions and constants
 
-Use `constexpr` keyword where appropriate, mainly for getters, operators and
-static pure functions which will be heavily used with compile-time constants,
-such as Containers::EnumSet::operator&().
+Use @cpp constexpr @ce keyword where appropriate, mainly for getters, operators
+and static pure functions which will be heavily used with compile-time
+constants, such as @ref Containers::EnumSet::operator&().
 
 Traits class members and class constants which are not meant to be referenced
-or pointed to should be defined as `constexpr` function or using anonymous
-typed enum (@ref corrade-coding-style-cpp-enums "see below"), because declaring
-them as `static const` variable will result in another (probably unwanted)
-symbol and the constant might not be always inlined.
+or pointed to should be defined as @cpp constexpr @ce function or using
+anonymous typed enum (@ref corrade-coding-style-cpp-enums "see below"), because
+declaring them as @cpp static const @ce variable will result in another
+(probably unwanted) symbol and the constant might not be always inlined.
 
 @subsection corrade-coding-style-cpp-assert Assertions
 
@@ -424,7 +443,8 @@ describe a condition that is covered by an assert macro).
 
 Try to avoid having one enum accessible through more than one type, for
 example:
-@code
+
+@code{.cpp}
 class AbstractImage {
     public:
         enum class Format { RGB, RGBA };
@@ -438,7 +458,8 @@ class ImageWrapper: public AbstractImage {};
 With this you have more than one way to specify the format (trivial choices
 slowing down the development), not to mention confusion (are all the enums the
 same or is each enum different?) and weird combinations:
-@code
+
+@code{.cpp}
 Image2D image;
 image.setFormat(AbstractImage::Format::RGB); // should I prefer `AbstractImage`
 image.setFormat(Image2D::Format::RGB);       // or `Image2D`?
@@ -448,7 +469,8 @@ image.setFormat(ImageWrapper::Format::RGBA); // is this even allowed?
 Better way would be to extract the enum out, now there is only one way to
 specify the format (and it's less typing). Also, when the user later decides to
 change the image type to another, the enum value doesn't need to be updated:
-@code
+
+@code{.cpp}
 enum class PixelFormat { RGB, RGBA };
 
 class AbstractImage {
@@ -464,7 +486,8 @@ image.setFormat(PixelFormat::RGBA);
 
 On the other hand, if each class has its own enum values, the original way is
 the preferred one:
-@code
+
+@code{.cpp}
 class ColoredImage {
     public:
         enum class Format { RGB, RGBA };
@@ -483,69 +506,71 @@ Prefer to use references instead of pointers in function parameters and class
 members. Use raw pointers only as non-owning optional references, use
 @ref Containers::ArrayView and @ref Containers::StaticArrayView to pass array
 references around. If you need to hold or transfer ownership, use
-`std::unique_ptr` or @ref Containers::Array. If you need given class to be
-copyable/movable, use `std::reference_wrapper` instead of a reference.
+@ref std::unique_ptr or @ref Containers::Array. If you need given class to be
+copyable/movable, use @ref std::reference_wrapper instead of a reference.
 
-Avoid to use `std::shared_ptr`, if possible. Unlike `std::unique_ptr` and
+Avoid to use @ref std::shared_ptr, if possible. Unlike @ref std::unique_ptr and
 @ref Containers::Array, which are just zero-cost wrappers checked at
 compile-time, shared pointers have serious runtime penalty due to reference
 counting.
 
 @subsection corrade-coding-style-cpp-forbidden Forbidden and deprecated C/C++ features
 
-Don't use RTTI (`dynamic_cast` and `std::typeinfo`) and exceptions, if you don't
-desperately need to. They violate C++ principle of "don't pay for what you don't
-use". Ideally the code should be compilable with `-fno-rtti -fno-exceptions`.
+Don't use RTTI (@cpp dynamic_cast @ce and @ref std::type_info) and exceptions,
+if you don't desperately need to. They violate C++ principle of "don't pay for
+what you don't use". Ideally the code should be compilable with
+`-fno-rtti -fno-exceptions`.
 
 @subsubsection corrade-coding-style-cpp-heavy-headers Heavy STL headers
 
 Don't add heavy STL includes in header files. Each of these
-`#``include`s brings >20k lines of source code which needs to be
+@cpp #include @ce s brings >20k lines of source code which needs to be
 preprocessed and compiled even if majority of it is later tossed out. Prefer to
 include these only in source files. The following headers are the heaviest,
-numbers taken from `g++-4.8 -std=c++11 -E | wc -l`:
+numbers taken from @cb{.sh} g++-4.8 -std=c++11 -E | wc -l @ce:
 
--   `<algorithm>` -- 46k lines after preprocessing. Most of it are new
+-   `<algorithm>` --- 46k lines after preprocessing. Most of it are new
     C++11 features, with C++03 it had only ~10k.
--   `<istream>` and friends -- 22-24k lines after preprocessing. Use `<iosfwd>`
+-   `<istream>` and friends --- 22-24k lines after preprocessing. Use `<iosfwd>`
     instead and include stream headers only in source files. If you want to
     just print something to output, use Utility::Debug class and friends.
--   `<iterator>` -- includes stream headers, thus the same as above.
--   `<memory>` -- 25k lines after preprocessing.
--   `<random>` -- 36k lines after preprocessing.
+-   `<iterator>` --- includes stream headers, thus the same as above.
+-   `<memory>` --- 25k lines after preprocessing.
+-   `<random>` --- 36k lines after preprocessing.
 
 Some other headers (e.g. the container ones) are heavy too, but in most cases
 they just need to be included.
 
 @subsubsection corrade-coding-style-cpp-using using namespace keyword
 
-`using namespace std` is not allowed. It brings many symbols into default
-namespace and can lead to unintended behavior. Consider `abs()` function. If
-using it without `std::` prefix, you can by mistake use the non-overloaded
-`double abs(double)` from plain C `<math.h>` header, which can cause serious
-performance issues when using it for integers only. By explicitly calling
-`std::abs()` you ensure that proper overload is always selected.
+@cpp using namespace std @ce is not allowed. It brings many symbols into
+default namespace and can lead to unintended behavior. Consider `abs()`
+function. If using it without `std::` prefix, you can by mistake use the
+non-overloaded `double abs(double)` from plain C `<math.h>` header, which can
+cause serious performance issues when using it for integers only. By explicitly
+calling `std::abs()` you ensure that proper overload is always selected.
 
-`using namespace` keyword should be used only for root namespace, i.e.
-`using namespace Corrade` and not `using namespace Corrade::Utility`. If you
-are using some class from subnamespace in many places, use only that particular
-name, e.g. `using Corrade::Utility::ConfigurationGroup` and try to restrict
-it to as small block of code as possible (e.g. place the `using` only in
-function body).
+@cpp using namespace @ce keyword should be used only for root namespace, i.e.
+@cpp using namespace Corrade @ce and not @cpp using namespace Corrade::Utility @ce.
+If you are using some class from subnamespace in many places, use only that
+particular name, e.g. @cpp using Corrade::Utility::ConfigurationGroup @ce and
+try to restrict it to as small block of code as possible (e.g. place the
+@cpp using @ce only in function body).
 
-It's probably common practice, but repeating won't hurt: **headers shouldn't
-have `using` declarations at all** (unless there is good excuse for bringing
-some useful feature from different namespace into another namespace -- but not
-in the default namespace!).
+It's probably common practice, but repeating won't hurt: headers shouldn't
+have @cpp using @ce declarations at all (unless there is good excuse for
+bringing some useful feature from different namespace into another namespace ---
+but not in the default namespace!).
 
 @subsubsection corrade-coding-style-cpp-backward C-style casts
 
-Don't use C-style casts, use C++-style `static_cast` and `reinterpret_cast`
-instead. Corrade enables compiler warning about their usage in `CORRADE_CXX_FLAGS`
-CMake variable. You can also use "constructor cast" instead of `static_cast`
-when doing non-harmful conversions, such as integer to float or strongly-typed
-enum to its underlying type.
-@code
+Don't use C-style casts, use C++-style @cpp static_cast @ce and
+@cpp reinterpret_cast @ce instead. Corrade enables compiler warning about their
+usage in `CORRADE_CXX_FLAGS` CMake variable. You can also use "constructor
+cast" instead of @cpp static_cast @ce when doing non-harmful conversions, such
+as integer to float or strongly-typed enum to its underlying type.
+
+@code{.cpp}
 int a = 22;
 int b = 7;
 float pi = ((float) a)/b;           // bad!
@@ -555,18 +580,18 @@ float pi = float(a)/b;              // even better here
 
 @subsubsection corrade-coding-style-cpp-enums Unscoped and untyped enums
 
-Prefer to use C++11 `enum class`. Use Containers::EnumSet instead of integral
-bit masks. Always explicitly specify underlying type, it might save some memory
-and also allows for forward declaration of the enum, which is good if the enum
-is part of otherwise large header.
+Prefer to use C++11 @cpp enum class @ce. Use @ref Containers::EnumSet instead
+of integral bit masks. Always explicitly specify underlying type, it might save
+some memory and also allows for forward declaration of the enum, which is good
+if the enum is part of otherwise large header.
 
 @see @ref corrade-coding-style-cpp-enum-inheritance
 
 @subsubsection corrade-coding-style-cpp-anonymous-namespace static keyword
 
-Prefer to use anonymous namespaces instead of `static` keyword. Anonymous
-namespace ensures that the symbols won't be exported and unlike `static` keyword
-it can be used also for type declarations.
+Prefer to use anonymous namespaces instead of @cpp static @ce keyword.
+Anonymous namespace ensures that the symbols won't be exported and unlike
+@cpp static @ce keyword it can be used also for type declarations.
 
 @section corrade-coding-style-comments Comments
 
@@ -580,7 +605,7 @@ Multi-line comments should be done in a way which preserves block align (so
 when first line starts with slash, asterisk and space, the second line should
 be indented with three spaces to align the text).
 
-@include codingstyle/comments.cpp
+@include codingstyle/comments.h.nostrip
 
 @section corrade-coding-style-documentation Doxygen documentation
 
@@ -590,7 +615,7 @@ block starting at beginning of the line (with no indentation) and spanning
 more lines shouldn't have leading asterisks and use whole 80 column width to
 save horizontal space.
 
-@verbinclude codingstyle/doxygen.cpp
+@include codingstyle/doxygen.h.nostrip
 
 Doxygen commands are prefixed with `@`, not `\`.
 
@@ -605,7 +630,8 @@ Doxygen documentation is mainly in header files. In source file should be only
 class/function documentation should be prefixed with corresponding name (with no
 case change), followed by dash, the rest of the name is in lowercase with dashes
 between words:
-@verbinclude codingstyle/doxygen-sections.cpp
+
+@include codingstyle/doxygen-sections.h.nostrip
 
 Additional documentation files which don't belong to any particular class
 (e.g. namespaces, overview...) are in `doc/` directory and use `*.dox`
@@ -616,7 +642,8 @@ filename corresponds to name of documentation page it contains.
 Each file has a file documentation block (@c \@file) which right after license
 block. It explains only in @c \@brief what content given header contains so the
 user is able to go to given type documentation right from the file list:
-@verbinclude codingstyle/doxygen-file.cpp
+
+@include codingstyle/doxygen-file.h.nostrip
 
 Namespace documentation is only in the `namespaces.dox` file inside `doc/`
 directory. Exception is in case given namespace appears only in one file, is
@@ -640,11 +667,12 @@ available horizontal space to the maximum, so indent only as strictly necessary
 and don't be afraid to make exceptions for overly long identifiers that would
 otherwise cause excessive blank space. Example:
 
-@verbinclude codingstyle/doxygen-function.cpp
+@include codingstyle/doxygen-function.h.nostrip
 
 Trivial function overloads (e.g. `const` overloads) are marked only with
 @c \@overload keyword and are always *after* the original documented function:
-@verbinclude codingstyle/doxygen-overload.cpp
+
+@include codingstyle/doxygen-overload.h.nostrip
 
 Enum value and trivial C structure documentation is without the @c \@brief
 section because it only adds unnecessary padding and the brief section does not
@@ -653,14 +681,30 @@ have any other visual difference.
 If the documentation is short enough, it can be placed after the documented
 element, but only if it doesn't exceed the 80 character limit too much (e.g.
 enum value documentation):
-@verbinclude codingstyle/doxygen-short.cpp
+
+@include codingstyle/doxygen-short.h.nostrip
 
 For hiding implementation details from documentation or for working around
 Doxygen parsing issues (and false positive warnings), preprocessor define
 `DOXYGEN_GENERATING_OUTPUT` can be used. It is defined only when Doxygen
 generates the documentation. If that works around some Doxygen parsing bug,
 don't forget to mark it with @c \@todoc (see below). Example:
-@verbinclude codingstyle/doxygen-macro.cpp
+
+@include codingstyle/doxygen-macro.h.nostrip
+
+Code blocks using the @c \@code command should be separated from surrounding
+text with a blank line and every code block should specify the language so
+highlighting is done properly:
+
+@include codingstyle/doxygen-code-block.h.nostrip
+
+See @ref corrade-coding-style-documentation-code "below" for a way to highlight
+inline code snippets. The inline code is detected using a heuristics and due to
+Doxygen XML output limitations, sometimes a single-line code block is detected
+as inline code and prepended to the immediately following paragraph. In order
+to prevent that, add a stray @cb{.html} <p> @ce tag right after the block:
+
+@include codingstyle/doxygen-code-block-workaround.h.nostrip
 
 @subsection corrade-coding-style-documentation-ordering Section ordering
 
@@ -674,6 +718,17 @@ and in most cases only for internal use.
 
 @subsection corrade-coding-style-documentation-commands Special documentation commands
 
+@subsubsection corrade-coding-style-documentation-code Code
+
+It's possible to annotate inline code with language as well. There's no
+difference in the output for the stock Doxygen HTML output, but third-party
+tools can make use of it. The @c \@cb command denotes beginning of inline code
+snippet and takes the language as an argument. Inline code end is denoted with
+@c \@ce. To make things easier, there are @c \@cpp and @c \@cmake aliases that
+expand to <tt>\@cb{.cpp}</tt> and <tt>\@cb{.cmake}</tt>, respectively.
+
+@include codingstyle/doxygen-code-inline.h.nostrip
+
 @subsubsection corrade-coding-style-documentation-commands-todoc Documentation-related TODOs
 
 TODOs about documentation (or about Doxygen workarounds) should be written
@@ -684,14 +739,16 @@ with @c \@todoc instead of @c \@todo. They will appear on @ref todoc
 
 Operators for printing types on Corrade's debug output should be marked with
 @c \@debugoperator, e.g.:
-@verbinclude codingstyle/doxygen-debugoperator.cpp
+
+@include codingstyle/doxygen-debugoperator.h.nostrip
 
 They will appear as related functions within documentation of class specified
 as the parameter and also crossreferenced from page @ref debugoperators.
 
 For non-class enums there is @c \@debugoperatorenum command and for in-class
 enums the @c \@debugoperatorclassenum command:
-@verbinclude codingstyle/doxygen-debugoperatorenum.cpp
+
+@include codingstyle/doxygen-debugoperatorenum.h.nostrip
 
 Debug operator for non-class enum will appear in documentation of surrounding
 namespace, debug operator for class enum will appear as related function in
@@ -702,7 +759,8 @@ documentation of given class.
 Helper classes for parsing and writing configuration values should be marked
 with @c \@configurationvalue, and referenced from the class using
 @c \@configurationvalueref e.g.:
-@verbinclude codingstyle/doxygen-configurationvalue.cpp
+
+@include codingstyle/doxygen-configurationvalue.h.nostrip
 
 They will appear linked with documentation of class specified as the
 parameter and also crossreferenced from page `configurationvalues`.
@@ -714,13 +772,13 @@ Features that are not supported on all platform should be marked with
 
 @subsubsection corrade-coding-style-documentation-commands-experimental Backwards compatibility and experimental features
 
-Common practice is to keep backwards compatibility when refactoring APIs -- if
+Common practice is to keep backwards compatibility when refactoring APIs --- if
 given feature is present for a considerable amount of time or is already part
 of some release, any change that breaks source compatibility should be
 complemented with backwards-compatible function or type alias that is marked as
 deprecated using @c \@deprecated and one of @ref CORRADE_DEPRECATED() macros.
 If given feature is still in experimental stage, maintaining backwards
-compatibility might hurt innovation -- in that case the feature should be
+compatibility might hurt innovation --- in that case the feature should be
 marked with @c \@experimental.
 
 @section corrade-coding-style-git Git commit messages, branch and tag format

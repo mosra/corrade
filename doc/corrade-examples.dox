@@ -24,7 +24,7 @@
 */
 
 namespace Corrade {
-/** @page corrade-example-index Examples and tutorials
+/** @page corrade-example-index Examples
 
  - @subpage interconnect
  - @subpage plugin-management

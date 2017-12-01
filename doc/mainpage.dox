@@ -26,16 +26,18 @@
 namespace Corrade {
 /** @mainpage
 
-*corrade* (v.) - "To scrape together, to gather together from various sources"
+> *corrade* (v.) --- "To scrape together, to gather together from various sources"
 
-Corrade is multiplatform utility library written in C++11/C++14.
+Corrade is a multiplatform utility library written in C++11/C++14. It's used as
+a base for the [Magnum graphics engine](http://magnum.graphics/) among other
+things.
 
 @section corrade-mainpage-platforms Supported platforms
 
 -   **Linux** and embedded Linux
 -   **Windows**
 -   **macOS**, **iOS**
--   **Android** 1.5 (API Level 3) and higher
+-   **Android**
 -   **Windows RT** (Store/Phone)
 -   **Web** (asm.js or WebAssembly), through [Emscripten](http://kripken.github.io/emscripten-site/)
 
@@ -45,7 +47,7 @@ Corrade is multiplatform utility library written in C++11/C++14.
 -   Plugin management library with static and dynamic plugins and dependency
     handling.
 -   Easy-to-use unit test framework and extensible debugging output.
--   Various utilities to ease multiplatform development.
+-   Various utilities to simplify multiplatform development.
 
 @section corrade-mainpage-building Building Corrade
 
@@ -60,25 +62,25 @@ The best way to get started is to read some @ref corrade-example-index
 
 If you want to hack on this library, if you spotted a bug, need an feature or
 have an awesome idea, you can get a copy of the sources from GitHub and start
-right now! There is the already mentioned guide about
-@ref building-corrade "how to download and build Corrade" and also guide about
-@ref corrade-coding-style "coding style and best practices" which you should
-follow to make the library as consistent and maintainable as possible.
+right away! There is the already mentioned guide about
+@ref building-corrade "how to download and build Corrade" and also a guide
+about @ref corrade-coding-style "coding style and best practices" which you
+should follow to keep the library as consistent and maintainable as possible.
 
-Feel free to get more information or contact the author at:
+Feel free to get more information or contact the team at:
 
--   Website -- http://magnum.graphics/corrade/
--   GitHub -- https://github.com/mosra/corrade
--   Gitter -- https://gitter.im/mosra/magnum
--   IRC -- join `#magnum-engine` channel on freenode
--   Google Groups -- https://groups.google.com/forum/#!forum/magnum-engine
--   Twitter -- https://twitter.com/czmosra
--   E-mail -- mosra@centrum.cz
--   Jabber -- mosra@jabbim.cz
+-   Website --- http://magnum.graphics/corrade/
+-   GitHub --- https://github.com/mosra/corrade
+-   Gitter --- https://gitter.im/mosra/magnum
+-   IRC --- join `#magnum-engine` channel on freenode
+-   Google Groups --- https://groups.google.com/forum/#!forum/magnum-engine
+-   Twitter --- https://twitter.com/czmosra
+-   E-mail --- mosra@centrum.cz
+-   Jabber --- mosra@jabbim.cz
 
 @section corrade-mainpage-license License
 
-Corrade is licensed under MIT/Expat license:
+Corrade is licensed under the MIT/Expat license:
 
 >
 >   Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,

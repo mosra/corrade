@@ -44,18 +44,18 @@ class Bomb: public Interconnect::Receiver {
 
 void Bomb::launch(const std::string& password, int timeout) {
     if(password != "terrorist69") {
-        Utility::Error() << "Wrong password. No apocalypse will be performed.";
+        Utility::Error{} << "Wrong password. No apocalypse will be performed.";
         return;
     }
 
-    Utility::Warning() << "Launching bomb in" << timeout << "seconds.";
+    Utility::Warning{} << "Launching bomb in" << timeout << "seconds.";
 
     // ...
 
     delete this; // commit suicide
 }
 
-int main(int, char**) {
+int main() {
     RemoteControl rc;
     Bomb *bomb1 = new Bomb,
          *bomb2 = new Bomb,
@@ -65,15 +65,14 @@ int main(int, char**) {
     Interconnect::connect(rc, &RemoteControl::triggered, *bomb2, &Bomb::launch);
     Interconnect::connect(rc, &RemoteControl::triggered, *bomb3, &Bomb::launch);
 
-    Utility::Debug() << "Successfully installed" << rc.signalConnectionCount() << "bombs.";
+    Utility::Debug{} << "Successfully installed" << rc.signalConnectionCount()
+                     << "bombs.";
 
     rc.triggered("terrorist69", 60); // Launch all connected bombs after 60 seconds
 
-    if(rc.signalConnectionCount()) {
-        Utility::Error() << "Mission failed!" << rc.signalConnectionCount() << "bombs didn't explode!";
-        return 1;
-    }
+    if(rc.signalConnectionCount())
+        Utility::Fatal{1} << "Mission failed!" << rc.signalConnectionCount()
+                          << "bombs didn't explode!";
 
-    Utility::Debug() << "Mission succeeded!";
-    return 0;
+    Utility::Debug{} << "Mission succeeded!";
 }

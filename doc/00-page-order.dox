@@ -4,7 +4,7 @@
 
 @page building-corrade Downloading and building
 @page corrade-cmake Usage with CMake
-@page corrade-example-index Examples and tutorials
+@page corrade-example-index Examples
 @page partialsupport List of partially supported features
 @page debugoperators Debug output operators for custom types
 @page deprecated Deprecated list

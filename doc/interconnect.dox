@@ -26,6 +26,8 @@
 namespace Corrade {
 /** @page interconnect Signals and slots
 
+@tableofcontents
+
 Signal and slots are a technique introduced in Qt, which allows to intuitively
 pass events to arbitrary objects and methods without unnecessary boilerplate
 code (such as various `EventListener` interfaces in Java).
@@ -38,7 +40,7 @@ slots connected to it are called and signal arguments are passed to them.
 
 The signal/slot connection is automatically removed when either emitter or
 (when the signal is connected to member function) receiver object is
-destroyed. The connection can be removed also explicitly -- you can remove
+destroyed. The connection can be removed also explicitly --- you can remove
 one particular connection, all connections to given slot or all connections
 to given object.
 
@@ -49,6 +51,7 @@ functions with @ref Interconnect::Emitter::Signal "Signal" as return type.
 There are no limitations on argument types or argument count. The signal
 function calls @ref Interconnect::Emitter::emit() "emit()" internally, passes
 its own signature and all arguments to it and propagates the returned value.
+
 @dontinclude interconnect/main.cpp
 @skip class RemoteControl
 @until };
@@ -60,8 +63,13 @@ void can be connected to any signal if they have the same argument count and
 types. If connecting to member function, you have to derive your class from
 @ref Interconnect::Receiver base class to ensure that the connection is
 automatically removed when receiver is destroyed.
+
 @skip class Bomb
 @until };
+@until }
+@until }
+@until }
+@until }
 
 @section interconnect-connecting Connecting signals to slots
 
@@ -70,8 +78,9 @@ signals from emitters to slots. There are no connectivity limitations, you can
 connect any number of signals to one slot and any number of slots to one
 signal. See @ref Interconnect::connect() for more information about how to
 manage the connections.
-@skip RemoteControl rc
-@until Interconnect::connect(rc, &RemoteControl::triggered, *bomb3
+
+@skip int main
+@until bombs
 
 See @ref Interconnect::connect(), @ref Interconnect::Emitter::disconnectSignal(),
     @ref Interconnect::Emitter::disconnectAllSignals() and
@@ -81,18 +90,24 @@ See @ref Interconnect::connect(), @ref Interconnect::Emitter::disconnectSignal()
 @section interconnect-emitting Emitting signals
 
 The implemented signal can be emitted simply by calling the function.
-@skipline rc.trigger
+
+@skip rc.trigger
+@until }
+@until }
+@until }
 
 @section interconnect-compiling Compiling and running the example
 
 After successful compilation the application will print out this text:
 
-    $ ./interconnect
-    Successfully installed 3 bombs.
-    Launching bomb in 60 seconds.
-    Launching bomb in 60 seconds.
-    Launching bomb in 60 seconds.
-    Mission succeeded!
+@code{.shell-session}
+$ ./interconnect
+Successfully installed 3 bombs.
+Launching bomb in 60 seconds.
+Launching bomb in 60 seconds.
+Launching bomb in 60 seconds.
+Mission succeeded!
+@endcode
 
 See the whole example:
  - @ref interconnect/CMakeLists.txt

@@ -24,7 +24,7 @@
 */
 
 namespace Corrade {
-/** @page resource-management Resource management tutorial
+/** @page resource-management Resource management
 
 The @ref Utility::Resource class provides management of resources compiled
 directly into the executable, such as icons, data files etc. This tutorial will
@@ -37,6 +37,7 @@ executable and later retrieved in the application.
 
 Imagine that you have e.g. a long license text with all these yelling words
 in all caps:
+
 @include resource/licenses/en.txt
 
 And for obvious reasons you don't want to put directly into the code, but
@@ -48,11 +49,13 @@ which takes resource configuration file and produces C++ source file. The
 source file can be then passed among other source files to executable or
 library. First argument is name of resulting C++ source file, second argument
 is configuration file name.
+
 @dontinclude resource/CMakeLists.txt
 @skipline corrade_add_resource
 
 The configuration file contains group name (explained below) and list of all
 the files. The files can also have aliases for e.g. simplifying filenames.
+
 @include resource/resources.conf
 
 @section resource-management-management Resource management
@@ -61,27 +64,32 @@ Now it's time to make an application which will have these resources compiled
 in. The resources should be initialized automatically, if not (for example if
 they are compiled into static library), call @ref CORRADE_RESOURCE_INITIALIZE()
 with resource name as argument before they are used, for example at the
-beginning of `main()` function.
+beginning of @cpp main() @ce function.
 
 This example application will just print the license text and exit:
+
 @dontinclude resource/main.cpp
 @skip int main
 @until }
 
-Compile the application with simple CMake `add_executable` command and don't
-forget to compile in the resource file created above:
+Compile the application with simple CMake @cmake add_executable() @ce command
+and don't forget to compile in the resource file created above:
+
 @dontinclude resource/CMakeLists.txt
 @skipline add_executable
 
 After successful compilation the application will print out the license text:
 
-    $ ./ResourceTest
-    This application is copyright © John Doe et al. and the author IS NOT
-    RESPONSIBLE AT ALL FOR ANY PHYSICAL OR OTHER DAMAGES AND INJURIES WHICH
-    MAY LEAD TO DEATH OR EVEN APOCALYPSE AND CAN BE CAUSED BY THIS APPLICATION
-    ...
+@code{.shell-session}
+$ ./ResourceTest
+This application is copyright © John Doe et al. and the author IS NOT
+RESPONSIBLE AT ALL FOR ANY PHYSICAL OR OTHER DAMAGES AND INJURIES WHICH
+MAY LEAD TO DEATH OR EVEN APOCALYPSE AND CAN BE CAUSED BY THIS APPLICATION
+...
+@endcode
 
 See the whole example:
+
  - @ref resource/licenses/en.txt
  - @ref resource/resources.conf
  - @ref resource/main.cpp

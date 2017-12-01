@@ -31,7 +31,7 @@ namespace Corrade {
 
 @section corrade-changelog-latest Changes since 2015-05 snapshot
 
-## Dependency changes
+@subsection corrade-changelog-latest-dependencies Dependency changes
 
 -   Completely removed NaCl support (see https://blog.chromium.org/2017/05/goodbye-pnacl-hello-webassembly.html)
 -   Dropped support for the old MinGW32 (only MinGW-w64 is supported now)
@@ -40,7 +40,7 @@ namespace Corrade {
 -   Dropped the `compatibility` branch and all support for MSVC 2013 and GCC <
     4.7
 
-## New features
+@subsection corrade-changelog-latest-new New features
 
 -   MSVC 2015 and 2017 support in `master` branch. It needs some workarounds,
     thus the compatibility is controlled using `MSVC2015_COMPATIBILITY` /
@@ -53,7 +53,7 @@ namespace Corrade {
 -   iOS support, integration of @ref TestSuite with Xcode XCTest
 -   WebAssembly support when building for Emscripten
 
-### Containers library
+@subsubsection corrade-changelog-latest-new-containers Containers library
 
 -   New @ref Containers::StaticArray class, similar to @ref Containers::Array
     but with stack-allocated storage of compile-time size
@@ -71,16 +71,16 @@ namespace Corrade {
 -   New @ref Containers::arrayView() and @ref Containers::staticArrayView()
     helper functions to make @ref Containers::ArrayView / @ref Containers::StaticArrayView
     instances without needing to fully specify the type (similarly to what
-    `std::make_tuple()` is to `std::tuple`)
--   New @ref Containers::arrayCast() function to `reinterpret_cast` arrays with
-    correct size recalculation
+    @ref std::make_tuple() is to @ref std::tuple)
+-   New @ref Containers::arrayCast() function to @cpp reinterpret_cast @ce
+    arrays with correct size recalculation
 -   New @ref Containers::arraySize() helper function for easier size queries
     on array-like types
 -   Added XOR operators to @ref Containers::EnumSet
 -   New @ref Containers::enumSetDebugOutput() utility to help with implementing
     debug operators for @ref Containers::EnumSet types
 
-### PluginManager library
+@subsubsection corrade-changelog-latest-new-pluginmanager PluginManager library
 
 -   Name passed to plugin constructors is now the aliased name instead of the
     actual name, allowing the plugins to have different functionality based on
@@ -89,7 +89,7 @@ namespace Corrade {
     `PngImageConverter`). New @ref PluginManager::AbstractPlugin::plugin()
     function returns the aliased name.
 
-### TestSuite library
+@subsubsection corrade-changelog-latest-new-testsuite TestSuite library
 
 -   Major update of @ref TestSuite library including colored output for more
     readable output, command-line arguments for fine-grained control,
@@ -106,7 +106,7 @@ namespace Corrade {
 -   Ability to bundle files with @ref corrade-cmake-add-test "corrade_add_test()"
     CMake macro for Android and Emscripten tests
 
-### Utility library
+@subsubsection corrade-changelog-latest-new-utility Utility library
 
 -   Added @ref Utility::Arguments::setFromEnvironment(), making it possible to
     pass options via environment variables. List of all environment options is
@@ -135,22 +135,22 @@ namespace Corrade {
 -   Added @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_ALIAS(),
     @ref CORRADE_ALIGNAS() and @ref CORRADE_NORETURN macros
 
-## Changes and improvements
+@subsection corrade-changelog-latest-changes Changes and improvements
 
-### Containers library
+@subsubsection corrade-changelog-latest-changes-containers Containers library
 
 -   @ref Containers::EnumSet now can take a @ref Containers::NoInit tag to
     create an uninitialized value
 -   Exposed @ref Containers::EnumSet::FullValue constant
 
-### PluginManager library
+@subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
 
 -   @ref PluginManager::Manager now properly loads plugins from UTF-8 encoded
     paths also on Windows
 -   @ref PluginManager::Manager can now be constructed without specifying
     plugin directory
 
-### TestSuite library
+@subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
 
 -   @ref TestSuite::Compare::Container now prints contents of whole container
     instead of just the first difference
@@ -160,7 +160,7 @@ namespace Corrade {
 -   @ref CORRADE_EXPECT_FAIL_IF() now works also on types with explicit bool
     conversion
 
-### Utility library
+@subsubsection corrade-changelog-latest-changes-utility Utility library
 
 -   @ref Utility::Arguments::parse() can now be called with zero/null
     arguments
@@ -184,9 +184,9 @@ namespace Corrade {
     CMake macro now properly handle UTF-8 filenames on all platforms
 -   Removed global constructors from @ref Utility::String internals
 -   Added @ref Utility::Unicode::nextChar() overload that takes a char array
-    view instead of a `std::string`
+    view instead of a @ref std::string
 
-## Build system
+@subsection corrade-changelog-latest-buildsystem Build system
 
 -   Continuous testing for Linux, OSX, Windows MSVC, Windows MinGW, Windows RT,
     iOS, Android and Emscripten on [Travis CI](https://travis-ci.org/mosra/corrade)
@@ -194,9 +194,9 @@ namespace Corrade {
     coverage on [coveralls.io](https://coveralls.io/github/mosra/corrade);
     replacing the unmaintained and outdated Jenkins configuration
 -   Support for CMake subprojects. You can now clone Corrade into a
-    subdirectory in your project and add it using `add_subdirectory()`. The
-    `find_package()` command will then use the CMake subproject instead of
-    looking for it in system-wide locations.
+    subdirectory in your project and add it using @cmake add_subdirectory() @ce.
+    The @cmake find_package() @ce command will then use the CMake subproject
+    instead of looking for it in system-wide locations.
 -   Reworked CMake buildsystem to use the new imported target workflow, see
     @ref corrade-cmake for more information
 -   CMake targets are now organized in folders for better development
@@ -204,19 +204,19 @@ namespace Corrade {
 -   Enabling `-Wmissing-prototypes` warning on Clang when
     `CORRADE_USE_PEDANTIC_FLAGS` property is enabled
 -   It's now possible to build only parts of the library using `WITH_*` CMake
-    options and `find_package()` needs to request particular parts of the
-    library that are used; see @ref building-corrade and @ref corrade-cmake for
-    more information
+    options and @cmake find_package() @ce needs to request particular parts of
+    the library that are used; see @ref building-corrade and @ref corrade-cmake
+    for more information
 -   @ref corrade-cmake-add-plugin "corrade_add_plugin()" now properly installs
     plugin *.dll to `bin/` and *.lib to `lib/` on Windows
 -   Added @ref building-corrade-packages-brew "Homebrew package"
 -   Added @ref corrade-cmake-find-dlls-for-libs "corrade_find_dlls_for_libs()"
     CMake macro
 -   `MACOSX_RPATH` is now enabled by default on CMake 3.0+
--   Enabling only C++ in CMake `project()` call, if possible, to speed up
-    initial CMake run
+-   Enabling only C++ in CMake @cmake project() @ce call, if possible, to speed
+    up initial CMake run
 
-## Bug fixes
+@subsection corrade-changelog-latest-bugfixes Bug fixes
 
 -   @ref Containers::ArrayView::data() on non-const data now properly returns
     non-const pointer
@@ -230,8 +230,8 @@ namespace Corrade {
     for named arguments
 -   Prefixed @ref Utility::Arguments failed on encountering value starting with
     `-`
--   @ref Utility::Directory::mkpath() now properly returns `false` if path
-    creation fails
+-   @ref Utility::Directory::mkpath() now properly returns @cpp false @ce if
+    path creation fails
 -   Fixed @ref Utility::Directory::rm() for directories on Emscripten
 -   Fixed unaligned reads and iterative digesting in @ref Utility::Sha1
 -   Properly re-running CMake and updating dependencies when resource
@@ -239,7 +239,7 @@ namespace Corrade {
     changes
 -   Fixed @ref Containers::LinkedList::move() called on an item itself
 
-## Deprecated APIs
+@subsection corrade-changelog-latest-deprecated Deprecated APIs
 
 -   @ref Containers::ArrayReference is deprecated, use the shorter
     @ref Containers::ArrayView name instead
@@ -260,7 +260,7 @@ namespace Corrade {
     `CORRADE_USE_PEDANTIC_FLAGS` properties. See @ref corrade-cmake for more
     information.
 
-## Potential compatibility breakages, removed APIs
+@subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 
 -   @ref PluginManager::AbstractPlugin now takes plugin name via `const&`
     instead of by-value
@@ -273,9 +273,9 @@ namespace Corrade {
     classes are now a namespace (might break `using` declarations, but
     otherwise it's fully source-compatible)
 -   @ref corrade-cmake-add-test "corrade_add_test()" CMake macro now calls
-    `target_link_libraries()` with explicit `PRIVATE` keyword, meaning the
-    users also have to specify `PUBLIC`/`PRIVATE`/`INTERFACE` when calling
-    `target_link_libraries()` on a test
+    @cmake target_link_libraries() @ce with explicit `PRIVATE` keyword, meaning
+    the users also have to specify `PUBLIC`/`PRIVATE`/`INTERFACE` when calling
+    @cmake target_link_libraries() @ce on a test
 -   All path handling functions in @ref Utility::Directory consistently return
     and expect only forward slashes as directory separators
 

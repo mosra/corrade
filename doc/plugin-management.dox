@@ -24,7 +24,7 @@
 */
 
 namespace Corrade {
-/** @page plugin-management Plugin management tutorial
+/** @page plugin-management Plugin management
 
 The @ref PluginManager::Manager class provides hierarchical plugin management
 functions. Main features:
@@ -60,6 +60,7 @@ should also contain version identifier to make sure the plugin will not be
 loaded with incompatible interface version.
 
 So, there is an example interface class:
+
 @dontinclude pluginmanager/AbstractAnimal.h
 @skip class AbstractAnimal
 @until };
@@ -78,6 +79,7 @@ out-of-the-box. After declaring that plugin we register it with macro
 @ref CORRADE_PLUGIN_REGISTER(). The first argument is plugin name (which will
 be used when instancing the plugin), second argument is name of the plugin
 class and third is name of used plugin interface.
+
 @dontinclude pluginmanager/Canary.cpp
 @skip class Canary
 @until };
@@ -85,6 +87,7 @@ class and third is name of used plugin interface.
 @until )
 
 Configuration file for Canary plugin:
+
 @include pluginmanager/Canary.conf
 
 Then we define one example dynamic plugin. Note that the macro for registering
@@ -93,6 +96,7 @@ you will see below. This way you can decide at compile time which plugins will
 be dynamic, which will be static, or, for example, which will be compiled
 directly into the library/application, so they can be used directly without
 plugin manager.
+
 @dontinclude pluginmanager/Dog.cpp
 @skip class Dog
 @until };
@@ -100,6 +104,7 @@ plugin manager.
 @until )
 
 Configuration file for `Dog` plugin:
+
 @include pluginmanager/Dog.conf
 
  - @ref pluginmanager/AbstractAnimal.h
@@ -112,6 +117,7 @@ Configuration file for `Dog` plugin:
 
 `CorradeMacros.cmake` provides CMake macros for compiling both static and
 dynamic plugins:
+
 @dontinclude pluginmanager/CMakeLists.txt
 @skip corrade_add_plugin
 @until corrade_add_static_plugin
@@ -140,14 +146,16 @@ function), which takes plugin name as argument.
 This example application will load plugin specified as command-line argument
 and then displays brief info about a given animal. For convenient argument
 parsing and usage documentation we used @ref Utility::Arguments.
+
 @dontinclude pluginmanager/main.cpp
 @skip int main
 @until }
 @until }
 @until }
 
-Compile the application with simple CMake `add_executable()` command and don't
-forget to link in all the static plugins compiled above:
+Compile the application with simple CMake @cmake add_executable() @ce
+command and don't forget to link in all the static plugins compiled above:
+
 @dontinclude pluginmanager/CMakeLists.txt
 @skip add_executable
 @until target_link_libraries
@@ -155,31 +163,33 @@ forget to link in all the static plugins compiled above:
 After successfull compilation we can run the application with plugin name
 as argument:
 
-    <strong>$</strong> ./PluginTest --help
-    Usage:
-      ./PluginTest [-h|--help] [--plugin-dir DIR] [--] plugin
+@code{.shell-session}
+$ ./PluginTest --help
+Usage:
+    ./PluginTest [-h|--help] [--plugin-dir DIR] [--] plugin
 
-    Displays info about given animal.
+Displays info about given animal.
 
-    Arguments:
-      plugin            animal plugin name
-      -h, --help        display this help message and exit
-      --plugin-dir DIR  plugin directory to use
-                        (default: .)
+Arguments:
+    plugin            animal plugin name
+    -h, --help        display this help message and exit
+    --plugin-dir DIR  plugin directory to use
+                    (default: .)
 
-    $ ./PluginTest Canary
-    Using plugin 'I'm allergic to canaries!'
+$ ./PluginTest Canary
+Using plugin 'I'm allergic to canaries!'
 
-    Name:      Achoo
-    Leg count: 2
-    Has tail:  yes
+Name:      Achoo
+Leg count: 2
+Has tail:  yes
 
-    $ ./PluginTest Dog
-    Using plugin 'A simple dog plugin'
+$ ./PluginTest Dog
+Using plugin 'A simple dog plugin'
 
-    Name:      Doug
-    Leg count: 4
-    Has tail:  yes
+Name:      Doug
+Leg count: 4
+Has tail:  yes
+@endcode
 
  */
 }
