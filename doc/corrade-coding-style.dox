@@ -692,7 +692,7 @@ don't forget to mark it with @c \@todoc (see below). Example:
 
 @include codingstyle/doxygen-macro.h.nostrip
 
-Code blocks using the @c \@code command should be separated from surrounding
+Code blocks using the `\@``code` command should be separated from surrounding
 text with a blank line and every code block should specify the language so
 highlighting is done properly:
 
