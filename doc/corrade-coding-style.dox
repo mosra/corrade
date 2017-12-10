@@ -605,7 +605,7 @@ Multi-line comments should be done in a way which preserves block align (so
 when first line starts with slash, asterisk and space, the second line should
 be indented with three spaces to align the text).
 
-@include codingstyle/comments.h.nostrip
+@include codingstyle/comments.h
 
 @section corrade-coding-style-documentation Doxygen documentation
 
@@ -615,7 +615,7 @@ block starting at beginning of the line (with no indentation) and spanning
 more lines shouldn't have leading asterisks and use whole 80 column width to
 save horizontal space.
 
-@include codingstyle/doxygen.h.nostrip
+@include codingstyle/doxygen.h
 
 Doxygen commands are prefixed with `@`, not `\`.
 
@@ -631,7 +631,7 @@ class/function documentation should be prefixed with corresponding name (with no
 case change), followed by dash, the rest of the name is in lowercase with dashes
 between words:
 
-@include codingstyle/doxygen-sections.h.nostrip
+@include codingstyle/doxygen-sections.h
 
 Additional documentation files which don't belong to any particular class
 (e.g. namespaces, overview...) are in `doc/` directory and use `*.dox`
@@ -643,7 +643,7 @@ Each file has a file documentation block (@c \@file) which right after license
 block. It explains only in @c \@brief what content given header contains so the
 user is able to go to given type documentation right from the file list:
 
-@include codingstyle/doxygen-file.h.nostrip
+@include codingstyle/doxygen-file.h
 
 Namespace documentation is only in the `namespaces.dox` file inside `doc/`
 directory. Exception is in case given namespace appears only in one file, is
@@ -667,12 +667,12 @@ available horizontal space to the maximum, so indent only as strictly necessary
 and don't be afraid to make exceptions for overly long identifiers that would
 otherwise cause excessive blank space. Example:
 
-@include codingstyle/doxygen-function.h.nostrip
+@include codingstyle/doxygen-function.h
 
 Trivial function overloads (e.g. `const` overloads) are marked only with
 @c \@overload keyword and are always *after* the original documented function:
 
-@include codingstyle/doxygen-overload.h.nostrip
+@include codingstyle/doxygen-overload.h
 
 Enum value and trivial C structure documentation is without the @c \@brief
 section because it only adds unnecessary padding and the brief section does not
@@ -682,7 +682,7 @@ If the documentation is short enough, it can be placed after the documented
 element, but only if it doesn't exceed the 80 character limit too much (e.g.
 enum value documentation):
 
-@include codingstyle/doxygen-short.h.nostrip
+@include codingstyle/doxygen-short.h
 
 For hiding implementation details from documentation or for working around
 Doxygen parsing issues (and false positive warnings), preprocessor define
@@ -690,13 +690,13 @@ Doxygen parsing issues (and false positive warnings), preprocessor define
 generates the documentation. If that works around some Doxygen parsing bug,
 don't forget to mark it with @c \@todoc (see below). Example:
 
-@include codingstyle/doxygen-macro.h.nostrip
+@include codingstyle/doxygen-macro.h
 
 Code blocks using the `\@``code` command should be separated from surrounding
 text with a blank line and every code block should specify the language so
 highlighting is done properly:
 
-@include codingstyle/doxygen-code-block.h.nostrip
+@include codingstyle/doxygen-code-block.h
 
 See @ref corrade-coding-style-documentation-code "below" for a way to highlight
 inline code snippets. The inline code is detected using a heuristics and due to
@@ -704,7 +704,7 @@ Doxygen XML output limitations, sometimes a single-line code block is detected
 as inline code and prepended to the immediately following paragraph. In order
 to prevent that, add a stray @cb{.html} <p> @ce tag right after the block:
 
-@include codingstyle/doxygen-code-block-workaround.h.nostrip
+@include codingstyle/doxygen-code-block-workaround.h
 
 @subsection corrade-coding-style-documentation-ordering Section ordering
 
@@ -727,7 +727,7 @@ snippet and takes the language as an argument. Inline code end is denoted with
 @c \@ce. To make things easier, there are @c \@cpp and @c \@cmake aliases that
 expand to <tt>\@cb{.cpp}</tt> and <tt>\@cb{.cmake}</tt>, respectively.
 
-@include codingstyle/doxygen-code-inline.h.nostrip
+@include codingstyle/doxygen-code-inline.h
 
 @subsubsection corrade-coding-style-documentation-commands-todoc Documentation-related TODOs
 
@@ -740,7 +740,7 @@ with @c \@todoc instead of @c \@todo. They will appear on @ref todoc
 Operators for printing types on Corrade's debug output should be marked with
 @c \@debugoperator, e.g.:
 
-@include codingstyle/doxygen-debugoperator.h.nostrip
+@include codingstyle/doxygen-debugoperator.h
 
 They will appear as related functions within documentation of class specified
 as the parameter and also crossreferenced from page @ref debugoperators.
@@ -748,7 +748,7 @@ as the parameter and also crossreferenced from page @ref debugoperators.
 For non-class enums there is @c \@debugoperatorenum command and for in-class
 enums the @c \@debugoperatorclassenum command:
 
-@include codingstyle/doxygen-debugoperatorenum.h.nostrip
+@include codingstyle/doxygen-debugoperatorenum.h
 
 Debug operator for non-class enum will appear in documentation of surrounding
 namespace, debug operator for class enum will appear as related function in
@@ -760,7 +760,7 @@ Helper classes for parsing and writing configuration values should be marked
 with @c \@configurationvalue, and referenced from the class using
 @c \@configurationvalueref e.g.:
 
-@include codingstyle/doxygen-configurationvalue.h.nostrip
+@include codingstyle/doxygen-configurationvalue.h
 
 They will appear linked with documentation of class specified as the
 parameter and also crossreferenced from page `configurationvalues`.
