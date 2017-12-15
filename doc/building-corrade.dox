@@ -152,9 +152,8 @@ The most straightforward way to build and install the library is again via the
 command-line. The bonus point is that you don't even need to wait for Visual
 Studio to load:
 
-@code{.sh}
-mkdir build
-cd build
+@code{.bat}
+mkdir build && cd build
 cmake -DCMAKE_INSTALL_PREFIX="C:/Sys" ..
 cmake --build .
 cmake --build . --target install
@@ -268,7 +267,8 @@ information.
 @subsection building-corrade-doc Building documentation
 
 The documentation (which you are currently reading) is written in **Doxygen**
-Documentation using the stock HTML theme can be build by running
+and additionally uses **LaTeX** for math formulas. Documentation using the
+stock HTML theme can be build by running
 
 @code{.sh}
 doxygen
@@ -382,8 +382,7 @@ toolchains repository from https://github.com/mosra/toolchains and put the
 contents in `toolchains/` subdirectory.
 
 @code{.sh}
-git submodule init
-git submodule update
+git submodule update --init
 @endcode
 
 @subsection building-corrade-cross-winrt Crosscompiling for Windows RT
@@ -396,8 +395,7 @@ WinRT applications run in a sandbox, it's recommended to build the library as
 static so you don't have to bundle all the DLLs. Example:
 
 @code{.bat}
-mkdir build-winrt
-cd build-winrt
+mkdir build-winrt && cd build-winrt
 cmake .. ^
     -DCORRADE_RC_EXECUTABLE="C:/Sys/bin/corrade-rc.exe" ^
     -DCMAKE_INSTALL_PREFIX="C:/Sys-winrt" ^
@@ -422,7 +420,7 @@ to make it available for depending projects.
 You will need MinGW-w64 version of the compiler and libraries, i.e. this
 ArchLinux package:
 
-- `mingw-w64-gcc`
+-   `mingw-w64-gcc`
 
 Then create build directories for 32b/64b build and run cmake and build command
 in them. You may need to modify the `basic-mingw-w64-32.cmake`/`basic-mingw-w64-64.cmake`
@@ -435,7 +433,9 @@ cmake .. \
     -DCMAKE_TOOLCHAIN_FILE=../toolchains/archlinux/basic-mingw-w64-32.cmake \
     -DCMAKE_INSTALL_PREFIX=/usr/i686-w64-mingw32
 cmake --build .
+@endcode
 
+@code{.sh}
 mkdir build-mingw-w64-64 && cd build-mingw-w64-64
 cmake .. \
     -DCMAKE_TOOLCHAIN_FILE=../toolchains/archlinux/basic-mingw-w64-64.cmake \
