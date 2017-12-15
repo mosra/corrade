@@ -239,10 +239,16 @@ ALIASES                = \
     "partialsupport=@xrefitem partialsupport \"Partially supported\" \"List of partially supported features\"" \
     "todoc=@xrefitem todoc \"Documentation todo\" \"Documentation-related todo list\"" \
     "experimental=@attention This functionality is still experimental and may change in the future without keeping full backwards compatibility." \
-    "cb{1}=`" \
-    "cpp=`" \
-    "cmake=`" \
-    "ce=`"
+    "cb{1}=<tt>" \
+    "cpp=<tt>" \
+    "cmake=<tt>" \
+    "ce=</tt>" \
+    "m_div{1}=" \
+    "m_enddiv=" \
+    "m_span{1}=" \
+    "m_endspan=" \
+    "m_class{1}=" \
+    "m_footernavigation="
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only).
 # A mapping has the form "name=value". For example adding "class=itcl::class"
