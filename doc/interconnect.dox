@@ -27,15 +27,16 @@ namespace Corrade {
 /** @page interconnect Signals and slots
 
 @tableofcontents
+@m_footernavigation
 
 Signal and slots are a technique introduced in Qt, which allows to intuitively
 pass events to arbitrary objects and methods without unnecessary boilerplate
 code (such as various `EventListener` interfaces in Java).
 
 Basically there is an emitter with special functions called signals. Each
-signal function can have arbitrary number of parameters. The signals are
-connected to slots, which can be either functions, member functions or lambda
-functions with the same argument list. When the emitter emits signal, all
+signal function can have an arbitrary number of parameters. The signals are
+connected to slots, which can be either free functions, member functions or
+lambdas with the same argument list. When the emitter emits signal, all
 slots connected to it are called and signal arguments are passed to them.
 
 The signal/slot connection is automatically removed when either emitter or
@@ -46,7 +47,7 @@ to given object.
 
 @section interconnect-signals Implementing signals
 
-Signals are implemented in @ref Interconnect::Emitter subclass as public
+Signals are implemented in some @ref Interconnect::Emitter subclass as public
 functions with @ref Interconnect::Emitter::Signal "Signal" as return type.
 There are no limitations on argument types or argument count. The signal
 function calls @ref Interconnect::Emitter::emit() "emit()" internally, passes
@@ -59,9 +60,9 @@ its own signature and all arguments to it and propagates the returned value.
 @section interconnect-slots Implementing slots
 
 Any free function, lambda function or non-constant member function returning
-void can be connected to any signal if they have the same argument count and
-types. If connecting to member function, you have to derive your class from
-@ref Interconnect::Receiver base class to ensure that the connection is
+@cpp void @ce can be connected to any signal if both have the same argument
+count and types. If connecting to a member function, you have to derive your
+class from @ref Interconnect::Receiver to ensure that the connection is
 automatically removed when receiver is destroyed.
 
 @skip class Bomb
@@ -73,7 +74,7 @@ automatically removed when receiver is destroyed.
 
 @section interconnect-connecting Connecting signals to slots
 
-When you have instances of emitter and receiver objects, you can connect
+Once you have instances of emitter and receiver objects, you can connect
 signals from emitters to slots. There are no connectivity limitations, you can
 connect any number of signals to one slot and any number of slots to one
 signal. See @ref Interconnect::connect() for more information about how to
@@ -98,7 +99,7 @@ The implemented signal can be emitted simply by calling the function.
 
 @section interconnect-compiling Compiling and running the example
 
-After successful compilation the application will print out this text:
+After a successful compilation the application will print out this text:
 
 @code{.shell-session}
 $ ./interconnect
@@ -109,9 +110,12 @@ Launching bomb in 60 seconds.
 Mission succeeded!
 @endcode
 
-See the whole example:
- - @ref interconnect/CMakeLists.txt
- - @ref interconnect/main.cpp
+See the whole example below. The example is also in the
+[corrade GitHub repository](https://github.com/mosra/corrade/tree/master/src/examples/interconnect)
+in the `src/examples/interconnect` directory.
+
+-   @ref interconnect/main.cpp
+-   @ref interconnect/CMakeLists.txt
 
 */
 }

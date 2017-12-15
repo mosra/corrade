@@ -26,12 +26,12 @@
 namespace Corrade {
 /** @page resource-management Resource management
 
+@m_footernavigation
+
 The @ref Utility::Resource class provides management of resources compiled
 directly into the executable, such as icons, data files etc. This tutorial will
 give you a brief introduction into how resources are compiled into the
 executable and later retrieved in the application.
-
-@tableofcontents
 
 @section resource-management-compilation Resource compilation
 
@@ -40,18 +40,19 @@ in all caps:
 
 @include resource/licenses/en.txt
 
-And for obvious reasons you don't want to put directly into the code, but
-in a separate file instead. But in the end you want it compiled directly into
-the executable, so your product is one compact file.
+And for obvious reasons you don't want to put directly into the code, have it
+in a separate file, but in the end you want it compiled directly into the
+executable, so your product is one compact file.
 
-Corrade's CMake support provides macro @ref corrade-cmake-add-resource "corrade_add_resource()",
-which takes resource configuration file and produces C++ source file. The
-source file can be then passed among other source files to executable or
-library. First argument is name of resulting C++ source file, second argument
-is configuration file name.
+Corrade's CMake support provides the @ref corrade-cmake-add-resource "corrade_add_resource()",
+macro which takes resource configuration file and produces C++ source file. The
+source file can be then passed among other source files to an executable or
+a library. First argument is name of resulting C++ source file, second argument
+is a configuration file name.
 
 @dontinclude resource/CMakeLists.txt
-@skipline corrade_add_resource
+@skip find_package
+@until corrade_add_resource
 
 The configuration file contains group name (explained below) and list of all
 the files. The files can also have aliases for e.g. simplifying filenames.
@@ -69,14 +70,17 @@ beginning of @cpp main() @ce function.
 This example application will just print the license text and exit:
 
 @dontinclude resource/main.cpp
-@skip int main
+@skip #include
+@until }
+@until }
 @until }
 
 Compile the application with simple CMake @cmake add_executable() @ce command
 and don't forget to compile in the resource file created above:
 
 @dontinclude resource/CMakeLists.txt
-@skipline add_executable
+@skip add_executable
+@until target_link_libraries
 
 After successful compilation the application will print out the license text:
 
@@ -88,7 +92,9 @@ MAY LEAD TO DEATH OR EVEN APOCALYPSE AND CAN BE CAUSED BY THIS APPLICATION
 ...
 @endcode
 
-See the whole example:
+See the whole example below. The example is also in the
+[corrade GitHub repository](https://github.com/mosra/corrade/tree/master/src/examples/resource)
+in the `src/examples/resource` directory.
 
  - @ref resource/licenses/en.txt
  - @ref resource/resources.conf

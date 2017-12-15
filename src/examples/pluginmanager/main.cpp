@@ -33,7 +33,7 @@ using namespace Corrade;
 
 int main(int argc, char** argv) {
     /* Import static plugin using the same name as in Canary.cpp */
-    CORRADE_PLUGIN_IMPORT(Canary);
+    CORRADE_PLUGIN_IMPORT(Canary)
 
     Utility::Arguments args;
     args.addArgument("plugin").setHelp("plugin", "animal plugin name")
@@ -42,23 +42,23 @@ int main(int argc, char** argv) {
         .parse(argc, argv);
 
     /* Initialize plugin manager with given directory */
-    PluginManager::Manager<Examples::AbstractAnimal> manager(args.value("plugin-dir"));
+    PluginManager::Manager<Examples::AbstractAnimal> manager{args.value("plugin-dir")};
 
     /* Try to load a plugin */
     if(!(manager.load(args.value("plugin")) & PluginManager::LoadState::Loaded)) {
-        Utility::Error() << "The requested plugin" << args.value("plugin") << "cannot be loaded.";
+        Utility::Error{} << "The requested plugin" << args.value("plugin") << "cannot be loaded.";
         return 2;
     }
 
     /* Instance of an animal */
     std::unique_ptr<Examples::AbstractAnimal> animal = manager.instance(args.value("plugin"));
 
-    Utility::Debug() << "Using plugin" << '\'' + animal->metadata()->data().value("name") + '\''
+    Utility::Debug{} << "Using plugin" << '\'' + animal->metadata()->data().value("name") + '\''
                      << "...\n";
 
-    Utility::Debug() << "Name:     " << animal->name();
-    Utility::Debug() << "Leg count:" << animal->legCount();
-    Utility::Debug() << "Has tail: " << (animal->hasTail() ? "yes" : "no");
+    Utility::Debug{} << "Name:     " << animal->name();
+    Utility::Debug{} << "Leg count:" << animal->legCount();
+    Utility::Debug{} << "Has tail: " << (animal->hasTail() ? "yes" : "no");
 
     return 0;
 }

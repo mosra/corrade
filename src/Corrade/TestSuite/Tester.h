@@ -305,11 +305,13 @@ for example running the tests in a batch via `ctest`.
 
 Usage:
 
-    ./my-test [-h|--help] [-c|--color on|off|auto] [--skip "N1 N2..."]
-        [--skip-tests] [--skip-benchmarks] [--only "N1 N2..."] [--shuffle]
-        [--repeat-every N] [--repeat-all N] [--abort-on-fail] [--no-xfail]
-        [--benchmark TYPE] [--benchmark-discard N] [--benchmark-yellow N]
-        [--benchmark-red N]
+@code{.shell-session}
+./my-test [-h|--help] [-c|--color on|off|auto] [--skip "N1 N2..."]
+    [--skip-tests] [--skip-benchmarks] [--only "N1 N2..."] [--shuffle]
+    [--repeat-every N] [--repeat-all N] [--abort-on-fail] [--no-xfail]
+    [--benchmark TYPE] [--benchmark-discard N] [--benchmark-yellow N]
+    [--benchmark-red N]
+@endcode
 
 Arguments:
 

@@ -26,40 +26,39 @@
 namespace Corrade {
 /** @page plugin-management Plugin management
 
+@tableofcontents
+@m_footernavigation
+
 The @ref PluginManager::Manager class provides hierarchical plugin management
 functions. Main features:
 
-- Plugin manager version and plugin interface version checks to avoid
-  unexpected behavior
-- Both static and dynamic plugin support
-- Plugin dependecies and aliases
-- Usage checks, manager doesn't allow plugin unload if there are any active
-  plugin instances
+-   Plugin manager version and plugin interface version checks to avoid
+    unexpected behavior
+-   Both static and dynamic plugin support
+-   Plugin dependecies and aliases
+-   Usage checks, manager doesn't allow plugin unload if there are any active
+    plugin instances
 
 This tutorial will give you a brief introduction into how plugins are defined,
 compiled and managed.
 
-@tableofcontents
-
 @section plugin-management-interface Plugin interface
 
-Plugin interface is class with well defined abstract public methods, which
-defines the way how to work with a particular plugin.
+Plugin interface is a class with well-defined virtual methods, which defines
+the way how to work with a particular plugin.
 
 Every plugin interface must be derived from @ref PluginManager::AbstractPlugin
-class and must reimplement @ref PluginManager::AbstractPlugin constructor. This
+and must reimplement the @ref PluginManager::AbstractPlugin constructor. This
 is needed for instance use checks, as described above. Plugin classes derived
 from that interface must reimplement the constructor too, of course.
 
-Additionaly, interface must be defined with @ref CORRADE_PLUGIN_INTERFACE()
-macro in header to make sure loaded plugins will use the same interface in the
-same version. One single argument is an string which uniquely names that
-particular interface. A good practice is to use "Java package name"-style
-syntax because this makes the name as unique as possible. The interface name
-should also contain version identifier to make sure the plugin will not be
-loaded with incompatible interface version.
-
-So, there is an example interface class:
+Additionaly, an interface string must be defined with @ref CORRADE_PLUGIN_INTERFACE()
+in the header to make sure loaded plugins depend on the same interface in the
+same version. The macro takes a string which uniquely names that particular
+interface. A good practice is to use "Java package name"-style syntax because
+this makes the name as unique as possible. The interface name should also
+contain version identifier to make sure the plugin will not be loaded with
+incompatible interface version.
 
 @dontinclude pluginmanager/AbstractAnimal.h
 @skip class AbstractAnimal
@@ -75,10 +74,10 @@ specification of plugin configuration file syntax can be found in
 @ref PluginManager::PluginMetadata class documentation.
 
 First we define one static plugin, which will be included in the application
-out-of-the-box. After declaring that plugin we register it with macro
-@ref CORRADE_PLUGIN_REGISTER(). The first argument is plugin name (which will
-be used when instancing the plugin), second argument is name of the plugin
-class and third is name of used plugin interface.
+out-of-the-box. After declaring that plugin we register it with the
+@ref CORRADE_PLUGIN_REGISTER() macro. The first argument is plugin name (which
+will be used when instancing the plugin), second argument is name of the plugin
+class and third is the name of used plugin interface.
 
 @dontinclude pluginmanager/Canary.cpp
 @skip class Canary
@@ -86,16 +85,16 @@ class and third is name of used plugin interface.
 @skip CORRADE_PLUGIN_REGISTER
 @until )
 
-Configuration file for Canary plugin:
+And a corresponding configuration file, `Canary.conf`:
 
 @include pluginmanager/Canary.conf
 
-Then we define one example dynamic plugin. Note that the macro for registering
-dynamic plugin is the same, the only difference will be in `CMakeLists.txt`, as
-you will see below. This way you can decide at compile time which plugins will
-be dynamic, which will be static, or, for example, which will be compiled
-directly into the library/application, so they can be used directly without
-plugin manager.
+Then we define one dynamic plugin. Note that the macro for registering dynamic
+plugin is the same, the only difference will be in `CMakeLists.txt`, as you
+will see below. This way you can decide at compile time which plugins will be
+dynamic, which will be static, or, for example, which will be compiled directly
+into the library/application, so they can be used directly without plugin
+manager.
 
 @dontinclude pluginmanager/Dog.cpp
 @skip class Dog
@@ -103,45 +102,39 @@ plugin manager.
 @skip CORRADE_PLUGIN_REGISTER
 @until )
 
-Configuration file for `Dog` plugin:
+And a corresponding configuration file, `Dog.conf`:
 
 @include pluginmanager/Dog.conf
 
- - @ref pluginmanager/AbstractAnimal.h
- - @ref pluginmanager/Canary.cpp
- - @ref pluginmanager/Canary.conf
- - @ref pluginmanager/Dog.cpp
- - @ref pluginmanager/Dog.conf
-
 @section plugin-management-compilation Plugin compilation
 
-`CorradeMacros.cmake` provides CMake macros for compiling both static and
-dynamic plugins:
+Requiring the Corrade package using @cmake find_package() @ce will define two
+useful macros for plugin compilation:
 
 @dontinclude pluginmanager/CMakeLists.txt
-@skip corrade_add_plugin
+@skip find_package
 @until corrade_add_static_plugin
 
-@ref corrade-cmake-add-plugin "corrade_add_plugin()" macro takes plugin name as
-first argument, second argument is dir where to install the plugin files, third
-argument is name of configuration file and after that comes one or more source
-files. We use the build directory for storing the plugins to avoid the need for
-installation.
+The @ref corrade-cmake-add-plugin "corrade_add_plugin()" macro takes plugin
+name as first argument, second argument is a directory where to install the
+plugin files, third argument is name of configuration file and after that comes
+one or more source files. We use the build directory for storing the plugins to
+avoid the need for installation.
 
-@ref corrade-cmake-add-static-plugin "corrade_add_static_plugin()" is similar
-to the above macro, except that it creates static plugin instead of dynamic
-one.
+The @ref corrade-cmake-add-static-plugin "corrade_add_static_plugin()" is
+similar to the above macro, except that it creates a static plugin instead of
+a dynamic one.
 
 @section plugin-management-management Plugin management
 
-Now it's time to initialize @ref PluginManager::Manager class and make use of
-the plugins. @ref PluginManager::Manager is templated class and that means it
+Now it's time to initialize @ref PluginManager::Manager and make use of the
+plugins. @ref PluginManager::Manager is a templated class and that means it
 will load and make available only plugins with the interface specified as
 template.
 
-To make sure plugin manager will find the static plugins, we must import them
-with a macro @ref CORRADE_PLUGIN_IMPORT() (for example at the beginning of main
-function), which takes plugin name as argument.
+In order to make the plugin manager find the static plugins, we have to import
+them with a macro @ref CORRADE_PLUGIN_IMPORT() (for example at the beginning of
+main function), which takes plugin name as argument.
 
 This example application will load plugin specified as command-line argument
 and then displays brief info about a given animal. For convenient argument
@@ -152,16 +145,21 @@ parsing and usage documentation we used @ref Utility::Arguments.
 @until }
 @until }
 @until }
+@until }
+@until }
+@until }
+@until }
+@until }
 
-Compile the application with simple CMake @cmake add_executable() @ce
+Compile the application with a simple CMake @cmake add_executable() @ce
 command and don't forget to link in all the static plugins compiled above:
 
 @dontinclude pluginmanager/CMakeLists.txt
 @skip add_executable
 @until target_link_libraries
 
-After successfull compilation we can run the application with plugin name
-as argument:
+After a successful compilation we can run the application with plugin name
+as an argument:
 
 @code{.shell-session}
 $ ./PluginTest --help
@@ -171,9 +169,9 @@ Usage:
 Displays info about given animal.
 
 Arguments:
-    plugin            animal plugin name
-    -h, --help        display this help message and exit
-    --plugin-dir DIR  plugin directory to use
+  plugin            animal plugin name
+  -h, --help        display this help message and exit
+  --plugin-dir DIR  plugin directory to use
                     (default: .)
 
 $ ./PluginTest Canary
@@ -190,6 +188,18 @@ Name:      Doug
 Leg count: 4
 Has tail:  yes
 @endcode
+
+The full file content is linked below. The example is also in the
+[corrade GitHub repository](https://github.com/mosra/corrade/tree/master/src/examples/pluginmanager)
+in the `src/examples/pluginamanager` directory.
+
+-   @ref pluginmanager/AbstractAnimal.h
+-   @ref pluginmanager/Canary.cpp
+-   @ref pluginmanager/Canary.conf
+-   @ref pluginmanager/Dog.cpp
+-   @ref pluginmanager/Dog.conf
+-   @ref pluginmanager/main.cpp
+-   @ref pluginmanager/CMakeLists.txt
 
  */
 }

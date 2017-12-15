@@ -26,10 +26,10 @@
 namespace Corrade {
 /** @page corrade-example-index Examples
 
- - @subpage interconnect
- - @subpage plugin-management
- - @subpage resource-management
- - @subpage testsuite
+-   @subpage testsuite
+-   @subpage resource-management
+-   @subpage plugin-management
+-   @subpage interconnect
 
 @todoc Rename (merge) to page `examples` when doxygen treats it as regular page.
 

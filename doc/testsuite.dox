@@ -26,7 +26,9 @@
 namespace Corrade {
 /** @page testsuite Testing and benchmarking
 
-Corrade's @ref TestSuite took its initial inspiration in QtTest framework.
+@m_footernavigation
+
+Corrade's @ref TestSuite took its initial inspiration in the QtTest framework.
 Unlike most other test libraries out there, it is not designed around opaque
 macros but rather tries to make use of standard C++ features to manage most of
 the test code. At first it may seem that this involves more typing, but it
@@ -34,13 +36,13 @@ allows for much greater flexibility, easier debugging and more predictable
 control flow with real-world cases of data-driven testing and benchmarking.
 
 Below is a simple introduction into writing tests and benchmarks, you can find
-more detailed information about all the features in @ref TestSuite::Tester
+more detailed information about all the features in the @ref TestSuite::Tester
 class documentation.
 
 @section testsuite-class Tester class
 
-First step for creating unit test is to subclass @ref TestSuite::Tester class
-and add test cases and benchmarks to it.
+First step for creating a unit test is to subclass @ref TestSuite::Tester and
+add test cases and benchmarks to it.
 
 @dontinclude testsuite/MyTest.cpp
 @skip struct MyTest
@@ -58,14 +60,15 @@ In constructor we register our test cases and benchmarks using
 Now we implement our test cases. The simplest macro is @ref CORRADE_VERIFY(),
 which only verifies that given expression is @cpp true @ce; if not, it exits
 current test case (i.e. skips processing the rest of the function) and prints
-error on error output:
+a diagnostic on the error output.
 
 @skip MyTest::commutativity()
 @until }
 
-Next macro is @ref CORRADE_COMPARE(), which takes two values and compares them
-for equality. Its advantage over @ref CORRADE_VERIFY() is that it prints
-contents of both arguments via @ref Utility::Debug if the comparison fails:
+Next macro is @ref CORRADE_COMPARE(), which takes an actual value and compares
+it to expected value. Its advantage over @ref CORRADE_VERIFY() is that it
+prints contents of both arguments via @ref Utility::Debug if the comparison
+fails:
 
 @skip MyTest::associativity()
 @until }
@@ -108,20 +111,22 @@ each other so one can immediatelly see the difference:
 @until }
 @until }
 
-@section testsuite-compilation Compilation and running
-
 Lastly, we create the @cpp main() @ce function using the @ref CORRADE_TEST_MAIN()
-macro:
+macro. It conveniently abstracts platform differences and takes care of
+command-line argument parsing for us.
 
 @skipline CORRADE_TEST_MAIN
 
+@section testsuite-compilation Compilation and running
+
 Now we can compile and run our test using CMake and the
-@ref corrade-cmake-add-test "corrade_add_test()" macro. Don't forget to call
-@cmake enable_testing() @ce first so `ctest` is able to collect and run
-all the tests.
+@ref corrade-cmake-add-test "corrade_add_test()" macro. It compiles the
+executable and links it to all required libraries so we don't have to care
+about that ourselves. Don't forget to call @cmake enable_testing() @ce first so
+`ctest` is able to collect and run all the tests.
 
 @dontinclude testsuite/CMakeLists.txt
-@skip enable_testing
+@skip find_package
 @until corrade_add_test
 
 The test executable can be run either manually or in a batch with all other
@@ -130,7 +135,11 @@ tests using `ctest`. When executed, it produces output similar to this:
 @include testsuite.ansi
 
 The test executable accepts various arguments to control the test and benchmark
-execution, pass `--help` to it to see all the options.
+execution, pass `--help` to it to see all the options or
+@ref TestSuite-Tester-command-line "head over to the documentation". The full
+file contents are linked below, this example is also in the
+[corrade GitHub repository](https://github.com/mosra/corrade/tree/master/src/examples/testsuite)
+in the `src/examples/testsuite` directory.
 
  - @ref testsuite/MyTest.cpp
  - @ref testsuite/CMakeLists.txt

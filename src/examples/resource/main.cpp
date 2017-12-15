@@ -29,11 +29,9 @@
 using namespace Corrade;
 
 int main() {
-    /* Initialize resource manager with name of resource group we are using */
-    Utility::Resource rs("data");
+    /* Initialize resource manager with name of the group we are using */
+    Utility::Resource rs{"data"};
 
     /* Print out the license */
-    Utility::Debug() << rs.get("license.txt");
-
-    return 0;
+    Utility::Debug{} << rs.get("license.txt");
 }
