@@ -261,9 +261,11 @@ namespace TestSuite {
 
 @subsubsection corrade-coding-style-cpp-classes Class and structure declarations
 
-Class and structure protection levels are ordered as following: first friend
-declarations, then public members, then protected members and finally private
-members, so class public interface is easy to spot at the top of the file.
+Class and structure protection levels are ordered as following: first public
+members, then protected members and finally private members, so class public
+interface is easy to spot at the top of the file. Friend declarations are
+preferred to stay in the private section at the end, as they are usually not
+very important.
 
 Members are ordered as following: first classes and enums, then static
 functions, then non-static functions (where constructors, destructors and
@@ -283,9 +285,7 @@ and horizontal space.
 Indented is everything except namespace declarations (as specified above) ---
 blocks, class protection levels, @cpp case @ce statements. Overlong line breaks
 are indented also with 4 spaces (or any other value if it makes more sense,
-e.g. for aligning similar code). Friend declarations are not affected by class
-protection levels so they are outside of all of them, indented by only four
-spaces.
+e.g. for aligning similar code).
 
 @code{.cpp}
 class Foo {
