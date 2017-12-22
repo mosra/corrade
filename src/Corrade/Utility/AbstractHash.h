@@ -113,9 +113,6 @@ template<std::size_t digestSize> class AbstractHash {
              */
             DigestSize = digestSize
         };
-
-    protected:
-        ~AbstractHash() {}
 };
 
 /** @debugoperator{Corrade::Utility::HashDigest} */
