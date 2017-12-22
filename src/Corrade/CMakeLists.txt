@@ -96,6 +96,10 @@ if(CORRADE_WITH_UTILITY) # Cyclic dependency of Containers and Utility
     add_subdirectory(Containers)
 endif()
 
+if(CORRADE_WITH_FILESYSTEM)
+    add_subdirectory(Filesystem)
+endif()
+
 if(CORRADE_WITH_INTERCONNECT)
     add_subdirectory(Interconnect)
 endif()

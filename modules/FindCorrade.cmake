@@ -26,6 +26,7 @@
 # components, which are:
 #
 #  Containers                   - Containers library
+#  Filesystem                   - Filesystem library
 #  Interconnect                 - Interconnect library
 #  Main                         - Main library
 #  PluginManager                - PluginManager library
@@ -153,6 +154,10 @@
 #   installation directory
 #  CORRADE_PLUGINS_[DEBUG|RELEASE]_LIBRARY_INSTALL_DIR - Plugin library
 #   installation directory
+#  CORRADE_PLUGINS_FILESYSTEM_[DEBUG|RELEASE]_BINARY_INSTALL_DIR - Filesystem
+#   plugin binary installation directory
+#  CORRADE_PLUGINS_FILESYSTEM_[DEBUG|RELEASE]_LIBRARY_INSTALL_DIR - Filesystem
+#   plugin library installation directory
 #  CORRADE_INCLUDE_INSTALL_DIR  - Header installation directory
 #  CORRADE_PLUGINS_INCLUDE_INSTALL_DIR - Plugin header installation directory
 #
@@ -391,7 +396,7 @@ set(CORRADE_LIB_SUFFIX_MODULE ${_CORRADE_MODULE_DIR}/CorradeLibSuffix.cmake)
 # Component distinction (listing them explicitly to avoid mistakes with finding
 # unknown components)
 set(_CORRADE_LIBRARY_COMPONENTS
-    Containers Interconnect Main PluginManager TestSuite Utility)
+    Containers Filesystem Interconnect Main PluginManager TestSuite Utility)
 # These libraries are excluded from DLL detection if Corrade is built as shared
 set(_CORRADE_LIBRARY_COMPONENTS_ALWAYS_STATIC
     Main)
@@ -404,10 +409,11 @@ set(_CORRADE_EXECUTABLE_COMPONENTS rc)
 # Currently everything is enabled implicitly. Keep in sync with Corrade's root
 # CMakeLists.txt.
 set(_CORRADE_IMPLICITLY_ENABLED_COMPONENTS
-    Containers Interconnect Main PluginManager TestSuite Utility rc)
+    Containers Filesystem Interconnect Main PluginManager TestSuite Utility rc)
 
 # Inter-component dependencies
 set(_CORRADE_Containers_DEPENDENCIES Utility)
+set(_CORRADE_Filesystem_DEPENDENCIES PluginManager)
 set(_CORRADE_Interconnect_DEPENDENCIES Containers Utility)
 set(_CORRADE_PluginManager_DEPENDENCIES Containers Utility rc)
 set(_CORRADE_TestSuite_DEPENDENCIES Containers Utility Main) # see below
@@ -600,6 +606,7 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
         endif()
 
         # No special setup for Containers library
+        # No special setup for Filesystem library
 
         # Interconnect library
         if(_component STREQUAL Interconnect)
@@ -779,3 +786,8 @@ if(CORRADE_BUILD_DEPRECATED AND CORRADE_INCLUDE_INSTALL_PREFIX AND NOT CORRADE_I
     message(DEPRECATION "CORRADE_INCLUDE_INSTALL_PREFIX is obsolete as its primary use was for old Android NDK versions. Please switch to the NDK r19+ layout instead of using this variable and recreate your build directory to get rid of this warning.")
     set(CORRADE_INCLUDE_INSTALL_DIR ${CORRADE_INCLUDE_INSTALL_PREFIX}/${CORRADE_INCLUDE_INSTALL_DIR})
 endif()
+
+set(CORRADE_PLUGINS_FILESYSTEM_DEBUG_BINARY_INSTALL_DIR ${CORRADE_PLUGINS_DEBUG_BINARY_INSTALL_DIR}/filesystems)
+set(CORRADE_PLUGINS_FILESYSTEM_DEBUG_LIBRARY_INSTALL_DIR ${CORRADE_PLUGINS_DEBUG_LIBRARY_INSTALL_DIR}/filesystems)
+set(CORRADE_PLUGINS_FILESYSTEM_RELEASE_BINARY_INSTALL_DIR ${CORRADE_PLUGINS_RELEASE_BINARY_INSTALL_DIR}/filesystems)
+set(CORRADE_PLUGINS_FILESYSTEM_RELEASE_LIBRARY_INSTALL_DIR ${CORRADE_PLUGINS_RELEASE_LIBRARY_INSTALL_DIR}/filesystems)

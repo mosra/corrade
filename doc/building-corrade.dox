@@ -531,6 +531,8 @@ By default the library is built with everything included. Using the following
 `CORRADE_WITH_*` CMake options you can specify which parts will be built and
 which not:
 
+-   `CORRADE_WITH_FILESYSTEM` --- Build the @ref Filesystem library. Enables
+    also building of the PluginManager library.
 -   `CORRADE_WITH_INTERCONNECT` --- Build the @ref Interconnect library.
     Enables also building of the Utility library.
 -   `CORRADE_WITH_MAIN` --- build The @ref main "Main" library. Enabled
