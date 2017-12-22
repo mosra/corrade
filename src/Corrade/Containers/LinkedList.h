@@ -133,8 +133,6 @@ class Object: private LinkedListItem<Object, ObjectGroup> {
     // ...
 };
 @endcode
-
-@todo Reduce branches (make the list circular internally)
 */
 template<class T> class LinkedList {
     public:
