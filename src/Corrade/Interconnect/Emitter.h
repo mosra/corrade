@@ -213,9 +213,6 @@ Interconnect::connect(&foo, &Foo::signal, &b, &std::string::clear); // ok
 @todo Allow move
 */
 class CORRADE_INTERCONNECT_EXPORT Emitter {
-    friend Connection;
-    friend Receiver;
-
     public:
         /**
          * @brief Signature for signals
@@ -344,8 +341,15 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         template<class Emitter, class ...Args> Signal emit(Signal(Emitter::*signal)(Args...), typename std::common_type<Args>::type... args);
 
     private:
+        /* https://bugzilla.gnome.org/show_bug.cgi?id=776986. Also the class
+           docs link to this connect() instead of Interconnect::connect(). Ugh. */
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        friend Connection;
+        friend Receiver;
+
         template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> friend Connection connect(EmitterObject&, Signal(Emitter::*)(Args...), ReceiverObject&, void(Receiver::*)(Args...));
         template<class EmitterObject, class Emitter, class ...Args> friend Connection connect(EmitterObject&, Signal(Emitter::*)(Args...), void(*)(Args...));
+        #endif
 
         static void connectInternal(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data);
         static void disconnectInternal(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data);
@@ -361,12 +365,6 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
 namespace Implementation {
 
 class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
-    template<class...> friend class FunctionConnectionData;
-    template<class, class...> friend class MemberConnectionData;
-    friend Interconnect::Connection;
-    friend Interconnect::Emitter;
-    friend Interconnect::Receiver;
-
     public:
         enum class Type: std::uint8_t { Function, Member };
 
@@ -382,6 +380,15 @@ class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
         explicit AbstractConnectionData(Emitter* emitter, Type type): _connection{nullptr}, _emitter{emitter}, _lastHandledSignal{0}, _type{type} {}
 
     private:
+        /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        template<class...> friend class FunctionConnectionData;
+        template<class, class...> friend class MemberConnectionData;
+        friend Interconnect::Connection;
+        friend Interconnect::Emitter;
+        friend Interconnect::Receiver;
+        #endif
+
         Connection* _connection;
         Emitter* _emitter;
         std::uint32_t _lastHandledSignal;
@@ -389,22 +396,28 @@ class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
 };
 
 class AbstractMemberConnectionData: public AbstractConnectionData {
-    friend Interconnect::Emitter;
-
     public:
         template<class Emitter, class Receiver> explicit AbstractMemberConnectionData(Emitter* emitter, Receiver* receiver): AbstractConnectionData{emitter, Type::Member}, _receiver{receiver} {}
 
     private:
+        /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        friend Interconnect::Emitter;
+        #endif
+
         Receiver* _receiver;
 };
 
 template<class ...Args> class BaseMemberConnectionData: public AbstractMemberConnectionData {
-    friend Interconnect::Emitter;
-
     public:
         template<class Emitter, class Receiver> explicit BaseMemberConnectionData(Emitter* emitter, Receiver* receiver): AbstractMemberConnectionData{emitter, receiver} {}
 
     private:
+        /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        friend Interconnect::Emitter;
+        #endif
+
         virtual void handle(Args... args) = 0;
 };
 
@@ -417,14 +430,17 @@ template<class ...Args> void BaseMemberConnectionData<Args...>::handle(Args...) 
 #endif
 
 template<class Receiver, class ...Args> class MemberConnectionData: public BaseMemberConnectionData<Args...> {
-    friend Interconnect::Emitter;
-
     public:
         typedef void(Receiver::*Slot)(Args...);
 
         template<class Emitter> explicit MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): BaseMemberConnectionData<Args...>(emitter, receiver), _receiver{receiver}, _slot{slot} {}
 
     private:
+        /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        friend Interconnect::Emitter;
+        #endif
+
         void handle(Args... args) override final {
             (_receiver->*_slot)(args...);
         }
@@ -434,14 +450,17 @@ template<class Receiver, class ...Args> class MemberConnectionData: public BaseM
 };
 
 template<class ...Args> class FunctionConnectionData: public AbstractConnectionData {
-    friend Interconnect::Emitter;
-
     public:
         typedef void(*Slot)(Args...);
 
         template<class Emitter> explicit FunctionConnectionData(Emitter* emitter, Slot slot): AbstractConnectionData{emitter, Type::Function}, _slot{slot} {}
 
     private:
+        /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        friend Interconnect::Emitter;
+        #endif
+
         void handle(Args... args) { _slot(args...); }
 
         const Slot _slot;

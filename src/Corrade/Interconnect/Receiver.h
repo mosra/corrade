@@ -49,9 +49,6 @@ Contains member function slots. See @ref interconnect for introduction.
 @todo Allow move
 */
 class CORRADE_INTERCONNECT_EXPORT Receiver {
-    friend Implementation::AbstractConnectionData;
-    friend Emitter;
-
     public:
         explicit Receiver();
 
@@ -100,6 +97,12 @@ class CORRADE_INTERCONNECT_EXPORT Receiver {
         ~Receiver();
 
     private:
+        /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        friend Implementation::AbstractConnectionData;
+        friend Emitter;
+        #endif
+
         std::vector<Implementation::AbstractConnectionData*> _connections;
 };
 

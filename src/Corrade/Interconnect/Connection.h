@@ -41,9 +41,6 @@ namespace Implementation {
     struct SignalDataHash;
 
     class SignalData {
-        friend Interconnect::Emitter;
-        friend SignalDataHash;
-
         public:
             enum: std::size_t { Size = 2*sizeof(void*)/sizeof(std::size_t) };
 
@@ -74,6 +71,12 @@ namespace Implementation {
             }
 
         private:
+            /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            friend Interconnect::Emitter;
+            friend SignalDataHash;
+            #endif
+
             #ifdef CORRADE_MSVC2017_COMPATIBILITY
             SignalData(): data() {}
             #endif
@@ -96,9 +99,6 @@ object.
 @see @ref interconnect, @ref Emitter, @ref Receiver
 */
 class CORRADE_INTERCONNECT_EXPORT Connection {
-    friend Emitter;
-    friend Receiver;
-
     public:
         /** @brief Copying is not allowed */
         Connection(const Connection&) = delete;
@@ -164,6 +164,12 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
         explicit Connection(Implementation::SignalData signal, Implementation::AbstractConnectionData* data);
 
     private:
+        /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        friend Emitter;
+        friend Receiver;
+        #endif
+
         Implementation::SignalData _signal;
         Implementation::AbstractConnectionData* _data;
         bool _connected;
