@@ -110,7 +110,7 @@ is possible to initialize the array in a different way using so-called *tags*:
     elements of the array using provided arguments.
 -   @ref Array(NoInitT, std::size_t) does not initialize anything and you need
     to call the constructor on all elements manually using placement new,
-    @ref std::uninitialized_copy or similar. This is the dangerous option.
+    @ref std::uninitialized_copy() or similar. This is the dangerous option.
 
 Example:
 

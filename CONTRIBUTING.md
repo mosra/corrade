@@ -31,7 +31,7 @@ Code contribution
     the existing to make sure new code is properly covered (if possible). Here
     is a [short tutorial](http://doc.magnum.graphics/corrade/unit-testing.html)
     to help you with creating unit tests.
-*   Best way to contribute is by using GitHub [pull requests](https://github.com/mosra/corrade/pulls)
+*   Best way to contribute is using GitHub [pull requests](https://github.com/mosra/corrade/pulls)
     -- fork the repository and make pull request from feature branch. You can
     also send patches via e-mail or contact me any other way.
 *   All your code will be released under license of the project (see [COPYING](COPYING)

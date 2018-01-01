@@ -80,7 +80,7 @@ is possible to initialize the array in a different way using so-called *tags*:
     the array using provided arguments.
 -   @ref StaticArray(NoInitT) does not initialize anything and you need to call
     the constructor on all elements manually using placement new,
-    @ref std::uninitialized_copy or similar. This is the dangerous option.
+    @ref std::uninitialized_copy() or similar. This is the dangerous option.
 
 Example:
 
