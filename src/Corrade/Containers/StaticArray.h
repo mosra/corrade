@@ -71,13 +71,13 @@ is possible to initialize the array in a different way using so-called *tags*:
 
 -   @ref StaticArray(DefaultInitT) is equivalent to the implicit parameterless
     constructor (useful when you want to make the choice appear explicit).
--   @ref StaticArray(InPlaceInitT, Args...) is equivalent to the implicit
-    parameteric constructor (again useful when you want to make the choice
-    appear explicit).
+-   @ref StaticArray(InPlaceInitT, Args&&... args) is equivalent to the
+    implicit parameteric constructor (again useful when you want to make the
+    choice appear explicit).
 -   @ref StaticArray(ValueInitT) zero-initializes trivial types and calls
     default constructor elsewhere.
--   @ref StaticArray(DirectInitT, Args...) constructs every element of the
-    array using provided arguments.
+-   @ref StaticArray(DirectInitT, Args&&... args) constructs every element of
+    the array using provided arguments.
 -   @ref StaticArray(NoInitT) does not initialize anything and you need to call
     the constructor on all elements manually using placement new,
     @ref std::uninitialized_copy or similar. This is the dangerous option.
@@ -154,7 +154,7 @@ template<std::size_t size_, class T> class StaticArray {
          * @attention Internally the destruction is done using custom deleter
          *      that explicitly calls destructor on *all elements* regardless
          *      of whether they were properly constructed or not.
-         * @see @ref NoInit, @ref StaticArray(DirectInitT, Args...)
+         * @see @ref NoInit, @ref StaticArray(DirectInitT, Args&&... args)
          */
         explicit StaticArray(NoInitT) {}
 
@@ -164,7 +164,7 @@ template<std::size_t size_, class T> class StaticArray {
          * Constructs the array using the @ref StaticArray(NoInitT) constructor
          * and then initializes each element with placement new using forwarded
          * @p args.
-         * @see @ref StaticArray(InPlaceInitT, Args&&...)
+         * @see @ref StaticArray(InPlaceInitT, Args&&... args)
          */
         template<class ...Args> explicit StaticArray(DirectInitT, Args&&... args);
 
@@ -172,7 +172,7 @@ template<std::size_t size_, class T> class StaticArray {
          * @brief Construct in-place-initialized array
          *
          * The arguments are forwarded to the array constructor.
-         * @see @ref StaticArray(DirectInitT, Args&&...)
+         * @see @ref StaticArray(DirectInitT, Args&&... args)
          */
         template<class ...Args> explicit StaticArray(InPlaceInitT, Args&&... args): _data{std::forward<Args>(args)...} {
             static_assert(sizeof...(args) == size_, "Containers::StaticArray: wrong number of initializers");
@@ -189,8 +189,8 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief Construct in-place-initialized array
          *
-         * Alias to @ref StaticArray(InPlaceInitT, Args&&...).
-         * @see @ref StaticArray(DirectInitT, Args&&...)
+         * Alias to @ref StaticArray(InPlaceInitT, Args&&... args).
+         * @see @ref StaticArray(DirectInitT, Args&&... args)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class ...Args> explicit StaticArray(Args&&... args);

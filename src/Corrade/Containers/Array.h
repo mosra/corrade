@@ -106,8 +106,8 @@ is possible to initialize the array in a different way using so-called *tags*:
     (useful when you want to make the choice appear explicit).
 -   @ref Array(ValueInitT, std::size_t) zero-initializes trivial types and
     calls default constructor elsewhere.
--   @ref Array(DirectInitT, std::size_t, Args...) constructs all elements of
-    the array using provided arguments.
+-   @ref Array(DirectInitT, std::size_t, Args&&... args) constructs all
+    elements of the array using provided arguments.
 -   @ref Array(NoInitT, std::size_t) does not initialize anything and you need
     to call the constructor on all elements manually using placement new,
     @ref std::uninitialized_copy or similar. This is the dangerous option.
@@ -142,10 +142,10 @@ for(Foo& f: d) new(&f) Foo(index++);
 By default the class makes all allocations using @cpp operator new[] @ce and
 deallocates using @cpp operator delete[] @ce for given @p T, with some
 additional trickery done internally to make the @ref Array(NoInitT, std::size_t)
-and @ref Array(DirectInitT, std::size_t, ...) constructors work. When wrapping
-an externally allocated array using @ref Array(T*, std::size_t, D), it is
-possible to specify which function to use for deallocation. By default the
-deleter is set to @cpp nullptr @ce, which is equivalent to deleting the
+and @ref Array(DirectInitT, std::size_t, Args&&... args) constructors work.
+When wrapping an externally allocated array using @ref Array(T*, std::size_t, D),
+it is possible to specify which function to use for deallocation. By default
+the deleter is set to @cpp nullptr @ce, which is equivalent to deleting the
 contents using @cpp operator delete[] @ce.
 
 For example, properly deallocating array allocated using @ref std::malloc():
@@ -266,7 +266,7 @@ class Array {
          *      calls destructor on *all elements* regardless of whether they
          *      were properly constructed or not and then deallocates the data
          *      as @cpp char @ce array.
-         * @see @ref NoInit, @ref Array(DirectInitT, std::size_t, Args...),
+         * @see @ref NoInit, @ref Array(DirectInitT, std::size_t, Args&&... args),
          *      @ref deleter()
          */
         explicit Array(NoInitT, std::size_t size): _data{size ? reinterpret_cast<T*>(new char[size*sizeof(T)]) : nullptr}, _size{size}, _deleter{Implementation::noInitDeleter} {}
