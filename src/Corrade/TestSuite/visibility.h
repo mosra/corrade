@@ -28,6 +28,7 @@
 #include "Corrade/configure.h"
 #include "Corrade/Utility/VisibilityMacros.h"
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 #ifndef CORRADE_BUILD_STATIC
     #ifdef CorradeTestSuite_EXPORTS
         #define CORRADE_TESTSUITE_EXPORT CORRADE_VISIBILITY_EXPORT
@@ -38,5 +39,9 @@
     #define CORRADE_TESTSUITE_EXPORT CORRADE_VISIBILITY_STATIC
 #endif
 #define CORRADE_TESTSUITE_LOCAL CORRADE_VISIBILITY_LOCAL
+#else
+#define CORRADE_TESTSUITE_EXPORT
+#define CORRADE_TESTSUITE_LOCAL
+#endif
 
 #endif

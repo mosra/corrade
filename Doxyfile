@@ -1954,7 +1954,7 @@ SEARCH_INCLUDES        = YES
 # preprocessor.
 # This tag requires that the tag SEARCH_INCLUDES is set to YES.
 
-INCLUDE_PATH           =
+INCLUDE_PATH           = src
 
 # You can use the INCLUDE_FILE_PATTERNS tag to specify one or more wildcard
 # patterns (like *.h and *.hpp) to filter out the header-files in the
@@ -1975,11 +1975,7 @@ INCLUDE_FILE_PATTERNS  =
 PREDEFINED             = DOXYGEN_GENERATING_OUTPUT \
     CORRADE_BUILD_DEPRECATED CORRADE_DEPRECATED(message)= \
     CORRADE_DEPRECATED_ALIAS(message)= CORRADE_DEPRECATED_ENUM(message)= \
-    CORRADE_UTILITY_LOCAL= \
-    CORRADE_UTILITY_EXPORT= \
-    CORRADE_TESTSUITE_EXPORT= \
-    CORRADE_PLUGINMANAGER_EXPORT= \
-    CORRADE_INTERCONNECT_EXPORT=
+    CORRADE_ENUMSET_OPERATORS(class)=
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The

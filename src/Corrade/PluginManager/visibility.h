@@ -28,6 +28,7 @@
 #include "Corrade/configure.h"
 #include "Corrade/Utility/VisibilityMacros.h"
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 #ifndef CORRADE_BUILD_STATIC
     #if defined(CorradePluginManager_EXPORTS) || defined(CorradePluginManagerObjects_EXPORTS) || defined(CorradePluginManagerTestLib_EXPORTS)
         #define CORRADE_PLUGINMANAGER_EXPORT CORRADE_VISIBILITY_EXPORT
@@ -38,7 +39,11 @@
     #define CORRADE_PLUGINMANAGER_EXPORT CORRADE_VISIBILITY_STATIC
 #endif
 #define CORRADE_PLUGINMANAGER_LOCAL CORRADE_VISIBILITY_LOCAL
-
 #define CORRADE_PLUGIN_EXPORT CORRADE_VISIBILITY_EXPORT
+#else
+#define CORRADE_PLUGINMANAGER_EXPORT
+#define CORRADE_PLUGINMANAGER_LOCAL
+#define CORRADE_PLUGIN_EXPORT
+#endif
 
 #endif
