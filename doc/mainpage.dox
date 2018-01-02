@@ -29,38 +29,108 @@ namespace Corrade {
 > *corrade* (v.) --- "To scrape together, to gather together from various sources"
 
 Corrade is a multiplatform utility library written in C++11/C++14. It's used as
-a base for the [Magnum graphics engine](http://magnum.graphics/) among other
+a base for the [Magnum graphics engine](http://magnum.graphics/), among other
 things.
+
+-   Project homepage --- http://magnum.graphics/corrade/
+-   Documentation --- http://doc.magnum.graphics/corrade/
+-   GitHub project page --- https://github.com/mosra/corrade
 
 @section corrade-mainpage-platforms Supported platforms
 
 -   **Linux** and embedded Linux
--   **Windows**
+-   **Windows**, **Windows RT** (Store/Phone)
 -   **macOS**, **iOS**
 -   **Android**
--   **Windows RT** (Store/Phone)
--   **Web** (asm.js or WebAssembly), through [Emscripten](http://kripken.github.io/emscripten-site/)
+-   **Web** ([asm.js](http://asmjs.org/) or [WebAssembly](http://webassembly.org/)),
+    through [Emscripten](http://kripken.github.io/emscripten-site/)
+
+See the Magnum Project [Build Status page](http://magnum.graphics/build-status/)
+for detailed per-platform build status.
 
 @section corrade-mainpage-features Features
 
--   Signal/slot connection library with compile-time argument checking.
--   Plugin management library with static and dynamic plugins and dependency
-    handling.
--   Easy-to-use unit test framework and extensible debugging output.
--   Various utilities to simplify multiplatform development.
+-   Low-level utilities to bridge platform differences when accessing OS
+    functionality, filesystem, console and environment
+-   Lightweight container implementations, complementing STL features with
+    focus on compilation speed, ease of use and performance
+-   Test framework emphasizing flexibility, extensibility, minimal use of
+    macros and clarity of diagnostic output
+-   Plugin management library with static and dynamic plugins, dependency
+    handling and hot code reload
+-   Signal/slot connection library with full type safety
+
+Check also the Magnum Project [Feature Overview pages](http://magnum.graphics/features/)
+for further information.
 
 @section corrade-mainpage-building Building Corrade
 
-Guide @ref building-corrade "how to build Corrade" on different platforms.
+You can either use packaging scripts, which are stored in the `package/`
+subdirectory, or clone the project [from GitHub](https://github.com/mosra/corrade)
+and compile and install everything manually. A short guide is below, for
+complete documentation for all platforms head over to the
+@ref building-corrade page.
+
+@subsection corrade-mainpage-building-dependencies Minimal dependencies
+
+-   C++ compiler with good C++11 support. Compilers which are tested to have
+    everything needed are **GCC** >= 4.7, **Clang** >= 3.1 and **MSVC** >= 2015.
+    For Windows you can also use **MinGW-w64**.
+-   **CMake** >= 2.8.12
+
+@subsection corrade-mainpage-building-compilation Compilation, installation
+
+The library can be cloned, built and installed using these commands:
+
+@code{.sh}
+git clone git://github.com/mosra/corrade && cd corrade
+mkdir -p build && cd build
+cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+make -j
+make install # sudo may be required
+@endcode
+
+@subsection corrade-mainpage-building-tests Building and running unit tests
+
+If you want to build also unit tests (which are not built by default), pass
+`-DBUILD_TESTS=ON` to CMake. Unit tests use Corrade's own @ref TestSuite
+framework and can be run using
+
+@code{.sh}
+ctest --output-on-failure
+@endcode
+
+in build directory. Everything should pass ;)
+
+@subsection corrade-mainpage-building-doc Building documentation
+
+The documentation, which you are currently reading, is written using
+[Doxygen](https://doxygen.org). It can be built by running
+
+@code{.sh}
+doxygen
+@endcode
+
+in the root directory (i.e. where `Doxyfile` is). You may need to create the
+`build/` directory if it doesn't exist yet. Resulting HTML documentation will
+be in the `build/doc/` directory.
 
 @section corrade-mainpage-getting-started Examples and tutorials
 
 The best way to get started is to read some @ref corrade-example-index
-"examples and tutorials".
+"examples and tutorials". Sources for them are contained in the `src/examples`
+directory and are built separately, requiring Corrade to be installed:
 
-@section corrade-mainpage-hacking Hacking Corrade
+@code{.sh}
+mkdir -p build-examples
+cd build-examples
+cmake ../src/examples
+make -j
+@endcode
 
-If you want to hack on this library, if you spotted a bug, need an feature or
+@section corrade-mainpage-contact Contact & support
+
+If you want to contribute to Corrade, if you spotted a bug, need a feature or
 have an awesome idea, you can get a copy of the sources from GitHub and start
 right away! There is the already mentioned guide about
 @ref building-corrade "how to download and build Corrade" and also a guide
@@ -69,14 +139,16 @@ should follow to keep the library as consistent and maintainable as possible.
 
 Feel free to get more information or contact the team at:
 
--   Website --- http://magnum.graphics/corrade/
--   GitHub --- https://github.com/mosra/corrade
--   Gitter --- https://gitter.im/mosra/magnum
--   IRC --- join `#magnum-engine` channel on freenode
--   Google Groups --- https://groups.google.com/forum/#!forum/magnum-engine
--   Twitter --- https://twitter.com/czmosra
--   E-mail --- mosra@centrum.cz
--   Jabber --- mosra@jabbim.cz
+-   Project homepage --- http://magnum.graphics/corrade/
+-   GitHub project page --- https://github.com/mosra/corrade
+-   Gitter community chat --- https://gitter.im/mosra/magnum
+-   IRC --- join the <tt>\#magnum-engine</tt> channel on freenode
+-   Google Groups mailing list --- magnum-engine@googlegroups.com ([archive](https://groups.google.com/forum/#!forum/magnum-engine))
+-   Author's personal Twitter --- https://twitter.com/czmosra
+-   Author's personal e-mail --- mosra@centrum.cz
+
+See also the Magnum Project [Contact & Support page](http://magnum.graphics/contact/)
+for further information.
 
 @section corrade-mainpage-license License
 
@@ -84,7 +156,7 @@ Corrade is licensed under the MIT/Expat license:
 
 >
 >   Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
->               2017 Vladimír Vondruš &lt;mosra@centrum.cz&gt;
+>               2017, 2018 Vladimír Vondruš &lt;mosra@centrum.cz&gt; and contributors
 >
 >   Permission is hereby granted, free of charge, to any person obtaining a
 >   copy of this software and associated documentation files (the "Software"),
