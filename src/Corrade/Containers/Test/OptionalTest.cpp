@@ -45,6 +45,10 @@ struct OptionalTest: TestSuite::Tester {
     void constructMoveFromNull();
     void constructMoveFromSet();
 
+    void compareToOptional();
+    void compareToNull();
+    void compareToValue();
+
     void copyNullToNull();
     void copyNullToSet();
     void copySetToNull();
@@ -76,6 +80,10 @@ OptionalTest::OptionalTest() {
 
               &OptionalTest::constructMoveFromNull,
               &OptionalTest::constructMoveFromSet,
+
+              &OptionalTest::compareToOptional,
+              &OptionalTest::compareToNull,
+              &OptionalTest::compareToValue,
 
               &OptionalTest::copyNullToNull,
               &OptionalTest::copyNullToSet,
@@ -307,6 +315,42 @@ void OptionalTest::constructMoveFromSet() {
     CORRADE_COMPARE(Copyable::destructed, 2);
     CORRADE_COMPARE(Copyable::copied, 0);
     CORRADE_COMPARE(Copyable::moved, 1);
+}
+
+void OptionalTest::compareToOptional() {
+    Optional<int> a;
+    Optional<int> b{5};
+    Optional<int> c{6};
+
+    CORRADE_VERIFY(a == a);
+    CORRADE_VERIFY(b == b);
+    CORRADE_VERIFY(a != b);
+    CORRADE_VERIFY(b != a);
+    CORRADE_VERIFY(b != c);
+    CORRADE_VERIFY(c != b);
+}
+
+void OptionalTest::compareToNull() {
+    Optional<int> a;
+    Optional<int> b{5};
+
+    CORRADE_VERIFY(a == NullOpt);
+    CORRADE_VERIFY(b != NullOpt);
+    CORRADE_VERIFY(NullOpt == a);
+    CORRADE_VERIFY(NullOpt != b);
+}
+
+void OptionalTest::compareToValue() {
+    Optional<int> a;
+    Optional<int> b{5};
+    Optional<int> c{6};
+
+    CORRADE_VERIFY(a != 6);
+    CORRADE_VERIFY(b != 6);
+    CORRADE_VERIFY(c == 6);
+    CORRADE_VERIFY(6 != a);
+    CORRADE_VERIFY(6 != b);
+    CORRADE_VERIFY(6 == c);
 }
 
 void OptionalTest::copyNullToNull() {

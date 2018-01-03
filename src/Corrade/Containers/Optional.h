@@ -69,7 +69,7 @@ checked using @ref operator bool(). The stored object can be accessed using
 to access a stored object in an empty state leads to assertion error.
 
 Unlike `std::optional`, this class does not provide a @cpp constexpr @ce
-implementation or any comparison operators, which makes it simpler and more
+implementation or ordering operators, which makes it simpler and more
 lightweight.
 */
 template<class T> class Optional {
@@ -161,6 +161,57 @@ template<class T> class Optional {
         explicit operator bool() const { return _set; }
 
         /**
+         * @brief Equality comparison to another optional
+         *
+         * Returns @cpp true @ce if either both instances are empty or both
+         * instances have a value and the values compare equal, @cpp false @ce
+         * otherwise.
+         */
+        bool operator==(const Optional<T>& other) const {
+            return (!_set && !other._set) || (_set && other._set && _value.v == other._value.v);
+        }
+
+        /**
+         * @brief Non-equality comparison to another optional
+         *
+         * Returns negation of @ref operator==(const Optional<T>&) const.
+         */
+        bool operator!=(const Optional<T>& other) const { return !operator==(other); }
+
+        /**
+         * @brief Equality comparison to a null optional
+         *
+         * Returns @cpp true @ce if the instance is empty, @cpp false @ce
+         * otherwise.
+         */
+        bool operator==(NullOptT) const { return !_set; }
+
+        /**
+         * @brief Non-equality comparison to a null optional
+         *
+         * Returns @cpp true @ce if the instance has a value, @cpp false @ce
+         * otherwise.
+         */
+        bool operator!=(NullOptT) const { return _set; }
+
+        /**
+         * @brief Equality comparison to a value
+         *
+         * Returns @cpp true @ce if the instance has a value which compares
+         * equal to @p other, @cpp false @ce otherwise.
+         */
+        bool operator==(const T& other) const {
+            return _set ? _value.v == other : false;
+        }
+
+        /**
+         * @brief Non-equality comparison to a value
+         *
+         * Returns negation of @ref operator!=(const T&) const.
+         */
+        bool operator!=(const T& other) const { return !operator==(other); }
+
+        /**
          * @brief Get the stored object
          *
          * Expects that the optional object has a value.
@@ -230,6 +281,34 @@ template<class T> class Optional {
         } _value;
         bool _set;
 };
+
+/** @relates Optional
+@brief Equality comparison of a null optional and an optional
+
+See @ref Optional::operator==(NullOptT) const for more information.
+*/
+template<class T> bool operator==(NullOptT, const Optional<T>& b) { return b == NullOpt; }
+
+/** @relates Optional
+@brief Non-euality comparison of a null optional and an optional
+
+See @ref Optional::operator!=(NullOptT) const for more information.
+*/
+template<class T> bool operator!=(NullOptT, const Optional<T>& b) { return b != NullOpt; }
+
+/** @relates Optional
+@brief Equality comparison of a value and an optional
+
+See @ref Optional::operator==(const T&) const for more information.
+*/
+template<class T> bool operator==(const T& a, const Optional<T>& b) { return b == a; }
+
+/** @relates Optional
+@brief Non-equality comparison of a value and an optional
+
+See @ref Optional::operator!=(const T&) const for more information.
+*/
+template<class T> bool operator!=(const T& a, const Optional<T>& b) { return b != a; }
 
 template<class T> Optional<T>::Optional(const Optional<T>& other): _set(other._set) {
     if(_set) new(&_value.v) T{other._value.v};
