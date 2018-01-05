@@ -25,6 +25,7 @@
 
 namespace Corrade {
 /** @page testsuite Testing and benchmarking
+@brief Creating automated unit tests, integration tests and benchmarks.
 
 @m_footernavigation
 
@@ -137,12 +138,14 @@ tests using `ctest`. When executed, it produces output similar to this:
 The test executable accepts various arguments to control the test and benchmark
 execution, pass `--help` to it to see all the options or
 @ref TestSuite-Tester-command-line "head over to the documentation". The full
-file contents are linked below, this example is also in the
-[corrade GitHub repository](https://github.com/mosra/corrade/tree/master/src/examples/testsuite)
-in the `src/examples/testsuite` directory.
+file contents are linked below, full source code is also available in the
+[GitHub repository](https://github.com/mosra/corrade/tree/master/src/examples/testsuite).
 
- - @ref testsuite/MyTest.cpp
- - @ref testsuite/CMakeLists.txt
+-   @ref testsuite/CMakeLists.txt "CMakeLists.txt"
+-   @ref testsuite/MyTest.cpp "MyTest.cpp"
+
+@example testsuite/CMakeLists.txt @m_examplenavigation{testsuite,testsuite/} @m_footernavigation
+@example testsuite/MyTest.cpp @m_examplenavigation{testsuite,testsuite/} @m_footernavigation
 
 */
-}}
+}

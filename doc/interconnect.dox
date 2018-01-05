@@ -25,6 +25,7 @@
 
 namespace Corrade {
 /** @page interconnect Signals and slots
+@brief Easy-to-use API to connect listeners to events.
 
 @tableofcontents
 @m_footernavigation
@@ -111,11 +112,13 @@ Mission succeeded!
 @endcode
 
 See the whole example below. The example is also in the
-[corrade GitHub repository](https://github.com/mosra/corrade/tree/master/src/examples/interconnect)
-in the `src/examples/interconnect` directory.
+[GitHub repository](https://github.com/mosra/corrade/tree/master/src/examples/interconnect).
 
--   @ref interconnect/main.cpp
--   @ref interconnect/CMakeLists.txt
+-   @ref interconnect/CMakeLists.txt "CMakeLists.txt"
+-   @ref interconnect/main.cpp "main.cpp"
+
+@example interconnect/CMakeLists.txt @m_examplenavigation{interconnect,interconnect/} @m_footernavigation
+@example interconnect/main.cpp @m_examplenavigation{interconnect,interconnect/} @m_footernavigation
 
 */
 }

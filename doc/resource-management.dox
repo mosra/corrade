@@ -25,6 +25,7 @@
 
 namespace Corrade {
 /** @page resource-management Resource management
+@brief Compiling external files into application binary.
 
 @m_footernavigation
 
@@ -92,14 +93,18 @@ MAY LEAD TO DEATH OR EVEN APOCALYPSE AND CAN BE CAUSED BY THIS APPLICATION
 ...
 @endcode
 
-See the whole example below. The example is also in the
-[corrade GitHub repository](https://github.com/mosra/corrade/tree/master/src/examples/resource)
-in the `src/examples/resource` directory.
+The full file content is linked below. Full source code is also available in
+the [GitHub repository](https://github.com/mosra/corrade/tree/master/src/examples/resource).
 
- - @ref resource/licenses/en.txt
- - @ref resource/resources.conf
- - @ref resource/main.cpp
- - @ref resource/CMakeLists.txt
+-   @ref resource/CMakeLists.txt "CMakeLists.txt"
+-   @ref resource/licenses/en.txt "licenses/en.txt"
+-   @ref resource/main.cpp "main.cpp"
+-   @ref resource/resources.conf "resources.conf"
+
+@example resource/licenses/en.txt @m_examplenavigation{resource-management,resource/} @m_footernavigation
+@example resource/resources.conf @m_examplenavigation{resource-management,resource/} @m_footernavigation
+@example resource/main.cpp @m_examplenavigation{resource-management,resource/} @m_footernavigation
+@example resource/CMakeLists.txt @m_examplenavigation{resource-management,resource/} @m_footernavigation
 
 */
-}}
+}

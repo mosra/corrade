@@ -25,6 +25,7 @@
 
 namespace Corrade {
 /** @page plugin-management Plugin management
+@brief Developing, loading and using plugins.
 
 @tableofcontents
 @m_footernavigation
@@ -189,17 +190,24 @@ Leg count: 4
 Has tail:  yes
 @endcode
 
-The full file content is linked below. The example is also in the
-[corrade GitHub repository](https://github.com/mosra/corrade/tree/master/src/examples/pluginmanager)
-in the `src/examples/pluginamanager` directory.
+The full file content is linked below. Full source code is also available in
+the [GitHub repository](https://github.com/mosra/corrade/tree/master/src/examples/pluginmanager).
 
--   @ref pluginmanager/AbstractAnimal.h
--   @ref pluginmanager/Canary.cpp
--   @ref pluginmanager/Canary.conf
--   @ref pluginmanager/Dog.cpp
--   @ref pluginmanager/Dog.conf
--   @ref pluginmanager/main.cpp
--   @ref pluginmanager/CMakeLists.txt
+-   @ref pluginmanager/AbstractAnimal.h "AbstractAnimal.h"
+-   @ref pluginmanager/Canary.cpp "Canary.cpp"
+-   @ref pluginmanager/Canary.conf "Canary.conf"
+-   @ref pluginmanager/Dog.cpp "Dog.cpp"
+-   @ref pluginmanager/Dog.conf "Dog.conf"
+-   @ref pluginmanager/main.cpp "main.cpp"
+-   @ref pluginmanager/CMakeLists.txt "CMakeLists.txt"
+
+@example pluginmanager/AbstractAnimal.h @m_examplenavigation{plugin-management,pluginmanager/} @m_footernavigation
+@example pluginmanager/Canary.cpp @m_examplenavigation{plugin-management,pluginmanager/} @m_footernavigation
+@example pluginmanager/Canary.conf @m_examplenavigation{plugin-management,pluginmanager/} @m_footernavigation
+@example pluginmanager/Dog.cpp @m_examplenavigation{plugin-management,pluginmanager/} @m_footernavigation
+@example pluginmanager/Dog.conf @m_examplenavigation{plugin-management,pluginmanager/} @m_footernavigation
+@example pluginmanager/main.cpp @m_examplenavigation{plugin-management,pluginmanager/} @m_footernavigation
+@example pluginmanager/CMakeLists.txt @m_examplenavigation{plugin-management,pluginmanager/} @m_footernavigation
 
  */
 }
