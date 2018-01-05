@@ -1,10 +1,14 @@
-> *corrade* (v.) — "To scrape together, to gather together from various sources"
+> *corrade* (v.) — “To scrape together, to gather together from various sources”
 
 Corrade is a multiplatform utility library written in C++11/C++14. It's used as
 a base for the [Magnum graphics engine](http://magnum.graphics/), among other
 things.
 
-[![Join the chat at https://gitter.im/mosra/magnum](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mosra/magnum?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/mosra/corrade.svg?branch=master)](https://travis-ci.org/mosra/corrade) [![Build Status](https://ci.appveyor.com/api/projects/status/afjjlsgtk6jjxulp/branch/master?svg=true)](https://ci.appveyor.com/project/mosra/corrade/branch/master) [![Coverage Status](https://coveralls.io/repos/github/mosra/corrade/badge.svg?branch=master)](https://coveralls.io/github/mosra/corrade?branch=master)
+[![Join the chat at https://gitter.im/mosra/magnum](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mosra/magnum?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/mosra/corrade.svg?branch=master)](https://travis-ci.org/mosra/corrade)
+[![Build Status](https://ci.appveyor.com/api/projects/status/afjjlsgtk6jjxulp/branch/master?svg=true)](https://ci.appveyor.com/project/mosra/corrade/branch/master)
+[![Coverage Status](https://coveralls.io/repos/github/mosra/corrade/badge.svg?branch=master)](https://coveralls.io/github/mosra/corrade?branch=master)
+[![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 -   Project homepage — http://magnum.graphics/corrade/
 -   Documentation — http://doc.magnum.graphics/corrade/
@@ -42,10 +46,11 @@ for further information.
 BUILDING CORRADE
 ================
 
-You can either use packaging scripts, which are stored in the `package/`
+You can either use packaging scripts, which are stored in the
+[package/](https://github.com/mosra/corrade/tree/master/package)
 subdirectory, or compile and install everything manually. A short guide is
-below, for complete documentation for all platforms head over to the
-[Corrade documentation](http://doc.magnum.graphics/corrade/building-corrade.html).
+below, for complete building documentation covering all platforms head over to
+the [Corrade documentation](http://doc.magnum.graphics/corrade/building-corrade.html).
 
 Minimal dependencies
 --------------------
@@ -96,10 +101,11 @@ will be in the `build/doc/` directory. You may need to create the `build/`
 directory if it doesn't exist yet. Snapshot of the documentation is
 [also available for online viewing](http://doc.magnum.graphics/corrade/).
 
-EXAMPLES AND TUTORIALS
-======================
+GETTING STARTED
+===============
 
-The best way to get started is to read some [examples and tutorials](http://doc.magnum.graphics/corrade/corrade-example-index.html). Sources for them are contained in the `src/examples`
+The best way to get started is to read some [examples and tutorials](http://doc.magnum.graphics/corrade/corrade-example-index.html). Sources for them are contained in the
+[src/examples](https://github.com/mosra/corrade/tree/master/src/examples)
 directory and are built separately, requiring Corrade to be installed:
 
 ```sh
