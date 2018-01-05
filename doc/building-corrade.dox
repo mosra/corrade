@@ -284,7 +284,7 @@ publicly available documentation at http://doc.magnum.graphics/corrade/.
 
 @subsection building-corrade-examples Building examples
 
-The library comes with handful of examples, contained in `src/examples/`
+The library comes with handful of examples, contained in the `src/examples/`
 directory. Documentation for them is available on page @ref corrade-example-index.
 The examples require Corrade to be installed and they are built separately:
 
