@@ -36,9 +36,9 @@ see @ref building-corrade-examples for more information.
 -   @subpage plugin-management --- @copybrief plugin-management
 -   @subpage interconnect --- @copybrief interconnect
 
-While Corrade itself and its documentation is licensed under MIT/Expat license,
-all example code is put into public domain (or UNLICENSE) to free you from any
-legal obstacles when reusing the code in your apps:
+While Corrade itself and its documentation is licensed under the MIT/Expat
+license, all example code is put into public domain (or UNLICENSE) to free you
+from any legal obstacles when reusing the code in your apps:
 
 >
 >   This is free and unencumbered software released into the public domain.
