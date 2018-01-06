@@ -281,6 +281,14 @@ namespace Corrade {
 -   All path handling functions in @ref Utility::Directory consistently return
     and expect only forward slashes as directory separators
 
+@subsection corrade-changelog-latest-documentation Documentation
+
+-   New documentation theme powered by [m.css](http://mcss.mosra.cz) and
+    related massive updates of *everything*
+-   Various updates and clarifications to the @ref corrade-coding-style page
+-   All example code is put into public domain (or UNLICENSE) to free you from
+    any legal obstacles when reusing the code in your apps.
+
 @section corrade-changelog-2015-05 2015-05 snapshot
 
 See the [release notes and full changelog](http://blog.magnum.graphics/announcements/may-2015-updates/#corrade).
