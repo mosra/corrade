@@ -75,6 +75,8 @@ template<class T> using Foo CORRADE_DEPRECATED_ALIAS("use Bar instead") = Bar<T>
 */
 #if defined(__GNUC__) || defined(__clang__)
 #define CORRADE_DEPRECATED_ALIAS(message) __attribute((deprecated(message)))
+#elif defined(_MSC_VER) && _MSC_VER >= 1910
+#define CORRADE_DEPRECATED_ALIAS(message) [[deprecated(message)]]
 #else
 #define CORRADE_DEPRECATED_ALIAS(message)
 #endif
