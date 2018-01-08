@@ -212,23 +212,6 @@ template<class T> class Optional {
         bool operator!=(const T& other) const { return !operator==(other); }
 
         /**
-         * @brief Get the stored object
-         *
-         * Expects that the optional object has a value.
-         * @see @ref operator bool()
-         */
-        operator T&() {
-            CORRADE_INTERNAL_ASSERT(_set);
-            return _value.v;
-        }
-
-        /** @overload */
-        operator const T&() const {
-            CORRADE_INTERNAL_ASSERT(_set);
-            return _value.v;
-        }
-
-        /**
          * @brief Access the stored object
          *
          * Expects that the optional object has a value.

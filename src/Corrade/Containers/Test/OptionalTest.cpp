@@ -555,11 +555,6 @@ void OptionalTest::access() {
     CORRADE_COMPARE(ca->a, 32);
     CORRADE_COMPARE((*a).a, 32);
     CORRADE_COMPARE((*ca).a, 32);
-
-    Copyable& v = a;
-    const Copyable& cv = ca;
-    CORRADE_COMPARE(v.a, 32);
-    CORRADE_COMPARE(cv.a, 32);
 }
 
 }}}
