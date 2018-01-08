@@ -45,6 +45,8 @@ struct OptionalTest: TestSuite::Tester {
     void constructMoveFromNull();
     void constructMoveFromSet();
 
+    void boolConversion();
+
     void compareToOptional();
     void compareToNull();
     void compareToValue();
@@ -80,6 +82,8 @@ OptionalTest::OptionalTest() {
 
               &OptionalTest::constructMoveFromNull,
               &OptionalTest::constructMoveFromSet,
+
+              &OptionalTest::boolConversion,
 
               &OptionalTest::compareToOptional,
               &OptionalTest::compareToNull,
@@ -315,6 +319,15 @@ void OptionalTest::constructMoveFromSet() {
     CORRADE_COMPARE(Copyable::destructed, 2);
     CORRADE_COMPARE(Copyable::copied, 0);
     CORRADE_COMPARE(Copyable::moved, 1);
+}
+
+void OptionalTest::boolConversion() {
+    Optional<int> a;
+    Optional<int> b{5};
+
+    CORRADE_VERIFY(!a);
+    CORRADE_VERIFY(b);
+    CORRADE_VERIFY(!!b);
 }
 
 void OptionalTest::compareToOptional() {
