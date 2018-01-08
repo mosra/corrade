@@ -36,7 +36,9 @@ struct OptionalTest: TestSuite::Tester {
     void constructDefault();
     void constructNullOpt();
     void constructCopy();
+    void constructCopyMake();
     void constructMove();
+    void constructMoveMake();
     void constructInPlace();
 
     void constructCopyFromNull();
@@ -75,7 +77,9 @@ OptionalTest::OptionalTest() {
     addTests({&OptionalTest::constructDefault,
               &OptionalTest::constructNullOpt,
               &OptionalTest::constructCopy,
+              &OptionalTest::constructCopyMake,
               &OptionalTest::constructMove,
+              &OptionalTest::constructMoveMake,
 
               &OptionalTest::constructCopyFromNull,
               &OptionalTest::constructCopyFromSet,
@@ -237,6 +241,21 @@ void OptionalTest::constructCopy() {
     CORRADE_COMPARE(Copyable::moved, 0);
 }
 
+void OptionalTest::constructCopyMake() {
+    {
+        Copyable v{32};
+        auto a = optional(v);
+        CORRADE_VERIFY(a);
+        CORRADE_VERIFY((std::is_same<decltype(a), Optional<Copyable>>::value));
+        CORRADE_COMPARE(a->a, 32);
+    }
+
+    CORRADE_COMPARE(Copyable::constructed, 2);
+    CORRADE_COMPARE(Copyable::destructed, 2);
+    /* Argument is forwarded (passed as T&), so there's just one copy: on return */
+    CORRADE_COMPARE(Copyable::copied, 1);
+}
+
 void OptionalTest::constructMove() {
     {
         Optional<Movable> a{Movable{32}};
@@ -246,6 +265,19 @@ void OptionalTest::constructMove() {
 
     CORRADE_COMPARE(Movable::constructed, 2);
     CORRADE_COMPARE(Movable::destructed, 2);
+    CORRADE_COMPARE(Movable::moved, 1);
+}
+
+void OptionalTest::constructMoveMake() {
+    {
+        auto a = optional(Movable{32});
+        CORRADE_VERIFY(a);
+        CORRADE_COMPARE(a->a, 32);
+    }
+
+    CORRADE_COMPARE(Movable::constructed, 2);
+    CORRADE_COMPARE(Movable::destructed, 2);
+    /* Argument is forwarded (passed as T&&), so there's just one move: on return */
     CORRADE_COMPARE(Movable::moved, 1);
 }
 

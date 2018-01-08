@@ -75,6 +75,7 @@ to access a stored object in an empty state leads to assertion error.
 Unlike `std::optional`, this class does not provide a @cpp constexpr @ce
 implementation or ordering operators, which makes it simpler and more
 lightweight.
+@see @ref NullOpt, @ref optional()
 */
 template<class T> class Optional {
     public:
@@ -307,6 +308,23 @@ template<class T> bool operator==(const T& a, const Optional<T>& b) { return b =
 See @ref Optional::operator!=(const T&) const for more information.
 */
 template<class T> bool operator!=(const T& a, const Optional<T>& b) { return b != a; }
+
+/** @relatesalso Optional
+@brief Make an optional
+
+Convenience alternative to @ref Optional::Optional(const T&) or @ref Optional::Optional(T&&).
+The following two lines are equivalent:
+
+@code{.cpp}
+std::string value;
+
+auto a = Containers::Optional<std::string>{value};
+auto b = Containers::optional(value);
+@endcode
+*/
+template<class T> Optional<typename std::decay<T>::type> optional(T&& value) {
+    return Optional<typename std::decay<T>::type>{std::forward<T>(value)};
+}
 
 template<class T> Optional<T>::Optional(const Optional<T>& other): _set(other._set) {
     if(_set) new(&_value.v) T{other._value.v};
