@@ -25,13 +25,12 @@
 
 cmake_minimum_required(VERSION 2.8.12)
 
-# Configuration fails on < 3.9 if only C++ is enabled (TestBigEndian macro)
-if(NOT CMAKE_VERSION VERSION_LESS 3.9.0)
-    set(LANG CXX)
+# CMake policies
+# Use AppleClang instead of Clang on Apple
+if(POLICY CMP0025)
+    cmake_policy(SET CMP0025 NEW)
 endif()
-project(Corrade ${LANG})
-
-# CMake policies: don't treat imported targets with :: as files
+# Don't treat imported targets with :: as files
 if(POLICY CMP0028)
     cmake_policy(SET CMP0028 NEW)
 endif()
@@ -43,6 +42,12 @@ endif()
 if(POLICY CMP0054)
     cmake_policy(SET CMP0054 NEW)
 endif()
+
+# Configuration fails on < 3.9 if only C++ is enabled (TestBigEndian macro)
+if(NOT CMAKE_VERSION VERSION_LESS 3.9.0)
+    set(LANG CXX)
+endif()
+project(Corrade ${LANG})
 
 # Use folders for nice tree in Visual Studio and XCode
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
