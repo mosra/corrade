@@ -49,13 +49,14 @@ endif()
 # Test for C++17:
 # - GCC reports proper __cplusplus since 7.0 (see
 #   https://gcc.gnu.org/gcc-7/changes.html#cxx)
-# - Clang had first C++17 feature in 4.0, which corresponds to AppleClang 9.0
-#   (see https://gist.github.com/yamaya/2924292#gistcomment-2289472)
+# - Clang reports proper __cplusplus since 5.0 (tested manually, no idea about
+#   AppleClang)
 # - MSVC since 2017
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0") OR
-   (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.0") OR
-   (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.0") OR
+   (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0") OR
+  #(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0") OR
    (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10"))
+   message(STATUS ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION})
     corrade_add_test(Cpp17StandardTest CppStandardTest.cpp)
     set_target_properties(Cpp17StandardTest PROPERTIES
         CORRADE_CXX_STANDARD 17
