@@ -64,7 +64,8 @@ Does not work on template aliases and enum values, use
 /** @hideinitializer
 @brief Alias deprecation mark
 
-Marked alias will emit deprecation warning on supported compilers (GCC, Clang):
+Marked alias will emit deprecation warning on supported compilers (GCC, Clang,
+MSVC 2017):
 
 @code{.cpp}
 template<class T> using Foo CORRADE_DEPRECATED_ALIAS("use Bar instead") = Bar<T>;

@@ -259,6 +259,7 @@ template<class T> class Optional {
          */
         template<class ...Args> T& emplace(Args&&... args);
 
+        #ifndef DOXYGEN_GENERATING_OUTPUT
         #if defined(CORRADE_BUILD_DEPRECATED) && !defined(CORRADE_GCC47_COMPATIBILITY)
         /* Used by Magnum to provide backwards compatibility with (previously
            bundled) std::optional. I hate myself for this. */
@@ -268,6 +269,7 @@ template<class T> class Optional {
         template<class U, class V = decltype(Implementation::OptionalConverter<T, U>::to(std::declval<Optional<T>>()))> operator U() && {
             return Implementation::OptionalConverter<T, U>::to(std::move(*this));
         }
+        #endif
         #endif
 
     private:
