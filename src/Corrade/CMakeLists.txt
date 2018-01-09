@@ -68,5 +68,9 @@ if(WITH_UTILITY)
     add_subdirectory(Utility)
 endif()
 
+if(BUILD_TESTS)
+    add_subdirectory(Test)
+endif()
+
 # Corrade configure file for superprojects
 set(_CORRADE_CONFIGURE_FILE ${CMAKE_CURRENT_BINARY_DIR}/configure.h CACHE INTERNAL "")
