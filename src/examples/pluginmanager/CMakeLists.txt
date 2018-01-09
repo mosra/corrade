@@ -29,7 +29,7 @@
 
 cmake_minimum_required(VERSION 2.8.12)
 
-# CMake policies
+# CMake policies. 0025 needs to be before project(), so putting all there.
 # Use AppleClang instead of Clang on Apple
 if(POLICY CMP0025)
     cmake_policy(SET CMP0025 NEW)
