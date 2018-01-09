@@ -322,7 +322,7 @@ auto a = Containers::Optional<std::string>{value};
 auto b = Containers::optional(value);
 @endcode
 */
-template<class T> Optional<typename std::decay<T>::type> optional(T&& value) {
+template<class T> inline Optional<typename std::decay<T>::type> optional(T&& value) {
     return Optional<typename std::decay<T>::type>{std::forward<T>(value)};
 }
 
