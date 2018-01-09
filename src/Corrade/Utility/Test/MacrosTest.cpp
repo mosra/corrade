@@ -37,7 +37,8 @@ struct MacrosTest: TestSuite::Tester {
 
 MacrosTest::MacrosTest() {
     addTests({&MacrosTest::alignAs,
-              &MacrosTest::deprecated});
+              &MacrosTest::deprecated,
+              &MacrosTest::noreturn});
 }
 
 void MacrosTest::alignAs() {
