@@ -105,6 +105,7 @@ namespace Corrade {
 -   Added @ref TestSuite::Compare::Less, @ref TestSuite::Compare::LessOrEqual,
     @ref TestSuite::Compare::Greater, @ref TestSuite::Compare::GreaterOrEqual
     and @ref TestSuite::Compare::Around
+-   Added @ref TestSuite::Tester::setTestName()
 -   Ability to bundle files with @ref corrade-cmake-add-test "corrade_add_test()"
     CMake macro for Android and Emscripten tests
 

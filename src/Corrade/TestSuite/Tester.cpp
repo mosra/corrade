@@ -467,7 +467,7 @@ void Tester::verifyInternal(const std::string& expression, bool expressionValue)
 
 void Tester::registerTest(std::string filename, std::string name) {
     _testFilename = std::move(filename);
-    _testName = std::move(name);
+    if(_testName.empty()) _testName = std::move(name);
 }
 
 void Tester::skip(const std::string& message) {
@@ -475,6 +475,14 @@ void Tester::skip(const std::string& message) {
     printTestCaseLabel(out, "  SKIP", Debug::Color::Default, Debug::Color::Default);
     out << Debug::newline << "       " << message;
     throw SkipException();
+}
+
+void Tester::setTestName(const std::string& name) {
+    _testName = name;
+}
+
+void Tester::setTestName(std::string&& name) {
+    _testName = std::move(name);
 }
 
 void Tester::setTestCaseName(const std::string& name) {

@@ -421,6 +421,8 @@ struct TesterTest: Tester {
     void benchmarkCpuCycles();
     void benchmarkDiscardAll();
 
+    void testName();
+
     void compareNoCommonType();
     void compareAsOverload();
     void compareAsVarargs();
@@ -454,6 +456,8 @@ TesterTest::TesterTest() {
               &TesterTest::benchmarkCpuClock,
               &TesterTest::benchmarkCpuCycles,
               &TesterTest::benchmarkDiscardAll,
+
+              &TesterTest::testName,
 
               &TesterTest::compareNoCommonType,
               &TesterTest::compareAsOverload,
@@ -956,6 +960,27 @@ void TesterTest::benchmarkDiscardAll() {
         " BENCH [35]   0.00          ns benchmarkDefault()@1x1000000000 (wall time)\n"
         " BENCH [37] 348.36          kB benchmarkOnce()@1x1\n"
         "Finished TesterTest::Test with 0 errors out of 0 checks.\n";
+    CORRADE_COMPARE(out.str(), expected);
+}
+
+void TesterTest::testName() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "11" };
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
+
+    Test t{&out};
+    t.setTestName("MyCustomTestName");
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(&out, &out);
+
+    CORRADE_COMPARE(result, 0);
+
+    std::string expected =
+        "Starting MyCustomTestName with 1 test cases...\n"
+        "    OK [11] compareWith()\n"
+        "Finished MyCustomTestName with 0 errors out of 1 checks.\n";
     CORRADE_COMPARE(out.str(), expected);
 }
 

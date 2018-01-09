@@ -888,6 +888,17 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         std::size_t testCaseRepeatId() const { return _testCaseRepeatId; }
 
         /**
+         * @brief Set custom test name
+         *
+         * By default the test name is gathered together with test filename by
+         * the @ref CORRADE_TEST_MAIN() macro and is equivalent to
+         * fully-qualified class name.
+         * @see @ref setTestCaseName(), @ref setTestCaseDescription()
+         */
+        void setTestName(const std::string& name);
+        void setTestName(std::string&& name); /**< @overload */
+
+        /**
          * @brief Set custom test case name
          *
          * By default the test case name is gathered in the check macros and is
@@ -896,6 +907,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @code{.cpp}
          * setTestCaseName(__func__);
          * @endcode
+         *
+         * @see @ref setTestName(), @ref setTestCaseDescription()
          */
         void setTestCaseName(const std::string& name);
         void setTestCaseName(std::string&& name); /**< @overload */
@@ -906,6 +919,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * Additional text displayed after the test case name. By default
          * the description is empty for non-instanced test cases and instance
          * ID for instanced test cases.
+         * @see @ref setTestName(), @ref setTestCaseName()
          */
         void setTestCaseDescription(const std::string& description);
         void setTestCaseDescription(std::string&& description); /**< @overload */
