@@ -595,9 +595,6 @@ void DirectoryTest::list() {
 }
 
 void DirectoryTest::listSkipDirectories() {
-    #ifdef TRAVIS_CI_HAS_CRAZY_FILESYSTEM_ON_LINUX
-    CORRADE_EXPECT_FAIL("Travis CI has crazy filesystem on Linux.");
-    #endif
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
     CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
         "CTest is not able to run XCTest executables properly in the simulator.");
@@ -609,9 +606,6 @@ void DirectoryTest::listSkipDirectories() {
 }
 
 void DirectoryTest::listSkipFiles() {
-    #ifdef TRAVIS_CI_HAS_CRAZY_FILESYSTEM_ON_LINUX
-    CORRADE_EXPECT_FAIL("Travis CI has crazy filesystem on Linux.");
-    #endif
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
     CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
         "CTest is not able to run XCTest executables properly in the simulator.");
@@ -625,9 +619,6 @@ void DirectoryTest::listSkipFiles() {
 void DirectoryTest::listSkipSpecial() {
     #ifdef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_EXPECT_FAIL("Files are treated as special in Emscripten.");
-    #endif
-    #ifdef TRAVIS_CI_HAS_CRAZY_FILESYSTEM_ON_LINUX
-    CORRADE_EXPECT_FAIL("Travis CI has crazy filesystem on Linux.");
     #endif
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
     CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),

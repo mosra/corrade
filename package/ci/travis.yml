@@ -94,7 +94,6 @@ install:
 # so the directory tests pass (and then some workaround for crazy filesystem issues)
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && ( [ "$TARGET" == "desktop" ] || [ "$TARGET" == "desktop-sanitizers" ] ); then mkdir -p ~/.config/autostart; fi
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && ( [ "$TARGET" == "desktop" ] || [ "$TARGET" == "desktop-sanitizers" ] ); then mkdir -p ~/.local; fi
-- if [ "$TRAVIS_OS_NAME" == "linux" ] && ( [ "$TARGET" == "desktop" ] || [ "$TARGET" == "desktop-sanitizers" ] ); then export CMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS -DTRAVIS_CI_HAS_CRAZY_FILESYSTEM_ON_LINUX"; fi
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "android" ]; then wget -nc http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bin && chmod +x android-*.bin && ./android-*.bin -y | grep -v Extracting; fi
 # Because Android build has to use 12.04 and CMake 2.8.12 stopped working there
 # since May 2017, I have to manually download a prebuilt version. Also, the
