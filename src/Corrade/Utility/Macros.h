@@ -174,6 +174,27 @@ CORRADE_NORETURN void exit42() { std::exit(42); }
 #endif
 
 /** @hideinitializer
+@brief C++ standard version
+
+Expands to `__cplusplus` macro on all sane compilers; on MSVC uses `_MSVC_LANG`
+if defined (since Visual Studio 2015 Update 3), otherwise reports C++11. The
+returned version is:
+
+-   @cpp 201703 @ce when C++17 is used
+-   @cpp 201402 @ce when C++14 is used
+-   @cpp 201103 @ce when C++11 is used
+*/
+#ifdef _MSC_VER
+#ifdef _MSVC_LANG
+#define CORRADE_CXX_STANDARD _MSVC_LANG
+#else
+#define CORRADE_CXX_STANDARD 201103L
+#endif
+#else
+#define CORRADE_CXX_STANDARD __cplusplus
+#endif
+
+/** @hideinitializer
 @brief Automatic initializer
 @param function Initializer function name of type @cpp int(*)() @ce.
 

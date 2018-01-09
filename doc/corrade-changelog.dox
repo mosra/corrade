@@ -136,7 +136,8 @@ namespace Corrade {
     macros and CMake variables
 -   Added @ref CORRADE_TARGET_X86 and @ref CORRADE_TARGET_ARM macros
 -   Added @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_ALIAS(),
-    @ref CORRADE_ALIGNAS() and @ref CORRADE_NORETURN macros
+    @ref CORRADE_ALIGNAS(), @ref CORRADE_NORETURN and @ref CORRADE_CXX_STANDARD
+    macros
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 

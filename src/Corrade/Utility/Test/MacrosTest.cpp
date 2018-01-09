@@ -24,6 +24,7 @@
 */
 
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Numeric.h"
 
 namespace Corrade { namespace Utility { namespace Test {
 
@@ -33,12 +34,14 @@ struct MacrosTest: TestSuite::Tester {
     void alignAs();
     void deprecated();
     void noreturn();
+    void cxxStandard();
 };
 
 MacrosTest::MacrosTest() {
     addTests({&MacrosTest::alignAs,
               &MacrosTest::deprecated,
-              &MacrosTest::noreturn});
+              &MacrosTest::noreturn,
+              &MacrosTest::cxxStandard});
 }
 
 void MacrosTest::alignAs() {
@@ -93,6 +96,10 @@ namespace {
 void MacrosTest::noreturn() {
     if(false) foo();
     CORRADE_VERIFY(true);
+}
+
+void MacrosTest::cxxStandard() {
+    CORRADE_COMPARE_AS(CORRADE_CXX_STANDARD, 201103, TestSuite::Compare::GreaterOrEqual);
 }
 
 }}}
