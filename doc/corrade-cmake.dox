@@ -24,7 +24,7 @@
 */
 
 namespace Corrade {
-/** @page corrade-cmake Usage with CMake
+/** @page corrade-cmake Using Corrade with CMake
 @brief Guide how to find and use Corrade with CMake build system
 
 @tableofcontents

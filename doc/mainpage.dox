@@ -33,71 +33,11 @@ C++11/C++14, that's used as a base for the [Magnum Project](http://magnum.graphi
 To see high-level feature overview, project goals or read the developer blog,
 head over to the [project homepage](http://magnum.graphics/corrade/).
 
-@section corrade-mainpage-building Building Corrade
-
-You can either use packaging scripts, which are stored in the `package/`
-subdirectory [of the Git repository](https://github.com/mosra/corrade/tree/master/package),
-or compile and install everything manually. A short guide is below, for
-complete building documentation covering all platforms head over to
-the @ref building-corrade page.
-
-@subsection corrade-mainpage-building-dependencies Minimal dependencies
-
--   C++ compiler with good C++11 support. Compilers which are tested to have
-    everything needed are **GCC** >= 4.7, **Clang** >= 3.1 and **MSVC** >= 2015.
-    For Windows you can also use **MinGW-w64**.
--   **CMake** >= 2.8.12
-
-@subsection corrade-mainpage-building-compilation Compilation, installation
-
-The library can be cloned, built and installed using these commands:
-
-@code{.sh}
-git clone git://github.com/mosra/corrade && cd corrade
-mkdir -p build && cd build
-cmake -DCMAKE_INSTALL_PREFIX=/usr ..
-make -j
-make install # sudo may be required
-@endcode
-
-@subsection corrade-mainpage-building-tests Building and running unit tests
-
-If you want to build also unit tests (which are not built by default), pass
-`-DBUILD_TESTS=ON` to CMake. Unit tests use Corrade's own @ref TestSuite
-framework and can be run using
-
-@code{.sh}
-ctest --output-on-failure
-@endcode
-
-in build directory. Everything should pass ;)
-
-@subsection corrade-mainpage-building-doc Building documentation
-
-The documentation, which you are currently reading, is written using
-[Doxygen](https://doxygen.org). It can be built by running
-
-@code{.sh}
-doxygen
-@endcode
-
-in the root directory (i.e. where `Doxyfile` is). You may need to create the
-`build/` directory if it doesn't exist yet. Resulting HTML documentation will
-be in the `build/doc/` directory.
-
 @section corrade-mainpage-getting-started Getting started
 
-The best way to get started is to read some @ref corrade-example-index
-"examples and tutorials". Sources for them are contained in the `src/examples`
-directory [of the Git repository](https://github.com/mosra/corrade/tree/master/src/examples)
-and are built separately, requiring Corrade to be installed:
-
-@code{.sh}
-mkdir -p build-examples
-cd build-examples
-cmake ../src/examples
-make -j
-@endcode
+Download, build and install Corrade as explained in @ref building-corrade ---
+we provide ready-made packages for many platforms. After that, the best way to
+get started is to read some @ref corrade-example-index "examples and tutorials".
 
 @section corrade-mainpage-contact Contact & support
 

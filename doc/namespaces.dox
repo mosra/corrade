@@ -29,9 +29,19 @@
 /** @namespace Corrade
 @brief Root namespace
 
-Root namespace alone doesn't contain any functionality, see subnamespaces for
-more information. See also @ref building-corrade and @ref corrade-cmake for
-more information.
+Root namespace alone doesn't contain any functionality except for the
+@ref Corrade/Corrade.h header, see subnamespaces for more information. To use
+the base from CMake, you need to request the `Corrade` package and link to the
+`Corrade::Corrade` target:
+
+@code{.cmake}
+find_package(Corrade REQUIRED)
+
+# ...
+target_link_libraries(your-app Corrade::Corrade)
+@endcode
+
+See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir Corrade/Containers
@@ -43,9 +53,17 @@ more information.
 Implementations for various containers which don't have equivalents in STL.
 
 This library is built if `WITH_UTILITY` is enabled when building Corrade. To
-use this library, you need to request `Containers` component of `Corrade`
-package in CMake and link to `Corrade::Containers` target. See also
-@ref building-corrade and @ref corrade-cmake for more information.
+use this library with CMake, you need to request the `Containers` component of
+the `Corrade` package and link to the `Corrade::Containers` target:
+
+@code{.cmake}
+find_package(Corrade REQUIRED Containers)
+
+# ...
+target_link_libraries(your-app Corrade::Containers)
+@endcode
+
+See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir Corrade/Utility
@@ -60,45 +78,17 @@ debug and error output (class @ref Debug), access to configuration files (class
 @ref Resource, see also @ref resource-management "tutorial").
 
 This library is built if `WITH_UTILITY` is enabled when building Corrade. To
-use this library, you need to request `Utility` component of `Corrade` package
-in CMake and link to `Corrade::Utility` target. See also @ref building-corrade
-and @ref corrade-cmake for more information.
-*/
+use this library with CMake, you need to request the `Utility` component of the
+`Corrade` package and link to the `Corrade::Utility` target:
 
-/** @namespace Corrade::Utility::Directory
-@brief Filesystem utilities
+@code{.cmake}
+find_package(Corrade REQUIRED Utility)
 
-This library is built if `WITH_UTILITY` is enabled when building Corrade. To
-use this library, you need to request `Utility` component of `Corrade` package
-in CMake and link to `Corrade::Utility` target. See also @ref building-corrade
-and @ref corrade-cmake for more information.
-*/
+# ...
+target_link_libraries(your-app Corrade::Utility)
+@endcode
 
-/** @namespace Corrade::Utility::String
-@brief String utilities
-
-This library is built if `WITH_UTILITY` is enabled when building Corrade. To
-use this library, you need to request `Utility` component of `Corrade` package
-in CMake and link to `Corrade::Utility` target. See also @ref building-corrade
-and @ref corrade-cmake for more information.
-*/
-
-/** @namespace Corrade::Utility::System
-@brief System utilities
-
-This library is built if `WITH_UTILITY` is enabled when building Corrade. To
-use this library, you need to request `Utility` component of `Corrade` package
-in CMake and link to `Corrade::Utility` target. See also @ref building-corrade
-and @ref corrade-cmake for more information.
-*/
-
-/** @namespace Corrade::Utility::Unicode
-@brief Unicode utilities
-
-This library is built if `WITH_UTILITY` is enabled when building Corrade. To
-use this library, you need to request `Utility` component of `Corrade` package
-in CMake and link to `Corrade::Utility` target. See also @ref building-corrade
-and @ref corrade-cmake for more information.
+See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir Corrade/PluginManager
@@ -113,9 +103,18 @@ the base of all plugins. See @ref plugin-management for a brief introduction to
 how plugins work.
 
 This library is built if `WITH_PLUGINMANAGER` is enabled when building Corrade.
-To use this library, you need to request `PluginManager` component of `Corrade`
-package in CMake and link to `Corrade::PluginManager` target. See also
-@ref building-corrade and @ref corrade-cmake for more information.
+To use this library with CMake, you need to request the `PluginManager`
+component of the  `Corrade` package and link to the `Corrade::PluginManager`
+target:
+
+@code{.cmake}
+find_package(Corrade REQUIRED PluginManager)
+
+# ...
+target_link_libraries(your-app Corrade::PluginManager)
+@endcode
+
+See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir Corrade/Interconnect
@@ -128,9 +127,18 @@ This library allows you to interconnect objects. See @ref interconnect for more
 information.
 
 This library is built if `WITH_INTERCONNECT` is enabled when building Corrade.
-To use this library, you need to request `Interconnect` component of `Corrade`
-package in CMake and link to `Corrade::Interconnect` target. See also
-@ref building-corrade and @ref corrade-cmake for more information.
+To use this library with CMake, you need to request the `Interconnect`
+component of the `Corrade` package and link to the `Corrade::Interconnect`
+target:
+
+@code{.cmake}
+find_package(Corrade REQUIRED Interconnect)
+
+# ...
+target_link_libraries(your-app Corrade::Interconnect)
+@endcode
+
+See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir Corrade/TestSuite
@@ -142,9 +150,17 @@ package in CMake and link to `Corrade::Interconnect` target. See also
 Testing and benchmarking framework. See @ref testsuite for more information.
 
 This library is built if `WITH_TESTSUITE` is enabled when building Corrade. To
-use this library, you need to request `TestSuite` component of `Corrade`
-package in CMake and link to `Corrade::TestSuite` target. See also
-@ref building-corrade and @ref corrade-cmake for more information.
+use this library with CMake, you need to request the `TestSuite` component of
+the `Corrade` package and link to the `Corrade::TestSuite` target:
+
+@code{.cmake}
+find_package(Corrade REQUIRED TestSuite)
+
+# ...
+target_link_libraries(your-app Corrade::TestSuite)
+@endcode
+
+See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir Corrade/TestSuite/Compare
@@ -157,7 +173,15 @@ See @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH() and @ref Comparator
 for more information.
 
 This library is built if `WITH_TESTSUITE` is enabled when building Corrade. To
-use this library, you need to request `TestSuite` component of `Corrade`
-package in CMake and link to `Corrade::TestSuite` target. See also
-@ref building-corrade and @ref corrade-cmake for more information.
+use this library with CMake, you need to request the `TestSuite` component of
+the `Corrade` package in CMake and link to the `Corrade::TestSuite` target:
+
+@code{.cmake}
+find_package(Corrade REQUIRED TestSuite)
+
+# ...
+target_link_libraries(your-app Corrade::TestSuite)
+@endcode
+
+See also @ref building-corrade and @ref corrade-cmake for more information.
 */

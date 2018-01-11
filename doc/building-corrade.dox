@@ -25,10 +25,147 @@
 
 namespace Corrade {
 
-/** @page building-corrade Downloading and building
+/** @page building-corrade Downloading and building Corrade
 @brief Guide how to download and build Corrade on different platforms.
 
 @tableofcontents
+
+@section building-corrade-packages Prepared packages
+
+The easiest way to install Corrade is to use one of the ready-made packages for
+your platform of choice. See @ref building-corrade-manual if you want to have
+more control and @ref building-corrade-cross for cross-compiling to other
+platforms.
+
+-   @ref building-corrade-packages-arch
+-   @ref building-corrade-packages-deb
+-   @ref building-corrade-packages-gentoo
+-   @ref building-corrade-packages-rpm
+-   @ref building-corrade-packages-brew
+
+@subsection building-corrade-packages-arch ArchLinux packages
+
+In `package/archlinux/corrade-git` there is a package for Git development
+build. The package is also in AUR as
+[corrade-git](https://aur.archlinux.org/packages/corrade-git/).
+
+There are also a quite a few development packages for native builds,
+cross-compilation for Emscripten, Android and MinGW or various
+sanitizer/coverage builds. See the PKGBUILD files in the `package/archlinux`
+directory. They allow you to build and install the package directly from the
+source tree. Example usage:
+
+@code{.sh}
+git clone git://github.com/mosra/corrade && cd corrade
+cd package/archlinux
+makepkg -fp PKGBUILD # or any other PKGBUILD file
+@endcode
+
+In most cases the development PKGBUILDs also contain a @cb{.sh} check() @ce
+function which will run all unit tests before packaging. That might sometimes
+fail or take too long, pass `--nocheck` to `makepkg` to skip that.
+
+Once built, install the package using `pacman`:
+
+@code{.sh}
+sudo pacman -U corrade-*.pkg.tar.xz
+@endcode
+
+Edit the PKGBUILDs if you want to pass additional flags to CMake or
+@ref building-corrade-features "enable / disable additional features".
+
+@subsection building-corrade-packages-deb Packages for Debian, Ubuntu and derivatives
+
+The `package/debian/` directory contains all files needed for building Debian
+packages. In addition you will need `dpkg-dev` and `debhelper` packages.
+Building is easy, just change directory to package root, link or copy
+`package/debian` directory there and run `dpkg-buildpackage`:
+
+@code{.sh}
+git clone git://github.com/mosra/corrade && cd corrade
+ln -s package/debian .
+dpkg-buildpackage
+@endcode
+
+This will compile binary and development packages, which will then appear in a
+parent directory. Install them using `dpkg`:
+
+@code{.sh}
+sudo dpkg -i ../corrade*.deb
+@endcode
+
+If you want to pass additional flags to CMake or
+@ref building-corrade-features "enable / disable additional features", add them
+to `dh_auto_configure` at the bottom of `debian/rules`. Watch out, as
+indentation has to be done using tabs, not spaces.
+
+@subsection building-corrade-packages-gentoo Gentoo Linux ebuilds
+
+Gentoo Git ebuild is available in the `package/gentoo` directory. Build and
+install the package like this:
+
+@code{.sh}
+git clone git://github.com/mosra/corrade && cd corrade
+cd package/gentoo
+sudo ebuild dev-libs/corrade/corrade-99999.ebuild manifest clean merge
+@endcode
+
+If you want to pass additional flags to CMake or
+@ref building-corrade-features "enable / disable additional features", add them
+to `mycmakeargs` in the `*.ebuild` file.
+
+@subsection building-corrade-packages-rpm Packages for Fedora, openSUSE and other RPM-based Linux distributions
+
+Spec files for RPM-based distributions is in `package/rpm/` directory. In
+addition you will need the `rpm-build` package and a `~/.rpmmacros` file, which
+contains at least this:
+
+@code{.spec}
+%_topdir /directory/where/to/store/rpms
+%_tmppath /directory/where/to/do/compilation
+%packager Your Name <your@email.com>
+@endcode
+
+First you need to download or create source tarball. Source tarball can
+be downloaded from GitHub (URL is in spec file), or in the `package/` directory
+there is a script `make-github-like-archive.sh`, which generates exactly the
+same tarballs.
+
+The downloaded or generated tarball must be moved or copied to
+`%{_topdir}/SOURCES` directory, so `rpmbuild` can find it.
+
+When you have the sources, go to `package/rpm/` directory and run this:
+
+@code{.sh}
+rpmbuild -bb corrade.spec
+@endcode
+
+This will compile and generate library and development RPM for Corrade in
+`%{_topdir}/RPMS`. Install it like this:
+
+@code{.sh}
+rpm -U corrade*.rpm
+@endcode
+
+If you want to pass additional flags to CMake or
+@ref building-corrade-features "enable / disable additional features", edit the
+`*.spec` file.
+
+@subsection building-corrade-packages-brew Homebrew formulas for macOS
+
+macOS [Homebrew](https://brew.sh) formulas building the latest Git revision are
+in the `package/homebrew` directory. Either use the `*.rb` files directly or
+use the tap at https://github.com/mosra/homebrew-magnum :
+
+@code{.sh}
+brew install --HEAD mosra/magnum/corrade
+@endcode
+
+If you want to pass additional flags to CMake or
+@ref building-corrade-features "enable / disable additional features", edit the
+`*.rb` file.
+
+@section building-corrade-manual Manual build
 
 Minimal set of tools required for building is:
 
@@ -37,36 +174,33 @@ Minimal set of tools required for building is:
     For Windows you can also use **MinGW-w64**.
 -   **CMake** >= 2.8.12
 
-Note that full feature set is available only on GCC >= 4.8.1 and Clang >= 3.1
-and compatibility mode with reduced feature set is used on other compilers.
-
-@section building-corrade-download Downloading the sources
+@subsection building-corrade-download Downloading the sources
 
 The source is available on GitHub: https://github.com/mosra/corrade. Clone the
-repository with your favorite IDE or Git GUI, download currrent snapshot as
+repository with your favorite IDE or Git GUI, download currrent snapshot as a
 compressed archive or use the command line:
 
 @code{.sh}
 git clone git://github.com/mosra/corrade.git
 @endcode
 
-@section building-corrade-compilation Compilation, installation
-
 @subsection building-corrade-cmake CMake primer
 
-Corrade uses CMake as build system and expects it to be used also in depending
-projects. If you are familiar enough with it, you can skip this section and go
-straight to building. Otherwise be sure to read this so you don't get lost
-later.
+Corrade uses CMake as a build system and provides modules for CMake-based
+depending projects. That said, you need CMake to build Corrade itself, but you
+are not forced to use it in your project. If you are familiar enough with
+CMake, you can skip this section and go straight to building. Otherwise be sure
+to read this so you don't get lost later.
 
-CMake is meta-build system, which means that it generates platform-specific
-build files which then need to be processed (e.g. on Linux it generates
-Makefiles which are then processed with `make`).
+CMake is a meta-build system, which means that it generates platform-specific
+build files that then need to be processed (e.g. on Linux it generates
+Makefiles that are then processed with `make`).
 
-The most straightforward way to use CMake is via command-line. First create
-build directory, then run `cmake` in it, with parameter specifying where root
-`CMakeLists.txt` and then run the actual build command. You can either use the
-platform-specific tool (like `make`) or use platform-independent `cmake --build`:
+The most straightforward way to use CMake is via the command line. First create
+a build directory, then run `cmake` with a parameter specifying where root
+`CMakeLists.txt` is, and then run the actual build command. You can either use
+the platform-specific tool (like `make`) or use the platform-independent
+`cmake --build`:
 
 @code{.sh}
 mkdir build && cd build
@@ -75,9 +209,9 @@ cmake --build .
 @endcode
 
 Or you can use some IDE, for example QtCreator. Open project's root
-`CMakeLists.txt` file within it, QtCreator then asks you where to create build
-directory, allows you to specify initial CMake parameters and then you can just
-press Configure and everything is ready to be built.
+`CMakeLists.txt` file within it, QtCreator then asks you where to create the
+build directory, allows you to specify initial CMake parameters and then you
+can just press *Configure* and everything is ready to be built.
 
 Corrade build is controlled using plenty of configuration variables, which are
 @ref building-corrade-features "listed and described below". The variables can
@@ -88,13 +222,13 @@ cmake -DBUILD_TESTS=ON ..
 @endcode
 
 Boolean variables accept `ON`, `OFF`, `True` or `False`. If using QtCreator,
-you can enter `-Dname=value` into *Arguments* field when running CMake. You can
-also use CMake GUI for more convenient variable specification. You can run it
-from command-line, pointing it to your build dir:
+you can enter `-Dname=value` into the *Arguments* field when running CMake. You
+can also use CMake GUI or `ccmake` for more convenient variable specification.
+You can run itfrom command-line, pointing it to your build dir:
 
 @code{.sh}
 cd build
-cmake-gui .
+cmake-gui . # or ccmake
 @endcode
 
 Or you can start it as is common on your system and then point it to the build
@@ -107,39 +241,39 @@ changes afterwards and reparse the project accordingly, so you don't need to
 re-run CMake from within it.
 
 The variables can also be modified directly by editing `CMakeCache.txt` in
-build dir, although that is the least recommended way.
+the build dir, although that is the least recommended way.
 
-@subsection building-corrade-linux Via command-line (on Linux/Unix)
+@subsection building-corrade-linux Via command line (on Linux/Unix)
 
-On Unix-based OSs, the library can be built and installed using these four
+On Unix-based OSes, the library can be built and installed using these four
 commands:
 
 @code{.sh}
 mkdir build && cd build
 cmake -DCMAKE_INSTALL_PREFIX=/usr ..
 make
-make install
+make install # sudo may be needed
 @endcode
 
-If using older compiler, you might need to enable compatibility mode to pass
-the CMake configuration step --- see @ref building-corrade-features "below" for
-additional configuration options.
+See @ref building-corrade-features "below" for additional configuration
+options.
 
-If you plan to install the library to non-standard location (other than `/usr`,
-e.g. `/home/xyz/projects`) you might want to set `CMAKE_INSTALL_RPATH` to
-`lib/` subdir (thus `/home/xyz/projects/lib`) so the dynamic libraries can be
-found at runtime.
+If you plan to install the library to a non-standard location (other than
+`/usr`, e.g. `/home/xyz/projects`) you might want to set `CMAKE_INSTALL_RPATH`
+to `lib/` subdir of given prefix (thus `/home/xyz/projects/lib`) so the dynamic
+libraries can be found at runtime.
 
 @subsection building-corrade-windows Building on Windows
 
-On Windows you can use either MSVC or MinGW-w64 compiler. It's then up to you
-whether you will use QtCreator, Visual Studio or do the build from command-
-line. Note that for most convenient usage it's best use some dedicated
-directory (e.g. `C:/Sys`) for installing dependencies instead of putting each
-dependency to its own directory in `C:/Program Files`. Then add its `bin/`
-subdir (e.g. `C:/Sys/bin`) to PATH so all the DLLs are found when running the
-executables. If you are using MinGW-w64, the `C:/MinGW` directory is in most
-cases already prepared for exactly this.
+On Windows you can use either MSVC or the MinGW-w64 compiler. It's then up to
+you whether you will use QtCreator, Visual Studio or another IDE or do the
+build from a command line. Note that for most convenient usage it's best to use
+some dedicated directory (e.g. `C:/Sys`) for installing dependencies instead of
+putting each dependency to its own directory in `C:/Program Files` or
+elsewhere. Then you can just add its `bin/` subdir (e.g. `C:/Sys/bin`) to
+@cb{.bat} %PATH% @ce so all the DLLs are found when running the executables. If
+you are using MinGW-w64, the `C:/MinGW` directory is in most cases already
+prepared for exactly this.
 
 Then, when running CMake, set `CMAKE_INSTALL_PREFIX` value to that directory
 (e.g. `-DCMAKE_INSTALL_PREFIX=C:/Sys`).
@@ -149,7 +283,7 @@ Then, when running CMake, set `CMAKE_INSTALL_PREFIX` value to that directory
 On Windows CMake by default creates Visual Studio project files.
 
 The most straightforward way to build and install the library is again via the
-command-line. The bonus point is that you don't even need to wait for Visual
+command line. The bonus point is that you don't even need to wait for Visual
 Studio to load:
 
 @code{.bat}
@@ -164,22 +298,23 @@ project file generated by CMake in the build directory.
 
 @subsubsection building-corrade-windows-qtcreator Using QtCreator
 
-On Windows you can also use QtCreator (just QtCreator, you don't need the full
-Qt SDK). Configure it to use CMake and either MSVC compiler or MinGW-w64 and
-then just open project's root `CMakeLists.txt` file within it. QtCreator then
-asks you where to create build directory, allows you to specify initial CMake
-parameters (e.g. `CMAKE_PREFIX_PATH` and `CMAKE_INSTALL_PREFIX`) and then you
-can just press *Configure* and everything is ready to be built.
+On Windows, besides other IDEs, you can also use QtCreator (just QtCreator, you
+don't need the full Qt SDK). Configure it to use CMake and either the MSVC
+compiler or MinGW-w64  and then just open project's root `CMakeLists.txt` file
+within it. QtCreator then asks you where to create build directory, allows you
+to specify initial CMake parameters (e.g. `CMAKE_PREFIX_PATH` and
+`CMAKE_INSTALL_PREFIX`) and then  you can just press *Configure* and everything
+is ready to be built.
 
 After the initial import you might want to reconfigure some CMake variables,
 see @ref building-corrade-features "below" for more information.
 
-Installation to given prefix can be done from within QtCreator by adding new
+Installation to given prefix can be done from within QtCreator by adding a new
 `make install` build rule.
 
 @subsection building-corrade-features Enabling or disabling features
 
-The libraries are build as shared by default. If you are developing for
+The libraries are build as shared by default. If you are developing for a
 platform which doesn't support shared libraries or if you just want to link
 them statically, enable `BUILD_STATIC` to build the libraries as static. If you
 plan to use them with shared libraries later, enable also position-independent
@@ -187,12 +322,13 @@ code with `BUILD_STATIC_PIC`. If you want to build with another compiler (e.g.
 Clang), pass `-DCMAKE_CXX_COMPILER=clang++` to CMake.
 
 Libraries built in `Debug` configuration (e.g. with `CMAKE_BUILD_TYPE` set to
-`Debug`) have `-d` suffix to make it possible to have both debug and release
+`Debug`) have a `-d` suffix to make it possible to have both debug and release
 libraries installed alongside each other. Headers and other files are the same
-for both. This distinction is handled automatically when using the library in
-depending projects, see @ref corrade-cmake for more information.
+for both debug and release configurations. This distinction is handled
+automatically when using the library in depending projects, see @ref corrade-cmake
+for more information.
 
-By default the library expects standards conforming compiler. However, for
+By default the library expects standards-conforming compiler. However, for
 portability, compatibility mode for older compilers is provided. The build
 system tries to autodect it, but in some rare cases you may need to enable
 the compatibility mode explicitly:
@@ -206,25 +342,27 @@ the compatibility mode explicitly:
     for Microsoft Visual C++ 2015.
 
 Corrade will detect the compiler used and refuses to build (or be used) if
-some compatibility mode needs to be enabled. On the other hand, if any of these
-is enabled, Corrade will refuse to build (or be used) with any newer compiler.
+some required compatibility mode is not enabled. On the other hand, if any of
+these is enabled, Corrade will refuse to build (or be used) with a compiler
+that doesn't match given compatibility mode.
 
 The library is constantly evolving and thus some APIs are deprecated and then
 later removed in favor of better ones. To preserve backwards compatibility,
-Corrade is by default built with all deprecated APIs. However, to make your
-code more robust and future-proof, it's recommended to build the library with
-`BUILD_DEPRECATED` disabled.
+Corrade is by default built with all deprecated APIs included. However, to make
+your code more robust and future-proof, it's recommended to build the library
+with `BUILD_DEPRECATED` disabled.
 
-By default the library is built with everything. Using `WITH_*` CMake
-parameters you can specify which parts will be built and which not:
+By default the library is built with everything included. Using the following
+`WITH_*` CMake options you can specify which parts will be built and which
+not:
 
--   `WITH_INTERCONNECT` --- @ref Interconnect library. Enables also building of
-    Utility library.
--   `WITH_PLUGINMANAGER` --- @ref PluginManager library. Enables also building
-    of Utility library.
--   `WITH_TESTSUITE` --- @ref TestSuite library. Enables also building of
-    Utility library.
--   `WITH_UTILITY` --- @ref Utility library. Enabled automatically if
+-   `WITH_INTERCONNECT` --- Build the @ref Interconnect library. Enables also
+    building of the Utility library.
+-   `WITH_PLUGINMANAGER` --- Build the @ref PluginManager library. Enables also
+    building of the Utility library.
+-   `WITH_TESTSUITE` --- Build the @ref TestSuite library. Enables also
+    building of the Utility library.
+-   `WITH_UTILITY` --- Build the @ref Utility library. Enabled automatically if
     `WITH_INTERCONNECT`, `WITH_PLUGINMANAGER` or `WITH_TESTSUITE` is enabled.
     The @ref Containers library and `corrade-rc` executable is built along with
     this library.
@@ -237,7 +375,7 @@ Platform-specific options:
     them properly. Note that when compiling for
     @ref CORRADE_TARGET_WINDOWS_RT "Windows RT" this option is implicitly
     enabled, because the WINAPI functions are not available for this target.
--   `TESTSUITE_TARGET_XCTEST` --- if building for Xcode on OSX or iOS, this
+-   `TESTSUITE_TARGET_XCTEST` --- if building for Xcode on macOS or iOS, this
     will make the @ref TestSuite tests compatible with the XCTest framework and
     thus runnable directly from Xcode and also directly on iOS.
 
@@ -245,48 +383,52 @@ The features used can be conveniently detected in depending projects both in
 CMake and C++ sources, see @ref corrade-cmake and @ref Corrade/Corrade.h for
 more information.
 
-Note that [each namespace](namespaces.html) contains more detailed guide how to
-use given library with CMake.
+Note that each [namespace](namespaces.html) documentation contains more
+detailed guide how to enable given library for building and how to use it with
+CMake.
 
-@subsection building-corrade-tests Building and running unit tests
+@subsection building-corrade-tests Building and running tests
 
-If you want to build also unit tests (which are not built by default), enable
-`BUILD_TESTS` in CMake. Unit tests use Corrade's own @ref Corrade::TestSuite "TestSuite"
+If you want to build also the tests (which are not built by default), enable
+`BUILD_TESTS` in CMake. The tests use Corrade's own @ref Corrade::TestSuite "TestSuite"
 framework and can be run either manually (the binaries are located in `Test/`
-subdirectories of build directory) or using
+subdirectories in the build directory) or using
 
 @code{.sh}
 ctest --output-on-failure
 @endcode
 
-in build directory. On Windows the tests require the library to be installed
-with DLLs accessible through `PATH`. See
+in the build directory. On Windows the tests require the library to be
+installed with DLLs accessible through @cb{.bat} %PATH% @ce. See the
 @ref building-corrade-windows "above Windows documentation" for more
 information.
 
 @subsection building-corrade-doc Building documentation
 
-The documentation (which you are currently reading) is written in **Doxygen**
-and additionally uses **LaTeX** for math formulas. Documentation using the
-stock HTML theme can be build by running
+The documentation (which you are currently reading) is written in
+[Doxygen](http://doxygen.org) and additionally uses **LaTeX** for math
+formulas. Documentation using the stock HTML theme can be build by running
 
 @code{.sh}
 doxygen
 @endcode
 
-in root directory (i.e. where `Doxyfile` is). Resulting HTML documentation
-will be in `build/doc/` directory. You might need to create `build/` directory
-if it doesn't exist yet.
+in the root directory (i.e. where `Doxyfile` is). The resulting HTML
+documentation will be in the `build/doc/` directory. You might need to create
+the `build/` directory if it doesn't exist yet.
 
-The documentation can be also generated using the [m.css Doxygen theme](http://mcss.mosra.cz/doxygen/).
-Use `Doxyfile-mcss` for local build, the `Doxyfile-public` is meant for the
-publicly available documentation at http://doc.magnum.graphics/corrade/.
+The documentation can be also generated using the
+[m.css Doxygen theme](http://mcss.mosra.cz/doxygen/). Use `Doxyfile-mcss` for a
+local build, the `Doxyfile-public` is meant for the publicly available
+documentation at http://doc.magnum.graphics/corrade/. The resulting
+documentation will be either in `build/doc-mcss/` or `build/doc-public/`.
 
 @subsection building-corrade-examples Building examples
 
-The library comes with handful of examples, contained in the `src/examples/`
-directory. Documentation for them is available on page @ref corrade-example-index.
-The examples require Corrade to be installed and they are built separately:
+The library comes with a handful of examples, contained in the `src/examples/`
+directory. Documentation for them is available on the @ref corrade-example-index
+page. The examples require Corrade to be installed and they are built
+separately:
 
 @code{.sh}
 mkdir build-examples && cd build-examples
@@ -294,103 +436,28 @@ cmake ../src/examples
 cmake --build .
 @endcode
 
-@section building-corrade-packages Prepared packages
+@section building-corrade-cross Cross-compiling
 
-@subsection building-corrade-packages-arch ArchLinux packages
-
-In `package/archlinux` directory are three packages - one for stable version,
-one for Git development build and one for building under MinGW-w64. The packages
-are also in AUR under the same names.
-
-There are also a few development PKGBUILDs in `package/archlinux`, which allow
-you to build and install the package directly from source tree without
-downloading anything. The development PKGBUILDs also contain @cb{.sh} check() @ce
-function which will run all unit tests before packaging.
-
-@subsection building-corrade-packages-gentoo Gentoo ebuilds
-
-Gentoo Git ebuild is available in `package/gentoo` directory.
-
-@subsection building-corrade-packages-rpm RPM packages
-
-Every package contains `spec` files for RPM-based distributions in
-`package/rpm/` directory. In addition you will need `rpm-build` package
-and `~/.rpmmacros` file, which contains at least this:
-
-@code{.spec}
-%_topdir /directory/where/to/store/rpms
-%_tmppath /directory/where/to/do/compilation
-%packager Your Name <your@email.com>
-@endcode
-
-First you need to download or create source tarball. Source tarball can
-be downloaded from GitHub (URL is in spec file), or in subdirectory `package/`
-there is an script `make-github-like-archive.sh`, which generates exactly the
-same tarballs.
-
-The downloaded or generated tarball must be moved or copied to
-`%{_topdir}/SOURCES` directory, so `rpmbuild` can find it.
-
-When you have the sources, go to `package/rpm/` directory and run this:
-
-@code{.sh}
-rpmbuild -bb corrade.spec
-@endcode
-
-This will compile and generate library and development RPM for Corrade in
-`%{_topdir}/RPMS`.
-
-@subsection building-corrade-packages-deb DEB packages
-
-There is also `package/debian/` directory with all files needed for building
-Debian packages. In addition you will need `dpkg-dev` and `debhelper` packages.
-Building is easy, just change directory to package root, link or copy
-`package/debian` directory there and run `dpkg-buildpackage`:
-
-@code{.sh}
-ln -s package/debian .
-dpkg-buildpackage
-@endcode
-
-This will compile binary and development packages, which will then appear in
-parent directory. If you need to specify some additional CMake flags, modify
-the last line in `debian/rules`, e.g.:
-
-@code{.sh}
-dh_auto_configure -- -DBUILD_STATIC=ON
-@endcode
-
-@subsection building-corrade-packages-brew Homebrew formulas
-
-macOS Homebrew formulas are in `package/homebrew` directory. Either use the
-`*.rb` files directly or use the tap at https://github.com/mosra/homebrew-magnum :
-
-@code{.sh}
-brew install --HEAD mosra/magnum/corrade
-@endcode
-
-@section building-corrade-cross Crosscompiling
-
-For crosscompiling you need to have native version of Corrade installed,
-because Corrade needs to run `corrade-rc` utility on the host system as part
-of the build process. If native version of `corrade-rc` is not found on the
-system, Corrade will refuse to crosscompile.
+For cross-compiling you need to have a native version of Corrade installed,
+because Corrade needs to run the `corrade-rc` utility on the host system as
+part of the build process. If native version of `corrade-rc` is not found on
+the system, cross-compilation will fail.
 
 You also need to have the toolchains submodule updated. Either run the
-following commands, or, if you build from source archive, download snapshot of
-toolchains repository from https://github.com/mosra/toolchains and put the
-contents in `toolchains/` subdirectory.
+following command, or, if you build from source archive, download a snapshot of
+the toolchains repository from https://github.com/mosra/toolchains and put the
+contents in the `toolchains/` subdirectory.
 
 @code{.sh}
 git submodule update --init
 @endcode
 
-@subsection building-corrade-cross-winrt Crosscompiling for Windows RT
+@subsection building-corrade-cross-winrt Cross-compiling for Windows RT
 
-As said above, you need native build of `corrade-rc` executable. The below
-script assumes that native Corrade build is installed in `C:/Sys` and the
-installation path for WinRT is in `C:/Sys-winrt`. You need at least Windows
-8.1, Visual Studio 2013 and Windows 8.1 Store/Phone SDK installed. Because
+As said above, you need a native build of the `corrade-rc` executable. The
+below script assumes that a native Corrade build is installed in `C:/Sys` and
+the installation path for WinRT is in `C:/Sys-winrt`. You need at least Windows
+8.1, Visual Studio 2015 and Windows 8.1 Store/Phone SDK installed. Because
 WinRT applications run in a sandbox, it's recommended to build the library as
 static so you don't have to bundle all the DLLs. Example:
 
@@ -407,25 +474,24 @@ cmake --build .
 @endcode
 
 Change `WindowsStore` to `WindowsPhone` if you want to build for Windows Phone
-instead. When done, you can install the package using `cmake --build . --target install`
-to make it available for depending projects.
+instead. When done, you can install the package using
+@cb{.bat} cmake --build . --target install @ce to make it available to
+depending projects.
 
-@subsection building-corrade-cross-win Crosscompiling for Windows using MinGW-w64
+@subsection building-corrade-cross-win Cross-compiling for Windows using MinGW-w64
 
-@note This guide is tailored mainly for crosscompiling from ArchLinux. For
-    this system there is also prepared `mingw-w64-corrade` development package
-    in `package/archlinux`, named `PKGBUILD-mingw-w64`. See
+@note This guide is tailored mainly for cross-compiling from ArchLinux. For
+    this system there is also a prepared `mingw-w64-corrade` development
+    package in `package/archlinux`, named `PKGBUILD-mingw-w64`. See
     @ref building-corrade-packages-arch "above" for more information.
 
-You will need MinGW-w64 version of the compiler and libraries, i.e. this
-ArchLinux package:
+You will need a MinGW-w64 version of the compiler and libraries, i.e. the
+`mingw-w64-gcc` ArchLinux package.
 
--   `mingw-w64-gcc`
-
-Then create build directories for 32b/64b build and run cmake and build command
-in them. You may need to modify the `basic-mingw-w64-32.cmake`/`basic-mingw-w64-64.cmake`
-files and `CMAKE_INSTALL_PREFIX` to suit your distribution filesystem
-hierarchy.
+Create build directories for 32b/64b build and run `cmake` and the build
+command in them. You may need to modify the `basic-mingw-w64-32.cmake` /
+`basic-mingw-w64-64.cmake` files and `CMAKE_INSTALL_PREFIX` to suit your
+distribution filesystem hierarchy.
 
 @code{.sh}
 mkdir build-mingw-w64-32 && cd build-mingw-w64-32
@@ -443,17 +509,17 @@ cmake .. \
 cmake --build .
 @endcode
 
-Then you can install the package using `cmake --build . --target install` to
-make it available for depending projects.
+Then you can install the package using @cb{.sh} cmake --build . --target install @ce
+to make it available to depending projects.
 
-@subsection building-corrade-cross-emscripten Crosscompiling for Emscripten
+@subsection building-corrade-cross-emscripten Cross-compiling for Emscripten
 
-You will need [Emscripten](http://kripken.github.io/emscripten-site/docs/getting_started/Tutorial.html)
-installed and configured. The toolchains require CMake 3.7 or newer to properly
-set compiler and linker flags.
+You will need [Emscripten](http://kripken.github.io/emscripten-site/) installed
+and configured. The toolchains require CMake 3.7 or newer to properly set
+compiler and linker flags.
 
 There are two toolchain files. The `generic/Emscripten.cmake` is for the
-classical (asm.js) build, the `generic/Emscripten-wasm.cmake` is for
+classical (asm.js) build, the `generic/Emscripten-wasm.cmake` is for a
 WebAssembly build. Don't forget to adapt `EMSCRIPTEN_PREFIX` variable in
 `generic/Emscripten*.cmake` to path where Emscripten is installed; you can also
 pass it explicitly on command-line using `-DEMSCRIPTEN_PREFIX`. Default is
@@ -461,8 +527,9 @@ pass it explicitly on command-line using `-DEMSCRIPTEN_PREFIX`. Default is
 porting and they are generally slower, thus `BUILD_STATIC` is implicitly
 enabled.
 
-Then create build directory and run cmake and build command in it. Be sure to
-set `CMAKE_INSTALL_PREFIX` to path contained in `EMSCRIPTEN_TOOLCHAIN_PATH`.
+Then create build directory and run `cmake` and the build command in it. Be
+sure to set `CMAKE_INSTALL_PREFIX` to a path contained in
+`EMSCRIPTEN_TOOLCHAIN_PATH`.
 
 @code{.sh}
 mkdir build-emscripten && cd build-emscripten
@@ -473,25 +540,24 @@ cmake .. \
 cmake --build .
 @endcode
 
-Then you can install the library using `cmake --build . --target install` to
-make it available for depending projects.
+Then you can install the library using @cb{.sh} cmake --build . --target install @ce
+to make it available to depending projects.
 
 If you have Node.js installed, you can also build and run unit tests using
-`ctest`. See `BUILD_TESTS` above.
+`ctest`. See the `BUILD_TESTS` option @ref building-corrade-tests "above".
 
 For ArchLinux there are also prepared package files in `package/archlinux`,
-named `PKGBUILD-emscripten`, `PKGBUILD-emscripten-noopt` and
-`PKGBUILD-emscripten-wasm`, see @ref building-corrade-packages-arch "above"
-for more information. The first file is for optimized asm.js build (*slow* to
-compile), the second for unoptimized build (faster to compile) and the third
-for WebAssembly build.
+named `PKGBUILD-emscripten` and `PKGBUILD-emscripten-wasm`, see
+@ref building-corrade-packages-arch "above" for more information. The first
+file is for optimized asm.js build (*slow* to compile), the second for a
+WebAssembly build.
 
-@subsection building-corrade-cross-ios Crosscompiling for iOS
+@subsection building-corrade-cross-ios Cross-compiling for iOS
 
-You will need macOS and Xcode installed.
+You will need macOS with Xcode installed.
 
-Set `CMAKE_OSX_ROOT` to SDK you want to target and enable all desired
-architectures in `CMAKE_OSX_ARCHITECTURES`. Set `CMAKE_INSTALL_PREFIX` to
+Set `CMAKE_OSX_ROOT` to the SDK you want to target and enable all desired
+architectures in `CMAKE_OSX_ARCHITECTURES`. Set `CMAKE_INSTALL_PREFIX` to the
 prefix where you want to store your iOS dependencies for other projects.
 
 As every application is in its own sandbox, it doesn't make sense to build
@@ -505,25 +571,26 @@ cmake .. \
     -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk \
     -DCMAKE_OSX_ARCHITECTURES="arm64;armv7;armv7s" \
     -DCMAKE_INSTALL_PREFIX=~/ios-libs \
-    -DBUILD_STATIC=ON -G Xcode
+    -DBUILD_STATIC=ON \
+    -G Xcode
 cmake --build .
 @endcode
 
-Then you can install the library using `cmake --build . --target install` to
-make it available for depending projects.
+Then you can install the library using @cb{.sh} cmake --build . --target install @ce
+to make it available to depending projects.
 
-@subsection building-corrade-cross-android Crosscompiling for Android ARM and x86
+@subsection building-corrade-cross-android Cross-compiling for Android ARM and x86
 
 You will need [Android NDK](https://developer.android.com/tools/sdk/ndk/index.html)
 installed and configured.
 
-Don't forget to adapt `ANDROID_NDK_ROOT` in `generic/Android-*.cmake` to path
+Don't forget to adapt `ANDROID_NDK_ROOT` in `generic/Android-*.cmake` to a path
 where NDK is installed. Default is `/opt/android-ndk`. Adapt also
 `ANDROID_SYSROOT` to your preferred API level. You might also need to update
 `ANDROID_TOOLCHAIN_PREFIX` and `ANDROID_TOOLCHAIN_ROOT` to fit your system.
 
-Then create build directory and run cmake and build command in it. Be sure to
-set `CMAKE_INSTALL_PREFIX` to `/usr` subdirectory of `ANDROID_SYSROOT`.
+Then create a build directory and run `cmake` and the build command in it. Be
+sure to set `CMAKE_INSTALL_PREFIX` to `/usr` subdirectory of `ANDROID_SYSROOT`.
 
 Note that `BUILD_STATIC` is implicitly enabled, because manually loading all
 depending shared libraries using JNI would be too inconvenient.
@@ -545,36 +612,39 @@ cmake --build .
 @endcode
 
 Then you can install both versions using `cmake --build . --target install` to
-make them available for depending projects.
+make them available to depending projects.
 
 For ArchLinux there are also prepared package files in `package/archlinux`,
 named `PKGBUILD-android-arm` and `PKGBUILD-android-x86`, see
 @ref building-corrade-packages-arch "above" for more information.
 
-On Windows it's possible that you get the following CMake error when
-configuring the project:
-
-> CMAKE_SYSTEM_NAME is 'Android' but 'NVIDIA Nsight Tegra Visual Studio
-> Edition' is not installed.
-
-This is because MSVC as the default generator on Windows is not able to
-build arbitrary Android project. To fix it, use a different generator (for
-example Ninja, by passing `-G Ninja` to CMake).
+@attention
+    On Windows it's possible that you get the following CMake error when
+    configuring the project:
+@attention
+    <blockquote>
+    CMAKE_SYSTEM_NAME is 'Android' but 'NVIDIA Nsight Tegra Visual Studio
+    Edition' is not installed.
+    </blockquote>
+@attention
+    This is because MSVC as the default generator on Windows is not able to
+    build arbitrary Android projects. To fix it, use a different generator (for
+    example Ninja, by passing `-G Ninja` to CMake).
 
 @section building-corrade-ci Continuous Integration
 
 @subsection building-corrade-ci-travis Travis
 
-In `package/ci/` there is a `travis.yml` file with Linux GCC 4.7, macOS Clang,
-iOS, Emscripten, Android, AddressSanitizer and ThreadSanitizer configuration.
-Online at https://travis-ci.org/mosra/corrade. The Linux build has code
-coverage reports available online at https://coveralls.io/github/mosra/corrade.
+In `package/ci/` there is a `travis.yml` file with Linux GCC 4.7, macOS, iOS,
+Emscripten, Android, AddressSanitizer and ThreadSanitizer configuration. Online
+at https://travis-ci.org/mosra/corrade. The Linux build has code coverage
+reports available online at https://coveralls.io/github/mosra/corrade.
 
 @subsection building-corrade-ci-appveyor AppVeyor
 
 In `package/ci/` there is an `appveyor.yml` file with Windows desktop MSVC,
-MinGW and Windows RT configuration. Online at https://ci.appveyor.com/project/mosra/corrade.
-
+MinGW and Windows RT configuration. Online at
+https://ci.appveyor.com/project/mosra/corrade.
 */
 
 }
