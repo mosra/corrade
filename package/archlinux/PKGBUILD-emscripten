@@ -26,12 +26,17 @@ build() {
     cmake .. \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr/lib/emscripten/system \
-        -DBUILD_TESTS=ON
+        -DBUILD_TESTS=OFF
     ninja
 }
 
 check() {
     cd "$_rootdir/build-emscripten"
+
+    # So tests are not even built (takes AGES) when the user doesn't want to
+    cmake . -DBUILD_TESTS=ON
+    ninja
+
     CORRADE_TEST_COLOR=ON ctest --output-on-failure
 }
 
