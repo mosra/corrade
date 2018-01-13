@@ -37,11 +37,47 @@ your platform of choice. See @ref building-corrade-manual if you want to have
 more control and @ref building-corrade-cross for cross-compiling to other
 platforms.
 
+-   @ref building-corrade-packages-vcpkg
 -   @ref building-corrade-packages-arch
 -   @ref building-corrade-packages-deb
 -   @ref building-corrade-packages-gentoo
 -   @ref building-corrade-packages-rpm
 -   @ref building-corrade-packages-brew
+
+@subsection building-corrade-packages-vcpkg Vcpkg packages on Windows
+
+Corrade is available as a [Vcpkg](https://github.com/Microsoft/vcpkg) package.
+After setting up Vcpkg like described in the README, you can install a stable
+pinned version of Corrade like this:
+
+@code{.bat}
+vcpkg install corrade
+@endcode
+
+To install the latest Git revision, use
+
+@code{.bat}
+vcpkg install corrade --head
+@endcode
+
+Packages installed using Vcpkg can be used straight away in Visual Studio ---
+all you need to do is to @cpp #include @ce the headers you want, the
+buildsystem will do all needed library linking and setup behind the scenes
+automatically. <em>(Cool, isn't it?)</em>
+
+In order to make Corrade installed using Vcpkg available to CMake-based
+projects, specify the Vcpkg toolchain file on the command line when invoking
+CMake in a fresh build directory, for example:
+
+@code{.bat}
+mkdir build && cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=C:/src/vcpkg/scripts/buildsystems/vcpkg.cmake
+@endcode
+
+If you want to pass additional flags to CMake or
+@ref building-corrade-features "enable / disable additional features", add them
+to `OPTIONS` in @cmake vcpkg_configure_cmake() @ce inside the
+`ports/corrade/portfile.cmake` file in your local Vcpkg installation.
 
 @subsection building-corrade-packages-arch ArchLinux packages
 
