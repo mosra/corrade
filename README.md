@@ -43,77 +43,14 @@ FEATURES
 Check also the Magnum Project [Feature Overview pages](http://magnum.graphics/features/)
 for further information.
 
-BUILDING CORRADE
-================
-
-You can either use packaging scripts, which are stored in the
-[package/](https://github.com/mosra/corrade/tree/master/package)
-subdirectory, or compile and install everything manually. A short guide is
-below, for complete building documentation covering all platforms head over to
-the [Corrade documentation](http://doc.magnum.graphics/corrade/building-corrade.html).
-
-Minimal dependencies
---------------------
-
--   C++ compiler with good C++11 support. Compilers which are tested to have
-    everything needed are **GCC** >= 4.7, **Clang** >= 3.1 and **MSVC** >= 2015.
-    For Windows you can also use **MinGW-w64**.
--   **CMake** >= 2.8.12
-
-Compilation, installation
--------------------------
-
-The library can be built and installed using these commands:
-
-```sh
-git clone git://github.com/mosra/corrade && cd corrade
-mkdir -p build && cd build
-cmake -DCMAKE_INSTALL_PREFIX=/usr ..
-make -j
-make install # sudo may be required
-```
-
-Building and running unit tests
--------------------------------
-
-If you want to build also unit tests (which are not built by default), pass
-`-DBUILD_TESTS=ON` to CMake. Unit tests use Corrade's own TestSuite framework
-and can be run using
-
-```sh
-ctest --output-on-failure
-````
-
-in build directory. Everything should pass ;)
-
-Building documentation
-----------------------
-
-The documentation is written using [Doxygen](https://doxygen.org). It can be
-built by running
-
-```sh
-doxygen
-```
-
-in the root directory (i.e. where `Doxyfile` is). Resulting HTML documentation
-will be in the `build/doc/` directory. You may need to create the `build/`
-directory if it doesn't exist yet. Snapshot of the documentation is
-[also available for online viewing](http://doc.magnum.graphics/corrade/).
-
 GETTING STARTED
 ===============
 
-The best way to get started is to read some [examples and tutorials](http://doc.magnum.graphics/corrade/corrade-example-index.html). Sources for them are contained in the
-[src/examples](https://github.com/mosra/corrade/tree/master/src/examples)
-directory and are built separately, requiring Corrade to be installed:
-
-```sh
-mkdir -p build-examples
-cd build-examples
-cmake ../src/examples
-make -j
-```
+Download, build and install Corrade as explained in
+[the building documentation](http://doc.magnum.graphics/corrade/building-corrade.html)
+— we provide packages for many platforms, including Windows, Linux and macOS.
+After that, the best way to get started is to read some
+[examples and tutorials](http://doc.magnum.graphics/corrade/corrade-example-index.html).
 
 CONTACT & SUPPORT
 =================

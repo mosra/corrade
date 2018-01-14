@@ -36,8 +36,9 @@ head over to the [project homepage](http://magnum.graphics/corrade/).
 @section corrade-mainpage-getting-started Getting started
 
 Download, build and install Corrade as explained in @ref building-corrade ---
-we provide ready-made packages for many platforms. After that, the best way to
-get started is to read some @ref corrade-example-index "examples and tutorials".
+we provide packages for many platforms, including Windows, Linux and macOS.
+After that, the best way to get started is to read some
+@ref corrade-example-index "examples and tutorials".
 
 @section corrade-mainpage-contact Contact & support
 
