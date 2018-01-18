@@ -219,6 +219,8 @@ namespace Corrade {
 -   `MACOSX_RPATH` is now enabled by default on CMake 3.0+
 -   Enabling only C++ in CMake @cmake project() @ce call, if possible, to speed
     up initial CMake run
+-   Properly passing `/std:c++14` or `/std:c++14` when `CORRADE_CXX_STANDARD`
+    is set to `14` or `17`
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
@@ -290,6 +292,9 @@ namespace Corrade {
 -   Various updates and clarifications to the @ref corrade-coding-style page
 -   All example code is put into public domain (or UNLICENSE) to free you from
     any legal obstacles when reusing the code in your apps.
+-   The @ref building-corrade documentation now prefers package installation
+    instead of manual build
+-   Documented how to use Vcpkg packages
 
 @section corrade-changelog-2015-05 2015-05 snapshot
 
