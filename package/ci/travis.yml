@@ -29,13 +29,28 @@ matrix:
     env:
     - JOBID=linux-sanitizers
     - TARGET=desktop-sanitizers
-    - CMAKE_CXX_FLAGS="-fsanitize=address"
+    - CMAKE_CXX_FLAGS="-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
     addons:
       apt:
         sources:
         - llvm-toolchain-trusty
         packages:
         - clang-3.8
+  - language: cpp
+    os: linux
+    compiler: clang
+    env:
+    - TARGET=desktop-sanitizers
+    # It's either ASan or MSan, can't have both at the same time
+    - CMAKE_CXX_FLAGS="-fsanitize=memory -fsanitize-memory-track-origins -stdlib=libc++"
+    addons:
+      apt:
+        sources:
+        - debian-sid
+        packages:
+        - libc++-dev
+        - clang-3.8
+        - cmake
   - language: cpp
     os: osx
     compiler: clang

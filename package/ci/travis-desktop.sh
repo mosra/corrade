@@ -11,7 +11,7 @@ cmake .. \
     -DBUILD_DEPRECATED=$BUILD_DEPRECATED \
     -DCMAKE_BUILD_TYPE=Debug
 make -j install
-ASAN_OPTIONS="color=always" LSAN_OPTIONS="color=always" CORRADE_TEST_COLOR=ON ctest -V
+ASAN_OPTIONS="color=always" LSAN_OPTIONS="color=always" UBSAN_OPTIONS="color=always" MSAN_OPTIONS="color=always" CORRADE_TEST_COLOR=ON ctest -V
 cd ..
 
 # Examples
