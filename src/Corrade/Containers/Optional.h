@@ -250,6 +250,20 @@ template<class T> class Optional {
             return _value.v;
         }
 
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @copybrief operator*()
+         * @deprecated Included only for compatibility with `std::optional`.
+         *      Use @ref operator*() instead.
+         */
+        CORRADE_DEPRECATED("use operator*() instead") T& value() { return operator*(); }
+
+        /** @copybrief operator*()
+         * @deprecated Included only for compatibility with `std::optional`.
+         *      Use @ref operator*() instead.
+         */
+        CORRADE_DEPRECATED("use operator*() instead") const T& value() const { return operator*(); }
+        #endif
+
         /**
          * @brief Emplace a new value
          *
