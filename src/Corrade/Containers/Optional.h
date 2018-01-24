@@ -126,10 +126,10 @@ template<class T> class Optional {
         }
 
         /** @brief Copy constructor */
-        Optional(const Optional<T>& other);
+        Optional(const Optional<T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value);
 
         /** @brief Move constructor */
-        Optional(Optional<T>&& other);
+        Optional(Optional<T>&& other) noexcept(std::is_nothrow_move_constructible<T>::value);
 
         /**
          * @brief Copy assignment
@@ -137,7 +137,7 @@ template<class T> class Optional {
          * If the object already contains a value, calls its destructor.
          * Copy-constructs the value from @p other using placement-new.
          */
-        Optional<T>& operator=(const Optional<T>& other);
+        Optional<T>& operator=(const Optional<T>& other) noexcept(std::is_nothrow_copy_assignable<T>::value);
 
         /**
          * @brief Move assignment
@@ -147,7 +147,7 @@ template<class T> class Optional {
          * contains a value, move-constructs the value from it using placement
          * new.
          */
-        Optional<T>& operator=(Optional<T>&& other);
+        Optional<T>& operator=(Optional<T>&& other) noexcept(std::is_nothrow_move_assignable<T>::value);
 
         /**
          * @brief Destructor
@@ -328,21 +328,21 @@ template<class T> inline Optional<typename std::decay<T>::type> optional(T&& val
     return Optional<typename std::decay<T>::type>{std::forward<T>(value)};
 }
 
-template<class T> Optional<T>::Optional(const Optional<T>& other): _set(other._set) {
+template<class T> Optional<T>::Optional(const Optional<T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value): _set(other._set) {
     if(_set) new(&_value.v) T{other._value.v};
 }
 
-template<class T> Optional<T>::Optional(Optional<T>&& other): _set(other._set) {
+template<class T> Optional<T>::Optional(Optional<T>&& other) noexcept(std::is_nothrow_move_constructible<T>::value): _set(other._set) {
     if(_set) new(&_value.v) T{std::move(other._value.v)};
 }
 
-template<class T> Optional<T>& Optional<T>::operator=(const Optional<T>& other) {
+template<class T> Optional<T>& Optional<T>::operator=(const Optional<T>& other) noexcept(std::is_nothrow_copy_assignable<T>::value) {
     if(_set) _value.v.~T();
     if((_set = other._set)) new(&_value.v) T{other._value.v};
     return *this;
 }
 
-template<class T> Optional<T>& Optional<T>::operator=(Optional<T>&& other) {
+template<class T> Optional<T>& Optional<T>::operator=(Optional<T>&& other) noexcept(std::is_nothrow_move_assignable<T>::value) {
     if(_set && other._set) {
         using std::swap;
         swap(other._value.v, _value.v);

@@ -123,22 +123,22 @@ struct Copyable {
     static int copied;
     static int moved;
 
-    Copyable(int a): a{a} { ++constructed; }
+    Copyable(int a) noexcept: a{a} { ++constructed; }
     ~Copyable() { ++destructed; }
-    Copyable(const Copyable& other): a{other.a} {
+    Copyable(const Copyable& other) noexcept: a{other.a} {
         ++constructed;
         ++copied;
     }
-    Copyable(Copyable&& other): a{other.a} {
+    Copyable(Copyable&& other) noexcept: a{other.a} {
         ++constructed;
         ++moved;
     }
-    Copyable& operator=(const Copyable& other) {
+    Copyable& operator=(const Copyable& other) noexcept {
         a = other.a;
         ++copied;
         return *this;
     }
-    Copyable& operator=(Copyable&& other) {
+    Copyable& operator=(Copyable&& other) noexcept {
         a = other.a;
         ++moved;
         return *this;
@@ -245,6 +245,15 @@ void OptionalTest::constructCopy() {
     CORRADE_COMPARE(Copyable::destructed, 2);
     CORRADE_COMPARE(Copyable::copied, 1);
     CORRADE_COMPARE(Copyable::moved, 0);
+
+    CORRADE_VERIFY(std::is_nothrow_copy_constructible<Copyable>::value);
+    CORRADE_VERIFY(std::is_nothrow_copy_constructible<Optional<Copyable>>::value);
+    CORRADE_VERIFY(std::is_nothrow_copy_assignable<Copyable>::value);
+    CORRADE_VERIFY(std::is_nothrow_copy_assignable<Optional<Copyable>>::value);
+    CORRADE_VERIFY(std::is_nothrow_move_constructible<Copyable>::value);
+    CORRADE_VERIFY(std::is_nothrow_move_constructible<Optional<Copyable>>::value);
+    CORRADE_VERIFY(std::is_nothrow_move_assignable<Copyable>::value);
+    CORRADE_VERIFY(std::is_nothrow_move_assignable<Optional<Copyable>>::value);
 }
 
 void OptionalTest::constructCopyMake() {
@@ -272,6 +281,11 @@ void OptionalTest::constructMove() {
     CORRADE_COMPARE(Movable::constructed, 2);
     CORRADE_COMPARE(Movable::destructed, 2);
     CORRADE_COMPARE(Movable::moved, 1);
+
+    CORRADE_VERIFY(std::is_nothrow_move_constructible<Movable>::value);
+    CORRADE_VERIFY(std::is_nothrow_move_constructible<Optional<Movable>>::value);
+    CORRADE_VERIFY(std::is_nothrow_move_assignable<Movable>::value);
+    CORRADE_VERIFY(std::is_nothrow_move_assignable<Optional<Movable>>::value);
 }
 
 void OptionalTest::constructMoveMake() {
