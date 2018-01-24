@@ -23,6 +23,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <vector>
+
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/TestSuite/Tester.h"
 
@@ -69,6 +71,8 @@ struct OptionalTest: TestSuite::Tester {
     void resetCounters();
 
     void access();
+
+    void vectorOfMovableOptional();
 };
 
 OptionalTest::OptionalTest() {
@@ -106,7 +110,9 @@ OptionalTest::OptionalTest() {
               &OptionalTest::emplaceNull,
               &OptionalTest::emplaceSet}, &OptionalTest::resetCounters, &OptionalTest::resetCounters);
 
-    addTests({&OptionalTest::access});
+    addTests({&OptionalTest::access,
+
+              &OptionalTest::vectorOfMovableOptional});
 }
 
 namespace {
@@ -153,13 +159,13 @@ struct Movable {
 
     Movable(int a): a{a} { ++constructed; }
     Movable(const Movable&) = delete;
-    Movable(Movable&& other): a(other.a) {
+    Movable(Movable&& other) noexcept: a(other.a) {
         ++constructed;
         ++moved;
     }
     ~Movable() { ++destructed; }
     Movable& operator=(const Movable&) = delete;
-    Movable& operator=(Movable&& other) {
+    Movable& operator=(Movable&& other) noexcept {
         a = other.a;
         ++moved;
         return *this;
@@ -587,6 +593,20 @@ void OptionalTest::access() {
     CORRADE_COMPARE(ca->a, 32);
     CORRADE_COMPARE((*a).a, 32);
     CORRADE_COMPARE((*ca).a, 32);
+}
+
+void OptionalTest::vectorOfMovableOptional() {
+    std::vector<Optional<Movable>> vec;
+
+    vec.emplace_back(23);
+    vec.emplace_back();
+    vec.emplace_back(Containers::NullOpt);
+    vec.push_back(Movable{67});
+
+    CORRADE_COMPARE(vec[0]->a, 23);
+    CORRADE_VERIFY(!vec[1]);
+    CORRADE_VERIFY(!vec[2]);
+    CORRADE_COMPARE(vec[3]->a, 67);
 }
 
 }}}
