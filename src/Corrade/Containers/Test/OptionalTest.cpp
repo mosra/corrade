@@ -23,6 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <sstream>
 #include <vector>
 
 #include "Corrade/Containers/Optional.h"
@@ -71,6 +72,7 @@ struct OptionalTest: TestSuite::Tester {
     void resetCounters();
 
     void access();
+    void debug();
 
     void vectorOfMovableOptional();
 };
@@ -111,6 +113,7 @@ OptionalTest::OptionalTest() {
               &OptionalTest::emplaceSet}, &OptionalTest::resetCounters, &OptionalTest::resetCounters);
 
     addTests({&OptionalTest::access,
+              &OptionalTest::debug,
 
               &OptionalTest::vectorOfMovableOptional});
 }
@@ -607,6 +610,12 @@ void OptionalTest::access() {
     CORRADE_COMPARE(ca->a, 32);
     CORRADE_COMPARE((*a).a, 32);
     CORRADE_COMPARE((*ca).a, 32);
+}
+
+void OptionalTest::debug() {
+    std::stringstream out;
+    Debug{&out} << Containers::optional(42) << Optional<int>{} << Containers::NullOpt;
+    CORRADE_COMPARE(out.str(), "42 Containers::NullOpt Containers::NullOpt\n");
 }
 
 void OptionalTest::vectorOfMovableOptional() {

@@ -328,6 +328,17 @@ template<class T> inline Optional<typename std::decay<T>::type> optional(T&& val
     return Optional<typename std::decay<T>::type>{std::forward<T>(value)};
 }
 
+/** @debugoperator{Optional} */
+inline Utility::Debug& operator<<(Utility::Debug& debug, NullOptT) {
+    return debug << "Containers::NullOpt";
+}
+
+/** @debugoperator{Optional} */
+template<class T> Utility::Debug& operator<<(Utility::Debug& debug, const Optional<T>& value) {
+    if(!value) return debug << NullOpt;
+    else return debug << *value;
+}
+
 template<class T> Optional<T>::Optional(const Optional<T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value): _set(other._set) {
     if(_set) new(&_value.v) T{other._value.v};
 }
