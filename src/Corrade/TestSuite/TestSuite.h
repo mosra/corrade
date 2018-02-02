@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Forward declarations for @ref Corrade::TestSuite namespace
+ * @brief Forward declarations for the @ref Corrade::TestSuite namespace
  */
 
 namespace Corrade { namespace TestSuite {

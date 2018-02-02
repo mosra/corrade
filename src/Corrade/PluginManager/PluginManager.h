@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Forward declarations for @ref Corrade::PluginManager namespace
+ * @brief Forward declarations for the @ref Corrade::PluginManager namespace
  */
 
 namespace Corrade { namespace PluginManager {
