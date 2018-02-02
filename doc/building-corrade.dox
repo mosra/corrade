@@ -682,14 +682,18 @@ named `PKGBUILD-android-arm` and `PKGBUILD-android-x86`, see
 
 In `package/ci/` there is a `travis.yml` file with Linux GCC 4.7, macOS, iOS,
 Emscripten, Android, AddressSanitizer and ThreadSanitizer configuration. Online
-at https://travis-ci.org/mosra/corrade. The builds have code coverage
-reports available online at https://codecov.io/gh/mosra/corrade.
+at https://travis-ci.org/mosra/corrade.
 
 @subsection building-corrade-ci-appveyor AppVeyor
 
 In `package/ci/` there is an `appveyor.yml` file with Windows desktop MSVC,
 MinGW and Windows RT configuration. Online at
 https://ci.appveyor.com/project/mosra/corrade.
+
+@subsection building-corrade-ci-coverage Codecov.io
+
+Linux, macOS and Windows MinGW builds contribute to a combined code coverage
+report, available online at https://codecov.io/gh/mosra/corrade.
 */
 
 }

@@ -40,6 +40,7 @@ notifications:
 install:
 - cinst ninja
 - set PATH=C:/tools/ninja;%PATH%
+- IF "%TARGET%" == "desktop" IF "%COMPILER%" == "mingw" pip install codecov
 
 build_script:
 - IF "%TARGET%" == "desktop" IF "%COMPILER%" == "msvc" call package\ci\appveyor-desktop.bat
