@@ -4,6 +4,7 @@ addons:
   apt:
     packages:
     - g++-4.7
+    - ninja-build
 
 matrix:
   include:
@@ -20,6 +21,7 @@ matrix:
       apt:
         packages:
         - g++-4.7
+        - ninja-build
         - lcov
   - language: cpp
     os: linux
@@ -42,6 +44,7 @@ matrix:
         sources:
         - llvm-toolchain-trusty
         packages:
+        - ninja-build
         - clang-3.8
   - language: cpp
     os: osx
@@ -74,6 +77,7 @@ matrix:
         sources:
         - ubuntu-toolchain-r-test
         packages:
+        - ninja-build
         - g++-4.7
     android:
       components:
@@ -106,6 +110,7 @@ install:
 # PATH setting can't be cached, so it's separate (bit me two times already)
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "android" ] && [ ! -e "$HOME/cmake/bin" ]; then cd $HOME ; wget -nc --no-check-certificate https://cmake.org/files/v2.8/cmake-2.8.12.2-Linux-i386.tar.gz && mkdir -p cmake && cd cmake && tar --strip-components=1 -xzvf ../cmake-2.8.12.2-Linux-i386.tar.gz && cd $TRAVIS_BUILD_DIR ; fi
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "android" ]; then export PATH=$HOME/cmake/bin:$PATH; fi
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then HOMEBREW_NO_AUTO_UPDATE=1 brew install ninja; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then HOMEBREW_NO_AUTO_UPDATE=1 brew install lcov; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "ios-simulator" ]; then gem install xcpretty; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "emscripten" ]; then brew install emscripten && export LLVM=/usr/local/opt/emscripten/libexec/llvm/bin && emcc; fi

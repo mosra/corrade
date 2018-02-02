@@ -11,8 +11,9 @@ cmake .. \
     -DWITH_INTERCONNECT=OFF \
     -DWITH_PLUGINMANAGER=OFF \
     -DWITH_TESTSUITE=OFF \
-    -DCMAKE_BUILD_TYPE=Release
-make -j install
+    -DCMAKE_BUILD_TYPE=Release \
+    -G Ninja
+ninja install
 cd ..
 
 # Crosscompile

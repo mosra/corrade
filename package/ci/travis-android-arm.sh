@@ -11,8 +11,9 @@ cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
     -DWITH_INTERCONNECT=OFF \
     -DWITH_PLUGINMANAGER=OFF \
-    -DWITH_TESTSUITE=OFF
-make -j install
+    -DWITH_TESTSUITE=OFF \
+    -G Ninja
+ninja install
 cd ..
 
 # Crosscompile
@@ -21,8 +22,9 @@ ANDROID_NDK=$TRAVIS_BUILD_DIR/android-ndk-r10e cmake .. \
     -DCMAKE_TOOLCHAIN_FILE=../toolchains/generic/Android-ARM.cmake \
     -DCMAKE_BUILD_TYPE=Release \
     -DCORRADE_RC_EXECUTABLE=$HOME/deps-native/bin/corrade-rc \
-    -DBUILD_TESTS=ON
-make -j
+    -DBUILD_TESTS=ON \
+    -G Ninja
+ninja
 
 # Start simulator and run tests
 echo no | android create avd --force -n test -t android-19 --abi armeabi-v7a
