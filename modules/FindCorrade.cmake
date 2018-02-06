@@ -321,7 +321,7 @@ set(CORRADE_USE_MODULE ${_CORRADE_MODULE_DIR}/UseCorrade.cmake)
 set(CORRADE_LIB_SUFFIX_MODULE ${_CORRADE_MODULE_DIR}/CorradeLibSuffix.cmake)
 
 # Ensure that all inter-component dependencies are specified as well
-foreach(_component ${Corrade_FIND_COMPONENTS})
+foreach(_component Containers PluginManager TestSuite Utility rc)
     string(TOUPPER ${_component} _COMPONENT)
 
     if(_component STREQUAL Containers)
@@ -342,7 +342,10 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
             set(Corrade_FIND_REQUIRED_${_dependency} TRUE)
         endforeach()
     endif()
+endforeach()
 
+foreach(_component ${Corrade_FIND_COMPONENTS})
+    string(TOUPPER ${_component} _COMPONENT)
     list(APPEND _CORRADE_ADDITIONAL_COMPONENTS ${_CORRADE_${_COMPONENT}_DEPENDENCIES})
 endforeach()
 
