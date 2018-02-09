@@ -26,18 +26,21 @@
 corrade_add_test(TestSuiteFailingTest FailingTest.cpp)
 set_tests_properties(TestSuiteFailingTest PROPERTIES WILL_FAIL ON)
 
-corrade_add_test(TestSuiteTesterTest TesterTest.cpp)
-
 if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
+    set(TEST_DIR ".")
     set(RELATIVE_TEST_DIR ".")
     set(ABSOLUTE_TEST_DIR ".")
 else()
+    set(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
     set(RELATIVE_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
     set(ABSOLUTE_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/BundledFilesTestFiles)
 endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
+
+corrade_add_test(TestSuiteTesterTest TesterTest.cpp FILES test-output.txt)
+target_include_directories(TestSuiteTesterTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 corrade_add_test(TestSuiteBenchmarkStatsTest BenchmarkStatsTest.cpp)
 

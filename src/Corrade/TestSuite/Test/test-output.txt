@@ -1,0 +1,168 @@
+Starting TesterTest::Test with 57 test cases...
+     ? [01] <unknown>()
+    OK [02] trueExpression()
+  FAIL [03] falseExpression() at here.cpp on line 213
+        Expression 5 != 5 failed.
+    OK [04] equal()
+  FAIL [05] nonEqual() at here.cpp on line 223
+        Values a and b are not the same, actual is
+        5
+        but expected
+        3
+ XFAIL [06] expectFail() at here.cpp on line 229
+        The world is not mad yet. 2 + 2 and 5 are not equal.
+ XFAIL [06] expectFail() at here.cpp on line 230
+        The world is not mad yet. Expression false == true failed.
+    OK [06] expectFail()
+ XPASS [07] unexpectedPassExpression() at here.cpp on line 243
+        Expression true == true was expected to fail.
+ XPASS [08] unexpectedPassEqual() at here.cpp on line 248
+        2 + 2 and 4 are not expected to be equal.
+    OK [09] compareAs()
+  FAIL [10] compareAsFail() at here.cpp on line 256
+        Length of actual \"meh\" doesn't match length of expected \"hello\" with epsilon 0
+    OK [11] compareWith()
+  FAIL [12] compareWithFail() at here.cpp on line 264
+        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9
+  FAIL [13] compareImplicitConversionFail() at here.cpp on line 269
+        Values \"holla\" and hello are not the same, actual is
+        holla
+        but expected
+        hello
+  SKIP [14] skip()
+        This testcase is skipped.
+    OK [15] testCaseName<15>()
+     ? [16] testCaseName<27>()
+    OK [17] testCaseDescription(hello)
+       [18] setting up...
+       [18] tearing down...
+    OK [18] setupTeardown()
+       [19] setting up...
+       [19] tearing down...
+     ? [19] <unknown>()
+       [20] setting up...
+  FAIL [20] setupTeardownFail() at here.cpp on line 306
+        Expression false failed.
+       [20] tearing down...
+       [21] setting up...
+  SKIP [21] setupTeardownSkip()
+        Skipped.
+       [21] tearing down...
+    OK [22] instancedTest(zero)
+    OK [23] instancedTest(1)
+  FAIL [24] instancedTest(two) at here.cpp on line 331
+        Values data.value*data.value*data.value and data.result are not the same, actual is
+        125
+        but expected
+        122
+    OK [25] instancedTest(3)
+    OK [26] instancedTest(last)
+0
+1
+2
+3
+4
+    OK [27] repeatedTest()@5
+     ? [28] <unknown>()@50
+  FAIL [29] repeatedTestFail()@18 at here.cpp on line 342
+        Expression _i++ < 17 failed.
+  SKIP [30] repeatedTestSkip()@29
+        Too late.
+       [31] setting up...
+       [31] tearing down...
+       [31] setting up...
+       [31] tearing down...
+    OK [31] repeatedTestSetupTeardown()@2
+       [32] setting up...
+       [32] tearing down...
+       [32] setting up...
+       [32] tearing down...
+     ? [32] <unknown>()@2
+       [33] setting up...
+  FAIL [33] repeatedTestSetupTeardownFail()@1 at here.cpp on line 356
+        Expression false failed.
+       [33] tearing down...
+       [34] setting up...
+  SKIP [34] repeatedTestSetupTeardownSkip()@1
+        Skipped.
+       [34] tearing down...
+Benchmark begin
+Benchmark iteration
+Benchmark iteration
+Benchmark end: 300
+Benchmark begin
+Benchmark iteration
+Benchmark iteration
+Benchmark end: 400
+Benchmark begin
+Benchmark iteration
+Benchmark iteration
+Benchmark end: 500
+ BENCH [35] benchmark()@3
+        2 iterations per repeat. Space clock time per iteration:
+        Min: 150.00 ns       Max: 250.00 ns       Avg: 200.00 ns
+ BENCH [36] benchmarkUnits(ones)@10
+        10000 iterations per repeat. Custom benchmark per iteration:
+        Min:   0.15          Max:   1.05          Avg:   0.60
+ BENCH [37] benchmarkUnits(thousands)@10
+        10000 iterations per repeat. Custom benchmark per iteration:
+        Min:   0.15 k        Max:   1.05 k        Avg:   0.60 k
+ BENCH [38] benchmarkUnits(millions)@10
+        10000 iterations per repeat. Custom benchmark per iteration:
+        Min:   0.15 M        Max:   1.05 M        Avg:   0.60 M
+ BENCH [39] benchmarkUnits(billions)@10
+        10000 iterations per repeat. Custom benchmark per iteration:
+        Min:   0.15 G        Max:   1.05 G        Avg:   0.60 G
+ BENCH [40] benchmarkUnits(ones)@10
+        10000 iterations per repeat. Time per iteration:
+        Min:   0.15 ns       Max:   1.05 ns       Avg:   0.60 ns
+ BENCH [41] benchmarkUnits(thousands)@10
+        10000 iterations per repeat. Time per iteration:
+        Min:   0.15 µs       Max:   1.05 µs       Avg:   0.60 µs
+ BENCH [42] benchmarkUnits(millions)@10
+        10000 iterations per repeat. Time per iteration:
+        Min:   0.15 ms       Max:   1.05 ms       Avg:   0.60 ms
+ BENCH [43] benchmarkUnits(billions)@10
+        10000 iterations per repeat. Time per iteration:
+        Min:   0.15  s       Max:   1.05  s       Avg:   0.60  s
+ BENCH [44] benchmarkUnits(ones)@10
+        10000 iterations per repeat. Cycles per iteration:
+        Min:   0.15  cycles  Max:   1.05  cycles  Avg:   0.60  cycles
+ BENCH [45] benchmarkUnits(thousands)@10
+        10000 iterations per repeat. Cycles per iteration:
+        Min:   0.15 kcycles  Max:   1.05 kcycles  Avg:   0.60 kcycles
+ BENCH [46] benchmarkUnits(millions)@10
+        10000 iterations per repeat. Cycles per iteration:
+        Min:   0.15 Mcycles  Max:   1.05 Mcycles  Avg:   0.60 Mcycles
+ BENCH [47] benchmarkUnits(billions)@10
+        10000 iterations per repeat. Cycles per iteration:
+        Min:   0.15 Gcycles  Max:   1.05 Gcycles  Avg:   0.60 Gcycles
+ BENCH [48] benchmarkUnits(ones)@10
+        10000 iterations per repeat. Instructions per iteration:
+        Min:   0.15  instrs  Max:   1.05  instrs  Avg:   0.60  instrs
+ BENCH [49] benchmarkUnits(thousands)@10
+        10000 iterations per repeat. Instructions per iteration:
+        Min:   0.15 kinstrs  Max:   1.05 kinstrs  Avg:   0.60 kinstrs
+ BENCH [50] benchmarkUnits(millions)@10
+        10000 iterations per repeat. Instructions per iteration:
+        Min:   0.15 Minstrs  Max:   1.05 Minstrs  Avg:   0.60 Minstrs
+ BENCH [51] benchmarkUnits(billions)@10
+        10000 iterations per repeat. Instructions per iteration:
+        Min:   0.15 Ginstrs  Max:   1.05 Ginstrs  Avg:   0.60 Ginstrs
+ BENCH [52] benchmarkUnits(ones)@10
+        10000 iterations per repeat. Memory per iteration:
+        Min:   0.15  B       Max:   1.05  B       Avg:   0.60  B
+ BENCH [53] benchmarkUnits(thousands)@10
+        10000 iterations per repeat. Memory per iteration:
+        Min:   0.15 kB       Max:   1.05 kB       Avg:   0.60 kB
+ BENCH [54] benchmarkUnits(millions)@10
+        10000 iterations per repeat. Memory per iteration:
+        Min:   0.15 MB       Max:   1.05 MB       Avg:   0.60 MB
+ BENCH [55] benchmarkUnits(billions)@10
+        10000 iterations per repeat. Memory per iteration:
+        Min:   0.15 GB       Max:   1.05 GB       Avg:   0.60 GB
+  SKIP [56] benchmarkSkip()@1
+        Can't verify the measurements anyway.
+  SKIP [57] benchmarkSkip()@1
+        Can't verify the measurements anyway.
+Finished TesterTest::Test with 11 errors out of 50 checks. 5 test cases didn't contain any checks!

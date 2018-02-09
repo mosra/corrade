@@ -602,7 +602,7 @@ void TesterTest::test() {
         "        Can't verify the measurements anyway.\n"
         "Finished TesterTest::Test with 11 errors out of 51 checks. 5 test cases didn't contain any checks!\n";
 
-    //CORRADE_COMPARE(out.str().length(), expected.length());
+    CORRADE_COMPARE(out.str().length(), expected.length());
     CORRADE_COMPARE(out.str(), expected);
 }
 
