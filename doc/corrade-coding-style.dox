@@ -888,11 +888,14 @@ and in most cases only for internal use.
 
 @subsection corrade-coding-style-documentation-commands Special documentation commands
 
-@subsubsection corrade-coding-style-documentation-code Code
+All @c \@m_* commands from the [m.css theme](http://mcss.mosra.cz/doxygen/#theme-specific-commands)
+are available.
+
+@subsubsection corrade-coding-style-documentation-commands-code Code
 
 It's possible to annotate inline code with language as well. There's no
-difference in the output for the stock Doxygen HTML output, but third-party
-tools can make use of it. The @c \@cb command denotes beginning of inline code
+difference in the output for the stock Doxygen HTML output, but the m.css theme
+can make use of it. The @c \@cb command denotes beginning of inline code
 snippet and takes the language as an argument. Inline code end is denoted with
 @c \@ce. To make things easier, there are @c \@cpp and @c \@cmake aliases that
 expand to <tt>\@cb{.cpp}</tt> and <tt>\@cb{.cmake}</tt>, respectively.
