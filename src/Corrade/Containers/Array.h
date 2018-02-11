@@ -195,7 +195,7 @@ class Array {
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
-         * @copybrief Array(InPlaceInitT, std::initializer_list<T>)
+         * @brief @copybrief Array(InPlaceInitT, std::initializer_list<T>)
          * @deprecated Use @ref Array(InPlaceInitT, std::initializer_list<T>) instead.
          */
         template<class ...U> CORRADE_DEPRECATED("use Array(InPlaceInitT, std::initializer_list<T>) instead") static Array<T, D> from(U&&... values) {
@@ -203,7 +203,7 @@ class Array {
         }
 
         /**
-         * @copybrief Array(ValueInitT, std::size_t)
+         * @brief @copybrief Array(ValueInitT, std::size_t)
          * @deprecated Use @ref Array(ValueInitT, std::size_t) instead.
          */
         CORRADE_DEPRECATED("use Array(ValueInitT, std::size_t) instead") static Array<T, D> zeroInitialized(std::size_t size) {
@@ -564,7 +564,7 @@ template<class T> std::size_t arraySize(const Array<T>& view) {
 }
 
 #ifdef CORRADE_BUILD_DEPRECATED
-/** @copybrief ArrayView
+/** @brief @copybrief ArrayView
  * @deprecated Use @ref ArrayView.h and @ref ArrayView instead.
  */
 #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */

@@ -470,7 +470,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
             WallTime = 2,
 
             #ifdef CORRADE_BUILD_DEPRECATED
-            /** @copybrief BenchmarkType::WallTime
+            /** @brief @copybrief BenchmarkType::WallTime
              * @deprecated Use @ref BenchmarkType::WallTime instead.
              */
             WallClock CORRADE_DEPRECATED_ENUM("use BenchmarkType::WallTime instead") = int(WallTime),
@@ -516,7 +516,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
             Nanoseconds = 100,      /**< Time in nanoseconds */
 
             #ifdef CORRADE_BUILD_DEPRECATED
-            /** @copybrief BenchmarkUnits::Nanoseconds
+            /** @brief @copybrief BenchmarkUnits::Nanoseconds
              * @deprecated Use @ref BenchmarkUnits::Nanoseconds instead.
              */
             Time CORRADE_DEPRECATED_ENUM("use Nanoseconds instead") = int(Nanoseconds),
@@ -527,7 +527,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
             Bytes = 103,            /**< Memory (in bytes) */
 
             #ifdef CORRADE_BUILD_DEPRECATED
-            /** @copybrief BenchmarkUnits::Bytes
+            /** @brief @copybrief BenchmarkUnits::Bytes
              * @deprecated Use @ref BenchmarkUnits::Bytes instead.
              */
             Memory CORRADE_DEPRECATED_ENUM("use Bytes instead") = int(Bytes),

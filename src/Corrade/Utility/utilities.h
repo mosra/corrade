@@ -61,7 +61,7 @@ template<class To, class From> inline To bitCast(const From& from) {
 
 #ifdef CORRADE_BUILD_DEPRECATED
 /**
- * @copybrief System::sleep()
+ * @brief @copybrief System::sleep()
  * @deprecated Use @ref System::sleep() instead.
  */
 inline CORRADE_DEPRECATED("Use System::sleep() instead") void sleep(std::size_t ms) {

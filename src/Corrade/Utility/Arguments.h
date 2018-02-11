@@ -463,7 +463,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
         Arguments& setHelp(const std::string& key, std::string help, std::string helpKey = {});
 
         #ifdef CORRADE_BUILD_DEPRECATED
-        /** @copybrief setHelp(const std::string&, std::string, std::string)
+        /** @brief @copybrief setHelp(const std::string&, std::string, std::string)
          * @deprecated Use @ref setHelp(const std::string&, std::string, std::string) instead.
          */
         CORRADE_DEPRECATED("use setHelp() instead") Arguments& setHelpKey(const std::string& key, std::string helpKey);

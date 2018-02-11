@@ -251,13 +251,13 @@ template<class T> class Optional {
         }
 
         #ifdef CORRADE_BUILD_DEPRECATED
-        /** @copybrief operator*()
+        /** @brief @copybrief operator*()
          * @deprecated Included only for compatibility with `std::optional`.
          *      Use @ref operator*() instead.
          */
         CORRADE_DEPRECATED("use operator*() instead") T& value() { return operator*(); }
 
-        /** @copybrief operator*()
+        /** @brief @copybrief operator*()
          * @deprecated Included only for compatibility with `std::optional`.
          *      Use @ref operator*() instead.
          */
