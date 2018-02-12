@@ -130,4 +130,4 @@ after_success:
 - if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then lcov $LCOV_EXTRA_OPTS --extract coverage.info "*/src/Corrade/*" --output-file coverage.info > /dev/null; fi
 - if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then lcov $LCOV_EXTRA_OPTS --remove coverage.info "*/Test/*" --output-file coverage.info > /dev/null; fi
 - if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then lcov $LCOV_EXTRA_OPTS --remove coverage.info "*/build/src/Corrade/*" --output-file coverage.info > /dev/null; fi
-- bash <(curl -s https://codecov.io/bash) -f coverage.info
+- if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then bash <(curl -s https://codecov.io/bash) -f coverage.info; fi
