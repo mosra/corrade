@@ -31,7 +31,8 @@ namespace Corrade {
 
 @section corrade-changelog-2018-02 2018.02
 
-Not yet released.
+Released 2018-02-15, tagged as
+[v2018.02](https://github.com/mosra/corrade/releases/tag/v2012.02).
 
 @subsection corrade-changelog-2018-02-dependencies Dependency changes
 
@@ -72,7 +73,7 @@ Not yet released.
     to create @ref Containers::Array from an initializer list
 -   New @ref Containers::Array::Array(T*, std::size_t, D) "Containers::Array::Array(T*, std::size_t, D)"
     constructor that allows wrapping externally allocated array with custom
-    deleter function
+    deleter function (see [mosra/magnum-examples#20](https://github.com/mosra/magnum-examples/issues/20))
 -   New @ref Containers::arrayView() and @ref Containers::staticArrayView()
     helper functions to make @ref Containers::ArrayView / @ref Containers::StaticArrayView
     instances without needing to fully specify the type (similarly to what
@@ -362,6 +363,8 @@ No dependency changes in this release.
     plugins.
 -   Fixed issues with plugin manager having multiple global instances in static
     builds (see [mosra/corrade#15](https://github.com/mosra/corrade/issues/15))
+-   Fixed a crash in Clang caused by overly clever code (see
+    [mosra/magnum#84](https://github.com/mosra/magnum/issues/84))
 
 @subsection corrade-changelog-2015-05-deprecated Deprecated APIs
 
@@ -371,7 +374,7 @@ No API was deprecated in this release.
 
 -   Removed unused plugin replacement feature, as it had questionable benefits
     and no real use.
--   All functionality deprecated in @ref corrade-changelog-2014-01-deprecated "2014.01"
+-   All functionality @ref corrade-changelog-2014-01-deprecated "deprecated in 2014.01"
     has been removed, namely:
 
     -   Removed deprecated ability to use relative includes (e.g.
@@ -510,8 +513,8 @@ No dependency changes in this release.
     (author name, version, description), as they don't fit current use case
     anymore (they were used back in 2007 when Corrade was part of Kompas).
     These metadata can be easily added back as custom configuration values.
--   Removed now useless @cpp Utility::Translator @ce class, it was used only for
-    plugin metadata and was prime example of bad design (exposing unguarded
+-   Removed now useless @cpp Utility::Translator @ce class, it was used only
+    for plugin metadata and was prime example of bad design (exposing unguarded
     naked pointers)
 
 @subsection corrade-changelog-2014-01-internal Internal changes
@@ -521,9 +524,9 @@ No dependency changes in this release.
     Clang 3.3, Clang 3.3 with libc++, Emscripten, x86-32/x86-64 Native Client
     and MinGW32 compilers are tested with both shared and static libraries.
     Separately testing builds with deprecated features enabled and disabled.
--   All files from ``src/`` directory were moved to ``src/Corrade``,
-    ``examples/`` directory was moved to ``src/examples`` (required to make
-    inter-project includes absolute, as mentioned above)
+-   All files from `src/` directory were moved to `src/Corrade`, `examples/`
+    directory was moved to `src/examples` (required to make inter-project
+    includes absolute, as mentioned above)
 
 @section corrade-changelog-2013-10 2013.10
 
@@ -580,11 +583,17 @@ No deprecated API was removed in this release.
 
 @section corrade-changelog-2013-08 2013.08
 
-See the [Magnum project announcement](http://blog.magnum.graphics/announcements/introducing-magnum/) for a high-level overview.
+Released 2013-08-30, tagged as
+[v2013.08](https://github.com/mosra/corrade/releases/tag/v2013.08). See the
+[Magnum project announcement](http://blog.magnum.graphics/announcements/introducing-magnum/)
+for a high-level overview.
 
 @section corrade-changelog-2012-02 2012.02
 
-See the [project announcement](http://blog.magnum.graphics/announcements/introducing-corrade/).
+Released 2012-02-08, tagged as
+[v2012.02](https://github.com/mosra/corrade/releases/tag/v2012.02). See the
+[project announcement](http://blog.magnum.graphics/announcements/introducing-corrade/)
+for a high-level overview.
 
 */
 
