@@ -1,11 +1,35 @@
-corrade (1.0) UNRELEASED; urgency=low
+corrade (2015.05-1) unstable; urgency=low
 
-  * Latest upstream version
+  * Version 2015.05
 
- -- Vladimír Vondruš <mosra@centrum.cz>  Fri, 31 Jan 2014 12:09:53 +0100
+ -- Vladimír Vondruš <mosra@centrum.cz>  Sat, 09 May 2015 10:57:44 +0200
 
-corrade (0.2-1) unstable; urgency=low
+corrade (2014.06-1) unstable; urgency=low
 
-  * Initial release
+  * Version 2014.06
+
+ -- Vladimír Vondruš <mosra@centrum.cz>  Mon, 30 Jun 2014 00:10:06 +0200
+
+corrade (2014.01-1) unstable; urgency=low
+
+  * Version 2014.01
+
+ -- Vladimír Vondruš <mosra@centrum.cz>  Tue, 21 Jan 2014 16:14:33 +0100
+
+corrade (2013.10-1) unstable; urgency=low
+
+  * Version 2013.10
+
+ -- Vladimír Vondruš <mosra@centrum.cz>  Wed, 30 Oct 2013 18:24:06 +0100
+
+corrade (2013.08-1) unstable; urgency=low
+
+  * Version 2013.08
+
+ -- Vladimír Vondruš <mosra@centrum.cz>  Wed, 30 Oct 2013 08:40:36 +0100
+
+corrade (2012.02-1) unstable; urgency=low
+
+  * Version 2012.02
 
  -- Vladimír Vondruš <mosra@centrum.cz>  Wed, 08 Feb 2012 01:28:01 +0100
