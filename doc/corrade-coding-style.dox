@@ -868,11 +868,12 @@ highlighting is done properly:
 
 @include codingstyle/doxygen-code-block.h
 
-See @ref corrade-coding-style-documentation-code "below" for a way to highlight
-inline code snippets. The inline code is detected using a heuristics and due to
-Doxygen XML output limitations, sometimes a single-line code block is detected
-as inline code and prepended to the immediately following paragraph. In order
-to prevent that, add a stray @cb{.html} <p> @ce tag right after the block:
+See @ref corrade-coding-style-documentation-commands-code "below" for a way to
+highlight inline code snippets. The inline code is detected using a heuristics
+and due to Doxygen XML output limitations, sometimes a single-line code block
+is detected as inline code and prepended to the immediately following
+paragraph. In order to prevent that, add a stray @cb{.html} <p> @ce tag right
+after the block:
 
 @include codingstyle/doxygen-code-block-workaround.h
 
