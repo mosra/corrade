@@ -209,7 +209,7 @@ set(CORRADE_INCLUDE_INSTALL_DIR include/Corrade)
 
 # Library version
 set(CORRADE_LIBRARY_VERSION 1.0)
-set(CORRADE_LIBRARY_SOVERSION 0)
+set(CORRADE_LIBRARY_SOVERSION 1)
 
 add_subdirectory(modules)
 add_subdirectory(src)
