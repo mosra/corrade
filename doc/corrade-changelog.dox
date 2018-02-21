@@ -222,7 +222,7 @@ Released 2018-02-15, tagged as
     for more information
 -   @ref corrade-cmake-add-plugin "corrade_add_plugin()" now properly installs
     plugin *.dll to `bin/` and *.lib to `lib/` on Windows
--   Added @ref building-corrade-packages-brew "Homebrew package" (see [mosra/corrade#22](https://github.com/mosra/corrade/issues/22)
+-   Added @ref building-corrade-packages-brew "Homebrew package" (see [mosra/corrade#22](https://github.com/mosra/corrade/issues/22))
 -   Added @ref corrade-cmake-find-dlls-for-libs "corrade_find_dlls_for_libs()"
     CMake macro
 -   `MACOSX_RPATH` is now enabled by default on CMake 3.0+
@@ -232,7 +232,7 @@ Released 2018-02-15, tagged as
 -   Fixed various MSVC compilation issues (see [mosra/corrade#28](https://github.com/mosra/corrade/pull/28))
 -   Various fixes for builds without deprecated features enabled (see
     [mosra/corrade#24](https://github.com/mosra/corrade/issues/24),
-    [mosra/corrade#32](https://github.com/mosra/corrade/pull/32)
+    [mosra/corrade#32](https://github.com/mosra/corrade/pull/32))
 -   Properly passing `/std:c++14` or `/std:c++14` when `CORRADE_CXX_STANDARD`
     is set to `14` or `17`
 
