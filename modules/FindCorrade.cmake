@@ -109,7 +109,9 @@
 #  CORRADE_*_LIBRARIES          - Expands to ``Corrade::*`` target. Use
 #   ``Corrade::*`` target directly instead.
 #  CORRADE_CXX_FLAGS            - Pedantic compile flags. Use
-#   :prop_tgt:`CORRADE_USE_PEDANTIC_FLAGS` property instead.
+#   :prop_tgt:`CORRADE_USE_PEDANTIC_FLAGS` property or
+#   :variable:`CORRADE_PEDANTIC_COMPILER_DEFINITIONS` /
+#   :variable:`CORRADE_PEDANTIC_COMPILER_OPTIONS` list variables instead.
 #
 # Corrade provides these macros and functions:
 #

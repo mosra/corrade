@@ -99,7 +99,9 @@ Corrade defines the following custom target properties:
     particular standard setting flag or if given target contains
     `CMAKE_CXX_STANDARD` property. Allowed value is `11`, `14` or `17`.
 -   `CORRADE_USE_PEDANTIC_FLAGS` --- Enable additional compiler/linker flags.
-    Boolean.
+    Boolean. The particular flags are contained in the
+    `CORRADE_PEDANTIC_COMPILER_OPTIONS` and
+    `CORRADE_PEDANTIC_COMPILER_DEFINITIONS` variables.
 
 These properties are inherited from directory properties, meaning that if you
 set them on directories, they get implicitly set on all targets in given
@@ -148,8 +150,9 @@ are included just for backwards compatibility and only if
 -   `CORRADE_*_LIBRARIES` --- Expands to `Corrade::*` target. Use `Corrade::*`
     target directly instead.
 -   `CORRADE_CXX_FLAGS` --- Additional pedantic compile flags. Use
-    `CORRADE_USE_PEDANTIC_CXX` per-target property or
-    `CORRADE_PEDANTIC_CXX_OPTIONS` list variable instead.
+    `CORRADE_USE_PEDANTIC_FLAGS` per-target property or
+    `CORRADE_PEDANTIC_COMPILER_DEFINITIONS` / `CORRADE_PEDANTIC_COMPILER_OPTIONS`
+    list variables instead.
 
 Note that [each namespace](namespaces.html) contains more detailed guide how to
 use given library with CMake.
