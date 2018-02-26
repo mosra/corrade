@@ -29,6 +29,13 @@ namespace Corrade {
 
 @tableofcontents
 
+@section corrade-changelog-latest Changes since 2018.02
+
+@subsection corrade-changelog-latest-docs Documentation
+
+-   A new @ref corrade-developers page containing step-by-step checklists for
+    maintainers and core developers
+
 @section corrade-changelog-2018-02 2018.02
 
 Released 2018-02-15, tagged as

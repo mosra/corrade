@@ -6,10 +6,11 @@
 @page corrade-cmake Using Corrade with CMake
 @page corrade-example-index Examples
 @page partialsupport List of partially supported features
+@page corrade-changelog Changelog
+
+@page corrade-developers Developers guide
+@page corrade-coding-style Coding style
 @page debugoperators Debug output operators for custom types
 @page deprecated Deprecated list
-@page corrade-coding-style Coding style
-
-@page corrade-changelog Changelog
 
 */
