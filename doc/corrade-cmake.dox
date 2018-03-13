@@ -95,9 +95,9 @@ Corrade defines the following custom target properties:
     C++ macro, which allows for checking of used C++ standard in a portable
     way.
 -   `INTERFACE_CORRADE_CXX_STANDARD` --- C++ standard to require when *using*
-    given target. Does nothing if :variable:`CMAKE_CXX_FLAGS` already contains
-    particular standard setting flag or if given target contains
-    `CMAKE_CXX_STANDARD` property. Allowed value is `11`, `14` or `17`.
+    given target. Does nothing if `CMAKE_CXX_FLAGS` already contains particular
+    standard setting flag or if given target contains `CMAKE_CXX_STANDARD`
+    property. Allowed value is `11`, `14` or `17`.
 -   `CORRADE_USE_PEDANTIC_FLAGS` --- Enable additional compiler/linker flags.
     Boolean. The particular flags are contained in the
     `CORRADE_PEDANTIC_COMPILER_OPTIONS` and
