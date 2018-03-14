@@ -31,6 +31,14 @@ namespace Corrade {
 
 @section corrade-changelog-latest Changes since 2018.02
 
+@subsection corrade-changelog-latest-dependencies Dependency changes
+
+-   Building for Android now requires CMake 3.7 with builtin Android
+    crosscompilation support, the old toolchains were removed. Only the Clang
+    and libc++ toolchain is now supported, support for GCC and libstdc++ was
+    dropped, as it was still missing some important C++11 functionality. See
+    @ref building-corrade-cross-android for more information.
+
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
 -   The Android ADB test runner was not correctly propagating @ref TestSuite
