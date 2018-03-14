@@ -64,10 +64,12 @@ set(CorradeUtility_HEADERS
 
 # Android-specific functionality
 if(CORRADE_TARGET_ANDROID)
-    set(CorradeUtility_SRCS ${CorradeUtility_SRCS}
-        AndroidStreamBuffer.cpp)
-    set(CorradeUtility_HEADERS ${CorradeUtility_HEADERS}
-        AndroidStreamBuffer.h)
+    list(APPEND CorradeUtility_SRCS AndroidLogStreamBuffer.cpp)
+    list(APPEND CorradeUtility_HEADERS AndroidLogStreamBuffer.h)
+
+    if(CORRADE_BUILD_DEPRECATED)
+        list(APPEND CorradeUtility_HEADERS AndroidStreamBuffer.h)
+    endif()
 endif()
 
 # Objects shared between main and test library

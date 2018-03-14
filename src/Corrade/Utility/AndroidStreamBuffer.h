@@ -26,78 +26,17 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Utility::AndroidLogStreamBuffer
+ * @deprecated Use @ref Corrade/Utility/AndroidLogStreamBuffer.h instead.
  */
 
-#include <sstream>
-#include <android/log.h>
+#include "Corrade/configure.h"
 
-#include "Corrade/Utility/visibility.h"
-
-#ifndef CORRADE_TARGET_ANDROID
-#error This file is available only in Android target
+#ifdef CORRADE_BUILD_DEPRECATED
+#include "Corrade/Utility/Macros.h"
+#include "Corrade/Utility/AndroidLogStreamBuffer.h"
+CORRADE_DEPRECATED_FILE("use Corrade/Utility/AndroidLogStreamBuffer.h instead")
+#else
+#error use Corrade/Utility/AndroidLogStreamBuffer.h instead
 #endif
-
-namespace Corrade { namespace Utility {
-
-/**
-@brief Stream buffer that sends the data to Android log
-
-Usable in conjunction with @ref std::ostream to redirect the output to Android
-log buffer, which can later be accessed through the `logcat` utility. The data
-are sent on each `flush()` call and then the internal buffer is cleared.
-Example usage:
-
-@code{.cpp}
-AndroidLogStreamBuffer buffer(AndroidLogStreamBuffer::LogPriority::Info, "native-app");
-
-std::ostream out(&buffer);
-
-out << "Hello World!" << std::endl;
-@endcode
-
-The output stream can be also used with @ref Debug classes.
-@partialsupport Available only on @ref CORRADE_TARGET_ANDROID "Android".
-*/
-class CORRADE_UTILITY_EXPORT AndroidLogStreamBuffer: public std::stringbuf {
-    public:
-        /**
-         * @brief Log level
-         *
-         * @see @ref AndroidLogStreamBuffer()
-         */
-        enum class LogPriority: std::int32_t {
-            Verbose = ANDROID_LOG_VERBOSE,  /**< Verbose debug message */
-            Debug = ANDROID_LOG_DEBUG,      /**< Debug message */
-            Info = ANDROID_LOG_INFO,        /**< Information */
-            Warning = ANDROID_LOG_WARN,     /**< Warning */
-            Error = ANDROID_LOG_ERROR,      /**< Error */
-            Fatal = ANDROID_LOG_FATAL,      /**< Fatal error */
-        };
-
-        /**
-         * @brief Constructor
-         * @param priority  Log priority
-         * @param tag       Message tag
-         */
-        explicit AndroidLogStreamBuffer(LogPriority priority, std::string tag);
-
-        ~AndroidLogStreamBuffer();
-
-    protected:
-        /**
-         * @brief Send current data to the log buffer
-         *
-         * After sending the message the internal data buffer is cleared to
-         * avoid sending the same data repeatedly.
-         */
-        int sync() override;
-
-    private:
-        LogPriority _priority;
-        std::string _tag;
-};
-
-}}
 
 #endif

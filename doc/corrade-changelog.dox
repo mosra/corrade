@@ -36,6 +36,11 @@ namespace Corrade {
 -   The Android ADB test runner was not correctly propagating @ref TestSuite
     `CORRADE_TEST_*` environment variables to the executable
 
+@subsection corrade-changelog-latest-deprecated Deprecated APIs
+
+-   The `Corrade/Utility/AndroidStreamBuffer.h` header is deprecated, use
+    @ref Corrade/Utility/AndroidLogStreamBuffer.h instead
+
 @subsection corrade-changelog-latest-docs Documentation
 
 -   A new @ref corrade-developers page containing step-by-step checklists for

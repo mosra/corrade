@@ -23,7 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "AndroidStreamBuffer.h"
+#include "AndroidLogStreamBuffer.h"
 
 namespace Corrade { namespace Utility {
 
