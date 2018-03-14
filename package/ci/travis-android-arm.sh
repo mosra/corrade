@@ -18,8 +18,13 @@ cd ..
 
 # Crosscompile
 mkdir build-android-arm && cd build-android-arm
-ANDROID_NDK=$TRAVIS_BUILD_DIR/android-ndk-r10e cmake .. \
-    -DCMAKE_TOOLCHAIN_FILE=../toolchains/generic/Android-ARM.cmake \
+cmake .. \
+    -DCMAKE_ANDROID_NDK=$TRAVIS_BUILD_DIR/android-ndk-r16b \
+    -DCMAKE_SYSTEM_NAME=Android \
+    -DCMAKE_SYSTEM_VERSION=22 \
+    -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a \
+    -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang \
+    -DCMAKE_ANDROID_STL_TYPE=c++_static \
     -DCMAKE_BUILD_TYPE=Release \
     -DCORRADE_RC_EXECUTABLE=$HOME/deps-native/bin/corrade-rc \
     -DBUILD_TESTS=ON \
@@ -27,7 +32,7 @@ ANDROID_NDK=$TRAVIS_BUILD_DIR/android-ndk-r10e cmake .. \
 ninja
 
 # Start simulator and run tests
-echo no | android create avd --force -n test -t android-19 --abi armeabi-v7a
+echo no | android create avd --force -n test -t android-22 --abi armeabi-v7a
 emulator -avd test -no-audio -no-window &
 android-wait-for-emulator
 CORRADE_TEST_COLOR=ON ctest -V
