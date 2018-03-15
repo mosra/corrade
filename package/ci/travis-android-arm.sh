@@ -1,8 +1,6 @@
 #!/bin/bash
 set -ev
 
-git submodule update --init
-
 # Build native corrade-rc
 mkdir build && cd build
 cmake .. \
