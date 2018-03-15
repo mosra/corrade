@@ -196,7 +196,8 @@ template<class T> void DebugTest::floats() {
         #endif
 
         #ifdef CORRADE_TARGET_ANDROID
-        CORRADE_EXPECT_FAIL_IF((std::is_same<T, long double>::value), "Android probably also treats long double as double.");
+        CORRADE_EXPECT_FAIL_IF((std::is_same<T, long double>::value && sizeof(void*) == 4),
+            "Android has precision problems with long double on 32bit.");
         #endif
         CORRADE_COMPARE(o.str(), FloatsData<T>::expected());
     }
