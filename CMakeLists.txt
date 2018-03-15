@@ -71,6 +71,9 @@ option(BUILD_STATIC "Build static libraries (default are shared)" OFF)
 cmake_dependent_option(BUILD_STATIC_PIC "Build static libraries with position-independent code" ON "BUILD_STATIC" OFF)
 option(BUILD_TESTS "Build unit tests" OFF)
 
+set(CORRADE_INCLUDE_INSTALL_PREFIX "."
+    CACHE STRING "Prefix where to put platform-independent include and other files")
+
 if(BUILD_TESTS)
     if(CORRADE_TARGET_IOS)
         set(CORRADE_TESTSUITE_BUNDLE_IDENTIFIER_PREFIX "cz.mosra.corrade")
@@ -203,9 +206,9 @@ endif()
 include(CorradeLibSuffix)
 set(CORRADE_BINARY_INSTALL_DIR bin)
 set(CORRADE_LIBRARY_INSTALL_DIR lib${LIB_SUFFIX})
-set(CORRADE_DATA_INSTALL_DIR share/corrade)
-set(CORRADE_CMAKE_MODULE_INSTALL_DIR share/cmake/Corrade)
-set(CORRADE_INCLUDE_INSTALL_DIR include/Corrade)
+set(CORRADE_DATA_INSTALL_DIR ${CORRADE_INCLUDE_INSTALL_PREFIX}/share/corrade)
+set(CORRADE_CMAKE_MODULE_INSTALL_DIR ${CORRADE_INCLUDE_INSTALL_PREFIX}/share/cmake/Corrade)
+set(CORRADE_INCLUDE_INSTALL_DIR ${CORRADE_INCLUDE_INSTALL_PREFIX}/include/Corrade)
 
 # Library version
 set(CORRADE_LIBRARY_VERSION 1.0)

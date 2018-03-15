@@ -30,6 +30,7 @@ build() {
     cmake .. \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/opt/android-ndk/platforms/android-22/arch-arm64/usr \
+        -DCORRADE_INCLUDE_INSTALL_PREFIX=/opt/android-ndk/sysroot/usr \
         -DBUILD_TESTS=ON
     ninja
 }
