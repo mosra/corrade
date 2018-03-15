@@ -81,7 +81,7 @@ for file in "$@"; do
     adb push "${file_pair[0]}" "$remote_tmpdir/${file_pair[1]}" | tail -n 1
 done
 
-# No comment. https://code.google.com/p/android/issues/detail?id=3254
+# No comment. http://web.archive.org/web/20160806094132/https://code.google.com/p/android/issues/detail?id=3254
 adb shell 'cd '$remote_tmpdir' && '$test_env' ./'$filename'; echo -n ADB_IS_SHIT:$?' | tee $tmpdir/adb.retval | grep -v ADB_IS_SHIT
 returncode=$(grep ADB_IS_SHIT $tmpdir/adb.retval | cut -d':' -f2)
 

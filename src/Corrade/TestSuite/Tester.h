@@ -350,14 +350,20 @@ Arguments:
 -   `--benchmark-red N` --- deviation threshold for marking benchmark red
     (environment: `CORRADE_BENCHMARK_RED`, default: `0.25`)
 
-@section TestSuite-Tester-cmake CMake support and platform-specific goodies
+@section TestSuite-Tester-running Compiling and running tests
 
-While the test executables can be created in any way you want, there's also an
-@ref corrade-cmake-add-test "corrade_add_test()" CMake macro that creates the
-executable, links `Corrade::TestSuite` library to it and adds it to CTest.
-Besides that it is able to link other arbitrary libraries to the executable
-and specify a list of files that the tests used. It provides additional useful
-features on various platforms:
+In general, just compiling the executable and linking it to the TestSuite
+library is enough, no further setup is needed. When running, the test produces
+output to standard output / standard error and exits with non-zero code in case
+of a test failure.
+
+@subsection TestSuite-Tester-running-cmake Using CMake
+
+If you are using CMake, there's a convenience @ref corrade-cmake-add-test "corrade_add_test()"
+CMake macro that creates the executable, links `Corrade::TestSuite` library to
+it and adds it to CTest. Besides that it is able to link other arbitrary
+libraries to the executable and specify a list of files that the tests used. It
+provides additional useful features on various platforms:
 
 -   If compiling for Emscripten, using @ref corrade-cmake-add-test "corrade_add_test()"
     makes CTest run the resulting `*.js` file via Node.js. Also it is able to
@@ -380,6 +386,42 @@ Emscripten and Android in path specified in `JPEG_TEST_DIR` that was saved into
 the `configure.h` file inside current build directory:
 
 @snippet testsuite.cmake 0
+
+@subsection TestSuite-Tester-running-android Manually running the tests on Android
+
+If not using CMake CTest, Android tests can be run manually. When you have
+developer-enabled Android device connected or Android emulator running, you can
+use ADB to upload the built test to device temp directory and run it there:
+
+@code{.sh}
+adb push <path-to-the-test-build>/MyTest /data/local/tmp
+adb shell /data/local/tmp/MyTest
+@endcode
+
+You can also use @cb{.sh} adb shell @ce to log directly into the device shell
+and continue from there. All @ref TestSuite-Tester-command-line "command-line arguments"
+are supported.
+
+@attention Keep in mind that older versions of ADB and Android do not correctly
+    propagate the exit code to caller, which may result in your test failures
+    being silently ignored. See [Android Issue 3254](http://web.archive.org/web/20160806094132/https://code.google.com/p/android/issues/detail?id=3254)
+    for possible workarounds. The @ref corrade-cmake-add-test "corrade_add_test()"
+    CMake macro also works around this issue.
+
+@subsection TestSuite-Tester-running-emscripten Manually running the tests on Emscripten
+
+When not using CMake CTest, Emscripten tests can be run directly using Node.js.
+Emscripten sideloads the WebAssembly or asm.js binary files from current
+working directory, so it's needed to @cb{.sh} cd @ce into the test build
+directory first:
+
+@code{.sh}
+cd <test-build-directory>
+node MyTest.js
+@endcode
+
+See also the `--embed-files` [emcc option](https://kripken.github.io/emscripten-site/docs/porting/files/packaging_files.html)
+for a possibility to bundle test files with the executable.
 */
 class CORRADE_TESTSUITE_EXPORT Tester {
     public:
