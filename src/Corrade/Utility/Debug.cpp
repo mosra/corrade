@@ -186,6 +186,10 @@ void Error::setOutput(std::ostream* output) {
 }
 #endif
 
+std::ostream* Debug::output() { return _globalOutput; }
+std::ostream* Warning::output() { return _globalWarningOutput; }
+std::ostream* Error::output() { return _globalErrorOutput; }
+
 bool Debug::isTty(std::ostream* const output) {
     /* On Windows with WINAPI colors check the stream output handle */
     #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)

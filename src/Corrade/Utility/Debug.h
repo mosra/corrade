@@ -377,7 +377,15 @@ class CORRADE_UTILITY_EXPORT Debug {
         /*@}*/
 
         /**
-         * @brief Whether given output is a TTY
+         * @brief Current debug output stream
+         *
+         * Debug output constructed with the @ref Debug(Flags) constructor will
+         * be using this output stream.
+         */
+        static std::ostream* output();
+
+        /**
+         * @brief Whether given output stream is a TTY
          *
          * Useful for deciding whether to use ANSI colored output using
          * @ref Flag::DisableColors. Returns @cpp true @ce if @p output is a
@@ -686,6 +694,14 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
         #endif
 
         /**
+         * @brief Current warning output stream
+         *
+         * Warning output constructed with the @ref Warning(Flags) constructor
+         * will be using this output stream.
+         */
+        static std::ostream* output();
+
+        /**
          * @brief Whether current warning output is a TTY
          *
          * Calls @ref isTty(std::ostream*) with output of enclosing
@@ -777,7 +793,15 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
         #endif
 
         /**
-         * @brief Whether current error output is a TTY
+         * @brief Current error output stream
+         *
+         * Error output constructed with the @ref Error(Flags) constructor
+         * will be using this output stream.
+         */
+        static std::ostream* output();
+
+        /**
+         * @brief Whether current error output stream is a TTY
          *
          * Calls @ref isTty(std::ostream*) with output of enclosing @ref Error
          * instance or with @ref std::cerr if there isn't any.

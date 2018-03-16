@@ -39,6 +39,13 @@ namespace Corrade {
     dropped, as it was still missing some important C++11 functionality. See
     @ref building-corrade-cross-android for more information.
 
+@subsection corrade-changelog-latest-new New features
+
+@subsubsection corrade-changelog-latest-new-utility Utility library
+
+-   Ability to query current scoped output stream using @ref Utility::Debug::output(),
+    @ref Utility::Warning::output() and @ref Utility::Error::output()
+
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
 -   The Android ADB test runner was not correctly propagating @ref TestSuite

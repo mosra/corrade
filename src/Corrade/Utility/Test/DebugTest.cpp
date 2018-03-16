@@ -533,10 +533,18 @@ void DebugTest::scopedOutput() {
     Warning muteW{nullptr};
     Error muteE{nullptr};
 
+    CORRADE_VERIFY(!Debug::output());
+    CORRADE_VERIFY(!Warning::output());
+    CORRADE_VERIFY(!Error::output());
+
     {
         Debug redirectD1{&debug1};
         Warning redirectW1{&warning1};
         Error redirectE1{&error1};
+
+        CORRADE_VERIFY(Debug::output() == &debug1);
+        CORRADE_VERIFY(Warning::output() == &warning1);
+        CORRADE_VERIFY(Error::output() == &error1);
 
         Debug() << "hello";
         Warning() << "crazy";
@@ -547,15 +555,27 @@ void DebugTest::scopedOutput() {
             Warning redirectW2{&warning2};
             Error redirectE2{&error2};
 
+            CORRADE_VERIFY(Debug::output() == &debug2);
+            CORRADE_VERIFY(Warning::output() == &warning2);
+            CORRADE_VERIFY(Error::output() == &error2);
+
             Debug() << "well";
             Warning() << "that";
             Error() << "smells";
         }
 
+        CORRADE_VERIFY(Debug::output() == &debug1);
+        CORRADE_VERIFY(Warning::output() == &warning1);
+        CORRADE_VERIFY(Error::output() == &error1);
+
         Debug() << "how";
         Warning() << "are";
         Error() << "you?";
     }
+
+    CORRADE_VERIFY(!Debug::output());
+    CORRADE_VERIFY(!Warning::output());
+    CORRADE_VERIFY(!Error::output());
 
     Debug() << "anyone";
     Warning() << "hears";
