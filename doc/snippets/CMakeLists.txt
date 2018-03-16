@@ -34,12 +34,14 @@ if(WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
     add_executable(testsuite-basic testsuite-basic.cpp)
     add_executable(testsuite-templated testsuite-templated.cpp)
     add_executable(testsuite-repeated testsuite-repeated.cpp)
+    add_executable(testsuite-instanced testsuite-instanced.cpp)
     add_executable(testsuite-benchmark testsuite-benchmark.cpp)
     add_executable(testsuite-benchmark-custom testsuite-benchmark-custom.cpp)
     set_target_properties(
         testsuite-basic
         testsuite-templated
         testsuite-repeated
+        testsuite-instanced
         testsuite-benchmark
         testsuite-benchmark-custom
         PROPERTIES FOLDER "Corrade/doc/snippets")
@@ -47,12 +49,7 @@ if(WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
     target_link_libraries(testsuite-basic CorradeTestSuite)
     target_link_libraries(testsuite-templated CorradeTestSuite)
     target_link_libraries(testsuite-repeated CorradeTestSuite ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries(testsuite-instanced CorradeTestSuite)
     target_link_libraries(testsuite-benchmark CorradeTestSuite)
     target_link_libraries(testsuite-benchmark-custom CorradeTestSuite)
-
-    if(NOT CORRADE_TARGET_ANDROID)
-        add_executable(testsuite-instanced testsuite-instanced.cpp)
-        target_link_libraries(testsuite-instanced CorradeTestSuite)
-        set_target_properties(testsuite-instanced PROPERTIES FOLDER "Corrade/doc/snippets")
-    endif()
 endif()
