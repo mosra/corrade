@@ -25,18 +25,19 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#if defined(CORRADE_TARGET_ANDROID) || defined(DOXYGEN_GENERATING_OUTPUT)
 /** @file
  * @brief Class @ref Corrade::Utility::AndroidLogStreamBuffer
  */
+#endif
 
+#include "Corrade/configure.h"
+
+#if defined(CORRADE_TARGET_ANDROID) || defined(DOXYGEN_GENERATING_OUTPUT)
 #include <sstream>
 #include <android/log.h>
 
 #include "Corrade/Utility/visibility.h"
-
-#ifndef CORRADE_TARGET_ANDROID
-#error This file is available only in Android target
-#endif
 
 namespace Corrade { namespace Utility {
 
@@ -106,5 +107,8 @@ class CORRADE_UTILITY_EXPORT AndroidLogStreamBuffer: public std::stringbuf {
 
 }}
 
+#else
+#error this file is available only on Android build
 #endif
 
+#endif
