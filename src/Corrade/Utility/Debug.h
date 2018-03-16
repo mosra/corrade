@@ -546,10 +546,10 @@ class CORRADE_UTILITY_EXPORT Debug {
     private:
         template<Color c, bool bold> CORRADE_UTILITY_LOCAL static Modifier colorInternal();
 
-        static std::ostream* _globalOutput;
+        static CORRADE_UTILITY_LOCAL std::ostream* _globalOutput;
         #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
-        static Color _globalColor;
-        static bool _globalColorBold;
+        static CORRADE_UTILITY_LOCAL Color _globalColor;
+        static CORRADE_UTILITY_LOCAL bool _globalColorBold;
         #endif
 
         template<class T> CORRADE_UTILITY_LOCAL Debug& print(const T& value);
