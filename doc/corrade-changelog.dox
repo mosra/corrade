@@ -60,6 +60,8 @@ namespace Corrade {
 
 -   A new @ref corrade-developers page containing step-by-step checklists for
     maintainers and core developers
+-   Updating the docs with compiled code snippets to ensure they don't get out
+    of sync with the code
 
 @section corrade-changelog-2018-02 2018.02
 
