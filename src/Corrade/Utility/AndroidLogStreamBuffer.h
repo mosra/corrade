@@ -91,16 +91,9 @@ class CORRADE_UTILITY_EXPORT AndroidLogStreamBuffer: public std::stringbuf {
 
         ~AndroidLogStreamBuffer();
 
-    protected:
-        /**
-         * @brief Send current data to the log buffer
-         *
-         * After sending the message the internal data buffer is cleared to
-         * avoid sending the same data repeatedly.
-         */
+    private:
         int sync() override;
 
-    private:
         LogPriority _priority;
         std::string _tag;
 };
