@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_UNUSED, @ref CORRADE_ALIGNAS(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
+ * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_UNUSED, @ref CORRADE_ALIGNAS(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -49,9 +49,10 @@ CORRADE_DEPRECATED("use bar() instead") void foo();
 typedef CORRADE_DEPRECATED("use Fizz instead") Output<5> Buzz;
 @endcode
 
-Does not work on template aliases and enum values, use
-@ref CORRADE_DEPRECATED_ALIAS() and @ref CORRADE_DEPRECATED_ENUM() instead.
-@see @ref CORRADE_DEPRECATED_FILE()
+Might not work for template aliases, namespaces and enum values on all
+compilers, use @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE()
+and @ref CORRADE_DEPRECATED_ENUM() instead. See @ref CORRADE_DEPRECATED_FILE()
+for file-level deprecation.
 */
 #if defined(__GNUC__) || defined(__clang__)
 #define CORRADE_DEPRECATED(message) __attribute((deprecated(message)))
@@ -71,8 +72,8 @@ MSVC 2017):
 template<class T> using Foo CORRADE_DEPRECATED_ALIAS("use Bar instead") = Bar<T>;
 @endcode
 
-@see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ENUM(),
-    @ref CORRADE_DEPRECATED_FILE()
+@see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_NAMESPACE(),
+    @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE()
 */
 #if defined(__GNUC__) || defined(__clang__)
 #define CORRADE_DEPRECATED_ALIAS(message) __attribute((deprecated(message)))
@@ -80,6 +81,33 @@ template<class T> using Foo CORRADE_DEPRECATED_ALIAS("use Bar instead") = Bar<T>
 #define CORRADE_DEPRECATED_ALIAS(message) [[deprecated(message)]]
 #else
 #define CORRADE_DEPRECATED_ALIAS(message)
+#endif
+
+/** @hideinitializer
+@brief Namespace deprecation mark
+
+Marked enum or enum value will emit deprecation warning on supported compilers
+(C++17 feature, MSVC 2015 and Clang):
+
+@code{.cpp}
+namespace CORRADE_DEPRECATED_NAMESPACE("use Bar instead") Foo {}
+@endcode
+
+GCC claims support since version 4.9, but even in version 7.3 it only emits an
+"attribute ignored" warning at the declaration location no diagnostic when such
+namespace is used --- which is practically useless
+([source](https://stackoverflow.com/q/46052410)).
+
+@see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
+    @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE()
+*/
+#ifdef __clang__
+/* Clang warns that this is a C++14 extension, disabling that so it's usable in C++11 */
+#define CORRADE_DEPRECATED_NAMESPACE(message) _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wc++14-extensions\"") [[deprecated(message)]] _Pragma("GCC diagnostic pop")
+#elif defined(_MSC_VER)
+#define CORRADE_DEPRECATED_NAMESPACE(message) [[deprecated(message)]]
+#else
+#define CORRADE_DEPRECATED_NAMESPACE(message)
 #endif
 
 /** @hideinitializer
@@ -99,7 +127,7 @@ enum class Bar {
 @endcode
 
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
-    @ref CORRADE_DEPRECATED_FILE()
+    @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_FILE()
 */
 #if defined(__clang__) || (defined(__GNUC__) && __GNUC__ >= 6)
 #define CORRADE_DEPRECATED_ENUM(message) __attribute((deprecated(message)))
@@ -113,11 +141,16 @@ enum class Bar {
 @brief File deprecation mark
 
 Putting this in a file will emit deprecation warning when given file is
-included or compiled (GCCC, Clang):
+included or compiled (GCC, Clang):
 
 @code{.cpp}
-CORRADE_DEPRECATED_FILE("use Bar.h instead")
+CORRADE_DEPRECATED_FILE("use Bar.h instead") // yes, no semicolon at the end
 @endcode
+
+Note that the warning is suppressed in case given directory is included as
+system (`-isystem` on GCC and Clang).
+@see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
+    @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM()
 */
 #if defined(__clang__)
 #define CORRADE_DEPRECATED_FILE(message) _Pragma(_CORRADE_HELPER_STR(GCC warning ("this file is deprecated: " message)))

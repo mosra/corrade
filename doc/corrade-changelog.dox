@@ -45,6 +45,7 @@ namespace Corrade {
 
 -   Ability to query current scoped output stream using @ref Utility::Debug::output(),
     @ref Utility::Warning::output() and @ref Utility::Error::output()
+-   New @ref CORRADE_DEPRECATED_NAMESPACE() macro
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

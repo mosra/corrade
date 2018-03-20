@@ -58,6 +58,9 @@ struct Struct { enum: int { Value = 1 }; };
 using DeprecatedAlias CORRADE_DEPRECATED_ALIAS("use Struct instead") = Struct;
 enum class CORRADE_DEPRECATED_ENUM("use Enum instead") DeprecatedEnum { Value = 1 };
 enum class Foo { DeprecatedEnumValue CORRADE_DEPRECATED_ENUM("use Foo::Value instead") = 1 };
+namespace CORRADE_DEPRECATED_NAMESPACE("use Namespace instead") DeprecatedNamespace {
+    enum: int { Value = 1 };
+}
 /* Not sure how to test CORRADE_DEPRECATED_FILE() though */
 
 }
@@ -80,6 +83,7 @@ void MacrosTest::deprecated() {
     CORRADE_VERIFY(DeprecatedAlias::Value);
     CORRADE_VERIFY(int(DeprecatedEnum::Value));
     CORRADE_VERIFY(int(Foo::DeprecatedEnumValue));
+    CORRADE_VERIFY(int(DeprecatedNamespace::Value));
 }
 #ifndef ENABLE_DEPRECATION_WARNINGS
 #ifdef __GNUC__
