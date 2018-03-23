@@ -36,7 +36,7 @@ namespace Corrade { namespace Examples {
 class AbstractAnimal: public PluginManager::AbstractPlugin {
     public:
         static std::string pluginInterface() {
-            return "cz.mosra.Corrade.Examples.AbstractAnimal/1.0";
+            return "cz.mosra.corrade.Examples.AbstractAnimal/1.0";
         }
 
         AbstractAnimal(PluginManager::AbstractManager& manager, const std::string& plugin):

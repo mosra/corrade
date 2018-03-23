@@ -39,4 +39,4 @@ class RottenTomato: public AbstractFood {
 
 /* Wrong plugin interface */
 CORRADE_PLUGIN_REGISTER(RottenTomato, Corrade::PluginManager::Test::RottenTomato,
-    "cz.mosra.Corrade.PluginManager.Test.AbstractFood/0.1")
+    "cz.mosra.corrade.PluginManager.Test.AbstractFood/0.1")

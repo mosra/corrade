@@ -32,7 +32,7 @@ namespace Corrade { namespace PluginManager { namespace Test {
 class AbstractFood: public AbstractPlugin {
     public:
         static std::string pluginInterface() {
-            return "cz.mosra.Corrade.PluginManager.Test.AbstractFood/1.0";
+            return "cz.mosra.corrade.PluginManager.Test.AbstractFood/1.0";
         }
 
         explicit AbstractFood(AbstractManager& manager, const std::string& plugin): AbstractPlugin{manager, plugin} {}

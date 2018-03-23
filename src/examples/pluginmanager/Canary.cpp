@@ -44,4 +44,4 @@ class Canary: public AbstractAnimal {
 }}
 
 CORRADE_PLUGIN_REGISTER(Canary, Corrade::Examples::Canary,
-    "cz.mosra.Corrade.Examples.AbstractAnimal/1.0")
+    "cz.mosra.corrade.Examples.AbstractAnimal/1.0")

@@ -39,4 +39,4 @@ class Bulldog: public AbstractAnimal {
 }}}
 
 CORRADE_PLUGIN_REGISTER(Bulldog, Corrade::PluginManager::Test::Bulldog,
-    "cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")
+    "cz.mosra.corrade.PluginManager.Test.AbstractAnimal/1.0")

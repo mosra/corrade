@@ -44,4 +44,4 @@ class Canary: public AbstractAnimal {
 }}}
 
 CORRADE_PLUGIN_REGISTER(Canary, Corrade::PluginManager::Test::Canary,
-    "cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")
+    "cz.mosra.corrade.PluginManager.Test.AbstractAnimal/1.0")

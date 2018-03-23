@@ -175,7 +175,7 @@ void Test::wrongPluginInterface() {
 
     PluginManager::Manager<AbstractFood> foodManager(foodPluginsDir);
     CORRADE_COMPARE(foodManager.load("RottenTomato"), PluginManager::LoadState::WrongInterfaceVersion);
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): wrong interface string of plugin RottenTomato, expected cz.mosra.Corrade.PluginManager.Test.AbstractFood/1.0 but got cz.mosra.Corrade.PluginManager.Test.AbstractFood/0.1\n");
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): wrong interface string of plugin RottenTomato, expected cz.mosra.corrade.PluginManager.Test.AbstractFood/1.0 but got cz.mosra.corrade.PluginManager.Test.AbstractFood/0.1\n");
     #endif
 }
 

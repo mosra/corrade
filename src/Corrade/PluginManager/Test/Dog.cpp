@@ -38,4 +38,4 @@ int Dog::legCount() { return 4; }
 }}}
 
 CORRADE_PLUGIN_REGISTER(Dog, Corrade::PluginManager::Test::Dog,
-    "cz.mosra.Corrade.PluginManager.Test.AbstractAnimal/1.0")
+    "cz.mosra.corrade.PluginManager.Test.AbstractAnimal/1.0")

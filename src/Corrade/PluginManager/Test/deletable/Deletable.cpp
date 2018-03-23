@@ -37,4 +37,4 @@ class Deletable: public AbstractDeletable {
 }}}
 
 CORRADE_PLUGIN_REGISTER(Deletable, Corrade::PluginManager::Test::Deletable,
-    "cz.mosra.Corrade.PluginManager.Test.AbstractDeletable/1.0")
+    "cz.mosra.corrade.PluginManager.Test.AbstractDeletable/1.0")

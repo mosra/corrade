@@ -41,4 +41,4 @@ class OldBread: public AbstractFood {
 #undef CORRADE_PLUGIN_VERSION
 #define CORRADE_PLUGIN_VERSION 0
 CORRADE_PLUGIN_REGISTER(OldBread, Corrade::PluginManager::Test::OldBread,
-    "cz.mosra.Corrade.PluginManager.Test.AbstractFood/1.0")
+    "cz.mosra.corrade.PluginManager.Test.AbstractFood/1.0")

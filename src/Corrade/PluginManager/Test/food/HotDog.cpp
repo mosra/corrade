@@ -44,4 +44,4 @@ class HotDog: public AbstractFood {
 }}}
 
 CORRADE_PLUGIN_REGISTER(HotDog, Corrade::PluginManager::Test::HotDog,
-    "cz.mosra.Corrade.PluginManager.Test.AbstractFood/1.0")
+    "cz.mosra.corrade.PluginManager.Test.AbstractFood/1.0")
