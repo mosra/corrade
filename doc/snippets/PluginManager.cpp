@@ -1,5 +1,3 @@
-#ifndef Corrade_PluginManager_Test_AbstractFood_h
-#define Corrade_PluginManager_Test_AbstractFood_h
 /*
     This file is part of Corrade.
 
@@ -27,20 +25,20 @@
 
 #include "Corrade/PluginManager/AbstractPlugin.h"
 
-namespace Corrade { namespace PluginManager { namespace Test {
+using namespace Corrade;
 
-class AbstractFood: public AbstractPlugin {
+/* [AbstractPlugin] */
+class AbstractFilesystem: public PluginManager::AbstractPlugin {
     public:
         static std::string pluginInterface() {
-            return "cz.mosra.Corrade.PluginManager.Test.AbstractFood/1.0";
+            return "cz.mosra.corrade.AbstractFilesystem/1.0";
         }
 
-        explicit AbstractFood(AbstractManager& manager, const std::string& plugin): AbstractPlugin{manager, plugin} {}
+        explicit AbstractFilesystem(PluginManager::AbstractManager& manager, const std::string& plugin):
+            PluginManager::AbstractPlugin{manager, plugin} {}
 
-        virtual int weight() = 0;
-        virtual bool isTasty() = 0;
+        explicit AbstractFilesystem() = default;
+
+        // the actual plugin interface goes here
 };
-
-}}}
-
-#endif
+/* [AbstractPlugin] */

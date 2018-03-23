@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::PluginManager::AbstractPlugin, macro @ref CORRADE_PLUGIN_VERSION, @ref CORRADE_PLUGIN_INTERFACE(), @ref CORRADE_PLUGIN_REGISTER().
+ * @brief Class @ref Corrade::PluginManager::AbstractPlugin, macro @ref CORRADE_PLUGIN_VERSION, @ref CORRADE_PLUGIN_REGISTER()
  */
 
 #include <string>
@@ -38,10 +38,34 @@ namespace Corrade { namespace PluginManager {
 /**
 @brief Base class for plugin interfaces
 
-Connects every plugin instance to parent plugin manager to ensure the
-plugin can be unloaded only if there are no active instances.
-@see @ref AbstractManagingPlugin, @ref CORRADE_PLUGIN_INTERFACE(),
-    @ref CORRADE_PLUGIN_REGISTER()
+Makes it possible to connects every plugin instance to its corresponding plugin
+manager, which ensures the plugin can be unloaded only if there are no active
+instances. Besides that, provides access to interface-specific and
+plugin-specific metadata.
+
+@section PluginManager-AbstractPlugin-subclassing Subclassing
+
+Plugin interface classes have to provide the following:
+
+-   A @cpp public @ce @cpp static std::string pluginInterface() @ce function,
+    defining a unique plugin interface string. Plugins implementing the
+    interface have to define exactly the same interface string, otherwise they
+    won't be loaded. A good practice is to use a "Java package name"-style
+    syntax. The interface name should also contain version identifier to make
+    sure the plugin will not be loaded with incompatible interface version.
+-   A constructor with signature the same as
+    @ref AbstractPlugin(AbstractManager&, const std::string&) so the plugin
+    manager can load them
+-   A constructor with signature the same as @ref AbstractPlugin(), in case it
+    makes sense to instantiate the plugin directly without a plugin manager
+
+A minimal example, with function definitions inline:
+
+@snippet PluginManager.cpp AbstractPlugin
+
+See @ref plugin-management for a detailed tutorial.
+
+@see @ref AbstractManagingPlugin, @ref CORRADE_PLUGIN_REGISTER()
 */
 class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
     template<class> friend class AbstractManagingPlugin;
@@ -164,22 +188,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
 
 /** @brief Plugin version */
 #define CORRADE_PLUGIN_VERSION 5
-
-/**
-@brief Define plugin interface
-@param name          Interface name
-@hideinitializer
-
-This macro is called in class definition and makes that class usable as
-plugin interface. Plugins using that interface must have exactly the same
-interface name, otherwise they will not be loaded. A good practice
-is to use "Java package name"-style syntax for version name, because this
-makes the name as unique as possible. The interface name should also contain
-version identifier to make sure the plugin will not be loaded with
-incompatible interface version.
- */
-#define CORRADE_PLUGIN_INTERFACE(name) \
-    public: static std::string pluginInterface() { return name; } private:
 
 /**
 @brief Register static or dynamic lugin

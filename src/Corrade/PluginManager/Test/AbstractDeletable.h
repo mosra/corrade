@@ -30,9 +30,11 @@
 namespace Corrade { namespace PluginManager { namespace Test {
 
 class AbstractDeletable: public AbstractPlugin {
-    CORRADE_PLUGIN_INTERFACE("cz.mosra.Corrade.PluginManager.Test.AbstractDeletable/1.0")
-
     public:
+        static std::string pluginInterface() {
+            return "cz.mosra.Corrade.PluginManager.Test.AbstractDeletable/1.0";
+        }
+
         explicit AbstractDeletable(AbstractManager& manager, const std::string& plugin): AbstractPlugin{manager, plugin} {}
 
         void set(unsigned int* var) { _var = var; }

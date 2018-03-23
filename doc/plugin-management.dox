@@ -53,9 +53,9 @@ and must reimplement the @ref PluginManager::AbstractPlugin constructor. This
 is needed for instance use checks, as described above. Plugin classes derived
 from that interface must reimplement the constructor too, of course.
 
-Additionaly, an interface string must be defined with @ref CORRADE_PLUGIN_INTERFACE()
-in the header to make sure loaded plugins depend on the same interface in the
-same version. The macro takes a string which uniquely names that particular
+Additionaly, an interface string must be provided by a @cpp pluginInterface() @ce
+function to make sure loaded plugins depend on the same interface in the same
+version. The macro takes a string which uniquely names that particular
 interface. A good practice is to use "Java package name"-style syntax because
 this makes the name as unique as possible. The interface name should also
 contain version identifier to make sure the plugin will not be loaded with
