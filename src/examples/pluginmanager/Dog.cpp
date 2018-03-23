@@ -33,7 +33,7 @@ namespace Corrade { namespace Examples {
 
 class Dog: public AbstractAnimal {
     public:
-        Dog(PluginManager::AbstractManager& manager, const std::string& plugin):
+        explicit Dog(PluginManager::AbstractManager& manager, const std::string& plugin):
             AbstractAnimal{manager, plugin} {}
 
         std::string name() const override { return "Doug"; }

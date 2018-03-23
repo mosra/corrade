@@ -39,7 +39,7 @@ class AbstractAnimal: public PluginManager::AbstractPlugin {
             return "cz.mosra.corrade.Examples.AbstractAnimal/1.0";
         }
 
-        AbstractAnimal(PluginManager::AbstractManager& manager, const std::string& plugin):
+        explicit AbstractAnimal(PluginManager::AbstractManager& manager, const std::string& plugin):
             AbstractPlugin{manager, plugin} {}
 
         virtual std::string name() const = 0;

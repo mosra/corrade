@@ -45,13 +45,15 @@ compiled and managed.
 
 @section plugin-management-interface Plugin interface
 
-Plugin interface is a class with well-defined virtual methods, which defines
-the way how to work with a particular plugin.
+Plugin interface is a class with virtual methods, defining the way how to work
+with a particular plugin.
 
 Every plugin interface must be derived from @ref PluginManager::AbstractPlugin
-and must reimplement the @ref PluginManager::AbstractPlugin constructor. This
-is needed for instance use checks, as described above. Plugin classes derived
-from that interface must reimplement the constructor too, of course.
+and must reimplement the
+@ref PluginManager::AbstractPlugin::AbstractPlugin(PluginManager::AbstractManager&, const std::string&)
+constructor. This is needed for instance use checks, as described above. Plugin
+classes derived from that interface must reimplement the constructor too, of
+course.
 
 Additionaly, an interface string must be provided by a @cpp pluginInterface() @ce
 function to make sure loaded plugins depend on the same interface in the same
@@ -75,16 +77,21 @@ specification of plugin configuration file syntax can be found in
 @ref PluginManager::PluginMetadata class documentation.
 
 First we define one static plugin, which will be included in the application
-out-of-the-box. After declaring that plugin we register it with the
-@ref CORRADE_PLUGIN_REGISTER() macro. The first argument is plugin name (which
-will be used when instancing the plugin), second argument is name of the plugin
-class and third is the name of used plugin interface.
+out-of-the-box:
 
 @dontinclude pluginmanager/Canary.cpp
 @skip class Canary
 @until };
-@skip CORRADE_PLUGIN_REGISTER
-@until )
+
+After defining the plugin we have to register it with the
+@ref CORRADE_PLUGIN_REGISTER() macro. The first argument is plugin name (which
+will be used when instancing the plugin), second argument is name of the plugin
+class and third is the name of used plugin interface.
+
+@code{.cpp}
+CORRADE_PLUGIN_REGISTER(Canary, Canary,
+    "cz.mosra.corrade.Examples.AbstractAnimal/1.0")
+@endcode
 
 And a corresponding configuration file, `Canary.conf`:
 
@@ -100,8 +107,11 @@ manager.
 @dontinclude pluginmanager/Dog.cpp
 @skip class Dog
 @until };
-@skip CORRADE_PLUGIN_REGISTER
-@until )
+
+@code{.cpp}
+CORRADE_PLUGIN_REGISTER(Dog, Dog,
+    "cz.mosra.corrade.Examples.AbstractAnimal/1.0")
+@endcode
 
 And a corresponding configuration file, `Dog.conf`:
 
