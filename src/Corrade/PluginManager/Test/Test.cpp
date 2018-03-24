@@ -494,26 +494,26 @@ void Test::reloadPluginDirectory() {
     #else
     PluginManager::Manager<AbstractAnimal> manager;
 
-    /* Load Dog and rename the plugin */
-    CORRADE_COMPARE(manager.load("Dog"), LoadState::Loaded);
-    Utility::Directory::move(Utility::Directory::join(pluginsDir, std::string("Dog") + PLUGIN_FILENAME_SUFFIX),
-                             Utility::Directory::join(pluginsDir, std::string("LostDog") + PLUGIN_FILENAME_SUFFIX));
-    Utility::Directory::move(Utility::Directory::join(pluginsDir, "Dog.conf"),
-                             Utility::Directory::join(pluginsDir, "LostDog.conf"));
-
-    /* Rename PitBull */
+    /* Load PitBull and rename the plugin */
+    CORRADE_COMPARE(manager.load("PitBull"), LoadState::Loaded);
     Utility::Directory::move(Utility::Directory::join(pluginsDir, std::string("PitBull") + PLUGIN_FILENAME_SUFFIX),
                              Utility::Directory::join(pluginsDir, std::string("LostPitBull") + PLUGIN_FILENAME_SUFFIX));
     Utility::Directory::move(Utility::Directory::join(pluginsDir, "PitBull.conf"),
                              Utility::Directory::join(pluginsDir, "LostPitBull.conf"));
+
+    /* Rename Snail */
+    Utility::Directory::move(Utility::Directory::join(pluginsDir, std::string("Snail") + PLUGIN_FILENAME_SUFFIX),
+                             Utility::Directory::join(pluginsDir, std::string("LostSnail") + PLUGIN_FILENAME_SUFFIX));
+    Utility::Directory::move(Utility::Directory::join(pluginsDir, "Snail.conf"),
+                             Utility::Directory::join(pluginsDir, "LostSnail.conf"));
 
     /* Reload plugin dir and check new name list */
     manager.reloadPluginDirectory();
     std::vector<std::string> actualPlugins1 = manager.pluginList();
     std::vector<std::string> actualAliases1 = manager.aliasList();
 
-    /* Unload Dog and it should disappear from the list */
-    CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
+    /* Unload PitBull and it should disappear from the list */
+    CORRADE_COMPARE(manager.unload("PitBull"), LoadState::NotLoaded);
     manager.reloadPluginDirectory();
     std::vector<std::string> actualPlugins2 = manager.pluginList();
     std::vector<std::string> actualAliases2 = manager.aliasList();
@@ -521,27 +521,27 @@ void Test::reloadPluginDirectory() {
     /** @todo Also test that "WrongMetadataFile" plugins are reloaded */
 
     /* Rename everything back and clean up */
-    Utility::Directory::move(Utility::Directory::join(pluginsDir, std::string("LostDog") + PLUGIN_FILENAME_SUFFIX),
-                             Utility::Directory::join(pluginsDir, std::string("Dog") + PLUGIN_FILENAME_SUFFIX));
-    Utility::Directory::move(Utility::Directory::join(pluginsDir, "LostDog.conf"),
-                             Utility::Directory::join(pluginsDir, "Dog.conf"));
-
     Utility::Directory::move(Utility::Directory::join(pluginsDir, std::string("LostPitBull") + PLUGIN_FILENAME_SUFFIX),
                              Utility::Directory::join(pluginsDir, std::string("PitBull") + PLUGIN_FILENAME_SUFFIX));
     Utility::Directory::move(Utility::Directory::join(pluginsDir, "LostPitBull.conf"),
                              Utility::Directory::join(pluginsDir, "PitBull.conf"));
 
+    Utility::Directory::move(Utility::Directory::join(pluginsDir, std::string("LostSnail") + PLUGIN_FILENAME_SUFFIX),
+                             Utility::Directory::join(pluginsDir, std::string("Snail") + PLUGIN_FILENAME_SUFFIX));
+    Utility::Directory::move(Utility::Directory::join(pluginsDir, "LostSnail.conf"),
+                             Utility::Directory::join(pluginsDir, "Snail.conf"));
+
     manager.reloadPluginDirectory();
 
     /* And now we can safely compare */
     CORRADE_COMPARE_AS(actualPlugins1, (std::vector<std::string>{
-        "Bulldog", "Canary", "Dog", "LostDog", "LostPitBull", "Snail"}), TestSuite::Compare::Container);
+        "Bulldog", "Canary", "Dog", "LostPitBull", "LostSnail", "PitBull"}), TestSuite::Compare::Container);
     CORRADE_COMPARE_AS(actualAliases1, (std::vector<std::string>{
-        "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "LostDog", "LostPitBull", "Snail"}), TestSuite::Compare::Container);
+        "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "LostPitBull", "LostSnail", "PitBull"}), TestSuite::Compare::Container);
     CORRADE_COMPARE_AS(actualPlugins2, (std::vector<std::string>{
-        "Bulldog", "Canary", "LostDog", "LostPitBull", "Snail"}), TestSuite::Compare::Container);
+        "Bulldog", "Canary", "Dog", "LostPitBull", "LostSnail"}), TestSuite::Compare::Container);
     CORRADE_COMPARE_AS(actualAliases2, (std::vector<std::string>{
-        "Bulldog", "Canary", "JustSomeBird", "JustSomeMammal", "LostDog", "LostPitBull", "Snail"}), TestSuite::Compare::Container);
+        "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "LostPitBull", "LostSnail"}), TestSuite::Compare::Container);
     #endif
 }
 
