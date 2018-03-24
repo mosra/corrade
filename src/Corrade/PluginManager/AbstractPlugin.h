@@ -55,6 +55,9 @@ Plugin interface classes have to provide the following:
     sure the plugin will not be loaded with incompatible interface version.
 -   A @ref pluginSearchPaths() function, defining hardcoded search paths for
     plugins in this interface (if any). See its documentation for details.
+-   A pair of @ref initialize() / @ref finalize() functions, used to initialize
+    and finalize global state of given plugin library. See their documentation
+    for details.
 -   A constructor with signature the same as
     @ref AbstractPlugin(AbstractManager&, const std::string&) so the plugin
     manager can load them
@@ -102,9 +105,11 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * without plugin manager, you have to call this function manually (if
          * needed).
          *
-         * Note that this function might be called subsequently more than once
-         * (e.g. when loading derived plugin after the base plugin has been
-         * already initialized).
+         * @attention In case you derive a plugin from one that implements this
+         *      function, it's advised to override it with an empty body so the
+         *      base initialization routine doesn't get called second time when
+         *      initializing the derived plugin.
+         *
          * @see @ref finalize()
          */
         static void initialize();
@@ -121,12 +126,12 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * without plugin manager, you have to call this function manually (if
          * needed).
          *
-         * Note that this function might be called subsequently more than once
-         * (e.g. when loading derived plugin after the base plugin has been
-         * already initialized).
+         * @attention In case you derive a plugin from one that implements this
+         *      function, it's advised to override it with an empty body so the
+         *      base finalization routine doesn't get called when finalizing
+         *      only the derived plugin.
+         *
          * @see @ref initialize()
-         * @bug ^ this will fail for base plugin if derived plugin is unloaded
-         *      and base plugin is still used
          */
         static void finalize();
 
