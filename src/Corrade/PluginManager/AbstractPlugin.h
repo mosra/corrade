@@ -181,7 +181,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * Called from PluginManager on all active instances before the plugin
          * is unloaded. Returns @cpp true @ce if it is safe to delete the
          * instance from the manager, @cpp false @ce if not. If any instance
-         * returns @cpp false @ce, the plugin is not unloaded.
+         * returns @cpp false @ce, the plugin is not unloaded. See
+         * @ref PluginManager-Manager-reload for more information.
          */
         virtual bool canBeDeleted();
 
@@ -199,7 +200,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * @brief Metadata
          *
          * Metadata associated with given plugin. If the plugin was not
-         * instantiated through plugin manager, returns @cpp nullptr @ce.
+         * instantiated through a plugin manager, returns @cpp nullptr @ce.
          * @see @ref AbstractManager::metadata()
          */
         const PluginMetadata* metadata() const { return _metadata; }

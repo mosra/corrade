@@ -221,9 +221,9 @@ typedef Containers::EnumSet<LoadState> LoadStates;
 CORRADE_ENUMSET_OPERATORS(LoadStates)
 
 /**
-@brief Non-templated base class of @ref Manager
+@brief Non-templated base for plugin managers
 
-See also @ref plugin-management.
+See @ref Manager and @ref plugin-management for more information.
  */
 class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
     friend AbstractPlugin;

@@ -41,17 +41,17 @@ namespace Corrade { namespace PluginManager {
 /**
 @brief Plugin metadata
 
-This class stores metadata about particular plugin. The plugin metadata are
-stored in plugin configuration file, which resides either besides the dynamic
-plugin binary in a filesystem or is compiled directly into executable with an
-static plugin. See @ref plugin-management for tutorial and brief introduction
-into how plugins work.
+This class stores metadata about a particular plugin. The plugin metadata are
+stored in a plugin metadata file, which resides either besides the dynamic
+plugin binary in a filesystem or is compiled directly into executable with a
+static plugin. See @ref plugin-management for a tutorial and brief introduction
+to how plugins work.
 
-The plugin configuration file has an simple syntax (see
+The plugin metadata file has a simple INI-like syntax (see
 @ref Utility::Configuration class documentation for full specification). The
 file stores list of dependencies (if the plugin depends on another), list of
-aliases and optionally plugin-specific configuration. Example `Matrix.conf`
-file for `Matrix` plugin:
+aliases and optionally plugin-specific data and configuration. Example
+`Matrix.conf` file for a `Matrix` plugin:
 
 @code{.ini}
 # Dependencies
@@ -76,6 +76,16 @@ According to the configuration file, the `Matrix` plugin can be loaded only if
 `SomeRandomJohnDoesPlugin`, `BaseMatrixPlugin` and `SkyNetPlugin` are found can
 be loaded. It will be also loaded when requesting `RealWorld` plugin, but only
 if this is the first plugin providing it.
+
+The @cb{.ini} [data] @ce section can contain read-only data that can be used
+for example to provide additional info about the plugin in a user interface and
+is accessible through @ref data().
+
+The @cb{.ini} [configuration] @ce section contains initial configuration data
+that can be modified by the user to setup a particular plugin instance beyond
+what's possible via the plugin interface. The initial configuration is
+accessible through @ref configuration(), while a modifiable copy is stored
+in each plugin instance, accessible through @ref AbstractPlugin::configuration().
 */
 class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
     friend AbstractManager;
@@ -118,7 +128,10 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          * @brief Plugin-specific data
          *
          * Additional plugin-specific data, contained in the
-         * @cb{.ini} [data] @ce group of plugin configuration.
+         * @cb{.ini} [data] @ce group of plugin metadata. If the
+         * @cb{.ini} [data] @ce group was not present in the metadata, the
+         * returned group is empty.
+         * @see @ref configuration()
          */
         const Utility::ConfigurationGroup& data() const { return *_data; }
 

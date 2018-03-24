@@ -38,7 +38,8 @@ namespace Corrade { namespace PluginManager {
 /**
 @brief Plugin manager
 
-Manages loading, instancing and unloading plugins.
+Manages loading, instancing and unloading plugins. See @ref plugin-management
+for a detailed usage tutorial.
 
 @section PluginManager-Manager-paths Plugin directories
 
@@ -52,7 +53,40 @@ Plugins are searched in the following directories, in order:
 
 The matching directory is then saved and available through @ref pluginDirectory().
 
-See also @ref plugin-management for a detailed usage tutorial.
+@section PluginManager-Manager-reload Plugin loading, instantiation and unloading
+
+A plugin is loaded by calling @ref load() with given plugin name or alias.
+After that, you can get one or more instances using @ref instantiate(). For
+convenience, @ref loadAndInstantiate() combines these two operations into one.
+
+Plugin is unloaded either by calling @ref unload() or on plugin manager
+destruction. By default, all active plugin instances have to be deleted before
+a plugin can be unloaded. For hot reloading and other specific use cases it's
+possible to unload a plugin that still has active instances. For that to work,
+@ref AbstractPlugin::canBeDeleted() has to return @cpp true @ce for all active
+instances, otherwise @ref unload() returns @ref LoadState::Used. Moreover, in
+order to avoid double-free issues, you have to call @ref std::unique_ptr::release()
+on all @ref std::unique_ptr instances returned from @ref Manager::instance() or
+@ref Manager::loadAndInstantiate().
+
+@section PluginManager-Manager-data Plugin-specific data and configuration
+
+Besides the API provided by a particular plugin interface after given plugin is
+instantiated, plugins can also define various additional metadata that can be
+accessed even if the plugin is not loaded. That can be used for example to
+provide extra information to users in a plugin listing UI. Plugin-specific data
+can be accessed via @ref PluginMetadata::data() through either @ref metadata()
+or @ref AbstractPlugin::metadata().
+
+In order to make it possible to configure behavior of specific plugins on top
+of what the general plugin interface provides, the
+@ref AbstractPlugin::configuration() function provides read-write access to
+a configuration specific to a particular plugin instance. This can be used for
+example to adjust various quality/speed properties of a JPEG image conversion
+plugin that wouldn't be otherwise available in the general image converter
+plugin API.
+
+See @ref PluginMetadata for detailed description of the plugin metadata file.
  */
 template<class T> class Manager: public AbstractManager {
     public:
