@@ -1,5 +1,3 @@
-#ifndef Corrade_PluginManager_Test_AbstractAnimal_h
-#define Corrade_PluginManager_Test_AbstractAnimal_h
 /*
     This file is part of Corrade.
 
@@ -25,23 +23,27 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/PluginManager/AbstractPlugin.h"
+#include "AbstractDeletable.h"
+
+#include "Corrade/Utility/Directory.h"
+
+#include "configure.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-class AbstractAnimal: public AbstractPlugin {
-    public:
-        static std::string pluginInterface();
-        static std::vector<std::string> pluginSearchPaths();
+std::string AbstractDeletable::pluginInterface() {
+    return "cz.mosra.corrade.PluginManager.Test.AbstractDeletable/1.0";
+}
 
-        explicit AbstractAnimal() = default;
-        explicit AbstractAnimal(AbstractManager& manager, const std::string& plugin): AbstractPlugin{manager, plugin} {}
-
-        virtual std::string name() = 0;
-        virtual int legCount() = 0;
-        virtual bool hasTail() = 0;
-};
+std::vector<std::string> AbstractDeletable::pluginSearchPaths() {
+    return {
+        #ifndef CMAKE_INTDIR
+        Utility::Directory::join(PLUGINS_DIR, "deletable")
+        #else
+        Utility::Directory::join(Utility::Directory::join(PLUGINS_DIR, "deletable"), CMAKE_INTDIR)
+        #endif
+    };
+}
 
 }}}
 
-#endif

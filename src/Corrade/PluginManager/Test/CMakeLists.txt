@@ -42,7 +42,12 @@ endif()
 corrade_add_static_plugin(Canary ${CMAKE_CURRENT_BINARY_DIR} Canary.conf Canary.cpp)
 set_target_properties(Canary Canary-dependencies PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
-corrade_add_test(PluginManagerTest Test.cpp LIBRARIES CorradePluginManagerTestLib Canary)
+corrade_add_test(PluginManagerTest
+    Test.cpp
+    AbstractAnimal.cpp
+    AbstractDeletable.cpp
+    AbstractFood.cpp
+    LIBRARIES CorradePluginManagerTestLib Canary)
 set_target_properties(PluginManagerTest PROPERTIES FOLDER "Corrade/PluginManager/Test")
 target_include_directories(PluginManagerTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 

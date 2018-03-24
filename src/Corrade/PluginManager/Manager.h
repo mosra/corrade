@@ -38,15 +38,29 @@ namespace Corrade { namespace PluginManager {
 /**
 @brief Plugin manager
 
-Manages loading, instancing and unloading plugins. See also
-@ref plugin-management.
+Manages loading, instancing and unloading plugins.
+
+@section PluginManager-Manager-paths Plugin directories
+
+Plugins are searched in the following directories, in order:
+
+1.  If a non-empty `pluginDirectory` was passed to the @ref Manager(std::string)
+    constructor, plugins are searched there.
+2.  Otherwise, it's expected that given plugin interface defined
+    @ref AbstractPlugin::pluginSearchPaths(). The search goes through the
+    entries and stops once an existing directory is found.
+
+The matching directory is then saved and available through @ref pluginDirectory().
+
+See also @ref plugin-management for a detailed usage tutorial.
  */
 template<class T> class Manager: public AbstractManager {
     public:
         /**
          * @brief Constructor
-         * @param pluginDirectory   Directory where plugins will be searched,
-         *      encoded in UTF-8. No recursive processing is done.
+         * @param pluginDirectory   Optional directory where plugins will be
+         *      searched. See @ref PluginManager-Manager-paths for more
+         *      information.
          *
          * First goes through list of static plugins and finds ones that use
          * the same interface as this manager instance. Then gets list of all
@@ -62,7 +76,7 @@ template<class T> class Manager: public AbstractManager {
          *      @ref CORRADE_TARGET_ANDROID "Android" as only static plugins
          *      are supported.
          */
-        explicit Manager(std::string pluginDirectory = {}): AbstractManager(T::pluginInterface(), std::move(pluginDirectory)) {}
+        explicit Manager(std::string pluginDirectory = {}): AbstractManager{T::pluginInterface(), T::pluginSearchPaths(), std::move(pluginDirectory)} {}
 
         /**
          * @brief Plugin instance

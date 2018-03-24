@@ -113,9 +113,9 @@ void AbstractManager::importStaticPlugin(std::string plugin, int _version, std::
 #endif
 
 /* GCC 4.7 doesn't like initializing references with {} */
-AbstractManager::AbstractManager(std::string pluginInterface, std::string pluginDirectory): _plugins(initializeGlobalPluginStorage()), _pluginInterface{std::move(pluginInterface)} {
+AbstractManager::AbstractManager(std::string pluginInterface, const std::vector<std::string>& pluginSearchPaths, std::string pluginDirectory): _plugins(initializeGlobalPluginStorage()), _pluginInterface{std::move(pluginInterface)} {
     /* Find static plugins which have the same interface and have not
-        assigned manager to them */
+       assigned manager to them */
     for(auto p: _plugins.plugins) {
         if(p.second->loadState != LoadState::Static || p.second->manager != nullptr || p.second->staticPlugin->interface != _pluginInterface)
             continue;
@@ -126,8 +126,26 @@ AbstractManager::AbstractManager(std::string pluginInterface, std::string plugin
     }
 
     #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-    setPluginDirectory(std::move(pluginDirectory));
+    /* If plugin directory is set, use it, otherwise loop through */
+    if(!pluginDirectory.empty()) setPluginDirectory(std::move(pluginDirectory));
+    else {
+        CORRADE_ASSERT(!pluginSearchPaths.empty(),
+            "PluginManager::Manager(): either pluginDirectory has to be set or T::pluginSearchPaths() is expected to have at least one entry", );
+
+        const std::string executableDir = Utility::Directory::path(Utility::Directory::executableLocation());
+        for(const std::string& path: pluginSearchPaths) {
+            std::string fullPath = Utility::Directory::join(executableDir, path);
+            if(!Utility::Directory::fileExists(fullPath)) continue;
+
+            setPluginDirectory(std::move(fullPath));
+            break;
+        }
+
+        /* If no hardcoded path exists, plugin directory is "", i.e. the same
+           as what the user set */
+    }
     #else
+    static_cast<void>(pluginSearchPaths);
     static_cast<void>(pluginDirectory);
     #endif
 }

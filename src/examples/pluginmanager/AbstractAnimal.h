@@ -39,6 +39,10 @@ class AbstractAnimal: public PluginManager::AbstractPlugin {
             return "cz.mosra.corrade.Examples.AbstractAnimal/1.0";
         }
 
+        static std::vector<std::string> pluginSearchPaths() {
+            return {""};
+        }
+
         explicit AbstractAnimal(PluginManager::AbstractManager& manager, const std::string& plugin):
             AbstractPlugin{manager, plugin} {}
 

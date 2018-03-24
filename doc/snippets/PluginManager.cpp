@@ -24,14 +24,23 @@
 */
 
 #include "Corrade/PluginManager/AbstractPlugin.h"
+#include "Corrade/Utility/Directory.h"
 
 using namespace Corrade;
 
+#define CMAKE_INSTALL_PREFIX "/usr"
 /* [AbstractPlugin] */
 class AbstractFilesystem: public PluginManager::AbstractPlugin {
     public:
         static std::string pluginInterface() {
             return "cz.mosra.corrade.AbstractFilesystem/1.0";
+        }
+
+        std::vector<std::string> pluginSearchPaths() {
+            return {
+                "corrade/filesystems",
+                Utility::Directory::join(CMAKE_INSTALL_PREFIX, "lib/corrade/filesystems")
+            };
         }
 
         explicit AbstractFilesystem(PluginManager::AbstractManager& manager, const std::string& plugin):

@@ -41,12 +41,11 @@ int main(int argc, char** argv) {
 
     Utility::Arguments args;
     args.addArgument("plugin").setHelp("plugin", "animal plugin name")
-        .addOption("plugin-dir", ".").setHelp("plugin-dir", "plugin directory to use", "DIR")
         .setHelp("Displays info about given animal.")
         .parse(argc, argv);
 
     /* Initialize plugin manager with given directory */
-    PluginManager::Manager<Examples::AbstractAnimal> manager{args.value("plugin-dir")};
+    PluginManager::Manager<Examples::AbstractAnimal> manager;
 
     /* Try to load a plugin */
     if(!(manager.load(args.value("plugin")) & PluginManager::LoadState::Loaded)) {

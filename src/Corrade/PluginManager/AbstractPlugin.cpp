@@ -31,6 +31,8 @@
 
 namespace Corrade { namespace PluginManager {
 
+std::vector<std::string> AbstractPlugin::pluginSearchPaths() { return {}; }
+
 void AbstractPlugin::initialize() {}
 
 void AbstractPlugin::finalize() {}

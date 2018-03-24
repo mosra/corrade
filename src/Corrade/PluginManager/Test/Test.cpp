@@ -47,6 +47,8 @@ namespace Corrade { namespace PluginManager { namespace Test {
 struct Test: TestSuite::Tester {
     explicit Test();
 
+    void pluginSearchPaths();
+
     void nameList();
     void wrongPluginVersion();
     void wrongPluginInterface();
@@ -85,7 +87,9 @@ struct Test: TestSuite::Tester {
 };
 
 Test::Test() {
-    addTests({&Test::nameList,
+    addTests({&Test::pluginSearchPaths,
+
+              &Test::nameList,
               &Test::wrongPluginVersion,
               &Test::wrongPluginInterface,
               &Test::wrongMetadataFile,
@@ -126,30 +130,64 @@ Test::Test() {
 namespace {
     #ifndef CMAKE_INTDIR
     const std::string pluginsDir = PLUGINS_DIR;
-    const std::string foodPluginsDir = Utility::Directory::join(PLUGINS_DIR, "food");
-    const std::string deletablePluginsDir = Utility::Directory::join(PLUGINS_DIR, "deletable");
     #else
     const std::string pluginsDir = Utility::Directory::join(PLUGINS_DIR, CMAKE_INTDIR);
-    const std::string foodPluginsDir = Utility::Directory::join(Utility::Directory::join(PLUGINS_DIR, "food"), CMAKE_INTDIR);
-    const std::string deletablePluginsDir = Utility::Directory::join(Utility::Directory::join(PLUGINS_DIR, "deletable"), CMAKE_INTDIR);
+    #endif
+}
+
+void Test::pluginSearchPaths() {
+    struct SomePlugin: AbstractPlugin {
+        static std::string pluginInterface() { return {}; }
+
+        SomePlugin(PluginManager::AbstractManager& manager, const std::string& plugin):
+            AbstractPlugin{manager, plugin} {}
+    };
+
+    /* Everything okay in this case */
+    {
+        PluginManager::Manager<SomePlugin> manager{"someDirectory"};
+    }
+
+    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    /* Complain that plugin search path is set */
+    std::ostringstream out;
+    Error redirectError{&out};
+    {
+        PluginManager::Manager<SomePlugin> manager;
+    }
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager(): either pluginDirectory has to be set or T::pluginSearchPaths() is expected to have at least one entry\n");
+    #else
+    CORRADE_VERIFY(true);
     #endif
 }
 
 void Test::nameList() {
     #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
     {
-        PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+        PluginManager::Manager<AbstractAnimal> manager;
 
         CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
             "Bulldog", "Canary", "Dog", "PitBull", "Snail"}), TestSuite::Compare::Container);
     }
     #endif
 
-    /* Check if the list of dynamic plugins is cleared after destructing */
-    PluginManager::Manager<AbstractAnimal> manager("nonexistent");
+    {
+        /* Check if the list of dynamic plugins is cleared after destructing */
+        PluginManager::Manager<AbstractAnimal> manager("nonexistent");
 
-    CORRADE_COMPARE_AS(manager.pluginList(), std::vector<std::string>{
-        "Canary"}, TestSuite::Compare::Container);
+        CORRADE_COMPARE_AS(manager.pluginList(), std::vector<std::string>{
+            "Canary"}, TestSuite::Compare::Container);
+    }
+
+    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    /* Check that explicitly specifying the same plugin path does the same */
+    {
+        PluginManager::Manager<AbstractAnimal> manager{pluginsDir};
+
+        CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
+            "Bulldog", "Canary", "Dog", "PitBull", "Snail"}), TestSuite::Compare::Container);
+    }
+    #endif
 }
 
 void Test::wrongPluginVersion() {
@@ -159,7 +197,7 @@ void Test::wrongPluginVersion() {
     std::ostringstream out;
     Error redirectError{&out};
 
-    PluginManager::Manager<AbstractFood> foodManager(foodPluginsDir);
+    PluginManager::Manager<AbstractFood> foodManager;
     CORRADE_COMPARE(foodManager.load("OldBread"), PluginManager::LoadState::WrongPluginVersion);
     CORRADE_COMPARE(foodManager.loadState("OldBread"), PluginManager::LoadState::NotLoaded);
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): wrong version of plugin OldBread, expected 5 but got 0\n");
@@ -173,7 +211,7 @@ void Test::wrongPluginInterface() {
     std::ostringstream out;
     Error redirectError{&out};
 
-    PluginManager::Manager<AbstractFood> foodManager(foodPluginsDir);
+    PluginManager::Manager<AbstractFood> foodManager;
     CORRADE_COMPARE(foodManager.load("RottenTomato"), PluginManager::LoadState::WrongInterfaceVersion);
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): wrong interface string of plugin RottenTomato, expected cz.mosra.corrade.PluginManager.Test.AbstractFood/1.0 but got cz.mosra.corrade.PluginManager.Test.AbstractFood/0.1\n");
     #endif
@@ -186,7 +224,7 @@ void Test::wrongMetadataFile() {
     std::ostringstream out;
     Error redirectError{&out};
 
-    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+    PluginManager::Manager<AbstractAnimal> manager;
     CORRADE_COMPARE(manager.loadState("Snail"), LoadState::WrongMetadataFile);
     CORRADE_COMPARE(manager.load("Snail"), LoadState::WrongMetadataFile);
     CORRADE_COMPARE(out.str(),
@@ -196,7 +234,7 @@ void Test::wrongMetadataFile() {
 }
 
 void Test::loadNonexistent() {
-    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+    PluginManager::Manager<AbstractAnimal> manager;
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -209,7 +247,7 @@ void Test::loadNonexistent() {
 }
 
 void Test::unloadNonexistent() {
-    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+    PluginManager::Manager<AbstractAnimal> manager;
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -218,7 +256,7 @@ void Test::unloadNonexistent() {
 }
 
 void Test::staticPlugin() {
-    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+    PluginManager::Manager<AbstractAnimal> manager;
 
     CORRADE_COMPARE(manager.loadState("Canary"), LoadState::Static);
     CORRADE_COMPARE(manager.metadata("Canary")->data().value("description"), "I'm allergic to canaries!");
@@ -234,7 +272,7 @@ void Test::staticPlugin() {
 
 #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
 void Test::dynamicPlugin() {
-    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+    PluginManager::Manager<AbstractAnimal> manager;
 
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.load("Dog"), LoadState::Loaded);
@@ -287,7 +325,7 @@ void Test::dynamicPluginInitFini() {
     std::ostringstream out;
     Debug redirectDebug{&out};
 
-    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+    PluginManager::Manager<AbstractAnimal> manager;
 
     /* Initialization is right after manager loads them */
     out.str({});
@@ -305,7 +343,7 @@ void Test::deletable() {
     #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
     CORRADE_SKIP("Can't test because static plugins can't be unloaded");
     #else
-    PluginManager::Manager<AbstractDeletable> deletableManager(deletablePluginsDir);
+    PluginManager::Manager<AbstractDeletable> deletableManager;
 
     /* Load plugin where canBeDeleted() returns true */
     CORRADE_COMPARE(deletableManager.load("Deletable"), LoadState::Loaded);
@@ -328,7 +366,7 @@ void Test::hierarchy() {
     #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
     CORRADE_SKIP("Dependency hierarchy is meaningful only for dynamic plugins");
     #else
-    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+    PluginManager::Manager<AbstractAnimal> manager;
 
     CORRADE_COMPARE(manager.load("PitBull"), LoadState::Loaded);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
@@ -369,7 +407,7 @@ void Test::destructionHierarchy() {
     CORRADE_VERIFY(std::string{"Dog"} < std::string{"PitBull"});
 
     {
-        PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+        PluginManager::Manager<AbstractAnimal> manager;
         CORRADE_COMPARE(manager.load("PitBull"), LoadState::Loaded);
         CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
     }
@@ -380,8 +418,8 @@ void Test::destructionHierarchy() {
 }
 
 void Test::crossManagerDependencies() {
-    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
-    PluginManager::Manager<AbstractFood> foodManager(foodPluginsDir);
+    PluginManager::Manager<AbstractAnimal> manager;
+    PluginManager::Manager<AbstractFood> foodManager;
 
     #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
     CORRADE_SKIP("Cross-manager dependencies are meaningful only for dynamic plugins");
@@ -425,8 +463,8 @@ void Test::unresolvedDependencies() {
     #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
     CORRADE_SKIP("UsedBy list is irrelevant for static plugins");
     #else
-    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
-    PluginManager::Manager<AbstractFood> foodManager(foodPluginsDir);
+    PluginManager::Manager<AbstractAnimal> manager;
+    PluginManager::Manager<AbstractFood> foodManager;
 
     /* HotDogWithSnail depends on Dog and Snail, which cannot be loaded, so the
        loading fails too. Dog plugin then shouldn't have HotDogWithSnail in
@@ -448,7 +486,7 @@ void Test::reloadPluginDirectory() {
     #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
     CORRADE_SKIP("Plugin directory is irrelevant for static plugins");
     #else
-    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+    PluginManager::Manager<AbstractAnimal> manager;
 
     /* Load Dog and rename the plugin */
     CORRADE_COMPARE(manager.load("Dog"), LoadState::Loaded);
@@ -496,7 +534,7 @@ void Test::reloadPluginDirectory() {
 }
 
 void Test::staticProvides() {
-    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+    PluginManager::Manager<AbstractAnimal> manager;
 
     CORRADE_COMPARE(manager.metadata("Canary")->provides(), std::vector<std::string>{"JustSomeBird"});
 
@@ -511,7 +549,7 @@ void Test::staticProvides() {
 
 #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
 void Test::dynamicProvides() {
-    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+    PluginManager::Manager<AbstractAnimal> manager;
 
     CORRADE_COMPARE(manager.metadata("Dog")->provides(), std::vector<std::string>{"JustSomeMammal"});
 
@@ -532,7 +570,7 @@ void Test::dynamicProvides() {
 }
 
 void Test::dynamicProvidesDependency() {
-    PluginManager::Manager<AbstractAnimal> manager(pluginsDir);
+    PluginManager::Manager<AbstractAnimal> manager;
 
     /* The plugin JustSomeMammal exists, but is an alias and cannot be used as
        a dependency */

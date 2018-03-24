@@ -41,6 +41,12 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-new New features
 
+@subsubsection corrade-changelog-latest-new-pluginmanager PluginManager library
+
+-   New @ref PluginManager::AbstractPlugin::pluginSearchPaths() interface
+    allowing plugin interfaces to specify plugin search paths to make life
+    simpler for the end user
+
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
 -   Ability to query current scoped output stream using @ref Utility::Debug::output(),

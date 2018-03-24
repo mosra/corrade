@@ -63,8 +63,18 @@ this makes the name as unique as possible. The interface name should also
 contain version identifier to make sure the plugin will not be loaded with
 incompatible interface version.
 
+To make lives of the users easier, we can define a list of paths where the
+plugins will be searched for using
+@ref PluginManager::AbstractPlugin::pluginSearchPaths() "pluginSearchPaths()".
+The paths can be either absolute (for example hardcoding a system-wide
+installation path) or relative (relative to the executable file). In this case
+the plugins will be right next to the executable, so just a single entry
+with @cpp "" @ce will do. If we wouldn't specify the search paths, the user
+would need to pass a plugin search path to the plugin manager constructor.
+
 @dontinclude pluginmanager/AbstractAnimal.h
 @skip class AbstractAnimal
+@until };
 @until };
 
 @section plugin-management-plugin Plugin definition

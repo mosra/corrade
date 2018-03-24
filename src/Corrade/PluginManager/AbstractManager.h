@@ -436,7 +436,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
             std::map<std::string, Plugin&> aliases;
         };
 
-        explicit AbstractManager(std::string pluginInterface, std::string pluginDirectory);
+        explicit AbstractManager(std::string pluginInterface, const std::vector<std::string>& pluginSearchPaths, std::string pluginDirectory);
 
         #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
         std::string _pluginDirectory;
