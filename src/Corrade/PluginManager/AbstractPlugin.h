@@ -204,10 +204,25 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          */
         const PluginMetadata* metadata() const { return _metadata; }
 
+        /**
+         * @brief Plugin-specific configuration
+         *
+         * Configuration associated with given plugin instance. Can be used to
+         * modify plugin behavior beyond what's possible through the plugin
+         * interface. Every instance gets a fresh copy from
+         * @ref PluginMetadata::configuration(), modifications are affecting
+         * only particular plugin instance. If the plugin was not instantiated
+         * through a plugin manager or the @cb{.ini} [configuration] @ce
+         * group was not present in the metadata, the returned group is empty.
+         */
+        Utility::ConfigurationGroup& configuration() { return *_configuration; }
+        const Utility::ConfigurationGroup& configuration() const { return *_configuration; } /**< @overload */
+
     private:
         AbstractManager* _manager;
         const std::string _plugin;
         const PluginMetadata* _metadata;
+        std::unique_ptr<Utility::ConfigurationGroup> _configuration;
 };
 
 /** @brief Plugin version */

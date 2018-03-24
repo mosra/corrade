@@ -65,6 +65,10 @@ struct Test: TestSuite::Tester {
     void dynamicPluginInitFini();
     #endif
 
+    void configuration();
+    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    void configurationImplicit();
+    #endif
     void deletable();
     void hierarchy();
     void destructionHierarchy();
@@ -109,6 +113,10 @@ Test::Test() {
               &Test::dynamicPluginInitFini,
               #endif
 
+              &Test::configuration,
+              #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+              &Test::configurationImplicit,
+              #endif
               &Test::deletable,
               &Test::hierarchy,
               &Test::destructionHierarchy,
@@ -350,6 +358,44 @@ void Test::dynamicPluginInitFini() {
     out.str({});
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
     CORRADE_COMPARE(out.str(), "Dog finalized\n");
+}
+#endif
+
+void Test::configuration() {
+    PluginManager::Manager<AbstractAnimal> manager;
+
+    CORRADE_COMPARE(manager.loadState("Canary"), LoadState::Static);
+
+    std::unique_ptr<AbstractAnimal> animal = manager.instance("Canary");
+    CORRADE_VERIFY(animal);
+    CORRADE_COMPARE(animal->name(), "Achoo");
+
+    CORRADE_COMPARE(manager.metadata("Canary")->configuration().value("name"), "Achoo");
+    CORRADE_COMPARE(animal->configuration().value("name"), "Achoo");
+
+    animal->configuration().setValue("name", "Bird!!");
+    CORRADE_COMPARE(animal->name(), "Bird!!");
+
+    /* Other instances are not affected */
+    std::unique_ptr<AbstractAnimal> animal2 = manager.instance("Canary");
+    CORRADE_VERIFY(animal2);
+    CORRADE_COMPARE(animal2->name(), "Achoo");
+}
+
+#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+void Test::configurationImplicit() {
+    PluginManager::Manager<AbstractAnimal> manager;
+
+    std::unique_ptr<AbstractAnimal> animal = manager.loadAndInstantiate("Dog");
+    CORRADE_VERIFY(animal);
+
+    /* The plugin should get an implicitly created configuration */
+    CORRADE_COMPARE(manager.metadata("Dog")->configuration().valueCount(), 0);
+    CORRADE_COMPARE(animal->configuration().valueCount(), 0);
+
+    /* And a modifiable one */
+    animal->configuration().setValue("name", "UPDOG");
+    CORRADE_COMPARE(animal->configuration().value("name"), "UPDOG");
 }
 #endif
 

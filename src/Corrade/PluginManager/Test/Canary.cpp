@@ -36,7 +36,7 @@ class Canary: public AbstractAnimal {
 
         explicit Canary(AbstractManager& manager, const std::string& plugin): AbstractAnimal{manager, plugin} {}
 
-        std::string name() override { return "Achoo"; }
+        std::string name() override { return configuration().value("name"); }
         int legCount() override { return 2; }
         bool hasTail() override { return true; }
 };

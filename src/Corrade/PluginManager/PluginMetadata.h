@@ -66,6 +66,10 @@ provides=RealButSlightlyTwistedWorld
 # Optional plugin-specific data
 [data]
 description=My first matrix without bugs
+
+# Optional plugin-specific configuration
+[configuration]
+redPillOrBluePill=red
 @endcode
 
 According to the configuration file, the `Matrix` plugin can be loaded only if
@@ -118,6 +122,18 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          */
         const Utility::ConfigurationGroup& data() const { return *_data; }
 
+        /**
+         * @brief Initial plugin-specific configuration
+         *
+         * Initial plugin-specific configuration, contained in the
+         * @cb{.ini} [configuration] @ce group of plugin configuration. A
+         * read-write copy is stored in each plugin instance, available through
+         * @ref AbstractPlugin::configuration(). If the @cb{.ini} [configuration] @ce
+         * group was not present in the metadata, the returned group is empty.
+         * @see @ref data()
+         */
+        const Utility::ConfigurationGroup& configuration() const { return *_configuration; }
+
     private:
         explicit PluginMetadata(std::string name, Utility::ConfigurationGroup& conf);
 
@@ -127,7 +143,7 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
             _usedBy,
             _provides;
 
-        const Utility::ConfigurationGroup* _data;
+        const Utility::ConfigurationGroup *_data, *_configuration;
 };
 
 }}

@@ -37,10 +37,13 @@ void AbstractPlugin::initialize() {}
 
 void AbstractPlugin::finalize() {}
 
-AbstractPlugin::AbstractPlugin(): _manager{nullptr}, _metadata{nullptr} {}
+AbstractPlugin::AbstractPlugin(): _manager{nullptr}, _metadata{nullptr} {
+    _configuration.reset(new Utility::ConfigurationGroup);
+}
 
 AbstractPlugin::AbstractPlugin(AbstractManager& manager, const std::string& plugin): _manager{&manager}, _plugin{plugin} {
     manager.registerInstance(plugin, *this, _metadata);
+    _configuration.reset(new Utility::ConfigurationGroup(_metadata->configuration()));
 }
 
 AbstractPlugin::~AbstractPlugin() {

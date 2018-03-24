@@ -36,9 +36,11 @@ PluginMetadata::PluginMetadata(std::string name, Utility::ConfigurationGroup& co
     _depends = conf.values("depends");
     _provides = conf.values("provides");
 
-    /* Plugin configuration data */
+    /* Plugin data, configuration */
     _data = conf.group("data");
+    _configuration = conf.group("configuration");
     if(!_data) _data = conf.addGroup("data");
+    if(!_configuration) _configuration = conf.addGroup("configuration");
 }
 
 std::string PluginMetadata::name() const { return _name; }
