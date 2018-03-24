@@ -427,6 +427,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
             AbstractManager* manager;
 
             Instancer instancer;
+            void(*finalizer)();
 
             #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
             union {

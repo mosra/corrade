@@ -408,7 +408,9 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
     HMODULE module = LoadLibraryW(widen(filename).data());
     #endif
     if(!module) {
-        Error() << "PluginManager::Manager::load(): cannot open plugin file" << '"' + filename + "\":" << dlerror();
+        Error{} << "PluginManager::Manager::load(): cannot load plugin"
+                << plugin.metadata._name << "from \"" << Debug::nospace
+                << filename << Debug::nospace << "\":" << dlerror();
         return LoadState::LoadFailed;
     }
 
@@ -444,6 +446,28 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
         return LoadState::WrongInterfaceVersion;
     }
 
+    /* Load plugin initializer */
+    #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
+    __extension__
+    #endif
+    void(*initializer)() = reinterpret_cast<void(*)()>(dlsym(module, "pluginInitializer"));
+    if(initializer == nullptr) {
+        Error() << "PluginManager::Manager::load(): cannot get initializer of plugin" << plugin.metadata._name + ":" << dlerror();
+        dlclose(module);
+        return LoadState::LoadFailed;
+    }
+
+    /* Load plugin finalizer */
+    #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
+    __extension__
+    #endif
+    void(*finalizer)() = reinterpret_cast<void(*)()>(dlsym(module, "pluginFinalizer"));
+    if(finalizer == nullptr) {
+        Error() << "PluginManager::Manager::load(): cannot get finalizer of plugin" << plugin.metadata._name + ":" << dlerror();
+        dlclose(module);
+        return LoadState::LoadFailed;
+    }
+
     /* Load plugin instancer */
     #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
@@ -456,15 +480,6 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
     }
 
     /* Initialize plugin */
-    #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
-    __extension__
-    #endif
-    void(*initializer)() = reinterpret_cast<void(*)()>(dlsym(module, "pluginInitializer"));
-    if(initializer == nullptr) {
-        Error() << "PluginManager::Manager::load(): cannot get initializer of plugin" << plugin.metadata._name + ":" << dlerror();
-        dlclose(module);
-        return LoadState::LoadFailed;
-    }
     initializer();
 
     /* Everything is okay, add this plugin to usedBy list of each dependency */
@@ -475,6 +490,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
     plugin.loadState = LoadState::Loaded;
     plugin.module = module;
     plugin.instancer = instancer;
+    plugin.finalizer = finalizer;
     return LoadState::Loaded;
 }
 #endif
@@ -537,14 +553,7 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
     }
 
     /* Finalize plugin */
-    #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
-    __extension__
-    #endif
-    void(*finalizer)() = reinterpret_cast<void(*)()>(dlsym(plugin.module, "pluginFinalizer"));
-    if(finalizer == nullptr) {
-        Error() << "PluginManager::Manager::unload(): cannot get finalizer of plugin" << plugin.metadata._name + ":" << dlerror();
-        /* Not fatal, continue with unloading */
-    } else finalizer();
+    plugin.finalizer();
 
     /* Close the module */
     #ifndef CORRADE_TARGET_WINDOWS
@@ -561,6 +570,7 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
     plugin.loadState = LoadState::NotLoaded;
     plugin.module = nullptr;
     plugin.instancer = nullptr;
+    plugin.finalizer = nullptr;
     return LoadState::NotLoaded;
 }
 #endif

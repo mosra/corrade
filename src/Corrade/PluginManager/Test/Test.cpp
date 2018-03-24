@@ -50,9 +50,20 @@ struct Test: TestSuite::Tester {
     void pluginSearchPaths();
 
     void nameList();
-    void wrongPluginVersion();
-    void wrongPluginInterface();
+
+    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
     void wrongMetadataFile();
+    void unresolvedReference();
+    void noPluginVersion();
+    void wrongPluginVersion();
+    void noPluginInterface();
+    void wrongPluginInterface();
+    void noPluginInitializer();
+    void noPluginFinalizer();
+    void noPluginInstancer();
+    #endif
+
+    void queryNonexistent();
     void loadNonexistent();
     void unloadNonexistent();
 
@@ -98,9 +109,20 @@ Test::Test() {
     addTests({&Test::pluginSearchPaths,
 
               &Test::nameList,
-              &Test::wrongPluginVersion,
-              &Test::wrongPluginInterface,
+
+              #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
               &Test::wrongMetadataFile,
+              &Test::unresolvedReference,
+              &Test::noPluginVersion,
+              &Test::wrongPluginVersion,
+              &Test::noPluginInterface,
+              &Test::wrongPluginInterface,
+              &Test::noPluginInitializer,
+              &Test::noPluginFinalizer,
+              &Test::noPluginInstancer,
+              #endif
+
+              &Test::queryNonexistent,
               &Test::loadNonexistent,
               &Test::unloadNonexistent,
 
@@ -212,37 +234,28 @@ void Test::nameList() {
     #endif
 }
 
-void Test::wrongPluginVersion() {
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
-    CORRADE_SKIP("Can't test plugin version of static plugins");
-    #else
-    std::ostringstream out;
-    Error redirectError{&out};
+#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+namespace {
 
-    PluginManager::Manager<AbstractFood> foodManager;
-    CORRADE_COMPARE(foodManager.load("OldBread"), PluginManager::LoadState::WrongPluginVersion);
-    CORRADE_COMPARE(foodManager.loadState("OldBread"), PluginManager::LoadState::NotLoaded);
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): wrong version of plugin OldBread, expected 5 but got 0\n");
-    #endif
-}
+struct WrongPlugin: AbstractPlugin {
+    static std::string pluginInterface() { return {}; }
 
-void Test::wrongPluginInterface() {
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
-    CORRADE_SKIP("Can't test plugin interface of static plugins");
-    #else
-    std::ostringstream out;
-    Error redirectError{&out};
+    static std::vector<std::string> pluginSearchPaths() {
+        return {
+            #ifndef CMAKE_INTDIR
+            Utility::Directory::join(PLUGINS_DIR, "wrong")
+            #else
+            Utility::Directory::join(Utility::Directory::join(PLUGINS_DIR, "wrong"), CMAKE_INTDIR)
+            #endif
+        };
+    }
 
-    PluginManager::Manager<AbstractFood> foodManager;
-    CORRADE_COMPARE(foodManager.load("RottenTomato"), PluginManager::LoadState::WrongInterfaceVersion);
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): wrong interface string of plugin RottenTomato, expected cz.mosra.corrade.PluginManager.Test.AbstractFood/1.0 but got cz.mosra.corrade.PluginManager.Test.AbstractFood/0.1\n");
-    #endif
+    explicit WrongPlugin(AbstractManager& manager, const std::string& plugin): AbstractPlugin{manager, plugin} {}
+};
+
 }
 
 void Test::wrongMetadataFile() {
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
-    CORRADE_SKIP("Can't test metadata file of static plugins");
-    #else
     std::ostringstream out;
     Error redirectError{&out};
 
@@ -252,7 +265,98 @@ void Test::wrongMetadataFile() {
     CORRADE_COMPARE(out.str(),
         "Utility::Configuration::Configuration(): key/value pair without '=' character\n"
         "PluginManager::Manager::load(): plugin Snail is not ready to load: PluginManager::LoadState::WrongMetadataFile\n");
-    #endif
+}
+
+void Test::unresolvedReference() {
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    PluginManager::Manager<WrongPlugin> manager;
+    CORRADE_COMPARE(manager.load("UnresolvedReference"), PluginManager::LoadState::LoadFailed);
+    CORRADE_COMPARE(manager.loadState("UnresolvedReference"), PluginManager::LoadState::NotLoaded);
+    const std::string expectedPrefix = "PluginManager::Manager::load(): cannot load plugin UnresolvedReference from \"";
+    CORRADE_COMPARE(out.str().substr(0, expectedPrefix.size()), expectedPrefix);
+}
+
+void Test::noPluginVersion() {
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    PluginManager::Manager<WrongPlugin> manager;
+    CORRADE_COMPARE(manager.load("NoPluginVersion"), PluginManager::LoadState::LoadFailed);
+    CORRADE_COMPARE(manager.loadState("NoPluginVersion"), PluginManager::LoadState::NotLoaded);
+    const std::string expectedPrefix = "PluginManager::Manager::load(): cannot get version of plugin NoPluginVersion: ";
+    CORRADE_COMPARE(out.str().substr(0, expectedPrefix.size()), expectedPrefix);
+}
+
+void Test::wrongPluginVersion() {
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    PluginManager::Manager<AbstractFood> foodManager;
+    CORRADE_COMPARE(foodManager.load("OldBread"), PluginManager::LoadState::WrongPluginVersion);
+    CORRADE_COMPARE(foodManager.loadState("OldBread"), PluginManager::LoadState::NotLoaded);
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): wrong version of plugin OldBread, expected 5 but got 0\n");
+}
+
+void Test::noPluginInterface() {
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    PluginManager::Manager<WrongPlugin> manager;
+    CORRADE_COMPARE(manager.load("NoPluginInterface"), PluginManager::LoadState::LoadFailed);
+    CORRADE_COMPARE(manager.loadState("NoPluginInterface"), PluginManager::LoadState::NotLoaded);
+    const std::string expectedPrefix =  "PluginManager::Manager::load(): cannot get interface string of plugin NoPluginInterface: ";
+    CORRADE_COMPARE(out.str().substr(0, expectedPrefix.size()), expectedPrefix);
+}
+
+void Test::wrongPluginInterface() {
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    PluginManager::Manager<AbstractFood> foodManager;
+    CORRADE_COMPARE(foodManager.load("RottenTomato"), PluginManager::LoadState::WrongInterfaceVersion);
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): wrong interface string of plugin RottenTomato, expected cz.mosra.corrade.PluginManager.Test.AbstractFood/1.0 but got cz.mosra.corrade.PluginManager.Test.AbstractFood/0.1\n");
+}
+
+void Test::noPluginInitializer() {
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    PluginManager::Manager<WrongPlugin> manager;
+    CORRADE_COMPARE(manager.load("NoPluginInitializer"), PluginManager::LoadState::LoadFailed);
+    CORRADE_COMPARE(manager.loadState("NoPluginInitializer"), PluginManager::LoadState::NotLoaded);
+    const std::string expectedPrefix = "PluginManager::Manager::load(): cannot get initializer of plugin NoPluginInitializer: ";
+    CORRADE_COMPARE(out.str().substr(0, expectedPrefix.size()), expectedPrefix);
+}
+
+void Test::noPluginFinalizer() {
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    PluginManager::Manager<WrongPlugin> manager;
+    CORRADE_COMPARE(manager.load("NoPluginFinalizer"), PluginManager::LoadState::LoadFailed);
+    CORRADE_COMPARE(manager.loadState("NoPluginFinalizer"), PluginManager::LoadState::NotLoaded);
+    const std::string expectedPrefix = "PluginManager::Manager::load(): cannot get finalizer of plugin NoPluginFinalizer: ";
+    CORRADE_COMPARE(out.str().substr(0, expectedPrefix.size()), expectedPrefix);
+}
+
+void Test::noPluginInstancer() {
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    PluginManager::Manager<WrongPlugin> manager;
+    CORRADE_COMPARE(manager.load("NoPluginInstancer"), PluginManager::LoadState::LoadFailed);
+    CORRADE_COMPARE(manager.loadState("NoPluginInstancer"), PluginManager::LoadState::NotLoaded);
+    const std::string expectedPrefix = "PluginManager::Manager::load(): cannot get instancer of plugin NoPluginInstancer: ";
+    CORRADE_COMPARE(out.str().substr(0, expectedPrefix.size()), expectedPrefix);
+}
+#endif
+
+void Test::queryNonexistent() {
+    PluginManager::Manager<AbstractAnimal> manager;
+    CORRADE_VERIFY(!manager.metadata("Nonexistent"));
+    CORRADE_COMPARE(manager.loadState("Nonexistent"), LoadState::NotFound);
 }
 
 void Test::loadNonexistent() {
