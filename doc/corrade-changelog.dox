@@ -48,6 +48,8 @@ namespace Corrade {
     simpler for the end user
 -   Added @ref PluginManager::AbstractManager::aliasList() for listing all
     available plugin aliases
+-   Ability to control what plugin is used for given alias using
+    @ref PluginManager::AbstractManager::setPreferredPlugins(()
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 

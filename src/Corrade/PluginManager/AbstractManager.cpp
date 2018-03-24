@@ -289,6 +289,25 @@ void AbstractManager::reloadPluginDirectory() {
 }
 #endif
 
+void AbstractManager::setPreferredPlugins(const std::string& alias, const std::initializer_list<std::string> plugins) {
+    auto foundAlias = _aliases.find(alias);
+    CORRADE_ASSERT(foundAlias != _aliases.end(),
+        "PluginManager::Manager::setPreferredPlugins():" << alias << "is not a known alias", );
+
+    /* Replace the alias with the first candidate that exists */
+    for(const std::string& plugin: plugins) {
+        auto foundPlugin = _plugins.plugins.find(plugin);
+        if(foundPlugin == _plugins.plugins.end() || foundPlugin->second->manager != this)
+            continue;
+
+        CORRADE_ASSERT(std::find(foundPlugin->second->metadata.provides().begin(), foundPlugin->second->metadata.provides().end(), alias) != foundPlugin->second->metadata.provides().end(),
+            "PluginManager::Manager::setPreferredPlugins():" << plugin << "does not provide" << alias, );
+        _aliases.erase(foundAlias);
+        _aliases.insert({alias, *foundPlugin->second});
+        break;
+    }
+}
+
 std::vector<std::string> AbstractManager::pluginList() const {
     std::vector<std::string> names;
     for(const std::pair<std::string, Plugin*>& plugin: _plugins.plugins) {

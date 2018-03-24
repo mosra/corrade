@@ -77,6 +77,10 @@ struct Test: TestSuite::Tester {
     #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
     void dynamicProvides();
     void dynamicProvidesDependency();
+    void setPreferredPlugins();
+    void setPreferredPluginsUnknownAlias();
+    void setPreferredPluginsDoesNotProvide();
+    void setPreferredPluginsOverridePrimaryPlugin();
     #endif
 
     #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
@@ -116,6 +120,10 @@ Test::Test() {
               #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
               &Test::dynamicProvides,
               &Test::dynamicProvidesDependency,
+              &Test::setPreferredPlugins,
+              &Test::setPreferredPluginsUnknownAlias,
+              &Test::setPreferredPluginsDoesNotProvide,
+              &Test::setPreferredPluginsOverridePrimaryPlugin,
               #endif
 
               #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
@@ -594,6 +602,59 @@ void Test::dynamicProvidesDependency() {
     Error redirectError{&out};
     CORRADE_COMPARE(manager.load("Bulldog"), LoadState::UnresolvedDependency);
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): unresolved dependency JustSomeMammal of plugin Bulldog\n");
+}
+
+void Test::setPreferredPlugins() {
+    PluginManager::Manager<AbstractAnimal> manager;
+
+    CORRADE_COMPARE(manager.metadata("Dog")->provides(), std::vector<std::string>{"JustSomeMammal"});
+    CORRADE_COMPARE(manager.metadata("PitBull")->provides(), (std::vector<std::string>{"JustSomeMammal", "Dog"}));
+
+    /* Implicit state */
+    CORRADE_COMPARE(manager.metadata("JustSomeMammal")->name(), "Dog");
+
+    /* Override */
+    manager.setPreferredPlugins("JustSomeMammal", {"Chihuahua", "PitBull"});
+    CORRADE_COMPARE(manager.metadata("JustSomeMammal")->name(), "PitBull");
+
+    /* Reloading plugin directory resets the mapping back */
+    manager.reloadPluginDirectory();
+    CORRADE_COMPARE(manager.metadata("JustSomeMammal")->name(), "Dog");
+}
+
+void Test::setPreferredPluginsUnknownAlias() {
+    PluginManager::Manager<AbstractAnimal> manager;
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    manager.setPreferredPlugins("Chihuahua", {"PitBull"});
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager::setPreferredPlugins(): Chihuahua is not a known alias\n");
+}
+
+void Test::setPreferredPluginsDoesNotProvide() {
+    PluginManager::Manager<AbstractAnimal> manager;
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    manager.setPreferredPlugins("Dog", {"Snail"});
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager::setPreferredPlugins(): Snail does not provide Dog\n");
+}
+
+void Test::setPreferredPluginsOverridePrimaryPlugin() {
+    PluginManager::Manager<AbstractAnimal> manager;
+
+    CORRADE_COMPARE(manager.metadata("PitBull")->provides(), (std::vector<std::string>{"JustSomeMammal", "Dog"}));
+
+    /* Implicit state */
+    CORRADE_COMPARE(manager.metadata("Dog")->name(), "Dog");
+
+    /* Override */
+    manager.setPreferredPlugins("Dog", {"PitBull"});
+    CORRADE_COMPARE(manager.metadata("Dog")->name(), "PitBull");
+
+    /* Reloading plugin directory resets the mapping back */
+    manager.reloadPluginDirectory();
+    CORRADE_COMPARE(manager.metadata("Dog")->name(), "Dog");
 }
 
 void Test::utf8Path() {

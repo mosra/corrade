@@ -297,6 +297,22 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         #endif
 
         /**
+         * @brief Set preferred plugins for given alias
+         *
+         * By default, if more than one plugin provides given @p alias, one of
+         * them is arbitrarily chosen. With this function it's possible to
+         * control the behavior. For given @p alias the function goes through
+         * the list in @p plugins and uses the first plugin that is available.
+         * The @p alias is expected to exist and be defined by plugins in
+         * @p plugins. If none of @p plugins is available, nothing is done.
+         *
+         * Note that after calling @ref setPluginDirectory() or @ref reloadPluginDirectory()
+         * this preference gets reset and you may need to call this function
+         * again.
+         */
+        void setPreferredPlugins(const std::string& alias, std::initializer_list<std::string> plugins);
+
+        /**
          * @brief List of all available plugin names
          *
          * Returns a list of names that correspond to concrete unique static or
