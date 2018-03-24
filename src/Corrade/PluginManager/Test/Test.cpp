@@ -283,7 +283,7 @@ void Test::staticPlugin() {
     CORRADE_COMPARE(manager.loadState("Canary"), LoadState::Static);
     CORRADE_COMPARE(manager.metadata("Canary")->data().value("description"), "I'm allergic to canaries!");
 
-    std::unique_ptr<AbstractAnimal> animal = manager.instance("Canary");
+    std::unique_ptr<AbstractAnimal> animal = manager.instantiate("Canary");
     CORRADE_VERIFY(animal);
     CORRADE_VERIFY(animal->hasTail());
     CORRADE_COMPARE(animal->name(), "Achoo");
@@ -302,7 +302,7 @@ void Test::dynamicPlugin() {
     CORRADE_COMPARE(manager.metadata("Dog")->data().value("description"), "A simple dog plugin.");
 
     {
-        std::unique_ptr<AbstractAnimal> animal = manager.instance("Dog");
+        std::unique_ptr<AbstractAnimal> animal = manager.instantiate("Dog");
         CORRADE_VERIFY(animal);
         CORRADE_VERIFY(animal->hasTail());
         CORRADE_COMPARE(animal->name(), "Doug");
@@ -366,8 +366,7 @@ void Test::configuration() {
 
     CORRADE_COMPARE(manager.loadState("Canary"), LoadState::Static);
 
-    std::unique_ptr<AbstractAnimal> animal = manager.instance("Canary");
-    CORRADE_VERIFY(animal);
+    std::unique_ptr<AbstractAnimal> animal = manager.instantiate("Canary");
     CORRADE_COMPARE(animal->name(), "Achoo");
 
     CORRADE_COMPARE(manager.metadata("Canary")->configuration().value("name"), "Achoo");
@@ -377,8 +376,7 @@ void Test::configuration() {
     CORRADE_COMPARE(animal->name(), "Bird!!");
 
     /* Other instances are not affected */
-    std::unique_ptr<AbstractAnimal> animal2 = manager.instance("Canary");
-    CORRADE_VERIFY(animal2);
+    std::unique_ptr<AbstractAnimal> animal2 = manager.instantiate("Canary");
     CORRADE_COMPARE(animal2->name(), "Achoo");
 }
 
@@ -412,7 +410,7 @@ void Test::deletable() {
 
     /* create an instance and connect it to local variable, which will be
        changed on destruction */
-    AbstractDeletable* deletable = deletableManager.instance("Deletable").release();
+    AbstractDeletable* deletable = deletableManager.instantiate("Deletable").release();
     deletable->set(&var);
 
     /* plugin destroys all instances on deletion => the variable will be changed */
@@ -437,8 +435,7 @@ void Test::hierarchy() {
         std::vector<std::string>{"PitBull"});
 
     {
-        std::unique_ptr<AbstractAnimal> animal = manager.instance("PitBull");
-        CORRADE_VERIFY(animal);
+        std::unique_ptr<AbstractAnimal> animal = manager.instantiate("PitBull");
         CORRADE_VERIFY(animal->hasTail()); // inherited from dog
         CORRADE_COMPARE(animal->legCount(), 4); // this too
         CORRADE_COMPARE(animal->name(), "Rodriguez");
@@ -494,8 +491,7 @@ void Test::crossManagerDependencies() {
 
     {
         /* Verify hotdog */
-        std::unique_ptr<AbstractFood> hotdog = foodManager.instance("HotDog");
-        CORRADE_VERIFY(hotdog);
+        std::unique_ptr<AbstractFood> hotdog = foodManager.instantiate("HotDog");
         CORRADE_VERIFY(!hotdog->isTasty());
         CORRADE_COMPARE(hotdog->weight(), 6800);
 
@@ -511,11 +507,11 @@ void Test::crossManagerDependencies() {
     #endif
 
     /* Verify that the plugin can be instanced only through its own manager */
-    CORRADE_VERIFY(manager.instance("Canary"));
+    CORRADE_VERIFY(manager.instantiate("Canary"));
 
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(!foodManager.instance("Canary"));
+    CORRADE_VERIFY(!foodManager.instantiate("Canary"));
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::instance(): plugin Canary is not loaded\n");
 }
 
@@ -608,7 +604,7 @@ void Test::staticProvides() {
     CORRADE_VERIFY(manager.metadata("JustSomeBird"));
     CORRADE_COMPARE(manager.metadata("JustSomeBird")->name(), "Canary");
 
-    const auto animal = manager.instance("JustSomeBird");
+    const auto animal = manager.instantiate("JustSomeBird");
     CORRADE_COMPARE(animal->plugin(), "JustSomeBird");
     CORRADE_COMPARE(animal->metadata()->name(), "Canary");
 }
@@ -625,7 +621,7 @@ void Test::dynamicProvides() {
     CORRADE_VERIFY(manager.metadata("JustSomeMammal"));
     CORRADE_COMPARE(manager.metadata("JustSomeMammal")->name(), "Dog");
 
-    const auto animal = manager.instance("JustSomeMammal");
+    const auto animal = manager.instantiate("JustSomeMammal");
     CORRADE_COMPARE(animal->plugin(), "JustSomeMammal");
     CORRADE_COMPARE(animal->metadata()->name(), "Dog");
 
@@ -721,7 +717,7 @@ void Test::utf8Path() {
     CORRADE_COMPARE(manager.load("Dog"), LoadState::Loaded);
 
     {
-        std::unique_ptr<AbstractAnimal> animal = manager.instance("Dog");
+        std::unique_ptr<AbstractAnimal> animal = manager.instantiate("Dog");
         CORRADE_VERIFY(animal);
         CORRADE_VERIFY(animal->hasTail());
         CORRADE_COMPARE(animal->name(), "Doug");

@@ -79,29 +79,38 @@ template<class T> class Manager: public AbstractManager {
         explicit Manager(std::string pluginDirectory = {}): AbstractManager{T::pluginInterface(), T::pluginSearchPaths(), std::move(pluginDirectory)} {}
 
         /**
-         * @brief Plugin instance
+         * @brief Instantiate a plugin
          *
-         * Returns new instance of given plugin. The plugin must be
-         * already successfully loaded by this manager. The returned value is
-         * never @cpp nullptr @ce.
+         * Returns new instance of given plugin. The plugin must be already
+         * successfully loaded by this manager. The returned value is never
+         * @cpp nullptr @ce.
          * @see @ref loadAndInstantiate(),
          *      @ref AbstractManager::loadState() "loadState()",
          *      @ref AbstractManager::load() "load()"
          */
-        std::unique_ptr<T> instance(const std::string& plugin) {
+        std::unique_ptr<T> instantiate(const std::string& plugin) {
             /** @todo C++14: `std::make_unique()` */
-            return std::unique_ptr<T>(static_cast<T*>(instanceInternal(plugin)));
+            return std::unique_ptr<T>(static_cast<T*>(instantiateInternal(plugin)));
         }
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @brief @copybrief instantiate()
+         * @deprecated Use @ref instantiate() instead.
+         */
+        CORRADE_DEPRECATED("use instantiate() instead") std::unique_ptr<T> instance(const std::string& plugin) {
+            return instantiate(plugin);
+        }
+        #endif
 
         /**
          * @brief Load and instantiate plugin
          *
          * Convenience alternative to calling both @ref load() and
-         * @ref instance(). If loading fails, @cpp nullptr @ce is returned.
+         * @ref instantiate(). If loading fails, @cpp nullptr @ce is returned.
          */
         std::unique_ptr<T> loadAndInstantiate(const std::string& plugin) {
             if(!(load(plugin) & LoadState::Loaded)) return nullptr;
-            return instance(plugin);
+            return instantiate(plugin);
         }
 };
 

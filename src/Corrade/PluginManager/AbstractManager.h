@@ -479,7 +479,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
         GlobalPluginStorage& _plugins;
 
-        void* instanceInternal(const std::string& plugin);
+        void* instantiateInternal(const std::string& plugin);
 
     private:
         /* Temporary storage of all information needed to import static plugins.

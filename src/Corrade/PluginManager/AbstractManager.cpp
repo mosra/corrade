@@ -599,7 +599,7 @@ void AbstractManager::unregisterInstance(const std::string& plugin, AbstractPlug
     if(instancesForPlugin.empty()) _instances.erase(foundInstance);
 }
 
-void* AbstractManager::instanceInternal(const std::string& plugin) {
+void* AbstractManager::instantiateInternal(const std::string& plugin) {
     Plugin* const found = findWithAlias(plugin);
 
     CORRADE_ASSERT(found && (found->loadState & LoadState::Loaded),

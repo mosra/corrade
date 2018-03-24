@@ -68,6 +68,8 @@ namespace Corrade {
 
 -   The `Corrade/Utility/AndroidStreamBuffer.h` header is deprecated, use
     @ref Corrade/Utility/AndroidLogStreamBuffer.h instead
+-   `PluginManager::Manager::instance()` is deprecated as it has a confusing
+    naming, use @ref PluginManager::Manager::instantiate() instead
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 
