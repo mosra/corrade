@@ -32,7 +32,9 @@
 #include <utility>
 
 #include "Corrade/PluginManager/AbstractPlugin.h"
+#include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/Configuration.h"
 
@@ -57,6 +59,67 @@ using Corrade::Utility::Unicode::widen;
 using namespace Corrade::Utility;
 
 namespace Corrade { namespace PluginManager {
+
+struct AbstractManager::StaticPlugin  {
+    std::string plugin;
+    std::string interface;
+    Instancer instancer;
+    void(*initializer)();
+    void(*finalizer)();
+};
+
+struct AbstractManager::Plugin {
+    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    LoadState loadState;
+    #else
+    const LoadState loadState; /* Always LoadState::Static */
+    #endif
+    Utility::Configuration configuration;
+    PluginMetadata metadata;
+
+    /* If set to nullptr, the plugin has not any associated plugin
+        manager and cannot be loaded. */
+    AbstractManager* manager;
+
+    Instancer instancer;
+    void(*finalizer)();
+
+    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    union {
+        /* For static plugins */
+        StaticPlugin* staticPlugin;
+
+        /* For dynamic plugins */
+        #ifndef CORRADE_TARGET_WINDOWS
+        void* module;
+        #else
+        HMODULE module;
+        #endif
+    };
+    #else
+    StaticPlugin* staticPlugin;
+    #endif
+
+    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    /* Constructor for dynamic plugins */
+    explicit Plugin(std::string name, const std::string& metadata, AbstractManager* manager);
+    #endif
+
+    /* Constructor for static plugins */
+    explicit Plugin(std::string name, std::istream& metadata, StaticPlugin* staticPlugin);
+
+    /* Ensure that we don't delete staticPlugin twice */
+    Plugin(const Plugin&) = delete;
+    Plugin(Plugin&&) = delete;
+    Plugin& operator=(const Plugin&) = delete;
+    Plugin& operator=(Plugin&&) = delete;
+
+    ~Plugin();
+};
+
+struct AbstractManager::GlobalPluginStorage {
+    std::map<std::string, Plugin*> plugins;
+};
 
 const int AbstractManager::Version = CORRADE_PLUGIN_VERSION;
 

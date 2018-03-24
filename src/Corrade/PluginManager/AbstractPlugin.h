@@ -29,6 +29,7 @@
  * @brief Class @ref Corrade::PluginManager::AbstractPlugin, macro @ref CORRADE_PLUGIN_VERSION, @ref CORRADE_PLUGIN_REGISTER()
  */
 
+#include <memory>
 #include <string>
 
 #include "Corrade/PluginManager/AbstractManager.h"

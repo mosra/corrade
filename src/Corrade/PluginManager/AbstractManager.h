@@ -29,17 +29,13 @@
  * @brief Class @ref Corrade::PluginManager::AbstractManager
  */
 
-#include <iosfwd>
 #include <map>
 #include <string>
 #include <vector>
 
 #include "Corrade/Containers/EnumSet.h"
-#include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/PluginManager/PluginManager.h"
 #include "Corrade/PluginManager/visibility.h"
-#include "Corrade/Utility/Configuration.h"
-#include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Resource.h"
 
 #ifdef CORRADE_TARGET_WINDOWS
@@ -405,66 +401,9 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
     #else
     protected:
     #endif
-        struct StaticPlugin {
-            std::string plugin;
-            std::string interface;
-            Instancer instancer;
-            void(*initializer)();
-            void(*finalizer)();
-        };
-
-        struct Plugin {
-            #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-            LoadState loadState;
-            #else
-            const LoadState loadState; /* Always LoadState::Static */
-            #endif
-            Utility::Configuration configuration;
-            PluginMetadata metadata;
-
-            /* If set to nullptr, the plugin has not any associated plugin
-               manager and cannot be loaded. */
-            AbstractManager* manager;
-
-            Instancer instancer;
-            void(*finalizer)();
-
-            #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-            union {
-                /* For static plugins */
-                StaticPlugin* staticPlugin;
-
-                /* For dynamic plugins */
-                #ifndef CORRADE_TARGET_WINDOWS
-                void* module;
-                #else
-                HMODULE module;
-                #endif
-            };
-            #else
-            StaticPlugin* staticPlugin;
-            #endif
-
-            #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-            /* Constructor for dynamic plugins */
-            explicit Plugin(std::string name, const std::string& metadata, AbstractManager* manager);
-            #endif
-
-            /* Constructor for static plugins */
-            explicit Plugin(std::string name, std::istream& metadata, StaticPlugin* staticPlugin);
-
-            /* Ensure that we don't delete staticPlugin twice */
-            Plugin(const Plugin&) = delete;
-            Plugin(Plugin&&) = delete;
-            Plugin& operator=(const Plugin&) = delete;
-            Plugin& operator=(Plugin&&) = delete;
-
-            ~Plugin();
-        };
-
-        struct GlobalPluginStorage {
-            std::map<std::string, Plugin*> plugins;
-        };
+        struct CORRADE_PLUGINMANAGER_LOCAL StaticPlugin;
+        struct CORRADE_PLUGINMANAGER_LOCAL Plugin;
+        struct CORRADE_PLUGINMANAGER_LOCAL GlobalPluginStorage;
 
         explicit AbstractManager(std::string pluginInterface, const std::vector<std::string>& pluginSearchPaths, std::string pluginDirectory);
 
@@ -476,7 +415,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
            and fills it with entries from staticPlugins(). The reference is
            then in constructor stored in _plugins variable to avoid at least
            some issues with duplicated static variables on static builds. */
-        static GlobalPluginStorage& initializeGlobalPluginStorage();
+        static CORRADE_PLUGINMANAGER_LOCAL GlobalPluginStorage& initializeGlobalPluginStorage();
 
         GlobalPluginStorage& _plugins;
 

@@ -24,6 +24,7 @@
 */
 
 #include "Corrade/Utility/Debug.h"
+#include "Corrade/Utility/Configuration.h"
 
 #include "AbstractAnimal.h"
 

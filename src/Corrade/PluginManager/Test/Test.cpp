@@ -27,9 +27,11 @@
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/PluginManager/Manager.h"
+#include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Configuration.h"
 
 #include "AbstractAnimal.h"
 #include "AbstractFood.h"
