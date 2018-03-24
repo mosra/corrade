@@ -433,7 +433,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
         struct GlobalPluginStorage {
             std::map<std::string, Plugin*> plugins;
-            std::map<std::string, Plugin&> aliases;
         };
 
         explicit AbstractManager(std::string pluginInterface, const std::vector<std::string>& pluginSearchPaths, std::string pluginDirectory);
@@ -479,6 +478,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         #endif
 
         std::string _pluginInterface;
+        std::map<std::string, Plugin&> _aliases;
         std::map<std::string, std::vector<AbstractPlugin*>> _instances;
 };
 

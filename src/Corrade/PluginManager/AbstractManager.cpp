@@ -73,24 +73,6 @@ auto AbstractManager::initializeGlobalPluginStorage() -> GlobalPluginStorage& {
             /* Insert plugin to list */
             const auto result = plugins->plugins.insert(std::make_pair(staticPlugin->plugin, new Plugin(staticPlugin->plugin, metadata, staticPlugin)));
             CORRADE_INTERNAL_ASSERT(result.second);
-
-            /* The plugin is the best version of itself. If there was already
-               an alias for this name, replace it. */
-            {
-                const auto alias = plugins->aliases.find(staticPlugin->plugin);
-                if(alias != plugins->aliases.end()) plugins->aliases.erase(alias);
-                CORRADE_INTERNAL_ASSERT_OUTPUT(plugins->aliases.insert({staticPlugin->plugin, *result.first->second}).second);
-            }
-
-            /* Add aliases to the list (only the ones that aren't already there
-               are added) */
-            for(const std::string& alias: result.first->second->metadata._provides) {
-                /* Libc++ frees the passed Plugin& reference when using
-                   emplace(), causing double-free memory corruption later.
-                   Everything is okay with insert(). */
-                /** @todo put back emplace() here when libc++ is fixed */
-                plugins->aliases.insert({alias, *result.first->second});
-            }
         }
 
         /** @todo Assert dependencies of static plugins */
@@ -131,6 +113,24 @@ AbstractManager::AbstractManager(std::string pluginInterface, const std::vector<
         /* Assign the plugin to this manager and initialize it */
         p.second->manager = this;
         p.second->staticPlugin->initializer();
+
+        /* The plugin is the best version of itself. If there was already an
+           alias for this name, replace it. */
+        {
+            const auto alias = _aliases.find(p.first);
+            if(alias != _aliases.end()) _aliases.erase(alias);
+            CORRADE_INTERNAL_ASSERT_OUTPUT(_aliases.insert({p.first, *p.second}).second);
+        }
+
+        /* Add aliases to the list (only the ones that aren't already there are
+           added) */
+        for(const std::string& alias: p.second->metadata._provides) {
+            /* Libc++ frees the passed Plugin& reference when using emplace(),
+               causing double-free memory corruption later. Everything is okay
+               with insert(). */
+            /** @todo put back emplace() here when libc++ is fixed */
+            _aliases.insert({alias, *p.second});
+        }
     }
 
     #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
@@ -160,48 +160,32 @@ AbstractManager::AbstractManager(std::string pluginInterface, const std::vector<
 
 AbstractManager::~AbstractManager() {
     /* Unload all plugins associated with this plugin manager */
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-    std::vector<std::map<std::string, Plugin*>::iterator> removed;
-    #endif
-    for(auto it = _plugins.plugins.begin(); it != _plugins.plugins.end(); ++it) {
+    auto it = _plugins.plugins.begin();
+    while(it != _plugins.plugins.end()) {
         /* Plugin doesn't belong to this manager */
-        if(it->second->manager != this) continue;
+        if(it->second->manager != this) {
+            ++it;
+            continue;
+        }
 
         #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
         /* Try to unload the plugin (and all plugins that depend on it) */
         const LoadState loadState = unloadRecursiveInternal(*it->second);
 
-        /* Schedule it for deletion, if it is not static, otherwise just
-           disconnect this manager from the plugin and finalize it, so another
-           manager can take over it in the future. */
-        if(loadState == LoadState::Static) {
-            it->second->manager = nullptr;
-            it->second->staticPlugin->finalizer();
-        } else removed.push_back(it);
-        #else
-        /* In Emscripten etc. there are only static plugins */
+        /* Erase from the container, if it is not static */
+        if(loadState != LoadState::Static) {
+            delete it->second;
+            it = _plugins.plugins.erase(it);
+            continue;
+        }
+        #endif
+
+        /* Otherwise just disconnect this manager from the plugin and finalize
+           it, so another manager can take over it in the future. */
         it->second->manager = nullptr;
         it->second->staticPlugin->finalizer();
-        #endif
+        ++it;
     }
-
-    /* Remove all non-static aliases associated with this manager. After the
-       previous step, the only plugins associated with this manager should now
-       be dynamic and unloaded. */
-    auto ait = _plugins.aliases.cbegin();
-    while(ait != _plugins.aliases.cend()) {
-        if(ait->second.manager == this && ait->second.loadState != LoadState::Static)
-            ait = _plugins.aliases.erase(ait);
-        else ++ait;
-    }
-
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-    /* Remove the plugins from global container */
-    for(auto it: removed) {
-        delete it->second;
-        _plugins.plugins.erase(it);
-    }
-    #endif
 }
 
 #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
@@ -244,10 +228,10 @@ void AbstractManager::setPluginDirectory(std::string directory) {
 
     /* Remove aliases for unloaded plugins from the container. They need to be
        removed before plugins themselves */
-    auto ait = _plugins.aliases.cbegin();
-    while(ait != _plugins.aliases.cend()) {
-        if(ait->second.manager == this && ait->second.loadState & (LoadState::NotLoaded|LoadState::WrongMetadataFile))
-            ait = _plugins.aliases.erase(ait);
+    auto ait = _aliases.cbegin();
+    while(ait != _aliases.cend()) {
+        if(ait->second.loadState & (LoadState::NotLoaded|LoadState::WrongMetadataFile))
+            ait = _aliases.erase(ait);
         else ++ait;
     }
 
@@ -283,9 +267,9 @@ void AbstractManager::setPluginDirectory(std::string directory) {
         /* The plugin is the best version of itself. If there was already an
            alias for this name, replace it. */
         {
-            const auto alias = _plugins.aliases.find(name);
-            if(alias != _plugins.aliases.end()) _plugins.aliases.erase(alias);
-            CORRADE_INTERNAL_ASSERT_OUTPUT(_plugins.aliases.insert({name, *result.first->second}).second);
+            const auto alias = _aliases.find(name);
+            if(alias != _aliases.end()) _aliases.erase(alias);
+            CORRADE_INTERNAL_ASSERT_OUTPUT(_aliases.insert({name, *result.first->second}).second);
         }
 
         /* Add aliases to the list. Calling insert() won't overwrite the
@@ -295,7 +279,7 @@ void AbstractManager::setPluginDirectory(std::string directory) {
                causing double-free memory corruption later. Everything is okay
                with insert(). */
             /** @todo put back emplace() here when libc++ is fixed */
-            _plugins.aliases.insert({alias, *result.first->second});
+            _aliases.insert({alias, *result.first->second});
         }
     }
 }
@@ -321,11 +305,10 @@ auto AbstractManager::findWithAlias(const std::string& plugin) -> Plugin* {
 }
 
 auto AbstractManager::findWithAlias(const std::string& plugin) const -> const Plugin* {
-    const auto aliasFound = _plugins.aliases.find(plugin);
+    const auto aliasFound = _aliases.find(plugin);
 
-    /* Found alias which belongs to this manager, load */
-    if(aliasFound != _plugins.aliases.end() && aliasFound->second.manager == this)
-        return &aliasFound->second;
+    /* Found an alias, load */
+    if(aliasFound != _aliases.end()) return &aliasFound->second;
 
     /* Not found */
     return nullptr;
