@@ -25,6 +25,8 @@
 
 #include "AbstractAnimal.h"
 
+#include "Corrade/PluginManager/AbstractManager.h"
+
 namespace Corrade { namespace PluginManager { namespace Test {
 
 class Snail: public AbstractAnimal {

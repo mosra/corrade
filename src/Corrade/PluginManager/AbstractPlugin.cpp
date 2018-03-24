@@ -25,8 +25,7 @@
 
 #include "AbstractPlugin.h"
 
-#include <utility>
-
+#include "Corrade/PluginManager/AbstractManager.h"
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/Utility/ConfigurationGroup.h"
 

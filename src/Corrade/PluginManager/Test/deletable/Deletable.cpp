@@ -25,6 +25,8 @@
 
 #include "../AbstractDeletable.h"
 
+#include "Corrade/PluginManager/AbstractManager.h"
+
 namespace Corrade { namespace PluginManager { namespace Test {
 
 class Deletable: public AbstractDeletable {

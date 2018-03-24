@@ -26,6 +26,8 @@
 #include "../AbstractFood.h"
 #include "../Dog.h"
 
+#include "Corrade/PluginManager/AbstractManager.h"
+
 namespace Corrade { namespace PluginManager { namespace Test {
 
 class HotDog: public AbstractFood {

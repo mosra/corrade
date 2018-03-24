@@ -25,6 +25,8 @@
 
 #include "../AbstractFood.h"
 
+#include "Corrade/PluginManager/AbstractManager.h"
+
 namespace Corrade { namespace PluginManager { namespace Test {
 
 class OldBread: public AbstractFood {

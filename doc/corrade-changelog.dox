@@ -76,6 +76,9 @@ namespace Corrade {
 -   Removed the unnecessarily opaque `CORRADE_PLUGIN_INTERFACE()` macro. Define
     a @cpp public @ce @cpp static const char* pluginInterface() @ce function
     instead. See @ref PluginManager::AbstractPlugin for more information.
+-   Moved the @ref CORRADE_PLUGIN_REGISTER() macro to
+    @ref Corrade/PluginManager/AbstractManager.h from
+    @ref Corrade/PluginManager/AbstractPlugin.h to reduce header dependencies
 
 @subsection corrade-changelog-latest-docs Documentation
 

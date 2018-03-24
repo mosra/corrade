@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::PluginManager::AbstractManager
+ * @brief Class @ref Corrade::PluginManager::AbstractManager, macro @ref CORRADE_PLUGIN_VERSION, @ref CORRADE_PLUGIN_REGISTER()
  */
 
 #include <map>
@@ -477,6 +477,69 @@ macro for automatic call.
     extern int pluginImporter_##name();                                     \
     pluginImporter_##name();                                                \
     CORRADE_RESOURCE_INITIALIZE(name)
+
+/** @brief Plugin version */
+#define CORRADE_PLUGIN_VERSION 5
+
+/**
+@brief Register static or dynamic lugin
+@param name          Name of static plugin (equivalent of dynamic plugin
+     filename)
+@param className     Plugin class name
+@param interface     Interface name (the same as is defined with
+     CORRADE_PLUGIN_INTERFACE() in plugin base class)
+@hideinitializer
+
+If the plugin is built as **static** (using CMake command
+@ref corrade-cmake-add-static-plugin "corrade_add_static_plugin()"), registers
+it, so it will be loaded automatically when PluginManager instance with
+corresponding interface is created. When building as static plugin,
+`CORRADE_STATIC_PLUGIN` preprocessor directive is defined.
+
+If the plugin is built as **dynamic** (using CMake command
+@ref corrade-cmake-add-plugin "corrade_add_plugin()"), registers it, so it can
+be dynamically loaded via @ref Corrade::PluginManager::Manager by supplying a
+name of the plugin. When building as dynamic plugin, `CORRADE_DYNAMIC_PLUGIN`
+preprocessor directive is defined.
+
+If the plugin is built as dynamic or static **library or executable** (not as
+plugin, using e.g. CMake command @cmake add_library() @ce /
+@cmake add_executable() @ce), this macro won't do anything to prevent linker
+issues when linking more plugins together. No plugin-related preprocessor
+directive is defined.
+
+See @ref plugin-management for more information about plugin compilation.
+
+@attention This macro should be called outside of any namespace. If you are
+    running into linker errors with `pluginImporter_`, this could be the
+    problem.
+*/
+#ifdef CORRADE_STATIC_PLUGIN
+#define CORRADE_PLUGIN_REGISTER(name, className, interface)                 \
+    inline void* pluginInstancer_##name(Corrade::PluginManager::AbstractManager& manager, const std::string& plugin) \
+        { return new className(manager, plugin); }                          \
+    int pluginImporter_##name();                                            \
+    int pluginImporter_##name() {                                           \
+        Corrade::PluginManager::AbstractManager::importStaticPlugin(#name, CORRADE_PLUGIN_VERSION, interface, pluginInstancer_##name, className::initialize, className::finalize); return 1; \
+    }
+#elif defined(CORRADE_DYNAMIC_PLUGIN)
+#define CORRADE_PLUGIN_REGISTER(name, className, interface)                 \
+    extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion();                   \
+    extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion() { return CORRADE_PLUGIN_VERSION; } \
+    extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractManager& manager, const std::string& plugin); \
+    extern "C" CORRADE_PLUGIN_EXPORT void* pluginInstancer(Corrade::PluginManager::AbstractManager& manager, const std::string& plugin) \
+        { return new className{manager, plugin}; }                          \
+    extern "C" CORRADE_PLUGIN_EXPORT void pluginInitializer();              \
+    extern "C" CORRADE_PLUGIN_EXPORT void pluginInitializer()               \
+        { className::initialize(); }                                        \
+    extern "C" CORRADE_PLUGIN_EXPORT void pluginFinalizer();                \
+    extern "C" CORRADE_PLUGIN_EXPORT void pluginFinalizer()                 \
+        { className::finalize(); }                                          \
+    extern "C" CORRADE_PLUGIN_EXPORT const char* pluginInterface();         \
+    extern "C" CORRADE_PLUGIN_EXPORT const char* pluginInterface() { return interface; }
+#else
+#define CORRADE_PLUGIN_REGISTER(name, className, interface)
+#endif
 
 }}
 

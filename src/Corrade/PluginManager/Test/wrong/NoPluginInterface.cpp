@@ -23,7 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/PluginManager/AbstractPlugin.h"
+#include "Corrade/PluginManager/AbstractManager.h"
 
 extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion();
 extern "C" CORRADE_PLUGIN_EXPORT int pluginVersion() { return CORRADE_PLUGIN_VERSION; }

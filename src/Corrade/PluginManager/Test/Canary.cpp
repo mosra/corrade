@@ -23,6 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include "Corrade/PluginManager/AbstractManager.h"
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Configuration.h"
 

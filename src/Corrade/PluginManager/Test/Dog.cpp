@@ -25,6 +25,7 @@
 
 #include "Dog.h"
 
+#include "Corrade/PluginManager/AbstractManager.h"
 #include "Corrade/Utility/Debug.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {

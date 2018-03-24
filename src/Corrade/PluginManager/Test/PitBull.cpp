@@ -25,6 +25,8 @@
 
 #include "Dog.h"
 
+#include "Corrade/PluginManager/AbstractManager.h"
+
 namespace Corrade { namespace PluginManager { namespace Test {
 
 class PitBull: public Dog {
