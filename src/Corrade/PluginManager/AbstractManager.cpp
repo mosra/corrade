@@ -418,14 +418,17 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
     #ifdef __GNUC__ /* http://www.mr-edd.co.uk/blog/supressing_gcc_warnings */
     __extension__
     #endif
-    int (*_version)() = reinterpret_cast<int(*)()>(dlsym(module, "pluginVersion"));
-    if(_version == nullptr) {
-        Error() << "PluginManager::Manager::load(): cannot get version of plugin" << plugin.metadata._name + ":" << dlerror();
+    int (*version)() = reinterpret_cast<int(*)()>(dlsym(module, "pluginVersion"));
+    if(version == nullptr) {
+        Error{} << "PluginManager::Manager::load(): cannot get version of plugin"
+                << plugin.metadata._name << Debug::nospace << ":" << dlerror();
         dlclose(module);
         return LoadState::LoadFailed;
     }
-    if(_version() != Version) {
-        Error() << "PluginManager::Manager::load(): wrong version of plugin" << plugin.metadata._name + ", expected" << Version << "but got" << _version();
+    if(version() != Version) {
+        Error{} << "PluginManager::Manager::load(): wrong version of plugin"
+                << plugin.metadata._name << Debug::nospace << ", expected"
+                << Version << "but got" << version();
         dlclose(module);
         return LoadState::WrongPluginVersion;
     }
@@ -436,7 +439,8 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
     #endif
     const char* (*interface)() = reinterpret_cast<const char* (*)()>(dlsym(module, "pluginInterface"));
     if(interface == nullptr) {
-        Error() << "PluginManager::Manager::load(): cannot get interface string of plugin" << plugin.metadata._name + ":" << dlerror();
+        Error{} << "PluginManager::Manager::load(): cannot get interface string of plugin"
+                << plugin.metadata._name << Debug::nospace << ":" << dlerror();
         dlclose(module);
         return LoadState::LoadFailed;
     }
@@ -452,7 +456,8 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
     #endif
     void(*initializer)() = reinterpret_cast<void(*)()>(dlsym(module, "pluginInitializer"));
     if(initializer == nullptr) {
-        Error() << "PluginManager::Manager::load(): cannot get initializer of plugin" << plugin.metadata._name + ":" << dlerror();
+        Error{} << "PluginManager::Manager::load(): cannot get initializer of plugin"
+                << plugin.metadata._name + ":" << dlerror();
         dlclose(module);
         return LoadState::LoadFailed;
     }
@@ -463,7 +468,8 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
     #endif
     void(*finalizer)() = reinterpret_cast<void(*)()>(dlsym(module, "pluginFinalizer"));
     if(finalizer == nullptr) {
-        Error() << "PluginManager::Manager::load(): cannot get finalizer of plugin" << plugin.metadata._name + ":" << dlerror();
+        Error{} << "PluginManager::Manager::load(): cannot get finalizer of plugin"
+                << plugin.metadata._name + ":" << dlerror();
         dlclose(module);
         return LoadState::LoadFailed;
     }
@@ -474,7 +480,8 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
     #endif
     Instancer instancer = reinterpret_cast<Instancer>(dlsym(module, "pluginInstancer"));
     if(instancer == nullptr) {
-        Error() << "PluginManager::Manager::load(): cannot get instancer of plugin" << plugin.metadata._name + ":" << dlerror();
+        Error{} << "PluginManager::Manager::load(): cannot get instancer of plugin"
+                << plugin.metadata._name + ":" << dlerror();
         dlclose(module);
         return LoadState::LoadFailed;
     }
@@ -513,13 +520,17 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
     /* Plugin is not ready to unload, nothing to do */
     if(plugin.loadState != LoadState::Loaded) {
         if(!(plugin.loadState & (LoadState::Static|LoadState::NotLoaded|LoadState::WrongMetadataFile)))
-            Error() << "PluginManager::Manager::unload(): plugin" << plugin.metadata._name << "is not ready to unload:" << plugin.loadState;
+            Error{} << "PluginManager::Manager::unload(): plugin"
+                    << plugin.metadata._name << "is not ready to unload:"
+                    << plugin.loadState;
         return plugin.loadState;
     }
 
     /* Plugin is used by another plugin, don't unload */
     if(!plugin.metadata._usedBy.empty()) {
-        Error() << "PluginManager::Manager::unload(): plugin" << plugin.metadata._name << "is required by other plugins:" << plugin.metadata._usedBy;
+        Error{} << "PluginManager::Manager::unload(): plugin"
+                << plugin.metadata._name << "is required by other plugins:"
+                << plugin.metadata._usedBy;
         return LoadState::Required;
     }
 
@@ -529,7 +540,9 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
         /* Check if all instances can be safely deleted */
         for(AbstractPlugin* const instance: foundInstance->second)
             if(!instance->canBeDeleted()) {
-                Error() << "PluginManager::Manager::unload(): plugin" << plugin.metadata._name << "is currently used and cannot be deleted";
+                Error{} << "PluginManager::Manager::unload(): plugin"
+                        << plugin.metadata._name
+                        << "is currently used and cannot be deleted";
                 return LoadState::Used;
             }
 
@@ -561,7 +574,8 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
     #else
     if(!FreeLibrary(plugin.module)) {
     #endif
-        Error() << "PluginManager::Manager::unload(): cannot unload plugin" << plugin.metadata._name + ":" << dlerror();
+        Error{} << "PluginManager::Manager::unload(): cannot unload plugin"
+                << plugin.metadata._name << Debug::nospace << ":" << dlerror();
         plugin.loadState = LoadState::NotLoaded;
         return LoadState::UnloadFailed;
     }
