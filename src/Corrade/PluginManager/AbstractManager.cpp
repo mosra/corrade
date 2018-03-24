@@ -74,6 +74,14 @@ auto AbstractManager::initializeGlobalPluginStorage() -> GlobalPluginStorage& {
             const auto result = plugins->plugins.insert(std::make_pair(staticPlugin->plugin, new Plugin(staticPlugin->plugin, metadata, staticPlugin)));
             CORRADE_INTERNAL_ASSERT(result.second);
 
+            /* The plugin is the best version of itself. If there was already
+               an alias for this name, replace it. */
+            {
+                const auto alias = plugins->aliases.find(staticPlugin->plugin);
+                if(alias != plugins->aliases.end()) plugins->aliases.erase(alias);
+                CORRADE_INTERNAL_ASSERT_OUTPUT(plugins->aliases.insert({staticPlugin->plugin, *result.first->second}).second);
+            }
+
             /* Add aliases to the list (only the ones that aren't already there
                are added) */
             for(const std::string& alias: result.first->second->metadata._provides) {
@@ -272,7 +280,16 @@ void AbstractManager::setPluginDirectory(std::string directory) {
         const auto result = _plugins.plugins.insert({name, new Plugin(name, Directory::join(_pluginDirectory, name + ".conf"), this)});
         CORRADE_INTERNAL_ASSERT(result.second);
 
-        /* Add aliases to the list */
+        /* The plugin is the best version of itself. If there was already an
+           alias for this name, replace it. */
+        {
+            const auto alias = _plugins.aliases.find(name);
+            if(alias != _plugins.aliases.end()) _plugins.aliases.erase(alias);
+            CORRADE_INTERNAL_ASSERT_OUTPUT(_plugins.aliases.insert({name, *result.first->second}).second);
+        }
+
+        /* Add aliases to the list. Calling insert() won't overwrite the
+           existing value, which ensures that the above note is still held. */
         for(const std::string& alias: result.first->second->metadata._provides) {
             /* Libc++ frees the passed Plugin& reference when using emplace(),
                causing double-free memory corruption later. Everything is okay
@@ -304,18 +321,11 @@ auto AbstractManager::findWithAlias(const std::string& plugin) -> Plugin* {
 }
 
 auto AbstractManager::findWithAlias(const std::string& plugin) const -> const Plugin* {
-    const auto found = _plugins.plugins.find(plugin);
+    const auto aliasFound = _plugins.aliases.find(plugin);
 
-    /* Not found, try aliases */
-    if(found == _plugins.plugins.end()) {
-        const auto aliasFound = _plugins.aliases.find(plugin);
-
-        /* Found alias which belongs to this manager, load */
-        if(aliasFound != _plugins.aliases.end() && aliasFound->second.manager == this)
-            return &aliasFound->second;
-
-    /* Found and belongs to this manager, load */
-    } else if(found->second->manager == this) return found->second;
+    /* Found alias which belongs to this manager, load */
+    if(aliasFound != _plugins.aliases.end() && aliasFound->second.manager == this)
+        return &aliasFound->second;
 
     /* Not found */
     return nullptr;
