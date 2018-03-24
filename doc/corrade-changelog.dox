@@ -46,6 +46,8 @@ namespace Corrade {
 -   New @ref PluginManager::AbstractPlugin::pluginSearchPaths() interface
     allowing plugin interfaces to specify plugin search paths to make life
     simpler for the end user
+-   Added @ref PluginManager::AbstractManager::aliasList() for listing all
+    available plugin aliases
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 

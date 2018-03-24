@@ -296,8 +296,22 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         void reloadPluginDirectory();
         #endif
 
-        /** @brief List of all available plugin names */
+        /**
+         * @brief List of all available plugin names
+         *
+         * Returns a list of names that correspond to concrete unique static or
+         * dynamic plugins.
+         * @see @ref aliasList()
+         */
         std::vector<std::string> pluginList() const;
+
+        /**
+         * @brief List of all available alias names
+         *
+         * In addition to everything returned by @ref pluginList() contains
+         * also all plugin aliases.
+         */
+        std::vector<std::string> aliasList() const;
 
         /**
          * @brief Plugin metadata

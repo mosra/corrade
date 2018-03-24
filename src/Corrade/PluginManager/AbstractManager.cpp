@@ -300,6 +300,12 @@ std::vector<std::string> AbstractManager::pluginList() const {
     return names;
 }
 
+std::vector<std::string> AbstractManager::aliasList() const {
+    std::vector<std::string> names;
+    for(const auto& alias: _aliases) names.push_back(alias.first);
+    return names;
+}
+
 auto AbstractManager::findWithAlias(const std::string& plugin) -> Plugin* {
     return const_cast<Plugin*>(const_cast<const AbstractManager&>(*this).findWithAlias(plugin));
 }

@@ -168,6 +168,8 @@ void Test::nameList() {
 
         CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
             "Bulldog", "Canary", "Dog", "PitBull", "Snail"}), TestSuite::Compare::Container);
+        CORRADE_COMPARE_AS(manager.aliasList(), (std::vector<std::string>{
+            "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "PitBull", "Snail"}), TestSuite::Compare::Container);
     }
     #endif
 
@@ -175,8 +177,10 @@ void Test::nameList() {
         /* Check if the list of dynamic plugins is cleared after destructing */
         PluginManager::Manager<AbstractAnimal> manager("nonexistent");
 
-        CORRADE_COMPARE_AS(manager.pluginList(), std::vector<std::string>{
-            "Canary"}, TestSuite::Compare::Container);
+        CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
+            "Canary"}), TestSuite::Compare::Container);
+        CORRADE_COMPARE_AS(manager.aliasList(), (std::vector<std::string>{
+            "Canary", "JustSomeBird"}), TestSuite::Compare::Container);
     }
 
     #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
@@ -186,6 +190,8 @@ void Test::nameList() {
 
         CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
             "Bulldog", "Canary", "Dog", "PitBull", "Snail"}), TestSuite::Compare::Container);
+        CORRADE_COMPARE_AS(manager.aliasList(), (std::vector<std::string>{
+            "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "PitBull", "Snail"}), TestSuite::Compare::Container);
     }
     #endif
 }
@@ -503,12 +509,14 @@ void Test::reloadPluginDirectory() {
 
     /* Reload plugin dir and check new name list */
     manager.reloadPluginDirectory();
-    std::vector<std::string> actual1 = manager.pluginList();
+    std::vector<std::string> actualPlugins1 = manager.pluginList();
+    std::vector<std::string> actualAliases1 = manager.aliasList();
 
     /* Unload Dog and it should disappear from the list */
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
     manager.reloadPluginDirectory();
-    std::vector<std::string> actual2 = manager.pluginList();
+    std::vector<std::string> actualPlugins2 = manager.pluginList();
+    std::vector<std::string> actualAliases2 = manager.aliasList();
 
     /** @todo Also test that "WrongMetadataFile" plugins are reloaded */
 
@@ -526,10 +534,14 @@ void Test::reloadPluginDirectory() {
     manager.reloadPluginDirectory();
 
     /* And now we can safely compare */
-    CORRADE_COMPARE_AS(actual1, (std::vector<std::string>{
+    CORRADE_COMPARE_AS(actualPlugins1, (std::vector<std::string>{
         "Bulldog", "Canary", "Dog", "LostDog", "LostPitBull", "Snail"}), TestSuite::Compare::Container);
-    CORRADE_COMPARE_AS(actual2, (std::vector<std::string>{
+    CORRADE_COMPARE_AS(actualAliases1, (std::vector<std::string>{
+        "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "LostDog", "LostPitBull", "Snail"}), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(actualPlugins2, (std::vector<std::string>{
         "Bulldog", "Canary", "LostDog", "LostPitBull", "Snail"}), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(actualAliases2, (std::vector<std::string>{
+        "Bulldog", "Canary", "JustSomeBird", "JustSomeMammal", "LostDog", "LostPitBull", "Snail"}), TestSuite::Compare::Container);
     #endif
 }
 
