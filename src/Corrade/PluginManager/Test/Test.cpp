@@ -404,7 +404,7 @@ void Test::hierarchy() {
         CORRADE_COMPARE(out.str(), "PluginManager::Manager::unload(): plugin Dog is required by other plugins: {PitBull}\n");
     }
 
-    /* After deleting instance, unload chihuahua plugin, then try again */
+    /* After deleting instance, unload PitBull plugin, then try again */
     CORRADE_COMPARE(manager.unload("PitBull"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
     CORRADE_VERIFY(manager.metadata("Dog")->usedBy().empty());
