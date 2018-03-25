@@ -23,6 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include "Corrade/PluginManager/AbstractManager.h"
 #include "Corrade/PluginManager/AbstractPlugin.h"
 #include "Corrade/Utility/Directory.h"
 
@@ -51,3 +52,10 @@ class AbstractFilesystem: public PluginManager::AbstractPlugin {
         // the actual plugin interface goes here
 };
 /* [AbstractPlugin] */
+
+/* [CORRADE_PLUGIN_IMPORT] */
+int corradeZipFilesystemStaticImport() {
+    CORRADE_PLUGIN_IMPORT(ZipFilesystem)
+    return 1;
+} CORRADE_AUTOMATIC_INITIALIZER(corradeZipFilesystemStaticImport)
+/* [CORRADE_PLUGIN_IMPORT] */
