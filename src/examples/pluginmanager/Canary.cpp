@@ -27,6 +27,8 @@
     CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include <Corrade/PluginManager/AbstractManager.h>
+
 #include "AbstractAnimal.h"
 
 namespace Corrade { namespace Examples {

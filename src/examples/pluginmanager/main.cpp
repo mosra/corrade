@@ -28,7 +28,9 @@
 */
 
 #include <Corrade/PluginManager/Manager.h>
+#include <Corrade/PluginManager/PluginMetadata.h>
 #include <Corrade/Utility/Arguments.h>
+#include <Corrade/Utility/ConfigurationGroup.h>
 #include <Corrade/Utility/Debug.h>
 
 #include "AbstractAnimal.h"
@@ -54,7 +56,7 @@ int main(int argc, char** argv) {
     }
 
     /* Instance of an animal */
-    std::unique_ptr<Examples::AbstractAnimal> animal = manager.instance(args.value("plugin"));
+    std::unique_ptr<Examples::AbstractAnimal> animal = manager.instantiate(args.value("plugin"));
 
     Utility::Debug{} << "Using plugin" << '\'' + animal->metadata()->data().value("name") + '\''
                      << "...\n";
