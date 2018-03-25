@@ -366,6 +366,10 @@ function(corrade_add_test test_name)
                 emscripten_embed_file(${test_name} ${input_filename} "/${output_filename}")
             endforeach()
 
+            # Generate the runner file
+            configure_file(${CORRADE_TESTSUITE_EMSCRIPTEN_RUNNER}
+                           ${CMAKE_CURRENT_BINARY_DIR}/${test_name}.html)
+
         # Run tests using ADB on Android
         elseif(CORRADE_TARGET_ANDROID)
             # The executables need to be PIE

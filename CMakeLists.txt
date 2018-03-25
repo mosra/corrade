@@ -151,6 +151,8 @@ if(CORRADE_TESTSUITE_TARGET_XCTEST)
     set(CORRADE_TESTSUITE_XCTEST_RUNNER ${PROJECT_SOURCE_DIR}/src/Corrade/TestSuite/XCTestRunner.mm.in)
 elseif(CORRADE_TARGET_ANDROID)
     set(CORRADE_TESTSUITE_ADB_RUNNER ${PROJECT_SOURCE_DIR}/src/Corrade/TestSuite/AdbRunner.sh)
+elseif(CORRADE_TARGET_EMSCRIPTEN)
+    set(CORRADE_TESTSUITE_EMSCRIPTEN_RUNNER ${PROJECT_SOURCE_DIR}/src/Corrade/TestSuite/EmscriptenRunner.html.in)
 endif()
 
 # Detect and auto-enable compiler compatibility

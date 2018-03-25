@@ -65,6 +65,8 @@ if(CORRADE_TESTSUITE_TARGET_XCTEST)
     install(FILES XCTestRunner.mm.in DESTINATION ${CORRADE_DATA_INSTALL_DIR}/TestSuite)
 elseif(CORRADE_TARGET_ANDROID)
     install(PROGRAMS AdbRunner.sh DESTINATION ${CORRADE_DATA_INSTALL_DIR}/TestSuite)
+elseif(CORRADE_TARGET_EMSCRIPTEN)
+    install(FILES EmscriptenRunner.html.in DESTINATION ${CORRADE_DATA_INSTALL_DIR}/TestSuite)
 endif()
 
 add_subdirectory(Compare)

@@ -426,6 +426,12 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
                 find_file(CORRADE_TESTSUITE_ADB_RUNNER AdbRunner.sh
                     PATH_SUFFIXES share/corrade/TestSuite)
                 set(CORRADE_TESTSUITE_ADB_RUNNER_NEEDED CORRADE_TESTSUITE_ADB_RUNNER)
+
+            # Emscripten runner file
+            elseif(CORRADE_TARGET_EMSCRIPTEN)
+                find_file(CORRADE_TESTSUITE_EMSCRIPTEN_RUNNER EmscriptenRunner.html.in
+                    PATH_SUFFIXES share/corrade/TestSuite)
+                set(CORRADE_TESTSUITE_EMSCRIPTEN_RUNNER_NEEDED CORRADE_TESTSUITE_EMSCRIPTEN_RUNNER)
             endif()
 
         # Utility library (contains all setup that is used by others)
@@ -503,6 +509,7 @@ find_package_handle_standard_args(Corrade REQUIRED_VARS
     _CORRADE_CONFIGURE_FILE
     ${CORRADE_TESTSUITE_XCTEST_RUNNER_NEEDED}
     ${CORRADE_TESTSUITE_ADB_RUNNER_NEEDED}
+    ${CORRADE_TESTSUITE_EMSCRIPTEN_RUNNER_NEEDED}
     HANDLE_COMPONENTS)
 
 # Finalize the finding process

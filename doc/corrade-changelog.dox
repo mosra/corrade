@@ -53,6 +53,13 @@ namespace Corrade {
 -   Ability to configure extra plugin functionality via
     @ref PluginManager::AbstractPlugin::configuration()
 
+@subsubsection corrade-changelog-latest-new-testsuite TestSuite library
+
+-   When compiling for Emscripten, the @ref corrade-cmake-add-test "corrade_add_test()"
+    macro now generates a HTML runner for running each test case in a web
+    browser. See @ref TestSuite-Tester-running-emscripten-browser for more
+    information.
+
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
 -   Ability to query current scoped output stream using @ref Utility::Debug::output(),

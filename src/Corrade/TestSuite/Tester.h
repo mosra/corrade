@@ -369,7 +369,10 @@ provides additional useful features on various platforms:
     makes CTest run the resulting `*.js` file via Node.js. Also it is able to
     bundle all files specified in `FILES` into the virtual Emscripten
     filesystem, making it easy to run file-based tests on this platform; all
-    environment options are passed through as well.
+    environment options are passed through as well. The macro also creates a
+    runner for manual testing in a browser, see
+    @ref TestSuite-Tester-running-emscripten-browser "below" for more
+    information.
 -   If Xcode projects are generated via CMake and @ref CORRADE_TESTSUITE_TARGET_XCTEST
     is enabled, @ref corrade-cmake-add-test "corrade_add_test()" makes the test
     executables in a way compatible with XCTest, making it easy to run them
@@ -422,6 +425,23 @@ node MyTest.js
 
 See also the `--embed-files` [emcc option](https://kripken.github.io/emscripten-site/docs/porting/files/packaging_files.html)
 for a possibility to bundle test files with the executable.
+
+@subsection TestSuite-Tester-running-emscripten-browser Running Emscripten tests in a browser
+
+Besides running tests using Node.js, it's possible to run each test case
+manually in a browser. Browsers require the executables to be accessed via a
+webserver --- if you have Python installed, you can simply start serving the
+contents of your build directory using the following command:
+
+@code{.sh}
+cd <test-build-directory>
+python -m http.server
+@endcode
+
+The webserver is then available at http://localhost:8000. It supports directory
+listing, so you can navigate to each test case runner HTML file (look for e.g.
+`MyTest.html`). Unfortunately it's at the moment not possible to run all
+browser tests in a batch or automate the process in any other way.
 */
 class CORRADE_TESTSUITE_EXPORT Tester {
     public:
