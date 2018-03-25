@@ -55,4 +55,4 @@ find_package(Corrade REQUIRED Interconnect)
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
 add_executable(interconnect main.cpp)
-target_link_libraries(interconnect Corrade::Interconnect)
+target_link_libraries(interconnect PRIVATE Corrade::Interconnect)

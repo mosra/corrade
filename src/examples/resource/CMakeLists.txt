@@ -57,4 +57,4 @@ set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 corrade_add_resource(Resources resources.conf)
 
 add_executable(ResourceTest main.cpp ${Resources})
-target_link_libraries(ResourceTest Corrade::Utility)
+target_link_libraries(ResourceTest PRIVATE Corrade::Utility)
