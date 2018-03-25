@@ -118,6 +118,10 @@ struct AbstractManager::Plugin {
 };
 
 struct AbstractManager::GlobalPluginStorage {
+    /* Beware: having std::map<std::string, std::unique_ptr> is an IMPOSSIBLE
+       feat on GCC 4.7, as it will fails with tons of compiler errors because
+       std::pair is trying to copy itself. So calm down and ignore those few
+       delete calls. Please. Last tried: March 2018. */
     std::map<std::string, Plugin*> plugins;
 };
 
