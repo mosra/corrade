@@ -736,7 +736,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, PluginManager::LoadState value
         /* LCOV_EXCL_STOP */
     }
 
-    return debug << "PluginManager::LoadState::(invalid)";
+    return debug << "PluginManager::LoadState(" << Debug::nospace << reinterpret_cast<void*>(std::uint16_t(value)) << Debug::nospace << ")";
 }
 #endif
 

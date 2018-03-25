@@ -837,8 +837,8 @@ void Test::utf8Path() {
 void Test::debug() {
     std::ostringstream o;
 
-    Debug(&o) << LoadState::Static;
-    CORRADE_COMPARE(o.str(), "PluginManager::LoadState::Static\n");
+    Debug(&o) << LoadState::Static << LoadState(0x3f);
+    CORRADE_COMPARE(o.str(), "PluginManager::LoadState::Static PluginManager::LoadState(0x3f)\n");
 }
 
 }}}
