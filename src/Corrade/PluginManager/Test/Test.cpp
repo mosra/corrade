@@ -300,6 +300,10 @@ void Test::wrongMetadataFile() {
 }
 
 void Test::unresolvedReference() {
+    #ifdef CORRADE_TARGET_WINDOWS
+    CORRADE_SKIP("At the moment, plugins are not compiled as modules on Windows, so this is not possible to test.");
+    #endif
+
     std::ostringstream out;
     Error redirectError{&out};
 
