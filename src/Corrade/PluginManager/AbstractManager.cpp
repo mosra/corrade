@@ -205,7 +205,7 @@ AbstractManager::AbstractManager(std::string pluginInterface, const std::vector<
     if(!pluginDirectory.empty()) setPluginDirectory(std::move(pluginDirectory));
     else {
         CORRADE_ASSERT(!pluginSearchPaths.empty(),
-            "PluginManager::Manager(): either pluginDirectory has to be set or T::pluginSearchPaths() is expected to have at least one entry", );
+            "PluginManager::Manager::Manager(): either pluginDirectory has to be set or T::pluginSearchPaths() is expected to have at least one entry", );
 
         const std::string executableDir = Utility::Directory::path(Utility::Directory::executableLocation());
         for(const std::string& path: pluginSearchPaths) {
@@ -217,7 +217,10 @@ AbstractManager::AbstractManager(std::string pluginInterface, const std::vector<
         }
 
         /* If no hardcoded path exists, plugin directory is "", i.e. the same
-           as what the user set */
+           as what the user set. That's probably not wanted, so give a heads up
+           warning. */
+        if(_pluginDirectory.empty())
+            Warning{} << "PluginManager::Manager::Manager(): none of the plugin search paths in" << pluginSearchPaths << "exists and pluginDirectory was not set, falling back to current working directory";
     }
     #else
     static_cast<void>(pluginSearchPaths);

@@ -49,7 +49,11 @@ namespace Corrade { namespace PluginManager { namespace Test {
 struct Test: TestSuite::Tester {
     explicit Test();
 
-    void pluginSearchPaths();
+    void pluginSearchPathsNotUsed();
+    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    void pluginSearchPathsNotProvided();
+    void pluginSearchPathsNotFound();
+    #endif
 
     void nameList();
 
@@ -108,7 +112,11 @@ struct Test: TestSuite::Tester {
 };
 
 Test::Test() {
-    addTests({&Test::pluginSearchPaths,
+    addTests({&Test::pluginSearchPathsNotUsed,
+              #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+              &Test::pluginSearchPathsNotProvided,
+              &Test::pluginSearchPathsNotFound,
+              #endif
 
               &Test::nameList,
 
@@ -175,31 +183,53 @@ namespace {
     #endif
 }
 
-void Test::pluginSearchPaths() {
+void Test::pluginSearchPathsNotUsed() {
     struct SomePlugin: AbstractPlugin {
         static std::string pluginInterface() { return {}; }
-
-        SomePlugin(PluginManager::AbstractManager& manager, const std::string& plugin):
-            AbstractPlugin{manager, plugin} {}
     };
 
-    /* Everything okay in this case */
+    /* Everything okay in this case (no assert) */
+    std::ostringstream out;
+    Error redirectError{&out};
     {
         PluginManager::Manager<SomePlugin> manager{"someDirectory"};
     }
+    CORRADE_COMPARE(out.str(), "");
+}
 
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-    /* Complain that plugin search path is set */
+#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+void Test::pluginSearchPathsNotProvided() {
+    struct SomePlugin: AbstractPlugin {
+        static std::string pluginInterface() { return {}; }
+    };
+
+    /* Complain that no plugin search path is set */
     std::ostringstream out;
     Error redirectError{&out};
     {
         PluginManager::Manager<SomePlugin> manager;
     }
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager(): either pluginDirectory has to be set or T::pluginSearchPaths() is expected to have at least one entry\n");
-    #else
-    CORRADE_VERIFY(true);
-    #endif
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager::Manager(): either pluginDirectory has to be set or T::pluginSearchPaths() is expected to have at least one entry\n");
 }
+
+void Test::pluginSearchPathsNotFound() {
+    struct SomePlugin: AbstractPlugin {
+        static std::vector<std::string> pluginSearchPaths() {
+            return {"nonexistent", "/absolute/but/nonexistent"};
+        }
+
+        static std::string pluginInterface() { return {}; }
+    };
+
+    /* Complain that no plugin search path is set */
+    std::ostringstream out;
+    Warning redirectWarning{&out};
+    {
+        PluginManager::Manager<SomePlugin> manager;
+    }
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager::Manager(): none of the plugin search paths in {nonexistent, /absolute/but/nonexistent} exists and pluginDirectory was not set, falling back to current working directory\n");
+}
+#endif
 
 void Test::nameList() {
     #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
