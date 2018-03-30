@@ -191,7 +191,6 @@ define_property(TARGET PROPERTY CORRADE_USE_PEDANTIC_FLAGS INHERITED
     FULL_DOCS "Enables additional pedantic C, C++ and linker flags on given
         targets or directories.")
 
-
 set(_CORRADE_CXX_STANDARD_ONLY_IF_NOT_ALREADY_SET
     "$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>,$<NOT:$<BOOL:$<TARGET_PROPERTY:CXX_STANDARD>>>")
 
