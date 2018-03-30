@@ -687,7 +687,6 @@ void* AbstractManager::instantiateInternal(const std::string& plugin) {
     CORRADE_ASSERT(found != _aliases.end() && (found->second.loadState & LoadState::Loaded),
         "PluginManager::Manager::instance(): plugin" << plugin << "is not loaded", nullptr);
 
-    /* Instance the plugin using its original (non-aliased) name */
     return found->second.instancer(*this, plugin);
 }
 
