@@ -37,6 +37,7 @@
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/Configuration.h"
+#include "Corrade/Utility/String.h"
 
 #ifndef CORRADE_TARGET_WINDOWS
 #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
@@ -315,17 +316,15 @@ void AbstractManager::setPluginDirectory(std::string directory) {
     }
 
     /* Find plugin files in the directory */
-    static const std::size_t suffixSize = std::strlen(PLUGIN_FILENAME_SUFFIX);
     const std::vector<std::string> d = Directory::list(_pluginDirectory,
         Directory::Flag::SkipDirectories|Directory::Flag::SkipDotAndDotDot);
     for(const std::string& filename: d) {
         /* File doesn't have module suffix, continue to next */
-        const std::size_t end = filename.length()-suffixSize;
-        if(filename.substr(end) != PLUGIN_FILENAME_SUFFIX)
+        if(!Utility::String::endsWith(filename, PLUGIN_FILENAME_SUFFIX))
             continue;
 
         /* Dig plugin name from filename */
-        const std::string name = filename.substr(0, end);
+        const std::string name = filename.substr(0, filename.length() - sizeof(PLUGIN_FILENAME_SUFFIX) + 1);
 
         /* Skip the plugin if it is among loaded */
         if(_plugins.plugins.find(name) != _plugins.plugins.end()) continue;
