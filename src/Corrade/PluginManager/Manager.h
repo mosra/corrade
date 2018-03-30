@@ -53,6 +53,13 @@ Plugins are searched in the following directories, in order:
 
 The matching directory is then saved and available through @ref pluginDirectory().
 
+Besides the above, it's possible to call @ref load() with a concrete path to a
+dynamic module file to load a plugin from outside of the plugin directory. The
+file is expected to be accompanied by its corresponding `*.conf` metadata file
+and no plugin with the same name is expected to be loaded at the same time. If
+loading succeeds, the module is exposed through the API under its basename
+(excluding extension).
+
 @section PluginManager-Manager-reload Plugin loading, instantiation and unloading
 
 A plugin is loaded by calling @ref load() with given plugin name or alias.
@@ -141,10 +148,17 @@ template<class T> class Manager: public AbstractManager {
          *
          * Convenience alternative to calling both @ref load() and
          * @ref instantiate(). If loading fails, @cpp nullptr @ce is returned.
+         *
+         * If @p plugin is a plugin file path (i.e., ending with a
+         * platform-specific extension such as `.so` or `.dll`), it's loaded
+         * from given location using @ref load() and its basename (without
+         * extension) exposed as an available plugin name. The plugin name is
+         * then loaded using @ref instantiate(). It's expected that a plugin
+         * with the same name is not already registered.
          */
         std::unique_ptr<T> loadAndInstantiate(const std::string& plugin) {
-            if(!(load(plugin) & LoadState::Loaded)) return nullptr;
-            return instantiate(plugin);
+            /** @todo C++14: std::make_unique() */
+            return std::unique_ptr<T>{static_cast<T*>(loadAndInstantiateInternal(plugin))};
         }
 };
 

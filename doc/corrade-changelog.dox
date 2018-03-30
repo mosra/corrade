@@ -52,6 +52,8 @@ namespace Corrade {
     @ref PluginManager::AbstractManager::setPreferredPlugins()
 -   Ability to configure extra plugin functionality via
     @ref PluginManager::AbstractPlugin::configuration()
+-   Ability to load plugins outside of the plugin directory by supplying a file
+    path to @ref PluginManager::AbstractManager::load()
 
 @subsubsection corrade-changelog-latest-new-testsuite TestSuite library
 

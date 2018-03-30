@@ -79,6 +79,11 @@ struct Test: TestSuite::Tester {
     void staticPlugin();
     #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
     void dynamicPlugin();
+    void dynamicPluginLoadAndInstantiate();
+    void dynamicPluginFilePath();
+    void dynamicPluginFilePathLoadAndInstantiate();
+    void dynamicPluginFilePathConflictsWithLoadedPlugin();
+    void dynamicPluginFilePathRemoveOnFail();
     #endif
     void staticPluginInitFini();
     #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
@@ -142,6 +147,11 @@ Test::Test() {
               &Test::staticPlugin,
               #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
               &Test::dynamicPlugin,
+              &Test::dynamicPluginLoadAndInstantiate,
+              &Test::dynamicPluginFilePath,
+              &Test::dynamicPluginFilePathLoadAndInstantiate,
+              &Test::dynamicPluginFilePathConflictsWithLoadedPlugin,
+              &Test::dynamicPluginFilePathRemoveOnFail,
               #endif
               &Test::staticPluginInitFini,
               #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
@@ -456,6 +466,98 @@ void Test::dynamicPlugin() {
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotLoaded);
 }
+
+void Test::dynamicPluginLoadAndInstantiate() {
+    PluginManager::Manager<AbstractAnimal> manager;
+    std::unique_ptr<AbstractAnimal> animal = manager.loadAndInstantiate("Dog");
+    CORRADE_VERIFY(animal);
+    CORRADE_COMPARE(animal->name(), "Doug");
+}
+
+void Test::dynamicPluginFilePath() {
+    PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
+
+    CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotFound);
+    CORRADE_COMPARE(manager.load(DOG_PLUGIN_FILENAME), LoadState::Loaded);
+    CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"Canary", "Dog"}));
+    CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
+
+    std::unique_ptr<AbstractAnimal> animal = manager.instantiate("Dog");
+    CORRADE_VERIFY(animal);
+    CORRADE_COMPARE(animal->name(), "Doug");
+    CORRADE_COMPARE(animal->metadata()->data().value("description"), "A simple dog plugin.");
+}
+
+void Test::dynamicPluginFilePathLoadAndInstantiate() {
+    PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
+    std::unique_ptr<AbstractAnimal> animal = manager.loadAndInstantiate(DOG_PLUGIN_FILENAME);
+    CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
+    CORRADE_VERIFY(animal);
+    CORRADE_COMPARE(animal->name(), "Doug");
+    CORRADE_COMPARE(animal->metadata()->data().value("description"), "A simple dog plugin.");
+}
+
+void Test::dynamicPluginFilePathConflictsWithLoadedPlugin() {
+    PluginManager::Manager<AbstractAnimal> manager; /* Use the path that has Dog plugin */
+
+    CORRADE_COMPARE(manager.load("Dog"), LoadState::Loaded);
+
+    /* Fails when Dog is loaded */
+    {
+        std::ostringstream out;
+        Error redirectError{&out};
+        CORRADE_COMPARE(manager.load(DOG_PLUGIN_FILENAME), LoadState::Used);
+        CORRADE_COMPARE(out.str(), "PluginManager::load(): Dog" PLUGIN_FILENAME_SUFFIX " conflicts with currently loaded plugin of the same name\n");
+    }
+
+    /* JustSomeMammal is provided by (the currently loaded) Dog plugin */
+    CORRADE_COMPARE(manager.loadState("JustSomeMammal"), LoadState::Loaded);
+    CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
+    CORRADE_COMPARE(manager.loadState("JustSomeMammal"), LoadState::NotLoaded);
+
+    /* Succeeds when it's unloaded */
+    CORRADE_COMPARE(manager.load(DOG_PLUGIN_FILENAME), LoadState::Loaded);
+    {
+        std::unique_ptr<AbstractAnimal> animal = manager.instantiate("Dog");
+        CORRADE_VERIFY(animal);
+        CORRADE_COMPARE(animal->name(), "Doug");
+        CORRADE_COMPARE(animal->metadata()->data().value("description"), "A simple dog plugin.");
+    }
+
+    /* JustSomeMammal is loaded again, different plugin. Test that it
+       instantiates properly. */
+    CORRADE_COMPARE(manager.loadState("JustSomeMammal"), LoadState::Loaded);
+    {
+        std::unique_ptr<AbstractAnimal> animal = manager.instantiate("JustSomeMammal");
+        CORRADE_VERIFY(animal);
+        CORRADE_COMPARE(animal->name(), "Doug");
+        CORRADE_COMPARE(animal->metadata()->data().value("description"), "A simple dog plugin.");
+    }
+}
+
+void Test::dynamicPluginFilePathRemoveOnFail() {
+    PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
+
+    /* Sure, PitBull needs a Dog */
+    CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotFound);
+    CORRADE_COMPARE(manager.load(PITBULL_PLUGIN_FILENAME), LoadState::UnresolvedDependency);
+
+    /* No internal statie is modified, even through PitBull provides a Dog */
+    CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotFound);
+
+    /* Now load the Dog and test it */
+    CORRADE_COMPARE(manager.load(DOG_PLUGIN_FILENAME), LoadState::Loaded);
+    CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
+    {
+        std::unique_ptr<AbstractAnimal> animal = manager.instantiate("Dog");
+        CORRADE_VERIFY(animal);
+        CORRADE_COMPARE(animal->name(), "Doug");
+    }
+
+    /* Now it's available and we can finally load PitBull */
+    CORRADE_COMPARE(manager.load(PITBULL_PLUGIN_FILENAME), LoadState::Loaded);
+}
+
 #endif
 
 void Test::staticPluginInitFini() {

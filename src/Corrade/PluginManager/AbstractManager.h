@@ -179,8 +179,10 @@ enum class LoadState: unsigned short {
 
     #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
     /**
-     * The plugin has active instance and cannot be unloaded. Destroy all
-     * instances and try again. Returned by @ref AbstractManager::unload().
+     * @ref AbstractManager::unload() returns this if the plugin has an active
+     * instance and cannot be unloaded. Destroy all instances and try again.
+     * @ref AbstractManager::load() returns this if loading a file path
+     * directly and a plugin with the same name already exists.
      * @partialsupport Only static plugins are supported in
      *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
      *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
@@ -358,6 +360,15 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * If the plugin has any dependencies, they are recursively processed
          * before loading given plugin.
          *
+         * If @p plugin is a plugin file path (i.e., ending with a
+         * platform-specific extension such as `.so` or `.dll`), it's loaded
+         * from given location and, if the loading succeeds, its basename
+         * (without extension) is exposed as an available plugin name. It's
+         * expected that a plugin with the same name is not already loaded. The
+         * plugin will reside in the plugin list as long as it's loaded or,
+         * after calling @ref unload() on it, until next call to
+         * @ref setPluginDirectory() or @ref reloadPluginDirectory().
+         *
          * @see @ref unload(), @ref loadState(), @ref Manager::instance(),
          *      @ref Manager::loadAndInstantiate()
          * @partialsupport Only static plugins are supported in
@@ -420,6 +431,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         GlobalPluginStorage& _plugins;
 
         void* instantiateInternal(const std::string& plugin);
+        void* loadAndInstantiateInternal(const std::string& plugin);
 
     private:
         /* Temporary storage of all information needed to import static plugins.
@@ -434,11 +446,14 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
            be uninitalized when accessed from CORRADE_PLUGIN_REGISTER(). */
         CORRADE_PLUGINMANAGER_LOCAL static std::vector<StaticPlugin*>*& staticPlugins();
 
+        CORRADE_PLUGINMANAGER_LOCAL void registerDynamicPlugin(const std::string& name, Plugin* plugin);
+
         CORRADE_PLUGINMANAGER_LOCAL void registerInstance(const std::string& plugin, AbstractPlugin& instance, const PluginMetadata*& metadata);
         CORRADE_PLUGINMANAGER_LOCAL void unregisterInstance(const std::string& plugin, AbstractPlugin& instance);
 
         #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
         CORRADE_PLUGINMANAGER_LOCAL LoadState loadInternal(Plugin& plugin);
+        CORRADE_PLUGINMANAGER_LOCAL LoadState loadInternal(Plugin& plugin, const std::string& filename);
         CORRADE_PLUGINMANAGER_LOCAL LoadState unloadInternal(Plugin& plugin);
         CORRADE_PLUGINMANAGER_LOCAL LoadState unloadRecursive(const std::string& plugin);
         CORRADE_PLUGINMANAGER_LOCAL LoadState unloadRecursiveInternal(Plugin& plugin);

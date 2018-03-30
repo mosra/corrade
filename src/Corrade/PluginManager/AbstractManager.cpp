@@ -329,27 +329,7 @@ void AbstractManager::setPluginDirectory(std::string directory) {
         /* Skip the plugin if it is among loaded */
         if(_plugins.plugins.find(name) != _plugins.plugins.end()) continue;
 
-        /* Insert plugin to list */
-        const auto result = _plugins.plugins.insert({name, new Plugin(name, Directory::join(_pluginDirectory, name + ".conf"), this)});
-        CORRADE_INTERNAL_ASSERT(result.second);
-
-        /* The plugin is the best version of itself. If there was already an
-           alias for this name, replace it. */
-        {
-            const auto alias = _aliases.find(name);
-            if(alias != _aliases.end()) _aliases.erase(alias);
-            CORRADE_INTERNAL_ASSERT_OUTPUT(_aliases.insert({name, *result.first->second}).second);
-        }
-
-        /* Add aliases to the list. Calling insert() won't overwrite the
-           existing value, which ensures that the above note is still held. */
-        for(const std::string& alias: result.first->second->metadata._provides) {
-            /* Libc++ frees the passed Plugin& reference when using emplace(),
-               causing double-free memory corruption later. Everything is okay
-               with insert(). */
-            /** @todo put back emplace() here when libc++ is fixed */
-            _aliases.insert({alias, *result.first->second});
-        }
+        registerDynamicPlugin(name, new Plugin{name, Directory::join(_pluginDirectory, name + ".conf"), this});
     }
 }
 
@@ -409,6 +389,50 @@ LoadState AbstractManager::loadState(const std::string& plugin) const {
 }
 
 LoadState AbstractManager::load(const std::string& plugin) {
+    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    /* File path passed, load directly */
+    if(Utility::String::endsWith(plugin, PLUGIN_FILENAME_SUFFIX)) {
+        /* Dig plugin name from filename and verify it's not loaded at the moment */
+        const std::string filename = Utility::Directory::filename(plugin);
+        const std::string name = filename.substr(0, filename.length() - sizeof(PLUGIN_FILENAME_SUFFIX) + 1);
+        const auto found = _plugins.plugins.find(name);
+        if(found != _plugins.plugins.end() && (found->second->loadState & LoadState::Loaded)) {
+            Error{} << "PluginManager::load():" << filename << "conflicts with currently loaded plugin of the same name";
+            return LoadState::Used;
+        }
+
+        /* Load the plugin and register it only if loading succeeded so we
+           don't crap the alias state. If there's already a registered
+           plugin of this name, replace it. */
+        std::unique_ptr<Plugin> data{new Plugin{name, Directory::join(Utility::Directory::path(plugin), name + ".conf"), this}};
+        const LoadState state = loadInternal(*data, plugin);
+        if(state & LoadState::Loaded) {
+            /* Remove the potential plugin with the same name (we already
+               checked above that it's *not* loaded) */
+            if(found != _plugins.plugins.end()) {
+                /* Erase all aliases that reference this plugin, as they would
+                   be dangling now. */
+                auto ait = _aliases.cbegin();
+                while(ait != _aliases.cend()) {
+                    if(&ait->second == found->second)
+                        ait = _aliases.erase(ait);
+                    else ++ait;
+                }
+
+                /* Erase the plugin from the plugin map. It could happen that
+                   the original plugin was not owned by this plugin manager --
+                   but since we were able to load the new plugin, everything
+                   should be fine. */
+                delete found->second;
+                _plugins.plugins.erase(found);
+            }
+
+            registerDynamicPlugin(name, data.release());
+        }
+        return state;
+    }
+    #endif
+
     auto found = _aliases.find(plugin);
     if(found != _aliases.end()) {
         #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
@@ -429,6 +453,10 @@ LoadState AbstractManager::load(const std::string& plugin) {
 
 #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
 LoadState AbstractManager::loadInternal(Plugin& plugin) {
+    return loadInternal(plugin, Directory::join(_pluginDirectory, plugin.metadata._name + PLUGIN_FILENAME_SUFFIX));
+}
+
+LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filename) {
     /* Plugin is not ready to load */
     if(plugin.loadState != LoadState::NotLoaded) {
         if(!(plugin.loadState & (LoadState::Static|LoadState::Loaded)))
@@ -454,8 +482,6 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
 
         dependencies.emplace_back(*foundDependency->second);
     }
-
-    const std::string filename = Directory::join(_pluginDirectory, plugin.metadata._name + PLUGIN_FILENAME_SUFFIX);
 
     /* Open plugin file, make symbols globally available for next libs (which
        may depend on this) */
@@ -647,6 +673,30 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
 }
 #endif
 
+void AbstractManager::registerDynamicPlugin(const std::string& name, Plugin* const plugin) {
+    /* Insert plugin to list */
+    const auto result = _plugins.plugins.insert({name, plugin});
+    CORRADE_INTERNAL_ASSERT(result.second);
+
+    /* The plugin is the best version of itself. If there was already an
+       alias for this name, replace it. */
+    {
+        const auto alias = _aliases.find(name);
+        if(alias != _aliases.end()) _aliases.erase(alias);
+        CORRADE_INTERNAL_ASSERT_OUTPUT(_aliases.insert({name, *result.first->second}).second);
+    }
+
+    /* Add aliases to the list. Calling insert() won't overwrite the
+       existing value, which ensures that the above note is still held. */
+    for(const std::string& alias: result.first->second->metadata._provides) {
+        /* Libc++ frees the passed Plugin& reference when using emplace(),
+           causing double-free memory corruption later. Everything is okay
+           with insert(). */
+        /** @todo put back emplace() here when libc++ is fixed */
+        _aliases.insert({alias, *result.first->second});
+    }
+}
+
 void AbstractManager::registerInstance(const std::string& plugin, AbstractPlugin& instance, const PluginMetadata*& metadata) {
     /** @todo assert proper interface */
     auto found = _aliases.find(plugin);
@@ -687,6 +737,24 @@ void* AbstractManager::instantiateInternal(const std::string& plugin) {
     CORRADE_ASSERT(found != _aliases.end() && (found->second.loadState & LoadState::Loaded),
         "PluginManager::Manager::instantiate(): plugin" << plugin << "is not loaded", nullptr);
 
+    return found->second.instancer(*this, plugin);
+}
+
+void* AbstractManager::loadAndInstantiateInternal(const std::string& plugin) {
+    if(!(load(plugin) & LoadState::Loaded)) return nullptr;
+
+    /* If file path passed, instantiate extracted name instead */
+    std::map<std::string, Plugin&>::iterator found;
+    if(Utility::String::endsWith(plugin, PLUGIN_FILENAME_SUFFIX)) {
+        const std::string filename = Utility::Directory::filename(plugin);
+        const std::string name = filename.substr(0, filename.length() - sizeof(PLUGIN_FILENAME_SUFFIX) + 1);
+        found = _aliases.find(name);
+        CORRADE_INTERNAL_ASSERT(found != _aliases.end());
+        return found->second.instancer(*this, name);
+    }
+
+    found = _aliases.find(plugin);
+    CORRADE_INTERNAL_ASSERT(found != _aliases.end());
     return found->second.instancer(*this, plugin);
 }
 

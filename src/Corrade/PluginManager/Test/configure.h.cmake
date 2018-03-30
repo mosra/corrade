@@ -24,3 +24,5 @@
 */
 
 #define PLUGINS_DIR "$<TARGET_FILE_DIR:PluginManagerTest>"
+#define DOG_PLUGIN_FILENAME "$<TARGET_FILE:Dog>"
+#define PITBULL_PLUGIN_FILENAME "$<TARGET_FILE:PitBull>"
