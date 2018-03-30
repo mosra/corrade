@@ -142,6 +142,10 @@ plugin files, third argument is name of configuration file and after that comes
 one or more source files. We use the build directory for storing the plugins to
 avoid the need for installation.
 
+@note Note that on Windows a plugin DLL can't have unresolved references and
+    thus needs to be explicitly linked to all its dependencies, even if they
+    would be later at runtime correctly supplied by the plugin manager.
+
 The @ref corrade-cmake-add-static-plugin "corrade_add_static_plugin()" macro is
 similar to the above, except that it creates a static plugin instead of a
 dynamic one.

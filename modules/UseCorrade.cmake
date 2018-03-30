@@ -474,7 +474,14 @@ function(corrade_add_plugin plugin_name debug_install_dirs release_install_dirs 
         endif()
     endif()
 
-    # Create dynamic library and bring all needed options along
+    # Create dynamic library and bring all needed options along. On Windows a
+    # DLL cannot have undefined references, so we need to link against all its
+    # dependencies *at compile time*, as opposed to runtime like in all sane
+    # systems. But when using add_library(MODULE), CMake disallows linking
+    # MODULEs to MODULEs (when dealing with inter-plugin dependencies, for
+    # example) -- probably because, on Windows, creating a MODULE doesn't
+    # create the corresponding import lib for it. So we work around that by
+    # using SHARED on Windows.
     if(CORRADE_TARGET_WINDOWS)
         add_library(${plugin_name} SHARED ${ARGN})
     else()
