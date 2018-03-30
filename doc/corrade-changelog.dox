@@ -49,7 +49,7 @@ namespace Corrade {
 -   Added @ref PluginManager::AbstractManager::aliasList() for listing all
     available plugin aliases
 -   Ability to control what plugin is used for given alias using
-    @ref PluginManager::AbstractManager::setPreferredPlugins(()
+    @ref PluginManager::AbstractManager::setPreferredPlugins()
 -   Ability to configure extra plugin functionality via
     @ref PluginManager::AbstractPlugin::configuration()
 
@@ -81,7 +81,7 @@ namespace Corrade {
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 
 -   Removed the unnecessarily opaque `CORRADE_PLUGIN_INTERFACE()` macro. Define
-    a @cpp public @ce @cpp static const char* pluginInterface() @ce function
+    a @cpp public @ce @cpp static std::string pluginInterface() @ce function
     instead. See @ref PluginManager::AbstractPlugin for more information.
 -   Moved the @ref CORRADE_PLUGIN_REGISTER() macro to
     @ref Corrade/PluginManager/AbstractManager.h from
