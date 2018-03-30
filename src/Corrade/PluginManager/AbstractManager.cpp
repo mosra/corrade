@@ -394,39 +394,27 @@ std::vector<std::string> AbstractManager::aliasList() const {
     return names;
 }
 
-auto AbstractManager::findWithAlias(const std::string& plugin) -> Plugin* {
-    return const_cast<Plugin*>(const_cast<const AbstractManager&>(*this).findWithAlias(plugin));
-}
-
-auto AbstractManager::findWithAlias(const std::string& plugin) const -> const Plugin* {
-    const auto aliasFound = _aliases.find(plugin);
-
-    /* Found an alias, load */
-    if(aliasFound != _aliases.end()) return &aliasFound->second;
-
-    /* Not found */
-    return nullptr;
-}
-
 const PluginMetadata* AbstractManager::metadata(const std::string& plugin) const {
-    if(const Plugin* const found = findWithAlias(plugin)) return &found->metadata;
+    auto found = _aliases.find(plugin);
+    if(found != _aliases.end()) return &found->second.metadata;
 
     return nullptr;
 }
 
 LoadState AbstractManager::loadState(const std::string& plugin) const {
-    if(const Plugin* const found = findWithAlias(plugin))
-        return found->loadState;
+    auto found = _aliases.find(plugin);
+    if(found != _aliases.end()) return found->second.loadState;
 
     return LoadState::NotFound;
 }
 
 LoadState AbstractManager::load(const std::string& plugin) {
-    if(Plugin* const found = findWithAlias(plugin)) {
+    auto found = _aliases.find(plugin);
+    if(found != _aliases.end()) {
         #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-        return loadInternal(*found);
+        return loadInternal(found->second);
         #else
-        return found->loadState;
+        return found->second.loadState;
         #endif
     }
 
@@ -572,11 +560,12 @@ LoadState AbstractManager::loadInternal(Plugin& plugin) {
 #endif
 
 LoadState AbstractManager::unload(const std::string& plugin) {
-    if(Plugin* const found = findWithAlias(plugin)) {
+    auto found = _aliases.find(plugin);
+    if(found != _aliases.end()) {
         #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-        return unloadInternal(*found);
+        return unloadInternal(found->second);
         #else
-        return found->loadState;
+        return found->second.loadState;
         #endif
     }
 
@@ -660,27 +649,27 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
 
 void AbstractManager::registerInstance(const std::string& plugin, AbstractPlugin& instance, const PluginMetadata*& metadata) {
     /** @todo assert proper interface */
-    Plugin* const foundPlugin = findWithAlias(plugin);
+    auto found = _aliases.find(plugin);
 
-    CORRADE_ASSERT(foundPlugin && foundPlugin->manager == this,
+    CORRADE_ASSERT(found != _aliases.end() && found->second.manager == this,
         "PluginManager::AbstractPlugin::AbstractPlugin(): attempt to register instance of plugin not known to given manager", );
 
     auto foundInstance = _instances.find(plugin);
 
     if(foundInstance == _instances.end())
-        foundInstance = _instances.insert({foundPlugin->metadata.name(), {}}).first;
+        foundInstance = _instances.insert({found->second.metadata.name(), {}}).first;
 
     foundInstance->second.push_back(&instance);
 
-    metadata = &foundPlugin->metadata;
+    metadata = &found->second.metadata;
 }
 
 void AbstractManager::unregisterInstance(const std::string& plugin, AbstractPlugin& instance) {
-    Plugin* const foundPlugin = findWithAlias(plugin);
+    auto found = _aliases.find(plugin);
 
-    CORRADE_INTERNAL_ASSERT(foundPlugin && foundPlugin->manager == this);
+    CORRADE_INTERNAL_ASSERT(found != _aliases.end() && found->second.manager == this);
 
-    auto foundInstance = _instances.find(foundPlugin->metadata.name());
+    auto foundInstance = _instances.find(found->second.metadata.name());
     CORRADE_INTERNAL_ASSERT(foundInstance != _instances.end());
     std::vector<AbstractPlugin*>& instancesForPlugin = foundInstance->second;
 
@@ -693,13 +682,13 @@ void AbstractManager::unregisterInstance(const std::string& plugin, AbstractPlug
 }
 
 void* AbstractManager::instantiateInternal(const std::string& plugin) {
-    Plugin* const found = findWithAlias(plugin);
+    auto found = _aliases.find(plugin);
 
-    CORRADE_ASSERT(found && (found->loadState & LoadState::Loaded),
+    CORRADE_ASSERT(found != _aliases.end() && (found->second.loadState & LoadState::Loaded),
         "PluginManager::Manager::instance(): plugin" << plugin << "is not loaded", nullptr);
 
     /* Instance the plugin using its original (non-aliased) name */
-    return found->instancer(*this, plugin);
+    return found->second.instancer(*this, plugin);
 }
 
 #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
