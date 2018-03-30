@@ -647,7 +647,7 @@ void Test::crossManagerDependencies() {
     std::ostringstream out;
     Error redirectError{&out};
     CORRADE_VERIFY(!foodManager.instantiate("Canary"));
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager::instance(): plugin Canary is not loaded\n");
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager::instantiate(): plugin Canary is not loaded\n");
 }
 
 void Test::unresolvedDependencies() {
