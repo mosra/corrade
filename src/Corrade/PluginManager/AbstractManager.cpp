@@ -79,7 +79,7 @@ struct AbstractManager::Plugin {
     PluginMetadata metadata;
 
     /* If set to nullptr, the plugin has not any associated plugin
-        manager and cannot be loaded. */
+       manager and cannot be loaded. */
     AbstractManager* manager;
 
     Instancer instancer;
