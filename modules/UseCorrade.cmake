@@ -500,21 +500,18 @@ function(corrade_add_plugin plugin_name debug_install_dirs release_install_dirs 
             LINK_FLAGS "-undefined dynamic_lookup")
     endif()
 
-    # Copy metadata next to the binary for testing purposes or install it both
-    # somewhere
-    if(debug_install_dirs STREQUAL CMAKE_CURRENT_BINARY_DIR)
-        add_custom_command(
-            OUTPUT ${plugin_name}.conf
-            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${plugin_name}.conf
-            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
-        add_custom_target(${plugin_name}-metadata ALL
-            DEPENDS ${plugin_name}.conf
-            # Force IDEs display also the metadata file in project view
-            SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
-    else()
+    # Copy metadata next to the binary for testing purposes
+    add_custom_command(
+        OUTPUT ${plugin_name}.conf
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${plugin_name}.conf
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
+    add_custom_target(${plugin_name}-metadata ALL
+        DEPENDS ${plugin_name}.conf
         # Force IDEs display also the metadata file in project view
-        add_custom_target(${plugin_name}-metadata SOURCES ${metadata_file})
+        SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
 
+    # Install it somewhere, unless that's explicitly not wanted
+    if(NOT debug_install_dirs STREQUAL CMAKE_CURRENT_BINARY_DIR)
         # CONFIGURATIONS must be first in order to not be ignored when having
         # multiple destinations.
         # https://gitlab.kitware.com/cmake/cmake/issues/16361
