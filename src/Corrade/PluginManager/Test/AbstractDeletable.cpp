@@ -36,13 +36,7 @@ std::string AbstractDeletable::pluginInterface() {
 }
 
 std::vector<std::string> AbstractDeletable::pluginSearchPaths() {
-    return {
-        #ifndef CMAKE_INTDIR
-        Utility::Directory::join(PLUGINS_DIR, "deletable")
-        #else
-        Utility::Directory::join(Utility::Directory::join(PLUGINS_DIR, "deletable"), CMAKE_INTDIR)
-        #endif
-    };
+    return {Utility::Directory::join(PLUGINS_DIR, "deletable")};
 }
 
 }}}

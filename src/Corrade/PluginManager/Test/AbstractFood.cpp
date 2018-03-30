@@ -36,13 +36,7 @@ std::string AbstractFood::pluginInterface() {
 }
 
 std::vector<std::string> AbstractFood::pluginSearchPaths() {
-    return {
-        #ifndef CMAKE_INTDIR
-        Utility::Directory::join(PLUGINS_DIR, "food")
-        #else
-        Utility::Directory::join(Utility::Directory::join(PLUGINS_DIR, "food"), CMAKE_INTDIR)
-        #endif
-    };
+    return {Utility::Directory::join(PLUGINS_DIR, "food")};
 }
 
 }}}

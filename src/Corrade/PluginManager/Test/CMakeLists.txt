@@ -23,8 +23,8 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
-               ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
+file(GENERATE OUTPUT $<TARGET_FILE_DIR:PluginManagerTest>/configure.h
+    INPUT ${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake)
 
 if(NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET_WINDOWS_RT AND NOT CORRADE_TARGET_IOS AND NOT CORRADE_TARGET_ANDROID)
     corrade_add_plugin(Snail ${CMAKE_CURRENT_BINARY_DIR} "" Snail.conf Snail.cpp)
@@ -49,7 +49,7 @@ corrade_add_test(PluginManagerTest
     AbstractFood.cpp
     LIBRARIES CorradePluginManagerTestLib Canary)
 set_target_properties(PluginManagerTest PROPERTIES FOLDER "Corrade/PluginManager/Test")
-target_include_directories(PluginManagerTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(PluginManagerTest PRIVATE $<TARGET_FILE_DIR:PluginManagerTest>)
 
 target_link_libraries(Canary CorradePluginManagerTestLib)
 if(CORRADE_TARGET_WINDOWS)

@@ -36,13 +36,7 @@ std::string AbstractAnimal::pluginInterface() {
 }
 
 std::vector<std::string> AbstractAnimal::pluginSearchPaths() {
-    return {
-        #ifndef CMAKE_INTDIR
-        PLUGINS_DIR
-        #else
-        Utility::Directory::join(PLUGINS_DIR, CMAKE_INTDIR)
-        #endif
-    };
+    return {PLUGINS_DIR};
 }
 
 }}}
