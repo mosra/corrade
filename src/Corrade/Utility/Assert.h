@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_ASSERT(), @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(), @ref CORRADE_ASSERT_UNREACHABLE()
+ * @brief Macro @ref CORRADE_ASSERT(), @ref CORRADE_ASSERT_OUTPUT(), @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(), @ref CORRADE_ASSERT_UNREACHABLE()
  */
 
 #if !defined(CORRADE_NO_ASSERT) || defined(CORRADE_GRACEFUL_ASSERT)
@@ -84,8 +84,8 @@ CORRADE_ASSERT(pos < size(),
     @endcode
 @attention
     If @cpp CORRADE_NO_ASSERT @ce is defined, the macro is not expanded and
-    thus the function gets never called. See @ref CORRADE_INTERNAL_ASSERT_OUTPUT()
-    for possible solution.
+    thus the function gets never called. See @ref CORRADE_ASSERT_OUTPUT() for a
+    possible solution.
 
 @see @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_ASSERT_UNREACHABLE()
 */
@@ -104,6 +104,46 @@ CORRADE_ASSERT(pos < size(),
     do {                                                                    \
         if(!(condition)) {                                                  \
             Corrade::Utility::Error() << message;                           \
+            std::abort();                                                   \
+            return returnValue;                                             \
+        }                                                                   \
+    } while(false)
+#endif
+
+/** @hideinitializer
+@brief Call output assertion macro
+@param call         Assert call
+@param message      Message on assertion fail
+@param returnValue  Return value on assertion fail
+
+Unlike @ref CORRADE_ASSERT(), this macro performs the call even if
+@cpp CORRADE_NO_ASSERT @ce is defined, making it usable for checking function
+output. Otherwise the behavior is the same as with @ref CORRADE_ASSERT().
+Example usage:
+
+@code{.cpp}
+CORRADE_ASSERT_OUTPUT(initialize(),
+    "Initialization failed: wrong parameter" << userParam, );
+@endcode
+
+@see @ref CORRADE_INTERNAL_ASSERT_OUTPUT()
+*/
+#ifdef CORRADE_GRACEFUL_ASSERT
+#define CORRADE_ASSERT_OUTPUT(call, message, returnValue)                   \
+    do {                                                                    \
+        if(!(call)) {                                                       \
+            Corrade::Utility::Error{} << message;                           \
+            return returnValue;                                             \
+        }                                                                   \
+    } while(false)
+#elif defined(CORRADE_NO_ASSERT)
+#define CORRADE_ASSERT_OUTPUT(call, message, returnValue)                   \
+    static_cast<void>(call)
+#else
+#define CORRADE_ASSERT_OUTPUT(call, message, returnValue)                   \
+    do {                                                                    \
+        if(!(call)) {                                                       \
+            Corrade::Utility::Error{} << message;                           \
             std::abort();                                                   \
             return returnValue;                                             \
         }                                                                   \
