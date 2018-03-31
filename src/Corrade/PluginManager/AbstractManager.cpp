@@ -267,15 +267,18 @@ LoadState AbstractManager::unloadRecursive(const std::string& plugin) {
 }
 
 LoadState AbstractManager::unloadRecursiveInternal(Plugin& plugin) {
-    /* Plugin doesn't belong to this manager, cannot do anything (will assert
-       on unload() in parent call) */
+    /* Plugin doesn't belong to this manager, cannot do anything. Caller takes
+       care of properly blowing up. */
     if(plugin.manager != this) return LoadState::NotFound;
 
     /* If the plugin is not static and is used by others, try to unload these
-       first so it can be unloaded too */
+       first so it can be unloaded too. Verification that the child actually
+       got unloaded is done by assert for the above return value and the assert
+       down below. */
     if(plugin.loadState != LoadState::Static) {
         while(!plugin.metadata._usedBy.empty())
-            unloadRecursive(plugin.metadata._usedBy.front());
+            CORRADE_ASSERT_OUTPUT(unloadRecursive(plugin.metadata._usedBy.front()) != LoadState::NotFound,
+                "PluginManager::Manager: wrong destruction order, cannot unload" << plugin.metadata._name << "that depends on" << plugin.metadata._usedBy.front() << "from a different manager instance", {});
     }
 
     /* Unload the plugin */

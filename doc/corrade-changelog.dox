@@ -74,6 +74,9 @@ namespace Corrade {
 
 -   The Android ADB test runner was not correctly propagating @ref TestSuite
     `CORRADE_TEST_*` environment variables to the executable
+-   Wrong destruction order of @ref PluginManager::Manager instances could lead
+    to an infinite loop if cross-manager plugin dependencies were involved. Now
+    an assertion fires instead.
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 
