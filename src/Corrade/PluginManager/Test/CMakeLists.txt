@@ -23,9 +23,10 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-file(GENERATE OUTPUT $<TARGET_FILE_DIR:PluginManagerTest>/configure.h
-    INPUT ${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake)
-
+# CMake before 3.8 has broken $<TARGET_FILE*> expressions for iOS (see
+# https://gitlab.kitware.com/cmake/cmake/merge_requests/404) and since Corrade
+# doesn't support dynamic plugins on iOS, this sorta works around that. Should
+# be revisited when updating Travis to newer Xcode (current has CMake 3.6).
 if(NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET_WINDOWS_RT AND NOT CORRADE_TARGET_IOS AND NOT CORRADE_TARGET_ANDROID)
     corrade_add_plugin(Snail ${CMAKE_CURRENT_BINARY_DIR} "" Snail.conf Snail.cpp)
     corrade_add_plugin(Dog ${CMAKE_CURRENT_BINARY_DIR} "" Dog.conf Dog.cpp)
@@ -38,7 +39,20 @@ if(NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET_WINDOWS_RT AND NOT CORRA
         Bulldog Bulldog-metadata
         PitBull PitBull-metadata
         PROPERTIES FOLDER "Corrade/PluginManager/Test")
+
+    set(DOG_PLUGIN_FILENAME $<TARGET_FILE:Dog>)
+    set(PITBULL_PLUGIN_FILENAME $<TARGET_FILE:PitBull>)
+
+    # First replace ${} variables, then $<> generator expressions
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
+                   ${CMAKE_CURRENT_BINARY_DIR}/configure.h.in)
+    file(GENERATE OUTPUT $<TARGET_FILE_DIR:PluginManagerTest>/configure.h
+        INPUT ${CMAKE_CURRENT_BINARY_DIR}/configure.h.in)
+else()
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
+                   ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 endif()
+
 corrade_add_static_plugin(Canary ${CMAKE_CURRENT_BINARY_DIR} Canary.conf Canary.cpp)
 set_target_properties(Canary Canary-dependencies PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
@@ -49,7 +63,11 @@ corrade_add_test(PluginManagerTest
     AbstractFood.cpp
     LIBRARIES CorradePluginManagerTestLib Canary)
 set_target_properties(PluginManagerTest PROPERTIES FOLDER "Corrade/PluginManager/Test")
-target_include_directories(PluginManagerTest PRIVATE $<TARGET_FILE_DIR:PluginManagerTest>)
+if(NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET_WINDOWS_RT AND NOT CORRADE_TARGET_IOS AND NOT CORRADE_TARGET_ANDROID)
+    target_include_directories(PluginManagerTest PRIVATE $<TARGET_FILE_DIR:PluginManagerTest>)
+else()
+    target_include_directories(PluginManagerTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+endif()
 
 target_link_libraries(Canary CorradePluginManagerTestLib)
 if(CORRADE_TARGET_WINDOWS)
