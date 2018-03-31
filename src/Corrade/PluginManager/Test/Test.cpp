@@ -244,7 +244,7 @@ void Test::nameList() {
         CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
             "Bulldog", "Canary", "Dog", "PitBull", "Snail"}), TestSuite::Compare::Container);
         CORRADE_COMPARE_AS(manager.aliasList(), (std::vector<std::string>{
-            "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "PitBull", "Snail"}), TestSuite::Compare::Container);
+            "AGoodBoy", "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "PitBull", "Snail"}), TestSuite::Compare::Container);
     }
     #endif
 
@@ -266,7 +266,7 @@ void Test::nameList() {
         CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
             "Bulldog", "Canary", "Dog", "PitBull", "Snail"}), TestSuite::Compare::Container);
         CORRADE_COMPARE_AS(manager.aliasList(), (std::vector<std::string>{
-            "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "PitBull", "Snail"}), TestSuite::Compare::Container);
+            "AGoodBoy", "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "PitBull", "Snail"}), TestSuite::Compare::Container);
     }
     #endif
 }
@@ -510,10 +510,11 @@ void Test::dynamicPluginFilePathConflictsWithLoadedPlugin() {
         CORRADE_COMPARE(out.str(), "PluginManager::load(): Dog" PLUGIN_FILENAME_SUFFIX " conflicts with currently loaded plugin of the same name\n");
     }
 
-    /* JustSomeMammal is provided by (the currently loaded) Dog plugin */
-    CORRADE_COMPARE(manager.loadState("JustSomeMammal"), LoadState::Loaded);
+    /* AGoodBoy is provided by (the currently loaded) Dog plugin */
+    CORRADE_COMPARE(manager.metadata("AGoodBoy")->name(), "Dog");
+    CORRADE_COMPARE(manager.loadState("AGoodBoy"), LoadState::Loaded);
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
-    CORRADE_COMPARE(manager.loadState("JustSomeMammal"), LoadState::NotLoaded);
+    CORRADE_COMPARE(manager.loadState("AGoodBoy"), LoadState::NotLoaded);
 
     /* Succeeds when it's unloaded */
     CORRADE_COMPARE(manager.load(DOG_PLUGIN_FILENAME), LoadState::Loaded);
@@ -524,11 +525,11 @@ void Test::dynamicPluginFilePathConflictsWithLoadedPlugin() {
         CORRADE_COMPARE(animal->metadata()->data().value("description"), "A simple dog plugin.");
     }
 
-    /* JustSomeMammal is loaded again, different plugin. Test that it
+    /* AGoodBoy is loaded again, different plugin. Test that it
        instantiates properly. */
-    CORRADE_COMPARE(manager.loadState("JustSomeMammal"), LoadState::Loaded);
+    CORRADE_COMPARE(manager.loadState("AGoodBoy"), LoadState::Loaded);
     {
-        std::unique_ptr<AbstractAnimal> animal = manager.instantiate("JustSomeMammal");
+        std::unique_ptr<AbstractAnimal> animal = manager.instantiate("AGoodBoy");
         CORRADE_VERIFY(animal);
         CORRADE_COMPARE(animal->name(), "Doug");
         CORRADE_COMPARE(animal->metadata()->data().value("description"), "A simple dog plugin.");
@@ -824,11 +825,11 @@ void Test::reloadPluginDirectory() {
     CORRADE_COMPARE_AS(actualPlugins1, (std::vector<std::string>{
         "Bulldog", "Canary", "Dog", "LostPitBull", "LostSnail", "PitBull"}), TestSuite::Compare::Container);
     CORRADE_COMPARE_AS(actualAliases1, (std::vector<std::string>{
-        "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "LostPitBull", "LostSnail", "PitBull"}), TestSuite::Compare::Container);
+        "AGoodBoy", "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "LostPitBull", "LostSnail", "PitBull"}), TestSuite::Compare::Container);
     CORRADE_COMPARE_AS(actualPlugins2, (std::vector<std::string>{
         "Bulldog", "Canary", "Dog", "LostPitBull", "LostSnail"}), TestSuite::Compare::Container);
     CORRADE_COMPARE_AS(actualAliases2, (std::vector<std::string>{
-        "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "LostPitBull", "LostSnail"}), TestSuite::Compare::Container);
+        "AGoodBoy", "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "LostPitBull", "LostSnail"}), TestSuite::Compare::Container);
     #endif
 }
 
@@ -850,7 +851,7 @@ void Test::staticProvides() {
 void Test::dynamicProvides() {
     PluginManager::Manager<AbstractAnimal> manager;
 
-    CORRADE_COMPARE(manager.metadata("Dog")->provides(), std::vector<std::string>{"JustSomeMammal"});
+    CORRADE_COMPARE(manager.metadata("Dog")->provides(), (std::vector<std::string>{"JustSomeMammal", "AGoodBoy"}));
 
     CORRADE_COMPARE(manager.loadState("JustSomeMammal"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.load("JustSomeMammal"), LoadState::Loaded);
@@ -886,7 +887,7 @@ void Test::dynamicProvidesDependency() {
 void Test::setPreferredPlugins() {
     PluginManager::Manager<AbstractAnimal> manager;
 
-    CORRADE_COMPARE(manager.metadata("Dog")->provides(), std::vector<std::string>{"JustSomeMammal"});
+    CORRADE_COMPARE(manager.metadata("Dog")->provides(), (std::vector<std::string>{"JustSomeMammal", "AGoodBoy"}));
     CORRADE_COMPARE(manager.metadata("PitBull")->provides(), (std::vector<std::string>{"JustSomeMammal", "Dog"}));
 
     /* Implicit state */
