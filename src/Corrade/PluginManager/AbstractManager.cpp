@@ -170,8 +170,14 @@ void AbstractManager::importStaticPlugin(std::string plugin, int _version, std::
 }
 #endif
 
-/* GCC 4.7 doesn't like initializing references with {} */
-AbstractManager::AbstractManager(std::string pluginInterface, const std::vector<std::string>& pluginSearchPaths, std::string pluginDirectory): _plugins(initializeGlobalPluginStorage()), _pluginInterface{std::move(pluginInterface)} {
+#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+AbstractManager::AbstractManager(std::string pluginInterface, const std::vector<std::string>& pluginSearchPaths, std::string pluginDirectory):
+#else
+AbstractManager::AbstractManager(std::string pluginInterface):
+#endif
+    /* GCC 4.7 doesn't like initializing references with {} */
+    _plugins(initializeGlobalPluginStorage()), _pluginInterface{std::move(pluginInterface)}
+{
     /* Find static plugins which have the same interface and have not
        assigned manager to them */
     for(auto p: _plugins.plugins) {
@@ -223,9 +229,6 @@ AbstractManager::AbstractManager(std::string pluginInterface, const std::vector<
         if(_pluginDirectory.empty())
             Warning{} << "PluginManager::Manager::Manager(): none of the plugin search paths in" << pluginSearchPaths << "exists and pluginDirectory was not set, falling back to current working directory";
     }
-    #else
-    static_cast<void>(pluginSearchPaths);
-    static_cast<void>(pluginDirectory);
     #endif
 }
 

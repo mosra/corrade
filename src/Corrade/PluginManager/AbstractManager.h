@@ -416,7 +416,11 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         struct CORRADE_PLUGINMANAGER_LOCAL Plugin;
         struct CORRADE_PLUGINMANAGER_LOCAL GlobalPluginStorage;
 
+        #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
         explicit AbstractManager(std::string pluginInterface, const std::vector<std::string>& pluginSearchPaths, std::string pluginDirectory);
+        #else
+        explicit AbstractManager(std::string pluginInterface);
+        #endif
 
         #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
         std::string _pluginDirectory;

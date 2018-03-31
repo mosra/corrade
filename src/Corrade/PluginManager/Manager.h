@@ -117,7 +117,12 @@ template<class T> class Manager: public AbstractManager {
          *      @ref CORRADE_TARGET_ANDROID "Android" as only static plugins
          *      are supported.
          */
-        explicit Manager(std::string pluginDirectory = {}): AbstractManager{T::pluginInterface(), T::pluginSearchPaths(), std::move(pluginDirectory)} {}
+        explicit Manager(std::string pluginDirectory = {}):
+            #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+            AbstractManager{T::pluginInterface(), T::pluginSearchPaths(), std::move(pluginDirectory)} {}
+            #else
+            AbstractManager{T::pluginInterface()} { static_cast<void>(pluginDirectory); }
+            #endif
 
         /**
          * @brief Instantiate a plugin

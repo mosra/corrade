@@ -31,11 +31,14 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 
 #include "Corrade/PluginManager/PluginManager.h"
 #include "Corrade/PluginManager/visibility.h"
 #include "Corrade/Utility/Utility.h"
+
+#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+#include <vector>
+#endif
 
 namespace Corrade { namespace PluginManager {
 
@@ -85,6 +88,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
     template<class> friend class AbstractManagingPlugin;
 
     public:
+        #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
         /**
          * @brief Plugin search paths
          *
@@ -94,8 +98,14 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * entries have more priority than later, search stops once an existing
          * directory is found. By default this function returns an empty list.
          * See also @ref PluginManager-Manager-paths for more information.
+         * @partialsupport Only static plugins are supported on
+         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
+         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
+         *      @ref CORRADE_TARGET_IOS "iOS" and
+         *      @ref CORRADE_TARGET_ANDROID "Android".
          */
         static std::vector<std::string> pluginSearchPaths();
+        #endif
 
         /**
          * @brief Initialize plugin
