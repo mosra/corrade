@@ -56,7 +56,7 @@ T operator[](std::size_t pos) const {
 }
 @endcode
 
-If the function has return type @cpp void @ce, just use empty parameter
+If the function has return type @cpp void @ce, just use an empty parameter
 (allowed in C++11):
 
 @code{.cpp}
@@ -88,8 +88,6 @@ CORRADE_ASSERT(pos < size(),
     for possible solution.
 
 @see @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_ASSERT_UNREACHABLE()
-@todo find a way that @p returnValue gets validated but doesn't get included in
-    the code unless `CORRADE_GRACEFUL_ASSERT` is used
 */
 #ifdef CORRADE_GRACEFUL_ASSERT
 #define CORRADE_ASSERT(condition, message, returnValue)                     \
@@ -99,8 +97,7 @@ CORRADE_ASSERT(pos < size(),
             return returnValue;                                             \
         }                                                                   \
     } while(false)
-#else
-#ifdef CORRADE_NO_ASSERT
+#elif defined(CORRADE_NO_ASSERT)
 #define CORRADE_ASSERT(condition, message, returnValue) do {} while(0)
 #else
 #define CORRADE_ASSERT(condition, message, returnValue)                     \
@@ -112,18 +109,17 @@ CORRADE_ASSERT(pos < size(),
         }                                                                   \
     } while(false)
 #endif
-#endif
 
 /** @hideinitializer
 @brief Internal assertion macro
 @param condition    Assert condition
 
 Unlike @ref CORRADE_ASSERT() usable for sanity checks on internal state, as it
-prints what failed and where instead of user-friendly message.
+prints what failed and where instead of a user-friendly message.
 
 By default, if assertion fails, failed condition, file and line is printed to
-error output and the application aborts. If `CORRADE_NO_ASSERT` is defined,
-this macro does nothing. Example usage:
+error output and the application aborts. If @cpp CORRADE_NO_ASSERT @ce is
+defined, this macro does nothing. Example usage:
 
 @code{.cpp}
 CORRADE_INTERNAL_ASSERT(!nullptr);
@@ -197,7 +193,7 @@ switch(flag) {
 CORRADE_ASSERT_UNREACHABLE();
 @endcode
 
-@see @ref CORRADE_ASSERT()
+@see @ref CORRADE_ASSERT(), @ref CORRADE_INTERNAL_ASSERT()
 */
 #ifdef CORRADE_NO_ASSERT
 #if defined(__GNUC__)
