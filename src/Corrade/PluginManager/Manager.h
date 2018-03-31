@@ -154,12 +154,9 @@ template<class T> class Manager: public AbstractManager {
          * Convenience alternative to calling both @ref load() and
          * @ref instantiate(). If loading fails, @cpp nullptr @ce is returned.
          *
-         * If @p plugin is a plugin file path (i.e., ending with a
-         * platform-specific extension such as `.so` or `.dll`), it's loaded
-         * from given location using @ref load() and its basename (without
-         * extension) exposed as an available plugin name. The plugin name is
-         * then loaded using @ref instantiate(). It's expected that a plugin
-         * with the same name is not already registered.
+         * As with @ref load(), it's possible to pass a file path to @p plugin.
+         * See its documentation for more information. The resulting plugin
+         * name is then loaded using @ref instantiate() as usual.
          */
         std::unique_ptr<T> loadAndInstantiate(const std::string& plugin) {
             /** @todo C++14: std::make_unique() */

@@ -369,6 +369,10 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * after calling @ref unload() on it, until next call to
          * @ref setPluginDirectory() or @ref reloadPluginDirectory().
          *
+         * @note If passing a file path, the implementation expects forward
+         *      slashes as directory separators. Use @ref Utility::Directory::fromNativeSeparators()
+         *      to convert from platform-specific format.
+         *
          * @see @ref unload(), @ref loadState(), @ref Manager::instance(),
          *      @ref Manager::loadAndInstantiate()
          * @partialsupport Only static plugins are supported on
