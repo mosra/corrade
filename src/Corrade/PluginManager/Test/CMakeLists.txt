@@ -46,7 +46,7 @@ if(NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET_WINDOWS_RT AND NOT CORRA
     # First replace ${} variables, then $<> generator expressions
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
                    ${CMAKE_CURRENT_BINARY_DIR}/configure.h.in)
-    file(GENERATE OUTPUT $<TARGET_FILE_DIR:PluginManagerTest>/configure.h
+    file(GENERATE OUTPUT $<TARGET_FILE_DIR:PluginManagerManagerTest>/configure.h
         INPUT ${CMAKE_CURRENT_BINARY_DIR}/configure.h.in)
 else()
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
@@ -56,17 +56,17 @@ endif()
 corrade_add_static_plugin(Canary ${CMAKE_CURRENT_BINARY_DIR} Canary.conf Canary.cpp)
 set_target_properties(Canary Canary-dependencies PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
-corrade_add_test(PluginManagerTest
-    Test.cpp
+corrade_add_test(PluginManagerManagerTest
+    ManagerTest.cpp
     AbstractAnimal.cpp
     AbstractDeletable.cpp
     AbstractFood.cpp
     LIBRARIES CorradePluginManagerTestLib Canary)
-set_target_properties(PluginManagerTest PROPERTIES FOLDER "Corrade/PluginManager/Test")
+set_target_properties(PluginManagerManagerTest PROPERTIES FOLDER "Corrade/PluginManager/Test")
 if(NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET_WINDOWS_RT AND NOT CORRADE_TARGET_IOS AND NOT CORRADE_TARGET_ANDROID)
-    target_include_directories(PluginManagerTest PRIVATE $<TARGET_FILE_DIR:PluginManagerTest>)
+    target_include_directories(PluginManagerManagerTest PRIVATE $<TARGET_FILE_DIR:PluginManagerManagerTest>)
 else()
-    target_include_directories(PluginManagerTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+    target_include_directories(PluginManagerManagerTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
 target_link_libraries(Canary PRIVATE CorradePluginManagerTestLib)

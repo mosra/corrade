@@ -49,8 +49,8 @@ static void initialize() {
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-struct Test: TestSuite::Tester {
-    explicit Test();
+struct ManagerTest: TestSuite::Tester {
+    explicit ManagerTest();
 
     void pluginSearchPathsNotUsed();
     #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
@@ -119,76 +119,76 @@ struct Test: TestSuite::Tester {
     void debug();
 };
 
-Test::Test() {
-    addTests({&Test::pluginSearchPathsNotUsed,
+ManagerTest::ManagerTest() {
+    addTests({&ManagerTest::pluginSearchPathsNotUsed,
               #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-              &Test::pluginSearchPathsNotProvided,
-              &Test::pluginSearchPathsNotFound,
+              &ManagerTest::pluginSearchPathsNotProvided,
+              &ManagerTest::pluginSearchPathsNotFound,
               #endif
 
-              &Test::nameList,
+              &ManagerTest::nameList,
 
               #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-              &Test::wrongMetadataFile,
-              &Test::unresolvedReference,
-              &Test::noPluginVersion,
-              &Test::wrongPluginVersion,
-              &Test::noPluginInterface,
-              &Test::wrongPluginInterface,
-              &Test::noPluginInitializer,
-              &Test::noPluginFinalizer,
-              &Test::noPluginInstancer,
+              &ManagerTest::wrongMetadataFile,
+              &ManagerTest::unresolvedReference,
+              &ManagerTest::noPluginVersion,
+              &ManagerTest::wrongPluginVersion,
+              &ManagerTest::noPluginInterface,
+              &ManagerTest::wrongPluginInterface,
+              &ManagerTest::noPluginInitializer,
+              &ManagerTest::noPluginFinalizer,
+              &ManagerTest::noPluginInstancer,
               #endif
 
-              &Test::queryNonexistent,
-              &Test::loadNonexistent,
-              &Test::unloadNonexistent,
+              &ManagerTest::queryNonexistent,
+              &ManagerTest::loadNonexistent,
+              &ManagerTest::unloadNonexistent,
 
-              &Test::staticPlugin,
+              &ManagerTest::staticPlugin,
               #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-              &Test::dynamicPlugin,
-              &Test::dynamicPluginLoadAndInstantiate,
-              &Test::dynamicPluginFilePath,
-              &Test::dynamicPluginFilePathLoadAndInstantiate,
-              &Test::dynamicPluginFilePathConflictsWithLoadedPlugin,
-              &Test::dynamicPluginFilePathRemoveOnFail,
+              &ManagerTest::dynamicPlugin,
+              &ManagerTest::dynamicPluginLoadAndInstantiate,
+              &ManagerTest::dynamicPluginFilePath,
+              &ManagerTest::dynamicPluginFilePathLoadAndInstantiate,
+              &ManagerTest::dynamicPluginFilePathConflictsWithLoadedPlugin,
+              &ManagerTest::dynamicPluginFilePathRemoveOnFail,
               #endif
-              &Test::staticPluginInitFini,
+              &ManagerTest::staticPluginInitFini,
               #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-              &Test::dynamicPluginInitFini,
+              &ManagerTest::dynamicPluginInitFini,
               #endif
 
-              &Test::configuration,
+              &ManagerTest::configuration,
               #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-              &Test::configurationImplicit,
+              &ManagerTest::configurationImplicit,
               #endif
-              &Test::deletable,
-              &Test::hierarchy,
-              &Test::destructionHierarchy,
-              &Test::crossManagerDependencies,
-              &Test::unresolvedDependencies,
-              &Test::reloadPluginDirectory,
+              &ManagerTest::deletable,
+              &ManagerTest::hierarchy,
+              &ManagerTest::destructionHierarchy,
+              &ManagerTest::crossManagerDependencies,
+              &ManagerTest::unresolvedDependencies,
+              &ManagerTest::reloadPluginDirectory,
 
-              &Test::staticProvides,
+              &ManagerTest::staticProvides,
               #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-              &Test::dynamicProvides,
-              &Test::dynamicProvidesDependency,
-              &Test::setPreferredPlugins,
-              &Test::setPreferredPluginsUnknownAlias,
-              &Test::setPreferredPluginsDoesNotProvide,
-              &Test::setPreferredPluginsOverridePrimaryPlugin,
-              #endif
-
-              #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-              &Test::utf8Path,
+              &ManagerTest::dynamicProvides,
+              &ManagerTest::dynamicProvidesDependency,
+              &ManagerTest::setPreferredPlugins,
+              &ManagerTest::setPreferredPluginsUnknownAlias,
+              &ManagerTest::setPreferredPluginsDoesNotProvide,
+              &ManagerTest::setPreferredPluginsOverridePrimaryPlugin,
               #endif
 
-              &Test::debug});
+              #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+              &ManagerTest::utf8Path,
+              #endif
+
+              &ManagerTest::debug});
 
     initialize();
 }
 
-void Test::pluginSearchPathsNotUsed() {
+void ManagerTest::pluginSearchPathsNotUsed() {
     struct SomePlugin: AbstractPlugin {
         static std::string pluginInterface() { return {}; }
     };
@@ -203,7 +203,7 @@ void Test::pluginSearchPathsNotUsed() {
 }
 
 #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-void Test::pluginSearchPathsNotProvided() {
+void ManagerTest::pluginSearchPathsNotProvided() {
     struct SomePlugin: AbstractPlugin {
         static std::string pluginInterface() { return {}; }
     };
@@ -217,7 +217,7 @@ void Test::pluginSearchPathsNotProvided() {
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::Manager(): either pluginDirectory has to be set or T::pluginSearchPaths() is expected to have at least one entry\n");
 }
 
-void Test::pluginSearchPathsNotFound() {
+void ManagerTest::pluginSearchPathsNotFound() {
     struct SomePlugin: AbstractPlugin {
         static std::vector<std::string> pluginSearchPaths() {
             return {"nonexistent", "/absolute/but/nonexistent"};
@@ -236,7 +236,7 @@ void Test::pluginSearchPathsNotFound() {
 }
 #endif
 
-void Test::nameList() {
+void ManagerTest::nameList() {
     #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
     {
         PluginManager::Manager<AbstractAnimal> manager;
@@ -292,7 +292,7 @@ struct WrongPlugin: AbstractPlugin {
 
 }
 
-void Test::wrongMetadataFile() {
+void ManagerTest::wrongMetadataFile() {
     std::ostringstream out;
     Error redirectError{&out};
 
@@ -304,7 +304,7 @@ void Test::wrongMetadataFile() {
         "PluginManager::Manager::load(): plugin Snail is not ready to load: PluginManager::LoadState::WrongMetadataFile\n");
 }
 
-void Test::unresolvedReference() {
+void ManagerTest::unresolvedReference() {
     #ifdef CORRADE_TARGET_WINDOWS
     CORRADE_SKIP("At the moment, plugins are not compiled as modules on Windows, so this is not possible to test.");
     #endif
@@ -319,7 +319,7 @@ void Test::unresolvedReference() {
     CORRADE_COMPARE(out.str().substr(0, expectedPrefix.size()), expectedPrefix);
 }
 
-void Test::noPluginVersion() {
+void ManagerTest::noPluginVersion() {
     std::ostringstream out;
     Error redirectError{&out};
 
@@ -330,7 +330,7 @@ void Test::noPluginVersion() {
     CORRADE_COMPARE(out.str().substr(0, expectedPrefix.size()), expectedPrefix);
 }
 
-void Test::wrongPluginVersion() {
+void ManagerTest::wrongPluginVersion() {
     std::ostringstream out;
     Error redirectError{&out};
 
@@ -340,7 +340,7 @@ void Test::wrongPluginVersion() {
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): wrong version of plugin OldBread, expected 5 but got 0\n");
 }
 
-void Test::noPluginInterface() {
+void ManagerTest::noPluginInterface() {
     std::ostringstream out;
     Error redirectError{&out};
 
@@ -351,7 +351,7 @@ void Test::noPluginInterface() {
     CORRADE_COMPARE(out.str().substr(0, expectedPrefix.size()), expectedPrefix);
 }
 
-void Test::wrongPluginInterface() {
+void ManagerTest::wrongPluginInterface() {
     std::ostringstream out;
     Error redirectError{&out};
 
@@ -360,7 +360,7 @@ void Test::wrongPluginInterface() {
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): wrong interface string of plugin RottenTomato, expected cz.mosra.corrade.PluginManager.Test.AbstractFood/1.0 but got cz.mosra.corrade.PluginManager.Test.AbstractFood/0.1\n");
 }
 
-void Test::noPluginInitializer() {
+void ManagerTest::noPluginInitializer() {
     std::ostringstream out;
     Error redirectError{&out};
 
@@ -371,7 +371,7 @@ void Test::noPluginInitializer() {
     CORRADE_COMPARE(out.str().substr(0, expectedPrefix.size()), expectedPrefix);
 }
 
-void Test::noPluginFinalizer() {
+void ManagerTest::noPluginFinalizer() {
     std::ostringstream out;
     Error redirectError{&out};
 
@@ -382,7 +382,7 @@ void Test::noPluginFinalizer() {
     CORRADE_COMPARE(out.str().substr(0, expectedPrefix.size()), expectedPrefix);
 }
 
-void Test::noPluginInstancer() {
+void ManagerTest::noPluginInstancer() {
     std::ostringstream out;
     Error redirectError{&out};
 
@@ -394,13 +394,13 @@ void Test::noPluginInstancer() {
 }
 #endif
 
-void Test::queryNonexistent() {
+void ManagerTest::queryNonexistent() {
     PluginManager::Manager<AbstractAnimal> manager;
     CORRADE_VERIFY(!manager.metadata("Nonexistent"));
     CORRADE_COMPARE(manager.loadState("Nonexistent"), LoadState::NotFound);
 }
 
-void Test::loadNonexistent() {
+void ManagerTest::loadNonexistent() {
     PluginManager::Manager<AbstractAnimal> manager;
 
     std::ostringstream out;
@@ -413,7 +413,7 @@ void Test::loadNonexistent() {
     #endif
 }
 
-void Test::unloadNonexistent() {
+void ManagerTest::unloadNonexistent() {
     PluginManager::Manager<AbstractAnimal> manager;
 
     std::ostringstream out;
@@ -422,7 +422,7 @@ void Test::unloadNonexistent() {
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::unload(): plugin Nonexistent was not found\n");
 }
 
-void Test::staticPlugin() {
+void ManagerTest::staticPlugin() {
     PluginManager::Manager<AbstractAnimal> manager;
 
     CORRADE_COMPARE(manager.loadState("Canary"), LoadState::Static);
@@ -438,7 +438,7 @@ void Test::staticPlugin() {
 }
 
 #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-void Test::dynamicPlugin() {
+void ManagerTest::dynamicPlugin() {
     PluginManager::Manager<AbstractAnimal> manager;
 
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotLoaded);
@@ -467,14 +467,14 @@ void Test::dynamicPlugin() {
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotLoaded);
 }
 
-void Test::dynamicPluginLoadAndInstantiate() {
+void ManagerTest::dynamicPluginLoadAndInstantiate() {
     PluginManager::Manager<AbstractAnimal> manager;
     std::unique_ptr<AbstractAnimal> animal = manager.loadAndInstantiate("Dog");
     CORRADE_VERIFY(animal);
     CORRADE_COMPARE(animal->name(), "Doug");
 }
 
-void Test::dynamicPluginFilePath() {
+void ManagerTest::dynamicPluginFilePath() {
     PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
 
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::NotFound);
@@ -488,7 +488,7 @@ void Test::dynamicPluginFilePath() {
     CORRADE_COMPARE(animal->metadata()->data().value("description"), "A simple dog plugin.");
 }
 
-void Test::dynamicPluginFilePathLoadAndInstantiate() {
+void ManagerTest::dynamicPluginFilePathLoadAndInstantiate() {
     PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
     std::unique_ptr<AbstractAnimal> animal = manager.loadAndInstantiate(DOG_PLUGIN_FILENAME);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
@@ -497,7 +497,7 @@ void Test::dynamicPluginFilePathLoadAndInstantiate() {
     CORRADE_COMPARE(animal->metadata()->data().value("description"), "A simple dog plugin.");
 }
 
-void Test::dynamicPluginFilePathConflictsWithLoadedPlugin() {
+void ManagerTest::dynamicPluginFilePathConflictsWithLoadedPlugin() {
     PluginManager::Manager<AbstractAnimal> manager; /* Use the path that has Dog plugin */
 
     CORRADE_COMPARE(manager.load("Dog"), LoadState::Loaded);
@@ -536,7 +536,7 @@ void Test::dynamicPluginFilePathConflictsWithLoadedPlugin() {
     }
 }
 
-void Test::dynamicPluginFilePathRemoveOnFail() {
+void ManagerTest::dynamicPluginFilePathRemoveOnFail() {
     PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
 
     /* Sure, PitBull needs a Dog */
@@ -561,7 +561,7 @@ void Test::dynamicPluginFilePathRemoveOnFail() {
 
 #endif
 
-void Test::staticPluginInitFini() {
+void ManagerTest::staticPluginInitFini() {
     std::ostringstream out;
     Debug redirectDebug{&out};
 
@@ -581,7 +581,7 @@ void Test::staticPluginInitFini() {
 }
 
 #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-void Test::dynamicPluginInitFini() {
+void ManagerTest::dynamicPluginInitFini() {
     std::ostringstream out;
     Debug redirectDebug{&out};
 
@@ -599,7 +599,7 @@ void Test::dynamicPluginInitFini() {
 }
 #endif
 
-void Test::configuration() {
+void ManagerTest::configuration() {
     PluginManager::Manager<AbstractAnimal> manager;
 
     CORRADE_COMPARE(manager.loadState("Canary"), LoadState::Static);
@@ -619,7 +619,7 @@ void Test::configuration() {
 }
 
 #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-void Test::configurationImplicit() {
+void ManagerTest::configurationImplicit() {
     PluginManager::Manager<AbstractAnimal> manager;
 
     std::unique_ptr<AbstractAnimal> animal = manager.loadAndInstantiate("Dog");
@@ -635,7 +635,7 @@ void Test::configurationImplicit() {
 }
 #endif
 
-void Test::deletable() {
+void ManagerTest::deletable() {
     #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
     CORRADE_SKIP("Can't test because static plugins can't be unloaded");
     #else
@@ -658,7 +658,7 @@ void Test::deletable() {
     #endif
 }
 
-void Test::hierarchy() {
+void ManagerTest::hierarchy() {
     #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
     CORRADE_SKIP("Dependency hierarchy is meaningful only for dynamic plugins");
     #else
@@ -692,7 +692,7 @@ void Test::hierarchy() {
     #endif
 }
 
-void Test::destructionHierarchy() {
+void ManagerTest::destructionHierarchy() {
     #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
     CORRADE_SKIP("Dependency hierarchy is meaningful only for dynamic plugins");
     #else
@@ -712,7 +712,7 @@ void Test::destructionHierarchy() {
     #endif
 }
 
-void Test::crossManagerDependencies() {
+void ManagerTest::crossManagerDependencies() {
     PluginManager::Manager<AbstractAnimal> manager;
     PluginManager::Manager<AbstractFood> foodManager;
 
@@ -753,7 +753,7 @@ void Test::crossManagerDependencies() {
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::instantiate(): plugin Canary is not loaded\n");
 }
 
-void Test::unresolvedDependencies() {
+void ManagerTest::unresolvedDependencies() {
     #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
     CORRADE_SKIP("UsedBy list is irrelevant for static plugins");
     #else
@@ -776,7 +776,7 @@ void Test::unresolvedDependencies() {
     #endif
 }
 
-void Test::reloadPluginDirectory() {
+void ManagerTest::reloadPluginDirectory() {
     #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
     CORRADE_SKIP("Plugin directory is irrelevant for static plugins");
     #else
@@ -833,7 +833,7 @@ void Test::reloadPluginDirectory() {
     #endif
 }
 
-void Test::staticProvides() {
+void ManagerTest::staticProvides() {
     PluginManager::Manager<AbstractAnimal> manager;
 
     CORRADE_COMPARE(manager.metadata("Canary")->provides(), std::vector<std::string>{"JustSomeBird"});
@@ -848,7 +848,7 @@ void Test::staticProvides() {
 }
 
 #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
-void Test::dynamicProvides() {
+void ManagerTest::dynamicProvides() {
     PluginManager::Manager<AbstractAnimal> manager;
 
     CORRADE_COMPARE(manager.metadata("Dog")->provides(), (std::vector<std::string>{"JustSomeMammal", "AGoodBoy"}));
@@ -869,7 +869,7 @@ void Test::dynamicProvides() {
     CORRADE_COMPARE(manager.unload("Dog"), LoadState::Used);
 }
 
-void Test::dynamicProvidesDependency() {
+void ManagerTest::dynamicProvidesDependency() {
     PluginManager::Manager<AbstractAnimal> manager;
 
     /* The plugin JustSomeMammal exists, but is an alias and cannot be used as
@@ -884,7 +884,7 @@ void Test::dynamicProvidesDependency() {
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): unresolved dependency JustSomeMammal of plugin Bulldog\n");
 }
 
-void Test::setPreferredPlugins() {
+void ManagerTest::setPreferredPlugins() {
     PluginManager::Manager<AbstractAnimal> manager;
 
     CORRADE_COMPARE(manager.metadata("Dog")->provides(), (std::vector<std::string>{"JustSomeMammal", "AGoodBoy"}));
@@ -902,7 +902,7 @@ void Test::setPreferredPlugins() {
     CORRADE_COMPARE(manager.metadata("JustSomeMammal")->name(), "Dog");
 }
 
-void Test::setPreferredPluginsUnknownAlias() {
+void ManagerTest::setPreferredPluginsUnknownAlias() {
     PluginManager::Manager<AbstractAnimal> manager;
 
     std::ostringstream out;
@@ -911,7 +911,7 @@ void Test::setPreferredPluginsUnknownAlias() {
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::setPreferredPlugins(): Chihuahua is not a known alias\n");
 }
 
-void Test::setPreferredPluginsDoesNotProvide() {
+void ManagerTest::setPreferredPluginsDoesNotProvide() {
     PluginManager::Manager<AbstractAnimal> manager;
 
     std::ostringstream out;
@@ -920,7 +920,7 @@ void Test::setPreferredPluginsDoesNotProvide() {
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::setPreferredPlugins(): Snail does not provide Dog\n");
 }
 
-void Test::setPreferredPluginsOverridePrimaryPlugin() {
+void ManagerTest::setPreferredPluginsOverridePrimaryPlugin() {
     PluginManager::Manager<AbstractAnimal> manager;
 
     CORRADE_COMPARE(manager.metadata("PitBull")->provides(), (std::vector<std::string>{"JustSomeMammal", "Dog"}));
@@ -937,7 +937,7 @@ void Test::setPreferredPluginsOverridePrimaryPlugin() {
     CORRADE_COMPARE(manager.metadata("Dog")->name(), "Dog");
 }
 
-void Test::utf8Path() {
+void ManagerTest::utf8Path() {
     /* Copy the dog plugin to a new UTF-8 path */
     const std::string utf8PluginsDir = Utility::Directory::join(PLUGINS_DIR, "hýždě");
     CORRADE_VERIFY(Utility::Directory::mkpath(utf8PluginsDir));
@@ -966,7 +966,7 @@ void Test::utf8Path() {
 }
 #endif
 
-void Test::debug() {
+void ManagerTest::debug() {
     std::ostringstream o;
 
     Debug(&o) << LoadState::Static << LoadState(0x3f);
@@ -975,4 +975,4 @@ void Test::debug() {
 
 }}}
 
-CORRADE_TEST_MAIN(Corrade::PluginManager::Test::Test)
+CORRADE_TEST_MAIN(Corrade::PluginManager::Test::ManagerTest)
