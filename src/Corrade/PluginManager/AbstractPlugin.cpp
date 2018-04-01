@@ -31,7 +31,7 @@
 
 namespace Corrade { namespace PluginManager {
 
-#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 std::vector<std::string> AbstractPlugin::pluginSearchPaths() { return {}; }
 #endif
 

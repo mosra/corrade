@@ -65,59 +65,44 @@ enum class LoadState: unsigned short {
      */
     NotFound = 1 << 0,
 
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     /**
      * The plugin is build with different version of plugin manager and cannot
      * be loaded. Returned by @ref AbstractManager::load().
-     * @partialsupport Only static plugins are supported on
-     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
-     *      @ref CORRADE_TARGET_IOS "iOS" and
-     *      @ref CORRADE_TARGET_ANDROID "Android".
+     * @partialsupport Not available on platforms without
+     *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
      */
     WrongPluginVersion = 1 << 1,
 
     /**
      * The plugin uses different interface than the interface used by plugin
      * manager and cannot be loaded. Returned by @ref AbstractManager::load().
-     * @partialsupport Only static plugins are supported on
-     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
-     *      @ref CORRADE_TARGET_IOS "iOS" and
-     *      @ref CORRADE_TARGET_ANDROID "Android".
+     * @partialsupport Not available on platforms without
+     *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
      */
     WrongInterfaceVersion = 1 << 2,
 
     /**
      * The plugin doesn't have any metadata file or the metadata file contains
      * errors. Returned by @ref AbstractManager::load().
-     * @partialsupport Only static plugins are supported on
-     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
-     *      @ref CORRADE_TARGET_IOS "iOS" and
-     *      @ref CORRADE_TARGET_ANDROID "Android".
+     * @partialsupport Not available on platforms without
+     *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
      */
     WrongMetadataFile = 1 << 3,
 
     /**
      * The plugin depends on another plugin, which cannot be loaded (e.g. not
      * found or wrong version). Returned by @ref AbstractManager::load().
-     * @partialsupport Only static plugins are supported on
-     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
-     *      @ref CORRADE_TARGET_IOS "iOS" and
-     *      @ref CORRADE_TARGET_ANDROID "Android".
+     * @partialsupport Not available on platforms without
+     *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
      */
     UnresolvedDependency = 1 << 4,
 
     /**
      * The plugin failed to load for other reason (e.g. linking failure).
      * Returned by @ref AbstractManager::load().
-     * @partialsupport Only static plugins are supported on
-     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
-     *      @ref CORRADE_TARGET_IOS "iOS" and
-     *      @ref CORRADE_TARGET_ANDROID "Android".
+     * @partialsupport Not available on platforms without
+     *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
      */
     LoadFailed = 1 << 5,
     #endif
@@ -136,58 +121,44 @@ enum class LoadState: unsigned short {
      * and @ref CORRADE_TARGET_ANDROID the value is equivalent to
      * @ref LoadState::Static.
      */
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     Loaded = (1 << 7) | LoadState::Static,
     #else
     Loaded = LoadState::Static,
     #endif
 
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     /**
      * The plugin is not loaded. Plugin can be unloaded only if is dynamic and
      * is not required by any other plugin. Returned by
      * @ref AbstractManager::loadState() and @ref AbstractManager::load().
-     * @partialsupport Only static plugins are supported on
-     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
-     *      @ref CORRADE_TARGET_IOS "iOS" and
-     *      @ref CORRADE_TARGET_ANDROID "Android".
+     * @partialsupport Not available on platforms without
+     *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
      */
     NotLoaded = 1 << 8,
 
     /**
      * The plugin failed to unload. Returned by @ref AbstractManager::unload().
-     * @partialsupport Only static plugins are supported on
-     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
-     *      @ref CORRADE_TARGET_IOS "iOS" and
-     *      @ref CORRADE_TARGET_ANDROID "Android".
+     * @partialsupport Not available on platforms without
+     *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
      */
     UnloadFailed = 1 << 9,
 
     /**
      * The plugin cannot be unloaded because another plugin is depending on it.
      * Unload that plugin first and try again. Returned by @ref AbstractManager::unload().
-     * @partialsupport Only static plugins are supported on
-     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
-     *      @ref CORRADE_TARGET_IOS "iOS" and
-     *      @ref CORRADE_TARGET_ANDROID "Android".
+     * @partialsupport Not available on platforms without
+     *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
      */
     Required = 1 << 10,
-    #endif
 
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
     /**
      * @ref AbstractManager::unload() returns this if the plugin has an active
      * instance and cannot be unloaded. Destroy all instances and try again.
      * @ref AbstractManager::load() returns this if loading a file path
      * directly and a plugin with the same name already exists.
-     * @partialsupport Only static plugins are supported on
-     *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-     *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
-     *      @ref CORRADE_TARGET_IOS "iOS" and
-     *      @ref CORRADE_TARGET_ANDROID "Android".
+     * @partialsupport Not available on platforms without
+     *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
      */
     Used = 1 << 11
     #endif
@@ -255,15 +226,12 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          */
         std::string pluginInterface() const;
 
-        #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+        #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         /**
          * @brief Plugin directory
          *
-         * @partialsupport Only static plugins are supported on
-         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
-         *      @ref CORRADE_TARGET_IOS "iOS" and
-         *      @ref CORRADE_TARGET_ANDROID "Android".
+         * @partialsupport Not available on platforms without
+         *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
          */
         std::string pluginDirectory() const;
 
@@ -273,11 +241,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * Keeps loaded plugins untouched, removes unloaded plugins which are
          * not existing anymore and adds newly found plugins. The directory is
          * expected to be in UTF-8.
-         * @partialsupport Only static plugins are supported on
-         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
-         *      @ref CORRADE_TARGET_IOS "iOS" and
-         *      @ref CORRADE_TARGET_ANDROID "Android".
+         * @partialsupport Not available on platforms without
+         *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
          */
         void setPluginDirectory(std::string directory);
 
@@ -285,11 +250,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * @brief Reload plugin directory
          *
          * Convenience equivalent to @cpp setPluginDirectory(pluginDirectory()) @ce.
-         * @partialsupport Only static plugins are supported on
-         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
-         *      @ref CORRADE_TARGET_IOS "iOS" and
-         *      @ref CORRADE_TARGET_ANDROID "Android".
+         * @partialsupport Not available on platforms without
+         *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
          */
         void reloadPluginDirectory();
         #endif
@@ -375,11 +337,10 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          *
          * @see @ref unload(), @ref loadState(), @ref Manager::instance(),
          *      @ref Manager::loadAndInstantiate()
-         * @partialsupport Only static plugins are supported on
-         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
-         *      @ref CORRADE_TARGET_IOS "iOS" and
-         *      @ref CORRADE_TARGET_ANDROID "Android".
+         * @partialsupport On platforms without
+         *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support"
+         *      returns always either @ref LoadState::Static or
+         *      @ref LoadState::NotFound.
          */
         LoadState load(const std::string& plugin);
 
@@ -388,16 +349,15 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          *
          * Returns @ref LoadState::NotLoaded if the plugin is not loaded or
          * unloading succeeded. For static plugins always returns
-         * @ref LoadState::Static. On failure returns
+         * @ref LoadState::Static. On failure returns @ref LoadState::NotFound,
          * @ref LoadState::UnloadFailed, @ref LoadState::Required or
          * @ref LoadState::Used.
          *
          * @see @ref load(), @ref loadState()
-         * @partialsupport Only static plugins are supported on
-         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
-         *      @ref CORRADE_TARGET_IOS "iOS" and
-         *      @ref CORRADE_TARGET_ANDROID "Android".
+         * @partialsupport On platforms without
+         *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support"
+         *      returns always either @ref LoadState::Static or
+         *      @ref LoadState::NotFound.
          */
         LoadState unload(const std::string& plugin);
 
@@ -420,13 +380,13 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         struct CORRADE_PLUGINMANAGER_LOCAL Plugin;
         struct CORRADE_PLUGINMANAGER_LOCAL GlobalPluginStorage;
 
-        #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+        #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         explicit AbstractManager(std::string pluginInterface, const std::vector<std::string>& pluginSearchPaths, std::string pluginDirectory);
         #else
         explicit AbstractManager(std::string pluginInterface);
         #endif
 
-        #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+        #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         std::string _pluginDirectory;
         #endif
 
@@ -459,7 +419,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         CORRADE_PLUGINMANAGER_LOCAL void registerInstance(const std::string& plugin, AbstractPlugin& instance, const PluginMetadata*& metadata);
         CORRADE_PLUGINMANAGER_LOCAL void unregisterInstance(const std::string& plugin, AbstractPlugin& instance);
 
-        #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+        #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         CORRADE_PLUGINMANAGER_LOCAL LoadState loadInternal(Plugin& plugin);
         CORRADE_PLUGINMANAGER_LOCAL LoadState loadInternal(Plugin& plugin, const std::string& filename);
         CORRADE_PLUGINMANAGER_LOCAL LoadState unloadInternal(Plugin& plugin);

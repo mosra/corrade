@@ -41,6 +41,10 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-new New features
 
+-   New @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT preprocessor
+    @cpp #define @ce and CMake variable for easier distinction of platforms
+    without dynamic plugin loading support
+
 @subsubsection corrade-changelog-latest-new-pluginmanager PluginManager library
 
 -   New @ref PluginManager::AbstractPlugin::pluginSearchPaths() interface

@@ -36,7 +36,7 @@
 #include "Corrade/PluginManager/visibility.h"
 #include "Corrade/Utility/Utility.h"
 
-#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 #include <vector>
 #endif
 
@@ -88,7 +88,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
     template<class> friend class AbstractManagingPlugin;
 
     public:
-        #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+        #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         /**
          * @brief Plugin search paths
          *
@@ -98,11 +98,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * entries have more priority than later, search stops once an existing
          * directory is found. By default this function returns an empty list.
          * See also @ref PluginManager-Manager-paths for more information.
-         * @partialsupport Only static plugins are supported on
-         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
-         *      @ref CORRADE_TARGET_IOS "iOS" and
-         *      @ref CORRADE_TARGET_ANDROID "Android".
+         * @partialsupport Not available on platforms without
+         *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
          */
         static std::vector<std::string> pluginSearchPaths();
         #endif

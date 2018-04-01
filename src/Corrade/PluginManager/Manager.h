@@ -110,15 +110,12 @@ template<class T> class Manager: public AbstractManager {
          *      should have all dependencies present. Also, dynamic plugins
          *      with the same name as another static plugin are skipped.
          * @see @ref pluginList()
-         * @partialsupport Parameter @p pluginDirectory has no effect on
-         *      @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
-         *      @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
-         *      @ref CORRADE_TARGET_IOS "iOS" and
-         *      @ref CORRADE_TARGET_ANDROID "Android" as only static plugins
-         *      are supported.
+         * @partialsupport The @p pluginDirectory parameter has no effect on
+         *      platforms without
+         *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
          */
         explicit Manager(std::string pluginDirectory = {}):
-            #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+            #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
             AbstractManager{T::pluginInterface(), T::pluginSearchPaths(), std::move(pluginDirectory)} {}
             #else
             AbstractManager{T::pluginInterface()} { static_cast<void>(pluginDirectory); }

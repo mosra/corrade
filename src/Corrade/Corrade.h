@@ -185,6 +185,17 @@ doesn't know about yet.
 #undef CORRADE_TARGET_ARM
 
 /**
+@brief PluginManager doesn't have dynamic plugin support on this platform
+
+Defined if the @ref Corrade::PluginManager "PluginManager" library doesn't
+support dynamic plugin loading due to platform limitations. Defined on
+@ref CORRADE_TARGET_EMSCRIPTEN "Emscripten", @ref CORRADE_TARGET_WINDOWS_RT "Windows RT",
+@ref CORRADE_TARGET_IOS "iOS" and @ref CORRADE_TARGET_ANDROID "Android".
+*/
+#define CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+#undef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+
+/**
 @brief Target XCTest with TestSuite
 
 Defined if the @ref Corrade::TestSuite "TestSuite" library is targeting Xcode

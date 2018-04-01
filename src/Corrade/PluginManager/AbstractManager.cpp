@@ -70,7 +70,7 @@ struct AbstractManager::StaticPlugin  {
 };
 
 struct AbstractManager::Plugin {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     LoadState loadState;
     #else
     const LoadState loadState; /* Always LoadState::Static */
@@ -85,7 +85,7 @@ struct AbstractManager::Plugin {
     Instancer instancer;
     void(*finalizer)();
 
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     union {
         /* For static plugins */
         StaticPlugin* staticPlugin;
@@ -101,7 +101,7 @@ struct AbstractManager::Plugin {
     StaticPlugin* staticPlugin;
     #endif
 
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     /* Constructor for dynamic plugins */
     explicit Plugin(std::string name, const std::string& metadata, AbstractManager* manager);
     #endif
@@ -170,7 +170,7 @@ void AbstractManager::importStaticPlugin(std::string plugin, int _version, std::
 }
 #endif
 
-#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 AbstractManager::AbstractManager(std::string pluginInterface, const std::vector<std::string>& pluginSearchPaths, std::string pluginDirectory):
 #else
 AbstractManager::AbstractManager(std::string pluginInterface):
@@ -207,7 +207,7 @@ AbstractManager::AbstractManager(std::string pluginInterface):
         }
     }
 
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     /* If plugin directory is set, use it, otherwise loop through */
     if(!pluginDirectory.empty()) setPluginDirectory(std::move(pluginDirectory));
     else {
@@ -242,7 +242,7 @@ AbstractManager::~AbstractManager() {
             continue;
         }
 
-        #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+        #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         /* Try to unload the plugin (and all plugins that depend on it) */
         const LoadState loadState = unloadRecursiveInternal(*it->second);
 
@@ -262,7 +262,7 @@ AbstractManager::~AbstractManager() {
     }
 }
 
-#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 LoadState AbstractManager::unloadRecursive(const std::string& plugin) {
     const auto found = _plugins.plugins.find(plugin);
     CORRADE_INTERNAL_ASSERT(found != _plugins.plugins.end());
@@ -395,7 +395,7 @@ LoadState AbstractManager::loadState(const std::string& plugin) const {
 }
 
 LoadState AbstractManager::load(const std::string& plugin) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     /* File path passed, load directly */
     if(Utility::String::endsWith(plugin, PLUGIN_FILENAME_SUFFIX)) {
         /* Dig plugin name from filename and verify it's not loaded at the moment */
@@ -441,7 +441,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
 
     auto found = _aliases.find(plugin);
     if(found != _aliases.end()) {
-        #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+        #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         return loadInternal(found->second);
         #else
         return found->second.loadState;
@@ -449,7 +449,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
     }
 
     Error() << "PluginManager::Manager::load(): plugin" << plugin
-        #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+        #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         << "is not static and was not found in" << _pluginDirectory;
         #else
         << "was not found";
@@ -457,7 +457,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
     return LoadState::NotFound;
 }
 
-#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 LoadState AbstractManager::loadInternal(Plugin& plugin) {
     return loadInternal(plugin, Directory::join(_pluginDirectory, plugin.metadata._name + PLUGIN_FILENAME_SUFFIX));
 }
@@ -594,7 +594,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
 LoadState AbstractManager::unload(const std::string& plugin) {
     auto found = _aliases.find(plugin);
     if(found != _aliases.end()) {
-        #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+        #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         return unloadInternal(found->second);
         #else
         return found->second.loadState;
@@ -605,7 +605,7 @@ LoadState AbstractManager::unload(const std::string& plugin) {
     return LoadState::NotFound;
 }
 
-#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 LoadState AbstractManager::unloadInternal(Plugin& plugin) {
     /* Plugin is not ready to unload, nothing to do */
     if(plugin.loadState != LoadState::Loaded) {
@@ -764,7 +764,7 @@ void* AbstractManager::loadAndInstantiateInternal(const std::string& plugin) {
     return found->second.instancer(*this, plugin);
 }
 
-#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 AbstractManager::Plugin::Plugin(std::string name, const std::string& metadata, AbstractManager* manager): configuration{metadata, Utility::Configuration::Flag::ReadOnly}, metadata{std::move(name), configuration}, manager{manager}, instancer{nullptr}, module{nullptr} {
     loadState = configuration.isValid() ? LoadState::NotLoaded : LoadState::WrongMetadataFile;
 }
@@ -773,7 +773,7 @@ AbstractManager::Plugin::Plugin(std::string name, const std::string& metadata, A
 AbstractManager::Plugin::Plugin(std::string name, std::istream& metadata, StaticPlugin* staticPlugin): loadState{LoadState::Static}, configuration{metadata, Utility::Configuration::Flag::ReadOnly}, metadata{std::move(name), configuration}, manager{nullptr}, instancer{staticPlugin->instancer}, staticPlugin{staticPlugin} {}
 
 AbstractManager::Plugin::~Plugin() {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     if(loadState == LoadState::Static)
     #endif
         delete staticPlugin;
@@ -785,7 +785,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, PluginManager::LoadState value
         /* LCOV_EXCL_START */
         #define ls(state) case PluginManager::LoadState::state: return debug << "PluginManager::LoadState::" #state;
         ls(NotFound)
-        #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+        #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         ls(WrongPluginVersion)
         ls(WrongInterfaceVersion)
         ls(WrongMetadataFile)
@@ -797,7 +797,7 @@ Utility::Debug& operator<<(Utility::Debug& debug, PluginManager::LoadState value
         ls(Required)
         #endif
         ls(Static)
-        #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+        #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         ls(Used)
         #endif
         #undef ls

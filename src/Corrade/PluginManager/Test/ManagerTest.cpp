@@ -39,7 +39,7 @@
 
 #include "Corrade/PluginManager/configure.h"
 
-#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 #include "configure.h"
 #endif
 
@@ -53,14 +53,14 @@ struct ManagerTest: TestSuite::Tester {
     explicit ManagerTest();
 
     void pluginSearchPathsNotUsed();
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     void pluginSearchPathsNotProvided();
     void pluginSearchPathsNotFound();
     #endif
 
     void nameList();
 
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     void wrongMetadataFile();
     void unresolvedReference();
     void noPluginVersion();
@@ -77,7 +77,7 @@ struct ManagerTest: TestSuite::Tester {
     void unloadNonexistent();
 
     void staticPlugin();
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     void dynamicPlugin();
     void dynamicPluginLoadAndInstantiate();
     void dynamicPluginFilePath();
@@ -86,12 +86,12 @@ struct ManagerTest: TestSuite::Tester {
     void dynamicPluginFilePathRemoveOnFail();
     #endif
     void staticPluginInitFini();
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     void dynamicPluginInitFini();
     #endif
 
     void configuration();
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     void configurationImplicit();
     #endif
     void deletable();
@@ -103,7 +103,7 @@ struct ManagerTest: TestSuite::Tester {
     void reloadPluginDirectory();
 
     void staticProvides();
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     void dynamicProvides();
     void dynamicProvidesDependency();
     void setPreferredPlugins();
@@ -112,7 +112,7 @@ struct ManagerTest: TestSuite::Tester {
     void setPreferredPluginsOverridePrimaryPlugin();
     #endif
 
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     void utf8Path();
     #endif
 
@@ -121,14 +121,14 @@ struct ManagerTest: TestSuite::Tester {
 
 ManagerTest::ManagerTest() {
     addTests({&ManagerTest::pluginSearchPathsNotUsed,
-              #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+              #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
               &ManagerTest::pluginSearchPathsNotProvided,
               &ManagerTest::pluginSearchPathsNotFound,
               #endif
 
               &ManagerTest::nameList,
 
-              #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+              #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
               &ManagerTest::wrongMetadataFile,
               &ManagerTest::unresolvedReference,
               &ManagerTest::noPluginVersion,
@@ -145,7 +145,7 @@ ManagerTest::ManagerTest() {
               &ManagerTest::unloadNonexistent,
 
               &ManagerTest::staticPlugin,
-              #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+              #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
               &ManagerTest::dynamicPlugin,
               &ManagerTest::dynamicPluginLoadAndInstantiate,
               &ManagerTest::dynamicPluginFilePath,
@@ -154,12 +154,12 @@ ManagerTest::ManagerTest() {
               &ManagerTest::dynamicPluginFilePathRemoveOnFail,
               #endif
               &ManagerTest::staticPluginInitFini,
-              #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+              #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
               &ManagerTest::dynamicPluginInitFini,
               #endif
 
               &ManagerTest::configuration,
-              #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+              #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
               &ManagerTest::configurationImplicit,
               #endif
               &ManagerTest::deletable,
@@ -170,7 +170,7 @@ ManagerTest::ManagerTest() {
               &ManagerTest::reloadPluginDirectory,
 
               &ManagerTest::staticProvides,
-              #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+              #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
               &ManagerTest::dynamicProvides,
               &ManagerTest::dynamicProvidesDependency,
               &ManagerTest::setPreferredPlugins,
@@ -179,7 +179,7 @@ ManagerTest::ManagerTest() {
               &ManagerTest::setPreferredPluginsOverridePrimaryPlugin,
               #endif
 
-              #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+              #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
               &ManagerTest::utf8Path,
               #endif
 
@@ -202,7 +202,7 @@ void ManagerTest::pluginSearchPathsNotUsed() {
     CORRADE_COMPARE(out.str(), "");
 }
 
-#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 void ManagerTest::pluginSearchPathsNotProvided() {
     struct SomePlugin: AbstractPlugin {
         static std::string pluginInterface() { return {}; }
@@ -237,7 +237,7 @@ void ManagerTest::pluginSearchPathsNotFound() {
 #endif
 
 void ManagerTest::nameList() {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     {
         PluginManager::Manager<AbstractAnimal> manager;
 
@@ -258,7 +258,7 @@ void ManagerTest::nameList() {
             "Canary", "JustSomeBird"}), TestSuite::Compare::Container);
     }
 
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     /* Check that explicitly specifying the same plugin path does the same */
     {
         PluginManager::Manager<AbstractAnimal> manager{PLUGINS_DIR};
@@ -271,7 +271,7 @@ void ManagerTest::nameList() {
     #endif
 }
 
-#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 namespace {
 
 struct WrongPlugin: AbstractPlugin {
@@ -437,7 +437,7 @@ void ManagerTest::staticPlugin() {
     CORRADE_COMPARE(manager.unload("Canary"), LoadState::Static);
 }
 
-#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 void ManagerTest::dynamicPlugin() {
     PluginManager::Manager<AbstractAnimal> manager;
 
@@ -580,7 +580,7 @@ void ManagerTest::staticPluginInitFini() {
     CORRADE_COMPARE(out.str(), "Canary finalized\n");
 }
 
-#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 void ManagerTest::dynamicPluginInitFini() {
     std::ostringstream out;
     Debug redirectDebug{&out};
@@ -618,7 +618,7 @@ void ManagerTest::configuration() {
     CORRADE_COMPARE(animal2->name(), "Achoo");
 }
 
-#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 void ManagerTest::configurationImplicit() {
     PluginManager::Manager<AbstractAnimal> manager;
 
@@ -636,7 +636,7 @@ void ManagerTest::configurationImplicit() {
 #endif
 
 void ManagerTest::deletable() {
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
+    #ifdef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     CORRADE_SKIP("Can't test because static plugins can't be unloaded");
     #else
     PluginManager::Manager<AbstractDeletable> deletableManager;
@@ -659,7 +659,7 @@ void ManagerTest::deletable() {
 }
 
 void ManagerTest::hierarchy() {
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
+    #ifdef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     CORRADE_SKIP("Dependency hierarchy is meaningful only for dynamic plugins");
     #else
     PluginManager::Manager<AbstractAnimal> manager;
@@ -693,7 +693,7 @@ void ManagerTest::hierarchy() {
 }
 
 void ManagerTest::destructionHierarchy() {
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
+    #ifdef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     CORRADE_SKIP("Dependency hierarchy is meaningful only for dynamic plugins");
     #else
     /* Dog needs to be ordered first in the map for this test case to work.
@@ -716,7 +716,7 @@ void ManagerTest::crossManagerDependencies() {
     PluginManager::Manager<AbstractAnimal> manager;
     PluginManager::Manager<AbstractFood> foodManager;
 
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
+    #ifdef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     CORRADE_SKIP("Cross-manager dependencies are meaningful only for dynamic plugins");
     #else
     /* Load HotDog */
@@ -754,7 +754,7 @@ void ManagerTest::crossManagerDependencies() {
 }
 
 void ManagerTest::unresolvedDependencies() {
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
+    #ifdef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     CORRADE_SKIP("UsedBy list is irrelevant for static plugins");
     #else
     PluginManager::Manager<AbstractAnimal> manager;
@@ -777,7 +777,7 @@ void ManagerTest::unresolvedDependencies() {
 }
 
 void ManagerTest::reloadPluginDirectory() {
-    #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
+    #ifdef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     CORRADE_SKIP("Plugin directory is irrelevant for static plugins");
     #else
     PluginManager::Manager<AbstractAnimal> manager;
@@ -847,7 +847,7 @@ void ManagerTest::staticProvides() {
     CORRADE_COMPARE(animal->metadata()->name(), "Canary");
 }
 
-#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_WINDOWS_RT) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 void ManagerTest::dynamicProvides() {
     PluginManager::Manager<AbstractAnimal> manager;
 
