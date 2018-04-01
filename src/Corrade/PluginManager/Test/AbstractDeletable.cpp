@@ -25,9 +25,11 @@
 
 #include "AbstractDeletable.h"
 
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 #include "Corrade/Utility/Directory.h"
 
 #include "configure.h"
+#endif
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
@@ -35,9 +37,11 @@ std::string AbstractDeletable::pluginInterface() {
     return "cz.mosra.corrade.PluginManager.Test.AbstractDeletable/1.0";
 }
 
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 std::vector<std::string> AbstractDeletable::pluginSearchPaths() {
     return {Utility::Directory::join(PLUGINS_DIR, "deletable")};
 }
+#endif
 
 }}}
 

@@ -23,8 +23,10 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
-               ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
+if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
+                   ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
+endif()
 
 set(CorradePluginManager_SRCS
     AbstractPlugin.cpp

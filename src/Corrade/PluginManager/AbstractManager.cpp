@@ -35,15 +35,15 @@
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Debug.h"
-#include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/Configuration.h"
 #include "Corrade/Utility/String.h"
 
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+#include "Corrade/Utility/Directory.h"
+
 #ifndef CORRADE_TARGET_WINDOWS
-#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_IOS) && !defined(CORRADE_TARGET_ANDROID)
 #include <dlfcn.h>
-#endif
-#elif !defined(CORRADE_TARGET_WINDOWS_RT)
+#else
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN /* Otherwise `#define interface struct` breaks everything */
 #endif
@@ -55,7 +55,8 @@
 using Corrade::Utility::Unicode::widen;
 #endif
 
-#include "configure.h"
+#include "Corrade/PluginManager/configure.h"
+#endif
 
 using namespace Corrade::Utility;
 
@@ -749,17 +750,18 @@ void* AbstractManager::instantiateInternal(const std::string& plugin) {
 void* AbstractManager::loadAndInstantiateInternal(const std::string& plugin) {
     if(!(load(plugin) & LoadState::Loaded)) return nullptr;
 
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     /* If file path passed, instantiate extracted name instead */
-    std::map<std::string, Plugin&>::iterator found;
     if(Utility::String::endsWith(plugin, PLUGIN_FILENAME_SUFFIX)) {
         const std::string filename = Utility::Directory::filename(plugin);
         const std::string name = filename.substr(0, filename.length() - sizeof(PLUGIN_FILENAME_SUFFIX) + 1);
-        found = _aliases.find(name);
+        auto found = _aliases.find(name);
         CORRADE_INTERNAL_ASSERT(found != _aliases.end());
         return found->second.instancer(*this, name);
     }
+    #endif
 
-    found = _aliases.find(plugin);
+    auto found = _aliases.find(plugin);
     CORRADE_INTERNAL_ASSERT(found != _aliases.end());
     return found->second.instancer(*this, plugin);
 }

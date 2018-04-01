@@ -37,9 +37,9 @@
 #include "AbstractFood.h"
 #include "AbstractDeletable.h"
 
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 #include "Corrade/PluginManager/configure.h"
 
-#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 #include "configure.h"
 #endif
 

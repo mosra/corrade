@@ -25,9 +25,11 @@
 
 #include "AbstractAnimal.h"
 
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 #include "Corrade/Utility/Directory.h"
 
 #include "configure.h"
+#endif
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
@@ -35,8 +37,10 @@ std::string AbstractAnimal::pluginInterface() {
     return "cz.mosra.corrade.PluginManager.Test.AbstractAnimal/1.0";
 }
 
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 std::vector<std::string> AbstractAnimal::pluginSearchPaths() {
     return {PLUGINS_DIR};
 }
+#endif
 
 }}}
