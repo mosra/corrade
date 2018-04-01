@@ -224,11 +224,12 @@ AbstractManager::AbstractManager(std::string pluginInterface):
             break;
         }
 
-        /* If no hardcoded path exists, plugin directory is "", i.e. the same
-           as what the user set. That's probably not wanted, so give a heads up
-           warning. */
+        /* If no hardcoded path exists and plugin directory is "", disable
+           plugin discovery as searching in the current directory would almost
+           never be what the user wants -- e.g., it would treat
+           CorradeUtility.dll as a plugin. */
         if(_pluginDirectory.empty())
-            Warning{} << "PluginManager::Manager::Manager(): none of the plugin search paths in" << pluginSearchPaths << "exists and pluginDirectory was not set, falling back to current working directory";
+            Warning{} << "PluginManager::Manager::Manager(): none of the plugin search paths in" << pluginSearchPaths << "exists and pluginDirectory was not set, skipping plugin discovery";
     }
     #endif
 }
