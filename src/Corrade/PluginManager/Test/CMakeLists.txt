@@ -40,6 +40,7 @@ if(NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET_WINDOWS_RT AND NOT CORRA
         PitBull PitBull-metadata
         PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
+    set(PLUGINS_DIR $<TARGET_FILE_DIR:PluginManagerManagerTest>)
     set(DOG_PLUGIN_FILENAME $<TARGET_FILE:Dog>)
     set(PITBULL_PLUGIN_FILENAME $<TARGET_FILE:PitBull>)
 
