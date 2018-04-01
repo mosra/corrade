@@ -27,5 +27,5 @@ corrade_add_plugin(Deletable ${CMAKE_CURRENT_BINARY_DIR} "" Deletable.conf Delet
 set_target_properties(Deletable Deletable-metadata PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
 if(CORRADE_TARGET_WINDOWS)
-    target_link_libraries(Deletable CorradePluginManagerTestLib)
+    target_link_libraries(Deletable PRIVATE CorradePluginManagerTestLib)
 endif()

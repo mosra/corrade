@@ -36,8 +36,8 @@ set_target_properties(
     PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
 if(CORRADE_TARGET_WINDOWS)
-    target_link_libraries(HotDog CorradePluginManagerTestLib Dog)
-    target_link_libraries(HotDogWithSnail CorradePluginManagerTestLib HotDog)
-    target_link_libraries(OldBread CorradePluginManagerTestLib)
-    target_link_libraries(RottenTomato CorradePluginManagerTestLib)
+    target_link_libraries(HotDog PUBLIC Dog)
+    target_link_libraries(HotDogWithSnail PRIVATE HotDog)
+    target_link_libraries(OldBread PRIVATE CorradePluginManagerTestLib)
+    target_link_libraries(RottenTomato PRIVATE CorradePluginManagerTestLib)
 endif()
