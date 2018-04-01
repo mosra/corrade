@@ -185,6 +185,17 @@ doesn't know about yet.
 #undef CORRADE_TARGET_ARM
 
 /**
+@brief Target XCTest with TestSuite
+
+Defined if the @ref Corrade::TestSuite "TestSuite" library is targeting Xcode
+XCTest. Available only on Apple platforms. Enabled using `TESTSUITE_TARGET_XCTEST`
+CMake option when building Corrade.
+@see @ref CORRADE_TARGET_APPLE, @ref building-corrade, @ref corrade-cmake
+*/
+#define CORRADE_TESTSUITE_TARGET_XCTEST
+#undef CORRADE_TESTSUITE_TARGET_XCTEST
+
+/**
 @brief Use ANSI escape sequences for colored Debug output on Windows
 
 By default colored output using @ref Corrade::Utility::Debug "Utility::Debug"
@@ -197,17 +208,6 @@ building Corrade.
 */
 #define CORRADE_UTILITY_USE_ANSI_COLORS
 #undef CORRADE_UTILITY_USE_ANSI_COLORS
-
-/**
-@brief Target XCTest with TestSuite
-
-Defined if the @ref Corrade::TestSuite "TestSuite" library is targeting Xcode
-XCTest. Available only on Apple platforms. Enabled using `TESTSUITE_TARGET_XCTEST`
-CMake option when building Corrade.
-@see @ref CORRADE_TARGET_APPLE, @ref building-corrade, @ref corrade-cmake
-*/
-#define CORRADE_TESTSUITE_TARGET_XCTEST
-#undef CORRADE_TESTSUITE_TARGET_XCTEST
 #endif
 
 }
