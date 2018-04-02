@@ -184,7 +184,7 @@ Containers::ArrayView<const char> Configuration::parse(Containers::ArrayView<con
             if(buffer[buffer.size()-1] != ']')
                 throw std::string("missing closing bracket for group header");
 
-            std::string nextGroup = String::trim(buffer.substr(1, buffer.size()-2));
+            const std::string nextGroup = String::trim(buffer.substr(1, buffer.size()-2));
 
             if(nextGroup.empty())
                 throw std::string("empty group name");
