@@ -102,8 +102,9 @@ namespace is used --- which is practically useless
     @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE()
 */
 #ifdef __clang__
-/* Clang warns that this is a C++14 extension, disabling that so it's usable in C++11 */
-#define CORRADE_DEPRECATED_NAMESPACE(message) _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wc++14-extensions\"") [[deprecated(message)]] _Pragma("GCC diagnostic pop")
+/* Clang < 6.0 warns that this is a C++14 extension, Clang 6.0 warns that this
+   is a C++17 extension. Disabling both so it's usable in C++11. */
+#define CORRADE_DEPRECATED_NAMESPACE(message) _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wc++14-extensions\"") _Pragma("GCC diagnostic ignored \"-Wc++17-extensions\"") [[deprecated(message)]] _Pragma("GCC diagnostic pop")
 #elif defined(_MSC_VER)
 #define CORRADE_DEPRECATED_NAMESPACE(message) [[deprecated(message)]]
 #else
