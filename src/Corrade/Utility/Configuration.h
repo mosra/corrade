@@ -287,8 +287,8 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
 
         CORRADE_ENUMSET_FRIEND_OPERATORS(InternalFlags)
 
-        CORRADE_UTILITY_LOCAL bool parse(std::istream& in);
-        CORRADE_UTILITY_LOCAL std::string parse(std::istream& in, ConfigurationGroup* group, const std::string& fullPath);
+        CORRADE_UTILITY_LOCAL bool parse(Containers::ArrayView<const char> in);
+        CORRADE_UTILITY_LOCAL Containers::ArrayView<const char> parse(Containers::ArrayView<const char> in, ConfigurationGroup* group, const std::string& fullPath);
         CORRADE_UTILITY_LOCAL void save(std::ostream& out, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const;
 
         CORRADE_UTILITY_LOCAL void setConfigurationPointer(ConfigurationGroup* group);

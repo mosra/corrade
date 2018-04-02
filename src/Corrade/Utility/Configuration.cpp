@@ -25,10 +25,12 @@
 
 #include "Configuration.h"
 
+#include <algorithm>
 #include <sstream>
 #include <utility>
 #include <vector>
 
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Directory.h"
@@ -48,13 +50,9 @@ Configuration::Configuration(const std::string& filename, const Flags flags): Co
         return;
     }
 
-    /* Read full contents of a file and then pass it via stringstream to the
-       parser. Doing it this way to avoid Unicode filename issues on Windows. */
-    /** @todo get rid of streams altogether */
     if(!Directory::fileExists(filename))
         Error() << "Utility::Configuration::Configuration(): cannot open file" << filename;
-    std::istringstream in{Directory::readString(filename)};
-    if(parse(in)) return;
+    if(parse(Directory::read(filename))) return;
 
     /* Error, reset everything back */
     _filename = {};
@@ -68,7 +66,9 @@ Configuration::Configuration(std::istream& in, const Flags flags): Configuration
         return;
     }
 
-    if(parse(in)) _flags |= InternalFlag::IsValid;
+    /** @todo deprecate and remove completely */
+    const std::string data{std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>()};
+    if(parse({data.data(), data.size()})) _flags |= InternalFlag::IsValid;
 }
 
 Configuration::Configuration(Configuration&& other): ConfigurationGroup{std::move(other)}, _filename{std::move(other._filename)}, _flags{other._flags} {
@@ -105,18 +105,12 @@ namespace {
     constexpr const char Bom[] = "\xEF\xBB\xBF";
 }
 
-bool Configuration::parse(std::istream& in) {
+bool Configuration::parse(Containers::ArrayView<const char> in) {
     try {
-        /* It looks like BOM */
-        if(in.peek() == Bom[0]) {
-            char bom[4];
-            in.get(bom, 4);
-
-            /* This is not a BOM, rewind back */
-            if(bom[0] != Bom[0] || bom[1] != Bom[1] || bom[2] != Bom[2]) in.seekg(0);
-
-            /* Or set flag */
-            else _flags |= InternalFlag::HasBom;
+        /* Oh, BOM, eww */
+        if(in.size() >= 3 && in[0] == Bom[0] && in[1] == Bom[1] && in[2] == Bom[2]) {
+            _flags |= InternalFlag::HasBom;
+            in = in.suffix(3);
         }
 
         /* Parse file */
@@ -131,13 +125,20 @@ bool Configuration::parse(std::istream& in) {
     return true;
 }
 
-std::string Configuration::parse(std::istream& in, ConfigurationGroup* group, const std::string& fullPath) {
+Containers::ArrayView<const char> Configuration::parse(Containers::ArrayView<const char> in, ConfigurationGroup* group, const std::string& fullPath) {
+    CORRADE_INTERNAL_ASSERT(fullPath.empty() || String::endsWith(fullPath, '/'));
+
     std::string buffer;
 
     /* Parse file */
     bool multiLineValue = false;
-    while(in.good()) {
-        std::getline(in, buffer);
+    while(!in.empty()) {
+        const Containers::ArrayView<const char> currentLine = in;
+
+        /* Extract the line and ignore the newline character after it, if any */
+        const char* end = std::find(in.begin(), in.end(), '\n');
+        buffer.assign(in.begin(), end);
+        in = in.suffix(end == in.end() ? end : end + 1);
 
         /* Windows EOL */
         if(!buffer.empty() && buffer.back() == '\r')
@@ -173,7 +174,8 @@ std::string Configuration::parse(std::istream& in, ConfigurationGroup* group, co
         if(buffer.empty()) {
             if(_flags & InternalFlag::SkipComments) continue;
 
-            group->_values.emplace_back();
+            /* Save it only if this is not the last one */
+            if(in) group->_values.emplace_back();
 
         /* Group header */
         } else if(buffer[0] == '[') {
@@ -187,8 +189,8 @@ std::string Configuration::parse(std::istream& in, ConfigurationGroup* group, co
             if(nextGroup.empty())
                 throw std::string("empty group name");
 
-            /* Next group is subgroup of current group, recursive call */
-            while(!nextGroup.empty() && String::beginsWith(nextGroup, fullPath)) {
+            /* This is a subgroup of this one, parse recursively */
+            if(String::beginsWith(nextGroup, fullPath)) {
                 ConfigurationGroup::Group g;
                 g.name = nextGroup.substr(fullPath.size());
                 g.group = new ConfigurationGroup(_configuration);
@@ -196,10 +198,11 @@ std::string Configuration::parse(std::istream& in, ConfigurationGroup* group, co
                    could throw an exception and the group would otherwise be
                    leaked */
                 group->_groups.push_back(std::move(g));
-                nextGroup = parse(in, g.group, nextGroup+'/');
-            }
+                in = parse(in, g.group, nextGroup + '/');
 
-            return nextGroup;
+            /* Otherwise it's a subgroup of some parent, return the control
+               back to caller (again with this line) */
+            } else return currentLine;
 
         /* Comment */
         } else if(buffer[0] == '#' || buffer[0] == ';') {
@@ -237,12 +240,8 @@ std::string Configuration::parse(std::istream& in, ConfigurationGroup* group, co
         }
     }
 
-    /* Remove last empty line, if present (will be written automatically) */
-    if(!group->_values.empty() && group->_values.back().key.empty() && group->_values.back().value.empty())
-        group->_values.pop_back();
-
     /* This was the last group */
-    return {};
+    return in;
 }
 
 bool Configuration::save(const std::string& filename) {
