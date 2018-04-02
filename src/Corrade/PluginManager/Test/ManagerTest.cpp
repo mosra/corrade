@@ -300,7 +300,7 @@ void ManagerTest::wrongMetadataFile() {
     CORRADE_COMPARE(manager.loadState("Snail"), LoadState::WrongMetadataFile);
     CORRADE_COMPARE(manager.load("Snail"), LoadState::WrongMetadataFile);
     CORRADE_COMPARE(out.str(),
-        "Utility::Configuration::Configuration(): key/value pair without '=' character\n"
+        "Utility::Configuration::Configuration(): missing equals for a value\n"
         "PluginManager::Manager::load(): plugin Snail is not ready to load: PluginManager::LoadState::WrongMetadataFile\n");
 }
 

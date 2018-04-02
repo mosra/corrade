@@ -42,6 +42,7 @@ corrade_add_test(UtilityMurmurHash2Test MurmurHash2Test.cpp)
 corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp
     LIBRARIES CorradeUtilityTestLib
     FILES
+        ConfigurationTestFiles/bom.conf
         ConfigurationTestFiles/comments.conf
         ConfigurationTestFiles/comments-saved.conf
         ConfigurationTestFiles/eol-mixed.conf
@@ -50,11 +51,14 @@ corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp
         ConfigurationTestFiles/hierarchic.conf
         ConfigurationTestFiles/hierarchic-empty-group.conf
         ConfigurationTestFiles/hierarchic-empty-subgroup.conf
+        ConfigurationTestFiles/hierarchic-missing-bracket.conf
         ConfigurationTestFiles/hierarchic-modified.conf
         ConfigurationTestFiles/hierarchic-shortcuts.conf
         ConfigurationTestFiles/hierarchic-shortcuts-modified.conf
         ConfigurationTestFiles/hýždě.conf
-        ConfigurationTestFiles/invalid.conf
+        ConfigurationTestFiles/missing-equals.conf
+        ConfigurationTestFiles/missing-quote.conf
+        ConfigurationTestFiles/missing-multiline-quote.conf
         ConfigurationTestFiles/multiLine.conf
         ConfigurationTestFiles/multiLine-crlf.conf
         ConfigurationTestFiles/multiLine-crlf-saved.conf

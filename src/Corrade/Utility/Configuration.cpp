@@ -180,7 +180,7 @@ Containers::ArrayView<const char> Configuration::parse(Containers::ArrayView<con
 
             /* Check ending bracket */
             if(buffer[buffer.size()-1] != ']')
-                throw std::string("missing closing bracket for group header");
+                throw std::string("missing closing bracket for a group header");
 
             const std::string nextGroup = String::trim(buffer.substr(1, buffer.size()-2));
 
@@ -234,7 +234,7 @@ Containers::ArrayView<const char> Configuration::parse(Containers::ArrayView<con
         } else {
             const std::size_t splitter = buffer.find_first_of('=');
             if(splitter == std::string::npos)
-                throw std::string("key/value pair without '=' character");
+                throw std::string("missing equals for a value");
 
             ConfigurationGroup::Value item;
             item.key = String::trim(buffer.substr(0, splitter));
@@ -249,7 +249,7 @@ Containers::ArrayView<const char> Configuration::parse(Containers::ArrayView<con
             /** @todo Check `"` characters better */
             } else if(!item.value.empty() && item.value[0] == '"') {
                 if(item.value.size() < 2 || item.value[item.value.size()-1] != '"')
-                    throw std::string("missing closing quotes in value");
+                    throw std::string("missing closing quote for a value");
 
                 item.value = item.value.substr(1, item.value.size()-2);
             }
@@ -257,6 +257,9 @@ Containers::ArrayView<const char> Configuration::parse(Containers::ArrayView<con
             group->_values.push_back(item);
         }
     }
+
+    if(multiLineValue)
+        throw std::string{"missing closing quotes for a multi-line value"};
 
     /* This was the last group */
     return in;

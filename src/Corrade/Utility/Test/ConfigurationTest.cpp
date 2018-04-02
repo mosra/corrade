@@ -43,10 +43,14 @@ struct ConfigurationTest: TestSuite::Tester {
     explicit ConfigurationTest();
 
     void parse();
+    void parseMissingEquals();
+    void parseMissingQuote();
+    void parseMissingMultiLineQuote();
     void parseHierarchic();
     void parseHierarchicShortcuts();
     void parseHierarchicEmptyGroup();
     void parseHierarchicEmptySubgroup();
+    void parseHierarchicMissingBracket();
     void utf8Filename();
 
     void groupIndex();
@@ -60,6 +64,7 @@ struct ConfigurationTest: TestSuite::Tester {
     void truncate();
 
     void whitespaces();
+    void bom();
     void eol();
     void stripComments();
 
@@ -73,10 +78,14 @@ struct ConfigurationTest: TestSuite::Tester {
 
 ConfigurationTest::ConfigurationTest() {
     addTests({&ConfigurationTest::parse,
+              &ConfigurationTest::parseMissingEquals,
+              &ConfigurationTest::parseMissingQuote,
+              &ConfigurationTest::parseMissingMultiLineQuote,
               &ConfigurationTest::parseHierarchic,
               &ConfigurationTest::parseHierarchicShortcuts,
               &ConfigurationTest::parseHierarchicEmptyGroup,
               &ConfigurationTest::parseHierarchicEmptySubgroup,
+              &ConfigurationTest::parseHierarchicMissingBracket,
               &ConfigurationTest::utf8Filename,
 
               &ConfigurationTest::groupIndex,
@@ -84,12 +93,12 @@ ConfigurationTest::ConfigurationTest() {
 
               &ConfigurationTest::names,
 
-              &ConfigurationTest::invalid,
               &ConfigurationTest::readonly,
               &ConfigurationTest::nonexistentFile,
               &ConfigurationTest::truncate,
 
               &ConfigurationTest::whitespaces,
+              &ConfigurationTest::bom,
               &ConfigurationTest::eol,
               &ConfigurationTest::stripComments,
 
@@ -161,6 +170,42 @@ void ConfigurationTest::parse() {
     CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "parse.conf"),
                        Directory::join(CONFIGURATION_TEST_DIR, "parse-modified.conf"),
                        TestSuite::Compare::File);
+}
+
+void ConfigurationTest::parseMissingEquals() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "missing-equals.conf"));
+
+    /* Nothing remains, filename is empty and valid bit is not set */
+    CORRADE_VERIFY(!conf.isValid());
+    CORRADE_VERIFY(conf.isEmpty());
+    CORRADE_VERIFY(conf.filename().empty());
+    CORRADE_COMPARE(out.str(), "Utility::Configuration::Configuration(): missing equals for a value\n");
+}
+
+void ConfigurationTest::parseMissingQuote() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "missing-quote.conf"));
+
+    /* Nothing remains, filename is empty and valid bit is not set */
+    CORRADE_VERIFY(!conf.isValid());
+    CORRADE_VERIFY(conf.isEmpty());
+    CORRADE_VERIFY(conf.filename().empty());
+    CORRADE_COMPARE(out.str(), "Utility::Configuration::Configuration(): missing closing quote for a value\n");
+}
+
+void ConfigurationTest::parseMissingMultiLineQuote() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "missing-multiline-quote.conf"));
+
+    /* Nothing remains, filename is empty and valid bit is not set */
+    CORRADE_VERIFY(!conf.isValid());
+    CORRADE_VERIFY(conf.isEmpty());
+    CORRADE_VERIFY(conf.filename().empty());
+    CORRADE_COMPARE(out.str(), "Utility::Configuration::Configuration(): missing closing quotes for a multi-line value\n");
 }
 
 void ConfigurationTest::parseHierarchic() {
@@ -247,6 +292,16 @@ void ConfigurationTest::parseHierarchicEmptySubgroup() {
     CORRADE_COMPARE(out.str(), "Utility::Configuration::Configuration(): empty subgroup name\n");
 }
 
+void ConfigurationTest::parseHierarchicMissingBracket() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "hierarchic-missing-bracket.conf"));
+    CORRADE_VERIFY(!conf.isValid());
+    CORRADE_VERIFY(conf.isEmpty());
+    CORRADE_VERIFY(conf.filename().empty());
+    CORRADE_COMPARE(out.str(), "Utility::Configuration::Configuration(): missing closing bracket for a group header\n");
+}
+
 void ConfigurationTest::utf8Filename() {
     Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "hýždě.conf"));
     conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hýždě.conf"));
@@ -316,15 +371,6 @@ void ConfigurationTest::names() {
     CORRADE_COMPARE(out.str(), "Utility::ConfigurationGroup::addValue(): disallowed character in key\n");
 }
 
-void ConfigurationTest::invalid() {
-    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "invalid.conf"));
-
-    /* Nothing remains, filename is empty and valid bit is not set */
-    CORRADE_VERIFY(!conf.isValid());
-    CORRADE_VERIFY(conf.isEmpty());
-    CORRADE_VERIFY(conf.filename().empty());
-}
-
 void ConfigurationTest::readonly() {
     Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "parse.conf"), Configuration::Flag::ReadOnly);
 
@@ -368,6 +414,24 @@ void ConfigurationTest::whitespaces() {
     CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "whitespaces.conf"),
                        Directory::join(CONFIGURATION_TEST_DIR, "whitespaces-saved.conf"),
                        TestSuite::Compare::File);
+}
+
+void ConfigurationTest::bom() {
+    {
+        /* Stripped by default */
+        Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "bom.conf"));
+        CORRADE_VERIFY(conf.isValid());
+        CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "bom.conf")));
+        CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "bom.conf"),
+            "", TestSuite::Compare::FileToString);
+    } {
+        /* Explicitly preserved */
+        Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "bom.conf"), Configuration::Flag::PreserveBom);
+        CORRADE_VERIFY(conf.isValid());
+        CORRADE_VERIFY(conf.save(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "bom-preserve.conf")));
+        CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "bom-preserve.conf"),
+            "\xEF\xBB\xBF", TestSuite::Compare::FileToString);
+    }
 }
 
 void ConfigurationTest::eol() {
