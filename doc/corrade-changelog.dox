@@ -75,6 +75,10 @@ namespace Corrade {
     @ref CORRADE_INTERNAL_ASSERT_OUTPUT()
 -   @ref String::beginsWith() and @ref String::endsWith() overloads taking just
     a single @cpp char @ce
+-   @ref String::ltrimInPlace(), @ref String::rtrimInPlace() and
+    @ref String::trimInPlace() for easier operation on mutable strings. The
+    @ref String::ltrim(), @ref String::rtrim() and @ref String::trim()
+    functions are now implemented using these.
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

@@ -34,6 +34,7 @@ struct StringTest: TestSuite::Tester {
 
     void fromArray();
     void trim();
+    void trimInPlace();
     void split();
     void splitMultipleCharacters();
     void join();
@@ -47,6 +48,7 @@ struct StringTest: TestSuite::Tester {
 StringTest::StringTest() {
     addTests({&StringTest::fromArray,
               &StringTest::trim,
+              &StringTest::trimInPlace,
               &StringTest::split,
               &StringTest::splitMultipleCharacters,
               &StringTest::join,
@@ -92,6 +94,81 @@ void StringTest::trim() {
     CORRADE_COMPARE(String::ltrim("oubya", std::string{"aeiyou"}), "bya");
     CORRADE_COMPARE(String::rtrim("oubya", std::string{"aeiyou"}), "oub");
     CORRADE_COMPARE(String::trim("oubya", std::string{"aeiyou"}), "b");
+}
+
+void StringTest::trimInPlace() {
+    /* Spaces at the end */
+    {
+        std::string a = "abc  ";
+        String::ltrimInPlace(a);
+        CORRADE_COMPARE(a, "abc  ");
+    } {
+        std::string a = "abc  ";
+        String::rtrimInPlace(a);
+        CORRADE_COMPARE(a, "abc");
+    }
+
+    /* Spaces at the beginning */
+    {
+        std::string a = "  abc";
+        String::ltrimInPlace(a);
+        CORRADE_COMPARE(a, "abc");
+    } {
+        std::string a = "  abc";
+        String::rtrimInPlace(a);
+        CORRADE_COMPARE(a, "  abc");
+    }
+
+    /* Spaces on both beginning and end */
+    {
+        std::string a = "  abc  ";
+        String::trimInPlace(a);
+        CORRADE_COMPARE(a, "abc");
+    }
+
+    /* No spaces */
+    {
+        std::string a = "abc";
+        String::trimInPlace(a);
+        CORRADE_COMPARE(a, "abc");
+    }
+
+    /* All spaces */
+    {
+        std::string a = "\t\r\n\f\v ";
+        String::trimInPlace(a);
+        CORRADE_COMPARE(a, "");
+    }
+
+    /* Special characters */
+    {
+        std::string a = "oubya";
+        String::ltrimInPlace(a, "aeiyou");
+        CORRADE_COMPARE(a, "bya");
+    } {
+        std::string a = "oubya";
+        String::rtrimInPlace(a, "aeiyou");
+        CORRADE_COMPARE(a, "oub");
+    } {
+        std::string a = "oubya";
+        String::trimInPlace(a, "aeiyou");
+        CORRADE_COMPARE(a, "b");
+    }
+
+    /* Special characters as a string */
+    {
+        std::string a = "oubya";
+        String::ltrimInPlace(a, std::string{"aeiyou"});
+        CORRADE_COMPARE(a, "bya");
+    } {
+        std::string a = "oubya";
+        String::rtrimInPlace(a, std::string{"aeiyou"});
+        CORRADE_COMPARE(a, "oub");
+    } {
+        std::string a = "oubya";
+        String::trimInPlace(a, std::string{"aeiyou"});
+        CORRADE_COMPARE(a, "b");
+    }
 }
 
 void StringTest::split() {

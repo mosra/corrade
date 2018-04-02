@@ -32,16 +32,32 @@ namespace Corrade { namespace Utility { namespace String {
 
 namespace Implementation {
 
+void ltrimInPlace(std::string& string, const Containers::ArrayView<const char> characters) {
+    string.erase(0, string.find_first_not_of(characters, 0, characters.size()));
+}
+
+void rtrimInPlace(std::string& string, const Containers::ArrayView<const char> characters) {
+    string.erase(string.find_last_not_of(characters, std::string::npos, characters.size())+1);
+}
+
+void trimInPlace(std::string& string, const Containers::ArrayView<const char> characters) {
+    rtrimInPlace(string, characters);
+    ltrimInPlace(string, characters);
+}
+
 std::string ltrim(std::string string, const Containers::ArrayView<const char> characters) {
-    return std::move(string.erase(0, string.find_first_not_of(characters, 0, characters.size())));
+    ltrimInPlace(string, characters);
+    return string;
 }
 
 std::string rtrim(std::string string, const Containers::ArrayView<const char> characters) {
-    return std::move(string.erase(string.find_last_not_of(characters, std::string::npos, characters.size())+1));
+    rtrimInPlace(string, characters);
+    return string;
 }
 
 std::string trim(std::string string, const Containers::ArrayView<const char> characters) {
-    return ltrim(rtrim(std::move(string), characters), characters);
+    trimInPlace(string, characters);
+    return string;
 }
 
 std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const Containers::ArrayView<const char> delimiters) {
@@ -82,6 +98,12 @@ std::string ltrim(std::string string) { return ltrim(std::move(string), Whitespa
 std::string rtrim(std::string string) { return rtrim(std::move(string), Whitespace); }
 
 std::string trim(std::string string) { return trim(std::move(string), Whitespace); }
+
+void ltrimInPlace(std::string& string) { ltrimInPlace(string, Whitespace); }
+
+void rtrimInPlace(std::string& string) { rtrimInPlace(string, Whitespace); }
+
+void trimInPlace(std::string& string) { trimInPlace(string, Whitespace); }
 
 std::vector<std::string> splitWithoutEmptyParts(const std::string& string) {
     return splitWithoutEmptyParts(string, Whitespace);

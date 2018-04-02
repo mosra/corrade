@@ -58,6 +58,10 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 namespace String {
 
 namespace Implementation {
+    CORRADE_UTILITY_EXPORT void ltrimInPlace(std::string& string, Containers::ArrayView<const char> characters);
+    CORRADE_UTILITY_EXPORT void rtrimInPlace(std::string& string, Containers::ArrayView<const char> characters);
+    CORRADE_UTILITY_EXPORT void trimInPlace(std::string& string, Containers::ArrayView<const char> characters);
+
     CORRADE_UTILITY_EXPORT std::string ltrim(std::string string, Containers::ArrayView<const char> characters);
     CORRADE_UTILITY_EXPORT std::string rtrim(std::string string, Containers::ArrayView<const char> characters);
     CORRADE_UTILITY_EXPORT std::string trim(std::string string, Containers::ArrayView<const char> characters);
@@ -92,6 +96,7 @@ inline std::string fromArray(const char* string, std::size_t length) {
 @param string       String to be trimmed
 @param characters   Characters which will be trimmed
 
+Implemented using @ref ltrimInPlace().
 @see @ref rtrim(), @ref trim()
 */
 inline std::string ltrim(std::string string, const std::string& characters) {
@@ -107,7 +112,7 @@ template<std::size_t size> inline std::string ltrim(std::string string, const ch
 @brief Trim leading whitespace from string
 
 Equivalent to calling @ref ltrim(std::string, const char(&)[size]) with
-@cpp " \t\f\v\r\n" @ce as second parameter.
+@cpp " \t\f\v\r\n" @ce as second parameter. Implemented using @ref ltrimInPlace().
 @see @ref rtrim(), @ref trim()
 */
 CORRADE_UTILITY_EXPORT std::string ltrim(std::string string);
@@ -117,6 +122,7 @@ CORRADE_UTILITY_EXPORT std::string ltrim(std::string string);
 @param string       String to be trimmed
 @param characters   Characters which will be trimmed
 
+Implemented using @ref rtrimInPlace().
 @see @ref ltrim(), @ref trim()
 */
 inline std::string rtrim(std::string string, const std::string& characters) {
@@ -132,7 +138,7 @@ template<std::size_t size> inline std::string rtrim(std::string string, const ch
 @brief Trim trailing whitespace from string
 
 Equivalent to calling @ref rtrim(std::string, const char(&)[size] with
-@cpp " \t\f\v\r\n" @ce as second parameter.
+@cpp " \t\f\v\r\n" @ce as second parameter. Implemented using @ref trimInPlace().
 @see @ref ltrim(), @ref trim()
 */
 CORRADE_UTILITY_EXPORT std::string rtrim(std::string string);
@@ -142,7 +148,8 @@ CORRADE_UTILITY_EXPORT std::string rtrim(std::string string);
 @param string       String to be trimmed
 @param characters   Characters which will be trimmed
 
-Equivalent to @cpp ltrim(rtrim(string)) @ce.
+Equivalent to @cpp ltrim(rtrim(string, characters), characters) @ce.
+Implemented using @ref trimInPlace().
 */
 inline std::string trim(std::string string, const std::string& characters) {
     return Implementation::trim(std::move(string), {characters.data(), characters.size()});
@@ -157,9 +164,85 @@ template<std::size_t size> inline std::string trim(std::string string, const cha
 @brief Trim leading and trailing whitespace from string
 
 Equivalent to calling @ref trim(std::string, const char(&)[size]) with
-@cpp " \t\f\v\r\n" @ce as second parameter.
+@cpp " \t\f\v\r\n" @ce as second parameter. Implemented using @ref trimInPlace().
 */
 CORRADE_UTILITY_EXPORT std::string trim(std::string string);
+
+/**
+@brief Trim leading characters from string, in place
+@param string       String to be trimmed in place
+@param characters   Characters which will be trimmed
+
+@see @ref ltrim(), @ref rtrimInPlace(), @ref trimInPlace()
+*/
+inline void ltrimInPlace(std::string& string, const std::string& characters) {
+    Implementation::ltrimInPlace(string, {characters.data(), characters.size()});
+}
+
+/** @overload */
+template<std::size_t size> inline void ltrimInPlace(std::string& string, const char(&characters)[size]) {
+    Implementation::ltrimInPlace(string, {characters, size - 1});
+}
+
+/**
+@brief Trim leading whitespace from string
+
+Equivalent to calling @ref ltrimInPlace(std::string&, const char(&)[size]) with
+@cpp " \t\f\v\r\n" @ce as second parameter.
+@see @ref ltrim(), @ref rtrimInPlace(), @ref trimInPlace()
+*/
+CORRADE_UTILITY_EXPORT void ltrimInPlace(std::string& string);
+
+/**
+@brief Trim trailing characters from string
+@param string       String to be trimmed
+@param characters   Characters which will be trimmed
+
+@see @ref rtrim(), @ref ltrimInPlace(), @ref trimInPlace()
+*/
+inline void rtrimInPlace(std::string& string, const std::string& characters) {
+    Implementation::rtrimInPlace(string, {characters.data(), characters.size()});
+}
+
+/** @overload */
+template<std::size_t size> inline void rtrimInPlace(std::string& string, const char(&characters)[size]) {
+    Implementation::rtrimInPlace(string, {characters, size - 1});
+}
+
+/**
+@brief Trim trailing whitespace from string
+
+Equivalent to calling @ref rtrimInPlace(std::string&, const char(&)[size] with
+@cpp " \t\f\v\r\n" @ce as second parameter.
+@see @ref rtrim(), @ref ltrim(), @ref trim()
+*/
+CORRADE_UTILITY_EXPORT void rtrimInPlace(std::string& string);
+
+/**
+@brief Trim leading and trailing characters from string
+@param string       String to be trimmed
+@param characters   Characters which will be trimmed
+
+Equivalent to calling both @ref ltrimInPlace() and @ref rtrimInPlace().
+@see @ref trim()
+*/
+inline void trimInPlace(std::string& string, const std::string& characters) {
+    return Implementation::trimInPlace(string, {characters.data(), characters.size()});
+}
+
+/** @overload */
+template<std::size_t size> inline void trimInPlace(std::string& string, const char(&characters)[size]) {
+    return Implementation::trimInPlace(string, {characters, size - 1});
+}
+
+/**
+@brief Trim leading and trailing whitespace from string
+
+Equivalent to calling @ref trimInPlace(std::string&, const char(&)[size]) with
+@cpp " \t\f\v\r\n" @ce as second parameter.
+@see @ref trim()
+*/
+CORRADE_UTILITY_EXPORT void trimInPlace(std::string& string);
 
 /**
 @brief Split string on given character
