@@ -212,6 +212,13 @@ template<std::size_t size_, class T> class StaticArray {
         /** @brief Moving is not allowed */
         StaticArray<size_, T>& operator=(StaticArray<size_, T>&&) = delete;
 
+        #ifndef CORRADE_MSVC2017_COMPATIBILITY
+        /** @brief Whether the array is non-empty */
+        /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
+           pointer arithmetic. */
+        constexpr explicit operator bool() const { return size_; }
+        #endif
+
         /**
          * @brief Convert to @ref ArrayView
          *

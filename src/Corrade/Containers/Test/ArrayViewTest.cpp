@@ -43,6 +43,7 @@ struct ArrayViewTest: TestSuite::Tester {
     void constructVoid();
 
     void convertBool();
+    void convertBoolNullptr();
     void convertPointer();
     void convertConst();
     void convertVoid();
@@ -75,6 +76,7 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::constructVoid,
 
               &ArrayViewTest::convertBool,
+              &ArrayViewTest::convertBoolNullptr,
               &ArrayViewTest::convertPointer,
               &ArrayViewTest::convertConst,
               &ArrayViewTest::convertVoid,
@@ -202,6 +204,15 @@ void ArrayViewTest::convertBool() {
     CORRADE_VERIFY(!(std::is_convertible<VoidArrayView, int>::value));
 }
 
+void ArrayViewTest::convertBoolNullptr() {
+    /* Zero-sized slice of an array should convert to false, while three-item
+       array starting at 0 should convert to true. The documentation says
+       it returns true if nonempty. */
+    int a[7];
+    CORRADE_VERIFY(!(ArrayView{a, 0}));
+    CORRADE_VERIFY((ArrayView{nullptr, 5}));
+}
+
 void ArrayViewTest::convertPointer() {
     int a[7];
     ArrayView b = a;
@@ -321,22 +332,22 @@ void ArrayViewTest::sliceNullptr() {
     ArrayView a{nullptr, 5};
 
     ArrayView b = a.prefix(nullptr);
-    CORRADE_VERIFY(!b);
+    CORRADE_VERIFY(!b.begin());
     CORRADE_COMPARE(b.size(), 0);
 
     ArrayView c = a.suffix(nullptr);
-    CORRADE_VERIFY(!c);
+    CORRADE_VERIFY(!c.begin());
     CORRADE_COMPARE(c.size(), 5);
 
     int data[5];
     ArrayView d{data};
 
     ArrayView e = d.prefix(nullptr);
-    CORRADE_VERIFY(!e);
+    CORRADE_VERIFY(!e.begin());
     CORRADE_COMPARE(e.size(), 0);
 
     ArrayView f = d.suffix(nullptr);
-    CORRADE_VERIFY(!f);
+    CORRADE_VERIFY(!f.begin());
     CORRADE_COMPARE(f.size(), 0);
 }
 

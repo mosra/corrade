@@ -41,6 +41,7 @@ struct StaticArrayViewTest: TestSuite::Tester {
     void constructConst();
 
     void convertBool();
+    void convertBoolNullptr();
     void convertPointer();
     void convertConst();
     void convertVoid();
@@ -70,6 +71,7 @@ StaticArrayViewTest::StaticArrayViewTest() {
               &StaticArrayViewTest::constructConst,
 
               &StaticArrayViewTest::convertBool,
+              &StaticArrayViewTest::convertBoolNullptr,
               &StaticArrayViewTest::convertPointer,
               &StaticArrayViewTest::convertConst,
               &StaticArrayViewTest::convertVoid,
@@ -158,8 +160,19 @@ void StaticArrayViewTest::constructConst() {
 void StaticArrayViewTest::convertBool() {
     int a[7];
     CORRADE_VERIFY(StaticArrayView<5>{a});
-    CORRADE_VERIFY(!StaticArrayView<5>{});
+    /** @todo ISO C++ forbids zero-side array, can't really test */
+    //CORRADE_VERIFY(StaticArrayView<0>{});
     CORRADE_VERIFY(!(std::is_convertible<StaticArrayView<5>, int>::value));
+}
+
+void StaticArrayViewTest::convertBoolNullptr() {
+    /* Zero-sized slice of an array should convert to false, while three-item
+       array starting at 0 should convert to true. The documentation says
+       it returns true if nonempty. */
+    /** @todo ISO C++ forbids zero-side array, can't really test */
+    //int a[7];
+    //CORRADE_VERIFY(!StaticArrayView<5>{a}.slice<0>(1));
+    CORRADE_VERIFY(StaticArrayView<5>{nullptr});
 }
 
 void StaticArrayViewTest::convertPointer() {
