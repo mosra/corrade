@@ -79,6 +79,8 @@ namespace Corrade {
     @ref String::trimInPlace() for easier operation on mutable strings. The
     @ref String::ltrim(), @ref String::rtrim() and @ref String::trim()
     functions are now implemented using these.
+-   @ref String::stripPrefix() and @ref String::stripSuffix() for checked
+    prefix and suffix stripping
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

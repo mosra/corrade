@@ -30,13 +30,13 @@ set(CorradeUtility_SRCS
     ConfigurationValue.cpp
     MurmurHash2.cpp
     Sha1.cpp
-    String.cpp
     System.cpp)
 
 set(CorradeUtility_GracefulAssert_SRCS
     Arguments.cpp
     ConfigurationGroup.cpp
     Resource.cpp
+    String.cpp
     Unicode.cpp)
 
 set(CorradeUtility_HEADERS

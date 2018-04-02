@@ -87,6 +87,18 @@ bool endsWith(const std::string& string, const Containers::ArrayView<const char>
     return string.compare(string.size() - suffix.size(), suffix.size(), suffix, suffix.size()) == 0;
 }
 
+std::string stripPrefix(const std::string& string, const Containers::ArrayView<const char> prefix) {
+    CORRADE_ASSERT(beginsWith(string, prefix),
+        "Utility::String::stripPrefix(): string doesn't begin with given prefix", {});
+    return string.substr(prefix.size());
+}
+
+std::string stripSuffix(const std::string& string, const Containers::ArrayView<const char> suffix) {
+    CORRADE_ASSERT(endsWith(string, suffix),
+        "Utility::String::stripSuffix(): string doesn't end with given suffix", {});
+    return string.substr(0, string.size() - suffix.size());
+}
+
 }
 
 namespace {

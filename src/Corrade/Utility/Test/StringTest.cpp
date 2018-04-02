@@ -23,6 +23,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <sstream>
+
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/String.h"
@@ -43,6 +45,11 @@ struct StringTest: TestSuite::Tester {
 
     void beginsWith();
     void endsWith();
+
+    void stripPrefix();
+    void stripPrefixInvalid();
+    void stripSuffix();
+    void stripSuffixInvalid();
 };
 
 StringTest::StringTest() {
@@ -56,7 +63,12 @@ StringTest::StringTest() {
               &StringTest::uppercase,
 
               &StringTest::beginsWith,
-              &StringTest::endsWith});
+              &StringTest::endsWith,
+
+              &StringTest::stripPrefix,
+              &StringTest::stripPrefixInvalid,
+              &StringTest::stripSuffix,
+              &StringTest::stripSuffixInvalid});
 }
 
 void StringTest::fromArray() {
@@ -323,6 +335,34 @@ void StringTest::endsWith() {
     CORRADE_VERIFY(!String::endsWith("hello", 'h'));
     CORRADE_VERIFY(String::endsWith("hello", 'o'));
     CORRADE_VERIFY(!String::endsWith("", 'h'));
+}
+
+void StringTest::stripPrefix() {
+    CORRADE_COMPARE(String::stripPrefix("overcomplicated", "over"), "complicated");
+    CORRADE_COMPARE(String::stripPrefix("overcomplicated", std::string{"over"}), "complicated");
+    CORRADE_COMPARE(String::stripPrefix("overcomplicated", 'o'), "vercomplicated");
+    CORRADE_COMPARE(String::stripPrefix("overcomplicated", ""), "overcomplicated");
+}
+
+void StringTest::stripPrefixInvalid() {
+    std::ostringstream out;
+    Error redirectOutput{&out};
+    String::stripPrefix("overcomplicated", "complicated");
+    CORRADE_COMPARE(out.str(), "Utility::String::stripPrefix(): string doesn't begin with given prefix\n");
+}
+
+void StringTest::stripSuffix() {
+    CORRADE_COMPARE(String::stripSuffix("overcomplicated", "complicated"), "over");
+    CORRADE_COMPARE(String::stripSuffix("overcomplicated", std::string{"complicated"}), "over");
+    CORRADE_COMPARE(String::stripSuffix("overcomplicated", 'd'), "overcomplicate");
+    CORRADE_COMPARE(String::stripSuffix("overcomplicated", ""), "overcomplicated");
+}
+
+void StringTest::stripSuffixInvalid() {
+    std::ostringstream out;
+    Error redirectOutput{&out};
+    String::stripSuffix("overcomplicated", "over");
+    CORRADE_COMPARE(out.str(), "Utility::String::stripSuffix(): string doesn't end with given suffix\n");
 }
 
 }}}

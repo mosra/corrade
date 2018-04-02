@@ -70,6 +70,9 @@ namespace Implementation {
 
     CORRADE_UTILITY_EXPORT bool beginsWith(const std::string& string, Containers::ArrayView<const char> prefix);
     CORRADE_UTILITY_EXPORT bool endsWith(const std::string& string, Containers::ArrayView<const char> suffix);
+
+    CORRADE_UTILITY_EXPORT std::string stripPrefix(const std::string& string, Containers::ArrayView<const char> suffix);
+    CORRADE_UTILITY_EXPORT std::string stripSuffix(const std::string& string, Containers::ArrayView<const char> suffix);
 }
 
 /**
@@ -344,6 +347,46 @@ template<std::size_t size> inline bool endsWith(const std::string& string, const
 /** @overload */
 inline bool endsWith(const std::string& string, char suffix) {
     return !string.empty() && string[string.size() - 1] == suffix;
+}
+
+/**
+@brief Strip given prefix from a string
+
+Expects that the string actually begins with given prefix.
+@see @ref beginsWith()
+*/
+inline std::string stripPrefix(std::string string, const std::string& prefix) {
+    return Implementation::stripPrefix(string, {prefix.data(), prefix.size()});
+}
+
+/** @overload */
+template<std::size_t size> inline std::string stripPrefix(const std::string& string, const char(&prefix)[size]) {
+    return Implementation::stripPrefix(string, {prefix, size - 1});
+}
+
+/** @overload */
+inline std::string stripPrefix(const std::string& string, char prefix) {
+    return Implementation::stripPrefix(string, {&prefix, 1});
+}
+
+/**
+@brief Strip given suffix from a string
+
+Expects that the string actually ends with given suffix.
+@see @ref endsWith()
+*/
+inline std::string stripSuffix(const std::string& string, const std::string& suffix) {
+    return Implementation::stripSuffix(string, {suffix.data(), suffix.size()});
+}
+
+/** @overload */
+template<std::size_t size> inline std::string stripSuffix(const std::string& string, const char(&suffix)[size]) {
+    return Implementation::stripSuffix(string, {suffix, size - 1});
+}
+
+/** @overload */
+inline std::string stripSuffix(const std::string& string, char suffix) {
+    return Implementation::stripSuffix(string, {&suffix, 1});
 }
 
 }}}
