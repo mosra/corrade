@@ -44,6 +44,7 @@ struct ConfigurationTest: TestSuite::Tester {
 
     void parse();
     void parseHierarchic();
+    void parseHierarchicEmptyGroup();
     void utf8Filename();
 
     void groupIndex();
@@ -71,6 +72,7 @@ struct ConfigurationTest: TestSuite::Tester {
 ConfigurationTest::ConfigurationTest() {
     addTests({&ConfigurationTest::parse,
               &ConfigurationTest::parseHierarchic,
+              &ConfigurationTest::parseHierarchicEmptyGroup,
               &ConfigurationTest::utf8Filename,
 
               &ConfigurationTest::groupIndex,
@@ -189,6 +191,16 @@ void ConfigurationTest::parseHierarchic() {
     CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic.conf"),
                        Directory::join(CONFIGURATION_TEST_DIR, "hierarchic-modified.conf"),
                        TestSuite::Compare::File);
+}
+
+void ConfigurationTest::parseHierarchicEmptyGroup() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "hierarchic-empty-group.conf"));
+    CORRADE_VERIFY(!conf.isValid());
+    CORRADE_VERIFY(conf.isEmpty());
+    CORRADE_VERIFY(conf.filename().empty());
+    CORRADE_COMPARE(out.str(), "Utility::Configuration::Configuration(): empty group name\n");
 }
 
 void ConfigurationTest::utf8Filename() {

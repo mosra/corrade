@@ -48,6 +48,7 @@ corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp
         ConfigurationTestFiles/eol-unix.conf
         ConfigurationTestFiles/eol-windows.conf
         ConfigurationTestFiles/hierarchic.conf
+        ConfigurationTestFiles/hierarchic-empty-group.conf
         ConfigurationTestFiles/hierarchic-modified.conf
         ConfigurationTestFiles/hýždě.conf
         ConfigurationTestFiles/invalid.conf
