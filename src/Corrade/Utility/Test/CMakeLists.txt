@@ -49,7 +49,10 @@ corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp
         ConfigurationTestFiles/eol-windows.conf
         ConfigurationTestFiles/hierarchic.conf
         ConfigurationTestFiles/hierarchic-empty-group.conf
+        ConfigurationTestFiles/hierarchic-empty-subgroup.conf
         ConfigurationTestFiles/hierarchic-modified.conf
+        ConfigurationTestFiles/hierarchic-shortcuts.conf
+        ConfigurationTestFiles/hierarchic-shortcuts-modified.conf
         ConfigurationTestFiles/hýždě.conf
         ConfigurationTestFiles/invalid.conf
         ConfigurationTestFiles/multiLine.conf

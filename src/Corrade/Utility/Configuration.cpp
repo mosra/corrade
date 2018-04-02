@@ -192,13 +192,33 @@ Containers::ArrayView<const char> Configuration::parse(Containers::ArrayView<con
             /* This is a subgroup of this one, parse recursively */
             if(String::beginsWith(nextGroup, fullPath)) {
                 ConfigurationGroup::Group g;
-                g.name = nextGroup.substr(fullPath.size());
-                g.group = new ConfigurationGroup(_configuration);
-                /* Add the group before attempting any other parsing, as it
-                   could throw an exception and the group would otherwise be
-                   leaked */
-                group->_groups.push_back(std::move(g));
-                in = parse(in, g.group, nextGroup + '/');
+
+                /* If the subgroup has a shorthand for multiple nesting, call
+                   parse() on this same line again but with nested group and
+                   larger fullPath */
+                const std::size_t end = nextGroup.find('/', fullPath.size());
+                if(end != std::string::npos) {
+                    if(end == fullPath.size())
+                        throw std::string("empty subgroup name");
+
+                    g.name = nextGroup.substr(fullPath.size(), end - fullPath.size());
+                    g.group = new ConfigurationGroup(_configuration);
+                    /* Add the group before attempting any other parsing, as it
+                       could throw an exception and the group would otherwise
+                       be leaked */
+                    group->_groups.push_back(std::move(g));
+                    in = parse(currentLine, g.group, nextGroup.substr(0, end+1));
+
+                /* Otherwise call parse() on the next line */
+                } else {
+                    g.name = nextGroup.substr(fullPath.size());
+                    g.group = new ConfigurationGroup(_configuration);
+                    /* Add the group before attempting any other parsing, as it
+                       could throw an exception and the group would otherwise
+                       be leaked */
+                    group->_groups.push_back(std::move(g));
+                    in = parse(in, g.group, nextGroup + '/');
+                }
 
             /* Otherwise it's a subgroup of some parent, return the control
                back to caller (again with this line) */
@@ -321,13 +341,19 @@ void Configuration::save(std::ostream& out, const std::string& eol, Configuratio
     }
 
     /* Recursively process all subgroups */
-    for(const Group& g: group->_groups) {
+    for(std::size_t i = 0; i != group->_groups.size(); ++i) {
+        const Group& g = group->_groups[i];
+
         /* Subgroup name */
         std::string name = g.name;
         if(!fullPath.empty()) name = fullPath + '/' + name;
 
-        buffer = '[' + name + ']' + eol;
-        out.write(buffer.data(), buffer.size());
+        /* Omit the name if the group is a first subgroup of given name, has no
+           values and only subgroups */
+        if(!((i == 0 || group->_groups[i - 1].name != g.name) && g.group->_values.empty() && !g.group->_groups.empty())) {
+            buffer = '[' + name + ']' + eol;
+            out.write(buffer.data(), buffer.size());
+        }
 
         save(out, eol, g.group, name);
     }

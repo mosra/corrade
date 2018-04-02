@@ -44,7 +44,9 @@ struct ConfigurationTest: TestSuite::Tester {
 
     void parse();
     void parseHierarchic();
+    void parseHierarchicShortcuts();
     void parseHierarchicEmptyGroup();
+    void parseHierarchicEmptySubgroup();
     void utf8Filename();
 
     void groupIndex();
@@ -72,7 +74,9 @@ struct ConfigurationTest: TestSuite::Tester {
 ConfigurationTest::ConfigurationTest() {
     addTests({&ConfigurationTest::parse,
               &ConfigurationTest::parseHierarchic,
+              &ConfigurationTest::parseHierarchicShortcuts,
               &ConfigurationTest::parseHierarchicEmptyGroup,
+              &ConfigurationTest::parseHierarchicEmptySubgroup,
               &ConfigurationTest::utf8Filename,
 
               &ConfigurationTest::groupIndex,
@@ -193,6 +197,36 @@ void ConfigurationTest::parseHierarchic() {
                        TestSuite::Compare::File);
 }
 
+void ConfigurationTest::parseHierarchicShortcuts() {
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "hierarchic-shortcuts.conf"));
+    conf.setFilename(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic-shortcuts.conf"));
+    CORRADE_VERIFY(conf.isValid());
+    CORRADE_VERIFY(!conf.isEmpty());
+
+    /* Should not be parsed as a/b/c */
+    CORRADE_VERIFY(!conf.hasGroup("c/d/e"));
+    CORRADE_VERIFY(conf.hasGroup("c"));
+    CORRADE_COMPARE(conf.group("c")->group("d")->group("e")->value("hello"), "there");
+    CORRADE_COMPARE(conf.group("c")->group("d")->group("e")->group("f")->group("g")->value("hi"), "again");
+
+    /* Second g group */
+    CORRADE_COMPARE(conf.group("c")->group("d")->group("e")->group("f")->groupCount("g"), 2);
+    CORRADE_COMPARE(conf.group("c")->group("d")->group("e")->group("f")->group("g", 1)->value("hey"), "hiya");
+
+    /* First g group in second f group */
+    CORRADE_COMPARE(conf.group("c")->group("d")->group("e")->groupCount("f"), 2);
+    CORRADE_COMPARE(conf.group("c")->group("d")->group("e")->group("f", 1)->group("g")->value("hola"), "hallo");
+
+    /* A group with explicitly enumerated parents */
+    CORRADE_COMPARE(conf.group("q")->group("w")->group("e")->group("r")->value("key4"), "val7");
+
+    /* Verify that nothing changed except for the last squashed group */
+    CORRADE_VERIFY(conf.save());
+    CORRADE_COMPARE_AS(Directory::join(CONFIGURATION_WRITE_TEST_DIR, "hierarchic-shortcuts.conf"),
+                       Directory::join(CONFIGURATION_TEST_DIR, "hierarchic-shortcuts-modified.conf"),
+                       TestSuite::Compare::File);
+}
+
 void ConfigurationTest::parseHierarchicEmptyGroup() {
     std::ostringstream out;
     Error redirectError{&out};
@@ -201,6 +235,16 @@ void ConfigurationTest::parseHierarchicEmptyGroup() {
     CORRADE_VERIFY(conf.isEmpty());
     CORRADE_VERIFY(conf.filename().empty());
     CORRADE_COMPARE(out.str(), "Utility::Configuration::Configuration(): empty group name\n");
+}
+
+void ConfigurationTest::parseHierarchicEmptySubgroup() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    Configuration conf(Directory::join(CONFIGURATION_TEST_DIR, "hierarchic-empty-subgroup.conf"));
+    CORRADE_VERIFY(!conf.isValid());
+    CORRADE_VERIFY(conf.isEmpty());
+    CORRADE_VERIFY(conf.filename().empty());
+    CORRADE_COMPARE(out.str(), "Utility::Configuration::Configuration(): empty subgroup name\n");
 }
 
 void ConfigurationTest::utf8Filename() {
