@@ -50,8 +50,6 @@ Configuration::Configuration(const std::string& filename, const Flags flags): Co
         return;
     }
 
-    if(!Directory::fileExists(filename))
-        Error() << "Utility::Configuration::Configuration(): cannot open file" << filename;
     if(parse(Directory::read(filename))) return;
 
     /* Error, reset everything back */
