@@ -167,7 +167,7 @@ std::string Configuration::parse(std::istream& in, ConfigurationGroup* group, co
         }
 
         /* Trim buffer */
-        buffer = String::trim(buffer);
+        String::trimInPlace(buffer);
 
         /* Empty line */
         if(buffer.empty()) {
@@ -188,7 +188,7 @@ std::string Configuration::parse(std::istream& in, ConfigurationGroup* group, co
                 throw std::string("empty group name");
 
             /* Next group is subgroup of current group, recursive call */
-            while(!nextGroup.empty() && (fullPath.empty() || nextGroup.substr(0, fullPath.size()) == fullPath)) {
+            while(!nextGroup.empty() && String::beginsWith(nextGroup, fullPath)) {
                 ConfigurationGroup::Group g;
                 g.name = nextGroup.substr(fullPath.size());
                 g.group = new ConfigurationGroup(_configuration);
