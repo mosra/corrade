@@ -84,7 +84,14 @@ void StringTest::trim() {
     CORRADE_COMPARE(String::trim("\t\r\n\f\v "), "");
 
     /* Special characters */
-    CORRADE_COMPARE(String::trim("ouya", "aeiyou"), "");
+    CORRADE_COMPARE(String::ltrim("oubya", "aeiyou"), "bya");
+    CORRADE_COMPARE(String::rtrim("oubya", "aeiyou"), "oub");
+    CORRADE_COMPARE(String::trim("oubya", "aeiyou"), "b");
+
+    /* Special characters as a string */
+    CORRADE_COMPARE(String::ltrim("oubya", std::string{"aeiyou"}), "bya");
+    CORRADE_COMPARE(String::rtrim("oubya", std::string{"aeiyou"}), "oub");
+    CORRADE_COMPARE(String::trim("oubya", std::string{"aeiyou"}), "b");
 }
 
 void StringTest::split() {
@@ -120,7 +127,7 @@ void StringTest::split() {
 }
 
 void StringTest::splitMultipleCharacters() {
-    const std::string delimiters = ".:;";
+    const char delimiters[] = ".:;";
 
     /* Empty */
     CORRADE_COMPARE_AS(String::splitWithoutEmptyParts({}, delimiters),
@@ -140,6 +147,14 @@ void StringTest::splitMultipleCharacters() {
 
     /* Empty parts */
     CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("ab:c;;def.", delimiters),
+        (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
+
+    /* Delimiters as a string */
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("ab:c;;def.", std::string{delimiters}),
+        (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
+
+    /* Whitespace */
+    CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("ab c  \t \ndef\r"),
         (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
 }
 
