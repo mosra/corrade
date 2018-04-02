@@ -228,6 +228,10 @@ void StringTest::beginsWith() {
 
     CORRADE_VERIFY(!String::beginsWith("overcomplicated", "oven"));
     CORRADE_VERIFY(!String::beginsWith("overcomplicated", std::string{"oven"}));
+
+    CORRADE_VERIFY(String::beginsWith("hello", 'h'));
+    CORRADE_VERIFY(!String::beginsWith("hello", 'o'));
+    CORRADE_VERIFY(!String::beginsWith("", 'h'));
 }
 
 void StringTest::endsWith() {
@@ -238,6 +242,10 @@ void StringTest::endsWith() {
     CORRADE_VERIFY(!String::endsWith("overcomplicated", std::string{"somplicated"}));
 
     CORRADE_VERIFY(!String::endsWith("overcomplicated", "overcomplicated even more"));
+
+    CORRADE_VERIFY(!String::endsWith("hello", 'h'));
+    CORRADE_VERIFY(String::endsWith("hello", 'o'));
+    CORRADE_VERIFY(!String::endsWith("", 'h'));
 }
 
 }}}

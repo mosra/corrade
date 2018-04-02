@@ -225,7 +225,11 @@ CORRADE_UTILITY_EXPORT std::string lowercase(std::string string);
 */
 CORRADE_UTILITY_EXPORT std::string uppercase(std::string string);
 
-/** @brief Whether the string has given prefix */
+/**
+@brief Whether the string has given prefix
+
+In particular, returns @cpp false @ce also if @p string is empty.
+*/
 inline bool beginsWith(const std::string& string, const std::string& prefix) {
     return Implementation::beginsWith(string, {prefix.data(), prefix.size()});
 }
@@ -235,7 +239,16 @@ template<std::size_t size> inline bool beginsWith(const std::string& string, con
     return Implementation::beginsWith(string, {prefix, size - 1});
 }
 
-/** @brief Whether the string has given suffix */
+/** @overload */
+inline bool beginsWith(const std::string& string, char prefix) {
+    return !string.empty() && string[0] == prefix;
+}
+
+/**
+@brief Whether the string has given suffix
+
+In particular, returns @cpp false @ce also if @p string is empty.
+*/
 inline bool endsWith(const std::string& string, const std::string& suffix) {
     return Implementation::endsWith(string, {suffix.data(), suffix.size()});
 }
@@ -243,6 +256,11 @@ inline bool endsWith(const std::string& string, const std::string& suffix) {
 /** @overload */
 template<std::size_t size> inline bool endsWith(const std::string& string, const char(&suffix)[size]) {
     return Implementation::endsWith(string, {suffix, size - 1});
+}
+
+/** @overload */
+inline bool endsWith(const std::string& string, char suffix) {
+    return !string.empty() && string[string.size() - 1] == suffix;
 }
 
 }}}
