@@ -42,61 +42,66 @@ namespace Corrade { namespace Utility {
 /**
 @brief Parser and writer for configuration files
 
-Provides hierarchical configuration storage. The key/value pairs are stored in
-hierarchical groups, this class acts as an root configuration group. Supported
-are either non-unique or unique group and key names, uniqueness can be enforced
-via flag in constructor. See @ref ConfigurationGroup class documentation for
-accessing, deleting, adding and setting groups and values.
+Provides hierarchical configuration storage for key/value pairs with support
+for parsing and loading into an textual INI-style file format. Basic API usage
+example:
 
-Values can be saved and retrieved using templated function, so it's possible to
-implement saving for any type. See @ref ConfigurationValue documentation for an
-example.
+@snippet Utility.cpp Configuration-usage
 
-@section Utility-Configuration-example Example usage
+@section Utility-Configuration-usage File syntax and usage
 
-@code{.cpp}
-Configuration conf("my.conf");
-
-// Get value of third occurence of the key from some deep group
-string myValue = conf.group("foo")->group("bar")->value<string>("myKey", 2);
-
-// Save new value
-conf.group("foo")->group("bar")->setValue<string>("myKey", "newValue");
-
-// Remove all groups named "bar" from root
-conf.removeGroups("bar");
-
-// Add three new values of integer type
-conf.addValue<int>("a", 1);
-conf.addValue<int>("a", 2);
-conf.addValue<int>("a", 3);
-
-conf.save();
-@endcode
-
-@section Utility-Configuration-syntax File syntax
-
-File syntax is based on INI syntax, consisting of three basic elements:
+File syntax is based on the well-known INI format, consisting of three basic
+elements:
 
 - group header
 - key/value pair
 - comment / empty line
 
-Elements can have leading/trailing whitespaces, they will be stripped on
-parsing and saving. Whitespace is preserved in values enclosed in `"` and
-multi-line values. Comments and empty lines are preserved, unless the comment
-is in group which was deleted.
+@subsection Utility-Configuration-usage-whitespace Whitespace and comments
 
-Configuration group header is enclosed in `[` and `]`, hierarchic group names
-are separated with `/` character. No group name can be empty.
+Lines can have leading/trailing whitespace, which will be stripped on parsing
+and saving. Whitespace is preserved in values enclosed in `"` and in multi-line
+values. Comments and empty lines are preserved unless @ref Flag::SkipComments
+is set in constructor or a group containing the comment gets deleted. It's not
+possible to add comments or empty lines programatically.
 
-Key/value pair consist of key name string, zero or more whitespaces, `=`
-character, zero or more whitespaces and value. Whitespaces around the value are
-stripped on parsing, if you want to preserve them, enclose the value in `"`
-characters.
+Comments begin with @cb{.ini} # @ce or @cb{.ini} ; @ce character and continue
+to the end of line. Each line of a multiline comment must begin with one of
+these characters.
 
-Multi-line values are enclosed in `"""` alone on the line, first and last line
-break is ignored. The following value is parsed as two lines:
+@code{.ini}
+# A comment
+  # on
+  # multiple
+# lines
+
+; Another type of comment
+@endcode
+
+@subsection Utility-Configuration-usage-values Key/value pairs
+
+Key/value pair consist of key name string, zero or more whitespace characters,
+the `=` character, zero or more whitespace characters and the value. Whitespace
+around the key is always stripped. Whitespace around the value is stripped on
+parsing, if you want to preserve it, enclose the value in @cb{.py} " @ce
+characters. Calling @ref setValue() with a string that contains
+leading/trailing whitespace will cause it to be automatically wrapped in quotes
+on save.
+
+@code{.ini}
+a=    a string with leading whitespace trimmed
+b="    a string with leading whitespace preserved"
+@endcode
+
+All values are internally stored as strings, parsing to and saving from custom
+types is done by calling an appropriate @ref ConfigurationValue. See its
+documentation for a guide to integrating your own type, see @ref configurationvalues
+for a list of additional parsers implemented in Corrade itself.
+
+Multi-line values are enclosed in @cb{.py} """ @ce alone on the line, first and
+last line break is ignored. Calling @ref setValue() with a string that contains
+newline characters will cause it to be automatically enclosed in
+@cb{.py} """ @ce on save. The following value is parsed as two lines:
 
 @code{.py}
 value="""
@@ -105,27 +110,82 @@ Spanning multiple lines.
 """
 @endcode
 
-Comments begin with `#` or `;` character and continue to the end of line. Each
-line of multiline comments must begin with these characters.
-
-Example file:
+It's allowed to have more than one value with the same key. You can access all
+values for given key name using @ref values().
 
 @code{.ini}
-# Hierarchic group
-[foo/bar]
-myKey=myValue
+buy=bread
+buy=milk
+buy=apples
+buy=onions
+@endcode
 
-# Multiple groups with the same name
-[group]
-a = 35.3
-[group]
-[group]
-a = 19
+@subsection Utility-Configuration-usage-groups Value groups
 
-# Value of custom type
-vec = -3 2 17 0
+Value group header is enclosed in `[` and `]`. Group name is a non-empty
+sequence of characters. As with values, it's allowed to have more than one
+group with the same name.
 
-; Another type of comment
+@code{.ini}
+[customer]
+name=John
+buys=bread
+
+[customer]
+name=Jacqueline
+buys=cookies
+@endcode
+
+Hierarchic group names are separated with the `/` character. A group first
+contains all values and then optional subgroups. A group is a subgroup of the
+previous group if it has the previous group header as a prefix. In the
+following snippet, *Jake* has *Mary* and *Max* as parents, while *Joanna*
+and *Ferdinand* are his grandparents, Mary's parents.
+
+@code{.ini}
+name=Jake
+likes=cycling
+
+[parent]
+name=Mary
+likes=nature
+
+[parent/parent]
+name=Joanna
+likes=cooking
+
+[parent/parent]
+name=Ferdinand
+likes=smoking pipe
+
+[parent]
+name=Max
+likes=books
+@endcode
+
+For a shorter syntax, it's possible to omit names of parent groups if they
+contain only subgroups and given group is the first in the list. The following
+two snippets are equivalent:
+
+@code{.ini}
+[org]
+[org/java]
+[org/java/lang]
+class=AbstractBeanFactoryListener
+class=AbstractFactoryListenerProviderDelegate
+
+[org/java/system]
+[org/java/system/services]
+class=BeanFactoryListenerProviderDelegateGarbageAllocator
+@endcode
+
+@code{.ini}
+[org/java/lang]
+class=AbstractBeanFactoryListener
+class=AbstractFactoryListenerProviderDelegate
+
+[org/java/system/services]
+class=BeanFactoryListenerProviderDelegateGarbageAllocator
 @endcode
 
 @todo Renaming, copying groups

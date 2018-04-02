@@ -28,6 +28,11 @@ if(WITH_PLUGINMANAGER)
     target_link_libraries(snippets-PluginManager PRIVATE CorradePluginManager)
 endif()
 
+if(WITH_UTILITY)
+    add_library(snippets-Utility STATIC Utility.cpp)
+    target_link_libraries(snippets-Utility PRIVATE CorradeUtility)
+endif()
+
 # TODO: causes spurious linker errors on Travis iOS build, so I'm disabling it
 if(WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
     find_package(Threads REQUIRED)
