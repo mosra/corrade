@@ -101,6 +101,13 @@ and edit `OPTIONS` in @cmake vcpkg_configure_cmake() @ce.
 
 @subsection building-corrade-packages-arch ArchLinux packages
 
+Package for the latest stable release is maintained in the `community` repo.
+Installing is as simple as this:
+
+@code{.sh}
+sudo pacman -S corrade
+@endcode
+
 In `package/archlinux/corrade-git` there is a package for Git development
 build. The package is also in AUR as
 [corrade-git](https://aur.archlinux.org/packages/corrade-git/).

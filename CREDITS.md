@@ -9,5 +9,7 @@ Contributors to Corrade library
     packages
 -   Olga Turanksaya ([@olga-python](https://github.com/olga-python)) -- Gentoo
     ebuild
+-   Alexander F Rødseth ([@xyproto](https://github.com/xyproto)) -- packages in
+    the ArchLinux community repository
 
 Big thanks to everyone involved!
