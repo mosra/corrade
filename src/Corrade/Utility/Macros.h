@@ -93,10 +93,15 @@ namespace is used --- which is practically useless
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
     @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE()
 */
-#ifdef __clang__
+#if defined(__clang__)
 /* Clang < 6.0 warns that this is a C++14 extension, Clang 6.0 warns that this
-   is a C++17 extension. Disabling both so it's usable in C++11. */
-#define CORRADE_DEPRECATED_NAMESPACE(message) _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wc++14-extensions\"") _Pragma("GCC diagnostic ignored \"-Wc++17-extensions\"") [[deprecated(message)]] _Pragma("GCC diagnostic pop")
+   is a C++17 extension. Clang < 6.0 doesn't know -Wc++17-extensions, so can't
+   disable both in the same macro. YAY!! */
+#if __clang__major__ < 6
+#define CORRADE_DEPRECATED_NAMESPACE(message) _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wc++14-extensions\"") [[deprecated(message)]] _Pragma("GCC diagnostic pop")
+#else
+#define CORRADE_DEPRECATED_NAMESPACE(message) _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wc++17-extensions\"") [[deprecated(message)]] _Pragma("GCC diagnostic pop")
+#endif
 #elif defined(_MSC_VER)
 #define CORRADE_DEPRECATED_NAMESPACE(message) [[deprecated(message)]]
 #else
