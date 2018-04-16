@@ -52,6 +52,16 @@ conf.save();
 /* [Configuration-usage] */
 }
 
+{
+/* [CORRADE_IGNORE_DEPRECATED] */
+CORRADE_DEPRECATED("use bar() instead") void foo(int);
+
+CORRADE_IGNORE_DEPRECATED_PUSH
+foo(42);
+CORRADE_IGNORE_DEPRECATED_POP
+/* [CORRADE_IGNORE_DEPRECATED] */
+}
+
 }
 
 namespace A {

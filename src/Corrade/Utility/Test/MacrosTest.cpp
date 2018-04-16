@@ -69,13 +69,7 @@ namespace CORRADE_DEPRECATED_NAMESPACE("use Namespace instead") DeprecatedNamesp
 // #define ENABLE_DEPRECATION_WARNINGS
 
 #ifndef ENABLE_DEPRECATION_WARNINGS
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#elif defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable: 4996)
-#endif
+CORRADE_IGNORE_DEPRECATED_PUSH
 #endif
 void MacrosTest::deprecated() {
     CORRADE_VERIFY(deprecatedFunction());
@@ -86,11 +80,7 @@ void MacrosTest::deprecated() {
     CORRADE_VERIFY(int(DeprecatedNamespace::Value));
 }
 #ifndef ENABLE_DEPRECATION_WARNINGS
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#elif defined(_MSC_VER)
-#pragma warning(pop)
-#endif
+CORRADE_IGNORE_DEPRECATED_POP
 #endif
 
 namespace {

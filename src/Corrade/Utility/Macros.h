@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_UNUSED, @ref CORRADE_ALIGNAS(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
+ * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_ALIGNAS(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -143,6 +143,43 @@ system (`-isystem` on GCC and Clang).
 #define CORRADE_DEPRECATED_FILE(message) _Pragma(_CORRADE_HELPER_STR(GCC warning message))
 #else
 #define CORRADE_DEPRECATED_FILE(message)
+#endif
+
+/** @hideinitializer
+@brief Begin code section with deprecation warnings ignored
+
+Suppresses compiler warnings when using a deprecated API (GCC, Clang, MSVC).
+Useful when testing or writing APIs that depend on deprecated functionality.
+In order to avoid warning suppressions to leak, for every
+@ref CORRADE_IGNORE_DEPRECATED_PUSH there has to be a corresponding
+@ref CORRADE_IGNORE_DEPRECATED_POP. Example usage:
+
+@snippet Utility.cpp CORRADE_IGNORE_DEPRECATED
+
+In particular, warnings from @ref CORRADE_DEPRECATED(),
+@ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE() and
+@ref CORRADE_DEPRECATED_ENUM() are suppressed. Doesn't suppress
+@ref CORRADE_DEPRECATED_FILE() warnings.
+*/
+#ifdef __GNUC__
+#define CORRADE_IGNORE_DEPRECATED_PUSH _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
+#elif defined(_MSC_VER)
+#define CORRADE_IGNORE_DEPRECATED_PUSH __pragma(warning(push)) __pragma(warning(disable: 4996))
+#else
+#define CORRADE_IGNORE_DEPRECATED_PUSH
+#endif
+
+/** @hideinitializer
+@brief End code section with deprecation warnings ignored
+
+See @ref CORRADE_IGNORE_DEPRECATED_PUSH for more information.
+*/
+#ifdef __GNUC__
+#define CORRADE_IGNORE_DEPRECATED_POP _Pragma("GCC diagnostic pop")
+#elif defined(_MSC_VER)
+#define CORRADE_IGNORE_DEPRECATED_POP __pragma(warning(pop))
+#else
+#define CORRADE_IGNORE_DEPRECATED_POP
 #endif
 
 /** @hideinitializer
