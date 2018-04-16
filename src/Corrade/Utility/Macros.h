@@ -43,11 +43,7 @@
 Marked function, class or typedef will emit deprecation warning on supported
 compilers (GCC, Clang, MSVC):
 
-@code{.cpp}
-class CORRADE_DEPRECATED("use Bar instead") Foo;
-CORRADE_DEPRECATED("use bar() instead") void foo();
-typedef CORRADE_DEPRECATED("use Fizz instead") Output<5> Buzz;
-@endcode
+@snippet Utility.cpp CORRADE_DEPRECATED
 
 Might not work for template aliases, namespaces and enum values on all
 compilers, use @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE()
@@ -68,9 +64,7 @@ for file-level deprecation.
 Marked alias will emit deprecation warning on supported compilers (GCC, Clang,
 MSVC 2017):
 
-@code{.cpp}
-template<class T> using Foo CORRADE_DEPRECATED_ALIAS("use Bar instead") = Bar<T>;
-@endcode
+@snippet Utility.cpp CORRADE_DEPRECATED_ALIAS
 
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_NAMESPACE(),
     @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE()
@@ -89,9 +83,7 @@ template<class T> using Foo CORRADE_DEPRECATED_ALIAS("use Bar instead") = Bar<T>
 Marked enum or enum value will emit deprecation warning on supported compilers
 (C++17 feature, MSVC 2015 and Clang):
 
-@code{.cpp}
-namespace CORRADE_DEPRECATED_NAMESPACE("use Bar instead") Foo {}
-@endcode
+@snippet Utility.cpp CORRADE_DEPRECATED_NAMESPACE
 
 GCC claims support since version 4.9, but even in version 7.3 it only emits an
 "attribute ignored" warning at the declaration location no diagnostic when such
@@ -117,15 +109,7 @@ namespace is used --- which is practically useless
 Marked enum or enum value will emit deprecation warning on supported compilers
 (C++17 feature, MSVC 2015, Clang and GCC 6+):
 
-@code{.cpp}
-enum class CORRADE_DEPRECATED_ENUM("use Bar instead") Foo {};
-
-enum class Bar {
-    Fizz = 0,
-    Buzz = 1,
-    Baz CORRADE_DEPRECATED_ENUM("use Bar::Buzz instead") = 1
-};
-@endcode
+@snippet Utility.cpp CORRADE_DEPRECATED_ENUM
 
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
     @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_FILE()
@@ -167,6 +151,8 @@ system (`-isystem` on GCC and Clang).
 Putting this before unused variable will suppress compiler warning about it
 being unused. If possible, use @cpp static_cast<void>(var) @ce or nameless
 function parameters instead.
+
+@snippet Utility.cpp CORRADE_UNUSED
 */
 #if defined(__GNUC__)
 #define CORRADE_UNUSED __attribute__((__unused__))
@@ -182,9 +168,7 @@ function parameters instead.
 Expands to C++11 @cpp alignas() @ce specifier on supported compilers, otherwise
 falls back to compiler-specific attribute. Example usage:
 
-@code{.cpp}
-CORRADE_ALIGNAS(4) char data[16]; // so it can be read as 32-bit integers
-@endcode
+@snippet Utility.cpp CORRADE_ALIGNAS
 */
 #if defined(__GNUC__) && __GNUC__*100 + __GNUC_MINOR__ < 408
 #define CORRADE_ALIGNAS(alignment) __attribute__((aligned(alignment)))
@@ -198,9 +182,7 @@ CORRADE_ALIGNAS(4) char data[16]; // so it can be read as 32-bit integers
 Expands to C++11 @cpp [[noreturn]] @ce attribute on supported compilers,
 otherwise falls back to compiler-specific attribute. Example usage:
 
-@code{.cpp}
-CORRADE_NORETURN void exit42() { std::exit(42); }
-@endcode
+@snippet Utility.cpp CORRADE_NORETURN
 */
 #if defined(__GNUC__) && __GNUC__*100 + __GNUC_MINOR__ < 408
 #define CORRADE_NORETURN __attribute__((noreturn))

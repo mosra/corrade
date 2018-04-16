@@ -23,7 +23,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <cstdlib>
 #include <Corrade/Utility/Configuration.h>
+#include <Corrade/Utility/Macros.h>
 
 using namespace Corrade;
 
@@ -51,3 +53,55 @@ conf.save();
 }
 
 }
+
+namespace A {
+
+template<int> class Output;
+/* [CORRADE_DEPRECATED] */
+class CORRADE_DEPRECATED("use Bar instead") Foo;
+CORRADE_DEPRECATED("use bar() instead") void foo();
+typedef CORRADE_DEPRECATED("use Fizz instead") Output<5> Buzz;
+/* [CORRADE_DEPRECATED] */
+
+}
+
+namespace B {
+
+template<class> class Bar;
+/* [CORRADE_DEPRECATED_ALIAS] */
+template<class T> using Foo CORRADE_DEPRECATED_ALIAS("use Bar instead") = Bar<T>;
+/* [CORRADE_DEPRECATED_ALIAS] */
+
+}
+
+/* [CORRADE_DEPRECATED_NAMESPACE] */
+namespace CORRADE_DEPRECATED_NAMESPACE("use Bar instead") Foo {}
+/* [CORRADE_DEPRECATED_NAMESPACE] */
+
+namespace C {
+
+/* [CORRADE_DEPRECATED_ENUM] */
+enum class CORRADE_DEPRECATED_ENUM("use Bar instead") Foo {};
+
+enum class Bar {
+    Fizz = 0,
+    Buzz = 1,
+    Baz CORRADE_DEPRECATED_ENUM("use Bar::Buzz instead") = 1
+};
+/* [CORRADE_DEPRECATED_ENUM] */
+
+}
+
+/* [CORRADE_UNUSED] */
+int foo(int a, CORRADE_UNUSED int b) {
+    return a;
+}
+/* [CORRADE_UNUSED] */
+
+/* [CORRADE_ALIGNAS] */
+CORRADE_ALIGNAS(4) char data[16]; // so it can be read as 32-bit integers
+/* [CORRADE_ALIGNAS] */
+
+/* [CORRADE_NORETURN] */
+CORRADE_NORETURN void exit42() { std::exit(42); }
+/* [CORRADE_NORETURN] */
