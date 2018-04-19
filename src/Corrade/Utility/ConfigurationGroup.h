@@ -432,7 +432,7 @@ template<> inline std::vector<std::string> ConfigurationGroup::values(const std:
 
 template<class T> inline T ConfigurationGroup::value(const std::string& key, const unsigned int index, const ConfigurationValueFlags flags) const {
     std::string value = valueInternal(key, index, flags);
-    return value.empty() ? T() : ConfigurationValue<T>::fromString(value, flags);
+    return ConfigurationValue<T>::fromString(value, flags);
 }
 
 template<class T> std::vector<T> ConfigurationGroup::values(const std::string& key, const ConfigurationValueFlags flags) const {

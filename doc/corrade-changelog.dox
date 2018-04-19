@@ -92,6 +92,9 @@ namespace Corrade {
 -   Wrong destruction order of @ref PluginManager::Manager instances could lead
     to an infinite loop if cross-manager plugin dependencies were involved. Now
     an assertion fires instead.
+-   Fixed usage of @ref Utility::ConfigurationValue specializations to support
+    types without default constructors and be able to return
+    non-default-constructed instances for empty values.
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 

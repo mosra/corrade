@@ -142,30 +142,81 @@ namespace Implementation {
     };
 }
 
-/** @brief Configuration value parser and writer for `short` type */
+/**
+@brief Configuration value parser and writer for `short` type
+
+Empty value is parsed as @cpp 0 @ce.
+*/
 template<> struct ConfigurationValue<short>: public Implementation::BasicConfigurationValue<short> {};
-/** @brief Configuration value parser and writer for `unsigned short` type */
+
+/**
+@brief Configuration value parser and writer for `unsigned short` type
+
+Empty value is parsed as @cpp 0 @ce.
+*/
 template<> struct ConfigurationValue<unsigned short>: public Implementation::BasicConfigurationValue<unsigned short> {};
-/** @brief Configuration value parser and writer for `int` type */
+
+/**
+@brief Configuration value parser and writer for `int` type
+
+Empty value is parsed as @cpp 0 @ce.
+*/
 template<> struct ConfigurationValue<int>: public Implementation::BasicConfigurationValue<int> {};
-/** @brief Configuration value parser and writer for `unsigned int` type */
+
+/**
+@brief Configuration value parser and writer for `unsigned int` type
+
+Empty value is parsed as @cpp 0 @ce.
+*/
 template<> struct ConfigurationValue<unsigned int>: public Implementation::BasicConfigurationValue<unsigned int> {};
-/** @brief Configuration value parser and writer for `long` type */
+
+/**
+@brief Configuration value parser and writer for `long` type
+
+Empty value is parsed as @cpp 0 @ce.
+*/
 template<> struct ConfigurationValue<long>: public Implementation::BasicConfigurationValue<long> {};
-/** @brief Configuration value parser and writer for `unsigned long` type */
+
+/**
+@brief Configuration value parser and writer for `unsigned long` type
+
+Empty value is parsed as @cpp 0 @ce.
+*/
 template<> struct ConfigurationValue<unsigned long>: public Implementation::BasicConfigurationValue<unsigned long> {};
-/** @brief Configuration value parser and writer for `long long` type */
+
+/**
+@brief Configuration value parser and writer for `long long` type
+
+Empty value is parsed as @cpp 0 @ce.
+*/
 template<> struct ConfigurationValue<long long>: public Implementation::BasicConfigurationValue<long long> {};
-/** @brief Configuration value parser and writer for `unsigned long long` type */
+
+/**
+@brief Configuration value parser and writer for `unsigned long long` type
+
+Empty value is parsed as @cpp 0 @ce.
+*/
 template<> struct ConfigurationValue<unsigned long long>: public Implementation::BasicConfigurationValue<unsigned long long> {};
-/** @brief Configuration value parser and writer for `float` type */
+
+/**
+@brief Configuration value parser and writer for `float` type
+
+Empty value is parsed as @cpp 0.0f @ce.
+*/
 template<> struct ConfigurationValue<float>: public Implementation::BasicConfigurationValue<float> {};
-/** @brief Configuration value parser and writer for `double` type */
+
+/**
+@brief Configuration value parser and writer for `double` type
+
+Empty value is parsed as @cpp 0.0 @ce.
+*/
 template<> struct ConfigurationValue<double>: public Implementation::BasicConfigurationValue<double> {};
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN
 /**
 @brief Configuration value parser and writer for `long double` type
+
+Empty value is parsed as @cpp 0.0l @ce.
 @partialsupport Not available in @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" as
     JavaScript doesn't support doubles larger than 64 bits.
 */
@@ -193,7 +244,7 @@ template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<bool> {
 /**
 @brief Configuration value parser and writer for `char32_t` type
 
-Reads and writes the value in hexadecimal.
+Reads and writes the value in hexadecimal. Empty value is parsed as @cpp 0 @ce.
 */
 template<> struct CORRADE_UTILITY_EXPORT ConfigurationValue<char32_t> {
     ConfigurationValue() = delete;

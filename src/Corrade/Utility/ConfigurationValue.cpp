@@ -49,6 +49,8 @@ namespace Implementation {
     }
 
     template<class T> T BasicConfigurationValue<T>::fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
+        if(stringValue.empty()) return T{};
+
         std::istringstream stream{stringValue};
 
         /* Hexadecimal / octal values, scientific notation */

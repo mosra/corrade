@@ -26,7 +26,29 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Configuration.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility {
+
+namespace {
+
+struct NoDefaultConstructor {
+    explicit NoDefaultConstructor(std::size_t a): a{a} {}
+    std::size_t a;
+};
+
+}
+
+template<> struct ConfigurationValue<NoDefaultConstructor> {
+    ConfigurationValue() = delete;
+
+    static std::string toString(NoDefaultConstructor value, ConfigurationValueFlags) {
+        return std::string(value.a, 'a');
+    }
+    static NoDefaultConstructor fromString(const std::string& stringValue, ConfigurationValueFlags) {
+        return NoDefaultConstructor{stringValue.size()};
+    }
+};
+
+namespace Test {
 
 struct ConfigurationValueTest: TestSuite::Tester {
     explicit ConfigurationValueTest();
@@ -39,6 +61,8 @@ struct ConfigurationValueTest: TestSuite::Tester {
     void floatingPointScientific();
     void unicodeCharLiteral();
     void boolean();
+
+    void custom();
 };
 
 ConfigurationValueTest::ConfigurationValueTest() {
@@ -49,7 +73,9 @@ ConfigurationValueTest::ConfigurationValueTest() {
               &ConfigurationValueTest::floatingPoint,
               &ConfigurationValueTest::floatingPointScientific,
               &ConfigurationValueTest::unicodeCharLiteral,
-              &ConfigurationValueTest::boolean});
+              &ConfigurationValueTest::boolean,
+
+              &ConfigurationValueTest::custom});
 }
 
 void ConfigurationValueTest::string() {
@@ -63,6 +89,10 @@ void ConfigurationValueTest::string() {
     std::string newline{"hello\nworld"};
     c.setValue("newline", newline);
     CORRADE_COMPARE(c.value("newline"), newline);
+
+    /* Empty value is default-constructed */
+    c.setValue("empty", "");
+    CORRADE_COMPARE(c.value("empty"), "");
 }
 
 void ConfigurationValueTest::unsignedInteger() {
@@ -74,6 +104,10 @@ void ConfigurationValueTest::unsignedInteger() {
     c.setValue("uint", a);
     CORRADE_COMPARE(c.value("uint"), value);
     CORRADE_COMPARE(c.value<std::uint32_t>("uint"), a);
+
+    /* Empty value is default-constructed */
+    c.setValue("empty", "");
+    CORRADE_COMPARE(c.value<std::uint32_t>("empty"), 0);
 }
 
 void ConfigurationValueTest::signedInteger() {
@@ -85,6 +119,10 @@ void ConfigurationValueTest::signedInteger() {
     c.setValue("int", a);
     CORRADE_COMPARE(c.value("int"), value);
     CORRADE_COMPARE(c.value<std::int32_t>("int"), a);
+
+    /* Empty value is default-constructed */
+    c.setValue("empty", "");
+    CORRADE_COMPARE(c.value<std::int32_t>("empty"), 0);
 }
 
 void ConfigurationValueTest::integerFlags() {
@@ -144,7 +182,7 @@ void ConfigurationValueTest::floatingPoint() {
 
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     {
-        long double a = 0.125;
+        long double a = 0.125l;
         std::string value{"0.125"};
 
         c.setValue("ld", a);
@@ -152,6 +190,10 @@ void ConfigurationValueTest::floatingPoint() {
         CORRADE_COMPARE(c.value<long double>("ld"), a);
     }
     #endif
+
+    /* Empty value is default-constructed */
+    c.setValue("empty", "");
+    CORRADE_COMPARE(c.value<double>("empty"), 0);
 }
 
 void ConfigurationValueTest::floatingPointScientific() {
@@ -275,6 +317,10 @@ void ConfigurationValueTest::unicodeCharLiteral() {
     c.setValue("unicode", a);
     CORRADE_COMPARE(c.value("unicode"), value);
     CORRADE_COMPARE(c.value<char32_t>("unicode"), a);
+
+    /* Empty value is default-constructed */
+    c.setValue("empty", "");
+    CORRADE_COMPARE(c.value<char32_t>("empty"), 0);
 }
 
 void ConfigurationValueTest::boolean() {
@@ -288,6 +334,34 @@ void ConfigurationValueTest::boolean() {
     CORRADE_COMPARE(c.value<bool>("bool", 0), true);
     CORRADE_COMPARE(c.value("bool", 1), "false");
     CORRADE_COMPARE(c.value<bool>("bool", 1), false);
+
+    /* Empty value is default-constructed */
+    c.setValue("empty", "");
+    CORRADE_COMPARE(c.value<bool>("empty"), false);
+}
+
+void ConfigurationValueTest::custom() {
+    Configuration c;
+
+    c.setValue("custom", NoDefaultConstructor{15});
+    CORRADE_COMPARE(c.value("custom"), "aaaaaaaaaaaaaaa");
+    CORRADE_COMPARE(c.value<NoDefaultConstructor>("custom").a, 15);
+
+    c.setValue("empty", NoDefaultConstructor{0});
+    CORRADE_COMPARE(c.value("empty"), "");
+    CORRADE_COMPARE(c.value<NoDefaultConstructor>("empty").a, 0);
+
+    c.addValue("more", NoDefaultConstructor{2});
+    c.addValue("more", NoDefaultConstructor{5});
+    c.addValue("more", NoDefaultConstructor{0});
+    c.addValue("more", NoDefaultConstructor{7});
+
+    std::vector<NoDefaultConstructor> values = c.values<NoDefaultConstructor>("more");
+    CORRADE_COMPARE(values.size(), 4);
+    CORRADE_COMPARE(values[0].a, 2);
+    CORRADE_COMPARE(values[1].a, 5);
+    CORRADE_COMPARE(values[2].a, 0);
+    CORRADE_COMPARE(values[3].a, 7);
 }
 
 }}}
