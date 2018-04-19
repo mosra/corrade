@@ -131,7 +131,7 @@ Marked enum or enum value will emit deprecation warning on supported compilers
 @brief File deprecation mark
 
 Putting this in a file will emit deprecation warning when given file is
-included or compiled (GCC, Clang):
+included or compiled (GCC 4.8, Clang):
 
 @code{.cpp}
 CORRADE_DEPRECATED_FILE("use Bar.h instead") // yes, no semicolon at the end
@@ -144,7 +144,7 @@ system (`-isystem` on GCC and Clang).
 */
 #if defined(__clang__)
 #define CORRADE_DEPRECATED_FILE(message) _Pragma(_CORRADE_HELPER_STR(GCC warning ("this file is deprecated: " message)))
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) && __GNUC__*100 + __GNUC_MINOR__ >= 408
 #define CORRADE_DEPRECATED_FILE(message) _Pragma(_CORRADE_HELPER_STR(GCC warning message))
 #else
 #define CORRADE_DEPRECATED_FILE(message)
