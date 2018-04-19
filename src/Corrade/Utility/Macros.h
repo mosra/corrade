@@ -168,10 +168,12 @@ In order to avoid warning suppressions to leak, for every
 
 In particular, warnings from @ref CORRADE_DEPRECATED(),
 @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE() and
-@ref CORRADE_DEPRECATED_ENUM() are suppressed. Doesn't suppress
-@ref CORRADE_DEPRECATED_FILE() warnings.
+@ref CORRADE_DEPRECATED_ENUM() are suppressed. The
+@ref CORRADE_DEPRECATED_FILE() warnings are suppressed only on Clang.
 */
-#ifdef __GNUC__
+#ifdef __clang__
+#define CORRADE_IGNORE_DEPRECATED_PUSH _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"") _Pragma("GCC diagnostic ignored \"-W#pragma-messages\"")
+#elif defined(__GNUC__)
 #define CORRADE_IGNORE_DEPRECATED_PUSH _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
 #elif defined(_MSC_VER)
 #define CORRADE_IGNORE_DEPRECATED_PUSH __pragma(warning(push)) __pragma(warning(disable: 4996))

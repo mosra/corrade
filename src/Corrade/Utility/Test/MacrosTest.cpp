@@ -61,7 +61,6 @@ enum class Foo { DeprecatedEnumValue CORRADE_DEPRECATED_ENUM("use Foo::Value ins
 namespace CORRADE_DEPRECATED_NAMESPACE("use Namespace instead") DeprecatedNamespace {
     enum: int { Value = 1 };
 }
-/* Not sure how to test CORRADE_DEPRECATED_FILE() though */
 
 }
 
@@ -71,6 +70,8 @@ namespace CORRADE_DEPRECATED_NAMESPACE("use Namespace instead") DeprecatedNamesp
 #ifndef ENABLE_DEPRECATION_WARNINGS
 CORRADE_IGNORE_DEPRECATED_PUSH
 #endif
+CORRADE_DEPRECATED_FILE("ignore me, I'm just testing the CORRADE_DEPRECATED_FILE() macro")
+
 void MacrosTest::deprecated() {
     CORRADE_VERIFY(deprecatedFunction());
     CORRADE_VERIFY(DeprecatedStruct::Value);
