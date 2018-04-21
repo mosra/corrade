@@ -150,10 +150,10 @@ void NumericTest::around() {
     std::stringstream out;
 
     {
-        Error e(&out);
+        Error err{&out};
         Comparator<Around<float>> compare{0.02f};
         CORRADE_VERIFY(!compare(a, b));
-        compare.printErrorMessage(e, "a", "b");
+        compare.printErrorMessage(err, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Value a is not around b, actual is 9.25 but 9.26 <= expected <= 9.3\n");

@@ -437,12 +437,12 @@ template<class T> inline T ConfigurationGroup::value(const std::string& key, con
 
 template<class T> std::vector<T> ConfigurationGroup::values(const std::string& key, const ConfigurationValueFlags flags) const {
     std::vector<std::string> stringValues = valuesInternal(key, flags);
-    std::vector<T> _values;
-    _values.reserve(stringValues.size());
+    std::vector<T> values;
+    values.reserve(stringValues.size());
     for(std::vector<std::string>::const_iterator it = stringValues.begin(); it != stringValues.end(); ++it)
-        _values.push_back(ConfigurationValue<T>::fromString(*it, flags));
+        values.push_back(ConfigurationValue<T>::fromString(*it, flags));
 
-    return _values;
+    return values;
 }
 
 }}

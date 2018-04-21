@@ -194,18 +194,18 @@ Containers::ArrayView<const char> Configuration::parse(Containers::ArrayView<con
                 /* If the subgroup has a shorthand for multiple nesting, call
                    parse() on this same line again but with nested group and
                    larger fullPath */
-                const std::size_t end = nextGroup.find('/', fullPath.size());
-                if(end != std::string::npos) {
-                    if(end == fullPath.size())
+                const std::size_t groupEnd = nextGroup.find('/', fullPath.size());
+                if(groupEnd != std::string::npos) {
+                    if(groupEnd == fullPath.size())
                         throw std::string("empty subgroup name");
 
-                    g.name = nextGroup.substr(fullPath.size(), end - fullPath.size());
+                    g.name = nextGroup.substr(fullPath.size(), groupEnd - fullPath.size());
                     g.group = new ConfigurationGroup(_configuration);
                     /* Add the group before attempting any other parsing, as it
                        could throw an exception and the group would otherwise
                        be leaked */
                     group->_groups.push_back(std::move(g));
-                    in = parse(currentLine, g.group, nextGroup.substr(0, end+1));
+                    in = parse(currentLine, g.group, nextGroup.substr(0, groupEnd + 1));
 
                 /* Otherwise call parse() on the next line */
                 } else {
