@@ -635,8 +635,15 @@ namespace Implementation {
     template<class T> inline void tupleDebugOutput(Debug&, const T&, Sequence<>) {}
     template<class T, std::size_t i, std::size_t ...sequence> void tupleDebugOutput(Debug& debug, const T& tuple, Sequence<i, sequence...>) {
         debug << std::get<i>(tuple);
+        #ifdef _MSC_VER
+        #pragma warning(push)
+        #pragma warning(disable:4127) /* conditional expression is constant (of course) */
+        #endif
         if(i + 1 != std::tuple_size<T>::value)
             debug << Debug::nospace << ",";
+        #ifdef _MSC_VER
+        #pragma warning(pop)
+        #endif
         tupleDebugOutput(debug, tuple, Sequence<sequence...>{});
     }
 }
