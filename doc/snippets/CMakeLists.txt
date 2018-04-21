@@ -23,6 +23,15 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+# On MSVC remove /W3, as we are replacing it with /W4
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
+    string(REPLACE "/W3" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+endif()
+
+set_directory_properties(PROPERTIES
+    CORRADE_CXX_STANDARD 11
+    CORRADE_USE_PEDANTIC_FLAGS ON)
+
 if(WITH_PLUGINMANAGER)
     add_library(snippets-PluginManager STATIC PluginManager.cpp)
     target_link_libraries(snippets-PluginManager PRIVATE CorradePluginManager)

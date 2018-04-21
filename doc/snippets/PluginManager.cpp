@@ -54,7 +54,7 @@ class AbstractFilesystem: public PluginManager::AbstractPlugin {
 /* [AbstractPlugin] */
 
 /* [CORRADE_PLUGIN_IMPORT] */
-int corradeZipFilesystemStaticImport() {
+static int corradeZipFilesystemStaticImport() {
     CORRADE_PLUGIN_IMPORT(ZipFilesystem)
     return 1;
 } CORRADE_AUTOMATIC_INITIALIZER(corradeZipFilesystemStaticImport)

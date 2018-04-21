@@ -28,6 +28,8 @@
 
 using namespace Corrade;
 
+namespace {
+
 /* Taken from https://en.wikipedia.org/wiki/Fast_inverse_square_root */
 float fastinvsqrt(float number) {
     int i;
@@ -41,6 +43,8 @@ float fastinvsqrt(float number) {
     y = *reinterpret_cast<float*>(&i);
     y = y*(threehalfs - (x2*y*y));
     return y;
+}
+
 }
 
 /** [0] */
@@ -62,12 +66,14 @@ void InvSqrtBenchmark::naive() {
     volatile float a; /* to avoid optimizers removing the benchmark code */
     CORRADE_BENCHMARK(1000000)
         a = 1.0f/std::sqrt(float(testCaseRepeatId()));
+    CORRADE_VERIFY(a);
 }
 
 void InvSqrtBenchmark::fast() {
     volatile float a; /* to avoid optimizers removing the benchmark code */
     CORRADE_BENCHMARK(1000000)
         a = fastinvsqrt(float(testCaseRepeatId()));
+    CORRADE_VERIFY(a);
 }
 
 CORRADE_TEST_MAIN(InvSqrtBenchmark)
