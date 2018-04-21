@@ -29,6 +29,8 @@
  * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_ALIGNAS(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
+#include "Corrade/configure.h"
+
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /* Internal macro implementation */
 #define _CORRADE_HELPER_PASTE2(a, b) a ## b
@@ -94,13 +96,16 @@ namespace is used --- which is practically useless
     @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE()
 */
 #if defined(__clang__)
-/* Clang < 6.0 warns that this is a C++14 extension, Clang 6.0 warns that this
-   is a C++17 extension. Clang < 6.0 doesn't know -Wc++17-extensions, so can't
-   disable both in the same macro. YAY!! */
-#if __clang__major__ < 6
+/* Clang < 6.0 warns that this is a C++14 extension, Clang 6.0+ warns that
+   namespace attributes are a C++17 extension and deprecated attribute is a
+   C++14 extension. Clang < 6.0 doesn't know -Wc++17-extensions, so can't
+   disable both in the same macro. Also, Apple has its own versioning of Clang
+   (even in __clang_major__, args) and at the moment (April 2018) latest Xcode
+   9.3 maps to Clang 5.1, so I assume Xcode 10 will be Clang 6. Yay? */
+#if (!defined(CORRADE_TARGET_APPLE) && __clang_major__ < 6) || (defined(CORRADE_TARGET_APPLE) && __clang_major__ < 10)
 #define CORRADE_DEPRECATED_NAMESPACE(message) _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wc++14-extensions\"") [[deprecated(message)]] _Pragma("GCC diagnostic pop")
 #else
-#define CORRADE_DEPRECATED_NAMESPACE(message) _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wc++17-extensions\"") [[deprecated(message)]] _Pragma("GCC diagnostic pop")
+#define CORRADE_DEPRECATED_NAMESPACE(message) _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wc++14-extensions\"") _Pragma("GCC diagnostic ignored \"-Wc++17-extensions\"") [[deprecated(message)]] _Pragma("GCC diagnostic pop")
 #endif
 #elif defined(_MSC_VER)
 #define CORRADE_DEPRECATED_NAMESPACE(message) [[deprecated(message)]]
