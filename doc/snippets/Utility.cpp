@@ -84,8 +84,11 @@ template<class T> using Foo CORRADE_DEPRECATED_ALIAS("use Bar instead") = Bar<T>
 
 }
 
+namespace Bar {}
 /* [CORRADE_DEPRECATED_NAMESPACE] */
-namespace CORRADE_DEPRECATED_NAMESPACE("use Bar instead") Foo {}
+namespace CORRADE_DEPRECATED_NAMESPACE("use Bar instead") Foo {
+    using namespace Bar;
+}
 /* [CORRADE_DEPRECATED_NAMESPACE] */
 
 namespace C {

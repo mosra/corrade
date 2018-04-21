@@ -87,9 +87,12 @@ Marked enum or enum value will emit deprecation warning on supported compilers
 
 @snippet Utility.cpp CORRADE_DEPRECATED_NAMESPACE
 
+Note that this doesn't work on namespace aliases (i.e., marking
+@cpp namespace Bar = Foo; @ce with this macro will result in a compile error.
+
 GCC claims support since version 4.9, but even in version 7.3 it only emits an
-"attribute ignored" warning at the declaration location no diagnostic when such
-namespace is used --- which is practically useless
+"attribute ignored" warning at the declaration location and no diagnostic when
+such namespace is used --- which is practically useless
 ([source](https://stackoverflow.com/q/46052410)).
 
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
@@ -142,11 +145,15 @@ included or compiled (GCC 4.8, Clang, MSVC):
 CORRADE_DEPRECATED_FILE("use Bar.h instead") // yes, no semicolon at the end
 @endcode
 
-On Clang and MSVC the message is prepended with *this file is deprecated*,
-which is not possible on GCC. Note that the warning is suppressed in case given
-directory is included as system (`-isystem` on GCC and Clang). Due to MSVC
-limitation, the warning also just appears in the log output on MSVC and doesn't
-contribute to the warning log.
+On Clang the message is prepended with *this file is deprecated*, which is not
+possible on GCC. Note that the warning is suppressed in case given
+directory is included as system (`-isystem` on GCC and Clang).
+
+On MSVC the message is prepended with *warning: &lt;file&gt; is deprecated*.
+The message just appears in the log output without any association to a
+particular file, so the file is included in the message. Due to MSVC
+limitations, the message doesn't contribute to the warning log or warning count
+in any way.
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
     @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM()
 */
