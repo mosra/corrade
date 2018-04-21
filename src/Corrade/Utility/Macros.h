@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_ALIGNAS(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
+ * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_MACRO(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_ALIGNAS(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
 #include "Corrade/configure.h"
@@ -50,7 +50,8 @@ compilers (GCC, Clang, MSVC):
 Might not work for template aliases, namespaces and enum values on all
 compilers, use @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE()
 and @ref CORRADE_DEPRECATED_ENUM() instead. See @ref CORRADE_DEPRECATED_FILE()
-for file-level deprecation.
+for file-level deprecation and @ref CORRADE_DEPRECATED_MACRO() for deprecating
+macros.
 */
 #if defined(__GNUC__) || defined(__clang__)
 #define CORRADE_DEPRECATED(message) __attribute((deprecated(message)))
@@ -69,7 +70,8 @@ MSVC 2017):
 @snippet Utility.cpp CORRADE_DEPRECATED_ALIAS
 
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_NAMESPACE(),
-    @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE()
+    @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(),
+    @ref CORRADE_DEPRECATED_MACRO()
 */
 #if defined(__GNUC__) || defined(__clang__)
 #define CORRADE_DEPRECATED_ALIAS(message) __attribute((deprecated(message)))
@@ -96,7 +98,8 @@ such namespace is used --- which is practically useless
 ([source](https://stackoverflow.com/q/46052410)).
 
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
-    @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE()
+    @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(),
+    @ref CORRADE_DEPRECATED_MACRO()
 */
 #if defined(__clang__)
 /* Clang < 6.0 warns that this is a C++14 extension, Clang 6.0+ warns that
@@ -125,7 +128,8 @@ Marked enum or enum value will emit deprecation warning on supported compilers
 @snippet Utility.cpp CORRADE_DEPRECATED_ENUM
 
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
-    @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_FILE()
+    @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_FILE(),
+    @ref CORRADE_DEPRECATED_MACRO()
 */
 #if defined(__clang__) || (defined(__GNUC__) && __GNUC__ >= 6)
 #define CORRADE_DEPRECATED_ENUM(message) __attribute((deprecated(message)))
@@ -155,7 +159,8 @@ particular file, so the file is included in the message. Due to MSVC
 limitations, the message doesn't contribute to the warning log or warning count
 in any way.
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
-    @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM()
+    @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(),
+    @ref CORRADE_DEPRECATED_MACRO()
 */
 #if defined(__clang__)
 #define CORRADE_DEPRECATED_FILE(message) _Pragma(_CORRADE_HELPER_STR(GCC warning ("this file is deprecated: " message)))
@@ -165,6 +170,39 @@ in any way.
 #define CORRADE_DEPRECATED_FILE(_message) __pragma(message ("warning: " __FILE__ " is deprecated: " _message))
 #else
 #define CORRADE_DEPRECATED_FILE(message)
+#endif
+
+/** @hideinitializer
+@brief Macro deprecation mark
+
+Putting this in a macro definition will emit deprecation warning when given
+macro is used (GCC 4.8, Clang, MSVC):
+
+@code{.cpp}
+#define MAKE_FOO(args) \
+    CORRADE_DEPRECATED_MACRO(MAKE_FOO(),"use MAKE_BAR() instead") MAKE_BAR(args)
+@endcode
+
+On Clang and MSVC the message is prepended with *this macro is deprecated*,
+which is not possible on GCC.
+
+On MSVC the message is prepended with *&lt;file&gt; warning: &lt;macro&gt; is deprecated*,
+where the macro name is taken from the first argument. The message just appears
+in the log output without any association to a particular file, so the file is
+included in the message. Due to MSVC limitations, the message doesn't
+contribute to the warning log or warning count in any way.
+@see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
+    @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(),
+    @ref CORRADE_DEPRECATED_FILE()
+*/
+#if defined(__clang__)
+#define CORRADE_DEPRECATED_MACRO(macro,message) _Pragma(_CORRADE_HELPER_STR(GCC warning ("this macro is deprecated: " message)))
+#elif defined(__GNUC__) && __GNUC__*100 + __GNUC_MINOR__ >= 408
+#define CORRADE_DEPRECATED_MACRO(macro,message) _Pragma(_CORRADE_HELPER_STR(GCC warning message))
+#elif defined(_MSC_VER)
+#define CORRADE_DEPRECATED_MACRO(macro,_message) __pragma(message (__FILE__ ": warning: " _CORRADE_HELPER_STR(macro) " is deprecated: " _message))
+#else
+#define CORRADE_DEPRECATED_MACRO(macro,message)
 #endif
 
 /** @hideinitializer
@@ -181,7 +219,8 @@ In order to avoid warning suppressions to leak, for every
 In particular, warnings from @ref CORRADE_DEPRECATED(),
 @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE() and
 @ref CORRADE_DEPRECATED_ENUM() are suppressed. The
-@ref CORRADE_DEPRECATED_FILE() warnings are suppressed only on Clang.
+@ref CORRADE_DEPRECATED_FILE() and @ref CORRADE_DEPRECATED_MACRO() warnings are
+suppressed only on Clang.
 */
 #ifdef __clang__
 #define CORRADE_IGNORE_DEPRECATED_PUSH _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"") _Pragma("GCC diagnostic ignored \"-W#pragma-messages\"")

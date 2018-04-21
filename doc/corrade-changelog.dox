@@ -70,7 +70,8 @@ namespace Corrade {
 
 -   Ability to query current scoped output stream using @ref Utility::Debug::output(),
     @ref Utility::Warning::output() and @ref Utility::Error::output()
--   New @ref CORRADE_DEPRECATED_NAMESPACE() macro
+-   New @ref CORRADE_DEPRECATED_NAMESPACE() and @ref CORRADE_DEPRECATED_FILE()
+    macros
 -   New @ref CORRADE_IGNORE_DEPRECATED_PUSH and @ref CORRADE_IGNORE_DEPRECATED_POP
     macros useful for writing and testing APIs that need to use deprecated
     functionality

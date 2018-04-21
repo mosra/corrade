@@ -62,6 +62,10 @@ namespace CORRADE_DEPRECATED_NAMESPACE("use Namespace instead") DeprecatedNamesp
     enum: int { Value = 1 };
 }
 
+#define MACRO(foo) do {} while(false)
+#define DEPRECATED_MACRO(foo) \
+    CORRADE_DEPRECATED_MACRO(DEPRECATED_MACRO(),"ignore me, I'm just testing the CORRADE_DEPRECATED_MACRO() macro") MACRO(foo)
+
 }
 
 /* Uncomment to test deprecation warnings */
@@ -73,6 +77,8 @@ CORRADE_IGNORE_DEPRECATED_PUSH
 CORRADE_DEPRECATED_FILE("ignore me, I'm just testing the CORRADE_DEPRECATED_FILE() macro")
 
 void MacrosTest::deprecated() {
+    DEPRECATED_MACRO(hello?);
+
     CORRADE_VERIFY(deprecatedFunction());
     CORRADE_VERIFY(DeprecatedStruct::Value);
     CORRADE_VERIFY(DeprecatedAlias::Value);
