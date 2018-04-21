@@ -165,7 +165,7 @@ void ConfigurationValueTest::floatingPoint() {
     Configuration c;
 
     {
-        float a = 3.78;
+        float a = 3.78f;
         std::string value{"3.78"};
 
         c.setValue("float", a);
