@@ -23,7 +23,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <iostream>
+#include <fstream>
 #include <cstdlib>
+#include <Corrade/Utility/Arguments.h>
 #include <Corrade/Utility/Assert.h>
 #include <Corrade/Utility/Configuration.h>
 #include <Corrade/Utility/Macros.h>
@@ -94,6 +97,63 @@ switch(flag) {
 
 CORRADE_ASSERT_UNREACHABLE();
 /* [CORRADE_ASSERT_UNREACHABLE] */
+}
+};
+
+class Buzz {
+/* [Arguments-usage] */
+int main(int argc, char** argv) {
+    Utility::Arguments args;
+    args.addArgument("text").setHelp("text", "the text to print")
+        .addNamedArgument('n', "repeat").setHelp("repeat", "repeat count")
+        .addBooleanOption('v', "verbose").setHelp("verbose", "log verbosely")
+        .addOption("log", "log.txt").setHelp("log", "save verbose log to given file")
+        .setHelp("Repeats the text given number of times.")
+        .parse(argc, argv);
+
+    std::ofstream logOutput(args.value("log"));
+    for(int i = 0; i < args.value<int>("repeat"); ++i) {
+        if(args.isSet("verbose")) {
+            logOutput << "Printing instance " << i << " of text " << args.value("text");
+        }
+
+        std::cout << args.value("text");
+    }
+
+    return 0;
+}
+/* [Arguments-usage] */
+
+void another(int argc, char** argv) {
+/* [Arguments-delegating] */
+{
+    /* The underlying library */
+    Utility::Arguments args{"formatter"};
+    args.addOption("width", "80").setHelp("width", "number of columns")
+        .addOption("color", "auto").setHelp("color", "output color")
+        .parse(argc, argv);
+}
+
+/* The application */
+Utility::Arguments args;
+args.addArgument("text").setHelp("text", "the text to print")
+    .addNamedArgument('n', "repeat").setHelp("repeat", "repeat count")
+    .addSkippedPrefix("formatter", "formatter options")
+    .setHelp("Repeats the text given number of times.")
+    .parse(argc, argv);
+/* [Arguments-delegating] */
+
+{
+/* [Arguments-delegating-bool] */
+Utility::Arguments args{"formatter"};
+args.addOption("unicode", "false");
+
+// ...
+
+bool handleUnicode = args.value<bool>("unicode");
+/* [Arguments-delegating-bool] */
+static_cast<void>(handleUnicode);
+}
 }
 };
 

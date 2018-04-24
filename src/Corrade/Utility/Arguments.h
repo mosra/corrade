@@ -58,28 +58,7 @@ argument etc.), the parser prints short usage information and exits.
 Contrived example of command-line utility which prints given text given number
 of times, optionally redirecting the output to a file:
 
-@code{.cpp}
-int main(int argc, char** argv) {
-    Arguments args;
-    args.addArgument("text").setHelp("text", "the text to print")
-        .addNamedArgument('n', "repeat").setHelp("repeat", "repeat count")
-        .addBooleanOption('v', "verbose").setHelp("verbose", "log verbosely")
-        .addOption("log", "log.txt").setHelp("log", "save verbose log to given file")
-        .setHelp("Repeats the text given number of times.")
-        .parse(argc, argv);
-
-    std::ofstream logOutput(args.value("log"));
-    for(int i = 0; i < args.value<int>("repeat"); ++i) {
-        if(args.isSet("verbose")) {
-            logOutput << "Printing instance " << i << " of text " << args.value("text");
-        }
-
-        std::cout << args.value("text");
-    }
-
-    return 0;
-}
-@endcode
+@snippet Utility.cpp Arguments-usage
 
 Upon requesting help, the utility prints the following:
 
@@ -109,23 +88,7 @@ would skip those instead of reporting them as unknown. The prefixed arguments
 are restricted to non-boolean options with long names to keep the usage simple
 both for the application author and users. Example:
 
-@code{.cpp}
-{
-    // the underlying library
-    Arguments args{"formatter"};
-    args.addOption("width", "80").setHelp("width", "number of columns")
-        .addOption("color", "auto").setHelp("color", "output color")
-        .parse(argc, argv);
-}
-
-// the application
-Arguments args;
-args.addArgument("text").setHelp("text", "the text to print")
-    .addNamedArgument('n', "repeat").setHelp("repeat", "repeat count")
-    .addSkippedPrefix("formatter", "formatter options")
-    .setHelp("Repeats the text given number of times.")
-    .parse(argc, argv);
-@endcode
+@snippet Utility.cpp Arguments-delegating
 
 The application can be then called like the following, the prefixed and
 unprefixed options and named arguments can be mixed without restriction:
@@ -165,6 +128,11 @@ Arguments:
   --formatter-color COLOR  output color
                            (default: auto)
 @endcode
+
+Boolean options would cause parsing ambiguity so they are not allowed, but you
+can work around the limitation like this, for example:
+
+@snippet Utility.cpp Arguments-delegating-bool
 */
 class CORRADE_UTILITY_EXPORT Arguments {
     public:
