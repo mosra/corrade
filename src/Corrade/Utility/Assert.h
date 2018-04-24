@@ -160,7 +160,7 @@ defined, this macro does nothing. Example usage:
 #define CORRADE_INTERNAL_ASSERT(condition)                                  \
     do {                                                                    \
         if(!(condition)) {                                                  \
-            Corrade::Utility::Error() << "Assertion" << #condition << "failed in" << __FILE__ << "on line" << __LINE__; \
+            Corrade::Utility::Error() << "Assertion " #condition " failed in " __FILE__ " on line" << __LINE__; \
             std::abort();                                                   \
         }                                                                   \
     } while(false)
@@ -184,7 +184,7 @@ Example usage:
 #define CORRADE_INTERNAL_ASSERT_OUTPUT(call)                                \
     do {                                                                    \
         if(!(call)) {                                                       \
-            Corrade::Utility::Error() << "Assertion" << #call << "failed in" << __FILE__ << "on line" << __LINE__; \
+            Corrade::Utility::Error() << "Assertion " #call " failed in " __FILE__ " on line" << __LINE__; \
             std::abort();                                                   \
         }                                                                   \
     } while(false)
@@ -211,7 +211,7 @@ given code is not reachable, possibly improving performance. Example usage:
 #else
 #define CORRADE_ASSERT_UNREACHABLE()                                        \
     do {                                                                    \
-        Corrade::Utility::Error() << "Reached unreachable code in" << __FILE__ << "on line" << __LINE__; \
+        Corrade::Utility::Error() << "Reached unreachable code in " __FILE__ " on line" << __LINE__; \
         std::abort();                                                       \
     } while(false)
 #endif
