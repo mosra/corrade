@@ -37,6 +37,51 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
 corrade_add_test(UtilityArgumentsTest ArgumentsTest.cpp LIBRARIES CorradeUtilityTestLib)
 set_tests_properties(UtilityArgumentsTest
     PROPERTIES ENVIRONMENT "ARGUMENTSTEST_SIZE=1337;ARGUMENTSTEST_VERBOSE=ON;ARGUMENTSTEST_COLOR=OFF;ARGUMENTSTEST_UNICODE=hýždě")
+
+add_library(AssertTestObjects OBJECT AssertTest.cpp)
+target_include_directories(AssertTestObjects PRIVATE $<TARGET_PROPERTY:CorradeUtility,INTERFACE_INCLUDE_DIRECTORIES>)
+corrade_add_test(UtilityAssertTest
+    $<TARGET_OBJECTS:AssertTestObjects>
+    ${PROJECT_SOURCE_DIR}/src/dummy.cpp)
+# WILL_FAIL doesn't work for abort() on desktop, test this only on embedded
+# then. Oh well. Also the tests could be just one executable added multiple
+# times with different arguments, but corrade_add_test() doesn't support that,
+# so I'm doing it at least via an OBJECTS library.
+if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
+    corrade_add_test(UtilityAssertTestFailAssert
+        $<TARGET_OBJECTS:AssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp
+        ARGUMENTS --fail-on-assert true)
+    set_tests_properties(UtilityAssertTestFailAssert PROPERTIES
+        PASS_REGULAR_EXPRESSION "A should be zero")
+    corrade_add_test(UtilityAssertTestFailInternalAssert
+        $<TARGET_OBJECTS:AssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp
+        ARGUMENTS --fail-on-internal-assert true)
+    set_tests_properties(UtilityAssertTestFailInternalAssert PROPERTIES
+        PASS_REGULAR_EXPRESSION "Assertion b && !_failInternalAssert failed in ")
+    corrade_add_test(UtilityAssertTestFailAssertOutput
+        $<TARGET_OBJECTS:AssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp
+        ARGUMENTS --fail-on-assert-output true)
+    set_tests_properties(UtilityAssertTestFailAssertOutput PROPERTIES
+        PASS_REGULAR_EXPRESSION "foo\\(\\) should succeed")
+    corrade_add_test(UtilityAssertTestFailInternalAssertOutput
+        $<TARGET_OBJECTS:AssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp
+        ARGUMENTS --fail-on-internal-assert-output true)
+    set_tests_properties(UtilityAssertTestFailInternalAssertOutput PROPERTIES
+        PASS_REGULAR_EXPRESSION "Assertion foo\\(\\) && !_failInternalAssertOutput failed in ")
+    corrade_add_test(UtilityAssertTestFailAssertUnreachable
+        $<TARGET_OBJECTS:AssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp
+        ARGUMENTS --fail-on-assert-unreachable true)
+    set_tests_properties(UtilityAssertTestFailAssertUnreachable PROPERTIES
+        PASS_REGULAR_EXPRESSION "Reached unreachable code in ")
+endif()
+
+corrade_add_test(UtilityAssertDisabledTest AssertDisabledTest.cpp)
+corrade_add_test(UtilityAssertGracefulTest AssertGracefulTest.cpp)
 corrade_add_test(UtilityEndianTest EndianTest.cpp)
 corrade_add_test(UtilityMurmurHash2Test MurmurHash2Test.cpp)
 corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp
