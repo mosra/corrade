@@ -100,6 +100,20 @@ CORRADE_ASSERT_UNREACHABLE();
 }
 };
 
+/* [CORRADE_CONSTEXPR_ASSERT] */
+constexpr int divide(int a, int b) {
+    return CORRADE_CONSTEXPR_ASSERT(b, "divide(): can't divide by zero"), a/b;
+}
+/* [CORRADE_CONSTEXPR_ASSERT] */
+
+namespace Internal {
+/* [CORRADE_INTERNAL_CONSTEXPR_ASSERT] */
+constexpr int divide(int a, int b) {
+    return CORRADE_INTERNAL_CONSTEXPR_ASSERT(b), a/b;
+}
+/* [CORRADE_INTERNAL_CONSTEXPR_ASSERT] */
+}
+
 class Buzz {
 /* [Arguments-usage] */
 int main(int argc, char** argv) {

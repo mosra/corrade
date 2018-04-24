@@ -36,10 +36,12 @@ struct AssertDisabledTest: TestSuite::Tester {
     explicit AssertDisabledTest();
 
     void test();
+    void constexprTest();
 };
 
 AssertDisabledTest::AssertDisabledTest() {
-    addTests({&AssertDisabledTest::test});
+    addTests({&AssertDisabledTest::test,
+              &AssertDisabledTest::constexprTest});
 }
 
 void AssertDisabledTest::test() {
@@ -61,6 +63,39 @@ void AssertDisabledTest::test() {
     CORRADE_COMPARE(a, 3);
     CORRADE_COMPARE(b, 3);
     CORRADE_COMPARE(c, 3);
+    CORRADE_COMPARE(out.str(), "");
+}
+
+namespace {
+
+constexpr int divide(int a, int b) {
+    return CORRADE_CONSTEXPR_ASSERT(b, "b can't be zero"), a/(b + 5);
+}
+
+constexpr int divideInternal(int a, int b) {
+    return CORRADE_INTERNAL_CONSTEXPR_ASSERT(b), a/(b + 5);
+}
+
+}
+
+void AssertDisabledTest::constexprTest() {
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    {
+        constexpr int three = divide(15, 0);
+        CORRADE_COMPARE(three, 3);
+    } {
+        constexpr int three = divideInternal(15, 0);
+        CORRADE_COMPARE(three, 3);
+    } {
+        int three = divide(15, 0);
+        CORRADE_COMPARE(three, 3);
+    } {
+        int three = divideInternal(15, 0);
+        CORRADE_COMPARE(three, 3);
+    }
+
     CORRADE_COMPARE(out.str(), "");
 }
 

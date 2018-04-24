@@ -36,10 +36,12 @@ struct AssertGracefulTest: TestSuite::Tester {
     explicit AssertGracefulTest();
 
     void test();
+    void constexprTest();
 };
 
 AssertGracefulTest::AssertGracefulTest() {
-    addTests({&AssertGracefulTest::test});
+    addTests({&AssertGracefulTest::test,
+              &AssertGracefulTest::constexprTest});
 }
 
 void AssertGracefulTest::test() {
@@ -65,6 +67,29 @@ void AssertGracefulTest::test() {
         "A should be zero!\n"
         "foo() should succeed\n"
         "foo() should succeed!\n");
+}
+
+namespace {
+
+constexpr int divide(int a, int b) {
+    return CORRADE_CONSTEXPR_ASSERT(b, "b can't be zero"), a/(b + 5);
+}
+
+}
+
+void AssertGracefulTest::constexprTest() {
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    {
+        int three = divide(15, 0);
+        CORRADE_COMPARE(three, 3);
+    }
+
+    /* CORRADE_INTERNAL_CONSTEXPR_ASSERT() doesn't have a graceful version */
+
+    CORRADE_COMPARE(out.str(),
+        "b can't be zero\n");
 }
 
 }}}
