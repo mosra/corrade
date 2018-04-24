@@ -107,6 +107,7 @@ std::vector<std::string> Arguments::environment() {
     #ifdef __clang__
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Winvalid-pp-token"
+    #pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
     #endif
     char* const env = reinterpret_cast<char*>(EM_ASM_INT_V({
         var env = '';

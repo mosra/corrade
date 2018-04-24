@@ -54,12 +54,24 @@ if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
         ARGUMENTS --fail-on-assert true)
     set_tests_properties(UtilityAssertTestFailAssert PROPERTIES
         PASS_REGULAR_EXPRESSION "A should be zero")
+    corrade_add_test(UtilityAssertTestFailConstexprAssert
+        $<TARGET_OBJECTS:AssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp
+        ARGUMENTS --fail-on-constexpr-assert true)
+    set_tests_properties(UtilityAssertTestFailConstexprAssert PROPERTIES
+        PASS_REGULAR_EXPRESSION "b can't be zero")
     corrade_add_test(UtilityAssertTestFailInternalAssert
         $<TARGET_OBJECTS:AssertTestObjects>
         ${PROJECT_SOURCE_DIR}/src/dummy.cpp
         ARGUMENTS --fail-on-internal-assert true)
     set_tests_properties(UtilityAssertTestFailInternalAssert PROPERTIES
         PASS_REGULAR_EXPRESSION "Assertion b && !_failInternalAssert failed in ")
+    corrade_add_test(UtilityAssertTestFailInternalConstexprAssert
+        $<TARGET_OBJECTS:AssertTestObjects>
+        ${PROJECT_SOURCE_DIR}/src/dummy.cpp
+        ARGUMENTS --fail-on-internal-constexpr-assert true)
+    set_tests_properties(UtilityAssertTestFailInternalConstexprAssert PROPERTIES
+        PASS_REGULAR_EXPRESSION "Assertion b failed in ")
     corrade_add_test(UtilityAssertTestFailAssertOutput
         $<TARGET_OBJECTS:AssertTestObjects>
         ${PROJECT_SOURCE_DIR}/src/dummy.cpp
