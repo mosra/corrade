@@ -287,6 +287,10 @@ function(corrade_add_test test_name)
         elseif(arg STREQUAL FILES)
             set(_DOING_LIBRARIES OFF)
             set(_DOING_FILES ON)
+        elseif(arg STREQUAL ARGUMENTS)
+            set(_DOING_LIBRARIES OFF)
+            set(_DOING_FILES OFF)
+            set(_DOING_ARGUMENTS ON)
         else()
             if(_DOING_LIBRARIES)
                 list(APPEND libraries ${arg})
@@ -322,6 +326,8 @@ function(corrade_add_test test_name)
                 get_filename_component(input_filename ${input_filename} ABSOLUTE)
                 list(APPEND files ${input_filename}@${output_filename})
                 list(APPEND absolute_files ${absolute_input_filename})
+            elseif(_DOING_ARGUMENTS)
+                list(APPEND arguments ${arg})
             else()
                 list(APPEND sources ${arg})
             endif()
@@ -345,6 +351,9 @@ function(corrade_add_test test_name)
         else()
             xctest_add_test(${test_name} ${test_name}Runner)
         endif()
+        if(arguments)
+            message(WARNING "corrade_add_test() ARGUMENTS are not supported when CORRADE_TESTSUITE_TARGET_XCTEST is enabled")
+        endif()
     else()
         add_executable(${test_name} ${sources})
         target_link_libraries(${test_name} PRIVATE ${libraries} Corrade::TestSuite)
@@ -355,7 +364,7 @@ function(corrade_add_test test_name)
             # properly
             set_property(TARGET ${test_name} APPEND_STRING PROPERTY LINK_FLAGS "-s DISABLE_EXCEPTION_CATCHING=0")
             find_package(NodeJs REQUIRED)
-            add_test(NAME ${test_name} COMMAND NodeJs::NodeJs --stack-trace-limit=0 $<TARGET_FILE:${test_name}>)
+            add_test(NAME ${test_name} COMMAND NodeJs::NodeJs --stack-trace-limit=0 $<TARGET_FILE:${test_name}> ${arguments})
 
             # Embed all files
             foreach(file ${files})
@@ -374,12 +383,15 @@ function(corrade_add_test test_name)
             # The executables need to be PIE
             target_compile_options(${test_name} PRIVATE "-fPIE")
             set_property(TARGET ${test_name} APPEND_STRING PROPERTY LINK_FLAGS "-fPIE -pie")
-            # All files will be copied to the target when the test is run
-            add_test(NAME ${test_name} COMMAND ${CORRADE_TESTSUITE_ADB_RUNNER} $<TARGET_FILE_DIR:${test_name}> $<TARGET_FILE_NAME:${test_name}> ${files})
+            # All files will be copied to the target when the test is run. The
+            # arguments are passed together with the filename, at the moment it
+            # will fail for arguments with spaces
+            string(REPLACE ";" " " arguments_str "${arguments}")
+            add_test(NAME ${test_name} COMMAND ${CORRADE_TESTSUITE_ADB_RUNNER} $<TARGET_FILE_DIR:${test_name}> "$<TARGET_FILE_NAME:${test_name}> ${arguments_str}" ${files})
 
         # Run tests natively elsewhere
         else()
-            add_test(${test_name} ${test_name})
+            add_test(${test_name} ${test_name} ${arguments})
         endif()
 
         # iOS-specific

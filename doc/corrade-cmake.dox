@@ -176,13 +176,17 @@ The `modules/` directory contains more useful CMake modules:
 corrade_add_test(<test name>
                  <sources>...
                  [LIBRARIES <libraries>...]
-                 [FILES <files>...])
+                 [FILES <files>...]
+                 [ARGUMENTS <arguments>...])
 @endcode
 
-Test name is also executable name. You can also specify libraries to link with
-instead of using @cmake target_link_libraries() @ce. `Corrade::TestSuite`
-target is linked automatically to each test. Note that the
-@cmake enable_testing() @ce function must be called explicitly.
+Test name is also executable name. You can use `LIBRARIES` to specify libraries
+to link with instead of using @cmake target_link_libraries() @ce. The
+`Corrade::TestSuite` target is linked automatically to each test. Note that the
+@cmake enable_testing() @ce function must be called explicitly. Arguments
+passed after `ARGUMENTS` will be appended to the test command line. `ARGUMENTS`
+are supported everywhere except when @ref CORRADE_TESTSUITE_TARGET_XCTEST is
+enabled.
 
 You can list files needed by the test in the `FILES` section. If given
 filename is relative, it is treated relatively to `CMAKE_CURRENT_SOURCE_DIR`.

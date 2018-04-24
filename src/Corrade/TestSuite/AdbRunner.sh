@@ -2,9 +2,10 @@
 set -e
 
 # Usage:
-#  ./AdbRunner.sh /path/to/test/binary/dir executable-name additional files...
+#  ./AdbRunner.sh /path/to/test/binary/dir executable-name-and-args additional files...
 binary_dir=$1
-filename=$2
+filename_and_args=$2
+filename=${filename_and_args%% *}
 # So the additional files are available in $@
 shift && shift
 
@@ -82,7 +83,7 @@ for file in "$@"; do
 done
 
 # No comment. http://web.archive.org/web/20160806094132/https://code.google.com/p/android/issues/detail?id=3254
-adb shell 'cd '$remote_tmpdir' && '$test_env' ./'$filename'; echo -n ADB_IS_SHIT:$?' | tee $tmpdir/adb.retval | grep -v ADB_IS_SHIT
+adb shell 'cd '$remote_tmpdir' && '$test_env' ./'$filename_and_args'; echo -n ADB_IS_SHIT:$?' | tee $tmpdir/adb.retval | grep -v ADB_IS_SHIT
 returncode=$(grep ADB_IS_SHIT $tmpdir/adb.retval | cut -d':' -f2)
 
 # Clean up after ourselves -- remove the temporary directories both on local

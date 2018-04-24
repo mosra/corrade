@@ -124,12 +124,16 @@
 #  corrade_add_test(<test name>
 #                   <sources>...
 #                   [LIBRARIES <libraries>...]
-#                   [FILES <files>...])
+#                   [FILES <files>...]
+#                   [ARGUMENTS <arguments>...])
 #
-# Test name is also executable name. You can also specify libraries to link
-# with instead of using :command:`target_link_libraries()`.
-# ``Corrade::TestSuite`` target is linked automatically to each test. Note
+# Test name is also executable name. You can use ``LIBRARIES`` to specify
+# libraries to link with instead of using :command:`target_link_libraries()`.
+# The ``Corrade::TestSuite`` target is linked automatically to each test. Note
 # that the :command:`enable_testing()` function must be called explicitly.
+# Arguments passed after ``ARGUMENTS`` will be appended to the test
+# command line. ``ARGUMENTS`` are supported everywhere except when
+# ``CORRADE_TESTSUITE_TARGET_XCTEST`` is enabled.
 #
 # You can list files needed by the test in the ``FILES`` section. If given
 # filename is relative, it is treated relatively to `CMAKE_CURRENT_SOURCE_DIR`.

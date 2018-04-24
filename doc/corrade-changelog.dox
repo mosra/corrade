@@ -65,6 +65,8 @@ namespace Corrade {
     macro now generates a HTML runner for running each test case in a web
     browser. See @ref TestSuite-Tester-running-emscripten-browser for more
     information.
+-   @ref corrade-cmake-add-test "corrade_add_test()" learned a new `ARGUMENTS`
+    option for passing additional arguments to test executables
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
