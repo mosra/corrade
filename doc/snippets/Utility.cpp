@@ -24,10 +24,78 @@
 */
 
 #include <cstdlib>
+#include <Corrade/Utility/Assert.h>
 #include <Corrade/Utility/Configuration.h>
 #include <Corrade/Utility/Macros.h>
 
 using namespace Corrade;
+
+class Vec {
+typedef char T;
+std::size_t size() const;
+T data[1];
+/* [CORRADE_ASSERT] */
+T operator[](std::size_t pos) const {
+    CORRADE_ASSERT(pos < size(), "Array::operator[](): index out of range", {});
+    return data[pos];
+}
+/* [CORRADE_ASSERT] */
+
+std::vector<T> sources;
+/* [CORRADE_ASSERT-void] */
+void compile() {
+    CORRADE_ASSERT(!sources.empty(), "Shader::compile(): no sources added", );
+
+    // ...
+}
+/* [CORRADE_ASSERT-void] */
+
+T set(std::size_t pos) {
+/* [CORRADE_ASSERT-stream] */
+CORRADE_ASSERT(pos < size(), "Array::operator[](): accessing element"
+    << pos << "in an array of size" << size(), {});
+/* [CORRADE_ASSERT-stream] */
+
+/* [CORRADE_INTERNAL_ASSERT] */
+CORRADE_INTERNAL_ASSERT(pos < size());
+/* [CORRADE_INTERNAL_ASSERT] */
+return {};
+}
+
+bool initialize(char = 0);
+void foo(char userParam) {
+/* [CORRADE_ASSERT-output] */
+CORRADE_ASSERT(initialize(userParam),
+    "Initialization failed: wrong parameter" << userParam, );
+/* [CORRADE_ASSERT-output] */
+
+/* [CORRADE_ASSERT_OUTPUT] */
+CORRADE_ASSERT_OUTPUT(initialize(userParam),
+    "Initialization failed: wrong parameter" << userParam, );
+/* [CORRADE_ASSERT_OUTPUT] */
+
+/* [CORRADE_INTERNAL_ASSERT-output] */
+CORRADE_INTERNAL_ASSERT(initialize());
+/* [CORRADE_INTERNAL_ASSERT-output] */
+
+/* [CORRADE_INTERNAL_ASSERT_OUTPUT] */
+CORRADE_INTERNAL_ASSERT_OUTPUT(initialize());
+/* [CORRADE_INTERNAL_ASSERT_OUTPUT] */
+}
+
+enum class Flag { A, B };
+bool foo(Flag flag) {
+bool foo{}, bar{};
+/* [CORRADE_ASSERT_UNREACHABLE] */
+switch(flag) {
+    case Flag::A: return foo;
+    case Flag::B: return bar;
+}
+
+CORRADE_ASSERT_UNREACHABLE();
+/* [CORRADE_ASSERT_UNREACHABLE] */
+}
+};
 
 int main() {
 {
