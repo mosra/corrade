@@ -90,6 +90,11 @@ namespace Corrade {
 -   @ref String::stripPrefix() and @ref String::stripSuffix() for checked
     prefix and suffix stripping
 
+@subsection corrade-changelog-latest-buildsystem Build system
+
+-   Fixed the Debian package to not include a revision. While just a warning on
+    Ubuntu, it's a hard error on Debian.
+
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
 -   The Android ADB test runner was not correctly propagating @ref TestSuite
