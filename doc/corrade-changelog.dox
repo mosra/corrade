@@ -29,9 +29,12 @@ namespace Corrade {
 
 @tableofcontents
 
-@section corrade-changelog-latest Changes since 2018.02
+@section corrade-changelog-2018-04 2018.04
 
-@subsection corrade-changelog-latest-dependencies Dependency changes
+Released 2018-05-01, tagged as
+[v2018.04](https://github.com/mosra/corrade/releases/tag/v2018.04).
+
+@subsection corrade-changelog-2018-04-dependencies Dependency changes
 
 -   Building for Android now requires CMake 3.7 with builtin Android
     crosscompilation support, the old toolchains were removed. Only the Clang
@@ -39,13 +42,13 @@ namespace Corrade {
     dropped, as it was still missing some important C++11 functionality. See
     @ref building-corrade-cross-android for more information.
 
-@subsection corrade-changelog-latest-new New features
+@subsection corrade-changelog-2018-04-new New features
 
 -   New @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT preprocessor
     @cpp #define @ce and CMake variable for easier distinction of platforms
     without dynamic plugin loading support
 
-@subsubsection corrade-changelog-latest-new-pluginmanager PluginManager library
+@subsubsection corrade-changelog-2018-04-new-pluginmanager PluginManager library
 
 -   New @ref PluginManager::AbstractPlugin::pluginSearchPaths() interface
     allowing plugin interfaces to specify plugin search paths to make life
@@ -60,7 +63,7 @@ namespace Corrade {
 -   Ability to load plugins outside of the plugin directory by supplying a file
     path to @ref PluginManager::AbstractManager::load()
 
-@subsubsection corrade-changelog-latest-new-testsuite TestSuite library
+@subsubsection corrade-changelog-2018-04-new-testsuite TestSuite library
 
 -   When compiling for Emscripten, the @ref corrade-cmake-add-test "corrade_add_test()"
     macro now generates a HTML runner for running each test case in a web
@@ -69,7 +72,7 @@ namespace Corrade {
 -   @ref corrade-cmake-add-test "corrade_add_test()" learned a new `ARGUMENTS`
     option for passing additional arguments to test executables
 
-@subsubsection corrade-changelog-latest-new-utility Utility library
+@subsubsection corrade-changelog-2018-04-new-utility Utility library
 
 -   Ability to query current scoped output stream using @ref Utility::Debug::output(),
     @ref Utility::Warning::output() and @ref Utility::Error::output()
@@ -91,12 +94,12 @@ namespace Corrade {
 -   @ref String::stripPrefix() and @ref String::stripSuffix() for checked
     prefix and suffix stripping
 
-@subsection corrade-changelog-latest-buildsystem Build system
+@subsection corrade-changelog-2018-04-buildsystem Build system
 
 -   Fixed the Debian package to not include a revision. While just a warning on
     Ubuntu, it's a hard error on Debian. (See [mosra/corrade#44](https://github.com/mosra/corrade/issues/44).)
 
-@subsection corrade-changelog-latest-bugfixes Bug fixes
+@subsection corrade-changelog-2018-04-bugfixes Bug fixes
 
 -   The Android ADB test runner was not correctly propagating @ref TestSuite
     `CORRADE_TEST_*` environment variables to the executable
@@ -107,14 +110,14 @@ namespace Corrade {
     types without default constructors and be able to return
     non-default-constructed instances for empty values.
 
-@subsection corrade-changelog-latest-deprecated Deprecated APIs
+@subsection corrade-changelog-2018-04-deprecated Deprecated APIs
 
 -   The `Corrade/Utility/AndroidStreamBuffer.h` header is deprecated, use
     @ref Corrade/Utility/AndroidLogStreamBuffer.h instead
 -   `PluginManager::Manager::instance()` is deprecated as it has a confusing
     naming, use @ref PluginManager::Manager::instantiate() instead
 
-@subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
+@subsection corrade-changelog-2018-04-compatibility Potential compatibility breakages, removed APIs
 
 -   Removed the unnecessarily opaque `CORRADE_PLUGIN_INTERFACE()` macro. Define
     a @cpp public @ce @cpp static std::string pluginInterface() @ce function
@@ -123,7 +126,7 @@ namespace Corrade {
     @ref Corrade/PluginManager/AbstractManager.h from
     @ref Corrade/PluginManager/AbstractPlugin.h to reduce header dependencies
 
-@subsection corrade-changelog-latest-docs Documentation
+@subsection corrade-changelog-2018-04-docs Documentation
 
 -   A new @ref corrade-developers page containing step-by-step checklists for
     maintainers and core developers
