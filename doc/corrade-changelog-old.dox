@@ -1,0 +1,318 @@
+/*
+    This file is part of Corrade.
+
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
+                2017, 2018 Vladimír Vondruš <mosra@centrum.cz>
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
+*/
+
+namespace Corrade {
+
+/** @page corrade-changelog-old Archvied changelogs
+
+@tableofcontents
+
+@section corrade-changelog-2015-05 2015.05
+
+Released 2015-05-09, tagged as
+[v2015.05](https://github.com/mosra/corrade/releases/tag/v2015.05). See the
+[release announcement](http://blog.magnum.graphics/announcements/may-2015-updates/)
+for a high-level overview.
+
+@subsection corrade-changelog-2015-05-dependencies Dependency changes
+
+No dependency changes in this release.
+
+@subsection corrade-changelog-2015-05-new New features
+
+-   Support for plugin aliases in @ref PluginManager library.
+-   Range-based-for support in @ref Containers::LinkedList.
+-   Added convenience @ref PluginManager::Manager::loadAndInstantiate()
+    function.
+-   Added @ref Containers::Array::slice() "Containers::*Array::slice()" and
+    friends.
+-   @ref Utility::Debug is able to reuse existing @cpp operator<< @ce overloads
+    for @ref std::ostream (see [mosra/corrade#12](https://github.com/mosra/corrade/pull/12))
+-   Added @ref Utility::String::beginsWith() and @ref Utility::String::endsWith().
+
+@subsection corrade-changelog-2015-05-changes Changes
+
+-   @ref TestSuite::Compare::Container is now able to compare non-copyable
+    containers such as @ref Containers::Array
+    (see [mosra/corrade#9](https://github.com/mosra/corrade/issues/9)).
+-   Using @cpp const char @ce instead of @cpp const unsigned char @ce for raw
+    binary data.
+-   Better algorithm for comparing floating-point values in @ref TestSuite.
+
+@subsection corrade-changelog-2015-05-buildsystem Build system
+
+-   CMake now always installs `FindCorrade.cmake` to library-specific location,
+    making it usable without providing own copy of the file in depending
+    projects. The `WITH_FIND_MODULE` option is no longer needed. See [mosra/corrade#17](https://github.com/mosra/corrade/issues/17).
+-   Displaying all header files, plugin metadata files and resource files in
+    project view to make use of some IDEs less painful (such as QtCreator)
+-   Properly checking for C++ standard compiler flags to avoid adding
+    conflicting ones (see [mosra/corrade#10](https://github.com/mosra/corrade/pull/10))
+-   Gentoo ebuild (see [mosra/corrade#16](https://github.com/mosra/corrade/issues/16))
+-   Better handling of RPATH on macOS (see [mosra/corrade#18](https://github.com/mosra/corrade/pull/18))
+
+@subsection corrade-changelog-2015-05-bugfixes Bug fixes
+
+-   Removed static initializers to avoid memory corruption in static builds
+    (see [mosra/magnum#90](https://github.com/mosra/magnum/issues/90)).
+-   Plugin manager now correctly folows dependency order when unloading
+    plugins.
+-   Fixed issues with plugin manager having multiple global instances in static
+    builds (see [mosra/corrade#15](https://github.com/mosra/corrade/issues/15))
+-   Fixed a crash in Clang caused by overly clever code (see
+    [mosra/magnum#84](https://github.com/mosra/magnum/issues/84))
+
+@subsection corrade-changelog-2015-05-deprecated Deprecated APIs
+
+No API was deprecated in this release.
+
+@subsection corrade-changelog-2015-05-compatibility Potential compatibility breakages, removed APIs
+
+-   Removed unused plugin replacement feature, as it had questionable benefits
+    and no real use.
+-   All functionality @ref corrade-changelog-2014-01-deprecated "deprecated in 2014.01"
+    has been removed, namely:
+
+    -   Removed deprecated ability to use relative includes (e.g.
+        @cpp #include <Utility/Debug.h> @ce), use absolute paths
+        (@cpp #include <Corrade/Utility/Debug.h> @ce) instead.
+    -   Removed deprecated `Utility::String::split()` overload, use either
+        @ref Utility::String::split() "split()" or
+        @ref Utility::String::splitWithoutEmptyParts() "splitWithoutEmptyParts()"
+        instead.
+
+@section corrade-changelog-2014-06 2014.06
+
+Released 2014-06-30, tagged as
+[v2014.06](https://github.com/mosra/corrade/releases/tag/v2014.06). See the
+[release announcement](http://blog.magnum.graphics/announcements/june-2014-updates/)
+for a high-level overview.
+
+@subsection corrade-changelog-2014-06-dependencies Dependency changes
+
+-   Minimal required GCC version is now 4.7. Support for GCC 4.6 has been moved
+    to `compatibility` branch.
+
+@subsection corrade-changelog-2014-06-new New features
+
+-   Initial Android support, see @ref building-corrade-cross-android "building documentation"
+    for more information.
+-   @ref Utility::AndroidLogStreamBuffer class for sending messages to
+    Android system log
+-   @ref CORRADE_TARGET_ANDROID and @ref CORRADE_TARGET_APPLE CMake and
+    preprocessor variables
+
+@subsection corrade-changelog-2014-06-changes Changes
+
+-   Libraries and plugins in debug build configuration are installed to
+    different locations, making it possible to have debug and release libraries
+    installed alongside each other
+-   Compiler compatibility mode is now automatically detected by CMake to make
+    the building easier
+-   It's no longer needed to explicitly test validity of pointer returned from
+    @ref PluginManager::Manager::instance()
+-   Improved error reporting in @ref PluginManager library
+-   Thorough documentation review, fixes and improvements
+
+@subsection corrade-changelog-2014-06-bugfixes Bug fixes
+
+-   Fixed corner case when @ref Utility::Resource::getRaw() could
+    unexpectedly return @cpp nullptr @ce.
+
+@subsection corrade-changelog-2014-06-deprecated Deprecated APIs
+
+No API was deprecated in this release.
+
+@subsection corrade-changelog-2014-06-compatibility Potential compatibility breakages, removed APIs
+
+-   All functionality deprecated in @ref corrade-changelog-2013-10-deprecated "2013.10"
+    has been removed. In particular the deprecated @cpp Interconnect::Emitter::connect() @ce
+    was removed, use @ref Interconnect::connect() instead.
+
+@section corrade-changelog-2014-01 2014.01
+
+Released 2014-01-21, tagged as
+[v2014.01](https://github.com/mosra/corrade/releases/tag/v2014.01). See the
+[release announcement](http://blog.magnum.graphics/announcements/january-2014-updates/)
+for a high-level overview.
+
+@subsection corrade-changelog-2014-01-dependencies Dependency changes
+
+No dependency changes in this release.
+
+@subsection corrade-changelog-2014-01-new New features
+
+-   MSVC 2013 support in the `compatibility` branch
+-   Ability to create @ref Containers::Array from initializer list
+-   @ref Containers::Array::release() function to release ownership of the
+    data, similar to @ref std::unique_ptr::release()
+-   @ref Containers::Array::data() "Containers::Array[Reference]::data()"
+    function for easier explicit data access and also disallowing pointer
+    conversion of rvalue Array as it would result in access to deleted memory
+    (GCC 4.8.1/Clang only).
+-   Improved state change signals in @ref Interconnect::StateMachine
+-   Support for multiple template arguments in @ref CORRADE_COMPARE_AS()
+    macro in @ref TestSuite library.
+-   @ref Utility::String::join() and @ref Utility::String::joinWithoutEmptyParts()
+    functions.
+-   @ref Utility::String::fromArray() convenience functions to create
+    @ref std::string from either character array or @cpp nullptr @ce
+-   Ability to retrieve list of all compiled-in resources in given group using
+    @ref Utility::Resource::list()
+-   Added @cpp read() @ce, @cpp readString() @ce, @cpp write() @ce and
+    @cpp writeString() @ce functions to @ref Utility::Directory
+-   New @ref CORRADE_HAS_TYPE() type traits macro, which now allows to use
+    @ref Utility::Debug to print any container that is iterable with C++11
+    range-based for.
+-   New @ref CORRADE_TARGET_WINDOWS and @ref CORRADE_TARGET_UNIX
+    preprocessor definitions and CMake variables.
+-   All classes in documentation are now shown with corresponding @cpp #include @ce
+    path
+
+@subsection corrade-changelog-2014-01-changes Changes
+
+-   @ref TestSuite tests now display @cb{.shell-session} ?: <unknown>() @ce in
+    test output for test cases without any checks to make them more
+    discoverable
+-   Skipped test cases in @ref TestSuite tests are displayed without useless
+    file/line information (unlike failed test cases, where the information is
+    needed)
+-   All deprecated functions and types are now emitting compiler warnings to
+    encourage updating the code
+-   Various documentation and example updates and improvements
+
+@subsection corrade-changelog-2014-01-bugfixes Bug fixes
+
+-   @ref TestSuite::Compare::File "TestSuite::Compare::*File*" is comparing
+    the files in binary mode to avoid platform-dependent EOL issues.
+-   @ref Utility::Resource now properly handles empty files when compiling
+    resources.
+-   @ref Utility::Directory is now working properly under Windows.
+-   Fixed compilation issues with Clang and libc++
+-   Fixed various compilation issues under MSVC (and worked around a much
+    larger amount of compiler bugs)
+-   Adapted @ref Utility::Configuration test to work under MinGW (see [mosra/corrade#7](https://github.com/mosra/corrade/pull/7))
+
+@subsection corrade-changelog-2014-01-deprecated Deprecated APIs
+
+-   @cpp Utility::String::split(..., bool) @ce is deprecated, use separate
+    functions @ref Utility::String::split() "split()" and
+    @ref Utility::String::splitWithoutEmptyParts() "splitWithoutEmptyParts()"
+    instead.
+
+@subsection corrade-changelog-2014-01-compatibility Potential compatibility breakages, removed APIs
+
+-   Removed @cpp Utility::log2() @ce and @cpp Utility::pow2() @ce utility
+    functions, as they weren't used anywhere anymore (and the latter one was a
+    bad joke)
+-   Removed useless metadata from @ref PluginManager::PluginMetadata class
+    (author name, version, description), as they don't fit current use case
+    anymore (they were used back in 2007 when Corrade was part of Kompas).
+    These metadata can be easily added back as custom configuration values.
+-   Removed now useless @cpp Utility::Translator @ce class, it was used only
+    for plugin metadata and was prime example of bad design (exposing unguarded
+    naked pointers)
+
+@subsection corrade-changelog-2014-01-internal Internal changes
+
+-   Using Jenkins Continuous Integration to maintain compilable and bug-free
+    state of the project more easily. Currently GCC 4.8, 4.7, 4.6, 4.5, 4.4,
+    Clang 3.3, Clang 3.3 with libc++, Emscripten, x86-32/x86-64 Native Client
+    and MinGW32 compilers are tested with both shared and static libraries.
+    Separately testing builds with deprecated features enabled and disabled.
+-   All files from `src/` directory were moved to `src/Corrade`, `examples/`
+    directory was moved to `src/examples` (required to make inter-project
+    includes absolute, as mentioned above)
+
+@section corrade-changelog-2013-10 2013.10
+
+Released 2013-10-30, tagged as
+[v2013.10](https://github.com/mosra/corrade/releases/tag/v2013.10). See the
+[release annoucement](http://blog.magnum.graphics/announcements/october-2013-updates/)
+for a high-level overview.
+
+@subsection corrade-changelog-2013-10-dependencies Dependency changes
+
+No dependency changes in this release.
+
+@subsection corrade-changelog-2013-10-new New features
+
+-   macOS port (thanks to David Lin, see [mosra/corrade#4](https://github.com/mosra/corrade/pull/4))
+-   Fixed and updated Emscripten (HTML5) port
+-   @ref Interconnect library can now connect signals to non-member functions
+    and C++11 lambdas. See @ref Interconnect::connect() for more information.
+-   Added simple @ref Interconnect::StateMachine "StateMachine"
+    implementation into @ref Interconnect library.
+
+@subsection corrade-changelog-2013-10-changes Changes
+
+-   Returning @ref std::unique_ptr instead of naked pointer from
+    @ref PluginManager::Manager::instance() for better usability and to avoid
+    accidental memory leaks
+-   Documentation updates and improvements to make the library more accessible
+    for newcomers
+-   Various build system updates for better compile times and easier
+    installation
+
+@subsection corrade-changelog-2013-10-buildsystem Build system
+
+-   Added a `WITH_FIND_MODULE` CMake option to install Find modules for Corrade
+    into a system location (see [mosra/corrade#2](https://github.com/mosra/corrade/issues/2))
+-   `GCC*_COMPATIBILITY` is sometimes needed to be set explicitly (see [mosra/corrade#1](https://github.com/mosra/corrade/issues/31))
+-   Installing `*.dll` and `*.lib` files to pproper locations on Windows (see [mosra/corrade#5](https://github.com/mosra/corrade/pull/5))
+
+@subsection corrade-changelog-2013-10-bugfixes Bug fixes
+
+-   @ref CORRADE_VERIFY() macro in @ref TestSuite can now be conveniently used
+    also on classes with explicit @cpp operator bool() @ce
+-   Fixed assertion failure on @cb{.shell-session} -long-arguments @ce parsing
+    in @ref Utility::Arguments
+
+@subsection corrade-changelog-2013-10-deprecated Deprecated APIs
+
+-   @ref Interconnect::Emitter::connect() is deprecated, use
+    @ref Interconnect::connect() instead.
+
+@subsection corrade-changelog-2013-10-compatibility Potential compatibility breakages, removed APIs
+
+No deprecated API was removed in this release.
+
+@section corrade-changelog-2013-08 2013.08
+
+Released 2013-08-30, tagged as
+[v2013.08](https://github.com/mosra/corrade/releases/tag/v2013.08). See the
+[Magnum project announcement](http://blog.magnum.graphics/announcements/introducing-magnum/)
+for a high-level overview.
+
+@section corrade-changelog-2012-02 2012.02
+
+Released 2012-02-08, tagged as
+[v2012.02](https://github.com/mosra/corrade/releases/tag/v2012.02). See the
+[project announcement](http://blog.magnum.graphics/announcements/introducing-corrade/)
+for a high-level overview.
+
+*/
+
+}
