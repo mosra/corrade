@@ -96,6 +96,10 @@ Released 2018-05-01, tagged as
 
 @subsection corrade-changelog-2018-04-buildsystem Build system
 
+-   Stable version of Corrade is now available as a binary package in the
+    ArchLinux `[community]` repo
+-   Homebrew macOS packages were updated to install the stable version by
+    default
 -   Fixed the Debian package to not include a revision. While just a warning on
     Ubuntu, it's a hard error on Debian. (See [mosra/corrade#44](https://github.com/mosra/corrade/issues/44).)
 
