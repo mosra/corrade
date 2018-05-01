@@ -53,7 +53,8 @@ namespace Corrade {
 -   Added @ref PluginManager::AbstractManager::aliasList() for listing all
     available plugin aliases
 -   Ability to control what plugin is used for given alias using
-    @ref PluginManager::AbstractManager::setPreferredPlugins()
+    @ref PluginManager::AbstractManager::setPreferredPlugins() (see
+    [mosra/magnum-plugins#25](https://github.com/mosra/magnum-plugins/issues/25))
 -   Ability to configure extra plugin functionality via
     @ref PluginManager::AbstractPlugin::configuration()
 -   Ability to load plugins outside of the plugin directory by supplying a file
@@ -93,7 +94,7 @@ namespace Corrade {
 @subsection corrade-changelog-latest-buildsystem Build system
 
 -   Fixed the Debian package to not include a revision. While just a warning on
-    Ubuntu, it's a hard error on Debian.
+    Ubuntu, it's a hard error on Debian. (See [mosra/corrade#44](https://github.com/mosra/corrade/issues/44).)
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
