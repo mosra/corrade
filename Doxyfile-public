@@ -44,6 +44,8 @@ HTML_EXTRA_STYLESHEET = \
 
 M_SEARCH_DOWNLOAD_BINARY = YES
 
+M_FAVICON = http://doc.magnum.graphics/favicon.ico
+
 M_SEARCH_EXTERNAL_URL = "https://google.com/search?q=site:doc.magnum.graphics+Corrade+{query}"
 
 # kate: hl Doxyfile
