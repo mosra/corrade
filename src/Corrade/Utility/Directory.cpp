@@ -68,6 +68,7 @@
 
 #include "Corrade/configure.h"
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/String.h"
 
 /* Unicode helpers for Windows */

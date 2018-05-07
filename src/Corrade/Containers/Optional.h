@@ -30,6 +30,7 @@
  */
 
 #include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/Debug.h"
 
 namespace Corrade { namespace Containers {
 
