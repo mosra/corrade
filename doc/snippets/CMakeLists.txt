@@ -32,14 +32,13 @@ set_directory_properties(PROPERTIES
     CORRADE_CXX_STANDARD 11
     CORRADE_USE_PEDANTIC_FLAGS ON)
 
+add_library(snippets STATIC
+    Utility.cpp)
+target_link_libraries(snippets PRIVATE CorradeUtility)
+
 if(WITH_PLUGINMANAGER)
     add_library(snippets-PluginManager STATIC PluginManager.cpp)
     target_link_libraries(snippets-PluginManager PRIVATE CorradePluginManager)
-endif()
-
-if(WITH_UTILITY)
-    add_library(snippets-Utility STATIC Utility.cpp)
-    target_link_libraries(snippets-Utility PRIVATE CorradeUtility)
 endif()
 
 # TODO: causes spurious linker errors on Travis iOS build, so I'm disabling it
