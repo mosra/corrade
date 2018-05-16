@@ -29,6 +29,14 @@ namespace Corrade {
 
 @tableofcontents
 
+@section corrade-changelog-latest Changes since 2018.04
+
+@subsection corrade-changelog-latest-new New features
+
+@subsubsection corrade-changelog-latest-new-containers Containers library
+
+-   New @ref Containers::ScopedExit helper class
+
 @section corrade-changelog-2018-04 2018.04
 
 Released 2018-05-01, tagged as

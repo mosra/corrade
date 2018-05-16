@@ -33,6 +33,7 @@ set_directory_properties(PROPERTIES
     CORRADE_USE_PEDANTIC_FLAGS ON)
 
 add_library(snippets STATIC
+    Containers.cpp
     Utility.cpp)
 target_link_libraries(snippets PRIVATE CorradeUtility)
 
