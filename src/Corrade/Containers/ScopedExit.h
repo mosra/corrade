@@ -66,6 +66,18 @@ class ScopedExit {
         template<class T, class U> explicit ScopedExit(T handle, U(*deleter)(T));
         #endif
 
+        /** @brief Copying is not allowed */
+        ScopedExit(const ScopedExit&) = delete;
+
+        /** @brief Moving is not allowed */
+        ScopedExit(ScopedExit&&) = delete;
+
+        /** @brief Copying is not allowed */
+        ScopedExit& operator=(const ScopedExit&) = delete;
+
+        /** @brief Moving is not allowed */
+        ScopedExit& operator=(ScopedExit&&) = delete;
+
         ~ScopedExit() { _deleterWrapper(&_deleter, &_handle); }
 
     private:
