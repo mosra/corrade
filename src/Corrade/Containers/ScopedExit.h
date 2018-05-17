@@ -78,7 +78,23 @@ class ScopedExit {
         /** @brief Moving is not allowed */
         ScopedExit& operator=(ScopedExit&&) = delete;
 
-        ~ScopedExit() { _deleterWrapper(&_deleter, &_handle); }
+        /**
+         * @brief Release the handle ownership
+         *
+         * Causes the deleter passed in constructor to not get called on
+         * destruction.
+         */
+        void release() { _deleterWrapper = nullptr; }
+
+        /**
+         * @brief Destructor
+         *
+         * Executes the deleter passed in constructor. Does nothing if
+         * @ref release() has been called.
+         */
+        ~ScopedExit() {
+            if(_deleterWrapper) _deleterWrapper(&_deleter, &_handle);
+        }
 
     private:
         void(*_deleterWrapper)(void(**)(), void**);

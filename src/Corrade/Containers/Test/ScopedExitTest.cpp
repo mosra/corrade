@@ -35,13 +35,15 @@ struct ScopedExitTest: TestSuite::Tester {
     void value();
     void lambda();
     void returningLambda();
+    void release();
 };
 
 ScopedExitTest::ScopedExitTest() {
     addTests({&ScopedExitTest::pointer,
               &ScopedExitTest::value,
               &ScopedExitTest::lambda,
-              &ScopedExitTest::returningLambda});
+              &ScopedExitTest::returningLambda,
+              &ScopedExitTest::release});
 }
 
 namespace {
@@ -89,6 +91,15 @@ void ScopedExitTest::returningLambda() {
     }
     CORRADE_COMPARE(fd, 7);
     #endif
+}
+
+void ScopedExitTest::release() {
+    float v = 1.234f;
+    {
+        ScopedExit e{&v, close};
+        e.release();
+    }
+    CORRADE_COMPARE(v, 1.234f);
 }
 
 }}}
