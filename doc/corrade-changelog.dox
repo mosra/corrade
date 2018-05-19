@@ -39,7 +39,15 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
--   Added @ref Utility::Arguments::prefix()
+-   Added @ref Utility::Arguments::prefix(), @ref Utility::Arguments::isParsed()
+
+@subsection corrade-changelog-latest-changes Changes and improvements
+
+@subsubsection corrade-changelog-latest-new-utility Utility library
+
+-   @ref Utility::Arguments::value() and @ref Utility::Arguments::isSet() now
+    check that the arguments were already successfully parsed to prevent
+    accidentally forgotten calls to @ref Utility::Arguments::parse()
 
 @section corrade-changelog-2018-04 2018.04
 

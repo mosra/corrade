@@ -54,6 +54,9 @@ struct ArgumentsTest: TestSuite::Tester {
     void disallowedCharacter();
     void disallowedCharacterShort();
 
+    void notParsedYet();
+    void notParsedYetOnlyHelp();
+
     void parseNullptr();
     void parseHelp();
     void parseArguments();
@@ -108,6 +111,9 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::duplicateShortKey,
               &ArgumentsTest::disallowedCharacter,
               &ArgumentsTest::disallowedCharacterShort,
+
+              &ArgumentsTest::notParsedYet,
+              &ArgumentsTest::notParsedYetOnlyHelp,
 
               &ArgumentsTest::parseNullptr,
               &ArgumentsTest::parseHelp,
@@ -387,6 +393,47 @@ void ArgumentsTest::disallowedCharacterShort() {
     CORRADE_COMPARE(out.str(), "Utility::Arguments::addOption(): invalid key bar or its short variant\n");
 }
 
+void ArgumentsTest::notParsedYet() {
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    Arguments args;
+    args.addOption("value")
+        .addBooleanOption("boolean");
+
+    args.value("value");
+    args.isSet("boolean");
+
+    CORRADE_VERIFY(!args.isParsed());
+    CORRADE_COMPARE(out.str(),
+        "Utility::Arguments::value(): arguments were not successfully parsed yet\n"
+        "Utility::Arguments::isSet(): arguments were not successfully parsed yet\n");
+}
+
+void ArgumentsTest::notParsedYetOnlyHelp() {
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    const char* argv[] = { "", "--help" };
+
+    Arguments args;
+    args.addArgument("value")
+        .addBooleanOption("boolean");
+
+    /* parse() should not succeed if there is --help but some arguments were
+       not specified */
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
+
+    args.value("value");
+    args.isSet("boolean");
+
+    CORRADE_VERIFY(!args.isParsed());
+    CORRADE_COMPARE(out.str(),
+        "Missing command-line argument value\n"
+        "Utility::Arguments::value(): arguments were not successfully parsed yet\n"
+        "Utility::Arguments::isSet(): arguments were not successfully parsed yet\n");
+}
+
 void ArgumentsTest::parseNullptr() {
     Arguments args;
 
@@ -402,8 +449,6 @@ void ArgumentsTest::parseHelp() {
     /* The parse() will not exit if help is set, but tryParse() should indicate
        the error */
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_VERIFY(args.isSet("help"));
-    CORRADE_VERIFY(args.isSet("no-foo-bars"));
 }
 
 void ArgumentsTest::parseArguments() {

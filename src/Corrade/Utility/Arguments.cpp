@@ -169,6 +169,10 @@ Arguments& Arguments::addArgument(std::string key) {
     /* Verify that the argument has unique key */
     CORRADE_ASSERT(find(key) == _entries.end(), "Utility::Arguments::addArgument(): the key" << key << "is already used", *this);
 
+    /* Reset the parsed flag -- it's probably a mistake to add an argument and
+       then ask for values without parsing again */
+    _isParsed = false;
+
     std::string helpKey = key;
     _entries.emplace_back(Type::Argument, '\0', std::move(key), std::move(helpKey), std::string(), _values.size());
     _values.emplace_back();
@@ -184,6 +188,10 @@ Arguments& Arguments::addNamedArgument(char shortKey, std::string key) {
 
     CORRADE_ASSERT(_prefix.empty(),
         "Utility::Arguments::addNamedArgument(): argument" << key << "not allowed in prefixed version", *this);
+
+    /* Reset the parsed flag -- it's probably a mistake to add an argument and
+       then ask for values without parsing again */
+    _isParsed = false;
 
     std::string helpKey = key;
     _entries.emplace_back(Type::NamedArgument, shortKey, std::move(key), std::move(helpKey), std::string(), _values.size());
@@ -202,6 +210,10 @@ Arguments& Arguments::addOption(char shortKey, std::string key, std::string defa
         "Utility::Arguments::addOption(): short option" << std::string{shortKey} << "not allowed in prefixed version", *this);
     CORRADE_ASSERT(!skippedPrefix(key),
         "Utility::Arguments::addOption(): key" << key << "conflicts with skipped prefixes", *this);
+
+    /* Reset the parsed flag -- it's probably a mistake to add an option and
+       then ask for values without parsing again */
+    _isParsed = false;
 
     std::string helpKey;
     if(_prefix.empty())
@@ -227,6 +239,10 @@ Arguments& Arguments::addBooleanOption(char shortKey, std::string key) {
         "Utility::Arguments::addBooleanOption(): boolean option" << key << "not allowed in prefixed version", *this);
     CORRADE_ASSERT(!skippedPrefix(key),
         "Utility::Arguments::addBooleanOption(): key" << key << "conflicts with skipped prefixes", *this);
+
+    /* Reset the parsed flag -- it's probably a mistake to add an option and
+       then ask for values without parsing again */
+    _isParsed = false;
 
     /* The prefix addition is here only for --prefix-help, which is the only
        allowed boolean option */
@@ -552,6 +568,11 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
         }
     }
 
+    /* Set parsed status based on success. It can happen that parse() is called
+       twice, first succeeding, then failing and in that case the arguments
+       should be in invalid state again */
+    _isParsed = success;
+
     return success;
 }
 
@@ -731,6 +752,7 @@ std::string Arguments::valueInternal(const std::string& key) const {
     CORRADE_ASSERT(found->type != Type::BooleanOption,
         "Utility::Arguments::value(): cannot use this function for boolean option" << key, {});
     CORRADE_INTERNAL_ASSERT(found->id < _values.size());
+    CORRADE_ASSERT(_isParsed, "Utility::Arguments::value(): arguments were not successfully parsed yet", {});
     return _values[found->id];
 }
 
@@ -740,6 +762,7 @@ bool Arguments::isSet(const std::string& key) const {
     CORRADE_ASSERT(found->type == Type::BooleanOption,
         "Utility::Arguments::isSet(): cannot use this function for non-boolean value" << key, false);
     CORRADE_INTERNAL_ASSERT(found->id < _booleans.size());
+    CORRADE_ASSERT(_isParsed, "Utility::Arguments::isSet(): arguments were not successfully parsed yet", {});
     return _booleans[found->id];
 }
 

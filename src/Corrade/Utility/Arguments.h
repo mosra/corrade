@@ -508,11 +508,10 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * @param key       Long argument or option key
          * @param flags     Configuration value flags
          *
-         * Expects that the key exists. Use @ref isSet() for boolean options.
-         * If the arguments weren't parsed yet, returns empty string or
-         * default-constructed value. If @p T is not @ref std::string, uses
-         * @ref ConfigurationValue::fromString() to convert the value to given
-         * type.
+         * Expects that the key exists and @ref parse() was successful. Use
+         * @ref isSet() for boolean options. If @p T is not @ref std::string,
+         * uses @ref ConfigurationValue::fromString() to convert the value to
+         * given type.
          */
         template<class T = std::string> T value(const std::string& key, ConfigurationValueFlags flags = {}) const;
 
@@ -520,9 +519,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * @brief Whether boolean option is set
          * @param key   Long option key
          *
-         * Expects that the option exists and is boolean. Help option (`-h`,
-         * `--help`) is present by default. If the arguments weren't parsed
-         * yet, returns false.
+         * Expects that the option exists, is boolean and @ref parse() was
+         * successful. Help option (`-h`, `--help`) is present by default.
          * @see @ref value()
          */
         bool isSet(const std::string& key) const;
@@ -542,6 +540,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
 
         std::string valueInternal(const std::string& key) const;
 
+        bool _isParsed{false};
         std::string _prefix;
         std::string _command;
         std::string _help;
