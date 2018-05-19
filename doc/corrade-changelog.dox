@@ -48,6 +48,9 @@ namespace Corrade {
 -   @ref Utility::Arguments::value() and @ref Utility::Arguments::isSet() now
     check that the arguments were already successfully parsed to prevent
     accidentally forgotten calls to @ref Utility::Arguments::parse()
+-   @ref Utility::Arguments is now move-only to avoid accidental copies ---
+    it's not meant to be used as a general storage for parsed arguments, only a
+    parser
 
 @section corrade-changelog-2018-04 2018.04
 

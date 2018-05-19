@@ -38,6 +38,9 @@ struct ArgumentsTest: TestSuite::Tester {
     void environment();
     void environmentUtf8();
 
+    void copy();
+    void move();
+
     void helpArgumentsOnly();
     void helpNamedOnly();
     void helpBoth();
@@ -95,6 +98,9 @@ struct ArgumentsTest: TestSuite::Tester {
 ArgumentsTest::ArgumentsTest() {
     addTests({&ArgumentsTest::environment,
               &ArgumentsTest::environmentUtf8,
+
+              &ArgumentsTest::copy,
+              &ArgumentsTest::move,
 
               &ArgumentsTest::helpArgumentsOnly,
               &ArgumentsTest::helpNamedOnly,
@@ -188,6 +194,35 @@ void ArgumentsTest::environmentUtf8() {
         [](const std::string& v){ return String::beginsWith(v, "ARGUMENTSTEST_UNICODE="); });
     CORRADE_VERIFY(found != list.end());
     CORRADE_COMPARE(*found, "ARGUMENTSTEST_UNICODE=hýždě");
+}
+
+void ArgumentsTest::copy() {
+    CORRADE_VERIFY(!std::is_copy_constructible<Arguments>::value);
+    CORRADE_VERIFY(!std::is_copy_assignable<Arguments>::value);
+}
+
+void ArgumentsTest::move() {
+    const char* argv[] = {"", "--prefix-bar", "hey"};
+
+    Arguments args{"prefix"};
+    args.addOption("bar");
+
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+
+    Arguments args2{std::move(args)};
+    CORRADE_COMPARE(args2.value("bar"), "hey");
+
+    CORRADE_VERIFY(!args.isParsed());
+    CORRADE_COMPARE(args.prefix(), "");
+
+    Arguments args3{"another"};
+    args3 = std::move(args2);
+    CORRADE_VERIFY(!args2.isParsed());
+    CORRADE_COMPARE(args2.prefix(), "another");
+    CORRADE_COMPARE(args3.value("bar"), "hey");
+
+    /* Everything should work well even after two moves */
+    CORRADE_VERIFY(args3.tryParse(Containers::arraySize(argv), argv));
 }
 
 void ArgumentsTest::helpArgumentsOnly() {

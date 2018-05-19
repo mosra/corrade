@@ -154,6 +154,23 @@ Arguments::Arguments() {
     setHelp("help", "display this help message and exit");
 }
 
+Arguments::Arguments(Arguments&& other) noexcept: _isParsed{std::move(other._isParsed)}, _prefix{std::move(other._prefix)}, _command{std::move(other._command)}, _help{std::move(other._help)}, _entries{std::move(other._entries)}, _values{std::move(other._values)}, _skippedPrefixes{std::move(other._skippedPrefixes)}, _booleans{std::move(other._booleans)} {
+    other._isParsed = false;
+}
+
+Arguments& Arguments::operator=(Arguments&& other) noexcept {
+    std::swap(other._prefix, _prefix);
+    std::swap(other._command, _command);
+    std::swap(other._help, _help);
+    std::swap(other._entries, _entries);
+    std::swap(other._values, _values);
+    std::swap(other._skippedPrefixes, _skippedPrefixes);
+    std::swap(other._booleans, _booleans);
+    std::swap(other._isParsed, _isParsed);
+
+    return *this;
+}
+
 Arguments::~Arguments() = default;
 
 std::string Arguments::prefix() const {

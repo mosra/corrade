@@ -165,6 +165,26 @@ class CORRADE_UTILITY_EXPORT Arguments {
          */
         explicit Arguments(const std::string& prefix);
 
+        /** @brief Copying is not allowed */
+        Arguments(const Arguments&) = delete;
+
+        /**
+         * @brief Move constructor
+         *
+         * A moved-out instance behaves the same as newly created instance.
+         */
+        Arguments(Arguments&& other) noexcept;
+
+        /** @brief Copying is not allowed */
+        Arguments& operator=(const Arguments&) = delete;
+
+        /**
+         * @brief Move assignment
+         *
+         * Swaps contents of the two instances.
+         */
+        Arguments& operator=(Arguments&& other) noexcept;
+
         ~Arguments();
 
         /**
@@ -174,6 +194,14 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * returns the specified prefix. Otherwise returns empty string.
          */
         std::string prefix() const;
+
+        /**
+         * @brief Whether the arguments were successfully parsed
+         *
+         * Returns @cpp true @ce if @ref parse() was successfully called,
+         * @cpp false @ce otherwise.
+         */
+        bool isParsed() const { return _isParsed; }
 
         /**
          * @brief Add mandatory argument
