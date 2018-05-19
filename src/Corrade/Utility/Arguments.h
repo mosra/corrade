@@ -240,7 +240,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *   ./app -a|--argument ARGUMENT
          *
          * Arguments:
-         *   --a, --argument   help text
+         *   -a, --argument    help text
          * @endcode
          *
          * If no help text is set, the argument is not displayed in argument
