@@ -168,6 +168,14 @@ class CORRADE_UTILITY_EXPORT Arguments {
         ~Arguments();
 
         /**
+         * @brief Argument prefix
+         *
+         * If the class was instantiated with @ref Arguments(const std::string&),
+         * returns the specified prefix. Otherwise returns empty string.
+         */
+        std::string prefix() const;
+
+        /**
          * @brief Add mandatory argument
          *
          * After calling @cpp addArgument("argument") @ce the argument will be

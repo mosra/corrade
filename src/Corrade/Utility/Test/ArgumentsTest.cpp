@@ -655,6 +655,9 @@ void ArgumentsTest::prefixedParse() {
     arg2.addOption("behavior")
         .addOption("buffer-size");
 
+    CORRADE_COMPARE(arg1.prefix(), "");
+    CORRADE_COMPARE(arg2.prefix(), "read");
+
     const char* argv[] = { "", "-b", "--read-behavior", "buffered", "--speed", "fast", "--binary", "--read-buffer-size", "4K", "file.dat" };
     const int argc = std::extent<decltype(argv)>();
 

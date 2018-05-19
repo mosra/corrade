@@ -156,6 +156,10 @@ Arguments::Arguments() {
 
 Arguments::~Arguments() = default;
 
+std::string Arguments::prefix() const {
+    return _prefix.empty() ? std::string{} : _prefix.substr(0, _prefix.size() - 1);
+}
+
 Arguments& Arguments::addArgument(std::string key) {
     CORRADE_ASSERT(_prefix.empty(),
         "Utility::Arguments::addArgument(): argument" << key << "not allowed in prefixed version", *this);

@@ -37,6 +37,10 @@ namespace Corrade {
 
 -   New @ref Containers::ScopedExit helper class
 
+@subsubsection corrade-changelog-latest-new-utility Utility library
+
+-   Added @ref Utility::Arguments::prefix()
+
 @section corrade-changelog-2018-04 2018.04
 
 Released 2018-05-01, tagged as
