@@ -301,10 +301,9 @@ void ArgumentsTest::helpAfterParse() {
     Arguments args;
 
     const char* argv[] = { "foobar" };
-    const int argc = std::extent<decltype(argv)>();
 
     /* Take command name from argv */
-    CORRADE_VERIFY(args.tryParse(argc, argv));
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
     const auto expected = R"text(Usage:
   foobar [-h|--help]
 )text";
@@ -312,7 +311,7 @@ void ArgumentsTest::helpAfterParse() {
 
     /* If set custom command name, don't override */
     args.setCommand("myFoobarApp");
-    CORRADE_VERIFY(args.tryParse(argc, argv));
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
     const auto expected2 = R"text(Usage:
   myFoobarApp [-h|--help]
 )text";
@@ -399,11 +398,10 @@ void ArgumentsTest::parseHelp() {
     args.addBooleanOption("no-foo-bars");
 
     const char* argv[] = { "", "-h", "--no-foo-bars", "error" };
-    const int argc = std::extent<decltype(argv)>();
 
     /* The parse() will not exit if help is set, but tryParse() should indicate
        the error */
-    CORRADE_VERIFY(!args.tryParse(argc, argv));
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_VERIFY(args.isSet("help"));
     CORRADE_VERIFY(args.isSet("no-foo-bars"));
 }
@@ -415,9 +413,8 @@ void ArgumentsTest::parseArguments() {
         .addArgument("output");
 
     const char* argv[] = { "", "hello", "in.txt", "out.bin" };
-    const int argc = std::extent<decltype(argv)>();
 
-    CORRADE_VERIFY(args.tryParse(argc, argv));
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(args.value("name"), "hello");
     CORRADE_COMPARE(args.value("input"), "in.txt");
     CORRADE_COMPARE(args.value("output"), "out.bin");
@@ -432,9 +429,8 @@ void ArgumentsTest::parseMixed() {
         .addBooleanOption('l', "loud");
 
     const char* argv[] = { "", "-o", "log.txt", "-v", "input.txt" };
-    const int argc = std::extent<decltype(argv)>();
 
-    CORRADE_VERIFY(args.tryParse(argc, argv));
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_VERIFY(!args.isSet("help"));
     CORRADE_VERIFY(args.isSet("verbose"));
     CORRADE_COMPARE(args.value("file"), "input.txt");
@@ -449,9 +445,8 @@ void ArgumentsTest::parseCustomType() {
     args.addNamedArgument("pi");
 
     const char* argv[] = { "", "--pi", "0.3141516e+1" };
-    const int argc = std::extent<decltype(argv)>();
 
-    CORRADE_VERIFY(args.tryParse(argc, argv));
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(args.value<float>("pi"), 3.141516f);
 }
 
@@ -460,9 +455,8 @@ void ArgumentsTest::parseCustomTypeFlags() {
     args.addNamedArgument("key");
 
     const char* argv[] = { "", "--key", "0xdeadbeef" };
-    const int argc = std::extent<decltype(argv)>();
 
-    CORRADE_VERIFY(args.tryParse(argc, argv));
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(args.value<unsigned int>("key", ConfigurationValueFlag::Hex), 0xdeadbeef);
 }
 
@@ -472,9 +466,8 @@ void ArgumentsTest::parseDoubleArgument() {
         .addBooleanOption('b', "bool");
 
     const char* argv[] = { "", "--arg", "first", "-b", "--arg", "second", "-b" };
-    const int argc = std::extent<decltype(argv)>();
 
-    CORRADE_VERIFY(args.tryParse(argc, argv));
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(args.value("arg"), "second");
     CORRADE_VERIFY(args.isSet("bool"));
 }
@@ -483,11 +476,10 @@ void ArgumentsTest::parseUnknownArgument() {
     Arguments args;
 
     const char* argv[] = { "", "--error" };
-    const int argc = std::extent<decltype(argv)>();
 
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(!args.tryParse(argc, argv));
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(out.str(), "Unknown command-line argument --error\n");
 }
 
@@ -495,11 +487,10 @@ void ArgumentsTest::parseUnknownShortArgument() {
     Arguments args;
 
     const char* argv[] = { "", "-e" };
-    const int argc = std::extent<decltype(argv)>();
 
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(!args.tryParse(argc, argv));
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(out.str(), "Unknown command-line argument -e\n");
 }
 
@@ -507,11 +498,10 @@ void ArgumentsTest::parseSuperfluousArgument() {
     Arguments args;
 
     const char* argv[] = { "", "error" };
-    const int argc = std::extent<decltype(argv)>();
 
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(!args.tryParse(argc, argv));
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(out.str(), "Superfluous command-line argument error\n");
 }
 
@@ -520,11 +510,10 @@ void ArgumentsTest::parseArgumentAfterSeparator() {
     args.addBooleanOption('b', "bar");
 
     const char* argv[] = { "", "--", "-b" };
-    const int argc = std::extent<decltype(argv)>();
 
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(!args.tryParse(argc, argv));
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(out.str(), "Superfluous command-line argument -b\n");
 }
 
@@ -532,11 +521,10 @@ void ArgumentsTest::parseInvalidShortArgument() {
     Arguments args;
 
     const char* argv[] = { "", "-?" };
-    const int argc = std::extent<decltype(argv)>();
 
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(!args.tryParse(argc, argv));
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(out.str(), "Invalid command-line argument -?\n");
 }
 
@@ -544,11 +532,10 @@ void ArgumentsTest::parseInvalidLongArgument() {
     Arguments args;
 
     const char* argv[] = { "", "--?" };
-    const int argc = std::extent<decltype(argv)>();
 
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(!args.tryParse(argc, argv));
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(out.str(), "Invalid command-line argument --?\n");
 }
 
@@ -556,11 +543,10 @@ void ArgumentsTest::parseInvalidLongArgumentDashes() {
     Arguments args;
 
     const char* argv[] = { "", "-long-argument" };
-    const int argc = std::extent<decltype(argv)>();
 
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(!args.tryParse(argc, argv));
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(out.str(), "Invalid command-line argument -long-argument (did you mean --long-argument?)\n");
 }
 
@@ -569,11 +555,10 @@ void ArgumentsTest::parseMissingValue() {
     args.addOption("output");
 
     const char* argv[] = { "", "--output" };
-    const int argc = std::extent<decltype(argv)>();
 
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(!args.tryParse(argc, argv));
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(out.str(), "Missing value for command-line argument --output\n");
 }
 
@@ -582,11 +567,10 @@ void ArgumentsTest::parseMissingOption() {
     args.addNamedArgument("output");
 
     const char* argv[] = { "" };
-    const int argc = std::extent<decltype(argv)>();
 
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(!args.tryParse(argc, argv));
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(out.str(), "Missing command-line argument --output\n");
 }
 
@@ -595,11 +579,10 @@ void ArgumentsTest::parseMissingArgument() {
     args.addArgument("file").setHelp("file", "", "file.dat");
 
     const char* argv[] = { "" };
-    const int argc = std::extent<decltype(argv)>();
 
     std::ostringstream out;
     Error redirectError{&out};
-    CORRADE_VERIFY(!args.tryParse(argc, argv));
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(out.str(), "Missing command-line argument file.dat\n");
 }
 
@@ -616,10 +599,9 @@ void ArgumentsTest::parseEnvironment() {
         .addBooleanOption("color").setFromEnvironment("color", "ARGUMENTSTEST_COLOR");
 
     const char* argv[] = { "" };
-    const int argc = std::extent<decltype(argv)>();
 
     /* Set from environment by CTest */
-    CORRADE_VERIFY(args.tryParse(argc, argv));
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(args.value("size"), "1337");
     CORRADE_VERIFY(args.isSet("verbose"));
     CORRADE_VERIFY(!args.isSet("color"));
@@ -637,9 +619,8 @@ void ArgumentsTest::parseEnvironmentUtf8() {
     args.addOption("unicode").setFromEnvironment("unicode", "ARGUMENTSTEST_UNICODE");
 
     const char* argv[] = { "" };
-    const int argc = std::extent<decltype(argv)>();
 
-    CORRADE_VERIFY(args.tryParse(argc, argv));
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(args.value("unicode"), "hýždě");
     #endif
 }
@@ -659,14 +640,13 @@ void ArgumentsTest::prefixedParse() {
     CORRADE_COMPARE(arg2.prefix(), "read");
 
     const char* argv[] = { "", "-b", "--read-behavior", "buffered", "--speed", "fast", "--binary", "--read-buffer-size", "4K", "file.dat" };
-    const int argc = std::extent<decltype(argv)>();
 
-    CORRADE_VERIFY(arg1.tryParse(argc, argv));
+    CORRADE_VERIFY(arg1.tryParse(Containers::arraySize(argv), argv));
     CORRADE_VERIFY(arg1.isSet("binary"));
     CORRADE_COMPARE(arg1.value("speed"), "fast");
     CORRADE_COMPARE(arg1.value("file"), "file.dat");
 
-    CORRADE_VERIFY(arg2.tryParse(argc, argv));
+    CORRADE_VERIFY(arg2.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(arg2.value("behavior"), "buffered");
     CORRADE_COMPARE(arg2.value("buffer-size"), "4K");
 }
@@ -681,12 +661,11 @@ void ArgumentsTest::prefixedParseMinus() {
         .addOption("buffer-size");
 
     const char* argv[] = { "", "--read-behavior", "buffered", "--offset", "-50" };
-    const int argc = std::extent<decltype(argv)>();
 
-    CORRADE_VERIFY(arg1.tryParse(argc, argv));
+    CORRADE_VERIFY(arg1.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(arg1.value("offset"), "-50");
 
-    CORRADE_VERIFY(arg2.tryParse(argc, argv));
+    CORRADE_VERIFY(arg2.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(arg2.value("behavior"), "buffered");
 }
 
@@ -700,12 +679,11 @@ void ArgumentsTest::prefixedParseMinusMinus() {
         .addOption("buffer-size");
 
     const char* argv[] = { "", "--read-behavior", "buffered", "--offset", "--50" };
-    const int argc = std::extent<decltype(argv)>();
 
-    CORRADE_VERIFY(arg1.tryParse(argc, argv));
+    CORRADE_VERIFY(arg1.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(arg1.value("offset"), "--50");
 
-    CORRADE_VERIFY(arg2.tryParse(argc, argv));
+    CORRADE_VERIFY(arg2.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(arg2.value("behavior"), "buffered");
 }
 
@@ -719,9 +697,8 @@ void ArgumentsTest::prefixedParseHelpArgument() {
         .addSkippedPrefix("reader");
 
     const char* argv[] = { "", "--reader-help", "-b" };
-    const int argc = std::extent<decltype(argv)>();
 
-    CORRADE_VERIFY(arg1.tryParse(argc, argv));
+    CORRADE_VERIFY(arg1.tryParse(Containers::arraySize(argv), argv));
     CORRADE_VERIFY(arg1.isSet("binary"));
 }
 
@@ -827,9 +804,8 @@ void ArgumentsTest::prefixedUnknownWithPrefix() {
     args.addOption("bar");
 
     const char* argv[] = { "", "--reader-foo", "hello", "--something", "other" };
-    const int argc = std::extent<decltype(argv)>();
 
-    CORRADE_VERIFY(!args.tryParse(argc, argv));
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(out.str(), "Unknown command-line argument --reader-foo\n");
 }
 
