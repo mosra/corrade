@@ -186,15 +186,15 @@ void DebugTest::isTty() {
 template<class T> void DebugTest::floats() {
     setTestCaseName(FloatsData<T>::name());
 
+    /* That's the case for MSVC as well, source:
+       https://msdn.microsoft.com/en-us/library/9cx8xs15.aspx */
+    if(std::is_same<T, long double>::value)
+        CORRADE_SKIP("long double is equivalent to double on this system.");
+
     std::ostringstream o;
     /* The last float value is to verify that the precision gets reset back */
     Debug(&o) << T(3.1415926535897932384626l) << T(-12345.67890123456789l) << T(1.234567890123456789e-12l) << 3.141592653589793f;
     {
-        #ifdef _MSC_VER
-        /* Source: https://msdn.microsoft.com/en-us/library/9cx8xs15.aspx */
-        CORRADE_EXPECT_FAIL_IF((std::is_same<T, long double>::value), "MSVC treats long double as double.");
-        #endif
-
         #ifdef CORRADE_TARGET_ANDROID
         CORRADE_EXPECT_FAIL_IF((std::is_same<T, long double>::value && sizeof(void*) == 4),
             "Android has precision problems with long double on 32bit.");
