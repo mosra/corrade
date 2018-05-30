@@ -357,7 +357,7 @@ Arguments& Arguments::setHelpKey(const std::string& key, std::string helpKey) {
 void Arguments::parse(const int argc, const char** const argv) {
     const bool status = tryParse(argc, argv);
 
-    if(isSet("help")) {
+    if(_booleans.at(find(_prefix + "help")->id)) {
         Debug() << help();
         std::exit(0);
     }
