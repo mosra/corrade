@@ -43,7 +43,7 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 
-@subsubsection corrade-changelog-latest-new-utility Utility library
+@subsubsection corrade-changelog-latest-changes-utility Utility library
 
 -   @ref Utility::Arguments::value() and @ref Utility::Arguments::isSet() now
     check that the arguments were already successfully parsed to prevent
