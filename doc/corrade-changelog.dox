@@ -52,6 +52,11 @@ namespace Corrade {
     it's not meant to be used as a general storage for parsed arguments, only a
     parser
 
+@subsection corrade-changelog-latest-buildsystem Build system
+
+-   There's now a PPA for Ubuntu packages. See @ref building-corrade-packages-deb
+    for more information.
+
 @section corrade-changelog-2018-04 2018.04
 
 Released 2018-05-01, tagged as
