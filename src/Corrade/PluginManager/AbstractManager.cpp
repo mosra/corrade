@@ -339,6 +339,23 @@ void AbstractManager::setPluginDirectory(std::string directory) {
 
         registerDynamicPlugin(name, new Plugin{name, Directory::join(_pluginDirectory, name + ".conf"), this});
     }
+
+    /* If some of the currently loaded plugins aliased plugins that werre in
+       the old plugin directory, these are no longer there. Refresh the alias
+       list with the new plugins. */
+    for(auto p: _plugins.plugins) {
+        if(p.second->manager != this) continue;
+
+        /* Add aliases to the list (only the ones that aren't already there are
+           added, calling insert() won't overwrite the existing value) */
+        for(const std::string& alias: p.second->metadata._provides) {
+            /* Libc++ frees the passed Plugin& reference when using emplace(),
+               causing double-free memory corruption later. Everything is okay
+               with insert(). */
+            /** @todo put back emplace() here when libc++ is fixed */
+            _aliases.insert({alias, *p.second});
+        }
+    }
 }
 
 void AbstractManager::reloadPluginDirectory() {
