@@ -86,10 +86,6 @@ struct ManagerTest: TestSuite::Tester {
     void dynamicPluginFilePathConflictsWithLoadedPlugin();
     void dynamicPluginFilePathRemoveOnFail();
     #endif
-    void staticPluginInitFini();
-    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-    void dynamicPluginInitFini();
-    #endif
 
     void configuration();
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
@@ -153,10 +149,6 @@ ManagerTest::ManagerTest() {
               &ManagerTest::dynamicPluginFilePathLoadAndInstantiate,
               &ManagerTest::dynamicPluginFilePathConflictsWithLoadedPlugin,
               &ManagerTest::dynamicPluginFilePathRemoveOnFail,
-              #endif
-              &ManagerTest::staticPluginInitFini,
-              #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-              &ManagerTest::dynamicPluginInitFini,
               #endif
 
               &ManagerTest::configuration,
@@ -560,44 +552,6 @@ void ManagerTest::dynamicPluginFilePathRemoveOnFail() {
     CORRADE_COMPARE(manager.load(PITBULL_PLUGIN_FILENAME), LoadState::Loaded);
 }
 
-#endif
-
-void ManagerTest::staticPluginInitFini() {
-    std::ostringstream out;
-    Debug redirectDebug{&out};
-
-    {
-        /* Initialization is right after manager assigns them to itself */
-        out.str({});
-        PluginManager::Manager<AbstractAnimal> manager{"inexistentDir"};
-        CORRADE_COMPARE_AS(manager.pluginList(), std::vector<std::string>{
-            "Canary"}, TestSuite::Compare::Container);
-        CORRADE_COMPARE(out.str(), "Canary initialized\n");
-
-        /* Finalization is right before manager frees them */
-        out.str({});
-    }
-
-    CORRADE_COMPARE(out.str(), "Canary finalized\n");
-}
-
-#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-void ManagerTest::dynamicPluginInitFini() {
-    std::ostringstream out;
-    Debug redirectDebug{&out};
-
-    PluginManager::Manager<AbstractAnimal> manager;
-
-    /* Initialization is right after manager loads them */
-    out.str({});
-    CORRADE_COMPARE(manager.load("Dog"), LoadState::Loaded);
-    CORRADE_COMPARE(out.str(), "Dog initialized\n");
-
-    /* Finalization is right before manager unloads them */
-    out.str({});
-    CORRADE_COMPARE(manager.unload("Dog"), LoadState::NotLoaded);
-    CORRADE_COMPARE(out.str(), "Dog finalized\n");
-}
 #endif
 
 void ManagerTest::configuration() {

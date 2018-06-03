@@ -1,3 +1,5 @@
+#ifndef Corrade_PluginManager_Test_InitFini_h
+#define Corrade_PluginManager_Test_InitFini_h
 /*
     This file is part of Corrade.
 
@@ -23,24 +25,34 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/PluginManager/AbstractManager.h"
-#include "Corrade/Utility/Debug.h"
-#include "Corrade/Utility/Configuration.h"
+#include "Corrade/PluginManager/AbstractPlugin.h"
+#include "Corrade/Utility/Directory.h"
 
-#include "AbstractAnimal.h"
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+#include "Corrade/PluginManager/Test/configure.h"
+#endif
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-class Canary: public AbstractAnimal {
-    public:
-        explicit Canary(AbstractManager& manager, const std::string& plugin): AbstractAnimal{manager, plugin} {}
+struct InitFini: AbstractPlugin {
+    static std::string pluginInterface() { return {}; }
 
-        std::string name() override { return configuration().value("name"); }
-        int legCount() override { return 2; }
-        bool hasTail() override { return true; }
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+    static std::vector<std::string> pluginSearchPaths() {
+        return {
+            #ifndef CMAKE_INTDIR
+            Utility::Directory::join(PLUGINS_DIR, "init-fini")
+            #else
+            Utility::Directory::join(Utility::Directory::join(PLUGINS_DIR, "init-fini"), CMAKE_INTDIR)
+            #endif
+        };
+    }
+    #endif
+
+    explicit InitFini(AbstractManager& manager, const std::string& plugin): AbstractPlugin{manager, plugin} {}
 };
 
 }}}
 
-CORRADE_PLUGIN_REGISTER(Canary, Corrade::PluginManager::Test::Canary,
-    "cz.mosra.corrade.PluginManager.Test.AbstractAnimal/1.0")
+#endif
+

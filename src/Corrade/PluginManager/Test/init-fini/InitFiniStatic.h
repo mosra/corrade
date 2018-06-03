@@ -1,3 +1,5 @@
+#ifndef Corrade_PluginManager_Test_InitFiniStatic_h
+#define Corrade_PluginManager_Test_InitFiniStatic_h
 /*
     This file is part of Corrade.
 
@@ -23,24 +25,17 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/PluginManager/AbstractManager.h"
-#include "Corrade/Utility/Debug.h"
-#include "Corrade/Utility/Configuration.h"
-
-#include "AbstractAnimal.h"
+#include "InitFini.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-class Canary: public AbstractAnimal {
-    public:
-        explicit Canary(AbstractManager& manager, const std::string& plugin): AbstractAnimal{manager, plugin} {}
+struct InitFiniStatic: InitFini {
+    static void initialize();
+    static void finalize();
 
-        std::string name() override { return configuration().value("name"); }
-        int legCount() override { return 2; }
-        bool hasTail() override { return true; }
+    explicit InitFiniStatic(AbstractManager& manager, const std::string& plugin): InitFini{manager, plugin} {}
 };
 
 }}}
 
-CORRADE_PLUGIN_REGISTER(Canary, Corrade::PluginManager::Test::Canary,
-    "cz.mosra.corrade.PluginManager.Test.AbstractAnimal/1.0")
+#endif

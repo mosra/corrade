@@ -23,23 +23,15 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-corrade_add_plugin(NoPluginVersion ${CMAKE_CURRENT_BINARY_DIR} "" ../dummy.conf NoPluginVersion.cpp)
-corrade_add_plugin(NoPluginInterface ${CMAKE_CURRENT_BINARY_DIR} "" ../dummy.conf NoPluginInterface.cpp)
-corrade_add_plugin(NoPluginInitializer ${CMAKE_CURRENT_BINARY_DIR} "" ../dummy.conf NoPluginInitializer.cpp)
-corrade_add_plugin(NoPluginFinalizer ${CMAKE_CURRENT_BINARY_DIR} "" ../dummy.conf NoPluginFinalizer.cpp)
-corrade_add_plugin(NoPluginInstancer ${CMAKE_CURRENT_BINARY_DIR} "" ../dummy.conf NoPluginInstancer.cpp)
-
-set_target_properties(
-    NoPluginVersion NoPluginVersion-metadata
-    NoPluginInterface NoPluginInterface-metadata
-    NoPluginInitializer NoPluginInitializer-metadata
-    NoPluginFinalizer NoPluginFinalizer-metadata
-    NoPluginInstancer NoPluginInstancer-metadata
-    PROPERTIES FOLDER "Corrade/PluginManager/Test")
-
-if(NOT CORRADE_TARGET_WINDOWS)
-    # On Windows it's SHARED, not MODULE, so this doesn't really work
-    corrade_add_plugin(UnresolvedReference ${CMAKE_CURRENT_BINARY_DIR} "" ../dummy.conf UnresolvedReference.cpp)
-    set_target_properties(UnresolvedReference UnresolvedReference-metadata
+if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
+    corrade_add_plugin(InitFiniDynamic ${CMAKE_CURRENT_BINARY_DIR} "" InitFiniDynamic.conf InitFiniDynamic.cpp)
+    set_target_properties(InitFiniDynamic InitFiniDynamic-metadata
         PROPERTIES FOLDER "Corrade/PluginManager/Test")
+endif()
+
+corrade_add_static_plugin(InitFiniStatic ${CMAKE_CURRENT_BINARY_DIR} ../dummy.conf InitFiniStatic.cpp)
+set_target_properties(InitFiniStatic InitFiniStatic-dependencies PROPERTIES FOLDER "Corrade/PluginManager/Test")
+
+if(CORRADE_TARGET_WINDOWS)
+    target_link_libraries(InitFiniDynamic PRIVATE CorradePluginManager)
 endif()

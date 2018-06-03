@@ -23,24 +23,20 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include "InitFiniStatic.h"
+
 #include "Corrade/PluginManager/AbstractManager.h"
 #include "Corrade/Utility/Debug.h"
-#include "Corrade/Utility/Configuration.h"
-
-#include "AbstractAnimal.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-class Canary: public AbstractAnimal {
-    public:
-        explicit Canary(AbstractManager& manager, const std::string& plugin): AbstractAnimal{manager, plugin} {}
+struct InitFiniDynamic: InitFiniStatic {
+    static void initialize() { Utility::Debug{} << "Dynamic plugin initialized"; }
+    static void finalize() { Utility::Debug{} << "Dynamic plugin finalized"; }
 
-        std::string name() override { return configuration().value("name"); }
-        int legCount() override { return 2; }
-        bool hasTail() override { return true; }
+    explicit InitFiniDynamic(AbstractManager& manager, const std::string& plugin): InitFiniStatic{manager, plugin} {}
 };
 
 }}}
 
-CORRADE_PLUGIN_REGISTER(Canary, Corrade::PluginManager::Test::Canary,
-    "cz.mosra.corrade.PluginManager.Test.AbstractAnimal/1.0")
+CORRADE_PLUGIN_REGISTER(InitFiniDynamic, Corrade::PluginManager::Test::InitFiniDynamic, "")

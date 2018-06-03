@@ -63,12 +63,20 @@ corrade_add_test(PluginManagerManagerTest
     AbstractDeletable.cpp
     AbstractFood.cpp
     LIBRARIES CorradePluginManagerTestLib Canary)
-set_target_properties(PluginManagerManagerTest PROPERTIES FOLDER "Corrade/PluginManager/Test")
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     target_include_directories(PluginManagerManagerTest PRIVATE $<TARGET_FILE_DIR:PluginManagerManagerTest>)
 else()
     target_include_directories(PluginManagerManagerTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 endif()
+
+corrade_add_test(PluginManagerManagerInitFiniTest
+    ManagerInitFiniTest.cpp
+    LIBRARIES InitFiniStatic CorradePluginManager)
+
+set_target_properties(
+    PluginManagerManagerTest
+    PluginManagerManagerInitFiniTest
+    PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
 target_link_libraries(Canary PRIVATE CorradePluginManagerTestLib)
 if(CORRADE_TARGET_WINDOWS)
@@ -78,6 +86,7 @@ if(CORRADE_TARGET_WINDOWS)
     target_link_libraries(PitBull PRIVATE Dog)
 endif()
 
+add_subdirectory(init-fini)
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     add_subdirectory(deletable)
     add_subdirectory(food)
