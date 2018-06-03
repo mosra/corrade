@@ -98,6 +98,7 @@ struct ManagerTest: TestSuite::Tester {
     void unresolvedDependencies();
 
     void reloadPluginDirectory();
+    void restoreAliasesAfterPluginDirectoryChange();
 
     void staticProvides();
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
@@ -160,7 +161,9 @@ ManagerTest::ManagerTest() {
               &ManagerTest::destructionHierarchy,
               &ManagerTest::crossManagerDependencies,
               &ManagerTest::unresolvedDependencies,
+
               &ManagerTest::reloadPluginDirectory,
+              &ManagerTest::restoreAliasesAfterPluginDirectoryChange,
 
               &ManagerTest::staticProvides,
               #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
@@ -785,6 +788,28 @@ void ManagerTest::reloadPluginDirectory() {
         "Bulldog", "Canary", "Dog", "LostPitBull", "LostSnail"}), TestSuite::Compare::Container);
     CORRADE_COMPARE_AS(actualAliases2, (std::vector<std::string>{
         "AGoodBoy", "Bulldog", "Canary", "Dog", "JustSomeBird", "JustSomeMammal", "LostPitBull", "LostSnail"}), TestSuite::Compare::Container);
+    #endif
+}
+
+void ManagerTest::restoreAliasesAfterPluginDirectoryChange() {
+    #ifdef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+    CORRADE_SKIP("Plugin directory is irrelevant for static plugins");
+    #else
+    PluginManager::Manager<AbstractAnimal> manager;
+    CORRADE_COMPARE(manager.load(DOGGO_PLUGIN_FILENAME), LoadState::Loaded);
+
+    CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
+        "Bulldog", "Canary", "Dog", "Doggo", "PitBull", "Snail"}), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(manager.aliasList(), (std::vector<std::string>{
+        "AGoodBoy", "Bulldog", "Canary", "Dog", "Doggo", "JustSomeBird", "JustSomeMammal", "PitBull", "Snail"}), TestSuite::Compare::Container);
+
+    /* Set plugin directory to an empty idr -- there should stay the Doggo
+       plugin and its Dog alias */
+    manager.setPluginDirectory("nonexistent");
+    CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
+        "Canary", "Doggo"}), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(manager.aliasList(), (std::vector<std::string>{
+        "Canary", "Dog", "Doggo", "JustSomeBird"}), TestSuite::Compare::Container);
     #endif
 }
 

@@ -23,7 +23,22 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#cmakedefine PLUGINS_DIR "${PLUGINS_DIR}"
-#cmakedefine DOG_PLUGIN_FILENAME "${DOG_PLUGIN_FILENAME}"
-#cmakedefine DOGGO_PLUGIN_FILENAME "${DOGGO_PLUGIN_FILENAME}"
-#cmakedefine PITBULL_PLUGIN_FILENAME "${PITBULL_PLUGIN_FILENAME}"
+#include "../AbstractAnimal.h"
+
+#include "Corrade/PluginManager/AbstractManager.h"
+
+namespace Corrade { namespace PluginManager { namespace Test {
+
+class Doggo: public AbstractAnimal {
+    public:
+        explicit Doggo(AbstractManager& manager, const std::string& plugin): AbstractAnimal{manager, plugin} {}
+
+        std::string name() override { return "Doggo"; }
+        int legCount() override { return 0; }
+        bool hasTail() override { return false; }
+};
+
+}}}
+
+CORRADE_PLUGIN_REGISTER(Doggo, Corrade::PluginManager::Test::Doggo,
+    "cz.mosra.corrade.PluginManager.Test.AbstractAnimal/1.0")

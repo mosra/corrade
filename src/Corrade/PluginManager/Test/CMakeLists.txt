@@ -42,6 +42,7 @@ if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
 
     set(PLUGINS_DIR $<TARGET_FILE_DIR:PluginManagerManagerTest>)
     set(DOG_PLUGIN_FILENAME $<TARGET_FILE:Dog>)
+    set(DOGGO_PLUGIN_FILENAME $<TARGET_FILE:Doggo>)
     set(PITBULL_PLUGIN_FILENAME $<TARGET_FILE:PitBull>)
 
     # First replace ${} variables, then $<> generator expressions
@@ -88,6 +89,7 @@ endif()
 
 add_subdirectory(init-fini)
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
+    add_subdirectory(doggo)
     add_subdirectory(deletable)
     add_subdirectory(food)
     add_subdirectory(wrong)
