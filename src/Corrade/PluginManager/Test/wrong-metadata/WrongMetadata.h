@@ -1,3 +1,5 @@
+#ifndef Corrade_PluginManager_Test_WrongMetadata_h
+#define Corrade_PluginManager_Test_WrongMetadata_h
 /*
     This file is part of Corrade.
 
@@ -23,4 +25,31 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-/* This file is purposedly empty to trigger an error on load. */
+#include "Corrade/PluginManager/AbstractPlugin.h"
+#include "Corrade/Utility/Directory.h"
+
+#include "Corrade/PluginManager/Test/configure.h"
+
+namespace Corrade { namespace PluginManager { namespace Test {
+
+/* This is both a plugin interface and a plugin implementation. That's okay. */
+
+struct WrongMetadata: AbstractPlugin {
+    static std::string pluginInterface() { return {}; }
+
+    static std::vector<std::string> pluginSearchPaths() {
+        return {
+            #ifndef CMAKE_INTDIR
+            Utility::Directory::join(PLUGINS_DIR, "wrong-metadata")
+            #else
+            Utility::Directory::join(Utility::Directory::join(PLUGINS_DIR, "wrong-metadata"), CMAKE_INTDIR)
+            #endif
+        };
+    }
+
+    explicit WrongMetadata(AbstractManager& manager, const std::string& plugin): AbstractPlugin{manager, plugin} {}
+};
+
+}}}
+
+#endif

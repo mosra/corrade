@@ -40,7 +40,8 @@
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 #include "Corrade/PluginManager/configure.h"
 
-#include "configure.h"
+#include "Corrade/PluginManager/Test/wrong-metadata/WrongMetadata.h"
+#include "Corrade/PluginManager/Test/configure.h"
 #endif
 
 static void initialize() {
@@ -296,12 +297,12 @@ void ManagerTest::wrongMetadataFile() {
     std::ostringstream out;
     Error redirectError{&out};
 
-    PluginManager::Manager<AbstractAnimal> manager;
-    CORRADE_COMPARE(manager.loadState("Snail"), LoadState::WrongMetadataFile);
-    CORRADE_COMPARE(manager.load("Snail"), LoadState::WrongMetadataFile);
+    PluginManager::Manager<WrongMetadata> manager;
+    CORRADE_COMPARE(manager.loadState("WrongMetadata"), LoadState::WrongMetadataFile);
+    CORRADE_COMPARE(manager.load("WrongMetadata"), LoadState::WrongMetadataFile);
     CORRADE_COMPARE(out.str(),
         "Utility::Configuration::Configuration(): missing equals for a value\n"
-        "PluginManager::Manager::load(): plugin Snail is not ready to load: PluginManager::LoadState::WrongMetadataFile\n");
+        "PluginManager::Manager::load(): plugin WrongMetadata is not ready to load: PluginManager::LoadState::WrongMetadataFile\n");
 }
 
 void ManagerTest::unresolvedReference() {
@@ -768,7 +769,7 @@ void ManagerTest::unresolvedDependencies() {
     Error redirectError{&out};
     CORRADE_COMPARE(foodManager.load("HotDogWithSnail"), LoadState::UnresolvedDependency);
     CORRADE_COMPARE(out.str(),
-        "PluginManager::Manager::load(): plugin Snail is not ready to load: PluginManager::LoadState::WrongMetadataFile\n"
+        "PluginManager::Manager::load(): unresolved dependency SomethingThatDoesNotExist of plugin Snail\n"
         "PluginManager::Manager::load(): unresolved dependency Snail of plugin HotDogWithSnail\n");
     CORRADE_COMPARE(foodManager.loadState("HotDogWithSnail"), LoadState::NotLoaded);
     CORRADE_COMPARE(manager.metadata("Dog")->usedBy(),

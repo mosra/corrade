@@ -23,4 +23,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-/* This file is purposedly empty to trigger an error on load. */
+#include "WrongMetadata.h"
+
+#include "Corrade/PluginManager/AbstractManager.h"
+
+CORRADE_PLUGIN_REGISTER(WrongMetadata, Corrade::PluginManager::Test::WrongMetadata, "")
