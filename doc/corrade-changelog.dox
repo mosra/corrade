@@ -57,6 +57,11 @@ namespace Corrade {
 -   There's now a PPA for Ubuntu packages. See @ref building-corrade-packages-deb
     for more information.
 
+@subsection corrade-changelog-latest-bugfixes Bug fixes
+
+-   Calling @ref PluginManager::Manager::setPluginDirectory() could lead to
+    plugin aliases being forgotten in some cases
+
 @section corrade-changelog-2018-04 2018.04
 
 Released 2018-05-01, tagged as
