@@ -66,11 +66,11 @@ if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
         ARGUMENTS --fail-on-internal-assert true)
     set_tests_properties(UtilityAssertTestFailInternalAssert PROPERTIES
         PASS_REGULAR_EXPRESSION "Assertion b && !_failInternalAssert failed in ")
-    corrade_add_test(UtilityAssertTestFailInternalConstexprAssert
+    corrade_add_test(UtilityAssertTestFailInternalC___Assert
         $<TARGET_OBJECTS:AssertTestObjects>
         ${PROJECT_SOURCE_DIR}/src/dummy.cpp
         ARGUMENTS --fail-on-internal-constexpr-assert true)
-    set_tests_properties(UtilityAssertTestFailInternalConstexprAssert PROPERTIES
+    set_tests_properties(UtilityAssertTestFailInternalC___Assert PROPERTIES
         PASS_REGULAR_EXPRESSION "Assertion b failed in ")
     corrade_add_test(UtilityAssertTestFailAssertOutput
         $<TARGET_OBJECTS:AssertTestObjects>
@@ -78,11 +78,11 @@ if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
         ARGUMENTS --fail-on-assert-output true)
     set_tests_properties(UtilityAssertTestFailAssertOutput PROPERTIES
         PASS_REGULAR_EXPRESSION "foo\\(\\) should succeed")
-    corrade_add_test(UtilityAssertTestFailInternalAssertOutput
+    corrade_add_test(UtilityAssertTestFailInternalA___Output
         $<TARGET_OBJECTS:AssertTestObjects>
         ${PROJECT_SOURCE_DIR}/src/dummy.cpp
         ARGUMENTS --fail-on-internal-assert-output true)
-    set_tests_properties(UtilityAssertTestFailInternalAssertOutput PROPERTIES
+    set_tests_properties(UtilityAssertTestFailInternalA___Output PROPERTIES
         PASS_REGULAR_EXPRESSION "Assertion foo\\(\\) && !_failInternalAssertOutput failed in ")
     corrade_add_test(UtilityAssertTestFailAssertUnreachable
         $<TARGET_OBJECTS:AssertTestObjects>
