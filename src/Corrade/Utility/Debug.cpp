@@ -143,7 +143,7 @@ auto Debug::color(Color color) -> Modifier {
         #undef _c
     }
 
-    return [](Debug&) {};
+    return [](Debug&) {}; /* LCOV_EXCL_LINE */
 }
 
 auto Debug::boldColor(Color color) -> Modifier {
@@ -165,7 +165,7 @@ auto Debug::boldColor(Color color) -> Modifier {
         #undef _c
     }
 
-    return [](Debug&) {};
+    return [](Debug&) {}; /* LCOV_EXCL_LINE */
 }
 
 void Debug::resetColor(Debug& debug) {
