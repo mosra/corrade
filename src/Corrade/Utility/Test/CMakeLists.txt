@@ -148,6 +148,9 @@ corrade_add_test(UtilityDirectoryTest ${UtilityDirectoryTest_SRCS}
         DirectoryTestFilesUtf8/hýždě)
 target_include_directories(UtilityDirectoryTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
+corrade_add_test(UtilityFormatTest FormatTest.cpp LIBRARIES CorradeUtilityTestLib)
+target_include_directories(UtilityFormatTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
 corrade_add_test(UtilityHashDigestTest HashDigestTest.cpp)
 corrade_add_test(UtilityMacrosTest MacrosTest.cpp)
 corrade_add_test(UtilitySha1Test Sha1Test.cpp)

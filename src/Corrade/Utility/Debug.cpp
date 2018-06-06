@@ -360,14 +360,16 @@ Debug& Debug::operator<<(float value) {
     if(!_output) return *this;
     /* The default. Source: http://en.cppreference.com/w/cpp/io/ios_base/precision,
        Wikipedia says 6-digit number can be converted back and forth without
-       loss: https://en.wikipedia.org/wiki/Single-precision_floating-point_format */
+       loss: https://en.wikipedia.org/wiki/Single-precision_floating-point_format
+       Kept in sync with format(). */
     *_output << std::setprecision(6);
     return print(value);
 }
 Debug& Debug::operator<<(double value) {
     if(!_output) return *this;
     /* Wikipedia says 15-digit number can be converted back and forth without
-       loss: https://en.wikipedia.org/wiki/Double-precision_floating-point_format */
+       loss: https://en.wikipedia.org/wiki/Double-precision_floating-point_format
+       Kept in sync with format(). */
     *_output << std::setprecision(15);
     return print(value);
 }
@@ -375,7 +377,8 @@ Debug& Debug::operator<<(double value) {
 Debug& Debug::operator<<(long double value) {
     if(!_output) return *this;
     /* Wikipedia says 18-digit number can be converted both ways without
-       loss: https://en.wikipedia.org/wiki/Extended_precision#Working_range */
+       loss: https://en.wikipedia.org/wiki/Extended_precision#Working_range
+       Kept in sync with format(). */
     *_output << std::setprecision(18);
     return print(value);
 }

@@ -35,6 +35,7 @@ set(CorradeUtility_SRCS
 set(CorradeUtility_GracefulAssert_SRCS
     Arguments.cpp
     ConfigurationGroup.cpp
+    Format.cpp
     Resource.cpp
     String.cpp
     Unicode.cpp)
@@ -49,6 +50,7 @@ set(CorradeUtility_HEADERS
     Debug.h
     Directory.h
     Endianness.h
+    Format.h
     Macros.h
     MurmurHash2.h
     Resource.h

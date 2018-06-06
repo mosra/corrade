@@ -29,6 +29,7 @@
 #include <Corrade/Utility/Arguments.h>
 #include <Corrade/Utility/Assert.h>
 #include <Corrade/Utility/Configuration.h>
+#include <Corrade/Utility/Format.h>
 #include <Corrade/Utility/Macros.h>
 
 using namespace Corrade;
@@ -202,6 +203,63 @@ CORRADE_IGNORE_DEPRECATED_PUSH
 foo(42);
 CORRADE_IGNORE_DEPRECATED_POP
 /* [CORRADE_IGNORE_DEPRECATED] */
+}
+
+{
+/* [format] */
+std::string s = Utility::format("{} version {}.{}.{}, {} MB",
+    "vulkan.hpp", 1, 1, 76, 1.79);
+// vulkan.hpp version 1.1.76, 1.79 MB
+/* [format] */
+static_cast<void>(s);
+}
+
+{
+/* [format-numbered] */
+std::string s = Utility::format("<{0}><{1}>Good {}, {}!</{1}></{0}>",
+    "p", "strong", "afternoon", "ma'am!");
+// <p><strong>Good afternoon, ma'am!</strong></p>
+/* [format-numbered] */
+static_cast<void>(s);
+}
+
+{
+/* [format-escape] */
+std::string s = Utility::format("union {{ {} a; char data[{}]; }} caster;",
+    "float", 4);
+// union { float a; char data[4]; } caster;
+/* [format-escape] */
+static_cast<void>(s);
+}
+
+{
+void addShaderSource(Containers::ArrayView<char>);
+/* [formatInto-buffer] */
+char shaderVersion[128]; // large enough
+std::size_t size = Utility::formatInto(shaderVersion, "#version {}\n", 430);
+addShaderSource({shaderVersion, size});
+/* [formatInto-buffer] */
+}
+
+{
+/* [formatInto-string] */
+std::vector<float> positions{-0.5f, -0.5f, 0.0f,
+                              0.5f, -0.5f, 0.0f,
+                              0.0f,  0.5f, 0.0f};
+std::string out;
+for(std::size_t i = 0; i < positions.size(); i += 3)
+    Utility::formatInto(out, out.size(), "{}[{0}, {1}, {2}]",
+        out.empty() ? "" : ", ",
+        positions[i*3 + 0], positions[i*3 + 1], positions[i*3 + 2]);
+
+// [-0.5, -0.5, 0], [0.5, -0.5, 0], [0.0, 0.5, 0.0]
+/* [formatInto-string] */
+}
+
+{
+/* [formatInto-stdout] */
+Utility::formatInto(stdout, "Hello, {}!", "world");
+/* [formatInto-stdout] */
 }
 
 }

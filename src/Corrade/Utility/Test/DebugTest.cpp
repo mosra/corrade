@@ -186,6 +186,8 @@ void DebugTest::isTty() {
 template<class T> void DebugTest::floats() {
     setTestCaseName(FloatsData<T>::name());
 
+    /* This test is shared with Format to ensure consistency of output */
+
     /* That's the case for MSVC as well, source:
        https://msdn.microsoft.com/en-us/library/9cx8xs15.aspx */
     if(std::is_same<T, long double>::value && sizeof(double) == sizeof(long double))
