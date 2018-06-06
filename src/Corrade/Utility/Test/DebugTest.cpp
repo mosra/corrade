@@ -188,7 +188,7 @@ template<class T> void DebugTest::floats() {
 
     /* That's the case for MSVC as well, source:
        https://msdn.microsoft.com/en-us/library/9cx8xs15.aspx */
-    if(std::is_same<T, long double>::value)
+    if(std::is_same<T, long double>::value && sizeof(double) == sizeof(long double))
         CORRADE_SKIP("long double is equivalent to double on this system.");
 
     std::ostringstream o;
