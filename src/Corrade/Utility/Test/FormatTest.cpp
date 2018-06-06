@@ -161,7 +161,12 @@ void FormatTest::escapes() {
 }
 
 void FormatTest::integerChar() {
-    CORRADE_COMPARE(format<char>("{}", -15), "-15");
+    if(std::is_signed<char>::value) {
+        CORRADE_COMPARE(format<char>("{}", -15), "-15");
+    } else {
+        /* Android simulator does this. Huh? */
+        CORRADE_COMPARE(format<char>("{}", -15), "241");
+    }
     CORRADE_COMPARE(format<unsigned char>("{}", 230), "230");
 }
 
