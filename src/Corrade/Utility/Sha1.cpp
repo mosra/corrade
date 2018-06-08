@@ -79,6 +79,18 @@ Sha1& Sha1::operator<<(const std::string& data) {
     return *this;
 }
 
+/* GCC 6 (and possibly 7) on Raspberry Pi 3 Model B+ (aarch64) misoptimizes the
+   Sha1 calculation (e.g. giving 7073c2761c38837eb837837ef037837eafd80709 for
+   an empty input instead of correct da39a3ee5e6b4b0d3255bfef95601890afd80709)
+   when -O3 is used. Does not happen on GCC 8, does not happen with Clang. Due
+   to not having a better access to the device, I'm forcing O2 on all related
+   code. However note that this also forces it in case O0 was used. The
+   actual line affected seems to be  Digest d = Digest::fromByteArray(...). A
+   report with further details: https://github.com/mosra/corrade/issues/45 */
+#if defined(__GNUC__) && !defined(__clang__) && defined(CORRADE_TARGET_ARM) && __GNUC__ < 8
+#pragma GCC push_options
+#pragma GCC optimize ("O2")
+#endif
 Sha1::Digest Sha1::digest() {
     /* Add '1' bit to the leftovers, pad to (n*64)+56 bytes */
     _buffer.append(1, '\x80');
@@ -104,6 +116,9 @@ Sha1::Digest Sha1::digest() {
     _dataSize = 0;
     return d;
 }
+#if defined(__GNUC__) && !defined(__clang__) && defined(CORRADE_TARGET_ARM) && __GNUC__ < 8
+#pragma GCC pop_options
+#endif
 
 void Sha1::processChunk(const char* data) {
     /* Extend the data to 80 bytes, make it big endian */
