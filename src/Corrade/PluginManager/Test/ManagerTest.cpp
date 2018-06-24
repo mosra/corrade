@@ -41,7 +41,7 @@
 #include "Corrade/PluginManager/configure.h"
 
 #include "Corrade/PluginManager/Test/wrong-metadata/WrongMetadata.h"
-#include "Corrade/PluginManager/Test/configure.h"
+#include "configure.h"
 #endif
 
 static void initialize() {

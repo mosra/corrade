@@ -28,7 +28,7 @@
 #include "Corrade/PluginManager/AbstractPlugin.h"
 #include "Corrade/Utility/Directory.h"
 
-#include "Corrade/PluginManager/Test/configure.h"
+#include "configure.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 

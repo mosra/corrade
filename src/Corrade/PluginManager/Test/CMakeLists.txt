@@ -73,6 +73,9 @@ endif()
 corrade_add_test(PluginManagerManagerInitFiniTest
     ManagerInitFiniTest.cpp
     LIBRARIES InitFiniStatic CorradePluginManager)
+if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
+    target_include_directories(PluginManagerManagerInitFiniTest PRIVATE $<TARGET_FILE_DIR:PluginManagerManagerTest>)
+endif()
 
 set_target_properties(
     PluginManagerManagerTest

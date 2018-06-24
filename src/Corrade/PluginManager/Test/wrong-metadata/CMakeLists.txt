@@ -29,6 +29,7 @@ corrade_add_plugin(WrongMetadata ${CMAKE_CURRENT_BINARY_DIR} "" WrongMetadata.co
 set_target_properties(
     WrongMetadata WrongMetadata-metadata
     PROPERTIES FOLDER "Corrade/PluginManager/Test")
+target_include_directories(WrongMetadata PRIVATE $<TARGET_FILE_DIR:PluginManagerManagerTest>)
 
 if(CORRADE_TARGET_WINDOWS)
     target_link_libraries(WrongMetadata PRIVATE CorradePluginManagerTestLib)

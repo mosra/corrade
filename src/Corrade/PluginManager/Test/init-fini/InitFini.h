@@ -29,7 +29,7 @@
 #include "Corrade/Utility/Directory.h"
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-#include "Corrade/PluginManager/Test/configure.h"
+#include "configure.h"
 #endif
 
 namespace Corrade { namespace PluginManager { namespace Test {
