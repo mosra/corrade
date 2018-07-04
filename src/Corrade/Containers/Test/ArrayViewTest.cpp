@@ -173,7 +173,7 @@ void ArrayViewTest::constructConst() {
         CORRADE_COMPARE(b.size(), 6);
         CORRADE_COMPARE(b[2], 7);
     } {
-        ConstArrayView b = a;
+        auto b = arrayView(a);
         CORRADE_VERIFY((std::is_same<decltype(b), ConstArrayView>::value));
         CORRADE_COMPARE(b.size(), 6);
         CORRADE_COMPARE(b[2], 7);
