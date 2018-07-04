@@ -31,12 +31,14 @@ corrade_add_test(ContainersOptionalTest OptionalTest.cpp)
 corrade_add_test(ContainersScopedExitTest ScopedExitTest.cpp)
 corrade_add_test(ContainersStaticArrayTest StaticArrayTest.cpp)
 corrade_add_test(ContainersStaticArrayViewTest StaticArrayViewTest.cpp)
+corrade_add_test(ContainersStridedArrayViewTest StridedArrayViewTest.cpp)
 corrade_add_test(ContainersTagsTest TagsTest.cpp)
 
 set_property(TARGET
     ContainersLinkedListTest
     ContainersArrayViewTest
     ContainersStaticArrayViewTest
+    ContainersStridedArrayViewTest
     APPEND PROPERTY COMPILE_DEFINITIONS "CORRADE_GRACEFUL_ASSERT")
 
 set_target_properties(

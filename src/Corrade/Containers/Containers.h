@@ -43,6 +43,9 @@ template<class> class ArrayView;
 template<std::size_t, class> class StaticArrayView;
 template<std::size_t, class> class StaticArray;
 
+template<class> class StridedArrayView;
+template<class> class StridedIterator;
+
 template<class T, typename std::underlying_type<T>::type fullValue = typename std::underlying_type<T>::type(~0)> class EnumSet;
 template<class> class LinkedList;
 template<class Derived, class List = LinkedList<Derived>> class LinkedListItem;

@@ -33,6 +33,7 @@ set(CorradeContainers_HEADERS
     Optional.h
     ScopedExit.h
     StaticArray.h
+    StridedArrayView.h
     Tags.h)
 
 # Force IDEs to display all header files in project view

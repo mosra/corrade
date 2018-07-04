@@ -36,6 +36,8 @@ namespace Corrade {
 @subsubsection corrade-changelog-latest-new-containers Containers library
 
 -   New @ref Containers::ScopedExit helper class
+-   New @ref Containers::StridedArrayView class for providing access to
+    interleaved data
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 

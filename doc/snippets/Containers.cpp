@@ -30,6 +30,7 @@
 #endif
 
 #include "Corrade/Containers/ScopedExit.h"
+#include "Corrade/Containers/StridedArrayView.h"
 
 using namespace Corrade;
 
@@ -68,5 +69,32 @@ FILE* f{};
     Containers::ScopedExit e{f, static_cast<bool(*)(FILE*)>(closer)};
 }
 /* [ScopedExit-returning-lambda] */
+
+{
+/* [StridedArrayView-usage] */
+struct Position {
+    float x, y;
+};
+
+Position positions[]{{-0.5f, -0.5f}, { 0.5f, -0.5f}, { 0.0f,  0.5f}};
+
+Containers::StridedArrayView<float> horizontalPositions{
+    &positions[0].x, Containers::arraySize(positions), sizeof(Position)};
+
+/* Move to the right */
+for(float& x: horizontalPositions) x += 3.0f;
+/* [StridedArrayView-usage] */
+}
+
+{
+
+/* [StridedArrayView-usage-conversion] */
+int data[] { 1, 42, 1337, -69 };
+
+Containers::StridedArrayView<int> view1{data, 4, sizeof(int)};
+Containers::StridedArrayView<int> view2 = data;
+/* [StridedArrayView-usage-conversion] */
+static_cast<void>(view2);
+}
 
 }
