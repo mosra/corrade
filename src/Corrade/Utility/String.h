@@ -68,8 +68,8 @@ namespace Implementation {
 
     CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std::string& string, Containers::ArrayView<const char> delimiters);
 
-    CORRADE_UTILITY_EXPORT bool beginsWith(const std::string& string, Containers::ArrayView<const char> prefix);
-    CORRADE_UTILITY_EXPORT bool endsWith(const std::string& string, Containers::ArrayView<const char> suffix);
+    CORRADE_UTILITY_EXPORT bool beginsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> prefix);
+    CORRADE_UTILITY_EXPORT bool endsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> suffix);
 
     CORRADE_UTILITY_EXPORT std::string stripPrefix(const std::string& string, Containers::ArrayView<const char> suffix);
     CORRADE_UTILITY_EXPORT std::string stripSuffix(const std::string& string, Containers::ArrayView<const char> suffix);
@@ -315,14 +315,15 @@ CORRADE_UTILITY_EXPORT std::string uppercase(std::string string);
 @brief Whether the string has given prefix
 
 In particular, returns @cpp false @ce also if @p string is empty.
+@see @ref viewBeginsWith(), @ref stripPrefix()
 */
 inline bool beginsWith(const std::string& string, const std::string& prefix) {
-    return Implementation::beginsWith(string, {prefix.data(), prefix.size()});
+    return Implementation::beginsWith({string.data(), string.size()}, {prefix.data(), prefix.size()});
 }
 
 /** @overload */
 template<std::size_t size> inline bool beginsWith(const std::string& string, const char(&prefix)[size]) {
-    return Implementation::beginsWith(string, {prefix, size - 1});
+    return Implementation::beginsWith({string.data(), string.size()}, {prefix, size - 1});
 }
 
 /** @overload */
@@ -331,21 +332,52 @@ inline bool beginsWith(const std::string& string, char prefix) {
 }
 
 /**
+@brief Whether string view has given prefix
+
+In particular, returns @cpp false @ce also if @p string is empty.
+@see @ref beginsWith()
+*/
+template<std::size_t size> inline bool viewBeginsWith(Containers::ArrayView<const char> string, const char(&prefix)[size]) {
+    return Implementation::beginsWith(string, {prefix, size - 1});
+}
+
+/** @overload */
+inline bool viewBeginsWith(Containers::ArrayView<const char> string, char prefix) {
+    return !string.empty() && string[0] == prefix;
+}
+
+/**
 @brief Whether the string has given suffix
 
 In particular, returns @cpp false @ce also if @p string is empty.
+@see @ref viewEndsWith(), @ref stripSuffix()
 */
 inline bool endsWith(const std::string& string, const std::string& suffix) {
-    return Implementation::endsWith(string, {suffix.data(), suffix.size()});
+    return Implementation::endsWith({string.data(), string.size()}, {suffix.data(), suffix.size()});
 }
 
 /** @overload */
 template<std::size_t size> inline bool endsWith(const std::string& string, const char(&suffix)[size]) {
-    return Implementation::endsWith(string, {suffix, size - 1});
+    return Implementation::endsWith({string.data(), string.size()}, {suffix, size - 1});
 }
 
 /** @overload */
 inline bool endsWith(const std::string& string, char suffix) {
+    return !string.empty() && string[string.size() - 1] == suffix;
+}
+
+/**
+@brief Whether string view has given suffix
+
+In particular, returns @cpp false @ce also if @p string is empty.
+@see @ref endsWith()
+*/
+template<std::size_t size> inline bool viewEndsWith(Containers::ArrayView<const char> string, const char(&suffix)[size]) {
+    return Implementation::endsWith(string, {suffix, size - 1});
+}
+
+/** @overload */
+inline bool viewEndsWith(Containers::ArrayView<const char> string, char suffix) {
     return !string.empty() && string[string.size() - 1] == suffix;
 }
 

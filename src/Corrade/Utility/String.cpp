@@ -26,6 +26,7 @@
 #include "String.h"
 
 #include <cctype>
+#include <cstring>
 #include <algorithm>
 
 namespace Corrade { namespace Utility { namespace String {
@@ -77,24 +78,26 @@ std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const
     return parts;
 }
 
-bool beginsWith(const std::string& string, const Containers::ArrayView<const char> prefix) {
-    return string.compare(0, prefix.size(), prefix, prefix.size()) == 0;
+bool beginsWith(Containers::ArrayView<const char> string, const Containers::ArrayView<const char> prefix) {
+    if(string.size() < prefix.size()) return false;
+
+    return std::strncmp(string, prefix, prefix.size()) == 0;
 }
 
-bool endsWith(const std::string& string, const Containers::ArrayView<const char> suffix) {
+bool endsWith(Containers::ArrayView<const char> string, const Containers::ArrayView<const char> suffix) {
     if(string.size() < suffix.size()) return false;
 
-    return string.compare(string.size() - suffix.size(), suffix.size(), suffix, suffix.size()) == 0;
+    return std::strncmp(string + string.size() - suffix.size(), suffix, suffix.size()) == 0;
 }
 
 std::string stripPrefix(const std::string& string, const Containers::ArrayView<const char> prefix) {
-    CORRADE_ASSERT(beginsWith(string, prefix),
+    CORRADE_ASSERT(beginsWith({string.data(), string.size()}, prefix),
         "Utility::String::stripPrefix(): string doesn't begin with given prefix", {});
     return string.substr(prefix.size());
 }
 
 std::string stripSuffix(const std::string& string, const Containers::ArrayView<const char> suffix) {
-    CORRADE_ASSERT(endsWith(string, suffix),
+    CORRADE_ASSERT(endsWith({string.data(), string.size()}, suffix),
         "Utility::String::stripSuffix(): string doesn't end with given suffix", {});
     return string.substr(0, string.size() - suffix.size());
 }

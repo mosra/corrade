@@ -44,7 +44,9 @@ struct StringTest: TestSuite::Tester {
     void uppercase();
 
     void beginsWith();
+    void viewBeginsWith();
     void endsWith();
+    void viewEndsWith();
 
     void stripPrefix();
     void stripPrefixInvalid();
@@ -63,7 +65,9 @@ StringTest::StringTest() {
               &StringTest::uppercase,
 
               &StringTest::beginsWith,
+              &StringTest::viewBeginsWith,
               &StringTest::endsWith,
+              &StringTest::viewEndsWith,
 
               &StringTest::stripPrefix,
               &StringTest::stripPrefixInvalid,
@@ -323,6 +327,15 @@ void StringTest::beginsWith() {
     CORRADE_VERIFY(!String::beginsWith("", 'h'));
 }
 
+void StringTest::viewBeginsWith() {
+    CORRADE_VERIFY(String::viewBeginsWith("overcomplicated", "over"));
+    CORRADE_VERIFY(!String::viewBeginsWith("overcomplicated", "oven"));
+
+    CORRADE_VERIFY(String::viewBeginsWith("hello", 'h'));
+    CORRADE_VERIFY(!String::viewBeginsWith("hello", 'o'));
+    CORRADE_VERIFY(!String::viewBeginsWith("", 'h'));
+}
+
 void StringTest::endsWith() {
     CORRADE_VERIFY(String::endsWith("overcomplicated", "complicated"));
     CORRADE_VERIFY(String::endsWith("overcomplicated", std::string{"complicated"}));
@@ -335,6 +348,19 @@ void StringTest::endsWith() {
     CORRADE_VERIFY(!String::endsWith("hello", 'h'));
     CORRADE_VERIFY(String::endsWith("hello", 'o'));
     CORRADE_VERIFY(!String::endsWith("", 'h'));
+}
+
+void StringTest::viewEndsWith() {
+    CORRADE_VERIFY(String::viewEndsWith({"overcomplicated", 15}, "complicated"));
+    CORRADE_VERIFY(!String::viewEndsWith("overcomplicated", "complicated"));
+
+    CORRADE_VERIFY(!String::viewEndsWith({"overcomplicated", 15}, "somplicated"));
+    CORRADE_VERIFY(!String::viewEndsWith({"overcomplicated", 15}, "overcomplicated even more"));
+
+    CORRADE_VERIFY(!String::viewEndsWith({"hello", 5}, 'h'));
+    CORRADE_VERIFY(String::viewEndsWith({"hello", 5}, 'o'));
+    CORRADE_VERIFY(!String::viewEndsWith("hello", 'o'));
+    CORRADE_VERIFY(!String::viewEndsWith("", 'h'));
 }
 
 void StringTest::stripPrefix() {
