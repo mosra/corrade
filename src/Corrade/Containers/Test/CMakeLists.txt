@@ -48,5 +48,6 @@ set_target_properties(
     ContainersLinkedListTest
     ContainersStaticArrayTest
     ContainersStaticArrayViewTest
+    ContainersStridedArrayViewTest
     ContainersTagsTest
     PROPERTIES FOLDER "Corrade/Containers/Test")
