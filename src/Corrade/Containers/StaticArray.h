@@ -324,15 +324,39 @@ template<std::size_t size_, class T> class StaticArray {
          */
         constexpr bool empty() const { return !size_; }
 
-        /** @brief Pointer to first element */
+        /**
+         * @brief Pointer to first element
+         *
+         * @see @ref front()
+         */
         T* begin() { return _data; }
         const T* begin() const { return _data; }            /**< @overload */
         const T* cbegin() const { return _data; }           /**< @overload */
 
-        /** @brief Pointer to (one item after) last element */
+        /**
+         * @brief Pointer to (one item after) last element
+         *
+         * @see @ref back()
+         */
         T* end() { return _data + size_; }
         const T* end() const { return _data + size_; }      /**< @overload */
         const T* cend() const { return _data + size_; }     /**< @overload */
+
+        /**
+         * @brief First element
+         *
+         * @see @ref begin()
+         */
+        T& front() { return _data[0]; }
+        const T& front() const { return _data[0]; }         /**< @overload */
+
+        /**
+         * @brief Last element
+         *
+         * @see @ref end()
+         */
+        T& back() { return _data[size_ - 1]; }
+        const T& back() const { return _data[size_ - 1]; }  /**< @overload */
 
         /**
          * @brief Reference to array slice

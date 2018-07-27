@@ -23,6 +23,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <sstream>
+
 #include "Corrade/Containers/Array.h"
 #include "Corrade/TestSuite/Tester.h"
 
@@ -53,6 +55,7 @@ struct ArrayTest: TestSuite::Tester {
     void emptyCheck();
     void access();
     void accessConst();
+    void accessInvalid();
     void rvalueArrayAccess();
     void rangeBasedFor();
 
@@ -97,6 +100,7 @@ ArrayTest::ArrayTest() {
               &ArrayTest::emptyCheck,
               &ArrayTest::access,
               &ArrayTest::accessConst,
+              &ArrayTest::accessInvalid,
               &ArrayTest::rvalueArrayAccess,
               &ArrayTest::rangeBasedFor,
 
@@ -371,6 +375,8 @@ void ArrayTest::access() {
         a[i] = i;
 
     CORRADE_COMPARE(a.data(), static_cast<int*>(a));
+    CORRADE_COMPARE(a.front(), 0);
+    CORRADE_COMPARE(a.back(), 6);
     CORRADE_COMPARE(*(a.begin()+2), 2);
     CORRADE_COMPARE(a[4], 4);
     CORRADE_COMPARE(a.end()-a.begin(), a.size());
@@ -389,11 +395,25 @@ void ArrayTest::accessConst() {
 
     const Array& ca = a;
     CORRADE_COMPARE(ca.data(), static_cast<int*>(a));
+    CORRADE_COMPARE(ca.front(), 0);
+    CORRADE_COMPARE(ca.back(), 6);
     CORRADE_COMPARE(*(ca.begin()+2), 2);
     CORRADE_COMPARE(ca[4], 4);
     CORRADE_COMPARE(ca.end() - ca.begin(), ca.size());
     CORRADE_COMPARE(ca.cbegin(), ca.begin());
     CORRADE_COMPARE(ca.cend(), ca.end());
+}
+
+void ArrayTest::accessInvalid() {
+    std::stringstream out;
+    Error redirectError{&out};
+
+    Array a;
+    a.front();
+    a.back();
+    CORRADE_COMPARE(out.str(),
+        "Containers::Array::front(): array is empty\n"
+        "Containers::Array::back(): array is empty\n");
 }
 
 void ArrayTest::rvalueArrayAccess() {

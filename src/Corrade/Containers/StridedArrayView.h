@@ -163,15 +163,39 @@ template<class T> class StridedArrayView {
             return *const_cast<T*>(reinterpret_cast<const T*>(_data + i*_stride));
         }
 
-        /** @brief Iterator to first element */
+        /**
+         * @brief Iterator to first element
+         *
+         * @see @ref front()
+         */
         constexpr StridedIterator<T> begin() const { return {_data, _stride}; }
         /** @overload */
         constexpr StridedIterator<T> cbegin() const { return {_data, _stride}; }
 
-        /** @brief Iterator to (one item after) last element */
+        /**
+         * @brief Iterator to (one item after) last element
+         *
+         * @see @ref back()
+         */
         StridedIterator<T> end() const { return {_data+_size*_stride, _stride}; }
         /** @overload */
         StridedIterator<T> cend() const { return {_data+_size*_stride, _stride}; }
+
+        /**
+         * @brief First element
+         *
+         * Expects there is at least one element.
+         * @see @ref begin()
+         */
+        T& front() const;
+
+        /**
+         * @brief Last element
+         *
+         * Expects there is at least one element.
+         * @see @ref end()
+         */
+        T& back() const;
 
         /**
          * @brief Array slice
@@ -286,6 +310,16 @@ template<class T> class StridedIterator {
 */
 template<class T> inline StridedIterator<T> operator+(std::ptrdiff_t i, StridedIterator<T> it) {
     return it + i;
+}
+
+template<class T> T& StridedArrayView<T>::front() const {
+    CORRADE_ASSERT(_size, "Containers::StridedArrayView::front(): view is empty", (*this)[0]);
+    return (*this)[0];
+}
+
+template<class T> T& StridedArrayView<T>::back() const {
+    CORRADE_ASSERT(_size, "Containers::StridedArrayView::back(): view is empty", (*this)[_size - 1]);
+    return (*this)[_size - 1];
 }
 
 template<class T> StridedArrayView<T> StridedArrayView<T>::slice(std::size_t begin, std::size_t end) const {

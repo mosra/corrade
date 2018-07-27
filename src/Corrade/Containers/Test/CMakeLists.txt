@@ -36,6 +36,7 @@ corrade_add_test(ContainersTagsTest TagsTest.cpp)
 
 set_property(TARGET
     ContainersLinkedListTest
+    ContainersArrayTest
     ContainersArrayViewTest
     ContainersStaticArrayViewTest
     ContainersStridedArrayViewTest

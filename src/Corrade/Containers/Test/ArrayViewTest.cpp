@@ -50,6 +50,7 @@ struct ArrayViewTest: TestSuite::Tester {
     void emptyCheck();
     void access();
     void accessConst();
+    void accessInvalid();
     void rangeBasedFor();
 
     void sliceInvalid();
@@ -83,6 +84,7 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::emptyCheck,
               &ArrayViewTest::access,
               &ArrayViewTest::accessConst,
+              &ArrayViewTest::accessInvalid,
               &ArrayViewTest::rangeBasedFor,
 
               &ArrayViewTest::sliceInvalid,
@@ -277,6 +279,8 @@ void ArrayViewTest::access() {
         b[i] = i;
 
     CORRADE_VERIFY(b.data() == a);
+    CORRADE_COMPARE(b.front(), 0);
+    CORRADE_COMPARE(b.back(), 6);
     CORRADE_COMPARE(*(b.begin()+2), 2);
     CORRADE_COMPARE(b[4], 4);
     CORRADE_COMPARE(b.end()-b.begin(), b.size());
@@ -292,17 +296,33 @@ void ArrayViewTest::accessConst() {
 
     int a[7];
     const ArrayView b = a;
+    b.front() = 0;
     *(b.begin()+1) = 1;
     *(b.cbegin()+2) = 2;
     b[3] = 3;
     *(b.end()-3) = 4;
     *(b.cend()-2) = 5;
+    b.back() = 6;
 
+    CORRADE_COMPARE(a[0], 0);
     CORRADE_COMPARE(a[1], 1);
     CORRADE_COMPARE(a[2], 2);
     CORRADE_COMPARE(a[3], 3);
     CORRADE_COMPARE(a[4], 4);
     CORRADE_COMPARE(a[5], 5);
+    CORRADE_COMPARE(a[6], 6);
+}
+
+void ArrayViewTest::accessInvalid() {
+    std::stringstream out;
+    Error redirectError{&out};
+
+    ArrayView a;
+    a.front();
+    a.back();
+    CORRADE_COMPARE(out.str(),
+        "Containers::ArrayView::front(): view is empty\n"
+        "Containers::ArrayView::back(): view is empty\n");
 }
 
 void ArrayViewTest::rangeBasedFor() {

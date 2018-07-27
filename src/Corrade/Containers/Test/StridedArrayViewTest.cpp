@@ -49,6 +49,7 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void emptyCheck();
     void access();
     void accessConst();
+    void accessInvalid();
     void iterator();
     void rangeBasedFor();
 
@@ -76,6 +77,7 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::emptyCheck,
               &StridedArrayViewTest::access,
               &StridedArrayViewTest::accessConst,
+              &StridedArrayViewTest::accessInvalid,
               &StridedArrayViewTest::iterator,
               &StridedArrayViewTest::rangeBasedFor,
 
@@ -233,6 +235,8 @@ void StridedArrayViewTest::access() {
 
     /* Data access */
     CORRADE_VERIFY(b.data() == a);
+    CORRADE_COMPARE(b.front(), 0);
+    CORRADE_COMPARE(b.back(), 6);
     CORRADE_COMPARE(b[4], 4);
 
     ConstStridedArrayView c = {&a[0].value, 7, 8};
@@ -244,17 +248,33 @@ void StridedArrayViewTest::accessConst() {
 
     int a[7];
     const StridedArrayView b = a;
+    b.front() = 0;
     *(b.begin()+1) = 1;
     *(b.cbegin()+2) = 2;
     b[3] = 3;
     *(b.end()-3) = 4;
     *(b.cend()-2) = 5;
+    b.back() = 6;
 
+    CORRADE_COMPARE(a[0], 0);
     CORRADE_COMPARE(a[1], 1);
     CORRADE_COMPARE(a[2], 2);
     CORRADE_COMPARE(a[3], 3);
     CORRADE_COMPARE(a[4], 4);
     CORRADE_COMPARE(a[5], 5);
+    CORRADE_COMPARE(a[6], 6);
+}
+
+void StridedArrayViewTest::accessInvalid() {
+    std::stringstream out;
+    Error redirectError{&out};
+
+    StridedArrayView a;
+    a.front();
+    a.back();
+    CORRADE_COMPARE(out.str(),
+        "Containers::StridedArrayView::front(): view is empty\n"
+        "Containers::StridedArrayView::back(): view is empty\n");
 }
 
 void StridedArrayViewTest::iterator() {

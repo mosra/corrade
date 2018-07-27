@@ -210,6 +210,8 @@ void StaticArrayViewTest::access() {
         b[i] = i;
 
     CORRADE_VERIFY(b.data() == a);
+    CORRADE_COMPARE(b.front(), 0);
+    CORRADE_COMPARE(b.back(), 6);
     CORRADE_COMPARE(*(b.begin()+2), 2);
     CORRADE_COMPARE(b[4], 4);
     CORRADE_COMPARE(b.end()-b.begin(), 7);
@@ -225,17 +227,21 @@ void StaticArrayViewTest::accessConst() {
 
     int a[7];
     const StaticArrayView<7> b = a;
+    b.front() = 0;
     *(b.begin()+1) = 1;
     *(b.cbegin()+2) = 2;
     b[3] = 3;
     *(b.end()-3) = 4;
     *(b.cend()-2) = 5;
+    b.back() = 6;
 
+    CORRADE_COMPARE(a[0], 0);
     CORRADE_COMPARE(a[1], 1);
     CORRADE_COMPARE(a[2], 2);
     CORRADE_COMPARE(a[3], 3);
     CORRADE_COMPARE(a[4], 4);
     CORRADE_COMPARE(a[5], 5);
+    CORRADE_COMPARE(a[6], 6);
 }
 
 void StaticArrayViewTest::rangeBasedFor() {

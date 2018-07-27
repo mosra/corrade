@@ -38,6 +38,9 @@ namespace Corrade {
 -   New @ref Containers::ScopedExit helper class
 -   New @ref Containers::StridedArrayView class for providing access to
     interleaved data
+-   New @ref Containers::ArrayView::front() "front()" and
+    @ref Containers::ArrayView::back() "back()" accessors for all array and
+    array view types
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 

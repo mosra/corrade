@@ -402,6 +402,8 @@ void StaticArrayTest::access() {
         a[i] = i;
 
     CORRADE_COMPARE(a.data(), static_cast<int*>(a));
+    CORRADE_COMPARE(a.front(), 0);
+    CORRADE_COMPARE(a.back(), 4);
     CORRADE_COMPARE(*(a.begin()+2), 2);
     CORRADE_COMPARE(a[4], 4);
     CORRADE_COMPARE(a.end()-a.begin(), 5);
@@ -416,6 +418,8 @@ void StaticArrayTest::accessConst() {
 
     const StaticArray& ca = a;
     CORRADE_COMPARE(ca.data(), static_cast<int*>(a));
+    CORRADE_COMPARE(ca.front(), 0);
+    CORRADE_COMPARE(ca.back(), 4);
     CORRADE_COMPARE(*(ca.begin()+2), 2);
     CORRADE_COMPARE(ca[4], 4);
     CORRADE_COMPARE(ca.end() - ca.begin(), 5);

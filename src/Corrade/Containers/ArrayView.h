@@ -163,13 +163,37 @@ template<class T> class ArrayView {
         /** @brief Whether the array is empty */
         constexpr bool empty() const { return !_size; }
 
-        /** @brief Pointer to first element */
+        /**
+         * @brief Pointer to first element
+         *
+         * @see @ref front()
+         */
         constexpr T* begin() const { return _data; }
         constexpr T* cbegin() const { return _data; }   /**< @overload */
 
-        /** @brief Pointer to (one item after) last element */
+        /**
+         * @brief Pointer to (one item after) last element
+         *
+         * @see @ref back()
+         */
         T* end() const { return _data+_size; }
         T* cend() const { return _data+_size; }         /**< @overload */
+
+        /**
+         * @brief First element
+         *
+         * Expects there is at least one element.
+         * @see @ref begin()
+         */
+        T& front() const;
+
+        /**
+         * @brief Last element
+         *
+         * Expects there is at least one element.
+         * @see @ref end()
+         */
+        T& back() const;
 
         /**
          * @brief Array slice
@@ -512,13 +536,37 @@ template<std::size_t size_, class T> class StaticArrayView {
         /** @brief Whether the array is empty */
         constexpr bool empty() const { return !size_; }
 
-        /** @brief Pointer to first element */
+        /**
+         * @brief Pointer to first element
+         *
+         * @see @ref front()
+         */
         constexpr T* begin() const { return _data; }
         constexpr T* cbegin() const { return _data; }   /**< @overload */
 
-        /** @brief Pointer to (one item after) last element */
+        /**
+         * @brief Pointer to (one item after) last element
+         *
+         * @see @ref back()
+         */
         T* end() const { return _data + size_; }
         T* cend() const { return _data + size_; }       /**< @overload */
+
+        /**
+         * @brief First element
+         *
+         * Expects there is at least one element.
+         * @see @ref begin()
+         */
+        T& front() const;
+
+        /**
+         * @brief Last element
+         *
+         * Expects there is at least one element.
+         * @see @ref end()
+         */
+        T& back() const;
 
         /** @copydoc ArrayView::slice(T*, T*) const */
         ArrayView<T> slice(T* begin, T* end) const {
@@ -631,6 +679,16 @@ template<class U, std::size_t size, class T> StaticArrayView<size*sizeof(T)/size
     return arrayCast<U>(StaticArrayView<size, T>{data});
 }
 
+template<class T> T& ArrayView<T>::front() const {
+    CORRADE_ASSERT(_size, "Containers::ArrayView::front(): view is empty", _data[0]);
+    return _data[0];
+}
+
+template<class T> T& ArrayView<T>::back() const {
+    CORRADE_ASSERT(_size, "Containers::ArrayView::back(): view is empty", _data[_size - 1]);
+    return _data[_size - 1];
+}
+
 template<class T> ArrayView<T> ArrayView<T>::slice(T* begin, T* end) const {
     CORRADE_ASSERT(_data <= begin && begin <= end && end <= _data + _size,
         "Containers::ArrayView::slice(): slice [" << Utility::Debug::nospace
@@ -638,6 +696,16 @@ template<class T> ArrayView<T> ArrayView<T>::slice(T* begin, T* end) const {
         << Utility::Debug::nospace << end - _data << Utility::Debug::nospace
         << "] out of range for" << _size << "elements", nullptr);
     return ArrayView<T>{begin, std::size_t(end - begin)};
+}
+
+template<std::size_t size_, class T> T& StaticArrayView<size_, T>::front() const {
+    static_assert(size_, "view is empty");
+    return _data[0];
+}
+
+template<std::size_t size_, class T> T& StaticArrayView<size_, T>::back() const {
+    static_assert(size_, "view is empty");
+    return _data[size_ - 1];
 }
 
 template<class T> template<std::size_t viewSize> StaticArrayView<viewSize, T> ArrayView<T>::slice(T* begin) const {

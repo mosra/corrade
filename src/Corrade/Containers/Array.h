@@ -409,15 +409,41 @@ class Array {
         /** @brief Whether the array is empty */
         bool empty() const { return !_size; }
 
-        /** @brief Pointer to first element */
+        /**
+         * @brief Pointer to first element
+         *
+         * @see @ref front()
+         */
         T* begin() { return _data; }
         const T* begin() const { return _data; }        /**< @overload */
         const T* cbegin() const { return _data; }       /**< @overload */
 
-        /** @brief Pointer to (one item after) last element */
+        /**
+         * @brief Pointer to (one item after) last element
+         *
+         * @see @ref back()
+         */
         T* end() { return _data+_size; }
         const T* end() const { return _data+_size; }    /**< @overload */
         const T* cend() const { return _data+_size; }   /**< @overload */
+
+        /**
+         * @brief First element
+         *
+         * Expects there is at least one element.
+         * @see @ref begin()
+         */
+        T& front();
+        const T& front() const; /**< @overload */
+
+        /**
+         * @brief Last element
+         *
+         * Expects there is at least one element.
+         * @see @ref end()
+         */
+        T& back();
+        const T& back() const; /**< @overload */
 
         /**
          * @brief Reference to array slice
@@ -593,6 +619,24 @@ template<class T, class D> inline Array<T, D>& Array<T, D>::operator=(Array<T, D
     swap(_size, other._size);
     swap(_deleter, other._deleter);
     return *this;
+}
+
+template<class T, class D> const T& Array<T, D>::front() const {
+    CORRADE_ASSERT(_size, "Containers::Array::front(): array is empty", _data[0]);
+    return _data[0];
+}
+
+template<class T, class D> const T& Array<T, D>::back() const {
+    CORRADE_ASSERT(_size, "Containers::Array::back(): array is empty", _data[_size - 1]);
+    return _data[_size - 1];
+}
+
+template<class T, class D> T& Array<T, D>::front() {
+    return const_cast<T&>(static_cast<const Array<T, D>&>(*this).front());
+}
+
+template<class T, class D> T& Array<T, D>::back() {
+    return const_cast<T&>(static_cast<const Array<T, D>&>(*this).back());
 }
 
 template<class T, class D> inline T* Array<T, D>::release() {
