@@ -1,0 +1,37 @@
+# Author: mosra <mosra@centrum.cz>
+pkgname=corrade
+pkgver=dev.clang.addresssanitizer
+pkgrel=1
+pkgdesc="C++11/C++14 multiplatform utility library (clang-addresssanitizer build)"
+arch=('i686' 'x86_64')
+url="http://magnum.graphics/corrade/"
+license=('MIT')
+makedepends=('cmake' 'clang')
+options=(!strip)
+provides=('corrade-git')
+
+_rootdir=$startdir/../../
+
+build() {
+    mkdir -p "$_rootdir/build-clang-addresssanitizer"
+    cd "$_rootdir/build-clang-addresssanitizer"
+
+    cmake .. \
+        -DCMAKE_CXX_COMPILER=clang++ \
+        -DCMAKE_CXX_FLAGS="-fsanitize=address" \
+        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DBUILD_TESTS=ON \
+        -G Ninja
+    ninja
+}
+
+check() {
+    cd "$_rootdir/build-clang-addresssanitizer"
+    CORRADE_TEST_COLOR=ON ctest --output-on-failure
+}
+
+package() {
+    cd "$_rootdir/build-clang-addresssanitizer"
+    DESTDIR="$pkgdir/" ninja install
+}
