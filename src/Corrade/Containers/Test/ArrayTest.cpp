@@ -52,6 +52,7 @@ struct ArrayTest: TestSuite::Tester {
 
     void emptyCheck();
     void access();
+    void accessConst();
     void rvalueArrayAccess();
     void rangeBasedFor();
 
@@ -95,6 +96,7 @@ ArrayTest::ArrayTest() {
 
               &ArrayTest::emptyCheck,
               &ArrayTest::access,
+              &ArrayTest::accessConst,
               &ArrayTest::rvalueArrayAccess,
               &ArrayTest::rangeBasedFor,
 
@@ -378,6 +380,20 @@ void ArrayTest::access() {
     const Array b{InPlaceInit, {7, 3, 5, 4}};
     CORRADE_COMPARE(b.data(), static_cast<const int*>(b));
     CORRADE_COMPARE(b[2], 5);
+}
+
+void ArrayTest::accessConst() {
+    Array a(7);
+    for(std::size_t i = 0; i != 7; ++i)
+        a[i] = i;
+
+    const Array& ca = a;
+    CORRADE_COMPARE(ca.data(), static_cast<int*>(a));
+    CORRADE_COMPARE(*(ca.begin()+2), 2);
+    CORRADE_COMPARE(ca[4], 4);
+    CORRADE_COMPARE(ca.end() - ca.begin(), ca.size());
+    CORRADE_COMPARE(ca.cbegin(), ca.begin());
+    CORRADE_COMPARE(ca.cend(), ca.end());
 }
 
 void ArrayTest::rvalueArrayAccess() {

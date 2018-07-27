@@ -46,6 +46,7 @@ struct StaticArrayViewTest: TestSuite::Tester {
     void convertVoid();
 
     void access();
+    void accessConst();
     void rangeBasedFor();
 
     void slice();
@@ -75,6 +76,7 @@ StaticArrayViewTest::StaticArrayViewTest() {
               &StaticArrayViewTest::convertVoid,
 
               &StaticArrayViewTest::access,
+              &StaticArrayViewTest::accessConst,
               &StaticArrayViewTest::rangeBasedFor,
 
               &StaticArrayViewTest::slice,
@@ -216,6 +218,24 @@ void StaticArrayViewTest::access() {
 
     ConstStaticArrayView<7> c = a;
     CORRADE_COMPARE(c.data(), a);
+}
+
+void StaticArrayViewTest::accessConst() {
+    /* The array is non-owning, so it should provide write access to the data */
+
+    int a[7];
+    const StaticArrayView<7> b = a;
+    *(b.begin()+1) = 1;
+    *(b.cbegin()+2) = 2;
+    b[3] = 3;
+    *(b.end()-3) = 4;
+    *(b.cend()-2) = 5;
+
+    CORRADE_COMPARE(a[1], 1);
+    CORRADE_COMPARE(a[2], 2);
+    CORRADE_COMPARE(a[3], 3);
+    CORRADE_COMPARE(a[4], 4);
+    CORRADE_COMPARE(a[5], 5);
 }
 
 void StaticArrayViewTest::rangeBasedFor() {

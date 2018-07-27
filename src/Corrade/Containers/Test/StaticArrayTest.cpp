@@ -50,6 +50,7 @@ struct StaticArrayTest: TestSuite::Tester {
     void convertVoid();
 
     void access();
+    void accessConst();
     void rvalueArrayAccess();
     void rangeBasedFor();
 
@@ -87,6 +88,7 @@ StaticArrayTest::StaticArrayTest() {
               &StaticArrayTest::convertVoid,
 
               &StaticArrayTest::access,
+              &StaticArrayTest::accessConst,
               &StaticArrayTest::rvalueArrayAccess,
               &StaticArrayTest::rangeBasedFor,
 
@@ -405,6 +407,20 @@ void StaticArrayTest::access() {
     CORRADE_COMPARE(a.end()-a.begin(), 5);
     CORRADE_COMPARE(a.cbegin(), a.begin());
     CORRADE_COMPARE(a.cend(), a.end());
+}
+
+void StaticArrayTest::accessConst() {
+    StaticArray a;
+    for(std::size_t i = 0; i != 5; ++i)
+        a[i] = i;
+
+    const StaticArray& ca = a;
+    CORRADE_COMPARE(ca.data(), static_cast<int*>(a));
+    CORRADE_COMPARE(*(ca.begin()+2), 2);
+    CORRADE_COMPARE(ca[4], 4);
+    CORRADE_COMPARE(ca.end() - ca.begin(), 5);
+    CORRADE_COMPARE(ca.cbegin(), ca.begin());
+    CORRADE_COMPARE(ca.cend(), ca.end());
 }
 
 void StaticArrayTest::rvalueArrayAccess() {
