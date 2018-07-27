@@ -159,12 +159,8 @@ template<class T> class StridedArrayView {
         constexpr bool empty() const { return !_size; }
 
         /** @brief Element access */
-        T& operator[](std::size_t i) {
+        T& operator[](std::size_t i) const {
             return *const_cast<T*>(reinterpret_cast<const T*>(_data + i*_stride));
-        }
-        /** @overload */
-        const T& operator[](std::size_t i) const {
-            return *reinterpret_cast<const T*>(_data + i*_stride);
         }
 
         /** @brief Iterator to first element */
