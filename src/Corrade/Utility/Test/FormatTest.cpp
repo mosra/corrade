@@ -148,63 +148,63 @@ FormatTest::FormatTest() {
 }
 
 void FormatTest::empty() {
-    CORRADE_COMPARE(format(""), "");
+    CORRADE_COMPARE(formatString(""), "");
 }
 
 void FormatTest::textOnly() {
-    CORRADE_COMPARE(format("hello"), "hello");
+    CORRADE_COMPARE(formatString("hello"), "hello");
 }
 
 void FormatTest::escapes() {
-    CORRADE_COMPARE(format("typedef struct {{ int a; }} Type;"),
+    CORRADE_COMPARE(formatString("typedef struct {{ int a; }} Type;"),
         "typedef struct { int a; } Type;");
 }
 
 void FormatTest::integerChar() {
     if(std::is_signed<char>::value) {
-        CORRADE_COMPARE(format<char>("{}", -15), "-15");
+        CORRADE_COMPARE(formatString<char>("{}", -15), "-15");
     } else {
         /* Android simulator does this. Huh? */
-        CORRADE_COMPARE(format<char>("{}", -15), "241");
+        CORRADE_COMPARE(formatString<char>("{}", -15), "241");
     }
-    CORRADE_COMPARE(format<unsigned char>("{}", 230), "230");
+    CORRADE_COMPARE(formatString<unsigned char>("{}", 230), "230");
 }
 
 void FormatTest::integerShort() {
-    CORRADE_COMPARE(format<short>("{}", -32001), "-32001");
-    CORRADE_COMPARE(format<unsigned short>("{}", 62750), "62750");
+    CORRADE_COMPARE(formatString<short>("{}", -32001), "-32001");
+    CORRADE_COMPARE(formatString<unsigned short>("{}", 62750), "62750");
 }
 
 void FormatTest::integerInt() {
-    CORRADE_COMPARE(format<int>("{}", -2000123), "-2000123");
-    CORRADE_COMPARE(format<unsigned int>("{}", 4025136), "4025136");
+    CORRADE_COMPARE(formatString<int>("{}", -2000123), "-2000123");
+    CORRADE_COMPARE(formatString<unsigned int>("{}", 4025136), "4025136");
 }
 
 void FormatTest::integerLong() {
-    CORRADE_COMPARE(format<long>("{}", -2000123), "-2000123");
-    CORRADE_COMPARE(format<unsigned long>("{}", 4025136), "4025136");
+    CORRADE_COMPARE(formatString<long>("{}", -2000123), "-2000123");
+    CORRADE_COMPARE(formatString<unsigned long>("{}", 4025136), "4025136");
 }
 
 void FormatTest::integerLongLong() {
-    CORRADE_COMPARE(format<long long>("{}", -12345678901234ll), "-12345678901234");
-    CORRADE_COMPARE(format<unsigned long long>("{}", 24568780984912ull), "24568780984912");
+    CORRADE_COMPARE(formatString<long long>("{}", -12345678901234ll), "-12345678901234");
+    CORRADE_COMPARE(formatString<unsigned long long>("{}", 24568780984912ull), "24568780984912");
 }
 
 void FormatTest::floatingFloat() {
-    CORRADE_COMPARE(format("{}", 12.34f), "12.34");
+    CORRADE_COMPARE(formatString("{}", 12.34f), "12.34");
     #ifndef __MINGW32__
-    CORRADE_COMPARE(format("{}", -1.32e+07f), "-1.32e+07");
+    CORRADE_COMPARE(formatString("{}", -1.32e+07f), "-1.32e+07");
     #else
-    CORRADE_COMPARE(format("{}", -1.32e+07f), "-1.32e+007");
+    CORRADE_COMPARE(formatString("{}", -1.32e+07f), "-1.32e+007");
     #endif
 }
 
 void FormatTest::floatingDouble() {
-    CORRADE_COMPARE(format("{}", 12.3404), "12.3404");
+    CORRADE_COMPARE(formatString("{}", 12.3404), "12.3404");
     #ifndef __MINGW32__
-    CORRADE_COMPARE(format("{}", -1.32e+37), "-1.32e+37");
+    CORRADE_COMPARE(formatString("{}", -1.32e+37), "-1.32e+37");
     #else
-    CORRADE_COMPARE(format("{}", -1.32e+37), "-1.32e+037");
+    CORRADE_COMPARE(formatString("{}", -1.32e+37), "-1.32e+037");
     #endif
 }
 
@@ -219,11 +219,11 @@ void FormatTest::floatingLongDouble() {
     CORRADE_EXPECT_FAIL_IF(sizeof(void*) == 4,
         "Android has precision problems with long double on 32bit.");
     #endif
-    CORRADE_COMPARE(format("{}", 12.3404l), "12.3404");
+    CORRADE_COMPARE(formatString("{}", 12.3404l), "12.3404");
     #ifndef __MINGW32__
-    CORRADE_COMPARE(format("{}", -1.32e+67l), "-1.32e+67");
+    CORRADE_COMPARE(formatString("{}", -1.32e+67l), "-1.32e+67");
     #else
-    CORRADE_COMPARE(format("{}", -1.32e+67l), "-1.32e+067");
+    CORRADE_COMPARE(formatString("{}", -1.32e+67l), "-1.32e+067");
     #endif
 }
 #endif
@@ -280,7 +280,7 @@ template<class T> void FormatTest::floatingPrecision() {
         CORRADE_EXPECT_FAIL_IF((std::is_same<T, long double>::value && sizeof(void*) == 4),
             "Android has precision problems with long double on 32bit.");
         #endif
-        CORRADE_COMPARE(format("{} {} {} {}",
+        CORRADE_COMPARE(formatString("{} {} {} {}",
             T(3.1415926535897932384626l),
             T(-12345.67890123456789l),
             T(1.234567890123456789e-12l),
@@ -291,39 +291,39 @@ template<class T> void FormatTest::floatingPrecision() {
 void FormatTest::charArray() {
     /* Decays from const char[n] to char* (?), stuff after \0 ignored due to
        strlen */
-    CORRADE_COMPARE(format("hello {}", "world\0, i guess?"), "hello world");
+    CORRADE_COMPARE(formatString("hello {}", "world\0, i guess?"), "hello world");
 
     /* Decays to const char* (?) */
-    CORRADE_COMPARE(format("hello {}", false ? "world" : "nobody"), "hello nobody");
+    CORRADE_COMPARE(formatString("hello {}", false ? "world" : "nobody"), "hello nobody");
 }
 
 void FormatTest::charArrayView() {
-    CORRADE_COMPARE(format("hello {}", Containers::arrayView("worlds", 5)),
+    CORRADE_COMPARE(formatString("hello {}", Containers::arrayView("worlds", 5)),
         "hello world");
-    CORRADE_COMPARE(format("hello {}", Containers::arrayView("world\0, i guess?", 16)),
+    CORRADE_COMPARE(formatString("hello {}", Containers::arrayView("world\0, i guess?", 16)),
         (std::string{"hello world\0, i guess?", 22}));
 }
 
 void FormatTest::string() {
-    CORRADE_COMPARE(format("hello {}", std::string{"worlds", 5}),
+    CORRADE_COMPARE(formatString("hello {}", std::string{"worlds", 5}),
         "hello world");
-    CORRADE_COMPARE(format("hello {}", std::string{"world\0, i guess?", 16}),
+    CORRADE_COMPARE(formatString("hello {}", std::string{"world\0, i guess?", 16}),
         (std::string{"hello world\0, i guess?", 22}));
 }
 
 void FormatTest::multiple() {
-    CORRADE_COMPARE(format("so I got {} {}, {} and {} and all that for {}€!",
+    CORRADE_COMPARE(formatString("so I got {} {}, {} and {} and all that for {}€!",
         2, "beers", "a goulash", "a soup", 8.70f),
         "so I got 2 beers, a goulash and a soup and all that for 8.7€!");
 }
 
 void FormatTest::numbered() {
-    CORRADE_COMPARE(format("<{0}>HTML, <{1}>amirite</{1}>?</{0}>", "p", "strong"),
+    CORRADE_COMPARE(formatString("<{0}>HTML, <{1}>amirite</{1}>?</{0}>", "p", "strong"),
         "<p>HTML, <strong>amirite</strong>?</p>");
 }
 
 void FormatTest::mixed() {
-    CORRADE_COMPARE(format("this {1} {} {0}, {}", "wrong", "is", "certainly"),
+    CORRADE_COMPARE(formatString("this {1} {} {0}, {}", "wrong", "is", "certainly"),
         "this is certainly wrong, is");
 }
 
@@ -409,11 +409,11 @@ void FormatTest::fileLongDouble() {
 #endif
 
 void FormatTest::tooLittlePlaceholders() {
-    CORRADE_COMPARE(format("{}!", 42, "but this is", "not visible", 1337), "42!");
+    CORRADE_COMPARE(formatString("{}!", 42, "but this is", "not visible", 1337), "42!");
 }
 
 void FormatTest::tooManyPlaceholders() {
-    CORRADE_COMPARE(format("{} + {} = {13}!", 42, "a"), "42 + a = {13}!");
+    CORRADE_COMPARE(formatString("{} + {} = {13}!", 42, "a"), "42 + a = {13}!");
 }
 
 void FormatTest::tooSmallBuffer() {

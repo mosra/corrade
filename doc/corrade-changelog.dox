@@ -44,8 +44,8 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
--   New @ref Utility::format() and @ref Utility::formatInto() functions for
-    Python-style zero-allocation string formatting
+-   New @ref Utility::formatString() and @ref Utility::formatInto() functions
+    for Python-style zero-allocation string formatting
 -   Added @ref Utility::Arguments::prefix(), @ref Utility::Arguments::isParsed()
 -   New @ref Utility::String::viewBeginsWith() and
     @ref Utility::String::viewEndsWith() utilities that take

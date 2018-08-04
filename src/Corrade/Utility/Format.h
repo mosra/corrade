@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Function @ref Corrade::Utility::format(), @ref Corrade::Utility::formatInto()
+ * @brief Function @ref Corrade::Utility::formatString(), @ref Corrade::Utility::formatInto()
  * @experimental
  */
 
@@ -101,7 +101,7 @@ serializing text files.
 
 @experimental
 */
-template<class ...Args> std::string format(const char* format, const Args&... args);
+template<class ...Args> std::string formatString(const char* format, const Args&... args);
 
 /**
 @brief Format a string into an existing string
@@ -253,7 +253,7 @@ CORRADE_UTILITY_EXPORT void formatInto(std::FILE* file, const char* format, Cont
 
 }
 
-template<class ...Args> std::string format(const char* format, const Args&... args) {
+template<class ...Args> std::string formatString(const char* format, const Args&... args) {
     std::string buffer;
     formatInto(buffer, 0, format, args...);
     return buffer;
