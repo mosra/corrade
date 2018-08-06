@@ -88,14 +88,6 @@ void Formatter<long double>::format(std::FILE* const file, const long double val
     std::fprintf(file, "%.18Lg", value);
 }
 
-std::size_t Formatter<const char*>::format(const Containers::ArrayView<char> buffer, const char* value) {
-    const std::size_t size = std::strlen(value);
-    if(buffer) std::memcpy(buffer, value, size);
-    return size;
-}
-void Formatter<const char*>::format(std::FILE* const file, const char* value) {
-    std::fputs(value, file);
-}
 std::size_t Formatter<Containers::ArrayView<const char>>::format(const Containers::ArrayView<char> buffer, const Containers::ArrayView<const char> value) {
     /* strncpy() would stop on \0 characters */
     if(buffer) std::memcpy(buffer, value, value.size());
@@ -103,6 +95,12 @@ std::size_t Formatter<Containers::ArrayView<const char>>::format(const Container
 }
 void Formatter<Containers::ArrayView<const char>>::format(std::FILE* const file, const Containers::ArrayView<const char> value) {
     std::fwrite(value.data(), value.size(), 1, file);
+}
+std::size_t Formatter<const char*>::format(const Containers::ArrayView<char> buffer, const char* value) {
+    return Formatter<Containers::ArrayView<const char>>::format(buffer, {value, std::strlen(value)});
+}
+void Formatter<const char*>::format(std::FILE* const file, const char* value) {
+    Formatter<Containers::ArrayView<const char>>::format(file, {value, std::strlen(value)});
 }
 std::size_t Formatter<std::string>::format(const Containers::ArrayView<char> buffer, const std::string& value) {
     return Formatter<Containers::ArrayView<const char>>::format(buffer, {value.data(), value.size()});
