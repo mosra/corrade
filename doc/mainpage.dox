@@ -33,6 +33,11 @@ C++11/C++14, that's used as a base for the [Magnum Project](http://magnum.graphi
 To see high-level feature overview, project goals or read the developer blog,
 head over to the [project homepage](http://magnum.graphics/corrade/).
 
+@section corrade-mainpage-whats-new What's new?
+
+Curious about what was added or improved recently? Check out the
+@ref corrade-changelog-latest "Changelog".
+
 @section corrade-mainpage-getting-started Getting started
 
 Download, build and install Corrade as explained in @ref building-corrade ---

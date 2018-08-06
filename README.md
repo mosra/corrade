@@ -43,6 +43,14 @@ FEATURES
 Check also the Magnum Project [Feature Overview pages](http://magnum.graphics/features/)
 for further information.
 
+WHAT'S NEW?
+===========
+
+Curious about what was added or improved recently? Check out the
+[Changelog](http://doc.magnum.graphics/corrade/corrade-changelog.html#corrade-changelog-latest)
+page in the documentation. Check also the Magnum Project
+[Changelog](http://doc.magnum.graphics/magnum/changelog.html#changelog-latest).
+
 GETTING STARTED
 ===============
 
