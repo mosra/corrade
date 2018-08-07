@@ -634,11 +634,11 @@ void FormatTest::file() {
         FILE* f = std::fopen(filename.data(), "w");
         CORRADE_VERIFY(f);
         Containers::ScopedExit e{f, fclose};
-        formatInto(f, "A {} {} {} {} {} {} + ({})",
-            "string", std::string{"file"}, -2000123, 4025136u, -12345678901234ll, 24568780984912ull, 12.3404f);
+        formatInto(f, "A {} {} {} {} {} {} + ({}) {}",
+            "string", std::string{"file"}, -2000123, 4025136u, -12345678901234ll, 24568780984912ull, 12.3404f, 1.52);
     }
     CORRADE_COMPARE_AS(filename,
-        "A string file -2000123 4025136 -12345678901234 24568780984912 + (12.3404)",
+        "A string file -2000123 4025136 -12345678901234 24568780984912 + (12.3404) 1.52",
         TestSuite::Compare::FileToString);
 }
 
