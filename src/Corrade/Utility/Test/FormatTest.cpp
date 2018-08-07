@@ -398,13 +398,21 @@ template<class T> void FormatTest::floatingPrecision() {
 }
 
 void FormatTest::floatGeneric() {
+    #ifndef __MINGW32__
     CORRADE_COMPARE(formatString("{}", 1234.0e5f), "1.234e+08");
+    #else
+    CORRADE_COMPARE(formatString("{}", 1234.0e5f), "1.234e+008");
+    #endif
     CORRADE_COMPARE(formatString("{}", 1234.0e5), "123400000");
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_COMPARE(formatString("{}", 1234.0e5l), "123400000");
     #endif
 
+    #ifndef __MINGW32__
     CORRADE_COMPARE(formatString("{:g}", 1234.0e5f), "1.234e+08");
+    #else
+    CORRADE_COMPARE(formatString("{:g}", 1234.0e5f), "1.234e+008");
+    #endif
     CORRADE_COMPARE(formatString("{:g}", 1234.0e5), "123400000");
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_COMPARE(formatString("{:g}", 1234.0e5l), "123400000");
@@ -430,7 +438,11 @@ void FormatTest::floatGeneric() {
 }
 
 void FormatTest::floatGenericUppercase() {
+    #ifndef __MINGW32__
     CORRADE_COMPARE(formatString("{:G}", 1234.0e5f), "1.234E+08");
+    #else
+    CORRADE_COMPARE(formatString("{:G}", 1234.0e5f), "1.234E+008");
+    #endif
     CORRADE_COMPARE(formatString("{:G}", 1234.0e5), "123400000");
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_COMPARE(formatString("{:G}", 1234.0e5l), "123400000");
@@ -447,12 +459,19 @@ void FormatTest::floatGenericUppercase() {
 }
 
 void FormatTest::floatExponent() {
+    #ifndef __MINGW32__
     CORRADE_COMPARE(formatString("{:e}", 1234.0e5f), "1.234000e+08");
     CORRADE_COMPARE(formatString("{:e}", 1234.0e5), "1.234000000000000e+08");
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_COMPARE(formatString("{:e}", 1234.0e5l), "1.234000000000000000e+08");
     #endif
+    #else
+    CORRADE_COMPARE(formatString("{:e}", 1234.0e5f), "1.234000e+008");
+    CORRADE_COMPARE(formatString("{:e}", 1234.0e5), "1.234000000000000e+008");
+    CORRADE_COMPARE(formatString("{:e}", 1234.0e5l), "1.234000000000000000e+008");
+    #endif
 
+    #ifndef __MINGW32__
     CORRADE_COMPARE(formatString("{:.3e}", 1.0f), "1.000e+00");
     CORRADE_COMPARE(formatString("{:.3e}", 1.0), "1.000e+00");
     CORRADE_COMPARE(formatString("{:.3e}", 1.0l), "1.000e+00");
@@ -461,15 +480,30 @@ void FormatTest::floatExponent() {
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_COMPARE(formatString("{:.3e}", 12.34567l), "1.235e+01");
     #endif
+    #else
+    CORRADE_COMPARE(formatString("{:.3e}", 1.0f), "1.000e+000");
+    CORRADE_COMPARE(formatString("{:.3e}", 1.0), "1.000e+000");
+    CORRADE_COMPARE(formatString("{:.3e}", 1.0l), "1.000e+000");
+    CORRADE_COMPARE(formatString("{:.3e}", 12.34567f), "1.235e+001");
+    CORRADE_COMPARE(formatString("{:.3e}", 12.34567), "1.235e+001");
+    CORRADE_COMPARE(formatString("{:.3e}", 12.34567l), "1.235e+001");
+    #endif
 }
 
 void FormatTest::floatExponentUppercase() {
+    #ifndef __MINGW32__
     CORRADE_COMPARE(formatString("{:E}", 1234.0e5f), "1.234000E+08");
     CORRADE_COMPARE(formatString("{:E}", 1234.0e5), "1.234000000000000E+08");
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_COMPARE(formatString("{:E}", 1234.0e5l), "1.234000000000000000E+08");
     #endif
+    #else
+    CORRADE_COMPARE(formatString("{:E}", 1234.0e5f), "1.234000E+008");
+    CORRADE_COMPARE(formatString("{:E}", 1234.0e5), "1.234000000000000E+008");
+    CORRADE_COMPARE(formatString("{:E}", 1234.0e5l), "1.234000000000000000E+008");
+    #endif
 
+    #ifndef __MINGW32__
     CORRADE_COMPARE(formatString("{:.3E}", 1.0f), "1.000E+00");
     CORRADE_COMPARE(formatString("{:.3E}", 1.0), "1.000E+00");
     CORRADE_COMPARE(formatString("{:.3E}", 1.0l), "1.000E+00");
@@ -477,6 +511,14 @@ void FormatTest::floatExponentUppercase() {
     CORRADE_COMPARE(formatString("{:.3E}", 12.34567), "1.235E+01");
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_COMPARE(formatString("{:.3E}", 12.34567l), "1.235E+01");
+    #endif
+    #else
+    CORRADE_COMPARE(formatString("{:.3E}", 1.0f), "1.000E+000");
+    CORRADE_COMPARE(formatString("{:.3E}", 1.0), "1.000E+000");
+    CORRADE_COMPARE(formatString("{:.3E}", 1.0l), "1.000E+000");
+    CORRADE_COMPARE(formatString("{:.3E}", 12.34567f), "1.235E+001");
+    CORRADE_COMPARE(formatString("{:.3E}", 12.34567), "1.235E+001");
+    CORRADE_COMPARE(formatString("{:.3E}", 12.34567l), "1.235E+001");
     #endif
 }
 
