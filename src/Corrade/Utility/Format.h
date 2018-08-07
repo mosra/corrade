@@ -40,10 +40,11 @@ namespace Corrade { namespace Utility {
 /**
 @brief Format a string
 
-Provides Python-style type-safe formatting of arbitrary types into a template
-string. Example usage:
+Provides type-safe formatting of arbitrary types into a template string,
+similar in syntax to Python's [format()](https://docs.python.org/3.4/library/string.html#format-string-syntax).
+Example usage:
 
-@snippet Utility.cpp format
+@snippet Utility.cpp formatString
 
 # Templating language
 
@@ -52,7 +53,7 @@ ordering (as shown above), or be numbered, such as `{2}`. Zero means first item
 from @p args, it's allowed to repeat the numbers. An implicit placeholder
 following a numbered one will get next position after. Example:
 
-@snippet Utility.cpp format-numbered
+@snippet Utility.cpp formatString-numbered
 
 Unlike in Python, it's allowed to both have more placeholders than arguments or
 more arguments than placeholders. Extraneous placeholders are copied to the
@@ -60,25 +61,25 @@ output verbatim, extraneous arguments are simply ignored.
 
 In order to write a literal curly brace to the output, simply double it:
 
-@snippet Utility.cpp format-escape
+@snippet Utility.cpp formatString-escape
 
 # Data type support
 
 @m_class{m-fullwidth}
 
-| Type                                  | Behavior                          |
-| ------------------------------------- | --------------------------------- |
-| @cpp char @ce, @cpp unsigned char @ce | Written as an integer (*not as a character*) |
-| @cpp short @ce, @cpp unsigned short @ce | Written as an integer           |
-| @cpp int @ce, @cpp unsigned int @ce   | Written as an integer             |
-| @cpp long @ce, @cpp unsigned long @ce | Written as an integer             |
-| @cpp long long @ce, @cpp unsigned long long @ce | Written as an integer   |
-| @cpp float @ce <b></b>    | Written as a float with 6 significant digits  |
-| @cpp double @ce <b></b>   | Written as a float with 15 significant digits |
-| @cpp long double @ce <b></b> | Written as a float with 18 significant digits |
-| @cpp char* @ce <b></b> | Written as a sequence of characters until @cpp '\0' @ce (which is not written) |
-| @ref std::string | Written as a sequence of @ref std::string::size() characters |
-| @ref Containers::ArrayView "Containers::ArrayView<char>" | Written as a sequence of @ref Containers::ArrayView::size() characters |
+| Type                                  | Behavior
+| ------------------------------------- | --------
+| @cpp char @ce, @cpp unsigned char @ce | Written as an integer (*not as a character*)
+| @cpp short @ce, @cpp unsigned short @ce | Written as an integer
+| @cpp int @ce, @cpp unsigned int @ce   | Written as an integer
+| @cpp long @ce, @cpp unsigned long @ce | Written as an integer
+| @cpp long long @ce, @cpp unsigned long long @ce | Written as an integer
+| @cpp float @ce <b></b>    | Written as a float with 6 significant digits by default
+| @cpp double @ce <b></b>   | Written as a float with 15 significant digits by default
+| @cpp long double @ce <b></b> | Written as a float with 18 significant digits by default
+| @cpp char* @ce <b></b> | Written as a sequence of characters until @cpp '\0' @ce (which is not written)
+| @ref std::string | Written as a sequence of @ref std::string::size() characters
+| @ref Containers::ArrayView "Containers::ArrayView<char>" | Written as a sequence of @ref Containers::ArrayView::size() characters
 
 # Performance
 
@@ -95,9 +96,9 @@ files or standard output.
 @ref Debug class desired usage is for easy printing of complex nested types,
 containers, enum values or opaque types for logging and diagnostic purposes,
 with focus on convenience rather than speed or advanced formatting
-capabilities. The @ref format() family of functions is intended for cases where
-it's required to have a complete control over the output, for example when
-serializing text files.
+capabilities. The @ref formatString() family of functions is intended for cases
+where it's required to have a complete control over the output, for example
+when serializing text files.
 
 @experimental
 */
@@ -114,7 +115,8 @@ terminating @cpp '\0' @ce character. Example usage:
 
 @snippet Utility.cpp formatInto-string
 
-See @ref format() for more information about usage and templating language.
+See @ref formatString() for more information about usage and templating
+language.
 
 @experimental
 */
@@ -130,7 +132,8 @@ Example usage:
 
 @snippet Utility.cpp formatInto-buffer
 
-See @ref format() for more information about usage and templating language.
+See @ref formatString() for more information about usage and templating
+language.
 
 @experimental
 */
@@ -146,7 +149,8 @@ not* write any terminating @cpp '\0' @ce character. Example usage:
 
 @snippet Utility.cpp formatInto-stdout
 
-See @ref format() for more information about usage and templating language.
+See @ref formatString() for more information about usage and templating
+language.
 
 @experimental
 */

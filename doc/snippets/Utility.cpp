@@ -206,29 +206,29 @@ CORRADE_IGNORE_DEPRECATED_POP
 }
 
 {
-/* [format] */
+/* [formatString] */
 std::string s = Utility::formatString("{} version {}.{}.{}, {} MB",
     "vulkan.hpp", 1, 1, 76, 1.79);
 // vulkan.hpp version 1.1.76, 1.79 MB
-/* [format] */
+/* [formatString] */
 static_cast<void>(s);
 }
 
 {
-/* [format-numbered] */
+/* [formatString-numbered] */
 std::string s = Utility::formatString("<{0}><{1}>Good {}, {}!</{1}></{0}>",
     "p", "strong", "afternoon", "ma'am!");
 // <p><strong>Good afternoon, ma'am!</strong></p>
-/* [format-numbered] */
+/* [formatString-numbered] */
 static_cast<void>(s);
 }
 
 {
-/* [format-escape] */
+/* [formatString-escape] */
 std::string s = Utility::formatString("union {{ {} a; char data[{}]; }} caster;",
-    "float", 4);
+    "float", sizeof(float));
 // union { float a; char data[4]; } caster;
-/* [format-escape] */
+/* [formatString-escape] */
 static_cast<void>(s);
 }
 
