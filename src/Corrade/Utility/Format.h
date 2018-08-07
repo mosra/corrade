@@ -81,6 +81,51 @@ In order to write a literal curly brace to the output, simply double it:
 | @ref std::string | Written as a sequence of @ref std::string::size() characters
 | @ref Containers::ArrayView "Containers::ArrayView<char>" | Written as a sequence of @ref Containers::ArrayView::size() characters
 
+# Advanced formatting options
+
+Advanced formatting such as precision or presentation type is possible by
+putting extra options after a semicolon, following the optional placeholder
+number, such as `{:x}` to print an integer value in hexadecimal. In general,
+the syntax similar to the @ref std::printf()-style formatting, with the
+addition of `{}` and `:` used instead of `%` --- for example, @cpp "%.2x" @ce
+can be translated to @cpp "{:.2x}" @ce.
+
+The full placeholder syntax is the following, again a subset of the Python
+[format()](https://docs.python.org/3.4/library/string.html#format-string-syntax):
+
+    {[number][:[.precision][type]]}
+
+The `type` is a single character specifying output conversion:
+
+Value           | Meaning
+--------------- | -------
+@cpp 'd' @ce <b></b> | Decimal integer (base 10). Valid only for integer types. Default for integers if nothing is specified.
+@cpp 'o' @ce <b></b> | Octal integer (base 8). Valid only for integer types.
+@cpp 'x' @ce <b></b> | Hexadecimal integer (base 16) with lowercase letters a--f. Valid only for integer types.
+@cpp 'X' @ce <b></b> | Hexadecimal integer with uppercase letters A--F. Valid only for integer types.
+@cpp 'g' @ce <b></b> | General floating-point, formatting the value either in exponent notation or fixed-point format depending on its magnitude. The exponent `e` and special values such as `nan` or `inf` are printed lowercase. Valid only for floating-point types.
+@cpp 'G' @ce <b></b> | General floating-point. The exponent `E` and special values such as `NAN` or `INF` are printed uppercase. Valid only for floating-point types.
+@cpp 'e' @ce <b></b> | Exponent notation. The exponent `e` and special values such as `nan` or `inf` are printed lowercase. Valid only for floating-point types.
+@cpp 'E' @ce <b></b> | Exponent notation. The exponent `E` and special values such as `NAN` or `INF` are printed uppercase. Valid only for floating-point types.
+@cpp 'f' @ce <b></b> | Fixed point. The exponent `e` and special values such as `nan` or `inf` are printed lowercase. Valid only for floating-point types.
+@cpp 'F' @ce <b></b> | Fixed point. The exponent `E` and special values such as `NAN` or `INF` are printed uppercase. Valid only for floating-point types.
+<em>none</em>   | Default based on type, equivalent to @cpp 'd' @ce for integral types and @cpp 'g' @ce for floating-point types. The only valid specifier for strings.
+
+The `precision` field specifies a precision of the output. It's interpreted
+differently based on the data type:
+
+Type            | Meaning
+--------------- | -------
+Integers        | If the number of decimals is smaller than `precision`, the integer gets padded with the `0` character from the left. If both the number and `precision` is @cpp 0 @ce, nothing is written to the output. Default `precision` is @cpp 1 @ce.
+Floating-point types with default or @cpp 'g' @ce / @cpp 'G' @ce type specifier | The number is printed with *at most* `precision` significant digits. Default `precision` depends on data type, see the type support table above.
+Floating-point types with @cpp 'e' @ce / @cpp 'E' @ce type specifier | The number is always printed with *exactly* one decimal, `precision` decimal points (including trailing zeros) and the exponent. Default `precision` depends on data type, see the type support table above.
+Floating-point types with @cpp 'f' @ce / @cpp 'F' @ce type specifier | The number is always printed with *exactly* `precision` decimal points including trailing zeros. Default `precision` depends on data type, see the type support table above.
+Strings         | If the string length is larger than `precision`, only the first `precision` *bytes* are written to the output. Default `precision` is unlimited. Note that this doesn't work with UTF-8 at the moment.
+
+Example of formating of CSS colors with correct width:
+
+@snippet Utility.cpp formatString-type-precision
+
 # Performance
 
 This function always does exactly one allocation for the output string. See
@@ -158,58 +203,60 @@ template<class ...Args> void formatInto(std::FILE* file, const char* format, con
 
 namespace Implementation {
 
+enum class FormatType: std::uint8_t;
+
 template<class T> struct Formatter;
 
 template<> struct Formatter<int> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, int value);
-    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, int value);
+    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, int value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, int value, int precision, FormatType type);
 };
 template<> struct Formatter<char>: Formatter<int> {};
 template<> struct Formatter<short>: Formatter<int> {};
 
 template<> struct Formatter<unsigned int> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, unsigned int value);
-    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, unsigned int value);
+    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, unsigned int value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, unsigned int value, int precision, FormatType type);
 };
 template<> struct Formatter<unsigned char>: Formatter<unsigned int> {};
 template<> struct Formatter<unsigned short>: Formatter<unsigned int> {};
 
 template<> struct Formatter<long long> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, long long value);
-    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, long long value);
+    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, long long value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, long long value, int precision, FormatType type);
 };
 template<> struct Formatter<long>: Formatter<long long> {};
 
 template<> struct Formatter<unsigned long long> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, unsigned long long value);
-    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, unsigned long long value);
+    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, unsigned long long value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, unsigned long long value, int precision, FormatType type);
 };
 template<> struct Formatter<unsigned long>: Formatter<unsigned long long> {};
 
 template<> struct Formatter<float> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, float value);
-    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, float value);
+    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, float value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, float value, int precision, FormatType type);
 };
 template<> struct Formatter<double> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, double value);
-    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, double value);
+    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, double value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, double value, int precision, FormatType type);
 };
 template<> struct Formatter<long double> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, long double value);
-    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, long double value);
+    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, long double value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, long double value, int precision, FormatType type);
 };
 template<> struct Formatter<const char*> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, const char* value);
-    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, const char* value);
+    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, const char* value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, const char* value, int precision, FormatType type);
 };
 template<> struct Formatter<char*>: Formatter<const char*> {};
 template<> struct Formatter<Containers::ArrayView<const char>> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, Containers::ArrayView<const char> value);
-    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, Containers::ArrayView<const char> value);
+    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, Containers::ArrayView<const char> value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, Containers::ArrayView<const char> value, int precision, FormatType type);
 };
 template<> struct Formatter<std::string> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, const std::string& value);
-    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, const std::string& value);
+    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, const std::string& value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, const std::string& value, int precision, FormatType type);
 };
 
 struct BufferFormatter {
@@ -217,20 +264,20 @@ struct BufferFormatter {
     /*implicit*/ constexpr BufferFormatter(): _fn{}, _value{} {}
 
     template<class T> explicit BufferFormatter(const T& value): _value{&value} {
-        _fn = [](Containers::ArrayView<char> buffer, const void* value) {
-            return Formatter<typename std::decay<T>::type>::format(buffer, *static_cast<const T*>(value));
+        _fn = [](Containers::ArrayView<char> buffer, const void* value, int precision, FormatType type) {
+            return Formatter<typename std::decay<T>::type>::format(buffer, *static_cast<const T*>(value), precision, type);
         };
     }
 
-    std::size_t operator()(Containers::ArrayView<char> buffer) const {
-        return _fn(buffer, _value);
+    std::size_t operator()(Containers::ArrayView<char> buffer, int precision, FormatType type) const {
+        return _fn(buffer, _value, precision, type);
     }
 
     /* Cached size of the formatted string to avoid recalculations */
     std::size_t size{~std::size_t{}};
 
     private:
-        std::size_t(*_fn)(Containers::ArrayView<char>, const void*);
+        std::size_t(*_fn)(Containers::ArrayView<char>, const void*, int precision, FormatType type);
         const void* _value;
 };
 
@@ -239,15 +286,15 @@ struct FileFormatter {
     /*implicit*/ constexpr FileFormatter(): _fn{}, _value{} {}
 
     template<class T> explicit FileFormatter(const T& value): _value{&value} {
-        _fn = [](std::FILE* file, const void* value) {
-            Formatter<typename std::decay<T>::type>::format(file, *static_cast<const T*>(value));
+        _fn = [](std::FILE* file, const void* value, int precision, FormatType type) {
+            Formatter<typename std::decay<T>::type>::format(file, *static_cast<const T*>(value), precision, type);
         };
     }
 
-    void operator()(std::FILE* file) const { _fn(file, _value); }
+    void operator()(std::FILE* file, int precision, FormatType type) const { _fn(file, _value, precision, type); }
 
     private:
-        void(*_fn)(std::FILE*, const void*);
+        void(*_fn)(std::FILE*, const void*, int precision, FormatType type);
         const void* _value;
 };
 

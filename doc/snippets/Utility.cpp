@@ -233,6 +233,14 @@ static_cast<void>(s);
 }
 
 {
+/* [formatString-type-precision] */
+std::string s = Utility::formatString("path {{ fill: #{:6x}; stroke: #{:6x}; }}",
+    0x33ff00, 0x00aa55);
+// path { fill: #33ff00; stroke: #00aa55; }
+/* [formatString-type-precision] */
+}
+
+{
 void addShaderSource(Containers::ArrayView<char>);
 /* [formatInto-buffer] */
 char shaderVersion[128]; // large enough
