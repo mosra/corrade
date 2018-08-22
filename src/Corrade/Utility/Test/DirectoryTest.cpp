@@ -504,7 +504,11 @@ void DirectoryTest::configurationDir() {
     if(Directory::isSandboxed())
         CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(Directory::path(dir)), "Caches")));
     else
-        CORRADE_VERIFY(Directory::fileExists(Directory::join(Directory::path(dir), "App Store")));
+        /* App Store is not present on *some* Travis VMs since 2018-08-05.
+           CrashReporter is. */
+        CORRADE_VERIFY(
+            Directory::fileExists(Directory::join(Directory::path(dir), "App Store")) ||
+            Directory::fileExists(Directory::join(Directory::path(dir), "CrashReporter")));
 
     /* On Linux verify that the parent dir contains `autostart` directory,
        something from GTK or something from Qt. Ugly and hacky, but it's the
