@@ -31,6 +31,7 @@
 @page corrade-cmake Using Corrade with CMake
 @page corrade-example-index Examples
 @page partialsupport List of partially supported features
+@m_keyword{Partially supported features,,}
 @page corrade-changelog Changelog
 @page corrade-changelog-old Archived changelogs
 
