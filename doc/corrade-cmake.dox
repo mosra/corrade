@@ -63,7 +63,7 @@ components, which are:
 -   `PluginManager` --- @ref PluginManager library
 -   `TestSuite` --- @ref TestSuite library
 -   `Utility` --- @ref Utility library
--   `rc` --- `corrade-rc` executable
+-   `rc` --- @ref corrade-rc "corrade-rc" executable
 
 Example usage with specifying additional components is:
 

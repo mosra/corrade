@@ -23,21 +23,52 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-/** @file
-@brief Utility for compiling data resources via command-line.
-
-Produces compiled C++ file with data in hexadecimal representation. Status
-messages are printed to standard output, errors are printed to error output.
-See `corrade-rc --help` for command-line parameters, see @ref resource-management
-for brief introduction.
-*/
-
 #include <string>
 
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/Resource.h"
+
+namespace Corrade {
+
+/** @page corrade-rc Resource compiler
+@brief Utility for compiling data resources via command-line.
+
+Produces compiled C++ file with data in hexadecimal representation to be used
+with @ref Utility::Resource. See @ref resource-management for brief
+introduction.
+
+This utility is built if `WITH_RC` is enabled when building Corrade. To use
+this utility with CMake, see the
+@ref corrade-cmake-add-resource "corrade_add_resource()" macro. To use it
+directly, you need to request the `rc` component of the `Corrade` package and
+use the `Corrade::rc` target for example in a custom command:
+
+@code{.cmake}
+find_package(Corrade REQUIRED rc)
+
+add_custom_command(OUTPUT ... COMMAND Corrade::rc ...)
+@endcode
+
+See @ref building-corrade, @ref corrade-cmake and the @ref Utility namespace
+for more information.
+
+@section corrade-rc-usage Usage
+
+@code{.sh}
+corrade-rc [-h|--help] [--] name resources.conf outfile.cpp
+@endcode
+
+Arguments:
+
+-   `resources.conf` --- resource configuration file (see @ref Utility::Resource
+    for format description)
+-   `outfile.cpp` --- output file
+-   `-h`, `--help` --- display this help message and exit
+*/
+
+}
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 int main(int argc, char** argv) {

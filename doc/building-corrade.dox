@@ -463,10 +463,10 @@ not:
     the `corrade-rc` executable. Enabled automatically if `WITH_INTERCONNECT`,
     `WITH_PLUGINMANAGER` or `WITH_TESTSUITE` is enabled. The @ref Containers
     library is built along with this library.
--   `WITH_RC` --- Build the @ref corrade-rc utility. Enabled automatically if
-    `WITH_UTILITY` or anything depending on it is enabled. It's possible to
-    build just this executable without anything else, for example when
-    crosscompiling.
+-   `WITH_RC` --- Build the @ref corrade-rc "corrade-rc" utility. Enabled
+    automatically if `WITH_UTILITY` or anything depending on it is enabled.
+    It's possible to build just this executable without anything else, for
+    example when crosscompiling.
 
 Platform-specific options:
 

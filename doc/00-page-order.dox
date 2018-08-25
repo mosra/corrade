@@ -25,11 +25,13 @@
 
 /* This is here just to order the pages in some reasonable way. */
 
-/**
+namespace Corrade {
 
+/**
 @page building-corrade Downloading and building Corrade
 @page corrade-cmake Using Corrade with CMake
 @page corrade-example-index Examples
+@page corrade-rc Resource compiler
 @page partialsupport List of partially supported features
 @m_keyword{Partially supported features,,}
 @page corrade-changelog Changelog
@@ -40,5 +42,6 @@
 @page debugoperators Debug output operators for custom types
 @page configurationvalues Configuration value parsers and writers for custom types
 @page deprecated Deprecated list
-
 */
+
+}

@@ -47,11 +47,12 @@ and reading. Resources can be differentiated into more groups, every resource
 in given group has unique filename.
 
 See @ref resource-management for brief introduction and example usage.
-Standalone resource compiler executable is implemented in @ref rc.cpp.
+Standalone resource compiler executable is implemented in
+@ref corrade-rc "corrade-rc".
 
 @section Utility-Resource-conf Resource configuration file
 
-Function @ref compileFrom() takes configuration file as parameter. The file
+Function @ref compileFrom() takes a configuration file as parameter. The file
 allows you to specify filenames and filename aliases of resource files instead
 of passing the data manually to @ref compile(). The file is used when compiling
 resources using @ref corrade-cmake-add-resource "corrade_add_resource()" via
