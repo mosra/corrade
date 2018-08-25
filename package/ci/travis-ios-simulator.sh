@@ -7,10 +7,10 @@ git submodule update --init
 mkdir build && cd build
 cmake .. \
     -DCMAKE_INSTALL_PREFIX=$HOME/deps-native \
-    -DCMAKE_INSTALL_RPATH=$HOME/deps-native/lib \
     -DWITH_INTERCONNECT=OFF \
     -DWITH_PLUGINMANAGER=OFF \
     -DWITH_TESTSUITE=OFF \
+    -DWITH_UTILITY=OFF \
     -DCMAKE_BUILD_TYPE=Release \
     -G Ninja
 ninja install
