@@ -40,6 +40,20 @@ set(CorradeUtility_GracefulAssert_SRCS
     String.cpp
     Unicode.cpp)
 
+# Sources for standalone corrade-rc
+set(CorradeUtilityRc_SRCS
+    Arguments.cpp
+    Debug.cpp
+    Directory.cpp
+    Configuration.cpp
+    ConfigurationGroup.cpp
+    Resource.cpp
+    String.cpp)
+if(CORRADE_TARGET_WINDOWS)
+    # Needed for dealing with the design failure that's called "Unicode WINAPI"
+    list(APPEND CorradeUtilityRc_SRCS Unicode.cpp)
+endif()
+
 set(CorradeUtility_HEADERS
     Arguments.h
     AbstractHash.h
@@ -135,9 +149,21 @@ install(FILES ${CorradeUtility_HEADERS} DESTINATION ${CORRADE_INCLUDE_INSTALL_DI
 # and similar change would be in UseCorrade.cmake. More info in this thread:
 #  https://cmake.org/pipermail/cmake-developers/2015-January/024242.html
 if(NOT CMAKE_CROSSCOMPILING)
-    add_executable(corrade-rc rc.cpp)
+    # Having a tool used during a build depend on a shared library brings a lot
+    # of annoyances especially for CMake and RPATH beginners (and Windows users
+    # as there is no RPATH), so I'm making it dependency-less here by compiling
+    # everything the executable needs directly inside. In case the library is
+    # already built as static, there's no need to do any extra work -- just
+    # link it.
+    if(NOT BUILD_STATIC)
+        add_executable(corrade-rc rc.cpp ${CorradeUtilityRc_SRCS})
+        target_include_directories(corrade-rc PRIVATE $<TARGET_PROPERTY:CorradeUtility,INTERFACE_INCLUDE_DIRECTORIES>)
+        target_compile_definitions(corrade-rc PRIVATE "CORRADE_BUILD_STATIC")
+    else()
+        add_executable(corrade-rc rc.cpp)
+        target_link_libraries(corrade-rc CorradeUtility)
+    endif()
     set_target_properties(corrade-rc PROPERTIES FOLDER "Corrade/Utility")
-    target_link_libraries(corrade-rc CorradeUtility)
     install(TARGETS corrade-rc DESTINATION ${CORRADE_BINARY_INSTALL_DIR})
 endif()
 
