@@ -61,6 +61,7 @@ option(WITH_INTERCONNECT "Build Interconnect library" ON)
 option(WITH_PLUGINMANAGER "Build PluginManager library" ON)
 option(WITH_TESTSUITE "Build TestSuite library" ON)
 cmake_dependent_option(WITH_UTILITY "Build Utility library" ON "NOT WITH_INTERCONNECT;NOT WITH_PLUGINMANAGER;NOT WITH_TESTSUITE" ON)
+cmake_dependent_option(WITH_RC "Build the corrade-rc utility" ON "NOT WITH_UTILITY" ON)
 
 option(BUILD_DEPRECATED "Include deprecated API in the build" ON)
 if(BUILD_DEPRECATED)

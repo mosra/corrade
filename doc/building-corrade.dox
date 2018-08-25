@@ -459,10 +459,14 @@ not:
     building of the Utility library.
 -   `WITH_TESTSUITE` --- Build the @ref TestSuite library. Enables also
     building of the Utility library.
--   `WITH_UTILITY` --- Build the @ref Utility library. Enabled automatically if
-    `WITH_INTERCONNECT`, `WITH_PLUGINMANAGER` or `WITH_TESTSUITE` is enabled.
-    The @ref Containers library and `corrade-rc` executable is built along with
-    this library.
+-   `WITH_UTILITY` --- Build the @ref Utility library. Enables also building of
+    the `corrade-rc` executable. Enabled automatically if `WITH_INTERCONNECT`,
+    `WITH_PLUGINMANAGER` or `WITH_TESTSUITE` is enabled. The @ref Containers
+    library is built along with this library.
+-   `WITH_RC` --- Build the @ref corrade-rc utility. Enabled automatically if
+    `WITH_UTILITY` or anything depending on it is enabled. It's possible to
+    build just this executable without anything else, for example when
+    crosscompiling.
 
 Platform-specific options:
 

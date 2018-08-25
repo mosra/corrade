@@ -64,7 +64,7 @@ if(WITH_TESTSUITE)
     add_subdirectory(TestSuite)
 endif()
 
-if(WITH_UTILITY)
+if(WITH_UTILITY OR WITH_RC)
     add_subdirectory(Utility)
 endif()
 

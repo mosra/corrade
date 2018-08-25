@@ -67,7 +67,10 @@ namespace Corrade {
 -   There's now a PPA for Ubuntu packages. See @ref building-corrade-packages-deb
     for more information.
 -   The @ref corrade-rc utility is now fully standalone even with shared builds
-    to minimize annoying first-time-use issues
+    to minimize annoying first-time-use issues. It's also possible to build
+    just this utility without anything else for example for crosscompiling, by
+    enabling only `WITH_RC` and disabling all other @ref corrade-cmake "CMake"
+    options.
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
