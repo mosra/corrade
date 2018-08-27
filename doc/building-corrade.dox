@@ -47,40 +47,44 @@ platforms.
 @subsection building-corrade-packages-vcpkg Vcpkg packages on Windows
 
 Corrade is available as a [Vcpkg](https://github.com/Microsoft/vcpkg) package.
-After setting up Vcpkg like described in the README, you can install latest
-stable version of Corrade like this:
+After setting up Vcpkg as described in their README, it is recommended to set
+the "default triplet". You can do this by setting the `VCPKG_DEFAULT_TRIPLET`
+variable, e.g. to `x64-windows` --- refer to the
+[documentation on triplets](https://vcpkg.readthedocs.io/en/latest/users/triplets/#additional-remarks)
+for other options.
+
+You can then install latest stable version of Corrade like this:
 
 @code{.bat}
 vcpkg install corrade
 @endcode
 
-To install the latest Git revision, use
+Often you may want to install the latest Git revision instead:
 
 @code{.bat}
 vcpkg install corrade --head
 @endcode
 
-This by default installs a 32-bit dynamic version of the package, you can use
-@cb{.bat} vcpkg install corrade:x64-windows @ce or
-@cb{.bat} vcpkg install corrade:x64-windows-static @ce to install a 64-bit
-(static) version instead. You can also use the `VCPKG_DEFAULT_TRIPLET` variable
-to change the default --- see the
-<a href="https://github.com/Microsoft/vcpkg/blob/master/docs/users/triplets.md">Vcpkg triplet documentation</a>
-for more information.
-
-Not all features are installed by default, only those that are implicitly
+Not all features are installed by default; only those that are implicitly
 enabled in @ref building-corrade-features. To opt-in or opt-out of additional
 features, you can use the following syntax; feature names are simply names of
-CMake `WITH_*` options but lowercase. See the
-<a href="https://github.com/Microsoft/vcpkg/blob/master/docs/specifications/feature-packages.md">feature documentation</a>
-for more information.
+CMake `WITH_*` options but lowercase, e.g.:
 
 @code{.bat}
 vcpkg install corrade[pluginmanager,testsuite]
 @endcode
 
-Packages installed using Vcpkg can be used straight away in Visual Studio ---
-all you need to do is to @cpp #include @ce the headers you want, the
+To install all features of a package, use `*`, e.g.:
+
+@code{.bat}
+vcpkg install corrade[*]
+@endcode
+
+For more information, see the
+[documentation on feature packages](https://vcpkg.readthedocs.io/en/latest/specifications/feature-packages/).
+
+Packages installed using Vcpkg can be used in Visual Studio straight away ---
+all you need to do is to @cpp #include @ce the headers you want and the
 buildsystem will do all needed library linking and setup behind the scenes
 automatically. <em>(Cool, isn't it?)</em>
 
@@ -96,8 +100,9 @@ mkdir build && cd build
 cmake .. -DCMAKE_TOOLCHAIN_FILE=C:/src/vcpkg/scripts/buildsystems/vcpkg.cmake
 @endcode
 
-If you want to pass additional flags to CMake, run @cb{.bat} vcpkg edit corrade @ce
-and edit `OPTIONS` in @cmake vcpkg_configure_cmake() @ce.
+If you want Vcpkg to pass additional flags to CMake during installation of a
+package, use the `edit` command, e.g. @cb{.bat} vcpkg edit corrade @ce, and
+edit `OPTIONS` in @cmake vcpkg_configure_cmake() @ce.
 
 @subsection building-corrade-packages-arch ArchLinux packages
 
