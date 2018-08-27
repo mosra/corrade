@@ -1155,14 +1155,15 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         std::vector<TestCase> _testCases;
         std::string _testFilename, _testName, _testCaseName,
             _testCaseDescription, _benchmarkName, _expectFailMessage;
-        std::size_t _testCaseId, _testCaseInstanceId, _testCaseRepeatId,
-            _benchmarkBatchSize, _testCaseLine, _checkCount;
+        std::size_t _testCaseId{}, _testCaseInstanceId{~std::size_t{}},
+            _testCaseRepeatId{}, _benchmarkBatchSize{}, _testCaseLine{},
+            _checkCount{};
 
-        std::uint64_t _benchmarkBegin;
-        std::uint64_t _benchmarkResult;
+        std::uint64_t _benchmarkBegin{};
+        std::uint64_t _benchmarkResult{};
         TestCase* _testCase = nullptr;
-        bool _expectedFailuresDisabled;
-        ExpectedFailure* _expectedFailure;
+        bool _expectedFailuresDisabled{};
+        ExpectedFailure* _expectedFailure{};
         TesterConfiguration _configuration;
 };
 

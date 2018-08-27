@@ -45,7 +45,7 @@ inline std::tuple<double, double, Utility::Debug::Color> calculateStats(const Co
     /* Calculate mean */
     double mean{};
     for(std::uint64_t v: measurements)
-        mean += double(v)/(batchSize*measurements.size());
+        mean += double(v)/double(batchSize*measurements.size());
 
     /* Calculate sample variance */
     double variance{};
