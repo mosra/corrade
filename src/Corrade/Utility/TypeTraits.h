@@ -83,10 +83,12 @@ Equivalent to @ref std::true_type if the class is has either @cpp begin() @ce /
 @cpp end() @ce members, is usable with free @cpp begin() @ce / @cpp end() @ce
 functions or has @ref std::begin() / @ref std::end() overloads. Otherwise
 equivalent to @ref std::false_type.
+@todoc use the ellipsis macro once m.css has it
 */
 /* When using {}, MSVC 2015 complains that even the explicitly defaulted
    constructor doesn't exist */
 template<class T> using IsIterable = std::integral_constant<bool,
+    #ifndef DOXYGEN_GENERATING_OUTPUT
     (Implementation::HasMemberBegin<T>::value ||
     #ifndef CORRADE_GCC47_COMPATIBILITY
     Implementation::HasBegin<T>::value ||
@@ -95,7 +97,11 @@ template<class T> using IsIterable = std::integral_constant<bool,
     #ifndef CORRADE_GCC47_COMPATIBILITY
     Implementation::HasEnd<T>::value ||
     #endif
-    Implementation::HasStdEnd<T>::value)>;
+    Implementation::HasStdEnd<T>::value)
+    #else
+    implementation-specific
+    #endif
+    >;
 
 }}
 
