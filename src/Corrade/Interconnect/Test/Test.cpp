@@ -51,6 +51,7 @@ struct Test: TestSuite::Tester {
 
     void emit();
     void emitterSubclass();
+    void emitterVirtualBase();
     void receiverSubclass();
     void slotInReceiverBase();
     void virtualSlot();
@@ -135,6 +136,7 @@ Test::Test() {
 
               &Test::emit,
               &Test::emitterSubclass,
+              &Test::emitterVirtualBase,
               &Test::receiverSubclass,
               &Test::slotInReceiverBase,
               &Test::virtualSlot,
@@ -408,6 +410,40 @@ void Test::emitterSubclass() {
     postman.disconnectSignal(&BetterPostman::newMessage);
     CORRADE_VERIFY(postman.hasSignalConnections(&BetterPostman::newRichTextMessage));
     postman.disconnectSignal(&BetterPostman::newRichTextMessage);
+    CORRADE_VERIFY(!postman.hasSignalConnections());
+}
+
+void Test::emitterVirtualBase() {
+    struct A {
+        int foo;
+    };
+
+    struct Diamond: virtual A, Postman {
+        Signal newDiamondCladMessage(int price, const std::string& value) {
+            return emit(&Diamond::newDiamondCladMessage, price, "<>"+value+"<>");
+        }
+    };
+
+    Diamond postman;
+    Mailbox mailbox;
+
+    /* Virtual bases have extra big pointer sizes on MSVC (16 bytes on 32bit).
+       Ensure this is handled correctly in both cases -- members functions and
+       free functions. */
+    Interconnect::connect(postman, &Diamond::newDiamondCladMessage, mailbox, &Mailbox::addMessage);
+    Interconnect::connect(postman, &Diamond::newDiamondCladMessage, [](int, const std::string&){});
+    Interconnect::connect(postman, &Diamond::newMessage, mailbox, &Mailbox::addMessage);
+
+    /* Just to be sure */
+    postman.newMessage(5, "hello");
+    postman.newDiamondCladMessage(10, "ahoy");
+    CORRADE_COMPARE_AS(mailbox.messages, (std::vector<std::string>{"hello", "<>ahoy<>"}),
+                       TestSuite::Compare::SortedContainer);
+    CORRADE_COMPARE(mailbox.money, 15);
+
+    postman.disconnectSignal(&Diamond::newMessage);
+    CORRADE_VERIFY(postman.hasSignalConnections(&Diamond::newDiamondCladMessage));
+    postman.disconnectSignal(&Diamond::newDiamondCladMessage);
     CORRADE_VERIFY(!postman.hasSignalConnections());
 }
 
