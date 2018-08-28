@@ -43,40 +43,13 @@ namespace Corrade { namespace Containers {
 
 Assuming underlying enum type has already implemented `operator<<` for
 @ref Utility::Debug, this function is able to print value of given enum set.
-Example usage:
+Example definition:
 
-@code{.cpp}
-enum class Feature: unsigned int {
-    Fast = 1 << 0,
-    Cheap = 1 << 1,
-    Tested = 1 << 2,
-    Popular = 1 << 3
-};
+@snippet Containers.cpp enumSetDebugOutput
 
-// already defined to print values as e.g. Feature::Fast and Features(0xabcd)
-// for unknown values
-Utility::Debug& operator<<(Utility::Debug&, Feature);
+The usage would be then straightforward:
 
-typedef EnumSet<Feature> Features;
-CORRADE_ENUMSET_OPERATORS(Features)
-
-Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
-    return enumSetDebugOutput(debug, value, "Features{}", {
-        Feature::Fast,
-        Feature::Cheap,
-        Feature::Tested,
-        Feature::Popular});
-}
-
-// prints Feature::Fast|Feature::Cheap
-Utility::Debug{} << Feature::Fast|Feature::Cheap;
-
-// prints Feature::Popular|Feature(0xdead)
-Utility::Debug{} << Feature::Popular|Feature(0xdead000);
-
-// prints Features{}
-Utility::Debug{} << Features{};
-@endcode
+@snippet Containers.cpp enumSetDebugOutput-usage
 
 @attention This function assumes that the recognized values have unique bits
     set. The output is undefined if more than one value share the same bit.

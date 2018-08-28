@@ -48,20 +48,7 @@ implicitly constructible also from const references to @ref Array and
 
 Usage example:
 
-@code{.cpp}
-// `a` gets implicitly converted to const array view
-void printArray(Containers::ArrayView<const float> values) { ... }
-Containers::Array<float> a;
-printArray(a);
-
-// Wrapping compile-time array with size information
-constexpr const int data[] = {5, 17, -36, 185};
-Containers::ArrayView<const int> b = data; // b.size() == 4
-
-// Wrapping general array with size information
-const int* data2;
-Containers::ArrayView<const int> c{data2, 3};
-@endcode
+@snippet Containers.cpp ArrayView-usage
 
 @attention Note that when using @cpp Containers::ArrayView<const char> @ce, C
     string literals (such as @cpp "hello" @ce) are implicitly convertible to it
@@ -260,11 +247,7 @@ size in bytes. This specialization doesn't provide any @cpp begin() @ce /
 
 Usage example:
 
-@code{.cpp}
-Containers::Array<int> a(5);
-
-Containers::ArrayView<const void> b(a); // b.size() == 20
-@endcode
+@snippet Containers.cpp ArrayView-void-usage
 */
 template<> class ArrayView<const void> {
     public:
@@ -341,12 +324,7 @@ template<> class ArrayView<const void> {
 Convenience alternative to @ref ArrayView::ArrayView(T*, std::size_t). The
 following two lines are equivalent:
 
-@code{.cpp}
-std::uint32_t* data;
-
-Containers::ArrayView<std::uint32_t> a{data, 5};
-auto b = Containers::arrayView(data, 5);
-@endcode
+@snippet Containers.cpp arrayView
 */
 template<class T> constexpr ArrayView<T> arrayView(T* data, std::size_t size) {
     return ArrayView<T>{data, size};
@@ -358,12 +336,7 @@ template<class T> constexpr ArrayView<T> arrayView(T* data, std::size_t size) {
 Convenience alternative to @ref ArrayView::ArrayView(U(&)[size]). The following
 two lines are equivalent:
 
-@code{.cpp}
-std::uint32_t data[15];
-
-Containers::ArrayView<std::uint32_t> a{data};
-auto b = Containers::arrayView(data);
-@endcode
+@snippet Containers.cpp arrayView-array
 */
 template<std::size_t size, class T> constexpr ArrayView<T> arrayView(T(&data)[size]) {
     return ArrayView<T>{data};
@@ -375,12 +348,7 @@ template<std::size_t size, class T> constexpr ArrayView<T> arrayView(T(&data)[si
 Convenience alternative to @ref ArrayView::ArrayView(StaticArrayView<size, U>).
 The following two lines are equivalent:
 
-@code{.cpp}
-std::uint32_t data[15];
-
-Containers::ArrayView<std::uint32_t> a{data};
-auto b = Containers::arrayView(data);
-@endcode
+@snippet Containers.cpp arrayView-StaticArrayView
 */
 template<std::size_t size, class T> constexpr ArrayView<T> arrayView(StaticArrayView<size, T> view) {
     return ArrayView<T>{view};
@@ -393,11 +361,7 @@ Size of the new array is calculated as @cpp view.size()*sizeof(T)/sizeof(U) @ce.
 Expects that both types are [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
 and the total byte size doesn't change. Example usage:
 
-@code{.cpp}
-std::int32_t data[15];
-auto a = Containers::arrayView(data); // a.size() == 15
-auto b = Containers::arrayCast<char>(a); // b.size() == 60
-@endcode
+@snippet Containers.cpp arrayCast
 */
 template<class U, class T> ArrayView<U> arrayCast(ArrayView<T> view) {
     static_assert(std::is_standard_layout<T>::value, "the source type is not standard layout");
@@ -413,11 +377,7 @@ template<class U, class T> ArrayView<U> arrayCast(ArrayView<T> view) {
 
 Alias to @ref ArrayView::size(), useful as a shorthand in cases like this:
 
-@code{.cpp}
-std::int32_t a[5];
-
-std::size_t size = Containers::arraySize(a);
-@endcode
+@snippet Containers.cpp arraySize
 */
 template<class T> std::size_t arraySize(ArrayView<T> view) {
     return view.size();
@@ -439,16 +399,7 @@ template<std::size_t size_, class T> constexpr std::size_t arraySize(T(&)[size_]
 Equivalent to @ref ArrayView, but with compile-time size information.
 Convertible from and to @ref ArrayView. Example usage:
 
-@code{.cpp}
-Containers::ArrayView<int> data;
-
-// Take elements 7 to 11
-Containers::StaticArrayView<5, int> fiveInts = data.slice<5>(7);
-
-// Convert back to ArrayView
-Containers::ArrayView<int> fiveInts2 = data; // fiveInts2.size() == 5
-Containers::ArrayView<int> threeInts = data.slice(2, 5);
-@endcode
+@snippet Containers.cpp StaticArrayView-usage
 
 @see @ref staticArrayView(), @ref arrayCast(StaticArrayView<size, T>)
 */
@@ -614,12 +565,7 @@ template<std::size_t size_, class T> class StaticArrayView {
 Convenience alternative to @ref StaticArrayView::StaticArrayView(T*). The
 following two lines are equivalent:
 
-@code{.cpp}
-std::uint32_t* data;
-
-Containers::StaticArrayView<5, std::uint32_t> a{data};
-auto b = Containers::staticArrayView<5>(data);
-@endcode
+@snippet Containers.cpp staticArrayView
 */
 template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArrayView(T* data) {
     return StaticArrayView<size, T>{data};
@@ -631,12 +577,7 @@ template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArr
 Convenience alternative to @ref StaticArrayView::StaticArrayView(U(&)[size_]).
 The following two lines are equivalent:
 
-@code{.cpp}
-std::uint32_t data[15];
-
-Containers::StaticArrayView<15, std::uint32_t> a{data};
-auto b = Containers::staticArrayView(data);
-@endcode
+@snippet Containers.cpp staticArrayView-array
 */
 template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArrayView(T(&data)[size]) {
     return StaticArrayView<size, T>{data};
@@ -649,11 +590,7 @@ Size of the new array is calculated as @cpp view.size()*sizeof(T)/sizeof(U) @ce.
 Expects that both types are [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
 and the total byte size doesn't change. Example usage:
 
-@code{.cpp}
-std::int32_t data[15];
-auto a = Containers::staticArrayView(data); // a.size() == 15
-Containers::StaticArrayView<60, char> b = Containers::arrayCast<char>(a);
-@endcode
+@snippet Containers.cpp arrayCast-StaticArrayView
 */
 template<class U, std::size_t size, class T> StaticArrayView<size*sizeof(T)/sizeof(U), U> arrayCast(StaticArrayView<size, T> view) {
     static_assert(std::is_standard_layout<T>::value, "the source type is not standard layout");
@@ -670,10 +607,7 @@ template<class U, std::size_t size, class T> StaticArrayView<size*sizeof(T)/size
 Calls @ref arrayCast(StaticArrayView<size, T>) with the argument converted to
 @ref StaticArrayView of the same type and size. Example usage:
 
-@code{.cpp}
-std::int32_t data[15];
-a = Containers::arrayCast<char>(data); // a.size() == 60
-@endcode
+@snippet Containers.cpp arrayCast-StaticArrayView-array
 */
 template<class U, std::size_t size, class T> StaticArrayView<size*sizeof(T)/sizeof(U), U> arrayCast(T(&data)[size]) {
     return arrayCast<U>(StaticArrayView<size, T>{data});

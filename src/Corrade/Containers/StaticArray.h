@@ -52,16 +52,7 @@ as more featureful alternative to plain C arrays or @ref std::array.
 
 Usage example:
 
-@code{.cpp}
-// Create default-initialized array with 5 integers and set them to some value
-Containers::StaticArray<5, int> a;
-int b = 0;
-for(auto& i: a) i = b++; // a = {0, 1, 2, 3, 4}
-
-// Create array from given values
-Containers::StaticArray<4, int> b{3, 18, -157, 0};
-b[3] = 25; // b = {3, 18, -157, 25}
-@endcode
+@snippet Containers.cpp StaticArray-usage
 
 @section Containers-StaticArray-initialization Array initialization
 
@@ -84,32 +75,7 @@ is possible to initialize the array in a different way using so-called *tags*:
 
 Example:
 
-@code{.cpp}
-// These two are equivalent
-Containers::StaticArray<5, int> a1;
-Containers::StaticArray<5, int> a2{Containers::DefaultInit};
-
-// Array of 100 zeros
-Containers::StaticArray<100, int> b{Containers::ValueInit};
-
-// Array of 4 values initialized in-place (these two are equivalent)
-Containers::StaticArray<4, int> c1{3, 18, -157, 0};
-Containers::StaticArray<4, int> c2{Containers::InPlaceInit, 3, 18, -157, 0};
-
-// Array of type with no default constructor
-struct Vec3 {
-    Vec3(float, float, float);
-};
-Containers::StaticArray<5, Vec3> d{Containers::DirectInit, 5.2f, 0.4f, 1.0f};
-
-// Manual construction of each element
-struct Foo {
-    Foo(int index);
-};
-Containers::StaticArray<5, Foo> e{Containers::NoInit};
-int index = 0;
-for(Foo& f: e) new(&f) Foo(index++);
-@endcode
+@snippet Containers.cpp StaticArray-initialization
 
 @see @ref arrayCast(StaticArray<size, T>&)
 */
@@ -455,12 +421,7 @@ template<std::size_t size_, class T> class StaticArray {
 Convenience alternative to calling @ref StaticArray::operator ArrayView<U>()
 explicitly. The following two lines are equivalent:
 
-@code{.cpp}
-Containers::StaticArray<5, std::uint32_t> data;
-
-Containers::ArrayView<std::uint32_t> a{data};
-auto b = Containers::arrayView(data);
-@endcode
+@snippet Containers.cpp StaticArray-arrayView
 */
 template<std::size_t size, class T> constexpr ArrayView<T> arrayView(StaticArray<size, T>& array) {
     return ArrayView<T>{array};
@@ -472,12 +433,7 @@ template<std::size_t size, class T> constexpr ArrayView<T> arrayView(StaticArray
 Convenience alternative to calling @ref StaticArray::operator ArrayView<U>()
 explicitly. The following two lines are equivalent:
 
-@code{.cpp}
-const Containers::StaticArray<5, std::uint32_t> data;
-
-Containers::ArrayView<const std::uint32_t> a{data};
-auto b = Containers::arrayView(data);
-@endcode
+@snippet Containers.cpp StaticArray-arrayView-const
 */
 template<std::size_t size, class T> constexpr ArrayView<const T> arrayView(const StaticArray<size, T>& array) {
     return ArrayView<const T>{array};
@@ -489,12 +445,7 @@ template<std::size_t size, class T> constexpr ArrayView<const T> arrayView(const
 Convenience alternative to calling @cpp StaticArray::operator StaticArrayView<size_, U>() @ce
 explicitly. The following two lines are equivalent:
 
-@code{.cpp}
-Containers::StaticArray<5, std::uint32_t> data;
-
-Containers::StaticArrayView<5, std::uint32_t> a{data};
-auto b = Containers::staticArrayView(data);
-@endcode
+@snippet Containers.cpp StaticArray-staticArrayView
 
 @todoc Make it a real reference once Doxygen is sane
 */
@@ -508,12 +459,7 @@ template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArr
 Convenience alternative to calling @cpp StaticArray::operator StaticArrayView<size_, U>() @ce
 explicitly. The following two lines are equivalent:
 
-@code{.cpp}
-const Containers::StaticArray<5, std::uint32_t> data;
-
-Containers::StaticArrayView<5, const std::uint32_t> a{data};
-auto b = Containers::staticArrayView(data);
-@endcode
+@snippet Containers.cpp StaticArray-staticArrayView-const
 
 @todoc Make it a real reference once Doxygen is sane
 */

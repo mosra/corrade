@@ -332,12 +332,7 @@ template<class T> bool operator!=(const T& a, const Optional<T>& b) { return b !
 Convenience alternative to @ref Optional::Optional(const T&) or @ref Optional::Optional(T&&).
 The following two lines are equivalent:
 
-@code{.cpp}
-std::string value;
-
-auto a = Containers::Optional<std::string>{value};
-auto b = Containers::optional(value);
-@endcode
+@snippet Containers.cpp optional
 */
 template<class T> inline Optional<typename std::decay<T>::type> optional(T&& value) {
     return Optional<typename std::decay<T>::type>{std::forward<T>(value)};

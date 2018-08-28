@@ -50,60 +50,21 @@ Desired usage is via @cpp typedef @ce'ing. You should also call
 @ref CORRADE_ENUMSET_OPERATORS() macro with the resulting type as parameter to
 have out-of-class operators defined:
 
-@code{.cpp}
-enum class Feature: unsigned int {
-    Fast = 1 << 0,
-    Cheap = 1 << 1,
-    Tested = 1 << 2,
-    Popular = 1 << 3
-};
-
-typedef EnumSet<Feature> Features;
-CORRADE_ENUMSET_OPERATORS(Features)
-@endcode
+@snippet Containers.cpp EnumSet-usage
 
 @anchor EnumSet-friend-operators
 If you have the EnumSet as private or protected member of any class, you have
 to declare the out-of-class operators as friends. It can be done with
 @ref CORRADE_ENUMSET_FRIEND_OPERATORS() macro:
 
-@code{.cpp}
-class Application {
-    private:
-        enum class Flag: unsigned int {
-            Redraw = 1 << 0,
-            Exit = 1 << 1
-        };
-
-        typedef EnumSet<Flag> Flags;
-        CORRADE_ENUMSET_FRIEND_OPERATORS(Flags)
-};
-
-CORRADE_ENUMSET_OPERATORS(Application::Flags)
-@endcode
+@snippet Containers.cpp EnumSet-friend
 
 One thing these macros cannot do is to provide operators for enum sets inside
 templated classes. If the enum values are not depending on the template, you
 can work around the issue by declaring the enum in some hidden namespace
 outside the class and then typedef'ing it back into the class:
 
-@code{.cpp}
-namespace Implementation {
-    enum class ObjectFlag: unsigned int {
-        Dirty = 1 << 0,
-        Marked = 1 << 1
-    };
-
-    typedef EnumSet<ObjectFlag> ObjectFlags;
-    CORRADE_ENUMSET_OPERATORS(ObjectFlags)
-}
-
-template<class T> class Object {
-    public:
-        typedef Implementation::ObjectFlag Flag;
-        typedef Implementation::ObjectFlags Flags;
-};
-@endcode
+@snippet Containers.cpp EnumSet-templated
 
 @see @ref enumSetDebugOutput()
 */

@@ -49,38 +49,17 @@ manually if desperately needed.
 
 @section Containers-LinkedList-basic-usage Basic usage
 
-@code{.cpp}
-class Object: public LinkedListItem<Object> {
-    // ...
-};
-
-Object a, b, c;
-
-LinkedList<Object> list;
-list.insert(&a);
-list.insert(&b);
-list.insert(&c);
-
-list.cut(&b);
-@endcode
+@snippet Containers.cpp LinkedList-usage
 
 Traversing through the list can be done using range-based for:
 
-@code{.cpp}
-for(Object& o: list) {
-    // ...
-}
-@endcode
+@snippet Containers.cpp LinkedList-traversal
 
 Or, if you need more flexibility, like in the following code. It is also
 possible to go in reverse order using @ref last() and
 @ref LinkedListItem::previous().
 
-@code{.cpp}
-for(Object* i = list.first(); i; i = i->next()) {
-    // ...
-}
-@endcode
+@snippet Containers.cpp LinkedList-traversal-classic
 
 @section Containers-LinkedList-list-pointer Making advantage of pointer to the list
 
@@ -90,18 +69,7 @@ each object, you can reuse the @ref LinkedListItem::list() pointer, which will
 be cast to type you specify as @p List template parameter of
 @ref LinkedListItem class:
 
-@code{.cpp}
-class ObjectGroup: public LinkedList<Object> {
-    // ...
-};
-
-class Object: public LinkedListItem<Object, ObjectGroup> {
-    public:
-        ObjectGroup* group() { return list(); }
-
-    // ...
-};
-@endcode
+@snippet Containers.cpp LinkedList-list-pointer
 
 @section Containers-LinkedList-private-inheritance Using private inheritance
 
@@ -109,30 +77,7 @@ You might want to subclass LinkedList and LinkedListItem privately and for
 example provide wrapper functions with more descriptive names. In that case
 you need to friend both LinkedList and LinkedListItem in both your subclasses.
 
-@code{.cpp}
-class ObjectGroup: private LinkedList<Object> {
-    friend LinkedList<Object>;
-    friend LinkedListItem<Object, ObjectGroup>;
-
-    public:
-        Object* firstObject() { return first(); }
-        Object* lastObject() { return last(); }
-
-    // ...
-};
-
-class Object: private LinkedListItem<Object, ObjectGroup> {
-    friend LinkedList<Object>;
-    friend LinkedListItem<Object, ObjectGroup>;
-
-    public:
-        ObjectGroup* group() { return list(); }
-        Object* previousObject() { return previous(); }
-        Object* nextObject() { return next(); }
-
-    // ...
-};
-@endcode
+@snippet Containers.cpp LinkedList-private-inheritance
 */
 template<class T> class LinkedList {
     public:
@@ -204,12 +149,7 @@ template<class T> class LinkedList {
          *
          * Equivalent to the following:
          *
-         * @code{.cpp}
-         * if(item != before) {
-         *     list.cut(item);
-         *     list.move(item, before);
-         * }
-         * @endcode
+         * @snippet Containers.cpp LinkedList-move
          */
         void move(T* item, T* before);
 
@@ -219,10 +159,7 @@ template<class T> class LinkedList {
          *
          * Equivalent to:
          *
-         * @code{.cpp}
-         * list.cut(item);
-         * delete item;
-         * @endcode
+         * @snippet Containers.cpp LinkedList-erase
          */
         void erase(T* item);
 
@@ -241,11 +178,7 @@ template<class T> class LinkedList {
 This class is usually subclassed using [CRTP](http://en.wikipedia.org/wiki/Curiously_Recurring_Template_Pattern),
 e.g.:
 
-@code{.cpp}
-class Item: public LinkedListItem<Item> {
-    // ...
-};
-@endcode
+@snippet Containers.cpp LinkedListItem-usage
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class Derived, class List = LinkedList<Derived>>

@@ -85,16 +85,7 @@ additionally also in range-for cycle.
 
 Usage example:
 
-@code{.cpp}
-// Create default-initialized array with 5 integers and set them to some value
-Containers::Array<int> a{5};
-int b = 0;
-for(auto& i: a) i = b++; // a = {0, 1, 2, 3, 4}
-
-// Create array from given values
-auto b = Containers::Array<int>::from(3, 18, -157, 0);
-b[3] = 25; // b = {3, 18, -157, 25}
-@endcode
+@snippet Containers.cpp Array-usage
 
 @section Containers-Array-initialization Array initialization
 
@@ -114,28 +105,7 @@ is possible to initialize the array in a different way using so-called *tags*:
 
 Example:
 
-@code{.cpp}
-// These are equivalent
-Containers::Array<int> a1{5};
-Containers::Array<int> a2{Containers::DefaultInit, 5};
-
-// Array of 100 zeros
-Containers::Array<int> b{Containers::ValueInit, 100};
-
-// Array of type with no default constructor
-struct Vec3 {
-    Vec3(float, float, float);
-};
-Containers::Array<Vec3> c{Containers::DirectInit, 5, 5.2f, 0.4f, 1.0f};
-
-// Manual construction of each element
-struct Foo {
-    Foo(int index);
-};
-Containers::Array<Foo> d{Containers::NoInit, 5};
-int index = 0;
-for(Foo& f: d) new(&f) Foo(index++);
-@endcode
+@snippet Containers.cpp Array-initialization
 
 @section Containers-Array-wrapping Wrapping externally allocated arrays
 
@@ -150,32 +120,13 @@ contents using @cpp operator delete[] @ce.
 
 For example, properly deallocating array allocated using @ref std::malloc():
 
-@code{.cpp}
-const int* data = reinterpret_cast<int*>(std::malloc(25*sizeof(int)));
-
-// Will call std::free() on destruction
-Containers::Array<int> array{data, 25, [](int* data, std::size_t) { std::free(data); }};
-@endcode
+@snippet Containers.cpp Array-wrapping
 
 By default, plain function pointers are used to avoid having the type affected
 by the deleter function. If the deleter needs to manage some state, a custom
 deleter type can be used:
 
-@code{.cpp}
-struct UnmapBuffer {
-    UnmapBuffer(GLuint id): _id{id} {}
-    void operator()(T*, std::size_t) { glUnmapNamedBuffer(_id); }
-
-private:
-    GLuint _id;
-};
-
-GLuint buffer;
-char* data = reinterpret_cast<char*>(glMapNamedBuffer(buffer, GL_READ_WRITE));
-
-// Will unmap the buffer on destruction
-Containers::Array<char, UnmapBuffer> array{data, bufferSize, UnmapBuffer{buffer}};
-@endcode
+@snippet Containers.cpp Array-deleter
 
 @see @ref arrayCast(Array<T, D>&)
 
@@ -538,12 +489,7 @@ class Array {
 Convenience alternative to calling @ref Array::operator ArrayView<U>()
 explicitly. The following two lines are equivalent:
 
-@code{.cpp}
-Containers::Array<std::uint32_t> data;
-
-Containers::ArrayView<std::uint32_t> a{data};
-auto b = Containers::arrayView(data);
-@endcode
+@snippet Containers.cpp Array-arrayView
 */
 template<class T, class D> inline ArrayView<T> arrayView(Array<T, D>& array) {
     return ArrayView<T>{array};
@@ -555,12 +501,7 @@ template<class T, class D> inline ArrayView<T> arrayView(Array<T, D>& array) {
 Convenience alternative to calling @ref Array::operator ArrayView<U>()
 explicitly. The following two lines are equivalent:
 
-@code{.cpp}
-const Containers::Array<std::uint32_t> data;
-
-Containers::ArrayView<const std::uint32_t> a{data};
-auto b = Containers::arrayView(data);
-@endcode
+@snippet Containers.cpp Array-arrayView-const
 */
 template<class T, class D> inline ArrayView<const T> arrayView(const Array<T, D>& array) {
     return ArrayView<const T>{array};
