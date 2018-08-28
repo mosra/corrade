@@ -46,6 +46,12 @@ endif()
 if(WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
     find_package(Threads REQUIRED)
 
+    # Both define the same symbols so they need to be in separate libs
+    add_library(snippets-TestSuite STATIC TestSuite.cpp)
+    target_link_libraries(snippets-TestSuite PRIVATE CorradeTestSuite)
+    add_library(snippets-TestSuite2 STATIC TestSuite2.cpp)
+    target_link_libraries(snippets-TestSuite2 PRIVATE CorradeTestSuite)
+
     # TestSuite documentation snippets. I need them executable so I can
     # copy&paste the output to the documentation. Also mot using
     # corrade_add_test() because these tests shouldn't be run as part of CTest

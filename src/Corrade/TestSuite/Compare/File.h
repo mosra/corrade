@@ -65,21 +65,16 @@ namespace Compare {
 /**
 @brief Pseudo-type for comparing file contents
 
-Prints the length of both files (if they are different) and prints value
-and position of first different character in both files. Filenames are expected
-to be in UTF-8. Example usage:
+Prints the length of both files (if they are different) and prints the value
+and position of the first different character in both files. Filenames are
+expected to be in UTF-8. Example usage:
 
-@code{.cpp}
-CORRADE_COMPARE_AS("actual.txt", "expected.txt", TestSuite::Compare::File);
-@endcode
+@snippet TestSuite.cpp Compare-File
 
 If the files have the same path prefix, you can use @ref CORRADE_COMPARE_WITH()
-macro and pass the prefix to the constructor:
+and pass the prefix to the constructor:
 
-@code{.cpp}
-CORRADE_COMPARE_WITH("actual.txt", "expected.txt",
-    TestSuite::Compare::File{"/common/prefix"});
-@endcode
+@snippet TestSuite.cpp Compare-File-prefix
 
 See @ref TestSuite-Comparator-pseudo-types and @ref TestSuite-Comparator-parameters
 for more information.

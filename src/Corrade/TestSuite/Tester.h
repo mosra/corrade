@@ -479,15 +479,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @brief Alias for debug output
          *
          * For convenient debug output inside test cases (instead of using
-         * fully qualified name):
+         * the fully qualified name):
          *
-         * @code{.cpp}
-         * void myTestCase() {
-         *     int a = 4;
-         *     Debug() << a;
-         *     CORRADE_COMPARE(a + a, 8);
-         * }
-         * @endcode
+         * @snippet TestSuite.cpp Tester-Debug
          *
          * @see @ref Warning, @ref Error
          */
@@ -966,9 +960,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * By default the test case name is gathered in the check macros and is
          * equivalent to the following:
          *
-         * @code{.cpp}
-         * setTestCaseName(__func__);
-         * @endcode
+         * @snippet TestSuite.cpp Tester-setTestCaseName
          *
          * @see @ref setTestName(), @ref setTestCaseDescription()
          */
@@ -1215,19 +1207,13 @@ namespace.
 If the expression is not true, the expression is printed and execution of given
 test case is terminated. Example usage:
 
-@code{.cpp}
-string s("hello");
-CORRADE_VERIFY(!s.empty());
-@endcode
+@snippet TestSuite.cpp CORRADE_VERIFY
 
 It is possible to use @ref CORRADE_VERIFY() also on objects with
 @cpp explicit operator bool() @ce without doing explicit conversion (e.g. using
 @cpp !! @ce), for example:
 
-@code{.cpp}
-std::unique_ptr<T> t(new T);
-CORRADE_VERIFY(t);
-@endcode
+@snippet TestSuite.cpp CORRADE_VERIFY-explicit
 
 @see @ref CORRADE_COMPARE(), @ref CORRADE_COMPARE_AS()
 */
@@ -1243,10 +1229,7 @@ CORRADE_VERIFY(t);
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
 
-@code{.cpp}
-int a = 5 + 3;
-CORRADE_COMPARE(a, 8);
-@endcode
+@snippet TestSuite.cpp CORRADE_COMPARE
 
 Comparison of floating-point types is by default done as a fuzzy-compare, see
 @ref Corrade::TestSuite::Comparator<float> "TestSuite::Comparator<float>" and
@@ -1269,9 +1252,7 @@ comparison operators and is printable via @ref Corrade::Utility::Debug "Utility:
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
 
-@code{.cpp}
-CORRADE_COMPARE_AS(std::sin(0.0), 0.0f, float);
-@endcode
+@snippet TestSuite.cpp CORRADE_COMPARE_AS
 
 See also @ref Corrade::TestSuite::Comparator "TestSuite::Comparator" class documentation
 for example of more involved comparisons.
@@ -1297,9 +1278,7 @@ with given comparator type.
 If the values are not the same, they are printed for comparison and execution
 of given test case is terminated. Example usage:
 
-@code{.cpp}
-CORRADE_COMPARE_WITH("actual.txt", "expected.txt", Compare::File("/common/path/prefix"));
-@endcode
+@snippet TestSuite.cpp CORRADE_COMPARE_WITH
 
 See @ref Corrade::TestSuite::Comparator "TestSuite::Comparator" class
 documentation for more information.
@@ -1325,15 +1304,7 @@ and @ref CORRADE_COMPARE_AS() checks in the same scope. In most cases it will
 be until the end of the function, but you can limit the scope by placing
 relevant checks in a separate block:
 
-@code{.cpp}
-{
-    CORRADE_EXPECT_FAIL("Not implemented.");
-    CORRADE_VERIFY(isFutureClear());
-}
-
-int i = 6*7;
-CORRADE_COMPARE(i, 42);
-@endcode
+@snippet TestSuite.cpp CORRADE_EXPECT_FAIL
 
 If any of the following checks passes, an error will be printed to output.
 @see @ref CORRADE_EXPECT_FAIL_IF()
@@ -1352,24 +1323,11 @@ With @ref CORRADE_EXPECT_FAIL() it's not possible to write code such as this,
 because the scope of expected failure will end at the end of the @cpp if @ce
 block:
 
-@code{.cpp}
-{
-    if(answer != 42)
-        CORRADE_EXPECT_FAIL("This is not our universe.");
-
-    CORRADE_VERIFY(6*7, 49); // always fails
-}
-@endcode
+@snippet TestSuite.cpp CORRADE_EXPECT_FAIL_IF-wrong
 
 The solution is to use @cpp CORRADE_EXPECT_FAIL_IF() @ce:
 
-@code{.cpp}
-{
-    CORRADE_EXPECT_FAIL_IF(answer != 42, "This is not our universe.");
-
-    CORRADE_VERIFY(6*7, 49); // expect the failure if answer is not 42
-}
-@endcode
+@snippet TestSuite.cpp CORRADE_EXPECT_FAIL_IF
 
 Similarly to @ref CORRADE_VERIFY(), it is possible to use
 @ref CORRADE_EXPECT_FAIL_IF() also on objects with @cpp explicit operator bool @ce
@@ -1386,11 +1344,7 @@ without doing explicit conversion (e.g. using @cpp !! @ce).
 Skips all following checks in given test case. Useful for e.g. indicating that
 given feature can't be tested on given platform:
 
-@code{.cpp}
-if(!bigEndian) {
-    CORRADE_SKIP("Big endian compatibility can't be tested on this system.");
-}
-@endcode
+@snippet TestSuite.cpp CORRADE_SKIP
 */
 #define CORRADE_SKIP(message)                                               \
     do {                                                                    \
@@ -1410,14 +1364,7 @@ optimizer from removing the benchmark code such as assigning to a
 @cpp volatile @ce variable or combining all the results to a variable, which is
 then being used outside of the loop.
 
-@code{.cpp}
-void benchmark() {
-    std::string a = "hello", b = "world";
-    CORRADE_BENCHMARK(1000) {
-        volatile std::string c = a + b;
-    }
-}
-@endcode
+@snippet TestSuite.cpp CORRADE_BENCHMARK
 
 The resulting measured value is divided by @p batchSize to represent cost of
 one iteration.

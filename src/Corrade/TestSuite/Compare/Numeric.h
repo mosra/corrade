@@ -43,10 +43,7 @@ Prints both values if the first is not less than the second. Compared type
 needs to implement at least an @cpp operator<() @ce (explicitly) convertible to
 @cpp bool @ce. Example usage:
 
-@code{.cpp}
-float a;
-CORRADE_COMPARE_AS(a, 9.28f, Compare::Less);
-@endcode
+@snippet TestSuite.cpp Compare-Less
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
 @see @ref LessOrEqual, @ref GreaterOrEqual, @ref Greater
@@ -60,10 +57,7 @@ Prints both values if the first is not less than the second. Compared type
 needs to implement at least an @cpp operator<=() @ce (explicitly) convertible
 to @cpp bool @ce. Example usage:
 
-@code{.cpp}
-float a;
-CORRADE_COMPARE_AS(a, 9.28f, Compare::LessOrEqual);
-@endcode
+@snippet TestSuite.cpp Compare-LessOrEqual
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
 @see @ref LessOrEqual, @ref GreaterOrEqual, @ref Greater
@@ -77,10 +71,7 @@ Prints both values if the first is not less than the second.  Compared type
 needs to implement at least an @cpp operator>=() @ce (explicitly) convertible
 to @cpp bool @ce. Example usage:
 
-@code{.cpp}
-float a;
-CORRADE_COMPARE_AS(a, 9.28f, Compare::GreaterOrEqual);
-@endcode
+@snippet TestSuite.cpp Compare-GreaterOrEqual
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
 @see @ref LessOrEqual, @ref GreaterOrEqual, @ref Greater
@@ -94,10 +85,7 @@ Prints both values if the first is not less than the second. Compared type
 needs to implement at least an @cpp operator>() @ce (explicitly) convertible to
 @cpp bool @ce. Example usage:
 
-@code{.cpp}
-float a;
-CORRADE_COMPARE_AS(a, 9.28f, Compare::Greater);
-@endcode
+@snippet TestSuite.cpp Compare-Greater
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
 @see @ref LessOrEqual, @ref GreaterOrEqual, @ref Greater
@@ -112,10 +100,7 @@ Prints both values if @cpp actual < expected - epsilon @ce or
 an @cpp operator-() @ce, @cpp operator+() @ce and @cpp operator<() @ce. Example
 usage:
 
-@code{.cpp}
-float a;
-CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::Around<float>{0.1f});
-@endcode
+@snippet TestSuite.cpp Compare-Around
 
 @see @ref around()
 */
@@ -141,10 +126,7 @@ template<class T> class Around {
 Convenience wrapper around @ref Around::Around(T). These two lines are
 equivalent:
 
-@code{.cpp}
-CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::Around<float>{0.1f});
-CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::around(0.1f));
-@endcode
+@snippet TestSuite.cpp Compare-around
 */
 template<class T> inline Around<T> around(T epsilon) { return Around<T>{epsilon}; }
 

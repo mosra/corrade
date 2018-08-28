@@ -42,14 +42,11 @@ namespace Compare {
 /**
 @brief Pseudo-type for comparing file contents to string
 
-Prints the length of both files (if they are different) and prints value
-and position of first different character in both files. Filename is expected
-to be in UTF-8. Example usage:
+Prints the length of both files (if they are different) and prints the value
+and position of the first different character in both files. Filename is
+expected to be in UTF-8. Example usage:
 
-@code{.cpp}
-CORRADE_COMPARE_AS("actual.txt", "expected file contents",
-    TestSuite::Compare::FileToString);
-@endcode
+@snippet TestSuite.cpp Compare-FileToString
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
 @see @ref Compare::File, @ref Compare::StringToFile

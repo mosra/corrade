@@ -45,102 +45,48 @@ and @ref Compare namespace for pseudo-type comparator implementations.
 @section TestSuite-Comparator-subclassing Subclassing
 
 You can reimplement this class for your own data types and even pseudo types
-for providing different ways to compare the same type.
+to provide different ways to compare the same type.
 
-You have to implement @cpp operator()() @ce for comparison of two values with
-arbitrary type and @cpp printErrorMessage() @ce for printing error message when
-the comparison failed. The reason for having those two separated is allowing
-the user to use colored output --- due to a limitation of Windows console API,
-where it's only possible to specify text color when writing directly to the
-output without any intermediate buffer.
+You have to implement @cpp operator()() @ce for comparison of two values of
+arbitrary types and @cpp printErrorMessage() @ce for printing error message
+when the comparison failed. The reason for having those two separated is
+allowing the user to use colored output --- due to a limitation of Windows
+console API, where it's only possible to specify text color when writing
+directly to the output without any intermediate buffer.
 
 @section TestSuite-Comparator-pseudo-types Comparing with pseudo-types
 
 Imagine you have two filenames and you want to compare their contents instead
 of comparing the filename strings. Because you want to also compare strings
-elsewhere, you cannot override its behavior. The solution is to have some
-"pseudo type", for which you create the Comparator template specialization, but
-the actual comparison operator will still take strings as parameters:
+elsewhere, you cannot override the default behavior. The solution is to have
+some "pseudo type", for which you create the @ref Comparator template
+specialization, but the actual comparison operator will still take strings as
+parameters:
 
-@code{.cpp}
-class FileContents {};
-
-namespace Corrade { namespace TestSuite { // the namespace is important
-
-template<> class Comparator<FileContents> {
-    public:
-        bool operator()(const std::string& actual, const std::string& expected) {
-            _actualContents = ...;
-            _expectedContents = ...;
-            return _actualContents == _expectedContents;
-        }
-
-        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
-            e << "Files" << actual << "and" << expected << "are not the same, actual" << _actualContents << "but expected" << _expectedContents;
-        }
-
-    private:
-        std::string _actualContents, _expectedContents;
-};
-
-}}
-@endcode
+@snippet TestSuite.cpp Comparator-pseudotypes
 
 You can add more overloads for @cpp operator()() @ce in one class, e.g. for
-comparing file contents with string or input stream etc. The actual use in unit
+comparing file contents with an @ref std::istream. The actual use in the unit
 test would be like this:
 
-@code{.cpp}
-CORRADE_COMPARE_AS("/path/to/actual.dat", "/path/to/expected.dat",
-    FileContents);
-@endcode
+@snippet TestSuite.cpp Comparator-pseudotypes-usage
 
 @section TestSuite-Comparator-parameters Passing parameters to comparators
 
-Sometimes you need to pass additional parameters to comparator class so you
-can then use it in @ref CORRADE_COMPARE_WITH() macro. In that case you need to
-implement constructor and @cpp comparator() @ce function in your pseudo-type.
-Function @cpp comparator() @ce returns reference to existing configured
-@ref Comparator instance. Example:
+Sometimes you need to pass additional parameters to the comparator class so you
+can then use it in the @ref CORRADE_COMPARE_WITH() macro. In that case you need
+to implement the constructor and a @cpp comparator() @ce function in your
+pseudo-type. The @cpp comparator() @ce function returns reference to existing
+configured @ref Comparator instance. Example:
 
-@code{.cpp}
-class FileContents;
-
-namespace Corrade { namespace TestSuite { // the namespace is important
-
-template<> class Comparator<FileContents> {
-    public:
-        Comparator(const std::string& pathPrefix = {});
-        bool operator()(const std::string& actual, const std::string& expected);
-        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const;
-
-        // ...
-};
-
-}}
-
-class FileContents {
-    public:
-        explicit FileContents(const std::string& pathPrefix = {}): _c{pathPrefix} {}
-
-        Comparator<FileContents>& comparator() {
-            return _c;
-        }
-
-    private:
-        Comparator<FileContents> _c;
-};
-@endcode
+@snippet TestSuite2.cpp Comparator-parameters
 
 Don't forget to allow default construction of @ref Comparator, if you want to
 be able to use it also with @ref CORRADE_COMPARE_AS().
 
-The actual use in unit test would be like this:
+The actual use in a test would be like this:
 
-@code{.cpp}
-CORRADE_COMPARE_WITH("actual.dat", "expected.dat",
-    FileContents{"/common/path/prefix"});
-@endcode
+@snippet TestSuite2.cpp Comparator-parameters-usage
 */
 template<class T> class Comparator {
     public:
