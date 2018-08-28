@@ -59,3 +59,17 @@ static int corradeZipFilesystemStaticImport() {
     return 1;
 } CORRADE_AUTOMATIC_INITIALIZER(corradeZipFilesystemStaticImport)
 /* [CORRADE_PLUGIN_IMPORT] */
+
+int main() {
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+{
+PluginManager::LoadState loadState{};
+/* [LoadStates] */
+if(loadState & (PluginManager::LoadState::WrongPluginVersion|
+                PluginManager::LoadState::WrongInterfaceVersion)) {
+    // ...
+}
+/* [LoadStates] */
+}
+#endif
+}

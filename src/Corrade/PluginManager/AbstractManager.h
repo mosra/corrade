@@ -173,15 +173,12 @@ CORRADE_PLUGINMANAGER_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, P
 Useful when checking whether @ref LoadState in in given set of values, for
 example:
 
-@code{.cpp}
-if(loadState & (LoadState::WrongPluginVersion|LoadState::WrongInterfaceVersion)) {
-    // ...
-}
-@endcode
+@snippet PluginManager.cpp LoadStates
 
-Note that @ref LoadState::Loaded includes value of @ref LoadState::Static, so
-you can use @cpp loadState & LoadState::Loaded @ce instead of much more verbose
-@cpp state & (LoadState::Loaded|LoadState::Static) @ce.
+Note that @ref LoadState::Loaded includes the value of @ref LoadState::Static,
+so you can use @cpp loadState & PluginManager::LoadState::Loaded @ce instead of
+much more verbose
+@cpp loadState & (PluginManager::LoadState::Loaded|PluginManager::LoadState::Static) @ce.
 @see @ref AbstractManager::loadState(), @ref AbstractManager::load(),
     @ref AbstractManager::unload()
 */
