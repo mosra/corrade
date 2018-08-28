@@ -79,6 +79,9 @@ namespace Corrade {
 -   Worked around a misoptimization of @ref Utility::Sha1 when using GCC 6 with
     -O3 on Raspberry Pi Model 3 B+ (AArch64) (GCC 8 works properly again). See
     [mosra/corrade#45](https://github.com/mosra/corrade/issues/45).
+-   It was not possible to use the @ref Interconnect::Emitter class with
+    virtual base classes on 32-bit Windows due to an incorrect assumption about
+    member function pointer sizes
 
 @subsection corrade-changelog-latest-docs Documentation
 

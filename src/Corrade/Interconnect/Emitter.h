@@ -402,8 +402,8 @@ more information about connections.
      @ref Emitter::signalConnectionCount()
 */
 template<class EmitterObject, class Emitter, class ...Args> Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), void(*slot)(Args...)) {
-    static_assert(sizeof(Interconnect::Emitter::Signal(Emitter::*)(Args...)) <= 2*sizeof(void*),
-        "Size of member function pointer is incorrectly assumed to be smaller than 2*sizeof(void*)");
+    static_assert(sizeof(Interconnect::Emitter::Signal(Emitter::*)(Args...)) <= sizeof(Implementation::SignalData),
+        "size of member function pointer is incorrectly assumed to be smaller");
     static_assert(std::is_base_of<Emitter, EmitterObject>::value,
         "Emitter object doesn't have given signal");
 
@@ -446,8 +446,8 @@ more information about connections.
 @todo Connecting to signals
 */
 template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), ReceiverObject& receiver, void(Receiver::*slot)(Args...)) {
-    static_assert(sizeof(Interconnect::Emitter::Signal(Emitter::*)(Args...)) <= 2*sizeof(void*),
-        "Size of member function pointer is incorrectly assumed to be smaller than 2*sizeof(void*)");
+    static_assert(sizeof(Interconnect::Emitter::Signal(Emitter::*)(Args...)) <= sizeof(Implementation::SignalData),
+        "Size of member function pointer is incorrectly assumed to be smaller");
     static_assert(std::is_base_of<Emitter, EmitterObject>::value,
         "Emitter object doesn't have given signal");
     static_assert(std::is_base_of<Receiver, ReceiverObject>::value,

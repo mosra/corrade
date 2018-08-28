@@ -42,7 +42,15 @@ namespace Implementation {
 
     class SignalData {
         public:
-            enum: std::size_t { Size = 2*sizeof(void*)/sizeof(std::size_t) };
+            enum: std::size_t { Size =
+                #ifndef CORRADE_TARGET_WINDOWS
+                2*sizeof(void*)/sizeof(std::size_t)
+                #else
+                /* On MSVC, pointers to members with a virtual base class
+                   are the biggest and have 16 bytes both on 32bit and 64bit. */
+                16/sizeof(std::size_t)
+                #endif
+            };
 
             #ifndef CORRADE_MSVC2017_COMPATIBILITY
             template<class Emitter, class ...Args> SignalData(typename Emitter::Signal(Emitter::*signal)(Args...)): data() {
