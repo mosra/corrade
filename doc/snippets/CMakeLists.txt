@@ -37,6 +37,11 @@ add_library(snippets STATIC
     Utility.cpp)
 target_link_libraries(snippets PRIVATE CorradeUtility)
 
+if(WITH_INTERCONNECT)
+    add_library(snippets-Interconnect STATIC Interconnect.cpp)
+    target_link_libraries(snippets-Interconnect PRIVATE CorradeInterconnect)
+endif()
+
 if(WITH_PLUGINMANAGER)
     add_library(snippets-PluginManager STATIC PluginManager.cpp)
     target_link_libraries(snippets-PluginManager PRIVATE CorradePluginManager)

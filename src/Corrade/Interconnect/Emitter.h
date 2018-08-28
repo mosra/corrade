@@ -66,26 +66,11 @@ argument count and types are not limited. The body consists of single
 @ref emit() call, to which you pass pointer to the function and forward all
 arguments. Example signal implementations:
 
-@code{.cpp}
-class Postman: public Interconnect::Emitter {
-    public:
-        Signal messageDelivered(const std::string& message, int price = 0) {
-            return emit(&Postman::messageDelivered, message, price);
-        }
-
-        Signal paymentRequired(int amount) {
-            return emit(&Postman::paymentRequired, amount);
-        }
-};
-@endcode
+@snippet Interconnect.cpp Emitter-signals
 
 The implemented signal can be emitted simply by calling the function:
 
-@code{.cpp}
-Postman postman;
-postman.messageDelivered("hello");
-postman.paymentRequired(245);
-@endcode
+@snippet Interconnect.cpp Emitter-emit
 
 If the signal is not declared as public function, it cannot be connected or
 called from outside the class.
@@ -99,14 +84,7 @@ established, returned @ref Connection object can be used to remove or
 reestablish given connection using @ref Connection::disconnect() or
 @ref Connection::connect():
 
-@code{.cpp}
-Connection c = Emitter::connect(...);
-// ...
-c.disconnect();
-// ...
-c.connect();
-// ...
-@endcode
+@snippet Interconnect.cpp Emitter-connect
 
 You can also call @ref disconnectSignal() or @ref disconnectAllSignals() on
 emitter to remove the connections. All emitter connections are automatically
@@ -121,24 +99,7 @@ removed when emitter object is destroyed.
 
 You can connect any signal, as long as the emitter object is of proper type:
 
-@code{.cpp}
-class Base: public Interconnect::Emitter {
-    public:
-        Slot baseSignal();
-};
-
-class Derived: public Base {
-    public:
-        Slot derivedSignal();
-};
-
-Base* a = new Derived;
-Derived* b = new Derived;
-Interconnect::connect(*a, &Base::baseSignal, ...);       // ok
-Interconnect::connect(*b, &Base::baseSignal, ...);       // ok
-Interconnect::connect(*a, &Derived::derivedSignal, ...); // error, `a` is not of Derived type
-Interconnect::connect(*b, &Derived::derivedSignal, ...); // ok
-@endcode
+@snippet Interconnect.cpp Emitter-connect-emitter-type
 
 There are a few slot types, each type has its particular use:
 
@@ -156,58 +117,18 @@ removed also when receiver object is destroyed. You can also use
 
 Example usage:
 
-@code{.cpp}
-class Mailbox: public Interconnect::Receiver {
-    public:
-        void addMessage(const std::string& message, int price);
-};
+@snippet Interconnect.cpp Emitter-connect-member-slot
 
-Postman postman;
-Mailbox mailbox;
-Interconnect::connect(&postman, &Postman::messageDelivered, &mailbox, &Mailbox::addMessage);
-@endcode
+You can connect to any member function, as long as @ref Receiver exists
+somewhere in given object type hierarchy:
 
-You can connect to any member function, as long as Receiver exists somewhere
-in given object type hierarchy:
-
-@code{.cpp}
-class Foo: public Interconnect::Emitter {
-    public:
-        Signal signal();
-};
-
-class Base: public Interconnect::Receiver {
-    public:
-        void baseSlot();
-};
-
-class Derived: public Base {
-    public:
-        void derivedSlot();
-};
-
-Foo foo;
-Base* a = new Derived;
-Derived* b = new Derived;
-
-Interconnect::connect(&foo, &Foo::signal, a, &Base::baseSlot);       // ok
-Interconnect::connect(&foo, &Foo::signal, b, &Base::baseSlot);       // ok
-Interconnect::connect(&foo, &Foo::signal, a, &Derived::derivedSlot); // error, `a` is not of Derived type
-Interconnect::connect(&foo, &Foo::signal, b, &Derived::derivedSlot); // ok
-@endcode
+@snippet Interconnect.cpp Emitter-connect-receiver-type
 
 It is also possible to connect to member function of class which itself isn't
 subclass of @ref Receiver, just add @ref Receiver using multiple inheritance.
 Convoluted example:
 
-@code{.cpp}
-class MyString: public std::string, public Receiver {};
-
-std::string a;
-MyString b;
-Interconnect::connect(&foo, &Foo::signal, &a, &std::string::clear); // error, `a` is not of Receiver type
-Interconnect::connect(&foo, &Foo::signal, &b, &std::string::clear); // ok
-@endcode
+@snippet Interconnect.cpp Emitter-connect-receiver-multiple-inheritance
 
 @see @ref Receiver, @ref Connection
 @todo Allow move
@@ -293,14 +214,9 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         /**
          * @brief Disconnect signal
          *
-         * Disconnects all slots connected to given signal.
+         * Disconnects all slots connected to given signal. Example usage:
          *
-         * Example usage:
-         *
-         * @code{.cpp}
-         * Postman postman;
-         * postman.disconnect(&postman, &Postman::messageDelivered);
-         * @endcode
+         * @snippet Interconnect.cpp Emitter-disconnectSignal
          *
          * @see @ref Connection::disconnect(), @ref disconnectAllSignals(),
          *      @ref Receiver::disconnectAllSlots(),

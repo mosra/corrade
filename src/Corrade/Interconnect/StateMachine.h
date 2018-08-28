@@ -59,60 +59,33 @@ defined and connected at compile time.
 Define two enums for states and inputs. The enums should have consecutive
 values starting from @cpp 0 @ce.
 
-@code{.cpp}
-enum class State: std::uint8_t {
-    Ready,
-    Printing,
-    Finished
-};
-
-enum class Input: std::uint8_t {
-    Operate,
-    RemoveDocument
-};
-@endcode
+@snippet Interconnect.cpp StateMachine-states-inputs
 
 Then @cpp typedef @ce the state machine consisting of these two enums, count
 of all states and count of all inputs:
 
-@code{.cpp}
-typedef Interconnect::StateMachine<3, 2, State, Input> Printer;
-@endcode
+@snippet Interconnect.cpp StateMachine-typedef
 
 Now add your state transitions, for each transition first original state, then
 input, and then state after transition. Everything else is implicitly a no-op.
 
-@code{.cpp}
-Printer p;
-p.addTransitions({
-    {State::Ready,      Input::Operate,         State::Printing},
-    {State::Printing,   Input::Operate,         State::Finished},
-    {State::Finished,   Input::RemoveDocument,  State::Ready}
-});
-@endcode
+@snippet Interconnect.cpp StateMachine-transitions
 
 Lastly connect transition signals to desired slots, so you can react to state
 changes:
 
-@code{.cpp}
-Interconnect::connect(p, &Printer::entered<State::Ready>, [](State) { Utility::Debug() << "Printer is ready."; });
-Interconnect::connect(p, &Printer::entered<State::Finished>, [](State) { Utility::Debug() << "Print finished. Please remove the document."; });
-Interconnect::connect(p, &Printer::entered<State::Printing>, [](State) { Utility::Debug() << "Starting the print..."; });
-Interconnect::connect(p, &Printer::exited<State::Printing>, [](State) { Utility::Debug() << "Finishing the print..."; });
-@endcode
+@snippet Interconnect.cpp StateMachine-connect
 
-Stepping the machine will print the following output:
+Now, stepping the machine:
 
-@code{.cpp}
-p.step(Input::Operate);
-p.step(Input::Operate);
-p.step(Input::Remove);
-@endcode
+@snippet Interconnect.cpp StateMachine-step
+
+will print the following output:
 
 @code{.shell-session}
 Starting the print...
 Finishing the print...
-Print finished. Please remove the document.
+Finished. Please take the document.
 Printer is ready.
 @endcode
 
