@@ -80,6 +80,11 @@ namespace Corrade {
     -O3 on Raspberry Pi Model 3 B+ (AArch64) (GCC 8 works properly again). See
     [mosra/corrade#45](https://github.com/mosra/corrade/issues/45).
 
+@subsection corrade-changelog-latest-docs Documentation
+
+-   All code snippets are now compiled, ensuring no deprecated APIs are used
+    and no accidental compile errors are present
+
 @section corrade-changelog-2018-04 2018.04
 
 Released 2018-05-01, tagged as
