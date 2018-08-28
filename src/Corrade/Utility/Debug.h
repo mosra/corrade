@@ -51,26 +51,7 @@ Provides convenient stream interface for passing data to debug output (standard
 output). Data are by default separated with spaces and last value is enclosed
 with newline character. Example usage:
 
-@code{.cpp}
-// Common usage
-Debug{} << "string" << 34 << 275.0f;
-
-// Redirect debug output to string
-std::ostringstream out;
-Debug{&out} << "the meaning of life, universe and everything is" << 42;
-
-// Mute debug output
-Debug{nullptr} << "no one should see my ebanking password" << password;
-
-// Conditional debug output (avoid inserting newline where it's not desired)
-Debug d;
-d << "Cannot foo";
-if(bar)
-    d << "because of bar.";
-else
-    d << "because of everything else.";
-// (newline character will be written to output on object destruction)
-@endcode
+@snippet Utility.cpp Debug-usage
 
 Support for printing more types can be added by implementing function
 @ref operator<<(Debug&, const T&) for given type. If there is no
@@ -84,24 +65,7 @@ Output specified in class constructor is used for all instances created during
 that instance lifetime. @ref Debug, @ref Warning and @ref Error classes outputs
 can be controlled separately:
 
-@code{.cpp}
-std::ostringstream debugOut, errorOut;
-
-Error{} << "this is printed into std::cerr";
-
-Error redirectError{&errorOut};
-
-{
-    Debug redirectDebug{&debugOut};
-
-    Debug{} << "this is printed into debugOut";
-    Error{} << "this is printed into errorOut";
-    Debug{} << "this is also printed into debugOut";
-}
-
-Debug{} << "this is printed into std::cout again";
-Error{} << "this is still printed into errorOut";
-@endcode
+@snippet Utility.cpp Debug-scoped-output
 
 @section Utility-Debug-modifiers Output modifiers
 
@@ -113,16 +77,7 @@ output stream.
 Sometimes you might not want to have everything separated by spaces or having
 newline at the end:
 
-@code{.cpp}
-// Prints "Value: 16, 24"
-Debug{} << "Value:" << 16 << Debug::nospace << "," << 24;
-
-// Prints "Value\n16"
-Debug{} << "Value:" << Debug::newline << 16;
-
-// Doesn't output newline at the end
-Debug{Debug::Flag::NoNewlineAtTheEnd} << "Hello!";
-@endcode
+@snippet Utility.cpp Debug-modifiers-whitespace
 
 @subsection Utility-Debug-modifiers-colors Colored output
 
@@ -130,10 +85,9 @@ It is possible to color the output using @ref color() and @ref boldColor(). The
 color is automatically reset to previous value on destruction to avoid messing
 up the terminal, you can also use @ref resetColor() to reset it explicitly.
 
-@code{.cpp}
-Debug{} << Debug::boldColor(Debug::Color::Green) << "Success!"
-        << Debug::resetColor << "Everything is fine.";
-@endcode
+@snippet Utility.cpp Debug-modifiers-colors
+
+@include UtilityDebug-color.ansi
 
 On POSIX the coloring is done using ANSI color escape sequences and works both
 when outputting to a terminal or any other stream. On Windows, by default due
@@ -145,26 +99,11 @@ Note that colors make sense only when they finally appear in a terminal and not
 when redirecting output to file. You can control this by setting
 @ref Flag::DisableColors based on value of @ref isTty(), for example:
 
-@code{.cpp}
-Debug::Flags flags = Debug::isTty() ? Debug::Flags{} : Debug::Flag::DisableColors;
-Debug{flags} << Debug::boldColor(Debug::Color::Green) << "Success!";
-@endcode
+@snippet Utility.cpp Debug-modifiers-colors-disable
 
 Similarly as with scoped output redirection, colors can be also scoped:
 
-@code{.cpp}
-Debug{} << "this has default color";
-
-{
-    Debug d;
-    if(errorHappened) d << Debug::color(Debug::Color::Red);
-
-    Debug{} << "if an error happened, this will be printed red";
-    Debug{} << "this also" << Debug::boldColor(Debug::Color::Blue) << "and this blue";
-}
-
-Debug{} << "this has default color again";
-@endcode
+@snippet Utility.cpp Debug-modifiers-colors-scoped
 
 @see @ref Warning, @ref Error, @ref Fatal, @ref CORRADE_ASSERT(),
     @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(),
@@ -300,9 +239,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * then restored. The following line outputs
          * @cb{.shell-session} Value: 16, 24 @ce:
          *
-         * @code{.cpp}
-         * Debug() << "Value:" << 16 << Debug::nospace << "," << 24;
-         * @endcode
+         * @snippet Utility.cpp Debug-nospace
          *
          * @see @ref newline()
          */
@@ -315,10 +252,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * Puts a newline (not surrounded by spaces) to the output. The
          * following two lines are equivalent:
          *
-         * @code{.cpp}
-         * Debug() << "Value:" << Debug::newline << 16;
-         * Debug() << "Value:" << Debug::nospace << "\n" << Debug::nospace << 16;
-         * @endcode
+         * @snippet Utility.cpp Debug-newline
          *
          * and their output is
          *
@@ -877,19 +811,11 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
 Equivalent to @ref Error, but exits with defined exit code on destruction. So
 instead of this:
 
-@code{.cpp}
-if(stuff.broken()) {
-    Error{} << "Everything's broken, exiting.";
-    std::exit(42);
-}
-@endcode
+@snippet Utility.cpp Fatal-Error
 
 You can write just this:
 
-@code{.cpp}
-if(stuff.broken())
-    Fatal{42} << "Everything's broken, exiting.";
-@endcode
+@snippet Utility.cpp Fatal-Fatal
 */
 class CORRADE_UTILITY_EXPORT Fatal: public Error {
     public:

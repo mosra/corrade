@@ -64,44 +64,17 @@ CORRADE_ENUMSET_OPERATORS(ConfigurationValueFlags)
 @brief Configuration value parser and writer
 
 Functions in this struct are called internally by @ref ConfigurationGroup
-functions to convert values from and to templated types. Reimplement the
-structure with template specialization to allow saving and getting
-non-standard types into and from configuration files.
+and @ref Arguments to convert values from and to templated types. Reimplement
+the structure with a template specialization to allow saving and getting
+non-standard types into and from configuration files or parsing them from
+command line.
 
 @section Utility-ConfigurationValue-example Example: custom structure
 
 We have structure named `Foo` and want to store it in configuration file as a
 sequence of two integers separated by a space.
 
-@code{.cpp}
-#include <Corrade/Utility/ConfigurationGroup.h>
-
-struct Foo {
-    int a, b;
-};
-
-namespace Corrade { namespace Utility {
-
-template<> struct ConfigurationValue<Foo> {
-    static std::string toString(const Foo& value, ConfigurationValueFlags flags) {
-        return
-            ConfigurationValue<int>::toString(value.a, flags) + ' ' +
-            ConfigurationValue<int>::toString(value.b, flags);
-    }
-
-    static Foo fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
-        std::istringstream i(stringValue);
-        std::string a, b;
-
-        Foo foo;
-        (i >> a) && (area.a = ConfigurationValue<int>::fromString(a, flags));
-        (i >> b) && (area.b = ConfigurationValue<int>::fromString(a, flags));
-        return foo;
-    }
-};
-
-}}
-@endcode
+@snippet Utility.cpp ConfigurationValue
 
 When saving the structure into configuration file using e.g.
 @cpp configuration->addValue("fooValue", Foo{6, 7}); @ce, the result will look

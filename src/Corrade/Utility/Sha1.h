@@ -42,7 +42,7 @@ class CORRADE_UTILITY_EXPORT Sha1: public AbstractHash<20> {
         /**
          * @brief Digest of given data
          *
-         * Convenience function for @cpp (Sha1() << data).digest() @ce.
+         * Convenience function for @cpp (Utility::Sha1{} << data).digest() @ce.
          */
         static Digest digest(const std::string& data) {
             return (Sha1() << data).digest();

@@ -47,21 +47,11 @@ then implicitly convertible to `bool` holding the result.
 
 Usage examples: checking for presence of @cpp const_iterator @ce member type:
 
-@code{.cpp}
-CORRADE_HAS_TYPE(HasKeyType, typename T::key_type);
-
-static_assert(HasKeyType<std::map<int, int>>::value, "");
-static_assert(!HasKeyType<std::vector<int>>::value, "");
-@endcode
+@snippet Utility.cpp CORRADE_HAS_TYPE-type
 
 Checking for presence of @cpp size() @ce member function:
 
-@code{.cpp}
-CORRADE_HAS_TYPE(HasSize, decltype(std::declval<T>().size()));
-
-static_assert(HasSize<std::vector<int>>::value, "");
-static_assert(!HasSize<std::tuple<int, int>>::value, "");
-@endcode
+@snippet Utility.cpp CORRADE_HAS_TYPE-function
 */
 /* Two overloaded get() functions return type of different size. Templated
    get() is used when T has given attribute, non-templated otherwise. Bool

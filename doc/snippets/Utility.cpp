@@ -23,14 +23,47 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <iostream>
-#include <fstream>
 #include <cstdlib>
-#include <Corrade/Utility/Arguments.h>
-#include <Corrade/Utility/Assert.h>
-#include <Corrade/Utility/Configuration.h>
-#include <Corrade/Utility/Format.h>
-#include <Corrade/Utility/Macros.h>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <sstream>
+
+#include "Corrade/Utility/Arguments.h"
+#include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/Configuration.h"
+#include "Corrade/Utility/Format.h"
+#include "Corrade/Utility/Macros.h"
+
+/* [ConfigurationValue] */
+#include <Corrade/Utility/ConfigurationGroup.h>
+
+struct Foo {
+    int a, b;
+};
+
+namespace Corrade { namespace Utility {
+
+template<> struct ConfigurationValue<Foo> {
+    static std::string toString(const Foo& value, ConfigurationValueFlags flags) {
+        return
+            ConfigurationValue<int>::toString(value.a, flags) + ' ' +
+            ConfigurationValue<int>::toString(value.b, flags);
+    }
+
+    static Foo fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
+        std::istringstream i{stringValue};
+        std::string a, b;
+
+        Foo foo;
+        (i >> a) && (foo.a = ConfigurationValue<int>::fromString(a, flags));
+        (i >> b) && (foo.b = ConfigurationValue<int>::fromString(a, flags));
+        return foo;
+    }
+};
+
+}}
+/* [ConfigurationValue] */
 
 using namespace Corrade;
 
@@ -114,6 +147,20 @@ constexpr int divide(int a, int b) {
 }
 /* [CORRADE_INTERNAL_CONSTEXPR_ASSERT] */
 }
+
+/* [CORRADE_HAS_TYPE-type] */
+CORRADE_HAS_TYPE(HasKeyType, typename T::key_type);
+
+static_assert(HasKeyType<std::map<int, int>>::value, "");
+static_assert(!HasKeyType<std::vector<int>>::value, "");
+/* [CORRADE_HAS_TYPE-type] */
+
+/* [CORRADE_HAS_TYPE-function] */
+CORRADE_HAS_TYPE(HasSize, decltype(std::declval<T>().size()));
+
+static_assert(HasSize<std::vector<int>>::value, "");
+static_assert(!HasSize<std::tuple<int, int>>::value, "");
+/* [CORRADE_HAS_TYPE-function] */
 
 class Buzz {
 /* [Arguments-usage] */
@@ -206,6 +253,132 @@ CORRADE_IGNORE_DEPRECATED_POP
 }
 
 {
+int pwd{};
+bool bar{};
+/* [Debug-usage] */
+// Common usage
+Utility::Debug{} << "string" << 34 << 275.0f;
+
+// Redirect debug output to string
+std::ostringstream o;
+Utility::Debug{&o} << "the meaning of life, universe and everything is" << 42;
+
+// Mute debug output
+Utility::Debug{nullptr} << "no one should see my ebanking password" << pwd;
+
+// Conditional debug output (avoid inserting newline where it's not desired)
+Utility::Debug d;
+d << "Cannot foo";
+if(bar)
+    d << "because of bar.";
+else
+    d << "because of everything else.";
+// (newline character will be written to output on object destruction)
+/* [Debug-usage] */
+}
+
+{
+/* [Debug-scoped-output] */
+std::ostringstream debugOut, errorOut;
+
+Utility::Error{} << "this is printed into std::cerr";
+
+Utility::Error redirectError{&errorOut};
+
+{
+    Utility::Debug redirectDebug{&debugOut};
+
+    Utility::Debug{} << "this is printed into debugOut";
+    Utility::Error{} << "this is printed into errorOut";
+    Utility::Debug{} << "this is also printed into debugOut";
+}
+
+Utility::Debug{} << "this is printed into std::cout again";
+Utility::Error{} << "this is still printed into errorOut";
+/* [Debug-scoped-output] */
+}
+
+{
+/* [Debug-modifiers-whitespace] */
+// Prints "Value: 16, 24"
+Utility::Debug{} << "Value:" << 16 << Utility::Debug::nospace << "," << 24;
+
+// Prints "Value\n16"
+Utility::Debug{} << "Value:" << Utility::Debug::newline << 16;
+
+// Doesn't output newline at the end
+Utility::Debug{Utility::Debug::Flag::NoNewlineAtTheEnd} << "Hello!";
+/* [Debug-modifiers-whitespace] */
+}
+
+{
+/* [Debug-modifiers-colors] */
+Utility::Debug{}
+    << Utility::Debug::boldColor(Utility::Debug::Color::Green) << "Success!"
+    << Utility::Debug::resetColor << "Everything is fine.";
+/* [Debug-modifiers-colors] */
+}
+
+{
+/* [Debug-modifiers-colors-disable] */
+Utility::Debug::Flags flags = Utility::Debug::isTty() ?
+    Utility::Debug::Flags{} : Utility::Debug::Flag::DisableColors;
+Utility::Debug{flags}
+    << Utility::Debug::boldColor(Utility::Debug::Color::Green) << "Success!";
+/* [Debug-modifiers-colors-disable] */
+}
+
+{
+bool errorHappened{};
+/* [Debug-modifiers-colors-scoped] */
+Utility::Debug{} << "this has default color";
+
+{
+    Utility::Debug d;
+    if(errorHappened) d << Utility::Debug::color(Utility::Debug::Color::Red);
+
+    Utility::Debug{} << "if an error happened, this will be printed red";
+    Utility::Debug{} << "this also"
+        << Utility::Debug::boldColor(Utility::Debug::Color::Blue)
+        << "and this blue";
+}
+
+Utility::Debug{} << "this has default color again";
+/* [Debug-modifiers-colors-scoped] */
+}
+
+{
+/* [Debug-nospace] */
+Utility::Debug{} << "Value:" << 16 << Utility::Debug::nospace << "," << 24;
+/* [Debug-nospace] */
+}
+
+{
+/* [Debug-newline] */
+Utility::Debug{} << "Value:" << Utility::Debug::newline << 16;
+Utility::Debug{} << "Value:" << Utility::Debug::nospace << "\n"
+    << Utility::Debug::nospace << 16;
+/* [Debug-newline] */
+}
+
+{
+struct {
+    bool broken() { return true; }
+} stuff;
+/* [Fatal-Error] */
+if(stuff.broken()) {
+    Utility::Error{} << "Everything's broken, exiting.";
+    std::exit(42);
+}
+/* [Fatal-Error] */
+
+/* [Fatal-Fatal] */
+if(stuff.broken())
+    Utility::Fatal{42} << "Everything's broken, exiting.";
+/* [Fatal-Fatal] */
+}
+
+{
 /* [formatString] */
 std::string s = Utility::formatString("{} version {}.{}.{}, {} MB",
     "vulkan.hpp", 1, 1, 76, 1.79);
@@ -292,12 +465,14 @@ template<class T> using Foo CORRADE_DEPRECATED_ALIAS("use Bar instead") = Bar<T>
 
 }
 
+namespace Another {
 namespace Bar {}
 /* [CORRADE_DEPRECATED_NAMESPACE] */
 namespace CORRADE_DEPRECATED_NAMESPACE("use Bar instead") Foo {
     using namespace Bar;
 }
 /* [CORRADE_DEPRECATED_NAMESPACE] */
+}
 
 namespace C {
 
