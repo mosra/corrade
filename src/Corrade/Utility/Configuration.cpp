@@ -114,7 +114,7 @@ bool Configuration::parse(Containers::ArrayView<const char> in) {
         /* Parse file */
         CORRADE_INTERNAL_ASSERT_OUTPUT(parse(in, this, {}).empty());
 
-    } catch(std::string e) {
+    } catch(const std::string& e) {
         Error() << "Utility::Configuration::Configuration():" << e;
         clear();
         return false;

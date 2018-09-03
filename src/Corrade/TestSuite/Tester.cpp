@@ -307,10 +307,10 @@ benchmark types:
 
             try {
                 (this->*testCase.second.test)();
-            } catch(Exception) {
+            } catch(const Exception&) {
                 ++errorCount;
                 aborted = true;
-            } catch(SkipException) {
+            } catch(const SkipException&) {
                 aborted = true;
                 skipped = true;
             }
