@@ -9,6 +9,8 @@ things.
 [![Build Status](https://ci.appveyor.com/api/projects/status/afjjlsgtk6jjxulp/branch/master?svg=true)](https://ci.appveyor.com/project/mosra/corrade/branch/master)
 [![Coverage Status](https://codecov.io/gh/mosra/corrade/branch/master/graph/badge.svg)](https://codecov.io/gh/mosra/corrade)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code Quality: Cpp](https://img.shields.io/lgtm/grade/cpp/g/mosra/corrade.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/mosra/corrade/context:cpp)
+[![Total Alerts](https://img.shields.io/lgtm/alerts/g/mosra/corrade.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/mosra/corrade/alerts)
 
 -   Project homepage — http://magnum.graphics/corrade/
 -   Documentation — http://doc.magnum.graphics/corrade/
