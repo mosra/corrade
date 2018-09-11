@@ -151,6 +151,15 @@ template<class T> class Optional {
         Optional<T>& operator=(Optional<T>&& other) noexcept(std::is_nothrow_move_assignable<T>::value);
 
         /**
+         * @brief Clear the contained value
+         *
+         * If the object contains a value, calls its destructor. Compared to
+         * @ref operator=(Optional<T>&&) this doesn't require the type to be
+         * move-assignable.
+         */
+        Optional<T>& operator=(NullOptT) noexcept;
+
+        /**
          * @brief Destructor
          *
          * If the optional object is not empty, calls destructor on stored
@@ -371,6 +380,12 @@ template<class T> Optional<T>& Optional<T>::operator=(Optional<T>&& other) noexc
         if(_set) _value.v.~T();
         if((_set = other._set)) new(&_value.v) T{std::move(other._value.v)};
     }
+    return *this;
+}
+
+template<class T> Optional<T>& Optional<T>::operator=(NullOptT) noexcept {
+    if(_set) _value.v.~T();
+    _set = false;
     return *this;
 }
 

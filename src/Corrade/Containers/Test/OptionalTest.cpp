@@ -66,6 +66,9 @@ struct OptionalTest: TestSuite::Tester {
     void moveSetToNull();
     void moveSetToSet();
 
+    void moveNullOptToNull();
+    void moveNullOptToSet();
+
     void emplaceNull();
     void emplaceSet();
 
@@ -108,6 +111,9 @@ OptionalTest::OptionalTest() {
               &OptionalTest::moveNullToSet,
               &OptionalTest::moveSetToNull,
               &OptionalTest::moveSetToSet,
+
+              &OptionalTest::moveNullOptToNull,
+              &OptionalTest::moveNullOptToSet,
 
               &OptionalTest::emplaceNull,
               &OptionalTest::emplaceSet}, &OptionalTest::resetCounters, &OptionalTest::resetCounters);
@@ -566,6 +572,30 @@ void OptionalTest::moveSetToSet() {
     CORRADE_COMPARE(Movable::constructed, 2);
     CORRADE_COMPARE(Movable::destructed, 2);
     CORRADE_COMPARE(Movable::moved, 0);
+}
+
+void OptionalTest::moveNullOptToNull() {
+    {
+        Optional<Immovable> a;
+        a = NullOpt;
+
+        CORRADE_VERIFY(!a);
+    }
+
+    CORRADE_COMPARE(Immovable::constructed, 0);
+    CORRADE_COMPARE(Immovable::destructed, 0);
+}
+
+void OptionalTest::moveNullOptToSet() {
+    {
+        Optional<Immovable> a{InPlaceInit, 32};
+        a = NullOpt;
+
+        CORRADE_VERIFY(!a);
+    }
+
+    CORRADE_COMPARE(Immovable::constructed, 1);
+    CORRADE_COMPARE(Immovable::destructed, 1);
 }
 
 void OptionalTest::emplaceNull() {

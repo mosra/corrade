@@ -41,6 +41,8 @@ namespace Corrade {
 -   New @ref Containers::ArrayView::front() "front()" and
     @ref Containers::ArrayView::back() "back()" accessors for all array and
     array view types
+-   Added @ref Containers::Optional::operator=(NullOptT) for resetting an
+    optional value without requiring the type to be movable
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
