@@ -231,11 +231,11 @@ TAB_SIZE               = 4
 ## Important: keep this in sync with Doxyfile-mcss and Doxyfile-public!
 
 ALIASES                = \
-    "debugoperator{1}=@relates \1 @brief %Debug output operator @xrefitem debugoperators \"Debug output operator\" \"Debug output operators for custom types\" Allows printing @ref \1 with @ref Corrade::Utility::Debug and friends." \
-    "debugoperatorenum{1}=@brief Debug output operator @xrefitem debugoperators \"Debug output operator\" \"Debug output operators for custom types\" Allows printing @ref \1 with @ref Corrade::Utility::Debug and friends." \
-    "debugoperatorclassenum{2}=@relates \1 @brief Debug output operator @xrefitem debugoperators \"Debug output operator\" \"Debug output operators for custom types\" Allows printing @ref \2 with @ref Corrade::Utility::Debug and friends." \
-    "configurationvalueref{1}=@see @ref configurationvalues \"Corrade::Utility::ConfigurationValue<\1>\"" \
-    "configurationvalue{1}=@brief %Configuration value parser and writer @xrefitem configurationvalues \"Configuration value parser and writer\" \"Configuration value parsers and writers for custom types\" Allows parsing and writing \1 from and to @ref Corrade::Utility::Configuration." \
+    "debugoperator{1}=@relates \1 @brief %Debug output operator @xrefitem corrade-debugoperators \"Debug output operator\" \"Debug output operators for custom types\" Allows printing @ref \1 with @ref Corrade::Utility::Debug and friends." \
+    "debugoperatorenum{1}=@brief Debug output operator @xrefitem corrade-debugoperators \"Debug output operator\" \"Debug output operators for custom types\" Allows printing @ref \1 with @ref Corrade::Utility::Debug and friends." \
+    "debugoperatorclassenum{2}=@relates \1 @brief Debug output operator @xrefitem corrade-debugoperators \"Debug output operator\" \"Debug output operators for custom types\" Allows printing @ref \2 with @ref Corrade::Utility::Debug and friends." \
+    "configurationvalueref{1}=@see @ref corrade-configurationvalues \"Corrade::Utility::ConfigurationValue<\1>\"" \
+    "configurationvalue{1}=@brief %Configuration value parser and writer @xrefitem corrade-configurationvalues \"Configuration value parser and writer\" \"Configuration value parsers and writers for custom types\" Allows parsing and writing \1 from and to @ref Corrade::Utility::Configuration." \
     "partialsupport=@xrefitem partialsupport \"Partially supported\" \"List of partially supported features\"" \
     "todoc=@xrefitem todoc \"Documentation todo\" \"Documentation-related todo list\"" \
     "experimental=@attention This functionality is still experimental and may change in the future without keeping full backwards compatibility." \

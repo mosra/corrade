@@ -917,7 +917,7 @@ Operators for printing types on Corrade's debug output should be marked with
 @include codingstyle/doxygen-debugoperator.h
 
 They will appear as related functions within documentation of class specified
-as the parameter and also crossreferenced from page @ref debugoperators.
+as the parameter and also crossreferenced from page @ref corrade-debugoperators.
 
 For non-class enums there is @c \@debugoperatorenum command and for in-class
 enums the @c \@debugoperatorclassenum command:

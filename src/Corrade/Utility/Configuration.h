@@ -95,8 +95,9 @@ b="    a string with leading whitespace preserved"
 
 All values are internally stored as strings, parsing to and saving from custom
 types is done by calling an appropriate @ref ConfigurationValue. See its
-documentation for a guide to integrating your own type, see @ref configurationvalues
-for a list of additional parsers implemented in Corrade itself.
+documentation for a guide to integrating your own type, see
+@ref corrade-configurationvalues for a list of additional parsers implemented
+in Corrade itself.
 
 Multi-line values are enclosed in @cb{.py} """ @ce alone on the line, first and
 last line break is ignored. Calling @ref setValue() with a string that contains
