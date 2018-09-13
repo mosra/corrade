@@ -39,8 +39,15 @@ namespace Corrade {
 
 @page corrade-developers Developers guide
 @page corrade-coding-style Coding style
+
 @page corrade-debugoperators Debug output operators for custom types
+
+See also @ref corrade-configurationvalues.
+
 @page corrade-configurationvalues Configuration value parsers and writers for custom types
+
+See also @ref corrade-debugoperators.
+
 @page deprecated Deprecated list
 */
 
