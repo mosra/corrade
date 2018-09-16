@@ -32,7 +32,7 @@
 #include "Corrade/configure.h"
 
 /** @hideinitializer
- * @brief Export symbol into shared library
+ * @brief Export symbol into a shared library
  */
 #ifdef CORRADE_TARGET_WINDOWS
 #define CORRADE_VISIBILITY_EXPORT __declspec(dllexport)
@@ -41,7 +41,7 @@
 #endif
 
 /** @hideinitializer
- * @brief Import symbol from shared library
+ * @brief Import symbol from a shared library
  */
 #ifdef CORRADE_TARGET_WINDOWS
 #define CORRADE_VISIBILITY_IMPORT __declspec(dllimport)
@@ -50,7 +50,7 @@
 #endif
 
 /** @hideinitializer
- * @brief Public symbol in static library
+ * @brief Public symbol in a static library
  */
 #ifdef CORRADE_TARGET_WINDOWS
 #define CORRADE_VISIBILITY_STATIC
@@ -61,7 +61,7 @@
 /** @hideinitializer
 @brief Local symbol
 
-The symbol name will not be exported into shared or static library.
+The symbol name will not be exported into a shared or static library.
 */
 #ifdef CORRADE_TARGET_WINDOWS
 #define CORRADE_VISIBILITY_LOCAL
