@@ -88,3 +88,12 @@ CREDITS
 
 See the [CREDITS.md](CREDITS.md) file for details. Big thanks to everyone
 involved!
+
+LICENSE
+=======
+
+Corrade itself and its documentation is licensed under the MIT/Expat license,
+see the [COPYING](COPYING) file for details. All example code in `src/examples`
+is put into public domain (or UNLICENSE) to free you from any legal obstacles
+when reusing the code in your apps. See the [COPYING-examples](COPYING-examples)
+file for details.
