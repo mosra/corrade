@@ -74,7 +74,9 @@ You can use stream output operators for formatting just like when printing to
 @see @ref CORRADE_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT(),
     @ref CORRADE_ASSERT_UNREACHABLE()
 */
-#ifdef CORRADE_GRACEFUL_ASSERT
+#ifdef CORRADE_NO_ASSERT
+#define CORRADE_ASSERT(condition, message, returnValue) do {} while(0)
+#elif defined(CORRADE_GRACEFUL_ASSERT)
 #define CORRADE_ASSERT(condition, message, returnValue)                     \
     do {                                                                    \
         if(!(condition)) {                                                  \
@@ -82,8 +84,6 @@ You can use stream output operators for formatting just like when printing to
             return returnValue;                                             \
         }                                                                   \
     } while(false)
-#elif defined(CORRADE_NO_ASSERT)
-#define CORRADE_ASSERT(condition, message, returnValue) do {} while(0)
 #else
 #define CORRADE_ASSERT(condition, message, returnValue)                     \
     do {                                                                    \
@@ -117,13 +117,13 @@ formatting just like when printing to @ref Corrade::Utility::Debug output.
 
 @see @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT()
 */
-#ifdef CORRADE_GRACEFUL_ASSERT
+#ifdef CORRADE_NO_ASSERT
+#define CORRADE_CONSTEXPR_ASSERT(condition, message) static_cast<void>(0)
+#elif defined(CORRADE_GRACEFUL_ASSERT)
 #define CORRADE_CONSTEXPR_ASSERT(condition, message)                        \
     static_cast<void>((condition) ? 0 : ([&]() {                            \
         Corrade::Utility::Error{} << message;                               \
     }(), 0))
-#elif defined(CORRADE_NO_ASSERT)
-#define CORRADE_CONSTEXPR_ASSERT(condition, message) static_cast<void>(0)
 #else
 #define CORRADE_CONSTEXPR_ASSERT(condition, message)                        \
     static_cast<void>((condition) ? 0 : ([&]() {                            \
@@ -147,7 +147,10 @@ Example usage:
 
 @see @ref CORRADE_INTERNAL_ASSERT_OUTPUT()
 */
-#ifdef CORRADE_GRACEFUL_ASSERT
+#ifdef CORRADE_NO_ASSERT
+#define CORRADE_ASSERT_OUTPUT(call, message, returnValue)                   \
+    static_cast<void>(call)
+#elif defined(CORRADE_GRACEFUL_ASSERT)
 #define CORRADE_ASSERT_OUTPUT(call, message, returnValue)                   \
     do {                                                                    \
         if(!(call)) {                                                       \
@@ -155,9 +158,6 @@ Example usage:
             return returnValue;                                             \
         }                                                                   \
     } while(false)
-#elif defined(CORRADE_NO_ASSERT)
-#define CORRADE_ASSERT_OUTPUT(call, message, returnValue)                   \
-    static_cast<void>(call)
 #else
 #define CORRADE_ASSERT_OUTPUT(call, message, returnValue)                   \
     do {                                                                    \

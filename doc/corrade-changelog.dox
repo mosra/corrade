@@ -89,6 +89,8 @@ namespace Corrade {
 -   It was not possible to use the @ref Interconnect::Emitter class with
     virtual base classes on 32-bit Windows due to an incorrect assumption about
     member function pointer sizes
+-   Assertions were not removed if both @cpp CORRADE_NO_ASSERT @ce and
+    @cpp CORRADE_GRACEFUL_ASSERT @ce was defined
 
 @subsection corrade-changelog-latest-docs Documentation
 
