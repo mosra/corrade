@@ -31,6 +31,7 @@
 
 namespace Corrade { namespace PluginManager {
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 PluginMetadata::PluginMetadata(std::string name, Utility::ConfigurationGroup& conf): _name(std::move(name)) {
     /* Dependencies, aliases */
     _depends = conf.values("depends");
@@ -42,6 +43,7 @@ PluginMetadata::PluginMetadata(std::string name, Utility::ConfigurationGroup& co
     if(!_data) _data = conf.addGroup("data");
     if(!_configuration) _configuration = conf.addGroup("configuration");
 }
+#endif
 
 std::string PluginMetadata::name() const { return _name; }
 

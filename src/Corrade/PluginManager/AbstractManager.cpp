@@ -192,7 +192,7 @@ AbstractManager::AbstractManager(std::string pluginInterface):
         Resource r("CorradeStaticPlugin_" + p.first);
         std::istringstream metadata(r.get(p.first + ".conf"));
         p.second->configuration = Utility::Configuration{metadata, Utility::Configuration::Flag::ReadOnly};
-        p.second->metadata = PluginMetadata{p.first, p.second->configuration};
+        p.second->metadata.emplace(p.first, p.second->configuration);
         p.second->manager = this;
         p.second->staticPlugin->initializer();
 
@@ -802,7 +802,7 @@ void* AbstractManager::loadAndInstantiateInternal(const std::string& plugin) {
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-AbstractManager::Plugin::Plugin(std::string name, const std::string& metadata, AbstractManager* manager): configuration{metadata, Utility::Configuration::Flag::ReadOnly}, metadata{PluginMetadata{std::move(name), configuration}}, manager{manager}, instancer{nullptr}, module{nullptr} {
+AbstractManager::Plugin::Plugin(std::string name, const std::string& metadata, AbstractManager* manager): configuration{metadata, Utility::Configuration::Flag::ReadOnly}, metadata{Containers::InPlaceInit, std::move(name), configuration}, manager{manager}, instancer{nullptr}, module{nullptr} {
     loadState = configuration.isValid() ? LoadState::NotLoaded : LoadState::WrongMetadataFile;
 }
 #endif

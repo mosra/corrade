@@ -88,9 +88,19 @@ accessible through @ref configuration(), while a modifiable copy is stored
 in each plugin instance, accessible through @ref AbstractPlugin::configuration().
 */
 class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
-    friend AbstractManager;
-
     public:
+        /** @brief Copying is not allowed */
+        PluginMetadata(const PluginMetadata&) = delete;
+
+        /** @brief Moving is not allowed */
+        PluginMetadata(PluginMetadata&&) = delete;
+
+        /** @brief Copying is not allowed */
+        PluginMetadata& operator=(const PluginMetadata&) = delete;
+
+        /** @brief Moving is not allowed */
+        PluginMetadata& operator=(PluginMetadata&&) = delete;
+
         /** @brief Plugin name */
         std::string name() const;
 
@@ -153,8 +163,12 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
         Utility::ConfigurationGroup& configuration() { return *_configuration; }
         const Utility::ConfigurationGroup& configuration() const { return *_configuration; } /**< @overload */
 
-    private:
+        #ifndef DOXYGEN_GENERATING_OUTPUT
         explicit PluginMetadata(std::string name, Utility::ConfigurationGroup& conf);
+        #endif
+
+    private:
+        friend AbstractManager;
 
         std::string _name;
 
