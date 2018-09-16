@@ -293,7 +293,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          * plugin is not found.
          * @see @ref AbstractPlugin::metadata()
          */
-        const PluginMetadata* metadata(const std::string& plugin) const;
+        PluginMetadata* metadata(const std::string& plugin);
+        const PluginMetadata* metadata(const std::string& plugin) const; /**< @overload */
 
         /**
          * @brief Load state of a plugin

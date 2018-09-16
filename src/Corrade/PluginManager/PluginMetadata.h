@@ -140,12 +140,18 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          *
          * Initial plugin-specific configuration, contained in the
          * @cb{.ini} [configuration] @ce group of plugin configuration. A
-         * read-write copy is stored in each plugin instance, available through
-         * @ref AbstractPlugin::configuration(). If the @cb{.ini} [configuration] @ce
-         * group was not present in the metadata, the returned group is empty.
+         * plugin-local copy is stored in each plugin instance, available
+         * through @ref AbstractPlugin::configuration(). Changing the global
+         * configuration will affect all plugins instantiated with the same
+         * manager, resetting the configuration back can be done by recreating
+         * the manager.
+         *
+         * If the @cb{.ini} [configuration] @ce group was not present in the
+         * metadata, the returned group is empty.
          * @see @ref data()
          */
-        const Utility::ConfigurationGroup& configuration() const { return *_configuration; }
+        Utility::ConfigurationGroup& configuration() { return *_configuration; }
+        const Utility::ConfigurationGroup& configuration() const { return *_configuration; } /**< @overload */
 
     private:
         explicit PluginMetadata(std::string name, Utility::ConfigurationGroup& conf);
@@ -156,7 +162,8 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
             _usedBy,
             _provides;
 
-        const Utility::ConfigurationGroup *_data, *_configuration;
+        const Utility::ConfigurationGroup* _data;
+        Utility::ConfigurationGroup*_configuration;
 };
 
 }}

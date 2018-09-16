@@ -87,7 +87,8 @@ struct ManagerTest: TestSuite::Tester {
     void dynamicPluginFilePathRemoveOnFail();
     #endif
 
-    void configuration();
+    void configurationGlobal();
+    void configurationLocal();
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     void configurationImplicit();
     #endif
@@ -152,7 +153,8 @@ ManagerTest::ManagerTest() {
               &ManagerTest::dynamicPluginFilePathRemoveOnFail,
               #endif
 
-              &ManagerTest::configuration,
+              &ManagerTest::configurationGlobal,
+              &ManagerTest::configurationLocal,
               #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
               &ManagerTest::configurationImplicit,
               #endif
@@ -557,23 +559,40 @@ void ManagerTest::dynamicPluginFilePathRemoveOnFail() {
 
 #endif
 
-void ManagerTest::configuration() {
+void ManagerTest::configurationGlobal() {
     PluginManager::Manager<AbstractAnimal> manager;
 
     CORRADE_COMPARE(manager.loadState("Canary"), LoadState::Static);
 
+    /* Change the global config, the instance then gets a copy */
+    PluginMetadata& metadata = *manager.metadata("Canary");
+    metadata.configuration().setValue("name", "BIRD UP!!");
+
+    std::unique_ptr<AbstractAnimal> animal = manager.instantiate("Canary");
+    CORRADE_COMPARE(animal->name(), "BIRD UP!!");
+    CORRADE_COMPARE(animal->configuration().value("name"), "BIRD UP!!");
+}
+
+void ManagerTest::configurationLocal() {
+    PluginManager::Manager<AbstractAnimal> manager;
+
+    CORRADE_COMPARE(manager.loadState("Canary"), LoadState::Static);
+
+    /* Verify everything is accessible through const& */
+    const PluginMetadata& metadata = *const_cast<const PluginManager::Manager<AbstractAnimal>&>(manager).metadata("Canary");
+    CORRADE_COMPARE(metadata.configuration().value("name"), "Achoo");
+
     std::unique_ptr<AbstractAnimal> animal = manager.instantiate("Canary");
     CORRADE_COMPARE(animal->name(), "Achoo");
-
-    CORRADE_COMPARE(manager.metadata("Canary")->configuration().value("name"), "Achoo");
     CORRADE_COMPARE(animal->configuration().value("name"), "Achoo");
 
+    /* Local config is also mutable */
     animal->configuration().setValue("name", "Bird!!");
     CORRADE_COMPARE(animal->name(), "Bird!!");
 
-    /* Other instances are not affected */
-    std::unique_ptr<AbstractAnimal> animal2 = manager.instantiate("Canary");
-    CORRADE_COMPARE(animal2->name(), "Achoo");
+    /* Global config and other instances are not affected by it */
+    CORRADE_COMPARE(metadata.configuration().value("name"), "Achoo");
+    CORRADE_COMPARE(manager.instantiate("Canary")->name(), "Achoo");
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT

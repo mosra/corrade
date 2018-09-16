@@ -44,6 +44,14 @@ namespace Corrade {
 -   Added @ref Containers::Optional::operator=(NullOptT) for resetting an
     optional value without requiring the type to be movable
 
+@subsubsection corrade-changelog-latest-new-pluginmanager PluginManager library
+
+-   Ability to change plugin-specific configuration globally using
+    @ref PluginMetadata::configuration() --- compared to modifying
+    instance-specific configuration, this can be done even before a concrete
+    instance is created and affects all plugin instances loaded later through
+    the same manager
+
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
 -   New @ref Utility::formatString() and @ref Utility::formatInto() functions
