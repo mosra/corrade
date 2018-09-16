@@ -130,7 +130,8 @@ benchmark types:
         defaultBenchmarkType = TestCaseType::CpuTimeBenchmark;
     else if(args.value("benchmark") == "cpu-cycles")
         defaultBenchmarkType = TestCaseType::CpuCyclesBenchmark;
-    else Utility::Fatal() << "Unknown benchmark type" << args.value("benchmark");
+    else Utility::Fatal{} << "Unknown benchmark type" << args.value("benchmark")
+        << Utility::Debug::nospace << ", use one of wall-time, cpu-time or cpu-cycles";
 
     std::vector<std::pair<int, TestCase>> usedTestCases;
 
