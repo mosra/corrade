@@ -55,6 +55,11 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 
+@subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
+
+-   Adapted Emscripten test runner markup for consistency with the
+    [m.css](http://mcss.mosra.cz) theme used in [Magnum](http://magnum.graphics)
+
 @subsubsection corrade-changelog-latest-changes-utility Utility library
 
 -   @ref Utility::Arguments::value() and @ref Utility::Arguments::isSet() now
