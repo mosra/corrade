@@ -382,6 +382,15 @@ template<std::size_t size_, class T> class StaticArray {
         ArrayView<T> prefix(std::size_t end) { return prefix(_data + end); } /**< @overload */
         ArrayView<const T> prefix(std::size_t end) const { return prefix(_data + end); } /**< @overload */
 
+        /** @overload */
+        template<std::size_t viewSize> StaticArrayView<viewSize, T> prefix() {
+            return slice<viewSize>(_data);
+        }
+        /** @overload */
+        template<std::size_t viewSize> StaticArrayView<viewSize, const T> prefix() const {
+            return slice<viewSize>(_data);
+        }
+
         /**
          * @brief Array suffix
          *

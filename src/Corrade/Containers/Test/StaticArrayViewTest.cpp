@@ -288,6 +288,11 @@ void StaticArrayViewTest::sliceToStatic() {
     CORRADE_COMPARE(b[0], 2);
     CORRADE_COMPARE(b[1], 3);
     CORRADE_COMPARE(b[2], 4);
+
+    StaticArrayView<3> c = a.prefix<3>();
+    CORRADE_COMPARE(c[0], 1);
+    CORRADE_COMPARE(c[1], 2);
+    CORRADE_COMPARE(c[2], 3);
 }
 
 void StaticArrayViewTest::cast() {

@@ -43,6 +43,8 @@ namespace Corrade {
     array view types
 -   Added @ref Containers::Optional::operator=(NullOptT) for resetting an
     optional value without requiring the type to be movable
+-   Added fixed-size @ref Containers::ArrayView::prefix() const "prefix()"
+    overload to all Array classes
 
 @subsubsection corrade-changelog-latest-new-pluginmanager PluginManager library
 

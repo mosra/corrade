@@ -220,6 +220,15 @@ template<class T> class ArrayView {
         ArrayView<T> prefix(std::size_t end) const { return prefix(_data + end); } /**< @overload */
 
         /**
+         * @brief Fixed-size array prefix
+         *
+         * Equivalent to @cpp data.slice<viewSize>(data.begin()) @ce.
+         */
+        template<std::size_t viewSize> StaticArrayView<viewSize, T> prefix() const {
+            return slice<viewSize>(_data);
+        }
+
+        /**
          * @brief Array suffix
          *
          * Equivalent to @cpp data.slice(begin, data.end()) @ce. If @p begin is
@@ -544,6 +553,11 @@ template<std::size_t size_, class T> class StaticArrayView {
         /** @overload */
         ArrayView<T> prefix(std::size_t end) const {
             return ArrayView<T>(*this).prefix(end);
+        }
+
+        /** @copydoc ArrayView::prefix() const */
+        template<std::size_t viewSize> StaticArrayView<viewSize, T> prefix() const {
+            return slice<viewSize>(_data);
         }
 
         /** @copydoc ArrayView::suffix(T*) const */
