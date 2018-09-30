@@ -1036,7 +1036,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         }
 
         /* Compare two different types with explicit comparator specification */
-        template<class T, class U, class V> void compareWith(Comparator<T> comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue);
+        template<class T, class U, class V> void compareWith(Comparator<T>& comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue);
+        template<class T, class U, class V> void compareWith(Comparator<T>&& comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
+            return compareWith<T, U, V>(comparator, actual, actualValue, expected, expectedValue);
+        }
 
         template<class T> void verify(const std::string& expression, T&& value);
 
@@ -1373,7 +1376,7 @@ one iteration.
     _CORRADE_REGISTER_TEST_CASE();                                          \
     for(CORRADE_UNUSED auto&& _CORRADE_HELPER_PASTE(benchmarkIteration, __func__): Tester::createBenchmarkRunner(batchSize))
 
-template<class T, class U, class V> void Tester::compareWith(Comparator<T> comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
+template<class T, class U, class V> void Tester::compareWith(Comparator<T>& comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
     ++_checkCount;
 
     /* Store (references to) possibly implicitly-converted values,

@@ -78,6 +78,8 @@ namespace Corrade {
 
 -   Adapted Emscripten test runner markup for consistency with the
     [m.css](http://mcss.mosra.cz) theme used in [Magnum](http://magnum.graphics)
+-   It's now possible to have non-copyable and non-moveable
+    @ref TestSuite::Comparator specializations
 
 @subsubsection corrade-changelog-latest-changes-utility Utility library
 
