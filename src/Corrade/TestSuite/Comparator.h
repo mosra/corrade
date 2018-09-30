@@ -65,11 +65,14 @@ parameters:
 
 @snippet TestSuite.cpp Comparator-pseudotypes
 
-You can add more overloads for @cpp operator()() @ce in one class, e.g. for
-comparing file contents with an @ref std::istream. The actual use in the unit
-test would be like this:
+The actual use in the unit test would be like this:
 
 @snippet TestSuite.cpp Comparator-pseudotypes-usage
+
+@attention Due to implementation limitations, it's not possible to have
+    multiple overloads for @cpp operator()() @ce in one class (for example to
+    compare file contents with both a filename and a @ref std::istream), you
+    have to create a different pseudo-type for that.
 
 @section TestSuite-Comparator-parameters Passing parameters to comparators
 
