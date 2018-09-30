@@ -32,6 +32,7 @@ check() {
 
     rm -rf coverage
     mkdir coverage
+    # Keep in sync with package/ci/appveyor-lcov.sh and travis.yml, please
     lcov --gcov-tool="gcov-6" --directory . --capture --output-file coverage.info
     lcov --gcov-tool="gcov-6" --extract coverage.info "*/src/Corrade/*" --output-file coverage.info
     lcov --gcov-tool="gcov-6" --remove coverage.info "*/Test/*" --output-file coverage.info
