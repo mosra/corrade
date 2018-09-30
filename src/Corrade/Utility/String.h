@@ -314,7 +314,8 @@ CORRADE_UTILITY_EXPORT std::string uppercase(std::string string);
 /**
 @brief Whether the string has given prefix
 
-In particular, returns @cpp false @ce also if @p string is empty.
+In particular, returns @cpp true @ce for empty @p string only if @p prefix is
+empty as well.
 @see @ref viewBeginsWith(), @ref stripPrefix()
 */
 inline bool beginsWith(const std::string& string, const std::string& prefix) {
@@ -334,7 +335,8 @@ inline bool beginsWith(const std::string& string, char prefix) {
 /**
 @brief Whether string view has given prefix
 
-In particular, returns @cpp false @ce also if @p string is empty.
+In particular, returns @cpp true @ce for empty @p string only if @p prefix is
+empty as well.
 @see @ref beginsWith()
 */
 template<std::size_t size> inline bool viewBeginsWith(Containers::ArrayView<const char> string, const char(&prefix)[size]) {
@@ -349,7 +351,8 @@ inline bool viewBeginsWith(Containers::ArrayView<const char> string, char prefix
 /**
 @brief Whether the string has given suffix
 
-In particular, returns @cpp false @ce also if @p string is empty.
+In particular, returns @cpp true @ce for empty @p string only if @p suffix is
+empty as well.
 @see @ref viewEndsWith(), @ref stripSuffix()
 */
 inline bool endsWith(const std::string& string, const std::string& suffix) {
@@ -369,7 +372,8 @@ inline bool endsWith(const std::string& string, char suffix) {
 /**
 @brief Whether string view has given suffix
 
-In particular, returns @cpp false @ce also if @p string is empty.
+In particular, returns @cpp true @ce for empty @p string only if @p suffix is
+empty as well.
 @see @ref endsWith()
 */
 template<std::size_t size> inline bool viewEndsWith(Containers::ArrayView<const char> string, const char(&suffix)[size]) {

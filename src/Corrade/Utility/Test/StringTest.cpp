@@ -44,8 +44,10 @@ struct StringTest: TestSuite::Tester {
     void uppercase();
 
     void beginsWith();
+    void beginsWithEmpty();
     void viewBeginsWith();
     void endsWith();
+    void endsWithEmpty();
     void viewEndsWith();
 
     void stripPrefix();
@@ -65,8 +67,10 @@ StringTest::StringTest() {
               &StringTest::uppercase,
 
               &StringTest::beginsWith,
+              &StringTest::beginsWithEmpty,
               &StringTest::viewBeginsWith,
               &StringTest::endsWith,
+              &StringTest::endsWithEmpty,
               &StringTest::viewEndsWith,
 
               &StringTest::stripPrefix,
@@ -327,6 +331,12 @@ void StringTest::beginsWith() {
     CORRADE_VERIFY(!String::beginsWith("", 'h'));
 }
 
+void StringTest::beginsWithEmpty() {
+    CORRADE_VERIFY(!String::beginsWith("", "overcomplicated"));
+    CORRADE_VERIFY(String::beginsWith("overcomplicated", ""));
+    CORRADE_VERIFY(String::beginsWith("", ""));
+}
+
 void StringTest::viewBeginsWith() {
     CORRADE_VERIFY(String::viewBeginsWith("overcomplicated", "over"));
     CORRADE_VERIFY(!String::viewBeginsWith("overcomplicated", "oven"));
@@ -348,6 +358,12 @@ void StringTest::endsWith() {
     CORRADE_VERIFY(!String::endsWith("hello", 'h'));
     CORRADE_VERIFY(String::endsWith("hello", 'o'));
     CORRADE_VERIFY(!String::endsWith("", 'h'));
+}
+
+void StringTest::endsWithEmpty() {
+    CORRADE_VERIFY(!String::beginsWith("", "overcomplicated"));
+    CORRADE_VERIFY(String::beginsWith("overcomplicated", ""));
+    CORRADE_VERIFY(String::beginsWith("", ""));
 }
 
 void StringTest::viewEndsWith() {
