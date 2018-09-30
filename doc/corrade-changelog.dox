@@ -63,6 +63,8 @@ namespace Corrade {
 -   New @ref Utility::String::viewBeginsWith() and
     @ref Utility::String::viewEndsWith() utilities that take
     @ref Containers::ArrayView instead of @ref std::string as a first parameter
+-   New @ref Utility::String::replaceFirst() and
+    @ref Utility::String::replaceAll() utilities for replacing substrings
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 

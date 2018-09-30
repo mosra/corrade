@@ -104,6 +104,23 @@ std::string stripSuffix(std::string string, const Containers::ArrayView<const ch
     return string;
 }
 
+std::string replaceFirst(std::string string, const Containers::ArrayView<const char> search, const Containers::ArrayView<const char> replace) {
+    const std::size_t found = string.find(search, 0, search.size());
+    if(found != std::string::npos)
+        string.replace(found, search.size(), replace, replace.size());
+    return string;
+}
+
+std::string replaceAll(std::string string, const Containers::ArrayView<const char> search, const Containers::ArrayView<const char> replace) {
+    CORRADE_ASSERT(!search.empty(), "Utility::String::replaceAll(): empty search string would cause an infinite loop", {});
+    std::size_t found = 0;
+    while((found = string.find(search, found, search.size())) != std::string::npos) {
+        string.replace(found, search.size(), replace, replace.size());
+        found += replace.size();
+    }
+    return string;
+}
+
 }
 
 namespace {

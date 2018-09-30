@@ -73,6 +73,9 @@ namespace Implementation {
 
     CORRADE_UTILITY_EXPORT std::string stripPrefix(std::string string, Containers::ArrayView<const char> suffix);
     CORRADE_UTILITY_EXPORT std::string stripSuffix(std::string string, Containers::ArrayView<const char> suffix);
+
+    CORRADE_UTILITY_EXPORT std::string replaceFirst(std::string string, Containers::ArrayView<const char> search, Containers::ArrayView<const char> replace);
+    CORRADE_UTILITY_EXPORT std::string replaceAll(std::string string, Containers::ArrayView<const char> search, Containers::ArrayView<const char> replace);
 }
 
 /**
@@ -423,6 +426,58 @@ template<std::size_t size> inline std::string stripSuffix(std::string string, co
 /** @overload */
 inline std::string stripSuffix(std::string string, char suffix) {
     return Implementation::stripSuffix(std::move(string), {&suffix, 1});
+}
+
+/**
+@brief Replace first occurence in a string
+
+Returns @p string unmodified if it doesn't contain @p search. Having empty
+@p search causes @p replace to be prepended to @p string.
+@see @ref replaceAll()
+*/
+inline std::string replaceFirst(std::string string, const std::string& search, const std::string& replace) {
+    return Implementation::replaceFirst(std::move(string), {search.data(), search.size()}, {replace.data(), replace.size()});
+}
+
+/** @overload */
+template<std::size_t searchSize, std::size_t replaceSize> inline std::string replaceFirst(std::string string, const char(&search)[searchSize], const char(&replace)[replaceSize]) {
+    return Implementation::replaceFirst(std::move(string), {search, searchSize - 1}, {replace, replaceSize - 1});
+}
+
+/** @overload */
+template<std::size_t searchSize> inline std::string replaceFirst(std::string string, const char(&search)[searchSize], const std::string& replace) {
+    return Implementation::replaceFirst(std::move(string), {search, searchSize - 1}, {replace.data(), replace.size()});
+}
+
+/** @overload */
+template<std::size_t replaceSize> inline std::string replaceFirst(std::string string, const std::string& search, const char(&replace)[replaceSize]) {
+    return Implementation::replaceFirst(std::move(string), {search.data(), search.size()}, {replace, replaceSize - 1});
+}
+
+/**
+@brief Replace all occurences in a string
+
+Returns @p string unmodified if it doesn't contain @p search. Expects that
+@p search is not empty, as that would cause an infinite loop.
+@see @ref replaceFirst()
+*/
+inline std::string replaceAll(std::string string, const std::string& search, const std::string& replace) {
+    return Implementation::replaceAll(std::move(string), {search.data(), search.size()}, {replace.data(), replace.size()});
+}
+
+/** @overload */
+template<std::size_t searchSize, std::size_t replaceSize> inline std::string replaceAll(std::string string, const char(&search)[searchSize], const char(&replace)[replaceSize]) {
+    return Implementation::replaceAll(std::move(string), {search, searchSize - 1}, {replace, replaceSize - 1});
+}
+
+/** @overload */
+template<std::size_t searchSize> inline std::string replaceAll(std::string string, const char(&search)[searchSize], const std::string& replace) {
+    return Implementation::replaceAll(std::move(string), {search, searchSize - 1}, {replace.data(), replace.size()});
+}
+
+/** @overload */
+template<std::size_t replaceSize> inline std::string replaceAll(std::string string, const std::string& search, const char(&replace)[replaceSize]) {
+    return Implementation::replaceAll(std::move(string), {search.data(), search.size()}, {replace, replaceSize - 1});
 }
 
 }}}
