@@ -364,6 +364,16 @@ template<std::size_t size, class T> constexpr ArrayView<T> arrayView(StaticArray
 }
 
 /** @relatesalso ArrayView
+@brief Make view on a view
+
+Equivalent to the implicit @ref ArrayView copy constructor --- it shouldn't be
+an error to call @ref arrayView() on itself.
+*/
+template<class T> constexpr ArrayView<T> arrayView(ArrayView<T> view) {
+    return view;
+}
+
+/** @relatesalso ArrayView
 @brief Reinterpret-cast an array view
 
 Size of the new array is calculated as @cpp view.size()*sizeof(T)/sizeof(U) @ce.
@@ -595,6 +605,16 @@ The following two lines are equivalent:
 */
 template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArrayView(T(&data)[size]) {
     return StaticArrayView<size, T>{data};
+}
+
+/** @relatesalso StaticArrayView
+@brief Make view on a view
+
+Equivalent to the implicit @ref StaticArrayView copy constructor --- it
+shouldn't be an error to call @ref staticArrayView() on itself.
+*/
+template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArrayView(StaticArrayView<size, T> view) {
+    return view;
 }
 
 /** @relatesalso StaticArrayView

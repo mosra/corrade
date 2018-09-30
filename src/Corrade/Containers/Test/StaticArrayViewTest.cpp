@@ -109,6 +109,10 @@ void StaticArrayViewTest::construct() {
         const auto b = staticArrayView<5>(a);
         CORRADE_VERIFY((std::is_same<decltype(b), const StaticArrayView<5>>::value));
         CORRADE_VERIFY(b == a);
+
+        const auto c = staticArrayView(b);
+        CORRADE_VERIFY((std::is_same<decltype(c), const StaticArrayView<5>>::value));
+        CORRADE_VERIFY(c == a);
     }
 
     /* Implicit construction from pointer should not be allowed */

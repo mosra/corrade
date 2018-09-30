@@ -68,6 +68,12 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 
+@subsubsection corrade-changelog-latest-changes-containers Containers library
+
+-   It's no longer a compile error to call @ref Containers::arrayView() /
+    @ref Containers::staticArrayView() on a type that's already an
+    @ref Containers::ArrayView / @ref Containers::StaticArrayView
+
 @subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
 
 -   Adapted Emscripten test runner markup for consistency with the

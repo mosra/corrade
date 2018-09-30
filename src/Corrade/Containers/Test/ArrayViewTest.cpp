@@ -131,6 +131,11 @@ void ArrayViewTest::construct() {
         CORRADE_VERIFY((std::is_same<decltype(b), const ArrayView>::value));
         CORRADE_VERIFY(b == a);
         CORRADE_COMPARE(b.size(), 20);
+
+        const auto c = arrayView(b);
+        CORRADE_VERIFY((std::is_same<decltype(c), const ArrayView>::value));
+        CORRADE_VERIFY(c == a);
+        CORRADE_COMPARE(c.size(), 20);
     }
 }
 
