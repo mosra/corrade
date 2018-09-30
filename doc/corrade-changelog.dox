@@ -79,6 +79,8 @@ namespace Corrade {
 -   @ref Utility::Arguments is now move-only to avoid accidental copies ---
     it's not meant to be used as a general storage for parsed arguments, only a
     parser
+-   @ref Utility::String::stripPrefix() and @ref Utility::String::stripSuffix()
+    have now zero-allocation implementation
 
 @subsection corrade-changelog-latest-buildsystem Build system
 

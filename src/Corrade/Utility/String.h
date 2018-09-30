@@ -71,8 +71,8 @@ namespace Implementation {
     CORRADE_UTILITY_EXPORT bool beginsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> prefix);
     CORRADE_UTILITY_EXPORT bool endsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> suffix);
 
-    CORRADE_UTILITY_EXPORT std::string stripPrefix(const std::string& string, Containers::ArrayView<const char> suffix);
-    CORRADE_UTILITY_EXPORT std::string stripSuffix(const std::string& string, Containers::ArrayView<const char> suffix);
+    CORRADE_UTILITY_EXPORT std::string stripPrefix(std::string string, Containers::ArrayView<const char> suffix);
+    CORRADE_UTILITY_EXPORT std::string stripSuffix(std::string string, Containers::ArrayView<const char> suffix);
 }
 
 /**
@@ -392,17 +392,17 @@ Expects that the string actually begins with given prefix.
 @see @ref beginsWith()
 */
 inline std::string stripPrefix(std::string string, const std::string& prefix) {
-    return Implementation::stripPrefix(string, {prefix.data(), prefix.size()});
+    return Implementation::stripPrefix(std::move(string), {prefix.data(), prefix.size()});
 }
 
 /** @overload */
-template<std::size_t size> inline std::string stripPrefix(const std::string& string, const char(&prefix)[size]) {
-    return Implementation::stripPrefix(string, {prefix, size - 1});
+template<std::size_t size> inline std::string stripPrefix(std::string string, const char(&prefix)[size]) {
+    return Implementation::stripPrefix(std::move(string), {prefix, size - 1});
 }
 
 /** @overload */
-inline std::string stripPrefix(const std::string& string, char prefix) {
-    return Implementation::stripPrefix(string, {&prefix, 1});
+inline std::string stripPrefix(std::string string, char prefix) {
+    return Implementation::stripPrefix(std::move(string), {&prefix, 1});
 }
 
 /**
@@ -411,18 +411,18 @@ inline std::string stripPrefix(const std::string& string, char prefix) {
 Expects that the string actually ends with given suffix.
 @see @ref endsWith()
 */
-inline std::string stripSuffix(const std::string& string, const std::string& suffix) {
-    return Implementation::stripSuffix(string, {suffix.data(), suffix.size()});
+inline std::string stripSuffix(std::string string, const std::string& suffix) {
+    return Implementation::stripSuffix(std::move(string), {suffix.data(), suffix.size()});
 }
 
 /** @overload */
-template<std::size_t size> inline std::string stripSuffix(const std::string& string, const char(&suffix)[size]) {
-    return Implementation::stripSuffix(string, {suffix, size - 1});
+template<std::size_t size> inline std::string stripSuffix(std::string string, const char(&suffix)[size]) {
+    return Implementation::stripSuffix(std::move(string), {suffix, size - 1});
 }
 
 /** @overload */
-inline std::string stripSuffix(const std::string& string, char suffix) {
-    return Implementation::stripSuffix(string, {&suffix, 1});
+inline std::string stripSuffix(std::string string, char suffix) {
+    return Implementation::stripSuffix(std::move(string), {&suffix, 1});
 }
 
 }}}

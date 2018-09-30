@@ -90,16 +90,18 @@ bool endsWith(Containers::ArrayView<const char> string, const Containers::ArrayV
     return std::strncmp(string + string.size() - suffix.size(), suffix, suffix.size()) == 0;
 }
 
-std::string stripPrefix(const std::string& string, const Containers::ArrayView<const char> prefix) {
+std::string stripPrefix(std::string string, const Containers::ArrayView<const char> prefix) {
     CORRADE_ASSERT(beginsWith({string.data(), string.size()}, prefix),
         "Utility::String::stripPrefix(): string doesn't begin with given prefix", {});
-    return string.substr(prefix.size());
+    string.erase(0, prefix.size());
+    return string;
 }
 
-std::string stripSuffix(const std::string& string, const Containers::ArrayView<const char> suffix) {
+std::string stripSuffix(std::string string, const Containers::ArrayView<const char> suffix) {
     CORRADE_ASSERT(endsWith({string.data(), string.size()}, suffix),
         "Utility::String::stripSuffix(): string doesn't end with given suffix", {});
-    return string.substr(0, string.size() - suffix.size());
+    string.erase(string.size() - suffix.size());
+    return string;
 }
 
 }
