@@ -333,9 +333,12 @@ void AbstractManager::setPluginDirectory(std::string directory) {
         } else ++it;
     }
 
-    /* Find plugin files in the directory */
+    /* Find plugin files in the directory. Sort the list so we have predictable
+       plugin preference behavior for aliases on systems that have random
+       directory listing order. */
     const std::vector<std::string> d = Directory::list(_pluginDirectory,
-        Directory::Flag::SkipDirectories|Directory::Flag::SkipDotAndDotDot);
+        Directory::Flag::SkipDirectories|Directory::Flag::SkipDotAndDotDot|
+        Directory::Flag::SortAscending);
     for(const std::string& filename: d) {
         /* File doesn't have module suffix, continue to next */
         if(!Utility::String::endsWith(filename, PLUGIN_FILENAME_SUFFIX))
