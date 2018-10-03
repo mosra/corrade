@@ -101,6 +101,11 @@ namespace Corrade {
     just this utility without anything else for example for crosscompiling, by
     enabling only `WITH_RC` and disabling all other @ref corrade-cmake "CMake"
     options.
+-   Due to changes in Xcode 10, CMake before 3.12 would fail during the build
+    of Corrade. To prevent that, when Xcode 10 is detected, the build aborts
+    with a clear message upfront, telling the user to upgrade to CMake 3.12.
+    See [mosra/corrade#52](https://github.com/mosra/corrade/issues/52) and
+    [cmake/cmake#18099](https://gitlab.kitware.com/cmake/cmake/issues/18099).
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

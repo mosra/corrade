@@ -25,6 +25,16 @@
 
 cmake_minimum_required(VERSION 2.8.12)
 
+# As reported in https://github.com/mosra/corrade/issues/52 and then tracked
+# down to https://gitlab.kitware.com/cmake/cmake/issues/18099, CMake < 3.12 has
+# various issues with the new XCode, resulting in weird build failures in
+# Corrade. CMake 3.12 fixes that by temporarily switching to the legacy build
+# system for Xcode 10. Instead of failing later during the build, fail upfront
+# with a clear message.
+if(APPLE AND CMAKE_GENERATOR STREQUAL Xcode AND NOT XCODE_VERSION VERSION_LESS 10.0 AND CMAKE_VERSION VERSION_LESS 3.12.0)
+    message(FATAL_ERROR "CMake < 3.12 and Xcode 10 have various compatibility issues, breaking the Corrade build. Please upgrade to CMake 3.12 to use Xcode 10.")
+endif()
+
 # CMake policies. 0025 needs to be before project(), so putting all there.
 # Use AppleClang instead of Clang on Apple
 if(POLICY CMP0025)
