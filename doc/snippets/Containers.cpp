@@ -298,6 +298,7 @@ Containers::Array<int> a(5);
 
 Containers::ArrayView<const void> b(a); // b.size() == 20
 /* [ArrayView-void-usage] */
+static_cast<void>(b);
 }
 
 #ifdef __clang__
@@ -596,6 +597,7 @@ Containers::StaticArray<5, std::uint32_t> data;
 Containers::ArrayView<std::uint32_t> a{data};
 auto b = Containers::arrayView(data);
 /* [StaticArray-arrayView] */
+static_cast<void>(a);
 static_cast<void>(b);
 }
 
@@ -606,6 +608,7 @@ const Containers::StaticArray<5, std::uint32_t> data;
 Containers::ArrayView<const std::uint32_t> a{data};
 auto b = Containers::arrayView(data);
 /* [StaticArray-arrayView-const] */
+static_cast<void>(a);
 static_cast<void>(b);
 }
 
@@ -616,6 +619,7 @@ Containers::StaticArray<5, std::uint32_t> data;
 Containers::StaticArrayView<5, std::uint32_t> a{data};
 auto b = Containers::staticArrayView(data);
 /* [StaticArray-staticArrayView] */
+static_cast<void>(a);
 static_cast<void>(b);
 }
 
@@ -626,6 +630,7 @@ const Containers::StaticArray<5, std::uint32_t> data;
 Containers::StaticArrayView<5, const std::uint32_t> a{data};
 auto b = Containers::staticArrayView(data);
 /* [StaticArray-staticArrayView-const] */
+static_cast<void>(a);
 static_cast<void>(b);
 }
 
