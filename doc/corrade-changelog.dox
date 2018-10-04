@@ -74,6 +74,11 @@ namespace Corrade {
     @ref Containers::staticArrayView() on a type that's already an
     @ref Containers::ArrayView / @ref Containers::StaticArrayView
 
+@subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
+
+-   Plugins are now loaded from the filesystem in an alphabetical order for
+    predictable behavior across different systems
+
 @subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
 
 -   Adapted Emscripten test runner markup for consistency with the
