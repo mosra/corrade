@@ -65,6 +65,12 @@ if(WITH_UTILITY)
         VisibilityMacros.h
         visibility.h)
 
+    # Unix-specific / non-RT-Windows-specific functionality. Also Emscripten.
+    if(CORRADE_TARGET_UNIX OR (CORRADE_TARGET_WINDOWS AND NOT CORRADE_TARGET_WINDOWS_RT) OR CORRADE_TARGET_EMSCRIPTEN)
+        list(APPEND CorradeUtility_SRCS FileWatcher.cpp)
+        list(APPEND CorradeUtility_HEADERS FileWatcher.h)
+    endif()
+
     # Android-specific functionality
     if(CORRADE_TARGET_ANDROID)
         list(APPEND CorradeUtility_SRCS AndroidLogStreamBuffer.cpp)

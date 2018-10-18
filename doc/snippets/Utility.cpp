@@ -32,6 +32,9 @@
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Configuration.h"
+#if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
+#include "Corrade/Utility/FileWatcher.h"
+#endif
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Macros.h"
 
@@ -443,6 +446,18 @@ Utility::formatInto(stdout, "Hello, {}!", "world");
 /* [formatInto-stdout] */
 }
 
+#if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
+{
+/* [FileWatcher] */
+Utility::FileWatcher watcher{"settings.conf"};
+
+// in the main application loop
+if(watcher.hasChanged()) {
+    // reload the settings
+}
+/* [FileWatcher] */
+}
+#endif
 }
 
 namespace A {

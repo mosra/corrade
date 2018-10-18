@@ -29,7 +29,14 @@ namespace Corrade {
 
 @tableofcontents
 
-@anchor corrade-changelog-latest
+@section corrade-changelog-latest Changes since 2018.10
+
+@subsection corrade-changelog-latest-new New features
+
+@subsubsection corrade-changelog-latest-new-utility Utility library
+
+-   Initial implementation of a @ref Utility::FileWatcher utility for
+    monitoring changes to a file
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

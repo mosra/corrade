@@ -47,6 +47,7 @@ class ConfigurationGroup;
 enum class ConfigurationValueFlag: std::uint8_t;
 typedef Containers::EnumSet<ConfigurationValueFlag> ConfigurationValueFlags;
 template<class T> struct ConfigurationValue;
+class FileWatcher;
 
 class Debug;
 class Warning;
