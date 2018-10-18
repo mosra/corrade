@@ -152,6 +152,11 @@ target_include_directories(UtilityDirectoryTest PRIVATE ${CMAKE_CURRENT_BINARY_D
 if(CORRADE_TARGET_UNIX OR (CORRADE_TARGET_WINDOWS AND NOT CORRADE_TARGET_WINDOWS_RT) OR CORRADE_TARGET_EMSCRIPTEN)
     corrade_add_test(UtilityFileWatcherTest FileWatcherTest.cpp)
     target_include_directories(UtilityFileWatcherTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+    corrade_add_test(UtilityTweakableTest TweakableTest.cpp)
+    corrade_add_test(UtilityTweakableIntegrationTest TweakableIntegrationTest.cpp
+        FILES TweakableIntegrationTest.cpp)
+    target_include_directories(UtilityTweakableIntegrationTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
 corrade_add_test(UtilityFormatTest FormatTest.cpp LIBRARIES CorradeUtilityTestLib)
@@ -162,6 +167,7 @@ corrade_add_test(UtilityMacrosTest MacrosTest.cpp)
 corrade_add_test(UtilitySha1Test Sha1Test.cpp)
 corrade_add_test(UtilityStringTest StringTest.cpp LIBRARIES CorradeUtilityTestLib)
 corrade_add_test(UtilitySystemTest SystemTest.cpp)
+corrade_add_test(UtilityTweakableParserTest TweakableParserTest.cpp)
 corrade_add_test(UtilityTypeTraitsTest TypeTraitsTest.cpp)
 corrade_add_test(UtilityUnicodeTest UnicodeTest.cpp LIBRARIES CorradeUtilityTestLib)
 

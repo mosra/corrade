@@ -1,5 +1,5 @@
-#ifndef Corrade_Utility_Utility_h
-#define Corrade_Utility_Utility_h
+#ifndef Corrade_Utility_Implementation_tweakable_h
+#define Corrade_Utility_Implementation_tweakable_h
 /*
     This file is part of Corrade.
 
@@ -25,48 +25,32 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-/** @file
- * @brief Forward declarations for the @ref Corrade::Utility namespace
- */
+#include <string>
+#include <set>
+#include <tuple>
+#include <vector>
 
-#include <cstdint>
-#include <cstddef>
+#include "Corrade/Utility/FileWatcher.h"
+#include "Corrade/Utility/Tweakable.h"
 
-#include "Corrade/configure.h"
-#include "Corrade/Containers/Containers.h"
+namespace Corrade { namespace Utility { namespace Implementation {
 
-namespace Corrade { namespace Utility {
+/* Needs to be exposed like this so we can test it */
 
-class Arguments;
+struct TweakableVariable {
+    /* Align so we can safely save 64bit types without worrying about unaligned
+       access. */
+    CORRADE_ALIGNAS(8) char storage[TweakableStorageSize]{};
+    int line{};
+    TweakableState(*parser)(Containers::ArrayView<const char>, Containers::StaticArrayView<TweakableStorageSize, char>);
+    void(*scopeLambda)(void(*)(), void*){};
+    void(*scopeUserCall)(){};
+    void* scopeUserData{};
+};
 
-template<std::size_t> class HashDigest;
-/* AbstractHash is not used directly */
+CORRADE_UTILITY_EXPORT std::string findTweakableAlias(const std::string& file);
+CORRADE_UTILITY_EXPORT TweakableState parseTweakables(std::string& name, const std::string& filename, const std::string& data, std::vector<TweakableVariable>& variables, std::set<std::tuple<void(*)(void(*)(), void*), void(*)(), void*>>& scopes);
 
-class Configuration;
-class ConfigurationGroup;
-enum class ConfigurationValueFlag: std::uint8_t;
-typedef Containers::EnumSet<ConfigurationValueFlag> ConfigurationValueFlags;
-template<class> struct ConfigurationValue;
-#if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
-class FileWatcher;
-#endif
-
-class Debug;
-class Warning;
-class Error;
-class Fatal;
-
-/* Endianness used only statically */
-class MurmurHash2;
-
-/* Resource doesn't need forward declaration */
-class Sha1;
-class Translator;
-
-/* Tweakable doesn't need forward declaration */
-template<class> struct TweakableParser;
-enum class TweakableState: std::uint8_t;
-
-}}
+}}}
 
 #endif

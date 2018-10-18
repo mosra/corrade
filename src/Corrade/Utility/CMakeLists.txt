@@ -65,10 +65,20 @@ if(WITH_UTILITY)
         VisibilityMacros.h
         visibility.h)
 
+    set(CorradeUtility_PRIVATE_HEADERS )
+
     # Unix-specific / non-RT-Windows-specific functionality. Also Emscripten.
     if(CORRADE_TARGET_UNIX OR (CORRADE_TARGET_WINDOWS AND NOT CORRADE_TARGET_WINDOWS_RT) OR CORRADE_TARGET_EMSCRIPTEN)
-        list(APPEND CorradeUtility_SRCS FileWatcher.cpp)
-        list(APPEND CorradeUtility_HEADERS FileWatcher.h)
+        list(APPEND CorradeUtility_SRCS
+            FileWatcher.cpp
+            Tweakable.cpp
+            TweakableParser.cpp)
+        list(APPEND CorradeUtility_HEADERS
+            FileWatcher.h
+            Tweakable.h
+            TweakableParser.h)
+        list(APPEND CorradeUtility_PRIVATE_HEADERS
+            Implementation/tweakable.h)
     endif()
 
     # Android-specific functionality
@@ -84,7 +94,8 @@ if(WITH_UTILITY)
     # Objects shared between main and test library
     add_library(CorradeUtilityObjects OBJECT
         ${CorradeUtility_SRCS}
-        ${CorradeUtility_HEADERS})
+        ${CorradeUtility_HEADERS}
+        ${CorradeUtility_PRIVATE_HEADERS})
     target_include_directories(CorradeUtilityObjects PUBLIC $<TARGET_PROPERTY:CorradeUtility,INTERFACE_INCLUDE_DIRECTORIES>)
     if(NOT BUILD_STATIC)
         target_compile_definitions(CorradeUtilityObjects PRIVATE "-DCorradeUtilityObjects_EXPORTS")

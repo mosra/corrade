@@ -37,6 +37,8 @@ namespace Corrade {
 
 -   Initial implementation of a @ref Utility::FileWatcher utility for
     monitoring changes to a file
+-   New @ref Utility::Tweakable class, implementing tweakable constants for
+    hot-reload
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

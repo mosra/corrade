@@ -38,6 +38,11 @@
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/Macros.h"
 
+/* [Tweakable-disable-header] */
+#define CORRADE_TWEAKABLE
+#include "Corrade/Utility/Tweakable.h"
+/* [Tweakable-disable-header] */
+
 /* [ConfigurationValue] */
 #include <Corrade/Utility/ConfigurationGroup.h>
 
@@ -458,7 +463,80 @@ if(watcher.hasChanged()) {
 /* [FileWatcher] */
 }
 #endif
+
+{
+/* [Tweakable-define] */
+#define _ CORRADE_TWEAKABLE
+/* [Tweakable-define] */
 }
+
+{
+struct App {
+float dt{}, fallVelocity{};
+struct {
+    float x{}, y{};
+} position;
+/* [Tweakable-wrap-update] */
+Utility::Tweakable tweakable;
+
+// …
+
+void mainLoop() {
+    fallVelocity += _(9.81f)*dt;
+    position.x += _(2.2f)*dt;
+    position.y += fallVelocity*dt;
+
+    // …
+
+    tweakable.update();
+}
+/* [Tweakable-wrap-update] */
+};
+}
+
+{
+struct App {
+/* [Tweakable-scope] */
+explicit App() {
+    // …
+
+    tweakable.scope([](App& app) {
+        app.dt = _(0.01666667f); // 60 FPS
+        app.fallVelocity = _(0.0f);
+        app.position = {_(5.0f), _(150.0f)};
+    }, *this);
+}
+
+void mainLoop() {
+    fallVelocity += _(9.81f)*dt;
+    // …
+/* [Tweakable-scope] */
+}
+
+#undef _
+/* [Tweakable-disable] */
+#define _
+/* [Tweakable-disable] */
+
+Utility::Tweakable tweakable;
+float dt, fallVelocity;
+struct {
+    float x, y;
+} position;
+};
+}
+}
+
+typedef std::pair<int, int> T;
+/* [TweakableParser] */
+namespace Corrade { namespace Utility { // namespace is important
+
+template<> struct TweakableParser<T> {
+    static std::pair<TweakableState, T> parse(Containers::ArrayView<const char> value);
+};
+
+}}
+/* [TweakableParser] */
 
 namespace A {
 
