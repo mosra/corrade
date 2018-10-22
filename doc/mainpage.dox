@@ -29,9 +29,9 @@ namespace Corrade {
 > *corrade* (v.) --- “To scrape together, to gather together from various sources”
 
 This is a documentation for Corrade, a multiplatform utility library written in
-C++11/C++14, that's used as a base for the [Magnum Project](http://magnum.graphics).
+C++11/C++14, that's used as a base for the [Magnum Project](https://magnum.graphics).
 To see high-level feature overview, project goals or read the developer blog,
-head over to the [project homepage](http://magnum.graphics/corrade/).
+head over to the [project homepage](https://magnum.graphics/corrade/).
 
 @section corrade-mainpage-whats-new What's new?
 
@@ -56,7 +56,7 @@ should follow to keep the library as consistent and maintainable as possible.
 
 Feel free to get more information or contact the team at:
 
--   Project homepage --- http://magnum.graphics/corrade/
+-   Project homepage --- https://magnum.graphics/corrade/
 -   GitHub project page --- https://github.com/mosra/corrade
 -   Gitter community chat --- https://gitter.im/mosra/magnum
 -   E-mail --- info@magnum.graphics
@@ -64,7 +64,7 @@ Feel free to get more information or contact the team at:
 -   Google Groups mailing list --- magnum-engine@googlegroups.com ([archive](https://groups.google.com/forum/#!forum/magnum-engine))
 -   Author's personal Twitter --- https://twitter.com/czmosra
 
-See also the Magnum Project [Contact & Support page](http://magnum.graphics/contact/)
+See also the Magnum Project [Contact & Support page](https://magnum.graphics/contact/)
 for further information.
 
 @section corrade-mainpage-license License

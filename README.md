@@ -1,7 +1,7 @@
 > *corrade* (v.) — “To scrape together, to gather together from various sources”
 
 Corrade is a multiplatform utility library written in C++11/C++14. It's used as
-a base for the [Magnum graphics engine](http://magnum.graphics/), among other
+a base for the [Magnum graphics engine](https://magnum.graphics/), among other
 things.
 
 [![Join the chat at https://gitter.im/mosra/magnum](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mosra/magnum?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -10,8 +10,8 @@ things.
 [![Coverage Status](https://codecov.io/gh/mosra/corrade/branch/master/graph/badge.svg)](https://codecov.io/gh/mosra/corrade)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
--   Project homepage — http://magnum.graphics/corrade/
--   Documentation — http://doc.magnum.graphics/corrade/
+-   Project homepage — https://magnum.graphics/corrade/
+-   Documentation — https://doc.magnum.graphics/corrade/
 -   GitHub project page — https://github.com/mosra/corrade
 
 SUPPORTED PLATFORMS
@@ -24,7 +24,7 @@ SUPPORTED PLATFORMS
 -   **Web** ([asm.js](http://asmjs.org/) or [WebAssembly](http://webassembly.org/)),
     through [Emscripten](http://kripken.github.io/emscripten-site/)
 
-See the Magnum Project [Build Status page](http://magnum.graphics/build-status/)
+See the Magnum Project [Build Status page](https://magnum.graphics/build-status/)
 for detailed per-platform build status.
 
 FEATURES
@@ -40,25 +40,25 @@ FEATURES
     handling and hot code reload
 -   Signal/slot connection library with full type safety
 
-Check also the Magnum Project [Feature Overview pages](http://magnum.graphics/features/)
+Check also the Magnum Project [Feature Overview pages](https://magnum.graphics/features/)
 for further information.
 
 WHAT'S NEW?
 ===========
 
 Curious about what was added or improved recently? Check out the
-[Changelog](http://doc.magnum.graphics/corrade/corrade-changelog.html#corrade-changelog-latest)
+[Changelog](https://doc.magnum.graphics/corrade/corrade-changelog.html#corrade-changelog-latest)
 page in the documentation. Check also the Magnum Project
-[Changelog](http://doc.magnum.graphics/magnum/changelog.html#changelog-latest).
+[Changelog](https://doc.magnum.graphics/magnum/changelog.html#changelog-latest).
 
 GETTING STARTED
 ===============
 
 Download, build and install Corrade as explained in
-[the building documentation](http://doc.magnum.graphics/corrade/building-corrade.html)
+[the building documentation](https://doc.magnum.graphics/corrade/building-corrade.html)
 — we provide packages for many platforms, including Windows, Linux and macOS.
 After that, the best way to get started is to read some
-[examples and tutorials](http://doc.magnum.graphics/corrade/corrade-example-index.html).
+[examples and tutorials](https://doc.magnum.graphics/corrade/corrade-example-index.html).
 
 CONTACT & SUPPORT
 =================
@@ -66,13 +66,13 @@ CONTACT & SUPPORT
 If you want to contribute to Corrade, if you spotted a bug, need a feature or
 have an awesome idea, you can get a copy of the sources from GitHub and start
 right away! There is the already mentioned guide about
-[how to download and build Corrade](http://doc.magnum.graphics/corrade/building-corrade.html)
-and also a guide about [coding style and best practices](http://doc.magnum.graphics/corrade/corrade-coding-style.html)
+[how to download and build Corrade](https://doc.magnum.graphics/corrade/building-corrade.html)
+and also a guide about [coding style and best practices](https://doc.magnum.graphics/corrade/corrade-coding-style.html)
 which you should follow to keep the library as consistent and maintainable as
 possible.
 
--   Project homepage — http://magnum.graphics/corrade/
--   Documentation — http://doc.magnum.graphics/corrade/
+-   Project homepage — https://magnum.graphics/corrade/
+-   Documentation — https://doc.magnum.graphics/corrade/
 -   GitHub project page — https://github.com/mosra/corrade
 -   Gitter community chat — https://gitter.im/mosra/magnum
 -   E-mail — info@magnum.graphics
@@ -80,7 +80,7 @@ possible.
 -   Google Groups mailing list — magnum-engine@googlegroups.com ([archive](https://groups.google.com/forum/#!forum/magnum-engine))
 -   Author's personal Twitter — https://twitter.com/czmosra
 
-See also the Magnum Project [Contact & Support page](http://magnum.graphics/contact/)
+See also the Magnum Project [Contact & Support page](https://magnum.graphics/contact/)
 for further information.
 
 CREDITS

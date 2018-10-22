@@ -4,7 +4,7 @@ Maintainer: Vladimír Vondruš <mosra@centrum.cz>
 Build-Depends: debhelper (>= 9), cmake (>= 2.8.12)
 Standards-Version: 3.9.2
 Section: libs
-Homepage: http://magnum.graphics/corrade/
+Homepage: https://magnum.graphics/corrade/
 Vcs-Git: git://github.com/mosra/corrade.git
 Vcs-Browser: https://github.com/mosra/corrade
 

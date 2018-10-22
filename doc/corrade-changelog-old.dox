@@ -33,7 +33,7 @@ namespace Corrade {
 
 Released 2015-05-09, tagged as
 [v2015.05](https://github.com/mosra/corrade/releases/tag/v2015.05). See the
-[release announcement](http://blog.magnum.graphics/announcements/may-2015-updates/)
+[release announcement](https://blog.magnum.graphics/announcements/may-2015-updates/)
 for a high-level overview.
 
 @subsection corrade-changelog-2015-05-dependencies Dependency changes
@@ -107,7 +107,7 @@ No API was deprecated in this release.
 
 Released 2014-06-30, tagged as
 [v2014.06](https://github.com/mosra/corrade/releases/tag/v2014.06). See the
-[release announcement](http://blog.magnum.graphics/announcements/june-2014-updates/)
+[release announcement](https://blog.magnum.graphics/announcements/june-2014-updates/)
 for a high-level overview.
 
 @subsection corrade-changelog-2014-06-dependencies Dependency changes
@@ -155,7 +155,7 @@ No API was deprecated in this release.
 
 Released 2014-01-21, tagged as
 [v2014.01](https://github.com/mosra/corrade/releases/tag/v2014.01). See the
-[release announcement](http://blog.magnum.graphics/announcements/january-2014-updates/)
+[release announcement](https://blog.magnum.graphics/announcements/january-2014-updates/)
 for a high-level overview.
 
 @subsection corrade-changelog-2014-01-dependencies Dependency changes
@@ -250,7 +250,7 @@ No dependency changes in this release.
 
 Released 2013-10-30, tagged as
 [v2013.10](https://github.com/mosra/corrade/releases/tag/v2013.10). See the
-[release annoucement](http://blog.magnum.graphics/announcements/october-2013-updates/)
+[release annoucement](https://blog.magnum.graphics/announcements/october-2013-updates/)
 for a high-level overview.
 
 @subsection corrade-changelog-2013-10-dependencies Dependency changes
@@ -303,14 +303,14 @@ No deprecated API was removed in this release.
 
 Released 2013-08-30, tagged as
 [v2013.08](https://github.com/mosra/corrade/releases/tag/v2013.08). See the
-[Magnum project announcement](http://blog.magnum.graphics/announcements/introducing-magnum/)
+[Magnum project announcement](https://blog.magnum.graphics/announcements/introducing-magnum/)
 for a high-level overview.
 
 @section corrade-changelog-2012-02 2012.02
 
 Released 2012-02-08, tagged as
 [v2012.02](https://github.com/mosra/corrade/releases/tag/v2012.02). See the
-[project announcement](http://blog.magnum.graphics/announcements/introducing-corrade/)
+[project announcement](https://blog.magnum.graphics/announcements/introducing-corrade/)
 for a high-level overview.
 
 */

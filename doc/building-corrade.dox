@@ -526,7 +526,7 @@ the `build/` directory if it doesn't exist yet.
 The documentation can be also generated using the
 [m.css Doxygen theme](http://mcss.mosra.cz/doxygen/). Use `Doxyfile-mcss` for a
 local build, the `Doxyfile-public` is meant for the publicly available
-documentation at http://doc.magnum.graphics/corrade/. The resulting
+documentation at https://doc.magnum.graphics/corrade/. The resulting
 documentation will be either in `build/doc-mcss/` or `build/doc-public/`.
 
 @subsection building-corrade-examples Building examples

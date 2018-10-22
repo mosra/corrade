@@ -1,5 +1,5 @@
 Name: corrade
-URL: http://magnum.graphics/corrade/
+URL: https://magnum.graphics/corrade/
 Version: 0.2
 Release: 1
 License: MIT

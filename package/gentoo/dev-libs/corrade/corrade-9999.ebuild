@@ -5,7 +5,7 @@ EGIT_REPO_URI="git://github.com/mosra/corrade.git"
 inherit cmake-utils git-r3
 
 DESCRIPTION="C++11 Multiplatform plugin management and utility library"
-HOMEPAGE="http://magnum.graphics/corrade/"
+HOMEPAGE="https://magnum.graphics/corrade/"
 
 LICENSE="MIT"
 SLOT="0"
