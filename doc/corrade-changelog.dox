@@ -29,11 +29,16 @@ namespace Corrade {
 
 @tableofcontents
 
-@section corrade-changelog-latest Changes since 2018.04
+@anchor corrade-changelog-latest
 
-@subsection corrade-changelog-latest-new New features
+@section corrade-changelog-2018-10 2018.10
 
-@subsubsection corrade-changelog-latest-new-containers Containers library
+Released 2018-10-23, tagged as
+[v2018.10](https://github.com/mosra/corrade/releases/tag/v2018.10).
+
+@subsection corrade-changelog-2018-10-new New features
+
+@subsubsection corrade-changelog-2018-10-new-containers Containers library
 
 -   New @ref Containers::ScopedExit helper class
 -   New @ref Containers::StridedArrayView class for providing access to
@@ -46,7 +51,7 @@ namespace Corrade {
 -   Added fixed-size @ref Containers::ArrayView::prefix() const "prefix()"
     overload to all Array classes
 
-@subsubsection corrade-changelog-latest-new-pluginmanager PluginManager library
+@subsubsection corrade-changelog-2018-10-new-pluginmanager PluginManager library
 
 -   Ability to change plugin-specific configuration globally using
     @ref PluginManager::PluginMetadata::configuration() --- compared to
@@ -55,7 +60,7 @@ namespace Corrade {
     before a plugin is loaded and affects all plugin instances loaded later
     through the same manager
 
-@subsubsection corrade-changelog-latest-new-utility Utility library
+@subsubsection corrade-changelog-2018-10-new-utility Utility library
 
 -   New @ref Utility::formatString() and @ref Utility::formatInto() functions
     for Python-style zero-allocation string formatting
@@ -66,27 +71,27 @@ namespace Corrade {
 -   New @ref Utility::String::replaceFirst() and
     @ref Utility::String::replaceAll() utilities for replacing substrings
 
-@subsection corrade-changelog-latest-changes Changes and improvements
+@subsection corrade-changelog-2018-10-changes Changes and improvements
 
-@subsubsection corrade-changelog-latest-changes-containers Containers library
+@subsubsection corrade-changelog-2018-10-changes-containers Containers library
 
 -   It's no longer a compile error to call @ref Containers::arrayView() /
     @ref Containers::staticArrayView() on a type that's already an
     @ref Containers::ArrayView / @ref Containers::StaticArrayView
 
-@subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
+@subsubsection corrade-changelog-2018-10-changes-pluginmanager PluginManager library
 
 -   Plugins are now loaded from the filesystem in an alphabetical order for
     predictable behavior across different systems
 
-@subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
+@subsubsection corrade-changelog-2018-10-changes-testsuite TestSuite library
 
 -   Adapted Emscripten test runner markup for consistency with the
     [m.css](http://mcss.mosra.cz) theme used in [Magnum](https://magnum.graphics)
 -   It's now possible to have non-copyable and non-moveable
     @ref TestSuite::Comparator specializations
 
-@subsubsection corrade-changelog-latest-changes-utility Utility library
+@subsubsection corrade-changelog-2018-10-changes-utility Utility library
 
 -   @ref Utility::Arguments::value() and @ref Utility::Arguments::isSet() now
     check that the arguments were already successfully parsed to prevent
@@ -97,7 +102,7 @@ namespace Corrade {
 -   @ref Utility::String::stripPrefix() and @ref Utility::String::stripSuffix()
     have now zero-allocation implementation
 
-@subsection corrade-changelog-latest-buildsystem Build system
+@subsection corrade-changelog-2018-10-buildsystem Build system
 
 -   There's now a PPA for Ubuntu packages. See @ref building-corrade-packages-deb
     for more information.
@@ -112,7 +117,7 @@ namespace Corrade {
     See [mosra/corrade#52](https://github.com/mosra/corrade/issues/52) and
     [cmake/cmake#18099](https://gitlab.kitware.com/cmake/cmake/issues/18099).
 
-@subsection corrade-changelog-latest-bugfixes Bug fixes
+@subsection corrade-changelog-2018-10-bugfixes Bug fixes
 
 -   Calling @ref PluginManager::Manager::setPluginDirectory() could lead to
     plugin aliases being forgotten in some cases
@@ -121,17 +126,18 @@ namespace Corrade {
     [mosra/corrade#45](https://github.com/mosra/corrade/issues/45).
 -   It was not possible to use the @ref Interconnect::Emitter class with
     virtual base classes on 32-bit Windows due to an incorrect assumption about
-    member function pointer sizes
+    member function pointer sizes (see
+    [mosra/magnum-extras#7](https://github.com/mosra/magnum-extras/issues/7))
 -   Assertions were not removed if both @cpp CORRADE_NO_ASSERT @ce and
     @cpp CORRADE_GRACEFUL_ASSERT @ce was defined
 
-@subsection corrade-changelog-latest-docs Documentation
+@subsection corrade-changelog-2018-10-docs Documentation
 
 -   All code snippets are now compiled, ensuring no deprecated APIs are used
     and no accidental compile errors are present
 -   @ref TestSuite::Comparator documentation mistakenly stated that it's
-    possible to have multiple @cpp operator()() @ce overloads for a single. Due
-    to implementation limitations it's not.
+    possible to have multiple @cpp operator()() @ce overloads for a single
+    pseudo-type. Due to implementation limitations it's not.
 
 @section corrade-changelog-2018-04 2018.04
 
