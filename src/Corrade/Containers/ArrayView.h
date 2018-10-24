@@ -135,7 +135,7 @@ template<class T> class ArrayView {
         /** @brief Whether the array is non-empty */
         /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
            pointer arithmetic. */
-        explicit operator bool() const { return _data; }
+        explicit operator bool() const { return _size; }
         #endif
 
         /** @brief Conversion to array type */
@@ -491,7 +491,7 @@ template<std::size_t size_, class T> class StaticArrayView {
         /** @brief Whether the array is non-empty */
         /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
            pointer arithmetic. */
-        explicit operator bool() const { return _data; }
+        constexpr explicit operator bool() const { return size_; }
         #endif
 
         /** @brief Conversion to array type */
