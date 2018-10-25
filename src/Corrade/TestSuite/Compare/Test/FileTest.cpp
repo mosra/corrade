@@ -37,6 +37,7 @@ struct FileTest: Tester {
     explicit FileTest();
 
     void same();
+    void sameCommonPrefix();
     void empty();
     void utf8Filename();
 
@@ -61,16 +62,16 @@ FileTest::FileTest() {
 }
 
 void FileTest::same() {
-    CORRADE_VERIFY(Comparator<Compare::File>(FILETEST_DIR)("base.txt", "base.txt"));
+    CORRADE_COMPARE_WITH("base.txt", "base.txt", Compare::File{FILETEST_DIR});
 }
 
 void FileTest::empty() {
-    CORRADE_VERIFY(Comparator<Compare::File>(FILETEST_DIR)("empty.txt", "empty.txt"));
+    CORRADE_COMPARE_WITH("empty.txt", "empty.txt", Compare::File{FILETEST_DIR});
 }
 
 void FileTest::utf8Filename() {
-    CORRADE_VERIFY(Comparator<Compare::File>(FILETEST_DIR)("hýždě.txt", "base.txt"));
-    CORRADE_VERIFY(Comparator<Compare::File>(FILETEST_DIR)("base.txt", "hýždě.txt"));
+    CORRADE_COMPARE_WITH("hýždě.txt", "base.txt", Compare::File{FILETEST_DIR});
+    CORRADE_COMPARE_WITH("base.txt", "hýždě.txt", Compare::File{FILETEST_DIR});
 }
 
 void FileTest::actualNotFound() {

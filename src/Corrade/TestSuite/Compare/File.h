@@ -80,7 +80,7 @@ See @ref TestSuite-Comparator-pseudo-types and @ref TestSuite-Comparator-paramet
 for more information.
 @see @ref Compare::FileToString, @ref Compare::StringToFile
 */
-class File {
+class CORRADE_TESTSUITE_EXPORT File {
     public:
         /**
          * @brief Constructor

@@ -60,15 +60,15 @@ FileToStringTest::FileToStringTest() {
 }
 
 void FileToStringTest::same() {
-    CORRADE_VERIFY(Comparator<Compare::FileToString>()(Utility::Directory::join(FILETEST_DIR, "base.txt"), "Hello World!"));
+    CORRADE_COMPARE_AS(Utility::Directory::join(FILETEST_DIR, "base.txt"), "Hello World!", Compare::FileToString);
 }
 
 void FileToStringTest::empty() {
-    CORRADE_VERIFY(Comparator<Compare::FileToString>()(Utility::Directory::join(FILETEST_DIR, "empty.txt"), ""));
+    CORRADE_COMPARE_AS(Utility::Directory::join(FILETEST_DIR, "empty.txt"), "", Compare::FileToString);
 }
 
 void FileToStringTest::utf8Filename() {
-    CORRADE_VERIFY(Comparator<Compare::FileToString>()(Utility::Directory::join(FILETEST_DIR, "hýždě.txt"), "Hello World!"));
+    CORRADE_COMPARE_AS(Utility::Directory::join(FILETEST_DIR, "hýždě.txt"), "Hello World!", Compare::FileToString);
 }
 
 void FileToStringTest::notFound() {
