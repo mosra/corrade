@@ -56,7 +56,15 @@ FileWatcher::FileWatcher(FileWatcher&&) noexcept = default;
 
 FileWatcher::~FileWatcher() = default;
 
-FileWatcher& FileWatcher::operator=(FileWatcher&&) noexcept = default;
+FileWatcher& FileWatcher::operator=(FileWatcher&&)
+    /* Clang 3.8 (the one I'm using for ASan builds on Travis) complains that
+       the calculated implicit move constructor doesn't match this declaration.
+       Maybe because it's deleting the string instead of swapping. So no
+       noexcept for you then. */
+    #if !defined(__clang__) || __clang_major__*100 + __clang_minor__ > 308
+    noexcept
+    #endif
+    = default;
 
 bool FileWatcher::hasChanged() {
     if(!_valid) return false;
