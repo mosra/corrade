@@ -394,8 +394,10 @@ void ManagerTest::noPluginInstancer() {
 
 void ManagerTest::queryNonexistent() {
     PluginManager::Manager<AbstractAnimal> manager;
+    const PluginManager::Manager<AbstractAnimal>& cmanager = manager;
     CORRADE_VERIFY(!manager.metadata("Nonexistent"));
-    CORRADE_COMPARE(manager.loadState("Nonexistent"), LoadState::NotFound);
+    CORRADE_VERIFY(!cmanager.metadata("Nonexistent"));
+    CORRADE_COMPARE(cmanager.loadState("Nonexistent"), LoadState::NotFound);
 }
 
 void ManagerTest::loadNonexistent() {
