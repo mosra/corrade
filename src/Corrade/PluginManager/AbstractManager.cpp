@@ -646,12 +646,13 @@ LoadState AbstractManager::unload(const std::string& plugin) {
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 LoadState AbstractManager::unloadInternal(Plugin& plugin) {
-    /* Plugin is not ready to unload, nothing to do */
+    /* Plugin is not ready to unload, nothing to do. The only thing this can
+       happen is when the plugin is static or not loaded (which is fine, so we
+       just return that load state) or when its metadata file is broken (which
+       is not good, but what can we do). All other states (such as UnloadFailed
+       etc.) are transient -- not saved into the local state, only returned. */
     if(plugin.loadState != LoadState::Loaded) {
-        if(!(plugin.loadState & (LoadState::Static|LoadState::NotLoaded|LoadState::WrongMetadataFile)))
-            Error{} << "PluginManager::Manager::unload(): plugin"
-                    << plugin.metadata->_name << "is not ready to unload:"
-                    << plugin.loadState;
+        CORRADE_INTERNAL_ASSERT(plugin.loadState & (LoadState::Static|LoadState::NotLoaded|LoadState::WrongMetadataFile));
         return plugin.loadState;
     }
 
