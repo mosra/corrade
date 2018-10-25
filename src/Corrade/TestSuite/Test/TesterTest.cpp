@@ -409,6 +409,7 @@ struct TesterTest: Tester {
     void skipBenchmarksNothingElse();
     void skipTestsBenchmarks();
 
+    void shuffleOne();
     void repeatEvery();
     void repeatAll();
 
@@ -445,6 +446,7 @@ TesterTest::TesterTest() {
               &TesterTest::skipBenchmarksNothingElse,
               &TesterTest::skipTestsBenchmarks,
 
+              &TesterTest::shuffleOne,
               &TesterTest::repeatEvery,
               &TesterTest::repeatAll,
 
@@ -742,6 +744,28 @@ void TesterTest::skipTestsBenchmarks() {
 
     CORRADE_COMPARE(result, 2);
     CORRADE_COMPARE(out.str(), "No test cases to run in TesterTest::Test!\n");
+}
+
+void TesterTest::shuffleOne() {
+    /* Shuffling just one test to quickly verify it doesn't blow up, at least */
+
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "4", "--shuffle" };
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(&out, &out);
+
+    CORRADE_VERIFY(result == 0);
+
+    std::string expected =
+        "Starting TesterTest::Test with 1 test cases...\n"
+        "    OK [04] equal()\n"
+        "Finished TesterTest::Test with 0 errors out of 1 checks.\n";
+    CORRADE_COMPARE(out.str(), expected);
 }
 
 void TesterTest::repeatEvery() {
