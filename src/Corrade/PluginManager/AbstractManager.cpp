@@ -704,6 +704,11 @@ LoadState AbstractManager::unloadInternal(Plugin& plugin) {
     #else
     if(!FreeLibrary(plugin.module)) {
     #endif
+        /* This is hard to test, the only possibility I can think of is
+           dlclose() when a symbol is still needed (by another plugin, e.g.),
+           but that's possible only on QNX, on linux dlclose() only unloads the
+           library if it's really not needed. Source:
+           https://stackoverflow.com/questions/28882298/error-on-dlclose-shared-objects-still-referenced */
         Error{} << "PluginManager::Manager::unload(): cannot unload plugin"
                 << plugin.metadata->_name << Debug::nospace << ":" << dlerror();
         plugin.loadState = LoadState::NotLoaded;
