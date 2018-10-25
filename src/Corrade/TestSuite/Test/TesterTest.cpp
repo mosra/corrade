@@ -1021,7 +1021,7 @@ void TesterTest::compareNoCommonType() {
 void TesterTest::compareAsOverload() {
     /* Just test that this compiles well */
     float a = 3.0f;
-    double b = 3.0f;
+    double b = 3.0;
     CORRADE_COMPARE_AS(a, b, float);
     CORRADE_COMPARE_AS(a, b, double);
 }
