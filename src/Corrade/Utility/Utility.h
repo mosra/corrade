@@ -46,7 +46,7 @@ class Configuration;
 class ConfigurationGroup;
 enum class ConfigurationValueFlag: std::uint8_t;
 typedef Containers::EnumSet<ConfigurationValueFlag> ConfigurationValueFlags;
-template<class T> struct ConfigurationValue;
+template<class> struct ConfigurationValue;
 class FileWatcher;
 
 class Debug;
@@ -54,15 +54,12 @@ class Warning;
 class Error;
 class Fatal;
 
-/* Directory used only statically */
 /* Endianness used only statically */
 class MurmurHash2;
 
 /* Resource doesn't need forward declaration */
 class Sha1;
-/* String used only statically */
 class Translator;
-/* Unicode used only statically */
 
 }}
 
