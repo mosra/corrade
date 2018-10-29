@@ -342,8 +342,13 @@ TweakableState parseTweakables(std::string& name, const std::string& filename, c
             if(variableState != TweakableState::NoChange) {
                 CORRADE_INTERNAL_ASSERT(variableState == TweakableState::Success);
                 Debug{} << "Utility::Tweakable::update(): updating" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
-                if(v.scopeLambda)
+                if(v.scopeLambda) {
+                    #ifndef CORRADE_GCC47_COMPATIBILITY
                     scopes.emplace(v.scopeLambda, v.scopeUserCall, v.scopeUserData);
+                    #else
+                    scopes.insert(std::make_tuple(v.scopeLambda, v.scopeUserCall, v.scopeUserData));
+                    #endif
+                }
                 state = TweakableState::Success;
             }
         }
