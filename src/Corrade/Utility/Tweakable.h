@@ -351,9 +351,13 @@ namespace Implementation {
     template<class T> struct TweakableTraits {
         static_assert(sizeof(T) <= TweakableStorageSize,
             "tweakable storage size too small for this type, save it via a unique_ptr instead");
-        #if !defined(__GNUC__) || defined(__clang__) || __GNUC__ >= 5
+        #if (!defined(__GNUC__) && !defined(__clang__)) || __GNUC__ >= 5 || __clang_major__ >= 4
         /* https://gcc.gnu.org/onlinedocs/gcc-4.9.2/libstdc++/manual/manual/status.html#status.iso.2011
-        vs https://gcc.gnu.org/onlinedocs/gcc-5.5.0/libstdc++/manual/manual/status.html#status.iso.2011 */
+           vs https://gcc.gnu.org/onlinedocs/gcc-5.5.0/libstdc++/manual/manual/status.html#status.iso.2011.
+           Also, it's not possible to detect what libstdc++ version is used
+           when on Clang, because their version macro is a RELEASE DATE that
+           has absolutely no relation to the version. So I'm cutting it off for
+           Clang 4 and lower as well, because I'm using 3.8 on Travis for ASan. */
         static_assert(std::is_trivially_copyable<T>::value,
             "tweakable type is not trivially copyable, use the advanced parser signature instead");
         static_assert(std::is_trivially_destructible<T>::value,
