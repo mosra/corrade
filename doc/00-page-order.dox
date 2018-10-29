@@ -42,11 +42,15 @@ namespace Corrade {
 
 @page corrade-debugoperators Debug output operators for custom types
 
-See also @ref corrade-configurationvalues.
+See also @ref corrade-configurationvalues and @ref corrade-tweakableliterals.
 
 @page corrade-configurationvalues Configuration value parsers and writers for custom types
 
-See also @ref corrade-debugoperators.
+See also @ref corrade-debugoperators and @ref corrade-tweakableliterals.
+
+@page corrade-tweakableliterals Tweakable literal parsers
+
+See also @ref corrade-debugoperators and @ref corrade-configurationvalues.
 
 @page deprecated Deprecated list
 */

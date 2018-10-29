@@ -917,7 +917,8 @@ Operators for printing types on Corrade's debug output should be marked with
 @include codingstyle/doxygen-debugoperator.h
 
 They will appear as related functions within documentation of class specified
-as the parameter and also crossreferenced from page @ref corrade-debugoperators.
+as the parameter and also crossreferenced from the @ref corrade-debugoperators
+page.
 
 For non-class enums there is @c \@debugoperatorenum command and for in-class
 enums the @c \@debugoperatorclassenum command:
@@ -930,14 +931,23 @@ documentation of given class.
 
 @subsubsection corrade-coding-style-documentation-commands-configurationvalue Configuration value parsers and writers
 
-Helper classes for parsing and writing configuration values should be marked
-with @c \@configurationvalue, and referenced from the class using
-@c \@configurationvalueref e.g.:
+Helper classes for parsing and writing @ref Utility::Configuration values
+should be marked with @c \@configurationvalue, and referenced from the class
+using @c \@configurationvalueref e.g.:
 
 @include codingstyle/doxygen-configurationvalue.h
 
 They will appear linked with documentation of class specified as the
-parameter and also crossreferenced from page `configurationvalues`.
+parameter and also crossreferenced from the @ref corrade-configurationvalues
+page.
+
+@subsubsection corrade-coding-style-documentation-commands-tweakableliteral Tweakable literal parsers
+
+@ref Utility::Tweakable literal parsers should be marked with
+@c \@tweakableliteral, similarly to how it's done for configuration value
+parsers. They will appear linked with documentation of the class specified as a
+parameter and also crossreferenced from the @ref corrade-tweakableliterals
+page.
 
 @subsubsection corrade-coding-style-documentation-commands-partialsupport Partially supported features
 
