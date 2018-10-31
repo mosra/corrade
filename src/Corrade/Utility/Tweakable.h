@@ -190,6 +190,8 @@ its documentation for more information.
 [Tweakable Constants](https://www.gamedev.net/articles/programming/general-and-gameplay-programming/tweakable-constants-r2731/)
 article by Joel Davis, thanks goes to Alexey Yurchenko ([\@alexesDev](https://github.com/alexesDev))
 for sharing this article.
+
+@experimental
 */
 class CORRADE_UTILITY_EXPORT Tweakable {
     public:

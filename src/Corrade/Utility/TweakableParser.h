@@ -84,6 +84,8 @@ already handled by the implementation. So for example a custom C++11 binary
 literal @cpp 110110110_b @ce, returning @cpp int @ce and supplementing the
 builtin C++14 literal @cpp 0b110110110 @ce, wouldn't be possible to implement,
 since @ref TweakableParser<int> is already defined.
+
+@experimental
 */
 template<class T> struct TweakableParser;
 
@@ -91,6 +93,7 @@ template<class T> struct TweakableParser;
 @brief Tweakable state
 
 @see @ref Tweakable::update()
+@experimental
 */
 enum class TweakableState: std::uint8_t {
     /**
@@ -142,6 +145,7 @@ Expects literals in the form @cpp 42 @ce, @cpp 0x2a @ce, @cpp 052 @ce or
 @cpp 0b101010 @ce, case-insensitive, with no suffixes. Unary @cpp + @ce or
 @cpp - @ce is allowed. C++14 group separator @c ' is not supported at the
 moment.
+@experimental
 */
 template<> struct CORRADE_UTILITY_EXPORT TweakableParser<int> {
     TweakableParser() = delete;
@@ -157,6 +161,7 @@ Expects literals in the form @cpp 42u @ce, @cpp 0x2au @ce, @cpp 052u @ce or
 @cpp 0b101010u @ce, case-insensitive. The `u` suffix is *not* optional, unary
 @cpp + @ce or @cpp - @ce is allowed. C++14 group separator @c ' is not
 supported at the moment.
+@experimental
 */
 template<> struct CORRADE_UTILITY_EXPORT TweakableParser<unsigned int> {
     TweakableParser() = delete;
@@ -172,6 +177,7 @@ Expects literals in the form @cpp 42l @ce, @cpp 0x2al @ce, @cpp 052l @ce or
 @cpp 0b101010l @ce, case-insensitive. The `l` suffix is *not* optional, unary
 @cpp + @ce or @cpp - @ce is allowed. C++14 group separator @c ' is not
 supported at the moment.
+@experimental
 */
 template<> struct CORRADE_UTILITY_EXPORT TweakableParser<long> {
     TweakableParser() = delete;
@@ -187,6 +193,7 @@ Expects literals in the form @cpp 42ul @ce, @cpp 0x2aul @ce, @cpp 052ul @ce or
 @cpp 0b101010ul @ce, case-insensitive. The `ul` suffix is *not* optional, unary
 @cpp + @ce or @cpp - @ce is allowed. C++14 group separator @c ' is not
 supported at the moment.
+@experimental
 */
 template<> struct CORRADE_UTILITY_EXPORT TweakableParser<unsigned long> {
     TweakableParser() = delete;
@@ -202,6 +209,7 @@ Expects literals in the form @cpp 42ll @ce, @cpp 0x2all @ce, @cpp 052ll @ce or
 @cpp 0b101010ll @ce, case-insensitive. The `ll` suffix is *not* optional, unary
 @cpp + @ce or @cpp - @ce is allowed. C++14 group separator @c ' is not
 supported at the moment.
+@experimental
 */
 template<> struct CORRADE_UTILITY_EXPORT TweakableParser<long long> {
     TweakableParser() = delete;
@@ -217,6 +225,7 @@ Expects literals in the form @cpp 42ull @ce, @cpp 0x2aull @ce, @cpp 052ull @ce
 or @cpp 0b101010ull @ce, case-insensitive. The `ull` suffix is *not* optional,
 unary @cpp + @ce or @cpp - @ce is allowed. C++14 group separator @c ' is not
 supported at the moment.
+@experimental
 */
 template<> struct CORRADE_UTILITY_EXPORT TweakableParser<unsigned long long> {
     TweakableParser() = delete;
@@ -231,6 +240,7 @@ template<> struct CORRADE_UTILITY_EXPORT TweakableParser<unsigned long long> {
 Expects literals in the form @cpp 0.42f @ce, @cpp 4.2e-1f @ce, @cpp .42f @ce
 and variants, case-insensitive. The `f` suffix is *not* optional, unary
 @cpp + @ce or @cpp - @ce is allowed.
+@experimental
 */
 template<> struct CORRADE_UTILITY_EXPORT TweakableParser<float> {
     TweakableParser() = delete;
@@ -245,6 +255,7 @@ template<> struct CORRADE_UTILITY_EXPORT TweakableParser<float> {
 Expects literals in the form @cpp 0.42 @ce, @cpp 4.2e-1 @ce, @cpp .42 @ce
 and variants, case-insensitive, with no suffixes. Unary @cpp + @ce or
 @cpp - @ce is allowed.
+@experimental
 */
 template<> struct CORRADE_UTILITY_EXPORT TweakableParser<double> {
     TweakableParser() = delete;
@@ -260,6 +271,7 @@ template<> struct CORRADE_UTILITY_EXPORT TweakableParser<double> {
 Expects literals in the form @cpp 0.42l @ce, @cpp 4.2e-1l @ce, @cpp .42l @ce
 and variants, case-insensitive. The `l` suffix is *not* optional, unary
 @cpp + @ce or @cpp - @ce is allowed.
+@experimental
 @partialsupport Not available in @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten"
     as JavaScript doesn't support doubles larger than 64 bits.
 */
@@ -276,6 +288,7 @@ template<> struct CORRADE_UTILITY_EXPORT TweakableParser<long double> {
 
 Expects literals in the form @cpp 'a' @ce. Escape characters other than
 <tt>\'</tt> and unicode char literals are not supported at the moment.
+@experimental
 */
 template<> struct CORRADE_UTILITY_EXPORT TweakableParser<char> {
     TweakableParser() = delete;
@@ -288,6 +301,7 @@ template<> struct CORRADE_UTILITY_EXPORT TweakableParser<char> {
 @brief Tweakable constant parser for the `bool` type
 
 Expects literals in the form @cpp true @ce or @cpp false @ce.
+@experimental
 */
 template<> struct CORRADE_UTILITY_EXPORT TweakableParser<bool> {
     TweakableParser() = delete;
