@@ -63,9 +63,11 @@ class MurmurHash2;
 class Sha1;
 class Translator;
 
+#if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
 /* Tweakable doesn't need forward declaration */
 template<class> struct TweakableParser;
 enum class TweakableState: std::uint8_t;
+#endif
 
 }}
 

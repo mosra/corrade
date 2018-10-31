@@ -29,6 +29,9 @@
  * @brief Class @ref Corrade::Utility::Tweakable, macro @ref CORRADE_TWEAKABLE()
  */
 
+#include "Corrade/configure.h"
+
+#if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include <memory>
 
 #include "Corrade/Containers/ArrayView.h"
@@ -192,6 +195,9 @@ article by Joel Davis, thanks goes to Alexey Yurchenko ([\@alexesDev](https://gi
 for sharing this article.
 
 @experimental
+@partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
+    @ref CORRADE_TARGET_WINDOWS "Windows" platforms and on
+    @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
 */
 class CORRADE_UTILITY_EXPORT Tweakable {
     public:
@@ -394,5 +400,8 @@ template<class T> T Tweakable::operator()(const char* file, int line, int variab
 }
 
 }}
+#else
+#error this header is available only on Unix, non-RT Windows and Emscripten
+#endif
 
 #endif
