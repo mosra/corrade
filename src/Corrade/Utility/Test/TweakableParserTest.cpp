@@ -134,7 +134,7 @@ constexpr struct {
     {"exponential positive", "3.5e+1", 35.0f},
     {"exponential negative", "350.0e-1", 35.0f},
     {"positive", "+35.0", 35.0f},
-    {"negative", "-35.0", -35.0}
+    {"negative", "-35.0", -35.0f}
 };
 
 constexpr struct {
