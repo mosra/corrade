@@ -27,6 +27,8 @@ namespace Corrade {
 /** @page corrade-cmake Using Corrade with CMake
 @brief Guide how to find and use Corrade with CMake build system
 
+@m_keywords{CMake}
+
 @tableofcontents
 
 Corrade uses CMake build system for both building and integration into your
