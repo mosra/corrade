@@ -82,11 +82,13 @@ class CORRADE_UTILITY_EXPORT FileWatcher {
 
         /** @brief Move assignment */
         FileWatcher& operator=(FileWatcher&&)
-            /* Clang 3.8 (the one I'm using for ASan builds on Travis)
-               complains that the calculated implicit move constructor doesn't
-               match this declaration. Maybe because it's deleting the string
-               instead of swapping. So no noexcept for you then. */
-            #if !defined(__clang__) || __clang_major__*100 + __clang_minor__ > 308
+            /* std::string move assignment in libstdc++ before 5.5 is not
+               noexcept: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=58265
+               It went through on GCC 4.7, but apparently only because it
+               doesn't care. This also affect Clang 3.8 I'm using on Travis CI
+               for ASan builds and since it's impossible to check for a
+               libstdc++ version, I'm disabling it for Clang as well. */
+            #if (!defined(__clang__) && !defined(__GNUC__)) || __clang_major__*100 + __clang_minor__ > 308 || __GNUC__*100 + __GNUC_MINOR__ >= 505
             noexcept
             #endif
             ;
