@@ -36,7 +36,7 @@ namespace Corrade {
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
 -   Initial implementation of a @ref Utility::FileWatcher utility for
-    monitoring changes to a file
+    monitoring changes to a file (see also [mosra/corrade#54](https://github.com/mosra/corrade/issues/54))
 -   New @ref Utility::Tweakable class, implementing tweakable constants for
     hot-reload
 
