@@ -148,17 +148,6 @@ corrade_add_test(UtilityDirectoryTest ${UtilityDirectoryTest_SRCS}
         DirectoryTestFilesUtf8/hýždě)
 target_include_directories(UtilityDirectoryTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-# Unix-specific / non-RT-Windows-specific functionality. Also Emscripten.
-if(CORRADE_TARGET_UNIX OR (CORRADE_TARGET_WINDOWS AND NOT CORRADE_TARGET_WINDOWS_RT) OR CORRADE_TARGET_EMSCRIPTEN)
-    corrade_add_test(UtilityFileWatcherTest FileWatcherTest.cpp)
-    target_include_directories(UtilityFileWatcherTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-
-    corrade_add_test(UtilityTweakableTest TweakableTest.cpp)
-    corrade_add_test(UtilityTweakableIntegrationTest TweakableIntegrationTest.cpp
-        FILES TweakableIntegrationTest.cpp)
-    target_include_directories(UtilityTweakableIntegrationTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-endif()
-
 corrade_add_test(UtilityFormatTest FormatTest.cpp LIBRARIES CorradeUtilityTestLib)
 target_include_directories(UtilityFormatTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -224,8 +213,9 @@ set_target_properties(
     UtilityConfigurationTest
     UtilityConfigurationValueTest
     UtilityDebugTest
-    UtilityFatalTest
     UtilityDirectoryTest
+    UtilityFatalTest
+    UtilityFormatTest
     UtilityHashDigestTest
     UtilityMacrosTest
     UtilityResourceTest
@@ -241,3 +231,19 @@ set_target_properties(
     ResourceTestEmptyFileData-dependencies
     ResourceTestNothingData-dependencies
     PROPERTIES FOLDER "Corrade/Utility/Test")
+
+# Unix-specific / non-RT-Windows-specific functionality. Also Emscripten.
+if(CORRADE_TARGET_UNIX OR (CORRADE_TARGET_WINDOWS AND NOT CORRADE_TARGET_WINDOWS_RT) OR CORRADE_TARGET_EMSCRIPTEN)
+    corrade_add_test(UtilityFileWatcherTest FileWatcherTest.cpp)
+    target_include_directories(UtilityFileWatcherTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+    corrade_add_test(UtilityTweakableTest TweakableTest.cpp)
+    corrade_add_test(UtilityTweakableIntegrationTest TweakableIntegrationTest.cpp
+        FILES TweakableIntegrationTest.cpp)
+    target_include_directories(UtilityTweakableIntegrationTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+    set_target_properties(
+        UtilityFileWatcherTest
+        UtilityTweakableTest
+        PROPERTIES FOLDER "Corrade/Utility/Test")
+endif()
