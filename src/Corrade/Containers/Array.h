@@ -29,6 +29,7 @@
  * @brief Class @ref Corrade::Containers::Array
  */
 
+#include <new>
 #include <type_traits>
 #include <utility>
 

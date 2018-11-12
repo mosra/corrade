@@ -29,6 +29,7 @@
  * @brief Class @ref Corrade::Containers::StaticArray
  */
 
+#include <new>
 #include <type_traits>
 #include <utility>
 
