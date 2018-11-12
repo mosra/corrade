@@ -462,14 +462,14 @@ macro for automatic call:
 /** @brief Plugin version */
 #define CORRADE_PLUGIN_VERSION 5
 
-/**
+/** @hideinitializer
 @brief Register static or dynamic lugin
 @param name          Name of static plugin (equivalent of dynamic plugin
      filename)
 @param className     Plugin class name
-@param interface     Interface name (the same as is defined with
-     CORRADE_PLUGIN_INTERFACE() in plugin base class)
-@hideinitializer
+@param interface     Interface name (the same as is defined by the
+    @ref Corrade::PluginManager::AbstractPlugin::pluginInterface() "pluginInterface()"
+    member of given plugin class)
 
 If the plugin is built as **static** (using CMake command
 @ref corrade-cmake-add-static-plugin "corrade_add_static_plugin()"), registers
