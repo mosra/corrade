@@ -28,6 +28,10 @@ namespace Corrade {
 @brief Guide how to find and use Corrade with CMake build system
 
 @m_keywords{CMake}
+@m_keyword{corrade_add_resource,corrade_add_resource(),2}
+@m_keyword{corrade_add_plugin,corrade_add_plugin(),2}
+@m_keyword{corrade_add_static_plugin,corrade_add_static_plugin(),2}
+@m_keyword{corrade_find_dlls_for_libs,corrade_find_dlls_for_libs(),2}
 
 @tableofcontents
 
