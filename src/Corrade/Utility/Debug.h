@@ -598,7 +598,7 @@ template<class ...Args> Debug& operator<<(Debug& debug, const std::tuple<Args...
  * @overload
  */
 template<class T, class U> Debug& operator<<(Debug& debug, const std::pair<T, U>& value) {
-    return debug << std::tuple<T, U>(value);
+    return debug << "(" << Debug::nospace << value.first << Debug::nospace << "," << value.second << Debug::nospace << ")";
 }
 
 /**
