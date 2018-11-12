@@ -254,7 +254,8 @@ class CORRADE_UTILITY_EXPORT Tweakable {
          *
          * Be sure to call this function before any tweakable constant or
          * @ref scope() is used for consistent results. Calling the function
-         * again after the tweakable was already enabled is not allowed.
+         * again after the tweakable was already enabled will cause the
+         * instance to reset all previous internal state.
          * @see @ref isEnabled(), @ref enable(const std::string&, const std::string&),
          *      @ref Utility-Tweakable-usage-disabling
          */
@@ -276,7 +277,8 @@ class CORRADE_UTILITY_EXPORT Tweakable {
          *
          * Be sure to call this function before any tweakable constant or
          * @ref scope() is used for consistent results. Calling the function
-         * again after the tweakable was already enabled is not allowed.
+         * again after the tweakable was already enabled will cause the
+         * instance to reset all previous internal state.
          * @see @ref isEnabled(), @ref Utility-Tweakable-usage-disabling
          */
         void enable(const std::string& prefix, const std::string& replace);

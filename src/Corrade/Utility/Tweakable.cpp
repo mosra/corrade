@@ -77,7 +77,6 @@ Tweakable::~Tweakable() {
 void Tweakable::enable() { Tweakable::enable({}, {}); }
 
 void Tweakable::enable(const std::string& prefix, const std::string& replace) {
-    CORRADE_ASSERT(!_data, "Utility::Tweakable::enable(): the tweakable is already enabled", );
     _data.reset(new Data{prefix, replace});
 }
 
