@@ -134,8 +134,6 @@ set_tests_properties(UtilityFatalTest PROPERTIES WILL_FAIL ON)
 
 set(UtilityDirectoryTest_SRCS DirectoryTest.cpp)
 if(CORRADE_TARGET_IOS)
-    set(UtilityDirectoryTest_RESOURCES
-        DirectoryTestFiles)
     set_source_files_properties(DirectoryTestFiles PROPERTIES
         MACOSX_PACKAGE_LOCATION Resources)
     list(APPEND UtilityDirectoryTest_SRCS DirectoryTestFiles)
