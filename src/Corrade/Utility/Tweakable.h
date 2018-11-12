@@ -202,6 +202,13 @@ for sharing this article.
 class CORRADE_UTILITY_EXPORT Tweakable {
     public:
         /**
+         * @brief Current instance
+         *
+         * Expects that an instance exists.
+         */
+        static Tweakable& instance();
+
+        /**
          * @brief Constructor
          *
          * Makes a global instance available to the @ref CORRADE_TWEAKABLE()
@@ -315,7 +322,6 @@ class CORRADE_UTILITY_EXPORT Tweakable {
     private:
     #endif
         /* Internal API used by the CORRADE_TWEAKABLE() macro */
-        static Tweakable& instance();
         template<class T> T operator()(const char* filename, int line, int variable, T&& value);
 
     private:
