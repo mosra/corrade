@@ -225,7 +225,7 @@ TweakableState parseTweakables(std::string& name, const std::string& filename, c
         if(pos && ((data[pos - 1] >= 'A' && data[pos - 1] <= 'Z') ||
                    (data[pos - 1] >= 'a' && data[pos - 1] <= 'z') ||
                    (data[pos - 1] >= '0' && data[pos - 1] <= '9') ||
-                    data[pos - 1] == '_' || data[pos - 1] < 0)) {
+                    data[pos - 1] == '_' || (data[pos - 1] & 0x80))) {
             pos += name.size();
             continue;
         }
