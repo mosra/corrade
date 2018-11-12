@@ -31,6 +31,8 @@
 
 namespace Corrade { namespace PluginManager {
 
+std::string AbstractPlugin::pluginInterface() { return {}; }
+
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 std::vector<std::string> AbstractPlugin::pluginSearchPaths() { return {}; }
 #endif

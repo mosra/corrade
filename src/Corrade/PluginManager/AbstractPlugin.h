@@ -54,12 +54,8 @@ plugin-specific metadata.
 
 Plugin interface classes have to provide the following:
 
--   A @cpp public @ce @cpp static std::string pluginInterface() @ce function,
-    defining a unique plugin interface string. Plugins implementing the
-    interface have to define exactly the same interface string, otherwise they
-    won't be loaded. A good practice is to use a "Java package name"-style
-    syntax. The interface name should also contain version identifier to make
-    sure the plugin will not be loaded with incompatible interface version.
+-   A @ref pluginInterface() function, defining a unique plugin interface
+    string. See its documentation for details.
 -   A @ref pluginSearchPaths() function, defining hardcoded search paths for
     plugins in this interface (if any). See its documentation for details.
 -   A pair of @ref initialize() / @ref finalize() functions, used to initialize
@@ -88,6 +84,19 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
     template<class> friend class AbstractManagingPlugin;
 
     public:
+        /**
+         * @brief Plugin interface string
+         *
+         * Plugins implementing given interface have to define exactly the same
+         * interface string, otherwise they won't be loaded. This can be used
+         * to ensure the interface and plugin is correctly paired even in case
+         * where there is no ABI mismatch A good practice is to use a "Java
+         * package name"-style syntax. The interface name should also contain
+         * version identifier to make sure the plugin will not be loaded with
+         * incompatible interface version.
+         */
+        static std::string pluginInterface();
+
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         /**
          * @brief Plugin search paths

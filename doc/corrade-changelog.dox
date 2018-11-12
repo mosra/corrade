@@ -40,6 +40,14 @@ namespace Corrade {
 -   New @ref Utility::Tweakable class, implementing tweakable constants for
     hot-reload
 
+@subsection corrade-changelog-latest-changes Changes and improvements
+
+@subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
+
+-   Plugin interfaces now have the
+    @ref PluginManager::AbstractPlugin::pluginInterface() "pluginInterface()"
+    function optional to make implementing hot-reload interfaces less verbose
+
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
 -   It was not possible to use @ref TestSuite::Compare::File with
