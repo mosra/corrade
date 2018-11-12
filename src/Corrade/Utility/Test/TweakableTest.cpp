@@ -39,6 +39,9 @@ namespace Corrade { namespace Utility { namespace Test {
 struct TweakableTest: TestSuite::Tester {
     explicit TweakableTest();
 
+    void constructCopy();
+    void constructMove();
+
     void findTweakableAlias();
     void findTweakableAliasDefinedEmpty();
 
@@ -119,6 +122,9 @@ namespace {
 }
 
 TweakableTest::TweakableTest() {
+    addTests({&TweakableTest::constructCopy,
+              &TweakableTest::constructMove});
+
     addInstancedTests({&TweakableTest::findTweakableAlias},
         Containers::arraySize(TweakableAliasData));
 
@@ -133,6 +139,18 @@ TweakableTest::TweakableTest() {
                    &TweakableTest::benchmarkEnabled}, 200);
 
     addTests({&TweakableTest::debugState});
+}
+
+void TweakableTest::constructCopy() {
+    CORRADE_VERIFY(!(std::is_constructible<Tweakable, const Tweakable&>{}));
+    CORRADE_VERIFY(!(std::is_assignable<Tweakable, const Tweakable&>{}));
+}
+
+void TweakableTest::constructMove() {
+    /* For a move we would need some NoCreate state and the destructor not
+       checking for globalInstance == this */
+    CORRADE_VERIFY(!(std::is_constructible<Tweakable, Tweakable&&>{}));
+    CORRADE_VERIFY(!(std::is_assignable<Tweakable, Tweakable&&>{}));
 }
 
 void TweakableTest::findTweakableAlias() {

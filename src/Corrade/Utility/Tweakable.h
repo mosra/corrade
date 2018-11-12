@@ -218,6 +218,18 @@ class CORRADE_UTILITY_EXPORT Tweakable {
          */
         explicit Tweakable();
 
+        /** @brief Copying is not allowed */
+        Tweakable(const Tweakable&) = delete;
+
+        /** @brief Moving is not allowed */
+        Tweakable(Tweakable&&) = delete;
+
+        /** @brief Copying is not allowed */
+        Tweakable& operator=(const Tweakable&) = delete;
+
+        /** @brief Moving is not allowed */
+        Tweakable& operator=(Tweakable&&) = delete;
+
         /**
          * @brief Destructor
          *
