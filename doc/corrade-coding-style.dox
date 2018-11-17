@@ -954,6 +954,18 @@ page.
 Features that are not supported on all platform should be marked with
 @c \@partialsupport, listing unsupported platforms and optionally reason why.
 
+@subsubsection corrade-coding-style-documentation-commands-thirdparty Third party dependency licensing info
+
+Libraries, plugins and executables that make use of third party code should be
+visibly marked with @c \@thirdparty, in a color-coded block according to the
+description in @ref corrade-credits-third-party and highlighting the license
+name as well. It should link to the original license text, ideally also to a
+matching overview on https://choosealicense.com and have a short sentence
+explaining the main requirements (e.g., whether it's attribution, source code
+release, dynamic linking, explicit licensing for commercial use etc.) Example:
+
+@include codingstyle/doxygen-thirdparty.h
+
 @subsubsection corrade-coding-style-documentation-commands-experimental Backwards compatibility and experimental features
 
 Common practice is to keep backwards compatibility when refactoring APIs --- if
