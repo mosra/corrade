@@ -953,6 +953,7 @@ page.
 
 Features that are not supported on all platform should be marked with
 @c \@partialsupport, listing unsupported platforms and optionally reason why.
+They will be all crosslinked through the @ref corrade-partialsupport page.
 
 @subsubsection corrade-coding-style-documentation-commands-thirdparty Third party dependency licensing info
 

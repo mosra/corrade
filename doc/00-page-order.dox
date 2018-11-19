@@ -32,7 +32,7 @@ namespace Corrade {
 @page corrade-cmake Using Corrade with CMake
 @page corrade-example-index Examples
 @page corrade-rc Resource compiler
-@page partialsupport List of partially supported features
+@page corrade-partialsupport List of partially supported features
 @m_keyword{Partially supported features,,}
 @page corrade-changelog Changelog
 @page corrade-changelog-old Archived changelogs
