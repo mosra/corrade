@@ -325,7 +325,7 @@ function(corrade_add_test test_name)
                 # add to the list
                 get_filename_component(input_filename ${input_filename} ABSOLUTE)
                 list(APPEND files ${input_filename}@${output_filename})
-                list(APPEND absolute_files ${absolute_input_filename})
+                list(APPEND absolute_files ${input_filename})
             elseif(_DOING_ARGUMENTS)
                 list(APPEND arguments ${arg})
             else()

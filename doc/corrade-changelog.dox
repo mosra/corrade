@@ -53,6 +53,10 @@ namespace Corrade {
 -   It was not possible to use @ref TestSuite::Compare::File with
     @ref CORRADE_COMPARE_WITH() because its symbols were not exported by
     mistake
+-   The `FILES` section in @ref corrade-cmake-add-test "corrade_add_test()" was
+    mistakenly ignored everywhere except Android and Emscripten, making
+    cross-platform testing more prone to errors. Now `ctest` properly fails
+    when the `FILES` section contains a file that doesn't exist.
 
 @section corrade-changelog-2018-10 2018.10
 
