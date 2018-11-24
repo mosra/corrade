@@ -989,12 +989,12 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         int exec(std::ostream* logOutput, std::ostream* errorOutput);
 
         /* Compare two identical types without explicit type specification */
-        template<class T> void compare(const std::string& actual, const T& actualValue, const std::string& expected, const T& expectedValue) {
+        template<class T> void compare(const char* actual, const T& actualValue, const char* expected, const T& expectedValue) {
             compareAs<T, T, T>(actual, actualValue, expected, expectedValue);
         }
 
         /* Compare two different types without explicit type specification */
-        template<class Actual, class Expected> void compare(const std::string& actual, const Actual& actualValue, const std::string& expected, const Expected& expectedValue) {
+        template<class Actual, class Expected> void compare(const char* actual, const Actual& actualValue, const char* expected, const Expected& expectedValue) {
             compareAs<typename Implementation::CommonType<Actual, Expected>::Type, Actual, Expected>(actual, actualValue, expected, expectedValue);
         }
 
@@ -1003,25 +1003,25 @@ class CORRADE_TESTSUITE_EXPORT Tester {
            call only `CORRADE_COMPARE_AS(a, b, Compare::Containers)` without
            explicitly specifying the type, e.g.
            `CORRADE_COMPARE_AS(a, b, Compare::Containers<std::vector<int>>)` */
-        template<template<class> class T, class Actual, class Expected> void compareAs(const std::string& actual, const Actual& actualValue, const std::string& expected, const Expected& expectedValue) {
+        template<template<class> class T, class Actual, class Expected> void compareAs(const char* actual, const Actual& actualValue, const char* expected, const Expected& expectedValue) {
             compareAs<T<typename Implementation::CommonType<Actual, Expected>::Type>, Actual, Expected>(actual, actualValue, expected, expectedValue);
         }
 
         /* Compare two different types with explicit type specification */
-        template<class T, class U, class V> void compareAs(const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
+        template<class T, class U, class V> void compareAs(const char* actual, const U& actualValue, const char* expected, const V& expectedValue) {
             compareWith(Comparator<T>(), actual, actualValue, expected, expectedValue);
         }
 
         /* Compare two different types with explicit comparator specification */
-        template<class T, class U, class V> void compareWith(Comparator<T>& comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue);
-        template<class T, class U, class V> void compareWith(Comparator<T>&& comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
+        template<class T, class U, class V> void compareWith(Comparator<T>& comparator, const char* actual, const U& actualValue, const char* expected, const V& expectedValue);
+        template<class T, class U, class V> void compareWith(Comparator<T>&& comparator, const char* actual, const U& actualValue, const char* expected, const V& expectedValue) {
             return compareWith<T, U, V>(comparator, actual, actualValue, expected, expectedValue);
         }
 
-        template<class T> void verify(const std::string& expression, T&& value);
+        template<class T> void verify(const char* expression, T&& value);
 
         /* Called from CORRADE_TEST_MAIN() */
-        void registerTest(std::string filename, std::string name);
+        void registerTest(const char* filename, const char* name);
 
         /* Called from CORRADE_SKIP() */
         void skip(const std::string& message);
@@ -1047,7 +1047,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
         /* Called from all CORRADE_*() verification/skip/xfail macros through
            _CORRADE_REGISTER_TEST_CASE() */
-        void registerTestCase(std::string&& name, int line);
+        void registerTestCase(const char* name, int line);
 
     private:
         class Exception {};
@@ -1110,7 +1110,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         static int* _argc;
         static char** _argv;
 
-        void verifyInternal(const std::string& expression, bool value);
+        void verifyInternal(const char* expression, bool value);
         void printTestCaseLabel(Debug& out, const char* status, Debug::Color statusColor, Debug::Color labelColor);
 
         void wallTimeBenchmarkBegin();
@@ -1353,7 +1353,7 @@ one iteration.
     _CORRADE_REGISTER_TEST_CASE();                                          \
     for(CORRADE_UNUSED auto&& _CORRADE_HELPER_PASTE(benchmarkIteration, __func__): Tester::createBenchmarkRunner(batchSize))
 
-template<class T, class U, class V> void Tester::compareWith(Comparator<T>& comparator, const std::string& actual, const U& actualValue, const std::string& expected, const V& expectedValue) {
+template<class T, class U, class V> void Tester::compareWith(Comparator<T>& comparator, const char* actual, const U& actualValue, const char* expected, const V& expectedValue) {
     ++_checkCount;
 
     /* Store (references to) possibly implicitly-converted values,
@@ -1385,7 +1385,7 @@ template<class T, class U, class V> void Tester::compareWith(Comparator<T>& comp
     throw Exception();
 }
 
-template<class T> void Tester::verify(const std::string& expression, T&& value) {
+template<class T> void Tester::verify(const char* expression, T&& value) {
     if(value) verifyInternal(expression, true);
     else verifyInternal(expression, false);
 }

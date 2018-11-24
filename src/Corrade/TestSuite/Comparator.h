@@ -29,8 +29,6 @@
  * @brief Class @ref Corrade::TestSuite::Comparator
  */
 
-#include <string>
-
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Debug.h"
 
@@ -99,7 +97,7 @@ template<class T> class Comparator {
         bool operator()(const T& actual, const T& expected);
 
         /** @brief Print error message, assuming the two values are inequal */
-        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const;
+        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const;
 
     private:
         const T* actualValue;
@@ -116,7 +114,7 @@ template<class T> bool Comparator<T>::operator()(const T& actual, const T& expec
     return false;
 }
 
-template<class T> void Comparator<T>::printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
+template<class T> void Comparator<T>::printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
     CORRADE_INTERNAL_ASSERT(actualValue && expectedValue);
     e << "Values" << actual << "and" << expected << "are not the same, actual is\n       "
       << *actualValue << Utility::Debug::newline << "        but expected\n       " << *expectedValue;

@@ -72,7 +72,7 @@ template<class T> class Comparator<Compare::Container<T>> {
     public:
         bool operator()(const T& actual, const T& expected);
 
-        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const;
+        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const;
 
     private:
         const T* _actualContents;
@@ -93,7 +93,7 @@ template<class T> bool Comparator<Compare::Container<T>>::operator()(const T& ac
     return true;
 }
 
-template<class T> void Comparator<Compare::Container<T>>::printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
+template<class T> void Comparator<Compare::Container<T>>::printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
     e << "Containers" << actual << "and" << expected << "have different";
     if(_actualContents->size() != _expectedContents->size())
         e << "size, actual" << _actualContents->size() << "but" << _expectedContents->size() << "expected. Actual contents:\n       ";

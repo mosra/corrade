@@ -46,7 +46,7 @@ template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::File> {
 
         bool operator()(const std::string& actualFilename, const std::string& expectedFilename);
 
-        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const;
+        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const;
 
     private:
         enum class State {

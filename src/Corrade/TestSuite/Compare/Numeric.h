@@ -141,7 +141,7 @@ template<class T> class Comparator<Compare::Less<T>> {
             return bool(*_actualValue < *_expectedValue);
         }
 
-        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
+        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
             e << "Value" << actual << "is not less than" << expected
               << Utility::Debug::nospace << ", actual is" << *_actualValue
               << "but expected <" << *_expectedValue;
@@ -160,7 +160,7 @@ template<class T> class Comparator<Compare::LessOrEqual<T>> {
             return bool(*_actualValue <= *_expectedValue);
         }
 
-        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
+        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
             e << "Value" << actual << "is not less than or equal to" << expected
               << Utility::Debug::nospace << ", actual is" << *_actualValue
               << "but expected <=" << *_expectedValue;
@@ -179,7 +179,7 @@ template<class T> class Comparator<Compare::GreaterOrEqual<T>> {
             return bool(*_actualValue >= *_expectedValue);
         }
 
-        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
+        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
             e << "Value" << actual << "is not greater than or equal to" << expected
               << Utility::Debug::nospace << ", actual is" << *_actualValue
               << "but expected >=" << *_expectedValue;
@@ -198,7 +198,7 @@ template<class T> class Comparator<Compare::Greater<T>> {
             return bool(*_actualValue > *_expectedValue);
         }
 
-        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
+        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
             e << "Value" << actual << "is not greater than" << expected
               << Utility::Debug::nospace << ", actual is" << *_actualValue
               << "but expected >" << *_expectedValue;
@@ -222,7 +222,7 @@ template<class T> class Comparator<Compare::Around<T>> {
                      *_expectedValue + _epsilon < *_actualValue);
         }
 
-        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
+        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
             e << "Value" << actual << "is not around" << expected
               << Utility::Debug::nospace << ", actual is" << *_actualValue
               << "but" << *_expectedValue - _epsilon << "<= expected <="

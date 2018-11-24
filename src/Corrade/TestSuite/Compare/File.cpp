@@ -57,7 +57,7 @@ bool Comparator<Compare::File>::operator()(const std::string& actualFilename, co
     return _actualContents == _expectedContents;
 }
 
-void Comparator<Compare::File>::printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
+void Comparator<Compare::File>::printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
     if(_actualState != State::Success) {
         e << "Actual file" << actual << "(" + _actualFilename + ")" << "cannot be read.";
         return;

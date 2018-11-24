@@ -29,8 +29,6 @@
  * @brief Class @ref Corrade::TestSuite::Comparator specialized for floating-point values
  */
 
-#include <string>
-
 #include "Corrade/TestSuite/TestSuite.h"
 #include "Corrade/TestSuite/visibility.h"
 #include "Corrade/Utility/Utility.h"
@@ -53,7 +51,7 @@ namespace Implementation {
     template<class T> class CORRADE_TESTSUITE_EXPORT FloatComparator {
         public:
             bool operator()(T actual, T expected);
-            void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const;
+            void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const;
 
         private:
             T _actualValue, _expectedValue;

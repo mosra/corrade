@@ -449,7 +449,7 @@ void Tester::printTestCaseLabel(Debug& out, const char* const status, const Debu
     out << Debug::resetColor;
 }
 
-void Tester::verifyInternal(const std::string& expression, bool expressionValue) {
+void Tester::verifyInternal(const char* expression, bool expressionValue) {
     ++_checkCount;
 
     /* If the expression is true or the failure is expected, done */
@@ -474,7 +474,7 @@ void Tester::verifyInternal(const std::string& expression, bool expressionValue)
     throw Exception();
 }
 
-void Tester::registerTest(std::string filename, std::string name) {
+void Tester::registerTest(const char* filename, const char* name) {
     _testFilename = std::move(filename);
     if(_testName.empty()) _testName = std::move(name);
 }
@@ -518,7 +518,7 @@ void Tester::setBenchmarkName(std::string&& name) {
     _benchmarkName = std::move(name);
 }
 
-void Tester::registerTestCase(std::string&& name, int line) {
+void Tester::registerTestCase(const char* name, int line) {
     CORRADE_ASSERT(_testCase,
         "TestSuite::Tester: using verification macros outside of test cases is not allowed", );
 
