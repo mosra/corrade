@@ -178,8 +178,7 @@ AbstractManager::AbstractManager(std::string pluginInterface, const std::vector<
 #else
 AbstractManager::AbstractManager(std::string pluginInterface):
 #endif
-    /* GCC 4.7 doesn't like initializing references with {} */
-    _plugins(initializeGlobalPluginStorage()), _pluginInterface{std::move(pluginInterface)}
+    _plugins(initializeGlobalPluginStorage()), _pluginInterface(std::move(pluginInterface))
 {
     /* Find static plugins which have the same interface and have not
        assigned manager to them */

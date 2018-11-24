@@ -211,10 +211,7 @@ template<class T> class Comparator<Compare::Greater<T>> {
 
 template<class T> class Comparator<Compare::Around<T>> {
     public:
-        /* GCC 4.7 and 4.9 (Travis CI Ubuntu and Travis CI Android) complain
-           about too many intiializers for _epsilon{epsilon} in the test that
-           uses an empty Bar structure. So can't use {} here. */
-        explicit Comparator(T epsilon): _epsilon(epsilon) {}
+        explicit Comparator(T epsilon): _epsilon{epsilon} {}
 
         bool operator()(const T& actual, const T& expected) {
             _actualValue = &actual;

@@ -120,8 +120,6 @@ Features of found Corrade library are exposed in these variables, they are
 also available as preprocessor variables if you include
 @ref Corrade/Corrade.h "Corrade/Corrade.h":
 
--   `CORRADE_GCC47_COMPATIBILITY` --- Defined if compiled with compatibility
-    mode for GCC 4.7
 -   `CORRADE_MSVC2017_COMPATIBILITY` --- Defined if compiled with compatibility
     mode for MSVC 2017
 -   `CORRADE_MSVC2015_COMPATIBILITY` --- Defined if compiled with compatibility

@@ -63,7 +63,6 @@ project(Corrade ${LANG})
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 include(CMakeDependentOption)
-option(GCC47_COMPATIBILITY "Enable compatibility mode for GCC 4.7 (might disable some features)" OFF)
 option(MSVC2017_COMPATIBILITY "Enable compatibility mode for MSVC 2017 (might disable some features)" OFF)
 option(MSVC2015_COMPATIBILITY "Enable compatibility mode for MSVC 2015 (might disable some features)" OFF)
 
@@ -171,13 +170,10 @@ endif()
 
 # Detect and auto-enable compiler compatibility
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0")
-        message(FATAL_ERROR "Corrade cannot be used with GCC < 4.7. Sorry.")
-    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.1")
-        if(NOT GCC47_COMPATIBILITY)
-            set(GCC47_COMPATIBILITY ON)
-            message(WARNING "GCC < 4.8.1 detected, automatically enabling GCC47_COMPATIBILITY. Note that some features may not be available with this compiler.")
-        endif()
+    # The oldest known and supported GCC currently in use is 4.8.5 on CentOS 7
+    # (needed for some server installations)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.1")
+        message(FATAL_ERROR "Corrade cannot be used with GCC < 4.8.1. Sorry.")
     endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.0")
@@ -193,10 +189,6 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
             message(WARNING "MSVC 2017 detected, automatically enabling MSVC2017_COMPATIBILITY. Note that some features may not be available with this compiler.")
         endif()
     endif()
-endif()
-
-if(GCC47_COMPATIBILITY)
-    set(CORRADE_GCC47_COMPATIBILITY 1)
 endif()
 
 if(MSVC2017_COMPATIBILITY)

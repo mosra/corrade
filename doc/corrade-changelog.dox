@@ -31,6 +31,11 @@ namespace Corrade {
 
 @section corrade-changelog-latest Changes since 2018.10
 
+@subsection corrade-changelog-latest-dependencies Dependency changes
+
+-   Minimal supported GCC version is now 4.8.1, GCC 4.7 is not supported
+    anymore.
+
 @subsection corrade-changelog-latest-new New features
 
 @subsubsection corrade-changelog-latest-new-containers Containers library

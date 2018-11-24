@@ -39,19 +39,8 @@ endif()
 # Check compiler version
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # Don't allow to use compilers older than what compatibility mode allows
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0")
-        message(FATAL_ERROR "Corrade cannot be used with GCC < 4.7. Sorry.")
-    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.1")
-        if(NOT CORRADE_GCC47_COMPATIBILITY)
-            message(FATAL_ERROR "To use Corrade with GCC 4.7, build it with GCC47_COMPATIBILITY enabled")
-        endif()
-    endif()
-
-    # Don't allow to use compiler newer than what compatibility mode allows
-    if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.1")
-        if(CORRADE_GCC47_COMPATIBILITY)
-            message(FATAL_ERROR "GCC >= 4.8.1 cannot be used if Corrade is built with GCC47_COMPATIBILITY")
-        endif()
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.1")
+        message(FATAL_ERROR "Corrade cannot be used with GCC < 4.8.1. Sorry.")
     endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Don't allow to use compilers older than what compatibility mode allows

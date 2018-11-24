@@ -268,8 +268,8 @@ If you want to pass additional flags to CMake or
 Minimal set of tools required for building is:
 
 -   C++ compiler with good C++11 support. Compilers which are tested to have
-    everything needed are **GCC** >= 4.7, **Clang** >= 3.1 and **MSVC** >= 2015.
-    For Windows you can also use **MinGW-w64**.
+    everything needed are **GCC** >= 4.8.1, **Clang** >= 3.1 and
+    **MSVC** >= 2015. For Windows you can also use **MinGW-w64**.
 -   **CMake** >= 2.8.12
 
 @subsection building-corrade-download Downloading the sources
@@ -431,9 +431,6 @@ portability, compatibility mode for older compilers is provided. The build
 system tries to autodect it, but in some rare cases you may need to enable
 the compatibility mode explicitly:
 
--   `GCC47_COMPATIBILITY` --- Enable for compiling with compatibility mode for
-    GCC 4.7. Note that you need to enable this explicitly also if you are
-    building with Clang and use libstdc++ from GCC 4.7.
 -   `MSVC2017_COMPATIBILITY` --- Enable for compiling with compatibility mode
     for Microsoft Visual C++ 2017.
 -   `MSVC2015_COMPATIBILITY` --- Enable for compiling with compatibility mode
@@ -762,7 +759,7 @@ for more information.
 
 @subsection building-corrade-ci-travis Travis
 
-In `package/ci/` there is a `travis.yml` file with Linux GCC 4.7, macOS, iOS,
+In `package/ci/` there is a `travis.yml` file with Linux GCC 4.8, macOS, iOS,
 Emscripten, Android, AddressSanitizer and ThreadSanitizer configuration. Online
 at https://travis-ci.org/mosra/corrade.
 

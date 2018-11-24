@@ -64,11 +64,7 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
 
     CORRADE_INTERNAL_ASSERT(reinterpret_cast<std::uintptr_t>(positions) % 4 == 0);
 
-    #ifndef CORRADE_GCC47_COMPATIBILITY
     const auto groupData = resources().emplace(group, GroupData()).first;
-    #else
-    const auto groupData = resources().insert(std::make_pair(group, GroupData())).first;
-    #endif
 
     /* Cast to type which can be eaten by std::string constructor */
     const char* _positions = reinterpret_cast<const char*>(positions);
@@ -83,12 +79,7 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
         unsigned int dataPosition = *reinterpret_cast<const unsigned int*>(_positions+i+size);
 
         Containers::ArrayView<const char> res(reinterpret_cast<const char*>(data)+oldDataPosition, dataPosition-oldDataPosition);
-
-        #ifndef CORRADE_GCC47_COMPATIBILITY
         groupData->second.resources.emplace(std::string(_filenames+oldFilenamePosition, filenamePosition-oldFilenamePosition), res);
-        #else
-        groupData->second.resources.insert(std::make_pair(std::string(_filenames+oldFilenamePosition, filenamePosition-oldFilenamePosition), res));
-        #endif
 
         oldFilenamePosition = filenamePosition;
         oldDataPosition = dataPosition;
@@ -332,11 +323,7 @@ Containers::ArrayView<const char> Resource::getRaw(const std::string& filename) 
             }
 
             /* Save the file for later use and return */
-            #ifndef CORRADE_GCC47_COMPATIBILITY
             it = _overrideGroup->data.emplace(filename, std::move(data)).first;
-            #else
-            it = _overrideGroup->data.insert(std::make_pair(filename, std::move(data))).first;
-            #endif
             return it->second;
         }
 

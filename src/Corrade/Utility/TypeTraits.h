@@ -67,11 +67,8 @@ template<class U> class className {                                         \
 namespace Implementation {
     CORRADE_HAS_TYPE(HasMemberBegin, decltype(std::declval<T>().begin()));
     CORRADE_HAS_TYPE(HasMemberEnd, decltype(std::declval<T>().end()));
-    /** @todo Re-enable these for GCC 4.7 when I find some workaround */
-    #ifndef CORRADE_GCC47_COMPATIBILITY
     CORRADE_HAS_TYPE(HasBegin, decltype(begin(std::declval<T>())));
     CORRADE_HAS_TYPE(HasEnd, decltype(end(std::declval<T>())));
-    #endif
     CORRADE_HAS_TYPE(HasStdBegin, decltype(std::begin(std::declval<T>())));
     CORRADE_HAS_TYPE(HasStdEnd, decltype(std::end(std::declval<T>())));
 }
@@ -90,14 +87,11 @@ equivalent to @ref std::false_type.
 template<class T> using IsIterable = std::integral_constant<bool,
     #ifndef DOXYGEN_GENERATING_OUTPUT
     (Implementation::HasMemberBegin<T>::value ||
-    #ifndef CORRADE_GCC47_COMPATIBILITY
-    Implementation::HasBegin<T>::value ||
-    #endif
-    Implementation::HasStdBegin<T>::value) && (Implementation::HasMemberEnd<T>::value ||
-    #ifndef CORRADE_GCC47_COMPATIBILITY
-    Implementation::HasEnd<T>::value ||
-    #endif
-    Implementation::HasStdEnd<T>::value)
+     Implementation::HasBegin<T>::value ||
+     Implementation::HasStdBegin<T>::value) &&
+    (Implementation::HasMemberEnd<T>::value ||
+     Implementation::HasEnd<T>::value ||
+     Implementation::HasStdEnd<T>::value)
     #else
     implementation-specific
     #endif

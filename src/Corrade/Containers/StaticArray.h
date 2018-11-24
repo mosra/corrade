@@ -260,18 +260,10 @@ template<std::size_t size_, class T> class StaticArray {
            operators */
 
         /** @brief Conversion to array type */
-        /*implicit*/ operator T*()
-        #ifndef CORRADE_GCC47_COMPATIBILITY
-        &
-        #endif
-        { return _data; }
+        /*implicit*/ operator T*() & { return _data; }
 
         /** @overload */
-        /*implicit*/ operator const T*() const
-        #ifndef CORRADE_GCC47_COMPATIBILITY
-        &
-        #endif
-        { return _data; }
+        /*implicit*/ operator const T*() const & { return _data; }
 
         /** @brief Array data */
         T* data() { return _data; }

@@ -35,15 +35,6 @@ namespace Corrade {
 
 #ifdef DOXYGEN_GENERATING_OUTPUT
 /**
-@brief GCC 4.7 compatibility
-
-Defined if compatibility mode for GCC 4.7 is enabled.
-@see @ref building-corrade, @ref corrade-cmake
-*/
-#define CORRADE_GCC47_COMPATIBILITY
-#undef CORRADE_GCC47_COMPATIBILITY
-
-/**
 @brief MSVC 2017 compatibility
 
 Defined if compatibility mode for MSVC 2017 is enabled.
