@@ -70,4 +70,15 @@
 #error CORRADE_TARGET_X86 or CORRADE_TARGET_ARM defined on Emscripten
 #endif
 
+/* C++ standard */
+#ifdef _MSC_VER
+#ifdef _MSVC_LANG
+#define CORRADE_CXX_STANDARD _MSVC_LANG
+#else
+#define CORRADE_CXX_STANDARD 201103L
+#endif
+#else
+#define CORRADE_CXX_STANDARD __cplusplus
+#endif
+
 #endif

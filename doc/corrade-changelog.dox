@@ -42,6 +42,10 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 
+-   The @ref CORRADE_CXX_STANDARD macro has been moved to the top-level
+    @ref Corrade/Corrade.h from @ref Corrade/Utility/Macros.h so it's available
+    everywhere unconditionally
+
 @subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
 
 -   Plugin interfaces now have the
