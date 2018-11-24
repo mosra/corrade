@@ -29,10 +29,7 @@
  * @brief Macros @ref CORRADE_HAS_TYPE(), alias @ref Corrade::Utility::IsIterable
  */
 
-#include <iterator> /* for std::begin() in libc++ */
-#include <utility>
-
-#include "Corrade/configure.h"
+#include <type_traits>
 
 namespace Corrade { namespace Utility {
 
@@ -69,8 +66,6 @@ namespace Implementation {
     CORRADE_HAS_TYPE(HasMemberEnd, decltype(std::declval<T>().end()));
     CORRADE_HAS_TYPE(HasBegin, decltype(begin(std::declval<T>())));
     CORRADE_HAS_TYPE(HasEnd, decltype(end(std::declval<T>())));
-    CORRADE_HAS_TYPE(HasStdBegin, decltype(std::begin(std::declval<T>())));
-    CORRADE_HAS_TYPE(HasStdEnd, decltype(std::end(std::declval<T>())));
 }
 
 /**
@@ -86,12 +81,8 @@ equivalent to @ref std::false_type.
    constructor doesn't exist */
 template<class T> using IsIterable = std::integral_constant<bool,
     #ifndef DOXYGEN_GENERATING_OUTPUT
-    (Implementation::HasMemberBegin<T>::value ||
-     Implementation::HasBegin<T>::value ||
-     Implementation::HasStdBegin<T>::value) &&
-    (Implementation::HasMemberEnd<T>::value ||
-     Implementation::HasEnd<T>::value ||
-     Implementation::HasStdEnd<T>::value)
+    (Implementation::HasMemberBegin<T>::value || Implementation::HasBegin<T>::value) &&
+    (Implementation::HasMemberEnd<T>::value || Implementation::HasEnd<T>::value)
     #else
     implementation-specific
     #endif
