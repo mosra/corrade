@@ -30,9 +30,9 @@
  */
 
 #include <cstdint>
-#include <string>
 
 #include "Corrade/Containers/EnumSet.h"
+#include "Corrade/Utility/StlForwardString.h"
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
