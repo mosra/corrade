@@ -85,7 +85,9 @@ Defined if built as static libraries. Default are shared libraries.
 @brief Unix target
 
 Defined if the library is built for some Unix flavor (Linux, BSD, macOS, iOS,
-Android...).
+Android...). Note that while the behavior of Emscripten is closely emulating
+Unix systems, `CORRADE_TARGET_UNIX` is not defined there, only
+@ref CORRADE_TARGET_EMSCRIPTEN.
 @see @ref CORRADE_TARGET_APPLE, @ref CORRADE_TARGET_ANDROID, @ref corrade-cmake
 */
 #define CORRADE_TARGET_UNIX
@@ -142,6 +144,8 @@ Defined if the library is built for Windows Store or Phone.
 @brief Emscripten target
 
 Defined if the library is built for [Emscripten](http://kripken.github.io/emscripten-site/).
+Note that while the behavior of Emscripten is closely emulating Unix systems,
+@ref CORRADE_TARGET_UNIX is not defined there, only `CORRADE_TARGET_EMSCRIPTEN`.
 @see @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_TARGET_EMSCRIPTEN
