@@ -27,6 +27,9 @@
 
 #include <cstring>
 
+#include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Utility/Assert.h"
+
 namespace Corrade { namespace Utility { namespace Implementation {
 
 enum class FormatType: std::uint8_t {
@@ -111,7 +114,7 @@ template<> char formatTypeChar<float>(FormatType type) {
     CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
 }
 
-std::size_t Formatter<int>::format(const Containers::ArrayView<char> buffer, const int value, int precision, const FormatType type) {
+std::size_t Formatter<int>::format(const Containers::ArrayView<char>& buffer, const int value, int precision, const FormatType type) {
     if(precision == -1) precision = 1;
     const char format[]{ '%', '.', '*', formatTypeChar<int>(type), 0 };
     return std::snprintf(buffer, buffer.size(), format, precision, value);
@@ -122,7 +125,7 @@ void Formatter<int>::format(std::FILE* const file, const int value, int precisio
     const char format[]{ '%', '.', '*', formatTypeChar<int>(type), 0 };
     std::fprintf(file, format, precision, value);
 }
-std::size_t Formatter<unsigned int>::format(const Containers::ArrayView<char> buffer, const unsigned int value, int precision, const FormatType type) {
+std::size_t Formatter<unsigned int>::format(const Containers::ArrayView<char>& buffer, const unsigned int value, int precision, const FormatType type) {
     if(precision == -1) precision = 1;
     const char format[]{ '%', '.', '*', formatTypeChar<unsigned int>(type), 0 };
     return std::snprintf(buffer, buffer.size(), format, precision, value);
@@ -132,7 +135,7 @@ void Formatter<unsigned int>::format(std::FILE* const file, const unsigned int v
     const char format[]{ '%', '.', '*', formatTypeChar<unsigned int>(type), 0 };
     std::fprintf(file, format, precision, value);
 }
-std::size_t Formatter<long long>::format(const Containers::ArrayView<char> buffer, const long long value, int precision, const FormatType type) {
+std::size_t Formatter<long long>::format(const Containers::ArrayView<char>& buffer, const long long value, int precision, const FormatType type) {
     if(precision == -1) precision = 1;
     const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<int>(type), 0 };
     return std::snprintf(buffer, buffer.size(), format, precision, value);
@@ -142,7 +145,7 @@ void Formatter<long long>::format(std::FILE* const file, const long long value, 
     const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<int>(type), 0 };
     std::fprintf(file, format, precision, value);
 }
-std::size_t Formatter<unsigned long long>::format(const Containers::ArrayView<char> buffer, const unsigned long long value, int precision, const FormatType type) {
+std::size_t Formatter<unsigned long long>::format(const Containers::ArrayView<char>& buffer, const unsigned long long value, int precision, const FormatType type) {
     if(precision == -1) precision = 1;
     const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<unsigned int>(type), 0 };
     return std::snprintf(buffer, buffer.size(), format, precision, value);
@@ -157,7 +160,7 @@ void Formatter<unsigned long long>::format(std::FILE* const file, const unsigned
    Wikipedia says 6-digit number can be converted back and forth without loss:
    https://en.wikipedia.org/wiki/Single-precision_floating-point_format
    Kept in sync with Debug. */
-std::size_t Formatter<float>::format(const Containers::ArrayView<char> buffer, const float value, int precision, const FormatType type) {
+std::size_t Formatter<float>::format(const Containers::ArrayView<char>& buffer, const float value, int precision, const FormatType type) {
     if(precision == -1) precision = 6;
     const char format[]{ '%', '.', '*', formatTypeChar<float>(type), 0 };
     return std::snprintf(buffer, buffer.size(), format, precision, double(value));
@@ -171,7 +174,7 @@ void Formatter<float>::format(std::FILE* const file, const float value, int prec
 /* Wikipedia says 15-digit number can be converted back and forth without loss:
    https://en.wikipedia.org/wiki/Double-precision_floating-point_format
    Kept in sync with Debug. */
-std::size_t Formatter<double>::format(const Containers::ArrayView<char> buffer, const double value, int precision, const FormatType type) {
+std::size_t Formatter<double>::format(const Containers::ArrayView<char>& buffer, const double value, int precision, const FormatType type) {
     if(precision == -1) precision = 15;
     const char format[]{ '%', '.', '*', formatTypeChar<float>(type), 0 };
     return std::snprintf(buffer, buffer.size(), format, precision, value);
@@ -185,7 +188,7 @@ void Formatter<double>::format(std::FILE* const file, const double value, int pr
 /* Wikipedia says 18-digit number can be converted both ways without
    loss: https://en.wikipedia.org/wiki/Extended_precision#Working_range
    Kept in sync with Debug. */
-std::size_t Formatter<long double>::format(const Containers::ArrayView<char> buffer, const long double value, int precision, const FormatType type) {
+std::size_t Formatter<long double>::format(const Containers::ArrayView<char>& buffer, const long double value, int precision, const FormatType type) {
     if(precision == -1) precision = 18;
     const char format[]{ '%', '.', '*', 'L', formatTypeChar<float>(type), 0 };
     return std::snprintf(buffer, buffer.size(), format, precision, value);
@@ -196,7 +199,7 @@ void Formatter<long double>::format(std::FILE* const file, const long double val
     std::fprintf(file, format, precision, value);
 }
 
-std::size_t Formatter<Containers::ArrayView<const char>>::format(const Containers::ArrayView<char> buffer, const Containers::ArrayView<const char> value, const int precision, const FormatType type) {
+std::size_t Formatter<Containers::ArrayView<const char>>::format(const Containers::ArrayView<char>& buffer, const Containers::ArrayView<const char> value, const int precision, const FormatType type) {
     std::size_t size = value.size();
     if(std::size_t(precision) < size) size = precision;
     CORRADE_ASSERT(type == FormatType::Unspecified,
@@ -212,13 +215,13 @@ void Formatter<Containers::ArrayView<const char>>::format(std::FILE* const file,
         "Utility::format(): type specifier can't be used for a string value", );
     std::fwrite(value.data(), size, 1, file);
 }
-std::size_t Formatter<const char*>::format(const Containers::ArrayView<char> buffer, const char* value, const int precision, const FormatType type) {
+std::size_t Formatter<const char*>::format(const Containers::ArrayView<char>& buffer, const char* value, const int precision, const FormatType type) {
     return Formatter<Containers::ArrayView<const char>>::format(buffer, {value, std::strlen(value)}, precision, type);
 }
 void Formatter<const char*>::format(std::FILE* const file, const char* value, const int precision, const FormatType type) {
     Formatter<Containers::ArrayView<const char>>::format(file, {value, std::strlen(value)}, precision, type);
 }
-std::size_t Formatter<std::string>::format(const Containers::ArrayView<char> buffer, const std::string& value, const int precision, const FormatType type) {
+std::size_t Formatter<std::string>::format(const Containers::ArrayView<char>& buffer, const std::string& value, const int precision, const FormatType type) {
     return Formatter<Containers::ArrayView<const char>>::format(buffer, {value.data(), value.size()}, precision, type);
 }
 void Formatter<std::string>::format(std::FILE* const file, const std::string& value, const int precision, const FormatType type) {
@@ -378,7 +381,7 @@ template<class Writer, class FormattedWriter, class Formatter> void formatWith(c
 
 }
 
-std::size_t formatInto(const Containers::ArrayView<char> buffer, const char* const format, Containers::ArrayView<BufferFormatter> const formatters) {
+std::size_t formatInto(const Containers::ArrayView<char>& buffer, const char* const format, BufferFormatter* const formatters, std::size_t formatterCount) {
     std::size_t bufferOffset = 0;
     formatWith([&buffer, &bufferOffset](Containers::ArrayView<const char> data) {
         if(buffer) {
@@ -396,24 +399,24 @@ std::size_t formatInto(const Containers::ArrayView<char> buffer, const char* con
         } else if(formatter.size == ~std::size_t{})
             formatter.size = formatter(nullptr, precision, type);
         bufferOffset += formatter.size;
-    }, {format, std::strlen(format)}, formatters);
+    }, {format, std::strlen(format)}, Containers::arrayView(formatters, formatterCount));
     return bufferOffset;
 }
 
-std::size_t formatInto(std::string& buffer, const std::size_t offset, const char* const format, const Containers::ArrayView<BufferFormatter> formatters) {
-    const std::size_t size = formatInto(nullptr, format, formatters);
+std::size_t formatInto(std::string& buffer, const std::size_t offset, const char* const format, BufferFormatter* const formatters, std::size_t formatterCount) {
+    const std::size_t size = formatInto(nullptr, format, formatters, formatterCount);
     if(buffer.size() < offset + size) buffer.resize(offset + size);
     /* Under C++11, the character storage always includes the null terminator
        and printf() always wants to print the null terminator, so allow it */
-    return offset + formatInto({&buffer[offset], buffer.size() + 1}, format, formatters);
+    return offset + formatInto({&buffer[offset], buffer.size() + 1}, format, formatters, formatterCount);
 }
 
-void formatInto(std::FILE* const file,  const char* format, const Containers::ArrayView<FileFormatter> formatters) {
+void formatInto(std::FILE* const file,  const char* format, FileFormatter* const formatters, std::size_t formatterCount) {
     formatWith([&file](Containers::ArrayView<const char> data) {
         fwrite(data.data(), data.size(), 1, file);
     }, [&file](const FileFormatter& formatter, int precision, FormatType type) {
         formatter(file, precision, type);
-    }, {format, std::strlen(format)}, formatters);
+    }, {format, std::strlen(format)}, Containers::arrayView(formatters, formatterCount));
 }
 
 }

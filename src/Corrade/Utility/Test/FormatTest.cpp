@@ -26,6 +26,7 @@
 #include <limits>
 #include <sstream>
 
+#include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"

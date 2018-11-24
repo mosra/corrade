@@ -32,7 +32,7 @@
 
 #include <string>
 
-#include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/Containers.h"
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
@@ -131,7 +131,7 @@ Example of formating of CSS colors with correct width:
 This function always does exactly one allocation for the output string. See
 @ref formatInto(std::string&, std::size_t, const char*, const Args&... args)
 for an ability to write into an existing string (with at most one reallocation)
-and @ref formatInto(Containers::ArrayView<char>, const char*, const Args&... args)
+and @ref formatInto(const Containers::ArrayView<char>&, const char*, const Args&... args)
 for a completely zero-allocation alternative. There is also
 @ref formatInto(std::FILE*, const char*, const Args&... args) for writing to
 files or standard output.
@@ -182,7 +182,7 @@ language.
 
 @experimental
 */
-template<class ...Args> std::size_t formatInto(Containers::ArrayView<char> buffer, const char* format, const Args&... args);
+template<class ...Args> std::size_t formatInto(const Containers::ArrayView<char>& buffer, const char* format, const Args&... args);
 
 /**
 @brief Format a string into a file
@@ -232,54 +232,54 @@ enum class FormatType: std::uint8_t;
 template<class T> struct Formatter;
 
 template<> struct Formatter<int> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, int value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, int value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, int value, int precision, FormatType type);
 };
 template<> struct Formatter<char>: Formatter<int> {};
 template<> struct Formatter<short>: Formatter<int> {};
 
 template<> struct Formatter<unsigned int> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, unsigned int value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, unsigned int value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, unsigned int value, int precision, FormatType type);
 };
 template<> struct Formatter<unsigned char>: Formatter<unsigned int> {};
 template<> struct Formatter<unsigned short>: Formatter<unsigned int> {};
 
 template<> struct Formatter<long long> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, long long value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, long long value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, long long value, int precision, FormatType type);
 };
 template<> struct Formatter<long>: Formatter<long long> {};
 
 template<> struct Formatter<unsigned long long> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, unsigned long long value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, unsigned long long value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, unsigned long long value, int precision, FormatType type);
 };
 template<> struct Formatter<unsigned long>: Formatter<unsigned long long> {};
 
 template<> struct Formatter<float> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, float value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, float value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, float value, int precision, FormatType type);
 };
 template<> struct Formatter<double> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, double value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, double value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, double value, int precision, FormatType type);
 };
 template<> struct Formatter<long double> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, long double value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, long double value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, long double value, int precision, FormatType type);
 };
 template<> struct Formatter<const char*> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, const char* value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, const char* value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, const char* value, int precision, FormatType type);
 };
 template<> struct Formatter<char*>: Formatter<const char*> {};
 template<> struct Formatter<Containers::ArrayView<const char>> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, Containers::ArrayView<const char> value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, Containers::ArrayView<const char> value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, Containers::ArrayView<const char> value, int precision, FormatType type);
 };
 template<> struct Formatter<std::string> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(Containers::ArrayView<char> buffer, const std::string& value, int precision, FormatType type);
+    static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, const std::string& value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, const std::string& value, int precision, FormatType type);
 };
 
@@ -288,12 +288,12 @@ struct BufferFormatter {
     /*implicit*/ constexpr BufferFormatter(): _fn{}, _value{} {}
 
     template<class T> explicit BufferFormatter(const T& value): _value{&value} {
-        _fn = [](Containers::ArrayView<char> buffer, const void* value, int precision, FormatType type) {
+        _fn = [](const Containers::ArrayView<char>& buffer, const void* value, int precision, FormatType type) {
             return Formatter<typename std::decay<T>::type>::format(buffer, *static_cast<const T*>(value), precision, type);
         };
     }
 
-    std::size_t operator()(Containers::ArrayView<char> buffer, int precision, FormatType type) const {
+    std::size_t operator()(const Containers::ArrayView<char>& buffer, int precision, FormatType type) const {
         return _fn(buffer, _value, precision, type);
     }
 
@@ -301,7 +301,7 @@ struct BufferFormatter {
     std::size_t size{~std::size_t{}};
 
     private:
-        std::size_t(*_fn)(Containers::ArrayView<char>, const void*, int precision, FormatType type);
+        std::size_t(*_fn)(const Containers::ArrayView<char>&, const void*, int precision, FormatType type);
         const void* _value;
 };
 
@@ -322,9 +322,9 @@ struct FileFormatter {
         const void* _value;
 };
 
-CORRADE_UTILITY_EXPORT std::size_t formatInto(Containers::ArrayView<char> buffer, const char* format, Containers::ArrayView<BufferFormatter> formatters);
-CORRADE_UTILITY_EXPORT std::size_t formatInto(std::string& buffer, std::size_t offset, const char* format, Containers::ArrayView<BufferFormatter> formatters);
-CORRADE_UTILITY_EXPORT void formatInto(std::FILE* file, const char* format, Containers::ArrayView<FileFormatter> formatters);
+CORRADE_UTILITY_EXPORT std::size_t formatInto(const Containers::ArrayView<char>& buffer, const char* format, BufferFormatter* formatters, std::size_t formattersCount);
+CORRADE_UTILITY_EXPORT std::size_t formatInto(std::string& buffer, std::size_t offset, const char* format, BufferFormatter* formatters, std::size_t formattersCount);
+CORRADE_UTILITY_EXPORT void formatInto(std::FILE* file, const char* format, FileFormatter* formatters, std::size_t formattersCount);
 
 }
 
@@ -334,19 +334,19 @@ template<class ...Args> std::string formatString(const char* format, const Args&
     return buffer;
 }
 
-template<class ...Args> std::size_t formatInto(Containers::ArrayView<char> buffer, const char* format, const Args&... args) {
+template<class ...Args> std::size_t formatInto(const Containers::ArrayView<char>& buffer, const char* format, const Args&... args) {
     Implementation::BufferFormatter formatters[sizeof...(args) + 1] { Implementation::BufferFormatter{args}..., {} };
-    return Implementation::formatInto(buffer, format, {formatters, sizeof...(args)});
+    return Implementation::formatInto(buffer, format, formatters, sizeof...(args));
 }
 
 template<class ...Args> std::size_t formatInto(std::string& buffer, std::size_t offset, const char* format, const Args&... args) {
     Implementation::BufferFormatter formatters[sizeof...(args) + 1] { Implementation::BufferFormatter{args}..., {} };
-    return Implementation::formatInto(buffer, offset, format, {formatters, sizeof...(args)});
+    return Implementation::formatInto(buffer, offset, format, formatters, sizeof...(args));
 }
 
 template<class ...Args> void formatInto(std::FILE* file, const char* format, const Args&... args) {
     Implementation::FileFormatter formatters[sizeof...(args) + 1] { Implementation::FileFormatter{args}..., {} };
-    Implementation::formatInto(file, format, {formatters, sizeof...(args)});
+    Implementation::formatInto(file, format, formatters, sizeof...(args));
 }
 
 }}
