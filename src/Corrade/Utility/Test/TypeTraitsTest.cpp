@@ -43,12 +43,18 @@ struct TypeTraitsTest: TestSuite::Tester {
     explicit TypeTraitsTest();
 
     void hasType();
-    void isIterable();
+    void isIterableMember();
+    void isIterableFreeStd();
+    void isIterableFree();
+    void isIterableNot();
 };
 
 TypeTraitsTest::TypeTraitsTest() {
     addTests({&TypeTraitsTest::hasType,
-              &TypeTraitsTest::isIterable});
+              &TypeTraitsTest::isIterableMember,
+              &TypeTraitsTest::isIterableFreeStd,
+              &TypeTraitsTest::isIterableFree,
+              &TypeTraitsTest::isIterableNot});
 }
 
 CORRADE_HAS_TYPE(HasKeyType, typename T::key_type);
@@ -70,6 +76,7 @@ void TypeTraitsTest::hasType() {
 }
 
 struct Type {};
+struct NonIterableType {};
 #ifdef __clang__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunneeded-internal-declaration"
@@ -81,23 +88,31 @@ int* end(Type) { return nullptr; }
 #endif
 struct LinkedListItem: Containers::LinkedListItem<LinkedListItem> {};
 
-void TypeTraitsTest::isIterable() {
-    /* Non-iterable types */
-    CORRADE_VERIFY(!IsIterable<int>{});
-
+void TypeTraitsTest::isIterableMember() {
     /* STL types with begin()/end() members */
     CORRADE_VERIFY(IsIterable<std::vector<int>>{});
     CORRADE_VERIFY(IsIterable<std::string>{});
 
-    /* STL types with std::begin()/std::end() only */
-    CORRADE_VERIFY(IsIterable<std::valarray<int>>{});
+    /* Corrade types */
+    CORRADE_VERIFY(IsIterable<Containers::Array<int>>{});
+}
 
+void TypeTraitsTest::isIterableFreeStd() {
+    CORRADE_VERIFY(IsIterable<std::valarray<int>>{});
+    CORRADE_VERIFY(IsIterable<std::initializer_list<int>>{});
+}
+
+void TypeTraitsTest::isIterableFree() {
     /* Types with out-of-class begin()/end() */
     CORRADE_VERIFY(IsIterable<Type>{});
 
     /* Corrade types */
-    CORRADE_VERIFY(IsIterable<Containers::Array<int>>{});
     CORRADE_VERIFY(IsIterable<Containers::LinkedList<LinkedListItem>>{});
+}
+
+void TypeTraitsTest::isIterableNot() {
+    CORRADE_VERIFY(!IsIterable<int>{});
+    CORRADE_VERIFY(!IsIterable<NonIterableType>{});
 }
 
 }}}}
