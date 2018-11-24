@@ -28,6 +28,8 @@ namespace Corrade {
 /** @page building-corrade Downloading and building Corrade
 @brief Guide how to download and build Corrade on different platforms.
 
+@m_keyword{Building Corrade,,}
+
 @tableofcontents
 
 @section building-corrade-packages Prepared packages
