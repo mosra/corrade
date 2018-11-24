@@ -23,6 +23,11 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+/* Requests 64bit file offset on Linux */
+#ifdef CORRADE_TARGET_UNIX
+#define _FILE_OFFSET_BITS 64
+#endif
+
 /* Otherwise _wrename() and _wremove() is not defined on TDM-GCC 5.1. This has
    to be undefined before including any other header or it doesn't work. */
 #ifdef __MINGW32__
@@ -33,9 +38,7 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <array>
 #include <algorithm>
-#include <fstream>
 
 /* Unix memory mapping */
 #ifdef CORRADE_TARGET_UNIX
@@ -43,7 +46,7 @@
 #include <sys/mman.h>
 #endif
 
-/* Unix, Emscripten directory access */
+/* Unix, Emscripten file & directory access */
 #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include <sys/stat.h>
 #include <dirent.h>
@@ -64,20 +67,18 @@
 #include <basetyps.h>
 #endif
 #include <shlobj.h>
+#include <io.h>
 #endif
 
 #include "Corrade/configure.h"
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/String.h"
 
 /* Unicode helpers for Windows */
 #ifdef CORRADE_TARGET_WINDOWS
 #include "Corrade/Utility/Unicode.h"
-#ifdef __MINGW32__
-#include <fcntl.h>
-#include <ext/stdio_filebuf.h>
-#endif
 using Corrade::Utility::Unicode::widen;
 using Corrade::Utility::Unicode::narrow;
 #endif
@@ -209,11 +210,11 @@ bool move(const std::string& oldPath, const std::string& newPath) {
 
 bool exists(const std::string& filename) {
     /* Sane platforms */
-    #ifndef CORRADE_TARGET_WINDOWS
-    return std::ifstream(filename).good();
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    return access(filename.data(), F_OK) == 0;
 
     /* Windows (not Store/Phone) */
-    #elif !defined(CORRADE_TARGET_WINDOWS_RT)
+    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     return GetFileAttributesW(widen(filename).data()) != INVALID_FILE_ATTRIBUTES;
 
     /* Windows Store/Phone not implemented */
@@ -438,63 +439,60 @@ std::vector<std::string> list(const std::string& path, Flags flags) {
 }
 
 Containers::Array<char> read(const std::string& filename) {
-    /* Sane platforms */
+    /* Special case for "Unicode" Windows support */
     #ifndef CORRADE_TARGET_WINDOWS
-    std::ifstream file{filename, std::ifstream::binary};
-
-    /* MSVC */
-    #elif !defined(__MINGW32__)
-    std::ifstream file{widen(filename), std::ifstream::binary};
-
-    /* MinGW */
+    std::FILE* const f = std::fopen(filename.data(), "rb");
     #else
-    /* http://stackoverflow.com/q/6524821, http://stackoverflow.com/a/30263811,
-       but I'm not sure if filebuf should be stack- or heap-allocated */
-    /* https://gcc.gnu.org/onlinedocs/gcc-4.6.2/libstdc++/api/a00069.html#a1dcd5a3e751c566a4b9b3e851ce92b30
-       says that the file descriptor returned by _wopen will be closed
-       automatically on destruction */
-    const int fd = _wopen(widen(filename).data(), _O_RDONLY|_O_BINARY, 0666);
-    if(fd == -1) {
+    std::FILE* const f = _wfopen(widen(filename).data(), L"rb");
+    #endif
+    if(!f) {
         Error{} << "Utility::Directory::read(): can't open" << filename;
         return nullptr;
     }
-    __gnu_cxx::stdio_filebuf<char> filebuf{fd, std::ifstream::in|std::ifstream::binary};
-    std::istream file{&filebuf};
+
+    Containers::ScopeGuard exit{f, std::fclose};
+
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS)
+    /* If the file is not seekable, read it in chunks. On POSIX this is usually
+       -1 when the file is non-seekable: https://stackoverflow.com/q/3238788
+       It's undefined behavior on MSVC, tho (but possibly not on MinGW?):
+       https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/lseek-lseeki64 */
+    /** @todo find a reliable way on Windows */
+    if(
+        #ifndef CORRADE_TARGET_WINDOWS
+        lseek(fileno(f), 0, SEEK_END) == -1
+        #else
+        _lseek(_fileno(f), 0, SEEK_END) == -1
+        #endif
+    ) {
+        std::string data;
+        char buffer[4096];
+        std::size_t count;
+        do {
+            count = std::fread(buffer, 1, Containers::arraySize(buffer), f);
+            data.append(buffer, count);
+        } while(count);
+
+        Containers::Array<char> out{data.size()};
+        std::copy(data.begin(), data.end(), out.begin());
+        return out;
+    }
+    #else
+    /** @todo implementation for non-seekable platforms elsewhere? */
     #endif
 
-    if(!file) {
-        Error{} << "Utility::Directory::read(): can't open" << filename;
-        return nullptr;
-    }
-    file.seekg(0, std::ios::end);
+    std::fseek(f, 0, SEEK_END);
+    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    const std::size_t size = ftello(f);
+    #elif defined(CORRADE_TARGET_WINDOWS)
+    const std::size_t size = _ftelli64(f);
+    #else
+    const std::size_t size = std::ftell(f);
+    #endif
+    std::rewind(f);
 
-    /** @todo Better solution for non-seekable files */
-
-    /* Probably seekable file. GCC's libstdc++ returns (cast) -1 for
-       non-seekable files and sets badbit, Clang's libc++ returns 0 and doesn't
-       set badbit, thus zero-length files are indistinguishable from
-       non-seekable ones. */
-    if(file && file.tellg() != std::ios::pos_type{0}) {
-        Containers::Array<char> data(std::size_t(file.tellg()));
-        file.seekg(0, std::ios::beg);
-        file.read(data, data.size());
-        return data;
-    }
-
-    /* Probably non-seekable (or empty) file, clear badbit and read by chunks.
-       Hopefully this juggling won't cause any needless memory allocations for
-       empty files. */
-    file.clear();
-    std::string data;
-    std::array<char, 4096> buffer;
-    do {
-        file.read(&buffer[0], buffer.size());
-        data.append(&buffer[0], std::size_t(file.gcount()));
-    } while(file);
-
-    Containers::Array<char> out(data.size());
-    std::copy(data.begin(), data.end(), out.begin());
-
+    Containers::Array<char> out{size};
+    std::fread(out, 1, size, f);
     return out;
 }
 
@@ -505,36 +503,20 @@ std::string readString(const std::string& filename) {
 }
 
 bool write(const std::string& filename, const Containers::ArrayView<const void> data) {
-    /* Sane platforms */
+    /* Special case for "Unicode" Windows support */
     #ifndef CORRADE_TARGET_WINDOWS
-    std::ofstream file{filename, std::ofstream::binary};
-
-    /* MSVC */
-    #elif !defined(__MINGW32__)
-    std::ofstream file{widen(filename), std::ifstream::binary};
-
-    /* MinGW */
+    std::FILE* const f = std::fopen(filename.data(), "wb");
     #else
-    /* http://stackoverflow.com/q/6524821, http://stackoverflow.com/a/30263811,
-       but I'm not sure if filebuf should be stack- or heap-allocated */
-    /* https://gcc.gnu.org/onlinedocs/gcc-4.6.2/libstdc++/api/a00069.html#a1dcd5a3e751c566a4b9b3e851ce92b30
-       says that the file descriptor returned by _wopen will be closed
-       automatically on destruction */
-    const int fd = _wopen(widen(filename).data(), _O_CREAT|_O_TRUNC|_O_WRONLY|_O_BINARY, 0666);
-    if(fd == -1) {
-        Error{} << "Utility::Directory::write(): can't open" << filename;
-        return false;
-    }
-    __gnu_cxx::stdio_filebuf<char> filebuf{fd, std::ofstream::out|std::ofstream::binary};
-    std::ostream file{&filebuf};
+    std::FILE* const f = _wfopen(widen(filename).data(), L"wb");
     #endif
-
-    if(!file) {
+    if(!f) {
         Error{} << "Utility::Directory::write(): can't open" << filename;
         return false;
     }
 
-    file.write(reinterpret_cast<const char*>(data.data()), data.size());
+    Containers::ScopeGuard exit{f, std::fclose};
+
+    std::fwrite(data, 1, data.size(), f);
     return true;
 }
 
