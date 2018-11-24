@@ -3,7 +3,7 @@
 addons:
   apt:
     packages:
-    - g++-4.7
+    - g++-4.8
     - ninja-build
     - "libc6:i386" # CMake 2.8.12 is 32bit
 
@@ -17,11 +17,11 @@ matrix:
     - JOBID=linux
     - TARGET=desktop
     - CMAKE_CXX_FLAGS="--coverage"
-    - LCOV_EXTRA_OPTS="--gcov-tool /usr/bin/gcov-4.7"
+    - LCOV_EXTRA_OPTS="--gcov-tool /usr/bin/gcov-4.8"
     addons:
       apt:
         packages:
-        - g++-4.7
+        - g++-4.8
         - ninja-build
         - lcov
         - "libc6:i386" # CMake 2.8.12 is 32bit
@@ -96,7 +96,7 @@ cache:
   - $HOME/cmake
 
 install:
-- if [ "$TRAVIS_OS_NAME" == "linux" ] && [ ! "$TARGET" == "desktop-sanitizers" ] && [ ! "$TARGET" == "android" ]; then export CXX=g++-4.7; fi
+- if [ "$TRAVIS_OS_NAME" == "linux" ] && [ ! "$TARGET" == "desktop-sanitizers" ] && [ ! "$TARGET" == "android" ]; then export CXX=g++-4.8; fi
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "desktop-sanitizers" ]; then export CXX=clang++-3.8; fi
 - if [ "$BUILD_DEPRECATED" != "OFF" ]; then export BUILD_DEPRECATED=ON; fi
 # so the directory tests pass (and then some workaround for crazy filesystem issues)
