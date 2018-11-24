@@ -84,4 +84,29 @@
 #define CORRADE_CXX_STANDARD __cplusplus
 #endif
 
+/* Standard library edition. References:
+   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65473
+   https://github.com/gcc-mirror/gcc/commit/19665740d336d4ee7d0cf92b5b0643fa1d7da14a
+   https://en.cppreference.com/w/cpp/header/ciso646 */
+#include <ciso646>
+#ifdef _LIBCPP_VERSION
+#define CORRADE_TARGET_LIBCXX
+#elif defined(_CPPLIB_VER)
+#define CORRADE_TARGET_DINKUMWARE
+#elif defined(__GLIBCXX__)
+#define CORRADE_TARGET_LIBSTDCXX
+/* GCC's <ciso646> provides the __GLIBCXX__ macro only since 6.1, so on older
+   versions we'll try to get it from bits/c++config.h. GCC < 5.0 doesn't have
+   __has_include, so on these versions we'll give up completely. */
+#elif defined(__has_include)
+    #if __has_include(<bits/c++config.h>)
+        #include <bits/c++config.h>
+        #ifdef __GLIBCXX__
+        #define CORRADE_TARGET_LIBSTDCXX
+        #endif
+    #endif
+#else
+/* Otherwise no idea. */
+#endif
+
 #endif

@@ -34,11 +34,13 @@ struct TargetTest: TestSuite::Tester {
 
     void system();
     void architecture();
+    void stl();
 };
 
 TargetTest::TargetTest() {
     addTests({&TargetTest::system,
-              &TargetTest::architecture});
+              &TargetTest::architecture,
+              &TargetTest::stl});
 }
 
 void TargetTest::system() {
@@ -111,6 +113,30 @@ void TargetTest::architecture() {
     #ifdef CORRADE_TARGET_EMSCRIPTEN
     ++unique;
     Debug{&out} << "CORRADE_TARGET_EMSCRIPTEN";
+    #endif
+
+    Debug{Debug::Flag::NoNewlineAtTheEnd} << out.str();
+    CORRADE_VERIFY(!out.str().empty() || !"No suitable CORRADE_TARGET_* defined");
+    CORRADE_COMPARE(unique, 1);
+}
+
+void TargetTest::stl() {
+    std::ostringstream out;
+    int unique = 0;
+
+    #ifdef CORRADE_TARGET_LIBSTDCXX
+    ++unique;
+    Debug{&out} << "CORRADE_TARGET_LIBSTDCXX";
+    #endif
+
+    #ifdef CORRADE_TARGET_LIBCXX
+    ++unique;
+    Debug{&out} << "CORRADE_TARGET_LIBCXX";
+    #endif
+
+    #ifdef CORRADE_TARGET_DINKUMWARE
+    ++unique;
+    Debug{&out} << "CORRADE_TARGET_DINKUMWARE";
     #endif
 
     Debug{Debug::Flag::NoNewlineAtTheEnd} << out.str();

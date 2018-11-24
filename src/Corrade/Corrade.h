@@ -83,6 +83,9 @@ returned version is:
 -   @cpp 201402 @ce when C++14 is used
 -   @cpp 201703 @ce when C++17 is used
 -   greater than @cpp 201703 @ce when C++2a is used
+
+@see @ref CORRADE_TARGET_LIBCXX, @ref CORRADE_TARGET_LIBSTDCXX,
+    @ref CORRADE_TARGET_DINKUMWARE
 */
 #define CORRADE_CXX_STANDARD
 #undef CORRADE_CXX_STANDARD
@@ -210,6 +213,42 @@ yet.
 */
 #define CORRADE_TARGET_POWERPC
 #undef CORRADE_TARGET_POWERPC
+
+/**
+@brief STL libc++ target
+
+Defined if the library is built against Clang [libc++](https://libcxx.llvm.org/)
+STL implementation. This is most common on @ref CORRADE_TARGET_APPLE "Apple"
+macOS and iOS and on newer @ref CORRADE_TARGET_ANDROID "Android" NDKs, it's
+also sometimes used on Linux.
+@see @ref CORRADE_TARGET_LIBSTDCXX, @ref CORRADE_TARGET_DINKUMWARE,
+    @ref CORRADE_CXX_STANDARD
+*/
+#define CORRADE_TARGET_LIBCXX
+#undef CORRADE_TARGET_LIBCXX
+
+/**
+@brief STL libstdc++ target
+
+Defined if the library is built against GCC [libstdc++](https://gcc.gnu.org/onlinedocs/libstdc++/)
+STL implementation. This is most common on Linux and under MinGW, note that
+Clang is able to use libstdc++ as well.
+@see @ref CORRADE_TARGET_LIBCXX, @ref CORRADE_TARGET_DINKUMWARE,
+    @ref CORRADE_CXX_STANDARD
+*/
+#define CORRADE_TARGET_LIBSTDCXX
+#undef CORRADE_TARGET_LIBSTDCXX
+
+/**
+@brief STL Dinkumware target
+
+Defined if the library is built against Dinkumware STL implementation (used by
+MSVC). Note that Clang is able to use this implementation as well.
+@see @ref CORRADE_TARGET_LIBCXX, @ref CORRADE_TARGET_LIBSTDCXX,
+    @ref CORRADE_CXX_STANDARD
+*/
+#define CORRADE_TARGET_DINKUMWARE
+#undef CORRADE_TARGET_DINKUMWARE
 
 /**
 @brief PluginManager doesn't have dynamic plugin support on this platform
