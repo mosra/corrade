@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Utility::Debug, @ref Corrade::Utility::Warning, @ref Corrade::Utility::Error
+ * @brief Class @ref Corrade::Utility::Debug, @ref Corrade::Utility::Warning, @ref Corrade::Utility::Error, @ref Corrade::Utility::Fatal
  */
 
 #include <iosfwd>
@@ -446,7 +446,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @brief Print UTF-32 character literal to debug output
          *
          * Prints value as list of Unicode codepoints, i.e.
-         * @cb{.shell-session} [U+0061, U+0062, U+0063} @ce.
+         * @cb{.shell-session} {U+0061, U+0062, U+0063} @ce.
          */
         Debug& operator<<(const char32_t* value);
 
