@@ -29,7 +29,7 @@
  * @brief Class @ref Corrade::Containers::ScopedExit
  */
 
-#include <Corrade/configure.h>
+#include "Corrade/configure.h"
 
 namespace Corrade { namespace Containers {
 
