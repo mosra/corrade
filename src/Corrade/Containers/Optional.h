@@ -86,15 +86,7 @@ template<class T> class Optional {
          * Creates an optional object in empty state.
          * @see @ref operator bool(), @ref emplace()
          */
-        /*implicit*/ Optional() noexcept: _set{false} {}
-
-        /**
-         * @brief Null constructor
-         *
-         * Creates an optional object in empty state.
-         * @see @ref operator bool(), @ref emplace()
-         */
-        /*implicit*/ Optional(NullOptT) noexcept: _set{false} {}
+        /*implicit*/ Optional(NullOptT = NullOpt) noexcept: _set{false} {}
 
         /**
          * @brief Construct optional object by copy
