@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Function @ref Corrade::Utility::formatString(), @ref Corrade::Utility::formatInto()
+ * @brief Function @ref Corrade::Utility::formatString(), @ref Corrade::Utility::formatInto(), @ref Corrade::Utility::print(), @ref Corrade::Utility::printError()
  * @experimental
  */
 
@@ -200,6 +200,30 @@ language.
 @experimental
 */
 template<class ...Args> void formatInto(std::FILE* file, const char* format, const Args&... args);
+
+/**
+@brief Print a string to the standard output
+
+Equivalent to calling @ref formatInto(std::FILE*, const char*, const Args&... args)
+with @ref stdout as a first parameter.
+
+@experimental
+*/
+template<class ...Args> inline void print(const char* format, const Args&... args) {
+    return formatInto(stdout, format, args...);
+}
+
+/**
+@brief Print a string to the standard error output
+
+Equivalent to calling @ref formatInto(std::FILE*, const char*, const Args&... args)
+with @ref stderr as a first parameter.
+
+@experimental
+*/
+template<class ...Args> inline void printError(const char* format, const Args&... args) {
+    return formatInto(stderr, format, args...);
+}
 
 namespace Implementation {
 
