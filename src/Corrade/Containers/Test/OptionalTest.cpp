@@ -91,6 +91,7 @@ OptionalTest::OptionalTest() {
               &OptionalTest::constructCopyMake,
               &OptionalTest::constructMove,
               &OptionalTest::constructMoveMake,
+              &OptionalTest::constructInPlace,
 
               &OptionalTest::constructCopyFromNull,
               &OptionalTest::constructCopyFromSet,
@@ -323,8 +324,8 @@ void OptionalTest::constructInPlace() {
         CORRADE_COMPARE(a->a, 32);
     }
 
-    CORRADE_COMPARE(Immovable::constructed, 2);
-    CORRADE_COMPARE(Immovable::destructed, 2);
+    CORRADE_COMPARE(Immovable::constructed, 1);
+    CORRADE_COMPARE(Immovable::destructed, 1);
 }
 
 void OptionalTest::constructCopyFromNull() {
