@@ -59,7 +59,7 @@ Use for explicit initialization of null @ref Optional.
 constexpr NullOptT NullOpt{NullOptT::Init{}};
 
 /**
-@brief Optional value
+@brief Lightweight optional value
 
 Equivalent to `std::optional` from C++17, provides an optional checked storage
 for object of type @p T. The optional object can be seen as a container of @p T
@@ -74,8 +74,8 @@ checked using @ref operator bool(). The stored object can be accessed using
 to access a stored object in an empty state leads to assertion error.
 
 Unlike `std::optional`, this class does not provide a @cpp constexpr @ce
-implementation or ordering operators, which makes it simpler and more
-lightweight.
+implementation or ordering operators, which makes it fairly simple and
+lightweight. If you need the extra features, use the standard `std::optional`.
 @see @ref NullOpt, @ref optional()
 */
 template<class T> class Optional {
@@ -198,6 +198,7 @@ template<class T> class Optional {
          *
          * Returns @cpp true @ce if the instance is empty, @cpp false @ce
          * otherwise.
+         * @see @ref operator bool()
          */
         bool operator==(NullOptT) const { return !_set; }
 
@@ -206,6 +207,7 @@ template<class T> class Optional {
          *
          * Returns @cpp true @ce if the instance has a value, @cpp false @ce
          * otherwise.
+         * @see @ref operator bool()
          */
         bool operator!=(NullOptT) const { return _set; }
 
