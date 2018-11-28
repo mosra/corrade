@@ -44,6 +44,7 @@ void TagsTest::noDefaultConstructor() {
     CORRADE_VERIFY(!std::is_default_constructible<DefaultInitT>::value);
     CORRADE_VERIFY(!std::is_default_constructible<ValueInitT>::value);
     CORRADE_VERIFY(!std::is_default_constructible<NoInitT>::value);
+    CORRADE_VERIFY(!std::is_default_constructible<NoCreateT>::value);
     CORRADE_VERIFY(!std::is_default_constructible<DirectInitT>::value);
 }
 
@@ -51,6 +52,7 @@ void TagsTest::inlineDefinition() {
     CORRADE_VERIFY((std::is_same<decltype(DefaultInit), const DefaultInitT>::value));
     CORRADE_VERIFY((std::is_same<decltype(ValueInit), const ValueInitT>::value));
     CORRADE_VERIFY((std::is_same<decltype(NoInit), const NoInitT>::value));
+    CORRADE_VERIFY((std::is_same<decltype(NoCreate), const NoCreateT>::value));
     CORRADE_VERIFY((std::is_same<decltype(DirectInit), const DirectInitT>::value));
 }
 

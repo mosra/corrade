@@ -33,6 +33,12 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-new New features
 
+@subsubsection corrade-changelog-latest-new-containers Containers library
+
+-   New @ref Corrade::Containers::NoCreate tag for constructing instances
+    equivalent to a moved-from state. This tag was used in Magnum already,
+    moving it here to make it available to a wider set of APIs.
+
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
 -   Initial implementation of a @ref Utility::FileWatcher utility for

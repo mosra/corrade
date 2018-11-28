@@ -64,14 +64,31 @@ struct ValueInitT {
 /**
 @brief No initialization tag type
 
-Used to distinguish construction with no initialization at all.
-@see @ref NoInit
+Used to distinguish construction with no initialization at all, which leaves
+the data with whatever random values the memory had before.
+@see @ref NoInit, @ref NoCreateT
 */
 /* Explicit constructor to avoid ambiguous calls when using {} */
 struct NoInitT {
     #ifndef DOXYGEN_GENERATING_OUTPUT
     struct Init{};
     constexpr explicit NoInitT(Init) {}
+    #endif
+};
+
+/**
+@brief No creation tag type
+
+Used to distinguish construction with initialization but not creation. Contrary
+to @ref NotInitT this doesn't keep random values, but makes the instance empty
+(usually equivalent to a moved-out state).
+@see @ref NoCreate
+*/
+/* Explicit constructor to avoid ambiguous calls when using {} */
+struct NoCreateT {
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    struct Init{};
+    constexpr explicit NoCreateT(Init) {}
     #endif
 };
 
@@ -125,6 +142,14 @@ constexpr ValueInitT ValueInit{ValueInitT::Init{}};
 Use for construction with no initialization at all.
 */
 constexpr NoInitT NoInit{NoInitT::Init{}};
+
+/**
+@brief No creation tag
+
+Use for construction with initialization, but keeping the instance empty
+(usually equivalent to a moved-out state).
+*/
+constexpr NoCreateT NoCreate{NoCreateT::Init{}};
 
 /**
 @brief Direct initialization tag
