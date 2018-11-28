@@ -34,7 +34,8 @@ namespace Corrade { namespace Containers { namespace Test {
 struct OptionalTest: TestSuite::Tester {
     explicit OptionalTest();
 
-    void nullOptNotDefaultConstructible();
+    void nullOptNoDefaultConstructor();
+    void nullOptInlineDefinition();
 
     void constructDefault();
     void constructNullOpt();
@@ -81,7 +82,8 @@ struct OptionalTest: TestSuite::Tester {
 };
 
 OptionalTest::OptionalTest() {
-    addTests({&OptionalTest::nullOptNotDefaultConstructible});
+    addTests({&OptionalTest::nullOptNoDefaultConstructor,
+              &OptionalTest::nullOptInlineDefinition});
 
     addTests({&OptionalTest::constructDefault,
               &OptionalTest::constructNullOpt,
@@ -122,6 +124,14 @@ OptionalTest::OptionalTest() {
               &OptionalTest::debug,
 
               &OptionalTest::vectorOfMovableOptional});
+}
+
+void OptionalTest::nullOptNoDefaultConstructor() {
+    CORRADE_VERIFY(!std::is_default_constructible<NullOptT>::value);
+}
+
+void OptionalTest::nullOptInlineDefinition() {
+    CORRADE_VERIFY((std::is_same<decltype(NullOpt), const NullOptT>::value));
 }
 
 namespace {
@@ -210,10 +220,6 @@ void swap(Movable& a, Movable& b) {
     std::swap(a.a, b.a);
 }
 
-}
-
-void OptionalTest::nullOptNotDefaultConstructible() {
-    CORRADE_VERIFY(!std::is_default_constructible<NullOptT>::value);
 }
 
 void OptionalTest::constructDefault() {
