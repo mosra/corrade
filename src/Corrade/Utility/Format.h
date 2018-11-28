@@ -227,7 +227,7 @@ template<class ...Args> inline void printError(const char* format, const Args&..
 
 namespace Implementation {
 
-enum class FormatType: std::uint8_t;
+enum class FormatType: unsigned char;
 
 template<class T> struct Formatter;
 

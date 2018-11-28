@@ -32,7 +32,7 @@
 
 namespace Corrade { namespace Utility { namespace Implementation {
 
-enum class FormatType: std::uint8_t {
+enum class FormatType: unsigned char {
     Unspecified,
     Octal,
     Decimal,
