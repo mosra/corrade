@@ -511,7 +511,9 @@ void ArrayTest::release() {
     int* const released = a.release();
     delete[] released;
 
-    CORRADE_COMPARE(data, released);
+    /* Not comparing pointers directly because then Clang Analyzer complains
+       that printing the value of `released` is use-after-free. Um. */
+    CORRADE_COMPARE(reinterpret_cast<std::intptr_t>(data), reinterpret_cast<std::intptr_t>(released));
     CORRADE_COMPARE(a.begin(), nullptr);
     CORRADE_COMPARE(a.size(), 0);
 }
