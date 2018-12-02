@@ -45,6 +45,7 @@ AssertDisabledTest::AssertDisabledTest() {
 }
 
 void AssertDisabledTest::test() {
+    #ifndef __clang_analyzer__
     std::ostringstream out;
     Error redirectError{&out};
 
@@ -64,6 +65,9 @@ void AssertDisabledTest::test() {
     CORRADE_COMPARE(b, 3);
     CORRADE_COMPARE(c, 3);
     CORRADE_COMPARE(out.str(), "");
+    #else
+    CORRADE_SKIP("With assertions disabled, CORRADE_VERIFY() and CORRADE_COMPARE() cause a lot of false positives in Address Sanitizer.");
+    #endif
 }
 
 namespace {
@@ -79,6 +83,7 @@ constexpr int divideInternal(int a, int b) {
 }
 
 void AssertDisabledTest::constexprTest() {
+    #ifndef __clang_analyzer__
     std::ostringstream out;
     Error redirectError{&out};
 
@@ -97,6 +102,9 @@ void AssertDisabledTest::constexprTest() {
     }
 
     CORRADE_COMPARE(out.str(), "");
+    #else
+    CORRADE_SKIP("With assertions disabled, CORRADE_VERIFY() and CORRADE_COMPARE() cause a lot of false positives in Address Sanitizer.");
+    #endif
 }
 
 }}}
