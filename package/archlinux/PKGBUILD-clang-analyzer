@@ -1,0 +1,30 @@
+# Author: mosra <mosra@centrum.cz>
+pkgname=corrade
+pkgver=dev.clang.analyzer
+pkgrel=1
+pkgdesc="C++11/C++14 multiplatform utility library (clang-analyzer build)"
+arch=('i686' 'x86_64')
+url="https://magnum.graphics/corrade/"
+license=('MIT')
+makedepends=('cmake' 'clang-analyzer' 'ninja')
+options=(!strip)
+provides=('corrade-git')
+
+_rootdir=$startdir/../../
+
+build() {
+    mkdir -p "$_rootdir/build-clang-analyzer"
+    cd "$_rootdir/build-clang-analyzer"
+
+    scan-build --use-c++=$(which clang++) cmake .. \
+        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DBUILD_TESTS=ON \
+        -G Ninja
+    scan-build --use-c++=$(which clang++) --view ninja
+}
+
+package() {
+    error "Clang Analyzer builds are not meant to be installed."
+    exit 1
+}
