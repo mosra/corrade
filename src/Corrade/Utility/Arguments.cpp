@@ -369,6 +369,10 @@ void Arguments::parse(const int argc, const char** const argv) {
 }
 
 bool Arguments::tryParse(const int argc, const char** const argv) {
+    /* If argv is nullptr, argc should be 0. This also helps suppressing
+       false positives from Clang Analyzer. */
+    CORRADE_INTERNAL_ASSERT(!argv == !argc);
+
     /* Save command name */
     if(_command.empty() && argv && argc >= 1) _command = argv[0];
 
