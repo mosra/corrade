@@ -58,7 +58,9 @@ FileWatcher::~FileWatcher() = default;
 
 FileWatcher& FileWatcher::operator=(FileWatcher&&)
     /* See the header for details */
-    #if (!defined(__clang__) && !defined(__GNUC__)) || __clang_major__*100 + __clang_minor__ > 308 || __GNUC__*100 + __GNUC_MINOR__ >= 505
+    #ifdef __GNUC__
+    noexcept(std::is_nothrow_move_assignable<std::string>::value)
+    #else
     noexcept
     #endif
     = default;

@@ -85,10 +85,13 @@ class CORRADE_UTILITY_EXPORT FileWatcher {
             /* std::string move assignment in libstdc++ before 5.5 is not
                noexcept: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=58265
                It went through on GCC 4.7, but apparently only because it
-               doesn't care. This also affect Clang 3.8 I'm using on Travis CI
-               for ASan builds and since it's impossible to check for a
-               libstdc++ version, I'm disabling it for Clang as well. */
-            #if (!defined(__clang__) && !defined(__GNUC__)) || __clang_major__*100 + __clang_minor__ > 308 || __GNUC__*100 + __GNUC_MINOR__ >= 505
+               doesn't care; it causes build failure on Clang in case it's
+               using libstdc++ < 5.5. Since it's impossible to check for a
+               libstdc++ version when using Clang (the version number is A
+               RELEASE DATE, wtf!), I'm checking for it this way. */
+            #ifdef __GNUC__
+            noexcept(std::is_nothrow_move_assignable<std::string>::value)
+            #else
             noexcept
             #endif
             ;
