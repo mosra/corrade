@@ -39,12 +39,20 @@ your platform of choice. See @ref building-corrade-manual if you want to have
 more control and @ref building-corrade-cross for cross-compiling to other
 platforms.
 
+-   @ref building-corrade-packages-hunter
 -   @ref building-corrade-packages-vcpkg
 -   @ref building-corrade-packages-arch
 -   @ref building-corrade-packages-deb
 -   @ref building-corrade-packages-gentoo
 -   @ref building-corrade-packages-rpm
 -   @ref building-corrade-packages-brew
+
+@subsection building-corrade-packages-hunter Hunter package
+
+Starting from version 2018.10, stable releases of Corrade are available in the
+[Hunter](https://hunter.sh) CMake-driven package manager. See the
+[corrade package documentation](https://docs.hunter.sh/en/latest/packages/pkg/corrade.html)
+for details.
 
 @subsection building-corrade-packages-vcpkg Vcpkg packages on Windows
 

@@ -60,6 +60,12 @@ namespace Corrade {
     @ref PluginManager::AbstractPlugin::pluginInterface() "pluginInterface()"
     function optional to make implementing hot-reload interfaces less verbose
 
+@subsection corrade-changelog-latest-buildsystem Build system
+
+-   Corrade is now available through [Hunter](https://hunter.sh) CMake-driven
+    package manager. See @ref building-corrade-packages-hunter for more
+    information. See also [mosra/magnum#298](https://github.com/mosra/magnum/pull/298).
+
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
 -   It was not possible to use @ref TestSuite::Compare::File with
