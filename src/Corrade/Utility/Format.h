@@ -205,7 +205,7 @@ template<class ...Args> void formatInto(std::FILE* file, const char* format, con
 @brief Print a string to the standard output
 
 Equivalent to calling @ref formatInto(std::FILE*, const char*, const Args&... args)
-with @ref stdout as a first parameter.
+with @cpp stdout @ce as a first parameter.
 
 @experimental
 */
@@ -217,7 +217,7 @@ template<class ...Args> inline void print(const char* format, const Args&... arg
 @brief Print a string to the standard error output
 
 Equivalent to calling @ref formatInto(std::FILE*, const char*, const Args&... args)
-with @ref stderr as a first parameter.
+with @cpp stderr @ce as a first parameter.
 
 @experimental
 */

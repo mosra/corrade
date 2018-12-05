@@ -80,7 +80,7 @@ struct NoInitT {
 @brief No creation tag type
 
 Used to distinguish construction with initialization but not creation. Contrary
-to @ref NotInitT this doesn't keep random values, but makes the instance empty
+to @ref NoInitT this doesn't keep random values, but makes the instance empty
 (usually equivalent to a moved-out state).
 @see @ref NoCreate
 */
