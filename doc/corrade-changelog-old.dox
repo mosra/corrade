@@ -292,7 +292,7 @@ No dependency changes in this release.
 
 @subsection corrade-changelog-2013-10-deprecated Deprecated APIs
 
--   @ref Interconnect::Emitter::connect() is deprecated, use
+-   @cpp Interconnect::Emitter::connect() @ce is deprecated, use
     @ref Interconnect::connect() instead.
 
 @subsection corrade-changelog-2013-10-compatibility Potential compatibility breakages, removed APIs
