@@ -102,6 +102,13 @@ namespace Corrade {
     2016 and superseded by @ref Utility::Debug scoped output
 -   Removed @cpp Utility::Debug::noNewlineAtTheEnd() @ce, which was deprecated
     since 2016 and superseded by @ref Utility::Debug::Flag::NoNewlineAtTheEnd
+-   Removed @cpp TestSuite::Tester::BenchmarkType::WallClock @ce,
+    @cpp TestSuite::Tester::BenchmarkUnits::Time @ce and
+    @cpp TestSuite::Tester::BenchmarkUnits::Memory @ce which were deprecated
+    since January 2017, not long after introducing the benchmark functionality
+    itself. Use @ref TestSuite::Tester::BenchmarkType::WallTime,
+    @ref TestSuite::Tester::BenchmarkUnits::Nanoseconds and
+    @ref TestSuite::Tester::BenchmarkUnits::Bytes instead.
 
 @section corrade-changelog-2018-10 2018.10
 
