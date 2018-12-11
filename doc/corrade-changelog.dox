@@ -98,6 +98,8 @@ namespace Corrade {
 -   Removed @cpp Utility::Arguments::setHelpKey() @ce, which was deprecated
     since 2016. Its functionality was merged into
     @ref Utility::Arguments::setHelp().
+-   Removed @cpp Utility::Debug::setOutput() @ce, which was deprecated since
+    2016 and superseded by @ref Utility::Debug scoped output
 
 @section corrade-changelog-2018-10 2018.10
 
@@ -559,7 +561,7 @@ a high-level overview.
     instead
 -   @cpp Utility::Arguments::setHelpKey() @ce is deprecated as its
     functionality was merged into @ref Utility::Arguments::setHelp()
--   @ref Utility::Debug::setOutput() is deprecated and superseded by scoped
+-   @cpp Utility::Debug::setOutput() @ce is deprecated and superseded by scoped
     output, see @ref Utility::Debug class documentation for more information
 -   @ref Utility::sleep() is deprecated, use @ref Utility::System::sleep()
     instead

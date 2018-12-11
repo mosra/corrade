@@ -172,20 +172,6 @@ void Debug::resetColor(Debug& debug) {
     debug.resetColorInternal();
 }
 
-#ifdef CORRADE_BUILD_DEPRECATED
-void Debug::setOutput(std::ostream* output) {
-    _globalOutput = output;
-}
-
-void Warning::setOutput(std::ostream* output) {
-    _globalWarningOutput = output;
-}
-
-void Error::setOutput(std::ostream* output) {
-    _globalErrorOutput = output;
-}
-#endif
-
 std::ostream* Debug::output() { return _globalOutput; }
 std::ostream* Warning::output() { return _globalWarningOutput; }
 std::ostream* Error::output() { return _globalErrorOutput; }

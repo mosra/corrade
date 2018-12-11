@@ -157,14 +157,6 @@ class CORRADE_UTILITY_EXPORT Debug {
         }
         #endif
 
-        #ifdef CORRADE_BUILD_DEPRECATED
-        /**
-         * @brief Set output for instances in this scope
-         * @deprecated Use @ref Debug(std::ostream*, Flags) instead.
-         */
-        CORRADE_DEPRECATED("use Debug(std::ostream*, Flags) instead") static void setOutput(std::ostream* output);
-        #endif
-
         /** @{ @name Output modifiers
          *
          * See @ref Utility-Debug-modifiers for more information.
@@ -626,12 +618,6 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
         CORRADE_DEPRECATED("use Warning(std::ostream*, Flags) instead") static Warning noNewlineAtTheEnd(std::ostream* output) {
             return Warning{output, Flag::NoNewlineAtTheEnd};
         }
-
-        /**
-         * @brief Set output for instances in this scope
-         * @deprecated Use @ref Warning(std::ostream*, Flags) instead.
-         */
-        CORRADE_DEPRECATED("use Warning(std::ostream*, Flags) instead") static void setOutput(std::ostream* output);
         #endif
 
         /**
@@ -725,12 +711,6 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
         CORRADE_DEPRECATED("use Error(std::ostream*, Flags) instead") static Error noNewlineAtTheEnd(std::ostream* output) {
             return Error{output, Flag::NoNewlineAtTheEnd};
         }
-
-        /**
-         * @brief Set output for instances in this scope
-         * @deprecated Use @ref Error(std::ostream*, Flags) instead.
-         */
-        CORRADE_DEPRECATED("use Error(std::ostream*, Flags) instead") static void setOutput(std::ostream* output);
         #endif
 
         /**
