@@ -532,15 +532,6 @@ template<class T> std::size_t arraySize(const Array<T>& view) {
     return view.size();
 }
 
-#ifdef CORRADE_BUILD_DEPRECATED
-/** @brief @copybrief ArrayView
- * @deprecated Use @ref ArrayView.h and @ref ArrayView instead.
- */
-#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
-template<class T> using ArrayReference CORRADE_DEPRECATED_ALIAS("use ArrayView.h and ArrayView instead") = ArrayView<T>;
-#endif
-#endif
-
 template<class T, class D> inline Array<T, D>::Array(Array<T, D>&& other) noexcept: _data{other._data}, _size{other._size}, _deleter{other._deleter} {
     other._data = nullptr;
     other._size = 0;

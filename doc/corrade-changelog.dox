@@ -86,6 +86,11 @@ namespace Corrade {
     cross-platform testing more prone to errors. Now `ctest` properly fails
     when the `FILES` section contains a file that doesn't exist.
 
+@subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
+
+-   Removed @cpp Containers::ArrayReference @ce, which was deprecated since
+    2015. Use @ref Containers::ArrayView instead.
+
 @section corrade-changelog-2018-10 2018.10
 
 Released 2018-10-23, tagged as
@@ -537,7 +542,7 @@ a high-level overview.
 
 @subsection corrade-changelog-2018-02-deprecated Deprecated APIs
 
--   @ref Containers::ArrayReference is deprecated, use the shorter
+-   @cpp Containers::ArrayReference @ce is deprecated, use the shorter
     @ref Containers::ArrayView name instead
 -   @ref Containers::Array::zeroInitialized() is deprecated, use
     @ref Containers::Array::Array(ValueInitT, std::size_t) instead
