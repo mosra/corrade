@@ -100,6 +100,8 @@ namespace Corrade {
     @ref Utility::Arguments::setHelp().
 -   Removed @cpp Utility::Debug::setOutput() @ce, which was deprecated since
     2016 and superseded by @ref Utility::Debug scoped output
+-   Removed @cpp Utility::Debug::noNewlineAtTheEnd() @ce, which was deprecated
+    since 2016 and superseded by @ref Utility::Debug::Flag::NoNewlineAtTheEnd
 
 @section corrade-changelog-2018-10 2018.10
 
@@ -563,6 +565,8 @@ a high-level overview.
     functionality was merged into @ref Utility::Arguments::setHelp()
 -   @cpp Utility::Debug::setOutput() @ce is deprecated and superseded by scoped
     output, see @ref Utility::Debug class documentation for more information
+-   @cpp Utility::Debug::noNewlineAtTheEnd() @ce is deprecated, use
+    @ref Utility::Debug::Flag::NoNewlineAtTheEnd instead
 -   @ref Utility::sleep() is deprecated, use @ref Utility::System::sleep()
     instead
 -   `CORRADE_*_LIBRARIES`, `CORRADE_*_INCLUDE_DIRS` and `CORRADE_RC_EXECUTABLE`
@@ -578,7 +582,7 @@ a high-level overview.
 -   Reversed parameter order of @ref CORRADE_EXPECT_FAIL_IF() to be more
     intuitive
 -   The `Utility::Debug::setFlags()` function was removed, use
-    @ref Utility::Debug::nospace and @ref Utility::Debug::noNewlineAtTheEnd()
+    @ref Utility::Debug::nospace and @ref Utility::Debug::Flag::NoNewlineAtTheEnd
     instead
 -   The @ref Utility::Directory, @ref Utility::String and @ref Utility::Unicode
     classes are now a namespace (might break `using` declarations, but

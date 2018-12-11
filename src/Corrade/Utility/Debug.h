@@ -139,24 +139,6 @@ class CORRADE_UTILITY_EXPORT Debug {
          */
         typedef Containers::EnumSet<Flag> Flags;
 
-        #ifdef CORRADE_BUILD_DEPRECATED
-        /**
-         * @brief Debug output without newline at the end
-         * @deprecated Use @ref Debug(Flags) instead.
-         */
-        CORRADE_DEPRECATED("use Debug(Flags) instead") static Debug noNewlineAtTheEnd() {
-            return Debug{Flag::NoNewlineAtTheEnd};
-        }
-
-        /**
-         * @brief Debug output without newline at the end
-         * @deprecated Use @ref Debug(std::ostream*, Flags) instead.
-         */
-        CORRADE_DEPRECATED("use Debug(std::ostream*, Flags) instead") static Debug noNewlineAtTheEnd(std::ostream* output) {
-            return Debug{output, Flag::NoNewlineAtTheEnd};
-        }
-        #endif
-
         /** @{ @name Output modifiers
          *
          * See @ref Utility-Debug-modifiers for more information.
@@ -602,24 +584,6 @@ outputs.
 */
 class CORRADE_UTILITY_EXPORT Warning: public Debug {
     public:
-        #ifdef CORRADE_BUILD_DEPRECATED
-        /**
-         * @brief Warning output without newline at the end
-         * @deprecated Use @ref Warning(Flags) instead.
-         */
-        CORRADE_DEPRECATED("use Warning(Flags) instead") static Warning noNewlineAtTheEnd() {
-            return Warning{Flag::NoNewlineAtTheEnd};
-        }
-
-        /**
-         * @brief Warning output without newline at the end
-         * @deprecated Use @ref Warning(std::ostream*, Flags) instead.
-         */
-        CORRADE_DEPRECATED("use Warning(std::ostream*, Flags) instead") static Warning noNewlineAtTheEnd(std::ostream* output) {
-            return Warning{output, Flag::NoNewlineAtTheEnd};
-        }
-        #endif
-
         /**
          * @brief Current warning output stream
          *
@@ -695,24 +659,6 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
     friend Fatal;
 
     public:
-        #ifdef CORRADE_BUILD_DEPRECATED
-        /**
-         * @brief Error output without newline at the end
-         * @deprecated Use @ref Error(Flags) instead.
-         */
-        CORRADE_DEPRECATED("use Error(Flags) instead") static Error noNewlineAtTheEnd() {
-            return Error{Flag::NoNewlineAtTheEnd};
-        }
-
-        /**
-         * @brief Error output without newline at the end
-         * @deprecated Use @ref Error(std::ostream*, Flags) instead.
-         */
-        CORRADE_DEPRECATED("use Error(std::ostream*, Flags) instead") static Error noNewlineAtTheEnd(std::ostream* output) {
-            return Error{output, Flag::NoNewlineAtTheEnd};
-        }
-        #endif
-
         /**
          * @brief Current error output stream
          *
@@ -836,10 +782,6 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
         ~Fatal();
 
     private:
-        #ifdef CORRADE_BUILD_DEPRECATED
-        using Error::noNewlineAtTheEnd;
-        #endif
-
         int _exitCode;
 };
 
