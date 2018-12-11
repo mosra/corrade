@@ -207,8 +207,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * @brief Add mandatory argument
          *
          * After calling @cpp addArgument("argument") @ce the argument will be
-         * displayed in argument list like the following. Call
-         * @ref setHelpKey() to change the displayed key:
+         * displayed in argument list like the following. Call @ref setHelp()
+         * to change the displayed key:
          *
          * @code{.shell-session}
          * Usage:
@@ -232,7 +232,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * After calling @cpp addNamedArgument('a', "argument") @ce the
          * argument will be displayed in help text like the following. Argument
-         * value is just uppercased key value, call @ref setHelpKey() to change
+         * value is just uppercased key value, call @ref setHelp() to change
          * it:
          *
          * @code{.shell-session}
@@ -278,7 +278,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * After calling @cpp addOption('o', "option") @ce the option will be
          * displayed in help text like the following. Option value is just
-         * uppercased key value, call @ref setHelpKey() to change it:
+         * uppercased key value, call @ref setHelp() to change it:
          *
          * @code{.shell-session}
          * Usage:
@@ -338,9 +338,9 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *   -o, --option      help text
          * @endcode
          *
-         * Option presence can be queried with @ref isSet(), @ref setHelpKey()
-         * cannot be used with boolean options. Option for getting help (`-h`,
-         * `--help`) is added automatically.
+         * Option presence can be queried with @ref isSet(). Setting displayed
+         * key name in @ref setHelp() is not possible with boolean options.
+         * Option for getting help (`-h`, `--help`) is added automatically.
          *
          * Only non-boolean options are allowed in the prefixed version, use
          * @ref addOption() instead.
@@ -465,13 +465,6 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * The displayed keys are changed also in argument and option list.
          */
         Arguments& setHelp(const std::string& key, std::string help, std::string helpKey = {});
-
-        #ifdef CORRADE_BUILD_DEPRECATED
-        /** @brief @copybrief setHelp(const std::string&, std::string, std::string)
-         * @deprecated Use @ref setHelp(const std::string&, std::string, std::string) instead.
-         */
-        CORRADE_DEPRECATED("use setHelp() instead") Arguments& setHelpKey(const std::string& key, std::string helpKey);
-        #endif
 
         /**
          * @brief Parse the arguments and exit on failure

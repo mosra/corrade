@@ -346,14 +346,6 @@ Arguments& Arguments::setHelp(const std::string& key, std::string help, std::str
     return *this;
 }
 
-#ifdef CORRADE_BUILD_DEPRECATED
-Arguments& Arguments::setHelpKey(const std::string& key, std::string helpKey) {
-    auto found = find(_prefix + key);
-    CORRADE_ASSERT(found != _entries.end(), "Utility::Arguments::setHelp(): key" << key << "doesn't exist", *this);
-    return setHelp(key, found->help, std::move(helpKey));
-}
-#endif
-
 void Arguments::parse(const int argc, const char** const argv) {
     const bool status = tryParse(argc, argv);
 
