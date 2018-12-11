@@ -88,8 +88,8 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 
--   Removed @cpp Containers::ArrayReference @ce, which was deprecated since
-    2015. Use @ref Containers::ArrayView instead.
+-   Removed @cpp Containers::ArrayReference @ce, which was deprecated since 2015.
+    Use @ref Containers::ArrayView instead.
 -   Removed @cpp Containers::Array::zeroInitialized() @ce and
     @cpp Containers::Array::from() @ce, which were deprecated since 2015. Use
     @ref Containers::Array::Array(ValueInitT, std::size_t) and
