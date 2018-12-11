@@ -113,19 +113,10 @@ if(WITH_UTILITY)
         ${PROJECT_SOURCE_DIR}/src
         ${PROJECT_BINARY_DIR}/src)
     # Require (at least) C++11 for users
-    if(NOT CMAKE_VERSION VERSION_LESS 3.0.0)
-        set_property(TARGET CorradeUtility PROPERTY
-            INTERFACE_CORRADE_CXX_STANDARD 11)
-        set_property(TARGET CorradeUtility APPEND PROPERTY
-            COMPATIBLE_INTERFACE_NUMBER_MAX CORRADE_CXX_STANDARD)
-    else()
-        # See FindCorrade.cmake for juicy rant about 2.8.12 and why can't I use
-        # single property name to cover all cases. AAAAAAAAARGH.
-        set_property(TARGET CorradeUtility PROPERTY
-            INTERFACE_CORRADE_CXX_STANDARD_ 11)
-        set_property(TARGET CorradeUtility APPEND PROPERTY
-            COMPATIBLE_INTERFACE_STRING CORRADE_CXX_STANDARD_)
-    endif()
+    set_property(TARGET CorradeUtility PROPERTY
+        INTERFACE_CORRADE_CXX_STANDARD 11)
+    set_property(TARGET CorradeUtility APPEND PROPERTY
+        COMPATIBLE_INTERFACE_NUMBER_MAX CORRADE_CXX_STANDARD)
     set_target_properties(CorradeUtility PROPERTIES
         DEBUG_POSTFIX "-d"
         FOLDER "Corrade/Utility")

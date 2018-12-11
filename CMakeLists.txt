@@ -23,7 +23,15 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 2.8.12)
+# Oldest known CMake currently in use is 3.0.2 on Debian 8 (Jessie), but we
+# can't use that since it has a bug in handling imported targets -- a target
+# defined in a subdirectory (for example via
+# find_package(Corrade REQUIRED PluginManager)) and used as a dependency of
+# another target is not propagated correctly upwards, which results in errors
+# saying Corrade::PluginManager is not found. Next oldest supported version is
+# 3.5.2 (Ubuntu 16.04), but we don't need any features from that so let's stay
+# on 3.1.
+cmake_minimum_required(VERSION 3.1)
 
 # As reported in https://github.com/mosra/corrade/issues/52 and then tracked
 # down to https://gitlab.kitware.com/cmake/cmake/issues/18099, CMake < 3.12 has
@@ -33,24 +41,6 @@ cmake_minimum_required(VERSION 2.8.12)
 # with a clear message.
 if(APPLE AND CMAKE_GENERATOR STREQUAL Xcode AND NOT XCODE_VERSION VERSION_LESS 10.0 AND CMAKE_VERSION VERSION_LESS 3.12.0)
     message(FATAL_ERROR "CMake < 3.12 and Xcode 10 have various compatibility issues, breaking the Corrade build. Please upgrade to CMake 3.12 to use Xcode 10.")
-endif()
-
-# CMake policies. 0025 needs to be before project(), so putting all there.
-# Use AppleClang instead of Clang on Apple
-if(POLICY CMP0025)
-    cmake_policy(SET CMP0025 NEW)
-endif()
-# Don't treat imported targets with :: as files
-if(POLICY CMP0028)
-    cmake_policy(SET CMP0028 NEW)
-endif()
-# Enable MACOSX_RPATH by default
-if(POLICY CMP0042)
-    cmake_policy(SET CMP0042 NEW)
-endif()
-# Quoted variables should not be dereferenced
-if(POLICY CMP0054)
-    cmake_policy(SET CMP0054 NEW)
 endif()
 
 # Configuration fails on < 3.9 if only C++ is enabled (TestBigEndian macro)

@@ -445,26 +445,10 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
                 INTERFACE_INCLUDE_DIRECTORIES ${CORRADE_INCLUDE_DIR})
 
             # Require (at least) C++11 for users
-            if(NOT CMAKE_VERSION VERSION_LESS 3.0.0)
-                set_property(TARGET Corrade::${_component} PROPERTY
-                    INTERFACE_CORRADE_CXX_STANDARD 11)
-                set_property(TARGET Corrade::${_component} APPEND PROPERTY
-                    COMPATIBLE_INTERFACE_NUMBER_MAX CORRADE_CXX_STANDARD)
-            else()
-                # 2.8.12 is fucking buggy shit. Besides the fact that it
-                # doesn't know COMPATIBLE_INTERFACE_NUMBER_MAX, if I
-                # define_property() so I can inherit it from directory on a
-                # target, then I can't use it in COMPATIBLE_INTERFACE_STRING
-                # to inherit it from interfaces BECAUSE!! it thinks that it is
-                # not an user-defined property anymore. So I need to have two
-                # sets of properties, CORRADE_CXX_STANDARD_ used silently for
-                # inheritance from interfaces and CORRADE_CXX_STANDARD used
-                # publicly for inheritance from directories. AAAAAAAAARGH.
-                set_property(TARGET Corrade::${_component} PROPERTY
-                    INTERFACE_CORRADE_CXX_STANDARD_ 11)
-                set_property(TARGET Corrade::${_component} APPEND PROPERTY
-                    COMPATIBLE_INTERFACE_STRING CORRADE_CXX_STANDARD_)
-            endif()
+            set_property(TARGET Corrade::${_component} PROPERTY
+                INTERFACE_CORRADE_CXX_STANDARD 11)
+            set_property(TARGET Corrade::${_component} APPEND PROPERTY
+                COMPATIBLE_INTERFACE_NUMBER_MAX CORRADE_CXX_STANDARD)
 
             # AndroidLogStreamBuffer class needs to be linked to log library
             if(CORRADE_TARGET_ANDROID)
@@ -481,11 +465,10 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
             mark_as_advanced(_CORRADE_${_COMPONENT}_INCLUDE_DIR)
         endif()
 
-        # Add inter-library dependencies (except for the header-only libraries
-        # on 2.8.12)
-        if(_component MATCHES ${_CORRADE_LIBRARY_COMPONENTS} AND (NOT CMAKE_VERSION VERSION_LESS 3.0.0 OR NOT _component MATCHES ${_CORRADE_HEADER_ONLY_COMPONENTS}))
+        # Add inter-library dependencies
+        if(_component MATCHES ${_CORRADE_LIBRARY_COMPONENTS} OR _component MATCHES ${_CORRADE_HEADER_ONLY_COMPONENTS})
             foreach(_dependency ${_CORRADE_${_COMPONENT}_DEPENDENCIES})
-                if(_dependency MATCHES ${_CORRADE_LIBRARY_COMPONENTS} AND (NOT CMAKE_VERSION VERSION_LESS 3.0.0 OR NOT _dependency MATCHES ${_CORRADE_HEADER_ONLY_COMPONENTS}))
+                if(_dependency MATCHES ${_CORRADE_LIBRARY_COMPONENTS} OR _dependency MATCHES ${_CORRADE_HEADER_ONLY_COMPONENTS})
                     set_property(TARGET Corrade::${_component} APPEND PROPERTY
                         INTERFACE_LINK_LIBRARIES Corrade::${_dependency})
                 endif()
