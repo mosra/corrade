@@ -211,7 +211,9 @@ template<class T> class Comparator<Compare::Greater<T>> {
 
 template<class T> class Comparator<Compare::Around<T>> {
     public:
-        explicit Comparator(T epsilon): _epsilon{epsilon} {}
+        /* Has to be () and not {} otherwise GCC 4.8 complains that "too many
+           initializers for Bar" in NumericTest.cpp: */
+        explicit Comparator(T epsilon): _epsilon(epsilon) {}
 
         bool operator()(const T& actual, const T& expected) {
             _actualValue = &actual;
