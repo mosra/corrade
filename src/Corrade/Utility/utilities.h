@@ -29,15 +29,7 @@
  * @brief Basic utilities
  */
 
-#include <cstddef>
 #include <cstring>
-
-#include "Corrade/Utility/visibility.h"
-#include "Corrade/configure.h"
-#ifdef CORRADE_BUILD_DEPRECATED
-#include "Corrade/Utility/Macros.h"
-#include "Corrade/Utility/System.h"
-#endif
 
 namespace Corrade { namespace Utility {
 
@@ -58,16 +50,6 @@ template<class To, class From> inline To bitCast(const From& from) {
 }
 
 /*@}*/
-
-#ifdef CORRADE_BUILD_DEPRECATED
-/**
- * @brief @copybrief System::sleep()
- * @deprecated Use @ref System::sleep() instead.
- */
-inline CORRADE_DEPRECATED("Use System::sleep() instead") void sleep(std::size_t ms) {
-    return System::sleep(ms);
-}
-#endif
 
 }}
 

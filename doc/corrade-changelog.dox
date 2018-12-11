@@ -102,6 +102,8 @@ namespace Corrade {
     2016 and superseded by @ref Utility::Debug scoped output
 -   Removed @cpp Utility::Debug::noNewlineAtTheEnd() @ce, which was deprecated
     since 2016 and superseded by @ref Utility::Debug::Flag::NoNewlineAtTheEnd
+-   Removed @cpp Utility::sleep() @ce which was deprecated since 2016. Use
+    @ref Utility::System::sleep() instead.
 -   Removed @cpp TestSuite::Tester::BenchmarkType::WallClock @ce,
     @cpp TestSuite::Tester::BenchmarkUnits::Time @ce and
     @cpp TestSuite::Tester::BenchmarkUnits::Memory @ce which were deprecated
@@ -574,7 +576,7 @@ a high-level overview.
     output, see @ref Utility::Debug class documentation for more information
 -   @cpp Utility::Debug::noNewlineAtTheEnd() @ce is deprecated, use
     @ref Utility::Debug::Flag::NoNewlineAtTheEnd instead
--   @ref Utility::sleep() is deprecated, use @ref Utility::System::sleep()
+-   @cpp Utility::sleep() @ce is deprecated, use @ref Utility::System::sleep()
     instead
 -   `CORRADE_*_LIBRARIES`, `CORRADE_*_INCLUDE_DIRS` and `CORRADE_RC_EXECUTABLE`
     CMake variables are deprecated in favor of `Corrade::*` imported targets,
