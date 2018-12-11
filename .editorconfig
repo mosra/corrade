@@ -1,0 +1,7 @@
+[*]
+indent_style = space
+indent_size = 4
+
+[*.{css,html,html.in}]
+indent_style = space
+indent_size = 2
