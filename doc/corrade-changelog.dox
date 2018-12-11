@@ -90,6 +90,11 @@ namespace Corrade {
 
 -   Removed @cpp Containers::ArrayReference @ce, which was deprecated since
     2015. Use @ref Containers::ArrayView instead.
+-   Removed @cpp Containers::Array::zeroInitialized() @ce and
+    @cpp Containers::Array::from() @ce, which were deprecated since 2015. Use
+    @ref Containers::Array::Array(ValueInitT, std::size_t) and
+    @ref Containers::Array::Array(InPlaceInitT, std::initializer_list<T>)
+    instead.
 
 @section corrade-changelog-2018-10 2018.10
 
@@ -544,9 +549,9 @@ a high-level overview.
 
 -   @cpp Containers::ArrayReference @ce is deprecated, use the shorter
     @ref Containers::ArrayView name instead
--   @ref Containers::Array::zeroInitialized() is deprecated, use
+-   @cpp Containers::Array::zeroInitialized() @ce is deprecated, use
     @ref Containers::Array::Array(ValueInitT, std::size_t) instead
--   @ref Containers::Array::from() is deprecated, use
+-   @cpp Containers::Array::from() @ce is deprecated, use
     @ref Containers::Array::Array(InPlaceInitT, std::initializer_list<T>)
     instead
 -   @ref Utility::Arguments::setHelpKey() is deprecated as its functionality

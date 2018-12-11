@@ -37,10 +37,6 @@
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/Tags.h"
 
-#ifdef CORRADE_BUILD_DEPRECATED
-#include "Corrade/Utility/Macros.h"
-#endif
-
 namespace Corrade { namespace Containers {
 
 namespace Implementation {
@@ -144,24 +140,6 @@ class Array {
     public:
         typedef T Type;     /**< @brief Element type */
         typedef D Deleter;  /**< @brief Deleter type */
-
-        #ifdef CORRADE_BUILD_DEPRECATED
-        /**
-         * @brief @copybrief Array(InPlaceInitT, std::initializer_list<T>)
-         * @deprecated Use @ref Array(InPlaceInitT, std::initializer_list<T>) instead.
-         */
-        template<class ...U> CORRADE_DEPRECATED("use Array(InPlaceInitT, std::initializer_list<T>) instead") static Array<T, D> from(U&&... values) {
-            return Array<T, D>{InPlaceInit, {T(std::forward<U>(values))...}};
-        }
-
-        /**
-         * @brief @copybrief Array(ValueInitT, std::size_t)
-         * @deprecated Use @ref Array(ValueInitT, std::size_t) instead.
-         */
-        CORRADE_DEPRECATED("use Array(ValueInitT, std::size_t) instead") static Array<T, D> zeroInitialized(std::size_t size) {
-            return Array<T>{ValueInit, size};
-        }
-        #endif
 
         /** @brief Conversion from nullptr */
         #ifdef DOXYGEN_GENERATING_OUTPUT
