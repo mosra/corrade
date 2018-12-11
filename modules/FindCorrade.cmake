@@ -92,6 +92,7 @@
 #  CORRADE_INCLUDE_DIR          - Root include dir
 #  CORRADE_*_LIBRARY_DEBUG      - Debug version of given library, if found
 #  CORRADE_*_LIBRARY_RELEASE    - Release version of given library, if found
+#  CORRADE_*_EXECUTABLE         - Location of given executable, if found
 #  CORRADE_USE_MODULE           - Path to UseCorrade.cmake module (included
 #   automatically)
 #  CORRADE_TESTSUITE_XCTEST_RUNNER - Path to XCTestRunner.mm.in file
@@ -106,8 +107,6 @@
 # following variables are included just for backwards compatibility and only if
 # :variable:`CORRADE_BUILD_DEPRECATED` is enabled:
 #
-#  CORRADE_*_LIBRARIES          - Expands to ``Corrade::*`` target. Use
-#   ``Corrade::*`` target directly instead.
 #  CORRADE_CXX_FLAGS            - Pedantic compile flags. Use
 #   :prop_tgt:`CORRADE_USE_PEDANTIC_FLAGS` property or
 #   :variable:`CORRADE_PEDANTIC_COMPILER_DEFINITIONS` /
@@ -481,11 +480,6 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
         else()
             set(Corrade_${_component}_FOUND FALSE)
         endif()
-    endif()
-
-    # Deprecated variables
-    if(CORRADE_BUILD_DEPRECATED AND _component MATCHES ${_CORRADE_LIBRARY_COMPONENTS} AND NOT _component MATCHES ${_CORRADE_HEADER_ONLY_COMPONENTS})
-        set(CORRADE_${_COMPONENT}_LIBRARIES Corrade::${_component})
     endif()
 endforeach()
 

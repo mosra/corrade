@@ -111,6 +111,9 @@ namespace Corrade {
     itself. Use @ref TestSuite::Tester::BenchmarkType::WallTime,
     @ref TestSuite::Tester::BenchmarkUnits::Nanoseconds and
     @ref TestSuite::Tester::BenchmarkUnits::Bytes instead.
+-   Removed `CORRADE_*_LIBRARIES` and `CORRADE_*_INCLUDE_DIRS` CMake variables,
+    which were deprecated in favor of `Corrade::*` imported targets in 2016.
+    The deprecated `CORRADE_CXX_FLAGS` variable is still present, however.
 
 @section corrade-changelog-2018-10 2018.10
 
