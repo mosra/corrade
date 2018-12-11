@@ -35,7 +35,6 @@
 
 namespace Corrade { namespace Utility {
 
-
 /**
 @brief System utilities
 
