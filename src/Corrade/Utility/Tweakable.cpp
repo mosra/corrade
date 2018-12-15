@@ -441,6 +441,9 @@ TweakableState parseTweakables(const std::string& name, const std::string& filen
             std::size_t end = beg;
 
             /* A string -- parse until the next unescaped " */
+            /** @todo once string parsers are possible (they need heap alloc),
+                    combine this with the global string ignore, then also test
+                    for multiline strings (which are a syntax error) */
             if(data[beg] == '"') {
                 end = beg + 1;
                 while((end = data.find('"', end)) != std::string::npos) {
@@ -455,6 +458,9 @@ TweakableState parseTweakables(const std::string& name, const std::string& filen
                 ++end;
 
             /* A char -- parse until the next unescaped ' */
+            /** @todo once string parsers are possible (they need heap alloc),
+                    combine this with the global char ignore, then also test
+                    for multiline chars (which are a syntax error) */
             } else if(data[beg] == '\'') {
                 end = beg + 1;
                 while((end = data.find('\'', end)) != std::string::npos) {
@@ -473,7 +479,9 @@ TweakableState parseTweakables(const std::string& name, const std::string& filen
                 Error{} << "Utility::Tweakable::update(): unsupported wide char/string literal" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
                 return TweakableState::Error;
 
-            /** @todo implement */
+            /** @todo once string parsers are possible (they need heap alloc),
+                    combine this with the global (raw) string ignore, then also
+                    test for raw strings */
             } else if(data[beg] == 'u' || data[beg] == 'U' || data[beg] == 'R') {
                 Error{} << "Utility::Tweakable::update(): unsupported unicode/raw char/string literal" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
                 return TweakableState::Error;
