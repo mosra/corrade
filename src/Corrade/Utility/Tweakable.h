@@ -55,8 +55,9 @@ take care of source code changes that tweakable constants alone can't.
 @section Utility-Tweakable-usage Basic usage
 
 Common usage is to first define a shorter alias to the @ref CORRADE_TWEAKABLE()
-macro. It's possible to define any alias and you can also use the
-`CORRADE_TWEAKABLE` name directly. Here we'll use a single underscore:
+macro in every source file where you're going to use tweakable values. It's
+possible to define any alias and you can also use the `CORRADE_TWEAKABLE` name
+directly. Here we'll use a single underscore:
 
 @snippet Utility.cpp Tweakable-define
 
@@ -150,6 +151,8 @@ This is not magic, so it comes with a few limitations:
 -   Tweakable variables inside code that's compiled-out by the preprocessor
     (such as various @cpp #ifdef @ce s) will confuse the runtime parser, so
     avoid them entirely.
+-   For simplicity of the implementation, comments are not allowed *inside* the
+    tweakable macros, only whitespace.
 
 At the moment, the implementation is *not* thread-safe.
 
