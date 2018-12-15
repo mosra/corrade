@@ -46,7 +46,7 @@ First step for creating a unit test is to subclass @ref TestSuite::Tester and
 add test cases and benchmarks to it.
 
 @dontinclude testsuite/MyTest.cpp
-@skip struct MyTest
+@skip namespace {
 @until };
 
 In constructor we register our test cases and benchmarks using
@@ -57,6 +57,12 @@ In constructor we register our test cases and benchmarks using
 @until }
 @until }
 @until }
+
+@note You might have noticed that @cpp struct MyTest @ce is wrapped in an
+    unnamed namespace --- this makes compilers such as GCC and Clang warn about
+    defined-but-not-used member functions. That in turn ensures you don't
+    forget to add all the test cases using @ref TestSuite::Tester::addTests() "addTests()"
+    and friends.
 
 Now we implement our test cases. The simplest macro is @ref CORRADE_VERIFY(),
 which only verifies that given expression is @cpp true @ce; if not, it exits
@@ -116,7 +122,11 @@ Lastly, we create the @cpp main() @ce function using the @ref CORRADE_TEST_MAIN(
 macro. It conveniently abstracts platform differences and takes care of
 command-line argument parsing for us.
 
-@skipline CORRADE_TEST_MAIN
+@code{.cpp}
+}
+
+CORRADE_TEST_MAIN(MyTest)
+@endcode
 
 @section testsuite-compilation Compilation and running
 

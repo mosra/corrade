@@ -29,10 +29,13 @@
 
 #include <cmath>
 #include <list>
+#include <vector>
 #include <Corrade/TestSuite/Tester.h>
 #include <Corrade/Utility/Endianness.h>
 
 namespace Corrade { namespace Examples {
+
+namespace {
 
 struct MyTest: TestSuite::Tester {
     explicit MyTest();
@@ -113,6 +116,8 @@ void MyTest::prepend1kItemsList() {
         a += container.back();
     }
     CORRADE_VERIFY(a); // to avoid the benchmark loop being optimized out
+}
+
 }
 
 }}

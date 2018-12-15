@@ -130,9 +130,12 @@ lowercased to distinguish them from API headers.
 
 Code in the root Corrade namespace is in `src/Corrade` directory, each
 subnamespace is in its own subdirectory. Unit tests are in `Test` subnamespace
-(and subdirectory). Implementation details (helper classes etc.) which
-shouldn't be visible to end users should be in `Implementation` subnamespace in
-the same file as the class/function for which the implementation is.
+(and subdirectory), in order to make compilers warn about accidentally
+defined-but-not-used test cases, the whole test source should be wrapped in an
+additional unnamed namespace. Implementation details (helper classes etc.)
+which shouldn't be visible to end users should be in `Implementation`
+subnamespace in the same file as the class/function for which the
+implementation is.
 
 Implementation details which are not referenced from any header should be
 either in anonymous namespace in source file
