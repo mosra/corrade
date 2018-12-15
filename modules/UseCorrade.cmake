@@ -95,6 +95,14 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "(Appl
 
             # Fixing it in all places would add too much noise to the code.
             "-Wno-shorten-64-to-32")
+
+        list(APPEND CORRADE_PEDANTIC_TEST_COMPILER_OPTIONS
+            # Unlike GCC, -Wunused-function (which is enabled through -Wall)
+            # doesn't fire for member functions, it's controlled separately
+            "-Wunused-member-function"
+            # This is implicitly enabled by the above and causes lots of
+            # warnings for e.g. move constructors, so disabling
+            "-Wno-unneeded-member-function")
     endif()
 
 # MSVC-specific compiler flags
@@ -379,6 +387,8 @@ function(corrade_add_test test_name)
                 XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "YES")
         endif()
     endif()
+
+    set_property(TARGET ${test_name} APPEND PROPERTY COMPILE_OPTIONS "$<$<BOOL:$<TARGET_PROPERTY:CORRADE_USE_PEDANTIC_FLAGS>>:${CORRADE_PEDANTIC_TEST_COMPILER_OPTIONS}>")
 
     # Add the file to list of required files for given test case
     set_tests_properties(${test_name} PROPERTIES REQUIRED_FILES "${absolute_files}")
