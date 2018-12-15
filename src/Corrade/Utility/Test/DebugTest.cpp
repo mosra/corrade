@@ -74,6 +74,7 @@ DebugTest::DebugTest() {
     addTests({
         &DebugTest::isTty,
 
+        &DebugTest::debug,
         &DebugTest::boolean,
         &DebugTest::floats<float>,
         &DebugTest::floats<double>,
