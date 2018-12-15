@@ -200,156 +200,374 @@ std::string findTweakableAlias(const std::string& data) {
     return name;
 }
 
-TweakableState parseTweakables(std::string& name, const std::string& filename, const std::string& data, std::vector<TweakableVariable>& variables, std::set<std::tuple<void(*)(void(*)(), void*), void(*)(), void*>>& scopes) {
-    /* For simplicity disallow a space in front of ( */
-    name += '(';
+TweakableState parseTweakables(const std::string& name, const std::string& filename, const std::string& data, std::vector<TweakableVariable>& variables, std::set<std::tuple<void(*)(void(*)(), void*), void(*)(), void*>>& scopes) {
+    /* Prepare "matchers" */
+    CORRADE_INTERNAL_ASSERT(!name.empty());
+    const char findAnything[] = { '/', '\'', '"', '\n', name[0], 0 };
+    constexpr const char findLineCommentEnd[] = "\n";
+    constexpr const char findBlockCommentEnd[] = "\n*";
+    constexpr const char findStringEnd[] = "\n\"";
+    constexpr const char findCharEnd[] = "\n'";
+    constexpr const char findRawStringEnd[] = "\n)";
 
     /* Count the lines, count the variables */
     int line = 1;
     std::size_t variable = 0;
 
-    /* Go through all occurences, parse them and figure out the final state
-       from that */
-    std::size_t lastNewlinePos = 0;
+    /* State controlling which matchers we use */
+    bool insideLineComment = false;
+    bool insideBlockComment = false;
+    bool insideString = false;
+    bool insideChar = false;
+    /* Raw string end delimiter. The sequence is at most 16 chars long
+       according to https://en.cppreference.com/w/cpp/language/string_literal,
+       including the right parenthesis and the final quote it's 18 chars. */
+    char rawStringEndDelimiter[18]{};
+    std::size_t rawStringEndDelimiterLength = 0;
+
+    /* Parse the file */
     std::size_t pos = 0;
+    const char* find = findAnything;
     TweakableState state = TweakableState::NoChange;
-    while((pos = data.find(name, pos)) != std::string::npos) {
-        /* Count the newlines until this occurence */
-        while((lastNewlinePos = data.find('\n', lastNewlinePos)) < pos) {
-            ++lastNewlinePos;
+    while((pos = data.find_first_of(find, pos)) != std::string::npos) {
+        /* We should be only in one of these at a time */
+        CORRADE_INTERNAL_ASSERT(int(insideLineComment) + int(insideBlockComment)  + int(insideChar) + int(insideString) <= 1);
+
+        /* Got a newline */
+        if(data[pos] == '\n') {
+            ++pos;
+
+            /* Ends a line comment */
+            if(insideLineComment) {
+                insideLineComment = false;
+                find = findAnything;
+
+            /* Doesn't do anything for a block comment */
+            } else if(insideBlockComment) {
+                /* nothing */
+
+            /* If inside a char or a non-raw string literal, it's an error.
+               This will cause unterminated string to be reported after the
+               loop. */
+            } else if(insideChar || (insideString && !rawStringEndDelimiterLength)) break;
+
+            /* Update the line counter */
             ++line;
-        }
 
-        /* If the immediately preceding character is one of these (and we are
-           not at the start of the file), it's something else */
-        if(pos && ((data[pos - 1] >= 'A' && data[pos - 1] <= 'Z') ||
-                   (data[pos - 1] >= 'a' && data[pos - 1] <= 'z') ||
-                   (data[pos - 1] >= '0' && data[pos - 1] <= '9') ||
-                    data[pos - 1] == '_' || (data[pos - 1] & 0x80))) {
-            pos += name.size();
-            continue;
-        }
+        /* Got a potential comment start */
+        } else if(data[pos] == '/') {
+            /* We're not looking for this character when inside a comment or a
+               string, so this shouldn't happen */
+            CORRADE_INTERNAL_ASSERT(!insideBlockComment && !insideLineComment && !insideChar && !insideString);
 
-        /* Skip what we found */
-        std::size_t beg = pos + name.size();
+            ++pos;
 
-        /* Get rid of whitespace after */
-        eatWhitespace(data, beg);
-        if(beg == data.size()) {
-            Error{} << "Utility::Tweakable::update(): unterminated" << name << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
-            return TweakableState::Error;
-        }
+            /* There should be something after, if not, it's an unterminated
+               comment; it'll get reported after the loop ends */
+            if(pos == data.size()) break;
 
-        /* Everything between beg and end is the literal */
-        std::size_t end = beg;
+            /* Start of a line comment */
+            if(data[pos] == '/') {
+                ++pos;
+                insideLineComment = true;
+                find = findLineCommentEnd;
 
-        /* A string -- parse until the next unescaped " */
-        if(data[beg] == '"') {
-            end = beg + 1;
-            while((end = data.find('"', end)) != std::string::npos) {
-                if(data[end - 1] != '\\') break;
+            /* Start of a block comment */
+            } else if(data[pos] == '*') {
+                ++pos;
+                insideBlockComment = true;
+                find = findBlockCommentEnd;
+            }
+
+            /* Otherwise something else (operator/), no need to do anything */
+
+        /* Got a potential block comment end */
+        } else if(data[pos] == '*') {
+            /* We should get here only from inside a block comment, never
+               directly (i.e., not looking for operator*) */
+            CORRADE_INTERNAL_ASSERT(insideBlockComment);
+
+            ++pos;
+
+            /* There should be something after, if not, it's an unterminated
+               comment; it'll get reported after the loop ends */
+            if(pos == data.size()) break;
+
+            /* End of a block comment */
+            if(data[pos] == '/') {
+                ++pos;
+                insideBlockComment = false;
+                find = findAnything;
+            }
+
+            /* Otherwise something else (an asterisk inside a comment), no need
+               to do anything */
+
+        /* Got a char start or a potential end. In very pathological cases the
+           4-char literals like `'_(0)'` (compiler extension) may get mistaken
+           as a tweakables, so don't allow that either. */
+        } else if(data[pos] == '\'') {
+            /* We should get here only when not inside a comment, so either
+               from outside or from within a char */
+            CORRADE_INTERNAL_ASSERT(!insideLineComment && !insideBlockComment);
+
+            /* Potential char end */
+            if(insideChar) {
+                /* We should appear here only from within a char. If not
+                   escaped, it's the end. */
+                CORRADE_INTERNAL_ASSERT(pos);
+                if(data[pos - 1] != '\\') {
+                    insideChar = false;
+                    find = findAnything;
+                }
+
+                /* Escaped or not, move after */
+                ++pos;
+
+            /* Char start */
+            } else {
+                insideChar = true;
+                ++pos;
+                find = findCharEnd;
+            }
+
+        /* Got a string start or a potential end */
+        } else if(data[pos] == '"') {
+            /* We should get here only when not inside a comment or char, so
+               either from outside or from within a string */
+            CORRADE_INTERNAL_ASSERT(!insideLineComment && !insideBlockComment && !insideChar);
+
+            /* Potential string end */
+            if(insideString) {
+                /* We should appear here only from within a non-raw stirng. Raw
+                   strings search for right parenthesis instead. */
+                CORRADE_INTERNAL_ASSERT(pos && !rawStringEndDelimiterLength);
+
+                /* If not escaped, it's the end */
+                if(data[pos - 1] != '\\') {
+                    insideString = false;
+                    find = findAnything;
+                }
+
+                /* Escaped or not, move after */
+                ++pos;
+
+            /* String start */
+            } else {
+                insideString = true;
+
+                /* Raw string */
+                if(pos && data[pos - 1] == 'R') {
+                    ++pos;
+
+                    /* Consume the delimiter, at most 16 characters (+ 1 for
+                       the initial parenthesis) */
+                    rawStringEndDelimiter[0] = ')';
+                    rawStringEndDelimiterLength = 1;
+                    while(pos != data.size() && data[pos] != '(' && rawStringEndDelimiterLength < 17)
+                        rawStringEndDelimiter[rawStringEndDelimiterLength++] = data[pos++];
+                    if(pos == data.size() || data[pos] != '(') {
+                        Error{} << "Utility::Tweakable::update(): unterminated raw string delimiter in" << filename << Debug::nospace << ":" << Debug::nospace << line;
+                        return TweakableState::Error;
+                    }
+
+                    /* Skip the opening parenthesis, finalize the end delimiter
+                       and find it in the next round. We need to count newlines
+                       inside, so can't just do it directly here. */
+                    ++pos;
+                    rawStringEndDelimiter[rawStringEndDelimiterLength++] = '"';
+                    find = findRawStringEnd;
+
+                /* Classic string */
+                } else {
+                    ++pos;
+                    find = findStringEnd;
+                }
+            }
+
+        /* Got a potential raw string end */
+        } else if(data[pos] == ')') {
+            /* We should get here only from within a raw string */
+            CORRADE_INTERNAL_ASSERT(insideString && rawStringEndDelimiterLength);
+
+            /* If the delimiter end matches, end the string */
+            if(data.compare(pos, rawStringEndDelimiterLength, rawStringEndDelimiter, rawStringEndDelimiterLength) == 0) {
+                pos += rawStringEndDelimiterLength;
+                insideString = false;
+                rawStringEndDelimiterLength = 0;
+                find = findAnything;
+
+            /* Otherwise it's just some parenthesis inside, skip it */
+            } else ++pos;
+
+        /* Got a potential tweakable macro */
+        } else if(data[pos] == name[0] && data.compare(pos, name.size(), name) == 0) {
+            /* We should not get here from comments or raw strings */
+            CORRADE_INTERNAL_ASSERT(!insideBlockComment && !insideLineComment && !insideString);
+
+            /* If the immediately preceding character is one of these (and we
+               are not at the start of the file), it's something else */
+            if(pos && ((data[pos - 1] >= 'A' && data[pos - 1] <= 'Z') ||
+                       (data[pos - 1] >= 'a' && data[pos - 1] <= 'z') ||
+                       (data[pos - 1] >= '0' && data[pos - 1] <= '9') ||
+                        data[pos - 1] == '_' || (data[pos - 1] & 0x80))) {
+                pos += name.size();
+                continue;
+            }
+
+            /* Skip what we found */
+            std::size_t beg = pos + name.size();
+
+            /* Get rid of whitespace before the left parenthesis */
+            eatWhitespace(data, beg);
+
+            /* If there's no left parenthesis, it's something else */
+            if(beg == data.size() || data[beg] != '(') {
+                pos = beg;
+                continue;
+            }
+
+            /* Get rid of whitespace after the parenthesis */
+            {
+                const std::size_t paren = ++beg;
+                eatWhitespace(data, beg);
+                if(beg == data.size()) {
+                    Error{} << "Utility::Tweakable::update(): unterminated" << data.substr(pos, paren) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
+                    return TweakableState::Error;
+                }
+            }
+
+            /* Everything between beg and end is the literal */
+            std::size_t end = beg;
+
+            /* A string -- parse until the next unescaped " */
+            if(data[beg] == '"') {
+                end = beg + 1;
+                while((end = data.find('"', end)) != std::string::npos) {
+                    if(data[end - 1] != '\\') break;
+                    ++end;
+                }
+                if(end == std::string::npos) {
+                    Error{} << "Utility::Tweakable::update(): unterminated string" << data.substr(pos, end - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
+                    return TweakableState::Error;
+                }
+
                 ++end;
-            }
-            if(end == std::string::npos) {
-                Error{} << "Utility::Tweakable::update(): unterminated string" << data.substr(pos, end - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
-                return TweakableState::Error;
-            }
 
-            ++end;
+            /* A char -- parse until the next unescaped ' */
+            } else if(data[beg] == '\'') {
+                end = beg + 1;
+                while((end = data.find('\'', end)) != std::string::npos) {
+                    if(data[end - 1] != '\\') break;
+                    ++end;
+                }
+                if(end == std::string::npos) {
+                    Error{} << "Utility::Tweakable::update(): unterminated char" << data.substr(pos, end - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
+                    return TweakableState::Error;
+                }
 
-        /* A char -- parse until the next unescaped ' */
-        } else if(data[beg] == '\'') {
-            end = beg + 1;
-            while((end = data.find('\'', end)) != std::string::npos) {
-                if(data[end - 1] != '\\') break;
                 ++end;
+
+            /* I will *never* implement this awful thing */
+            } else if(data[beg] == 'L') {
+                Error{} << "Utility::Tweakable::update(): unsupported wide char/string literal" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
+                return TweakableState::Error;
+
+            /** @todo implement */
+            } else if(data[beg] == 'u' || data[beg] == 'U' || data[beg] == 'R') {
+                Error{} << "Utility::Tweakable::update(): unsupported unicode/raw char/string literal" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
+                return TweakableState::Error;
+
+            /* Something else, simply take everything that makes sense in a literal */
+            } else {
+                end = beg;
+                while(end < data.size() &&
+                    /* Besides the true/false keywords, custom literals can have
+                       any letter. ' is for C++14 thousands separator. */
+                    ((data[end] >= 'A' && data[end] <= 'Z') ||
+                     (data[end] >= 'a' && data[end] <= 'z') ||
+                     (data[end] >= '0' && data[end] <= '9') ||
+                      data[end] == '+' || data[end] == '-' ||
+                      data[end] == '.' || data[end] == 'x' ||
+                      data[end] == 'X' || data[end] == '\'' ||
+                      data[end] == '_')) ++end;
             }
-            if(end == std::string::npos) {
-                Error{} << "Utility::Tweakable::update(): unterminated char" << data.substr(pos, end - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
+
+            /* Save the value range */
+            const Containers::ArrayView<const char> value{data.data() + beg, end - beg};
+
+            /* Get rid of whitespace after, after that there should be the
+               ending parenthesis */
+            eatWhitespace(data, end);
+            if(end == data.size() || data[end] != ')') {
+                Error{} << "Utility::Tweakable::update(): unterminated" << data.substr(pos, end - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
                 return TweakableState::Error;
             }
 
-            ++end;
+            /* If the variable doesn't have a parser assigned, it means the app
+               haven't run this code path yet. That's not a critical problem. */
+            if(variables.size() <= variable || !variables[variable].parser) {
+                Warning{} << "Utility::Tweakable::update(): ignoring unknown new value" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
 
-        /* I will *never* implement this awful thing */
-        } else if(data[beg] == 'L') {
-            Error{} << "Utility::Tweakable::update(): unsupported wide char/string literal" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
-            return TweakableState::Error;
+            /* Otherwise we should have a parser that can convert the string
+               representation to the target type */
+            } else {
+                Implementation::TweakableVariable& v = variables[variable];
 
-        /** @todo implement */
-        } else if(data[beg] == 'u' || data[beg] == 'U' || data[beg] == 'R') {
-            Error{} << "Utility::Tweakable::update(): unsupported unicode/raw char/string literal" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
-            return TweakableState::Error;
+                /* If the variable is not on the same line as before, the code
+                   changed. Request a recompile. */
+                /** @todo SHA-1 the source (minus tweakables) and compare that for full verification */
+                if(v.line != line) {
+                    Warning{} << "Utility::Tweakable::update(): code changed around" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line << Debug::nospace << ", requesting a recompile";
+                    return TweakableState::Recompile;
+                }
 
-        /* Something else, simply take everything that makes sense in a literal */
-        } else {
-            end = beg;
-            while(end < data.size() &&
-                /* Besides the true/false keywords, custom literals can have
-                   any letter. ' is for C++14 thousands separator. */
-                ((data[end] >= 'A' && data[end] <= 'Z') ||
-                 (data[end] >= 'a' && data[end] <= 'z') ||
-                 (data[end] >= '0' && data[end] <= '9') ||
-                  data[end] == '+' || data[end] == '-' ||
-                  data[end] == '.' || data[end] == 'x' ||
-                  data[end] == 'X' || data[end] == '\'' ||
-                  data[end] == '_')) ++end;
-        }
+                /* Parse the variable. If a recompile is requested or an error
+                   occured, exit immediately. */
+                const TweakableState variableState = v.parser(value, Containers::staticArrayView(v.storage));
+                if(variableState == TweakableState::Recompile) {
+                    Warning{} << "Utility::Tweakable::update(): change of" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line << "requested a recompile";
+                    return TweakableState::Recompile;
+                }
+                if(variableState == TweakableState::Error) {
+                    Error{} << "Utility::Tweakable::update(): error parsing" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
+                    return TweakableState::Error;
+                }
 
-        /* Save the value range */
-        const Containers::ArrayView<const char> value{data.data() + beg, end - beg};
-
-        /* Get rid of whitespace after, after that there should be the
-           ending parenthesis */
-        eatWhitespace(data, end);
-        if(end == data.size() || data[end] != ')') {
-            Error{} << "Utility::Tweakable::update(): unterminated" << data.substr(pos, end - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
-            return TweakableState::Error;
-        }
-
-        /* If the variable doesn't have a parser assigned, it means the app
-           haven't run this code path yet. That's not a critical problem. */
-        if(variables.size() <= variable || !variables[variable].parser) {
-            Warning{} << "Utility::Tweakable::update(): ignoring unknown new value" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
-
-        /* Otherwise we should have a parser that can convert the string
-           representation to the target type */
-        } else {
-            Implementation::TweakableVariable& v = variables[variable];
-
-            /* If the variable is not on the same line as before, the code
-               changed. Request a recompile. */
-            /** @todo SHA-1 the source (minus tweakables) and compare that for full verification */
-            if(v.line != line) {
-                Warning{} << "Utility::Tweakable::update(): code changed around" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line << Debug::nospace << ", requesting a recompile";
-                return TweakableState::Recompile;
+                /* If a change occured, add a corresponding scope to update */
+                if(variableState != TweakableState::NoChange) {
+                    CORRADE_INTERNAL_ASSERT(variableState == TweakableState::Success);
+                    Debug{} << "Utility::Tweakable::update(): updating" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
+                    if(v.scopeLambda) scopes.emplace(v.scopeLambda, v.scopeUserCall, v.scopeUserData);
+                    state = TweakableState::Success;
+                }
             }
 
-            /* Parse the variable. If a recompile is requested or an error
-               occured, exit immediately. */
-            const TweakableState variableState = v.parser(value, Containers::staticArrayView(v.storage));
-            if(variableState == TweakableState::Recompile) {
-                Warning{} << "Utility::Tweakable::update(): change of" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line << "requested a recompile";
-                return TweakableState::Recompile;
-            }
-            if(variableState == TweakableState::Error) {
-                Error{} << "Utility::Tweakable::update(): error parsing" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
-                return TweakableState::Error;
-            }
+            /* Increase variable ID for the next round to match __COUNTER__,
+               update pos to restart the search after this variable */
+            pos = end + 1;
+            ++variable;
 
-            /* If a change occured, add a corresponding scope to update */
-            if(variableState != TweakableState::NoChange) {
-                CORRADE_INTERNAL_ASSERT(variableState == TweakableState::Success);
-                Debug{} << "Utility::Tweakable::update(): updating" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
-                if(v.scopeLambda) scopes.emplace(v.scopeLambda, v.scopeUserCall, v.scopeUserData);
-                state = TweakableState::Success;
-            }
-        }
+        /* Shouldn't get here */
+        } else CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+    }
 
-        /* Increase variable ID for the next round to match __COUNTER__,
-           update pos to restart the search after this variable */
-        pos = end + 1;
-        ++variable;
+    /* Being inside a line comment is okay, being inside a block comment is not */
+    if(insideBlockComment) {
+        Error{} << "Utility::Tweakable::update(): unterminated block comment in" << filename << Debug::nospace << ":" << Debug::nospace << line;
+        return TweakableState::Error;
+    }
+
+    /* Being inside a char is not okay */
+    if(insideChar) {
+        Error{} << "Utility::Tweakable::update(): unterminated character literal in" << filename << Debug::nospace << ":" << Debug::nospace << line;
+        return TweakableState::Error;
+    }
+
+    /* Being inside any string is also not okay */
+    if(insideString) {
+        Error{} << "Utility::Tweakable::update(): unterminated" << (rawStringEndDelimiterLength ? "raw string" : "string") << "literal in" << filename << Debug::nospace << ":" << Debug::nospace << line;
+        return TweakableState::Error;
     }
 
     return state;

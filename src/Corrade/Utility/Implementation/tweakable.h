@@ -49,7 +49,7 @@ struct TweakableVariable {
 };
 
 CORRADE_UTILITY_EXPORT std::string findTweakableAlias(const std::string& file);
-CORRADE_UTILITY_EXPORT TweakableState parseTweakables(std::string& name, const std::string& filename, const std::string& data, std::vector<TweakableVariable>& variables, std::set<std::tuple<void(*)(void(*)(), void*), void(*)(), void*>>& scopes);
+CORRADE_UTILITY_EXPORT TweakableState parseTweakables(const std::string& name, const std::string& filename, const std::string& data, std::vector<TweakableVariable>& variables, std::set<std::tuple<void(*)(void(*)(), void*), void(*)(), void*>>& scopes);
 
 }}}
 

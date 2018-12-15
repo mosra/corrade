@@ -147,12 +147,9 @@ This is not magic, so it comes with a few limitations:
     that'll change the type from @cpp float @ce to @cpp double @ce. While it
     usually generates at most a warning from the compiler, such change may
     break source code change detection in unexpected ways.
--   Tweakable variables inside commented-out and compiled-out code and also in
-    string literals will currently confuse the runtime parser, so avoid them
-    entirely. If you have the annotation inside a string literal and can't use
-    a different name (when testing the tweakable itself, for example), you can
-    use literal concatenation, e.g. convert @cpp "_(31.0f)" @ce to
-    @cpp "_""(31.0f)" @ce.
+-   Tweakable variables inside code that's compiled-out by the preprocessor
+    (such as various @cpp #ifdef @ce s) will confuse the runtime parser, so
+    avoid them entirely.
 
 At the moment, the implementation is *not* thread-safe.
 

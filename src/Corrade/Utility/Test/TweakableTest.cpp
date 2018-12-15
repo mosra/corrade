@@ -48,6 +48,9 @@ struct TweakableTest: TestSuite::Tester {
     void parseTweakables();
     void parseTweakablesError();
 
+    void parseSpecials();
+    void parseSpecialsError();
+
     void benchmarkBase();
     void benchmarkDisabled();
     void benchmarkEnabled();
@@ -121,6 +124,64 @@ constexpr struct {
         "Utility::Tweakable::update(): code changed around _(false) in a.cpp:2, requesting a recompile\n"}
 };
 
+constexpr struct {
+    const char* name;
+    const char* data;
+    int line;
+} ParseSpecialsData[]{
+    {"tweakable in a line comment", "// TW(42)\nTW(1337)", 2},
+    {"tweakable in a block comment", R"CPP(/*
+   this is
+   a TW(42)
+   comment */
+TW(1337)
+)CPP", 5},
+    {"tweakable in a nested block comment", R"CPP(/* this is
+a /* nested comment */
+which TW(1337)
+// should work */
+)CPP", 3},
+    {"tweakable in a 4-char", "'TW()' TW(1337)", 1},
+    {"tweakable in a string", "\"TW(42)\" TW(1337)", 1},
+    {"tweakable in a string with escapes", "\"hello \\\"TW(42)\\\" there\"\nTW(1337)", 2},
+    {"tweakable in a raw string with no delimiter", R"CPP(R"(TW(42))"
+TW(1337)
+)CPP", 2},
+    {"tweakable in a raw string with a delimiter", R"CPP(R"string(TW(42))string"
+TW(1337)
+)CPP", 2},
+    {"tweakable in a raw string with a 16-char delimiter", R"CPP(R"0123456789abcdef(TW(42))0123456789abcdef"
+    TW(1337)
+    )CPP", 2},
+    {"tweakable in a nested raw string", R"CPP(R"outer(R"inner(TW(42))inner")outer"
+    TW(1337)
+    )CPP", 2},
+};
+
+
+constexpr struct {
+    const char* name;
+    const char* data;
+    const char* error;
+} ParseSpecialsErrorData[]{
+    {"unterminated block comment", "/* you know, this\n  is all very\nnice but",
+        "Utility::Tweakable::update(): unterminated block comment in a.cpp:3\n"},
+    {"unterminated char", "\n'a",
+        "Utility::Tweakable::update(): unterminated character literal in a.cpp:2\n"},
+    {"multiline char", "\n\'\n",
+        "Utility::Tweakable::update(): unterminated character literal in a.cpp:2\n"},
+    {"unterminated string", "\n\n\"oh but i wanted to sa",
+        "Utility::Tweakable::update(): unterminated string literal in a.cpp:3\n"},
+    {"multiline non-raw string", "\n\"oh but\nthis is a newline\"",
+        "Utility::Tweakable::update(): unterminated string literal in a.cpp:2\n"},
+    {"unterminated raw string delimiter", "\n\nR\"\nbut",
+        "Utility::Tweakable::update(): unterminated raw string delimiter in a.cpp:3\n"},
+    {"too long raw string delimiter", "\n\nR\"0123456789abcdefg(haha)0123456789abcdefg\"",
+        "Utility::Tweakable::update(): unterminated raw string delimiter in a.cpp:3\n"},
+    {"unterminated raw string", "R\"boo(and this goes until \nthe EOF\n)boo \"",
+        "Utility::Tweakable::update(): unterminated raw string literal in a.cpp:3\n"}
+};
+
 }
 
 TweakableTest::TweakableTest() {
@@ -135,6 +196,12 @@ TweakableTest::TweakableTest() {
 
     addInstancedTests({&TweakableTest::parseTweakablesError},
         Containers::arraySize(ParseErrorData));
+
+    addInstancedTests({&TweakableTest::parseSpecials},
+        Containers::arraySize(ParseSpecialsData));
+
+    addInstancedTests({&TweakableTest::parseSpecialsError},
+        Containers::arraySize(ParseSpecialsErrorData));
 
     addBenchmarks({&TweakableTest::benchmarkBase,
                    &TweakableTest::benchmarkDisabled,
@@ -213,12 +280,11 @@ _('\'') // also no parser
     variables[5].parser = Implementation::TweakableTraits<char>::parse;
 
     {
-        std::string name = "_";
         std::ostringstream out;
         Debug redirectOutput{&out};
         Warning redirectWarning{&out};
         std::set<std::tuple<void(*)(void(*)(), void*), void(*)(), void*>> scopes;
-        TweakableState state = Implementation::parseTweakables(name, "a.cpp", data, variables, scopes);
+        TweakableState state = Implementation::parseTweakables("_", "a.cpp", data, variables, scopes);
         CORRADE_COMPARE(out.str(),
             "Utility::Tweakable::update(): updating _( 3) in a.cpp:3\n"
             "Utility::Tweakable::update(): updating _(true) in a.cpp:5\n"
@@ -238,12 +304,11 @@ _('\'') // also no parser
 
     /* Second pass should report no change */
     {
-        std::string name = "_";
         std::ostringstream out;
         std::set<std::tuple<void(*)(void(*)(), void*), void(*)(), void*>> scopes;
         Debug redirectOutput{&out};
         Warning redirectWarning{&out};
-        TweakableState state = Implementation::parseTweakables(name, "a.cpp", data, variables, scopes);
+        TweakableState state = Implementation::parseTweakables("_", "a.cpp", data, variables, scopes);
         CORRADE_COMPARE(out.str(),
             "Utility::Tweakable::update(): ignoring unknown new value _(\"some \\\"thing\\\"\") in a.cpp:8\n"
             "Utility::Tweakable::update(): ignoring unknown new value _('\\'') in a.cpp:13\n");
@@ -259,21 +324,62 @@ _('\'') // also no parser
 void TweakableTest::parseTweakablesError() {
     auto&& data = ParseErrorData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
-    std::set<std::tuple<void(*)(void(*)(), void*), void(*)(), void*>> scopes;
 
     std::vector<Implementation::TweakableVariable> variables{1};
     variables[0].line = 1;
     variables[0].parser = data.parser;
 
     {
-        std::string name = "_";
         std::ostringstream out;
         Warning redirectWarning{&out};
         Error redirectError{&out};
         std::set<std::tuple<void(*)(void(*)(), void*), void(*)(), void*>> scopes;
-        TweakableState state = Implementation::parseTweakables(name, "a.cpp", data.data, variables, scopes);
+        TweakableState state = Implementation::parseTweakables("_", "a.cpp", data.data, variables, scopes);
         CORRADE_COMPARE(out.str(), data.error);
         CORRADE_COMPARE(state, data.state);
+    }
+}
+
+void TweakableTest::parseSpecials() {
+    auto&& data = ParseSpecialsData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    std::vector<Implementation::TweakableVariable> variables{2};
+    variables[0].line = data.line;
+    variables[0].parser = Implementation::TweakableTraits<int>::parse;
+    variables[1].line = 100;
+    variables[1].parser = nullptr;
+
+    {
+        std::ostringstream out;
+        Debug redirectOutput{&out};
+        Warning redirectWarning{&out};
+        std::set<std::tuple<void(*)(void(*)(), void*), void(*)(), void*>> scopes;
+        TweakableState state = Implementation::parseTweakables("TW", "a.cpp", data.data, variables, scopes);
+        CORRADE_COMPARE(out.str(), formatString(
+            "Utility::Tweakable::update(): updating TW(1337) in a.cpp:{}\n", data.line));
+        CORRADE_COMPARE(state, TweakableState::Success);
+        CORRADE_COMPARE(scopes.size(), 0);
+    }
+    CORRADE_COMPARE(*reinterpret_cast<int*>(variables[0].storage), 1337);
+}
+
+void TweakableTest::parseSpecialsError() {
+    auto&& data = ParseSpecialsErrorData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
+
+    std::vector<Implementation::TweakableVariable> variables{1};
+    variables[0].line = 1;
+    variables[0].parser = Implementation::TweakableTraits<int>::parse;
+
+    {
+        std::ostringstream out;
+        Warning redirectWarning{&out};
+        Error redirectError{&out};
+        std::set<std::tuple<void(*)(void(*)(), void*), void(*)(), void*>> scopes;
+        TweakableState state = Implementation::parseTweakables("_", "a.cpp", data.data, variables, scopes);
+        CORRADE_COMPARE(out.str(), data.error);
+        CORRADE_COMPARE(state, TweakableState::Error);
     }
 }
 

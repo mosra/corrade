@@ -138,12 +138,11 @@ void TweakableIntegrationTest::variable() {
     Utility::System::sleep(10);
     #endif
 
-    /* Replace the above line with a different number. The parser is extra
-       shitty ATM so it would match even literals inside strings, so beware */
+    /* Replace the above line with a different number */
     CORRADE_VERIFY(Directory::writeString(_thisWriteableFile,
         String::replaceFirst(Directory::readString(_thisWriteableFile),
-            "_""('a'); /* now this */",
-            "_""('X'); /* now this */")));
+            "_('a'); /* now this */",
+            "_('X'); /* now this */")));
 
     /* Now it changes, if enabled */
     {
@@ -153,12 +152,11 @@ void TweakableIntegrationTest::variable() {
         TweakableState state = tweakable.update();
 
         if(data.enabled) {
-            /* Beware of the shitty parser here as well */
             CORRADE_COMPARE(out.str(), formatString(
-"Utility::Tweakable::update(): looking for updated _""() macros in {0}\n"
-"Utility::Tweakable::update(): updating _""('X') in {0}:101\n"
-"Utility::Tweakable::update(): ignoring unknown new value _""(42.0f) in {0}:187\n"
-"Utility::Tweakable::update(): ignoring unknown new value _""(22.7f) in {0}:255\n", __FILE__));
+"Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
+"Utility::Tweakable::update(): updating _('X') in {0}:101\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:185\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:251\n", __FILE__));
             CORRADE_COMPARE(state, TweakableState::Success);
         } else {
             CORRADE_COMPARE(out.str(), "");
@@ -205,12 +203,11 @@ void TweakableIntegrationTest::scopeTemplated() {
     Utility::System::sleep(10);
     #endif
 
-    /* Replace the above line with a different number. The parser is extra
-       shitty ATM so it would match even literals inside strings, so beware. */
+    /* Replace the above line with a different number */
     CORRADE_VERIFY(Directory::writeString(_thisWriteableFile,
         String::replaceFirst(Directory::readString(_thisWriteableFile),
-            "_""(42.0f); /* yes this */",
-            "_""(133.7f); /* yes this */")));
+            "_(42.0f); /* yes this */",
+            "_(133.7f); /* yes this */")));
 
     /* Now it changes, if enabled */
     {
@@ -220,12 +217,11 @@ void TweakableIntegrationTest::scopeTemplated() {
         TweakableState state = tweakable.update();
 
         if(data.enabled) {
-            /* Beware of the shitty parser here as well */
             CORRADE_COMPARE(out.str(), formatString(
-"Utility::Tweakable::update(): looking for updated _""() macros in {0}\n"
-"Utility::Tweakable::update(): ignoring unknown new value _""('a') in {0}:101\n"
-"Utility::Tweakable::update(): updating _""(133.7f) in {0}:187\n"
-"Utility::Tweakable::update(): ignoring unknown new value _""(22.7f) in {0}:255\n"
+"Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
+"Utility::Tweakable::update(): ignoring unknown new value _('a') in {0}:101\n"
+"Utility::Tweakable::update(): updating _(133.7f) in {0}:185\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:251\n"
 "Utility::Tweakable::update(): 1 scopes affected\n", __FILE__));
             CORRADE_COMPARE(state, TweakableState::Success);
         } else {
@@ -273,12 +269,11 @@ void TweakableIntegrationTest::scopeVoid() {
     Utility::System::sleep(10);
     #endif
 
-    /* Replace the above line with a different number. The parser is extra
-       shitty ATM so it would match even literals inside strings, so beware. */
+    /* Replace the above line with a different number */
     CORRADE_VERIFY(Directory::writeString(_thisWriteableFile,
         String::replaceFirst(Directory::readString(_thisWriteableFile),
-            "_""(22.7f); /* and finally */",
-            "_""(-1.44f); /* and finally */")));
+            "_(22.7f); /* and finally */",
+            "_(-1.44f); /* and finally */")));
 
     /* Now it changes, if enabled */
     {
@@ -288,12 +283,11 @@ void TweakableIntegrationTest::scopeVoid() {
         TweakableState state = tweakable.update();
 
         if(data.enabled) {
-            /* Beware of the shitty parser here as well */
             CORRADE_COMPARE(out.str(), formatString(
-"Utility::Tweakable::update(): looking for updated _""() macros in {0}\n"
-"Utility::Tweakable::update(): ignoring unknown new value _""('a') in {0}:101\n"
-"Utility::Tweakable::update(): ignoring unknown new value _""(42.0f) in {0}:187\n"
-"Utility::Tweakable::update(): updating _""(-1.44f) in {0}:255\n"
+"Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
+"Utility::Tweakable::update(): ignoring unknown new value _('a') in {0}:101\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:185\n"
+"Utility::Tweakable::update(): updating _(-1.44f) in {0}:251\n"
 "Utility::Tweakable::update(): 1 scopes affected\n", __FILE__));
             CORRADE_COMPARE(state, TweakableState::Success);
         } else {
@@ -322,23 +316,21 @@ void TweakableIntegrationTest::updateNoChange() {
     Utility::System::sleep(10);
     #endif
 
-    /* Replace without changing the literal itself. The parser is extra
-       shitty ATM so it would match even literals inside strings, so beware. */
+    /* Replace without changing the literal itself */
     CORRADE_VERIFY(Directory::writeString(_thisWriteableFile,
         String::replaceFirst(Directory::readString(_thisWriteableFile),
-            "_""('a'); /* now this */",
-            "_""('a'); /* now that */")));
+            "_('a'); /* now this */",
+            "_('a'); /* now that */")));
 
     std::ostringstream out;
     Debug redirectOutput{&out};
     Warning redirectWarning{&out};
     TweakableState state = tweakable.update();
 
-    /* Beware of the shitty parser here as well */
     CORRADE_COMPARE(out.str(), formatString(
-"Utility::Tweakable::update(): looking for updated _""() macros in {0}\n"
-"Utility::Tweakable::update(): ignoring unknown new value _""(42.0f) in {0}:187\n"
-"Utility::Tweakable::update(): ignoring unknown new value _""(22.7f) in {0}:255\n", __FILE__));
+"Utility::Tweakable::update(): looking for updated _() macros in {0}\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(42.0f) in {0}:185\n"
+"Utility::Tweakable::update(): ignoring unknown new value _(22.7f) in {0}:251\n", __FILE__));
     CORRADE_COMPARE(state, TweakableState::NoChange);
 }
 
@@ -359,20 +351,18 @@ void TweakableIntegrationTest::updateUnexpectedLine() {
     Utility::System::sleep(10);
     #endif
 
-    /* Replace without changing the literal itself. The parser is extra
-       shitty ATM so it would match even literals inside strings, so beware. */
+    /* Replace without changing the literal itself */
     CORRADE_VERIFY(Directory::writeString(_thisWriteableFile,
         String::replaceFirst(Directory::readString(_thisWriteableFile),
-            "_""('a'); /* now this */",
-            "\n_""('a'); /* now this */")));
+            "_('a'); /* now this */",
+            "\n_('a'); /* now this */")));
 
     std::ostringstream out;
     Warning redirectWarning{&out};
     TweakableState state = tweakable.update();
 
-    /* Beware of the shitty parser here as well */
     CORRADE_COMPARE(out.str(), formatString(
-"Utility::Tweakable::update(): code changed around _""('a') in {0}:102, requesting a recompile\n", __FILE__));
+"Utility::Tweakable::update(): code changed around _('a') in {0}:102, requesting a recompile\n", __FILE__));
     CORRADE_COMPARE(state, TweakableState::Recompile);
 }
 
@@ -393,22 +383,20 @@ void TweakableIntegrationTest::updateDifferentType() {
     Utility::System::sleep(10);
     #endif
 
-    /* Replace literal to a different type. The parser is extra shitty ATM so
-       it would match even literals inside strings, so beware. */
+    /* Replace literal to a different type */
     CORRADE_VERIFY(Directory::writeString(_thisWriteableFile,
         String::replaceFirst(Directory::readString(_thisWriteableFile),
-            "_""('a'); /* now this */",
-            "_""(14.4f); /* now this */")));
+            "_('a'); /* now this */",
+            "_(14.4f); /* now this */")));
 
     /* Now it changes, if enabled */
     std::ostringstream out;
     Warning redirectWarning{&out};
     TweakableState state = tweakable.update();
 
-    /* Beware of the shitty parser here as well */
     CORRADE_COMPARE(out.str(), formatString(
 "Utility::TweakableParser: 14.4f is not a character literal\n"
-"Utility::Tweakable::update(): change of _""(14.4f) in {0}:101 requested a recompile\n", __FILE__));
+"Utility::Tweakable::update(): change of _(14.4f) in {0}:101 requested a recompile\n", __FILE__));
     CORRADE_COMPARE(state, TweakableState::Recompile);
 }
 
@@ -429,22 +417,20 @@ void TweakableIntegrationTest::updateParseError() {
     Utility::System::sleep(10);
     #endif
 
-    /* Replace literal to a broken value. The parser is extra shitty ATM so it
-       would match even literals inside strings, so beware. */
+    /* Replace literal to a broken value */
     CORRADE_VERIFY(Directory::writeString(_thisWriteableFile,
         String::replaceFirst(Directory::readString(_thisWriteableFile),
-            "_""('a'); /* now this */",
-            "_""('\\X'); /* now this */")));
+            "_('a'); /* now this */",
+            "_('\\X'); /* now this */")));
 
     /* Now it changes, if enabled */
     std::ostringstream out;
     Error redirectError{&out};
     TweakableState state = tweakable.update();
 
-    /* Beware of the shitty parser here as well */
     CORRADE_COMPARE(out.str(), formatString(
 "Utility::TweakableParser: escape sequences in char literals are not implemented, sorry\n"
-"Utility::Tweakable::update(): error parsing _""('\\X') in {0}:101\n", __FILE__));
+"Utility::Tweakable::update(): error parsing _('\\X') in {0}:101\n", __FILE__));
     CORRADE_COMPARE(state, TweakableState::Error);
 }
 
