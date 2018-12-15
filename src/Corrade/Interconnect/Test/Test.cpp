@@ -505,11 +505,6 @@ void Test::virtualSlot() {
 
             virtual ~VirtualMailbox() {}
 
-            void addMessage(int price, const std::string& message) {
-                money += price;
-                messages.push_back(message);
-            }
-
             virtual void pay(int amount) {
                 money -= amount;
             }
