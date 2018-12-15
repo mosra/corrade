@@ -27,8 +27,9 @@
 
 #define CORRADE_GRACEFUL_ASSERT
 
-#include "Corrade/Utility/Assert.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 

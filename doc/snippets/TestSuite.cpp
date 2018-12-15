@@ -34,6 +34,7 @@
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/DebugStl.h"
 
 using namespace Corrade;
 

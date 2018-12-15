@@ -23,6 +23,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <string>
+
 #include "Corrade/Containers/OptionalStl.h"
 
 using namespace Corrade;

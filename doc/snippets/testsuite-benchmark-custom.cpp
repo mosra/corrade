@@ -23,6 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <vector>
 #include <Corrade/TestSuite/Tester.h>
 
 using namespace Corrade;

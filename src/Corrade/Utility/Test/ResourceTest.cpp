@@ -30,6 +30,7 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/Resource.h"
 

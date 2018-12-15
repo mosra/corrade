@@ -27,6 +27,7 @@
 
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace Corrade { namespace TestSuite { namespace Compare { namespace Test { namespace {
 

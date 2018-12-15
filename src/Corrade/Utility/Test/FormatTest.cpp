@@ -30,6 +30,7 @@
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
+#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/FormatStl.h"

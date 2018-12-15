@@ -35,6 +35,7 @@
 #endif
 
 #include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Utility/DebugStl.h"
 
 namespace Corrade { namespace TestSuite { namespace Implementation {
 

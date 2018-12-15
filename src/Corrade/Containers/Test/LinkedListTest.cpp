@@ -24,9 +24,11 @@
 */
 
 #include <sstream>
+#include <vector>
 
 #include "Corrade/Containers/LinkedList.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
 

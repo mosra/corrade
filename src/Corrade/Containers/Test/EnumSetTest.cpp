@@ -27,6 +27,7 @@
 
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
 

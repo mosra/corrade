@@ -27,6 +27,7 @@
 #include <tuple>
 
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Unicode.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {

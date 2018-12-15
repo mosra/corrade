@@ -29,9 +29,10 @@
 #undef NDEBUG /* So we can test them */
 #endif
 
+#include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/Assert.h"
-#include "Corrade/TestSuite/Tester.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 

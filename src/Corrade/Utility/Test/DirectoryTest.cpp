@@ -30,6 +30,7 @@
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/File.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
+#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Directory.h"
 
 #include "configure.h"

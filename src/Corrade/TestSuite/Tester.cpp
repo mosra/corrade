@@ -49,6 +49,56 @@ namespace {
     constexpr const char PaddingString[] = "0000000000";
 }
 
+struct Tester::TesterConfiguration::Data {
+    std::vector<std::string> skippedArgumentPrefixes;
+};
+
+Tester::TesterConfiguration::TesterConfiguration() noexcept = default;
+
+Tester::TesterConfiguration::TesterConfiguration(const TesterConfiguration& other): _data{other._data ? new Data{*other._data} : nullptr} {}
+
+Tester::TesterConfiguration::TesterConfiguration(TesterConfiguration&&) noexcept = default;
+
+Tester::TesterConfiguration& Tester::TesterConfiguration::operator=(const TesterConfiguration& other) {
+    _data.reset(other._data ? new Data{*other._data} : nullptr);
+    return *this;
+}
+
+Tester::TesterConfiguration& Tester::TesterConfiguration::operator=(TesterConfiguration&&) noexcept = default;
+
+Tester::TesterConfiguration::~TesterConfiguration() = default;
+
+Containers::ArrayView<const std::string> Tester::TesterConfiguration::skippedArgumentPrefixes() const {
+    return _data ? Containers::arrayView(&_data->skippedArgumentPrefixes[0], _data->skippedArgumentPrefixes.size()) : nullptr;
+}
+
+Tester::TesterConfiguration& Tester::TesterConfiguration::setSkippedArgumentPrefixes(std::initializer_list<std::string> prefixes) {
+    if(!_data) _data.reset(new Data);
+    _data->skippedArgumentPrefixes.insert(_data->skippedArgumentPrefixes.end(), prefixes);
+    return *this;
+}
+
+struct Tester::TesterState {
+    explicit TesterState(const TesterConfiguration& configuration): configuration{std::move(configuration)} {}
+
+    Debug::Flags useColor;
+    std::ostream *logOutput{}, *errorOutput{};
+    std::vector<TestCase> testCases;
+    std::string testFilename, testName, testCaseName,
+        testCaseDescription, benchmarkName;
+    std::size_t testCaseId{}, testCaseInstanceId{~std::size_t{}},
+        testCaseRepeatId{}, benchmarkBatchSize{}, testCaseLine{},
+        checkCount{};
+
+    std::uint64_t benchmarkBegin{};
+    std::uint64_t benchmarkResult{};
+    TestCase* testCase{};
+    bool expectedFailuresDisabled{};
+    ExpectedFailure* expectedFailure{};
+    std::string expectedFailureMessage;
+    TesterConfiguration configuration;
+};
+
 int* Tester::_argc = nullptr;
 char** Tester::_argv = nullptr;
 
@@ -57,7 +107,7 @@ void Tester::registerArguments(int& argc, char** const argv) {
     _argv = argv;
 }
 
-Tester::Tester(TesterConfiguration configuration): _logOutput{nullptr}, _errorOutput{nullptr}, _testCaseLine{0}, _checkCount{0}, _expectedFailure{nullptr}, _configuration{std::move(configuration)} {
+Tester::Tester(const TesterConfiguration& configuration): _state{new TesterState{configuration}} {
     CORRADE_ASSERT(_argc, "TestSuite::Tester: command-line arguments not available", );
 }
 
@@ -71,7 +121,7 @@ int Tester::exec() { return exec(&std::cout, &std::cerr); }
 
 int Tester::exec(std::ostream* const logOutput, std::ostream* const errorOutput) {
     Utility::Arguments args;
-    for(auto&& prefix: _configuration.skippedArgumentPrefixes())
+    for(auto&& prefix: _state->configuration.skippedArgumentPrefixes())
         args.addSkippedPrefix(prefix);
     args.addOption('c', "color", "auto").setHelp("color", "colored output", "on|off|auto")
             .setFromEnvironment("color", "CORRADE_TEST_COLOR")
@@ -107,16 +157,16 @@ benchmark types:
   cpu-cycles    CPU cycles spent (x86 only, gives zero result elsewhere))")
         .parse(*_argc, _argv);
 
-    _logOutput = logOutput;
-    _errorOutput = errorOutput;
+    _state->logOutput = logOutput;
+    _state->errorOutput = errorOutput;
 
     /* Decide about color */
     if(args.value("color") == "on" || args.value("color") == "ON")
-        _useColor = Debug::Flags{};
+        _state->useColor = Debug::Flags{};
     else if(args.value("color") == "off" || args.value("color") == "OFF")
-        _useColor = Debug::Flag::DisableColors;
+        _state->useColor = Debug::Flag::DisableColors;
     /* LCOV_EXCL_START */ /* Can't reliably test this */
-    else _useColor = Debug::isTty(logOutput) && Debug::isTty(errorOutput) ?
+    else _state->useColor = Debug::isTty(logOutput) && Debug::isTty(errorOutput) ?
             Debug::Flags{} : Debug::Flag::DisableColors;
     /* LCOV_EXCL_STOP */
 
@@ -136,16 +186,16 @@ benchmark types:
     std::vector<std::pair<int, TestCase>> usedTestCases;
 
     /* Disable expected failures, if requested */
-    _expectedFailuresDisabled = args.isSet("no-xfail");
+    _state->expectedFailuresDisabled = args.isSet("no-xfail");
 
     /* Skip test cases, if requested */
     if(args.isSet("skip-tests"))
-        for(TestCase& testCase: _testCases)
+        for(TestCase& testCase: _state->testCases)
             if(testCase.type == TestCaseType::Test) testCase.test = nullptr;
 
     /* Skip benchmarks, if requested */
     if(args.isSet("skip-benchmarks"))
-        for(TestCase& testCase: _testCases)
+        for(TestCase& testCase: _state->testCases)
             if(testCase.type != TestCaseType::Test) testCase.test = nullptr;
 
     /* Remove skipped test cases */
@@ -157,8 +207,8 @@ benchmark types:
             #else
             const std::size_t index = std::strtoul(n.data(), nullptr, 10);
             #endif
-            if(index - 1 >= _testCases.size()) continue;
-            _testCases[index - 1].test = nullptr;
+            if(index - 1 >= _state->testCases.size()) continue;
+            _state->testCases[index - 1].test = nullptr;
         }
     }
 
@@ -171,14 +221,14 @@ benchmark types:
             #else
             const std::size_t index = std::strtoul(n.data(), nullptr, 10);
             #endif
-            if(index - 1 >= _testCases.size() || !_testCases[index - 1].test) continue;
-            usedTestCases.emplace_back(index, _testCases[index - 1]);
+            if(index - 1 >= _state->testCases.size() || !_state->testCases[index - 1].test) continue;
+            usedTestCases.emplace_back(index, _state->testCases[index - 1]);
         }
 
     /* Otherwise extract all (and skip skipped) */
-    } else for(std::size_t i = 0; i != _testCases.size(); ++i) {
-        if(!_testCases[i].test) continue;
-        usedTestCases.emplace_back(i + 1, _testCases[i]);
+    } else for(std::size_t i = 0; i != _state->testCases.size(); ++i) {
+        if(!_state->testCases[i].test) continue;
+        usedTestCases.emplace_back(i + 1, _state->testCases[i]);
     }
 
     const std::size_t repeatAllCount = args.value<std::size_t>("repeat-all");
@@ -206,24 +256,24 @@ benchmark types:
         /* Not an error if we're skipping either tests or benchmarks (but not
            both) */
         if(args.isSet("skip-tests") && !args.isSet("skip-benchmarks")) {
-            Debug(logOutput, _useColor)
+            Debug(logOutput, _state->useColor)
                 << Debug::boldColor(Debug::Color::Default) << "No remaining benchmarks to run in"
-                << _testName << Debug::nospace << ".";
+                << _state->testName << Debug::nospace << ".";
             return 0;
         }
 
         if(!args.isSet("skip-tests") && args.isSet("skip-benchmarks")) {
-            Debug(logOutput, _useColor)
+            Debug(logOutput, _state->useColor)
                 << Debug::boldColor(Debug::Color::Default) << "No remaining tests to run in"
-                << _testName << Debug::nospace << ".";
+                << _state->testName << Debug::nospace << ".";
             return 0;
         }
 
-        Error(errorOutput, _useColor) << Debug::boldColor(Debug::Color::Red) << "No test cases to run in" << _testName << Debug::nospace << "!";
+        Error(errorOutput, _state->useColor) << Debug::boldColor(Debug::Color::Red) << "No test cases to run in" << _state->testName << Debug::nospace << "!";
         return 2;
     }
 
-    Debug(logOutput, _useColor) << Debug::boldColor(Debug::Color::Default) << "Starting" << _testName << "with" << usedTestCases.size() << "test cases...";
+    Debug(logOutput, _state->useColor) << Debug::boldColor(Debug::Color::Default) << "Starting" << _state->testName << "with" << usedTestCases.size() << "test cases...";
 
     for(std::pair<int, TestCase> testCase: usedTestCases) {
         /* Reset output to stdout for each test case to prevent debug
@@ -273,16 +323,16 @@ benchmark types:
             case TestCaseType::CustomMemoryBenchmark:
             case TestCaseType::CustomCountBenchmark:
                 benchmarkUnits = BenchmarkUnits(int(testCase.second.type));
-                _benchmarkName = "";
+                _state->benchmarkName = "";
                 break;
         }
 
-        _testCaseId = testCase.first;
-        _testCaseInstanceId = testCase.second.instanceId;
+        _state->testCaseId = testCase.first;
+        _state->testCaseInstanceId = testCase.second.instanceId;
         if(testCase.second.instanceId == ~std::size_t{})
-            _testCaseDescription = {};
+            _state->testCaseDescription = {};
         else
-            _testCaseDescription = std::to_string(testCase.second.instanceId);
+            _state->testCaseDescription = std::to_string(testCase.second.instanceId);
 
         /* Final combined repeat count */
         const std::size_t repeatCount = testCase.second.repeatCount*repeatEveryCount;
@@ -296,12 +346,12 @@ benchmark types:
                 (this->*testCase.second.setup)();
 
             /* Print the repeat ID only if we are repeating */
-            _testCaseRepeatId = repeatCount == 1 ? ~std::size_t{} : i;
-            _testCaseLine = 0;
-            _testCaseName.clear();
-            _testCase = &testCase.second;
-            _benchmarkBatchSize = 0;
-            _benchmarkResult = 0;
+            _state->testCaseRepeatId = repeatCount == 1 ? ~std::size_t{} : i;
+            _state->testCaseLine = 0;
+            _state->testCaseName.clear();
+            _state->testCase = &testCase.second;
+            _state->benchmarkBatchSize = 0;
+            _state->benchmarkResult = 0;
 
             try {
                 (this->*testCase.second.test)();
@@ -313,42 +363,42 @@ benchmark types:
                 skipped = true;
             }
 
-            _testCase = nullptr;
+            _state->testCase = nullptr;
 
             if(testCase.second.teardown)
                 (this->*testCase.second.teardown)();
 
             if(testCase.second.benchmarkEnd)
-                measurements[i] = _benchmarkResult;
+                measurements[i] = _state->benchmarkResult;
         }
 
         /* Print success message if the test case wasn't failed/skipped */
         if(!aborted) {
             /* No testing/benchmark macros called */
-            if(!_testCaseLine) {
-                Debug out{logOutput, _useColor};
+            if(!_state->testCaseLine) {
+                Debug out{logOutput, _state->useColor};
                 printTestCaseLabel(out, "     ?", Debug::Color::Yellow, Debug::Color::Yellow);
                 ++noCheckCount;
 
             /* Test case or benchmark with expected failure inside */
-            } else if(testCase.second.type == TestCaseType::Test || _expectedFailure) {
-                Debug out{logOutput, _useColor};
+            } else if(testCase.second.type == TestCaseType::Test || _state->expectedFailure) {
+                Debug out{logOutput, _state->useColor};
                 printTestCaseLabel(out,
-                    _expectedFailure ? " XFAIL" : "    OK",
-                    _expectedFailure ? Debug::Color::Yellow : Debug::Color::Default,
+                    _state->expectedFailure ? " XFAIL" : "    OK",
+                    _state->expectedFailure ? Debug::Color::Yellow : Debug::Color::Default,
                     Debug::Color::Default);
-                if(_expectedFailure) out << Debug::newline << "       " << _expectedFailure->message();
+                if(_state->expectedFailure) out << Debug::newline << "       " << _state->expectedFailureMessage;
 
             /* Benchmark. Completely custom printing. */
             } else {
-                Debug out{logOutput, _useColor};
+                Debug out{logOutput, _state->useColor};
 
-                const char* padding = PaddingString + sizeof(PaddingString) - digitCount(_testCases.size()) + digitCount(_testCaseId) - 1;
+                const char* padding = PaddingString + sizeof(PaddingString) - digitCount(_state->testCases.size()) + digitCount(_state->testCaseId) - 1;
 
                 out << Debug::boldColor(Debug::Color::Default) << " BENCH"
                     << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
                     << Debug::boldColor(Debug::Color::Cyan) << padding
-                    << Debug::nospace << _testCaseId << Debug::nospace
+                    << Debug::nospace << _state->testCaseId << Debug::nospace
                     << Debug::color(Debug::Color::Blue) << "]";
 
                 /* Gather measurements. There needs to be at least one
@@ -358,40 +408,40 @@ benchmark types:
 
                 double mean, stddev;
                 Utility::Debug::Color color;
-                std::tie(mean, stddev, color) = Implementation::calculateStats(measurements.suffix(discardMeasurements), _benchmarkBatchSize, args.value<double>("benchmark-yellow"), args.value<double>("benchmark-red"));
+                std::tie(mean, stddev, color) = Implementation::calculateStats(measurements.suffix(discardMeasurements), _state->benchmarkBatchSize, args.value<double>("benchmark-yellow"), args.value<double>("benchmark-red"));
 
                 Implementation::printStats(out, mean, stddev, color, benchmarkUnits);
 
                 out << Debug::boldColor(Debug::Color::Default)
-                    << (_testCaseName.empty() ? "<unknown>" : _testCaseName)
+                    << (_state->testCaseName.empty() ? "<unknown>" : _state->testCaseName)
                     << Debug::nospace;
 
                 /* Optional test case description */
-                if(!_testCaseDescription.empty()) {
+                if(!_state->testCaseDescription.empty()) {
                     out << "("
                         << Debug::nospace
-                        << Debug::resetColor << _testCaseDescription
+                        << Debug::resetColor << _state->testCaseDescription
                         << Debug::nospace << Debug::boldColor(Debug::Color::Default)
                         << ")";
                 } else out << "()";
 
                 out << Debug::nospace << "@" << Debug::nospace
                     << measurements.size() - discardMeasurements
-                    << Debug::nospace << "x" << Debug::nospace << _benchmarkBatchSize
+                    << Debug::nospace << "x" << Debug::nospace << _state->benchmarkBatchSize
                     << Debug::resetColor;
-                if(!_benchmarkName.empty())
-                    out << "(" << Utility::Debug::nospace << _benchmarkName
+                if(!_state->benchmarkName.empty())
+                    out << "(" << Utility::Debug::nospace << _state->benchmarkName
                         << Utility::Debug::nospace << ")";
             }
 
         /* Abort on first failure */
         } else if(args.isSet("abort-on-fail") && !skipped) {
-            Debug out{logOutput, _useColor};
+            Debug out{logOutput, _state->useColor};
             out << Debug::boldColor(Debug::Color::Red) << "Aborted"
-                << Debug::boldColor(Debug::Color::Default) << _testName
+                << Debug::boldColor(Debug::Color::Default) << _state->testName
                 << Debug::boldColor(Debug::Color::Red) << "after first failure"
                 << Debug::boldColor(Debug::Color::Default) << "out of"
-                << _checkCount << "checks so far.";
+                << _state->checkCount << "checks so far.";
             if(noCheckCount)
                 out << Debug::boldColor(Debug::Color::Yellow) << noCheckCount << "test cases didn't contain any checks!";
 
@@ -399,12 +449,12 @@ benchmark types:
         }
     }
 
-    Debug d(logOutput, _useColor);
-    d << Debug::boldColor(Debug::Color::Default) << "Finished" << _testName << "with";
+    Debug d(logOutput, _state->useColor);
+    d << Debug::boldColor(Debug::Color::Default) << "Finished" << _state->testName << "with";
     if(errorCount) d << Debug::boldColor(Debug::Color::Red);
     d << errorCount << "errors";
     if(errorCount) d << Debug::boldColor(Debug::Color::Default);
-    d << "out of" << _checkCount << "checks.";
+    d << "out of" << _state->checkCount << "checks.";
     if(noCheckCount)
         d << Debug::boldColor(Debug::Color::Yellow) << noCheckCount << "test cases didn't contain any checks!";
 
@@ -412,60 +462,84 @@ benchmark types:
 }
 
 void Tester::printTestCaseLabel(Debug& out, const char* const status, const Debug::Color statusColor, const Debug::Color labelColor) {
-    const char* padding = PaddingString + sizeof(PaddingString) - digitCount(_testCases.size()) + digitCount(_testCaseId) - 1;
+    const char* padding = PaddingString + sizeof(PaddingString) - digitCount(_state->testCases.size()) + digitCount(_state->testCaseId) - 1;
 
     out << Debug::boldColor(statusColor) << status
         << Debug::color(Debug::Color::Blue) << "[" << Debug::nospace
         << Debug::boldColor(Debug::Color::Cyan) << padding
-        << Debug::nospace << _testCaseId << Debug::nospace
+        << Debug::nospace << _state->testCaseId << Debug::nospace
         << Debug::color(Debug::Color::Blue) << "]"
         << Debug::boldColor(labelColor)
-        << (_testCaseName.empty() ? "<unknown>" : _testCaseName)
+        << (_state->testCaseName.empty() ? "<unknown>" : _state->testCaseName)
         << Debug::nospace;
 
     /* Optional test case description */
-    if(!_testCaseDescription.empty()) {
+    if(!_state->testCaseDescription.empty()) {
         out << "("
             << Debug::nospace
-            << Debug::resetColor << _testCaseDescription
+            << Debug::resetColor << _state->testCaseDescription
             << Debug::nospace << Debug::boldColor(labelColor)
             << ")";
     } else out << "()";
 
-    if(_testCaseRepeatId != ~std::size_t{})
-        out << Debug::nospace << "@" << Debug::nospace << _testCaseRepeatId + 1;
+    if(_state->testCaseRepeatId != ~std::size_t{})
+        out << Debug::nospace << "@" << Debug::nospace << _state->testCaseRepeatId + 1;
 
     out << Debug::resetColor;
 }
 
 void Tester::verifyInternal(const char* expression, bool expressionValue) {
-    ++_checkCount;
+    ++_state->checkCount;
 
     /* If the expression is true or the failure is expected, done */
-    if(!_expectedFailure) {
+    if(!_state->expectedFailure) {
         if(expressionValue) return;
     } else if(!expressionValue) {
-        Debug out{_logOutput, _useColor};
+        Debug out{_state->logOutput, _state->useColor};
         printTestCaseLabel(out, " XFAIL", Debug::Color::Yellow, Debug::Color::Default);
-        out << "at" << _testFilename << "on line" << _testCaseLine
-            << Debug::newline << "       " << _expectedFailure->message()
+        out << "at" << _state->testFilename << "on line" << _state->testCaseLine
+            << Debug::newline << "       " << _state->expectedFailureMessage
             << "Expression" << expression << "failed.";
         return;
     }
 
     /* Otherwise print message to error output and throw exception */
-    Error out{_errorOutput, _useColor};
-    printTestCaseLabel(out, _expectedFailure ? " XPASS" : "  FAIL", Debug::Color::Red, Debug::Color::Default);
-    out << "at" << _testFilename << "on line" << _testCaseLine
+    Error out{_state->errorOutput, _state->useColor};
+    printTestCaseLabel(out, _state->expectedFailure ? " XPASS" : "  FAIL", Debug::Color::Red, Debug::Color::Default);
+    out << "at" << _state->testFilename << "on line" << _state->testCaseLine
         << Debug::newline << "        Expression" << expression;
-    if(!_expectedFailure) out << "failed.";
+    if(!_state->expectedFailure) out << "failed.";
     else out << "was expected to fail.";
     throw Exception();
 }
 
+void Tester::printComparisonMessageInternal(bool equal, const char* actual, const char* expected, void(*printer)(void*, Error&, const char*, const char*), void* printerState) {
+    ++_state->checkCount;
+
+    if(!_state->expectedFailure) {
+        if(equal) return;
+    } else if(!equal) {
+        Debug out{_state->logOutput, _state->useColor};
+        printTestCaseLabel(out, " XFAIL", Debug::Color::Yellow, Debug::Color::Default);
+        out << "at" << _state->testFilename << "on line"
+            << _state->testCaseLine << Debug::newline << "       " << _state->expectedFailureMessage
+            << actual << "and" << expected << "failed the comparison.";
+        return;
+    }
+
+    /* Otherwise print message to error output and throw exception */
+    Error out{_state->errorOutput, _state->useColor};
+    printTestCaseLabel(out, _state->expectedFailure ? " XPASS" : "  FAIL", Debug::Color::Red, Debug::Color::Default);
+    out << "at" << _state->testFilename << "on line"
+        << _state->testCaseLine << Debug::newline << "       ";
+    if(!_state->expectedFailure) printer(printerState, out, actual, expected);
+    else out << actual << "and" << expected << "were expected to fail the comparison.";
+    throw Exception();
+}
+
 void Tester::registerTest(const char* filename, const char* name) {
-    _testFilename = std::move(filename);
-    if(_testName.empty()) _testName = std::move(name);
+    _state->testFilename = std::move(filename);
+    if(_state->testName.empty()) _state->testName = std::move(name);
 }
 
 void Tester::skip(const char* message) {
@@ -473,98 +547,132 @@ void Tester::skip(const char* message) {
 }
 
 void Tester::skip(const std::string& message) {
-    Debug out{_logOutput, _useColor};
+    Debug out{_state->logOutput, _state->useColor};
     printTestCaseLabel(out, "  SKIP", Debug::Color::Default, Debug::Color::Default);
     out << Debug::newline << "       " << message;
     throw SkipException();
 }
 
+std::size_t Tester::testCaseId() const { return _state->testCaseId; }
+std::size_t Tester::testCaseInstanceId() const { return _state->testCaseInstanceId; }
+std::size_t Tester::testCaseRepeatId() const { return _state->testCaseRepeatId; }
+
 void Tester::setTestName(const std::string& name) {
-    _testName = name;
+    _state->testName = name;
 }
 
 void Tester::setTestName(std::string&& name) {
-    _testName = std::move(name);
+    _state->testName = std::move(name);
+}
+
+void Tester::setTestName(const char* name) {
+    _state->testName = name;
 }
 
 void Tester::setTestCaseName(const std::string& name) {
-    _testCaseName = name;
+    _state->testCaseName = name;
 }
 
 void Tester::setTestCaseName(std::string&& name) {
-    _testCaseName = std::move(name);
+    _state->testCaseName = std::move(name);
+}
+
+void Tester::setTestCaseName(const char* name) {
+    _state->testCaseName = name;
 }
 
 void Tester::setTestCaseDescription(const std::string& description) {
-    _testCaseDescription = description;
+    _state->testCaseDescription = description;
 }
 
 void Tester::setTestCaseDescription(std::string&& description) {
-    _testCaseDescription = std::move(description);
+    _state->testCaseDescription = std::move(description);
+}
+
+void Tester::setTestCaseDescription(const char* description) {
+    _state->testCaseDescription = description;
 }
 
 void Tester::setBenchmarkName(const std::string& name) {
-    _benchmarkName = name;
+    _state->benchmarkName = name;
 }
 
 void Tester::setBenchmarkName(std::string&& name) {
-    _benchmarkName = std::move(name);
+    _state->benchmarkName = std::move(name);
+}
+
+void Tester::setBenchmarkName(const char* name) {
+    _state->benchmarkName = name;
 }
 
 void Tester::registerTestCase(const char* name, int line) {
-    CORRADE_ASSERT(_testCase,
+    CORRADE_ASSERT(_state->testCase,
         "TestSuite::Tester: using verification macros outside of test cases is not allowed", );
 
-    if(_testCaseName.empty()) _testCaseName = std::move(name);
-    _testCaseLine = line;
+    if(_state->testCaseName.empty()) _state->testCaseName = std::move(name);
+    _state->testCaseLine = line;
 }
 
 Tester::BenchmarkRunner Tester::createBenchmarkRunner(const std::size_t batchSize) {
-    CORRADE_ASSERT(_testCase,
+    CORRADE_ASSERT(_state->testCase,
         "TestSuite::Tester: using benchmark macros outside of test cases is not allowed",
         (BenchmarkRunner{*this, nullptr, nullptr}));
 
-    _benchmarkBatchSize = batchSize;
-    return BenchmarkRunner{*this, _testCase->benchmarkBegin, _testCase->benchmarkEnd};
+    _state->benchmarkBatchSize = batchSize;
+    return BenchmarkRunner{*this, _state->testCase->benchmarkBegin, _state->testCase->benchmarkEnd};
 }
 
 void Tester::wallTimeBenchmarkBegin() {
-    _benchmarkName = "wall time";
-    _benchmarkBegin = Implementation::wallTime();
+    _state->benchmarkName = "wall time";
+    _state->benchmarkBegin = Implementation::wallTime();
 }
 
 std::uint64_t Tester::wallTimeBenchmarkEnd() {
-    return Implementation::wallTime() - _benchmarkBegin;
+    return Implementation::wallTime() - _state->benchmarkBegin;
 }
 
 void Tester::cpuTimeBenchmarkBegin() {
-    _benchmarkName = "CPU time";
-    _benchmarkBegin = Implementation::cpuTime();
+    _state->benchmarkName = "CPU time";
+    _state->benchmarkBegin = Implementation::cpuTime();
 }
 
 std::uint64_t Tester::cpuTimeBenchmarkEnd() {
-    return Implementation::cpuTime() - _benchmarkBegin;
+    return Implementation::cpuTime() - _state->benchmarkBegin;
 }
 
 void Tester::cpuCyclesBenchmarkBegin() {
-    _benchmarkName = "CPU cycles";
-    _benchmarkBegin = Implementation::rdtsc();
+    _state->benchmarkName = "CPU cycles";
+    _state->benchmarkBegin = Implementation::rdtsc();
 }
 
 std::uint64_t Tester::cpuCyclesBenchmarkEnd() {
-    return Implementation::rdtsc() - _benchmarkBegin;
+    return Implementation::rdtsc() - _state->benchmarkBegin;
 }
 
-Tester::TesterConfiguration::TesterConfiguration() = default;
-
-Tester::ExpectedFailure::ExpectedFailure(Tester& instance, std::string message, const bool enabled): _instance(instance), _message(std::move(message)) {
-    if(enabled && !instance._expectedFailuresDisabled) _instance._expectedFailure = this;
+void Tester::addTestCaseInternal(const TestCase& testCase) {
+    _state->testCases.push_back(testCase);
 }
+
+Tester::ExpectedFailure::ExpectedFailure(Tester& instance, std::string&& message, const bool enabled): _instance(instance) {
+    if(!enabled || instance._state->expectedFailuresDisabled) return;
+    instance._state->expectedFailureMessage = message;
+    instance._state->expectedFailure = this;
+}
+
+Tester::ExpectedFailure::ExpectedFailure(Tester& instance, const std::string& message, const bool enabled): ExpectedFailure{instance, std::string{message}, enabled} {}
+
+Tester::ExpectedFailure::ExpectedFailure(Tester& instance, const char* message, const bool enabled): ExpectedFailure{instance, std::string{message}, enabled} {}
 
 Tester::ExpectedFailure::~ExpectedFailure() {
-    _instance._expectedFailure = nullptr;
+    _instance._state->expectedFailure = nullptr;
 }
 
-std::string Tester::ExpectedFailure::message() const { return _message; }
+Tester::BenchmarkRunner::~BenchmarkRunner() {
+    _instance._state->benchmarkResult = (_instance.*_end)();
+}
+
+const char* Tester::BenchmarkRunner::end() const {
+     return reinterpret_cast<char*>(_instance._state->benchmarkBatchSize);
+}
 
 }}

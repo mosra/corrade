@@ -23,6 +23,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <string>
+
 #include "Corrade/Interconnect/Emitter.h"
 #include "Corrade/Interconnect/Receiver.h"
 #include "Corrade/Interconnect/StateMachine.h"

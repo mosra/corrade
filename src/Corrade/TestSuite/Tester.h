@@ -30,17 +30,14 @@
  */
 
 #include <initializer_list>
-#include <iosfwd>
-#include <string>
-#include <type_traits>
-#include <vector>
 
+#include "Corrade/Containers/Pointer.h"
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/TestSuite/Compare/FloatingPoint.h"
 #include "Corrade/TestSuite/visibility.h"
 #include "Corrade/Utility/Debug.h"
-#include "Corrade/Utility/DebugStl.h" /** @todo remove once not needed */
 #include "Corrade/Utility/Macros.h"
+#include "Corrade/Utility/StlForwardString.h"
 
 #ifdef CORRADE_TARGET_EMSCRIPTEN
 #include <cstdlib>
@@ -460,12 +457,24 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          */
         class CORRADE_TESTSUITE_EXPORT TesterConfiguration {
             public:
-                explicit TesterConfiguration();
+                explicit TesterConfiguration() noexcept;
+
+                /** @brief Copy constructor */
+                TesterConfiguration(const TesterConfiguration&);
+
+                /** @brief Move constructor */
+                TesterConfiguration(TesterConfiguration&&) noexcept;
+
+                ~TesterConfiguration();
+
+                /** @brief Copy assignment */
+                TesterConfiguration& operator=(const TesterConfiguration&);
+
+                /** @brief Move assignment */
+                TesterConfiguration& operator=(TesterConfiguration&&) noexcept;
 
                 /** @brief Skipped argument prefixes */
-                const std::vector<std::string>& skippedArgumentPrefixes() const {
-                    return _skippedArgumentPrefixes;
-                }
+                Containers::ArrayView<const std::string> skippedArgumentPrefixes() const;
 
                 /**
                  * @brief Set skipped argument prefixes
@@ -474,13 +483,13 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                  * without having the tester complaining about them.
                  * @see @ref arguments()
                  */
-                TesterConfiguration& setSkippedArgumentPrefixes(std::initializer_list<std::string> prefixes) {
-                    _skippedArgumentPrefixes.insert(_skippedArgumentPrefixes.end(), prefixes);
-                    return *this;
-                }
+                TesterConfiguration& setSkippedArgumentPrefixes(std::initializer_list<std::string> prefixes);
 
             private:
-                std::vector<std::string> _skippedArgumentPrefixes;
+                /* Don't want to include any vector or array here because we
+                   don't need it in public APIs anyway. */
+                struct Data;
+                Containers::Pointer<Data> _data;
         };
 
         /**
@@ -581,7 +590,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @brief Constructor
          * @param configuration     Optional configuration
          */
-        explicit Tester(TesterConfiguration configuration = TesterConfiguration{});
+        explicit Tester(const TesterConfiguration& configuration = TesterConfiguration{});
 
         /**
          * @brief Command-line arguments
@@ -650,9 +659,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @see @ref addInstancedTests(), @ref addRepeatedInstancedTests()
          */
         template<class Derived> void addRepeatedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t repeatCount, void(Derived::*setup)(), void(Derived::*teardown)()) {
-            _testCases.reserve(_testCases.size() + tests.size());
             for(auto test: tests)
-                _testCases.emplace_back(~std::size_t{}, repeatCount, static_cast<TestCase::Function>(test), static_cast<TestCase::Function>(setup), static_cast<TestCase::Function>(teardown));
+                addTestCaseInternal({~std::size_t{}, repeatCount, static_cast<TestCase::Function>(test), static_cast<TestCase::Function>(setup), static_cast<TestCase::Function>(teardown)});
         }
 
         /**
@@ -720,9 +728,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @see @ref addInstancedTests(), @ref addRepeatedInstancedTests()
          */
         template<class Derived> void addRepeatedInstancedTests(std::initializer_list<void(Derived::*)()> tests, std::size_t repeatCount, std::size_t instanceCount, void(Derived::*setup)(), void(Derived::*teardown)()) {
-            _testCases.reserve(_testCases.size() + tests.size());
             for(auto test: tests) for(std::size_t i = 0; i != instanceCount; ++i)
-                _testCases.emplace_back(i, repeatCount, static_cast<TestCase::Function>(test), static_cast<TestCase::Function>(setup), static_cast<TestCase::Function>(teardown));
+                addTestCaseInternal({i, repeatCount, static_cast<TestCase::Function>(test), static_cast<TestCase::Function>(setup), static_cast<TestCase::Function>(teardown)});
         }
 
         /**
@@ -806,9 +813,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @see @ref addCustomInstancedBenchmarks()
          */
         template<class Derived> void addCustomBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, void(Derived::*setup)(), void(Derived::*teardown)(), void(Derived::*benchmarkBegin)(), std::uint64_t(Derived::*benchmarkEnd)(), BenchmarkUnits benchmarkUnits) {
-            _testCases.reserve(_testCases.size() + benchmarks.size());
             for(auto benchmark: benchmarks)
-                _testCases.emplace_back(~std::size_t{}, batchCount, static_cast<TestCase::Function>(benchmark), static_cast<TestCase::Function>(setup), static_cast<TestCase::Function>(teardown), static_cast<TestCase::BenchmarkBegin>(benchmarkBegin), static_cast<TestCase::BenchmarkEnd>(benchmarkEnd), TestCaseType(int(benchmarkUnits)));
+                addTestCaseInternal({~std::size_t{}, batchCount, static_cast<TestCase::Function>(benchmark), static_cast<TestCase::Function>(setup), static_cast<TestCase::Function>(teardown), static_cast<TestCase::BenchmarkBegin>(benchmarkBegin), static_cast<TestCase::BenchmarkEnd>(benchmarkEnd), TestCaseType(int(benchmarkUnits))});
         }
 
         /**
@@ -894,9 +900,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * it will appear once for each instance of each occurence in the list.
          */
         template<class Derived> void addCustomInstancedBenchmarks(std::initializer_list<void(Derived::*)()> benchmarks, std::size_t batchCount, std::size_t instanceCount, void(Derived::*setup)(), void(Derived::*teardown)(), void(Derived::*benchmarkBegin)(), std::uint64_t(Derived::*benchmarkEnd)(), BenchmarkUnits benchmarkUnits) {
-            _testCases.reserve(_testCases.size() + benchmarks.size());
             for(auto benchmark: benchmarks) for(std::size_t i = 0; i != instanceCount; ++i)
-                _testCases.emplace_back(i, batchCount, static_cast<TestCase::Function>(benchmark), static_cast<TestCase::Function>(setup), static_cast<TestCase::Function>(teardown), static_cast<TestCase::BenchmarkBegin>(benchmarkBegin), static_cast<TestCase::BenchmarkEnd>(benchmarkEnd), TestCaseType(int(benchmarkUnits)));
+                addTestCaseInternal({i, batchCount, static_cast<TestCase::Function>(benchmark), static_cast<TestCase::Function>(setup), static_cast<TestCase::Function>(teardown), static_cast<TestCase::BenchmarkBegin>(benchmarkBegin), static_cast<TestCase::BenchmarkEnd>(benchmarkEnd), TestCaseType(int(benchmarkUnits))});
         }
 
         /**
@@ -906,7 +911,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * from `1`. Value is undefined if called  outside of test cases and
          * setup/teardown functions.
          */
-        std::size_t testCaseId() const { return _testCaseId; }
+        std::size_t testCaseId() const;
 
         /**
          * @brief Test case instance ID
@@ -916,7 +921,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * of *instanced* test cases and setup/teardown functions.
          * @see @ref addInstancedTests()
          */
-        std::size_t testCaseInstanceId() const { return _testCaseInstanceId; }
+        std::size_t testCaseInstanceId() const;
 
         /**
          * @brief Test case repeat ID
@@ -926,7 +931,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * of *repeated* test cases and setup/teardown functions.
          * @see @ref addRepeatedTests()
          */
-        std::size_t testCaseRepeatId() const { return _testCaseRepeatId; }
+        std::size_t testCaseRepeatId() const;
 
         /**
          * @brief Set custom test name
@@ -938,6 +943,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          */
         void setTestName(const std::string& name);
         void setTestName(std::string&& name); /**< @overload */
+        void setTestName(const char* name); /**< @overload */
 
         /**
          * @brief Set custom test case name
@@ -951,6 +957,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          */
         void setTestCaseName(const std::string& name);
         void setTestCaseName(std::string&& name); /**< @overload */
+        void setTestCaseName(const char* name); /**< @overload */
 
         /**
          * @brief Set test case description
@@ -962,6 +969,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          */
         void setTestCaseDescription(const std::string& description);
         void setTestCaseDescription(std::string&& description); /**< @overload */
+        void setTestCaseDescription(const char* description); /**< @overload */
 
         /**
          * @brief Set benchmark name
@@ -971,6 +979,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          */
         void setBenchmarkName(const std::string& name);
         void setBenchmarkName(std::string&& name); /**< @overload */
+        void setBenchmarkName(const char* name); /**< @overload */
 
     protected:
         ~Tester();
@@ -1040,18 +1049,19 @@ class CORRADE_TESTSUITE_EXPORT Tester {
     #endif
         class CORRADE_TESTSUITE_EXPORT ExpectedFailure {
             public:
-                explicit ExpectedFailure(Tester& instance, std::string message, bool enabled = true);
+                explicit ExpectedFailure(Tester& instance, const std::string& message, bool enabled = true);
+                explicit ExpectedFailure(Tester& instance, std::string&& message, bool enabled = true);
+                explicit ExpectedFailure(Tester& instance, const char* message, bool enabled = true);
 
                 /* For types with explicit bool conversion */
-                template<class T> explicit ExpectedFailure(Tester& instance, std::string message, T&& enabled): ExpectedFailure{instance, message, enabled ? true : false} {}
+                template<class T> explicit ExpectedFailure(Tester& instance, const std::string& message, T&& enabled): ExpectedFailure{instance, message, enabled ? true : false} {}
+                template<class T> explicit ExpectedFailure(Tester& instance, std::string&& message, T&& enabled): ExpectedFailure{instance, message, enabled ? true : false} {}
+                template<class T> explicit ExpectedFailure(Tester& instance, const char* message, T&& enabled): ExpectedFailure{instance, message, enabled ? true : false} {}
 
                 ~ExpectedFailure();
 
-                std::string message() const;
-
             private:
                 Tester& _instance;
-                std::string _message;
         };
 
         /* Called from all CORRADE_*() verification/skip/xfail macros through
@@ -1080,9 +1090,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
             typedef void (Tester::*BenchmarkBegin)();
             typedef std::uint64_t (Tester::*BenchmarkEnd)();
 
-            explicit TestCase(std::size_t instanceId, std::size_t repeatCount, Function test, Function setup, Function teardown): instanceId{instanceId}, repeatCount{repeatCount}, test{test}, setup{setup}, teardown{teardown}, benchmarkBegin{}, benchmarkEnd{}, type{TestCaseType::Test} {}
+            /*implicit*/ TestCase(std::size_t instanceId, std::size_t repeatCount, Function test, Function setup, Function teardown): instanceId{instanceId}, repeatCount{repeatCount}, test{test}, setup{setup}, teardown{teardown}, benchmarkBegin{}, benchmarkEnd{}, type{TestCaseType::Test} {}
 
-            explicit TestCase(std::size_t instanceId, std::size_t repeatCount, Function test, Function setup, Function teardown, BenchmarkBegin benchmarkBegin, BenchmarkEnd benchmarkEnd, TestCaseType type): instanceId{instanceId}, repeatCount{repeatCount}, test{test}, setup{setup}, teardown{teardown}, benchmarkBegin{benchmarkBegin}, benchmarkEnd{benchmarkEnd}, type{type} {}
+            /*implicit*/ TestCase(std::size_t instanceId, std::size_t repeatCount, Function test, Function setup, Function teardown, BenchmarkBegin benchmarkBegin, BenchmarkEnd benchmarkEnd, TestCaseType type): instanceId{instanceId}, repeatCount{repeatCount}, test{test}, setup{setup}, teardown{teardown}, benchmarkBegin{benchmarkBegin}, benchmarkEnd{benchmarkEnd}, type{type} {}
 
             std::size_t instanceId, repeatCount;
             Function test, setup, teardown;
@@ -1100,12 +1110,10 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                     (_instance.*begin)();
                 }
 
-                ~BenchmarkRunner() {
-                    _instance._benchmarkResult = (_instance.*_end)();
-                }
+                ~BenchmarkRunner();
 
                 const char* begin() const { return nullptr; }
-                const char* end() const { return reinterpret_cast<char*>(_instance._benchmarkBatchSize); }
+                const char* end() const;
 
             private:
                 Tester& _instance;
@@ -1116,11 +1124,16 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         BenchmarkRunner createBenchmarkRunner(std::size_t batchSize);
 
     private:
+        /* Need to preserve as much unique name as possible here, just `State`
+           would cause conflicts with user-defined State types */
+        struct TesterState;
+
         static int* _argc;
         static char** _argv;
 
+        CORRADE_TESTSUITE_LOCAL void printTestCaseLabel(Debug& out, const char* status, Debug::Color statusColor, Debug::Color labelColor);
         void verifyInternal(const char* expression, bool value);
-        void printTestCaseLabel(Debug& out, const char* status, Debug::Color statusColor, Debug::Color labelColor);
+        void printComparisonMessageInternal(bool equal, const char* actual, const char* expected, void(*printer)(void*, Error&, const char*, const char*), void* printerState);
 
         void wallTimeBenchmarkBegin();
         std::uint64_t wallTimeBenchmarkEnd();
@@ -1131,21 +1144,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         void cpuCyclesBenchmarkBegin();
         std::uint64_t cpuCyclesBenchmarkEnd();
 
-        Debug::Flags _useColor;
-        std::ostream *_logOutput, *_errorOutput;
-        std::vector<TestCase> _testCases;
-        std::string _testFilename, _testName, _testCaseName,
-            _testCaseDescription, _benchmarkName, _expectFailMessage;
-        std::size_t _testCaseId{}, _testCaseInstanceId{~std::size_t{}},
-            _testCaseRepeatId{}, _benchmarkBatchSize{}, _testCaseLine{},
-            _checkCount{};
+        void addTestCaseInternal(const TestCase& testCase);
 
-        std::uint64_t _benchmarkBegin{};
-        std::uint64_t _benchmarkResult{};
-        TestCase* _testCase = nullptr;
-        bool _expectedFailuresDisabled{};
-        ExpectedFailure* _expectedFailure{};
-        TesterConfiguration _configuration;
+        Containers::Pointer<TesterState> _state;
 };
 
 /** @hideinitializer
@@ -1375,8 +1376,6 @@ one iteration.
 #endif
 
 template<class T, class U, class V> void Tester::compareWith(Comparator<T>& comparator, const char* actual, const U& actualValue, const char* expected, const V& expectedValue) {
-    ++_checkCount;
-
     /* Store (references to) possibly implicitly-converted values,
        otherwise the implicit conversion would when passing them to operator(),
        causing dead memory access later in printErrorMessage() */
@@ -1385,25 +1384,11 @@ template<class T, class U, class V> void Tester::compareWith(Comparator<T>& comp
 
     /* If the comparison succeeded or the failure is expected, done */
     bool equal = comparator(actualValueInExpectedActualType, expectedValueInExpectedExpectedType);
-    if(!_expectedFailure) {
-        if(equal) return;
-    } else if(!equal) {
-        Debug out{_logOutput, _useColor};
-        printTestCaseLabel(out, " XFAIL", Debug::Color::Yellow, Debug::Color::Default);
-        out << "at" << _testFilename << "on line"
-            << _testCaseLine << Debug::newline << "       " << _expectedFailure->message()
-            << actual << "and" << expected << "failed the comparison.";
-        return;
-    }
 
-    /* Otherwise print message to error output and throw exception */
-    Error out{_errorOutput, _useColor};
-    printTestCaseLabel(out, _expectedFailure ? " XPASS" : "  FAIL", Debug::Color::Red, Debug::Color::Default);
-    out << "at" << _testFilename << "on line"
-        << _testCaseLine << Debug::newline << "       ";
-    if(!_expectedFailure) comparator.printErrorMessage(out, actual, expected);
-    else out << actual << "and" << expected << "were expected to fail the comparison.";
-    throw Exception();
+    printComparisonMessageInternal(equal, actual, expected,
+        [](void* state, Error& out, const char* actual, const char* expected) {
+            static_cast<Comparator<T>*>(state)->printErrorMessage(out, actual, expected);
+        }, &comparator);
 }
 
 template<class T> void Tester::verify(const char* expression, T&& value) {
