@@ -504,10 +504,12 @@ TweakableState parseTweakables(const std::string& name, const std::string& filen
                 return TweakableState::Error;
             }
 
+            ++end;
+
             /* If the variable doesn't have a parser assigned, it means the app
                haven't run this code path yet. That's not a critical problem. */
             if(variables.size() <= variable || !variables[variable].parser) {
-                Warning{} << "Utility::Tweakable::update(): ignoring unknown new value" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
+                Warning{} << "Utility::Tweakable::update(): ignoring unknown new value" << data.substr(pos, end - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
 
             /* Otherwise we should have a parser that can convert the string
                representation to the target type */
@@ -518,7 +520,7 @@ TweakableState parseTweakables(const std::string& name, const std::string& filen
                    changed. Request a recompile. */
                 /** @todo SHA-1 the source (minus tweakables) and compare that for full verification */
                 if(v.line != line) {
-                    Warning{} << "Utility::Tweakable::update(): code changed around" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line << Debug::nospace << ", requesting a recompile";
+                    Warning{} << "Utility::Tweakable::update(): code changed around" << data.substr(pos, end - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line << Debug::nospace << ", requesting a recompile";
                     return TweakableState::Recompile;
                 }
 
@@ -526,18 +528,18 @@ TweakableState parseTweakables(const std::string& name, const std::string& filen
                    occured, exit immediately. */
                 const TweakableState variableState = v.parser(value, Containers::staticArrayView(v.storage));
                 if(variableState == TweakableState::Recompile) {
-                    Warning{} << "Utility::Tweakable::update(): change of" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line << "requested a recompile";
+                    Warning{} << "Utility::Tweakable::update(): change of" << data.substr(pos, end - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line << "requested a recompile";
                     return TweakableState::Recompile;
                 }
                 if(variableState == TweakableState::Error) {
-                    Error{} << "Utility::Tweakable::update(): error parsing" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
+                    Error{} << "Utility::Tweakable::update(): error parsing" << data.substr(pos, end - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
                     return TweakableState::Error;
                 }
 
                 /* If a change occured, add a corresponding scope to update */
                 if(variableState != TweakableState::NoChange) {
                     CORRADE_INTERNAL_ASSERT(variableState == TweakableState::Success);
-                    Debug{} << "Utility::Tweakable::update(): updating" << data.substr(pos, end + 1 - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
+                    Debug{} << "Utility::Tweakable::update(): updating" << data.substr(pos, end - pos) << "in" << filename << Debug::nospace << ":" << Debug::nospace << line;
                     if(v.scopeLambda) scopes.emplace(v.scopeLambda, v.scopeUserCall, v.scopeUserData);
                     state = TweakableState::Success;
                 }
@@ -545,7 +547,7 @@ TweakableState parseTweakables(const std::string& name, const std::string& filen
 
             /* Increase variable ID for the next round to match __COUNTER__,
                update pos to restart the search after this variable */
-            pos = end + 1;
+            pos = end;
             ++variable;
 
         /* Shouldn't get here */
