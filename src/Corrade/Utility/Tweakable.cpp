@@ -102,7 +102,7 @@ std::pair<bool, void*> Tweakable::registerVariable(const char* const file, const
     /* Find the file in the map */
     /** @todo this allocates and copies the string. std::map::find() in C++14
         has an overload that allows a zero-allocation lookup, but
-        std::unordered_map doesn't. */
+        std::unordered_map has that only since C++17. */
     auto found = _data->files.find(file);
     if(found == _data->files.end()) {
         /* Strip the directory prefix from the file. If that means the filename
