@@ -30,7 +30,7 @@
 #include "Corrade/Interconnect/Emitter.h"
 #include "Corrade/Interconnect/Receiver.h"
 
-namespace Corrade { namespace Interconnect { namespace Test {
+namespace Corrade { namespace Interconnect { namespace Test { namespace {
 
 struct Test: TestSuite::Tester {
     explicit Test();
@@ -625,6 +625,6 @@ void Test::function() {
     CORRADE_COMPARE(out.str(), "hello\n");
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Interconnect::Test::Test)

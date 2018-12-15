@@ -28,7 +28,7 @@
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test {
+namespace Corrade { namespace Containers { namespace Test { namespace {
 
 struct EnumSetTest: TestSuite::Tester {
     explicit EnumSetTest();
@@ -45,8 +45,6 @@ struct EnumSetTest: TestSuite::Tester {
 
     void debug();
 };
-
-namespace {
 
 enum class Feature: int {
     Fast = 1 << 0,
@@ -78,8 +76,6 @@ Utility::Debug& operator<<(Utility::Debug& debug, Features value) {
         Feature::Cheap,
         Feature::Tested,
         Feature::Popular});
-}
-
 }
 
 EnumSetTest::EnumSetTest() {
@@ -209,6 +205,6 @@ void EnumSetTest::debug() {
     CORRADE_COMPARE(out.str(), "Features{} Feature::Fast|Feature::Cheap Feature::Popular|Feature(0xdead000)\n");
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Containers::Test::EnumSetTest)

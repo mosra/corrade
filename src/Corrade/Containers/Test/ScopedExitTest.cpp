@@ -26,7 +26,7 @@
 #include "Corrade/Containers/ScopedExit.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test {
+namespace Corrade { namespace Containers { namespace Test { namespace {
 
 struct ScopedExitTest: TestSuite::Tester {
     explicit ScopedExitTest();
@@ -46,11 +46,9 @@ ScopedExitTest::ScopedExitTest() {
               &ScopedExitTest::release});
 }
 
-namespace {
-    int fd;
-    void close(float* value) { *value = 3.14f; }
-    int closeInt(int) { fd = 42; return 5; }
-}
+int fd;
+void close(float* value) { *value = 3.14f; }
+int closeInt(int) { fd = 42; return 5; }
 
 void ScopedExitTest::pointer() {
     float v = 0.0f;
@@ -102,6 +100,6 @@ void ScopedExitTest::release() {
     CORRADE_COMPARE(v, 1.234f);
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Containers::Test::ScopedExitTest)

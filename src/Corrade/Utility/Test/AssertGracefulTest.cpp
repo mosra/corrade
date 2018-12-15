@@ -30,7 +30,7 @@
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct AssertGracefulTest: TestSuite::Tester {
     explicit AssertGracefulTest();
@@ -69,12 +69,8 @@ void AssertGracefulTest::test() {
         "foo() should succeed!\n");
 }
 
-namespace {
-
 constexpr int divide(int a, int b) {
     return CORRADE_CONSTEXPR_ASSERT(b, "b can't be zero"), a/(b + 5);
-}
-
 }
 
 void AssertGracefulTest::constexprTest() {
@@ -92,6 +88,6 @@ void AssertGracefulTest::constexprTest() {
         "b can't be zero\n");
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::AssertGracefulTest)

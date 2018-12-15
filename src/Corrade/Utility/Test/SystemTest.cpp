@@ -26,7 +26,7 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/System.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct SystemTest: TestSuite::Tester {
     explicit SystemTest();
@@ -55,6 +55,6 @@ void SystemTest::sleep() {
     CORRADE_VERIFY(true);
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::SystemTest)

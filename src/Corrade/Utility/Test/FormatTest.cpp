@@ -34,7 +34,7 @@
 
 #include "configure.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct FormatTest: TestSuite::Tester {
     explicit FormatTest();
@@ -337,41 +337,39 @@ void FormatTest::floatingLongDouble() {
 }
 #endif
 
-namespace {
-    template<class> struct FloatingPrecisionData;
-    template<> struct FloatingPrecisionData<float> {
-        static const char* name() { return "floatingPrecision<float>"; }
-        static const char* expected() {
-            #ifndef __MINGW32__
-            return "3.14159 -12345.7 1.23457e-12 3.14159";
-            #else
-            return "3.14159 -12345.7 1.23457e-012 3.14159";
-            #endif
-        }
-    };
-    template<> struct FloatingPrecisionData<double> {
-        static const char* name() { return "floatingPrecision<double>"; }
-        static const char* expected() {
-            #ifndef __MINGW32__
-            return "3.14159265358979 -12345.6789012346 1.23456789012346e-12 3.14159";
-            #else
-            return "3.14159265358979 -12345.6789012346 1.23456789012346e-012 3.14159";
-            #endif
-        }
-    };
-    #ifndef CORRADE_TARGET_EMSCRIPTEN
-    template<> struct FloatingPrecisionData<long double> {
-        static const char* name() { return "floatingPrecision<long double>"; }
-        static const char* expected() {
-            #ifndef __MINGW32__
-            return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-12 3.14159";
-            #else
-            return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-012 3.14159";
-            #endif
-        }
-    };
-    #endif
-}
+template<class> struct FloatingPrecisionData;
+template<> struct FloatingPrecisionData<float> {
+    static const char* name() { return "floatingPrecision<float>"; }
+    static const char* expected() {
+        #ifndef __MINGW32__
+        return "3.14159 -12345.7 1.23457e-12 3.14159";
+        #else
+        return "3.14159 -12345.7 1.23457e-012 3.14159";
+        #endif
+    }
+};
+template<> struct FloatingPrecisionData<double> {
+    static const char* name() { return "floatingPrecision<double>"; }
+    static const char* expected() {
+        #ifndef __MINGW32__
+        return "3.14159265358979 -12345.6789012346 1.23456789012346e-12 3.14159";
+        #else
+        return "3.14159265358979 -12345.6789012346 1.23456789012346e-012 3.14159";
+        #endif
+    }
+};
+#ifndef CORRADE_TARGET_EMSCRIPTEN
+template<> struct FloatingPrecisionData<long double> {
+    static const char* name() { return "floatingPrecision<long double>"; }
+    static const char* expected() {
+        #ifndef __MINGW32__
+        return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-12 3.14159";
+        #else
+        return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-012 3.14159";
+        #endif
+    }
+};
+#endif
 
 template<class T> void FormatTest::floatingPrecision() {
     setTestCaseName(FloatingPrecisionData<T>::name());
@@ -914,6 +912,6 @@ void FormatTest::benchmarkFloatDebug() {
     CORRADE_COMPARE(out.str(), "hello, people! 4.2 + 13.37 = 17.57 = 13.37 + 4.2");
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::FormatTest)

@@ -29,7 +29,7 @@
 #include "Corrade/Utility/AbstractHash.h"
 #include "Corrade/Utility/Debug.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct HashDigestTest: TestSuite::Tester {
     explicit HashDigestTest();
@@ -79,6 +79,6 @@ void HashDigestTest::debug() {
     CORRADE_COMPARE(out.str(), "defeca7e\n");
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::HashDigestTest)

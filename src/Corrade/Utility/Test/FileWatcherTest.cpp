@@ -32,7 +32,7 @@
 
 #include "configure.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct FileWatcherTest: TestSuite::Tester {
     explicit FileWatcherTest();
@@ -221,6 +221,6 @@ void FileWatcherTest::changedRecreatedLate() {
     CORRADE_VERIFY(!watcher.isValid());
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::FileWatcherTest)

@@ -34,7 +34,7 @@
 
 #define _ CORRADE_TWEAKABLE
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct TweakableTest: TestSuite::Tester {
     explicit TweakableTest();
@@ -57,8 +57,6 @@ struct TweakableTest: TestSuite::Tester {
 
     void debugState();
 };
-
-namespace {
 
 constexpr struct {
     const char* name;
@@ -158,7 +156,6 @@ TW(1337)
     )CPP", 2},
 };
 
-
 constexpr struct {
     const char* name;
     const char* data;
@@ -181,8 +178,6 @@ constexpr struct {
     {"unterminated raw string", "R\"boo(and this goes until \nthe EOF\n)boo \"",
         "Utility::Tweakable::update(): unterminated raw string literal in a.cpp:3\n"}
 };
-
-}
 
 TweakableTest::TweakableTest() {
     addTests({&TweakableTest::constructCopy,
@@ -451,6 +446,6 @@ void TweakableTest::debugState() {
     CORRADE_COMPARE(out.str(), "Utility::TweakableState::NoChange Utility::TweakableState(0xde)\n");
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::TweakableTest)

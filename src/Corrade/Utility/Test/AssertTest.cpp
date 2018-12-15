@@ -29,7 +29,7 @@
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct AssertTest: TestSuite::Tester {
     explicit AssertTest();
@@ -89,16 +89,12 @@ void AssertTest::test() {
     CORRADE_COMPARE(out.str(), "");
 }
 
-namespace {
-
 constexpr int divide(int a, int b) {
     return CORRADE_CONSTEXPR_ASSERT(b, "b can't be zero"), a/b;
 }
 
 constexpr int divideInternal(int a, int b) {
     return CORRADE_INTERNAL_CONSTEXPR_ASSERT(b), a/b;
-}
-
 }
 
 void AssertTest::constexprTest() {
@@ -124,6 +120,6 @@ void AssertTest::constexprTest() {
     CORRADE_COMPARE(out.str(), "");
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::AssertTest)

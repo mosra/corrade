@@ -48,7 +48,7 @@ template<> struct ConfigurationValue<NoDefaultConstructor> {
     }
 };
 
-namespace Test {
+namespace Test { namespace {
 
 struct ConfigurationValueTest: TestSuite::Tester {
     explicit ConfigurationValueTest();
@@ -364,6 +364,6 @@ void ConfigurationValueTest::custom() {
     CORRADE_COMPARE(values[3].a, 7);
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::ConfigurationValueTest)

@@ -28,7 +28,7 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test {
+namespace Corrade { namespace Containers { namespace Test { namespace {
 
 struct ArrayTest: TestSuite::Tester {
     explicit ArrayTest();
@@ -168,14 +168,12 @@ void ArrayTest::constructValueInit() {
     CORRADE_COMPARE(a[1], 0);
 }
 
-namespace {
-    struct Foo {
-        static int constructorCallCount;
-        Foo() { ++constructorCallCount; }
-    };
+struct Foo {
+    static int constructorCallCount;
+    Foo() { ++constructorCallCount; }
+};
 
-    int Foo::constructorCallCount = 0;
-}
+int Foo::constructorCallCount = 0;
 
 void ArrayTest::constructNoInit() {
     const Containers::Array<Foo> a{NoInit, 5};
@@ -518,9 +516,7 @@ void ArrayTest::defaultDeleter() {
     CORRADE_COMPARE(a.deleter(), nullptr);
 }
 
-namespace {
-    int CustomDeleterDeletedCount = 0;
-}
+int CustomDeleterDeletedCount = 0;
 
 void ArrayTest::customDeleter() {
     int data[25]{};
@@ -535,13 +531,11 @@ void ArrayTest::customDeleter() {
     CORRADE_COMPARE(CustomDeleterDeletedCount, 25);
 }
 
-namespace {
-    struct CustomDeleter {
-        CustomDeleter(int& deletedCountOutput): deletedCount{deletedCountOutput} {}
-        void operator()(int*, std::size_t size) { deletedCount = size; }
-        int& deletedCount;
-    };
-}
+struct CustomDeleter {
+    CustomDeleter(int& deletedCountOutput): deletedCount{deletedCountOutput} {}
+    void operator()(int*, std::size_t size) { deletedCount = size; }
+    int& deletedCount;
+};
 
 void ArrayTest::customDeleterType() {
     int data[25]{};
@@ -628,6 +622,6 @@ void ArrayTest::size() {
     CORRADE_COMPARE(Containers::arraySize(a), 3);
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Containers::Test::ArrayTest)

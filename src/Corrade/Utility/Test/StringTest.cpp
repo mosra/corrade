@@ -29,7 +29,7 @@
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/String.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct StringTest: TestSuite::Tester {
     explicit StringTest();
@@ -502,6 +502,6 @@ void StringTest::replaceAllCycle() {
         "la", "lala"), "lalalalalala");
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::StringTest)

@@ -31,7 +31,7 @@
 
 #include "configure.h"
 
-namespace Corrade { namespace TestSuite { namespace Compare { namespace Test {
+namespace Corrade { namespace TestSuite { namespace Compare { namespace Test { namespace {
 
 class StringToFileTest: public Tester {
     public:
@@ -124,6 +124,6 @@ void StringToFileTest::output() {
     CORRADE_COMPARE(out.str(), "Files a and b have different contents. Actual character w but W expected on position 6.\n");
 }
 
-}}}}
+}}}}}
 
 CORRADE_TEST_MAIN(Corrade::TestSuite::Compare::Test::StringToFileTest)

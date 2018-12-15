@@ -28,7 +28,7 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 
-namespace Corrade { namespace TestSuite { namespace Compare { namespace Test {
+namespace Corrade { namespace TestSuite { namespace Compare { namespace Test { namespace {
 
 struct NumericTest: Tester {
     explicit NumericTest();
@@ -187,7 +187,7 @@ void NumericTest::explicitBoolConversion() {
     CORRADE_VERIFY(!Comparator<Compare::Around<Bar>>{{}}({}, {}));
 }
 
-}}}}
+}}}}}
 
 CORRADE_TEST_MAIN(Corrade::TestSuite::Compare::Test::NumericTest)
 

@@ -29,7 +29,7 @@
 #include "Corrade/Utility/AbstractHash.h"
 #include "Corrade/Utility/MurmurHash2.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct MurmurHash2Test: TestSuite::Tester {
     explicit MurmurHash2Test();
@@ -61,6 +61,6 @@ void MurmurHash2Test::constructor() {
     CORRADE_COMPARE(MurmurHash2()(std::string("hello")), MurmurHash2()("hello", 5));
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::MurmurHash2Test)

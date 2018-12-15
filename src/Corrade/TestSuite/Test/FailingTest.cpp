@@ -25,7 +25,7 @@
 
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace TestSuite { namespace Test {
+namespace Corrade { namespace TestSuite { namespace Test { namespace {
 
 struct FailingTest: TestSuite::Tester {
     explicit FailingTest();
@@ -44,6 +44,6 @@ void FailingTest::fail() {
     CORRADE_VERIFY(false);
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::TestSuite::Test::FailingTest)

@@ -34,7 +34,7 @@ static void initialize() {
     CORRADE_PLUGIN_IMPORT(InitFiniStatic)
 }
 
-namespace Corrade { namespace PluginManager { namespace Test {
+namespace Corrade { namespace PluginManager { namespace Test { namespace {
 
 struct ManagerInitFiniTest: TestSuite::Tester {
     explicit ManagerInitFiniTest();
@@ -101,6 +101,6 @@ void ManagerInitFiniTest::dynamicPlugin() {
 }
 #endif
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::PluginManager::Test::ManagerInitFiniTest)

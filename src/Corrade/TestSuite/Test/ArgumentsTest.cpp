@@ -26,7 +26,7 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Arguments.h"
 
-namespace Corrade { namespace TestSuite { namespace Test {
+namespace Corrade { namespace TestSuite { namespace Test { namespace {
 
 struct ArgumentsTest: TestSuite::Tester {
     explicit ArgumentsTest();
@@ -55,6 +55,6 @@ void ArgumentsTest::test() {
     CORRADE_COMPARE(_value, "hello");
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::TestSuite::Test::ArgumentsTest)

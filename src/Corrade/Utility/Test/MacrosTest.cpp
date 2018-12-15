@@ -26,7 +26,7 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct MacrosTest: TestSuite::Tester {
     explicit MacrosTest();
@@ -49,8 +49,6 @@ void MacrosTest::alignAs() {
     CORRADE_COMPARE(reinterpret_cast<std::uintptr_t>(aligned) % 16, 0);
 }
 
-namespace {
-
 /* Declarations on their own shouldn't produce any compiler diagnostics */
 CORRADE_DEPRECATED("use function() instead") int deprecatedFunction() { return 1; }
 struct CORRADE_DEPRECATED("use Struct instead") DeprecatedStruct { enum: int { Value = 1 }; };
@@ -65,8 +63,6 @@ namespace CORRADE_DEPRECATED_NAMESPACE("use Namespace instead") DeprecatedNamesp
 #define MACRO(foo) do {} while(false)
 #define DEPRECATED_MACRO(foo) \
     CORRADE_DEPRECATED_MACRO(DEPRECATED_MACRO(),"ignore me, I'm just testing the CORRADE_DEPRECATED_MACRO() macro") MACRO(foo)
-
-}
 
 /* Uncomment to test deprecation warnings */
 // #define ENABLE_DEPRECATION_WARNINGS
@@ -90,9 +86,7 @@ void MacrosTest::deprecated() {
 CORRADE_IGNORE_DEPRECATED_POP
 #endif
 
-namespace {
-    CORRADE_NORETURN void foo() { std::exit(42); }
-}
+CORRADE_NORETURN void foo() { std::exit(42); }
 
 void MacrosTest::noreturn() {
     if(false) foo();
@@ -103,6 +97,6 @@ void MacrosTest::cxxStandard() {
     CORRADE_COMPARE_AS(CORRADE_CXX_STANDARD, 201103, TestSuite::Compare::GreaterOrEqual);
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::MacrosTest)

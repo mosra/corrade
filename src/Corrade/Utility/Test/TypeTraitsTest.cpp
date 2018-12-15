@@ -37,7 +37,7 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/TypeTraits.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct TypeTraitsTest: TestSuite::Tester {
     explicit TypeTraitsTest();
@@ -69,19 +69,17 @@ void TypeTraitsTest::hasType() {
     CORRADE_VERIFY(!HasBegin<int*>::value);
 }
 
-namespace {
-    struct Type {};
-    #ifdef __clang__
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wunneeded-internal-declaration"
-    #endif
-    int* begin(Type) { return nullptr; }
-    int* end(Type) { return nullptr; }
-    #ifdef __clang__
-    #pragma GCC diagnostic pop
-    #endif
-    struct LinkedListItem: Containers::LinkedListItem<LinkedListItem> {};
-}
+struct Type {};
+#ifdef __clang__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunneeded-internal-declaration"
+#endif
+int* begin(Type) { return nullptr; }
+int* end(Type) { return nullptr; }
+#ifdef __clang__
+#pragma GCC diagnostic pop
+#endif
+struct LinkedListItem: Containers::LinkedListItem<LinkedListItem> {};
 
 void TypeTraitsTest::isIterable() {
     /* Non-iterable types */
@@ -102,6 +100,6 @@ void TypeTraitsTest::isIterable() {
     CORRADE_VERIFY(IsIterable<Containers::LinkedList<LinkedListItem>>{});
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::TypeTraitsTest)

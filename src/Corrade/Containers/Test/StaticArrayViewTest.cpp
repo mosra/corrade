@@ -28,7 +28,7 @@
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test {
+namespace Corrade { namespace Containers { namespace Test { namespace {
 
 struct StaticArrayViewTest: TestSuite::Tester {
     explicit StaticArrayViewTest();
@@ -321,6 +321,6 @@ void StaticArrayViewTest::size() {
     CORRADE_COMPARE(Containers::arraySize(b), 3);
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Containers::Test::StaticArrayViewTest)

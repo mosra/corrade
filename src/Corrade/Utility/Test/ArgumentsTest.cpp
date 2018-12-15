@@ -30,7 +30,7 @@
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/String.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct ArgumentsTest: TestSuite::Tester {
     explicit ArgumentsTest();
@@ -160,14 +160,12 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::prefixedInvalidUnprefixedName});
 }
 
-namespace {
-    bool hasEnv(const std::string& value) {
-        if(std::getenv(value.data())) return true;
+bool hasEnv(const std::string& value) {
+    if(std::getenv(value.data())) return true;
 
-        std::vector<std::string> list = Arguments::environment();
-        return std::find_if(list.begin(), list.end(),
-        [&value](const std::string& v){ return String::beginsWith(v, value); }) != list.end();
-    }
+    std::vector<std::string> list = Arguments::environment();
+    return std::find_if(list.begin(), list.end(),
+    [&value](const std::string& v){ return String::beginsWith(v, value); }) != list.end();
 }
 
 void ArgumentsTest::environment() {
@@ -918,6 +916,6 @@ void ArgumentsTest::prefixedInvalidUnprefixedName() {
     CORRADE_COMPARE(args.value("foo"), "yes");
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::ArgumentsTest)

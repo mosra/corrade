@@ -29,7 +29,7 @@
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test {
+namespace Corrade { namespace Containers { namespace Test { namespace {
 
 struct OptionalTest: TestSuite::Tester {
     explicit OptionalTest();
@@ -135,8 +135,6 @@ void OptionalTest::nullOptInlineDefinition() {
     CORRADE_VERIFY((std::is_same<decltype(NullOpt), const NullOptT>::value));
 }
 
-namespace {
-
 struct Copyable {
     static int constructed;
     static int destructed;
@@ -219,8 +217,6 @@ int Immovable::destructed = 0;
 void swap(Movable& a, Movable& b) {
     /* Swap these without copying the parent class */
     std::swap(a.a, b.a);
-}
-
 }
 
 void OptionalTest::constructDefault() {
@@ -669,6 +665,6 @@ void OptionalTest::vectorOfMovableOptional() {
     CORRADE_COMPARE(vec[3]->a, 67);
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Containers::Test::OptionalTest)

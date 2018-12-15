@@ -34,7 +34,7 @@
 
 #include "configure.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct DirectoryTest: TestSuite::Tester {
     explicit DirectoryTest();
@@ -853,6 +853,6 @@ void DirectoryTest::mapReadUtf8() {
     #endif
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::DirectoryTest)

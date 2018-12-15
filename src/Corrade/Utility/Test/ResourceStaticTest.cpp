@@ -34,7 +34,7 @@ static void initializeStaticResource() {
     CORRADE_RESOURCE_INITIALIZE(ResourceTestData)
 }
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct ResourceStaticTest: TestSuite::Tester {
     explicit ResourceStaticTest();
@@ -58,6 +58,6 @@ void ResourceStaticTest::get() {
                        TestSuite::Compare::StringToFile);
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::ResourceStaticTest)

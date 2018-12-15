@@ -26,7 +26,7 @@
 #include "Corrade/Containers/Tags.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test {
+namespace Corrade { namespace Containers { namespace Test { namespace {
 
 struct TagsTest: TestSuite::Tester {
     explicit TagsTest();
@@ -56,6 +56,6 @@ void TagsTest::inlineDefinition() {
     CORRADE_VERIFY((std::is_same<decltype(DirectInit), const DirectInitT>::value));
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Containers::Test::TagsTest)

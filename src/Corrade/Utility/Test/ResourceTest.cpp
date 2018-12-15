@@ -33,7 +33,7 @@
 
 #include "configure.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct ResourceTest: TestSuite::Tester {
     explicit ResourceTest();
@@ -302,6 +302,6 @@ void ResourceTest::overrideDifferentGroup() {
     CORRADE_COMPARE(out.str(), "Utility::Resource: overriden with different group, found 'wat' but expected 'test'\n");
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::ResourceTest)

@@ -26,7 +26,7 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 
-namespace Corrade { namespace Test {
+namespace Corrade { namespace Test { namespace {
 
 struct CppStandardTest: TestSuite::Tester {
     explicit CppStandardTest();
@@ -63,6 +63,6 @@ void CppStandardTest::test() {
     #endif
 }
 
-}}
+}}}
 
 CORRADE_TEST_MAIN(Corrade::Test::CppStandardTest)

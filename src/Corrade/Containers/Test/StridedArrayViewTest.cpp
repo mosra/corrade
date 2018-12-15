@@ -28,7 +28,7 @@
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test {
+namespace Corrade { namespace Containers { namespace Test { namespace {
 
 struct StridedArrayViewTest: TestSuite::Tester {
     explicit StridedArrayViewTest();
@@ -367,6 +367,6 @@ void StridedArrayViewTest::slice() {
     CORRADE_COMPARE(d[2], 5);
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Containers::Test::StridedArrayViewTest)

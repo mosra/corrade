@@ -26,7 +26,7 @@
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test {
+namespace Corrade { namespace Containers { namespace Test { namespace {
 
 struct StaticArrayTest: TestSuite::Tester {
     explicit StaticArrayTest();
@@ -143,17 +143,15 @@ void StaticArrayTest::constructValueInit() {
     CORRADE_COMPARE(a[4], 0);
 }
 
-namespace {
-    struct Foo {
-        static int constructorCallCount;
-        static int destructorCallCount;
-        Foo() { ++constructorCallCount; }
-        ~Foo() { ++destructorCallCount; }
-    };
+struct Foo {
+    static int constructorCallCount;
+    static int destructorCallCount;
+    Foo() { ++constructorCallCount; }
+    ~Foo() { ++destructorCallCount; }
+};
 
-    int Foo::constructorCallCount = 0;
-    int Foo::destructorCallCount = 0;
-}
+int Foo::constructorCallCount = 0;
+int Foo::destructorCallCount = 0;
 
 void StaticArrayTest::constructNoInit() {
     {
@@ -554,6 +552,6 @@ void StaticArrayTest::size() {
     CORRADE_COMPARE(Containers::arraySize(a), 5);
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Containers::Test::StaticArrayTest)

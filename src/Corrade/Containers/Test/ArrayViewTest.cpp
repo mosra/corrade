@@ -28,7 +28,7 @@
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test {
+namespace Corrade { namespace Containers { namespace Test { namespace {
 
 struct ArrayViewTest: TestSuite::Tester {
     explicit ArrayViewTest();
@@ -448,6 +448,6 @@ void ArrayViewTest::size() {
     CORRADE_COMPARE(Containers::arraySize(c), 24);
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Containers::Test::ArrayViewTest)

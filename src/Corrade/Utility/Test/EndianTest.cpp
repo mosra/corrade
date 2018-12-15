@@ -29,7 +29,7 @@
 #include "Corrade/Utility/Endianness.h"
 #include "Corrade/Utility/Debug.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct EndianTest: TestSuite::Tester {
     explicit EndianTest();
@@ -141,6 +141,6 @@ void EndianTest::enumClass() {
     #undef otherInPlace
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::EndianTest)

@@ -29,7 +29,7 @@
 
 #include "Corrade/TestSuite/Implementation/BenchmarkStats.h"
 
-namespace Corrade { namespace TestSuite { namespace Test {
+namespace Corrade { namespace TestSuite { namespace Test { namespace {
 
 struct BenchmarkStatsTest: Tester {
     explicit BenchmarkStatsTest();
@@ -47,48 +47,46 @@ struct BenchmarkStatsTest: Tester {
     void printDiscardAllButOne();
 };
 
-namespace {
-    enum: std::size_t { MultiplierDataCount = 14 };
+enum: std::size_t { MultiplierDataCount = 14 };
 
-    constexpr const struct {
-        const char* name;
-        double multiplierMean;
-        double multiplierStddev;
-        TestSuite::Tester::BenchmarkUnits units;
-        const char* expected;
-    } MultiplierData[MultiplierDataCount]{
-        {"ones", 1.0, 1.0, TestSuite::Tester::BenchmarkUnits::Count,
-            "153.70 ± 42.10    "},
-        {"bytes", 1.0, 10.0, TestSuite::Tester::BenchmarkUnits::Bytes,
-            "153.70 ± 421.00  B"},
-        {"nanoseconds", 1.0, 10.0, TestSuite::Tester::BenchmarkUnits::Nanoseconds,
-            "153.70 ± 421.00 ns"},
-        {"thousands bytes mean", 1000.0, 10.0, TestSuite::Tester::BenchmarkUnits::Bytes,
-            "150.10 ± 0.41   kB"},
-        {"thousands cycles stddev", 10.0, 1000.0, TestSuite::Tester::BenchmarkUnits::Cycles,
-            "  1.54 ± 42.10  kC"},
-        {"microseconds", 1.0, 1000.0, TestSuite::Tester::BenchmarkUnits::Nanoseconds,
-            "  0.15 ± 42.10  µs"},
-        {"millions instructions mean", 1000000.0, 10000.0, TestSuite::Tester::BenchmarkUnits::Instructions,
-            "153.70 ± 0.42   MI"},
-        {"millions bytes stddev", 10000.0, 1000000.0, TestSuite::Tester::BenchmarkUnits::Bytes,
-            "  1.47 ± 40.15  MB"},
-        {"milliseconds", 1000000.0, 1000.0, TestSuite::Tester::BenchmarkUnits::Nanoseconds,
-            "153.70 ± 0.04   ms"},
-        {"billions bytes mean", 1000000000.0, 10000000.0, TestSuite::Tester::BenchmarkUnits::Bytes,
-            "143.14 ± 0.39   GB"},
-        {"billions stddev", 10000000.0, 1000000000.0, TestSuite::Tester::BenchmarkUnits::Count,
-            "  1.54 ± 42.10  G "},
-        {"seconds", 1000000.0, 100000000.0, TestSuite::Tester::BenchmarkUnits::Nanoseconds,
-            "  0.15 ± 4.21    s"},
-        {"no count", std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
-            TestSuite::Tester::BenchmarkUnits::Instructions,
-            "(no data)        I"},
-        {"single time", 1000.0, std::numeric_limits<double>::quiet_NaN(),
-            TestSuite::Tester::BenchmarkUnits::Nanoseconds,
-            "153.70          µs"}
-    };
-}
+constexpr const struct {
+    const char* name;
+    double multiplierMean;
+    double multiplierStddev;
+    TestSuite::Tester::BenchmarkUnits units;
+    const char* expected;
+} MultiplierData[MultiplierDataCount]{
+    {"ones", 1.0, 1.0, TestSuite::Tester::BenchmarkUnits::Count,
+        "153.70 ± 42.10    "},
+    {"bytes", 1.0, 10.0, TestSuite::Tester::BenchmarkUnits::Bytes,
+        "153.70 ± 421.00  B"},
+    {"nanoseconds", 1.0, 10.0, TestSuite::Tester::BenchmarkUnits::Nanoseconds,
+        "153.70 ± 421.00 ns"},
+    {"thousands bytes mean", 1000.0, 10.0, TestSuite::Tester::BenchmarkUnits::Bytes,
+        "150.10 ± 0.41   kB"},
+    {"thousands cycles stddev", 10.0, 1000.0, TestSuite::Tester::BenchmarkUnits::Cycles,
+        "  1.54 ± 42.10  kC"},
+    {"microseconds", 1.0, 1000.0, TestSuite::Tester::BenchmarkUnits::Nanoseconds,
+        "  0.15 ± 42.10  µs"},
+    {"millions instructions mean", 1000000.0, 10000.0, TestSuite::Tester::BenchmarkUnits::Instructions,
+        "153.70 ± 0.42   MI"},
+    {"millions bytes stddev", 10000.0, 1000000.0, TestSuite::Tester::BenchmarkUnits::Bytes,
+        "  1.47 ± 40.15  MB"},
+    {"milliseconds", 1000000.0, 1000.0, TestSuite::Tester::BenchmarkUnits::Nanoseconds,
+        "153.70 ± 0.04   ms"},
+    {"billions bytes mean", 1000000000.0, 10000000.0, TestSuite::Tester::BenchmarkUnits::Bytes,
+        "143.14 ± 0.39   GB"},
+    {"billions stddev", 10000000.0, 1000000000.0, TestSuite::Tester::BenchmarkUnits::Count,
+        "  1.54 ± 42.10  G "},
+    {"seconds", 1000000.0, 100000000.0, TestSuite::Tester::BenchmarkUnits::Nanoseconds,
+        "  0.15 ± 4.21    s"},
+    {"no count", std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+        TestSuite::Tester::BenchmarkUnits::Instructions,
+        "(no data)        I"},
+    {"single time", 1000.0, std::numeric_limits<double>::quiet_NaN(),
+        TestSuite::Tester::BenchmarkUnits::Nanoseconds,
+        "153.70          µs"}
+};
 
 BenchmarkStatsTest::BenchmarkStatsTest() {
     addTests({&BenchmarkStatsTest::calculateWhite,
@@ -101,10 +99,8 @@ BenchmarkStatsTest::BenchmarkStatsTest() {
     addInstancedTests({&BenchmarkStatsTest::print}, MultiplierDataCount);
 }
 
-namespace {
-    /* Stolen from https://en.wikipedia.org/wiki/Standard_deviation */
-    constexpr const std::uint64_t Measurements[] = { 20, 40, 40, 40, 50, 50, 70, 90 };
-}
+/* Stolen from https://en.wikipedia.org/wiki/Standard_deviation */
+constexpr const std::uint64_t Measurements[] = { 20, 40, 40, 40, 50, 50, 70, 90 };
 
 void BenchmarkStatsTest::calculateWhite() {
     double mean, stddev;
@@ -180,6 +176,6 @@ void BenchmarkStatsTest::print() {
         MultiplierData[testCaseInstanceId()].expected);
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::TestSuite::Test::BenchmarkStatsTest)

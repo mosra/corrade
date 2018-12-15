@@ -60,7 +60,7 @@ class StringLength {
         Comparator<StringLength> c;
 };
 
-namespace Test {
+namespace Test { namespace {
 
 struct Test: Tester {
     Test(std::ostream* out);
@@ -293,19 +293,17 @@ void Test::setupTeardownSkip() {
     CORRADE_SKIP("Skipped.");
 }
 
-namespace {
-    constexpr struct {
-        const char* desc;
-        int value;
-        int result;
-    } InstanceData[] = {
-        {"zero",   3,   27},
-        {nullptr,  1,    1},
-        {"two",    5,  122},
-        {nullptr, -6, -216},
-        {"last",   0,    0}
-    };
-}
+constexpr struct {
+    const char* desc;
+    int value;
+    int result;
+} InstanceData[] = {
+    {"zero",   3,   27},
+    {nullptr,  1,    1},
+    {"two",    5,  122},
+    {nullptr, -6, -216},
+    {"last",   0,    0}
+};
 
 void Test::instancedTest() {
     const auto& data = InstanceData[testCaseInstanceId()];
@@ -547,7 +545,7 @@ void TesterTest::test() {
         "       [21] tearing down...\n"
         "    OK [22] instancedTest(zero)\n"
         "    OK [23] instancedTest(1)\n"
-        "  FAIL [24] instancedTest(two) at here.cpp on line 314\n"
+        "  FAIL [24] instancedTest(two) at here.cpp on line 312\n"
         "        Values data.value*data.value*data.value and data.result are not the same, actual is\n"
         "        125\n"
         "        but expected\n"
@@ -561,7 +559,7 @@ void TesterTest::test() {
         "4\n"
         "    OK [27] repeatedTest()@5\n"
         "     ? [28] <unknown>()@50\n"
-        "  FAIL [29] repeatedTestFail()@18 at here.cpp on line 325\n"
+        "  FAIL [29] repeatedTestFail()@18 at here.cpp on line 323\n"
         "        Expression _i++ < 17 failed.\n"
         "  SKIP [30] repeatedTestSkip()@29\n"
         "        Too late.\n"
@@ -576,7 +574,7 @@ void TesterTest::test() {
         "       [32] tearing down...\n"
         "     ? [32] <unknown>()@2\n"
         "       [33] setting up...\n"
-        "  FAIL [33] repeatedTestSetupTeardownFail()@1 at here.cpp on line 339\n"
+        "  FAIL [33] repeatedTestSetupTeardownFail()@1 at here.cpp on line 337\n"
         "        Expression false failed.\n"
         "       [33] tearing down...\n"
         "       [34] setting up...\n"
@@ -1032,19 +1030,17 @@ void TesterTest::compareAsVarargs() {
     CORRADE_COMPARE_AS(a, b, std::pair<int, int>);
 }
 
-namespace {
-    struct NonCopyable {
-        explicit NonCopyable() = default;
-        NonCopyable(const NonCopyable&) = delete;
-        NonCopyable(NonCopyable&&) = delete;
-        NonCopyable& operator=(const NonCopyable&) = delete;
-        NonCopyable& operator=(NonCopyable&&) = delete;
-    };
+struct NonCopyable {
+    explicit NonCopyable() = default;
+    NonCopyable(const NonCopyable&) = delete;
+    NonCopyable(NonCopyable&&) = delete;
+    NonCopyable& operator=(const NonCopyable&) = delete;
+    NonCopyable& operator=(NonCopyable&&) = delete;
+};
 
-    inline bool operator==(const NonCopyable&, const NonCopyable&) { return true; }
-    inline Utility::Debug& operator<<(Utility::Debug& debug, const NonCopyable&) {
-        return debug << "NonCopyable";
-    }
+inline bool operator==(const NonCopyable&, const NonCopyable&) { return true; }
+inline Utility::Debug& operator<<(Utility::Debug& debug, const NonCopyable&) {
+    return debug << "NonCopyable";
 }
 
 void TesterTest::compareNonCopyable() {
@@ -1093,6 +1089,6 @@ void TesterTest::expectFailIfExplicitBool() {
     }
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::TestSuite::Test::TesterTest)

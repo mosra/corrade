@@ -28,7 +28,7 @@
 #include "Corrade/Containers/LinkedList.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test {
+namespace Corrade { namespace Containers { namespace Test { namespace {
 
 struct LinkedListTest: TestSuite::Tester {
     explicit LinkedListTest();
@@ -441,6 +441,6 @@ void LinkedListTest::rangeBasedFor() {
     }
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Containers::Test::LinkedListTest)

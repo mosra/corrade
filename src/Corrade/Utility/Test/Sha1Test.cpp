@@ -32,7 +32,7 @@
 #include "Corrade/Utility/AbstractHash.h"
 #include "Corrade/Utility/Sha1.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct Sha1Test: TestSuite::Tester {
     explicit Sha1Test();
@@ -77,18 +77,16 @@ void Sha1Test::twoBlockPadding() {
                     Sha1::Digest::fromHexString("40e94c62ada5dc762f3e9c472001ca64a67d2cbb"));
 }
 
-namespace {
-    constexpr const char Data[] =
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
-        "eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim "
-        "ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut "
-        "aliquip ex ea commodo consequat. Duis aute irure dolor in "
-        "reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla "
-        "pariatur. Excepteur sint occaecat cupidatat non proident, sunt in "
-        "culpa qui officia deserunt mollit anim id est laborum.";
+constexpr const char Data[] =
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
+    "eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim "
+    "ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut "
+    "aliquip ex ea commodo consequat. Duis aute irure dolor in "
+    "reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla "
+    "pariatur. Excepteur sint occaecat cupidatat non proident, sunt in "
+    "culpa qui officia deserunt mollit anim id est laborum.";
 
-    const Containers::ArrayView<const char> String{Data, sizeof(Data) - 1};
-}
+const Containers::ArrayView<const char> String{Data, sizeof(Data) - 1};
 
 void Sha1Test::iterative() {
     Sha1 hasher;
@@ -113,6 +111,6 @@ void Sha1Test::reuse() {
     CORRADE_COMPARE(hasher.digest(), Sha1::Digest::fromHexString("cd36b370758a259b34845084a6cc38473cb95e27"));
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::Sha1Test)

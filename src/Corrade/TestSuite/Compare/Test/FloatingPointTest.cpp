@@ -28,7 +28,7 @@
 
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace TestSuite { namespace Test {
+namespace Corrade { namespace TestSuite { namespace Test { namespace {
 
 struct FloatingPointTest: Tester {
     explicit FloatingPointTest();
@@ -91,6 +91,6 @@ void FloatingPointTest::output() {
     CORRADE_COMPARE(out.str(), "Floating-point values a and b are not the same, actual 3 but 8 expected (delta -5).\n");
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::TestSuite::Test::FloatingPointTest)

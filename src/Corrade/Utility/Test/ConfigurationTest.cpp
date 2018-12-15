@@ -37,7 +37,7 @@
 
 #include "configure.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct ConfigurationTest: TestSuite::Tester {
     explicit ConfigurationTest();
@@ -613,6 +613,6 @@ void ConfigurationTest::move() {
     CORRADE_VERIFY(confAssignedMove.group("group")->configuration() == &confAssignedMove);
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::ConfigurationTest)

@@ -29,7 +29,7 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Unicode.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct UnicodeTest: TestSuite::Tester {
     explicit UnicodeTest();
@@ -268,6 +268,6 @@ void UnicodeTest::narrow() {
 }
 #endif
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::UnicodeTest)

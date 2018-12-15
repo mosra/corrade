@@ -29,7 +29,7 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 
-namespace Corrade { namespace TestSuite { namespace Compare { namespace Test {
+namespace Corrade { namespace TestSuite { namespace Compare { namespace Test { namespace {
 
 struct ContainerTest: Tester {
     explicit ContainerTest();
@@ -165,6 +165,6 @@ void ContainerTest::nonCopyableArray() {
     CORRADE_VERIFY(!Comparator<Compare::Container<Containers::Array<int>>>()(a, c));
 }
 
-}}}}
+}}}}}
 
 CORRADE_TEST_MAIN(Corrade::TestSuite::Compare::Test::ContainerTest)

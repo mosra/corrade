@@ -28,7 +28,7 @@
 #include "Corrade/Interconnect/StateMachine.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Interconnect { namespace Test {
+namespace Corrade { namespace Interconnect { namespace Test { namespace {
 
 struct StateMachineTest: TestSuite::Tester {
     explicit StateMachineTest();
@@ -111,6 +111,6 @@ void StateMachineTest::test() {
                                "start entered, previous 1\n");
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Interconnect::Test::StateMachineTest)

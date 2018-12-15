@@ -31,7 +31,7 @@
 #include "Corrade/Utility/String.h"
 #include "Corrade/Utility/Tweakable.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct TweakableParserTest: TestSuite::Tester {
     explicit TweakableParserTest();
@@ -49,8 +49,6 @@ struct TweakableParserTest: TestSuite::Tester {
     void boolean();
     void booleanError();
 };
-
-namespace {
 
 template<class> struct TypeTraits;
 template<> struct TypeTraits<int> {
@@ -200,8 +198,6 @@ constexpr struct {
     {"garbage after", "true_foo", TweakableState::Recompile,
         "Utility::TweakableParser: true_foo is not a boolean literal\n"}
 };
-
-}
 
 TweakableParserTest::TweakableParserTest() {
     addInstancedTests<TweakableParserTest>({
@@ -406,6 +402,6 @@ void TweakableParserTest::booleanError() {
     CORRADE_COMPARE(state, data.state);
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::TweakableParserTest)

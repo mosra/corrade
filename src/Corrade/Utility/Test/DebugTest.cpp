@@ -33,7 +33,7 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Debug.h"
 
-namespace Corrade { namespace Utility { namespace Test {
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct DebugTest: TestSuite::Tester {
     explicit DebugTest();
@@ -136,41 +136,39 @@ void DebugTest::debug() {
     CORRADE_COMPARE(debug.str(), "");
 }
 
-namespace {
-    template<class> struct FloatsData;
-    template<> struct FloatsData<float> {
-        static const char* name() { return "floats<float>"; }
-        static const char* expected() {
-            #ifndef __MINGW32__
-            return "3.14159 -12345.7 1.23457e-12 3.14159\n";
-            #else
-            return "3.14159 -12345.7 1.23457e-012 3.14159\n";
-            #endif
-        }
-    };
-    template<> struct FloatsData<double> {
-        static const char* name() { return "floats<double>"; }
-        static const char* expected() {
-            #ifndef __MINGW32__
-            return "3.14159265358979 -12345.6789012346 1.23456789012346e-12 3.14159\n";
-            #else
-            return "3.14159265358979 -12345.6789012346 1.23456789012346e-012 3.14159\n";
-            #endif
-        }
-    };
-    #ifndef CORRADE_TARGET_EMSCRIPTEN
-    template<> struct FloatsData<long double> {
-        static const char* name() { return "floats<long double>"; }
-        static const char* expected() {
-            #ifndef __MINGW32__
-            return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-12 3.14159\n";
-            #else
-            return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-012 3.14159\n";
-            #endif
-        }
-    };
-    #endif
-}
+template<class> struct FloatsData;
+template<> struct FloatsData<float> {
+    static const char* name() { return "floats<float>"; }
+    static const char* expected() {
+        #ifndef __MINGW32__
+        return "3.14159 -12345.7 1.23457e-12 3.14159\n";
+        #else
+        return "3.14159 -12345.7 1.23457e-012 3.14159\n";
+        #endif
+    }
+};
+template<> struct FloatsData<double> {
+    static const char* name() { return "floats<double>"; }
+    static const char* expected() {
+        #ifndef __MINGW32__
+        return "3.14159265358979 -12345.6789012346 1.23456789012346e-12 3.14159\n";
+        #else
+        return "3.14159265358979 -12345.6789012346 1.23456789012346e-012 3.14159\n";
+        #endif
+    }
+};
+#ifndef CORRADE_TARGET_EMSCRIPTEN
+template<> struct FloatsData<long double> {
+    static const char* name() { return "floats<long double>"; }
+    static const char* expected() {
+        #ifndef __MINGW32__
+        return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-12 3.14159\n";
+        #else
+        return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-012 3.14159\n";
+        #endif
+    }
+};
+#endif
 
 void DebugTest::isTty() {
     Debug{} << "Debug output is a TTY?  " << (Debug::isTty() ? "yes" : "no");
@@ -240,16 +238,12 @@ void DebugTest::unicode() {
     CORRADE_COMPARE(o.str(), "{U+0061, U+0062, U+0063}\n");
 }
 
-namespace {
-
 struct Foo {
     int value;
 };
 
 Debug& operator<<(Debug& debug, const Foo& value) {
     return debug << value.value;
-}
-
 }
 
 void DebugTest::custom() {
@@ -295,25 +289,23 @@ void DebugTest::noNewlineAtTheEnd() {
     CORRADE_COMPARE(out3.str(), "Ahoy\nHello");
 }
 
-namespace {
-    constexpr const struct {
-        const char* desc;
-        Debug::Color color;
-        char c;
-    } ColorsData[] = {
-        #define _c(color) {#color, Debug::Color::color, char('0' + char(Debug::Color::color))},
-        _c(Black)
-        _c(Red)
-        _c(Green)
-        _c(Yellow)
-        _c(Blue)
-        _c(Magenta)
-        _c(Cyan)
-        _c(White)
-        _c(Default)
-        #undef _c
-    };
-}
+constexpr const struct {
+    const char* desc;
+    Debug::Color color;
+    char c;
+} ColorsData[] = {
+    #define _c(color) {#color, Debug::Color::color, char('0' + char(Debug::Color::color))},
+    _c(Black)
+    _c(Red)
+    _c(Green)
+    _c(Yellow)
+    _c(Blue)
+    _c(Magenta)
+    _c(Cyan)
+    _c(White)
+    _c(Default)
+    #undef _c
+};
 
 void DebugTest::colors() {
     auto&& data = ColorsData[testCaseInstanceId()];
@@ -491,8 +483,6 @@ void DebugTest::tuple() {
     CORRADE_COMPARE(out.str(), "(3, 4.56, hello)\n");
 }
 
-namespace {
-
 struct Bar {};
 struct Baz {};
 
@@ -506,8 +496,6 @@ inline std::ostream& operator<<(std::ostream& o, const Baz&) {
 
 inline Debug& operator<<(Debug& debug, const Baz&) {
     return debug << "baz from Debug";
-}
-
 }
 
 void DebugTest::ostreamFallback() {
@@ -599,6 +587,6 @@ void DebugTest::debugColor() {
     CORRADE_COMPARE(out.str(), "Debug::Color::White Debug::Color(0xde)\n");
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::Utility::Test::DebugTest)

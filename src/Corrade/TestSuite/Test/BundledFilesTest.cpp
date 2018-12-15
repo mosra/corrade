@@ -29,7 +29,7 @@
 
 #include "configure.h"
 
-namespace Corrade { namespace TestSuite { namespace Test {
+namespace Corrade { namespace TestSuite { namespace Test { namespace {
 
 struct BundledFilesTest: Tester {
     explicit BundledFilesTest();
@@ -60,6 +60,6 @@ void BundledFilesTest::absolutePath() {
         "absolute\n", Compare::FileToString);
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::TestSuite::Test::BundledFilesTest)

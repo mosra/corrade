@@ -48,7 +48,7 @@ static void initialize() {
     CORRADE_PLUGIN_IMPORT(Canary)
 }
 
-namespace Corrade { namespace PluginManager { namespace Test {
+namespace Corrade { namespace PluginManager { namespace Test { namespace {
 
 struct ManagerTest: TestSuite::Tester {
     explicit ManagerTest();
@@ -270,8 +270,6 @@ void ManagerTest::nameList() {
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-namespace {
-
 struct WrongPlugin: AbstractPlugin {
     static std::string pluginInterface() { return {}; }
 
@@ -287,8 +285,6 @@ struct WrongPlugin: AbstractPlugin {
 
     explicit WrongPlugin(AbstractManager& manager, const std::string& plugin): AbstractPlugin{manager, plugin} {}
 };
-
-}
 
 void ManagerTest::wrongMetadataFile() {
     std::ostringstream out;
@@ -974,6 +970,6 @@ void ManagerTest::debug() {
     CORRADE_COMPARE(o.str(), "PluginManager::LoadState::Static PluginManager::LoadState(0x3f)\n");
 }
 
-}}}
+}}}}
 
 CORRADE_TEST_MAIN(Corrade::PluginManager::Test::ManagerTest)
