@@ -48,6 +48,8 @@ namespace Corrade {
 -   New @ref Corrade::Containers::NoCreate tag for constructing instances
     equivalent to a moved-from state. This tag was used in Magnum already,
     moving it here to make it available to a wider set of APIs.
+-   New @ref Containers::optional(Args&&... args) overload for in-place
+    initialization
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 

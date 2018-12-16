@@ -44,6 +44,8 @@ struct OptionalTest: TestSuite::Tester {
     void constructMove();
     void constructMoveMake();
     void constructInPlace();
+    void constructInPlaceMake();
+    void constructInPlaceMakeAmbiguous();
 
     void constructCopyFromNull();
     void constructCopyFromSet();
@@ -92,6 +94,8 @@ OptionalTest::OptionalTest() {
               &OptionalTest::constructMove,
               &OptionalTest::constructMoveMake,
               &OptionalTest::constructInPlace,
+              &OptionalTest::constructInPlaceMake,
+              &OptionalTest::constructInPlaceMakeAmbiguous,
 
               &OptionalTest::constructCopyFromNull,
               &OptionalTest::constructCopyFromSet,
@@ -322,6 +326,49 @@ void OptionalTest::constructInPlace() {
 
     CORRADE_COMPARE(Immovable::constructed, 1);
     CORRADE_COMPARE(Immovable::destructed, 1);
+}
+
+void OptionalTest::constructInPlaceMake() {
+    {
+        auto a = optional<Movable>(15);
+        CORRADE_VERIFY(a);
+        CORRADE_COMPARE(a->a, 15);
+    }
+
+    /* Interesting. So there is a full RVO? */
+    CORRADE_COMPARE(Movable::constructed, 1);
+    CORRADE_COMPARE(Movable::destructed, 1);
+    CORRADE_COMPARE(Movable::moved, 0);
+}
+
+void OptionalTest::constructInPlaceMakeAmbiguous() {
+    struct Ambiguous {
+        Ambiguous() = default;
+        Ambiguous(Ambiguous& parent, int = {}): parent{&parent} {}
+        Ambiguous(const Ambiguous&) = default;
+        Ambiguous& operator=(const Ambiguous&) = default;
+        Ambiguous* parent{};
+    };
+
+    /* Similar to what's in the Pointer test, though there it is a
+       static_assert. Here we can't disambiguate. */
+    Ambiguous parent;
+    auto a = optional(parent);
+    auto b = optional(Ambiguous{});
+    auto c = optional<Ambiguous>(parent);
+    auto d = optional<Ambiguous>(Ambiguous{});
+    auto e = optional<Ambiguous>();
+    auto f = optional<Ambiguous>(parent, 32);
+    auto g = Optional<Ambiguous>{InPlaceInit, parent};
+    auto h = Optional<Ambiguous>{parent};
+    CORRADE_COMPARE(a->parent, nullptr); /* wrong, but we can't disambiguate */
+    CORRADE_COMPARE(b->parent, nullptr);
+    CORRADE_COMPARE(c->parent, &parent);
+    CORRADE_COMPARE(d->parent, nullptr);
+    CORRADE_COMPARE(e->parent, nullptr);
+    CORRADE_COMPARE(f->parent, &parent);
+    CORRADE_COMPARE(g->parent, &parent);
+    CORRADE_COMPARE(h->parent, nullptr);
 }
 
 void OptionalTest::constructCopyFromNull() {

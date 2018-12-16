@@ -515,6 +515,13 @@ auto b = Containers::optional(value);
 /* [optional] */
 }
 
+{
+/* [optional-inplace] */
+auto a = Containers::Optional<std::string>{Containers::InPlaceInit, 'a', 'b'};
+auto b = Containers::optional<std::string>('a', 'b');
+/* [optional-inplace] */
+}
+
 #ifdef __linux__
 /* [ScopedExit-usage] */
 {

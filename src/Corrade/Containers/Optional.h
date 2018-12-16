@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Containers::Optional, tag type @ref Corrade::Containers::NullOptT, tag @ref Corrade::Containers::NullOpt
+ * @brief Class @ref Corrade::Containers::Optional, tag type @ref Corrade::Containers::NullOptT, tag @ref Corrade::Containers::NullOpt, function @ref Corrade::Containers::optional()
  */
 
 #include <new>
@@ -80,7 +80,7 @@ to access a stored object in an empty state leads to assertion error.
 Unlike `std::optional`, this class does not provide a @cpp constexpr @ce
 implementation or ordering operators, which makes it fairly simple and
 lightweight. If you need the extra features, use the standard `std::optional`.
-@see @ref NullOpt, @ref optional()
+@see @ref NullOpt, @ref optional(T&&), @ref optional(Args&&... args)
 */
 template<class T> class Optional {
     public:
@@ -341,9 +341,37 @@ Convenience alternative to @ref Optional::Optional(const T&) or @ref Optional::O
 The following two lines are equivalent:
 
 @snippet Containers.cpp optional
+
+@attention Note that for types that are constructible from their own non-
+    @cpp const @ce reference the call gets ambiguous between this function and
+    @ref optional(Args&&... args). Such case is impossible to detect at compile
+    time and you're advised to use the @ref Optional constructor explicitly to
+    avoid surprising behavior.
+
+@see @ref optional(Args&&... args)
 */
 template<class T> inline Optional<typename std::decay<T>::type> optional(T&& value) {
     return Optional<typename std::decay<T>::type>{std::forward<T>(value)};
+}
+
+/** @relatesalso Optional
+@brief Make an optional
+
+Convenience alternative to @ref Optional::Optional(InPlaceInitT, Args&&... args).
+The following two lines are equivalent:
+
+@snippet Containers.cpp optional-inplace
+
+@attention Note that for types that are constructible from their own non-
+    @cpp const @ce reference the call gets ambiguous between this function and
+    @ref optional(T&&). Such case is impossible to detect at compile time and
+    you're advised to use the @ref Optional constructor explicitly to avoid
+    surprising behavior.
+
+@see @ref optional(T&&)
+*/
+template<class T, class ...Args> inline Optional<T> optional(Args&&... args) {
+    return Optional<T>{InPlaceInit, std::forward<Args>(args)...};
 }
 
 /** @debugoperator{Optional} */
