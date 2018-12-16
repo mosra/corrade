@@ -59,6 +59,8 @@ namespace Corrade {
     @ref Utility::Directory::write()
 -   New @ref Utility::Directory::copy() utility for zero-allocation file
     copies.
+-   New @ref Utility::Directory::join(std::initializer_list<std::string>)
+    overload for joining a path from multiple parts at once
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 

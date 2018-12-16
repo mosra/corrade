@@ -169,6 +169,17 @@ If the path is empty or the filename is absolute (with leading slash), returns
 CORRADE_UTILITY_EXPORT std::string join(const std::string& path, const std::string& filename);
 
 /**
+@brief Join paths
+
+Convenience overload to @ref join(const std::string&, const std::string&) when
+joining the path from more than two parts. When @p paths is empty, returns
+empty string, when it's just a single path, returns it verbatim.
+@attention The implementation expects forward slashes as directory separators.
+    Use @ref fromNativeSeparators() to convert from platform-specific format.
+*/
+CORRADE_UTILITY_EXPORT std::string join(std::initializer_list<std::string> paths);
+
+/**
 @brief List directory contents
 
 On failure returns empty vector.

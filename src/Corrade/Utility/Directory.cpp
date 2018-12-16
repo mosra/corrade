@@ -153,6 +153,18 @@ std::string join(const std::string& path, const std::string& filename) {
     return path + filename;
 }
 
+std::string join(const std::initializer_list<std::string> paths) {
+    if(paths.size() == 0) return {};
+
+    auto it = paths.begin();
+    std::string path = *it;
+    ++it;
+    for(; it != paths.end(); ++it)
+        path = join(path, *it);
+
+    return path;
+}
+
 bool mkpath(const std::string& path) {
     if(path.empty()) return false;
 

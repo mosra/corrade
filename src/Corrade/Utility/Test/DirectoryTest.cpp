@@ -47,6 +47,11 @@ struct DirectoryTest: TestSuite::Tester {
     #ifdef CORRADE_TARGET_WINDOWS
     void joinWindows();
     #endif
+    void joinMultiple();
+    void joinMultipleAbsolute();
+    void joinMultipleOneEmpty();
+    void joinMultipleJustOne();
+    void joinMultipleNone();
 
     void exists();
     void existsUtf8();
@@ -141,6 +146,11 @@ DirectoryTest::DirectoryTest() {
               #ifdef CORRADE_TARGET_WINDOWS
               &DirectoryTest::joinWindows,
               #endif
+              &DirectoryTest::joinMultiple,
+              &DirectoryTest::joinMultipleAbsolute,
+              &DirectoryTest::joinMultipleOneEmpty,
+              &DirectoryTest::joinMultipleJustOne,
+              &DirectoryTest::joinMultipleNone,
 
               &DirectoryTest::exists,
               &DirectoryTest::existsUtf8,
@@ -312,6 +322,26 @@ void DirectoryTest::joinWindows() {
     CORRADE_COMPARE(Directory::join("/foo/bar", "X:/path/file.txt"), "X:/path/file.txt");
 }
 #endif
+
+void DirectoryTest::joinMultiple() {
+    CORRADE_COMPARE(Directory::join({"foo", "bar", "file.txt"}), "foo/bar/file.txt");
+}
+
+void DirectoryTest::joinMultipleAbsolute() {
+    CORRADE_COMPARE(Directory::join({"foo", "/bar", "file.txt"}), "/bar/file.txt");
+}
+
+void DirectoryTest::joinMultipleOneEmpty() {
+    CORRADE_COMPARE(Directory::join({"foo", "", "file.txt"}), "foo/file.txt");
+}
+
+void DirectoryTest::joinMultipleJustOne() {
+    CORRADE_COMPARE(Directory::join({"file.txt"}), "file.txt");
+}
+
+void DirectoryTest::joinMultipleNone() {
+    CORRADE_COMPARE(Directory::join({}), "");
+}
 
 void DirectoryTest::exists() {
     /* File */
