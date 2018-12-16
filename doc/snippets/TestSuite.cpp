@@ -26,10 +26,10 @@
 #include <cmath>
 
 #include "Corrade/Containers/Pointer.h"
-#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/File.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
+#include "Corrade/TestSuite/Compare/SortedContainer.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/TestSuite/Tester.h"

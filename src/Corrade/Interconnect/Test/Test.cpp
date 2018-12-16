@@ -28,7 +28,7 @@
 #include "Corrade/Interconnect/Emitter.h"
 #include "Corrade/Interconnect/Receiver.h"
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/TestSuite/Compare/Container.h"
+#include "Corrade/TestSuite/Compare/SortedContainer.h"
 #include "Corrade/Utility/DebugStl.h"
 
 namespace Corrade { namespace Interconnect { namespace Test { namespace {

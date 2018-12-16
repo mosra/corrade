@@ -167,6 +167,11 @@ namespace Corrade {
     header, @ref Corrade/Utility/FormatStl.h, to speed up compile times. Since
     including it for backwards compatibility would practically revert the
     optimization, you have to @cpp #include @ce it explicitly where needed.
+-   @ref TestSuite::Compare::SortedContainer was split from the
+    @ref Corrade/TestSuite/Compare/Container.h header into
+    @ref Corrade/TestSuite/Compare/SortedContainer.h to isolate the heavy
+    `<algorithm>` include. Backwards compatibility is not provided in order to
+    reduce compile times, please include the new header now.
 
 @subsection corrade-changelog-latest-documentation Documentation
 

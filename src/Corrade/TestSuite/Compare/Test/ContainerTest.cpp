@@ -40,7 +40,6 @@ struct ContainerTest: Tester {
     void outputActualSmaller();
     void outputExpectedSmaller();
     void output();
-    void sorted();
     void floatingPoint();
 
     void nonCopyableArray();
@@ -51,7 +50,6 @@ ContainerTest::ContainerTest() {
               &ContainerTest::outputActualSmaller,
               &ContainerTest::outputExpectedSmaller,
               &ContainerTest::output,
-              &ContainerTest::sorted,
               &ContainerTest::floatingPoint,
 
               &ContainerTest::nonCopyableArray});
@@ -121,16 +119,6 @@ void ContainerTest::output() {
         "        but expected\n"
         "        {1, 2, 3, 4}\n"
         "        Actual 9 but 2 expected on position 1.\n");
-}
-
-void ContainerTest::sorted() {
-    std::vector<int> a{1, 2, 4, 3};
-    std::vector<int> b{1, 4, 3, 2};
-    std::vector<int> c{1, 4, 3, 3};
-
-    CORRADE_VERIFY((Comparator<Compare::SortedContainer<std::vector<int>>>()(a, b)));
-    CORRADE_VERIFY((Comparator<Compare::SortedContainer<std::vector<int>>>()(b, a)));
-    CORRADE_VERIFY((!Comparator<Compare::SortedContainer<std::vector<int>>>()(a, c)));
 }
 
 void ContainerTest::floatingPoint() {

@@ -26,10 +26,8 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::TestSuite::Compare::Container, @ref Corrade::TestSuite::Compare::SortedContainer
+ * @brief Class @ref Corrade::TestSuite::Compare::Container
  */
-
-#include <algorithm>
 
 #include "Corrade/TestSuite/Comparator.h"
 
@@ -58,13 +56,11 @@ See @ref TestSuite-Comparator-pseudo-types for more information.
 */
 template<class> class Container {};
 
-/**
-@brief Pseudo-type for comparing sorted container contents
+}
 
-See @ref Container for more information.
-*/
-template<class T> class SortedContainer: public Container<T> {};
-
+namespace Implementation {
+    /* Copied from Magnum/Math/Vector.h, to avoid #include <algorithm> */
+    inline std::size_t max(std::size_t a, std::size_t b) { return a < b ? b : a; }
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -103,7 +99,7 @@ template<class T> void Comparator<Compare::Container<T>>::printErrorMessage(Util
     e << *_actualContents << Utility::Debug::newline << "        but expected\n       " << *_expectedContents << Utility::Debug::newline << "       ";
 
     Comparator<typename std::decay<decltype((*_actualContents)[0])>::type> comparator;
-    for(std::size_t i = 0, end = std::max(_actualContents->size(), _expectedContents->size()); i != end; ++i) {
+    for(std::size_t i = 0, end = Implementation::max(_actualContents->size(), _expectedContents->size()); i != end; ++i) {
         if(_actualContents->size() > i && _expectedContents->size() > i &&
             comparator((*_actualContents)[i], (*_expectedContents)[i])) continue;
 
@@ -117,24 +113,6 @@ template<class T> void Comparator<Compare::Container<T>>::printErrorMessage(Util
         e << "on position" << i << Utility::Debug::nospace << ".";
         break;
     }
-}
-
-template<class T> class Comparator<Compare::SortedContainer<T>>: public Comparator<Compare::Container<T>> {
-    public:
-        bool operator()(const T& actual, const T& expected);
-
-    private:
-        T _actualSorted, _expectedSorted;
-};
-
-template<class T> bool Comparator<Compare::SortedContainer<T>>::operator()(const T& actual, const T& expected) {
-    _actualSorted = actual;
-    _expectedSorted = expected;
-
-    std::sort(_actualSorted.begin(), _actualSorted.end());
-    std::sort(_expectedSorted.begin(), _expectedSorted.end());
-
-    return Comparator<Compare::Container<T>>::operator()(_actualSorted, _expectedSorted);
 }
 #endif
 
