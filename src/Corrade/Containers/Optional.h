@@ -29,6 +29,10 @@
  * @brief Class @ref Corrade::Containers::Optional, tag type @ref Corrade::Containers::NullOptT, tag @ref Corrade::Containers::NullOpt
  */
 
+#include <new>
+#include <type_traits>
+
+#include "Corrade/Containers/Tags.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Debug.h"
 
