@@ -114,8 +114,13 @@ void EnumSetTest::constructNoInit() {
         new(&features)Features{NoInit};
         #if defined(__GNUC__) && __GNUC__*100 + __GNUC_MINOR__ >= 601 && __OPTIMIZE__
         CORRADE_EXPECT_FAIL("GCC 6.1+ misoptimizes and overwrites the value.");
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
         #endif
         CORRADE_COMPARE(int(features), 4);
+        #if defined(__GNUC__) && __GNUC__*100 + __GNUC_MINOR__ >= 601 && __OPTIMIZE__
+        #pragma GCC diagnostic pop
+        #endif
     }
 }
 

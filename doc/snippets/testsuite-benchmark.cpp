@@ -30,6 +30,10 @@ using namespace Corrade;
 
 namespace {
 
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
 /* Taken from https://en.wikipedia.org/wiki/Fast_inverse_square_root */
 float fastinvsqrt(float number) {
     int i;
@@ -44,6 +48,9 @@ float fastinvsqrt(float number) {
     y = y*(threehalfs - (x2*y*y));
     return y;
 }
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 }
 
