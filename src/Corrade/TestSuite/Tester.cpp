@@ -968,6 +968,7 @@ Tester::Printer::~Printer() = default;
 Tester::ExpectedFailure::ExpectedFailure(const bool enabled) {
     Tester& instance = Tester::instance();
     if(!enabled || instance._state->expectedFailuresDisabled) return;
+    /** @todo some assert to avoid multiple active expected failures at the same time */
     instance._state->expectedFailure = this;
 }
 
