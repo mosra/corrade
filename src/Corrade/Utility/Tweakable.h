@@ -379,13 +379,16 @@ namespace Implementation {
     template<class T> struct TweakableTraits {
         static_assert(sizeof(T) <= TweakableStorageSize,
             "tweakable storage size too small for this type, save it via a unique_ptr instead");
-        #if (!defined(__GNUC__) && !defined(__clang__)) || __GNUC__ >= 5 || __clang_major__ >= 4
+        #if (!defined(__GNUC__) && !defined(__clang__)) || __GNUC__ >= 5 || (defined(_GLIBCXX_RELEASE) && _GLIBCXX_RELEASE >= 5)
         /* https://gcc.gnu.org/onlinedocs/gcc-4.9.2/libstdc++/manual/manual/status.html#status.iso.2011
            vs https://gcc.gnu.org/onlinedocs/gcc-5.5.0/libstdc++/manual/manual/status.html#status.iso.2011.
-           Also, it's not possible to detect what libstdc++ version is used
-           when on Clang, because their version macro is a RELEASE DATE that
-           has absolutely no relation to the version. So I'm cutting it off for
-           Clang 4 and lower as well, because I'm using 3.8 on Travis for ASan. */
+           Also, until GCC 7 it's not possible to detect what libstdc++ version
+           is used when on Clang, because __GLIBCXX__ is a RELEASE DATE that
+           has absolutely no relation to the version and is completely useless:
+           https://gcc.gnu.org/onlinedocs/libstdc++/manual/abi.html#abi.versioning.__GLIBCXX__
+           So in case of Clang I'm trying to use _GLIBCXX_RELEASE, but that
+           cuts off libstdc++ 5 or libstdc++ 6 because these don't have this
+           macro yet. */
         static_assert(std::is_trivially_copyable<T>::value,
             "tweakable type is not trivially copyable, use the advanced parser signature instead");
         static_assert(std::is_trivially_destructible<T>::value,
