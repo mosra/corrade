@@ -143,7 +143,7 @@ template<std::size_t size> inline std::string rtrim(std::string string, const ch
 /**
 @brief Trim trailing whitespace from string
 
-Equivalent to calling @ref rtrim(std::string, const char(&)[size] with
+Equivalent to calling @ref rtrim(std::string, const char(&)[size]) with
 @cpp " \t\f\v\r\n" @ce as second parameter. Implemented using @ref trimInPlace().
 @see @ref ltrim(), @ref trim()
 */
@@ -218,7 +218,7 @@ template<std::size_t size> inline void rtrimInPlace(std::string& string, const c
 /**
 @brief Trim trailing whitespace from string
 
-Equivalent to calling @ref rtrimInPlace(std::string&, const char(&)[size] with
+Equivalent to calling @ref rtrimInPlace(std::string&, const char(&)[size]) with
 @cpp " \t\f\v\r\n" @ce as second parameter.
 @see @ref rtrim(), @ref ltrim(), @ref trim()
 */
