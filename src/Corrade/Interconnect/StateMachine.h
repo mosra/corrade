@@ -25,6 +25,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+/** @file
+ * @brief Class @ref Corrade::Interconnect::StateMachine, @ref Corrade::Interconnect::StateTransition
+ */
+
 #include "Corrade/Interconnect/Emitter.h"
 
 namespace Corrade { namespace Interconnect {

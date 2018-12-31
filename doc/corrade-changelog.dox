@@ -438,7 +438,7 @@ a high-level overview.
     @ref Utility::Directory::toNativeSeparators()
 -   Added @ref Utility::Directory::map() and @ref Utility::mapRead() for
     mapping files into memory, works on non-RT Windows and all Unix-like
-    systems (see [mosra/corrade#27](https://github.com/mosra/corrade/pull/27)
+    systems (see [mosra/corrade#27](https://github.com/mosra/corrade/pull/27))
 -   Added @ref Utility::Resource::hasGroup()
 -   Added @ref Utility::Unicode::prevChar(), @ref Utility::Unicode::utf8()
 -   Added @ref Utility::Unicode::widen() and @ref Utility::Unicode::narrow()
@@ -616,7 +616,8 @@ a high-level overview.
 -   The @ref building-corrade documentation now prefers package installation
     instead of manual build
 -   Documented how to use Vcpkg packages
--   Various other updates (see [mosra/corrade#26](https://github.com/mosra/corrade/pull/26), [mosra/corrade#30](https://github.com/mosra/corrade/pull/30))
+-   Various other updates (see [mosra/corrade#26](https://github.com/mosra/corrade/pull/26),
+    [mosra/corrade#30](https://github.com/mosra/corrade/pull/30))
 
 Changelogs for previous versions are available in @ref corrade-changelog-old.
 
