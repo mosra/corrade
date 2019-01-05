@@ -35,6 +35,7 @@
 
 namespace Corrade { namespace Containers {
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 template<class T, class = void(*)(T*, std::size_t)> class Array;
 template<class> class ArrayView;
 template<std::size_t, class> class StaticArrayView;
@@ -48,6 +49,7 @@ template<class> class LinkedList;
 template<class Derived, class List = LinkedList<Derived>> class LinkedListItem;
 
 template<class T> class Optional;
+#endif
 
 }}
 
