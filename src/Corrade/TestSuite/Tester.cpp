@@ -119,8 +119,10 @@ benchmark types:
         _useColor = Debug::Flags{};
     else if(args.value("color") == "off" || args.value("color") == "OFF")
         _useColor = Debug::Flag::DisableColors;
+    /* LCOV_EXCL_START */ /* Can't reliably test this */
     else _useColor = Debug::isTty(logOutput) && Debug::isTty(errorOutput) ?
             Debug::Flags{} : Debug::Flag::DisableColors;
+    /* LCOV_EXCL_STOP */
 
     /* Decide about default benchmark type */
     TestCaseType defaultBenchmarkType{};
@@ -130,8 +132,10 @@ benchmark types:
         defaultBenchmarkType = TestCaseType::CpuTimeBenchmark;
     else if(args.value("benchmark") == "cpu-cycles")
         defaultBenchmarkType = TestCaseType::CpuCyclesBenchmark;
+    /* LCOV_EXCL_START */ /* Can't test stuff that aborts the app */
     else Utility::Fatal{} << "Unknown benchmark type" << args.value("benchmark")
         << Utility::Debug::nospace << ", use one of wall-time, cpu-time or cpu-cycles";
+    /* LCOV_EXCL_STOP */
 
     std::vector<std::pair<int, TestCase>> usedTestCases;
 
@@ -183,8 +187,10 @@ benchmark types:
 
     const std::size_t repeatAllCount = args.value<std::size_t>("repeat-all");
     const std::size_t repeatEveryCount = args.value<std::size_t>("repeat-every");
+    /* LCOV_EXCL_START */ /* Can't test stuff that aborts the app */
     if(!repeatAllCount || !repeatEveryCount)
         Utility::Fatal() << "You have to repeat at least once";
+    /* LCOV_EXCL_STOP */
 
     /* Repeat the test cases, if requested */
     const std::size_t originalTestCaseCount = usedTestCases.size();
@@ -238,8 +244,10 @@ benchmark types:
         /* Select benchmark function */
         BenchmarkUnits benchmarkUnits = BenchmarkUnits::Count;
         switch(testCase.second.type) {
+            /* LCOV_EXCL_START */
             case TestCaseType::DefaultBenchmark:
-                CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+                CORRADE_ASSERT_UNREACHABLE();
+            /* LCOV_EXCL_STOP */
 
             case TestCaseType::Test:
                 break;
