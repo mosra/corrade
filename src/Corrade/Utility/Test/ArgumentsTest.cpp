@@ -93,6 +93,8 @@ struct ArgumentsTest: TestSuite::Tester {
     void prefixedDisallowedWithPrefix();
     void prefixedDisallowedWithPrefixAfterSkipPrefix();
     void prefixedUnknownWithPrefix();
+    void prefixedInvalidPrefixedName();
+    void prefixedInvalidUnprefixedName();
 };
 
 ArgumentsTest::ArgumentsTest() {
@@ -153,7 +155,9 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::prefixedDisallowedCalls,
               &ArgumentsTest::prefixedDisallowedWithPrefix,
               &ArgumentsTest::prefixedDisallowedWithPrefixAfterSkipPrefix,
-              &ArgumentsTest::prefixedUnknownWithPrefix});
+              &ArgumentsTest::prefixedUnknownWithPrefix,
+              &ArgumentsTest::prefixedInvalidPrefixedName,
+              &ArgumentsTest::prefixedInvalidUnprefixedName});
 }
 
 namespace {
@@ -887,6 +891,31 @@ void ArgumentsTest::prefixedUnknownWithPrefix() {
 
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(out.str(), "Unknown command-line argument --reader-foo\n");
+}
+
+void ArgumentsTest::prefixedInvalidPrefixedName() {
+    Arguments args;
+    args.addSkippedPrefix("reader")
+        .addOption("foo");
+
+    /* The prefixed options might be parsed with something that's more
+       forgiving about what is valid in an argument, so be cool about that */
+    const char* argv[] = { "", "--reader-?", "hello", "--foo", "yes" };
+
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(args.value("foo"), "yes");
+}
+
+void ArgumentsTest::prefixedInvalidUnprefixedName() {
+    Arguments args{"reader"};
+    args.addOption("foo");
+
+    /* The unprefixed options might be parsed with something that's more
+       forgiving about what is valid in an argument, so be cool about that */
+    const char* argv[] = { "", "--?", "hello", "--reader-foo", "yes" };
+
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(args.value("foo"), "yes");
 }
 
 }}}
