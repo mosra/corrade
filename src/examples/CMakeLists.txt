@@ -3,8 +3,8 @@
 #
 #   Original authors — credit is appreciated but not required:
 #
-#       2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018
-#           — Vladimír Vondruš <mosra@centrum.cz>
+#       2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
+#       2017, 2018, 2019 — Vladimír Vondruš <mosra@centrum.cz>
 #
 #   This is free and unencumbered software released into the public domain.
 #
