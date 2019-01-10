@@ -489,17 +489,18 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
             } else if(len > 2) {
                 if(std::strncmp(argv[i], "--", 2) == 0) {
                     const std::string key = argv[i]+2;
-                    if(!verifyKey(key)) {
-                        Error() << "Invalid command-line argument" << std::string("--") + key;
-                        return false;
-                    }
 
                     /* If this is prefixed version and the option does not have
-                       the prefix, ignore */
+                       the prefix, ignore. Do this before verifying validity of
+                       the key so less restrictive argument parsers can be used
+                       for the unprefixed version. */
                     if(!_prefix.empty() && !keyHasPrefix(key, _prefix))
                         continue;
 
-                    /* If skipped prefix, ignore the option and its value */
+                    /* If skipped prefix, ignore the option and its value.
+                       Again do this before verifying validity of the key so
+                       less restrictive argument parsers can be used for the
+                       prefixed version. */
                     bool ignore = false;
                     for(auto&& prefix: _skippedPrefixes) {
                         if(!keyHasPrefix(key, prefix.first)) continue;
@@ -511,6 +512,11 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                         break;
                     }
                     if(ignore) continue;
+
+                    if(!verifyKey(key)) {
+                        Error() << "Invalid command-line argument" << std::string("--") + key;
+                        return false;
+                    }
 
                     /* Find the option */
                     found = find(key);

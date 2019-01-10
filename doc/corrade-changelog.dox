@@ -70,6 +70,13 @@ namespace Corrade {
     @ref PluginManager::AbstractPlugin::pluginInterface() "pluginInterface()"
     function optional to make implementing hot-reload interfaces less verbose
 
+@subsubsection corrade-changelog-latest-changes-utility Utility library
+
+-   Prefixed or prefix-ignoring @ref Utility::Arguments now work better with
+    3rd party argument parsers which may be less restrictive about argument
+    name format; arguments that are ignored are not checked for key validity
+    anymore (see [mosra/magnum#305](https://github.com/mosra/magnum/issues/305))
+
 @subsection corrade-changelog-latest-buildsystem Build system
 
 -   Corrade is now available through [Hunter](https://hunter.sh) CMake-driven
