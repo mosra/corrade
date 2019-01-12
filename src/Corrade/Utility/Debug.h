@@ -423,6 +423,13 @@ class CORRADE_UTILITY_EXPORT Debug {
          */
         Debug& operator<<(const char32_t* value);
 
+        /**
+         * @brief Print a nullptr to debug output
+         *
+         * Prints the value as @cb{.shell-session} nullptr @ce.
+         */
+        Debug& operator<<(std::nullptr_t);
+
         #ifndef DOXYGEN_GENERATING_OUTPUT
         Debug& operator<<(Implementation::DebugOstreamFallback&& value);
         #endif

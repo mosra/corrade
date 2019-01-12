@@ -218,8 +218,8 @@ void DebugTest::chars() {
 
 void DebugTest::pointer() {
     std::ostringstream out;
-    Debug{&out} << reinterpret_cast<void*>(0xdeadbabe);
-    CORRADE_COMPARE(out.str(), "0xdeadbabe\n");
+    Debug{&out} << reinterpret_cast<void*>(0xdeadbabe) << nullptr;
+    CORRADE_COMPARE(out.str(), "0xdeadbabe nullptr\n");
 }
 
 void DebugTest::unicode() {

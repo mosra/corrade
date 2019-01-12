@@ -57,6 +57,7 @@ namespace Corrade {
     hot-reload
 -   Added @ref Utility::print() and @ref Utility::printError() convenience
     functions for @ref Utility::formatInto()
+-   It's now possible to print @ref std::nullptr_t with @ref Utility::Debug
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 

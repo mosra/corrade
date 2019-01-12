@@ -380,6 +380,10 @@ Debug& Debug::operator<<(const char32_t* value) {
     return *this << std::u32string(value);
 }
 
+Debug& Debug::operator<<(std::nullptr_t) {
+    return print("nullptr");
+}
+
 #ifndef DOXYGEN_GENERATING_OUTPUT
 Debug& Debug::operator<<(Implementation::DebugOstreamFallback&& value) {
     return print(value);
