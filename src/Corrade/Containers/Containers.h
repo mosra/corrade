@@ -49,6 +49,7 @@ template<class> class LinkedList;
 template<class Derived, class List = LinkedList<Derived>> class LinkedListItem;
 
 template<class T> class Optional;
+template<class T> class Pointer;
 #endif
 
 }}

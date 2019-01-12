@@ -28,6 +28,7 @@ corrade_add_test(ContainersArrayViewTest ArrayViewTest.cpp)
 corrade_add_test(ContainersEnumSetTest EnumSetTest.cpp)
 corrade_add_test(ContainersLinkedListTest LinkedListTest.cpp)
 corrade_add_test(ContainersOptionalTest OptionalTest.cpp)
+corrade_add_test(ContainersPointerTest PointerTest.cpp)
 corrade_add_test(ContainersScopedExitTest ScopedExitTest.cpp)
 corrade_add_test(ContainersStaticArrayTest StaticArrayTest.cpp)
 corrade_add_test(ContainersStaticArrayViewTest StaticArrayViewTest.cpp)
@@ -39,6 +40,7 @@ set_property(TARGET
     ContainersArrayTest
     ContainersArrayViewTest
     ContainersOptionalTest
+    ContainersPointerTest
     ContainersStaticArrayViewTest
     ContainersStridedArrayViewTest
     APPEND PROPERTY COMPILE_DEFINITIONS "CORRADE_GRACEFUL_ASSERT")
@@ -48,6 +50,7 @@ set_target_properties(
     ContainersArrayViewTest
     ContainersEnumSetTest
     ContainersLinkedListTest
+    ContainersPointerTest
     ContainersStaticArrayTest
     ContainersStaticArrayViewTest
     ContainersStridedArrayViewTest

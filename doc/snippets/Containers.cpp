@@ -34,6 +34,7 @@
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/LinkedList.h"
 #include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/Pointer.h"
 #include "Corrade/Containers/ScopedExit.h"
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StridedArrayView.h"
@@ -667,6 +668,32 @@ Containers::StridedArrayView<int> view1{data, 4, sizeof(int)};
 Containers::StridedArrayView<int> view2 = data;
 /* [StridedArrayView-usage-conversion] */
 static_cast<void>(view2);
+}
+
+#ifdef __clang__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
+{
+/* [pointer] */
+std::string* ptr;
+
+auto a = Containers::Pointer<std::string>{ptr};
+auto b = Containers::pointer(ptr);
+/* [pointer] */
+}
+#if defined(__clang__) || defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+
+{
+/* [pointer-inplace] */
+auto a = Containers::Pointer<std::string>{Containers::InPlaceInit, 'a', 'b'};
+auto b = Containers::pointer<std::string>('a', 'b');
+/* [pointer-inplace] */
 }
 
 }

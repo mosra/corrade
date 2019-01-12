@@ -31,6 +31,7 @@ set(CorradeContainers_HEADERS
     EnumSet.hpp
     LinkedList.h
     Optional.h
+    Pointer.h
     ScopedExit.h
     StaticArray.h
     StridedArrayView.h

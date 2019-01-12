@@ -68,7 +68,7 @@ constexpr NullOptT NullOpt{NullOptT::Init{}};
 Equivalent to `std::optional` from C++17, provides an optional checked storage
 for object of type @p T. The optional object can be seen as a container of @p T
 objects with maximal size 1 and can be in two states, either empty or having a
-value.
+value. A non-allocating counterpart to @ref Pointer.
 
 A common use for an optional object is for a return value of function that can
 fail --- like @ref std::unique_ptr, but without the unnecessary allocation
@@ -348,7 +348,7 @@ The following two lines are equivalent:
     time and you're advised to use the @ref Optional constructor explicitly to
     avoid surprising behavior.
 
-@see @ref optional(Args&&... args)
+@see @ref optional(Args&&... args), @ref pointer(T*)
 */
 template<class T> inline Optional<typename std::decay<T>::type> optional(T&& value) {
     return Optional<typename std::decay<T>::type>{std::forward<T>(value)};
@@ -368,7 +368,7 @@ The following two lines are equivalent:
     you're advised to use the @ref Optional constructor explicitly to avoid
     surprising behavior.
 
-@see @ref optional(T&&)
+@see @ref optional(T&&), @ref pointer(Args&&... args)
 */
 template<class T, class ...Args> inline Optional<T> optional(Args&&... args) {
     return Optional<T>{InPlaceInit, std::forward<Args>(args)...};
