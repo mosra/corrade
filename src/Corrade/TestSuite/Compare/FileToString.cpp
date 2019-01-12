@@ -64,6 +64,7 @@ void Comparator<Compare::FileToString>::printErrorMessage(Utility::Error& e, con
     for(std::size_t i = 0, end = std::max(_actualContents.size(), _expectedContents.size()); i != end; ++i) {
         if(_actualContents.size() > i && _expectedContents.size() > i && _actualContents[i] == _expectedContents[i]) continue;
 
+        /** @todo do this without std::string */
         if(_actualContents.size() <= i)
             e << "Expected has character" << std::string() + _expectedContents[i];
         else if(_expectedContents.size() <= i)
