@@ -149,8 +149,7 @@ struct Copyable {
     static int copied;
     static int moved;
 
-    Copyable(int a) noexcept: a{a} { ++constructed; }
-    ~Copyable() { ++destructed; }
+    explicit Copyable(int a) noexcept: a{a} { ++constructed; }
     Copyable(const Copyable& other) noexcept: a{other.a} {
         ++constructed;
         ++copied;
@@ -159,6 +158,7 @@ struct Copyable {
         ++constructed;
         ++moved;
     }
+    ~Copyable() { ++destructed; }
     Copyable& operator=(const Copyable& other) noexcept {
         a = other.a;
         ++copied;
@@ -183,7 +183,7 @@ struct Movable {
     static int destructed;
     static int moved;
 
-    Movable(int a): a{a} { ++constructed; }
+    explicit Movable(int a): a{a} { ++constructed; }
     Movable(const Movable&) = delete;
     Movable(Movable&& other) noexcept: a(other.a) {
         ++constructed;
@@ -210,11 +210,10 @@ struct Immovable {
 
     Immovable(const Immovable&) = delete;
     Immovable(Immovable&&) = delete;
+    explicit Immovable(int a): a{a} { ++constructed; }
+    ~Immovable() { ++destructed; }
     Immovable& operator=(const Immovable&) = delete;
     Immovable& operator=(Immovable&&) = delete;
-
-    Immovable(int a): a{a} { ++constructed; }
-    ~Immovable() { ++destructed; }
 
     int a;
 };
@@ -254,6 +253,8 @@ void OptionalTest::constructNullOpt() {
 }
 
 void OptionalTest::constructCopy() {
+    /* copy construction tested below in constructCopyFrom*()/ copy*To*() */
+
     {
         Copyable v{32};
         Optional<Copyable> a{v};
@@ -292,6 +293,8 @@ void OptionalTest::constructCopyMake() {
 }
 
 void OptionalTest::constructMove() {
+    /* move construction tested below in constructMoveFrom*()/ move*To*() */
+
     {
         Optional<Movable> a{Movable{32}};
         CORRADE_VERIFY(a);
@@ -443,6 +446,9 @@ void OptionalTest::boolConversion() {
     CORRADE_VERIFY(!a);
     CORRADE_VERIFY(b);
     CORRADE_VERIFY(!!b);
+
+    CORRADE_VERIFY(!(std::is_convertible<Optional<int>, int>::value));
+    CORRADE_VERIFY(!(std::is_convertible<Optional<int>, bool>::value));
 }
 
 void OptionalTest::compareToOptional() {
@@ -685,8 +691,8 @@ void OptionalTest::resetCounters() {
 }
 
 void OptionalTest::access() {
-    Optional<Copyable> a{32};
-    const Optional<Copyable> ca{32};
+    Optional<Copyable> a{Copyable{32}};
+    const Optional<Copyable> ca{Copyable{32}};
 
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(ca);
@@ -724,16 +730,16 @@ void OptionalTest::accessInvalid() {
 
 void OptionalTest::debug() {
     std::stringstream out;
-    Debug{&out} << Containers::optional(42) << Optional<int>{} << Containers::NullOpt;
+    Debug{&out} << optional(42) << Optional<int>{} << NullOpt;
     CORRADE_COMPARE(out.str(), "42 Containers::NullOpt Containers::NullOpt\n");
 }
 
 void OptionalTest::vectorOfMovableOptional() {
     std::vector<Optional<Movable>> vec;
 
-    vec.emplace_back(23);
+    vec.emplace_back(Movable{23});
     vec.emplace_back();
-    vec.emplace_back(Containers::NullOpt);
+    vec.emplace_back(NullOpt);
     vec.push_back(Movable{67});
 
     CORRADE_COMPARE(vec[0]->a, 23);
