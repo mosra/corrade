@@ -140,7 +140,6 @@ class CORRADE_UTILITY_EXPORT Debug {
         typedef Containers::EnumSet<Flag> Flags;
 
         /** @{ @name Output modifiers
-         *
          * See @ref Utility-Debug-modifiers for more information.
          */
 
