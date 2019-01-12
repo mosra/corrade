@@ -368,7 +368,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         /**
          * @brief Print string to debug output
          *
-         * If there is already something on the output, puts space before
+         * If there is already something in the output, puts a space before
          * the value, unless @ref nospace() was set immediately before.
          * @see @ref operator<<(Debug&, const T&)
          */
@@ -411,14 +411,14 @@ class CORRADE_UTILITY_EXPORT Debug {
         /**
          * @brief Print UTF-32 character to debug output
          *
-         * Prints value as Unicode codepoint, i.e. @cb{.shell-session} U+0061 @ce.
+         * Prints the value as Unicode codepoint, i.e. @cb{.shell-session} U+0061 @ce.
          */
         Debug& operator<<(char32_t value);
 
         /**
          * @brief Print UTF-32 character literal to debug output
          *
-         * Prints value as list of Unicode codepoints, i.e.
+         * Prints the value as list of Unicode codepoints, i.e.
          * @cb{.shell-session} {U+0061, U+0062, U+0063} @ce.
          */
         Debug& operator<<(const char32_t* value);
