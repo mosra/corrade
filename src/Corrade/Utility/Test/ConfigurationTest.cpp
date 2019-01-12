@@ -58,7 +58,6 @@ struct ConfigurationTest: TestSuite::Tester {
 
     void names();
 
-    void invalid();
     void readonly();
     void nonexistentFile();
     void truncate();

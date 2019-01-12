@@ -37,7 +37,6 @@ struct FileTest: Tester {
     explicit FileTest();
 
     void same();
-    void sameCommonPrefix();
     void empty();
     void utf8Filename();
 

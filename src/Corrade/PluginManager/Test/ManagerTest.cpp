@@ -282,8 +282,6 @@ struct WrongPlugin: AbstractPlugin {
             #endif
         };
     }
-
-    explicit WrongPlugin(AbstractManager& manager, const std::string& plugin): AbstractPlugin{manager, plugin} {}
 };
 
 void ManagerTest::wrongMetadataFile() {

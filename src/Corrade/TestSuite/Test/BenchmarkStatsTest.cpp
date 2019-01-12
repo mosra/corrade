@@ -42,9 +42,6 @@ struct BenchmarkStatsTest: Tester {
     void calculateSingleValue();
 
     void print();
-    void printNoValues();
-    void printSingleValue();
-    void printDiscardAllButOne();
 };
 
 enum: std::size_t { MultiplierDataCount = 14 };
