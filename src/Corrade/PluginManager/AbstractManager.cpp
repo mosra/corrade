@@ -35,7 +35,7 @@
 #include "Corrade/PluginManager/AbstractPlugin.h"
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/Utility/Assert.h"
-#include "Corrade/Utility/Debug.h"
+#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Configuration.h"
 #include "Corrade/Utility/String.h"
 

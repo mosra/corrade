@@ -53,6 +53,8 @@
 #endif
 #endif
 
+#include "Corrade/Utility/DebugStl.h"
+
 namespace Corrade { namespace Utility {
 
 namespace {
@@ -326,8 +328,6 @@ template<class T> Debug& Debug::print(const T& value) {
     return *this;
 }
 
-Debug& Debug::operator<<(const std::string& value) { return print(value); }
-
 Debug& Debug::operator<<(const void* const value) {
     std::ostringstream o;
     o << "0x" << std::hex << reinterpret_cast<std::uintptr_t>(value);
@@ -385,10 +385,6 @@ Debug& Debug::operator<<(std::nullptr_t) {
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-Debug& Debug::operator<<(Implementation::DebugOstreamFallback&& value) {
-    return print(value);
-}
-
 /* Doxygen can't match this to the declaration, eh. */
 Debug& operator<<(Debug& debug, Debug::Color value) {
     switch(value) {
@@ -410,6 +406,17 @@ Debug& operator<<(Debug& debug, Debug::Color value) {
     }
 
     return debug << "Debug::Color(" << Debug::nospace << reinterpret_cast<void*>(static_cast<unsigned char>(char(value))) << Debug::nospace << ")";
+}
+
+/* For some reason Doxygen can't match this with the declaration in DebugStl.h */
+Debug& operator<<(Debug& debug, const std::string& value) {
+    return debug.print(value);
+}
+#endif
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+Debug& operator<<(Debug& debug, Implementation::DebugOstreamFallback&& value) {
+    return debug.print(value);
 }
 #endif
 

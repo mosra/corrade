@@ -28,6 +28,7 @@
 #include <cstring>
 #include <algorithm>
 
+#include "Corrade/Utility/DebugStl.h" /** @todo get rid of this */
 #include "Corrade/Utility/String.h"
 #include "Corrade/Utility/Tweakable.h"
 

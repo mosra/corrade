@@ -29,6 +29,7 @@
 
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo get rid of this */
 
 namespace Corrade { namespace Utility { namespace Implementation {
 

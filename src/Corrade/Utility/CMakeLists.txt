@@ -49,6 +49,7 @@ if(WITH_UTILITY)
         ConfigurationGroup.h
         ConfigurationValue.h
         Debug.h
+        DebugStl.h
         Directory.h
         Endianness.h
         Format.h

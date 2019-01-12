@@ -27,12 +27,12 @@
 
 /** @file
  * @brief Class @ref Corrade::Utility::Debug, @ref Corrade::Utility::Warning, @ref Corrade::Utility::Error, @ref Corrade::Utility::Fatal
+ * @see @ref Corrade/Utility/DebugStl.h
  */
 
 #include <iosfwd>
-#include <string>
-#include <tuple>
 #include <type_traits>
+#include <utility> /** @todo consider putting this away as well (900 LOC) */
 
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Containers/EnumSet.h"
@@ -41,8 +41,6 @@
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
-
-namespace Implementation { struct DebugOstreamFallback; }
 
 /**
 @brief Debug output handler
@@ -53,11 +51,20 @@ with newline character. Example usage:
 
 @snippet Utility.cpp Debug-usage
 
-Support for printing more types can be added by implementing function
-@ref operator<<(Debug&, const T&) for given type. If there is no
-@cpp operator<<() @ce implemented for printing given type using the @ref Debug
-class, suitable @ref std::ostream @cpp operator<<() @ce overload is used as
-fallback, if found.
+Support for printing more types can be added by implementing an overload of
+@ref operator<<(Debug&, const T&) for given type.
+
+@section Utility-Debug-stl Printing STL types
+
+To optimize compile times, the @ref Corrade/Utility/Debug.h header provides
+only support for printing builtin types, generic iterable containers and
+@ref std::pair. Printing of @ref std::string and @ref std::tuple is possible if
+you @cpp #include @ce a separate @ref Corrade/Utility/DebugStl.h header. This
+header also provides a fallback to @ref std::ostream @cpp operator<<() @ce
+overloads, if there's no @cpp operator<<() @ce implemented for printing given
+type using @ref Debug. Note that printing @ref std::vector or @ref std::map
+containers is already possible with the generic iterable container support in
+@ref Corrade/Utility/Debug.h.
 
 @section Utility-Debug-scoped-output Scoped output redirection
 
@@ -370,9 +377,9 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * If there is already something in the output, puts a space before
          * the value, unless @ref nospace() was set immediately before.
-         * @see @ref operator<<(Debug&, const T&)
+         * @see @ref operator<<(Debug&, const std::string&),
+         *      @ref operator<<(Debug&, const T&)
          */
-        Debug& operator<<(const std::string& value);
         Debug& operator<<(const char* value);            /**< @overload */
         Debug& operator<<(const void* value);            /**< @overload */
         Debug& operator<<(bool value);                   /**< @overload */
@@ -430,9 +437,13 @@ class CORRADE_UTILITY_EXPORT Debug {
          */
         Debug& operator<<(std::nullptr_t);
 
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        Debug& operator<<(Implementation::DebugOstreamFallback&& value);
-        #endif
+    #ifdef DOXYGEN_GENERATING_OUTPUT
+    private:
+    #endif
+        /* Used by the out-of-class operator<<(Debug&, const std::string&) and
+           operator<<(Debug&, Implementation::DebugOstreamFallback&&) which is
+           defined in DebugStl.h. */
+        template<class T> CORRADE_UTILITY_LOCAL Debug& print(const T& value);
 
     #ifndef DOXYGEN_GENERATING_OUTPUT
     protected:
@@ -466,7 +477,6 @@ class CORRADE_UTILITY_EXPORT Debug {
         static CORRADE_UTILITY_LOCAL bool _globalColorBold;
         #endif
 
-        template<class T> CORRADE_UTILITY_LOCAL Debug& print(const T& value);
         CORRADE_UTILITY_LOCAL void resetColorInternal();
 
         std::ostream* _previousGlobalOutput;
@@ -493,23 +503,23 @@ template<class T> inline Debug& operator<<(Debug&& debug, const T& value) {
 #endif
 
 #ifdef DOXYGEN_GENERATING_OUTPUT
-/** @relates Debug
-@brief Operator for printing custom types to debug
+/** @relatesalso Debug
+@brief Operator for printing custom types to debug output
 @param debug     Debug class
 @param value     Value to be printed
 
 Support for printing custom types (i.e. those not handled by @ref std::iostream)
 can be added by implementing this function for given type.
 
-The function should convert the type to one of supported types (such as
-@ref std::string) and then call @ref Debug::operator<<(const std::string&) with
+The function should convert the type to one of supported types (such as the
+builtin types or @ref std::string) and then call @ref Debug::operator<<() with
 it. You can also use @ref Debug::nospace() and @ref Debug::newline().
  */
 template<class T> Debug& operator<<(Debug& debug, const T& value);
 #endif
 
-/** @relates Debug
-@brief Operator for printing iterable types to debug
+/** @relatesalso Debug
+@brief Operator for printing iterable types to debug output
 
 Prints the value as @cb{.shell-session} {a, b, c} @ce.
 */
@@ -518,7 +528,7 @@ template<class Iterable> Debug& operator<<(Debug& debug, const Iterable& value)
 #else
 /* libc++ from Apple's Clang "4.2" (3.2-svn) doesn't have constexpr operator
    bool for std::integral_constant, thus we need to use ::value instead */
-template<class Iterable> Debug& operator<<(typename std::enable_if<IsIterable<Iterable>::value && !std::is_same<Iterable, std::string>::value, Debug&>::type debug, const Iterable& value)
+template<class Iterable> Debug& operator<<(typename std::enable_if<IsIterable<Iterable>::value && !IsStringLike<Iterable>::value, Debug&>::type debug, const Iterable& value)
 #endif
 {
     debug << "{" << Debug::nospace;
@@ -544,39 +554,13 @@ namespace Implementation {
         typedef Sequence<sequence...> Type;
     };
     #endif
-
-    /* Used by operator<<(Debug&, std::tuple<>...) */
-    template<class T> inline void tupleDebugOutput(Debug&, const T&, Sequence<>) {}
-    template<class T, std::size_t i, std::size_t ...sequence> void tupleDebugOutput(Debug& debug, const T& tuple, Sequence<i, sequence...>) {
-        debug << std::get<i>(tuple);
-        #ifdef _MSC_VER
-        #pragma warning(push)
-        #pragma warning(disable:4127) /* conditional expression is constant (of course) */
-        #endif
-        if(i + 1 != std::tuple_size<T>::value)
-            debug << Debug::nospace << ",";
-        #ifdef _MSC_VER
-        #pragma warning(pop)
-        #endif
-        tupleDebugOutput(debug, tuple, Sequence<sequence...>{});
-    }
 }
 
-/** @relates Debug
-@brief Operator for printing tuple types to debug
+/** @relatesalso Debug
+@brief Print a @ref std::pair to debug output
 
-Prints the value as @cb{.shell-session} (first, second, third...) @ce.
+Prints the value as @cb{.shell-session} (first, second) @ce.
 */
-template<class ...Args> Debug& operator<<(Debug& debug, const std::tuple<Args...>& value) {
-    debug << "(" << Debug::nospace;
-    Implementation::tupleDebugOutput(debug, value, typename Implementation::GenerateSequence<sizeof...(Args)>::Type{});
-    debug << Debug::nospace << ")";
-    return debug;
-}
-
-/** @relates Debug
- * @overload
- */
 template<class T, class U> Debug& operator<<(Debug& debug, const std::pair<T, U>& value) {
     return debug << "(" << Debug::nospace << value.first << Debug::nospace << "," << value.second << Debug::nospace << ")";
 }
@@ -793,27 +777,6 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
 
 /** @debugoperatorclassenum{Debug,Debug::Color} */
 CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, Debug::Color value);
-
-namespace Implementation {
-
-/* Used by Debug::operator<<(Implementation::DebugOstreamFallback&&) */
-struct DebugOstreamFallback {
-    template<class T> /*implicit*/ DebugOstreamFallback(const T& t): applier(&DebugOstreamFallback::applyImpl<T>), value(&t) {}
-
-    void apply(std::ostream& s) const {
-        (this->*applier)(s);
-    }
-
-    template<class T> void applyImpl(std::ostream& s) const {
-        s << *static_cast<const T*>(value);
-    }
-
-    using ApplierFunc = void(DebugOstreamFallback::*)(std::ostream&) const;
-    const ApplierFunc applier;
-    const void* value;
-};
-
-}
 
 }}
 

@@ -36,6 +36,7 @@
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pointer.h"
 #include "Corrade/Utility/TweakableParser.h"
+#include "Corrade/Utility/StlForwardString.h"
 
 namespace Corrade { namespace Utility {
 

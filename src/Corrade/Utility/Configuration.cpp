@@ -32,7 +32,7 @@
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Utility/Assert.h"
-#include "Corrade/Utility/Debug.h"
+#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/String.h"
 

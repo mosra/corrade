@@ -29,6 +29,8 @@
  * @brief Function @ref Corrade::Containers::enumSetDebugOutput()
  */
 
+#include <initializer_list>
+
 #include "Corrade/Containers/EnumSet.h"
 #include "Corrade/Utility/Debug.h"
 

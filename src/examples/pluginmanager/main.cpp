@@ -32,6 +32,7 @@
 #include <Corrade/Utility/Arguments.h>
 #include <Corrade/Utility/ConfigurationGroup.h>
 #include <Corrade/Utility/Debug.h>
+#include <Corrade/Utility/DebugStl.h>
 
 #include "AbstractAnimal.h"
 

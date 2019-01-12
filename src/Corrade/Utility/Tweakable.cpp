@@ -30,6 +30,7 @@
 #include <unordered_map>
 
 #include "Corrade/Utility/Assert.h"
+#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/FileWatcher.h"
 #include "Corrade/Utility/String.h"

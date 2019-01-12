@@ -39,6 +39,7 @@
 #include "Corrade/TestSuite/Compare/FloatingPoint.h"
 #include "Corrade/TestSuite/visibility.h"
 #include "Corrade/Utility/Debug.h"
+#include "Corrade/Utility/DebugStl.h" /** @todo remove once not needed */
 #include "Corrade/Utility/Macros.h"
 
 #ifdef CORRADE_TARGET_EMSCRIPTEN

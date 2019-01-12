@@ -30,7 +30,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "Corrade/Utility/Debug.h"
+#include "Corrade/Utility/DebugStl.h"
 
 #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
 #include "Corrade/Utility/Unicode.h"

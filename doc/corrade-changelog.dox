@@ -154,6 +154,14 @@ namespace Corrade {
     from looking like it works on directories only, but such name then caused
     people to ask if it works on directories as well, not helping anything.
 
+@subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
+
+-   Support for @ref std::tuple and @ref std::string in
+    @ref Utility::Debug is now provided through a separate header,
+    @ref Corrade/Utility/DebugStl.h, to speed up compile times. Since including
+    it for backwards compatibility would practically revert the optimization,
+    you have to @cpp #include @ce it explicitly where needed.
+
 @subsection corrade-changelog-latest-documentation Documentation
 
 -   Updated docs of the @ref Corrade/Utility/Macros.h header mentioning what

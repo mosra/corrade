@@ -32,6 +32,7 @@
 #include <string>
 
 #include "Corrade/Utility/Debug.h"
+#include "Corrade/Utility/DebugStl.h"
 
 namespace Corrade { namespace Utility {
 
