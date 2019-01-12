@@ -78,6 +78,8 @@ struct OptionalTest: TestSuite::Tester {
     void resetCounters();
 
     void access();
+    void accessInvalid();
+
     void debug();
 
     void vectorOfMovableOptional();
@@ -126,6 +128,8 @@ OptionalTest::OptionalTest() {
               &OptionalTest::emplaceSet}, &OptionalTest::resetCounters, &OptionalTest::resetCounters);
 
     addTests({&OptionalTest::access,
+              &OptionalTest::accessInvalid,
+
               &OptionalTest::debug,
 
               &OptionalTest::vectorOfMovableOptional});
@@ -690,6 +694,32 @@ void OptionalTest::access() {
     CORRADE_COMPARE(ca->a, 32);
     CORRADE_COMPARE((*a).a, 32);
     CORRADE_COMPARE((*ca).a, 32);
+}
+
+void OptionalTest::accessInvalid() {
+    struct Innocent {
+        void foo() const {}
+    };
+
+    Optional<Innocent> a;
+    const Optional<Innocent> ca;
+
+    CORRADE_VERIFY(!a);
+    CORRADE_VERIFY(!ca);
+
+    std::ostringstream out;
+    {
+        Error redirectError{&out};
+        a->foo();
+        ca->foo();
+        (*a).foo();
+        (*ca).foo();
+    }
+    CORRADE_COMPARE(out.str(),
+        "Containers::Optional: the optional is empty\n"
+        "Containers::Optional: the optional is empty\n"
+        "Containers::Optional: the optional is empty\n"
+        "Containers::Optional: the optional is empty\n");
 }
 
 void OptionalTest::debug() {

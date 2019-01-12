@@ -232,13 +232,13 @@ template<class T> class Optional {
          * @see @ref operator bool(), @ref operator*()
          */
         T* operator->() {
-            CORRADE_INTERNAL_ASSERT(_set);
+            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", &_value.v);
             return &_value.v;
         }
 
         /** @overload */
         const T* operator->() const {
-            CORRADE_INTERNAL_ASSERT(_set);
+            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", &_value.v);
             return &_value.v;
         }
 
@@ -249,13 +249,13 @@ template<class T> class Optional {
          * @see @ref operator bool(), @ref operator->()
          */
         T& operator*() {
-            CORRADE_INTERNAL_ASSERT(_set);
+            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", _value.v);
             return _value.v;
         }
 
         /** @overload */
         const T& operator*() const {
-            CORRADE_INTERNAL_ASSERT(_set);
+            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", _value.v);
             return _value.v;
         }
 

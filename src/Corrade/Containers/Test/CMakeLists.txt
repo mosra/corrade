@@ -38,6 +38,7 @@ set_property(TARGET
     ContainersLinkedListTest
     ContainersArrayTest
     ContainersArrayViewTest
+    ContainersOptionalTest
     ContainersStaticArrayViewTest
     ContainersStridedArrayViewTest
     APPEND PROPERTY COMPILE_DEFINITIONS "CORRADE_GRACEFUL_ASSERT")
