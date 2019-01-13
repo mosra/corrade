@@ -123,6 +123,12 @@ namespace Corrade {
     which were deprecated in favor of `Corrade::*` imported targets in 2016.
     The deprecated `CORRADE_CXX_FLAGS` variable is still present, however.
 
+@subsection corrade-changelog-latest-documentation Documentation
+
+-   The user-definable macros @ref CORRADE_NO_ASSERT and
+    @ref CORRADE_GRACEFUL_ASSERT now have dedicated documentation, instead of
+    being casually mentioned on various places and impossible to search for.
+
 @section corrade-changelog-2018-10 2018.10
 
 Released 2018-10-23, tagged as
@@ -220,8 +226,8 @@ Released 2018-10-23, tagged as
     virtual base classes on 32-bit Windows due to an incorrect assumption about
     member function pointer sizes (see
     [mosra/magnum-extras#7](https://github.com/mosra/magnum-extras/issues/7))
--   Assertions were not removed if both @cpp CORRADE_NO_ASSERT @ce and
-    @cpp CORRADE_GRACEFUL_ASSERT @ce was defined
+-   Assertions were not removed if both @ref CORRADE_NO_ASSERT and
+    @ref CORRADE_GRACEFUL_ASSERT was defined
 
 @subsection corrade-changelog-2018-10-docs Documentation
 

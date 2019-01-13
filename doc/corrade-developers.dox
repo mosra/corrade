@@ -59,7 +59,7 @@ not strictly required to follow them to the point.
     -   add installable headers to `CorradeLibraryName_HEADERS` variable
     -   add private headers to `CorradeLibraryName_PRIVATE_HEADERS` variable
         (if any)
-    -   if the test needs some extra setup (such as e.g. @cpp CORRADE_NO_ASSERT @ce
+    -   if the test needs some extra setup (such as e.g. @ref CORRADE_NO_ASSERT
         enabled for particular files), create a new `CorradeLibraryNameObjects`
         `OBJECT` library with files that can be compiled the same way in both
         cases to speed up compilation
