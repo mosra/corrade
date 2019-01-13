@@ -29,12 +29,19 @@
  * @brief Class @ref Corrade::PluginManager::Manager
  */
 
+#include <string>
+
 #include "Corrade/Containers/Pointer.h"
 #include "Corrade/PluginManager/AbstractManager.h"
 #include "Corrade/Utility/Macros.h"
 
 #ifdef CORRADE_BUILD_DEPRECATED
 #include "Corrade/Containers/PointerStl.h"
+#endif
+
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+/** @todo figure out a better way of passing plugin search paths (accept any container) */
+#include <vector>
 #endif
 
 namespace Corrade { namespace PluginManager {

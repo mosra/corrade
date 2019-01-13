@@ -29,14 +29,13 @@
  * @brief Class @ref Corrade::PluginManager::AbstractManager, macro @ref CORRADE_PLUGIN_VERSION, @ref CORRADE_PLUGIN_REGISTER()
  */
 
-#include <map>
-#include <string>
-#include <vector>
-
 #include "Corrade/Containers/EnumSet.h"
+#include "Corrade/Containers/Pointer.h"
 #include "Corrade/PluginManager/PluginManager.h"
 #include "Corrade/PluginManager/visibility.h"
 #include "Corrade/Utility/Resource.h"
+#include "Corrade/Utility/StlForwardString.h"
+#include "Corrade/Utility/StlForwardVector.h"
 #include "Corrade/Utility/Utility.h"
 
 #ifdef CORRADE_TARGET_WINDOWS
@@ -385,10 +384,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         explicit AbstractManager(std::string pluginInterface);
         #endif
 
-        #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-        std::string _pluginDirectory;
-        #endif
-
         /* Initialize global plugin map. On first run it creates the instance
            and fills it with entries from staticPlugins(). The reference is
            then in constructor stored in _plugins variable to avoid at least
@@ -401,6 +396,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         Containers::Pointer<AbstractPlugin> loadAndInstantiateInternal(const std::string& plugin);
 
     private:
+        struct State;
+
         /* Temporary storage of all information needed to import static plugins.
            They are imported to plugins() map on first call to plugins(),
            because at that time it is safe to assume that all static resources
@@ -426,9 +423,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         CORRADE_PLUGINMANAGER_LOCAL LoadState unloadRecursiveInternal(Plugin& plugin);
         #endif
 
-        std::string _pluginInterface;
-        std::map<std::string, Plugin&> _aliases;
-        std::map<std::string, std::vector<AbstractPlugin*>> _instances;
+        Containers::Pointer<State> _state;
 };
 
 /** @hideinitializer
