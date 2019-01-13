@@ -662,6 +662,16 @@ Avoid to use @ref std::shared_ptr, if possible. Unlike @ref std::unique_ptr and
 compile-time, shared pointers have serious runtime penalty due to reference
 counting.
 
+@subsection corrade-coding-style-cpp-sfinae SFINAE and templates
+
+Prefer to use @ref std::enable_if on function return type rather than in
+template argument list, as it is much faster because it doesn't participate in
+overload resolution (details: https://bugs.llvm.org/show_bug.cgi?id=36158).
+
+Hide verbose SFINAE sequences for Doxygen documentation and replace them with a descriptive template argument name instead, where possible. For example instead
+of using @cpp std::enable_if<std::is_integral<T>::value>::type @ce, simply
+rename @cpp T @ce to @cpp Integral @ce for the purpose of documentation.
+
 @subsection corrade-coding-style-cpp-discouraged Discouraged C/C++ features
 
 Don't use RTTI (@cpp dynamic_cast @ce and @ref std::type_info) and exceptions,
