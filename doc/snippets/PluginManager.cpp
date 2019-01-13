@@ -26,6 +26,7 @@
 #include "Corrade/PluginManager/AbstractManager.h"
 #include "Corrade/PluginManager/AbstractPlugin.h"
 #include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/Macros.h"
 
 using namespace Corrade;
 

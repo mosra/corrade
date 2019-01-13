@@ -24,7 +24,9 @@
 */
 
 #include <sstream>
+#include <vector>
 
+#include "Corrade/Containers/ArrayView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"

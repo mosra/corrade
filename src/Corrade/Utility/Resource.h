@@ -29,12 +29,11 @@
  * @brief Class @ref Corrade::Utility::Resource
  */
 
-#include <map>
-#include <string>
 #include <utility>
-#include <vector>
 
-#include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/Containers.h"
+#include "Corrade/Utility/StlForwardString.h"
+#include "Corrade/Utility/StlForwardVector.h"
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
@@ -162,21 +161,15 @@ class CORRADE_UTILITY_EXPORT Resource {
         static void unregisterData(const char* group);
 
     private:
-        struct CORRADE_UTILITY_LOCAL GroupData {
-            explicit GroupData();
-            ~GroupData();
-
-            std::string overrideGroup;
-            std::map<std::string, Containers::ArrayView<const char>> resources;
-        };
-
+        struct Resources;
+        struct GroupData;
         struct OverrideData;
 
         /* Accessed through function to overcome "static initialization order
            fiasco" which I think currently fails only in static build */
-        CORRADE_UTILITY_LOCAL static std::map<std::string, GroupData>& resources();
+        CORRADE_UTILITY_LOCAL static Resources& resources();
 
-        std::map<std::string, GroupData>::const_iterator _group;
+        std::pair<const std::string, GroupData>* _group;
         OverrideData* _overrideGroup;
 };
 

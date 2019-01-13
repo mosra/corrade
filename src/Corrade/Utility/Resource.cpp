@@ -29,6 +29,7 @@
 #include <algorithm> /* std::max() */
 #endif
 #include <iomanip>
+#include <map>
 #include <sstream>
 #include <tuple>
 #include <vector>
@@ -42,6 +43,8 @@
 
 namespace Corrade { namespace Utility {
 
+struct Resource::Resources: std::map<std::string, GroupData> {};
+
 struct Resource::OverrideData {
     const Configuration conf;
     std::map<std::string, Containers::Array<char>> data;
@@ -49,11 +52,19 @@ struct Resource::OverrideData {
     explicit OverrideData(const std::string& filename): conf(filename) {}
 };
 
+struct Resource::GroupData {
+    explicit GroupData();
+    ~GroupData();
+
+    std::string overrideGroup;
+    std::map<std::string, Containers::ArrayView<const char>> resources;
+};
+
 Resource::GroupData::GroupData() = default;
 Resource::GroupData::~GroupData() = default;
 
-auto Resource::resources() -> std::map<std::string, GroupData>& {
-    static std::map<std::string, GroupData> resources;
+auto Resource::resources() -> Resources& {
+    static Resources resources;
     return resources;
 }
 
@@ -266,9 +277,10 @@ bool Resource::hasGroup(const std::string& group) {
 }
 
 Resource::Resource(const std::string& group): _overrideGroup(nullptr) {
-    _group = resources().find(group);
-    CORRADE_ASSERT(_group != resources().end(),
+    auto groupIt = resources().find(group);
+    CORRADE_ASSERT(groupIt != resources().end(),
         "Utility::Resource: group" << '\'' + group + '\'' << "was not found", );
+    _group = &*groupIt;
 
     if(!_group->second.overrideGroup.empty()) {
         Debug() << "Utility::Resource: group" << '\'' + group + '\''
@@ -287,7 +299,7 @@ Resource::~Resource() {
 }
 
 std::vector<std::string> Resource::list() const {
-    CORRADE_INTERNAL_ASSERT(_group != resources().end());
+    CORRADE_INTERNAL_ASSERT(_group);
 
     std::vector<std::string> result;
     result.reserve(_group->second.resources.size());
@@ -298,7 +310,7 @@ std::vector<std::string> Resource::list() const {
 }
 
 Containers::ArrayView<const char> Resource::getRaw(const std::string& filename) const {
-    CORRADE_INTERNAL_ASSERT(_group != resources().end());
+    CORRADE_INTERNAL_ASSERT(_group);
 
     /* The group is overriden with live data */
     if(_overrideGroup) {

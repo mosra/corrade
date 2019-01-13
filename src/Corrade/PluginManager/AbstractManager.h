@@ -37,6 +37,7 @@
 #include "Corrade/PluginManager/PluginManager.h"
 #include "Corrade/PluginManager/visibility.h"
 #include "Corrade/Utility/Resource.h"
+#include "Corrade/Utility/Utility.h"
 
 #ifdef CORRADE_TARGET_WINDOWS
 /* I didn't find a better way to circumvent the need for including windows.h */

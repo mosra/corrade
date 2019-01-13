@@ -31,6 +31,7 @@
 
 #include "Corrade/Containers/Pointer.h"
 #include "Corrade/PluginManager/AbstractManager.h"
+#include "Corrade/Utility/Macros.h"
 
 #ifdef CORRADE_BUILD_DEPRECATED
 #include "Corrade/Containers/PointerStl.h"
