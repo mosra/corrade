@@ -70,7 +70,7 @@ Arguments:
 
 }
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
+#ifndef DOXYGEN_GENERATING_OUTPUT /* LCOV_EXCL_START */
 int main(int argc, char** argv) {
     Corrade::Utility::Arguments args;
     args.addArgument("name")
@@ -97,4 +97,4 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-#endif
+#endif /* LCOV_EXCL_STOP */
