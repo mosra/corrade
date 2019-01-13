@@ -143,6 +143,14 @@ void OptionalTest::nullOptInlineDefinition() {
     CORRADE_VERIFY((std::is_same<decltype(NullOpt), const NullOptT>::value));
 }
 
+struct Throwable {
+    explicit Throwable(int) {}
+    Throwable(const Throwable&) {}
+    Throwable(Throwable&&) {}
+    Throwable& operator=(const Throwable&) { return *this; }
+    Throwable& operator=(Throwable&&) { return *this; }
+};
+
 struct Copyable {
     static int constructed;
     static int destructed;
@@ -183,7 +191,9 @@ struct Movable {
     static int destructed;
     static int moved;
 
-    explicit Movable(int a): a{a} { ++constructed; }
+    explicit Movable(int a) noexcept: a{a} { ++constructed; }
+    /* To test perfect forwarding in in-place construction */
+    explicit Movable(int a, int&&) noexcept: Movable{a} {}
     Movable(const Movable&) = delete;
     Movable(Movable&& other) noexcept: a(other.a) {
         ++constructed;
@@ -210,7 +220,9 @@ struct Immovable {
 
     Immovable(const Immovable&) = delete;
     Immovable(Immovable&&) = delete;
-    explicit Immovable(int a): a{a} { ++constructed; }
+    explicit Immovable(int a) noexcept: a{a} { ++constructed; }
+    /* To test perfect forwarding in in-place construction */
+    explicit Immovable(int a, int&&) noexcept: Immovable{a} {}
     ~Immovable() { ++destructed; }
     Immovable& operator=(const Immovable&) = delete;
     Immovable& operator=(Immovable&&) = delete;
@@ -236,6 +248,9 @@ void OptionalTest::constructDefault() {
     CORRADE_COMPARE(Copyable::destructed, 0);
     CORRADE_COMPARE(Copyable::copied, 0);
     CORRADE_COMPARE(Copyable::moved, 0);
+
+    CORRADE_VERIFY(std::is_nothrow_constructible<Optional<Copyable>>::value);
+    CORRADE_VERIFY(std::is_nothrow_constructible<Optional<Throwable>>::value);
 }
 
 void OptionalTest::constructNullOpt() {
@@ -250,6 +265,9 @@ void OptionalTest::constructNullOpt() {
     CORRADE_COMPARE(Copyable::destructed, 0);
     CORRADE_COMPARE(Copyable::copied, 0);
     CORRADE_COMPARE(Copyable::moved, 0);
+
+    CORRADE_VERIFY((std::is_nothrow_constructible<Optional<Copyable>, NullOptT>::value));
+    CORRADE_VERIFY((std::is_nothrow_constructible<Optional<Throwable>, NullOptT>::value));
 }
 
 void OptionalTest::constructCopy() {
@@ -269,12 +287,19 @@ void OptionalTest::constructCopy() {
 
     CORRADE_VERIFY(std::is_nothrow_copy_constructible<Copyable>::value);
     CORRADE_VERIFY(std::is_nothrow_copy_constructible<Optional<Copyable>>::value);
+    CORRADE_VERIFY((std::is_nothrow_constructible<Optional<Copyable>, const Copyable&>::value));
     CORRADE_VERIFY(std::is_nothrow_copy_assignable<Copyable>::value);
     CORRADE_VERIFY(std::is_nothrow_copy_assignable<Optional<Copyable>>::value);
-    CORRADE_VERIFY(std::is_nothrow_move_constructible<Copyable>::value);
-    CORRADE_VERIFY(std::is_nothrow_move_constructible<Optional<Copyable>>::value);
-    CORRADE_VERIFY(std::is_nothrow_move_assignable<Copyable>::value);
-    CORRADE_VERIFY(std::is_nothrow_move_assignable<Optional<Copyable>>::value);
+    CORRADE_VERIFY((std::is_nothrow_assignable<Optional<Copyable>, const Copyable&>::value));
+
+    CORRADE_VERIFY(std::is_copy_constructible<Throwable>::value);
+    CORRADE_VERIFY(!std::is_nothrow_copy_constructible<Throwable>::value);
+    CORRADE_VERIFY(!std::is_nothrow_copy_constructible<Optional<Throwable>>::value);
+    CORRADE_VERIFY(!(std::is_nothrow_constructible<Optional<Throwable>, const Throwable&>::value));
+    CORRADE_VERIFY(std::is_copy_assignable<Throwable>::value);
+    CORRADE_VERIFY(!std::is_nothrow_copy_assignable<Throwable>::value);
+    CORRADE_VERIFY(!std::is_nothrow_copy_assignable<Optional<Throwable>>::value);
+    CORRADE_VERIFY(!(std::is_nothrow_assignable<Optional<Throwable>, const Throwable&>::value));
 }
 
 void OptionalTest::constructCopyMake() {
@@ -307,8 +332,19 @@ void OptionalTest::constructMove() {
 
     CORRADE_VERIFY(std::is_nothrow_move_constructible<Movable>::value);
     CORRADE_VERIFY(std::is_nothrow_move_constructible<Optional<Movable>>::value);
+    CORRADE_VERIFY((std::is_nothrow_constructible<Optional<Movable>, Movable&&>::value));
     CORRADE_VERIFY(std::is_nothrow_move_assignable<Movable>::value);
     CORRADE_VERIFY(std::is_nothrow_move_assignable<Optional<Movable>>::value);
+    CORRADE_VERIFY((std::is_nothrow_assignable<Optional<Movable>, Movable&&>::value));
+
+    CORRADE_VERIFY(std::is_move_constructible<Throwable>::value);
+    CORRADE_VERIFY(!std::is_nothrow_move_constructible<Throwable>::value);
+    CORRADE_VERIFY(!std::is_nothrow_move_constructible<Optional<Throwable>>::value);
+    CORRADE_VERIFY(!(std::is_nothrow_constructible<Optional<Throwable>, Throwable&&>::value));
+    CORRADE_VERIFY(std::is_move_assignable<Throwable>::value);
+    CORRADE_VERIFY(!std::is_nothrow_move_assignable<Throwable>::value);
+    CORRADE_VERIFY(!std::is_nothrow_move_assignable<Optional<Throwable>>::value);
+    CORRADE_VERIFY(!(std::is_nothrow_assignable<Optional<Throwable>, Throwable&&>::value));
 }
 
 void OptionalTest::constructMoveMake() {
@@ -326,18 +362,24 @@ void OptionalTest::constructMoveMake() {
 
 void OptionalTest::constructInPlace() {
     {
-        Optional<Immovable> a{InPlaceInit, 32};
+        /* Using int{} to test perfect forwarding */
+        Optional<Immovable> a{InPlaceInit, 32, int{}};
         CORRADE_VERIFY(a);
         CORRADE_COMPARE(a->a, 32);
     }
 
     CORRADE_COMPARE(Immovable::constructed, 1);
     CORRADE_COMPARE(Immovable::destructed, 1);
+
+    CORRADE_VERIFY((std::is_nothrow_constructible<Optional<Immovable>, InPlaceInitT, int, int&&>::value));
+    CORRADE_VERIFY((std::is_constructible<Optional<Throwable>, InPlaceInitT, int>::value));
+    CORRADE_VERIFY(!(std::is_nothrow_constructible<Optional<Throwable>, InPlaceInitT, int>::value));
 }
 
 void OptionalTest::constructInPlaceMake() {
     {
-        auto a = optional<Movable>(15);
+        /* Using int{} to test perfect forwarding */
+        auto a = optional<Movable>(15, int{});
         CORRADE_VERIFY(a);
         CORRADE_COMPARE(a->a, 15);
     }
@@ -661,7 +703,8 @@ void OptionalTest::moveNullOptToSet() {
 void OptionalTest::emplaceNull() {
     {
         Optional<Immovable> a;
-        a.emplace(32);
+        /* Using int{} to test perfect forwarding */
+        a.emplace(32, int{});
 
         CORRADE_VERIFY(a);
         CORRADE_COMPARE(a->a, 32);
@@ -674,7 +717,8 @@ void OptionalTest::emplaceNull() {
 void OptionalTest::emplaceSet() {
     {
         Optional<Immovable> a{InPlaceInit, 32};
-        a.emplace(76);
+        /* Using int{} to test perfect forwarding */
+        a.emplace(76, int{});
 
         CORRADE_VERIFY(a);
         CORRADE_COMPARE(a->a, 76);
@@ -692,14 +736,14 @@ void OptionalTest::resetCounters() {
 
 void OptionalTest::access() {
     Optional<Copyable> a{Copyable{32}};
-    const Optional<Copyable> ca{Copyable{32}};
+    const Optional<Copyable> ca{Copyable{18}};
 
     CORRADE_VERIFY(a);
     CORRADE_VERIFY(ca);
     CORRADE_COMPARE(a->a, 32);
-    CORRADE_COMPARE(ca->a, 32);
+    CORRADE_COMPARE(ca->a, 18);
     CORRADE_COMPARE((*a).a, 32);
-    CORRADE_COMPARE((*ca).a, 32);
+    CORRADE_COMPARE((*ca).a, 18);
 }
 
 void OptionalTest::accessInvalid() {

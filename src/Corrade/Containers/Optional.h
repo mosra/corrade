@@ -98,7 +98,7 @@ template<class T> class Optional {
          * Stores a copy of passed object.
          * @see @ref operator bool(), @ref operator->(), @ref operator*()
          */
-        /*implicit*/ Optional(const T& value): _set{true} {
+        /*implicit*/ Optional(const T& value) noexcept(std::is_nothrow_copy_assignable<T>::value): _set{true} {
             new(&_value.v) T{value};
         }
 
@@ -108,7 +108,7 @@ template<class T> class Optional {
          * Moves the passed object to internal storage.
          * @see @ref operator bool(), @ref operator->(), @ref operator*()
          */
-        /*implicit*/ Optional(T&& value): _set{true} {
+        /*implicit*/ Optional(T&& value) noexcept(std::is_nothrow_move_assignable<T>::value): _set{true} {
             new(&_value.v) T{std::move(value)};
         }
 
@@ -119,7 +119,7 @@ template<class T> class Optional {
          * @see @ref operator bool(), @ref operator->(), @ref operator*(),
          *      @ref emplace()
          */
-        template<class ...Args> /*implicit*/ Optional(InPlaceInitT, Args&&... args): _set{true} {
+        template<class ...Args> /*implicit*/ Optional(InPlaceInitT, Args&&... args) noexcept(std::is_nothrow_constructible<T, Args&&...>::value): _set{true} {
             new(&_value.v) T{std::forward<Args>(args)...};
         }
 
