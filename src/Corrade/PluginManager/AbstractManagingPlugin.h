@@ -62,9 +62,7 @@ template<class Interface> class AbstractManagingPlugin: public AbstractPlugin {
          *
          * The @ref metadata() function will return @cpp nullptr @ce.
          */
-        explicit AbstractManagingPlugin(Manager<Interface>& manager) {
-            _manager = &manager;
-        }
+        explicit AbstractManagingPlugin(Manager<Interface>& manager): AbstractPlugin{manager} {}
 
         /**
          * @brief Plugin manager constructor
@@ -84,12 +82,12 @@ template<class Interface> class AbstractManagingPlugin: public AbstractPlugin {
          * instantiated with access to plugin manager, returns @cpp nullptr @ce.
          */
         Manager<Interface>* manager() {
-            return static_cast<Manager<Interface>*>(_manager);
+            return static_cast<Manager<Interface>*>(AbstractPlugin::manager());
         }
 
         /** @overload */
         const Manager<Interface>* manager() const {
-            return static_cast<const Manager<Interface>*>(_manager);
+            return static_cast<const Manager<Interface>*>(AbstractPlugin::manager());
         }
 };
 

@@ -31,6 +31,13 @@
 
 namespace Corrade { namespace PluginManager {
 
+struct AbstractPlugin::State {
+    AbstractManager* manager{};
+    std::string plugin;
+    const PluginMetadata* metadata{};
+    Utility::ConfigurationGroup configuration;
+};
+
 std::string AbstractPlugin::pluginInterface() { return {}; }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
@@ -41,13 +48,17 @@ void AbstractPlugin::initialize() {}
 
 void AbstractPlugin::finalize() {}
 
-AbstractPlugin::AbstractPlugin(): _manager{nullptr}, _metadata{nullptr} {
-    _configuration.reset(new Utility::ConfigurationGroup);
+AbstractPlugin::AbstractPlugin(): _state{Containers::InPlaceInit} {}
+
+AbstractPlugin::AbstractPlugin(AbstractManager& manager, const std::string& plugin): _state{Containers::InPlaceInit} {
+    _state->manager = &manager;
+    _state->plugin = plugin;
+    manager.registerInstance(plugin, *this, _state->metadata);
+    _state->configuration = _state->metadata->configuration();
 }
 
-AbstractPlugin::AbstractPlugin(AbstractManager& manager, const std::string& plugin): _manager{&manager}, _plugin{plugin} {
-    manager.registerInstance(plugin, *this, _metadata);
-    _configuration.reset(new Utility::ConfigurationGroup(_metadata->configuration()));
+AbstractPlugin::AbstractPlugin(AbstractManager& manager): _state{Containers::InPlaceInit} {
+    _state->manager = &manager;
 }
 
 AbstractPlugin::~AbstractPlugin() {
@@ -56,10 +67,20 @@ AbstractPlugin::~AbstractPlugin() {
        AbstractManagingPlugin::AbstractManagingPlugin(AbstractManager&) is
        *not* instantiating through the manager, in that case the _metadata
        field would be nullptr */
-    if(_manager && _metadata)
-        _manager->unregisterInstance(_plugin, *this);
+    if(_state->manager && _state->metadata)
+        _state->manager->unregisterInstance(_state->plugin, *this);
 }
 
 bool AbstractPlugin::canBeDeleted() { return false; }
+
+const std::string& AbstractPlugin::plugin() const { return _state->plugin; }
+
+const PluginMetadata* AbstractPlugin::metadata() const { return _state->metadata; }
+
+Utility::ConfigurationGroup& AbstractPlugin::configuration() { return _state->configuration; }
+const Utility::ConfigurationGroup& AbstractPlugin::configuration() const { return _state->configuration; }
+
+AbstractManager* AbstractPlugin::manager() { return _state->manager; }
+const AbstractManager* AbstractPlugin::manager() const { return _state->manager; }
 
 }}

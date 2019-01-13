@@ -29,15 +29,14 @@
  * @brief Class @ref Corrade::PluginManager::AbstractPlugin
  */
 
-#include <string>
-
 #include "Corrade/Containers/Pointer.h"
 #include "Corrade/PluginManager/PluginManager.h"
 #include "Corrade/PluginManager/visibility.h"
+#include "Corrade/Utility/StlForwardString.h"
 #include "Corrade/Utility/Utility.h"
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-#include <vector>
+#include "Corrade/Utility/StlForwardVector.h"
 #endif
 
 namespace Corrade { namespace PluginManager {
@@ -214,7 +213,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * returns empty string. Use @cpp metadata()->name() @ce to get plugin
          * true name unconditionally.
          */
-        const std::string& plugin() const { return _plugin; }
+        const std::string& plugin() const;
 
         /**
          * @brief Metadata
@@ -223,7 +222,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * instantiated through a plugin manager, returns @cpp nullptr @ce.
          * @see @ref AbstractManager::metadata()
          */
-        const PluginMetadata* metadata() const { return _metadata; }
+        const PluginMetadata* metadata() const;
 
         /**
          * @brief Plugin-specific configuration
@@ -236,14 +235,17 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * through a plugin manager or the @cb{.ini} [configuration] @ce
          * group was not present in the metadata, the returned group is empty.
          */
-        Utility::ConfigurationGroup& configuration() { return *_configuration; }
-        const Utility::ConfigurationGroup& configuration() const { return *_configuration; } /**< @overload */
+        Utility::ConfigurationGroup& configuration();
+        const Utility::ConfigurationGroup& configuration() const; /**< @overload */
 
     private:
-        AbstractManager* _manager;
-        const std::string _plugin;
-        const PluginMetadata* _metadata;
-        Containers::Pointer<Utility::ConfigurationGroup> _configuration;
+        /* used by AbstractManagingPlugin */
+        explicit AbstractPlugin(AbstractManager& manager);
+        AbstractManager* manager();
+        const AbstractManager* manager() const;
+
+        struct State;
+        Containers::Pointer<State> _state;
 };
 
 }}

@@ -25,6 +25,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <string>
+
 #include "Corrade/PluginManager/AbstractPlugin.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
