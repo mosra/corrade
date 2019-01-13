@@ -50,7 +50,9 @@ See also @ref building-corrade and @ref corrade-cmake for more information.
 /** @namespace Corrade::Containers
 @brief Container implementations
 
-Implementations for various containers which don't have equivalents in STL.
+Implementations for various containers which don't have direct equivalents in
+STL or are better tailored to specific use cases than general standard
+implementations.
 
 This library is built if `WITH_UTILITY` is enabled when building Corrade. To
 use this library with CMake, you need to request the `Containers` component of
