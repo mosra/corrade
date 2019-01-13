@@ -41,6 +41,7 @@ struct DebugTest: TestSuite::Tester {
     void isTty();
 
     void debug();
+    template<class T> void ints();
     template<class T> void floats();
     void boolean();
     void chars();
@@ -76,6 +77,16 @@ DebugTest::DebugTest() {
 
         &DebugTest::debug,
         &DebugTest::boolean,
+        &DebugTest::ints<unsigned char>,
+        &DebugTest::ints<char>,
+        &DebugTest::ints<unsigned short>,
+        &DebugTest::ints<short>,
+        &DebugTest::ints<unsigned int>,
+        &DebugTest::ints<int>,
+        &DebugTest::ints<unsigned long>,
+        &DebugTest::ints<long>,
+        &DebugTest::ints<unsigned long long>,
+        &DebugTest::ints<long long>,
         &DebugTest::floats<float>,
         &DebugTest::floats<double>,
         #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -137,6 +148,60 @@ void DebugTest::debug() {
     CORRADE_COMPARE(debug.str(), "");
 }
 
+template<class> struct IntsData;
+template<> struct IntsData<char> {
+    static const char* name() { return "ints<char>"; }
+    static char value() { return -123; }
+    static const char* expected() { return "-123\n"; }
+};
+template<> struct IntsData<unsigned char> {
+    static const char* name() { return "ints<unsigned char>"; }
+    static unsigned char value() { return 223; }
+    static const char* expected() { return "223\n"; }
+};
+template<> struct IntsData<short> {
+    static const char* name() { return "ints<short>"; }
+    static short value() { return -31752; }
+    static const char* expected() { return "-31752\n"; }
+};
+template<> struct IntsData<unsigned short> {
+    static const char* name() { return "ints<unsigned short>"; }
+    static unsigned short value() { return 48523; }
+    static const char* expected() { return "48523\n"; }
+};
+template<> struct IntsData<int> {
+    static const char* name() { return "ints<int>"; }
+    static int value() { return -1423584221; }
+    static const char* expected() { return "-1423584221\n"; }
+};
+template<> struct IntsData<unsigned int> {
+    static const char* name() { return "ints<unsigned int>"; }
+    static unsigned int value() { return 4214211824; }
+    static const char* expected() { return "4214211824\n"; }
+};
+template<> struct IntsData<long long> {
+    static const char* name() { return "ints<long long>"; }
+    static long long value() { return -4214211824234535464ll; }
+    static const char* expected() { return "-4214211824234535464\n"; }
+};
+template<> struct IntsData<unsigned long long> {
+    static const char* name() { return "ints<unsigned long long>"; }
+    static unsigned long long value() { return 14214211824234535464ull; }
+    static const char* expected() { return "14214211824234535464\n"; }
+};
+template<int> struct IntsDataFor;
+template<int> struct IntsDataForUnsigned;
+template<> struct IntsDataFor<4>: IntsData<int> {};
+template<> struct IntsDataFor<8>: IntsData<long long> {};
+template<> struct IntsDataForUnsigned<4>: IntsData<unsigned int> {};
+template<> struct IntsDataForUnsigned<8>: IntsData<unsigned long long> {};
+template<> struct IntsData<long>: IntsDataFor<sizeof(long)> {
+    static const char* name() { return "ints<long>"; }
+};
+template<> struct IntsData<unsigned long>: IntsDataForUnsigned<sizeof(long)> {
+    static const char* name() { return "ints<unsigned long>"; }
+};
+
 template<class> struct FloatsData;
 template<> struct FloatsData<float> {
     static const char* name() { return "floats<float>"; }
@@ -180,6 +245,14 @@ void DebugTest::isTty() {
 
     std::ostringstream o;
     CORRADE_VERIFY(!Debug::isTty(&o));
+}
+
+template<class T> void DebugTest::ints() {
+    setTestCaseName(IntsData<T>::name());
+
+    std::ostringstream out;
+    Debug{&out} << IntsData<T>::value();
+    CORRADE_COMPARE(out.str(), IntsData<T>::expected());
 }
 
 template<class T> void DebugTest::floats() {
