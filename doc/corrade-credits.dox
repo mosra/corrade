@@ -71,6 +71,8 @@ There are no third party components used at the moment.
 /** @page corrade-credits-contributors Contributors
 @brief People and organizations that contributed to Corrade
 
+@m_keywords{Credits}
+
 Listing only people with code contributions or other significant work, because
 otherwise there's too many :) There's also a list of
 @ref corrade-credits-third-party "third party components with their license info".
