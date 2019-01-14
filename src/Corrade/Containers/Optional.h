@@ -375,7 +375,7 @@ template<class T, class ...Args> inline Optional<T> optional(Args&&... args) {
     return Optional<T>{InPlaceInit, std::forward<Args>(args)...};
 }
 
-/** @debugoperator{Optional} */
+/** @debugoperator{NullOptT} */
 inline Utility::Debug& operator<<(Utility::Debug& debug, NullOptT) {
     return debug << "Containers::NullOpt";
 }

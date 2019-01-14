@@ -388,8 +388,8 @@ Debug& Debug::operator<<(std::nullptr_t) {
 Debug& Debug::operator<<(Implementation::DebugOstreamFallback&& value) {
     return print(value);
 }
-#endif
 
+/* Doxygen can't match this to the declaration, eh. */
 Debug& operator<<(Debug& debug, Debug::Color value) {
     switch(value) {
         /* LCOV_EXCL_START */
@@ -411,5 +411,6 @@ Debug& operator<<(Debug& debug, Debug::Color value) {
 
     return debug << "Debug::Color(" << Debug::nospace << reinterpret_cast<void*>(static_cast<unsigned char>(char(value))) << Debug::nospace << ")";
 }
+#endif
 
 }}

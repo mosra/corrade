@@ -32,7 +32,7 @@
 
 #include <type_traits>
 
-#include "Corrade/Containers/Containers.h"
+#include "Corrade/Containers/Containers.h" /* for template default args */
 #include "Corrade/Containers/Tags.h"
 
 namespace Corrade { namespace Containers {

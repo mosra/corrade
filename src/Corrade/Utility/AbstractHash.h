@@ -115,7 +115,7 @@ template<std::size_t digestSize> class AbstractHash {
         };
 };
 
-/** @debugoperator{Corrade::Utility::HashDigest} */
+/** @debugoperator{HashDigest} */
 template<std::size_t size> inline Debug& operator<<(Debug& debug, const HashDigest<size>& value) {
     return debug << value.hexString();
 }
