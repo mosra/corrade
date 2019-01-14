@@ -27,7 +27,9 @@
 
 #include <type_traits>
 
+#ifndef CORRADE_NO_DEBUG
 #include "Corrade/Utility/Debug.h"
+#endif
 
 /** @file
  * @brief Class @ref Corrade::Containers::Reference
@@ -124,10 +126,12 @@ template<class T> class Reference {
         T* _reference;
 };
 
+#ifndef CORRADE_NO_DEBUG
 /** @debugoperator{Reference} */
 template<class T> Utility::Debug& operator<<(Utility::Debug& debug, const Reference<T>& value) {
     return debug << value.get();
 }
+#endif
 
 }}
 

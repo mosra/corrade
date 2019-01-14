@@ -34,7 +34,9 @@
 
 #include "Corrade/Containers/Tags.h"
 #include "Corrade/Utility/Assert.h"
+#ifndef CORRADE_NO_DEBUG
 #include "Corrade/Utility/Debug.h"
+#endif
 
 namespace Corrade { namespace Containers {
 
@@ -375,6 +377,7 @@ template<class T, class ...Args> inline Optional<T> optional(Args&&... args) {
     return Optional<T>{InPlaceInit, std::forward<Args>(args)...};
 }
 
+#ifndef CORRADE_NO_DEBUG
 /** @debugoperator{NullOptT} */
 inline Utility::Debug& operator<<(Utility::Debug& debug, NullOptT) {
     return debug << "Containers::NullOpt";
@@ -385,6 +388,7 @@ template<class T> Utility::Debug& operator<<(Utility::Debug& debug, const Option
     if(!value) return debug << NullOpt;
     else return debug << *value;
 }
+#endif
 
 template<class T> Optional<T>::Optional(const Optional<T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value): _set(other._set) {
     if(_set) new(&_value.v) T{other._value.v};

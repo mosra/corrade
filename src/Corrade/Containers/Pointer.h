@@ -35,7 +35,9 @@
 
 #include "Corrade/Containers/Tags.h"
 #include "Corrade/Utility/Assert.h"
+#ifndef CORRADE_NO_DEBUG
 #include "Corrade/Utility/Debug.h"
+#endif
 
 namespace Corrade { namespace Containers {
 
@@ -302,10 +304,12 @@ template<class T, class ...Args> inline Pointer<T> pointer(Args&&... args) {
     return Pointer<T>{InPlaceInit, std::forward<Args>(args)...};
 }
 
+#ifndef CORRADE_NO_DEBUG
 /** @debugoperator{Pointer} */
 template<class T> Utility::Debug& operator<<(Utility::Debug& debug, const Pointer<T>& value) {
     return debug << value.get();
 }
+#endif
 
 }}
 
