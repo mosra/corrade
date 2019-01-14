@@ -29,7 +29,7 @@
  * @brief Macro @ref CORRADE_ASSERT(), @ref CORRADE_CONSTEXPR_ASSERT(), @ref CORRADE_ASSERT_OUTPUT(), @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(), @ref CORRADE_ASSERT_UNREACHABLE(), @ref CORRADE_NO_ASSERT, @ref CORRADE_GRACEFUL_ASSERT, @ref CORRADE_STANDARD_ASSERT
  */
 
-#ifndef CORRADE_NO_ASSERT
+#if !defined(CORRADE_NO_ASSERT) && (!defined(CORRADE_ASSERT) || !defined(CORRADE_CONSTEXPR_ASSERT) || !defined(CORRADE_ASSERT_OUTPUT) || !defined(CORRADE_INTERNAL_ASSERT) || !defined(CORRADE_INTERNAL_CONSTEXPR_ASSERT) || !defined(CORRADE_INTERNAL_ASSERT_OUTPUT) || !defined(CORRADE_ASSERT_UNREACHABLE))
 #ifndef CORRADE_STANDARD_ASSERT
 #include <cstdlib>
 
@@ -134,9 +134,14 @@ You can use stream output operators for formatting just like when printing to
     thus the function gets never called. See @ref CORRADE_ASSERT_OUTPUT() for a
     possible solution.
 
+You can override this implementation by placing your own
+@cpp #define CORRADE_ASSERT @ce before including the
+@ref Corrade/Utility/Assert.h header.
+
 @see @ref CORRADE_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT(),
     @ref CORRADE_ASSERT_UNREACHABLE()
 */
+#ifndef CORRADE_ASSERT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
 #define CORRADE_ASSERT(condition, message, returnValue) do {} while(0)
 #elif defined(CORRADE_GRACEFUL_ASSERT)
@@ -158,6 +163,7 @@ You can use stream output operators for formatting just like when printing to
             return returnValue;                                             \
         }                                                                   \
     } while(false)
+#endif
 #endif
 
 /** @hideinitializer
@@ -186,8 +192,13 @@ formatting just like when printing to @ref Corrade::Utility::Debug output.
 The implementation is based on the [Asserts in constexpr functions](https://akrzemi1.wordpress.com/2017/05/18/asserts-in-constexpr-functions/)
 article by Andrzej Krzemieński and the followup discussion.
 
+You can override this implementation by placing your own
+@cpp #define CORRADE_CONSTEXPR_ASSERT @ce before including the
+@ref Corrade/Utility/Assert.h header.
+
 @see @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT()
 */
+#ifndef CORRADE_CONSTEXPR_ASSERT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
 #define CORRADE_CONSTEXPR_ASSERT(condition, message) static_cast<void>(0)
 #elif defined(CORRADE_GRACEFUL_ASSERT)
@@ -207,6 +218,7 @@ article by Andrzej Krzemieński and the followup discussion.
         std::abort();                                                       \
     }(), 0))
 #endif
+#endif
 
 /** @hideinitializer
 @brief Call output assertion macro
@@ -222,8 +234,13 @@ usage:
 
 @snippet Utility.cpp CORRADE_ASSERT_OUTPUT
 
+You can override this implementation by placing your own
+@cpp #define CORRADE_ASSERT_OUTPUT @ce before including the
+@ref Corrade/Utility/Assert.h header.
+
 @see @ref CORRADE_INTERNAL_ASSERT_OUTPUT()
 */
+#ifndef CORRADE_ASSERT_OUTPUT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
 #define CORRADE_ASSERT_OUTPUT(call, message, returnValue)                   \
     static_cast<void>(call)
@@ -246,6 +263,7 @@ usage:
             return returnValue;                                             \
         }                                                                   \
     } while(false)
+#endif
 #endif
 
 /** @hideinitializer
@@ -273,9 +291,14 @@ Example usage:
     the function gets never called. Use @ref CORRADE_INTERNAL_ASSERT_OUTPUT()
     instead.
 
+You can override this implementation by placing your own
+@cpp #define CORRADE_INTERNAL_ASSERT @ce before including the
+@ref Corrade/Utility/Assert.h header.
+
 @see @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(),
     @ref CORRADE_ASSERT_UNREACHABLE()
 */
+#ifndef CORRADE_INTERNAL_ASSERT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
 #define CORRADE_INTERNAL_ASSERT(condition) do {} while(0)
 #elif defined(CORRADE_STANDARD_ASSERT)
@@ -288,6 +311,7 @@ Example usage:
             std::abort();                                                   \
         }                                                                   \
     } while(false)
+#endif
 #endif
 
 /** @hideinitializer
@@ -306,7 +330,12 @@ and line is printed to error output and the application aborts. If
 called if @p condition fails. If @ref CORRADE_NO_ASSERT is defined (or if both
 @ref CORRADE_STANDARD_ASSERT and @cpp NDEBUG @ce are defined), this macro
 compiles to @cpp static_cast<void>(0) @ce.
+
+You can override this implementation by placing your own
+@cpp #define CORRADE_INTERNAL_CONSTEXPR_ASSERT @ce before including the
+@ref Corrade/Utility/Assert.h header.
 */
+#ifndef CORRADE_INTERNAL_CONSTEXPR_ASSERT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
 #define CORRADE_INTERNAL_CONSTEXPR_ASSERT(condition) static_cast<void>(0)
 #elif defined(CORRADE_STANDARD_ASSERT)
@@ -321,6 +350,7 @@ compiles to @cpp static_cast<void>(0) @ce.
         std::abort();                                                       \
     }(), 0))
 #endif
+#endif
 
 /** @hideinitializer
 @brief Internal call output assertion macro
@@ -333,7 +363,12 @@ Otherwise the behavior is the same as with @ref CORRADE_INTERNAL_ASSERT().
 Example usage:
 
 @snippet Utility.cpp CORRADE_INTERNAL_ASSERT_OUTPUT
+
+You can override this implementation by placing your own
+@cpp #define CORRADE_INTERNAL_ASSERT_OUTPUT @ce before including the
+@ref Corrade/Utility/Assert.h header.
 */
+#ifndef CORRADE_INTERNAL_ASSERT_OUTPUT
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
 #define CORRADE_INTERNAL_ASSERT_OUTPUT(call)                                \
     static_cast<void>(call)
@@ -347,6 +382,7 @@ Example usage:
             std::abort();                                                   \
         }                                                                   \
     } while(false)
+#endif
 #endif
 
 /** @hideinitializer
@@ -362,8 +398,13 @@ performance. Example usage:
 
 @snippet Utility.cpp CORRADE_ASSERT_UNREACHABLE
 
+You can override this implementation by placing your own
+@cpp #define CORRADE_ASSERT_UNREACHABLE @ce before including the
+@ref Corrade/Utility/Assert.h header.
+
 @see @ref CORRADE_ASSERT(), @ref CORRADE_INTERNAL_ASSERT()
 */
+#ifndef CORRADE_ASSERT_UNREACHABLE
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
 #if defined(__GNUC__)
 #define CORRADE_ASSERT_UNREACHABLE() __builtin_unreachable()
@@ -378,6 +419,7 @@ performance. Example usage:
         Corrade::Utility::Error() << "Reached unreachable code in " __FILE__ " on line" << __LINE__; \
         std::abort();                                                       \
     } while(false)
+#endif
 #endif
 
 #endif

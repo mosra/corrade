@@ -53,6 +53,9 @@ namespace Corrade {
 
 -   Asserts from the @ref Corrade/Utility/Assert.h can now use the standard
     @cpp assert() @ce if @ref CORRADE_STANDARD_ASSERT is defined
+-   It's now possible to provide custom implementation for any assertion macro
+    from @ref Corrade/Utility/Assert.h by placing a @cpp #define @ce before
+    including the header
 -   Initial implementation of a @ref Utility::FileWatcher utility for
     monitoring changes to a file (see also [mosra/corrade#54](https://github.com/mosra/corrade/issues/54))
 -   New @ref Utility::Tweakable class, implementing tweakable constants for
