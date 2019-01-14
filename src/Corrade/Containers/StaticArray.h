@@ -37,10 +37,6 @@
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/Tags.h"
 
-#ifdef CORRADE_BUILD_DEPRECATED
-#include "Corrade/Utility/Macros.h"
-#endif
-
 namespace Corrade { namespace Containers {
 
 /**
