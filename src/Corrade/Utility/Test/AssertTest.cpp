@@ -35,8 +35,8 @@ struct AssertTest: TestSuite::Tester {
     explicit AssertTest();
 
     void test();
-
     void constexprTest();
+    void evaluateOnce();
 
     bool _failAssert, _failConstexprAssert, _failInternalAssert,
         _failInternalConstexprAssert, _failAssertOutput,
@@ -45,7 +45,8 @@ struct AssertTest: TestSuite::Tester {
 
 AssertTest::AssertTest(): TestSuite::Tester{TesterConfiguration{}.setSkippedArgumentPrefixes({"fail-on"})} {
     addTests({&AssertTest::test,
-              &AssertTest::constexprTest});
+              &AssertTest::constexprTest,
+              &AssertTest::evaluateOnce});
 
     Arguments args{"fail-on"};
     args.addOption("assert", "false").setHelp("assert", "fail on CORRADE_ASSERT()", "BOOL")
@@ -118,6 +119,34 @@ void AssertTest::constexprTest() {
     }
 
     CORRADE_COMPARE(out.str(), "");
+}
+
+void AssertTest::evaluateOnce() {
+    int i;
+
+    i = 0;
+    CORRADE_ASSERT(i += 1, "", );
+    CORRADE_COMPARE(i, 1);
+
+    i = 0;
+    CORRADE_INTERNAL_ASSERT(i += 1);
+    CORRADE_COMPARE(i, 1);
+
+    i = 0;
+    CORRADE_ASSERT_OUTPUT(i += 1, "", );
+    CORRADE_COMPARE(i, 1);
+
+    i = 0;
+    CORRADE_INTERNAL_ASSERT_OUTPUT(i += 1);
+    CORRADE_COMPARE(i, 1);
+
+    i = 0;
+    CORRADE_CONSTEXPR_ASSERT(i += 1, "");
+    CORRADE_COMPARE(i, 1);
+
+    i = 0;
+    CORRADE_INTERNAL_CONSTEXPR_ASSERT(i += 1);
+    CORRADE_COMPARE(i, 1);
 }
 
 }}}}
