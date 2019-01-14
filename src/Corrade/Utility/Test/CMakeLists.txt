@@ -92,7 +92,17 @@ if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
         PASS_REGULAR_EXPRESSION "Reached unreachable code in ")
 endif()
 
+# The same as above, but using CORRADE_STANDARD_ASSERT
+corrade_add_test(UtilityAssertStandardTest AssertTest.cpp)
+target_compile_definitions(UtilityAssertStandardTest PRIVATE
+    "CORRADE_STANDARD_ASSERT")
+
 corrade_add_test(UtilityAssertDisabledTest AssertDisabledTest.cpp)
+# The same, but using CORRADE_STANDARD_ASSERT and NDEBUG
+corrade_add_test(UtilityAssertStandardDisabledTest AssertDisabledTest.cpp)
+target_compile_definitions(UtilityAssertStandardDisabledTest PRIVATE
+    "CORRADE_STANDARD_ASSERT" "NDEBUG")
+
 corrade_add_test(UtilityAssertGracefulTest AssertGracefulTest.cpp)
 corrade_add_test(UtilityEndianTest EndianTest.cpp)
 corrade_add_test(UtilityMurmurHash2Test MurmurHash2Test.cpp)

@@ -25,6 +25,10 @@
 
 #include <sstream>
 
+#ifdef CORRADE_STANDARD_ASSERT
+#undef NDEBUG /* So we can test them */
+#endif
+
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/TestSuite/Tester.h"
@@ -65,6 +69,10 @@ AssertTest::AssertTest(): TestSuite::Tester{TesterConfiguration{}.setSkippedArgu
     _failAssertOutput = args.value<bool>("assert-output");
     _failInternalAssertOutput = args.value<bool>("internal-assert-output");
     _failAssertUnreachable = args.value<bool>("assert-unreachable");
+
+    #ifdef CORRADE_STANDARD_ASSERT
+    setTestName("Corrade::Utility::Test::AssertStandardTest");
+    #endif
 }
 
 void AssertTest::test() {

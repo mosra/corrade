@@ -42,6 +42,10 @@ struct AssertDisabledTest: TestSuite::Tester {
 AssertDisabledTest::AssertDisabledTest() {
     addTests({&AssertDisabledTest::test,
               &AssertDisabledTest::constexprTest});
+
+    #ifdef CORRADE_STANDARD_ASSERT
+    setTestName("Corrade::Utility::Test::AssertStandardDisabledTest");
+    #endif
 }
 
 void AssertDisabledTest::test() {
