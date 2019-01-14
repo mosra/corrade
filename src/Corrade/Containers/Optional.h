@@ -80,7 +80,8 @@ to access a stored object in an empty state leads to assertion error.
 Unlike `std::optional`, this class does not provide a @cpp constexpr @ce
 implementation or ordering operators, which makes it fairly simple and
 lightweight. If you need the extra features, use the standard `std::optional`.
-@see @ref NullOpt, @ref optional(T&&), @ref optional(Args&&... args)
+@see @ref NullOpt, @ref optional(T&&), @ref optional(Args&&... args),
+    @ref Reference
 */
 template<class T> class Optional {
     public:

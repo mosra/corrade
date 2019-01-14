@@ -33,6 +33,7 @@ set(CorradeContainers_HEADERS
     Optional.h
     Pointer.h
     PointerStl.h
+    Reference.h
     ScopedExit.h
     StaticArray.h
     StridedArrayView.h

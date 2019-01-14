@@ -47,6 +47,8 @@ namespace Corrade {
 
 -   New @ref Containers::Pointer class, a lightweight equivalent to
     @ref std::unique_ptr
+-   New @ref Containers::Reference class, a lightweight equivalent to
+    @ref std::reference_wrapper
 -   New @ref Containers::NoCreate tag for constructing instances
     equivalent to a moved-from state. This tag was used in Magnum already,
     moving it here to make it available to a wider set of APIs.
