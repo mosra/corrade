@@ -36,6 +36,10 @@
 
 namespace Corrade { namespace Containers {
 
+namespace Implementation {
+    template<class> struct ReferenceConverter;
+}
+
 /**
 @brief Lightweight reference wrapper
 
@@ -47,6 +51,16 @@ not deemed necessary. This class is trivially copyable
 (@ref std::reference_wrapper is guaranteed to be so since C++17) and also works
 on incomplete types, which @ref std::reference_wrapper knows since C++20.
 
+@section Containers-Reference-stl STL compatibility
+
+Instances of @ref Reference are implicitly convertible to and from
+@ref std::reference_wrapper if you include @ref Corrade/Containers/ReferenceStl.h.
+The conversion is provided in a separate header to avoid unconditional
+@cpp #include <functional> @ce, which significantly affects compile times.
+Example:
+
+@snippet Containers-stl.cpp Reference
+
 @see @ref Pointer, @ref Optional
 */
 template<class T> class Reference {
@@ -54,12 +68,20 @@ template<class T> class Reference {
         /** @brief Constructor */
         /*implicit*/ Reference(T& reference) noexcept: _reference{&reference} {}
 
+        /** @brief Construct a reference from external representation */
+        template<class U, class = decltype(Implementation::ReferenceConverter<U>::from(std::declval<U>()))> /*implicit*/ Reference(U other) noexcept: Reference{Implementation::ReferenceConverter<U>::from(other)} {}
+
         /**
          * @brief Construction from r-value references is not allowed
          *
          * @todo Fix LWG 2993 / LWG 3041 (details in the skipped test)
          */
         Reference(T&&) = delete;
+
+        /** @brief Convert the reference to external representation */
+        template<class U, class = decltype(Implementation::ReferenceConverter<U>::to(std::declval<Reference<T>>()))> /*implicit*/ operator U() {
+            return Implementation::ReferenceConverter<U>::to(*this);
+        }
 
         /** @brief Underlying reference */
         /*implicit*/ operator T&() { return *_reference; }

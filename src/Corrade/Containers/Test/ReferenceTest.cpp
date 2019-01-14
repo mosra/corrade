@@ -28,7 +28,29 @@
 #include "Corrade/Containers/Reference.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test { namespace {
+struct IntRef {
+    IntRef(int& a): a{&a} {}
+
+    int* a;
+};
+
+namespace Corrade { namespace Containers {
+
+namespace Implementation {
+
+template<> struct ReferenceConverter<IntRef> {
+    static Reference<int> from(IntRef other) {
+        return *other.a;
+    }
+
+    static IntRef to(Reference<int> other) {
+        return IntRef{*other};
+    }
+};
+
+}
+
+namespace Test { namespace {
 
 struct ReferenceTest: TestSuite::Tester {
     explicit ReferenceTest();
@@ -39,6 +61,7 @@ struct ReferenceTest: TestSuite::Tester {
     void constructCopy();
     void constructFromRvalue();
     void constructIncomplete();
+    void convert();
 
     void convertToReference();
     void convertToConst();
@@ -56,6 +79,7 @@ ReferenceTest::ReferenceTest() {
               &ReferenceTest::constructCopy,
               &ReferenceTest::constructFromRvalue,
               &ReferenceTest::constructIncomplete,
+              &ReferenceTest::convert,
 
               &ReferenceTest::convertToReference,
               &ReferenceTest::convertToConst,
@@ -138,6 +162,18 @@ void ReferenceTest::constructIncomplete() {
     Reference<Foo> c = b;
     CORRADE_COMPARE(&b.get(), static_cast<void*>(&a));
     CORRADE_COMPARE(&c.get(), static_cast<void*>(&a));
+}
+
+void ReferenceTest::convert() {
+    int a = 1348;
+    IntRef b = a;
+    CORRADE_COMPARE(*b.a, 1348);
+
+    Reference<int> c = b; /* implicit conversion *is* allowed */
+    CORRADE_COMPARE(*c, 1348);
+
+    IntRef d = c; /* implicit conversion *is* allowed */
+    CORRADE_COMPARE(*d.a, 1348);
 }
 
 void ReferenceTest::convertToReference() {

@@ -1,3 +1,5 @@
+#ifndef Corrade_Containers_ReferenceStl_h
+#define Corrade_Containers_ReferenceStl_h
 /*
     This file is part of Corrade.
 
@@ -23,30 +25,34 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/Containers/PointerStl.h"
-#include "Corrade/Containers/ReferenceStl.h"
+/** @file
+@brief STL compatibility for @ref Corrade::Containers::Reference
 
-using namespace Corrade;
+Including this header allows you to seamlessly convert between
+@ref Corrade::Containers::Reference and @ref std::reference_wrapper using move
+construction / assignment. See @ref Containers-Reference-stl for more
+information.
+*/
 
-int main() {
-{
-/* [Pointer] */
-std::unique_ptr<int> a{new int{5}};
-Containers::Pointer<int> b = std::move(a);
+#include <functional>
 
-std::unique_ptr<int> c = Containers::pointer<int>(12);
-/* [Pointer] */
-}
+#include "Corrade/Containers/Reference.h"
 
-{
-/* [Reference] */
-int a = 1337;
-Containers::Reference<int> b = a;
+/* Listing these namespaces doesn't anything to the docs, so don't */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+namespace Corrade { namespace Containers { namespace Implementation {
 
-std::reference_wrapper<int> c = b;
-Containers::Reference<const int> d = std::cref(a);
-/* [Reference] */
-static_cast<void>(c);
-static_cast<void>(d);
-}
-}
+template<class T> struct ReferenceConverter<std::reference_wrapper<T>> {
+    static Reference<T> from(std::reference_wrapper<T> other) {
+        return other;
+    }
+
+    static std::reference_wrapper<T> to(Reference<T> other) {
+        return other;
+    }
+};
+
+}}}
+#endif
+
+#endif

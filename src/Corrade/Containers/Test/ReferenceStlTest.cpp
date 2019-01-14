@@ -23,30 +23,37 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/Containers/PointerStl.h"
+#include <memory>
+
 #include "Corrade/Containers/ReferenceStl.h"
+#include "Corrade/TestSuite/Tester.h"
 
-using namespace Corrade;
+namespace Corrade { namespace Containers { namespace Test { namespace {
 
-int main() {
-{
-/* [Pointer] */
-std::unique_ptr<int> a{new int{5}};
-Containers::Pointer<int> b = std::move(a);
+struct ReferenceStlTest: TestSuite::Tester {
+    explicit ReferenceStlTest();
 
-std::unique_ptr<int> c = Containers::pointer<int>(12);
-/* [Pointer] */
+    void convert();
+};
+
+ReferenceStlTest::ReferenceStlTest() {
+    addTests({&ReferenceStlTest::convert});
 }
 
-{
-/* [Reference] */
-int a = 1337;
-Containers::Reference<int> b = a;
+void ReferenceStlTest::convert() {
+    int a = 5;
+    std::reference_wrapper<int> b = a;
+    CORRADE_COMPARE(b, 5);
 
-std::reference_wrapper<int> c = b;
-Containers::Reference<const int> d = std::cref(a);
-/* [Reference] */
-static_cast<void>(c);
-static_cast<void>(d);
+    Reference<int> c = b; /* implicit conversion *is* allowed */
+    CORRADE_COMPARE(c, 5);
+
+    std::reference_wrapper<int> d = c; /* implicit conversion *is* allowed */
+    CORRADE_COMPARE(d, 5);
+
+
 }
-}
+
+}}}}
+
+CORRADE_TEST_MAIN(Corrade::Containers::Test::ReferenceStlTest)
