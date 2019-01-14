@@ -27,6 +27,7 @@
 
 /** @file
  * @brief Class @ref Corrade::Containers::EnumSet
+ * @see @ref Corrade/Containers/EnumSet.hpp
  */
 
 #include <type_traits>

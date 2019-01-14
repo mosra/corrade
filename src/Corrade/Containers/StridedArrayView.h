@@ -46,7 +46,8 @@ iteration over interleaved arrays. Usage example:
 
 For convenience, similarly to @ref ArrayView, this class is implicitly
 convertible from plain C arrays, @ref ArrayView and
-@link StaticArrayView @endlink, with stride equal to array type size.
+@link StaticArrayView @endlink, with stride equal to array type size. The
+following two statements are equivalent:
 
 @snippet Containers.cpp StridedArrayView-usage-conversion
 

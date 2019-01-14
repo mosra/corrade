@@ -92,7 +92,7 @@ template<class T> class Optional {
          * @brief Construct optional object by copy
          *
          * Stores a copy of passed object.
-         * @see @ref operator bool(), @ref operator->()
+         * @see @ref operator bool(), @ref operator->(), @ref operator*()
          */
         /*implicit*/ Optional(const T& value): _set{true} {
             new(&_value.v) T{value};
@@ -102,17 +102,18 @@ template<class T> class Optional {
          * @brief Construct optional object by move
          *
          * Moves the passed object to internal storage.
-         * @see @ref operator bool(), @ref operator->()
+         * @see @ref operator bool(), @ref operator->(), @ref operator*()
          */
         /*implicit*/ Optional(T&& value): _set{true} {
             new(&_value.v) T{std::move(value)};
         }
 
         /**
-         * @brief Construct optional object in place
+         * @brief Construct optional object in-place
          *
          * Constructs the value by passing @p args to its constructor in-place.
-         * @see @ref operator bool(), @ref operator->(), @ref emplace()
+         * @see @ref operator bool(), @ref operator->(), @ref operator*(),
+         *      @ref emplace()
          */
         template<class ...Args> /*implicit*/ Optional(InPlaceInitT, Args&&... args): _set{true} {
             new(&_value.v) T{std::forward<Args>(args)...};
@@ -224,7 +225,7 @@ template<class T> class Optional {
          * @brief Access the stored object
          *
          * Expects that the optional object has a value.
-         * @see @ref operator bool()
+         * @see @ref operator bool(), @ref operator*()
          */
         T* operator->() {
             CORRADE_INTERNAL_ASSERT(_set);
@@ -241,7 +242,7 @@ template<class T> class Optional {
          * @brief Access the stored object
          *
          * Expects that the optional object has a value.
-         * @see @ref operator bool()
+         * @see @ref operator bool(), @ref operator->()
          */
         T& operator*() {
             CORRADE_INTERNAL_ASSERT(_set);
