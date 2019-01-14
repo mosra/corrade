@@ -27,6 +27,7 @@
 
 /** @file
  * @brief Class @ref Corrade::Containers::Pointer, function @ref Corrade::Containers::pointer()
+ * @see @ref Corrade/Containers/PointerStl.h
  */
 
 #include <type_traits>
@@ -37,6 +38,10 @@
 #include "Corrade/Utility/Debug.h"
 
 namespace Corrade { namespace Containers {
+
+namespace Implementation {
+    template<class> struct PointerConverter;
+}
 
 /**
 @brief Lightweight unique pointer
@@ -53,6 +58,16 @@ other hand that makes it fairly simple and lightweight. If you need a custom
 deleter, use either @ref ScopedExit or the standard @ref std::unique_ptr. For
 owning array wrappers use @ref Array, which maintains a size information and
 also supports custom deleters.
+
+@section Containers-Pointer-stl STL compatibility
+
+Instances of @ref Pointer are implicitly move-convertible to and from
+@ref std::unique_ptr if you include @ref Corrade/Containers/PointerStl.h. The
+conversion is provided in a separate header to avoid unconditional
+@cpp #include <memory> @ce, which significantly affects compile times. Example:
+
+@snippet Containers-stl.cpp Pointer
+
 @see @ref pointer(T*), @ref pointer(Args&&... args)
 */
 template<class T> class Pointer {
@@ -83,6 +98,9 @@ template<class T> class Pointer {
          */
         template<class ...Args> explicit Pointer(InPlaceInitT, Args&&... args): _pointer{new T{std::forward<Args>(args)...}} {}
 
+        /** @brief Construct a pointer from external representation */
+        template<class U, class = decltype(Implementation::PointerConverter<U>::from(std::declval<U&&>()))> /*implicit*/ Pointer(U&& other) noexcept: Pointer{Implementation::PointerConverter<U>::from(std::move(other))} {}
+
         /** @brief Copying is not allowed */
         Pointer(const Pointer<T>&) = delete;
 
@@ -98,6 +116,11 @@ template<class T> class Pointer {
         Pointer<T>& operator=(Pointer<T>&& other) noexcept {
             std::swap(_pointer, other._pointer);
             return *this;
+        }
+
+        /** @brief Convert the pointer to external representation */
+        template<class U, class = decltype(Implementation::PointerConverter<U>::to(std::declval<Pointer<T>&&>()))> /*implicit*/ operator U() && {
+            return Implementation::PointerConverter<U>::to(std::move(*this));
         }
 
         /**

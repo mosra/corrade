@@ -28,7 +28,41 @@
 #include "Corrade/Containers/Pointer.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test { namespace {
+struct IntPtr {
+    explicit IntPtr(int* a): a{a} {}
+    IntPtr(const IntPtr&) = delete;
+    IntPtr(IntPtr&& other): a{other.a} {
+        other.a = nullptr;
+    }
+    ~IntPtr() { delete a; }
+    IntPtr& operator=(const IntPtr&) = delete;
+    IntPtr& operator=(IntPtr&& other) {
+        std::swap(a, other.a);
+        return *this;
+    }
+
+    int* a;
+};
+
+namespace Corrade { namespace Containers {
+
+namespace Implementation {
+
+template<> struct PointerConverter<IntPtr> {
+    static Pointer<int> from(IntPtr&& other) {
+        Pointer<int> ret{other.a};
+        other.a = nullptr;
+        return ret;
+    }
+
+    static IntPtr to(Pointer<int>&& other) {
+        return IntPtr{other.release()};
+    }
+};
+
+}
+
+namespace Test { namespace {
 
 struct PointerTest: TestSuite::Tester {
     explicit PointerTest();
@@ -44,6 +78,7 @@ struct PointerTest: TestSuite::Tester {
     void constructInPlace();
     void constructInPlaceMake();
     void constructInPlaceMakeAmbiguous();
+    void convert();
 
     void boolConversion();
     void compareToNullptr();
@@ -71,6 +106,7 @@ PointerTest::PointerTest() {
               &PointerTest::constructInPlaceMake}, &PointerTest::resetCounters, &PointerTest::resetCounters);
 
     addTests({&PointerTest::constructInPlaceMakeAmbiguous,
+              &PointerTest::convert,
 
               &PointerTest::boolConversion,
               &PointerTest::compareToNullptr});
@@ -268,6 +304,29 @@ void PointerTest::constructInPlaceMakeAmbiguous() {
     CORRADE_COMPARE(f->parent, &parent);
     CORRADE_COMPARE(g->parent, &parent);
     CORRADE_COMPARE(h->parent, nullptr);
+}
+
+void PointerTest::convert() {
+    IntPtr a{new int{5}};
+    int* ptr = a.a;
+    CORRADE_VERIFY(ptr);
+    CORRADE_COMPARE(*ptr, 5);
+
+    Pointer<int> b = std::move(a); /* implicit conversion *is* allowed */
+    CORRADE_COMPARE(b.get(), ptr);
+    CORRADE_COMPARE(*b, 5);
+    CORRADE_VERIFY(!a.a);
+
+    IntPtr c = std::move(b); /* implicit conversion *is* allowed */
+    CORRADE_COMPARE(c.a, ptr);
+    CORRADE_COMPARE(*c.a, 5);
+    CORRADE_VERIFY(!b);
+
+    /* Non-move conversion is not allowed */
+    CORRADE_VERIFY((std::is_convertible<IntPtr&&, Pointer<int>>::value));
+    CORRADE_VERIFY(!(std::is_convertible<const IntPtr&, Pointer<int>>::value));
+    CORRADE_VERIFY((std::is_convertible<Pointer<int>&&, IntPtr>::value));
+    CORRADE_VERIFY(!(std::is_convertible<const Pointer<int>&, IntPtr>::value));
 }
 
 void PointerTest::boolConversion() {

@@ -34,6 +34,7 @@ set_directory_properties(PROPERTIES
 
 add_library(snippets STATIC
     Containers.cpp
+    Containers-stl.cpp
     Utility.cpp)
 target_link_libraries(snippets PRIVATE CorradeUtility)
 
