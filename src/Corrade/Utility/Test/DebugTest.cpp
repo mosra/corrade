@@ -151,8 +151,14 @@ void DebugTest::debug() {
 template<class> struct IntsData;
 template<> struct IntsData<char> {
     static const char* name() { return "ints<char>"; }
-    static char value() { return -123; }
-    static const char* expected() { return "-123\n"; }
+    static char value() {
+        /* Android has unsigned char */
+        return std::is_signed<char>::value ? -123 : 223;
+    }
+    static const char* expected() {
+        /* Android has unsigned char */
+        return std::is_signed<char>::value ? "-123\n" : "223\n";
+    }
 };
 template<> struct IntsData<unsigned char> {
     static const char* name() { return "ints<unsigned char>"; }
