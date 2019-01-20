@@ -50,8 +50,6 @@ if(BUILD_TESTS)
 endif()
 
 # Corrade::Containers target alias for superprojects
-if(NOT CMAKE_VERSION VERSION_LESS 3.0.0)
-    add_library(CorradeContainers INTERFACE)
-    target_link_libraries(CorradeContainers INTERFACE CorradeUtility)
-    add_library(Corrade::Containers ALIAS CorradeContainers)
-endif()
+add_library(CorradeContainers INTERFACE)
+target_link_libraries(CorradeContainers INTERFACE CorradeUtility)
+add_library(Corrade::Containers ALIAS CorradeContainers)
