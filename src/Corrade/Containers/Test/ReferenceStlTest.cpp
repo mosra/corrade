@@ -50,8 +50,6 @@ void ReferenceStlTest::convert() {
 
     std::reference_wrapper<int> d = c; /* implicit conversion *is* allowed */
     CORRADE_COMPARE(d, 5);
-
-
 }
 
 }}}}
