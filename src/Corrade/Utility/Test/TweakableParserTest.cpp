@@ -83,10 +83,12 @@ template<> struct TypeTraits<double> {
     static const char* name() { return "double"; }
     static const char* suffix() { return ""; }
 };
+#ifndef CORRADE_TARGET_EMSCRIPTEN
 template<> struct TypeTraits<long double> {
     static const char* name() { return "long double"; }
     static const char* suffix() { return "l"; }
 };
+#endif
 
 constexpr struct {
     const char* name;
