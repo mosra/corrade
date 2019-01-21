@@ -34,6 +34,9 @@
 
 #include "Corrade/Containers/Tags.h"
 #include "Corrade/Utility/Assert.h"
+#ifdef CORRADE_BUILD_DEPRECATED
+#include "Corrade/Utility/Macros.h"
+#endif
 #ifndef CORRADE_NO_DEBUG
 #include "Corrade/Utility/Debug.h"
 #endif
