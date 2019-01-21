@@ -168,9 +168,20 @@ void StaticArrayViewTest::constructFixedSize() {
 }
 
 /* Needs to be here in order to use it in constexpr */
-struct Base { int i{}; };
-struct Derived: Base {};
-constexpr Derived DerivedArray[5];
+struct Base {
+    constexpr Base(): i{} {}
+    int i;
+};
+struct Derived: Base {
+    constexpr Derived() {}
+};
+constexpr Derived DerivedArray[5]
+    /* This missing makes MSVC2015 complain it's not constexpr, but if present
+       then GCC 4.8 fails to build. Eh. ¯\_(ツ)_/¯ */
+    #ifdef CORRADE_MSVC2015_COMPATIBILITY
+    {}
+    #endif
+    ;
 
 void StaticArrayViewTest::constructDerived() {
     /* See ArrayViewTest for comments */
