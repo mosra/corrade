@@ -31,6 +31,7 @@
 
 #include <new>
 #include <type_traits>
+#include <utility>
 
 #include "Corrade/Containers/Tags.h"
 #include "Corrade/Utility/Assert.h"
