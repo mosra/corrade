@@ -216,7 +216,7 @@ CMake option when building Corrade.
 #undef CORRADE_TESTSUITE_TARGET_XCTEST
 
 /**
-@brief Use ANSI escape sequences for colored Debug output on Windows
+@brief Use ANSI escape sequences for colored debug output on Windows
 
 By default colored output using @ref Corrade::Utility::Debug "Utility::Debug"
 on Windows is done using WINAPI that has a limited functionality, because ANSI

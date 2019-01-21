@@ -277,12 +277,12 @@ void ReferenceTest::access() {
     CORRADE_COMPARE(cb.get().a, 15);
 }
 
-//truct ConvertibleFromInt {
+//struct ConvertibleFromInt {
 //   ConvertibleFromInt(int) {}
 //;
 //
-//oid foo(Reference<int>);
-//oid foo(ConvertibleFromInt) {}
+//void foo(Reference<int>);
+//void foo(ConvertibleFromInt) {}
 
 void ReferenceTest::unambiguousOverloadWithTypeConvertibleFromInt() {
     CORRADE_SKIP("Not implemented yet.");

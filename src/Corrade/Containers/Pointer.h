@@ -70,7 +70,8 @@ conversion is provided in a separate header to avoid unconditional
 
 @snippet Containers-stl.cpp Pointer
 
-@see @ref pointer(T*), @ref pointer(Args&&... args), @ref Reference
+@see @ref pointer(T*), @ref pointer(Args&&... args), @ref pointerCast(),
+    @ref Reference
 */
 template<class T> class Pointer {
     static_assert(!std::is_array<T>::value, "use Containers::Array for arrays instead");

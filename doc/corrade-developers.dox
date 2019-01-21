@@ -379,8 +379,9 @@ in inverse --- but usually @ref corrade-developers-deprecation "deprecate first"
         used now
     -   update building docs to say what version is required now
     -   add an entry to the dependencies section in `doc/changelog.dox`
-    -   update `package/ci/travis.yml` to download a newer version, possibly
-        removing 32-bit compat libraries
+    -   update `package/ci/travis.yml` to download a newer version
+    -   look for all mentions of the old version and remove them, grep for
+        `CMAKE_VERSION` in all projects and remove what's obsolete
 3.  In case of a compiler:
     -   remove everything related to `CORRADE_GCCXY_COMPATIBILITY` of the old
         version, if applicable
