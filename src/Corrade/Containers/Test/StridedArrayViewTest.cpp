@@ -54,6 +54,9 @@ struct StridedArrayViewTest: TestSuite::Tester {
 
     void sliceInvalid();
     void slice();
+
+    void cast();
+    void castInvalid();
 };
 
 typedef Containers::StridedArrayView<int> StridedArrayView;
@@ -80,7 +83,10 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::rangeBasedFor,
 
               &StridedArrayViewTest::sliceInvalid,
-              &StridedArrayViewTest::slice});
+              &StridedArrayViewTest::slice,
+
+              &StridedArrayViewTest::cast,
+              &StridedArrayViewTest::castInvalid});
 }
 
 void StridedArrayViewTest::constructEmpty() {
@@ -450,6 +456,52 @@ void StridedArrayViewTest::slice() {
     CORRADE_COMPARE(d[0], 3);
     CORRADE_COMPARE(d[1], 4);
     CORRADE_COMPARE(d[2], 5);
+}
+
+void StridedArrayViewTest::cast() {
+    struct {
+        short a;
+        short b;
+        int c;
+    } data[5]{{1, 10, 0}, {2, 20, 0}, {3, 30, 0}, {4, 40, 0}, {5, 50, 0}};
+    Containers::StridedArrayView<short> a{&data[0].a, 5, 8};
+    CORRADE_COMPARE(a.size(), 5);
+    CORRADE_COMPARE(a.stride(), 8);
+    CORRADE_COMPARE(a[2], 3);
+    CORRADE_COMPARE(a[3], 4);
+
+    auto b = Containers::arrayCast<int>(a);
+    CORRADE_COMPARE(b.size(), 5);
+    CORRADE_COMPARE(b.stride(), 8);
+    CORRADE_COMPARE(b[2], 1966083);
+    CORRADE_COMPARE(b[3], 2621444);
+}
+
+void StridedArrayViewTest::castInvalid() {
+     struct {
+        char a;
+        char b;
+    } data[5] CORRADE_ALIGNAS(2) {{1, 10}, {2, 20}, {3, 30}, {4, 40}, {5, 50}};
+    Containers::StridedArrayView<char> a{&data[0].a, 5, 2};
+    CORRADE_COMPARE(a.size(), 5);
+    CORRADE_COMPARE(a.stride(), 2);
+
+    /* Check the alignment to avoid unaligned reads on platforms where it
+       matters (such as Emscripten) */
+    CORRADE_VERIFY(reinterpret_cast<std::uintptr_t>(data)%2 == 0);
+
+    auto b = Containers::arrayCast<short>(a);
+    CORRADE_COMPARE(b.size(), 5);
+    CORRADE_COMPARE(b.stride(), 2);
+    CORRADE_COMPARE(b[2], 7683);
+    CORRADE_COMPARE(b[3], 10244);
+
+    {
+        std::ostringstream out;
+        Error redirectError{&out};
+        Containers::arrayCast<int>(a);
+        CORRADE_COMPARE(out.str(), "Containers::arrayCast(): can't fit a 4-byte type into a stride of 2\n");
+    }
 }
 
 }}}}

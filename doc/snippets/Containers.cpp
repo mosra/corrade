@@ -670,6 +670,20 @@ Containers::StridedArrayView<int> view2 = data;
 static_cast<void>(view2);
 }
 
+{
+/* [arrayCast-StridedArrayView] */
+struct Pixel {
+    std::uint8_t r, g, b, a;
+};
+
+Pixel pixels[]{{0x33, 0xff, 0x99, 0x66}, {0x11, 0xab, 0x33, 0xff}};
+
+auto red = Containers::StridedArrayView<std::uint8_t>{&pixels[0].r, 2, 4};
+auto rgba = Containers::arrayCast<Pixel>(red);
+/* [arrayCast-StridedArrayView] */
+static_cast<void>(rgba);
+}
+
 #ifdef __clang__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wuninitialized"

@@ -237,6 +237,24 @@ template<class T> class StridedArrayView {
         std::size_t _size, _stride;
 };
 
+/** @relatesalso StridedArrayView
+@brief Reinterpret-cast a strided array view
+
+Size of the new array is the same as original. Expects that both types are
+[standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
+and @cpp sizeof(U) @ce is not larger than @ref StridedArrayView::stride() "stride()"
+of the original array.
+
+@snippet Containers.cpp arrayCast-StridedArrayView
+*/
+template<class U, class T> StridedArrayView<U> arrayCast(StridedArrayView<T> view) {
+    static_assert(std::is_standard_layout<T>::value, "the source type is not standard layout");
+    static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
+    CORRADE_ASSERT(sizeof(U) <= view.stride(),
+        "Containers::arrayCast(): can't fit a" << sizeof(U) << Utility::Debug::nospace << "-byte type into a stride of" << view.stride(), {});
+    return StridedArrayView<U>{reinterpret_cast<U*>(view.data()), view.size(), view.stride()};
+}
+
 /**
 @brief Strided array view iterator
 

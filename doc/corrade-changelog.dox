@@ -54,6 +54,8 @@ namespace Corrade {
     moving it here to make it available to a wider set of APIs.
 -   New @ref Containers::optional(Args&&... args) overload for in-place
     initialization
+-   New @ref Containers::arrayCast(StridedArrayView<T>) overload for casting
+    strided array views
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
