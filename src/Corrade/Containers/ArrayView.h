@@ -387,7 +387,7 @@ template<class U, class T> ArrayView<U> arrayCast(ArrayView<T> view) {
     static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
     const std::size_t size = view.size()*sizeof(T)/sizeof(U);
     CORRADE_ASSERT(size*sizeof(U) == view.size()*sizeof(T),
-        "Containers::arrayCast(): type sizes are not compatible", {});
+        "Containers::arrayCast(): can't reinterpret" << view.size() << sizeof(T) << Utility::Debug::nospace << "-byte items into a" << sizeof(U) << Utility::Debug::nospace << "-byte type", {});
     return {reinterpret_cast<U*>(view.begin()), size};
 }
 

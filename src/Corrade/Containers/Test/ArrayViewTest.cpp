@@ -59,6 +59,7 @@ struct ArrayViewTest: TestSuite::Tester {
     void sliceToStatic();
 
     void cast();
+    void castInvalid();
     void size();
 };
 
@@ -93,6 +94,7 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::sliceToStatic,
 
               &ArrayViewTest::cast,
+              &ArrayViewTest::castInvalid,
               &ArrayViewTest::size});
 }
 
@@ -565,6 +567,21 @@ void ArrayViewTest::cast() {
     CORRADE_COMPARE(a.size(), 6);
     CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(c.size(), 12);
+}
+
+void ArrayViewTest::castInvalid() {
+    char data[10]{};
+    Containers::ArrayView<char> a = data;
+
+    auto b = Containers::arrayCast<std::uint16_t>(a);
+    CORRADE_COMPARE(b.size(), 5);
+
+    {
+        std::ostringstream out;
+        Error redirectError{&out};
+        Containers::arrayCast<std::uint32_t>(a);
+        CORRADE_COMPARE(out.str(), "Containers::arrayCast(): can't reinterpret 10 1-byte items into a 4-byte type\n");
+    }
 }
 
 void ArrayViewTest::size() {
