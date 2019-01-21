@@ -206,7 +206,10 @@ void ReferenceTest::constructDerived() {
     CORRADE_COMPARE(c->a, 42);
 
     constexpr Reference<const Derived> cb = DerivedInstance;
-    constexpr Reference<const Base> cc = cb;
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* Implicit pointer downcast not constexpr on MSVC 2015 */
+    #endif
+    Reference<const Base> cc = cb;
     CORRADE_COMPARE(cc->a, 42);
 
     CORRADE_VERIFY((std::is_nothrow_constructible<Reference<Base>, Reference<Derived>>::value));
@@ -234,7 +237,10 @@ void ReferenceTest::convert() {
     constexpr Reference<const int> cc = cb;
     CORRADE_COMPARE(*cc, 3);
 
-    constexpr IntRef cd = cc;
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* Pointer dereference not constexpr on MSVC 2015(?) */
+    #endif
+    IntRef cd = cc;
     CORRADE_COMPARE(*cd.a, 3);
 }
 
@@ -248,7 +254,10 @@ void ReferenceTest::convertToReference() {
     CORRADE_COMPARE(cc, 32);
 
     constexpr Reference<const int> cb = Int;
-    constexpr const int& ccc = cb;
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* Pointer dereference not constexpr on MSVC 2015(?) */
+    #endif
+    const int& ccc = cb;
     CORRADE_COMPARE(ccc, 3);
 }
 
