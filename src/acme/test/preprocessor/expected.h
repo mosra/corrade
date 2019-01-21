@@ -49,3 +49,15 @@ auto this_gets_enabled() -> Yay { return {}; }
 
 /* No extraneous endifs */
 // yes
+
+/* Remove both these, since they're empty */
+
+/* Don't remove anything here */
+#ifdef A
+#elif defined(B)
+#endif
+
+/* Don't remove anything here either */
+#ifdef A
+#else
+#endif

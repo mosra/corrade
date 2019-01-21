@@ -107,3 +107,22 @@ NEITHER THIS! INTERCAL FTW
 #elif 1
 // yes
 #endif
+
+/* Remove both these, since they're empty */
+#ifdef B
+#endif
+
+#ifdef A
+#ifndef B
+#endif
+#endif
+
+/* Don't remove anything here */
+#ifdef A
+#elif defined(B)
+#endif
+
+/* Don't remove anything here either */
+#ifdef A
+#elif 1
+#endif

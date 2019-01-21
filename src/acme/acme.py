@@ -147,7 +147,7 @@ def acme(toplevel_file, output) -> List[str]:
         # False if not and None if the preprocessor branching should be kept
         # verbatim. There's always at least one element, using a two-element
         # list instead of a tuple so I can modify the entries
-        branch_stack = [[True, True]]
+        branch_stack = [[True, True, 0]]
 
         line: str
         with open(file) as f:
@@ -243,7 +243,7 @@ def acme(toplevel_file, output) -> List[str]:
                         # not enable it back
                         if branch_stack[-1][1] is False: push_value = False
                         # Push a new node on the stack
-                        branch_stack += [[True, push_value]]
+                        branch_stack += [[True, push_value, len(out)]]
                         # If the new node doesn't affect visibility, print it
                         if branch_stack[-1][1] is None:
                             out += ['{}#{} {}{}\n'.format(indent, what, value, comment)]
@@ -285,7 +285,7 @@ def acme(toplevel_file, output) -> List[str]:
                         # in order to remember the visibility status of the
                         # else block
                         branch_stack[-1][0] = False
-                        branch_stack += [[True, push_value]]
+                        branch_stack += [[True, push_value, branch_stack[-1][2]]]
                     elif what == 'else':
                         assert len(branch_stack) >= 2
                         # Put the line to output if the branch didn't affect
@@ -303,8 +303,15 @@ def acme(toplevel_file, output) -> List[str]:
                         assert len(branch_stack) >= 2
                         # Put the line to output if the branch didn't affect
                         # visibility
+                        endif_written = False
                         if branch_stack[-1][1] is None:
+                            endif_written = True
                             out += ['{}#endif{}\n'.format(indent, comment)]
+
+                        # Remember the line no. of the `if` statement, so we
+                        # can remove the whole thing below if it turns out to
+                        # be empty
+                        if_lineno = branch_stack[-1][2]
                         branch_stack.pop()
 
                         # There might be dummy #elif nodes above, drop all of
@@ -313,8 +320,15 @@ def acme(toplevel_file, output) -> List[str]:
                         while branch_stack[-1][0] is False:
                             if branch_stack[-1][1] is None:
                                 out += ['{}#endif{}\n'.format(indent, comment)]
+                            if_lineno = branch_stack[-1][2]
                             branch_stack.pop()
                         assert len(branch_stack) >= 1
+
+                        # If the endif was written and there's nothing between
+                        # the if and the endif, remove the whole thing.
+                        if endif_written and if_lineno + 2 == len(out):
+                            out.pop()
+                            out.pop()
 
                     continue
 
