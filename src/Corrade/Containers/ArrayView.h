@@ -135,7 +135,7 @@ template<class T> class ArrayView {
         /** @brief Whether the array is non-empty */
         /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
            pointer arithmetic. */
-        explicit operator bool() const { return _data; }
+        constexpr explicit operator bool() const { return _data; }
         #endif
 
         /** @brief Conversion to array type */
@@ -398,7 +398,7 @@ Alias to @ref ArrayView::size(), useful as a shorthand in cases like this:
 
 @snippet Containers.cpp arraySize
 */
-template<class T> std::size_t arraySize(ArrayView<T> view) {
+template<class T> constexpr std::size_t arraySize(ArrayView<T> view) {
     return view.size();
 }
 
@@ -491,7 +491,7 @@ template<std::size_t size_, class T> class StaticArrayView {
         /** @brief Whether the array is non-empty */
         /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
            pointer arithmetic. */
-        explicit operator bool() const { return _data; }
+        constexpr explicit operator bool() const { return _data; }
         #endif
 
         /** @brief Conversion to array type */

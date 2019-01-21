@@ -38,7 +38,6 @@ struct StaticArrayViewTest: TestSuite::Tester {
     void construct();
     void constructFixedSize();
     void constructDerived();
-    void constructConst();
 
     void convertBool();
     void convertPointer();
@@ -68,7 +67,6 @@ StaticArrayViewTest::StaticArrayViewTest() {
               &StaticArrayViewTest::construct,
               &StaticArrayViewTest::constructFixedSize,
               &StaticArrayViewTest::constructDerived,
-              &StaticArrayViewTest::constructConst,
 
               &StaticArrayViewTest::convertBool,
               &StaticArrayViewTest::convertPointer,
@@ -87,17 +85,29 @@ StaticArrayViewTest::StaticArrayViewTest() {
 }
 
 void StaticArrayViewTest::constructDefault() {
-    const StaticArrayView<5> a;
+    StaticArrayView<5> a;
     CORRADE_VERIFY(a == nullptr);
     CORRADE_VERIFY(!a.empty());
     CORRADE_COMPARE(a.size(), StaticArrayView<5>::Size);
     CORRADE_COMPARE(a.size(), 5);
+
+    constexpr StaticArrayView<5> ca;
+    CORRADE_VERIFY(ca == nullptr);
+    CORRADE_VERIFY(!ca.empty());
+    CORRADE_COMPARE(ca.size(), StaticArrayView<5>::Size);
+    CORRADE_COMPARE(ca.size(), 5);
 }
 
 void StaticArrayViewTest::constructNullptr() {
     const StaticArrayView<5> a = nullptr;
     CORRADE_VERIFY(a == nullptr);
+
+    constexpr StaticArrayView<5> ca = nullptr;
+    CORRADE_VERIFY(ca == nullptr);
 }
+
+/* Needs to be here in order to use it in constexpr */
+constexpr int Array30[30]{};
 
 void StaticArrayViewTest::construct() {
     int a[30];
@@ -106,65 +116,94 @@ void StaticArrayViewTest::construct() {
         const StaticArrayView<5> b{a};
         CORRADE_VERIFY(b == a);
     } {
-        const auto b = staticArrayView<5>(a);
-        CORRADE_VERIFY((std::is_same<decltype(b), const StaticArrayView<5>>::value));
+        auto b = staticArrayView<5>(a);
+        CORRADE_VERIFY((std::is_same<decltype(b), StaticArrayView<5>>::value));
         CORRADE_VERIFY(b == a);
 
-        const auto c = staticArrayView(b);
-        CORRADE_VERIFY((std::is_same<decltype(c), const StaticArrayView<5>>::value));
+        auto c = staticArrayView(b);
+        CORRADE_VERIFY((std::is_same<decltype(c), StaticArrayView<5>>::value));
         CORRADE_VERIFY(c == a);
+    }
+
+    {
+        constexpr ConstStaticArrayView<5> b{Array30};
+        CORRADE_VERIFY(b == Array30);
+    } {
+        constexpr auto b = staticArrayView<5>(Array30);
+        CORRADE_VERIFY((std::is_same<decltype(b), const ConstStaticArrayView<5>>::value));
+        CORRADE_VERIFY(b == Array30);
+
+        constexpr auto c = staticArrayView(b);
+        CORRADE_VERIFY((std::is_same<decltype(c), const ConstStaticArrayView<5>>::value));
+        CORRADE_VERIFY(c == Array30);
     }
 
     /* Implicit construction from pointer should not be allowed */
     CORRADE_VERIFY(!(std::is_convertible<int*, StaticArrayView<5>>::value));
 }
 
+/* Needs to be here in order to use it in constexpr */
+constexpr int Array13[13]{};
+
 void StaticArrayViewTest::constructFixedSize() {
     int a[13];
 
     {
-        const StaticArrayView<13> b = a;
+        StaticArrayView<13> b = a;
         CORRADE_VERIFY(b == a);
     } {
-        const auto b = staticArrayView(a);
-        CORRADE_VERIFY((std::is_same<decltype(b), const StaticArrayView<13>>::value));
+        auto b = staticArrayView(a);
+        CORRADE_VERIFY((std::is_same<decltype(b), StaticArrayView<13>>::value));
         CORRADE_VERIFY(b == a);
+    }
+
+    {
+        constexpr ConstStaticArrayView<13> b = Array13;
+        CORRADE_VERIFY(b == Array13);
+    } {
+        constexpr auto b = staticArrayView(Array13);
+        CORRADE_VERIFY((std::is_same<decltype(b), const ConstStaticArrayView<13>>::value));
+        CORRADE_VERIFY(b == Array13);
     }
 }
 
-void StaticArrayViewTest::constructDerived() {
-    struct A { int i; };
-    struct B: A {};
+/* Needs to be here in order to use it in constexpr */
+struct Base { int i{}; };
+struct Derived: Base {};
+constexpr Derived DerivedArray[5];
 
+void StaticArrayViewTest::constructDerived() {
     /* See ArrayViewTest for comments */
 
-    B b[5];
-    Containers::StaticArrayView<5, B> bv{b};
-
-    Containers::StaticArrayView<5, A> a{b};
-    Containers::StaticArrayView<5, A> av{bv};
+    Derived b[5];
+    Containers::StaticArrayView<5, Derived> bv{b};
+    Containers::StaticArrayView<5, Base> a{b};
+    Containers::StaticArrayView<5, Base> av{bv};
 
     CORRADE_VERIFY(a == &b[0]);
     CORRADE_VERIFY(av == &b[0]);
-}
 
-void StaticArrayViewTest::constructConst() {
-    const int a[] = {3, 4, 7, 12, 0, -15};
+    constexpr Containers::StaticArrayView<5, const Derived> cbv{DerivedArray};
+    constexpr Containers::StaticArrayView<5, const Base> ca{DerivedArray};
+    constexpr Containers::StaticArrayView<5, const Base> cav{cbv};
 
-    {
-        ConstStaticArrayView<6> b = a;
-        CORRADE_COMPARE(b[2], 7);
-    } {
-        const auto b = staticArrayView(a);
-        CORRADE_VERIFY((std::is_same<decltype(b), const ConstStaticArrayView<6>>::value));
-        CORRADE_COMPARE(b[2], 7);
-    }
+    CORRADE_VERIFY(ca == &DerivedArray[0]);
+    CORRADE_VERIFY(cav == &DerivedArray[0]);
 }
 
 void StaticArrayViewTest::convertBool() {
     int a[7];
     CORRADE_VERIFY(StaticArrayView<5>{a});
     CORRADE_VERIFY(!StaticArrayView<5>{});
+
+    constexpr ConstStaticArrayView<30> cb = Array30;
+    constexpr bool boolCb = !!cb;
+    CORRADE_VERIFY(boolCb);
+
+    constexpr ConstStaticArrayView<30> cc;
+    constexpr bool boolCc = !!cc;
+    CORRADE_VERIFY(!boolCc);
+
     CORRADE_VERIFY(!(std::is_convertible<StaticArrayView<5>, int>::value));
 }
 
@@ -177,6 +216,10 @@ void StaticArrayViewTest::convertPointer() {
     const StaticArrayView<7> c = a;
     const int* cp = c;
     CORRADE_COMPARE(cp, static_cast<const int*>(a));
+
+    constexpr ConstStaticArrayView<13> cc = Array13;
+    constexpr const int* ccp = cc;
+    CORRADE_COMPARE(ccp, static_cast<const int*>(Array13));
 
     /* Pointer arithmetic */
     const StaticArrayView<7> e = a;
@@ -205,7 +248,16 @@ void StaticArrayViewTest::convertVoid() {
     CORRADE_VERIFY(cc == cb);
     CORRADE_COMPARE(c.size(), 6*sizeof(int));
     CORRADE_COMPARE(cc.size(), 6*sizeof(int));
+
+    /* void reference to ArrayView */
+    constexpr ConstStaticArrayView<13> ccb = Array13;
+    VoidArrayView ccc = ccb;
+    CORRADE_VERIFY(ccc == ccb);
+    CORRADE_COMPARE(ccc.size(), 13*sizeof(int));
 }
+
+/* Needs to be here in order to use it in constexpr */
+constexpr int OneToSeven[]{0, 1, 2, 3, 4, 5, 6};
 
 void StaticArrayViewTest::access() {
     int a[7];
@@ -214,6 +266,7 @@ void StaticArrayViewTest::access() {
         b[i] = i;
 
     CORRADE_VERIFY(b.data() == a);
+    CORRADE_COMPARE(b.size(), 7);
     CORRADE_COMPARE(b.front(), 0);
     CORRADE_COMPARE(b.back(), 6);
     CORRADE_COMPARE(*(b.begin()+2), 2);
@@ -224,6 +277,19 @@ void StaticArrayViewTest::access() {
 
     ConstStaticArrayView<7> c = a;
     CORRADE_COMPARE(c.data(), a);
+
+    constexpr ConstStaticArrayView<7> cb = OneToSeven;
+
+    constexpr const int* data = cb.data();
+    CORRADE_VERIFY(data == OneToSeven);
+
+    constexpr std::size_t size = cb.size();
+    CORRADE_COMPARE(size, 7);
+
+    constexpr const int* begin = cb.begin();
+    constexpr const int* cbegin = cb.cbegin();
+    CORRADE_COMPARE(begin, OneToSeven);
+    CORRADE_COMPARE(cbegin, OneToSeven);
 }
 
 void StaticArrayViewTest::accessConst() {
@@ -319,6 +385,10 @@ void StaticArrayViewTest::size() {
     StaticArrayView<3> b{a};
 
     CORRADE_COMPARE(Containers::arraySize(b), 3);
+
+    constexpr ConstStaticArrayView<3> cb{Array13};
+    constexpr std::size_t size = Containers::arraySize(cb);
+    CORRADE_COMPARE(size, 3);
 }
 
 }}}}
