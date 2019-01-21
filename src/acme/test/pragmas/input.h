@@ -35,3 +35,11 @@ auto apiNames(int a = 0) -> SomethingNormal; /* hidden as well */
 #endif
 
 #pragma ACME unknown
+
+#pragma ACME disable input_h
+
+#ifndef input_h
+#define input_h
+/* Forced defines also make it possible to get rid of include guards, so this
+   comment is not wrapped in any */
+#endif

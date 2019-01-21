@@ -106,6 +106,7 @@ def simplify_expression(what, expression, forced_defines = {}):
 
 include_rx = re.compile(r'^(?P<include>#include (?P<quote>["<])(?P<file>[^">]+)[">]).*?$')
 preprocessor_rx = re.compile(r'^(?P<indent>\s*)#(?P<what>ifdef|ifndef|if|else|elif|endif)\s*(?P<value>[^/\n]*)(?P<comment>\s*/[/*].*)?$')
+define_rx = re.compile(r'\s*#(?P<what>define|undef) (?P<name>[^\s]+)\s*$')
 linecomment_rx = re.compile(r'^\s*(/\*.*\*/|//.*)?\s*$')
 copyright_rc = re.compile(r'^\s+Copyright © 20.+$')
 #copyright_keep_rc = re.compile(r'^\s+Copyright © 20.+>$')
@@ -382,6 +383,11 @@ def acme(toplevel_file, output) -> List[str]:
                     else:
                         logging.warning("Unknown #pragma ACME %s %s", what, value)
 
+                    continue
+
+                # Preprocessor define -- if it's among the forced ones, ignore
+                match = define_rx.match(line)
+                if match and match.group('name') in forced_defines:
                     continue
 
                 # Something else, add it verbatim
