@@ -80,6 +80,14 @@ matrix:
       - build-tools-22.0.1
       - android-22
       - sys-img-armeabi-v7a-android-22
+  # python preprocessor for magnum-singles, for a lack of better name
+  - language: python
+    python: 3.6
+    env:
+    - TARGET=acme
+    addons:
+      apt:
+        packages: #none
 
 notifications:
   webhooks:
@@ -114,6 +122,9 @@ install:
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "ios-simulator" ]; then gem install xcpretty; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "emscripten" ]; then HOMEBREW_NO_AUTO_UPDATE=1 brew install emscripten && export LLVM=/usr/local/opt/emscripten/libexec/llvm/bin && emcc; fi
 
+# for python preprocessor for magnum-singles, for a lack of better name
+- if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "acme" ]; then pip install coverage codecov; fi
+
 script:
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && ( [ "$TARGET" == "desktop" ] || [ "$TARGET" == "desktop-sanitizers" ] ); then ./package/ci/travis-desktop.sh; fi
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "android" ]; then ./package/ci/travis-android-arm.sh; fi
@@ -123,6 +134,9 @@ script:
 # Travis somehow is not able to gather all output, try to force it using this
 - sync
 
+# python preprocessor for magnum-singles, for a lack of better name
+- if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "acme" ]; then cd $TRAVIS_BUILD_DIR/src/acme && coverage run -m unittest; fi
+
 after_success:
 # Keep in sync with PKBUILD-coverage and appveyor-lcov.sh, please
 - if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then lcov $LCOV_EXTRA_OPTS --directory . --capture --output-file coverage.info > /dev/null; fi
@@ -130,3 +144,6 @@ after_success:
 - if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then lcov $LCOV_EXTRA_OPTS --remove coverage.info "*/Test/*" --output-file coverage.info > /dev/null; fi
 - if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then lcov $LCOV_EXTRA_OPTS --remove coverage.info "*/build/src/Corrade/*" --output-file coverage.info > /dev/null; fi
 - if [[ "$CMAKE_CXX_FLAGS" == *"--coverage"* ]]; then bash <(curl -s https://codecov.io/bash) -f coverage.info; fi
+
+# python preprocessor for magnum-singles, for a lack of better name
+- if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "acme" ]; then cd $TRAVIS_BUILD_DIR/src/acme && codecov; fi
