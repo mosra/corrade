@@ -195,8 +195,14 @@ void StaticArrayViewTest::constructDerived() {
     CORRADE_VERIFY(av == &b[0]);
 
     constexpr Containers::StaticArrayView<5, const Derived> cbv{DerivedArray};
-    constexpr Containers::StaticArrayView<5, const Base> ca{DerivedArray};
-    constexpr Containers::StaticArrayView<5, const Base> cav{cbv};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* Implicit pointer downcast not constexpr on MSVC 2015 */
+    #endif
+    Containers::StaticArrayView<5, const Base> ca{DerivedArray};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* Implicit pointer downcast not constexpr on MSVC 2015 */
+    #endif
+    Containers::StaticArrayView<5, const Base> cav{cbv};
 
     CORRADE_VERIFY(ca == &DerivedArray[0]);
     CORRADE_VERIFY(cav == &DerivedArray[0]);

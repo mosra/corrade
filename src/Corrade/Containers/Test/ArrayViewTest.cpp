@@ -233,8 +233,14 @@ void ArrayViewTest::constructDerived() {
     CORRADE_COMPARE(av.size(), 5);
 
     constexpr Containers::ArrayView<const Derived> cbv{DerivedArray};
-    constexpr Containers::ArrayView<const Base> ca{DerivedArray};
-    constexpr Containers::ArrayView<const Base> cav{cbv};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* Implicit pointer downcast not constexpr on MSVC 2015 */
+    #endif
+    Containers::ArrayView<const Base> ca{DerivedArray};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* Implicit pointer downcast not constexpr on MSVC 2015 */
+    #endif
+    Containers::ArrayView<const Base> cav{cbv};
 
     CORRADE_VERIFY(ca == &DerivedArray[0]);
     CORRADE_VERIFY(cav == &DerivedArray[0]);

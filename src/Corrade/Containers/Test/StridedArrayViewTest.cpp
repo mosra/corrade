@@ -216,8 +216,14 @@ void StridedArrayViewTest::constructDerived() {
     CORRADE_COMPARE(av.stride(), 2);
 
     constexpr Containers::StridedArrayView<const Derived> cbv{DerivedArray};
-    constexpr Containers::StridedArrayView<const Base> ca{DerivedArray};
-    constexpr Containers::StridedArrayView<const Base> cav{cbv};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* Implicit pointer downcast not constexpr on MSVC 2015 */
+    #endif
+    Containers::StridedArrayView<const Base> ca{DerivedArray};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* Implicit pointer downcast not constexpr on MSVC 2015 */
+    #endif
+    Containers::StridedArrayView<const Base> cav{cbv};
 
     CORRADE_VERIFY(ca.data() == &DerivedArray[0]);
     CORRADE_VERIFY(cav.data() == &DerivedArray[0]);
