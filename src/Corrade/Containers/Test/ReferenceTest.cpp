@@ -61,6 +61,7 @@ struct ReferenceTest: TestSuite::Tester {
     void constructCopy();
     void constructFromRvalue();
     void constructIncomplete();
+    void constructDerived();
     void convert();
 
     void convertToReference();
@@ -79,6 +80,7 @@ ReferenceTest::ReferenceTest() {
               &ReferenceTest::constructCopy,
               &ReferenceTest::constructFromRvalue,
               &ReferenceTest::constructIncomplete,
+              &ReferenceTest::constructDerived,
               &ReferenceTest::convert,
 
               &ReferenceTest::convertToReference,
@@ -175,6 +177,25 @@ void ReferenceTest::constructIncomplete() {
     Reference<Foo> c = b;
     CORRADE_COMPARE(&b.get(), static_cast<void*>(&a));
     CORRADE_COMPARE(&c.get(), static_cast<void*>(&a));
+}
+
+void ReferenceTest::constructDerived() {
+    struct Base { int a; };
+    struct Derived: Base {
+        Derived(int a): Base{a} {}
+    };
+
+    Derived a{42};
+    Reference<Derived> b = a;
+    Reference<Base> c = b;
+    CORRADE_COMPARE(c->a, 42);
+
+    CORRADE_VERIFY((std::is_nothrow_constructible<Reference<Base>, Reference<Derived>>::value));
+
+    CORRADE_VERIFY((std::is_constructible<Reference<Base>, Derived&>::value));
+    CORRADE_VERIFY(!(std::is_constructible<Reference<Derived>, Base&>::value));
+    CORRADE_VERIFY((std::is_constructible<Reference<Base>, Reference<Derived>>::value));
+    CORRADE_VERIFY(!(std::is_constructible<Reference<Derived>, Reference<Base>>::value));
 }
 
 void ReferenceTest::convert() {

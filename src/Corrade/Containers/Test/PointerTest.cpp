@@ -78,6 +78,7 @@ struct PointerTest: TestSuite::Tester {
     void constructInPlace();
     void constructInPlaceMake();
     void constructInPlaceMakeAmbiguous();
+    void constructDerived();
     void convert();
 
     void boolConversion();
@@ -106,6 +107,7 @@ PointerTest::PointerTest() {
               &PointerTest::constructInPlaceMake}, &PointerTest::resetCounters, &PointerTest::resetCounters);
 
     addTests({&PointerTest::constructInPlaceMakeAmbiguous,
+              &PointerTest::constructDerived,
               &PointerTest::convert,
 
               &PointerTest::boolConversion,
@@ -304,6 +306,26 @@ void PointerTest::constructInPlaceMakeAmbiguous() {
     CORRADE_COMPARE(f->parent, &parent);
     CORRADE_COMPARE(g->parent, &parent);
     CORRADE_COMPARE(h->parent, nullptr);
+}
+
+void PointerTest::constructDerived() {
+    struct Base { int a; };
+    struct Derived: Base {
+        Derived(int a): Base{a} {}
+    };
+
+    Pointer<Derived> a{InPlaceInit, 42};
+    Pointer<Base> b = std::move(a);
+    CORRADE_VERIFY(!a);
+    CORRADE_VERIFY(b);
+    CORRADE_COMPARE(b->a, 42);
+
+    CORRADE_VERIFY((std::is_nothrow_constructible<Pointer<Base>, Pointer<Derived>>::value));
+
+    CORRADE_VERIFY((std::is_constructible<Pointer<Base>, Derived*>::value));
+    CORRADE_VERIFY(!(std::is_constructible<Pointer<Derived>, Base*>::value));
+    CORRADE_VERIFY((std::is_constructible<Pointer<Base>, Pointer<Derived>>::value));
+    CORRADE_VERIFY(!(std::is_constructible<Pointer<Derived>, Pointer<Base>>::value));
 }
 
 void PointerTest::convert() {

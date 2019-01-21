@@ -80,6 +80,13 @@ template<class T> class Reference {
          */
         Reference(T&&) = delete;
 
+        /**
+         * @brief Construct a reference from another of a derived type
+         *
+         * Expects that @p T is a base of @p U.
+         */
+        template<class U, class = typename std::enable_if<std::is_base_of<T, U>::value>::type> /*implicit*/ Reference(Reference<U> other) noexcept: _reference{&*other} {}
+
         /** @brief Convert the reference to external representation */
         template<class U, class = decltype(Implementation::ReferenceConverter<U>::to(std::declval<Reference<T>>()))> /*implicit*/ operator U() {
             return Implementation::ReferenceConverter<U>::to(*this);

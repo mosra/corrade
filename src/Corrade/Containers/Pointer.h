@@ -100,6 +100,14 @@ template<class T> class Pointer {
          */
         template<class ...Args> explicit Pointer(InPlaceInitT, Args&&... args): _pointer{new T{std::forward<Args>(args)...}} {}
 
+        /**
+         * @brief Construct a pointer from another of a derived type
+         *
+         * Expects that @p T is a base of @p U. For upcasting (base to
+         * derived) use @ref pointerCast(). Calls @ref release() on @p other.
+         */
+        template<class U, class = typename std::enable_if<std::is_base_of<T, U>::value>::type> /*implicit*/ Pointer(Pointer<U>&& other) noexcept: _pointer{other.release()} {}
+
         /** @brief Construct a pointer from external representation */
         template<class U, class = decltype(Implementation::PointerConverter<U>::from(std::declval<U&&>()))> /*implicit*/ Pointer(U&& other) noexcept: Pointer{Implementation::PointerConverter<U>::from(std::move(other))} {}
 
