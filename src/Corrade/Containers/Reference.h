@@ -43,10 +43,10 @@ namespace Implementation {
 }
 
 /**
-@brief Lightweight reference wrapper
+@brief Lightweight non-owning reference wrapper
 
 Equivalent to @ref std::reference_wrapper from C++11, provides a copyable
-wrapper over references to allow storing them in containers. Unlike
+non-owning wrapper over references to allow storing them in containers. Unlike
 @ref std::reference_wrapper, this class does not provide @cpp operator() @ce
 and there are no equivalents to @ref std::ref() / @ref std::cref() as they are
 not deemed necessary. This class is trivially copyable
@@ -68,10 +68,10 @@ Example:
 template<class T> class Reference {
     public:
         /** @brief Constructor */
-        /*implicit*/ Reference(T& reference) noexcept: _reference{&reference} {}
+        constexpr /*implicit*/ Reference(T& reference) noexcept: _reference{&reference} {}
 
         /** @brief Construct a reference from external representation */
-        template<class U, class = decltype(Implementation::ReferenceConverter<U>::from(std::declval<U>()))> /*implicit*/ Reference(U other) noexcept: Reference{Implementation::ReferenceConverter<U>::from(other)} {}
+        template<class U, class = decltype(Implementation::ReferenceConverter<U>::from(std::declval<U>()))> constexpr /*implicit*/ Reference(U other) noexcept: Reference{Implementation::ReferenceConverter<U>::from(other)} {}
 
         /**
          * @brief Construction from r-value references is not allowed
@@ -85,33 +85,26 @@ template<class T> class Reference {
          *
          * Expects that @p T is a base of @p U.
          */
-        template<class U, class = typename std::enable_if<std::is_base_of<T, U>::value>::type> /*implicit*/ Reference(Reference<U> other) noexcept: _reference{&*other} {}
+        template<class U, class = typename std::enable_if<std::is_base_of<T, U>::value>::type> constexpr /*implicit*/ Reference(Reference<U> other) noexcept: _reference{&*other} {}
 
         /** @brief Convert the reference to external representation */
-        template<class U, class = decltype(Implementation::ReferenceConverter<U>::to(std::declval<Reference<T>>()))> /*implicit*/ operator U() {
+        template<class U, class = decltype(Implementation::ReferenceConverter<U>::to(std::declval<Reference<T>>()))> constexpr /*implicit*/ operator U() const {
             return Implementation::ReferenceConverter<U>::to(*this);
         }
 
         /** @brief Underlying reference */
-        /*implicit*/ operator T&() { return *_reference; }
-        /*implicit*/ operator const T&() const { return *_reference; } /**< @overload */
-        /*implicit*/ operator Reference<const T>() const { return *_reference; } /**< @overload */
+        constexpr /*implicit*/ operator T&() const { return *_reference; }
+        constexpr /*implicit*/ operator Reference<const T>() const { return *_reference; } /**< @overload */
 
         /** @brief Underlying reference */
-        T& get() { return *_reference; }
-        const T& get() const { return *_reference; } /**< @overload */
+        constexpr T& get() const { return *_reference; }
 
         /**
          * @brief Access the underlying reference
          *
          * @ref get(), @ref operator*()
          */
-        T* operator->() {
-            return _reference;
-        }
-
-        /** @overload */
-        const T* operator->() const {
+        constexpr T* operator->() const {
             return _reference;
         }
 
@@ -120,12 +113,7 @@ template<class T> class Reference {
          *
          * @see @ref get(), @ref operator->()
          */
-        T& operator*() {
-            return *_reference;
-        }
-
-        /** @overload */
-        const T& operator*() const {
+        constexpr T& operator*() const {
             return *_reference;
         }
 

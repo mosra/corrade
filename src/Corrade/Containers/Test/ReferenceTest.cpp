@@ -29,9 +29,9 @@
 #include "Corrade/TestSuite/Tester.h"
 
 struct IntRef {
-    IntRef(int& a): a{&a} {}
+    constexpr IntRef(const int& a): a{&a} {}
 
-    int* a;
+    const int* a;
 };
 
 namespace Corrade { namespace Containers {
@@ -39,11 +39,11 @@ namespace Corrade { namespace Containers {
 namespace Implementation {
 
 template<> struct ReferenceConverter<IntRef> {
-    static Reference<int> from(IntRef other) {
+    constexpr static Reference<const int> from(IntRef other) {
         return *other.a;
     }
 
-    static IntRef to(Reference<int> other) {
+    constexpr static IntRef to(Reference<const int> other) {
         return IntRef{*other};
     }
 };
@@ -91,14 +91,18 @@ ReferenceTest::ReferenceTest() {
               &ReferenceTest::debug});
 }
 
+/* Needs to be here in order to use it in constexpr */
+constexpr int Int = 3;
+
 void ReferenceTest::construct() {
     int a = 3;
 
     Reference<int> b = a;
-    Reference<const int> cb = a;
     CORRADE_COMPARE(&b.get(), &a);
-    CORRADE_COMPARE(&cb.get(), &a);
     CORRADE_COMPARE(b, 3);
+
+    constexpr Reference<const int> cb = Int;
+    CORRADE_COMPARE(&cb.get(), &Int);
     CORRADE_COMPARE(cb, 3);
 
     CORRADE_VERIFY((std::is_nothrow_constructible<Reference<int>, int&>::value));
@@ -144,6 +148,12 @@ void ReferenceTest::constructCopy() {
     d = c;
     CORRADE_COMPARE(d, 3);
 
+    constexpr Reference<const int> cb = Int;
+    CORRADE_COMPARE(cb, 3);
+
+    constexpr Reference<const int> cc = cb;
+    CORRADE_COMPARE(cc, 3);
+
     CORRADE_VERIFY(std::is_copy_constructible<Reference<int>>::value);
     CORRADE_VERIFY(std::is_copy_assignable<Reference<int>>::value);
     #if (!defined(__GNUC__) && !defined(__clang__)) || __GNUC__ >= 5 || (defined(_GLIBCXX_RELEASE) && _GLIBCXX_RELEASE >= 5)
@@ -179,16 +189,25 @@ void ReferenceTest::constructIncomplete() {
     CORRADE_COMPARE(&c.get(), static_cast<void*>(&a));
 }
 
-void ReferenceTest::constructDerived() {
-    struct Base { int a; };
-    struct Derived: Base {
-        Derived(int a): Base{a} {}
-    };
+/* Needs to be here in order to use it in constexpr */
+struct Base {
+    constexpr Base(int a): a{a} {}
+    int a;
+};
+struct Derived: Base {
+    constexpr Derived(int a): Base{a} {}
+};
+constexpr Derived DerivedInstance{42};
 
+void ReferenceTest::constructDerived() {
     Derived a{42};
     Reference<Derived> b = a;
     Reference<Base> c = b;
     CORRADE_COMPARE(c->a, 42);
+
+    constexpr Reference<const Derived> cb = DerivedInstance;
+    constexpr Reference<const Base> cc = cb;
+    CORRADE_COMPARE(cc->a, 42);
 
     CORRADE_VERIFY((std::is_nothrow_constructible<Reference<Base>, Reference<Derived>>::value));
 
@@ -199,15 +218,24 @@ void ReferenceTest::constructDerived() {
 }
 
 void ReferenceTest::convert() {
-    int a = 1348;
+    const int a = 1348;
     IntRef b = a;
     CORRADE_COMPARE(*b.a, 1348);
 
-    Reference<int> c = b; /* implicit conversion *is* allowed */
+    Reference<const int> c = b; /* implicit conversion *is* allowed */
     CORRADE_COMPARE(*c, 1348);
 
     IntRef d = c; /* implicit conversion *is* allowed */
     CORRADE_COMPARE(*d.a, 1348);
+
+    constexpr IntRef cb = Int;
+    CORRADE_COMPARE(*cb.a, 3);
+
+    constexpr Reference<const int> cc = cb;
+    CORRADE_COMPARE(*cc, 3);
+
+    constexpr IntRef cd = cc;
+    CORRADE_COMPARE(*cd.a, 3);
 }
 
 void ReferenceTest::convertToReference() {
@@ -218,6 +246,10 @@ void ReferenceTest::convertToReference() {
     const int& cc = b;
     CORRADE_COMPARE(c, 32);
     CORRADE_COMPARE(cc, 32);
+
+    constexpr Reference<const int> cb = Int;
+    constexpr const int& ccc = cb;
+    CORRADE_COMPARE(ccc, 3);
 }
 
 void ReferenceTest::convertToConst() {
@@ -228,12 +260,21 @@ void ReferenceTest::convertToConst() {
     CORRADE_COMPARE(c, 18);
 }
 
+constexpr struct Foo {
+    int a;
+} FooInstance{15};
+
 void ReferenceTest::access() {
-    struct Foo { int a; } a{15};
+    Foo a{15};
     Reference<Foo> b = a;
     CORRADE_COMPARE(b->a, 15);
     CORRADE_COMPARE((*b).a, 15);
     CORRADE_COMPARE(b.get().a, 15);
+
+    constexpr Reference<const Foo> cb = FooInstance;
+    CORRADE_COMPARE(cb->a, 15);
+    CORRADE_COMPARE((*cb).a, 15);
+    CORRADE_COMPARE(cb.get().a, 15);
 }
 
 //truct ConvertibleFromInt {
