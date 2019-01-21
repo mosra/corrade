@@ -76,6 +76,11 @@ namespace Corrade {
     @ref Corrade/Corrade.h from @ref Corrade/Utility/Macros.h so it's available
     everywhere unconditionally
 
+@subsubsection corrade-changelog-latest-changes-containers Containers library
+
+-   The @ref Containers::StridedArrayView class is now @cpp constexpr @ce,
+    allowing it to be used to describe data layout at compile-time
+
 @subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
 
 -   Plugin interfaces now have the

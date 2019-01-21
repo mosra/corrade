@@ -60,6 +60,9 @@ template<class T> class StridedArrayView {
     public:
         typedef T Type;     /**< @brief Element type */
 
+        /** @brief Erased type */
+        typedef typename std::conditional<std::is_const<T>::value, const void, void>::type ErasedType;
+
         /** @brief Conversion from `nullptr` */
         constexpr /*implicit*/ StridedArrayView(std::nullptr_t) noexcept: _data{}, _size{}, _stride{} {}
 
@@ -77,7 +80,7 @@ template<class T> class StridedArrayView {
          * @param size      Data size
          * @param stride    Data stride
          */
-        /*implicit*/ StridedArrayView(T* data, std::size_t size, std::size_t stride) noexcept: _data{reinterpret_cast<const char*>(data)}, _size{size}, _stride{stride} {}
+        constexpr /*implicit*/ StridedArrayView(T* data, std::size_t size, std::size_t stride) noexcept: _data{data}, _size{size}, _stride{stride} {}
 
         /**
          * @brief Construct view on a fixed-size array
@@ -92,7 +95,7 @@ template<class T> class StridedArrayView {
         #else
         template<class U, std::size_t size, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
         #endif
-        /*implicit*/ StridedArrayView(U(&data)[size]) noexcept: _data{reinterpret_cast<const char*>(data)}, _size{size}, _stride{sizeof(T)} {
+        constexpr /*implicit*/ StridedArrayView(U(&data)[size]) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
         }
 
@@ -108,7 +111,7 @@ template<class T> class StridedArrayView {
         #else
         template<class U, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
         #endif
-        /*implicit*/ StridedArrayView(StridedArrayView<U> view) noexcept: _data{reinterpret_cast<const char*>(view.data())}, _size{view.size()}, _stride{view.stride()} {
+        constexpr /*implicit*/ StridedArrayView(StridedArrayView<U> view) noexcept: _data{view.data()}, _size{view.size()}, _stride{view.stride()} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
         }
 
@@ -124,7 +127,7 @@ template<class T> class StridedArrayView {
         #else
         template<class U, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
         #endif
-        /*implicit*/ StridedArrayView(ArrayView<U> view) noexcept: _data{reinterpret_cast<const char*>(view.data())}, _size{view.size()}, _stride{sizeof(T)} {
+        constexpr /*implicit*/ StridedArrayView(ArrayView<U> view) noexcept: _data{view.data()}, _size{view.size()}, _stride{sizeof(T)} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
         }
 
@@ -140,15 +143,15 @@ template<class T> class StridedArrayView {
         #else
         template<std::size_t size, class U, class = typename std::enable_if<std::is_convertible<U*, T*>::value>::type>
         #endif
-        /*implicit*/ StridedArrayView(StaticArrayView<size, U> view) noexcept: _data{reinterpret_cast<const char*>(view.data())}, _size{size}, _stride{sizeof(T)} {
+        constexpr /*implicit*/ StridedArrayView(StaticArrayView<size, U> view) noexcept: _data{view.data()}, _size{size}, _stride{sizeof(T)} {
             static_assert(sizeof(U) == sizeof(T), "type sizes are not compatible");
         }
 
         /** @brief Whether the array is non-empty */
-        explicit operator bool() const { return _data; }
+        constexpr explicit operator bool() const { return _data; }
 
         /** @brief Array data */
-        constexpr const void* data() const { return _data; }
+        constexpr ErasedType* data() const { return _data; }
 
         /** @brief Array size */
         constexpr std::size_t size() const { return _size; }
@@ -161,7 +164,7 @@ template<class T> class StridedArrayView {
 
         /** @brief Element access */
         T& operator[](std::size_t i) const {
-            return *const_cast<T*>(reinterpret_cast<const T*>(_data + i*_stride));
+            return *(reinterpret_cast<T*>(reinterpret_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(_data) + i*_stride));
         }
 
         /**
@@ -169,18 +172,22 @@ template<class T> class StridedArrayView {
          *
          * @see @ref front()
          */
-        constexpr StridedIterator<T> begin() const { return {_data, _stride}; }
+        StridedIterator<T> begin() const { return {_data, _stride}; }
         /** @overload */
-        constexpr StridedIterator<T> cbegin() const { return {_data, _stride}; }
+        StridedIterator<T> cbegin() const { return {_data, _stride}; }
 
         /**
          * @brief Iterator to (one item after) last element
          *
          * @see @ref back()
          */
-        StridedIterator<T> end() const { return {_data+_size*_stride, _stride}; }
+        StridedIterator<T> end() const {
+            return {reinterpret_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(_data)+_size*_stride, _stride};
+        }
         /** @overload */
-        StridedIterator<T> cend() const { return {_data+_size*_stride, _stride}; }
+        StridedIterator<T> cend() const {
+            return {reinterpret_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(_data)+_size*_stride, _stride};
+        }
 
         /**
          * @brief First element
@@ -226,7 +233,7 @@ template<class T> class StridedArrayView {
         }
 
     private:
-        const char* _data;
+        ErasedType* _data;
         std::size_t _size, _stride;
 };
 
@@ -238,36 +245,36 @@ Used by @ref StridedArrayView to provide iterator access to its items.
 template<class T> class StridedIterator {
     public:
         #ifndef DOXYGEN_GENERATING_OUTPUT
-        constexpr /*implicit*/ StridedIterator(const char* i, std::size_t stride): _i{i}, _stride{stride} {}
+        /*implicit*/ StridedIterator(typename std::conditional<std::is_const<T>::value, const void, void>::type* i, std::size_t stride): _i{reinterpret_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(i)}, _stride{stride} {}
         #endif
 
         /** @brief Equality comparison */
-        constexpr bool operator==(StridedIterator<T> other) const {
+        bool operator==(StridedIterator<T> other) const {
             return _i == other._i;
         }
 
         /** @brief Non-equality comparison */
-        constexpr bool operator!=(StridedIterator<T> other) const {
+        bool operator!=(StridedIterator<T> other) const {
             return _i != other._i;
         }
 
         /** @brief Less than comparison */
-        constexpr bool operator<(StridedIterator<T> other) const {
+        bool operator<(StridedIterator<T> other) const {
             return _i < other._i;
         }
 
         /** @brief Less than or equal comparison */
-        constexpr bool operator<=(StridedIterator<T> other) const {
+        bool operator<=(StridedIterator<T> other) const {
             return _i <= other._i;
         }
 
         /** @brief Greater than comparison */
-        constexpr bool operator>(StridedIterator<T> other) const {
+        bool operator>(StridedIterator<T> other) const {
             return _i > other._i;
         }
 
         /** @brief Greater than or equal comparison */
-        constexpr bool operator>=(StridedIterator<T> other) const {
+        bool operator>=(StridedIterator<T> other) const {
             return _i >= other._i;
         }
 
@@ -299,10 +306,10 @@ template<class T> class StridedIterator {
         }
 
         /** @brief Dereference */
-        T& operator*() const { return *const_cast<T*>(reinterpret_cast<const T*>(_i)); }
+        T& operator*() const { return *reinterpret_cast<T*>(_i); }
 
     private:
-        const char* _i;
+        typename std::conditional<std::is_const<T>::value, const char, char>::type* _i;
         std::size_t _stride;
 };
 
@@ -329,7 +336,7 @@ template<class T> StridedArrayView<T> StridedArrayView<T>::slice(std::size_t beg
         << begin << Utility::Debug::nospace << ":"
         << Utility::Debug::nospace << end << Utility::Debug::nospace
         << "] out of range for" << _size << "elements", nullptr);
-    return StridedArrayView<T>{const_cast<T*>(reinterpret_cast<const T*>(_data + begin*_stride)), std::size_t(end - begin), _stride};
+    return StridedArrayView<T>{reinterpret_cast<T*>(reinterpret_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(_data) + begin*_stride), std::size_t(end - begin), _stride};
 }
 
 }}
