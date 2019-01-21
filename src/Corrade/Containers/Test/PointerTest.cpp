@@ -91,6 +91,8 @@ struct PointerTest: TestSuite::Tester {
     void emplace();
     void release();
 
+    void cast();
+
     void debug();
 };
 
@@ -121,7 +123,8 @@ PointerTest::PointerTest() {
               &PointerTest::emplace,
               &PointerTest::release}, &PointerTest::resetCounters, &PointerTest::resetCounters);
 
-    addTests({&PointerTest::debug});
+    addTests({&PointerTest::cast,
+              &PointerTest::debug});
 }
 
 struct Immovable {
@@ -461,6 +464,20 @@ void PointerTest::release() {
 
     CORRADE_COMPARE(Immovable::constructed, 1);
     CORRADE_COMPARE(Immovable::destructed, 1);
+}
+
+void PointerTest::cast() {
+    struct Base {};
+    struct Derived: Base {
+        Derived(int a): a{a} {}
+        int a;
+    };
+
+    Pointer<Base> a{new Derived{42}};
+    Pointer<Derived> b = pointerCast<Derived>(std::move(a));
+    CORRADE_VERIFY(!a);
+    CORRADE_VERIFY(b);
+    CORRADE_COMPARE(b->a, 42);
 }
 
 void PointerTest::debug() {

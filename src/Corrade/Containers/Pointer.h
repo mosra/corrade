@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Containers::Pointer, function @ref Corrade::Containers::pointer()
+ * @brief Class @ref Corrade::Containers::Pointer, function @ref Corrade::Containers::pointer(), @ref Corrade::Containers::pointerCast()
  * @see @ref Corrade/Containers/PointerStl.h
  */
 
@@ -284,6 +284,24 @@ lines are equivalent:
 template<class T> inline Pointer<T> pointer(T* pointer) {
     static_assert(!std::is_constructible<T, T*>::value, "the type is constructible from its own pointer, which is ambiguous -- explicitly use the constructor instead");
     return Pointer<T>{pointer};
+}
+
+/** @relatesalso Pointer
+@brief Upcast a pointer
+
+While downcasting (derived to base) is handled implicitly with @ref Pointer::Pointer(Pointer<U>&&),
+upcasting needs to be done explicitly. Performs @cpp static_cast<U>() @ce,
+calling @ref Pointer::release() on @p pointer. You have to ensure the pointer
+is actually of type @p U, as only the inheritance relation between @p T and
+@p U is checked at compile time, not the actual type stored in @p pointer.
+
+Casting with @cpp dynamic_cast<U>() @ce is not supported, as it would lead to a
+destructive behavior in case the instance is not of type @p U. The standard
+library provides @ref std::dynamic_pointer_cast() and friends for this case,
+but they return a @ref std::shared_ptr in order to behave non-destructively.
+*/
+template<class U, class T> Pointer<U> pointerCast(Pointer<T>&& pointer) {
+    return Pointer<U>{static_cast<U*>(pointer.release())};
 }
 
 namespace Implementation {
