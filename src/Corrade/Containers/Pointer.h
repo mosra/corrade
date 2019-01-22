@@ -104,7 +104,7 @@ template<class T> class Pointer {
         /**
          * @brief Construct a pointer from another of a derived type
          *
-         * Expects that @p T is a base of @p U. For upcasting (base to
+         * Expects that @p T is a base of @p U. For downcasting (base to
          * derived) use @ref pointerCast(). Calls @ref release() on @p other.
          */
         template<class U, class = typename std::enable_if<std::is_base_of<T, U>::value>::type> /*implicit*/ Pointer(Pointer<U>&& other) noexcept: _pointer{other.release()} {}
@@ -288,10 +288,10 @@ template<class T> inline Pointer<T> pointer(T* pointer) {
 }
 
 /** @relatesalso Pointer
-@brief Upcast a pointer
+@brief Downcast a pointer
 
-While downcasting (derived to base) is handled implicitly with @ref Pointer::Pointer(Pointer<U>&&),
-upcasting needs to be done explicitly. Performs @cpp static_cast<U>() @ce,
+While upcasting (derived to base) is handled implicitly with @ref Pointer::Pointer(Pointer<U>&&),
+downcasting needs to be done explicitly. Performs @cpp static_cast<U>() @ce,
 calling @ref Pointer::release() on @p pointer. You have to ensure the pointer
 is actually of type @p U, as only the inheritance relation between @p T and
 @p U is checked at compile time, not the actual type stored in @p pointer.
