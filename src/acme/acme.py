@@ -419,16 +419,24 @@ def acme(toplevel_file, output) -> List[str]:
     lines = parse(toplevel_file, 0)
 
     # Find an include placeholder and put the includes there
-    for i, line in enumerate(lines):
-        if line.strip() == '// {{includes}}':
-            lines = lines[:i] + sorted(includes) + lines[i + 1:]
-            break
+    if includes:
+        includes = sorted(includes)
+        for i, line in enumerate(lines):
+            if line.strip() == '// {{includes}}':
+                lines = lines[:i] + includes + lines[i + 1:]
+                break
+        else:
+            logging.warning("No {{includes}} placeholder found, putting includes on the top")
+            lines = includes + lines
 
     # Find a copyright placeholder and put the copyrights there
-    for i, line in enumerate(lines):
-        if line.strip() == '{{copyright}}':
-            lines = lines[:i] + sorted(copyrights) + lines[i + 1:]
-            break
+    if copyrights:
+        for i, line in enumerate(lines):
+            if line.strip() == '{{copyright}}':
+                lines = lines[:i] + sorted(copyrights) + lines[i + 1:]
+                break
+        else:
+            logging.warning(" No {{copyrights}} placeholder found, ignoring found copyright statements")
 
     logging.info('Writing %i lines to %s', len(lines), output)
     with open(output, 'w') as of:

@@ -107,6 +107,9 @@ class ParseFile(unittest.TestCase):
     def test_includes(self):
         self.assertEqual(*self.run_acme('includes'))
 
+    def test_includes_no_placeholder(self):
+        self.assertEqual(*self.run_acme('no_copyright_include_placeholders'))
+
     def test_preprocessor(self):
         self.assertEqual(*self.run_acme('preprocessor'))
 

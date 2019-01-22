@@ -1,3 +1,5 @@
+#include <type_traits>
+
 // this gets included
 int this_too = 3;
 
