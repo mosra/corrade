@@ -1,7 +1,7 @@
 /*
     This file is part of a single header. library
 
-    [copyright]
+    {{copyright}}
 
     SOME MORE TEXT
 */

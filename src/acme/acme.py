@@ -422,13 +422,13 @@ def acme(toplevel_file, output) -> List[str]:
 
     # Find an include placeholder and put the includes there
     for i, line in enumerate(lines):
-        if line.strip() == '// [includes]':
+        if line.strip() == '// {{includes}}':
             lines = lines[:i] + sorted(includes) + lines[i + 1:]
             break
 
     # Find a copyright placeholder and put the copyrights there
     for i, line in enumerate(lines):
-        if line.strip() == '[copyright]':
+        if line.strip() == '{{copyright}}':
             lines = lines[:i] + sorted(copyrights) + lines[i + 1:]
             break
 

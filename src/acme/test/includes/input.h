@@ -1,6 +1,6 @@
 // Some random comment
 
-// [includes]
+// {{includes}}
 
 // And after
 
