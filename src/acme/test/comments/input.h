@@ -7,7 +7,7 @@
 */
 
 /*
-    Copyright © 2001, 2006 John Doe <john@doe.com>
+    Copyright © 1997, 2006 John Doe <john@doe.com>
 
     the whole contents of this block will get removed
 
