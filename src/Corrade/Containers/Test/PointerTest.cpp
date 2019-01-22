@@ -323,6 +323,11 @@ void PointerTest::constructDerived() {
     CORRADE_VERIFY(b);
     CORRADE_COMPARE(b->a, 42);
 
+    /* Test assign as well */
+    b = Pointer<Derived>{InPlaceInit, 36};
+    CORRADE_VERIFY(b);
+    CORRADE_COMPARE(b->a, 36);
+
     CORRADE_VERIFY((std::is_nothrow_constructible<Pointer<Base>, Pointer<Derived>>::value));
 
     CORRADE_VERIFY((std::is_constructible<Pointer<Base>, Derived*>::value));
