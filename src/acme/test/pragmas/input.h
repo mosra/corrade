@@ -17,6 +17,8 @@ int a;
 /** @brief A comment between two lines should get removed too */
 float b;
 
+void foobar(); /**< trailing comments nuked as well */
+
 #pragma ACME comments on
 
 #ifdef DOXYGEN_GENERATING_OUTPUT

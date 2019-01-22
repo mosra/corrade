@@ -1,6 +1,8 @@
 int a;
 float b;
 
+void foobar();
+
 // Only this gets to the output, in fact.
 /** @brief Docs */
 DebugStuff apiNames(int a = "disambiguate"[0]);

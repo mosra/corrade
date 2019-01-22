@@ -426,7 +426,12 @@ def acme(toplevel_file, output) -> List[str]:
                     continue
 
                 # Something else, add it verbatim
-                out += [line]
+                # Something else, copy verbatim to the output. Strip the
+                # trailing comment, if requested
+                if line.rstrip().endswith('*/'):
+                    out += [line[:line.rindex('/*')].rstrip() + '\n']
+                else:
+                    out += [line]
 
         # Assert that the branch stack is correct
         assert len(branch_stack) == 1
