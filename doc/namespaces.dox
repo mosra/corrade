@@ -65,7 +65,9 @@ find_package(Corrade REQUIRED Containers)
 target_link_libraries(your-app Corrade::Containers)
 @endcode
 
-See also @ref building-corrade and @ref corrade-cmake for more information.
+Parts of this library are additionally available in a form of
+@ref corrade-singles "single-header libraries". See also
+@ref building-corrade and @ref corrade-cmake for more information.
 */
 
 /** @dir Corrade/Utility

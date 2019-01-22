@@ -43,6 +43,10 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-new New features
 
+-   Various Corrade features are now being available also as single-header
+    libraries for easier integration into your projects. See
+    @ref corrade-singles for more information.
+
 @subsubsection corrade-changelog-latest-new-containers Containers library
 
 -   New @ref Containers::Pointer class, a lightweight equivalent to

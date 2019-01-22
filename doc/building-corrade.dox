@@ -43,6 +43,12 @@ CMake is not a strict requirement, it's also possible to use Corrade with
 custom buildsystems. Building Corrade without CMake is possible if you recreate
 its buildsystem yourself, but it's neither supported nor recommended.
 
+@section building-corrade-singles Single-header libraries
+
+Selected Corrade functionality is available as single-header libraries for
+easier integration into your projects. See @ref corrade-singles for more
+information.
+
 @section building-corrade-packages Prepared packages
 
 The easiest way to install Corrade is to use one of the ready-made packages for

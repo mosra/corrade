@@ -70,6 +70,19 @@ conversion is provided in a separate header to avoid unconditional
 
 @snippet Containers-stl.cpp Pointer
 
+<b></b>
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This class is also available as a single-header, dependency-less
+    [CorradePointer.h](https://github.com/mosra/magnum-singles/tree/master/CorradePointer.h)
+    library in the Magnum Singles repository for easier integration into your
+    projects. See @ref corrade-singles for more information. The above
+    mentioned STL compatibility is included as well, but disabled by default.
+    Enable it by specifying @cpp #define CORRADE_POINTER_STL_COMPATIBILITY @ce
+    before including the file.
+
 @see @ref pointer(T*), @ref pointer(Args&&... args), @ref pointerCast(),
     @ref Reference
 */

@@ -30,6 +30,7 @@ namespace Corrade {
 /**
 @page building-corrade Downloading and building Corrade
 @page corrade-cmake Using Corrade with CMake
+@page corrade-singles Single-header libraries
 @page corrade-example-index Examples
 @page corrade-rc Resource compiler
 @page corrade-partialsupport List of partially supported features
@@ -37,6 +38,7 @@ namespace Corrade {
 @page corrade-changelog Changelog
 @page corrade-changelog-old Archived changelogs
 @page corrade-developers Developers guide
+@page acme Single-header generator tool
 @page corrade-coding-style Coding style
 @page corrade-credits-third-party Third-party components
 @page corrade-credits-contributors Contributors

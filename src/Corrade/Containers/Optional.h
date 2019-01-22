@@ -86,6 +86,15 @@ to access a stored object in an empty state leads to assertion error.
 Unlike `std::optional`, this class does not provide a @cpp constexpr @ce
 implementation or ordering operators, which makes it fairly simple and
 lightweight. If you need the extra features, use the standard `std::optional`.
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This class is also available as a single-header, dependency-less
+    [CorradeOptional.h](https://github.com/mosra/magnum-singles/tree/master/CorradeOptional.h)
+    library in the Magnum Singles repository for easier integration into your
+    projects. See @ref corrade-singles for more information.
+
 @see @ref NullOpt, @ref optional(T&&), @ref optional(Args&&... args),
     @ref Reference
 */

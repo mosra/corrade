@@ -1,0 +1,296 @@
+/*
+    This file is part of Corrade.
+
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
+                2017, 2018, 2019 Vladimír Vondruš <mosra@centrum.cz>
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
+*/
+
+namespace Corrade {
+
+/** @page acme Single-header generator tool
+
+@tableofcontents
+@m_keywords{acme.py}
+
+The [src/acme/](https://github.com/mosra/corrade/tree/master/src/acme)
+directory of the Corrade repository contains a tool written in Python 3.6 for
+generating single-header libraries from multi-file C and C++ projects. It's
+currently used to generate @ref corrade-singles "single-header Corrade libraries",
+which are available through the [magnum-singles](https://github.com/mosra/magnum-singles)
+repository.
+
+@m_class{m-block m-danger}
+
+@par Why another tool?
+    In comparison to other tools such as [Quom](https://github.com/Viatorus/quom) or [Buck](https://hackernoon.com/generating-a-single-include-c-header-file-using-buck-827f20be3f9d),
+    this script is single-file, completely free of dependencies and it doesn't
+    need any external configuration file or command-line options, as everything
+    is configured in the source files themselves. The Magnum codebase is also
+    very special, so I can take a few shortcuts thanks to its strict coding
+    style but also spend extra time implementing features that only Magnum
+    needs. While it works on Magnum, it may misbehave on other codebases.
+@par
+    Uh, it also needs a better name.
+
+The desired usage is by creating a driver file, described below, which contains
+the complete setup and references all input files, and then running the script
+on it. For example:
+
+@code{.sh}
+./acme.py path/to/CorradeArray.h
+@endcode
+
+The above creates a file in `path/to/output/CorradeArray.h`, replacing
+file-relative @cpp #include @ce-s by actual file contents, among other things.
+Example contents of the driver file are below --- it will create a hypothetical
+`CorradeArray.h` header, combining @ref Containers::Array,
+@ref Containers::StaticArray, @ref Containers::ArrayView and
+@ref Containers::StaticArrayView together. It contains placeholders for
+copyright notices, a global place to put all external @cpp #include @ce
+directives, a setup for additional processing behavior and finally includes for
+all headers that are meant to be combined.
+
+@include acme-driver.h
+
+The tool has special handling for various @cb{.jinja} {{placeholders}} @ce,
+preprocessor branches such as @cpp #ifdef @ce or @cpp #elif @ce and limited
+handling of @cpp #define @ce statements. To avoid the need for an external
+configuration file or excessive options passed on the command-line, additional
+options are passed via @cpp #pragma ACME @ce directives placed in input files.
+These options are recognized anywhere so for example if you are generating
+multiple single-header libraries, you can have the @cpp #pragma @ce directives
+in a common header and @cpp #include @ce it from the actual driver files.
+
+@section acme-system-includes System include placement
+
+All system includes (i.e., includes that are not quoted and not matching any
+local include paths) are sorted and placed on a line containing a
+@cpp // {{includes}} @ce placeholder. If the placeholder is not present, the
+includes are prepended before everything else.
+
+It's possible to have multiple occurences of the @cpp // {{includes}} @ce
+placeholder, each of them will expand only to newly encountered includes that
+aren't already present before. This can be used to separate away implementation
+details or heavy parts of the library, for example:
+
+@code{.cpp}
+// {{includes}}
+
+#include "Corrade/Containers/Pointer.h"
+
+#ifdef CORRADE_POINTER_STL_COMPATIBILITY
+// {{includes}}
+
+// This header includes <memory>, so make it opt-in
+#include "Corrade/Containers/PointerStl.h"
+#endif
+@endcode
+
+@m_class{m-block m-warning}
+
+@par Non-hermetic includes
+    The script currently assumes sanity in a sense that there are no
+    order-dependent includes. This may neeed to get fixed later if it turns out
+    to be a real problem. For includes that need to have some macro defined
+    before they are included, you can put the @cpp #define @ce before the
+    placeholder, such as:
+@par
+    @code{.cpp}
+    #define NDEBUG
+    // {{includes}}
+    @endcode
+
+@section acme-local-include-matching Local include matching
+
+By default the script treats only quote-included headers (@cpp #include "foo.h" @ce)
+as local, while @cpp #include <foo.h> @ce are treated as system (and thus kept
+in the final file). In addition, it's possible to specify which aditional path
+prefixes should be treated as local using @cpp #pragma ACME local @ce,
+independently of quoted or bracketed includes. For example, the following
+snippet will treat both @cpp #include <Magnum/Types.h> @ce and
+@cpp #include "Corrade/configure.h" @ce as local:
+
+@code{.cpp}
+#pragma ACME local Corrade
+#pragma ACME local Magnum
+@endcode
+
+By default the script searches for local includes relative to the location of
+the file which includes them. To extend the include paths, use
+@cpp #pragma ACME path @ce, again the path is taken relative to the file the
+@cpp #pragma @ce was in. For example, this makes the script look both into the
+Corrade source directory and to the build directory for generated headers:
+
+@code{.cpp}
+// assuming the driver file is placed next to the Corrade project directory
+#pragma ACME path corrade/src
+#pragma ACME path corrade/build/src
+@endcode
+
+The script aborts if it can't find a local include in any of the paths.
+
+@section acme-local-include-processing Local include processing
+
+For the top-level (driver) file, file contents from local @cpp #include @ce
+statements are pasted directly on the same line, in specified order, like the C
+preprocessor does. However, for remaining files, to avoid messy nested include
+guards, the files are concatenated in the depth-first other they got included.
+
+If a local file is included multiple times, only the first occurence is taken
+and other are ignored. Note that, to make the implementation simpler, this
+works similarly to the @cpp #pragma once @ce statement but without taking the
+actual @cpp #pragma once @ce or header guards into account.
+
+@m_class{m-block m-warning}
+
+@par Non-hermetic includes
+    This also means that attempts to include an unguarded file multiple times
+    and expecting it to be pasted more than once, *will not work*. Same goes
+    with @cpp #define @ce statements that are meant to override something in a
+    non-hermetic include file, as mentioned above. One possible solution is
+    to move the @cpp #define @ce and the @cpp #include @ce to the top-level
+    file to ensure proper order.
+
+@section acme-preprocessor Preprocessor branch processing
+
+In order to further trim down generated file size, the script has a rudimentary
+preprocessor branch evaluator. You can force a macro to be either defined or
+undefined, which will then cause things like @cpp #if defined(A_MACRO) @ce
+to become either @cpp #if 0 @ce or @cpp #if 1 @ce, which ultimately causes code
+inside to be either fully removed or included without the redundant wrapping
+@cpp #if 1 @ce. The syntax is as following:
+
+@code{.cpp}
+#pragma ACME enable NDEBUG
+#pragma ACME disable DOXYGEN
+@endcode
+
+The script is able to handle more complex preprocessor logic as well. With the
+above setup, the following line:
+
+@code{.cpp}
+#if defined(NDEBUG) && (defined(BUILD_DEPRECATED_APIS) || defined(DOXYGEN))
+@endcode
+
+@m_class{m-noindent}
+
+will be simplified to just
+
+@code{.cpp}
+#ifdef BUILD_DEPRECATED_APIS
+@endcode
+
+Besides the above, also all @cpp #define @ce / @cpp #undef @ce statements that
+touch the enabled/disabled macros will get removed. That makes it possible to
+remove header guards, for example the following input will become just the
+function definition after processing:
+
+@code{.cpp}
+#pragma ACME disable MyLib_Header_h
+
+#ifndef MyLib_Header_h
+#define MyLib_Header_h
+float calculate(float a, float b);
+#endif
+@endcode
+
+@note On the other hand, saying @cpp #pragma ACME enable MyLib_Header_h @ce
+    would cause the whole guarded contents to be discarded.
+
+@section acme-copyright Copyright information
+
+Commonly every header has a copyright block on top and it would be wasteful
+to duplicate it for all input files. It makes sense to have just one at top,
+but combining information about all people that contributed to each file from
+the input.
+
+The script matches lines starting with `Copyright © [year]` in file comments,
+sorts them and then places them instead of the @cb{.jinja} {{copyright}} @ce
+placeholder, if it's present. If a line containing the placeholder is not
+found, the copyright info is thrown away. Multiline copyright notices are
+supported as well if a  line ends with `,` instead of `>` for the e-mail
+address.
+
+@section acme-comments Code comments
+
+By default, the script includes all code comments except license blocks (blocks
+that contain the matched copyright lines). The @cpp #pragma ACME comments off @ce
+makes it discard all comments in code following the pragma, while
+@cpp #pragma ACME comments on @ce enables them again.
+
+@note In the example driver file above, note how @cpp #pragma ACME comments off @ce
+    is placed *after* the top-level copyright block, in order to keep it
+    included in the output file.
+
+@section acme-revision {{revision}}
+
+The @cb{.jinja} {{revision}} @ce placeholder can be used to annotate the
+generated header with a specific revision of the original code for easier
+version history tracking. The revision will be extracted in a working directory
+of the file this placeholder is in. For single-header libraries generated from
+multiple projects or in case it's needed to extract a revision from somewhere
+else than the directory containing the driver file, @cb{.jinja} {{revision:path}} @ce
+can be used. The `path` is a substring of a file path and the revision will be
+extracted in a directory containing the first file that matches given `path`.
+
+The revision is by default extracted using @cb{.sh} git describe @ce, you can
+override this using @cpp #pragma ACME revision @ce. First argument is the
+matching path, either corresponding to `path` part of some placeholder or being
+`*` to indicate a global setting. The rest of the line is a shell command to
+get the revision, which then gets executed with a CWD being the dir of first
+file that matched the path. If no such pragma is found, the default is as if
+the following line would be present:
+
+@code{.cpp}
+#pragma ACME revision * git describe --dirty --always
+@endcode
+
+@attention The @cb{.sh} git describe @ce command by default takes any tag it
+    can find. It's good to restrict it to just release tags using for example
+    <tt>--match 'v*'</tt>, based on your versioning scheme.
+
+@section acme-stats {{stats}}
+
+The @cb{.jinja} {{stats:id}} @ce placeholder can be used to print various stats
+of the final file before it gets written to the disk. The actual behavior is
+controlled by @cpp #pragma ACME stats @ce. First argument is the identifier
+matching the `id` part of the placeholder, the rest of the line is the shell
+command used to get the stats, the actual generated file contents being fed to
+its standard input. If no such pragma is found, no placeholders are replaced.
+For example, the following, when expanded to @cb{.jinja} {{stats:wc-l}} @ce,
+will show a number of lines the generated file has:
+
+@code{.cpp}
+#pragma ACME stats wc-l wc -l
+@endcode
+
+@section acme-example Real-world examples
+
+Tests for the above described functionality can be found in a
+[test/](https://github.com/mosra/corrade/tree/master/src/acme/test) directory
+next to the `acme.py` file. Real-world driver file examples, used for
+generating the @ref corrade-singles "Corrade single-header libs", are in the
+[src/singles/](https://github.com/mosra/corrade/tree/master/src/singles)
+directory.
+
+*/
+
+}

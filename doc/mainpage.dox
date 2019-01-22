@@ -45,6 +45,11 @@ we provide packages for many platforms, including Windows, Linux and macOS.
 After that, the best way to get started is to read some
 @ref corrade-example-index "examples and tutorials".
 
+Apart from that, various Corrade functionality is now available through
+@ref corrade-singles "single-header libraries". Just download a file,
+@cpp #include @ce it in your project and you're ready to go! No buildsystem
+wrangling needed.
+
 @section corrade-mainpage-contact Contact & support
 
 If you want to contribute to Corrade, if you spotted a bug, need a feature or

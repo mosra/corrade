@@ -483,6 +483,32 @@ inverse.
 10. Merge to `master`, put a "thank you" comment to the PR, explaining
     additional changes if necessary
 
+@section corrade-developers-singles Checklist for creating/updating a single-header lib
+
+1.  Create/update a driver file in `src/singles/`, if needed
+2.  Update `src/singles/postprocess.sh`, if needed
+3.  Run `src/singles/postprocess.sh`, regenerating all headers
+4.  Copy everything from `src/singles/output/` to the magnum-singles
+    repository.
+5.  Check `git diff` for suspicious changes.
+    -   no `-dirty` suffix in revision IDs
+    -   no preprocessed LoC being over 10k
+6.  If nothing changes except for revision IDs, there's no need to update
+7.  Run `magnum-singles/package/generate-loc.sh`, update the README with its
+    output (use block editing)
+8.  If there's something important to be mentioned, update the changelog in
+    the README
+9.  Add a new test, if needed
+    -   new file in `magnum-singles/test`, named after the header, including
+        the header and doing a simple operation that results in @cpp return 0 @ce
+    -   new entry in `magnum-singles/package/ci/travis.yml`, compiling the new
+        test
+10. Push to the `next` branch. If green, merge to `master`, if not, restart
+    from point 1.
+
+See @ref acme for developer-facing description of the single-header generator
+tool.
+
 @section corrade-developers-release Checklist for making a release
 
 1.  Open a new `20XY.ac` milestone
