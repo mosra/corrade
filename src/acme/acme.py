@@ -418,8 +418,6 @@ def acme(toplevel_file, output) -> List[str]:
 
     lines = parse(toplevel_file, 0)
 
-    #print(''.join(lines))
-
     # Find an include placeholder and put the includes there
     for i, line in enumerate(lines):
         if line.strip() == '// {{includes}}':
