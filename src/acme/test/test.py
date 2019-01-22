@@ -116,5 +116,5 @@ class ParseFile(unittest.TestCase):
     def test_pragmas(self):
         self.assertEqual(*self.run_acme('pragmas'))
 
-    def test_preprocessor(self):
-        self.assertEqual(*self.run_acme('revision'))
+    def test_revision_stats(self):
+        self.assertEqual(*self.run_acme('revision_stats'))

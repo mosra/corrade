@@ -127,8 +127,9 @@ def acme(toplevel_file, output) -> List[str]:
     parsed_files = set()
     forced_defines = {}
     revision_commands = {}
+    stats_commands = {}
     def parse(file, level):
-        nonlocal write_comments, paths, local_include_prefixes, all_includes, new_includes, copyrights, parsed_files, forced_defines, revision_commands
+        nonlocal write_comments, paths, local_include_prefixes, all_includes, new_includes, copyrights, parsed_files, forced_defines, revision_commands, stats_commands
 
         logging.info("%sParsing file %s...", ' '*level, file)
 
@@ -415,6 +416,9 @@ def acme(toplevel_file, output) -> List[str]:
                     elif what == 'revision':
                         path, _, command = value.partition(' ')
                         revision_commands[path] = command.strip()
+                    elif what == 'stats':
+                        id, _, command = value.partition(' ')
+                        stats_commands[id] = command.strip()
                     else:
                         logging.warning("Unknown #pragma ACME %s %s", what, value)
 
@@ -491,6 +495,16 @@ def acme(toplevel_file, output) -> List[str]:
 
                 revision = subprocess.check_output(command, cwd=cwd, shell=True).decode('utf-8').strip()
             lines[i] = line.replace(placeholder, revision)
+
+    # Perform some stats on file contents, passing them to stdin
+    for id, command in stats_commands.items():
+        placeholder = '{{{{stats:{}}}}}'.format(id)
+        stats = None
+        for i, line in enumerate(lines):
+            if not placeholder in line: continue
+            if not stats:
+                stats = subprocess.check_output(command, input=''.join(lines).encode('utf-8'), shell=True).decode('utf-8').strip()
+            lines[i] = line.replace(placeholder, stats)
 
     logging.info('Writing %i lines to %s', len(lines), output)
     with open(output, 'w') as of:
