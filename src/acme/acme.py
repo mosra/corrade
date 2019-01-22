@@ -120,12 +120,13 @@ def acme(toplevel_file, output) -> List[str]:
     write_comments = True
     paths = []
     local_include_prefixes = []
-    includes = set()
+    all_includes = set()
+    new_includes = []
     copyrights = set()
     parsed_files = set()
     forced_defines = {}
     def parse(file, level):
-        nonlocal write_comments, paths, local_include_prefixes, includes, copyrights, parsed_files, forced_defines
+        nonlocal write_comments, paths, local_include_prefixes, all_includes, new_includes, copyrights, parsed_files, forced_defines
 
         logging.info("%sParsing file %s...", ' '*level, file)
 
@@ -197,6 +198,12 @@ def acme(toplevel_file, output) -> List[str]:
 
                 # Single-line comment or an empty line
                 if linecomment_rx.match(line):
+                    # If this is an {{include}} placeholder, finalize the
+                    # previous set of includes and open a new one so the new
+                    # includes are added to the new placeholder
+                    if line.strip() == '// {{includes}}':
+                        new_includes += [set()]
+
                     # Add it only if we're not in a disabled preprocessor
                     # branch and it's either a non-empty line (and comments are
                     # not disabled) or an empty line that's not first in the
@@ -373,10 +380,19 @@ def acme(toplevel_file, output) -> List[str]:
                             else:
                                 includes_out += parsed_file
 
-                    # Global include, add to the set
+                    # System include. If seeing for the first time, add it to
+                    # the set of not-yet-written includes, it'll get written to
+                    # the nearest preceding {{includes}} placeholder. If
+                    # already spotted, don't do anything.
                     else:
                         assert not is_local
-                        includes.add(match.group('include') + '\n')
+                        includeline = match.group('include') + '\n'
+                        if includeline not in all_includes:
+                            all_includes.add(includeline)
+                            if not new_includes:
+                                logging.warning("Includes found before an {{includes}} placeholder, the resulting file will have them on the top")
+                                new_includes += [set()]
+                            new_includes[-1].add(includeline)
                     continue
 
                 # Pragma
@@ -418,16 +434,19 @@ def acme(toplevel_file, output) -> List[str]:
 
     lines = parse(toplevel_file, 0)
 
-    # Find an include placeholder and put the includes there
-    if includes:
-        includes = sorted(includes)
-        for i, line in enumerate(lines):
-            if line.strip() == '// {{includes}}':
-                lines = lines[:i] + includes + lines[i + 1:]
-                break
+    # For each include placeholder put the correspodning includes there. If
+    # there's none, put them on the top.
+    if new_includes:
+        i = 0
+        while i != len(lines):
+            if lines[i].strip() == '// {{includes}}':
+                lines = lines[:i] + sorted(new_includes[0]) + lines[i + 1:]
+                new_includes.pop(0)
+                if not new_includes: break
+            i = i + 1
         else:
-            logging.warning("No {{includes}} placeholder found, putting includes on the top")
-            lines = includes + lines
+            # Warning already printed when new_includes was discovered to be empty
+            lines = sorted(new_includes[0]) + lines
 
     # Find a copyright placeholder and put the copyrights there
     if copyrights:

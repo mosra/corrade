@@ -12,3 +12,9 @@
 #include <cstring>
 
 void stuffAtTheEnd(Integer = SomeValue);
+
+#ifdef INCLUDE_ALSO_HEAVY_STUFF
+// {{includes}}
+
+#include "Oof.h"
+#endif
