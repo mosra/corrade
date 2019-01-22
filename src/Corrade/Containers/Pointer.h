@@ -218,7 +218,7 @@ template<class T> class Pointer {
          * it with @p pointer.
          * @see @ref release()
          */
-        void reset(T* pointer) {
+        void reset(T* pointer = nullptr) {
             delete _pointer;
             _pointer = pointer;
         }
