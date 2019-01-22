@@ -29,6 +29,7 @@ import argparse
 import re
 import os
 import logging
+import subprocess
 
 from typing import List, Tuple
 
@@ -112,7 +113,7 @@ copyright_rc = re.compile(r'^\s+Copyright © \d{4}.+$')
 #copyright_keep_rc = re.compile(r'^\s+Copyright © 20.+>$')
 blockcomment_start_rx = re.compile(r'^\s*/\*.*\s*$')
 blockcomment_end_rx = re.compile(r'^\s*.*\*/\s*$')
-acme_pragma_rx = re.compile(r'^#pragma\s+ACME\s+(?P<what>[^\s]+)\s*(?P<value>[^\s]*)\s*$')
+acme_pragma_rx = re.compile(r'^#pragma\s+ACME\s+(?P<what>[^\s]+)\s*(?P<value>[^\s]?.*)\s*$')
 
 def acme(toplevel_file, output) -> List[str]:
     base_directory = os.path.dirname(toplevel_file)
@@ -125,8 +126,9 @@ def acme(toplevel_file, output) -> List[str]:
     copyrights = set()
     parsed_files = set()
     forced_defines = {}
+    revision_commands = {}
     def parse(file, level):
-        nonlocal write_comments, paths, local_include_prefixes, all_includes, new_includes, copyrights, parsed_files, forced_defines
+        nonlocal write_comments, paths, local_include_prefixes, all_includes, new_includes, copyrights, parsed_files, forced_defines, revision_commands
 
         logging.info("%sParsing file %s...", ' '*level, file)
 
@@ -410,6 +412,9 @@ def acme(toplevel_file, output) -> List[str]:
                         local_include_prefixes += [value]
                     elif what == 'comments':
                         write_comments = value == 'on'
+                    elif what == 'revision':
+                        path, _, command = value.partition(' ')
+                        revision_commands[path] = command.strip()
                     else:
                         logging.warning("Unknown #pragma ACME %s %s", what, value)
 
@@ -456,6 +461,31 @@ def acme(toplevel_file, output) -> List[str]:
                 break
         else:
             logging.warning(" No {{copyrights}} placeholder found, ignoring found copyright statements")
+
+    # If no custom revision fetch command was provided, add a default one. Then
+    # for each revision path find a corresponding placeholder and replace it.
+    if '*' not in revision_commands:
+        revision_commands['*'] = 'git describe --dirty --always'
+    for path, command in revision_commands.items():
+        placeholder = '{{{{revision{}}}}}'.format('' if path == '*' else ':' + path)
+        revision = None
+        for i, line in enumerate(lines):
+            if not placeholder in line: continue
+            if not revision:
+                # Find the file where the revision should be fetched
+                if path == '*': cwd = os.path.dirname(os.path.realpath(toplevel_file))
+                else:
+                    for file in parsed_files:
+                        realfile = os.path.realpath(file)
+                        if path in realfile:
+                            cwd = os.path.dirname(realfile)
+                            break
+                    else: # pragma: no cover
+                        logging.fatal("No matching file found for expanding %s", placeholder)
+                        assert False
+
+                revision = subprocess.check_output(command, cwd=cwd, shell=True).decode('utf-8').strip()
+            lines[i] = line.replace(placeholder, revision)
 
     logging.info('Writing %i lines to %s', len(lines), output)
     with open(output, 'w') as of:
