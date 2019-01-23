@@ -13,6 +13,9 @@
 
 void stuffAtTheEnd(Integer = SomeValue);
 
+#pragma ACME comments off
+/* to test the below // {includes} get preserved */
+
 #ifdef INCLUDE_ALSO_HEAVY_STUFF
 // {{includes}}
 

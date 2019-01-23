@@ -211,7 +211,7 @@ def acme(toplevel_file, output) -> List[str]:
                     # branch and it's either a non-empty line (and comments are
                     # not disabled) or an empty line that's not first in the
                     # file and there's not more than one following each other
-                    if branch_stack[-1][1] is not False and ((line.strip() and write_comments) or (not line.strip() and out and out[-1].strip())):
+                    if branch_stack[-1][1] is not False and ((line.strip() and write_comments) or line.strip() == '// {{includes}}' or (not line.strip() and out and out[-1].strip())):
                         out += [line]
                     continue
 
