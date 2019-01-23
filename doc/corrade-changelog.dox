@@ -123,6 +123,17 @@ namespace Corrade {
     @ref Containers::StaticArrayView::operator bool() operators were not
     @cpp constexpr @ce by accident
 
+@subsection corrade-changelog-latest-deprecated Deprecated APIs
+
+-   All uses of @ref std::unique_ptr are replaced with @ref Containers::Pointer
+    (affecting mainly the @ref PluginManager::Manager class). The types are
+    implicitly move-convertible to each other if the
+    @ref Corrade/Containers/PointerStl.h header is included. The header is
+    included where needed if @ref CORRADE_BUILD_DEPRECATED is enabled. To
+    ensure your code keeps with future versions of Magnum, either switch your
+    code to use @ref Containers::Pointer as well or include the
+    @ref Corrade/Containers/PointerStl.h header explicitly.
+
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 
 -   Removed @cpp Containers::ArrayReference @ce, which was deprecated since 2015.
