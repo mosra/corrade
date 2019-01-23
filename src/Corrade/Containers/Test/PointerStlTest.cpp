@@ -23,8 +23,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <memory>
-
 #include "Corrade/Containers/PointerStl.h"
 #include "Corrade/TestSuite/Tester.h"
 
