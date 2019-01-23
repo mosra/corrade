@@ -653,14 +653,23 @@ Prefer to use references instead of pointers in function parameters and class
 members. Use raw pointers only as non-owning optional references, use
 @ref Containers::ArrayView and @ref Containers::StaticArrayView to pass array
 references around. If you need to hold or transfer ownership, use
-@ref std::unique_ptr or @ref Containers::Array. If you need the type that
-contains a reference to be copyable/movable, use @ref std::reference_wrapper
+@ref Containers::Pointer or @ref Containers::Array. If you need the type that
+contains a reference to be copyable/movable, use @ref Containers::Reference
 instead of a reference.
 
-Avoid to use @ref std::shared_ptr, if possible. Unlike @ref std::unique_ptr and
-@ref Containers::Array, which are just zero-cost wrappers checked at
-compile-time, shared pointers have serious runtime penalty due to reference
-counting.
+Avoid @ref std::unique_ptr or @ref std::reference_wrapper, as the `<memory>`
+and `<functional>` headers are very heavy, significantly affecting compile
+time, and neither of these types can be portably forward-declared. The
+alternative @ref Containers::Pointer and @ref Containers::Reference types are
+implicitly convertible to these if STL compatibility is needed, see their docs
+for more information.
+
+Use of @ref std::shared_ptr is banned because, apart from compile-time
+effects of @ref std::unique_ptr, it involves locking, mutexes for thread-safe
+reference counting. None of that should be needed in a properly designed API.
+The only place where its usage is allowed is when needed to interface with 3rd
+party APIs. In that case the use should be reduced to ideally just a single
+source file to minimize compile time costs.
 
 @subsection corrade-coding-style-cpp-sfinae SFINAE and templates
 
