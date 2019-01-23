@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
     }
 
     /* Instance of an animal */
-    std::unique_ptr<Examples::AbstractAnimal> animal = manager.instantiate(args.value("plugin"));
+    Containers::Pointer<Examples::AbstractAnimal> animal = manager.instantiate(args.value("plugin"));
 
     Utility::Debug{} << "Using plugin" << '\'' + animal->metadata()->data().value("name") + '\''
                      << "...\n";

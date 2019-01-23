@@ -32,10 +32,9 @@
 #include "Corrade/configure.h"
 
 #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
-#include <memory>
-
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/Pointer.h"
 #include "Corrade/Utility/TweakableParser.h"
 
 namespace Corrade { namespace Utility {
@@ -345,7 +344,7 @@ class CORRADE_UTILITY_EXPORT Tweakable {
 
         void scopeInternal(void(*lambda)(void(*)(), void*), void(*userCall)(), void* userData);
 
-        std::unique_ptr<Data> _data;
+        Containers::Pointer<Data> _data;
 };
 
 /** @relatesalso Corrade::Utility::Tweakable
@@ -378,7 +377,7 @@ template<class Lambda> void Tweakable::scope(Lambda lambda, void* userData) {
 namespace Implementation {
     template<class T> struct TweakableTraits {
         static_assert(sizeof(T) <= TweakableStorageSize,
-            "tweakable storage size too small for this type, save it via a unique_ptr instead");
+            "tweakable storage size too small for this type, save it via a Pointer instead");
         #if (!defined(__GNUC__) && !defined(__clang__)) || __GNUC__ >= 5 || (defined(_GLIBCXX_RELEASE) && _GLIBCXX_RELEASE >= 5)
         /* https://gcc.gnu.org/onlinedocs/gcc-4.9.2/libstdc++/manual/manual/status.html#status.iso.2011
            vs https://gcc.gnu.org/onlinedocs/gcc-5.5.0/libstdc++/manual/manual/status.html#status.iso.2011.

@@ -29,9 +29,9 @@
  * @brief Class @ref Corrade::PluginManager::AbstractPlugin
  */
 
-#include <memory>
 #include <string>
 
+#include "Corrade/Containers/Pointer.h"
 #include "Corrade/PluginManager/PluginManager.h"
 #include "Corrade/PluginManager/visibility.h"
 #include "Corrade/Utility/Utility.h"
@@ -243,7 +243,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
         AbstractManager* _manager;
         const std::string _plugin;
         const PluginMetadata* _metadata;
-        std::unique_ptr<Utility::ConfigurationGroup> _configuration;
+        Containers::Pointer<Utility::ConfigurationGroup> _configuration;
 };
 
 }}

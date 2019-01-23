@@ -77,9 +77,9 @@ objects with maximal size 1 and can be in two states, either empty or having a
 value. A non-allocating counterpart to @ref Pointer.
 
 A common use for an optional object is for a return value of function that can
-fail --- like @ref std::unique_ptr, but without the unnecessary allocation
-overhead. Like with @ref std::unique_ptr, the presence of an object can be
-checked using @ref operator bool(). The stored object can be accessed using
+fail --- like @ref Pointer, but without the unnecessary allocation overhead.
+Similarly to @ref Pointer, the presence of an object can be checked using
+@ref operator bool(). The stored object can be accessed using
 @ref operator->(), @ref operator*() or using implicit conversion, while attempt
 to access a stored object in an empty state leads to assertion error.
 

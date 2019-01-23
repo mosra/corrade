@@ -422,7 +422,7 @@ void ManagerTest::staticPlugin() {
     CORRADE_COMPARE(manager.loadState("Canary"), LoadState::Static);
     CORRADE_COMPARE(manager.metadata("Canary")->data().value("description"), "I'm allergic to canaries!");
 
-    std::unique_ptr<AbstractAnimal> animal = manager.instantiate("Canary");
+    Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Canary");
     CORRADE_VERIFY(animal);
     CORRADE_VERIFY(animal->hasTail());
     CORRADE_COMPARE(animal->name(), "Achoo");
@@ -441,7 +441,7 @@ void ManagerTest::dynamicPlugin() {
     CORRADE_COMPARE(manager.metadata("Dog")->data().value("description"), "A simple dog plugin.");
 
     {
-        std::unique_ptr<AbstractAnimal> animal = manager.instantiate("Dog");
+        Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Dog");
         CORRADE_VERIFY(animal);
         CORRADE_VERIFY(animal->hasTail());
         CORRADE_COMPARE(animal->name(), "Doug");
@@ -463,7 +463,7 @@ void ManagerTest::dynamicPlugin() {
 
 void ManagerTest::dynamicPluginLoadAndInstantiate() {
     PluginManager::Manager<AbstractAnimal> manager;
-    std::unique_ptr<AbstractAnimal> animal = manager.loadAndInstantiate("Dog");
+    Containers::Pointer<AbstractAnimal> animal = manager.loadAndInstantiate("Dog");
     CORRADE_VERIFY(animal);
     CORRADE_COMPARE(animal->name(), "Doug");
 }
@@ -476,7 +476,7 @@ void ManagerTest::dynamicPluginFilePath() {
     CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"Canary", "Dog"}));
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
 
-    std::unique_ptr<AbstractAnimal> animal = manager.instantiate("Dog");
+    Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Dog");
     CORRADE_VERIFY(animal);
     CORRADE_COMPARE(animal->name(), "Doug");
     CORRADE_COMPARE(animal->metadata()->data().value("description"), "A simple dog plugin.");
@@ -484,7 +484,7 @@ void ManagerTest::dynamicPluginFilePath() {
 
 void ManagerTest::dynamicPluginFilePathLoadAndInstantiate() {
     PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-    std::unique_ptr<AbstractAnimal> animal = manager.loadAndInstantiate(DOG_PLUGIN_FILENAME);
+    Containers::Pointer<AbstractAnimal> animal = manager.loadAndInstantiate(DOG_PLUGIN_FILENAME);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
     CORRADE_VERIFY(animal);
     CORRADE_COMPARE(animal->name(), "Doug");
@@ -513,7 +513,7 @@ void ManagerTest::dynamicPluginFilePathConflictsWithLoadedPlugin() {
     /* Succeeds when it's unloaded */
     CORRADE_COMPARE(manager.load(DOG_PLUGIN_FILENAME), LoadState::Loaded);
     {
-        std::unique_ptr<AbstractAnimal> animal = manager.instantiate("Dog");
+        Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Dog");
         CORRADE_VERIFY(animal);
         CORRADE_COMPARE(animal->name(), "Doug");
         CORRADE_COMPARE(animal->metadata()->data().value("description"), "A simple dog plugin.");
@@ -523,7 +523,7 @@ void ManagerTest::dynamicPluginFilePathConflictsWithLoadedPlugin() {
        instantiates properly. */
     CORRADE_COMPARE(manager.loadState("AGoodBoy"), LoadState::Loaded);
     {
-        std::unique_ptr<AbstractAnimal> animal = manager.instantiate("AGoodBoy");
+        Containers::Pointer<AbstractAnimal> animal = manager.instantiate("AGoodBoy");
         CORRADE_VERIFY(animal);
         CORRADE_COMPARE(animal->name(), "Doug");
         CORRADE_COMPARE(animal->metadata()->data().value("description"), "A simple dog plugin.");
@@ -544,7 +544,7 @@ void ManagerTest::dynamicPluginFilePathRemoveOnFail() {
     CORRADE_COMPARE(manager.load(DOG_PLUGIN_FILENAME), LoadState::Loaded);
     CORRADE_COMPARE(manager.loadState("Dog"), LoadState::Loaded);
     {
-        std::unique_ptr<AbstractAnimal> animal = manager.instantiate("Dog");
+        Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Dog");
         CORRADE_VERIFY(animal);
         CORRADE_COMPARE(animal->name(), "Doug");
     }
@@ -564,7 +564,7 @@ void ManagerTest::configurationGlobal() {
     PluginMetadata& metadata = *manager.metadata("Canary");
     metadata.configuration().setValue("name", "BIRD UP!!");
 
-    std::unique_ptr<AbstractAnimal> animal = manager.instantiate("Canary");
+    Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Canary");
     CORRADE_COMPARE(animal->name(), "BIRD UP!!");
     CORRADE_COMPARE(animal->configuration().value("name"), "BIRD UP!!");
 }
@@ -578,7 +578,7 @@ void ManagerTest::configurationLocal() {
     const PluginMetadata& metadata = *const_cast<const PluginManager::Manager<AbstractAnimal>&>(manager).metadata("Canary");
     CORRADE_COMPARE(metadata.configuration().value("name"), "Achoo");
 
-    std::unique_ptr<AbstractAnimal> animal = manager.instantiate("Canary");
+    Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Canary");
     CORRADE_COMPARE(animal->name(), "Achoo");
     CORRADE_COMPARE(animal->configuration().value("name"), "Achoo");
 
@@ -595,7 +595,7 @@ void ManagerTest::configurationLocal() {
 void ManagerTest::configurationImplicit() {
     PluginManager::Manager<AbstractAnimal> manager;
 
-    std::unique_ptr<AbstractAnimal> animal = manager.loadAndInstantiate("Dog");
+    Containers::Pointer<AbstractAnimal> animal = manager.loadAndInstantiate("Dog");
     CORRADE_VERIFY(animal);
 
     /* The plugin should get an implicitly created configuration */
@@ -646,7 +646,7 @@ void ManagerTest::hierarchy() {
         std::vector<std::string>{"PitBull"});
 
     {
-        std::unique_ptr<AbstractAnimal> animal = manager.instantiate("PitBull");
+        Containers::Pointer<AbstractAnimal> animal = manager.instantiate("PitBull");
         CORRADE_VERIFY(animal->hasTail()); // inherited from dog
         CORRADE_COMPARE(animal->legCount(), 4); // this too
         CORRADE_COMPARE(animal->name(), "Rodriguez");
@@ -702,7 +702,7 @@ void ManagerTest::crossManagerDependencies() {
 
     {
         /* Verify hotdog */
-        std::unique_ptr<AbstractFood> hotdog = foodManager.instantiate("HotDog");
+        Containers::Pointer<AbstractFood> hotdog = foodManager.instantiate("HotDog");
         CORRADE_VERIFY(!hotdog->isTasty());
         CORRADE_COMPARE(hotdog->weight(), 6800);
 
@@ -950,7 +950,7 @@ void ManagerTest::utf8Path() {
     CORRADE_COMPARE(manager.load("Dog"), LoadState::Loaded);
 
     {
-        std::unique_ptr<AbstractAnimal> animal = manager.instantiate("Dog");
+        Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Dog");
         CORRADE_VERIFY(animal);
         CORRADE_VERIFY(animal->hasTail());
         CORRADE_COMPARE(animal->name(), "Doug");

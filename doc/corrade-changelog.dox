@@ -89,6 +89,10 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
 
+-   The @ref PluginManager::Manager::instantiate() and
+    @ref PluginManager::Manager::loadAndInstantiate() functions now return
+    @ref Containers::Pointer instead of @ref std::unique_ptr for improved
+    compile times
 -   Plugin interfaces now have the
     @ref PluginManager::AbstractPlugin::pluginInterface() "pluginInterface()"
     function optional to make implementing hot-reload interfaces less verbose

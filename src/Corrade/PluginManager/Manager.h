@@ -29,8 +29,7 @@
  * @brief Class @ref Corrade::PluginManager::Manager
  */
 
-#include <memory>
-
+#include "Corrade/Containers/Pointer.h"
 #include "Corrade/PluginManager/AbstractManager.h"
 
 namespace Corrade { namespace PluginManager {
@@ -72,8 +71,9 @@ a plugin can be unloaded. For hot reloading and other specific use cases it's
 possible to unload a plugin that still has active instances. For that to work,
 @ref AbstractPlugin::canBeDeleted() has to return @cpp true @ce for all active
 instances, otherwise @ref unload() returns @ref LoadState::Used. Moreover, in
-order to avoid double-free issues, you have to call @ref std::unique_ptr::release()
-on all @ref std::unique_ptr instances returned from @ref Manager::instance() or
+order to avoid double-free issues, you have to call
+@ref Containers::Pointer::release() "release()" on all @ref Containers::Pointer
+instances returned from @ref Manager::instance() or
 @ref Manager::loadAndInstantiate().
 
 @section PluginManager-Manager-data Plugin-specific data and configuration
@@ -131,16 +131,15 @@ template<class T> class Manager: public AbstractManager {
          *      @ref AbstractManager::loadState() "loadState()",
          *      @ref AbstractManager::load() "load()"
          */
-        std::unique_ptr<T> instantiate(const std::string& plugin) {
-            /** @todo C++14: `std::make_unique()` */
-            return std::unique_ptr<T>(static_cast<T*>(instantiateInternal(plugin)));
+        Containers::Pointer<T> instantiate(const std::string& plugin) {
+            return Containers::pointerCast<T>(instantiateInternal(plugin));
         }
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /** @brief @copybrief instantiate()
          * @deprecated Use @ref instantiate() instead.
          */
-        CORRADE_DEPRECATED("use instantiate() instead") std::unique_ptr<T> instance(const std::string& plugin) {
+        CORRADE_DEPRECATED("use instantiate() instead") Containers::Pointer<T> instance(const std::string& plugin) {
             return instantiate(plugin);
         }
         #endif
@@ -155,9 +154,8 @@ template<class T> class Manager: public AbstractManager {
          * See its documentation for more information. The resulting plugin
          * name is then loaded using @ref instantiate() as usual.
          */
-        std::unique_ptr<T> loadAndInstantiate(const std::string& plugin) {
-            /** @todo C++14: std::make_unique() */
-            return std::unique_ptr<T>{static_cast<T*>(loadAndInstantiateInternal(plugin))};
+        Containers::Pointer<T> loadAndInstantiate(const std::string& plugin) {
+            return Containers::pointerCast<T>(loadAndInstantiateInternal(plugin));
         }
 };
 

@@ -24,8 +24,8 @@
 */
 
 #include <cmath>
-#include <memory>
 
+#include "Corrade/Containers/Pointer.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/TestSuite/Compare/File.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
@@ -150,7 +150,7 @@ CORRADE_VERIFY(!s.empty());
 
 {
 /* [CORRADE_VERIFY-explicit] */
-std::unique_ptr<int> i{new int};
+Containers::Pointer<int> i{new int};
 CORRADE_VERIFY(i);
 /* [CORRADE_VERIFY-explicit] */
 }

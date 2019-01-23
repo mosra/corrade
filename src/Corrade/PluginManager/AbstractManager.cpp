@@ -122,10 +122,10 @@ struct AbstractManager::Plugin {
 };
 
 struct AbstractManager::GlobalPluginStorage {
-    /* Beware: having std::map<std::string, std::unique_ptr> is an IMPOSSIBLE
-       feat on GCC 4.7, as it will fails with tons of compiler errors because
-       std::pair is trying to copy itself. So calm down and ignore those few
-       delete calls. Please. Last tried: March 2018. */
+    /* Beware: having std::map<std::string, Containers::Pointer> is an
+       IMPOSSIBLE feat on GCC 4.7, as it will fails with tons of compiler
+       errors because std::pair is trying to copy itself. So calm down and
+       ignore those few delete calls. Please. Last tried: March 2018. */
     std::map<std::string, Plugin*> plugins;
 };
 
@@ -448,7 +448,7 @@ LoadState AbstractManager::load(const std::string& plugin) {
         /* Load the plugin and register it only if loading succeeded so we
            don't crap the alias state. If there's already a registered
            plugin of this name, replace it. */
-        std::unique_ptr<Plugin> data{new Plugin{name, Directory::join(Utility::Directory::path(plugin), name + ".conf"), this}};
+        Containers::Pointer<Plugin> data{new Plugin{name, Directory::join(Utility::Directory::path(plugin), name + ".conf"), this}};
         const LoadState state = loadInternal(*data, plugin);
         if(state & LoadState::Loaded) {
             /* Remove the potential plugin with the same name (we already
@@ -781,16 +781,16 @@ void AbstractManager::unregisterInstance(const std::string& plugin, AbstractPlug
     if(instancesForPlugin.empty()) _instances.erase(foundInstance);
 }
 
-void* AbstractManager::instantiateInternal(const std::string& plugin) {
+Containers::Pointer<AbstractPlugin> AbstractManager::instantiateInternal(const std::string& plugin) {
     auto found = _aliases.find(plugin);
 
     CORRADE_ASSERT(found != _aliases.end() && (found->second.loadState & LoadState::Loaded),
         "PluginManager::Manager::instantiate(): plugin" << plugin << "is not loaded", nullptr);
 
-    return found->second.instancer(*this, plugin);
+    return Containers::pointer(static_cast<AbstractPlugin*>(found->second.instancer(*this, plugin)));
 }
 
-void* AbstractManager::loadAndInstantiateInternal(const std::string& plugin) {
+Containers::Pointer<AbstractPlugin> AbstractManager::loadAndInstantiateInternal(const std::string& plugin) {
     if(!(load(plugin) & LoadState::Loaded)) return nullptr;
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
@@ -800,13 +800,13 @@ void* AbstractManager::loadAndInstantiateInternal(const std::string& plugin) {
         const std::string name = filename.substr(0, filename.length() - sizeof(PLUGIN_FILENAME_SUFFIX) + 1);
         auto found = _aliases.find(name);
         CORRADE_INTERNAL_ASSERT(found != _aliases.end());
-        return found->second.instancer(*this, name);
+        return Containers::pointer(static_cast<AbstractPlugin*>(found->second.instancer(*this, name)));
     }
     #endif
 
     auto found = _aliases.find(plugin);
     CORRADE_INTERNAL_ASSERT(found != _aliases.end());
-    return found->second.instancer(*this, plugin);
+    return Containers::pointer(static_cast<AbstractPlugin*>(found->second.instancer(*this, plugin)));
 }
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
