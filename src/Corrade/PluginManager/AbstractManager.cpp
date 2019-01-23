@@ -27,11 +27,11 @@
 
 #include <cstring>
 #include <algorithm>
-#include <functional>
 #include <sstream>
 #include <utility>
 
 #include "Corrade/Containers/Optional.h"
+#include "Corrade/Containers/Reference.h"
 #include "Corrade/PluginManager/AbstractPlugin.h"
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/Utility/Assert.h"
@@ -510,7 +510,7 @@ LoadState AbstractManager::loadInternal(Plugin& plugin, const std::string& filen
 
     /* Load dependencies and remember their names for later. Their names will
        be added to usedBy list only if everything goes well. */
-    std::vector<std::reference_wrapper<Plugin>> dependencies;
+    std::vector<Containers::Reference<Plugin>> dependencies;
     dependencies.reserve(plugin.metadata->_depends.size());
     for(const std::string& dependency: plugin.metadata->_depends) {
         /* Find manager which is associated to this plugin and load the plugin
