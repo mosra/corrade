@@ -115,6 +115,9 @@ namespace Corrade {
     mistakenly ignored everywhere except Android and Emscripten, making
     cross-platform testing more prone to errors. Now `ctest` properly fails
     when the `FILES` section contains a file that doesn't exist.
+-   The @ref Containers::ArrayView::operator bool() and
+    @ref Containers::StaticArrayView::operator bool() operators were not
+    @cpp constexpr @ce by accident
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 
