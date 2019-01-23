@@ -29,6 +29,8 @@
  * @brief Tag type @ref Corrade::Containers::ValueInitT, @ref Corrade::Containers::DefaultInitT, @ref Corrade::Containers::NoInitT, @ref Corrade::Containers::DirectInitT, tag @ref Corrade::Containers::ValueInit, @ref Corrade::Containers::DefaultInit, @ref Corrade::Containers::NoInit, @ref Corrade::Containers::DirectInit
  */
 
+#include "Corrade/configure.h"
+
 namespace Corrade { namespace Containers {
 
 /**

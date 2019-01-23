@@ -31,6 +31,8 @@
 
 #include <cstring>
 
+#include "Corrade/configure.h"
+
 namespace Corrade { namespace Utility {
 
 /** @{ @name Type utilities */
