@@ -35,18 +35,11 @@
 
 #include "Corrade/Containers/Tags.h"
 #include "Corrade/Utility/Assert.h"
-#ifdef CORRADE_BUILD_DEPRECATED
-#include "Corrade/Utility/Macros.h"
-#endif
 #ifndef CORRADE_NO_DEBUG
 #include "Corrade/Utility/Debug.h"
 #endif
 
 namespace Corrade { namespace Containers {
-
-#ifdef CORRADE_BUILD_DEPRECATED
-namespace Implementation { template<class, class> class OptionalConverter; }
-#endif
 
 /**
 @brief Null optional initialization tag type
@@ -275,20 +268,6 @@ template<class T> class Optional {
             return _value.v;
         }
 
-        #ifdef CORRADE_BUILD_DEPRECATED
-        /** @brief @copybrief operator*()
-         * @deprecated Included only for compatibility with `std::optional`.
-         *      Use @ref operator*() instead.
-         */
-        CORRADE_DEPRECATED("use operator*() instead") T& value() { return operator*(); }
-
-        /** @brief @copybrief operator*()
-         * @deprecated Included only for compatibility with `std::optional`.
-         *      Use @ref operator*() instead.
-         */
-        CORRADE_DEPRECATED("use operator*() instead") const T& value() const { return operator*(); }
-        #endif
-
         /**
          * @brief Emplace a new value
          *
@@ -297,19 +276,6 @@ template<class T> class Optional {
          * placement new.
          */
         template<class ...Args> T& emplace(Args&&... args);
-
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        #ifdef CORRADE_BUILD_DEPRECATED
-        /* Used by Magnum to provide backwards compatibility with (previously
-           bundled) std::optional. I hate myself for this. */
-        template<class U, class V = decltype(Implementation::OptionalConverter<T, U>::to(std::declval<Optional<T>>()))> operator U() const & {
-            return Implementation::OptionalConverter<T, U>::to(*this);
-        }
-        template<class U, class V = decltype(Implementation::OptionalConverter<T, U>::to(std::declval<Optional<T>>()))> operator U() && {
-            return Implementation::OptionalConverter<T, U>::to(std::move(*this));
-        }
-        #endif
-        #endif
 
     private:
         union Storage {
