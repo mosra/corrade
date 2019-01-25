@@ -8,43 +8,37 @@ pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
 pkgver=2018.10
 pkgrel=1
 pkgdesc='C++11/C++14 multiplatform utility library'
-provides=('corrade')
 arch=('any')
 url='https://magnum.graphics/corrade/'
 license=('MIT')
-makedepends=("${MINGW_PACKAGE_PREFIX}-cmake" 'git' "${MINGW_PACKAGE_PREFIX}-ninja")
-source=("${_realname}"::"git+https://github.com/mosra/corrade.git#tag=v$pkgver")
-sha1sums=('SKIP')
+makedepends=("${MINGW_PACKAGE_PREFIX}-cmake" "${MINGW_PACKAGE_PREFIX}-ninja")
+source=("https://github.com/mosra/corrade/archive/v${pkgver}.tar.gz")
+sha1sums=('240c68bfe89a0cc86411b6854358b1607c06d90d')
 
 build() {
-  [[ -d "${srcdir}"/build-${CARCH} ]] && rm -rf "${srcdir}"/build-${CARCH}
-  mkdir -p "${srcdir}"/build-${CARCH} && cd "${srcdir}"/build-${CARCH}
+    mkdir -p "${srcdir}"/build-${CARCH} && cd "${srcdir}"/build-${CARCH}
 
-  declare -a extra_config
-  if check_option "debug" "n"; then
-    extra_config+=("-DCMAKE_BUILD_TYPE=Release")
-  else
-    extra_config+=("-DCMAKE_BUILD_TYPE=Debug")
-  fi
-
-  MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
-    ${MINGW_PREFIX}/bin/cmake \
-      -G'Ninja' \
-      -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
-      "${extra_config[@]}" \
-      ../${_realname}
-
-  ninja
+    declare -a extra_config
+    if check_option "debug" "n"; then
+        extra_config+=("-DCMAKE_BUILD_TYPE=Release")
+    else
+        extra_config+=("-DCMAKE_BUILD_TYPE=Debug")
+    fi
+    
+    MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
+        ${MINGW_PREFIX}/bin/cmake \
+            -G'Ninja' \
+            -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
+            "${extra_config[@]}" \
+            ../${_realname}-${pkgver}
+    ninja
 }
 
 package() {
-  #DESTDIR="$pkgdir" ninja -C build-${CARCH} install
-  cd "${srcdir}"/build-${CARCH}
-  DESTDIR="${pkgdir}" ninja install
-  
-  install -Dm644 "${srcdir}/${_realname}/COPYING" \
-    "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/COPYING"
-}
+    #DESTDIR="$pkgdir" ninja -C build-${CARCH} install
+    cd "${srcdir}"/build-${CARCH}
+    DESTDIR="${pkgdir}" ninja install
 
-# vim: ts=2 sw=2 et:
-# getver: no
+    install -Dm644 "${srcdir}/${_realname}-${pkgver}/COPYING" \
+        "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/COPYING"
+}
