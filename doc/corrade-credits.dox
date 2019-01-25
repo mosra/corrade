@@ -93,6 +93,8 @@ Is the below list missing your name or something's wrong?
     --- interfacing @ref Utility::Debug with @ref std::ostream operators
 -   **Eliot Saba** ([\@staticfloat](https://github.com/staticfloat)) --- macOS
     buildsystem fixes
+-   **Guillaume Jacquemin** ([\@williamjcm](https://github.com/williamjcm)) ---
+    MSYS2 packages
 -   **[\@jaynus](https://github.com/jaynus)** --- MSVC compilation fixes
 -   **Michael Dietschi** ([\@mdietsch](https://github.com/mdietsch)) ---
     support for colored output in Win32 console

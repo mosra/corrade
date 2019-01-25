@@ -59,6 +59,7 @@ platforms.
 -   @ref building-corrade-packages-hunter
 -   @ref building-corrade-packages-vcpkg
 -   @ref building-corrade-packages-arch
+-   @ref building-corrade-packages-msys
 -   @ref building-corrade-packages-deb
 -   @ref building-corrade-packages-gentoo
 -   @ref building-corrade-packages-rpm
@@ -168,6 +169,33 @@ sudo pacman -U corrade-*.pkg.tar.xz
 
 Edit the PKGBUILDs if you want to pass additional flags to CMake or
 @ref building-corrade-features "enable / disable additional features".
+
+@subsection building-corrade-packages-msys MSYS2 packages
+
+`PKGBUILD`s for [MSYS2](https://www.msys2.org/) are in the `package/msys`
+directory. Similarly to ArchLinux, there is one package in the
+`package/msys/corrade` directory, which will download and package latest stable
+release; and then a development `PKGBUILD`, allowing you to package and install
+the currently checked out source tree. Example usage:
+
+@code{.sh}
+git clone git://github.com/mosra/corrade && cd corrade
+cd package/msys
+makepkg -fp PKGBUILD
+@endcode
+
+The above works in a 32/64bit MinGW shell, from a MSYS shell the equivalent
+command is
+
+@code{.sh}
+makepkg-mingw -fp PKGBUILD
+@endcode
+
+@m_class{m-noindent}
+
+which will build both a 32bit and a 64bit version. See the
+[MSYS2 Wiki](https://github.com/msys2/msys2/wiki/Creating-Packages) for more
+information.
 
 @subsection building-corrade-packages-deb Packages for Debian, Ubuntu and derivatives
 
