@@ -78,6 +78,7 @@ struct OptionalTest: TestSuite::Tester {
     void resetCounters();
 
     void access();
+    void accessRvalue();
     void accessInvalid();
 
     void debug();
@@ -128,6 +129,7 @@ OptionalTest::OptionalTest() {
               &OptionalTest::emplaceSet}, &OptionalTest::resetCounters, &OptionalTest::resetCounters);
 
     addTests({&OptionalTest::access,
+              &OptionalTest::accessRvalue,
               &OptionalTest::accessInvalid,
 
               &OptionalTest::debug,
@@ -750,6 +752,20 @@ void OptionalTest::access() {
     CORRADE_COMPARE(ca->a, 18);
     CORRADE_COMPARE((*a).a, 32);
     CORRADE_COMPARE((*ca).a, 18);
+}
+
+void OptionalTest::accessRvalue() {
+    Movable b = *Optional<Movable>{InPlaceInit, 42};
+    CORRADE_COMPARE(b.a, 42);
+
+    #if !defined(__GNUC__) || defined(__clang__) || __GNUC__ > 4
+    /* operator*() const && causes ambiguous overload on GCC 4.8 (and I assume
+       4.9 as well), so disabling it there. It's not a widely needed feature
+       (const&&, *why*) so I think this is okay. */
+    const Optional<Movable> ca{Movable{1337}};
+    const Movable&& cb = *std::move(ca);
+    CORRADE_COMPARE(cb.a, 1337);
+    #endif
 }
 
 void OptionalTest::accessInvalid() {

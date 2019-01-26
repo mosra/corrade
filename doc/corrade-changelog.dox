@@ -58,6 +58,8 @@ namespace Corrade {
     moving it here to make it available to a wider set of APIs.
 -   New @ref Containers::optional(Args&&... args) overload for in-place
     initialization
+-   Added r-value overloads to @ref Containers::Optional::operator*() allowing
+    you to easily take the value out of a r-value optional
 -   New @ref Containers::arrayCast(StridedArrayView<T>) overload for casting
     strided array views
 

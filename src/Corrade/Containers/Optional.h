@@ -257,16 +257,32 @@ template<class T> class Optional {
          * Expects that the optional object has a value.
          * @see @ref operator bool(), @ref operator->()
          */
-        T& operator*() {
+        T& operator*() & {
             CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", _value.v);
             return _value.v;
         }
 
         /** @overload */
-        const T& operator*() const {
+        T&& operator*() && {
+            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", std::move(_value.v));
+            return std::move(_value.v);
+        }
+
+        /** @overload */
+        const T& operator*() const & {
             CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", _value.v);
             return _value.v;
         }
+
+        #if !defined(__GNUC__) || defined(__clang__) || __GNUC__ > 4
+        /** @overload */
+        /* This causes ambiguous overload on GCC 4.8 (and I assume 4.9 as
+           well), so disabling it there. See also the corresponding test. */
+        const T&& operator*() const && {
+            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", std::move(_value.v));
+            return std::move(_value.v);
+        }
+        #endif
 
         /**
          * @brief Emplace a new value
