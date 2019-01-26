@@ -55,7 +55,9 @@ struct StaticArrayTest: TestSuite::Tester {
     void rangeBasedFor();
 
     void slice();
+    void slicePointer();
     void sliceToStatic();
+    void sliceToStaticPointer();
 
     void cast();
     void size();
@@ -93,7 +95,9 @@ StaticArrayTest::StaticArrayTest() {
               &StaticArrayTest::rangeBasedFor,
 
               &StaticArrayTest::slice,
+              &StaticArrayTest::slicePointer,
               &StaticArrayTest::sliceToStatic,
+              &StaticArrayTest::sliceToStaticPointer,
 
               &StaticArrayTest::cast,
               &StaticArrayTest::size});
@@ -482,6 +486,47 @@ void StaticArrayTest::slice() {
     CORRADE_COMPARE(dc[2], 5);
 }
 
+void StaticArrayTest::slicePointer() {
+    StaticArray a{InPlaceInit, 1, 2, 3, 4, 5};
+    const StaticArray ac{InPlaceInit, 1, 2, 3, 4, 5};
+
+    ArrayView b = a.slice(a + 1, a + 4);
+    CORRADE_COMPARE(b.size(), 3);
+    CORRADE_COMPARE(b[0], 2);
+    CORRADE_COMPARE(b[1], 3);
+    CORRADE_COMPARE(b[2], 4);
+
+    ConstArrayView bc = ac.slice(ac + 1, ac + 4);
+    CORRADE_COMPARE(bc.size(), 3);
+    CORRADE_COMPARE(bc[0], 2);
+    CORRADE_COMPARE(bc[1], 3);
+    CORRADE_COMPARE(bc[2], 4);
+
+    ArrayView c = a.prefix(a + 3);
+    CORRADE_COMPARE(c.size(), 3);
+    CORRADE_COMPARE(c[0], 1);
+    CORRADE_COMPARE(c[1], 2);
+    CORRADE_COMPARE(c[2], 3);
+
+    ConstArrayView cc = ac.prefix(ac + 3);
+    CORRADE_COMPARE(cc.size(), 3);
+    CORRADE_COMPARE(cc[0], 1);
+    CORRADE_COMPARE(cc[1], 2);
+    CORRADE_COMPARE(cc[2], 3);
+
+    ArrayView d = a.suffix(a + 2);
+    CORRADE_COMPARE(d.size(), 3);
+    CORRADE_COMPARE(d[0], 3);
+    CORRADE_COMPARE(d[1], 4);
+    CORRADE_COMPARE(d[2], 5);
+
+    ConstArrayView dc = ac.suffix(ac + 2);
+    CORRADE_COMPARE(dc.size(), 3);
+    CORRADE_COMPARE(dc[0], 3);
+    CORRADE_COMPARE(dc[1], 4);
+    CORRADE_COMPARE(dc[2], 5);
+}
+
 void StaticArrayTest::sliceToStatic() {
     StaticArray a{InPlaceInit, 1, 2, 3, 4, 5};
     const StaticArray ac{InPlaceInit, 1, 2, 3, 4, 5};
@@ -507,6 +552,21 @@ void StaticArrayTest::sliceToStatic() {
     CORRADE_COMPARE(cc[0], 1);
     CORRADE_COMPARE(cc[1], 2);
     CORRADE_COMPARE(cc[2], 3);
+}
+
+void StaticArrayTest::sliceToStaticPointer() {
+    StaticArray a{InPlaceInit, 1, 2, 3, 4, 5};
+    const StaticArray ac{InPlaceInit, 1, 2, 3, 4, 5};
+
+    Containers::StaticArrayView<3, int> b = a.slice<3>(a + 1);
+    CORRADE_COMPARE(b[0], 2);
+    CORRADE_COMPARE(b[1], 3);
+    CORRADE_COMPARE(b[2], 4);
+
+    Containers::StaticArrayView<3, const int> bc = ac.slice<3>(ac + 1);
+    CORRADE_COMPARE(bc[0], 2);
+    CORRADE_COMPARE(bc[1], 3);
+    CORRADE_COMPARE(bc[2], 4);
 }
 
 void StaticArrayTest::cast() {

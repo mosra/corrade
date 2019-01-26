@@ -56,7 +56,9 @@ struct ArrayViewTest: TestSuite::Tester {
     void sliceInvalid();
     void sliceNullptr();
     void slice();
+    void slicePointer();
     void sliceToStatic();
+    void sliceToStaticPointer();
 
     void cast();
     void castInvalid();
@@ -91,7 +93,9 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::sliceInvalid,
               &ArrayViewTest::sliceNullptr,
               &ArrayViewTest::slice,
+              &ArrayViewTest::slicePointer,
               &ArrayViewTest::sliceToStatic,
+              &ArrayViewTest::sliceToStaticPointer,
 
               &ArrayViewTest::cast,
               &ArrayViewTest::castInvalid,
@@ -604,6 +608,48 @@ void ArrayViewTest::slice() {
     CORRADE_COMPARE(cd[2], 5);
 }
 
+void ArrayViewTest::slicePointer() {
+    int data[5] = {1, 2, 3, 4, 5};
+    ArrayView a = data;
+
+    ArrayView b = a.slice(data + 1, data + 4);
+    CORRADE_COMPARE(b.size(), 3);
+    CORRADE_COMPARE(b[0], 2);
+    CORRADE_COMPARE(b[1], 3);
+    CORRADE_COMPARE(b[2], 4);
+
+    ArrayView c = a.prefix(data + 3);
+    CORRADE_COMPARE(c.size(), 3);
+    CORRADE_COMPARE(c[0], 1);
+    CORRADE_COMPARE(c[1], 2);
+    CORRADE_COMPARE(c[2], 3);
+
+    ArrayView d = a.suffix(data + 2);
+    CORRADE_COMPARE(d.size(), 3);
+    CORRADE_COMPARE(d[0], 3);
+    CORRADE_COMPARE(d[1], 4);
+    CORRADE_COMPARE(d[2], 5);
+
+    constexpr ConstArrayView ca = Array5;
+    constexpr ConstArrayView cb = ca.slice(Array5 + 1, Array5 + 4);
+    CORRADE_COMPARE(cb.size(), 3);
+    CORRADE_COMPARE(cb[0], 2);
+    CORRADE_COMPARE(cb[1], 3);
+    CORRADE_COMPARE(cb[2], 4);
+
+    constexpr ConstArrayView cc = ca.prefix(Array5 + 3);
+    CORRADE_COMPARE(cc.size(), 3);
+    CORRADE_COMPARE(cc[0], 1);
+    CORRADE_COMPARE(cc[1], 2);
+    CORRADE_COMPARE(cc[2], 3);
+
+    constexpr ConstArrayView cd = ca.suffix(Array5 + 2);
+    CORRADE_COMPARE(cd.size(), 3);
+    CORRADE_COMPARE(cd[0], 3);
+    CORRADE_COMPARE(cd[1], 4);
+    CORRADE_COMPARE(cd[2], 5);
+}
+
 void ArrayViewTest::sliceToStatic() {
     int data[5] = {1, 2, 3, 4, 5};
     ArrayView a = data;
@@ -628,6 +674,22 @@ void ArrayViewTest::sliceToStatic() {
     CORRADE_COMPARE(cc[0], 1);
     CORRADE_COMPARE(cc[1], 2);
     CORRADE_COMPARE(cc[2], 3);
+}
+
+void ArrayViewTest::sliceToStaticPointer() {
+    int data[5] = {1, 2, 3, 4, 5};
+    ArrayView a = data;
+
+    StaticArrayView<3, int> b = a.slice<3>(a + 1);
+    CORRADE_COMPARE(b[0], 2);
+    CORRADE_COMPARE(b[1], 3);
+    CORRADE_COMPARE(b[2], 4);
+
+    constexpr ConstArrayView ca = Array5;
+    constexpr StaticArrayView<3, const int> cb = ca.slice<3>(ca + 1);
+    CORRADE_COMPARE(cb[0], 2);
+    CORRADE_COMPARE(cb[1], 3);
+    CORRADE_COMPARE(cb[2], 4);
 }
 
 void ArrayViewTest::cast() {
