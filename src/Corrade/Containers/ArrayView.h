@@ -565,10 +565,13 @@ template<std::size_t size_, class T> class StaticArrayView {
             return ArrayView<T>(*this).prefix(end);
         }
 
-        /** @copydoc ArrayView::prefix() const */
-        template<std::size_t viewSize> constexpr StaticArrayView<viewSize, T> prefix() const {
-            return slice<viewSize>(_data);
-        }
+        /**
+         * @brief Static array prefix
+         *
+         * Expects (at compile-time) that @p viewSize is not larger than
+         * @ref Size.
+         */
+        template<std::size_t viewSize> constexpr StaticArrayView<viewSize, T> prefix() const;
 
         /** @copydoc ArrayView::suffix(T*) const */
         constexpr ArrayView<T> suffix(T* begin) const {
@@ -687,6 +690,11 @@ template<class T> template<std::size_t viewSize> constexpr StaticArrayView<viewS
             << Utility::Debug::nospace << "] out of range for" << _size
             << "elements"),
         StaticArrayView<viewSize, T>{begin};
+}
+
+template<std::size_t size_, class T> template<std::size_t viewSize> constexpr StaticArrayView<viewSize, T> StaticArrayView<size_, T>::prefix() const {
+    static_assert(viewSize <= size_, "prefix size too large");
+    return StaticArrayView<viewSize, T>{_data};
 }
 
 }}

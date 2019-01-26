@@ -371,14 +371,14 @@ template<std::size_t size_, class T> class StaticArray {
         ArrayView<T> prefix(std::size_t end) { return prefix(_data + end); } /**< @overload */
         ArrayView<const T> prefix(std::size_t end) const { return prefix(_data + end); } /**< @overload */
 
-        /** @overload */
-        template<std::size_t viewSize> StaticArrayView<viewSize, T> prefix() {
-            return slice<viewSize>(_data);
-        }
-        /** @overload */
-        template<std::size_t viewSize> StaticArrayView<viewSize, const T> prefix() const {
-            return slice<viewSize>(_data);
-        }
+        /**
+         * @brief Static array prefix
+         *
+         * Expects (at compile-time) that @p viewSize is not larger than
+         * @ref Size.
+         */
+        template<std::size_t viewSize> StaticArrayView<viewSize, T> prefix();
+        template<std::size_t viewSize> StaticArrayView<viewSize, const T> prefix() const; /**< @overload */
 
         /**
          * @brief Array suffix
@@ -497,6 +497,16 @@ template<std::size_t size_, class T> template<class ...Args> StaticArray<size_, 
 
 template<std::size_t size_, class T> StaticArray<size_, T>::~StaticArray() {
     for(T& i: _data) i.~T();
+}
+
+template<std::size_t size_, class T> template<std::size_t viewSize> StaticArrayView<viewSize, T> StaticArray<size_, T>::prefix() {
+    static_assert(viewSize <= size_, "prefix size too large");
+    return StaticArrayView<viewSize, T>{_data};
+}
+
+template<std::size_t size_, class T> template<std::size_t viewSize> StaticArrayView<viewSize, const T> StaticArray<size_, T>::prefix() const {
+    static_assert(viewSize <= size_, "prefix size too large");
+    return StaticArrayView<viewSize, const T>{_data};
 }
 
 }}

@@ -95,6 +95,10 @@ namespace Corrade {
     / @ref Containers::ArrayView::cbegin() "cbegin()" is
 -   Slicing APIs in @ref Containers::ArrayView and
     @ref Containers::StaticArrayView are now @cpp constexpr @ce
+-   Bounds checking in compile-time-sized
+    @ref Containers::StaticArray::prefix() and
+    @ref Containers::StaticArrayView::prefix() is now done at compile time as
+    well
 
 @subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
 
