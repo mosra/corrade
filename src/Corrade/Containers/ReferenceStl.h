@@ -44,11 +44,11 @@ namespace Corrade { namespace Containers { namespace Implementation {
 
 template<class T> struct ReferenceConverter<std::reference_wrapper<T>> {
     static Reference<T> from(std::reference_wrapper<T> other) {
-        return other;
+        return other.get();
     }
 
     static std::reference_wrapper<T> to(Reference<T> other) {
-        return other;
+        return other.get();
     }
 };
 
