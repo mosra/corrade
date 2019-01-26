@@ -349,6 +349,8 @@ void StaticArrayViewTest::rangeBasedFor() {
     CORRADE_COMPARE(b[4], 3);
 }
 
+constexpr int Array5[]{1, 2, 3, 4, 5};
+
 void StaticArrayViewTest::slice() {
     int data[5] = {1, 2, 3, 4, 5};
     StaticArrayView<5> a = data;
@@ -370,6 +372,25 @@ void StaticArrayViewTest::slice() {
     CORRADE_COMPARE(d[0], 3);
     CORRADE_COMPARE(d[1], 4);
     CORRADE_COMPARE(d[2], 5);
+
+    constexpr ConstStaticArrayView<5> ca = Array5;
+    constexpr ConstArrayView cb = ca.slice(1, 4);
+    CORRADE_COMPARE(cb.size(), 3);
+    CORRADE_COMPARE(cb[0], 2);
+    CORRADE_COMPARE(cb[1], 3);
+    CORRADE_COMPARE(cb[2], 4);
+
+    constexpr ConstArrayView cc = ca.prefix(3);
+    CORRADE_COMPARE(cc.size(), 3);
+    CORRADE_COMPARE(cc[0], 1);
+    CORRADE_COMPARE(cc[1], 2);
+    CORRADE_COMPARE(cc[2], 3);
+
+    constexpr ConstArrayView cd = ca.suffix(2);
+    CORRADE_COMPARE(cd.size(), 3);
+    CORRADE_COMPARE(cd[0], 3);
+    CORRADE_COMPARE(cd[1], 4);
+    CORRADE_COMPARE(cd[2], 5);
 }
 
 void StaticArrayViewTest::sliceToStatic() {
@@ -385,6 +406,17 @@ void StaticArrayViewTest::sliceToStatic() {
     CORRADE_COMPARE(c[0], 1);
     CORRADE_COMPARE(c[1], 2);
     CORRADE_COMPARE(c[2], 3);
+
+    constexpr ConstStaticArrayView<5> ca = Array5;
+    constexpr ConstStaticArrayView<3> cb = ca.slice<3>(1);
+    CORRADE_COMPARE(cb[0], 2);
+    CORRADE_COMPARE(cb[1], 3);
+    CORRADE_COMPARE(cb[2], 4);
+
+    constexpr ConstStaticArrayView<3> cc = ca.prefix<3>();
+    CORRADE_COMPARE(cc[0], 1);
+    CORRADE_COMPARE(cc[1], 2);
+    CORRADE_COMPARE(cc[2], 3);
 }
 
 void StaticArrayViewTest::cast() {

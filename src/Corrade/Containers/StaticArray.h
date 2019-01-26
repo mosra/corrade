@@ -314,7 +314,7 @@ template<std::size_t size_, class T> class StaticArray {
         const T& back() const { return _data[size_ - 1]; }  /**< @overload */
 
         /**
-         * @brief Reference to array slice
+         * @brief Array slice
          *
          * Equivalent to @ref ArrayView::slice().
          */

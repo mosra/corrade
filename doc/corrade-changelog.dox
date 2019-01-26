@@ -93,6 +93,8 @@ namespace Corrade {
     @ref Containers::ArrayView and @ref Containers::StaticArrayView are now
     @cpp constexpr @ce the same way @ref Containers::ArrayView::begin() "begin()"
     / @ref Containers::ArrayView::cbegin() "cbegin()" is
+-   Slicing APIs in @ref Containers::ArrayView and
+    @ref Containers::StaticArrayView are now @cpp constexpr @ce
 
 @subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
 

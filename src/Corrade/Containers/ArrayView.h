@@ -187,10 +187,10 @@ template<class T> class ArrayView {
          *
          * Both arguments are expected to be in range.
          */
-        ArrayView<T> slice(T* begin, T* end) const;
+        constexpr ArrayView<T> slice(T* begin, T* end) const;
 
         /** @overload */
-        ArrayView<T> slice(std::size_t begin, std::size_t end) const {
+        constexpr ArrayView<T> slice(std::size_t begin, std::size_t end) const {
             return slice(_data + begin, _data + end);
         }
 
@@ -200,10 +200,10 @@ template<class T> class ArrayView {
          * Both @p begin and @cpp begin + viewSize @ce are expected to be in
          * range.
          */
-        template<std::size_t viewSize> StaticArrayView<viewSize, T> slice(T* begin) const;
+        template<std::size_t viewSize> constexpr StaticArrayView<viewSize, T> slice(T* begin) const;
 
         /** @overload */
-        template<std::size_t viewSize> StaticArrayView<viewSize, T> slice(std::size_t begin) const {
+        template<std::size_t viewSize> constexpr StaticArrayView<viewSize, T> slice(std::size_t begin) const {
             return slice<viewSize>(_data + begin);
         }
 
@@ -213,18 +213,17 @@ template<class T> class ArrayView {
          * Equivalent to @cpp data.slice(data.begin(), end) @ce. If @p end is
          * @cpp nullptr @ce, returns zero-sized @cpp nullptr @ce array.
          */
-        ArrayView<T> prefix(T* end) const {
-            if(!end) return nullptr;
-            return slice(_data, end);
+        constexpr ArrayView<T> prefix(T* end) const {
+            return end ? slice(_data, end) : nullptr;
         }
-        ArrayView<T> prefix(std::size_t end) const { return prefix(_data + end); } /**< @overload */
+        constexpr ArrayView<T> prefix(std::size_t end) const { return prefix(_data + end); } /**< @overload */
 
         /**
          * @brief Fixed-size array prefix
          *
          * Equivalent to @cpp data.slice<viewSize>(data.begin()) @ce.
          */
-        template<std::size_t viewSize> StaticArrayView<viewSize, T> prefix() const {
+        template<std::size_t viewSize> constexpr StaticArrayView<viewSize, T> prefix() const {
             return slice<viewSize>(_data);
         }
 
@@ -235,11 +234,10 @@ template<class T> class ArrayView {
          * @cpp nullptr @ce and the original array isn't, returns zero-sized
          * @cpp nullptr @ce array.
          */
-        ArrayView<T> suffix(T* begin) const {
-            if(_data && !begin) return nullptr;
-            return slice(begin, _data + _size);
+        constexpr ArrayView<T> suffix(T* begin) const {
+            return _data && !begin ? nullptr : slice(begin, _data + _size);
         }
-        ArrayView<T> suffix(std::size_t begin) const { return suffix(_data + begin); } /**< @overload */
+        constexpr ArrayView<T> suffix(std::size_t begin) const { return suffix(_data + begin); } /**< @overload */
 
     private:
         T* _data;
@@ -541,43 +539,43 @@ template<std::size_t size_, class T> class StaticArrayView {
         T& back() const;
 
         /** @copydoc ArrayView::slice(T*, T*) const */
-        ArrayView<T> slice(T* begin, T* end) const {
+        constexpr ArrayView<T> slice(T* begin, T* end) const {
             return ArrayView<T>(*this).slice(begin, end);
         }
         /** @overload */
-        ArrayView<T> slice(std::size_t begin, std::size_t end) const {
+        constexpr ArrayView<T> slice(std::size_t begin, std::size_t end) const {
             return ArrayView<T>(*this).slice(begin, end);
         }
 
         /** @copydoc ArrayView::slice(T*) const */
-        template<std::size_t viewSize> StaticArrayView<viewSize, T> slice(T* begin) const {
+        template<std::size_t viewSize> constexpr StaticArrayView<viewSize, T> slice(T* begin) const {
             return ArrayView<T>(*this).template slice<viewSize>(begin);
         }
         /** @overload */
-        template<std::size_t viewSize> StaticArrayView<viewSize, T> slice(std::size_t begin) const {
+        template<std::size_t viewSize> constexpr StaticArrayView<viewSize, T> slice(std::size_t begin) const {
             return ArrayView<T>(*this).template slice<viewSize>(begin);
         }
 
         /** @copydoc ArrayView::prefix(T*) const */
-        ArrayView<T> prefix(T* end) const {
+        constexpr ArrayView<T> prefix(T* end) const {
             return ArrayView<T>(*this).prefix(end);
         }
         /** @overload */
-        ArrayView<T> prefix(std::size_t end) const {
+        constexpr ArrayView<T> prefix(std::size_t end) const {
             return ArrayView<T>(*this).prefix(end);
         }
 
         /** @copydoc ArrayView::prefix() const */
-        template<std::size_t viewSize> StaticArrayView<viewSize, T> prefix() const {
+        template<std::size_t viewSize> constexpr StaticArrayView<viewSize, T> prefix() const {
             return slice<viewSize>(_data);
         }
 
         /** @copydoc ArrayView::suffix(T*) const */
-        ArrayView<T> suffix(T* begin) const {
+        constexpr ArrayView<T> suffix(T* begin) const {
             return ArrayView<T>(*this).suffix(begin);
         }
         /** @overload */
-        ArrayView<T> suffix(std::size_t begin) const {
+        constexpr ArrayView<T> suffix(std::size_t begin) const {
             return ArrayView<T>(*this).suffix(begin);
         }
 
@@ -659,13 +657,15 @@ template<class T> T& ArrayView<T>::back() const {
     return _data[_size - 1];
 }
 
-template<class T> ArrayView<T> ArrayView<T>::slice(T* begin, T* end) const {
-    CORRADE_ASSERT(_data <= begin && begin <= end && end <= _data + _size,
-        "Containers::ArrayView::slice(): slice [" << Utility::Debug::nospace
-        << begin - _data << Utility::Debug::nospace << ":"
-        << Utility::Debug::nospace << end - _data << Utility::Debug::nospace
-        << "] out of range for" << _size << "elements", nullptr);
-    return ArrayView<T>{begin, std::size_t(end - begin)};
+template<class T> constexpr ArrayView<T> ArrayView<T>::slice(T* begin, T* end) const {
+    return CORRADE_CONSTEXPR_ASSERT(_data <= begin && begin <= end && end <= _data + _size,
+            "Containers::ArrayView::slice(): slice ["
+            << Utility::Debug::nospace << begin - _data
+            << Utility::Debug::nospace << ":"
+            << Utility::Debug::nospace << end - _data
+            << Utility::Debug::nospace << "] out of range for" << _size
+            << "elements"),
+        ArrayView<T>{begin, std::size_t(end - begin)};
 }
 
 template<std::size_t size_, class T> T& StaticArrayView<size_, T>::front() const {
@@ -678,13 +678,15 @@ template<std::size_t size_, class T> T& StaticArrayView<size_, T>::back() const 
     return _data[size_ - 1];
 }
 
-template<class T> template<std::size_t viewSize> StaticArrayView<viewSize, T> ArrayView<T>::slice(T* begin) const {
-    CORRADE_ASSERT(_data <= begin && begin + viewSize <= _data + _size,
-        "Containers::ArrayView::slice(): slice [" << Utility::Debug::nospace
-        << begin - _data << Utility::Debug::nospace << ":"
-        << Utility::Debug::nospace << begin + viewSize - _data << Utility::Debug::nospace
-        << "] out of range for" << _size << "elements", nullptr);
-    return StaticArrayView<viewSize, T>{begin};
+template<class T> template<std::size_t viewSize> constexpr StaticArrayView<viewSize, T> ArrayView<T>::slice(T* begin) const {
+    return CORRADE_CONSTEXPR_ASSERT(_data <= begin && begin + viewSize <= _data + _size,
+            "Containers::ArrayView::slice(): slice ["
+            << Utility::Debug::nospace << begin - _data
+            << Utility::Debug::nospace << ":"
+            << Utility::Debug::nospace << begin + viewSize - _data
+            << Utility::Debug::nospace << "] out of range for" << _size
+            << "elements"),
+        StaticArrayView<viewSize, T>{begin};
 }
 
 }}

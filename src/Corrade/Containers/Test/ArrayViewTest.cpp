@@ -526,6 +526,15 @@ void ArrayViewTest::sliceNullptr() {
     CORRADE_VERIFY(!c);
     CORRADE_COMPARE(c.size(), 5);
 
+    constexpr ArrayView ca{nullptr, 5};
+
+    constexpr ArrayView cb = ca.prefix(nullptr);
+    CORRADE_VERIFY(!cb);
+    CORRADE_COMPARE(cb.size(), 0);
+
+    /* constexpr ArrayView cc = ca.suffix(nullptr) won't compile because
+       arithmetic on nullptr is not allowed */
+
     int data[5];
     ArrayView d{data};
 
@@ -536,7 +545,18 @@ void ArrayViewTest::sliceNullptr() {
     ArrayView f = d.suffix(nullptr);
     CORRADE_VERIFY(!f);
     CORRADE_COMPARE(f.size(), 0);
+
+    constexpr ConstArrayView cd = Array13;
+    constexpr ConstArrayView ce = cd.prefix(nullptr);
+    CORRADE_VERIFY(!ce);
+    CORRADE_COMPARE(ce.size(), 0);
+
+    constexpr ConstArrayView cf = cd.suffix(nullptr);
+    CORRADE_VERIFY(!cf);
+    CORRADE_COMPARE(cf.size(), 0);
 }
+
+constexpr int Array5[]{1, 2, 3, 4, 5};
 
 void ArrayViewTest::slice() {
     int data[5] = {1, 2, 3, 4, 5};
@@ -559,6 +579,25 @@ void ArrayViewTest::slice() {
     CORRADE_COMPARE(d[0], 3);
     CORRADE_COMPARE(d[1], 4);
     CORRADE_COMPARE(d[2], 5);
+
+    constexpr ConstArrayView ca = Array5;
+    constexpr ConstArrayView cb = ca.slice(1, 4);
+    CORRADE_COMPARE(cb.size(), 3);
+    CORRADE_COMPARE(cb[0], 2);
+    CORRADE_COMPARE(cb[1], 3);
+    CORRADE_COMPARE(cb[2], 4);
+
+    constexpr ConstArrayView cc = ca.prefix(3);
+    CORRADE_COMPARE(cc.size(), 3);
+    CORRADE_COMPARE(cc[0], 1);
+    CORRADE_COMPARE(cc[1], 2);
+    CORRADE_COMPARE(cc[2], 3);
+
+    constexpr ConstArrayView cd = ca.suffix(2);
+    CORRADE_COMPARE(cd.size(), 3);
+    CORRADE_COMPARE(cd[0], 3);
+    CORRADE_COMPARE(cd[1], 4);
+    CORRADE_COMPARE(cd[2], 5);
 }
 
 void ArrayViewTest::sliceToStatic() {
@@ -574,6 +613,17 @@ void ArrayViewTest::sliceToStatic() {
     CORRADE_COMPARE(c[0], 1);
     CORRADE_COMPARE(c[1], 2);
     CORRADE_COMPARE(c[2], 3);
+
+    constexpr ConstArrayView ca = Array5;
+    constexpr StaticArrayView<3, const int> cb = ca.slice<3>(1);
+    CORRADE_COMPARE(cb[0], 2);
+    CORRADE_COMPARE(cb[1], 3);
+    CORRADE_COMPARE(cb[2], 4);
+
+    constexpr StaticArrayView<3, const int> cc = ca.prefix<3>();
+    CORRADE_COMPARE(cc[0], 1);
+    CORRADE_COMPARE(cc[1], 2);
+    CORRADE_COMPARE(cc[2], 3);
 }
 
 void ArrayViewTest::cast() {
