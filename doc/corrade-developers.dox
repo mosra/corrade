@@ -325,7 +325,7 @@ in inverse --- but usually @ref corrade-developers-deprecation "deprecate first"
     together with a @c \@deprecated  line to the deprecated feature
 3.  Reference the replacement functionality in both the deprecation macro and
     in the @c \@deprecated line to make porting easier
-4.  Ensure the deprecated symbol is wrapped in @cpp #ifndef CORRADE_BUILD_DEPRECATED @ce,
+4.  Ensure the deprecated symbol is wrapped in @cpp #ifdef CORRADE_BUILD_DEPRECATED @ce,
 5.  Ensure deprecated files @cpp #error @ce in case they get used in
     non-deprecated build, ensure they are not installed in non-deprecated
     builds
