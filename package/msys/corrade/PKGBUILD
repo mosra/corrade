@@ -12,8 +12,8 @@ arch=('any')
 url='https://magnum.graphics/corrade/'
 license=('MIT')
 makedepends=("${MINGW_PACKAGE_PREFIX}-cmake" "${MINGW_PACKAGE_PREFIX}-ninja")
-source=("https://github.com/mosra/corrade/archive/v${pkgver}.tar.gz")
-sha1sums=('240c68bfe89a0cc86411b6854358b1607c06d90d')
+source=("${_realname}-${pkgver}"::"git+https://github.com/mosra/corrade.git#tag=v$pkgver")
+sha1sums=('SKIP')
 
 build() {
     mkdir -p "${srcdir}"/build-${CARCH} && cd "${srcdir}"/build-${CARCH}
