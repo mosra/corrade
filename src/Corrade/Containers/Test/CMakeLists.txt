@@ -63,3 +63,15 @@ set_target_properties(
     ContainersStridedArrayViewTest
     ContainersTagsTest
     PROPERTIES FOLDER "Corrade/Containers/Test")
+
+# Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
+# (especially for AppleClang)
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0") OR
+   (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0") OR
+  #(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0") OR
+   (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10"))
+    corrade_add_test(ContainersOptionalStlTest OptionalStlTest.cpp)
+    set_target_properties(ContainersOptionalStlTest PROPERTIES
+        CORRADE_CXX_STANDARD 17
+        FOLDER "Corrade/Containers/Test")
+endif()

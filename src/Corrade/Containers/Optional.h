@@ -27,6 +27,7 @@
 
 /** @file
  * @brief Class @ref Corrade::Containers::Optional, tag type @ref Corrade::Containers::NullOptT, tag @ref Corrade::Containers::NullOpt, function @ref Corrade::Containers::optional()
+ * @see @ref Corrade/Containers/OptionalStl.h
  */
 
 #include <new>
@@ -40,6 +41,10 @@
 #endif
 
 namespace Corrade { namespace Containers {
+
+namespace Implementation {
+    template<class> struct OptionalConverter;
+}
 
 /**
 @brief Null optional initialization tag type
@@ -79,6 +84,18 @@ to access a stored object in an empty state leads to assertion error.
 Unlike `std::optional`, this class does not provide a @cpp constexpr @ce
 implementation or ordering operators, which makes it fairly simple and
 lightweight. If you need the extra features, use the standard `std::optional`.
+
+@section Containers-Optional-stl STL compatibility
+
+Instances of @ref Optional are *explicitly* copy- and move-convertible to and
+from @cpp std::optional @ce if you include @ref Corrade/Containers/OptionalStl.h
+and build your code with C++17 enabled. The conversion is provided in a
+separate header to avoid unconditional @cpp #include <optional> @ce, which
+significantly affects compile times. Example:
+
+@snippet Containers-stl17.cpp Optional
+
+<b></b>
 
 @m_class{m-block m-success}
 
@@ -132,6 +149,12 @@ template<class T> class Optional {
             new(&_value.v) T{std::forward<Args>(args)...};
         }
 
+        /** @brief Copy-construct an optional from external representation */
+        template<class U, class = decltype(Implementation::OptionalConverter<U>::from(std::declval<const U&>()))> explicit Optional(const U& other) noexcept(std::is_nothrow_copy_constructible<T>::value): Optional{Implementation::OptionalConverter<U>::from(other)} {}
+
+        /** @brief Move-construct an optional from external representation */
+        template<class U, class = decltype(Implementation::OptionalConverter<U>::from(std::declval<U&&>()))> explicit Optional(U&& other) noexcept(std::is_nothrow_move_constructible<T>::value): Optional{Implementation::OptionalConverter<U>::from(std::move(other))} {}
+
         /** @brief Copy constructor */
         Optional(const Optional<T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value);
 
@@ -155,6 +178,16 @@ template<class T> class Optional {
          * new.
          */
         Optional<T>& operator=(Optional<T>&& other) noexcept(std::is_nothrow_move_assignable<T>::value);
+
+        /** @brief Copy-convert the optional to external representation */
+        template<class U, class = decltype(Implementation::OptionalConverter<U>::to(std::declval<const Optional<T>&>()))> explicit operator U() const & {
+            return Implementation::OptionalConverter<U>::to(*this);
+        }
+
+        /** @brief Move-convert the optional to external representation */
+        template<class U, class = decltype(Implementation::OptionalConverter<U>::to(std::declval<Optional<T>&&>()))> explicit operator U() && {
+            return Implementation::OptionalConverter<U>::to(std::move(*this));
+        }
 
         /**
          * @brief Clear the contained value

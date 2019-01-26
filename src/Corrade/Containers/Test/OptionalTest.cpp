@@ -29,7 +29,63 @@
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test { namespace {
+namespace {
+
+struct MaybeInt {
+    MaybeInt(int a): a{a} {}
+
+    int a;
+};
+
+struct MaybePtr {
+    MaybePtr(int* a): a{a} {}
+    MaybePtr(const MaybePtr&) = delete;
+    MaybePtr(MaybePtr&& other): a{other.a} {
+        other.a = nullptr;
+    }
+    ~MaybePtr() { delete a; }
+    MaybePtr& operator=(const MaybePtr&) = delete;
+    MaybePtr& operator=(MaybePtr&& other) {
+        std::swap(a, other.a);
+        return *this;
+    }
+
+    int* a;
+};
+
+}
+
+namespace Corrade { namespace Containers {
+
+namespace Implementation {
+
+template<> struct OptionalConverter<MaybeInt> {
+    static Optional<int> from(const MaybeInt& other) {
+        return other.a;
+    }
+
+    static MaybeInt to(const Optional<int>& other) {
+        return *other;
+    }
+};
+
+template<> struct OptionalConverter<MaybePtr> {
+    static Optional<int*> from(MaybePtr&& other) {
+        Optional<int*> ret{other.a};
+        other.a = nullptr;
+        return ret;
+    }
+
+    static MaybePtr to(Optional<int*>&& other) {
+        MaybePtr ret{*other};
+        other = NullOpt;
+        return ret;
+    }
+};
+
+}
+
+namespace Test { namespace {
 
 struct OptionalTest: TestSuite::Tester {
     explicit OptionalTest();
@@ -46,6 +102,8 @@ struct OptionalTest: TestSuite::Tester {
     void constructInPlace();
     void constructInPlaceMake();
     void constructInPlaceMakeAmbiguous();
+    void convertCopy();
+    void convertMove();
 
     void constructCopyFromNull();
     void constructCopyFromSet();
@@ -98,9 +156,12 @@ OptionalTest::OptionalTest() {
               &OptionalTest::constructMoveMake,
               &OptionalTest::constructInPlace,
               &OptionalTest::constructInPlaceMake,
-              &OptionalTest::constructInPlaceMakeAmbiguous,
+              &OptionalTest::constructInPlaceMakeAmbiguous}, &OptionalTest::resetCounters, &OptionalTest::resetCounters);
 
-              &OptionalTest::constructCopyFromNull,
+    addTests({&OptionalTest::convertCopy,
+              &OptionalTest::convertMove});
+
+    addTests({&OptionalTest::constructCopyFromNull,
               &OptionalTest::constructCopyFromSet,
 
               &OptionalTest::constructMoveFromNull,
@@ -426,6 +487,43 @@ void OptionalTest::constructInPlaceMakeAmbiguous() {
     CORRADE_COMPARE(f->parent, &parent);
     CORRADE_COMPARE(g->parent, &parent);
     CORRADE_COMPARE(h->parent, nullptr);
+}
+
+void OptionalTest::convertCopy() {
+    MaybeInt a(5);
+    CORRADE_COMPARE(a.a, 5);
+
+    Optional<int> b(a);
+    CORRADE_COMPARE(*b, 5);
+
+    MaybeInt c(b);
+    CORRADE_COMPARE(c.a, 5);
+
+    /* Implicit conversion is not allowed */
+    CORRADE_VERIFY(!(std::is_convertible<const MaybeInt&, Optional<int>>::value));
+    CORRADE_VERIFY(!(std::is_convertible<const Optional<int>&, MaybeInt>::value));
+}
+
+void OptionalTest::convertMove() {
+    MaybePtr a(new int{35});
+    CORRADE_COMPARE(*a.a, 35);
+
+    Optional<int*> b(std::move(a));
+    CORRADE_COMPARE(**b, 35);
+    CORRADE_VERIFY(!a.a);
+
+    MaybePtr c(std::move(b));
+    CORRADE_COMPARE(*c.a, 35);
+    CORRADE_VERIFY(!b);
+
+    /* Copy construction is not allowed */
+    CORRADE_VERIFY((std::is_constructible<Optional<int*>, MaybePtr&&>::value));
+    CORRADE_VERIFY(!(std::is_constructible<Optional<int*>, const MaybePtr&>::value));
+    /** @todo how to check for explicit convertibility?? */
+
+    /* Implicit conversion is not allowed */
+    CORRADE_VERIFY(!(std::is_convertible<MaybePtr&&, Optional<int*>>::value));
+    CORRADE_VERIFY(!(std::is_convertible<Optional<int*>&&, MaybePtr>::value));
 }
 
 void OptionalTest::constructCopyFromNull() {

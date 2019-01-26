@@ -31,6 +31,7 @@ set(CorradeContainers_HEADERS
     EnumSet.hpp
     LinkedList.h
     Optional.h
+    OptionalStl.h
     Pointer.h
     PointerStl.h
     Reference.h
