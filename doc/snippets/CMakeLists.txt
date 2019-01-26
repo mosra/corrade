@@ -37,15 +37,18 @@ add_library(snippets STATIC
     Containers-stl.cpp
     Utility.cpp)
 target_link_libraries(snippets PRIVATE CorradeUtility)
+set_target_properties(snippets PROPERTIES FOLDER "Corrade/doc/snippets")
 
 if(WITH_INTERCONNECT)
     add_library(snippets-Interconnect STATIC Interconnect.cpp)
     target_link_libraries(snippets-Interconnect PRIVATE CorradeInterconnect)
+    set_target_properties(snippets-Interconnect PROPERTIES FOLDER "Corrade/doc/snippets")
 endif()
 
 if(WITH_PLUGINMANAGER)
     add_library(snippets-PluginManager STATIC PluginManager.cpp)
     target_link_libraries(snippets-PluginManager PRIVATE CorradePluginManager)
+    set_target_properties(snippets-PluginManager PROPERTIES FOLDER "Corrade/doc/snippets")
 endif()
 
 # TODO: causes spurious linker errors on Travis iOS build, so I'm disabling it
