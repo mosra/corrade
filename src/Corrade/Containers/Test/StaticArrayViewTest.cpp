@@ -419,6 +419,9 @@ void StaticArrayViewTest::slicePointer() {
     CORRADE_COMPARE(d[1], 4);
     CORRADE_COMPARE(d[2], 5);
 
+    /* MSVC 2015 chokes on all these due to (I assume) the assertion doing
+       pointer arithmetic on the _data member. */
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr ConstStaticArrayView<5> ca = Array5;
     constexpr ConstArrayView cb = ca.slice(Array5 + 1, Array5 + 4);
     CORRADE_COMPARE(cb.size(), 3);
@@ -444,6 +447,7 @@ void StaticArrayViewTest::slicePointer() {
     CORRADE_COMPARE(cd[1], 4);
     CORRADE_COMPARE(cd[2], 5);
     #endif
+    #endif
 }
 
 void StaticArrayViewTest::sliceToStatic() {
@@ -461,10 +465,15 @@ void StaticArrayViewTest::sliceToStatic() {
     CORRADE_COMPARE(c[2], 3);
 
     constexpr ConstStaticArrayView<5> ca = Array5;
+    /* Similarly to above, MSVC 2015 chokes on this due to (I assume) doing
+       pointer arithmetic on _data inside the assert. Note that the below
+       works, as there's no runtime assertion. */
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr ConstStaticArrayView<3> cb = ca.slice<3>(1);
     CORRADE_COMPARE(cb[0], 2);
     CORRADE_COMPARE(cb[1], 3);
     CORRADE_COMPARE(cb[2], 4);
+    #endif
 
     constexpr ConstStaticArrayView<3> cc = ca.prefix<3>();
     CORRADE_COMPARE(cc[0], 1);
@@ -481,11 +490,15 @@ void StaticArrayViewTest::sliceToStaticPointer() {
     CORRADE_COMPARE(b[1], 3);
     CORRADE_COMPARE(b[2], 4);
 
+    /* Similarly to above, MSVC 2015 chokes on this due to (I assume) doing
+       pointer arithmetic on _data inside the assert. */
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr ConstStaticArrayView<5> ca = Array5;
     constexpr ConstStaticArrayView<3> cb = ca.slice<3>(ca + 1);
     CORRADE_COMPARE(cb[0], 2);
     CORRADE_COMPARE(cb[1], 3);
     CORRADE_COMPARE(cb[2], 4);
+    #endif
 }
 
 void StaticArrayViewTest::cast() {
