@@ -38,6 +38,7 @@ struct ArrayViewTest: TestSuite::Tester {
     void constructNullptrSize();
     void construct();
     void constructFixedSize();
+    void constructFromStatic();
     void constructDerived();
     void constructVoid();
 
@@ -75,6 +76,7 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::constructNullptrSize,
               &ArrayViewTest::construct,
               &ArrayViewTest::constructFixedSize,
+              &ArrayViewTest::constructFromStatic,
               &ArrayViewTest::constructDerived,
               &ArrayViewTest::constructVoid,
 
@@ -203,6 +205,34 @@ void ArrayViewTest::constructFixedSize() {
 
     /* Implicit construction from pointer should not be allowed */
     CORRADE_VERIFY(!(std::is_convertible<int*, ArrayView>::value));
+}
+
+void ArrayViewTest::constructFromStatic() {
+    int a[13];
+    StaticArrayView<13, int> av = a;
+    constexpr StaticArrayView<13, const int> cav = Array13;
+
+    {
+        ArrayView b = av;
+        CORRADE_VERIFY(b == a);
+        CORRADE_COMPARE(b.size(), 13);
+    } {
+        auto b = arrayView(av);
+        CORRADE_VERIFY((std::is_same<decltype(b), ArrayView>::value));
+        CORRADE_VERIFY(b == a);
+        CORRADE_COMPARE(b.size(), 13);
+    }
+
+    {
+        constexpr ConstArrayView b = cav;
+        CORRADE_VERIFY(b == cav);
+        CORRADE_COMPARE(b.size(), 13);
+    } {
+        constexpr auto b = arrayView(cav);
+        CORRADE_VERIFY((std::is_same<decltype(b), const ConstArrayView>::value));
+        CORRADE_VERIFY(b == cav);
+        CORRADE_COMPARE(b.size(), 13);
+    }
 }
 
 /* Needs to be here in order to use it in constexpr */
