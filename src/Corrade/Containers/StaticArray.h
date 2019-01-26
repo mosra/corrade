@@ -327,11 +327,11 @@ template<std::size_t size_, class T> class StaticArray {
         }
         /** @overload */
         ArrayView<T> slice(std::size_t begin, std::size_t end) {
-            return slice(_data + begin, _data + end);
+            return ArrayView<T>(*this).slice(begin, end);
         }
         /** @overload */
         ArrayView<const T> slice(std::size_t begin, std::size_t end) const {
-            return slice(_data + begin, _data + end);
+            return ArrayView<const T>(*this).slice(begin, end);
         }
 
         /**
@@ -349,11 +349,11 @@ template<std::size_t size_, class T> class StaticArray {
         }
         /** @overload */
         template<std::size_t viewSize> StaticArrayView<viewSize, T> slice(std::size_t begin) {
-            return slice<viewSize>(_data + begin);
+            return ArrayView<T>(*this).template slice<viewSize>(begin);
         }
         /** @overload */
         template<std::size_t viewSize> StaticArrayView<viewSize, const T> slice(std::size_t begin) const {
-            return slice<viewSize>(_data + begin);
+            return ArrayView<const T>(*this).template slice<viewSize>(begin);
         }
 
         /**
@@ -368,8 +368,14 @@ template<std::size_t size_, class T> class StaticArray {
         ArrayView<const T> prefix(const T* end) const {
             return ArrayView<const T>(*this).prefix(end);
         }
-        ArrayView<T> prefix(std::size_t end) { return prefix(_data + end); } /**< @overload */
-        ArrayView<const T> prefix(std::size_t end) const { return prefix(_data + end); } /**< @overload */
+        /** @overload */
+        ArrayView<T> prefix(std::size_t end) {
+            return ArrayView<T>(*this).prefix(end);
+        }
+        /** @overload */
+        ArrayView<const T> prefix(std::size_t end) const {
+            return ArrayView<const T>(*this).prefix(end);
+        }
 
         /**
          * @brief Static array prefix
@@ -392,8 +398,14 @@ template<std::size_t size_, class T> class StaticArray {
         ArrayView<const T> suffix(const T* begin) const {
             return ArrayView<const T>(*this).suffix(begin);
         }
-        ArrayView<T> suffix(std::size_t begin) { return suffix(_data + begin); } /**< @overload */
-        ArrayView<const T> suffix(std::size_t begin) const { return suffix(_data + begin); } /**< @overload */
+        /** @overload */
+        ArrayView<T> suffix(std::size_t begin) {
+            return ArrayView<T>(*this).suffix(begin);
+        }
+        /** @overload */
+        ArrayView<const T> suffix(std::size_t begin) const {
+            return ArrayView<const T>(*this).suffix(begin);
+        }
 
     private:
         explicit StaticArray(DefaultInitT, std::true_type) {}
