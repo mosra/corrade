@@ -103,8 +103,7 @@ template<class T> class StridedArrayView {
          * @brief Construct view on @ref StridedArrayView
          *
          * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
-         * Expects that both types have the same size; stride is implicitly set
-         * to @cpp sizeof(T) @ce.
+         * Expects that both types have the same size.
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class U>

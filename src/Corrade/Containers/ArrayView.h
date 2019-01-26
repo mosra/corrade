@@ -249,10 +249,12 @@ template<class T> class ArrayView {
 /**
 @brief Constant void array view with size information
 
-Specialization of @ref ArrayView which is convertible from @ref Array or
-@ref ArrayView of any type. Size for particular type is recalculated to
-size in bytes. This specialization doesn't provide any @cpp begin() @ce /
-@cpp end() @ce accessors, because it has no use for @cpp void @ce type.
+Specialization of @ref ArrayView which is convertible from a compile-time
+array, @ref Array, @ref ArrayView or @ref StaticArrayView of any type. Size for
+particular type is recalculated to size in bytes. This specialization doesn't
+provide any accessors besides @ref data(), because it has no use for the
+@cpp void @ce type. Instead, use @ref arrayCast(ArrayView<T>) to first cast the
+array to a concrete type and then access the particular elements.
 
 Usage example:
 
