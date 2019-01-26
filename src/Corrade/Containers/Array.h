@@ -96,6 +96,8 @@ is possible to initialize the array in a different way using so-called *tags*:
     calls default constructor elsewhere.
 -   @ref Array(DirectInitT, std::size_t, Args&&... args) constructs all
     elements of the array using provided arguments.
+-   @ref Array(InPlaceInitT, std::initializer_list<T>) allocates unitialized
+    memory and then copy-constructs all elements from the initializer list
 -   @ref Array(NoInitT, std::size_t) does not initialize anything and you need
     to call the constructor on all elements manually using placement new,
     @ref std::uninitialized_copy() or similar. This is the dangerous option.

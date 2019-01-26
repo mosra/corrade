@@ -190,13 +190,16 @@ struct Vec3 {
 };
 Containers::Array<Vec3> c{Containers::DirectInit, 5, 5.2f, 0.4f, 1.0f};
 
+// Array from an initializer list
+Containers::Array<int> d{Containers::InPlaceInit, {1, 2, 3, 4, -5, 0, 42}};
+
 // Manual construction of each element
 struct Foo {
     explicit Foo(int) {}
 };
-Containers::Array<Foo> d{Containers::NoInit, 5};
+Containers::Array<Foo> e{Containers::NoInit, 5};
 int index = 0;
-for(Foo& f: d) new(&f) Foo(index++);
+for(Foo& f: e) new(&f) Foo(index++);
 /* [Array-initialization] */
 }
 
