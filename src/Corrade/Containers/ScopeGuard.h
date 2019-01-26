@@ -47,14 +47,18 @@ that the handle is copied by value, so references won't work.
 
 @snippet Containers.cpp ScopeGuard-lambda
 
-@attention
-    Note that due to @ref CORRADE_MSVC2015_COMPATIBILITY "MSVC 2015" limitation
-    ([source](https://developercommunity.visualstudio.com/content/problem/155715/visual-c-compiler-is-unable-to-convert-lambda-clos.html))
+<b></b>
+
+@m_class{m-block m-warning}
+
+@par Using lambdas in MSVC 2015
+    Note that due to a @ref CORRADE_MSVC2015_COMPATIBILITY "MSVC 2015"
+    limitation ([source](https://developercommunity.visualstudio.com/content/problem/155715/visual-c-compiler-is-unable-to-convert-lambda-clos.html))
     it's not possible to use lambdas with non-@cpp void @ce return type. Either
     remove the @cpp return @ce statement or explicitly convert the lambda to a
     function pointer before passing it to the constructor to work aroung the
     limitation:
-@attention
+@par
     @snippet Containers.cpp ScopeGuard-returning-lambda
 */
 class ScopeGuard {
