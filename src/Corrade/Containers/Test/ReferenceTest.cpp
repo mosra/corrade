@@ -28,11 +28,15 @@
 #include "Corrade/Containers/Reference.h"
 #include "Corrade/TestSuite/Tester.h"
 
+namespace {
+
 struct IntRef {
     constexpr IntRef(const int& a): a{&a} {}
 
     const int* a;
 };
+
+}
 
 namespace Corrade { namespace Containers {
 

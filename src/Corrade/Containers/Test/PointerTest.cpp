@@ -28,6 +28,8 @@
 #include "Corrade/Containers/Pointer.h"
 #include "Corrade/TestSuite/Tester.h"
 
+namespace {
+
 struct IntPtr {
     explicit IntPtr(int* a): a{a} {}
     IntPtr(const IntPtr&) = delete;
@@ -43,6 +45,8 @@ struct IntPtr {
 
     int* a;
 };
+
+}
 
 namespace Corrade { namespace Containers {
 
