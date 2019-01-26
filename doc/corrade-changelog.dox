@@ -88,6 +88,11 @@ namespace Corrade {
 
 -   The @ref Containers::StridedArrayView class is now @cpp constexpr @ce,
     allowing it to be used to describe data layout at compile-time
+-   The @ref Containers::ArrayView::end() "end()" and
+    @ref Containers::ArrayView::cend() "cend()" APIs in
+    @ref Containers::ArrayView and @ref Containers::StaticArrayView are now
+    @cpp constexpr @ce the same way @ref Containers::ArrayView::begin() "begin()"
+    / @ref Containers::ArrayView::cbegin() "cbegin()" is
 
 @subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
 

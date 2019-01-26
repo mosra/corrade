@@ -426,6 +426,11 @@ void ArrayViewTest::access() {
     constexpr const int* cbegin = cb.cbegin();
     CORRADE_COMPARE(begin, OneToSeven);
     CORRADE_COMPARE(cbegin, OneToSeven);
+
+    constexpr const int* end = cb.end();
+    constexpr const int* cend = cb.cend();
+    CORRADE_COMPARE(end, OneToSeven + 7);
+    CORRADE_COMPARE(cend, OneToSeven + 7);
 }
 
 void ArrayViewTest::accessVoid() {

@@ -156,15 +156,15 @@ template<class T> class ArrayView {
          * @see @ref front()
          */
         constexpr T* begin() const { return _data; }
-        constexpr T* cbegin() const { return _data; }   /**< @overload */
+        constexpr T* cbegin() const { return _data; } /**< @overload */
 
         /**
          * @brief Pointer to (one item after) last element
          *
          * @see @ref back()
          */
-        T* end() const { return _data+_size; }
-        T* cend() const { return _data+_size; }         /**< @overload */
+        constexpr T* end() const { return _data+_size; }
+        constexpr T* cend() const { return _data+_size; } /**< @overload */
 
         /**
          * @brief First element
@@ -514,15 +514,15 @@ template<std::size_t size_, class T> class StaticArrayView {
          * @see @ref front()
          */
         constexpr T* begin() const { return _data; }
-        constexpr T* cbegin() const { return _data; }   /**< @overload */
+        constexpr T* cbegin() const { return _data; } /**< @overload */
 
         /**
          * @brief Pointer to (one item after) last element
          *
          * @see @ref back()
          */
-        T* end() const { return _data + size_; }
-        T* cend() const { return _data + size_; }       /**< @overload */
+        constexpr T* end() const { return _data + size_; }
+        constexpr T* cend() const { return _data + size_; } /**< @overload */
 
         /**
          * @brief First element
