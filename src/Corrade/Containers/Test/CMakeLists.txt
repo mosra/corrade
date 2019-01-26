@@ -31,7 +31,7 @@ corrade_add_test(ContainersOptionalTest OptionalTest.cpp)
 corrade_add_test(ContainersPointerTest PointerTest.cpp)
 corrade_add_test(ContainersPointerStlTest PointerStlTest.cpp)
 corrade_add_test(ContainersReferenceTest ReferenceTest.cpp)
-corrade_add_test(ContainersScopedExitTest ScopedExitTest.cpp)
+corrade_add_test(ContainersScopeGuardTest ScopeGuardTest.cpp)
 corrade_add_test(ContainersStaticArrayTest StaticArrayTest.cpp)
 corrade_add_test(ContainersStaticArrayViewTest StaticArrayViewTest.cpp)
 corrade_add_test(ContainersStridedArrayViewTest StridedArrayViewTest.cpp)
@@ -55,6 +55,7 @@ set_target_properties(
     ContainersPointerTest
     ContainersPointerStlTest
     ContainersReferenceTest
+    ContainersScopeGuardTest
     ContainersStaticArrayTest
     ContainersStaticArrayViewTest
     ContainersStridedArrayViewTest

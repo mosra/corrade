@@ -34,10 +34,14 @@ set(CorradeContainers_HEADERS
     Pointer.h
     PointerStl.h
     Reference.h
-    ScopedExit.h
+    ScopeGuard.h
     StaticArray.h
     StridedArrayView.h
     Tags.h)
+
+if(BUILD_DEPRECATED)
+    list(APPEND CorradeContainers_HEADERS ScopedExit.h)
+endif()
 
 # Force IDEs to display all header files in project view
 add_custom_target(CorradeContainers-headers SOURCES ${CorradeContainers_HEADERS})

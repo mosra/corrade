@@ -26,7 +26,7 @@
 #include <limits>
 #include <sstream>
 
-#include "Corrade/Containers/ScopedExit.h"
+#include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/Utility/Directory.h"
@@ -673,7 +673,7 @@ void FormatTest::file() {
     {
         FILE* f = std::fopen(filename.data(), "w");
         CORRADE_VERIFY(f);
-        Containers::ScopedExit e{f, fclose};
+        Containers::ScopeGuard e{f, fclose};
         formatInto(f, "A {} {} {} {} {} {} + ({}) {}",
             "string", std::string{"file"}, -2000123, 4025136u, -12345678901234ll, 24568780984912ull, 12.3404f, 1.52);
     }
@@ -693,7 +693,7 @@ void FormatTest::fileLongDouble() {
     {
         FILE* f = std::fopen(filename.data(), "w");
         CORRADE_VERIFY(f);
-        Containers::ScopedExit e{f, fclose};
+        Containers::ScopeGuard e{f, fclose};
         formatInto(f, "{}", 12.3404l);
     } {
         /* That's the case for MSVC as well, source:

@@ -35,7 +35,7 @@
 #include "Corrade/Containers/LinkedList.h"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Pointer.h"
-#include "Corrade/Containers/ScopedExit.h"
+#include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/Utility/Debug.h"
@@ -524,38 +524,38 @@ auto b = Containers::optional<std::string>('a', 'b');
 }
 
 #ifdef __linux__
-/* [ScopedExit-usage] */
+/* [ScopeGuard-usage] */
 {
     int fd = open("file.dat", O_RDONLY);
-    Containers::ScopedExit e{fd, close};
+    Containers::ScopeGuard e{fd, close};
 } // fclose(f) gets called at the end of the scope
-/* [ScopedExit-usage] */
+/* [ScopeGuard-usage] */
 #endif
 
-/* [ScopedExit-lambda] */
+/* [ScopeGuard-lambda] */
 FILE* f{};
 
 {
     f = fopen("file.dat", "r");
-    Containers::ScopedExit e{&f, [](FILE** f) {
+    Containers::ScopeGuard e{&f, [](FILE** f) {
         fclose(*f);
         *f = nullptr;
     }};
 }
 
 // f is nullptr again
-/* [ScopedExit-lambda] */
+/* [ScopeGuard-lambda] */
 
-/* [ScopedExit-returning-lambda] */
+/* [ScopeGuard-returning-lambda] */
 {
     auto closer = [](FILE* f) {
         return fclose(f) != 0;
     };
 
     FILE* f = fopen("file.dat", "r");
-    Containers::ScopedExit e{f, static_cast<bool(*)(FILE*)>(closer)};
+    Containers::ScopeGuard e{f, static_cast<bool(*)(FILE*)>(closer)};
 }
-/* [ScopedExit-returning-lambda] */
+/* [ScopeGuard-returning-lambda] */
 
 {
 /* [StaticArray-usage] */

@@ -128,6 +128,8 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 
+-   @cpp Containers::ScopedExit @ce is deprecated, use
+    @ref Containers::ScopeGuard instead
 -   All uses of @ref std::unique_ptr are replaced with @ref Containers::Pointer
     (affecting mainly the @ref PluginManager::Manager class). The types are
     implicitly move-convertible to each other if the
@@ -181,7 +183,7 @@ Released 2018-10-23, tagged as
 
 @subsubsection corrade-changelog-2018-10-new-containers Containers library
 
--   New @ref Containers::ScopedExit helper class
+-   New @cpp Containers::ScopedExit @ce helper class
 -   New @ref Containers::StridedArrayView class for providing access to
     interleaved data
 -   New @ref Containers::ArrayView::front() "front()" and

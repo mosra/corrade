@@ -57,7 +57,7 @@ also thought of as a heap-allocated counterpart to @ref Optional.
 Unlike @ref std::unique_ptr, this class does not provide custom deleters,
 doesn't work with arrays and doesn't have a @cpp constexpr @ce API. On the
 other hand that makes it fairly simple and lightweight. If you need a custom
-deleter, use either @ref ScopedExit or the standard @ref std::unique_ptr. For
+deleter, use either @ref ScopeGuard or the standard @ref std::unique_ptr. For
 owning array wrappers use @ref Array, which maintains a size information and
 also supports custom deleters.
 

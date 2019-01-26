@@ -23,13 +23,13 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/Containers/ScopedExit.h"
+#include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/TestSuite/Tester.h"
 
 namespace Corrade { namespace Containers { namespace Test { namespace {
 
-struct ScopedExitTest: TestSuite::Tester {
-    explicit ScopedExitTest();
+struct ScopeGuardTest: TestSuite::Tester {
+    explicit ScopeGuardTest();
 
     void pointer();
     void value();
@@ -38,51 +38,51 @@ struct ScopedExitTest: TestSuite::Tester {
     void release();
 };
 
-ScopedExitTest::ScopedExitTest() {
-    addTests({&ScopedExitTest::pointer,
-              &ScopedExitTest::value,
-              &ScopedExitTest::lambda,
-              &ScopedExitTest::returningLambda,
-              &ScopedExitTest::release});
+ScopeGuardTest::ScopeGuardTest() {
+    addTests({&ScopeGuardTest::pointer,
+              &ScopeGuardTest::value,
+              &ScopeGuardTest::lambda,
+              &ScopeGuardTest::returningLambda,
+              &ScopeGuardTest::release});
 }
 
 int fd;
 void close(float* value) { *value = 3.14f; }
 int closeInt(int) { fd = 42; return 5; }
 
-void ScopedExitTest::pointer() {
+void ScopeGuardTest::pointer() {
     float v = 0.0f;
     {
-        ScopedExit e{&v, close};
+        ScopeGuard e{&v, close};
     }
     CORRADE_COMPARE(v, 3.14f);
 }
 
-void ScopedExitTest::value() {
+void ScopeGuardTest::value() {
     {
         fd = 1337;
-        ScopedExit e{fd, closeInt};
+        ScopeGuard e{fd, closeInt};
     }
     CORRADE_COMPARE(fd, 42);
 }
 
-void ScopedExitTest::lambda() {
+void ScopeGuardTest::lambda() {
     {
         fd = 0;
-        ScopedExit{&fd, [](int* handle) {
+        ScopeGuard{&fd, [](int* handle) {
             *handle = 7;
         }};
     }
     CORRADE_COMPARE(fd, 7);
 }
 
-void ScopedExitTest::returningLambda() {
+void ScopeGuardTest::returningLambda() {
     #ifdef CORRADE_MSVC2015_COMPATIBILITY
     CORRADE_SKIP("Lambdas with non-void return type are not supported on MSVC2015 due to a compiler limitation.");
     #else
     {
         fd = 0;
-        ScopedExit{&fd, [](int* handle) {
+        ScopeGuard{&fd, [](int* handle) {
             *handle = 7;
             return true;
         }};
@@ -91,10 +91,10 @@ void ScopedExitTest::returningLambda() {
     #endif
 }
 
-void ScopedExitTest::release() {
+void ScopeGuardTest::release() {
     float v = 1.234f;
     {
-        ScopedExit e{&v, close};
+        ScopeGuard e{&v, close};
         e.release();
     }
     CORRADE_COMPARE(v, 1.234f);
@@ -102,4 +102,4 @@ void ScopedExitTest::release() {
 
 }}}}
 
-CORRADE_TEST_MAIN(Corrade::Containers::Test::ScopedExitTest)
+CORRADE_TEST_MAIN(Corrade::Containers::Test::ScopeGuardTest)
