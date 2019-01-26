@@ -497,8 +497,12 @@ void ArrayViewTest::rangeBasedFor() {
 }
 
 void ArrayViewTest::sliceInvalid() {
-    int data[5] = {1, 2, 3, 4, 5};
-    ArrayView a = data;
+    /* Do it this way to avoid (reasonable) warnings about out-of-bounds array
+       access with `a - 1` */
+    int data[6] = {0, 1, 2, 3, 4, 5};
+    ArrayView a{data + 1, 5};
+
+    CORRADE_COMPARE(a.size(), 5);
 
     std::ostringstream out;
     Error redirectError{&out};
