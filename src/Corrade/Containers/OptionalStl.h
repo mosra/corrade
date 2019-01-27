@@ -1,5 +1,5 @@
-#ifndef Corrade_Containers_PointerStl_h
-#define Corrade_Containers_PointerStl_h
+#ifndef Corrade_Containers_OptionalStl_h
+#define Corrade_Containers_OptionalStl_h
 /*
     This file is part of Corrade.
 
