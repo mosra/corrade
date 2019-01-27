@@ -499,6 +499,9 @@ void OptionalTest::convertCopy() {
     MaybeInt c(b);
     CORRADE_COMPARE(c.a, 5);
 
+    /* Conversion from a different type is not allowed */
+    CORRADE_VERIFY(!(std::is_constructible<Optional<float>, MaybeInt>::value));
+
     /* Implicit conversion is not allowed */
     CORRADE_VERIFY(!(std::is_convertible<const MaybeInt&, Optional<int>>::value));
     CORRADE_VERIFY(!(std::is_convertible<const Optional<int>&, MaybeInt>::value));
@@ -515,6 +518,9 @@ void OptionalTest::convertMove() {
     MaybePtr c(std::move(b));
     CORRADE_COMPARE(*c.a, 35);
     CORRADE_VERIFY(!b);
+
+    /* Conversion from a different type is not allowed */
+    CORRADE_VERIFY(!(std::is_constructible<Optional<float*>, MaybePtr&&>::value));
 
     /* Copy construction is not allowed */
     CORRADE_VERIFY((std::is_constructible<Optional<int*>, MaybePtr&&>::value));
