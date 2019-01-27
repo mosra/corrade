@@ -42,7 +42,7 @@ information.
 #ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Corrade { namespace Containers { namespace Implementation {
 
-template<class T> struct OptionalConverter<std::optional<T>> {
+template<class T> struct OptionalConverter<T, std::optional<T>> {
     static Optional<T> from(const std::optional<T>& other) {
         return other ? Optional<T>{*other} : Containers::NullOpt;
     }

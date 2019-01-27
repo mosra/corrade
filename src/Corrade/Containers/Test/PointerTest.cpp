@@ -52,7 +52,7 @@ namespace Corrade { namespace Containers {
 
 namespace Implementation {
 
-template<> struct PointerConverter<IntPtr> {
+template<> struct PointerConverter<int, IntPtr> {
     static Pointer<int> from(IntPtr&& other) {
         Pointer<int> ret{other.a};
         other.a = nullptr;

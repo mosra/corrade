@@ -59,7 +59,7 @@ namespace Corrade { namespace Containers {
 
 namespace Implementation {
 
-template<> struct OptionalConverter<MaybeInt> {
+template<> struct OptionalConverter<int, MaybeInt> {
     static Optional<int> from(const MaybeInt& other) {
         return other.a;
     }
@@ -69,7 +69,7 @@ template<> struct OptionalConverter<MaybeInt> {
     }
 };
 
-template<> struct OptionalConverter<MaybePtr> {
+template<> struct OptionalConverter<int*, MaybePtr> {
     static Optional<int*> from(MaybePtr&& other) {
         Optional<int*> ret{other.a};
         other.a = nullptr;

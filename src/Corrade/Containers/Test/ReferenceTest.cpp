@@ -42,7 +42,7 @@ namespace Corrade { namespace Containers {
 
 namespace Implementation {
 
-template<> struct ReferenceConverter<IntRef> {
+template<> struct ReferenceConverter<const int, IntRef> {
     constexpr static Reference<const int> from(IntRef other) {
         return *other.a;
     }

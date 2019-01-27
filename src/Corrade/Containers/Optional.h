@@ -43,7 +43,7 @@
 namespace Corrade { namespace Containers {
 
 namespace Implementation {
-    template<class> struct OptionalConverter;
+    template<class, class> struct OptionalConverter;
 }
 
 /**
@@ -154,14 +154,14 @@ template<class T> class Optional {
          *
          * @see @ref Containers-Optional-stl
          */
-        template<class U, class = decltype(Implementation::OptionalConverter<U>::from(std::declval<const U&>()))> explicit Optional(const U& other) noexcept(std::is_nothrow_copy_constructible<T>::value): Optional{Implementation::OptionalConverter<U>::from(other)} {}
+        template<class U, class = decltype(Implementation::OptionalConverter<T, U>::from(std::declval<const U&>()))> explicit Optional(const U& other) noexcept(std::is_nothrow_copy_constructible<T>::value): Optional{Implementation::OptionalConverter<T, U>::from(other)} {}
 
         /**
          * @brief Move-construct an optional from external representation
          *
          * @see @ref Containers-Optional-stl
          */
-        template<class U, class = decltype(Implementation::OptionalConverter<U>::from(std::declval<U&&>()))> explicit Optional(U&& other) noexcept(std::is_nothrow_move_constructible<T>::value): Optional{Implementation::OptionalConverter<U>::from(std::move(other))} {}
+        template<class U, class = decltype(Implementation::OptionalConverter<T, U>::from(std::declval<U&&>()))> explicit Optional(U&& other) noexcept(std::is_nothrow_move_constructible<T>::value): Optional{Implementation::OptionalConverter<T, U>::from(std::move(other))} {}
 
         /** @brief Copy constructor */
         Optional(const Optional<T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value);
@@ -192,8 +192,8 @@ template<class T> class Optional {
          *
          * @see @ref Containers-Optional-stl
          */
-        template<class U, class = decltype(Implementation::OptionalConverter<U>::to(std::declval<const Optional<T>&>()))> explicit operator U() const & {
-            return Implementation::OptionalConverter<U>::to(*this);
+        template<class U, class = decltype(Implementation::OptionalConverter<T, U>::to(std::declval<const Optional<T>&>()))> explicit operator U() const & {
+            return Implementation::OptionalConverter<T, U>::to(*this);
         }
 
         /**
@@ -201,8 +201,8 @@ template<class T> class Optional {
          *
          * @see @ref Containers-Optional-stl
          */
-        template<class U, class = decltype(Implementation::OptionalConverter<U>::to(std::declval<Optional<T>&&>()))> explicit operator U() && {
-            return Implementation::OptionalConverter<U>::to(std::move(*this));
+        template<class U, class = decltype(Implementation::OptionalConverter<T, U>::to(std::declval<Optional<T>&&>()))> explicit operator U() && {
+            return Implementation::OptionalConverter<T, U>::to(std::move(*this));
         }
 
         /**

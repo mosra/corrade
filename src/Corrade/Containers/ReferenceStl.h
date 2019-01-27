@@ -42,7 +42,7 @@ information.
 #ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Corrade { namespace Containers { namespace Implementation {
 
-template<class T> struct ReferenceConverter<std::reference_wrapper<T>> {
+template<class T> struct ReferenceConverter<T, std::reference_wrapper<T>> {
     static Reference<T> from(std::reference_wrapper<T> other) {
         return other.get();
     }

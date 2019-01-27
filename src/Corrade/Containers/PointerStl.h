@@ -42,7 +42,7 @@ information.
 #ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Corrade { namespace Containers { namespace Implementation {
 
-template<class T> struct PointerConverter<std::unique_ptr<T>> {
+template<class T> struct PointerConverter<T, std::unique_ptr<T>> {
     static Pointer<T> from(std::unique_ptr<T>&& other) {
         return Pointer<T>{other.release()};
     }

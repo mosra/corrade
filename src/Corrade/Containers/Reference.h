@@ -39,7 +39,7 @@
 namespace Corrade { namespace Containers {
 
 namespace Implementation {
-    template<class> struct ReferenceConverter;
+    template<class, class> struct ReferenceConverter;
 }
 
 /**
@@ -88,7 +88,7 @@ template<class T> class Reference {
          *
          * @see @ref Containers-Reference-stl
          */
-        template<class U, class = decltype(Implementation::ReferenceConverter<U>::from(std::declval<U>()))> constexpr /*implicit*/ Reference(U other) noexcept: Reference{Implementation::ReferenceConverter<U>::from(other)} {}
+        template<class U, class = decltype(Implementation::ReferenceConverter<T, U>::from(std::declval<U>()))> constexpr /*implicit*/ Reference(U other) noexcept: Reference{Implementation::ReferenceConverter<T, U>::from(other)} {}
 
         /**
          * @brief Construction from r-value references is not allowed
@@ -109,8 +109,8 @@ template<class T> class Reference {
          *
          * @see @ref Containers-Reference-stl
          */
-        template<class U, class = decltype(Implementation::ReferenceConverter<U>::to(std::declval<Reference<T>>()))> constexpr /*implicit*/ operator U() const {
-            return Implementation::ReferenceConverter<U>::to(*this);
+        template<class U, class = decltype(Implementation::ReferenceConverter<T, U>::to(std::declval<Reference<T>>()))> constexpr /*implicit*/ operator U() const {
+            return Implementation::ReferenceConverter<T, U>::to(*this);
         }
 
         /** @brief Underlying reference */

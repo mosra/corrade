@@ -42,7 +42,7 @@
 namespace Corrade { namespace Containers {
 
 namespace Implementation {
-    template<class> struct PointerConverter;
+    template<class, class> struct PointerConverter;
 }
 
 /**
@@ -127,7 +127,7 @@ template<class T> class Pointer {
          *
          * @see @ref Containers-Pointer-stl
          */
-        template<class U, class = decltype(Implementation::PointerConverter<U>::from(std::declval<U&&>()))> /*implicit*/ Pointer(U&& other) noexcept: Pointer{Implementation::PointerConverter<U>::from(std::move(other))} {}
+        template<class U, class = decltype(Implementation::PointerConverter<T, U>::from(std::declval<U&&>()))> /*implicit*/ Pointer(U&& other) noexcept: Pointer{Implementation::PointerConverter<T, U>::from(std::move(other))} {}
 
         /** @brief Copying is not allowed */
         Pointer(const Pointer<T>&) = delete;
@@ -151,8 +151,8 @@ template<class T> class Pointer {
          *
          * @see @ref Containers-Pointer-stl
          */
-        template<class U, class = decltype(Implementation::PointerConverter<U>::to(std::declval<Pointer<T>&&>()))> /*implicit*/ operator U() && {
-            return Implementation::PointerConverter<U>::to(std::move(*this));
+        template<class U, class = decltype(Implementation::PointerConverter<T, U>::to(std::declval<Pointer<T>&&>()))> /*implicit*/ operator U() && {
+            return Implementation::PointerConverter<T, U>::to(std::move(*this));
         }
 
         /**
