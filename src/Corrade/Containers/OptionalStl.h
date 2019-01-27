@@ -60,6 +60,8 @@ template<class T> struct OptionalConverter<T, std::optional<T>> {
     }
 };
 
+template<class T> struct DeducedOptionalConverter<std::optional<T>>: OptionalConverter<T, std::optional<T>> {};
+
 }}}
 #endif
 

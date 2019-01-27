@@ -66,7 +66,9 @@ also supports custom deleters.
 Instances of @ref Pointer are implicitly move-convertible to and from
 @ref std::unique_ptr if you include @ref Corrade/Containers/PointerStl.h. The
 conversion is provided in a separate header to avoid unconditional
-@cpp #include <memory> @ce, which significantly affects compile times. Example:
+@cpp #include <memory> @ce, which significantly affects compile times.
+Additionally, the @ref pointer(T&&) overload also allows for such a conversion.
+Example:
 
 @snippet Containers-stl.cpp Pointer
 
@@ -125,7 +127,7 @@ template<class T> class Pointer {
         /**
          * @brief Construct a unique pointer from external representation
          *
-         * @see @ref Containers-Pointer-stl
+         * @see @ref Containers-Pointer-stl, @ref pointer(T&&)
          */
         template<class U, class = decltype(Implementation::PointerConverter<T, U>::from(std::declval<U&&>()))> /*implicit*/ Pointer(U&& other) noexcept: Pointer{Implementation::PointerConverter<T, U>::from(std::move(other))} {}
 
@@ -306,6 +308,19 @@ lines are equivalent:
 template<class T> inline Pointer<T> pointer(T* pointer) {
     static_assert(!std::is_constructible<T, T*>::value, "the type is constructible from its own pointer, which is ambiguous -- explicitly use the constructor instead");
     return Pointer<T>{pointer};
+}
+
+namespace Implementation {
+    template<class> struct DeducedPointerConverter;
+}
+
+/** @relatesalso Pointer
+@brief Make a unique pointer from external representation
+
+@see @ref Containers-Pointer-stl
+*/
+template<class T> inline auto pointer(T&& other) -> decltype(Implementation::DeducedPointerConverter<T>::from(std::move(other))) {
+    return Implementation::DeducedPointerConverter<T>::from(std::move(other));
 }
 
 /** @relatesalso Pointer

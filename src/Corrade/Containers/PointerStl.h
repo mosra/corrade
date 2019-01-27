@@ -52,6 +52,8 @@ template<class T> struct PointerConverter<T, std::unique_ptr<T>> {
     }
 };
 
+template<class T> struct DeducedPointerConverter<std::unique_ptr<T>>: PointerConverter<T, std::unique_ptr<T>> {};
+
 }}}
 #endif
 

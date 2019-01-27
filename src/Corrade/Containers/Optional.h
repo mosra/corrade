@@ -91,7 +91,8 @@ Instances of @ref Optional are *explicitly* copy- and move-convertible to and
 from @cpp std::optional @ce if you include @ref Corrade/Containers/OptionalStl.h
 and build your code with C++17 enabled. The conversion is provided in a
 separate header to avoid unconditional @cpp #include <optional> @ce, which
-significantly affects compile times. Example:
+significantly affects compile times. Additionally, the @ref optional(T&&)
+overload also allows for such a conversion. Example:
 
 @snippet Containers-stl17.cpp Optional
 
@@ -152,14 +153,14 @@ template<class T> class Optional {
         /**
          * @brief Copy-construct an optional from external representation
          *
-         * @see @ref Containers-Optional-stl
+         * @see @ref Containers-Optional-stl, @ref optional(T&&)
          */
         template<class U, class = decltype(Implementation::OptionalConverter<T, U>::from(std::declval<const U&>()))> explicit Optional(const U& other) noexcept(std::is_nothrow_copy_constructible<T>::value): Optional{Implementation::OptionalConverter<T, U>::from(other)} {}
 
         /**
          * @brief Move-construct an optional from external representation
          *
-         * @see @ref Containers-Optional-stl
+         * @see @ref Containers-Optional-stl, @ref optional(T&&)
          */
         template<class U, class = decltype(Implementation::OptionalConverter<T, U>::from(std::declval<U&&>()))> explicit Optional(U&& other) noexcept(std::is_nothrow_move_constructible<T>::value): Optional{Implementation::OptionalConverter<T, U>::from(std::move(other))} {}
 
@@ -381,6 +382,13 @@ See @ref Optional::operator!=(const T&) const for more information.
 */
 template<class T> bool operator!=(const T& a, const Optional<T>& b) { return b != a; }
 
+namespace Implementation {
+    /* The default implementation has a Type member, but the user-provided
+       ones don't. This is used to disambiguate whether optional(T&&) should
+       return Optional<T> or U where U is result of the conversion from T. */
+    template<class T> struct DeducedOptionalConverter { typedef T Type; };
+}
+
 /** @relatesalso Optional
 @brief Make an optional
 
@@ -397,7 +405,13 @@ The following two lines are equivalent:
 
 @see @ref optional(Args&&... args), @ref pointer(T*)
 */
-template<class T> inline Optional<typename std::decay<T>::type> optional(T&& value) {
+template<class T> inline
+#ifdef DOXYGEN_GENERATING_OUTPUT
+Optional<typename std::decay<T>::type>
+#else
+Optional<typename Implementation::DeducedOptionalConverter<typename std::decay<T>::type>::Type>
+#endif
+optional(T&& value) {
     return Optional<typename std::decay<T>::type>{std::forward<T>(value)};
 }
 
@@ -419,6 +433,15 @@ The following two lines are equivalent:
 */
 template<class T, class ...Args> inline Optional<T> optional(Args&&... args) {
     return Optional<T>{InPlaceInit, std::forward<Args>(args)...};
+}
+
+/** @relatesalso Optional
+@brief Make an optional from external representation
+
+@see @ref Containers-Optional-stl
+*/
+template<class T> inline auto optional(T&& other) -> decltype(Implementation::DeducedOptionalConverter<typename std::decay<T>::type>::from(std::forward<T>(other))) {
+    return Implementation::DeducedOptionalConverter<typename std::decay<T>::type>::from(std::forward<T>(other));
 }
 
 #ifndef CORRADE_NO_DEBUG

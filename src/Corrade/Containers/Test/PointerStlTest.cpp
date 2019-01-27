@@ -54,6 +54,11 @@ void PointerStlTest::convert() {
     CORRADE_COMPARE(*c, 5);
     CORRADE_VERIFY(!b);
 
+    auto d = pointer(std::unique_ptr<int>{new int{17}});
+    CORRADE_VERIFY((std::is_same<decltype(d), Pointer<int>>::value));
+    CORRADE_VERIFY(d);
+    CORRADE_COMPARE(*d, 17);
+
     /* Non-move conversion is not allowed */
     CORRADE_VERIFY((std::is_convertible<std::unique_ptr<int>&&, Pointer<int>>::value));
     CORRADE_VERIFY(!(std::is_convertible<const std::unique_ptr<int>&, Pointer<int>>::value));

@@ -69,6 +69,8 @@ template<> struct OptionalConverter<int, MaybeInt> {
     }
 };
 
+template<> struct DeducedOptionalConverter<MaybeInt>: OptionalConverter<int, MaybeInt> {};
+
 template<> struct OptionalConverter<int*, MaybePtr> {
     static Optional<int*> from(MaybePtr&& other) {
         Optional<int*> ret{other.a};
@@ -82,6 +84,8 @@ template<> struct OptionalConverter<int*, MaybePtr> {
         return ret;
     }
 };
+
+template<> struct DeducedOptionalConverter<MaybePtr>: OptionalConverter<int*, MaybePtr> {};
 
 }
 
@@ -494,10 +498,16 @@ void OptionalTest::convertCopy() {
     CORRADE_COMPARE(a.a, 5);
 
     Optional<int> b(a);
+    CORRADE_VERIFY(b);
     CORRADE_COMPARE(*b, 5);
 
     MaybeInt c(b);
     CORRADE_COMPARE(c.a, 5);
+
+    auto d = optional(MaybeInt{35});
+    CORRADE_VERIFY((std::is_same<decltype(d), Optional<int>>::value));
+    CORRADE_VERIFY(d);
+    CORRADE_COMPARE(*d, 35);
 
     /* Conversion from a different type is not allowed */
     CORRADE_VERIFY(!(std::is_constructible<Optional<float>, MaybeInt>::value));
@@ -512,12 +522,22 @@ void OptionalTest::convertMove() {
     CORRADE_COMPARE(*a.a, 35);
 
     Optional<int*> b(std::move(a));
+    CORRADE_VERIFY(b);
+    CORRADE_VERIFY(*b);
     CORRADE_COMPARE(**b, 35);
     CORRADE_VERIFY(!a.a);
 
     MaybePtr c(std::move(b));
+    CORRADE_VERIFY(c.a);
     CORRADE_COMPARE(*c.a, 35);
     CORRADE_VERIFY(!b);
+
+    int dv = 17; /* to avoid a leak */
+    auto d = optional(MaybePtr{&dv});
+    CORRADE_VERIFY((std::is_same<decltype(d), Optional<int*>>::value));
+    CORRADE_VERIFY(d);
+    CORRADE_VERIFY(*d);
+    CORRADE_COMPARE(**d, 17);
 
     /* Conversion from a different type is not allowed */
     CORRADE_VERIFY(!(std::is_constructible<Optional<float*>, MaybePtr&&>::value));

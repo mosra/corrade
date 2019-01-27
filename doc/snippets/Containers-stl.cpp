@@ -35,6 +35,9 @@ std::unique_ptr<int> a{new int{5}};
 Containers::Pointer<int> b = std::move(a);
 
 std::unique_ptr<int> c = Containers::pointer<int>(12);
+
+auto d = Containers::pointer(std::unique_ptr<int>{new int{5}});
+        // d is Containers::Pointer<int>
 /* [Pointer] */
 }
 

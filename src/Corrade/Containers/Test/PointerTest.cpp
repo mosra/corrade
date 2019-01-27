@@ -64,6 +64,8 @@ template<> struct PointerConverter<int, IntPtr> {
     }
 };
 
+template<> struct DeducedPointerConverter<IntPtr>: PointerConverter<int, IntPtr> {};
+
 }
 
 namespace Test { namespace {
@@ -355,6 +357,11 @@ void PointerTest::convert() {
     CORRADE_COMPARE(c.a, ptr);
     CORRADE_COMPARE(*c.a, 5);
     CORRADE_VERIFY(!b);
+
+    auto d = pointer(IntPtr{new int{72}});
+    CORRADE_VERIFY((std::is_same<decltype(d), Pointer<int>>::value));
+    CORRADE_VERIFY(d);
+    CORRADE_COMPARE(*d, 72);
 
     /* Conversion from a different type is not allowed */
     CORRADE_VERIFY(!(std::is_constructible<Pointer<float>, IntPtr>::value));

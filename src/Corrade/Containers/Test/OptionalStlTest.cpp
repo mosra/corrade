@@ -58,6 +58,11 @@ void OptionalStlTest::convertCopy() {
     std::optional<int> c{b};
     CORRADE_VERIFY(c);
     CORRADE_COMPARE(*c, 5);
+
+    auto d = optional(std::optional<int>{13});
+    CORRADE_VERIFY((std::is_same<decltype(d), Optional<int>>::value));
+    CORRADE_VERIFY(d);
+    CORRADE_COMPARE(*d, 13);
 }
 
 void OptionalStlTest::convertCopyNull() {
@@ -85,6 +90,11 @@ void OptionalStlTest::convertMove() {
     CORRADE_VERIFY(c);
     CORRADE_VERIFY(!*b);
     CORRADE_COMPARE(**c, 15);
+
+    auto d = optional(std::optional<Pointer<int>>{new int{13}});
+    CORRADE_VERIFY((std::is_same<decltype(d), Optional<Pointer<int>>>::value));
+    CORRADE_VERIFY(d);
+    CORRADE_COMPARE(**d, 13);
 }
 
 void OptionalStlTest::convertMoveNull() {
