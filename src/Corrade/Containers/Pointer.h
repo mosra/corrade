@@ -99,7 +99,7 @@ template<class T> class Pointer {
         /*implicit*/ Pointer(std::nullptr_t = nullptr) noexcept: _pointer{} {}
 
         /**
-         * @brief Construct a pointer by value
+         * @brief Construct a unique pointer by value
          *
          * Takes ownership of the passed pointer.
          * @see @ref operator bool(), @ref operator->()
@@ -107,7 +107,7 @@ template<class T> class Pointer {
         explicit Pointer(T* pointer) noexcept: _pointer{pointer} {}
 
         /**
-         * @brief Construct a pointer in-place
+         * @brief Construct a unique pointer in-place
          *
          * Allocates a new object by passing @p args to its constructor.
          * @see @ref operator bool(), @ref operator->()
@@ -115,14 +115,18 @@ template<class T> class Pointer {
         template<class ...Args> explicit Pointer(InPlaceInitT, Args&&... args): _pointer{new T{std::forward<Args>(args)...}} {}
 
         /**
-         * @brief Construct a pointer from another of a derived type
+         * @brief Construct a unique pointer from another of a derived type
          *
          * Expects that @p T is a base of @p U. For downcasting (base to
          * derived) use @ref pointerCast(). Calls @ref release() on @p other.
          */
         template<class U, class = typename std::enable_if<std::is_base_of<T, U>::value>::type> /*implicit*/ Pointer(Pointer<U>&& other) noexcept: _pointer{other.release()} {}
 
-        /** @brief Construct a pointer from external representation */
+        /**
+         * @brief Construct a unique pointer from external representation
+         *
+         * @see @ref Containers-Pointer-stl
+         */
         template<class U, class = decltype(Implementation::PointerConverter<U>::from(std::declval<U&&>()))> /*implicit*/ Pointer(U&& other) noexcept: Pointer{Implementation::PointerConverter<U>::from(std::move(other))} {}
 
         /** @brief Copying is not allowed */
@@ -142,7 +146,11 @@ template<class T> class Pointer {
             return *this;
         }
 
-        /** @brief Convert the pointer to external representation */
+        /**
+         * @brief Convert the unique pointer to external representation
+         *
+         * @see @ref Containers-Pointer-stl
+         */
         template<class U, class = decltype(Implementation::PointerConverter<U>::to(std::declval<Pointer<T>&&>()))> /*implicit*/ operator U() && {
             return Implementation::PointerConverter<U>::to(std::move(*this));
         }

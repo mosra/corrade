@@ -175,6 +175,10 @@ template<std::size_t size_, class T> class StaticArray {
         /** @brief Moving is not allowed */
         StaticArray<size_, T>& operator=(StaticArray<size_, T>&&) = delete;
 
+        /* The following ArrayView conversion are *not* restricted to this&
+           because that would break uses like `consume(foo());`, where
+           `consume()` expects a view but `foo()` returns an owning array. */
+
         /**
          * @brief Convert to @ref ArrayView
          *

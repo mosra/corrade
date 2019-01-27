@@ -83,7 +83,11 @@ template<class T> class Reference {
         /** @brief Constructor */
         constexpr /*implicit*/ Reference(T& reference) noexcept: _reference{&reference} {}
 
-        /** @brief Construct a reference from external representation */
+        /**
+         * @brief Construct a reference from external representation
+         *
+         * @see @ref Containers-Reference-stl
+         */
         template<class U, class = decltype(Implementation::ReferenceConverter<U>::from(std::declval<U>()))> constexpr /*implicit*/ Reference(U other) noexcept: Reference{Implementation::ReferenceConverter<U>::from(other)} {}
 
         /**
@@ -100,7 +104,11 @@ template<class T> class Reference {
          */
         template<class U, class = typename std::enable_if<std::is_base_of<T, U>::value>::type> constexpr /*implicit*/ Reference(Reference<U> other) noexcept: _reference{&*other} {}
 
-        /** @brief Convert the reference to external representation */
+        /**
+         * @brief Convert the reference to external representation
+         *
+         * @see @ref Containers-Reference-stl
+         */
         template<class U, class = decltype(Implementation::ReferenceConverter<U>::to(std::declval<Reference<T>>()))> constexpr /*implicit*/ operator U() const {
             return Implementation::ReferenceConverter<U>::to(*this);
         }

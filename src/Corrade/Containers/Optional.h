@@ -149,10 +149,18 @@ template<class T> class Optional {
             new(&_value.v) T{std::forward<Args>(args)...};
         }
 
-        /** @brief Copy-construct an optional from external representation */
+        /**
+         * @brief Copy-construct an optional from external representation
+         *
+         * @see @ref Containers-Optional-stl
+         */
         template<class U, class = decltype(Implementation::OptionalConverter<U>::from(std::declval<const U&>()))> explicit Optional(const U& other) noexcept(std::is_nothrow_copy_constructible<T>::value): Optional{Implementation::OptionalConverter<U>::from(other)} {}
 
-        /** @brief Move-construct an optional from external representation */
+        /**
+         * @brief Move-construct an optional from external representation
+         *
+         * @see @ref Containers-Optional-stl
+         */
         template<class U, class = decltype(Implementation::OptionalConverter<U>::from(std::declval<U&&>()))> explicit Optional(U&& other) noexcept(std::is_nothrow_move_constructible<T>::value): Optional{Implementation::OptionalConverter<U>::from(std::move(other))} {}
 
         /** @brief Copy constructor */
@@ -179,12 +187,20 @@ template<class T> class Optional {
          */
         Optional<T>& operator=(Optional<T>&& other) noexcept(std::is_nothrow_move_assignable<T>::value);
 
-        /** @brief Copy-convert the optional to external representation */
+        /**
+         * @brief Copy-convert the optional to external representation
+         *
+         * @see @ref Containers-Optional-stl
+         */
         template<class U, class = decltype(Implementation::OptionalConverter<U>::to(std::declval<const Optional<T>&>()))> explicit operator U() const & {
             return Implementation::OptionalConverter<U>::to(*this);
         }
 
-        /** @brief Move-convert the optional to external representation */
+        /**
+         * @brief Move-convert the optional to external representation
+         *
+         * @see @ref Containers-Optional-stl
+         */
         template<class U, class = decltype(Implementation::OptionalConverter<U>::to(std::declval<Optional<T>&&>()))> explicit operator U() && {
             return Implementation::OptionalConverter<U>::to(std::move(*this));
         }

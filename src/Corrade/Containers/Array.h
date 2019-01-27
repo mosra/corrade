@@ -263,6 +263,10 @@ class Array {
         explicit operator bool() const { return _data; }
         #endif
 
+        /* The following ArrayView conversion are *not* restricted to this&
+           because that would break uses like `consume(foo());`, where
+           `consume()` expects a view but `foo()` returns an owning array. */
+
         /**
          * @brief Convert to @ref ArrayView
          *

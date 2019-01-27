@@ -75,7 +75,7 @@ template<class T> class ArrayView {
         constexpr /*implicit*/ ArrayView() noexcept: _data(nullptr), _size(0) {}
 
         /**
-         * @brief Construct view on an array with explicit length
+         * @brief Construct a view on an array with explicit length
          * @param data      Data pointer
          * @param size      Data size
          *
@@ -84,7 +84,7 @@ template<class T> class ArrayView {
         constexpr /*implicit*/ ArrayView(T* data, std::size_t size) noexcept: _data(data), _size(size) {}
 
         /**
-         * @brief Construct view on a fixed-size array
+         * @brief Construct a view on a fixed-size array
          * @param data      Fixed-size array
          *
          * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
@@ -101,7 +101,7 @@ template<class T> class ArrayView {
         }
 
         /**
-         * @brief Construct view on @ref ArrayView
+         * @brief Construct a view on @ref ArrayView
          *
          * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
          * Expects that both types have the same size.
@@ -116,7 +116,7 @@ template<class T> class ArrayView {
         }
 
         /**
-         * @brief Construct view on @ref StaticArrayView
+         * @brief Construct a view on @ref StaticArrayView
          *
          * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
          * Expects that both types have the same size.
@@ -286,7 +286,7 @@ template<> class ArrayView<const void> {
         constexpr /*implicit*/ ArrayView() noexcept: _data(nullptr), _size(0) {}
 
         /**
-         * @brief Construct view on array of explicit length
+         * @brief Construct a view on array of explicit length
          * @param data      Data pointer
          * @param size      Data size
          */
@@ -302,7 +302,7 @@ template<> class ArrayView<const void> {
         template<class T> constexpr /*implicit*/ ArrayView(const T* data, std::size_t size) noexcept: _data(data), _size(size*sizeof(T)) {}
 
         /**
-         * @brief Construct view on fixed-size array
+         * @brief Construct a view on fixed-size array
          * @param data      Fixed-size array
          *
          * Size in bytes is calculated automatically.
@@ -340,7 +340,7 @@ template<> class ArrayView<const void> {
 };
 
 /** @relatesalso ArrayView
-@brief Make view on an array of specific length
+@brief Make a view on an array of specific length
 
 Convenience alternative to @ref ArrayView::ArrayView(T*, std::size_t). The
 following two lines are equivalent:
@@ -352,7 +352,7 @@ template<class T> constexpr ArrayView<T> arrayView(T* data, std::size_t size) {
 }
 
 /** @relatesalso ArrayView
-@brief Make view on fixed-size array
+@brief Make a view on fixed-size array
 
 Convenience alternative to @ref ArrayView::ArrayView(U(&)[size]). The following
 two lines are equivalent:
@@ -364,7 +364,7 @@ template<std::size_t size, class T> constexpr ArrayView<T> arrayView(T(&data)[si
 }
 
 /** @relatesalso ArrayView
-@brief Make view on @ref StaticArrayView
+@brief Make a view on @ref StaticArrayView
 
 Convenience alternative to @ref ArrayView::ArrayView(StaticArrayView<size, U>).
 The following two lines are equivalent:
@@ -376,7 +376,7 @@ template<std::size_t size, class T> constexpr ArrayView<T> arrayView(StaticArray
 }
 
 /** @relatesalso ArrayView
-@brief Make view on a view
+@brief Make a view on a view
 
 Equivalent to the implicit @ref ArrayView copy constructor --- it shouldn't be
 an error to call @ref arrayView() on itself.
@@ -599,7 +599,7 @@ template<std::size_t size_, class T> class StaticArrayView {
 };
 
 /** @relatesalso StaticArrayView
-@brief Make static view on an array
+@brief Make a static view on an array
 
 Convenience alternative to @ref StaticArrayView::StaticArrayView(T*). The
 following two lines are equivalent:
@@ -611,7 +611,7 @@ template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArr
 }
 
 /** @relatesalso StaticArrayView
-@brief Make static view on a fixed-size array
+@brief Make a static view on a fixed-size array
 
 Convenience alternative to @ref StaticArrayView::StaticArrayView(U(&)[size_]).
 The following two lines are equivalent:
@@ -623,7 +623,7 @@ template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArr
 }
 
 /** @relatesalso StaticArrayView
-@brief Make view on a view
+@brief Make a static view on a view
 
 Equivalent to the implicit @ref StaticArrayView copy constructor --- it
 shouldn't be an error to call @ref staticArrayView() on itself.
