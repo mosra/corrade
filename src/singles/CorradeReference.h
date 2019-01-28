@@ -13,6 +13,9 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2018.10-232-ge927d7f3 (2019-01-28)
+    -   Stricter matching for external representation conversion
+    -   Fixed STL compatibility to not recurse infinitely
     v2018.10-183-g4eb1adc0 (2019-01-23)
     -   Initial release
 
