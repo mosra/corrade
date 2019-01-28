@@ -60,6 +60,14 @@ that the handle is copied by value, so references won't work.
     limitation:
 @par
     @snippet Containers.cpp ScopeGuard-returning-lambda
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This class is also available as a single-header, dependency-less
+    [CorradeScopeGuard.h](https://github.com/mosra/magnum-singles/tree/master/CorradeScopeGuard.h)
+    library in the Magnum Singles repository for easier integration into your
+    projects. See @ref corrade-singles for more information.
 */
 class ScopeGuard {
     public:

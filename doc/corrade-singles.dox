@@ -47,6 +47,7 @@ Class or library            | Single-header version
 @ref Containers::Optional   | [CorradeOptional.h](https://github.com/mosra/magnum-singles/tree/master/CorradeOptional.h)
 @ref Containers::Pointer    | [CorradePointer.h](https://github.com/mosra/magnum-singles/tree/master/CorradePointer.h)
 @ref Containers::Reference  | [CorradeReference.h](https://github.com/mosra/magnum-singles/tree/master/CorradeReference.h)
+@ref Containers::ScopeGuard | [CorradeScopeGuard.h](https://github.com/mosra/magnum-singles/tree/master/CorradeScopeGuard.h)
 
 @section corrade-singles-behavior Behavior
 
