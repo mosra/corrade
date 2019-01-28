@@ -61,6 +61,10 @@ that the handle is copied by value, so references won't work.
 @par
     @snippet Containers.cpp ScopeGuard-returning-lambda
 
+<b></b>
+
+<b></b>
+
 @m_class{m-block m-success}
 
 @par Single-header version
