@@ -6,12 +6,15 @@
 
     This is a single-header library generated from the Corrade project. With
     the goal being easy integration, it's deliberately free of all comments
-    to keep the file size small. More info, changelogs and full docs here:
+    to keep the file size small. More info, detailed changelogs and docs here:
 
     -   Project homepage — https://magnum.graphics/corrade/
     -   Documentation — https://doc.magnum.graphics/corrade/
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
+
+    v2018.10-183-g4eb1adc0 (2019-01-23)
+    -   Initial release
 
     Generated from Corrade {{revision}}, {{stats:loc}} / {{stats:preprocessed}} LoC
 */
