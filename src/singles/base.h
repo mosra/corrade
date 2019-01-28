@@ -29,6 +29,9 @@
 #pragma ACME path ../
 #pragma ACME local Corrade
 
+/* For Corrade/configure.h */
+#pragma ACME path ../../build/src
+
 #pragma ACME disable CORRADE_BUILD_DEPRECATED
 
 #pragma ACME disable CORRADE_NO_ASSERT

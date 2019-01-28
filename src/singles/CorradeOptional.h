@@ -18,6 +18,9 @@
 
 #include "base.h"
 
+/* We don't need anything from configure.h here */
+#pragma ACME enable Corrade_configure_h
+
 /* Disable asserts that are not used */
 #pragma ACME enable CORRADE_CONSTEXPR_ASSERT
 #pragma ACME enable CORRADE_ASSERT_OUTPUT
