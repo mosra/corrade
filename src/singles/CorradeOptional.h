@@ -33,3 +33,7 @@
 #pragma ACME enable CORRADE_ASSERT_UNREACHABLE
 
 #include "Corrade/Containers/Optional.h"
+#ifdef CORRADE_OPTIONAL_STL_COMPATIBILITY
+// {{includes}}
+#include "Corrade/Containers/OptionalStl.h"
+#endif

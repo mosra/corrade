@@ -104,7 +104,11 @@ overload also allows for such a conversion. Example:
     This class is also available as a single-header, dependency-less
     [CorradeOptional.h](https://github.com/mosra/magnum-singles/tree/master/CorradeOptional.h)
     library in the Magnum Singles repository for easier integration into your
-    projects. See @ref corrade-singles for more information.
+    projects. See @ref corrade-singles for more information. The above
+    mentioned STL compatibility is included as well, but disabled by default.
+    Enable it by compiling as C++17 and specifying
+    @cpp #define CORRADE_OPTIONAL_STL_COMPATIBILITY @ce before including the
+    file.
 
 @see @ref NullOpt, @ref optional(T&&), @ref optional(Args&&... args),
     @ref Reference
