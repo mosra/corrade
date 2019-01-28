@@ -157,9 +157,9 @@ template<std::size_t size_, class T> class StaticArray {
          * @see @ref StaticArray(DirectInitT, Args&&... args)
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class ...Args> explicit StaticArray(Args&&... args);
+        template<class ...Args> /*implicit*/ StaticArray(Args&&... args);
         #else
-        template<class First, class ...Next> explicit StaticArray(First&& first, Next&&... next): StaticArray{InPlaceInit, std::forward<First>(first), std::forward<Next>(next)...} {}
+        template<class First, class ...Next> /*implicit*/ StaticArray(First&& first, Next&&... next): StaticArray{InPlaceInit, std::forward<First>(first), std::forward<Next>(next)...} {}
         #endif
 
         /** @brief Copying is not allowed */

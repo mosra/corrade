@@ -101,6 +101,8 @@ namespace Corrade {
     @ref Containers::StaticArray::prefix() and
     @ref Containers::StaticArrayView::prefix() is now done at compile time as
     well
+-   The "initializer list" @ref Containers::StaticArray::StaticArray(Args&&... args)
+    constructor is now implicit instead of explicit for easier use
 
 @subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
 
