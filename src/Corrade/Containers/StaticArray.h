@@ -61,7 +61,7 @@ is possible to initialize the array in a different way using so-called *tags*:
     constructor (useful when you want to make the choice appear explicit).
 -   @ref StaticArray(InPlaceInitT, Args&&... args) is equivalent to the
     implicit parameteric constructor (again useful when you want to make the
-    choice appear explicit).
+    choice appear explicit). Same as @ref StaticArray(Args&&... args).
 -   @ref StaticArray(ValueInitT) zero-initializes trivial types and calls
     default constructor elsewhere.
 -   @ref StaticArray(DirectInitT, Args&&... args) constructs every element of
@@ -134,7 +134,8 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief Construct in-place-initialized array
          *
-         * The arguments are forwarded to the array constructor.
+         * The arguments are forwarded to the array constructor. Same as
+         * @ref StaticArray(Args&&... args).
          * @see @ref StaticArray(DirectInitT, Args&&... args)
          */
         template<class ...Args> explicit StaticArray(InPlaceInitT, Args&&... args): _data{std::forward<Args>(args)...} {
