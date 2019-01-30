@@ -10,4 +10,3 @@ CMakeLists.txt.user*
 .DS_Store
 *.swp
 *~
-package/conan/test_package/build/*
