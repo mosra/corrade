@@ -61,7 +61,7 @@ namespace Corrade {
 -   Added r-value overloads to @ref Containers::Optional::operator*() allowing
     you to easily take the value out of a r-value optional
 -   Opt-in STL compatibility for @ref Containers::Optional, allowing for
-    *explicit* conversion from and to @cpp std::optional @ce in C++17.
+    explicit conversion from and to @cpp std::optional @ce in C++17.
 -   New @ref Containers::arrayCast(StridedArrayView<T>) overload for casting
     strided array views
 
