@@ -123,6 +123,9 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-buildsystem Build system
 
+-   Corrade now has a [Conan](https://conan.io/) package. See
+    @ref building-corrade-packages-conan for more information. See also
+    [mosra/corrade#57](https://github.com/mosra/corrade/pull/57).
 -   Corrade is now available through [Hunter](https://hunter.sh) CMake-driven
     package manager. See @ref building-corrade-packages-hunter for more
     information. See also [mosra/magnum#298](https://github.com/mosra/magnum/pull/298).

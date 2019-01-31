@@ -56,6 +56,7 @@ your platform of choice. See @ref building-corrade-manual if you want to have
 more control and @ref building-corrade-cross for cross-compiling to other
 platforms.
 
+-   @ref building-corrade-packages-conan
 -   @ref building-corrade-packages-hunter
 -   @ref building-corrade-packages-vcpkg
 -   @ref building-corrade-packages-arch
@@ -64,6 +65,21 @@ platforms.
 -   @ref building-corrade-packages-gentoo
 -   @ref building-corrade-packages-rpm
 -   @ref building-corrade-packages-brew
+
+@subsection building-corrade-packages-conan Conan package
+
+Starting from version 2018.10, stable releases of Corrade are available in the
+[Conan](https://conan.io/) package manager. You can install a stable version by
+checking out the Git repository and executing the @cb{.sh} conan create @ce
+command:
+
+@code{.sh}
+git clone git://github.com/mosra/corrade && cd corrade
+conan create . magnum/stable -tf package/conan/test_package
+@endcode
+
+The `-tf` argument is optional and ensures the package is built correctly by
+executing a simple test file.
 
 @subsection building-corrade-packages-hunter Hunter package
 
