@@ -101,9 +101,6 @@ class CorradeConan(ConanFile):
             add_cmake_option("MSVC2015_COMPATIBILITY", int(self.settings.compiler.version.value) == 14)
             add_cmake_option("MSVC2017_COMPATIBILITY", int(self.settings.compiler.version.value) == 17)
 
-        if self.settings.compiler == 'gcc':
-            add_cmake_option("GCC47_COMPATIBILITY", float(self.settings.compiler.version.value) < 4.8)
-
         cmake.configure(build_folder=self._build_subfolder)
 
         return cmake
