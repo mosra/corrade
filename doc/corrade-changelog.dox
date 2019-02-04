@@ -29,9 +29,14 @@ namespace Corrade {
 
 @tableofcontents
 
-@section corrade-changelog-latest Changes since 2018.10
+@anchor corrade-changelog-latest
 
-@subsection corrade-changelog-latest-dependencies Dependency changes
+@section corrade-changelog-2019-01 2019.01
+
+Released 2019-02-04, tagged as
+[v2019.01](https://github.com/mosra/corrade/releases/tag/v2019.01).
+
+@subsection corrade-changelog-2019-01-dependencies Dependency changes
 
 -   Minimal supported GCC version is now 4.8.1, GCC 4.7 is not supported
     anymore. Minimal Clang version is now 3.3, since that's the first version
@@ -43,13 +48,13 @@ namespace Corrade {
     systems (such as Ubuntu 14.04 or Debian 8). See also
     [mosra/magnum#274](https://github.com/mosra/magnum/issues/274).
 
-@subsection corrade-changelog-latest-new New features
+@subsection corrade-changelog-2019-01-new New features
 
 -   Various Corrade features are now being available also as single-header
     libraries for easier integration into your projects. See
     @ref corrade-singles for more information.
 
-@subsubsection corrade-changelog-latest-new-containers Containers library
+@subsubsection corrade-changelog-2019-01-new-containers Containers library
 
 -   New @ref Containers::Pointer class, a lightweight equivalent to
     @ref std::unique_ptr
@@ -67,7 +72,7 @@ namespace Corrade {
 -   New @ref Containers::arrayCast(StridedArrayView<T>) overload for casting
     strided array views
 
-@subsubsection corrade-changelog-latest-new-utility Utility library
+@subsubsection corrade-changelog-2019-01-new-utility Utility library
 
 -   Asserts from the @ref Corrade/Utility/Assert.h can now use the standard
     @cpp assert() @ce if @ref CORRADE_STANDARD_ASSERT is defined
@@ -82,13 +87,13 @@ namespace Corrade {
     functions for @ref Utility::formatInto()
 -   It's now possible to print @ref std::nullptr_t with @ref Utility::Debug
 
-@subsection corrade-changelog-latest-changes Changes and improvements
+@subsection corrade-changelog-2019-01-changes Changes and improvements
 
 -   The @ref CORRADE_CXX_STANDARD macro has been moved to the top-level
     @ref Corrade/Corrade.h from @ref Corrade/Utility/Macros.h so it's available
     everywhere unconditionally
 
-@subsubsection corrade-changelog-latest-changes-containers Containers library
+@subsubsection corrade-changelog-2019-01-changes-containers Containers library
 
 -   The @ref Containers::StridedArrayView class is now @cpp constexpr @ce,
     allowing it to be used to describe data layout at compile-time
@@ -106,7 +111,7 @@ namespace Corrade {
 -   The "initializer list" @ref Containers::StaticArray::StaticArray(Args&&... args)
     constructor is now implicit instead of explicit for easier use
 
-@subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
+@subsubsection corrade-changelog-2019-01-changes-pluginmanager PluginManager library
 
 -   The @ref PluginManager::Manager::instantiate() and
     @ref PluginManager::Manager::loadAndInstantiate() functions now return
@@ -116,14 +121,14 @@ namespace Corrade {
     @ref PluginManager::AbstractPlugin::pluginInterface() "pluginInterface()"
     function optional to make implementing hot-reload interfaces less verbose
 
-@subsubsection corrade-changelog-latest-changes-utility Utility library
+@subsubsection corrade-changelog-2019-01-changes-utility Utility library
 
 -   Prefixed or prefix-ignoring @ref Utility::Arguments now work better with
     3rd party argument parsers which may be less restrictive about argument
     name format; arguments that are ignored are not checked for key validity
     anymore (see [mosra/magnum#305](https://github.com/mosra/magnum/issues/305))
 
-@subsection corrade-changelog-latest-buildsystem Build system
+@subsection corrade-changelog-2019-01-buildsystem Build system
 
 -   Corrade now has a [Conan](https://conan.io/) package. See
     @ref building-corrade-packages-conan for more information. See also
@@ -135,7 +140,7 @@ namespace Corrade {
     [MSYS2](https://www.msys2.org/). See @ref building-corrade-packages-msys
     for more information. See also [mosra/corrade#56](https://github.com/mosra/corrade/pull/56).
 
-@subsection corrade-changelog-latest-bugfixes Bug fixes
+@subsection corrade-changelog-2019-01-bugfixes Bug fixes
 
 -   It was not possible to use @ref TestSuite::Compare::File with
     @ref CORRADE_COMPARE_WITH() because its symbols were not exported by
@@ -148,7 +153,7 @@ namespace Corrade {
     @ref Containers::StaticArrayView::operator bool() operators were not
     @cpp constexpr @ce by accident
 
-@subsection corrade-changelog-latest-deprecated Deprecated APIs
+@subsection corrade-changelog-2019-01-deprecated Deprecated APIs
 
 -   @cpp Containers::ScopedExit @ce is deprecated, use
     @ref Containers::ScopeGuard instead
@@ -161,7 +166,7 @@ namespace Corrade {
     code to use @ref Containers::Pointer as well or include the
     @ref Corrade/Containers/PointerStl.h header explicitly.
 
-@subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
+@subsection corrade-changelog-2019-01-compatibility Potential compatibility breakages, removed APIs
 
 -   Removed @cpp Containers::ArrayReference @ce, which was deprecated since 2015.
     Use @ref Containers::ArrayView instead.
@@ -190,7 +195,7 @@ namespace Corrade {
     which were deprecated in favor of `Corrade::*` imported targets in 2016.
     The deprecated `CORRADE_CXX_FLAGS` variable is still present, however.
 
-@subsection corrade-changelog-latest-documentation Documentation
+@subsection corrade-changelog-2019-01-documentation Documentation
 
 -   The user-definable macros @ref CORRADE_NO_ASSERT and
     @ref CORRADE_GRACEFUL_ASSERT now have dedicated documentation, instead of
