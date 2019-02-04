@@ -401,7 +401,13 @@ TweakableState parseTweakables(const std::string& name, const std::string& filen
             } else ++pos;
 
         /* Got a potential tweakable macro */
-        } else if(data[pos] == name[0] && data.compare(pos, name.size(), name) == 0) {
+        } else if(data[pos] == name[0]) {
+            /* Not a tweakable macro, continue */
+            if(data.compare(pos, name.size(), name) != 0) {
+                ++pos;
+                continue;
+            }
+
             /* We should not get here from comments or raw strings */
             CORRADE_INTERNAL_ASSERT(!insideBlockComment && !insideLineComment && !insideString);
 

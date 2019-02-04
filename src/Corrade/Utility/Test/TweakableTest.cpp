@@ -154,6 +154,9 @@ TW(1337)
     {"tweakable in a nested raw string", R"CPP(R"outer(R"inner(TW(42))inner")outer"
     TW(1337)
     )CPP", 2},
+    {"tweakable with the same initial char", R"CPP(namespace Tw {
+TW(1337)
+})CPP", 2},
 };
 
 constexpr struct {
