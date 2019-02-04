@@ -26,7 +26,7 @@ def sort_libs(correct_order, libs, lib_suffix='', reverse_result=False):
 
 class CorradeConan(ConanFile):
     name = "corrade"
-    version = "2018.10"
+    version = "2019.01"
     description = "Corrade is a multiplatform utility library written \
                     in C++11/C++14. It's used as a base for the Magnum \
                     graphics engine, among other things."
