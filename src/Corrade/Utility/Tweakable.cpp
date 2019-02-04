@@ -611,7 +611,13 @@ TweakableState Tweakable::update() {
         const std::string data = Directory::readString(file.second.watchPath);
         std::string name = Implementation::findTweakableAlias(data);
 
-        Debug{} << "Utility::Tweakable::update(): looking for updated" << name << Debug::nospace << "() macros in" << file.first;
+        /* Print helpful message in case no alias was found. Don't do name ==
+           "CORRADE_TWEAKABLE" to avoid a temporary allocation of std::string.
+           (Ugh, why can't it have an overload for this?!) */
+        if(name.compare("CORRADE_TWEAKABLE") == 0)
+            Warning{} << "Utility::Tweakable::update(): no alias found in" << file.first << Debug::nospace << ", fallback to looking for CORRADE_TWEAKABLE()";
+        else
+            Debug{} << "Utility::Tweakable::update(): looking for updated" << name << Debug::nospace << "() macros in" << file.first;
 
         /* Now find all annotated constants and update them. If there's a
            problem, exit immediately, otherwise just accumulate the state. */
