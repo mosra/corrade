@@ -1,5 +1,3 @@
-# kate: indent-width 2;
-
 class Corrade < Formula
   desc "C++11/C++14 multiplatform utility library"
   homepage "https://magnum.graphics/corrade/"
