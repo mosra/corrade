@@ -93,6 +93,7 @@ struct DirectoryTest: TestSuite::Tester {
     void readUtf8();
 
     void write();
+    void writeEmpty();
     void writeNoPermission();
     void writeUtf8();
 
@@ -164,6 +165,7 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::readUtf8,
 
               &DirectoryTest::write,
+              &DirectoryTest::writeEmpty,
               &DirectoryTest::writeNoPermission,
               &DirectoryTest::writeUtf8,
 
@@ -684,17 +686,18 @@ void DirectoryTest::listUtf8() {
         TestSuite::Compare::SortedContainer);
 }
 
+constexpr const char Data[]{'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'};
+
 void DirectoryTest::read() {
     /* Existing file, check if we are reading it as binary (CR+LF is not
        converted to LF) and nothing after \0 gets lost */
     CORRADE_COMPARE_AS(Directory::read(Directory::join(_testDir, "file")),
-        (Containers::Array<char>{Containers::InPlaceInit,
-            {'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}}),
+        Containers::arrayView(Data),
         TestSuite::Compare::Container);
 
     /* Read into string */
     CORRADE_COMPARE(Directory::readString(Directory::join(_testDir, "file")),
-        std::string("\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11));
+        std::string(Data, Containers::arraySize(Data)));
 }
 
 void DirectoryTest::readEmpty() {
@@ -730,23 +733,31 @@ void DirectoryTest::readUtf8() {
     /* Existing file, check if we are reading it as binary (CR+LF is not
        converted to LF) and nothing after \0 gets lost */
     CORRADE_COMPARE_AS(Directory::read(Directory::join(_testDirUtf8, "hýždě")),
-        (Containers::Array<char>{Containers::InPlaceInit,
-            {'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}}),
+        Containers::arrayView(Data),
         TestSuite::Compare::Container);
 }
 
 void DirectoryTest::write() {
-    constexpr char data[] = {'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'};
-    CORRADE_VERIFY(Directory::write(Directory::join(_writeTestDir, "file"), data));
-    CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "file"),
-        Directory::join(_testDir, "file"),
+    std::string file = Directory::join(_writeTestDir, "file");
+
+    if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
+    CORRADE_VERIFY(Directory::write(file, Data));
+    CORRADE_COMPARE_AS(file, Directory::join(_testDir, "file"),
         TestSuite::Compare::File);
 
-    CORRADE_VERIFY(Directory::writeString(Directory::join(_writeTestDir, "file"),
-        std::string("\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11)));
-    CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "file"),
-        Directory::join(_testDir, "file"),
+    CORRADE_VERIFY(Directory::rm(file));
+    CORRADE_VERIFY(Directory::writeString(file, std::string(Data, 11)));
+    CORRADE_COMPARE_AS(file, Directory::join(_testDir, "file"),
         TestSuite::Compare::File);
+}
+
+void DirectoryTest::writeEmpty() {
+    std::string file = Directory::join(_writeTestDir, "empty");
+
+    if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
+    CORRADE_VERIFY(Directory::write(file, nullptr));
+    CORRADE_COMPARE_AS(file, "",
+        TestSuite::Compare::FileToString);
 }
 
 void DirectoryTest::writeNoPermission() {
@@ -757,10 +768,11 @@ void DirectoryTest::writeNoPermission() {
 }
 
 void DirectoryTest::writeUtf8() {
-    constexpr unsigned char data[] = {0xCA, 0xFE, 0xBA, 0xBE, 0x0D, 0x0A, 0x00, 0xDE, 0xAD, 0xBE, 0xEF};
-    CORRADE_VERIFY(Directory::write(Directory::join(_writeTestDir, "hýždě"), data));
-    CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "hýždě"),
-        Directory::join(_testDirUtf8, "hýždě"),
+    std::string file = Directory::join(_writeTestDir, "hýždě");
+
+    if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
+    CORRADE_VERIFY(Directory::write(file, Data));
+    CORRADE_COMPARE_AS(file, Directory::join(_testDirUtf8, "hýždě"),
         TestSuite::Compare::File);
 }
 
