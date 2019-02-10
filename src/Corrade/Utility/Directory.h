@@ -289,17 +289,17 @@ inline CORRADE_DEPRECATED("use exists() instead") bool fileExists(const std::str
 #endif
 
 /**
-@brief Read file into array
+@brief Read file into an array
 
-Reads whole file as binary (i.e. without newline conversion). Returns
-@cpp nullptr @ce and prints message to @ref Error if the file can't be read.
+Reads the whole file as binary (i.e. without newline conversion). Returns
+@cpp nullptr @ce and prints a message to @ref Error if the file can't be read.
 Expects that the filename is in UTF-8.
 @see @ref readString(), @ref exists(), @ref write(), @ref mapRead()
 */
 CORRADE_UTILITY_EXPORT Containers::Array<char> read(const std::string& filename);
 
 /**
-@brief Read file into string
+@brief Read file into a string
 
 Convenience overload for @ref read().
 @see @ref exists(), @ref writeString()
@@ -307,17 +307,17 @@ Convenience overload for @ref read().
 CORRADE_UTILITY_EXPORT std::string readString(const std::string& filename);
 
 /**
-@brief Write array into file
+@brief Write array into a file
 
 Writes the file as binary (i.e. without newline conversion). Returns
-@cpp false @ce and prints message to @ref Error if the file can't be written,
+@cpp false @ce and prints a message to @ref Error if the file can't be written,
 @cpp true @ce otherwise. Expects that the filename is in UTF-8.
 @see @ref writeString(), @ref read(), @ref map()
 */
 CORRADE_UTILITY_EXPORT bool write(const std::string& filename, Containers::ArrayView<const void> data);
 
 /**
-@brief Write string into file
+@brief Write string into a file
 
 Convenience overload for @ref write().
 @see @ref write(), @ref readString()
