@@ -1349,9 +1349,21 @@ then being used outside of the loop.
 The resulting measured value is divided by @p batchSize to represent cost of
 one iteration.
 */
+#ifndef _MSC_VER
 #define CORRADE_BENCHMARK(batchSize)                                        \
     _CORRADE_REGISTER_TEST_CASE();                                          \
     for(CORRADE_UNUSED auto&& _CORRADE_HELPER_PASTE(benchmarkIteration, __func__): Tester::createBenchmarkRunner(batchSize))
+#else
+/* MSVC warns about the benchmarkIteration variable being set but unused, no
+   way around that except than disabling the warning */
+#define CORRADE_BENCHMARK(batchSize)                                        \
+    _CORRADE_REGISTER_TEST_CASE();                                          \
+    for(                                                                    \
+        __pragma(warning(push)) __pragma(warning(disable: 4189))            \
+        CORRADE_UNUSED auto&& _CORRADE_HELPER_PASTE(benchmarkIteration, __func__): Tester::createBenchmarkRunner(batchSize) \
+        __pragma(warning(pop))                                              \
+    )
+#endif
 
 template<class T, class U, class V> void Tester::compareWith(Comparator<T>& comparator, const char* actual, const U& actualValue, const char* expected, const V& expectedValue) {
     ++_checkCount;
