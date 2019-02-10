@@ -29,7 +29,14 @@ namespace Corrade {
 
 @tableofcontents
 
-@anchor corrade-changelog-latest
+@section corrade-changelog-latest Changes since 2019.01
+
+@subsection corrade-changelog-latest-deprecated Deprecated APIs
+
+-   @cpp Utility::Directory::fileExists() @ce is now deprecated in favor of
+    @ref Utility::Directory::exists(). It was named like this to prevent it
+    from looking like it works on directories only, but such name then caused
+    people to ask if it works on directories as well, not helping anything.
 
 @section corrade-changelog-2019-01 2019.01
 

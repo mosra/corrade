@@ -42,7 +42,7 @@ Configuration::Configuration(const Flags flags): ConfigurationGroup(this), _flag
 
 Configuration::Configuration(const std::string& filename, const Flags flags): ConfigurationGroup(this), _filename(flags & Flag::ReadOnly ? std::string() : filename), _flags(static_cast<InternalFlag>(std::uint32_t(flags))|InternalFlag::IsValid) {
     /* File doesn't exist yet, nothing to do */
-    if(!Directory::fileExists(filename)) return;
+    if(!Directory::exists(filename)) return;
 
     /* The user wants to truncate the file, mark it as changed and do nothing */
     if(flags & Flag::Truncate) {

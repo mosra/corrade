@@ -42,12 +42,12 @@ bool Comparator<Compare::File>::operator()(const std::string& actualFilename, co
     _actualFilename = Utility::Directory::join(_pathPrefix, actualFilename);
     _expectedFilename = Utility::Directory::join(_pathPrefix, expectedFilename);
 
-    if(!Utility::Directory::fileExists(_actualFilename))
+    if(!Utility::Directory::exists(_actualFilename))
         return false;
 
     _actualState = State::Success;
 
-    if(!Utility::Directory::fileExists(_expectedFilename))
+    if(!Utility::Directory::exists(_expectedFilename))
         return false;
 
     _actualContents = Utility::Directory::readString(_actualFilename);

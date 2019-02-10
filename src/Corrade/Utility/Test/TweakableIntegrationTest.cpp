@@ -103,7 +103,7 @@ void TweakableIntegrationTest::variable() {
     auto&& data = EnabledData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    CORRADE_VERIFY(Directory::fileExists(_thisWriteableFile));
+    CORRADE_VERIFY(Directory::exists(_thisWriteableFile));
 
     Tweakable tweakable;
     if(data.enabled)
@@ -169,7 +169,7 @@ void TweakableIntegrationTest::scopeTemplated() {
     auto&& data = EnabledData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    CORRADE_VERIFY(Directory::fileExists(_thisWriteableFile));
+    CORRADE_VERIFY(Directory::exists(_thisWriteableFile));
 
     Tweakable tweakable;
     if(data.enabled)
@@ -235,7 +235,7 @@ void TweakableIntegrationTest::scopeVoid() {
     auto&& data = EnabledData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
 
-    CORRADE_VERIFY(Directory::fileExists(_thisWriteableFile));
+    CORRADE_VERIFY(Directory::exists(_thisWriteableFile));
 
     Tweakable tweakable;
     if(data.enabled)
@@ -298,7 +298,7 @@ void TweakableIntegrationTest::scopeVoid() {
 }
 
 void TweakableIntegrationTest::updateNoChange() {
-    CORRADE_VERIFY(Directory::fileExists(_thisWriteableFile));
+    CORRADE_VERIFY(Directory::exists(_thisWriteableFile));
 
     Tweakable tweakable;
     tweakable.enable(_thisReadablePath, TWEAKABLE_WRITE_TEST_DIR);
@@ -333,7 +333,7 @@ void TweakableIntegrationTest::updateNoChange() {
 }
 
 void TweakableIntegrationTest::updateUnexpectedLine() {
-    CORRADE_VERIFY(Directory::fileExists(_thisWriteableFile));
+    CORRADE_VERIFY(Directory::exists(_thisWriteableFile));
 
     Tweakable tweakable;
     tweakable.enable(_thisReadablePath, TWEAKABLE_WRITE_TEST_DIR);
@@ -365,7 +365,7 @@ void TweakableIntegrationTest::updateUnexpectedLine() {
 }
 
 void TweakableIntegrationTest::updateDifferentType() {
-    CORRADE_VERIFY(Directory::fileExists(_thisWriteableFile));
+    CORRADE_VERIFY(Directory::exists(_thisWriteableFile));
 
     Tweakable tweakable;
     tweakable.enable(_thisReadablePath, TWEAKABLE_WRITE_TEST_DIR);
@@ -399,7 +399,7 @@ void TweakableIntegrationTest::updateDifferentType() {
 }
 
 void TweakableIntegrationTest::updateParseError() {
-    CORRADE_VERIFY(Directory::fileExists(_thisWriteableFile));
+    CORRADE_VERIFY(Directory::exists(_thisWriteableFile));
 
     Tweakable tweakable;
     tweakable.enable(_thisReadablePath, TWEAKABLE_WRITE_TEST_DIR);
@@ -433,7 +433,7 @@ void TweakableIntegrationTest::updateParseError() {
 }
 
 void TweakableIntegrationTest::updateNoAlias() {
-    CORRADE_VERIFY(Directory::fileExists(_thisWriteableFile));
+    CORRADE_VERIFY(Directory::exists(_thisWriteableFile));
 
     Tweakable tweakable;
     tweakable.enable(_thisReadablePath, TWEAKABLE_WRITE_TEST_DIR);

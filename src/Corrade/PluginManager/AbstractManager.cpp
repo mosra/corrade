@@ -224,7 +224,7 @@ AbstractManager::AbstractManager(std::string pluginInterface):
         const std::string executableDir = Utility::Directory::path(Utility::Directory::executableLocation());
         for(const std::string& path: pluginSearchPaths) {
             std::string fullPath = Utility::Directory::join(executableDir, path);
-            if(!Utility::Directory::fileExists(fullPath)) continue;
+            if(!Utility::Directory::exists(fullPath)) continue;
 
             setPluginDirectory(std::move(fullPath));
             break;

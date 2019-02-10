@@ -36,6 +36,10 @@
 #include "Corrade/Containers/EnumSet.h"
 #include "Corrade/Utility/visibility.h"
 
+#ifdef CORRADE_BUILD_DEPRECATED
+#include "Corrade/Utility/Macros.h"
+#endif
+
 namespace Corrade { namespace Utility {
 
 /**
@@ -267,13 +271,22 @@ Returned value is encoded in UTF-8.
 CORRADE_UTILITY_EXPORT std::string tmp();
 
 /**
-@brief Check if the file exists
+@brief Check if the file or directory exists
 
-Returns @cpp true @ce if the file exists and is accessible (e.g. user has
+Returns @cpp true @ce if the file exists and is accessible (i.e., user has a
 permission to open it), @cpp false @ce otherwise. Expects that the filename is
 in UTF-8.
 */
-CORRADE_UTILITY_EXPORT bool fileExists(const std::string& filename);
+CORRADE_UTILITY_EXPORT bool exists(const std::string& filename);
+
+#ifdef CORRADE_BUILD_DEPRECATED
+/** @brief @copybrief exists()
+ * @deprecated Use @ref exists() instead.
+ */
+inline CORRADE_DEPRECATED("use exists() instead") bool fileExists(const std::string& filename) {
+    return exists(filename);
+}
+#endif
 
 /**
 @brief Read file into array
@@ -281,7 +294,7 @@ CORRADE_UTILITY_EXPORT bool fileExists(const std::string& filename);
 Reads whole file as binary (i.e. without newline conversion). Returns
 @cpp nullptr @ce and prints message to @ref Error if the file can't be read.
 Expects that the filename is in UTF-8.
-@see @ref readString(), @ref fileExists(), @ref write(), @ref mapRead()
+@see @ref readString(), @ref exists(), @ref write(), @ref mapRead()
 */
 CORRADE_UTILITY_EXPORT Containers::Array<char> read(const std::string& filename);
 
@@ -289,7 +302,7 @@ CORRADE_UTILITY_EXPORT Containers::Array<char> read(const std::string& filename)
 @brief Read file into string
 
 Convenience overload for @ref read().
-@see @ref fileExists(), @ref writeString()
+@see @ref exists(), @ref writeString()
 */
 CORRADE_UTILITY_EXPORT std::string readString(const std::string& filename);
 

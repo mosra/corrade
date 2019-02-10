@@ -98,7 +98,7 @@ void Resource::unregisterData(const char* group) {
 namespace {
 
 std::pair<bool, Containers::Array<char>> fileContents(const std::string& filename) {
-    if(!Directory::fileExists(filename)) return {false, nullptr};
+    if(!Directory::exists(filename)) return {false, nullptr};
     return {true, Directory::read(filename)};
 }
 
@@ -135,7 +135,7 @@ template<class T> std::string numberToString(const T& number) {
 
 std::string Resource::compileFrom(const std::string& name, const std::string& configurationFile) {
     /* Resource file existence */
-    if(!Directory::fileExists(configurationFile)) {
+    if(!Directory::exists(configurationFile)) {
         Error() << "    Error: file" << configurationFile << "does not exist";
         return {};
     }

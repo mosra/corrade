@@ -95,7 +95,7 @@ void FileWatcherTest::teardown() {
 }
 
 void FileWatcherTest::changedRead() {
-    CORRADE_VERIFY(Directory::fileExists(_filename));
+    CORRADE_VERIFY(Directory::exists(_filename));
 
     FileWatcher watcher{_filename};
     CORRADE_VERIFY(watcher.isValid());
@@ -118,7 +118,7 @@ void FileWatcherTest::changedRead() {
 }
 
 void FileWatcherTest::changedWrite() {
-    CORRADE_VERIFY(Directory::fileExists(_filename));
+    CORRADE_VERIFY(Directory::exists(_filename));
 
     FileWatcher watcher{_filename};
     CORRADE_VERIFY(watcher.isValid());
@@ -159,7 +159,7 @@ void FileWatcherTest::changedWriteUtf8() {
 }
 
 void FileWatcherTest::changedDeleted() {
-    CORRADE_VERIFY(Directory::fileExists(_filename));
+    CORRADE_VERIFY(Directory::exists(_filename));
 
     FileWatcher watcher{_filename};
     CORRADE_VERIFY(watcher.isValid());
@@ -171,7 +171,7 @@ void FileWatcherTest::changedDeleted() {
 }
 
 void FileWatcherTest::changedRecreatedImmediately() {
-    CORRADE_VERIFY(Directory::fileExists(_filename));
+    CORRADE_VERIFY(Directory::exists(_filename));
 
     FileWatcher watcher{_filename};
     CORRADE_VERIFY(watcher.isValid());
@@ -195,7 +195,7 @@ void FileWatcherTest::changedRecreatedImmediately() {
 }
 
 void FileWatcherTest::changedRecreatedLate() {
-    CORRADE_VERIFY(Directory::fileExists(_filename));
+    CORRADE_VERIFY(Directory::exists(_filename));
 
     FileWatcher watcher{_filename};
     CORRADE_VERIFY(watcher.isValid());

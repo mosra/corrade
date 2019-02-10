@@ -40,7 +40,7 @@ Comparator<Compare::StringToFile>::Comparator(): _state(State::ReadError) {}
 bool Comparator<Compare::StringToFile>::operator()(const std::string& actualContents, const std::string& filename) {
     _filename = filename;
 
-    if(!Utility::Directory::fileExists(filename)) return false;
+    if(!Utility::Directory::exists(filename)) return false;
 
     _expectedContents = Utility::Directory::readString(filename);
     _actualContents = actualContents;

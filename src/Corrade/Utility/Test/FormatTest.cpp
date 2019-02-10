@@ -665,9 +665,9 @@ void FormatTest::insertToString() {
 
 void FormatTest::file() {
     const std::string filename = Directory::join(FORMAT_WRITE_TEST_DIR, "format.txt");
-    if(!Directory::fileExists(FORMAT_WRITE_TEST_DIR))
+    if(!Directory::exists(FORMAT_WRITE_TEST_DIR))
         CORRADE_VERIFY(Directory::mkpath(FORMAT_WRITE_TEST_DIR));
-    if(Directory::fileExists(filename))
+    if(Directory::exists(filename))
         CORRADE_VERIFY(Directory::rm(filename));
 
     {
@@ -685,9 +685,9 @@ void FormatTest::file() {
 #ifndef CORRADE_TARGET_EMSCRIPTEN
 void FormatTest::fileLongDouble() {
     const std::string filename = Directory::join(FORMAT_WRITE_TEST_DIR, "format-long-double.txt");
-    if(!Directory::fileExists(FORMAT_WRITE_TEST_DIR))
+    if(!Directory::exists(FORMAT_WRITE_TEST_DIR))
         CORRADE_VERIFY(Directory::mkpath(FORMAT_WRITE_TEST_DIR));
-    if(Directory::fileExists(filename))
+    if(Directory::exists(filename))
         CORRADE_VERIFY(Directory::rm(filename));
 
     {

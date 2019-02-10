@@ -151,11 +151,11 @@ bool mkpath(const std::string& path) {
         return mkpath(path.substr(0, path.size()-1));
 
     /* If the directory exists, done */
-    if(fileExists(path)) return true;
+    if(exists(path)) return true;
 
     /* If parent directory doesn't exist, create it */
     const std::string parentPath = Directory::path(path);
-    if(!parentPath.empty() && !fileExists(parentPath) && !mkpath(parentPath)) return false;
+    if(!parentPath.empty() && !exists(parentPath) && !mkpath(parentPath)) return false;
 
     /* Create directory, return true if successfully created or already exists */
 
@@ -207,7 +207,7 @@ bool move(const std::string& oldPath, const std::string& newPath) {
         == 0;
 }
 
-bool fileExists(const std::string& filename) {
+bool exists(const std::string& filename) {
     /* Sane platforms */
     #ifndef CORRADE_TARGET_WINDOWS
     return std::ifstream(filename).good();
@@ -219,7 +219,7 @@ bool fileExists(const std::string& filename) {
     /* Windows Store/Phone not implemented */
     #else
     static_cast<void>(filename);
-    Warning() << "Utility::Directory::fileExists(): not implemented on this platform";
+    Warning() << "Utility::Directory::exists(): not implemented on this platform";
     return false;
     #endif
 }
