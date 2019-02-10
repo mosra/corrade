@@ -28,3 +28,5 @@ package() {
     error "Clang Analyzer builds are not meant to be installed."
     exit 1
 }
+
+# kate: hl bash

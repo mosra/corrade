@@ -43,3 +43,5 @@ check() {
 package() {
     echo "Open file://$_rootdir/build-coverage/coverage/index.html to see the results." && false
 }
+
+# kate: hl bash

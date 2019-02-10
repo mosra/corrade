@@ -44,3 +44,5 @@ package() {
     cd "$_rootdir/build-emscripten-wasm"
     DESTDIR="$pkgdir/" ninja install
 }
+
+# kate: hl bash

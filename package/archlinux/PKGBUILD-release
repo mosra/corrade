@@ -49,3 +49,5 @@ package() {
     cd "$_rootdir/build-release"
     DESTDIR="$pkgdir/" ninja install/strip
 }
+
+# kate: hl bash

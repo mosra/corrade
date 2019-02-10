@@ -39,3 +39,5 @@ package() {
     cd "$_rootdir/build-android-arm64"
     DESTDIR="$pkgdir/" ninja install/strip
 }
+
+# kate: hl bash

@@ -43,3 +43,5 @@ package() {
     cd "$_rootdir/build-mingw-w64-64"
     DESTDIR="$pkgdir/" ninja install/strip
 }
+
+# kate: hl bash

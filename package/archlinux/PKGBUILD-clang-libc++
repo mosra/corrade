@@ -42,3 +42,5 @@ package() {
     cd "$_rootdir/build-clang-libc++"
     DESTDIR="$pkgdir/" ninja install
 }
+
+# kate: hl bash
