@@ -525,6 +525,29 @@ bool writeString(const std::string& filename, const std::string& data) {
     return write(filename, {data.data(), data.size()});
 }
 
+bool append(const std::string& filename, const Containers::ArrayView<const void> data) {
+    /* Special case for "Unicode" Windows support */
+    #ifndef CORRADE_TARGET_WINDOWS
+    std::FILE* const f = std::fopen(filename.data(), "ab");
+    #else
+    std::FILE* const f = _wfopen(widen(filename).data(), L"ab");
+    #endif
+    if(!f) {
+        Error{} << "Utility::Directory::append(): can't open" << filename;
+        return false;
+    }
+
+    Containers::ScopeGuard exit{f, std::fclose};
+
+    std::fwrite(data, 1, data.size(), f);
+    return true;
+}
+
+bool appendString(const std::string& filename, const std::string& data) {
+    static_assert(sizeof(std::string::value_type) == 1, "std::string doesn't have 8-bit characters");
+    return append(filename, {data.data(), data.size()});
+}
+
 #ifdef CORRADE_TARGET_UNIX
 void MapDeleter::operator()(const char* const data, const std::size_t size) {
     if(data && munmap(const_cast<char*>(data), size) == -1)

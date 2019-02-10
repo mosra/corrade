@@ -97,6 +97,12 @@ struct DirectoryTest: TestSuite::Tester {
     void writeNoPermission();
     void writeUtf8();
 
+    void append();
+    void appendToNonexistent();
+    void appendEmpty();
+    void appendNoPermission();
+    void appendUtf8();
+
     void map();
     void mapNoPermission();
     void mapUtf8();
@@ -168,6 +174,12 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::writeEmpty,
               &DirectoryTest::writeNoPermission,
               &DirectoryTest::writeUtf8,
+
+              &DirectoryTest::append,
+              &DirectoryTest::appendToNonexistent,
+              &DirectoryTest::appendEmpty,
+              &DirectoryTest::appendNoPermission,
+              &DirectoryTest::appendUtf8,
 
               &DirectoryTest::map,
               &DirectoryTest::mapNoPermission,

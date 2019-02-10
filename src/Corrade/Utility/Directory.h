@@ -294,7 +294,8 @@ inline CORRADE_DEPRECATED("use exists() instead") bool fileExists(const std::str
 Reads the whole file as binary (i.e. without newline conversion). Returns
 @cpp nullptr @ce and prints a message to @ref Error if the file can't be read.
 Expects that the filename is in UTF-8.
-@see @ref readString(), @ref exists(), @ref write(), @ref mapRead()
+@see @ref readString(), @ref exists(), @ref write(), @ref append(),
+    @ref mapRead()
 */
 CORRADE_UTILITY_EXPORT Containers::Array<char> read(const std::string& filename);
 
@@ -302,16 +303,17 @@ CORRADE_UTILITY_EXPORT Containers::Array<char> read(const std::string& filename)
 @brief Read file into a string
 
 Convenience overload for @ref read().
-@see @ref exists(), @ref writeString()
+@see @ref exists(), @ref writeString(), @ref append()
 */
 CORRADE_UTILITY_EXPORT std::string readString(const std::string& filename);
 
 /**
 @brief Write array into a file
 
-Writes the file as binary (i.e. without newline conversion). Returns
-@cpp false @ce and prints a message to @ref Error if the file can't be written,
-@cpp true @ce otherwise. Expects that the filename is in UTF-8.
+Writes the file as binary (i.e. without newline conversion). Existing files are
+overwritten, use @ref append() to append instead. Returns @cpp false @ce and
+prints a message to @ref Error if the file can't be written, @cpp true @ce
+otherwise. Expects that the filename is in UTF-8.
 @see @ref writeString(), @ref read(), @ref map()
 */
 CORRADE_UTILITY_EXPORT bool write(const std::string& filename, Containers::ArrayView<const void> data);
@@ -320,9 +322,27 @@ CORRADE_UTILITY_EXPORT bool write(const std::string& filename, Containers::Array
 @brief Write string into a file
 
 Convenience overload for @ref write().
-@see @ref write(), @ref readString()
+@see @ref readString(), @ref appendString()
 */
 CORRADE_UTILITY_EXPORT bool writeString(const std::string& filename, const std::string& data);
+
+/**
+@brief Append array into a file
+
+Appends to the file as binary (i.e. without newline conversion). Returns
+@cpp false @ce and prints a message to @ref Error if the file can't be written,
+@cpp true @ce otherwise. Expects that the filename is in UTF-8.
+@see @ref appendString(), @ref write(), @ref read(), @ref map()
+*/
+CORRADE_UTILITY_EXPORT bool append(const std::string& filename, Containers::ArrayView<const void> data);
+
+/**
+@brief Write string into file
+
+Convenience overload for @ref append().
+@see @ref writeString() @ref readString()
+*/
+CORRADE_UTILITY_EXPORT bool appendString(const std::string& filename, const std::string& data);
 
 #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
 /**

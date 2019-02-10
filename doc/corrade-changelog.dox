@@ -31,6 +31,14 @@ namespace Corrade {
 
 @section corrade-changelog-latest Changes since 2019.01
 
+@subsection corrade-changelog-latest-new New features
+
+@subsubsection corrade-changelog-latest-new-utility Utility library
+
+-   New @ref Utility::Directory::append() and
+    @ref Utility::Directory::appendString() counterparts to
+    @ref Utility::Directory::write()
+
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 
 -   @cpp Utility::Directory::fileExists() @ce is now deprecated in favor of
