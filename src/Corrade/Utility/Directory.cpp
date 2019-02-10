@@ -492,7 +492,7 @@ Containers::Array<char> read(const std::string& filename) {
     std::rewind(f);
 
     Containers::Array<char> out{size};
-    std::fread(out, 1, size, f);
+    CORRADE_INTERNAL_ASSERT(std::fread(out, 1, size, f) == size);
     return out;
 }
 
