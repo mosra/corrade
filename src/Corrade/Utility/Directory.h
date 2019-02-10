@@ -295,7 +295,7 @@ Reads the whole file as binary (i.e. without newline conversion). Returns
 @cpp nullptr @ce and prints a message to @ref Error if the file can't be read.
 Expects that the filename is in UTF-8.
 @see @ref readString(), @ref exists(), @ref write(), @ref append(),
-    @ref mapRead()
+    @ref copy(), @ref mapRead()
 */
 CORRADE_UTILITY_EXPORT Containers::Array<char> read(const std::string& filename);
 
@@ -303,7 +303,7 @@ CORRADE_UTILITY_EXPORT Containers::Array<char> read(const std::string& filename)
 @brief Read file into a string
 
 Convenience overload for @ref read().
-@see @ref exists(), @ref writeString(), @ref append()
+@see @ref exists(), @ref writeString(), @ref append(), @ref copy()
 */
 CORRADE_UTILITY_EXPORT std::string readString(const std::string& filename);
 
@@ -322,7 +322,7 @@ CORRADE_UTILITY_EXPORT bool write(const std::string& filename, Containers::Array
 @brief Write string into a file
 
 Convenience overload for @ref write().
-@see @ref readString(), @ref appendString()
+@see @ref readString(), @ref appendString(), @ref copy()
 */
 CORRADE_UTILITY_EXPORT bool writeString(const std::string& filename, const std::string& data);
 
@@ -332,7 +332,7 @@ CORRADE_UTILITY_EXPORT bool writeString(const std::string& filename, const std::
 Appends to the file as binary (i.e. without newline conversion). Returns
 @cpp false @ce and prints a message to @ref Error if the file can't be written,
 @cpp true @ce otherwise. Expects that the filename is in UTF-8.
-@see @ref appendString(), @ref write(), @ref read(), @ref map()
+@see @ref appendString(), @ref write(), @ref read(), @ref copy(), @ref map()
 */
 CORRADE_UTILITY_EXPORT bool append(const std::string& filename, Containers::ArrayView<const void> data);
 
@@ -340,9 +340,27 @@ CORRADE_UTILITY_EXPORT bool append(const std::string& filename, Containers::Arra
 @brief Write string into file
 
 Convenience overload for @ref append().
-@see @ref writeString() @ref readString()
+@see @ref writeString() @ref readString(), @ref copy()
 */
 CORRADE_UTILITY_EXPORT bool appendString(const std::string& filename, const std::string& data);
+
+/**
+@brief Copy a file
+
+Zero-allocation file copy with 128 kB block size. Does not work on
+directories. Returns @cpp false @ce and prints a message to @ref Error if
+@p from can't be read or @p to can't be written, @cpp true @ce otherwise.
+Expects that the filename is in UTF-8.
+
+Note that the following might be slightly faster on some systems where
+memory-mapping is supported and virtual memory is large enough for given file
+size:
+
+@snippet Utility.cpp Directory-copy-mmap
+
+@see @ref read(), @ref write(), @ref mapRead()
+*/
+CORRADE_UTILITY_EXPORT bool copy(const std::string& from, const std::string& to);
 
 #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
 /**

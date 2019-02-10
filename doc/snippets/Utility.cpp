@@ -29,9 +29,11 @@
 #include <map>
 #include <sstream>
 
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Configuration.h"
+#include "Corrade/Utility/Directory.h"
 #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include "Corrade/Utility/FileWatcher.h"
 #endif
@@ -385,6 +387,15 @@ if(stuff.broken())
     Utility::Fatal{42} << "Everything's broken, exiting.";
 /* [Fatal-Fatal] */
 }
+
+#if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+{
+std::string from, to;
+/* [Directory-copy-mmap] */
+Utility::Directory::write(to, Utility::Directory::mapRead(from));
+/* [Directory-copy-mmap] */
+}
+#endif
 
 {
 /* [formatString] */

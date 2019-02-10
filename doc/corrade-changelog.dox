@@ -38,6 +38,8 @@ namespace Corrade {
 -   New @ref Utility::Directory::append() and
     @ref Utility::Directory::appendString() counterparts to
     @ref Utility::Directory::write()
+-   New @ref Utility::Directory::copy() utility for zero-allocation file
+    copies.
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 

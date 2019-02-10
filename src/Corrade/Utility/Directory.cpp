@@ -548,6 +548,47 @@ bool appendString(const std::string& filename, const std::string& data) {
     return append(filename, {data.data(), data.size()});
 }
 
+bool copy(const std::string& from, const std::string& to) {
+    /* Special case for "Unicode" Windows support */
+    #ifndef CORRADE_TARGET_WINDOWS
+    std::FILE* const in = std::fopen(from.data(), "rb");
+    std::FILE* const out = std::fopen(to.data(), "wb");
+    #else
+    std::FILE* const in = _wfopen(widen(from).data(), L"rb");
+    std::FILE* const out = _wfopen(widen(to).data(), L"wb");
+    #endif
+    if(!in) {
+        Error{} << "Utility::Directory::copy(): can't open" << from;
+        return false;
+    }
+    if(!out) {
+        Error{} << "Utility::Directory::copy(): can't open" << to;
+        return false;
+    }
+
+    #if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
+    /* As noted in https://eklitzke.org/efficient-file-copying-on-linux, might
+       make the file reading faster. Didn't make any difference in the 100 MB
+       benchmark on my ultra-fast SSD, though. */
+    posix_fadvise(fileno(in), 0, 0, POSIX_FADV_SEQUENTIAL);
+    #endif
+
+    Containers::ScopeGuard exitIn{in, std::fclose};
+    Containers::ScopeGuard exitOut{out, std::fclose};
+
+    /* 128 kB: https://eklitzke.org/efficient-file-copying-on-linux. The 100 MB
+       benchmark agrees, going below is significantly slower and going above is
+       not any faster. */
+    char buffer[128*1024];
+    std::size_t count;
+    do {
+        count = std::fread(buffer, 1, Containers::arraySize(buffer), in);
+        std::fwrite(buffer, 1, count, out);
+    } while(count);
+
+    return true;
+}
+
 #ifdef CORRADE_TARGET_UNIX
 void MapDeleter::operator()(const char* const data, const std::size_t size) {
     if(data && munmap(const_cast<char*>(data), size) == -1)

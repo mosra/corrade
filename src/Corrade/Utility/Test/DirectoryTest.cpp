@@ -103,6 +103,22 @@ struct DirectoryTest: TestSuite::Tester {
     void appendNoPermission();
     void appendUtf8();
 
+    void prepareFileToCopy();
+    void copy();
+    void copyEmpty();
+    void copyNonexistent();
+    void copyNoPermission();
+    void copyUtf8();
+
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    void prepareFileToBenchmarkCopy();
+    void copy100MReadWrite();
+    void copy100MCopy();
+    #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    void copy100MMap();
+    #endif
+    #endif
+
     void map();
     void mapNoPermission();
     void mapUtf8();
@@ -179,9 +195,30 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::appendToNonexistent,
               &DirectoryTest::appendEmpty,
               &DirectoryTest::appendNoPermission,
-              &DirectoryTest::appendUtf8,
+              &DirectoryTest::appendUtf8});
 
-              &DirectoryTest::map,
+    addTests({&DirectoryTest::copy},
+             &DirectoryTest::prepareFileToCopy,
+             &DirectoryTest::prepareFileToCopy);
+
+    addTests({&DirectoryTest::copyEmpty,
+              &DirectoryTest::copyNonexistent,
+              &DirectoryTest::copyNoPermission,
+              &DirectoryTest::copyUtf8});
+
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    addBenchmarks({
+        &DirectoryTest::copy100MReadWrite,
+        &DirectoryTest::copy100MCopy,
+        #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+        &DirectoryTest::copy100MMap
+        #endif
+        }, 10,
+        &DirectoryTest::prepareFileToBenchmarkCopy,
+        &DirectoryTest::prepareFileToBenchmarkCopy);
+    #endif
+
+    addTests({&DirectoryTest::map,
               &DirectoryTest::mapNoPermission,
               &DirectoryTest::mapUtf8,
 
@@ -206,6 +243,10 @@ DirectoryTest::DirectoryTest() {
         _testDirUtf8 = DIRECTORY_TEST_DIR_UTF8;
         _writeTestDir = DIRECTORY_WRITE_TEST_DIR;
     }
+
+    /* Delete the file for copy tests to avoid using a stale version */
+    Directory::rm(Directory::join(_writeTestDir, "copySource.dat"));
+    Directory::rm(Directory::join(_writeTestDir, "copyBenchmarkSource.dat"));
 }
 
 void DirectoryTest::fromNativeSeparators() {
@@ -787,6 +828,172 @@ void DirectoryTest::writeUtf8() {
     CORRADE_COMPARE_AS(file, Directory::join(_testDirUtf8, "hýždě"),
         TestSuite::Compare::File);
 }
+
+void DirectoryTest::append() {
+    constexpr const char expected[]{'h', 'e', 'l', 'l', 'o', '\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'};
+
+    std::string file = Directory::join(_writeTestDir, "file");
+    if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
+    CORRADE_VERIFY(Directory::writeString(file, "hello"));
+
+    CORRADE_VERIFY(Directory::append(file, Data));
+    CORRADE_COMPARE_AS(file, (std::string{expected, Containers::arraySize(expected)}),
+        TestSuite::Compare::FileToString);
+
+    CORRADE_VERIFY(Directory::writeString(file, "hello"));
+
+    CORRADE_VERIFY(Directory::appendString(file, std::string{Data, Containers::arraySize(Data)}));
+    CORRADE_COMPARE_AS(file, (std::string{expected, Containers::arraySize(expected)}),
+        TestSuite::Compare::FileToString);
+}
+
+void DirectoryTest::appendToNonexistent() {
+    std::string file = Directory::join(_writeTestDir, "empty");
+
+    if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
+
+    CORRADE_VERIFY(Directory::appendString(file, "hello"));
+    CORRADE_COMPARE_AS(file, "hello",
+        TestSuite::Compare::FileToString);
+}
+
+void DirectoryTest::appendEmpty() {
+    std::string file = Directory::join(_writeTestDir, "empty");
+
+    if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
+    CORRADE_VERIFY(Directory::writeString(file, "hello"));
+
+    CORRADE_VERIFY(Directory::append(file, nullptr));
+    CORRADE_COMPARE_AS(file, "hello",
+        TestSuite::Compare::FileToString);
+}
+
+void DirectoryTest::appendNoPermission() {
+    std::ostringstream out;
+    {
+        Error redirectError{&out};
+        CORRADE_VERIFY(!Directory::append("/root/writtenFile", nullptr));
+    }
+    CORRADE_COMPARE(out.str(), "Utility::Directory::append(): can't open /root/writtenFile\n");
+}
+
+void DirectoryTest::appendUtf8() {
+    std::string file = Directory::join(_writeTestDir, "hýždě");
+
+    if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
+    CORRADE_VERIFY(Directory::append(file, Data));
+    CORRADE_COMPARE_AS(file, Directory::join(_testDirUtf8, "hýždě"),
+        TestSuite::Compare::File);
+}
+
+void DirectoryTest::prepareFileToCopy() {
+    if(Directory::exists(Directory::join(_writeTestDir, "copySource.dat")))
+        return;
+
+    Containers::Array<int> data{Containers::NoInit, 150000};
+    for(std::size_t i = 0; i != data.size(); ++i) data[i] = 4678641 + i;
+
+    Directory::write(Directory::join(_writeTestDir, "copySource.dat"), data);
+}
+
+void DirectoryTest::copy() {
+    CORRADE_VERIFY(Directory::exists(Directory::join(_writeTestDir, "copySource.dat")));
+
+    CORRADE_VERIFY(Directory::copy(
+        Directory::join(_writeTestDir, "copySource.dat"),
+        Directory::join(_writeTestDir, "copyDestination.dat")));
+
+    CORRADE_COMPARE_AS(
+        Directory::join(_writeTestDir, "copySource.dat"),
+        Directory::join(_writeTestDir, "copyDestination.dat"),
+        TestSuite::Compare::File);
+}
+
+void DirectoryTest::copyEmpty() {
+    std::string input = Directory::join(_testDir, "dir/dummy");
+    CORRADE_VERIFY(Directory::exists(input));
+
+    std::string output = Directory::join(_writeTestDir, "empty");
+    if(Directory::exists(output)) CORRADE_VERIFY(Directory::rm(output));
+    CORRADE_VERIFY(Directory::copy(input, output));
+    CORRADE_COMPARE_AS(output, "",
+        TestSuite::Compare::FileToString);
+}
+
+void DirectoryTest::copyNonexistent() {
+    std::ostringstream out;
+    {
+        Error redirectError{&out};
+        CORRADE_VERIFY(!Directory::copy("nonexistent", Directory::join(_writeTestDir, "empty")));
+    }
+    CORRADE_COMPARE(out.str(), "Utility::Directory::copy(): can't open nonexistent\n");
+}
+
+void DirectoryTest::copyNoPermission() {
+    std::ostringstream out;
+    {
+        Error err{&out};
+        CORRADE_VERIFY(!Directory::copy(Directory::join(_testDir, "dir/dummy"), "/root/writtenFile"));
+    }
+    CORRADE_COMPARE(out.str(), "Utility::Directory::copy(): can't open /root/writtenFile\n");
+}
+
+void DirectoryTest::copyUtf8() {
+    std::string output = Directory::join(_writeTestDir, "hýždě");
+
+    if(Directory::exists(output)) CORRADE_VERIFY(Directory::rm(output));
+
+    CORRADE_VERIFY(Directory::copy(Directory::join(_testDirUtf8, "hýždě"), output));
+    CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "hýždě"),
+        Directory::join(_testDirUtf8, "hýždě"),
+        TestSuite::Compare::File);
+}
+
+#ifndef CORRADE_TARGET_EMSCRIPTEN
+void DirectoryTest::prepareFileToBenchmarkCopy() {
+    if(Directory::exists(Directory::join(_writeTestDir, "copyBenchmarkSource.dat")))
+        return;
+
+    /* Append a megabyte file 100 times to create a 100MB file */
+    Containers::Array<int> data{Containers::ValueInit, 256*1024};
+    for(std::size_t i = 0; i != data.size(); ++i) data[i] = 4678641 + i;
+
+    for(std::size_t i = 0; i != 100; ++i)
+        Directory::append(Directory::join(_writeTestDir, "copyBenchmarkSource.dat"), data);
+}
+
+void DirectoryTest::copy100MReadWrite() {
+    std::string input = Directory::join(_writeTestDir, "copyBenchmarkSource.dat");
+    std::string output = Directory::join(_writeTestDir, "copyDestination.dat");
+    CORRADE_VERIFY(Directory::exists(input));
+    if(Directory::exists(output)) CORRADE_VERIFY(Directory::rm(output));
+
+    CORRADE_BENCHMARK(1)
+        Directory::write(output, Directory::read(input));
+}
+
+void DirectoryTest::copy100MCopy() {
+    std::string input = Directory::join(_writeTestDir, "copyBenchmarkSource.dat");
+    std::string output = Directory::join(_writeTestDir, "copyDestination.dat");
+    CORRADE_VERIFY(Directory::exists(input));
+    if(Directory::exists(output)) CORRADE_VERIFY(Directory::rm(output));
+
+    CORRADE_BENCHMARK(1)
+        Directory::copy(input, output);
+}
+
+#if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+void DirectoryTest::copy100MMap() {
+    std::string input = Directory::join(_writeTestDir, "copyBenchmarkSource.dat");
+    std::string output = Directory::join(_writeTestDir, "copyDestination.dat");
+    CORRADE_VERIFY(Directory::exists(input));
+    if(Directory::exists(output)) CORRADE_VERIFY(Directory::rm(output));
+
+    CORRADE_BENCHMARK(1)
+        Directory::write(output, Directory::mapRead(input));
+}
+#endif
+#endif
 
 void DirectoryTest::map() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
