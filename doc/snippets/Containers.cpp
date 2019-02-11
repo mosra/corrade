@@ -484,7 +484,6 @@ for(Object* i = list.first(); i; i = i->next()) {
 #endif
 {
 Object *item, *before;
-Containers::LinkedList<Object> list;
 /* [LinkedList-move] */
 if(item != before) {
     list.cut(item);
@@ -535,6 +534,7 @@ auto b = Containers::optional<std::string>('a', 'b');
 /* [ScopeGuard-usage] */
 #endif
 
+{
 /* [ScopeGuard-lambda] */
 FILE* f{};
 
@@ -548,6 +548,7 @@ FILE* f{};
 
 // f is nullptr again
 /* [ScopeGuard-lambda] */
+}
 
 /* [ScopeGuard-returning-lambda] */
 {

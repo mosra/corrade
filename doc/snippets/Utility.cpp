@@ -197,6 +197,7 @@ int main(int argc, char** argv) {
 /* [Arguments-usage] */
 
 void another(int argc, char** argv) {
+{
 /* [Arguments-delegating] */
 {
     /* The underlying library */
@@ -214,6 +215,7 @@ args.addArgument("text").setHelp("text", "the text to print")
     .setHelp("Repeats the text given number of times.")
     .parse(argc, argv);
 /* [Arguments-delegating] */
+}
 
 {
 /* [Arguments-delegating-bool] */
@@ -590,8 +592,6 @@ enum class Bar {
 };
 /* [CORRADE_DEPRECATED_ENUM] */
 
-}
-
 int foo(int, int);
 /* [CORRADE_UNUSED] */
 int foo(int a, CORRADE_UNUSED int b) {
@@ -607,3 +607,5 @@ void exit42();
 /* [CORRADE_NORETURN] */
 CORRADE_NORETURN void exit42() { std::exit(42); }
 /* [CORRADE_NORETURN] */
+
+}

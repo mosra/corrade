@@ -45,6 +45,7 @@ class Postman: public Interconnect::Emitter {
 };
 /* [Emitter-signals] */
 
+{
 /* [Emitter-emit] */
 Postman postman;
 postman.messageDelivered("hello");
@@ -62,6 +63,7 @@ c.disconnect();
 c.connect();
 // ...
 /* [Emitter-connect] */
+}
 
 #if defined(__GNUC__) || defined( __clang__)
 #pragma GCC diagnostic push
