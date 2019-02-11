@@ -616,7 +616,13 @@ void DirectoryTest::tmp() {
 
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
     CORRADE_VERIFY(Directory::exists(dir));
+    #ifndef __MINGW32__
     CORRADE_VERIFY(dir.find("Temp") != std::string::npos);
+    #else
+    /* MinGW shell maps temp to a different directory, e.g. C:/msys64/tmp, so
+       check for both */
+    CORRADE_VERIFY(dir.find("Temp") != std::string::npos || dir.find("tmp") != std::string::npos);
+    #endif
 
     /* On Windows it also shouldn't contain backslashes */
     CORRADE_COMPARE(dir.find('\\'), std::string::npos);
