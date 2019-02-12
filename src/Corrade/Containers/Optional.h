@@ -69,10 +69,10 @@ constexpr NullOptT NullOpt{NullOptT::Init{}};
 /**
 @brief Lightweight optional value
 
-Equivalent to `std::optional` from C++17, provides an optional checked storage
-for object of type @p T. The optional object can be seen as a container of @p T
-objects with maximal size 1 and can be in two states, either empty or having a
-value. A non-allocating counterpart to @ref Pointer.
+Equivalent to @ref std::optional from C++17, provides an optional checked
+storage for object of type @p T. The optional object can be seen as a container
+of @p T objects with maximal size 1 and can be in two states, either empty or
+having a value. A non-allocating counterpart to @ref Pointer.
 
 A common use for an optional object is for a return value of function that can
 fail --- like @ref Pointer, but without the unnecessary allocation overhead.
@@ -81,14 +81,14 @@ Similarly to @ref Pointer, the presence of an object can be checked using
 @ref operator->(), @ref operator*() or using implicit conversion, while attempt
 to access a stored object in an empty state leads to assertion error.
 
-Unlike `std::optional`, this class does not provide a @cpp constexpr @ce
+Unlike @ref std::optional, this class does not provide a @cpp constexpr @ce
 implementation or ordering operators, which makes it fairly simple and
-lightweight. If you need the extra features, use the standard `std::optional`.
+lightweight. If you need the extra features, use the standard @ref std::optional.
 
 @section Containers-Optional-stl STL compatibility
 
 Instances of @ref Optional are *explicitly* copy- and move-convertible to and
-from @cpp std::optional @ce if you include @ref Corrade/Containers/OptionalStl.h
+from @ref std::optional if you include @ref Corrade/Containers/OptionalStl.h
 and build your code with C++17 enabled. The conversion is provided in a
 separate header to avoid unconditional @cpp #include <optional> @ce, which
 significantly affects compile times. Additionally, the @ref optional(T&&)

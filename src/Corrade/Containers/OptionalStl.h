@@ -29,7 +29,7 @@
 @brief STL compatibility for @ref Corrade::Containers::Optional
 
 Including this header allows you to *explicitly* convert between
-@ref Corrade::Containers::Optional and @cpp std::optional @ce using copy / move
+@ref Corrade::Containers::Optional and @ref std::optional using copy / move
 construction and assignment. See @ref Containers-Optional-stl for more
 information.
 */

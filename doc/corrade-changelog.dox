@@ -92,7 +92,7 @@ Released 2019-02-04, tagged as
 -   Added r-value overloads to @ref Containers::Optional::operator*() allowing
     you to easily take the value out of a r-value optional
 -   Opt-in STL compatibility for @ref Containers::Optional, allowing for
-    explicit conversion from and to @cpp std::optional @ce in C++17.
+    explicit conversion from and to @ref std::optional in C++17
 -   New @ref Containers::arrayCast(StridedArrayView<T>) overload for casting
     strided array views
 
@@ -479,7 +479,7 @@ a high-level overview.
 -   New @ref Containers::StaticArrayView class, similar to @ref Containers::ArrayView
     but with compile-time size information
 -   New @ref Containers::Optional class, providing a subset of functionality
-    from C++17 `std::optional` (see [mosra/corrade#36](https://github.com/mosra/corrade/pull/36))
+    from C++17 @ref std::optional (see [mosra/corrade#36](https://github.com/mosra/corrade/pull/36))
 -   Added @ref Containers::NoInit, @ref Containers::DirectInit,
     @ref Containers::DefaultInit, @ref Containers::ValueInit and
     @ref Containers::InPlaceInit tags for better control over initialization of

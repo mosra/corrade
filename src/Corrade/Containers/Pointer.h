@@ -51,8 +51,8 @@ namespace Implementation {
 Equivalent to @ref std::unique_ptr from C++11, provides an owning move-only
 wrapper over a pointer of type @p T, calling @cpp delete @ce on it on
 destruction. The @ref pointer() convenience function also provides an
-equivalent for C++14 @cpp std::make_unique() @ce, but on C++11 as well. Can be
-also thought of as a heap-allocated counterpart to @ref Optional.
+equivalent for C++14 @ref std::make_unique(), but on C++11 as well. Can be also
+thought of as a heap-allocated counterpart to @ref Optional.
 
 Unlike @ref std::unique_ptr, this class does not provide custom deleters,
 doesn't work with arrays and doesn't have a @cpp constexpr @ce API. On the
@@ -349,8 +349,9 @@ namespace Implementation {
 /** @relatesalso Pointer
 @brief Make a unique pointer
 
-Convenience alternative to @ref Pointer::Pointer(InPlaceInitT, Args&&... args).
-The following two lines are equivalent:
+Convenience alternative to @ref Pointer::Pointer(InPlaceInitT, Args&&... args),
+similar to @ref std::make_unique() from C++14. The following two lines are
+equivalent:
 
 @snippet Containers.cpp pointer-inplace
 
