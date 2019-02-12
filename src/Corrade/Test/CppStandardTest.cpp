@@ -53,13 +53,21 @@ void CppStandardTest::test() {
     Debug{} << "Standard version using CORRADE_CXX_STANDARD:" << CORRADE_CXX_STANDARD;
 
     #ifdef COMPILING_AS_CPP11
-    CORRADE_COMPARE_AS(CORRADE_CXX_STANDARD, 201103L, TestSuite::Compare::GreaterOrEqual);
+    {
+        #ifdef _MSC_VER
+        CORRADE_EXPECT_FAIL("MSVC always compiles at least as C++14");
+        #endif
+        CORRADE_COMPARE(CORRADE_CXX_STANDARD, 201103L);
+    }
+    #ifdef _MSC_VER
+    CORRADE_COMPARE(CORRADE_CXX_STANDARD, 201402L);
+    #endif
     #elif defined(COMPILING_AS_CPP14)
-    CORRADE_COMPARE_AS(CORRADE_CXX_STANDARD, 201402L, TestSuite::Compare::GreaterOrEqual);
+    CORRADE_COMPARE(CORRADE_CXX_STANDARD, 201402L);
     #elif defined(COMPILING_AS_CPP17)
-    CORRADE_COMPARE_AS(CORRADE_CXX_STANDARD, 201703L, TestSuite::Compare::GreaterOrEqual);
+    CORRADE_COMPARE(CORRADE_CXX_STANDARD, 201703L);
     #else
-    #error no standard version macro passed from buildsystem
+    #error no standard version macro passed from the buildsystem
     #endif
 }
 
