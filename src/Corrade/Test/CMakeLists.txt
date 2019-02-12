@@ -49,14 +49,14 @@ endif()
 # Test for C++17:
 # - GCC reports proper __cplusplus since 7.0 (see
 #   https://gcc.gnu.org/gcc-7/changes.html#cxx)
-# - Clang reports proper __cplusplus since 5.0 (tested manually, no idea about
-#   AppleClang)
+# - Clang reports proper __cplusplus since 5.0 (https://releases.llvm.org/5.0.0/tools/clang/docs/ReleaseNotes.html#id1)
+# - AppleClang 9.3 is equivalent to 5.0.2 (https://en.wikipedia.org/wiki/Xcode#Latest_versions)
 # - MSVC since 2017
 # This same expression is used in doc/snippets/CMakeLists.txt and
 # src/Corrade/Containers/Test/CMakeLists.txt, please keep in sync.
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0") OR
    (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0") OR
-  #(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0") OR
+   (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.3") OR
    (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10"))
     corrade_add_test(Cpp17StandardTest CppStandardTest.cpp)
     set_target_properties(Cpp17StandardTest PROPERTIES

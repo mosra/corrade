@@ -40,10 +40,9 @@ target_link_libraries(snippets PRIVATE CorradeUtility)
 set_target_properties(snippets PROPERTIES FOLDER "Corrade/doc/snippets")
 
 # Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
-# (especially for AppleClang)
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0") OR
    (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0") OR
-  #(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0") OR
+   (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.3") OR
    (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10"))
     add_library(snippets-cpp17 STATIC
         Containers-stl17.cpp)
