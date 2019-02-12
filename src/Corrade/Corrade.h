@@ -79,9 +79,10 @@ Expands to `__cplusplus` macro on all sane compilers; on MSVC uses `_MSVC_LANG`
 if defined (since Visual Studio 2015 Update 3), otherwise reports C++11. The
 returned version is:
 
--   @cpp 201703 @ce when C++17 is used
--   @cpp 201402 @ce when C++14 is used
 -   @cpp 201103 @ce when C++11 is used
+-   @cpp 201402 @ce when C++14 is used
+-   @cpp 201703 @ce when C++17 is used
+-   greater than @cpp 201703 @ce when C++2a is used
 */
 #define CORRADE_CXX_STANDARD
 #undef CORRADE_CXX_STANDARD

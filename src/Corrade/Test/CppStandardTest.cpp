@@ -41,6 +41,8 @@ CppStandardTest::CppStandardTest() {
     setTestName("Cpp14StandardTest");
     #elif defined(COMPILING_AS_CPP17)
     setTestName("Cpp17StandardTest");
+    #elif defined(COMPILING_AS_CPP2A)
+    setTestName("Cpp2aStandardTest");
     #else
     #error no standard version macro passed from buildsystem
     #endif
@@ -66,6 +68,9 @@ void CppStandardTest::test() {
     CORRADE_COMPARE(CORRADE_CXX_STANDARD, 201402L);
     #elif defined(COMPILING_AS_CPP17)
     CORRADE_COMPARE(CORRADE_CXX_STANDARD, 201703L);
+    #elif defined(COMPILING_AS_CPP2A)
+    CORRADE_COMPARE_AS(CORRADE_CXX_STANDARD, 201703L,
+        TestSuite::Compare::Greater);
     #else
     #error no standard version macro passed from the buildsystem
     #endif

@@ -63,3 +63,19 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERS
         CORRADE_CXX_STANDARD 17
         COMPILE_DEFINITIONS COMPILING_AS_CPP17)
 endif()
+
+# Test for C++2a (__cplusplus larger than for C++17):
+# - GCC knows -std=c++2a since 8.0 (see
+#   https://gcc.gnu.org/gcc-8/changes.html#cxx)
+# - Clang knows -std=c++2a since 6.0 (https://releases.llvm.org/6.0.0/tools/clang/docs/ReleaseNotes.html#c-language-changes-in-clang)
+# - AppleClang 10.0 is equivalent to 6.0 (https://en.wikipedia.org/wiki/Xcode#Latest_versions)
+# - MSVC uses /std:c++latest for C++20 since 2017 19.15 (source?)
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.0") OR
+   (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "6.0") OR
+   (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0") OR
+   (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.15"))
+    corrade_add_test(Cpp2aStandardTest CppStandardTest.cpp)
+    set_target_properties(Cpp2aStandardTest PROPERTIES
+        CORRADE_CXX_STANDARD 20
+        COMPILE_DEFINITIONS COMPILING_AS_CPP2A)
+endif()

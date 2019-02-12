@@ -41,6 +41,13 @@ namespace Corrade {
 -   New @ref Utility::Directory::copy() utility for zero-allocation file
     copies.
 
+@subsection corrade-changelog-latest-buildsystem Build system
+
+-   The @ref CORRADE_CXX_STANDARD preprocessor macro learned support for the
+    upcoming C++2a standard. The equivalent CMake property can now be set to
+    @cpp 20 @ce to pass the `-std=c++2a` flag to GCC and Clang and
+    `/std:c++latest` to MSVC.
+
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 
 -   @cpp Utility::Directory::fileExists() @ce is now deprecated in favor of
