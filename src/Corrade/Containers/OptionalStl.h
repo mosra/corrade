@@ -38,7 +38,7 @@ information.
 
 #include "Corrade/Containers/Optional.h"
 
-/* Listing these namespaces doesn't anything to the docs, so don't */
+/* Listing these namespaces doesn't add anything to the docs, so don't */
 #ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Corrade { namespace Containers { namespace Implementation {
 

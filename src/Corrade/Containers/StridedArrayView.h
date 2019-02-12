@@ -75,7 +75,7 @@ template<class T> class StridedArrayView {
         constexpr /*implicit*/ StridedArrayView() noexcept: _data{}, _size{}, _stride{} {}
 
         /**
-         * @brief Construct view on an array with explicit length
+         * @brief Construct a view on an array with explicit length
          * @param data      Data pointer
          * @param size      Data size
          * @param stride    Data stride
@@ -83,7 +83,7 @@ template<class T> class StridedArrayView {
         constexpr /*implicit*/ StridedArrayView(T* data, std::size_t size, std::size_t stride) noexcept: _data{data}, _size{size}, _stride{stride} {}
 
         /**
-         * @brief Construct view on a fixed-size array
+         * @brief Construct a view on a fixed-size array
          * @param data      Fixed-size array
          *
          * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
@@ -100,7 +100,7 @@ template<class T> class StridedArrayView {
         }
 
         /**
-         * @brief Construct view on @ref StridedArrayView
+         * @brief Construct a view on @ref StridedArrayView
          *
          * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
          * Expects that both types have the same size.
@@ -115,7 +115,7 @@ template<class T> class StridedArrayView {
         }
 
         /**
-         * @brief Construct view on @ref ArrayView
+         * @brief Construct a view on @ref ArrayView
          *
          * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
          * Expects that both types have the same size; stride is implicitly set
@@ -131,7 +131,7 @@ template<class T> class StridedArrayView {
         }
 
         /**
-         * @brief Construct view on @ref StaticArrayView
+         * @brief Construct a view on @ref StaticArrayView
          *
          * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
          * Expects that both types have the same size; stride is implicitly set
