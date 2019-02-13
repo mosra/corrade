@@ -364,7 +364,10 @@ void PointerTest::convert() {
     CORRADE_COMPARE(*d, 72);
 
     /* Conversion from a different type is not allowed */
+    CORRADE_VERIFY((std::is_constructible<Pointer<int>, IntPtr>::value));
     CORRADE_VERIFY(!(std::is_constructible<Pointer<float>, IntPtr>::value));
+    CORRADE_VERIFY((std::is_constructible<IntPtr, Pointer<int>>::value));
+    CORRADE_VERIFY(!(std::is_constructible<IntPtr, Pointer<float>>::value));
 
     /* Non-move conversion is not allowed */
     CORRADE_VERIFY((std::is_convertible<IntPtr&&, Pointer<int>>::value));

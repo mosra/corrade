@@ -248,7 +248,10 @@ void ReferenceTest::convert() {
     CORRADE_COMPARE(*cd.a, 3);
 
     /* Conversion from a different type is not allowed */
-    CORRADE_VERIFY(!(std::is_constructible<Reference<const float>, IntRef>::value));
+    CORRADE_VERIFY((std::is_convertible<Reference<const int>, IntRef>::value));
+    CORRADE_VERIFY(!(std::is_convertible<Reference<const float>, IntRef>::value));
+    CORRADE_VERIFY((std::is_convertible<IntRef, Reference<const int>>::value));
+    CORRADE_VERIFY(!(std::is_convertible<IntRef, Reference<const float>>::value));
 }
 
 void ReferenceTest::convertToReference() {

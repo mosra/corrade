@@ -510,7 +510,10 @@ void OptionalTest::convertCopy() {
     CORRADE_COMPARE(*d, 35);
 
     /* Conversion from a different type is not allowed */
+    CORRADE_VERIFY((std::is_constructible<Optional<int>, MaybeInt>::value));
     CORRADE_VERIFY(!(std::is_constructible<Optional<float>, MaybeInt>::value));
+    CORRADE_VERIFY((std::is_constructible<MaybeInt, Optional<int>>::value));
+    CORRADE_VERIFY(!(std::is_constructible<MaybeInt, Optional<float>>::value));
 
     /* Implicit conversion is not allowed */
     CORRADE_VERIFY(!(std::is_convertible<const MaybeInt&, Optional<int>>::value));
@@ -540,12 +543,16 @@ void OptionalTest::convertMove() {
     CORRADE_COMPARE(**d, 17);
 
     /* Conversion from a different type is not allowed */
+    CORRADE_VERIFY((std::is_constructible<Optional<int*>, MaybePtr&&>::value));
     CORRADE_VERIFY(!(std::is_constructible<Optional<float*>, MaybePtr&&>::value));
+    CORRADE_VERIFY((std::is_constructible<MaybePtr, Optional<int*>&&>::value));
+    CORRADE_VERIFY(!(std::is_constructible<MaybePtr, Optional<float*>&&>::value));
 
     /* Copy construction is not allowed */
-    CORRADE_VERIFY((std::is_constructible<Optional<int*>, MaybePtr&&>::value));
+    CORRADE_VERIFY(!(std::is_constructible<Optional<int*>, MaybePtr&>::value));
     CORRADE_VERIFY(!(std::is_constructible<Optional<int*>, const MaybePtr&>::value));
-    /** @todo how to check for explicit convertibility?? */
+    CORRADE_VERIFY(!(std::is_constructible<MaybePtr, Optional<int*>&>::value));
+    CORRADE_VERIFY(!(std::is_constructible<MaybePtr, const Optional<int*>&>::value));
 
     /* Implicit conversion is not allowed */
     CORRADE_VERIFY(!(std::is_convertible<MaybePtr&&, Optional<int*>>::value));
