@@ -146,6 +146,18 @@ template<class T> class StridedArrayView {
             static_assert(sizeof(U) == sizeof(T), "type sizes are not compatible");
         }
 
+        /**
+         * @brief Construct a view from an external view representation
+         */
+        /* There's no restriction that would disallow creating StridedArrayView
+           from e.g. std::vector<T>&& because that would break uses like
+           `consume(foo());`, where `consume()` expects a view but `foo()`
+           returns a std::vector. Besides that, there's no
+           StaticArrayViewConverter overload as we wouldn't be able to infer
+           the size parameter. Since ArrayViewConverter is supposed to handle
+           conversion from statically sized arrays as well, this is okay. */
+        template<class U, class = decltype(Implementation::ArrayViewConverter<T, typename std::decay<U&&>::type>::from(std::declval<U&&>()))> constexpr /*implicit*/ StridedArrayView(U&& other) noexcept: StridedArrayView{Implementation::ArrayViewConverter<T, typename std::decay<U&&>::type>::from(std::forward<U>(other))} {}
+
         /** @brief Whether the array is non-empty */
         constexpr explicit operator bool() const { return _data; }
 

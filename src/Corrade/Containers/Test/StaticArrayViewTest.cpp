@@ -28,7 +28,55 @@
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test { namespace {
+namespace {
+
+struct IntView5 {
+    explicit IntView5(int* data): data{data} {}
+
+    int* data;
+};
+
+struct ConstIntView5 {
+    constexpr explicit ConstIntView5(const int* data): data{data} {}
+
+    const int* data;
+};
+
+}
+
+namespace Corrade { namespace Containers {
+
+namespace Implementation {
+
+template<> struct StaticArrayViewConverter<5, const int, ConstIntView5> {
+    constexpr static StaticArrayView<5, const int> from(ConstIntView5 other) {
+        return StaticArrayView<5, const int>{other.data};
+    }
+
+    constexpr static ConstIntView5 to(StaticArrayView<5, const int> other) {
+        return ConstIntView5{other.data()};
+    }
+};
+
+template<> struct ErasedStaticArrayViewConverter<ConstIntView5>: StaticArrayViewConverter<5, const int, ConstIntView5> {};
+template<> struct ErasedStaticArrayViewConverter<const ConstIntView5>: StaticArrayViewConverter<5, const int, ConstIntView5> {};
+
+/* To keep the ArrayView API in reasonable bounds, the cost-adding variants
+   have to be implemented explicitly */
+template<> struct StaticArrayViewConverter<5, const int, IntView5> {
+    static StaticArrayView<5, const int> from(IntView5 other) {
+        return StaticArrayView<5, const int>{other.data};
+    }
+};
+template<> struct StaticArrayViewConverter<5, int, ConstIntView5> {
+    static ConstIntView5 to(StaticArrayView<5, int> other) {
+        return ConstIntView5{other.data()};
+    }
+};
+
+}
+
+namespace Test { namespace {
 
 struct StaticArrayViewTest: TestSuite::Tester {
     explicit StaticArrayViewTest();
@@ -43,6 +91,9 @@ struct StaticArrayViewTest: TestSuite::Tester {
     void convertPointer();
     void convertConst();
     void convertVoid();
+    void convertExternalView();
+    void convertConstFromExternalView();
+    void convertToConstExternalView();
 
     void access();
     void accessConst();
@@ -74,6 +125,9 @@ StaticArrayViewTest::StaticArrayViewTest() {
               &StaticArrayViewTest::convertPointer,
               &StaticArrayViewTest::convertConst,
               &StaticArrayViewTest::convertVoid,
+              &StaticArrayViewTest::convertExternalView,
+              &StaticArrayViewTest::convertConstFromExternalView,
+              &StaticArrayViewTest::convertToConstExternalView,
 
               &StaticArrayViewTest::access,
               &StaticArrayViewTest::accessConst,
@@ -275,6 +329,77 @@ void StaticArrayViewTest::convertVoid() {
     VoidArrayView ccc = ccb;
     CORRADE_VERIFY(ccc == ccb);
     CORRADE_COMPARE(ccc.size(), 13*sizeof(int));
+}
+
+void StaticArrayViewTest::convertExternalView() {
+    const int data[]{1, 2, 3, 4, 5};
+    ConstIntView5 a{data};
+    CORRADE_COMPARE(a.data, data);
+
+    ConstStaticArrayView<5> b = a;
+    CORRADE_COMPARE(b.data(), data);
+    CORRADE_COMPARE(b.size(), 5);
+
+    ConstIntView5 c = b;
+    CORRADE_COMPARE(c.data, data);
+
+    auto d = staticArrayView(c);
+    CORRADE_VERIFY((std::is_same<decltype(d), Containers::StaticArrayView<5, const int>>::value));
+    CORRADE_COMPARE(d.data(), data);
+    CORRADE_COMPARE(d.size(), 5);
+
+    constexpr ConstIntView5 ca{Array13};
+    CORRADE_COMPARE(ca.data, Array13);
+
+    constexpr ConstStaticArrayView<5> cb = ca;
+    CORRADE_COMPARE(cb.data(), Array13);
+    CORRADE_COMPARE(cb.size(), 5);
+
+    constexpr ConstIntView5 cc = cb;
+    CORRADE_COMPARE(cc.data, Array13);
+
+    constexpr auto cd = staticArrayView(cc);
+    CORRADE_VERIFY((std::is_same<decltype(cd), const Containers::StaticArrayView<5, const int>>::value));
+    CORRADE_COMPARE(cd.data(), Array13);
+    CORRADE_COMPARE(cd.size(), 5);
+
+    /* Conversion to a different size or type is not allowed */
+    CORRADE_VERIFY((std::is_convertible<ConstIntView5, Containers::StaticArrayView<5, const int>>::value));
+    CORRADE_VERIFY(!(std::is_convertible<ConstIntView5, Containers::StaticArrayView<6, const int>>::value));
+    CORRADE_VERIFY(!(std::is_convertible<ConstIntView5, Containers::StaticArrayView<5, const float>>::value));
+    CORRADE_VERIFY((std::is_convertible<Containers::StaticArrayView<5, const int>, ConstIntView5>::value));
+    CORRADE_VERIFY(!(std::is_convertible<Containers::StaticArrayView<6, const int>, ConstIntView5>::value));
+    CORRADE_VERIFY(!(std::is_convertible<Containers::StaticArrayView<5, const float>, ConstIntView5>::value));
+}
+
+void StaticArrayViewTest::convertConstFromExternalView() {
+    int data[]{1, 2, 3, 4, 5};
+    IntView5 a{data};
+    CORRADE_COMPARE(a.data, +data);
+
+    ConstStaticArrayView<5> b = a;
+    CORRADE_COMPARE(b.data(), data);
+    CORRADE_COMPARE(b.size(), 5);
+
+    /* Conversion from a different size or type is not allowed */
+    CORRADE_VERIFY((std::is_convertible<IntView5, Containers::StaticArrayView<5, const int>>::value));
+    CORRADE_VERIFY(!(std::is_convertible<IntView5, Containers::StaticArrayView<6, const int>>::value));
+    CORRADE_VERIFY(!(std::is_convertible<IntView5, Containers::StaticArrayView<5, const float>>::value));
+}
+
+void StaticArrayViewTest::convertToConstExternalView() {
+    int data[]{1, 2, 3, 4, 5};
+    StaticArrayView<5> a = data;
+    CORRADE_COMPARE(a.data(), +data);
+    CORRADE_COMPARE(a.size(), 5);
+
+    ConstIntView5 b = a;
+    CORRADE_COMPARE(b.data, data);
+
+    /* Conversion to a different size or type is not allowed */
+    CORRADE_VERIFY((std::is_convertible<Containers::StaticArrayView<5, int>, ConstIntView5>::value));
+    CORRADE_VERIFY(!(std::is_convertible<Containers::StaticArrayView<6, int>, ConstIntView5>::value));
+    CORRADE_VERIFY(!(std::is_convertible<Containers::StaticArrayView<5, float>, ConstIntView5>::value));
 }
 
 /* Needs to be here in order to use it in constexpr */

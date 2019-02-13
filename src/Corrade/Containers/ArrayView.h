@@ -37,6 +37,11 @@
 
 namespace Corrade { namespace Containers {
 
+namespace Implementation {
+    template<class, class> struct ArrayViewConverter;
+    template<class> struct ErasedArrayViewConverter;
+}
+
 /**
 @brief Array view with size information
 
@@ -129,6 +134,27 @@ template<class T> class ArrayView {
         #endif
         constexpr /*implicit*/ ArrayView(StaticArrayView<size, U> view) noexcept: _data{view}, _size{size} {
             static_assert(sizeof(U) == sizeof(T), "type sizes are not compatible");
+        }
+
+        /**
+         * @brief Construct a view on an external type / from an external representation
+         */
+        /* There's no restriction that would disallow creating ArrayView from
+           e.g. std::vector<T>&& because that would break uses like
+           `consume(foo());`, where `consume()` expects a view but `foo()`
+           returns a std::vector. Besides that, to simplify the implementation,
+           there's no const-adding conversion. Instead, the implementer is
+           supposed to add an ArrayViewConverter variant for that. */
+        template<class U, class = decltype(Implementation::ArrayViewConverter<T, typename std::decay<U&&>::type>::from(std::declval<U&&>()))> constexpr /*implicit*/ ArrayView(U&& other) noexcept: ArrayView{Implementation::ArrayViewConverter<T, typename std::decay<U&&>::type>::from(std::forward<U>(other))} {}
+
+        /**
+         * @brief Convert the view to external representation
+         */
+        /* To simplify the implementation, there's no const-adding conversion.
+           Instead, the implementer is supposed to add an ArrayViewConverter
+           variant for that. */
+        template<class U, class = decltype(Implementation::ArrayViewConverter<T, U>::to(std::declval<ArrayView<T>>()))> constexpr /*implicit*/ operator U() const {
+            return Implementation::ArrayViewConverter<T, U>::to(*this);
         }
 
         #ifndef CORRADE_MSVC2017_COMPATIBILITY
@@ -315,6 +341,15 @@ template<> class ArrayView<const void> {
         /** @brief Construct const void view on any @ref StaticArrayView */
         template<std::size_t size, class T> constexpr /*implicit*/ ArrayView(const StaticArrayView<size, T>& array) noexcept: _data{array}, _size{size*sizeof(T)} {}
 
+        /**
+         * @brief Construct a view on an external type
+         */
+        /* There's no restriction that would disallow creating ArrayView from
+           e.g. std::vector<T>&& because that would break uses like
+           `consume(foo());`, where `consume()` expects a view but `foo()`
+           returns a std::vector. */
+        template<class T, class = decltype(Implementation::ErasedArrayViewConverter<const T>::from(std::declval<const T&>()))> constexpr /*implicit*/ ArrayView(const T& other) noexcept: ArrayView{Implementation::ErasedArrayViewConverter<const T>::from(other)} {}
+
         #ifndef CORRADE_MSVC2017_COMPATIBILITY
         /** @brief Whether the array is non-empty */
         /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
@@ -386,6 +421,16 @@ template<class T> constexpr ArrayView<T> arrayView(ArrayView<T> view) {
 }
 
 /** @relatesalso ArrayView
+@brief Make a view on an external type / from an external representation
+*/
+/* There's no restriction that would disallow creating ArrayView from
+   e.g. std::vector<T>&& because that would break uses like `consume(foo());`,
+   where `consume()` expects a view but `foo()` returns a std::vector. */
+template<class T, class U = decltype(Implementation::ErasedArrayViewConverter<typename std::remove_reference<T&&>::type>::from(std::declval<T&&>()))> constexpr U arrayView(T&& other) {
+    return Implementation::ErasedArrayViewConverter<typename std::remove_reference<T&&>::type>::from(std::forward<T>(other));
+}
+
+/** @relatesalso ArrayView
 @brief Reinterpret-cast an array view
 
 Size of the new array is calculated as @cpp view.size()*sizeof(T)/sizeof(U) @ce.
@@ -422,6 +467,11 @@ template<std::size_t size_, class T> constexpr std::size_t arraySize(StaticArray
 /** @overload */
 template<std::size_t size_, class T> constexpr std::size_t arraySize(T(&)[size_]) {
     return size_;
+}
+
+namespace Implementation {
+    template<std::size_t, class, class> struct StaticArrayViewConverter;
+    template<class> struct ErasedStaticArrayViewConverter;
 }
 
 /**
@@ -497,6 +547,28 @@ template<std::size_t size_, class T> class StaticArrayView {
         #endif
         constexpr /*implicit*/ StaticArrayView(StaticArrayView<size_, U> view) noexcept: _data{view} {
             static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
+        }
+
+        /**
+         * @brief Construct a view on an external type / from an external representation
+         */
+        /* There's no restriction that would disallow creating ArrayView from
+           e.g. std::vector<T>&& because that would break uses like
+           `consume(foo());`, where `consume()` expects a view but `foo()`
+           returns a std::vector. Besides that, to simplify the implementation,
+           there's no const-adding conversion. Instead, the implementer is
+           supposed to add a StaticArrayViewConverter variant for that. */
+        template<class U, class = decltype(Implementation::StaticArrayViewConverter<size_, T, typename std::decay<U&&>::type>::from(std::declval<U&&>()))> constexpr /*implicit*/ StaticArrayView(U&& other) noexcept: StaticArrayView{Implementation::StaticArrayViewConverter<size_, T, typename std::decay<U&&>::type>::from(std::forward<U>(other))} {}
+
+        /**
+         * @brief Convert the view to external representation
+         */
+        /* To simplify the implementation, there's no ArrayViewConverter
+           overload. Instead, the implementer is supposed to extend
+           StaticArrayViewConverter specializations for the non-static arrays
+           as well. The same goes for const-adding conversions. */
+        template<class U, class = decltype(Implementation::StaticArrayViewConverter<size_, T, U>::to(std::declval<StaticArrayView<size_, T>>()))> constexpr /*implicit*/ operator U() const {
+            return Implementation::StaticArrayViewConverter<size_, T, U>::to(*this);
         }
 
         #ifndef CORRADE_MSVC2017_COMPATIBILITY
@@ -630,6 +702,16 @@ shouldn't be an error to call @ref staticArrayView() on itself.
 */
 template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArrayView(StaticArrayView<size, T> view) {
     return view;
+}
+
+/** @relatesalso StaticArrayView
+@brief Make a static view on an external type / from an external representation
+*/
+/* There's no restriction that would disallow creating StaticArrayView from
+   e.g. std::array<T>&& because that would break uses like `consume(foo());`,
+   where `consume()` expects a view but `foo()` returns a std::array. */
+template<class T, class U = decltype(Implementation::ErasedStaticArrayViewConverter<typename std::remove_reference<T&&>::type>::from(std::declval<T&&>()))> constexpr U staticArrayView(T&& other) {
+    return Implementation::ErasedStaticArrayViewConverter<typename std::remove_reference<T&&>::type>::from(std::forward<T>(other));
 }
 
 /** @relatesalso StaticArrayView

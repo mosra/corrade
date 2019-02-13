@@ -28,7 +28,51 @@
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test { namespace {
+namespace {
+
+struct IntView {
+    IntView(int* data, std::size_t size): data{data}, size{size} {}
+
+    int* data;
+    std::size_t size;
+};
+
+struct ConstIntView {
+    constexpr ConstIntView(const int* data, std::size_t size): data{data}, size{size} {}
+
+    const int* data;
+    std::size_t size;
+};
+
+}
+
+namespace Corrade { namespace Containers {
+
+namespace Implementation {
+
+template<> struct ArrayViewConverter<int, IntView> {
+    static ArrayView<int> from(IntView other) {
+        return {other.data, other.size};
+    }
+};
+
+template<> struct ArrayViewConverter<const int, ConstIntView> {
+    constexpr static ArrayView<const int> from(ConstIntView other) {
+        return {other.data, other.size};
+    }
+};
+
+/* To keep the (Strided)ArrayView API in reasonable bounds, the cost-adding
+   variants have to be implemented explicitly */
+template<> struct ArrayViewConverter<const int, IntView> {
+    static ArrayView<const int> from(IntView other) {
+        return {other.data, other.size};
+    }
+};
+
+}
+
+namespace Test { namespace {
 
 struct StridedArrayViewTest: TestSuite::Tester {
     explicit StridedArrayViewTest();
@@ -44,6 +88,8 @@ struct StridedArrayViewTest: TestSuite::Tester {
 
     void convertBool();
     void convertConst();
+    void convertFromExternalView();
+    void convertConstFromExternalView();
 
     void emptyCheck();
     void access();
@@ -74,6 +120,8 @@ StridedArrayViewTest::StridedArrayViewTest() {
 
               &StridedArrayViewTest::convertBool,
               &StridedArrayViewTest::convertConst,
+              &StridedArrayViewTest::convertFromExternalView,
+              &StridedArrayViewTest::convertConstFromExternalView,
 
               &StridedArrayViewTest::emptyCheck,
               &StridedArrayViewTest::access,
@@ -294,6 +342,44 @@ void StridedArrayViewTest::convertConst() {
     CORRADE_VERIFY(c.data() == a);
     CORRADE_COMPARE(c.size(), 3);
     CORRADE_COMPARE(c.stride(), 4);
+}
+
+void StridedArrayViewTest::convertFromExternalView() {
+    int data[]{1, 2, 3, 4, 5};
+    IntView a{data, 5};
+    CORRADE_COMPARE(a.data, &data[0]);
+    CORRADE_COMPARE(a.size, 5);
+
+    StridedArrayView b = a;
+    CORRADE_COMPARE(b.data(), +data);
+    CORRADE_COMPARE(b.size(), 5);
+
+    constexpr ConstIntView ca{Array, 10};
+    CORRADE_COMPARE(ca.data, Array);
+    CORRADE_COMPARE(ca.size, 10);
+
+    constexpr ConstStridedArrayView cb = ca;
+    CORRADE_COMPARE(cb.data(), Array);
+    CORRADE_COMPARE(cb.size(), 10);
+
+    /* Conversion from a different type is not allowed */
+    CORRADE_VERIFY((std::is_convertible<IntView, Containers::StridedArrayView<int>>::value));
+    CORRADE_VERIFY(!(std::is_convertible<IntView, Containers::StridedArrayView<float>>::value));
+}
+
+void StridedArrayViewTest::convertConstFromExternalView() {
+    int data[]{1, 2, 3, 4, 5};
+    IntView a{data, 5};
+    CORRADE_COMPARE(a.data, +data);
+    CORRADE_COMPARE(a.size, 5);
+
+    ConstStridedArrayView b = a;
+    CORRADE_COMPARE(b.data(), data);
+    CORRADE_COMPARE(b.size(), 5);
+
+    /* Conversion to a different type is not allowed */
+    CORRADE_VERIFY((std::is_convertible<IntView, Containers::StridedArrayView<const int>>::value));
+    CORRADE_VERIFY(!(std::is_convertible<IntView, Containers::StridedArrayView<const float>>::value));
 }
 
 void StridedArrayViewTest::emptyCheck() {

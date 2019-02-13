@@ -28,7 +28,43 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test { namespace {
+namespace {
+
+struct IntView {
+    IntView(int* data, std::size_t size): data{data}, size{size} {}
+
+    int* data;
+    std::size_t size;
+};
+
+struct ConstIntView {
+    ConstIntView(const int* data, std::size_t size): data{data}, size{size} {}
+
+    const int* data;
+    std::size_t size;
+};
+
+}
+
+namespace Corrade { namespace Containers {
+
+namespace Implementation {
+
+template<> struct ArrayViewConverter<int, IntView> {
+    static IntView to(ArrayView<int> other) {
+        return {other.data(), other.size()};
+    }
+};
+
+template<> struct ArrayViewConverter<const int, ConstIntView> {
+    static ConstIntView to(ArrayView<const int> other) {
+        return {other.data(), other.size()};
+    }
+};
+
+}
+
+namespace Test { namespace {
 
 struct ArrayTest: TestSuite::Tester {
     explicit ArrayTest();
@@ -51,6 +87,8 @@ struct ArrayTest: TestSuite::Tester {
     void convertView();
     void convertViewDerived();
     void convertVoid();
+    void convertToExternalView();
+    void convertToConstExternalView();
 
     void emptyCheck();
     void access();
@@ -98,6 +136,8 @@ ArrayTest::ArrayTest() {
               &ArrayTest::convertView,
               &ArrayTest::convertViewDerived,
               &ArrayTest::convertVoid,
+              &ArrayTest::convertToExternalView,
+              &ArrayTest::convertToConstExternalView,
 
               &ArrayTest::emptyCheck,
               &ArrayTest::access,
@@ -354,6 +394,36 @@ void ArrayTest::convertVoid() {
     CORRADE_VERIFY(cb == ca);
     CORRADE_COMPARE(b.size(), a.size()*sizeof(int));
     CORRADE_COMPARE(cb.size(), ca.size()*sizeof(int));
+}
+
+void ArrayTest::convertToExternalView() {
+    Array a{InPlaceInit, {1, 2, 3, 4, 5}};
+
+    IntView b = a;
+    CORRADE_COMPARE(b.data, a);
+    CORRADE_COMPARE(b.size, a.size());
+
+    ConstIntView cb = a;
+    CORRADE_COMPARE(cb.data, a);
+    CORRADE_COMPARE(cb.size, a.size());
+
+    /* Conversion to a different type is not allowed */
+    CORRADE_VERIFY((std::is_convertible<Containers::Array<int>, IntView>::value));
+    CORRADE_VERIFY((std::is_convertible<Containers::Array<int>, ConstIntView>::value));
+    CORRADE_VERIFY(!(std::is_convertible<Containers::Array<float>, IntView>::value));
+    CORRADE_VERIFY(!(std::is_convertible<Containers::Array<float>, ConstIntView>::value));
+}
+
+void ArrayTest::convertToConstExternalView() {
+    const Array a{InPlaceInit, {1, 2, 3, 4, 5}};
+
+    ConstIntView b = a;
+    CORRADE_COMPARE(b.data, a);
+    CORRADE_COMPARE(b.size, a.size());
+
+    /* Conversion to a different type is not allowed */
+    CORRADE_VERIFY((std::is_convertible<const Containers::Array<int>, ConstIntView>::value));
+    CORRADE_VERIFY(!(std::is_convertible<const Containers::Array<float>, ConstIntView>::value));
 }
 
 void ArrayTest::emptyCheck() {

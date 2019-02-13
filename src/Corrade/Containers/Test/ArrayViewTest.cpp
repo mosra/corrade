@@ -28,7 +28,66 @@
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test { namespace {
+namespace {
+
+struct IntView {
+    IntView(int* data, std::size_t size): data{data}, size{size} {}
+
+    int* data;
+    std::size_t size;
+};
+
+struct ConstIntView {
+    constexpr ConstIntView(const int* data, std::size_t size): data{data}, size{size} {}
+
+    const int* data;
+    std::size_t size;
+};
+
+}
+
+namespace Corrade { namespace Containers {
+
+namespace Implementation {
+
+template<> struct ArrayViewConverter<int, IntView> {
+    /* Needed only by convertVoidFromExternalView() */
+    static ArrayView<int> from(IntView other) {
+        return {other.data, other.size};
+    }
+};
+
+template<> struct ErasedArrayViewConverter<const IntView>: ArrayViewConverter<int, IntView> {};
+
+template<> struct ArrayViewConverter<const int, ConstIntView> {
+    constexpr static ArrayView<const int> from(ConstIntView other) {
+        return {other.data, other.size};
+    }
+
+    constexpr static ConstIntView to(ArrayView<const int> other) {
+        return {other.data(), other.size()};
+    }
+};
+
+template<> struct ErasedArrayViewConverter<ConstIntView>: ArrayViewConverter<const int, ConstIntView> {};
+template<> struct ErasedArrayViewConverter<const ConstIntView>: ArrayViewConverter<const int, ConstIntView> {};
+
+/* To keep the ArrayView API in reasonable bounds, the cost-adding variants
+   have to be implemented explicitly */
+template<> struct ArrayViewConverter<const int, IntView> {
+    static ArrayView<const int> from(IntView other) {
+        return {other.data, other.size};
+    }
+};
+template<> struct ArrayViewConverter<int, ConstIntView> {
+    constexpr static ConstIntView to(ArrayView<int> other) {
+        return {other.data(), other.size()};
+    }
+};
+
+}
+
+namespace Test { namespace {
 
 struct ArrayViewTest: TestSuite::Tester {
     explicit ArrayViewTest();
@@ -48,6 +107,11 @@ struct ArrayViewTest: TestSuite::Tester {
     void convertPointer();
     void convertConst();
     void convertVoid();
+    void convertExternalView();
+    void convertConstFromExternalView();
+    void convertToConstExternalView();
+    void convertVoidFromExternalView();
+    void convertVoidFromConstExternalView();
 
     void emptyCheck();
     void access();
@@ -88,6 +152,11 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::convertPointer,
               &ArrayViewTest::convertConst,
               &ArrayViewTest::convertVoid,
+              &ArrayViewTest::convertExternalView,
+              &ArrayViewTest::convertConstFromExternalView,
+              &ArrayViewTest::convertToConstExternalView,
+              &ArrayViewTest::convertVoidFromExternalView,
+              &ArrayViewTest::convertVoidFromConstExternalView,
 
               &ArrayViewTest::emptyCheck,
               &ArrayViewTest::access,
@@ -440,6 +509,101 @@ void ArrayViewTest::convertVoid() {
     constexpr VoidArrayView ccg = ccf;
     CORRADE_VERIFY(ccg == ccf);
     CORRADE_COMPARE(ccg.size(), ccf.size()*sizeof(int));
+}
+
+void ArrayViewTest::convertExternalView() {
+    const int data[]{1, 2, 3, 4, 5};
+    ConstIntView a{data, 5};
+    CORRADE_COMPARE(a.data, data);
+    CORRADE_COMPARE(a.size, 5);
+
+    ConstArrayView b = a;
+    CORRADE_COMPARE(b.data(), data);
+    CORRADE_COMPARE(b.size(), 5);
+
+    ConstIntView c = b;
+    CORRADE_COMPARE(c.data, data);
+    CORRADE_COMPARE(c.size, 5);
+
+    auto d = arrayView(c);
+    CORRADE_VERIFY((std::is_same<decltype(d), Containers::ArrayView<const int>>::value));
+    CORRADE_COMPARE(d.data(), data);
+    CORRADE_COMPARE(d.size(), 5);
+
+    constexpr ConstIntView ca{Array13, 13};
+    CORRADE_COMPARE(ca.data, Array13);
+    CORRADE_COMPARE(ca.size, 13);
+
+    constexpr ConstArrayView cb = ca;
+    CORRADE_COMPARE(cb.data(), Array13);
+    CORRADE_COMPARE(cb.size(), 13);
+
+    constexpr ConstIntView cc = cb;
+    CORRADE_COMPARE(cc.data, Array13);
+    CORRADE_COMPARE(cc.size, 13);
+
+    constexpr auto cd = arrayView(cc);
+    CORRADE_VERIFY((std::is_same<decltype(cd), const Containers::ArrayView<const int>>::value));
+    CORRADE_COMPARE(cd.data(), Array13);
+    CORRADE_COMPARE(cd.size(), 13);
+
+    /* Conversion from/to a different type is not allowed */
+    CORRADE_VERIFY((std::is_convertible<ConstIntView, Containers::ArrayView<const int>>::value));
+    CORRADE_VERIFY(!(std::is_convertible<ConstIntView, Containers::ArrayView<const float>>::value));
+    CORRADE_VERIFY((std::is_convertible<Containers::ArrayView<const int>, ConstIntView>::value));
+    CORRADE_VERIFY(!(std::is_convertible<Containers::ArrayView<const float>, ConstIntView>::value));
+}
+
+void ArrayViewTest::convertConstFromExternalView() {
+    int data[]{1, 2, 3, 4, 5};
+    IntView a{data, 5};
+    CORRADE_COMPARE(a.data, +data);
+    CORRADE_COMPARE(a.size, 5);
+
+    ConstArrayView b = a;
+    CORRADE_COMPARE(b.data(), data);
+    CORRADE_COMPARE(b.size(), 5);
+
+    /* Conversion from a different type is not allowed */
+    CORRADE_VERIFY((std::is_convertible<IntView, Containers::ArrayView<const int>>::value));
+    CORRADE_VERIFY(!(std::is_convertible<IntView, Containers::ArrayView<const float>>::value));
+}
+
+void ArrayViewTest::convertToConstExternalView() {
+    int data[]{1, 2, 3, 4, 5};
+    ArrayView a = data;
+    CORRADE_COMPARE(a.data(), +data);
+    CORRADE_COMPARE(a.size(), 5);
+
+    ConstIntView b = a;
+    CORRADE_COMPARE(b.data, data);
+    CORRADE_COMPARE(b.size, 5);
+
+    /* Conversion to a different type is not allowed */
+    CORRADE_VERIFY((std::is_convertible<Containers::ArrayView<int>, ConstIntView>::value));
+    CORRADE_VERIFY(!(std::is_convertible<Containers::ArrayView<float>, ConstIntView>::value));
+}
+
+void ArrayViewTest::convertVoidFromExternalView() {
+    int data[]{1, 2, 3, 4, 5};
+    IntView a{data, 5};
+    CORRADE_COMPARE(a.data, +data);
+    CORRADE_COMPARE(a.size, 5);
+
+    VoidArrayView b = a;
+    CORRADE_COMPARE(b.data(), data);
+    CORRADE_COMPARE(b.size(), 5*4);
+}
+
+void ArrayViewTest::convertVoidFromConstExternalView() {
+    const int data[]{1, 2, 3, 4, 5};
+    ConstIntView a{data, 5};
+    CORRADE_COMPARE(a.data, +data);
+    CORRADE_COMPARE(a.size, 5);
+
+    VoidArrayView b = a;
+    CORRADE_COMPARE(b.data(), data);
+    CORRADE_COMPARE(b.size(), 5*4);
 }
 
 void ArrayViewTest::emptyCheck() {

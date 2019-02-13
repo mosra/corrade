@@ -256,8 +256,24 @@ template<std::size_t size_, class T> class StaticArray {
             return StaticArrayView<size_, const U>{_data};
         }
 
-        /* `char* a = Containers::Array<char>(5); a[3] = 5;` would result in
-           instant segfault, disallowing it in the following conversion
+        /**
+         * @brief Convert to external view representation
+         */
+        /* To simplify the implementation, there's no ArrayViewConverter
+           overload. Instead, the implementer is supposed to extend
+           StaticArrayViewConverter specializations for the non-static arrays
+           as well. */
+        template<class U, class = decltype(Implementation::StaticArrayViewConverter<size_, T, U>::to(std::declval<StaticArrayView<size_, T>>()))> /*implicit*/ operator U() {
+            return Implementation::StaticArrayViewConverter<size_, T, U>::to(*this);
+        }
+
+        /** @overload */
+        template<class U, class = decltype(Implementation::StaticArrayViewConverter<size_, const T, U>::to(std::declval<StaticArrayView<size_, const T>>()))> constexpr /*implicit*/ operator U() const {
+            return Implementation::StaticArrayViewConverter<size_, const T, U>::to(*this);
+        }
+
+        /* `char* a = Containers::StaticArray<char>(5); a[3] = 5;` would result
+           in instant segfault, disallowing it in the following conversion
            operators */
 
         /** @brief Conversion to array type */

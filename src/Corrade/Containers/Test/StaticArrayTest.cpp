@@ -26,7 +26,41 @@
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/TestSuite/Tester.h"
 
-namespace Corrade { namespace Containers { namespace Test { namespace {
+namespace {
+
+struct IntView5 {
+    explicit IntView5(int* data): data{data} {}
+
+    int* data;
+};
+
+struct ConstIntView5 {
+    explicit ConstIntView5(const int* data): data{data} {}
+
+    const int* data;
+};
+
+}
+
+namespace Corrade { namespace Containers {
+
+namespace Implementation {
+
+template<> struct StaticArrayViewConverter<5, int, IntView5> {
+    static IntView5 to(StaticArrayView<5, int> other) {
+        return IntView5{other.data()};
+    }
+};
+
+template<> struct StaticArrayViewConverter<5, const int, ConstIntView5> {
+    static ConstIntView5 to(StaticArrayView<5, const int> other) {
+        return ConstIntView5{other.data()};
+    }
+};
+
+}
+
+namespace Test { namespace {
 
 struct StaticArrayTest: TestSuite::Tester {
     explicit StaticArrayTest();
@@ -48,6 +82,8 @@ struct StaticArrayTest: TestSuite::Tester {
     void convertStaticView();
     void convertStaticViewDerived();
     void convertVoid();
+    void convertToExternalView();
+    void convertToConstExternalView();
 
     void access();
     void accessConst();
@@ -88,6 +124,8 @@ StaticArrayTest::StaticArrayTest() {
               &StaticArrayTest::convertStaticView,
               &StaticArrayTest::convertStaticViewDerived,
               &StaticArrayTest::convertVoid,
+              &StaticArrayTest::convertToExternalView,
+              &StaticArrayTest::convertToConstExternalView,
 
               &StaticArrayTest::access,
               &StaticArrayTest::accessConst,
@@ -391,6 +429,36 @@ void StaticArrayTest::convertVoid() {
     CORRADE_VERIFY(cb == ca);
     CORRADE_COMPARE(b.size(), 5*sizeof(int));
     CORRADE_COMPARE(cb.size(), 5*sizeof(int));
+}
+
+void StaticArrayTest::convertToExternalView() {
+    StaticArray a{1, 2, 3, 4, 5};
+
+    IntView5 b = a;
+    CORRADE_COMPARE(b.data, a.data());
+
+    ConstIntView5 cb = a;
+    CORRADE_COMPARE(cb.data, a.data());
+
+    /* Conversion to a different size or type is not allowed */
+    CORRADE_VERIFY((std::is_convertible<Containers::StaticArray<5, int>, IntView5>::value));
+    CORRADE_VERIFY((std::is_convertible<Containers::StaticArray<5, int>, ConstIntView5>::value));
+    CORRADE_VERIFY(!(std::is_convertible<Containers::StaticArray<6, int>, IntView5>::value));
+    CORRADE_VERIFY(!(std::is_convertible<Containers::StaticArray<6, int>, ConstIntView5>::value));
+    CORRADE_VERIFY(!(std::is_convertible<Containers::StaticArray<5, float>, IntView5>::value));
+    CORRADE_VERIFY(!(std::is_convertible<Containers::StaticArray<5, float>, ConstIntView5>::value));
+}
+
+void StaticArrayTest::convertToConstExternalView() {
+    const StaticArray a{1, 2, 3, 4, 5};
+
+    ConstIntView5 b = a;
+    CORRADE_COMPARE(b.data, a.data());
+
+    /* Conversion to a different size or type is not allowed */
+    CORRADE_VERIFY((std::is_convertible<const Containers::StaticArray<5, int>, ConstIntView5>::value));
+    CORRADE_VERIFY(!(std::is_convertible<const Containers::StaticArray<6, int>, ConstIntView5>::value));
+    CORRADE_VERIFY(!(std::is_convertible<const Containers::StaticArray<5, float>, ConstIntView5>::value));
 }
 
 void StaticArrayTest::access() {

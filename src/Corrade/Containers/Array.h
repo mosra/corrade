@@ -256,6 +256,18 @@ class Array {
         /** @brief Move assignment */
         Array<T, D>& operator=(Array<T, D>&&) noexcept;
 
+        /**
+         * @brief Convert to external view representation
+         */
+        template<class U, class = decltype(Implementation::ArrayViewConverter<T, U>::to(std::declval<ArrayView<T>>()))> /*implicit*/ operator U() {
+            return Implementation::ArrayViewConverter<T, U>::to(*this);
+        }
+
+        /** @overload */
+        template<class U, class = decltype(Implementation::ArrayViewConverter<const T, U>::to(std::declval<ArrayView<const T>>()))> constexpr /*implicit*/ operator U() const {
+            return Implementation::ArrayViewConverter<const T, U>::to(*this);
+        }
+
         #ifndef CORRADE_MSVC2017_COMPATIBILITY
         /** @brief Whether the array is non-empty */
         /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
