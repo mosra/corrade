@@ -33,6 +33,17 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-new New features
 
+@subsubsection corrade-changelog-latest-new-containers Containers library
+
+-   Opt-in STL compatibility for @ref Containers::ArrayView,
+    @ref Containers::StaticArrayView and @ref Containers::StridedArrayView
+    classes, allowing them to be implicitly converted from @ref std::vector and
+    @ref std::array
+-   Opt-in STL compatibility for @ref Containers::Array,
+    @ref Containers::ArrayView, @ref Containers::StaticArray,
+    @ref Containers::StaticArrayView and @ref Containers::StridedArrayView
+    allowing them to be implicitly converted to/from C++2a @cpp std::span @ce
+
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
 -   New @ref Utility::Directory::append() and

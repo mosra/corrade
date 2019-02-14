@@ -52,6 +52,19 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERS
         FOLDER "Corrade/doc/snippets")
 endif()
 
+# Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.0") OR
+   (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "6.0") OR
+   (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0") OR
+   (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.15"))
+    add_library(snippets-cpp2a STATIC
+        Containers-stl2a.cpp)
+    target_link_libraries(snippets-cpp2a PRIVATE CorradeUtility)
+    set_target_properties(snippets-cpp2a PROPERTIES
+        CORRADE_CXX_STANDARD 20
+        FOLDER "Corrade/doc/snippets")
+endif()
+
 if(WITH_INTERCONNECT)
     add_library(snippets-Interconnect STATIC Interconnect.cpp)
     target_link_libraries(snippets-Interconnect PRIVATE CorradeInterconnect)

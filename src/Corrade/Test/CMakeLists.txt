@@ -70,6 +70,8 @@ endif()
 # - Clang knows -std=c++2a since 6.0 (https://releases.llvm.org/6.0.0/tools/clang/docs/ReleaseNotes.html#c-language-changes-in-clang)
 # - AppleClang 10.0 is equivalent to 6.0 (https://en.wikipedia.org/wiki/Xcode#Latest_versions)
 # - MSVC uses /std:c++latest for C++20 since 2017 19.15 (source?)
+# This same expression is used in doc/snippets/CMakeLists.txt and
+# src/Corrade/Containers/Test/CMakeLists.txt, please keep in sync.
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.0") OR
    (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "6.0") OR
    (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0") OR

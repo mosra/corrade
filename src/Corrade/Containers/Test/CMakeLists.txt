@@ -25,6 +25,7 @@
 
 corrade_add_test(ContainersArrayTest ArrayTest.cpp)
 corrade_add_test(ContainersArrayViewTest ArrayViewTest.cpp)
+corrade_add_test(ContainersArrayViewStlTest ArrayViewStlTest.cpp)
 corrade_add_test(ContainersEnumSetTest EnumSetTest.cpp)
 corrade_add_test(ContainersLinkedListTest LinkedListTest.cpp)
 corrade_add_test(ContainersOptionalTest OptionalTest.cpp)
@@ -35,6 +36,7 @@ corrade_add_test(ContainersReferenceStlTest ReferenceStlTest.cpp)
 corrade_add_test(ContainersScopeGuardTest ScopeGuardTest.cpp)
 corrade_add_test(ContainersStaticArrayTest StaticArrayTest.cpp)
 corrade_add_test(ContainersStaticArrayViewTest StaticArrayViewTest.cpp)
+corrade_add_test(ContainersStaticArrayViewStlTest StaticArrayViewStlTest.cpp)
 corrade_add_test(ContainersStridedArrayViewTest StridedArrayViewTest.cpp)
 corrade_add_test(ContainersTagsTest TagsTest.cpp)
 
@@ -42,6 +44,7 @@ set_property(TARGET
     ContainersLinkedListTest
     ContainersArrayTest
     ContainersArrayViewTest
+    ContainersArrayViewStlTest
     ContainersOptionalTest
     ContainersPointerTest
     ContainersStaticArrayViewTest
@@ -72,5 +75,24 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERS
     corrade_add_test(ContainersOptionalStlTest OptionalStlTest.cpp)
     set_target_properties(ContainersOptionalStlTest PROPERTIES
         CORRADE_CXX_STANDARD 17
+        FOLDER "Corrade/Containers/Test")
+endif()
+
+# Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.0") OR
+   (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "6.0") OR
+   (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0") OR
+   (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.15"))
+    corrade_add_test(ContainersArrayStlSpanTest ArrayStlSpanTest.cpp)
+    corrade_add_test(ContainersArrayViewStlSpanTest ArrayViewStlSpanTest.cpp)
+    corrade_add_test(ContainersStaticArrayStlSpanTest StaticArrayStlSpanTest.cpp)
+    corrade_add_test(ContainersStaticArrayViewStlSpanTest StaticArrayViewStlSpanTest.cpp)
+    set_target_properties(
+        ContainersArrayStlSpanTest
+        ContainersArrayViewStlSpanTest
+        ContainersStaticArrayStlSpanTest
+        ContainersStaticArrayViewStlSpanTest
+        PROPERTIES
+        CORRADE_CXX_STANDARD 20
         FOLDER "Corrade/Containers/Test")
 endif()

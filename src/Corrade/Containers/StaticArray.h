@@ -75,6 +75,24 @@ Example:
 @snippet Containers.cpp StaticArray-initialization
 
 @see @ref arrayCast(StaticArray<size, T>&)
+
+@section Containers-StaticArray-stl STL compatibility
+
+On compilers that support C++2a and @cpp std::span @ce, implicit conversion of
+an @ref StaticArray to it is provided in @ref Corrade/Containers/ArrayViewStlSpan.h.
+The conversion is provided in a separate header to avoid unconditional
+@cpp #include <span> @ce, which significantly affects compile times. The
+following table lists allowed conversions:
+
+Corrade type                    | ↭ | STL type
+------------------------------- | - | ---------------------
+@ref StaticArray "StaticArray<size, T>" | → | @cpp std::span<T, size> @ce <b></b>
+@ref StaticArray "StaticArray<size, T>" | → | @cpp std::span<const T, size> @ce <b></b>
+@ref StaticArray "const StaticArray<size, T>" | → | @cpp std::span<const T, size> @ce <b></b>
+
+There are some dangerous corner cases due to the way @cpp std::span @ce is
+designed, see @ref Containers-ArrayView-stl "ArrayView STL compatibility" for
+more information.
 */
 /* Underscore at the end to avoid conflict with member size(). It's ugly, but
    having count instead of size_ would make the naming horribly inconsistent. */
@@ -258,6 +276,8 @@ template<std::size_t size_, class T> class StaticArray {
 
         /**
          * @brief Convert to external view representation
+         *
+         * @see @ref Containers-Array-stl
          */
         /* To simplify the implementation, there's no ArrayViewConverter
            overload. Instead, the implementer is supposed to extend

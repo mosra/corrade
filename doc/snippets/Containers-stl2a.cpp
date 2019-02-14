@@ -23,43 +23,48 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/Containers/ArrayViewStl.h"
-#include "Corrade/Containers/PointerStl.h"
-#include "Corrade/Containers/ReferenceStl.h"
+#include "Corrade/Corrade.h"
+#if __has_include(<span>)
+#include "Corrade/Containers/ArrayViewStlSpan.h"
+#endif
 
 using namespace Corrade;
 
 int main() {
+#if __has_include(<span>)
 {
 /* [ArrayView] */
-std::vector<int> a;
-
+std::span<int> a;
 Containers::ArrayView<int> b = a;
+
+float c[3]{42.0f, 13.37f, -25.0f};
+std::span<float, 3> d = Containers::staticArrayView(c);
 /* [ArrayView] */
 static_cast<void>(b);
-}
-
-{
-/* [Pointer] */
-std::unique_ptr<int> a{new int{5}};
-Containers::Pointer<int> b = std::move(a);
-
-std::unique_ptr<int> c = Containers::pointer<int>(12);
-
-auto d = Containers::pointer(std::unique_ptr<int>{new int{5}});
-        // d is Containers::Pointer<int>
-/* [Pointer] */
-}
-
-{
-/* [Reference] */
-int a = 1337;
-Containers::Reference<int> b = a;
-
-std::reference_wrapper<int> c = b;
-Containers::Reference<const int> d = std::cref(a);
-/* [Reference] */
-static_cast<void>(c);
 static_cast<void>(d);
 }
+
+{
+int data[3]{};
+/* [ArrayView-stupid-span] */
+std::span<int> a;
+std::span<int, 3> b{data};
+Containers::ArrayView<int> c = a;               // correct
+Containers::ArrayView<int> d = b;               // correct
+//Containers::StaticArrayView<3, int> e = a;    // correctly doesn't compile
+Containers::StaticArrayView<3, int> f = b;      // correct
+//Containers::StaticArrayView<4, int> g = b;    // correctly doesn't compile
+
+std::span<int> i = c;                           // correct
+std::span<int, 3> j = c;                        // incorrectly compiles, UB :(
+std::span<int, 3> k = f;                        // correct
+std::span<int, 4> l = f;                        // incorrectly compiles, UB :(
+/* [ArrayView-stupid-span] */
+static_cast<void>(d);
+static_cast<void>(i);
+static_cast<void>(j);
+static_cast<void>(k);
+static_cast<void>(l);
+}
+#endif
 }

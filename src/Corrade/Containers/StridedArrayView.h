@@ -54,6 +54,24 @@ following two statements are equivalent:
 Unlike @ref ArrayView, this wrapper doesn't provide direct pointer access
 because pointer arithmetic doesn't work as usual here.
 @see @ref StridedIterator
+
+@section Containers-StridedArrayView-stl STL compatibility
+
+On compilers that support C++2a and @cpp std::span @ce, implicit conversion
+of it to a @ref StridedArrayView is provided in
+@ref Corrade/Containers/ArrayViewStlSpan.h. The conversion is provided in a
+separate header to avoid unconditional @cpp #include <span> @ce, which
+significantly affects compile times. The following table lists allowed
+conversions:
+
+Corrade type                    | ↭ | STL type
+------------------------------- | - | ---------------------
+@ref StridedArrayView "StridedArrayView<T>" | ← | @cpp std::span<T> @ce <b></b>
+@ref StridedArrayView "StridedArrayView<T>" | ← | @cpp std::span<size, const T> @ce <b></b>
+@ref StridedArrayView "StridedArrayView<const T>" | ← | @cpp std::span<T> @ce <b></b>
+
+See @ref Containers-ArrayView-stl "ArrayView STL compatibility" for more
+information.
 */
 /* All member functions are const because the view doesn't own the data */
 template<class T> class StridedArrayView {
@@ -148,6 +166,8 @@ template<class T> class StridedArrayView {
 
         /**
          * @brief Construct a view from an external view representation
+         *
+         * @see @ref Containers-StridedArrayView-stl
          */
         /* There's no restriction that would disallow creating StridedArrayView
            from e.g. std::vector<T>&& because that would break uses like

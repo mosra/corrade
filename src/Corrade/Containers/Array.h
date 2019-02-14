@@ -132,6 +132,24 @@ deleter type can be used:
 @todo Something like ArrayTuple to create more than one array with single
     allocation and proper alignment for each type? How would non-POD types be
     constructed in that? Will that be useful in more than one place?
+
+@section Containers-Array-stl STL compatibility
+
+On compilers that support C++2a and @cpp std::span @ce, implicit conversion
+of an @ref Array to it is provided in @ref Corrade/Containers/ArrayViewStlSpan.h.
+The conversion is provided in a separate header to avoid unconditional
+@cpp #include <span> @ce, which significantly affects compile times. The
+following table lists allowed conversions:
+
+Corrade type                    | ↭ | STL type
+------------------------------- | - | ---------------------
+@ref Array "Array<T>" | → | @cpp std::span<T> @ce <b></b>
+@ref Array "Array<T>" | → | @cpp std::span<const T> @ce <b></b>
+@ref Array "const Array<T>" | → | @cpp std::span<const T> @ce <b></b>
+
+There are some dangerous corner cases due to the way @cpp std::span @ce is
+designed, see @ref Containers-ArrayView-stl "ArrayView STL compatibility" for
+more information.
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T, class D = void(*)(T*, std::size_t)>
@@ -258,6 +276,8 @@ class Array {
 
         /**
          * @brief Convert to external view representation
+         *
+         * @see @ref Containers-Array-stl
          */
         template<class U, class = decltype(Implementation::ArrayViewConverter<T, U>::to(std::declval<ArrayView<T>>()))> /*implicit*/ operator U() {
             return Implementation::ArrayViewConverter<T, U>::to(*this);

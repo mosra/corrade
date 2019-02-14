@@ -45,11 +45,13 @@ namespace Implementation {
 /**
 @brief Array view with size information
 
-Immutable wrapper around continuous range of data. Unlike @ref Array this class
-doesn't do any memory management. Main use case is passing array along with
-size information to functions etc. If @p T is @cpp const @ce type, the class is
-implicitly constructible also from const references to @ref Array and
-@ref ArrayView of non-const types.
+Immutable wrapper around continuous range of data, similar to a dynamic
+@cpp std::span @ce from C++2a. Unlike @ref Array this class doesn't do any
+memory management. Main use case is passing array along with size information
+to functions etc. If @p T is @cpp const @ce type, the class is implicitly
+constructible also from const references to @ref Array and @ref ArrayView of
+non-const types. There's also a variant with compile-time size information
+called @ref StaticArrayView.
 
 Usage example:
 
@@ -60,7 +62,99 @@ Usage example:
     and the size includes also the zero-terminator (thus in case of
     @cpp "hello" @ce the size would be 6, not 5, as one might expect).
 
-@see @ref ArrayView<const void>, @ref StaticArrayView, @ref arrayView(),
+@section Containers-ArrayView-stl STL compatibility
+
+Instances of @ref ArrayView and @ref StaticArrayView are convertible from
+@ref std::vector and @ref std::array if you include
+@ref Corrade/Containers/ArrayViewStl.h. The conversion is provided in a
+separate header to avoid unconditional @cpp #include <vector> @ce or
+@cpp #include <array> @ce, which significantly affect compile times.
+Additionally, the @ref arrayView(T&&) overload also allows for such a
+conversion. The following table lists allowed conversions:
+
+Corrade type                    | ↭ | STL type
+------------------------------- | - | ---------------------
+@ref ArrayView "ArrayView<T>" | ← | @ref std::array "std::array<T, size>"
+@ref ArrayView "ArrayView<const T>" | ← | @ref std::array "const std::array<T>"
+@ref ArrayView<const void> | ← | @ref std::array "const std::array<T>"
+@ref ArrayView "ArrayView<T>" | ← | @ref std::vector "std::vector<T, Allocator>"
+@ref ArrayView "ArrayView<const T>" | ← | @ref std::vector "const std::vector<T, Allocator>"
+@ref ArrayView<const void> | ← | @ref std::vector "const std::vector<T, Allocator>"
+@ref StaticArrayView "StaticArrayView<size, T>" | ← | @ref std::array "std::array<T, size>"
+@ref StaticArrayView "StaticArrayView<size, const T>" | ← | @ref std::array "const std::array<T, size>"
+
+Example:
+
+@snippet Containers-stl.cpp ArrayView
+
+On compilers that support C++2a and @cpp std::span @ce, implicit conversion
+from and also to it is provided in @ref Corrade/Containers/ArrayViewStlSpan.h.
+For similar reasons, it's a dedicated header to avoid unconditional
+@cpp #include <span> @ce, but this one is even significantly heavier than the
+@ref vector "<vector>" etc. includes, so it's separate from the others as well.
+The following table lists allowed conversions:
+
+Corrade type                    | ↭ | STL type
+------------------------------- | - | ---------------------
+@ref ArrayView "ArrayView<T>" | ⇆ | @cpp std::span<T> @ce <b></b>
+@ref ArrayView "ArrayView<T>" | ← | @cpp std::span<T, size> @ce <b></b>
+@ref ArrayView<const void> | ← | @cpp std::span<T> @ce <b></b>
+@ref ArrayView<const void> | ← | @cpp std::span<T, size> @ce <b></b>
+@ref StaticArrayView "StaticArrayView<size, T>" | ⇆ | @cpp std::span<T, size> @ce <b></b>
+@ref StaticArrayView "StaticArrayView<size, T>" | → | @cpp std::span<T> @ce <b></b>
+
+Example:
+
+@snippet Containers-stl2a.cpp ArrayView
+
+<b></b>
+
+@m_class{m-block m-danger}
+
+@par Dangers of fixed-size std::span conversions
+    The C++2a @cpp std::span @ce class has an implicit all-catching
+    @cpp span(const Container&) @ce constructor, due to which it's not possible
+    to implement the conversion to @cpp std::span @ce on Corrade side and
+    properly check for correct dimensionality *at compile time*. That means
+    it's possible to accidentally convert an arbitrary @ref ArrayView<int> to
+    @cpp std::span<int, 37> @ce or @ref StaticArrayView "StaticArrayView<5, int>"
+    to @cpp std::span<int, 6> @ce and there's nothing Corrade can do to prevent
+    that. Even worse, the C++ standard
+    [defines this conversion as Undefined Behavior](https://en.cppreference.com/w/cpp/container/span/span),
+    instead of, well, throwing an exception or something.
+@par
+    Fortunately, in the other direction at least, conversion of @cpp std::span @ce
+    to Corrade container classes *can* be (and are) checked at compile time.
+@par
+    @snippet Containers-stl2a.cpp ArrayView-stupid-span
+
+<b></b>
+
+<b></b>
+
+@m_class{m-block m-warning}
+
+@par Conversion from std::initializer_list
+    The class deliberately *doesn't* provide any conversion from
+    @ref std::initializer_list, as it would lead to dangerous behavior even in
+    very simple and seemingly innocent cases --- see the snippet below.
+    Instead, where it makes sense, functions accepting @ref ArrayView provide
+    also an overload taking @ref std::initializer_list.
+@par
+    @code{.cpp}
+    std::initializer_list<int> a{1, 2, 3, 4};
+    a[2] = 5; // okay
+
+    Containers::ArrayView<int> b{1, 2, 3, 4}; // hypothetical, doesn't compile
+    b[2] = 5; // crash, initializer_list already destructed here
+    @endcode
+
+Other array classes provide a subset of this STL compatibility as well, see the
+documentation of @ref Containers-Array-stl "Array",
+@ref Containers-StaticArray-stl "StaticArray" and
+@ref Containers-StridedArrayView-stl "StridedArrayView" for more information.
+
+@see @ref ArrayView<const void>, @ref StridedArrayView, @ref arrayView(),
     @ref arrayCast(ArrayView<T>)
 */
 /* All member functions are const because the view doesn't own the data */
@@ -138,6 +232,8 @@ template<class T> class ArrayView {
 
         /**
          * @brief Construct a view on an external type / from an external representation
+         *
+         * @see @ref Containers-ArrayView-stl
          */
         /* There's no restriction that would disallow creating ArrayView from
            e.g. std::vector<T>&& because that would break uses like
@@ -149,6 +245,8 @@ template<class T> class ArrayView {
 
         /**
          * @brief Convert the view to external representation
+         *
+         * @see @ref Containers-ArrayView-stl
          */
         /* To simplify the implementation, there's no const-adding conversion.
            Instead, the implementer is supposed to add an ArrayViewConverter
@@ -286,11 +384,12 @@ template<class T> class ArrayView {
 @brief Constant void array view with size information
 
 Specialization of @ref ArrayView which is convertible from a compile-time
-array, @ref Array, @ref ArrayView or @ref StaticArrayView of any type. Size for
-particular type is recalculated to size in bytes. This specialization doesn't
-provide any accessors besides @ref data(), because it has no use for the
-@cpp void @ce type. Instead, use @ref arrayCast(ArrayView<T>) to first cast the
-array to a concrete type and then access the particular elements.
+array, @ref Array, @ref ArrayView or @ref StaticArrayView of any type and also
+any type convertible to them. Size for a particular type is recalculated to
+a size in bytes. This specialization doesn't provide any accessors besides
+@ref data(), because it has no use for the @cpp void @ce type. Instead, use
+@ref arrayCast(ArrayView<T>) to first cast the array to a concrete type and
+then access the particular elements.
 
 Usage example:
 
@@ -343,6 +442,8 @@ template<> class ArrayView<const void> {
 
         /**
          * @brief Construct a view on an external type
+         *
+         * @see @ref Containers-ArrayView-stl
          */
         /* There's no restriction that would disallow creating ArrayView from
            e.g. std::vector<T>&& because that would break uses like
@@ -422,6 +523,8 @@ template<class T> constexpr ArrayView<T> arrayView(ArrayView<T> view) {
 
 /** @relatesalso ArrayView
 @brief Make a view on an external type / from an external representation
+
+@see @ref Containers-ArrayView-stl
 */
 /* There's no restriction that would disallow creating ArrayView from
    e.g. std::vector<T>&& because that would break uses like `consume(foo());`,
@@ -477,10 +580,16 @@ namespace Implementation {
 /**
 @brief Fixed-size array view
 
-Equivalent to @ref ArrayView, but with compile-time size information.
-Convertible from and to @ref ArrayView. Example usage:
+Equivalent to @ref ArrayView, but with compile-time size information. Similar
+to a fixed-size @cpp std::span @ce from C++2a. Convertible from and to
+@ref ArrayView. Example usage:
 
 @snippet Containers.cpp StaticArrayView-usage
+
+@section Containers-StaticArrayView-stl STL compatibility
+
+See @ref Containers-ArrayView-stl "ArrayView STL compatibility" for more
+information.
 
 @see @ref staticArrayView(), @ref arrayCast(StaticArrayView<size, T>)
 */
@@ -551,6 +660,8 @@ template<std::size_t size_, class T> class StaticArrayView {
 
         /**
          * @brief Construct a view on an external type / from an external representation
+         *
+         * @see @ref Containers-StaticArrayView-stl
          */
         /* There's no restriction that would disallow creating ArrayView from
            e.g. std::vector<T>&& because that would break uses like
@@ -562,6 +673,8 @@ template<std::size_t size_, class T> class StaticArrayView {
 
         /**
          * @brief Convert the view to external representation
+         *
+         * @see @ref Containers-StaticArrayView-stl
          */
         /* To simplify the implementation, there's no ArrayViewConverter
            overload. Instead, the implementer is supposed to extend
@@ -706,6 +819,8 @@ template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArr
 
 /** @relatesalso StaticArrayView
 @brief Make a static view on an external type / from an external representation
+
+@see @ref Containers-StaticArrayView-stl
 */
 /* There's no restriction that would disallow creating StaticArrayView from
    e.g. std::array<T>&& because that would break uses like `consume(foo());`,
