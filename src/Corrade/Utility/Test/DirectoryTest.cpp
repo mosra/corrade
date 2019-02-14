@@ -213,7 +213,7 @@ DirectoryTest::DirectoryTest() {
         #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
         &DirectoryTest::copy100MMap
         #endif
-        }, 10,
+        }, 5,
         &DirectoryTest::prepareFileToBenchmarkCopy,
         &DirectoryTest::prepareFileToBenchmarkCopy);
     #endif
