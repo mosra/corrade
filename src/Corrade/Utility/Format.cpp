@@ -185,6 +185,7 @@ void Formatter<double>::format(std::FILE* const file, const double value, int pr
     std::fprintf(file, format, precision, value);
 }
 
+#ifndef CORRADE_TARGET_EMSCRIPTEN
 /* Wikipedia says 18-digit number can be converted both ways without
    loss: https://en.wikipedia.org/wiki/Extended_precision#Working_range
    Kept in sync with Debug. */
@@ -198,6 +199,7 @@ void Formatter<long double>::format(std::FILE* const file, const long double val
     const char format[]{ '%', '.', '*', 'L', formatTypeChar<float>(type), 0 };
     std::fprintf(file, format, precision, value);
 }
+#endif
 
 std::size_t Formatter<Containers::ArrayView<const char>>::format(const Containers::ArrayView<char>& buffer, const Containers::ArrayView<const char> value, const int precision, const FormatType type) {
     std::size_t size = value.size();

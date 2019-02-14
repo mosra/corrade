@@ -419,7 +419,9 @@ void FormatTest::floatGeneric() {
 
     CORRADE_COMPARE(formatString("{:.3}", 1.0f), "1");
     CORRADE_COMPARE(formatString("{:.3}", 1.0), "1");
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_COMPARE(formatString("{:.3}", 1.0l), "1");
+    #endif
     CORRADE_COMPARE(formatString("{:.3}", 12.34567f), "12.3");
     CORRADE_COMPARE(formatString("{:.3}", 12.34567), "12.3");
     #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -428,7 +430,9 @@ void FormatTest::floatGeneric() {
 
     CORRADE_COMPARE(formatString("{:.3g}", 1.0f), "1");
     CORRADE_COMPARE(formatString("{:.3g}", 1.0), "1");
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_COMPARE(formatString("{:.3g}", 1.0l), "1");
+    #endif
     CORRADE_COMPARE(formatString("{:.3g}", 12.34567f), "12.3");
     CORRADE_COMPARE(formatString("{:.3g}", 12.34567), "12.3");
     #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -449,7 +453,9 @@ void FormatTest::floatGenericUppercase() {
 
     CORRADE_COMPARE(formatString("{:.3G}", 1.0f), "1");
     CORRADE_COMPARE(formatString("{:.3G}", 1.0), "1");
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_COMPARE(formatString("{:.3G}", 1.0l), "1");
+    #endif
     CORRADE_COMPARE(formatString("{:.3G}", 12.34567f), "12.3");
     CORRADE_COMPARE(formatString("{:.3G}", 12.34567), "12.3");
     #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -473,7 +479,9 @@ void FormatTest::floatExponent() {
     #ifndef __MINGW32__
     CORRADE_COMPARE(formatString("{:.3e}", 1.0f), "1.000e+00");
     CORRADE_COMPARE(formatString("{:.3e}", 1.0), "1.000e+00");
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_COMPARE(formatString("{:.3e}", 1.0l), "1.000e+00");
+    #endif
     CORRADE_COMPARE(formatString("{:.3e}", 12.34567f), "1.235e+01");
     CORRADE_COMPARE(formatString("{:.3e}", 12.34567), "1.235e+01");
     #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -505,7 +513,9 @@ void FormatTest::floatExponentUppercase() {
     #ifndef __MINGW32__
     CORRADE_COMPARE(formatString("{:.3E}", 1.0f), "1.000E+00");
     CORRADE_COMPARE(formatString("{:.3E}", 1.0), "1.000E+00");
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_COMPARE(formatString("{:.3E}", 1.0l), "1.000E+00");
+    #endif
     CORRADE_COMPARE(formatString("{:.3E}", 12.34567f), "1.235E+01");
     CORRADE_COMPARE(formatString("{:.3E}", 12.34567), "1.235E+01");
     #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -531,7 +541,9 @@ void FormatTest::floatFixed() {
 
     CORRADE_COMPARE(formatString("{:.3f}", 1.0f), "1.000");
     CORRADE_COMPARE(formatString("{:.3f}", 1.0), "1.000");
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_COMPARE(formatString("{:.3f}", 1.0l), "1.000");
+    #endif
     CORRADE_COMPARE(formatString("{:.3f}", 12.34567f), "12.346");
     CORRADE_COMPARE(formatString("{:.3f}", 12.34567), "12.346");
     #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -549,7 +561,9 @@ void FormatTest::floatFixedUppercase() {
 
     CORRADE_COMPARE(formatString("{:.3F}", 1.0f), "1.000");
     CORRADE_COMPARE(formatString("{:.3F}", 1.0), "1.000");
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_COMPARE(formatString("{:.3F}", 1.0l), "1.000");
+    #endif
     CORRADE_COMPARE(formatString("{:.3F}", 12.34567f), "12.346");
     CORRADE_COMPARE(formatString("{:.3F}", 12.34567), "12.346");
     #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -566,11 +580,15 @@ void FormatTest::floatBase() {
     char buffer[128]{};
     formatInto(buffer, "{:o}", 123456.0f);
     formatInto(buffer, "{:x}", 123456.0);
-    formatInto(buffer, "{:d}", 123456.0l);
     CORRADE_COMPARE(out.str(),
         "Utility::format(): integral type used for a floating-point value\n"
-        "Utility::format(): integral type used for a floating-point value\n"
         "Utility::format(): integral type used for a floating-point value\n");
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    out.str({});
+    formatInto(buffer, "{:d}", 123456.0l);
+    CORRADE_COMPARE(out.str(),
+        "Utility::format(): integral type used for a floating-point value\n");
+    #endif
 }
 
 void FormatTest::charArray() {

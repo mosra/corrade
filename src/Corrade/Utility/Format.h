@@ -265,10 +265,12 @@ template<> struct Formatter<double> {
     static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, double value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, double value, int precision, FormatType type);
 };
+#ifndef CORRADE_TARGET_EMSCRIPTEN
 template<> struct Formatter<long double> {
     static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, long double value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, long double value, int precision, FormatType type);
 };
+#endif
 template<> struct Formatter<const char*> {
     static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, const char* value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, const char* value, int precision, FormatType type);
