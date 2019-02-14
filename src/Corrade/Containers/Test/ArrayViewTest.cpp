@@ -34,7 +34,9 @@ struct ArrayViewTest: TestSuite::Tester {
     explicit ArrayViewTest();
 
     void constructEmpty();
+    void constructEmptyVoid();
     void constructNullptr();
+    void constructNullptrVoid();
     void constructNullptrSize();
     void construct();
     void constructFixedSize();
@@ -72,7 +74,9 @@ typedef Containers::ArrayView<const void> VoidArrayView;
 
 ArrayViewTest::ArrayViewTest() {
     addTests({&ArrayViewTest::constructEmpty,
+              &ArrayViewTest::constructEmptyVoid,
               &ArrayViewTest::constructNullptr,
+              &ArrayViewTest::constructNullptrVoid,
               &ArrayViewTest::constructNullptrSize,
               &ArrayViewTest::construct,
               &ArrayViewTest::constructFixedSize,
@@ -107,20 +111,48 @@ ArrayViewTest::ArrayViewTest() {
 void ArrayViewTest::constructEmpty() {
     ArrayView a;
     CORRADE_VERIFY(a == nullptr);
+    CORRADE_VERIFY(a.empty());
     CORRADE_COMPARE(a.size(), 0);
 
     constexpr ArrayView ca;
     CORRADE_VERIFY(ca == nullptr);
+    CORRADE_VERIFY(ca.empty());
+    CORRADE_COMPARE(ca.size(), 0);
+}
+
+void ArrayViewTest::constructEmptyVoid() {
+    VoidArrayView a;
+    CORRADE_VERIFY(a == nullptr);
+    CORRADE_VERIFY(a.empty());
+    CORRADE_COMPARE(a.size(), 0);
+
+    constexpr ArrayView ca;
+    CORRADE_VERIFY(ca == nullptr);
+    CORRADE_VERIFY(ca.empty());
     CORRADE_COMPARE(ca.size(), 0);
 }
 
 void ArrayViewTest::constructNullptr() {
     ArrayView a = nullptr;
     CORRADE_VERIFY(a == nullptr);
+    CORRADE_VERIFY(a.empty());
     CORRADE_COMPARE(a.size(), 0);
 
     constexpr ArrayView ca = nullptr;
     CORRADE_VERIFY(ca == nullptr);
+    CORRADE_VERIFY(ca.empty());
+    CORRADE_COMPARE(ca.size(), 0);
+}
+
+void ArrayViewTest::constructNullptrVoid() {
+    VoidArrayView a = nullptr;
+    CORRADE_VERIFY(a == nullptr);
+    CORRADE_VERIFY(a.empty());
+    CORRADE_COMPARE(a.size(), 0);
+
+    constexpr VoidArrayView ca = nullptr;
+    CORRADE_VERIFY(ca == nullptr);
+    CORRADE_VERIFY(ca.empty());
     CORRADE_COMPARE(ca.size(), 0);
 }
 
@@ -129,10 +161,12 @@ void ArrayViewTest::constructNullptrSize() {
        Magnum::Buffer::setData() without passing any actual data */
     ArrayView a{nullptr, 5};
     CORRADE_VERIFY(a == nullptr);
+    CORRADE_VERIFY(!a.empty());
     CORRADE_COMPARE(a.size(), 5);
 
     constexpr ArrayView ca{nullptr, 5};
     CORRADE_VERIFY(ca == nullptr);
+    CORRADE_VERIFY(!a.empty());
     CORRADE_COMPARE(ca.size(), 5);
 }
 
@@ -286,15 +320,18 @@ void ArrayViewTest::constructVoid() {
     void* a = reinterpret_cast<void*>(0xdeadbeef);
     VoidArrayView b(a, 25);
     CORRADE_VERIFY(b == a);
+    CORRADE_VERIFY(!b.empty());
     CORRADE_COMPARE(b.size(), 25);
 
     int* c = reinterpret_cast<int*>(0xdeadbeef);
     VoidArrayView d(c, 25);
     CORRADE_VERIFY(d == c);
+    CORRADE_VERIFY(!d.empty());
     CORRADE_COMPARE(d.size(), 100);
 
     constexpr VoidArrayView cd{Array30, 25};
     CORRADE_VERIFY(cd == Array30);
+    CORRADE_VERIFY(!cd.empty());
     CORRADE_COMPARE(cd.size(), 100);
 }
 
