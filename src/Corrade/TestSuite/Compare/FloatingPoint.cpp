@@ -61,5 +61,8 @@ template<class T> void FloatComparator<T>::printErrorMessage(Utility::Error& e, 
 
 template class FloatComparator<float>;
 template class FloatComparator<double>;
+#ifndef CORRADE_TARGET_EMSCRIPTEN
+template class FloatComparator<long double>;
+#endif
 
 }}}

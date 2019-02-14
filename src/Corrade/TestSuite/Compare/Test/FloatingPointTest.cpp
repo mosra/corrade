@@ -53,6 +53,10 @@ void FloatingPointTest::smallDelta() {
                                        3.202123f));
     CORRADE_VERIFY(Comparator<double>()(3.202122232425,
                                         3.202122232426));
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    CORRADE_VERIFY(Comparator<long double>()(3.202122232425765l,
+                                             3.202122232425766l));
+    #endif
 }
 
 void FloatingPointTest::largeDelta() {
@@ -60,6 +64,10 @@ void FloatingPointTest::largeDelta() {
                                         3.20213f));
     CORRADE_VERIFY(!Comparator<double>()(3.20212223242,
                                          3.20212223243));
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    CORRADE_VERIFY(!Comparator<long double>()(3.20212223242572l,
+                                              3.20212223242573l));
+    #endif
 }
 
 void FloatingPointTest::nan() {
