@@ -351,7 +351,7 @@ void StridedArrayViewTest::convertFromExternalView() {
     CORRADE_COMPARE(a.size, 5);
 
     StridedArrayView b = a;
-    CORRADE_COMPARE(b.data(), +data);
+    CORRADE_COMPARE(b.data(), &data[0]);
     CORRADE_COMPARE(b.size(), 5);
 
     constexpr ConstIntView ca{Array, 10};
@@ -370,7 +370,7 @@ void StridedArrayViewTest::convertFromExternalView() {
 void StridedArrayViewTest::convertConstFromExternalView() {
     int data[]{1, 2, 3, 4, 5};
     IntView a{data, 5};
-    CORRADE_COMPARE(a.data, +data);
+    CORRADE_COMPARE(a.data, &data[0]);
     CORRADE_COMPARE(a.size, 5);
 
     ConstStridedArrayView b = a;

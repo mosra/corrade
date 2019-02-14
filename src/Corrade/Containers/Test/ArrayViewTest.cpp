@@ -557,7 +557,7 @@ void ArrayViewTest::convertExternalView() {
 void ArrayViewTest::convertConstFromExternalView() {
     int data[]{1, 2, 3, 4, 5};
     IntView a{data, 5};
-    CORRADE_COMPARE(a.data, +data);
+    CORRADE_COMPARE(a.data, &data[0]);
     CORRADE_COMPARE(a.size, 5);
 
     ConstArrayView b = a;
@@ -572,7 +572,7 @@ void ArrayViewTest::convertConstFromExternalView() {
 void ArrayViewTest::convertToConstExternalView() {
     int data[]{1, 2, 3, 4, 5};
     ArrayView a = data;
-    CORRADE_COMPARE(a.data(), +data);
+    CORRADE_COMPARE(a.data(), &data[0]);
     CORRADE_COMPARE(a.size(), 5);
 
     ConstIntView b = a;
@@ -587,7 +587,7 @@ void ArrayViewTest::convertToConstExternalView() {
 void ArrayViewTest::convertVoidFromExternalView() {
     int data[]{1, 2, 3, 4, 5};
     IntView a{data, 5};
-    CORRADE_COMPARE(a.data, +data);
+    CORRADE_COMPARE(a.data, &data[0]);
     CORRADE_COMPARE(a.size, 5);
 
     VoidArrayView b = a;
@@ -598,7 +598,7 @@ void ArrayViewTest::convertVoidFromExternalView() {
 void ArrayViewTest::convertVoidFromConstExternalView() {
     const int data[]{1, 2, 3, 4, 5};
     ConstIntView a{data, 5};
-    CORRADE_COMPARE(a.data, +data);
+    CORRADE_COMPARE(a.data, &data[0]);
     CORRADE_COMPARE(a.size, 5);
 
     VoidArrayView b = a;

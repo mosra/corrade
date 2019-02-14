@@ -375,7 +375,7 @@ void StaticArrayViewTest::convertExternalView() {
 void StaticArrayViewTest::convertConstFromExternalView() {
     int data[]{1, 2, 3, 4, 5};
     IntView5 a{data};
-    CORRADE_COMPARE(a.data, +data);
+    CORRADE_COMPARE(a.data, &data[0]);
 
     ConstStaticArrayView<5> b = a;
     CORRADE_COMPARE(b.data(), data);
@@ -390,7 +390,7 @@ void StaticArrayViewTest::convertConstFromExternalView() {
 void StaticArrayViewTest::convertToConstExternalView() {
     int data[]{1, 2, 3, 4, 5};
     StaticArrayView<5> a = data;
-    CORRADE_COMPARE(a.data(), +data);
+    CORRADE_COMPARE(a.data(), &data[0]);
     CORRADE_COMPARE(a.size(), 5);
 
     ConstIntView5 b = a;
