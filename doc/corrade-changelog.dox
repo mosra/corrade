@@ -52,6 +52,13 @@ namespace Corrade {
 -   New @ref Utility::Directory::copy() utility for zero-allocation file
     copies.
 
+@subsection corrade-changelog-latest-changes Changes and improvements
+
+@subsubsection corrade-changelog-latest-changes-containers Containers library
+
+-   It's now possible to create @ref Containers::ScopeGuard without a handle
+    in order to easily call a global function or lambda on scope end
+
 @subsection corrade-changelog-latest-buildsystem Build system
 
 -   The @ref CORRADE_CXX_STANDARD preprocessor macro learned support for the

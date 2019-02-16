@@ -35,6 +35,7 @@ struct ScopeGuardTest: TestSuite::Tester {
     void value();
     void lambda();
     void returningLambda();
+    void noHandle();
     void release();
 };
 
@@ -43,6 +44,7 @@ ScopeGuardTest::ScopeGuardTest() {
               &ScopeGuardTest::value,
               &ScopeGuardTest::lambda,
               &ScopeGuardTest::returningLambda,
+              &ScopeGuardTest::noHandle,
               &ScopeGuardTest::release});
 }
 
@@ -89,6 +91,18 @@ void ScopeGuardTest::returningLambda() {
     }
     CORRADE_COMPARE(fd, 7);
     #endif
+}
+
+int globalThingy;
+
+void ScopeGuardTest::noHandle() {
+    globalThingy = 42;
+    {
+        ScopeGuard e{[]() {
+            globalThingy = 1337;
+        }};
+    }
+    CORRADE_COMPARE(globalThingy, 1337);
 }
 
 void ScopeGuardTest::release() {

@@ -47,6 +47,11 @@ that the handle is copied by value, so references won't work.
 
 @snippet Containers.cpp ScopeGuard-lambda
 
+For calling global functions with no extra state, the constructor can also take
+just a parameter-less function or lambda:
+
+@snippet Containers.cpp ScopeGuard-usage-no-handle
+
 <b></b>
 
 @m_class{m-block m-warning}
@@ -78,8 +83,12 @@ class ScopeGuard {
         /** @brief Constructor */
         template<class T, class Deleter> explicit ScopeGuard(T handle, Deleter deleter);
 
+        /** @overload */
+        template<class Deleter> explicit ScopeGuard(Deleter deleter);
+
         #ifdef CORRADE_MSVC2015_COMPATIBILITY
         template<class T, class U> explicit ScopeGuard(T handle, U(*deleter)(T));
+        template<class U> explicit ScopeGuard(U(*deleter)());
         #endif
 
         /** @brief Copying is not allowed */
@@ -131,6 +140,18 @@ template<class T, class Deleter> ScopeGuard::ScopeGuard(T handle, Deleter delete
     };
 }
 
+template<class Deleter> ScopeGuard::ScopeGuard(Deleter deleter): _deleter{
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    reinterpret_cast<void(*)()>(+deleter) /* https://stackoverflow.com/a/18889029 */
+    #else
+    reinterpret_cast<void(*)()>(static_cast<void(*)()>(deleter)) /* Details why below */
+    #endif
+}, _handle{nullptr} {
+    _deleterWrapper = [](void(**deleter)(), void**) {
+        (*reinterpret_cast<Deleter*>(deleter))();
+    };
+}
+
 #ifdef CORRADE_MSVC2015_COMPATIBILITY
 /* MSVC 2015 has ambiguous operator+ on lambdas, thus I need to work around
    that by converting the lambda to a function pointer explicitly above. There
@@ -143,6 +164,12 @@ template<class T, class U> ScopeGuard::ScopeGuard(T handle, U(*deleter)(T)): _de
     static_assert(sizeof(T) <= sizeof(void*), "handle too big to store");
     _deleterWrapper = [](void(**deleter)(), void** handle) {
         (*reinterpret_cast<U(**)(T)>(deleter))(*reinterpret_cast<T*>(handle));
+    };
+}
+
+template<class U> ScopeGuard::ScopeGuard(U(*deleter)()): _deleter{reinterpret_cast<void(*)()>(deleter)}, _handle{nullptr} {
+    _deleterWrapper = [](void(**deleter)(), void**) {
+        (*reinterpret_cast<U(**)()>(deleter))();
     };
 }
 #endif

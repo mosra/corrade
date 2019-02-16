@@ -550,6 +550,14 @@ FILE* f{};
 /* [ScopeGuard-lambda] */
 }
 
+/* [ScopeGuard-usage-no-handle] */
+{
+    Containers::ScopeGuard e{[]() {
+        Utility::Debug{} << "We're done here!";
+    }};
+}
+/* [ScopeGuard-usage-no-handle] */
+
 /* [ScopeGuard-returning-lambda] */
 {
     auto closer = [](FILE* f) {
