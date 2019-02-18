@@ -83,6 +83,7 @@ matrix:
     python: 3.6
     env:
     - TARGET=acme
+    - JOBID=acme
     addons:
       apt:
         packages: #none
