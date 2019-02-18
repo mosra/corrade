@@ -30,6 +30,7 @@
  */
 
 #include <type_traits>
+#include <cstddef>
 
 #include "Corrade/configure.h"
 
