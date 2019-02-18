@@ -150,6 +150,14 @@ Corrade type                    | ↭ | STL type
 There are some dangerous corner cases due to the way @cpp std::span @ce is
 designed, see @ref Containers-ArrayView-stl "ArrayView STL compatibility" for
 more information.
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This class, together with @ref StaticArray, is also available as a
+    single-header [CorradeArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArray.h)
+    library in the Magnum Singles repository for easier integration into your
+    projects. See @ref corrade-singles for more information.
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T, class D = void(*)(T*, std::size_t)>
