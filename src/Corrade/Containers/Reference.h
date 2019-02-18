@@ -74,7 +74,8 @@ Example:
     projects. See @ref corrade-singles for more information. The above
     mentioned STL compatibility is included as well, but disabled by default.
     Enable it by specifying @cpp #define CORRADE_REFERENCE_STL_COMPATIBILITY @ce
-    before including the file.
+    before including the file. Including it multiple times with different
+    macros defined works as well.
 
 @see @ref Pointer, @ref Optional
 */

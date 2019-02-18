@@ -108,7 +108,8 @@ overload also allows for such a conversion. Example:
     mentioned STL compatibility is included as well, but disabled by default.
     Enable it by compiling as C++17 and specifying
     @cpp #define CORRADE_OPTIONAL_STL_COMPATIBILITY @ce before including the
-    file.
+    file. Including it multiple times with different macros defined works as
+    well.
 
 @see @ref NullOpt, @ref optional(T&&), @ref optional(Args&&... args),
     @ref Reference
