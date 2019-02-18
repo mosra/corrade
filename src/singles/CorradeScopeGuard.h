@@ -13,6 +13,8 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2019.01-41-g39c08d7c (2019-02-18)
+    -   Ability to create a handle-less ScopeGuard
     v2018.10-232-ge927d7f3 (2019-01-28)
     -   Initial release
 
