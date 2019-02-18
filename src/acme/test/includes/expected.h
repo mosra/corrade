@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <cstring>
 
+#include "noexpand.h"
+
 // And after
 
 enum EnumInRelativePath {};

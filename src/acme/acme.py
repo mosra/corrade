@@ -105,6 +105,14 @@ def simplify_expression(what, expression, forced_defines = {}):
 
     return result, what, expression
 
+def sort_includes(includes: List[str]) -> List[str]:
+    system, local = [], []
+    for i in sorted(includes):
+        if i.startswith('#include <'): system += [i]
+        elif i.startswith('#include "'): local += [i]
+        else: assert False # pragma: no cover
+    return (system + ["\n"] + local) if local and system else (system + local)
+
 include_rx = re.compile(r'^(?P<include>#include (?P<quote>["<])(?P<file>[^">]+)[">]).*?$')
 preprocessor_rx = re.compile(r'^(?P<indent>\s*)#(?P<what>ifdef|ifndef|if|else|elif|endif)\s*(?P<value>[^/\n]*)(?P<comment>\s*/[/*].*)?$')
 define_rx = re.compile(r'\s*#(?P<what>define|undef) (?P<name>[^\s]+)\s*$')
@@ -121,6 +129,7 @@ def acme(toplevel_file, output) -> List[str]:
     write_comments = True
     paths = []
     local_include_prefixes = []
+    local_includes_noexpand = set()
     all_includes = set()
     new_includes = []
     copyrights = set()
@@ -354,7 +363,7 @@ def acme(toplevel_file, output) -> List[str]:
                     include:str = match.group('file')
                     is_local = match.group('quote') == '"'
                     # Local includes or includes from dependent projects, recurse
-                    if is_local or include.partition('/')[0] in local_include_prefixes:
+                    if (is_local or include.partition('/')[0] in local_include_prefixes) and not include in local_includes_noexpand:
                         # A header corresponding to an implementation file
                         if is_local and '/' not in include:
                             absolute_include = os.path.join(os.path.dirname(file), include)
@@ -383,12 +392,11 @@ def acme(toplevel_file, output) -> List[str]:
                             else:
                                 includes_out += parsed_file
 
-                    # System include. If seeing for the first time, add it to
-                    # the set of not-yet-written includes, it'll get written to
-                    # the nearest preceding {{includes}} placeholder. If
-                    # already spotted, don't do anything.
+                    # System or local noexpand include. If seeing for the first
+                    # time, add it to the set of not-yet-written includes,
+                    # it'll get written to the nearest preceding {{includes}}
+                    # placeholder. If already spotted, don't do anything.
                     else:
-                        assert not is_local
                         includeline = match.group('include') + '\n'
                         if includeline not in all_includes:
                             all_includes.add(includeline)
@@ -419,6 +427,8 @@ def acme(toplevel_file, output) -> List[str]:
                     elif what == 'stats':
                         id, _, command = value.partition(' ')
                         stats_commands[id] = command.strip()
+                    elif what == 'noexpand':
+                        local_includes_noexpand.add(value)
                     else:
                         logging.warning("Unknown #pragma ACME %s %s", what, value)
 
@@ -448,19 +458,19 @@ def acme(toplevel_file, output) -> List[str]:
 
     lines = parse(toplevel_file, 0)
 
-    # For each include placeholder put the correspodning includes there. If
+    # For each include placeholder put the corresponding includes there. If
     # there's none, put them on the top.
     if new_includes:
         i = 0
         while i != len(lines):
             if lines[i].strip() == '// {{includes}}':
-                lines = lines[:i] + sorted(new_includes[0]) + lines[i + 1:]
+                lines = lines[:i] + sort_includes(new_includes[0]) + lines[i + 1:]
                 new_includes.pop(0)
                 if not new_includes: break
             i = i + 1
         else:
             # Warning already printed when new_includes was discovered to be empty
-            lines = sorted(new_includes[0]) + lines
+            lines = sort_includes(new_includes[0]) + lines
 
     # Find a copyright placeholder and put the copyrights there
     if copyrights:

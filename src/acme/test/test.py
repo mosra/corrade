@@ -27,7 +27,7 @@ import os
 import shutil
 import unittest
 
-from acme import simplify_expression, acme
+from acme import simplify_expression, sort_includes, acme
 
 class ParseExpression(unittest.TestCase):
     def test_basic(self):
@@ -79,6 +79,41 @@ class ParseExpression(unittest.TestCase):
             (None, 'elif', '!defined(A)'))
         self.assertEqual(simplify_expression('elif', 'defined(CORRADE_NO_DEBUG) || defined(NDEBUG)', {'DOXYGEN_GENERATING_OUTPUT': False, 'CORRADE_NO_DEBUG': True}),
             (True, 'elif', '1'))
+
+class SortIncludes(unittest.TestCase):
+    def test_system(self):
+        self.assertEqual(sort_includes([
+            "#include <thread>\n",
+            "#include <cstring>\n",
+            "#include <string>\n"
+        ]), [
+            "#include <cstring>\n",
+            "#include <string>\n",
+            "#include <thread>\n"
+        ])
+
+    def test_local(self):
+        self.assertEqual(sort_includes([
+            "#include \"world.h\"\n",
+            "#include \"hello.h\"\n"
+        ]), [
+            "#include \"hello.h\"\n",
+            "#include \"world.h\"\n"
+        ])
+
+    def test_mixed(self):
+        self.assertEqual(sort_includes([
+            "#include <string>\n",
+            "#include \"noexpand.h\"\n",
+            "#include \"neither.h\"\n",
+            "#include <cstring>\n"
+        ]), [
+            "#include <cstring>\n",
+            "#include <string>\n",
+            "\n",
+            "#include \"neither.h\"\n",
+            "#include \"noexpand.h\"\n"
+        ])
 
 class ParseFile(unittest.TestCase):
     def __init__(self, *args, **kwargs):

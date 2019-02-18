@@ -169,6 +169,25 @@ actual @cpp #pragma once @ce or header guards into account.
     to move the @cpp #define @ce and the @cpp #include @ce to the top-level
     file to ensure proper order.
 
+In case it's not desired to expand a local include (for example to make one
+header-only library depend on another), a @cpp #pragma ACME noexpand @ce
+directive can be used. For example, in the following case the
+@cb{.jinja} {{includes}} @ce placeholder will contain also
+@cpp #include "BaseLib.h" @ce after replacing, separated by a blank line from
+system includes.
+
+@code{.cpp}
+// {{includes}}
+
+#pragma ACME noexpand BaseLib.h
+
+…
+
+#include <cstddef>
+
+#include "BaseLib.h"
+@endcode
+
 @section acme-preprocessor Preprocessor branch processing
 
 In order to further trim down generated file size, the script has a rudimentary

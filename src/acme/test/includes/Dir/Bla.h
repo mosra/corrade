@@ -4,3 +4,5 @@ typedef int Integer;
 #include "Dir/Absolute.h"
 
 #include <cstring> // included twice
+
+#include "noexpand.h" // local, not found, but explicitly not expanded

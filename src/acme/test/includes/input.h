@@ -6,6 +6,7 @@
 
 #pragma ACME path .
 #pragma ACME local Dir
+#pragma ACME noexpand noexpand.h
 
 #include <Dir/Bla.h>
 #include "Local.h"
