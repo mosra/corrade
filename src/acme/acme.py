@@ -506,14 +506,19 @@ def acme(toplevel_file, output) -> List[str]:
                 revision = subprocess.check_output(command, cwd=cwd, shell=True).decode('utf-8').strip()
             lines[i] = line.replace(placeholder, revision)
 
-    # Perform some stats on file contents, passing them to stdin
+    # Create the output directory
+    output_dir = os.path.dirname(output)
+    if not os.path.exists(output_dir): os.makedirs(output_dir)
+
+    # Perform some stats on file contents, passing them to stdin, running in
+    # the (freshly created) output directory
     for id, command in stats_commands.items():
         placeholder = '{{{{stats:{}}}}}'.format(id)
         stats = None
         for i, line in enumerate(lines):
             if not placeholder in line: continue
             if not stats:
-                stats = subprocess.check_output(command, input=''.join(lines).encode('utf-8'), shell=True).decode('utf-8').strip()
+                stats = subprocess.check_output(command, cwd=output_dir, input=''.join(lines).encode('utf-8'), shell=True).decode('utf-8').strip()
             lines[i] = line.replace(placeholder, stats)
 
     logging.info('Writing %i lines to %s', len(lines), output)

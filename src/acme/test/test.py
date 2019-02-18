@@ -126,13 +126,14 @@ class ParseFile(unittest.TestCase):
     def setUp(self):
         if os.path.exists(os.path.join(self.path, 'output')): shutil.rmtree(os.path.join(self.path, 'output'))
 
-    def run_acme(self, path):
+    def run_acme(self, path, output_dir = None):
         test_dir = os.path.join(self.path, path)
-        acme(os.path.join(test_dir, 'input.h'), os.path.join(test_dir, 'actual.h'))
+        output_dir = output_dir or test_dir
+        acme(os.path.join(test_dir, 'input.h'), os.path.join(output_dir, 'actual.h'))
 
         with open(os.path.join(test_dir, 'expected.h')) as f:
             expected_contents = f.read()
-        with open(os.path.join(test_dir, 'actual.h')) as f:
+        with open(os.path.join(output_dir, 'actual.h')) as f:
             actual_contents = f.read()
         return actual_contents, expected_contents
 
@@ -152,4 +153,4 @@ class ParseFile(unittest.TestCase):
         self.assertEqual(*self.run_acme('pragmas'))
 
     def test_revision_stats(self):
-        self.assertEqual(*self.run_acme('revision_stats'))
+        self.assertEqual(*self.run_acme('revision_stats', os.path.join(self.path, 'revision_stats/output')))

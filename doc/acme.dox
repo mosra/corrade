@@ -301,6 +301,10 @@ will show a number of lines the generated file has:
 #pragma ACME stats wc-l wc -l
 @endcode
 
+Compared to @cb{.jinja} {{revision}} @ce, which is run in the directory of the
+corresponding source file, this command is always run in the directory of the
+output.
+
 @section acme-example Real-world examples
 
 Tests for the above described functionality can be found in a
