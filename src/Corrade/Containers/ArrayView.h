@@ -156,6 +156,8 @@ documentation of @ref Containers-Array-stl "Array",
 
 @anchor Containers-ArrayView-single-header
 
+<b></b>
+
 @m_class{m-block m-success}
 
 @par Single-header version
@@ -168,7 +170,7 @@ documentation of @ref Containers-Array-stl "Array",
     Enable it for @ref std::vector and @ref std::array by specifying
     @cpp #define CORRADE_ARRAYVIEW_STL_COMPATIBILITY @ce and for @cpp std::span @ce
     by compiling as C++2a and specifying
-    @cpp #define CORRADE_OPTIONAL_STL_SPAN_COMPATIBILITY @ce before including
+    @cpp #define CORRADE_ARRAYVIEW_STL_SPAN_COMPATIBILITY @ce before including
     the file. Including it multiple times with different macros defined works
     as well.
 
