@@ -44,6 +44,7 @@ sources using the builtin @ref acme "single-header generator tool".
 
 Class or library            | Single-header version
 --------------------------- | ----------------------------
+@ref Containers::ArrayView, \n @ref Containers::ArrayView<const void>, \n @ref Containers::StaticArrayView  | [CorradeArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArrayView.h)
 @ref Containers::Optional   | [CorradeOptional.h](https://github.com/mosra/magnum-singles/tree/master/CorradeOptional.h)
 @ref Containers::Pointer    | [CorradePointer.h](https://github.com/mosra/magnum-singles/tree/master/CorradePointer.h)
 @ref Containers::Reference  | [CorradeReference.h](https://github.com/mosra/magnum-singles/tree/master/CorradeReference.h)

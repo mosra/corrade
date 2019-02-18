@@ -35,6 +35,10 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-new-containers Containers library
 
+-   The @ref Containers::ArrayView class is, together with
+    @ref Containers::StaticArrayView, available as a single-header library for
+    easier integration into your projects. See @ref corrade-singles for more
+    information.
 -   Opt-in STL compatibility for @ref Containers::ArrayView,
     @ref Containers::StaticArrayView and @ref Containers::StridedArrayView
     classes, allowing them to be implicitly converted from @ref std::vector and

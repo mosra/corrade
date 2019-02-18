@@ -154,6 +154,24 @@ documentation of @ref Containers-Array-stl "Array",
 @ref Containers-StaticArray-stl "StaticArray" and
 @ref Containers-StridedArrayView-stl "StridedArrayView" for more information.
 
+@anchor Containers-ArrayView-single-header
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This class, together with the @ref ArrayView<const void> specialization and
+    @ref StaticArrayView is also available as a single-header, dependency-less
+    [CorradeArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArrayView.h)
+    library in the Magnum Singles repository for easier integration into your
+    projects. See @ref corrade-singles for more information. The above
+    mentioned STL compatibility is included as well, but disabled by default.
+    Enable it for @ref std::vector and @ref std::array by specifying
+    @cpp #define CORRADE_ARRAYVIEW_STL_COMPATIBILITY @ce and for @cpp std::span @ce
+    by compiling as C++2a and specifying
+    @cpp #define CORRADE_OPTIONAL_STL_SPAN_COMPATIBILITY @ce before including
+    the file. Including it multiple times with different macros defined works
+    as well.
+
 @see @ref ArrayView<const void>, @ref StridedArrayView, @ref arrayView(),
     @ref arrayCast(ArrayView<T>)
 */
@@ -394,6 +412,17 @@ then access the particular elements.
 Usage example:
 
 @snippet Containers.cpp ArrayView-void-usage
+
+<b></b>
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This specialization is, together with the generic @ref ArrayView and
+    @ref StaticArrayView, is also available as a single-header, dependency-less
+    library in the Magnum Singles repository for easier integration into your
+    projects. See the @ref Containers-ArrayView-single-header "ArrayView documentation"
+    for more information.
 */
 template<> class ArrayView<const void> {
     public:
@@ -590,6 +619,16 @@ to a fixed-size @cpp std::span @ce from C++2a. Convertible from and to
 
 See @ref Containers-ArrayView-stl "ArrayView STL compatibility" for more
 information.
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This class is, together with @ref ArrayView and the
+    @ref ArrayView<const void> specialization, is also available as a
+    single-header, dependency-less library in the Magnum Singles repository for
+    easier integration into your projects. See the
+    @ref Containers-ArrayView-single-header "ArrayView documentation" for more
+    information.
 
 @see @ref staticArrayView(), @ref arrayCast(StaticArrayView<size, T>)
 */
