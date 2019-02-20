@@ -8,7 +8,7 @@ matrix:
   include:
   - language: cpp
     os: linux
-    dist: trusty
+    dist: xenial
     compiler: gcc
     env:
     - JOBID=linux
@@ -24,7 +24,7 @@ matrix:
   - language: cpp
     os: linux
     compiler: gcc
-    dist: trusty
+    dist: xenial
     env:
     - JOBID=linux-nondeprecated
     - TARGET=desktop
@@ -32,7 +32,7 @@ matrix:
   - language: cpp
     os: linux
     compiler: clang
-    dist: trusty
+    dist: xenial
     env:
     - JOBID=linux-sanitizers
     - TARGET=desktop-sanitizers
@@ -40,7 +40,7 @@ matrix:
     addons:
       apt:
         sources:
-        - llvm-toolchain-trusty
+        - llvm-toolchain-xenial
         packages:
         - ninja-build
         - clang-3.8
@@ -65,6 +65,8 @@ matrix:
     - TARGET=emscripten
   - language: android
     os: linux
+    # Setting xenial here will cause it to use 12.04, with GCC 4.6 and other
+    # prehistoric nightmares. So staying with 14.04 for the time being.
     dist: trusty
     env:
     - JOBID=android
