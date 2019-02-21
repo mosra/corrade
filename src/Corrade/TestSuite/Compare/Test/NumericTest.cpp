@@ -39,6 +39,12 @@ struct NumericTest: Tester {
     void greater();
     void around();
 
+    void lessMulti();
+    void lessOrEqualMulti();
+    void greaterOrEqualMulti();
+    void greaterMulti();
+    void aroundMulti();
+
     void explicitBoolConversion();
 };
 
@@ -49,8 +55,43 @@ NumericTest::NumericTest() {
               &NumericTest::greater,
               &NumericTest::around,
 
+              &NumericTest::lessMulti,
+              &NumericTest::lessOrEqualMulti,
+              &NumericTest::greaterOrEqualMulti,
+              &NumericTest::greaterMulti,
+              &NumericTest::aroundMulti,
+
               &NumericTest::explicitBoolConversion});
 }
+
+struct BVec2 {
+    BVec2(bool a, bool b): a{a}, b{b} {}
+    explicit operator bool() const { return a && b; }
+    bool a, b;
+};
+
+struct Vec2 {
+    Vec2(float a, float b): a{a}, b{b} {}
+    BVec2 operator<(const Vec2& other) const {
+        return {a < other.a, b < other.b};
+    }
+    BVec2 operator<=(const Vec2& other) const {
+        return {a <= other.a, b <= other.b};
+    }
+    BVec2 operator>=(const Vec2& other) const {
+        return {a >= other.a, b >= other.b};
+    }
+    BVec2 operator>(const Vec2& other) const {
+        return {a > other.a, b > other.b};
+    }
+    Vec2 operator+(const Vec2& other) const {
+        return {a + other.a, b + other.b};
+    }
+    Vec2 operator-(const Vec2& other) const {
+        return {a - other.a, b - other.b};
+    }
+    float a, b;
+};
 
 void NumericTest::less() {
     /* In random order to assure that we don't accidentally compare pointer
@@ -185,6 +226,74 @@ void NumericTest::explicitBoolConversion() {
     CORRADE_VERIFY(Comparator<Compare::GreaterOrEqual<Foo>>{}({}, {}));
     CORRADE_VERIFY(Comparator<Compare::Greater<Foo>>{}({}, {}));
     CORRADE_VERIFY(!Comparator<Compare::Around<Bar>>{{}}({}, {}));
+}
+
+void NumericTest::lessMulti() {
+    Vec2 a{9.27f, 3.11f};
+    Vec2 b{9.28f, 3.12f};
+    Vec2 c{9.28f, 3.10f};
+    CORRADE_VERIFY(Comparator<Compare::Less<Vec2>>{}(a, b));
+    CORRADE_VERIFY(!Comparator<Compare::Less<Vec2>>{}(b, b));
+
+    /* b is neither less nor greater/equal than c */
+    CORRADE_VERIFY(!Comparator<Compare::Less<Vec2>>{}(c, b));
+    CORRADE_VERIFY(!Comparator<Compare::GreaterOrEqual<Vec2>>{}(c, b));
+}
+
+void NumericTest::lessOrEqualMulti() {
+    Vec2 a{9.27f, 3.11f};
+    Vec2 b{9.27f, 3.12f};
+    Vec2 c{9.28f, 3.10f};
+    CORRADE_VERIFY(Comparator<Compare::LessOrEqual<Vec2>>{}(a, b));
+    CORRADE_VERIFY(Comparator<Compare::LessOrEqual<Vec2>>{}(b, b));
+
+    /* b is neither less/equal nor greater than c */
+    CORRADE_VERIFY(!Comparator<Compare::LessOrEqual<Vec2>>{}(c, b));
+    CORRADE_VERIFY(!Comparator<Compare::Greater<Vec2>>{}(c, b));
+}
+
+void NumericTest::greaterOrEqualMulti() {
+    Vec2 a{9.27f, 3.12f};
+    Vec2 b{9.27f, 3.11f};
+    Vec2 c{9.28f, 3.10f};
+    CORRADE_VERIFY(Comparator<Compare::GreaterOrEqual<Vec2>>{}(a, b));
+    CORRADE_VERIFY(Comparator<Compare::GreaterOrEqual<Vec2>>{}(b, b));
+
+    /* b is neither greater/equal nor less than c */
+    CORRADE_VERIFY(!Comparator<Compare::GreaterOrEqual<Vec2>>{}(c, b));
+    CORRADE_VERIFY(!Comparator<Compare::Less<Vec2>>{}(c, b));
+}
+
+void NumericTest::greaterMulti() {
+    Vec2 a{9.28f, 3.12f};
+    Vec2 b{9.27f, 3.11f};
+    Vec2 c{9.28f, 3.10f};
+    CORRADE_VERIFY(Comparator<Compare::Greater<Vec2>>{}(a, b));
+    CORRADE_VERIFY(!Comparator<Compare::Greater<Vec2>>{}(b, b));
+
+    /* b is neither greater nor less/equal than c */
+    CORRADE_VERIFY(!Comparator<Compare::Greater<Vec2>>{}(c, b));
+    CORRADE_VERIFY(!Comparator<Compare::LessOrEqual<Vec2>>{}(c, b));
+}
+
+void NumericTest::aroundMulti() {
+    Vec2 epsilon{0.02f, 0.02f};
+
+    Vec2 a{9.25f, 3.08f};
+    Vec2 b{9.28f, 3.11f};
+    Vec2 c{9.31f, 3.14f};
+    Vec2 d{9.29f, 3.10f};
+    Vec2 e{9.25f, 3.14f};
+
+    /* Too below for both / too above for both */
+    CORRADE_VERIFY(!Comparator<Compare::Around<Vec2>>{epsilon}(a, b));
+    CORRADE_VERIFY(!Comparator<Compare::Around<Vec2>>{epsilon}(c, b));
+
+    /* Slightly above for one and slightly below for the other */
+    CORRADE_VERIFY(Comparator<Compare::Around<Vec2>>{epsilon}(d, b));
+
+    /* Too below for one and too above for the other */
+    CORRADE_VERIFY(!Comparator<Compare::Around<Vec2>>{epsilon}(e, b));
 }
 
 }}}}}
