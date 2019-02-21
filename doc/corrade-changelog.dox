@@ -75,6 +75,9 @@ namespace Corrade {
 
 -   The @ref TestSuite::Comparator class by mistake did not have fuzzy
     comparison for @cpp long double @ce
+-   Fixed @ref TestSuite::Compare::around() for types that don't have a total
+    ordering (for example, for Magnum matrix and vector types, @cpp !(a < b) @ce
+    might not neccesarily imply that @cpp a >= b @ce).
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 

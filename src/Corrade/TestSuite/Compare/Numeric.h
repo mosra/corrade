@@ -95,10 +95,10 @@ template<class T> class Greater {};
 /**
 @brief Pseudo-type for verifying that value is in given bounds
 
-Prints both values if @cpp actual < expected - epsilon @ce or
-@cpp expected + epsilon < actual @ce. Compared type needs to implement at least
-an @cpp operator-() @ce, @cpp operator+() @ce and @cpp operator<() @ce. Example
-usage:
+Prints both values if
+@cpp !(actual >= expected - epsilon && expected + epsilon >= actual) @ce.
+Compared type needs to implement at least an @cpp operator-() @ce,
+@cpp operator+() @ce and @cpp operator>=() @ce. Example usage:
 
 @snippet TestSuite.cpp Compare-Around
 
@@ -218,8 +218,8 @@ template<class T> class Comparator<Compare::Around<T>> {
         bool operator()(const T& actual, const T& expected) {
             _actualValue = &actual;
             _expectedValue = &expected;
-            return !(*_actualValue < *_expectedValue - _epsilon ||
-                     *_expectedValue + _epsilon < *_actualValue);
+            return *_actualValue >= *_expectedValue - _epsilon &&
+                   *_expectedValue + _epsilon >= *_actualValue;
         }
 
         void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {

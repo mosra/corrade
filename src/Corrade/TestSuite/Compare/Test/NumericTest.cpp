@@ -216,7 +216,7 @@ void NumericTest::explicitBoolConversion() {
     };
 
     struct Bar {
-        ExplicitBool operator<(const Bar&) const { return {}; }
+        ExplicitBool operator>=(const Bar&) const { return {}; }
         Bar operator-(const Bar&) const { return {}; }
         Bar operator+(const Bar&) const { return {}; }
     };
@@ -225,7 +225,7 @@ void NumericTest::explicitBoolConversion() {
     CORRADE_VERIFY(Comparator<Compare::LessOrEqual<Foo>>{}({}, {}));
     CORRADE_VERIFY(Comparator<Compare::GreaterOrEqual<Foo>>{}({}, {}));
     CORRADE_VERIFY(Comparator<Compare::Greater<Foo>>{}({}, {}));
-    CORRADE_VERIFY(!Comparator<Compare::Around<Bar>>{{}}({}, {}));
+    CORRADE_VERIFY(Comparator<Compare::Around<Bar>>{{}}({}, {}));
 }
 
 void NumericTest::lessMulti() {
