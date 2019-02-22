@@ -49,6 +49,12 @@ manually if desperately needed.
 
 @section Containers-LinkedList-basic-usage Basic usage
 
+Usage involves creating a subclass of @ref LinkedListItem and then adding them
+to the list instance. By default, the list instance takes ownership of the
+added items, calling @cpp delete @ce on each on destruction. See
+@ref Containers-LinkedList-memory-management for details and other
+possibilities.
+
 @snippet Containers.cpp LinkedList-usage
 
 Traversing through the list can be done using range-based for:
@@ -78,6 +84,16 @@ example provide wrapper functions with more descriptive names. In that case
 you need to friend both LinkedList and LinkedListItem in both your subclasses.
 
 @snippet Containers.cpp LinkedList-private-inheritance
+
+@section Containers-LinkedList-memory-management Memory management
+
+By default, the list takes ownership of all its items. When the list is
+destructed, @ref clear() or @ref erase() is called,
+@ref LinkedListItem::erase() is called on each item, which in turn calls
+@cpp delete this @ce. For cases where such behavior is not desirable (e.g.
+items meant to be owned by something else than the list),
+@ref LinkedListItem::erase() can be overriden to prevent this behavior. See its
+documentation for more information.
 */
 template<class T> class LinkedList {
     public:
@@ -157,7 +173,7 @@ template<class T> class LinkedList {
          * @brief Erase item
          * @param item      Item to erase
          *
-         * Equivalent to:
+         * Equivalent to the following:
          *
          * @snippet Containers.cpp LinkedList-erase
          */
@@ -179,6 +195,8 @@ This class is usually subclassed using [CRTP](http://en.wikipedia.org/wiki/Curio
 e.g.:
 
 @snippet Containers.cpp LinkedListItem-usage
+
+See @ref LinkedList for more information.
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class Derived, class List = LinkedList<Derived>>
@@ -227,7 +245,34 @@ class LinkedListItem {
         Derived* next() { return _next; }
         const Derived* next() const { return _next; } /**< @overload */
 
+        /**
+         * @brief Erase the item
+         *
+         * Called from @ref LinkedList destructor, @ref LinkedList::clear() and
+         * @ref LinkedList::erase(). By default, calls @ref doErase(), which
+         * then performs @cpp delete this @ce. For cases where this is not
+         * desired (for example when providing bindings to reference-counted
+         * languages), it's possible to provide a different behavior by either:
+         *
+         * -    *replacing* this non-virtual function in your derived class
+         *      (faster, doesn't involve a @cpp virtual @ce call, but requires
+         *      the corresponding @ref LinkedList to be templated on the type
+         *      that provides the replacement function),
+         * -    or overriding the private @ref doErase() function (slower due
+         *      to the @cpp virtual @ce call, but without imposing any
+         *      restrictions on the @ref LinkedList type)
+         */
+        void erase() { doErase(); }
+
     private:
+        /**
+         * @brief Erase the item
+         *
+         * Implementation for @ref erase(), see its documentation for more
+         * information. Default implementation performs @cpp delete this @ce.
+         */
+        virtual void doErase() { delete this; }
+
         List* _list;
         Derived *_previous, *_next;
 };
@@ -325,7 +370,7 @@ template<class T> inline void LinkedList<T>::move(T* const item, T* const before
 
 template<class T> inline void LinkedList<T>::erase(T* const item) {
     cut(item);
-    delete item;
+    item->erase();
 }
 
 template<class T> void LinkedList<T>::clear() {

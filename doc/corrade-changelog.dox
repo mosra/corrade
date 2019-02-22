@@ -63,6 +63,8 @@ namespace Corrade {
 
 -   It's now possible to create @ref Containers::ScopeGuard without a handle
     in order to easily call a global function or lambda on scope end
+-   Implicit memory management of @ref Containers::LinkedList can be now
+    overriden by reimplementing @ref Containers::LinkedListItem::erase()
 
 @subsection corrade-changelog-latest-buildsystem Build system
 

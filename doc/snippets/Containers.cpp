@@ -446,9 +446,9 @@ class Object: public Containers::LinkedListItem<Object> {
     // ...
 };
 
-Object a, b, c;
-
 Containers::LinkedList<Object> list;
+
+Object a, b, c;
 list.insert(&a);
 list.insert(&b);
 list.insert(&c);
@@ -493,7 +493,7 @@ if(item != before) {
 
 /* [LinkedList-erase] */
 list.cut(item);
-delete item;
+item->erase();
 /* [LinkedList-erase] */
 }
 #if defined(__clang__) || defined(__GNUC__)

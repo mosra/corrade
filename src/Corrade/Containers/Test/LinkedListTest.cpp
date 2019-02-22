@@ -46,6 +46,8 @@ struct LinkedListTest: TestSuite::Tester {
     void moveItem();
 
     void rangeBasedFor();
+    void overrideErase();
+    void overrideEraseVirtual();
 };
 
 class Item: public LinkedListItem<Item> {
@@ -79,7 +81,9 @@ LinkedListTest::LinkedListTest() {
               &LinkedListTest::moveList,
               &LinkedListTest::moveItem,
 
-              &LinkedListTest::rangeBasedFor});
+              &LinkedListTest::rangeBasedFor,
+              &LinkedListTest::overrideErase,
+              &LinkedListTest::overrideEraseVirtual});
 }
 
 void LinkedListTest::listBackReference() {
@@ -439,6 +443,71 @@ void LinkedListTest::rangeBasedFor() {
         for(auto&& i: clist) items.push_back(&i);
         CORRADE_COMPARE(items, (std::vector<const Item*>{&item, &item2, &item3}));
     }
+}
+
+void LinkedListTest::overrideErase() {
+    struct NonErasingItem: LinkedListItem<NonErasingItem> {
+        void erase() { dead = true; }
+        bool dead = false;
+    };
+
+    /* Have the items initialized before the list so we test that the list
+       doesn't try to call delete on them first. */
+    NonErasingItem item;
+    NonErasingItem item2;
+
+    CORRADE_VERIFY(!item.dead);
+    CORRADE_VERIFY(!item2.dead);
+    CORRADE_COMPARE(item.list(), nullptr);
+    CORRADE_COMPARE(item2.list(), nullptr);
+
+    {
+        Containers::LinkedList<NonErasingItem> list;
+        list.insert(&item);
+        list.insert(&item2);
+        CORRADE_COMPARE(item.list(), &list);
+        CORRADE_COMPARE(item2.list(), &list);
+    }
+
+    CORRADE_VERIFY(item.dead);
+    CORRADE_VERIFY(item2.dead);
+    CORRADE_COMPARE(item.list(), nullptr);
+    CORRADE_COMPARE(item2.list(), nullptr);
+}
+
+void LinkedListTest::overrideEraseVirtual() {
+    struct NonErasingItemBase: LinkedListItem<NonErasingItemBase> {
+        void doErase() override { dead = true; }
+        bool dead = false;
+    };
+    struct NonErasingItem: NonErasingItemBase {
+        /* This shouldn't get called, doErase() should */
+        void erase() { CORRADE_ASSERT_UNREACHABLE(); }
+    };
+
+    /* Have the items initialized before the list so we test that the list
+       doesn't try to call delete on them first. */
+    NonErasingItem item;
+    NonErasingItem item2;
+
+    CORRADE_VERIFY(!item.dead);
+    CORRADE_VERIFY(!item2.dead);
+    CORRADE_COMPARE(item.list(), nullptr);
+    CORRADE_COMPARE(item2.list(), nullptr);
+
+    {
+        /* Have list of the base items so erase() doesn't get called */
+        Containers::LinkedList<NonErasingItemBase> list;
+        list.insert(&item);
+        list.insert(&item2);
+        CORRADE_COMPARE(item.list(), &list);
+        CORRADE_COMPARE(item2.list(), &list);
+    }
+
+    CORRADE_VERIFY(item.dead);
+    CORRADE_VERIFY(item2.dead);
+    CORRADE_COMPARE(item.list(), nullptr);
+    CORRADE_COMPARE(item2.list(), nullptr);
 }
 
 }}}}
