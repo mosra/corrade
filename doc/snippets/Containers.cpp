@@ -447,13 +447,10 @@ class Object: public Containers::LinkedListItem<Object> {
 };
 
 Containers::LinkedList<Object> list;
+list.insert(new Object);
+list.insert(new Object);
 
-Object a, b, c;
-list.insert(&a);
-list.insert(&b);
-list.insert(&c);
-
-list.cut(&b);
+list.erase(list.last());
 /* [LinkedList-usage] */
 
 #if defined(__GNUC__) || defined( __clang__)
