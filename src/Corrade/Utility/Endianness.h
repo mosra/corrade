@@ -65,7 +65,7 @@ class Endianness {
          */
         template<class T> static T bigEndian(T value) {
             #ifdef CORRADE_BIG_ENDIAN
-            return number;
+            return value;
             #else
             return swap(value);
             #endif
