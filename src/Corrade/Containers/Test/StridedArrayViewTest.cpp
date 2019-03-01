@@ -581,8 +581,13 @@ void StridedArrayViewTest::cast() {
     auto b = Containers::arrayCast<int>(a);
     CORRADE_COMPARE(b.size(), 5);
     CORRADE_COMPARE(b.stride(), 8);
-    CORRADE_COMPARE(b[2], 1966083);
-    CORRADE_COMPARE(b[3], 2621444);
+    #ifndef CORRADE_BIG_ENDIAN
+    CORRADE_COMPARE(b[2], (30 << 16) | 3); /* 1966083 on LE */
+    CORRADE_COMPARE(b[3], (40 << 16) | 4); /* 2621444 on LE */
+    #else
+    CORRADE_COMPARE(b[2], (3 << 16) | 30); /* 196638 on BE */
+    CORRADE_COMPARE(b[3], (4 << 16) | 40); /* 262184 on BE */
+    #endif
 }
 
 void StridedArrayViewTest::castInvalid() {
@@ -601,8 +606,13 @@ void StridedArrayViewTest::castInvalid() {
     auto b = Containers::arrayCast<short>(a);
     CORRADE_COMPARE(b.size(), 5);
     CORRADE_COMPARE(b.stride(), 2);
-    CORRADE_COMPARE(b[2], 7683);
-    CORRADE_COMPARE(b[3], 10244);
+    #ifndef CORRADE_BIG_ENDIAN
+    CORRADE_COMPARE(b[2], (30 << 8) | 3); /* 7683 on LE */
+    CORRADE_COMPARE(b[3], (40 << 8) | 4); /* 10244 on LE */
+    #else
+    CORRADE_COMPARE(b[2], (3 << 8) | 30); /* 798 on BE */
+    CORRADE_COMPARE(b[3], (4 << 8) | 40); /* 1064 on BE */
+    #endif
 
     {
         std::ostringstream out;
