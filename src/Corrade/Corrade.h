@@ -170,12 +170,13 @@ Defined if the library is built for Android.
 @brief x86 target
 
 Defined if the library is built for x86 platforms (32 or 64-bit). Note that
-unlike other `CORRADE_TARGET_*` variables, this variable and
-@ref CORRADE_TARGET_ARM are not exposed in CMake because the meaning is unclear
-on platforms with multi-architecture binaries. If neither
-@ref CORRADE_TARGET_X86 nor @ref CORRADE_TARGET_ARM is defined, the platform
-might be either @ref CORRADE_TARGET_EMSCRIPTEN or any other that the library
-doesn't know about yet.
+unlike other `CORRADE_TARGET_*` variables, this variable,
+@ref CORRADE_TARGET_ARM and @ref CORRADE_TARGET_POWERPC are not exposed in
+CMake because the meaning is unclear on platforms with multi-architecture
+binaries. If neither @ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM nor
+@ref CORRADE_TARGET_POWERPC is defined, the platform might be either
+@ref CORRADE_TARGET_EMSCRIPTEN or any other that the library doesn't know about
+yet.
 */
 #define CORRADE_TARGET_X86
 #undef CORRADE_TARGET_X86
@@ -184,15 +185,31 @@ doesn't know about yet.
 @brief ARM target
 
 Defined if the library is built for ARM platforms (32 or 64-bit). Note that
-unlike other `CORRADE_TARGET_*` variables, this variable and
-@ref CORRADE_TARGET_X86 are not exposed in CMake because the meaning is unclear
-on platforms with multi-architecture binaries. If neither
-@ref CORRADE_TARGET_X86 nor @ref CORRADE_TARGET_ARM is defined, the platform
-might be either @ref CORRADE_TARGET_EMSCRIPTEN or any other that the library
-doesn't know about yet.
+unlike other `CORRADE_TARGET_*` variables, this variable,
+@ref CORRADE_TARGET_X86 and @ref CORRADE_TARGET_POWERPC are not exposed in
+CMake because the meaning is unclear on platforms with multi-architecture
+binaries. If neither @ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM nor
+@ref CORRADE_TARGET_POWERPC is defined, the platform might be either
+@ref CORRADE_TARGET_EMSCRIPTEN or any other that the library doesn't know about
+yet.
 */
 #define CORRADE_TARGET_ARM
 #undef CORRADE_TARGET_ARM
+
+/**
+@brief PowerPC target
+
+Defined if the library is built for PowerPC platforms (32 or 64-bit). Note that
+unlike other `CORRADE_TARGET_*` variables, this variable,
+@ref CORRADE_TARGET_X86 and @ref CORRADE_TARGET_ARM are not exposed in CMake
+because the meaning is unclear on platforms with multi-architecture binaries.
+If neither @ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM nor
+@ref CORRADE_TARGET_POWERPC is defined, the platform might be either
+@ref CORRADE_TARGET_EMSCRIPTEN or any other that the library doesn't know about
+yet.
+*/
+#define CORRADE_TARGET_POWERPC
+#undef CORRADE_TARGET_POWERPC
 
 /**
 @brief PluginManager doesn't have dynamic plugin support on this platform

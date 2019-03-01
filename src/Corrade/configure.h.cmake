@@ -59,6 +59,10 @@
 #elif defined(__arm__) || defined(__aarch64__) || defined(_M_ARM) || defined(_M_ARM64)
 #define CORRADE_TARGET_ARM
 
+/* First is GCC/Clang, second is MSVC */
+#elif defined(__powerpc64__) || defined(_M_PPC)
+#define CORRADE_TARGET_POWERPC
+
 /* Otherwise one should expect CORRADE_TARGET_EMSCRIPTEN. No other platforms
    are currently tested for, but that's okay -- a runtime test for this is in
    Utility/Test/SystemTest.cpp */
@@ -66,7 +70,7 @@
 
 /* Sanity checks */
 #if defined(CORRADE_TARGET_EMSCRIPTEN) && (defined(CORRADE_TARGET_X86) || defined(CORRADE_TARGET_ARM))
-#error CORRADE_TARGET_X86 or CORRADE_TARGET_ARM defined on Emscripten
+#error CORRADE_TARGET_X86 / _ARM / _POWERPC defined on Emscripten
 #endif
 
 /* C++ standard */

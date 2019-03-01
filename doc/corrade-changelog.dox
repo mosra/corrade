@@ -33,6 +33,9 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-new New features
 
+-   Added @ref CORRADE_TARGET_POWERPC for detecting PowerPC architectures (see
+    [mosra/corrade#60](https://github.com/mosra/corrade/pull/60))
+
 @subsubsection corrade-changelog-latest-new-containers Containers library
 
 -   The @ref Containers::ArrayView class together with
