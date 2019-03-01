@@ -80,6 +80,8 @@ namespace Corrade {
 -   Fixed @ref TestSuite::Compare::around() for types that don't have a total
     ordering (for example, for Magnum matrix and vector types, @cpp !(a < b) @ce
     might not neccesarily imply that @cpp a >= b @ce).
+-   Fixed build on big-endian platforms (see
+    [mosra/corrade#58](https://github.com/mosra/corrade/pull/58))
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 
