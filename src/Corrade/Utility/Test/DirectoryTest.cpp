@@ -433,6 +433,9 @@ void DirectoryTest::mkpath() {
 }
 
 void DirectoryTest::mkpathNoPermission() {
+    if(Directory::home() == "/root")
+        CORRADE_SKIP("Running under root, can't test for permissions.");
+
     #ifdef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_SKIP("Everything is writeable under Emscripten");
     #elif !defined(CORRADE_TARGET_WINDOWS)
@@ -521,10 +524,12 @@ void DirectoryTest::home() {
     CORRADE_VERIFY(Directory::exists(Directory::join(home, "Library")));
 
     /* On other Unixes (except Android, which is shit) verify that the home dir
-       contains `.local` directory. Ugly and hacky, but it's the best I came up
-       with. Can't test for e.g. `/home/` substring, as that can be overriden. */
+       contains `.local` directory or is /root. Ugly and hacky, but it's the
+       best I came up with. Can't test for e.g. `/home/` substring, as that can
+       be overriden. */
     #elif defined(CORRADE_TARGET_UNIX) && !defined(CORRADE_TARGET_ANDROID)
-    CORRADE_VERIFY(Directory::exists(Directory::join(home, ".local")));
+    CORRADE_VERIFY(Directory::exists(home));
+    CORRADE_VERIFY(Directory::exists(Directory::join(home, ".local")) || home == "/root");
 
     /* On Emscripten verify that the directory exists (it's empty by default) */
     #elif defined(CORRADE_TARGET_EMSCRIPTEN)
@@ -820,8 +825,12 @@ void DirectoryTest::writeEmpty() {
 }
 
 void DirectoryTest::writeNoPermission() {
+    if(Directory::home() == "/root")
+        CORRADE_SKIP("Running under root, can't test for permissions.");
+
     std::ostringstream out;
     Error err{&out};
+
     CORRADE_VERIFY(!Directory::write("/root/writtenFile", nullptr));
     CORRADE_COMPARE(out.str(), "Utility::Directory::write(): can't open /root/writtenFile\n");
 }
@@ -875,6 +884,9 @@ void DirectoryTest::appendEmpty() {
 }
 
 void DirectoryTest::appendNoPermission() {
+    if(Directory::home() == "/root")
+        CORRADE_SKIP("Running under root, can't test for permissions.");
+
     std::ostringstream out;
     {
         Error redirectError{&out};
@@ -936,6 +948,9 @@ void DirectoryTest::copyNonexistent() {
 }
 
 void DirectoryTest::copyNoPermission() {
+    if(Directory::home() == "/root")
+        CORRADE_SKIP("Running under root, can't test for permissions.");
+
     std::ostringstream out;
     {
         Error err{&out};
@@ -1020,6 +1035,9 @@ void DirectoryTest::map() {
 
 void DirectoryTest::mapNoPermission() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    if(Directory::home() == "/root")
+        CORRADE_SKIP("Running under root, can't test for permissions.");
+
     {
         std::ostringstream out;
         Error err{&out};
