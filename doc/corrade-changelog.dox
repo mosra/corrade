@@ -82,6 +82,8 @@ namespace Corrade {
     might not neccesarily imply that @cpp a >= b @ce).
 -   Fixed build on big-endian platforms (see
     [mosra/corrade#58](https://github.com/mosra/corrade/pull/58))
+-   Fixed @ref Utility::Sha1 calculation on big-endian platforms (see
+    [mosra/corrade#60](https://github.com/mosra/corrade/pull/60))
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 

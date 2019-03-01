@@ -124,13 +124,14 @@ void Sha1::processChunk(const char* data) {
     /* Extend the data to 80 bytes, make it big endian */
     unsigned int extended[80];
     /* Some memory juggling to avoid unaligned reads on platforms that don't
-       like it (Emscripten) */
+       like it (Emscripten). The data don't have any endianness, so take the
+       first byte first, as usual. */
     for(int i = 0; i != 16; ++i)
-        extended[i] = Endianness::bigEndian<unsigned int>(
-            (static_cast<unsigned int>(static_cast<unsigned char>(data[i*4 + 3])) << 24) |
-            (static_cast<unsigned int>(static_cast<unsigned char>(data[i*4 + 2])) << 16) |
-            (static_cast<unsigned int>(static_cast<unsigned char>(data[i*4 + 1])) <<  8) |
-            (static_cast<unsigned int>(static_cast<unsigned char>(data[i*4 + 0])) <<  0));
+        extended[i] =
+            (static_cast<unsigned int>(static_cast<unsigned char>(data[i*4 + 0])) << 24) |
+            (static_cast<unsigned int>(static_cast<unsigned char>(data[i*4 + 1])) << 16) |
+            (static_cast<unsigned int>(static_cast<unsigned char>(data[i*4 + 2])) <<  8) |
+            (static_cast<unsigned int>(static_cast<unsigned char>(data[i*4 + 3])) <<  0);
     for(int i = 16; i != 80; ++i)
         extended[i] = leftrotate((extended[i-3] ^ extended[i-8] ^ extended[i-14] ^ extended[i-16]), 1);
 
