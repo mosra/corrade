@@ -180,7 +180,7 @@ int main(int argc, char** argv) {
         .addNamedArgument('n', "repeat").setHelp("repeat", "repeat count")
         .addBooleanOption('v', "verbose").setHelp("verbose", "log verbosely")
         .addOption("log", "log.txt").setHelp("log", "save verbose log to given file")
-        .setHelp("Repeats the text given number of times.")
+        .setGlobalHelp("Repeats the text given number of times.")
         .parse(argc, argv);
 
     std::ofstream logOutput(args.value("log"));
@@ -212,7 +212,7 @@ Utility::Arguments args;
 args.addArgument("text").setHelp("text", "the text to print")
     .addNamedArgument('n', "repeat").setHelp("repeat", "repeat count")
     .addSkippedPrefix("formatter", "formatter options")
-    .setHelp("Repeats the text given number of times.")
+    .setGlobalHelp("Repeats the text given number of times.")
     .parse(argc, argv);
 /* [Arguments-delegating] */
 }

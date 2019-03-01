@@ -320,13 +320,19 @@ Arguments& Arguments::setCommand(std::string name) {
     return *this;
 }
 
-Arguments& Arguments::setHelp(std::string help) {
+Arguments& Arguments::setGlobalHelp(std::string help) {
     CORRADE_ASSERT(_prefix.empty(),
-        "Utility::Arguments::setHelp(): global help text only allowed in unprefixed version", *this);
+        "Utility::Arguments::setGlobalHelp(): global help text only allowed in unprefixed version", *this);
 
     _help = std::move(help);
     return *this;
 }
+
+#ifdef CORRADE_BUILD_DEPRECATED
+Arguments& Arguments::setHelp(std::string help) {
+    return setGlobalHelp(std::move(help));
+}
+#endif
 
 Arguments& Arguments::setHelp(const std::string& key, std::string help, std::string helpKey) {
     auto found = find(_prefix + key);

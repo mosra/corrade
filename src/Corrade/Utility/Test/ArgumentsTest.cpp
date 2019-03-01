@@ -283,7 +283,7 @@ Arguments:
 void ArgumentsTest::helpText() {
     Arguments args;
     args.addArgument("foo").setHelp("foo", "which foo to bar with")
-        .setHelp("Bars with given foo.");
+        .setGlobalHelp("Bars with given foo.");
 
     const auto expected = R"text(Usage:
   ./app [-h|--help] [--] foo
@@ -847,14 +847,14 @@ void ArgumentsTest::prefixedDisallowedCalls() {
         .addNamedArgument("bar")
         .addOption('a', "baz")
         .addBooleanOption("eh")
-        .setHelp("global help");
+        .setGlobalHelp("global help");
 
     CORRADE_COMPARE(out.str(),
         "Utility::Arguments::addArgument(): argument foo not allowed in prefixed version\n"
         "Utility::Arguments::addNamedArgument(): argument bar not allowed in prefixed version\n"
         "Utility::Arguments::addOption(): short option a not allowed in prefixed version\n"
         "Utility::Arguments::addBooleanOption(): boolean option eh not allowed in prefixed version\n"
-        "Utility::Arguments::setHelp(): global help text only allowed in unprefixed version\n");
+        "Utility::Arguments::setGlobalHelp(): global help text only allowed in unprefixed version\n");
 }
 
 void ArgumentsTest::prefixedDisallowedWithPrefix() {

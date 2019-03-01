@@ -103,7 +103,7 @@ int Tester::exec(std::ostream* const logOutput, std::ostream* const errorOutput)
             .setFromEnvironment("benchmark-yellow", "CORRADE_BENCHMARK_YELLOW")
         .addOption("benchmark-red", "0.25").setHelp("benchmark-red", "deviation threshold for marking benchmark red", "N")
             .setFromEnvironment("benchmark-red", "CORRADE_BENCHMARK_RED")
-        .setHelp(R"(Corrade TestSuite executable. By default runs test cases in order in which they
+        .setGlobalHelp(R"(Corrade TestSuite executable. By default runs test cases in order in which they
 were added and exits with non-zero code if any of them failed. Supported
 benchmark types:
   wall-time     wall time spent

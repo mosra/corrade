@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
         .addArgument("conf").setHelp("conf", "resource configuration file", "resources.conf")
         .addArgument("out").setHelp("out", "output file", "outfile.cpp")
         .setCommand("corrade-rc")
-        .setHelp("Resource compiler for Corrade.")
+        .setGlobalHelp("Resource compiler for Corrade.")
         .parse(argc, argv);
 
     /* Remove previous output file */

@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
 
     Utility::Arguments args;
     args.addArgument("plugin").setHelp("plugin", "animal plugin name")
-        .setHelp("Displays info about given animal.")
+        .setGlobalHelp("Displays info about given animal.")
         .parse(argc, argv);
 
     /* Initialize plugin manager with given directory */

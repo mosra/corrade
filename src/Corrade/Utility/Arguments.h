@@ -36,6 +36,10 @@
 #include "Corrade/Utility/ConfigurationValue.h"
 #include "Corrade/Utility/visibility.h"
 
+#ifdef CORRADE_BUILD_DEPRECATED
+#include "Corrade/Utility/Macros.h"
+#endif
+
 namespace Corrade { namespace Utility {
 
 /**
@@ -437,7 +441,14 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * Help text can be set only in the unprefixed version.
          * @see @ref setCommand()
          */
-        Arguments& setHelp(std::string help);
+        Arguments& setGlobalHelp(std::string help);
+
+        #ifdef CORRADE_BUILD_DEPRECATED
+        /** @brief @copybrief setGlobalHelp()
+         * @deprecated Use @ref setGlobalHelp() instead.
+         */
+        CORRADE_DEPRECATED("use setGlobalHelp() instead") Arguments& setHelp(std::string help);
+        #endif
 
         /**
          * @brief Set help text for given key

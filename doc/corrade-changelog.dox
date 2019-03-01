@@ -85,6 +85,9 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 
+-   Single-argument @cpp Utility::Arguments::setHelp() @ce is now deprecated in
+    favor of @ref Utility::Arguments::setGlobalHelp() to avoid it being used
+    for documenting named arguments by accident.
 -   @cpp Utility::Directory::fileExists() @ce is now deprecated in favor of
     @ref Utility::Directory::exists(). It was named like this to prevent it
     from looking like it works on directories only, but such name then caused
