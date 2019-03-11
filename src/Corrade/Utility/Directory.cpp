@@ -23,7 +23,11 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-/* Requests 64bit file offset on Linux */
+#include "Corrade/configure.h"
+
+/* Requests 64bit file offset on Linux. Has to be done before anything else is
+   included, since we can't be sure that <string> doesn't include anything that
+   this macro would affect. */
 #ifdef CORRADE_TARGET_UNIX
 #define _FILE_OFFSET_BITS 64
 #endif
