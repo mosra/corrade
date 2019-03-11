@@ -44,6 +44,11 @@
 #include <cstdlib>
 #include <algorithm>
 
+/* Checking for API level on Android */
+#ifdef CORRADE_TARGET_ANDROID
+#include <android/api-level.h>
+#endif
+
 /* Unix memory mapping */
 #ifdef CORRADE_TARGET_UNIX
 #include <fcntl.h>
@@ -487,7 +492,16 @@ Containers::Array<char> read(const std::string& filename) {
 
     std::fseek(f, 0, SEEK_END);
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    const std::size_t size = ftello(f);
+    const std::size_t size =
+        /* 32-bit Android ignores _LARGEFILE_SOURCE and instead makes ftello()
+           available always after API level 24 and never before that
+           https://android.googlesource.com/platform/bionic/+/master/docs/32-bit-abi.md */
+        #if defined(CORRADE_TARGET_ANDROID) && __SIZEOF_POINTER__ == 4 && __ANDROID_API__ < 24
+        ftell(f)
+        #else
+        ftello(f)
+        #endif
+        ;
     #elif defined(CORRADE_TARGET_WINDOWS)
     const std::size_t size = _ftelli64(f);
     #else
