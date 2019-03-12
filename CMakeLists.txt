@@ -150,12 +150,15 @@ if(CMAKE_CROSSCOMPILING)
     add_executable(Corrade::rc IMPORTED)
     set_property(TARGET Corrade::rc PROPERTY IMPORTED_LOCATION ${CORRADE_RC_EXECUTABLE})
 endif()
+
+# If we're in a CMake subproject, find_package(Corrade) will be looking for
+# these, so supply their in-source location to cache
 if(CORRADE_TESTSUITE_TARGET_XCTEST)
-    set(CORRADE_TESTSUITE_XCTEST_RUNNER ${PROJECT_SOURCE_DIR}/src/Corrade/TestSuite/XCTestRunner.mm.in)
+    set(CORRADE_TESTSUITE_XCTEST_RUNNER ${PROJECT_SOURCE_DIR}/src/Corrade/TestSuite/XCTestRunner.mm.in CACHE INTERNAL "" FORCE)
 elseif(CORRADE_TARGET_ANDROID)
-    set(CORRADE_TESTSUITE_ADB_RUNNER ${PROJECT_SOURCE_DIR}/src/Corrade/TestSuite/AdbRunner.sh)
+    set(CORRADE_TESTSUITE_ADB_RUNNER ${PROJECT_SOURCE_DIR}/src/Corrade/TestSuite/AdbRunner.sh CACHE INTERNAL "" FORCE)
 elseif(CORRADE_TARGET_EMSCRIPTEN)
-    set(CORRADE_TESTSUITE_EMSCRIPTEN_RUNNER ${PROJECT_SOURCE_DIR}/src/Corrade/TestSuite/EmscriptenRunner.html.in)
+    set(CORRADE_TESTSUITE_EMSCRIPTEN_RUNNER ${PROJECT_SOURCE_DIR}/src/Corrade/TestSuite/EmscriptenRunner.html.in CACHE INTERNAL "" FORCE)
 endif()
 
 # Detect and auto-enable compiler compatibility

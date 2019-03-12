@@ -75,6 +75,8 @@ namespace Corrade {
     upcoming C++2a standard. The equivalent CMake property can now be set to
     @cpp 20 @ce to pass the `-std=c++2a` flag to GCC and Clang and
     `/std:c++latest` to MSVC.
+-   It's now possible to use the @ref TestSuite library via CMake subprojects
+    also on Android, iOS and Emscripten
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

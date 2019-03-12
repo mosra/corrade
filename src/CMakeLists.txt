@@ -41,4 +41,4 @@ endif()
 add_subdirectory(Corrade)
 
 # Corrade include dir for superprojects
-set(CORRADE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "")
+set(CORRADE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "" FORCE)
