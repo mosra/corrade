@@ -71,6 +71,8 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-buildsystem Build system
 
+-   @ref building-corrade-packages-msys "MSYS2 packages" are now in official
+    repositories, installable directly via `pacman`
 -   The @ref CORRADE_CXX_STANDARD preprocessor macro learned support for the
     upcoming C++2a standard. The equivalent CMake property can now be set to
     @cpp 20 @ce to pass the `-std=c++2a` flag to GCC and Clang and

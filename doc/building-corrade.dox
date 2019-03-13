@@ -188,10 +188,16 @@ Edit the PKGBUILDs if you want to pass additional flags to CMake or
 
 @subsection building-corrade-packages-msys MSYS2 packages
 
-`PKGBUILD`s for [MSYS2](https://www.msys2.org/) are in the `package/msys`
-directory. Similarly to ArchLinux, there is one package in the
-`package/msys/corrade` directory, which will download and package latest stable
-release; and then a development `PKGBUILD`, allowing you to package and install
+[MSYS2](https://www.msys2.org/) package for the latest stable release is
+mantained in the official repos. Installing is as simple as this:
+
+@code{.sh}
+pacman -S mingw-w64-x86_64-corrade # or mingw-w64-i686-corrade
+@endcode
+
+Similarly to ArchLinux, there is one package in the `package/msys/corrade`
+directory, which will download and package latest stable release; and then a
+development `PKGBUILD` in `package/msys`, allowing you to package and install
 the currently checked out source tree. Example usage:
 
 @code{.sh}
