@@ -61,9 +61,19 @@ namespace Implementation {
             /* MSVC is not able to detect template parameters, so I need to
                shovel these in explicitly using "static constructor" */
             template<class Emitter, class ...Args> static SignalData create(typename Emitter::Signal(Emitter::*signal)(Args...)) {
-                typedef typename Emitter::Signal(Emitter::*Signal)(Args...);
+                /* Member function pointers on Windows have different size
+                   based on whether the class has no/single inheritance,
+                   multiple inheritance or virtual inheritance. Casting to
+                   (Emitter::*) which has no inheritance (like done for other
+                   platforms) would thus lose information and cause problems
+                   when classes with multiple or virtual inheritance are used,
+                   so we create a new type, virtually inherited from emitter,
+                   cast the pointer to that and then save its representation.
+                   The same is done for MinGW above. */
                 SignalData d;
-                *reinterpret_cast<Signal*>(d.data) = signal;
+                struct VirtuallyInheritedEmitter: virtual Emitter {};
+                typedef typename Emitter::Signal(VirtuallyInheritedEmitter::*VirtuallyDerivedSignal)(Args...);
+                *reinterpret_cast<VirtuallyDerivedSignal*>(d.data) = signal;
                 return d;
             }
             #endif

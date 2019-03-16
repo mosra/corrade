@@ -96,6 +96,8 @@ namespace Corrade {
 -   Fixed @ref Interconnect::Emitter::emit() for signals from
     multiply-inherited base classes on MSVC --- it was due to an insufficiently
     tested workaround for a template deduction limitation in the compiler
+-   @ref Interconnect::Emitter::emit() now works correctly on MSVC for signals
+    from classes where multiple and/or virtual inheritance is involved
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 
