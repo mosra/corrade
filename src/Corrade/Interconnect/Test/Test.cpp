@@ -51,7 +51,10 @@ struct Test: TestSuite::Tester {
 
     void emit();
     void emitterSubclass();
-    void emitterVirtualBase();
+    void emitterMultipleInheritance();
+    void emitterMultipleInheritanceVirtual();
+    void emitterIdenticalSignals();
+
     void receiverSubclass();
     void slotInReceiverBase();
     void virtualSlot();
@@ -136,7 +139,10 @@ Test::Test() {
 
               &Test::emit,
               &Test::emitterSubclass,
-              &Test::emitterVirtualBase,
+              &Test::emitterMultipleInheritance,
+              &Test::emitterMultipleInheritanceVirtual,
+              &Test::emitterIdenticalSignals,
+
               &Test::receiverSubclass,
               &Test::slotInReceiverBase,
               &Test::virtualSlot,
@@ -413,7 +419,39 @@ void Test::emitterSubclass() {
     CORRADE_VERIFY(!postman.hasSignalConnections());
 }
 
-void Test::emitterVirtualBase() {
+void Test::emitterMultipleInheritance() {
+    struct A {
+        int foo;
+    };
+
+    struct Diamond: A, Postman {
+        Signal newDiamondCladMessage(int price, const std::string& value) {
+            return emit(&Diamond::newDiamondCladMessage, price, "<>"+value+"<>");
+        }
+    };
+
+    Diamond postman;
+    Mailbox mailbox;
+
+    Interconnect::connect(postman, &Diamond::newDiamondCladMessage, mailbox, &Mailbox::addMessage);
+    Interconnect::connect(postman, &Diamond::newMessage, mailbox, &Mailbox::addMessage);
+
+    postman.newDiamondCladMessage(10, "ahoy");
+    postman.newMessage(5, "hello");
+    CORRADE_COMPARE_AS(mailbox.messages, (std::vector<std::string>{"hello", "<>ahoy<>"}),
+                       TestSuite::Compare::SortedContainer);
+    CORRADE_COMPARE(mailbox.money, 15);
+
+    CORRADE_VERIFY(postman.hasSignalConnections(&Diamond::newMessage));
+    postman.disconnectSignal(&Diamond::newMessage);
+    CORRADE_VERIFY(postman.hasSignalConnections(&Diamond::newDiamondCladMessage));
+    postman.disconnectSignal(&Diamond::newDiamondCladMessage);
+    CORRADE_VERIFY(!postman.hasSignalConnections());
+}
+
+void Test::emitterMultipleInheritanceVirtual() {
+    /* Same as above, but with A derived virtually */
+
     struct A {
         int foo;
     };
@@ -428,23 +466,66 @@ void Test::emitterVirtualBase() {
     Mailbox mailbox;
 
     /* Virtual bases have extra big pointer sizes on MSVC (16 bytes on 32bit).
-       Ensure this is handled correctly in both cases -- members functions and
-       free functions. */
+       Ensure this is handled correctly. */
     Interconnect::connect(postman, &Diamond::newDiamondCladMessage, mailbox, &Mailbox::addMessage);
     Interconnect::connect(postman, &Diamond::newDiamondCladMessage, [](int, const std::string&){});
     Interconnect::connect(postman, &Diamond::newMessage, mailbox, &Mailbox::addMessage);
 
-    /* Just to be sure */
-    postman.newMessage(5, "hello");
     postman.newDiamondCladMessage(10, "ahoy");
+    postman.newMessage(5, "hello");
     CORRADE_COMPARE_AS(mailbox.messages, (std::vector<std::string>{"hello", "<>ahoy<>"}),
                        TestSuite::Compare::SortedContainer);
     CORRADE_COMPARE(mailbox.money, 15);
 
+    CORRADE_VERIFY(postman.hasSignalConnections(&Diamond::newMessage));
     postman.disconnectSignal(&Diamond::newMessage);
     CORRADE_VERIFY(postman.hasSignalConnections(&Diamond::newDiamondCladMessage));
     postman.disconnectSignal(&Diamond::newDiamondCladMessage);
     CORRADE_VERIFY(!postman.hasSignalConnections());
+}
+
+void Test::emitterIdenticalSignals() {
+    /* This is mainly to verify that identical looking functions are not merged
+       under MSVC (the /OPT:ICF linker flag) */
+
+    struct Widget: Emitter {
+        Signal tapped() {
+            return emit(&Widget::tapped);
+        }
+
+        Signal pressed() {
+            return emit(&Widget::pressed);
+        }
+
+        Signal released() {
+            return emit(&Widget::released);
+        }
+    };
+
+    Widget a;
+    Widget b;
+
+    Interconnect::connect(a, &Widget::pressed, [](){ Debug{} << "a pressed!"; });
+    Interconnect::connect(a, &Widget::released, [](){ Debug{} << "a released!"; });
+    Interconnect::connect(b, &Widget::tapped, [](){ Debug{} << "b tapped!"; });
+
+    std::ostringstream out;
+    Debug redirectOutput{&out};
+    a.pressed();
+    a.released();
+    a.tapped();
+
+    b.pressed();
+    b.released();
+    b.tapped();
+
+    CORRADE_VERIFY(&Widget::tapped != &Widget::pressed);
+    CORRADE_VERIFY(&Widget::tapped != &Widget::released);
+
+    CORRADE_COMPARE(out.str(),
+        "a pressed!\n"
+        "a released!\n"
+        "b tapped!\n");
 }
 
 void Test::receiverSubclass() {
