@@ -54,8 +54,8 @@ namespace Implementation {
 
             #ifndef CORRADE_MSVC2017_COMPATIBILITY
             template<class Emitter, class ...Args> SignalData(typename Emitter::Signal(Emitter::*signal)(Args...)): data() {
-                typedef typename Emitter::Signal(Emitter::*Signal)(Args...);
-                *reinterpret_cast<Signal*>(data) = signal;
+                typedef typename Emitter::Signal(Emitter::*BaseSignal)(Args...);
+                *reinterpret_cast<BaseSignal*>(data) = signal;
             }
             #else
             /* MSVC is not able to detect template parameters, so I need to
