@@ -410,7 +410,7 @@ template<class EmitterObject, class Emitter, class ...Args> Connection connect(E
     #ifndef CORRADE_MSVC2017_COMPATIBILITY
     Implementation::SignalData signalData(signal);
     #else
-    auto signalData = Implementation::SignalData::create<EmitterObject, Args...>(signal);
+    auto signalData = Implementation::SignalData::create<Emitter, Args...>(signal);
     #endif
     auto data = new Implementation::FunctionConnectionData<Args...>(&emitter, slot);
     Interconnect::Emitter::connectInternal(signalData, data);
@@ -456,7 +456,7 @@ template<class EmitterObject, class Emitter, class Receiver, class ReceiverObjec
     #ifndef CORRADE_MSVC2017_COMPATIBILITY
     Implementation::SignalData signalData(signal);
     #else
-    auto signalData = Implementation::SignalData::create<EmitterObject, Args...>(signal);
+    auto signalData = Implementation::SignalData::create<Emitter, Args...>(signal);
     #endif
     auto data = new Implementation::MemberConnectionData<ReceiverObject, Args...>(&emitter, &receiver, slot);
     Interconnect::Emitter::connectInternal(signalData, data);

@@ -93,6 +93,9 @@ namespace Corrade {
     [mosra/corrade#60](https://github.com/mosra/corrade/pull/60))
 -   Fixed @ref Utility::Directory::read() to not use `ftello()` on 32-bit
     Android and API levels below 24
+-   Fixed @ref Interconnect::Emitter::emit() for signals from
+    multiply-inherited base classes on MSVC --- it was due to an insufficiently
+    tested workaround for a template deduction limitation in the compiler
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 
