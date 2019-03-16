@@ -52,6 +52,11 @@ compilers, use @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPAC
 and @ref CORRADE_DEPRECATED_ENUM() instead. See @ref CORRADE_DEPRECATED_FILE()
 for file-level deprecation and @ref CORRADE_DEPRECATED_MACRO() for deprecating
 macros.
+
+Note that on MSVC and GCC this doesn't warn when using nested names of
+deprecated classes or typedefs, only when the type is instantiated --- i.e.,
+@cpp DeprecatedStruct a; @ce will warn, but @cpp DeprecatedStruct::Value @ce
+will not.
 */
 #if defined(__GNUC__) || defined(__clang__)
 #define CORRADE_DEPRECATED(message) __attribute((deprecated(message)))
@@ -65,9 +70,14 @@ macros.
 @brief Alias deprecation mark
 
 Marked alias will emit deprecation warning on supported compilers (GCC, Clang,
-MSVC 2017):
+MSVC 2017+):
 
 @snippet Utility.cpp CORRADE_DEPRECATED_ALIAS
+
+Note that on MSVC and GCC this doesn't warn when using nested names of
+deprecated aliases, only when the type is instantiated --- i.e.,
+@cpp DeprecatedAlias a; @ce will warn, but @cpp DeprecatedAlias::Value @ce
+will not.
 
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_NAMESPACE(),
     @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(),
@@ -85,14 +95,14 @@ MSVC 2017):
 @brief Namespace deprecation mark
 
 Marked enum or enum value will emit deprecation warning on supported compilers
-(C++17 feature, MSVC 2015 and Clang):
+(C++17 feature, MSVC and Clang):
 
 @snippet Utility.cpp CORRADE_DEPRECATED_NAMESPACE
 
 Note that this doesn't work on namespace aliases (i.e., marking
 @cpp namespace Bar = Foo; @ce with this macro will result in a compile error.
 
-GCC claims support since version 4.9, but even in version 7.3 it only emits an
+GCC claims support since version 4.9, but even in version 8.2 it only emits an
 "attribute ignored" warning at the declaration location and no diagnostic when
 such namespace is used --- which is practically useless
 ([source](https://stackoverflow.com/q/46052410)).
@@ -123,9 +133,15 @@ such namespace is used --- which is practically useless
 @brief Enum deprecation mark
 
 Marked enum or enum value will emit deprecation warning on supported compilers
-(C++17 feature, MSVC 2015, Clang and GCC 6+):
+(C++17 feature, MSVC 2017+, Clang and GCC 6+):
 
 @snippet Utility.cpp CORRADE_DEPRECATED_ENUM
+
+Note that on MSVC and GCC this doesn't warn when using values of deprecated
+enums, only when the enum is instantiated --- i.e., @cpp DeprecatedEnum e; @ce
+will warn, but @cpp DeprecatedEnum::Value @ce will not. Moreover, on MSVC this
+doesn't warn when a enum value marked as deprecated is used. MSVC 2015 supports
+the annotation, but ignores it for both enums and enum values.
 
 @see @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(),
     @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_FILE(),

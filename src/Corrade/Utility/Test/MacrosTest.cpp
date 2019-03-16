@@ -51,8 +51,8 @@ void MacrosTest::alignAs() {
 
 /* Declarations on their own shouldn't produce any compiler diagnostics */
 CORRADE_DEPRECATED("use function() instead") int deprecatedFunction() { return 1; }
-struct CORRADE_DEPRECATED("use Struct instead") DeprecatedStruct { enum: int { Value = 1 }; };
-struct Struct { enum: int { Value = 1 }; };
+struct CORRADE_DEPRECATED("use Struct instead") DeprecatedStruct { enum: int { Value = 1 }; int value = 1; };
+struct Struct { enum: int { Value = 1 }; int value = 1; };
 using DeprecatedAlias CORRADE_DEPRECATED_ALIAS("use Struct instead") = Struct;
 enum class CORRADE_DEPRECATED_ENUM("use Enum instead") DeprecatedEnum { Value = 1 };
 enum class Foo { DeprecatedEnumValue CORRADE_DEPRECATED_ENUM("use Foo::Value instead") = 1 };
@@ -70,16 +70,37 @@ namespace CORRADE_DEPRECATED_NAMESPACE("use Namespace instead") DeprecatedNamesp
 #ifndef ENABLE_DEPRECATION_WARNINGS
 CORRADE_IGNORE_DEPRECATED_PUSH
 #endif
-CORRADE_DEPRECATED_FILE("ignore me, I'm just testing the CORRADE_DEPRECATED_FILE() macro")
+CORRADE_DEPRECATED_FILE( /* Warning on MSVC, GCC, Clang */
+    "ignore me, I'm just testing the CORRADE_DEPRECATED_FILE() macro")
 
 void MacrosTest::deprecated() {
-    DEPRECATED_MACRO(hello?);
+    DEPRECATED_MACRO(hello?); /* Warning on MSVC, GCC, Clang */
 
-    CORRADE_VERIFY(deprecatedFunction());
+    CORRADE_VERIFY(deprecatedFunction()); /* Warning on MSVC, GCC, Clang */
+
+    DeprecatedStruct s; /* Warning on MSVC, GCC, Clang */
+    CORRADE_VERIFY(s.value); /* This too warns on MSVC */
+    /* Doesn't fire a warning on MSVC or GCC, only instantiating the struct
+       above does. Works on Clang. */
     CORRADE_VERIFY(DeprecatedStruct::Value);
+
+    DeprecatedAlias a; /* Warning on MSVC 2017 (2015 unsupported), GCC, Clang */
+    CORRADE_VERIFY(a.value);
+    /* Doesn't fire a warning on MSVC or GCC, only instantiating the struct
+       above does. Works on Clang. */
     CORRADE_VERIFY(DeprecatedAlias::Value);
+
+    DeprecatedEnum e{}; /* Warning on MSVC 2017 (2015 ignores it), GCC, Clang */
+    CORRADE_VERIFY(!int(e));
+    /* Doesn't fire a warning on MSVC or GCC, only instantiating the enum above
+       does. Works on Clang. */
     CORRADE_VERIFY(int(DeprecatedEnum::Value));
+
+    /* Doesn't fire a warning on MSVC. Works on GCC and Clang. */
     CORRADE_VERIFY(int(Foo::DeprecatedEnumValue));
+
+    /* Warning on MSVC, Clang. Doesn't fire on GCC (because it's broken
+       and thus disabled there -- see CORRADE_DEPRECATED_NAMESPACE() docs). */
     CORRADE_VERIFY(int(DeprecatedNamespace::Value));
 }
 #ifndef ENABLE_DEPRECATION_WARNINGS
