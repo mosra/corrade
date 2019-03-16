@@ -79,6 +79,11 @@ namespace Corrade {
     `/std:c++latest` to MSVC.
 -   It's now possible to use the @ref TestSuite library via CMake subprojects
     also on Android, iOS and Emscripten
+-   Explicitly disabling a MSVC linker optimization that causes seemingly
+    similar signals to be conflated together, causing erratic behavior. This is
+    done automatically for CMake-based projects, see the
+    @ref Interconnect-Emitter-msvc-icf "Interconnect::Emitter" documentation
+    for more information when using custom buildsystems.
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

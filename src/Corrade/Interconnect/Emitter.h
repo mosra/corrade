@@ -130,6 +130,31 @@ Convoluted example:
 
 @snippet Interconnect.cpp Emitter-connect-receiver-multiple-inheritance
 
+@anchor Interconnect-Emitter-msvc-icf
+
+<b></b>
+
+@m_class{m-block m-danger}
+
+@par MSVC and identical function merging
+    MSVC linker has an optimization called "identical COMDAT folding"
+    (`/OPT:ICF`) that looks for functions with identical generated machine code
+    and merges them together to reduce binary size. This is unfortunately done
+    also for functions which have their pointer taken and compared, making it a
+    [non-conformant behavior](https://www.reddit.com/r/cpp/comments/3brezz/do_you_know_that_different_functions_may_have_the/)
+    --- the C++ standard says that different functions should have different
+    pointers.
+@par
+    Since the core functionality of @ref Emitter is based around taking
+    pointers to signals and comparing them, this optimization breaks it. The
+    only reliable solution is disabling the optimization altogether using
+    `/OPT:NOICF,REF` (the `REF` part means that you don't want the functions
+    merged but you still want to include only functions that are referenced ---
+    a valid optimization). If you're using CMake and linking to
+    `Corrade::Interconnect` (even transitively), this flag is added implicitly.
+    If you're using a custom buildsystem, you have to add this flag yourself to
+    prevent erratic behavior.
+
 @see @ref Receiver, @ref Connection
 @todo Allow move
 */

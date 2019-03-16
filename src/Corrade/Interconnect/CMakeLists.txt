@@ -49,7 +49,16 @@ elseif(BUILD_STATIC_PIC)
     set_target_properties(CorradeInterconnect PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
 
-target_link_libraries(CorradeInterconnect CorradeUtility)
+target_link_libraries(CorradeInterconnect PUBLIC CorradeUtility)
+# Disable /OPT:ICF on MSVC, which merges functions with identical contents and
+# thus breaks signal comparison
+if(CORRADE_TARGET_WINDOWS AND CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    if(CMAKE_VERSION VERSION_LESS 3.13)
+        target_link_libraries(CorradeInterconnect INTERFACE "-OPT:NOICF,REF")
+    else()
+        target_link_options(CorradeInterconnect INTERFACE "/OPT:NOICF,REF")
+    endif()
+endif()
 
 install(TARGETS CorradeInterconnect
         RUNTIME DESTINATION ${CORRADE_BINARY_INSTALL_DIR}

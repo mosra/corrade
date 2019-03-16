@@ -409,10 +409,23 @@ foreach(_component ${Corrade_FIND_COMPONENTS})
         endif()
 
         # No special setup for Containers library
-        # No special setup for Interconnect library
+
+        # Interconnect library
+        if(_component STREQUAL Interconnect)
+            # Disable /OPT:ICF on MSVC, which merges functions with identical
+            # contents and thus breaks signal comparison
+            if(CORRADE_TARGET_WINDOWS AND CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+                if(CMAKE_VERSION VERSION_LESS 3.13)
+                    set_property(TARGET Corrade::${_component} PROPERTY
+                        INTERFACE_LINK_LIBRARIES "-OPT:NOICF,REF")
+                else()
+                    set_property(TARGET Corrade::${_component} PROPERTY
+                        INTERFACE_LINK_OPTIONS "/OPT:NOICF,REF")
+                endif()
+            endif()
 
         # PluginManager library
-        if(_component STREQUAL PluginManager)
+        elseif(_component STREQUAL PluginManager)
             # At least static build needs this
             if(CORRADE_TARGET_UNIX)
                 set_property(TARGET Corrade::${_component} APPEND PROPERTY
