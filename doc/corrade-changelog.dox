@@ -117,6 +117,12 @@ namespace Corrade {
     from looking like it works on directories only, but such name then caused
     people to ask if it works on directories as well, not helping anything.
 
+@subsection corrade-changelog-latest-documentation Documentation
+
+-   Updated docs of the @ref Corrade/Utility/Macros.h header mentioning what
+    @ref CORRADE_DEPRECATED() macros work on what compiler (see
+    [mosra/corrade#46](https://github.com/mosra/corrade/issues/46))
+
 @section corrade-changelog-2019-01 2019.01
 
 Released 2019-02-04, tagged as
