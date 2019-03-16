@@ -1,6 +1,9 @@
-compiled.cpp -text
-compiled-empty.cpp -text
-compiled-nothing.cpp -text
-compiled-unicode.cpp -text
-consequence2.txt -text
-predisposition2.txt -text
+compiled-be.cpp text eol=lf
+compiled-le.cpp text eol=lf
+compiled-empty-be.cpp text eol=lf
+compiled-empty-le.cpp text eol=lf
+compiled-nothing.cpp text eol=lf
+compiled-unicode-be.cpp text eol=lf
+compiled-unicode-le.cpp text eol=lf
+consequence2.txt text eol=lf
+predisposition2.txt text eol=lf
