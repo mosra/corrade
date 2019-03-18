@@ -45,7 +45,9 @@ struct MaybePtr {
     }
     ~MaybePtr() { delete a; }
     MaybePtr& operator=(const MaybePtr&) = delete;
-    MaybePtr& operator=(MaybePtr&& other) {
+    /* Some compilers get upset when move assignment is not implemented even
+       though it's not actually used */
+    CORRADE_UNUSED MaybePtr& operator=(MaybePtr&& other) {
         std::swap(a, other.a);
         return *this;
     }

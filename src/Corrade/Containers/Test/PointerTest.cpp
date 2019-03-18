@@ -38,7 +38,9 @@ struct IntPtr {
     }
     ~IntPtr() { delete a; }
     IntPtr& operator=(const IntPtr&) = delete;
-    IntPtr& operator=(IntPtr&& other) {
+    /* Some compilers get upset when move assignment is not implemented even
+       though it's not actually used */
+    CORRADE_UNUSED IntPtr& operator=(IntPtr&& other) {
         std::swap(a, other.a);
         return *this;
     }

@@ -62,7 +62,9 @@ ArrayViewStlSpanTest::ArrayViewStlSpanTest() {
               &ArrayViewStlSpanTest::convertVoidFromConstSpanSized});
 }
 
+#if __has_include(<span>)
 constexpr float Data[]{42.0f, 13.37f, -25.0f};
+#endif
 
 void ArrayViewStlSpanTest::convertSpan() {
     #if !__has_include(<span>)

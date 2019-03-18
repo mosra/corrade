@@ -482,7 +482,7 @@ void LinkedListTest::overrideEraseVirtual() {
     };
     struct NonErasingItem: NonErasingItemBase {
         /* This shouldn't get called, doErase() should */
-        void erase() { CORRADE_ASSERT_UNREACHABLE(); }
+        CORRADE_UNUSED void erase() { CORRADE_ASSERT_UNREACHABLE(); }
     };
 
     /* Have the items initialized before the list so we test that the list
