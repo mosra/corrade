@@ -77,6 +77,8 @@ namespace Corrade {
     executable is kept in `/data/local/tmp` so it's possible to debug it
     manually later. See the @ref TestSuite-Tester-running-cmake "Android testing docs"
     for more information.
+-   Android tests ran through CTest have stderr redirected to stdout because
+    otherwise the `adb` bridge causes them to be extremely out-of-sync
 
 @subsection corrade-changelog-latest-buildsystem Build system
 
