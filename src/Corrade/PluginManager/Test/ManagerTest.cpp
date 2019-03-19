@@ -846,6 +846,7 @@ void ManagerTest::staticProvides() {
 void ManagerTest::dynamicProvides() {
     PluginManager::Manager<AbstractAnimal> manager;
 
+    CORRADE_VERIFY(manager.metadata("Dog"));
     CORRADE_COMPARE(manager.metadata("Dog")->provides(), (std::vector<std::string>{"JustSomeMammal", "AGoodBoy"}));
 
     CORRADE_COMPARE(manager.loadState("JustSomeMammal"), LoadState::NotLoaded);
@@ -882,7 +883,9 @@ void ManagerTest::dynamicProvidesDependency() {
 void ManagerTest::setPreferredPlugins() {
     PluginManager::Manager<AbstractAnimal> manager;
 
+    CORRADE_VERIFY(manager.metadata("Dog"));
     CORRADE_COMPARE(manager.metadata("Dog")->provides(), (std::vector<std::string>{"JustSomeMammal", "AGoodBoy"}));
+    CORRADE_VERIFY(manager.metadata("PitBull"));
     CORRADE_COMPARE(manager.metadata("PitBull")->provides(), (std::vector<std::string>{"JustSomeMammal", "Dog"}));
 
     /* Implicit state */
@@ -918,9 +921,11 @@ void ManagerTest::setPreferredPluginsDoesNotProvide() {
 void ManagerTest::setPreferredPluginsOverridePrimaryPlugin() {
     PluginManager::Manager<AbstractAnimal> manager;
 
+    CORRADE_VERIFY(manager.metadata("PitBull"));
     CORRADE_COMPARE(manager.metadata("PitBull")->provides(), (std::vector<std::string>{"JustSomeMammal", "Dog"}));
 
     /* Implicit state */
+    CORRADE_VERIFY(manager.metadata("Dog"));
     CORRADE_COMPARE(manager.metadata("Dog")->name(), "Dog");
 
     /* Override */
