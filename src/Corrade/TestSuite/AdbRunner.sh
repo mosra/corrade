@@ -89,7 +89,9 @@ returncode=$(grep ADB_IS_SHIT $tmpdir/adb.retval | cut -d':' -f2)
 # Clean up after ourselves -- remove the temporary directories both on local
 # machine and device / emulator. This is not done if any of the above fails,
 # but that's okay -- it should stay there to be able to debug the problems
-adb shell 'rm -r '$remote_tmpdir
+if [ "$returncode" -eq "0" ]; then
+    adb shell 'rm -r '$remote_tmpdir
+fi
 rm -r $tmpdir
 
 # Propagate the return code

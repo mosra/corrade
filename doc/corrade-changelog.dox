@@ -71,6 +71,13 @@ namespace Corrade {
 -   Implicit memory management of @ref Containers::LinkedList can be now
     overriden by reimplementing @ref Containers::LinkedListItem::erase()
 
+@subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
+
+-   When a test executed through CTest fails on Android, the uploaded test
+    executable is kept in `/data/local/tmp` so it's possible to debug it
+    manually later. See the @ref TestSuite-Tester-running-cmake "Android testing docs"
+    for more information.
+
 @subsection corrade-changelog-latest-buildsystem Build system
 
 -   @ref building-corrade-packages-msys "MSYS2 packages" are now in official

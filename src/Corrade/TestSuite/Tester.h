@@ -381,6 +381,13 @@ provides additional useful features on various platforms:
     will make CTest upload the test executables and all files specified in `FILES`
     onto the device or emulator via `adb`, run it there with all environment
     options passed through as well and transfers test results back to the host.
+    @attention If a test fails, the executable and all files it references is
+        kept in `/data/local/tmp` to make it possible to debug / re-run the
+        test directly. Note that in the extreme case this may cause the
+        internal storage to get filled over time. Rebooting the device or
+        doing system cleanup will wipe the temp directory.
+
+.
 
 Example of using the @ref corrade-cmake-add-test "corrade_add_test()" macro is
 below. The test executable will get built from the specified source with the
@@ -405,7 +412,7 @@ You can also use @cb{.sh} adb shell @ce to log directly into the device shell
 and continue from there. All @ref TestSuite-Tester-command-line "command-line arguments"
 are supported.
 
-@attention Keep in mind that older versions of ADB and Android do not correctly
+@note Keep in mind that older versions of ADB and Android do not correctly
     propagate the exit code to caller, which may result in your test failures
     being silently ignored. See [Android Issue 3254](http://web.archive.org/web/20160806094132/https://code.google.com/p/android/issues/detail?id=3254)
     for possible workarounds. The @ref corrade-cmake-add-test "corrade_add_test()"
