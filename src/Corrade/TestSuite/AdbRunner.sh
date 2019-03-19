@@ -61,7 +61,7 @@ fi
 # Create a local temporary directory. Android doesn't have mktemp, so we have
 # to assume that there is ever only one computer connected to a device /
 # emulator and so mktemp always returns unique value.
-tmpdir=$(mktemp -d /tmp/corrade-testsuite-XXXXX)
+tmpdir=$(mktemp -d /tmp/corrade-testsuite-$filename-XXXXX)
 remote_tmpdir=/data/local$tmpdir
 
 # The device / emulator might have stale temporary directories that could clash
