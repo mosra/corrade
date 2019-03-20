@@ -117,6 +117,8 @@ namespace Corrade {
 -   @ref Interconnect::Emitter::emit() now works correctly on MSVC for signals
     from classes where multiple and/or virtual inheritance is involved (see
     [mosra/corrade#51](https://github.com/mosra/corrade/issues/51))
+-   Fixed @ref CORRADE_COMPARE_WITH() to be callable with expressions such as
+    @cpp *comparator @ce
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 

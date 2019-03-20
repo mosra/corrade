@@ -1278,7 +1278,7 @@ comparator type.
 #define CORRADE_COMPARE_WITH(actual, expected, comparatorInstance)          \
     do {                                                                    \
         _CORRADE_REGISTER_TEST_CASE();                                      \
-        Tester::compareWith(comparatorInstance.comparator(), #actual, actual, #expected, expected); \
+        Tester::compareWith((comparatorInstance).comparator(), #actual, actual, #expected, expected); \
     } while(false)
 
 /** @hideinitializer
