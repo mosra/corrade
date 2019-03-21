@@ -69,7 +69,9 @@ bool FileWatcher::hasChanged() {
     if(!_valid) return false;
 
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
-    struct stat result{};
+    /* GCC 4.8 complains about missing initializers if {} is used. The struct
+       is initialized by stat() anyway so it's okay to keep it uninitialized */
+    struct stat result;
     if(stat(_filename.data(), &result) != 0)
     #elif defined(CORRADE_TARGET_WINDOWS)
     struct _stat result;

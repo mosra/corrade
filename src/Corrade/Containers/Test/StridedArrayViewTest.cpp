@@ -183,7 +183,9 @@ constexpr const struct {
     int value;
     int other;
 } Struct[10]{
-    {2, 23125}, {16, 1}, {7853268, -2}, {-100, 5}, {234810, 1}, {}, {}, {}, {}, {}
+    {2, 23125}, {16, 1}, {7853268, -2}, {-100, 5}, {234810, 1},
+    /* Otherwise GCC 4.8 loudly complains about missing initializers */
+    {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}
 };
 
 void StridedArrayViewTest::construct() {
@@ -191,7 +193,9 @@ void StridedArrayViewTest::construct() {
         int value;
         int other;
     } a[10]{
-        {2, 23125}, {16, 1}, {7853268, -2}, {-100, 5}, {234810, 1}, {}, {}, {}, {}, {}
+        {2, 23125}, {16, 1}, {7853268, -2}, {-100, 5}, {234810, 1},
+        /* Otherwise GCC 4.8 loudly complains about missing initializers */
+        {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}
     };
 
     StridedArrayView b = {&a[0].value, 5, 8};
@@ -413,7 +417,9 @@ void StridedArrayViewTest::access() {
         int value;
         int other;
     } a[10]{
-        {2, 23125}, {16, 1}, {7853268, -2}, {-100, 5}, {234810, 1}, {}, {}, {}, {}, {}
+        {2, 23125}, {16, 1}, {7853268, -2}, {-100, 5}, {234810, 1},
+        /* Otherwise GCC 4.8 loudly complains about missing initializers */
+        {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}
     };
 
     StridedArrayView b{&a[0].value, 7, 8};
