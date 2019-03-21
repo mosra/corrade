@@ -1032,6 +1032,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
         /* Called from CORRADE_SKIP() */
         void skip(const std::string& message);
+        void skip(const char* message);
 
     #ifndef DOXYGEN_GENERATING_OUTPUT
     protected:

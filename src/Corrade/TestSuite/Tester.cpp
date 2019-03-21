@@ -468,6 +468,10 @@ void Tester::registerTest(const char* filename, const char* name) {
     if(_testName.empty()) _testName = std::move(name);
 }
 
+void Tester::skip(const char* message) {
+    skip(std::string{message});
+}
+
 void Tester::skip(const std::string& message) {
     Debug out{_logOutput, _useColor};
     printTestCaseLabel(out, "  SKIP", Debug::Color::Default, Debug::Color::Default);
