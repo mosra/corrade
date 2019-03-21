@@ -31,21 +31,11 @@ namespace Corrade { namespace Utility { namespace Test { namespace {
 struct SystemTest: TestSuite::Tester {
     explicit SystemTest();
 
-    void target();
     void sleep();
 };
 
 SystemTest::SystemTest() {
-    addTests({&SystemTest::target,
-              &SystemTest::sleep});
-}
-
-void SystemTest::target() {
-    #if !defined(CORRADE_TARGET_X86) && !defined(CORRADE_TARGET_ARM) && !defined(CORRADE_TARGET_POWERPC) && !defined(CORRADE_TARGET_EMSCRIPTEN)
-    CORRADE_VERIFY(!"No suitable CORRADE_TARGET_* defined on this platform");
-    #else
-    CORRADE_VERIFY(true);
-    #endif
+    addTests({&SystemTest::sleep});
 }
 
 void SystemTest::sleep() {

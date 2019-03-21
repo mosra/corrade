@@ -23,6 +23,8 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+corrade_add_test(TargetTest TargetTest.cpp)
+
 # Baseline, C++11, is everywhere
 corrade_add_test(Cpp11StandardTest CppStandardTest.cpp)
 set_target_properties(Cpp11StandardTest PROPERTIES
