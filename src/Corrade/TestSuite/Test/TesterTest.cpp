@@ -43,7 +43,7 @@ template<> class Comparator<StringLength> {
             return std::abs(int(actual.size()) - int(expected.size())) <= epsilon;
         }
 
-        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
+        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
             e << "Length of actual" << actual << "doesn't match length of expected" << expected << "with epsilon" << epsilon;
         }
 

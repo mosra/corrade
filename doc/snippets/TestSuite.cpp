@@ -50,7 +50,7 @@ template<> class Comparator<FileContents> {
             return _actualContents == _expectedContents;
         }
 
-        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const {
+        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
             e << "Files" << actual << "and" << expected << "are not the same, actual" << _actualContents << "but expected" << _expectedContents;
         }
 
