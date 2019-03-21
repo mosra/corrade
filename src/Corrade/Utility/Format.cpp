@@ -24,6 +24,7 @@
 */
 
 #include "Format.h"
+#include "FormatStl.h"
 
 #include <cstring>
 

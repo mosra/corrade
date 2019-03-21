@@ -26,11 +26,11 @@
 */
 
 /** @file
- * @brief Function @ref Corrade::Utility::format(), @ref Corrade::Utility::formatString(), @ref Corrade::Utility::formatInto(), @ref Corrade::Utility::print(), @ref Corrade::Utility::printError()
+ * @brief Function @ref Corrade::Utility::format(), @ref Corrade::Utility::formatInto(), @ref Corrade::Utility::print(), @ref Corrade::Utility::printError()
  * @experimental
  */
 
-#include <string>
+#include <cstdio>
 
 #include "Corrade/Containers/Containers.h"
 #include "Corrade/Utility/visibility.h"
@@ -157,32 +157,6 @@ template<class ...Args, class Array = Containers::Array<char>> Array format(cons
 #endif
 
 /**
-@brief Format a string
-
-Same as @ref format(), but returning a @ref std::string instead of
-@ref Containers::Array.
-*/
-template<class ...Args> std::string formatString(const char* format, const Args&... args);
-
-/**
-@brief Format a string into an existing string
-
-Takes an existing @p string and writes the formatted content starting at
-@p offset. If the string is not large enough, does at most one reallocation
-(by calling @p std::string::resize()). Returns final written size (which might
-be less than the string size if inserting in the middle). *Does not* write any
-terminating @cpp '\0' @ce character. Example usage:
-
-@snippet Utility.cpp formatInto-string
-
-See @ref formatString() for more information about usage and templating
-language.
-
-@experimental
-*/
-template<class ...Args> std::size_t formatInto(std::string& string, std::size_t offset, const char* format, const Args&... args);
-
-/**
 @brief Format a string into an existing buffer
 
 Writes formatted output to given @p buffer, expecting that it is large enough.
@@ -295,10 +269,6 @@ template<> struct Formatter<Containers::ArrayView<const char>> {
     static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, Containers::ArrayView<const char> value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, Containers::ArrayView<const char> value, int precision, FormatType type);
 };
-template<> struct Formatter<std::string> {
-    static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, const std::string& value, int precision, FormatType type);
-    static CORRADE_UTILITY_EXPORT void format(std::FILE* file, const std::string& value, int precision, FormatType type);
-};
 
 struct BufferFormatter {
     /* Needed for a sentinel value (C arrays can't have zero size) */
@@ -340,7 +310,6 @@ struct FileFormatter {
 };
 
 CORRADE_UTILITY_EXPORT std::size_t formatInto(const Containers::ArrayView<char>& buffer, const char* format, BufferFormatter* formatters, std::size_t formattersCount);
-CORRADE_UTILITY_EXPORT std::size_t formatInto(std::string& buffer, std::size_t offset, const char* format, BufferFormatter* formatters, std::size_t formattersCount);
 CORRADE_UTILITY_EXPORT void formatInto(std::FILE* file, const char* format, FileFormatter* formatters, std::size_t formattersCount);
 
 }
@@ -362,20 +331,9 @@ template<class ...Args, class Array> Array format(const char* format, const Args
 }
 #endif
 
-template<class ...Args> std::string formatString(const char* format, const Args&... args) {
-    std::string buffer;
-    formatInto(buffer, 0, format, args...);
-    return buffer;
-}
-
 template<class ...Args> std::size_t formatInto(const Containers::ArrayView<char>& buffer, const char* format, const Args&... args) {
     Implementation::BufferFormatter formatters[sizeof...(args) + 1] { Implementation::BufferFormatter{args}..., {} };
     return Implementation::formatInto(buffer, format, formatters, sizeof...(args));
-}
-
-template<class ...Args> std::size_t formatInto(std::string& buffer, std::size_t offset, const char* format, const Args&... args) {
-    Implementation::BufferFormatter formatters[sizeof...(args) + 1] { Implementation::BufferFormatter{args}..., {} };
-    return Implementation::formatInto(buffer, offset, format, formatters, sizeof...(args));
 }
 
 template<class ...Args> void formatInto(std::FILE* file, const char* format, const Args&... args) {

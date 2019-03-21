@@ -28,6 +28,7 @@
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Format.h"
+#include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/String.h"
 #include "Corrade/Utility/Tweakable.h"
 

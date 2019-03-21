@@ -53,6 +53,7 @@ if(WITH_UTILITY)
         Directory.h
         Endianness.h
         Format.h
+        FormatStl.h
         Macros.h
         MurmurHash2.h
         Resource.h

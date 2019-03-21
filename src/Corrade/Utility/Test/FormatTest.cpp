@@ -32,6 +32,7 @@
 #include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/Format.h"
+#include "Corrade/Utility/FormatStl.h"
 
 #include "configure.h"
 

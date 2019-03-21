@@ -161,6 +161,12 @@ namespace Corrade {
     @ref Corrade/Utility/DebugStl.h, to speed up compile times. Since including
     it for backwards compatibility would practically revert the optimization,
     you have to @cpp #include @ce it explicitly where needed.
+-   @ref Utility::formatString(), @ref Utility::formatInto() taking a
+    @ref std::string and support for formatting @ref std::string through the
+    @ref Utility::format() family of APIs is now provided through a separate
+    header, @ref Corrade/Utility/FormatStl.h, to speed up compile times. Since
+    including it for backwards compatibility would practically revert the
+    optimization, you have to @cpp #include @ce it explicitly where needed.
 
 @subsection corrade-changelog-latest-documentation Documentation
 

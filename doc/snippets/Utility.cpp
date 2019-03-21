@@ -38,6 +38,7 @@
 #include "Corrade/Utility/FileWatcher.h"
 #endif
 #include "Corrade/Utility/Format.h"
+#include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Macros.h"
 
 /* [Tweakable-disable-header] */
