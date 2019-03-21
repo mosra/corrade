@@ -37,10 +37,6 @@
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/String.h"
 
-#ifdef CORRADE_TARGET_ANDROID
-#include <sstream>
-#endif
-
 namespace Corrade { namespace TestSuite {
 
 namespace {
@@ -285,15 +281,8 @@ benchmark types:
         _testCaseInstanceId = testCase.second.instanceId;
         if(testCase.second.instanceId == ~std::size_t{})
             _testCaseDescription = {};
-        else {
-            #ifndef CORRADE_TARGET_ANDROID
+        else
             _testCaseDescription = std::to_string(testCase.second.instanceId);
-            #else
-            std::ostringstream out;
-            out << testCase.second.instanceId;
-            _testCaseDescription = out.str();
-            #endif
-        }
 
         /* Final combined repeat count */
         const std::size_t repeatCount = testCase.second.repeatCount*repeatEveryCount;
