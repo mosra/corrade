@@ -413,7 +413,7 @@ std::size_t formatInto(std::string& buffer, const std::size_t offset, const char
     return offset + formatInto({&buffer[offset], buffer.size() + 1}, format, formatters, formatterCount);
 }
 
-void formatInto(std::FILE* const file,  const char* format, FileFormatter* const formatters, std::size_t formatterCount) {
+void formatInto(std::FILE* const file, const char* format, FileFormatter* const formatters, std::size_t formatterCount) {
     formatWith([&file](Containers::ArrayView<const char> data) {
         fwrite(data.data(), data.size(), 1, file);
     }, [&file](const FileFormatter& formatter, int precision, FormatType type) {
