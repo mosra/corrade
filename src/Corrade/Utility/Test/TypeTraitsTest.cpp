@@ -43,18 +43,26 @@ struct TypeTraitsTest: TestSuite::Tester {
     explicit TypeTraitsTest();
 
     void hasType();
+
     void isIterableMember();
     void isIterableFreeStd();
     void isIterableFree();
     void isIterableNot();
+
+    void isStringLike();
+    void isStringLikeNot();
 };
 
 TypeTraitsTest::TypeTraitsTest() {
     addTests({&TypeTraitsTest::hasType,
+
               &TypeTraitsTest::isIterableMember,
               &TypeTraitsTest::isIterableFreeStd,
               &TypeTraitsTest::isIterableFree,
-              &TypeTraitsTest::isIterableNot});
+              &TypeTraitsTest::isIterableNot,
+
+              &TypeTraitsTest::isStringLike,
+              &TypeTraitsTest::isStringLikeNot});
 }
 
 CORRADE_HAS_TYPE(HasKeyType, typename T::key_type);
@@ -113,6 +121,16 @@ void TypeTraitsTest::isIterableFree() {
 void TypeTraitsTest::isIterableNot() {
     CORRADE_VERIFY(!IsIterable<int>{});
     CORRADE_VERIFY(!IsIterable<NonIterableType>{});
+}
+
+void TypeTraitsTest::isStringLike() {
+    CORRADE_VERIFY(IsStringLike<std::string>{});
+    CORRADE_VERIFY(IsStringLike<std::wstring>{});
+    CORRADE_VERIFY(IsStringLike<std::u32string>{});
+}
+
+void TypeTraitsTest::isStringLikeNot() {
+    CORRADE_VERIFY(!IsStringLike<std::vector<int>>{});
 }
 
 }}}}

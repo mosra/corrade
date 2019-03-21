@@ -69,6 +69,7 @@ namespace Corrade {
     @ref Corrade/Utility/StlForwardVector.h providing lightweight forward
     declarations for @ref std::string, @ref std::tuple and @ref std::vector on
     platforms that have them (and including the full definition otherwise)
+-   New @ref Utility::IsStringLike type trait
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 

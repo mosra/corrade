@@ -66,6 +66,7 @@ namespace Implementation {
     CORRADE_HAS_TYPE(HasMemberEnd, decltype(std::declval<T>().end()));
     CORRADE_HAS_TYPE(HasBegin, decltype(begin(std::declval<T>())));
     CORRADE_HAS_TYPE(HasEnd, decltype(end(std::declval<T>())));
+    CORRADE_HAS_TYPE(HasMemberCStr, decltype(std::declval<T>().c_str()));
 }
 
 /**
@@ -75,6 +76,9 @@ Equivalent to @ref std::true_type if the class is has either @cpp begin() @ce /
 @cpp end() @ce members, is usable with free @cpp begin() @ce / @cpp end() @ce
 functions or has @ref std::begin() / @ref std::end() overloads. Otherwise
 equivalent to @ref std::false_type.
+
+Used together with @ref IsStringLike by @ref Debug to decide whether given type
+should be printed as a container of its contents or as a whole.
 @todoc use the ellipsis macro once m.css has it
 */
 /* When using {}, MSVC 2015 complains that even the explicitly defaulted
@@ -83,6 +87,26 @@ template<class T> using IsIterable = std::integral_constant<bool,
     #ifndef DOXYGEN_GENERATING_OUTPUT
     (Implementation::HasMemberBegin<T>::value || Implementation::HasBegin<T>::value) &&
     (Implementation::HasMemberEnd<T>::value || Implementation::HasEnd<T>::value)
+    #else
+    implementation-specific
+    #endif
+    >;
+
+/**
+@brief Traits class for checking whether given type is iterable
+
+Equivalent to @ref std::true_type if the class is has a @cpp c_str() @ce
+member. Otherwise equivalent to @ref std::false_type. Useful for dispatching
+on the @ref std::string type without having to include or
+@ref StlForwardString.h "forward-declare" it.
+
+Used together with @ref IsIterable by @ref Debug to decide whether given type
+should be printed as a container of its contents or as a whole.
+@todoc use the ellipsis macro once m.css has it
+*/
+template<class T> using IsStringLike = std::integral_constant<bool,
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    Implementation::HasMemberCStr<T>::value
     #else
     implementation-specific
     #endif
