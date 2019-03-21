@@ -57,6 +57,9 @@ if(WITH_UTILITY)
         Resource.h
         Sha1.h
         String.h
+        StlForwardString.h
+        StlForwardTuple.h
+        StlForwardVector.h
         System.h
         TypeTraits.h
         Unicode.h
