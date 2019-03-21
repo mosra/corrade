@@ -55,12 +55,15 @@ struct Tester::TesterConfiguration::Data {
 
 Tester::TesterConfiguration::TesterConfiguration() noexcept = default;
 
-Tester::TesterConfiguration::TesterConfiguration(const TesterConfiguration& other): _data{other._data ? new Data{*other._data} : nullptr} {}
+Tester::TesterConfiguration::TesterConfiguration(const TesterConfiguration& other):
+    /* GCC 4.8 doesn't like {} here */
+    _data{other._data ? new Data(*other._data) : nullptr} {}
 
 Tester::TesterConfiguration::TesterConfiguration(TesterConfiguration&&) noexcept = default;
 
 Tester::TesterConfiguration& Tester::TesterConfiguration::operator=(const TesterConfiguration& other) {
-    _data.reset(other._data ? new Data{*other._data} : nullptr);
+    /* GCC 4.8 doesn't like {} here */
+    _data.reset(other._data ? new Data(*other._data) : nullptr);
     return *this;
 }
 
