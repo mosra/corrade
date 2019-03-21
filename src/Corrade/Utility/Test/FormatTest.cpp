@@ -26,7 +26,7 @@
 #include <limits>
 #include <sstream>
 
-#include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/FileToString.h"
@@ -87,6 +87,8 @@ struct FormatTest: TestSuite::Tester {
 
     void toBuffer();
     void toBufferNullTerminatorFromSnprintfAtTheEnd();
+    void array();
+    void arrayNullTerminatorFromSnprintfAtTheEnd();
     void appendToString();
     void insertToString();
     void file();
@@ -168,6 +170,8 @@ FormatTest::FormatTest() {
 
               &FormatTest::toBuffer,
               &FormatTest::toBufferNullTerminatorFromSnprintfAtTheEnd,
+              &FormatTest::array,
+              &FormatTest::arrayNullTerminatorFromSnprintfAtTheEnd,
               &FormatTest::appendToString,
               &FormatTest::insertToString,
               &FormatTest::file,
@@ -664,6 +668,16 @@ void FormatTest::toBufferNullTerminatorFromSnprintfAtTheEnd() {
         CORRADE_COMPARE((std::string{buffer, 8}), "hello 42");
     }
     CORRADE_COMPARE(std::string{buffer}, "hello 4");
+}
+
+void FormatTest::array() {
+    Containers::Array<char> array = format("hello, {}!", "world");
+    CORRADE_COMPARE((std::string{array, array.size()}), "hello, world!");
+}
+
+void FormatTest::arrayNullTerminatorFromSnprintfAtTheEnd() {
+    Containers::Array<char> array = format("hello {}", 42);
+    CORRADE_COMPARE((std::string{array, array.size()}), "hello 42");
 }
 
 void FormatTest::appendToString() {

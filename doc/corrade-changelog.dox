@@ -70,6 +70,8 @@ namespace Corrade {
     declarations for @ref std::string, @ref std::tuple and @ref std::vector on
     platforms that have them (and including the full definition otherwise)
 -   New @ref Utility::IsStringLike type trait
+-   Added @ref Utility::format(), an alternative to @ref Utility::formatString()
+    returning @ref Containers::Array instead of @ref std::string
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 

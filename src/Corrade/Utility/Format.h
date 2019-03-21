@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Function @ref Corrade::Utility::formatString(), @ref Corrade::Utility::formatInto(), @ref Corrade::Utility::print(), @ref Corrade::Utility::printError()
+ * @brief Function @ref Corrade::Utility::format(), @ref Corrade::Utility::formatString(), @ref Corrade::Utility::formatInto(), @ref Corrade::Utility::print(), @ref Corrade::Utility::printError()
  * @experimental
  */
 
@@ -128,7 +128,7 @@ Example of formating of CSS colors with correct width:
 
 # Performance
 
-This function always does exactly one allocation for the output string. See
+This function always does exactly one allocation for the output array. See
 @ref formatInto(std::string&, std::size_t, const char*, const Args&... args)
 for an ability to write into an existing string (with at most one reallocation)
 and @ref formatInto(const Containers::ArrayView<char>&, const char*, const Args&... args)
@@ -141,11 +141,26 @@ files or standard output.
 @ref Debug class desired usage is for easy printing of complex nested types,
 containers, enum values or opaque types for logging and diagnostic purposes,
 with focus on convenience rather than speed or advanced formatting
-capabilities. The @ref formatString() family of functions is intended for cases
-where it's required to have a complete control over the output, for example
-when serializing text files.
+capabilities. The @ref format() family of functions is intended for cases where
+it's required to have a complete control over the output, for example when
+serializing text files.
 
 @experimental
+
+@see @ref formatString(), @ref formatInto(), @ref print(), @ref printError()
+*/
+#ifdef DOXYGEN_GENERATING_OUTPUT
+template<class ...Args> Containers::Array<char> format(const char* format, const Args&... args);
+#else
+/* Done this way to avoid including <Containers/Array.h> for the return type */
+template<class ...Args, class Array = Containers::Array<char>> Array format(const char* format, const Args&... args);
+#endif
+
+/**
+@brief Format a string
+
+Same as @ref format(), but returning a @ref std::string instead of
+@ref Containers::Array.
 */
 template<class ...Args> std::string formatString(const char* format, const Args&... args);
 
@@ -329,6 +344,23 @@ CORRADE_UTILITY_EXPORT std::size_t formatInto(std::string& buffer, std::size_t o
 CORRADE_UTILITY_EXPORT void formatInto(std::FILE* file, const char* format, FileFormatter* formatters, std::size_t formattersCount);
 
 }
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+template<class ...Args, class Array> Array format(const char* format, const Args&... args) {
+    Array array;
+    /* array is nullptr here, so we get just the size. Can't pass just nullptr,
+       because that would match the formatInto(std::FILE*) overload :( */
+    const std::size_t size = formatInto(array, format, args...);
+    /* printf() always wants to print the null terminator, so allow it, and
+       then recreate the Array to be of a correct size again. Once we switch
+       away from printf() this workaround could be removed. The upcoming
+       Containers::String class will probably have something similar, though
+       implicit. */
+    array = Array{size + 1};
+    formatInto(array, format, args...);
+    return Array{array.release(), size};
+}
+#endif
 
 template<class ...Args> std::string formatString(const char* format, const Args&... args) {
     std::string buffer;
