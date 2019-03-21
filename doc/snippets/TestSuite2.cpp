@@ -23,6 +23,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <string>
+
 #include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Directory.h"

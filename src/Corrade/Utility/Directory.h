@@ -29,11 +29,12 @@
  * @brief Namespace @ref Corrade::Utility::Directory
  */
 
-#include <string>
-#include <vector>
+#include <initializer_list>
 
 #include "Corrade/Containers/Containers.h"
 #include "Corrade/Containers/EnumSet.h"
+#include "Corrade/Utility/StlForwardString.h"
+#include "Corrade/Utility/StlForwardVector.h"
 #include "Corrade/Utility/visibility.h"
 
 #ifdef CORRADE_BUILD_DEPRECATED

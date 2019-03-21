@@ -24,6 +24,7 @@
 */
 
 #include <sstream>
+#include <vector>
 
 #include "Corrade/Containers/Array.h"
 #include "Corrade/TestSuite/Tester.h"

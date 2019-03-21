@@ -24,6 +24,7 @@
 */
 
 #include <cmath>
+#include <vector>
 
 #include "Corrade/Containers/Pointer.h"
 #include "Corrade/TestSuite/Compare/File.h"

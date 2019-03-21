@@ -26,6 +26,8 @@
 #include "AbstractAnimal.h"
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+#include <vector>
+
 #include "Corrade/Utility/Directory.h"
 
 #include "configure.h"

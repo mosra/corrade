@@ -23,6 +23,9 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <string>
+#include <vector>
+
 #include "Corrade/PluginManager/AbstractManager.h"
 #include "Corrade/PluginManager/AbstractPlugin.h"
 #include "Corrade/Utility/Directory.h"
