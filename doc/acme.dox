@@ -104,6 +104,12 @@ details or heavy parts of the library, for example:
 #endif
 @endcode
 
+If a system include is wrapped in a preprocessor define other than the
+file-level include guard, it's assumed to be platform-specific and is at its
+own line, without being moved to the global location. If you want it to be
+present at the global location but wrapped in the preprocessor defines, do it
+manually.
+
 @m_class{m-block m-warning}
 
 @par Non-hermetic includes

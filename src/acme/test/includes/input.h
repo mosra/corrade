@@ -14,6 +14,11 @@
 
 void stuffAtTheEnd(Integer = SomeValue);
 
+/* this ifdef stays here even though the file doesn't have an include guard */
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #pragma ACME comments off
 /* to test the below // {includes} get preserved */
 

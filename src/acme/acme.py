@@ -478,18 +478,37 @@ def acme(toplevel_file, output) -> List[str]:
                             else:
                                 includes_out += parsed_file
 
-                    # System or local noexpand include. If seeing for the first
-                    # time, add it to the set of not-yet-written includes,
-                    # it'll get written to the nearest preceding {{includes}}
-                    # placeholder. If already spotted, don't do anything.
+                    # System or local noexpand include.
                     else:
                         includeline = match.group('include') + '\n'
-                        if includeline not in all_includes:
-                            all_includes.add(includeline)
+
+                        # Already spotted, don't do anything
+                        if includeline in all_includes: continue
+
+                        # If the include is wrapped in a preprocessor branch
+                        # other than the include guard (i.e., it starts at a
+                        # line > 0) and the branch is not disabled/enabled,
+                        # then we need to keep it in place -- it might be a
+                        # platform-specific thing.
+                        if len(branch_stack) > 1 and branch_stack[-1][2] != 0 and branch_stack[-1][1] is None:
+                            out += [includeline]
+
+                        # Otherwise add it to the set of not-yet-written
+                        # includes, it'll get written to the nearest preceding
+                        # {{includes}} placeholder.
+                        else:
                             if not new_includes:
                                 logging.warning("Includes found before an {{includes}} placeholder, the resulting file will have them on the top")
                                 new_includes += [set()]
                             new_includes[-1].add(includeline)
+
+                        # In both cases, add it to the list of global includes
+                        # to avoid including it more than once. This is done
+                        # with the assumption that platform-specific includes
+                        # always get wrapped in the preprocessor branch the
+                        # same way.
+                        # TODO: this might cause problems?
+                        all_includes.add(includeline)
                     continue
 
                 # Pragma
