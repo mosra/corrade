@@ -89,7 +89,6 @@ def simplify_expression(what, expression, forced_defines = {}):
         for rexp, repl in [(zero_and_something_rx, '0'), (something_and_zero_rx, '0'),
                            (one_or_something_rx, '1'), (something_or_one_rx, '1')]:
             match = rexp.search(expression)
-            #print(rexp)
             if match:
                 expression = expression[:match.start()] + repl + expression[match.end():]
                 modified = True
@@ -119,7 +118,6 @@ preprocessor_rx = re.compile(r'^(?P<indent>\s*)#(?P<what>ifdef|ifndef|if|else|el
 define_rx = re.compile(r'\s*#(?P<what>define|undef) (?P<name>[^\s]+)\s*$')
 linecomment_rx = re.compile(r'^\s*(/\*.*\*/|//.*)?\s*$')
 copyright_rc = re.compile(r'^\s+Copyright © \d{4}.+$')
-#copyright_keep_rc = re.compile(r'^\s+Copyright © 20.+>$')
 blockcomment_start_rx = re.compile(r'^\s*/\*.*\s*$')
 blockcomment_end_rx = re.compile(r'^\s*.*\*/\s*$')
 acme_pragma_rx = re.compile(r'^#pragma\s+ACME\s+(?P<what>[^\s]+)\s*(?P<value>[^\s]?.*)\s*$')
@@ -448,7 +446,6 @@ def acme(toplevel_file, output) -> List[str]:
                 if match and match.group('name') in forced_defines:
                     continue
 
-                # Something else, add it verbatim
                 # Something else, copy verbatim to the output. Strip the
                 # trailing comment, if requested
                 if line.rstrip().endswith('*/'):
