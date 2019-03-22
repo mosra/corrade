@@ -205,8 +205,9 @@ def acme(toplevel_file, output) -> List[str]:
                             # Add a complete copyright line to the global list
                             if line.rstrip().endswith('>'): copyrights.add(line)
 
-                            # If a multi-line copyright, wait for next time
-                            elif line.rstrip().endswith(','): multiline_copyright = line
+                            # If a multi-line copyright (ending either with a
+                            # `,` or a year), wait for next time
+                            else: multiline_copyright = line
 
                         # Otherwise add to the buffer. The buffer is always at least
                         # one line (added when comment start matches), if not then it

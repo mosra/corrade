@@ -19,6 +19,9 @@
 
     Copyright © 2020 Some Guy <oh@well>
 
+    Copyright © 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019
+                Some Long-Time Contributor <me@me.team>
+
     Copyright is fine, but don't go *too* extreme with that, ok? :>
 */
 
