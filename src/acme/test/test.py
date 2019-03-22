@@ -137,6 +137,11 @@ class ParseFile(unittest.TestCase):
             actual_contents = f.read()
         return actual_contents, expected_contents
 
+    def test_bom(self):
+        with self.assertRaises(ValueError) as context:
+            self.run_acme('bom')
+        self.assertIn('contains a BOM', context.exception.args[0])
+
     def test_comments(self):
         self.assertEqual(*self.run_acme('comments'))
 
