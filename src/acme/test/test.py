@@ -78,6 +78,16 @@ class ParseExpression(unittest.TestCase):
         self.assertEqual(simplify_expression('elif', '!(0 && defined(A)) && (defined(B) || 1)'),
             (True, 'elif', '1'))
 
+    def test_simplify_nested_parentheses(self):
+        self.assertEqual(simplify_expression('if', '0 && (defined(FOO) || (defined(BAR) && !defined(BAZ)))'),
+            (False, 'if', '0'))
+        self.assertEqual(simplify_expression('if', '(defined(FOO) || (defined(BAR) && !defined(BAZ))) && 0'),
+            (False, 'if', '0'))
+        self.assertEqual(simplify_expression('if', '1 || !(defined(FOO) || (defined(BAR) && !defined(BAZ)))'),
+            (True, 'if', '1'))
+        self.assertEqual(simplify_expression('if', '!(defined(FOO) || (defined(BAR) && !defined(BAZ))) || 1'),
+            (True, 'if', '1'))
+
     def test_forced_defines(self):
         self.assertEqual(simplify_expression('elif', '!(0 || defined(A)) && (defined(B) && 1)', {'A': False}),
             (None, 'elif', 'defined(B)'))
@@ -85,6 +95,9 @@ class ParseExpression(unittest.TestCase):
             (None, 'elif', '!defined(A)'))
         self.assertEqual(simplify_expression('elif', 'defined(CORRADE_NO_DEBUG) || defined(NDEBUG)', {'DOXYGEN_GENERATING_OUTPUT': False, 'CORRADE_NO_DEBUG': True}),
             (True, 'elif', '1'))
+        # Crazy thing, combining all the awful corner cases from above
+        self.assertEqual(simplify_expression('if', '!defined(CORRADE_NO_TWEAKABLE) && (defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN))', {'DOXYGEN_GENERATING_OUTPUT': False, 'CORRADE_NO_TWEAKABLE': True}),
+            (False, 'if', '0'))
 
 class SortIncludes(unittest.TestCase):
     def test_system(self):

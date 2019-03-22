@@ -35,10 +35,10 @@ import subprocess
 from typing import List, Tuple
 
 alone_in_parentheses_rx = re.compile(r'\((?P<inside>0|1|!?defined\((?P<name>[^)]+)\))\)')
-zero_and_something_rx = re.compile(r'0 && (0|1|!?defined\([^)]+\))')
-something_and_zero_rx = re.compile(r'(0|1|!?defined\([^)]+\)) && 0')
-one_or_something_rx = re.compile(r'1 \|\| (0|1|!?defined\([^)]+\))')
-something_or_one_rx = re.compile(r'(0|1|!?defined\([^)]+\)) \|\| 1')
+zero_and_something_rx = re.compile(r'0 && (0|1|!?defined\([^)]+\)|!?\()')
+something_and_zero_rx = re.compile(r'(0|1|!?defined\([^)]+\)|\)) && 0')
+one_or_something_rx = re.compile(r'1 \|\| (0|1|!?defined\([^)]+\)|!?\()')
+something_or_one_rx = re.compile(r'(0|1|!?defined\([^)]+\)|\)) \|\| 1')
 alone_defined_rx = re.compile(r'^(?P<not>!)?defined\((?P<name>[^)]+)\)$')
 
 def normalize_expression(expression) -> Tuple[str, str]:
@@ -86,13 +86,52 @@ def simplify_expression(what, expression, forced_defines = {}):
             expression = expression[:match.start()] + match.group('inside') + expression[match.end():]
             modified = True
 
+        # If the above replacements modified something, restart to avoid e.g.
+        # `!0 && (something)` getting reduced by the "zero and something" rule
+        # below
+        if modified: continue
+
         # 0 && something or something && 0, replace with just 0
         # 1 || something or something || 1, replace with just 1
         for rexp, repl in [(zero_and_something_rx, '0'), (something_and_zero_rx, '0'),
                            (one_or_something_rx, '1'), (something_or_one_rx, '1')]:
             match = rexp.search(expression)
             if match:
-                expression = expression[:match.start()] + repl + expression[match.end():]
+                # The "something" is a parenthesised expression after, go to
+                # the right and eat everything in matching parentheses
+                if match.group(1) in ['(', '!(']:
+                    level = 1
+                    for i in range(match.end(), len(expression)):
+                        c = expression[i]
+                        if c == '(': level = level + 1
+                        elif c == ')':
+                            level = level - 1
+                            assert level >= 0
+                            if level == 0:
+                                expression = expression[:match.start()] + repl + expression[i + 1:]
+                                break
+
+                # The "something" is a parenthesised expression before, go to
+                # the left and eat everything in matching parentheses
+                elif match.group(1) == ')':
+                    level = 1
+                    for i in range(match.start(), 0, -1):
+                        c = expression[i - 1]
+                        if c == ')': level = level + 1
+                        elif c == '(':
+                            level = level - 1
+                            assert level >= 0
+                            if level == 0:
+                                # Eat also the negation, if there
+                                if i > 1 and expression[i - 2] == '!':
+                                    i = i - 1
+                                expression = expression[:i - 1] + repl + expression[match.end():]
+                                break
+
+                # Simple version
+                else:
+                    expression = expression[:match.start()] + repl + expression[match.end():]
+
                 modified = True
 
     if expression == '0':
