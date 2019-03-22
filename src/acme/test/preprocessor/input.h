@@ -128,3 +128,8 @@ NEITHER THIS! INTERCAL FTW
 #ifdef A
 #elif 1
 #endif
+
+/* Parse this correctly (the slash is there) */
+#if __has_include(<bits/c++config.h>) /* the __GLIBCXX__ define */
+// yay!
+#endif

@@ -155,7 +155,7 @@ def sort_includes(includes: List[str]) -> List[str]:
     return (system + ["\n"] + local) if local and system else (system + local)
 
 include_rx = re.compile(r'^(?P<include>#include (?P<quote>["<])(?P<file>[^">]+)[">]).*?$')
-preprocessor_rx = re.compile(r'^(?P<indent>\s*)#(?P<what>ifdef|ifndef|if|else|elif|endif)\s*(?P<value>[^/\n]*)(?P<comment>\s*/[/*].*)?$')
+preprocessor_rx = re.compile(r'^(?P<indent>\s*)#(?P<what>ifdef|ifndef|if|else|elif|endif)\s*(?P<value>[^\n]*?[^\s]?)(?P<comment>\s*/[/*].*)?$')
 define_rx = re.compile(r'\s*#(?P<what>define|undef) (?P<name>[^\s]+)\s*$')
 linecomment_rx = re.compile(r'^\s*(/\*.*\*/|//.*)?\s*$')
 copyright_rc = re.compile(r'^\s+Copyright © \d{4}.+$')
@@ -297,7 +297,7 @@ def acme(toplevel_file, output) -> List[str]:
                     what = match.group('what')
                     value = match.group('value').strip()
                     comment = match.group('comment') or ''
-                    if comment: comment = ' ' + comment
+                    if comment and not comment[0].isspace(): comment = ' ' + comment
 
                     # Leaf node should always be a real node
                     assert len(branch_stack) >= 1
