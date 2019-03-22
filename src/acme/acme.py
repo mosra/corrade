@@ -154,6 +154,43 @@ def sort_includes(includes: List[str]) -> List[str]:
         else: assert False # pragma: no cover
     return (system + ["\n"] + local) if local and system else (system + local)
 
+copyright_email_rx = re.compile(r'<[^@]+@[^>]+>')
+copyright_year_rx = re.compile(r'\d\d\d\d')
+
+def sort_copyrights(copyrights: List[str]) -> List[str]:
+    email_dict = {}
+    output = []
+
+    # Go through all copyright, the oldest first
+    for copyright in sorted(copyrights):
+        match = copyright_email_rx.search(copyright)
+        assert match
+        email = match.group(0)
+
+        # If the e-mail is not in the dict yet, add it there with all years it
+        # covers
+        years = set([int(i) for i in copyright_year_rx.findall(copyright)])
+        if email not in email_dict:
+            email_dict[email] = (years, len(output))
+            output += [copyright]
+
+        # If given mail is in the dict already, check that all years are there
+        # as well
+        else:
+            # If all years are there, nothing left to do
+            if years <= email_dict[email][0]: continue
+
+            # If we have a superset of the years, use this copyright line
+            # instead
+            if years > email_dict[email][0]:
+                output[email_dict[email][1]] = copyright
+                continue
+
+            # Otherwise complain
+            raise ValueError("First copyright found for {} is missing years {}, supply an explicit combined copyright instead".format(email, repr(years - email_dict[email][0])))
+
+    return output
+
 include_rx = re.compile(r'^(?P<include>#include (?P<quote>["<])(?P<file>[^">]+)[">]).*?$')
 preprocessor_rx = re.compile(r'^(?P<indent>\s*)#(?P<what>ifdef|ifndef|if|else|elif|endif)\s*(?P<value>[^\n]*?[^\s]?)(?P<comment>\s*/[/*].*)?$')
 define_rx = re.compile(r'\s*#(?P<what>define|undef) (?P<name>[^\s]+)\s*$')
@@ -524,7 +561,7 @@ def acme(toplevel_file, output) -> List[str]:
     if copyrights:
         for i, line in enumerate(lines):
             if line.strip() == '{{copyright}}':
-                lines = lines[:i] + sorted(copyrights) + lines[i + 1:]
+                lines = lines[:i] + sort_copyrights(copyrights) + lines[i + 1:]
                 break
         else:
             logging.warning(" No {{copyrights}} placeholder found, ignoring found copyright statements")

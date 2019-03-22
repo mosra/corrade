@@ -27,7 +27,7 @@ import os
 import shutil
 import unittest
 
-from acme import simplify_expression, sort_includes, acme
+from acme import simplify_expression, sort_includes, sort_copyrights, acme
 
 class ParseExpression(unittest.TestCase):
     def test_basic(self):
@@ -133,6 +133,47 @@ class SortIncludes(unittest.TestCase):
             "#include \"neither.h\"\n",
             "#include \"noexpand.h\"\n"
         ])
+
+class SortCopyrights(unittest.TestCase):
+    def test_sort(self):
+        self.assertEqual(sort_copyrights([
+            "Copyright © 2015, 2016 John Doe <foo@bar>",
+            "Copyright © 1997, 2003 Boo Bee <bar@bar>",
+            "Copyright © 2018 Ho <hu@he>"
+        ]), [
+            "Copyright © 1997, 2003 Boo Bee <bar@bar>",
+            "Copyright © 2015, 2016 John Doe <foo@bar>",
+            "Copyright © 2018 Ho <hu@he>"
+        ])
+
+    def test_pick_earlier(self):
+        self.assertEqual(sort_copyrights([
+            "Copyright © 2015, 2016, 2018 John Doe <foo@bar>",
+            "Copyright © 2018 John Doe <foo@bar>",
+            "Copyright © 1997, 2003 Boo Bee <bar@bar>",
+            "Copyright © 2016 John Doe <foo@bar>"
+        ]), [
+            "Copyright © 1997, 2003 Boo Bee <bar@bar>",
+            "Copyright © 2015, 2016, 2018 John Doe <foo@bar>"
+        ])
+
+    def test_pick_longer(self):
+        self.assertEqual(sort_copyrights([
+            "Copyright © 2015 John Doe <foo@bar>",
+            "Copyright © 2015, 2016, 2018 John Doe <foo@bar>"
+        ]), [
+            "Copyright © 2015, 2016, 2018 John Doe <foo@bar>"
+        ])
+
+    def test_extra_year(self):
+        with self.assertRaises(ValueError) as context:
+            sort_copyrights([
+                "Copyright © 2015, 2016, 2018 John Doe <foo@bar>",
+                "Copyright © 2016 John Doe <foo@bar>",
+                "Copyright © 2016, 2017, 2019 John Doe <foo@bar>"
+            ])
+
+        self.assertIn('First copyright found for <foo@bar> is missing years {2017, 2019}', context.exception.args[0])
 
 class ParseFile(unittest.TestCase):
     def __init__(self, *args, **kwargs):

@@ -248,6 +248,11 @@ found, the copyright info is thrown away. Multiline copyright notices are
 supported as well if a  line ends with `,` instead of `>` for the e-mail
 address.
 
+If multiple copyrights are found for a single e-mail address, the one with a
+superset of years is chosen. If the year sets are disjoint, the script fail. To
+fix that, explicitly supply a copyright line combining all years in the driver
+file.
+
 @section acme-comments Code comments
 
 By default, the script includes all code comments except license blocks (blocks
