@@ -64,6 +64,12 @@ class ParseExpression(unittest.TestCase):
         self.assertEqual(simplify_expression('elif', '!(!!0)'),
             (True, 'elif', '1'))
 
+    def test_negation_precedence(self):
+        self.assertEqual(simplify_expression('if', '!0 || defined(FOO)'),
+            (True, 'if', '1'))
+        self.assertEqual(simplify_expression('if', '!0 && defined(FOO)'),
+            (None, 'ifdef', 'FOO'))
+
     def test_simplify(self):
         self.assertEqual(simplify_expression('if', '0 || (!defined(FOO) && 1)'),
             (None, 'ifndef', 'FOO'))

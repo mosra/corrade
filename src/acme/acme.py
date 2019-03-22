@@ -68,12 +68,14 @@ def simplify_expression(what, expression, forced_defines = {}):
         modified = False # Nothing done in this round yet
 
         # Basic replacements
-        for find, replace in [('0 || ', ''),
+        for find, replace in [('!0', '1'),
+                              ('!1', '0'),
+                              # All these have to be after `!0` / `!1` so e.g.
+                              # `!0 || b` doesn't get # simplified to `!b`
+                              ('0 || ', ''),
                               (' || 0', ''),
                               ('1 && ', ''),
-                              (' && 1', ''),
-                              ('!0', '1'),
-                              ('!1', '0')]:
+                              (' && 1', '')]:
             if expression.find(find) != -1:
                 expression = expression.replace(find, replace)
                 modified = True
