@@ -23,11 +23,17 @@
 */
 
 #include "base.h"
+// {{includes}}
+#if !defined(CORRADE_ASSERT) && !defined(NDEBUG)
+#include <cassert>
+#endif
 
 /* We don't need anything from configure.h here */
 #pragma ACME enable Corrade_configure_h
 
-/* Disable asserts that are not used */
+/* Disable asserts that are not used. CORRADE_ASSERT is used, wrapping the
+   #include <cassert> above. When enabling additional asserts, be sure to
+   update it above as well. */
 #pragma ACME enable CORRADE_CONSTEXPR_ASSERT
 #pragma ACME enable CORRADE_ASSERT_OUTPUT
 #pragma ACME enable CORRADE_INTERNAL_ASSERT

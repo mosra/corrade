@@ -27,7 +27,8 @@
 /* We don't need anything from configure.h here */
 #pragma ACME enable Corrade_configure_h
 
-/* Disable asserts that are not used */
+/* Disable asserts that are not used (all of them). The Assert.h file is not
+   even included. */
 #pragma ACME enable CORRADE_CONSTEXPR_ASSERT
 #pragma ACME enable CORRADE_ASSERT_OUTPUT
 #pragma ACME enable CORRADE_INTERNAL_ASSERT

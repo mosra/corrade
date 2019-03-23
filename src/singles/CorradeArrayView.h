@@ -24,6 +24,9 @@
 #include "base.h"
 // {{includes}}
 #include <cstddef>
+#if (!defined(CORRADE_ASSERT) || !defined(CORRADE_CONSTEXPR_ASSERT)) && !defined(NDEBUG)
+#include <cassert>
+#endif
 
 /* We need just CORRADE_MSVC2017_COMPATIBILITY from configure.h. This is
    equivalent to the version check in UseCorrade.cmake. */
@@ -35,7 +38,9 @@
 /* We need just the array forward declarations from Containers.h */
 #pragma ACME enable Corrade_Containers_Containers_h
 
-/* Disable asserts that are not used */
+/* Disable asserts that are not used. CORRADE_ASSERT and
+   CORRADE_CONSTEXPR_ASSERT is used, wrapping the #include <cassert> above.
+   When enabling additional asserts, be sure to update it above as well. */
 #pragma ACME enable CORRADE_ASSERT_OUTPUT
 #pragma ACME enable CORRADE_INTERNAL_ASSERT
 #pragma ACME enable CORRADE_INTERNAL_CONSTEXPR_ASSERT
