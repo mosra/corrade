@@ -13,6 +13,8 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2019.01-107-g80d9f347 (2019-03-23)
+    -   Including <cassert> only when needed
     v2018.10-232-ge927d7f3 (2019-01-28)
     -   Ability to "take" a value out of a r-value optional using operator*
     -   Opt-in compatibility with <optional> from C++17

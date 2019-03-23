@@ -15,6 +15,8 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2019.01-107-g80d9f347 (2019-03-23)
+    -   Including <cassert> only when needed
     v2019.01-41-g39c08d7c (2019-02-18)
     -   Initial release
 
