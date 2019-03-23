@@ -1,5 +1,7 @@
 // Some random comment
 
+/* An {{includes}} that has nothing to add will get ignored */
+
 #include <cmath>
 #include <cstdint>
 #include <cstring>

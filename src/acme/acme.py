@@ -568,10 +568,13 @@ def acme(toplevel_file, output) -> List[str]:
         i = 0
         while i != len(lines):
             if lines[i].strip() == '// {{includes}}':
-                lines = lines[:i] + sort_includes(new_includes[0]) + lines[i + 1:]
+                sorted_includes = sort_includes(new_includes[0])
+                lines = lines[:i] + sorted_includes + lines[i + 1:]
                 new_includes.pop(0)
                 if not new_includes: break
-            i = i + 1
+                i = i + len(sorted_includes)
+            else:
+                i = i + 1
         else:
             # Warning already printed when new_includes was discovered to be empty
             lines = sort_includes(new_includes[0]) + lines

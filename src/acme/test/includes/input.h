@@ -1,5 +1,8 @@
 // Some random comment
 
+/* An {{includes}} that has nothing to add will get ignored */
+// {{includes}}
+
 // {{includes}}
 
 // And after
