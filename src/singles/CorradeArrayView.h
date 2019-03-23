@@ -22,6 +22,8 @@
 */
 
 #include "base.h"
+// {{includes}}
+#include <cstddef>
 
 /* We need just CORRADE_MSVC2017_COMPATIBILITY from configure.h. This is
    equivalent to the version check in UseCorrade.cmake. */
@@ -42,7 +44,6 @@
 
 #ifndef CorradeArrayView_h
 #define CorradeArrayView_h
-#include <cstddef>
 
 namespace Corrade { namespace Containers {
 
@@ -50,6 +51,7 @@ template<class> class ArrayView;
 template<std::size_t, class> class StaticArrayView;
 
 }}
+
 #endif
 #include "Corrade/Containers/ArrayView.h"
 #ifdef CORRADE_ARRAYVIEW_STL_COMPATIBILITY
