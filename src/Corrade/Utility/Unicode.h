@@ -30,10 +30,10 @@
  */
 
 #include <cstddef>
-#include <string>
 #include <utility>
 
 #include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Utility/StlForwardString.h"
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
@@ -67,9 +67,7 @@ following character. If an error occurs, returns position of next byte and
 CORRADE_UTILITY_EXPORT std::pair<char32_t, std::size_t> nextChar(Containers::ArrayView<const char> text, std::size_t cursor);
 
 /** @overload */
-inline std::pair<char32_t, std::size_t> nextChar(const std::string& text, const std::size_t cursor) {
-    return nextChar(Containers::ArrayView<const char>{text.data(), text.size()}, cursor);
-}
+CORRADE_UTILITY_EXPORT std::pair<char32_t, std::size_t> nextChar(const std::string& text, const std::size_t cursor);
 
 /** @overload */
 /* to fix ambiguity when passing char array in */
@@ -88,9 +86,7 @@ codepoint.
 CORRADE_UTILITY_EXPORT std::pair<char32_t, std::size_t> prevChar(Containers::ArrayView<const char> text, std::size_t cursor);
 
 /** @overload */
-inline std::pair<char32_t, std::size_t> prevChar(const std::string& text, const std::size_t cursor) {
-    return prevChar(Containers::ArrayView<const char>{text.data(), text.size()}, cursor);
-}
+CORRADE_UTILITY_EXPORT std::pair<char32_t, std::size_t> prevChar(const std::string& text, const std::size_t cursor);
 
 /** @overload */
 /* to fix ambiguity when passing char array in */
@@ -113,11 +109,6 @@ UTF-32 range, returns 0.
 CORRADE_UTILITY_EXPORT std::size_t utf8(char32_t character, Containers::StaticArrayView<4, char> result);
 
 #if defined(CORRADE_TARGET_WINDOWS) || defined(DOXYGEN_GENERATING_OUTPUT)
-namespace Implementation {
-    CORRADE_UTILITY_EXPORT std::wstring widen(const char* text, int length);
-    CORRADE_UTILITY_EXPORT std::string narrow(const wchar_t* text, int length);
-}
-
 /**
 @brief Widen UTF-8 string for use with Windows Unicode APIs
 
@@ -130,21 +121,15 @@ return @ref std::u16string but a @ref std::wstring.
 */
 /* Not named utf16() in order to avoid clashes with potential portable
    std::u16string utf16(const std::string&) implementation in the future */
-inline std::wstring widen(const std::string& text) {
-    return Implementation::widen(text.data(), text.size());
-}
+CORRADE_UTILITY_EXPORT std::wstring widen(const std::string& text);
 
 /** @overload */
-inline std::wstring widen(Containers::ArrayView<const char> text) {
-    return Implementation::widen(text.data(), text.size());
-}
+CORRADE_UTILITY_EXPORT std::wstring widen(Containers::ArrayView<const char> text);
 
 /** @overload
 Expects that @p text is null-terminated.
 */
-inline std::wstring widen(const char* text) {
-    return Implementation::widen(text, -1);
-}
+CORRADE_UTILITY_EXPORT std::wstring widen(const char* text);
 
 /**
 @brief Narrow string to UTF-8 for use with Windows Unicode APIs
@@ -156,21 +141,15 @@ accept @ref std::u16string but a @ref std::wstring.
     used when dealing directly with Windows Unicode APIs. Other code should
     always use UTF-8, see http://utf8everywhere.org for more information.
 */
-inline std::string narrow(const std::wstring& text) {
-    return Implementation::narrow(text.data(), text.size());
-}
+CORRADE_UTILITY_EXPORT std::string narrow(const std::wstring& text);
 
 /** @overload */
-inline std::string narrow(Containers::ArrayView<const wchar_t> text) {
-    return Implementation::narrow(text.data(), text.size());
-}
+CORRADE_UTILITY_EXPORT std::string narrow(Containers::ArrayView<const wchar_t> text);
 
 /** @overload
 Expects that @p text is null-terminated.
 */
-inline std::string narrow(const wchar_t* text) {
-    return Implementation::narrow(text, -1);
-}
+CORRADE_UTILITY_EXPORT std::string narrow(const wchar_t* text);
 #endif
 
 }}}

@@ -26,8 +26,11 @@
 #include "Unicode.h"
 
 #include <cstdint>
+#include <string>
 
 #ifdef CORRADE_TARGET_WINDOWS
+#define WIN32_LEAN_AND_MEAN 1
+#define VC_EXTRALEAN
 #include <windows.h>
 #endif
 
@@ -79,6 +82,10 @@ std::pair<char32_t, std::size_t> nextChar(const Containers::ArrayView<const char
     return {result, end};
 }
 
+std::pair<char32_t, std::size_t> nextChar(const std::string& text, const std::size_t cursor) {
+    return nextChar(Containers::ArrayView<const char>{text.data(), text.size()}, cursor);
+}
+
 std::pair<char32_t, std::size_t> prevChar(const Containers::ArrayView<const char> text, std::size_t cursor) {
     CORRADE_ASSERT(cursor > 0,
         "Utility::Unicode::prevChar(): cursor already at the beginning", {});
@@ -117,6 +124,10 @@ std::pair<char32_t, std::size_t> prevChar(const Containers::ArrayView<const char
     }
 
     return {result, begin};
+}
+
+std::pair<char32_t, std::size_t> prevChar(const std::string& text, const std::size_t cursor) {
+    return prevChar(Containers::ArrayView<const char>{text.data(), text.size()}, cursor);
 }
 
 std::size_t utf8(const char32_t character, const Containers::StaticArrayView<4, char> result) {
@@ -164,7 +175,7 @@ std::u32string utf32(const std::string& text) {
 }
 
 #ifdef CORRADE_TARGET_WINDOWS
-namespace Implementation {
+namespace {
 
 std::wstring widen(const char* const text, const int size) {
     if(!size) return {};
@@ -182,6 +193,30 @@ std::string narrow(const wchar_t* const text, const int size) {
     return result;
 }
 
+}
+
+std::wstring widen(const std::string& text) {
+    return widen(text.data(), text.size());
+}
+
+std::wstring widen(Containers::ArrayView<const char> text) {
+    return widen(text.data(), text.size());
+}
+
+std::wstring widen(const char* text) {
+    return widen(text, -1);
+}
+
+std::string narrow(const std::wstring& text) {
+    return narrow(text.data(), text.size());
+}
+
+std::string narrow(Containers::ArrayView<const wchar_t> text) {
+    return narrow(text.data(), text.size());
+}
+
+std::string narrow(const wchar_t* text) {
+    return narrow(text, -1);
 }
 #endif
 
