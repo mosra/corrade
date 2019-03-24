@@ -66,9 +66,12 @@ namespace Corrade {
     overload for joining a path from multiple parts at once
 -   New @ref Corrade/Utility/StlForwardString.h,
     @ref Corrade/Utility/StlForwardTuple.h and
-    @ref Corrade/Utility/StlForwardVector.h providing lightweight forward
-    declarations for @ref std::string, @ref std::tuple and @ref std::vector on
-    platforms that have them (and including the full definition otherwise)
+    @ref Corrade/Utility/StlForwardVector.h headers providing lightweight
+    forward declarations for @ref std::string, @ref std::tuple and
+    @ref std::vector on platforms that have them (and including the full
+    definition otherwise)
+-   New @ref Corrade/Utility/StlMath.h header providing bloat-free
+    @cpp #include <cmath> @ce on C++17 an up
 -   New @ref Utility::IsStringLike type trait
 -   Added @ref Utility::format(), an alternative to @ref Utility::formatString()
     returning @ref Containers::Array instead of @ref std::string

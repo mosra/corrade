@@ -165,6 +165,18 @@ corrade_add_test(UtilitySha1Test Sha1Test.cpp)
 corrade_add_test(UtilityStlForwardStringTest StlForwardStringTest.cpp)
 corrade_add_test(UtilityStlForwardTupleTest StlForwardTupleTest.cpp)
 corrade_add_test(UtilityStlForwardVectorTest StlForwardVectorTest.cpp)
+
+# Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0") OR
+   (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0") OR
+   (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.3") OR
+   (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10"))
+    corrade_add_test(UtilityStlMathTest StlMathTest.cpp)
+    set_target_properties(UtilityStlMathTest PROPERTIES
+        CORRADE_CXX_STANDARD 17
+        FOLDER "Corrade/Containers/Test")
+endif()
+
 corrade_add_test(UtilityStringTest StringTest.cpp LIBRARIES CorradeUtilityTestLib)
 corrade_add_test(UtilitySystemTest SystemTest.cpp)
 corrade_add_test(UtilityTweakableParserTest TweakableParserTest.cpp)
