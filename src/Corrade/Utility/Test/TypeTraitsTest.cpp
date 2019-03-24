@@ -26,7 +26,6 @@
 #include <iterator>
 #include <map>
 #include <string>
-#include <tuple>
 #include <type_traits>
 #include <valarray>
 #include <vector>
@@ -76,7 +75,7 @@ void TypeTraitsTest::hasType() {
 
     /* Member function */
     CORRADE_VERIFY(HasSize<std::vector<int>>::value);
-    CORRADE_VERIFY(!(HasSize<std::tuple<int, int>>::value));
+    CORRADE_VERIFY(!(HasSize<std::pair<int, int>>::value));
 
     /* Non-member function */
     CORRADE_VERIFY(HasBegin<std::string>::value);
