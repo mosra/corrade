@@ -61,6 +61,11 @@ Download, build and install Corrade as explained in
 After that, the best way to get started is to read some
 [examples and tutorials](https://doc.magnum.graphics/corrade/corrade-example-index.html).
 
+Apart from that, various Corrade functionality is available through
+[single-header libraries](https://doc.magnum.graphics/corrade/corrade-singles.html).
+Just download a file, `#include` it in your project and you're ready to go! No
+buildsystem wrangling needed.
+
 CONTACT & SUPPORT
 =================
 
