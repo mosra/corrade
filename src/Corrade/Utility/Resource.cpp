@@ -31,7 +31,6 @@
 #include <iomanip>
 #include <map>
 #include <sstream>
-#include <tuple>
 #include <vector>
 
 #include "Corrade/Containers/Array.h"
@@ -174,14 +173,12 @@ std::string Resource::compileFrom(const std::string& name, const std::string& co
             return {};
         }
 
-        bool success;
-        Containers::Array<char> contents;
-        std::tie(success, contents) = fileContents(Directory::join(path, filename));
-        if(!success) {
+        std::pair<bool, Containers::Array<char>> contents = fileContents(Directory::join(path, filename));
+        if(!contents.first) {
             Error() << "    Error: cannot open file" << filename << "of file" << fileData.size()+1 << "in group" << group;
             return {};
         }
-        fileData.emplace_back(alias, std::string{contents, contents.size()});
+        fileData.emplace_back(alias, std::string{contents.second, contents.second.size()});
     }
 
     return compile(name, group, fileData);
