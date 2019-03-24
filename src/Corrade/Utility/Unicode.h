@@ -33,8 +33,13 @@
 #include <utility>
 
 #include "Corrade/Containers/ArrayView.h"
-#include "Corrade/Utility/StlForwardString.h"
 #include "Corrade/Utility/visibility.h"
+
+#ifdef CORRADE_TARGET_LIBCXX
+#include <string> /* Libc++ doesn't have std::u32string in the fwdecl */
+#else
+#include "Corrade/Utility/StlForwardString.h"
+#endif
 
 namespace Corrade { namespace Utility {
 

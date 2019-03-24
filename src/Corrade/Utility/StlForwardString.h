@@ -35,7 +35,11 @@ implementation-specific STL header containing just the forward declaration of
 implementations where forward declaration is not possible or is unknown is
 equivalent to @cpp #include <string> @ce.
 
-<b></b>
+@attention On libc++, the forward declaration header contains just
+    @ref std::string and @ref std::wstring. While that is enough for majority
+    of cases, types like @ref std::u32string are not there and in that case
+    you need to @cpp #include <string> @ce in its complete form. You can detect
+    this case using the @ref CORRADE_TARGET_LIBCXX macro.
 
 @m_class{m-block m-success}
 
