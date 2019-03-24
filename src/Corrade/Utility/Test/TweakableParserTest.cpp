@@ -24,7 +24,6 @@
 */
 
 #include <sstream>
-#include <tuple>
 
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/TestSuite/Tester.h"
@@ -283,11 +282,7 @@ template<class T> void TweakableParserTest::integral() {
     setTestCaseName(formatString("integral<{}>", TypeTraits<T>::name()));
     setTestCaseDescription(data.name);
     std::string input = formatString("{}{}", data.data, TypeTraits<T>::suffix());
-    TweakableState state;
-    T result;
-    std::tie(state, result) = TweakableParser<T>::parse({input.data(), input.size()});
-    CORRADE_COMPARE(state, TweakableState::Success);
-    CORRADE_COMPARE(result, T(data.result));
+    CORRADE_COMPARE(TweakableParser<T>::parse({input.data(), input.size()}), std::make_pair(TweakableState::Success, T(data.result)));
 }
 
 template<class T> void TweakableParserTest::integralUppercase() {
@@ -295,11 +290,7 @@ template<class T> void TweakableParserTest::integralUppercase() {
     setTestCaseName(formatString("integralUppercase<{}>", TypeTraits<T>::name()));
     setTestCaseDescription(data.name);
     std::string input = String::uppercase(formatString("{}{}", data.data, TypeTraits<T>::suffix()));
-    TweakableState state;
-    T result;
-    std::tie(state, result) = TweakableParser<T>::parse({input.data(), input.size()});
-    CORRADE_COMPARE(state, TweakableState::Success);
-    CORRADE_COMPARE(result, T(data.result));
+    CORRADE_COMPARE(TweakableParser<T>::parse({input.data(), input.size()}), std::make_pair(TweakableState::Success, T(data.result)));
 }
 
 template<class T> void TweakableParserTest::integralError() {
@@ -321,11 +312,9 @@ template<class T> void TweakableParserTest::floatingPoint() {
     setTestCaseName(formatString("floatingPoint<{}>", TypeTraits<T>::name()));
     setTestCaseDescription(data.name);
     std::string input = formatString("{}{}", data.data, TypeTraits<T>::suffix());
-    TweakableState state;
-    T result;
-    std::tie(state, result) = TweakableParser<T>::parse({input.data(), input.size()});
-    CORRADE_COMPARE(state, TweakableState::Success);
-    CORRADE_COMPARE(result, T(data.result));
+    std::pair<TweakableState, T> parsed = TweakableParser<T>::parse({input.data(), input.size()});
+    CORRADE_COMPARE(parsed.first, TweakableState::Success);
+    CORRADE_COMPARE(parsed.second, T(data.result));
 }
 
 template<class T> void TweakableParserTest::floatingPointUppercase() {
@@ -333,11 +322,9 @@ template<class T> void TweakableParserTest::floatingPointUppercase() {
     setTestCaseName(formatString("floatingPointUppercase<{}>", TypeTraits<T>::name()));
     setTestCaseDescription(data.name);
     std::string input = String::uppercase(formatString("{}{}", data.data, TypeTraits<T>::suffix()));
-    TweakableState state;
-    T result;
-    std::tie(state, result) = TweakableParser<T>::parse({input.data(), input.size()});
-    CORRADE_COMPARE(state, TweakableState::Success);
-    CORRADE_COMPARE(result, T(data.result));
+    std::pair<TweakableState, T> parsed = TweakableParser<T>::parse({input.data(), input.size()});
+    CORRADE_COMPARE(parsed.first, TweakableState::Success);
+    CORRADE_COMPARE(parsed.second, T(data.result));
 }
 
 template<class T> void TweakableParserTest::floatingPointError() {
@@ -359,13 +346,10 @@ void TweakableParserTest::character() {
     setTestCaseDescription(data.name);
     std::string input = data.data; /* lazy way to get a length */
 
-    TweakableState state;
-    char result;
-    std::tie(state, result) = TweakableParser<char>::parse({input.data(), input.size()});
+    auto parsed = TweakableParser<char>::parse({input.data(), input.size()});
     {
         CORRADE_EXPECT_FAIL_IF(data.expectFail, "Not yet implemented.");
-        CORRADE_COMPARE(state, TweakableState::Success);
-        CORRADE_COMPARE(result, data.result);
+        CORRADE_COMPARE(parsed, std::make_pair(TweakableState::Success, data.result));
     }
 }
 
@@ -386,12 +370,7 @@ void TweakableParserTest::boolean() {
     auto&& data = BooleanData[testCaseInstanceId()];
     setTestCaseDescription(data.name);
     std::string input = data.data; /* lazy way to get a length */
-
-    TweakableState state;
-    bool result;
-    std::tie(state, result) = TweakableParser<bool>::parse({input.data(), input.size()});
-    CORRADE_COMPARE(state, TweakableState::Success);
-    CORRADE_COMPARE(result, data.result);
+    CORRADE_COMPARE(TweakableParser<bool>::parse({input.data(), input.size()}), std::make_pair(TweakableState::Success, data.result));
 }
 
 void TweakableParserTest::booleanError() {
