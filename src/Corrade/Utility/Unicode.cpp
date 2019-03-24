@@ -26,7 +26,6 @@
 #include "Unicode.h"
 
 #include <cstdint>
-#include <tuple>
 
 #ifdef CORRADE_TARGET_WINDOWS
 #include <windows.h>
@@ -156,9 +155,9 @@ std::u32string utf32(const std::string& text) {
     result.reserve(text.size());
 
     for(std::size_t i = 0; i != text.size(); ) {
-        char32_t unicode;
-        std::tie(unicode, i) = Utility::Unicode::nextChar(text, i);
-        result.push_back(unicode);
+        const std::pair<char32_t, std::size_t> next = Utility::Unicode::nextChar(text, i);
+        result.push_back(next.first);
+        i = next.second;
     }
 
     return result;

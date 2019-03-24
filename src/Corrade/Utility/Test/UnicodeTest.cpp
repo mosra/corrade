@@ -24,7 +24,6 @@
 */
 
 #include <sstream>
-#include <tuple>
 
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
@@ -74,48 +73,28 @@ UnicodeTest::UnicodeTest() {
 }
 
 void UnicodeTest::nextUtf8() {
-    std::uint32_t codepoint;
-    std::size_t next;
-
     /* One-byte sequence */
-    std::tie(codepoint, next) = Unicode::nextChar("   \x7f", 3);
-    CORRADE_COMPARE(next, 4);
-    CORRADE_COMPARE(codepoint, 127);
+    CORRADE_COMPARE(Unicode::nextChar("   \x7f", 3), std::make_pair(127, 4));
 
     /* Two byte sequence */
-    std::tie(codepoint, next) = Unicode::nextChar("   \xce\xac", 3);
-    CORRADE_COMPARE(next, 5);
-    CORRADE_COMPARE(codepoint, 940);
+    CORRADE_COMPARE(Unicode::nextChar("   \xce\xac", 3), std::make_pair(940, 5));
 
     /* Three-byte sequence */
-    std::tie(codepoint, next) = Unicode::nextChar("   \xea\xb8\x89", 3);
-    CORRADE_COMPARE(next, 6);
-    CORRADE_COMPARE(codepoint, 44553);
+    CORRADE_COMPARE(Unicode::nextChar("   \xea\xb8\x89", 3), std::make_pair(44553, 6));
 
     /* Four-byte sequence */
-    std::tie(codepoint, next) = Unicode::nextChar("   \xf4\x85\x98\x80", 3);
-    CORRADE_COMPARE(next, 7);
-    CORRADE_COMPARE(codepoint, 1070592);
+    CORRADE_COMPARE(Unicode::nextChar("   \xf4\x85\x98\x80", 3), std::make_pair(1070592, 7));
 }
 
 void UnicodeTest::nextUtf8Error() {
-    std::uint32_t codepoint;
-    std::size_t next;
-
     /* Wrong start of a sequence */
-    std::tie(codepoint, next) = Unicode::nextChar("   \xb0", 3);
-    CORRADE_COMPARE(next, 4);
-    CORRADE_COMPARE(codepoint, 0xffffffffu);
+    CORRADE_COMPARE(Unicode::nextChar("   \xb0", 3), std::make_pair(0xffffffffu, 4));
 
     /* Garbage in multibyte sequence */
-    std::tie(codepoint, next) = Unicode::nextChar("   \xea\x40\xb8", 3);
-    CORRADE_COMPARE(next, 4);
-    CORRADE_COMPARE(codepoint, 0xffffffffu);
+    CORRADE_COMPARE(Unicode::nextChar("   \xea\x40\xb8", 3), std::make_pair(0xffffffffu, 4));
 
     /* Too small string for mulibyte sequence */
-    std::tie(codepoint, next) = Unicode::nextChar("   \xce", 3);
-    CORRADE_COMPARE(next, 4);
-    CORRADE_COMPARE(codepoint, 0xffffffffu);
+    CORRADE_COMPARE(Unicode::nextChar("   \xce", 3), std::make_pair(0xffffffffu, 4));
 }
 
 void UnicodeTest::nextUtf8Empty() {
@@ -127,68 +106,40 @@ void UnicodeTest::nextUtf8Empty() {
 }
 
 void UnicodeTest::prevUtf8() {
-    std::uint32_t codepoint;
-    std::size_t prev;
-
     /* One-byte sequence */
-    std::tie(codepoint, prev) = Unicode::prevChar("   \x7f", 4);
-    CORRADE_COMPARE(prev, 3);
-    CORRADE_COMPARE(codepoint, 127);
+    CORRADE_COMPARE(Unicode::prevChar("   \x7f", 4), std::make_pair(127, 3));
 
     /* Two byte sequence */
-    std::tie(codepoint, prev) = Unicode::prevChar("   \xce\xac", 5);
-    CORRADE_COMPARE(prev, 3);
-    CORRADE_COMPARE(codepoint, 940);
+    CORRADE_COMPARE(Unicode::prevChar("   \xce\xac", 5), std::make_pair(940, 3));
 
     /* Three-byte sequence */
-    std::tie(codepoint, prev) = Unicode::prevChar("   \xea\xb8\x89", 6);
-    CORRADE_COMPARE(prev, 3);
-    CORRADE_COMPARE(codepoint, 44553);
+    CORRADE_COMPARE(Unicode::prevChar("   \xea\xb8\x89", 6), std::make_pair(44553, 3));
 
     /* Four-byte sequence */
-    std::tie(codepoint, prev) = Unicode::prevChar("   \xf4\x85\x98\x80", 7);
-    CORRADE_COMPARE(prev, 3);
-    CORRADE_COMPARE(codepoint, 1070592);
+    CORRADE_COMPARE(Unicode::prevChar("   \xf4\x85\x98\x80", 7), std::make_pair(1070592, 3));
 }
 
 void UnicodeTest::prevUtf8Error() {
-    std::uint32_t codepoint;
-    std::size_t prev;
-
     /* Wrong start of a sequence */
-    std::tie(codepoint, prev) = Unicode::prevChar("   \xb0", 4);
-    CORRADE_COMPARE(prev, 3);
-    CORRADE_COMPARE(codepoint, 0xffffffffu);
+    CORRADE_COMPARE(Unicode::prevChar("   \xb0", 4), std::make_pair(0xffffffffu, 3));
 
     /* Garbage in two-byte sequence */
-    std::tie(codepoint, prev) = Unicode::prevChar("   \x40\xac", 5);
-    CORRADE_COMPARE(prev, 4);
-    CORRADE_COMPARE(codepoint, 0xffffffffu);
+    CORRADE_COMPARE(Unicode::prevChar("   \x40\xac", 5), std::make_pair(0xffffffffu, 4));
 
     /* Garbage in three-byte sequence */
-    std::tie(codepoint, prev) = Unicode::prevChar("   \x40\xb8\xb8", 6);
-    CORRADE_COMPARE(prev, 5);
-    CORRADE_COMPARE(codepoint, 0xffffffffu);
+    CORRADE_COMPARE(Unicode::prevChar("   \x40\xb8\xb8", 6), std::make_pair(0xffffffffu, 5));
 
     /* Garbage in four-byte sequence */
-    std::tie(codepoint, prev) = Unicode::prevChar("   \x40\x85\x98\x80", 7);
-    CORRADE_COMPARE(prev, 6);
-    CORRADE_COMPARE(codepoint, 0xffffffffu);
+    CORRADE_COMPARE(Unicode::prevChar("   \x40\x85\x98\x80", 7), std::make_pair(0xffffffffu, 6));
 
     /* Too small string for two-byte sequence */
-    std::tie(codepoint, prev) = Unicode::prevChar("\xac", 1);
-    CORRADE_COMPARE(prev, 0);
-    CORRADE_COMPARE(codepoint, 0xffffffffu);
+    CORRADE_COMPARE(Unicode::prevChar("\xac", 1), std::make_pair(0xffffffffu, 0));
 
     /* Too small string for three-byte sequence */
-    std::tie(codepoint, prev) = Unicode::prevChar("\xb8\x89", 2);
-    CORRADE_COMPARE(prev, 1);
-    CORRADE_COMPARE(codepoint, 0xffffffffu);
+    CORRADE_COMPARE(Unicode::prevChar("\xb8\x89", 2), std::make_pair(0xffffffffu, 1));
 
     /* Too small string for four-byte sequence */
-    std::tie(codepoint, prev) = Unicode::prevChar("\x85\x98\x80", 3);
-    CORRADE_COMPARE(prev, 2);
-    CORRADE_COMPARE(codepoint, 0xffffffffu);
+    CORRADE_COMPARE(Unicode::prevChar("\x85\x98\x80", 3), std::make_pair(0xffffffffu, 2));
 }
 
 void UnicodeTest::prevUtf8Empty() {
