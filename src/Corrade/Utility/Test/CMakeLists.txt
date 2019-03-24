@@ -235,6 +235,9 @@ set_target_properties(
     UtilityResourceTest
     UtilityResourceStaticTest
     UtilitySha1Test
+    UtilityStlForwardStringTest
+    UtilityStlForwardTupleTest
+    UtilityStlForwardVectorTest
     UtilityStringTest
     UtilitySystemTest
     UtilityTypeTraitsTest
