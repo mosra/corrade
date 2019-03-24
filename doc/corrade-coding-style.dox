@@ -705,8 +705,20 @@ numbers taken from @cb{.sh} g++-4.8 -std=c++11 -E | wc -l @ce:
 -   `<memory>` --- 25k lines after preprocessing.
 -   `<random>` --- 36k lines after preprocessing.
 
-Some other headers (e.g. the container ones) are heavy too, but in most cases
-they just need to be included.
+In some cases, Corrade has forward declaration headers that help reduce the
+bloat in STL headers:
+
+-   @ref Corrade/Utility/StlForwardString.h forward-declares @ref std::string
+    where possible
+-   @ref Corrade/Utility/StlForwardTuple.h forward-declares @ref std::tuple
+    where possible
+-   @ref Corrade/Utility/StlForwardVector.h forward-declares @ref std::vector
+    where possible
+
+In C++17 and up, @cpp #include <cmath> @ce is about 11k lines on libstdc++ due
+to new math additions such as @ref std::riemann_zeta(). For this reason,
+directly including the `<cmath>` header is discouraged and you should be using
+@ref Corrade/Utility/StlMath.h instead.
 
 @subsubsection corrade-coding-style-cpp-using using namespace keyword
 
