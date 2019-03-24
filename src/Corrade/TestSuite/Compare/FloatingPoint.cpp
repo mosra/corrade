@@ -25,9 +25,8 @@
 
 #include "FloatingPoint.h"
 
-#include <cmath>
-
 #include "Corrade/Utility/Debug.h"
+#include "Corrade/Utility/StlMath.h"
 
 namespace Corrade { namespace TestSuite { namespace Implementation {
 

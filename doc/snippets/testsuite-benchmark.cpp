@@ -23,8 +23,8 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <cmath>
 #include <Corrade/TestSuite/Tester.h>
+#include <Corrade/Utility/StlMath.h>
 
 using namespace Corrade;
 

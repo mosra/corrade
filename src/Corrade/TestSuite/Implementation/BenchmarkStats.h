@@ -26,7 +26,6 @@
 */
 
 #include <cstdint>
-#include <cmath>
 #include <iomanip>
 #include <limits>
 #include <sstream>
@@ -36,6 +35,7 @@
 
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/StlMath.h"
 
 namespace Corrade { namespace TestSuite { namespace Implementation {
 

@@ -23,7 +23,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
@@ -31,6 +30,7 @@
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/StlMath.h"
 
 namespace Corrade { namespace TestSuite {
 

@@ -23,7 +23,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <cmath>
 #include <vector>
 
 #include "Corrade/Containers/Pointer.h"
@@ -36,6 +35,7 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/StlMath.h"
 
 using namespace Corrade;
 
