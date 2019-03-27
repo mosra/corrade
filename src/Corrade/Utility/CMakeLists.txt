@@ -57,6 +57,7 @@ if(WITH_UTILITY)
         Resource.h
         Sha1.h
         String.h
+        StlForwardArray.h
         StlForwardString.h
         StlForwardTuple.h
         StlForwardVector.h

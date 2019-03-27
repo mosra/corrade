@@ -1,5 +1,3 @@
-#ifndef Corrade_Utility_StlForwardTuple_h
-#define Corrade_Utility_StlForwardTuple_h
 /*
     This file is part of Corrade.
 
@@ -25,33 +23,27 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-/** @file
-@brief Forward declaration for @ref std::tuple
+#include "Corrade/TestSuite/Tester.h" /* This doesn't include <array> */
+#include "Corrade/Utility/StlForwardArray.h"
 
-On @ref CORRADE_TARGET_LIBCXX "libc++", @ref CORRADE_TARGET_LIBSTDCXX "libstdc++"
-and @ref CORRADE_TARGET_DINKUMWARE "MSVC STL" includes a lightweight
-implementation-specific STL header containing just the forward declaration of
-@ref std::tuple. On other implementations where forward declaration is unknown
-is equivalent to @cpp #include <tuple> @ce.
-@see @ref Corrade/Utility/StlForwardArray.h,
-    @ref Corrade/Utility/StlForwardString.h,
-    @ref Corrade/Utility/StlForwardVector.h
-*/
+namespace Corrade { namespace Utility { namespace Test { namespace {
 
-#include "Corrade/configure.h"
+struct StlForwardArrayTest: TestSuite::Tester {
+    explicit StlForwardArrayTest();
 
-#ifdef CORRADE_TARGET_LIBCXX
-/* https://github.com/llvm-mirror/libcxx/blob/73d2eccc78ac83d5947243c4d26a53f668b4f432/include/__tuple#L163 */
-#include <__tuple>
-#elif defined(CORRADE_TARGET_LIBSTDCXX)
-/* https://github.com/gcc-mirror/gcc/blob/c014d57d57a03e6061a57fa8534e90979567392b/libstdc%2B%2B-v3/include/std/type_traits#L2465-L2466 */
-#include <type_traits>
-#elif defined(CORRADE_TARGET_DINKUMWARE)
-/* MSVC has it defined next to std::pair */
-#include <utility>
-#else
-/* Including the full definition otherwise */
-#include <tuple>
-#endif
+    void test();
+};
 
-#endif
+StlForwardArrayTest::StlForwardArrayTest() {
+    addTests({&StlForwardArrayTest::test});
+}
+
+void StlForwardArrayTest::test() {
+    /* Just verify that this compiles without error */
+    std::array<int, 3>* a = nullptr;
+    CORRADE_VERIFY(!a);
+}
+
+}}}}
+
+CORRADE_TEST_MAIN(Corrade::Utility::Test::StlForwardArrayTest)

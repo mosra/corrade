@@ -34,7 +34,8 @@ implementation-specific STL header containing just the forward declaration of
 @ref std::string. On @ref CORRADE_TARGET_DINKUMWARE "MSVC STL" and other
 implementations where forward declaration is not possible or is unknown is
 equivalent to @cpp #include <string> @ce.
-@see @ref Corrade/Utility/StlForwardTuple.h,
+@see @ref Corrade/Utility/StlForwardArray.h,
+    @ref Corrade/Utility/StlForwardTuple.h,
     @ref Corrade/Utility/StlForwardVector.h
 */
 

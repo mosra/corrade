@@ -1,5 +1,5 @@
-#ifndef Corrade_Utility_StlForwardTuple_h
-#define Corrade_Utility_StlForwardTuple_h
+#ifndef Corrade_Utility_StlForwardArray_h
+#define Corrade_Utility_StlForwardArray_h
 /*
     This file is part of Corrade.
 
@@ -26,32 +26,31 @@
 */
 
 /** @file
-@brief Forward declaration for @ref std::tuple
+@brief Forward declaration for @ref std::array
 
-On @ref CORRADE_TARGET_LIBCXX "libc++", @ref CORRADE_TARGET_LIBSTDCXX "libstdc++"
-and @ref CORRADE_TARGET_DINKUMWARE "MSVC STL" includes a lightweight
+On @ref CORRADE_TARGET_LIBCXX "libc++" and
+@ref CORRADE_TARGET_DINKUMWARE "MSVC STL" includes a lightweight
 implementation-specific STL header containing just the forward declaration of
-@ref std::tuple. On other implementations where forward declaration is unknown
-is equivalent to @cpp #include <tuple> @ce.
-@see @ref Corrade/Utility/StlForwardArray.h,
-    @ref Corrade/Utility/StlForwardString.h,
+@ref std::array. On other implementations where forward declaration is not
+possible or is unknown is equivalent to @cpp #include <array> @ce.
+@see @ref Corrade/Utility/StlForwardString.h,
+    @ref Corrade/Utility/StlForwardTuple.h,
     @ref Corrade/Utility/StlForwardVector.h
 */
 
 #include "Corrade/configure.h"
 
 #ifdef CORRADE_TARGET_LIBCXX
-/* https://github.com/llvm-mirror/libcxx/blob/73d2eccc78ac83d5947243c4d26a53f668b4f432/include/__tuple#L163 */
+/* https://github.com/llvm-mirror/libcxx/blob/73d2eccc78ac83d5947243c4d26a53f668b4f432/include/__tuple#L223 */
 #include <__tuple>
-#elif defined(CORRADE_TARGET_LIBSTDCXX)
-/* https://github.com/gcc-mirror/gcc/blob/c014d57d57a03e6061a57fa8534e90979567392b/libstdc%2B%2B-v3/include/std/type_traits#L2465-L2466 */
-#include <type_traits>
 #elif defined(CORRADE_TARGET_DINKUMWARE)
 /* MSVC has it defined next to std::pair */
 #include <utility>
 #else
-/* Including the full definition otherwise */
-#include <tuple>
+/* Including the full definition otherwise. Couldn't find the declaration for
+   libstdc++ (std::tuple is defined in <type_traits> but std::array is not),
+   that however doesn't mean the forward declaration doesn't exist. */
+#include <array>
 #endif
 
 #endif

@@ -162,6 +162,7 @@ target_include_directories(UtilityFormatTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
 corrade_add_test(UtilityHashDigestTest HashDigestTest.cpp)
 corrade_add_test(UtilityMacrosTest MacrosTest.cpp)
 corrade_add_test(UtilitySha1Test Sha1Test.cpp)
+corrade_add_test(UtilityStlForwardArrayTest StlForwardArrayTest.cpp)
 corrade_add_test(UtilityStlForwardStringTest StlForwardStringTest.cpp)
 corrade_add_test(UtilityStlForwardTupleTest StlForwardTupleTest.cpp)
 corrade_add_test(UtilityStlForwardVectorTest StlForwardVectorTest.cpp)
