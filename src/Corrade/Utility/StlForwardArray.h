@@ -33,6 +33,17 @@ On @ref CORRADE_TARGET_LIBCXX "libc++" and
 implementation-specific STL header containing just the forward declaration of
 @ref std::array. On other implementations where forward declaration is not
 possible or is unknown is equivalent to @cpp #include <array> @ce.
+
+<b></b>
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This header is also available as a single-header, dependency-less
+    [CorradeStlForwardArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardArray.h)
+    library in the Magnum Singles repository for easier integration into your
+    projects. See @ref corrade-singles for more information.
+
 @see @ref Corrade/Utility/StlForwardString.h,
     @ref Corrade/Utility/StlForwardTuple.h,
     @ref Corrade/Utility/StlForwardVector.h

@@ -33,6 +33,17 @@ and @ref CORRADE_TARGET_DINKUMWARE "MSVC STL" includes a lightweight
 implementation-specific STL header containing just the forward declaration of
 @ref std::tuple. On other implementations where forward declaration is unknown
 is equivalent to @cpp #include <tuple> @ce.
+
+<b></b>
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This header is also available as a single-header, dependency-less
+    [CorradeStlForwardTuple.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardTuple.h)
+    library in the Magnum Singles repository for easier integration into your
+    projects. See @ref corrade-singles for more information.
+
 @see @ref Corrade/Utility/StlForwardArray.h,
     @ref Corrade/Utility/StlForwardString.h,
     @ref Corrade/Utility/StlForwardVector.h

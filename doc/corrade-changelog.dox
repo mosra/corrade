@@ -70,7 +70,9 @@ namespace Corrade {
     @ref Corrade/Utility/StlForwardVector.h headers providing lightweight
     forward declarations for @ref std::array, @ref std::string, @ref std::tuple
     and @ref std::vector on platforms that have them (and including the full
-    definition otherwise)
+    definition otherwise). These are also available as single-header libraries
+    for easier integration into your projects. See @ref corrade-singles for
+    more information.
 -   New @ref Corrade/Utility/StlMath.h header providing bloat-free
     @cpp #include <cmath> @ce on C++17 an up
 -   New @ref Utility::IsStringLike type trait

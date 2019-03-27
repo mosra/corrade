@@ -34,6 +34,17 @@ implementation-specific STL header containing just the forward declaration of
 @ref std::string. On @ref CORRADE_TARGET_DINKUMWARE "MSVC STL" and other
 implementations where forward declaration is not possible or is unknown is
 equivalent to @cpp #include <string> @ce.
+
+<b></b>
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This header is also available as a single-header, dependency-less
+    [CorradeStlForwardString.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardString.h)
+    library in the Magnum Singles repository for easier integration into your
+    projects. See @ref corrade-singles for more information.
+
 @see @ref Corrade/Utility/StlForwardArray.h,
     @ref Corrade/Utility/StlForwardTuple.h,
     @ref Corrade/Utility/StlForwardVector.h

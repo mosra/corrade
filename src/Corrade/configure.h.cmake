@@ -84,7 +84,7 @@
 #define CORRADE_CXX_STANDARD __cplusplus
 #endif
 
-/* Standard library edition. References:
+/* Standard library edition. Keep in sync with CorradeStl* singles. References:
    https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65473
    https://github.com/gcc-mirror/gcc/commit/19665740d336d4ee7d0cf92b5b0643fa1d7da14a
    https://en.cppreference.com/w/cpp/header/ciso646 */

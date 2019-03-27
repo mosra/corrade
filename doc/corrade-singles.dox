@@ -35,14 +35,15 @@ as easy as possible to integrate into existing projects. The general rule is
 having preprocessed size not not exceeding 10k lines --- to put this in
 perspective, not even the `<string>` header can fit there.
 
-So far, the following classes and libraries are provided as single-header libs,
-all of them available for download through the [magnum-singles](https://github.com/mosra/magnum-singles)
-repository. Each of them is automatically generated from unmodified Corrade
-sources using the builtin @ref acme "single-header generator tool".
+So far, the following classes, libraries and utility headers are provided as
+single-header libs, all of them available for download through the
+[magnum-singles](https://github.com/mosra/magnum-singles) repository. Each of
+them is automatically generated from unmodified Corrade sources using the
+builtin @ref acme "single-header generator tool".
 
 @m_class{m-fullwidth m-flat}
 
-Class or library            | Single-header version
+Class, library or header    | Single-header version
 --------------------------- | ----------------------------
 @ref Containers::ArrayView, \n @ref Containers::ArrayView<const void>, \n @ref Containers::StaticArrayView | [CorradeArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArrayView.h)
 @ref Containers::Array, \n @ref Containers::StaticArray | [CorradeArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArray.h), depends on `CorradeArrayView.h`
@@ -50,6 +51,10 @@ Class or library            | Single-header version
 @ref Containers::Pointer    | [CorradePointer.h](https://github.com/mosra/magnum-singles/tree/master/CorradePointer.h)
 @ref Containers::Reference  | [CorradeReference.h](https://github.com/mosra/magnum-singles/tree/master/CorradeReference.h)
 @ref Containers::ScopeGuard | [CorradeScopeGuard.h](https://github.com/mosra/magnum-singles/tree/master/CorradeScopeGuard.h)
+@ref Corrade/Utility/StlForwardArray.h | [CorradeStlForwardArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardArray.h)
+@ref Corrade/Utility/StlForwardString.h | [CorradeStlForwardString.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardString.h)
+@ref Corrade/Utility/StlForwardTuple.h | [CorradeStlForwardTuple.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardTuple.h)
+@ref Corrade/Utility/StlForwardVector.h | [CorradeStlForwardVector.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardVector.h)
 
 @section corrade-singles-behavior Behavior
 
@@ -76,7 +81,7 @@ possible to override them by providing e.g. your own
 
 Some files contain additional disabled-by-default functionality (for example
 the STL compatibility of @ref Containers::Pointer), see documentation of each
-class for detailed library-specific behavior.
+class, library or header for detailed library-specific behavior.
 
 */
 
