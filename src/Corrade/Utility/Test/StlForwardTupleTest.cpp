@@ -24,7 +24,7 @@
 */
 
 #include "Corrade/TestSuite/Tester.h" /* This doesn't include <string> */
-#include "Corrade/Utility/StlForwardString.h"
+#include "Corrade/Utility/StlForwardTuple.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
@@ -40,7 +40,7 @@ StlForwardStringTest::StlForwardStringTest() {
 
 void StlForwardStringTest::test() {
     /* Just verify that this compiles without error */
-    std::string* a = nullptr;
+    std::tuple<int, int>* a = nullptr;
     CORRADE_VERIFY(!a);
 }
 
