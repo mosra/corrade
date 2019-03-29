@@ -107,10 +107,11 @@ std::pair<bool, void*> Tweakable::registerVariable(const char* const file, const
     if(found == _data->files.end()) {
         /* Strip the directory prefix from the file. If that means the filename
            would then start with a slash, strip that too so Directory::join()
-           works correctly. */
+           works correctly -- but don't do that in case the directory prefix
+           was empty, in that case the file path was absolute. */
         /** @todo maybe some Directory utility for this? */
         std::string stripped = String::stripPrefix(Directory::fromNativeSeparators(file), _data->prefix);
-        if(!stripped.empty() && stripped.front() == '/')
+        if(!_data->prefix.empty() && !stripped.empty() && stripped.front() == '/')
             stripped.erase(0, 1);
 
         const std::string watchPath = Directory::join(_data->replace, stripped);
