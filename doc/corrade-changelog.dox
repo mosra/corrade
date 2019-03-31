@@ -139,6 +139,10 @@ namespace Corrade {
 -   Fixed @ref Utility::Tweakable to work correctly with buildsystems using
     absolute paths for `__FILE__` macros (such as Makefiles, Ninja is using
     relative paths). See [mosra/corrade#61](https://github.com/mosra/corrade/issues/61).
+-   In some corner cases, automatic registering / unregistering of
+    @ref Utility::Resource data happens more than once. While this was allowed
+    for registration, the unregistration caused an assert to be fired. Fixed
+    this to be allowed on both.
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 

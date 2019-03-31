@@ -89,10 +89,11 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
 void Resource::unregisterData(const char* group) {
     /** @todo test this */
     auto it = resources().find(group);
-    CORRADE_ASSERT(it != resources().end(),
-        "Utility::Resource: resource group" << group << "is not registered", );
 
-    resources().erase(it);
+    /* Since registerData() allows the registration to be done multiple times,
+       we need to allow that here too. */
+    /** @todo Figure out why and assert that this doesn't happen */
+    if(it != resources().end()) resources().erase(it);
 }
 
 namespace {
