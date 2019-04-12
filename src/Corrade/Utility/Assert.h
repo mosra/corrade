@@ -395,7 +395,8 @@ line is printed to error output and the application aborts. If
 @cpp assert(false) @ce. If @ref CORRADE_NO_ASSERT is defined (or if both
 @ref CORRADE_STANDARD_ASSERT and @cpp NDEBUG @ce are defined), this macro hints
 to the compiler that given code is not reachable, possibly improving
-performance. Example usage:
+performance (using a compiler builtin on GCC, Clang and MSVC; calling
+@ref std::abort() otherwise). Example usage:
 
 @snippet Utility.cpp CORRADE_ASSERT_UNREACHABLE
 
@@ -409,11 +410,13 @@ You can override this implementation by placing your own
 #if defined(CORRADE_NO_ASSERT) || (defined(CORRADE_STANDARD_ASSERT) && defined(NDEBUG))
 #if defined(__GNUC__)
 #define CORRADE_ASSERT_UNREACHABLE() __builtin_unreachable()
+#elif defined(_MSC_VER)
+#define CORRADE_ASSERT_UNREACHABLE() __assume(0)
 #else
 #define CORRADE_ASSERT_UNREACHABLE() std::abort()
 #endif
 #elif defined(CORRADE_STANDARD_ASSERT)
-#define CORRADE_ASSERT_UNREACHABLE() assert(false)
+#define CORRADE_ASSERT_UNREACHABLE() assert(!"unreachable code")
 #else
 #define CORRADE_ASSERT_UNREACHABLE()                                        \
     do {                                                                    \

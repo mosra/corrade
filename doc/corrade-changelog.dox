@@ -97,6 +97,11 @@ namespace Corrade {
 -   Android tests ran through CTest have stderr redirected to stdout because
     otherwise the `adb` bridge causes them to be extremely out-of-sync
 
+@subsubsection corrade-changelog-latest-changes-utility Utility library
+
+-   @ref CORRADE_ASSERT_UNREACHABLE() now compiles into a compiler builtin on
+    MSVC as well
+
 @subsection corrade-changelog-latest-buildsystem Build system
 
 -   @ref building-corrade-packages-msys "MSYS2 packages" are now in official
