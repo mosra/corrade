@@ -33,6 +33,7 @@
 #include <utility>
 
 #include "Corrade/Containers/Containers.h"
+#include "Corrade/Containers/Tags.h"
 #include "Corrade/Utility/Assert.h"
 
 namespace Corrade { namespace Containers {
