@@ -189,8 +189,8 @@ template<class T> class ArrayView {
         /**
          * @brief Default constructor
          *
-         * Creates empty view. Copy non-empty @ref Array or @ref ArrayView onto
-         * the instance to make it useful.
+         * Creates an empty view. Copy a non-empty @ref Array or @ref ArrayView
+         * onto the instance to make it useful.
          */
         constexpr /*implicit*/ ArrayView() noexcept: _data(nullptr), _size(0) {}
 
