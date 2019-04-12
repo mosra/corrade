@@ -106,7 +106,7 @@ are placed in a `modules/` directory in the project root and then added to
 `CMAKE_MODULE_PATH` in the top-level `CMakeLists.txt` file:
 
 @code{.cpp}
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/modules)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/modules ${CMAKE_MODULE_PATH})
 @endcode
 
 CMake toolchain files are placed either in the `toolchains/` submodule or in

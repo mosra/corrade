@@ -31,7 +31,10 @@ cmake_minimum_required(VERSION 3.1)
 
 project(CorradePluginManagerExample)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../../../modules")
+# Add module path in case this is project root
+if(PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../../../modules" ${CMAKE_MODULE_PATH})
+endif()
 
 find_package(Corrade REQUIRED PluginManager)
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
