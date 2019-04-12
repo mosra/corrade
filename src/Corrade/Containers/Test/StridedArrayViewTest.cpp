@@ -1020,12 +1020,16 @@ void StridedArrayViewTest::construct3DDerived() {
     CORRADE_COMPARE(av.stride(), (Stride2D{2, 2}));
 
     constexpr Containers::StridedArrayView2D<const Derived> cbv{DerivedArray, {5, 1}, {sizeof(Derived), sizeof(Derived)}};
-    #ifndef CORRADE_MSVC2015_COMPATIBILITY
-    constexpr /* Implicit pointer downcast not constexpr on MSVC 2015 */
+    #ifndef CORRADE_MSVC2017_COMPATIBILITY
+    /* Implicit pointer downcast not constexpr on MSVC 2015, causes an ICE on
+       MSVC 2017 (but only in the 3D case, not for 1D) */
+    constexpr
     #endif
     Containers::StridedArrayView2D<const Base> ca{DerivedArray, {5, 1}, {sizeof(Base), sizeof(Base)}};
-    #ifndef CORRADE_MSVC2015_COMPATIBILITY
-    constexpr /* Implicit pointer downcast not constexpr on MSVC 2015 */
+    #ifndef CORRADE_MSVC2017_COMPATIBILITY
+    /* Implicit pointer downcast not constexpr on MSVC 2015, causes an ICE on
+       MSVC 2017 (but only in the 3D case, not for 1D) */
+    constexpr
     #endif
     Containers::StridedArrayView2D<const Base> cav{cbv};
 
