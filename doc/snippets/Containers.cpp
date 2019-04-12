@@ -669,7 +669,7 @@ struct Position {
 
 Position positions[]{{-0.5f, -0.5f}, { 0.5f, -0.5f}, { 0.0f,  0.5f}};
 
-Containers::StridedArrayView<float> horizontalPositions{
+Containers::StridedArrayView1D<float> horizontalPositions{positions,
     &positions[0].x, Containers::arraySize(positions), sizeof(Position)};
 
 /* Move to the right */
@@ -678,14 +678,89 @@ for(float& x: horizontalPositions) x += 3.0f;
 }
 
 {
-
 /* [StridedArrayView-usage-conversion] */
 int data[] { 1, 42, 1337, -69 };
 
-Containers::StridedArrayView<int> view1{data, 4, sizeof(int)};
-Containers::StridedArrayView<int> view2 = data;
+Containers::StridedArrayView1D<int> view1{data, 4, sizeof(int)};
+Containers::StridedArrayView1D<int> view2 = data;
 /* [StridedArrayView-usage-conversion] */
 static_cast<void>(view2);
+}
+
+{
+std::uint32_t rgbaData[256*256*16]{};
+/* [StridedArrayView-usage-3d] */
+/* Sixteen 256x256 RGBA8 images */
+Containers::StridedArrayView3D<std::uint32_t> images{rgbaData,
+    {16, 256, 256}, {256*256*4, 256*4, 4}};
+
+/* Make the center 64x64 pixels of each image opaque red */
+for(auto&& image: images.slice({0, 96, 96}, {16, 160, 160}))
+    for(auto&& row: image)
+        for(std::uint32_t& pixel: row)
+            pixel = 0xff0000ff;
+/* [StridedArrayView-usage-3d] */
+
+/* [StridedArrayView-usage-3d-slice-2d] */
+Containers::StridedArrayView2D<std::uint32_t> image = images[5];
+Containers::StridedArrayView2D<std::uint32_t> imageCenter =
+    images.slice<2>({4, 96, 96}, {5, 160, 160});
+/* [StridedArrayView-usage-3d-slice-2d] */
+static_cast<void>(imageCenter);
+
+/* [StridedArrayView-usage-inflate] */
+/* First dimension is Y, second X, third R/G/B/A */
+Containers::StridedArrayView3D<std::uint8_t> channels =
+    Containers::arrayCast<3, std::uint8_t>(image);
+
+Utility::Debug{} << channels[128][128][1]; // green channel, 0xff
+/* [StridedArrayView-usage-inflate] */
+
+/* [StridedArrayView-usage-rotate] */
+/* Bottom left before is now bottom right */
+Containers::StridedArrayView2D<std::uint32_t> rotated90DegLeft =
+    image.transposed<0, 1>().flipped<0>();
+/* [StridedArrayView-usage-rotate] */
+static_cast<void>(rotated90DegLeft);
+
+/* [StridedArrayView-usage-broadcast] */
+int data[8] { 0, 1, 2, 3, 4, 5, 6, 7 };
+
+/* 8x8 array with 0–7 repeated in every row */
+Containers::StridedArrayView2D<int> gradient =
+    Containers::StridedArrayView1D<int>{data}.slice<2>().broadcasted<1>(8);
+/* [StridedArrayView-usage-broadcast] */
+static_cast<void>(gradient);
+}
+
+{
+/* [stridedArrayView-array] */
+std::uint32_t data[15];
+
+Containers::StridedArrayView1D<std::uint32_t> a{data};
+auto b = Containers::stridedArrayView(data);
+/* [stridedArrayView-array] */
+static_cast<void>(b);
+}
+
+{
+/* [stridedArrayView-ArrayView] */
+Containers::ArrayView<std::uint32_t> data;
+
+Containers::StridedArrayView1D<std::uint32_t> a{data};
+auto b = Containers::stridedArrayView(data);
+/* [stridedArrayView-ArrayView] */
+static_cast<void>(b);
+}
+
+{
+/* [stridedArrayView-StaticArrayView] */
+Containers::StaticArrayView<15, std::uint32_t> data;
+
+Containers::StridedArrayView1D<std::uint32_t> a{data};
+auto b = Containers::stridedArrayView(data);
+/* [stridedArrayView-StaticArrayView] */
+static_cast<void>(b);
 }
 
 {
@@ -696,10 +771,25 @@ struct Pixel {
 
 Pixel pixels[]{{0x33, 0xff, 0x99, 0x66}, {0x11, 0xab, 0x33, 0xff}};
 
-auto red = Containers::StridedArrayView<std::uint8_t>{&pixels[0].r, 2, 4};
+auto red = Containers::StridedArrayView1D<std::uint8_t>{pixels, &pixels[0].r, 2, 4};
 auto rgba = Containers::arrayCast<Pixel>(red);
 /* [arrayCast-StridedArrayView] */
 static_cast<void>(rgba);
+}
+
+{
+/* [arrayCast-StridedArrayView-inflate] */
+struct Rgb {
+    std::uint8_t r, g, b;
+};
+
+Containers::ArrayView<Rgb> pixels;
+
+Containers::StridedArrayView2D<Rgb> view{pixels, {128, 128}, {128*3, 3}};
+Containers::StridedArrayView3D<std::uint8_t> rgb =
+    Containers::arrayCast<3, std::uint8_t>(view);
+/* [arrayCast-StridedArrayView-inflate] */
+static_cast<void>(rgb);
 }
 
 #ifdef __clang__

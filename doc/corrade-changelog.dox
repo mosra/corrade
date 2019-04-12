@@ -54,6 +54,12 @@ namespace Corrade {
     @ref Containers::ArrayView, @ref Containers::StaticArray,
     @ref Containers::StaticArrayView and @ref Containers::StridedArrayView
     allowing them to be implicitly converted to/from C++2a @cpp std::span @ce
+-   @ref Containers::StridedArrayView is now multi-dimensional with a
+    possibility of negative and zero strides, making it usable in a broader
+    range of use-cases
+-   Added convenience @ref Containers::stridedArrayView() "make functions",
+    similar to existing @ref Containers::arrayView() and
+    @ref Containers::staticArrayView()
 -   Added compile-time-sized @ref Containers::StaticArrayView::suffix() variant
 -   Added a @ref Containers::ArrayView<void> specialization as a mutable
     type-erased counterpart to @ref Containers::ArrayView<const void>
@@ -166,6 +172,11 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 
+-   @cpp Containers::StridedArrayView<T> @ce is now
+    @ref Containers::StridedArrayView "Containers::StridedArrayView<dimensions, T>"
+    and all code that was using it directly before needs to be changed to use
+    @ref Containers::StridedArrayView1D<T> instead; the constructor is also
+    changed to take a linear array view in addition for better bounds checking
 -   Support for @ref std::tuple and @ref std::string in
     @ref Utility::Debug is now provided through a separate header,
     @ref Corrade/Utility/DebugStl.h, to speed up compile times. Since including
@@ -227,8 +238,8 @@ Released 2019-02-04, tagged as
     you to easily take the value out of a r-value optional
 -   Opt-in STL compatibility for @ref Containers::Optional, allowing for
     explicit conversion from and to @ref std::optional in C++17
--   New @ref Containers::arrayCast(StridedArrayView<T>) overload for casting
-    strided array views
+-   New @ref Containers::arrayCast(const StridedArrayView<dimensions, T>&) "Containers::arrayCast(StridedArrayView<T>)"
+    overload for casting strided array views
 
 @subsubsection corrade-changelog-2019-01-new-utility Utility library
 
