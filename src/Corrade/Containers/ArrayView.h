@@ -807,10 +807,10 @@ template<std::size_t size_, class T> class StaticArrayView {
         /**
          * @brief Static array prefix
          *
-         * Expects (at compile-time) that @p viewSize is not larger than
+         * Expects (at compile-time) that @p end_ is not larger than
          * @ref Size.
          */
-        template<std::size_t viewSize> constexpr StaticArrayView<viewSize, T> prefix() const;
+        template<std::size_t end_> constexpr StaticArrayView<end_, T> prefix() const;
 
         /** @copydoc ArrayView::suffix(T*) const */
         constexpr ArrayView<T> suffix(T* begin) const {
@@ -820,6 +820,14 @@ template<std::size_t size_, class T> class StaticArrayView {
         constexpr ArrayView<T> suffix(std::size_t begin) const {
             return ArrayView<T>(*this).suffix(begin);
         }
+
+        /**
+         * @brief Static array suffix
+         *
+         * Expects (at compile-time) that @p begin_ is not larger than
+         * @ref Size.
+         */
+        template<std::size_t begin_> constexpr StaticArrayView<size_ - begin_, T> suffix() const;
 
     private:
         T* _data;
@@ -965,9 +973,14 @@ template<class T> template<std::size_t viewSize> constexpr StaticArrayView<viewS
         StaticArrayView<viewSize, T>{_data + begin};
 }
 
-template<std::size_t size_, class T> template<std::size_t viewSize> constexpr StaticArrayView<viewSize, T> StaticArrayView<size_, T>::prefix() const {
-    static_assert(viewSize <= size_, "prefix size too large");
-    return StaticArrayView<viewSize, T>{_data};
+template<std::size_t size_, class T> template<std::size_t end_> constexpr StaticArrayView<end_, T> StaticArrayView<size_, T>::prefix() const {
+    static_assert(end_ <= size_, "prefix size too large");
+    return StaticArrayView<end_, T>{_data};
+}
+
+template<std::size_t size_, class T> template<std::size_t begin_> constexpr StaticArrayView<size_ - begin_, T> StaticArrayView<size_, T>::suffix() const {
+    static_assert(begin_ <= size_, "suffix size too large");
+    return StaticArrayView<size_ - begin_, T>{_data + begin_};
 }
 
 }}
