@@ -441,10 +441,22 @@ void StridedArrayViewTest::dimensionsAccess() {
     CORRADE_COMPARE(*(a.end() - 1), 29);
     CORRADE_COMPARE(*(a.cend() - 1), 29);
 
-    constexpr std::size_t cabegin = *Sizes.begin();
-    constexpr std::size_t cacbegin = *Sizes.cbegin();
-    constexpr std::size_t caend = *(Sizes.end() - 1);
-    constexpr std::size_t cacend = *(Sizes.cend() - 1);
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* ¯\_(ツ)_/¯ */
+    #endif
+    std::size_t cabegin = *Sizes.begin();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* ¯\_(ツ)_/¯ */
+    #endif
+    std::size_t cacbegin = *Sizes.cbegin();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* ¯\_(ツ)_/¯ */
+    #endif
+    std::size_t caend = *(Sizes.end() - 1);
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    constexpr /* ¯\_(ツ)_/¯ */
+    #endif
+    std::size_t cacend = *(Sizes.cend() - 1);
     CORRADE_COMPARE(cabegin, 34);
     CORRADE_COMPARE(cacbegin, 34);
     CORRADE_COMPARE(caend, 98989);
