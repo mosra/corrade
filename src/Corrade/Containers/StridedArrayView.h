@@ -98,7 +98,10 @@ template<unsigned dimensions, class T> class StridedDimensions {
         constexpr /*implicit*/ StridedDimensions(const T(&values)[dimensions]) noexcept: StridedDimensions{values, typename Implementation::GenerateSequence<dimensions>::Type{}} {}
 
         /** @brief Conversion to an array view */
-        constexpr /*implicit*/ operator StaticArrayView<dimensions, const T>() const { return _data; }
+        constexpr /*implicit*/ operator StaticArrayView<dimensions, const T>() const {
+            /* GCC 4.8 needs this to be explicit */
+            return Containers::staticArrayView(_data);
+        }
 
         /**
          * @brief Conversion to a scalar
@@ -642,7 +645,8 @@ The following two lines are equivalent:
 @snippet Containers.cpp stridedArrayView-array
 */
 template<std::size_t size, class T> constexpr StridedArrayView1D<T> stridedArrayView(T(&data)[size]) {
-    return data;
+    /* GCC 4.8 needs this to be explicit */
+    return StridedArrayView1D<T>{data};
 }
 
 /** @relatesalso StridedArrayView
