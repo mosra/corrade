@@ -338,7 +338,7 @@ static_cast<void>(b);
 
 {
 /* [arrayView-StaticArrayView] */
-std::uint32_t data[15];
+Containers::StaticArrayView<15, std::uint32_t> data;
 
 Containers::ArrayView<std::uint32_t> a{data};
 auto b = Containers::arrayView(data);
