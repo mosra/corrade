@@ -61,9 +61,10 @@ directly. Here we'll use a single underscore:
 
 @snippet Utility.cpp Tweakable-define
 
-After that, wrap desired literals in this macro invocation and periodically
-call @ref update(), for best responsiveness ideally in each event loop
-iteration.
+After that, enable it using @ref enable() (it's disabled by default). From that
+point onwards, all literals wrapped with this macro invocation will get
+recognized by it. To reflect source changes in the app, eriodically call
+@ref update(), for best responsiveness ideally in each event loop iteration.
 
 @snippet Utility.cpp Tweakable-wrap-update
 
@@ -167,19 +168,19 @@ for changes
 
 Upon calling @ref update(), modified files are parsed for occurences of the
 defined macro and arguments of each macro call are parsed at runtime. If there
-is any change, @ref State::Success is returned and the next time code with
-given annotated literal is executed (either by the caller or directly through
-one of the scopes), the class will supply the updated value instead. If no
-files are modified or if the modification didn't result in any literal update,
-@ref State::NoChange is returned.
+is any change, @ref TweakableState::Success is returned and the next time code
+with given annotated literal is executed (either by the caller or directly
+through one of the scopes), the class will supply the updated value instead. If
+no files are modified or if the modification didn't result in any literal
+update, @ref TweakableState::NoChange is returned.
 
 If parsing the updated literals fails (because of a syntax error or because the
 mark is not just a literal), the @ref update() function returns
-@ref State::Error and doesn't update anything, waiting for the user to fix the
-error. If there is some mismatch detected (such as the constant having a
-different type than before or appearing on a different line),
-@ref State::Recompile is returned and you are encouraged to trigger the
-classical hot-reload approach (or restart a recompiled version of the app).
+@ref TweakableState::Error and doesn't update anything, waiting for the user to
+fix the error. If there is some mismatch detected (such as the constant having
+a different type than before or appearing on a different line),
+@ref TweakableState::Recompile is returned and you are encouraged to trigger
+the classical hot-reload approach (or restart a recompiled version of the app).
 
 @section Utility-Tweakable-extending Extending for custom types
 

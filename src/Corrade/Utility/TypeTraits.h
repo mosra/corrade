@@ -40,9 +40,10 @@ namespace Corrade { namespace Utility {
 
 Defines a traits class checking whether @p typeExpression is valid. You can use
 @cpp T @ce to reference the type which is being checked. The defined class is
-then implicitly convertible to `bool` holding the result.
+then implicitly convertible to @cpp bool @ce holding the result.
 
-Usage examples: checking for presence of @cpp const_iterator @ce member type:
+Usage examples: checking for presence of @cpp key_type @ce member
+@cpp typedef @ce:
 
 @snippet Utility.cpp CORRADE_HAS_TYPE-type
 
