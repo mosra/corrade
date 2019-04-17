@@ -307,6 +307,31 @@ otherwise falls back to compiler-specific attribute. Example usage:
 #endif
 
 /** @hideinitializer
+@brief Line number as a string
+
+Turns the standard @cpp __LINE__ @ce macro into a string. Useful for example
+to have correct line numbers when embedding GLSL shaders directly in the code:
+
+@snippet Utility.cpp CORRADE_LINE_STRING
+
+Depending on where the source string is located in the file, the potential
+error or warning messages from the shader compiler will show the errors for
+example like
+
+@code{.shell-session}
+1:97(4): error: no function with name 'THIS_IS_AN_ERROR'
+@endcode
+
+@m_class{m-noindent}
+
+instead of showing the line number relatively as @cb{.shell-session} 1:5(4) @ce.
+Note that GLSL in particular, unlike C, interprets the @cpp #line @ce statement
+as applying to the immediately following line, which is why the extra
+@cpp "\n" @ce is needed.
+*/
+#define CORRADE_LINE_STRING _CORRADE_HELPER_DEFER(_CORRADE_HELPER_STR, __LINE__)
+
+/** @hideinitializer
 @brief Automatic initializer
 @param function Initializer function name of type @cpp int(*)() @ce.
 

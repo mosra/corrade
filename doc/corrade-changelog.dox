@@ -79,6 +79,7 @@ namespace Corrade {
 -   New @ref Utility::IsStringLike type trait
 -   Added @ref Utility::format(), an alternative to @ref Utility::formatString()
     returning @ref Containers::Array instead of @ref std::string
+-   New @ref CORRADE_LINE_STRING utility macro for a stringified @cpp __LINE__ @ce
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 

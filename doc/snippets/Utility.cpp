@@ -479,6 +479,19 @@ if(watcher.hasChanged()) {
 #endif
 
 {
+/* [CORRADE_LINE_STRING] */
+const char* shader = "#line " CORRADE_LINE_STRING "\n" R"GLSL(
+    in vec3 position;
+
+    void main() {
+        THIS_IS_AN_ERROR();
+    }
+)GLSL";
+/* [CORRADE_LINE_STRING] */
+static_cast<void>(shader);
+}
+
+{
 /* [Tweakable-define] */
 #define _ CORRADE_TWEAKABLE
 /* [Tweakable-define] */
@@ -493,7 +506,11 @@ struct {
 /* [Tweakable-wrap-update] */
 Utility::Tweakable tweakable;
 
-// …
+void init() {
+    tweakable.enable();
+
+    // …
+}
 
 void mainLoop() {
     fallVelocity += _(9.81f)*dt;
