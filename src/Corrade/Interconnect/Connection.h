@@ -68,8 +68,7 @@ namespace Implementation {
                    platforms) would thus lose information and cause problems
                    when classes with multiple or virtual inheritance are used,
                    so we create a new type, virtually inherited from emitter,
-                   cast the pointer to that and then save its representation.
-                   The same is done for MinGW above. */
+                   cast the pointer to that and then save its representation. */
                 SignalData d;
                 struct VirtuallyInheritedEmitter: virtual Emitter {};
                 typedef typename Emitter::Signal(VirtuallyInheritedEmitter::*VirtuallyDerivedSignal)(Args...);
