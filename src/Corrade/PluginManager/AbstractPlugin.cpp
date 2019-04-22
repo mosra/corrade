@@ -35,7 +35,7 @@ struct AbstractPlugin::State {
     AbstractManager* manager{};
     std::string plugin;
     const PluginMetadata* metadata{};
-    Utility::ConfigurationGroup configuration;
+    Utility::ConfigurationGroup configuration{};
 };
 
 std::string AbstractPlugin::pluginInterface() { return {}; }
