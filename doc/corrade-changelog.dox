@@ -120,6 +120,7 @@ namespace Corrade {
     @ref Interconnect-Emitter-msvc-icf "Interconnect::Emitter" documentation
     for more information when using custom buildsystems, see also
     [mosra/corrade#51](https://github.com/mosra/corrade/issues/51).
+-   Fixed compilation with Clang and `-std=gnu++14` (see [mosra/corrade#62](https://github.com/mosra/corrade/pull/62)
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
