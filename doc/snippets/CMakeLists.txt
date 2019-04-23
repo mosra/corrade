@@ -39,30 +39,33 @@ add_library(snippets STATIC
 target_link_libraries(snippets PRIVATE CorradeUtility)
 set_target_properties(snippets PROPERTIES FOLDER "Corrade/doc/snippets")
 
-# Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
-if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0") OR
-   (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0") OR
-   (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.3") OR
-   (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10"))
-    add_library(snippets-cpp17 STATIC
-        Containers-stl17.cpp)
-    target_link_libraries(snippets-cpp17 PRIVATE CorradeUtility)
-    set_target_properties(snippets-cpp17 PROPERTIES
-        CORRADE_CXX_STANDARD 17
-        FOLDER "Corrade/doc/snippets")
-endif()
+# Build these only if there's no explicit -std= passed in the flags
+if(NOT CMAKE_CXX_FLAGS MATCHES "-std=")
+    # Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
+    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0") OR
+    (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0") OR
+    (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.3") OR
+    (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.10"))
+        add_library(snippets-cpp17 STATIC
+            Containers-stl17.cpp)
+        target_link_libraries(snippets-cpp17 PRIVATE CorradeUtility)
+        set_target_properties(snippets-cpp17 PROPERTIES
+            CORRADE_CXX_STANDARD 17
+            FOLDER "Corrade/doc/snippets")
+    endif()
 
-# Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
-if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.0") OR
-   (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "6.0") OR
-   (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0") OR
-   (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.15"))
-    add_library(snippets-cpp2a STATIC
-        Containers-stl2a.cpp)
-    target_link_libraries(snippets-cpp2a PRIVATE CorradeUtility)
-    set_target_properties(snippets-cpp2a PROPERTIES
-        CORRADE_CXX_STANDARD 20
-        FOLDER "Corrade/doc/snippets")
+    # Copied verbatim from src/Corrade/Test/CMakeLists.txt, please keep in sync
+    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.0") OR
+    (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "6.0") OR
+    (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0") OR
+    (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.15"))
+        add_library(snippets-cpp2a STATIC
+            Containers-stl2a.cpp)
+        target_link_libraries(snippets-cpp2a PRIVATE CorradeUtility)
+        set_target_properties(snippets-cpp2a PROPERTIES
+            CORRADE_CXX_STANDARD 20
+            FOLDER "Corrade/doc/snippets")
+    endif()
 endif()
 
 if(WITH_INTERCONNECT)
