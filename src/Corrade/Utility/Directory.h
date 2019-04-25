@@ -93,7 +93,7 @@ enum class Flag: unsigned char {
     SkipDirectories = 1 << 2,
 
     /**
-     * Skip everything what is not a file or directory
+     * Skip everything that is not a file or directory
      * @partialsupport Has no effect on @ref CORRADE_TARGET_WINDOWS "Windows".
      *      In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" skips everything
      *      except directories.
