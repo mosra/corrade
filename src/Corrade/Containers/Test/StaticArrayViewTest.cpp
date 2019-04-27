@@ -315,8 +315,6 @@ void StaticArrayViewTest::convertConst() {
 void StaticArrayViewTest::convertVoid() {
     int a[] = {3, 4, 7, 12, 0, -15};
 
-    /** @todo C++14: test that all the operations are really constexpr (C++11 doesn't allow void conversions IMHO) */
-
     /* void reference to ArrayView */
     StaticArrayView<6> b = a;
     const StaticArrayView<6> cb = a;

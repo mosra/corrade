@@ -389,7 +389,6 @@ void ArrayTest::convertViewDerived() {
 }
 
 void ArrayTest::convertVoid() {
-    /* void reference to Array */
     Array a(6);
     VoidArrayView b = a;
     CORRADE_VERIFY(b == a);

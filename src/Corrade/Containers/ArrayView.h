@@ -125,7 +125,7 @@ Example:
     instead of, well, throwing an exception or something.
 @par
     Fortunately, in the other direction at least, conversion of @cpp std::span @ce
-    to Corrade container classes *can* be (and are) checked at compile time.
+    to Corrade container classes *can* be (and is) checked at compile time.
 @par
     @snippet Containers-stl2a.cpp ArrayView-stupid-span
 

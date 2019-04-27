@@ -530,8 +530,6 @@ void ArrayViewTest::convertConst() {
 void ArrayViewTest::convertVoid() {
     int a[] = {3, 4, 7, 12, 0, -15};
 
-    /** @todo C++14: test that all the operations are really constexpr (C++11 doesn't allow void conversions IMHO) */
-
     /* void reference to compile-time array */
     VoidArrayView b = a;
     CORRADE_VERIFY(b == a);

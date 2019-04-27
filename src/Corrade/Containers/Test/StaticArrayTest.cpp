@@ -423,7 +423,6 @@ void StaticArrayTest::convertStaticViewDerived() {
 }
 
 void StaticArrayTest::convertVoid() {
-    /* void reference to Array */
     StaticArray a;
     VoidArrayView b = a;
     CORRADE_VERIFY(b == a);
