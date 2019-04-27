@@ -91,6 +91,7 @@ struct StaticArrayViewTest: TestSuite::Tester {
     void convertPointer();
     void convertConst();
     void convertVoid();
+    void convertConstVoid();
     void convertExternalView();
     void convertConstFromExternalView();
     void convertToConstExternalView();
@@ -112,7 +113,8 @@ typedef Containers::ArrayView<int> ArrayView;
 typedef Containers::ArrayView<const int> ConstArrayView;
 template<std::size_t size> using StaticArrayView = Containers::StaticArrayView<size, int>;
 template<std::size_t size> using ConstStaticArrayView = Containers::StaticArrayView<size, const int>;
-typedef Containers::ArrayView<const void> VoidArrayView;
+typedef Containers::ArrayView<void> VoidArrayView;
+typedef Containers::ArrayView<const void> ConstVoidArrayView;
 
 StaticArrayViewTest::StaticArrayViewTest() {
     addTests({&StaticArrayViewTest::constructDefault,
@@ -125,6 +127,7 @@ StaticArrayViewTest::StaticArrayViewTest() {
               &StaticArrayViewTest::convertPointer,
               &StaticArrayViewTest::convertConst,
               &StaticArrayViewTest::convertVoid,
+              &StaticArrayViewTest::convertConstVoid,
               &StaticArrayViewTest::convertExternalView,
               &StaticArrayViewTest::convertConstFromExternalView,
               &StaticArrayViewTest::convertToConstExternalView,
@@ -324,9 +327,25 @@ void StaticArrayViewTest::convertVoid() {
     CORRADE_COMPARE(c.size(), 6*sizeof(int));
     CORRADE_COMPARE(cc.size(), 6*sizeof(int));
 
+    /** @todo constexpr but not const? c++14? */
+}
+
+void StaticArrayViewTest::convertConstVoid() {
+    int a[] = {3, 4, 7, 12, 0, -15};
+
+    /* void reference to ArrayView */
+    StaticArrayView<6> b = a;
+    const StaticArrayView<6> cb = a;
+    ConstVoidArrayView c = b;
+    ConstVoidArrayView cc = cb;
+    CORRADE_VERIFY(c == b);
+    CORRADE_VERIFY(cc == cb);
+    CORRADE_COMPARE(c.size(), 6*sizeof(int));
+    CORRADE_COMPARE(cc.size(), 6*sizeof(int));
+
     /* void reference to ArrayView */
     constexpr ConstStaticArrayView<13> ccb = Array13;
-    VoidArrayView ccc = ccb;
+    ConstVoidArrayView ccc = ccb;
     CORRADE_VERIFY(ccc == ccb);
     CORRADE_COMPARE(ccc.size(), 13*sizeof(int));
 }

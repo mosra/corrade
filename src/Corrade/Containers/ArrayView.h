@@ -162,9 +162,9 @@ documentation of @ref Containers-Array-stl "Array",
 @m_class{m-block m-success}
 
 @par Single-header version
-    This class, together with the @ref ArrayView<const void> specialization and
-    @ref StaticArrayView is also available as a single-header, dependency-less
-    [CorradeArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArrayView.h)
+    This class, together with the @ref ArrayView<void> /
+    @ref ArrayView<const void> specializations and @ref StaticArrayView, is
+    also available as a single-header, dependency-less [CorradeArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArrayView.h)
     library in the Magnum Singles repository for easier integration into your
     projects. See @ref corrade-singles for more information. The above
     mentioned STL compatibility is included as well, but disabled by default.
@@ -175,8 +175,8 @@ documentation of @ref Containers-Array-stl "Array",
     the file. Including it multiple times with different macros defined works
     as well.
 
-@see @ref ArrayView<const void>, @ref StridedArrayView, @ref arrayView(),
-    @ref arrayCast(ArrayView<T>)
+@see @ref ArrayView<void>, @ref ArrayView<const void>, @ref StridedArrayView,
+    @ref arrayView(), @ref arrayCast(ArrayView<T>)
 */
 /* All member functions are const because the view doesn't own the data */
 template<class T> class ArrayView {
@@ -402,6 +402,113 @@ template<class T> class ArrayView {
 };
 
 /**
+@brief Void array view with size information
+
+Specialization of @ref ArrayView which is convertible from a compile-time
+array, @ref Array, @ref ArrayView or @ref StaticArrayView of any non-constant
+type and also any non-constant type convertible to them. Size for a particular
+type is recalculated to a size in bytes. This specialization doesn't provide
+any accessors besides @ref data(), because it has no use for the @cpp void @ce
+type. Instead, use @ref arrayCast(ArrayView<T>) to first cast the array to a
+concrete type and then access the particular elements.
+
+Usage example:
+
+@snippet Containers.cpp ArrayView-const-void-usage
+
+<b></b>
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This specialization, together with @ref ArrayView<const void> and the
+    generic @ref ArrayView and @ref StaticArrayView, is also available as a
+    single-header, dependency-less library in the Magnum Singles repository for
+    easier integration into your projects. See the
+    @ref Containers-ArrayView-single-header "ArrayView documentation" for more
+    information.
+*/
+template<> class ArrayView<void> {
+    public:
+        typedef void Type;      /**< @brief Element type */
+
+        /** @brief Conversion from `nullptr` */
+        constexpr /*implicit*/ ArrayView(std::nullptr_t) noexcept: _data(nullptr), _size(0) {}
+
+        /**
+         * @brief Default constructor
+         *
+         * Creates zero-sized array. Move array with nonzero size onto the
+         * instance to make it useful.
+         */
+        constexpr /*implicit*/ ArrayView() noexcept: _data(nullptr), _size(0) {}
+
+        /**
+         * @brief Construct a view on array of explicit length
+         * @param data      Data pointer
+         * @param size      Data size
+         */
+        constexpr /*implicit*/ ArrayView(void* data, std::size_t size) noexcept: _data(data), _size(size) {}
+
+        /**
+         * @brief Constructor from any type
+         * @param data      Data pointer
+         * @param size      Data size
+         *
+         * Size is recalculated to size in bytes.
+         */
+        template<class T> constexpr /*implicit*/ ArrayView(T* data, std::size_t size) noexcept: _data(data), _size(size*sizeof(T)) {}
+
+        /**
+         * @brief Construct a view on fixed-size array
+         * @param data      Fixed-size array
+         *
+         * Size in bytes is calculated automatically.
+         */
+        template<class T, std::size_t size> constexpr /*implicit*/ ArrayView(T(&data)[size]) noexcept: _data(data), _size(size*sizeof(T)) {}
+
+        /** @brief Construct const void view on any @ref ArrayView */
+        template<class T> constexpr /*implicit*/ ArrayView(ArrayView<T> array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
+
+        /** @brief Construct const void view on any @ref StaticArrayView */
+        template<std::size_t size, class T> constexpr /*implicit*/ ArrayView(const StaticArrayView<size, T>& array) noexcept: _data{array}, _size{size*sizeof(T)} {}
+
+        /**
+         * @brief Construct a view on an external type
+         *
+         * @see @ref Containers-ArrayView-stl
+         */
+        /* There's no restriction that would disallow creating ArrayView from
+           e.g. std::vector<T>&& because that would break uses like
+           `consume(foo());`, where `consume()` expects a view but `foo()`
+           returns a std::vector. */
+        template<class T, class = decltype(Implementation::ErasedArrayViewConverter<typename std::decay<T&&>::type>::from(std::declval<T&&>()))> constexpr /*implicit*/ ArrayView(T&& other) noexcept: ArrayView{Implementation::ErasedArrayViewConverter<typename std::decay<T&&>::type>::from(other)} {}
+
+        #ifndef CORRADE_MSVC2017_COMPATIBILITY
+        /** @brief Whether the array is non-empty */
+        /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
+           pointer arithmetic. */
+        constexpr explicit operator bool() const { return _data; }
+        #endif
+
+        /** @brief Conversion to array type */
+        constexpr /*implicit*/ operator void*() const { return _data; }
+
+        /** @brief Array data */
+        constexpr void* data() const { return _data; }
+
+        /** @brief Array size */
+        constexpr std::size_t size() const { return _size; }
+
+        /** @brief Whether the array is empty */
+        constexpr bool empty() const { return !_size; }
+
+    private:
+        void* _data;
+        std::size_t _size;
+};
+
+/**
 @brief Constant void array view with size information
 
 Specialization of @ref ArrayView which is convertible from a compile-time
@@ -421,11 +528,12 @@ Usage example:
 @m_class{m-block m-success}
 
 @par Single-header version
-    This specialization is, together with the generic @ref ArrayView and
-    @ref StaticArrayView, is also available as a single-header, dependency-less
-    library in the Magnum Singles repository for easier integration into your
-    projects. See the @ref Containers-ArrayView-single-header "ArrayView documentation"
-    for more information.
+    This specialization, together with @ref ArrayView<void> and the generic
+    @ref ArrayView and @ref StaticArrayView, is also available as a
+    single-header, dependency-less library in the Magnum Singles repository
+    for easier integration into your projects. See the
+    @ref Containers-ArrayView-single-header "ArrayView documentation" for more
+    information.
 */
 template<> class ArrayView<const void> {
     public:

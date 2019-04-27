@@ -301,8 +301,17 @@ static_cast<void>(b);
 /* [ArrayView-void-usage] */
 Containers::Array<int> a(5);
 
-Containers::ArrayView<const void> b(a); // b.size() == 20
+Containers::ArrayView<void> b(a); // b.size() == 20
 /* [ArrayView-void-usage] */
+static_cast<void>(b);
+}
+
+{
+/* [ArrayView-const-void-usage] */
+Containers::Array<int> a(5);
+
+Containers::ArrayView<const void> b(a); // b.size() == 20
+/* [ArrayView-const-void-usage] */
 static_cast<void>(b);
 }
 

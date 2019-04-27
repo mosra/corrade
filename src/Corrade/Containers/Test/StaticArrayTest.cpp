@@ -82,6 +82,7 @@ struct StaticArrayTest: TestSuite::Tester {
     void convertStaticView();
     void convertStaticViewDerived();
     void convertVoid();
+    void convertConstVoid();
     void convertToExternalView();
     void convertToConstExternalView();
 
@@ -102,7 +103,8 @@ struct StaticArrayTest: TestSuite::Tester {
 typedef Containers::StaticArray<5, int> StaticArray;
 typedef Containers::ArrayView<int> ArrayView;
 typedef Containers::ArrayView<const int> ConstArrayView;
-typedef Containers::ArrayView<const void> VoidArrayView;
+typedef Containers::ArrayView<void> VoidArrayView;
+typedef Containers::ArrayView<const void> ConstVoidArrayView;
 typedef Containers::StaticArrayView<5, int> StaticArrayView;
 typedef Containers::StaticArrayView<5, const int> ConstStaticArrayView;
 
@@ -124,6 +126,7 @@ StaticArrayTest::StaticArrayTest() {
               &StaticArrayTest::convertStaticView,
               &StaticArrayTest::convertStaticViewDerived,
               &StaticArrayTest::convertVoid,
+              &StaticArrayTest::convertConstVoid,
               &StaticArrayTest::convertToExternalView,
               &StaticArrayTest::convertToConstExternalView,
 
@@ -422,9 +425,16 @@ void StaticArrayTest::convertStaticViewDerived() {
 void StaticArrayTest::convertVoid() {
     /* void reference to Array */
     StaticArray a;
-    const StaticArray ca;
     VoidArrayView b = a;
-    VoidArrayView cb = ca;
+    CORRADE_VERIFY(b == a);
+    CORRADE_COMPARE(b.size(), 5*sizeof(int));
+}
+
+void StaticArrayTest::convertConstVoid() {
+    StaticArray a;
+    const StaticArray ca;
+    ConstVoidArrayView b = a;
+    ConstVoidArrayView cb = ca;
     CORRADE_VERIFY(b == a);
     CORRADE_VERIFY(cb == ca);
     CORRADE_COMPARE(b.size(), 5*sizeof(int));

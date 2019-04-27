@@ -55,6 +55,8 @@ namespace Corrade {
     @ref Containers::StaticArrayView and @ref Containers::StridedArrayView
     allowing them to be implicitly converted to/from C++2a @cpp std::span @ce
 -   Added compile-time-sized @ref Containers::StaticArrayView::suffix() variant
+-   Added a @ref Containers::ArrayView<void> specialization as a mutable
+    type-erased counterpart to @ref Containers::ArrayView<const void>
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
