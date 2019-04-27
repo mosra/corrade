@@ -74,7 +74,24 @@ Example:
 
 @snippet Containers.cpp StaticArray-initialization
 
-@see @ref arrayCast(StaticArray<size, T>&)
+@section Containers-StaticArray-views Conversion to array views
+
+Arrays are implicitly convertible to @ref ArrayView / @ref StaticArrayView as
+described in the following table. The conversion is only allowed if @cpp T* @ce
+is implicitly convertible to @cpp U* @ce (or both are the same type) and both
+have the same size. This also extends to other container types constructibe
+from @ref ArrayView / @ref StaticArrayView, which means for example that a
+@ref StridedArrayView1D is implicitly convertible from @ref StaticArray as
+well.
+
+Owning array type               | ↭ | Non-owning view type
+------------------------------- | - | ---------------------
+@ref StaticArray "Array<size, T>" | → | @ref StaticArrayView "ArrayView<size, U>"
+@ref StaticArray "Array<size, T>" | → | @ref StaticArrayView "ArrayView<size, const U>"
+@ref StaticArray "const Array<size, T>" | → | @ref StaticArrayView "ArrayView<size, const U>"
+@ref StaticArray "Array<size, T>" | → | @ref ArrayView "ArrayView<U>"
+@ref StaticArray "Array<size, T>" | → | @ref ArrayView "ArrayView<const U>"
+@ref StaticArray "const Array<size, T>" | → | @ref ArrayView "ArrayView<const U>"
 
 @section Containers-StaticArray-stl STL compatibility
 
@@ -101,6 +118,8 @@ more information.
     [CorradeArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArray.h)
     library in the Magnum Singles repository for easier integration into your
     projects. See @ref corrade-singles for more information.
+
+@see @ref arrayCast(StaticArray<size, T>&), @ref Array
 */
 /* Underscore at the end to avoid conflict with member size(). It's ugly, but
    having count instead of size_ would make the naming horribly inconsistent. */
@@ -202,85 +221,9 @@ template<std::size_t size_, class T> class StaticArray {
         /** @brief Moving is not allowed */
         StaticArray<size_, T>& operator=(StaticArray<size_, T>&&) = delete;
 
-        /* The following ArrayView conversion are *not* restricted to this&
-           because that would break uses like `consume(foo());`, where
-           `consume()` expects a view but `foo()` returns an owning array. */
-
-        /**
-         * @brief Convert to @ref ArrayView
-         *
-         * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
-         * Expects that both types have the same size.
-         * @see @ref arrayView(StaticArray<size, T>&)
-         */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class U>
-        #else
-        template<class U, class V = typename std::enable_if<!std::is_void<U>::value && std::is_convertible<T*, U*>::value>::type>
-        #endif
-        /*implicit*/ operator ArrayView<U>() noexcept {
-            static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
-            return {_data, size_};
-        }
-
-        /**
-         * @brief Convert to const @ref ArrayView
-         *
-         * Enabled only if @cpp T* @ce or @cpp const T* @ce is implicitly
-         * convertible to @cpp U* @ce. Expects that both types have the same
-         * size.
-         * @see @ref arrayView(const StaticArray<size, T>&)
-         */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class U>
-        #else
-        template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value || std::is_convertible<T*, const U*>::value>::type>
-        #endif
-        /*implicit*/ operator ArrayView<const U>() const noexcept {
-            static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
-            return {_data, size_};
-        }
-
-        /** @overload */
-        /*implicit*/ operator ArrayView<const void>() const noexcept {
-            /* Yes, the size is properly multiplied by sizeof(T) by the constructor */
-            return {_data, size_};
-        }
-
-        /**
-         * @brief Convert to @ref StaticArrayView
-         *
-         * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
-         * Expects that both types have the same size.
-         * @see @ref staticArrayView(StaticArray<size, T>&)
-         */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class U>
-        #else
-        template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value>::type>
-        #endif
-        /*implicit*/ operator StaticArrayView<size_, U>() noexcept {
-            static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
-            return StaticArrayView<size_, U>{_data};
-        }
-
-        /**
-         * @brief Convert to const @ref StaticArrayView
-         *
-         * Enabled only if @cpp T* @ce or @cpp const T* @ce is implicitly
-         * convertible to @cpp U* @ce. Expects that both types have the same
-         * size.
-         * @see @ref staticArrayView(const StaticArray<size, T>&)
-         */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class U>
-        #else
-        template<class U, class V = typename std::enable_if<std::is_convertible<T*, U*>::value || std::is_convertible<T*, const U*>::value>::type>
-        #endif
-        /*implicit*/ operator StaticArrayView<size_, const U>() const noexcept {
-            static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
-            return StaticArrayView<size_, const U>{_data};
-        }
+        /* The following view conversion is *not* restricted to this& because
+           that would break uses like `consume(foo());`, where `consume()`
+           expects a view but `foo()` returns an owning array. */
 
         /**
          * @brief Convert to external view representation
@@ -477,8 +420,8 @@ template<std::size_t size_, class T> class StaticArray {
 /** @relatesalso StaticArray
 @brief Make view on @ref StaticArray
 
-Convenience alternative to calling @ref StaticArray::operator ArrayView<U>()
-explicitly. The following two lines are equivalent:
+Convenience alternative to converting to an @ref ArrayView explicitly. The
+following two lines are equivalent:
 
 @snippet Containers.cpp StaticArray-arrayView
 */
@@ -489,8 +432,8 @@ template<std::size_t size, class T> constexpr ArrayView<T> arrayView(StaticArray
 /** @relatesalso StaticArray
 @brief Make view on const @ref StaticArray
 
-Convenience alternative to calling @ref StaticArray::operator ArrayView<U>()
-explicitly. The following two lines are equivalent:
+Convenience alternative to converting to an @ref ArrayView explicitly. The
+following two lines are equivalent:
 
 @snippet Containers.cpp StaticArray-arrayView-const
 */
@@ -501,8 +444,8 @@ template<std::size_t size, class T> constexpr ArrayView<const T> arrayView(const
 /** @relatesalso StaticArray
 @brief Make static view on @ref StaticArray
 
-Convenience alternative to calling @cpp StaticArray::operator StaticArrayView<size_, U>() @ce
-explicitly. The following two lines are equivalent:
+Convenience alternative to converting to an @ref StaticArrayView explicitly.
+The following two lines are equivalent:
 
 @snippet Containers.cpp StaticArray-staticArrayView
 
@@ -515,8 +458,8 @@ template<std::size_t size, class T> constexpr StaticArrayView<size, T> staticArr
 /** @relatesalso StaticArray
 @brief Make static view on const @ref StaticArray
 
-Convenience alternative to calling @cpp StaticArray::operator StaticArrayView<size_, U>() @ce
-explicitly. The following two lines are equivalent:
+Convenience alternative to converting to an @ref StaticArrayView explicitly.
+The following two lines are equivalent:
 
 @snippet Containers.cpp StaticArray-staticArrayView-const
 
@@ -568,6 +511,50 @@ template<std::size_t size_, class T> template<std::size_t viewSize> StaticArrayV
 template<std::size_t size_, class T> template<std::size_t viewSize> StaticArrayView<viewSize, const T> StaticArray<size_, T>::prefix() const {
     static_assert(viewSize <= size_, "prefix size too large");
     return StaticArrayView<viewSize, const T>{_data};
+}
+
+namespace Implementation {
+
+/* StaticArray to ArrayView in order to have implicit conversion for
+   StridedArrayView without needing to introduce a header dependency */
+template<class U, std::size_t size, class T> struct ArrayViewConverter<U, StaticArray<size, T>> {
+    constexpr static ArrayView<U> from(StaticArray<size, T>& other) {
+        return {&other[0], other.size()};
+    }
+};
+template<class U, std::size_t size, class T> struct ArrayViewConverter<const U, StaticArray<size, T>> {
+    constexpr static ArrayView<const U> from(const StaticArray<size, T>& other) {
+        return {&other[0], other.size()};
+    }
+};
+template<class U, std::size_t size, class T> struct ArrayViewConverter<const U, StaticArray<size, const T>> {
+    constexpr static ArrayView<const U> from(const StaticArray<size, const T>& other) {
+        return {&other[0], other.size()};
+    }
+};
+template<std::size_t size, class T> struct ErasedArrayViewConverter<StaticArray<size, T>>: ArrayViewConverter<T, StaticArray<size, T>> {};
+template<std::size_t size, class T> struct ErasedArrayViewConverter<const StaticArray<size, T>>: ArrayViewConverter<const T, StaticArray<size, T>> {};
+
+/* StaticArray to StaticArrayView in order to have implicit conversion for
+   StridedArrayView without needing to introduce a header dependency */
+template<class U, std::size_t size, class T> struct StaticArrayViewConverter<size, U, StaticArray<size, T>> {
+    constexpr static StaticArrayView<size, U> from(StaticArray<size, T>& other) {
+        return StaticArrayView<size, T>{&other[0]};
+    }
+};
+template<class U, std::size_t size, class T> struct StaticArrayViewConverter<size, const U, StaticArray<size, T>> {
+    constexpr static StaticArrayView<size, const U> from(const StaticArray<size, T>& other) {
+        return StaticArrayView<size, const T>(&other[0]);
+    }
+};
+template<class U, std::size_t size, class T> struct StaticArrayViewConverter<size, const U, StaticArray<size, const T>> {
+    constexpr static StaticArrayView<size, const U> from(const StaticArray<size, const T>& other) {
+        return StaticArrayView<size, const T>(&other[0]);
+    }
+};
+template<std::size_t size, class T> struct ErasedStaticArrayViewConverter<StaticArray<size, T>>: StaticArrayViewConverter<size, T, StaticArray<size, T>> {};
+template<std::size_t size, class T> struct ErasedStaticArrayViewConverter<const StaticArray<size, T>>: StaticArrayViewConverter<size, const T, StaticArray<size, T>> {};
+
 }
 
 }}

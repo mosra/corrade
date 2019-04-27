@@ -128,11 +128,20 @@ deleter type can be used:
 
 @snippet Containers.cpp Array-deleter
 
-@see @ref arrayCast(Array<T, D>&)
+@section Containers-Array-views Conversion to array views
 
-@todo Something like ArrayTuple to create more than one array with single
-    allocation and proper alignment for each type? How would non-POD types be
-    constructed in that? Will that be useful in more than one place?
+Arrays are implicitly convertible to @ref ArrayView as described in the
+following table. The conversion is only allowed if @cpp T* @ce is implicitly
+convertible to @cpp U* @ce (or both are the same type) and both have the same
+size. This also extends to other container types constructibe from
+@ref ArrayView, which means for example that a @ref StridedArrayView1D is
+implicitly convertible from @ref Array as well.
+
+Owning array type               | ↭ | Non-owning view type
+------------------------------- | - | ---------------------
+@ref Array "Array<T>"           | → | @ref ArrayView "ArrayView<U>"
+@ref Array "Array<T>"           | → | @ref ArrayView "ArrayView<const U>"
+@ref Array "const Array<T>"     | → | @ref ArrayView "ArrayView<const U>"
 
 @section Containers-Array-stl STL compatibility
 
@@ -144,9 +153,9 @@ following table lists allowed conversions:
 
 Corrade type                    | ↭ | STL type
 ------------------------------- | - | ---------------------
-@ref Array "Array<T>" | → | @cpp std::span<T> @ce <b></b>
-@ref Array "Array<T>" | → | @cpp std::span<const T> @ce <b></b>
-@ref Array "const Array<T>" | → | @cpp std::span<const T> @ce <b></b>
+@ref Array "Array<T>"           | → | @cpp std::span<T> @ce <b></b>
+@ref Array "Array<T>"           | → | @cpp std::span<const T> @ce <b></b>
+@ref Array "const Array<T>"     | → | @cpp std::span<const T> @ce <b></b>
 
 There are some dangerous corner cases due to the way @cpp std::span @ce is
 designed, see @ref Containers-ArrayView-stl "ArrayView STL compatibility" for
@@ -159,6 +168,8 @@ more information.
     single-header [CorradeArray.h](https://github.com/mosra/magnum-singles/tree/master/CorradeArray.h)
     library in the Magnum Singles repository for easier integration into your
     projects. See @ref corrade-singles for more information.
+
+@see @ref arrayCast(Array<T, D>&), @ref StaticArray
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T, class D = void(*)(T*, std::size_t)>
@@ -283,6 +294,10 @@ class Array {
         /** @brief Move assignment */
         Array<T, D>& operator=(Array<T, D>&&) noexcept;
 
+        /* The following view conversion is *not* restricted to this& because
+           that would break uses like `consume(foo());`, where `consume()`
+           expects a view but `foo()` returns an owning array. */
+
         /**
          * @brief Convert to external view representation
          *
@@ -303,51 +318,6 @@ class Array {
            pointer arithmetic. */
         explicit operator bool() const { return _data; }
         #endif
-
-        /* The following ArrayView conversion are *not* restricted to this&
-           because that would break uses like `consume(foo());`, where
-           `consume()` expects a view but `foo()` returns an owning array. */
-
-        /**
-         * @brief Convert to @ref ArrayView
-         *
-         * Enabled only if @cpp T* @ce is implicitly convertible to @cpp U* @ce.
-         * Expects that both types have the same size.
-         * @see @ref arrayView(Array<T, D>&)
-         */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class U>
-        #else
-        template<class U, class = typename std::enable_if<!std::is_void<U>::value && std::is_convertible<T*, U*>::value>::type>
-        #endif
-        /*implicit*/ operator ArrayView<U>() noexcept {
-            static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
-            return {_data, _size};
-        }
-
-        /**
-         * @brief Convert to const @ref ArrayView
-         *
-         * Enabled only if @cpp T* @ce or @cpp const T* @ce is implicitly
-         * convertible to @cpp U* @ce. Expects that both types have the same
-         * size.
-         * @see @ref arrayView(const Array<T, D>&)
-         */
-        #ifdef DOXYGEN_GENERATING_OUTPUT
-        template<class U>
-        #else
-        template<class U, class = typename std::enable_if<std::is_convertible<T*, U*>::value || std::is_convertible<T*, const U*>::value>::type>
-        #endif
-        /*implicit*/ operator ArrayView<const U>() const noexcept {
-            static_assert(sizeof(T) == sizeof(U), "type sizes are not compatible");
-            return {_data, _size};
-        }
-
-        /** @overload */
-        /*implicit*/ operator ArrayView<const void>() const noexcept {
-            /* Yes, the size is properly multiplied by sizeof(T) by the constructor */
-            return {_data, _size};
-        }
 
         /* `char* a = Containers::Array<char>(5); a[3] = 5;` would result in
            instant segfault, disallowing it in the following conversion
@@ -525,8 +495,8 @@ class Array {
 /** @relatesalso ArrayView
 @brief Make view on @ref Array
 
-Convenience alternative to calling @ref Array::operator ArrayView<U>()
-explicitly. The following two lines are equivalent:
+Convenience alternative to converting to an @ref ArrayView explicitly. The
+following two lines are equivalent:
 
 @snippet Containers.cpp Array-arrayView
 */
@@ -537,8 +507,8 @@ template<class T, class D> inline ArrayView<T> arrayView(Array<T, D>& array) {
 /** @relatesalso ArrayView
 @brief Make view on const @ref Array
 
-Convenience alternative to calling @ref Array::operator ArrayView<U>()
-explicitly. The following two lines are equivalent:
+Convenience alternative to converting to an @ref ArrayView explicitly. The
+following two lines are equivalent:
 
 @snippet Containers.cpp Array-arrayView-const
 */
@@ -616,6 +586,33 @@ template<class T, class D> inline T* Array<T, D>::release() {
     _data = nullptr;
     _size = 0;
     return data;
+}
+
+namespace Implementation {
+
+/* Array to ArrayView in order to have implicit conversion for StridedArrayView
+   without needing to introduce a header dependency */
+template<class U, class T, class D> struct ArrayViewConverter<U, Array<T, D>> {
+    constexpr static ArrayView<U> from(Array<T, D>& other) {
+        static_assert(std::is_convertible<T*, U*>::value && sizeof(T) == sizeof(U), "types are not compatible");
+        return {&other[0], other.size()};
+    }
+};
+template<class U, class T, class D> struct ArrayViewConverter<const U, Array<T, D>> {
+    constexpr static ArrayView<const U> from(const Array<T, D>& other) {
+        static_assert(std::is_convertible<T*, U*>::value && sizeof(T) == sizeof(U), "types are not compatible");
+        return {&other[0], other.size()};
+    }
+};
+template<class U, class T, class D> struct ArrayViewConverter<const U, Array<const T, D>> {
+    constexpr static ArrayView<const U> from(const Array<const T, D>& other) {
+        static_assert(std::is_convertible<T*, U*>::value && sizeof(T) == sizeof(U), "types are not compatible");
+        return {&other[0], other.size()};
+    }
+};
+template<class T, class D> struct ErasedArrayViewConverter<Array<T, D>>: ArrayViewConverter<T, Array<T, D>> {};
+template<class T, class D> struct ErasedArrayViewConverter<const Array<T, D>>: ArrayViewConverter<const T, Array<T, D>> {};
+
 }
 
 }}
