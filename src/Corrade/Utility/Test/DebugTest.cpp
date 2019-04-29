@@ -63,6 +63,9 @@ struct DebugTest: TestSuite::Tester {
     void colorsNoOutput();
     void colorsScoped();
 
+    void valueAsColor();
+    void valueAsColorColorsDisabled();
+
     void iterable();
     void iterableNested();
     void iterablePacked();
@@ -120,6 +123,9 @@ DebugTest::DebugTest() {
         &DebugTest::colorsNospace,
         &DebugTest::colorsNoOutput,
         &DebugTest::colorsScoped,
+
+        &DebugTest::valueAsColor,
+        &DebugTest::valueAsColorColorsDisabled,
 
         &DebugTest::iterable,
         &DebugTest::iterableNested,
@@ -608,6 +614,43 @@ void DebugTest::colorsScoped() {
         "\033[0m"
         "And this resets back to default color.\n");
     #endif
+}
+
+void DebugTest::valueAsColor() {
+    Debug{} << "The following should be shades of gray:";
+
+    {
+        Debug d{Debug::Flag::Color|Debug::Flag::NoSpace};
+        /* *not* 255 as that would be an infinite loop */
+        for(unsigned char i = 0; i < 250; i += 7) d << i;
+    }
+
+    /* The modifier should work only for the immediately following value */
+    std::ostringstream out;
+    Debug{&out} << Debug::color << static_cast<unsigned char>(93)
+        << Debug::color << static_cast<unsigned char>(173)
+        << static_cast<unsigned char>(224);
+    CORRADE_COMPARE(out.str(),
+        "\033[38;2;93;93;93m\033[48;2;93;93;93m░░\033[0m "
+        "\033[38;2;173;173;173m\033[48;2;173;173;173m▓▓\033[0m 224\n");
+}
+
+void DebugTest::valueAsColorColorsDisabled() {
+    Debug{} << "The following should be uncolored shades of gray:";
+
+    {
+        Debug d{Debug::Flag::Color|Debug::Flag::DisableColors|Debug::Flag::NoSpace};
+        /* *not* 255 as that would be an infinite loop */
+        for(unsigned char i = 0; i < 250; i += 7) d << i;
+    }
+
+    /* The modifier should work only for the immediately following value */
+    std::ostringstream out;
+    Debug{&out, Debug::Flag::DisableColors}
+        << Debug::color << static_cast<unsigned char>(93)
+        << Debug::color << static_cast<unsigned char>(173)
+        << static_cast<unsigned char>(224);
+    CORRADE_COMPARE(out.str(), "░░ ▓▓ 224\n");
 }
 
 void DebugTest::iterable() {

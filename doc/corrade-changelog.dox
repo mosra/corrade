@@ -66,8 +66,9 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
--   @ref Utility::Debug::packed output modifier for tighter printing of
-    container types
+-   @ref Utility::Debug::packed and @ref Utility::Debug::color output modifiers
+    for tighter printing of container types and printing color-like values as
+    actual 24bit ANSI color sequences
 -   New @ref Utility::Directory::append() and
     @ref Utility::Directory::appendString() counterparts to
     @ref Utility::Directory::write()

@@ -375,6 +375,15 @@ Utility::Debug{} << "Value:" << Utility::Debug::nospace << "\n"
 }
 
 {
+/* [Debug-color] */
+unsigned char data[] { 0, 32, 64, 96, 128, 160, 192, 224, 255 };
+Utility::Debug{} << "41 shades of grey missing:"
+    << Utility::Debug::packed << Utility::Debug::color
+    << Containers::arrayView(data);
+/* [Debug-color] */
+}
+
+{
 struct {
     bool broken() { return true; }
 } stuff;

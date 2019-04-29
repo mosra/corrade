@@ -175,7 +175,7 @@ void Debug::resetColor(Debug& debug) {
     debug.resetColorInternal();
 }
 
-namespace { enum: unsigned char { PublicFlagMask = 0x0f }; }
+namespace { enum: unsigned char { PublicFlagMask = 0x1f }; }
 
 auto Debug::flags() const -> Flags {
     return Flag(static_cast<unsigned char>(_flags) & PublicFlagMask);
@@ -360,6 +360,46 @@ Debug& Debug::operator<<(const void* const value) {
 Debug& Debug::operator<<(const char* value) { return print(value); }
 Debug& Debug::operator<<(bool value) { return print(value ? "true" : "false"); }
 Debug& Debug::operator<<(int value) { return print(value); }
+
+Debug& Debug::operator<<(char value) { return print(int(value)); }
+
+Debug& Debug::operator<<(unsigned char value) {
+    /* Convert to int to avoid infinite recursion to operator<<(unsigned char) */
+    const int v = value;
+
+    /* Print the value as a shade of grey */
+    if(immediateFlags() & Flag::Color) {
+        const char* shade;
+        if(value < 51)       shade = "  ";
+        else if(value < 102) shade = "░░";
+        else if(value < 153) shade = "▒▒";
+        else if(value < 204) shade = "▓▓";
+        else                 shade = "██";
+
+        /* If ANSI colors are disabled, use just the shade */
+        if(immediateFlags() & Flag::DisableColors)
+            return print(shade);
+        else {
+            print("\033[38;2;");
+
+            /* Disable space between values for everything after the initial
+               value */
+            const Flags previousFlags = flags();
+            setFlags(previousFlags|Flag::NoSpace);
+
+            /* Set both background and foreground, reset back after */
+            *this << v << ";" << v << ";" << v << "m\033[48;2;"
+                << v << ";" << v << ";" << v << "m" << shade << "\033[0m";
+
+            /* Reset original flags */
+            setFlags(previousFlags);
+            return *this;
+        }
+
+    /* Otherwise print its numeric value */
+    } else return print(v);
+}
+
 Debug& Debug::operator<<(long value) { return print(value); }
 Debug& Debug::operator<<(long long value) { return print(value); }
 Debug& Debug::operator<<(unsigned value) { return print(value); }
@@ -439,6 +479,7 @@ Debug& operator<<(Debug& debug, Debug::Flag value) {
         _c(DisableColors)
         _c(NoSpace)
         _c(Packed)
+        _c(Color)
         #undef _c
         /* LCOV_EXCL_STOP */
     }
@@ -451,7 +492,8 @@ Debug& operator<<(Debug& debug, Debug::Flags value) {
         Debug::Flag::NoNewlineAtTheEnd,
         Debug::Flag::DisableColors,
         Debug::Flag::NoSpace,
-        Debug::Flag::Packed});
+        Debug::Flag::Packed,
+        Debug::Flag::Color});
 }
 
 /* For some reason Doxygen can't match this with the declaration in DebugStl.h */

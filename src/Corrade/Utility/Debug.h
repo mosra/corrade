@@ -117,6 +117,19 @@ Similarly as with scoped output redirection, colors can be also scoped:
 
 @snippet Utility.cpp Debug-modifiers-colors-scoped
 
+With @ref Flag::Color and/or the @ref color modifier, some types can be also
+printed as actual 24bit colors. The @ref operator<<(unsigned char) printer can
+interpret 8bit values as greyscale colors and other libraries may provide
+support for other types. For example, printing a container of 8bit values
+together with the @ref packed modifier:
+
+@snippet Utility.cpp Debug-color
+
+This prints the below output on terminals that support it. See the operator
+documentation for more information.
+
+@include UtilityDebug-color-greyscale.ansi
+
 @see @ref Warning, @ref Error, @ref Fatal, @ref CORRADE_ASSERT(),
     @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(),
     @ref AndroidLogStreamBuffer, @ref formatString()
@@ -153,7 +166,13 @@ class CORRADE_UTILITY_EXPORT Debug {
              * Print complex values (such as containers) in a packed form.
              * @see @ref packed, @ref operator<<(Debug&, const Iterable&)
              */
-            Packed = 1 << 3
+            Packed = 1 << 3,
+
+            /**
+             * Print colored values as colored squares in the terminal.
+             * @see @ref color, @ref operator<<(unsigned char)
+             */
+            Color = 1 << 4
 
             /* When adding values, don't forget to adapt PublicFlagMask in
                Debug.cpp */
@@ -311,6 +330,16 @@ class CORRADE_UTILITY_EXPORT Debug {
         }
 
         /**
+         * @brief Print the next value as a color
+         *
+         * Prints color-like values as actual 24bit ANSI color sequences.
+         * @see @ref Flag::Color, @ref operator<<(unsigned char)
+         */
+        static void color(Debug& debug) {
+            debug._immediateFlags |= InternalFlag::Color;
+        }
+
+        /**
          * @brief Debug output modification
          *
          * See @ref Utility-Debug-modifiers for more information.
@@ -447,6 +476,37 @@ class CORRADE_UTILITY_EXPORT Debug {
         Debug& operator<<(const char* value);            /**< @overload */
         Debug& operator<<(const void* value);            /**< @overload */
         Debug& operator<<(bool value);                   /**< @overload */
+
+        /**
+         * @brief Print char to debug output
+         *
+         * Printed as a numeric value.
+         */
+        Debug& operator<<(char value);
+
+        /**
+         * @brief Print unsigned char to debug output
+         *
+         * If @ref Flag::Color is enabled or @ref color was set immediately
+         * before, prints the value as a greyscale ANSI 24bit color escape
+         * sequence using two successive Unicode block characters (to have it
+         * roughly square). To preserve at least some information when text is
+         * copied, the square consists of one of the five
+         * @cb{.shell-session} ░▒▓█ @ce shades, however the color is set for
+         * both foreground and background so the actual block character is
+         * indistinguishable when seen on a terminal. See the
+         * @ref Utility-Debug-modifiers-colors "class documentation" for more
+         * information.
+         *
+         * If @ref Flag::Color is enabled and @ref Flag::DisableColors is set,
+         * only the shaded character is used, without any ANSI color escape
+         * sequence.
+         *
+         * If @ref Flag::Color is not enabled, the value is printed as a
+         * number.
+         */
+        Debug& operator<<(unsigned char value);
+
         Debug& operator<<(int value);                    /**< @overload */
         Debug& operator<<(long value);                   /**< @overload */
         Debug& operator<<(long long value);              /**< @overload */
@@ -522,8 +582,9 @@ class CORRADE_UTILITY_EXPORT Debug {
             DisableColors = 1 << 1,
             NoSpace = 1 << 2,
             Packed = 1 << 3,
-            ValueWritten = 1 << 4,
-            ColorWritten = 1 << 5
+            Color = 1 << 4,
+            ValueWritten = 1 << 5,
+            ColorWritten = 1 << 6
         };
         typedef Containers::EnumSet<InternalFlag> InternalFlags;
 
