@@ -64,6 +64,7 @@ struct DebugTest: TestSuite::Tester {
     void colorsScoped();
 
     void iterable();
+    void iterableNested();
     void tuple();
 
     void ostreamFallback();
@@ -116,6 +117,7 @@ DebugTest::DebugTest() {
         &DebugTest::colorsScoped,
 
         &DebugTest::iterable,
+        &DebugTest::iterableNested,
         &DebugTest::tuple,
 
         &DebugTest::ostreamFallback,
@@ -610,6 +612,19 @@ void DebugTest::iterable() {
     out.str({});
     Debug(&out) << std::map<int, std::string>{{1, "a"}, {2, "b"}, {3, "c"}};
     CORRADE_COMPARE(out.str(), "{(1, a), (2, b), (3, c)}\n");
+}
+
+void DebugTest::iterableNested() {
+    std::ostringstream out;
+    Debug{&out} << std::vector<std::vector<int>>{
+        {1, 2, 3},
+        {4, 5},
+        {6, 7, 8}
+    };
+    CORRADE_COMPARE(out.str(),
+        "{{1, 2, 3},\n"
+        " {4, 5},\n"
+        " {6, 7, 8}}\n");
 }
 
 void DebugTest::tuple() {

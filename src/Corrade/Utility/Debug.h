@@ -574,7 +574,8 @@ template<class T> Debug& operator<<(Debug& debug, const T& value);
 /** @relatesalso Debug
 @brief Operator for printing iterable types to debug output
 
-Prints the value as @cb{.shell-session} {a, b, c} @ce.
+Prints the value as @cb{.shell-session} {a, b, c} @ce. If the type contains
+a nested iterable type, the values are separated by newlines.
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class Iterable> Debug& operator<<(Debug& debug, const Iterable& value)
@@ -584,10 +585,12 @@ template<class Iterable> Debug& operator<<(Debug& debug, const Iterable& value)
 template<class Iterable> Debug& operator<<(typename std::enable_if<IsIterable<Iterable>::value && !IsStringLike<Iterable>::value, Debug&>::type debug, const Iterable& value)
 #endif
 {
+    const char* sep = IsIterable<decltype(*value.begin())>::value && !IsStringLike<decltype(*value.begin())>::value ? ",\n " : ", ";
+
     debug << "{" << Debug::nospace;
     for(auto it = value.begin(); it != value.end(); ++it) {
         if(it != value.begin())
-            debug << Debug::nospace << ",";
+            debug << Debug::nospace << sep << Debug::nospace;
         debug << *it;
     }
     debug << Debug::nospace << "}";
