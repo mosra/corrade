@@ -79,12 +79,24 @@ namespace Implementation {
 /** @relatesalso Debug
 @brief Print a @ref std::tuple to debug output
 
-Prints the value as @cb{.shell-session} (first, second, third...) @ce.
+Prints the value as @cb{.shell-session} (first, second, third...) @ce. Unlike
+@ref operator<<(Debug& debug, const Iterable& value), the output is not
+affected by @ref Debug::Flag::Packed / @ref Debug::packed.
 */
 template<class ...Args> Debug& operator<<(Debug& debug, const std::tuple<Args...>& value) {
+    /* Nested values should get printed with the same flags, so make all
+       immediate flags temporarily global -- except NoSpace, unless it's also
+       set globally */
+    const Debug::Flags prevFlags = debug.flags();
+    debug.setFlags(prevFlags | (debug.immediateFlags() & ~Debug::Flag::NoSpace));
+
     debug << "(" << Debug::nospace;
     Implementation::tupleDebugOutput(debug, value, typename Implementation::GenerateSequence<sizeof...(Args)>::Type{});
     debug << Debug::nospace << ")";
+
+    /* Reset the original flags back */
+    debug.setFlags(prevFlags);
+
     return debug;
 }
 

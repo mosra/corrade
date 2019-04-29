@@ -147,7 +147,13 @@ class CORRADE_UTILITY_EXPORT Debug {
              * Print without spaces between values.
              * @see @ref nospace
              */
-            NoSpace = 1 << 2
+            NoSpace = 1 << 2,
+
+            /**
+             * Print complex values (such as containers) in a packed form.
+             * @see @ref packed, @ref operator<<(Debug&, const Iterable&)
+             */
+            Packed = 1 << 3
 
             /* When adding values, don't forget to adapt PublicFlagMask in
                Debug.cpp */
@@ -292,6 +298,17 @@ class CORRADE_UTILITY_EXPORT Debug {
          * nothing.
          */
         static void resetColor(Debug& debug);
+
+        /**
+         * @brief Print the next value in a packed form
+         *
+         * Enables a more compact output for types that support it (such as
+         * iterable containers).
+         * @see @ref Flag::Packed, @ref operator<<(Debug&, const Iterable&)
+         */
+        static void packed(Debug& debug) {
+            debug._immediateFlags |= InternalFlag::Packed;
+        }
 
         /**
          * @brief Debug output modification
@@ -504,8 +521,9 @@ class CORRADE_UTILITY_EXPORT Debug {
             NoNewlineAtTheEnd = 1 << 0,
             DisableColors = 1 << 1,
             NoSpace = 1 << 2,
-            ValueWritten = 1 << 3,
-            ColorWritten = 1 << 4
+            Packed = 1 << 3,
+            ValueWritten = 1 << 4,
+            ColorWritten = 1 << 5
         };
         typedef Containers::EnumSet<InternalFlag> InternalFlags;
 
@@ -575,7 +593,9 @@ template<class T> Debug& operator<<(Debug& debug, const T& value);
 @brief Operator for printing iterable types to debug output
 
 Prints the value as @cb{.shell-session} {a, b, c} @ce. If the type contains
-a nested iterable type, the values are separated by newlines.
+a nested iterable type, the values are separated by newlines. Specifying
+@ref Debug::Flag::Packed or using @ref Debug::packed will print the values
+tightly-packed without commas and spaces in between.
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class Iterable> Debug& operator<<(Debug& debug, const Iterable& value)
@@ -585,15 +605,33 @@ template<class Iterable> Debug& operator<<(Debug& debug, const Iterable& value)
 template<class Iterable> Debug& operator<<(typename std::enable_if<IsIterable<Iterable>::value && !IsStringLike<Iterable>::value, Debug&>::type debug, const Iterable& value)
 #endif
 {
-    const char* sep = IsIterable<decltype(*value.begin())>::value && !IsStringLike<decltype(*value.begin())>::value ? ",\n " : ", ";
+    /* Nested containers should get printed with the same flags, so make all
+       immediate flags temporarily global -- except NoSpace, unless it's also
+       set globally */
+    const Debug::Flags prevFlags = debug.flags();
+    debug.setFlags(prevFlags | (debug.immediateFlags() & ~Debug::Flag::NoSpace));
 
-    debug << "{" << Debug::nospace;
+    const char *beg, *sep, *end;
+    if(debug.immediateFlags() & Debug::Flag::Packed) {
+        beg = end = "";
+        sep = IsIterable<decltype(*value.begin())>::value && !IsStringLike<decltype(*value.begin())>::value ? "\n" : "";
+    } else {
+        beg = "{";
+        end = "}";
+        sep = IsIterable<decltype(*value.begin())>::value && !IsStringLike<decltype(*value.begin())>::value ? ",\n " : ", ";
+    }
+
+    debug << beg << Debug::nospace;
     for(auto it = value.begin(); it != value.end(); ++it) {
         if(it != value.begin())
             debug << Debug::nospace << sep << Debug::nospace;
         debug << *it;
     }
-    debug << Debug::nospace << "}";
+    debug << Debug::nospace << end;
+
+    /* Reset the original flags back */
+    debug.setFlags(prevFlags);
+
     return debug;
 }
 
@@ -615,10 +653,23 @@ namespace Implementation {
 /** @relatesalso Debug
 @brief Print a @ref std::pair to debug output
 
-Prints the value as @cb{.shell-session} (first, second) @ce.
+Prints the value as @cb{.shell-session} (first, second) @ce. Unlike
+@ref operator<<(Debug& debug, const Iterable& value), the output is not
+affected by @ref Debug::Flag::Packed / @ref Debug::packed.
 */
 template<class T, class U> Debug& operator<<(Debug& debug, const std::pair<T, U>& value) {
-    return debug << "(" << Debug::nospace << value.first << Debug::nospace << "," << value.second << Debug::nospace << ")";
+    /* Nested values should get printed with the same flags, so make all
+       immediate flags temporarily global -- except NoSpace, unless it's also
+       set globally */
+    const Debug::Flags prevFlags = debug.flags();
+    debug.setFlags(prevFlags | (debug.immediateFlags() & ~Debug::Flag::NoSpace));
+
+    debug << "(" << Debug::nospace << value.first << Debug::nospace << "," << value.second << Debug::nospace << ")";
+
+    /* Reset the original flags back */
+    debug.setFlags(prevFlags);
+
+    return debug;
 }
 
 /**

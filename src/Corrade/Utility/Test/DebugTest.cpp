@@ -65,8 +65,12 @@ struct DebugTest: TestSuite::Tester {
 
     void iterable();
     void iterableNested();
+    void iterablePacked();
+    void iterableNospace();
     void pair();
     void tuple();
+    void iterablePairPacked();
+    void iterableTuplePacked();
 
     void ostreamFallback();
     void ostreamFallbackPriority();
@@ -119,8 +123,12 @@ DebugTest::DebugTest() {
 
         &DebugTest::iterable,
         &DebugTest::iterableNested,
+        &DebugTest::iterablePacked,
+        &DebugTest::iterableNospace,
         &DebugTest::pair,
         &DebugTest::tuple,
+        &DebugTest::iterablePairPacked,
+        &DebugTest::iterableTuplePacked,
 
         &DebugTest::ostreamFallback,
         &DebugTest::ostreamFallbackPriority,
@@ -629,6 +637,55 @@ void DebugTest::iterableNested() {
         " {6, 7, 8}}\n");
 }
 
+void DebugTest::iterablePacked() {
+    {
+        std::ostringstream out;
+        Debug{&out} << Debug::packed << std::vector<int>{1, 2, 3};
+        CORRADE_COMPARE(out.str(), "123\n");
+    }
+
+    /* Nested containers should be printed packed too */
+    {
+        std::ostringstream out;
+        Debug{&out} << Debug::packed << std::vector<std::vector<std::string>>{
+            {"a", "b", "c"},
+            {"d", "e"},
+            {"f", "g", "h"}
+        };
+        CORRADE_COMPARE(out.str(),
+            "abc\n"
+            "de\n"
+            "fgh\n");
+    }
+
+    /* It's affecting just the immediately next item, so the one after
+       shouldn't be packed */
+    {
+        std::ostringstream out;
+        Debug(&out) << Debug::packed << std::set<std::string>{"a", "b", "c"}
+            << std::vector<int>{1, 2, 3};
+        CORRADE_COMPARE(out.str(), "abc {1, 2, 3}\n");
+    }
+}
+
+void DebugTest::iterableNospace() {
+    /* The immediate nospace specifier should not be set for nested types */
+    {
+        std::ostringstream out;
+        Debug{&out} << "vector" << Debug::nospace
+            << std::vector<std::pair<int, int>>{{1, 2}, {3, 4}};
+        CORRADE_COMPARE(out.str(), "vector{(1, 2), (3, 4)}\n");
+    }
+
+    /* The global nospace specifier should be preserved for nested types */
+    {
+        std::ostringstream out;
+        Debug{&out, Debug::Flag::NoSpace} << "vector"
+            << std::vector<std::pair<int, int>>{{1, 2}, {3, 4}};
+        CORRADE_COMPARE(out.str(), "vector{(1,2), (3,4)}\n");
+    }
+}
+
 void DebugTest::pair() {
     std::ostringstream out;
     Debug(&out) << std::make_pair("hey", 42);
@@ -644,6 +701,26 @@ void DebugTest::tuple() {
     out.str({});
     Debug(&out) << std::make_tuple(3, 4.56, std::string{"hello"});
     CORRADE_COMPARE(out.str(), "(3, 4.56, hello)\n");
+}
+
+void DebugTest::iterablePairPacked() {
+    /* Nested container should be printed packed, but the flag should get reset
+       back after */
+    std::ostringstream out;
+    Debug{&out} << Debug::packed
+        << std::make_pair(42, std::vector<int>{1, 2, 3})
+        << std::vector<int>{1, 2, 3};
+    CORRADE_COMPARE(out.str(), "(42, 123) {1, 2, 3}\n");
+}
+
+void DebugTest::iterableTuplePacked() {
+    /* Nested container should be printed packed, but the flag should get reset
+       back after */
+    std::ostringstream out;
+    Debug{&out} << Debug::packed
+        << std::make_tuple("hey", 42, std::vector<int>{1, 2, 3})
+        << std::vector<int>{1, 2, 3};
+    CORRADE_COMPARE(out.str(), "(hey, 42, 123) {1, 2, 3}\n");
 }
 
 struct Bar {};

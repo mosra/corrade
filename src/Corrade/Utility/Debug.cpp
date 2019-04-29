@@ -175,7 +175,7 @@ void Debug::resetColor(Debug& debug) {
     debug.resetColorInternal();
 }
 
-namespace { enum: unsigned char { PublicFlagMask = 0x07 }; }
+namespace { enum: unsigned char { PublicFlagMask = 0x0f }; }
 
 auto Debug::flags() const -> Flags {
     return Flag(static_cast<unsigned char>(_flags) & PublicFlagMask);
@@ -438,6 +438,7 @@ Debug& operator<<(Debug& debug, Debug::Flag value) {
         _c(NoNewlineAtTheEnd)
         _c(DisableColors)
         _c(NoSpace)
+        _c(Packed)
         #undef _c
         /* LCOV_EXCL_STOP */
     }
@@ -449,7 +450,8 @@ Debug& operator<<(Debug& debug, Debug::Flags value) {
     return Containers::enumSetDebugOutput(debug, value, "Features{}", {
         Debug::Flag::NoNewlineAtTheEnd,
         Debug::Flag::DisableColors,
-        Debug::Flag::NoSpace});
+        Debug::Flag::NoSpace,
+        Debug::Flag::Packed});
 }
 
 /* For some reason Doxygen can't match this with the declaration in DebugStl.h */

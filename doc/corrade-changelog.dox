@@ -66,6 +66,8 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
+-   @ref Utility::Debug::packed output modifier for tighter printing of
+    container types
 -   New @ref Utility::Directory::append() and
     @ref Utility::Directory::appendString() counterparts to
     @ref Utility::Directory::write()
