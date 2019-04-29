@@ -82,7 +82,8 @@ output stream.
 @subsection Utility-Debug-modifiers-whitespace Explicit whitespace control
 
 Sometimes you might not want to have everything separated by spaces or having
-newline at the end:
+newline at the end --- use @ref Flag::NoNewlineAtTheEnd or the @ref nospace
+modifier:
 
 @snippet Utility.cpp Debug-modifiers-whitespace
 
@@ -153,7 +154,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         /**
          * @brief Debug output modifier
          *
-         * @see @ref nospace(), @ref newline(), @ref operator<<(Modifier)
+         * @see @ref nospace, @ref newline, @ref operator<<(Modifier)
          */
         typedef void(*Modifier)(Debug&);
 
@@ -221,7 +222,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * @snippet Utility.cpp Debug-nospace
          *
-         * @see @ref newline()
+         * @see @ref newline
          */
         /* MinGW complains loudly if the declaration doesn't also have inline */
         inline static void nospace(Debug& debug);
@@ -241,7 +242,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * 16
          * @endcode
          *
-         * @see @ref nospace()
+         * @see @ref nospace
          */
         static void newline(Debug& debug) {
             debug << nospace << "\n" << nospace;
@@ -376,7 +377,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          * @brief Print string to debug output
          *
          * If there is already something in the output, puts a space before
-         * the value, unless @ref nospace() was set immediately before.
+         * the value, unless @ref nospace was set immediately before.
          * @see @ref operator<<(Debug&, const std::string&),
          *      @ref operator<<(Debug&, const T&)
          */
@@ -488,6 +489,9 @@ class CORRADE_UTILITY_EXPORT Debug {
         #endif
 };
 
+/** @debugoperatorclassenum{Debug,Debug::Color} */
+CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, Debug::Color value);
+
 CORRADE_ENUMSET_OPERATORS(Debug::Flags)
 CORRADE_ENUMSET_OPERATORS(Debug::InternalFlags)
 
@@ -513,7 +517,7 @@ can be added by implementing this function for given type.
 
 The function should convert the type to one of supported types (such as the
 builtin types or @ref std::string) and then call @ref Debug::operator<<() with
-it. You can also use @ref Debug::nospace() and @ref Debug::newline().
+it. You can also use @ref Debug::nospace and @ref Debug::newline.
  */
 template<class T> Debug& operator<<(Debug& debug, const T& value);
 #endif
@@ -774,9 +778,6 @@ class CORRADE_UTILITY_EXPORT Fatal: public Error {
     private:
         int _exitCode;
 };
-
-/** @debugoperatorclassenum{Debug,Debug::Color} */
-CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, Debug::Color value);
 
 }}
 
