@@ -237,8 +237,9 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * @see @ref Flag::NoSpace, @ref newline
          */
-        /* MinGW complains loudly if the declaration doesn't also have inline */
-        inline static void nospace(Debug& debug);
+        static void nospace(Debug& debug) {
+            debug._immediateFlags |= InternalFlag::NoSpace;
+        }
 
         /**
          * @brief Output a newline
@@ -546,10 +547,6 @@ CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, Debug::Flags value);
 
 CORRADE_ENUMSET_OPERATORS(Debug::Flags)
 CORRADE_ENUMSET_OPERATORS(Debug::InternalFlags)
-
-inline void Debug::nospace(Debug& debug) {
-    debug._immediateFlags |= InternalFlag::NoSpace;
-}
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /* so Debug() << value works */
