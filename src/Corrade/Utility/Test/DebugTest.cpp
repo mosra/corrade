@@ -65,6 +65,7 @@ struct DebugTest: TestSuite::Tester {
 
     void iterable();
     void iterableNested();
+    void pair();
     void tuple();
 
     void ostreamFallback();
@@ -118,6 +119,7 @@ DebugTest::DebugTest() {
 
         &DebugTest::iterable,
         &DebugTest::iterableNested,
+        &DebugTest::pair,
         &DebugTest::tuple,
 
         &DebugTest::ostreamFallback,
@@ -625,6 +627,12 @@ void DebugTest::iterableNested() {
         "{{1, 2, 3},\n"
         " {4, 5},\n"
         " {6, 7, 8}}\n");
+}
+
+void DebugTest::pair() {
+    std::ostringstream out;
+    Debug(&out) << std::make_pair("hey", 42);
+    CORRADE_COMPARE(out.str(), "(hey, 42)\n");
 }
 
 void DebugTest::tuple() {
