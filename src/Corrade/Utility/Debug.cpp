@@ -53,6 +53,7 @@
 #endif
 #endif
 
+#include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Utility/DebugStl.h"
 
 namespace Corrade { namespace Utility {
@@ -174,6 +175,28 @@ void Debug::resetColor(Debug& debug) {
     debug.resetColorInternal();
 }
 
+namespace { enum: unsigned char { PublicFlagMask = 0x07 }; }
+
+auto Debug::flags() const -> Flags {
+    return Flag(static_cast<unsigned char>(_flags) & PublicFlagMask);
+}
+
+void Debug::setFlags(Flags flags) {
+    _flags = InternalFlag(static_cast<unsigned char>(flags)) |
+        InternalFlag(static_cast<unsigned char>(_flags) & ~PublicFlagMask);
+}
+
+auto Debug::immediateFlags() const -> Flags {
+    return Flag(static_cast<unsigned char>(_immediateFlags) & PublicFlagMask) |
+        Flag(static_cast<unsigned char>(_flags) & PublicFlagMask);
+}
+
+void Debug::setImmediateFlags(Flags flags) {
+    /* unlike _flags, _immediateFlags doesn't contain any internal flags so
+       no need to preserve these */
+    _immediateFlags = InternalFlag(static_cast<unsigned char>(flags));
+}
+
 std::ostream* Debug::output() { return _globalOutput; }
 std::ostream* Warning::output() { return _globalWarningOutput; }
 std::ostream* Error::output() { return _globalErrorOutput; }
@@ -242,7 +265,7 @@ bool Debug::isTty() { return isTty(_globalOutput); }
 bool Warning::isTty() { return Debug::isTty(_globalWarningOutput); }
 bool Error::isTty() { return Debug::isTty(_globalErrorOutput); }
 
-Debug::Debug(std::ostream* const output, const Flags flags): _flags{InternalFlag(static_cast<unsigned char>(flags))|InternalFlag::NoSpaceBeforeNextValue} {
+Debug::Debug(std::ostream* const output, const Flags flags): _flags{InternalFlag(static_cast<unsigned char>(flags))}, _immediateFlags{InternalFlag::NoSpace} {
     /* Save previous global output and replace it with current one */
     _previousGlobalOutput = _globalOutput;
     _globalOutput = _output = output;
@@ -317,10 +340,10 @@ Fatal::~Fatal() {
 template<class T> Debug& Debug::print(const T& value) {
     if(!_output) return *this;
 
-    /* Separate values with spaces, if enabled */
-    if(_flags & InternalFlag::NoSpaceBeforeNextValue)
-        _flags &= ~InternalFlag::NoSpaceBeforeNextValue;
-    else *_output << ' ';
+    /* Separate values with spaces if enabled; reset all internal flags after */
+    if(!((_immediateFlags|_flags) & InternalFlag::NoSpace))
+        *_output << ' ';
+    _immediateFlags = {};
 
     toStream(*_output, value);
 
@@ -406,6 +429,27 @@ Debug& operator<<(Debug& debug, Debug::Color value) {
     }
 
     return debug << "Debug::Color(" << Debug::nospace << reinterpret_cast<void*>(static_cast<unsigned char>(char(value))) << Debug::nospace << ")";
+}
+
+Debug& operator<<(Debug& debug, Debug::Flag value) {
+    switch(value) {
+        /* LCOV_EXCL_START */
+        #define _c(value) case Debug::Flag::value: return debug << "Debug::Flag::" #value;
+        _c(NoNewlineAtTheEnd)
+        _c(DisableColors)
+        _c(NoSpace)
+        #undef _c
+        /* LCOV_EXCL_STOP */
+    }
+
+    return debug << "Debug::Flag(" << Debug::nospace << reinterpret_cast<void*>(static_cast<unsigned char>(char(value))) << Debug::nospace << ")";
+}
+
+Debug& operator<<(Debug& debug, Debug::Flags value) {
+    return Containers::enumSetDebugOutput(debug, value, "Features{}", {
+        Debug::Flag::NoNewlineAtTheEnd,
+        Debug::Flag::DisableColors,
+        Debug::Flag::NoSpace});
 }
 
 /* For some reason Doxygen can't match this with the declaration in DebugStl.h */

@@ -109,6 +109,9 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-changes-utility Utility library
 
+-   @ref Utility::Debug output behavior can be now configured using new
+    @ref Utility::Debug::setFlags() and @ref Utility::Debug::setImmediateFlags()
+    in addition to output modifiers such as @ref Utility::Debug::nospace
 -   @ref CORRADE_ASSERT_UNREACHABLE() now compiles into a compiler builtin on
     MSVC as well
 

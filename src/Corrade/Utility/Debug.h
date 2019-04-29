@@ -76,7 +76,11 @@ can be controlled separately:
 
 @section Utility-Debug-modifiers Output modifiers
 
-It's possible to modify the debug output by passing a special function to the
+It's possible to modify the output behavior by calling @ref setFlags() or
+@ref setImmediateFlags(). The latter function applies given flag only to the
+immediately following value (and then it gets reset back) instead of all
+following values. For convenience, the operation of @ref setFlags() /
+@ref setImmediateFlags() can be done or by passing a special function to the
 output stream.
 
 @subsection Utility-Debug-modifiers-whitespace Explicit whitespace control
@@ -137,7 +141,16 @@ class CORRADE_UTILITY_EXPORT Debug {
              *      colored output by default works only if outputting directly
              *      to the console. See also @ref CORRADE_UTILITY_USE_ANSI_COLORS.
              */
-            DisableColors = 1 << 1
+            DisableColors = 1 << 1,
+
+            /**
+             * Print without spaces between values.
+             * @see @ref nospace
+             */
+            NoSpace = 1 << 2
+
+            /* When adding values, don't forget to adapt PublicFlagMask in
+               Debug.cpp */
         };
 
         /**
@@ -222,7 +235,7 @@ class CORRADE_UTILITY_EXPORT Debug {
          *
          * @snippet Utility.cpp Debug-nospace
          *
-         * @see @ref newline
+         * @see @ref Flag::NoSpace, @ref newline
          */
         /* MinGW complains loudly if the declaration doesn't also have inline */
         inline static void nospace(Debug& debug);
@@ -374,6 +387,38 @@ class CORRADE_UTILITY_EXPORT Debug {
         Debug& operator=(Debug&&) = delete;
 
         /**
+         * @brief Flags applied for all following values
+         *
+         * @see @ref Utility-Debug-modifiers, @ref immediateFlags()
+         */
+        Flags flags() const;
+
+        /**
+         * @brief Set flags applied for all following values
+         *
+         * @see @ref Utility-Debug-modifiers, @ref setImmediateFlags()
+         */
+        void setFlags(Flags flags);
+
+        /**
+         * @brief Flags applied for the immediately following value
+         *
+         * Returned value is a combination of @ref flags() and immediate flags.
+         * The immediate part gets reset after a value is printed.
+         * @see @ref Utility-Debug-modifiers
+         */
+        Flags immediateFlags() const;
+
+        /**
+         * @brief Set flags to be applied for the immediately following value
+         *
+         * Unlike flags set with @ref setFlags(), these get applied only to the
+         * immediately following value and reset after.
+         * @see @ref Utility-Debug-modifiers, @ref nospace
+         */
+        void setImmediateFlags(Flags flags);
+
+        /**
          * @brief Print string to debug output
          *
          * If there is already something in the output, puts a space before
@@ -457,7 +502,7 @@ class CORRADE_UTILITY_EXPORT Debug {
             /* Values compatible with Flag enum */
             NoNewlineAtTheEnd = 1 << 0,
             DisableColors = 1 << 1,
-            NoSpaceBeforeNextValue = 1 << 2,
+            NoSpace = 1 << 2,
             ValueWritten = 1 << 3,
             ColorWritten = 1 << 4
         };
@@ -468,6 +513,7 @@ class CORRADE_UTILITY_EXPORT Debug {
         CORRADE_UTILITY_LOCAL void cleanupOnDestruction(); /* Needed for Fatal */
 
         InternalFlags _flags;
+        InternalFlags _immediateFlags;
 
     private:
         template<Color c, bool bold> CORRADE_UTILITY_LOCAL static Modifier colorInternal();
@@ -492,11 +538,17 @@ class CORRADE_UTILITY_EXPORT Debug {
 /** @debugoperatorclassenum{Debug,Debug::Color} */
 CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, Debug::Color value);
 
+/** @debugoperatorclassenum{Debug,Debug::Flag} */
+CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, Debug::Flag value);
+
+/** @debugoperatorclassenum{Debug,Debug::Flags} */
+CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, Debug::Flags value);
+
 CORRADE_ENUMSET_OPERATORS(Debug::Flags)
 CORRADE_ENUMSET_OPERATORS(Debug::InternalFlags)
 
 inline void Debug::nospace(Debug& debug) {
-    debug._flags |= InternalFlag::NoSpaceBeforeNextValue;
+    debug._immediateFlags |= InternalFlag::NoSpace;
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT

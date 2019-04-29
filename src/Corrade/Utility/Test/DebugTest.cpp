@@ -49,6 +49,8 @@ struct DebugTest: TestSuite::Tester {
     void pointer();
     void unicode();
     void custom();
+
+    void flags();
     void nospace();
     void newline();
     void noNewlineAtTheEnd();
@@ -97,6 +99,8 @@ DebugTest::DebugTest() {
         &DebugTest::pointer,
         &DebugTest::unicode,
         &DebugTest::custom,
+
+        &DebugTest::flags,
         &DebugTest::nospace,
         &DebugTest::newline,
         &DebugTest::noNewlineAtTheEnd});
@@ -339,11 +343,66 @@ void DebugTest::custom() {
                                "42 is the answer\n");
 }
 
-void DebugTest::nospace() {
+void DebugTest::flags() {
     std::ostringstream out;
-    Debug(&out) << "Value:" << 16 << Debug::nospace << "," << 24;
 
-    CORRADE_COMPARE(out.str(), "Value: 16, 24\n");
+    {
+        Debug d{&out};
+        CORRADE_COMPARE(d.flags(), Debug::Flags{});
+        CORRADE_COMPARE(d.immediateFlags(), Debug::Flag::NoSpace);
+
+        d << "Hello";
+        CORRADE_COMPARE(d.flags(), Debug::Flags{});
+        CORRADE_COMPARE(d.immediateFlags(), Debug::Flags{});
+
+        d.setFlags(Debug::Flag::NoNewlineAtTheEnd);
+        CORRADE_COMPARE(d.flags(), Debug::Flag::NoNewlineAtTheEnd);
+        CORRADE_COMPARE(d.immediateFlags(), Debug::Flag::NoNewlineAtTheEnd);
+
+        d.setImmediateFlags(Debug::Flag::NoSpace);
+        CORRADE_COMPARE(d.flags(), Debug::Flag::NoNewlineAtTheEnd);
+        CORRADE_COMPARE(d.immediateFlags(), Debug::Flag::NoNewlineAtTheEnd|Debug::Flag::NoSpace);
+
+        d << ", world!";
+    }
+
+    /* No space, no newline at the end */
+    CORRADE_COMPARE(out.str(), "Hello, world!");
+}
+
+void DebugTest::nospace() {
+    /* Local nospace modifier, applied once */
+    {
+        std::ostringstream out;
+
+        {
+            Debug d{&out};
+            d << "Value:" << 16;
+            CORRADE_VERIFY(!(d.flags() & Debug::Flag::NoSpace));
+            CORRADE_VERIFY(!(d.immediateFlags() & Debug::Flag::NoSpace));
+
+            d << Debug::nospace;
+            CORRADE_VERIFY(!(d.flags() & Debug::Flag::NoSpace));
+            CORRADE_VERIFY((d.immediateFlags() & Debug::Flag::NoSpace));
+
+            d << "," << 24 << "and more";
+        }
+
+        CORRADE_COMPARE(out.str(), "Value: 16, 24 and more\n");
+    }
+
+    /* Global nospace modifier, applied always */
+    {
+        std::ostringstream out;
+        Debug d{&out, Debug::Flag::NoSpace};
+        CORRADE_VERIFY((d.flags() & Debug::Flag::NoSpace));
+        CORRADE_VERIFY((d.immediateFlags() & Debug::Flag::NoSpace));
+
+        d << "a" << "b" << "c";
+        CORRADE_VERIFY((d.flags() & Debug::Flag::NoSpace));
+        CORRADE_VERIFY((d.immediateFlags() & Debug::Flag::NoSpace));
+        CORRADE_COMPARE(out.str(), "abc");
+    }
 }
 
 void DebugTest::newline() {
