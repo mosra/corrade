@@ -17,6 +17,8 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2019.01-173-ge663b49c (2019-04-30)
+    -   Different implementation for Array-to-view conversion
     v2019.01-107-g80d9f347 (2019-03-23)
     -   Added missing <initializer_list> include
     v2019.01-47-g524c127e (2019-02-18)
