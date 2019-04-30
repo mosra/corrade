@@ -1,6 +1,7 @@
 set -e
 
 ../acme/acme.py CorradeArrayView.h --output ../../../magnum-singles
+../acme/acme.py CorradeStridedArrayView.h --output ../../../magnum-singles
 ../acme/acme.py CorradeArray.h --output ../../../magnum-singles
 ../acme/acme.py CorradeOptional.h --output ../../../magnum-singles
 ../acme/acme.py CorradePointer.h --output ../../../magnum-singles
