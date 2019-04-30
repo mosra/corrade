@@ -87,6 +87,7 @@ struct ArrayTest: TestSuite::Tester {
     void convertPointer();
     void convertView();
     void convertViewDerived();
+    void convertViewOverload();
     void convertVoid();
     void convertConstVoid();
     void convertToExternalView();
@@ -138,6 +139,7 @@ ArrayTest::ArrayTest() {
               &ArrayTest::convertPointer,
               &ArrayTest::convertView,
               &ArrayTest::convertViewDerived,
+              &ArrayTest::convertViewOverload,
               &ArrayTest::convertVoid,
               &ArrayTest::convertConstVoid,
               &ArrayTest::convertToExternalView,
@@ -372,7 +374,6 @@ void ArrayTest::convertView() {
         CORRADE_COMPARE(cbc.size(), 5);
     }
 }
-
 void ArrayTest::convertViewDerived() {
     struct A { int i; };
     struct B: A {};
@@ -386,6 +387,21 @@ void ArrayTest::convertViewDerived() {
 
     CORRADE_VERIFY(a == b);
     CORRADE_COMPARE(a.size(), 5);
+}
+
+bool takesAView(Containers::ArrayView<int>) { return true; }
+bool takesAConstView(Containers::ArrayView<const int>) { return true; }
+CORRADE_UNUSED bool takesAView(Containers::ArrayView<std::pair<int, int>>) { return false; }
+CORRADE_UNUSED bool takesAConstView(Containers::ArrayView<const std::pair<int, int>>) { return false; }
+
+void ArrayTest::convertViewOverload() {
+    Array a(5);
+    const Array ca(5);
+
+    /* It should pick the correct one and not fail, assert or be ambiguous */
+    CORRADE_VERIFY(takesAView(a));
+    CORRADE_VERIFY(takesAConstView(a));
+    CORRADE_VERIFY(takesAConstView(ca));
 }
 
 void ArrayTest::convertVoid() {

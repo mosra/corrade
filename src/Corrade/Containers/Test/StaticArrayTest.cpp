@@ -79,8 +79,10 @@ struct StaticArrayTest: TestSuite::Tester {
     void convertPointer();
     void convertView();
     void convertViewDerived();
+    void convertViewOverload();
     void convertStaticView();
     void convertStaticViewDerived();
+    void convertStaticViewOverload();
     void convertVoid();
     void convertConstVoid();
     void convertToExternalView();
@@ -123,8 +125,10 @@ StaticArrayTest::StaticArrayTest() {
               &StaticArrayTest::convertPointer,
               &StaticArrayTest::convertView,
               &StaticArrayTest::convertViewDerived,
+              &StaticArrayTest::convertViewOverload,
               &StaticArrayTest::convertStaticView,
               &StaticArrayTest::convertStaticViewDerived,
+              &StaticArrayTest::convertStaticViewOverload,
               &StaticArrayTest::convertVoid,
               &StaticArrayTest::convertConstVoid,
               &StaticArrayTest::convertToExternalView,
@@ -368,6 +372,21 @@ void StaticArrayTest::convertViewDerived() {
     CORRADE_COMPARE(a.size(), 5);
 }
 
+bool takesAView(Containers::ArrayView<int>) { return true; }
+bool takesAConstView(Containers::ArrayView<const int>) { return true; }
+CORRADE_UNUSED bool takesAView(Containers::ArrayView<std::pair<int, int>>) { return false; }
+CORRADE_UNUSED bool takesAConstView(Containers::ArrayView<const std::pair<int, int>>) { return false; }
+
+void StaticArrayTest::convertViewOverload() {
+    StaticArray a;
+    const StaticArray ca;
+
+    /* It should pick the correct one and not fail, assert or be ambiguous */
+    CORRADE_VERIFY(takesAView(a));
+    CORRADE_VERIFY(takesAConstView(a));
+    CORRADE_VERIFY(takesAConstView(ca));
+}
+
 void StaticArrayTest::convertStaticView() {
     StaticArray a;
     const StaticArray ca;
@@ -420,6 +439,21 @@ void StaticArrayTest::convertStaticViewDerived() {
 
     CORRADE_VERIFY(a == b);
     CORRADE_COMPARE(a.size(), 5);
+}
+
+bool takesAStaticView(Containers::StaticArrayView<5, int>) { return true; }
+bool takesAStaticConstView(Containers::StaticArrayView<5, const int>) { return true; }
+CORRADE_UNUSED bool takesAStaticView(Containers::StaticArrayView<5, std::pair<int, int>>) { return false; }
+CORRADE_UNUSED bool takesAStaticConstView(Containers::StaticArrayView<5, const std::pair<int, int>>) { return false; }
+
+void StaticArrayTest::convertStaticViewOverload() {
+    StaticArray a;
+    const StaticArray ca;
+
+    /* It should pick the correct one and not fail, assert or be ambiguous */
+    CORRADE_VERIFY(takesAStaticView(a));
+    CORRADE_VERIFY(takesAStaticConstView(a));
+    CORRADE_VERIFY(takesAStaticConstView(ca));
 }
 
 void StaticArrayTest::convertVoid() {
