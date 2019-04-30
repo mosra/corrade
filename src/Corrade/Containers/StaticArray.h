@@ -516,19 +516,24 @@ template<std::size_t size_, class T> template<std::size_t viewSize> StaticArrayV
 namespace Implementation {
 
 /* StaticArray to ArrayView in order to have implicit conversion for
-   StridedArrayView without needing to introduce a header dependency */
+   StridedArrayView without needing to introduce a header dependency. The
+   SFINAE needs to be here in order to ensure proper behavior with function
+   overloads taking more than one type of (Strided)ArrayView. */
 template<class U, std::size_t size, class T> struct ArrayViewConverter<U, StaticArray<size, T>> {
-    constexpr static ArrayView<U> from(StaticArray<size, T>& other) {
+    template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<U>>::type from(StaticArray<size, T>& other) {
+        static_assert(sizeof(T) == sizeof(U), "types are not compatible");
         return {&other[0], other.size()};
     }
 };
 template<class U, std::size_t size, class T> struct ArrayViewConverter<const U, StaticArray<size, T>> {
-    constexpr static ArrayView<const U> from(const StaticArray<size, T>& other) {
+    template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<const U>>::type from(const StaticArray<size, T>& other) {
+        static_assert(sizeof(T) == sizeof(U), "types are not compatible");
         return {&other[0], other.size()};
     }
 };
 template<class U, std::size_t size, class T> struct ArrayViewConverter<const U, StaticArray<size, const T>> {
-    constexpr static ArrayView<const U> from(const StaticArray<size, const T>& other) {
+    template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<const U>>::type from(const StaticArray<size, const T>& other) {
+        static_assert(sizeof(T) == sizeof(U), "types are not compatible");
         return {&other[0], other.size()};
     }
 };
@@ -536,19 +541,24 @@ template<std::size_t size, class T> struct ErasedArrayViewConverter<StaticArray<
 template<std::size_t size, class T> struct ErasedArrayViewConverter<const StaticArray<size, T>>: ArrayViewConverter<const T, StaticArray<size, T>> {};
 
 /* StaticArray to StaticArrayView in order to have implicit conversion for
-   StridedArrayView without needing to introduce a header dependency */
+   StridedArrayView without needing to introduce a header dependency. The
+   SFINAE needs to be here in order to ensure proper behavior with function
+   overloads taking more than one type of StaticArrayView. */
 template<class U, std::size_t size, class T> struct StaticArrayViewConverter<size, U, StaticArray<size, T>> {
-    constexpr static StaticArrayView<size, U> from(StaticArray<size, T>& other) {
+    template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, StaticArrayView<size, U>>::type from(StaticArray<size, T>& other) {
+        static_assert(sizeof(T) == sizeof(U), "types are not compatible");
         return StaticArrayView<size, T>{&other[0]};
     }
 };
 template<class U, std::size_t size, class T> struct StaticArrayViewConverter<size, const U, StaticArray<size, T>> {
-    constexpr static StaticArrayView<size, const U> from(const StaticArray<size, T>& other) {
+    template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, StaticArrayView<size, const U>>::type from(const StaticArray<size, T>& other) {
+        static_assert(sizeof(T) == sizeof(U), "types are not compatible");
         return StaticArrayView<size, const T>(&other[0]);
     }
 };
 template<class U, std::size_t size, class T> struct StaticArrayViewConverter<size, const U, StaticArray<size, const T>> {
-    constexpr static StaticArrayView<size, const U> from(const StaticArray<size, const T>& other) {
+    template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, StaticArrayView<size, const U>>::type from(const StaticArray<size, const T>& other) {
+        static_assert(sizeof(T) == sizeof(U), "types are not compatible");
         return StaticArrayView<size, const T>(&other[0]);
     }
 };

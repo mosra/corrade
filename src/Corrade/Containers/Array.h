@@ -591,22 +591,24 @@ template<class T, class D> inline T* Array<T, D>::release() {
 namespace Implementation {
 
 /* Array to ArrayView in order to have implicit conversion for StridedArrayView
-   without needing to introduce a header dependency */
+   without needing to introduce a header dependency. The SFINAE needs to be
+   here in order to ensure proper behavior with function overloads taking more
+   than one type of (Strided)ArrayView. */
 template<class U, class T, class D> struct ArrayViewConverter<U, Array<T, D>> {
-    constexpr static ArrayView<U> from(Array<T, D>& other) {
-        static_assert(std::is_convertible<T*, U*>::value && sizeof(T) == sizeof(U), "types are not compatible");
+    template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<U>>::type from(Array<T, D>& other) {
+        static_assert(sizeof(T) == sizeof(U), "types are not compatible");
         return {&other[0], other.size()};
     }
 };
 template<class U, class T, class D> struct ArrayViewConverter<const U, Array<T, D>> {
-    constexpr static ArrayView<const U> from(const Array<T, D>& other) {
-        static_assert(std::is_convertible<T*, U*>::value && sizeof(T) == sizeof(U), "types are not compatible");
+    template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<const U>>::type from(const Array<T, D>& other) {
+        static_assert(sizeof(T) == sizeof(U), "types are not compatible");
         return {&other[0], other.size()};
     }
 };
 template<class U, class T, class D> struct ArrayViewConverter<const U, Array<const T, D>> {
-    constexpr static ArrayView<const U> from(const Array<const T, D>& other) {
-        static_assert(std::is_convertible<T*, U*>::value && sizeof(T) == sizeof(U), "types are not compatible");
+    template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<const U>>::type from(const Array<const T, D>& other) {
+        static_assert(sizeof(T) == sizeof(U), "types are not compatible");
         return {&other[0], other.size()};
     }
 };
