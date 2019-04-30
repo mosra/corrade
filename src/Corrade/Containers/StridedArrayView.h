@@ -30,6 +30,7 @@
  */
 
 #include "Corrade/Containers/ArrayView.h"
+#include "Corrade/Containers/Tags.h"
 
 namespace Corrade { namespace Containers {
 
