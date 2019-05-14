@@ -553,6 +553,25 @@ template<unsigned dimensions, class T> class StridedArrayView {
         }
 
         /**
+         * @brief Pick every Nth element
+         *
+         * Multiplies @ref stride() with @p skip and adjusts @ref size()
+         * accordingly. Negative @p skip is equivalent to first calling
+         * @ref flipped() and then this function with a positive value. On
+         * multi-dimensional views affects just the top-level dimension.
+         */
+        StridedArrayView<dimensions, T> every(std::ptrdiff_t skip) const;
+
+        /**
+         * @brief Pick every Nth element
+         *
+         * Multiplies @ref stride() with @p skip and adjusts @ref size()
+         * accordingly. Negative @p skip is equivalent to first calling
+         * @ref flipped() and then this function with a positive value.
+         */
+        StridedArrayView<dimensions, T> every(const Stride& skip) const;
+
+        /**
          * @brief Transpose two dimensions
          *
          * Exchanges dimensions @p dimensionA and @p dimensionB by swapping
@@ -953,6 +972,36 @@ template<unsigned dimensions, class T> template<unsigned newDimensions> StridedA
     }
 
     return StridedArrayView<newDimensions, T>{size, stride, data};
+}
+
+template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedArrayView<dimensions, T>::every(const std::ptrdiff_t step) const {
+    Stride steps;
+    steps[0] = step;
+    for(std::size_t i = 1; i != dimensions; ++i) steps[i] = 1;
+    return every(steps);
+}
+
+template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedArrayView<dimensions, T>::every(const Stride& step) const {
+    ErasedType* data = _data;
+    Size size = _size;
+    Stride stride = _stride;
+    for(std::size_t dimension = 0; dimension != dimensions; ++dimension) {
+        CORRADE_ASSERT(step[dimension], "Containers::StridedArrayView::every(): step in dimension" << dimension << "is zero", {});
+
+        /* If step is negative, adjust also data pointer */
+        std::size_t divisor;
+        if(step[dimension] < 0) {
+            data = static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(data) + _stride._data[dimension]*(_size._data[dimension] ? _size._data[dimension] - 1 : 0);
+            divisor = -step[dimension];
+        } else divisor = step[dimension];
+
+        /* Taking every 5th element of a 6-element array should result in 2
+           elements */
+        size[dimension] = (size[dimension] + divisor - 1)/divisor;
+        stride[dimension] *= step[dimension];
+    }
+
+    return StridedArrayView<dimensions, T>{size, stride, data};
 }
 
 template<unsigned dimensions, class T> template<unsigned dimensionA, unsigned dimensionB> StridedArrayView<dimensions, T> StridedArrayView<dimensions, T>::transposed() const {

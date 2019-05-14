@@ -165,6 +165,14 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void sliceDimensionDown();
     void sliceDimensionDownInvalid();
 
+    void every();
+    void everyNegative();
+    void everyInvalid();
+    void every2D();
+    void every2DNegative();
+    void every2DInvalid();
+    void every2DFirstDimension();
+
     void transposed();
     void flipped();
     void flipped3D();
@@ -294,6 +302,14 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::sliceDimensionUpInvalid,
               &StridedArrayViewTest::sliceDimensionDown,
               &StridedArrayViewTest::sliceDimensionDownInvalid,
+
+              &StridedArrayViewTest::every,
+              &StridedArrayViewTest::everyNegative,
+              &StridedArrayViewTest::everyInvalid,
+              &StridedArrayViewTest::every2D,
+              &StridedArrayViewTest::every2DNegative,
+              &StridedArrayViewTest::every2DInvalid,
+              &StridedArrayViewTest::every2DFirstDimension,
 
               &StridedArrayViewTest::transposed,
               &StridedArrayViewTest::flipped,
@@ -1916,6 +1932,124 @@ void StridedArrayViewTest::sliceDimensionDownInvalid() {
     CORRADE_COMPARE(out.str(),
         "Containers::StridedArrayView::slice(): slice [{0, 1, 4}:{1, 2, 5}] out of range for {2, 2, 3} elements in dimension 2\n"
         "Containers::StridedArrayView::slice(): slice [{0, 1, 0}:{1, 0, 1}] out of range for {2, 2, 3} elements in dimension 1\n");
+}
+
+void StridedArrayViewTest::every() {
+    int data[]{0, 1, 2, 3, 4, 5, 6, 7};
+    StridedArrayView1Di a = data;
+
+    StridedArrayView1Di b = a.every(1);
+    CORRADE_COMPARE(b.size(), 8);
+    CORRADE_COMPARE(b.stride(), 4);
+    CORRADE_COMPARE(b[0], 0);
+    CORRADE_COMPARE(b[1], 1);
+    CORRADE_COMPARE(b[2], 2);
+
+    StridedArrayView1Di c = a.every(3);
+    CORRADE_COMPARE(c.size(), 3);
+    CORRADE_COMPARE(c.stride(), 12);
+    CORRADE_COMPARE(c[0], 0);
+    CORRADE_COMPARE(c[1], 3);
+    CORRADE_COMPARE(c[2], 6);
+
+    CORRADE_COMPARE(a.every(7).size(), 2);
+    CORRADE_COMPARE(a.every(10).size(), 1);
+}
+
+void StridedArrayViewTest::everyNegative() {
+    int data[]{0, 1, 2, 3, 4, 5, 6, 7};
+    StridedArrayView1Di a = data;
+
+    StridedArrayView1Di b = a.every(-1);
+    CORRADE_COMPARE(b.size(), 8);
+    CORRADE_COMPARE(b.stride(), -4);
+    CORRADE_COMPARE(b[0], 7);
+    CORRADE_COMPARE(b[1], 6);
+    CORRADE_COMPARE(b[2], 5);
+
+    StridedArrayView1Di c = a.every(-3);
+    CORRADE_COMPARE(c.size(), 3);
+    CORRADE_COMPARE(c.stride(), -12);
+    CORRADE_COMPARE(c[0], 7);
+    CORRADE_COMPARE(c[1], 4);
+    CORRADE_COMPARE(c[2], 1);
+
+    StridedArrayView1Di d = a.every(-7);
+    CORRADE_COMPARE(d.size(), 2);
+    CORRADE_COMPARE(d.stride(), -28);
+    CORRADE_COMPARE(d[0], 7);
+
+    StridedArrayView1Di e = a.every(-10);
+    CORRADE_COMPARE(e.size(), 1);
+    CORRADE_COMPARE(e.stride(), -40);
+    CORRADE_COMPARE(e[0], 7);
+}
+
+void StridedArrayViewTest::everyInvalid() {
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    StridedArrayView1Di{}.every(0);
+    CORRADE_COMPARE(out.str(), "Containers::StridedArrayView::every(): step in dimension 0 is zero\n");
+}
+
+void StridedArrayViewTest::every2D() {
+    int data[]{0, 1, 2, 3, 4, 5, 6, 7,
+               4, 5, 6, 7, 8, 9, 10, 11,
+               8, 9, 10, 11, 12, 13, 14, 15};
+    StridedArrayView2Di a{data, {3, 8}, {32, 4}};
+
+    StridedArrayView2Di b = a.every({2, 3});
+    CORRADE_COMPARE(b.size(), (Size2D{2, 3}));
+    CORRADE_COMPARE(b.stride(), (Stride2D{64, 12}));
+    CORRADE_COMPARE(b[0][0], 0);
+    CORRADE_COMPARE(b[0][1], 3);
+    CORRADE_COMPARE(b[0][2], 6);
+    CORRADE_COMPARE(b[1][0], 8);
+    CORRADE_COMPARE(b[1][1], 11);
+    CORRADE_COMPARE(b[1][2], 14);
+}
+
+void StridedArrayViewTest::every2DNegative() {
+    int data[]{0, 1, 2, 3, 4, 5, 6, 7,
+               4, 5, 6, 7, 8, 9, 10, 11,
+               8, 9, 10, 11, 12, 13, 14, 15};
+    StridedArrayView2Di a{data, {3, 8}, {32, 4}};
+
+    StridedArrayView2Di b = a.every({-2, -3});
+    CORRADE_COMPARE(b.size(), (Size2D{2, 3}));
+    CORRADE_COMPARE(b.stride(), (Stride2D{-64, -12}));
+    CORRADE_COMPARE(b[0][0], 15);
+    CORRADE_COMPARE(b[0][1], 12);
+    CORRADE_COMPARE(b[0][2], 9);
+    CORRADE_COMPARE(b[1][0], 7);
+    CORRADE_COMPARE(b[1][1], 4);
+    CORRADE_COMPARE(b[1][2], 1);
+}
+
+void StridedArrayViewTest::every2DInvalid() {
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    StridedArrayView2Di{}.every({3, 0});
+    CORRADE_COMPARE(out.str(), "Containers::StridedArrayView::every(): step in dimension 1 is zero\n");
+}
+
+void StridedArrayViewTest::every2DFirstDimension() {
+    int data[]{0, 1, 2, 3, 4, 5, 6, 7,
+               4, 5, 6, 7, 8, 9, 10, 11,
+               8, 9, 10, 11, 12, 13, 14, 15};
+    StridedArrayView2Di a{data, {3, 8}, {32, 4}};
+
+    StridedArrayView2Di b = a.every(2);
+    CORRADE_COMPARE(b.size(), (Size2D{2, 8}));
+    CORRADE_COMPARE(b.stride(), (Stride2D{64, 4}));
+    CORRADE_COMPARE(b[0][0], 0);
+    CORRADE_COMPARE(b[0][1], 1);
+    CORRADE_COMPARE(b[0][2], 2);
+    CORRADE_COMPARE(b[1][0], 8);
+    CORRADE_COMPARE(b[1][1], 9);
+    CORRADE_COMPARE(b[1][2], 10);
 }
 
 void StridedArrayViewTest::transposed() {
