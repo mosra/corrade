@@ -1961,6 +1961,9 @@ void StridedArrayViewTest::flipped() {
     CORRADE_COMPARE(b[2], 2);
     CORRADE_COMPARE(b[3], 1);
     CORRADE_COMPARE(b[4], 0);
+
+    /* Flipping twice results in the same thing */
+    CORRADE_VERIFY(a.flipped<0>().flipped<0>().data() == data);
 }
 
 void StridedArrayViewTest::flipped3D() {
