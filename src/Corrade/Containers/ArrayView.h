@@ -285,13 +285,13 @@ template<class T> class ArrayView {
         /** @brief Conversion to array type */
         constexpr /*implicit*/ operator T*() const { return _data; }
 
-        /** @brief Array data */
+        /** @brief View data */
         constexpr T* data() const { return _data; }
 
-        /** @brief Array size */
+        /** @brief View size */
         constexpr std::size_t size() const { return _size; }
 
-        /** @brief Whether the array is empty */
+        /** @brief Whether the view is empty */
         constexpr bool empty() const { return !_size; }
 
         /**
