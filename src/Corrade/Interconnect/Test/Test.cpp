@@ -707,10 +707,10 @@ void Test::function() {
     CORRADE_VERIFY(connection2.isConnected());
 
     postman.newMessage(0, "hello");
-    CORRADE_COMPARE(receivedMessage, "hello");
+    CORRADE_COMPARE(receivedMessage, "hello"); // "hello" should be received
     connection2.disconnect();
     postman.newMessage(0, "heyy");
-    CORRADE_COMPARE(receivedMessage, "hello\n");
+    CORRADE_COMPARE(receivedMessage, "hello"); // after disconnect, "hello" should still be there
 }
 
 }}}}

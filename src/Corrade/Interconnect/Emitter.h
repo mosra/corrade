@@ -31,7 +31,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
@@ -290,7 +289,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         friend Receiver;
 
         template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> friend Connection connect(EmitterObject&, Signal(Emitter::*)(Args...), ReceiverObject&, void(Receiver::*)(Args...));
-        template<class EmitterObject, class Emitter, class ...Args> friend Connection connect(EmitterObject&, Signal(Emitter::*)(Args...), std::function<void(Args...)>);
+        template<class EmitterObject, class Emitter, class Lambda, class ...Args> friend Connection connect(EmitterObject& , Interconnect::Emitter::Signal(Emitter::*)(Args...), Lambda );
         #endif
 
         static void connectInternal(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data);
@@ -308,7 +307,7 @@ namespace Implementation {
 
 class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
     public:
-        enum class Type: std::uint8_t { Function, Member };
+        enum class Type: std::uint8_t { Function, Member, CapturingLambda };
 
         AbstractConnectionData(const AbstractConnectionData&) = delete;
         AbstractConnectionData(AbstractConnectionData&&) = delete;
@@ -393,7 +392,7 @@ template<class Receiver, class ...Args> class MemberConnectionData: public BaseM
 
 template<class ...Args> class FunctionConnectionData: public AbstractConnectionData {
     public:
-        typedef std::function<void(Args...)> Slot;
+        typedef void(*Slot)(Args...);
 
         template<class Emitter> explicit FunctionConnectionData(Emitter* emitter, Slot slot): AbstractConnectionData{emitter, Type::Function}, _slot{slot} {}
 
@@ -406,6 +405,38 @@ template<class ...Args> class FunctionConnectionData: public AbstractConnectionD
         void handle(Args... args) { _slot(args...); }
 
         const Slot _slot;
+};
+
+template<class ...Args> class AbstractLambdaConnection : public AbstractConnectionData {
+public:
+
+    template<class Emitter> explicit AbstractLambdaConnection(Emitter* emitter) : AbstractConnectionData{emitter, Type::CapturingLambda} {}
+
+private:
+    /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+    friend Interconnect::Emitter;
+#endif
+
+    virtual void handle(Args... args) = 0;
+};
+
+template<class Lambda, class ...Args> class CapturingLambdaConnectionData : public AbstractLambdaConnection<Args...> {
+public:
+
+    template<class Emitter> explicit CapturingLambdaConnectionData(Emitter* emitter, Lambda lambda) : AbstractLambdaConnection<Args...>{emitter}, _lambda{std::move(lambda)} {}
+
+private:
+    /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
+#ifndef DOXYGEN_GENERATING_OUTPUT
+    friend Interconnect::Emitter;
+#endif
+
+    void handle(Args... args) override final {
+        _lambda(args...);
+    }
+
+    const Lambda _lambda;
 };
 
 }
@@ -427,7 +458,7 @@ more information about connections.
 @see @ref Emitter::hasSignalConnections(), @ref Connection::isConnected(),
      @ref Emitter::signalConnectionCount()
 */
-template<class EmitterObject, class Emitter, class ...Args> Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), std::function<void(Args...)> slot) {
+template<class EmitterObject, class Emitter, class ...Args> Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), void(*slot)(Args...)) {
     static_assert(sizeof(Interconnect::Emitter::Signal(Emitter::*)(Args...)) <= sizeof(Implementation::SignalData),
         "size of member function pointer is incorrectly assumed to be smaller");
     static_assert(std::is_base_of<Emitter, EmitterObject>::value,
@@ -445,10 +476,33 @@ template<class EmitterObject, class Emitter, class ...Args> Connection connect(E
 
 /** @relatesalso Emitter
 @overload
+Overload for accepting function pointers and non-capturing lambdas (which are directly convertible to function pointers)
 @todo Why conversion of lambdas to function pointers is not done implicitly?
 */
-template<class EmitterObject, class Emitter, class Lambda, class ...Args> Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), Lambda slot) {
-    return connect(emitter, signal, std::function<void(Args...)>(slot));
+//template<class EmitterObject, class Emitter, class FunctionPointer, class ...Args>
+//typename std::enable_if<std::is_convertible<FunctionPointer, void(*)(Args...)>::value, Connection>::type connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), FunctionPointer slot) {
+//    return connect(emitter, signal, static_cast<void(*)(Args...)>(slot));
+//}
+
+
+/** @relatesalso Emitter
+@overload
+Overload for capturing lambdas
+*/
+template<class EmitterObject, class Emitter, class Lambda, class ...Args>
+Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), Lambda slot) {
+    static_assert(std::is_base_of<Emitter, EmitterObject>::value,
+        "Emitter object doesn't have given signal");
+    //static_assert(!std::is_convertible<Lambda, void(*)(Args...)>::value, "Overload failure: Lambda type is convertible to function pointer, should use different overload!");
+
+#ifndef CORRADE_MSVC2017_COMPATIBILITY
+    Implementation::SignalData signalData(signal);
+#else
+    auto signalData = Implementation::SignalData::create<Emitter, Args...>(signal);
+#endif
+    auto data = new Implementation::CapturingLambdaConnectionData<Lambda, Args...>(&emitter, slot);
+    Interconnect::Emitter::connectInternal(signalData, data);
+    return Connection(signalData, data);
 }
 
 /** @relatesalso Emitter
@@ -511,6 +565,9 @@ template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emi
                     break;
                 case Implementation::AbstractConnectionData::Type::Member:
                     static_cast<Implementation::BaseMemberConnectionData<Args...>*>(it->second)->handle(args...);
+                    break;
+                case Implementation::AbstractConnectionData::Type::CapturingLambda:
+                    static_cast<Implementation::AbstractLambdaConnection<Args...>*>(it->second)->handle(args...);
                     break;
                 default: CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
             }
