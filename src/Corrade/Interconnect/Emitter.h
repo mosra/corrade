@@ -479,10 +479,10 @@ template<class EmitterObject, class Emitter, class ...Args> Connection connect(E
 Overload for accepting function pointers and non-capturing lambdas (which are directly convertible to function pointers)
 @todo Why conversion of lambdas to function pointers is not done implicitly?
 */
-//template<class EmitterObject, class Emitter, class FunctionPointer, class ...Args>
-//typename std::enable_if<std::is_convertible<FunctionPointer, void(*)(Args...)>::value, Connection>::type connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), FunctionPointer slot) {
-//    return connect(emitter, signal, static_cast<void(*)(Args...)>(slot));
-//}
+template<class EmitterObject, class Emitter, class FunctionPointer, class ...Args>
+Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), typename std::enable_if<std::is_convertible<FunctionPointer, void(*)(Args...)>::value, FunctionPointer>::type slot) {
+    return connect(emitter, signal, static_cast<void(*)(Args...)>(slot));
+}
 
 
 /** @relatesalso Emitter
@@ -490,10 +490,10 @@ Overload for accepting function pointers and non-capturing lambdas (which are di
 Overload for capturing lambdas
 */
 template<class EmitterObject, class Emitter, class Lambda, class ...Args>
-Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), Lambda slot) {
+Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), typename std::enable_if<!std::is_convertible<Lambda, void(*)(Args...)>::value, Lambda>::type slot) {
     static_assert(std::is_base_of<Emitter, EmitterObject>::value,
         "Emitter object doesn't have given signal");
-    //static_assert(!std::is_convertible<Lambda, void(*)(Args...)>::value, "Overload failure: Lambda type is convertible to function pointer, should use different overload!");
+    static_assert(!std::is_convertible<Lambda, void(*)(Args...)>::value, "Overload failure: Lambda type is convertible to function pointer, should use different overload!");
 
 #ifndef CORRADE_MSVC2017_COMPATIBILITY
     Implementation::SignalData signalData(signal);
