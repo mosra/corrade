@@ -31,6 +31,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
@@ -289,7 +290,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         friend Receiver;
 
         template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> friend Connection connect(EmitterObject&, Signal(Emitter::*)(Args...), ReceiverObject&, void(Receiver::*)(Args...));
-        template<class EmitterObject, class Emitter, class ...Args> friend Connection connect(EmitterObject&, Signal(Emitter::*)(Args...), void(*)(Args...));
+        template<class EmitterObject, class Emitter, class ...Args> friend Connection connect(EmitterObject&, Signal(Emitter::*)(Args...), std::function<void(Args...)>);
         #endif
 
         static void connectInternal(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data);
@@ -392,7 +393,7 @@ template<class Receiver, class ...Args> class MemberConnectionData: public BaseM
 
 template<class ...Args> class FunctionConnectionData: public AbstractConnectionData {
     public:
-        typedef void(*Slot)(Args...);
+        typedef std::function<void(Args...)> Slot;
 
         template<class Emitter> explicit FunctionConnectionData(Emitter* emitter, Slot slot): AbstractConnectionData{emitter, Type::Function}, _slot{slot} {}
 
@@ -426,7 +427,7 @@ more information about connections.
 @see @ref Emitter::hasSignalConnections(), @ref Connection::isConnected(),
      @ref Emitter::signalConnectionCount()
 */
-template<class EmitterObject, class Emitter, class ...Args> Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), void(*slot)(Args...)) {
+template<class EmitterObject, class Emitter, class ...Args> Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), std::function<void(Args...)> slot) {
     static_assert(sizeof(Interconnect::Emitter::Signal(Emitter::*)(Args...)) <= sizeof(Implementation::SignalData),
         "size of member function pointer is incorrectly assumed to be smaller");
     static_assert(std::is_base_of<Emitter, EmitterObject>::value,
@@ -447,7 +448,7 @@ template<class EmitterObject, class Emitter, class ...Args> Connection connect(E
 @todo Why conversion of lambdas to function pointers is not done implicitly?
 */
 template<class EmitterObject, class Emitter, class Lambda, class ...Args> Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), Lambda slot) {
-    return connect(emitter, signal, static_cast<void(*)(Args...)>(slot));
+    return connect(emitter, signal, std::function<void(Args...)>(slot));
 }
 
 /** @relatesalso Emitter

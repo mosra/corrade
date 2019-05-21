@@ -700,6 +700,17 @@ void Test::function() {
     connection.disconnect();
     postman.newMessage(0, "heyy");
     CORRADE_COMPARE(out.str(), "hello\n");
+
+    std::string receivedMessage{ "none" };
+    Connection connection2 = Interconnect::connect(postman, &Postman::newMessage, [&receivedMessage](int, const std::string&msg) { receivedMessage = msg; });
+    CORRADE_VERIFY(connection2.isConnectionPossible());
+    CORRADE_VERIFY(connection2.isConnected());
+
+    postman.newMessage(0, "hello");
+    CORRADE_COMPARE(receivedMessage, "hello");
+    connection2.disconnect();
+    postman.newMessage(0, "heyy");
+    CORRADE_COMPARE(receivedMessage, "hello\n");
 }
 
 }}}}
