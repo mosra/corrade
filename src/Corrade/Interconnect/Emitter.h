@@ -407,10 +407,10 @@ template<class ...Args> class FunctionConnectionData: public AbstractConnectionD
         const Slot _slot;
 };
 
-template<class ...Args> class AbstractLambdaConnection : public AbstractConnectionData {
+template<class ...Args> class AbstractLambdaConnectionData : public AbstractConnectionData {
 public:
 
-    template<class Emitter> explicit AbstractLambdaConnection(Emitter* emitter) : AbstractConnectionData{emitter, Type::CapturingLambda} {}
+    template<class Emitter> explicit AbstractLambdaConnectionData(Emitter* emitter) : AbstractConnectionData{emitter, Type::CapturingLambda} {}
 
 private:
     /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
@@ -421,10 +421,10 @@ private:
     virtual void handle(Args... args) = 0;
 };
 
-template<class Lambda, class ...Args> class CapturingLambdaConnectionData : public AbstractLambdaConnection<Args...> {
+template<class Lambda, class ...Args> class CapturingLambdaConnectionData : public AbstractLambdaConnectionData<Args...> {
 public:
 
-    template<class Emitter> explicit CapturingLambdaConnectionData(Emitter* emitter, Lambda lambda) : AbstractLambdaConnection<Args...>{emitter}, _lambda{std::move(lambda)} {}
+    template<class Emitter> explicit CapturingLambdaConnectionData(Emitter* emitter, Lambda lambda) : AbstractLambdaConnectionData<Args...>{emitter}, _lambda{std::move(lambda)} {}
 
 private:
     /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
@@ -567,7 +567,7 @@ template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emi
                     static_cast<Implementation::BaseMemberConnectionData<Args...>*>(it->second)->handle(args...);
                     break;
                 case Implementation::AbstractConnectionData::Type::CapturingLambda:
-                    static_cast<Implementation::AbstractLambdaConnection<Args...>*>(it->second)->handle(args...);
+                    static_cast<Implementation::AbstractLambdaConnectionData<Args...>*>(it->second)->handle(args...);
                     break;
                 default: CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
             }
