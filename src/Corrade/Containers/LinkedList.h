@@ -173,9 +173,8 @@ template<class T> class LinkedList {
          * @brief Erase item
          * @param item      Item to erase
          *
-         * Equivalent to the following:
-         *
-         * @snippet Containers.cpp LinkedList-erase
+         * Equivalent to calling @ref LinkedListItem::erase(). See its
+         * documentation for more information.
          */
         void erase(T* item);
 
@@ -250,9 +249,10 @@ class LinkedListItem {
          *
          * Called from @ref LinkedList destructor, @ref LinkedList::clear() and
          * @ref LinkedList::erase(). By default, calls @ref doErase(), which
-         * then performs @cpp delete this @ce. For cases where this is not
-         * desired (for example when providing bindings to reference-counted
-         * languages), it's possible to provide a different behavior by either:
+         * then calls @ref LinkedList::cut() followed by @cpp delete this @ce.
+         * For cases where this is not desired (for example when providing
+         * bindings to reference-counted languages), it's possible to provide a
+         * different behavior by either:
          *
          * -    *replacing* this non-virtual function in your derived class
          *      (faster, doesn't involve a @cpp virtual @ce call, but requires
@@ -261,17 +261,25 @@ class LinkedListItem {
          * -    or overriding the private @ref doErase() function (slower due
          *      to the @cpp virtual @ce call, but without imposing any
          *      restrictions on the @ref LinkedList type)
+         *
+         * The overriden implementation has to call @ref LinkedList::cut() in
+         * order to correctly remove itself from the list; the @ref list() is
+         * guaranteed to be non-@cpp nullptr @ce in this context.
+         *
+         * @attention This function is not meant to be called by the user, use
+         *      @ref LinkedList::erase() instead.
          */
-        void erase() { doErase(); }
+        void erase();
 
     private:
         /**
          * @brief Erase the item
          *
          * Implementation for @ref erase(), see its documentation for more
-         * information. Default implementation performs @cpp delete this @ce.
+         * information. Default implementation calls
+         * @ref LinkedList::cut() followed by @cpp delete this @ce.
          */
-        virtual void doErase() { delete this; }
+        virtual void doErase();
 
         List* _list;
         Derived *_previous, *_next;
@@ -369,7 +377,7 @@ template<class T> inline void LinkedList<T>::move(T* const item, T* const before
 }
 
 template<class T> inline void LinkedList<T>::erase(T* const item) {
-    cut(item);
+    CORRADE_ASSERT(item->_list == this, "Containers::LinkedList::erase(): cannot erase an item which is not a part of the list", );
     item->erase();
 }
 
@@ -406,6 +414,15 @@ template<class Derived, class List> LinkedListItem<Derived, List>& LinkedListIte
     }
 
     return *this;
+}
+
+template<class Derived, class List> void LinkedListItem<Derived, List>::erase() {
+    doErase();
+}
+
+template<class Derived, class List> void LinkedListItem<Derived, List>::doErase() {
+    _list->LinkedList<Derived>::cut(static_cast<Derived*>(this));
+    delete this;
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT

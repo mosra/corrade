@@ -449,7 +449,10 @@ void LinkedListTest::rangeBasedFor() {
 
 void LinkedListTest::overrideErase() {
     struct NonErasingItem: LinkedListItem<NonErasingItem> {
-        void erase() { dead = true; }
+        void erase() {
+            list()->cut(this);
+            dead = true;
+        }
         bool dead = false;
     };
 
@@ -479,7 +482,10 @@ void LinkedListTest::overrideErase() {
 
 void LinkedListTest::overrideEraseVirtual() {
     struct NonErasingItemBase: LinkedListItem<NonErasingItemBase> {
-        void doErase() override { dead = true; }
+        void doErase() override {
+            list()->cut(this);
+            dead = true;
+        }
         bool dead = false;
     };
     struct NonErasingItem: NonErasingItemBase {

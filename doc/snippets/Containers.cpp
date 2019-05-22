@@ -496,11 +496,6 @@ if(item != before) {
     list.move(item, before);
 }
 /* [LinkedList-move] */
-
-/* [LinkedList-erase] */
-list.cut(item);
-item->erase();
-/* [LinkedList-erase] */
 }
 #if defined(__clang__) || defined(__GNUC__)
 #pragma GCC diagnostic pop
