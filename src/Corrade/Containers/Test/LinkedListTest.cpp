@@ -174,7 +174,7 @@ void LinkedListTest::insertFromOtherList() {
 
     LinkedList list2;
     list2.insert(&item);
-    CORRADE_COMPARE(out.str(), "Containers::LinkedList: Cannot insert item already connected elsewhere.\n");
+    CORRADE_COMPARE(out.str(), "Containers::LinkedList::insert(): cannot insert an item already connected elsewhere\n");
 }
 
 void LinkedListTest::insertBeforeFromOtherList() {
@@ -188,7 +188,7 @@ void LinkedListTest::insertBeforeFromOtherList() {
     LinkedList list2;
     Item item2;
     list2.insert(&item2, &item);
-    CORRADE_COMPARE(out.str(), "Containers::LinkedList: Cannot insert before item which is not part of the list.\n");
+    CORRADE_COMPARE(out.str(), "Containers::LinkedList::insert(): cannot insert before an item which is not a part of the list\n");
 }
 
 void LinkedListTest::cutFromOtherList() {
@@ -201,7 +201,7 @@ void LinkedListTest::cutFromOtherList() {
 
     LinkedList list2;
     list2.cut(&item);
-    CORRADE_COMPARE(out.str(), "Containers::LinkedList: Cannot cut out item which is not part of the list.\n");
+    CORRADE_COMPARE(out.str(), "Containers::LinkedList::cut(): cannot cut out an item which is not a part of the list\n");
 }
 
 void LinkedListTest::cut() {

@@ -302,8 +302,8 @@ template<class T> LinkedList<T>& LinkedList<T>::operator=(LinkedList<T>&& other)
 }
 
 template<class T> void LinkedList<T>::insert(T* const item, T* const before) {
-    CORRADE_ASSERT(!(item->_list), "Containers::LinkedList: Cannot insert item already connected elsewhere.", );
-    CORRADE_ASSERT(!before || before->_list == this, "Containers::LinkedList: Cannot insert before item which is not part of the list.", );
+    CORRADE_ASSERT(!item->_list, "Containers::LinkedList::insert(): cannot insert an item already connected elsewhere", );
+    CORRADE_ASSERT(!before || before->_list == this, "Containers::LinkedList::insert(): cannot insert before an item which is not a part of the list", );
 
     item->_list = static_cast<decltype(item->_list)>(this);
 
@@ -335,7 +335,7 @@ template<class T> void LinkedList<T>::insert(T* const item, T* const before) {
 }
 
 template<class T> void LinkedList<T>::cut(T* const item) {
-    CORRADE_ASSERT(item->_list == this, "Containers::LinkedList: Cannot cut out item which is not part of the list.", );
+    CORRADE_ASSERT(item->_list == this, "Containers::LinkedList::cut(): cannot cut out an item which is not a part of the list", );
 
     /* Removing first item */
     if(item == _first) {
