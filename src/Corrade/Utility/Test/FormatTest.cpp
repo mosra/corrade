@@ -80,6 +80,8 @@ struct FormatTest: TestSuite::Tester {
     void string();
     void stringPrecision();
 
+    void enumConstant();
+
     void multiple();
     void numbered();
     void numberedType();
@@ -162,6 +164,8 @@ FormatTest::FormatTest() {
               &FormatTest::charArrayView,
               &FormatTest::string,
               &FormatTest::stringPrecision,
+
+              &FormatTest::enumConstant,
 
               &FormatTest::multiple,
               &FormatTest::numbered,
@@ -622,6 +626,25 @@ void FormatTest::string() {
 
 void FormatTest::stringPrecision() {
     CORRADE_COMPARE(formatString("{:.4}", "hello world"), "hell");
+}
+
+enum: std::uint64_t { SomeValue = 12345678901234ull };
+enum Enum { SomeDifferentValue };
+
+}}
+
+namespace Implementation {
+    template<> struct Formatter<Test::Enum> {
+        static std::size_t format(const Containers::ArrayView<char>& buffer, Test::Enum, int precision, FormatType type) {
+            return Formatter<const char*>::format(buffer, "SomeDifferentValue", precision, type);
+        }
+    };
+}
+
+namespace Test { namespace {
+
+void FormatTest::enumConstant() {
+    CORRADE_COMPARE(formatString("value: {} but an enum: {}", SomeValue, SomeDifferentValue), "value: 12345678901234 but an enum: SomeDifferentValue");
 }
 
 void FormatTest::multiple() {

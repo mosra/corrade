@@ -218,7 +218,7 @@ namespace Implementation {
 
 enum class FormatType: unsigned char;
 
-template<class T> struct Formatter;
+template<class T, class = void> struct Formatter;
 
 template<> struct Formatter<int> {
     static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, int value, int precision, FormatType type);
@@ -269,6 +269,10 @@ template<> struct Formatter<Containers::ArrayView<const char>> {
     static CORRADE_UTILITY_EXPORT std::size_t format(const Containers::ArrayView<char>& buffer, Containers::ArrayView<const char> value, int precision, FormatType type);
     static CORRADE_UTILITY_EXPORT void format(std::FILE* file, Containers::ArrayView<const char> value, int precision, FormatType type);
 };
+
+/* If the type is an enum, use its underlying type, assuming the enum is
+   convertible to it */
+template<class T> struct Formatter<T, typename std::enable_if<std::is_enum<T>::value>::type>: Formatter<typename std::underlying_type<T>::type> {};
 
 struct BufferFormatter {
     /* Needed for a sentinel value (C arrays can't have zero size) */

@@ -119,6 +119,9 @@ namespace Corrade {
     more readable output
 -   @ref CORRADE_ASSERT_UNREACHABLE() now compiles into a compiler builtin on
     MSVC as well
+-   @ref Utility::format() now prints @cpp enum @ce values implicitly
+    convertible to integers as integers without requiring the user to do an
+    explicit cast first
 
 @subsection corrade-changelog-latest-buildsystem Build system
 
