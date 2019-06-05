@@ -25,47 +25,49 @@
 
 #include "ConfigurationValue.h"
 
-#include <sstream>
+// #include <sstream>
+#include <string>
 
 namespace Corrade { namespace Utility {
 
 namespace Implementation {
     template<class T> std::string BasicConfigurationValue<T>::toString(const T& value, ConfigurationValueFlags flags) {
-        std::ostringstream stream;
-
-        /* Hexadecimal / octal values, scientific notation */
-        if(flags & ConfigurationValueFlag::Hex)
-            stream.setf(std::istringstream::hex, std::istringstream::basefield);
-        else if(flags & ConfigurationValueFlag::Oct)
-            stream.setf(std::istringstream::oct, std::istringstream::basefield);
-        else if(flags & ConfigurationValueFlag::Scientific)
-            stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
-
-        if(flags & ConfigurationValueFlag::Uppercase)
-            stream.setf(std::istringstream::uppercase);
-
-        stream << value;
-        return stream.str();
+//         std::ostringstream stream;
+//
+//         /* Hexadecimal / octal values, scientific notation */
+//         if(flags & ConfigurationValueFlag::Hex)
+//             stream.setf(std::istringstream::hex, std::istringstream::basefield);
+//         else if(flags & ConfigurationValueFlag::Oct)
+//             stream.setf(std::istringstream::oct, std::istringstream::basefield);
+//         else if(flags & ConfigurationValueFlag::Scientific)
+//             stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
+//
+//         if(flags & ConfigurationValueFlag::Uppercase)
+//             stream.setf(std::istringstream::uppercase);
+//
+//         stream << value;
+//         return stream.str();
+        return {};
     }
 
     template<class T> T BasicConfigurationValue<T>::fromString(const std::string& stringValue, ConfigurationValueFlags flags) {
-        if(stringValue.empty()) return T{};
-
-        std::istringstream stream{stringValue};
-
-        /* Hexadecimal / octal values, scientific notation */
-        if(flags & ConfigurationValueFlag::Hex)
-            stream.setf(std::istringstream::hex, std::istringstream::basefield);
-        else if(flags & ConfigurationValueFlag::Oct)
-            stream.setf(std::istringstream::oct, std::istringstream::basefield);
-        else if(flags & ConfigurationValueFlag::Scientific)
-            stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
-
-        if(flags & ConfigurationValueFlag::Uppercase)
-            stream.setf(std::istringstream::uppercase);
+//         if(stringValue.empty()) return T{};
+//
+//         std::istringstream stream{stringValue};
+//
+//         /* Hexadecimal / octal values, scientific notation */
+//         if(flags & ConfigurationValueFlag::Hex)
+//             stream.setf(std::istringstream::hex, std::istringstream::basefield);
+//         else if(flags & ConfigurationValueFlag::Oct)
+//             stream.setf(std::istringstream::oct, std::istringstream::basefield);
+//         else if(flags & ConfigurationValueFlag::Scientific)
+//             stream.setf(std::istringstream::scientific, std::istringstream::floatfield);
+//
+//         if(flags & ConfigurationValueFlag::Uppercase)
+//             stream.setf(std::istringstream::uppercase);
 
         T value;
-        stream >> value;
+//         stream >> value;
         return value;
     }
 

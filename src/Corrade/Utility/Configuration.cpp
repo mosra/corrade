@@ -26,7 +26,7 @@
 #include "Configuration.h"
 
 #include <algorithm>
-#include <sstream>
+// #include <sstream>
 #include <utility>
 #include <vector>
 
@@ -58,15 +58,15 @@ Configuration::Configuration(const std::string& filename, const Flags flags): Co
 }
 
 Configuration::Configuration(std::istream& in, const Flags flags): ConfigurationGroup(this), _flags(static_cast<InternalFlag>(std::uint32_t(flags))) {
-    /* The user wants to truncate the file, mark it as changed and do nothing */
-    if(flags & Flag::Truncate) {
-        _flags |= (InternalFlag::Changed|InternalFlag::IsValid);
-        return;
-    }
-
-    /** @todo deprecate and remove completely */
-    const std::string data{std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>()};
-    if(parse({data.data(), data.size()})) _flags |= InternalFlag::IsValid;
+//     /* The user wants to truncate the file, mark it as changed and do nothing */
+//     if(flags & Flag::Truncate) {
+//         _flags |= (InternalFlag::Changed|InternalFlag::IsValid);
+//         return;
+//     }
+//
+//     /** @todo deprecate and remove completely */
+//     const std::string data{std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>()};
+//     if(parse({data.data(), data.size()})) _flags |= InternalFlag::IsValid;
 }
 
 Configuration::Configuration(Configuration&& other): ConfigurationGroup{std::move(other)}, _filename{std::move(other._filename)}, _flags{other._flags} {
@@ -266,33 +266,33 @@ Containers::ArrayView<const char> Configuration::parse(Containers::ArrayView<con
 }
 
 bool Configuration::save(const std::string& filename) {
-    /* Save to a stringstream and then write it as a string to the file. Doing
-       it this way to avoid issues with Unicode filenames on Windows. */
-    /** @todo get rid of streams altogether */
-    std::ostringstream out;
-    save(out);
-    if(Directory::writeString(filename, out.str()))
-        return true;
-
-    Error() << "Utility::Configuration::save(): cannot open file" << filename;
+//     /* Save to a stringstream and then write it as a string to the file. Doing
+//        it this way to avoid issues with Unicode filenames on Windows. */
+//     /** @todo get rid of streams altogether */
+//     std::ostringstream out;
+//     save(out);
+//     if(Directory::writeString(filename, out.str()))
+//         return true;
+//
+//     Error() << "Utility::Configuration::save(): cannot open file" << filename;
     return false;
 }
 
 void Configuration::save(std::ostream& out) {
-    /* BOM, if user explicitly wants that crap */
-    if((_flags & InternalFlag::PreserveBom) && (_flags & InternalFlag::HasBom))
-        out.write(Bom, 3);
-
-    /* EOL character */
-    std::string eol;
-    if(_flags & (InternalFlag::ForceWindowsEol|InternalFlag::WindowsEol) && !(_flags & InternalFlag::ForceUnixEol)) eol = "\r\n";
-    else eol = "\n";
-
-    /** @todo Checking file.good() after every operation */
-    /** @todo Backup file */
-
-    /* Recursively save all groups */
-    save(out, eol, this, {});
+//     /* BOM, if user explicitly wants that crap */
+//     if((_flags & InternalFlag::PreserveBom) && (_flags & InternalFlag::HasBom))
+//         out.write(Bom, 3);
+//
+//     /* EOL character */
+//     std::string eol;
+//     if(_flags & (InternalFlag::ForceWindowsEol|InternalFlag::WindowsEol) && !(_flags & InternalFlag::ForceUnixEol)) eol = "\r\n";
+//     else eol = "\n";
+//
+//     /** @todo Checking file.good() after every operation */
+//     /** @todo Backup file */
+//
+//     /* Recursively save all groups */
+//     save(out, eol, this, {});
 }
 
 bool Configuration::save() {
@@ -307,57 +307,57 @@ namespace {
 }
 
 void Configuration::save(std::ostream& out, const std::string& eol, ConfigurationGroup* group, const std::string& fullPath) const {
-    CORRADE_INTERNAL_ASSERT(group->configuration() == this);
-    std::string buffer;
-
-    /* Foreach all items in the group */
-    for(const Value& value: group->_values) {
-        /* Key/value pair */
-        if(!value.key.empty()) {
-            /* Multi-line value */
-            if(value.value.find_first_of('\n') != std::string::npos) {
-                /* Replace \n with `eol` */
-                /** @todo fixme: ugly and slow */
-                std::string valueString = value.value;
-                std::size_t pos = 0;
-                while((pos = valueString.find_first_of('\n', pos)) != std::string::npos) {
-                    valueString.replace(pos, 1, eol);
-                    pos += eol.size();
-                }
-
-                buffer = value.key + "=\"\"\"" + eol + valueString + eol + "\"\"\"" + eol;
-
-            /* Value with leading/trailing spaces */
-            } else if(!value.value.empty() && (isWhitespace(value.value.front()) || isWhitespace(value.value.back()))) {
-                buffer = value.key + "=\"" + value.value + '"' + eol;
-
-            /* Value without spaces */
-            } else buffer = value.key + '=' + value.value + eol;
-        }
-
-        /* Comment / empty line */
-        else buffer = value.value + eol;
-
-        out.write(buffer.data(), buffer.size());
-    }
-
-    /* Recursively process all subgroups */
-    for(std::size_t i = 0; i != group->_groups.size(); ++i) {
-        const Group& g = group->_groups[i];
-
-        /* Subgroup name */
-        std::string name = g.name;
-        if(!fullPath.empty()) name = fullPath + '/' + name;
-
-        /* Omit the name if the group is a first subgroup of given name, has no
-           values and only subgroups */
-        if(!((i == 0 || group->_groups[i - 1].name != g.name) && g.group->_values.empty() && !g.group->_groups.empty())) {
-            buffer = '[' + name + ']' + eol;
-            out.write(buffer.data(), buffer.size());
-        }
-
-        save(out, eol, g.group, name);
-    }
+//     CORRADE_INTERNAL_ASSERT(group->configuration() == this);
+//     std::string buffer;
+//
+//     /* Foreach all items in the group */
+//     for(const Value& value: group->_values) {
+//         /* Key/value pair */
+//         if(!value.key.empty()) {
+//             /* Multi-line value */
+//             if(value.value.find_first_of('\n') != std::string::npos) {
+//                 /* Replace \n with `eol` */
+//                 /** @todo fixme: ugly and slow */
+//                 std::string valueString = value.value;
+//                 std::size_t pos = 0;
+//                 while((pos = valueString.find_first_of('\n', pos)) != std::string::npos) {
+//                     valueString.replace(pos, 1, eol);
+//                     pos += eol.size();
+//                 }
+//
+//                 buffer = value.key + "=\"\"\"" + eol + valueString + eol + "\"\"\"" + eol;
+//
+//             /* Value with leading/trailing spaces */
+//             } else if(!value.value.empty() && (isWhitespace(value.value.front()) || isWhitespace(value.value.back()))) {
+//                 buffer = value.key + "=\"" + value.value + '"' + eol;
+//
+//             /* Value without spaces */
+//             } else buffer = value.key + '=' + value.value + eol;
+//         }
+//
+//         /* Comment / empty line */
+//         else buffer = value.value + eol;
+//
+//         out.write(buffer.data(), buffer.size());
+//     }
+//
+//     /* Recursively process all subgroups */
+//     for(std::size_t i = 0; i != group->_groups.size(); ++i) {
+//         const Group& g = group->_groups[i];
+//
+//         /* Subgroup name */
+//         std::string name = g.name;
+//         if(!fullPath.empty()) name = fullPath + '/' + name;
+//
+//         /* Omit the name if the group is a first subgroup of given name, has no
+//            values and only subgroups */
+//         if(!((i == 0 || group->_groups[i - 1].name != g.name) && g.group->_values.empty() && !g.group->_groups.empty())) {
+//             buffer = '[' + name + ']' + eol;
+//             out.write(buffer.data(), buffer.size());
+//         }
+//
+//         save(out, eol, g.group, name);
+//     }
 }
 
 }}

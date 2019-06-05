@@ -119,43 +119,47 @@ template<> char formatTypeChar<float>(FormatType type) {
 std::size_t Formatter<int>::format(const Containers::ArrayView<char>& buffer, const int value, int precision, const FormatType type) {
     if(precision == -1) precision = 1;
     const char format[]{ '%', '.', '*', formatTypeChar<int>(type), 0 };
-    return std::snprintf(buffer, buffer.size(), format, precision, value);
+//     return std::snprintf(buffer, buffer.size(), format, precision, value);
     return {};
 }
 void Formatter<int>::format(std::FILE* const file, const int value, int precision, FormatType type) {
     if(precision == -1) precision = 1;
     const char format[]{ '%', '.', '*', formatTypeChar<int>(type), 0 };
-    std::fprintf(file, format, precision, value);
+//     std::fprintf(file, format, precision, value);
+
 }
 std::size_t Formatter<unsigned int>::format(const Containers::ArrayView<char>& buffer, const unsigned int value, int precision, const FormatType type) {
     if(precision == -1) precision = 1;
     const char format[]{ '%', '.', '*', formatTypeChar<unsigned int>(type), 0 };
-    return std::snprintf(buffer, buffer.size(), format, precision, value);
+//     return std::snprintf(buffer, buffer.size(), format, precision, value);
+    return {};
 }
 void Formatter<unsigned int>::format(std::FILE* const file, const unsigned int value, int precision, const FormatType type) {
     if(precision == -1) precision = 1;
     const char format[]{ '%', '.', '*', formatTypeChar<unsigned int>(type), 0 };
-    std::fprintf(file, format, precision, value);
+//     std::fprintf(file, format, precision, value);
 }
 std::size_t Formatter<long long>::format(const Containers::ArrayView<char>& buffer, const long long value, int precision, const FormatType type) {
     if(precision == -1) precision = 1;
     const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<int>(type), 0 };
-    return std::snprintf(buffer, buffer.size(), format, precision, value);
+//     return std::snprintf(buffer, buffer.size(), format, precision, value);
+    return {};
 }
 void Formatter<long long>::format(std::FILE* const file, const long long value, int precision, const FormatType type) {
     if(precision == -1) precision = 1;
     const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<int>(type), 0 };
-    std::fprintf(file, format, precision, value);
+//     std::fprintf(file, format, precision, value);
 }
 std::size_t Formatter<unsigned long long>::format(const Containers::ArrayView<char>& buffer, const unsigned long long value, int precision, const FormatType type) {
     if(precision == -1) precision = 1;
     const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<unsigned int>(type), 0 };
-    return std::snprintf(buffer, buffer.size(), format, precision, value);
+//     return std::snprintf(buffer, buffer.size(), format, precision, value);
+    return {};
 }
 void Formatter<unsigned long long>::format(std::FILE* const file, const unsigned long long value, int precision, const FormatType type) {
     if(precision == -1) precision = 1;
     const char format[]{ '%', '.', '*', 'l', 'l', formatTypeChar<unsigned int>(type), 0 };
-    std::fprintf(file, format, precision, value);
+//     std::fprintf(file, format, precision, value);
 }
 
 /* The default. Source: http://en.cppreference.com/w/cpp/io/ios_base/precision,
@@ -165,12 +169,13 @@ void Formatter<unsigned long long>::format(std::FILE* const file, const unsigned
 std::size_t Formatter<float>::format(const Containers::ArrayView<char>& buffer, const float value, int precision, const FormatType type) {
     if(precision == -1) precision = 6;
     const char format[]{ '%', '.', '*', formatTypeChar<float>(type), 0 };
-    return std::snprintf(buffer, buffer.size(), format, precision, double(value));
+//     return std::snprintf(buffer, buffer.size(), format, precision, double(value));
+    return {};
 }
 void Formatter<float>::format(std::FILE* const file, const float value, int precision, const FormatType type) {
     if(precision == -1) precision = 6;
     const char format[]{ '%', '.', '*', formatTypeChar<float>(type), 0 };
-    std::fprintf(file, format, precision, double(value));
+//     std::fprintf(file, format, precision, double(value));
 }
 
 /* Wikipedia says 15-digit number can be converted back and forth without loss:
@@ -179,12 +184,13 @@ void Formatter<float>::format(std::FILE* const file, const float value, int prec
 std::size_t Formatter<double>::format(const Containers::ArrayView<char>& buffer, const double value, int precision, const FormatType type) {
     if(precision == -1) precision = 15;
     const char format[]{ '%', '.', '*', formatTypeChar<float>(type), 0 };
-    return std::snprintf(buffer, buffer.size(), format, precision, value);
+//     return std::snprintf(buffer, buffer.size(), format, precision, value);
+    return {};
 }
 void Formatter<double>::format(std::FILE* const file, const double value, int precision, const FormatType type) {
     if(precision == -1) precision = 15;
     const char format[]{ '%', '.', '*', formatTypeChar<float>(type), 0 };
-    std::fprintf(file, format, precision, value);
+//     std::fprintf(file, format, precision, value);
 }
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -194,12 +200,13 @@ void Formatter<double>::format(std::FILE* const file, const double value, int pr
 std::size_t Formatter<long double>::format(const Containers::ArrayView<char>& buffer, const long double value, int precision, const FormatType type) {
     if(precision == -1) precision = 18;
     const char format[]{ '%', '.', '*', 'L', formatTypeChar<float>(type), 0 };
-    return std::snprintf(buffer, buffer.size(), format, precision, value);
+//     return std::snprintf(buffer, buffer.size(), format, precision, value);
+    return {};
 }
 void Formatter<long double>::format(std::FILE* const file, const long double value, int precision, const FormatType type) {
     if(precision == -1) precision = 18;
     const char format[]{ '%', '.', '*', 'L', formatTypeChar<float>(type), 0 };
-    std::fprintf(file, format, precision, value);
+//     std::fprintf(file, format, precision, value);
 }
 #endif
 

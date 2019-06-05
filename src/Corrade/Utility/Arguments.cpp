@@ -31,7 +31,7 @@
 #include <algorithm> /* std::max() */
 #endif
 #include <iomanip>
-#include <sstream>
+// #include <sstream>
 
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/DebugStl.h"
@@ -606,173 +606,174 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
 }
 
 std::string Arguments::usage() const {
-    std::ostringstream out;
-    out << "Usage:\n  " << (_command.empty() ? "./app" : _command);
-
-    /* Print all skipped prefixes */
-    for(auto&& prefix: _skippedPrefixes)
-        out << " [--" << prefix.first << "...]";
-
-    /* Print all options and named argument */
-    bool hasArguments = false;
-    for(const Entry& entry: _entries) {
-        if(entry.type == Type::Argument) {
-            hasArguments = true;
-            continue;
-        }
-
-        out << ' ';
-
-        /* Optional */
-        if(entry.type == Type::Option || entry.type == Type::BooleanOption)
-            out << '[';
-
-        /* Key name (+ value) */
-        if(entry.shortKey)
-            out << '-' << entry.shortKey << '|';
-        out << "--" << entry.helpKey;
-
-        /* Optional */
-        if(entry.type == Type::Option || entry.type == Type::BooleanOption)
-            out << ']';
-    }
-
-    /* Separator between named arguments (options) and unnamed arguments. Help
-       option is always present. */
-    if(hasArguments) out << " [--]";
-
-    /* Print all arguments second */
-    for(const Entry& entry: _entries) {
-        if(entry.type != Type::Argument) continue;
-
-        out << ' ' << entry.helpKey;
-    }
-
-    /* Print ellipsis for main application arguments, if this is an prefixed
-       version */
-    if(!_prefix.empty()) out << " ...";
-
-    out << '\n';
-
-    return out.str();
+//     std::ostringstream out;
+//     out << "Usage:\n  " << (_command.empty() ? "./app" : _command);
+//
+//     /* Print all skipped prefixes */
+//     for(auto&& prefix: _skippedPrefixes)
+//         out << " [--" << prefix.first << "...]";
+//
+//     /* Print all options and named argument */
+//     bool hasArguments = false;
+//     for(const Entry& entry: _entries) {
+//         if(entry.type == Type::Argument) {
+//             hasArguments = true;
+//             continue;
+//         }
+//
+//         out << ' ';
+//
+//         /* Optional */
+//         if(entry.type == Type::Option || entry.type == Type::BooleanOption)
+//             out << '[';
+//
+//         /* Key name (+ value) */
+//         if(entry.shortKey)
+//             out << '-' << entry.shortKey << '|';
+//         out << "--" << entry.helpKey;
+//
+//         /* Optional */
+//         if(entry.type == Type::Option || entry.type == Type::BooleanOption)
+//             out << ']';
+//     }
+//
+//     /* Separator between named arguments (options) and unnamed arguments. Help
+//        option is always present. */
+//     if(hasArguments) out << " [--]";
+//
+//     /* Print all arguments second */
+//     for(const Entry& entry: _entries) {
+//         if(entry.type != Type::Argument) continue;
+//
+//         out << ' ' << entry.helpKey;
+//     }
+//
+//     /* Print ellipsis for main application arguments, if this is an prefixed
+//        version */
+//     if(!_prefix.empty()) out << " ...";
+//
+//     out << '\n';
+//
+//     return out.str();
+    return {};
 }
 
 std::string Arguments::help() const {
-    std::ostringstream out;
-    out << usage();
+//     std::ostringstream out;
+//     out << usage();
+//
+//     /* Global help text */
+//     if(!_help.empty())
+//         out << '\n' << _help << '\n';
+//
+//     /* Calculate key column width. Minimal is to display `-h, --help` */
+//     constexpr std::size_t maxKeyColumnWidth = 26;
+//     std::size_t keyColumnWidth = 10;
+//     for(auto&& prefix: _skippedPrefixes) {
+//         /* Add space for `--` at the beginning and `...` at the end */
+//         keyColumnWidth = std::max(prefix.first.size() + 5, keyColumnWidth);
+//
+//         /* If the key width is larger than maximum, cut it. Also no need to
+//            process more entries, as no key width can be larger than this */
+//         if(keyColumnWidth >= maxKeyColumnWidth) {
+//             keyColumnWidth = maxKeyColumnWidth;
+//             break;
+//         }
+//     }
+//
+//     /* If prefixes are already long enough, no need to go through the entries */
+//     if(keyColumnWidth != maxKeyColumnWidth) for(const Entry& entry: _entries) {
+//         /* Skip arguments and options without default value, environment or
+//            help text (won't be printed, so they shouldn't contribute to the
+//            width) */
+//         if(entry.type == Type::Argument || (entry.defaultValue.empty() && entry.help.empty()
+//             #ifndef CORRADE_TARGET_WINDOWS_RT
+//             && entry.environment.empty()
+//             #endif
+//         ))
+//             continue;
+//
+//         /* Compute size of current key column */
+//         std::size_t currentKeyColumnWidth = entry.helpKey.size();
+//         if(entry.type != Type::Argument) {
+//             currentKeyColumnWidth += 2;
+//             if(entry.shortKey) currentKeyColumnWidth += 4;
+//         }
+//
+//         keyColumnWidth = std::max(currentKeyColumnWidth, keyColumnWidth);
+//
+//         /* If the key width is larger than maximum, cut it. Also no need to
+//            process more entries, as no key width can be larger than this */
+//         if(keyColumnWidth >= maxKeyColumnWidth) {
+//             keyColumnWidth = maxKeyColumnWidth;
+//             break;
+//         }
+//     }
+//
+//     /* Argument and option list */
+//     out << "\nArguments:\n";
+//
+//     /* If prefixed, print the info about unprefixed arguments */
+//     if(!_prefix.empty()) {
+//         out << "  " << std::left << std::setw(keyColumnWidth) << "..." << "  main application arguments\n"
+//             << std::string(keyColumnWidth + 4, ' ') << "(see -h or --help for details)\n";
+//     }
+//
+//     /* Print all arguments first */
+//     for(const Entry& entry: _entries) {
+//         /* Skip non-arguments and arguments without help text */
+//         if(entry.type != Type::Argument || entry.help.empty()) continue;
+//
+//         out << "  " << std::left << std::setw(keyColumnWidth) << entry.helpKey << "  " << entry.help << '\n';
+//     }
+//
+//     /* Print all named arguments and options second */
+//     for(const Entry& entry: _entries) {
+//         /* Skip arguments and options without default value, environment or
+//            help text (no additional info to show) */
+//         if(entry.type == Type::Argument || (entry.defaultValue.empty() && entry.help.empty()
+//             #ifndef CORRADE_TARGET_WINDOWS_RT
+//             && entry.environment.empty()
+//             #endif
+//         ))
+//             continue;
+//
+//         /* Key name */
+//         out << "  ";
+//         if(entry.shortKey)
+//             out << '-' << entry.shortKey << ", ";
+//         out << "--" << std::left << std::setw(keyColumnWidth - (entry.shortKey ? 6 : 2)) << entry.helpKey << "  ";
+//
+//         /* Help text */
+//         if(!entry.help.empty()) out << entry.help << '\n';
+//
+//         /* Value taken from environment */
+//         #ifndef CORRADE_TARGET_WINDOWS_RT
+//         if(!entry.environment.empty()) {
+//             if(!entry.help.empty()) out << std::string(keyColumnWidth + 4, ' ');
+//             out << "(environment: " << entry.environment;
+//             if(entry.type == Type::BooleanOption) out << "=ON|OFF";
+//             out << ")\n";
+//         }
+//         #endif
+//
+//         /* Default value, put it on new indented line (two spaces from the
+//            left and one from the right additionaly to key column width), if
+//            help text is also present */
+//         if(!entry.defaultValue.empty()) {
+//             if(!entry.help.empty()) out << std::string(keyColumnWidth + 4, ' ');
+//             out << "(default: " << entry.defaultValue << ")\n";
+//         }
+//     }
+//
+//     /* Print references to skipped prefies last */
+//     for(auto&& prefix: _skippedPrefixes) {
+//         out << "  --" << std::left << std::setw(keyColumnWidth) << prefix.first + "...  ";
+//         if(!prefix.second.empty()) out << prefix.second << '\n' << std::string(keyColumnWidth + 4, ' ');
+//         out << "(see --" << prefix.first << "help for details)\n";
+//     }
 
-    /* Global help text */
-    if(!_help.empty())
-        out << '\n' << _help << '\n';
-
-    /* Calculate key column width. Minimal is to display `-h, --help` */
-    constexpr std::size_t maxKeyColumnWidth = 26;
-    std::size_t keyColumnWidth = 10;
-    for(auto&& prefix: _skippedPrefixes) {
-        /* Add space for `--` at the beginning and `...` at the end */
-        keyColumnWidth = std::max(prefix.first.size() + 5, keyColumnWidth);
-
-        /* If the key width is larger than maximum, cut it. Also no need to
-           process more entries, as no key width can be larger than this */
-        if(keyColumnWidth >= maxKeyColumnWidth) {
-            keyColumnWidth = maxKeyColumnWidth;
-            break;
-        }
-    }
-
-    /* If prefixes are already long enough, no need to go through the entries */
-    if(keyColumnWidth != maxKeyColumnWidth) for(const Entry& entry: _entries) {
-        /* Skip arguments and options without default value, environment or
-           help text (won't be printed, so they shouldn't contribute to the
-           width) */
-        if(entry.type == Type::Argument || (entry.defaultValue.empty() && entry.help.empty()
-            #ifndef CORRADE_TARGET_WINDOWS_RT
-            && entry.environment.empty()
-            #endif
-        ))
-            continue;
-
-        /* Compute size of current key column */
-        std::size_t currentKeyColumnWidth = entry.helpKey.size();
-        if(entry.type != Type::Argument) {
-            currentKeyColumnWidth += 2;
-            if(entry.shortKey) currentKeyColumnWidth += 4;
-        }
-
-        keyColumnWidth = std::max(currentKeyColumnWidth, keyColumnWidth);
-
-        /* If the key width is larger than maximum, cut it. Also no need to
-           process more entries, as no key width can be larger than this */
-        if(keyColumnWidth >= maxKeyColumnWidth) {
-            keyColumnWidth = maxKeyColumnWidth;
-            break;
-        }
-    }
-
-    /* Argument and option list */
-    out << "\nArguments:\n";
-
-    /* If prefixed, print the info about unprefixed arguments */
-    if(!_prefix.empty()) {
-        out << "  " << std::left << std::setw(keyColumnWidth) << "..." << "  main application arguments\n"
-            << std::string(keyColumnWidth + 4, ' ') << "(see -h or --help for details)\n";
-    }
-
-    /* Print all arguments first */
-    for(const Entry& entry: _entries) {
-        /* Skip non-arguments and arguments without help text */
-        if(entry.type != Type::Argument || entry.help.empty()) continue;
-
-        out << "  " << std::left << std::setw(keyColumnWidth) << entry.helpKey << "  " << entry.help << '\n';
-    }
-
-    /* Print all named arguments and options second */
-    for(const Entry& entry: _entries) {
-        /* Skip arguments and options without default value, environment or
-           help text (no additional info to show) */
-        if(entry.type == Type::Argument || (entry.defaultValue.empty() && entry.help.empty()
-            #ifndef CORRADE_TARGET_WINDOWS_RT
-            && entry.environment.empty()
-            #endif
-        ))
-            continue;
-
-        /* Key name */
-        out << "  ";
-        if(entry.shortKey)
-            out << '-' << entry.shortKey << ", ";
-        out << "--" << std::left << std::setw(keyColumnWidth - (entry.shortKey ? 6 : 2)) << entry.helpKey << "  ";
-
-        /* Help text */
-        if(!entry.help.empty()) out << entry.help << '\n';
-
-        /* Value taken from environment */
-        #ifndef CORRADE_TARGET_WINDOWS_RT
-        if(!entry.environment.empty()) {
-            if(!entry.help.empty()) out << std::string(keyColumnWidth + 4, ' ');
-            out << "(environment: " << entry.environment;
-            if(entry.type == Type::BooleanOption) out << "=ON|OFF";
-            out << ")\n";
-        }
-        #endif
-
-        /* Default value, put it on new indented line (two spaces from the
-           left and one from the right additionaly to key column width), if
-           help text is also present */
-        if(!entry.defaultValue.empty()) {
-            if(!entry.help.empty()) out << std::string(keyColumnWidth + 4, ' ');
-            out << "(default: " << entry.defaultValue << ")\n";
-        }
-    }
-
-    /* Print references to skipped prefies last */
-    for(auto&& prefix: _skippedPrefixes) {
-        out << "  --" << std::left << std::setw(keyColumnWidth) << prefix.first + "...  ";
-        if(!prefix.second.empty()) out << prefix.second << '\n' << std::string(keyColumnWidth + 4, ' ');
-        out << "(see --" << prefix.first << "help for details)\n";
-    }
-
-    return out.str();
+    return {};// out.str();
 }
 
 std::string Arguments::valueInternal(const std::string& key) const {

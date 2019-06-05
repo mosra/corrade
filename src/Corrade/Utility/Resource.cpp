@@ -30,7 +30,7 @@
 #endif
 #include <iomanip>
 #include <map>
-#include <sstream>
+// #include <sstream>
 #include <vector>
 
 #include "Corrade/Containers/Array.h"
@@ -118,22 +118,23 @@ std::string comment(const std::string& comment) {
 }
 
 std::string hexcode(const std::string& data) {
-    std::ostringstream out;
-    out << std::hex;
-
-    /* Each row is indented by four spaces and has newline at the end */
-    for(std::size_t row = 0; row < data.size(); row += 15) {
-        out << "\n    ";
-
-        /* Convert all characters on a row to hex "0xab,0x01,..." */
-        for(std::size_t end = std::min(row + 15, data.size()), i = row; i != end; ++i) {
-            out << "0x" << std::setw(2) << std::setfill('0')
-                << static_cast<unsigned int>(static_cast<unsigned char>(data[i]))
-                << ",";
-        }
-    }
-
-    return out.str();
+//     std::ostringstream out;
+//     out << std::hex;
+//
+//     /* Each row is indented by four spaces and has newline at the end */
+//     for(std::size_t row = 0; row < data.size(); row += 15) {
+//         out << "\n    ";
+//
+//         /* Convert all characters on a row to hex "0xab,0x01,..." */
+//         for(std::size_t end = std::min(row + 15, data.size()), i = row; i != end; ++i) {
+//             out << "0x" << std::setw(2) << std::setfill('0')
+//                 << static_cast<unsigned int>(static_cast<unsigned char>(data[i]))
+//                 << ",";
+//         }
+//     }
+//
+//     return out.str();
+    return {};
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT

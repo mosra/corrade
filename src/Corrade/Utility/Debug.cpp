@@ -26,9 +26,9 @@
 #include "Debug.h"
 
 #include <cstdlib>
-#include <iostream>
-#include <iomanip>
-#include <sstream>
+// #include <iostream>
+// #include <iomanip>
+// #include <sstream>
 
 /* For isatty() on Unix-like systems */
 #ifdef CORRADE_TARGET_UNIX
@@ -61,7 +61,7 @@ namespace Corrade { namespace Utility {
 namespace {
 
 template<class T> inline void toStream(std::ostream& s, const T& value) {
-    s << value;
+//     s << value;
 }
 
 template<> inline void toStream<Implementation::DebugOstreamFallback>(std::ostream& s, const Implementation::DebugOstreamFallback& value) {
@@ -78,9 +78,9 @@ HANDLE streamOutputHandle(const std::ostream* s) {
 
 }
 
-std::ostream* Debug::_globalOutput = &std::cout;
-std::ostream* Warning::_globalWarningOutput = &std::cerr;
-std::ostream* Error::_globalErrorOutput = &std::cerr;
+std::ostream* Debug::_globalOutput = nullptr;// &std::cout;
+std::ostream* Warning::_globalWarningOutput = nullptr;// &std::cerr;
+std::ostream* Error::_globalErrorOutput = nullptr;// &std::cerr;
 
 #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
 Debug::Color Debug::_globalColor = Debug::Color::Default;
@@ -101,8 +101,8 @@ template<Debug::Color c, bool bold> Debug::Modifier Debug::colorInternal() {
         #else
         _globalColor = c;
         _globalColorBold = bold;
-        constexpr const char code[] = { '\033', '[', bold ? '1' : '0', ';', '3', '0' + char(c), 'm', '\0' };
-        *debug._output << code;
+//         constexpr const char code[] = { '\033', '[', bold ? '1' : '0', ';', '3', '0' + char(c), 'm', '\0' };
+//         *debug._output << code;
         #endif
     };
 }
@@ -118,9 +118,9 @@ inline void Debug::resetColorInternal() {
         SetConsoleTextAttribute(h, _previousColorAttributes);
     #else
     if(_previousColor != Color::Default || _previousColorBold) {
-        const char code[] = { '\033', '[', _previousColorBold ? '1' : '0', ';', '3', char('0' + char(_previousColor)), 'm', '\0' };
-        *_output << code;
-    } else *_output << "\033[0m";
+//         const char code[] = { '\033', '[', _previousColorBold ? '1' : '0', ';', '3', char('0' + char(_previousColor)), 'm', '\0' };
+//         *_output << code;
+    } else {};//*_output << "\033[0m";
 
     _globalColor = _previousColor;
     _globalColorBold = _previousColorBold;
@@ -209,23 +209,23 @@ bool Debug::isTty(std::ostream* const output) {
     /* We can autodetect via isatty() on Unix-like systems and Windows with
        ANSI colors enabled */
     #elif defined(CORRADE_UTILITY_USE_ANSI_COLORS) || defined(CORRADE_TARGET_UNIX)
-    return
-        /* Windows RT projects have C4996 treated as error by default. WHY */
-        #ifdef _MSC_VER
-        #pragma warning(push)
-        #pragma warning(disable: 4996)
-        #endif
-        ((output == &std::cout && isatty(1)) ||
-         (output == &std::cerr && isatty(2)))
-        #ifdef _MSC_VER
-        #pragma warning(pop)
-        #endif
-        #ifdef CORRADE_TARGET_APPLE
-        /* Xcode's console reports that it is a TTY, but it doesn't support
-           colors. We have to check for the following undocumented environment
-           variable instead. If set, then don't use colors. */
-        && !std::getenv("XPC_SERVICE_NAME")
-        #endif
+    return false;
+//         /* Windows RT projects have C4996 treated as error by default. WHY */
+//         #ifdef _MSC_VER
+//         #pragma warning(push)
+//         #pragma warning(disable: 4996)
+//         #endif
+//         ((output == &std::cout && isatty(1)) ||
+//          (output == &std::cerr && isatty(2)))
+//         #ifdef _MSC_VER
+//         #pragma warning(pop)
+//         #endif
+//         #ifdef CORRADE_TARGET_APPLE
+//         /* Xcode's console reports that it is a TTY, but it doesn't support
+//            colors. We have to check for the following undocumented environment
+//            variable instead. If set, then don't use colors. */
+//         && !std::getenv("XPC_SERVICE_NAME")
+//         #endif
         ;
 
     /* Emscripten isatty() is kinda broken ATM (1.37.1), until fixed we have to
@@ -238,10 +238,10 @@ bool Debug::isTty(std::ostream* const output) {
        triggering a Clang warning and everything is just fucking ugly. */
     #elif defined(CORRADE_TARGET_EMSCRIPTEN)
     int out = 0;
-    if(output == &std::cout)
-        out = 1;
-    else if(output == &std::cerr)
-        out = 2;
+//     if(output == &std::cout)
+//         out = 1;
+//     else if(output == &std::cerr)
+//         out = 2;
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wdollar-in-identifier-extension"
     return EM_ASM_INT({
@@ -305,8 +305,8 @@ void Debug::cleanupOnDestruction() {
     resetColorInternal();
 
     /* Newline at the end */
-    if(_output && (_flags & InternalFlag::ValueWritten) && !(_flags & InternalFlag::NoNewlineAtTheEnd))
-        *_output << std::endl;
+//     if(_output && (_flags & InternalFlag::ValueWritten) && !(_flags & InternalFlag::NoNewlineAtTheEnd))
+//         *_output << std::endl;
 
     /* Reset previous global output */
     _globalOutput = _previousGlobalOutput;
@@ -341,8 +341,8 @@ template<class T> Debug& Debug::print(const T& value) {
     if(!_output) return *this;
 
     /* Separate values with spaces if enabled; reset all internal flags after */
-    if(!((_immediateFlags|_flags) & InternalFlag::NoSpace))
-        *_output << ' ';
+//     if(!((_immediateFlags|_flags) & InternalFlag::NoSpace))
+//         *_output << ' ';
     _immediateFlags = {};
 
     toStream(*_output, value);
@@ -352,9 +352,10 @@ template<class T> Debug& Debug::print(const T& value) {
 }
 
 Debug& Debug::operator<<(const void* const value) {
-    std::ostringstream o;
-    o << "0x" << std::hex << reinterpret_cast<std::uintptr_t>(value);
-    return print(o.str());
+//     std::ostringstream o;
+//     o << "0x" << std::hex << reinterpret_cast<std::uintptr_t>(value);
+//     return print(o.str());
+    return *this;
 }
 
 Debug& Debug::operator<<(const char* value) { return print(value); }
@@ -406,37 +407,41 @@ Debug& Debug::operator<<(unsigned value) { return print(value); }
 Debug& Debug::operator<<(unsigned long value) { return print(value); }
 Debug& Debug::operator<<(unsigned long long value) { return print(value); }
 Debug& Debug::operator<<(float value) {
-    if(!_output) return *this;
+//     if(!_output)
+        return *this;
     /* The default. Source: http://en.cppreference.com/w/cpp/io/ios_base/precision,
        Wikipedia says 6-digit number can be converted back and forth without
        loss: https://en.wikipedia.org/wiki/Single-precision_floating-point_format
        Kept in sync with format(). */
-    *_output << std::setprecision(6);
-    return print(value);
+//     *_output << std::setprecision(6);
+//     return print(value);
 }
 Debug& Debug::operator<<(double value) {
-    if(!_output) return *this;
+//     if(!_output)
+        return *this;
     /* Wikipedia says 15-digit number can be converted back and forth without
        loss: https://en.wikipedia.org/wiki/Double-precision_floating-point_format
        Kept in sync with format(). */
-    *_output << std::setprecision(15);
-    return print(value);
+//     *_output << std::setprecision(15);
+//     return print(value);
 }
 #ifndef CORRADE_TARGET_EMSCRIPTEN
 Debug& Debug::operator<<(long double value) {
-    if(!_output) return *this;
+//     if(!_output)
+        return *this;
     /* Wikipedia says 18-digit number can be converted both ways without
        loss: https://en.wikipedia.org/wiki/Extended_precision#Working_range
        Kept in sync with format(). */
-    *_output << std::setprecision(18);
-    return print(value);
+//     *_output << std::setprecision(18);
+//     return print(value);s
 }
 #endif
 
 Debug& Debug::operator<<(char32_t value) {
-    std::ostringstream o;
-    o << "U+" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << value;
-    return print(o.str());
+//     std::ostringstream o;
+//     o << "U+" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << value;
+//     return print(o.str());
+    return *this;
 }
 
 Debug& Debug::operator<<(const char32_t* value) {

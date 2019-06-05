@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <functional>
 #include <map>
-#include <sstream>
+// #include <sstream>
 #include <utility>
 
 #include "Corrade/Containers/Optional.h"
@@ -203,8 +203,8 @@ AbstractManager::AbstractManager(std::string pluginInterface):
         /* Assign the plugin to this manager, parse its metadata and initialize
            it */
         Resource r("CorradeStaticPlugin_" + p.first);
-        std::istringstream metadata(r.get(p.first + ".conf"));
-        p.second->configuration = Utility::Configuration{metadata, Utility::Configuration::Flag::ReadOnly};
+//         std::istringstream metadata(r.get(p.first + ".conf"));
+//         p.second->configuration = Utility::Configuration{metadata, Utility::Configuration::Flag::ReadOnly};
         p.second->metadata.emplace(p.first, p.second->configuration);
         p.second->manager = this;
         p.second->staticPlugin->initializer();
