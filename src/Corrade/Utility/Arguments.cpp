@@ -96,6 +96,7 @@ Arguments::Entry::Entry(Type type, char shortKey, std::string key, std::string h
 std::vector<std::string> Arguments::environment() {
     std::vector<std::string> list;
 
+#if 0
     /* Standard Unix and local Emscripten environment */
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     for(char** e = environ; *e; ++e)
@@ -138,6 +139,7 @@ std::vector<std::string> Arguments::environment() {
     /* Other platforms not implemented */
     #else
     #endif
+#endif
 
     return list;
 }
@@ -384,6 +386,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
     }
 
     /* Get options from environment */
+#if 0
     #ifndef CORRADE_TARGET_WINDOWS_RT
     for(const Entry& entry: _entries) {
         if(entry.environment.empty()) continue;
@@ -443,6 +446,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
         #endif
     }
     #endif
+#endif
 
     std::vector<Entry>::iterator valueFor = _entries.end();
     bool optionsAllowed = true;

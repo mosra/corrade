@@ -306,7 +306,7 @@ std::string executableLocation() {
 
 std::string home() {
     /* Unix, Emscripten */
-    #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    #if (defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)) && 0
     if(const char* const h = std::getenv("HOME"))
         return h;
     return std::string{};
@@ -334,8 +334,8 @@ std::string configurationDir(const std::string& applicationName) {
        superset), Emscripten */
     #elif defined(__unix__) || defined(CORRADE_TARGET_EMSCRIPTEN)
     const std::string lowercaseApplicationName = String::lowercase(applicationName);
-    if(const char* const config = std::getenv("XDG_CONFIG_HOME"))
-        return join(config, lowercaseApplicationName);
+//     if(const char* const config = std::getenv("XDG_CONFIG_HOME"))
+//         return join(config, lowercaseApplicationName);
 
     const std::string home = Directory::home();
     return home.empty() ? std::string{} : join(home, ".config/" + lowercaseApplicationName);
