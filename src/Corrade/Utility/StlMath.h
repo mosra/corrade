@@ -39,7 +39,7 @@ size as on C++11. If you *need* the additions, @cpp #include <cmath> @ce
 * *before* this header.
 
 Currently, the C++17 additions are present neither on
-@ref CORRADE_TARGET_LIBCXX "libc++" 7 nor
+@ref CORRADE_TARGET_LIBCXX "libc++" 8 nor
 @ref CORRADE_TARGET_DINKUMWARE "MSVC STL" 2017, so there this header
 effectively does just a simple @cpp #include <cmath> @ce.
 */

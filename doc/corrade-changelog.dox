@@ -141,11 +141,6 @@ namespace Corrade {
     [mosra/corrade#51](https://github.com/mosra/corrade/issues/51).
 -   Fixed compilation with Clang and `-std=gnu++14` (see [mosra/corrade#62](https://github.com/mosra/corrade/pull/62)
 
-@subsection corrade-changelog-latest-documentation Documentation
-
--   Fixed Gentoo build instructions (see
-    [mosra/corrade#64](https://github.com/mosra/corrade/pull/64))
-
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
 -   The @ref TestSuite::Comparator class by mistake did not have fuzzy
@@ -215,6 +210,8 @@ namespace Corrade {
 -   Updated docs of the @ref Corrade/Utility/Macros.h header mentioning what
     @ref CORRADE_DEPRECATED() macros work on what compiler (see
     [mosra/corrade#46](https://github.com/mosra/corrade/issues/46))
+-   Fixed Gentoo build instructions (see
+    [mosra/corrade#64](https://github.com/mosra/corrade/pull/64))
 
 @section corrade-changelog-2019-01 2019.01
 
