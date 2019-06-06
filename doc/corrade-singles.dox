@@ -56,6 +56,7 @@ Class, library or header    | Single-header version
 @ref Corrade/Utility/StlForwardString.h | [CorradeStlForwardString.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardString.h)
 @ref Corrade/Utility/StlForwardTuple.h | [CorradeStlForwardTuple.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardTuple.h)
 @ref Corrade/Utility/StlForwardVector.h | [CorradeStlForwardVector.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlForwardVector.h)
+@ref Corrade/Utility/StlMath.h | [CorradeStlMath.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStlMath.h)
 
 @section corrade-singles-behavior Behavior
 

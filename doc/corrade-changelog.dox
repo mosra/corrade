@@ -86,7 +86,9 @@ namespace Corrade {
     for easier integration into your projects. See @ref corrade-singles for
     more information.
 -   New @ref Corrade/Utility/StlMath.h header providing bloat-free
-    @cpp #include <cmath> @ce on C++17 an up
+    @cpp #include <cmath> @ce on C++17 an up. This header is also available as
+    a single-header library for easier integration into your projects. See
+    @ref corrade-singles for more information.
 -   New @ref Utility::IsStringLike type trait
 -   Added @ref Utility::format(), an alternative to @ref Utility::formatString()
     returning @ref Containers::Array instead of @ref std::string

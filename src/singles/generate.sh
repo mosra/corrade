@@ -12,3 +12,4 @@ set -e
 ../acme/acme.py CorradeStlForwardString.h --output ../../../magnum-singles
 ../acme/acme.py CorradeStlForwardTuple.h --output ../../../magnum-singles
 ../acme/acme.py CorradeStlForwardVector.h --output ../../../magnum-singles
+../acme/acme.py CorradeStlMath.h --output ../../../magnum-singles
