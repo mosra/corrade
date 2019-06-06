@@ -12,6 +12,9 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2019.01-186-gdd93f1f1 (2019-06-06)
+    -   Initial release
+
     Generated from Corrade {{revision}}, {{stats:loc}} / {{stats:preprocessed-cpp17}} LoC
 */
 
