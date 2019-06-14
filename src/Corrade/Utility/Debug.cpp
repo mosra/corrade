@@ -78,13 +78,13 @@ HANDLE streamOutputHandle(const std::ostream* s) {
 
 }
 
-std::ostream* Debug::_globalOutput = &std::cout;
-std::ostream* Warning::_globalWarningOutput = &std::cerr;
-std::ostream* Error::_globalErrorOutput = &std::cerr;
+thread_local std::ostream* Debug::_globalOutput = &std::cout;
+thread_local std::ostream* Warning::_globalWarningOutput = &std::cerr;
+thread_local std::ostream* Error::_globalErrorOutput = &std::cerr;
 
 #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
-Debug::Color Debug::_globalColor = Debug::Color::Default;
-bool Debug::_globalColorBold = false;
+thread_local Debug::Color Debug::_globalColor = Debug::Color::Default;
+thread_local bool Debug::_globalColorBold = false;
 #endif
 
 template<Debug::Color c, bool bold> Debug::Modifier Debug::colorInternal() {

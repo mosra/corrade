@@ -598,10 +598,10 @@ class CORRADE_UTILITY_EXPORT Debug {
     private:
         template<Color c, bool bold> CORRADE_UTILITY_LOCAL static Modifier colorInternal();
 
-        static CORRADE_UTILITY_LOCAL std::ostream* _globalOutput;
+        static thread_local CORRADE_UTILITY_LOCAL std::ostream* _globalOutput;
         #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
-        static CORRADE_UTILITY_LOCAL Color _globalColor;
-        static CORRADE_UTILITY_LOCAL bool _globalColorBold;
+        static thread_local CORRADE_UTILITY_LOCAL Color _globalColor;
+        static thread_local CORRADE_UTILITY_LOCAL bool _globalColorBold;
         #endif
 
         CORRADE_UTILITY_LOCAL void resetColorInternal();
@@ -803,7 +803,7 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
         Warning& operator=(Warning&&) = delete;
 
     private:
-        static CORRADE_UTILITY_LOCAL std::ostream* _globalWarningOutput;
+        static thread_local CORRADE_UTILITY_LOCAL std::ostream* _globalWarningOutput;
         std::ostream* _previousGlobalWarningOutput;
 };
 
@@ -885,7 +885,7 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
         CORRADE_UTILITY_LOCAL void cleanupOnDestruction(); /* Needed for Fatal */
 
     private:
-        static CORRADE_UTILITY_LOCAL std::ostream* _globalErrorOutput;
+        static thread_local CORRADE_UTILITY_LOCAL std::ostream* _globalErrorOutput;
         std::ostream* _previousGlobalErrorOutput;
 };
 
