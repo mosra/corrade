@@ -50,13 +50,12 @@
 #endif
 
 /** @hideinitializer
- * @brief Public symbol in a static library
- */
-#ifdef CORRADE_TARGET_WINDOWS
+@brief Public symbol in a static library
+
+Defined as empty --- to be consistent with hidden visibility by default,
+symbols in static libraries shouldn't be exported either.
+*/
 #define CORRADE_VISIBILITY_STATIC
-#else
-#define CORRADE_VISIBILITY_STATIC __attribute__ ((visibility ("default")))
-#endif
 
 /** @hideinitializer
 @brief Local symbol

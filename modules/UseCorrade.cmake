@@ -73,7 +73,13 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "(Appl
         "-Werror=return-type"
         "-Wmissing-declarations"
         "-pedantic"
-        "-fvisibility=hidden")
+        # Needs to have both, otherwise Clang's linker on macOS complains that
+        # "direct access in function [...] to global weak symbol [...] means the
+        # weak symbol cannot be overridden at runtime. This was likely caused
+        # by different translation units being compiled with different
+        # visibility settings." See also various google results for the above
+        # message.
+        "-fvisibility=hidden" "-fvisibility-inlines-hidden")
 
     # Some flags are not yet supported everywhere
     # TODO: do this with check_c_compiler_flags()
