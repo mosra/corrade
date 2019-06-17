@@ -76,13 +76,26 @@ HANDLE streamOutputHandle(const std::ostream* s) {
 }
 #endif
 
-thread_local std::ostream* globalOutput = &std::cout;
-thread_local std::ostream* globalWarningOutput = &std::cerr;
-thread_local std::ostream* globalErrorOutput = &std::cerr;
+/* Old versions of Apple Xcode do not support thread_local
+ * (but have __has_feature) */
+#ifdef __has_feature
+#if __has_feature(cxx_thread_local)
+#define THREAD_LOCAL thread_local
+#else
+#define THREAD_LOCAL __thread
+#endif
+#else
+/* assume it is present -- thread_local is more standardized than __thread */
+#define THREAD_LOCAL thread_local
+#endif
+
+THREAD_LOCAL std::ostream* globalOutput = &std::cout;
+THREAD_LOCAL std::ostream* globalWarningOutput = &std::cerr;
+THREAD_LOCAL std::ostream* globalErrorOutput = &std::cerr;
 
 #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
-thread_local Debug::Color globalColor = Debug::Color::Default;
-thread_local bool globalColorBold = false;
+THREAD_LOCAL Debug::Color globalColor = Debug::Color::Default;
+THREAD_LOCAL bool globalColorBold = false;
 #endif
 
 }
