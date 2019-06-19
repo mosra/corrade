@@ -76,13 +76,13 @@ HANDLE streamOutputHandle(const std::ostream* s) {
 }
 #endif
 
-std::ostream* globalOutput = &std::cout;
-std::ostream* globalWarningOutput = &std::cerr;
-std::ostream* globalErrorOutput = &std::cerr;
+CORRADE_THREAD_LOCAL std::ostream* globalOutput = &std::cout;
+CORRADE_THREAD_LOCAL std::ostream* globalWarningOutput = &std::cerr;
+CORRADE_THREAD_LOCAL std::ostream* globalErrorOutput = &std::cerr;
 
 #if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
-Debug::Color globalColor = Debug::Color::Default;
-bool globalColorBold = false;
+CORRADE_THREAD_LOCAL Debug::Color globalColor = Debug::Color::Default;
+CORRADE_THREAD_LOCAL bool globalColorBold = false;
 #endif
 
 }
