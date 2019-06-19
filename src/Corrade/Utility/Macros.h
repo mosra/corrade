@@ -307,6 +307,23 @@ otherwise falls back to compiler-specific attribute. Example usage:
 #endif
 
 /** @hideinitializer
+@brief Thread-local annotation
+
+Expands to C++11 @cpp thread_local @ce keyword on all compilers except old
+Apple Clang, where it's defined as @cpp __thread @ce. Note that the
+pre-standard @cpp __thread @ce has some semantic differences, in particular
+regarding RAII.
+*/
+#ifdef __has_feature
+#if !__has_feature(cxx_thread_local) /* Apple Clang 7.3 says false here */
+#define CORRADE_THREAD_LOCAL __thread
+#endif
+#endif
+#ifndef CORRADE_THREAD_LOCAL /* Assume it's supported otherwise */
+#define CORRADE_THREAD_LOCAL thread_local
+#endif
+
+/** @hideinitializer
 @brief Line number as a string
 
 Turns the standard @cpp __LINE__ @ce macro into a string. Useful for example

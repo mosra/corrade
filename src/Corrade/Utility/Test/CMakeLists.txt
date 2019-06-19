@@ -160,7 +160,13 @@ corrade_add_test(UtilityFormatTest FormatTest.cpp LIBRARIES CorradeUtilityTestLi
 target_include_directories(UtilityFormatTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 corrade_add_test(UtilityHashDigestTest HashDigestTest.cpp)
+
 corrade_add_test(UtilityMacrosTest MacrosTest.cpp)
+if(NOT CORRADE_TARGET_EMSCRIPTEN)
+    find_package(Threads REQUIRED)
+    target_link_libraries(UtilityMacrosTest PRIVATE Threads::Threads)
+endif()
+
 corrade_add_test(UtilitySha1Test Sha1Test.cpp)
 corrade_add_test(UtilityStlForwardArrayTest StlForwardArrayTest.cpp)
 corrade_add_test(UtilityStlForwardStringTest StlForwardStringTest.cpp)

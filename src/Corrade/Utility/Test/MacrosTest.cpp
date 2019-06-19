@@ -26,6 +26,10 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
 
+#ifndef CORRADE_TARGET_EMSCRIPTEN
+#include <thread>
+#endif
+
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct MacrosTest: TestSuite::Tester {
@@ -35,13 +39,22 @@ struct MacrosTest: TestSuite::Tester {
     void deprecated();
     void noreturn();
     void cxxStandard();
+
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    void threadLocal();
+    #endif
 };
 
 MacrosTest::MacrosTest() {
     addTests({&MacrosTest::alignAs,
               &MacrosTest::deprecated,
               &MacrosTest::noreturn,
-              &MacrosTest::cxxStandard});
+              &MacrosTest::cxxStandard,
+
+              #ifndef CORRADE_TARGET_EMSCRIPTEN
+              &MacrosTest::threadLocal
+              #endif
+              });
 }
 
 void MacrosTest::alignAs() {
@@ -117,6 +130,29 @@ void MacrosTest::noreturn() {
 void MacrosTest::cxxStandard() {
     CORRADE_COMPARE_AS(CORRADE_CXX_STANDARD, 201103, TestSuite::Compare::GreaterOrEqual);
 }
+
+#ifndef CORRADE_TARGET_EMSCRIPTEN
+CORRADE_THREAD_LOCAL int threadLocalVar = 3;
+int globalVar = 3;
+
+void MacrosTest::threadLocal() {
+    threadLocalVar = 5;
+    globalVar = 15;
+
+    CORRADE_COMPARE(threadLocalVar, 5);
+    CORRADE_COMPARE(globalVar, 15);
+
+    std::thread t{[]() {
+        threadLocalVar = 7;
+        globalVar = 17;
+    }};
+
+    t.join();
+
+    CORRADE_COMPARE(threadLocalVar, 5);
+    CORRADE_COMPARE(globalVar, 17);
+}
+#endif
 
 }}}}
 

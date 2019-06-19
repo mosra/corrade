@@ -94,6 +94,8 @@ namespace Corrade {
 -   Added @ref Utility::format(), an alternative to @ref Utility::formatString()
     returning @ref Containers::Array instead of @ref std::string
 -   New @ref CORRADE_LINE_STRING utility macro for a stringified @cpp __LINE__ @ce
+-   New @ref CORRADE_THREAD_LOCAL macro for a portable @cpp thread_local @ce
+    annotation
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 
