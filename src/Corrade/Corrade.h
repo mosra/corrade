@@ -73,6 +73,16 @@ Defined if built as static libraries. Default are shared libraries.
 #undef CORRADE_BUILD_STATIC
 
 /**
+@brief Multi-threaded build
+
+Defined if the library is built in a way that makes it possible to safely use
+certain Corrade features simultaenously in multiple threads.
+@see @ref building-corrade, @ref corrade-cmake
+*/
+#define CORRADE_BUILD_MULTITHREADED
+#undef CORRADE_BUILD_MULTITHREADED
+
+/**
 @brief C++ standard version
 
 Expands to `__cplusplus` macro on all sane compilers; on MSVC uses `_MSVC_LANG`

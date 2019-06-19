@@ -508,6 +508,11 @@ Corrade is by default built with all deprecated APIs included. However, to make
 your code more robust and future-proof, it's recommended to build the library
 with `BUILD_DEPRECATED` disabled.
 
+By default the library is built in a way that makes it possible to safely use
+certain Corrade features simultaenously in multiple threads. This might cause
+some performance penalties --- if you are sure that you will never need such
+feature, you can disable it via the `BUILD_MULTITHREADED` option.
+
 By default the library is built with everything included. Using the following
 `WITH_*` CMake options you can specify which parts will be built and which
 not:

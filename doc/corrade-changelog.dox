@@ -38,6 +38,7 @@ namespace Corrade {
 -   New set of @ref CORRADE_TARGET_LIBCXX, @ref CORRADE_TARGET_LIBSTDCXX and
     @ref CORRADE_TARGET_DINKUMWARE macros to detect the common STL
     implementations
+-   New @ref CORRADE_BUILD_MULTITHREADED build-time option, moved from Magnum
 
 @subsubsection corrade-changelog-latest-new-containers Containers library
 

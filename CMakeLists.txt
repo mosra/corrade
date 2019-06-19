@@ -67,6 +67,11 @@ if(BUILD_DEPRECATED)
     set(CORRADE_BUILD_DEPRECATED 1)
 endif()
 
+option(BUILD_MULTITHREADED "Build in a way that makes it possible to safely use certain Corrade features simultaenously in multiple threads" ON)
+if(BUILD_MULTITHREADED)
+    set(CORRADE_BUILD_MULTITHREADED 1)
+endif()
+
 option(BUILD_STATIC "Build static libraries (default are shared)" OFF)
 cmake_dependent_option(BUILD_STATIC_PIC "Build static libraries with position-independent code" ON "BUILD_STATIC" OFF)
 option(BUILD_TESTS "Build unit tests" OFF)
