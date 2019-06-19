@@ -100,6 +100,8 @@ Is the below list missing your name or something's wrong?
 -   **Guillaume Jacquemin** ([\@williamjcm](https://github.com/williamjcm)) ---
     MSYS2 packages
 -   **[\@jaynus](https://github.com/jaynus)** --- MSVC compilation fixes
+-   **Max Schwarz** ([\@xqms](https://github.com/xqms)) --- thread-local
+    @ref Utility::Debug scoped output redirection and coloring
 -   **Michael "Croydon" Keck** ([\@Croydon](https://github.com/Croydon)) ---
     Conan package
 -   **Michael Dietschi** ([\@mdietsch](https://github.com/mdietsch)) ---
