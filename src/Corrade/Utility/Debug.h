@@ -130,6 +130,13 @@ documentation for more information.
 
 @include UtilityDebug-color-greyscale.ansi
 
+@section Utility-Debug-multithreading Thread safety
+
+If Corrade is compiled with @ref CORRADE_BUILD_MULTITHREADED enabled (the
+default), scoped output redirection and coloring is done thread-locally. This
+might cause some performance penalties --- if you are sure that you never need
+to handle these per-thread, build Corrade with the option disabled.
+
 @see @ref Warning, @ref Error, @ref Fatal, @ref CORRADE_ASSERT(),
     @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(),
     @ref AndroidLogStreamBuffer, @ref formatString()

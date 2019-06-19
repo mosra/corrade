@@ -136,7 +136,14 @@ corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp
         ConfigurationTestFiles/whitespaces-saved.conf)
 target_include_directories(UtilityConfigurationTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 corrade_add_test(UtilityConfigurationValueTest ConfigurationValueTest.cpp)
+
 corrade_add_test(UtilityDebugTest DebugTest.cpp)
+corrade_add_test(UtilityMacrosTest MacrosTest.cpp)
+if(NOT CORRADE_TARGET_EMSCRIPTEN)
+    find_package(Threads REQUIRED)
+    target_link_libraries(UtilityDebugTest PRIVATE Threads::Threads)
+    target_link_libraries(UtilityMacrosTest PRIVATE Threads::Threads)
+endif()
 
 # It should return with a non-zero exit code
 corrade_add_test(UtilityFatalTest FatalTest.cpp)
@@ -160,12 +167,6 @@ corrade_add_test(UtilityFormatTest FormatTest.cpp LIBRARIES CorradeUtilityTestLi
 target_include_directories(UtilityFormatTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 corrade_add_test(UtilityHashDigestTest HashDigestTest.cpp)
-
-corrade_add_test(UtilityMacrosTest MacrosTest.cpp)
-if(NOT CORRADE_TARGET_EMSCRIPTEN)
-    find_package(Threads REQUIRED)
-    target_link_libraries(UtilityMacrosTest PRIVATE Threads::Threads)
-endif()
 
 corrade_add_test(UtilitySha1Test Sha1Test.cpp)
 corrade_add_test(UtilityStlForwardArrayTest StlForwardArrayTest.cpp)

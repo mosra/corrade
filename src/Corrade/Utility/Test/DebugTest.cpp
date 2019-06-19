@@ -34,6 +34,10 @@
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/DebugStl.h"
 
+#ifndef CORRADE_TARGET_EMSCRIPTEN
+#include <thread>
+#endif
+
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct DebugTest: TestSuite::Tester {
@@ -81,6 +85,10 @@ struct DebugTest: TestSuite::Tester {
     void scopedOutput();
 
     void debugColor();
+
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    void multithreaded();
+    #endif
 };
 
 DebugTest::DebugTest() {
@@ -141,7 +149,12 @@ DebugTest::DebugTest() {
 
         &DebugTest::scopedOutput,
 
-        &DebugTest::debugColor});
+        &DebugTest::debugColor,
+
+        #ifndef CORRADE_TARGET_EMSCRIPTEN
+        &DebugTest::multithreaded,
+        #endif
+        });
 }
 
 void DebugTest::debug() {
@@ -869,6 +882,40 @@ void DebugTest::debugColor() {
     Debug(&out) << Debug::Color::White << Debug::Color(0xde);
     CORRADE_COMPARE(out.str(), "Debug::Color::White Debug::Color(0xde)\n");
 }
+
+#ifndef CORRADE_TARGET_EMSCRIPTEN
+void DebugTest::multithreaded() {
+    std::ostream* defaultOutput = Debug::output();
+
+    std::ostream* threadOutput = nullptr;
+    std::ostringstream another;
+    {
+        Debug out{&another};
+
+        std::thread t{[](std::ostream*& output) {
+            output = Debug::output();
+        }, std::ref(threadOutput)};
+
+        t.join();
+    }
+
+    Debug{} << "CORRADE_BUILD_MULTITHREADED defined:" <<
+        #ifdef CORRADE_BUILD_MULTITHREADED
+        true
+        #else
+        false
+        #endif
+        ;
+
+    Debug{} << "Output redirection visible in another thread:" << (threadOutput == &another);
+
+    #ifdef CORRADE_BUILD_MULTITHREADED
+    CORRADE_COMPARE(threadOutput, defaultOutput);
+    #else
+    CORRADE_COMPARE(threadOutput, &another);
+    #endif
+}
+#endif
 
 }}}}
 
