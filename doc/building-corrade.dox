@@ -729,6 +729,10 @@ As every application is in its own sandbox, it doesn't make sense to build
 shared libraries (although it is supported). Enable `BUILD_STATIC` to build
 static libraries.
 
+Please note that `BUILD_MULTITHREADED` is supported only since Xcode 7.3 and
+doesn't work on `i386` iOS Simulator, you need to disable it in order to build
+for older platforms.
+
 @code{.sh}
 mkdir build-ios && cd build-ios
 cmake .. \
