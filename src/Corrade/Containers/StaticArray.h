@@ -58,14 +58,17 @@ are not initialized at all and default constructor is called on other types. It
 is possible to initialize the array in a different way using so-called *tags*:
 
 -   @ref StaticArray(DefaultInitT) is equivalent to the implicit parameterless
-    constructor (useful when you want to make the choice appear explicit).
+    constructor (useful when you want to make the choice appear explicit). In
+    other words, @cpp T array[size] @ce.
 -   @ref StaticArray(InPlaceInitT, Args&&... args) is equivalent to the
     implicit parameteric constructor (again useful when you want to make the
-    choice appear explicit). Same as @ref StaticArray(Args&&... args).
+    choice appear explicit). Same as @ref StaticArray(Args&&... args). In
+    other words, @cpp T array[size]{args...} @ce.
 -   @ref StaticArray(ValueInitT) zero-initializes trivial types and calls
-    default constructor elsewhere.
+    default constructor elsewhere. In other words, @cpp T array[size]{} @ce.
 -   @ref StaticArray(DirectInitT, Args&&... args) constructs every element of
-    the array using provided arguments.
+    the array using provided arguments. In other words,
+    @cpp T array[size]{T{args...}, T{args...}, …} @ce.
 -   @ref StaticArray(NoInitT) does not initialize anything and you need to call
     the constructor on all elements manually using placement new,
     @ref std::uninitialized_copy() or similar. This is the dangerous option.

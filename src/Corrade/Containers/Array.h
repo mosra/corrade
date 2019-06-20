@@ -92,13 +92,17 @@ are not initialized at all and default constructor is called on other types. It
 is possible to initialize the array in a different way using so-called *tags*:
 
 -   @ref Array(DefaultInitT, std::size_t) is equivalent to the default case
-    (useful when you want to make the choice appear explicit).
+    (useful when you want to make the choice appear explicit). In other words,
+    @cpp new T[size] @ce.
 -   @ref Array(ValueInitT, std::size_t) zero-initializes trivial types and
-    calls default constructor elsewhere.
+    calls default constructor elsewhere. In other words,
+    @cpp new T[size]{} @ce.
 -   @ref Array(DirectInitT, std::size_t, Args&&... args) constructs all
-    elements of the array using provided arguments.
+    elements of the array using provided arguments. In other words,
+    @cpp new T[size]{T{args...}, T{args...}, …} @ce.
 -   @ref Array(InPlaceInitT, std::initializer_list<T>) allocates unitialized
-    memory and then copy-constructs all elements from the initializer list
+    memory and then copy-constructs all elements from the initializer list. In
+    other words, @cpp new T[size]{args...} @ce.
 -   @ref Array(NoInitT, std::size_t) does not initialize anything and you need
     to call the constructor on all elements manually using placement new,
     @ref std::uninitialized_copy() or similar. This is the dangerous option.
