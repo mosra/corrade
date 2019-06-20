@@ -74,12 +74,14 @@ conversion. The following table lists allowed conversions:
 
 Corrade type                    | ↭ | STL type
 ------------------------------- | - | ---------------------
-@ref ArrayView "ArrayView<T>" | ← | @ref std::array "std::array<T, size>"
-@ref ArrayView "ArrayView<const T>" | ← | @ref std::array "const std::array<T>"
-@ref ArrayView<const void> | ← | @ref std::array "const std::array<T>"
-@ref ArrayView "ArrayView<T>" | ← | @ref std::vector "std::vector<T, Allocator>"
+@ref ArrayView "ArrayView<T>"   | ← | @ref std::array "std::array<T, size>"
+@ref ArrayView<void>            | ← | @ref std::array "std::array<T, size>"
+@ref ArrayView "ArrayView<const T>" | ← | @ref std::array "const std::array<T, size>"
+@ref ArrayView<const void>      | ← | @ref std::array "const std::array<T, size>"
+@ref ArrayView "ArrayView<T>"   | ← | @ref std::vector "std::vector<T, Allocator>"
+@ref ArrayView<void>            | ← | @ref std::vector "std::vector<T, Allocator>"
 @ref ArrayView "ArrayView<const T>" | ← | @ref std::vector "const std::vector<T, Allocator>"
-@ref ArrayView<const void> | ← | @ref std::vector "const std::vector<T, Allocator>"
+@ref ArrayView<const void>      | ← | @ref std::vector "const std::vector<T, Allocator>"
 @ref StaticArrayView "StaticArrayView<size, T>" | ← | @ref std::array "std::array<T, size>"
 @ref StaticArrayView "StaticArrayView<size, const T>" | ← | @ref std::array "const std::array<T, size>"
 
@@ -96,10 +98,12 @@ The following table lists allowed conversions:
 
 Corrade type                    | ↭ | STL type
 ------------------------------- | - | ---------------------
-@ref ArrayView "ArrayView<T>" | ⇆ | @ref std::span "std::span<T>"
-@ref ArrayView "ArrayView<T>" | ← | @ref std::span "std::span<T, size>"
-@ref ArrayView<const void> | ← | @ref std::span "std::span<T>"
-@ref ArrayView<const void> | ← | @ref std::span "std::span<T, size>"
+@ref ArrayView "ArrayView<T>"   | ⇆ | @ref std::span "std::span<T>"
+@ref ArrayView "ArrayView<T>"   | ← | @ref std::span "std::span<T, size>"
+@ref ArrayView<void>            | ← | @ref std::span "std::span<T>"
+@ref ArrayView<void>            | ← | @ref std::span "std::span<T, size>"
+@ref ArrayView<const void>      | ← | @ref std::span "std::span<T>"
+@ref ArrayView<const void>      | ← | @ref std::span "std::span<T, size>"
 @ref StaticArrayView "StaticArrayView<size, T>" | ⇆ | @ref std::span "std::span<T, size>"
 @ref StaticArrayView "StaticArrayView<size, T>" | → | @ref std::span "std::span<T>"
 
