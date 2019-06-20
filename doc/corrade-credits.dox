@@ -99,6 +99,8 @@ Is the below list missing your name or something's wrong?
     package
 -   **Guillaume Jacquemin** ([\@williamjcm](https://github.com/williamjcm)) ---
     MSYS2 packages
+-   **Ivan Sanz Carasa** ([\@isc30](https://github.com/isc30)) --- Emscripten
+    toolchain improvements
 -   **[\@jaynus](https://github.com/jaynus)** --- MSVC compilation fixes
 -   **Max Schwarz** ([\@xqms](https://github.com/xqms)) --- thread-local
     @ref Utility::Debug scoped output redirection and coloring

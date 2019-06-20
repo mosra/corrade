@@ -154,6 +154,8 @@ namespace Corrade {
     when @ref corrade-cmake "CORRADE_USE_PEDANTIC_FLAGS" property is enabled in
     CMake on GCC and Clang to avoid linker warnings on macOS (see
     [mosra/corrade#53](https://github.com/mosra/corrade/issues/53))
+-   The Emscripten CMake toolchain now sets the `EMSCRIPTEN` variable to help
+    3rd party projects (see [mosra/toolchains#7](https://github.com/mosra/toolchains/pull/7))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
