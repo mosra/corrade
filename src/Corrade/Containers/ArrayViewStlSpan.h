@@ -30,7 +30,7 @@
 
 Including this header allows you to convert
 @ref Corrade::Containers::ArrayView / @ref Corrade::Containers::StaticArrayView
-from and to a C++2a @cpp std::span @ce. A separate
+from and to a C++2a @ref std::span. A separate
 @ref Corrade/Containers/ArrayViewStl.h header provides compatibility with
 @ref std::array and @ref std::vector. See
 @ref Containers-ArrayView-stl "ArrayView STL compatibility" for more

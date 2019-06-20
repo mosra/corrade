@@ -54,7 +54,7 @@ namespace Corrade {
 -   Opt-in STL compatibility for @ref Containers::Array,
     @ref Containers::ArrayView, @ref Containers::StaticArray,
     @ref Containers::StaticArrayView and @ref Containers::StridedArrayView
-    allowing them to be implicitly converted to/from C++2a @cpp std::span @ce
+    allowing them to be implicitly converted to/from C++2a @ref std::span
 -   @ref Containers::StridedArrayView is now multi-dimensional with a
     possibility of negative and zero strides, making it usable in a broader
     range of use-cases

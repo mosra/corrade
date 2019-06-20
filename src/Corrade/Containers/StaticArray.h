@@ -95,19 +95,19 @@ Owning array type               | ↭ | Non-owning view type
 
 @section Containers-StaticArray-stl STL compatibility
 
-On compilers that support C++2a and @cpp std::span @ce, implicit conversion of
-an @ref StaticArray to it is provided in @ref Corrade/Containers/ArrayViewStlSpan.h.
+On compilers that support C++2a and @ref std::span, implicit conversion of an
+@ref StaticArray to it is provided in @ref Corrade/Containers/ArrayViewStlSpan.h.
 The conversion is provided in a separate header to avoid unconditional
 @cpp #include <span> @ce, which significantly affects compile times. The
 following table lists allowed conversions:
 
 Corrade type                    | ↭ | STL type
 ------------------------------- | - | ---------------------
-@ref StaticArray "StaticArray<size, T>" | → | @cpp std::span<T, size> @ce <b></b>
-@ref StaticArray "StaticArray<size, T>" | → | @cpp std::span<const T, size> @ce <b></b>
-@ref StaticArray "const StaticArray<size, T>" | → | @cpp std::span<const T, size> @ce <b></b>
+@ref StaticArray "StaticArray<size, T>" | → | @ref std::span "std::span<T, size>"
+@ref StaticArray "StaticArray<size, T>" | → | @ref std::span "std::span<const T, size>"
+@ref StaticArray "const StaticArray<size, T>" | → | @ref std::span "std::span<const T, size>"
 
-There are some dangerous corner cases due to the way @cpp std::span @ce is
+There are some dangerous corner cases due to the way @ref std::span is
 designed, see @ref Containers-ArrayView-stl "ArrayView STL compatibility" for
 more information.
 

@@ -145,19 +145,19 @@ Owning array type               | ↭ | Non-owning view type
 
 @section Containers-Array-stl STL compatibility
 
-On compilers that support C++2a and @cpp std::span @ce, implicit conversion
-of an @ref Array to it is provided in @ref Corrade/Containers/ArrayViewStlSpan.h.
-The conversion is provided in a separate header to avoid unconditional
+On compilers that support C++2a and @ref std::span, implicit conversion of an
+@ref Array to it is provided in @ref Corrade/Containers/ArrayViewStlSpan.h. The
+conversion is provided in a separate header to avoid unconditional
 @cpp #include <span> @ce, which significantly affects compile times. The
 following table lists allowed conversions:
 
 Corrade type                    | ↭ | STL type
 ------------------------------- | - | ---------------------
-@ref Array "Array<T>"           | → | @cpp std::span<T> @ce <b></b>
-@ref Array "Array<T>"           | → | @cpp std::span<const T> @ce <b></b>
-@ref Array "const Array<T>"     | → | @cpp std::span<const T> @ce <b></b>
+@ref Array "Array<T>"           | → | @ref std::span "std::span<T>"
+@ref Array "Array<T>"           | → | @ref std::span "std::span<const T>"
+@ref Array "const Array<T>"     | → | @ref std::span "std::span<const T>"
 
-There are some dangerous corner cases due to the way @cpp std::span @ce is
+There are some dangerous corner cases due to the way @ref std::span is
 designed, see @ref Containers-ArrayView-stl "ArrayView STL compatibility" for
 more information.
 

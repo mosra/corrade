@@ -222,8 +222,8 @@ will repeat given dimension given number of times:
 
 @section Containers-StridedArrayView-stl STL compatibility
 
-On compilers that support C++2a and @cpp std::span @ce, implicit conversion
-of it to a @ref StridedArrayView1D is provided in
+On compilers that support C++2a and @ref std::span, implicit conversion of it
+to a @ref StridedArrayView1D is provided in
 @ref Corrade/Containers/ArrayViewStlSpan.h. The conversion is provided in a
 separate header to avoid unconditional @cpp #include <span> @ce, which
 significantly affects compile times. The following table lists allowed
@@ -231,9 +231,9 @@ conversions:
 
 Corrade type                    | ↭ | STL type
 ------------------------------- | - | ---------------------
-@ref StridedArrayView1D "StridedArrayView1D<T>" | ← | @cpp std::span<T> @ce <b></b>
-@ref StridedArrayView1D "StridedArrayView1D<T>" | ← | @cpp std::span<size, const T> @ce <b></b>
-@ref StridedArrayView1D "StridedArrayView1D<const T>" | ← | @cpp std::span<T> @ce <b></b>
+@ref StridedArrayView1D "StridedArrayView1D<T>" | ← | @ref std::span "std::span<T>"
+@ref StridedArrayView1D "StridedArrayView1D<T>" | ← | @ref std::span "std::span<const T, size>"
+@ref StridedArrayView1D "StridedArrayView1D<const T>" | ← | @ref std::span "std::span<const T>"
 
 See @ref Containers-ArrayView-stl "ArrayView STL compatibility" for more
 information.

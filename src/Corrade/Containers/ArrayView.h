@@ -46,9 +46,9 @@ namespace Implementation {
 @brief Array view with size information
 
 Immutable wrapper around continuous range of data, similar to a dynamic
-@cpp std::span @ce from C++2a. Unlike @ref Array this class doesn't do any
-memory management. Main use case is passing array along with size information
-to functions etc. If @p T is @cpp const @ce type, the class is implicitly
+@ref std::span from C++2a. Unlike @ref Array this class doesn't do any memory
+management. Main use case is passing array along with size information to
+functions etc. If @p T is @cpp const @ce type, the class is implicitly
 constructible also from const references to @ref Array and @ref ArrayView of
 non-const types. There's also a variant with compile-time size information
 called @ref StaticArrayView.
@@ -87,21 +87,21 @@ Example:
 
 @snippet Containers-stl.cpp ArrayView
 
-On compilers that support C++2a and @cpp std::span @ce, implicit conversion
-from and also to it is provided in @ref Corrade/Containers/ArrayViewStlSpan.h.
-For similar reasons, it's a dedicated header to avoid unconditional
+On compilers that support C++2a and @ref std::span, implicit conversion from
+and also to it is provided in @ref Corrade/Containers/ArrayViewStlSpan.h. For
+similar reasons, it's a dedicated header to avoid unconditional
 @cpp #include <span> @ce, but this one is even significantly heavier than the
 @ref vector "<vector>" etc. includes, so it's separate from the others as well.
 The following table lists allowed conversions:
 
 Corrade type                    | ↭ | STL type
 ------------------------------- | - | ---------------------
-@ref ArrayView "ArrayView<T>" | ⇆ | @cpp std::span<T> @ce <b></b>
-@ref ArrayView "ArrayView<T>" | ← | @cpp std::span<T, size> @ce <b></b>
-@ref ArrayView<const void> | ← | @cpp std::span<T> @ce <b></b>
-@ref ArrayView<const void> | ← | @cpp std::span<T, size> @ce <b></b>
-@ref StaticArrayView "StaticArrayView<size, T>" | ⇆ | @cpp std::span<T, size> @ce <b></b>
-@ref StaticArrayView "StaticArrayView<size, T>" | → | @cpp std::span<T> @ce <b></b>
+@ref ArrayView "ArrayView<T>" | ⇆ | @ref std::span "std::span<T>"
+@ref ArrayView "ArrayView<T>" | ← | @ref std::span "std::span<T, size>"
+@ref ArrayView<const void> | ← | @ref std::span "std::span<T>"
+@ref ArrayView<const void> | ← | @ref std::span "std::span<T, size>"
+@ref StaticArrayView "StaticArrayView<size, T>" | ⇆ | @ref std::span "std::span<T, size>"
+@ref StaticArrayView "StaticArrayView<size, T>" | → | @ref std::span "std::span<T>"
 
 Example:
 
@@ -112,18 +112,18 @@ Example:
 @m_class{m-block m-danger}
 
 @par Dangers of fixed-size std::span conversions
-    The C++2a @cpp std::span @ce class has an implicit all-catching
+    The C++2a @ref std::span class has an implicit all-catching
     @cpp span(const Container&) @ce constructor, due to which it's not possible
-    to implement the conversion to @cpp std::span @ce on Corrade side and
-    properly check for correct dimensionality *at compile time*. That means
-    it's possible to accidentally convert an arbitrary @ref ArrayView<int> to
-    @cpp std::span<int, 37> @ce or @ref StaticArrayView "StaticArrayView<5, int>"
-    to @cpp std::span<int, 6> @ce and there's nothing Corrade can do to prevent
-    that. Even worse, the C++ standard
+    to implement the conversion to @ref std::span on Corrade side and properly
+    check for correct dimensionality *at compile time*. That means it's
+    possible to accidentally convert an arbitrary @ref ArrayView<int> to
+    @ref std::span "std::span<int, 37>" or @ref StaticArrayView "StaticArrayView<5, int>"
+    to @ref std::span "std::span<int, 6>" and there's nothing Corrade can do to
+    prevent that. Even worse, the C++ standard
     [defines this conversion as Undefined Behavior](https://en.cppreference.com/w/cpp/container/span/span),
     instead of, well, throwing an exception or something.
 @par
-    Fortunately, in the other direction at least, conversion of @cpp std::span @ce
+    Fortunately, in the other direction at least, conversion of @ref std::span
     to Corrade container classes *can* be (and is) checked at compile time.
 @par
     @snippet Containers-stl2a.cpp ArrayView-stupid-span
@@ -168,7 +168,7 @@ documentation of @ref Containers-Array-stl "Array",
     projects. See @ref corrade-singles for more information. The above
     mentioned STL compatibility is included as well, but disabled by default.
     Enable it for @ref std::vector and @ref std::array by specifying
-    @cpp #define CORRADE_ARRAYVIEW_STL_COMPATIBILITY @ce and for @cpp std::span @ce
+    @cpp #define CORRADE_ARRAYVIEW_STL_COMPATIBILITY @ce and for @ref std::span
     by compiling as C++2a and specifying
     @cpp #define CORRADE_ARRAYVIEW_STL_SPAN_COMPATIBILITY @ce before including
     the file. Including it multiple times with different macros defined works
@@ -720,7 +720,7 @@ namespace Implementation {
 @brief Fixed-size array view
 
 Equivalent to @ref ArrayView, but with compile-time size information. Similar
-to a fixed-size @cpp std::span @ce from C++2a. Convertible from and to
+to a fixed-size @ref std::span from C++2a. Convertible from and to
 @ref ArrayView. Example usage:
 
 @snippet Containers.cpp StaticArrayView-usage

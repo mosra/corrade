@@ -21,6 +21,11 @@
     <namespace>std</namespace>
   </compound>
   <compound kind="file">
+    <name>bit</name>
+    <filename>cpp/header/bit</filename>
+    <namespace>std</namespace>
+  </compound>
+  <compound kind="file">
     <name>bitset</name>
     <filename>cpp/header/bitset</filename>
     <namespace>std</namespace>
@@ -53,6 +58,11 @@
   <compound kind="file">
     <name>cfloat</name>
     <filename>cpp/header/cfloat</filename>
+    <namespace>std</namespace>
+  </compound>
+  <compound kind="file">
+    <name>charconv</name>
+    <filename>cpp/header/charconv</filename>
     <namespace>std</namespace>
   </compound>
   <compound kind="file">
@@ -91,13 +101,28 @@
     <namespace>std</namespace>
   </compound>
   <compound kind="file">
+    <name>compare</name>
+    <filename>cpp/header/compare</filename>
+    <namespace>std</namespace>
+  </compound>
+  <compound kind="file">
     <name>complex</name>
     <filename>cpp/header/complex</filename>
     <namespace>std</namespace>
   </compound>
   <compound kind="file">
+    <name>concepts</name>
+    <filename>cpp/header/concepts</filename>
+    <namespace>std</namespace>
+  </compound>
+  <compound kind="file">
     <name>condition_variable</name>
     <filename>cpp/header/condition_variable</filename>
+    <namespace>std</namespace>
+  </compound>
+  <compound kind="file">
+    <name>contract</name>
+    <filename>cpp/header/contract</filename>
     <namespace>std</namespace>
   </compound>
   <compound kind="file">
@@ -316,6 +341,11 @@
     <namespace>std</namespace>
   </compound>
   <compound kind="file">
+    <name>ranges</name>
+    <filename>cpp/header/ranges</filename>
+    <namespace>std</namespace>
+  </compound>
+  <compound kind="file">
     <name>ratio</name>
     <filename>cpp/header/ratio</filename>
     <namespace>std</namespace>
@@ -338,6 +368,11 @@
   <compound kind="file">
     <name>shared_mutex</name>
     <filename>cpp/header/shared_mutex</filename>
+    <namespace>std</namespace>
+  </compound>
+  <compound kind="file">
+    <name>span</name>
+    <filename>cpp/header/span</filename>
     <namespace>std</namespace>
   </compound>
   <compound kind="file">
@@ -373,6 +408,11 @@
   <compound kind="file">
     <name>strstream</name>
     <filename>cpp/header/strstream</filename>
+    <namespace>std</namespace>
+  </compound>
+  <compound kind="file">
+    <name>syncstream</name>
+    <filename>cpp/header/syncstream</filename>
     <namespace>std</namespace>
   </compound>
   <compound kind="file">
@@ -433,6 +473,11 @@
   <compound kind="file">
     <name>vector</name>
     <filename>cpp/header/vector</filename>
+    <namespace>std</namespace>
+  </compound>
+  <compound kind="file">
+    <name>version</name>
+    <filename>cpp/header/version</filename>
     <namespace>std</namespace>
   </compound>
   <compound kind="namespace">
@@ -663,6 +708,13 @@
       <type>T</type>
       <name>assoc_legendrel</name>
       <anchorfile>cpp/numeric/special_math/assoc_legendre</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>assume_aligned</name>
+      <anchorfile>cpp/memory/assume_aligned</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -899,6 +951,7 @@
     </member>
     <class kind="class">std::atomic_long</class>
     <class kind="class">std::atomic_ptrdiff_t</class>
+    <class kind="class">std::atomic_ref</class>
     <class kind="class">std::atomic_schar</class>
     <class kind="class">std::atomic_short</class>
     <member kind="function">
@@ -961,7 +1014,6 @@
     </member>
     <class kind="class">std::bad_alloc</class>
     <class kind="class">std::bad_any_cast</class>
-    <class kind="class">std::bad_array_length</class>
     <class kind="class">std::bad_array_new_length</class>
     <class kind="class">std::bad_cast</class>
     <class kind="class">std::bad_exception</class>
@@ -970,6 +1022,7 @@
     <class kind="class">std::bad_typeid</class>
     <class kind="class">std::bad_variant_access</class>
     <class kind="class">std::bad_weak_ptr</class>
+    <class kind="class">std::basic_common_reference</class>
     <class kind="class">std::basic_filebuf</class>
     <class kind="class">std::basic_fstream</class>
     <class kind="class">std::basic_ifstream</class>
@@ -980,12 +1033,14 @@
     <class kind="class">std::basic_ofstream</class>
     <class kind="class">std::basic_ostream</class>
     <class kind="class">std::basic_ostringstream</class>
+    <class kind="class">std::basic_osyncstream</class>
     <class kind="class">std::basic_regex</class>
     <class kind="class">std::basic_streambuf</class>
     <class kind="class">std::basic_string</class>
     <class kind="class">std::basic_string_view</class>
     <class kind="class">std::basic_stringbuf</class>
     <class kind="class">std::basic_stringstream</class>
+    <class kind="class">std::basic_syncbuf</class>
     <member kind="function">
       <type>T</type>
       <name>begin</name>
@@ -1032,10 +1087,18 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <member kind="function">
+      <type>T</type>
+      <name>bind_front</name>
+      <anchorfile>cpp/utility/functional/bind_front</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
     <class kind="class">std::binomial_distribution</class>
     <class kind="class">std::bit_and</class>
     <class kind="class">std::bit_not</class>
     <class kind="class">std::bit_or</class>
+    <class kind="class">std::bit_xor</class>
     <class kind="class">std::bitset</class>
     <class kind="class">std::bool_constant</class>
     <member kind="function">
@@ -1061,6 +1124,7 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <class kind="class">std::byte</class>
     <member kind="function">
       <type>T</type>
       <name>c16rtomb</name>
@@ -1072,6 +1136,13 @@
       <type>T</type>
       <name>c32rtomb</name>
       <anchorfile>cpp/string/multibyte/c32rtomb</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>c8rtomb</name>
+      <anchorfile>cpp/string/multibyte/c8rtomb</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -1121,6 +1192,7 @@
     <class kind="class">std::centi</class>
     <class kind="class">std::cerr</class>
     <class kind="class">std::char_traits</class>
+    <class kind="class">std::chars_format</class>
     <class kind="class">std::chi_squared_distribution</class>
     <namespace>std::chrono</namespace>
     <class kind="class">std::cin</class>
@@ -1156,6 +1228,10 @@
     <class kind="class">std::codecvt_utf8_utf16</class>
     <class kind="class">std::collate</class>
     <class kind="class">std::collate_byname</class>
+    <class kind="class">std::common_comparison_category</class>
+    <class kind="class">std::common_comparison_category_t</class>
+    <class kind="class">std::common_reference</class>
+    <class kind="class">std::common_reference_t</class>
     <class kind="class">std::common_type</class>
     <class kind="class">std::common_type_t</class>
     <member kind="function">
@@ -1218,6 +1294,13 @@
       <type>T</type>
       <name>comp_ellint_3l</name>
       <anchorfile>cpp/numeric/special_math/comp_ellint_3</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>compare_3way</name>
+      <anchorfile>cpp/algorithm/compare_3way</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -1608,6 +1691,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>emit_on_flush</name>
+      <anchorfile>cpp/io/manip/emit_on_flush</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>empty</name>
       <anchorfile>cpp/iterator/empty</anchorfile>
       <anchor></anchor>
@@ -1979,6 +2069,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>flush_emit</name>
+      <anchorfile>cpp/io/manip/flush_emit</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>fma</name>
       <anchorfile>cpp/numeric/math/fma</anchorfile>
       <anchor></anchor>
@@ -2114,6 +2211,13 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <member kind="function">
+      <type>T</type>
+      <name>from_chars</name>
+      <anchorfile>cpp/utility/from_chars</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
     <class kind="class">std::front_insert_iterator</class>
     <member kind="function">
       <type>T</type>
@@ -2156,10 +2260,11 @@
     <member kind="function">
       <type>T</type>
       <name>future_category</name>
-      <anchorfile>cpp/thread/future/future_category</anchorfile>
+      <anchorfile>cpp/thread/future_category</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <class kind="class">std::future_errc</class>
     <class kind="class">std::future_error</class>
     <member kind="function">
       <type>T</type>
@@ -2403,6 +2508,7 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <class kind="class">std::identity</class>
     <class kind="class">std::ifstream</class>
     <member kind="function">
       <type>T</type>
@@ -2419,16 +2525,29 @@
       <arglist>(T... args)</arglist>
     </member>
     <class kind="class">std::imaxdiv_t</class>
-    <member kind="function">
+    <member kind="variable">
       <type>T</type>
       <name>in_place</name>
       <anchorfile>cpp/utility/in_place</anchorfile>
       <anchor></anchor>
-      <arglist>(T... args)</arglist>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>in_place_index</name>
+      <anchorfile>cpp/utility/in_place</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
     </member>
     <class kind="class">std::in_place_index_t</class>
     <class kind="class">std::in_place_t</class>
-    <class kind="class">std::in_place_tag</class>
+    <member kind="variable">
+      <type>T</type>
+      <name>in_place_type</name>
+      <anchorfile>cpp/utility/in_place</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <class kind="class">std::in_place_type_t</class>
     <member kind="function">
       <type>T</type>
@@ -2444,6 +2563,7 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <class kind="class">std::incrementable_traits</class>
     <class kind="class">std::independent_bits_engine</class>
     <class kind="class">std::index_sequence</class>
     <class kind="class">std::index_sequence_for</class>
@@ -2503,6 +2623,9 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <class kind="class">std::invoke_result</class>
+    <class kind="class">std::invoke_result_t</class>
+    <class kind="class">std::io_errc</class>
     <class kind="class">std::ios_base</class>
     <class kind="class">std::iostream</class>
     <member kind="function">
@@ -2524,6 +2647,14 @@
       <type>T</type>
       <name>is_abstract_v</name>
       <anchorfile>cpp/types/is_abstract</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
+    <class kind="class">std::is_aggregate</class>
+    <member kind="variable">
+      <type>T</type>
+      <name>is_aggregate_v</name>
+      <anchorfile>cpp/types/is_aggregate</anchorfile>
       <anchor></anchor>
       <arglist></arglist>
     </member>
@@ -2567,11 +2698,11 @@
       <anchor></anchor>
       <arglist></arglist>
     </member>
-    <class kind="class">std::is_callable</class>
+    <class kind="class">std::is_bounded_array</class>
     <member kind="variable">
       <type>T</type>
-      <name>is_callable_v</name>
-      <anchorfile>cpp/types/is_callable</anchorfile>
+      <name>is_bounded_array_v</name>
+      <anchorfile>cpp/types/is_bounded_array</anchorfile>
       <anchor></anchor>
       <arglist></arglist>
     </member>
@@ -2598,6 +2729,13 @@
       <anchorfile>cpp/types/is_const</anchorfile>
       <anchor></anchor>
       <arglist></arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>is_constant_evaluated</name>
+      <anchorfile>cpp/types/is_constant_evaluated</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
     </member>
     <class kind="class">std::is_constructible</class>
     <member kind="variable">
@@ -2663,6 +2801,13 @@
       <anchor></anchor>
       <arglist></arglist>
     </member>
+    <member kind="function">
+      <type>T</type>
+      <name>is_eq</name>
+      <anchorfile>cpp/utility/compare/named_comparison_functions</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
     <class kind="class">std::is_error_code_enum</class>
     <class kind="class">std::is_error_code_enum_v</class>
     <class kind="class">std::is_error_condition_enum</class>
@@ -2715,6 +2860,20 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>is_gt</name>
+      <anchorfile>cpp/utility/compare/named_comparison_functions</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>is_gteq</name>
+      <anchorfile>cpp/utility/compare/named_comparison_functions</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>is_heap</name>
       <anchorfile>cpp/algorithm/is_heap</anchorfile>
       <anchor></anchor>
@@ -2735,6 +2894,22 @@
       <anchor></anchor>
       <arglist></arglist>
     </member>
+    <class kind="class">std::is_invocable</class>
+    <class kind="class">std::is_invocable_r</class>
+    <member kind="variable">
+      <type>T</type>
+      <name>is_invocable_r_v</name>
+      <anchorfile>cpp/types/is_invocable</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>is_invocable_v</name>
+      <anchorfile>cpp/types/is_invocable</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <class kind="class">std::is_literal_type</class>
     <member kind="variable">
       <type>T</type>
@@ -2742,6 +2917,20 @@
       <anchorfile>cpp/types/is_literal_type</anchorfile>
       <anchor></anchor>
       <arglist></arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>is_lt</name>
+      <anchorfile>cpp/utility/compare/named_comparison_functions</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>is_lteq</name>
+      <anchorfile>cpp/utility/compare/named_comparison_functions</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
     </member>
     <class kind="class">std::is_lvalue_reference</class>
     <member kind="variable">
@@ -2791,6 +2980,13 @@
       <anchor></anchor>
       <arglist></arglist>
     </member>
+    <member kind="function">
+      <type>T</type>
+      <name>is_neq</name>
+      <anchorfile>cpp/utility/compare/named_comparison_functions</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
     <class kind="class">std::is_nothrow_assignable</class>
     <member kind="variable">
       <type>T</type>
@@ -2799,19 +2995,19 @@
       <anchor></anchor>
       <arglist></arglist>
     </member>
-    <class kind="class">std::is_nothrow_callable</class>
-    <member kind="variable">
-      <type>T</type>
-      <name>is_nothrow_callable_v</name>
-      <anchorfile>cpp/types/is_callable</anchorfile>
-      <anchor></anchor>
-      <arglist></arglist>
-    </member>
     <class kind="class">std::is_nothrow_constructible</class>
     <member kind="variable">
       <type>T</type>
       <name>is_nothrow_constructible_v</name>
       <anchorfile>cpp/types/is_constructible</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
+    <class kind="class">std::is_nothrow_convertible</class>
+    <member kind="variable">
+      <type>T</type>
+      <name>is_nothrow_convertible_v</name>
+      <anchorfile>cpp/types/is_convertible</anchorfile>
       <anchor></anchor>
       <arglist></arglist>
     </member>
@@ -2847,6 +3043,22 @@
       <anchor></anchor>
       <arglist></arglist>
     </member>
+    <class kind="class">std::is_nothrow_invocable</class>
+    <class kind="class">std::is_nothrow_invocable_r</class>
+    <member kind="variable">
+      <type>T</type>
+      <name>is_nothrow_invocable_r_v</name>
+      <anchorfile>cpp/types/is_invocable</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>is_nothrow_invocable_v</name>
+      <anchorfile>cpp/types/is_invocable</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <class kind="class">std::is_nothrow_move_assignable</class>
     <member kind="variable">
       <type>T</type>
@@ -2875,7 +3087,7 @@
     <member kind="variable">
       <type>T</type>
       <name>is_nothrow_swappable_with_v</name>
-      <anchorfile>cpp/types/is_swappable_with</anchorfile>
+      <anchorfile>cpp/types/is_swappable</anchorfile>
       <anchor></anchor>
       <arglist></arglist>
     </member>
@@ -3015,7 +3227,7 @@
     <member kind="variable">
       <type>T</type>
       <name>is_swappable_with_v</name>
-      <anchorfile>cpp/types/is_swappable_with</anchorfile>
+      <anchorfile>cpp/types/is_swappable</anchorfile>
       <anchor></anchor>
       <arglist></arglist>
     </member>
@@ -3096,6 +3308,14 @@
       <type>T</type>
       <name>is_trivially_move_constructible_v</name>
       <anchorfile>cpp/types/is_move_constructible</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
+    <class kind="class">std::is_unbounded_array</class>
+    <member kind="variable">
+      <type>T</type>
+      <name>is_unbounded_array_v</name>
+      <anchorfile>cpp/types/is_unbounded_array</anchorfile>
       <anchor></anchor>
       <arglist></arglist>
     </member>
@@ -3423,6 +3643,10 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <class kind="class">std::iter_common_reference_t</class>
+    <class kind="class">std::iter_difference_t</class>
+    <class kind="class">std::iter_reference_t</class>
+    <class kind="class">std::iter_rvalue_reference_t</class>
     <member kind="function">
       <type>T</type>
       <name>iter_swap</name>
@@ -3430,6 +3654,7 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <class kind="class">std::iter_value_t</class>
     <class kind="class">std::iterator</class>
     <class kind="class">std::iterator_traits</class>
     <class kind="class">std::jmp_buf</class>
@@ -3535,6 +3760,13 @@
       <type>T</type>
       <name>lexicographical_compare</name>
       <anchorfile>cpp/algorithm/lexicographical_compare</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>lexicographical_compare_3way</name>
+      <anchorfile>cpp/algorithm/lexicographical_compare_3way</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -3702,6 +3934,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>make_obj_using_allocator</name>
+      <anchorfile>cpp/memory/make_obj_using_allocator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>make_optional</name>
       <anchorfile>cpp/utility/optional/make_optional</anchorfile>
       <anchor></anchor>
@@ -3796,6 +4035,13 @@
       <type>T</type>
       <name>mbrtoc32</name>
       <anchorfile>cpp/string/multibyte/mbrtoc32</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>mbrtoc8</name>
+      <anchorfile>cpp/string/multibyte/mbrtoc8</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -4056,6 +4302,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>no_emit_on_flush</name>
+      <anchorfile>cpp/io/manip/emit_on_flush</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>noboolalpha</name>
       <anchorfile>cpp/io/manip/boolalpha</anchorfile>
       <anchor></anchor>
@@ -4170,12 +4423,21 @@
     <class kind="class">std::ostreambuf_iterator</class>
     <class kind="class">std::ostringstream</class>
     <class kind="class">std::ostrstream</class>
+    <class kind="class">std::osyncstream</class>
     <class kind="class">std::out_of_range</class>
     <class kind="class">std::output_iterator_tag</class>
     <class kind="class">std::overflow_error</class>
     <class kind="class">std::owner_less</class>
     <class kind="class">std::packaged_task</class>
     <class kind="class">std::pair</class>
+    <member kind="function">
+      <type>T</type>
+      <name>partial_order</name>
+      <anchorfile>cpp/utility/compare/partial_order</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <class kind="class">std::partial_ordering</class>
     <member kind="function">
       <type>T</type>
       <name>partial_sort</name>
@@ -4369,6 +4631,7 @@
       <arglist>(T... args)</arglist>
     </member>
     <class kind="class">std::range_error</class>
+    <namespace>std::ranges</namespace>
     <class kind="class">std::rank</class>
     <member kind="variable">
       <type>T</type>
@@ -4442,6 +4705,7 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <class kind="class">std::readable_traits</class>
     <member kind="function">
       <type>T</type>
       <name>realloc</name>
@@ -4535,6 +4799,8 @@
     </member>
     <class kind="class">std::remove_cv</class>
     <class kind="class">std::remove_cv_t</class>
+    <class kind="class">std::remove_cvref</class>
+    <class kind="class">std::remove_cvref_t</class>
     <class kind="class">std::remove_extent</class>
     <class kind="class">std::remove_extent_t</class>
     <member kind="function">
@@ -4872,6 +5138,20 @@
     <class kind="class">std::shared_timed_mutex</class>
     <member kind="function">
       <type>T</type>
+      <name>shift_left</name>
+      <anchorfile>cpp/algorithm/shift</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>shift_right</name>
+      <anchorfile>cpp/algorithm/shift</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>showbase</name>
       <anchorfile>cpp/io/manip/showbase</anchorfile>
       <anchor></anchor>
@@ -4967,6 +5247,7 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <class kind="class">std::span</class>
     <member kind="function">
       <type>T</type>
       <name>sph_bessel</name>
@@ -5057,6 +5338,13 @@
       <type>T</type>
       <name>sscanf</name>
       <anchorfile>cpp/io/c/fscanf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>ssize</name>
+      <anchorfile>cpp/iterator/size</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -5233,6 +5521,22 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>strong_equal</name>
+      <anchorfile>cpp/utility/compare/strong_equal</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <class kind="class">std::strong_equality</class>
+    <member kind="function">
+      <type>T</type>
+      <name>strong_order</name>
+      <anchorfile>cpp/utility/compare/strong_order</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <class kind="class">std::strong_ordering</class>
+    <member kind="function">
+      <type>T</type>
       <name>strpbrk</name>
       <anchorfile>cpp/string/byte/strpbrk</anchorfile>
       <anchor></anchor>
@@ -5369,6 +5673,7 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <class kind="class">std::syncbuf</class>
     <member kind="function">
       <type>T</type>
       <name>system</name>
@@ -5470,6 +5775,20 @@
       <type>T</type>
       <name>tmpnam</name>
       <anchorfile>cpp/io/c/tmpnam</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>to_address</name>
+      <anchorfile>cpp/memory/to_address</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>to_chars</name>
+      <anchorfile>cpp/utility/to_chars</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -5595,6 +5914,8 @@
       <anchor></anchor>
       <arglist></arglist>
     </member>
+    <class kind="class">std::type_identity</class>
+    <class kind="class">std::type_identity_t</class>
     <class kind="class">std::type_index</class>
     <class kind="class">std::type_info</class>
     <class kind="class">std::u16streampos</class>
@@ -5603,6 +5924,8 @@
     <class kind="class">std::u32streampos</class>
     <class kind="class">std::u32string</class>
     <class kind="class">std::u32string_view</class>
+    <class kind="class">std::u8string</class>
+    <class kind="class">std::u8string_view</class>
     <class kind="class">std::uint16_t</class>
     <class kind="class">std::uint32_t</class>
     <class kind="class">std::uint64_t</class>
@@ -5622,6 +5945,13 @@
     <member kind="function">
       <type>T</type>
       <name>uncaught_exception</name>
+      <anchorfile>cpp/error/uncaught_exception</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>uncaught_exceptions</name>
       <anchorfile>cpp/error/uncaught_exception</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
@@ -5667,6 +5997,13 @@
     </member>
     <class kind="class">std::uniform_int_distribution</class>
     <class kind="class">std::uniform_real_distribution</class>
+    <member kind="function">
+      <type>T</type>
+      <name>uninitialized_construct_using_allocator</name>
+      <anchorfile>cpp/memory/uninitialized_construct_using_allocator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
     <member kind="function">
       <type>T</type>
       <name>uninitialized_copy</name>
@@ -5764,6 +6101,9 @@
     <class kind="class">std::unordered_multimap</class>
     <class kind="class">std::unordered_multiset</class>
     <class kind="class">std::unordered_set</class>
+    <class kind="class">std::unwrap_ref_decay</class>
+    <class kind="class">std::unwrap_ref_decay_t</class>
+    <class kind="class">std::unwrap_reference</class>
     <member kind="function">
       <type>T</type>
       <name>upper_bound</name>
@@ -5786,6 +6126,13 @@
       <arglist>(T... args)</arglist>
     </member>
     <class kind="class">std::uses_allocator</class>
+    <member kind="function">
+      <type>T</type>
+      <name>uses_allocator_construction_args</name>
+      <anchorfile>cpp/memory/uses_allocator_construction_args</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
     <member kind="variable">
       <type>T</type>
       <name>uses_allocator_v</name>
@@ -6145,6 +6492,22 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <member kind="function">
+      <type>T</type>
+      <name>weak_equal</name>
+      <anchorfile>cpp/utility/compare/weak_equal</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <class kind="class">std::weak_equality</class>
+    <member kind="function">
+      <type>T</type>
+      <name>weak_order</name>
+      <anchorfile>cpp/utility/compare/weak_order</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <class kind="class">std::weak_ordering</class>
     <class kind="class">std::weak_ptr</class>
     <class kind="class">std::weibull_distribution</class>
     <class kind="class">std::wfilebuf</class>
@@ -6191,6 +6554,7 @@
     <class kind="class">std::wofstream</class>
     <class kind="class">std::wostream</class>
     <class kind="class">std::wostringstream</class>
+    <class kind="class">std::wosyncstream</class>
     <member kind="function">
       <type>T</type>
       <name>wprintf</name>
@@ -6224,6 +6588,7 @@
     <class kind="class">std::wstring_view</class>
     <class kind="class">std::wstringbuf</class>
     <class kind="class">std::wstringstream</class>
+    <class kind="class">std::wsyncbuf</class>
     <class kind="class">std::yocto</class>
     <class kind="class">std::yotta</class>
     <class kind="class">std::zetta</class>
@@ -10271,6 +10636,171 @@
     </member>
   </compound>
   <compound kind="class">
+    <name>std::atomic_ref</name>
+    <filename>cpp/atomic/atomic_ref</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>atomic_ref</name>
+      <anchorfile>cpp/atomic/atomic_ref/atomic_ref</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>compare_exchange_strong</name>
+      <anchorfile>cpp/atomic/atomic_ref/compare_exchange</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>compare_exchange_weak</name>
+      <anchorfile>cpp/atomic/atomic_ref/compare_exchange</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>exchange</name>
+      <anchorfile>cpp/atomic/atomic_ref/exchange</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>fetch_add</name>
+      <anchorfile>cpp/atomic/atomic_ref/fetch_add</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>fetch_and</name>
+      <anchorfile>cpp/atomic/atomic_ref/fetch_and</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>fetch_or</name>
+      <anchorfile>cpp/atomic/atomic_ref/fetch_or</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>fetch_sub</name>
+      <anchorfile>cpp/atomic/atomic_ref/fetch_sub</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>fetch_xor</name>
+      <anchorfile>cpp/atomic/atomic_ref/fetch_xor</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>is_lock_free</name>
+      <anchorfile>cpp/atomic/atomic_ref/is_lock_free</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>load</name>
+      <anchorfile>cpp/atomic/atomic_ref/load</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator T</name>
+      <anchorfile>cpp/atomic/atomic_ref/operator_T</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator&amp;=</name>
+      <anchorfile>cpp/atomic/atomic_ref/operator_arith2</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++</name>
+      <anchorfile>cpp/atomic/atomic_ref/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++(int)</name>
+      <anchorfile>cpp/atomic/atomic_ref/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator+=</name>
+      <anchorfile>cpp/atomic/atomic_ref/operator_arith2</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator--</name>
+      <anchorfile>cpp/atomic/atomic_ref/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator--(int)</name>
+      <anchorfile>cpp/atomic/atomic_ref/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator-=</name>
+      <anchorfile>cpp/atomic/atomic_ref/operator_arith2</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator=</name>
+      <anchorfile>cpp/atomic/atomic_ref/operator=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator^=</name>
+      <anchorfile>cpp/atomic/atomic_ref/operator_arith2</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator|=</name>
+      <anchorfile>cpp/atomic/atomic_ref/operator_arith2</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>store</name>
+      <anchorfile>cpp/atomic/atomic_ref/store</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
     <name>std::atomic_schar</name>
     <filename>cpp/atomic/atomic</filename>
     <member kind="function">
@@ -14135,6 +14665,41 @@
   <compound kind="class">
     <name>std::back_insert_iterator</name>
     <filename>cpp/iterator/back_insert_iterator</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>back_insert_iterator</name>
+      <anchorfile>cpp/iterator/back_insert_iterator/back_insert_iterator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator*</name>
+      <anchorfile>cpp/iterator/back_insert_iterator/operator*</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++</name>
+      <anchorfile>cpp/iterator/back_insert_iterator/operator++</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++(int)</name>
+      <anchorfile>cpp/iterator/back_insert_iterator/operator++</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator=</name>
+      <anchorfile>cpp/iterator/back_insert_iterator/operator=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
   </compound>
   <compound kind="class">
     <name>std::bad_alloc</name>
@@ -14166,24 +14731,6 @@
     <filename>cpp/utility/any/bad_any_cast</filename>
   </compound>
   <compound kind="class">
-    <name>std::bad_array_length</name>
-    <filename>cpp/memory/new/bad_array_length</filename>
-    <member kind="function">
-      <type>T</type>
-      <name>bad_array_length</name>
-      <anchorfile>cpp/memory/new/bad_array_length</anchorfile>
-      <anchor></anchor>
-      <arglist>(T... args)</arglist>
-    </member>
-    <member kind="function">
-      <type>T</type>
-      <name>what</name>
-      <anchorfile>cpp/memory/new/bad_alloc</anchorfile>
-      <anchor></anchor>
-      <arglist>(T... args)</arglist>
-    </member>
-  </compound>
-  <compound kind="class">
     <name>std::bad_array_new_length</name>
     <filename>cpp/memory/new/bad_array_new_length</filename>
     <member kind="function">
@@ -14196,7 +14743,7 @@
     <member kind="function">
       <type>T</type>
       <name>what</name>
-      <anchorfile>cpp/memory/new/bad_alloc</anchorfile>
+      <anchorfile>cpp/error/exception/what</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -14273,7 +14820,7 @@
     <member kind="function">
       <type>T</type>
       <name>bad_weak_ptr</name>
-      <anchorfile>cpp/memory/bad_weak_ptr/bad_weak_ptr</anchorfile>
+      <anchorfile>cpp/memory/bad_weak_ptr</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -14284,6 +14831,10 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+  </compound>
+  <compound kind="class">
+    <name>std::basic_common_reference</name>
+    <filename>cpp/types/common_reference</filename>
   </compound>
   <compound kind="class">
     <name>std::basic_filebuf</name>
@@ -17987,6 +18538,366 @@
     </member>
   </compound>
   <compound kind="class">
+    <name>std::basic_osyncstream</name>
+    <filename>cpp/io/basic_osyncstream</filename>
+    <class kind="class">std::basic_osyncstream::Init</class>
+    <member kind="function">
+      <type>T</type>
+      <name>bad</name>
+      <anchorfile>cpp/io/basic_ios/bad</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>basic_osyncstream</name>
+      <anchorfile>cpp/io/basic_osyncstream/basic_osyncstream</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>clear</name>
+      <anchorfile>cpp/io/basic_ios/clear</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>copyfmt</name>
+      <anchorfile>cpp/io/basic_ios/copyfmt</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>emit</name>
+      <anchorfile>cpp/io/basic_osyncstream/emit</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>eof</name>
+      <anchorfile>cpp/io/basic_ios/eof</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <class kind="class">std::basic_osyncstream::event_callback</class>
+    <member kind="function">
+      <type>T</type>
+      <name>exceptions</name>
+      <anchorfile>cpp/io/basic_ios/exceptions</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>fail</name>
+      <anchorfile>cpp/io/basic_ios/fail</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <class kind="class">std::basic_osyncstream::failure</class>
+    <member kind="function">
+      <type>T</type>
+      <name>fill</name>
+      <anchorfile>cpp/io/basic_ios/fill</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>flags</name>
+      <anchorfile>cpp/io/ios_base/flags</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>flush</name>
+      <anchorfile>cpp/io/basic_ostream/flush</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>get_wrapped</name>
+      <anchorfile>cpp/io/basic_osyncstream/get_wrapped</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>getloc</name>
+      <anchorfile>cpp/io/ios_base/getloc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>good</name>
+      <anchorfile>cpp/io/basic_ios/good</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>imbue</name>
+      <anchorfile>cpp/io/basic_ios/imbue</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>init</name>
+      <anchorfile>cpp/io/basic_ios/init</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>iword</name>
+      <anchorfile>cpp/io/ios_base/iword</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>move</name>
+      <anchorfile>cpp/io/basic_ios/move</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>narrow</name>
+      <anchorfile>cpp/io/basic_ios/narrow</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator bool</name>
+      <anchorfile>cpp/io/basic_ios/operator_bool</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator!</name>
+      <anchorfile>cpp/io/basic_ios/operator!</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator&lt;&lt;</name>
+      <anchorfile>cpp/io/basic_ostream/operator_ltlt</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator=</name>
+      <anchorfile>cpp/io/basic_osyncstream/operator=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>precision</name>
+      <anchorfile>cpp/io/ios_base/precision</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>put</name>
+      <anchorfile>cpp/io/basic_ostream/put</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pword</name>
+      <anchorfile>cpp/io/ios_base/pword</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>rdbuf</name>
+      <anchorfile>cpp/io/basic_ios/rdbuf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>rdstate</name>
+      <anchorfile>cpp/io/basic_ios/rdstate</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>register_callback</name>
+      <anchorfile>cpp/io/ios_base/register_callback</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>seekp</name>
+      <anchorfile>cpp/io/basic_ostream/seekp</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <class kind="class">std::basic_osyncstream::sentry</class>
+    <member kind="function">
+      <type>T</type>
+      <name>set_rdbuf</name>
+      <anchorfile>cpp/io/basic_ios/set_rdbuf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>setf</name>
+      <anchorfile>cpp/io/ios_base/setf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>setstate</name>
+      <anchorfile>cpp/io/basic_ios/setstate</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>swap</name>
+      <anchorfile>cpp/io/basic_ios/swap</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sync_with_stdio</name>
+      <anchorfile>cpp/io/ios_base/sync_with_stdio</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>tellp</name>
+      <anchorfile>cpp/io/basic_ostream/tellp</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>tie</name>
+      <anchorfile>cpp/io/basic_ios/tie</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>unsetf</name>
+      <anchorfile>cpp/io/ios_base/unsetf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>widen</name>
+      <anchorfile>cpp/io/basic_ios/widen</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>width</name>
+      <anchorfile>cpp/io/ios_base/width</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>write</name>
+      <anchorfile>cpp/io/basic_ostream/write</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>xalloc</name>
+      <anchorfile>cpp/io/ios_base/xalloc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>~basic_osyncstream</name>
+      <anchorfile>cpp/io/basic_osyncstream/~basic_osyncstream</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::basic_osyncstream::Init</name>
+    <filename>cpp/io/ios_base/Init</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::basic_osyncstream::event_callback</name>
+    <filename>cpp/io/ios_base/event_callback</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::basic_osyncstream::failure</name>
+    <filename>cpp/io/ios_base/failure</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>failure</name>
+      <anchorfile>cpp/io/ios_base/failure</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>what</name>
+      <anchorfile>cpp/error/exception/what</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::basic_osyncstream::sentry</name>
+    <filename>cpp/io/basic_ostream/sentry</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>operator bool</name>
+      <anchorfile>cpp/io/basic_ostream/sentry</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sentry</name>
+      <anchorfile>cpp/io/basic_ostream/sentry</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>~sentry</name>
+      <anchorfile>cpp/io/basic_ostream/sentry</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
     <name>std::basic_regex</name>
     <filename>cpp/regex/basic_regex</filename>
     <member kind="function">
@@ -18475,6 +19386,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>ends_with</name>
+      <anchorfile>cpp/string/basic_string/ends_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>erase</name>
       <anchorfile>cpp/string/basic_string/erase</anchorfile>
       <anchor></anchor>
@@ -18547,6 +19465,20 @@
       <type>T</type>
       <name>max_size</name>
       <anchorfile>cpp/string/basic_string/max_size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator basic_string_view</name>
+      <anchorfile>cpp/string/basic_string/operator_basic_string_view</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator+=</name>
+      <anchorfile>cpp/string/basic_string/operator+=</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -18631,6 +19563,13 @@
       <type>T</type>
       <name>size</name>
       <anchorfile>cpp/string/basic_string/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>starts_with</name>
+      <anchorfile>cpp/string/basic_string/starts_with</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -18745,6 +19684,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>ends_with</name>
+      <anchorfile>cpp/string/basic_string_view/ends_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>find</name>
       <anchorfile>cpp/string/basic_string_view/find</anchorfile>
       <anchor></anchor>
@@ -18852,6 +19798,13 @@
       <type>T</type>
       <name>size</name>
       <anchorfile>cpp/string/basic_string_view/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>starts_with</name>
+      <anchorfile>cpp/string/basic_string_view/starts_with</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -19599,6 +20552,325 @@
     </member>
   </compound>
   <compound kind="class">
+    <name>std::basic_syncbuf</name>
+    <filename>cpp/io/basic_syncbuf</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>basic_syncbuf</name>
+      <anchorfile>cpp/io/basic_syncbuf/basic_syncbuf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>eback</name>
+      <anchorfile>cpp/io/basic_streambuf/gptr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>egptr</name>
+      <anchorfile>cpp/io/basic_streambuf/gptr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>emit</name>
+      <anchorfile>cpp/io/basic_syncbuf/emit</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>epptr</name>
+      <anchorfile>cpp/io/basic_streambuf/pptr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>gbump</name>
+      <anchorfile>cpp/io/basic_streambuf/gbump</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>get_allocator</name>
+      <anchorfile>cpp/io/basic_syncbuf/get_allocator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>get_wrapped</name>
+      <anchorfile>cpp/io/basic_syncbuf/get_wrapped</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>getloc</name>
+      <anchorfile>cpp/io/basic_streambuf/getloc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>gptr</name>
+      <anchorfile>cpp/io/basic_streambuf/gptr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>imbue</name>
+      <anchorfile>cpp/io/basic_streambuf/pubimbue</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>in_avail</name>
+      <anchorfile>cpp/io/basic_streambuf/in_avail</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator=</name>
+      <anchorfile>cpp/io/basic_syncbuf/operator=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>overflow</name>
+      <anchorfile>cpp/io/basic_streambuf/overflow</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pbackfail</name>
+      <anchorfile>cpp/io/basic_streambuf/pbackfail</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pbase</name>
+      <anchorfile>cpp/io/basic_streambuf/pptr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pbump</name>
+      <anchorfile>cpp/io/basic_streambuf/pbump</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pptr</name>
+      <anchorfile>cpp/io/basic_streambuf/pptr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pubimbue</name>
+      <anchorfile>cpp/io/basic_streambuf/pubimbue</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pubseekoff</name>
+      <anchorfile>cpp/io/basic_streambuf/pubseekoff</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pubseekpos</name>
+      <anchorfile>cpp/io/basic_streambuf/pubseekpos</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pubsetbuf</name>
+      <anchorfile>cpp/io/basic_streambuf/pubsetbuf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pubsync</name>
+      <anchorfile>cpp/io/basic_streambuf/pubsync</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sbumpc</name>
+      <anchorfile>cpp/io/basic_streambuf/sbumpc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>seekoff</name>
+      <anchorfile>cpp/io/basic_streambuf/pubseekoff</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>seekpos</name>
+      <anchorfile>cpp/io/basic_streambuf/pubseekpos</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>set_emit_on_sync</name>
+      <anchorfile>cpp/io/basic_syncbuf/set_emit_on_sync</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>setbuf</name>
+      <anchorfile>cpp/io/basic_streambuf/pubsetbuf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>setg</name>
+      <anchorfile>cpp/io/basic_streambuf/setg</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>setp</name>
+      <anchorfile>cpp/io/basic_streambuf/setp</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sgetc</name>
+      <anchorfile>cpp/io/basic_streambuf/sgetc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sgetn</name>
+      <anchorfile>cpp/io/basic_streambuf/sgetn</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>showmanyc</name>
+      <anchorfile>cpp/io/basic_streambuf/showmanyc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>snextc</name>
+      <anchorfile>cpp/io/basic_streambuf/snextc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sputbackc</name>
+      <anchorfile>cpp/io/basic_streambuf/sputbackc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sputc</name>
+      <anchorfile>cpp/io/basic_streambuf/sputc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sputn</name>
+      <anchorfile>cpp/io/basic_streambuf/sputn</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sungetc</name>
+      <anchorfile>cpp/io/basic_streambuf/sungetc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>swap</name>
+      <anchorfile>cpp/io/basic_streambuf/swap</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sync</name>
+      <anchorfile>cpp/io/basic_streambuf/pubsync</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>uflow</name>
+      <anchorfile>cpp/io/basic_streambuf/uflow</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>underflow</name>
+      <anchorfile>cpp/io/basic_streambuf/underflow</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>xsgetn</name>
+      <anchorfile>cpp/io/basic_streambuf/sgetn</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>xsputn</name>
+      <anchorfile>cpp/io/basic_streambuf/sputn</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>~basic_syncbuf</name>
+      <anchorfile>cpp/io/basic_syncbuf/~basic_syncbuf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
     <name>std::bernoulli_distribution</name>
     <filename>cpp/numeric/random/bernoulli_distribution</filename>
     <member kind="function">
@@ -19752,6 +21024,17 @@
       <type>T</type>
       <name>operator()</name>
       <anchorfile>cpp/utility/functional/bit_or</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::bit_xor</name>
+    <filename>cpp/utility/functional/bit_xor</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>operator()</name>
+      <anchorfile>cpp/utility/functional/bit_xor</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -19947,6 +21230,13 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator()</name>
+      <anchorfile>cpp/utility/functional/boyer_moore_horspool_searcher</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
   </compound>
   <compound kind="class">
     <name>std::boyer_moore_searcher</name>
@@ -19958,6 +21248,17 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator()</name>
+      <anchorfile>cpp/utility/functional/boyer_moore_searcher</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::byte</name>
+    <filename>cpp/types/byte</filename>
   </compound>
   <compound kind="class">
     <name>std::cauchy_distribution</name>
@@ -20123,6 +21424,10 @@
     </member>
   </compound>
   <compound kind="class">
+    <name>std::chars_format</name>
+    <filename>cpp/utility/chars_format</filename>
+  </compound>
+  <compound kind="class">
     <name>std::chi_squared_distribution</name>
     <filename>cpp/numeric/random/chi_squared_distribution</filename>
     <member kind="function">
@@ -20205,6 +21510,13 @@
       <arglist>(T... args)</arglist>
     </member>
     <class kind="class">std::chrono::treat_as_floating_point</class>
+    <member kind="variable">
+      <type>T</type>
+      <name>treat_as_floating_point_v</name>
+      <anchorfile>cpp/chrono/treat_as_floating_point</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
   </compound>
   <compound kind="class">
     <name>std::chrono::duration</name>
@@ -21412,6 +22724,13 @@
       <arglist>(T... args)</arglist>
     </member>
     <class kind="class">std::codecvt::extern_type</class>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/codecvt</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <member kind="function">
       <type>T</type>
       <name>in</name>
@@ -21547,6 +22866,13 @@
       <arglist>(T... args)</arglist>
     </member>
     <class kind="class">std::codecvt_byname::extern_type</class>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/codecvt</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <member kind="function">
       <type>T</type>
       <name>in</name>
@@ -21671,6 +22997,13 @@
       <arglist>(T... args)</arglist>
     </member>
     <class kind="class">std::codecvt_utf16::extern_type</class>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/codecvt</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <member kind="function">
       <type>T</type>
       <name>in</name>
@@ -21788,6 +23121,13 @@
       <arglist>(T... args)</arglist>
     </member>
     <class kind="class">std::codecvt_utf8::extern_type</class>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/codecvt</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <member kind="function">
       <type>T</type>
       <name>in</name>
@@ -21905,6 +23245,13 @@
       <arglist>(T... args)</arglist>
     </member>
     <class kind="class">std::codecvt_utf8_utf16::extern_type</class>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/codecvt</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <member kind="function">
       <type>T</type>
       <name>in</name>
@@ -22001,6 +23348,13 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/collate</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <class kind="class">std::collate::string_type</class>
     <member kind="function">
       <type>T</type>
@@ -22071,6 +23425,13 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/collate</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <class kind="class">std::collate_byname::string_type</class>
     <member kind="function">
       <type>T</type>
@@ -22094,6 +23455,22 @@
   <compound kind="class">
     <name>std::collate_byname::string_type</name>
     <filename>cpp/locale/collate</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::common_comparison_category</name>
+    <filename>cpp/utility/compare/common_comparison_category</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::common_comparison_category_t</name>
+    <filename>cpp/utility/compare/common_comparison_category</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::common_reference</name>
+    <filename>cpp/types/common_reference</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::common_reference_t</name>
+    <filename>cpp/types/common_reference</filename>
   </compound>
   <compound kind="class">
     <name>std::common_type</name>
@@ -22230,13 +23607,6 @@
       <type>T</type>
       <name>condition_variable_any</name>
       <anchorfile>cpp/thread/condition_variable_any/condition_variable_any</anchorfile>
-      <anchor></anchor>
-      <arglist>(T... args)</arglist>
-    </member>
-    <member kind="function">
-      <type>T</type>
-      <name>native_handle</name>
-      <anchorfile>cpp/thread/condition_variable_any/native_handle</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -22510,6 +23880,13 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/ctype</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <member kind="function">
       <type>T</type>
       <name>is</name>
@@ -22626,6 +24003,13 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/ctype</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <member kind="function">
       <type>T</type>
       <name>is</name>
@@ -22725,6 +24109,13 @@
     <member kind="function">
       <type>T</type>
       <name>default_searcher</name>
+      <anchorfile>cpp/utility/functional/default_searcher</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator()</name>
       <anchorfile>cpp/utility/functional/default_searcher</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
@@ -23428,6 +24819,7 @@
     <class kind="class">std::execution::parallel_policy</class>
     <class kind="class">std::execution::parallel_unsequenced_policy</class>
     <class kind="class">std::execution::sequenced_policy</class>
+    <class kind="class">std::execution::unsequenced_policy</class>
   </compound>
   <compound kind="class">
     <name>std::execution::parallel_policy</name>
@@ -23439,6 +24831,10 @@
   </compound>
   <compound kind="class">
     <name>std::execution::sequenced_policy</name>
+    <filename>cpp/algorithm/execution_policy_tag_t</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::execution::unsequenced_policy</name>
     <filename>cpp/algorithm/execution_policy_tag_t</filename>
   </compound>
   <compound kind="namespace">
@@ -23993,21 +25389,21 @@
     <member kind="function">
       <type>T</type>
       <name>make_boyer_moore_horspool_searcher</name>
-      <anchorfile>cpp/experimental/make_boyer_moore_horspool_searcher</anchorfile>
+      <anchorfile>cpp/experimental/boyer_moore_horspool_searcher</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
     <member kind="function">
       <type>T</type>
       <name>make_boyer_moore_searcher</name>
-      <anchorfile>cpp/experimental/make_boyer_moore_searcher</anchorfile>
+      <anchorfile>cpp/experimental/boyer_moore_searcher</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
     <member kind="function">
       <type>T</type>
       <name>make_default_searcher</name>
-      <anchorfile>cpp/experimental/make_default_searcher</anchorfile>
+      <anchorfile>cpp/experimental/default_searcher</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -25554,7 +26950,7 @@
   </compound>
   <compound kind="class">
     <name>std::experimental::pmr::null_memory_resource</name>
-    <filename>cpp/experimental/null_Memory_resource</filename>
+    <filename>cpp/experimental/null_memory_resource</filename>
   </compound>
   <compound kind="class">
     <name>std::experimental::pmr::polymorphic_allocator</name>
@@ -25578,7 +26974,7 @@
   </compound>
   <compound kind="class">
     <name>std::experimental::raw_invocation_type</name>
-    <filename>cpp/experimental/raw_invocation_type</filename>
+    <filename>cpp/experimental/invocation_type</filename>
   </compound>
   <compound kind="class">
     <name>std::experimental::source_location</name>
@@ -27148,6 +28544,7 @@
       <arglist>(T... args)</arglist>
     </member>
     <class kind="class">std::filesystem::path</class>
+    <class kind="class">std::filesystem::perm_options</class>
     <member kind="function">
       <type>T</type>
       <name>permissions</name>
@@ -27232,13 +28629,6 @@
       <type>T</type>
       <name>symlink_status</name>
       <anchorfile>cpp/filesystem/status</anchorfile>
-      <anchor></anchor>
-      <arglist>(T... args)</arglist>
-    </member>
-    <member kind="function">
-      <type>T</type>
-      <name>system_complete</name>
-      <anchorfile>cpp/filesystem/absolute</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -27405,7 +28795,7 @@
     <member kind="function">
       <type>T</type>
       <name>~file_status</name>
-      <anchorfile>cpp/filesystem/file_status/~file_status</anchorfile>
+      <anchorfile>cpp/filesystem/file_status</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -27819,6 +29209,10 @@
     </member>
   </compound>
   <compound kind="class">
+    <name>std::filesystem::perm_options</name>
+    <filename>cpp/filesystem/perm_options</filename>
+  </compound>
+  <compound kind="class">
     <name>std::filesystem::perms</name>
     <filename>cpp/filesystem/perms</filename>
   </compound>
@@ -28224,6 +29618,41 @@
   <compound kind="class">
     <name>std::front_insert_iterator</name>
     <filename>cpp/iterator/front_insert_iterator</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>front_insert_iterator</name>
+      <anchorfile>cpp/iterator/front_insert_iterator/front_insert_iterator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator*</name>
+      <anchorfile>cpp/iterator/front_insert_iterator/operator*</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++</name>
+      <anchorfile>cpp/iterator/front_insert_iterator/operator++</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++(int)</name>
+      <anchorfile>cpp/iterator/front_insert_iterator/operator++</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator=</name>
+      <anchorfile>cpp/iterator/front_insert_iterator/operator=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
   </compound>
   <compound kind="class">
     <name>std::fstream</name>
@@ -28811,6 +30240,10 @@
     </member>
   </compound>
   <compound kind="class">
+    <name>std::future_errc</name>
+    <filename>cpp/thread/future_errc</filename>
+  </compound>
+  <compound kind="class">
     <name>std::future_error</name>
     <filename>cpp/thread/future_error</filename>
     <member kind="function">
@@ -29004,6 +30437,17 @@
   <compound kind="class">
     <name>std::hecto</name>
     <filename>cpp/numeric/ratio/ratio</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::identity</name>
+    <filename>cpp/utility/functional/identity</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>operator()</name>
+      <anchorfile>cpp/utility/functional/identity</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
   </compound>
   <compound kind="class">
     <name>std::ifstream</name>
@@ -29441,12 +30885,12 @@
     <filename>cpp/utility/in_place</filename>
   </compound>
   <compound kind="class">
-    <name>std::in_place_tag</name>
-    <filename>cpp/utility/in_place_tag</filename>
-  </compound>
-  <compound kind="class">
     <name>std::in_place_type_t</name>
     <filename>cpp/utility/in_place</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::incrementable_traits</name>
+    <filename>cpp/iterator/incrementable_traits</filename>
   </compound>
   <compound kind="class">
     <name>std::independent_bits_engine</name>
@@ -29552,6 +30996,41 @@
   <compound kind="class">
     <name>std::insert_iterator</name>
     <filename>cpp/iterator/insert_iterator</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>insert_iterator</name>
+      <anchorfile>cpp/iterator/insert_iterator/insert_iterator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator*</name>
+      <anchorfile>cpp/iterator/insert_iterator/operator*</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++</name>
+      <anchorfile>cpp/iterator/insert_iterator/operator++</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++(int)</name>
+      <anchorfile>cpp/iterator/insert_iterator/operator++</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator=</name>
+      <anchorfile>cpp/iterator/insert_iterator/operator=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
   </compound>
   <compound kind="class">
     <name>std::int16_t</name>
@@ -29634,6 +31113,18 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+  </compound>
+  <compound kind="class">
+    <name>std::invoke_result</name>
+    <filename>cpp/types/result_of</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::invoke_result_t</name>
+    <filename>cpp/types/result_of</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::io_errc</name>
+    <filename>cpp/io/io_errc</filename>
   </compound>
   <compound kind="class">
     <name>std::ios_base</name>
@@ -30201,6 +31692,10 @@
     <filename>cpp/types/is_abstract</filename>
   </compound>
   <compound kind="class">
+    <name>std::is_aggregate</name>
+    <filename>cpp/types/is_aggregate</filename>
+  </compound>
+  <compound kind="class">
     <name>std::is_arithmetic</name>
     <filename>cpp/types/is_arithmetic</filename>
   </compound>
@@ -30221,8 +31716,8 @@
     <filename>cpp/utility/functional/is_bind_expression</filename>
   </compound>
   <compound kind="class">
-    <name>std::is_callable</name>
-    <filename>cpp/types/is_callable</filename>
+    <name>std::is_bounded_array</name>
+    <filename>cpp/types/is_bounded_array</filename>
   </compound>
   <compound kind="class">
     <name>std::is_class</name>
@@ -30305,6 +31800,14 @@
     <filename>cpp/types/is_integral</filename>
   </compound>
   <compound kind="class">
+    <name>std::is_invocable</name>
+    <filename>cpp/types/is_invocable</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::is_invocable_r</name>
+    <filename>cpp/types/is_invocable</filename>
+  </compound>
+  <compound kind="class">
     <name>std::is_literal_type</name>
     <filename>cpp/types/is_literal_type</filename>
   </compound>
@@ -30337,12 +31840,12 @@
     <filename>cpp/types/is_assignable</filename>
   </compound>
   <compound kind="class">
-    <name>std::is_nothrow_callable</name>
-    <filename>cpp/types/is_callable</filename>
-  </compound>
-  <compound kind="class">
     <name>std::is_nothrow_constructible</name>
     <filename>cpp/types/is_constructible</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::is_nothrow_convertible</name>
+    <filename>cpp/types/is_convertible</filename>
   </compound>
   <compound kind="class">
     <name>std::is_nothrow_copy_assignable</name>
@@ -30361,6 +31864,14 @@
     <filename>cpp/types/is_destructible</filename>
   </compound>
   <compound kind="class">
+    <name>std::is_nothrow_invocable</name>
+    <filename>cpp/types/is_invocable</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::is_nothrow_invocable_r</name>
+    <filename>cpp/types/is_invocable</filename>
+  </compound>
+  <compound kind="class">
     <name>std::is_nothrow_move_assignable</name>
     <filename>cpp/types/is_move_assignable</filename>
   </compound>
@@ -30374,7 +31885,7 @@
   </compound>
   <compound kind="class">
     <name>std::is_nothrow_swappable_with</name>
-    <filename>cpp/types/is_swappable_with</filename>
+    <filename>cpp/types/is_swappable</filename>
   </compound>
   <compound kind="class">
     <name>std::is_null_pointer</name>
@@ -30430,7 +31941,7 @@
   </compound>
   <compound kind="class">
     <name>std::is_swappable_with</name>
-    <filename>cpp/types/is_swappable_with</filename>
+    <filename>cpp/types/is_swappable</filename>
   </compound>
   <compound kind="class">
     <name>std::is_trivial</name>
@@ -30471,6 +31982,10 @@
   <compound kind="class">
     <name>std::is_trivially_move_constructible</name>
     <filename>cpp/types/is_move_constructible</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::is_unbounded_array</name>
+    <filename>cpp/types/is_unbounded_array</filename>
   </compound>
   <compound kind="class">
     <name>std::is_union</name>
@@ -30879,10 +32394,101 @@
   <compound kind="class">
     <name>std::istream_iterator</name>
     <filename>cpp/iterator/istream_iterator</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>istream_iterator</name>
+      <anchorfile>cpp/iterator/istream_iterator/istream_iterator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator*</name>
+      <anchorfile>cpp/iterator/istream_iterator/operator*</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++</name>
+      <anchorfile>cpp/iterator/istream_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++(int)</name>
+      <anchorfile>cpp/iterator/istream_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator-&gt;</name>
+      <anchorfile>cpp/iterator/istream_iterator/operator*</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>~istream_iterator</name>
+      <anchorfile>cpp/iterator/istream_iterator/~istream_iterator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
   </compound>
   <compound kind="class">
     <name>std::istreambuf_iterator</name>
     <filename>cpp/iterator/istreambuf_iterator</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>equal</name>
+      <anchorfile>cpp/iterator/istreambuf_iterator/equal</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>istreambuf_iterator</name>
+      <anchorfile>cpp/iterator/istreambuf_iterator/istreambuf_iterator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator*</name>
+      <anchorfile>cpp/iterator/istreambuf_iterator/operator*</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++</name>
+      <anchorfile>cpp/iterator/istreambuf_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++(int)</name>
+      <anchorfile>cpp/iterator/istreambuf_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator-&gt;</name>
+      <anchorfile>cpp/iterator/istreambuf_iterator/operator*</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>~istreambuf_iterator</name>
+      <anchorfile>cpp/iterator/istreambuf_iterator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
   </compound>
   <compound kind="class">
     <name>std::istringstream</name>
@@ -31675,6 +33281,26 @@
     </member>
   </compound>
   <compound kind="class">
+    <name>std::iter_common_reference_t</name>
+    <filename>cpp/iterator/iter_t</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::iter_difference_t</name>
+    <filename>cpp/iterator/iter_t</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::iter_reference_t</name>
+    <filename>cpp/iterator/iter_t</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::iter_rvalue_reference_t</name>
+    <filename>cpp/iterator/iter_t</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::iter_value_t</name>
+    <filename>cpp/iterator/iter_t</filename>
+  </compound>
+  <compound kind="class">
     <name>std::iterator</name>
     <filename>cpp/iterator/iterator</filename>
   </compound>
@@ -32435,6 +34061,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>contains</name>
+      <anchorfile>cpp/container/map/contains</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>count</name>
       <anchorfile>cpp/container/map/count</anchorfile>
       <anchor></anchor>
@@ -32881,6 +34514,13 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/messages</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <member kind="function">
       <type>T</type>
       <name>messages</name>
@@ -32964,6 +34604,13 @@
       <anchorfile>cpp/locale/messages/get</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
+    </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/messages</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
     </member>
     <member kind="function">
       <type>T</type>
@@ -33149,6 +34796,13 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/money_get</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <class kind="class">std::money_get::iter_type</class>
     <member kind="function">
       <type>T</type>
@@ -33193,6 +34847,13 @@
       <anchorfile>cpp/locale/money_put/put</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
+    </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/money_put</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
     </member>
     <class kind="class">std::money_put::iter_type</class>
     <member kind="function">
@@ -33329,6 +34990,13 @@
       <anchorfile>cpp/locale/moneypunct/grouping</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
+    </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/moneypunct</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
     </member>
     <member kind="function">
       <type>T</type>
@@ -33489,6 +35157,13 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/moneypunct</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <member kind="function">
       <type>T</type>
       <name>moneypunct_byname</name>
@@ -33559,21 +35234,21 @@
     <member kind="function">
       <type>T</type>
       <name>monostate</name>
-      <anchorfile>cpp/utility/variant/monostate/monostate</anchorfile>
+      <anchorfile>cpp/utility/variant/monostate</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
     <member kind="function">
       <type>T</type>
       <name>operator=</name>
-      <anchorfile>cpp/utility/variant/monostate/operator=</anchorfile>
+      <anchorfile>cpp/utility/variant/monostate</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
     <member kind="function">
       <type>T</type>
       <name>~monostate</name>
-      <anchorfile>cpp/utility/variant/monostate/~monostate</anchorfile>
+      <anchorfile>cpp/utility/variant/monostate</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -33581,6 +35256,104 @@
   <compound kind="class">
     <name>std::move_iterator</name>
     <filename>cpp/iterator/move_iterator</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>base</name>
+      <anchorfile>cpp/iterator/move_iterator/base</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>move_iterator</name>
+      <anchorfile>cpp/iterator/move_iterator/move_iterator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator*</name>
+      <anchorfile>cpp/iterator/move_iterator/operator*</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator+</name>
+      <anchorfile>cpp/iterator/move_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++</name>
+      <anchorfile>cpp/iterator/move_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++(int)</name>
+      <anchorfile>cpp/iterator/move_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator+=</name>
+      <anchorfile>cpp/iterator/move_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator-</name>
+      <anchorfile>cpp/iterator/move_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator--</name>
+      <anchorfile>cpp/iterator/move_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator--(int)</name>
+      <anchorfile>cpp/iterator/move_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator-=</name>
+      <anchorfile>cpp/iterator/move_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator-&gt;</name>
+      <anchorfile>cpp/iterator/move_iterator/operator*</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator=</name>
+      <anchorfile>cpp/iterator/move_iterator/operator=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator[]</name>
+      <anchorfile>cpp/iterator/move_iterator/operator_at</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
   </compound>
   <compound kind="class">
     <name>std::mt19937</name>
@@ -33702,6 +35475,13 @@
       <type>T</type>
       <name>clear</name>
       <anchorfile>cpp/container/multimap/clear</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>contains</name>
+      <anchorfile>cpp/container/multimap/contains</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -33932,6 +35712,13 @@
       <type>T</type>
       <name>clear</name>
       <anchorfile>cpp/container/multiset/clear</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>contains</name>
+      <anchorfile>cpp/container/multiset/contains</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -34373,6 +36160,13 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/num_get</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <class kind="class">std::num_get::iter_type</class>
     <member kind="function">
       <type>T</type>
@@ -34407,6 +36201,13 @@
       <anchorfile>cpp/locale/num_put/put</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
+    </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/num_put</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
     </member>
     <class kind="class">std::num_put::iter_type</class>
     <member kind="function">
@@ -34566,6 +36367,13 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/numpunct</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <member kind="function">
       <type>T</type>
       <name>numpunct</name>
@@ -34663,6 +36471,13 @@
       <anchorfile>cpp/locale/numpunct/grouping</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
+    </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/numpunct</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
     </member>
     <member kind="function">
       <type>T</type>
@@ -35503,10 +37318,101 @@
   <compound kind="class">
     <name>std::ostream_iterator</name>
     <filename>cpp/iterator/ostream_iterator</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>operator*</name>
+      <anchorfile>cpp/iterator/ostream_iterator/operator*</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++</name>
+      <anchorfile>cpp/iterator/ostream_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++(int)</name>
+      <anchorfile>cpp/iterator/ostream_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator=</name>
+      <anchorfile>cpp/iterator/ostream_iterator/operator=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>ostream_iterator</name>
+      <anchorfile>cpp/iterator/ostream_iterator/ostream_iterator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>~ostream_iterator</name>
+      <anchorfile>cpp/iterator/ostream_iterator/~ostream_iterator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
   </compound>
   <compound kind="class">
     <name>std::ostreambuf_iterator</name>
     <filename>cpp/iterator/ostreambuf_iterator</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>failed</name>
+      <anchorfile>cpp/iterator/ostreambuf_iterator/failed</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator*</name>
+      <anchorfile>cpp/iterator/ostreambuf_iterator/operator*</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++</name>
+      <anchorfile>cpp/iterator/ostreambuf_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++(int)</name>
+      <anchorfile>cpp/iterator/ostreambuf_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator=</name>
+      <anchorfile>cpp/iterator/ostreambuf_iterator/operator=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>ostreambuf_iterator</name>
+      <anchorfile>cpp/iterator/ostreambuf_iterator/ostreambuf_iterator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>~ostreambuf_iterator</name>
+      <anchorfile>cpp/iterator/ostreambuf_iterator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
   </compound>
   <compound kind="class">
     <name>std::ostringstream</name>
@@ -36215,6 +38121,366 @@
     </member>
   </compound>
   <compound kind="class">
+    <name>std::osyncstream</name>
+    <filename>cpp/io/basic_osyncstream</filename>
+    <class kind="class">std::osyncstream::Init</class>
+    <member kind="function">
+      <type>T</type>
+      <name>bad</name>
+      <anchorfile>cpp/io/basic_ios/bad</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>clear</name>
+      <anchorfile>cpp/io/basic_ios/clear</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>copyfmt</name>
+      <anchorfile>cpp/io/basic_ios/copyfmt</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>emit</name>
+      <anchorfile>cpp/io/basic_osyncstream/emit</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>eof</name>
+      <anchorfile>cpp/io/basic_ios/eof</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <class kind="class">std::osyncstream::event_callback</class>
+    <member kind="function">
+      <type>T</type>
+      <name>exceptions</name>
+      <anchorfile>cpp/io/basic_ios/exceptions</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>fail</name>
+      <anchorfile>cpp/io/basic_ios/fail</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <class kind="class">std::osyncstream::failure</class>
+    <member kind="function">
+      <type>T</type>
+      <name>fill</name>
+      <anchorfile>cpp/io/basic_ios/fill</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>flags</name>
+      <anchorfile>cpp/io/ios_base/flags</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>flush</name>
+      <anchorfile>cpp/io/basic_ostream/flush</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>get_wrapped</name>
+      <anchorfile>cpp/io/basic_osyncstream/get_wrapped</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>getloc</name>
+      <anchorfile>cpp/io/ios_base/getloc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>good</name>
+      <anchorfile>cpp/io/basic_ios/good</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>imbue</name>
+      <anchorfile>cpp/io/basic_ios/imbue</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>init</name>
+      <anchorfile>cpp/io/basic_ios/init</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>iword</name>
+      <anchorfile>cpp/io/ios_base/iword</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>move</name>
+      <anchorfile>cpp/io/basic_ios/move</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>narrow</name>
+      <anchorfile>cpp/io/basic_ios/narrow</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator bool</name>
+      <anchorfile>cpp/io/basic_ios/operator_bool</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator!</name>
+      <anchorfile>cpp/io/basic_ios/operator!</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator&lt;&lt;</name>
+      <anchorfile>cpp/io/basic_ostream/operator_ltlt</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator=</name>
+      <anchorfile>cpp/io/basic_osyncstream/operator=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>osyncstream</name>
+      <anchorfile>cpp/io/basic_osyncstream/basic_osyncstream</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>precision</name>
+      <anchorfile>cpp/io/ios_base/precision</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>put</name>
+      <anchorfile>cpp/io/basic_ostream/put</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pword</name>
+      <anchorfile>cpp/io/ios_base/pword</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>rdbuf</name>
+      <anchorfile>cpp/io/basic_ios/rdbuf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>rdstate</name>
+      <anchorfile>cpp/io/basic_ios/rdstate</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>register_callback</name>
+      <anchorfile>cpp/io/ios_base/register_callback</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>seekp</name>
+      <anchorfile>cpp/io/basic_ostream/seekp</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <class kind="class">std::osyncstream::sentry</class>
+    <member kind="function">
+      <type>T</type>
+      <name>set_rdbuf</name>
+      <anchorfile>cpp/io/basic_ios/set_rdbuf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>setf</name>
+      <anchorfile>cpp/io/ios_base/setf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>setstate</name>
+      <anchorfile>cpp/io/basic_ios/setstate</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>swap</name>
+      <anchorfile>cpp/io/basic_ios/swap</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sync_with_stdio</name>
+      <anchorfile>cpp/io/ios_base/sync_with_stdio</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>tellp</name>
+      <anchorfile>cpp/io/basic_ostream/tellp</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>tie</name>
+      <anchorfile>cpp/io/basic_ios/tie</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>unsetf</name>
+      <anchorfile>cpp/io/ios_base/unsetf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>widen</name>
+      <anchorfile>cpp/io/basic_ios/widen</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>width</name>
+      <anchorfile>cpp/io/ios_base/width</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>write</name>
+      <anchorfile>cpp/io/basic_ostream/write</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>xalloc</name>
+      <anchorfile>cpp/io/ios_base/xalloc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>~osyncstream</name>
+      <anchorfile>cpp/io/basic_osyncstream/~basic_osyncstream</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::osyncstream::Init</name>
+    <filename>cpp/io/ios_base/Init</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::osyncstream::event_callback</name>
+    <filename>cpp/io/ios_base/event_callback</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::osyncstream::failure</name>
+    <filename>cpp/io/ios_base/failure</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>failure</name>
+      <anchorfile>cpp/io/ios_base/failure</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>what</name>
+      <anchorfile>cpp/error/exception/what</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::osyncstream::sentry</name>
+    <filename>cpp/io/basic_ostream/sentry</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>operator bool</name>
+      <anchorfile>cpp/io/basic_ostream/sentry</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sentry</name>
+      <anchorfile>cpp/io/basic_ostream/sentry</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>~sentry</name>
+      <anchorfile>cpp/io/basic_ostream/sentry</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
     <name>std::out_of_range</name>
     <filename>cpp/error/out_of_range</filename>
     <member kind="function">
@@ -36367,6 +38633,17 @@
       <type>T</type>
       <name>swap</name>
       <anchorfile>cpp/utility/pair/swap</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::partial_ordering</name>
+    <filename>cpp/utility/compare/partial_ordering</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>operator weak_equality</name>
+      <anchorfile>cpp/utility/compare/partial_ordering</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -36564,6 +38841,7 @@
     <class kind="class">std::pmr::synchronized_pool_resource</class>
     <class kind="class">std::pmr::u16string</class>
     <class kind="class">std::pmr::u32string</class>
+    <class kind="class">std::pmr::u8string</class>
     <class kind="class">std::pmr::unordered_map</class>
     <class kind="class">std::pmr::unordered_multimap</class>
     <class kind="class">std::pmr::unordered_multiset</class>
@@ -37324,6 +39602,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>contains</name>
+      <anchorfile>cpp/container/map/contains</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>count</name>
       <anchorfile>cpp/container/map/count</anchorfile>
       <anchor></anchor>
@@ -37691,6 +39976,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>contains</name>
+      <anchorfile>cpp/container/multimap/contains</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>count</name>
       <anchorfile>cpp/container/multimap/count</anchorfile>
       <anchor></anchor>
@@ -37905,6 +40197,13 @@
       <type>T</type>
       <name>clear</name>
       <anchorfile>cpp/container/multiset/clear</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>contains</name>
+      <anchorfile>cpp/container/multiset/contains</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -38138,8 +40437,8 @@
     </member>
     <member kind="function">
       <type>T</type>
-      <name>select_on_container_copy_contruction</name>
-      <anchorfile>cpp/memory/polymorphic_allocator/select_on_container_copy_contruction</anchorfile>
+      <name>select_on_container_copy_construction</name>
+      <anchorfile>cpp/memory/polymorphic_allocator/select_on_container_copy_construction</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -38197,6 +40496,13 @@
       <type>T</type>
       <name>clear</name>
       <anchorfile>cpp/container/set/clear</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>contains</name>
+      <anchorfile>cpp/container/set/contains</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -38507,6 +40813,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>ends_with</name>
+      <anchorfile>cpp/string/basic_string/ends_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>erase</name>
       <anchorfile>cpp/string/basic_string/erase</anchorfile>
       <anchor></anchor>
@@ -38579,6 +40892,20 @@
       <type>T</type>
       <name>max_size</name>
       <anchorfile>cpp/string/basic_string/max_size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator basic_string_view</name>
+      <anchorfile>cpp/string/basic_string/operator_basic_string_view</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator+=</name>
+      <anchorfile>cpp/string/basic_string/operator+=</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -38663,6 +40990,13 @@
       <type>T</type>
       <name>size</name>
       <anchorfile>cpp/string/basic_string/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>starts_with</name>
+      <anchorfile>cpp/string/basic_string/starts_with</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -38893,6 +41227,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>ends_with</name>
+      <anchorfile>cpp/string/basic_string/ends_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>erase</name>
       <anchorfile>cpp/string/basic_string/erase</anchorfile>
       <anchor></anchor>
@@ -38965,6 +41306,20 @@
       <type>T</type>
       <name>max_size</name>
       <anchorfile>cpp/string/basic_string/max_size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator basic_string_view</name>
+      <anchorfile>cpp/string/basic_string/operator_basic_string_view</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator+=</name>
+      <anchorfile>cpp/string/basic_string/operator+=</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -39049,6 +41404,13 @@
       <type>T</type>
       <name>size</name>
       <anchorfile>cpp/string/basic_string/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>starts_with</name>
+      <anchorfile>cpp/string/basic_string/starts_with</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -39198,6 +41560,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>ends_with</name>
+      <anchorfile>cpp/string/basic_string/ends_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>erase</name>
       <anchorfile>cpp/string/basic_string/erase</anchorfile>
       <anchor></anchor>
@@ -39270,6 +41639,20 @@
       <type>T</type>
       <name>max_size</name>
       <anchorfile>cpp/string/basic_string/max_size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator basic_string_view</name>
+      <anchorfile>cpp/string/basic_string/operator_basic_string_view</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator+=</name>
+      <anchorfile>cpp/string/basic_string/operator+=</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -39359,6 +41742,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>starts_with</name>
+      <anchorfile>cpp/string/basic_string/starts_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>substr</name>
       <anchorfile>cpp/string/basic_string/substr</anchorfile>
       <anchor></anchor>
@@ -39374,6 +41764,339 @@
     <member kind="function">
       <type>T</type>
       <name>u32string</name>
+      <anchorfile>cpp/string/basic_string/basic_string</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::pmr::u8string</name>
+    <filename>cpp/string/basic_string</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>append</name>
+      <anchorfile>cpp/string/basic_string/append</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>assign</name>
+      <anchorfile>cpp/string/basic_string/assign</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>at</name>
+      <anchorfile>cpp/string/basic_string/at</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>back</name>
+      <anchorfile>cpp/string/basic_string/back</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>begin</name>
+      <anchorfile>cpp/string/basic_string/begin</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>c_str</name>
+      <anchorfile>cpp/string/basic_string/c_str</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>capacity</name>
+      <anchorfile>cpp/string/basic_string/capacity</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>cbegin</name>
+      <anchorfile>cpp/string/basic_string/begin</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>cend</name>
+      <anchorfile>cpp/string/basic_string/end</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>clear</name>
+      <anchorfile>cpp/string/basic_string/clear</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>compare</name>
+      <anchorfile>cpp/string/basic_string/compare</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>copy</name>
+      <anchorfile>cpp/string/basic_string/copy</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>crbegin</name>
+      <anchorfile>cpp/string/basic_string/rbegin</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>crend</name>
+      <anchorfile>cpp/string/basic_string/rend</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>data</name>
+      <anchorfile>cpp/string/basic_string/data</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>empty</name>
+      <anchorfile>cpp/string/basic_string/empty</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>end</name>
+      <anchorfile>cpp/string/basic_string/end</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>ends_with</name>
+      <anchorfile>cpp/string/basic_string/ends_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>erase</name>
+      <anchorfile>cpp/string/basic_string/erase</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>find</name>
+      <anchorfile>cpp/string/basic_string/find</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>find_first_not_of</name>
+      <anchorfile>cpp/string/basic_string/find_first_not_of</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>find_first_of</name>
+      <anchorfile>cpp/string/basic_string/find_first_of</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>find_last_not_of</name>
+      <anchorfile>cpp/string/basic_string/find_last_not_of</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>find_last_of</name>
+      <anchorfile>cpp/string/basic_string/find_last_of</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>front</name>
+      <anchorfile>cpp/string/basic_string/front</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>get_allocator</name>
+      <anchorfile>cpp/string/basic_string/get_allocator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>insert</name>
+      <anchorfile>cpp/string/basic_string/insert</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>length</name>
+      <anchorfile>cpp/string/basic_string/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>max_size</name>
+      <anchorfile>cpp/string/basic_string/max_size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator basic_string_view</name>
+      <anchorfile>cpp/string/basic_string/operator_basic_string_view</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator+=</name>
+      <anchorfile>cpp/string/basic_string/operator+=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator=</name>
+      <anchorfile>cpp/string/basic_string/operator=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator[]</name>
+      <anchorfile>cpp/string/basic_string/operator_at</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pop_back</name>
+      <anchorfile>cpp/string/basic_string/pop_back</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>push_back</name>
+      <anchorfile>cpp/string/basic_string/push_back</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>rbegin</name>
+      <anchorfile>cpp/string/basic_string/rbegin</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>rend</name>
+      <anchorfile>cpp/string/basic_string/rend</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>replace</name>
+      <anchorfile>cpp/string/basic_string/replace</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>reserve</name>
+      <anchorfile>cpp/string/basic_string/reserve</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>resize</name>
+      <anchorfile>cpp/string/basic_string/resize</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>rfind</name>
+      <anchorfile>cpp/string/basic_string/rfind</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>shrink_to_fit</name>
+      <anchorfile>cpp/string/basic_string/shrink_to_fit</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>size</name>
+      <anchorfile>cpp/string/basic_string/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>starts_with</name>
+      <anchorfile>cpp/string/basic_string/starts_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>substr</name>
+      <anchorfile>cpp/string/basic_string/substr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>swap</name>
+      <anchorfile>cpp/string/basic_string/swap</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>u8string</name>
       <anchorfile>cpp/string/basic_string/basic_string</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
@@ -39456,6 +42179,13 @@
       <type>T</type>
       <name>clear</name>
       <anchorfile>cpp/container/unordered_map/clear</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>contains</name>
+      <anchorfile>cpp/container/unordered_map/contains</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -39738,6 +42468,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>contains</name>
+      <anchorfile>cpp/container/unordered_multimap/contains</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>count</name>
       <anchorfile>cpp/container/unordered_multimap/count</anchorfile>
       <anchor></anchor>
@@ -39994,6 +42731,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>contains</name>
+      <anchorfile>cpp/container/unordered_multiset/contains</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>count</name>
       <anchorfile>cpp/container/unordered_multiset/count</anchorfile>
       <anchor></anchor>
@@ -40245,6 +42989,13 @@
       <type>T</type>
       <name>clear</name>
       <anchorfile>cpp/container/unordered_set/clear</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>contains</name>
+      <anchorfile>cpp/container/unordered_set/contains</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -40871,6 +43622,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>ends_with</name>
+      <anchorfile>cpp/string/basic_string/ends_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>erase</name>
       <anchorfile>cpp/string/basic_string/erase</anchorfile>
       <anchor></anchor>
@@ -40943,6 +43701,20 @@
       <type>T</type>
       <name>max_size</name>
       <anchorfile>cpp/string/basic_string/max_size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator basic_string_view</name>
+      <anchorfile>cpp/string/basic_string/operator_basic_string_view</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator+=</name>
+      <anchorfile>cpp/string/basic_string/operator+=</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -41027,6 +43799,13 @@
       <type>T</type>
       <name>size</name>
       <anchorfile>cpp/string/basic_string/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>starts_with</name>
+      <anchorfile>cpp/string/basic_string/starts_with</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -41400,6 +44179,133 @@
       <arglist>(T... args)</arglist>
     </member>
   </compound>
+  <compound kind="namespace">
+    <name>std::ranges</name>
+    <filename></filename>
+    <member kind="function">
+      <type>T</type>
+      <name>begin</name>
+      <anchorfile>cpp/ranges/begin</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>cbegin</name>
+      <anchorfile>cpp/ranges/begin</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <class kind="class">std::ranges::equal_to</class>
+    <class kind="class">std::ranges::greater</class>
+    <class kind="class">std::ranges::greater_equal</class>
+    <class kind="class">std::ranges::less</class>
+    <class kind="class">std::ranges::less_equal</class>
+    <class kind="class">std::ranges::not_equal_to</class>
+    <member kind="function">
+      <type>T</type>
+      <name>swap</name>
+      <anchorfile>cpp/utility/ranges/swap</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::ranges::equal_to</name>
+    <filename>cpp/utility/functional/ranges/equal_to</filename>
+    <class kind="class">std::ranges::equal_to::is_transparent</class>
+    <member kind="function">
+      <type>T</type>
+      <name>operator()</name>
+      <anchorfile>cpp/utility/functional/ranges/equal_to</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::ranges::equal_to::is_transparent</name>
+    <filename>cpp/utility/functional/ranges/equal_to</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::ranges::greater</name>
+    <filename>cpp/utility/functional/ranges/greater</filename>
+    <class kind="class">std::ranges::greater::is_transparent</class>
+    <member kind="function">
+      <type>T</type>
+      <name>operator()</name>
+      <anchorfile>cpp/utility/functional/ranges/greater</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::ranges::greater::is_transparent</name>
+    <filename>cpp/utility/functional/ranges/greater</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::ranges::greater_equal</name>
+    <filename>cpp/utility/functional/ranges/greater_equal</filename>
+    <class kind="class">std::ranges::greater_equal::is_transparent</class>
+    <member kind="function">
+      <type>T</type>
+      <name>operator()</name>
+      <anchorfile>cpp/utility/functional/ranges/greater_equal</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::ranges::greater_equal::is_transparent</name>
+    <filename>cpp/utility/functional/ranges/greater_equal</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::ranges::less</name>
+    <filename>cpp/utility/functional/ranges/less</filename>
+    <class kind="class">std::ranges::less::is_transparent</class>
+    <member kind="function">
+      <type>T</type>
+      <name>operator()</name>
+      <anchorfile>cpp/utility/functional/ranges/less</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::ranges::less::is_transparent</name>
+    <filename>cpp/utility/functional/ranges/less</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::ranges::less_equal</name>
+    <filename>cpp/utility/functional/ranges/less_equal</filename>
+    <class kind="class">std::ranges::less_equal::is_transparent</class>
+    <member kind="function">
+      <type>T</type>
+      <name>operator()</name>
+      <anchorfile>cpp/utility/functional/ranges/less_equal</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::ranges::less_equal::is_transparent</name>
+    <filename>cpp/utility/functional/ranges/less_equal</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::ranges::not_equal_to</name>
+    <filename>cpp/utility/functional/ranges/not_equal_to</filename>
+    <class kind="class">std::ranges::not_equal_to::is_transparent</class>
+    <member kind="function">
+      <type>T</type>
+      <name>operator()</name>
+      <anchorfile>cpp/utility/functional/ranges/not_equal_to</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::ranges::not_equal_to::is_transparent</name>
+    <filename>cpp/utility/functional/ranges/not_equal_to</filename>
+  </compound>
   <compound kind="class">
     <name>std::rank</name>
     <filename>cpp/types/rank</filename>
@@ -41677,6 +44583,10 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+  </compound>
+  <compound kind="class">
+    <name>std::readable_traits</name>
+    <filename>cpp/iterator/readable_traits</filename>
   </compound>
   <compound kind="class">
     <name>std::recursive_mutex</name>
@@ -42170,6 +45080,14 @@
     <filename>cpp/types/remove_cv</filename>
   </compound>
   <compound kind="class">
+    <name>std::remove_cvref</name>
+    <filename>cpp/types/remove_cvref</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::remove_cvref_t</name>
+    <filename>cpp/types/remove_cvref</filename>
+  </compound>
+  <compound kind="class">
     <name>std::remove_extent</name>
     <filename>cpp/types/remove_extent</filename>
   </compound>
@@ -42212,6 +45130,104 @@
   <compound kind="class">
     <name>std::reverse_iterator</name>
     <filename>cpp/iterator/reverse_iterator</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>base</name>
+      <anchorfile>cpp/iterator/reverse_iterator/base</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator*</name>
+      <anchorfile>cpp/iterator/reverse_iterator/operator*</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator+</name>
+      <anchorfile>cpp/iterator/reverse_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++</name>
+      <anchorfile>cpp/iterator/reverse_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator++(int)</name>
+      <anchorfile>cpp/iterator/reverse_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator+=</name>
+      <anchorfile>cpp/iterator/reverse_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator-</name>
+      <anchorfile>cpp/iterator/reverse_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator--</name>
+      <anchorfile>cpp/iterator/reverse_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator--(int)</name>
+      <anchorfile>cpp/iterator/reverse_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator-=</name>
+      <anchorfile>cpp/iterator/reverse_iterator/operator_arith</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator-&gt;</name>
+      <anchorfile>cpp/iterator/reverse_iterator/operator*</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator=</name>
+      <anchorfile>cpp/iterator/reverse_iterator/operator=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator[]</name>
+      <anchorfile>cpp/iterator/reverse_iterator/operator_at</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>reverse_iterator</name>
+      <anchorfile>cpp/iterator/reverse_iterator/reverse_iterator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
   </compound>
   <compound kind="class">
     <name>std::runtime_error</name>
@@ -42365,6 +45381,13 @@
       <type>T</type>
       <name>clear</name>
       <anchorfile>cpp/container/set/clear</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>contains</name>
+      <anchorfile>cpp/container/set/contains</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -43149,6 +46172,150 @@
     </member>
   </compound>
   <compound kind="class">
+    <name>std::span</name>
+    <filename>cpp/container/span</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>back</name>
+      <anchorfile>cpp/container/span/back</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>begin</name>
+      <anchorfile>cpp/container/span/begin</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>cbegin</name>
+      <anchorfile>cpp/container/span/begin</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>cend</name>
+      <anchorfile>cpp/container/span/end</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>crbegin</name>
+      <anchorfile>cpp/container/span/rbegin</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>crend</name>
+      <anchorfile>cpp/container/span/rend</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>data</name>
+      <anchorfile>cpp/container/span/data</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>empty</name>
+      <anchorfile>cpp/container/span/empty</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>end</name>
+      <anchorfile>cpp/container/span/end</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>first</name>
+      <anchorfile>cpp/container/span/first</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>front</name>
+      <anchorfile>cpp/container/span/front</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>last</name>
+      <anchorfile>cpp/container/span/last</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator=</name>
+      <anchorfile>cpp/container/span/operator=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator[]</name>
+      <anchorfile>cpp/container/span/operator_at</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>rbegin</name>
+      <anchorfile>cpp/container/span/rbegin</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>rend</name>
+      <anchorfile>cpp/container/span/rend</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>size</name>
+      <anchorfile>cpp/container/span/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>size_bytes</name>
+      <anchorfile>cpp/container/span/size_bytes</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>span</name>
+      <anchorfile>cpp/container/span/span</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>subspan</name>
+      <anchorfile>cpp/container/span/subspan</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
     <name>std::sregex_iterator</name>
     <filename>cpp/regex/regex_iterator</filename>
     <member kind="function">
@@ -43815,6 +46982,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>ends_with</name>
+      <anchorfile>cpp/string/basic_string/ends_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>erase</name>
       <anchorfile>cpp/string/basic_string/erase</anchorfile>
       <anchor></anchor>
@@ -43887,6 +47061,20 @@
       <type>T</type>
       <name>max_size</name>
       <anchorfile>cpp/string/basic_string/max_size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator basic_string_view</name>
+      <anchorfile>cpp/string/basic_string/operator_basic_string_view</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator+=</name>
+      <anchorfile>cpp/string/basic_string/operator+=</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -43971,6 +47159,13 @@
       <type>T</type>
       <name>size</name>
       <anchorfile>cpp/string/basic_string/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>starts_with</name>
+      <anchorfile>cpp/string/basic_string/starts_with</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -44085,6 +47280,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>ends_with</name>
+      <anchorfile>cpp/string/basic_string_view/ends_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>find</name>
       <anchorfile>cpp/string/basic_string_view/find</anchorfile>
       <anchor></anchor>
@@ -44192,6 +47394,13 @@
       <type>T</type>
       <name>size</name>
       <anchorfile>cpp/string/basic_string_view/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>starts_with</name>
+      <anchorfile>cpp/string/basic_string_view/starts_with</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -44941,6 +48150,49 @@
       <type>T</type>
       <name>~sentry</name>
       <anchorfile>cpp/io/basic_istream/sentry</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::strong_equality</name>
+    <filename>cpp/utility/compare/strong_equality</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>operator weak_equality</name>
+      <anchorfile>cpp/utility/compare/strong_equality</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::strong_ordering</name>
+    <filename>cpp/utility/compare/strong_ordering</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>operator partial_ordering</name>
+      <anchorfile>cpp/utility/compare/strong_ordering</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator strong_equality</name>
+      <anchorfile>cpp/utility/compare/strong_ordering</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator weak_equality</name>
+      <anchorfile>cpp/utility/compare/strong_ordering</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator weak_ordering</name>
+      <anchorfile>cpp/utility/compare/strong_ordering</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -45840,6 +49092,325 @@
     </member>
   </compound>
   <compound kind="class">
+    <name>std::syncbuf</name>
+    <filename>cpp/io/basic_syncbuf</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>eback</name>
+      <anchorfile>cpp/io/basic_streambuf/gptr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>egptr</name>
+      <anchorfile>cpp/io/basic_streambuf/gptr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>emit</name>
+      <anchorfile>cpp/io/basic_syncbuf/emit</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>epptr</name>
+      <anchorfile>cpp/io/basic_streambuf/pptr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>gbump</name>
+      <anchorfile>cpp/io/basic_streambuf/gbump</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>get_allocator</name>
+      <anchorfile>cpp/io/basic_syncbuf/get_allocator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>get_wrapped</name>
+      <anchorfile>cpp/io/basic_syncbuf/get_wrapped</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>getloc</name>
+      <anchorfile>cpp/io/basic_streambuf/getloc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>gptr</name>
+      <anchorfile>cpp/io/basic_streambuf/gptr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>imbue</name>
+      <anchorfile>cpp/io/basic_streambuf/pubimbue</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>in_avail</name>
+      <anchorfile>cpp/io/basic_streambuf/in_avail</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator=</name>
+      <anchorfile>cpp/io/basic_syncbuf/operator=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>overflow</name>
+      <anchorfile>cpp/io/basic_streambuf/overflow</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pbackfail</name>
+      <anchorfile>cpp/io/basic_streambuf/pbackfail</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pbase</name>
+      <anchorfile>cpp/io/basic_streambuf/pptr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pbump</name>
+      <anchorfile>cpp/io/basic_streambuf/pbump</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pptr</name>
+      <anchorfile>cpp/io/basic_streambuf/pptr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pubimbue</name>
+      <anchorfile>cpp/io/basic_streambuf/pubimbue</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pubseekoff</name>
+      <anchorfile>cpp/io/basic_streambuf/pubseekoff</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pubseekpos</name>
+      <anchorfile>cpp/io/basic_streambuf/pubseekpos</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pubsetbuf</name>
+      <anchorfile>cpp/io/basic_streambuf/pubsetbuf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pubsync</name>
+      <anchorfile>cpp/io/basic_streambuf/pubsync</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sbumpc</name>
+      <anchorfile>cpp/io/basic_streambuf/sbumpc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>seekoff</name>
+      <anchorfile>cpp/io/basic_streambuf/pubseekoff</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>seekpos</name>
+      <anchorfile>cpp/io/basic_streambuf/pubseekpos</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>set_emit_on_sync</name>
+      <anchorfile>cpp/io/basic_syncbuf/set_emit_on_sync</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>setbuf</name>
+      <anchorfile>cpp/io/basic_streambuf/pubsetbuf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>setg</name>
+      <anchorfile>cpp/io/basic_streambuf/setg</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>setp</name>
+      <anchorfile>cpp/io/basic_streambuf/setp</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sgetc</name>
+      <anchorfile>cpp/io/basic_streambuf/sgetc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sgetn</name>
+      <anchorfile>cpp/io/basic_streambuf/sgetn</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>showmanyc</name>
+      <anchorfile>cpp/io/basic_streambuf/showmanyc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>snextc</name>
+      <anchorfile>cpp/io/basic_streambuf/snextc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sputbackc</name>
+      <anchorfile>cpp/io/basic_streambuf/sputbackc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sputc</name>
+      <anchorfile>cpp/io/basic_streambuf/sputc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sputn</name>
+      <anchorfile>cpp/io/basic_streambuf/sputn</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sungetc</name>
+      <anchorfile>cpp/io/basic_streambuf/sungetc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>swap</name>
+      <anchorfile>cpp/io/basic_streambuf/swap</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sync</name>
+      <anchorfile>cpp/io/basic_streambuf/pubsync</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>syncbuf</name>
+      <anchorfile>cpp/io/basic_syncbuf/basic_syncbuf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>uflow</name>
+      <anchorfile>cpp/io/basic_streambuf/uflow</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>underflow</name>
+      <anchorfile>cpp/io/basic_streambuf/underflow</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>xsgetn</name>
+      <anchorfile>cpp/io/basic_streambuf/sgetn</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>xsputn</name>
+      <anchorfile>cpp/io/basic_streambuf/sputn</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>~syncbuf</name>
+      <anchorfile>cpp/io/basic_syncbuf/~basic_syncbuf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
     <name>std::system_error</name>
     <filename>cpp/error/system_error</filename>
     <member kind="function">
@@ -46145,6 +49716,13 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/time_get</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <class kind="class">std::time_get::iter_type</class>
     <member kind="function">
       <type>T</type>
@@ -46271,6 +49849,13 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/time_get</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
+    </member>
     <class kind="class">std::time_get_byname::iter_type</class>
     <member kind="function">
       <type>T</type>
@@ -46305,6 +49890,13 @@
       <anchorfile>cpp/locale/time_put/put</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
+    </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/time_put</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
     </member>
     <class kind="class">std::time_put::iter_type</class>
     <member kind="function">
@@ -46347,6 +49939,13 @@
       <anchorfile>cpp/locale/time_put/put</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
+    </member>
+    <member kind="variable">
+      <type>T</type>
+      <name>id</name>
+      <anchorfile>cpp/locale/time_put</anchorfile>
+      <anchor></anchor>
+      <arglist></arglist>
     </member>
     <class kind="class">std::time_put_byname::iter_type</class>
     <member kind="function">
@@ -46472,6 +50071,14 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+  </compound>
+  <compound kind="class">
+    <name>std::type_identity</name>
+    <filename>cpp/types/type_identity</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::type_identity_t</name>
+    <filename>cpp/types/type_identity</filename>
   </compound>
   <compound kind="class">
     <name>std::type_index</name>
@@ -46714,6 +50321,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>ends_with</name>
+      <anchorfile>cpp/string/basic_string/ends_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>erase</name>
       <anchorfile>cpp/string/basic_string/erase</anchorfile>
       <anchor></anchor>
@@ -46786,6 +50400,20 @@
       <type>T</type>
       <name>max_size</name>
       <anchorfile>cpp/string/basic_string/max_size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator basic_string_view</name>
+      <anchorfile>cpp/string/basic_string/operator_basic_string_view</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator+=</name>
+      <anchorfile>cpp/string/basic_string/operator+=</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -46870,6 +50498,13 @@
       <type>T</type>
       <name>size</name>
       <anchorfile>cpp/string/basic_string/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>starts_with</name>
+      <anchorfile>cpp/string/basic_string/starts_with</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -46984,6 +50619,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>ends_with</name>
+      <anchorfile>cpp/string/basic_string_view/ends_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>find</name>
       <anchorfile>cpp/string/basic_string_view/find</anchorfile>
       <anchor></anchor>
@@ -47091,6 +50733,13 @@
       <type>T</type>
       <name>size</name>
       <anchorfile>cpp/string/basic_string_view/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>starts_with</name>
+      <anchorfile>cpp/string/basic_string_view/starts_with</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -47251,6 +50900,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>ends_with</name>
+      <anchorfile>cpp/string/basic_string/ends_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>erase</name>
       <anchorfile>cpp/string/basic_string/erase</anchorfile>
       <anchor></anchor>
@@ -47323,6 +50979,20 @@
       <type>T</type>
       <name>max_size</name>
       <anchorfile>cpp/string/basic_string/max_size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator basic_string_view</name>
+      <anchorfile>cpp/string/basic_string/operator_basic_string_view</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator+=</name>
+      <anchorfile>cpp/string/basic_string/operator+=</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -47407,6 +51077,13 @@
       <type>T</type>
       <name>size</name>
       <anchorfile>cpp/string/basic_string/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>starts_with</name>
+      <anchorfile>cpp/string/basic_string/starts_with</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -47516,6 +51193,13 @@
       <type>T</type>
       <name>end</name>
       <anchorfile>cpp/string/basic_string_view/end</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>ends_with</name>
+      <anchorfile>cpp/string/basic_string_view/ends_with</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -47633,6 +51317,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>starts_with</name>
+      <anchorfile>cpp/string/basic_string_view/starts_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>substr</name>
       <anchorfile>cpp/string/basic_string_view/substr</anchorfile>
       <anchor></anchor>
@@ -47648,6 +51339,574 @@
     <member kind="function">
       <type>T</type>
       <name>u32string_view</name>
+      <anchorfile>cpp/string/basic_string_view/basic_string_view</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::u8string</name>
+    <filename>cpp/string/basic_string</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>append</name>
+      <anchorfile>cpp/string/basic_string/append</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>assign</name>
+      <anchorfile>cpp/string/basic_string/assign</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>at</name>
+      <anchorfile>cpp/string/basic_string/at</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>back</name>
+      <anchorfile>cpp/string/basic_string/back</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>begin</name>
+      <anchorfile>cpp/string/basic_string/begin</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>c_str</name>
+      <anchorfile>cpp/string/basic_string/c_str</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>capacity</name>
+      <anchorfile>cpp/string/basic_string/capacity</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>cbegin</name>
+      <anchorfile>cpp/string/basic_string/begin</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>cend</name>
+      <anchorfile>cpp/string/basic_string/end</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>clear</name>
+      <anchorfile>cpp/string/basic_string/clear</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>compare</name>
+      <anchorfile>cpp/string/basic_string/compare</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>copy</name>
+      <anchorfile>cpp/string/basic_string/copy</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>crbegin</name>
+      <anchorfile>cpp/string/basic_string/rbegin</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>crend</name>
+      <anchorfile>cpp/string/basic_string/rend</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>data</name>
+      <anchorfile>cpp/string/basic_string/data</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>empty</name>
+      <anchorfile>cpp/string/basic_string/empty</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>end</name>
+      <anchorfile>cpp/string/basic_string/end</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>ends_with</name>
+      <anchorfile>cpp/string/basic_string/ends_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>erase</name>
+      <anchorfile>cpp/string/basic_string/erase</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>find</name>
+      <anchorfile>cpp/string/basic_string/find</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>find_first_not_of</name>
+      <anchorfile>cpp/string/basic_string/find_first_not_of</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>find_first_of</name>
+      <anchorfile>cpp/string/basic_string/find_first_of</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>find_last_not_of</name>
+      <anchorfile>cpp/string/basic_string/find_last_not_of</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>find_last_of</name>
+      <anchorfile>cpp/string/basic_string/find_last_of</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>front</name>
+      <anchorfile>cpp/string/basic_string/front</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>get_allocator</name>
+      <anchorfile>cpp/string/basic_string/get_allocator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>insert</name>
+      <anchorfile>cpp/string/basic_string/insert</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>length</name>
+      <anchorfile>cpp/string/basic_string/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>max_size</name>
+      <anchorfile>cpp/string/basic_string/max_size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator basic_string_view</name>
+      <anchorfile>cpp/string/basic_string/operator_basic_string_view</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator+=</name>
+      <anchorfile>cpp/string/basic_string/operator+=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator=</name>
+      <anchorfile>cpp/string/basic_string/operator=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator[]</name>
+      <anchorfile>cpp/string/basic_string/operator_at</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pop_back</name>
+      <anchorfile>cpp/string/basic_string/pop_back</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>push_back</name>
+      <anchorfile>cpp/string/basic_string/push_back</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>rbegin</name>
+      <anchorfile>cpp/string/basic_string/rbegin</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>rend</name>
+      <anchorfile>cpp/string/basic_string/rend</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>replace</name>
+      <anchorfile>cpp/string/basic_string/replace</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>reserve</name>
+      <anchorfile>cpp/string/basic_string/reserve</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>resize</name>
+      <anchorfile>cpp/string/basic_string/resize</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>rfind</name>
+      <anchorfile>cpp/string/basic_string/rfind</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>shrink_to_fit</name>
+      <anchorfile>cpp/string/basic_string/shrink_to_fit</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>size</name>
+      <anchorfile>cpp/string/basic_string/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>starts_with</name>
+      <anchorfile>cpp/string/basic_string/starts_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>substr</name>
+      <anchorfile>cpp/string/basic_string/substr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>swap</name>
+      <anchorfile>cpp/string/basic_string/swap</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>u8string</name>
+      <anchorfile>cpp/string/basic_string/basic_string</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::u8string_view</name>
+    <filename>cpp/string/basic_string_view</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>at</name>
+      <anchorfile>cpp/string/basic_string_view/at</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>back</name>
+      <anchorfile>cpp/string/basic_string_view/back</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>begin</name>
+      <anchorfile>cpp/string/basic_string_view/begin</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>cbegin</name>
+      <anchorfile>cpp/string/basic_string_view/begin</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>cend</name>
+      <anchorfile>cpp/string/basic_string_view/end</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>compare</name>
+      <anchorfile>cpp/string/basic_string_view/compare</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>copy</name>
+      <anchorfile>cpp/string/basic_string_view/copy</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>crbegin</name>
+      <anchorfile>cpp/string/basic_string_view/rbegin</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>crend</name>
+      <anchorfile>cpp/string/basic_string_view/rend</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>data</name>
+      <anchorfile>cpp/string/basic_string_view/data</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>empty</name>
+      <anchorfile>cpp/string/basic_string_view/empty</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>end</name>
+      <anchorfile>cpp/string/basic_string_view/end</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>ends_with</name>
+      <anchorfile>cpp/string/basic_string_view/ends_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>find</name>
+      <anchorfile>cpp/string/basic_string_view/find</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>find_first_not_of</name>
+      <anchorfile>cpp/string/basic_string_view/find_first_not_of</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>find_first_of</name>
+      <anchorfile>cpp/string/basic_string_view/find_first_of</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>find_last_not_of</name>
+      <anchorfile>cpp/string/basic_string_view/find_last_not_of</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>find_last_of</name>
+      <anchorfile>cpp/string/basic_string_view/find_last_of</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>front</name>
+      <anchorfile>cpp/string/basic_string_view/front</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>length</name>
+      <anchorfile>cpp/string/basic_string_view/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>max_size</name>
+      <anchorfile>cpp/string/basic_string_view/max_size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator=</name>
+      <anchorfile>cpp/string/basic_string_view/operator=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator[]</name>
+      <anchorfile>cpp/string/basic_string_view/operator_at</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>rbegin</name>
+      <anchorfile>cpp/string/basic_string_view/rbegin</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>remove_prefix</name>
+      <anchorfile>cpp/string/basic_string_view/remove_prefix</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>remove_suffix</name>
+      <anchorfile>cpp/string/basic_string_view/remove_suffix</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>rend</name>
+      <anchorfile>cpp/string/basic_string_view/rend</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>rfind</name>
+      <anchorfile>cpp/string/basic_string_view/rfind</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>size</name>
+      <anchorfile>cpp/string/basic_string_view/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>starts_with</name>
+      <anchorfile>cpp/string/basic_string_view/starts_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>substr</name>
+      <anchorfile>cpp/string/basic_string_view/substr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>swap</name>
+      <anchorfile>cpp/string/basic_string_view/swap</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>u8string_view</name>
       <anchorfile>cpp/string/basic_string_view/basic_string_view</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
@@ -48132,6 +52391,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>contains</name>
+      <anchorfile>cpp/container/unordered_map/contains</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>count</name>
       <anchorfile>cpp/container/unordered_map/count</anchorfile>
       <anchor></anchor>
@@ -48409,6 +52675,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>contains</name>
+      <anchorfile>cpp/container/unordered_multimap/contains</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>count</name>
       <anchorfile>cpp/container/unordered_multimap/count</anchorfile>
       <anchor></anchor>
@@ -48660,6 +52933,13 @@
       <type>T</type>
       <name>clear</name>
       <anchorfile>cpp/container/unordered_multiset/clear</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>contains</name>
+      <anchorfile>cpp/container/unordered_multiset/contains</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -48921,6 +53201,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>contains</name>
+      <anchorfile>cpp/container/unordered_set/contains</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>count</name>
       <anchorfile>cpp/container/unordered_set/count</anchorfile>
       <anchor></anchor>
@@ -49101,6 +53388,18 @@
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
+  </compound>
+  <compound kind="class">
+    <name>std::unwrap_ref_decay</name>
+    <filename>cpp/utility/functional/unwrap_reference</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::unwrap_ref_decay_t</name>
+    <filename>cpp/utility/functional/unwrap_reference</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::unwrap_reference</name>
+    <filename>cpp/utility/functional/unwrap_reference</filename>
   </compound>
   <compound kind="class">
     <name>std::uses_allocator</name>
@@ -49754,6 +54053,28 @@
       <type>T</type>
       <name>wcsub_match</name>
       <anchorfile>cpp/regex/sub_match/sub_match</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::weak_equality</name>
+    <filename>cpp/utility/compare/weak_equality</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::weak_ordering</name>
+    <filename>cpp/utility/compare/weak_ordering</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>operator partial_ordering</name>
+      <anchorfile>cpp/utility/compare/weak_ordering</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator weak_equality</name>
+      <anchorfile>cpp/utility/compare/weak_ordering</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -53316,6 +57637,366 @@
     </member>
   </compound>
   <compound kind="class">
+    <name>std::wosyncstream</name>
+    <filename>cpp/io/basic_osyncstream</filename>
+    <class kind="class">std::wosyncstream::Init</class>
+    <member kind="function">
+      <type>T</type>
+      <name>bad</name>
+      <anchorfile>cpp/io/basic_ios/bad</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>clear</name>
+      <anchorfile>cpp/io/basic_ios/clear</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>copyfmt</name>
+      <anchorfile>cpp/io/basic_ios/copyfmt</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>emit</name>
+      <anchorfile>cpp/io/basic_osyncstream/emit</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>eof</name>
+      <anchorfile>cpp/io/basic_ios/eof</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <class kind="class">std::wosyncstream::event_callback</class>
+    <member kind="function">
+      <type>T</type>
+      <name>exceptions</name>
+      <anchorfile>cpp/io/basic_ios/exceptions</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>fail</name>
+      <anchorfile>cpp/io/basic_ios/fail</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <class kind="class">std::wosyncstream::failure</class>
+    <member kind="function">
+      <type>T</type>
+      <name>fill</name>
+      <anchorfile>cpp/io/basic_ios/fill</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>flags</name>
+      <anchorfile>cpp/io/ios_base/flags</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>flush</name>
+      <anchorfile>cpp/io/basic_ostream/flush</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>get_wrapped</name>
+      <anchorfile>cpp/io/basic_osyncstream/get_wrapped</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>getloc</name>
+      <anchorfile>cpp/io/ios_base/getloc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>good</name>
+      <anchorfile>cpp/io/basic_ios/good</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>imbue</name>
+      <anchorfile>cpp/io/basic_ios/imbue</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>init</name>
+      <anchorfile>cpp/io/basic_ios/init</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>iword</name>
+      <anchorfile>cpp/io/ios_base/iword</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>move</name>
+      <anchorfile>cpp/io/basic_ios/move</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>narrow</name>
+      <anchorfile>cpp/io/basic_ios/narrow</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator bool</name>
+      <anchorfile>cpp/io/basic_ios/operator_bool</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator!</name>
+      <anchorfile>cpp/io/basic_ios/operator!</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator&lt;&lt;</name>
+      <anchorfile>cpp/io/basic_ostream/operator_ltlt</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator=</name>
+      <anchorfile>cpp/io/basic_osyncstream/operator=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>precision</name>
+      <anchorfile>cpp/io/ios_base/precision</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>put</name>
+      <anchorfile>cpp/io/basic_ostream/put</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pword</name>
+      <anchorfile>cpp/io/ios_base/pword</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>rdbuf</name>
+      <anchorfile>cpp/io/basic_ios/rdbuf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>rdstate</name>
+      <anchorfile>cpp/io/basic_ios/rdstate</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>register_callback</name>
+      <anchorfile>cpp/io/ios_base/register_callback</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>seekp</name>
+      <anchorfile>cpp/io/basic_ostream/seekp</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <class kind="class">std::wosyncstream::sentry</class>
+    <member kind="function">
+      <type>T</type>
+      <name>set_rdbuf</name>
+      <anchorfile>cpp/io/basic_ios/set_rdbuf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>setf</name>
+      <anchorfile>cpp/io/ios_base/setf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>setstate</name>
+      <anchorfile>cpp/io/basic_ios/setstate</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>swap</name>
+      <anchorfile>cpp/io/basic_ios/swap</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sync_with_stdio</name>
+      <anchorfile>cpp/io/ios_base/sync_with_stdio</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>tellp</name>
+      <anchorfile>cpp/io/basic_ostream/tellp</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>tie</name>
+      <anchorfile>cpp/io/basic_ios/tie</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>unsetf</name>
+      <anchorfile>cpp/io/ios_base/unsetf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>widen</name>
+      <anchorfile>cpp/io/basic_ios/widen</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>width</name>
+      <anchorfile>cpp/io/ios_base/width</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>wosyncstream</name>
+      <anchorfile>cpp/io/basic_osyncstream/basic_osyncstream</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>write</name>
+      <anchorfile>cpp/io/basic_ostream/write</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>xalloc</name>
+      <anchorfile>cpp/io/ios_base/xalloc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>~wosyncstream</name>
+      <anchorfile>cpp/io/basic_osyncstream/~basic_osyncstream</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::wosyncstream::Init</name>
+    <filename>cpp/io/ios_base/Init</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::wosyncstream::event_callback</name>
+    <filename>cpp/io/ios_base/event_callback</filename>
+  </compound>
+  <compound kind="class">
+    <name>std::wosyncstream::failure</name>
+    <filename>cpp/io/ios_base/failure</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>failure</name>
+      <anchorfile>cpp/io/ios_base/failure</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>what</name>
+      <anchorfile>cpp/error/exception/what</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::wosyncstream::sentry</name>
+    <filename>cpp/io/basic_ostream/sentry</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>operator bool</name>
+      <anchorfile>cpp/io/basic_ostream/sentry</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sentry</name>
+      <anchorfile>cpp/io/basic_ostream/sentry</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>~sentry</name>
+      <anchorfile>cpp/io/basic_ostream/sentry</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
     <name>std::wregex</name>
     <filename>cpp/regex/basic_regex</filename>
     <member kind="function">
@@ -54104,6 +58785,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>ends_with</name>
+      <anchorfile>cpp/string/basic_string/ends_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>erase</name>
       <anchorfile>cpp/string/basic_string/erase</anchorfile>
       <anchor></anchor>
@@ -54176,6 +58864,20 @@
       <type>T</type>
       <name>max_size</name>
       <anchorfile>cpp/string/basic_string/max_size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator basic_string_view</name>
+      <anchorfile>cpp/string/basic_string/operator_basic_string_view</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator+=</name>
+      <anchorfile>cpp/string/basic_string/operator+=</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -54260,6 +58962,13 @@
       <type>T</type>
       <name>size</name>
       <anchorfile>cpp/string/basic_string/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>starts_with</name>
+      <anchorfile>cpp/string/basic_string/starts_with</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -54420,6 +59129,13 @@
     </member>
     <member kind="function">
       <type>T</type>
+      <name>ends_with</name>
+      <anchorfile>cpp/string/basic_string_view/ends_with</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
       <name>find</name>
       <anchorfile>cpp/string/basic_string_view/find</anchorfile>
       <anchor></anchor>
@@ -54527,6 +59243,13 @@
       <type>T</type>
       <name>size</name>
       <anchorfile>cpp/string/basic_string_view/size</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>starts_with</name>
+      <anchorfile>cpp/string/basic_string_view/starts_with</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
@@ -55276,6 +59999,325 @@
       <type>T</type>
       <name>~sentry</name>
       <anchorfile>cpp/io/basic_istream/sentry</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+  </compound>
+  <compound kind="class">
+    <name>std::wsyncbuf</name>
+    <filename>cpp/io/basic_syncbuf</filename>
+    <member kind="function">
+      <type>T</type>
+      <name>eback</name>
+      <anchorfile>cpp/io/basic_streambuf/gptr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>egptr</name>
+      <anchorfile>cpp/io/basic_streambuf/gptr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>emit</name>
+      <anchorfile>cpp/io/basic_syncbuf/emit</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>epptr</name>
+      <anchorfile>cpp/io/basic_streambuf/pptr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>gbump</name>
+      <anchorfile>cpp/io/basic_streambuf/gbump</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>get_allocator</name>
+      <anchorfile>cpp/io/basic_syncbuf/get_allocator</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>get_wrapped</name>
+      <anchorfile>cpp/io/basic_syncbuf/get_wrapped</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>getloc</name>
+      <anchorfile>cpp/io/basic_streambuf/getloc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>gptr</name>
+      <anchorfile>cpp/io/basic_streambuf/gptr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>imbue</name>
+      <anchorfile>cpp/io/basic_streambuf/pubimbue</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>in_avail</name>
+      <anchorfile>cpp/io/basic_streambuf/in_avail</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>operator=</name>
+      <anchorfile>cpp/io/basic_syncbuf/operator=</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>overflow</name>
+      <anchorfile>cpp/io/basic_streambuf/overflow</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pbackfail</name>
+      <anchorfile>cpp/io/basic_streambuf/pbackfail</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pbase</name>
+      <anchorfile>cpp/io/basic_streambuf/pptr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pbump</name>
+      <anchorfile>cpp/io/basic_streambuf/pbump</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pptr</name>
+      <anchorfile>cpp/io/basic_streambuf/pptr</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pubimbue</name>
+      <anchorfile>cpp/io/basic_streambuf/pubimbue</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pubseekoff</name>
+      <anchorfile>cpp/io/basic_streambuf/pubseekoff</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pubseekpos</name>
+      <anchorfile>cpp/io/basic_streambuf/pubseekpos</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pubsetbuf</name>
+      <anchorfile>cpp/io/basic_streambuf/pubsetbuf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>pubsync</name>
+      <anchorfile>cpp/io/basic_streambuf/pubsync</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sbumpc</name>
+      <anchorfile>cpp/io/basic_streambuf/sbumpc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>seekoff</name>
+      <anchorfile>cpp/io/basic_streambuf/pubseekoff</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>seekpos</name>
+      <anchorfile>cpp/io/basic_streambuf/pubseekpos</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>set_emit_on_sync</name>
+      <anchorfile>cpp/io/basic_syncbuf/set_emit_on_sync</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>setbuf</name>
+      <anchorfile>cpp/io/basic_streambuf/pubsetbuf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>setg</name>
+      <anchorfile>cpp/io/basic_streambuf/setg</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>setp</name>
+      <anchorfile>cpp/io/basic_streambuf/setp</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sgetc</name>
+      <anchorfile>cpp/io/basic_streambuf/sgetc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sgetn</name>
+      <anchorfile>cpp/io/basic_streambuf/sgetn</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>showmanyc</name>
+      <anchorfile>cpp/io/basic_streambuf/showmanyc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>snextc</name>
+      <anchorfile>cpp/io/basic_streambuf/snextc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sputbackc</name>
+      <anchorfile>cpp/io/basic_streambuf/sputbackc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sputc</name>
+      <anchorfile>cpp/io/basic_streambuf/sputc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sputn</name>
+      <anchorfile>cpp/io/basic_streambuf/sputn</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sungetc</name>
+      <anchorfile>cpp/io/basic_streambuf/sungetc</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>swap</name>
+      <anchorfile>cpp/io/basic_streambuf/swap</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>sync</name>
+      <anchorfile>cpp/io/basic_streambuf/pubsync</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>uflow</name>
+      <anchorfile>cpp/io/basic_streambuf/uflow</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>underflow</name>
+      <anchorfile>cpp/io/basic_streambuf/underflow</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>wsyncbuf</name>
+      <anchorfile>cpp/io/basic_syncbuf/basic_syncbuf</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>xsgetn</name>
+      <anchorfile>cpp/io/basic_streambuf/sgetn</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>xsputn</name>
+      <anchorfile>cpp/io/basic_streambuf/sputn</anchorfile>
+      <anchor></anchor>
+      <arglist>(T... args)</arglist>
+    </member>
+    <member kind="function">
+      <type>T</type>
+      <name>~wsyncbuf</name>
+      <anchorfile>cpp/io/basic_syncbuf/~basic_syncbuf</anchorfile>
       <anchor></anchor>
       <arglist>(T... args)</arglist>
     </member>
