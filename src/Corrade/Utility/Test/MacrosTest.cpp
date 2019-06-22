@@ -39,6 +39,7 @@ struct MacrosTest: TestSuite::Tester {
     void deprecated();
     void noreturn();
     void cxxStandard();
+    void alwaysNeverInline();
 
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     void threadLocal();
@@ -50,6 +51,7 @@ MacrosTest::MacrosTest() {
               &MacrosTest::deprecated,
               &MacrosTest::noreturn,
               &MacrosTest::cxxStandard,
+              &MacrosTest::alwaysNeverInline,
 
               #ifndef CORRADE_TARGET_EMSCRIPTEN
               &MacrosTest::threadLocal
@@ -129,6 +131,13 @@ void MacrosTest::noreturn() {
 
 void MacrosTest::cxxStandard() {
     CORRADE_COMPARE_AS(CORRADE_CXX_STANDARD, 201103, TestSuite::Compare::GreaterOrEqual);
+}
+
+CORRADE_ALWAYS_INLINE int alwaysInline() { return 5; }
+CORRADE_NEVER_INLINE int neverInline() { return 37; }
+
+void MacrosTest::alwaysNeverInline() {
+    CORRADE_COMPARE(alwaysInline() + neverInline(), 42);
 }
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN

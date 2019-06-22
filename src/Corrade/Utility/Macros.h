@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_MACRO(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_ALIGNAS(), @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
+ * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_MACRO(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_ALIGNAS(), @ref CORRADE_NORETURN, @ref CORRADE_THREAD_LOCAL, @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE, @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
 #include "Corrade/configure.h"
@@ -321,6 +321,53 @@ regarding RAII.
 #endif
 #ifndef CORRADE_THREAD_LOCAL /* Assume it's supported otherwise */
 #define CORRADE_THREAD_LOCAL thread_local
+#endif
+
+/** @hideinitializer
+@brief Always inline a function
+
+Stronger than the standard @cpp inline @ce keyword where supported, but even
+then the compiler might decide to not inline the function (for example if it's
+recursive). Expands to @cpp __attribute__((always_inline)) inline @ce on GCC
+and Clang (both keywords need to be specified,
+[docs](https://gcc.gnu.org/onlinedocs/gcc-4.1.2/gcc/Function-Attributes.html)),
+to @cpp __forceinline @ce on MSVC ([docs](https://docs.microsoft.com/en-us/cpp/cpp/inline-functions-cpp))
+and to just @cpp inline @ce elsewhere. On GCC and Clang this makes the function
+inline also in Debug mode (`-g`), while on MSVC compiling in Debug (`/Ob0`)
+always suppresses all inlining. Example usage:
+
+@snippet Utility.cpp CORRADE_ALWAYS_INLINE
+
+@see @ref CORRADE_NEVER_INLINE
+*/
+#ifdef __GNUC__
+#define CORRADE_ALWAYS_INLINE __attribute__((always_inline)) inline
+#elif defined(_MSC_VER)
+#define CORRADE_ALWAYS_INLINE __forceinline
+#else
+#define CORRADE_ALWAYS_INLINE inline
+#endif
+
+/** @hideinitializer
+@brief Never inline a function
+
+Prevents the compiler from inlining a function during an optimization pass.
+Expands to @cpp __attribute__((noinline)) @ce on GCC and Clang
+([docs](https://gcc.gnu.org/onlinedocs/gcc-4.1.2/gcc/Function-Attributes.html)),
+to @cpp __declspec(noinline) @ce on MSVC
+([docs](https://docs.microsoft.com/en-us/cpp/cpp/noinline)) and is empty
+elsewhere. Example usage:
+
+@snippet Utility.cpp CORRADE_NEVER_INLINE
+
+@see @ref CORRADE_ALWAYS_INLINE
+*/
+#ifdef __GNUC__
+#define CORRADE_NEVER_INLINE __attribute__((noinline))
+#elif defined(_MSC_VER)
+#define CORRADE_NEVER_INLINE __declspec(noinline)
+#else
+#define CORRADE_NEVER_INLINE
 #endif
 
 /** @hideinitializer

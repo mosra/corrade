@@ -99,6 +99,8 @@ namespace Corrade {
 -   New @ref CORRADE_LINE_STRING utility macro for a stringified @cpp __LINE__ @ce
 -   New @ref CORRADE_THREAD_LOCAL macro for a portable @cpp thread_local @ce
     annotation
+-   New @ref CORRADE_ALWAYS_INLINE and @ref CORRADE_NEVER_INLINE annotations
+    for easier overriding of optimizer behavior
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 

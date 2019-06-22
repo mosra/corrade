@@ -635,4 +635,13 @@ void exit42();
 CORRADE_NORETURN void exit42() { std::exit(42); }
 /* [CORRADE_NORETURN] */
 
+/* [CORRADE_ALWAYS_INLINE] */
+CORRADE_ALWAYS_INLINE int addOne(int a);
+/* [CORRADE_ALWAYS_INLINE] */
+
+int counter = 0;
+/* [CORRADE_NEVER_INLINE] */
+CORRADE_NEVER_INLINE void testFunctionCallOverhead();
+/* [CORRADE_NEVER_INLINE] */
+
 }
