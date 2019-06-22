@@ -102,6 +102,8 @@ Is the below list missing your name or something's wrong?
 -   **Ivan Sanz Carasa** ([\@isc30](https://github.com/isc30)) --- Emscripten
     toolchain improvements
 -   **[\@jaynus](https://github.com/jaynus)** --- MSVC compilation fixes
+-   **Jonathan Hale** ([\@Squareys](https://github.com/Squareys)) ---
+    compilation and docs fixes
 -   **Max Schwarz** ([\@xqms](https://github.com/xqms)) --- thread-local
     @ref Utility::Debug scoped output redirection and coloring
 -   **Michael "Croydon" Keck** ([\@Croydon](https://github.com/Croydon)) ---
