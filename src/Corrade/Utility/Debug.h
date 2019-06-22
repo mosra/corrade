@@ -889,7 +889,7 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
 };
 
 /**
-@brief Warning output handler
+@brief Fatal output handler
 
 Equivalent to @ref Error, but exits with defined exit code on destruction. So
 instead of this:
