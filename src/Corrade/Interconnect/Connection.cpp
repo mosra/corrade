@@ -32,55 +32,26 @@
 
 namespace Corrade { namespace Interconnect {
 
-Connection::Connection(Connection&& other) noexcept: _signal{other._signal}, _data{other._data}, _connected{other._connected} {
-    if(_data) _data->_connection = this;
-    other._data = nullptr;
-    other._connected = false;
-}
+Connection::Connection(
+    #ifdef CORRADE_BUILD_DEPRECATED
+    Emitter& emitter,
+    #endif
+    Implementation::SignalData signal, Implementation::ConnectionData& data):
+    #ifdef CORRADE_BUILD_DEPRECATED
+    _emitter{emitter},
+    #endif
+    _signal{signal}, _data{&data} {}
 
-Connection::~Connection() {
-    /* If disconnected, delete connection data (as we are the last remaining
-       owner) */
-    if(!_connected) delete _data;
-
-    /* Else remove reference to itself from connection data */
-    else if(_data) {
-        CORRADE_INTERNAL_ASSERT(_data->_connection == this);
-        _data->_connection = nullptr;
-    }
-}
-
-Connection& Connection::operator=(Connection&& other) noexcept {
-    using std::swap;
-    swap(other._signal, _signal);
-    swap(other._data, _data);
-    swap(other._connected, _connected);
-    if(_data) _data->_connection = this;
-    if(other._data) other._data->_connection = &other;
-    return *this;
-}
-
-bool Connection::connect() {
-    /* The connection is not possible anymore */
-    if(!_data) return false;
-
-    /* Already connected */
-    if(_connected) return true;
-
-    /* Create the connection */
-    Emitter::connectInternal(_signal, _data);
-    return true;
+#ifdef CORRADE_BUILD_DEPRECATED
+bool Connection::isConnected() const {
+    Utility::Warning{} << "Interconnect::Emitter::isConnected(): this function is dangerous, use Emitter::isConnected() instead";
+    return _emitter->isConnected(*this);
 }
 
 void Connection::disconnect() {
-    /* Already disconnected or the connection doesn't exist anymore */
-    if(!_connected || !_data) return;
-
-    Emitter::disconnectInternal(_signal, _data);
+    Utility::Warning{} << "Interconnect::Connection::disconnect(): this function is dangerous, use Interconnect::disconnect() instead";
+    Interconnect::disconnect(_emitter, *this);
 }
-
-Connection::Connection(Implementation::SignalData signal, Implementation::AbstractConnectionData* data): _signal{signal}, _data{data}, _connected{true} {
-    _data->_connection = this;
-}
+#endif
 
 }}

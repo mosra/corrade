@@ -25,57 +25,31 @@
 
 #include "Receiver.h"
 
-#include <utility>
-
 #include "Corrade/Interconnect/Connection.h"
 #include "Corrade/Interconnect/Emitter.h"
+#include "Corrade/Interconnect/Implementation/ReceiverConnection.h"
 #include "Corrade/Utility/Assert.h"
 
 namespace Corrade { namespace Interconnect {
 
 Receiver::Receiver() = default;
 
-Receiver::~Receiver() {
-    for(auto end = _connections.end(), it = _connections.begin(); it != end; ++it) {
-        /* Remove connection from emitter */
-        for(auto eend = (*it)->_emitter->_connections.end(), eit = (*it)->_emitter->_connections.begin(); eit != eend; ++eit) {
-            if(eit->second != *it) continue;
+Receiver::~Receiver() { disconnectAllSlots(); }
 
-            (*it)->_emitter->_connections.erase(eit);
-            (*it)->_emitter->_connectionsChanged = true;
-            break;
-        }
+bool Receiver::hasSlotConnections() const { return !_connections.empty(); }
 
-        /* If there is connection object, remove reference to connection data
-           from it and mark it as disconnected */
-        if((*it)->_connection) {
-            CORRADE_INTERNAL_ASSERT(*it == (*it)->_connection->_data);
-            (*it)->_connection->_data = nullptr;
-            (*it)->_connection->_connected = false;
-        }
-
-        /* Delete connection data (as they make no sense without receiver) */
-        delete *it;
-    }
-}
+std::size_t Receiver::slotConnectionCount() const { return _connections.size(); }
 
 void Receiver::disconnectAllSlots() {
-    for(Implementation::AbstractConnectionData* const connection: _connections) {
-        /* Remove connection from emitter */
-        for(auto end = connection->_emitter->_connections.end(), eit = connection->_emitter->_connections.begin(); eit != end; ++eit) {
-            if(eit->second != connection) continue;
+    for(Implementation::ReceiverConnection& connection: _connections) {
+        auto range = connection.emitter->_connections.equal_range(connection.signal);
+        for(auto it = range.first; it != range.second; ++it) {
+            if(&it->second != &*connection.data) continue;
 
-            connection->_emitter->_connections.erase(eit);
-            connection->_emitter->_connectionsChanged = true;
+            connection.emitter->_connections.erase(it);
+            connection.emitter->_connectionsChanged = true;
             break;
         }
-
-        /* If there is no connection object, destroy also connection data (as we
-           are the last remaining owner) */
-        if(!connection->_connection) delete connection;
-
-        /* Else mark the connection as disconnected */
-        else connection->_connection->_connected = false;
     }
 
     _connections.clear();

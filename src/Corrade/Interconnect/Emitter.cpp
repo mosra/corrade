@@ -26,79 +26,71 @@
 #include "Emitter.h"
 
 #include "Corrade/Interconnect/Receiver.h"
+#include "Corrade/Interconnect/Implementation/ReceiverConnection.h"
 #include "Corrade/Utility/Assert.h"
 
 namespace Corrade { namespace Interconnect {
 
 namespace Implementation {
 
-AbstractConnectionData::~AbstractConnectionData() = default;
+ConnectionData::ConnectionData(ConnectionData&& other) noexcept:
+    storage{other.storage},
+    call{other.call},
+    lastHandledSignal{other.lastHandledSignal},
+    type{other.type}
+{
+    if(type == ConnectionType::FunctorWithDestructor)
+        other.type = ConnectionType::Functor;
+}
+
+ConnectionData& ConnectionData::operator=(ConnectionData&& other) noexcept {
+    using std::swap;
+    swap(storage, other.storage);
+    swap(call, other.call);
+    swap(lastHandledSignal, other.lastHandledSignal);
+    swap(type, other.type);
+    return *this;
+}
+
+ConnectionData::~ConnectionData() {
+    if(type == ConnectionType::FunctorWithDestructor)
+        storage.functor.destruct(storage);
+}
 
 }
 
 Emitter::Emitter(): _lastHandledSignal{0}, _connectionsChanged{false} {}
 
 Emitter::~Emitter() {
-    for(auto connection: _connections) {
-        const Implementation::AbstractConnectionData* data = connection.second;
-
-        /* Remove connection from receiver, if this is member function connection */
-        if(data->_type == Implementation::AbstractConnectionData::Type::Member) {
-            auto& receiverConnections = static_cast<const Implementation::AbstractMemberConnectionData*>(data)->_receiver->_connections;
-            for(auto end = receiverConnections.end(), rit = receiverConnections.begin(); rit != end; ++rit) {
-                if(*rit != data) continue;
-
-                receiverConnections.erase(rit);
-                break;
-            }
-        }
-
-        /* If there is connection object, remove reference to connection data
-           from it and mark it as disconnected */
-        if(data->_connection) {
-            CORRADE_INTERNAL_ASSERT(data == data->_connection->_data);
-            data->_connection->_data = nullptr;
-            data->_connection->_connected = false;
-        }
-
-        /* Delete connection data (as they make no sense without emitter) */
-        delete data;
-    }
+    for(auto& connection: _connections) disconnectFromReceiver(connection.second);
 }
 
-void Emitter::connectInternal(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data) {
+bool Emitter::isConnected(const Connection& connection) const {
+    auto range = _connections.equal_range(connection._signal);
+    for(auto it = range.first; it != range.second; ++it)
+        if(&it->second == &*connection._data) return true;
+
+    return false;
+}
+
+Implementation::ConnectionData& Emitter::connectInternal(const Implementation::SignalData& signal, Implementation::ConnectionData&& data) {
     /* Add connection to emitter */
-    data->_emitter->_connections.insert(std::make_pair(signal, data));
-    data->_emitter->_connectionsChanged = true;
+    Implementation::ConnectionData& out =
+    _connections.emplace(signal, std::move(data))->second;
+    _connectionsChanged = true;
 
     /* Add connection to receiver, if this is member function connection */
-    if(data->_type == Implementation::AbstractConnectionData::Type::Member)
-        static_cast<Implementation::AbstractMemberConnectionData*>(data)->_receiver->_connections.push_back(data);
+    if(data.type == Implementation::ConnectionType::Member)
+        out.storage.member.receiver->_connections.emplace_back(*this, signal, out);
 
-    /* If there is connection object, mark the connection as connected */
-    if(data->_connection) data->_connection->_connected = true;
-}
-
-void Emitter::disconnectInternal(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data) {
-    /* Find given connection, disconnect it and erase */
-    auto range = data->_emitter->_connections.equal_range(signal);
-    for(auto it = range.first; it != range.second; ++it) {
-        if(it->second != data) continue;
-
-        data->_emitter->disconnectInternal(it);
-        data->_emitter->_connections.erase(it);
-        data->_emitter->_connectionsChanged = true;
-        return;
-    }
-
-    /* The connection must be found */
-    CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+    /* Return reference to the final position */
+    return out;
 }
 
 void Emitter::disconnectInternal(const Implementation::SignalData& signal) {
     auto range = _connections.equal_range(signal);
     for(auto it = range.first; it != range.second; ++it)
-        disconnectInternal(it);
+        disconnectFromReceiver(it->second);
 
     _connections.erase(range.first, range.second);
     _connectionsChanged = true;
@@ -106,34 +98,39 @@ void Emitter::disconnectInternal(const Implementation::SignalData& signal) {
 
 void Emitter::disconnectAllSignals() {
     for(auto it = _connections.begin(); it != _connections.end(); ++it)
-        disconnectInternal(it);
+        disconnectFromReceiver(it->second);
 
     _connections.clear();
     _connectionsChanged = true;
 }
 
-void Emitter::disconnectInternal(std::unordered_multimap<Implementation::SignalData, Implementation::AbstractConnectionData*, Implementation::SignalDataHash>::const_iterator it) {
-    Implementation::AbstractConnectionData* data = it->second;
+void Emitter::disconnectFromReceiver(const Implementation::ConnectionData& data) {
+    if(data.type != Implementation::ConnectionType::Member) return;
 
-    /* Remove connection from receiver, if this is member function connection */
-    if(data->_type == Implementation::AbstractConnectionData::Type::Member) {
-        auto& receiverConnections = static_cast<Implementation::AbstractMemberConnectionData*>(data)->_receiver->_connections;
-        for(auto end = receiverConnections.end(), rit = receiverConnections.begin(); rit != end; ++rit) {
-            if(*rit != data) continue;
+    auto& receiverConnections = data.storage.member.receiver->_connections;
+    for(auto end = receiverConnections.end(), rit = receiverConnections.begin(); rit != end; ++rit) {
+        if(&*rit->data != &data) continue;
 
-            receiverConnections.erase(rit);
-            break;
-        }
+        receiverConnections.erase(rit);
+        return;
     }
 
-    /* If there is no connection object, destroy also connection data (as we
-       are the last remaining owner) */
-    if(!data->_connection) delete data;
+    /* The connection must be found */
+    CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
+}
 
-    /* Else mark the connection as disconnected */
-    else data->_connection->_connected = false;
+bool disconnect(Emitter& emitter, const Connection& connection) {
+    auto range = emitter._connections.equal_range(connection._signal);
+    for(auto it = range.first; it != range.second; ++it) {
+        if(&it->second != &*connection._data) continue;
 
-    /* (erasing the iterator is up to the caller) */
+        emitter.disconnectFromReceiver(it->second);
+        emitter._connections.erase(it);
+        emitter._connectionsChanged = true;
+        return true;
+    }
+
+    return false;
 }
 
 }}

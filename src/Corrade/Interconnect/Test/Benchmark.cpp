@@ -47,10 +47,12 @@ struct Benchmark: TestSuite::Tester {
     void call1kStdFunctions();
     void call1kFunctionConnectionData();
     void call1kLambdaConnectionData();
+    void call1kLambdaHeapConnectionData();
     void call1kMemberConnectionData();
     void callSlotFunction1000x();
     void call1kSlotFunctions();
     void call1kSlotLambdas();
+    void call1kSlotLambdasHeap();
     void call1kSlotMembers();
 };
 
@@ -67,10 +69,12 @@ Benchmark::Benchmark() {
                    &Benchmark::call1kStdFunctions,
                    &Benchmark::call1kFunctionConnectionData,
                    &Benchmark::call1kLambdaConnectionData,
+                   &Benchmark::call1kLambdaHeapConnectionData,
                    &Benchmark::call1kMemberConnectionData,
                    &Benchmark::callSlotFunction1000x,
                    &Benchmark::call1kSlotFunctions,
                    &Benchmark::call1kSlotLambdas,
+                   &Benchmark::call1kSlotLambdasHeap,
                    &Benchmark::call1kSlotMembers}, 25);
 }
 
@@ -213,25 +217,47 @@ void Benchmark::call1kFunctionConnectionData() {
     output = 0;
 
     struct: Emitter {} emitter;
-    Implementation::FunctionConnectionData<> d{&emitter, freeFunctionSlot};
+
+    auto d = Implementation::ConnectionData::createFunctor(freeFunctionSlot);
 
     CORRADE_BENCHMARK(100) {
         for(std::size_t i = 0; i != 1000; ++i)
-            d.handle();
+            reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d.call)(d.storage);
     }
 
     CORRADE_COMPARE(output, 1000*100);
 }
 
 void Benchmark::call1kLambdaConnectionData() {
-    output = 0;
+    int output = 0;
 
     struct: Emitter {} emitter;
-    Implementation::FunctionConnectionData<> d{&emitter, []() { ++output; }};
+
+    auto d = Implementation::ConnectionData::createFunctor([&output]() { ++output; });
 
     CORRADE_BENCHMARK(100) {
         for(std::size_t i = 0; i != 1000; ++i)
-            d.handle();
+            reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d.call)(d.storage);
+    }
+
+    CORRADE_COMPARE(output, 1000*100);
+}
+
+void Benchmark::call1kLambdaHeapConnectionData() {
+    struct Destructor {
+        int value = 1;
+        ~Destructor() { output += 1; }
+    } a;
+
+    int output = 0;
+
+    struct: Emitter {} emitter;
+
+    auto d = Implementation::ConnectionData::createFunctor([a, &output]() { output += a.value; });
+
+    CORRADE_BENCHMARK(100) {
+        for(std::size_t i = 0; i != 1000; ++i)
+            reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d.call)(d.storage);
     }
 
     CORRADE_COMPARE(output, 1000*100);
@@ -247,11 +273,11 @@ void Benchmark::call1kMemberConnectionData() {
         void receive() { ++output; }
     } receiver;
 
-    Implementation::MemberConnectionData<R> d{&emitter, &receiver, &R::receive};
+    auto d = Implementation::ConnectionData::createMember<R, R>(receiver, &R::receive);
 
     CORRADE_BENCHMARK(100) {
         for(std::size_t i = 0; i != 1000; ++i)
-            d.handle();
+            reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d.call)(d.storage);
     }
 
     CORRADE_COMPARE(receiver.output, 1000*100);
@@ -304,6 +330,29 @@ void Benchmark::call1kSlotLambdas() {
 
     for(std::size_t i = 0; i != 1000; ++i)
         connect(emitter, &E::fire, [](){ ++output; });
+
+    CORRADE_BENCHMARK(100)
+        emitter.fire();
+
+    CORRADE_COMPARE(output, 1000*100);
+}
+
+void Benchmark::call1kSlotLambdasHeap() {
+    struct Destructor {
+        int value = 1;
+        ~Destructor() { output += 1; }
+    } a;
+
+    int output = 0;
+
+    struct E: Emitter {
+        Signal fire() {
+            return emit(&E::fire);
+        }
+    } emitter;
+
+    for(std::size_t i = 0; i != 1000; ++i)
+        connect(emitter, &E::fire, [a, &output](){ output += a.value; });
 
     CORRADE_BENCHMARK(100)
         emitter.fire();

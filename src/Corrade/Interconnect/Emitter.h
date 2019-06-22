@@ -45,10 +45,95 @@ namespace Implementation {
 struct SignalDataHash {
     std::size_t operator()(const SignalData& data) const {
         std::size_t hash = 0;
-        for(std::size_t i = 0; i != SignalData::Size; ++i)
+        for(std::size_t i = 0; i != FunctionPointerSize; ++i)
             hash ^= data.data[i];
         return hash;
     }
+};
+
+enum class ConnectionType: std::uint8_t {
+    Free,
+    Member,
+    Functor,
+    FunctorWithDestructor
+};
+
+struct CORRADE_INTERCONNECT_EXPORT ConnectionData {
+    union CORRADE_ALIGNAS(sizeof(std::size_t)) Storage {
+        char data[FunctionPointerSize*sizeof(std::size_t) + sizeof(void*)];
+        void(*function)();
+        struct {
+            char data[FunctionPointerSize*sizeof(std::size_t)];
+            Receiver* receiver;
+        } member;
+        struct {
+            void* data;
+            void(*destruct)(Storage&);
+        } functor;
+    };
+
+    /* Construct a member function connection */
+    template<class Receiver, class ReceiverObject, class ...Args> static ConnectionData createMember(ReceiverObject& receiver, void(Receiver::*slot)(Args...)) {
+        ConnectionData out{ConnectionType::Member};
+        reinterpret_cast<void(Receiver::*&)(Args...)>(out.storage.member.data) = slot;
+        out.storage.member.receiver = &receiver;
+        out.call = reinterpret_cast<void(*)()>(static_cast<void(*)(Storage&, Args&&...)>([](Storage& storage, Args&&... args) {
+            (static_cast<ReceiverObject*>(storage.member.receiver)->*reinterpret_cast<void(Receiver::*&)(Args...)>(storage.member.data))(std::forward<Args>(args)...);
+        }));
+        return out;
+    }
+
+    /* Construct a free function connection */
+    template<class ...Args, class F> static ConnectionData createFunctor(F&& f, typename std::enable_if<std::is_convertible<typename std::decay<F>::type, void(*)(Args...)>::value>::type* = nullptr) {
+        ConnectionData out{ConnectionType::Free};
+        out.storage.function = reinterpret_cast<void(*)()>(static_cast<void(*)(Args...)>(f));
+        out.call = reinterpret_cast<void(*)()>(static_cast<void(*)(Storage&, Args&&...)>([](Storage& storage, Args&&... args) {
+            reinterpret_cast<void(*)(Args...)>(storage.function)(std::forward<Args>(args)...);
+        }));
+        return out;
+    }
+
+    /* Construct a simple, small enough and trivial functor connection (which
+       is not convertible to a function pointer). Trivially copyable implies
+       a trivial destructor. */
+    template<class ...Args, class F> static ConnectionData createFunctor(F&& f, typename std::enable_if<!std::is_convertible<typename std::decay<F>::type, void(*)(Args...)>::value && sizeof(typename std::decay<F>::type) <= sizeof(Storage) && std::is_trivially_copyable<typename std::decay<F>::type>::value>::type* = nullptr) {
+        ConnectionData out{ConnectionType::Functor};
+        new(&out.storage.data) typename std::decay<F>::type{std::move(f)};
+        out.call = reinterpret_cast<void(*)()>(static_cast<void(*)(Storage&, Args&&...)>([](Storage& storage, Args&&... args) {
+            reinterpret_cast<F&>(storage.data)(std::forward<Args>(args)...);
+        }));
+        return out;
+    }
+
+    /* Construct a non-trivial or too large functor connection -- if something
+       is not trivially destructible, it also isn't trivially copyable
+       (potentially non-copyable) and thus we need to allocate it on heap. */
+    template<class ...Args, class F> static ConnectionData createFunctor(F&& f, typename std::enable_if<(sizeof(typename std::decay<F>::type) > sizeof(Storage)) || !std::is_trivially_copyable<typename std::decay<F>::type>::value>::type* = nullptr) {
+        ConnectionData out{ConnectionType::FunctorWithDestructor};
+        reinterpret_cast<typename std::decay<F>::type*&>(out.storage.functor.data) = new typename std::decay<F>::type{std::move(f)};
+        out.storage.functor.destruct = [](Storage& storage) {
+            delete reinterpret_cast<typename std::decay<F>::type*>(storage.functor.data);
+        };
+        out.call = reinterpret_cast<void(*)()>(static_cast<void(*)(Storage&, Args&&...)>([](Storage& storage, Args&&... args) {
+            (*reinterpret_cast<typename std::decay<F>::type*>(storage.functor.data))(std::forward<Args>(args)...);
+        }));
+        return out;
+    }
+
+    ConnectionData(ConnectionType type) noexcept: type{type} {}
+
+    ConnectionData(const ConnectionData&) = delete;
+    ConnectionData(ConnectionData&& other) noexcept;
+
+    ~ConnectionData();
+
+    ConnectionData& operator=(const ConnectionData&) = delete;
+    ConnectionData& operator=(ConnectionData&& other) noexcept;
+
+    Storage storage;
+    void(*call)();
+    std::uint32_t lastHandledSignal{};
+    ConnectionType type;
 };
 
 }
@@ -62,7 +147,7 @@ Contains signals and manages connections between signals and slots. See
 @section Interconnect-Emitter-signals Implementing signals
 
 Signals are implemented as member functions with @ref Signal as return type,
-argument count and types are not limited. The body consists of single
+argument count and types are not limited. Their body consists of a single
 @ref emit() call, to which you pass pointer to the function and forward all
 arguments. Example signal implementations:
 
@@ -74,61 +159,6 @@ The implemented signal can be emitted simply by calling the function:
 
 If the signal is not declared as public function, it cannot be connected or
 called from outside the class.
-
-@section Interconnect-Emitter-connections Connecting signals to slots
-
-Signals implemented on Emitter subclasses can be connected to slots using
-various @ref connect() functions. The argument count and types of slot function
-must be exactly the same as of the signal function. When a connection is
-established, returned @ref Connection object can be used to remove or
-reestablish given connection using @ref Connection::disconnect() or
-@ref Connection::connect():
-
-@snippet Interconnect.cpp Emitter-connect
-
-You can also call @ref disconnectSignal() or @ref disconnectAllSignals() on
-emitter to remove the connections. All emitter connections are automatically
-removed when emitter object is destroyed.
-
-@attention It is possible to connect given signal to given slot more than
-    once, because there is no way to check whether the connection already
-    exists. As a result, after signal is emitted, the slot function will be
-    then called more than once.
-@attention In the slot you can add or remove connections, however you can't
-    delete the emitter object, as it would lead to undefined behavior.
-
-You can connect any signal, as long as the emitter object is of proper type:
-
-@snippet Interconnect.cpp Emitter-connect-emitter-type
-
-There are a few slot types, each type has its particular use:
-
-@section Interconnect-Emitter-member-slots Member function slots
-
-When connecting to member function slot with @ref connect(), @p receiver must
-be subclass of @ref Receiver and @p slot must be non-constant member function
-with @cpp void @ce as return type.
-
-In addition to the cases mentioned above, the connection is automatically
-removed also when receiver object is destroyed. You can also use
-@ref Receiver::disconnectAllSlots() to disconnect the receiver from everything.
-
-@note It is perfectly safe to delete receiver object in its own slot.
-
-Example usage:
-
-@snippet Interconnect.cpp Emitter-connect-member-slot
-
-You can connect to any member function, as long as @ref Receiver exists
-somewhere in given object type hierarchy:
-
-@snippet Interconnect.cpp Emitter-connect-receiver-type
-
-It is also possible to connect to member function of class which itself isn't
-subclass of @ref Receiver, just add @ref Receiver using multiple inheritance.
-Convoluted example:
-
-@snippet Interconnect.cpp Emitter-connect-receiver-multiple-inheritance
 
 @anchor Interconnect-Emitter-msvc-icf
 
@@ -154,6 +184,82 @@ Convoluted example:
     `Corrade::Interconnect` (even transitively), this flag is added implicitly.
     If you're using a custom buildsystem, you have to add this flag yourself to
     prevent erratic behavior.
+
+@section Interconnect-Emitter-connections Connecting signals to slots
+
+Signals implemented on @ref Emitter subclasses can be connected to slots using
+various @ref connect() functions. The argument count and types of slot function
+must be exactly the same as of the signal function. When a connection is
+established, returned @ref Connection object can be used together with
+@ref disconnect() to remove given connection:
+
+@snippet Interconnect.cpp Emitter-connect
+
+Note that the @ref Connection object is just a handle --- its destruction
+* *doesn't* lead to the connection being removed. You can also call
+@ref disconnectSignal() or @ref disconnectAllSignals() on the emitter to remove
+the connections. All emitter connections are automatically removed when emitter
+object is destroyed.
+
+@note It is possible to connect given signal to given slot more than
+    once, because there is no way to check whether the connection already
+    exists. As a result, after signal is emitted, the slot function will be
+    then called more than once.
+@note In the slot you can add or remove connections, however you can't
+    @cpp delete @ce the emitter object, as it would lead to undefined behavior.
+
+You can connect any signal, as long as the emitter object is of proper type ---
+in particular, referring a signal from a derived type while passing an emitter
+of base type is not allowed:
+
+@snippet Interconnect.cpp Emitter-connect-emitter-type
+
+@section Interconnect-Emitter-free-slots Free function, lambda and function object slots
+
+Slots can be simply free functions. Non-capturing lambdas, shown above, are
+converted to function pointers and treated the same. These have the least call
+overhead.
+
+Capturing lambdas and function objects, as long as they are trivially copyable
+and destructible and small enough (not more than three pointers) are stored
+by-value similarly to free functions, but the call overhead is slightly larger.
+
+Lambdas and function objects larger than three pointers or having non-trivial
+copy / destruction are allocated on heap. This is the case of @ref std::function,
+for example, and the overhead is offset by another indirection.
+
+@attention
+    Note that when using capturing lambdas or stateful function objects you
+    have to ensure that all referenced data are kept in scope for as long as
+    the connection is alive, which might be tricky. A better recommendation is
+    to use member function slots on a @ref Receiver object as shown below ---
+    there the connection gets automatically removed once the receiver goes out
+    of scope.
+
+@section Interconnect-Emitter-member-slots Member function slots
+
+Finally, it's possible to connect signals to member functions. The receiving
+object must be a subclass of @ref Receiver and @p slot must be a non-constant
+member function with @cpp void @ce as a return type. In addition to the cases
+mentioned above, the connection is automatically removed also when receiver
+object is destroyed. You can also use @ref Receiver::disconnectAllSlots() to
+disconnect the receiver from everything.
+
+@note Unlike with emitters, it's perfectly fine to destroy the *receiver*
+    object in its own slot.
+
+@snippet Interconnect.cpp Emitter-connect-member-slot
+
+You can connect to any member function, as long as @ref Receiver exists
+somewhere in given object type hierarchy:
+
+@snippet Interconnect.cpp Emitter-connect-receiver-type
+
+It is also possible to connect to member function of class which itself isn't
+subclass of @ref Receiver, just add @ref Receiver using multiple inheritance.
+Convoluted example:
+
+@snippet Interconnect.cpp Emitter-connect-receiver-multiple-inheritance
 
 @see @ref Receiver, @ref Connection
 @todo Allow move
@@ -189,8 +295,8 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         /**
          * @brief Whether the emitter is connected to any slot
          *
-         * @see @ref Receiver::hasSlotConnections(),
-         *      @ref Connection::isConnected(), @ref signalConnectionCount()
+         * @see @ref Receiver::hasSlotConnections(), @ref isConnected(),
+         *      @ref signalConnectionCount()
          */
         bool hasSignalConnections() const {
             return !_connections.empty();
@@ -199,8 +305,8 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         /**
          * @brief Whether given signal is connected to any slot
          *
-         * @see @ref Receiver::hasSlotConnections(),
-         *      @ref Connection::isConnected(), @ref signalConnectionCount()
+         * @see @ref Receiver::hasSlotConnections(), @ref isConnected(),
+         *      @ref signalConnectionCount()
          */
         template<class Emitter, class ...Args> bool hasSignalConnections(Signal(Emitter::*signal)(Args...)) const {
             return _connections.count(
@@ -211,6 +317,18 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
                 #endif
                 ) != 0;
         }
+
+        /**
+         * @brief Whether given connection still exists
+         *
+         * Checks if the @ref Connection object returned by @ref connect()
+         * still refers to an existing connection. It's the user responsibility
+         * to ensure that the @p connection corresponds to proper @ref Emitter
+         * instance.
+         * @see @ref hasSignalConnections(),
+         *      @ref Receiver::hasSlotConnections(), @ref disconnect()
+         */
+        bool isConnected(const Connection& connection) const;
 
         /**
          * @brief Count of connections to this emitter signals
@@ -289,125 +407,20 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
         friend Receiver;
 
         template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> friend Connection connect(EmitterObject&, Signal(Emitter::*)(Args...), ReceiverObject&, void(Receiver::*)(Args...));
-        template<class EmitterObject, class Emitter, class ...Args> friend Connection connect(EmitterObject&, Signal(Emitter::*)(Args...), void(*)(Args...));
+        template<class EmitterObject, class Emitter, class Functor, class ...Args> friend Connection connect(EmitterObject&, Signal(Emitter::*)(Args...), Functor&&);
+        friend bool disconnect(Emitter&, const Connection&);
         #endif
 
-        static void connectInternal(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data);
-        static void disconnectInternal(const Implementation::SignalData& signal, Implementation::AbstractConnectionData* data);
+        /* Returns the actual location of the connection in the hashmap */
+        Implementation::ConnectionData& connectInternal(const Implementation::SignalData& signal, Implementation::ConnectionData&& data);
+        CORRADE_INTERCONNECT_LOCAL void disconnectFromReceiver(const Implementation::ConnectionData& data);
 
         void disconnectInternal(const Implementation::SignalData& signal);
-        void disconnectInternal(std::unordered_multimap<Implementation::SignalData, Implementation::AbstractConnectionData*, Implementation::SignalDataHash>::const_iterator it);
 
-        std::unordered_multimap<Implementation::SignalData, Implementation::AbstractConnectionData*, Implementation::SignalDataHash> _connections;
+        std::unordered_multimap<Implementation::SignalData, Implementation::ConnectionData, Implementation::SignalDataHash> _connections;
         std::uint32_t _lastHandledSignal;
         bool _connectionsChanged;
 };
-
-namespace Implementation {
-
-class CORRADE_INTERCONNECT_EXPORT AbstractConnectionData {
-    public:
-        enum class Type: std::uint8_t { Function, Member };
-
-        AbstractConnectionData(const AbstractConnectionData&) = delete;
-        AbstractConnectionData(AbstractConnectionData&&) = delete;
-
-        virtual ~AbstractConnectionData() = 0;
-
-        AbstractConnectionData& operator=(const AbstractConnectionData&) = delete;
-        AbstractConnectionData& operator=(AbstractConnectionData&&) = delete;
-
-    protected:
-        explicit AbstractConnectionData(Emitter* emitter, Type type): _connection{nullptr}, _emitter{emitter}, _lastHandledSignal{0}, _type{type} {}
-
-    private:
-        /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        template<class...> friend class FunctionConnectionData;
-        template<class, class...> friend class MemberConnectionData;
-        friend Interconnect::Connection;
-        friend Interconnect::Emitter;
-        friend Interconnect::Receiver;
-        #endif
-
-        Connection* _connection;
-        Emitter* _emitter;
-        std::uint32_t _lastHandledSignal;
-        Type _type;
-};
-
-class AbstractMemberConnectionData: public AbstractConnectionData {
-    public:
-        template<class Emitter, class Receiver> explicit AbstractMemberConnectionData(Emitter* emitter, Receiver* receiver): AbstractConnectionData{emitter, Type::Member}, _receiver{receiver} {}
-
-    private:
-        /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        friend Interconnect::Emitter;
-        #endif
-
-        Receiver* _receiver;
-};
-
-template<class ...Args> class BaseMemberConnectionData: public AbstractMemberConnectionData {
-    public:
-        template<class Emitter, class Receiver> explicit BaseMemberConnectionData(Emitter* emitter, Receiver* receiver): AbstractMemberConnectionData{emitter, receiver} {}
-
-        virtual void handle(Args... args) = 0;
-
-    private:
-        /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        friend Interconnect::Emitter;
-        #endif
-};
-
-#if defined(__GNUC__) && !defined(__clang__)
-/* GCC complains that this function is used but never defined. Clang is sane.
-   MSVC too. WHAT THE FUCK, GCC? */
-template<class ...Args> void BaseMemberConnectionData<Args...>::handle(Args...) {
-    CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
-}
-#endif
-
-template<class Receiver, class ...Args> class MemberConnectionData: public BaseMemberConnectionData<Args...> {
-    public:
-        typedef void(Receiver::*Slot)(Args...);
-
-        template<class Emitter> explicit MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): BaseMemberConnectionData<Args...>(emitter, receiver), _receiver{receiver}, _slot{slot} {}
-
-        void handle(Args... args) override final {
-            (_receiver->*_slot)(args...);
-        }
-
-    private:
-        /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        friend Interconnect::Emitter;
-        #endif
-
-        Receiver* _receiver;
-        const Slot _slot;
-};
-
-template<class ...Args> class FunctionConnectionData: public AbstractConnectionData {
-    public:
-        typedef void(*Slot)(Args...);
-
-        template<class Emitter> explicit FunctionConnectionData(Emitter* emitter, Slot slot): AbstractConnectionData{emitter, Type::Function}, _slot{slot} {}
-
-        void handle(Args... args) { _slot(args...); }
-
-    private:
-        /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        friend Interconnect::Emitter;
-        #endif
-
-        const Slot _slot;
-};
-
-}
 
 /** @relatesalso Emitter
 @brief Connect signal to function slot
@@ -416,9 +429,15 @@ template<class ...Args> class FunctionConnectionData: public AbstractConnectionD
 @param slot          Slot
 
 Connects given signal to compatible slot. @p emitter must be subclass of
-@ref Emitter, @p signal must be implemented signal and @p slot must be
-non-member function or non-capturing lambda with `void` as return type. The
-argument count and types must be exactly the same.
+@ref Emitter, @p signal must be implemented signal and @p slot can be either
+a non-member function, a lambda or any other function object. The argument
+count and types must be exactly the same.
+
+@attention Note that in case the lambda or function object references external
+    data, you need to ensure the data are in scope for the whole lifetime of
+    the connection. A much safer alternative is to make use of the
+    @ref Receiver object --- in that case the connection is automatically
+    removed when it goes out of scope.
 
 See @ref Interconnect-Emitter-connections "Emitter class documentation" for
 more information about connections.
@@ -426,7 +445,7 @@ more information about connections.
 @see @ref Emitter::hasSignalConnections(), @ref Connection::isConnected(),
      @ref Emitter::signalConnectionCount()
 */
-template<class EmitterObject, class Emitter, class ...Args> Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), void(*slot)(Args...)) {
+template<class EmitterObject, class Emitter, class Functor, class ...Args> Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), Functor&& slot) {
     static_assert(sizeof(Interconnect::Emitter::Signal(Emitter::*)(Args...)) <= sizeof(Implementation::SignalData),
         "size of member function pointer is incorrectly assumed to be smaller");
     static_assert(std::is_base_of<Emitter, EmitterObject>::value,
@@ -437,17 +456,11 @@ template<class EmitterObject, class Emitter, class ...Args> Connection connect(E
     #else
     auto signalData = Implementation::SignalData::create<Emitter, Args...>(signal);
     #endif
-    auto data = new Implementation::FunctionConnectionData<Args...>(&emitter, slot);
-    Interconnect::Emitter::connectInternal(signalData, data);
-    return Connection(signalData, data);
-}
-
-/** @relatesalso Emitter
-@overload
-@todo Why conversion of lambdas to function pointers is not done implicitly?
-*/
-template<class EmitterObject, class Emitter, class Lambda, class ...Args> Connection connect(EmitterObject& emitter, Interconnect::Emitter::Signal(Emitter::*signal)(Args...), Lambda slot) {
-    return connect(emitter, signal, static_cast<void(*)(Args...)>(slot));
+    return Connection{
+        #ifdef CORRADE_BUILD_DEPRECATED
+        emitter,
+        #endif
+        signalData, emitter.connectInternal(signalData, Implementation::ConnectionData::createFunctor<Args...>(std::move(slot)))};
 }
 
 /** @relatesalso Emitter
@@ -483,10 +496,23 @@ template<class EmitterObject, class Emitter, class Receiver, class ReceiverObjec
     #else
     auto signalData = Implementation::SignalData::create<Emitter, Args...>(signal);
     #endif
-    auto data = new Implementation::MemberConnectionData<ReceiverObject, Args...>(&emitter, &receiver, slot);
-    Interconnect::Emitter::connectInternal(signalData, data);
-    return Connection(signalData, data);
+    return Connection{
+        #ifdef CORRADE_BUILD_DEPRECATED
+        emitter,
+        #endif
+        signalData, emitter.connectInternal(signalData, Implementation::ConnectionData::createMember<Receiver, ReceiverObject, Args...>(receiver, slot))};
 }
+
+/** @relatesalso Emitter
+@brief Disconnect a signal/slot connection
+@param emitter      Emitter
+@param connection   Connection handle returned by @ref connect()
+
+It's the user responsibility to ensure that @p connection corresponds to given
+@p emitter instance. See @ref Interconnect-Emitter-connections "Emitter class documentation"
+for more information about connections.
+*/
+CORRADE_INTERCONNECT_EXPORT bool disconnect(Emitter& emitter, const Connection& connection);
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emitter_::*signal)(Args...), typename std::common_type<Args>::type... args) {
@@ -501,18 +527,14 @@ template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emi
         );
     auto it = range.first;
     while(it != range.second) {
+        /* Caching this actually helps *immensely* with debug runtime perf */
+        Implementation::ConnectionData& data = it->second;
+
         /* If not already handled, proceed and mark as such */
-        if(it->second->_lastHandledSignal != _lastHandledSignal) {
-            it->second->_lastHandledSignal = _lastHandledSignal;
-            switch(it->second->_type) {
-                case Implementation::AbstractConnectionData::Type::Function:
-                    static_cast<Implementation::FunctionConnectionData<Args...>*>(it->second)->handle(args...);
-                    break;
-                case Implementation::AbstractConnectionData::Type::Member:
-                    static_cast<Implementation::BaseMemberConnectionData<Args...>*>(it->second)->handle(args...);
-                    break;
-                default: CORRADE_ASSERT_UNREACHABLE(); /* LCOV_EXCL_LINE */
-            }
+        if(data.lastHandledSignal != _lastHandledSignal) {
+            data.lastHandledSignal = _lastHandledSignal;
+
+            reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&, Args&&...)>(data.call)(data.storage, std::forward<Args>(args)...);
 
             /* Connections changed by the slot, go through again */
             if(_connectionsChanged) {

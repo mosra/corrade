@@ -31,27 +31,27 @@
 
 #include <cstddef>
 
+#include "Corrade/Containers/Reference.h"
 #include "Corrade/Interconnect/Interconnect.h"
 #include "Corrade/Interconnect/visibility.h"
 
 namespace Corrade { namespace Interconnect {
 
 namespace Implementation {
-    class AbstractConnectionData;
     struct SignalDataHash;
+
+    enum: std::size_t { FunctionPointerSize =
+        #ifndef CORRADE_TARGET_WINDOWS
+        2*sizeof(void*)/sizeof(std::size_t)
+        #else
+        /* On MSVC, pointers to members with a virtual base class
+           are the biggest and have 16 bytes both on 32bit and 64bit. */
+        16/sizeof(std::size_t)
+        #endif
+    };
 
     class SignalData {
         public:
-            enum: std::size_t { Size =
-                #ifndef CORRADE_TARGET_WINDOWS
-                2*sizeof(void*)/sizeof(std::size_t)
-                #else
-                /* On MSVC, pointers to members with a virtual base class
-                   are the biggest and have 16 bytes both on 32bit and 64bit. */
-                16/sizeof(std::size_t)
-                #endif
-            };
-
             #ifndef CORRADE_MSVC2017_COMPATIBILITY
             template<class Emitter, class ...Args> SignalData(typename Emitter::Signal(Emitter::*signal)(Args...)): data() {
                 typedef typename Emitter::Signal(Emitter::*BaseSignal)(Args...);
@@ -78,7 +78,7 @@ namespace Implementation {
             #endif
 
             bool operator==(const SignalData& other) const {
-                for(std::size_t i = 0; i != Size; ++i)
+                for(std::size_t i = 0; i != FunctionPointerSize; ++i)
                     if(data[i] != other.data[i]) return false;
                 return true;
             }
@@ -98,98 +98,93 @@ namespace Implementation {
             SignalData(): data() {}
             #endif
 
-            std::size_t data[Size];
+            std::size_t data[FunctionPointerSize];
     };
 }
 
 /**
 @brief Connection
 
-Returned by @ref Interconnect::connect(), allows to remove or reestablish the
-connection. Destruction of Connection object does not remove the connection,
-after that the only possibility to remove the connection is to disconnect whole
-emitter or receiver or disconnect everything connected to given signal using
+Returned by @ref Interconnect::connect(), allows to remove the connection
+later using @ref Interconnect::disconnect(). Destruction of the @ref Connection
+object does not remove the connection, after that the only possibility to
+remove the connection is to disconnect the whole emitter or receiver or
+disconnect everything connected to given signal using
 @ref Emitter::disconnectSignal(), @ref Emitter::disconnectAllSignals() or
-@ref Receiver::disconnectAllSlots() or destroy either emitter or receiver
+@ref Receiver::disconnectAllSlots(), or destroy either the emitter or receiver
 object.
 
 @see @ref interconnect, @ref Emitter, @ref Receiver
 */
 class CORRADE_INTERCONNECT_EXPORT Connection {
     public:
-        /** @brief Copying is not allowed */
-        Connection(const Connection&) = delete;
-
-        /** @brief Move constructor */
-        Connection(Connection&& other) noexcept;
-
-        /** @brief Copying is not allowed */
-        Connection& operator=(const Connection&) = delete;
-
-        /** @brief Move assignment */
-        Connection& operator=(Connection&& other) noexcept;
-
-        /**
-         * @brief Destructor
-         *
-         * Does not remove the connection.
-         */
-        ~Connection();
-
-        /**
-         * @brief Whether connection is possible
-         * @return @cpp false @ce if either emitter or receiver object (if
-         *      applicable) doesn't exist anymore, @cpp true @ce otherwise.
-         *
-         * @see @ref isConnected()
-         */
-        bool isConnectionPossible() const { return _data; }
-
+        #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Whether the connection exists
-         *
-         * @see @ref isConnectionPossible(),
-         *      @ref Emitter::hasSignalConnections(),
-         *      @ref Receiver::hasSlotConnections()
+         * @deprecated This function is dangerous as it has no way to check
+         *      that the original @ref Emitter object still exists, use
+         *      @ref Emitter::isConnected() instead.
          */
-        bool isConnected() const { return _connected; }
-
-        /**
-         * @brief Establish the connection
-         *
-         * If connection is not possible, returns @cpp false @ce, otherwise
-         * creates the connection (if not already connected) and returns
-         * @cpp true @ce.
-         * @see @ref isConnectionPossible(), @ref isConnected(),
-         *      @ref Interconnect::connect()
-         */
-        bool connect();
+        CORRADE_DEPRECATED("dangerous, use Emitter::isConnected() instead") bool isConnected() const;
 
         /**
          * @brief Remove the connection
-         *
-         * Disconnects if connection exists.
-         * @see @ref isConnected(), @ref Emitter::disconnectSignal(),
-         *      @ref Emitter::disconnectAllSignals(),
-         *      @ref Receiver::disconnectAllSlots()
+         * @deprecated This function is dangerous as it has no way to check
+         *      that the original @ref Emitter object still exists, use
+         *      @ref Interconnect::disconnect() instead.
          */
-        void disconnect();
+        CORRADE_DEPRECATED("dangerous, use Interconnect::disconnect() instead") void disconnect();
+
+        /**
+         * @brief Whether connection is possible
+         * @deprecated Re-connecting a disconnected signal is not possible
+         *      anymore in order to make the library more efficient. This
+         *      function now just returns the value of (also deprecated)
+         *      @ref isConnected().
+         */
+        CORRADE_DEPRECATED("re-connecting a disconnected signal is not possible anymore") bool isConnectionPossible() const {
+            CORRADE_IGNORE_DEPRECATED_PUSH
+            return isConnected();
+            CORRADE_IGNORE_DEPRECATED_POP
+        }
+
+        /**
+         * @brief Re-establish the connection
+         * @deprecated Re-connecting a disconnected signal is not possible
+         *      anymore in order to make the library more efficient. This
+         *      function now just returns the value of (also deprecated)
+         *      @ref isConnected().
+         */
+        CORRADE_DEPRECATED("re-connecting a disconnected signal is not possible anymore") bool connect() {
+            CORRADE_IGNORE_DEPRECATED_PUSH
+            return isConnected();
+            CORRADE_IGNORE_DEPRECATED_POP
+        }
+        #endif
 
     #ifdef DOXYGEN_GENERATING_OUTPUT
     private:
     #endif
-        explicit Connection(Implementation::SignalData signal, Implementation::AbstractConnectionData* data);
+        explicit Connection(
+            #ifdef CORRADE_BUILD_DEPRECATED
+            Emitter& emitter,
+            #endif
+            Implementation::SignalData signal, Implementation::ConnectionData& data);
 
     private:
         /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
         #ifndef DOXYGEN_GENERATING_OUTPUT
         friend Emitter;
         friend Receiver;
+        friend bool disconnect(Emitter&, const Connection&);
         #endif
 
+        #ifdef CORRADE_BUILD_DEPRECATED
+        Containers::Reference<Emitter> _emitter;
+        #endif
         Implementation::SignalData _signal;
-        Implementation::AbstractConnectionData* _data;
-        bool _connected;
+        /* Note: this might become dangling at some point */
+        Implementation::ConnectionData* _data;
 };
 
 }}

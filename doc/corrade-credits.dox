@@ -101,6 +101,8 @@ Is the below list missing your name or something's wrong?
     MSYS2 packages
 -   **Ivan Sanz Carasa** ([\@isc30](https://github.com/isc30)) --- Emscripten
     toolchain improvements
+-   **Jakob Weiss** ([\@TheHugeManatee](https://github.com/TheHugeManatee)) ---
+    Stateful lambda support in the @ref Interconnect library
 -   **[\@jaynus](https://github.com/jaynus)** --- MSVC compilation fixes
 -   **Jonathan Hale** ([\@Squareys](https://github.com/Squareys)) ---
     various fixes

@@ -55,15 +55,13 @@ postman.paymentRequired(245);
 /* [Emitter-emit] */
 
 /* [Emitter-connect] */
-Interconnect::Connection c = Interconnect::connect(postman,
-    &Postman::paymentRequired, [](int amount) {
-        Utility::Debug{} << "pay" << amount;
-    });
+Interconnect::Connection c = Interconnect::connect(
+    postman, &Postman::paymentRequired,
+    [](int amount) { Utility::Debug{} << "pay" << amount; });
+
 // ...
-c.disconnect();
-// ...
-c.connect();
-// ...
+
+Interconnect::disconnect(postman, c);
 /* [Emitter-connect] */
 }
 
@@ -115,11 +113,10 @@ class Derived: public Base {
 
 Base* a = new Derived;
 Derived* b = new Derived;
-Interconnect::connect(*a, &Base::baseSignal, [](){});       // ok
-Interconnect::connect(*b, &Base::baseSignal, [](){});       // ok
-// Interconnect::connect(*a, &Derived::derivedSignal, [](){});
-// error, `a` is not of Derived type
-Interconnect::connect(*b, &Derived::derivedSignal, [](){}); // ok
+Interconnect::connect(*a, &Base::baseSignal, [](){});           // ok
+Interconnect::connect(*b, &Base::baseSignal, [](){});           // ok
+//Interconnect::connect(*a, &Derived::derivedSignal, [](){});   // error
+Interconnect::connect(*b, &Derived::derivedSignal, [](){});     // ok
 /* [Emitter-connect-emitter-type] */
 }
 
@@ -144,11 +141,10 @@ Foo foo;
 Base* a = new Derived;
 Derived* b = new Derived;
 
-Interconnect::connect(foo, &Foo::signal, *a, &Base::baseSlot);       // ok
-Interconnect::connect(foo, &Foo::signal, *b, &Base::baseSlot);       // ok
-// Interconnect::connect(foo, &Foo::signal, *a, &Derived::derivedSlot);
-// error, `a` is not of Derived type
-Interconnect::connect(foo, &Foo::signal, *b, &Derived::derivedSlot); // ok
+Interconnect::connect(foo, &Foo::signal, *a, &Base::baseSlot);         // ok
+Interconnect::connect(foo, &Foo::signal, *b, &Base::baseSlot);         // ok
+//Interconnect::connect(foo, &Foo::signal, *a, &Derived::derivedSlot); // error
+Interconnect::connect(foo, &Foo::signal, *b, &Derived::derivedSlot);   // ok
 /* [Emitter-connect-receiver-type] */
 
 /* [Emitter-connect-receiver-multiple-inheritance] */
@@ -156,9 +152,9 @@ class MyString: public std::string, public Interconnect::Receiver {};
 
 std::string c;
 MyString d;
-// Interconnect::connect(foo, &Foo::signal, c, &std::string::clear);
-// error, `c` is not of Receiver type
-Interconnect::connect(foo, &Foo::signal, d, &std::string::clear); // ok
+
+//Interconnect::connect(foo, &Foo::signal, c, &std::string::clear);    // error
+Interconnect::connect(foo, &Foo::signal, d, &std::string::clear);      // ok
 /* [Emitter-connect-receiver-multiple-inheritance] */
 }
 

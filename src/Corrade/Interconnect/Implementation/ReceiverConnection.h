@@ -1,5 +1,5 @@
-#ifndef Corrade_Interconnect_Interconnect_h
-#define Corrade_Interconnect_Interconnect_h
+#ifndef Corrade_Interconnect_Implementation_ReceiverConnection_h
+#define Corrade_Interconnect_Implementation_ReceiverConnection_h
 /*
     This file is part of Corrade.
 
@@ -25,25 +25,19 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-/** @file
- * @brief Forward declarations for the @ref Corrade::Interconnect namespace
- */
+#include "Corrade/Containers/Reference.h"
+#include "Corrade/Interconnect/Connection.h"
 
-#include <cstddef>
+namespace Corrade { namespace Interconnect { namespace Implementation {
 
-namespace Corrade { namespace Interconnect {
+struct ReceiverConnection {
+    explicit ReceiverConnection(Emitter& emitter, Implementation::SignalData signal, Implementation::ConnectionData& data) noexcept: emitter{emitter}, signal{signal}, data{data} {}
 
-class Connection;
-class Emitter;
-class Receiver;
+    Containers::Reference<Emitter> emitter;
+    Implementation::SignalData signal;
+    Containers::Reference<Implementation::ConnectionData> data;
+};
 
-namespace Implementation {
-    struct ConnectionData;
-    class SignalData;
-}
-
-template<std::size_t, std::size_t, class, class> class StateMachine;
-
-}}
+}}}
 
 #endif

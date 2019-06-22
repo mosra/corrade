@@ -111,6 +111,14 @@ namespace Corrade {
 -   Implicit memory management of @ref Containers::LinkedList can be now
     overriden by reimplementing @ref Containers::LinkedListItem::erase()
 
+@subsubsection corrade-changelog-latest-changes-Interconnect Interconnect library
+
+-   The @ref Interconnect library internals got reworked with less allocations,
+    better memory usage, improved signal emitting performance and support for
+    connecting to arbitrary function objects along with @ref std::function. See
+    also [mosra/corrade#63](https://github.com/mosra/corrade/pull/63) for more
+    information.
+
 @subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
 
 -   When a test executed through CTest fails on Android, the uploaded test
@@ -200,6 +208,18 @@ namespace Corrade {
     @ref Utility::Directory::exists(). It was named like this to prevent it
     from looking like it works on directories only, but such name then caused
     people to ask if it works on directories as well, not helping anything.
+-   `Interconnect::Connection::isConnected()` and
+    `Interconnect::Connection::disconnect()` are deprecated and print a warning
+    at runtime as the redesigned internals of the @ref Interconnect library now
+    make it impossible to check that the original @ref Interconnect::Emitter
+    object still exists. Use @ref Interconnect::Emitter::isConnected() and
+    @ref Interconnect::disconnect() instead.
+-   Re-connecting a disconnected signal using
+    `Interconnect::Connection::isConnectionPossible()` and
+    `Interconnect::Connection::connect()` is not possible anymore in order
+    to make the @ref Interconnect library more efficient. These two functions
+    are now deprecated and just returningthe value of (also deprecated)
+    `isConnected()`.
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 

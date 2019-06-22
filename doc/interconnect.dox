@@ -84,7 +84,8 @@ manage the connections.
 @skip int main
 @until bombs
 
-See @ref Interconnect::connect(), @ref Interconnect::Emitter::disconnectSignal(),
+See @ref Interconnect::disconnect(),
+    @ref Interconnect::Emitter::disconnectSignal(),
     @ref Interconnect::Emitter::disconnectAllSignals() and
     @ref Interconnect::Receiver::disconnectAllSlots() functions for information
     about removing connections.

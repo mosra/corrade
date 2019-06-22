@@ -23,12 +23,14 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <functional>
 #include <sstream>
 
 #include "Corrade/Interconnect/Emitter.h"
 #include "Corrade/Interconnect/Receiver.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/SortedContainer.h"
+#include "Corrade/TestSuite/Compare/Numeric.h"
 #include "Corrade/Utility/DebugStl.h"
 
 namespace Corrade { namespace Interconnect { namespace Test { namespace {
@@ -39,8 +41,13 @@ struct Test: TestSuite::Tester {
     void signalData();
     void templatedSignalData();
 
+    void connectionDataFree();
+    void connectionDataMember();
+    void connectionDataLambda();
+    void connectionDataLambdaDestructor();
+    void connectionDataLambdaHeap();
+
     void connect();
-    void connectMoveConnection();
 
     void disconnect();
     void disconnectSignal();
@@ -65,6 +72,8 @@ struct Test: TestSuite::Tester {
     void deleteReceiverInSlot();
 
     void function();
+    void capturingLambda();
+    void stdFunction();
 };
 
 class Postman: public Interconnect::Emitter {
@@ -127,8 +136,13 @@ Test::Test() {
     addTests({&Test::signalData,
               &Test::templatedSignalData,
 
+              &Test::connectionDataFree,
+              &Test::connectionDataMember,
+              &Test::connectionDataLambda,
+              &Test::connectionDataLambdaDestructor,
+              &Test::connectionDataLambdaHeap,
+
               &Test::connect,
-              &Test::connectMoveConnection,
 
               &Test::disconnect,
               &Test::disconnectSignal,
@@ -152,7 +166,9 @@ Test::Test() {
               &Test::changeConnectionsInSlot,
               &Test::deleteReceiverInSlot,
 
-              &Test::function});
+              &Test::function,
+              &Test::capturingLambda,
+              &Test::stdFunction});
 }
 
 void Test::signalData() {
@@ -178,8 +194,7 @@ void Test::signalData() {
     CORRADE_VERIFY(Implementation::SignalDataHash()(data1) != Implementation::SignalDataHash()(data3));
 }
 
-void Test::templatedSignalData()
-{
+void Test::templatedSignalData() {
     #ifndef CORRADE_MSVC2017_COMPATIBILITY
     Implementation::SignalData data1(&TemplatedPostman::newMessage<std::int32_t>);
     Implementation::SignalData data2(&TemplatedPostman::newMessage<std::string>);
@@ -194,14 +209,178 @@ void Test::templatedSignalData()
     CORRADE_VERIFY(data1 != data3);
 }
 
+int counter;
+
+void incrementCounter() { ++counter; }
+
+void Test::connectionDataFree() {
+    auto d = Implementation::ConnectionData::createFunctor(incrementCounter);
+    CORRADE_VERIFY(d.type == Implementation::ConnectionType::Free);
+    CORRADE_COMPARE(d.storage.function, &incrementCounter);
+    CORRADE_VERIFY(d.call);
+
+    counter = 0;
+    reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d.call)(d.storage);
+    CORRADE_COMPARE(counter, 1);
+
+    Implementation::ConnectionData d2{std::move(d)};
+    CORRADE_VERIFY(d2.type == Implementation::ConnectionType::Free);
+    CORRADE_COMPARE(d2.storage.function, &incrementCounter);
+    CORRADE_VERIFY(d2.call);
+
+    reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d2.call)(d2.storage);
+    CORRADE_COMPARE(counter, 2);
+
+    Implementation::ConnectionData d3{Implementation::ConnectionType::Member};
+    d3 = std::move(d2);
+    CORRADE_VERIFY(d3.type == Implementation::ConnectionType::Free);
+    CORRADE_COMPARE(d3.storage.function, &incrementCounter);
+    CORRADE_VERIFY(d3.call);
+
+    reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d3.call)(d3.storage);
+    CORRADE_COMPARE(counter, 3);
+}
+
+void Test::connectionDataMember() {
+    struct R: Receiver {
+        int output = 0;
+
+        void receive() { ++output; }
+    } receiver;
+
+    auto d = Implementation::ConnectionData::createMember(receiver, &R::receive);
+    CORRADE_VERIFY(d.type == Implementation::ConnectionType::Member);
+    CORRADE_COMPARE(d.storage.member.receiver, &receiver);
+    CORRADE_VERIFY(d.call);
+
+    reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d.call)(d.storage);
+    CORRADE_COMPARE(receiver.output, 1);
+
+    Implementation::ConnectionData d2{std::move(d)};
+    CORRADE_VERIFY(d2.type == Implementation::ConnectionType::Member);
+    CORRADE_COMPARE(d2.storage.member.receiver, &receiver);
+    CORRADE_VERIFY(d2.call);
+
+    reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d2.call)(d2.storage);
+    CORRADE_COMPARE(receiver.output, 2);
+
+    Implementation::ConnectionData d3{Implementation::ConnectionType::Free};
+    d3 = std::move(d2);
+    CORRADE_VERIFY(d3.type == Implementation::ConnectionType::Member);
+    CORRADE_COMPARE(d3.storage.member.receiver, &receiver);
+    CORRADE_VERIFY(d3.call);
+
+    reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d3.call)(d3.storage);
+    CORRADE_COMPARE(receiver.output, 3);
+}
+
+void Test::connectionDataLambda() {
+    int counter = 0;
+
+    auto d = Implementation::ConnectionData::createFunctor([&counter]() { ++counter; });
+    CORRADE_VERIFY(d.type == Implementation::ConnectionType::Functor);
+    CORRADE_VERIFY(d.call);
+
+    reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d.call)(d.storage);
+    CORRADE_COMPARE(counter, 1);
+
+    Implementation::ConnectionData d2{std::move(d)};
+    CORRADE_VERIFY(d2.type == Implementation::ConnectionType::Functor);
+    CORRADE_VERIFY(d2.call);
+
+    reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d2.call)(d2.storage);
+    CORRADE_COMPARE(counter, 2);
+
+    Implementation::ConnectionData d3{Implementation::ConnectionType::Member};
+    d3 = std::move(d2);
+    CORRADE_VERIFY(d3.type == Implementation::ConnectionType::Functor);
+    CORRADE_VERIFY(d3.call);
+
+    reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d3.call)(d3.storage);
+    CORRADE_COMPARE(counter, 3);
+}
+
+void Test::connectionDataLambdaDestructor() {
+    struct Destructor {
+        int value = 3;
+        ~Destructor() { counter += 7; }
+    } a;
+
+    {
+        auto d = Implementation::ConnectionData::createFunctor([a](){ counter += a.value; });
+        CORRADE_VERIFY(d.type == Implementation::ConnectionType::FunctorWithDestructor);
+        CORRADE_VERIFY(d.storage.functor.destruct);
+        CORRADE_VERIFY(d.call);
+
+        counter = 0;
+        reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d.call)(d.storage);
+        CORRADE_COMPARE(counter, 3);
+
+        Implementation::ConnectionData d2{std::move(d)};
+        CORRADE_VERIFY(d.type == Implementation::ConnectionType::Functor);
+        CORRADE_VERIFY(d2.type == Implementation::ConnectionType::FunctorWithDestructor);
+        CORRADE_VERIFY(d2.storage.functor.destruct);
+        CORRADE_VERIFY(d2.call);
+
+        reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d2.call)(d2.storage);
+        CORRADE_COMPARE(counter, 6);
+
+        Implementation::ConnectionData d3{Implementation::ConnectionType::Member};
+        d3 = std::move(d2);
+        CORRADE_VERIFY(d2.type == Implementation::ConnectionType::Member);
+        CORRADE_VERIFY(d3.type == Implementation::ConnectionType::FunctorWithDestructor);
+        CORRADE_VERIFY(d3.storage.functor.destruct);
+        CORRADE_VERIFY(d3.call);
+
+        reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d3.call)(d3.storage);
+        CORRADE_COMPARE(counter, 9);
+    }
+
+    CORRADE_COMPARE(counter, 16);
+}
+
+void Test::connectionDataLambdaHeap() {
+    int counter = 0;
+
+    std::function<void()> f{[&counter](){ ++counter; }};
+    CORRADE_COMPARE_AS(sizeof(f), sizeof(Implementation::ConnectionData::Storage),
+        TestSuite::Compare::Greater);
+
+    auto d = Implementation::ConnectionData::createFunctor(f);
+    CORRADE_VERIFY(d.type == Implementation::ConnectionType::FunctorWithDestructor);
+    CORRADE_VERIFY(d.storage.functor.destruct);
+    CORRADE_VERIFY(d.call);
+
+    reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d.call)(d.storage);
+    CORRADE_COMPARE(counter, 1);
+
+    Implementation::ConnectionData d2{std::move(d)};
+    CORRADE_VERIFY(d.type == Implementation::ConnectionType::Functor);
+    CORRADE_VERIFY(d2.type == Implementation::ConnectionType::FunctorWithDestructor);
+    CORRADE_VERIFY(d2.storage.functor.destruct);
+    CORRADE_VERIFY(d2.call);
+
+    reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d2.call)(d2.storage);
+    CORRADE_COMPARE(counter, 2);
+
+    Implementation::ConnectionData d3{Implementation::ConnectionType::Member};
+    d3 = std::move(d2);
+    CORRADE_VERIFY(d2.type == Implementation::ConnectionType::Member);
+    CORRADE_VERIFY(d3.type == Implementation::ConnectionType::FunctorWithDestructor);
+    CORRADE_VERIFY(d3.storage.functor.destruct);
+    CORRADE_VERIFY(d3.call);
+
+    reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d3.call)(d3.storage);
+    CORRADE_COMPARE(counter, 3);
+}
+
 void Test::connect() {
     Postman postman;
     Mailbox mailbox1, mailbox2;
 
     /* Verify returned connection */
     Connection connection = Interconnect::connect(postman, &Postman::newMessage, mailbox1, &Mailbox::addMessage);
-    CORRADE_VERIFY(connection.isConnectionPossible());
-    CORRADE_VERIFY(connection.isConnected());
+    CORRADE_VERIFY(postman.isConnected(connection));
 
     /* Verify connection adding */
     Interconnect::connect(postman, &Postman::paymentRequested, mailbox1, &Mailbox::pay);
@@ -222,35 +401,6 @@ void Test::connect() {
     CORRADE_COMPARE(mailbox1.slotConnectionCount(), 3);
 }
 
-void Test::connectMoveConnection() {
-    Postman postman;
-    Mailbox mailbox1, mailbox2;
-
-    Connection connection1 = Interconnect::connect(postman, &Postman::newMessage, mailbox1, &Mailbox::addMessage);
-    Connection connection2 = Interconnect::connect(postman, &Postman::newMessage, mailbox2, &Mailbox::addMessage);
-    connection2.disconnect();
-
-    /* Move construction */
-    CORRADE_VERIFY(connection1.isConnectionPossible());
-    CORRADE_VERIFY(connection1.isConnected());
-    Connection connection3{std::move(connection1)};
-    CORRADE_VERIFY(!connection1.isConnectionPossible());
-    CORRADE_VERIFY(connection3.isConnectionPossible());
-    CORRADE_VERIFY(!connection1.isConnected());
-    CORRADE_VERIFY(connection3.isConnected());
-
-    /* Move assignment */
-    CORRADE_VERIFY(connection3.isConnected());
-    CORRADE_VERIFY(!connection2.isConnected());
-    CORRADE_VERIFY(connection2.isConnectionPossible());
-    CORRADE_VERIFY(connection3.isConnectionPossible());
-    connection2 = std::move(connection3);
-    CORRADE_VERIFY(connection2.isConnected());
-    CORRADE_VERIFY(!connection3.isConnected());
-    CORRADE_VERIFY(connection2.isConnectionPossible());
-    CORRADE_VERIFY(connection3.isConnectionPossible());
-}
-
 void Test::disconnect() {
     Postman postman;
     Mailbox mailbox1, mailbox2;
@@ -260,18 +410,13 @@ void Test::disconnect() {
     Interconnect::connect(postman, &Postman::newMessage, mailbox2, &Mailbox::addMessage);
 
     /* Verify disconnection response */
-    connection.disconnect();
-    CORRADE_VERIFY(connection.isConnectionPossible());
-    CORRADE_VERIFY(!connection.isConnected());
+    CORRADE_VERIFY(Interconnect::disconnect(postman, connection));
+    CORRADE_VERIFY(!postman.isConnected(connection));
     CORRADE_COMPARE(postman.signalConnectionCount(&Postman::newMessage), 1);
     CORRADE_COMPARE(mailbox1.slotConnectionCount(), 1);
 
-    /* Verify connection response */
-    connection.connect();
-    CORRADE_VERIFY(connection.isConnectionPossible());
-    CORRADE_VERIFY(connection.isConnected());
-    CORRADE_COMPARE(postman.signalConnectionCount(&Postman::newMessage), 2);
-    CORRADE_COMPARE(mailbox1.slotConnectionCount(), 2);
+    /* Disconnecting the second time fails */
+    CORRADE_VERIFY(!Interconnect::disconnect(postman, connection));
 }
 
 void Test::disconnectSignal() {
@@ -283,11 +428,9 @@ void Test::disconnectSignal() {
     Connection c3 = Interconnect::connect(postman, &Postman::paymentRequested, mailbox1, &Mailbox::pay);
 
     postman.disconnectSignal(&Postman::newMessage);
-    CORRADE_VERIFY(c1.isConnectionPossible());
-    CORRADE_VERIFY(!c1.isConnected());
-    CORRADE_VERIFY(c2.isConnectionPossible());
-    CORRADE_VERIFY(!c2.isConnected());
-    CORRADE_VERIFY(c3.isConnected());
+    CORRADE_VERIFY(!postman.isConnected(c1));
+    CORRADE_VERIFY(!postman.isConnected(c2));
+    CORRADE_VERIFY(postman.isConnected(c3));
     CORRADE_COMPARE(postman.signalConnectionCount(), 1);
     CORRADE_VERIFY(!postman.hasSignalConnections(&Postman::newMessage));
     CORRADE_COMPARE(postman.signalConnectionCount(&Postman::newMessage), 0);
@@ -304,11 +447,9 @@ void Test::disconnectEmitter() {
     Connection c3 = Interconnect::connect(postman2, &Postman::newMessage, mailbox, &Mailbox::addMessage);
 
     postman1.disconnectAllSignals();
-    CORRADE_VERIFY(c1.isConnectionPossible());
-    CORRADE_VERIFY(!c1.isConnected());
-    CORRADE_VERIFY(c2.isConnectionPossible());
-    CORRADE_VERIFY(!c2.isConnected());
-    CORRADE_VERIFY(c3.isConnected());
+    CORRADE_VERIFY(!postman1.isConnected(c1));
+    CORRADE_VERIFY(!postman1.isConnected(c2));
+    CORRADE_VERIFY(postman2.isConnected(c3));
     CORRADE_VERIFY(!postman1.hasSignalConnections());
     CORRADE_COMPARE(postman1.signalConnectionCount(), 0);
     CORRADE_VERIFY(postman2.hasSignalConnections());
@@ -324,11 +465,9 @@ void Test::disconnectReceiver() {
     Connection c3 = Interconnect::connect(postman, &Postman::newMessage, mailbox2, &Mailbox::addMessage);
 
     mailbox1.disconnectAllSlots();
-    CORRADE_VERIFY(c1.isConnectionPossible());
-    CORRADE_VERIFY(!c1.isConnected());
-    CORRADE_VERIFY(c2.isConnectionPossible());
-    CORRADE_VERIFY(!c2.isConnected());
-    CORRADE_VERIFY(c3.isConnected());
+    CORRADE_VERIFY(!postman.isConnected(c1));
+    CORRADE_VERIFY(!postman.isConnected(c2));
+    CORRADE_VERIFY(postman.isConnected(c3));
     CORRADE_COMPARE(postman.signalConnectionCount(), 1);
     CORRADE_VERIFY(!mailbox1.hasSlotConnections());
     CORRADE_COMPARE(mailbox2.slotConnectionCount(), 1);
@@ -339,16 +478,15 @@ void Test::destroyEmitter() {
     Postman postman2;
     Mailbox mailbox;
 
-    Connection c1 = Interconnect::connect(*postman1, &Postman::newMessage, mailbox, &Mailbox::addMessage);
-    Connection c2 = Interconnect::connect(*postman1, &Postman::paymentRequested, mailbox, &Mailbox::pay);
+    Interconnect::connect(*postman1, &Postman::newMessage, mailbox, &Mailbox::addMessage);
+    Interconnect::connect(*postman1, &Postman::paymentRequested, mailbox, &Mailbox::pay);
     Connection c3 = Interconnect::connect(postman2, &Postman::newMessage, mailbox, &Mailbox::addMessage);
 
+    CORRADE_COMPARE(postman2.signalConnectionCount(), 1);
+    CORRADE_COMPARE(mailbox.slotConnectionCount(), 3);
+
     delete postman1;
-    CORRADE_VERIFY(!c1.isConnectionPossible());
-    CORRADE_VERIFY(!c1.isConnected());
-    CORRADE_VERIFY(!c2.isConnectionPossible());
-    CORRADE_VERIFY(!c2.isConnected());
-    CORRADE_VERIFY(c3.isConnected());
+    CORRADE_VERIFY(postman2.isConnected(c3));
     CORRADE_COMPARE(postman2.signalConnectionCount(), 1);
     CORRADE_COMPARE(mailbox.slotConnectionCount(), 1);
 }
@@ -363,11 +501,9 @@ void Test::destroyReceiver() {
     Connection c3 = Interconnect::connect(postman, &Postman::newMessage, mailbox2, &Mailbox::addMessage);
 
     delete mailbox1;
-    CORRADE_VERIFY(!c1.isConnectionPossible());
-    CORRADE_VERIFY(!c1.isConnected());
-    CORRADE_VERIFY(!c2.isConnectionPossible());
-    CORRADE_VERIFY(!c2.isConnected());
-    CORRADE_VERIFY(c3.isConnected());
+    CORRADE_VERIFY(!postman.isConnected(c1));
+    CORRADE_VERIFY(!postman.isConnected(c2));
+    CORRADE_VERIFY(postman.isConnected(c3));
     CORRADE_COMPARE(postman.signalConnectionCount(), 1);
     CORRADE_COMPARE(mailbox2.slotConnectionCount(), 1);
 }
@@ -697,7 +833,34 @@ void Test::function() {
 
     postman.newMessage(0, "hello");
     CORRADE_COMPARE(out.str(), "hello\n");
-    connection.disconnect();
+    Interconnect::disconnect(postman, connection);
+    postman.newMessage(0, "heyy");
+    CORRADE_COMPARE(out.str(), "hello\n");
+}
+
+void Test::capturingLambda() {
+    std::ostringstream out;
+
+    Postman postman;
+    Connection connection = Interconnect::connect(postman, &Postman::newMessage, [&out](int, const std::string& message) { Debug{&out} << message; });
+
+    postman.newMessage(0, "hello");
+    CORRADE_COMPARE(out.str(), "hello\n");
+    Interconnect::disconnect(postman, connection);
+    postman.newMessage(0, "heyy");
+    CORRADE_COMPARE(out.str(), "hello\n");
+}
+
+void Test::stdFunction() {
+    std::ostringstream out;
+    std::function<void(int, const std::string&)> f{[&out](int, const std::string& message) { Debug{&out} << message; }};
+
+    Postman postman;
+    Connection connection = Interconnect::connect(postman, &Postman::newMessage, f);
+
+    postman.newMessage(0, "hello");
+    CORRADE_COMPARE(out.str(), "hello\n");
+    Interconnect::disconnect(postman, connection);
     postman.newMessage(0, "heyy");
     CORRADE_COMPARE(out.str(), "hello\n");
 }

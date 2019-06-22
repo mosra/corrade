@@ -36,10 +36,14 @@ set(CorradeInterconnect_HEADERS
     StateMachine.h
     visibility.h)
 
+set(CorradeInterconnect_PRIVATE_HEADERS
+    Implementation/ReceiverConnection.h)
+
 # Interconnect library
 add_library(CorradeInterconnect ${SHARED_OR_STATIC}
     ${CorradeInterconnect_SRCS}
-    ${CorradeInterconnect_HEADERS})
+    ${CorradeInterconnect_HEADERS}
+    ${CorradeInterconnect_PRIVATE_HEADERS})
 set_target_properties(CorradeInterconnect PROPERTIES
     DEBUG_POSTFIX "-d"
     FOLDER "Corrade/Interconnect")
