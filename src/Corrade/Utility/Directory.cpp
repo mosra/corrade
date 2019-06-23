@@ -590,10 +590,12 @@ bool copy(const std::string& from, const std::string& to) {
     #endif
     if(!in) {
         Error{} << "Utility::Directory::copy(): can't open" << from;
+        if(out) std::fclose(out);
         return false;
     }
     if(!out) {
         Error{} << "Utility::Directory::copy(): can't open" << to;
+        if(in) std::fclose(in);
         return false;
     }
 
