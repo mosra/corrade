@@ -3,6 +3,7 @@
 
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
                 2017, 2018, 2019 Vladimír Vondruš <mosra@centrum.cz>
+    Copyright © 2015 Jonathan Hale <squareys@googlemail.com>
 
     Permission is hereby granted, free of charge, to any person obtaining a
     copy of this software and associated documentation files (the "Software"),
@@ -583,19 +584,27 @@ bool copy(const std::string& from, const std::string& to) {
     /* Special case for "Unicode" Windows support */
     #ifndef CORRADE_TARGET_WINDOWS
     std::FILE* const in = std::fopen(from.data(), "rb");
-    std::FILE* const out = std::fopen(to.data(), "wb");
     #else
     std::FILE* const in = _wfopen(widen(from).data(), L"rb");
-    std::FILE* const out = _wfopen(widen(to).data(), L"wb");
     #endif
     if(!in) {
         Error{} << "Utility::Directory::copy(): can't open" << from;
         return false;
     }
+
+    Containers::ScopeGuard exitIn{in, std::fclose};
+
+    #ifndef CORRADE_TARGET_WINDOWS
+    std::FILE* const out = std::fopen(to.data(), "wb");
+    #else
+    std::FILE* const out = _wfopen(widen(to).data(), L"wb");
+    #endif
     if(!out) {
         Error{} << "Utility::Directory::copy(): can't open" << to;
         return false;
     }
+
+    Containers::ScopeGuard exitOut{out, std::fclose};
 
     #if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
     /* As noted in https://eklitzke.org/efficient-file-copying-on-linux, might
@@ -603,9 +612,6 @@ bool copy(const std::string& from, const std::string& to) {
        benchmark on my ultra-fast SSD, though. */
     posix_fadvise(fileno(in), 0, 0, POSIX_FADV_SEQUENTIAL);
     #endif
-
-    Containers::ScopeGuard exitIn{in, std::fclose};
-    Containers::ScopeGuard exitOut{out, std::fclose};
 
     /* 128 kB: https://eklitzke.org/efficient-file-copying-on-linux. The 100 MB
        benchmark agrees, going below is significantly slower and going above is

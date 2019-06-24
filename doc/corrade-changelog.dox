@@ -186,6 +186,8 @@ namespace Corrade {
     @ref Utility::Resource data happens more than once. While this was allowed
     for registration, the unregistration caused an assert to be fired. Fixed
     this to be allowed on both.
+-   @ref Utility::Directory::copy() wasn't properly freeing both opened files
+    if one of them failed to open (see [mosra/corrade#70](https://github.com/mosra/corrade/pull/70))
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 
