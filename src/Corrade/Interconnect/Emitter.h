@@ -353,13 +353,13 @@ template<class ...Args> class BaseMemberConnectionData: public AbstractMemberCon
     public:
         template<class Emitter, class Receiver> explicit BaseMemberConnectionData(Emitter* emitter, Receiver* receiver): AbstractMemberConnectionData{emitter, receiver} {}
 
+        virtual void handle(Args... args) = 0;
+
     private:
         /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
         #ifndef DOXYGEN_GENERATING_OUTPUT
         friend Interconnect::Emitter;
         #endif
-
-        virtual void handle(Args... args) = 0;
 };
 
 #if defined(__GNUC__) && !defined(__clang__)
@@ -376,15 +376,15 @@ template<class Receiver, class ...Args> class MemberConnectionData: public BaseM
 
         template<class Emitter> explicit MemberConnectionData(Emitter* emitter, Receiver* receiver, void(Receiver::*slot)(Args...)): BaseMemberConnectionData<Args...>(emitter, receiver), _receiver{receiver}, _slot{slot} {}
 
+        void handle(Args... args) override final {
+            (_receiver->*_slot)(args...);
+        }
+
     private:
         /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
         #ifndef DOXYGEN_GENERATING_OUTPUT
         friend Interconnect::Emitter;
         #endif
-
-        void handle(Args... args) override final {
-            (_receiver->*_slot)(args...);
-        }
 
         Receiver* _receiver;
         const Slot _slot;
@@ -396,13 +396,13 @@ template<class ...Args> class FunctionConnectionData: public AbstractConnectionD
 
         template<class Emitter> explicit FunctionConnectionData(Emitter* emitter, Slot slot): AbstractConnectionData{emitter, Type::Function}, _slot{slot} {}
 
+        void handle(Args... args) { _slot(args...); }
+
     private:
         /* https://bugzilla.gnome.org/show_bug.cgi?id=776986 */
         #ifndef DOXYGEN_GENERATING_OUTPUT
         friend Interconnect::Emitter;
         #endif
-
-        void handle(Args... args) { _slot(args...); }
 
         const Slot _slot;
 };
