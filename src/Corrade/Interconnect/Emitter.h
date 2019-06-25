@@ -421,7 +421,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
 
         template<class EmitterObject, class Emitter, class Receiver, class ReceiverObject, class ...Args> friend Connection connect(EmitterObject&, Signal(Emitter::*)(Args...), ReceiverObject&, void(Receiver::*)(Args...));
         template<class EmitterObject, class Emitter, class Functor, class ...Args> friend Connection connect(EmitterObject&, Signal(Emitter::*)(Args...), Functor&&);
-        friend bool disconnect(Emitter&, const Connection&);
+        friend CORRADE_INTERCONNECT_EXPORT bool disconnect(Emitter&, const Connection&);
         #endif
 
         /* Returns the actual location of the connection in the hashmap */

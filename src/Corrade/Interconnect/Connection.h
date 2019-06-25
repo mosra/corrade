@@ -176,7 +176,7 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
         #ifndef DOXYGEN_GENERATING_OUTPUT
         friend Emitter;
         friend Receiver;
-        friend bool disconnect(Emitter&, const Connection&);
+        friend CORRADE_INTERCONNECT_EXPORT bool disconnect(Emitter&, const Connection&);
         #endif
 
         #ifdef CORRADE_BUILD_DEPRECATED
