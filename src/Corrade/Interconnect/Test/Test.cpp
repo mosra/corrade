@@ -280,7 +280,21 @@ void Test::connectionDataLambda() {
     #endif
     int counter = 0;
 
+    /* Lambdas are not trivially copyable under MSVC, working around that with
+       a handmade function object */
+    #ifndef _MSC_VER
     auto d = Implementation::ConnectionData::createFunctor([&counter]() { ++counter; });
+    #else
+    struct Lambda {
+        Lambda(int& counter): counter{&counter} {}
+        void operator()() const { ++*counter; }
+        int* counter;
+    };
+    static_assert(std::is_trivially_copyable<Lambda>::value,
+        "everything is wrong, let's put the world on fire");
+    auto d = Implementation::ConnectionData::createFunctor(Lambda{counter});
+    #endif
+
     #if !defined(CORRADE_TARGET_LIBSTDCXX) || _GLIBCXX_RELEASE >= 5
     CORRADE_VERIFY(d.type == Implementation::ConnectionType::Functor);
     #else

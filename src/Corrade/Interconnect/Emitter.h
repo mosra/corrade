@@ -116,10 +116,11 @@ struct CORRADE_INTERCONNECT_EXPORT ConnectionData {
        is not trivially destructible, it also isn't trivially copyable
        (potentially non-copyable) and thus we need to allocate it on heap. */
     template<class ...Args, class F> static ConnectionData createFunctor(F&& f, typename std::enable_if<
-        #if !defined(CORRADE_TARGET_LIBSTDCXX) || _GLIBCXX_RELEASE >= 5
-        (sizeof(typename std::decay<F>::type) > sizeof(Storage)) || !std::is_trivially_copyable<typename std::decay<F>::type>::value
-        #else
+        /* On MSVC *all* lambdas are *for some reason* not trivially compable
+           so the call gets ambiguous without the is_convertible check */
         !std::is_convertible<typename std::decay<F>::type, void(*)(Args...)>::value
+        #if !defined(CORRADE_TARGET_LIBSTDCXX) || _GLIBCXX_RELEASE >= 5
+        && ((sizeof(typename std::decay<F>::type) > sizeof(Storage)) || !std::is_trivially_copyable<typename std::decay<F>::type>::value)
         #endif
         >::type* = nullptr) {
         ConnectionData out{ConnectionType::FunctorWithDestructor};
@@ -248,6 +249,17 @@ for example, and the overhead is offset by another indirection.
     to use member function slots on a @ref Receiver object as shown below ---
     there the connection gets automatically removed once the receiver goes out
     of scope.
+
+<b></b>
+
+@m_class{m-block m-danger}
+
+@par MSVC and non-trivially-copyable lambdas
+    For some reason, @ref std::is_trivially_copyable returns @cpp false @ce for
+    any lambda type on MSVC and thus all lambdas that are not convertible to
+    plain function pointers are allocated on heap on this compiler. If this
+    proves to be a performance bottleneck, you can work around this limitation
+    by creating a function object capturing the needed state manually.
 
 @section Interconnect-Emitter-member-slots Member function slots
 
