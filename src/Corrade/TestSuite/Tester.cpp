@@ -145,13 +145,13 @@ int Tester::exec(std::ostream* const logOutput, std::ostream* const errorOutput)
         .addBooleanOption("no-xfail").setHelp("no-xfail", "disallow expected failures")
             .setFromEnvironment("no-xfail", "CORRADE_TEST_NO_XFAIL")
         .addOption("benchmark", "wall-time").setHelp("benchmark", "default benchmark type", "TYPE")
-            .setFromEnvironment("benchmark", "CORRADE_BENCHMARK")
+            .setFromEnvironment("benchmark", "CORRADE_TEST_BENCHMARK")
         .addOption("benchmark-discard", "1").setHelp("benchmark-discard", "discard first N measurements of each benchmark", "N")
-            .setFromEnvironment("benchmark-discard", "CORRADE_BENCHMARK_DISCARD")
+            .setFromEnvironment("benchmark-discard", "CORRADE_TEST_BENCHMARK_DISCARD")
         .addOption("benchmark-yellow", "0.05").setHelp("benchmark-yellow", "deviation threshold for marking benchmark yellow", "N")
-            .setFromEnvironment("benchmark-yellow", "CORRADE_BENCHMARK_YELLOW")
+            .setFromEnvironment("benchmark-yellow", "CORRADE_TEST_BENCHMARK_YELLOW")
         .addOption("benchmark-red", "0.25").setHelp("benchmark-red", "deviation threshold for marking benchmark red", "N")
-            .setFromEnvironment("benchmark-red", "CORRADE_BENCHMARK_RED")
+            .setFromEnvironment("benchmark-red", "CORRADE_TEST_BENCHMARK_RED")
         .setGlobalHelp(R"(Corrade TestSuite executable. By default runs test cases in order in which they
 were added and exits with non-zero code if any of them failed. Supported
 benchmark types:

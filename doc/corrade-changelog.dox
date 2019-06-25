@@ -224,6 +224,12 @@ namespace Corrade {
     @ref Corrade/TestSuite/Compare/SortedContainer.h to isolate the heavy
     `<algorithm>` include. Backwards compatibility is not provided in order to
     reduce compile times, please include the new header now.
+-   The `CORRADE_BENCHMARK`, `CORRADE_BENCHMARK_DISCARD`,
+    `CORRADE_BENCHMARK_YELLOW` and `CORRADE_BENCHMARK_RED` environment
+    variables used by @ref TestSuite::Tester were renamed to
+    `CORRADE_TEST_BENCHMARK`, `CORRADE_TEST_BENCHMARK_DISCARD`,
+    `CORRADE_TEST_BENCHMARK_YELLOW` and `CORRADE_TEST_BENCHMARK_RED` to be
+    consistent with remaining variables understood by test suite executables.
 
 @subsection corrade-changelog-latest-documentation Documentation
 

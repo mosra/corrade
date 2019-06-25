@@ -336,17 +336,17 @@ Arguments:
 -   `--no-xfail` --- disallow expected failures (environment:
     `CORRADE_TEST_NO_XFAIL=ON|OFF`)
 -   `--benchmark TYPE` --- default benchmark type (environment:
-    `CORRADE_BENCHMARK`). Supported benchmark types:
+    `CORRADE_TEST_BENCHMARK`). Supported benchmark types:
     -   `wall-time` --- wall time spent
     -   `cpu-time` --- CPU time spent
     -   `cpu-cycles` --- CPU cycles spent (x86 only, gives zero result
         elsewhere)
 -   `--benchmark-discard N` --- discard first N measurements of each benchmark
-    (environment: `CORRADE_BENCHMARK_DISCARD`, default: `1`)
+    (environment: `CORRADE_TEST_BENCHMARK_DISCARD`, default: `1`)
 -   `--benchmark-yellow N` --- deviation threshold for marking benchmark yellow
-    (environment: `CORRADE_BENCHMARK_YELLOW`, default: `0.05`)
+    (environment: `CORRADE_TEST_BENCHMARK_YELLOW`, default: `0.05`)
 -   `--benchmark-red N` --- deviation threshold for marking benchmark red
-    (environment: `CORRADE_BENCHMARK_RED`, default: `0.25`)
+    (environment: `CORRADE_TEST_BENCHMARK_RED`, default: `0.25`)
 
 @section TestSuite-Tester-running Compiling and running tests
 
