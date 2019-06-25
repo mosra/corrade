@@ -278,14 +278,25 @@ void Test::connectionDataLambda() {
     int counter = 0;
 
     auto d = Implementation::ConnectionData::createFunctor([&counter]() { ++counter; });
+    #if !defined(CORRADE_TARGET_LIBSTDCXX) || _GLIBCXX_RELEASE >= 5
     CORRADE_VERIFY(d.type == Implementation::ConnectionType::Functor);
+    #else
+    CORRADE_VERIFY(d.type == Implementation::ConnectionType::FunctorWithDestructor);
+    CORRADE_VERIFY(d.storage.functor.destruct);
+    #endif
     CORRADE_VERIFY(d.call);
 
     reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d.call)(d.storage);
     CORRADE_COMPARE(counter, 1);
 
     Implementation::ConnectionData d2{std::move(d)};
+    #if !defined(CORRADE_TARGET_LIBSTDCXX) || _GLIBCXX_RELEASE >= 5
     CORRADE_VERIFY(d2.type == Implementation::ConnectionType::Functor);
+    #else
+    CORRADE_VERIFY(d.type == Implementation::ConnectionType::Functor);
+    CORRADE_VERIFY(d2.type == Implementation::ConnectionType::FunctorWithDestructor);
+    CORRADE_VERIFY(d2.storage.functor.destruct);
+    #endif
     CORRADE_VERIFY(d2.call);
 
     reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d2.call)(d2.storage);
@@ -293,7 +304,13 @@ void Test::connectionDataLambda() {
 
     Implementation::ConnectionData d3{Implementation::ConnectionType::Member};
     d3 = std::move(d2);
+    #if !defined(CORRADE_TARGET_LIBSTDCXX) || _GLIBCXX_RELEASE >= 5
     CORRADE_VERIFY(d3.type == Implementation::ConnectionType::Functor);
+    #else
+    CORRADE_VERIFY(d2.type == Implementation::ConnectionType::Member);
+    CORRADE_VERIFY(d3.type == Implementation::ConnectionType::FunctorWithDestructor);
+    CORRADE_VERIFY(d3.storage.functor.destruct);
+    #endif
     CORRADE_VERIFY(d3.call);
 
     reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d3.call)(d3.storage);
