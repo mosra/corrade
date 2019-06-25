@@ -275,6 +275,9 @@ void Test::connectionDataMember() {
 }
 
 void Test::connectionDataLambda() {
+    #if defined(CORRADE_TARGET_LIBSTDCXX) && !defined(_GLIBCXX_RELEASE)
+    Warning{} << "libstdc++ which doesn't have std::is_trivially_copyable is used, lambdas allocated on heap";
+    #endif
     int counter = 0;
 
     auto d = Implementation::ConnectionData::createFunctor([&counter]() { ++counter; });

@@ -34,7 +34,7 @@ namespace Corrade { namespace Interconnect {
 namespace Implementation {
 
 ConnectionData::ConnectionData(ConnectionData&& other) noexcept:
-    storage{other.storage},
+    storage(other.storage), /* GCC 4.8 needs () */
     call{other.call},
     lastHandledSignal{other.lastHandledSignal},
     type{other.type}
