@@ -105,7 +105,8 @@ Is the below list missing your name or something's wrong?
 -   **Jonathan Hale** ([\@Squareys](https://github.com/Squareys)) ---
     compilation and docs fixes
 -   **Max Schwarz** ([\@xqms](https://github.com/xqms)) --- thread-local
-    @ref Utility::Debug scoped output redirection and coloring
+    @ref Utility::Debug scoped output redirection and coloring, documentation
+    fixes
 -   **Michael "Croydon" Keck** ([\@Croydon](https://github.com/Croydon)) ---
     Conan package
 -   **Michael Dietschi** ([\@mdietsch](https://github.com/mdietsch)) ---

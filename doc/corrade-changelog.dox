@@ -229,7 +229,8 @@ namespace Corrade {
 -   Fixed Gentoo build instructions (see
     [mosra/corrade#64](https://github.com/mosra/corrade/pull/64))
 -   Various other doc updates (see
-    [mosra/corrade#69](https://github.com/mosra/corrade/pull/69))
+    [mosra/corrade#69](https://github.com/mosra/corrade/pull/69) and
+    [mosra/corrade#71](https://github.com/mosra/corrade/pull/71))
 
 @section corrade-changelog-2019-01 2019.01
 
