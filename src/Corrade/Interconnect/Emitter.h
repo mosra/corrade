@@ -178,6 +178,44 @@ called from outside the class.
 
 <b></b>
 
+@m_class{m-block m-warning}
+
+@par Connecting slots across shared objects
+    If you're planning to use signal/slot connections across shared objects, be
+    aware that in combination with GCC/Clang `-fvisibility-inlines-hidden`
+    option (enabled by default when you use the `CORRADE_USE_PEDANTIC_FLAGS`
+    @ref corrade-cmake "CMake property"), address of given signal inside a
+    shared library will differ from its address outside of it. Copied from GCC
+    documentation:
+@par
+    <blockquote>
+    This switch declares that the user does not attempt to compare pointers
+    to inline methods where the addresses of the two functions were taken in
+    different shared objects.
+    </blockquote>
+@par
+    There are three possible solutions:
+@par
+    1.  Compile without `-fvisibility-inlines-hidden`. Not recommended, as you
+        usually have no control over externally specified flags. This flag is
+        not available on MSVC or MinGW and while MSVC "just works", MinGW
+        doesn't.
+    2.  Make the signal definition non-inline by moving its definition to a
+        `*.cpp` file. Potentially very verbose, but works everywhere including
+        MinGW.
+    3.  Annotating the function with an export macro such as
+        @ref CORRADE_VISIBILITY_INLINE_MEMBER_EXPORT from
+        @ref Corrade/Utility/VisibilityMacros.h that puts its visibility back
+        to default. Doesn't work on MinGW either.
+@par
+    Similar issue happens with the `-Wl,-Bsymbolic-functions` option passed to
+    the linker. This flag is unfortunately present by default when building
+    Ubuntu packages and has to be explicitly removed in order to make the
+    signal connections work correctly. See the `package/debian/rules` file for
+    an example how to do it.
+
+<b></b>
+
 @m_class{m-block m-danger}
 
 @par MSVC and identical function merging

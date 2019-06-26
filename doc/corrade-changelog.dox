@@ -169,6 +169,8 @@ namespace Corrade {
     [mosra/corrade#53](https://github.com/mosra/corrade/issues/53))
 -   The Emscripten CMake toolchain now sets the `EMSCRIPTEN` variable to help
     3rd party projects (see [mosra/toolchains#7](https://github.com/mosra/toolchains/pull/7))
+-   Clarified interaction of `-fvisibility-inlines-hidden` and/or
+    `-Wl,-Bsymbolic-functions` GCC/Clang flags and @ref Interconnect::Emitter
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

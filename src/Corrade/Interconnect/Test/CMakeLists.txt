@@ -27,8 +27,13 @@ corrade_add_test(InterconnectTest Test.cpp LIBRARIES CorradeInterconnect)
 corrade_add_test(InterconnectStateMachineTest StateMachineTest.cpp LIBRARIES CorradeInterconnect)
 corrade_add_test(InterconnectBenchmark Benchmark.cpp LIBRARIES CorradeInterconnect)
 
+add_library(InterconnectTestEmitterLibrary ${SHARED_OR_STATIC} EmitterLibrary.cpp)
+target_link_libraries(InterconnectTestEmitterLibrary PUBLIC CorradeInterconnect)
+corrade_add_test(InterconnectLibraryTest LibraryTest.cpp LIBRARIES CorradeInterconnect InterconnectTestEmitterLibrary)
+
 set_target_properties(
     InterconnectTest
     InterconnectStateMachineTest
     InterconnectBenchmark
+    InterconnectLibraryTest
     PROPERTIES FOLDER "Corrade/Interconnect/Test")
