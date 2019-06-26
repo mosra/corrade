@@ -141,7 +141,7 @@ CORRADE_UTILITY_EXPORT std::string toNativeSeparators(std::string path);
 /**
 @brief Extract path from filename
 
-Returns everything before first slash. If the filename doesn't contain any
+Returns everything before the last slash. If the filename doesn't contain any
 path, returns empty string, if the filename is already a path (ends with
 slash), returns whole string without trailing slash.
 @attention The implementation expects forward slashes as directory separators.
