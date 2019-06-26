@@ -101,6 +101,9 @@ namespace Corrade {
     annotation
 -   New @ref CORRADE_ALWAYS_INLINE and @ref CORRADE_NEVER_INLINE annotations
     for easier overriding of optimizer behavior
+-   New @ref CORRADE_VISIBILITY_INLINE_MEMBER_EXPORT visibility macro to aid
+    codebases compiled with `-fvisibility-inlines-hidden`; the
+    @ref CORRADE_VISIBILITY_EXPORT and friends are now also properly documented
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 

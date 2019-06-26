@@ -644,4 +644,47 @@ int counter = 0;
 CORRADE_NEVER_INLINE void testFunctionCallOverhead();
 /* [CORRADE_NEVER_INLINE] */
 
+/* [CORRADE_VISIBILITY_EXPORT] */
+void privateFunction(); /* can't be used outside of the shared library */
+
+CORRADE_VISIBILITY_EXPORT void exportedFunction();
+
+class CORRADE_VISIBILITY_EXPORT ExportedClass {
+    public:
+        void foo(); /* Non-inline members get implicitly exported as well */
+
+    private:
+        /* Used only privately, thus doesn't need to be exported */
+        CORRADE_VISIBILITY_LOCAL void privateFoo();
+};
+/* [CORRADE_VISIBILITY_EXPORT] */
+}
+
+namespace D {
+/* [CORRADE_VISIBILITY_EXPORT-dllexport] */
+#ifdef MyLibrary_EXPORTS
+    #define MYLIBRARY_EXPORT CORRADE_VISIBILITY_EXPORT
+#else
+    #define MYLIBRARY_EXPORT CORRADE_VISIBILITY_IMPORT
+#endif
+
+class MYLIBRARY_EXPORT ExportedClass {
+    public:
+        // …
+};
+/* [CORRADE_VISIBILITY_EXPORT-dllexport] */
+}
+
+namespace E {
+extern int stuff;
+/* [CORRADE_VISIBILITY_INLINE_MEMBER_EXPORT] */
+class MYLIBRARY_EXPORT ExportedClass {
+    public:
+        // …
+
+        CORRADE_VISIBILITY_INLINE_MEMBER_EXPORT int inlineFoo() {
+            return stuff + 3;
+        }
+};
+/* [CORRADE_VISIBILITY_INLINE_MEMBER_EXPORT] */
 }
