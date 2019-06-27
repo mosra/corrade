@@ -181,8 +181,8 @@ class CORRADE_UTILITY_EXPORT Debug {
              */
             Color = 1 << 4
 
-            /* When adding values, don't forget to adapt PublicFlagMask in
-               Debug.cpp */
+            /* When adding values, don't forget to adapt InternalFlag as well
+               and update PublicFlagMask in Debug.cpp */
         };
 
         /**
