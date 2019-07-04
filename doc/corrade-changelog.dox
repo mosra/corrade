@@ -177,6 +177,9 @@ namespace Corrade {
     @ref corrade-cmake-add-test "corrade_add_test()" are now built with
     `-s DISABLE_EXCEPTION_CATCHING=0` being explicitly specified both for the
     compiler and linker to work correctly on Emscripten 1.38.36 and newer
+-   Emscripten builds now have the `-fPIC` option disabled by default as it
+    causes linker errors related to `__memory_base` on 1.38.36 (see also
+    [emscripten-core/emscripten#8761](https://github.com/emscripten-core/emscripten/issues/8761))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

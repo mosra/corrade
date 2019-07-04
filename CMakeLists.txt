@@ -73,7 +73,15 @@ if(BUILD_MULTITHREADED)
 endif()
 
 option(BUILD_STATIC "Build static libraries (default are shared)" OFF)
-cmake_dependent_option(BUILD_STATIC_PIC "Build static libraries with position-independent code" ON "BUILD_STATIC" OFF)
+# Disable PIC on Emscripten by default (but still allow it to be enabled
+# explicitly if one so desired). Currently causes linker errors related to
+# __memory_base etc.: https://github.com/emscripten-core/emscripten/issues/8761
+if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+    set(ON_EXCEPT_EMSCRIPTEN OFF)
+else()
+    set(ON_EXCEPT_EMSCRIPTEN ON)
+endif()
+cmake_dependent_option(BUILD_STATIC_PIC "Build static libraries with position-independent code" ${ON_EXCEPT_EMSCRIPTEN} "BUILD_STATIC" OFF)
 option(BUILD_TESTS "Build unit tests" OFF)
 
 set(CORRADE_INCLUDE_INSTALL_PREFIX "."
