@@ -143,6 +143,8 @@ namespace Corrade {
 -   @ref Utility::format() now prints @cpp enum @ce values implicitly
     convertible to integers as integers without requiring the user to do an
     explicit cast first
+-   @ref Utility::Configuration internals were rewritten to not use exceptions
+    anymore
 
 @subsection corrade-changelog-latest-buildsystem Build system
 

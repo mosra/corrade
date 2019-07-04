@@ -104,26 +104,25 @@ namespace {
 }
 
 bool Configuration::parse(Containers::ArrayView<const char> in) {
-    try {
-        /* Oh, BOM, eww */
-        if(in.size() >= 3 && in[0] == Bom[0] && in[1] == Bom[1] && in[2] == Bom[2]) {
-            _flags |= InternalFlag::HasBom;
-            in = in.suffix(3);
-        }
+    /* Oh, BOM, eww */
+    if(in.size() >= 3 && in[0] == Bom[0] && in[1] == Bom[1] && in[2] == Bom[2]) {
+        _flags |= InternalFlag::HasBom;
+        in = in.suffix(3);
+    }
 
-        /* Parse file */
-        CORRADE_INTERNAL_ASSERT_OUTPUT(parse(in, this, {}).empty());
-
-    } catch(const std::string& e) {
-        Error() << "Utility::Configuration::Configuration():" << e;
+    /* Parse file */
+    std::pair<Containers::ArrayView<const char>, const char*> parsed = parse(in, this, {});
+    if(parsed.second) {
+        Error() << "Utility::Configuration::Configuration():" << parsed.second;
         clear();
         return false;
     }
 
+    CORRADE_INTERNAL_ASSERT(parsed.first.empty());
     return true;
 }
 
-Containers::ArrayView<const char> Configuration::parse(Containers::ArrayView<const char> in, ConfigurationGroup* group, const std::string& fullPath) {
+std::pair<Containers::ArrayView<const char>, const char*> Configuration::parse(Containers::ArrayView<const char> in, ConfigurationGroup* group, const std::string& fullPath) {
     CORRADE_INTERNAL_ASSERT(fullPath.empty() || String::endsWith(fullPath, '/'));
 
     std::string buffer;
@@ -180,12 +179,12 @@ Containers::ArrayView<const char> Configuration::parse(Containers::ArrayView<con
 
             /* Check ending bracket */
             if(buffer[buffer.size()-1] != ']')
-                throw std::string("missing closing bracket for a group header");
+                return {nullptr, "missing closing bracket for a group header"};
 
             const std::string nextGroup = String::trim(buffer.substr(1, buffer.size()-2));
 
             if(nextGroup.empty())
-                throw std::string("empty group name");
+                return {nullptr, "empty group name"};
 
             /* This is a subgroup of this one, parse recursively */
             if(String::beginsWith(nextGroup, fullPath)) {
@@ -197,7 +196,7 @@ Containers::ArrayView<const char> Configuration::parse(Containers::ArrayView<con
                 const std::size_t groupEnd = nextGroup.find('/', fullPath.size());
                 if(groupEnd != std::string::npos) {
                     if(groupEnd == fullPath.size())
-                        throw std::string("empty subgroup name");
+                        return {nullptr, "empty subgroup name"};
 
                     g.name = nextGroup.substr(fullPath.size(), groupEnd - fullPath.size());
                     g.group = new ConfigurationGroup(_configuration);
@@ -205,7 +204,9 @@ Containers::ArrayView<const char> Configuration::parse(Containers::ArrayView<con
                        could throw an exception and the group would otherwise
                        be leaked */
                     group->_groups.push_back(std::move(g));
-                    in = parse(currentLine, g.group, nextGroup.substr(0, groupEnd + 1));
+                    std::pair<Containers::ArrayView<const char>, const char*> parsed = parse(currentLine, g.group, nextGroup.substr(0, groupEnd + 1));
+                    if(parsed.second) return parsed; /* Error, bubble up */
+                    in = parsed.first;
 
                 /* Otherwise call parse() on the next line */
                 } else {
@@ -215,12 +216,14 @@ Containers::ArrayView<const char> Configuration::parse(Containers::ArrayView<con
                        could throw an exception and the group would otherwise
                        be leaked */
                     group->_groups.push_back(std::move(g));
-                    in = parse(in, g.group, nextGroup + '/');
+                    std::pair<Containers::ArrayView<const char>, const char*> parsed = parse(in, g.group, nextGroup + '/');
+                    if(parsed.second) return parsed; /* Error, bubble up */
+                    in = parsed.first;
                 }
 
             /* Otherwise it's a subgroup of some parent, return the control
                back to caller (again with this line) */
-            } else return currentLine;
+            } else return {currentLine, nullptr};
 
         /* Comment */
         } else if(buffer[0] == '#' || buffer[0] == ';') {
@@ -234,7 +237,7 @@ Containers::ArrayView<const char> Configuration::parse(Containers::ArrayView<con
         } else {
             const std::size_t splitter = buffer.find_first_of('=');
             if(splitter == std::string::npos)
-                throw std::string("missing equals for a value");
+                return {nullptr, "missing equals for a value"};
 
             ConfigurationGroup::Value item;
             item.key = String::trim(buffer.substr(0, splitter));
@@ -249,7 +252,7 @@ Containers::ArrayView<const char> Configuration::parse(Containers::ArrayView<con
             /** @todo Check `"` characters better */
             } else if(!item.value.empty() && item.value[0] == '"') {
                 if(item.value.size() < 2 || item.value[item.value.size()-1] != '"')
-                    throw std::string("missing closing quote for a value");
+                    return {nullptr, "missing closing quote for a value"};
 
                 item.value = item.value.substr(1, item.value.size()-2);
             }
@@ -259,10 +262,10 @@ Containers::ArrayView<const char> Configuration::parse(Containers::ArrayView<con
     }
 
     if(multiLineValue)
-        throw std::string{"missing closing quotes for a multi-line value"};
+        return {nullptr, "missing closing quotes for a multi-line value"};
 
     /* This was the last group */
-    return in;
+    return {in, nullptr};
 }
 
 bool Configuration::save(const std::string& filename) {
