@@ -173,6 +173,10 @@ namespace Corrade {
     3rd party projects (see [mosra/toolchains#7](https://github.com/mosra/toolchains/pull/7))
 -   Clarified interaction of `-fvisibility-inlines-hidden` and/or
     `-Wl,-Bsymbolic-functions` GCC/Clang flags and @ref Interconnect::Emitter
+-   The @ref TestSuite library and all tests created with
+    @ref corrade-cmake-add-test "corrade_add_test()" are now built with
+    `-s DISABLE_EXCEPTION_CATCHING=0` being explicitly specified both for the
+    compiler and linker to work correctly on Emscripten 1.38.36 and newer
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

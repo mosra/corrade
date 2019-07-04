@@ -213,6 +213,11 @@ Unless @ref CORRADE_TESTSUITE_TARGET_XCTEST is set, test cases run on an
 identifier set to CMake project name by default. Use the cache variable
 `CORRADE_TESTSUITE_BUNDLE_IDENTIFIER_PREFIX` to change it to something else.
 
+On @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" this automatically adds
+`-s DISABLE_EXCEPTION_CATCHING=0` to both compiler and linker flags since
+early-exit from test cases (failure, expected failure, skipped test case...) is
+done via exceptions.
+
 @subsection corrade-cmake-add-resource Compile data resources into application binary
 
 @code{.cmake}
