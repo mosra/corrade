@@ -169,7 +169,7 @@ if(WITH_UTILITY)
         add_subdirectory(Test)
     endif()
 
-    # Corrade::Utility and Corrade::rc target alias for superprojects
+    # Corrade::Utility target alias for superprojects
     add_library(Corrade::Utility ALIAS CorradeUtility)
 endif()
 
@@ -215,5 +215,6 @@ if(NOT CMAKE_CROSSCOMPILING)
     set_target_properties(corrade-rc PROPERTIES FOLDER "Corrade/Utility")
     install(TARGETS corrade-rc DESTINATION ${CORRADE_BINARY_INSTALL_DIR})
 
+    # Corrade::rc target alias for superprojects
     add_executable(Corrade::rc ALIAS corrade-rc)
 endif()
