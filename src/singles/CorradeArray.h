@@ -35,7 +35,7 @@
 #pragma ACME enable Corrade_Containers_ArrayView_h
 #include "CorradeArrayView.h"
 
-/* We need just CORRADE_MSVC2017_COMPATIBILITY from configure.h, but that's
+/* We need just CORRADE_MSVC2019_COMPATIBILITY from configure.h, but that's
    handled by CorradeArrayView.h already. From Containers.h we need just the
    array forward declarations, the array view ones are again already in
    CorradeArrayView.h. */

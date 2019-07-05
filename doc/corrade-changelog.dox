@@ -33,6 +33,10 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-new New features
 
+-   MSVC 2019 support. It needs about the same set of workarounds as MSVC 2017,
+    which means there's a new (automatically enbaled) `MSVC2019_COMPATIBILITY`
+    CMake option, exposed further as @ref CORRADE_MSVC2019_COMPATIBILITY CMake
+    variable and preprocessor macro.
 -   Added @ref CORRADE_TARGET_POWERPC for detecting PowerPC architectures (see
     [mosra/corrade#60](https://github.com/mosra/corrade/pull/60))
 -   New set of @ref CORRADE_TARGET_LIBCXX, @ref CORRADE_TARGET_LIBSTDCXX and

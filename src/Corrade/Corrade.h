@@ -35,6 +35,15 @@ namespace Corrade {
 
 #ifdef DOXYGEN_GENERATING_OUTPUT
 /**
+@brief MSVC 2019 compatibility
+
+Defined if compatibility mode for MSVC 2019 is enabled.
+@see @ref building-corrade, @ref corrade-cmake
+*/
+#define CORRADE_MSVC2019_COMPATIBILITY
+#undef CORRADE_MSVC2019_COMPATIBILITY
+
+/**
 @brief MSVC 2017 compatibility
 
 Defined if compatibility mode for MSVC 2017 is enabled.

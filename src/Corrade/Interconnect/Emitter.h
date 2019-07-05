@@ -373,7 +373,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          */
         template<class Emitter, class ...Args> bool hasSignalConnections(Signal(Emitter::*signal)(Args...)) const {
             return _connections.count(
-                #ifndef CORRADE_MSVC2017_COMPATIBILITY
+                #ifndef CORRADE_MSVC2019_COMPATIBILITY
                 Implementation::SignalData(signal)
                 #else
                 Implementation::SignalData::create<Emitter, Args...>(signal)
@@ -409,7 +409,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          */
         template<class Emitter, class ...Args> std::size_t signalConnectionCount(Signal(Emitter::*signal)(Args...)) const {
             return _connections.count(
-                #ifndef CORRADE_MSVC2017_COMPATIBILITY
+                #ifndef CORRADE_MSVC2019_COMPATIBILITY
                 Implementation::SignalData(signal)
                 #else
                 Implementation::SignalData::create<Emitter, Args...>(signal)
@@ -430,7 +430,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          */
         template<class Emitter, class ...Args> void disconnectSignal(Signal(Emitter::*signal)(Args...)) {
             disconnectInternal(
-                #ifndef CORRADE_MSVC2017_COMPATIBILITY
+                #ifndef CORRADE_MSVC2019_COMPATIBILITY
                 Implementation::SignalData(signal)
                 #else
                 Implementation::SignalData::create<Emitter, Args...>(signal)
@@ -514,7 +514,7 @@ template<class EmitterObject, class Emitter, class Functor, class ...Args> Conne
     static_assert(std::is_base_of<Emitter, EmitterObject>::value,
         "Emitter object doesn't have given signal");
 
-    #ifndef CORRADE_MSVC2017_COMPATIBILITY
+    #ifndef CORRADE_MSVC2019_COMPATIBILITY
     Implementation::SignalData signalData(signal);
     #else
     auto signalData = Implementation::SignalData::create<Emitter, Args...>(signal);
@@ -554,7 +554,7 @@ template<class EmitterObject, class Emitter, class Receiver, class ReceiverObjec
     static_assert(std::is_base_of<Receiver, ReceiverObject>::value,
         "Receiver object doesn't have given slot");
 
-    #ifndef CORRADE_MSVC2017_COMPATIBILITY
+    #ifndef CORRADE_MSVC2019_COMPATIBILITY
     Implementation::SignalData signalData(signal);
     #else
     auto signalData = Implementation::SignalData::create<Emitter, Args...>(signal);
@@ -582,7 +582,7 @@ template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emi
     _connectionsChanged = false;
     ++_lastHandledSignal;
     auto range = _connections.equal_range(
-        #ifndef CORRADE_MSVC2017_COMPATIBILITY
+        #ifndef CORRADE_MSVC2019_COMPATIBILITY
         Implementation::SignalData(signal)
         #else
         Implementation::SignalData::create<Emitter_, Args...>(signal)
@@ -602,7 +602,7 @@ template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emi
             /* Connections changed by the slot, go through again */
             if(_connectionsChanged) {
                 range = _connections.equal_range(
-                    #ifndef CORRADE_MSVC2017_COMPATIBILITY
+                    #ifndef CORRADE_MSVC2019_COMPATIBILITY
                     Implementation::SignalData(signal)
                     #else
                     Implementation::SignalData::create<Emitter_, Args...>(signal)

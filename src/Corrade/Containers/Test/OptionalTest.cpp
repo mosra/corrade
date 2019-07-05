@@ -464,7 +464,7 @@ void OptionalTest::constructInPlaceMakeAmbiguous() {
     struct Ambiguous {
         Ambiguous() = default;
         Ambiguous(Ambiguous& parent, int = {}): parent{&parent} {}
-        #ifndef CORRADE_MSVC2017_COMPATIBILITY
+        #ifndef CORRADE_MSVC2019_COMPATIBILITY
         /* https://developercommunity.visualstudio.com/content/problem/358751/c2580-for-different-versions-of-constructors.html,
            affects 2015 as well (https://stackoverflow.com/a/36658141) */
         Ambiguous(const Ambiguous&) = default;

@@ -316,10 +316,13 @@ class Array {
             return Implementation::ArrayViewConverter<const T, U>::to(*this);
         }
 
-        #ifndef CORRADE_MSVC2017_COMPATIBILITY
+        #ifndef CORRADE_MSVC2019_COMPATIBILITY
         /** @brief Whether the array is non-empty */
         /* Disabled on MSVC <= 2017 to avoid ambiguous operator+() when doing
-           pointer arithmetic. */
+           pointer arithmetic. On MSVC 2019 this works properly when
+           /permissive- is enabled, but I can neither detect a presence of that
+           flag nor force it for all users (since it often ICEs and breaks 3rd
+           party code), so disabling for 2019 as well. */
         explicit operator bool() const { return _data; }
         #endif
 

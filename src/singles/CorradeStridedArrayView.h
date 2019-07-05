@@ -31,7 +31,7 @@
 
 /* We need just CORRADE_MSVC2015_COMPATIBILITY from configure.h, this is
    equivalent to the version check in UseCorrade.cmake.
-   CORRADE_MSVC2017_COMPATIBILITY is handled by CorradeArrayView.h already.
+   CORRADE_MSVC2019_COMPATIBILITY is handled by CorradeArrayView.h already.
    From Containers.h we need just the array forward declarations, the array
    view ones are again already in CorradeArrayView.h. */
 #pragma ACME enable Corrade_configure_h

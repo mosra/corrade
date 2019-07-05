@@ -52,7 +52,7 @@ namespace Implementation {
 
     class SignalData {
         public:
-            #ifndef CORRADE_MSVC2017_COMPATIBILITY
+            #ifndef CORRADE_MSVC2019_COMPATIBILITY
             template<class Emitter, class ...Args> SignalData(typename Emitter::Signal(Emitter::*signal)(Args...)): data() {
                 typedef typename Emitter::Signal(Emitter::*BaseSignal)(Args...);
                 *reinterpret_cast<BaseSignal*>(data) = signal;
@@ -94,7 +94,7 @@ namespace Implementation {
             friend SignalDataHash;
             #endif
 
-            #ifdef CORRADE_MSVC2017_COMPATIBILITY
+            #ifdef CORRADE_MSVC2019_COMPATIBILITY
             SignalData(): data() {}
             #endif
 

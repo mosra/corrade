@@ -172,7 +172,7 @@ Test::Test() {
 }
 
 void Test::signalData() {
-    #ifndef CORRADE_MSVC2017_COMPATIBILITY
+    #ifndef CORRADE_MSVC2019_COMPATIBILITY
     Implementation::SignalData data1(&Postman::newMessage);
     Implementation::SignalData data2(&Postman::newMessage);
     Implementation::SignalData data3(&Postman::paymentRequested);
@@ -195,7 +195,7 @@ void Test::signalData() {
 }
 
 void Test::templatedSignalData() {
-    #ifndef CORRADE_MSVC2017_COMPATIBILITY
+    #ifndef CORRADE_MSVC2019_COMPATIBILITY
     Implementation::SignalData data1(&TemplatedPostman::newMessage<std::int32_t>);
     Implementation::SignalData data2(&TemplatedPostman::newMessage<std::string>);
     Implementation::SignalData data3(&TemplatedPostman::oldMessage<std::int32_t>);
