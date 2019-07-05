@@ -209,9 +209,9 @@ void Test::templatedSignalData() {
     CORRADE_VERIFY(data1 != data3);
 }
 
-int counter;
+int globalCounter;
 
-void incrementCounter() { ++counter; }
+void incrementCounter() { ++globalCounter; }
 
 void Test::connectionDataFree() {
     auto d = Implementation::ConnectionData::createFunctor(incrementCounter);
@@ -219,9 +219,9 @@ void Test::connectionDataFree() {
     CORRADE_COMPARE(d.storage.function, &incrementCounter);
     CORRADE_VERIFY(d.call);
 
-    counter = 0;
+    globalCounter = 0;
     reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d.call)(d.storage);
-    CORRADE_COMPARE(counter, 1);
+    CORRADE_COMPARE(globalCounter, 1);
 
     Implementation::ConnectionData d2{std::move(d)};
     CORRADE_VERIFY(d2.type == Implementation::ConnectionType::Free);
@@ -229,7 +229,7 @@ void Test::connectionDataFree() {
     CORRADE_VERIFY(d2.call);
 
     reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d2.call)(d2.storage);
-    CORRADE_COMPARE(counter, 2);
+    CORRADE_COMPARE(globalCounter, 2);
 
     Implementation::ConnectionData d3{Implementation::ConnectionType::Member};
     d3 = std::move(d2);
@@ -238,7 +238,7 @@ void Test::connectionDataFree() {
     CORRADE_VERIFY(d3.call);
 
     reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d3.call)(d3.storage);
-    CORRADE_COMPARE(counter, 3);
+    CORRADE_COMPARE(globalCounter, 3);
 }
 
 void Test::connectionDataMember() {
@@ -337,18 +337,18 @@ void Test::connectionDataLambda() {
 void Test::connectionDataLambdaDestructor() {
     struct Destructor {
         int value = 3;
-        ~Destructor() { counter += 7; }
+        ~Destructor() { globalCounter += 7; }
     } a;
 
     {
-        auto d = Implementation::ConnectionData::createFunctor([a](){ counter += a.value; });
+        auto d = Implementation::ConnectionData::createFunctor([a](){ globalCounter += a.value; });
         CORRADE_VERIFY(d.type == Implementation::ConnectionType::FunctorWithDestructor);
         CORRADE_VERIFY(d.storage.functor.destruct);
         CORRADE_VERIFY(d.call);
 
-        counter = 0;
+        globalCounter = 0;
         reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d.call)(d.storage);
-        CORRADE_COMPARE(counter, 3);
+        CORRADE_COMPARE(globalCounter, 3);
 
         Implementation::ConnectionData d2{std::move(d)};
         CORRADE_VERIFY(d.type == Implementation::ConnectionType::Functor);
@@ -357,7 +357,7 @@ void Test::connectionDataLambdaDestructor() {
         CORRADE_VERIFY(d2.call);
 
         reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d2.call)(d2.storage);
-        CORRADE_COMPARE(counter, 6);
+        CORRADE_COMPARE(globalCounter, 6);
 
         Implementation::ConnectionData d3{Implementation::ConnectionType::Member};
         d3 = std::move(d2);
@@ -367,10 +367,10 @@ void Test::connectionDataLambdaDestructor() {
         CORRADE_VERIFY(d3.call);
 
         reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d3.call)(d3.storage);
-        CORRADE_COMPARE(counter, 9);
+        CORRADE_COMPARE(globalCounter, 9);
     }
 
-    CORRADE_COMPARE(counter, 16);
+    CORRADE_COMPARE(globalCounter, 16);
 }
 
 void Test::connectionDataLambdaHeap() {
