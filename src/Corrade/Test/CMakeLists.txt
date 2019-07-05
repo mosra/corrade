@@ -23,6 +23,8 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+corrade_add_test(MainTest MainTest.cpp
+    ARGUMENTS --arg-utf hýždě --arg-another šňůra)
 corrade_add_test(TargetTest TargetTest.cpp)
 
 # Baseline, C++11, is everywhere

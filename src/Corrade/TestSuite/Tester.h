@@ -363,6 +363,9 @@ it and adds it to CTest. Besides that it is able to link other arbitrary
 libraries to the executable and specify a list of files that the tests used. It
 provides additional useful features on various platforms:
 
+-   On Windows, the macro links the test executable to the @ref main "Corrade::Main"
+    library for ANSI color support, UTF-8 argument parsing and UTF-8 output
+    encoding.
 -   If compiling for Emscripten, using @ref corrade-cmake-add-test "corrade_add_test()"
     makes CTest run the resulting `*.js` file via Node.js. Also it is able to
     bundle all files specified in `FILES` into the virtual Emscripten

@@ -130,6 +130,11 @@ documentation for more information.
 
 @include UtilityDebug-color-greyscale.ansi
 
+@section Utility-Debug-windows ANSI color support and UTF-8 output on Windows
+
+See the @ref main "Corrade::Main" library for more information about a
+convenient way to support ANSI colors and UTF-8 output encoding on Windows.
+
 @section Utility-Debug-multithreading Thread safety
 
 If Corrade is compiled with @ref CORRADE_BUILD_MULTITHREADED enabled (the

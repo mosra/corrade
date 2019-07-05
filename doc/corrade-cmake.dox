@@ -191,7 +191,8 @@ corrade_add_test(<test name>
 
 Test name is also executable name. You can use `LIBRARIES` to specify libraries
 to link with instead of using @cmake target_link_libraries() @ce. The
-`Corrade::TestSuite` target is linked automatically to each test. Note that the
+`Corrade::TestSuite` target is linked automatically to each test, together with
+@ref main "Corrade::Main" for improved experience on Windows. Note that the
 @cmake enable_testing() @ce function must be called explicitly. Arguments
 passed after `ARGUMENTS` will be appended to the test command line. `ARGUMENTS`
 are supported everywhere except when @ref CORRADE_TESTSUITE_TARGET_XCTEST is

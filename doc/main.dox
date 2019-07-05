@@ -1,0 +1,127 @@
+/*
+    This file is part of Corrade.
+
+    Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
+                2017, 2018, 2019 Vladimír Vondruš <mosra@centrum.cz>
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
+*/
+
+namespace Corrade {
+
+/** @page main Corrade::Main library
+@brief Improves general user experience on Windows.
+
+This library is built if `WITH_MAIN` is enabled when building Corrade. To use
+this library with CMake, you need to request the `Main` component of the
+`Corrade` package and link *your application executable* to the `Corrade::Main`
+target:
+
+@code{.cmake}
+find_package(Corrade REQUIRED Main)
+
+add_executable(your-app WIN32 main.cpp) # use WIN32 to hide the console window
+target_link_libraries(your-app PRIVATE Corrade::Main)
+@endcode
+
+See also @ref building-corrade and @ref corrade-cmake for more information.
+
+@m_class{m-block m-success}
+
+@par Corrade::Main on non-Windows systems
+    If you're not on Windows, congratulations. Your system is great and there's
+    no need for any sanity-restoring countermeasures. Linking to `Corrade::Main`
+    via CMake on such systems is a no-op.
+
+If you're on Windows, linking to the `Corrade::Main` library does the
+following:
+
+-   allows you to always use the standard @cpp main() @ce (instead of
+    @cpp _tmain() @ce, @cpp wWinMain() @ce and other atrocities)
+-   makes it possible to create executables with @cmake add_executable(... WIN32 ...) @ce
+    and hide the console window again without requiring you to do any sad
+    things to your main function
+-   gives you @cpp char** argv @ce in UTF-8, converting them from
+    Windows-specific wide-char APIs
+-   sets up console output to be in UTF-8 as well, so special characters and
+    non-ASCII alphabets display correctly
+-   if @ref CORRADE_UTILITY_USE_ANSI_COLORS is enabled, enables processing of
+    ANSI escape codes in the console, so @ref Utility::Debug colored output and
+    other advanced terminal features work properly
+
+@section main-utf8-arguments Standard main() with UTF-8 command-line arguments
+
+When you link to Corrade Main, you can keep using the standard
+@cpp int main(int argc, char** argv) @ce as you would do on Unix systems and
+you get the @p argv in UTF-8. The library does this by providing a "shim"
+@cpp wmain() @ce / @cpp wWinMain() @ce, converting the wide-char `argv` to
+UTF-8 and then passing that to your standard @cpp main() @ce.
+
+@section main-winmain WIN32 apps without console window lurking in the background
+
+Executables created with @cmake add_executable(... WIN32 ...) @ce "just work"
+and there's no console window lurking in the background anymore. Nevertheless,
+you still get UTF-8 encoded `argc` / `argv` in your usual @cpp main() @ce.
+Standard output isn't captured anywhere by default, for debugging purposes you
+can either temporarily remove the `WIN32` option and rebuild or use console
+redirection (@cb{.bat} app.exe > stdout.txt @ce and
+@cb{.bat} app.exe 2> stderr.txt @ce works as expected).
+
+@section main-ansi-colors ANSI colors in console output
+
+By default, for compatibility reasons, Corrade is built with the
+@ref corrade-cmake "CMake option" `UTILITY_USE_ANSI_COLORS` disabled, meaning
+colored output is done through direct WINAPI calls only when writing directly
+to the console. Those APIs provide only a limited subset of the ANSI escape
+code feature set and stop working as soon as you redirect the output to a file
+or a pipe.
+
+With the @ref CORRADE_UTILITY_USE_ANSI_COLORS option enabled, the colored
+output is printed the same way as on Unix terminals. Recent versions of Windows
+10 support that natively, however it's needed to enable this feature explicitly
+in the console that's running the application by passing
+`ENABLE_VIRTUAL_TERMINAL_PROCESSING` to
+@m_class{m-doc-external} [SetConsoleMode()](https://docs.microsoft.com/en-us/windows/console/setconsolemode).
+The Corrade Main library does that in the @cpp wmain() @ce / @cpp wWinMain() @ce
+shim.
+
+@section main-utf8-output UTF-8 console otuput encoding
+
+With Corrade being designed in a way that UTF-8 is the standard encoding, it
+makes sense to have the console output encoding set to UTF-8 as well. Corrade
+Main does that by calling @m_class{m-doc-external} [SetConsoleOutputCP()](https://docs.microsoft.com/en-us/windows/console/setconsoleoutputcp)
+with `CP_UTF8` in the @cpp wmain() @ce / @cpp wWinMain() @ce shim.
+
+@section main-non-cmake Usage without CMake
+
+When you don't use CMake, simply linking to the `CorradeMain.lib` is not enough
+to achieve the desired effect --- additionally you need to tell the linker to
+choose a different entry point. That's done by passing `/ENTRY:wmainCRTStartup`
+to it for console apps and `/ENTRY:wWinMainCRTStartup` for GUI apps.
+
+@m_class{m-block m-warning}
+
+@par Entry point specification with MinGW
+    Unfortunately, the `/ENTRY` option is not recognized by MinGW and there you
+    need to pass `-municode` instead, regardless of whether the app is console
+    or GUI.
+
+*/
+
+}

@@ -30,6 +30,7 @@ namespace Corrade {
 /**
 @page building-corrade Downloading and building Corrade
 @page corrade-cmake Using Corrade with CMake
+@page main Corrade::Main library
 @page corrade-singles Single-header libraries
 @page corrade-example-index Examples
 @page corrade-rc Resource compiler

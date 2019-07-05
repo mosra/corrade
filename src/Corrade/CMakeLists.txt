@@ -72,5 +72,44 @@ if(BUILD_TESTS)
     add_subdirectory(Test)
 endif()
 
+if(WITH_MAIN)
+    if(CORRADE_TARGET_WINDOWS)
+        add_library(CorradeMain STATIC CorradeMain.cpp)
+        target_include_directories(CorradeMain PUBLIC
+            ${PROJECT_SOURCE_DIR}/src
+            ${PROJECT_BINARY_DIR}/src)
+        set_property(TARGET CorradeMain PROPERTY
+            INTERFACE_CORRADE_CXX_STANDARD 11) # TODO: interface, really?
+        set_property(TARGET CorradeMain APPEND PROPERTY
+            COMPATIBLE_INTERFACE_NUMBER_MAX CORRADE_CXX_STANDARD)
+        set_target_properties(CorradeMain PROPERTIES DEBUG_POSTFIX "-d")
+        if(NOT MINGW)
+            # Abusing INTERFACE_LINK_LIBRARIES because INTERFACE_LINK_OPTIONS
+            # is only since 3.13. They treat things with `-` in front as linker
+            # flags and fortunately I can use `-ENTRY` instead of `/ENTRY`.
+            # https://gitlab.kitware.com/cmake/cmake/issues/16543
+            set_property(TARGET CorradeMain APPEND PROPERTY
+                INTERFACE_LINK_LIBRARIES "-ENTRY:$<$<NOT:$<BOOL:$<TARGET_PROPERTY:WIN32_EXECUTABLE>>>:wmainCRTStartup>$<$<BOOL:$<TARGET_PROPERTY:WIN32_EXECUTABLE>>:wWinMainCRTStartup>")
+        else()
+            set_property(TARGET CorradeMain APPEND PROPERTY
+                INTERFACE_LINK_LIBRARIES "-municode")
+        endif()
+        install(TARGETS CorradeMain
+            RUNTIME DESTINATION ${CORRADE_BINARY_INSTALL_DIR}
+            LIBRARY DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR}
+            ARCHIVE DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
+
+    # On sane system it's just a dummy interface target
+    else()
+        add_library(CorradeMain INTERFACE)
+        target_include_directories(CorradeMain INTERFACE
+            ${PROJECT_SOURCE_DIR}/src
+            ${PROJECT_BINARY_DIR}/src)
+    endif()
+
+    # Corrade::Main target alias for superprojects
+    add_library(Corrade::Main ALIAS CorradeMain)
+endif()
+
 # Corrade configure file for superprojects
 set(_CORRADE_CONFIGURE_FILE ${CMAKE_CURRENT_BINARY_DIR}/configure.h CACHE INTERNAL "")

@@ -300,6 +300,10 @@ escape sequences are supported only on Windows 10 or when using non-standard
 console emulators. Available only on Windows, all other platforms use ANSI
 sequences implicitly. Enabled using `UTILITY_USE_ANSI_COLORS` CMake option when
 building Corrade.
+
+Note that on Windows 10 you need to additionally enable ANSI color support in
+the console. This is done automatically when you link to the
+@ref main "Corrade Main library".
 @see @ref CORRADE_TARGET_WINDOWS, @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_UTILITY_USE_ANSI_COLORS

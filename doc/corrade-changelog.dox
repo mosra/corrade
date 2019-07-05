@@ -37,6 +37,9 @@ namespace Corrade {
     which means there's a new (automatically enbaled) `MSVC2019_COMPATIBILITY`
     CMake option, exposed further as @ref CORRADE_MSVC2019_COMPATIBILITY CMake
     variable and preprocessor macro.
+-   New @ref main "Corrade::Main" library for improved user experience and
+    consistent behavior on Windows platforms (see
+    [mosra/corrade#37](https://github.com/mosra/corrade/pull/37))
 -   Added @ref CORRADE_TARGET_POWERPC for detecting PowerPC architectures (see
     [mosra/corrade#60](https://github.com/mosra/corrade/pull/60))
 -   New set of @ref CORRADE_TARGET_LIBCXX, @ref CORRADE_TARGET_LIBSTDCXX and

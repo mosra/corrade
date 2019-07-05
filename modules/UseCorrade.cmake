@@ -337,6 +337,7 @@ function(corrade_add_test test_name)
     if(CORRADE_TESTSUITE_TARGET_XCTEST)
         add_library(${test_name} SHARED ${sources})
         set_target_properties(${test_name} PROPERTIES FRAMEWORK TRUE)
+        # This never Windows, so no need to bother with Corrade::Main
         target_link_libraries(${test_name} PRIVATE ${libraries} Corrade::TestSuite)
 
         set(test_runner_file ${CMAKE_CURRENT_BINARY_DIR}/${test_name}.mm)
@@ -356,7 +357,7 @@ function(corrade_add_test test_name)
         endif()
     else()
         add_executable(${test_name} ${sources})
-        target_link_libraries(${test_name} PRIVATE ${libraries} Corrade::TestSuite)
+        target_link_libraries(${test_name} PRIVATE ${libraries} Corrade::TestSuite Corrade::Main)
 
         # Run tests using Node.js on Emscripten
         if(CORRADE_TARGET_EMSCRIPTEN)
