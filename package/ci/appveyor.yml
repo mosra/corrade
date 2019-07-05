@@ -16,6 +16,13 @@ environment:
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     APPVEYOR_JOB_NAME: windows-msvc2017
     CONFIGURATION: Debug
+  - TARGET: desktop
+    COMPILER: msvc
+    ANSI_COLORS: ON
+    PLATFORM: x64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    APPVEYOR_JOB_NAME: windows-msvc2019
+    CONFIGURATION: Debug
   # Build the 32bit and non-ANSI as Release, one on 2015 and one on 2017, so we
   # catch things that are not a problem on either with 64bit and Debug.
   - TARGET: desktop
@@ -36,9 +43,6 @@ environment:
     COMPILER: mingw
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     APPVEYOR_JOB_NAME: windows-mingw
-  - TARGET: rt
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    APPVEYOR_JOB_NAME: windows-rt-msvc2015
   - TARGET: rt
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     APPVEYOR_JOB_NAME: windows-rt-msvc2017
