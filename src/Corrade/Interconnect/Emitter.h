@@ -42,6 +42,13 @@ namespace Corrade { namespace Interconnect {
 
 namespace Implementation {
 
+/* Previously I used std::common_type<T>::type, but that decays inside so
+   references are lost. OTOH std::type_identity is only C++20, so making my own
+   thing here. */
+template<class T> struct Identity {
+    typedef T Type;
+};
+
 struct SignalDataHash {
     std::size_t operator()(const SignalData& data) const {
         std::size_t hash = 0;
@@ -460,7 +467,7 @@ class CORRADE_INTERCONNECT_EXPORT Emitter {
          * See @ref Interconnect-Emitter-signals "class documentation" for more
          * information about implementing signals.
          */
-        template<class Emitter, class ...Args> Signal emit(Signal(Emitter::*signal)(Args...), typename std::common_type<Args>::type... args);
+        template<class Emitter, class ...Args> Signal emit(Signal(Emitter::*signal)(Args...), typename Implementation::Identity<Args>::Type... args);
 
     private:
         /* https://bugzilla.gnome.org/show_bug.cgi?id=776986. Also the class
@@ -578,7 +585,7 @@ for more information about connections.
 CORRADE_INTERCONNECT_EXPORT bool disconnect(Emitter& emitter, const Connection& connection);
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emitter_::*signal)(Args...), typename std::common_type<Args>::type... args) {
+template<class Emitter_, class ...Args> Emitter::Signal Emitter::emit(Signal(Emitter_::*signal)(Args...), typename Implementation::Identity<Args>::Type... args) {
     _connectionsChanged = false;
     ++_lastHandledSignal;
     auto range = _connections.equal_range(

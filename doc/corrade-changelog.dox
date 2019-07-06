@@ -220,6 +220,8 @@ namespace Corrade {
     this to be allowed on both.
 -   @ref Utility::Directory::copy() wasn't properly freeing both opened files
     if one of them failed to open (see [mosra/corrade#70](https://github.com/mosra/corrade/pull/70))
+-   @ref Interconnect::Emitter::emit() (and signal/slot connections in general)
+    now work correctly with non-copyable arguments
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 
