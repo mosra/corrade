@@ -74,6 +74,8 @@ struct Test: TestSuite::Tester {
     void function();
     void capturingLambda();
     void stdFunction();
+
+    void nonCopyableParameter();
 };
 
 class Postman: public Interconnect::Emitter {
@@ -168,7 +170,9 @@ Test::Test() {
 
               &Test::function,
               &Test::capturingLambda,
-              &Test::stdFunction});
+              &Test::stdFunction,
+
+              &Test::nonCopyableParameter});
 }
 
 void Test::signalData() {
@@ -897,6 +901,36 @@ void Test::stdFunction() {
     Interconnect::disconnect(postman, connection);
     postman.newMessage(0, "heyy");
     CORRADE_COMPARE(out.str(), "hello\n");
+}
+
+void Test::nonCopyableParameter() {
+    struct NonCopyable {
+        explicit NonCopyable(int a): a{a} {}
+
+        NonCopyable(const NonCopyable&) = delete;
+        NonCopyable& operator=(const NonCopyable&) = delete;
+
+        int a;
+    };
+
+    struct E: Emitter {
+        Signal send(const NonCopyable& a) {
+            return emit(&E::send, a);
+        }
+    } emitter;
+
+    struct R: Receiver {
+        void receive(const NonCopyable& a) {
+            received += a.a;
+        }
+
+        int received{};
+    } receiver;
+
+    Interconnect::connect(emitter, &E::send, receiver, &R::receive);
+    NonCopyable a{42};
+    emitter.send(a);
+    CORRADE_COMPARE(receiver.received, 42);
 }
 
 }}}}
