@@ -37,7 +37,8 @@ namespace Corrade {
     which means there's a new (automatically enbaled) `MSVC2019_COMPATIBILITY`
     CMake option, exposed further as @ref CORRADE_MSVC2019_COMPATIBILITY CMake
     variable and preprocessor macro. See also
-    [mosra/magnum-bootstrap#18](https://github.com/mosra/magnum-bootstrap/issues/18).
+    [mosra/magnum-bootstrap#18](https://github.com/mosra/magnum-bootstrap/issues/18)
+    and [mosra/magnum#343](https://github.com/mosra/magnum/pull/343).
 -   New @ref main "Corrade::Main" library for improved user experience and
     consistent behavior on Windows platforms (see
     [mosra/corrade#37](https://github.com/mosra/corrade/pull/37))
