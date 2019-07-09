@@ -130,6 +130,13 @@ namespace Corrade {
     also [mosra/corrade#63](https://github.com/mosra/corrade/pull/63) for more
     information.
 
+@subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
+
+-   Instantiating a @ref PluginManager::Manager without an explicit plugin
+    directory will only print a warning about no dynamic plugins found if
+    there's no statically linked plugin either. That makes it behave better on
+    setups where all plugins are always linked statically.
+
 @subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
 
 -   When a test executed through CTest fails on Android, the uploaded test
