@@ -146,6 +146,11 @@ namespace Corrade {
     for more information.
 -   Android tests ran through CTest have stderr redirected to stdout because
     otherwise the `adb` bridge causes them to be extremely out-of-sync
+-   @ref TestSuite::Tester::testCaseId(),
+    @ref TestSuite::Tester::testCaseInstanceId() and
+    @ref TestSuite::Tester::testCaseRepeatId() are now expected to be called
+    only from within actual (instanced, repeated) test cases instead of
+    silently giving back an undefined value, making mistakes harder to spot
 
 @subsubsection corrade-changelog-latest-changes-utility Utility library
 

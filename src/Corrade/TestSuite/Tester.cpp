@@ -32,6 +32,7 @@
 #include <utility>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/ScopeGuard.h"
 #include "Corrade/TestSuite/Implementation/BenchmarkCounters.h"
 #include "Corrade/TestSuite/Implementation/BenchmarkStats.h"
 #include "Corrade/Utility/Arguments.h"
@@ -89,8 +90,8 @@ struct Tester::TesterState {
     std::vector<TestCase> testCases;
     std::string testFilename, testName, testCaseName,
         testCaseDescription, benchmarkName;
-    std::size_t testCaseId{}, testCaseInstanceId{~std::size_t{}},
-        testCaseRepeatId{}, benchmarkBatchSize{}, testCaseLine{},
+    std::size_t testCaseId{~std::size_t{}}, testCaseInstanceId{~std::size_t{}},
+        testCaseRepeatId{~std::size_t{}}, benchmarkBatchSize{}, testCaseLine{},
         checkCount{};
 
     std::uint64_t benchmarkBegin{};
@@ -277,6 +278,13 @@ benchmark types:
     }
 
     Debug(logOutput, _state->useColor) << Debug::boldColor(Debug::Color::Default) << "Starting" << _state->testName << "with" << usedTestCases.size() << "test cases...";
+
+    /* Ensure the test case IDs are valid only during the test run */
+    Containers::ScopeGuard testCaseIdReset{&*_state, [](TesterState* state) {
+        state->testCaseId = ~std::size_t{};
+        state->testCaseRepeatId = ~std::size_t{};
+        state->testCaseInstanceId = ~std::size_t{};
+    }};
 
     for(std::pair<int, TestCase> testCase: usedTestCases) {
         /* Reset output to stdout for each test case to prevent debug
@@ -556,9 +564,23 @@ void Tester::skip(const std::string& message) {
     throw SkipException();
 }
 
-std::size_t Tester::testCaseId() const { return _state->testCaseId; }
-std::size_t Tester::testCaseInstanceId() const { return _state->testCaseInstanceId; }
-std::size_t Tester::testCaseRepeatId() const { return _state->testCaseRepeatId; }
+std::size_t Tester::testCaseId() const {
+    CORRADE_ASSERT(_state->testCaseId != ~std::size_t{},
+        "TestSuite::Tester::testCaseId(): can be called only from within a test case", {});
+    return _state->testCaseId;
+}
+
+std::size_t Tester::testCaseInstanceId() const {
+    CORRADE_ASSERT(_state->testCaseInstanceId != ~std::size_t{},
+        "TestSuite::Tester::testCaseInstanceId(): can be called only from within an instanced test case", {});
+    return _state->testCaseInstanceId;
+}
+
+std::size_t Tester::testCaseRepeatId() const {
+    CORRADE_ASSERT(_state->testCaseRepeatId != ~std::size_t{},
+        "TestSuite::Tester::testCaseInstanceId(): can be called only from within a repeated test case", {});
+    return _state->testCaseRepeatId;
+}
 
 void Tester::setTestName(const std::string& name) {
     _state->testName = name;

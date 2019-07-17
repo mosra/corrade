@@ -911,8 +911,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @brief Test case ID
          *
          * Returns ID of the test case that is currently executing, starting
-         * from `1`. Value is undefined if called  outside of test cases and
-         * setup/teardown functions.
+         * from `1`.  Expects that this function is called from within a test
+         * case or its corresponding setup/teardown function.
          */
         std::size_t testCaseId() const;
 
@@ -920,8 +920,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @brief Test case instance ID
          *
          * Returns instance ID of the instanced test case that is currently
-         * executing, starting from `0`. Value is undefined if called outside
-         * of *instanced* test cases and setup/teardown functions.
+         * executing, starting from `0`. Expects that this function is called
+         * from within an instanced test case or its corresponding
+         * setup/teardown function.
          * @see @ref addInstancedTests()
          */
         std::size_t testCaseInstanceId() const;
@@ -930,8 +931,9 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * @brief Test case repeat ID
          *
          * Returns repeat ID of the repeated test case that is currently
-         * executing, starting from `0`. Value is undefined if called outside
-         * of *repeated* test cases and setup/teardown functions.
+         * executing, starting from `0`. Expects that this function is called
+         * from within a repeated test case or its corresponding setup/teardown
+         * function.
          * @see @ref addRepeatedTests()
          */
         std::size_t testCaseRepeatId() const;
