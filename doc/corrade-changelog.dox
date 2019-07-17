@@ -77,6 +77,11 @@ namespace Corrade {
     @ref Containers::Array::slice() const and @ref Containers::StaticArray::slice() const variants that take both being and
     end offsets at compile time (and thus also more range checking at compile
     time)
+-   Added @ref Containers::ArrayView::except() and similar APIs to
+    @ref Containers::StaticArrayView, @ref Containers::Array,
+    @ref Containers::StaticArray and @ref Containers::StridedArrayView. It's
+    like @ref Containers::ArrayView::prefix() but taking a count of items to
+    exclude from the end instead of how much to include from the beginning.
 -   Added a @ref Containers::ArrayView<void> specialization as a mutable
     type-erased counterpart to @ref Containers::ArrayView<const void>
 

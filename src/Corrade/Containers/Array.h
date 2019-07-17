@@ -500,6 +500,19 @@ class Array {
         }
 
         /**
+         * @brief Array prefix except the last @p count items
+         *
+         * Equivalent to @ref ArrayView::except().
+         */
+        ArrayView<T> except(std::size_t count) {
+            return ArrayView<T>(*this).except(count);
+        }
+        /** @overload */
+        ArrayView<const T> except(std::size_t count) const {
+            return ArrayView<const T>(*this).except(count);
+        }
+
+        /**
          * @brief Release data storage
          *
          * Returns the data pointer and resets internal state to default.

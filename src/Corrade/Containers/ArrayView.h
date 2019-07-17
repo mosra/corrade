@@ -415,6 +415,16 @@ template<class T> class ArrayView {
             return slice(begin, _size);
         }
 
+        /**
+         * @brief Array prefix except the last @p count items
+         *
+         * Equivalent to @cpp data.slice(0, data.size() - count) @ce.
+         * @see @ref slice(std::size_t, std::size_t) const
+         */
+        constexpr ArrayView<T> except(std::size_t count) const {
+            return slice(0, _size - count);
+        }
+
     private:
         T* _data;
         std::size_t _size;
@@ -975,6 +985,21 @@ template<std::size_t size_, class T> class StaticArrayView {
          */
         template<std::size_t begin_> constexpr StaticArrayView<size_ - begin_, T> suffix() const {
             return slice<begin_, size_>();
+        }
+
+        /** @copydoc ArrayView::except(std::size_t) const */
+        constexpr ArrayView<T> except(std::size_t count) const {
+            return ArrayView<T>(*this).except(count);
+        }
+
+        /**
+         * @brief Static array prefix except the last @p count items
+         *
+         * Equivalent to @cpp data.slice<0, Size - count>() @ce.
+         * @see @ref slice() const
+         */
+        template<std::size_t count> constexpr StaticArrayView<size_ - count, T> except() const {
+            return slice<0, size_ - count>();
         }
 
     private:

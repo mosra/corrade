@@ -427,6 +427,32 @@ template<std::size_t size_, class T> class StaticArray {
             return StaticArrayView<size_, const T>(*this).template suffix<begin_>();
         }
 
+        /**
+         * @brief Array prefix except the last @p count items
+         *
+         * Equivalent to @ref StaticArrayView::except(std::size_t) const.
+         */
+        ArrayView<T> except(std::size_t count) {
+            return ArrayView<T>(*this).except(count);
+        }
+        /** @overload */
+        ArrayView<const T> except(std::size_t count) const {
+            return ArrayView<const T>(*this).except(count);
+        }
+
+        /**
+         * @brief Static array prefix except the last @p count items
+         *
+         * Equivalent to @ref StaticArrayView::except() const.
+         */
+        template<std::size_t count> StaticArrayView<size_ - count, T> except() {
+            return StaticArrayView<size_, T>(*this).template except<count>();
+        }
+        /** @overload */
+        template<std::size_t count> StaticArrayView<size_ - count, const T> except() const {
+            return StaticArrayView<size_, const T>(*this).template except<count>();
+        }
+
     private:
         explicit StaticArray(DefaultInitT, std::true_type) {}
         /* GCC 5.3 is not able to initialize non-movable types inside

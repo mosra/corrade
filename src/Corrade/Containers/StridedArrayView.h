@@ -554,6 +554,27 @@ template<unsigned dimensions, class T> class StridedArrayView {
         }
 
         /**
+         * @brief Array suffix
+         *
+         * Equivalent to @cpp data.slice({}, data.size()[0] - count) @ce.
+         * @see @ref slice(std::size_t, std::size_t) const,
+         *      @ref suffix(const Size&) const
+         */
+        StridedArrayView<dimensions, T> except(std::size_t count) const {
+            return slice({}, _size._data[0] - count);
+        }
+
+        /**
+         * @brief Multi-dimensional array suffix
+         *
+         * Equivalent to @cpp data.slice<newDimensions>({}, end) @ce, where
+         * @p end is @cpp data.size()[i] - count[i] @ce for all dimensions.
+         * @see @ref slice(const Size&, const Size&) const,
+         *      @ref except(std::size_t) const
+         */
+        template<unsigned newDimensions = dimensions> StridedArrayView<newDimensions, T> except(const Size& count) const;
+
+        /**
          * @brief Pick every Nth element
          *
          * Multiplies @ref stride() with @p skip and adjusts @ref size()
@@ -973,6 +994,13 @@ template<unsigned dimensions, class T> template<unsigned newDimensions> StridedA
     }
 
     return StridedArrayView<newDimensions, T>{size, stride, data};
+}
+
+template<unsigned dimensions, class T> template<unsigned newDimensions> StridedArrayView<newDimensions, T> StridedArrayView<dimensions, T>::except(const Size& count) const {
+    Size end{NoInit};
+    for(std::size_t i = 0; i != dimensions; ++i)
+        end._data[i] = _size._data[i] - count._data[i];
+    return slice<newDimensions>({}, end);
 }
 
 template<unsigned dimensions, class T> StridedArrayView<dimensions, T> StridedArrayView<dimensions, T>::every(const std::ptrdiff_t step) const {
