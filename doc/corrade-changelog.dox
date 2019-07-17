@@ -70,7 +70,8 @@ namespace Corrade {
 -   Added convenience @ref Containers::stridedArrayView() "make functions",
     similar to existing @ref Containers::arrayView() and
     @ref Containers::staticArrayView()
--   Added compile-time-sized @ref Containers::StaticArrayView::suffix() variant
+-   Added compile-time-sized @ref Containers::StaticArrayView::suffix() and
+    @ref Containers::StaticArray::suffix() variants
 -   Added a @ref Containers::ArrayView<void> specialization as a mutable
     type-erased counterpart to @ref Containers::ArrayView<const void>
 

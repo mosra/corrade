@@ -401,6 +401,19 @@ template<std::size_t size_, class T> class StaticArray {
             return ArrayView<const T>(*this).suffix(begin);
         }
 
+        /**
+         * @brief Static array suffix
+         *
+         * Equivalent to @ref StaticArrayView::suffix() const.
+         */
+        template<std::size_t begin_> StaticArrayView<size_ - begin_, T> suffix() {
+            return StaticArrayView<size_, T>(*this).template suffix<begin_>();
+        }
+        /** @overload */
+        template<std::size_t begin_> StaticArrayView<size_ - begin_, const T> suffix() const {
+            return StaticArrayView<size_, const T>(*this).template suffix<begin_>();
+        }
+
     private:
         explicit StaticArray(DefaultInitT, std::true_type) {}
         /* GCC 5.3 is not able to initialize non-movable types inside
