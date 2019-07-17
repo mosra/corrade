@@ -520,8 +520,9 @@ template<unsigned dimensions, class T> class StridedArrayView {
         /**
          * @brief Multi-dimensional array prefix
          *
-         * Equivalent to @cpp data.slice({}, end) @ce. If @p end is @cpp 0 @ce
-         * in all dimensions, returns zero-sized @cpp nullptr @ce array.
+         * Equivalent to @cpp data.slice<newDimensions>({}, end) @ce. If @p end
+         * is @cpp 0 @ce in all dimensions, returns zero-sized @cpp nullptr @ce
+         * array.
          * @see @ref slice(const Size&, const Size&) const,
          *      @ref prefix(std::size_t) const
          */
@@ -544,7 +545,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
         /**
          * @brief Multi-dimensional array suffix
          *
-         * Equivalent to @cpp data.slice(begin, data.size()) @ce.
+         * Equivalent to @cpp data.slice<newDimensions>(begin, data.size()) @ce.
          * @see @ref slice(const Size&, const Size&) const,
          *      @ref suffix(std::size_t) const
          */

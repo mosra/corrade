@@ -311,7 +311,8 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief Array slice
          *
-         * Equivalent to @ref ArrayView::slice().
+         * Equivalent to @ref StaticArrayView::slice(T*, T*) const and
+         * overloads.
          */
         ArrayView<T> slice(T* begin, T* end) {
             return ArrayView<T>(*this).slice(begin, end);
@@ -330,10 +331,9 @@ template<std::size_t size_, class T> class StaticArray {
         }
 
         /**
-         * @brief Fixed-size array slice
+         * @brief Static array slice
          *
-         * Both @cpp begin @ce and @cpp begin + viewSize @ce are expected to be
-         * in range.
+         * Equivalent to @ref StaticArrayView::slice(T*) const and overloads.
          */
         template<std::size_t viewSize> StaticArrayView<viewSize, T> slice(T* begin) {
             return ArrayView<T>(*this).template slice<viewSize>(begin);
@@ -354,7 +354,7 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief Array prefix
          *
-         * Equivalent to @ref ArrayView::prefix().
+         * Equivalent to @ref StaticArrayView::prefix(T*) const and overloads.
          */
         ArrayView<T> prefix(T* end) {
             return ArrayView<T>(*this).prefix(end);
@@ -375,8 +375,7 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief Static array prefix
          *
-         * Expects (at compile-time) that @p viewSize is not larger than
-         * @ref Size.
+         * Equivalent to @ref StaticArrayView::prefix(T*) const and overloads.
          */
         template<std::size_t viewSize> StaticArrayView<viewSize, T> prefix();
         template<std::size_t viewSize> StaticArrayView<viewSize, const T> prefix() const; /**< @overload */
@@ -384,7 +383,7 @@ template<std::size_t size_, class T> class StaticArray {
         /**
          * @brief Array suffix
          *
-         * Equivalent to @ref ArrayView::suffix().
+         * Equivalent to @ref StaticArrayView::suffix(T*) const and overloads.
          */
         ArrayView<T> suffix(T* begin) {
             return ArrayView<T>(*this).suffix(begin);

@@ -344,7 +344,7 @@ template<class T> class ArrayView {
         constexpr ArrayView<T> slice(std::size_t begin, std::size_t end) const;
 
         /**
-         * @brief Fixed-size array slice
+         * @brief Static array slice
          *
          * Both @p begin and @cpp begin + viewSize @ce are expected to be in
          * range.
@@ -359,6 +359,7 @@ template<class T> class ArrayView {
          *
          * Equivalent to @cpp data.slice(data.begin(), end) @ce. If @p end is
          * @cpp nullptr @ce, returns zero-sized @cpp nullptr @ce array.
+         * @see @ref slice(T*, T*) const
          */
         constexpr ArrayView<T> prefix(T* end) const {
             return end ? slice(_data, end) : nullptr;
@@ -368,13 +369,14 @@ template<class T> class ArrayView {
          * @brief Array prefix
          *
          * Equivalent to @cpp data.slice(0, end) @ce.
+         * @see @ref slice(std::size_t, std::size_t) const
          */
         constexpr ArrayView<T> prefix(std::size_t end) const {
             return slice(0, end);
         }
 
         /**
-         * @brief Fixed-size array prefix
+         * @brief Static array prefix
          *
          * Equivalent to @cpp data.slice<viewSize>(data.begin()) @ce.
          */
@@ -388,6 +390,7 @@ template<class T> class ArrayView {
          * Equivalent to @cpp data.slice(begin, data.end()) @ce. If @p begin is
          * @cpp nullptr @ce and the original array isn't, returns zero-sized
          * @cpp nullptr @ce array.
+         * @see @ref slice(T*, T*) const
          */
         constexpr ArrayView<T> suffix(T* begin) const {
             return _data && !begin ? nullptr : slice(begin, _data + _size);
@@ -396,7 +399,8 @@ template<class T> class ArrayView {
         /**
          * @brief Array suffix
          *
-         * Equivalent to @cpp data.slice(begin, _size) @ce.
+         * Equivalent to @cpp data.slice(begin, data.size()) @ce.
+         * @see @ref slice(std::size_t, std::size_t) const
          */
         constexpr ArrayView<T> suffix(std::size_t begin) const {
             return slice(begin, _size);
