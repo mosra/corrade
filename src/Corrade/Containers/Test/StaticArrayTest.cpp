@@ -642,15 +642,25 @@ void StaticArrayTest::sliceToStatic() {
     StaticArray a{InPlaceInit, 1, 2, 3, 4, 5};
     const StaticArray ac{InPlaceInit, 1, 2, 3, 4, 5};
 
-    Containers::StaticArrayView<3, int> b = a.slice<3>(1);
-    CORRADE_COMPARE(b[0], 2);
-    CORRADE_COMPARE(b[1], 3);
-    CORRADE_COMPARE(b[2], 4);
+    Containers::StaticArrayView<3, int> b1 = a.slice<3>(1);
+    CORRADE_COMPARE(b1[0], 2);
+    CORRADE_COMPARE(b1[1], 3);
+    CORRADE_COMPARE(b1[2], 4);
 
-    Containers::StaticArrayView<3, const int> bc = ac.slice<3>(1);
-    CORRADE_COMPARE(bc[0], 2);
-    CORRADE_COMPARE(bc[1], 3);
-    CORRADE_COMPARE(bc[2], 4);
+    Containers::StaticArrayView<3, const int> bc1 = ac.slice<3>(1);
+    CORRADE_COMPARE(bc1[0], 2);
+    CORRADE_COMPARE(bc1[1], 3);
+    CORRADE_COMPARE(bc1[2], 4);
+
+    Containers::StaticArrayView<3, int> b2 = a.slice<1, 4>();
+    CORRADE_COMPARE(b2[0], 2);
+    CORRADE_COMPARE(b2[1], 3);
+    CORRADE_COMPARE(b2[2], 4);
+
+    Containers::StaticArrayView<3, const int> bc2 = ac.slice<1, 4>();
+    CORRADE_COMPARE(bc2[0], 2);
+    CORRADE_COMPARE(bc2[1], 3);
+    CORRADE_COMPARE(bc2[2], 4);
 
     Containers::StaticArrayView<3, int> c = a.prefix<3>();
     CORRADE_COMPARE(c[0], 1);

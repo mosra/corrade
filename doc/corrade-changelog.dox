@@ -72,6 +72,11 @@ namespace Corrade {
     @ref Containers::staticArrayView()
 -   Added compile-time-sized @ref Containers::StaticArrayView::suffix() and
     @ref Containers::StaticArray::suffix() variants
+-   Added @ref Containers::ArrayView::slice() const,
+    @ref Containers::StaticArrayView::slice() const,
+    @ref Containers::Array::slice() const and @ref Containers::StaticArray::slice() const variants that take both being and
+    end offsets at compile time (and thus also more range checking at compile
+    time)
 -   Added a @ref Containers::ArrayView<void> specialization as a mutable
     type-erased counterpart to @ref Containers::ArrayView<const void>
 

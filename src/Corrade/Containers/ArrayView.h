@@ -355,6 +355,14 @@ template<class T> class ArrayView {
         template<std::size_t viewSize> constexpr StaticArrayView<viewSize, T> slice(std::size_t begin) const;
 
         /**
+         * @brief Static array slice
+         *
+         * At compile time expects that @cpp begin < end_ @ce, at runtime that
+         * @p end_ is not larger than @ref size().
+         */
+        template<std::size_t begin_, std::size_t end_> constexpr StaticArrayView<end_ - begin_, T> slice() const;
+
+        /**
          * @brief Array prefix
          *
          * Equivalent to @cpp data.slice(data.begin(), end) @ce. If @p end is
@@ -378,10 +386,11 @@ template<class T> class ArrayView {
         /**
          * @brief Static array prefix
          *
-         * Equivalent to @cpp data.slice<viewSize>(data.begin()) @ce.
+         * Equivalent to @cpp data.slice<0, end_>() @ce.
+         * @see @ref slice() const
          */
-        template<std::size_t viewSize> constexpr StaticArrayView<viewSize, T> prefix() const {
-            return slice<viewSize>(_data);
+        template<std::size_t end_> constexpr StaticArrayView<end_, T> prefix() const {
+            return slice<0, end_>();
         }
 
         /**
@@ -922,6 +931,14 @@ template<std::size_t size_, class T> class StaticArrayView {
             return ArrayView<T>(*this).template slice<viewSize>(begin);
         }
 
+        /**
+         * @brief Static array slice
+         *
+         * Expects (at compile time) that @cpp begin < end_ @ce and @p end_ is
+         * not larger than @ref Size.
+         */
+        template<std::size_t begin_, std::size_t end_> constexpr StaticArrayView<end_ - begin_, T> slice() const;
+
         /** @copydoc ArrayView::prefix(T*) const */
         constexpr ArrayView<T> prefix(T* end) const {
             return ArrayView<T>(*this).prefix(end);
@@ -934,10 +951,12 @@ template<std::size_t size_, class T> class StaticArrayView {
         /**
          * @brief Static array prefix
          *
-         * Expects (at compile-time) that @p end_ is not larger than
-         * @ref Size.
+         * Equivalent to @cpp data.slice<0, end_>() @ce.
+         * @see @ref slice() const
          */
-        template<std::size_t end_> constexpr StaticArrayView<end_, T> prefix() const;
+        template<std::size_t end_> constexpr StaticArrayView<end_, T> prefix() const {
+            return slice<0, end_>();
+        }
 
         /** @copydoc ArrayView::suffix(T*) const */
         constexpr ArrayView<T> suffix(T* begin) const {
@@ -951,10 +970,12 @@ template<std::size_t size_, class T> class StaticArrayView {
         /**
          * @brief Static array suffix
          *
-         * Expects (at compile-time) that @p begin_ is not larger than
-         * @ref Size.
+         * Equivalent to @cpp data.slice<begin_, Size>() @ce.
+         * @see @ref slice() const
          */
-        template<std::size_t begin_> constexpr StaticArrayView<size_ - begin_, T> suffix() const;
+        template<std::size_t begin_> constexpr StaticArrayView<size_ - begin_, T> suffix() const {
+            return slice<begin_, size_>();
+        }
 
     private:
         T* _data;
@@ -1100,14 +1121,22 @@ template<class T> template<std::size_t viewSize> constexpr StaticArrayView<viewS
         StaticArrayView<viewSize, T>{_data + begin};
 }
 
-template<std::size_t size_, class T> template<std::size_t end_> constexpr StaticArrayView<end_, T> StaticArrayView<size_, T>::prefix() const {
-    static_assert(end_ <= size_, "prefix size too large");
-    return StaticArrayView<end_, T>{_data};
+template<class T> template<std::size_t begin_, std::size_t end_> constexpr StaticArrayView<end_ - begin_, T> ArrayView<T>::slice() const {
+    static_assert(begin_ < end_, "fixed-size slice needs to have a positive size");
+    return CORRADE_CONSTEXPR_ASSERT(end_ <= _size,
+            "Containers::ArrayView::slice(): slice ["
+            << Utility::Debug::nospace << begin_
+            << Utility::Debug::nospace << ":"
+            << Utility::Debug::nospace << end_
+            << Utility::Debug::nospace << "] out of range for" << _size
+            << "elements"),
+        StaticArrayView<end_ - begin_, T>{_data + begin_};
 }
 
-template<std::size_t size_, class T> template<std::size_t begin_> constexpr StaticArrayView<size_ - begin_, T> StaticArrayView<size_, T>::suffix() const {
-    static_assert(begin_ <= size_, "suffix size too large");
-    return StaticArrayView<size_ - begin_, T>{_data + begin_};
+template<std::size_t size_, class T> template<std::size_t begin_, std::size_t end_> constexpr StaticArrayView<end_ - begin_, T> StaticArrayView<size_, T>::slice() const {
+    static_assert(begin_ < end_, "fixed-size slice needs to have a positive size");
+    static_assert(end_ <= size_, "slice out of bounds");
+    return StaticArrayView<end_ - begin_, T>{_data + begin_};
 }
 
 }}

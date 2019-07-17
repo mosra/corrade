@@ -1019,10 +1019,15 @@ void ArrayViewTest::sliceToStatic() {
     int data[5] = {1, 2, 3, 4, 5};
     ArrayView a = data;
 
-    StaticArrayView<3, int> b = a.slice<3>(1);
-    CORRADE_COMPARE(b[0], 2);
-    CORRADE_COMPARE(b[1], 3);
-    CORRADE_COMPARE(b[2], 4);
+    StaticArrayView<3, int> b1 = a.slice<3>(1);
+    CORRADE_COMPARE(b1[0], 2);
+    CORRADE_COMPARE(b1[1], 3);
+    CORRADE_COMPARE(b1[2], 4);
+
+    StaticArrayView<3, int> b2 = a.slice<1, 4>();
+    CORRADE_COMPARE(b2[0], 2);
+    CORRADE_COMPARE(b2[1], 3);
+    CORRADE_COMPARE(b2[2], 4);
 
     StaticArrayView<3, int> c = a.prefix<3>();
     CORRADE_COMPARE(c[0], 1);
@@ -1033,10 +1038,15 @@ void ArrayViewTest::sliceToStatic() {
        pointer arithmetic on _data inside the assert. */
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
     constexpr ConstArrayView ca = Array5;
-    constexpr StaticArrayView<3, const int> cb = ca.slice<3>(1);
-    CORRADE_COMPARE(cb[0], 2);
-    CORRADE_COMPARE(cb[1], 3);
-    CORRADE_COMPARE(cb[2], 4);
+    constexpr StaticArrayView<3, const int> cb1 = ca.slice<3>(1);
+    CORRADE_COMPARE(cb1[0], 2);
+    CORRADE_COMPARE(cb1[1], 3);
+    CORRADE_COMPARE(cb1[2], 4);
+
+    constexpr StaticArrayView<3, const int> cb2 = ca.slice<1, 4>();
+    CORRADE_COMPARE(cb2[0], 2);
+    CORRADE_COMPARE(cb2[1], 3);
+    CORRADE_COMPARE(cb2[2], 4);
 
     constexpr StaticArrayView<3, const int> cc = ca.prefix<3>();
     CORRADE_COMPARE(cc[0], 1);

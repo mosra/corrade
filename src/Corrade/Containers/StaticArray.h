@@ -352,6 +352,19 @@ template<std::size_t size_, class T> class StaticArray {
         }
 
         /**
+         * @brief Static array slice
+         *
+         * Equivalent to @ref StaticArrayView::slice() const.
+         */
+        template<std::size_t begin_, std::size_t end_> StaticArrayView<end_ - begin_, T> slice() {
+            return StaticArrayView<size_, T>(*this).template slice<begin_, end_>();
+        }
+        /** @overload */
+        template<std::size_t begin_, std::size_t end_> StaticArrayView<end_ - begin_, const T> slice() const {
+            return StaticArrayView<size_, const T>(*this).template slice<begin_, end_>();
+        }
+
+        /**
          * @brief Array prefix
          *
          * Equivalent to @ref StaticArrayView::prefix(T*) const and overloads.

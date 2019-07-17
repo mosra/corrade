@@ -613,10 +613,15 @@ void StaticArrayViewTest::sliceToStatic() {
     int data[5] = {1, 2, 3, 4, 5};
     StaticArrayView<5> a = data;
 
-    StaticArrayView<3> b = a.slice<3>(1);
-    CORRADE_COMPARE(b[0], 2);
-    CORRADE_COMPARE(b[1], 3);
-    CORRADE_COMPARE(b[2], 4);
+    StaticArrayView<3> b1 = a.slice<3>(1);
+    CORRADE_COMPARE(b1[0], 2);
+    CORRADE_COMPARE(b1[1], 3);
+    CORRADE_COMPARE(b1[2], 4);
+
+    StaticArrayView<3> b2 = a.slice<1, 4>();
+    CORRADE_COMPARE(b2[0], 2);
+    CORRADE_COMPARE(b2[1], 3);
+    CORRADE_COMPARE(b2[2], 4);
 
     StaticArrayView<3> c = a.prefix<3>();
     CORRADE_COMPARE(c[0], 1);
@@ -633,11 +638,16 @@ void StaticArrayViewTest::sliceToStatic() {
        pointer arithmetic on _data inside the assert. Note that the below
        works, as there's no runtime assertion. */
     #ifndef CORRADE_MSVC2015_COMPATIBILITY
-    constexpr ConstStaticArrayView<3> cb = ca.slice<3>(1);
-    CORRADE_COMPARE(cb[0], 2);
-    CORRADE_COMPARE(cb[1], 3);
-    CORRADE_COMPARE(cb[2], 4);
+    constexpr ConstStaticArrayView<3> cb1 = ca.slice<3>(1);
+    CORRADE_COMPARE(cb1[0], 2);
+    CORRADE_COMPARE(cb1[1], 3);
+    CORRADE_COMPARE(cb1[2], 4);
     #endif
+
+    constexpr ConstStaticArrayView<3> cb2 = ca.slice<1, 4>();
+    CORRADE_COMPARE(cb2[0], 2);
+    CORRADE_COMPARE(cb2[1], 3);
+    CORRADE_COMPARE(cb2[2], 4);
 
     constexpr ConstStaticArrayView<3> cc = ca.prefix<3>();
     CORRADE_COMPARE(cc[0], 1);

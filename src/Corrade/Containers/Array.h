@@ -435,6 +435,20 @@ class Array {
         }
 
         /**
+         * @brief Fixed-size array slice
+         *
+         * At compile time expects that @cpp begin < end_ @ce, at runtime that
+         * @p end_ is not larger than @ref size().
+         */
+        template<std::size_t begin_, std::size_t end_> StaticArrayView<end_ - begin_, T> slice() {
+            return ArrayView<T>(*this).template slice<begin_, end_>();
+        }
+        /** @overload */
+        template<std::size_t begin_, std::size_t end_> StaticArrayView<end_ - begin_, const T> slice() const {
+            return ArrayView<const T>(*this).template slice<begin_, end_>();
+        }
+
+        /**
          * @brief Array prefix
          *
          * Equivalent to @ref ArrayView::prefix().
