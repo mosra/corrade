@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_MACRO(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_ALIGNAS(), @ref CORRADE_NORETURN, @ref CORRADE_THREAD_LOCAL, @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE, @ref CORRADE_LINE_STRING, @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
+ * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_MACRO(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_ALIGNAS(), @ref CORRADE_NORETURN, @ref CORRADE_THREAD_LOCAL, @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE, @ref CORRADE_FUNCTION, @ref CORRADE_LINE_STRING, @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
 #include "Corrade/configure.h"
@@ -371,6 +371,26 @@ elsewhere. Example usage:
 #endif
 
 /** @hideinitializer
+@brief Function name
+
+Gives out an undecorated function name. Equivalent to the standard C++11
+@cpp __func__ @ce on all sane platforms and to @cpp __FUNCTION__ @ce on
+@ref CORRADE_TARGET_ANDROID "Android", because it just *has to be different*.
+
+Note that the function name is *not* a string literal, meaning it can't be
+concatenated with other string literals like @cpp __FILE__ @ce or
+@ref CORRADE_LINE_STRING. Details [in this Stack Overflow answer](https://stackoverflow.com/a/18301370).
+*/
+#ifndef CORRADE_TARGET_ANDROID
+#define CORRADE_FUNCTION __func__
+#else
+/* C++11 standard __func__ on Android behaves like GCC's __PRETTY_FUNCTION__,
+   while GCC's __FUNCTION__ does the right thing.. I wonder -- do they have
+   *any* tests for libc at all?! */
+#define CORRADE_FUNCTION __FUNCTION__
+#endif
+
+/** @hideinitializer
 @brief Line number as a string
 
 Turns the standard @cpp __LINE__ @ce macro into a string. Useful for example
@@ -392,6 +412,8 @@ instead of showing the line number relatively as @cb{.shell-session} 1:5(4) @ce.
 Note that GLSL in particular, unlike C, interprets the @cpp #line @ce statement
 as applying to the immediately following line, which is why the extra
 @cpp "\n" @ce is needed.
+
+@see @ref CORRADE_FUNCTION
 */
 #define CORRADE_LINE_STRING _CORRADE_HELPER_DEFER(_CORRADE_HELPER_STR, __LINE__)
 

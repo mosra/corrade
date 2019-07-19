@@ -44,6 +44,7 @@ struct MacrosTest: TestSuite::Tester {
     void noreturn();
     void cxxStandard();
     void alwaysNeverInline();
+    void function();
     void lineString();
 
     #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -57,6 +58,7 @@ MacrosTest::MacrosTest() {
               &MacrosTest::noreturn,
               &MacrosTest::cxxStandard,
               &MacrosTest::alwaysNeverInline,
+              &MacrosTest::function,
               &MacrosTest::lineString,
 
               #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -144,6 +146,19 @@ CORRADE_NEVER_INLINE int neverInline() { return 37; }
 
 void MacrosTest::alwaysNeverInline() {
     CORRADE_COMPARE(alwaysInline() + neverInline(), 42);
+}
+
+namespace SubNamespace {
+    const char* thisIsAFunction(int, float) {
+        return CORRADE_FUNCTION;
+    }
+}
+
+void MacrosTest::function() {
+    /* Should be really just a function name, with no mangled signature or
+       surrounding namespace. Compare as a string to avoid comparing
+       pointers -- they are equal on some compilers, but not always. */
+    CORRADE_COMPARE(SubNamespace::thisIsAFunction(1, 0.0f), std::string{"thisIsAFunction"});
 }
 
 void MacrosTest::lineString() {
