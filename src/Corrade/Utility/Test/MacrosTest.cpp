@@ -25,12 +25,16 @@
 
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Numeric.h"
+#include "Corrade/Utility/DebugStl.h"
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN
 #include <thread>
 #endif
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
+
+/* Putting this as early as possible so it doesn't get changed every time */
+constexpr const char* ThisIsLine37 = CORRADE_LINE_STRING;
 
 struct MacrosTest: TestSuite::Tester {
     explicit MacrosTest();
@@ -40,6 +44,7 @@ struct MacrosTest: TestSuite::Tester {
     void noreturn();
     void cxxStandard();
     void alwaysNeverInline();
+    void lineString();
 
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     void threadLocal();
@@ -52,6 +57,7 @@ MacrosTest::MacrosTest() {
               &MacrosTest::noreturn,
               &MacrosTest::cxxStandard,
               &MacrosTest::alwaysNeverInline,
+              &MacrosTest::lineString,
 
               #ifndef CORRADE_TARGET_EMSCRIPTEN
               &MacrosTest::threadLocal
@@ -138,6 +144,10 @@ CORRADE_NEVER_INLINE int neverInline() { return 37; }
 
 void MacrosTest::alwaysNeverInline() {
     CORRADE_COMPARE(alwaysInline() + neverInline(), 42);
+}
+
+void MacrosTest::lineString() {
+    CORRADE_COMPARE(ThisIsLine37, std::string{"37"});
 }
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN
