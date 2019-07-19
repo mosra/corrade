@@ -221,7 +221,7 @@ if(!bigEndian) {
 
 {
 /* [Tester-setTestCaseName] */
-setTestCaseName(__func__);
+setTestCaseName(CORRADE_FUNCTION);
 /* [Tester-setTestCaseName] */
 }
 }

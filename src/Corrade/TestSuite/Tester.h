@@ -958,7 +958,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          *
          * @snippet TestSuite.cpp Tester-setTestCaseName
          *
-         * @see @ref setTestName(), @ref setTestCaseDescription()
+         * @see @ref setTestName(), @ref setTestCaseDescription(),
+         *      @ref CORRADE_FUNCTION
          */
         void setTestCaseName(const std::string& name);
         void setTestCaseName(std::string&& name); /**< @overload */
@@ -1183,19 +1184,6 @@ namespace.
     }
 #endif
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
-#ifndef CORRADE_TARGET_ANDROID
-#define _CORRADE_REGISTER_TEST_CASE()                                       \
-    Tester::registerTestCase(__func__, __LINE__);
-#else
-/* C++11 standard __func__ on Android behaves like GCC's __PRETTY_FUNCTION__,
-   while GCC's __FUNCTION__ does the right thing.. I wonder -- do they have
-   *any* tests for libc at all?! */
-#define _CORRADE_REGISTER_TEST_CASE()                                       \
-    Tester::registerTestCase(__FUNCTION__, __LINE__);
-#endif
-#endif
-
 /** @hideinitializer
 @brief Verify an expression in @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass
 
@@ -1214,7 +1202,7 @@ It is possible to use @ref CORRADE_VERIFY() also on objects with
 */
 #define CORRADE_VERIFY(expression)                                          \
     do {                                                                    \
-        _CORRADE_REGISTER_TEST_CASE();                                      \
+        Tester::registerTestCase(CORRADE_FUNCTION, __LINE__);               \
         Tester::verify(#expression, expression);                            \
     } while(false)
 
@@ -1237,7 +1225,7 @@ comparison operators and is printable via @ref Corrade::Utility::Debug "Utility:
 */
 #define CORRADE_COMPARE(actual, expected)                                   \
     do {                                                                    \
-        _CORRADE_REGISTER_TEST_CASE();                                      \
+        Tester::registerTestCase(CORRADE_FUNCTION, __LINE__);               \
         Tester::compare(#actual, actual, #expected, expected);              \
     } while(false)
 
@@ -1262,7 +1250,7 @@ with given comparator type.
 #else
 #define CORRADE_COMPARE_AS(actual, expected, ...)                           \
     do {                                                                    \
-        _CORRADE_REGISTER_TEST_CASE();                                      \
+        Tester::registerTestCase(CORRADE_FUNCTION, __LINE__);               \
         Tester::compareAs<__VA_ARGS__>(#actual, actual, #expected, expected); \
     } while(false)
 #endif
@@ -1285,7 +1273,7 @@ comparator type.
 */
 #define CORRADE_COMPARE_WITH(actual, expected, comparatorInstance)          \
     do {                                                                    \
-        _CORRADE_REGISTER_TEST_CASE();                                      \
+        Tester::registerTestCase(CORRADE_FUNCTION, __LINE__);               \
         Tester::compareWith((comparatorInstance).comparator(), #actual, actual, #expected, expected); \
     } while(false)
 
@@ -1343,7 +1331,7 @@ given feature can't be tested on given platform:
 */
 #define CORRADE_SKIP(message)                                               \
     do {                                                                    \
-        _CORRADE_REGISTER_TEST_CASE();                                      \
+        Tester::registerTestCase(CORRADE_FUNCTION, __LINE__);               \
         Tester::skip(message);                                              \
     } while(false)
 
@@ -1366,13 +1354,13 @@ one iteration.
 */
 #ifndef _MSC_VER
 #define CORRADE_BENCHMARK(batchSize)                                        \
-    _CORRADE_REGISTER_TEST_CASE();                                          \
+    Tester::registerTestCase(CORRADE_FUNCTION, __LINE__);                   \
     for(CORRADE_UNUSED auto&& _CORRADE_HELPER_PASTE(benchmarkIteration, __func__): Tester::createBenchmarkRunner(batchSize))
 #else
 /* MSVC warns about the benchmarkIteration variable being set but unused, no
    way around that except than disabling the warning */
 #define CORRADE_BENCHMARK(batchSize)                                        \
-    _CORRADE_REGISTER_TEST_CASE();                                          \
+    Tester::registerTestCase(CORRADE_FUNCTION, __LINE__);                   \
     for(                                                                    \
         __pragma(warning(push)) __pragma(warning(disable: 4189))            \
         CORRADE_UNUSED auto&& _CORRADE_HELPER_PASTE(benchmarkIteration, __func__): Tester::createBenchmarkRunner(batchSize) \
