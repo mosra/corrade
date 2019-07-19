@@ -186,7 +186,7 @@ void DebugTest::debug() {
 
 template<class> struct IntsData;
 template<> struct IntsData<char> {
-    static const char* name() { return "ints<char>"; }
+    static const char* name() { return "char"; }
     static char value() {
         /* Android has unsigned char */
         return std::is_signed<char>::value ? -123 : 223;
@@ -197,37 +197,37 @@ template<> struct IntsData<char> {
     }
 };
 template<> struct IntsData<unsigned char> {
-    static const char* name() { return "ints<unsigned char>"; }
+    static const char* name() { return "unsigned char"; }
     static unsigned char value() { return 223; }
     static const char* expected() { return "223\n"; }
 };
 template<> struct IntsData<short> {
-    static const char* name() { return "ints<short>"; }
+    static const char* name() { return "short"; }
     static short value() { return -31752; }
     static const char* expected() { return "-31752\n"; }
 };
 template<> struct IntsData<unsigned short> {
-    static const char* name() { return "ints<unsigned short>"; }
+    static const char* name() { return "unsigned short"; }
     static unsigned short value() { return 48523; }
     static const char* expected() { return "48523\n"; }
 };
 template<> struct IntsData<int> {
-    static const char* name() { return "ints<int>"; }
+    static const char* name() { return "int"; }
     static int value() { return -1423584221; }
     static const char* expected() { return "-1423584221\n"; }
 };
 template<> struct IntsData<unsigned int> {
-    static const char* name() { return "ints<unsigned int>"; }
+    static const char* name() { return "unsigned int"; }
     static unsigned int value() { return 4214211824; }
     static const char* expected() { return "4214211824\n"; }
 };
 template<> struct IntsData<long long> {
-    static const char* name() { return "ints<long long>"; }
+    static const char* name() { return "long long"; }
     static long long value() { return -4214211824234535464ll; }
     static const char* expected() { return "-4214211824234535464\n"; }
 };
 template<> struct IntsData<unsigned long long> {
-    static const char* name() { return "ints<unsigned long long>"; }
+    static const char* name() { return "unsigned long long"; }
     static unsigned long long value() { return 14214211824234535464ull; }
     static const char* expected() { return "14214211824234535464\n"; }
 };
@@ -238,15 +238,15 @@ template<> struct IntsDataFor<8>: IntsData<long long> {};
 template<> struct IntsDataForUnsigned<4>: IntsData<unsigned int> {};
 template<> struct IntsDataForUnsigned<8>: IntsData<unsigned long long> {};
 template<> struct IntsData<long>: IntsDataFor<sizeof(long)> {
-    static const char* name() { return "ints<long>"; }
+    static const char* name() { return "long"; }
 };
 template<> struct IntsData<unsigned long>: IntsDataForUnsigned<sizeof(long)> {
-    static const char* name() { return "ints<unsigned long>"; }
+    static const char* name() { return "unsigned long"; }
 };
 
 template<class> struct FloatsData;
 template<> struct FloatsData<float> {
-    static const char* name() { return "floats<float>"; }
+    static const char* name() { return "float"; }
     static const char* expected() {
         #ifndef __MINGW32__
         return "3.14159 -12345.7 1.23457e-12 3.14159\n";
@@ -256,7 +256,7 @@ template<> struct FloatsData<float> {
     }
 };
 template<> struct FloatsData<double> {
-    static const char* name() { return "floats<double>"; }
+    static const char* name() { return "double"; }
     static const char* expected() {
         #ifndef __MINGW32__
         return "3.14159265358979 -12345.6789012346 1.23456789012346e-12 3.14159\n";
@@ -267,7 +267,7 @@ template<> struct FloatsData<double> {
 };
 #ifndef CORRADE_TARGET_EMSCRIPTEN
 template<> struct FloatsData<long double> {
-    static const char* name() { return "floats<long double>"; }
+    static const char* name() { return "long double"; }
     static const char* expected() {
         #ifndef __MINGW32__
         return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-12 3.14159\n";
@@ -290,7 +290,7 @@ void DebugTest::isTty() {
 }
 
 template<class T> void DebugTest::ints() {
-    setTestCaseName(IntsData<T>::name());
+    setTestCaseTemplateName(IntsData<T>::name());
 
     std::ostringstream out;
     Debug{&out} << IntsData<T>::value();
@@ -298,7 +298,7 @@ template<class T> void DebugTest::ints() {
 }
 
 template<class T> void DebugTest::floats() {
-    setTestCaseName(FloatsData<T>::name());
+    setTestCaseTemplateName(FloatsData<T>::name());
 
     /* This test is shared with Format to ensure consistency of output */
 

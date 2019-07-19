@@ -350,7 +350,7 @@ void FormatTest::floatingLongDouble() {
 
 template<class> struct FloatingPrecisionData;
 template<> struct FloatingPrecisionData<float> {
-    static const char* name() { return "floatingPrecision<float>"; }
+    static const char* name() { return "float"; }
     static const char* expected() {
         #ifndef __MINGW32__
         return "3.14159 -12345.7 1.23457e-12 3.14159";
@@ -360,7 +360,7 @@ template<> struct FloatingPrecisionData<float> {
     }
 };
 template<> struct FloatingPrecisionData<double> {
-    static const char* name() { return "floatingPrecision<double>"; }
+    static const char* name() { return "double"; }
     static const char* expected() {
         #ifndef __MINGW32__
         return "3.14159265358979 -12345.6789012346 1.23456789012346e-12 3.14159";
@@ -371,7 +371,7 @@ template<> struct FloatingPrecisionData<double> {
 };
 #ifndef CORRADE_TARGET_EMSCRIPTEN
 template<> struct FloatingPrecisionData<long double> {
-    static const char* name() { return "floatingPrecision<long double>"; }
+    static const char* name() { return "long double"; }
     static const char* expected() {
         #ifndef __MINGW32__
         return "3.14159265358979324 -12345.6789012345679 1.23456789012345679e-12 3.14159";
@@ -383,7 +383,7 @@ template<> struct FloatingPrecisionData<long double> {
 #endif
 
 template<class T> void FormatTest::floatingPrecision() {
-    setTestCaseName(FloatingPrecisionData<T>::name());
+    setTestCaseTemplateName(FloatingPrecisionData<T>::name());
 
     /* This test is shared with DebugTest to ensure consistency of output */
 

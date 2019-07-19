@@ -279,7 +279,7 @@ TweakableParserTest::TweakableParserTest() {
 
 template<class T> void TweakableParserTest::integral() {
     auto&& data = IntegralData[testCaseInstanceId()];
-    setTestCaseName(formatString("integral<{}>", TypeTraits<T>::name()));
+    setTestCaseTemplateName(TypeTraits<T>::name());
     setTestCaseDescription(data.name);
     std::string input = formatString("{}{}", data.data, TypeTraits<T>::suffix());
     CORRADE_COMPARE(TweakableParser<T>::parse({input.data(), input.size()}), std::make_pair(TweakableState::Success, T(data.result)));
@@ -287,7 +287,7 @@ template<class T> void TweakableParserTest::integral() {
 
 template<class T> void TweakableParserTest::integralUppercase() {
     auto&& data = IntegralData[testCaseInstanceId()];
-    setTestCaseName(formatString("integralUppercase<{}>", TypeTraits<T>::name()));
+    setTestCaseTemplateName(TypeTraits<T>::name());
     setTestCaseDescription(data.name);
     std::string input = String::uppercase(formatString("{}{}", data.data, TypeTraits<T>::suffix()));
     CORRADE_COMPARE(TweakableParser<T>::parse({input.data(), input.size()}), std::make_pair(TweakableState::Success, T(data.result)));
@@ -295,7 +295,7 @@ template<class T> void TweakableParserTest::integralUppercase() {
 
 template<class T> void TweakableParserTest::integralError() {
     auto&& data = IntegralErrorData[testCaseInstanceId()];
-    setTestCaseName(formatString("integralError<{}>", TypeTraits<T>::name()));
+    setTestCaseTemplateName(TypeTraits<T>::name());
     setTestCaseDescription(data.name);
     std::string input = Utility::formatString(data.data, TypeTraits<T>::suffix());
 
@@ -309,7 +309,7 @@ template<class T> void TweakableParserTest::integralError() {
 
 template<class T> void TweakableParserTest::floatingPoint() {
     auto&& data = FloatingPointData[testCaseInstanceId()];
-    setTestCaseName(formatString("floatingPoint<{}>", TypeTraits<T>::name()));
+    setTestCaseTemplateName(TypeTraits<T>::name());
     setTestCaseDescription(data.name);
     std::string input = formatString("{}{}", data.data, TypeTraits<T>::suffix());
     std::pair<TweakableState, T> parsed = TweakableParser<T>::parse({input.data(), input.size()});
@@ -319,7 +319,7 @@ template<class T> void TweakableParserTest::floatingPoint() {
 
 template<class T> void TweakableParserTest::floatingPointUppercase() {
     auto&& data = FloatingPointData[testCaseInstanceId()];
-    setTestCaseName(formatString("floatingPointUppercase<{}>", TypeTraits<T>::name()));
+    setTestCaseTemplateName(TypeTraits<T>::name());
     setTestCaseDescription(data.name);
     std::string input = String::uppercase(formatString("{}{}", data.data, TypeTraits<T>::suffix()));
     std::pair<TweakableState, T> parsed = TweakableParser<T>::parse({input.data(), input.size()});
@@ -329,7 +329,7 @@ template<class T> void TweakableParserTest::floatingPointUppercase() {
 
 template<class T> void TweakableParserTest::floatingPointError() {
     auto&& data = FloatingPointErrorData[testCaseInstanceId()];
-    setTestCaseName(formatString("floatingPointError<{}>", TypeTraits<T>::name()));
+    setTestCaseTemplateName(TypeTraits<T>::name());
     setTestCaseDescription(data.name);
     std::string input = Utility::formatString(data.data, TypeTraits<T>::suffix());
 
