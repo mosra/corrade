@@ -86,6 +86,8 @@ struct Test: Tester {
 
     void testCaseName();
     void testCaseNameNoChecks();
+    void testCaseTemplateName();
+    void testCaseTemplateNameNoChecks();
     void testCaseDescription();
 
     void setupTeardown();
@@ -146,6 +148,8 @@ Test::Test(std::ostream* const out): _out{out} {
 
               &Test::testCaseName,
               &Test::testCaseNameNoChecks,
+              &Test::testCaseTemplateName,
+              &Test::testCaseTemplateNameNoChecks,
               &Test::testCaseDescription});
 
     addTests({&Test::setupTeardown,
@@ -266,6 +270,15 @@ void Test::testCaseName() {
 
 void Test::testCaseNameNoChecks() {
     setTestCaseName("testCaseName<27>");
+}
+
+void Test::testCaseTemplateName() {
+    setTestCaseTemplateName("15");
+    CORRADE_VERIFY(true);
+}
+
+void Test::testCaseTemplateNameNoChecks() {
+    setTestCaseTemplateName("27");
 }
 
 void Test::testCaseDescription() {
@@ -497,33 +510,33 @@ void TesterTest::test() {
     CORRADE_VERIFY(result == 1);
 
     std::string expected =
-        "Starting TesterTest::Test with 40 test cases...\n"
+        "Starting TesterTest::Test with 42 test cases...\n"
         "     ? [01] <unknown>()\n"
         "    OK [02] trueExpression()\n"
-        "  FAIL [03] falseExpression() at here.cpp on line 198\n"
+        "  FAIL [03] falseExpression() at here.cpp on line 202\n"
         "        Expression 5 != 5 failed.\n"
         "    OK [04] equal()\n"
-        "  FAIL [05] nonEqual() at here.cpp on line 208\n"
+        "  FAIL [05] nonEqual() at here.cpp on line 212\n"
         "        Values a and b are not the same, actual is\n"
         "        5\n"
         "        but expected\n"
         "        3\n"
-        " XFAIL [06] expectFail() at here.cpp on line 214\n"
+        " XFAIL [06] expectFail() at here.cpp on line 218\n"
         "        The world is not mad yet. 2 + 2 and 5 failed the comparison.\n"
-        " XFAIL [06] expectFail() at here.cpp on line 215\n"
+        " XFAIL [06] expectFail() at here.cpp on line 219\n"
         "        The world is not mad yet. Expression false == true failed.\n"
         "    OK [06] expectFail()\n"
-        " XPASS [07] unexpectedPassExpression() at here.cpp on line 228\n"
+        " XPASS [07] unexpectedPassExpression() at here.cpp on line 232\n"
         "        Expression true == true was expected to fail.\n"
-        " XPASS [08] unexpectedPassEqual() at here.cpp on line 233\n"
+        " XPASS [08] unexpectedPassEqual() at here.cpp on line 237\n"
         "        2 + 2 and 4 were expected to fail the comparison.\n"
         "    OK [09] compareAs()\n"
-        "  FAIL [10] compareAsFail() at here.cpp on line 241\n"
+        "  FAIL [10] compareAsFail() at here.cpp on line 245\n"
         "        Length of actual \"meh\" doesn't match length of expected \"hello\" with epsilon 0\n"
         "    OK [11] compareWith()\n"
-        "  FAIL [12] compareWithFail() at here.cpp on line 249\n"
+        "  FAIL [12] compareWithFail() at here.cpp on line 253\n"
         "        Length of actual \"You rather GTFO\" doesn't match length of expected \"hello\" with epsilon 9\n"
-        "  FAIL [13] compareImplicitConversionFail() at here.cpp on line 254\n"
+        "  FAIL [13] compareImplicitConversionFail() at here.cpp on line 258\n"
         "        Values \"holla\" and hello are not the same, actual is\n"
         "        holla\n"
         "        but expected\n"
@@ -532,60 +545,62 @@ void TesterTest::test() {
         "        This testcase is skipped.\n"
         "    OK [15] testCaseName<15>()\n"
         "     ? [16] testCaseName<27>()\n"
-        "    OK [17] testCaseDescription(hello)\n"
-        "       [18] setting up...\n"
-        "       [18] tearing down...\n"
-        "    OK [18] setupTeardown()\n"
-        "       [19] setting up...\n"
-        "       [19] tearing down...\n"
-        "     ? [19] <unknown>()\n"
+        "    OK [17] testCaseTemplateName<15>()\n"
+        "     ? [18] <unknown>()\n"
+        "    OK [19] testCaseDescription(hello)\n"
         "       [20] setting up...\n"
-        "  FAIL [20] setupTeardownFail() at here.cpp on line 291\n"
-        "        Expression false failed.\n"
         "       [20] tearing down...\n"
+        "    OK [20] setupTeardown()\n"
         "       [21] setting up...\n"
-        "  SKIP [21] setupTeardownSkip()\n"
-        "        Skipped.\n"
         "       [21] tearing down...\n"
-        "    OK [22] instancedTest(zero)\n"
-        "    OK [23] instancedTest(1)\n"
-        "  FAIL [24] instancedTest(two) at here.cpp on line 314\n"
+        "     ? [21] <unknown>()\n"
+        "       [22] setting up...\n"
+        "  FAIL [22] setupTeardownFail() at here.cpp on line 304\n"
+        "        Expression false failed.\n"
+        "       [22] tearing down...\n"
+        "       [23] setting up...\n"
+        "  SKIP [23] setupTeardownSkip()\n"
+        "        Skipped.\n"
+        "       [23] tearing down...\n"
+        "    OK [24] instancedTest(zero)\n"
+        "    OK [25] instancedTest(1)\n"
+        "  FAIL [26] instancedTest(two) at here.cpp on line 327\n"
         "        Values data.value*data.value*data.value and data.result are not the same, actual is\n"
         "        125\n"
         "        but expected\n"
         "        122\n"
-        "    OK [25] instancedTest(3)\n"
-        "    OK [26] instancedTest(last)\n"
+        "    OK [27] instancedTest(3)\n"
+        "    OK [28] instancedTest(last)\n"
         "0\n"
         "1\n"
         "2\n"
         "3\n"
         "4\n"
-        "    OK [27] repeatedTest()@5\n"
-        "     ? [28] <unknown>()@50\n"
-        "  FAIL [29] repeatedTestFail()@18 at here.cpp on line 325\n"
+        "    OK [29] repeatedTest()@5\n"
+        "     ? [30] <unknown>()@50\n"
+        "  FAIL [31] repeatedTestFail()@18 at here.cpp on line 338\n"
         "        Expression _i++ < 17 failed.\n"
-        "  SKIP [30] repeatedTestSkip()@29\n"
+        "  SKIP [32] repeatedTestSkip()@29\n"
         "        Too late.\n"
-        "       [31] setting up...\n"
-        "       [31] tearing down...\n"
-        "       [31] setting up...\n"
-        "       [31] tearing down...\n"
-        "    OK [31] repeatedTestSetupTeardown()@2\n"
-        "       [32] setting up...\n"
-        "       [32] tearing down...\n"
-        "       [32] setting up...\n"
-        "       [32] tearing down...\n"
-        "     ? [32] <unknown>()@2\n"
         "       [33] setting up...\n"
-        "  FAIL [33] repeatedTestSetupTeardownFail()@1 at here.cpp on line 339\n"
-        "        Expression false failed.\n"
         "       [33] tearing down...\n"
+        "       [33] setting up...\n"
+        "       [33] tearing down...\n"
+        "    OK [33] repeatedTestSetupTeardown()@2\n"
         "       [34] setting up...\n"
-        "  SKIP [34] repeatedTestSetupTeardownSkip()@1\n"
-        "        Skipped.\n"
         "       [34] tearing down...\n"
-        " BENCH [35]   0.00 ± 0.00   ns benchmarkDefault()@9x1000000000 (wall time)\n"
+        "       [34] setting up...\n"
+        "       [34] tearing down...\n"
+        "     ? [34] <unknown>()@2\n"
+        "       [35] setting up...\n"
+        "  FAIL [35] repeatedTestSetupTeardownFail()@1 at here.cpp on line 352\n"
+        "        Expression false failed.\n"
+        "       [35] tearing down...\n"
+        "       [36] setting up...\n"
+        "  SKIP [36] repeatedTestSetupTeardownSkip()@1\n"
+        "        Skipped.\n"
+        "       [36] tearing down...\n"
+        " BENCH [37]   0.00 ± 0.00   ns benchmarkDefault()@9x1000000000 (wall time)\n"
         "Benchmark begin\n"
         "Benchmark iteration\n"
         "Benchmark iteration\n"
@@ -598,13 +613,13 @@ void TesterTest::test() {
         "Benchmark iteration\n"
         "Benchmark iteration\n"
         "Benchmark end: 500\n"
-        " BENCH [36] 225.00 ± 35.36  ns benchmark()@2x2\n"
-        " BENCH [37] 348.36          kB benchmarkOnce()@1x1\n"
-        " BENCH [38] (no data)        B benchmarkZero()@1x0 (bytes in millibits)\n"
-        " BENCH [39] (no data)        B benchmarkNoMacro(this is gonna fail)@1x0\n"
-        "  SKIP [40] benchmarkSkip()@1\n"
+        " BENCH [38] 225.00 ± 35.36  ns benchmark()@2x2\n"
+        " BENCH [39] 348.36          kB benchmarkOnce()@1x1\n"
+        " BENCH [40] (no data)        B benchmarkZero()@1x0 (bytes in millibits)\n"
+        " BENCH [41] (no data)        B benchmarkNoMacro(this is gonna fail)@1x0\n"
+        "  SKIP [42] benchmarkSkip()@1\n"
         "        Can't verify the measurements anyway.\n"
-        "Finished TesterTest::Test with 11 errors out of 51 checks. 5 test cases didn't contain any checks!\n";
+        "Finished TesterTest::Test with 11 errors out of 52 checks. 6 test cases didn't contain any checks!\n";
 
     //CORRADE_COMPARE(out.str().length(), expected.length());
     CORRADE_COMPARE(out.str(), expected);
@@ -665,7 +680,7 @@ void TesterTest::skipAll() {
 void TesterTest::skipTests() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "11 37 9", "--skip-tests" };
+    const char* argv[] = { "", "--color", "off", "--only", "11 39 9", "--skip-tests" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -677,7 +692,7 @@ void TesterTest::skipTests() {
 
     std::string expected =
         "Starting TesterTest::Test with 1 test cases...\n"
-        " BENCH [37] 348.36          kB benchmarkOnce()@1x1\n"
+        " BENCH [39] 348.36          kB benchmarkOnce()@1x1\n"
         "Finished TesterTest::Test with 0 errors out of 0 checks.\n";
     CORRADE_COMPARE(out.str(), expected);
 }
@@ -685,7 +700,7 @@ void TesterTest::skipTests() {
 void TesterTest::skipBenchmarks() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "11 36 9", "--skip-benchmarks" };
+    const char* argv[] = { "", "--color", "off", "--only", "11 38 9", "--skip-benchmarks" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -721,7 +736,7 @@ void TesterTest::skipTestsNothingElse() {
 void TesterTest::skipBenchmarksNothingElse() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "36", "--skip-benchmarks" };
+    const char* argv[] = { "", "--color", "off", "--only", "38", "--skip-benchmarks" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -773,7 +788,7 @@ void TesterTest::shuffleOne() {
 void TesterTest::repeatEvery() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "27 4", "--repeat-every", "2" };
+    const char* argv[] = { "", "--color", "off", "--only", "29 4", "--repeat-every", "2" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -795,7 +810,7 @@ void TesterTest::repeatEvery() {
         "7\n"
         "8\n"
         "9\n"
-        "    OK [27] repeatedTest()@10\n"
+        "    OK [29] repeatedTest()@10\n"
         "    OK [04] equal()@2\n"
         "Finished TesterTest::Test with 0 errors out of 12 checks.\n";
     CORRADE_COMPARE(out.str(), expected);
@@ -804,7 +819,7 @@ void TesterTest::repeatEvery() {
 void TesterTest::repeatAll() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "27 4", "--repeat-all", "2" };
+    const char* argv[] = { "", "--color", "off", "--only", "29 4", "--repeat-all", "2" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -821,14 +836,14 @@ void TesterTest::repeatAll() {
         "2\n"
         "3\n"
         "4\n"
-        "    OK [27] repeatedTest()@5\n"
+        "    OK [29] repeatedTest()@5\n"
         "    OK [04] equal()\n"
         "0\n"
         "1\n"
         "2\n"
         "3\n"
         "4\n"
-        "    OK [27] repeatedTest()@5\n"
+        "    OK [29] repeatedTest()@5\n"
         "    OK [04] equal()\n"
         "Finished TesterTest::Test with 0 errors out of 12 checks.\n";
     CORRADE_COMPARE(out.str(), expected);
@@ -851,7 +866,7 @@ void TesterTest::abortOnFail() {
         "Starting TesterTest::Test with 4 test cases...\n"
         "     ? [01] <unknown>()\n"
         "    OK [02] trueExpression()\n"
-        "  FAIL [03] falseExpression() at here.cpp on line 198\n"
+        "  FAIL [03] falseExpression() at here.cpp on line 202\n"
         "        Expression 5 != 5 failed.\n"
         "Aborted TesterTest::Test after first failure out of 2 checks so far. 1 test cases didn't contain any checks!\n";
     CORRADE_COMPARE(out.str(), expected);
@@ -875,7 +890,7 @@ void TesterTest::abortOnFailSkip() {
         "  SKIP [14] skip()\n"
         "        This testcase is skipped.\n"
         "    OK [02] trueExpression()\n"
-        "  FAIL [03] falseExpression() at here.cpp on line 198\n"
+        "  FAIL [03] falseExpression() at here.cpp on line 202\n"
         "        Expression 5 != 5 failed.\n"
         "Aborted TesterTest::Test after first failure out of 2 checks so far.\n";
     CORRADE_COMPARE(out.str(), expected);
@@ -896,7 +911,7 @@ void TesterTest::noXfail() {
 
     std::string expected =
         "Starting TesterTest::Test with 1 test cases...\n"
-        "  FAIL [06] expectFail() at here.cpp on line 214\n"
+        "  FAIL [06] expectFail() at here.cpp on line 218\n"
         "        Values 2 + 2 and 5 are not the same, actual is\n"
         "        4\n"
         "        but expected\n"
@@ -908,7 +923,7 @@ void TesterTest::noXfail() {
 void TesterTest::benchmarkWallClock() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "35 37", "--benchmark", "wall-time" };
+    const char* argv[] = { "", "--color", "off", "--only", "37 39", "--benchmark", "wall-time" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -920,8 +935,8 @@ void TesterTest::benchmarkWallClock() {
 
     std::string expected =
         "Starting TesterTest::Test with 2 test cases...\n"
-        " BENCH [35]   0.00 ± 0.00   ns benchmarkDefault()@9x1000000000 (wall time)\n"
-        " BENCH [37] 348.36          kB benchmarkOnce()@1x1\n"
+        " BENCH [37]   0.00 ± 0.00   ns benchmarkDefault()@9x1000000000 (wall time)\n"
+        " BENCH [39] 348.36          kB benchmarkOnce()@1x1\n"
         "Finished TesterTest::Test with 0 errors out of 0 checks.\n";
     CORRADE_COMPARE(out.str(), expected);
 }
@@ -929,7 +944,7 @@ void TesterTest::benchmarkWallClock() {
 void TesterTest::benchmarkCpuClock() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "35 37", "--benchmark", "cpu-time" };
+    const char* argv[] = { "", "--color", "off", "--only", "37 39", "--benchmark", "cpu-time" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -941,8 +956,8 @@ void TesterTest::benchmarkCpuClock() {
 
     std::string expected =
         "Starting TesterTest::Test with 2 test cases...\n"
-        " BENCH [35]   0.00 ± 0.00   ns benchmarkDefault()@9x1000000000 (CPU time)\n"
-        " BENCH [37] 348.36          kB benchmarkOnce()@1x1\n"
+        " BENCH [37]   0.00 ± 0.00   ns benchmarkDefault()@9x1000000000 (CPU time)\n"
+        " BENCH [39] 348.36          kB benchmarkOnce()@1x1\n"
         "Finished TesterTest::Test with 0 errors out of 0 checks.\n";
     CORRADE_COMPARE(out.str(), expected);
 }
@@ -950,7 +965,7 @@ void TesterTest::benchmarkCpuClock() {
 void TesterTest::benchmarkCpuCycles() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "35 37", "--benchmark", "cpu-cycles" };
+    const char* argv[] = { "", "--color", "off", "--only", "37 39", "--benchmark", "cpu-cycles" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -962,8 +977,8 @@ void TesterTest::benchmarkCpuCycles() {
 
     std::string expected =
         "Starting TesterTest::Test with 2 test cases...\n"
-        " BENCH [35]   0.00 ± 0.00    C benchmarkDefault()@9x1000000000 (CPU cycles)\n"
-        " BENCH [37] 348.36          kB benchmarkOnce()@1x1\n"
+        " BENCH [37]   0.00 ± 0.00    C benchmarkDefault()@9x1000000000 (CPU cycles)\n"
+        " BENCH [39] 348.36          kB benchmarkOnce()@1x1\n"
         "Finished TesterTest::Test with 0 errors out of 0 checks.\n";
     CORRADE_COMPARE(out.str(), expected);
 }
@@ -971,7 +986,7 @@ void TesterTest::benchmarkCpuCycles() {
 void TesterTest::benchmarkDiscardAll() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "35 37", "--benchmark-discard", "100" };
+    const char* argv[] = { "", "--color", "off", "--only", "37 39", "--benchmark-discard", "100" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -983,8 +998,8 @@ void TesterTest::benchmarkDiscardAll() {
 
     std::string expected =
         "Starting TesterTest::Test with 2 test cases...\n"
-        " BENCH [35]   0.00          ns benchmarkDefault()@1x1000000000 (wall time)\n"
-        " BENCH [37] 348.36          kB benchmarkOnce()@1x1\n"
+        " BENCH [37]   0.00          ns benchmarkDefault()@1x1000000000 (wall time)\n"
+        " BENCH [39] 348.36          kB benchmarkOnce()@1x1\n"
         "Finished TesterTest::Test with 0 errors out of 0 checks.\n";
     CORRADE_COMPARE(out.str(), expected);
 }

@@ -944,7 +944,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * By default the test name is gathered together with test filename by
          * the @ref CORRADE_TEST_MAIN() macro and is equivalent to
          * fully-qualified class name.
-         * @see @ref setTestCaseName(), @ref setTestCaseDescription()
+         * @see @ref setTestCaseName(), @ref setTestCaseTemplateName(),
+         *      @ref setTestCaseDescription()
          */
         void setTestName(const std::string& name);
         void setTestName(std::string&& name); /**< @overload */
@@ -958,12 +959,28 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          *
          * @snippet TestSuite.cpp Tester-setTestCaseName
          *
-         * @see @ref setTestName(), @ref setTestCaseDescription(),
-         *      @ref CORRADE_FUNCTION
+         * @see @ref setTestCaseTemplateName(), @ref setTestName(),
+         *      @ref setTestCaseDescription(), @ref CORRADE_FUNCTION
          */
         void setTestCaseName(const std::string& name);
         void setTestCaseName(std::string&& name); /**< @overload */
         void setTestCaseName(const char* name); /**< @overload */
+
+        /**
+         * @brief Set test case template name
+         *
+         * Useful to distinguish different specializations of the same templated
+         * test case. Equivalent to the following called from inside the test
+         * case:
+         *
+         * @snippet TestSuite.cpp Tester-setTestCaseTemplateName
+         *
+         * @see @ref setTestCaseName(), @ref setTestName(),
+         *      @ref setTestCaseDescription(), @ref CORRADE_FUNCTION
+         */
+        void setTestCaseTemplateName(const std::string& name);
+        void setTestCaseTemplateName(std::string&& name); /**< @overload */
+        void setTestCaseTemplateName(const char* name); /**< @overload */
 
         /**
          * @brief Set test case description
@@ -971,7 +988,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          * Additional text displayed after the test case name. By default
          * the description is empty for non-instanced test cases and instance
          * ID for instanced test cases.
-         * @see @ref setTestName(), @ref setTestCaseName()
+         * @see @ref setTestName(), @ref setTestCaseName(),
+         *      @ref setTestCaseTemplateName()
          */
         void setTestCaseDescription(const std::string& description);
         void setTestCaseDescription(std::string&& description); /**< @overload */

@@ -126,6 +126,11 @@ namespace Corrade {
     codebases compiled with `-fvisibility-inlines-hidden`; the
     @ref CORRADE_VISIBILITY_EXPORT and friends are now also properly documented
 
+@subsubsection corrade-changelog-latest-new-testsuite TestSuite library
+
+-   Added @ref TestSuite::Tester::setTestCaseTemplateName() for convenient
+    distinction of different specializations of templated test cases
+
 @subsection corrade-changelog-latest-changes Changes and improvements
 
 @subsubsection corrade-changelog-latest-changes-containers Containers library

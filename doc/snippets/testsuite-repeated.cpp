@@ -43,8 +43,8 @@ RaceTest::RaceTest() {
 }
 
 template<class T> void RaceTest::threadedIncrement() {
-    setTestCaseName(std::is_same<T, int>::value ?
-        "threadedIncrement<int>" : "threadedIncrement<std::atomic_int>");
+    setTestCaseTemplateName(std::is_same<T, int>::value ?
+        "int" : "std::atomic_int");
 
     T x{0};
     int y = 1;

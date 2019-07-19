@@ -43,7 +43,7 @@ PiTest::PiTest() {
 }
 
 template<class T> void PiTest::calculate() {
-    setTestCaseName(std::is_same<T, float>::value ? "calculate<float>" : "calculate<double>");
+    setTestCaseTemplateName(std::is_same<T, float>::value ? "float" : "double");
 
     CORRADE_COMPARE(calculatePi<T>(), T(3.141592653589793));
 }

@@ -36,6 +36,7 @@
 #include "Corrade/TestSuite/Implementation/BenchmarkCounters.h"
 #include "Corrade/TestSuite/Implementation/BenchmarkStats.h"
 #include "Corrade/Utility/Arguments.h"
+#include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/String.h"
 
 namespace Corrade { namespace TestSuite {
@@ -85,10 +86,16 @@ Tester::TesterConfiguration& Tester::TesterConfiguration::setSkippedArgumentPref
 struct Tester::TesterState {
     explicit TesterState(const TesterConfiguration& configuration): configuration{std::move(configuration)} {}
 
+    std::string formattedTestCaseName() const {
+        if(testCaseName.empty()) return "<unknown>";
+        if(testCaseTemplateName.empty()) return testCaseName;
+        return Utility::formatString("{}<{}>", testCaseName, testCaseTemplateName);
+    }
+
     Debug::Flags useColor;
     std::ostream *logOutput{}, *errorOutput{};
     std::vector<TestCase> testCases;
-    std::string testFilename, testName, testCaseName,
+    std::string testFilename, testName, testCaseName, testCaseTemplateName,
         testCaseDescription, benchmarkName;
     std::size_t testCaseId{~std::size_t{}}, testCaseInstanceId{~std::size_t{}},
         testCaseRepeatId{~std::size_t{}}, benchmarkBatchSize{}, testCaseLine{},
@@ -360,6 +367,7 @@ benchmark types:
             _state->testCaseRepeatId = repeatCount == 1 ? ~std::size_t{} : i;
             _state->testCaseLine = 0;
             _state->testCaseName.clear();
+            _state->testCaseTemplateName.clear();
             _state->testCase = &testCase.second;
             _state->benchmarkBatchSize = 0;
             _state->benchmarkResult = 0;
@@ -424,8 +432,7 @@ benchmark types:
                 Implementation::printStats(out, mean, stddev, color, benchmarkUnits);
 
                 out << Debug::boldColor(Debug::Color::Default)
-                    << (_state->testCaseName.empty() ? "<unknown>" : _state->testCaseName)
-                    << Debug::nospace;
+                    << _state->formattedTestCaseName() << Debug::nospace;
 
                 /* Optional test case description */
                 if(!_state->testCaseDescription.empty()) {
@@ -480,8 +487,7 @@ void Tester::printTestCaseLabel(Debug& out, const char* const status, const Debu
         << Debug::boldColor(Debug::Color::Cyan) << padding
         << Debug::nospace << _state->testCaseId << Debug::nospace
         << Debug::color(Debug::Color::Blue) << "]"
-        << Debug::boldColor(labelColor)
-        << (_state->testCaseName.empty() ? "<unknown>" : _state->testCaseName)
+        << Debug::boldColor(labelColor) << _state->formattedTestCaseName()
         << Debug::nospace;
 
     /* Optional test case description */
@@ -604,6 +610,18 @@ void Tester::setTestCaseName(std::string&& name) {
 
 void Tester::setTestCaseName(const char* name) {
     _state->testCaseName = name;
+}
+
+void Tester::setTestCaseTemplateName(const std::string& name) {
+    _state->testCaseTemplateName = name;
+}
+
+void Tester::setTestCaseTemplateName(std::string&& name) {
+    _state->testCaseTemplateName = std::move(name);
+}
+
+void Tester::setTestCaseTemplateName(const char* name) {
+    _state->testCaseTemplateName = name;
 }
 
 void Tester::setTestCaseDescription(const std::string& description) {

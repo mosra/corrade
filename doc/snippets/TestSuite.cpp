@@ -35,6 +35,7 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/DebugStl.h"
+#include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/StlMath.h"
 
 using namespace Corrade;
@@ -223,6 +224,13 @@ if(!bigEndian) {
 /* [Tester-setTestCaseName] */
 setTestCaseName(CORRADE_FUNCTION);
 /* [Tester-setTestCaseName] */
+}
+
+{
+const char* name{};
+/* [Tester-setTestCaseTemplateName] */
+setTestCaseName(Utility::formatString("{}<{}>", CORRADE_FUNCTION, name));
+/* [Tester-setTestCaseTemplateName] */
 }
 }
 
