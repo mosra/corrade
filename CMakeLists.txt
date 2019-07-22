@@ -88,13 +88,6 @@ option(BUILD_TESTS "Build unit tests" OFF)
 set(CORRADE_INCLUDE_INSTALL_PREFIX "."
     CACHE STRING "Prefix where to put platform-independent include and other files")
 
-if(BUILD_TESTS)
-    if(CORRADE_TARGET_IOS)
-        set(CORRADE_TESTSUITE_BUNDLE_IDENTIFIER_PREFIX "cz.mosra.corrade")
-    endif()
-    enable_testing()
-endif()
-
 if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     set(CORRADE_TARGET_EMSCRIPTEN 1)
     # It's meaningless to use dynamic libraries with Emscripten
@@ -127,6 +120,13 @@ elseif(WIN32)
     if(WINDOWS_PHONE OR WINDOWS_STORE)
         set(CORRADE_TARGET_WINDOWS_RT 1)
     endif()
+endif()
+
+if(BUILD_TESTS)
+    if(CORRADE_TARGET_IOS)
+        set(CORRADE_TESTSUITE_BUNDLE_IDENTIFIER_PREFIX "cz.mosra.corrade")
+    endif()
+    enable_testing()
 endif()
 
 # Platform-specific options
