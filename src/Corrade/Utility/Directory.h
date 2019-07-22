@@ -225,6 +225,20 @@ otherwise.
 CORRADE_UTILITY_EXPORT bool isSandboxed();
 
 /**
+@brief Current directory
+
+Returns current working directory on Unix systems (equivalent to the value of
+shell builtin @cb{.sh} pwd @ce), non-RT Windows and
+@ref CORRADE_TARGET_EMSCRIPTEN "Emscripten". On other systems prints a warning
+and returns an empty string. Returned value is encoded in UTF-8.
+@note The path is returned with forward slashes on all platforms. Use
+    @ref toNativeSeparators() to convert it to platform-specific format, if
+    needed.
+@see @ref executableLocation()
+*/
+CORRADE_UTILITY_EXPORT std::string current();
+
+/**
 @brief Executable location
 
 Returns location of the executable on Linux, Windows, non-sandboxed and
@@ -233,6 +247,7 @@ empty string is returned. Returned value is encoded in UTF-8.
 @note The path is returned with forward slashes on all platforms. Use
     @ref toNativeSeparators() to convert it to platform-specific format, if
     needed.
+@see @ref current()
 */
 CORRADE_UTILITY_EXPORT std::string executableLocation();
 

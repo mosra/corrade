@@ -73,6 +73,9 @@ struct DirectoryTest: TestSuite::Tester {
 
     void isSandboxed();
 
+    void current();
+    void currentUtf8();
+
     void executableLocation();
     void executableLocationUtf8();
 
@@ -171,6 +174,9 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::mkpathUtf8,
 
               &DirectoryTest::isSandboxed,
+
+              &DirectoryTest::current,
+              &DirectoryTest::currentUtf8,
 
               &DirectoryTest::executableLocation,
               &DirectoryTest::executableLocationUtf8,
@@ -497,6 +503,29 @@ void DirectoryTest::isSandboxed() {
     #else
     CORRADE_VERIFY(!Directory::isSandboxed());
     #endif
+}
+
+void DirectoryTest::current() {
+    const std::string current = Directory::current();
+    Debug() << "Current directory found as:" << current;
+
+    /* Ensure the test is not accidentally false positive due to stale files */
+    if(Directory::exists("currentDir.mark"))
+        CORRADE_VERIFY(Directory::rm("currentDir.mark"));
+    CORRADE_VERIFY(!Directory::exists("currentDir.mark"));
+
+    /* Create a file on a relative path. If current directory is correctly
+       queried, it should exist there */
+    CORRADE_VERIFY(Directory::write("currentDir.mark",
+        "hi, i'm testing Utility::Directory::current()"));
+    CORRADE_VERIFY(Directory::exists(Directory::join(current, "currentDir.mark")));
+
+    /* Clean up after ourselves */
+    CORRADE_VERIFY(Directory::rm("currentDir.mark"));
+}
+
+void DirectoryTest::currentUtf8() {
+    CORRADE_SKIP("Not sure how to test this.");
 }
 
 void DirectoryTest::executableLocation() {

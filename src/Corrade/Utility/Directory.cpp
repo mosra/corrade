@@ -58,6 +58,8 @@
 
 /* Unix, Emscripten file & directory access */
 #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+#include <cerrno>
+#include <cstring>
 #include <sys/stat.h>
 #include <dirent.h>
 #include <unistd.h>
@@ -255,6 +257,48 @@ bool isSandboxed() {
     return std::getenv("APP_SANDBOX_CONTAINER_ID");
     #else
     return false;
+    #endif
+}
+
+std::string current() {
+    /* POSIX. Needs a shitty loop because ... ugh. */
+    #ifdef CORRADE_TARGET_UNIX
+    std::string path(4, '\0');
+    char* success;
+    while(!(success = getcwd(&path[0], path.size() + 1))) {
+        /* Unexpected error, exit */
+        if(errno != ERANGE) {
+            Error{} << "Utility::Directory::current(): error:" << strerror(errno);
+            return {};
+        }
+
+        /* Otherwise try again with larger buffer */
+        path.resize(path.size()*2);
+    }
+
+    /* Success, cut the path to correct size */
+    path.resize(std::strlen(&path[0]));
+    return path;
+    CORRADE_ASSERT_UNREACHABLE();
+
+    /* Windows (not RT) */
+    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    const std::size_t sizePlusOne = GetCurrentDirectoryW(0, nullptr);
+    CORRADE_INTERNAL_ASSERT(sizePlusOne);
+    /* std::string is always 0-terminated meaning we can ask it to have size
+       only for what we need */
+    std::wstring path(sizePlusOne - 1, '\0');
+    CORRADE_INTERNAL_ASSERT_OUTPUT(GetCurrentDirectoryW(sizePlusOne, &path[0]) == sizePlusOne - 1);
+    return fromNativeSeparators(narrow(path));
+
+    /* Use the root path on Emscripten */
+    #elif defined(CORRADE_TARGET_EMSCRIPTEN)
+    return "/";
+
+    /* No clue elsewhere (and on Windows RT) */
+    #else
+    Warning() << "Utility::Directory::current(): not implemented on this platform";
+    return {};
     #endif
 }
 
