@@ -243,7 +243,8 @@ CORRADE_UTILITY_EXPORT std::string current();
 
 Returns location of the executable on Linux, Windows, non-sandboxed and
 sandboxed macOS and iOS. On other systems or if the directory can't be found,
-empty string is returned. Returned value is encoded in UTF-8.
+a warning is printed and an empty string is returned. Returned value is encoded
+in UTF-8.
 @note The path is returned with forward slashes on all platforms. Use
     @ref toNativeSeparators() to convert it to platform-specific format, if
     needed.

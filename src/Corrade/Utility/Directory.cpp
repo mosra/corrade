@@ -345,6 +345,7 @@ std::string executableLocation() {
 
     /* Not implemented */
     #else
+    Warning() << "Utility::Directory::executableLocation(): not implemented on this platform";
     return std::string{};
     #endif
 }
