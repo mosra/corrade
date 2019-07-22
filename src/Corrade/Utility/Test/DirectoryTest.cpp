@@ -764,23 +764,34 @@ void DirectoryTest::listSortPrecedence() {
 }
 
 void DirectoryTest::listUtf8() {
+    std::vector<std::string> list{".", "..", "hýždě", "šňůra"};
+
+    std::vector<std::string> actual = Directory::list(_testDirUtf8, Directory::Flag::SortAscending);
+
+    #ifdef CORRADE_TARGET_APPLE
+    /* Apple HFS+ stores filenames in a decomposed normalized form to avoid
+       e.g. `e` + `ˇ` and `ě` being treated differently. That makes sense. I
+       wonder why neither Linux nor Windows do this. */
+    std::vector<std::string> listDecomposedUnicode{".", "..", "hýždě", "šňůra"};
+    CORRADE_VERIFY(list[3] != listDecomposedUnicode[3]);
+    #endif
+
+    #ifdef CORRADE_TARGET_APPLE
     #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
     CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
         "CTest is not able to run XCTest executables properly in the simulator.");
     #endif
 
-    std::vector<std::string> list{".", "..",
-        #ifdef CORRADE_TARGET_APPLE
-        /* Apple HFS+ stores filenames in a decomposed normalized form to avoid
-           e.g. `e` + `ˇ` and `ě` being treated differently. That makes sense.
-           I wonder why neither Linux nor Windows do this. */
-        "šňůra", "hýždě",
-        #else
-        "šňůra", "hýždě"
-        #endif
-        };
-    CORRADE_COMPARE_AS(Directory::list(_testDirUtf8), list,
-        TestSuite::Compare::SortedContainer);
+    /* However, Apple systems still can use filesystems other than HFS+, so
+       be prepared that it can compare to either */
+    if(actual[3] == listDecomposedUnicode[3]) {
+        CORRADE_COMPARE_AS(actual, listDecomposedUnicode,
+            TestSuite::Compare::Container);
+    } else
+    #endif
+    {
+        CORRADE_COMPARE_AS(actual, list, TestSuite::Compare::Container);
+    }
 }
 
 constexpr const char Data[]{'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'};
