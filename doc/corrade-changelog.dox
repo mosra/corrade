@@ -254,6 +254,15 @@ namespace Corrade {
     if one of them failed to open (see [mosra/corrade#70](https://github.com/mosra/corrade/pull/70))
 -   @ref Interconnect::Emitter::emit() (and signal/slot connections in general)
     now work correctly with non-copyable arguments
+-   Fixed @ref Utility::Debug::isTty() (and thus also @ref TestSuite colored
+    output) to reliably work on macOS. Because Xcode output window doesn't
+    support ANSI color escape codes, tt was relying on an undocumented
+    @cb{.sh} $XPC_SERVICE_NAME @ce variable that was always defined inside
+    Xcode to disable colored output. Nowadays this variable is sometimes
+    defined outside as well, making the check unreliable. Fixed by testing for
+    @cb{.sh} $TERM @ce instead, see
+    [mosra/corrade#73](https://github.com/mosra/corrade/issues/73) for more
+    information.
 
 @subsection corrade-changelog-latest-deprecated Deprecated APIs
 

@@ -237,9 +237,12 @@ bool Debug::isTty(std::ostream* const output) {
         #endif
         #ifdef CORRADE_TARGET_APPLE
         /* Xcode's console reports that it is a TTY, but it doesn't support
-           colors. We have to check for the following undocumented environment
-           variable instead. If set, then don't use colors. */
-        && !std::getenv("XPC_SERVICE_NAME")
+           colors. Originally this was testing for XPC_SERVICE_NAME being
+           defined because that's always defined when running inside Xcode, but
+           nowadays that's often defined also outside of Xcode, so it's
+           useless. According to https://stackoverflow.com/a/39292112, we can
+           reliably check for TERM -- if it's null, we're inside Xcode. */
+        && std::getenv("TERM")
         #endif
         ;
 
