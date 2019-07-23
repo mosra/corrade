@@ -220,6 +220,12 @@ namespace Corrade {
 -   Emscripten builds now have the `-fPIC` option disabled by default as it
     causes linker errors related to `__memory_base` on 1.38.36 (see also
     [emscripten-core/emscripten#8761](https://github.com/emscripten-core/emscripten/issues/8761))
+-   With CMake 3.15 there's an unfortunate collision between
+    `CORRADE_CXX_STANDARD` and CMake's own `COMPILE_FEATURES` target property,
+    where a request to use C++14 from a 3rd party library would get ignored
+    with C++11 being used instead. To fix that, the `CORRADE_CXX_STANDARD`
+    property does nothing if the `COMPILE_FEATURES` property is set on the
+    target as well. See @ref corrade-cmake for more information.
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 

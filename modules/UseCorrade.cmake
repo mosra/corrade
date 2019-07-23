@@ -198,11 +198,19 @@ define_property(TARGET PROPERTY CORRADE_USE_PEDANTIC_FLAGS INHERITED
     FULL_DOCS "Enables additional pedantic C, C++ and linker flags on given
         targets or directories.")
 
+# In order to avoid clashes with builtin CMake features, we won't add the
+# standard flag in case the CXX_STANDARD property is present. Additionally,
+# since CMake 3.15, the cxx_std_14 compile feature doesn't result in any flag
+# being added to compiler command-line if C++14 is a default on given compiler
+# (such as GCC 6 and up). That unfortunately means ours default flag (-std=c++11)
+# gets set, making it look like the COMPILE_FEATURES didn't work at all. To
+# circumvent that, the CORRADE_CXX_STANDARD isn't set if anything from
+# COMPILE_FEATURES is present either.
 set(_CORRADE_CXX_STANDARD_ONLY_IF_NOT_ALREADY_SET
-    "$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>,$<NOT:$<BOOL:$<TARGET_PROPERTY:CXX_STANDARD>>>")
+    "$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>,$<NOT:$<BOOL:$<TARGET_PROPERTY:CXX_STANDARD>>>,$<NOT:$<BOOL:$<TARGET_PROPERTY:COMPILE_FEATURES>>>")
 
-# Enable C++11/14/17/2a on GCC/Clang if CORRADE_CXX_STANDARD is set. Does
-# nothing in case the user specified CXX_STANDARD property or put "-std=" in
+# Enable C++11/14/17/2a on GCC/Clang if CORRADE_CXX_STANDARD is set. In
+# addition to the above it also does nothing in case the user put "-std=" in
 # CMAKE_CXX_FLAGS. It doesn't cover adding flags using target_compile_options(),
 # though.
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?Clang" AND NOT CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC") OR CORRADE_TARGET_EMSCRIPTEN) AND NOT CMAKE_CXX_FLAGS MATCHES "-std=")
