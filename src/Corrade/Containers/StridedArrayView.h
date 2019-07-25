@@ -645,6 +645,10 @@ template<unsigned dimensions, class T> class StridedArrayView {
         }
 
         ErasedType* _data;
+
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    protected: /* so Python buffer protocol can point to these members */
+    #endif
         Size _size;
         Stride _stride;
 };

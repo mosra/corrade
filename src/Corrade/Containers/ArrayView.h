@@ -427,6 +427,10 @@ template<class T> class ArrayView {
 
     private:
         T* _data;
+
+    #ifndef DOXYGEN_GENERATING_OUTPUT
+    protected: /* so Python buffer protocol can point to this member */
+    #endif
         std::size_t _size;
 };
 
