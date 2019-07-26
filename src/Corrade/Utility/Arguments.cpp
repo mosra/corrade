@@ -395,13 +395,17 @@ void Arguments::parse(const int argc, const char** const argv) {
     const bool status = tryParse(argc, argv);
 
     if(_booleans.at(find(_prefix + "help")->id)) {
+        /* LCOV_EXCL_START */
         Debug() << help();
         std::exit(0);
+        /* LCOV_EXCL_STOP */
     }
 
     if(!status) {
+        /* LCOV_EXCL_START */
         Error() << usage();
         std::exit(1);
+        /* LCOV_EXCL_STOP */
     }
 }
 
