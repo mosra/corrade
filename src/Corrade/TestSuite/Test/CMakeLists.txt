@@ -29,14 +29,33 @@ corrade_add_test(TestSuiteArgumentsTest ArgumentsTest.cpp
 corrade_add_test(TestSuiteFailingTest FailingTest.cpp)
 set_tests_properties(TestSuiteFailingTest PROPERTIES WILL_FAIL ON)
 
-corrade_add_test(TestSuiteTesterTest TesterTest.cpp)
+corrade_add_test(TestSuiteTesterTest TesterTest.cpp
+    FILES
+        TesterTestFiles/abortOnFail.txt
+        TesterTestFiles/abortOnFailSkip.txt
+        TesterTestFiles/benchmarkCpuClock.txt
+        TesterTestFiles/benchmarkCpuCycles.txt
+        TesterTestFiles/benchmarkDiscardAll.txt
+        TesterTestFiles/benchmarkWallClock.txt
+        TesterTestFiles/noXfail.txt
+        TesterTestFiles/repeatAll.txt
+        TesterTestFiles/repeatEvery.txt
+        TesterTestFiles/shuffleOne.txt
+        TesterTestFiles/skipBenchmarks.txt
+        TesterTestFiles/skipOnly.txt
+        TesterTestFiles/skipTests.txt
+        TesterTestFiles/test.txt
+        TesterTestFiles/testName.txt)
+target_include_directories(TestSuiteTesterTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
     set(RELATIVE_TEST_DIR ".")
     set(ABSOLUTE_TEST_DIR ".")
+    set(TESTER_TEST_DIR "TesterTestFiles")
 else()
     set(RELATIVE_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
     set(ABSOLUTE_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/BundledFilesTestFiles)
+    set(TESTER_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/TesterTestFiles)
 endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake

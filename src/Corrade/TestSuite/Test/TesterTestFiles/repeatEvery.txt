@@ -1,0 +1,14 @@
+Starting TesterTest::Test with 2 test cases...
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+    OK [29] repeatedTest()@10
+    OK [04] equal()@2
+Finished TesterTest::Test with 0 errors out of 12 checks.

@@ -1,0 +1,7 @@
+Starting TesterTest::Test with 1 test cases...
+  FAIL [06] expectFail() at here.cpp on line 222
+        Values 2 + 2 and 5 are not the same, actual is
+        4
+        but expected
+        5
+Finished TesterTest::Test with 1 errors out of 1 checks.
