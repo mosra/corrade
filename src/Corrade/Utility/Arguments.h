@@ -164,7 +164,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * you want to handle them in separate steps. Prefixed version can have
          * only named arguments and long options.
          *
-         * See class documentation for example.
+         * See class documentation for an example.
          * @see @ref addSkippedPrefix()
          */
         explicit Arguments(const std::string& prefix);

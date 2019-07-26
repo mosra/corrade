@@ -49,7 +49,7 @@ expected to be in UTF-8. Example usage:
 @snippet TestSuite.cpp Compare-FileToString
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
-@see @ref Compare::File, @ref Compare::StringToFile
+@see @ref File, @ref StringToFile
 */
 class FileToString {};
 

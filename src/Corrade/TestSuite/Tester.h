@@ -192,7 +192,7 @@ Depending on various factors, here is one possible output:
 Similarly to @ref testCaseInstanceId() there is @ref testCaseRepeatId() which
 gives repeat index. Use with care, however, as the repeated tests are assumed
 to execute the same code every time. On
-@ref TestSuite-Tester-command-line "the command-line" it is possible to
+@ref TestSuite-Tester-command-line "the command line" it is possible to
 increase repeat count via `--repeat-every`. In addition there is `--repeat-all`
 which behaves as like all `add*()` functions in the constructor were called
 multiple times in a loop. Combined with `--shuffle` this can be used to run the

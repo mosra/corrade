@@ -68,12 +68,13 @@ VectorBenchmark::VectorBenchmark() {
 }
 
 void VectorBenchmark::insert() {
-    setTestCaseDescription(InsertData[testCaseInstanceId()].name);
+    auto&& data = InsertData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
 
-    std::vector<CopyCounter> data;
+    std::vector<CopyCounter> v;
     CORRADE_BENCHMARK(1)
-        for(std::size_t i = 0, end = InsertData[testCaseInstanceId()].count; i != end; ++i)
-            data.push_back({});
+        for(std::size_t i = 0; i != data.count; ++i)
+            v.push_back({});
 }
 
 void VectorBenchmark::copyCountBegin() {

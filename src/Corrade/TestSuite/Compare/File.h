@@ -78,7 +78,7 @@ and pass the prefix to the constructor:
 
 See @ref TestSuite-Comparator-pseudo-types and @ref TestSuite-Comparator-parameters
 for more information.
-@see @ref Compare::FileToString, @ref Compare::StringToFile
+@see @ref FileToString, @ref StringToFile
 */
 class CORRADE_TESTSUITE_EXPORT File {
     public:

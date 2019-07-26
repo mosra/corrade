@@ -58,10 +58,10 @@ RoundTest::RoundTest() {
 }
 
 void RoundTest::test() {
-    setTestCaseDescription(RoundData[testCaseInstanceId()].name);
+    auto&& data = RoundData[testCaseInstanceId()];
+    setTestCaseDescription(data.name);
 
-    CORRADE_COMPARE(round(RoundData[testCaseInstanceId()].input),
-        RoundData[testCaseInstanceId()].expected);
+    CORRADE_COMPARE(round(data.input), data.expected);
 }
 
 CORRADE_TEST_MAIN(RoundTest)
