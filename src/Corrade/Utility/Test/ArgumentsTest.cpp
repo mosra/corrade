@@ -248,16 +248,16 @@ void ArgumentsTest::move() {
 
 void ArgumentsTest::helpArgumentsOnly() {
     Arguments args;
-    args.addArgument("foo").setHelp("foo", "which foo to bar")
-        .addArgument("bar").setHelp("bar", {}, "output.bin")
+    args.addArgument("foo")
+        .addArgument("bar").setHelp("bar", "where to put things", "output.bin.gz")
         .setCommand("foobar");
 
     const auto expected = R"text(Usage:
-  foobar [-h|--help] [--] foo output.bin
+  foobar [-h|--help] [--] foo output.bin.gz
 
 Arguments:
-  foo         which foo to bar
-  -h, --help  display this help message and exit
+  output.bin.gz  where to put things
+  -h, --help     display this help message and exit
 )text";
     CORRADE_COMPARE(args.help(), expected);
 }
