@@ -751,14 +751,13 @@ std::string Arguments::help() const {
 
     /* If prefixes are already long enough, no need to go through the entries */
     if(keyColumnWidth != maxKeyColumnWidth) for(const Entry& entry: _entries) {
-        /* Skip arguments and options without default value, environment or
-           help text (won't be printed, so they shouldn't contribute to the
-           width) */
-        if(entry.type == Type::Argument || (entry.defaultValue.empty() && entry.help.empty()
+        /* Skip entries without default value, environment or help text (won't
+           be printed, so they shouldn't contribute to the width) */
+        if(entry.defaultValue.empty() && entry.help.empty()
             #ifndef CORRADE_TARGET_WINDOWS_RT
             && entry.environment.empty()
             #endif
-        ))
+        )
             continue;
 
         /* Compute size of current key column */
