@@ -438,6 +438,9 @@ void Test::benchmarkSkip() {
 struct TesterTest: Tester {
     explicit TesterTest();
 
+    void configurationCopy();
+    void configurationMove();
+
     void test();
     void emptyTest();
 
@@ -478,7 +481,10 @@ struct TesterTest: Tester {
 class EmptyTest: public Tester {};
 
 TesterTest::TesterTest() {
-    addTests({&TesterTest::test,
+    addTests({&TesterTest::configurationCopy,
+              &TesterTest::configurationMove,
+
+              &TesterTest::test,
               &TesterTest::emptyTest,
 
               &TesterTest::skipOnly,
@@ -513,6 +519,42 @@ TesterTest::TesterTest() {
               &TesterTest::compareNonCopyable,
               &TesterTest::verifyExplicitBool,
               &TesterTest::expectFailIfExplicitBool});
+}
+
+void TesterTest::configurationCopy() {
+    TesterConfiguration a;
+    a.setSkippedArgumentPrefixes({"eyy", "bla"});
+
+    TesterConfiguration b{a};
+    CORRADE_COMPARE(a.skippedArgumentPrefixes().size(), 2);
+    CORRADE_COMPARE(b.skippedArgumentPrefixes().size(), 2);
+    CORRADE_COMPARE(a.skippedArgumentPrefixes()[1], "bla");
+    CORRADE_COMPARE(b.skippedArgumentPrefixes()[1], "bla");
+
+    TesterConfiguration c;
+    c.setSkippedArgumentPrefixes({"welp"});
+    c = b;
+    CORRADE_COMPARE(b.skippedArgumentPrefixes().size(), 2);
+    CORRADE_COMPARE(c.skippedArgumentPrefixes().size(), 2);
+    CORRADE_COMPARE(b.skippedArgumentPrefixes()[1], "bla");
+    CORRADE_COMPARE(c.skippedArgumentPrefixes()[1], "bla");
+}
+
+void TesterTest::configurationMove() {
+    TesterConfiguration a;
+    a.setSkippedArgumentPrefixes({"eyy", "bla"});
+
+    TesterConfiguration b{std::move(a)};
+    CORRADE_VERIFY(a.skippedArgumentPrefixes().empty());
+    CORRADE_COMPARE(b.skippedArgumentPrefixes().size(), 2);
+    CORRADE_COMPARE(b.skippedArgumentPrefixes()[1], "bla");
+
+    TesterConfiguration c;
+    c.setSkippedArgumentPrefixes({"welp"});
+    c = std::move(b);
+    CORRADE_COMPARE(b.skippedArgumentPrefixes().size(), 1);
+    CORRADE_COMPARE(c.skippedArgumentPrefixes().size(), 2);
+    CORRADE_COMPARE(c.skippedArgumentPrefixes()[1], "bla");
 }
 
 void TesterTest::test() {
