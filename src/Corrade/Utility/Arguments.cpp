@@ -97,8 +97,6 @@ Arguments::Entry::Entry(Type type, char shortKey, std::string key, std::string h
     if(type == Type::NamedArgument || type == Type::Option)
         this->helpKey = this->key + ' ' + uppercaseKey(helpKey);
     else this->helpKey = std::move(helpKey);
-
-    CORRADE_INTERNAL_ASSERT(type == Type::Option || this->defaultValue.empty());
 }
 
 std::vector<std::string> Arguments::environment() {
@@ -198,8 +196,13 @@ Arguments& Arguments::addArgument(std::string key) {
 
     CORRADE_ASSERT(!key.empty(), "Utility::Arguments::addArgument(): key must not be empty", *this);
 
-    /* Verify that the argument has unique key */
+    /* Verify that the argument has an unique key */
     CORRADE_ASSERT(find(key) == _entries.end(), "Utility::Arguments::addArgument(): the key" << key << "is already used", *this);
+
+    /* Can't add arguments after the final optional one -- otherwise it messes
+       up the order in help and usage */
+    CORRADE_ASSERT(!_finalOptionalArgument,
+        "Utility::Arguments::addArgument(): can't add more arguments after the final optional one", *this);
 
     /* Reset the parsed flag -- it's probably a mistake to add an argument and
        then ask for values without parsing again */
@@ -293,6 +296,27 @@ namespace {
         if(key.size() < prefix.size()) return false;
         return std::equal(prefix.begin(), prefix.end(), key.begin());
     }
+}
+
+Arguments& Arguments::addFinalOptionalArgument(std::string key, std::string defaultValue) {
+    CORRADE_ASSERT(_prefix.empty(),
+        "Utility::Arguments::addFinalOptionalArgument(): argument" << key << "not allowed in prefixed version", *this);
+    CORRADE_ASSERT(!key.empty(),
+        "Utility::Arguments::addFinalOptionalArgument(): key must not be empty", *this);
+    CORRADE_ASSERT(find(key) == _entries.end(),
+        "Utility::Arguments::addFinalOptionalArgument(): the key" << key << "is already used", *this);
+    CORRADE_ASSERT(!_finalOptionalArgument,
+        "Utility::Arguments::addFinalOptionalArgument(): there's already a final optional argument" << _entries[_finalOptionalArgument].key, *this);
+
+    /* Reset the parsed flag -- it's probably a mistake to add an argument and
+       then ask for values without parsing again */
+    _flags &= ~InternalFlag::Parsed;
+
+    _finalOptionalArgument = _entries.size();
+    std::string helpKey = key;
+    _entries.emplace_back(Type::Argument, '\0', std::move(key), std::move(helpKey), std::move(defaultValue), _values.size());
+    _values.emplace_back();
+    return *this;
 }
 
 Arguments& Arguments::addSkippedPrefix(std::string prefix, std::string help) {
@@ -603,7 +627,10 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
 
     bool success = true;
 
-    /* Check missing options */
+    /* Check missing options. The _finalOptionalArgument points to one of them
+       or is 0 if it's not set -- we assume that entry 0 is always --help, so
+       there's no ambiguity. */
+    CORRADE_INTERNAL_ASSERT(_entries[0].type == Type::BooleanOption);
     for(std::size_t i = 0; i != _entries.size(); ++i) {
         const Entry& entry = _entries[i];
 
@@ -611,8 +638,8 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
         if(entry.type == Type::BooleanOption || entry.type == Type::Option)
             continue;
 
-        /* Argument was not parsed */
-        if(parsedArguments[i] != true) {
+        /* Argument was not parsed and it was not the final optional one */
+        if(parsedArguments[i] != true && _finalOptionalArgument != i) {
             Error() << "Missing command-line argument" << keyName(_entries[i]);
             success = false;
         }
@@ -639,8 +666,12 @@ std::string Arguments::usage() const {
 
     /* Print all options and named argument */
     bool hasArguments = false;
-    for(const Entry& entry: _entries) {
+    for(std::size_t i = 0; i != _entries.size(); ++i) {
+        const Entry& entry = _entries[i];
+
         if(entry.type == Type::Argument) {
+            /* Final argument should be always after all other arguments */
+            CORRADE_INTERNAL_ASSERT(!_finalOptionalArgument || _finalOptionalArgument >= i);
             hasArguments = true;
             continue;
         }
@@ -666,10 +697,20 @@ std::string Arguments::usage() const {
     if(hasArguments) out << " [--]";
 
     /* Print all arguments second */
-    for(const Entry& entry: _entries) {
+    for(std::size_t i = 0; i != _entries.size(); ++i) {
+        const Entry& entry = _entries[i];
+
         if(entry.type != Type::Argument) continue;
 
-        out << ' ' << entry.helpKey;
+        out << ' ';
+
+        /* Final optional argument */
+        CORRADE_INTERNAL_ASSERT(_entries[0].type == Type::BooleanOption);
+        if(_finalOptionalArgument == i) out << '[';
+
+        out << entry.helpKey;
+
+        if(_finalOptionalArgument == i) out << ']';
     }
 
     /* Print ellipsis for main application arguments, if this is an prefixed
@@ -743,11 +784,26 @@ std::string Arguments::help() const {
     }
 
     /* Print all arguments first */
-    for(const Entry& entry: _entries) {
-        /* Skip non-arguments and arguments without help text */
-        if(entry.type != Type::Argument || entry.help.empty()) continue;
+    for(std::size_t i = 0; i != _entries.size(); ++i) {
+        const Entry& entry = _entries[i];
+        /* Skip non-arguments and arguments without help text (or default
+           value, in case of the final optional argument) */
+        if(entry.type != Type::Argument || (entry.defaultValue.empty() && entry.help.empty()))
+            continue;
 
-        out << "  " << std::left << std::setw(keyColumnWidth) << entry.helpKey << "  " << entry.help << '\n';
+        out << "  " << std::left << std::setw(keyColumnWidth) << entry.helpKey << "  ";
+
+        /* Help text */
+        if(!entry.help.empty()) out << entry.help << '\n';
+
+        /* Default value, put it on new indented line (two spaces from the
+           left and one from the right additionaly to key column width), if
+           help text is also present */
+        if(!entry.defaultValue.empty()) {
+            CORRADE_INTERNAL_ASSERT(_finalOptionalArgument == i);
+            if(!entry.help.empty()) out << std::string(keyColumnWidth + 4, ' ');
+            out << "(default: " << entry.defaultValue << ")\n";
+        }
     }
 
     /* Print all named arguments and options second */

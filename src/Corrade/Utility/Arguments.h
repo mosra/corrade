@@ -264,6 +264,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * Only non-boolean options are allowed in the prefixed version, use
          * @ref addOption() instead.
+         *
+         * @see @ref addFinalOptionalArgument()
          */
         Arguments& addArgument(std::string key);
 
@@ -357,6 +359,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *   --option          help text
          *                     (default: defaultValue)
          * @endcode
+         *
+         * @see @ref addNamedArgument(), @ref addFinalOptionalArgument()
          */
         Arguments& addOption(std::string key, std::string defaultValue = std::string()) {
             return addOption('\0', std::move(key), std::move(defaultValue));
@@ -407,6 +411,28 @@ class CORRADE_UTILITY_EXPORT Arguments {
         Arguments& addBooleanOption(std::string key) {
             return addBooleanOption('\0', std::move(key));
         }
+
+        /**
+         * @brief Add final optional argument
+         *
+         * Always parsed as the last after all other unnamed arguments.
+         * Compared to arguments added with @ref addArgument() this one doesn't
+         * need to be present; compared to options added with @ref addOption()
+         * it doesn't need to be specified together with option name. There can
+         * be only one final optional argument. After calling
+         * @cpp addFinalOptionalArgument("argument") @ce the argument will be
+         * displayed in help text like the following:
+         *
+         * @code{.shell-session}
+         * Usage:
+         *   ./app [--] [argument]
+         *
+         * Arguments:
+         *   argument          help text
+         *                     (default: defaultValue)
+         * @endcode
+         */
+        Arguments& addFinalOptionalArgument(std::string key, std::string defaultValue = std::string());
 
         /**
          * @brief Skip given prefix
@@ -613,6 +639,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
         std::string valueInternal(const std::string& key) const;
 
         InternalFlags _flags;
+        /* not std::size_t so it fits into the padding after flags */
+        std::uint32_t _finalOptionalArgument{};
         std::string _prefix;
         std::string _command;
         std::string _help;

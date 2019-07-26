@@ -52,12 +52,16 @@ struct ArgumentsTest: TestSuite::Tester {
     void helpAfterParse();
     void helpLongKeys();
     void helpLongKeyNotPrinted();
+    void helpFinalOptionalArgument();
+    void helpFinalOptionalArgumentDefaultValueOnly();
 
     void duplicateKey();
     void duplicateShortKey();
     void disallowedCharacter();
     void disallowedCharacterShort();
     void disallowedIgnoreUnknown();
+    void finalOptionalArgumentTwice();
+    void finalOptionalArgumentNotLast();
 
     void notParsedYet();
     void notParsedYetOnlyHelp();
@@ -71,6 +75,8 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseDoubleArgument();
     void parseEnvironment();
     void parseEnvironmentUtf8();
+    void parseFinalOptionalArgument();
+    void parseFinalOptionalArgumentDefault();
 
     void parseUnknownArgument();
     void parseUnknownShortArgument();
@@ -118,12 +124,16 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::helpAfterParse,
               &ArgumentsTest::helpLongKeys,
               &ArgumentsTest::helpLongKeyNotPrinted,
+              &ArgumentsTest::helpFinalOptionalArgument,
+              &ArgumentsTest::helpFinalOptionalArgumentDefaultValueOnly,
 
               &ArgumentsTest::duplicateKey,
               &ArgumentsTest::duplicateShortKey,
               &ArgumentsTest::disallowedCharacter,
               &ArgumentsTest::disallowedCharacterShort,
               &ArgumentsTest::disallowedIgnoreUnknown,
+              &ArgumentsTest::finalOptionalArgumentTwice,
+              &ArgumentsTest::finalOptionalArgumentNotLast,
 
               &ArgumentsTest::notParsedYet,
               &ArgumentsTest::notParsedYetOnlyHelp,
@@ -137,6 +147,8 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::parseDoubleArgument,
               &ArgumentsTest::parseEnvironment,
               &ArgumentsTest::parseEnvironmentUtf8,
+              &ArgumentsTest::parseFinalOptionalArgument,
+              &ArgumentsTest::parseFinalOptionalArgumentDefault,
 
               &ArgumentsTest::parseUnknownArgument,
               &ArgumentsTest::parseUnknownShortArgument,
@@ -399,6 +411,36 @@ Arguments:
     CORRADE_COMPARE(args.help(), expected);
 }
 
+void ArgumentsTest::helpFinalOptionalArgument() {
+    Arguments args;
+    args.addArgument("undocumented")
+        .addFinalOptionalArgument("optional", "42").setHelp("optional", "the help", "answer");
+
+    const auto expected = R"text(Usage:
+  ./app [-h|--help] [--] undocumented [answer]
+
+Arguments:
+  answer      the help
+              (default: 42)
+  -h, --help  display this help message and exit
+)text";
+    CORRADE_COMPARE(args.help(), expected);
+}
+
+void ArgumentsTest::helpFinalOptionalArgumentDefaultValueOnly() {
+    Arguments args;
+    args.addFinalOptionalArgument("optional", "42");
+
+    const auto expected = R"text(Usage:
+  ./app [-h|--help] [--] [optional]
+
+Arguments:
+  optional    (default: 42)
+  -h, --help  display this help message and exit
+)text";
+    CORRADE_COMPARE(args.help(), expected);
+}
+
 void ArgumentsTest::duplicateKey() {
     std::ostringstream out;
     Error redirectError{&out};
@@ -442,6 +484,24 @@ void ArgumentsTest::disallowedIgnoreUnknown() {
     Error redirectError{&out};
     Arguments args{Arguments::Flag::IgnoreUnknownOptions};
     CORRADE_COMPARE(out.str(), "Utility::Arguments: Flag::IgnoreUnknownOptions allowed only in the prefixed variant\n");
+}
+
+void ArgumentsTest::finalOptionalArgumentTwice() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    Arguments args;
+    args.addFinalOptionalArgument("first")
+        .addFinalOptionalArgument("second");
+    CORRADE_COMPARE(out.str(), "Utility::Arguments::addFinalOptionalArgument(): there's already a final optional argument first\n");
+}
+
+void ArgumentsTest::finalOptionalArgumentNotLast() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    Arguments args;
+    args.addFinalOptionalArgument("arg")
+        .addArgument("bla");
+    CORRADE_COMPARE(out.str(), "Utility::Arguments::addArgument(): can't add more arguments after the final optional one\n");
 }
 
 void ArgumentsTest::notParsedYet() {
@@ -605,6 +665,36 @@ void ArgumentsTest::parseEnvironmentUtf8() {
     CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(args.value("unicode"), "hýždě");
     #endif
+}
+
+void ArgumentsTest::parseFinalOptionalArgument() {
+    Arguments args;
+    args.addArgument("input")
+        .addFinalOptionalArgument("output")
+        .addOption('x', "language")
+        .addBooleanOption("debug");
+
+    const char* argv[] = { "", "main.cpp", "-x", "c++", "a.out", "--debug" };
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(args.value("input"), "main.cpp");
+    CORRADE_COMPARE(args.value("output"), "a.out");
+    CORRADE_COMPARE(args.value("language"), "c++");
+    CORRADE_VERIFY(args.isSet("debug"));
+}
+
+void ArgumentsTest::parseFinalOptionalArgumentDefault() {
+    Arguments args;
+    args.addArgument("input")
+        .addFinalOptionalArgument("output", "a.out")
+        .addOption('x', "language")
+        .addBooleanOption("debug");
+
+    const char* argv[] = { "", "main.cpp", "-x", "c++", "--debug" };
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(args.value("input"), "main.cpp");
+    CORRADE_COMPARE(args.value("output"), "a.out");
+    CORRADE_COMPARE(args.value("language"), "c++");
+    CORRADE_VERIFY(args.isSet("debug"));
 }
 
 void ArgumentsTest::parseUnknownArgument() {

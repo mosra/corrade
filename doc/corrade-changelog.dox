@@ -127,6 +127,8 @@ namespace Corrade {
     [mosra/corrade#66](https://github.com/mosra/corrade/pull/66))
 -   @ref Utility::Arguments is now able to ignore unknown options in the
     prefixed variant
+-   Added @ref Utility::Arguments::addFinalOptionalArgument(), combining the
+    best of arguments and options together in one wonderful feature
 -   New @ref CORRADE_FUNCTION utility macro for a portable C++11 @cpp __func__ @ce
 -   New @ref CORRADE_LINE_STRING utility macro for a stringified @cpp __LINE__ @ce
 -   New @ref CORRADE_THREAD_LOCAL macro for a portable @cpp thread_local @ce
