@@ -359,7 +359,6 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
 };
 
 CORRADE_ENUMSET_OPERATORS(Configuration::Flags)
-CORRADE_ENUMSET_OPERATORS(Configuration::InternalFlags)
 
 }}
 

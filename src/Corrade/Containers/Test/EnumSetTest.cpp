@@ -44,6 +44,8 @@ struct EnumSetTest: TestSuite::Tester {
     void operatorInverse();
     void compare();
 
+    void templateFriendOperators();
+
     void debug();
 };
 
@@ -89,6 +91,8 @@ EnumSetTest::EnumSetTest() {
               &EnumSetTest::operatorBool,
               &EnumSetTest::operatorInverse,
               &EnumSetTest::compare,
+
+              &EnumSetTest::templateFriendOperators,
 
               &EnumSetTest::debug});
 }
@@ -197,6 +201,21 @@ void EnumSetTest::compare() {
 
     CORRADE_VERIFY(features <= (Feature::Popular|Feature::Fast|Feature::Cheap|Feature::Tested));
     CORRADE_VERIFY(!(features >= (Feature::Popular|Feature::Fast|Feature::Cheap|Feature::Tested)));
+}
+
+template<class T> struct Foo {
+    enum class Flag {
+        A = 1 << 0,
+        B = 2 << 0
+    };
+
+    typedef EnumSet<Flag> Flags;
+    CORRADE_ENUMSET_FRIEND_OPERATORS(Flags)
+};
+
+void EnumSetTest::templateFriendOperators() {
+    Foo<int>::Flags a = Foo<int>::Flag::A & ~Foo<int>::Flag::B;
+    CORRADE_COMPARE(int(a), 1);
 }
 
 void EnumSetTest::debug() {

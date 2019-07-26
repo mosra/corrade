@@ -143,6 +143,9 @@ namespace Corrade {
     in order to easily call a global function or lambda on scope end
 -   Implicit memory management of @ref Containers::LinkedList can be now
     overriden by reimplementing @ref Containers::LinkedListItem::erase()
+-   The @ref CORRADE_ENUMSET_FRIEND_OPERATORS() macro now works with templated
+    classes and doesn't need a corresponding @ref CORRADE_ENUMSET_OPERATORS()
+    to be present anymore
 
 @subsubsection corrade-changelog-latest-changes-Interconnect Interconnect library
 
@@ -317,6 +320,10 @@ namespace Corrade {
     @ref Corrade/TestSuite/Compare/SortedContainer.h to isolate the heavy
     `<algorithm>` include. Backwards compatibility is not provided in order to
     reduce compile times, please include the new header now.
+-   The @ref CORRADE_ENUMSET_FRIEND_OPERATORS() macro now provides both
+    declarations and definitions of enum set operators. This means it has to be
+    used alone, without @ref CORRADE_ENUMSET_OPERATORS(), as that would lead to
+    duplicate definitions.
 -   The `CORRADE_BENCHMARK`, `CORRADE_BENCHMARK_DISCARD`,
     `CORRADE_BENCHMARK_YELLOW` and `CORRADE_BENCHMARK_RED` environment
     variables used by @ref TestSuite::Tester were renamed to

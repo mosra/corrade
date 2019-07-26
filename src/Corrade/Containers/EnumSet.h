@@ -43,29 +43,26 @@ namespace Corrade { namespace Containers {
 @tparam fullValue   All enum values together. Defaults to all bits set to `1`.
 
 Provides strongly-typed set-like functionality for strongly typed enums, such
-as binary OR and AND operations. The only requirement for enum type is that
+as binary OR and AND operations. The only requirement for the enum type is that
 all the values must be binary exclusive.
 
 @anchor EnumSet-out-of-class-operators
-Desired usage is via @cpp typedef @ce'ing. You should also call
-@ref CORRADE_ENUMSET_OPERATORS() macro with the resulting type as parameter to
-have out-of-class operators defined:
+
+Desired usage is via @cpp typedef @ce'ing. You should also call the
+@ref CORRADE_ENUMSET_OPERATORS() macro with the resulting type as a parameter
+to have out-of-class operators defined:
 
 @snippet Containers.cpp EnumSet-usage
 
 @anchor EnumSet-friend-operators
-If you have the EnumSet as private or protected member of any class, you have
-to declare the out-of-class operators as friends. It can be done with
-@ref CORRADE_ENUMSET_FRIEND_OPERATORS() macro:
+
+You can have the @ref EnumSet as a private or protected member of any class.
+The only difference is that you need to call
+@ref CORRADE_ENUMSET_FRIEND_OPERATORS() inside the class. *Do not* combine it
+with the @ref CORRADE_ENUMSET_OPERATORS() in this case, you'd get duplicate
+definitions. This macro works with templated classes as well.
 
 @snippet Containers.cpp EnumSet-friend
-
-One thing these macros cannot do is to provide operators for enum sets inside
-templated classes. If the enum values are not depending on the template, you
-can work around the issue by declaring the enum in some hidden namespace
-outside the class and then typedef'ing it back into the class:
-
-@snippet Containers.cpp EnumSet-templated
 
 @see @ref enumSetDebugOutput()
 */
@@ -220,14 +217,30 @@ usage.
 See @ref EnumSet-friend-operators "EnumSet documentation" for example usage.
 */
 #define CORRADE_ENUMSET_FRIEND_OPERATORS(class)                             \
-    friend constexpr bool operator==(class::Type, class);                   \
-    friend constexpr bool operator!=(class::Type, class);                   \
-    friend constexpr bool operator>=(class::Type, class);                   \
-    friend constexpr bool operator<=(class::Type, class);                   \
-    friend constexpr class operator&(class::Type, class);                   \
-    friend constexpr class operator|(class::Type, class);                   \
-    friend constexpr class operator^(class::Type, class);                   \
-    friend constexpr class operator~(class::Type);
+    friend constexpr bool operator==(typename class::Type a, class b) {     \
+        return class(a) == b;                                               \
+    }                                                                       \
+    friend constexpr bool operator!=(typename class::Type a, class b) {     \
+        return class(a) != b;                                               \
+    }                                                                       \
+    friend constexpr bool operator>=(typename class::Type a, class b) {     \
+        return class(a) >= b;                                               \
+    }                                                                       \
+    friend constexpr bool operator<=(typename class::Type a, class b) {     \
+        return class(a) <= b;                                               \
+    }                                                                       \
+    friend constexpr class operator|(typename class::Type a, class b) {     \
+        return b | a;                                                       \
+    }                                                                       \
+    friend constexpr class operator&(typename class::Type a, class b) {     \
+        return b & a;                                                       \
+    }                                                                       \
+    friend constexpr class operator^(typename class::Type a, class b) {     \
+        return b ^ a;                                                       \
+    }                                                                       \
+    friend constexpr class operator~(typename class::Type a) {              \
+        return ~class(a);                                                   \
+    }
 
 }}
 

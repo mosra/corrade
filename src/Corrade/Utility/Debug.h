@@ -631,7 +631,6 @@ CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, Debug::Flag value);
 CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, Debug::Flags value);
 
 CORRADE_ENUMSET_OPERATORS(Debug::Flags)
-CORRADE_ENUMSET_OPERATORS(Debug::InternalFlags)
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /* so Debug() << value works */

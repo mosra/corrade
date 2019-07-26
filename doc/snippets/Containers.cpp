@@ -67,27 +67,7 @@ class Application {
         typedef Containers::EnumSet<Flag> Flags;
         CORRADE_ENUMSET_FRIEND_OPERATORS(Flags)
 };
-
-CORRADE_ENUMSET_OPERATORS(Application::Flags)
 /* [EnumSet-friend] */
-
-/* [EnumSet-templated] */
-namespace Implementation {
-    enum class ObjectFlag: unsigned int {
-        Dirty = 1 << 0,
-        Marked = 1 << 1
-    };
-
-    typedef Containers::EnumSet<ObjectFlag> ObjectFlags;
-    CORRADE_ENUMSET_OPERATORS(ObjectFlags)
-}
-
-template<class T> class Object {
-    public:
-        typedef Implementation::ObjectFlag Flag;
-        typedef Implementation::ObjectFlags Flags;
-};
-/* [EnumSet-templated] */
 
 enum class Feature: unsigned int;
 typedef Containers::EnumSet<Feature> Features;
