@@ -229,6 +229,25 @@ bool handleUnicode = args.value<bool>("unicode");
 /* [Arguments-delegating-bool] */
 static_cast<void>(handleUnicode);
 }
+
+/* [Arguments-delegating-ignore-unknown] */
+/* The first instance handles all arguments */
+Utility::Arguments args{"formatter"};
+args.addOption("width", "80").setHelp("width", "number of columns")
+    .addOption("color", "auto").setHelp("color", "output color")
+    .addOption("log", "default").setHelp("log", "default|verbose|quiet")
+    .parse(argc, argv);
+
+{
+    /* A subsystem cares only about the log option, ignoring the rest. It also
+       doesn't need to provide help because that gets handled above already. */
+    Utility::Arguments arg1{"formatter",
+        Utility::Arguments::Flag::IgnoreUnknownOptions};
+    arg1.addOption("log", "default")
+        .parse(argc, argv);
+}
+/* [Arguments-delegating-ignore-unknown] */
+
 }
 };
 

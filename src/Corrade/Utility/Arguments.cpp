@@ -87,6 +87,8 @@ struct Arguments::Entry {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 enum class Arguments::InternalFlag: std::uint8_t {
+    /* Keep in sync with public flags */
+    IgnoreUnknownOptions = 1 << 0,
     Parsed = 1 << 7
 };
 #endif
@@ -148,13 +150,16 @@ std::vector<std::string> Arguments::environment() {
     return list;
 }
 
-Arguments::Arguments(const std::string& prefix): _prefix{prefix + '-'} {
+Arguments::Arguments(const std::string& prefix, Flags flags): _flags{InternalFlag(std::uint8_t(flags))}, _prefix{prefix + '-'} {
     /* Add help option */
     addBooleanOption("help");
     setHelp("help", "display this help message and exit");
 }
 
-Arguments::Arguments() {
+Arguments::Arguments(Flags flags): _flags{InternalFlag(std::uint8_t(flags))} {
+    CORRADE_ASSERT(!(flags & Flag::IgnoreUnknownOptions),
+        "Utility::Arguments: Flag::IgnoreUnknownOptions allowed only in the prefixed variant", );
+
     /* Add help option */
     addBooleanOption('h', "help");
     setHelp("help", "display this help message and exit");
@@ -537,6 +542,16 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                     /* Find the option */
                     found = find(key);
                     if(found == _entries.end()) {
+                        /* If we are told to ignore unknown options, do exactly
+                           that. This should happen only in the prefixed
+                           version as there we can know what's an option and
+                           what its value, in the unprefixed version we have
+                           no idea unless we know *all* options. */
+                        if(_flags & InternalFlag::IgnoreUnknownOptions) {
+                            CORRADE_INTERNAL_ASSERT(!_prefix.empty() && keyHasPrefix(key, _prefix));
+                            continue;
+                        }
+
                         Error() << "Unknown command-line argument" << std::string("--") + key;
                         return false;
                     }

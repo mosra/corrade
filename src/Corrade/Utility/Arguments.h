@@ -137,9 +137,44 @@ Boolean options would cause parsing ambiguity so they are not allowed, but you
 can work around the limitation like this, for example:
 
 @snippet Utility.cpp Arguments-delegating-bool
+
+With @ref Flag::IgnoreUnknownOptions it's also possible for multiple subsystems
+to share just a subset of the same prefixed options, ignoring the unknown ones.
+However in order to have a good user experience, the first instance should
+always understand all options to be able to provide full help text and properly
+react to unknown options.
+
+@snippet Utility.cpp Arguments-delegating-ignore-unknown
 */
 class CORRADE_UTILITY_EXPORT Arguments {
     public:
+        /**
+         * @brief Flag
+         *
+         * @see @ref Flags, @ref Arguments(Flags),
+         *      @ref Arguments(const std::string&, Flags)
+         */
+        enum class Flag: std::uint8_t {
+            /**
+             * For prefixed arguments (constructed with
+             * @ref Arguments(const std::string&, Flags)) this makes
+             * @ref parse() ignore unknown options. See
+             * @ref Utility-Arguments-delegating for a complete overview about
+             * delegating options and usage of this flag.
+             *
+             * It's not allowed to use this flag on unprefixed arguments.
+             */
+            IgnoreUnknownOptions = 1 << 0
+        };
+
+        /**
+         * @brief Flags
+         *
+         * @see @ref Arguments(Flags),
+         *      @ref Arguments(const std::string&, Flags)
+         */
+        typedef Containers::EnumSet<Flag> Flags;
+
         /**
          * @brief Environment values
          *
@@ -154,7 +189,8 @@ class CORRADE_UTILITY_EXPORT Arguments {
          */
         static std::vector<std::string> environment();
 
-        explicit Arguments();
+        /** @brief Constructor */
+        explicit Arguments(Flags flags = {});
 
         /**
          * @brief Construct prefixed arguments
@@ -167,7 +203,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * See class documentation for an example.
          * @see @ref addSkippedPrefix()
          */
-        explicit Arguments(const std::string& prefix);
+        explicit Arguments(const std::string& prefix, Flags flags = {});
 
         /** @brief Copying is not allowed */
         Arguments(const Arguments&) = delete;
@@ -194,7 +230,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
         /**
          * @brief Argument prefix
          *
-         * If the class was instantiated with @ref Arguments(const std::string&),
+         * If the class was instantiated with @ref Arguments(const std::string&, Flags),
          * returns the specified prefix. Otherwise returns empty string.
          */
         std::string prefix() const;

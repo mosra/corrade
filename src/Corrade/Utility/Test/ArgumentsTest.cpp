@@ -57,6 +57,7 @@ struct ArgumentsTest: TestSuite::Tester {
     void duplicateShortKey();
     void disallowedCharacter();
     void disallowedCharacterShort();
+    void disallowedIgnoreUnknown();
 
     void notParsedYet();
     void notParsedYetOnlyHelp();
@@ -96,6 +97,8 @@ struct ArgumentsTest: TestSuite::Tester {
     void prefixedUnknownWithPrefix();
     void prefixedInvalidPrefixedName();
     void prefixedInvalidUnprefixedName();
+    void prefixedIgnoreUnknown();
+    void prefixedIgnoreUnknownInvalidPrefixedName();
 };
 
 ArgumentsTest::ArgumentsTest() {
@@ -120,6 +123,7 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::duplicateShortKey,
               &ArgumentsTest::disallowedCharacter,
               &ArgumentsTest::disallowedCharacterShort,
+              &ArgumentsTest::disallowedIgnoreUnknown,
 
               &ArgumentsTest::notParsedYet,
               &ArgumentsTest::notParsedYetOnlyHelp,
@@ -158,7 +162,9 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::prefixedDisallowedWithPrefixAfterSkipPrefix,
               &ArgumentsTest::prefixedUnknownWithPrefix,
               &ArgumentsTest::prefixedInvalidPrefixedName,
-              &ArgumentsTest::prefixedInvalidUnprefixedName});
+              &ArgumentsTest::prefixedInvalidUnprefixedName,
+              &ArgumentsTest::prefixedIgnoreUnknown,
+              &ArgumentsTest::prefixedIgnoreUnknownInvalidPrefixedName});
 }
 
 bool hasEnv(const std::string& value) {
@@ -429,6 +435,13 @@ void ArgumentsTest::disallowedCharacterShort() {
     args.addOption(' ', "bar");
 
     CORRADE_COMPARE(out.str(), "Utility::Arguments::addOption(): invalid key bar or its short variant\n");
+}
+
+void ArgumentsTest::disallowedIgnoreUnknown() {
+    std::ostringstream out;
+    Error redirectError{&out};
+    Arguments args{Arguments::Flag::IgnoreUnknownOptions};
+    CORRADE_COMPARE(out.str(), "Utility::Arguments: Flag::IgnoreUnknownOptions allowed only in the prefixed variant\n");
 }
 
 void ArgumentsTest::notParsedYet() {
@@ -915,6 +928,32 @@ void ArgumentsTest::prefixedInvalidUnprefixedName() {
 
     CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(args.value("foo"), "yes");
+}
+
+void ArgumentsTest::prefixedIgnoreUnknown() {
+    Arguments args{"reader", Arguments::Flag::IgnoreUnknownOptions};
+    args.addOption("foo");
+
+    /* Unknown options should be ignored */
+    const char* argv[] = { "", "--reader-foo", "yes", "--reader-is-interested", "not sure" };
+
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(args.value("foo"), "yes");
+}
+
+void ArgumentsTest::prefixedIgnoreUnknownInvalidPrefixedName() {
+    Arguments args{"reader", Arguments::Flag::IgnoreUnknownOptions};
+    args.addOption("foo");
+
+    /* Invalid options should be reported, because we can't be sure that it
+       doesn't mess up with our assumption of what's an option and what a
+       value */
+    const char* argv[] = { "", "--reader-foo", "yes", "--reader-?", "what" };
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(out.str(), "Invalid command-line argument --reader-?\n");
 }
 
 }}}}
