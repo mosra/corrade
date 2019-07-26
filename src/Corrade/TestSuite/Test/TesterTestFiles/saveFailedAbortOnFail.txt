@@ -1,0 +1,6 @@
+Starting TesterTest::Test with 3 test cases...
+     ? [01] <unknown>()
+  FAIL [14] saveFailed() at here.cpp on line 285
+        Files "a.txt" and "b.txt" are not the same, actual ABC but expected abc
+ SAVED [14] saveFailed() -> /some/path/b.txt
+Aborted TesterTest::Test after first failure out of 1 checks so far. The failed test saved its output to a file. 1 test cases didn't contain any checks!

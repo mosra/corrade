@@ -40,6 +40,8 @@ corrade_add_test(TestSuiteTesterTest TesterTest.cpp
         TesterTestFiles/noXfail.txt
         TesterTestFiles/repeatAll.txt
         TesterTestFiles/repeatEvery.txt
+        TesterTestFiles/saveFailed.txt
+        TesterTestFiles/saveFailedAbortOnFail.txt
         TesterTestFiles/shuffleOne.txt
         TesterTestFiles/skipBenchmarks.txt
         TesterTestFiles/skipOnly.txt

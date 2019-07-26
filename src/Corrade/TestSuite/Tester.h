@@ -202,6 +202,26 @@ interactions and order-dependent bugs.
 It's also possible to combine instanced and repeated tests using
 @ref addRepeatedInstancedTests().
 
+@section TestSuite-Tester-save-failed Saving files for failed comparisons
+
+On comparison failure, it's sometimes desirable to inspect the generated data
+with an external tool. Or, in case the expected test data need to be updated,
+it's easier to copy over the generated data to the original file than applying
+changes manually. To make this easier without needing to add file-saving to the
+test itself, pass a path with the `--save-failed`
+@ref TestSuite-Tester-command-line "command-line" option. Comparators that operate with files (such as @ref Compare::File or @ref Compare::StringToFile)
+will then use this path to save the actual data under the same filename as the
+expected file, notifying you about the operation with a
+@cb{.ansi} [1;32mSAVED @ce message:
+
+@include testsuite-save-failed.ansi
+
+Note that this functionality is not restricted to just saving the actual
+compared data --- third-party comparators can use it for generating diffs or
+providing further diagnostic meant to be viewed externally. See
+the @ref TestSuite-Comparator-save-failed "Comparator" class for further
+information.
+
 @section TestSuite-Tester-benchmark Benchmarks
 
 Besides verifying code correctness, it's possible to measure code performance.
@@ -307,8 +327,8 @@ Usage:
 ./my-test [-h|--help] [-c|--color on|off|auto] [--skip "N1 N2..."]
     [--skip-tests] [--skip-benchmarks] [--only "N1 N2..."] [--shuffle]
     [--repeat-every N] [--repeat-all N] [--abort-on-fail] [--no-xfail]
-    [--benchmark TYPE] [--benchmark-discard N] [--benchmark-yellow N]
-    [--benchmark-red N]
+    [--save-failed PATH] [--benchmark TYPE] [--benchmark-discard N]
+    [--benchmark-yellow N] [--benchmark-red N]
 @endcode
 
 Arguments:
@@ -335,6 +355,8 @@ Arguments:
     `CORRADE_TEST_ABORT_ON_FAIL=ON|OFF`)
 -   `--no-xfail` --- disallow expected failures (environment:
     `CORRADE_TEST_NO_XFAIL=ON|OFF`)
+-   `--save-failed PATH` --- save files for failed comparisons to given path
+    (environment: `CORRADE_TEST_SAVE_FAILED`)
 -   `--benchmark TYPE` --- default benchmark type (environment:
     `CORRADE_TEST_BENCHMARK`). Supported benchmark types:
     -   `wall-time` --- wall time spent
@@ -1157,7 +1179,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
         CORRADE_TESTSUITE_LOCAL void printTestCaseLabel(Debug& out, const char* status, Debug::Color statusColor, Debug::Color labelColor);
         void verifyInternal(const char* expression, bool value);
-        void printComparisonMessageInternal(bool equal, const char* actual, const char* expected, void(*printer)(void*, Error&, const char*, const char*), void* printerState);
+        void printComparisonMessageInternal(bool equal, const char* actual, const char* expected, void(*printer)(void*, Error&, const char*, const char*), void(*saver)(void*, Debug&, const std::string&), void* comparator);
 
         void wallTimeBenchmarkBegin();
         std::uint64_t wallTimeBenchmarkEnd();
@@ -1397,9 +1419,9 @@ template<class T, class U, class V> void Tester::compareWith(Comparator<T>& comp
     bool equal = comparator(actualValueInExpectedActualType, expectedValueInExpectedExpectedType);
 
     printComparisonMessageInternal(equal, actual, expected,
-        [](void* state, Error& out, const char* actual, const char* expected) {
-            static_cast<Comparator<T>*>(state)->printErrorMessage(out, actual, expected);
-        }, &comparator);
+        [](void* comparator, Error& out, const char* actual, const char* expected) {
+            static_cast<Comparator<T>*>(comparator)->printErrorMessage(out, actual, expected);
+        }, Implementation::actualFileSaver<T>(), &comparator);
 }
 
 template<class T> void Tester::verify(const char* expression, T&& value) {

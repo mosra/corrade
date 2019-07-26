@@ -1,5 +1,5 @@
 Starting TesterTest::Test with 1 test cases...
-  FAIL [06] expectFail() at here.cpp on line 222
+  FAIL [06] expectFail() at here.cpp on line 241
         Values 2 + 2 and 5 are not the same, actual is
         4
         but expected

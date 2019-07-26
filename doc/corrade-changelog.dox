@@ -85,6 +85,13 @@ namespace Corrade {
 -   Added a @ref Containers::ArrayView<void> specialization as a mutable
     type-erased counterpart to @ref Containers::ArrayView<const void>
 
+@subsubsection corrade-changelog-latest-new-testsuite TestSuite library
+
+-   Custom @ref TestSuite comparators can now optionally save files on
+    test failure. See @ref TestSuite-Tester-save-failed for more information.
+-   Added @ref TestSuite::Tester::setTestCaseTemplateName() for convenient
+    distinction of different specializations of templated test cases
+
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
 -   @ref Utility::Debug::packed and @ref Utility::Debug::color output modifiers
@@ -127,11 +134,6 @@ namespace Corrade {
 -   New @ref CORRADE_VISIBILITY_INLINE_MEMBER_EXPORT visibility macro to aid
     codebases compiled with `-fvisibility-inlines-hidden`; the
     @ref CORRADE_VISIBILITY_EXPORT and friends are now also properly documented
-
-@subsubsection corrade-changelog-latest-new-testsuite TestSuite library
-
--   Added @ref TestSuite::Tester::setTestCaseTemplateName() for convenient
-    distinction of different specializations of templated test cases
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 

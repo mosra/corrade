@@ -66,6 +66,23 @@ class StringLength {
         Comparator<StringLength> c;
 };
 
+class SaveFailed {};
+
+template<> class Comparator<SaveFailed> {
+    public:
+        bool operator()(const std::string&, const std::string&) {
+            return false;
+        }
+
+        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
+            e << "Files" << actual << "and" << expected << "are not the same, actual ABC but expected abc";
+        }
+
+        void saveActualFile(Utility::Debug& out, const std::string& path) {
+            out << "->" << Utility::Directory::join(path, "b.txt");
+        }
+};
+
 namespace Test { namespace {
 
 struct Test: Tester {
@@ -85,6 +102,7 @@ struct Test: Tester {
     void compareWith();
     void compareWithFail();
     void compareImplicitConversionFail();
+    void saveFailed();
 
     void skip();
 
@@ -147,6 +165,7 @@ Test::Test(std::ostream* const out): _out{out} {
               &Test::compareWith,
               &Test::compareWithFail,
               &Test::compareImplicitConversionFail,
+              &Test::saveFailed,
 
               &Test::skip,
 
@@ -260,6 +279,10 @@ void Test::compareWithFail() {
 void Test::compareImplicitConversionFail() {
     std::string hello{"hello"};
     CORRADE_COMPARE("holla", hello);
+}
+
+void Test::saveFailed() {
+    CORRADE_COMPARE_AS("a.txt", "b.txt", SaveFailed);
 }
 
 void Test::skip() {
@@ -433,6 +456,8 @@ struct TesterTest: Tester {
     void abortOnFail();
     void abortOnFailSkip();
     void noXfail();
+    void saveFailed();
+    void saveFailedAbortOnFail();
 
     void benchmarkWallClock();
     void benchmarkCpuClock();
@@ -471,6 +496,8 @@ TesterTest::TesterTest() {
               &TesterTest::abortOnFail,
               &TesterTest::abortOnFailSkip,
               &TesterTest::noXfail,
+              &TesterTest::saveFailed,
+              &TesterTest::saveFailedAbortOnFail,
 
               &TesterTest::benchmarkWallClock,
               &TesterTest::benchmarkCpuClock,
@@ -492,9 +519,9 @@ void TesterTest::test() {
     /* Print to visually verify coloring */
     {
         Debug{} << "======================== visual color verification start =======================";
-        const char* argv = "";
-        int argc = 1;
-        Tester::registerArguments(argc, &argv);
+        const char* argv[] = { "", "--save-failed", "/some/path" };
+        int argc = std::extent<decltype(argv)>();
+        Tester::registerArguments(argc, argv);
         Test t{&std::cout};
         t.registerTest("here.cpp", "TesterTest::Test");
         t.exec();
@@ -535,7 +562,7 @@ void TesterTest::emptyTest() {
 void TesterTest::skipOnly() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "11 14 4 9", "--skip", "14" };
+    const char* argv[] = { "", "--color", "off", "--only", "11 15 4 9", "--skip", "15" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -552,7 +579,7 @@ void TesterTest::skipOnly() {
 void TesterTest::skipAll() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "14", "--skip", "14" };
+    const char* argv[] = { "", "--color", "off", "--only", "15", "--skip", "15" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -567,7 +594,7 @@ void TesterTest::skipAll() {
 void TesterTest::skipTests() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "11 39 9", "--skip-tests" };
+    const char* argv[] = { "", "--color", "off", "--only", "11 40 9", "--skip-tests" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -584,7 +611,7 @@ void TesterTest::skipTests() {
 void TesterTest::skipBenchmarks() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "11 38 9", "--skip-benchmarks" };
+    const char* argv[] = { "", "--color", "off", "--only", "11 39 9", "--skip-benchmarks" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -616,7 +643,7 @@ void TesterTest::skipTestsNothingElse() {
 void TesterTest::skipBenchmarksNothingElse() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "38", "--skip-benchmarks" };
+    const char* argv[] = { "", "--color", "off", "--only", "39", "--skip-benchmarks" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -665,7 +692,7 @@ void TesterTest::shuffleOne() {
 void TesterTest::repeatEvery() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "29 4", "--repeat-every", "2" };
+    const char* argv[] = { "", "--color", "off", "--only", "30 4", "--repeat-every", "2" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -682,7 +709,7 @@ void TesterTest::repeatEvery() {
 void TesterTest::repeatAll() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "29 4", "--repeat-all", "2" };
+    const char* argv[] = { "", "--color", "off", "--only", "30 4", "--repeat-all", "2" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -716,7 +743,7 @@ void TesterTest::abortOnFail() {
 void TesterTest::abortOnFailSkip() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "14 2 3 4", "--abort-on-fail" };
+    const char* argv[] = { "", "--color", "off", "--only", "15 2 3 4", "--abort-on-fail" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -747,10 +774,44 @@ void TesterTest::noXfail() {
         Compare::StringToFile);
 }
 
+void TesterTest::saveFailed() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "14 14", "--save-failed", "/some/path" };
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(&out, &out);
+
+    CORRADE_COMPARE(result, 1);
+    CORRADE_COMPARE_AS(out.str(),
+        Utility::Directory::join(TESTER_TEST_DIR, "saveFailed.txt"),
+        Compare::StringToFile);
+}
+
+void TesterTest::saveFailedAbortOnFail() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "1 14 14", "--save-failed", "/some/path", "--abort-on-fail" };
+    int argc = std::extent<decltype(argv)>();
+    Tester::registerArguments(argc, argv);
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(&out, &out);
+
+    CORRADE_COMPARE(result, 1);
+    CORRADE_COMPARE_AS(out.str(),
+        Utility::Directory::join(TESTER_TEST_DIR, "saveFailedAbortOnFail.txt"),
+        Compare::StringToFile);
+}
+
 void TesterTest::benchmarkWallClock() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "37 39", "--benchmark", "wall-time" };
+    const char* argv[] = { "", "--color", "off", "--only", "38 40", "--benchmark", "wall-time" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -767,7 +828,7 @@ void TesterTest::benchmarkWallClock() {
 void TesterTest::benchmarkCpuClock() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "37 39", "--benchmark", "cpu-time" };
+    const char* argv[] = { "", "--color", "off", "--only", "38 40", "--benchmark", "cpu-time" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -784,7 +845,7 @@ void TesterTest::benchmarkCpuClock() {
 void TesterTest::benchmarkCpuCycles() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "37 39", "--benchmark", "cpu-cycles" };
+    const char* argv[] = { "", "--color", "off", "--only", "38 40", "--benchmark", "cpu-cycles" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 
@@ -801,7 +862,7 @@ void TesterTest::benchmarkCpuCycles() {
 void TesterTest::benchmarkDiscardAll() {
     std::stringstream out;
 
-    const char* argv[] = { "", "--color", "off", "--only", "37 39", "--benchmark-discard", "100" };
+    const char* argv[] = { "", "--color", "off", "--only", "38 40", "--benchmark-discard", "100" };
     int argc = std::extent<decltype(argv)>();
     Tester::registerArguments(argc, argv);
 

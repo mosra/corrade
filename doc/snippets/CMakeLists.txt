@@ -84,11 +84,13 @@ endif()
 if(WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
     find_package(Threads REQUIRED)
 
-    # Both define the same symbols so they need to be in separate libs
+    # All define the same symbols so they need to be in separate libs
     add_library(snippets-TestSuite STATIC TestSuite.cpp)
     target_link_libraries(snippets-TestSuite PRIVATE CorradeTestSuite)
     add_library(snippets-TestSuite2 STATIC TestSuite2.cpp)
     target_link_libraries(snippets-TestSuite2 PRIVATE CorradeTestSuite)
+    add_library(snippets-TestSuite3 STATIC TestSuite3.cpp)
+    target_link_libraries(snippets-TestSuite3 PRIVATE CorradeTestSuite)
 
     # TestSuite documentation snippets. I need them executable so I can
     # copy&paste the output to the documentation. Also mot using
@@ -98,6 +100,7 @@ if(WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
     add_executable(testsuite-templated testsuite-templated.cpp)
     add_executable(testsuite-repeated testsuite-repeated.cpp)
     add_executable(testsuite-instanced testsuite-instanced.cpp)
+    add_executable(testsuite-save-failed testsuite-save-failed.cpp)
     add_executable(testsuite-benchmark testsuite-benchmark.cpp)
     add_executable(testsuite-benchmark-custom testsuite-benchmark-custom.cpp)
     set_target_properties(
@@ -105,6 +108,7 @@ if(WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
         testsuite-templated
         testsuite-repeated
         testsuite-instanced
+        testsuite-save-failed
         testsuite-benchmark
         testsuite-benchmark-custom
         PROPERTIES FOLDER "Corrade/doc/snippets")
@@ -113,6 +117,7 @@ if(WITH_TESTSUITE AND NOT CORRADE_TARGET_IOS)
     target_link_libraries(testsuite-templated CorradeTestSuite)
     target_link_libraries(testsuite-repeated CorradeTestSuite ${CMAKE_THREAD_LIBS_INIT})
     target_link_libraries(testsuite-instanced CorradeTestSuite)
+    target_link_libraries(testsuite-save-failed CorradeTestSuite)
     target_link_libraries(testsuite-benchmark CorradeTestSuite)
     target_link_libraries(testsuite-benchmark-custom CorradeTestSuite)
 endif()

@@ -99,7 +99,7 @@ struct Tester::TesterState {
         testCaseDescription, benchmarkName;
     std::size_t testCaseId{~std::size_t{}}, testCaseInstanceId{~std::size_t{}},
         testCaseRepeatId{~std::size_t{}}, benchmarkBatchSize{}, testCaseLine{},
-        checkCount{};
+        checkCount{}, savedCount{};
 
     std::uint64_t benchmarkBegin{};
     std::uint64_t benchmarkResult{};
@@ -108,6 +108,8 @@ struct Tester::TesterState {
     ExpectedFailure* expectedFailure{};
     std::string expectedFailureMessage;
     TesterConfiguration configuration;
+
+    std::string saveFailedPath;
 };
 
 int* Tester::_argc = nullptr;
@@ -152,6 +154,8 @@ int Tester::exec(std::ostream* const logOutput, std::ostream* const errorOutput)
             .setFromEnvironment("abort-on-fail", "CORRADE_TEST_ABORT_ON_FAIL")
         .addBooleanOption("no-xfail").setHelp("no-xfail", "disallow expected failures")
             .setFromEnvironment("no-xfail", "CORRADE_TEST_NO_XFAIL")
+        .addOption("save-failed", "").setHelp("save-failed", "save files for failed comparisons to given path", "PATH")
+            .setFromEnvironment("save-failed", "CORRADE_TEST_SAVE_FAILED")
         .addOption("benchmark", "wall-time").setHelp("benchmark", "default benchmark type", "TYPE")
             .setFromEnvironment("benchmark", "CORRADE_TEST_BENCHMARK")
         .addOption("benchmark-discard", "1").setHelp("benchmark-discard", "discard first N measurements of each benchmark", "N")
@@ -258,6 +262,9 @@ benchmark types:
     /* Shuffle the test cases, if requested */
     if(args.isSet("shuffle"))
         std::shuffle(usedTestCases.begin(), usedTestCases.end(), std::minstd_rand{std::random_device{}()});
+
+    /* Save the path for failed comparisons, if any */
+    _state->saveFailedPath = args.value("save-failed");
 
     unsigned int errorCount = 0,
         noCheckCount = 0;
@@ -460,6 +467,10 @@ benchmark types:
                 << Debug::boldColor(Debug::Color::Red) << "after first failure"
                 << Debug::boldColor(Debug::Color::Default) << "out of"
                 << _state->checkCount << "checks so far.";
+            if(_state->savedCount) {
+                CORRADE_INTERNAL_ASSERT(_state->savedCount == 1);
+                out << Debug::boldColor(Debug::Color::Green) << "The failed test saved its output to a file.";
+            }
             if(noCheckCount)
                 out << Debug::boldColor(Debug::Color::Yellow) << noCheckCount << "test cases didn't contain any checks!";
 
@@ -473,6 +484,8 @@ benchmark types:
     d << errorCount << "errors";
     if(errorCount) d << Debug::boldColor(Debug::Color::Default);
     d << "out of" << _state->checkCount << "checks.";
+    if(_state->savedCount)
+        d << Debug::boldColor(Debug::Color::Green) << _state->savedCount << "failed tests saved their output to a file.";
     if(noCheckCount)
         d << Debug::boldColor(Debug::Color::Yellow) << noCheckCount << "test cases didn't contain any checks!";
 
@@ -530,7 +543,7 @@ void Tester::verifyInternal(const char* expression, bool expressionValue) {
     throw Exception();
 }
 
-void Tester::printComparisonMessageInternal(bool equal, const char* actual, const char* expected, void(*printer)(void*, Error&, const char*, const char*), void* printerState) {
+void Tester::printComparisonMessageInternal(bool equal, const char* actual, const char* expected, void(*printer)(void*, Error&, const char*, const char*), void(*saver)(void*, Debug&, const std::string&), void* comparator) {
     ++_state->checkCount;
 
     if(!_state->expectedFailure) {
@@ -544,13 +557,23 @@ void Tester::printComparisonMessageInternal(bool equal, const char* actual, cons
         return;
     }
 
-    /* Otherwise print message to error output and throw exception */
+    /* Otherwise print message to error output */
     Error out{_state->errorOutput, _state->useColor};
     printTestCaseLabel(out, _state->expectedFailure ? " XPASS" : "  FAIL", Debug::Color::Red, Debug::Color::Default);
     out << "at" << _state->testFilename << "on line"
         << _state->testCaseLine << Debug::newline << "       ";
-    if(!_state->expectedFailure) printer(printerState, out, actual, expected);
+    if(!_state->expectedFailure) printer(comparator, out, actual, expected);
     else out << actual << "and" << expected << "were expected to fail the comparison.";
+
+    /* If we want to save actual file data on failed comparison, do that */
+    if(saver && !_state->saveFailedPath.empty()) {
+        ++_state->savedCount;
+        out << Debug::newline;
+        printTestCaseLabel(out, " SAVED", Debug::Color::Green, Debug::Color::Default);
+        saver(comparator, out, _state->saveFailedPath);
+    }
+
+    /* Throw an exception */
     throw Exception();
 }
 

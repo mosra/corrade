@@ -31,6 +31,7 @@
 
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Debug.h"
+#include "Corrade/Utility/StlForwardString.h"
 
 namespace Corrade { namespace TestSuite {
 
@@ -88,6 +89,25 @@ be able to use it also with @ref CORRADE_COMPARE_AS().
 The actual use in a test would be like this:
 
 @snippet TestSuite2.cpp Comparator-parameters-usage
+
+@section TestSuite-Comparator-save-failed Saving files for failed comparisons
+
+When comparing generated data against files, the comparator should provide an
+ability to save the actual file in case of a failure in order to support the
+@ref TestSuite-Tester-save-failed "--save-failed option". This is achieved by
+adding an @cpp saveActualFile() @ce function. It takes a path (without the
+filename) and the comparator is responsible for saving a file there with the
+same name as the expected file and then providing a message about its location:
+
+@snippet TestSuite3.cpp Comparator-file-saving
+
+The message is printed right after test case name and the comparator has a full
+freedom in its formatting as well as what it does. For example, a file
+comparator can write both the actual file and a diff to the original, then
+printing locations of both. In the above case, the message will look for
+example like this:
+
+@include testsuite-save-failed.ansi
 */
 template<class T> class Comparator {
     public:
@@ -130,6 +150,17 @@ template<class T, class U, class V> struct ComparatorOperatorTraits<bool(T::*)(U
 };
 
 template<class T> struct ComparatorTraits: ComparatorOperatorTraits<decltype(&Comparator<T>::operator())> {};
+
+CORRADE_HAS_TYPE(CanSaveActualFile, decltype(std::declval<T>().saveActualFile(std::declval<Utility::Debug&>(), "")));
+
+template<class T> auto actualFileSaver(typename std::enable_if<CanSaveActualFile<Comparator<T>>::value>::type* = nullptr) -> void(*)(void*, Utility::Debug& out, const std::string&) {
+    return [](void* comparator, Utility::Debug& out, const std::string& path) {
+        static_cast<Comparator<T>*>(comparator)->saveActualFile(out, path);
+    };
+}
+template<class T> auto actualFileSaver(typename std::enable_if<!CanSaveActualFile<Comparator<T>>::value>::type* = nullptr) -> void(*)(void*, Utility::Debug& out, const std::string&) {
+    return nullptr;
+}
 
 }
 
