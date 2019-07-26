@@ -69,6 +69,8 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseCustomType();
     void parseCustomTypeFlags();
     void parseDoubleArgument();
+    void parseEnvironment();
+    void parseEnvironmentUtf8();
 
     void parseUnknownArgument();
     void parseUnknownShortArgument();
@@ -77,8 +79,6 @@ struct ArgumentsTest: TestSuite::Tester {
     void parseInvalidShortArgument();
     void parseInvalidLongArgument();
     void parseInvalidLongArgumentDashes();
-    void parseEnvironment();
-    void parseEnvironmentUtf8();
 
     void parseMissingValue();
     void parseMissingOption();
@@ -568,6 +568,45 @@ void ArgumentsTest::parseDoubleArgument() {
     CORRADE_VERIFY(args.isSet("bool"));
 }
 
+void ArgumentsTest::parseEnvironment() {
+    #ifdef CORRADE_TARGET_WINDOWS_RT
+    CORRADE_SKIP("No environment on this platform.");
+    #else
+    if(!hasEnv("ARGUMENTSTEST_SIZE") || !hasEnv("ARGUMENTSTEST_VERBOSE") || !hasEnv("ARGUMENTSTEST_COLOR"))
+        CORRADE_SKIP("Environment not set. Call the test with ARGUMENTSTEST_SIZE=1337 ARGUMENTSTEST_VERBOSE=ON ARGUMENTTEST_COLOR=OFF to enable this test case.");
+
+    Arguments args;
+    args.addOption("size").setFromEnvironment("size", "ARGUMENTSTEST_SIZE")
+        .addBooleanOption("verbose").setFromEnvironment("verbose", "ARGUMENTSTEST_VERBOSE")
+        .addBooleanOption("color").setFromEnvironment("color", "ARGUMENTSTEST_COLOR");
+
+    const char* argv[] = { "" };
+
+    /* Set from environment by CTest */
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(args.value("size"), "1337");
+    CORRADE_VERIFY(args.isSet("verbose"));
+    CORRADE_VERIFY(!args.isSet("color"));
+    #endif
+}
+
+void ArgumentsTest::parseEnvironmentUtf8() {
+    #ifdef CORRADE_TARGET_WINDOWS_RT
+    CORRADE_SKIP("No environment on this platform.");
+    #else
+    if(!hasEnv("ARGUMENTSTEST_UNICODE"))
+        CORRADE_SKIP("Environment not set. Call the test with ARGUMENTSTEST_UNICODE=hýždě to enable this test case.");
+
+    Arguments args;
+    args.addOption("unicode").setFromEnvironment("unicode", "ARGUMENTSTEST_UNICODE");
+
+    const char* argv[] = { "" };
+
+    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
+    CORRADE_COMPARE(args.value("unicode"), "hýždě");
+    #endif
+}
+
 void ArgumentsTest::parseUnknownArgument() {
     Arguments args;
 
@@ -680,45 +719,6 @@ void ArgumentsTest::parseMissingArgument() {
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(out.str(), "Missing command-line argument file.dat\n");
-}
-
-void ArgumentsTest::parseEnvironment() {
-    #ifdef CORRADE_TARGET_WINDOWS_RT
-    CORRADE_SKIP("No environment on this platform.");
-    #else
-    if(!hasEnv("ARGUMENTSTEST_SIZE") || !hasEnv("ARGUMENTSTEST_VERBOSE") || !hasEnv("ARGUMENTSTEST_COLOR"))
-        CORRADE_SKIP("Environment not set. Call the test with ARGUMENTSTEST_SIZE=1337 ARGUMENTSTEST_VERBOSE=ON ARGUMENTTEST_COLOR=OFF to enable this test case.");
-
-    Arguments args;
-    args.addOption("size").setFromEnvironment("size", "ARGUMENTSTEST_SIZE")
-        .addBooleanOption("verbose").setFromEnvironment("verbose", "ARGUMENTSTEST_VERBOSE")
-        .addBooleanOption("color").setFromEnvironment("color", "ARGUMENTSTEST_COLOR");
-
-    const char* argv[] = { "" };
-
-    /* Set from environment by CTest */
-    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(args.value("size"), "1337");
-    CORRADE_VERIFY(args.isSet("verbose"));
-    CORRADE_VERIFY(!args.isSet("color"));
-    #endif
-}
-
-void ArgumentsTest::parseEnvironmentUtf8() {
-    #ifdef CORRADE_TARGET_WINDOWS_RT
-    CORRADE_SKIP("No environment on this platform.");
-    #else
-    if(!hasEnv("ARGUMENTSTEST_UNICODE"))
-        CORRADE_SKIP("Environment not set. Call the test with ARGUMENTSTEST_UNICODE=hýždě to enable this test case.");
-
-    Arguments args;
-    args.addOption("unicode").setFromEnvironment("unicode", "ARGUMENTSTEST_UNICODE");
-
-    const char* argv[] = { "" };
-
-    CORRADE_VERIFY(args.tryParse(Containers::arraySize(argv), argv));
-    CORRADE_COMPARE(args.value("unicode"), "hýždě");
-    #endif
 }
 
 void ArgumentsTest::prefixedParse() {
