@@ -396,14 +396,14 @@ void Arguments::parse(const int argc, const char** const argv) {
 
     if(_booleans.at(find(_prefix + "help")->id)) {
         /* LCOV_EXCL_START */
-        Debug() << help();
+        Debug{Debug::Flag::NoNewlineAtTheEnd} << help();
         std::exit(0);
         /* LCOV_EXCL_STOP */
     }
 
     if(!status) {
         /* LCOV_EXCL_START */
-        Error() << usage();
+        Debug{Debug::Flag::NoNewlineAtTheEnd} << usage();
         std::exit(1);
         /* LCOV_EXCL_STOP */
     }
