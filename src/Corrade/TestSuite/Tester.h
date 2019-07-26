@@ -1087,8 +1087,8 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         void registerTest(const char* filename, const char* name);
 
         /* Called from CORRADE_SKIP() */
-        void skip(const std::string& message);
-        void skip(const char* message);
+        CORRADE_NORETURN void skip(const std::string& message);
+        CORRADE_NORETURN void skip(const char* message);
 
     #ifndef DOXYGEN_GENERATING_OUTPUT
     protected:
