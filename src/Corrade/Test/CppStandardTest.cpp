@@ -38,7 +38,7 @@ CppStandardTest::CppStandardTest() {
     #ifdef COMPILING_AS_CPP11
     setTestName("Cpp11StandardTest");
     #elif defined(COMPILING_AS_CPP14)
-    setTestName("Cpp14StandardTest");
+    setTestName(TEST_NAME);
     #elif defined(COMPILING_AS_CPP17)
     setTestName("Cpp17StandardTest");
     #elif defined(COMPILING_AS_CPP2A)

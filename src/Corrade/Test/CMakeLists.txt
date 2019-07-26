@@ -45,9 +45,27 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERS
    (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0") OR
    (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"))
     corrade_add_test(Cpp14StandardTest CppStandardTest.cpp)
-    set_target_properties(Cpp14StandardTest PROPERTIES
-        CORRADE_CXX_STANDARD 14
-        COMPILE_DEFINITIONS COMPILING_AS_CPP14)
+    set_target_properties(Cpp14StandardTest PROPERTIES CORRADE_CXX_STANDARD 14)
+    target_compile_definitions(Cpp14StandardTest PRIVATE
+        COMPILING_AS_CPP14 "TEST_NAME=\"Cpp14StandardTest\"")
+
+    # Test also clashes of corrade's own setter and CMake one
+    corrade_add_test(Cpp14StandardTestCMakeStandard CppStandardTest.cpp)
+    set_target_properties(Cpp14StandardTestCMakeStandard PROPERTIES
+        CORRADE_CXX_STANDARD 17 # This should get ignored even tho it's higher
+        CXX_STANDARD 14)
+    target_compile_definitions(Cpp14StandardTestCMakeStandard PRIVATE
+        COMPILING_AS_CPP14 "TEST_NAME=\"Cpp14StandardTestCMakeStandard\"")
+
+    # cxx_std_* features are only since CMake 3.8
+    if(NOT CMAKE_VERSION VERSION_LESS 3.8)
+        corrade_add_test(Cpp14StandardTestCMakeFeatures CppStandardTest.cpp)
+         # This should get ignored even tho it's higher
+        set_target_properties(Cpp14StandardTestCMakeFeatures PROPERTIES CORRADE_CXX_STANDARD 17)
+        target_compile_features(Cpp14StandardTestCMakeFeatures PRIVATE cxx_std_14)
+        target_compile_definitions(Cpp14StandardTestCMakeFeatures PRIVATE
+            COMPILING_AS_CPP14 "TEST_NAME=\"Cpp14StandardTestCMakeFeatures\"")
+    endif()
 endif()
 
 # Test for C++17:
