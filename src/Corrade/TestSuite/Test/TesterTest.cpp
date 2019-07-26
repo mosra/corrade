@@ -199,72 +199,72 @@ void Test::noChecks() {
 }
 
 void Test::trueExpression() {
-    CORRADE_VERIFY(true); // #1
+    CORRADE_VERIFY(true);
 }
 
 void Test::falseExpression() {
-    CORRADE_VERIFY(5 != 5); // #2
+    CORRADE_VERIFY(5 != 5);
 }
 
 void Test::equal() {
-    CORRADE_COMPARE(3, 3); // #3
+    CORRADE_COMPARE(3, 3);
 }
 
 void Test::nonEqual() {
     int a = 5;
     int b = 3;
-    CORRADE_COMPARE(a, b); // #4
+    CORRADE_COMPARE(a, b);
 }
 
 void Test::expectFail() {
     {
         CORRADE_EXPECT_FAIL("The world is not mad yet.");
-        CORRADE_COMPARE(2 + 2, 5); // #5
-        CORRADE_VERIFY(false == true); // #6
+        CORRADE_COMPARE(2 + 2, 5);
+        CORRADE_VERIFY(false == true);
     }
 
-    CORRADE_VERIFY(true); // #7
+    CORRADE_VERIFY(true);
 
     {
         CORRADE_EXPECT_FAIL_IF(6*7 == 49, "This is not our universe");
-        CORRADE_VERIFY(true); // #8
+        CORRADE_VERIFY(true);
     }
 }
 
 void Test::unexpectedPassExpression() {
     CORRADE_EXPECT_FAIL("Not yet implemented.");
-    CORRADE_VERIFY(true == true); // #9
+    CORRADE_VERIFY(true == true);
 }
 
 void Test::unexpectedPassEqual() {
     CORRADE_EXPECT_FAIL("Cannot get it right.");
-    CORRADE_COMPARE(2 + 2, 4); // #10
+    CORRADE_COMPARE(2 + 2, 4);
 }
 
 void Test::compareAs() {
-    CORRADE_COMPARE_AS("kill!", "hello", StringLength); // #11
+    CORRADE_COMPARE_AS("kill!", "hello", StringLength);
 }
 
 void Test::compareAsFail() {
-    CORRADE_COMPARE_AS("meh", "hello", StringLength); // #12
+    CORRADE_COMPARE_AS("meh", "hello", StringLength);
 }
 
 void Test::compareWith() {
-    CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(10)); // #13
+    CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(10));
 }
 
 void Test::compareWithFail() {
-    CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(9)); // #14
+    CORRADE_COMPARE_WITH("You rather GTFO", "hello", StringLength(9));
 }
 
 void Test::compareImplicitConversionFail() {
     std::string hello{"hello"};
-    CORRADE_COMPARE("holla", hello); // #15
+    CORRADE_COMPARE("holla", hello);
 }
 
 void Test::skip() {
     CORRADE_SKIP("This testcase is skipped.");
-    CORRADE_VERIFY(false); // (not called)
+    CORRADE_VERIFY(false);
 }
 
 void Test::testCaseName() {
