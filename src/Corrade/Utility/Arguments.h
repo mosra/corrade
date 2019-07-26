@@ -252,7 +252,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          *
          * @code{.shell-session}
          * Usage:
-         *   ./app argument
+         *   ./app [--] argument
          *
          * Arguments:
          *   argument          help text
@@ -369,10 +369,10 @@ class CORRADE_UTILITY_EXPORT Arguments {
         /**
          * @brief Add boolean option with both short and long key alternative
          *
-         * If the option is present, the option has `true` value, otherwise it
-         * has `false` value. Unlike above functions, the usage text does not
-         * display option value and you need to set help text with
-         * @ref setHelp() to make it appear in option list:
+         * If the option is present, the option has a @cpp true @ce value,
+         * otherwise it has a @cpp false @ce value. Unlike above functions, the
+         * usage text does not display the option value and you need to set a
+         * help text with @ref setHelp() to make it appear in option list:
          *
          * @code{.shell-session}
          * Usage:
