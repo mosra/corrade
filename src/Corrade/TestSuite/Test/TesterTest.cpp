@@ -562,7 +562,7 @@ void TesterTest::test() {
     {
         Debug{} << "======================== visual color verification start =======================";
         const char* argv[] = { "", "--save-failed", "/some/path" };
-        int argc = std::extent<decltype(argv)>();
+        int argc = Containers::arraySize(argv);
         Tester::registerArguments(argc, argv);
         Test t{&std::cout};
         t.registerTest("here.cpp", "TesterTest::Test");
@@ -574,7 +574,7 @@ void TesterTest::test() {
 
     /* Disable automatic colors to ensure we have the same behavior everywhere */
     const char* argv[] = { "", "--color", "off" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
     Test t{&out};
     t.registerTest("here.cpp", "TesterTest::Test");
@@ -591,7 +591,7 @@ void TesterTest::emptyTest() {
 
     /* Disable automatic colors to ensure we have the same behavior everywhere */
     const char* argv[] = { "", "--color", "off" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
     EmptyTest t;
     t.registerTest("here.cpp", "TesterTest::EmptyTest");
@@ -605,7 +605,7 @@ void TesterTest::skipOnly() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "11 15 4 9", "--skip", "15" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -622,7 +622,7 @@ void TesterTest::skipAll() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "15", "--skip", "15" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -637,7 +637,7 @@ void TesterTest::skipTests() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "11 40 9", "--skip-tests" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -654,7 +654,7 @@ void TesterTest::skipBenchmarks() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "11 39 9", "--skip-benchmarks" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -671,7 +671,7 @@ void TesterTest::skipTestsNothingElse() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "11 9", "--skip-tests" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -686,7 +686,7 @@ void TesterTest::skipBenchmarksNothingElse() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "39", "--skip-benchmarks" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -701,7 +701,7 @@ void TesterTest::skipTestsBenchmarks() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--skip-tests", "--skip-benchmarks" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -718,7 +718,7 @@ void TesterTest::shuffleOne() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "4", "--shuffle" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -735,7 +735,7 @@ void TesterTest::repeatEvery() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "30 4", "--repeat-every", "2" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -752,7 +752,7 @@ void TesterTest::repeatAll() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "30 4", "--repeat-all", "2" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -769,7 +769,7 @@ void TesterTest::abortOnFail() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "1 2 3 4", "--abort-on-fail" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -786,7 +786,7 @@ void TesterTest::abortOnFailSkip() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "15 2 3 4", "--abort-on-fail" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -803,7 +803,7 @@ void TesterTest::noXfail() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "6", "--no-xfail" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -820,7 +820,7 @@ void TesterTest::saveFailed() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "14 14", "--save-failed", "/some/path" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -837,7 +837,7 @@ void TesterTest::saveFailedAbortOnFail() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "1 14 14", "--save-failed", "/some/path", "--abort-on-fail" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -854,7 +854,7 @@ void TesterTest::benchmarkWallClock() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "38 40", "--benchmark", "wall-time" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -871,7 +871,7 @@ void TesterTest::benchmarkCpuClock() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "38 40", "--benchmark", "cpu-time" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -888,7 +888,7 @@ void TesterTest::benchmarkCpuCycles() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "38 40", "--benchmark", "cpu-cycles" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -905,7 +905,7 @@ void TesterTest::benchmarkDiscardAll() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "38 40", "--benchmark-discard", "100" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
@@ -922,7 +922,7 @@ void TesterTest::testName() {
     std::stringstream out;
 
     const char* argv[] = { "", "--color", "off", "--only", "11" };
-    int argc = std::extent<decltype(argv)>();
+    int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
     Test t{&out};
