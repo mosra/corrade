@@ -85,6 +85,12 @@ struct Arguments::Entry {
     std::size_t id;
 };
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
+enum class Arguments::InternalFlag: std::uint8_t {
+    Parsed = 1 << 7
+};
+#endif
+
 Arguments::Entry::Entry(Type type, char shortKey, std::string key, std::string helpKey, std::string defaultValue, std::size_t id): type(type), shortKey(shortKey), key(std::move(key)), defaultValue(std::move(defaultValue)), id(id) {
     if(type == Type::NamedArgument || type == Type::Option)
         this->helpKey = this->key + ' ' + uppercaseKey(helpKey);
@@ -154,8 +160,8 @@ Arguments::Arguments() {
     setHelp("help", "display this help message and exit");
 }
 
-Arguments::Arguments(Arguments&& other) noexcept: _isParsed{std::move(other._isParsed)}, _prefix{std::move(other._prefix)}, _command{std::move(other._command)}, _help{std::move(other._help)}, _entries{std::move(other._entries)}, _values{std::move(other._values)}, _skippedPrefixes{std::move(other._skippedPrefixes)}, _booleans{std::move(other._booleans)} {
-    other._isParsed = false;
+Arguments::Arguments(Arguments&& other) noexcept: _flags{std::move(other._flags)}, _prefix{std::move(other._prefix)}, _command{std::move(other._command)}, _help{std::move(other._help)}, _entries{std::move(other._entries)}, _values{std::move(other._values)}, _skippedPrefixes{std::move(other._skippedPrefixes)}, _booleans{std::move(other._booleans)} {
+    other._flags &= ~InternalFlag::Parsed;
 }
 
 Arguments& Arguments::operator=(Arguments&& other) noexcept {
@@ -166,7 +172,7 @@ Arguments& Arguments::operator=(Arguments&& other) noexcept {
     std::swap(other._values, _values);
     std::swap(other._skippedPrefixes, _skippedPrefixes);
     std::swap(other._booleans, _booleans);
-    std::swap(other._isParsed, _isParsed);
+    std::swap(other._flags, _flags);
 
     return *this;
 }
@@ -175,6 +181,10 @@ Arguments::~Arguments() = default;
 
 std::string Arguments::prefix() const {
     return _prefix.empty() ? std::string{} : _prefix.substr(0, _prefix.size() - 1);
+}
+
+bool Arguments::isParsed() const {
+    return !!(_flags & InternalFlag::Parsed);
 }
 
 Arguments& Arguments::addArgument(std::string key) {
@@ -188,7 +198,7 @@ Arguments& Arguments::addArgument(std::string key) {
 
     /* Reset the parsed flag -- it's probably a mistake to add an argument and
        then ask for values without parsing again */
-    _isParsed = false;
+    _flags &= ~InternalFlag::Parsed;
 
     std::string helpKey = key;
     _entries.emplace_back(Type::Argument, '\0', std::move(key), std::move(helpKey), std::string(), _values.size());
@@ -208,7 +218,7 @@ Arguments& Arguments::addNamedArgument(char shortKey, std::string key) {
 
     /* Reset the parsed flag -- it's probably a mistake to add an argument and
        then ask for values without parsing again */
-    _isParsed = false;
+    _flags &= ~InternalFlag::Parsed;
 
     std::string helpKey = key;
     _entries.emplace_back(Type::NamedArgument, shortKey, std::move(key), std::move(helpKey), std::string(), _values.size());
@@ -230,7 +240,7 @@ Arguments& Arguments::addOption(char shortKey, std::string key, std::string defa
 
     /* Reset the parsed flag -- it's probably a mistake to add an option and
        then ask for values without parsing again */
-    _isParsed = false;
+    _flags &= ~InternalFlag::Parsed;
 
     std::string helpKey;
     if(_prefix.empty())
@@ -259,7 +269,7 @@ Arguments& Arguments::addBooleanOption(char shortKey, std::string key) {
 
     /* Reset the parsed flag -- it's probably a mistake to add an option and
        then ask for values without parsing again */
-    _isParsed = false;
+    _flags &= ~InternalFlag::Parsed;
 
     /* The prefix addition is here only for --prefix-help, which is the only
        allowed boolean option */
@@ -596,7 +606,10 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
     /* Set parsed status based on success. It can happen that parse() is called
        twice, first succeeding, then failing and in that case the arguments
        should be in invalid state again */
-    _isParsed = success;
+    if(success)
+        _flags |= InternalFlag::Parsed;
+    else
+        _flags &= ~InternalFlag::Parsed;
 
     return success;
 }
@@ -777,7 +790,7 @@ std::string Arguments::valueInternal(const std::string& key) const {
     CORRADE_ASSERT(found->type != Type::BooleanOption,
         "Utility::Arguments::value(): cannot use this function for boolean option" << key, {});
     CORRADE_INTERNAL_ASSERT(found->id < _values.size());
-    CORRADE_ASSERT(_isParsed, "Utility::Arguments::value(): arguments were not successfully parsed yet", {});
+    CORRADE_ASSERT(_flags & InternalFlag::Parsed, "Utility::Arguments::value(): arguments were not successfully parsed yet", {});
     return _values[found->id];
 }
 
@@ -787,7 +800,7 @@ bool Arguments::isSet(const std::string& key) const {
     CORRADE_ASSERT(found->type == Type::BooleanOption,
         "Utility::Arguments::isSet(): cannot use this function for non-boolean value" << key, false);
     CORRADE_INTERNAL_ASSERT(found->id < _booleans.size());
-    CORRADE_ASSERT(_isParsed, "Utility::Arguments::isSet(): arguments were not successfully parsed yet", {});
+    CORRADE_ASSERT(_flags & InternalFlag::Parsed, "Utility::Arguments::isSet(): arguments were not successfully parsed yet", {});
     return _booleans[found->id];
 }
 

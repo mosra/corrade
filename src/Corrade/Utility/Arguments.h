@@ -205,7 +205,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
          * Returns @cpp true @ce if @ref parse() was successfully called,
          * @cpp false @ce otherwise.
          */
-        bool isParsed() const { return _isParsed; }
+        bool isParsed() const;
 
         /**
          * @brief Add mandatory argument
@@ -558,6 +558,10 @@ class CORRADE_UTILITY_EXPORT Arguments {
         bool isSet(const std::string& key) const;
 
     private:
+        enum class InternalFlag: std::uint8_t;
+        typedef Containers::EnumSet<InternalFlag> InternalFlags;
+        CORRADE_ENUMSET_FRIEND_OPERATORS(InternalFlags)
+
         struct CORRADE_UTILITY_LOCAL Entry;
 
         bool CORRADE_UTILITY_LOCAL skippedPrefix(const std::string& key) const;
@@ -572,7 +576,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
 
         std::string valueInternal(const std::string& key) const;
 
-        bool _isParsed{false};
+        InternalFlags _flags;
         std::string _prefix;
         std::string _command;
         std::string _help;
