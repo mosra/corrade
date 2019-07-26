@@ -48,6 +48,8 @@ template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::File> {
 
         void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const;
 
+        void saveActualFile(Utility::Debug& out, const std::string& path);
+
     private:
         enum class State {
             Success,
@@ -78,6 +80,16 @@ and pass the prefix to the constructor:
 
 See @ref TestSuite-Comparator-pseudo-types and @ref TestSuite-Comparator-parameters
 for more information.
+
+@section TestSuite-Compare-File-save-failed Saving files for failed comparisons
+
+The comparator supports the @ref TestSuite-Tester-save-failed "--save-failed option",
+saving contents of the actual file to given directory with a filename matching
+the expected file. You can use it for example to quickly update expected test
+data --- point the option to the directory with expected test files and let the
+test overwrite them with actual results. The @ref StringToFile variant supports
+the same.
+
 @see @ref FileToString, @ref StringToFile
 */
 class CORRADE_TESTSUITE_EXPORT File {

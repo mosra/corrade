@@ -49,6 +49,12 @@ expected to be in UTF-8. Example usage:
 @snippet TestSuite.cpp Compare-FileToString
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
+
+Unlike @ref File and @ref StringToFile, this comparator *doesn't* support the
+@ref TestSuite-Tester-save-failed "--save-failed option", due to the fact that
+the comparison is done against a string and so producing a file isn't that
+helpful as in the other two variants.
+
 @see @ref File, @ref StringToFile
 */
 class FileToString {};

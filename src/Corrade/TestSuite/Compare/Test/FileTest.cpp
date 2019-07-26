@@ -29,6 +29,7 @@
 #include "Corrade/TestSuite/Compare/File.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/FormatStl.h"
 
 #include "configure.h"
 
@@ -47,6 +48,8 @@ struct FileTest: Tester {
     void outputActualSmaller();
     void outputExpectedSmaller();
     void output();
+
+    void saveFailed();
 };
 
 FileTest::FileTest() {
@@ -58,7 +61,9 @@ FileTest::FileTest() {
               &FileTest::expectedNotFound,
               &FileTest::outputActualSmaller,
               &FileTest::outputExpectedSmaller,
-              &FileTest::output});
+              &FileTest::output,
+
+              &FileTest::saveFailed});
 }
 
 void FileTest::same() {
@@ -137,6 +142,31 @@ void FileTest::output() {
     }
 
     CORRADE_COMPARE(out.str(), "Files a and b have different contents. Actual character w but W expected on position 6.\n");
+}
+
+void FileTest::saveFailed() {
+    std::stringstream out;
+
+    /* Create the output dir if it doesn't exist, but avoid stale files making
+       false positives */
+    CORRADE_VERIFY(Utility::Directory::mkpath(FILETEST_SAVE_DIR));
+    std::string filename = Utility::Directory::join(FILETEST_SAVE_DIR, "base.txt");
+    if(Utility::Directory::exists(filename))
+        CORRADE_VERIFY(Utility::Directory::rm(filename));
+
+    {
+        Error e(&out);
+        Comparator<Compare::File> compare(FILETEST_DIR);
+        CORRADE_VERIFY(!compare("different.txt", "base.txt"));
+        compare.saveActualFile(e, FILETEST_SAVE_DIR);
+    }
+
+    CORRADE_COMPARE(out.str(), Utility::formatString("-> {}\n", filename));
+
+    /* Extreme dogfooding, eheh. We expect the *actual* contents, but under the
+       *expected* filename */
+    CORRADE_COMPARE_AS(filename,
+        Utility::Directory::join(FILETEST_DIR, "different.txt"), File);
 }
 
 }}}}}

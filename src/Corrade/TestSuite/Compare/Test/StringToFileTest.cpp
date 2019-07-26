@@ -26,9 +26,11 @@
 #include <sstream>
 
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/FileToString.h"
 #include "Corrade/TestSuite/Compare/StringToFile.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/FormatStl.h"
 
 #include "configure.h"
 
@@ -47,6 +49,8 @@ class StringToFileTest: public Tester {
         void outputActualSmaller();
         void outputExpectedSmaller();
         void output();
+
+        void saveFailed();
 };
 
 StringToFileTest::StringToFileTest() {
@@ -58,7 +62,9 @@ StringToFileTest::StringToFileTest() {
 
               &StringToFileTest::outputActualSmaller,
               &StringToFileTest::outputExpectedSmaller,
-              &StringToFileTest::output});
+              &StringToFileTest::output,
+
+              &StringToFileTest::saveFailed});
 }
 
 void StringToFileTest::same() {
@@ -123,6 +129,30 @@ void StringToFileTest::output() {
     }
 
     CORRADE_COMPARE(out.str(), "Files a and b have different contents. Actual character w but W expected on position 6.\n");
+}
+
+void StringToFileTest::saveFailed() {
+    std::stringstream out;
+
+    /* Create the output dir if it doesn't exist, but avoid stale files making
+       false positives */
+    CORRADE_VERIFY(Utility::Directory::mkpath(FILETEST_SAVE_DIR));
+    std::string filename = Utility::Directory::join(FILETEST_SAVE_DIR, "base.txt");
+    if(Utility::Directory::exists(filename))
+        CORRADE_VERIFY(Utility::Directory::rm(filename));
+
+    {
+        Error e(&out);
+        Comparator<Compare::StringToFile> compare;
+        CORRADE_VERIFY(!compare("Hello world?", Utility::Directory::join(FILETEST_DIR, "base.txt")));
+        compare.saveActualFile(e, FILETEST_SAVE_DIR);
+    }
+
+    CORRADE_COMPARE(out.str(), Utility::formatString("-> {}\n", filename));
+
+    /* Extreme dogfooding, eheh. We expect the *actual* contents, but under the
+       *expected* filename */
+    CORRADE_COMPARE_AS(filename, "Hello world?", FileToString);
 }
 
 }}}}}

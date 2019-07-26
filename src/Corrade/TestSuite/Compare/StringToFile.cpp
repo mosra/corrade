@@ -35,6 +35,7 @@
 
 namespace Corrade { namespace TestSuite {
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
 Comparator<Compare::StringToFile>::Comparator(): _state(State::ReadError) {}
 
 bool Comparator<Compare::StringToFile>::operator()(const std::string& actualContents, const std::string& filename) {
@@ -75,7 +76,13 @@ void Comparator<Compare::StringToFile>::printErrorMessage(Utility::Error& e, con
         e << "on position" << i << Utility::Debug::nospace << ".";
         break;
     }
-
 }
+
+void Comparator<Compare::StringToFile>::saveActualFile(Utility::Debug& out, const std::string& path) {
+    std::string filename = Utility::Directory::join(path, Utility::Directory::filename(_filename));
+    if(Utility::Directory::writeString(filename, _actualContents))
+        out << "->" << filename;
+}
+#endif
 
 }}

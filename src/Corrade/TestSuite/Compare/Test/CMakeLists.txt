@@ -25,8 +25,10 @@
 
 if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)
     set(FILETEST_DIR FileTestFiles)
+    set(FILETEST_SAVE_DIR FileTestSaveFiles)
 else()
     set(FILETEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/FileTestFiles)
+    set(FILETEST_SAVE_DIR ${CMAKE_CURRENT_BINARY_DIR}/FileTestFiles)
 endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
