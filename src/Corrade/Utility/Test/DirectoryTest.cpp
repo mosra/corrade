@@ -46,6 +46,7 @@ struct DirectoryTest: TestSuite::Tester {
     void toNativeSeparators();
     void path();
     void filename();
+    void splitExtension();
     void join();
     #ifdef CORRADE_TARGET_WINDOWS
     void joinWindows();
@@ -148,6 +149,7 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::toNativeSeparators,
               &DirectoryTest::path,
               &DirectoryTest::filename,
+              &DirectoryTest::splitExtension,
               &DirectoryTest::join,
               #ifdef CORRADE_TARGET_WINDOWS
               &DirectoryTest::joinWindows,
@@ -306,6 +308,41 @@ void DirectoryTest::filename() {
 
     /* Common case */
     CORRADE_COMPARE(Directory::filename("foo/bar/map.conf"), "map.conf");
+}
+
+void DirectoryTest::splitExtension() {
+    /* In case you're not sure about the behavior, cross-check with Python's
+       os.path.splitext(). */
+
+    /* Empty */
+    CORRADE_COMPARE(Directory::splitExtension(""), std::make_pair("", ""));
+
+    /* Usual case */
+    CORRADE_COMPARE(Directory::splitExtension("file.txt"), std::make_pair("file", ".txt"));
+
+    /* Double extension */
+    CORRADE_COMPARE(Directory::splitExtension("file.tar.gz"), std::make_pair("file.tar", ".gz"));
+
+    /* No extension */
+    CORRADE_COMPARE(Directory::splitExtension("/etc/passwd"), std::make_pair("/etc/passwd", ""));
+
+    /* Dot not a part of the file */
+    CORRADE_COMPARE(Directory::splitExtension("/etc/rc.conf/file"), std::make_pair("/etc/rc.conf/file", ""));
+
+    /* Dot at the end */
+    CORRADE_COMPARE(Directory::splitExtension("/home/no."), std::make_pair("/home/no", "."));
+
+    /* Dotfile, prefixed or not */
+    CORRADE_COMPARE(Directory::splitExtension("/home/mosra/.bashrc"), std::make_pair("/home/mosra/.bashrc", ""));
+    CORRADE_COMPARE(Directory::splitExtension(".bashrc"), std::make_pair(".bashrc", ""));
+
+    /* One level up, prefixed or not */
+    CORRADE_COMPARE(Directory::splitExtension("/home/mosra/Code/.."), std::make_pair("/home/mosra/Code/..", ""));
+    CORRADE_COMPARE(Directory::splitExtension(".."), std::make_pair("..", ""));
+
+    /* This directory */
+    CORRADE_COMPARE(Directory::splitExtension("/home/mosra/."), std::make_pair("/home/mosra/.", ""));
+    CORRADE_COMPARE(Directory::splitExtension("."), std::make_pair(".", ""));
 }
 
 void DirectoryTest::join() {

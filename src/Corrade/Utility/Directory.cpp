@@ -136,6 +136,30 @@ std::string filename(const std::string& filename) {
     return filename.substr(pos+1);
 }
 
+std::pair<std::string, std::string> splitExtension(const std::string& filename) {
+    /* Find the last dot and the last slash -- for file.tar.gz we want just
+       .gz as an extension; for /etc/rc.conf/bak we don't want to split at the
+       folder name. */
+    const std::size_t pos = filename.find_last_of('.');
+    const std::size_t lastSlash = filename.find_last_of('/');
+
+    /* Empty extension if there's no dot or if the dot is not inside the
+       filename */
+    if(pos == std::string::npos || (lastSlash != std::string::npos && pos < lastSlash))
+        return {filename, {}};
+
+    /* If the dot at the start of the filename (/root/.bashrc), it's also an
+       empty extension. Multiple dots at the start (/home/mosra/../..) classify
+       as no extension as well. */
+    std::size_t prev = pos;
+    while(prev && filename[prev - 1] == '.') --prev;
+    CORRADE_INTERNAL_ASSERT(pos < filename.size());
+    if(prev == 0 || filename[prev - 1] == '/') return {filename, {}};
+
+    /* Otherwise it's a real extension */
+    return {filename.substr(0, pos), filename.substr(pos)};
+}
+
 std::string join(const std::string& path, const std::string& filename) {
     /* Empty path */
     if(path.empty()) return filename;

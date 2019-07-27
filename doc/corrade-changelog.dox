@@ -106,6 +106,8 @@ namespace Corrade {
     overload for joining a path from multiple parts at once
 -   New @ref Utility::Directory::current() utility for getting current working
     directory
+-   @ref Utility::Directory::splitExtension() as a complement to
+    @ref Utility::Directory::path() and @ref Utility::Directory::filename()
 -   New @ref Corrade/Utility/StlForwardArray.h,
     @ref Corrade/Utility/StlForwardString.h,
     @ref Corrade/Utility/StlForwardTuple.h and

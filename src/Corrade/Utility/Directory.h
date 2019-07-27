@@ -146,6 +146,7 @@ path, returns empty string, if the filename is already a path (ends with
 slash), returns whole string without trailing slash.
 @attention The implementation expects forward slashes as directory separators.
     Use @ref fromNativeSeparators() to convert from a platform-specific format.
+@see @ref filename(), @ref splitExtension()
 */
 CORRADE_UTILITY_EXPORT std::string path(const std::string& filename);
 
@@ -156,8 +157,23 @@ If the filename doesn't contain any slash, returns whole string, otherwise
 returns everything after last slash.
 @attention The implementation expects forward slashes as directory separators.
     Use @ref fromNativeSeparators() to convert from a platform-specific format.
+@see @ref path(), @ref splitExtension()
 */
 CORRADE_UTILITY_EXPORT std::string filename(const std::string& filename);
+
+/**
+@brief Split basename and extension
+
+Returns a pair `(root, ext)` where @cpp root + ext == path @ce, and ext is
+empty or begins with a period and contains at most one period. Leading periods
+on the filename are ignored, @cpp splitExtension("/home/.bashrc") @ce returns
+@cpp ("/home/.bashrc", "") @ce. Behavior equivalent to Python's
+@cb{.py} os.path.splitext() @ce.
+@attention The implementation expects forward slashes as directory separators.
+    Use @ref fromNativeSeparators() to convert from a platform-specific format.
+@see @ref path(), @ref filename()
+*/
+CORRADE_UTILITY_EXPORT std::pair<std::string, std::string> splitExtension(const std::string& path);
 
 /**
 @brief Join path and filename
