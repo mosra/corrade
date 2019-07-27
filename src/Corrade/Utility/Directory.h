@@ -145,7 +145,7 @@ Returns everything before the last slash. If the filename doesn't contain any
 path, returns empty string, if the filename is already a path (ends with
 slash), returns whole string without trailing slash.
 @attention The implementation expects forward slashes as directory separators.
-    Use @ref fromNativeSeparators() to convert from platform-specific format.
+    Use @ref fromNativeSeparators() to convert from a platform-specific format.
 */
 CORRADE_UTILITY_EXPORT std::string path(const std::string& filename);
 
@@ -155,7 +155,7 @@ CORRADE_UTILITY_EXPORT std::string path(const std::string& filename);
 If the filename doesn't contain any slash, returns whole string, otherwise
 returns everything after last slash.
 @attention The implementation expects forward slashes as directory separators.
-    Use @ref fromNativeSeparators() to convert from platform-specific format.
+    Use @ref fromNativeSeparators() to convert from a platform-specific format.
 */
 CORRADE_UTILITY_EXPORT std::string filename(const std::string& filename);
 
@@ -165,7 +165,7 @@ CORRADE_UTILITY_EXPORT std::string filename(const std::string& filename);
 If the path is empty or the filename is absolute (with leading slash), returns
 @p filename.
 @attention The implementation expects forward slashes as directory separators.
-    Use @ref fromNativeSeparators() to convert from platform-specific format.
+    Use @ref fromNativeSeparators() to convert from a platform-specific format.
 */
 CORRADE_UTILITY_EXPORT std::string join(const std::string& path, const std::string& filename);
 
@@ -176,7 +176,7 @@ Convenience overload to @ref join(const std::string&, const std::string&) when
 joining the path from more than two parts. When @p paths is empty, returns
 empty string, when it's just a single path, returns it verbatim.
 @attention The implementation expects forward slashes as directory separators.
-    Use @ref fromNativeSeparators() to convert from platform-specific format.
+    Use @ref fromNativeSeparators() to convert from a platform-specific format.
 */
 CORRADE_UTILITY_EXPORT std::string join(std::initializer_list<std::string> paths);
 

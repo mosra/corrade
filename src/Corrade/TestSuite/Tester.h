@@ -209,7 +209,8 @@ with an external tool. Or, in case the expected test data need to be updated,
 it's easier to copy over the generated data to the original file than applying
 changes manually. To make this easier without needing to add file-saving to the
 test itself, pass a path with the `--save-failed`
-@ref TestSuite-Tester-command-line "command-line" option. Comparators that operate with files (such as @ref Compare::File or @ref Compare::StringToFile)
+@ref TestSuite-Tester-command-line "command-line option". Comparators that
+operate with files (such as @ref Compare::File or @ref Compare::StringToFile)
 will then use this path to save the actual data under the same filename as the
 expected file, notifying you about the operation with a
 @cb{.ansi} [1;32mSAVED @ce message:
