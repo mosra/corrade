@@ -40,6 +40,11 @@ namespace Corrade { namespace Containers {
 namespace Implementation {
     template<class, class> struct ArrayViewConverter;
     template<class> struct ErasedArrayViewConverter;
+
+    /* so Python buffer protocol can point to the size member */
+    template<class T> std::size_t& sizeRef(Containers::ArrayView<T>& view) {
+        return view._size;
+    }
 }
 
 /**
@@ -426,11 +431,10 @@ template<class T> class ArrayView {
         }
 
     private:
-        T* _data;
+        /* so Python buffer protocol can point to the size member */
+        friend std::size_t& Implementation::sizeRef<>(Containers::ArrayView<T>&);
 
-    #ifndef DOXYGEN_GENERATING_OUTPUT
-    protected: /* so Python buffer protocol can point to this member */
-    #endif
+        T* _data;
         std::size_t _size;
 };
 

@@ -62,6 +62,14 @@ namespace Implementation {
         return largerStride(size[first]*std::size_t(stride[first] < 0 ? -stride[first] : stride[first]),
             largestStride(size, stride, Sequence<next...>{}));
     }
+
+    /* so Python buffer protocol can point to the size / stride members */
+    template<unsigned dimensions, class T> Containers::StridedDimensions<dimensions, std::size_t>& sizeRef(Containers::StridedArrayView<dimensions, T>& view) {
+        return view._size;
+    }
+    template<unsigned dimensions, class T> Containers::StridedDimensions<dimensions, std::ptrdiff_t>& strideRef(Containers::StridedArrayView<dimensions, T>& view) {
+        return view._stride;
+    }
 }
 
 /**
@@ -629,6 +637,10 @@ template<unsigned dimensions, class T> class StridedArrayView {
     private:
         template<unsigned, class> friend class StridedArrayView;
 
+        /* so Python buffer protocol can point to the size / stride members */
+        friend Containers::StridedDimensions<dimensions, std::size_t>& Implementation::sizeRef<>(Containers::StridedArrayView<dimensions, T>&);
+        friend Containers::StridedDimensions<dimensions, std::ptrdiff_t>& Implementation::strideRef<>(Containers::StridedArrayView<dimensions, T>&);
+
         /* Basically just so these can access the _size / _stride without going
            through getters (which additionally flatten their types for 1D) */
         template<unsigned, class> friend struct Implementation::StridedElement;
@@ -645,10 +657,6 @@ template<unsigned dimensions, class T> class StridedArrayView {
         }
 
         ErasedType* _data;
-
-    #ifndef DOXYGEN_GENERATING_OUTPUT
-    protected: /* so Python buffer protocol can point to these members */
-    #endif
         Size _size;
         Stride _stride;
 };
