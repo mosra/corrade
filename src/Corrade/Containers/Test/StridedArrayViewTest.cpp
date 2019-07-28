@@ -1072,8 +1072,8 @@ void StridedArrayViewTest::construct3DDerived() {
        and data layout */
 
     Derived b[5];
-    Containers::StridedArrayView2D<Derived> bv{b, {5, 1}, {sizeof(Derived), sizeof(Derived)}};
-    Containers::StridedArrayView2D<Base> a{b, {5, 1}, {sizeof(Base), sizeof(Base)}};
+    Containers::StridedArrayView2D<Derived> bv{b, {5, 1}};
+    Containers::StridedArrayView2D<Base> a{b, {5, 1}};
     Containers::StridedArrayView2D<Base> av{bv};
 
     CORRADE_VERIFY(a.data() == &b[0]);
@@ -1083,13 +1083,13 @@ void StridedArrayViewTest::construct3DDerived() {
     CORRADE_COMPARE(av.size(), (Size2D{5, 1}));
     CORRADE_COMPARE(av.stride(), (Stride2D{2, 2}));
 
-    constexpr Containers::StridedArrayView2D<const Derived> cbv{DerivedArray, {5, 1}, {sizeof(Derived), sizeof(Derived)}};
+    constexpr Containers::StridedArrayView2D<const Derived> cbv{DerivedArray, {5, 1}};
     #ifndef CORRADE_MSVC2019_COMPATIBILITY
     /* Implicit pointer downcast not constexpr on MSVC 2015, causes an ICE on
        MSVC 2017 and 2019 (but only in the 3D case, not for 1D) */
     constexpr
     #endif
-    Containers::StridedArrayView2D<const Base> ca{DerivedArray, {5, 1}, {sizeof(Base), sizeof(Base)}};
+    Containers::StridedArrayView2D<const Base> ca{DerivedArray, {5, 1}};
     #ifndef CORRADE_MSVC2019_COMPATIBILITY
     /* Implicit pointer downcast not constexpr on MSVC 2015, causes an ICE on
        MSVC 2017 and 2019 (but only in the 3D case, not for 1D) */
@@ -1252,7 +1252,7 @@ void StridedArrayViewTest::convert3DBool() {
 
 void StridedArrayViewTest::convert3DConst() {
     int a[6];
-    StridedArrayView3Di b{a, {1, 2, 3}, {24, 12, 4}};
+    StridedArrayView3Di b{a, {1, 2, 3}};
     ConstStridedArrayView3Di c = b;
     CORRADE_VERIFY(c.data() == a);
     CORRADE_COMPARE(c.size(), (Size3D{1, 2, 3}));
@@ -1455,7 +1455,7 @@ void StridedArrayViewTest::access3DConst() {
     /* The array is non-owning, so it should provide write access to the data */
 
     int a[7];
-    const StridedArrayView3Di b = {a, {7, 1, 1}, {sizeof(int), sizeof(int), sizeof(int)}};
+    const StridedArrayView3Di b = {a, {7, 1, 1}};
     b.front().front().front() = 0;
     *(*(*(b.begin() + 1)).begin()).begin() = 1;
     *(*(*(b.cbegin() + 2)).cbegin()).begin() = 2;
@@ -1887,7 +1887,7 @@ void StridedArrayViewTest::slice3DFirstDimension() {
 
 void StridedArrayViewTest::slice3DFirstDimensionInvalid() {
     int data[5] = {1, 2, 3, 4, 5};
-    StridedArrayView3Di a = {data, {5, 1, 1}, {4, 4, 4}};
+    StridedArrayView3Di a = {data, {5, 1, 1}};
 
     std::ostringstream out;
     Error redirectError{&out};
