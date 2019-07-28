@@ -107,7 +107,7 @@ CORRADE_ENUMSET_OPERATORS(ComparisonStatusFlags)
 @brief Default comparator implementation
 
 See @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH() for more information
-and @ref Compare namespace for pseudo-type comparator implementations.
+and the @ref Compare namespace for additional comparator implementations.
 
 @section TestSuite-Comparator-subclassing Subclassing
 
@@ -125,7 +125,7 @@ to provide further details from its internal state saved by @ref operator()().
 Imagine you have two filenames and you want to compare their contents instead
 of comparing the filename strings. Because you want to also compare strings
 elsewhere, you cannot override the default behavior. The solution is to have
-some "pseudo type", for which you create the @ref Comparator template
+some *pseudo-type*, for which you create a @ref Comparator template
 specialization, but the actual comparison operator will still take strings as
 parameters:
 
@@ -145,13 +145,12 @@ The actual use in the unit test would be like this:
 Sometimes you need to pass additional parameters to the comparator class so you
 can then use it in the @ref CORRADE_COMPARE_WITH() macro. In that case you need
 to implement the constructor and a @cpp comparator() @ce function in your
-pseudo-type. The @cpp comparator() @ce function returns reference to existing
-configured @ref Comparator instance. Example:
+pseudo-type. The @cpp comparator() @ce function returns a reference to a
+pre-configured @ref Comparator instance. Don't forget to allow default
+construction of @ref Comparator, if you want to be able to use it also with
+@ref CORRADE_COMPARE_AS().Example:
 
 @snippet TestSuite2.cpp Comparator-parameters
-
-Don't forget to allow default construction of @ref Comparator, if you want to
-be able to use it also with @ref CORRADE_COMPARE_AS().
 
 The actual use in a test would be like this:
 
