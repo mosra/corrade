@@ -656,18 +656,27 @@ for(float& x: horizontalPositions) x += 3.0f;
 /* [StridedArrayView-usage-conversion] */
 int data[] { 1, 42, 1337, -69 };
 
-Containers::StridedArrayView1D<int> view1{data, 4, sizeof(int)};
-Containers::StridedArrayView1D<int> view2 = data;
+Containers::StridedArrayView1D<int> a{data, 4, sizeof(int)};
+Containers::StridedArrayView1D<int> b = data;
 /* [StridedArrayView-usage-conversion] */
-static_cast<void>(view2);
+static_cast<void>(a);
+static_cast<void>(b);
+}
+
+{
+/* [StridedArrayView-usage-reshape] */
+int data3D[2*3*5];
+
+Containers::StridedArrayView3D<int> a{data3D, {2, 3, 5}, {3*5*4, 5*4, 4}};
+Containers::StridedArrayView3D<int> b{data3D, {2, 3, 5}};
+/* [StridedArrayView-usage-reshape] */
 }
 
 {
 std::uint32_t rgbaData[256*256*16]{};
 /* [StridedArrayView-usage-3d] */
 /* Sixteen 256x256 RGBA8 images */
-Containers::StridedArrayView3D<std::uint32_t> images{rgbaData,
-    {16, 256, 256}, {256*256*4, 256*4, 4}};
+Containers::StridedArrayView3D<std::uint32_t> images{rgbaData, {16, 256, 256}};
 
 /* Make the center 64x64 pixels of each image opaque red */
 for(auto&& image: images.slice({0, 96, 96}, {16, 160, 160}))
@@ -760,7 +769,7 @@ struct Rgb {
 
 Containers::ArrayView<Rgb> pixels;
 
-Containers::StridedArrayView2D<Rgb> view{pixels, {128, 128}, {128*3, 3}};
+Containers::StridedArrayView2D<Rgb> view{pixels, {128, 128}};
 Containers::StridedArrayView3D<std::uint8_t> rgb =
     Containers::arrayCast<3, std::uint8_t>(view);
 /* [arrayCast-StridedArrayView-inflate] */

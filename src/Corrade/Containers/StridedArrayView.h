@@ -51,16 +51,27 @@ namespace Implementation {
     template<unsigned, class> struct StridedElement;
     template<bool> struct ArrayCastFlattenOrInflate;
 
+    /* Used in the assertion that data array is large enough */
     template<unsigned dimensions> constexpr std::size_t largestStride(const StridedDimensions<dimensions, std::size_t>&, const StridedDimensions<dimensions, std::ptrdiff_t>&, Sequence<>) {
         return 0;
     }
-
     constexpr std::size_t largerStride(std::size_t a, std::size_t b) {
         return a < b ? b : a; /* max(), but named like this to avoid clashes */
     }
     template<unsigned dimensions, std::size_t first, std::size_t ...next> constexpr std::size_t largestStride(const StridedDimensions<dimensions, std::size_t>& size, const StridedDimensions<dimensions, std::ptrdiff_t>& stride, Sequence<first, next...>) {
         return largerStride(size[first]*std::size_t(stride[first] < 0 ? -stride[first] : stride[first]),
             largestStride(size, stride, Sequence<next...>{}));
+    }
+
+    /* Calculates stride when just size is passed */
+    template<unsigned dimensions> constexpr std::ptrdiff_t strideForSizeInternal(const StridedDimensions<dimensions, std::size_t>&, std::size_t, Sequence<>) {
+        return 1;
+    }
+    template<unsigned dimensions, std::size_t first, std::size_t ...next> constexpr std::ptrdiff_t strideForSizeInternal(const StridedDimensions<dimensions, std::size_t>& size, std::size_t index, Sequence<first, next...>) {
+        return (first > index ? size[first] : 1)*strideForSizeInternal(size, index, Sequence<next...>{});
+    }
+    template<unsigned dimensions, std::size_t ...index> constexpr StridedDimensions<dimensions, std::ptrdiff_t> strideForSize(const StridedDimensions<dimensions, std::size_t>& size, std::size_t typeSize, Sequence<index...>) {
+        return {std::ptrdiff_t(typeSize)*strideForSizeInternal(size, index, typename GenerateSequence<dimensions>::Type{})...};
     }
 
     /* so Python buffer protocol can point to the size / stride members */
@@ -172,7 +183,8 @@ template<unsigned dimensions, class T> class StridedDimensions {
 @brief Multi-dimensional array view with size and stride information
 
 Immutable wrapper around continuous sparse range of data, useful for easy
-iteration over interleaved arrays. Usage example:
+iteration over interleaved arrays and for describing multi-dimensional data.
+Usage example:
 
 @snippet Containers.cpp StridedArrayView-usage
 
@@ -182,6 +194,15 @@ stride equal to array type size. The following two statements are equivalent:
 
 @snippet Containers.cpp StridedArrayView-usage-conversion
 
+When constructing, if you don't specify the stride, the constructor assumes
+tightly packed data and calculates the stride automatically --- stride of a
+dimension is stride of the next dimension times next dimension size, while last
+dimension stride is implicitly @cpp sizeof(T) @ce. This is especially useful
+for "reshaping" linear data as a multi-dimensional view. Again, the following
+two statements are equivalent:
+
+@snippet Containers.cpp StridedArrayView-usage-reshape
+
 Unlike @ref ArrayView, this wrapper doesn't provide direct pointer access
 because pointer arithmetic doesn't work as usual here. The
 @ref arrayCast(const StridedArrayView<dimensions, T>&) overload also works
@@ -190,13 +211,12 @@ the stride instead of expecting the total byte size to stay the same.
 
 @section Containers-StridedArrayView-multidimensional Multi-dimensional views
 
-Apart from single-dimensional interleaved arrays, strided array views are
-useful also for describing and iteration over multi-dimensional data such as 2D
-(sub)images. In that case, @ref operator[]() and iterator access return a view
-of one dimension less instead of a direct element reference, and there are
-@ref slice(const Size&, const Size&) const, @ref prefix(const Size&) const and
-@ref suffix(const Size&) const overloads working on all dimensions at the same
-time.
+Strided array views are very useful for describing and iteration over
+multi-dimensional data such as 2D (sub)images. In that case, @ref operator[]()
+and iterator access return a view of one dimension less instead of a direct
+element reference, and there are @ref slice(const Size&, const Size&) const,
+@ref prefix(const Size&) const and @ref suffix(const Size&) const overloads
+working on all dimensions at the same time.
 
 @snippet Containers.cpp StridedArrayView-usage-3d
 
@@ -328,6 +348,16 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * second parameter.
          */
         constexpr /*implicit*/ StridedArrayView(Containers::ArrayView<T> data, const Size& size, const Stride& stride) noexcept: StridedArrayView{data, data.data(), size, stride} {}
+
+        /**
+         * @brief Construct a view with explicit size
+         *
+         * Assuming @p data are contiguous, stride is calculated implicitly
+         * from @p size --- stride of a dimension is stride of the next
+         * dimension times next dimension size, while last dimension stride is
+         * implicitly @cpp sizeof(T) @ce.
+         */
+        constexpr /*implicit*/ StridedArrayView(Containers::ArrayView<T> data, const Size& size) noexcept: StridedArrayView{data, data.data(), size, Implementation::strideForSize(size, sizeof(T), typename Implementation::GenerateSequence<dimensions>::Type{})} {}
 
         /**
          * @brief Construct a view on a fixed-size array

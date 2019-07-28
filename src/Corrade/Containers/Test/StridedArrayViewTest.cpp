@@ -114,6 +114,7 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void construct3DZeroStride();
     void construct3DNegativeStride();
     void construct3DPackedSizeStride();
+    void construct3DPackedSizeOnly();
     void construct3DInvalid();
     void construct3DFixedSize();
     void construct3DDerived();
@@ -251,6 +252,7 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::construct3DZeroStride,
               &StridedArrayViewTest::construct3DNegativeStride,
               &StridedArrayViewTest::construct3DPackedSizeStride,
+              &StridedArrayViewTest::construct3DPackedSizeOnly,
               &StridedArrayViewTest::construct3DInvalid,
               &StridedArrayViewTest::construct3DFixedSize,
               &StridedArrayViewTest::construct3DDerived,
@@ -1018,6 +1020,23 @@ void StridedArrayViewTest::construct3DPackedSizeStride() {
     CORRADE_COMPARE(a[0][2][3], 13);
 
     constexpr ConstStridedArrayView3Di ca{PackedData, {2, 3, 5}, {3*5*4, 5*4, 4}};
+    CORRADE_VERIFY(ca.data() == PackedData);
+    CORRADE_COMPARE(ca.size(), (Size3D{2, 3, 5}));
+    CORRADE_COMPARE(ca.stride(), (Stride3D{3*5*4, 5*4, 4}));
+    CORRADE_COMPARE(ca[1][1][2], 22);
+    CORRADE_COMPARE(ca[0][2][3], 13);
+}
+
+void StridedArrayViewTest::construct3DPackedSizeOnly() {
+    /* Should give the same result as construct3DPackedSizeStride */
+    ConstStridedArrayView3Di a{PackedData, {2, 3, 5}};
+    CORRADE_VERIFY(a.data() == PackedData);
+    CORRADE_COMPARE(a.size(), (Size3D{2, 3, 5}));
+    CORRADE_COMPARE(a.stride(), (Stride3D{3*5*4, 5*4, 4}));
+    CORRADE_COMPARE(a[1][1][2], 22);
+    CORRADE_COMPARE(a[0][2][3], 13);
+
+    constexpr ConstStridedArrayView3Di ca{PackedData, {2, 3, 5}};
     CORRADE_VERIFY(ca.data() == PackedData);
     CORRADE_COMPARE(ca.size(), (Size3D{2, 3, 5}));
     CORRADE_COMPARE(ca.stride(), (Stride3D{3*5*4, 5*4, 4}));
