@@ -558,17 +558,19 @@ void Tester::printComparisonMessageInternal(bool equal, const char* actual, cons
     }
 
     /* Otherwise print message to error output */
-    Error out{_state->errorOutput, _state->useColor};
-    printTestCaseLabel(out, _state->expectedFailure ? " XPASS" : "  FAIL", Debug::Color::Red, Debug::Color::Default);
-    out << "at" << _state->testFilename << "on line"
-        << _state->testCaseLine << Debug::newline << "       ";
-    if(!_state->expectedFailure) printer(comparator, out, actual, expected);
-    else out << actual << "and" << expected << "were expected to fail the comparison.";
+    {
+        Error out{_state->errorOutput, _state->useColor};
+        printTestCaseLabel(out, _state->expectedFailure ? " XPASS" : "  FAIL", Debug::Color::Red, Debug::Color::Default);
+        out << "at" << _state->testFilename << "on line"
+            << _state->testCaseLine << Debug::newline << "       ";
+        if(!_state->expectedFailure) printer(comparator, out, actual, expected);
+        else out << actual << "and" << expected << "were expected to fail the comparison.";
+    }
 
     /* If we want to save actual file data on failed comparison, do that */
     if(saver && !_state->saveFailedPath.empty()) {
+        Debug out{_state->logOutput, _state->useColor};
         ++_state->savedCount;
-        out << Debug::newline;
         printTestCaseLabel(out, " SAVED", Debug::Color::Green, Debug::Color::Default);
         saver(comparator, out, _state->saveFailedPath);
     }
