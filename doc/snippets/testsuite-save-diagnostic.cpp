@@ -37,16 +37,16 @@ namespace Corrade { namespace TestSuite {
 
 template<> class Comparator<FileContents> {
     public:
-        bool operator()(const std::string&, const std::string& expected) {
+        ComparisonStatusFlags operator()(const std::string&, const std::string& expected) {
             _expectedFilename = expected;
-            return false;
+            return ComparisonStatusFlag::Failed;
         }
 
-        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
-            e << "Files" << actual << "and" << expected << "are not the same, actual ABC but expected abc";
+        void printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const {
+            out << "Files" << actual << "and" << expected << "are not the same, actual ABC but expected abc";
         }
 
-        void saveActualFile(Utility::Debug& out, const std::string& path) {
+        void saveDiagnostic(ComparisonStatusFlags, Utility::Debug& out, const std::string& path) {
             out << "->" << Utility::Directory::join(path, Utility::Directory::filename(_expectedFilename));
         }
 

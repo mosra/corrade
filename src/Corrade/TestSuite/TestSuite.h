@@ -29,10 +29,18 @@
  * @brief Forward declarations for the @ref Corrade::TestSuite namespace
  */
 
+#include <cstdint>
+
+#include "Corrade/Containers/Containers.h"
+
 namespace Corrade { namespace TestSuite {
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
+enum class ComparisonStatusFlag: std::uint8_t;
+typedef Containers::EnumSet<ComparisonStatusFlag> ComparisonStatusFlags;
 template<class> class Comparator;
 /* Tester is always used through inheritance */
+#endif
 
 }}
 

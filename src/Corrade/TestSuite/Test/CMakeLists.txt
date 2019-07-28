@@ -37,11 +37,18 @@ corrade_add_test(TestSuiteTesterTest TesterTest.cpp
         TesterTestFiles/benchmarkCpuCycles.txt
         TesterTestFiles/benchmarkDiscardAll.txt
         TesterTestFiles/benchmarkWallClock.txt
+        TesterTestFiles/compareMessageFailed.txt
+        TesterTestFiles/compareMessageVerboseDisabled.txt
+        TesterTestFiles/compareMessageVerboseEnabled.txt
+        TesterTestFiles/compareMessageXfail.txt
         TesterTestFiles/noXfail.txt
         TesterTestFiles/repeatAll.txt
         TesterTestFiles/repeatEvery.txt
-        TesterTestFiles/saveFailed.txt
-        TesterTestFiles/saveFailedAbortOnFail.txt
+        TesterTestFiles/saveDiagnosticAbortOnFail.txt
+        TesterTestFiles/saveDiagnosticSucceeded.txt
+        TesterTestFiles/saveDiagnosticFailed.txt
+        TesterTestFiles/saveDiagnosticVerboseDisabled.txt
+        TesterTestFiles/saveDiagnosticVerboseEnabled.txt
         TesterTestFiles/shuffleOne.txt
         TesterTestFiles/skipBenchmarks.txt
         TesterTestFiles/skipOnly.txt

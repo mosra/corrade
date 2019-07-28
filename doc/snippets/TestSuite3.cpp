@@ -33,14 +33,15 @@ class FileContents;
 
 namespace Corrade { namespace TestSuite {
 
-/* [Comparator-file-saving] */
+/* [Comparator-save-diagnostic] */
 template<> class Comparator<FileContents> {
     public:
-        bool operator()(const std::string& actual, const std::string& expected);
+        ComparisonStatusFlags operator()(const std::string& actual, const std::string& expected);
 
         // ...
 
-        void saveActualFile(Utility::Debug& out, const std::string& path) {
+        void saveDiagnostic(ComparisonStatusFlags flags, Utility::Debug& out, const std::string& path) {
+            CORRADE_INTERNAL_ASSERT(flags & ComparisonStatusFlag::Diagnostic);
             std::string filename = Utility::Directory::join(path, _expectedFilename);
             if(Utility::Directory::writeString(filename, _actualContents))
                 out << "->" << filename;
@@ -51,6 +52,8 @@ template<> class Comparator<FileContents> {
         // ...
         std::string _expectedFilename;
 };
-/* [Comparator-file-saving] */
+/* [Comparator-save-diagnostic] */
+static_assert(Implementation::CanSaveDiagnostic<Comparator<FileContents>>::value,
+    "this snippet is broken");
 
 }}

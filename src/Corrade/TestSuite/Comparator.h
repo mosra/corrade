@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::TestSuite::Comparator
+ * @brief Class @ref Corrade::TestSuite::Comparator, enum @ref Corrade::TestSuite::ComparisonStatusFlag, enum set @ref Corrade::TestSuite::ComparisonStatusFlags
  */
 
 #include "Corrade/Utility/Assert.h"
@@ -36,6 +36,74 @@
 namespace Corrade { namespace TestSuite {
 
 /**
+@brief Comparison status flag
+
+@see @ref ComparisonStatusFlags, @ref Comparator
+*/
+enum class ComparisonStatusFlag: std::uint8_t {
+    /**
+     * The comparison failed. Absence of this flag indicates success.
+     * If this is returned from @ref Comparator::operator()(), the @ref Tester
+     * then calls @ref Comparator::printMessage().
+     */
+    Failed = 1 << 0,
+
+    /**
+     * The comparison wants to print a warning. If this is returned from
+     * @ref Comparator::operator()(), @ref Tester then calls
+     * @ref Comparator::printMessage().
+     */
+    Warning = 1 << 1,
+
+    /**
+     * The comparison wants to print a message. If this is returned from
+     * @ref Comparator::operator()(), @ref Tester then calls
+     * @ref Comparator::printMessage(). Should be used only seldomly to avoid
+     * spamming the output, prefer to use @ref ComparisonStatusFlag::Verbose
+     * instead.
+     */
+    Message = 1 << 2,
+
+    /**
+     * The comparison can print a verbose message. If this is returned
+     * from @ref Comparator::operator()() and the `--verbose`
+     * @ref TestSuite-Tester-command-line "command-line option" is specified,
+     * @ref Tester then calls @ref Comparator::printMessage().
+     */
+    Verbose = 1 << 3,
+
+    /**
+     * The comparison can save a comparison diagnostic to a file.
+     * If this is returned from @ref Comparator::operator()(), the comparator
+     * needs to implement an additional @ref Comparator::saveDiagnostic()
+     * function, which is called in case the `--save-diagnostic`
+     * @ref TestSuite-Tester-command-line "command-line option" is specified.
+     * See @ref TestSuite-Comparator-save-diagnostic for more information.
+     */
+    Diagnostic = 1 << 4,
+
+    /**
+     * The comparison can save a verbose comparison diagnostic to a file. If
+     * this is is returned from @ref Comparator::operator()(), the comparator
+     * needs to implement an additional @ref Comparator::saveDiagnostic()
+     * function. This function gets called in case both the `--save-diagnostic`
+     * and `--verbose` @ref TestSuite-Tester-command-line "command-line options"
+     * are specified. See @ref TestSuite-Comparator-save-diagnostic for more
+     * information.
+     */
+    VerboseDiagnostic = 1 << 5
+};
+
+/**
+@brief Comparison status flags
+
+@see @ref Comparator
+*/
+typedef Containers::EnumSet<ComparisonStatusFlag> ComparisonStatusFlags;
+
+CORRADE_ENUMSET_OPERATORS(ComparisonStatusFlags)
+
+/**
 @brief Default comparator implementation
 
 See @ref CORRADE_COMPARE_AS(), @ref CORRADE_COMPARE_WITH() for more information
@@ -43,15 +111,14 @@ and @ref Compare namespace for pseudo-type comparator implementations.
 
 @section TestSuite-Comparator-subclassing Subclassing
 
-You can reimplement this class for your own data types and even pseudo types
-to provide different ways to compare the same type.
-
-You have to implement @cpp operator()() @ce for comparison of two values of
-arbitrary types and @cpp printErrorMessage() @ce for printing error message
-when the comparison failed. The reason for having those two separated is
-allowing the user to use colored output --- due to a limitation of Windows
-console API, where it's only possible to specify text color when writing
-directly to the output without any intermediate buffer.
+You can reimplement this class for your own data types to provide additional
+means of comparison. At the very least you need to provide the @ref operator()()
+comparing two values of arbitrary types, returning empty
+@ref ComparisonStatusFlags on success and @ref ComparisonStatusFlag::Failed
+when the comparison fails. Then, @ref printMessage() gets called in case of a
+comparison failure to print a detailed message. It receives stringified
+"actual" and "expected" expressions from the comparison macro and is expected
+to provide further details from its internal state saved by @ref operator()().
 
 @section TestSuite-Comparator-pseudo-types Comparing with pseudo-types
 
@@ -90,34 +157,89 @@ The actual use in a test would be like this:
 
 @snippet TestSuite2.cpp Comparator-parameters-usage
 
-@section TestSuite-Comparator-save-failed Saving files for failed comparisons
+@section TestSuite-Comparator-messages Printing additional messages
 
-When comparing generated data against files, the comparator should provide an
-ability to save the actual file in case of a failure in order to support the
-@ref TestSuite-Tester-save-failed "--save-failed option". This is achieved by
-adding an @cpp saveActualFile() @ce function. It takes a path (without the
-filename) and the comparator is responsible for saving a file there with the
-same name as the expected file and then providing a message about its location:
+By default, the comparator is asked to print a message using @ref printMessage()
+only in case the comparison fails. In some cases it's desirable to provide
+extended info also in case the comparison *doesn't* fail. That can be done by
+returning @ref ComparisonStatusFlag::Warning, @ref ComparisonStatusFlag::Message
+or @ref ComparisonStatusFlag::Verbose from @ref operator()() in addition to the
+actual comparison status. The @ref printMessage() then gets passed those flags
+to know what to print.
 
-@snippet TestSuite3.cpp Comparator-file-saving
+The @ref printMessage() is always called at most once per comparison, with the
+@ref ComparisonStatusFlag::Verbose flag filtered out when the `--verbose`
+@ref TestSuite-Tester-command-line "command-line option" is not passed.
 
-The message is printed right after test case name and the comparator has a full
-freedom in its formatting as well as what it does. For example, a file
-comparator can write both the actual file and a diff to the original, then
-printing locations of both. In the above case, the message will look for
-example like this:
+@section TestSuite-Comparator-save-diagnostic Saving diagnostic files
 
-@include testsuite-save-failed.ansi
+In addition to messages, the comparison can also save diagnostic files. This is
+achieved by returning either @ref ComparisonStatusFlag::Diagnostic or
+@ref ComparisonStatusFlag::VerboseDiagnostic from @ref operator()(). The
+comparator is then required to implement the @ref saveDiagnostic() function
+(which doesn't need to be present otherwise). This function gets called when
+the `--save-diagnostic` @ref TestSuite-Tester-save-diagnostic "command-line option",
+is specified, in case of @ref ComparisonStatusFlag::VerboseDiagnostic the flag
+only when `--verbose` is enabled as well.
+
+The function receives a path to where the diagnostic files should be be saved
+and is free to do about anything -- for example a file comparator can write
+both the actual file and a diff to the original. The message is printed right
+after test case name and the comparator has a full freedom in its formatting as
+well.
+
+@snippet TestSuite3.cpp Comparator-save-diagnostic
+
+In the above case, the message will look for example like this:
+
+@include testsuite-save-diagnostic.ansi
 */
 template<class T> class Comparator {
     public:
         explicit Comparator();
 
-        /** @brief Compare two values */
-        bool operator()(const T& actual, const T& expected);
+        /**
+         * @brief Compare two values
+         *
+         * If the comparison fails, @ref ComparisonStatusFlag::Failed should be
+         * returned. In addition, if the comparison desires to print additional
+         * messages or save diagnostic file, it can include other flags.
+         */
+        ComparisonStatusFlags operator()(const T& actual, const T& expected);
 
-        /** @brief Print error message, assuming the two values are inequal */
-        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const;
+        /**
+         * @brief Print a message
+         *
+         * This function gets called only if @ref operator()() returned one of
+         * @ref ComparisonStatusFlag::Failed, @ref ComparisonStatusFlag::Warning,
+         * @ref ComparisonStatusFlag::Message or
+         * @ref ComparisonStatusFlag::Verbose. The @p status is a result of
+         * that call. The @ref ComparisonStatusFlag::Verbose flag gets filtered
+         * out in case the `--verbose`
+         * @ref TestSuite-Tester-command-line "command-line option" is not set
+         * (and the function not being called at all if none of the other
+         * above-mentioned flags are present).
+         */
+        void printMessage(ComparisonStatusFlags status, Utility::Debug& out, const char* actual, const char* expected);
+
+        /**
+         * @brief Save a diagnostic
+         *
+         * This function only needs to be present in the comparator
+         * implementation if @ref operator()() *can* return either
+         * @ref ComparisonStatusFlag::Diagnostic or
+         * @ref ComparisonStatusFlag::VerboseDiagnostic, doesn't need to be
+         * implemented at all otherwise. This function gets called only if
+         * @ref operator()() returned one of those two flags *and* the
+         * `--save-diagnostic` @ref TestSuite-Tester-command-line "command-line option"
+         * is present. The @p status is a result of that call. The
+         * @ref ComparisonStatusFlag::VerboseDiagnostic flag gets filtered out
+         * in case the `--verbose`
+         * @ref TestSuite-Tester-command-line "command-line option" is not set
+         * (and the function not being called at all if
+         * @ref ComparisonStatusFlag::Diagnostic is not present as well).
+         */
+        void saveDiagnostic(ComparisonStatusFlags status, Utility::Debug& out, const std::string& path);
 
     private:
         const T* actualValue;
@@ -126,41 +248,67 @@ template<class T> class Comparator {
 
 template<class T> Comparator<T>::Comparator(): actualValue(), expectedValue() {}
 
-template<class T> bool Comparator<T>::operator()(const T& actual, const T& expected) {
-    if(actual == expected) return true;
+template<class T> ComparisonStatusFlags Comparator<T>::operator()(const T& actual, const T& expected) {
+    if(actual == expected) return {};
 
     actualValue = &actual;
     expectedValue = &expected;
-    return false;
+    return ComparisonStatusFlag::Failed;
 }
 
-template<class T> void Comparator<T>::printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
+template<class T> void Comparator<T>::printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) {
     CORRADE_INTERNAL_ASSERT(actualValue && expectedValue);
-    e << "Values" << actual << "and" << expected << "are not the same, actual is\n       "
+    out << "Values" << actual << "and" << expected << "are not the same, actual is\n       "
       << *actualValue << Utility::Debug::newline << "        but expected\n       " << *expectedValue;
+}
+
+template<class T> void Comparator<T>::saveDiagnostic(ComparisonStatusFlags, Utility::Debug&, const std::string&) {
+    CORRADE_ASSERT_UNREACHABLE();
 }
 
 namespace Implementation {
 
 template<class T> struct ComparatorOperatorTraits;
 
-template<class T, class U, class V> struct ComparatorOperatorTraits<bool(T::*)(U, V)> {
+template<class T, class U, class V> struct ComparatorOperatorTraits<ComparisonStatusFlags(T::*)(U, V)> {
     typedef typename std::decay<U>::type ActualType;
     typedef typename std::decay<V>::type ExpectedType;
 };
 
 template<class T> struct ComparatorTraits: ComparatorOperatorTraits<decltype(&Comparator<T>::operator())> {};
 
-CORRADE_HAS_TYPE(CanSaveActualFile, decltype(std::declval<T>().saveActualFile(std::declval<Utility::Debug&>(), "")));
+CORRADE_HAS_TYPE(CanSaveDiagnostic, decltype(std::declval<T>().saveDiagnostic({}, std::declval<Utility::Debug&>(), {})));
 
-template<class T> auto actualFileSaver(typename std::enable_if<CanSaveActualFile<Comparator<T>>::value>::type* = nullptr) -> void(*)(void*, Utility::Debug& out, const std::string&) {
-    return [](void* comparator, Utility::Debug& out, const std::string& path) {
-        static_cast<Comparator<T>*>(comparator)->saveActualFile(out, path);
+template<class T> auto diagnosticSaver(typename std::enable_if<CanSaveDiagnostic<Comparator<T>>::value>::type* = nullptr) -> void(*)(void*, ComparisonStatusFlags, Utility::Debug& out, const std::string&) {
+    return [](void* comparator, ComparisonStatusFlags flags, Utility::Debug& out, const std::string& path) {
+        static_cast<Comparator<T>*>(comparator)->saveDiagnostic(flags, out, path);
     };
 }
-template<class T> auto actualFileSaver(typename std::enable_if<!CanSaveActualFile<Comparator<T>>::value>::type* = nullptr) -> void(*)(void*, Utility::Debug& out, const std::string&) {
+template<class T> auto diagnosticSaver(typename std::enable_if<!CanSaveDiagnostic<Comparator<T>>::value>::type* = nullptr) -> void(*)(void*, ComparisonStatusFlags, Utility::Debug& out, const std::string&) {
     return nullptr;
 }
+
+#ifdef CORRADE_BUILD_DEPRECATED
+/* Support for old signatures (operator() returning bool, printErrorMessage()
+   instead of printMessage()) */
+template<class T, class U, class V> struct ComparatorOperatorTraits<bool(T::*)(U, V)> {
+    typedef typename std::decay<U>::type ActualType;
+    typedef typename std::decay<V>::type ExpectedType;
+};
+constexpr CORRADE_DEPRECATED("return ComparisonStatusFlags in custom Comparator implementations instead") ComparisonStatusFlags comparisonStatusFlags(bool value) {
+    return value ? ComparisonStatusFlags{} : ComparisonStatusFlag::Failed;
+}
+constexpr ComparisonStatusFlags comparisonStatusFlags(ComparisonStatusFlags value) {
+    return value;
+}
+CORRADE_HAS_TYPE(HasOldPrintErrorMessage, decltype(std::declval<T>().printErrorMessage(std::declval<Utility::Error&>(), {}, {})));
+template<class T> CORRADE_DEPRECATED("use printMessage() in custom Comparator implementations instead") void printMessage(typename std::enable_if<HasOldPrintErrorMessage<T>::value, T&>::type comparator, ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) {
+    comparator.printErrorMessage(static_cast<Utility::Error&>(out), actual, expected);
+}
+template<class T> void printMessage(typename std::enable_if<!HasOldPrintErrorMessage<T>::value, T&>::type comparator, ComparisonStatusFlags flags, Utility::Debug& out, const char* actual, const char* expected) {
+    comparator.printMessage(flags, out, actual, expected);
+}
+#endif
 
 }
 

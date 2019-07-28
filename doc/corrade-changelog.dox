@@ -87,8 +87,9 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-new-testsuite TestSuite library
 
--   Custom @ref TestSuite comparators can now optionally save files on
-    test failure. See @ref TestSuite-Tester-save-failed for more information.
+-   Custom @ref TestSuite comparators can now optionally save diagnostic files
+    as well as print formatted messages to the output. See
+    @ref TestSuite-Tester-save-diagnostic for more information.
 -   Added @ref TestSuite::Tester::setTestCaseTemplateName() for convenient
     distinction of different specializations of templated test cases
 
@@ -302,6 +303,13 @@ namespace Corrade {
     to make the @ref Interconnect library more efficient. These two functions
     are now deprecated and just returningthe value of (also deprecated)
     `isConnected()`.
+-   Signatures of @ref TestSuite::Comparator methods were changed in order to
+    support new features. The old variant with
+    @ref TestSuite::Comparator::operator()() "operator()()" returning a
+    @cpp bool @ce and @cpp printErrorMessage() @ce instead of
+    @ref TestSuite::Comparator::printMessage() "printMessage()" is still
+    supported for backwards compatibility but custom comparators are strongly
+    advised to upgrade
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 

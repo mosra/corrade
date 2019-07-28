@@ -39,8 +39,8 @@ namespace Corrade { namespace TestSuite { // the namespace is important
 template<> class Comparator<FileContents> {
     public:
         Comparator(const std::string& pathPrefix = {});
-        bool operator()(const std::string& actual, const std::string& expected);
-        void printErrorMessage(Utility::Error& e, const std::string& actual, const std::string& expected) const;
+        ComparisonStatusFlags operator()(const std::string& actual, const std::string& expected);
+        void printMessage(ComparisonStatusFlags flags, Utility::Debug& out, const std::string& actual, const std::string& expected) const;
 
         // ...
 };

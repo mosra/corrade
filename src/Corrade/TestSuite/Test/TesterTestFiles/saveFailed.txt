@@ -1,8 +1,0 @@
-Starting TesterTest::Test with 2 test cases...
-  FAIL [14] saveFailed() at here.cpp on line 285
-        Files "a.txt" and "b.txt" are not the same, actual ABC but expected abc
- SAVED [14] saveFailed() -> /some/path/b.txt
-  FAIL [14] saveFailed() at here.cpp on line 285
-        Files "a.txt" and "b.txt" are not the same, actual ABC but expected abc
- SAVED [14] saveFailed() -> /some/path/b.txt
-Finished TesterTest::Test with 2 errors out of 2 checks. 2 failed tests saved their output to a file.

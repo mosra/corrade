@@ -47,14 +47,16 @@ namespace Corrade { namespace TestSuite { // the namespace is important
 
 template<> class Comparator<FileContents> {
     public:
-        bool operator()(const std::string& actual, const std::string& expected) {
+        ComparisonStatusFlags operator()(const std::string& actual, const std::string& expected) {
             _actualContents = Utility::Directory::readString(actual);
             _expectedContents = Utility::Directory::readString(expected);
-            return _actualContents == _expectedContents;
+            return _actualContents == _expectedContents ? ComparisonStatusFlags{} :
+                ComparisonStatusFlag::Failed;
         }
 
-        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
-            e << "Files" << actual << "and" << expected << "are not the same, actual" << _actualContents << "but expected" << _expectedContents;
+        void printMessage(ComparisonStatusFlags flags, Utility::Debug& out, const char* actual, const char* expected) const {
+            CORRADE_INTERNAL_ASSERT(flags & ComparisonStatusFlag::Failed);
+            out << "Files" << actual << "and" << expected << "are not the same, actual" << _actualContents << "but expected" << _expectedContents;
         }
 
     private:

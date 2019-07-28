@@ -105,11 +105,12 @@ struct Tester::TesterState {
     std::uint64_t benchmarkResult{};
     TestCase* testCase{};
     bool expectedFailuresDisabled{};
+    bool verbose{};
     ExpectedFailure* expectedFailure{};
     std::string expectedFailureMessage;
     TesterConfiguration configuration;
 
-    std::string saveFailedPath;
+    std::string saveDiagnosticPath;
 };
 
 int* Tester::_argc = nullptr;
@@ -154,8 +155,10 @@ int Tester::exec(std::ostream* const logOutput, std::ostream* const errorOutput)
             .setFromEnvironment("abort-on-fail", "CORRADE_TEST_ABORT_ON_FAIL")
         .addBooleanOption("no-xfail").setHelp("no-xfail", "disallow expected failures")
             .setFromEnvironment("no-xfail", "CORRADE_TEST_NO_XFAIL")
-        .addOption("save-failed", "").setHelp("save-failed", "save files for failed comparisons to given path", "PATH")
-            .setFromEnvironment("save-failed", "CORRADE_TEST_SAVE_FAILED")
+        .addOption("save-diagnostic", "").setHelp("save-diagnostic", "save diagnostic files to given path", "PATH")
+            .setFromEnvironment("save-diagnostic", "CORRADE_TEST_SAVE_DIAGNOSTIC")
+        .addBooleanOption("verbose").setHelp("verbose", "enable verbose output")
+            .setFromEnvironment("verbose", "CORRADE_TEST_VERBOSE")
         .addOption("benchmark", "wall-time").setHelp("benchmark", "default benchmark type", "TYPE")
             .setFromEnvironment("benchmark", "CORRADE_TEST_BENCHMARK")
         .addOption("benchmark-discard", "1").setHelp("benchmark-discard", "discard first N measurements of each benchmark", "N")
@@ -263,8 +266,9 @@ benchmark types:
     if(args.isSet("shuffle"))
         std::shuffle(usedTestCases.begin(), usedTestCases.end(), std::minstd_rand{std::random_device{}()});
 
-    /* Save the path for failed comparisons, if any */
-    _state->saveFailedPath = args.value("save-failed");
+    /* Save the path for diagnostic files, if set; remember verbosity */
+    _state->saveDiagnosticPath = args.value("save-diagnostic");
+    _state->verbose = args.isSet("verbose");
 
     unsigned int errorCount = 0,
         noCheckCount = 0;
@@ -467,10 +471,8 @@ benchmark types:
                 << Debug::boldColor(Debug::Color::Red) << "after first failure"
                 << Debug::boldColor(Debug::Color::Default) << "out of"
                 << _state->checkCount << "checks so far.";
-            if(_state->savedCount) {
-                CORRADE_INTERNAL_ASSERT(_state->savedCount == 1);
-                out << Debug::boldColor(Debug::Color::Green) << "The failed test saved its output to a file.";
-            }
+            if(_state->savedCount)
+                out << Debug::boldColor(Debug::Color::Green) << _state->savedCount << "checks saved diagnostic files.";
             if(noCheckCount)
                 out << Debug::boldColor(Debug::Color::Yellow) << noCheckCount << "test cases didn't contain any checks!";
 
@@ -485,7 +487,7 @@ benchmark types:
     if(errorCount) d << Debug::boldColor(Debug::Color::Default);
     d << "out of" << _state->checkCount << "checks.";
     if(_state->savedCount)
-        d << Debug::boldColor(Debug::Color::Green) << _state->savedCount << "failed tests saved their output to a file.";
+        d << Debug::boldColor(Debug::Color::Green) << _state->savedCount << "checks saved diagnostic files.";
     if(noCheckCount)
         d << Debug::boldColor(Debug::Color::Yellow) << noCheckCount << "test cases didn't contain any checks!";
 
@@ -543,40 +545,60 @@ void Tester::verifyInternal(const char* expression, bool expressionValue) {
     throw Exception();
 }
 
-void Tester::printComparisonMessageInternal(bool equal, const char* actual, const char* expected, void(*printer)(void*, Error&, const char*, const char*), void(*saver)(void*, Debug&, const std::string&), void* comparator) {
+void Tester::printComparisonMessageInternal(ComparisonStatusFlags flags, const char* actual, const char* expected, void(*printer)(void*, ComparisonStatusFlags, Debug&, const char*, const char*), void(*saver)(void*, ComparisonStatusFlags, Debug&, const std::string&), void* comparator) {
     ++_state->checkCount;
 
-    if(!_state->expectedFailure) {
-        if(equal) return;
-    } else if(!equal) {
+    /* If verbose output is not enabled, remove verbose stuff from comparison
+       status flags */
+    if(!_state->verbose) flags &= ~(ComparisonStatusFlag::Verbose|ComparisonStatusFlag::VerboseDiagnostic);
+
+    /* In case of an expected failure, print a static message */
+    if(_state->expectedFailure && (flags & ComparisonStatusFlag::Failed)) {
         Debug out{_state->logOutput, _state->useColor};
         printTestCaseLabel(out, " XFAIL", Debug::Color::Yellow, Debug::Color::Default);
         out << "at" << _state->testFilename << "on line"
             << _state->testCaseLine << Debug::newline << "       " << _state->expectedFailureMessage
             << actual << "and" << expected << "failed the comparison.";
-        return;
-    }
 
-    /* Otherwise print message to error output */
-    {
+    /* Otherwise, in case of an unexpected failure or an unexpected pass, print
+       an error message */
+    } else if(bool(_state->expectedFailure) != bool(flags & ComparisonStatusFlag::Failed)) {
         Error out{_state->errorOutput, _state->useColor};
         printTestCaseLabel(out, _state->expectedFailure ? " XPASS" : "  FAIL", Debug::Color::Red, Debug::Color::Default);
         out << "at" << _state->testFilename << "on line"
             << _state->testCaseLine << Debug::newline << "       ";
-        if(!_state->expectedFailure) printer(comparator, out, actual, expected);
+        if(!_state->expectedFailure) printer(comparator, flags, out, actual, expected);
         else out << actual << "and" << expected << "were expected to fail the comparison.";
+
+    /* Otherwise, if the comparison succeeded but the comparator wants to print
+       a message, let it do that as well */
+    /** @todo print also in case of XFAIL or XPASS? those currently get just a
+        static message and printer is never called */
+    } else if(flags & (ComparisonStatusFlag::Warning|ComparisonStatusFlag::Message|ComparisonStatusFlag::Verbose)) {
+        Debug out{_state->logOutput, _state->useColor};
+        printTestCaseLabel(out,
+            flags & ComparisonStatusFlag::Warning ? "  WARN" : "  INFO",
+            flags & ComparisonStatusFlag::Warning ? Debug::Color::Yellow : Debug::Color::Default,
+            Debug::Color::Default);
+        out << "at" << _state->testFilename << "on line"
+            << _state->testCaseLine << Debug::newline << "       ";
+        printer(comparator, flags, out, actual, expected);
     }
 
-    /* If we want to save actual file data on failed comparison, do that */
-    if(saver && !_state->saveFailedPath.empty()) {
+    /* Save diagnostic file(s) if the comparator wants to and the user allowed
+       that */
+    if(!_state->saveDiagnosticPath.empty() && (flags & (ComparisonStatusFlag::Diagnostic|ComparisonStatusFlag::VerboseDiagnostic))) {
+        CORRADE_ASSERT(saver, "TestSuite::Comparator: comparator returning ComparisonStatusFlag::[Verbose]Diagnostic has to implement saveDiagnostic() as well", );
+
         Debug out{_state->logOutput, _state->useColor};
         ++_state->savedCount;
         printTestCaseLabel(out, " SAVED", Debug::Color::Green, Debug::Color::Default);
-        saver(comparator, out, _state->saveFailedPath);
+        saver(comparator, flags, out, _state->saveDiagnosticPath);
     }
 
-    /* Throw an exception */
-    throw Exception();
+    /* Throw an exception if this is an error */
+    if(bool(_state->expectedFailure) != bool(flags & ComparisonStatusFlag::Failed))
+        throw Exception();
 }
 
 void Tester::registerTest(const char* filename, const char* name) {

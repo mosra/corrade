@@ -1,0 +1,4 @@
+Starting TesterTest::Test with 1 test cases...
+ SAVED [16] compareSaveDiagnostic() -> /some/path/b.txt
+    OK [16] compareSaveDiagnostic()
+Finished TesterTest::Test with 0 errors out of 1 checks. 1 checks saved diagnostic files.
