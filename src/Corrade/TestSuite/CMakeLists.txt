@@ -24,6 +24,7 @@
 #
 
 set(CorradeTestSuite_SRCS
+    Comparator.cpp
     Tester.cpp
 
     Compare/File.cpp

@@ -29,6 +29,7 @@
  * @brief Class @ref Corrade::TestSuite::Comparator, enum @ref Corrade::TestSuite::ComparisonStatusFlag, enum set @ref Corrade::TestSuite::ComparisonStatusFlags
  */
 
+#include "Corrade/TestSuite/visibility.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Debug.h"
 #include "Corrade/Utility/StlForwardString.h"
@@ -102,6 +103,12 @@ enum class ComparisonStatusFlag: std::uint8_t {
 typedef Containers::EnumSet<ComparisonStatusFlag> ComparisonStatusFlags;
 
 CORRADE_ENUMSET_OPERATORS(ComparisonStatusFlags)
+
+/** @debugoperatorenum{ComparisonStatusFlag} */
+CORRADE_TESTSUITE_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, ComparisonStatusFlag value);
+
+/** @debugoperatorenum{ComparisonStatusFlags} */
+CORRADE_TESTSUITE_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, ComparisonStatusFlags value);
 
 /**
 @brief Default comparator implementation

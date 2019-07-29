@@ -26,6 +26,8 @@
 corrade_add_test(TestSuiteArgumentsTest ArgumentsTest.cpp
     ARGUMENTS --arguments-value hello)
 
+corrade_add_test(TestSuiteComparatorTest ComparatorTest.cpp)
+
 corrade_add_test(TestSuiteFailingTest FailingTest.cpp)
 set_tests_properties(TestSuiteFailingTest PROPERTIES WILL_FAIL ON)
 
