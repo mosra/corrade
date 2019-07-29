@@ -29,6 +29,8 @@
  * @brief Forward declarations for the @ref Corrade::PluginManager namespace
  */
 
+#include "Corrade/configure.h"
+
 namespace Corrade { namespace PluginManager {
 
 enum class LoadState: unsigned short;

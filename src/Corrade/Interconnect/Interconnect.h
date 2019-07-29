@@ -31,6 +31,8 @@
 
 #include <cstddef>
 
+#include "Corrade/configure.h"
+
 namespace Corrade { namespace Interconnect {
 
 class Connection;
