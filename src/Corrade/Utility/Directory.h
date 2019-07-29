@@ -254,13 +254,33 @@ and returns an empty string. Returned value is encoded in UTF-8.
 */
 CORRADE_UTILITY_EXPORT std::string current();
 
+#if (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(DOXYGEN_GENERATING_OUTPUT)
+/**
+@brief DLL location
+
+Like @ref executableLocation() but instead of the main executable returns
+location of a DLL that's linked to the application. The @p name is the filename
+of the DLL without the extension, if you pass @cpp nullptr @ce you get the same
+behavior as @ref executableLocation(). If the DLL is not found, an empty string
+is returned. Returned value is encoded in UTF-8.
+
+For example, @cpp dllLocation("CorradeUtility") @ce returns location of the DLL
+containing this function, however note that debug DLLs might be named
+differently than release ones (in case of Corrade and Magnum libraries, with a
+`-d` suffix), and DLLs built with MinGW can (but don't need to) have a `lib` prefix).
+@partialsupport Available only on non-RT @ref CORRADE_TARGET_WINDOWS "Windows".
+*/
+CORRADE_UTILITY_EXPORT std::string dllLocation(const char* name);
+#endif
+
 /**
 @brief Executable location
 
 Returns location of the executable on Linux, Windows, non-sandboxed and
 sandboxed macOS and iOS. On other systems or if the directory can't be found,
 a warning is printed and an empty string is returned. Returned value is encoded
-in UTF-8.
+in UTF-8. On Windows this is equivalent to calling @ref dllLocation() with
+@cpp nullptr @ce as an argument.
 @note The path is returned with forward slashes on all platforms. Use
     @ref toNativeSeparators() to convert it to platform-specific format, if
     needed.

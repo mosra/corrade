@@ -326,6 +326,17 @@ std::string current() {
     #endif
 }
 
+#if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+std::string dllLocation(const char* name) {
+    HMODULE module = GetModuleHandleA(name);
+    if(!module) return {};
+    std::wstring path(MAX_PATH, L'\0');
+    std::size_t size = GetModuleFileNameW(module, &path[0], path.size());
+    path.resize(size);
+    return fromNativeSeparators(narrow(path));
+}
+#endif
+
 std::string executableLocation() {
     /* Linux */
     #if defined(__linux__)
@@ -357,11 +368,7 @@ std::string executableLocation() {
 
     /* Windows (not RT) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    HMODULE module = GetModuleHandle(nullptr);
-    std::wstring path(MAX_PATH, L'\0');
-    std::size_t size = GetModuleFileNameW(module, &path[0], path.size());
-    path.resize(size);
-    return fromNativeSeparators(narrow(path));
+    return dllLocation(nullptr);
 
     /* hardcoded for Emscripten */
     #elif defined(CORRADE_TARGET_EMSCRIPTEN)

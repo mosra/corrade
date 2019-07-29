@@ -77,6 +77,10 @@ struct DirectoryTest: TestSuite::Tester {
     void current();
     void currentUtf8();
 
+    #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    void dllLocation();
+    void dllLocationUtf8();
+    #endif
     void executableLocation();
     void executableLocationUtf8();
 
@@ -180,6 +184,10 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::current,
               &DirectoryTest::currentUtf8,
 
+              #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+              &DirectoryTest::dllLocation,
+              &DirectoryTest::dllLocationUtf8,
+              #endif
               &DirectoryTest::executableLocation,
               &DirectoryTest::executableLocationUtf8,
 
@@ -564,6 +572,53 @@ void DirectoryTest::current() {
 void DirectoryTest::currentUtf8() {
     CORRADE_SKIP("Not sure how to test this.");
 }
+
+#if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+void DirectoryTest::dllLocation() {
+    const std::string dllLocation = Directory::dllLocation(
+        #ifdef __MINGW32__
+        "lib"
+        #endif
+        #ifdef CORRADE_IS_DEBUG_BUILD
+        "CorradeUtility-d"
+        #else
+        "CorradeUtility"
+        #endif
+    );
+
+    Debug{} << "Corrade::Utility DLL location found as:" << dllLocation;
+
+    /* Shouldn't be empty */
+    CORRADE_VERIFY(!dllLocation.empty());
+
+    /* There should be a TestSuite DLL next to this one (assuming all DLLs are
+       installed into a single PATH location) */
+    const std::string testSuiteDllName =
+        #ifdef __MINGW32__
+        "lib"
+        #endif
+        #ifdef CORRADE_IS_DEBUG_BUILD
+        "CorradeTestSuite-d.dll"
+        #else
+        "CorradeTestSuite.dll"
+        #endif
+        ;
+    CORRADE_VERIFY(Directory::exists(Directory::join(Directory::path(dllLocation), testSuiteDllName)));
+
+    /* It shouldn't contain backslashes */
+    CORRADE_COMPARE(dllLocation.find('\\'), std::string::npos);
+
+    /* For nullptr it should give back the same as executableLocation() */
+    CORRADE_COMPARE(Directory::dllLocation(nullptr), Directory::executableLocation());
+
+    /* For a not found DLL it should give back an empty string */
+    CORRADE_COMPARE(Directory::dllLocation("ThisDllDoesNotExist"), "");
+}
+
+void DirectoryTest::dllLocationUtf8() {
+    CORRADE_SKIP("Not sure how to test this.");
+}
+#endif
 
 void DirectoryTest::executableLocation() {
     const std::string executableLocation = Directory::executableLocation();
