@@ -58,7 +58,7 @@ template<> class Comparator<StringLength> {
 
 class StringLength {
     public:
-        StringLength(int epsilon = 0): c(epsilon) {}
+        explicit StringLength(int epsilon = 0): c(epsilon) {}
 
         Comparator<StringLength> comparator() { return c; }
 
