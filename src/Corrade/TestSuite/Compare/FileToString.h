@@ -51,9 +51,9 @@ expected to be in UTF-8. Example usage:
 See @ref TestSuite-Comparator-pseudo-types for more information.
 
 Unlike @ref File and @ref StringToFile, this comparator *doesn't* support the
-@ref TestSuite-Tester-save-failed "--save-failed option", due to the fact that
-the comparison is done against a string and so producing a file isn't that
-helpful as in the other two variants.
+@ref TestSuite-Tester-save-diagnostic "--save-diagnostic option", due to the
+fact that the comparison is done against a string and so producing a file isn't
+that helpful as in the other two variants.
 
 @see @ref File, @ref StringToFile
 */
@@ -66,9 +66,9 @@ template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::FileToString> {
     public:
         Comparator();
 
-        bool operator()(const std::string& filename, const std::string& expectedContents);
+        ComparisonStatusFlags operator()(const std::string& filename, const std::string& expectedContents);
 
-        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const;
+        void printMessage(ComparisonStatusFlags flags, Utility::Debug& out, const char* actual, const char* expected) const;
 
     private:
         enum class State {

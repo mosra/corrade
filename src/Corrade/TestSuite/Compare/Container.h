@@ -66,51 +66,53 @@ namespace Implementation {
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<class T> class Comparator<Compare::Container<T>> {
     public:
-        bool operator()(const T& actual, const T& expected);
+        ComparisonStatusFlags operator()(const T& actual, const T& expected);
 
-        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const;
+        void printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const;
 
     private:
         const T* _actualContents;
         const T* _expectedContents;
 };
 
-template<class T> bool Comparator<Compare::Container<T>>::operator()(const T& actual, const T& expected) {
+template<class T> ComparisonStatusFlags Comparator<Compare::Container<T>>::operator()(const T& actual, const T& expected) {
     _actualContents = &actual;
     _expectedContents = &expected;
 
-    if(_actualContents->size() != _expectedContents->size()) return false;
+    if(_actualContents->size() != _expectedContents->size())
+        return ComparisonStatusFlag::Failed;
 
     /* Recursively use comparator on the values */
     Comparator<typename std::decay<decltype((*_actualContents)[0])>::type> comparator;
     for(std::size_t i = 0; i != _actualContents->size(); ++i)
-        if(!comparator((*_actualContents)[i], (*_expectedContents)[i])) return false;
+        if(comparator((*_actualContents)[i], (*_expectedContents)[i]) & ComparisonStatusFlag::Failed)
+            return ComparisonStatusFlag::Failed;
 
-    return true;
+    return {};
 }
 
-template<class T> void Comparator<Compare::Container<T>>::printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
-    e << "Containers" << actual << "and" << expected << "have different";
+template<class T> void Comparator<Compare::Container<T>>::printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const {
+    out << "Containers" << actual << "and" << expected << "have different";
     if(_actualContents->size() != _expectedContents->size())
-        e << "size, actual" << _actualContents->size() << "but" << _expectedContents->size() << "expected. Actual contents:\n       ";
+        out << "size, actual" << _actualContents->size() << "but" << _expectedContents->size() << "expected. Actual contents:\n       ";
     else
-        e << "contents, actual:\n       ";
+        out << "contents, actual:\n       ";
 
-    e << *_actualContents << Utility::Debug::newline << "        but expected\n       " << *_expectedContents << Utility::Debug::newline << "       ";
+    out << *_actualContents << Utility::Debug::newline << "        but expected\n       " << *_expectedContents << Utility::Debug::newline << "       ";
 
     Comparator<typename std::decay<decltype((*_actualContents)[0])>::type> comparator;
     for(std::size_t i = 0, end = Implementation::max(_actualContents->size(), _expectedContents->size()); i != end; ++i) {
         if(_actualContents->size() > i && _expectedContents->size() > i &&
-            comparator((*_actualContents)[i], (*_expectedContents)[i])) continue;
+            !(comparator((*_actualContents)[i], (*_expectedContents)[i]) & ComparisonStatusFlag::Failed)) continue;
 
         if(_actualContents->size() <= i)
-            e << "Expected has" << (*_expectedContents)[i];
+            out << "Expected has" << (*_expectedContents)[i];
         else if(_expectedContents->size() <= i)
-            e << "Actual has" << (*_actualContents)[i];
+            out << "Actual has" << (*_actualContents)[i];
         else
-            e << "Actual" << (*_actualContents)[i] << "but" << (*_expectedContents)[i] << "expected";
+            out << "Actual" << (*_actualContents)[i] << "but" << (*_expectedContents)[i] << "expected";
 
-        e << "on position" << i << Utility::Debug::nospace << ".";
+        out << "on position" << i << Utility::Debug::nospace << ".";
         break;
     }
 }

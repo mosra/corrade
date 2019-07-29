@@ -50,41 +50,53 @@ FloatingPointTest::FloatingPointTest() {
 }
 
 void FloatingPointTest::smallDelta() {
-    CORRADE_VERIFY(Comparator<float>()(3.202122f,
-                                       3.202123f));
-    CORRADE_VERIFY(Comparator<double>()(3.202122232425,
-                                        3.202122232426));
+    CORRADE_COMPARE(Comparator<float>()(3.202122f,
+                                        3.202123f),
+        ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<double>()(3.202122232425,
+                                         3.202122232426),
+        ComparisonStatusFlags{});
     #ifndef CORRADE_TARGET_EMSCRIPTEN
-    CORRADE_VERIFY(Comparator<long double>()(3.202122232425765l,
-                                             3.202122232425766l));
+    CORRADE_COMPARE(Comparator<long double>()(3.202122232425765l,
+                                              3.202122232425766l),
+        ComparisonStatusFlags{});
     #endif
 }
 
 void FloatingPointTest::largeDelta() {
-    CORRADE_VERIFY(!Comparator<float>()(3.20212f,
-                                        3.20213f));
-    CORRADE_VERIFY(!Comparator<double>()(3.20212223242,
-                                         3.20212223243));
+    CORRADE_COMPARE(Comparator<float>()(3.20212f,
+                                        3.20213f),
+        ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<double>()(3.20212223242,
+                                         3.20212223243),
+        ComparisonStatusFlag::Failed);
     #ifndef CORRADE_TARGET_EMSCRIPTEN
-    CORRADE_VERIFY(!Comparator<long double>()(3.20212223242572l,
-                                              3.20212223242573l));
+    CORRADE_COMPARE(Comparator<long double>()(3.20212223242572l,
+                                              3.20212223242573l),
+        ComparisonStatusFlag::Failed);
     #endif
 }
 
 void FloatingPointTest::nan() {
-    CORRADE_VERIFY(Comparator<float>()(std::numeric_limits<float>::quiet_NaN(),
-                                       std::numeric_limits<float>::quiet_NaN()));
-    CORRADE_VERIFY(!Comparator<float>()(std::numeric_limits<float>::quiet_NaN(), 0));
-    CORRADE_VERIFY(!Comparator<float>()(0, std::numeric_limits<float>::quiet_NaN()));
+    CORRADE_COMPARE(Comparator<float>()(std::numeric_limits<float>::quiet_NaN(),
+                                        std::numeric_limits<float>::quiet_NaN()),
+        ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<float>()(std::numeric_limits<float>::quiet_NaN(), 0),
+        ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<float>()(0, std::numeric_limits<float>::quiet_NaN()),
+        ComparisonStatusFlag::Failed);
 }
 
 void FloatingPointTest::infinity() {
-    CORRADE_VERIFY(Comparator<float>()(std::numeric_limits<float>::infinity(),
-                                       std::numeric_limits<float>::infinity()));
-    CORRADE_VERIFY(Comparator<float>()(-std::numeric_limits<float>::infinity(),
-                                       -std::numeric_limits<float>::infinity()));
-    CORRADE_VERIFY(!Comparator<float>()(std::numeric_limits<float>::quiet_NaN(),
-                                        std::numeric_limits<float>::infinity()));
+    CORRADE_COMPARE(Comparator<float>()(std::numeric_limits<float>::infinity(),
+                                        std::numeric_limits<float>::infinity()),
+        ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<float>()(-std::numeric_limits<float>::infinity(),
+                                        -std::numeric_limits<float>::infinity()),
+        ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<float>()(std::numeric_limits<float>::quiet_NaN(),
+                                       std::numeric_limits<float>::infinity()),
+        ComparisonStatusFlag::Failed);
 }
 
 void FloatingPointTest::output() {
@@ -93,8 +105,9 @@ void FloatingPointTest::output() {
     {
         Error e(&out);
         Comparator<float> compare;
-        compare(3.0f, 8.0f);
-        compare.printErrorMessage(e, "a", "b");
+        ComparisonStatusFlags flags = compare(3.0f, 8.0f);
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
+        compare.printMessage(flags, e, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Floating-point values a and b are not the same, actual 3 but 8 expected (delta -5).\n");

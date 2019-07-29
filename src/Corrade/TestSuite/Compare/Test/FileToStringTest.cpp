@@ -43,9 +43,9 @@ struct FileToStringTest: Tester {
 
     void notFound();
 
-    void outputActualSmaller();
-    void outputExpectedSmaller();
-    void output();
+    void differentContents();
+    void actualSmaller();
+    void expectedSmaller();
 };
 
 FileToStringTest::FileToStringTest() {
@@ -55,9 +55,9 @@ FileToStringTest::FileToStringTest() {
 
               &FileToStringTest::notFound,
 
-              &FileToStringTest::outputActualSmaller,
-              &FileToStringTest::outputExpectedSmaller,
-              &FileToStringTest::output});
+              &FileToStringTest::differentContents,
+              &FileToStringTest::actualSmaller,
+              &FileToStringTest::expectedSmaller});
 }
 
 void FileToStringTest::same() {
@@ -78,50 +78,54 @@ void FileToStringTest::notFound() {
     {
         Error e(&out);
         Comparator<Compare::FileToString> compare;
-        CORRADE_VERIFY(!compare("nonexistent.txt", "Hello World!"));
-        compare.printErrorMessage(e, "file", "b");
+        ComparisonStatusFlags flags = compare("nonexistent.txt", "Hello World!");
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
+        compare.printMessage(flags, e, "file", "b");
     }
 
     CORRADE_COMPARE(out.str(), "File file (nonexistent.txt) cannot be read.\n");
 }
 
-void FileToStringTest::outputActualSmaller() {
+void FileToStringTest::differentContents() {
     std::stringstream out;
 
     {
         Error e(&out);
         Comparator<Compare::FileToString> compare;
-        CORRADE_VERIFY(!compare(Utility::Directory::join(FILETEST_DIR, "smaller.txt"), "Hello World!"));
-        compare.printErrorMessage(e, "a", "b");
+        ComparisonStatusFlags flags = compare(Utility::Directory::join(FILETEST_DIR, "different.txt"), "Hello World!");
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
+        compare.printMessage(flags, e, "a", "b");
+    }
+
+    CORRADE_COMPARE(out.str(), "Files a and b have different contents. Actual character w but W expected on position 6.\n");
+}
+
+void FileToStringTest::actualSmaller() {
+    std::stringstream out;
+
+    {
+        Error e(&out);
+        Comparator<Compare::FileToString> compare;
+        ComparisonStatusFlags flags = compare(Utility::Directory::join(FILETEST_DIR, "smaller.txt"), "Hello World!");
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
+        compare.printMessage(flags, e, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Files a and b have different size, actual 7 but 12 expected. Expected has character o on position 7.\n");
 }
 
-void FileToStringTest::outputExpectedSmaller() {
+void FileToStringTest::expectedSmaller() {
     std::stringstream out;
 
     {
         Error e(&out);
         Comparator<Compare::FileToString> compare;
-        CORRADE_VERIFY(!compare(Utility::Directory::join(FILETEST_DIR, "base.txt"), "Hello W"));
-        compare.printErrorMessage(e, "a", "b");
+        ComparisonStatusFlags flags = compare(Utility::Directory::join(FILETEST_DIR, "base.txt"), "Hello W");
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
+        compare.printMessage(flags, e, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Files a and b have different size, actual 12 but 7 expected. Actual has character o on position 7.\n");
-}
-
-void FileToStringTest::output() {
-    std::stringstream out;
-
-    {
-        Error e(&out);
-        Comparator<Compare::FileToString> compare;
-        CORRADE_VERIFY(!compare(Utility::Directory::join(FILETEST_DIR, "different.txt"), "Hello World!"));
-        compare.printErrorMessage(e, "a", "b");
-    }
-
-    CORRADE_COMPARE(out.str(), "Files a and b have different contents. Actual character w but W expected on position 6.\n");
 }
 
 }}}}}

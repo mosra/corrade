@@ -29,6 +29,7 @@
  * @brief Class @ref Corrade::TestSuite::Compare::Less, @ref Corrade::TestSuite::Compare::LessOrEqual, @ref Corrade::TestSuite::Compare::GreaterOrEqual, @ref Corrade::TestSuite::Compare::Greater
  */
 
+#include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/TestSuite.h"
 #include "Corrade/Utility/Debug.h"
 
@@ -135,16 +136,17 @@ template<class T> inline Around<T> around(T epsilon) { return Around<T>{epsilon}
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<class T> class Comparator<Compare::Less<T>> {
     public:
-        bool operator()(const T& actual, const T& expected) {
+        ComparisonStatusFlags operator()(const T& actual, const T& expected) {
             _actualValue = &actual;
             _expectedValue = &expected;
-            return bool(*_actualValue < *_expectedValue);
+            return *_actualValue < *_expectedValue ?
+                ComparisonStatusFlags{} : ComparisonStatusFlag::Failed;
         }
 
-        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
-            e << "Value" << actual << "is not less than" << expected
-              << Utility::Debug::nospace << ", actual is" << *_actualValue
-              << "but expected <" << *_expectedValue;
+        void printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const {
+            out << "Value" << actual << "is not less than" << expected
+                << Utility::Debug::nospace << ", actual is" << *_actualValue
+                << "but expected <" << *_expectedValue;
         }
 
     private:
@@ -154,16 +156,17 @@ template<class T> class Comparator<Compare::Less<T>> {
 
 template<class T> class Comparator<Compare::LessOrEqual<T>> {
     public:
-        bool operator()(const T& actual, const T& expected) {
+        ComparisonStatusFlags operator()(const T& actual, const T& expected) {
             _actualValue = &actual;
             _expectedValue = &expected;
-            return bool(*_actualValue <= *_expectedValue);
+            return *_actualValue <= *_expectedValue ?
+                ComparisonStatusFlags{} : ComparisonStatusFlag::Failed;
         }
 
-        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
-            e << "Value" << actual << "is not less than or equal to" << expected
-              << Utility::Debug::nospace << ", actual is" << *_actualValue
-              << "but expected <=" << *_expectedValue;
+        void printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const {
+            out << "Value" << actual << "is not less than or equal to" << expected
+                << Utility::Debug::nospace << ", actual is" << *_actualValue
+                << "but expected <=" << *_expectedValue;
         }
 
     private:
@@ -173,16 +176,17 @@ template<class T> class Comparator<Compare::LessOrEqual<T>> {
 
 template<class T> class Comparator<Compare::GreaterOrEqual<T>> {
     public:
-        bool operator()(const T& actual, const T& expected) {
+        ComparisonStatusFlags operator()(const T& actual, const T& expected) {
             _actualValue = &actual;
             _expectedValue = &expected;
-            return bool(*_actualValue >= *_expectedValue);
+            return *_actualValue >= *_expectedValue ?
+                ComparisonStatusFlags{} : ComparisonStatusFlag::Failed;
         }
 
-        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
-            e << "Value" << actual << "is not greater than or equal to" << expected
-              << Utility::Debug::nospace << ", actual is" << *_actualValue
-              << "but expected >=" << *_expectedValue;
+        void printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const {
+            out << "Value" << actual << "is not greater than or equal to" << expected
+                << Utility::Debug::nospace << ", actual is" << *_actualValue
+                << "but expected >=" << *_expectedValue;
         }
 
     private:
@@ -192,16 +196,17 @@ template<class T> class Comparator<Compare::GreaterOrEqual<T>> {
 
 template<class T> class Comparator<Compare::Greater<T>> {
     public:
-        bool operator()(const T& actual, const T& expected) {
+        ComparisonStatusFlags operator()(const T& actual, const T& expected) {
             _actualValue = &actual;
             _expectedValue = &expected;
-            return bool(*_actualValue > *_expectedValue);
+            return *_actualValue > *_expectedValue ?
+                ComparisonStatusFlags{} : ComparisonStatusFlag::Failed;
         }
 
-        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
-            e << "Value" << actual << "is not greater than" << expected
-              << Utility::Debug::nospace << ", actual is" << *_actualValue
-              << "but expected >" << *_expectedValue;
+        void printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const {
+            out << "Value" << actual << "is not greater than" << expected
+                << Utility::Debug::nospace << ", actual is" << *_actualValue
+                << "but expected >" << *_expectedValue;
         }
 
     private:
@@ -215,18 +220,19 @@ template<class T> class Comparator<Compare::Around<T>> {
            initializers for Bar" in NumericTest.cpp: */
         explicit Comparator(T epsilon): _epsilon(epsilon) {}
 
-        bool operator()(const T& actual, const T& expected) {
+        ComparisonStatusFlags operator()(const T& actual, const T& expected) {
             _actualValue = &actual;
             _expectedValue = &expected;
             return *_actualValue >= *_expectedValue - _epsilon &&
-                   *_expectedValue + _epsilon >= *_actualValue;
+                   *_expectedValue + _epsilon >= *_actualValue ?
+                ComparisonStatusFlags{} : ComparisonStatusFlag::Failed;
         }
 
-        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
-            e << "Value" << actual << "is not around" << expected
-              << Utility::Debug::nospace << ", actual is" << *_actualValue
-              << "but" << *_expectedValue - _epsilon << "<= expected <="
-              << *_expectedValue + _epsilon;
+        void printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const {
+            out << "Value" << actual << "is not around" << expected
+                << Utility::Debug::nospace << ", actual is" << *_actualValue
+                << "but" << *_expectedValue - _epsilon << "<= expected <="
+                << *_expectedValue + _epsilon;
         }
 
     private:

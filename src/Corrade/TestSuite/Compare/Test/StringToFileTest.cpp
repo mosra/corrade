@@ -46,11 +46,9 @@ class StringToFileTest: public Tester {
 
         void notFound();
 
-        void outputActualSmaller();
-        void outputExpectedSmaller();
-        void output();
-
-        void saveFailed();
+        void differentContents();
+        void actualSmaller();
+        void expectedSmaller();
 };
 
 StringToFileTest::StringToFileTest() {
@@ -60,11 +58,9 @@ StringToFileTest::StringToFileTest() {
 
               &StringToFileTest::notFound,
 
-              &StringToFileTest::outputActualSmaller,
-              &StringToFileTest::outputExpectedSmaller,
-              &StringToFileTest::output,
-
-              &StringToFileTest::saveFailed});
+              &StringToFileTest::differentContents,
+              &StringToFileTest::actualSmaller,
+              &StringToFileTest::expectedSmaller});
 }
 
 void StringToFileTest::same() {
@@ -82,57 +78,51 @@ void StringToFileTest::utf8Filename() {
 void StringToFileTest::notFound() {
     std::stringstream out;
 
+    Comparator<Compare::StringToFile> compare;
+    ComparisonStatusFlags flags = compare("Hello World!", "nonexistent.txt");
+    /* Should return Diagnostic even though we can't find the expected file
+        as it doesn't matter */
+    CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic);
+
     {
-        Error e(&out);
-        Comparator<Compare::StringToFile> compare;
-        CORRADE_VERIFY(!compare("Hello World!", "nonexistent.txt"));
-        compare.printErrorMessage(e, "a", "file");
+        Debug redirectOutput{&out};
+        compare.printMessage(flags, redirectOutput, "a", "file");
     }
 
     CORRADE_COMPARE(out.str(), "File file (nonexistent.txt) cannot be read.\n");
-}
 
-void StringToFileTest::outputActualSmaller() {
-    std::stringstream out;
+    /* Create the output dir if it doesn't exist, but avoid stale files making
+       false positives */
+    CORRADE_VERIFY(Utility::Directory::mkpath(FILETEST_SAVE_DIR));
+    std::string filename = Utility::Directory::join(FILETEST_SAVE_DIR, "nonexistent.txt");
+    if(Utility::Directory::exists(filename))
+        CORRADE_VERIFY(Utility::Directory::rm(filename));
 
     {
-        Error e(&out);
-        Comparator<Compare::StringToFile> compare;
-        CORRADE_VERIFY(!compare("Hello W", Utility::Directory::join(FILETEST_DIR, "base.txt")));
-        compare.printErrorMessage(e, "a", "b");
+        out.str({});
+        Debug redirectOutput(&out);
+        compare.saveDiagnostic(flags, redirectOutput, FILETEST_SAVE_DIR);
     }
 
-    CORRADE_COMPARE(out.str(), "Files a and b have different size, actual 7 but 12 expected. Expected has character o on position 7.\n");
+    /* Extreme dogfooding, eheh. We expect the *actual* contents, but under the
+       *expected* filename */
+    CORRADE_COMPARE(out.str(), Utility::formatString("-> {}\n", filename));
+    CORRADE_COMPARE_AS(filename, "Hello World!", FileToString);
 }
 
-void StringToFileTest::outputExpectedSmaller() {
+void StringToFileTest::differentContents() {
     std::stringstream out;
 
-    {
-        Error e(&out);
-        Comparator<Compare::StringToFile> compare;
-        CORRADE_VERIFY(!compare("Hello World!", Utility::Directory::join(FILETEST_DIR, "smaller.txt")));
-        compare.printErrorMessage(e, "a", "b");
-    }
-
-    CORRADE_COMPARE(out.str(), "Files a and b have different size, actual 12 but 7 expected. Actual has character o on position 7.\n");
-}
-
-void StringToFileTest::output() {
-    std::stringstream out;
+    Comparator<Compare::StringToFile> compare;
+    ComparisonStatusFlags flags = compare("Hello world?", Utility::Directory::join(FILETEST_DIR, "base.txt"));
+    CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic);
 
     {
-        Error e(&out);
-        Comparator<Compare::StringToFile> compare;
-        CORRADE_VERIFY(!compare("Hello world?", Utility::Directory::join(FILETEST_DIR, "base.txt")));
-        compare.printErrorMessage(e, "a", "b");
+        Debug redirectOutput(&out);
+        compare.printMessage(flags, redirectOutput, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Files a and b have different contents. Actual character w but W expected on position 6.\n");
-}
-
-void StringToFileTest::saveFailed() {
-    std::stringstream out;
 
     /* Create the output dir if it doesn't exist, but avoid stale files making
        false positives */
@@ -142,17 +132,47 @@ void StringToFileTest::saveFailed() {
         CORRADE_VERIFY(Utility::Directory::rm(filename));
 
     {
-        Error e(&out);
-        Comparator<Compare::StringToFile> compare;
-        CORRADE_VERIFY(!compare("Hello world?", Utility::Directory::join(FILETEST_DIR, "base.txt")));
-        compare.saveActualFile(e, FILETEST_SAVE_DIR);
+        out.str({});
+        Debug redirectOutput(&out);
+        compare.saveDiagnostic(flags, redirectOutput, FILETEST_SAVE_DIR);
     }
-
-    CORRADE_COMPARE(out.str(), Utility::formatString("-> {}\n", filename));
 
     /* Extreme dogfooding, eheh. We expect the *actual* contents, but under the
        *expected* filename */
+    CORRADE_COMPARE(out.str(), Utility::formatString("-> {}\n", filename));
     CORRADE_COMPARE_AS(filename, "Hello world?", FileToString);
+}
+
+void StringToFileTest::actualSmaller() {
+    std::stringstream out;
+
+    {
+        Error e(&out);
+        Comparator<Compare::StringToFile> compare;
+        ComparisonStatusFlags flags = compare("Hello W", Utility::Directory::join(FILETEST_DIR, "base.txt"));
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic);
+        compare.printMessage(flags, e, "a", "b");
+        /* not testing diagnostic as differentContents() tested this code path
+           already */
+    }
+
+    CORRADE_COMPARE(out.str(), "Files a and b have different size, actual 7 but 12 expected. Expected has character o on position 7.\n");
+}
+
+void StringToFileTest::expectedSmaller() {
+    std::stringstream out;
+
+    {
+        Error e(&out);
+        Comparator<Compare::StringToFile> compare;
+        ComparisonStatusFlags flags = compare("Hello World!", Utility::Directory::join(FILETEST_DIR, "smaller.txt"));
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic);
+        compare.printMessage(flags, e, "a", "b");
+        /* not testing diagnostic as differentContents() tested this code path
+           already */
+    }
+
+    CORRADE_COMPARE(out.str(), "Files a and b have different size, actual 12 but 7 expected. Actual has character o on position 7.\n");
 }
 
 }}}}}

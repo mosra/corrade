@@ -30,6 +30,7 @@
 #include <algorithm> /* std::max() */
 #endif
 
+#include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Directory.h"
 
@@ -37,42 +38,44 @@ namespace Corrade { namespace TestSuite {
 
 Comparator<Compare::FileToString>::Comparator(): _state(State::ReadError) {}
 
-bool Comparator<Compare::FileToString>::operator()(const std::string& filename, const std::string& expectedContents) {
+ComparisonStatusFlags Comparator<Compare::FileToString>::operator()(const std::string& filename, const std::string& expectedContents) {
     _filename = filename;
 
-    if(!Utility::Directory::exists(filename)) return false;
+    if(!Utility::Directory::exists(filename))
+        return ComparisonStatusFlag::Failed;
 
     _actualContents = Utility::Directory::readString(filename);
     _expectedContents = expectedContents;
     _state = State::Success;
 
-    return _actualContents == expectedContents;
+    return _actualContents == expectedContents ? ComparisonStatusFlags{} :
+        ComparisonStatusFlag::Failed;
 }
 
-void Comparator<Compare::FileToString>::printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
+void Comparator<Compare::FileToString>::printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const {
     if(_state != State::Success) {
-        e << "File" << actual << "(" + _filename + ")" << "cannot be read.";
+        out << "File" << actual << "(" + _filename + ")" << "cannot be read.";
         return;
     }
 
-    e << "Files" << actual << "and" << expected << "have different";
+    out << "Files" << actual << "and" << expected << "have different";
     if(_actualContents.size() != _expectedContents.size())
-        e << "size, actual" << _actualContents.size() << "but" << _expectedContents.size() << "expected.";
+        out << "size, actual" << _actualContents.size() << "but" << _expectedContents.size() << "expected.";
     else
-        e << "contents.";
+        out << "contents.";
 
     for(std::size_t i = 0, end = std::max(_actualContents.size(), _expectedContents.size()); i != end; ++i) {
         if(_actualContents.size() > i && _expectedContents.size() > i && _actualContents[i] == _expectedContents[i]) continue;
 
         /** @todo do this without std::string */
         if(_actualContents.size() <= i)
-            e << "Expected has character" << std::string() + _expectedContents[i];
+            out << "Expected has character" << std::string() + _expectedContents[i];
         else if(_expectedContents.size() <= i)
-            e << "Actual has character" << std::string() + _actualContents[i];
+            out << "Actual has character" << std::string() + _actualContents[i];
         else
-            e << "Actual character" << std::string() + _actualContents[i] << "but" << std::string() + _expectedContents[i] << "expected";
+            out << "Actual character" << std::string() + _actualContents[i] << "but" << std::string() + _expectedContents[i] << "expected";
 
-        e << "on position" << i << Utility::Debug::nospace << ".";
+        out << "on position" << i << Utility::Debug::nospace << ".";
         break;
     }
 

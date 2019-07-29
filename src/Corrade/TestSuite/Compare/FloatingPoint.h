@@ -58,8 +58,8 @@ namespace Implementation {
 
     template<class T> class CORRADE_TESTSUITE_EXPORT FloatComparator {
         public:
-            bool operator()(T actual, T expected);
-            void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const;
+            ComparisonStatusFlags operator()(T actual, T expected);
+            void printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const;
 
         private:
             T _actualValue, _expectedValue;

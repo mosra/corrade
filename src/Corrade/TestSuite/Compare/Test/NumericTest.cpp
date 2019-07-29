@@ -102,17 +102,18 @@ void NumericTest::less() {
     float b = 9.28f;
     float a = 9.27f;
     float c = 9.29f;
-    CORRADE_VERIFY(Comparator<Compare::Less<float>>{}(a, b));
-    CORRADE_VERIFY(!Comparator<Compare::Less<float>>{}(b, b));
-    CORRADE_VERIFY(!Comparator<Compare::Less<float>>{}(c, b));
+    CORRADE_COMPARE(Comparator<Compare::Less<float>>{}(a, b), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::Less<float>>{}(b, b), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<Compare::Less<float>>{}(c, b), ComparisonStatusFlag::Failed);
 
     std::stringstream out;
 
     {
         Error e(&out);
         Comparator<Less<float>> compare;
-        CORRADE_VERIFY(!compare(c, b));
-        compare.printErrorMessage(e, "c", "b");
+        ComparisonStatusFlags flags = compare(c, b);
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
+        compare.printMessage(flags, e, "c", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Value c is not less than b, actual is 9.29 but expected < 9.28\n");
@@ -122,17 +123,18 @@ void NumericTest::lessOrEqual() {
     float a = 9.27f;
     float c = 9.29f;
     float b = 9.28f;
-    CORRADE_VERIFY(Comparator<Compare::LessOrEqual<float>>{}(a, b));
-    CORRADE_VERIFY(Comparator<Compare::LessOrEqual<float>>{}(b, b));
-    CORRADE_VERIFY(!Comparator<Compare::LessOrEqual<float>>{}(c, b));
+    CORRADE_COMPARE(Comparator<Compare::LessOrEqual<float>>{}(a, b), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::LessOrEqual<float>>{}(b, b), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::LessOrEqual<float>>{}(c, b), ComparisonStatusFlag::Failed);
 
     std::stringstream out;
 
     {
         Error e(&out);
         Comparator<LessOrEqual<float>> compare;
-        CORRADE_VERIFY(!compare(c, b));
-        compare.printErrorMessage(e, "c", "b");
+        ComparisonStatusFlags flags = compare(c, b);
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
+        compare.printMessage(flags, e, "c", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Value c is not less than or equal to b, actual is 9.29 but expected <= 9.28\n");
@@ -142,17 +144,18 @@ void NumericTest::greaterOrEqual() {
     float c = 9.29f;
     float b = 9.28f;
     float a = 9.27f;
-    CORRADE_VERIFY(!Comparator<Compare::GreaterOrEqual<float>>{}(a, b));
-    CORRADE_VERIFY(Comparator<Compare::GreaterOrEqual<float>>{}(b, b));
-    CORRADE_VERIFY(Comparator<Compare::GreaterOrEqual<float>>{}(c, b));
+    CORRADE_COMPARE(Comparator<Compare::GreaterOrEqual<float>>{}(a, b), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<Compare::GreaterOrEqual<float>>{}(b, b), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::GreaterOrEqual<float>>{}(c, b), ComparisonStatusFlags{});
 
     std::stringstream out;
 
     {
         Error e(&out);
         Comparator<GreaterOrEqual<float>> compare;
-        CORRADE_VERIFY(!compare(a, b));
-        compare.printErrorMessage(e, "a", "b");
+        ComparisonStatusFlags flags = compare(a, b);
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
+        compare.printMessage(flags, e, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Value a is not greater than or equal to b, actual is 9.27 but expected >= 9.28\n");
@@ -162,17 +165,17 @@ void NumericTest::greater() {
     float b = 9.28f;
     float c = 9.29f;
     float a = 9.27f;
-    CORRADE_VERIFY(!Comparator<Compare::Greater<float>>{}(a, b));
-    CORRADE_VERIFY(!Comparator<Compare::Greater<float>>{}(b, b));
-    CORRADE_VERIFY(Comparator<Compare::Greater<float>>{}(c, b));
+    CORRADE_COMPARE(Comparator<Compare::Greater<float>>{}(a, b), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<Compare::Greater<float>>{}(b, b), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<Compare::Greater<float>>{}(c, b), ComparisonStatusFlags{});
 
     std::stringstream out;
 
     {
         Error e(&out);
         Comparator<Greater<float>> compare;
-        CORRADE_VERIFY(!compare(a, b));
-        compare.printErrorMessage(e, "a", "b");
+        ComparisonStatusFlags flags = compare(a, b);
+        compare.printMessage(flags, e, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Value a is not greater than b, actual is 9.27 but expected > 9.28\n");
@@ -184,18 +187,19 @@ void NumericTest::around() {
     float c = 9.31f;
     float d = 9.29f;
     float e = 9.27f;
-    CORRADE_VERIFY(!Comparator<Compare::Around<float>>{0.02f}(a, b));
-    CORRADE_VERIFY(!Comparator<Compare::Around<float>>{0.02f}(c, b));
-    CORRADE_VERIFY(Comparator<Compare::Around<float>>{0.02f}(d, b));
-    CORRADE_VERIFY(Comparator<Compare::Around<float>>{0.02f}(e, b));
+    CORRADE_COMPARE(Comparator<Compare::Around<float>>{0.02f}(a, b), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<Compare::Around<float>>{0.02f}(c, b), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<Compare::Around<float>>{0.02f}(d, b), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::Around<float>>{0.02f}(e, b), ComparisonStatusFlags{});
 
     std::stringstream out;
 
     {
         Error err{&out};
         Comparator<Around<float>> compare{0.02f};
-        CORRADE_VERIFY(!compare(a, b));
-        compare.printErrorMessage(err, "a", "b");
+        ComparisonStatusFlags flags = compare(a, b);
+        CORRADE_COMPARE(flags, ComparisonStatusFlag::Failed);
+        compare.printMessage(flags, err, "a", "b");
     }
 
     CORRADE_COMPARE(out.str(), "Value a is not around b, actual is 9.25 but 9.26 <= expected <= 9.3\n");
@@ -222,59 +226,59 @@ void NumericTest::explicitBoolConversion() {
         Bar operator+(const Bar&) const { return {}; }
     };
 
-    CORRADE_VERIFY(Comparator<Compare::Less<Foo>>{}({}, {}));
-    CORRADE_VERIFY(Comparator<Compare::LessOrEqual<Foo>>{}({}, {}));
-    CORRADE_VERIFY(Comparator<Compare::GreaterOrEqual<Foo>>{}({}, {}));
-    CORRADE_VERIFY(Comparator<Compare::Greater<Foo>>{}({}, {}));
-    CORRADE_VERIFY(Comparator<Compare::Around<Bar>>{{}}({}, {}));
+    CORRADE_COMPARE(Comparator<Compare::Less<Foo>>{}({}, {}), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::LessOrEqual<Foo>>{}({}, {}), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::GreaterOrEqual<Foo>>{}({}, {}), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::Greater<Foo>>{}({}, {}), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::Around<Bar>>{{}}({}, {}), ComparisonStatusFlags{});
 }
 
 void NumericTest::lessMulti() {
     Vec2 a{9.27f, 3.11f};
     Vec2 b{9.28f, 3.12f};
     Vec2 c{9.28f, 3.10f};
-    CORRADE_VERIFY(Comparator<Compare::Less<Vec2>>{}(a, b));
-    CORRADE_VERIFY(!Comparator<Compare::Less<Vec2>>{}(b, b));
+    CORRADE_COMPARE(Comparator<Compare::Less<Vec2>>{}(a, b), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::Less<Vec2>>{}(b, b), ComparisonStatusFlag::Failed);
 
     /* b is neither less nor greater/equal than c */
-    CORRADE_VERIFY(!Comparator<Compare::Less<Vec2>>{}(c, b));
-    CORRADE_VERIFY(!Comparator<Compare::GreaterOrEqual<Vec2>>{}(c, b));
+    CORRADE_COMPARE(Comparator<Compare::Less<Vec2>>{}(c, b), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<Compare::GreaterOrEqual<Vec2>>{}(c, b), ComparisonStatusFlag::Failed);
 }
 
 void NumericTest::lessOrEqualMulti() {
     Vec2 a{9.27f, 3.11f};
     Vec2 b{9.27f, 3.12f};
     Vec2 c{9.28f, 3.10f};
-    CORRADE_VERIFY(Comparator<Compare::LessOrEqual<Vec2>>{}(a, b));
-    CORRADE_VERIFY(Comparator<Compare::LessOrEqual<Vec2>>{}(b, b));
+    CORRADE_COMPARE(Comparator<Compare::LessOrEqual<Vec2>>{}(a, b), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::LessOrEqual<Vec2>>{}(b, b), ComparisonStatusFlags{});
 
     /* b is neither less/equal nor greater than c */
-    CORRADE_VERIFY(!Comparator<Compare::LessOrEqual<Vec2>>{}(c, b));
-    CORRADE_VERIFY(!Comparator<Compare::Greater<Vec2>>{}(c, b));
+    CORRADE_COMPARE(Comparator<Compare::LessOrEqual<Vec2>>{}(c, b), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<Compare::Greater<Vec2>>{}(c, b), ComparisonStatusFlag::Failed);
 }
 
 void NumericTest::greaterOrEqualMulti() {
     Vec2 a{9.27f, 3.12f};
     Vec2 b{9.27f, 3.11f};
     Vec2 c{9.28f, 3.10f};
-    CORRADE_VERIFY(Comparator<Compare::GreaterOrEqual<Vec2>>{}(a, b));
-    CORRADE_VERIFY(Comparator<Compare::GreaterOrEqual<Vec2>>{}(b, b));
+    CORRADE_COMPARE(Comparator<Compare::GreaterOrEqual<Vec2>>{}(a, b), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::GreaterOrEqual<Vec2>>{}(b, b), ComparisonStatusFlags{});
 
     /* b is neither greater/equal nor less than c */
-    CORRADE_VERIFY(!Comparator<Compare::GreaterOrEqual<Vec2>>{}(c, b));
-    CORRADE_VERIFY(!Comparator<Compare::Less<Vec2>>{}(c, b));
+    CORRADE_COMPARE(Comparator<Compare::GreaterOrEqual<Vec2>>{}(c, b), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<Compare::Less<Vec2>>{}(c, b), ComparisonStatusFlag::Failed);
 }
 
 void NumericTest::greaterMulti() {
     Vec2 a{9.28f, 3.12f};
     Vec2 b{9.27f, 3.11f};
     Vec2 c{9.28f, 3.10f};
-    CORRADE_VERIFY(Comparator<Compare::Greater<Vec2>>{}(a, b));
-    CORRADE_VERIFY(!Comparator<Compare::Greater<Vec2>>{}(b, b));
+    CORRADE_COMPARE(Comparator<Compare::Greater<Vec2>>{}(a, b), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::Greater<Vec2>>{}(b, b), ComparisonStatusFlag::Failed);
 
     /* b is neither greater nor less/equal than c */
-    CORRADE_VERIFY(!Comparator<Compare::Greater<Vec2>>{}(c, b));
-    CORRADE_VERIFY(!Comparator<Compare::LessOrEqual<Vec2>>{}(c, b));
+    CORRADE_COMPARE(Comparator<Compare::Greater<Vec2>>{}(c, b), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<Compare::LessOrEqual<Vec2>>{}(c, b), ComparisonStatusFlag::Failed);
 }
 
 void NumericTest::aroundMulti() {
@@ -287,17 +291,16 @@ void NumericTest::aroundMulti() {
     Vec2 e{9.25f, 3.14f};
 
     /* Too below for both / too above for both */
-    CORRADE_VERIFY(!Comparator<Compare::Around<Vec2>>{epsilon}(a, b));
-    CORRADE_VERIFY(!Comparator<Compare::Around<Vec2>>{epsilon}(c, b));
+    CORRADE_COMPARE(Comparator<Compare::Around<Vec2>>{epsilon}(a, b), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<Compare::Around<Vec2>>{epsilon}(c, b), ComparisonStatusFlag::Failed);
 
     /* Slightly above for one and slightly below for the other */
-    CORRADE_VERIFY(Comparator<Compare::Around<Vec2>>{epsilon}(d, b));
+    CORRADE_COMPARE(Comparator<Compare::Around<Vec2>>{epsilon}(d, b), ComparisonStatusFlags{});
 
     /* Too below for one and too above for the other */
-    CORRADE_VERIFY(!Comparator<Compare::Around<Vec2>>{epsilon}(e, b));
+    CORRADE_COMPARE(Comparator<Compare::Around<Vec2>>{epsilon}(e, b), ComparisonStatusFlag::Failed);
 }
 
 }}}}}
 
 CORRADE_TEST_MAIN(Corrade::TestSuite::Compare::Test::NumericTest)
-

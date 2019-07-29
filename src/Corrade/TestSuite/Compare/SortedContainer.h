@@ -49,13 +49,13 @@ template<class T> class SortedContainer: public Container<T> {};
 #ifndef DOXYGEN_GENERATING_OUTPUT
 template<class T> class Comparator<Compare::SortedContainer<T>>: public Comparator<Compare::Container<T>> {
     public:
-        bool operator()(const T& actual, const T& expected);
+        ComparisonStatusFlags operator()(const T& actual, const T& expected);
 
     private:
         T _actualSorted, _expectedSorted;
 };
 
-template<class T> bool Comparator<Compare::SortedContainer<T>>::operator()(const T& actual, const T& expected) {
+template<class T> ComparisonStatusFlags Comparator<Compare::SortedContainer<T>>::operator()(const T& actual, const T& expected) {
     _actualSorted = actual;
     _expectedSorted = expected;
 

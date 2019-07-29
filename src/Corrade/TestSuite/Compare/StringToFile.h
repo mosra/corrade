@@ -50,14 +50,15 @@ expected to be in UTF-8. Example usage:
 
 See @ref TestSuite-Comparator-pseudo-types for more information.
 
-@section TestSuite-Compare-StringToFile-save-failed Saving files for failed comparisons
+@section TestSuite-Compare-StringToFile-save-diagnostic Saving files for failed comparisons
 
-The comparator supports the @ref TestSuite-Tester-save-failed "--save-failed option",
-saving contents of the actual file to given directory with a filename matching
-the expected file. You can use it for example to quickly update expected test
-data --- point the option to the directory with expected test files and let the
-test overwrite them with actual results. The @ref File variant supports the
-same.
+The comparator supports the @ref TestSuite-Tester-save-diagnostic "--save-diagnostic option"
+--- if the comparison fails, it saves actual file contents to given directory
+with a filename matching the expected file. You can use it to perform a manual
+data comparison with an external tool or for example to quickly update expected
+test data --- point the option to the directory with expected test files and
+let the test overwrite them with actual results. The @ref StringToFile variant
+supports the same.
 
 @see @ref Compare::File, @ref Compare::FileToString
 */
@@ -70,11 +71,11 @@ template<> class CORRADE_TESTSUITE_EXPORT Comparator<Compare::StringToFile> {
     public:
         Comparator();
 
-        bool operator()(const std::string& actualContents, const std::string& filename);
+        ComparisonStatusFlags operator()(const std::string& actualContents, const std::string& filename);
 
-        void printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const;
+        void printMessage(ComparisonStatusFlags flags, Utility::Debug& out, const char* actual, const char* expected) const;
 
-        void saveActualFile(Utility::Debug& out, const std::string& path);
+        void saveDiagnostic(ComparisonStatusFlags flags, Utility::Debug& out, const std::string& path);
 
     private:
         enum class State {

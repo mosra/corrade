@@ -31,6 +31,7 @@
 #include <algorithm> /* std::max() */
 #endif
 
+#include "Corrade/TestSuite/Comparator.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Directory.h"
 
@@ -39,59 +40,64 @@ namespace Corrade { namespace TestSuite {
 #ifndef DOXYGEN_GENERATING_OUTPUT
 Comparator<Compare::File>::Comparator(std::string pathPrefix): _actualState{State::ReadError}, _expectedState{State::ReadError}, _pathPrefix{std::move(pathPrefix)} {}
 
-bool Comparator<Compare::File>::operator()(const std::string& actualFilename, const std::string& expectedFilename) {
+ComparisonStatusFlags Comparator<Compare::File>::operator()(const std::string& actualFilename, const std::string& expectedFilename) {
     _actualFilename = Utility::Directory::join(_pathPrefix, actualFilename);
     _expectedFilename = Utility::Directory::join(_pathPrefix, expectedFilename);
 
     if(!Utility::Directory::exists(_actualFilename))
-        return false;
+        return ComparisonStatusFlag::Failed;
 
     _actualState = State::Success;
 
-    if(!Utility::Directory::exists(_expectedFilename))
-        return false;
-
+    /* Read the actual file contents before the expected so if the expected
+       file can't be read, we can still save actual file contents */
     _actualContents = Utility::Directory::readString(_actualFilename);
+
+    /* If this fails, we already have the actual contents so we can save them */
+    if(!Utility::Directory::exists(_expectedFilename))
+        return ComparisonStatusFlag::Diagnostic|ComparisonStatusFlag::Failed;
+
     _expectedContents = Utility::Directory::readString(_expectedFilename);
     _expectedState = State::Success;
 
-    return _actualContents == _expectedContents;
+    return _actualContents == _expectedContents ? ComparisonStatusFlags{} :
+        ComparisonStatusFlag::Diagnostic|ComparisonStatusFlag::Failed;
 }
 
-void Comparator<Compare::File>::printErrorMessage(Utility::Error& e, const char* actual, const char* expected) const {
+void Comparator<Compare::File>::printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const {
     if(_actualState != State::Success) {
-        e << "Actual file" << actual << "(" + _actualFilename + ")" << "cannot be read.";
+        out << "Actual file" << actual << "(" + _actualFilename + ")" << "cannot be read.";
         return;
     }
 
     if(_expectedState != State::Success) {
-        e << "Expected file" << expected << "(" + _expectedFilename + ")" << "cannot be read.";
+        out << "Expected file" << expected << "(" + _expectedFilename + ")" << "cannot be read.";
         return;
     }
 
-    e << "Files" << actual << "and" << expected << "have different";
+    out << "Files" << actual << "and" << expected << "have different";
     if(_actualContents.size() != _expectedContents.size())
-        e << "size, actual" << _actualContents.size() << "but" << _expectedContents.size() << "expected.";
+        out << "size, actual" << _actualContents.size() << "but" << _expectedContents.size() << "expected.";
     else
-        e << "contents.";
+        out << "contents.";
 
     for(std::size_t i = 0, end = std::max(_actualContents.size(), _expectedContents.size()); i != end; ++i) {
         if(_actualContents.size() > i && _expectedContents.size() > i && _actualContents[i] == _expectedContents[i]) continue;
 
         /** @todo do this without std::string */
         if(_actualContents.size() <= i)
-            e << "Expected has character" << std::string() + _expectedContents[i];
+            out << "Expected has character" << std::string() + _expectedContents[i];
         else if(_expectedContents.size() <= i)
-            e << "Actual has character" << std::string() + _actualContents[i];
+            out << "Actual has character" << std::string() + _actualContents[i];
         else
-            e << "Actual character" << std::string() + _actualContents[i] << "but" << std::string() + _expectedContents[i] << "expected";
+            out << "Actual character" << std::string() + _actualContents[i] << "but" << std::string() + _expectedContents[i] << "expected";
 
-        e << "on position" << i << Utility::Debug::nospace << ".";
+        out << "on position" << i << Utility::Debug::nospace << ".";
         break;
     }
 }
 
-void Comparator<Compare::File>::saveActualFile(Utility::Debug& out, const std::string& path) {
+void Comparator<Compare::File>::saveDiagnostic(ComparisonStatusFlags, Utility::Debug& out, const std::string& path) {
     std::string filename = Utility::Directory::join(path, Utility::Directory::filename(_expectedFilename));
     if(Utility::Directory::writeString(filename, _actualContents))
         out << "->" << filename;
