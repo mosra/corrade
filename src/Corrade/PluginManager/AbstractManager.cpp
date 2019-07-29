@@ -32,6 +32,7 @@
 #include <sstream>
 #include <utility>
 
+#include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Reference.h"
 #include "Corrade/PluginManager/AbstractPlugin.h"
@@ -867,6 +868,28 @@ Utility::Debug& operator<<(Utility::Debug& debug, LoadState value) {
 
     return debug << "PluginManager::LoadState(" << Debug::nospace << reinterpret_cast<void*>(std::uint16_t(value)) << Debug::nospace << ")";
 }
+
+Utility::Debug& operator<<(Utility::Debug& debug, const LoadStates value) {
+    return Containers::enumSetDebugOutput(debug, value, "PluginManager::LoadStates{}", {
+        LoadState::NotFound,
+        #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+        LoadState::WrongPluginVersion,
+        LoadState::WrongInterfaceVersion,
+        LoadState::WrongMetadataFile,
+        LoadState::UnresolvedDependency,
+        LoadState::LoadFailed,
+        LoadState::Loaded,
+        LoadState::NotLoaded,
+        LoadState::UnloadFailed,
+        LoadState::Required,
+        #endif
+        LoadState::Static,
+        #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+        LoadState::Used
+        #endif
+        });
+}
+
 #endif
 
 }}

@@ -186,6 +186,9 @@ typedef Containers::EnumSet<LoadState> LoadStates;
 
 CORRADE_ENUMSET_OPERATORS(LoadStates)
 
+/** @debugoperatorenum{LoadStates} */
+CORRADE_PLUGINMANAGER_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, PluginManager::LoadStates value);
+
 /**
 @brief Non-templated base for plugin managers
 

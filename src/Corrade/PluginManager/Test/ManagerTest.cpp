@@ -116,7 +116,8 @@ struct ManagerTest: TestSuite::Tester {
     void utf8Path();
     #endif
 
-    void debug();
+    void debugLoadState();
+    void debugLoadStates();
 };
 
 ManagerTest::ManagerTest() {
@@ -182,7 +183,8 @@ ManagerTest::ManagerTest() {
               &ManagerTest::utf8Path,
               #endif
 
-              &ManagerTest::debug});
+              &ManagerTest::debugLoadState,
+              &ManagerTest::debugLoadStates});
 
     initialize();
 }
@@ -967,11 +969,18 @@ void ManagerTest::utf8Path() {
 }
 #endif
 
-void ManagerTest::debug() {
+void ManagerTest::debugLoadState() {
     std::ostringstream o;
 
     Debug(&o) << LoadState::Static << LoadState(0x3f);
     CORRADE_COMPARE(o.str(), "PluginManager::LoadState::Static PluginManager::LoadState(0x3f)\n");
+}
+
+void ManagerTest::debugLoadStates() {
+    std::ostringstream out;
+
+    Debug{&out} << (LoadState::Static|LoadState::NotFound) << LoadStates{};
+    CORRADE_COMPARE(out.str(), "PluginManager::LoadState::NotFound|PluginManager::LoadState::Static PluginManager::LoadStates{}\n");
 }
 
 }}}}
