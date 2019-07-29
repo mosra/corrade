@@ -841,27 +841,27 @@ AbstractManager::Plugin::~Plugin() {
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-Utility::Debug& operator<<(Utility::Debug& debug, PluginManager::LoadState value) {
+Utility::Debug& operator<<(Utility::Debug& debug, LoadState value) {
     switch(value) {
         /* LCOV_EXCL_START */
-        #define ls(state) case PluginManager::LoadState::state: return debug << "PluginManager::LoadState::" #state;
-        ls(NotFound)
+        #define _c(value) case LoadState::value: return debug << "PluginManager::LoadState::" #value;
+        _c(NotFound)
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-        ls(WrongPluginVersion)
-        ls(WrongInterfaceVersion)
-        ls(WrongMetadataFile)
-        ls(UnresolvedDependency)
-        ls(LoadFailed)
-        ls(Loaded)
-        ls(NotLoaded)
-        ls(UnloadFailed)
-        ls(Required)
+        _c(WrongPluginVersion)
+        _c(WrongInterfaceVersion)
+        _c(WrongMetadataFile)
+        _c(UnresolvedDependency)
+        _c(LoadFailed)
+        _c(Loaded)
+        _c(NotLoaded)
+        _c(UnloadFailed)
+        _c(Required)
         #endif
-        ls(Static)
+        _c(Static)
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-        ls(Used)
+        _c(Used)
         #endif
-        #undef ls
+        #undef _c
         /* LCOV_EXCL_STOP */
     }
 
