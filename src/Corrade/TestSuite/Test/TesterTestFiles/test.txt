@@ -13,7 +13,6 @@ Starting TesterTest::Test with 45 test cases...
         The world is not mad yet. 2 + 2 and 5 failed the comparison.
  XFAIL [06] expectFail() at here.cpp on line 279
         The world is not mad yet. Expression false == true failed.
-    OK [06] expectFail()
  XPASS [07] unexpectedPassExpression() at here.cpp on line 292
         Expression true == true was expected to fail.
  XPASS [08] unexpectedPassEqual() at here.cpp on line 297
@@ -31,10 +30,8 @@ Starting TesterTest::Test with 45 test cases...
         hello
   WARN [14] compareWarning() at here.cpp on line 329
         This is a warning when comparing "a.txt" and "b.txt"
-    OK [14] compareWarning()
   INFO [15] compareMessage() at here.cpp on line 325
         This is a message when comparing "a.txt" and "b.txt"
-    OK [15] compareMessage()
     OK [16] compareSaveDiagnostic()
   SKIP [17] skip()
         This testcase is skipped.

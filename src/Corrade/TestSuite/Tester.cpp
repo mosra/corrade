@@ -106,6 +106,7 @@ struct Tester::TesterState {
     TestCase* testCase{};
     bool expectedFailuresDisabled{};
     bool verbose{};
+    bool testCaseLabelPrinted{};
     ExpectedFailure* expectedFailure{};
     std::string expectedFailureMessage;
     TesterConfiguration configuration;
@@ -359,6 +360,7 @@ benchmark types:
 
         _state->testCaseId = testCase.first;
         _state->testCaseInstanceId = testCase.second.instanceId;
+        _state->testCaseLabelPrinted = false;
         if(testCase.second.instanceId == ~std::size_t{})
             _state->testCaseDescription = {};
         else
@@ -416,10 +418,14 @@ benchmark types:
                 printTestCaseLabel(out, "     ?", Debug::Color::Yellow, Debug::Color::Yellow);
                 ++noCheckCount;
 
-            /* A successful test case */
+            /* A successful test case. Print the OK only if there wasn't some
+               other message (INFO, WARN, XFAIL or SAVED) before, as it would
+               otherwise make the output confusing ("is it OK or WARN?!") */
             } else if(testCase.second.type == TestCaseType::Test) {
-                Debug out{logOutput, _state->useColor};
-                printTestCaseLabel(out, "    OK", Debug::Color::Default, Debug::Color::Default);
+                if(!_state->testCaseLabelPrinted) {
+                    Debug out{logOutput, _state->useColor};
+                    printTestCaseLabel(out, "    OK", Debug::Color::Default, Debug::Color::Default);
+                }
 
             /* Benchmark. Completely custom printing. */
             } else {
@@ -511,6 +517,8 @@ benchmark types:
 }
 
 void Tester::printTestCaseLabel(Debug& out, const char* const status, const Debug::Color statusColor, const Debug::Color labelColor) {
+    _state->testCaseLabelPrinted = true;
+
     const char* padding = PaddingString + sizeof(PaddingString) - digitCount(_state->testCases.size()) + digitCount(_state->testCaseId) - 1;
 
     out << Debug::boldColor(statusColor) << status
