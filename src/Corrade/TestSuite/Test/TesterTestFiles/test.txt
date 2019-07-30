@@ -35,8 +35,7 @@ Starting TesterTest::Test with 45 test cases...
   INFO [15] compareMessage() at here.cpp on line 325
         This is a message when comparing "a.txt" and "b.txt"
     OK [15] compareMessage()
-  FAIL [16] compareSaveDiagnostic() at here.cpp on line 334
-        Files "a.txt" and "b.txt" are not the same, actual ABC but expected abc
+    OK [16] compareSaveDiagnostic()
   SKIP [17] skip()
         This testcase is skipped.
     OK [18] testCaseName<15>()
@@ -115,4 +114,4 @@ Benchmark end: 500
  BENCH [44] (no data)        B benchmarkNoMacro(this is gonna fail)@1x0
   SKIP [45] benchmarkSkip()@1
         Can't verify the measurements anyway.
-Finished TesterTest::Test with 12 errors out of 55 checks. 6 test cases didn't contain any checks!
+Finished TesterTest::Test with 11 errors out of 55 checks. 6 test cases didn't contain any checks!

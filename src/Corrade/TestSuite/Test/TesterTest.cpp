@@ -331,7 +331,7 @@ void Test::compareWarning() {
 
 void Test::compareSaveDiagnostic() {
     /* Let the flags be overriden by TesterTest::saveDiagnostic*() later */
-    CORRADE_COMPARE_WITH("a.txt", "b.txt", MessageDiagnostic(MessageDiagnostic::flags ? MessageDiagnostic::flags : ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic));
+    CORRADE_COMPARE_WITH("a.txt", "b.txt", MessageDiagnostic(MessageDiagnostic::flags ? MessageDiagnostic::flags : ComparisonStatusFlag::Diagnostic));
 }
 
 void Test::skip() {
@@ -518,8 +518,10 @@ struct TesterTest: Tester {
     /* variant with no --save-diagnostic verified in test() already */
     void saveDiagnosticVerboseDisabled();
     void saveDiagnosticVerboseEnabled();
-    void saveDiagnosticFailed();
-    void saveDiagnosticSucceeded();
+    void saveDiagnosticFailedDisabled();
+    void saveDiagnosticFailedEnabled();
+    void saveDiagnosticSucceededDisabled();
+    void saveDiagnosticSucceededEnabled();
     void saveDiagnosticAbortOnFail();
 
     void benchmarkWallClock();
@@ -570,8 +572,10 @@ TesterTest::TesterTest() {
 
               &TesterTest::saveDiagnosticVerboseDisabled,
               &TesterTest::saveDiagnosticVerboseEnabled,
-              &TesterTest::saveDiagnosticFailed,
-              &TesterTest::saveDiagnosticSucceeded,
+              &TesterTest::saveDiagnosticFailedDisabled,
+              &TesterTest::saveDiagnosticFailedEnabled,
+              &TesterTest::saveDiagnosticSucceededDisabled,
+              &TesterTest::saveDiagnosticSucceededEnabled,
               &TesterTest::saveDiagnosticAbortOnFail,
 
               &TesterTest::benchmarkWallClock,
@@ -1012,7 +1016,28 @@ void TesterTest::saveDiagnosticVerboseEnabled() {
         Compare::StringToFile);
 }
 
-void TesterTest::saveDiagnosticFailed() {
+void TesterTest::saveDiagnosticFailedDisabled() {
+    std::stringstream out;
+
+    MessageDiagnostic::xfail = false;
+    MessageDiagnostic::flags = ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic;
+    const char* argv[] = { "", "--color", "off", "--only", "16" };
+    int argc = Containers::arraySize(argv);
+    Tester::registerArguments(argc, argv);
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(&out, &out);
+
+    /* Should save the file and print the error, then hint about the flag in
+       the final wrap-up */
+    CORRADE_COMPARE(result, 1);
+    CORRADE_COMPARE_AS(out.str(),
+        Utility::Directory::join(TESTER_TEST_DIR, "saveDiagnosticFailedDisabled.txt"),
+        Compare::StringToFile);
+}
+
+void TesterTest::saveDiagnosticFailedEnabled() {
     std::stringstream out;
 
     MessageDiagnostic::xfail = false;
@@ -1028,11 +1053,32 @@ void TesterTest::saveDiagnosticFailed() {
     /* Should save the file and print both the error and SAVED */
     CORRADE_COMPARE(result, 1);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Directory::join(TESTER_TEST_DIR, "saveDiagnosticFailed.txt"),
+        Utility::Directory::join(TESTER_TEST_DIR, "saveDiagnosticFailedEnabled.txt"),
         Compare::StringToFile);
 }
 
-void TesterTest::saveDiagnosticSucceeded() {
+void TesterTest::saveDiagnosticSucceededDisabled() {
+    std::stringstream out;
+
+    MessageDiagnostic::xfail = false;
+    MessageDiagnostic::flags = ComparisonStatusFlag::Diagnostic;
+    const char* argv[] = { "", "--color", "off", "--only", "16" };
+    int argc = Containers::arraySize(argv);
+    Tester::registerArguments(argc, argv);
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(&out, &out);
+
+    /* Shouldn't save and shouldn't hint existence of the flag either as
+       there's no error */
+    CORRADE_COMPARE(result, 0);
+    CORRADE_COMPARE_AS(out.str(),
+        Utility::Directory::join(TESTER_TEST_DIR, "saveDiagnosticSucceededDisabled.txt"),
+        Compare::StringToFile);
+}
+
+void TesterTest::saveDiagnosticSucceededEnabled() {
     std::stringstream out;
 
     MessageDiagnostic::xfail = false;
@@ -1048,7 +1094,7 @@ void TesterTest::saveDiagnosticSucceeded() {
     /* Should save the file (and print) even though there's no error */
     CORRADE_COMPARE(result, 0);
     CORRADE_COMPARE_AS(out.str(),
-        Utility::Directory::join(TESTER_TEST_DIR, "saveDiagnosticSucceeded.txt"),
+        Utility::Directory::join(TESTER_TEST_DIR, "saveDiagnosticSucceededEnabled.txt"),
         Compare::StringToFile);
 }
 

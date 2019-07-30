@@ -99,7 +99,7 @@ struct Tester::TesterState {
         testCaseDescription, benchmarkName;
     std::size_t testCaseId{~std::size_t{}}, testCaseInstanceId{~std::size_t{}},
         testCaseRepeatId{~std::size_t{}}, benchmarkBatchSize{}, testCaseLine{},
-        checkCount{}, savedCount{};
+        checkCount{}, diagnosticCount{};
 
     std::uint64_t benchmarkBegin{};
     std::uint64_t benchmarkResult{};
@@ -491,9 +491,18 @@ benchmark types:
         if(errorCount) out << Debug::boldColor(Debug::Color::Default);
         out << "out of" << _state->checkCount << "checks.";
     }
-    if(_state->savedCount)
-        out << Debug::boldColor(Debug::Color::Green) << _state->savedCount
-            << "checks saved diagnostic files.";
+    if(_state->diagnosticCount) {
+        /* If --save-diagnostic was not enabled but failed checks indicated
+           that they *could* save diagnostic files, hint that to the user. */
+        if(!_state->saveDiagnosticPath.empty()) {
+            out << Debug::boldColor(Debug::Color::Green) << _state->diagnosticCount
+                << "checks saved diagnostic files.";
+        } else {
+            out << Debug::boldColor(Debug::Color::Green) << _state->diagnosticCount
+                << "failed checks are able to save diagnostic files, enable "
+                   "--save-diagnostic to get them.";
+        }
+    }
     if(noCheckCount)
         out << Debug::boldColor(Debug::Color::Yellow) << noCheckCount
             << "test cases didn't contain any checks!";
@@ -592,15 +601,22 @@ void Tester::printComparisonMessageInternal(ComparisonStatusFlags flags, const c
         printer(comparator, flags, out, actual, expected);
     }
 
-    /* Save diagnostic file(s) if the comparator wants to and the user allowed
-       that */
-    if(!_state->saveDiagnosticPath.empty() && (flags & (ComparisonStatusFlag::Diagnostic|ComparisonStatusFlag::VerboseDiagnostic))) {
-        CORRADE_ASSERT(saver, "TestSuite::Comparator: comparator returning ComparisonStatusFlag::[Verbose]Diagnostic has to implement saveDiagnostic() as well", );
+    /* Save diagnostic file(s) if the comparator wants to ... */
+    if(flags & (ComparisonStatusFlag::Diagnostic|ComparisonStatusFlag::VerboseDiagnostic)) {
+        /* ... and the user allowed that. */
+        if(!_state->saveDiagnosticPath.empty()) {
+            CORRADE_ASSERT(saver, "TestSuite::Comparator: comparator returning ComparisonStatusFlag::[Verbose]Diagnostic has to implement saveDiagnostic() as well", );
 
-        Debug out{_state->logOutput, _state->useColor};
-        ++_state->savedCount;
-        printTestCaseLabel(out, " SAVED", Debug::Color::Green, Debug::Color::Default);
-        saver(comparator, flags, out, _state->saveDiagnosticPath);
+            Debug out{_state->logOutput, _state->useColor};
+            printTestCaseLabel(out, " SAVED", Debug::Color::Green, Debug::Color::Default);
+            saver(comparator, flags, out, _state->saveDiagnosticPath);
+            ++_state->diagnosticCount;
+
+        /* If the user didn't allow, count all failure diagnostics in order to
+           hint to the user that there's --save-diagnostic in the final output */
+        } else if(flags & ComparisonStatusFlag::Failed) {
+            ++_state->diagnosticCount;
+        }
     }
 
     /* Throw an exception if this is an error */

@@ -47,8 +47,10 @@ corrade_add_test(TestSuiteTesterTest TesterTest.cpp
         TesterTestFiles/repeatAll.txt
         TesterTestFiles/repeatEvery.txt
         TesterTestFiles/saveDiagnosticAbortOnFail.txt
-        TesterTestFiles/saveDiagnosticSucceeded.txt
-        TesterTestFiles/saveDiagnosticFailed.txt
+        TesterTestFiles/saveDiagnosticSucceededDisabled.txt
+        TesterTestFiles/saveDiagnosticSucceededEnabled.txt
+        TesterTestFiles/saveDiagnosticFailedDisabled.txt
+        TesterTestFiles/saveDiagnosticFailedEnabled.txt
         TesterTestFiles/saveDiagnosticVerboseDisabled.txt
         TesterTestFiles/saveDiagnosticVerboseEnabled.txt
         TesterTestFiles/shuffleOne.txt
