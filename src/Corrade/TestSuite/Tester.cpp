@@ -400,6 +400,11 @@ benchmark types:
 
             if(testCase.second.benchmarkEnd)
                 measurements[i] = _state->benchmarkResult;
+
+            /* There shouldn't be any stale expected failure after the test
+               case exists. If this fires for user code, they did something
+               VERY WRONG. (Or I have a serious bug.) */
+            CORRADE_INTERNAL_ASSERT(!_state->expectedFailure);
         }
 
         /* Print success message if the test case wasn't failed/skipped */
@@ -410,17 +415,16 @@ benchmark types:
                 printTestCaseLabel(out, "     ?", Debug::Color::Yellow, Debug::Color::Yellow);
                 ++noCheckCount;
 
-            /* Test case or benchmark with expected failure inside */
-            } else if(testCase.second.type == TestCaseType::Test || _state->expectedFailure) {
+            /* A successful test case */
+            } else if(testCase.second.type == TestCaseType::Test) {
                 Debug out{logOutput, _state->useColor};
-                printTestCaseLabel(out,
-                    _state->expectedFailure ? " XFAIL" : "    OK",
-                    _state->expectedFailure ? Debug::Color::Yellow : Debug::Color::Default,
-                    Debug::Color::Default);
-                if(_state->expectedFailure) out << Debug::newline << "       " << _state->expectedFailureMessage;
+                printTestCaseLabel(out, "    OK", Debug::Color::Default, Debug::Color::Default);
 
             /* Benchmark. Completely custom printing. */
             } else {
+                /* All other types are benchmarks */
+                CORRADE_INTERNAL_ASSERT(testCase.second.type != TestCaseType::Test);
+
                 Debug out{logOutput, _state->useColor};
 
                 const char* padding = PaddingString + sizeof(PaddingString) - digitCount(_state->testCases.size()) + digitCount(_state->testCaseId) - 1;
