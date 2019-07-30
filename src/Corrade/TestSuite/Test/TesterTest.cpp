@@ -95,7 +95,7 @@ template<> class Comparator<MessageDiagnostic> {
 
         void saveDiagnostic(ComparisonStatusFlags flags, Utility::Debug& out, const std::string& path) {
             out << "->" << Utility::Directory::join(path,
-                flags & ComparisonStatusFlag::Verbose ? "b.verbose.txt" : "b.txt");
+                flags & ComparisonStatusFlag::VerboseDiagnostic ? "b.verbose.txt" : "b.txt");
         }
 
     private:
