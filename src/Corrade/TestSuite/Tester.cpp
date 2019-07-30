@@ -304,9 +304,10 @@ benchmark types:
         state->testCaseInstanceId = ~std::size_t{};
     }};
 
+    bool abortedOnFail = false;
     for(std::pair<int, TestCase> testCase: usedTestCases) {
         /* Reset output to stdout for each test case to prevent debug
-            output segfaults */
+           output segfaults */
         /** @todo Drop this when Debug::setOutput() is removed */
         Debug resetDebugRedirect{&std::cout};
         Error resetErrorRedirect{&std::cerr};
@@ -469,31 +470,33 @@ benchmark types:
 
         /* Abort on first failure */
         } else if(args.isSet("abort-on-fail") && !skipped) {
-            Debug out{logOutput, _state->useColor};
-            out << Debug::boldColor(Debug::Color::Red) << "Aborted"
-                << Debug::boldColor(Debug::Color::Default) << _state->testName
-                << Debug::boldColor(Debug::Color::Red) << "after first failure"
-                << Debug::boldColor(Debug::Color::Default) << "out of"
-                << _state->checkCount << "checks so far.";
-            if(_state->savedCount)
-                out << Debug::boldColor(Debug::Color::Green) << _state->savedCount << "checks saved diagnostic files.";
-            if(noCheckCount)
-                out << Debug::boldColor(Debug::Color::Yellow) << noCheckCount << "test cases didn't contain any checks!";
-
-            return 1;
+            abortedOnFail = true;
+            break;
         }
     }
 
-    Debug d(logOutput, _state->useColor);
-    d << Debug::boldColor(Debug::Color::Default) << "Finished" << _state->testName << "with";
-    if(errorCount) d << Debug::boldColor(Debug::Color::Red);
-    d << errorCount << "errors";
-    if(errorCount) d << Debug::boldColor(Debug::Color::Default);
-    d << "out of" << _state->checkCount << "checks.";
+    /* Print the final wrap-up */
+    Debug out(logOutput, _state->useColor);
+    if(abortedOnFail) {
+        out << Debug::boldColor(Debug::Color::Red) << "Aborted"
+            << Debug::boldColor(Debug::Color::Default) << _state->testName
+            << Debug::boldColor(Debug::Color::Red) << "after first failure"
+            << Debug::boldColor(Debug::Color::Default) << "out of"
+            << _state->checkCount << "checks so far.";
+    } else {
+        out << Debug::boldColor(Debug::Color::Default) << "Finished"
+            << _state->testName << "with";
+        if(errorCount) out << Debug::boldColor(Debug::Color::Red);
+        out << errorCount << "errors";
+        if(errorCount) out << Debug::boldColor(Debug::Color::Default);
+        out << "out of" << _state->checkCount << "checks.";
+    }
     if(_state->savedCount)
-        d << Debug::boldColor(Debug::Color::Green) << _state->savedCount << "checks saved diagnostic files.";
+        out << Debug::boldColor(Debug::Color::Green) << _state->savedCount
+            << "checks saved diagnostic files.";
     if(noCheckCount)
-        d << Debug::boldColor(Debug::Color::Yellow) << noCheckCount << "test cases didn't contain any checks!";
+        out << Debug::boldColor(Debug::Color::Yellow) << noCheckCount
+            << "test cases didn't contain any checks!";
 
     return errorCount != 0 || noCheckCount != 0;
 }
