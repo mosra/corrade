@@ -267,7 +267,7 @@ is returned. Returned value is encoded in UTF-8.
 For example, @cpp dllLocation("CorradeUtility") @ce returns location of the DLL
 containing this function, however note that debug DLLs might be named
 differently than release ones (in case of Corrade and Magnum libraries, with a
-`-d` suffix), and DLLs built with MinGW can (but don't need to) have a `lib` prefix).
+`-d` suffix), and DLLs built with MinGW can (but don't need to) have a `lib` prefix.
 @partialsupport Available only on non-RT @ref CORRADE_TARGET_WINDOWS "Windows".
 */
 CORRADE_UTILITY_EXPORT std::string dllLocation(const char* name);
