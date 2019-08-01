@@ -164,6 +164,17 @@ find_package(Corrade REQUIRED TestSuite)
 target_link_libraries(your-app Corrade::TestSuite)
 @endcode
 
+In case you're building for Emscripten and want to
+@ref TestSuite-Tester-running-cmake "run your tests via CTest", you also need
+to copy [FindNodeJs.cmake](https://github.com/mosra/corrade/blob/master/modules/FindNodeJs.cmake) from the `modules/` directory in Corrade sources to a
+`modules/` dir in your project and pointing `CMAKE_MODULE_PATH` to it (if not
+done already) so it is able to find the Node.js executable:
+
+@code{.cmake}
+# Path where FindNodeJs.cmake and others can be found, adapt as needed
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
+@endcode
+
 See also @ref building-corrade and @ref corrade-cmake for more information.
 */
 

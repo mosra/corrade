@@ -36,15 +36,26 @@ namespace Corrade {
 
 @tableofcontents
 
-Corrade uses CMake build system for both building and integration into your
-projects. The logic is in module `FindCorrade.cmake` distributed with the
-library in `modules/` directory, you are encouraged to copy it into your
-project and add path to the file to `CMAKE_MODULE_PATH`. Otherwise, if CMake
-won't be able to find this file in predefined locations, it will error out even
-if Corrade might be installed on the system.
+Corrade uses CMake as a primary build system for both building and integration
+into your projects. The main logic is in the
+[FindCorrade.cmake](https://github.com/mosra/corrade/blob/master/modules/FindCorrade.cmake)
+module distributed with the engine in the `modules/` directory, you are
+encouraged to copy it into your project and add path to the file to
+`CMAKE_MODULE_PATH`:
 
-Note that the module file is updated as the library evolves, you are encouraged
-to update your copy from time to time to avoid strange building issues.
+@code{.cmake}
+# Path where FindCorrade.cmake can be found, adapt as needed
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
+@endcode
+
+Otherwise, if CMake won't be able to find this file in predefined locations, it
+will error out even if Corrade might be installed on the system. There are
+other Find modules that you might need for particular features or platforms,
+see the @ref corrade-cmake-modules "full list below". Each library that needs
+one of the extra modules also mentions the requirement in its documentation.
+Note that the module files areupdated as the library evolves, you are
+encouraged to update your copies from time to time to avoid strange building
+issues.
 
 If you installed the library to non-standard location (other than `/usr`, e.g.
 `/home/xyz/projects`), set `CMAKE_PREFIX_PATH` to that directory to help CMake
@@ -175,11 +186,14 @@ use given library with CMake.
 
 @section corrade-cmake-modules Other CMake modules
 
-The `modules/` directory contains more useful CMake modules:
+The `modules/` directory of Corrade sources contains more useful CMake modules.
+If a library requires presence of any of these, it mentions them in its usage
+documentation.
 
--   `FindNodeJs.cmake` --- CMake module for finding Node.js. Copy this to your
-    module directory if you want to run @ref TestSuite unit tests when building
-    for @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
+-   [FindNodeJs.cmake](https://github.com/mosra/corrade/blob/master/modules/FindNodeJs.cmake)
+    --- CMake module for finding Node.js. Copy this to your module directory if
+    you want to run @ref TestSuite unit tests when building for
+    @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
 
 @section corrade-cmake-functions Macros and functions
 
