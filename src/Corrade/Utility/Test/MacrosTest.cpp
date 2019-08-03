@@ -148,11 +148,13 @@ void MacrosTest::alwaysNeverInline() {
     CORRADE_COMPARE(alwaysInline() + neverInline(), 42);
 }
 
-namespace SubNamespace {
+/* Needs another inner anonymous namespace otherwise Clang complains about a
+   missing prototype (UGH) */
+namespace SubNamespace { namespace {
     const char* thisIsAFunction(int, float) {
         return CORRADE_FUNCTION;
     }
-}
+}}
 
 void MacrosTest::function() {
     /* Should be really just a function name, with no mangled signature or
