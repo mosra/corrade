@@ -966,8 +966,8 @@ namespace Implementation {
     template<unsigned dimensions, class T> struct StridedElement {
         static StridedArrayView<dimensions - 1, T> get(typename std::conditional<std::is_const<T>::value, const void, void>::type* data, const StridedDimensions<dimensions, std::size_t>& size, const StridedDimensions<dimensions, std::ptrdiff_t>& stride, std::size_t i) {
             return StridedArrayView<dimensions - 1, T>{
-                Containers::StaticArrayView<dimensions, const std::size_t>(size).template suffix<1>(),
-                Containers::StaticArrayView<dimensions, const std::ptrdiff_t>(stride).template suffix<1>(),
+                StridedDimensions<dimensions - 1, std::size_t>(size._data + 1, typename Implementation::GenerateSequence<dimensions - 1>::Type{}),
+                StridedDimensions<dimensions - 1, std::ptrdiff_t>(stride._data + 1, typename Implementation::GenerateSequence<dimensions - 1>::Type{}),
                 static_cast<typename std::conditional<std::is_const<T>::value, const char, char>::type*>(data) + i*stride._data[0]};
         }
     };
