@@ -51,7 +51,15 @@ namespace Implementation {
     template<unsigned, class> struct StridedElement;
     template<bool> struct ArrayCastFlattenOrInflate;
 
-    /* Used in the assertion that data array is large enough */
+    /* Used in the assertion that data array is large enough. If any size
+       element is zero, the data can be zero-sized as well. Other we have to
+       compare against max stride. */
+    template<unsigned dimensions> constexpr bool isAnySizeZero(const StridedDimensions<dimensions, std::size_t>&, Sequence<>) {
+        return false;
+    }
+    template<unsigned dimensions, std::size_t first, std::size_t ...next> constexpr bool isAnySizeZero(const StridedDimensions<dimensions, std::size_t>& size, Sequence<first, next...>) {
+        return !size[first] || isAnySizeZero(size, Sequence<next...>{});
+    }
     template<unsigned dimensions> constexpr std::size_t largestStride(const StridedDimensions<dimensions, std::size_t>&, const StridedDimensions<dimensions, std::ptrdiff_t>&, Sequence<>) {
         return 0;
     }
@@ -335,9 +343,10 @@ template<unsigned dimensions, class T> class StridedArrayView {
         constexpr /*implicit*/ StridedArrayView(Containers::ArrayView<ErasedType> data, T* member, const Size& size, const Stride& stride) noexcept: _data{(
             /** @todo can't compare void pointers to check if member is in data,
                     it's not constexpr :( */
-            /* If the largest stride is zero, `data` can have *any* size and it
-               could be okay, can't reliably test that */
-            CORRADE_CONSTEXPR_ASSERT(Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
+            /* If any size is zero, data can be zero-sized too. If the largest
+               stride is zero, `data` can have *any* size and it could be okay,
+               can't reliably test that */
+            CORRADE_CONSTEXPR_ASSERT(Implementation::isAnySizeZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
                 "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride),
             member)}, _size{size}, _stride{stride} {}
 
