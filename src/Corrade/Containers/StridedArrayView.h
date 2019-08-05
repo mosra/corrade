@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Containers::StridedArrayView, @ref Corrade::Containers::StridedIterator
+ * @brief Class @ref Corrade::Containers::StridedArrayView, @ref Corrade::Containers::StridedIterator, alias @ref Corrade::Containers::StridedArrayView1D, @ref Corrade::Containers::StridedArrayView2D, @ref Corrade::Containers::StridedArrayView3D, @ref Corrade::Containers::StridedArrayView4D
  */
 
 #include "Corrade/Containers/ArrayView.h"
@@ -268,7 +268,7 @@ See @ref Containers-ArrayView-stl "ArrayView STL compatibility" for more
 information.
 
 @see @ref StridedIterator, @ref StridedArrayView1D, @ref StridedArrayView2D,
-    @ref StridedArrayView3D
+    @ref StridedArrayView3D, @ref StridedArrayView4D
 */
 /* All member functions are const because the view doesn't own the data */
 template<unsigned dimensions, class T> class StridedArrayView {
@@ -699,7 +699,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
 
 Convenience alternative to @cpp StridedArrayView<1, T> @ce. See
 @ref StridedArrayView for more information.
-@see @ref StridedArrayView2D, @ref StridedArrayView3D
+@see @ref StridedArrayView2D, @ref StridedArrayView3D, @ref StridedArrayView4D
 */
 template<class T> using StridedArrayView1D = StridedArrayView<1, T>;
 
@@ -708,7 +708,7 @@ template<class T> using StridedArrayView1D = StridedArrayView<1, T>;
 
 Convenience alternative to @cpp StridedArrayView<2, T> @ce. See
 @ref StridedArrayView for more information.
-@see @ref StridedArrayView1D, @ref StridedArrayView3D
+@see @ref StridedArrayView1D, @ref StridedArrayView3D, @ref StridedArrayView4D
 */
 template<class T> using StridedArrayView2D = StridedArrayView<2, T>;
 
@@ -717,9 +717,18 @@ template<class T> using StridedArrayView2D = StridedArrayView<2, T>;
 
 Convenience alternative to @cpp StridedArrayView<3, T> @ce. See
 @ref StridedArrayView for more information.
-@see @ref StridedArrayView1D, @ref StridedArrayView2D
+@see @ref StridedArrayView1D, @ref StridedArrayView2D, @ref StridedArrayView4D
 */
 template<class T> using StridedArrayView3D = StridedArrayView<3, T>;
+
+/**
+@brief Four-dimensional strided array view
+
+Convenience alternative to @cpp StridedArrayView<4, T> @ce. See
+@ref StridedArrayView for more information.
+@see @ref StridedArrayView1D, @ref StridedArrayView2D, @ref StridedArrayView3D
+*/
+template<class T> using StridedArrayView4D = StridedArrayView<4, T>;
 #endif
 
 /** @relatesalso StridedArrayView

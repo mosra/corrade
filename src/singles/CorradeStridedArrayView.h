@@ -65,6 +65,7 @@ template<unsigned, class> class StridedIterator;
 template<class T> using StridedArrayView1D = StridedArrayView<1, T>;
 template<class T> using StridedArrayView2D = StridedArrayView<2, T>;
 template<class T> using StridedArrayView3D = StridedArrayView<3, T>;
+template<class T> using StridedArrayView4D = StridedArrayView<4, T>;
 
 }}
 
