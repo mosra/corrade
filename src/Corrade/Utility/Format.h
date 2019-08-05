@@ -78,7 +78,7 @@ In order to write a literal curly brace to the output, simply double it:
 | @cpp double @ce <b></b>   | Written as a float with 15 significant digits by default
 | @cpp long double @ce <b></b> | Written as a float with 18 significant digits by default
 | @cpp char* @ce <b></b> | Written as a sequence of characters until @cpp '\0' @ce (which is not written)
-| @ref std::string | Written as a sequence of @ref std::string::size() characters
+| @ref std::string | Written as a sequence of @ref std::string::size() characters \n (@cpp #include @ce @ref Corrade/Utility/FormatStl.h in addition)
 | @ref Containers::ArrayView "Containers::ArrayView<char>" | Written as a sequence of @ref Containers::ArrayView::size() characters
 
 # Advanced formatting options
@@ -166,8 +166,7 @@ Example usage:
 
 @snippet Utility.cpp formatInto-buffer
 
-See @ref formatString() for more information about usage and templating
-language.
+See @ref format() for more information about usage and templating language.
 
 @experimental
 */
@@ -183,8 +182,7 @@ not* write any terminating @cpp '\0' @ce character. Example usage:
 
 @snippet Utility.cpp formatInto-stdout
 
-See @ref formatString() for more information about usage and templating
-language.
+See @ref format() for more information about usage and templating language.
 
 @experimental
 */
