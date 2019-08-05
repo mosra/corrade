@@ -337,7 +337,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
                     it's not constexpr :( */
             /* If the largest stride is zero, `data` can have *any* size and it
                could be okay, can't reliably test that */
-            CORRADE_CONSTEXPR_ASSERT(!Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
+            CORRADE_CONSTEXPR_ASSERT(Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
                 "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride),
             member)}, _size{size}, _stride{stride} {}
 
