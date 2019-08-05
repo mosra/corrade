@@ -115,6 +115,7 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void construct3DNegativeStride();
     void construct3DPackedSizeStride();
     void construct3DPackedSizeOnly();
+    void construct3DOneSizeZero();
     void construct3DInvalid();
     void construct3DFixedSize();
     void construct3DDerived();
@@ -253,6 +254,7 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::construct3DNegativeStride,
               &StridedArrayViewTest::construct3DPackedSizeStride,
               &StridedArrayViewTest::construct3DPackedSizeOnly,
+              &StridedArrayViewTest::construct3DOneSizeZero,
               &StridedArrayViewTest::construct3DInvalid,
               &StridedArrayViewTest::construct3DFixedSize,
               &StridedArrayViewTest::construct3DDerived,
@@ -1042,6 +1044,17 @@ void StridedArrayViewTest::construct3DPackedSizeOnly() {
     CORRADE_COMPARE(ca.stride(), (Stride3D{3*5*4, 5*4, 4}));
     CORRADE_COMPARE(ca[1][1][2], 22);
     CORRADE_COMPARE(ca[0][2][3], 13);
+}
+
+void StridedArrayViewTest::construct3DOneSizeZero() {
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    /* Assertion shouldn't fire because size in second dimension is zero */
+    int data[1];
+    StridedArrayView3Di a{{data, 0}, {5, 0, 3}, {46, 54, 22}};
+    CORRADE_COMPARE(out.str(), "");
+    CORRADE_COMPARE(a.data(), &data[0]);
 }
 
 void StridedArrayViewTest::construct3DInvalid() {
