@@ -15,6 +15,10 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2019.01-301-gefe8d740 (2019-08-05)
+    -   MSVC 2019 compatibility
+    -   Added except() for taking everything except last N elements
+    -   Added StaticArrayView::slice() with compile-time begin and end
     v2019.01-173-ge663b49c (2019-04-30)
     -   Added ArrayView<void> as a counterpart to ArrayView<const void>
     -   Added compile-time-sized StaticArrayView::suffix()

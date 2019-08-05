@@ -15,6 +15,11 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2019.01-301-gefe8d740 (2019-08-05)
+    -   MSVC 2019 compatibility
+    -   New constructor taking just a size, with stride calculated implicitly
+    -   Added except() for taking everything except last N elements
+    -   Added every() for taking every Nth element
     v2019.01-173-ge663b49c (2019-04-30)
     -   Initial release
 
