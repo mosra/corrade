@@ -42,6 +42,10 @@ template<class> class Comparator;
 /* Tester is always used through inheritance */
 #endif
 
+namespace Implementation {
+    template<class, class, class> struct ComparatorTraits;
+}
+
 }}
 
 #endif

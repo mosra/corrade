@@ -145,7 +145,9 @@ The actual use in the unit test would be like this:
 @attention Due to implementation limitations, it's not possible to have
     multiple overloads for @cpp operator()() @ce in one class (for example to
     compare file contents with both a filename and a @ref std::istream), you
-    have to create a different pseudo-type for that.
+    have to create a different pseudo-type for that. An alternative advanced
+    option is providing a specialization of the `ComparatorTraits` example, see
+    source for details.
 
 @section TestSuite-Comparator-parameters Passing parameters to comparators
 
@@ -281,7 +283,14 @@ template<class T, class U, class V> struct ComparatorOperatorTraits<ComparisonSt
     typedef typename std::decay<V>::type ExpectedType;
 };
 
-template<class T> struct ComparatorTraits: ComparatorOperatorTraits<decltype(&Comparator<T>::operator())> {};
+/* The second and third parameters are ignored in the default implementation
+   because for overloaded operators I don't see a general way to figure out
+   what overload gets taken for particular argument types in combination with
+   implicit conversions taking place. For particular types this could be fixed
+   by providing an explicit specialization of ComparatorTraits, but the
+   specialization has to be provided for all types that can be converted to
+   it. */
+template<class T, class, class> struct ComparatorTraits: ComparatorOperatorTraits<decltype(&Comparator<T>::operator())> {};
 
 CORRADE_HAS_TYPE(CanSaveDiagnostic, decltype(std::declval<T>().saveDiagnostic({}, std::declval<Utility::Debug&>(), {})));
 

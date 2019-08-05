@@ -1414,8 +1414,8 @@ template<class T, class U, class V> void Tester::compareWith(Comparator<T>& comp
     /* Store (references to) possibly implicitly-converted values,
        otherwise the implicit conversion would when passing them to operator(),
        causing dead memory access later in printErrorMessage() */
-    const typename Implementation::ComparatorTraits<T>::ActualType& actualValueInExpectedActualType = actualValue;
-    const typename Implementation::ComparatorTraits<T>::ExpectedType& expectedValueInExpectedExpectedType = expectedValue;
+    const typename Implementation::ComparatorTraits<T, typename std::decay<U>::type, typename std::decay<V>::type>::ActualType& actualValueInExpectedActualType = actualValue;
+    const typename Implementation::ComparatorTraits<T, typename std::decay<U>::type, typename std::decay<V>::type>::ExpectedType& expectedValueInExpectedExpectedType = expectedValue;
 
     /* Compare and then print the message, if needed */
     ComparisonStatusFlags status =
