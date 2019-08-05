@@ -73,7 +73,7 @@ namespace Implementation {
     template<unsigned dimensions, std::size_t ...index> constexpr StridedDimensions<dimensions, std::ptrdiff_t> strideForSize(const StridedDimensions<dimensions, std::size_t>& size, std::size_t typeSize, Sequence<index...>) {
         return {std::ptrdiff_t(typeSize)*strideForSizeInternal(size, index, typename GenerateSequence<dimensions>::Type{})...};
     }
-
+    #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
     /* so Python buffer protocol can point to the size / stride members */
     template<unsigned dimensions, class T> Containers::StridedDimensions<dimensions, std::size_t>& sizeRef(Containers::StridedArrayView<dimensions, T>& view) {
         return view._size;
@@ -81,6 +81,7 @@ namespace Implementation {
     template<unsigned dimensions, class T> Containers::StridedDimensions<dimensions, std::ptrdiff_t>& strideRef(Containers::StridedArrayView<dimensions, T>& view) {
         return view._stride;
     }
+    #endif
 }
 
 /**
@@ -667,10 +668,11 @@ template<unsigned dimensions, class T> class StridedArrayView {
     private:
         template<unsigned, class> friend class StridedArrayView;
 
+        #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
         /* so Python buffer protocol can point to the size / stride members */
         friend Containers::StridedDimensions<dimensions, std::size_t>& Implementation::sizeRef<>(Containers::StridedArrayView<dimensions, T>&);
         friend Containers::StridedDimensions<dimensions, std::ptrdiff_t>& Implementation::strideRef<>(Containers::StridedArrayView<dimensions, T>&);
-
+        #endif
         /* Basically just so these can access the _size / _stride without going
            through getters (which additionally flatten their types for 1D) */
         template<unsigned, class> friend struct Implementation::StridedElement;

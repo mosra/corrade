@@ -40,11 +40,12 @@ namespace Corrade { namespace Containers {
 namespace Implementation {
     template<class, class> struct ArrayViewConverter;
     template<class> struct ErasedArrayViewConverter;
-
+    #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
     /* so Python buffer protocol can point to the size member */
     template<class T> std::size_t& sizeRef(Containers::ArrayView<T>& view) {
         return view._size;
     }
+    #endif
 }
 
 /**
@@ -431,9 +432,10 @@ template<class T> class ArrayView {
         }
 
     private:
+        #ifndef CORRADE_NO_PYTHON_COMPATIBILITY
         /* so Python buffer protocol can point to the size member */
         friend std::size_t& Implementation::sizeRef<>(Containers::ArrayView<T>&);
-
+        #endif
         T* _data;
         std::size_t _size;
 };
