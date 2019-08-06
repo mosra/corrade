@@ -78,8 +78,16 @@
       display: none;
     }
     pre#log {
+      max-width: 100%;
+      width: 100%;
+      /* Make it fill at least the space given to it but let it expand beyond
+         (scrollbars in that tiny area are useless) */
+      min-height: 100%;
+      z-index: 10;
+      border-radius: 0.2rem; /*var(--border-radius)*/
       padding: 0.5rem 1rem;
-      overflow-x: auto;
+      white-space: pre-wrap; /* same as .m-console-wrap */
+      word-break: break-all;
       margin-top: 0; /* stupid defaults */
       color: #e6e6e6; /*var(--code-color)*/
       background-color: #282e36; /*var(--code-background-color)*/
