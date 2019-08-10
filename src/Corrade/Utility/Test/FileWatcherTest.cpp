@@ -49,6 +49,9 @@ struct FileWatcherTest: TestSuite::Tester {
     void changedDeleted();
     void changedRecreatedImmediately();
     void changedRecreatedLate();
+    void changedRecreatedLateIgnoreErrors();
+    void changedCleared();
+    void changedClearedIgnoreEmpty();
 
     private:
         std::string _filename;
@@ -65,7 +68,10 @@ FileWatcherTest::FileWatcherTest() {
 
     addTests({&FileWatcherTest::changedDeleted,
               &FileWatcherTest::changedRecreatedImmediately,
-              &FileWatcherTest::changedRecreatedLate},
+              &FileWatcherTest::changedRecreatedLate,
+              &FileWatcherTest::changedRecreatedLateIgnoreErrors,
+              &FileWatcherTest::changedCleared,
+              &FileWatcherTest::changedClearedIgnoreEmpty},
              &FileWatcherTest::setup, &FileWatcherTest::teardown);
 
     Directory::mkpath(FILEWATCHER_WRITE_TEST_DIR);
@@ -220,6 +226,82 @@ void FileWatcherTest::changedRecreatedLate() {
     /* And it won't recover from it */
     CORRADE_VERIFY(!watcher.hasChanged());
     CORRADE_VERIFY(!watcher.isValid());
+}
+
+void FileWatcherTest::changedRecreatedLateIgnoreErrors() {
+    CORRADE_VERIFY(Directory::exists(_filename));
+
+    FileWatcher watcher{_filename, FileWatcher::Flag::IgnoreErrors};
+    CORRADE_VERIFY(watcher.isValid());
+    CORRADE_VERIFY(!watcher.hasChanged());
+
+    CORRADE_VERIFY(Directory::rm(_filename));
+
+    /* File is gone, but that gets ignored */
+    CORRADE_VERIFY(!watcher.hasChanged());
+    CORRADE_VERIFY(watcher.isValid());
+
+    /* See above for details */
+    /** @todo get rid of this once proper FS inode etc. watching is implemented */
+    #if defined(CORRADE_TARGET_APPLE) || defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    System::sleep(1100);
+    #else
+    System::sleep(10);
+    #endif
+    Directory::writeString(_filename, "hello again");
+
+    CORRADE_VERIFY(watcher.hasChanged());
+    CORRADE_VERIFY(watcher.isValid());
+}
+
+void FileWatcherTest::changedCleared() {
+    CORRADE_VERIFY(Directory::exists(_filename));
+
+    FileWatcher watcher{_filename};
+    CORRADE_VERIFY(watcher.isValid());
+    CORRADE_VERIFY(!watcher.hasChanged());
+
+    /* See above for details */
+    /** @todo get rid of this once proper FS inode etc. watching is implemented */
+    #if defined(CORRADE_TARGET_APPLE) || defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    System::sleep(1100);
+    #else
+    System::sleep(10);
+    #endif
+    CORRADE_VERIFY(Directory::writeString(_filename, ""));
+    CORRADE_VERIFY(watcher.hasChanged());
+
+    /* A change right after should not get detected, since it's too soon */
+    CORRADE_VERIFY(Directory::writeString(_filename, "some content again"));
+    bool changed = watcher.hasChanged();
+    #if !defined(CORRADE_TARGET_APPLE) && !defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_EMSCRIPTEN)
+    if(changed) CORRADE_SKIP("Gah! Your system is too fast.");
+    #endif
+    CORRADE_VERIFY(!changed); /* Nothing changed second time */
+}
+
+void FileWatcherTest::changedClearedIgnoreEmpty() {
+    CORRADE_VERIFY(Directory::exists(_filename));
+
+    FileWatcher watcher{_filename, FileWatcher::Flag::IgnoreChangeIfEmpty};
+    CORRADE_VERIFY(watcher.isValid());
+    CORRADE_VERIFY(!watcher.hasChanged());
+
+    /* See above for details */
+    /** @todo get rid of this once proper FS inode etc. watching is implemented */
+    #if defined(CORRADE_TARGET_APPLE) || defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    System::sleep(1100);
+    #else
+    System::sleep(10);
+    #endif
+
+    /* Change to an empty file is ignored */
+    CORRADE_VERIFY(Directory::writeString(_filename, ""));
+    CORRADE_VERIFY(!watcher.hasChanged());
+
+    /* When the file becomes non-empty again, the change is signalled */
+    CORRADE_VERIFY(Directory::writeString(_filename, "some content again"));
+    CORRADE_VERIFY(watcher.hasChanged());
 }
 
 }}}}

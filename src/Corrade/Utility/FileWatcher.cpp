@@ -38,7 +38,17 @@
 
 namespace Corrade { namespace Utility {
 
-FileWatcher::FileWatcher(const std::string& filename):
+#ifndef DOXYGEN_GENERATING_OUTPUT
+enum class FileWatcher::InternalFlag: std::uint8_t {
+    /* Keep in sync with Flag */
+    IgnoreErrors = std::uint8_t(FileWatcher::Flag::IgnoreErrors),
+    IgnoreChangeIfEmpty = std::uint8_t(FileWatcher::Flag::IgnoreChangeIfEmpty),
+
+    Valid = 1 << 7
+};
+#endif
+
+FileWatcher::FileWatcher(const std::string& filename, Flags flags):
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     _filename{filename},
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
@@ -46,6 +56,7 @@ FileWatcher::FileWatcher(const std::string& filename):
     #else
     #error
     #endif
+    _flags{InternalFlag(std::uint8_t(flags))|InternalFlag::Valid},
     _time{~std::uint64_t{}}
 {
     /* Initialize the time value for the first time */
@@ -55,6 +66,14 @@ FileWatcher::FileWatcher(const std::string& filename):
 FileWatcher::FileWatcher(FileWatcher&&) noexcept = default;
 
 FileWatcher::~FileWatcher() = default;
+
+FileWatcher::Flags FileWatcher::flags() const {
+    return Flag(std::uint8_t(_flags & ~InternalFlag::Valid));
+}
+
+bool FileWatcher::isValid() const {
+    return _flags >= InternalFlag::Valid;
+}
 
 FileWatcher& FileWatcher::operator=(FileWatcher&&)
     /* See the header for details */
@@ -66,7 +85,7 @@ FileWatcher& FileWatcher::operator=(FileWatcher&&)
     = default;
 
 bool FileWatcher::hasChanged() {
-    if(!_valid) return false;
+    if(!(_flags & InternalFlag::Valid)) return false;
 
     #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
     /* GCC 4.8 complains about missing initializers if {} is used. The struct
@@ -80,7 +99,8 @@ bool FileWatcher::hasChanged() {
     #error
     #endif
     {
-        Error{} << "Utility::FileWatcher: can't stat"
+        Error err;
+        err << "Utility::FileWatcher: can't stat"
             #if defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
             << _filename
             #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
@@ -88,8 +108,16 @@ bool FileWatcher::hasChanged() {
             #else
             #error
             #endif
-            << Debug::nospace << ":" << std::strerror(errno) << Debug::nospace << ", aborting watch";
-        _valid = false;
+            << Debug::nospace << ":" << std::strerror(errno) << Debug::nospace;
+
+        /* Ignore the error if we are told so (but still warn) */
+        if(_flags & InternalFlag::IgnoreErrors) {
+            err << ", ignoring";
+            return false;
+        }
+
+        err << ", aborting watch";
+        _flags &= ~InternalFlag::Valid;
         return false;
     }
 
@@ -117,8 +145,9 @@ bool FileWatcher::hasChanged() {
         return false;
     }
 
-    /* Modification time changed, update and report change */
-    if(_time != time) {
+    /* Modification time changed, update and report change -- unless the size
+       is zero and we're told to ignore those */
+    if(_time != time && (!(_flags & InternalFlag::IgnoreChangeIfEmpty) || result.st_size != 0)) {
         _time = time;
         return true;
     }

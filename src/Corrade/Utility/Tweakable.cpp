@@ -118,7 +118,10 @@ std::pair<bool, void*> Tweakable::registerVariable(const char* const file, const
         const std::string watchPath = Directory::join(_data->replace, stripped);
 
         Debug{} << "Utility::Tweakable: watching for changes in" << watchPath;
-        found = _data->files.emplace(file, File{watchPath, FileWatcher{watchPath}, {}}).first;
+        /* Ignore errors and do not signal changes if the file is empty in
+           order to make everything more robust -- editors are known to be
+           doing both */
+        found = _data->files.emplace(file, File{watchPath, FileWatcher{watchPath, FileWatcher::Flag::IgnoreChangeIfEmpty|FileWatcher::Flag::IgnoreErrors}, {}}).first;
     }
 
     /* Extend the variable list to contain this one as well */
