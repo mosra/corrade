@@ -297,11 +297,21 @@ void FileWatcherTest::changedClearedIgnoreEmpty() {
 
     /* Change to an empty file is ignored */
     CORRADE_VERIFY(Directory::writeString(_filename, ""));
-    CORRADE_VERIFY(!watcher.hasChanged());
+    {
+        #ifdef CORRADE_TARGET_IOS
+        CORRADE_EXPECT_FAIL("iOS seems to be reporting all file sizes to be 0, so the IgnoreChangeIfEmpty flag is ignored there.");
+        #endif
+        CORRADE_VERIFY(!watcher.hasChanged());
+    }
 
     /* When the file becomes non-empty again, the change is signalled */
     CORRADE_VERIFY(Directory::writeString(_filename, "some content again"));
-    CORRADE_VERIFY(watcher.hasChanged());
+    {
+        #ifdef CORRADE_TARGET_IOS
+        CORRADE_EXPECT_FAIL("iOS seems to be reporting all file sizes to be 0, so the IgnoreChangeIfEmpty flag is ignored there.");
+        #endif
+        CORRADE_VERIFY(watcher.hasChanged());
+    }
 }
 
 }}}}

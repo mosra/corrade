@@ -93,6 +93,11 @@ class CORRADE_UTILITY_EXPORT FileWatcher {
              * the watched file is being updated by first clearing its contents
              * together with updating the modification time and then populating
              * it without updating the modifcation time again.
+             *
+             * @note @ref CORRADE_TARGET_IOS "iOS" seems to be always reporting
+             *      file sizes as 0 which would make @ref FileWatcher
+             *      absolutely useless with this flag. This flag is thus
+             *      ignored there.
              */
             IgnoreChangeIfEmpty = 1 << 1
         };

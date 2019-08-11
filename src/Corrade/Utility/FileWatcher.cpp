@@ -147,7 +147,14 @@ bool FileWatcher::hasChanged() {
 
     /* Modification time changed, update and report change -- unless the size
        is zero and we're told to ignore those */
-    if(_time != time && (!(_flags & InternalFlag::IgnoreChangeIfEmpty) || result.st_size != 0)) {
+    if(_time != time
+        #ifndef CORRADE_TARGET_IOS
+        /* iOS (or at least the simulator) reports all sizes to be always 0,
+           which means this flag would make FileWatcher absolutely useless. So
+           ignore it there. */
+        && (!(_flags & InternalFlag::IgnoreChangeIfEmpty) || result.st_size != 0)
+        #endif
+    ) {
         _time = time;
         return true;
     }
