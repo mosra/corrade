@@ -872,7 +872,7 @@ std::string Arguments::valueInternal(const std::string& key) const {
 
 bool Arguments::isSet(const std::string& key) const {
     const auto found = find(_prefix + key);
-    CORRADE_ASSERT(found != _entries.end(), "Utility::Arguments::value(): key" << key << "not found", false);
+    CORRADE_ASSERT(found != _entries.end(), "Utility::Arguments::isSet(): key" << key << "not found", false);
     CORRADE_ASSERT(found->type == Type::BooleanOption,
         "Utility::Arguments::isSet(): cannot use this function for non-boolean value" << key, false);
     CORRADE_INTERNAL_ASSERT(found->id < _booleans.size());

@@ -63,9 +63,6 @@ struct ArgumentsTest: TestSuite::Tester {
     void finalOptionalArgumentTwice();
     void finalOptionalArgumentNotLast();
 
-    void notParsedYet();
-    void notParsedYetOnlyHelp();
-
     void parseNullptr();
     void parseHelp();
     void parseArguments();
@@ -105,6 +102,11 @@ struct ArgumentsTest: TestSuite::Tester {
     void prefixedInvalidUnprefixedName();
     void prefixedIgnoreUnknown();
     void prefixedIgnoreUnknownInvalidPrefixedName();
+
+    void notParsedYet();
+    void notParsedYetOnlyHelp();
+    void valueNotFound();
+    void valueMismatchedBoolean();
 };
 
 ArgumentsTest::ArgumentsTest() {
@@ -134,9 +136,6 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::disallowedIgnoreUnknown,
               &ArgumentsTest::finalOptionalArgumentTwice,
               &ArgumentsTest::finalOptionalArgumentNotLast,
-
-              &ArgumentsTest::notParsedYet,
-              &ArgumentsTest::notParsedYetOnlyHelp,
 
               &ArgumentsTest::parseNullptr,
               &ArgumentsTest::parseHelp,
@@ -176,7 +175,12 @@ ArgumentsTest::ArgumentsTest() {
               &ArgumentsTest::prefixedInvalidPrefixedName,
               &ArgumentsTest::prefixedInvalidUnprefixedName,
               &ArgumentsTest::prefixedIgnoreUnknown,
-              &ArgumentsTest::prefixedIgnoreUnknownInvalidPrefixedName});
+              &ArgumentsTest::prefixedIgnoreUnknownInvalidPrefixedName,
+
+              &ArgumentsTest::notParsedYet,
+              &ArgumentsTest::notParsedYetOnlyHelp,
+              &ArgumentsTest::valueNotFound,
+              &ArgumentsTest::valueMismatchedBoolean});
 }
 
 bool hasEnv(const std::string& value) {
@@ -502,47 +506,6 @@ void ArgumentsTest::finalOptionalArgumentNotLast() {
     args.addFinalOptionalArgument("arg")
         .addArgument("bla");
     CORRADE_COMPARE(out.str(), "Utility::Arguments::addArgument(): can't add more arguments after the final optional one\n");
-}
-
-void ArgumentsTest::notParsedYet() {
-    std::ostringstream out;
-    Error redirectError{&out};
-
-    Arguments args;
-    args.addOption("value")
-        .addBooleanOption("boolean");
-
-    args.value("value");
-    args.isSet("boolean");
-
-    CORRADE_VERIFY(!args.isParsed());
-    CORRADE_COMPARE(out.str(),
-        "Utility::Arguments::value(): arguments were not successfully parsed yet\n"
-        "Utility::Arguments::isSet(): arguments were not successfully parsed yet\n");
-}
-
-void ArgumentsTest::notParsedYetOnlyHelp() {
-    std::ostringstream out;
-    Error redirectError{&out};
-
-    const char* argv[] = { "", "--help" };
-
-    Arguments args;
-    args.addArgument("value")
-        .addBooleanOption("boolean");
-
-    /* parse() should not succeed if there is --help but some arguments were
-       not specified */
-    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
-
-    args.value("value");
-    args.isSet("boolean");
-
-    CORRADE_VERIFY(!args.isParsed());
-    CORRADE_COMPARE(out.str(),
-        "Missing command-line argument value\n"
-        "Utility::Arguments::value(): arguments were not successfully parsed yet\n"
-        "Utility::Arguments::isSet(): arguments were not successfully parsed yet\n");
 }
 
 void ArgumentsTest::parseNullptr() {
@@ -1044,6 +1007,75 @@ void ArgumentsTest::prefixedIgnoreUnknownInvalidPrefixedName() {
     Error redirectError{&out};
     CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
     CORRADE_COMPARE(out.str(), "Invalid command-line argument --reader-?\n");
+}
+
+void ArgumentsTest::notParsedYet() {
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    Arguments args;
+    args.addOption("value")
+        .addBooleanOption("boolean");
+
+    args.value("value");
+    args.isSet("boolean");
+
+    CORRADE_VERIFY(!args.isParsed());
+    CORRADE_COMPARE(out.str(),
+        "Utility::Arguments::value(): arguments were not successfully parsed yet\n"
+        "Utility::Arguments::isSet(): arguments were not successfully parsed yet\n");
+}
+
+void ArgumentsTest::notParsedYetOnlyHelp() {
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    const char* argv[] = { "", "--help" };
+
+    Arguments args;
+    args.addArgument("value")
+        .addBooleanOption("boolean");
+
+    /* parse() should not succeed if there is --help but some arguments were
+       not specified */
+    CORRADE_VERIFY(!args.tryParse(Containers::arraySize(argv), argv));
+
+    args.value("value");
+    args.isSet("boolean");
+
+    CORRADE_VERIFY(!args.isParsed());
+    CORRADE_COMPARE(out.str(),
+        "Missing command-line argument value\n"
+        "Utility::Arguments::value(): arguments were not successfully parsed yet\n"
+        "Utility::Arguments::isSet(): arguments were not successfully parsed yet\n");
+}
+
+void ArgumentsTest::valueNotFound() {
+    Arguments args;
+    args.parse(0, nullptr);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    args.value("nonexistent");
+    args.isSet("nonexistent");
+    CORRADE_COMPARE(out.str(),
+        "Utility::Arguments::value(): key nonexistent not found\n"
+        "Utility::Arguments::isSet(): key nonexistent not found\n");
+}
+
+void ArgumentsTest::valueMismatchedBoolean() {
+    Arguments args;
+    args.addOption("value")
+        .addBooleanOption("boolean")
+        .parse(0, nullptr);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    args.value("boolean");
+    args.isSet("value");
+    CORRADE_COMPARE(out.str(),
+        "Utility::Arguments::value(): cannot use this function for boolean option boolean\n"
+        "Utility::Arguments::isSet(): cannot use this function for non-boolean value value\n");
 }
 
 }}}}
