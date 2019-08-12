@@ -85,6 +85,10 @@ void UnicodeTest::nextUtf8() {
 
     /* Four-byte sequence */
     CORRADE_COMPARE(Unicode::nextChar("   \xf4\x85\x98\x80", 3), std::make_pair(1070592, 7));
+
+    /* std::string argument */
+    CORRADE_COMPARE(Unicode::nextChar(std::string{"   \xea\xb8\x89"}, 3),
+        std::make_pair(44553, 6));
 }
 
 void UnicodeTest::nextUtf8Error() {
@@ -118,6 +122,10 @@ void UnicodeTest::prevUtf8() {
 
     /* Four-byte sequence */
     CORRADE_COMPARE(Unicode::prevChar("   \xf4\x85\x98\x80", 7), std::make_pair(1070592, 3));
+
+    /* std::string argument */
+    CORRADE_COMPARE(Unicode::prevChar(std::string{"   \xea\xb8\x89"}, 6),
+        std::make_pair(44553, 3));
 }
 
 void UnicodeTest::prevUtf8Error() {
