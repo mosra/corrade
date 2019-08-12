@@ -828,7 +828,16 @@ Containers::Pointer<AbstractPlugin> AbstractManager::loadAndInstantiateInternal(
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 AbstractManager::Plugin::Plugin(std::string name, const std::string& metadata, AbstractManager* manager): configuration{metadata, Utility::Configuration::Flag::ReadOnly}, metadata{Containers::InPlaceInit, std::move(name), configuration}, manager{manager}, instancer{nullptr}, module{nullptr} {
-    loadState = configuration.isValid() ? LoadState::NotLoaded : LoadState::WrongMetadataFile;
+    if(configuration.isValid()) {
+        if(Utility::Directory::exists(metadata)) {
+            loadState = LoadState::NotLoaded;
+            return;
+        }
+
+        Error{} << "PluginManager::Manager:" << metadata << "was not found";
+    }
+
+    loadState = LoadState::WrongMetadataFile;
 }
 #endif
 

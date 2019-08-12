@@ -83,8 +83,9 @@ enum class LoadState: unsigned short {
     WrongInterfaceVersion = 1 << 2,
 
     /**
-     * The plugin doesn't have any metadata file or the metadata file contains
-     * errors. Returned by @ref AbstractManager::load().
+     * The plugin doesn't have any associated `*.conf` metadata file or the
+     * metadata file contains errors. Returned by
+     * @ref AbstractManager::loadState() and @ref AbstractManager::load().
      * @partialsupport Not available on platforms without
      *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support".
      */
