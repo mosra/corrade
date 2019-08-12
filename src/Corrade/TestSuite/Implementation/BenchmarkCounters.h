@@ -64,7 +64,7 @@ inline std::uint64_t cpuTime() {
     /* FILETIME returns multiples of 100 nanoseconds */
     FILETIME a, b, c, d;
     if(!GetProcessTimes(GetCurrentProcess(), &a, &b, &c, &d))
-        return 0;
+        return 0; /* LCOV_EXCL_LINE */
     return ((std::uint64_t(d.dwHighDateTime) << 32)|std::uint64_t(d.dwLowDateTime))*100;
     #else
     return 0;

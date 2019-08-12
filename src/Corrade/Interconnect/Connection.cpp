@@ -43,6 +43,7 @@ Connection::Connection(
     _signal{signal}, _data{&data} {}
 
 #ifdef CORRADE_BUILD_DEPRECATED
+/* LCOV_EXCL_START */
 bool Connection::isConnected() const {
     Utility::Warning{} << "Interconnect::Emitter::isConnected(): this function is dangerous, use Emitter::isConnected() instead";
     return _emitter->isConnected(*this);
@@ -52,6 +53,7 @@ void Connection::disconnect() {
     Utility::Warning{} << "Interconnect::Connection::disconnect(): this function is dangerous, use Interconnect::disconnect() instead";
     Interconnect::disconnect(_emitter, *this);
 }
+/* LCOV_EXCL_STOP */
 #endif
 
 }}

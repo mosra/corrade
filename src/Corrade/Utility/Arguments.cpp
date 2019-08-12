@@ -368,9 +368,11 @@ Arguments& Arguments::setGlobalHelp(std::string help) {
 }
 
 #ifdef CORRADE_BUILD_DEPRECATED
+/* LCOV_EXCL_START */
 Arguments& Arguments::setHelp(std::string help) {
     return setGlobalHelp(std::move(help));
 }
+/* LCOV_EXCL_STOP */
 #endif
 
 Arguments& Arguments::setHelp(const std::string& key, std::string help, std::string helpKey) {
