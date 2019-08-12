@@ -32,6 +32,7 @@
 #include <string>
 
 #include "Corrade/Containers/EnumSet.h"
+#include "Corrade/Utility/Utility.h"
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
@@ -179,6 +180,12 @@ class CORRADE_UTILITY_EXPORT FileWatcher {
 };
 
 CORRADE_ENUMSET_OPERATORS(FileWatcher::Flags)
+
+/** @debugoperatorclassenum{FileWatcher,FileWatcher::Flag} */
+CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, FileWatcher::Flag value);
+
+/** @debugoperatorclassenum{FileWatcher,FileWatcher::Flags} */
+CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, FileWatcher::Flags value);
 #else
 #error this header is available only on Unix, non-RT Windows and Emscripten
 #endif

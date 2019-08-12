@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Utility/DebugStl.h"
 
 #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
@@ -161,5 +162,26 @@ bool FileWatcher::hasChanged() {
 
     return false;
 }
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+Debug& operator<<(Debug& debug, FileWatcher::Flag value) {
+    switch(value) {
+        /* LCOV_EXCL_START */
+        #define _c(value) case FileWatcher::Flag::value: return debug << "Utility::FileWatcher::Flag::" #value;
+        _c(IgnoreErrors)
+        _c(IgnoreChangeIfEmpty)
+        #undef _c
+        /* LCOV_EXCL_STOP */
+    }
+
+    return debug << "Utility::FileWatcher::Flag(" << Debug::nospace << reinterpret_cast<void*>(std::uint8_t(value)) << Debug::nospace << ")";
+}
+
+Debug& operator<<(Debug& debug, FileWatcher::Flags value) {
+    return Containers::enumSetDebugOutput(debug, value, "Utility::FileWatcher::Flags{}", {
+        FileWatcher::Flag::IgnoreErrors,
+        FileWatcher::Flag::IgnoreChangeIfEmpty});
+}
+#endif
 
 }}

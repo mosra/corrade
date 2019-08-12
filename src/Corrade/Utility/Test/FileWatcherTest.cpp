@@ -53,6 +53,9 @@ struct FileWatcherTest: TestSuite::Tester {
     void changedCleared();
     void changedClearedIgnoreEmpty();
 
+    void debugFlag();
+    void debugFlags();
+
     private:
         std::string _filename;
 };
@@ -74,6 +77,9 @@ FileWatcherTest::FileWatcherTest() {
               &FileWatcherTest::changedClearedIgnoreEmpty},
              &FileWatcherTest::setup, &FileWatcherTest::teardown);
 
+    addTests({&FileWatcherTest::debugFlag,
+              &FileWatcherTest::debugFlags});
+
     Directory::mkpath(FILEWATCHER_WRITE_TEST_DIR);
     _filename = Directory::join(FILEWATCHER_WRITE_TEST_DIR, "file.txt");
 }
@@ -83,7 +89,7 @@ void FileWatcherTest::nonexistent() {
     {
         Error redirectError{&out};
         FileWatcher watcher{"nonexistent"};
-
+        CORRADE_COMPARE(watcher.flags(), FileWatcher::Flags{});
         CORRADE_VERIFY(!watcher.isValid());
         CORRADE_VERIFY(!watcher.hasChanged());
     }
@@ -105,6 +111,7 @@ void FileWatcherTest::changedRead() {
     CORRADE_VERIFY(Directory::exists(_filename));
 
     FileWatcher watcher{_filename};
+    CORRADE_COMPARE(watcher.flags(), FileWatcher::Flags{});
     CORRADE_VERIFY(watcher.isValid());
     CORRADE_VERIFY(!watcher.hasChanged());
 
@@ -232,6 +239,7 @@ void FileWatcherTest::changedRecreatedLateIgnoreErrors() {
     CORRADE_VERIFY(Directory::exists(_filename));
 
     FileWatcher watcher{_filename, FileWatcher::Flag::IgnoreErrors};
+    CORRADE_COMPARE(watcher.flags(), FileWatcher::Flag::IgnoreErrors);
     CORRADE_VERIFY(watcher.isValid());
     CORRADE_VERIFY(!watcher.hasChanged());
 
@@ -284,6 +292,7 @@ void FileWatcherTest::changedClearedIgnoreEmpty() {
     CORRADE_VERIFY(Directory::exists(_filename));
 
     FileWatcher watcher{_filename, FileWatcher::Flag::IgnoreChangeIfEmpty};
+    CORRADE_COMPARE(watcher.flags(), FileWatcher::Flag::IgnoreChangeIfEmpty);
     CORRADE_VERIFY(watcher.isValid());
     CORRADE_VERIFY(!watcher.hasChanged());
 
@@ -312,6 +321,20 @@ void FileWatcherTest::changedClearedIgnoreEmpty() {
         #endif
         CORRADE_VERIFY(watcher.hasChanged());
     }
+}
+
+void FileWatcherTest::debugFlag() {
+    std::ostringstream out;
+
+    Debug(&out) << FileWatcher::Flag::IgnoreChangeIfEmpty << FileWatcher::Flag(0xde);
+    CORRADE_COMPARE(out.str(), "Utility::FileWatcher::Flag::IgnoreChangeIfEmpty Utility::FileWatcher::Flag(0xde)\n");
+}
+
+void FileWatcherTest::debugFlags() {
+    std::ostringstream out;
+
+    Debug(&out) << (FileWatcher::Flag::IgnoreChangeIfEmpty|FileWatcher::Flag::IgnoreErrors) << FileWatcher::Flags{};
+    CORRADE_COMPARE(out.str(), "Utility::FileWatcher::Flag::IgnoreErrors|Utility::FileWatcher::Flag::IgnoreChangeIfEmpty Utility::FileWatcher::Flags{}\n");
 }
 
 }}}}
