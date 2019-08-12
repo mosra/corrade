@@ -85,6 +85,8 @@ struct DebugTest: TestSuite::Tester {
     void scopedOutput();
 
     void debugColor();
+    void debugFlag();
+    void debugFlags();
 
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     void multithreaded();
@@ -150,6 +152,8 @@ DebugTest::DebugTest() {
         &DebugTest::scopedOutput,
 
         &DebugTest::debugColor,
+        &DebugTest::debugFlag,
+        &DebugTest::debugFlags,
 
         #ifndef CORRADE_TARGET_EMSCRIPTEN
         &DebugTest::multithreaded,
@@ -880,7 +884,21 @@ void DebugTest::debugColor() {
     std::ostringstream out;
 
     Debug(&out) << Debug::Color::White << Debug::Color(0xde);
-    CORRADE_COMPARE(out.str(), "Debug::Color::White Debug::Color(0xde)\n");
+    CORRADE_COMPARE(out.str(), "Utility::Debug::Color::White Utility::Debug::Color(0xde)\n");
+}
+
+void DebugTest::debugFlag() {
+    std::ostringstream out;
+
+    Debug(&out) << Debug::Flag::NoNewlineAtTheEnd << Debug::Flag(0xde);
+    CORRADE_COMPARE(out.str(), "Utility::Debug::Flag::NoNewlineAtTheEnd Utility::Debug::Flag(0xde)\n");
+}
+
+void DebugTest::debugFlags() {
+    std::ostringstream out;
+
+    Debug(&out) << (Debug::Flag::NoNewlineAtTheEnd|Debug::Flag::Packed) << Debug::Flags{};
+    CORRADE_COMPARE(out.str(), "Utility::Debug::Flag::NoNewlineAtTheEnd|Utility::Debug::Flag::Packed Utility::Debug::Flags{}\n");
 }
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN

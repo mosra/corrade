@@ -470,7 +470,7 @@ Debug& Debug::operator<<(std::nullptr_t) {
 Debug& operator<<(Debug& debug, Debug::Color value) {
     switch(value) {
         /* LCOV_EXCL_START */
-        #define _c(value) case Debug::Color::value: return debug << "Debug::Color::" #value;
+        #define _c(value) case Debug::Color::value: return debug << "Utility::Debug::Color::" #value;
         _c(Black)
         _c(Red)
         _c(Green)
@@ -486,13 +486,13 @@ Debug& operator<<(Debug& debug, Debug::Color value) {
         /* LCOV_EXCL_STOP */
     }
 
-    return debug << "Debug::Color(" << Debug::nospace << reinterpret_cast<void*>(static_cast<unsigned char>(char(value))) << Debug::nospace << ")";
+    return debug << "Utility::Debug::Color(" << Debug::nospace << reinterpret_cast<void*>(static_cast<unsigned char>(char(value))) << Debug::nospace << ")";
 }
 
 Debug& operator<<(Debug& debug, Debug::Flag value) {
     switch(value) {
         /* LCOV_EXCL_START */
-        #define _c(value) case Debug::Flag::value: return debug << "Debug::Flag::" #value;
+        #define _c(value) case Debug::Flag::value: return debug << "Utility::Debug::Flag::" #value;
         _c(NoNewlineAtTheEnd)
         _c(DisableColors)
         _c(NoSpace)
@@ -502,11 +502,11 @@ Debug& operator<<(Debug& debug, Debug::Flag value) {
         /* LCOV_EXCL_STOP */
     }
 
-    return debug << "Debug::Flag(" << Debug::nospace << reinterpret_cast<void*>(static_cast<unsigned char>(char(value))) << Debug::nospace << ")";
+    return debug << "Utility::Debug::Flag(" << Debug::nospace << reinterpret_cast<void*>(static_cast<unsigned char>(char(value))) << Debug::nospace << ")";
 }
 
 Debug& operator<<(Debug& debug, Debug::Flags value) {
-    return Containers::enumSetDebugOutput(debug, value, "Features{}", {
+    return Containers::enumSetDebugOutput(debug, value, "Utility::Debug::Flags{}", {
         Debug::Flag::NoNewlineAtTheEnd,
         Debug::Flag::DisableColors,
         Debug::Flag::NoSpace,
