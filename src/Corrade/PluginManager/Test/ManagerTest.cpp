@@ -32,6 +32,7 @@
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Configuration.h"
 
 #include "AbstractAnimal.h"
@@ -64,6 +65,7 @@ struct ManagerTest: TestSuite::Tester {
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     void wrongMetadataFile();
+    void missingMetadataFile();
     void unresolvedReference();
     void noPluginVersion();
     void wrongPluginVersion();
@@ -131,6 +133,7 @@ ManagerTest::ManagerTest() {
 
               #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
               &ManagerTest::wrongMetadataFile,
+              &ManagerTest::missingMetadataFile,
               &ManagerTest::unresolvedReference,
               &ManagerTest::noPluginVersion,
               &ManagerTest::wrongPluginVersion,
@@ -297,6 +300,23 @@ void ManagerTest::wrongMetadataFile() {
     CORRADE_COMPARE(out.str(),
         "Utility::Configuration::Configuration(): missing equals for a value\n"
         "PluginManager::Manager::load(): plugin WrongMetadata is not ready to load: PluginManager::LoadState::WrongMetadataFile\n");
+}
+
+void ManagerTest::missingMetadataFile() {
+    std::string dir = Utility::Directory::join(PLUGINS_DIR, "missing-metadata");
+    CORRADE_VERIFY(Utility::Directory::mkpath(dir));
+    CORRADE_VERIFY(Utility::Directory::writeString(Utility::Directory::join(dir, "MissingMetadata" PLUGIN_FILENAME_SUFFIX), "this is not a binary"));
+
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    PluginManager::Manager<WrongMetadata> manager{dir};
+    CORRADE_COMPARE(manager.loadState("MissingMetadata"), LoadState::WrongMetadataFile);
+    CORRADE_COMPARE(manager.load("MissingMetadata"), LoadState::WrongMetadataFile);
+    CORRADE_COMPARE(out.str(), Utility::formatString(
+        "PluginManager::Manager: {} was not found\n"
+        "PluginManager::Manager::load(): plugin MissingMetadata is not ready to load: PluginManager::LoadState::WrongMetadataFile\n",
+        Utility::Directory::join(dir, "MissingMetadata.conf")));
 }
 
 void ManagerTest::unresolvedReference() {
