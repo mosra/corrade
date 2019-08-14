@@ -520,14 +520,22 @@ function(corrade_add_plugin plugin_name debug_install_dirs release_install_dirs 
     endif()
 
     # Copy metadata next to the binary for testing purposes
-    add_custom_command(
-        OUTPUT ${plugin_name}.conf
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${plugin_name}.conf
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
     add_custom_target(${plugin_name}-metadata ALL
         DEPENDS ${plugin_name}.conf
         # Force IDEs display also the metadata file in project view
         SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
+    add_dependencies(${plugin_name} ${plugin_name}-metadata)
+    if(NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+        add_custom_command(
+                OUTPUT ${plugin_name}.conf
+                COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${plugin_name}.conf
+                DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
+    else()
+        add_custom_command(
+                OUTPUT ${plugin_name}.conf
+                COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${plugin_name}.conf
+                DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
+    endif()
 
     # Install it somewhere, unless that's explicitly not wanted
     if(NOT debug_install_dirs STREQUAL CMAKE_CURRENT_BINARY_DIR)
@@ -595,5 +603,13 @@ function(corrade_find_dlls_for_libs result)
     set(${result} ${dlls} PARENT_SCOPE)
 endfunction()
 endif()
+
+function(corrade_create_plugins_symlink_for_executable executable plugins_path symlink)
+    get_filename_component(link_dir ${symlink} DIRECTORY)
+    file(MAKE_DIRECTORY ${link_dir})
+    add_custom_target(${executable}-plugins-symlink ALL
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${plugins_path} ${symlink})
+    add_dependencies(${executable} ${executable}-plugins-symlink)
+endfunction()
 
 set(_CORRADE_USE_INCLUDED TRUE)
