@@ -101,9 +101,13 @@ void ArrayViewStlTest::convertVoidFromArray() {
     std::array<float, 3> a{{42.0f, 13.37f, -25.0f}};
     const std::array<float, 3> ca{{42.0f, 13.37f, -25.0f}};
 
-    ArrayView<const void> b = a;
+    ArrayView<void> b = a;
     CORRADE_COMPARE(b.data(), &a[0]);
     CORRADE_COMPARE(b.size(), 3*4);
+
+    ArrayView<const void> cb = a;
+    CORRADE_COMPARE(cb.data(), &a[0]);
+    CORRADE_COMPARE(cb.size(), 3*4);
 
     ArrayView<const void> c = ca;
     CORRADE_COMPARE(c.data(), &ca[0]);
@@ -160,9 +164,13 @@ void ArrayViewStlTest::convertConstFromVector() {
 void ArrayViewStlTest::convertVoidFromVector() {
     std::vector<float> a{42.0f, 13.37f, -25.0f};
 
-    ArrayView<const void> b = a;
+    ArrayView<void> b = a;
     CORRADE_COMPARE(b.data(), &a[0]);
     CORRADE_COMPARE(b.size(), 3*4);
+
+    ArrayView<const void> cb = a;
+    CORRADE_COMPARE(cb.data(), &a[0]);
+    CORRADE_COMPARE(cb.size(), 3*4);
 }
 
 void ArrayViewStlTest::convertVoidFromConstVector() {

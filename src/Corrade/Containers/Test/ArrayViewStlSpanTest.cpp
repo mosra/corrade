@@ -272,9 +272,13 @@ void ArrayViewStlSpanTest::convertVoidFromSpanSized() {
     float data[]{42.0f, 13.37f, -25.0f};
     std::span<float, 3> a = data;
 
-    ArrayView<const void> b = a;
+    ArrayView<void> b = a;
     CORRADE_COMPARE(b, +data);
     CORRADE_COMPARE(b.size(), 3*4);
+
+    ArrayView<const void> cb = a;
+    CORRADE_COMPARE(cb, +data);
+    CORRADE_COMPARE(cb.size(), 3*4);
     #endif
 }
 
