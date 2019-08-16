@@ -64,7 +64,13 @@ FileWatcher::FileWatcher(const std::string& filename, Flags flags):
     hasChanged();
 }
 
-FileWatcher::FileWatcher(FileWatcher&&) noexcept = default;
+FileWatcher::FileWatcher(FileWatcher&&)
+    #ifdef __GNUC__
+    noexcept(std::is_nothrow_move_constructible<std::string>::value)
+    #else
+    noexcept
+    #endif
+    = default;
 
 FileWatcher::~FileWatcher() = default;
 

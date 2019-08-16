@@ -117,7 +117,13 @@ class CORRADE_UTILITY_EXPORT FileWatcher {
         FileWatcher(const FileWatcher&) = delete;
 
         /** @brief Move constructor */
-        FileWatcher(FileWatcher&&) noexcept;
+        FileWatcher(FileWatcher&&)
+            #ifdef __GNUC__
+            noexcept(std::is_nothrow_move_constructible<std::string>::value)
+            #else
+            noexcept
+            #endif
+            ;
 
         /** @brief Copying is not allowed */
         FileWatcher& operator=(const FileWatcher&) = delete;
