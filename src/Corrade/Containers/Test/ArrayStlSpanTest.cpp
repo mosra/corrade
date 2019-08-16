@@ -35,7 +35,9 @@ struct ArrayStlSpanTest: TestSuite::Tester {
     explicit ArrayStlSpanTest();
 
     void toSpan();
+    void toSpanEmpty();
     void toSpanConst();
+    void toSpanConstEmpty();
 
     void toSpanSized();
     void toSpanSizedConst();
@@ -43,7 +45,9 @@ struct ArrayStlSpanTest: TestSuite::Tester {
 
 ArrayStlSpanTest::ArrayStlSpanTest() {
     addTests({&ArrayStlSpanTest::toSpan,
+              &ArrayStlSpanTest::toSpanEmpty,
               &ArrayStlSpanTest::toSpanConst,
+              &ArrayStlSpanTest::toSpanConstEmpty,
 
               &ArrayStlSpanTest::toSpanSized,
               &ArrayStlSpanTest::toSpanSizedConst});
@@ -67,6 +71,18 @@ void ArrayStlSpanTest::toSpan() {
     #endif
 }
 
+void ArrayStlSpanTest::toSpanEmpty() {
+    #if !__has_include(<span>)
+    CORRADE_SKIP("The <span> header is not available on this platform.");
+    #else
+    Array<float> a;
+
+    std::span<float> b = a;
+    CORRADE_COMPARE(b.data(), nullptr);
+    CORRADE_COMPARE(b.size(), 0);
+    #endif
+}
+
 void ArrayStlSpanTest::toSpanConst() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
@@ -84,6 +100,18 @@ void ArrayStlSpanTest::toSpanConst() {
     CORRADE_VERIFY((std::is_convertible<const Containers::Array<int>&, std::span<const int>>::value));
     CORRADE_VERIFY(!(std::is_convertible<Containers::Array<int>&, std::span<const float>>::value));
     CORRADE_VERIFY(!(std::is_convertible<const Containers::Array<int>&, std::span<const float>>::value));
+    #endif
+}
+
+void ArrayStlSpanTest::toSpanConstEmpty() {
+    #if !__has_include(<span>)
+    CORRADE_SKIP("The <span> header is not available on this platform.");
+    #else
+    Array<float> a;
+
+    std::span<const float> b = a;
+    CORRADE_COMPARE(b.data(), nullptr);
+    CORRADE_COMPARE(b.size(), 0);
     #endif
 }
 

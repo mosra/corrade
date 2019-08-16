@@ -34,32 +34,50 @@ struct ArrayViewStlSpanTest: TestSuite::Tester {
     explicit ArrayViewStlSpanTest();
 
     void convertSpan();
+    void convertSpanEmpty();
     void convertConstFromSpan();
+    void convertConstFromSpanEmpty();
     void convertToConstSpan();
+    void convertToConstSpanEmpty();
     void convertVoidFromSpan();
+    void convertVoidFromSpanEmpty();
     void convertVoidFromConstSpan();
+    void convertVoidFromConstSpanEmpty();
 
     void convertFromSpanSized();
+    void convertFromSpanSizedEmpty();
     void convertToSpanSized();
     void convertConstFromSpanSized();
+    void convertConstFromSpanSizedEmpty();
     void convertToConstSpanSized();
     void convertVoidFromSpanSized();
+    void convertVoidFromSpanSizedEmpty();
     void convertVoidFromConstSpanSized();
+    void convertVoidFromConstSpanSizedEmpty();
 };
 
 ArrayViewStlSpanTest::ArrayViewStlSpanTest() {
     addTests({&ArrayViewStlSpanTest::convertSpan,
+              &ArrayViewStlSpanTest::convertSpanEmpty,
               &ArrayViewStlSpanTest::convertConstFromSpan,
+              &ArrayViewStlSpanTest::convertConstFromSpanEmpty,
               &ArrayViewStlSpanTest::convertToConstSpan,
+              &ArrayViewStlSpanTest::convertToConstSpanEmpty,
               &ArrayViewStlSpanTest::convertVoidFromSpan,
+              &ArrayViewStlSpanTest::convertVoidFromSpanEmpty,
               &ArrayViewStlSpanTest::convertVoidFromConstSpan,
+              &ArrayViewStlSpanTest::convertVoidFromConstSpanEmpty,
 
               &ArrayViewStlSpanTest::convertFromSpanSized,
+              &ArrayViewStlSpanTest::convertFromSpanSizedEmpty,
               &ArrayViewStlSpanTest::convertToSpanSized,
               &ArrayViewStlSpanTest::convertConstFromSpanSized,
+              &ArrayViewStlSpanTest::convertConstFromSpanSizedEmpty,
               &ArrayViewStlSpanTest::convertToConstSpanSized,
               &ArrayViewStlSpanTest::convertVoidFromSpanSized,
-              &ArrayViewStlSpanTest::convertVoidFromConstSpanSized});
+              &ArrayViewStlSpanTest::convertVoidFromSpanSizedEmpty,
+              &ArrayViewStlSpanTest::convertVoidFromConstSpanSized,
+              &ArrayViewStlSpanTest::convertVoidFromConstSpanSizedEmpty});
 }
 
 #if __has_include(<span>)
@@ -117,6 +135,21 @@ void ArrayViewStlSpanTest::convertSpan() {
     #endif
 }
 
+void ArrayViewStlSpanTest::convertSpanEmpty() {
+    #if !__has_include(<span>)
+    CORRADE_SKIP("The <span> header is not available on this platform.");
+    #else
+    std::span<float> a;
+    ArrayView<float> b = a;
+    CORRADE_COMPARE(b.data(), nullptr);
+    CORRADE_COMPARE(b.size(), 0);
+
+    std::span<float> c = b;
+    CORRADE_COMPARE(b.data(), nullptr);
+    CORRADE_COMPARE(b.size(), 0);
+    #endif
+}
+
 void ArrayViewStlSpanTest::convertConstFromSpan() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
@@ -132,6 +165,18 @@ void ArrayViewStlSpanTest::convertConstFromSpan() {
     /* Conversion from a different type not allowed */
     CORRADE_VERIFY((std::is_convertible<std::span<int>, Containers::ArrayView<const int>>::value));
     CORRADE_VERIFY(!(std::is_convertible<std::span<int>, Containers::ArrayView<const float>>::value));
+    #endif
+}
+
+void ArrayViewStlSpanTest::convertConstFromSpanEmpty() {
+    #if !__has_include(<span>)
+    CORRADE_SKIP("The <span> header is not available on this platform.");
+    #else
+    std::span<float> a;
+
+    ArrayView<const float> b = a;
+    CORRADE_COMPARE(b.data(), nullptr);
+    CORRADE_COMPARE(b.size(), 0);
     #endif
 }
 
@@ -154,6 +199,18 @@ void ArrayViewStlSpanTest::convertToConstSpan() {
     #endif
 }
 
+void ArrayViewStlSpanTest::convertToConstSpanEmpty() {
+    #if !__has_include(<span>)
+    CORRADE_SKIP("The <span> header is not available on this platform.");
+    #else
+    ArrayView<float> a;
+
+    std::span<const float> b = a;
+    CORRADE_COMPARE(b.data(), nullptr);
+    CORRADE_COMPARE(b.size(), 0);
+    #endif
+}
+
 void ArrayViewStlSpanTest::convertVoidFromSpan() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
@@ -164,6 +221,18 @@ void ArrayViewStlSpanTest::convertVoidFromSpan() {
     ArrayView<const void> b = a;
     CORRADE_COMPARE(b.data(), +data);
     CORRADE_COMPARE(b.size(), 3*4);
+    #endif
+}
+
+void ArrayViewStlSpanTest::convertVoidFromSpanEmpty() {
+    #if !__has_include(<span>)
+    CORRADE_SKIP("The <span> header is not available on this platform.");
+    #else
+    std::span<float> a;
+
+    ArrayView<const void> b = a;
+    CORRADE_COMPARE(b.data(), nullptr);
+    CORRADE_COMPARE(b.size(), 0);
     #endif
 }
 
@@ -182,6 +251,18 @@ void ArrayViewStlSpanTest::convertVoidFromConstSpan() {
     constexpr ArrayView<const void> cb = ca;
     CORRADE_COMPARE(cb.data(), +Data);
     CORRADE_COMPARE(cb.size(), 3*4);
+    #endif
+}
+
+void ArrayViewStlSpanTest::convertVoidFromConstSpanEmpty() {
+    #if !__has_include(<span>)
+    CORRADE_SKIP("The <span> header is not available on this platform.");
+    #else
+    std::span<const float> a;
+
+    ArrayView<const void> b = a;
+    CORRADE_COMPARE(b.data(), nullptr);
+    CORRADE_COMPARE(b.size(), 0);
     #endif
 }
 
@@ -221,6 +302,18 @@ void ArrayViewStlSpanTest::convertFromSpanSized() {
     #endif
 }
 
+void ArrayViewStlSpanTest::convertFromSpanSizedEmpty() {
+    #if !__has_include(<span>)
+    CORRADE_SKIP("The <span> header is not available on this platform.");
+    #else
+    std::span<float, 0> a;
+
+    ArrayView<float> b = a;
+    CORRADE_COMPARE(b.data(), nullptr);
+    CORRADE_COMPARE(b.size(), 0);
+    #endif
+}
+
 void ArrayViewStlSpanTest::convertToSpanSized() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
@@ -248,6 +341,18 @@ void ArrayViewStlSpanTest::convertConstFromSpanSized() {
     /* Conversion from a different type not allowed */
     CORRADE_VERIFY((std::is_convertible<std::span<int, 37>, Containers::ArrayView<const int>>::value));
     CORRADE_VERIFY(!(std::is_convertible<std::span<int, 37>, Containers::ArrayView<const float>>::value));
+    #endif
+}
+
+void ArrayViewStlSpanTest::convertConstFromSpanSizedEmpty() {
+    #if !__has_include(<span>)
+    CORRADE_SKIP("The <span> header is not available on this platform.");
+    #else
+    std::span<float, 0> a;
+
+    ArrayView<const float> b = a;
+    CORRADE_COMPARE(b, nullptr);
+    CORRADE_COMPARE(b.size(), 0);
     #endif
 }
 
@@ -282,6 +387,22 @@ void ArrayViewStlSpanTest::convertVoidFromSpanSized() {
     #endif
 }
 
+void ArrayViewStlSpanTest::convertVoidFromSpanSizedEmpty() {
+    #if !__has_include(<span>)
+    CORRADE_SKIP("The <span> header is not available on this platform.");
+    #else
+    std::span<float, 0> a;
+
+    ArrayView<void> b = a;
+    CORRADE_COMPARE(b, nullptr);
+    CORRADE_COMPARE(b.size(), 0);
+
+    ArrayView<const void> cb = a;
+    CORRADE_COMPARE(cb, nullptr);
+    CORRADE_COMPARE(cb.size(), 0);
+    #endif
+}
+
 void ArrayViewStlSpanTest::convertVoidFromConstSpanSized() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
@@ -297,6 +418,18 @@ void ArrayViewStlSpanTest::convertVoidFromConstSpanSized() {
     constexpr ArrayView<const void> cb = ca;
     CORRADE_COMPARE(cb, +Data);
     CORRADE_COMPARE(cb.size(), 3*4);
+    #endif
+}
+
+void ArrayViewStlSpanTest::convertVoidFromConstSpanSizedEmpty() {
+    #if !__has_include(<span>)
+    CORRADE_SKIP("The <span> header is not available on this platform.");
+    #else
+    std::span<const float, 0> a;
+
+    ArrayView<const void> b = a;
+    CORRADE_COMPARE(b, nullptr);
+    CORRADE_COMPARE(b.size(), 0);
     #endif
 }
 

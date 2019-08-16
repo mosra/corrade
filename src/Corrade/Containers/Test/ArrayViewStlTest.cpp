@@ -32,30 +32,50 @@ struct ArrayViewStlTest: TestSuite::Tester {
     explicit ArrayViewStlTest();
 
     void convertFromArray();
+    void convertFromArrayEmpty();
     void convertFromConstArray();
+    void convertFromConstArrayEmpty();
     void convertConstFromArray();
+    void convertConstFromArrayEmpty();
     void convertVoidFromArray();
+    void convertVoidFromArrayEmpty();
     void convertVoidFromConstArray();
+    void convertVoidFromConstArrayEmpty();
 
     void convertFromVector();
+    void convertFromVectorEmpty();
     void convertFromConstVector();
+    void convertFromConstVectorEmpty();
     void convertConstFromVector();
+    void convertConstFromVectorEmpty();
     void convertVoidFromVector();
+    void convertVoidFromVectorEmpty();
     void convertVoidFromConstVector();
+    void convertVoidFromConstVectorEmpty();
 };
 
 ArrayViewStlTest::ArrayViewStlTest() {
     addTests({&ArrayViewStlTest::convertFromArray,
+              &ArrayViewStlTest::convertFromArrayEmpty,
               &ArrayViewStlTest::convertFromConstArray,
+              &ArrayViewStlTest::convertFromConstArrayEmpty,
               &ArrayViewStlTest::convertConstFromArray,
+              &ArrayViewStlTest::convertConstFromArrayEmpty,
               &ArrayViewStlTest::convertVoidFromArray,
+              &ArrayViewStlTest::convertVoidFromArrayEmpty,
               &ArrayViewStlTest::convertVoidFromConstArray,
+              &ArrayViewStlTest::convertVoidFromConstArrayEmpty,
 
               &ArrayViewStlTest::convertFromVector,
+              &ArrayViewStlTest::convertFromVectorEmpty,
               &ArrayViewStlTest::convertFromConstVector,
+              &ArrayViewStlTest::convertFromConstVectorEmpty,
               &ArrayViewStlTest::convertConstFromVector,
+              &ArrayViewStlTest::convertConstFromVectorEmpty,
               &ArrayViewStlTest::convertVoidFromVector,
-              &ArrayViewStlTest::convertVoidFromConstVector});
+              &ArrayViewStlTest::convertVoidFromVectorEmpty,
+              &ArrayViewStlTest::convertVoidFromConstVector,
+              &ArrayViewStlTest::convertVoidFromConstVectorEmpty});
 }
 
 void ArrayViewStlTest::convertFromArray() {
@@ -73,6 +93,14 @@ void ArrayViewStlTest::convertFromArray() {
     CORRADE_COMPARE(c[0], 42.0f);
 }
 
+void ArrayViewStlTest::convertFromArrayEmpty() {
+    std::array<float, 0> a{};
+    ArrayView<float> b = a;
+    /* If size() is 0, data() may or may not return a null pointer. So can't
+       test shit. FFS, C++. */
+    CORRADE_COMPARE(b.size(), 0);
+}
+
 void ArrayViewStlTest::convertFromConstArray() {
     const std::array<float, 3> a{{42.0f, 13.37f, -25.0f}};
 
@@ -88,6 +116,14 @@ void ArrayViewStlTest::convertFromConstArray() {
     CORRADE_COMPARE(c[0], 42.0f);
 }
 
+void ArrayViewStlTest::convertFromConstArrayEmpty() {
+    const std::array<float, 0> a{};
+    ArrayView<const float> b = a;
+    /* If size() is 0, data() may or may not return a null pointer. So can't
+       test shit. FFS, C++. */
+    CORRADE_COMPARE(b.size(), 0);
+}
+
 void ArrayViewStlTest::convertConstFromArray() {
     std::array<float, 3> a{{42.0f, 13.37f, -25.0f}};
 
@@ -95,6 +131,14 @@ void ArrayViewStlTest::convertConstFromArray() {
     CORRADE_COMPARE(b, &a[0]);
     CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(b[0], 42.0f);
+}
+
+void ArrayViewStlTest::convertConstFromArrayEmpty() {
+    std::array<float, 0> a{};
+    ArrayView<const float> b = a;
+    /* If size() is 0, data() may or may not return a null pointer. So can't
+       test shit. FFS, C++. */
+    CORRADE_COMPARE(b.size(), 0);
 }
 
 void ArrayViewStlTest::convertVoidFromArray() {
@@ -114,12 +158,28 @@ void ArrayViewStlTest::convertVoidFromArray() {
     CORRADE_COMPARE(c.size(), 3*4);
 }
 
+void ArrayViewStlTest::convertVoidFromArrayEmpty() {
+    std::array<float, 0> a{};
+    ArrayView<const void> b = a;
+    /* If size() is 0, data() may or may not return a null pointer. So can't
+       test shit. FFS, C++. */
+    CORRADE_COMPARE(b.size(), 0);
+}
+
 void ArrayViewStlTest::convertVoidFromConstArray() {
     const std::array<float, 3> a{{42.0f, 13.37f, -25.0f}};
 
     ArrayView<const void> b = a;
     CORRADE_COMPARE(b.data(), &a[0]);
     CORRADE_COMPARE(b.size(), 3*4);
+}
+
+void ArrayViewStlTest::convertVoidFromConstArrayEmpty() {
+    const std::array<float, 0> a{};
+    ArrayView<const void> b = a;
+    /* If size() is 0, data() may or may not return a null pointer. So can't
+       test shit. FFS, C++. */
+    CORRADE_COMPARE(b.size(), 0);
 }
 
 void ArrayViewStlTest::convertFromVector() {
@@ -137,6 +197,14 @@ void ArrayViewStlTest::convertFromVector() {
     CORRADE_COMPARE(c[0], 42.0f);
 }
 
+void ArrayViewStlTest::convertFromVectorEmpty() {
+    std::vector<float> a;
+    ArrayView<float> b = a;
+    /* If size() is 0, data() may or may not return a null pointer. So can't
+       test shit. FFS, C++. */
+    CORRADE_COMPARE(b.size(), 0);
+}
+
 void ArrayViewStlTest::convertFromConstVector() {
     const std::vector<float> a{42.0f, 13.37f, -25.0f};
 
@@ -152,6 +220,14 @@ void ArrayViewStlTest::convertFromConstVector() {
     CORRADE_COMPARE(c[0], 42.0f);
 }
 
+void ArrayViewStlTest::convertFromConstVectorEmpty() {
+    const std::vector<float> a;
+    ArrayView<const float> b = a;
+    /* If size() is 0, data() may or may not return a null pointer. So can't
+       test shit. FFS, C++. */
+    CORRADE_COMPARE(b.size(), 0);
+}
+
 void ArrayViewStlTest::convertConstFromVector() {
     std::vector<float> a{42.0f, 13.37f, -25.0f};
 
@@ -159,6 +235,14 @@ void ArrayViewStlTest::convertConstFromVector() {
     CORRADE_COMPARE(b, &a[0]);
     CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(b[0], 42.0f);
+}
+
+void ArrayViewStlTest::convertConstFromVectorEmpty() {
+    std::vector<float> a;
+    ArrayView<const float> b = a;
+    /* If size() is 0, data() may or may not return a null pointer. So can't
+       test shit. FFS, C++. */
+    CORRADE_COMPARE(b.size(), 0);
 }
 
 void ArrayViewStlTest::convertVoidFromVector() {
@@ -173,12 +257,35 @@ void ArrayViewStlTest::convertVoidFromVector() {
     CORRADE_COMPARE(cb.size(), 3*4);
 }
 
+void ArrayViewStlTest::convertVoidFromVectorEmpty() {
+    std::vector<float> a;
+
+    ArrayView<const void> b = a;
+    /* If size() is 0, data() may or may not return a null pointer. So can't
+       test shit. FFS, C++. */
+    CORRADE_COMPARE(b.size(), 0);
+
+    ArrayView<const void> cb = a;
+    /* If size() is 0, data() may or may not return a null pointer. So can't
+       test shit. FFS, C++. */
+    CORRADE_COMPARE(cb.size(), 0);
+}
+
 void ArrayViewStlTest::convertVoidFromConstVector() {
     const std::vector<float> a{42.0f, 13.37f, -25.0f};
 
     ArrayView<const void> b = a;
     CORRADE_COMPARE(b.data(), &a[0]);
     CORRADE_COMPARE(b.size(), 3*4);
+}
+
+void ArrayViewStlTest::convertVoidFromConstVectorEmpty() {
+    std::vector<float> a;
+
+    ArrayView<const void> b = a;
+    /* If size() is 0, data() may or may not return a null pointer. So can't
+       test shit. FFS, C++. */
+    CORRADE_COMPARE(b.size(), 0);
 }
 
 }}}}

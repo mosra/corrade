@@ -35,18 +35,26 @@ struct StaticArrayStlSpanTest: TestSuite::Tester {
     explicit StaticArrayStlSpanTest();
 
     void convertToSpan();
+    void convertToSpanEmpty();
     void convertToConstSpan();
+    void convertToConstSpanEmpty();
 
     void convertToSpanSized();
+    void convertToSpanSizedEmpty();
     void convertToConstSpanSized();
+    void convertToConstSpanSizedEmpty();
 };
 
 StaticArrayStlSpanTest::StaticArrayStlSpanTest() {
     addTests({&StaticArrayStlSpanTest::convertToSpan,
+              &StaticArrayStlSpanTest::convertToSpanEmpty,
               &StaticArrayStlSpanTest::convertToConstSpan,
+              &StaticArrayStlSpanTest::convertToConstSpanEmpty,
 
               &StaticArrayStlSpanTest::convertToSpanSized,
-              &StaticArrayStlSpanTest::convertToConstSpanSized});
+              &StaticArrayStlSpanTest::convertToSpanSizedEmpty,
+              &StaticArrayStlSpanTest::convertToConstSpanSized,
+              &StaticArrayStlSpanTest::convertToConstSpanSizedEmpty});
 }
 
 void StaticArrayStlSpanTest::convertToSpan() {
@@ -72,6 +80,10 @@ void StaticArrayStlSpanTest::convertToSpan() {
     #endif
 }
 
+void StaticArrayStlSpanTest::convertToSpanEmpty() {
+    CORRADE_SKIP("Zero-sized StaticArray is not implemented yet.");
+}
+
 void StaticArrayStlSpanTest::convertToConstSpan() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
@@ -88,6 +100,10 @@ void StaticArrayStlSpanTest::convertToConstSpan() {
     CORRADE_VERIFY((std::is_convertible<Containers::StaticArray<5, int>&, std::span<const int>>::value));
     CORRADE_VERIFY(!(std::is_convertible<Containers::StaticArray<5, int>&, std::span<const float>>::value));
     #endif
+}
+
+void StaticArrayStlSpanTest::convertToConstSpanEmpty() {
+    CORRADE_SKIP("Zero-sized StaticArray is not implemented yet.");
 }
 
 void StaticArrayStlSpanTest::convertToSpanSized() {
@@ -117,6 +133,10 @@ void StaticArrayStlSpanTest::convertToSpanSized() {
     #endif
 }
 
+void StaticArrayStlSpanTest::convertToSpanSizedEmpty() {
+    CORRADE_SKIP("Zero-sized StaticArray is not implemented yet.");
+}
+
 void StaticArrayStlSpanTest::convertToConstSpanSized() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
@@ -137,6 +157,10 @@ void StaticArrayStlSpanTest::convertToConstSpanSized() {
     }
     CORRADE_VERIFY(!(std::is_convertible<StaticArray<3, float>, std::span<const int, 3>>::value));
     #endif
+}
+
+void StaticArrayStlSpanTest::convertToConstSpanSizedEmpty() {
+    CORRADE_SKIP("Zero-sized StaticArray is not implemented yet.");
 }
 
 }}}}

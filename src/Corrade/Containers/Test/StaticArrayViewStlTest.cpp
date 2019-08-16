@@ -32,14 +32,20 @@ struct StaticArrayViewStlTest: TestSuite::Tester {
     explicit StaticArrayViewStlTest();
 
     void convertFromArray();
+    void convertFromArrayEmpty();
     void convertFromConstArray();
+    void convertFromConstArrayEmpty();
     void convertConstFromArray();
+    void convertConstFromArrayEmpty();
 };
 
 StaticArrayViewStlTest::StaticArrayViewStlTest() {
     addTests({&StaticArrayViewStlTest::convertFromArray,
+              &StaticArrayViewStlTest::convertFromArrayEmpty,
               &StaticArrayViewStlTest::convertFromConstArray,
-              &StaticArrayViewStlTest::convertConstFromArray});
+              &StaticArrayViewStlTest::convertFromConstArrayEmpty,
+              &StaticArrayViewStlTest::convertConstFromArray,
+              &StaticArrayViewStlTest::convertConstFromArrayEmpty});
 }
 
 void StaticArrayViewStlTest::convertFromArray() {
@@ -57,6 +63,10 @@ void StaticArrayViewStlTest::convertFromArray() {
     CORRADE_COMPARE(c[0], 42.0f);
 }
 
+void StaticArrayViewStlTest::convertFromArrayEmpty() {
+    CORRADE_SKIP("Zero-sized StaticArrayView is not implemented yet.");
+}
+
 void StaticArrayViewStlTest::convertFromConstArray() {
     const std::array<float, 3> a{{42.0f, 13.37f, -25.0f}};
 
@@ -66,6 +76,10 @@ void StaticArrayViewStlTest::convertFromConstArray() {
     CORRADE_COMPARE(b[0], 42.0f);
 }
 
+void StaticArrayViewStlTest::convertFromConstArrayEmpty() {
+    CORRADE_SKIP("Zero-sized StaticArrayView is not implemented yet.");
+}
+
 void StaticArrayViewStlTest::convertConstFromArray() {
     std::array<float, 3> a{{42.0f, 13.37f, -25.0f}};
 
@@ -73,6 +87,10 @@ void StaticArrayViewStlTest::convertConstFromArray() {
     CORRADE_COMPARE(b, &a[0]);
     CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(b[0], 42.0f);
+}
+
+void StaticArrayViewStlTest::convertConstFromArrayEmpty() {
+    CORRADE_SKIP("Zero-sized StaticArrayView is not implemented yet.");
 }
 
 }}}}

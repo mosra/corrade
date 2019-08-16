@@ -35,23 +35,33 @@ struct StaticArrayViewStlSpanTest: TestSuite::Tester {
 
     void convertFromSpan();
     void convertToSpan();
+    void convertToSpanEmpty();
     void convertConstFromSpan();
     void convertToConstSpan();
+    void convertToConstSpanEmpty();
 
     void convertSpanSized();
+    void convertSpanSizedEmpty();
     void convertConstFromSpanSized();
+    void convertConstFromSpanSizedEmpty();
     void convertToConstSpanSized();
+    void convertToConstSpanSizedEmpty();
 };
 
 StaticArrayViewStlSpanTest::StaticArrayViewStlSpanTest() {
     addTests({&StaticArrayViewStlSpanTest::convertFromSpan,
               &StaticArrayViewStlSpanTest::convertToSpan,
+              &StaticArrayViewStlSpanTest::convertToSpanEmpty,
               &StaticArrayViewStlSpanTest::convertConstFromSpan,
               &StaticArrayViewStlSpanTest::convertToConstSpan,
+              &StaticArrayViewStlSpanTest::convertToConstSpanEmpty,
 
               &StaticArrayViewStlSpanTest::convertSpanSized,
+              &StaticArrayViewStlSpanTest::convertSpanSizedEmpty,
               &StaticArrayViewStlSpanTest::convertConstFromSpanSized,
-              &StaticArrayViewStlSpanTest::convertToConstSpanSized});
+              &StaticArrayViewStlSpanTest::convertConstFromSpanSizedEmpty,
+              &StaticArrayViewStlSpanTest::convertToConstSpanSized,
+              &StaticArrayViewStlSpanTest::convertToConstSpanSizedEmpty});
 }
 
 void StaticArrayViewStlSpanTest::convertFromSpan() {
@@ -97,6 +107,10 @@ void StaticArrayViewStlSpanTest::convertToSpan() {
     #endif
 }
 
+void StaticArrayViewStlSpanTest::convertToSpanEmpty() {
+    CORRADE_SKIP("Zero-sized StaticArrayView is not implemented yet.");
+}
+
 void StaticArrayViewStlSpanTest::convertConstFromSpan() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
@@ -125,6 +139,10 @@ void StaticArrayViewStlSpanTest::convertToConstSpan() {
     CORRADE_VERIFY((std::is_convertible<Containers::StaticArrayView<5, int>, std::span<const int>>::value));
     CORRADE_VERIFY(!(std::is_convertible<Containers::StaticArrayView<5, int>, std::span<const float>>::value));
     #endif
+}
+
+void StaticArrayViewStlSpanTest::convertToConstSpanEmpty() {
+    CORRADE_SKIP("Zero-sized StaticArrayView is not implemented yet.");
 }
 
 void StaticArrayViewStlSpanTest::convertSpanSized() {
@@ -182,6 +200,10 @@ void StaticArrayViewStlSpanTest::convertSpanSized() {
     #endif
 }
 
+void StaticArrayViewStlSpanTest::convertSpanSizedEmpty() {
+    CORRADE_SKIP("Zero-sized StaticArrayView is not implemented yet.");
+}
+
 void StaticArrayViewStlSpanTest::convertConstFromSpanSized() {
     #if !__has_include(<span>)
     CORRADE_SKIP("The <span> header is not available on this platform.");
@@ -200,6 +222,10 @@ void StaticArrayViewStlSpanTest::convertConstFromSpanSized() {
     CORRADE_VERIFY(!(std::is_convertible<std::span<int, 5>, Containers::StaticArrayView<6, const int>>::value));
     CORRADE_VERIFY(!(std::is_convertible<std::span<int, 5>, Containers::StaticArrayView<5, const float>>::value));
     #endif
+}
+
+void StaticArrayViewStlSpanTest::convertConstFromSpanSizedEmpty() {
+    CORRADE_SKIP("Zero-sized StaticArrayView is not implemented yet.");
 }
 
 void StaticArrayViewStlSpanTest::convertToConstSpanSized() {
@@ -224,6 +250,10 @@ void StaticArrayViewStlSpanTest::convertToConstSpanSized() {
     }
     CORRADE_VERIFY(!(std::is_convertible<Containers::StaticArrayView<5, int>, std::span<const float, 5>>::value));
     #endif
+}
+
+void StaticArrayViewStlSpanTest::convertToConstSpanSizedEmpty() {
+    CORRADE_SKIP("Zero-sized StaticArrayView is not implemented yet.");
 }
 
 }}}}
