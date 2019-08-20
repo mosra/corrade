@@ -91,6 +91,8 @@ Is the below list missing your name or something's wrong?
 -   **David Lin** ([\@davll](https://github.com/davll)) --- initial macOS port
 -   **Chris Chambers** ([\@chris-chambers](https://github.com/chris-chambers))
     --- interfacing @ref Utility::Debug with @ref std::ostream operators
+-   **Cong Xie** ([\@xiconxi](https://github.com/xiconxi)) --- buildsystem
+    fixes
 -   **Eliot Saba** ([\@staticfloat](https://github.com/staticfloat)) --- macOS
     buildsystem fixes
 -   **Erik Wijmans** ([\@erikwijmans](https://github.com/erikwijmans)) ---

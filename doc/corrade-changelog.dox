@@ -243,6 +243,8 @@ namespace Corrade {
 -   Emscripten builds now have the `-fPIC` option disabled by default as it
     causes linker errors related to `__memory_base` on 1.38.36 (see also
     [emscripten-core/emscripten#8761](https://github.com/emscripten-core/emscripten/issues/8761))
+-   Fixed dynamic plugin metadata location when `CMAKE_LIBRARY_OUTPUT_DIRECTORY`
+    is set (see [mosra/corrade#74](https://github.com/mosra/corrade/pull/74))
 -   With CMake 3.15 there's an unfortunate collision between
     `CORRADE_CXX_STANDARD` and CMake's own `COMPILE_FEATURES` target property,
     where a request to use C++14 from a 3rd party library would get ignored
@@ -364,8 +366,9 @@ namespace Corrade {
 -   Fixed Gentoo build instructions (see
     [mosra/corrade#64](https://github.com/mosra/corrade/pull/64))
 -   Various other doc updates (see
-    [mosra/corrade#69](https://github.com/mosra/corrade/pull/69) and
-    [mosra/corrade#71](https://github.com/mosra/corrade/pull/71))
+    [mosra/corrade#69](https://github.com/mosra/corrade/pull/69),
+    [mosra/corrade#71](https://github.com/mosra/corrade/pull/71) and
+    [mosra/corrade#76](https://github.com/mosra/corrade/pull/76))
 
 @section corrade-changelog-2019-01 2019.01
 
