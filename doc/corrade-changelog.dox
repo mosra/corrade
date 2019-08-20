@@ -59,7 +59,7 @@ namespace Corrade {
 -   Opt-in STL compatibility for @ref Containers::ArrayView,
     @ref Containers::StaticArrayView and @ref Containers::StridedArrayView
     classes, allowing them to be implicitly converted from @ref std::vector and
-    @ref std::array
+    @ref std::array (see also [mosra/corrade#75](https://github.com/mosra/corrade/issues/75))
 -   Opt-in STL compatibility for @ref Containers::Array,
     @ref Containers::ArrayView, @ref Containers::StaticArray,
     @ref Containers::StaticArrayView and @ref Containers::StridedArrayView

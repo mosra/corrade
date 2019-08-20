@@ -48,12 +48,12 @@ namespace Corrade { namespace Containers { namespace Implementation {
 /* std::array to ArrayView */
 template<std::size_t size, class T> struct ArrayViewConverter<T, std::array<T, size>> {
     constexpr static ArrayView<T> from(std::array<T, size>& other) {
-        return {&other[0], other.size()};
+        return {other.data(), other.size()};
     }
 };
 template<std::size_t size, class T> struct ArrayViewConverter<const T, std::array<T, size>> {
     constexpr static ArrayView<const T> from(const std::array<T, size>& other) {
-        return {&other[0], other.size()};
+        return {other.data(), other.size()};
     }
 };
 template<std::size_t size, class T> struct ErasedArrayViewConverter<std::array<T, size>>: ArrayViewConverter<T, std::array<T, size>> {};
@@ -62,12 +62,12 @@ template<std::size_t size, class T> struct ErasedArrayViewConverter<const std::a
 /* std::vector to ArrayView */
 template<class T, class Allocator> struct ArrayViewConverter<T, std::vector<T, Allocator>> {
     static ArrayView<T> from(std::vector<T, Allocator>& other) {
-        return {&other[0], other.size()};
+        return {other.data(), other.size()};
     }
 };
 template<class T, class Allocator> struct ArrayViewConverter<const T, std::vector<T, Allocator>> {
     static ArrayView<const T> from(const std::vector<T, Allocator>& other) {
-        return {&other[0], other.size()};
+        return {other.data(), other.size()};
     }
 };
 template<class T, class Allocator> struct ErasedArrayViewConverter<std::vector<T, Allocator>>: ArrayViewConverter<T, std::vector<T, Allocator>> {};
@@ -76,12 +76,12 @@ template<class T, class Allocator> struct ErasedArrayViewConverter<const std::ve
 /* std::array to StaticArrayView */
 template<std::size_t size, class T> struct StaticArrayViewConverter<size, T, std::array<T, size>> {
     constexpr static StaticArrayView<size, T> from(std::array<T, size>& other) {
-        return StaticArrayView<size, T>{&other[0]};
+        return StaticArrayView<size, T>{other.data()};
     }
 };
 template<std::size_t size, class T> struct StaticArrayViewConverter<size, const T, std::array<T, size>> {
     constexpr static StaticArrayView<size, const T> from(const std::array<T, size>& other) {
-        return StaticArrayView<size, const T>(&other[0]);
+        return StaticArrayView<size, const T>(other.data());
     }
 };
 template<std::size_t size, class T> struct ErasedStaticArrayViewConverter<std::array<T, size>>: StaticArrayViewConverter<size, T, std::array<T, size>> {};
