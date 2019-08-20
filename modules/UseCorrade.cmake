@@ -522,7 +522,7 @@ function(corrade_add_plugin plugin_name debug_install_dirs release_install_dirs 
     # Copy metadata next to the binary for testing purposes
     add_custom_command(
         OUTPUT ${plugin_name}.conf
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${plugin_name}.conf
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} $<TARGET_FILE_DIR:${plugin_name}>/${plugin_name}.conf
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
     add_custom_target(${plugin_name}-metadata ALL
         DEPENDS ${plugin_name}.conf
