@@ -103,11 +103,25 @@ You can then install latest stable version of Corrade like this:
 vcpkg install corrade
 @endcode
 
-Often you may want to install the latest Git revision instead:
+@m_class{m-block m-success}
 
-@code{.bat}
-vcpkg install corrade --head
-@endcode
+@par Installing latest master
+    The `master` is considered stable for production use and often you may want
+    to prefer it over an potentially outdated tagged release. To do so, use
+    the `--head` option:
+@par
+    @code{.bat}
+    vcpkg install --head corrade
+    @endcode
+@par
+    Note that `vcpkg upgrade` doesn't work well with `--head` packages (it will
+    go back to latest tagged version instead of updated master), you have to
+    remove the package and install `--head` again instead:
+@par
+    @code{.bat}
+    vcpkg remove corrade
+    vcpkg install corrade --head
+    @endcode
 
 Not all features are installed by default; only those that are implicitly
 enabled in @ref building-corrade-features. To opt-in or opt-out of additional
