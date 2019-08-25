@@ -176,9 +176,9 @@ namespace Corrade {
     setups where all plugins are always linked statically.
 -   @ref PluginManager::Manager now explicitly checks for presence of a
     plugin metadata file for dynamic plugins and fails with
-    @ref PluginManager::LoadState::WrongMetadata if it's not found. Previously
-    it was silently ignoring missing metadata files, often resulting in a
-    runtime linker error due to a dependency not being loaded.
+    @ref PluginManager::LoadState::WrongMetadataFile if it's not found.
+    Previously it was silently ignoring missing metadata files, often resulting
+    in a runtime linker error due to a dependency not being loaded.
 
 @subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
 
