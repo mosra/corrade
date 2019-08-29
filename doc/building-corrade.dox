@@ -107,7 +107,7 @@ vcpkg install corrade
 
 @par Installing latest master
     The `master` is considered stable for production use and often you may want
-    to prefer it over an potentially outdated tagged release. To do so, use
+    to prefer it over a potentially outdated tagged release. To do so, use
     the `--head` option:
 @par
     @code{.bat}
