@@ -45,9 +45,12 @@
 
 namespace Corrade { namespace Utility {
 
+#ifndef CORRADE_BUILD_STATIC
+/* (Of course) can't be in an unnamed namespace in order to export it below */
 namespace {
+#endif
 
-struct {
+struct ResourceGlobals {
     /* A linked list of resources. Managed using utilities from
        Containers/Implementation/RawForwardList.h, look there for more info. */
     Implementation::ResourceGroup* groups;
@@ -56,13 +59,29 @@ struct {
        Resource::overrideGroup() and stores a pointer to a function-local
        static variable from there. */
     std::map<std::string, std::string>* overrideGroups;
+};
 
+#if defined(CORRADE_BUILD_STATIC) && !defined(CORRADE_TARGET_WINDOWS)
+/* On static builds that get linked to multiple shared libraries and then used
+   in a single app we want to ensure there's just one global symbol. On Linux
+   it's apparently enough to just export, macOS needs the weak attribute.
+   Windows not handled yet, as it needs a workaround using DllMain() and
+   GetProcAddress(). */
+CORRADE_VISIBILITY_EXPORT
+    #ifdef __GNUC__
+    __attribute__((weak))
+    #else
+    /* uh oh? the test will fail, probably */
+    #endif
+#endif
 /* The value of this variable is guaranteed to be zero-filled even before any
    resource initializers are executed, which means we don't hit any static
    initialization order fiasco. */
-} resourceGlobals{nullptr, nullptr};
+ResourceGlobals resourceGlobals{nullptr, nullptr};
 
+#ifndef CORRADE_BUILD_STATIC
 }
+#endif
 
 struct Resource::OverrideData {
     const Configuration conf;

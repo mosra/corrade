@@ -131,9 +131,12 @@ struct AbstractManager::State {
 
 const int AbstractManager::Version = CORRADE_PLUGIN_VERSION;
 
+#ifndef CORRADE_BUILD_STATIC
+/* (Of course) can't be in an unnamed namespace in order to export it below */
 namespace {
+#endif
 
-struct {
+struct Globals {
     /* A linked list of static plugins. Managed using utilities from
        Containers/Implementation/RawForwardList.h, look there for more info. */
     Implementation::StaticPlugin* staticPlugins;
@@ -147,16 +150,32 @@ struct {
        errors because std::pair is trying to copy itself. So calm down and
        ignore those few delete calls. Please. Last tried: March 2018. */
     std::map<std::string, AbstractManager::Plugin*>* plugins;
+};
 
+#if defined(CORRADE_BUILD_STATIC) && !defined(CORRADE_TARGET_WINDOWS)
+/* On static builds that get linked to multiple shared libraries and then used
+   in a single app we want to ensure there's just one global symbol. On Linux
+   it's apparently enough to just export, macOS needs the weak attribute.
+   Windows not handled yet, as it needs a workaround using DllMain() and
+   GetProcAddress(). */
+CORRADE_VISIBILITY_EXPORT
+    #ifdef __GNUC__
+    __attribute__((weak))
+    #else
+    /* uh oh? the test will fail, probably */
+    #endif
+#endif
 /* The value of this variable is guaranteed to be zero-filled even before any
    static plugin initializers are executed, which means we don't hit any static
    initialization order fiasco. */
-} globals{nullptr, nullptr};
+Globals globals{nullptr, nullptr};
+
+#ifndef CORRADE_BUILD_STATIC
+}
+#endif
 
 static_assert(std::is_pod<Implementation::StaticPlugin>::value,
     "static plugins shouldn't cause any global initialization / finalization to happen on their own");
-
-}
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 void AbstractManager::importStaticPlugin(int version, Implementation::StaticPlugin& plugin) {

@@ -152,6 +152,12 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 
+-   Global state used by @ref PluginManager::Manager, @ref Utility::Debug and
+    @ref Utility::Resource internals is no longer duplicated when Corrade is
+    built statically and linked to more than one dynamic library or executable.
+    Currently that holds only for Linux and macOS, Windows support will come
+    next.
+
 @subsubsection corrade-changelog-latest-changes-containers Containers library
 
 -   It's now possible to create @ref Containers::ScopeGuard without a handle

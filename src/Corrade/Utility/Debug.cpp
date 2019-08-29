@@ -76,23 +76,47 @@ HANDLE streamOutputHandle(const std::ostream* s) {
 }
 #endif
 
-#ifdef CORRADE_BUILD_MULTITHREADED
-CORRADE_THREAD_LOCAL
+}
+
+#ifndef CORRADE_BUILD_STATIC
+/* (Of course) can't be in an unnamed namespace in order to export it below */
+namespace {
 #endif
-struct {
+
+struct DebugGlobals {
     std::ostream *output, *warningOutput, *errorOutput;
     #if !defined(CORRADE_TARGET_WINDOWS) ||defined(CORRADE_UTILITY_USE_ANSI_COLORS)
     Debug::Color color;
     bool colorBold;
     #endif
-} debugGlobals {
+};
+
+#ifdef CORRADE_BUILD_MULTITHREADED
+CORRADE_THREAD_LOCAL
+#endif
+#if defined(CORRADE_BUILD_STATIC) && !defined(CORRADE_TARGET_WINDOWS)
+/* On static builds that get linked to multiple shared libraries and then used
+   in a single app we want to ensure there's just one global symbol. On Linux
+   it's apparently enough to just export, macOS needs the weak attribute.
+   Windows not handled yet, as it needs a workaround using DllMain() and
+   GetProcAddress(). */
+CORRADE_VISIBILITY_EXPORT
+    #ifdef __GNUC__
+    __attribute__((weak))
+    #else
+    /* uh oh? the test will fail, probably */
+    #endif
+#endif
+DebugGlobals debugGlobals{
     &std::cout, &std::cerr, &std::cerr,
     #if !defined(CORRADE_TARGET_WINDOWS) ||defined(CORRADE_UTILITY_USE_ANSI_COLORS)
     Debug::Color::Default, false
     #endif
 };
 
+#ifndef CORRADE_BUILD_STATIC
 }
+#endif
 
 template<Debug::Color c, bool bold> Debug::Modifier Debug::colorInternal() {
     return [](Debug& debug) {
