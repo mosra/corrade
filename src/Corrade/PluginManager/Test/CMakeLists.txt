@@ -67,6 +67,29 @@ set_target_properties(
     PluginManagerManagerInitFiniTest
     PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
+if(CORRADE_BUILD_STATIC AND NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET_IOS AND NOT CORRADE_TARGET_ANDROID AND NOT CORRADE_TARGET_WINDOWS_RT)
+    # Yes, adding AbstractAnimal.cpp to both targets is fine in this case.
+    # The whole Corrade gets duplicated too. Using CorradePluginManagerTestLib
+    # instead of CorradePluginManager as that's what Canary links to.
+    add_library(PluginManagerGlobalStateAcrossLibrariesLibrary SHARED
+        AbstractAnimal.cpp
+        GlobalStateAcrossLibrariesLibrary.cpp)
+    target_link_libraries(PluginManagerGlobalStateAcrossLibrariesLibrary
+        PUBLIC CorradePluginManagerTestLib
+        PRIVATE Canary)
+    target_include_directories(PluginManagerGlobalStateAcrossLibrariesLibrary PRIVATE $<TARGET_FILE_DIR:PluginManagerManagerTest>)
+
+    corrade_add_test(PluginManagerGlobalStateAcrossLi___Test
+        AbstractAnimal.cpp
+        GlobalStateAcrossLibrariesTest.cpp
+        LIBRARIES PluginManagerGlobalStateAcrossLibrariesLibrary)
+    target_include_directories(PluginManagerGlobalStateAcrossLi___Test PRIVATE $<TARGET_FILE_DIR:PluginManagerManagerTest>)
+    set_target_properties(
+        PluginManagerGlobalStateAcrossLibrariesLibrary
+        PluginManagerGlobalStateAcrossLi___Test
+        PROPERTIES FOLDER "Corrade/PluginManager/Test")
+endif()
+
 add_subdirectory(animals)
 add_subdirectory(init-fini)
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)

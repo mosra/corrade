@@ -269,6 +269,21 @@ set_target_properties(
     ResourceTestNothingData-dependencies
     PROPERTIES FOLDER "Corrade/Utility/Test")
 
+if(CORRADE_BUILD_STATIC AND NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET_IOS AND NOT CORRADE_TARGET_ANDROID AND NOT CORRADE_TARGET_WINDOWS_RT)
+    add_library(UtilityGlobalStateAcrossLibrariesLibrary SHARED
+        GlobalStateAcrossLibrariesLibrary.cpp
+        ${ResourceTestData})
+    target_link_libraries(UtilityGlobalStateAcrossLibrariesLibrary PRIVATE CorradeUtility)
+
+    corrade_add_test(UtilityGlobalStateAcrossLibrariesTest
+        GlobalStateAcrossLibrariesTest.cpp
+        LIBRARIES UtilityGlobalStateAcrossLibrariesLibrary)
+    set_target_properties(
+        UtilityGlobalStateAcrossLibrariesLibrary
+        UtilityGlobalStateAcrossLibrariesTest
+        PROPERTIES FOLDER "Corrade/Utility/Test")
+endif()
+
 # Unix-specific / non-RT-Windows-specific functionality. Also Emscripten.
 if(CORRADE_TARGET_UNIX OR (CORRADE_TARGET_WINDOWS AND NOT CORRADE_TARGET_WINDOWS_RT) OR CORRADE_TARGET_EMSCRIPTEN)
     corrade_add_test(UtilityFileWatcherTest FileWatcherTest.cpp)

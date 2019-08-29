@@ -39,6 +39,10 @@ endif()
 
 corrade_add_static_plugin(Canary ${CMAKE_CURRENT_BINARY_DIR} Canary.conf Canary.cpp)
 set_target_properties(Canary Canary-dependencies PROPERTIES FOLDER "Corrade/PluginManager/Test")
+if(BUILD_STATIC)
+    # The plugin gets linked to a shared test lib in a static build
+    set_target_properties(Canary PROPERTIES POSITION_INDEPENDENT_CODE ON)
+endif()
 
 target_link_libraries(Canary PRIVATE CorradePluginManagerTestLib)
 
