@@ -79,26 +79,18 @@ HANDLE streamOutputHandle(const std::ostream* s) {
 #ifdef CORRADE_BUILD_MULTITHREADED
 CORRADE_THREAD_LOCAL
 #endif
-std::ostream* globalOutput = &std::cout;
-#ifdef CORRADE_BUILD_MULTITHREADED
-CORRADE_THREAD_LOCAL
-#endif
-std::ostream* globalWarningOutput = &std::cerr;
-#ifdef CORRADE_BUILD_MULTITHREADED
-CORRADE_THREAD_LOCAL
-#endif
-std::ostream* globalErrorOutput = &std::cerr;
-
-#if !defined(CORRADE_TARGET_WINDOWS) || defined(CORRADE_UTILITY_USE_ANSI_COLORS)
-#ifdef CORRADE_BUILD_MULTITHREADED
-CORRADE_THREAD_LOCAL
-#endif
-Debug::Color globalColor = Debug::Color::Default;
-#ifdef CORRADE_BUILD_MULTITHREADED
-CORRADE_THREAD_LOCAL
-#endif
-bool globalColorBold = false;
-#endif
+struct {
+    std::ostream *output, *warningOutput, *errorOutput;
+    #if !defined(CORRADE_TARGET_WINDOWS) ||defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+    Debug::Color color;
+    bool colorBold;
+    #endif
+} debugGlobals {
+    &std::cout, &std::cerr, &std::cerr,
+    #if !defined(CORRADE_TARGET_WINDOWS) ||defined(CORRADE_UTILITY_USE_ANSI_COLORS)
+    Debug::Color::Default, false
+    #endif
+};
 
 }
 
@@ -114,8 +106,8 @@ template<Debug::Color c, bool bold> Debug::Modifier Debug::colorInternal() {
             char(c) |
             (bold ? FOREGROUND_INTENSITY : 0));
         #else
-        globalColor = c;
-        globalColorBold = bold;
+        debugGlobals.color = c;
+        debugGlobals.colorBold = bold;
         constexpr const char code[] = { '\033', '[', bold ? '1' : '0', ';', '3', '0' + char(c), 'm', '\0' };
         *debug._output << code;
         #endif
@@ -137,8 +129,8 @@ inline void Debug::resetColorInternal() {
         *_output << code;
     } else *_output << "\033[0m";
 
-    globalColor = _previousColor;
-    globalColorBold = _previousColorBold;
+    debugGlobals.color = _previousColor;
+    debugGlobals.colorBold = _previousColorBold;
     #endif
 }
 
@@ -212,9 +204,9 @@ void Debug::setImmediateFlags(Flags flags) {
     _immediateFlags = InternalFlag(static_cast<unsigned char>(flags));
 }
 
-std::ostream* Debug::output() { return globalOutput; }
-std::ostream* Warning::output() { return globalWarningOutput; }
-std::ostream* Error::output() { return globalErrorOutput; }
+std::ostream* Debug::output() { return debugGlobals.output; }
+std::ostream* Warning::output() { return debugGlobals.warningOutput; }
+std::ostream* Error::output() { return debugGlobals.errorOutput; }
 
 bool Debug::isTty(std::ostream* const output) {
     /* On Windows with WINAPI colors check the stream output handle */
@@ -279,14 +271,14 @@ bool Debug::isTty(std::ostream* const output) {
     #endif
 }
 
-bool Debug::isTty() { return isTty(globalOutput); }
-bool Warning::isTty() { return Debug::isTty(globalWarningOutput); }
-bool Error::isTty() { return Debug::isTty(globalErrorOutput); }
+bool Debug::isTty() { return isTty(debugGlobals.output); }
+bool Warning::isTty() { return Debug::isTty(debugGlobals.warningOutput); }
+bool Error::isTty() { return Debug::isTty(debugGlobals.errorOutput); }
 
 Debug::Debug(std::ostream* const output, const Flags flags): _flags{InternalFlag(static_cast<unsigned char>(flags))}, _immediateFlags{InternalFlag::NoSpace} {
     /* Save previous global output and replace it with current one */
-    _previousGlobalOutput = globalOutput;
-    globalOutput = _output = output;
+    _previousGlobalOutput = debugGlobals.output;
+    debugGlobals.output = _output = output;
 
     /* Save previous global color */
     #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_UTILITY_USE_ANSI_COLORS)
@@ -297,26 +289,26 @@ Debug::Debug(std::ostream* const output, const Flags flags): _flags{InternalFlag
         _previousColorAttributes = csbi.wAttributes;
     }
     #else
-    _previousColor = globalColor;
-    _previousColorBold = globalColorBold;
+    _previousColor = debugGlobals.color;
+    _previousColorBold = debugGlobals.colorBold;
     #endif
 }
 
 Warning::Warning(std::ostream* const output, const Flags flags): Debug{flags} {
     /* Save previous global output and replace it with current one */
-    _previousGlobalWarningOutput = globalWarningOutput;
-    globalWarningOutput = _output = output;
+    _previousGlobalWarningOutput = debugGlobals.warningOutput;
+    debugGlobals.warningOutput = _output = output;
 }
 
 Error::Error(std::ostream* const output, const Flags flags): Debug{flags} {
     /* Save previous global output and replace it with current one */
-    _previousGlobalErrorOutput = globalErrorOutput;
-    globalErrorOutput = _output = output;
+    _previousGlobalErrorOutput = debugGlobals.errorOutput;
+    debugGlobals.errorOutput = _output = output;
 }
 
-Debug::Debug(const Flags flags): Debug{globalOutput, flags} {}
-Warning::Warning(const Flags flags): Warning{globalWarningOutput, flags} {}
-Error::Error(const Flags flags): Error{globalErrorOutput, flags} {}
+Debug::Debug(const Flags flags): Debug{debugGlobals.output, flags} {}
+Warning::Warning(const Flags flags): Warning{debugGlobals.warningOutput, flags} {}
+Error::Error(const Flags flags): Error{debugGlobals.errorOutput, flags} {}
 
 void Debug::cleanupOnDestruction() {
     /* Reset output color */
@@ -327,7 +319,7 @@ void Debug::cleanupOnDestruction() {
         *_output << std::endl;
 
     /* Reset previous global output */
-    globalOutput = _previousGlobalOutput;
+    debugGlobals.output = _previousGlobalOutput;
 }
 
 Debug::~Debug() {
@@ -335,11 +327,11 @@ Debug::~Debug() {
 }
 
 Warning::~Warning() {
-    globalWarningOutput = _previousGlobalWarningOutput;
+    debugGlobals.warningOutput = _previousGlobalWarningOutput;
 }
 
 void Error::cleanupOnDestruction() {
-    globalErrorOutput = _previousGlobalErrorOutput;
+    debugGlobals.errorOutput = _previousGlobalErrorOutput;
 }
 
 Error::~Error() {
