@@ -35,9 +35,17 @@ set_target_properties(
     RottenTomato RottenTomato-metadata
     PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
+# DLLs don't allow unresolved symbols; on static builds there's no dynamic
+# plugin manager library to refer to so it has to be linked as well
+if(CORRADE_BUILD_STATIC OR CORRADE_TARGET_WINDOWS)
+    target_link_libraries(HotDog PRIVATE CorradePluginManagerTestLib)
+    target_link_libraries(HotDogWithSnail PRIVATE CorradePluginManagerTestLib)
+    target_link_libraries(OldBread PRIVATE CorradePluginManagerTestLib)
+    target_link_libraries(RottenTomato PRIVATE CorradePluginManagerTestLib)
+endif()
+
+# Additionally the plugin dependencies have to be linked as well
 if(CORRADE_TARGET_WINDOWS)
     target_link_libraries(HotDog PUBLIC Dog)
     target_link_libraries(HotDogWithSnail PRIVATE HotDog)
-    target_link_libraries(OldBread PRIVATE CorradePluginManagerTestLib)
-    target_link_libraries(RottenTomato PRIVATE CorradePluginManagerTestLib)
 endif()

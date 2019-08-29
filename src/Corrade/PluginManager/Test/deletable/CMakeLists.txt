@@ -26,6 +26,8 @@
 corrade_add_plugin(Deletable ${CMAKE_CURRENT_BINARY_DIR} "" Deletable.conf Deletable.cpp)
 set_target_properties(Deletable Deletable-metadata PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
-if(CORRADE_TARGET_WINDOWS)
+# DLLs don't allow unresolved symbols; on static builds there's no dynamic
+# plugin manager library to refer to so it has to be linked as well
+if(CORRADE_BUILD_STATIC OR CORRADE_TARGET_WINDOWS)
     target_link_libraries(Deletable PRIVATE CorradePluginManagerTestLib)
 endif()

@@ -31,6 +31,8 @@ set_target_properties(
     PROPERTIES FOLDER "Corrade/PluginManager/Test")
 target_include_directories(WrongMetadata PRIVATE $<TARGET_FILE_DIR:PluginManagerManagerTest>)
 
-if(CORRADE_TARGET_WINDOWS)
+# DLLs don't allow unresolved symbols; on static builds there's no dynamic
+# plugin manager library to refer to so it has to be linked as well
+if(CORRADE_BUILD_STATIC OR CORRADE_TARGET_WINDOWS)
     target_link_libraries(WrongMetadata PRIVATE CorradePluginManagerTestLib)
 endif()

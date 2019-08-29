@@ -36,6 +36,8 @@ if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     target_include_directories(InitFiniStatic PRIVATE $<TARGET_FILE_DIR:PluginManagerManagerTest>)
 endif()
 
-if(CORRADE_TARGET_WINDOWS)
+# DLLs don't allow unresolved symbols; on static builds there's no dynamic
+# plugin manager library to refer to so it has to be linked as well
+if((CORRADE_BUILD_STATIC OR CORRADE_TARGET_WINDOWS) AND NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     target_link_libraries(InitFiniDynamic PRIVATE CorradePluginManager)
 endif()

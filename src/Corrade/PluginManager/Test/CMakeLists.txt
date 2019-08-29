@@ -83,10 +83,18 @@ set_target_properties(
     PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
 target_link_libraries(Canary PRIVATE CorradePluginManagerTestLib)
-if(CORRADE_TARGET_WINDOWS)
+
+# DLLs don't allow unresolved symbols; on static builds there's no dynamic
+# plugin manager library to refer to so it has to be linked as well
+if((CORRADE_BUILD_STATIC OR CORRADE_TARGET_WINDOWS) AND NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     target_link_libraries(Snail PRIVATE CorradePluginManagerTestLib)
     target_link_libraries(Dog PUBLIC CorradePluginManagerTestLib)
     target_link_libraries(Bulldog PRIVATE CorradePluginManagerTestLib)
+    target_link_libraries(PitBull PRIVATE CorradePluginManagerTestLib)
+endif()
+
+# Additionally the plugin dependencies have to be linked as well
+if(CORRADE_TARGET_WINDOWS)
     target_link_libraries(PitBull PRIVATE Dog)
 endif()
 

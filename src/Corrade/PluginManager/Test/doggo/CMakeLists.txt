@@ -25,6 +25,8 @@
 
 corrade_add_plugin(Doggo ${CMAKE_CURRENT_BINARY_DIR} "" Doggo.conf Doggo.cpp)
 
-if(CORRADE_TARGET_WINDOWS)
+# DLLs don't allow unresolved symbols; on static builds there's no dynamic
+# plugin manager library to refer to so it has to be linked as well
+if(CORRADE_BUILD_STATIC OR CORRADE_TARGET_WINDOWS)
     target_link_libraries(Doggo PRIVATE CorradePluginManagerTestLib)
 endif()
