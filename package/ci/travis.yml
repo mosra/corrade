@@ -31,6 +31,15 @@ matrix:
     - BUILD_DEPRECATED=OFF
   - language: cpp
     os: linux
+    compiler: gcc
+    dist: xenial
+    env:
+    - JOBID=linux-static
+    - TARGET=desktop
+    - CMAKE_CXX_FLAGS="--coverage"
+    - BUILD_STATIC=ON
+  - language: cpp
+    os: linux
     compiler: clang
     dist: xenial
     env:
@@ -51,6 +60,14 @@ matrix:
     - JOBID=macos
     - TARGET=desktop
     - CMAKE_CXX_FLAGS="--coverage"
+  - language: cpp
+    os: osx
+    compiler: clang
+    env:
+    - JOBID=macos-static
+    - TARGET=desktop
+    - CMAKE_CXX_FLAGS="--coverage"
+    - BUILD_STATIC=ON
   - language: cpp
     os: osx
     osx_image: xcode7.3
@@ -105,6 +122,7 @@ cache:
 install:
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ ! "$TARGET" == "desktop-sanitizers" ] && [ ! "$TARGET" == "android" ]; then export CXX=g++-4.8; fi
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "desktop-sanitizers" ]; then export CXX=clang++-3.8; fi
+- if [ "$BUILD_STATIC" != "ON" ]; then export BUILD_STATIC=OFF; fi
 - if [ "$BUILD_DEPRECATED" != "OFF" ]; then export BUILD_DEPRECATED=ON; fi
 # so the directory tests pass (and then some workaround for crazy filesystem issues)
 - if [ "$TRAVIS_OS_NAME" == "linux" ] && ( [ "$TARGET" == "desktop" ] || [ "$TARGET" == "desktop-sanitizers" ] ); then mkdir -p ~/.config/autostart; fi

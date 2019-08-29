@@ -9,6 +9,7 @@ cmake .. \
     -DCMAKE_INSTALL_RPATH=$HOME/deps/lib \
     -DBUILD_TESTS=ON \
     -DBUILD_DEPRECATED=$BUILD_DEPRECATED \
+    -DBUILD_STATIC=$BUILD_STATIC \
     -DCMAKE_BUILD_TYPE=Debug \
     -G Ninja
 ninja install
