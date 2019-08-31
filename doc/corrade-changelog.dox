@@ -181,6 +181,8 @@ namespace Corrade {
     @ref PluginManager::LoadState::WrongMetadataFile if it's not found.
     Previously it was silently ignoring missing metadata files, often resulting
     in a runtime linker error due to a dependency not being loaded.
+-   @ref CORRADE_PLUGIN_REGISTER() now operates completely without heap access,
+    making it safe to run in restricted phases of application execution
 
 @subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
 

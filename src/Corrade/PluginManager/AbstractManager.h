@@ -189,6 +189,10 @@ CORRADE_ENUMSET_OPERATORS(LoadStates)
 /** @debugoperatorenum{LoadStates} */
 CORRADE_PLUGINMANAGER_EXPORT Utility::Debug& operator<<(Utility::Debug& debug, PluginManager::LoadStates value);
 
+namespace Implementation {
+    struct StaticPlugin;
+}
+
 /**
 @brief Non-templated base for plugin managers
 
@@ -203,7 +207,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
         typedef void* (*Instancer)(AbstractManager&, const std::string&);
-        static void importStaticPlugin(const char* plugin, int _version, const char* interface, Instancer instancer, void(*initializer)(), void(*finalizer)());
+        static void importStaticPlugin(int version, Implementation::StaticPlugin& plugin);
         #endif
 
         /** @brief Copying is not allowed */
@@ -377,7 +381,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
     #else
     protected:
     #endif
-        struct CORRADE_PLUGINMANAGER_LOCAL StaticPlugin;
         struct CORRADE_PLUGINMANAGER_LOCAL Plugin;
         struct CORRADE_PLUGINMANAGER_LOCAL GlobalPluginStorage;
 
@@ -401,18 +404,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
     private:
         struct State;
 
-        /* Temporary storage of all information needed to import static plugins.
-           They are imported to plugins() map on first call to plugins(),
-           because at that time it is safe to assume that all static resources
-           (plugin configuration files) are already registered. After that, the
-           storage is deleted and set to `nullptr` to indicate that static
-           plugins have been already processed.
-
-           The vector is accessible via function, not directly, because we don't
-           know initialization order of static members and thus the vector could
-           be uninitalized when accessed from CORRADE_PLUGIN_REGISTER(). */
-        CORRADE_PLUGINMANAGER_LOCAL static std::vector<StaticPlugin*>*& staticPlugins();
-
         CORRADE_PLUGINMANAGER_LOCAL void registerDynamicPlugin(const std::string& name, Plugin* plugin);
 
         CORRADE_PLUGINMANAGER_LOCAL void registerInstance(const std::string& plugin, AbstractPlugin& instance, const PluginMetadata*& metadata);
@@ -429,21 +420,37 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         Containers::Pointer<State> _state;
 };
 
+namespace Implementation {
+
+struct StaticPlugin {
+    /* Assuming both plugin and interface are static strings produced by the
+       CORRADE_PLUGIN_REGISTER() macro, so there's no need to make an allocated
+       copy of them, just a direct reference */
+    const char* plugin;
+    const char* interface;
+    AbstractManager::Instancer instancer;
+    void(*initializer)();
+    void(*finalizer)();
+    const StaticPlugin* next;
+};
+
+}
+
 /** @hideinitializer
 @brief Import static plugin
 @param name      Static plugin name (the same as defined with
     @ref CORRADE_PLUGIN_REGISTER())
 
-If static plugins are compiled into dynamic library or directly into the
+If static plugins are compiled into a dynamic library or directly into the
 executable, they should be automatically loaded at startup thanks to
 @ref CORRADE_AUTOMATIC_INITIALIZER() and @ref CORRADE_AUTOMATIC_FINALIZER()
 macros.
 
-If static plugins are compiled into static library, they are not automatically
-loaded at startup, so you need to load them explicitly by calling
-@ref CORRADE_PLUGIN_IMPORT() at the beginning of `main()` function. You can
-also wrap these macro calls into another function (which will then be compiled
-into dynamic library or main executable) and use @ref CORRADE_AUTOMATIC_INITIALIZER()
+If static plugins are compiled into a static library, they are not
+automatically loaded at startup, so you need to load them explicitly by calling
+@ref CORRADE_PLUGIN_IMPORT() at the beginning of the @cpp main() @ce function.
+You can also wrap these macro calls in another function (which will then be
+compiled into dynamic library or main executable) and use the @ref CORRADE_AUTOMATIC_INITIALIZER()
 macro for automatic call:
 
 @snippet PluginManager.cpp CORRADE_PLUGIN_IMPORT
@@ -452,7 +459,11 @@ macro for automatic call:
     running into linker errors with `pluginImporter_*`, this could be the
     reason. See @ref CORRADE_RESOURCE_INITIALIZE() documentation for more
     information.
- */
+
+Functions called by this macro don't do any dynamic allocation or other
+operations that could fail, so it's safe to call it even in restricted phases
+of application exection.
+*/
 /* This "bundles" CORRADE_RESOURCE_INITIALIZE() in itself. Keep in sync. */
 #define CORRADE_PLUGIN_IMPORT(name)                                         \
     extern int pluginImporter_##name();                                     \
@@ -461,7 +472,7 @@ macro for automatic call:
     resourceInitializer_##name();
 
 /** @brief Plugin version */
-#define CORRADE_PLUGIN_VERSION 5
+#define CORRADE_PLUGIN_VERSION 6
 
 /** @hideinitializer
 @brief Register static or dynamic lugin
@@ -498,11 +509,23 @@ See @ref plugin-management for more information about plugin compilation.
 */
 #ifdef CORRADE_STATIC_PLUGIN
 #define CORRADE_PLUGIN_REGISTER(name, className, interface)                 \
-    inline void* pluginInstancer_##name(Corrade::PluginManager::AbstractManager& manager, const std::string& plugin) \
-        { return new className(manager, plugin); }                          \
+    namespace {                                                             \
+        Corrade::PluginManager::Implementation::StaticPlugin staticPlugin_##name; \
+    }                                                                       \
     int pluginImporter_##name();                                            \
     int pluginImporter_##name() {                                           \
-        Corrade::PluginManager::AbstractManager::importStaticPlugin(#name, CORRADE_PLUGIN_VERSION, interface, pluginInstancer_##name, className::initialize, className::finalize); return 1; \
+        staticPlugin_##name = {                                             \
+            #name,                                                          \
+            interface,                                                      \
+            [](Corrade::PluginManager::AbstractManager& manager, const std::string& plugin) -> void* { \
+                return new className(manager, plugin);                      \
+            },                                                              \
+            className::initialize,                                          \
+            className::finalize,                                            \
+            nullptr                                                         \
+        };                                                                  \
+        Corrade::PluginManager::AbstractManager::importStaticPlugin(CORRADE_PLUGIN_VERSION, staticPlugin_##name); \
+        return 1;                                                           \
     }
 #elif defined(CORRADE_DYNAMIC_PLUGIN)
 #define CORRADE_PLUGIN_REGISTER(name, className, interface)                 \

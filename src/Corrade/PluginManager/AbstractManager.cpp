@@ -35,6 +35,7 @@
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/Optional.h"
 #include "Corrade/Containers/Reference.h"
+#include "Corrade/Containers/Implementation/RawForwardList.h"
 #include "Corrade/PluginManager/AbstractPlugin.h"
 #include "Corrade/PluginManager/PluginMetadata.h"
 #include "Corrade/Utility/Assert.h"
@@ -67,17 +68,6 @@ using namespace Corrade::Utility;
 
 namespace Corrade { namespace PluginManager {
 
-struct AbstractManager::StaticPlugin  {
-    /* Assuming both plugin and interface are static strings produced by the
-       CORRADE_PLUGIN_REGISTER() macro, so there's no need to make an allocated
-       copy of them, just a direct reference */
-    const char* plugin;
-    const char* interface;
-    Instancer instancer;
-    void(*initializer)();
-    void(*finalizer)();
-};
-
 struct AbstractManager::Plugin {
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     LoadState loadState;
@@ -98,7 +88,7 @@ struct AbstractManager::Plugin {
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     union {
         /* For static plugins */
-        StaticPlugin* staticPlugin;
+        const Implementation::StaticPlugin* staticPlugin;
 
         /* For dynamic plugins */
         #ifndef CORRADE_TARGET_WINDOWS
@@ -108,7 +98,7 @@ struct AbstractManager::Plugin {
         #endif
     };
     #else
-    StaticPlugin* staticPlugin;
+    const Implementation::StaticPlugin* staticPlugin;
     #endif
 
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
@@ -117,7 +107,7 @@ struct AbstractManager::Plugin {
     #endif
 
     /* Constructor for static plugins */
-    explicit Plugin(StaticPlugin* staticPlugin);
+    explicit Plugin(const Implementation::StaticPlugin& staticPlugin);
 
     /* Ensure that we don't delete staticPlugin twice */
     Plugin(const Plugin&) = delete;
@@ -125,7 +115,7 @@ struct AbstractManager::Plugin {
     Plugin& operator=(const Plugin&) = delete;
     Plugin& operator=(Plugin&&) = delete;
 
-    ~Plugin();
+    ~Plugin() = default;
 };
 
 struct AbstractManager::GlobalPluginStorage {
@@ -149,45 +139,33 @@ struct AbstractManager::State {
 
 const int AbstractManager::Version = CORRADE_PLUGIN_VERSION;
 
+namespace {
+
+struct {
+    /* A linked list of static plugins. Managed using utilities from
+       Containers/Implementation/RawForwardList.h, look there for more info. */
+    Implementation::StaticPlugin* staticPlugins;
+
+/* The value of this variable is guaranteed to be zero-filled even before any
+   static plugin initializers are executed, which means we don't hit any static
+   initialization order fiasco. */
+} globals{nullptr};
+
+static_assert(std::is_pod<Implementation::StaticPlugin>::value,
+    "static plugins shouldn't cause any global initialization / finalization to happen on their own");
+
+}
+
 auto AbstractManager::initializeGlobalPluginStorage() -> GlobalPluginStorage& {
     static GlobalPluginStorage* const plugins = new GlobalPluginStorage;
-
-    /* If there are unprocessed static plugins for this manager, add them */
-    if(staticPlugins()) {
-        for(StaticPlugin* staticPlugin: *staticPlugins()) {
-            /* Insert plugin to the list. The metadata are parsed only when the
-               plugin gets actually attached to a concrete manager. This is
-               needed in order to have properly reset its mutable configuration
-               on manager destruction and also avoid unnecessary work when
-               nothing actually used the plugin. */
-            const auto result = plugins->plugins.insert(std::make_pair(staticPlugin->plugin, new Plugin{staticPlugin}));
-            CORRADE_INTERNAL_ASSERT(result.second);
-        }
-
-        /** @todo Assert dependencies of static plugins */
-
-        /* Delete the array to mark them as processed */
-        delete staticPlugins();
-        staticPlugins() = nullptr;
-    }
-
     return *plugins;
 }
 
-std::vector<AbstractManager::StaticPlugin*>*& AbstractManager::staticPlugins() {
-    static std::vector<StaticPlugin*>* _staticPlugins = new std::vector<StaticPlugin*>();
-
-    return _staticPlugins;
-}
-
 #ifndef DOXYGEN_GENERATING_OUTPUT
-void AbstractManager::importStaticPlugin(const char* const plugin, int _version, const char* const interface, Instancer instancer, void(*initializer)(), void(*finalizer)()) {
-    CORRADE_ASSERT(_version == Version,
-        "PluginManager: wrong version of static plugin" << plugin << Debug::nospace << ", got" << _version << "but expected" << Version, );
-    CORRADE_ASSERT(staticPlugins(),
-        "PluginManager: too late to import static plugin" << plugin, );
-
-    staticPlugins()->push_back(new StaticPlugin{plugin, interface, instancer, initializer, finalizer});
+void AbstractManager::importStaticPlugin(int version, Implementation::StaticPlugin& plugin) {
+    CORRADE_ASSERT(version == Version,
+        "PluginManager: wrong version of static plugin" << plugin.plugin << Debug::nospace << ", got" << version << "but expected" << Version, );
+    Containers::Implementation::forwardListInsert(globals.staticPlugins, plugin);
 }
 #endif
 
@@ -199,37 +177,45 @@ AbstractManager::AbstractManager(std::string pluginInterface):
     _plugins(initializeGlobalPluginStorage()),
     _state{Containers::InPlaceInit, std::move(pluginInterface)}
 {
-    /* Find static plugins which have the same interface and have not
-       assigned manager to them */
-    for(auto p: _plugins.plugins) {
-        if(p.second->loadState != LoadState::Static || p.second->manager != nullptr || p.second->staticPlugin->interface != _state->pluginInterface)
-            continue;
+    /* Add static plugins which have the same interface and don't have a
+       manager assigned to them (i.e, aren't in the map yet). */
+    for(const Implementation::StaticPlugin* staticPlugin = globals.staticPlugins; staticPlugin; staticPlugin = Containers::Implementation::forwardListNext(*staticPlugin)) {
+        /* The plugin doesn't belong to this manager, skip it */
+        if(staticPlugin->interface != _state->pluginInterface) continue;
 
-        /* Assign the plugin to this manager, parse its metadata and initialize
-           it */
-        Resource r("CorradeStaticPlugin_" + p.first);
-        std::istringstream metadata(r.get(p.first + ".conf"));
-        p.second->configuration = Utility::Configuration{metadata, Utility::Configuration::Flag::ReadOnly};
-        p.second->metadata.emplace(p.first, p.second->configuration);
-        p.second->manager = this;
-        p.second->staticPlugin->initializer();
+        /* Attempt to insert the plugin into the global list. If it's
+           already there, it's owned by another plugin manager. Skip it. */
+        const auto inserted = _plugins.plugins.insert(std::make_pair(staticPlugin->plugin, nullptr));
+        if(!inserted.second) continue;
 
-        /* The plugin is the best version of itself. If there was already an
-           alias for this name, replace it. */
+        /* Only allocate the Plugin in case the insertion happened. */
+        Plugin& p = *(inserted.first->second = new Plugin{*staticPlugin});
+
+        /* Assign the plugin to this manager, parse its metadata and
+           initialize it */
+        Resource r("CorradeStaticPlugin_" + inserted.first->first);
+        std::istringstream metadata(r.get(inserted.first->first + ".conf"));
+        p.configuration = Utility::Configuration{metadata, Utility::Configuration::Flag::ReadOnly};
+        p.metadata.emplace(inserted.first->first, p.configuration);
+        p.manager = this;
+        p.staticPlugin->initializer();
+
+        /* The plugin is the best version of itself. If there was already
+           an alias for this name, replace it. */
         {
-            const auto alias = _state->aliases.find(p.first);
+            const auto alias = _state->aliases.find(inserted.first->first);
             if(alias != _state->aliases.end()) _state->aliases.erase(alias);
-            CORRADE_INTERNAL_ASSERT_OUTPUT(_state->aliases.insert({p.first, *p.second}).second);
+            CORRADE_INTERNAL_ASSERT_OUTPUT(_state->aliases.insert({inserted.first->first, p}).second);
         }
 
-        /* Add aliases to the list (only the ones that aren't already there are
-           added) */
-        for(const std::string& alias: p.second->metadata->_provides) {
-            /* Libc++ frees the passed Plugin& reference when using emplace(),
-               causing double-free memory corruption later. Everything is okay
-               with insert(). */
+        /* Add aliases to the list (only the ones that aren't already there
+           are added) */
+        for(const std::string& alias: p.metadata->_provides) {
+            /* Libc++ frees the passed Plugin& reference when using
+               emplace(), causing double-free memory corruption later.
+               Everything is okay with insert(). */
             /** @todo put back emplace() here when libc++ is fixed */
-            _state->aliases.insert({alias, *p.second});
+            _state->aliases.insert({alias, p});
         }
     }
 
@@ -272,26 +258,20 @@ AbstractManager::~AbstractManager() {
         }
 
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-        /* Try to unload the plugin (and all plugins that depend on it) */
-        const LoadState loadState = unloadRecursiveInternal(*it->second);
-
-        /* If the plugin is static, reset the metadata so any changes to the
-           plugin-specific configuration are discarded. For dynamic plugins
-           fully erase them from the container. */
-        if(loadState == LoadState::Static) {
-            it->second->metadata = Containers::NullOpt;
-        } else {
-            delete it->second;
-            it = _plugins.plugins.erase(it);
-            continue;
-        }
+        /* Try to unload the plugin (and all plugins that depend on it). If
+           that fails for some reason, it'll blow up with an assert. */
+        unloadRecursiveInternal(*it->second);
         #endif
 
-        /* Otherwise just disconnect this manager from the plugin and finalize
-           it, so another manager can take over it in the future. */
-        it->second->manager = nullptr;
-        it->second->staticPlugin->finalizer();
-        ++it;
+        /* Finalize static plugins before they get removed from the list */
+        if(it->second->loadState == LoadState::Static)
+            it->second->staticPlugin->finalizer();
+
+        /* Fully erase the plugin from the container, both static and dynamic
+           ones. The static ones get re-added next time a manager of matching
+           interface is instantiated. */
+        delete it->second;
+        it = _plugins.plugins.erase(it);
     }
 }
 
@@ -845,14 +825,7 @@ AbstractManager::Plugin::Plugin(std::string name, const std::string& metadata, A
 }
 #endif
 
-AbstractManager::Plugin::Plugin(StaticPlugin* staticPlugin): loadState{LoadState::Static}, manager{nullptr}, instancer{staticPlugin->instancer}, staticPlugin{staticPlugin} {}
-
-AbstractManager::Plugin::~Plugin() {
-    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
-    if(loadState == LoadState::Static)
-    #endif
-        delete staticPlugin;
-}
+AbstractManager::Plugin::Plugin(const Implementation::StaticPlugin& staticPlugin): loadState{LoadState::Static}, manager{nullptr}, instancer{staticPlugin.instancer}, staticPlugin{&staticPlugin} {}
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 Utility::Debug& operator<<(Utility::Debug& debug, LoadState value) {
