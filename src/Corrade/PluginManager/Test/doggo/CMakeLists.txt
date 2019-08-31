@@ -24,6 +24,7 @@
 #
 
 corrade_add_plugin(Doggo ${CMAKE_CURRENT_BINARY_DIR} "" Doggo.conf Doggo.cpp)
+set_target_properties(Doggo Doggo-metadata PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
 # DLLs don't allow unresolved symbols; on static builds there's no dynamic
 # plugin manager library to refer to so it has to be linked as well
