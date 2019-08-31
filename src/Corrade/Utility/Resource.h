@@ -206,6 +206,8 @@ call.
 
 @see @ref CORRADE_RESOURCE_FINALIZE()
 */
+/* Contents of this macro are used in PluginManager/AbstractManager.h to avoid
+   an include dependency. Keep in sync. */
 #define CORRADE_RESOURCE_INITIALIZE(name)                                     \
     extern int resourceInitializer_##name();                                  \
     resourceInitializer_##name();

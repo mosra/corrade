@@ -40,6 +40,7 @@
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Configuration.h"
+#include "Corrade/Utility/Resource.h"
 #include "Corrade/Utility/String.h"
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT

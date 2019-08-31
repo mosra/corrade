@@ -33,7 +33,6 @@
 #include "Corrade/Containers/Pointer.h"
 #include "Corrade/PluginManager/PluginManager.h"
 #include "Corrade/PluginManager/visibility.h"
-#include "Corrade/Utility/Resource.h"
 #include "Corrade/Utility/StlForwardString.h"
 #include "Corrade/Utility/StlForwardVector.h"
 #include "Corrade/Utility/Utility.h"
@@ -454,10 +453,12 @@ macro for automatic call:
     reason. See @ref CORRADE_RESOURCE_INITIALIZE() documentation for more
     information.
  */
+/* This "bundles" CORRADE_RESOURCE_INITIALIZE() in itself. Keep in sync. */
 #define CORRADE_PLUGIN_IMPORT(name)                                         \
     extern int pluginImporter_##name();                                     \
+    extern int resourceInitializer_##name();                                \
     pluginImporter_##name();                                                \
-    CORRADE_RESOURCE_INITIALIZE(name)
+    resourceInitializer_##name();
 
 /** @brief Plugin version */
 #define CORRADE_PLUGIN_VERSION 5
