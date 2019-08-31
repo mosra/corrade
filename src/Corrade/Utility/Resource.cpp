@@ -39,6 +39,7 @@
 #include "Corrade/Utility/ConfigurationGroup.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Directory.h"
+#include "Corrade/Utility/FormatStl.h"
 
 namespace Corrade { namespace Utility {
 
@@ -187,20 +188,24 @@ std::string Resource::compileFrom(const std::string& name, const std::string& co
 std::string Resource::compile(const std::string& name, const std::string& group, const std::vector<std::pair<std::string, std::string>>& files) {
     /* Special case for empty file list */
     if(files.empty()) {
-        return "/* Compiled resource file. DO NOT EDIT! */\n\n"
-            "#include \"Corrade/Corrade.h\"\n"
-            "#include \"Corrade/Utility/Macros.h\"\n"
-            "#include \"Corrade/Utility/Resource.h\"\n\n"
-            "int resourceInitializer_" + name + "();\n"
-            "int resourceInitializer_" + name + "() {\n"
-            "    Corrade::Utility::Resource::registerData(\"" + group + "\", 0, nullptr, nullptr, nullptr);\n"
-            "    return 1;\n"
-            "} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_" + name + ")\n\n"
-            "int resourceFinalizer_" + name + "();\n"
-            "int resourceFinalizer_" + name + "() {\n"
-            "    Corrade::Utility::Resource::unregisterData(\"" + group + "\");\n"
-            "    return 1;\n"
-            "} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_" + name + ")\n";
+        return formatString(R"(/* Compiled resource file. DO NOT EDIT! */
+
+#include "Corrade/Corrade.h"
+#include "Corrade/Utility/Macros.h"
+#include "Corrade/Utility/Resource.h"
+
+int resourceInitializer_{0}();
+int resourceInitializer_{0}() {{
+    Corrade::Utility::Resource::registerData("{1}", 0, nullptr, nullptr, nullptr);
+    return 1;
+}} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_{0})
+
+int resourceFinalizer_{0}();
+int resourceFinalizer_{0}() {{
+    Corrade::Utility::Resource::unregisterData("{1}");
+    return 1;
+}} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_{0})
+)", name, group);
     }
 
     std::string positions, filenames, data;
@@ -238,28 +243,42 @@ std::string Resource::compile(const std::string& name, const std::string& group,
        about functions which don't have corresponding declarations (enabled by
        -Wmissing-declarations in GCC). If we don't have any data, we don't
        create the resourceData array, as zero-length arrays are not allowed. */
-    return "/* Compiled resource file. DO NOT EDIT! */\n\n"
-        "#include \"Corrade/Corrade.h\"\n"
-        "#include \"Corrade/Utility/Macros.h\"\n"
-        "#include \"Corrade/Utility/Resource.h\"\n\n"
-        "CORRADE_ALIGNAS(4) static const unsigned char resourcePositions[] = {" +
-        positions + "\n};\n\n"
-        "static const unsigned char resourceFilenames[] = {" +
-        filenames + "\n};\n\n" +
-        (dataLen ? "" : "// ") + "static const unsigned char resourceData[] = {" +
-        data + '\n' + (dataLen ? "" : "// ") + "};\n\n" +
-        "int resourceInitializer_" + name + "();\n"
-        "int resourceInitializer_" + name + "() {\n"
-        "    Corrade::Utility::Resource::registerData(\"" + group + "\", " +
-            std::to_string(files.size()) +
-        ", resourcePositions, resourceFilenames, " + (dataLen ? "resourceData" : "nullptr") + ");\n"
-        "    return 1;\n"
-        "} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_" + name + ")\n\n"
-        "int resourceFinalizer_" + name + "();\n"
-        "int resourceFinalizer_" + name + "() {\n"
-        "    Corrade::Utility::Resource::unregisterData(\"" + group + "\");\n"
-        "    return 1;\n"
-        "} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_" + name + ")\n";
+    return formatString(R"(/* Compiled resource file. DO NOT EDIT! */
+
+#include "Corrade/Corrade.h"
+#include "Corrade/Utility/Macros.h"
+#include "Corrade/Utility/Resource.h"
+
+CORRADE_ALIGNAS(4) static const unsigned char resourcePositions[] = {{{0}
+}};
+
+static const unsigned char resourceFilenames[] = {{{1}
+}};
+
+{2}static const unsigned char resourceData[] = {{{3}
+{2}}};
+
+int resourceInitializer_{4}();
+int resourceInitializer_{4}() {{
+    Corrade::Utility::Resource::registerData("{5}", {6}, resourcePositions, resourceFilenames, {7});
+    return 1;
+}} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_{4})
+
+int resourceFinalizer_{4}();
+int resourceFinalizer_{4}() {{
+    Corrade::Utility::Resource::unregisterData("{5}");
+    return 1;
+}} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_{4})
+)",
+        positions,                              // 0
+        filenames,                              // 1
+        dataLen ? "" : "// ",                   // 2
+        data,                                   // 3
+        name,                                   // 4
+        group,                                  // 5
+        files.size(),                           // 6
+        dataLen ? "resourceData" : "nullptr"    // 7
+    );
 }
 
 void Resource::overrideGroup(const std::string& group, const std::string& configurationFile) {

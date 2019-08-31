@@ -187,6 +187,7 @@ if(NOT CMAKE_CROSSCOMPILING)
         Directory.cpp
         Configuration.cpp
         ConfigurationGroup.cpp
+        Format.cpp
         Resource.cpp
         String.cpp)
     if(CORRADE_TARGET_WINDOWS)
