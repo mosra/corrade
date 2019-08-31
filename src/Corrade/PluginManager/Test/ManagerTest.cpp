@@ -579,17 +579,24 @@ void ManagerTest::dynamicPluginFilePathRemoveOnFail() {
 #endif
 
 void ManagerTest::configurationGlobal() {
-    PluginManager::Manager<AbstractAnimal> manager;
+    {
+        PluginManager::Manager<AbstractAnimal> manager;
 
-    CORRADE_COMPARE(manager.loadState("Canary"), LoadState::Static);
+        CORRADE_COMPARE(manager.loadState("Canary"), LoadState::Static);
 
-    /* Change the global config, the instance then gets a copy */
-    PluginMetadata& metadata = *manager.metadata("Canary");
-    metadata.configuration().setValue("name", "BIRD UP!!");
+        /* Change the global config, the instance then gets a copy */
+        PluginMetadata& metadata = *manager.metadata("Canary");
+        metadata.configuration().setValue("name", "BIRD UP!!");
 
-    Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Canary");
-    CORRADE_COMPARE(animal->name(), "BIRD UP!!");
-    CORRADE_COMPARE(animal->configuration().value("name"), "BIRD UP!!");
+        Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Canary");
+        CORRADE_COMPARE(animal->name(), "BIRD UP!!");
+        CORRADE_COMPARE(animal->configuration().value("name"), "BIRD UP!!");
+    } {
+        /* When constructing the manager next time, the configuration should go
+           back to its initial state */
+        PluginManager::Manager<AbstractAnimal> manager;
+        CORRADE_COMPARE(manager.metadata("Canary")->configuration().value("name"), "Achoo");
+    }
 }
 
 void ManagerTest::configurationLocal() {
