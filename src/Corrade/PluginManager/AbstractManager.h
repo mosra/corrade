@@ -205,11 +205,6 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         /** @brief Plugin version */
         static const int Version;
 
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        typedef void* (*Instancer)(AbstractManager&, const std::string&);
-        static void importStaticPlugin(int version, Implementation::StaticPlugin& plugin);
-        #endif
-
         /** @brief Copying is not allowed */
         AbstractManager(const AbstractManager&) = delete;
 
@@ -379,24 +374,22 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
     #ifdef DOXYGEN_GENERATING_OUTPUT
     private:
     #else
-    protected:
+    public:
     #endif
         struct CORRADE_PLUGINMANAGER_LOCAL Plugin;
-        struct CORRADE_PLUGINMANAGER_LOCAL GlobalPluginStorage;
+        typedef void* (*Instancer)(AbstractManager&, const std::string&);
+        static void importStaticPlugin(int version, Implementation::StaticPlugin& plugin);
 
+    #ifdef DOXYGEN_GENERATING_OUTPUT
+    private:
+    #else
+    protected:
+    #endif
         #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
         explicit AbstractManager(std::string pluginInterface, const std::vector<std::string>& pluginSearchPaths, std::string pluginDirectory);
         #else
         explicit AbstractManager(std::string pluginInterface);
         #endif
-
-        /* Initialize global plugin map. On first run it creates the instance
-           and fills it with entries from staticPlugins(). The reference is
-           then in constructor stored in _plugins variable to avoid at least
-           some issues with duplicated static variables on static builds. */
-        static CORRADE_PLUGINMANAGER_LOCAL GlobalPluginStorage& initializeGlobalPluginStorage();
-
-        GlobalPluginStorage& _plugins;
 
         Containers::Pointer<AbstractPlugin> instantiateInternal(const std::string& plugin);
         Containers::Pointer<AbstractPlugin> loadAndInstantiateInternal(const std::string& plugin);
