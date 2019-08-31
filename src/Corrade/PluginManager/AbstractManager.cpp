@@ -67,8 +67,11 @@ using namespace Corrade::Utility;
 namespace Corrade { namespace PluginManager {
 
 struct AbstractManager::StaticPlugin  {
-    std::string plugin;
-    std::string interface;
+    /* Assuming both plugin and interface are static strings produced by the
+       CORRADE_PLUGIN_REGISTER() macro, so there's no need to make an allocated
+       copy of them, just a direct reference */
+    const char* plugin;
+    const char* interface;
     Instancer instancer;
     void(*initializer)();
     void(*finalizer)();
@@ -177,13 +180,13 @@ std::vector<AbstractManager::StaticPlugin*>*& AbstractManager::staticPlugins() {
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-void AbstractManager::importStaticPlugin(std::string plugin, int _version, std::string interface, Instancer instancer, void(*initializer)(), void(*finalizer)()) {
+void AbstractManager::importStaticPlugin(const char* const plugin, int _version, const char* const interface, Instancer instancer, void(*initializer)(), void(*finalizer)()) {
     CORRADE_ASSERT(_version == Version,
-        "PluginManager: wrong version of static plugin" << plugin + ", got" << _version << "but expected" << Version, );
+        "PluginManager: wrong version of static plugin" << plugin << Debug::nospace << ", got" << _version << "but expected" << Version, );
     CORRADE_ASSERT(staticPlugins(),
         "PluginManager: too late to import static plugin" << plugin, );
 
-    staticPlugins()->push_back(new StaticPlugin{std::move(plugin), std::move(interface), instancer, initializer, finalizer});
+    staticPlugins()->push_back(new StaticPlugin{plugin, interface, instancer, initializer, finalizer});
 }
 #endif
 

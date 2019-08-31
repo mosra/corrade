@@ -204,7 +204,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
         typedef void* (*Instancer)(AbstractManager&, const std::string&);
-        static void importStaticPlugin(std::string plugin, int _version, std::string interface, Instancer instancer, void(*initializer)(), void(*finalizer)());
+        static void importStaticPlugin(const char* plugin, int _version, const char* interface, Instancer instancer, void(*initializer)(), void(*finalizer)());
         #endif
 
         /** @brief Copying is not allowed */
