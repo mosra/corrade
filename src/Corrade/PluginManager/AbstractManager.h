@@ -451,7 +451,7 @@ macro for automatic call:
 
 @attention This macro should be called outside of any namespace. If you are
     running into linker errors with `pluginImporter_*`, this could be the
-    problem. See @ref CORRADE_RESOURCE_INITIALIZE() documentation for more
+    reason. See @ref CORRADE_RESOURCE_INITIALIZE() documentation for more
     information.
  */
 #define CORRADE_PLUGIN_IMPORT(name)                                         \
@@ -493,7 +493,7 @@ See @ref plugin-management for more information about plugin compilation.
 
 @attention This macro should be called outside of any namespace. If you are
     running into linker errors with `pluginImporter_`, this could be the
-    problem.
+    reason.
 */
 #ifdef CORRADE_STATIC_PLUGIN
 #define CORRADE_PLUGIN_REGISTER(name, className, interface)                 \

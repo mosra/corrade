@@ -85,7 +85,7 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @param group         Group name
          * @param files         Files (pairs of filename, file data)
          *
-         * Produces C++ file with hexadecimal data representation.
+         * Produces a C++ file with hexadecimal data representation.
          */
         static std::string compile(const std::string& name, const std::string& group, const std::vector<std::pair<std::string, std::string>>& files);
 
@@ -94,7 +94,7 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @param name          Resource name (see @ref CORRADE_RESOURCE_INITIALIZE())
          * @param configurationFile Filename of configuration file
          *
-         * Produces C++ file with hexadecimal data representation. See class
+         * Produces a C++ file with hexadecimal data representation. See class
          * documentation for configuration file syntax overview. The filenames
          * are taken relative to configuration file path.
          */
@@ -108,9 +108,9 @@ class CORRADE_UTILITY_EXPORT Resource {
          *
          * Overrides compiled-in resources of given group with live data
          * specified in given configuration file, useful during development and
-         * debugging. Subsequently created Resource instances with the same
-         * group will take data from live filesystem instead and fallback to
-         * compiled-in resources only for not found files.
+         * debugging. Subsequently created @ref Resource instances with the
+         * same group will take data from live filesystem instead and fallback
+         * to compiled-in resources only for files that are not found.
          */
         static void overrideGroup(const std::string& group, const std::string& configurationFile);
 
@@ -119,9 +119,8 @@ class CORRADE_UTILITY_EXPORT Resource {
 
         /**
          * @brief Constructor
-         * @param group         Group name
          *
-         * The group must exist.
+         * Expects that the group exists.
          * @see @ref hasGroup()
          */
         explicit Resource(const std::string& group);
@@ -132,7 +131,7 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @brief List of all resources in the group
          *
          * Note that the list contains only list of compiled-in files, no
-         * additional filenames from overriden group are incluuded.
+         * additional filenames from overriden group are included.
          */
         std::vector<std::string> list() const;
 
@@ -140,8 +139,8 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @brief Get pointer to raw resource data
          * @param filename      Filename in UTF-8
          *
-         * Returns reference to data of given file in the group. The file must
-         * exist. If the file is empty, returns @cpp nullptr @ce.
+         * Returns a view on data of given file in the group. Expects that
+         * the file exists. If the file is empty, returns @cpp nullptr @ce.
          */
         Containers::ArrayView<const char> getRaw(const std::string& filename) const;
 
@@ -149,7 +148,8 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @brief Get data resource
          * @param filename      Filename in UTF-8
          *
-         * Returns data of given file in the group. The file must exist.
+         * Returns data of given file in the group. Expects that the file
+         * exists.
          */
         std::string get(const std::string& filename) const;
 
@@ -187,7 +187,7 @@ call.
 
 @attention This macro should be called outside of any namespace. If you are
     running into linker errors with `resourceInitializer_*`, this could be the
-    problem. If you are in a namespace and cannot call this macro from `main()`,
+    reason. If you are in a namespace and cannot call this macro from `main()`,
     try this:
 @attention
     @code{.cpp}

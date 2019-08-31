@@ -281,7 +281,7 @@ void ResourceTest::overrideGroup() {
     CORRADE_COMPARE(r.get("predisposition.bin"), "overriden predisposition\n");
     CORRADE_COMPARE(r.get("consequence2.txt"), "overriden consequence\n");
 
-    /* Test that two subsequence r.getRaw() point to the same location */
+    /* Test that two subsequent r.getRaw() point to the same location */
     const auto ptr = r.getRaw("predisposition.bin").begin();
     CORRADE_VERIFY(r.getRaw("predisposition.bin").begin() == ptr);
 }

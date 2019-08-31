@@ -424,7 +424,9 @@ as applying to the immediately following line, which is why the extra
 Function passed as argument will be called even before entering @cpp main() @ce
 function. This is usable when e.g. automatically registering plugins or data
 resources without forcing the user to write additional code in @cpp main() @ce.
-@attention This macro does nothing in static libraries.
+@attention This macro does nothing in static libraries --- the global data
+    defined by it (which cause the initialization) are thrown away by the
+    linker as unused.
 */
 #define CORRADE_AUTOMATIC_INITIALIZER(function)                             \
     namespace {                                                             \
@@ -433,13 +435,15 @@ resources without forcing the user to write additional code in @cpp main() @ce.
     }
 
 /** @hideinitializer
-@brief Automatic initializer
+@brief Automatic finalizer
 @param function Finalizer function name of type @cpp int(*)() @ce.
 
-Function passed as argument will be called even before entering @cpp main() @ce
+Function passed as argument will be called after exiting the @cpp main() @ce
 function. This is usable in conjuction with @ref CORRADE_AUTOMATIC_INITIALIZER()
 when there is need to properly discard initialized data.
-@attention This macro does nothing in static libraries.
+@attention This macro does nothing in static libraries --- the global data
+    defined by it (which cause the finalization) are thrown away by the
+    linker as unused.
 */
 #define CORRADE_AUTOMATIC_FINALIZER(function)                               \
     class Finalizer_##function {                                            \
