@@ -1,5 +1,3 @@
-#ifndef Corrade_PluginManager_Test_Dog_h
-#define Corrade_PluginManager_Test_Dog_h
 /*
     This file is part of Corrade.
 
@@ -25,28 +23,24 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "AbstractAnimal.h"
+#include "Corrade/PluginManager/AbstractManager.h"
+#include "Corrade/Utility/Debug.h"
+#include "Corrade/Utility/Configuration.h"
 
-#include "Corrade/Utility/VisibilityMacros.h"
-
-#ifdef Dog_EXPORTS
-    #define DOG_EXPORT CORRADE_VISIBILITY_EXPORT
-#else
-    #define DOG_EXPORT CORRADE_VISIBILITY_IMPORT
-#endif
+#include "../AbstractAnimal.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-class DOG_EXPORT Dog: public AbstractAnimal {
+class Canary: public AbstractAnimal {
     public:
-        explicit Dog() = default;
-        explicit Dog(AbstractManager& manager, const std::string& plugin): AbstractAnimal{manager, plugin} {}
+        explicit Canary(AbstractManager& manager, const std::string& plugin): AbstractAnimal{manager, plugin} {}
 
-        std::string name() override;
-        int legCount() override;
-        bool hasTail() override;
+        std::string name() override { return configuration().value("name"); }
+        int legCount() override { return 2; }
+        bool hasTail() override { return true; }
 };
 
 }}}
 
-#endif
+CORRADE_PLUGIN_REGISTER(Canary, Corrade::PluginManager::Test::Canary,
+    "cz.mosra.corrade.PluginManager.Test.AbstractAnimal/1.0")

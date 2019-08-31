@@ -23,24 +23,22 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Corrade/PluginManager/AbstractManager.h"
-#include "Corrade/Utility/Debug.h"
-#include "Corrade/Utility/Configuration.h"
+#include "../AbstractAnimal.h"
 
-#include "AbstractAnimal.h"
+#include "Corrade/PluginManager/AbstractManager.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-class Canary: public AbstractAnimal {
+class Bulldog: public AbstractAnimal {
     public:
-        explicit Canary(AbstractManager& manager, const std::string& plugin): AbstractAnimal{manager, plugin} {}
+        explicit Bulldog(AbstractManager& manager, const std::string& plugin): AbstractAnimal{manager, plugin} {}
 
-        std::string name() override { return configuration().value("name"); }
-        int legCount() override { return 2; }
-        bool hasTail() override { return true; }
+        std::string name() override { return "Bulldog"; }
+        int legCount() override { return 0; }
+        bool hasTail() override { return false; }
 };
 
 }}}
 
-CORRADE_PLUGIN_REGISTER(Canary, Corrade::PluginManager::Test::Canary,
+CORRADE_PLUGIN_REGISTER(Bulldog, Corrade::PluginManager::Test::Bulldog,
     "cz.mosra.corrade.PluginManager.Test.AbstractAnimal/1.0")

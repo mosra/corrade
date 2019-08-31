@@ -28,18 +28,6 @@
 # doesn't support dynamic plugins on iOS, this sorta works around that. Should
 # be revisited when updating Travis to newer Xcode (current has CMake 3.6).
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
-    corrade_add_plugin(Snail ${CMAKE_CURRENT_BINARY_DIR} "" Snail.conf Snail.cpp)
-    corrade_add_plugin(Dog ${CMAKE_CURRENT_BINARY_DIR} "" Dog.conf Dog.cpp)
-    corrade_add_plugin(Bulldog ${CMAKE_CURRENT_BINARY_DIR} "" Bulldog.conf Bulldog.cpp)
-    corrade_add_plugin(PitBull ${CMAKE_CURRENT_BINARY_DIR} "" PitBull.conf PitBull.cpp)
-
-    set_target_properties(
-        Snail Snail-metadata
-        Dog Dog-metadata
-        Bulldog Bulldog-metadata
-        PitBull PitBull-metadata
-        PROPERTIES FOLDER "Corrade/PluginManager/Test")
-
     set(PLUGINS_DIR $<TARGET_FILE_DIR:PluginManagerManagerTest>)
     set(DOG_PLUGIN_FILENAME $<TARGET_FILE:Dog>)
     set(DOGGO_PLUGIN_FILENAME $<TARGET_FILE:Doggo>)
@@ -54,9 +42,6 @@ else()
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
                    ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 endif()
-
-corrade_add_static_plugin(Canary ${CMAKE_CURRENT_BINARY_DIR} Canary.conf Canary.cpp)
-set_target_properties(Canary Canary-dependencies PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
 corrade_add_test(PluginManagerManagerTest
     ManagerTest.cpp
@@ -82,22 +67,7 @@ set_target_properties(
     PluginManagerManagerInitFiniTest
     PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
-target_link_libraries(Canary PRIVATE CorradePluginManagerTestLib)
-
-# DLLs don't allow unresolved symbols; on static builds there's no dynamic
-# plugin manager library to refer to so it has to be linked as well
-if((CORRADE_BUILD_STATIC OR CORRADE_TARGET_WINDOWS) AND NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
-    target_link_libraries(Snail PRIVATE CorradePluginManagerTestLib)
-    target_link_libraries(Dog PUBLIC CorradePluginManagerTestLib)
-    target_link_libraries(Bulldog PRIVATE CorradePluginManagerTestLib)
-    target_link_libraries(PitBull PRIVATE CorradePluginManagerTestLib)
-endif()
-
-# Additionally the plugin dependencies have to be linked as well
-if(CORRADE_TARGET_WINDOWS)
-    target_link_libraries(PitBull PRIVATE Dog)
-endif()
-
+add_subdirectory(animals)
 add_subdirectory(init-fini)
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     add_subdirectory(doggo)

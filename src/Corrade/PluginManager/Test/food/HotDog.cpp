@@ -24,7 +24,7 @@
 */
 
 #include "../AbstractFood.h"
-#include "../Dog.h"
+#include "../animals/Dog.h"
 
 #include "Corrade/PluginManager/AbstractManager.h"
 

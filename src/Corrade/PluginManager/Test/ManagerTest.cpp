@@ -265,7 +265,7 @@ void ManagerTest::nameList() {
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     /* Check that explicitly specifying the same plugin path does the same */
     {
-        PluginManager::Manager<AbstractAnimal> manager{PLUGINS_DIR};
+        PluginManager::Manager<AbstractAnimal> manager{Utility::Directory::join(PLUGINS_DIR, "animals")};
 
         CORRADE_COMPARE_AS(manager.pluginList(), (std::vector<std::string>{
             "Bulldog", "Canary", "Dog", "PitBull", "Snail"}), TestSuite::Compare::Container);
@@ -426,7 +426,7 @@ void ManagerTest::loadNonexistent() {
     #if defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT) || defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID)
     CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): plugin Nonexistent was not found\n");
     #else
-    CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): plugin Nonexistent is not static and was not found in " PLUGINS_DIR "\n");
+    CORRADE_COMPARE(out.str(), "PluginManager::Manager::load(): plugin Nonexistent is not static and was not found in " PLUGINS_DIR "/animals\n");
     #endif
 }
 
@@ -780,16 +780,20 @@ void ManagerTest::reloadPluginDirectory() {
 
     /* Load PitBull and rename the plugin */
     CORRADE_COMPARE(manager.load("PitBull"), LoadState::Loaded);
-    Utility::Directory::move(Utility::Directory::join(PLUGINS_DIR, std::string("PitBull") + PLUGIN_FILENAME_SUFFIX),
-                             Utility::Directory::join(PLUGINS_DIR, std::string("LostPitBull") + PLUGIN_FILENAME_SUFFIX));
-    Utility::Directory::move(Utility::Directory::join(PLUGINS_DIR, "PitBull.conf"),
-                             Utility::Directory::join(PLUGINS_DIR, "LostPitBull.conf"));
+    Utility::Directory::move(
+        Utility::Directory::join({PLUGINS_DIR, "animals", std::string("PitBull") + PLUGIN_FILENAME_SUFFIX}),
+        Utility::Directory::join({PLUGINS_DIR, "animals", std::string("LostPitBull") + PLUGIN_FILENAME_SUFFIX}));
+    Utility::Directory::move(
+        Utility::Directory::join({PLUGINS_DIR, "animals", "PitBull.conf"}),
+        Utility::Directory::join({PLUGINS_DIR, "animals", "LostPitBull.conf"}));
 
     /* Rename Snail */
-    Utility::Directory::move(Utility::Directory::join(PLUGINS_DIR, std::string("Snail") + PLUGIN_FILENAME_SUFFIX),
-                             Utility::Directory::join(PLUGINS_DIR, std::string("LostSnail") + PLUGIN_FILENAME_SUFFIX));
-    Utility::Directory::move(Utility::Directory::join(PLUGINS_DIR, "Snail.conf"),
-                             Utility::Directory::join(PLUGINS_DIR, "LostSnail.conf"));
+    Utility::Directory::move(
+        Utility::Directory::join({PLUGINS_DIR, "animals", std::string("Snail") + PLUGIN_FILENAME_SUFFIX}),
+        Utility::Directory::join({PLUGINS_DIR, "animals", std::string("LostSnail") + PLUGIN_FILENAME_SUFFIX}));
+    Utility::Directory::move(
+        Utility::Directory::join({PLUGINS_DIR, "animals", "Snail.conf"}),
+        Utility::Directory::join({PLUGINS_DIR, "animals", "LostSnail.conf"}));
 
     /* Reload plugin dir and check new name list */
     manager.reloadPluginDirectory();
@@ -805,15 +809,19 @@ void ManagerTest::reloadPluginDirectory() {
     /** @todo Also test that "WrongMetadataFile" plugins are reloaded */
 
     /* Rename everything back and clean up */
-    Utility::Directory::move(Utility::Directory::join(PLUGINS_DIR, std::string("LostPitBull") + PLUGIN_FILENAME_SUFFIX),
-                             Utility::Directory::join(PLUGINS_DIR, std::string("PitBull") + PLUGIN_FILENAME_SUFFIX));
-    Utility::Directory::move(Utility::Directory::join(PLUGINS_DIR, "LostPitBull.conf"),
-                             Utility::Directory::join(PLUGINS_DIR, "PitBull.conf"));
+    Utility::Directory::move(
+        Utility::Directory::join({PLUGINS_DIR, "animals", std::string("LostPitBull") + PLUGIN_FILENAME_SUFFIX}),
+        Utility::Directory::join({PLUGINS_DIR, "animals", std::string("PitBull") + PLUGIN_FILENAME_SUFFIX}));
+    Utility::Directory::move(
+        Utility::Directory::join({PLUGINS_DIR, "animals", "LostPitBull.conf"}),
+        Utility::Directory::join({PLUGINS_DIR, "animals", "PitBull.conf"}));
 
-    Utility::Directory::move(Utility::Directory::join(PLUGINS_DIR, std::string("LostSnail") + PLUGIN_FILENAME_SUFFIX),
-                             Utility::Directory::join(PLUGINS_DIR, std::string("Snail") + PLUGIN_FILENAME_SUFFIX));
-    Utility::Directory::move(Utility::Directory::join(PLUGINS_DIR, "LostSnail.conf"),
-                             Utility::Directory::join(PLUGINS_DIR, "Snail.conf"));
+    Utility::Directory::move(
+        Utility::Directory::join({PLUGINS_DIR, "animals", std::string("LostSnail") + PLUGIN_FILENAME_SUFFIX}),
+        Utility::Directory::join({PLUGINS_DIR, "animals", std::string("Snail") + PLUGIN_FILENAME_SUFFIX}));
+    Utility::Directory::move(
+        Utility::Directory::join({PLUGINS_DIR, "animals", "LostSnail.conf"}),
+        Utility::Directory::join({PLUGINS_DIR, "animals", "Snail.conf"}));
 
     manager.reloadPluginDirectory();
 
@@ -966,10 +974,10 @@ void ManagerTest::utf8Path() {
     CORRADE_VERIFY(Utility::Directory::mkpath(utf8PluginsDir));
     Utility::Directory::write(
         Utility::Directory::join(utf8PluginsDir, std::string("Dog") + PLUGIN_FILENAME_SUFFIX),
-        Utility::Directory::mapRead(Utility::Directory::join(PLUGINS_DIR, std::string("Dog") + PLUGIN_FILENAME_SUFFIX)));
+        Utility::Directory::mapRead(Utility::Directory::join({PLUGINS_DIR, "animals", std::string("Dog") + PLUGIN_FILENAME_SUFFIX})));
     Utility::Directory::write(
         Utility::Directory::join(utf8PluginsDir, "Dog.conf"),
-        Utility::Directory::mapRead(Utility::Directory::join(PLUGINS_DIR, "Dog.conf")));
+        Utility::Directory::mapRead(Utility::Directory::join({PLUGINS_DIR, "animals", "Dog.conf"})));
 
     PluginManager::Manager<AbstractAnimal> manager{utf8PluginsDir};
     /* One static plugin always present */

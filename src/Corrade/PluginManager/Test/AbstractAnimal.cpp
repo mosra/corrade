@@ -41,7 +41,7 @@ std::string AbstractAnimal::pluginInterface() {
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 std::vector<std::string> AbstractAnimal::pluginSearchPaths() {
-    return {PLUGINS_DIR};
+    return {Utility::Directory::join(PLUGINS_DIR, "animals")};
 }
 #endif
 
