@@ -210,6 +210,9 @@ namespace Corrade {
     explicit cast first
 -   @ref Utility::Configuration internals were rewritten to not use exceptions
     anymore
+-   The @ref CORRADE_AUTOMATIC_INITIALIZER() and
+    @ref CORRADE_AUTOMATIC_FINALIZER() macros can now be overriden for testing
+    purposes or when global constructors / destructors are not desired.
 
 @subsection corrade-changelog-latest-buildsystem Build system
 

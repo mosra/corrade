@@ -433,15 +433,22 @@ defining function macros on command line --- for example,
 Function passed as argument will be called even before entering @cpp main() @ce
 function. This is usable when e.g. automatically registering plugins or data
 resources without forcing the user to write additional code in @cpp main() @ce.
+
 @attention This macro does nothing in static libraries --- the global data
     defined by it (which cause the initialization) are thrown away by the
     linker as unused.
+
+It's possible to override this macro for testing purposes or when global
+constructors are not desired. For a portable way to defining the macro out on
+compiler command line, see @ref CORRADE_NOOP().
 */
+#ifndef CORRADE_AUTOMATIC_INITIALIZER
 #define CORRADE_AUTOMATIC_INITIALIZER(function)                             \
     namespace {                                                             \
         struct Initializer_##function { static const int i; };              \
         const int Initializer_##function::i = function();                   \
     }
+#endif
 
 /** @hideinitializer
 @brief Automatic finalizer
@@ -450,15 +457,22 @@ resources without forcing the user to write additional code in @cpp main() @ce.
 Function passed as argument will be called after exiting the @cpp main() @ce
 function. This is usable in conjuction with @ref CORRADE_AUTOMATIC_INITIALIZER()
 when there is need to properly discard initialized data.
+
 @attention This macro does nothing in static libraries --- the global data
     defined by it (which cause the finalization) are thrown away by the
     linker as unused.
+
+It's possible to override this macro for testing purposes or when global
+destructors are not desired. For a portable way to defining the macro out on
+compiler command line, see @ref CORRADE_NOOP().
 */
+#ifndef CORRADE_AUTOMATIC_FINALIZER
 #define CORRADE_AUTOMATIC_FINALIZER(function)                               \
     class Finalizer_##function {                                            \
         public:                                                             \
             Finalizer_##function() {}                                       \
             ~Finalizer_##function() { function(); }                         \
     } Finalizer_##function;
+#endif
 
 #endif
