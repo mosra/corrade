@@ -575,6 +575,10 @@ void DirectoryTest::currentUtf8() {
 
 #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
 void DirectoryTest::dllLocation() {
+    #ifdef CORRADE_BUILD_STATIC
+    CORRADE_SKIP("Corrade built as static, no DLLs to test against.");
+    #endif
+
     const std::string dllLocation = Directory::dllLocation(
         #ifdef __MINGW32__
         "lib"
