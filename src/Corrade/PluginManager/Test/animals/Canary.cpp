@@ -42,5 +42,10 @@ class Canary: public AbstractAnimal {
 
 }}}
 
+#ifndef CANARY_WITHOUT_AUTOMATIC_INITIALIZER
 CORRADE_PLUGIN_REGISTER(Canary, Corrade::PluginManager::Test::Canary,
     "cz.mosra.corrade.PluginManager.Test.AbstractAnimal/1.0")
+#else
+CORRADE_PLUGIN_REGISTER(CanaryWithoutAutomaticInitializer, Corrade::PluginManager::Test::Canary,
+    "cz.mosra.corrade.PluginManager.Test.AbstractAnimal/1.0")
+#endif

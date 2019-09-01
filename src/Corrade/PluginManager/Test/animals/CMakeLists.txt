@@ -38,13 +38,23 @@ if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
 endif()
 
 corrade_add_static_plugin(Canary ${CMAKE_CURRENT_BINARY_DIR} Canary.conf Canary.cpp)
-set_target_properties(Canary Canary-dependencies PROPERTIES FOLDER "Corrade/PluginManager/Test")
+target_link_libraries(Canary PRIVATE CorradePluginManagerTestLib)
 if(BUILD_STATIC)
     # The plugin gets linked to a shared test lib in a static build
     set_target_properties(Canary PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
 
-target_link_libraries(Canary PRIVATE CorradePluginManagerTestLib)
+corrade_add_static_plugin(CanaryWithoutAutomaticInitializer ${CMAKE_CURRENT_BINARY_DIR} Canary.conf Canary.cpp)
+target_link_libraries(CanaryWithoutAutomaticInitializer PRIVATE CorradePluginManager)
+target_compile_definitions(CanaryWithoutAutomaticInitializer
+    PRIVATE
+        "CANARY_WITHOUT_AUTOMATIC_INITIALIZER"
+        "CORRADE_AUTOMATIC_INITIALIZER=CORRADE_NOOP")
+
+set_target_properties(
+    Canary Canary-dependencies
+    CanaryWithoutAutomaticInitializer CanaryWithoutAutomaticInitializer-dependencies
+    PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
 # DLLs don't allow unresolved symbols; on static builds there's no dynamic
 # plugin manager library to refer to so it has to be linked as well
