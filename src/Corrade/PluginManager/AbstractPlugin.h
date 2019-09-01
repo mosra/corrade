@@ -176,8 +176,16 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
         /** @brief Copying is not allowed */
         AbstractPlugin(const AbstractPlugin&) = delete;
 
-        /** @brief Moving is not allowed */
-        AbstractPlugin(AbstractPlugin&&) = delete;
+        /**
+         * @brief Move constructor
+         *
+         * In order to avoid unnecessary allocations of internal state, the
+         * move is destructive, which means none of @ref plugin(),
+         * @ref metadata(), @ref configuration() or
+         * @ref AbstractManagingPlugin::manager() can be called on a moved-out
+         * instance.
+         */
+        AbstractPlugin(AbstractPlugin&& other) noexcept;
 
         /**
          * @brief Destructor
@@ -191,7 +199,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
         /** @brief Copying is not allowed */
         AbstractPlugin& operator=(const AbstractPlugin&) = delete;
 
-        /** @brief Moving is not allowed */
+        /** @brief Only move construction is allowed */
         AbstractPlugin& operator=(AbstractPlugin&&) = delete;
 
         /**
@@ -212,6 +220,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * or an alias. If the plugin was not instantiated via plugin manager,
          * returns empty string. Use @cpp metadata()->name() @ce to get plugin
          * true name unconditionally.
+         *
+         * Can't be called on a moved-out instance.
          */
         const std::string& plugin() const;
 
@@ -220,6 +230,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          *
          * Metadata associated with given plugin. If the plugin was not
          * instantiated through a plugin manager, returns @cpp nullptr @ce.
+         *
+         * Can't be called on a moved-out instance.
          * @see @ref AbstractManager::metadata()
          */
         const PluginMetadata* metadata() const;
@@ -234,6 +246,8 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractPlugin {
          * only particular plugin instance. If the plugin was not instantiated
          * through a plugin manager or the @cb{.ini} [configuration] @ce
          * group was not present in the metadata, the returned group is empty.
+         *
+         * Can't be called on a moved-out instance.
          */
         Utility::ConfigurationGroup& configuration();
         const Utility::ConfigurationGroup& configuration() const; /**< @overload */

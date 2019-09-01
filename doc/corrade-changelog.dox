@@ -189,6 +189,8 @@ namespace Corrade {
     in a runtime linker error due to a dependency not being loaded.
 -   @ref CORRADE_PLUGIN_REGISTER() now operates completely without heap access,
     making it safe to run in restricted phases of application execution
+-   @ref PluginManager::AbstractPlugin now implements a destructive move
+    constructor
 
 @subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
 

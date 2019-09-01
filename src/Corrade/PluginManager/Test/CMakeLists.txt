@@ -72,10 +72,21 @@ else()
     target_include_directories(PluginManagerImportStaticTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
+corrade_add_test(PluginManagerAbstractPluginTest
+    AbstractAnimal.cpp
+    AbstractPluginTest.cpp
+    LIBRARIES CorradePluginManagerTestLib Canary)
+if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
+    target_include_directories(PluginManagerAbstractPluginTest PRIVATE $<TARGET_FILE_DIR:PluginManagerManagerTest>)
+else()
+    target_include_directories(PluginManagerAbstractPluginTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+endif()
+
 set_target_properties(
     PluginManagerManagerTest
     PluginManagerManagerInitFiniTest
     PluginManagerImportStaticTest
+    PluginManagerAbstractPluginTest
     PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
 if(CORRADE_BUILD_STATIC AND NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET_IOS AND NOT CORRADE_TARGET_ANDROID AND NOT CORRADE_TARGET_WINDOWS_RT)

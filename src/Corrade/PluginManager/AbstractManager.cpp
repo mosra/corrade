@@ -791,7 +791,7 @@ void AbstractManager::registerInstance(const std::string& plugin, AbstractPlugin
     metadata = &*found->second.metadata;
 }
 
-void AbstractManager::unregisterInstance(const std::string& plugin, AbstractPlugin& instance) {
+void AbstractManager::reregisterInstance(const std::string& plugin, AbstractPlugin& oldInstance, AbstractPlugin* const newInstance) {
     auto found = _state->aliases.find(plugin);
 
     CORRADE_INTERNAL_ASSERT(found != _state->aliases.end() && found->second.manager == this);
@@ -800,12 +800,16 @@ void AbstractManager::unregisterInstance(const std::string& plugin, AbstractPlug
     CORRADE_INTERNAL_ASSERT(foundInstance != _state->instances.end());
     std::vector<AbstractPlugin*>& instancesForPlugin = foundInstance->second;
 
-    auto pos = std::find(instancesForPlugin.begin(), instancesForPlugin.end(), &instance);
+    auto pos = std::find(instancesForPlugin.begin(), instancesForPlugin.end(), &oldInstance);
     CORRADE_INTERNAL_ASSERT(pos != instancesForPlugin.end());
 
-    instancesForPlugin.erase(pos);
-
-    if(instancesForPlugin.empty()) _state->instances.erase(foundInstance);
+    /* If the plugin is being moved, replace the instance pointer. Otherwise
+       remove it from the list, and if the list is empty, delete it fully. */
+    if(newInstance) *pos = newInstance;
+    else {
+        instancesForPlugin.erase(pos);
+        if(instancesForPlugin.empty()) _state->instances.erase(foundInstance);
+    }
 }
 
 Containers::Pointer<AbstractPlugin> AbstractManager::instantiateInternal(const std::string& plugin) {

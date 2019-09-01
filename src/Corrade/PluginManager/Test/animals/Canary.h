@@ -23,28 +23,18 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Canary.h"
-
-#include "Corrade/PluginManager/AbstractManager.h"
-#include "Corrade/Utility/Debug.h"
-#include "Corrade/Utility/Configuration.h"
+#include "../AbstractAnimal.h"
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
-Canary::Canary() = default;
+class Canary: public AbstractAnimal {
+    public:
+        explicit Canary();
+        explicit Canary(AbstractManager& manager, const std::string& plugin);
 
-Canary::Canary(AbstractManager& manager, const std::string& plugin): AbstractAnimal{manager, plugin} {}
-
-std::string Canary::name() { return configuration().value("name"); }
-int Canary::legCount() { return 2; }
-bool Canary::hasTail() { return true; }
+        std::string name() override;
+        int legCount() override;
+        bool hasTail() override;
+};
 
 }}}
-
-#ifndef CANARY_WITHOUT_AUTOMATIC_INITIALIZER
-CORRADE_PLUGIN_REGISTER(Canary, Corrade::PluginManager::Test::Canary,
-    "cz.mosra.corrade.PluginManager.Test.AbstractAnimal/1.0")
-#else
-CORRADE_PLUGIN_REGISTER(CanaryWithoutAutomaticInitializer, Corrade::PluginManager::Test::Canary,
-    "cz.mosra.corrade.PluginManager.Test.AbstractAnimal/1.0")
-#endif

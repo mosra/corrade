@@ -61,26 +61,55 @@ AbstractPlugin::AbstractPlugin(AbstractManager& manager): _state{Containers::InP
     _state->manager = &manager;
 }
 
+AbstractPlugin::AbstractPlugin(AbstractPlugin&& other) noexcept: _state{std::move(other._state)} {
+    /* Reregister the instance if the plugin was instantiated through a plugin
+       manager. Note that instantiating using
+       AbstractManagingPlugin::AbstractManagingPlugin(AbstractManager&) is
+       *not* instantiating through the manager, in that case the _metadata
+       field would be nullptr. */
+    if(_state && _state->manager && _state->metadata)
+        _state->manager->reregisterInstance(_state->plugin, other, this);
+}
+
 AbstractPlugin::~AbstractPlugin() {
-    /* Unregister the instance only if the plugin was instantiated through
+    /* Unregister the instance only if the plugin was instantiated through a
        plugin manager. Note that instantiating using
        AbstractManagingPlugin::AbstractManagingPlugin(AbstractManager&) is
        *not* instantiating through the manager, in that case the _metadata
-       field would be nullptr */
-    if(_state->manager && _state->metadata)
-        _state->manager->unregisterInstance(_state->plugin, *this);
+       field would be nullptr. */
+    if(_state && _state->manager && _state->metadata)
+        _state->manager->reregisterInstance(_state->plugin, *this, nullptr);
 }
 
 bool AbstractPlugin::canBeDeleted() { return false; }
 
-const std::string& AbstractPlugin::plugin() const { return _state->plugin; }
+const std::string& AbstractPlugin::plugin() const {
+    CORRADE_ASSERT(_state, "PluginManager::AbstractPlugin::plugin(): can't be called on a moved-out plugin", _state->plugin);
+    return _state->plugin;
+}
 
-const PluginMetadata* AbstractPlugin::metadata() const { return _state->metadata; }
+const PluginMetadata* AbstractPlugin::metadata() const {
+    CORRADE_ASSERT(_state, "PluginManager::AbstractPlugin::metadata(): can't be called on a moved-out plugin", {});
+    return _state->metadata;
+}
 
-Utility::ConfigurationGroup& AbstractPlugin::configuration() { return _state->configuration; }
-const Utility::ConfigurationGroup& AbstractPlugin::configuration() const { return _state->configuration; }
+Utility::ConfigurationGroup& AbstractPlugin::configuration() {
+    CORRADE_ASSERT(_state, "PluginManager::AbstractPlugin::configuration(): can't be called on a moved-out plugin", _state->configuration);
+    return _state->configuration;
+}
+const Utility::ConfigurationGroup& AbstractPlugin::configuration() const {
+    CORRADE_ASSERT(_state, "PluginManager::AbstractPlugin::configuration(): can't be called on a moved-out plugin", _state->configuration);
+    return _state->configuration;
+}
 
-AbstractManager* AbstractPlugin::manager() { return _state->manager; }
-const AbstractManager* AbstractPlugin::manager() const { return _state->manager; }
+/* These asserts refer AbstractManagingPlugin because it's public only there */
+AbstractManager* AbstractPlugin::manager() {
+    CORRADE_ASSERT(_state, "PluginManager::AbstractManagingPlugin::manager(): can't be called on a moved-out plugin", {});
+    return _state->manager;
+}
+const AbstractManager* AbstractPlugin::manager() const {
+    CORRADE_ASSERT(_state, "PluginManager::AbstractManagingPlugin::manager(): can't be called on a moved-out plugin", {});
+    return _state->manager;
+}
 
 }}
