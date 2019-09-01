@@ -53,6 +53,8 @@ See @ref resource-management for brief introduction and example usage.
 Standalone resource compiler executable is implemented in
 @ref corrade-rc "corrade-rc".
 
+@m_class{m-note m-default}
+
 @par Memory access and operation complexity
     Resource registration (either automatic or using
     @ref CORRADE_RESOURCE_INITIALIZE()) is a simple operation without any
@@ -160,7 +162,7 @@ class CORRADE_UTILITY_EXPORT Resource {
         std::vector<std::string> list() const;
 
         /**
-         * @brief Get pointer to raw resource data
+         * @brief Get resource data
          * @param filename      Filename in UTF-8
          *
          * Returns a view on data of given file in the group. Expects that
@@ -174,7 +176,7 @@ class CORRADE_UTILITY_EXPORT Resource {
         }
 
         /**
-         * @brief Get data resource
+         * @brief Get resource data as a @ref std::string
          * @param filename      Filename in UTF-8
          *
          * Returns data of given file in the group. Expects that the file
