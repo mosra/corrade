@@ -34,28 +34,45 @@ static void initializeStaticResource() {
     CORRADE_RESOURCE_INITIALIZE(ResourceTestData)
 }
 
+static void finalizeStaticResource() {
+    CORRADE_RESOURCE_FINALIZE(ResourceTestData)
+}
+
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct ResourceStaticTest: TestSuite::Tester {
     explicit ResourceStaticTest();
 
-    void get();
+    void test();
 };
 
 ResourceStaticTest::ResourceStaticTest() {
-    addTests({&ResourceStaticTest::get});
-
-    initializeStaticResource();
+    addTests({&ResourceStaticTest::test});
 }
 
-void ResourceStaticTest::get() {
+void ResourceStaticTest::test() {
+    CORRADE_VERIFY(!Resource::hasGroup("test"));
+
+    initializeStaticResource();
+    /* Initializing second time shouldn't cause any problems */
+    initializeStaticResource();
+
+    CORRADE_VERIFY(Resource::hasGroup("test"));
     Resource r("test");
     CORRADE_COMPARE_AS(r.get("predisposition.bin"),
-                       Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"),
-                       TestSuite::Compare::StringToFile);
+        Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"),
+        TestSuite::Compare::StringToFile);
     CORRADE_COMPARE_AS(r.get("consequence.bin"),
-                       Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
-                       TestSuite::Compare::StringToFile);
+        Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
+        TestSuite::Compare::StringToFile);
+
+    /* Finalizing should remove the group again */
+    finalizeStaticResource();
+    CORRADE_VERIFY(!Resource::hasGroup("test"));
+
+    /* Finalizing second time shouldn't cause any problems */
+    finalizeStaticResource();
+    CORRADE_VERIFY(!Resource::hasGroup("test"));
 }
 
 }}}}

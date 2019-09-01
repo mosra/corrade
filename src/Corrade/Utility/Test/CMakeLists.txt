@@ -229,6 +229,9 @@ target_include_directories(UtilityResourceTest PRIVATE ${CMAKE_CURRENT_BINARY_DI
 
 # Static lib resource test
 add_library(ResourceTestDataLib STATIC ${ResourceTestData})
+target_compile_definitions(ResourceTestDataLib PRIVATE
+    "CORRADE_AUTOMATIC_INITIALIZER=CORRADE_NOOP"
+    "CORRADE_AUTOMATIC_FINALIZER=CORRADE_NOOP")
 target_link_libraries(ResourceTestDataLib CorradeUtility)
 corrade_add_test(UtilityResourceStaticTest ResourceStaticTest.cpp
     LIBRARIES ResourceTestDataLib

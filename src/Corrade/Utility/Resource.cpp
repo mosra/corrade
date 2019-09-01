@@ -70,7 +70,6 @@ auto Resource::resources() -> Resources& {
 
 void Resource::registerData(const char* group, unsigned int count, const unsigned int* positions, const unsigned char* filenames, const unsigned char* data) {
     /* Already registered */
-    /** @todo Fix and assert that this doesn't happen */
     if(resources().find(group) != resources().end()) return;
 
     CORRADE_INTERNAL_ASSERT(reinterpret_cast<std::uintptr_t>(positions) % 4 == 0);
@@ -96,12 +95,10 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
 }
 
 void Resource::unregisterData(const char* group) {
-    /** @todo test this */
     auto it = resources().find(group);
 
     /* Since registerData() allows the registration to be done multiple times,
        we need to allow that here too. */
-    /** @todo Figure out why and assert that this doesn't happen */
     if(it != resources().end()) resources().erase(it);
 }
 

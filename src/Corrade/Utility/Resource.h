@@ -75,7 +75,6 @@ alias=levels-easy.conf
 @endcode
 
 @todo Ad-hoc resources
-@todo Test data unregistering
  */
 class CORRADE_UTILITY_EXPORT Resource {
     public:
