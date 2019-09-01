@@ -147,6 +147,8 @@ namespace Corrade {
 -   New @ref CORRADE_VISIBILITY_INLINE_MEMBER_EXPORT visibility macro to aid
     codebases compiled with `-fvisibility-inlines-hidden`; the
     @ref CORRADE_VISIBILITY_EXPORT and friends are now also properly documented
+-   Added a @ref CORRADE_NOOP() macro for a portable way to define out function
+    macros on compiler command line.
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 

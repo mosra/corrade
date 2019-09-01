@@ -418,6 +418,15 @@ as applying to the immediately following line, which is why the extra
 #define CORRADE_LINE_STRING _CORRADE_HELPER_DEFER(_CORRADE_HELPER_STR, __LINE__)
 
 /** @hideinitializer
+@brief No-op
+
+Eats all arguments passed to it. Useful on compilers that don't support
+defining function macros on command line --- for example,
+@cpp -DA_MACRO=CORRADE_NOOP @ce is the same as doing @cpp -D'A_MACRO(arg)=' @ce.
+*/
+#define CORRADE_NOOP(...)
+
+/** @hideinitializer
 @brief Automatic initializer
 @param function Initializer function name of type @cpp int(*)() @ce.
 
