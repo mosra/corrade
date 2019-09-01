@@ -23,6 +23,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#include <map>
 #include <sstream>
 #include <vector>
 
@@ -33,6 +34,7 @@
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/Resource.h"
+#include "Corrade/Utility/Implementation/Resource.h"
 
 #include "configure.h"
 
@@ -40,6 +42,13 @@ namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct ResourceTest: TestSuite::Tester {
     explicit ResourceTest();
+
+    void resourceFilenameAt();
+    void resourceDataAt();
+    void resourceLookup();
+
+    void benchmarkLookupInPlace();
+    void benchmarkLookupStdMap();
 
     void compile();
     void compileNothing();
@@ -68,6 +77,13 @@ struct ResourceTest: TestSuite::Tester {
 };
 
 ResourceTest::ResourceTest() {
+    addTests({&ResourceTest::resourceFilenameAt,
+              &ResourceTest::resourceDataAt,
+              &ResourceTest::resourceLookup});
+
+    addBenchmarks({&ResourceTest::benchmarkLookupInPlace,
+                   &ResourceTest::benchmarkLookupStdMap}, 100);
+
     addTests({&ResourceTest::compile,
               &ResourceTest::compileNothing,
               &ResourceTest::compileEmptyFile,
@@ -92,6 +108,123 @@ ResourceTest::ResourceTest() {
               &ResourceTest::overrideNonexistentFile,
               &ResourceTest::overrideNonexistentGroup,
               &ResourceTest::overrideDifferentGroup});
+}
+
+constexpr unsigned int Positions[] {
+    3, 6,
+    11, 17,
+    20, 21,
+    30, 25,
+    40, 44
+};
+
+constexpr unsigned char Filenames[] =
+    "TOC"           // 3    3
+    "data.txt"      // 8    11
+    "image.png"     // 9    20
+    "image2.png"    // 10   30
+    "license.md"    // 10   40
+    ;
+
+constexpr unsigned char Data[] =
+    "Don't."                    // 6    6
+    "hello world"               // 11   17
+    "!PNG"                      // 4    21
+    "!PNG"                      // 4    25
+    "GPL?!\n#####\n\nDon't."    // 19   44
+    ;
+
+inline std::string asString(Containers::ArrayView<const char> view) {
+    return {view.data(), view.size()};
+}
+
+void ResourceTest::resourceFilenameAt() {
+    /* Last position says how large the filenames are */
+    CORRADE_COMPARE(sizeof(Filenames) - 1, Positions[4*2]);
+
+    /* First is a special case */
+    CORRADE_COMPARE(asString(Implementation::resourceFilenameAt(Positions, Filenames, 0)), "TOC");
+    CORRADE_COMPARE(asString(Implementation::resourceFilenameAt(Positions, Filenames, 2)), "image.png");
+}
+
+void ResourceTest::resourceDataAt() {
+    /* Last position says how large the filenames are */
+    CORRADE_COMPARE(sizeof(Data) - 1, Positions[4*2 + 1]);
+
+    /* First is a special case */
+    CORRADE_COMPARE(asString(Implementation::resourceDataAt(Positions, Data, 0)), "Don't.");
+    CORRADE_COMPARE(asString(Implementation::resourceDataAt(Positions, Data, 4)), "GPL?!\n#####\n\nDon't.");
+}
+
+void ResourceTest::resourceLookup() {
+    /* The filenames should be sorted */
+    CORRADE_VERIFY(
+        asString(Implementation::resourceFilenameAt(Positions, Filenames, 0)) <
+        asString(Implementation::resourceFilenameAt(Positions, Filenames, 1)));
+    CORRADE_VERIFY(
+        asString(Implementation::resourceFilenameAt(Positions, Filenames, 1)) <
+        asString(Implementation::resourceFilenameAt(Positions, Filenames, 2)));
+    CORRADE_VERIFY(
+        asString(Implementation::resourceFilenameAt(Positions, Filenames, 2)) <
+        asString(Implementation::resourceFilenameAt(Positions, Filenames, 3)));
+    CORRADE_VERIFY(
+        asString(Implementation::resourceFilenameAt(Positions, Filenames, 3)) <
+        asString(Implementation::resourceFilenameAt(Positions, Filenames, 4)));
+
+    /* Those exist. Cutting off the null terminator of the filename. */
+    CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames,
+        Containers::arrayView("TOC").except(1)), 0);
+    CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames,
+        Containers::arrayView("data.txt").except(1)), 1);
+    CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames,
+        Containers::arrayView("image.png").except(1)), 2);
+    CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames,
+        Containers::arrayView("image2.png").except(1)), 3);
+    CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames,
+        Containers::arrayView("license.md").except(1)), 4);
+
+    /* An extra null terminator won't match */
+    CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames, "TOC"), 5);
+
+    /* Lower bound returns license.md, but filename match discards that */
+    CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames, "image3.png"), 5);
+
+    /* Last name is license.md, this is after, so lower bound returns end */
+    CORRADE_COMPARE(Implementation::resourceLookup(5, Positions, Filenames, "termcap.info"), 5);
+}
+
+CORRADE_NEVER_INLINE unsigned int lookupInPlace(Containers::ArrayView<const char> key) {
+    return Implementation::resourceLookup(5, Positions, Filenames, key);
+}
+
+CORRADE_NEVER_INLINE unsigned int lookupStdMap(const std::map<std::string, unsigned int>& map, const std::string& key) {
+    return map.at(key);
+}
+
+void ResourceTest::benchmarkLookupInPlace() {
+    const auto key = Containers::arrayView("license.md").except(1);
+    unsigned int out = 0;
+    CORRADE_BENCHMARK(10)
+        out += lookupInPlace(key);
+
+    CORRADE_COMPARE(out, 40);
+}
+
+void ResourceTest::benchmarkLookupStdMap() {
+    std::map<std::string, unsigned int> map{
+        {"TOC", 0},
+        {"data.txt", 1},
+        {"image.png", 2},
+        {"image2.png", 3},
+        {"license.md", 4},
+    };
+
+    std::string key = "license.md";
+    unsigned int out = 0;
+    CORRADE_BENCHMARK(10)
+        out += lookupStdMap(map, key);
+
+    CORRADE_COMPARE(out, 40);
 }
 
 void ResourceTest::compile() {

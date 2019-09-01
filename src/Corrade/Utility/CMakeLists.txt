@@ -72,7 +72,8 @@ if(WITH_UTILITY)
         VisibilityMacros.h
         visibility.h)
 
-    set(CorradeUtility_PRIVATE_HEADERS )
+    set(CorradeUtility_PRIVATE_HEADERS
+        Implementation/Resource.h)
 
     # Unix-specific / non-RT-Windows-specific functionality. Also Emscripten.
     if(CORRADE_TARGET_UNIX OR (CORRADE_TARGET_WINDOWS AND NOT CORRADE_TARGET_WINDOWS_RT) OR CORRADE_TARGET_EMSCRIPTEN)
