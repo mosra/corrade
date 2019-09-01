@@ -4,9 +4,8 @@
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Resource.h"
 
-CORRADE_ALIGNAS(4) static const unsigned char resourcePositions[] = {
-    0x09,0x00,0x00,0x00,
-    0x00,0x00,0x00,0x00
+static const unsigned int resourcePositions[] = {
+    0x00000009,0x00000000
 };
 
 static const unsigned char resourceFilenames[] = {

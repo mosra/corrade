@@ -202,13 +202,10 @@ corrade_add_test(UtilityResourceTest
     ${ResourceTestNothingData}
     LIBRARIES CorradeUtilityTestLib
     FILES
-        ResourceTestFiles/compiled-le.cpp
-        ResourceTestFiles/compiled-be.cpp
-        ResourceTestFiles/compiled-empty-le.cpp
-        ResourceTestFiles/compiled-empty-be.cpp
+        ResourceTestFiles/compiled.cpp
+        ResourceTestFiles/compiled-empty.cpp
         ResourceTestFiles/compiled-nothing.cpp
-        ResourceTestFiles/compiled-unicode-le.cpp
-        ResourceTestFiles/compiled-unicode-be.cpp
+        ResourceTestFiles/compiled-unicode.cpp
         ResourceTestFiles/consequence.bin
         ResourceTestFiles/consequence2.txt
         ResourceTestFiles/empty.bin

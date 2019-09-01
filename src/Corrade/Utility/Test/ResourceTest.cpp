@@ -99,15 +99,8 @@ void ResourceTest::compile() {
     std::vector<std::pair<std::string, std::string>> input{
         {"predisposition.bin", Directory::readString(Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"))},
         {"consequence.bin", Directory::readString(Directory::join(RESOURCE_TEST_DIR, "consequence.bin"))}};
-    const char* file =
-        #ifndef CORRADE_BIG_ENDIAN
-        "compiled-le.cpp"
-        #else
-        "compiled-be.cpp"
-        #endif
-        ;
     CORRADE_COMPARE_AS(Resource::compile("ResourceTestData", "test", input),
-                       Directory::join(RESOURCE_TEST_DIR, file),
+                       Directory::join(RESOURCE_TEST_DIR, "compiled.cpp"),
                        TestSuite::Compare::StringToFile);
 }
 
@@ -120,43 +113,22 @@ void ResourceTest::compileNothing() {
 void ResourceTest::compileEmptyFile() {
     std::vector<std::pair<std::string, std::string>> input{
         {"empty.bin", ""}};
-    const char* file =
-        #ifndef CORRADE_BIG_ENDIAN
-        "compiled-empty-le.cpp"
-        #else
-        "compiled-empty-be.cpp"
-        #endif
-        ;
     CORRADE_COMPARE_AS(Resource::compile("ResourceTestData", "test", input),
-                       Directory::join(RESOURCE_TEST_DIR, file),
+                       Directory::join(RESOURCE_TEST_DIR, "compiled-empty.cpp"),
                        TestSuite::Compare::StringToFile);
 }
 
 void ResourceTest::compileFrom() {
     const std::string compiled = Resource::compileFrom("ResourceTestData",
         Directory::join(RESOURCE_TEST_DIR, "resources.conf"));
-    const char* file =
-        #ifndef CORRADE_BIG_ENDIAN
-        "compiled-le.cpp"
-        #else
-        "compiled-be.cpp"
-        #endif
-        ;
-    CORRADE_COMPARE_AS(compiled, Directory::join(RESOURCE_TEST_DIR, file),
+    CORRADE_COMPARE_AS(compiled, Directory::join(RESOURCE_TEST_DIR, "compiled.cpp"),
                        TestSuite::Compare::StringToFile);
 }
 
 void ResourceTest::compileFromUtf8Filenames() {
     const std::string compiled = Resource::compileFrom("ResourceTestUtf8Data",
         Directory::join(RESOURCE_TEST_DIR, "hýždě.conf"));
-    const char* file =
-        #ifndef CORRADE_BIG_ENDIAN
-        "compiled-unicode-le.cpp"
-        #else
-        "compiled-unicode-be.cpp"
-        #endif
-        ;
-    CORRADE_COMPARE_AS(compiled, Directory::join(RESOURCE_TEST_DIR, file),
+    CORRADE_COMPARE_AS(compiled, Directory::join(RESOURCE_TEST_DIR, "compiled-unicode.cpp"),
                        TestSuite::Compare::StringToFile);
 }
 

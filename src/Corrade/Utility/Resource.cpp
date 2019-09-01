@@ -68,7 +68,7 @@ auto Resource::resources() -> Resources& {
     return resources;
 }
 
-void Resource::registerData(const char* group, unsigned int count, const unsigned char* positions, const unsigned char* filenames, const unsigned char* data) {
+void Resource::registerData(const char* group, unsigned int count, const unsigned int* positions, const unsigned char* filenames, const unsigned char* data) {
     /* Already registered */
     /** @todo Fix and assert that this doesn't happen */
     if(resources().find(group) != resources().end()) return;
@@ -78,16 +78,14 @@ void Resource::registerData(const char* group, unsigned int count, const unsigne
     const auto groupData = resources().emplace(group, GroupData()).first;
 
     /* Cast to type which can be eaten by std::string constructor */
-    const char* _positions = reinterpret_cast<const char*>(positions);
     const char* _filenames = reinterpret_cast<const char*>(filenames);
 
-    const unsigned int size = sizeof(unsigned int);
     unsigned int oldFilenamePosition = 0, oldDataPosition = 0;
 
     /* Every 2*sizeof(unsigned int) is one data */
-    for(unsigned int i = 0; i != count*2*size; i += 2*size) {
-        unsigned int filenamePosition = *reinterpret_cast<const unsigned int*>(_positions+i);
-        unsigned int dataPosition = *reinterpret_cast<const unsigned int*>(_positions+i+size);
+    for(unsigned int i = 0; i != count; ++i) {
+        const unsigned int filenamePosition = positions[2*i];
+        const unsigned int dataPosition = positions[2*i + 1];
 
         Containers::ArrayView<const char> res(reinterpret_cast<const char*>(data)+oldDataPosition, dataPosition-oldDataPosition);
         groupData->second.resources.emplace(std::string(_filenames+oldFilenamePosition, filenamePosition-oldFilenamePosition), res);
@@ -136,12 +134,6 @@ std::string hexcode(const std::string& data) {
 
     return out.str();
 }
-
-#ifndef DOXYGEN_GENERATING_OUTPUT
-template<class T> std::string numberToString(const T& number) {
-    return std::string(reinterpret_cast<const char*>(&number), sizeof(T));
-}
-#endif
 
 }
 
@@ -221,8 +213,7 @@ int resourceFinalizer_{0}() {{
             data += '\n';
         }
 
-        positions += hexcode(numberToString(filenamesLen));
-        positions += hexcode(numberToString(dataLen));
+        positions += Utility::formatString("\n    0x{:.8x},0x{:.8x},", filenamesLen, dataLen);
 
         filenames += comment(it->first);
         filenames += hexcode(it->first);
@@ -249,7 +240,7 @@ int resourceFinalizer_{0}() {{
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Resource.h"
 
-CORRADE_ALIGNAS(4) static const unsigned char resourcePositions[] = {{{0}
+static const unsigned int resourcePositions[] = {{{0}
 }};
 
 static const unsigned char resourceFilenames[] = {{{1}
