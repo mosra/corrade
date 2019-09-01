@@ -38,6 +38,10 @@
 
 namespace Corrade { namespace Utility {
 
+namespace Implementation {
+    struct ResourceGroup;
+}
+
 /**
 @brief Data resource management
 
@@ -155,20 +159,15 @@ class CORRADE_UTILITY_EXPORT Resource {
     #ifdef DOXYGEN_GENERATING_OUTPUT
     private:
     #endif
-        /* Internal use only. */
-        static void registerData(const char* group, unsigned int count, const unsigned int* positions, const unsigned char* filenames, const unsigned char* data);
-        static void unregisterData(const char* group);
+        /* Used internally from the CORRADE_RESOURCE_INITIALIZE() /
+           CORRADE_RESOURCE_FINALIZE() macros */
+        static void registerData(Implementation::ResourceGroup& resource);
+        static void unregisterData(Implementation::ResourceGroup& resource);
 
     private:
-        struct Resources;
-        struct GroupData;
         struct OverrideData;
 
-        /* Accessed through function to overcome "static initialization order
-           fiasco" which I think currently fails only in static build */
-        CORRADE_UTILITY_LOCAL static Resources& resources();
-
-        std::pair<const std::string, GroupData>* _group;
+        Implementation::ResourceGroup* _group;
         OverrideData* _overrideGroup;
 };
 
@@ -203,6 +202,10 @@ call.
     }
     @endcode
 
+Functions called by this macro don't do any dynamic allocation or other
+operations that could fail, so it's safe to call it even in restricted phases
+of application exection.
+
 @see @ref CORRADE_RESOURCE_FINALIZE()
 */
 /* Contents of this macro are used in PluginManager/AbstractManager.h to avoid
@@ -219,10 +222,27 @@ Cleans up resource previously (even automatically) initialized via
 
 @attention This macro should be called outside of any namespace. See
     @ref CORRADE_RESOURCE_INITIALIZE() documentation for more information.
+
+Functions called by this macro don't do any dynamic allocation or other
+operations that could fail, so it's safe to call it even in restricted phases
+of application exection.
 */
 #define CORRADE_RESOURCE_FINALIZE(name)                                       \
     extern int resourceFinalizer_##name();                                    \
     resourceFinalizer_##name();
+
+namespace Implementation {
+
+struct ResourceGroup {
+    const char* name;
+    unsigned int count;
+    const unsigned int* positions;
+    const unsigned char* filenames;
+    const unsigned char* data;
+    ResourceGroup* next;
+};
+
+}
 
 }}
 

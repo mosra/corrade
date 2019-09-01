@@ -34,16 +34,35 @@
 #include <vector>
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/Implementation/RawForwardList.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Configuration.h"
 #include "Corrade/Utility/ConfigurationGroup.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/FormatStl.h"
+#include "Corrade/Utility/Implementation/Resource.h"
 
 namespace Corrade { namespace Utility {
 
-struct Resource::Resources: std::map<std::string, GroupData> {};
+namespace {
+
+struct {
+    /* A linked list of resources. Managed using utilities from
+       Containers/Implementation/RawForwardList.h, look there for more info. */
+    Implementation::ResourceGroup* groups;
+
+    /* Overriden groups. This is only allocated if the user calls
+       Resource::overrideGroup() and stores a pointer to a function-local
+       static variable from there. */
+    std::map<std::string, std::string>* overrideGroups;
+
+/* The value of this variable is guaranteed to be zero-filled even before any
+   resource initializers are executed, which means we don't hit any static
+   initialization order fiasco. */
+} resourceGlobals{nullptr, nullptr};
+
+}
 
 struct Resource::OverrideData {
     const Configuration conf;
@@ -52,54 +71,12 @@ struct Resource::OverrideData {
     explicit OverrideData(const std::string& filename): conf(filename) {}
 };
 
-struct Resource::GroupData {
-    explicit GroupData();
-    ~GroupData();
-
-    std::string overrideGroup;
-    std::map<std::string, Containers::ArrayView<const char>> resources;
-};
-
-Resource::GroupData::GroupData() = default;
-Resource::GroupData::~GroupData() = default;
-
-auto Resource::resources() -> Resources& {
-    static Resources resources;
-    return resources;
+void Resource::registerData(Implementation::ResourceGroup& resource) {
+    Containers::Implementation::forwardListInsert(resourceGlobals.groups, resource);
 }
 
-void Resource::registerData(const char* group, unsigned int count, const unsigned int* positions, const unsigned char* filenames, const unsigned char* data) {
-    /* Already registered */
-    if(resources().find(group) != resources().end()) return;
-
-    CORRADE_INTERNAL_ASSERT(reinterpret_cast<std::uintptr_t>(positions) % 4 == 0);
-
-    const auto groupData = resources().emplace(group, GroupData()).first;
-
-    /* Cast to type which can be eaten by std::string constructor */
-    const char* _filenames = reinterpret_cast<const char*>(filenames);
-
-    unsigned int oldFilenamePosition = 0, oldDataPosition = 0;
-
-    /* Every 2*sizeof(unsigned int) is one data */
-    for(unsigned int i = 0; i != count; ++i) {
-        const unsigned int filenamePosition = positions[2*i];
-        const unsigned int dataPosition = positions[2*i + 1];
-
-        Containers::ArrayView<const char> res(reinterpret_cast<const char*>(data)+oldDataPosition, dataPosition-oldDataPosition);
-        groupData->second.resources.emplace(std::string(_filenames+oldFilenamePosition, filenamePosition-oldFilenamePosition), res);
-
-        oldFilenamePosition = filenamePosition;
-        oldDataPosition = dataPosition;
-    }
-}
-
-void Resource::unregisterData(const char* group) {
-    auto it = resources().find(group);
-
-    /* Since registerData() allows the registration to be done multiple times,
-       we need to allow that here too. */
-    if(it != resources().end()) resources().erase(it);
+void Resource::unregisterData(Implementation::ResourceGroup& resource) {
+    Containers::Implementation::forwardListRemove(resourceGlobals.groups, resource);
 }
 
 namespace {
@@ -131,6 +108,11 @@ std::string hexcode(const std::string& data) {
 
     return out.str();
 }
+
+inline bool lessFilename(const std::pair<std::string, std::string>& a, const std::pair<std::string, std::string>& b) {
+    return a.first < b.first;
+}
+
 
 }
 
@@ -171,10 +153,16 @@ std::string Resource::compileFrom(const std::string& name, const std::string& co
         fileData.emplace_back(alias, std::string{contents.second, contents.second.size()});
     }
 
+    /* The list has to be sorted before passing it to compile() */
+    std::sort(fileData.begin(), fileData.end(), lessFilename);
+
     return compile(name, group, fileData);
 }
 
 std::string Resource::compile(const std::string& name, const std::string& group, const std::vector<std::pair<std::string, std::string>>& files) {
+    CORRADE_ASSERT(std::is_sorted(files.begin(), files.end(), lessFilename),
+        "Utility::Resource::compile(): the file list is not sorted", {});
+
     /* Special case for empty file list */
     if(files.empty()) {
         return formatString(R"(/* Compiled resource file. DO NOT EDIT! */
@@ -183,15 +171,22 @@ std::string Resource::compile(const std::string& name, const std::string& group,
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Resource.h"
 
+namespace {{
+
+Corrade::Utility::Implementation::ResourceGroup resource;
+
+}}
+
 int resourceInitializer_{0}();
 int resourceInitializer_{0}() {{
-    Corrade::Utility::Resource::registerData("{1}", 0, nullptr, nullptr, nullptr);
+    resource = {{ "{1}", 0, nullptr, nullptr, nullptr, nullptr }};
+    Corrade::Utility::Resource::registerData(resource);
     return 1;
 }} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_{0})
 
 int resourceFinalizer_{0}();
 int resourceFinalizer_{0}() {{
-    Corrade::Utility::Resource::unregisterData("{1}");
+    Corrade::Utility::Resource::unregisterData(resource);
     return 1;
 }} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_{0})
 )", name, group);
@@ -237,24 +232,38 @@ int resourceFinalizer_{0}() {{
 #include "Corrade/Utility/Macros.h"
 #include "Corrade/Utility/Resource.h"
 
+namespace {{
+
 static const unsigned int resourcePositions[] = {{{0}
 }};
 
-static const unsigned char resourceFilenames[] = {{{1}
+const unsigned char resourceFilenames[] = {{{1}
 }};
 
-{2}static const unsigned char resourceData[] = {{{3}
+{2}const unsigned char resourceData[] = {{{3}
 {2}}};
+
+Corrade::Utility::Implementation::ResourceGroup resource;
+
+}}
 
 int resourceInitializer_{4}();
 int resourceInitializer_{4}() {{
-    Corrade::Utility::Resource::registerData("{5}", {6}, resourcePositions, resourceFilenames, {7});
+    resource = {{
+        "{5}",
+        {6},
+        resourcePositions,
+        resourceFilenames,
+        {7},
+        nullptr
+    }};
+    Corrade::Utility::Resource::registerData(resource);
     return 1;
 }} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_{4})
 
 int resourceFinalizer_{4}();
 int resourceFinalizer_{4}() {{
-    Corrade::Utility::Resource::unregisterData("{5}");
+    Corrade::Utility::Resource::unregisterData(resource);
     return 1;
 }} CORRADE_AUTOMATIC_FINALIZER(resourceFinalizer_{4})
 )",
@@ -269,32 +278,53 @@ int resourceFinalizer_{4}() {{
     );
 }
 
+namespace {
+    Implementation::ResourceGroup* findGroup(const Containers::ArrayView<const char> name) {
+        for(Implementation::ResourceGroup* group = resourceGlobals.groups; group; group = Containers::Implementation::forwardListNext(*group)) {
+            /* std::strncmp() would return equality also if name was just a
+               prefix of group->name, so test that it ends with a null
+               terminator */
+            if(std::strncmp(group->name, name, name.size()) == 0 && group->name[name.size()] == '\0') return group;
+        }
+
+        return nullptr;
+    }
+}
+
 void Resource::overrideGroup(const std::string& group, const std::string& configurationFile) {
-    auto it = resources().find(group);
-    CORRADE_ASSERT(it != resources().end(),
+    if(!resourceGlobals.overrideGroups) {
+        static std::map<std::string, std::string> overrideGroups;
+        resourceGlobals.overrideGroups = &overrideGroups;
+    }
+
+    CORRADE_ASSERT(findGroup({group.data(), group.size()}),
         "Utility::Resource::overrideGroup(): group" << '\'' + group + '\'' << "was not found", );
-    it->second.overrideGroup = configurationFile;
+    /* This group can be already overriden from before, so insert if not there
+       yet and then update the filename */
+    resourceGlobals.overrideGroups->emplace(group, std::string{}).first->second = configurationFile;
 }
 
 bool Resource::hasGroup(const std::string& group) {
-    return resources().find(group) != resources().end();
+    return findGroup({group.data(), group.size()});
 }
 
-Resource::Resource(const std::string& group): _overrideGroup(nullptr) {
-    auto groupIt = resources().find(group);
-    CORRADE_ASSERT(groupIt != resources().end(),
+Resource::Resource(const std::string& group): _group{findGroup({group.data(), group.size()})}, _overrideGroup(nullptr) {
+    CORRADE_ASSERT(_group,
         "Utility::Resource: group" << '\'' + group + '\'' << "was not found", );
-    _group = &*groupIt;
 
-    if(!_group->second.overrideGroup.empty()) {
-        Debug() << "Utility::Resource: group" << '\'' + group + '\''
-                << "overriden with" << '\'' + _group->second.overrideGroup + '\'';
-        _overrideGroup = new OverrideData(_group->second.overrideGroup);
+    if(resourceGlobals.overrideGroups) {
+        auto overriden = resourceGlobals.overrideGroups->find(group);
+        if(overriden != resourceGlobals.overrideGroups->end()) {
+            Debug{}
+                << "Utility::Resource: group" << '\'' + group + '\''
+                << "overriden with" << '\'' + overriden->second + '\'';
+            _overrideGroup = new OverrideData(overriden->second);
 
-        if(_overrideGroup->conf.value("group") != _group->first)
-            Warning() << "Utility::Resource: overriden with different group, found"
-                      << '\'' + _overrideGroup->conf.value("group") + '\''
-                      << "but expected" << '\'' + group + '\'';
+            if(_overrideGroup->conf.value("group") != group) Warning{}
+                <<   "Utility::Resource: overriden with different group, found"
+                << '\'' + _overrideGroup->conf.value("group") + '\''
+                << "but expected" << '\'' + group + '\'';
+        }
     }
 }
 
@@ -306,9 +336,11 @@ std::vector<std::string> Resource::list() const {
     CORRADE_INTERNAL_ASSERT(_group);
 
     std::vector<std::string> result;
-    result.reserve(_group->second.resources.size());
-    for(const auto& filename: _group->second.resources)
-        result.push_back(filename.first);
+    result.reserve(_group->count);
+    for(std::size_t i = 0; i != _group->count; ++i) {
+        Containers::ArrayView<const char> filename = Implementation::resourceFilenameAt(_group->positions, _group->filenames, i);
+        result.push_back({filename.data(), filename.size()});
+    }
 
     return result;
 }
@@ -333,14 +365,14 @@ Containers::ArrayView<const char> Resource::getRaw(const std::string& filename) 
             /* Load the file */
             bool success;
             Containers::Array<char> data;
-            std::tie(success, data) = fileContents(Directory::join(Directory::path(_group->second.overrideGroup), file->value("filename")));
+            std::tie(success, data) = fileContents(Directory::join(Directory::path(_overrideGroup->conf.filename()), file->value("filename")));
             if(!success) {
                 Error() << "Utility::Resource::get(): cannot open file" << file->value("filename") << "from overriden group";
                 break;
             }
 
             /* Save the file for later use and return */
-            it = _overrideGroup->data.emplace(filename, std::move(data)).first;
+            it = _overrideGroup->data.emplace(filenameString, std::move(data)).first;
             return it->second;
         }
 
@@ -349,11 +381,11 @@ Containers::ArrayView<const char> Resource::getRaw(const std::string& filename) 
                   << "was not found in overriden group, fallback to compiled-in resources";
     }
 
-    const auto it = _group->second.resources.find(filename);
-    CORRADE_ASSERT(it != _group->second.resources.end(),
-        "Utility::Resource::get(): file" << '\'' + filename + '\'' << "was not found in group" << '\'' + _group->first + '\'', nullptr);
+    const unsigned int i = Implementation::resourceLookup(_group->count, _group->positions, _group->filenames, {filename.data(), filename.size()});
+    CORRADE_ASSERT(i != _group->count,
+        "Utility::Resource::get(): file '" << Debug::nospace << filename << Debug::nospace << "' was not found in group '" << Debug::nospace << _group->name << Debug::nospace << "\'", nullptr);
 
-    return it->second;
+    return Implementation::resourceDataAt(_group->positions, _group->data, i);
 }
 
 std::string Resource::get(const std::string& filename) const {

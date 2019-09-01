@@ -51,6 +51,7 @@ struct ResourceTest: TestSuite::Tester {
     void benchmarkLookupStdMap();
 
     void compile();
+    void compileNotSorted();
     void compileNothing();
     void compileEmptyFile();
 
@@ -85,6 +86,7 @@ ResourceTest::ResourceTest() {
                    &ResourceTest::benchmarkLookupStdMap}, 100);
 
     addTests({&ResourceTest::compile,
+              &ResourceTest::compileNotSorted,
               &ResourceTest::compileNothing,
               &ResourceTest::compileEmptyFile,
 
@@ -230,11 +232,22 @@ void ResourceTest::benchmarkLookupStdMap() {
 void ResourceTest::compile() {
     /* Testing also null bytes and signed overflow, don't change binaries */
     std::vector<std::pair<std::string, std::string>> input{
-        {"predisposition.bin", Directory::readString(Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"))},
-        {"consequence.bin", Directory::readString(Directory::join(RESOURCE_TEST_DIR, "consequence.bin"))}};
+        {"consequence.bin", Directory::readString(Directory::join(RESOURCE_TEST_DIR, "consequence.bin"))},
+        {"predisposition.bin", Directory::readString(Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"))}};
     CORRADE_COMPARE_AS(Resource::compile("ResourceTestData", "test", input),
                        Directory::join(RESOURCE_TEST_DIR, "compiled.cpp"),
                        TestSuite::Compare::StringToFile);
+}
+
+void ResourceTest::compileNotSorted() {
+    std::vector<std::pair<std::string, std::string>> input{
+        {"predisposition.bin", {}},
+        {"consequence.bin",{}}};
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    Resource::compile("ResourceTestData", "test", input);
+    CORRADE_COMPARE(out.str(), "Utility::Resource::compile(): the file list is not sorted\n");
 }
 
 void ResourceTest::compileNothing() {
