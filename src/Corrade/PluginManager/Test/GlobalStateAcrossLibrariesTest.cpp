@@ -51,7 +51,12 @@ void GlobalStateAcrossLibrariesTest::test() {
 
     /* Avoid accidentally loading the dynamic plugins as well */
     PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-    CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"Canary"});
+    {
+        #ifdef CORRADE_TARGET_WINDOWS
+        CORRADE_EXPECT_FAIL("Deduplication of global data across shared libraries isn't implemented on Windows yet.");
+        #endif
+        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"Canary"});
+    }
 }
 
 }}}}
