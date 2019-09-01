@@ -57,7 +57,7 @@ void CppStandardTest::test() {
     #ifdef COMPILING_AS_CPP11
     {
         #ifdef _MSC_VER
-        CORRADE_EXPECT_FAIL("MSVC always compiles at least as C++14");
+        CORRADE_EXPECT_FAIL("MSVC always compiles at least as C++14.");
         #endif
         CORRADE_COMPARE(CORRADE_CXX_STANDARD, 201103L);
     }
