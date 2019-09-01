@@ -330,24 +330,45 @@ void ResourceTest::compileFromEmptyAlias() {
 
 void ResourceTest::hasGroup() {
     CORRADE_VERIFY(Resource::hasGroup("test"));
+    CORRADE_VERIFY(Resource::hasGroup(std::string{"test"}));
     CORRADE_VERIFY(!Resource::hasGroup("nonexistent"));
+    CORRADE_VERIFY(!Resource::hasGroup(std::string{"nonexistent"}));
 }
 
 void ResourceTest::list() {
-    Resource r("test");
-    CORRADE_COMPARE_AS(r.list(),
-                       (std::vector<std::string>{"consequence.bin", "predisposition.bin"}),
-                       TestSuite::Compare::Container);
+    {
+        Resource r{"test"};
+        CORRADE_COMPARE_AS(r.list(),
+            (std::vector<std::string>{"consequence.bin", "predisposition.bin"}),
+            TestSuite::Compare::Container);
+    } {
+        Resource r{std::string{"test"}};
+        CORRADE_COMPARE_AS(r.list(),
+            (std::vector<std::string>{"consequence.bin", "predisposition.bin"}),
+            TestSuite::Compare::Container);
+    }
 }
 
 void ResourceTest::get() {
     Resource r("test");
     CORRADE_COMPARE_AS(r.get("predisposition.bin"),
-                       Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"),
-                       TestSuite::Compare::StringToFile);
+        Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"),
+        TestSuite::Compare::StringToFile);
     CORRADE_COMPARE_AS(r.get("consequence.bin"),
-                       Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
-                       TestSuite::Compare::StringToFile);
+        Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
+        TestSuite::Compare::StringToFile);
+
+    {
+        Containers::ArrayView<const char> data = r.getRaw("consequence.bin");
+        CORRADE_COMPARE_AS((std::string{data, data.size()}),
+            Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
+            TestSuite::Compare::StringToFile);
+    } {
+        Containers::ArrayView<const char> data = r.getRaw(std::string{"consequence.bin"});
+        CORRADE_COMPARE_AS((std::string{data, data.size()}),
+            Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
+            TestSuite::Compare::StringToFile);
+    }
 }
 
 void ResourceTest::getEmptyFile() {

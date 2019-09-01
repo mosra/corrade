@@ -324,25 +324,31 @@ void Resource::overrideGroup(const std::string& group, const std::string& config
 }
 
 bool Resource::hasGroup(const std::string& group) {
-    return findGroup({group.data(), group.size()});
+    return hasGroupInternal({group.data(), group.size()});
 }
 
-Resource::Resource(const std::string& group): _group{findGroup({group.data(), group.size()})}, _overrideGroup(nullptr) {
-    CORRADE_ASSERT(_group,
-        "Utility::Resource: group" << '\'' + group + '\'' << "was not found", );
+bool Resource::hasGroupInternal(const Containers::ArrayView<const char> group) {
+    return findGroup(group);
+}
+
+Resource::Resource(const std::string& group): Resource{{group.data(), group.size()}, nullptr} {}
+
+Resource::Resource(const Containers::ArrayView<const char> group, void*): _group{findGroup(group)}, _overrideGroup(nullptr) {
+    CORRADE_ASSERT(_group, "Utility::Resource: group '" << Debug::nospace << (std::string{group, group.size()}) << Debug::nospace << "' was not found", );
 
     if(resourceGlobals.overrideGroups) {
-        auto overriden = resourceGlobals.overrideGroups->find(group);
+        const std::string groupString{group.data(), group.size()};
+        auto overriden = resourceGlobals.overrideGroups->find(groupString);
         if(overriden != resourceGlobals.overrideGroups->end()) {
             Debug{}
-                << "Utility::Resource: group" << '\'' + group + '\''
-                << "overriden with" << '\'' + overriden->second + '\'';
+                << "Utility::Resource: group '" << Debug::nospace << groupString << Debug::nospace << "' overriden with '" << Debug::nospace << overriden->second << Debug::nospace << "\'";
             _overrideGroup = new OverrideData(overriden->second);
 
-            if(_overrideGroup->conf.value("group") != group) Warning{}
-                <<   "Utility::Resource: overriden with different group, found"
-                << '\'' + _overrideGroup->conf.value("group") + '\''
-                << "but expected" << '\'' + group + '\'';
+            if(_overrideGroup->conf.value("group") != groupString) Warning{}
+                << "Utility::Resource: overriden with different group, found '"
+                << Debug::nospace << _overrideGroup->conf.value("group")
+                << Debug::nospace << "' but expected '" << Debug::nospace
+                << groupString << Debug::nospace << "'";
         }
     }
 }
@@ -365,12 +371,18 @@ std::vector<std::string> Resource::list() const {
 }
 
 Containers::ArrayView<const char> Resource::getRaw(const std::string& filename) const {
+    return getInternal({filename.data(), filename.size()});
+}
+
+Containers::ArrayView<const char> Resource::getInternal(const Containers::ArrayView<const char> filename) const {
     CORRADE_INTERNAL_ASSERT(_group);
 
     /* The group is overriden with live data */
     if(_overrideGroup) {
+        const std::string filenameString{filename.data(), filename.size()};
+
         /* The file is already loaded */
-        auto it = _overrideGroup->data.find(filename);
+        auto it = _overrideGroup->data.find(filenameString);
         if(it != _overrideGroup->data.end())
             return it->second;
 
@@ -379,7 +391,7 @@ Containers::ArrayView<const char> Resource::getRaw(const std::string& filename) 
         std::vector<const ConfigurationGroup*> files = _overrideGroup->conf.groups("file");
         for(auto file: files) {
             const std::string name = file->hasValue("alias") ? file->value("alias") : file->value("filename");
-            if(name != filename) continue;
+            if(name != filenameString) continue;
 
             /* Load the file */
             bool success;
@@ -396,13 +408,13 @@ Containers::ArrayView<const char> Resource::getRaw(const std::string& filename) 
         }
 
         /* The file was not found, fallback to compiled-in ones */
-        Warning() << "Utility::Resource::get(): file" << '\'' + filename + '\''
-                  << "was not found in overriden group, fallback to compiled-in resources";
+        Warning() << "Utility::Resource::get(): file '" << Debug::nospace
+            << filenameString << Debug::nospace << "' was not found in overriden group, fallback to compiled-in resources";
     }
 
-    const unsigned int i = Implementation::resourceLookup(_group->count, _group->positions, _group->filenames, {filename.data(), filename.size()});
+    const unsigned int i = Implementation::resourceLookup(_group->count, _group->positions, _group->filenames, filename);
     CORRADE_ASSERT(i != _group->count,
-        "Utility::Resource::get(): file '" << Debug::nospace << filename << Debug::nospace << "' was not found in group '" << Debug::nospace << _group->name << Debug::nospace << "\'", nullptr);
+        "Utility::Resource::get(): file '" << Debug::nospace << (std::string{filename, filename.size()}) << Debug::nospace << "' was not found in group '" << Debug::nospace << _group->name << Debug::nospace << "\'", nullptr);
 
     return Implementation::resourceDataAt(_group->positions, _group->data, i);
 }

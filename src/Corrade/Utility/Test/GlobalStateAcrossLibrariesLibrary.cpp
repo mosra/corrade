@@ -23,8 +23,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <string>
-
 #include "GlobalStateAcrossLibrariesLibrary.h"
 
 #include "Corrade/Utility/Debug.h"

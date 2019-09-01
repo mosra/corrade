@@ -221,6 +221,9 @@ namespace Corrade {
 -   The @ref CORRADE_AUTOMATIC_INITIALIZER() and
     @ref CORRADE_AUTOMATIC_FINALIZER() macros can now be overriden for testing
     purposes or when global constructors / destructors are not desired.
+-   @ref Utility::Resource internals now operate completely without heap
+    access, its APIs now also have overloads taking plain C string literals
+    instead of @ref std::string
 
 @subsection corrade-changelog-latest-buildsystem Build system
 

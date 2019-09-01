@@ -31,7 +31,7 @@
 
 #include <utility>
 
-#include "Corrade/Containers/Containers.h"
+#include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Utility/StlForwardString.h"
 #include "Corrade/Utility/StlForwardVector.h"
 #include "Corrade/Utility/visibility.h"
@@ -52,6 +52,18 @@ in given group has unique filename.
 See @ref resource-management for brief introduction and example usage.
 Standalone resource compiler executable is implemented in
 @ref corrade-rc "corrade-rc".
+
+@par Memory access and operation complexity
+    Resource registration (either automatic or using
+    @ref CORRADE_RESOURCE_INITIALIZE()) is a simple operation without any
+    heap access or other operations that could potentially fail. When using
+    only the @ref hasGroup() and @ref getRaw() APIs with plain C string
+    literals, no memory allocation or heap access is involved either.
+@par
+    The group lookup during construction and @ref hasGroup() is done with a
+    @f$ \mathcal{O}(n) @f$ complexity as the resources register themselves
+    into a linked list. Actual file lookup after is done in-place on the
+    compiled-in data in a @f$ \mathcal{O}(\log{}n) @f$ time.
 
 @section Utility-Resource-conf Resource configuration file
 
@@ -120,6 +132,11 @@ class CORRADE_UTILITY_EXPORT Resource {
         /** @brief Whether given group exists */
         static bool hasGroup(const std::string& group);
 
+        /** @overload */
+        template<std::size_t size> static bool hasGroup(const char(&group)[size]) {
+            return hasGroupInternal({group, size - 1});
+        }
+
         /**
          * @brief Constructor
          *
@@ -127,6 +144,10 @@ class CORRADE_UTILITY_EXPORT Resource {
          * @see @ref hasGroup()
          */
         explicit Resource(const std::string& group);
+
+        /** @overload */
+        template<std::size_t size>
+        explicit Resource(const char(&group)[size]): Resource{{group, size - 1}, nullptr} {}
 
         ~Resource();
 
@@ -147,6 +168,11 @@ class CORRADE_UTILITY_EXPORT Resource {
          */
         Containers::ArrayView<const char> getRaw(const std::string& filename) const;
 
+        /** @overload */
+        template<std::size_t size> Containers::ArrayView<const char> getRaw(const char(&filename)[size]) const {
+            return getInternal({filename, size - 1});
+        }
+
         /**
          * @brief Get data resource
          * @param filename      Filename in UTF-8
@@ -166,6 +192,13 @@ class CORRADE_UTILITY_EXPORT Resource {
 
     private:
         struct OverrideData;
+
+        static bool hasGroupInternal(Containers::ArrayView<const char> group);
+
+        /* The void* is just to avoid this being matched by accident */
+        explicit Resource(Containers::ArrayView<const char> group, void*);
+
+        Containers::ArrayView<const char> getInternal(Containers::ArrayView<const char> filename) const;
 
         Implementation::ResourceGroup* _group;
         OverrideData* _overrideGroup;
