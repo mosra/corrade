@@ -257,7 +257,7 @@ int resourceFinalizer_{0}() {{
 
 namespace {{
 
-static const unsigned int resourcePositions[] = {{{0}
+const unsigned int resourcePositions[] = {{{0}
 }};
 
 const unsigned char resourceFilenames[] = {{{1}

@@ -6,7 +6,7 @@
 
 namespace {
 
-static const unsigned int resourcePositions[] = {
+const unsigned int resourcePositions[] = {
     0x00000009,0x00000000
 };
 
