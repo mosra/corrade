@@ -207,16 +207,17 @@ class CORRADE_UTILITY_EXPORT Resource {
 };
 
 /**
-@brief Initialize resource
+@brief Initialize a resource
 
-If a resource is compiled into dynamic library or directly into executable, it
-will be initialized automatically thanks to
-@ref CORRADE_AUTOMATIC_INITIALIZER() macros. However, if the resource is
+If a resource is compiled into a dynamic library or directly into the
+executable, it will be registered automatically thanks to the
+@ref CORRADE_AUTOMATIC_INITIALIZER() macro. However, if the resource is
 compiled into static library, it must be explicitly initialized via this macro,
-e.g. at the beginning of @cpp main() @ce. You can also wrap these macro calls
-into another function (which will then be compiled into dynamic library or main
-executable) and use @ref CORRADE_AUTOMATIC_INITIALIZER() macro for automatic
-call.
+e.g. at the beginning of @cpp main() @ce, otherwise it won't be known to
+@ref Corrade::Utility::Resource "Utility::Resource". You can also wrap these
+macro calls into another function (which will then be compiled into a dynamic
+library or the main executable) and use the @ref CORRADE_AUTOMATIC_INITIALIZER()
+macro for an automatic call:
 
 @attention This macro should be called outside of any namespace. If you are
     running into linker errors with `resourceInitializer_*`, this could be the
@@ -239,7 +240,7 @@ call.
 
 Functions called by this macro don't do any dynamic allocation or other
 operations that could fail, so it's safe to call it even in restricted phases
-of application exection.
+of application exection. It's also safe to call this macro more than once.
 
 @see @ref CORRADE_RESOURCE_FINALIZE()
 */
@@ -250,17 +251,19 @@ of application exection.
     resourceInitializer_##name();
 
 /**
-@brief Cleanup resource
+@brief Finalize a resource
 
-Cleans up resource previously (even automatically) initialized via
-@ref CORRADE_RESOURCE_INITIALIZE().
+De-registers resource previously (even automatically) initialized via
+@ref CORRADE_RESOURCE_INITIALIZE(). After this call,
+@ref Corrade::Utility::Resource "Utility::Resource" will not know about given
+resource anymore.
 
-@attention This macro should be called outside of any namespace. See
-    @ref CORRADE_RESOURCE_INITIALIZE() documentation for more information.
+@attention This macro should be called outside of any namespace. See the
+    @ref CORRADE_RESOURCE_INITIALIZE() macro for more information.
 
 Functions called by this macro don't do any dynamic allocation or other
 operations that could fail, so it's safe to call it even in restricted phases
-of application exection.
+of application exection. It's also safe to call this macro more than once.
 */
 #define CORRADE_RESOURCE_FINALIZE(name)                                       \
     extern int resourceFinalizer_##name();                                    \

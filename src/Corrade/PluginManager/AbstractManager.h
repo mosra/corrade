@@ -430,21 +430,18 @@ struct StaticPlugin {
 }
 
 /** @hideinitializer
-@brief Import static plugin
+@brief Import a static plugin
 @param name      Static plugin name (the same as defined with
     @ref CORRADE_PLUGIN_REGISTER())
 
-If static plugins are compiled into a dynamic library or directly into the
-executable, they should be automatically loaded at startup thanks to
-@ref CORRADE_AUTOMATIC_INITIALIZER() and @ref CORRADE_AUTOMATIC_FINALIZER()
-macros.
-
-If static plugins are compiled into a static library, they are not
-automatically loaded at startup, so you need to load them explicitly by calling
-@ref CORRADE_PLUGIN_IMPORT() at the beginning of the @cpp main() @ce function.
-You can also wrap these macro calls in another function (which will then be
-compiled into dynamic library or main executable) and use the @ref CORRADE_AUTOMATIC_INITIALIZER()
-macro for automatic call:
+If you link static plugins to your executable, they can't automatically
+register themselves at startup to be known to
+@ref Corrade::PluginManager::Manager "PluginManager::Manager", and you need to
+load them explicitly by calling @ref CORRADE_PLUGIN_IMPORT() at the beginning
+of the @cpp main() @ce function. You can also wrap these macro calls in another
+function (which will then be compiled into a dynamic library or the main
+executable) and use the @ref CORRADE_AUTOMATIC_INITIALIZER() macro for an
+automatic call:
 
 @snippet PluginManager.cpp CORRADE_PLUGIN_IMPORT
 
@@ -455,7 +452,7 @@ macro for automatic call:
 
 Functions called by this macro don't do any dynamic allocation or other
 operations that could fail, so it's safe to call it even in restricted phases
-of application exection.
+of application exection. It's also safe to call this macro more than once.
 */
 /* This "bundles" CORRADE_RESOURCE_INITIALIZE() in itself. Keep in sync. */
 #define CORRADE_PLUGIN_IMPORT(name)                                         \
