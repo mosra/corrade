@@ -44,8 +44,12 @@ if(BUILD_STATIC)
     set_target_properties(Canary PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
 
+corrade_add_static_plugin(Dird ${CMAKE_CURRENT_BINARY_DIR} Dird.conf Dird.cpp)
+target_link_libraries(Dird PRIVATE CorradePluginManagerTestLib)
+
 set_target_properties(
     Canary Canary-dependencies
+    Dird Dird-dependencies
     PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
 # DLLs don't allow unresolved symbols; on static builds there's no dynamic

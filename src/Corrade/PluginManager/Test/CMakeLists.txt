@@ -65,7 +65,7 @@ endif()
 corrade_add_test(PluginManagerImportStaticTest
     AbstractAnimal.cpp
     ImportStaticTest.cpp
-    LIBRARIES CorradePluginManagerTestLib Canary)
+    LIBRARIES CorradePluginManagerTestLib Canary Dird)
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     target_include_directories(PluginManagerImportStaticTest PRIVATE $<TARGET_FILE_DIR:PluginManagerManagerTest>)
 else()

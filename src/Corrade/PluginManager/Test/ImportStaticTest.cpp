@@ -36,8 +36,16 @@ static void importPlugin() {
     CORRADE_PLUGIN_IMPORT(Canary)
 }
 
+static void importPluginAnother() {
+    CORRADE_PLUGIN_IMPORT(Dird)
+}
+
 static void ejectPlugin() {
     CORRADE_PLUGIN_EJECT(Canary)
+}
+
+static void ejectPluginAnother() {
+    CORRADE_PLUGIN_EJECT(Dird)
 }
 
 namespace Corrade { namespace PluginManager { namespace Test { namespace {
@@ -45,14 +53,51 @@ namespace Corrade { namespace PluginManager { namespace Test { namespace {
 struct ImportStaticTest: TestSuite::Tester {
     explicit ImportStaticTest();
 
-    void test();
+    /* These test that the linked list isn't getting overwritten in a bad way
+       (such as clearing the `next` pointer before adding an item, which was
+       the case before). Thorough tests for the linked list operations are in
+       Containers/Test/RawForwardListTest.cpp */
+    void importOnce();
+    void importTwice();
+    void importTwiceMixedWithAnother();
 };
 
 ImportStaticTest::ImportStaticTest() {
-    addTests({&ImportStaticTest::test});
+    addTests({&ImportStaticTest::importOnce,
+              &ImportStaticTest::importTwice,
+              &ImportStaticTest::importTwiceMixedWithAnother});
 }
 
-void ImportStaticTest::test() {
+void ImportStaticTest::importOnce() {
+    /* Nothing initialized yet so the plugin list is empty */
+    {
+        /* Avoid importing all dynamic plugins as well */
+        PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
+        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{});
+    }
+
+    importPlugin();
+
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    /* This shouldn't report any error and list the plugin just once */
+    {
+        PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
+        CORRADE_COMPARE(out.str(), "");
+        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"Canary"});
+    }
+
+    ejectPlugin();
+
+    /* Plugin list is empty again */
+    {
+        PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
+        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{});
+    }
+}
+
+void ImportStaticTest::importTwice() {
     /* Nothing initialized yet so the plugin is empty */
     {
         /* Avoid importing all dynamic plugins as well */
@@ -61,7 +106,6 @@ void ImportStaticTest::test() {
     }
 
     importPlugin();
-    /* Yes, twice -- it shouldn't blow up */
     importPlugin();
 
     std::ostringstream out;
@@ -81,6 +125,45 @@ void ImportStaticTest::test() {
     }
 
     ejectPlugin();
+    ejectPlugin();
+
+    /* Plugin list is empty again */
+    {
+        PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
+        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{});
+    }
+}
+
+void ImportStaticTest::importTwiceMixedWithAnother() {
+    /* Nothing initialized yet so the plugin is empty */
+    {
+        /* Avoid importing all dynamic plugins as well */
+        PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
+        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{});
+    }
+
+    importPlugin();
+    importPluginAnother();
+    importPlugin();
+
+    std::ostringstream out;
+    Error redirectError{&out};
+
+    /* This shouldn't report any error and list the plugin just once */
+    {
+        PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
+        CORRADE_COMPARE(out.str(), "");
+        CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"Canary", "Dird"}));
+
+    /* And instantiating everything second time should have no issues either */
+    } {
+        PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
+        CORRADE_COMPARE(out.str(), "");
+        CORRADE_COMPARE(manager.pluginList(), (std::vector<std::string>{"Canary", "Dird"}));
+    }
+
+    ejectPlugin();
+    ejectPluginAnother();
     ejectPlugin();
 
     /* Plugin list is empty again */

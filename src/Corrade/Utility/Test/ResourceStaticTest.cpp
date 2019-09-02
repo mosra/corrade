@@ -30,12 +30,20 @@
 
 #include "configure.h"
 
-static void initializeStaticResource() {
+static void initialize() {
     CORRADE_RESOURCE_INITIALIZE(ResourceTestData)
 }
 
-static void finalizeStaticResource() {
+static void initializeAnother() {
+    CORRADE_RESOURCE_INITIALIZE(ResourceTestNothingData)
+}
+
+static void finalize() {
     CORRADE_RESOURCE_FINALIZE(ResourceTestData)
+}
+
+static void finalizeAnother() {
+    CORRADE_RESOURCE_FINALIZE(ResourceTestNothingData)
 }
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
@@ -43,21 +51,30 @@ namespace Corrade { namespace Utility { namespace Test { namespace {
 struct ResourceStaticTest: TestSuite::Tester {
     explicit ResourceStaticTest();
 
-    void test();
+    /* These test that the linked list isn't getting overwritten in a bad way
+       (such as clearing the `next` pointer before adding an item, which was
+       the case before). Thorough tests for the linked list operations are in
+       Containers/Test/RawForwardListTest.cpp */
+    void initializeOnce();
+    void initializeTwice();
+    void initializeTwiceMixedWithAnother();
 };
 
 ResourceStaticTest::ResourceStaticTest() {
-    addTests({&ResourceStaticTest::test});
+    addTests({&ResourceStaticTest::initializeOnce,
+              &ResourceStaticTest::initializeTwice,
+              &ResourceStaticTest::initializeTwiceMixedWithAnother});
 }
 
-void ResourceStaticTest::test() {
+void ResourceStaticTest::initializeOnce() {
     CORRADE_VERIFY(!Resource::hasGroup("test"));
+    CORRADE_VERIFY(!Resource::hasGroup("nonexistent"));
 
-    initializeStaticResource();
-    /* Initializing second time shouldn't cause any problems */
-    initializeStaticResource();
+    initialize();
 
     CORRADE_VERIFY(Resource::hasGroup("test"));
+    CORRADE_VERIFY(!Resource::hasGroup("nonexistent"));
+
     Resource r("test");
     CORRADE_COMPARE_AS(r.get("predisposition.bin"),
         Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"),
@@ -66,13 +83,65 @@ void ResourceStaticTest::test() {
         Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
         TestSuite::Compare::StringToFile);
 
-    /* Finalizing should remove the group again */
-    finalizeStaticResource();
-    CORRADE_VERIFY(!Resource::hasGroup("test"));
+    finalize();
 
-    /* Finalizing second time shouldn't cause any problems */
-    finalizeStaticResource();
     CORRADE_VERIFY(!Resource::hasGroup("test"));
+    CORRADE_VERIFY(!Resource::hasGroup("nonexistent"));
+}
+
+void ResourceStaticTest::initializeTwice() {
+    CORRADE_VERIFY(!Resource::hasGroup("test"));
+    CORRADE_VERIFY(!Resource::hasGroup("nonexistent"));
+
+    initialize();
+    initialize();
+
+    CORRADE_VERIFY(Resource::hasGroup("test"));
+    CORRADE_VERIFY(!Resource::hasGroup("nonexistent"));
+
+    Resource r("test");
+    CORRADE_COMPARE_AS(r.get("predisposition.bin"),
+        Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"),
+        TestSuite::Compare::StringToFile);
+    CORRADE_COMPARE_AS(r.get("consequence.bin"),
+        Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
+        TestSuite::Compare::StringToFile);
+
+    finalize();
+    finalize();
+
+    CORRADE_VERIFY(!Resource::hasGroup("test"));
+    CORRADE_VERIFY(!Resource::hasGroup("nonexistent"));
+}
+
+void ResourceStaticTest::initializeTwiceMixedWithAnother() {
+    CORRADE_VERIFY(!Resource::hasGroup("test"));
+    CORRADE_VERIFY(!Resource::hasGroup("nothing"));
+    CORRADE_VERIFY(!Resource::hasGroup("nonexistent"));
+
+    initialize();
+    initializeAnother();
+    initialize();
+
+    CORRADE_VERIFY(Resource::hasGroup("test"));
+    CORRADE_VERIFY(Resource::hasGroup("nothing"));
+    CORRADE_VERIFY(!Resource::hasGroup("nonexistent"));
+
+    Resource r("test");
+    CORRADE_COMPARE_AS(r.get("predisposition.bin"),
+        Directory::join(RESOURCE_TEST_DIR, "predisposition.bin"),
+        TestSuite::Compare::StringToFile);
+    CORRADE_COMPARE_AS(r.get("consequence.bin"),
+        Directory::join(RESOURCE_TEST_DIR, "consequence.bin"),
+        TestSuite::Compare::StringToFile);
+
+    finalize();
+    finalizeAnother();
+    finalize();
+
+    CORRADE_VERIFY(!Resource::hasGroup("test"));
+    CORRADE_VERIFY(!Resource::hasGroup("nothing"));
+    CORRADE_VERIFY(!Resource::hasGroup("nonexistent"));
 }
 
 }}}}
