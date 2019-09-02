@@ -44,16 +44,8 @@ if(BUILD_STATIC)
     set_target_properties(Canary PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
 
-corrade_add_static_plugin(CanaryWithoutAutomaticInitializer ${CMAKE_CURRENT_BINARY_DIR} Canary.conf Canary.cpp)
-target_link_libraries(CanaryWithoutAutomaticInitializer PRIVATE CorradePluginManager)
-target_compile_definitions(CanaryWithoutAutomaticInitializer
-    PRIVATE
-        "CANARY_WITHOUT_AUTOMATIC_INITIALIZER"
-        "CORRADE_AUTOMATIC_INITIALIZER=CORRADE_NOOP")
-
 set_target_properties(
     Canary Canary-dependencies
-    CanaryWithoutAutomaticInitializer CanaryWithoutAutomaticInitializer-dependencies
     PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
 # DLLs don't allow unresolved symbols; on static builds there's no dynamic

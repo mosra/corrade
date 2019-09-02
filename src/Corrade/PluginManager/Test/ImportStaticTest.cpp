@@ -33,11 +33,11 @@
 #include "AbstractAnimal.h"
 
 static void importPlugin() {
-    CORRADE_PLUGIN_IMPORT(CanaryWithoutAutomaticInitializer)
+    CORRADE_PLUGIN_IMPORT(Canary)
 }
 
 static void ejectPlugin() {
-    CORRADE_PLUGIN_EJECT(CanaryWithoutAutomaticInitializer)
+    CORRADE_PLUGIN_EJECT(Canary)
 }
 
 namespace Corrade { namespace PluginManager { namespace Test { namespace {
@@ -71,13 +71,13 @@ void ImportStaticTest::test() {
     {
         PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
         CORRADE_COMPARE(out.str(), "");
-        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"CanaryWithoutAutomaticInitializer"});
+        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"Canary"});
 
     /* And instantiating everything second time should have no issues either */
     } {
         PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
         CORRADE_COMPARE(out.str(), "");
-        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"CanaryWithoutAutomaticInitializer"});
+        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"Canary"});
     }
 
     ejectPlugin();
