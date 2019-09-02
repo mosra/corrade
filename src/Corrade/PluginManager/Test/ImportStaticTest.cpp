@@ -32,8 +32,12 @@
 
 #include "AbstractAnimal.h"
 
-static void initialize() {
+static void importPlugin() {
     CORRADE_PLUGIN_IMPORT(CanaryWithoutAutomaticInitializer)
+}
+
+static void ejectPlugin() {
+    CORRADE_PLUGIN_EJECT(CanaryWithoutAutomaticInitializer)
 }
 
 namespace Corrade { namespace PluginManager { namespace Test { namespace {
@@ -56,9 +60,9 @@ void ImportStaticTest::test() {
         CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{});
     }
 
-    initialize();
+    importPlugin();
     /* Yes, twice -- it shouldn't blow up */
-    initialize();
+    importPlugin();
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -74,6 +78,15 @@ void ImportStaticTest::test() {
         PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
         CORRADE_COMPARE(out.str(), "");
         CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"CanaryWithoutAutomaticInitializer"});
+    }
+
+    ejectPlugin();
+    ejectPlugin();
+
+    /* Plugin list is empty again */
+    {
+        PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
+        CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{});
     }
 }
 

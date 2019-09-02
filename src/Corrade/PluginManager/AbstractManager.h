@@ -379,6 +379,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
         struct CORRADE_PLUGINMANAGER_LOCAL Plugin;
         typedef void* (*Instancer)(AbstractManager&, const std::string&);
         static void importStaticPlugin(int version, Implementation::StaticPlugin& plugin);
+        static void ejectStaticPlugin(int version, Implementation::StaticPlugin& plugin);
 
     #ifdef DOXYGEN_GENERATING_OUTPUT
     private:
@@ -424,7 +425,7 @@ struct StaticPlugin {
     AbstractManager::Instancer instancer;
     void(*initializer)();
     void(*finalizer)();
-    const StaticPlugin* next;
+    StaticPlugin* next;
 };
 
 }
@@ -453,6 +454,8 @@ automatic call:
 Functions called by this macro don't do any dynamic allocation or other
 operations that could fail, so it's safe to call it even in restricted phases
 of application exection. It's also safe to call this macro more than once.
+
+@see @ref CORRADE_PLUGIN_EJECT()
 */
 /* This "bundles" CORRADE_RESOURCE_INITIALIZE() in itself. Keep in sync. */
 #define CORRADE_PLUGIN_IMPORT(name)                                         \
@@ -460,6 +463,27 @@ of application exection. It's also safe to call this macro more than once.
     extern int resourceInitializer_##name();                                \
     pluginImporter_##name();                                                \
     resourceInitializer_##name();
+
+/** @hideinitializer
+@brief Eject a previously imported static plugin
+@param name      Static plugin name (the same as defined with
+    @ref CORRADE_PLUGIN_REGISTER())
+
+Deregisters a plugin previously registered using @ref CORRADE_PLUGIN_IMPORT().
+
+@attention This macro should be called outside of any namespace. See the
+    @ref CORRADE_RESOURCE_INITIALIZE() macro for more information.
+
+Functions called by this macro don't do any dynamic allocation or other
+operations that could fail, so it's safe to call it even in restricted phases
+of application exection. It's also safe to call this macro more than once.
+*/
+/* This "bundles" CORRADE_RESOURCE_FINALIZE() in itself. Keep in sync. */
+#define CORRADE_PLUGIN_EJECT(name)                                          \
+    extern int pluginEjector_##name();                                      \
+    extern int resourceFinalizer_##name();                                  \
+    pluginEjector_##name();                                                 \
+    resourceFinalizer_##name();
 
 /** @brief Plugin version */
 #define CORRADE_PLUGIN_VERSION 6
@@ -515,6 +539,11 @@ See @ref plugin-management for more information about plugin compilation.
             nullptr                                                         \
         };                                                                  \
         Corrade::PluginManager::AbstractManager::importStaticPlugin(CORRADE_PLUGIN_VERSION, staticPlugin_##name); \
+        return 1;                                                           \
+    }                                                                       \
+    int pluginEjector_##name();                                             \
+    int pluginEjector_##name() {                                            \
+        Corrade::PluginManager::AbstractManager::ejectStaticPlugin(CORRADE_PLUGIN_VERSION, staticPlugin_##name); \
         return 1;                                                           \
     }
 #elif defined(CORRADE_DYNAMIC_PLUGIN)

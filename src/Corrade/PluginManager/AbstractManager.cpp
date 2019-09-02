@@ -177,13 +177,17 @@ Globals globals{nullptr, nullptr};
 static_assert(std::is_pod<Implementation::StaticPlugin>::value,
     "static plugins shouldn't cause any global initialization / finalization to happen on their own");
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
 void AbstractManager::importStaticPlugin(int version, Implementation::StaticPlugin& plugin) {
     CORRADE_ASSERT(version == Version,
         "PluginManager: wrong version of static plugin" << plugin.plugin << Debug::nospace << ", got" << version << "but expected" << Version, );
     Containers::Implementation::forwardListInsert(globals.staticPlugins, plugin);
 }
-#endif
+
+void AbstractManager::ejectStaticPlugin(int version, Implementation::StaticPlugin& plugin) {
+    CORRADE_ASSERT(version == Version,
+        "PluginManager: wrong version of static plugin" << plugin.plugin << Debug::nospace << ", got" << version << "but expected" << Version, );
+    Containers::Implementation::forwardListRemove(globals.staticPlugins, plugin);
+}
 
 #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
 AbstractManager::AbstractManager(std::string pluginInterface, const std::vector<std::string>& pluginSearchPaths, std::string pluginDirectory):

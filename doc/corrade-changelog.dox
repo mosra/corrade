@@ -85,6 +85,12 @@ namespace Corrade {
 -   Added a @ref Containers::ArrayView<void> specialization as a mutable
     type-erased counterpart to @ref Containers::ArrayView<const void>
 
+@subsubsection corrade-changelog-latest-new-pluginmanager PluginManager library
+
+-   Added a @ref CORRADE_PLUGIN_EJECT() macro doing an inverse of
+    @ref CORRADE_PLUGIN_IMPORT() for static plugins, useful mainly for testing
+    purposes
+
 @subsubsection corrade-changelog-latest-new-testsuite TestSuite library
 
 -   Custom @ref TestSuite comparators can now optionally save diagnostic files
