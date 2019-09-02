@@ -31,7 +31,7 @@
 
 #include "init-fini/InitFini.h"
 
-static void initialize() {
+static void importPlugin() {
     CORRADE_PLUGIN_IMPORT(InitFiniStatic)
 }
 
@@ -53,7 +53,7 @@ ManagerInitFiniTest::ManagerInitFiniTest() {
               #endif
               });
 
-    initialize();
+    importPlugin();
 }
 
 void ManagerInitFiniTest::staticPlugin() {

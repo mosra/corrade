@@ -46,7 +46,7 @@
 #include "configure.h"
 #endif
 
-static void initialize() {
+static void importPlugin() {
     CORRADE_PLUGIN_IMPORT(Canary)
 }
 
@@ -189,7 +189,7 @@ ManagerTest::ManagerTest() {
               &ManagerTest::debugLoadState,
               &ManagerTest::debugLoadStates});
 
-    initialize();
+    importPlugin();
 }
 
 void ManagerTest::pluginSearchPathsNotUsed() {

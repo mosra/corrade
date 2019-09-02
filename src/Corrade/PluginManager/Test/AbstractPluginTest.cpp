@@ -31,7 +31,7 @@
 
 #include "animals/Canary.h"
 
-static void initialize() {
+static void importPlugin() {
     CORRADE_PLUGIN_IMPORT(Canary)
 }
 
@@ -48,7 +48,7 @@ AbstractPluginTest::AbstractPluginTest() {
     addTests({&AbstractPluginTest::constructCopy,
               &AbstractPluginTest::constructMove});
 
-    initialize();
+    importPlugin();
 }
 
 void AbstractPluginTest::constructCopy() {

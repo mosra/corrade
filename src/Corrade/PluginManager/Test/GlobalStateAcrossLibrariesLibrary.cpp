@@ -32,14 +32,14 @@
 
 #include "AbstractAnimal.h"
 
-static void initialize() {
+static void importPlugin() {
     CORRADE_PLUGIN_IMPORT(Canary)
 }
 
 namespace Corrade { namespace PluginManager { namespace Test {
 
 std::vector<std::string> staticPluginsLoadedInALibrary() {
-    initialize();
+    importPlugin();
 
     /* Avoid accidentally loading the dynamic plugins as well */
     Manager<AbstractAnimal> manager{"nonexistent"};
