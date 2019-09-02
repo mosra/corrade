@@ -425,6 +425,10 @@ struct StaticPlugin {
     AbstractManager::Instancer instancer;
     void(*initializer)();
     void(*finalizer)();
+    /* This field shouldn't be written to by anything else than
+       importStaticPlugin() / ejectStaticPlugin(). It's zero-initilized by
+       default and those use it to avoid inserting a single item to the linked
+       list more than once. */
     StaticPlugin* next;
 };
 
@@ -522,22 +526,20 @@ See @ref plugin-management for more information about plugin compilation.
     reason.
 */
 #ifdef CORRADE_STATIC_PLUGIN
-#define CORRADE_PLUGIN_REGISTER(name, className, interface)                 \
+#define CORRADE_PLUGIN_REGISTER(name, className, interface_)                \
     namespace {                                                             \
         Corrade::PluginManager::Implementation::StaticPlugin staticPlugin_##name; \
     }                                                                       \
     int pluginImporter_##name();                                            \
     int pluginImporter_##name() {                                           \
-        staticPlugin_##name = {                                             \
-            #name,                                                          \
-            interface,                                                      \
+        staticPlugin_##name.plugin = #name;                                 \
+        staticPlugin_##name.interface = interface_;                         \
+        staticPlugin_##name.instancer =                                     \
             [](Corrade::PluginManager::AbstractManager& manager, const std::string& plugin) -> void* { \
                 return new className(manager, plugin);                      \
-            },                                                              \
-            className::initialize,                                          \
-            className::finalize,                                            \
-            nullptr                                                         \
-        };                                                                  \
+            };                                                              \
+        staticPlugin_##name.initializer = className::initialize;            \
+        staticPlugin_##name.finalizer = className::finalize;                \
         Corrade::PluginManager::AbstractManager::importStaticPlugin(CORRADE_PLUGIN_VERSION, staticPlugin_##name); \
         return 1;                                                           \
     }                                                                       \

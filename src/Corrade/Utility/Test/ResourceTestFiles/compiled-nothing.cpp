@@ -12,7 +12,11 @@ Corrade::Utility::Implementation::ResourceGroup resource;
 
 int resourceInitializer_ResourceTestNothingData();
 int resourceInitializer_ResourceTestNothingData() {
-    resource = { "nothing", 0, nullptr, nullptr, nullptr, nullptr };
+    resource.name = "nothing";
+    resource.count = 0;
+    resource.positions = nullptr;
+    resource.filenames = nullptr;
+    resource.data = nullptr;
     Corrade::Utility::Resource::registerData(resource);
     return 1;
 } CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_ResourceTestNothingData)

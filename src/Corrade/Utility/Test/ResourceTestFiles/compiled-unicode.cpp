@@ -26,14 +26,11 @@ Corrade::Utility::Implementation::ResourceGroup resource;
 
 int resourceInitializer_ResourceTestUtf8Data();
 int resourceInitializer_ResourceTestUtf8Data() {
-    resource = {
-        "unicode",
-        1,
-        resourcePositions,
-        resourceFilenames,
-        resourceData,
-        nullptr
-    };
+    resource.name = "unicode";
+    resource.count = 1;
+    resource.positions = resourcePositions;
+    resource.filenames = resourceFilenames;
+    resource.data = resourceData;
     Corrade::Utility::Resource::registerData(resource);
     return 1;
 } CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_ResourceTestUtf8Data)

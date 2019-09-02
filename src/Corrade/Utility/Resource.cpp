@@ -198,7 +198,11 @@ Corrade::Utility::Implementation::ResourceGroup resource;
 
 int resourceInitializer_{0}();
 int resourceInitializer_{0}() {{
-    resource = {{ "{1}", 0, nullptr, nullptr, nullptr, nullptr }};
+    resource.name = "{1}";
+    resource.count = 0;
+    resource.positions = nullptr;
+    resource.filenames = nullptr;
+    resource.data = nullptr;
     Corrade::Utility::Resource::registerData(resource);
     return 1;
 }} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_{0})
@@ -268,14 +272,11 @@ Corrade::Utility::Implementation::ResourceGroup resource;
 
 int resourceInitializer_{4}();
 int resourceInitializer_{4}() {{
-    resource = {{
-        "{5}",
-        {6},
-        resourcePositions,
-        resourceFilenames,
-        {7},
-        nullptr
-    }};
+    resource.name = "{5}";
+    resource.count = {6};
+    resource.positions = resourcePositions;
+    resource.filenames = resourceFilenames;
+    resource.data = {7};
     Corrade::Utility::Resource::registerData(resource);
     return 1;
 }} CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_{4})

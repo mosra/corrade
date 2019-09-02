@@ -277,6 +277,10 @@ struct ResourceGroup {
     const unsigned int* positions;
     const unsigned char* filenames;
     const unsigned char* data;
+    /* This field shouldn't be written to by anything else than
+       resourceInitializer() / resourceFinalizer(). It's zero-initilized by
+       default and those use it to avoid inserting a single item to the linked
+       list more than once. */
     ResourceGroup* next;
 };
 

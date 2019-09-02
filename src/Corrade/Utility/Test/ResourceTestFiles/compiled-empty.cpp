@@ -25,14 +25,11 @@ Corrade::Utility::Implementation::ResourceGroup resource;
 
 int resourceInitializer_ResourceTestData();
 int resourceInitializer_ResourceTestData() {
-    resource = {
-        "test",
-        1,
-        resourcePositions,
-        resourceFilenames,
-        nullptr,
-        nullptr
-    };
+    resource.name = "test";
+    resource.count = 1;
+    resource.positions = resourcePositions;
+    resource.filenames = resourceFilenames;
+    resource.data = nullptr;
     Corrade::Utility::Resource::registerData(resource);
     return 1;
 } CORRADE_AUTOMATIC_INITIALIZER(resourceInitializer_ResourceTestData)
