@@ -48,6 +48,7 @@ namespace Corrade {
     @ref CORRADE_TARGET_DINKUMWARE macros to detect the common STL
     implementations
 -   New @ref CORRADE_BUILD_MULTITHREADED build-time option, moved from Magnum
+-   Fixed test execution command when library output path is set in CMake
 
 @subsubsection corrade-changelog-latest-new-containers Containers library
 
