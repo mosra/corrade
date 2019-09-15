@@ -401,7 +401,7 @@ function(corrade_add_test test_name)
 
         # Run tests natively elsewhere
         else()
-            add_test(${test_name} ${test_name} ${arguments})
+            add_test(NAME ${test_name} COMMAND ${test_name} ${arguments})
         endif()
 
         # iOS-specific
