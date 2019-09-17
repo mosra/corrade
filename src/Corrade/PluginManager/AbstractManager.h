@@ -194,7 +194,7 @@ namespace Implementation {
 }
 
 /**
-@brief Non-templated base for plugin managers
+@brief Base for plugin managers
 
 See @ref Manager and @ref plugin-management for more information.
  */
