@@ -200,6 +200,7 @@ CORRADE_UTILITY_EXPORT std::string join(std::initializer_list<std::string> paths
 @brief List directory contents
 
 On failure returns empty vector.
+@see @ref isDirectory(), @ref exists()
 */
 CORRADE_UTILITY_EXPORT std::vector<std::string> list(const std::string& path, Flags flags = Flags());
 
@@ -340,8 +341,19 @@ CORRADE_UTILITY_EXPORT std::string tmp();
 Returns @cpp true @ce if the file exists and is accessible (i.e., user has a
 permission to open it), @cpp false @ce otherwise. Expects that the filename is
 in UTF-8.
+@see @ref isDirectory(), @ref list()
 */
 CORRADE_UTILITY_EXPORT bool exists(const std::string& filename);
+
+/**
+@brief Check if given path is a directory
+
+Returns @cpp true @ce if the path exists, is accessible (i.e., user has a
+permission to open it) and is a directory, @cpp false @ce otherwise. Expects
+that the filename is in UTF-8.
+@see @ref exists(), @ref list()
+*/
+CORRADE_UTILITY_EXPORT bool isDirectory(const std::string& path);
 
 #ifdef CORRADE_BUILD_DEPRECATED
 /** @brief @copybrief exists()

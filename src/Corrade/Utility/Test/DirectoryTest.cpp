@@ -60,6 +60,9 @@ struct DirectoryTest: TestSuite::Tester {
     void exists();
     void existsUtf8();
 
+    void isDirectory();
+    void isDirectoryUtf8();
+
     void removeFile();
     void removeDirectory();
     void removeUtf8();
@@ -166,6 +169,9 @@ DirectoryTest::DirectoryTest() {
 
               &DirectoryTest::exists,
               &DirectoryTest::existsUtf8,
+
+              &DirectoryTest::isDirectory,
+              &DirectoryTest::isDirectoryUtf8,
 
               &DirectoryTest::removeFile,
               &DirectoryTest::removeDirectory,
@@ -410,6 +416,32 @@ void DirectoryTest::exists() {
 
 void DirectoryTest::existsUtf8() {
     CORRADE_VERIFY(Directory::exists(Directory::join(_testDirUtf8, "hýždě")));
+}
+
+void DirectoryTest::isDirectory() {
+    {
+        #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+            "iOS (in a simulator) thinks all paths are files.");
+        #endif
+        CORRADE_VERIFY(Directory::isDirectory(Directory::join(_testDir, "dir")));
+    }
+
+    CORRADE_VERIFY(!Directory::isDirectory(Directory::join(_testDir, "file")));
+
+    /* Nonexistent file */
+    CORRADE_VERIFY(!Directory::isDirectory(Directory::join(_testDir, "nonexistentFile")));
+}
+
+void DirectoryTest::isDirectoryUtf8() {
+    {
+        #if defined(CORRADE_TARGET_IOS) && defined(CORRADE_TESTSUITE_TARGET_XCTEST)
+        CORRADE_EXPECT_FAIL_IF(!std::getenv("SIMULATOR_UDID"),
+            "iOS (in a simulator) thinks all paths are files.");
+        #endif
+        CORRADE_VERIFY(Directory::isDirectory(Directory::join(_testDirUtf8, "šňůra")));
+    }
+    CORRADE_VERIFY(!Directory::isDirectory(Directory::join(_testDirUtf8, "hýždě")));
 }
 
 void DirectoryTest::removeFile() {

@@ -274,6 +274,21 @@ bool exists(const std::string& filename) {
     #endif
 }
 
+bool isDirectory(const std::string& path) {
+    #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    const DWORD fileAttributes = GetFileAttributesW(widen(path).data());
+    return fileAttributes != INVALID_FILE_ATTRIBUTES && (fileAttributes & FILE_ATTRIBUTE_DIRECTORY);
+
+    #elif defined(CORRADE_TARGET_UNIX) || defined(CORRADE_TARGET_EMSCRIPTEN)
+    struct stat st;
+    return lstat(path.data(), &st) == 0 && S_ISDIR(st.st_mode);
+    #else
+    static_cast<void>(path);
+    Warning() << "Utility::Directory::isDirectory(): not implemented on this platform";
+    return false;
+    #endif
+}
+
 bool isSandboxed() {
     #if defined(CORRADE_TARGET_IOS) || defined(CORRADE_TARGET_ANDROID) || defined(CORRADE_TARGET_EMSCRIPTEN) || defined(CORRADE_TARGET_WINDOWS_RT)
     return true;
