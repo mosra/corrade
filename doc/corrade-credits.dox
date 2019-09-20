@@ -87,6 +87,8 @@ Is the below list missing your name or something's wrong?
     packages in the ArchLinux community repository
 -   **Alexey Yurchenko** ([\@alexesDev](https://github.com/alexesDev)) ---
     static analyis, bug reports
+-   **Allie** ([\@bowling-allie](https://github.com/bowling-allie)) ---
+    improvements to the Emscripten CMake toolchain
 -   **[\@biosek](https://github.com/biosek)** --- MinGW compilation fixes
 -   **David Lin** ([\@davll](https://github.com/davll)) --- initial macOS port
 -   **Chris Chambers** ([\@chris-chambers](https://github.com/chris-chambers))
@@ -107,7 +109,7 @@ Is the below list missing your name or something's wrong?
     Stateful lambda support in the @ref Interconnect library
 -   **[\@jaynus](https://github.com/jaynus)** --- MSVC compilation fixes
 -   **Jonathan Hale** ([\@Squareys](https://github.com/Squareys)) ---
-    various fixes
+    various fixes, buildsystem improvements
 -   **Max Schwarz** ([\@xqms](https://github.com/xqms)) --- thread-local
     @ref Utility::Debug scoped output redirection and coloring, documentation
     fixes

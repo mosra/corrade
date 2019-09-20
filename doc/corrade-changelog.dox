@@ -258,6 +258,9 @@ namespace Corrade {
     [mosra/corrade#53](https://github.com/mosra/corrade/issues/53))
 -   The Emscripten CMake toolchain now sets the `EMSCRIPTEN` variable to help
     3rd party projects (see [mosra/toolchains#7](https://github.com/mosra/toolchains/pull/7))
+-   The Emscripten CMake toolchain now looks for `emcc` on @cb{.sh} $PATH @ce
+    as a last resort and then uses the parent directory as `EMSCRIPTEN_PREFIX`
+    (see [mosra/toolchains#8](https://github.com/mosra/toolchains/pull/8))
 -   Clarified interaction of `-fvisibility-inlines-hidden` and/or
     `-Wl,-Bsymbolic-functions` GCC/Clang flags and @ref Interconnect::Emitter
 -   The @ref TestSuite library and all tests created with
@@ -275,6 +278,8 @@ namespace Corrade {
     with C++11 being used instead. To fix that, the `CORRADE_CXX_STANDARD`
     property does nothing if the `COMPILE_FEATURES` property is set on the
     target as well. See @ref corrade-cmake for more information.
+-   Fixed @ref corrade-cmake-add-test "corrade_add_test()" when library output
+    path is set in CMake (see [mosra/corrade#77](https://github.com/mosra/corrade/pull/77))
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
