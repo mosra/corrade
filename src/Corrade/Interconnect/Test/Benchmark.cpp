@@ -58,12 +58,15 @@ struct Benchmark: TestSuite::Tester {
 
 Benchmark::Benchmark() {
     addBenchmarks({&Benchmark::connect1kFunctions,
-                   &Benchmark::connect1kMembers}, 100);
+                   &Benchmark::connect1kMembers}, 10);
 
     addBenchmarks({&Benchmark::destructBaseline,
                    &Benchmark::destruct1kFunctions,
-                   &Benchmark::destruct1kMembersEmitterFirst,
-                   &Benchmark::destruct1kMembersReceiverFirst}, 100);
+                   &Benchmark::destruct1kMembersEmitterFirst}, 100);
+
+    /* Takes like two hours on libstdc++:
+       https://gcc.gnu.org/bugzilla/show_bug.cgi?id=41975 */
+    addBenchmarks({&Benchmark::destruct1kMembersReceiverFirst}, 10);
 
     addBenchmarks({&Benchmark::call1kFunctions,
                    &Benchmark::call1kStdFunctions,
