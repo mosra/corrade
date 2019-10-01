@@ -45,17 +45,17 @@ fi
 if [ ! -z ${CORRADE_TEST_NO_XFAIL+x} ]; then
     test_env="$test_env CORRADE_TEST_NO_XFAIL=$CORRADE_TEST_NO_XFAIL"
 fi
-if [ ! -z ${CORRADE_BENCHMARK+x} ]; then
+if [ ! -z ${CORRADE_TEST_BENCHMARK+x} ]; then
     test_env="$test_env CORRADE_BENCHMARK=$CORRADE_BENCHMARK"
 fi
-if [ ! -z ${CORRADE_BENCHMARK_DISCARD+x} ]; then
-    test_env="$test_env CORRADE_BENCHMARK_DISCARD=$CORRADE_BENCHMARK_DISCARD"
+if [ ! -z ${CORRADE_TEST_BENCHMARK_DISCARD+x} ]; then
+    test_env="$test_env CORRADE_TEST_BENCHMARK_DISCARD=$CORRADE_TEST_BENCHMARK_DISCARD"
 fi
-if [ ! -z ${CORRADE_BENCHMARK_YELLOW+x} ]; then
-    test_env="$test_env CORRADE_BENCHMARK_YELLOW=$CORRADE_BENCHMARK_YELLOW"
+if [ ! -z ${CORRADE_TEST_BENCHMARK_YELLOW+x} ]; then
+    test_env="$test_env CORRADE_TEST_BENCHMARK_YELLOW=$CORRADE_TEST_BENCHMARK_YELLOW"
 fi
-if [ ! -z ${CORRADE_BENCHMARK_RED+x} ]; then
-    test_env="$test_env CORRADE_BENCHMARK_RED=$CORRADE_BENCHMARK_RED"
+if [ ! -z ${CORRADE_TEST_BENCHMARK_RED+x} ]; then
+    test_env="$test_env CORRADE_TEST_BENCHMARK_RED=$CORRADE_TEST_BENCHMARK_RED"
 fi
 
 # Create a local temporary directory. Android doesn't have mktemp, so we have
