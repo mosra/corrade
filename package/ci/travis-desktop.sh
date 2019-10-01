@@ -13,7 +13,7 @@ cmake .. \
     -DCMAKE_BUILD_TYPE=Debug \
     -G Ninja
 ninja install
-ASAN_OPTIONS="color=always" LSAN_OPTIONS="color=always" CORRADE_TEST_COLOR=ON ctest -V
+ASAN_OPTIONS="color=always" LSAN_OPTIONS="color=always" TSAN_OPTIONS="color=always suppressions=$TRAVIS_BUILD_DIR/package/ci/threadsanitizer.conf" CORRADE_TEST_COLOR=ON ctest -V
 cd ..
 
 # Examples
