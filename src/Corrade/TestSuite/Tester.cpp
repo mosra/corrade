@@ -609,8 +609,10 @@ void Tester::printComparisonMessageInternal(ComparisonStatusFlags flags, const c
         printer(comparator, flags, out, actual, expected);
     }
 
-    /* Save diagnostic file(s) if the comparator wants to ... */
-    if(flags & (ComparisonStatusFlag::Diagnostic|ComparisonStatusFlag::VerboseDiagnostic)) {
+    /* Save diagnostic file(s) if the comparator wants to, it's not
+       in an XFAIL (because XFAIL should be silent, OTOH XPASS should do the
+       same as FAIL), ... */
+    if((flags & (ComparisonStatusFlag::Diagnostic|ComparisonStatusFlag::VerboseDiagnostic)) && !(_state->expectedFailure && flags & ComparisonStatusFlag::Failed)) {
         /* ... and the user allowed that. */
         if(!_state->saveDiagnosticPath.empty()) {
             CORRADE_ASSERT(saver, "TestSuite::Comparator: comparator returning ComparisonStatusFlag::[Verbose]Diagnostic has to implement saveDiagnostic() as well", );
@@ -622,7 +624,7 @@ void Tester::printComparisonMessageInternal(ComparisonStatusFlags flags, const c
 
         /* If the user didn't allow, count all failure diagnostics in order to
            hint to the user that there's --save-diagnostic in the final output */
-        } else if(flags & ComparisonStatusFlag::Failed) {
+        } else if(bool(_state->expectedFailure) != bool(flags & ComparisonStatusFlag::Failed)) {
             ++_state->diagnosticCount;
         }
     }

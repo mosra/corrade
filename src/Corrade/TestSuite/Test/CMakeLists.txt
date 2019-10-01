@@ -53,6 +53,9 @@ corrade_add_test(TestSuiteTesterTest TesterTest.cpp
         TesterTestFiles/saveDiagnosticFailedEnabled.txt
         TesterTestFiles/saveDiagnosticVerboseDisabled.txt
         TesterTestFiles/saveDiagnosticVerboseEnabled.txt
+        TesterTestFiles/saveDiagnosticXfail.txt
+        TesterTestFiles/saveDiagnosticXpassDisabled.txt
+        TesterTestFiles/saveDiagnosticXpassEnabled.txt
         TesterTestFiles/shuffleOne.txt
         TesterTestFiles/skipBenchmarks.txt
         TesterTestFiles/skipOnly.txt

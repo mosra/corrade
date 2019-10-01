@@ -330,6 +330,8 @@ void Test::compareWarning() {
 }
 
 void Test::compareSaveDiagnostic() {
+    CORRADE_EXPECT_FAIL_IF(MessageDiagnostic::xfail, "Welp.");
+
     /* Let the flags be overriden by TesterTest::saveDiagnostic*() later */
     CORRADE_COMPARE_WITH("a.txt", "b.txt", MessageDiagnostic(MessageDiagnostic::flags ? MessageDiagnostic::flags : ComparisonStatusFlag::Diagnostic));
 }
@@ -520,6 +522,10 @@ struct TesterTest: Tester {
     void saveDiagnosticVerboseEnabled();
     void saveDiagnosticFailedDisabled();
     void saveDiagnosticFailedEnabled();
+    void saveDiagnosticXfailDisabled();
+    void saveDiagnosticXfailEnabled();
+    void saveDiagnosticXpassDisabled();
+    void saveDiagnosticXpassEnabled();
     void saveDiagnosticSucceededDisabled();
     void saveDiagnosticSucceededEnabled();
     void saveDiagnosticAbortOnFail();
@@ -574,6 +580,10 @@ TesterTest::TesterTest() {
               &TesterTest::saveDiagnosticVerboseEnabled,
               &TesterTest::saveDiagnosticFailedDisabled,
               &TesterTest::saveDiagnosticFailedEnabled,
+              &TesterTest::saveDiagnosticXfailDisabled,
+              &TesterTest::saveDiagnosticXfailEnabled,
+              &TesterTest::saveDiagnosticXpassDisabled,
+              &TesterTest::saveDiagnosticXpassEnabled,
               &TesterTest::saveDiagnosticSucceededDisabled,
               &TesterTest::saveDiagnosticSucceededEnabled,
               &TesterTest::saveDiagnosticAbortOnFail,
@@ -1029,8 +1039,7 @@ void TesterTest::saveDiagnosticFailedDisabled() {
     t.registerTest("here.cpp", "TesterTest::Test");
     int result = t.exec(&out, &out);
 
-    /* Should save the file and print the error, then hint about the flag in
-       the final wrap-up */
+    /* Should not save any file, only hint about the flag in the final wrap-up */
     CORRADE_COMPARE(result, 1);
     CORRADE_COMPARE_AS(out.str(),
         Utility::Directory::join(TESTER_TEST_DIR, "saveDiagnosticFailedDisabled.txt"),
@@ -1054,6 +1063,89 @@ void TesterTest::saveDiagnosticFailedEnabled() {
     CORRADE_COMPARE(result, 1);
     CORRADE_COMPARE_AS(out.str(),
         Utility::Directory::join(TESTER_TEST_DIR, "saveDiagnosticFailedEnabled.txt"),
+        Compare::StringToFile);
+}
+
+void TesterTest::saveDiagnosticXfailDisabled() {
+    std::stringstream out;
+
+    MessageDiagnostic::xfail = true;
+    MessageDiagnostic::flags = ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic;
+    const char* argv[] = { "", "--color", "off", "--only", "16" };
+    int argc = Containers::arraySize(argv);
+    Tester::registerArguments(argc, argv);
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(&out, &out);
+
+    /* Shouldn't save any file, just print XFAIL and succeed -- no difference
+       if diagnostic is enabled or not */
+    CORRADE_COMPARE(result, 0);
+    CORRADE_COMPARE_AS(out.str(),
+        Utility::Directory::join(TESTER_TEST_DIR, "saveDiagnosticXfail.txt"),
+        Compare::StringToFile);
+}
+
+void TesterTest::saveDiagnosticXfailEnabled() {
+    std::stringstream out;
+
+    MessageDiagnostic::xfail = true;
+    MessageDiagnostic::flags = ComparisonStatusFlag::Failed|ComparisonStatusFlag::Diagnostic;
+    const char* argv[] = { "", "--color", "off", "--only", "16", "--save-diagnostic", "/some/path" };
+    int argc = Containers::arraySize(argv);
+    Tester::registerArguments(argc, argv);
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(&out, &out);
+
+    /* Shouldn't save any file, just print XFAIL and succeed -- no difference
+       if diagnostic is enabled or not */
+    CORRADE_COMPARE(result, 0);
+    CORRADE_COMPARE_AS(out.str(),
+        Utility::Directory::join(TESTER_TEST_DIR, "saveDiagnosticXfail.txt"),
+        Compare::StringToFile);
+}
+
+void TesterTest::saveDiagnosticXpassDisabled() {
+    std::stringstream out;
+
+    MessageDiagnostic::xfail = true;
+    MessageDiagnostic::flags = ComparisonStatusFlag::Diagnostic;
+    const char* argv[] = { "", "--color", "off", "--only", "16" };
+    int argc = Containers::arraySize(argv);
+    Tester::registerArguments(argc, argv);
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(&out, &out);
+
+    /* Should not save any file, but print XPASS and hint about the flag in the
+       final wrap-up */
+    CORRADE_COMPARE(result, 1);
+    CORRADE_COMPARE_AS(out.str(),
+        Utility::Directory::join(TESTER_TEST_DIR, "saveDiagnosticXpassDisabled.txt"),
+        Compare::StringToFile);
+}
+
+void TesterTest::saveDiagnosticXpassEnabled() {
+    std::stringstream out;
+
+    MessageDiagnostic::xfail = true;
+    MessageDiagnostic::flags = ComparisonStatusFlag::Diagnostic;
+    const char* argv[] = { "", "--color", "off", "--only", "16", "--save-diagnostic", "/some/path" };
+    int argc = Containers::arraySize(argv);
+    Tester::registerArguments(argc, argv);
+
+    Test t{&out};
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(&out, &out);
+
+    /* Should save the file, print both XPASS and SAVED */
+    CORRADE_COMPARE(result, 1);
+    CORRADE_COMPARE_AS(out.str(),
+        Utility::Directory::join(TESTER_TEST_DIR, "saveDiagnosticXpassEnabled.txt"),
         Compare::StringToFile);
 }
 

@@ -1,0 +1,4 @@
+Starting TesterTest::Test with 1 test cases...
+ XFAIL [16] compareSaveDiagnostic() at here.cpp on line 336
+        Welp. "a.txt" and "b.txt" failed the comparison.
+Finished TesterTest::Test with 0 errors out of 1 checks.
