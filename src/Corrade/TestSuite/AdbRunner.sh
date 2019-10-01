@@ -48,6 +48,12 @@ fi
 if [ ! -z ${CORRADE_TEST_BENCHMARK+x} ]; then
     test_env="$test_env CORRADE_BENCHMARK=$CORRADE_BENCHMARK"
 fi
+if [ ! -z ${CORRADE_TEST_SAVE_DIAGNOSTIC+x} ]; then
+    test_env="$test_env CORRADE_TEST_SAVE_DIAGNOSTIC=$CORRADE_TEST_SAVE_DIAGNOSTIC"
+fi
+if [ ! -z ${CORRADE_TEST_VERBOSE+x} ]; then
+    test_env="$test_env CORRADE_TEST_VERBOSE=$CORRADE_TEST_VERBOSE"
+fi
 if [ ! -z ${CORRADE_TEST_BENCHMARK_DISCARD+x} ]; then
     test_env="$test_env CORRADE_TEST_BENCHMARK_DISCARD=$CORRADE_TEST_BENCHMARK_DISCARD"
 fi
