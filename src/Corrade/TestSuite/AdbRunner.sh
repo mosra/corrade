@@ -64,6 +64,21 @@ if [ ! -z ${CORRADE_TEST_BENCHMARK_RED+x} ]; then
     test_env="$test_env CORRADE_TEST_BENCHMARK_RED=$CORRADE_TEST_BENCHMARK_RED"
 fi
 
+# Magnum env variables. TODO: better ideas how to do this instead of making the
+# two projects interdependent like this?
+if [ ! -z ${MAGNUM_DISABLE_WORKAROUNDS+x} ]; then
+    test_env="$test_env MAGNUM_DISABLE_WORKAROUNDS=$MAGNUM_DISABLE_WORKAROUNDS"
+fi
+if [ ! -z ${MAGNUM_DISABLE_EXTENSIONS+x} ]; then
+    test_env="$test_env MAGNUM_DISABLE_EXTENSIONS=$MAGNUM_DISABLE_EXTENSIONS"
+fi
+if [ ! -z ${MAGNUM_GPU_VALIDATION+x} ]; then
+    test_env="$test_env MAGNUM_GPU_VALIDATION=$MAGNUM_GPU_VALIDATION"
+fi
+if [ ! -z ${MAGNUM_LOG+x} ]; then
+    test_env="$test_env MAGNUM_LOG=$MAGNUM_LOG"
+fi
+
 # Create a local temporary directory. Android doesn't have mktemp, so we have
 # to assume that there is ever only one computer connected to a device /
 # emulator and so mktemp always returns unique value.
