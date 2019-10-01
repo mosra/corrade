@@ -85,7 +85,17 @@ Defined if built as static libraries. Default are shared libraries.
 @brief Multi-threaded build
 
 Defined if the library is built in a way that makes it possible to safely use
-certain Corrade features simultaenously in multiple threads.
+certain Corrade features simultaenously in multiple threads. In particular:
+
+-   @ref Corrade::Utility::Debug "Utility::Debug" and derived classes use it
+    to have thread-local scoped output redirection and coloring
+-   @ref Corrade::PluginManager::Manager "PluginManager::Manager" uses it for
+    thread-local plugin loading, unloading and management
+
+Apart from these, @ref Corrade::Utility::Resource "Utility::Resource" uses
+global data but isn't affected by this option, as majority of its operation is
+only reading from the global storage. All other functionality is free of any
+read/write access to global data.
 @see @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_BUILD_MULTITHREADED

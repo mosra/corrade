@@ -92,6 +92,18 @@ filename=levels-insane.conf
 alias=levels-easy.conf
 @endcode
 
+@section Utility-Resource-multithreading Thread safety
+
+The resources register themselves into a global storage. If done
+implicitly, the registration is executed before entering @cpp main() @ce and
+thus serially. If done explicitly via @ref CORRADE_RESOURCE_INITIALIZE() /
+@ref CORRADE_RESOURCE_FINALIZE(), these macros *have to* be called from a
+single thread or externally guarded to avoid data races. Same goes for the
+@ref overrideGroup() function.
+
+On the other hand, all other functionality only reads from the global storage
+and thus is thread-safe.
+
 @todo Ad-hoc resources
  */
 class CORRADE_UTILITY_EXPORT Resource {
@@ -128,6 +140,10 @@ class CORRADE_UTILITY_EXPORT Resource {
          * debugging. Subsequently created @ref Resource instances with the
          * same group will take data from live filesystem instead and fallback
          * to compiled-in resources only for files that are not found.
+         *
+         * @attention Unlike all other methods of this class, this one is *not*
+         *      thread-safe. See @ref Utility-Resource-multithreading for more
+         *      information.
          */
         static void overrideGroup(const std::string& group, const std::string& configurationFile);
 

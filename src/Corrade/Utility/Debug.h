@@ -140,7 +140,8 @@ convenient way to support ANSI colors and UTF-8 output encoding on Windows.
 If Corrade is compiled with @ref CORRADE_BUILD_MULTITHREADED enabled (the
 default), scoped output redirection and coloring is done thread-locally. This
 might cause some performance penalties --- if you are sure that you will never
-need to handle these per-thread, build Corrade with the option disabled.
+need to handle these per-thread (and won't need any other functionality enabled
+by this option either), build Corrade with the option disabled.
 
 @see @ref Warning, @ref Error, @ref Fatal, @ref CORRADE_ASSERT(),
     @ref CORRADE_INTERNAL_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT(),
