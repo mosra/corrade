@@ -517,7 +517,6 @@ struct TesterTest: Tester {
     void compareMessageFailed();
     void compareMessageXfail();
 
-    /* variant with no --save-diagnostic verified in test() already */
     void saveDiagnosticVerboseDisabled();
     void saveDiagnosticVerboseEnabled();
     void saveDiagnosticFailedDisabled();
