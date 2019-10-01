@@ -54,6 +54,10 @@ if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
 else()
     target_include_directories(PluginManagerManagerTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 endif()
+if(NOT CORRADE_TARGET_EMSCRIPTEN)
+    find_package(Threads REQUIRED)
+    target_link_libraries(PluginManagerManagerTest PRIVATE Threads::Threads)
+endif()
 
 corrade_add_test(PluginManagerManagerInitFiniTest
     ManagerInitFiniTest.cpp

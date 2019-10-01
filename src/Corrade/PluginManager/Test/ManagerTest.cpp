@@ -34,6 +34,7 @@
 #include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Configuration.h"
+#include "Corrade/Utility/System.h"
 
 #include "AbstractAnimal.h"
 #include "AbstractFood.h"
@@ -44,6 +45,10 @@
 
 #include "Corrade/PluginManager/Test/wrong-metadata/WrongMetadata.h"
 #include "configure.h"
+#endif
+
+#ifndef CORRADE_TARGET_EMSCRIPTEN
+#include <thread>
 #endif
 
 static void importPlugin() {
@@ -120,6 +125,13 @@ struct ManagerTest: TestSuite::Tester {
 
     void debugLoadState();
     void debugLoadStates();
+
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    void multithreadedStatic();
+    #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+    void multithreadedDynamic();
+    #endif
+    #endif
 };
 
 ManagerTest::ManagerTest() {
@@ -188,6 +200,15 @@ ManagerTest::ManagerTest() {
 
               &ManagerTest::debugLoadState,
               &ManagerTest::debugLoadStates});
+
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    addRepeatedTests({
+        &ManagerTest::multithreadedStatic,
+        #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+        &ManagerTest::multithreadedDynamic
+        #endif
+        }, 25);
+    #endif
 
     importPlugin();
 }
@@ -1017,6 +1038,88 @@ void ManagerTest::debugLoadStates() {
     Debug{&out} << (LoadState::Static|LoadState::NotFound) << LoadStates{};
     CORRADE_COMPARE(out.str(), "PluginManager::LoadState::NotFound|PluginManager::LoadState::Static PluginManager::LoadStates{}\n");
 }
+
+#ifndef CORRADE_TARGET_EMSCRIPTEN
+void ManagerTest::multithreadedStatic() {
+    #ifndef CORRADE_BUILD_MULTITHREADED
+    CORRADE_SKIP("CORRADE_BUILD_MULTITHREADED not enabled.");
+    #endif
+
+    auto f = [](int& out) {
+        PluginManager::Manager<AbstractAnimal> manager;
+
+        for(std::size_t i = 0; i != 25; ++i) {
+            if(!(manager.load("Canary") & LoadState::Static)) {
+                out = -1;
+                break;
+            }
+
+            {
+                Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Canary");
+                out += animal->legCount();
+            }
+
+            if(!(manager.unload("Canary") & LoadState::Static)) {
+                out = -2;
+                break;
+            }
+
+            Utility::System::sleep(1);
+        }
+    };
+
+    int out1{}, out2{};
+    std::thread t1{f, std::ref(out1)};
+    std::thread t2{f, std::ref(out2)};
+
+    t1.join();
+    t2.join();
+
+    CORRADE_COMPARE(out1, 50);
+    CORRADE_COMPARE(out2, 50);
+}
+
+#ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
+void ManagerTest::multithreadedDynamic() {
+    #ifndef CORRADE_BUILD_MULTITHREADED
+    CORRADE_SKIP("CORRADE_BUILD_MULTITHREADED not enabled.");
+    #endif
+
+    auto f = [](int& out) {
+        PluginManager::Manager<AbstractAnimal> manager;
+
+        for(std::size_t i = 0; i != 25; ++i) {
+            if(!(manager.load("Dog") & LoadState::Loaded)) {
+                out = -1;
+                break;
+            }
+
+            {
+                Containers::Pointer<AbstractAnimal> animal = manager.instantiate("Dog");
+                out += animal->legCount();
+            }
+
+            if(!(manager.unload("Dog") & LoadState::NotLoaded)) {
+                out = -2;
+                break;
+            }
+
+            Utility::System::sleep(1);
+        }
+    };
+
+    int out1{}, out2{};
+    std::thread t1{f, std::ref(out1)};
+    std::thread t2{f, std::ref(out2)};
+
+    t1.join();
+    t2.join();
+
+    CORRADE_COMPARE(out1, 100);
+    CORRADE_COMPARE(out2, 100);
+}
+#endif
+#endif
 
 }}}}
 

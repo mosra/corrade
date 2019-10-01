@@ -165,6 +165,9 @@ namespace Corrade {
     built statically and linked to more than one dynamic library or executable.
     Currently that holds only for Linux and macOS, Windows support will come
     next.
+-   @ref PluginManager::Manager and @ref Utility::Debug now have the global
+    state thread-local when the @ref CORRADE_BUILD_MULTITHREADED option is
+    enabled.
 
 @subsubsection corrade-changelog-latest-changes-containers Containers library
 

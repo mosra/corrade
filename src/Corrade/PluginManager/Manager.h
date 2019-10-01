@@ -106,6 +106,21 @@ plugin that wouldn't be otherwise available in the general image converter
 plugin API.
 
 See @ref PluginMetadata for detailed description of the plugin metadata file.
+
+@section PluginManager-Manager-multithreading Thread safety
+
+Static plugins register themselves into a global storage. If done implicitly,
+the registration is executed before entering @cpp main() @ce and thus serially.
+If done explicitly via @ref CORRADE_PLUGIN_IMPORT() / @ref CORRADE_PLUGIN_EJECT(),
+these macros *have to* be called from a single thread or externally guarded to
+avoid data races.
+
+All other operation (instantiating a manager, loading/unloading plugins,
+instantiating them, ...) is done thread-locally if Corrade is compiled with
+@ref CORRADE_BUILD_MULTITHREADED enabled (the default). This might cause some
+performance penalties --- if you are sure that you will never need to manage
+plugins over multiple threads (and won't need any other functionality enabled
+by this option either), build Corrade with the option disabled.
  */
 template<class T> class Manager: public AbstractManager {
     public:
