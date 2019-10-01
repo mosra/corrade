@@ -358,7 +358,8 @@ Arguments:
     `CORRADE_TEST_NO_XFAIL=ON|OFF`)
 -   `--save-diagnostic PATH` --- save diagnostic files to given path
     (environment: `CORRADE_TEST_SAVE_DIAGNOSTIC`)
--   `--verbose` --- enable verbose output (environment: `CORRADE_TEST_VERBOSE)
+-   `-v`, `--verbose` --- enable verbose output (environment:
+    `CORRADE_TEST_VERBOSE`)
 -   `--benchmark TYPE` --- default benchmark type (environment:
     `CORRADE_TEST_BENCHMARK`). Supported benchmark types:
     -   `wall-time` --- wall time spent
