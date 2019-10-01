@@ -234,6 +234,10 @@ namespace Corrade {
 -   @ref Utility::Resource internals now operate completely without heap
     access, its APIs now also have overloads taking plain C string literals
     instead of @ref std::string
+-   @ref Utility::String::join() and
+    @ref Utility::String::joinWithoutEmptyParts() overloads taking a
+    @cb{.cpp} char @ce array and a @ref std::string for the delimiter in
+    addition to a single @cb{.cpp} char @ce
 
 @subsection corrade-changelog-latest-buildsystem Build system
 

@@ -67,6 +67,8 @@ namespace Implementation {
     CORRADE_UTILITY_EXPORT std::string trim(std::string string, Containers::ArrayView<const char> characters);
 
     CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std::string& string, Containers::ArrayView<const char> delimiters);
+    CORRADE_UTILITY_EXPORT std::string join(const std::vector<std::string>& strings, Containers::ArrayView<const char> delimiter);
+    CORRADE_UTILITY_EXPORT std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, Containers::ArrayView<const char> delimiter);
 
     CORRADE_UTILITY_EXPORT bool beginsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> prefix);
     CORRADE_UTILITY_EXPORT bool endsWith(Containers::ArrayView<const char> string, Containers::ArrayView<const char> suffix);
@@ -291,14 +293,38 @@ CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std
 @param strings      Strings to join
 @param delimiter    Delimiter
 */
-CORRADE_UTILITY_EXPORT std::string join(const std::vector<std::string>& strings, char delimiter);
+inline std::string join(const std::vector<std::string>& strings, char delimiter) {
+    return Implementation::join(strings, {&delimiter, 1});
+}
+
+/** @overload */
+template<std::size_t size> inline std::string join(const std::vector<std::string>& strings, const char(&delimiter)[size]) {
+    return Implementation::join(strings, {delimiter, size - 1});
+}
+
+/** @overload */
+inline std::string join(const std::vector<std::string>& strings, const std::string& delimiter) {
+    return Implementation::join(strings, {delimiter.data(), delimiter.size()});
+}
 
 /**
 @brief Join strings with given character and remove empty parts
 @param strings      Strings to join
 @param delimiter    Delimiter
 */
-CORRADE_UTILITY_EXPORT std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, char delimiter);
+inline std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, char delimiter) {
+    return Implementation::joinWithoutEmptyParts(strings, {&delimiter, 1});
+}
+
+/** @overload */
+template<std::size_t size> inline std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const char(&delimiter)[size]) {
+    return Implementation::joinWithoutEmptyParts(strings, {delimiter, size - 1});
+}
+
+/** @overload */
+inline std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const std::string& delimiter) {
+    return Implementation::joinWithoutEmptyParts(strings, {delimiter.data(), delimiter.size()});
+}
 
 /**
 @brief Convert string to lowercase

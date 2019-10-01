@@ -78,6 +78,46 @@ std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const
     return parts;
 }
 
+std::string join(const std::vector<std::string>& strings, const Containers::ArrayView<const char> delimiter) {
+    /* Compute size of the resulting string, count also delimiters */
+    std::size_t size = 0;
+    for(const auto& s: strings) size += s.size() + delimiter.size();
+    if(size) size -= delimiter.size();
+
+    /* Reserve memory for the resulting string */
+    std::string result;
+    result.reserve(size);
+
+    /* Join strings */
+    for(const auto& s: strings) {
+        result += s;
+        if(result.size() != size) result.append(delimiter, delimiter.size());
+    }
+
+    return result;
+}
+
+std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const Containers::ArrayView<const char> delimiter) {
+    /* Compute size of the resulting string, count also delimiters */
+    std::size_t size = 0;
+    for(const auto& s: strings) if(!s.empty()) size += s.size() + delimiter.size();
+    if(size) size -= delimiter.size();
+
+    /* Reserve memory for the resulting string */
+    std::string result;
+    result.reserve(size);
+
+    /* Join strings */
+    for(const auto& s: strings) {
+        if(s.empty()) continue;
+
+        result += s;
+        if(result.size() != size) result.append(delimiter, delimiter.size());
+    }
+
+    return result;
+}
+
 bool beginsWith(Containers::ArrayView<const char> string, const Containers::ArrayView<const char> prefix) {
     if(string.size() < prefix.size()) return false;
 
@@ -173,46 +213,6 @@ std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const
         parts.push_back(string.substr(oldpos));
 
     return parts;
-}
-
-std::string join(const std::vector<std::string>& strings, const char delimiter) {
-    /* Compute size of resulting string, count also delimiters */
-    std::size_t size = 0;
-    for(const auto& s: strings) size += s.size() + 1;
-    if(size) --size;
-
-    /* Reserve memory for resulting string */
-    std::string result;
-    result.reserve(size);
-
-    /* Join strings */
-    for(const auto& s: strings) {
-        result += s;
-        if(result.size() != size) result += delimiter;
-    }
-
-    return result;
-}
-
-std::string joinWithoutEmptyParts(const std::vector<std::string>& strings, const char delimiter) {
-    /* Compute size of resulting string, count also delimiters */
-    std::size_t size = 0;
-    for(const auto& s: strings) if(!s.empty()) size += s.size() + 1;
-    if(size) --size;
-
-    /* Reserve memory for resulting string */
-    std::string result;
-    result.reserve(size);
-
-    /* Join strings */
-    for(const auto& s: strings) {
-        if(s.empty()) continue;
-
-        result += s;
-        if(result.size() != size) result += delimiter;
-    }
-
-    return result;
 }
 
 std::string lowercase(std::string string) {

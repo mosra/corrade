@@ -297,11 +297,19 @@ void StringTest::join() {
     CORRADE_COMPARE(String::joinWithoutEmptyParts({"abcdef"}, '/'),
         "abcdef");
 
-    /* Common case */
+    /* Common case, also multi-character and std::string joiner */
     CORRADE_COMPARE(String::join({"ab", "c", "def"}, '/'),
         "ab/c/def");
+    CORRADE_COMPARE(String::join({"ab", "c", "def"}, ", "),
+        "ab, c, def");
+    CORRADE_COMPARE(String::join({"ab", "c", "def"}, std::string{", "}),
+        "ab, c, def");
     CORRADE_COMPARE(String::joinWithoutEmptyParts({"ab", "c", "def"}, '/'),
         "ab/c/def");
+    CORRADE_COMPARE(String::joinWithoutEmptyParts({"ab", "c", "def"}, ", "),
+        "ab, c, def");
+    CORRADE_COMPARE(String::joinWithoutEmptyParts({"ab", "c", "def"}, std::string{", "}),
+        "ab, c, def");
 
     /* Empty parts */
     CORRADE_COMPARE(String::join({"ab", "", "c", "def", "", ""}, '/'),
