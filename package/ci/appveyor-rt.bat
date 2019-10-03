@@ -28,3 +28,6 @@ cmake .. ^
     -DBUILD_STATIC=ON ^
     -G "%GENERATOR%" || exit /b
 cmake --build . --config Release || exit /b
+
+rem Test install, after running the tests as for them it shouldn't be needed
+cmake --build . --config Release --target install || exit /b

@@ -614,10 +614,9 @@ void DirectoryTest::libraryLocation() {
     /* Shouldn't be empty */
     CORRADE_VERIFY(!libraryLocation.empty());
 
-    #ifdef CORRADE_TARGET_WINDOWS
-    /* There should be a TestSuite DLL next to this one (assuming all DLLs are
-       installed into a single PATH location) */
-    const std::string testSuiteDllName =
+    /* There should be a TestSuite library next to this one */
+    const std::string testSuiteLibraryName =
+        #ifdef CORRADE_TARGET_WINDOWS
         #ifdef __MINGW32__
         "lib"
         #endif
@@ -626,21 +625,29 @@ void DirectoryTest::libraryLocation() {
         #else
         "CorradeTestSuite.dll"
         #endif
+        #elif defined(CORRADE_TARGET_APPLE)
+        #ifdef CORRADE_IS_DEBUG_BUILD
+        "libCorradeTestSuite-d.dylib"
+        #else
+        "libCorradeTestSuite.dylib"
+        #endif
+        #else
+        #ifdef CORRADE_IS_DEBUG_BUILD
+        "libCorradeTestSuite-d.so"
+        #else
+        "libCorradeTestSuite.so"
+        #endif
+        #endif
         ;
-    CORRADE_VERIFY(Directory::exists(Directory::join(Directory::path(libraryLocation), testSuiteDllName)));
+    CORRADE_VERIFY(Directory::exists(Directory::join(Directory::path(libraryLocation), testSuiteLibraryName)));
 
+    #ifdef CORRADE_TARGET_WINDOWS
     /* It shouldn't contain backslashes */
     CORRADE_COMPARE(libraryLocation.find('\\'), std::string::npos);
-    #else
-    /* We have RPATH, so the *.so/.dylib is hidden inside the build dir and
-       thus there should be the path reflected (assuming
-       CMAKE_RUNTIME_OUTPUT_LOCATION wasn't overriden) */
-    CORRADE_VERIFY(libraryLocation.find("src/Corrade/Utility") != std::string::npos);
     #endif
 
     /* Passing a null pointer should fail */
     CORRADE_COMPARE(Directory::libraryLocation(nullptr), "");
-
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
@@ -682,13 +689,14 @@ void DirectoryTest::executableLocation() {
     CORRADE_VERIFY(executableLocation.find("UtilityDirectoryTest") != std::string::npos);
     CORRADE_VERIFY(Directory::exists(Directory::join(Directory::path(executableLocation), "DirectoryTestFiles")));
 
-    /* Otherwise it should contain CMake build files */
+    /* Otherwise it should contain other executables and libraries as we put
+       all together */
     #else
     {
-        #ifdef CMAKE_INTDIR
-        CORRADE_VERIFY(Directory::exists(Directory::join(Directory::path(Directory::path(executableLocation)), "CMakeFiles")));
+        #ifndef CORRADE_TARGET_WINDOWS
+        CORRADE_VERIFY(Directory::exists(Directory::join(Directory::path(executableLocation), "corrade-rc")));
         #else
-        CORRADE_VERIFY(Directory::exists(Directory::join(Directory::path(executableLocation), "CMakeFiles")));
+        CORRADE_VERIFY(Directory::exists(Directory::join(Directory::path(executableLocation), "corrade-rc.exe")));
         #endif
     }
     #endif

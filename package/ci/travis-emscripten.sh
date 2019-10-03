@@ -24,6 +24,7 @@ cmake .. \
     -DEMSCRIPTEN_PREFIX=$(echo /usr/local/Cellar/emscripten/*/libexec) \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_CXX_FLAGS_RELEASE="-DNDEBUG -O1" \
+    -DCMAKE_INSTALL_PREFIX=$HOME/deps \
     -DCMAKE_EXE_LINKER_FLAGS_RELEASE="-O1" \
     -DBUILD_TESTS=ON \
     -G Ninja
@@ -31,3 +32,6 @@ ninja -j4
 
 # Test
 CORRADE_TEST_COLOR=ON ctest -V
+
+# Test install, after running the tests as for them it shouldn't be needed
+ninja install

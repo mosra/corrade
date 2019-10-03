@@ -97,15 +97,6 @@ if(BUILD_TESTS)
         target_link_libraries(CorradePluginManagerTestLib ${CMAKE_DL_LIBS})
     endif()
 
-    # On Windows we need to install first and then run the tests to avoid "DLL
-    # not found" hell, thus we need to install this too
-    if(CORRADE_TARGET_WINDOWS AND NOT CMAKE_CROSSCOMPILING AND NOT BUILD_STATIC)
-        install(TARGETS CorradePluginManagerTestLib
-            RUNTIME DESTINATION ${CORRADE_BINARY_INSTALL_DIR}
-            LIBRARY DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR}
-            ARCHIVE DESTINATION ${CORRADE_LIBRARY_INSTALL_DIR})
-    endif()
-
     add_subdirectory(Test)
 endif()
 

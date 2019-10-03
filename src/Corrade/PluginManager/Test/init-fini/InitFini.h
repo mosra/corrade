@@ -43,11 +43,7 @@ struct InitFini: AbstractPlugin {
     #ifndef CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     static std::vector<std::string> pluginSearchPaths() {
         return {
-            #ifndef CMAKE_INTDIR
             Utility::Directory::join(PLUGINS_DIR, "init-fini")
-            #else
-            Utility::Directory::join(Utility::Directory::join(PLUGINS_DIR, "init-fini"), CMAKE_INTDIR)
-            #endif
         };
     }
     #endif

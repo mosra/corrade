@@ -26,22 +26,25 @@
 # CMake before 3.8 has broken $<TARGET_FILE*> expressions for iOS (see
 # https://gitlab.kitware.com/cmake/cmake/merge_requests/404) and since Corrade
 # doesn't support dynamic plugins on iOS, this sorta works around that. Should
-# be revisited when updating Travis to newer Xcode (current has CMake 3.6).
+# be revisited when updating Travis to newer Xcode (xcode7.3 has CMake 3.6).
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
-    set(PLUGINS_DIR $<TARGET_FILE_DIR:PluginManagerManagerTest>)
+    # On windows, all DLLs are in bin/, but elsewhere in lib/. See the root
+    # CMakeLists.txt for more info about where this is set to.
+    if(CORRADE_TARGET_WINDOWS)
+        set(PLUGINS_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    else()
+        set(PLUGINS_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+    endif()
     set(DOG_PLUGIN_FILENAME $<TARGET_FILE:Dog>)
     set(DOGGO_PLUGIN_FILENAME $<TARGET_FILE:Doggo>)
     set(PITBULL_PLUGIN_FILENAME $<TARGET_FILE:PitBull>)
-
-    # First replace ${} variables, then $<> generator expressions
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
-                   ${CMAKE_CURRENT_BINARY_DIR}/configure.h.in)
-    file(GENERATE OUTPUT $<TARGET_FILE_DIR:PluginManagerManagerTest>/configure.h
-        INPUT ${CMAKE_CURRENT_BINARY_DIR}/configure.h.in)
-else()
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
-                   ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 endif()
+
+# First replace ${} variables, then $<> generator expressions
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
+               ${CMAKE_CURRENT_BINARY_DIR}/configure.h.in)
+file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/configure.h
+    INPUT ${CMAKE_CURRENT_BINARY_DIR}/configure.h.in)
 
 corrade_add_test(PluginManagerManagerTest
     ManagerTest.cpp
@@ -49,11 +52,7 @@ corrade_add_test(PluginManagerManagerTest
     AbstractDeletable.cpp
     AbstractFood.cpp
     LIBRARIES CorradePluginManagerTestLib Canary)
-if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
-    target_include_directories(PluginManagerManagerTest PRIVATE $<TARGET_FILE_DIR:PluginManagerManagerTest>)
-else()
-    target_include_directories(PluginManagerManagerTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-endif()
+target_include_directories(PluginManagerManagerTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
 if(NOT CORRADE_TARGET_EMSCRIPTEN)
     find_package(Threads REQUIRED)
     target_link_libraries(PluginManagerManagerTest PRIVATE Threads::Threads)
@@ -63,28 +62,20 @@ corrade_add_test(PluginManagerManagerInitFiniTest
     ManagerInitFiniTest.cpp
     LIBRARIES InitFiniStatic CorradePluginManager)
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
-    target_include_directories(PluginManagerManagerInitFiniTest PRIVATE $<TARGET_FILE_DIR:PluginManagerManagerTest>)
+    target_include_directories(PluginManagerManagerInitFiniTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
 endif()
 
 corrade_add_test(PluginManagerImportStaticTest
     AbstractAnimal.cpp
     ImportStaticTest.cpp
     LIBRARIES CorradePluginManagerTestLib Canary Dird)
-if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
-    target_include_directories(PluginManagerImportStaticTest PRIVATE $<TARGET_FILE_DIR:PluginManagerManagerTest>)
-else()
-    target_include_directories(PluginManagerImportStaticTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-endif()
+target_include_directories(PluginManagerImportStaticTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
 
 corrade_add_test(PluginManagerAbstractPluginTest
     AbstractAnimal.cpp
     AbstractPluginTest.cpp
     LIBRARIES CorradePluginManagerTestLib Canary)
-if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
-    target_include_directories(PluginManagerAbstractPluginTest PRIVATE $<TARGET_FILE_DIR:PluginManagerManagerTest>)
-else()
-    target_include_directories(PluginManagerAbstractPluginTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-endif()
+target_include_directories(PluginManagerAbstractPluginTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
 
 set_target_properties(
     PluginManagerManagerTest
@@ -116,13 +107,13 @@ if(CORRADE_BUILD_STATIC AND NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET
     target_link_libraries(PluginManagerGlobalStateAcrossLibrariesLibrary
         PUBLIC CorradePluginManagerTestLib
         PRIVATE Canary)
-    target_include_directories(PluginManagerGlobalStateAcrossLibrariesLibrary PRIVATE $<TARGET_FILE_DIR:PluginManagerManagerTest>)
+    target_include_directories(PluginManagerGlobalStateAcrossLibrariesLibrary PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
 
     corrade_add_test(PluginManagerGlobalStateAcrossLi___Test
         AbstractAnimal.cpp
         GlobalStateAcrossLibrariesTest.cpp
         LIBRARIES PluginManagerGlobalStateAcrossLibrariesLibrary)
-    target_include_directories(PluginManagerGlobalStateAcrossLi___Test PRIVATE $<TARGET_FILE_DIR:PluginManagerManagerTest>)
+    target_include_directories(PluginManagerGlobalStateAcrossLi___Test PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>)
     set_target_properties(
         PluginManagerGlobalStateAcrossLibrariesLibrary
         PluginManagerGlobalStateAcrossLi___Test

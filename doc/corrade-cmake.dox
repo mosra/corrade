@@ -37,8 +37,11 @@ namespace Corrade {
 @tableofcontents
 
 Corrade uses CMake as a primary build system for both building and integration
-into your projects. The main logic is in the
-[FindCorrade.cmake](https://github.com/mosra/corrade/blob/master/modules/FindCorrade.cmake)
+into your projects.
+
+@section corrade-cmake-installed Using Corrade that was externally built and installed
+
+The main logic is in the [FindCorrade.cmake](https://github.com/mosra/corrade/blob/master/modules/FindCorrade.cmake)
 module distributed with the engine in the `modules/` directory, you are
 encouraged to copy it into your project and add path to the file to
 `CMAKE_MODULE_PATH`:
@@ -46,6 +49,8 @@ encouraged to copy it into your project and add path to the file to
 @code{.cmake}
 # Path where FindCorrade.cmake can be found, adapt as needed
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
+
+find_package(Corrade REQUIRED ...) # see below
 @endcode
 
 Otherwise, if CMake won't be able to find this file in predefined locations, it
@@ -60,6 +65,48 @@ issues.
 If you installed the library to non-standard location (other than `/usr`, e.g.
 `/home/xyz/projects`), set `CMAKE_PREFIX_PATH` to that directory to help CMake
 find it.
+
+@section corrade-cmake-subproject Using Corrade as a CMake subproject
+
+A self-contained alternative to the above is adding the Corrade repository into
+your project (as a Git submodule, bundling a downloaded archive etc.) and use
+@cb{.cmake} add_subdirectory() @ce. With that approach you don't need to care
+about `FindCorrade.cmake`, however the usual tradeoffs when bundling code apply
+--- slower full rebuilds, IDEs having more to parse etc.
+
+@code{.cmake}
+add_subdirectory(corrade EXCLUDE_FROM_ALL) # so only things you use are built
+
+find_package(Corrade REQUIRED ...) # see below
+@endcode
+
+Note that the @cb{.cmake} find_package() @ce call is needed in both the
+installed and the subproject case for a properly configured environment.
+
+To simplify your project setup, the subproject globally configures
+@m_class{m-doc-external} [CMAKE_RUNTIME_OUTPUT_DIRECTORY](https://cmake.org/cmake/help/latest/variable/CMAKE_RUNTIME_OUTPUT_DIRECTORY.html)
+and friends to `<CONFIG>/bin` / `<CONFIG>/lib` directories inside your build
+directory. This makes the subproject workflow easier when dynamically-loaded
+plugins are involved; and on Windows it makes it possible to run built
+executables without having to do a @cb{.sh} $PATH @ce setup for dependency
+DLLs. If your project already configures `CMAKE_{RUNTIME,LIBRARY,ARCHIVE}_OUTPUT_DIRECTORY`,
+those will get used instead (and you can also set your own output directories
+* *after* the @cb{.cmake} add_subdirectory() @ce call, which will make Corrade
+keep the above). If you want to disable this behavior altogether and keep
+all executables and libraries in their implicit locations, set those variables
+to an empty string (as opposed to nothing at all, which is the same as if the
+variable is not set) --- Corrade will detect and respect that:
+
+@code{.cmake}
+# I'm happy with having binaries scattered around the build dir
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
+
+add_subdirectory(corrade EXCLUDE_FROM_ALL)
+@endcode
+
+@section corrade-cmake-find-module Finding the package and its component
 
 Basic usage is:
 

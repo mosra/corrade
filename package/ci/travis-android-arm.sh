@@ -23,6 +23,7 @@ cmake .. \
     -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a \
     -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang \
     -DCMAKE_ANDROID_STL_TYPE=c++_static \
+    -DCMAKE_INSTALL_PREFIX=$HOME/deps \
     -DCMAKE_BUILD_TYPE=Release \
     -DCORRADE_RC_EXECUTABLE=$HOME/deps-native/bin/corrade-rc \
     -DBUILD_TESTS=ON \
@@ -34,3 +35,6 @@ echo no | android create avd --force -n test -t android-22 --abi armeabi-v7a
 emulator -avd test -no-audio -no-window &
 android-wait-for-emulator
 CORRADE_TEST_COLOR=ON ctest -V
+
+# Test install, after running the tests as for them it shouldn't be needed
+ninja install

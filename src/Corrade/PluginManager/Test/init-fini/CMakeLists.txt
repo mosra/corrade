@@ -26,14 +26,17 @@
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
     corrade_add_plugin(InitFiniDynamic ${CMAKE_CURRENT_BINARY_DIR} "" InitFiniDynamic.conf InitFiniDynamic.cpp)
     set_target_properties(InitFiniDynamic InitFiniDynamic-metadata
-        PROPERTIES FOLDER "Corrade/PluginManager/Test")
-    target_include_directories(InitFiniDynamic PRIVATE $<TARGET_FILE_DIR:PluginManagerManagerTest>)
+        PROPERTIES FOLDER "Corrade/PluginManager/Test"
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/init-fini
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/init-fini
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/init-fini)
+    target_include_directories(InitFiniDynamic PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/../$<CONFIG>)
 endif()
 
 corrade_add_static_plugin(InitFiniStatic ${CMAKE_CURRENT_BINARY_DIR} ../dummy.conf InitFiniStatic.cpp)
 set_target_properties(InitFiniStatic InitFiniStatic-dependencies PROPERTIES FOLDER "Corrade/PluginManager/Test")
 if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
-    target_include_directories(InitFiniStatic PRIVATE $<TARGET_FILE_DIR:PluginManagerManagerTest>)
+    target_include_directories(InitFiniStatic PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/../$<CONFIG>)
 endif()
 
 # DLLs don't allow unresolved symbols; on static builds there's no dynamic

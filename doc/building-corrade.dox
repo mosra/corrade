@@ -49,6 +49,11 @@ Selected Corrade functionality is available as single-header libraries for
 easier integration into your projects. See @ref corrade-singles for more
 information.
 
+@section building-corrade-cmake-subproject Using Corrade as a CMake subproject
+
+Corrade can be bundled in your project with the @cb{.cmake} add_subdirectory() @ce
+CMake command. See @ref corrade-cmake-subproject for more information.
+
 @section building-corrade-packages Prepared packages
 
 The easiest way to install Corrade is to use one of the ready-made packages for
@@ -600,10 +605,8 @@ subdirectories in the build directory) or using
 ctest --output-on-failure
 @endcode
 
-in the build directory. On Windows the tests require the library to be
-installed with DLLs accessible through @cb{.bat} %PATH% @ce. See the
-@ref building-corrade-windows "above Windows documentation" for more
-information.
+in the build directory. It's not needed to install anything anywhere to run the
+tests.
 
 @subsection building-corrade-doc Building documentation
 
@@ -866,7 +869,7 @@ through `PATH`.
 
 If you set `CMAKE_INSTALL_PREFIX` to `/usr` subdirectory of the particular
 Android platform sysroot, the package will get found automatically when
-compiling subprojects. Gradle and other Android buildsystems expect
+compiling depending projects. Gradle and other Android buildsystems expect
 platform-independent includes and other files to be stored in a central
 location, you can set `CORRADE_INCLUDE_INSTALL_PREFIX` to `/usr` subdirectory of
 the global NDK sysroot. Another option is to explicitly set `CMAKE_PREFIX_PATH`

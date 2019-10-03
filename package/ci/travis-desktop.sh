@@ -12,8 +12,12 @@ cmake .. \
     -DBUILD_STATIC=$BUILD_STATIC \
     -DCMAKE_BUILD_TYPE=Debug \
     -G Ninja
-ninja install
+ninja
 ASAN_OPTIONS="color=always" LSAN_OPTIONS="color=always" TSAN_OPTIONS="color=always suppressions=$TRAVIS_BUILD_DIR/package/ci/threadsanitizer.conf" CORRADE_TEST_COLOR=ON ctest -V
+
+# Test install, after running the tests as for them it shouldn't be needed
+ninja install
+
 cd ..
 
 # Examples

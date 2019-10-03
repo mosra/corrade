@@ -301,13 +301,7 @@ struct WrongPlugin: AbstractPlugin {
     static std::string pluginInterface() { return {}; }
 
     static std::vector<std::string> pluginSearchPaths() {
-        return {
-            #ifndef CMAKE_INTDIR
-            Utility::Directory::join(PLUGINS_DIR, "wrong")
-            #else
-            Utility::Directory::join(Utility::Directory::join(PLUGINS_DIR, "wrong"), CMAKE_INTDIR)
-            #endif
-        };
+        return {Utility::Directory::join(PLUGINS_DIR, "wrong")};
     }
 };
 

@@ -33,7 +33,11 @@ set_target_properties(
     HotDogWithSnail HotDogWithSnail-metadata
     OldBread OldBread-metadata
     RottenTomato RottenTomato-metadata
-    PROPERTIES FOLDER "Corrade/PluginManager/Test")
+    PROPERTIES
+        FOLDER "Corrade/PluginManager/Test"
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/food
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/food
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/food)
 
 # DLLs don't allow unresolved symbols; on static builds there's no dynamic
 # plugin manager library to refer to so it has to be linked as well

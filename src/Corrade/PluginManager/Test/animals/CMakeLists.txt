@@ -34,7 +34,11 @@ if(NOT CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT)
         Dog Dog-metadata
         Bulldog Bulldog-metadata
         PitBull PitBull-metadata
-        PROPERTIES FOLDER "Corrade/PluginManager/Test")
+        PROPERTIES
+            FOLDER "Corrade/PluginManager/Test"
+            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/animals
+            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/animals
+            ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/animals)
 endif()
 
 corrade_add_static_plugin(Canary ${CMAKE_CURRENT_BINARY_DIR} Canary.conf Canary.cpp)
@@ -50,7 +54,11 @@ target_link_libraries(Dird PRIVATE CorradePluginManagerTestLib)
 set_target_properties(
     Canary Canary-dependencies
     Dird Dird-dependencies
-    PROPERTIES FOLDER "Corrade/PluginManager/Test")
+    PROPERTIES
+        FOLDER "Corrade/PluginManager/Test"
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/animals
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/animals
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/animals)
 
 # DLLs don't allow unresolved symbols; on static builds there's no dynamic
 # plugin manager library to refer to so it has to be linked as well

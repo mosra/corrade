@@ -356,7 +356,15 @@ function(corrade_add_test test_name)
             # The EFFECTIVE_PLATFORM_NAME variable is not expanded when using
             # TARGET_* generator expressions on iOS, we need to hardcode it
             # manually. See http://public.kitware.com/pipermail/cmake/2016-March/063049.html
-            add_test(NAME ${test_name} COMMAND ${XCTest_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>${_CORRADE_EFFECTIVE_PLATFORM_NAME}/${test_name}Runner.xctest)
+            # In case we redirect the runtime output directory, use that (and
+            # assume there's no TARGET_* generator expression). This will of
+            # course break when someone sets the LIBRARY_OUTPUT_DIRECTORY
+            # property of the target, but that didn't work before either.
+            if(CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+                add_test(NAME ${test_name} COMMAND ${XCTest_EXECUTABLE} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${test_name}Runner.xctest)
+            else()
+                add_test(NAME ${test_name} COMMAND ${XCTest_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>${_CORRADE_EFFECTIVE_PLATFORM_NAME}/${test_name}Runner.xctest)
+            endif()
         else()
             xctest_add_test(${test_name} ${test_name}Runner)
         endif()
