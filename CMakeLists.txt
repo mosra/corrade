@@ -23,15 +23,11 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-# Oldest known CMake currently in use is 3.0.2 on Debian 8 (Jessie), but we
-# can't use that since it has a bug in handling imported targets -- a target
-# defined in a subdirectory (for example via
-# find_package(Corrade REQUIRED PluginManager)) and used as a dependency of
-# another target is not propagated correctly upwards, which results in errors
-# saying Corrade::PluginManager is not found. Next oldest supported version is
-# 3.5.2 (Ubuntu 16.04), but we don't need any features from that so let's stay
-# on 3.1.
-cmake_minimum_required(VERSION 3.1)
+# Oldest known CMake currently in use is 3.0.2 on Debian 8 (Jessie). Next
+# oldest supported version is 3.5.2 (Ubuntu 16.04), but we don't need any
+# features from that, 3.4 is required in order to have RUNTIME_OUTPUT_DIRECTORY
+# etc. properties accept generator expressions.
+cmake_minimum_required(VERSION 3.4)
 
 # As reported in https://github.com/mosra/corrade/issues/52 and then tracked
 # down to https://gitlab.kitware.com/cmake/cmake/issues/18099, CMake < 3.12 has
