@@ -50,10 +50,11 @@
 #include <android/api-level.h>
 #endif
 
-/* Unix memory mapping */
+/* Unix memory mapping, library location */
 #ifdef CORRADE_TARGET_UNIX
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <dlfcn.h> /* dladdr(), needs also -ldl */
 #endif
 
 /* Unix, Emscripten file & directory access */
@@ -341,15 +342,42 @@ std::string current() {
     #endif
 }
 
-#if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-std::string dllLocation(const char* name) {
-    HMODULE module = GetModuleHandleA(name);
-    if(!module) return {};
+#if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+std::string libraryLocation(const void* address) {
+    /* Linux (and macOS as well, even though Linux man pages don't mention that) */
+    #ifdef CORRADE_TARGET_UNIX
+    Dl_info info{};
+    if(!dladdr(address, &info)) {
+        Error e;
+        e << "Utility::Directory::libraryLocation(): can't get library location";
+        const char* const error = dlerror();
+        if(error)
+            e << Debug::nospace << ":" << error;
+        return {};
+    }
+
+    return info.dli_fname;
+    #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
+    HMODULE module{};
+    if(!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, reinterpret_cast<const char*>(address), &module)) {
+        /** @todo use FormatMessage() for a string error */
+        Error{} << "Utility::Directory::libraryLocation(): can't get library location:" << GetLastError();
+        return {};
+    }
+
+    /** @todo get rid of MAX_PATH */
     std::wstring path(MAX_PATH, L'\0');
     std::size_t size = GetModuleFileNameW(module, &path[0], path.size());
     path.resize(size);
     return fromNativeSeparators(narrow(path));
+    #endif
 }
+
+#ifndef DOXYGEN_GENERATING_OUTPUT
+std::string libraryLocation(Implementation::FunctionPointer address) {
+    return libraryLocation(address.address);
+}
+#endif
 #endif
 
 std::string executableLocation() {
@@ -383,7 +411,10 @@ std::string executableLocation() {
 
     /* Windows (not RT) */
     #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    return dllLocation(nullptr);
+    std::wstring path(MAX_PATH, L'\0');
+    std::size_t size = GetModuleFileNameW(nullptr, &path[0], path.size());
+    path.resize(size);
+    return fromNativeSeparators(narrow(path));
 
     /* hardcoded for Emscripten */
     #elif defined(CORRADE_TARGET_EMSCRIPTEN)

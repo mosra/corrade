@@ -124,7 +124,7 @@ namespace Corrade {
     directory
 -   New @ref Utility::Directory::isDirectory() utility for distinguishing
     between files and directories
--   @ref Utility::Directory::dllLocation() as a Windows-specific counterpart to
+-   @ref Utility::Directory::libraryLocation() as a counterpart to
     @ref Utility::Directory::executableLocation()
 -   @ref Utility::Directory::splitExtension() as a complement to
     @ref Utility::Directory::path() and @ref Utility::Directory::filename()

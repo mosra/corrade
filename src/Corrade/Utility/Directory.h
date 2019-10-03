@@ -255,23 +255,36 @@ and returns an empty string. Returned value is encoded in UTF-8.
 */
 CORRADE_UTILITY_EXPORT std::string current();
 
-#if (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(DOXYGEN_GENERATING_OUTPUT)
+#if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
 /**
-@brief DLL location
+@brief Shared library location containing given address
 
 Like @ref executableLocation() but instead of the main executable returns
-location of a DLL that's linked to the application. The @p name is the filename
-of the DLL without the extension, if you pass @cpp nullptr @ce you get the same
-behavior as @ref executableLocation(). If the DLL is not found, an empty string
-is returned. Returned value is encoded in UTF-8.
-
-For example, @cpp dllLocation("CorradeUtility") @ce returns location of the DLL
-containing this function, however note that debug DLLs might be named
-differently than release ones (in case of Corrade and Magnum libraries, with a
-`-d` suffix), and DLLs built with MinGW can (but don't need to) have a `lib` prefix.
-@partialsupport Available only on non-RT @ref CORRADE_TARGET_WINDOWS "Windows".
+location of a shared library that contains @p address. If the address is not
+contained in a shared object, an error is printed to the output and an empty
+string is returned. Returned value is encoded in UTF-8.
+@partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
+    @ref CORRADE_TARGET_WINDOWS "Windows" platforms.
 */
-CORRADE_UTILITY_EXPORT std::string dllLocation(const char* name);
+CORRADE_UTILITY_EXPORT std::string libraryLocation(const void* address);
+
+/** @overload */
+#ifdef DOXYGEN_GENERATING_OUTPUT
+template<class R, class ...Args> std::string libraryLocation(R(*address)(Args...));
+#else
+/* Can't do a template because that would mean including <string>. NOPE NOPE */
+namespace Implementation {
+    /** @todo make a reusable type in Containers for this once there's more
+        than one use case? */
+    struct FunctionPointer {
+        /* Assuming both POSIX and Windows allow this (otherwise dlsym() or
+           GetProcAddress() wouldn't work either) */
+        template<class R, class ...Args> /*implicit*/ FunctionPointer(R(*address)(Args...)): address{reinterpret_cast<const void*>(address)} {}
+        const void* address;
+    };
+}
+CORRADE_UTILITY_EXPORT std::string libraryLocation(Implementation::FunctionPointer address);
+#endif
 #endif
 
 /**
@@ -280,12 +293,11 @@ CORRADE_UTILITY_EXPORT std::string dllLocation(const char* name);
 Returns location of the executable on Linux, Windows, non-sandboxed and
 sandboxed macOS and iOS. On other systems or if the directory can't be found,
 a warning is printed and an empty string is returned. Returned value is encoded
-in UTF-8. On Windows this is equivalent to calling @ref dllLocation() with
-@cpp nullptr @ce as an argument.
+in UTF-8.
 @note The path is returned with forward slashes on all platforms. Use
     @ref toNativeSeparators() to convert it to platform-specific format, if
     needed.
-@see @ref current()
+@see @ref current(), @ref libraryLocation()
 */
 CORRADE_UTILITY_EXPORT std::string executableLocation();
 

@@ -70,10 +70,8 @@ if(NOT BUILD_STATIC)
 elseif(BUILD_STATIC_PIC)
     set_target_properties(CorradePluginManager PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
+# Utility also does -ldl now
 target_link_libraries(CorradePluginManager CorradeUtility)
-if(CORRADE_TARGET_UNIX)
-    target_link_libraries(CorradePluginManager ${CMAKE_DL_LIBS})
-endif()
 
 install(TARGETS CorradePluginManager
         RUNTIME DESTINATION ${CORRADE_BINARY_INSTALL_DIR}

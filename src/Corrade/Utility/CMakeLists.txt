@@ -134,9 +134,13 @@ if(WITH_UTILITY)
         set_target_properties(CorradeUtility PROPERTIES POSITION_INDEPENDENT_CODE ON)
     endif()
 
+    # Directory::libraryLocation() needs this
+    if(CORRADE_TARGET_UNIX)
+        target_link_libraries(CorradeUtility PUBLIC ${CMAKE_DL_LIBS})
+    endif()
     # AndroidLogStreamBuffer class needs to be linked to log library
     if(CORRADE_TARGET_ANDROID)
-        target_link_libraries(CorradeUtility log)
+        target_link_libraries(CorradeUtility PUBLIC log)
     endif()
 
     install(TARGETS CorradeUtility
@@ -212,7 +216,11 @@ if(NOT CMAKE_CROSSCOMPILING)
         target_compile_definitions(corrade-rc PRIVATE "CORRADE_BUILD_STATIC")
     else()
         add_executable(corrade-rc rc.cpp)
-        target_link_libraries(corrade-rc CorradeUtility)
+        target_link_libraries(corrade-rc PRIVATE CorradeUtility)
+    endif()
+    # Directory::libraryLocation() needs this
+    if(CORRADE_TARGET_UNIX)
+        target_link_libraries(corrade-rc PRIVATE ${CMAKE_DL_LIBS})
     endif()
     set_target_properties(corrade-rc PROPERTIES FOLDER "Corrade/Utility")
     install(TARGETS corrade-rc DESTINATION ${CORRADE_BINARY_INSTALL_DIR})

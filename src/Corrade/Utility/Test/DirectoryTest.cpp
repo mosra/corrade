@@ -80,10 +80,8 @@ struct DirectoryTest: TestSuite::Tester {
     void current();
     void currentUtf8();
 
-    #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-    void dllLocation();
-    void dllLocationUtf8();
-    #endif
+    void libraryLocation();
+    void libraryLocationUtf8();
     void executableLocation();
     void executableLocationUtf8();
 
@@ -190,10 +188,8 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::current,
               &DirectoryTest::currentUtf8,
 
-              #if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-              &DirectoryTest::dllLocation,
-              &DirectoryTest::dllLocationUtf8,
-              #endif
+              &DirectoryTest::libraryLocation,
+              &DirectoryTest::libraryLocationUtf8,
               &DirectoryTest::executableLocation,
               &DirectoryTest::executableLocationUtf8,
 
@@ -605,28 +601,20 @@ void DirectoryTest::currentUtf8() {
     CORRADE_SKIP("Not sure how to test this.");
 }
 
-#if defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
-void DirectoryTest::dllLocation() {
+void DirectoryTest::libraryLocation() {
     #ifdef CORRADE_BUILD_STATIC
-    CORRADE_SKIP("Corrade built as static, no DLLs to test against.");
+    CORRADE_SKIP("Corrade built as static, no libraries to test against.");
     #endif
 
-    const std::string dllLocation = Directory::dllLocation(
-        #ifdef __MINGW32__
-        "lib"
-        #endif
-        #ifdef CORRADE_IS_DEBUG_BUILD
-        "CorradeUtility-d"
-        #else
-        "CorradeUtility"
-        #endif
-    );
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    const std::string libraryLocation = Directory::libraryLocation(&Utility::Directory::rm);
 
-    Debug{} << "Corrade::Utility DLL location found as:" << dllLocation;
+    Debug{} << "Corrade::Utility library location found as:" << libraryLocation;
 
     /* Shouldn't be empty */
-    CORRADE_VERIFY(!dllLocation.empty());
+    CORRADE_VERIFY(!libraryLocation.empty());
 
+    #ifdef CORRADE_TARGET_WINDOWS
     /* There should be a TestSuite DLL next to this one (assuming all DLLs are
        installed into a single PATH location) */
     const std::string testSuiteDllName =
@@ -639,22 +627,32 @@ void DirectoryTest::dllLocation() {
         "CorradeTestSuite.dll"
         #endif
         ;
-    CORRADE_VERIFY(Directory::exists(Directory::join(Directory::path(dllLocation), testSuiteDllName)));
+    CORRADE_VERIFY(Directory::exists(Directory::join(Directory::path(libraryLocation), testSuiteDllName)));
 
     /* It shouldn't contain backslashes */
-    CORRADE_COMPARE(dllLocation.find('\\'), std::string::npos);
+    CORRADE_COMPARE(libraryLocation.find('\\'), std::string::npos);
+    #else
+    /* We have RPATH, so the *.so/.dylib is hidden inside the build dir and
+       thus there should be the path reflected (assuming
+       CMAKE_RUNTIME_OUTPUT_LOCATION wasn't overriden) */
+    CORRADE_VERIFY(libraryLocation.find("src/Corrade/Utility") != std::string::npos);
+    #endif
 
-    /* For nullptr it should give back the same as executableLocation() */
-    CORRADE_COMPARE(Directory::dllLocation(nullptr), Directory::executableLocation());
+    /* Passing a null pointer should fail */
+    CORRADE_COMPARE(Directory::libraryLocation(nullptr), "");
 
-    /* For a not found DLL it should give back an empty string */
-    CORRADE_COMPARE(Directory::dllLocation("ThisDllDoesNotExist"), "");
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
 }
 
-void DirectoryTest::dllLocationUtf8() {
+void DirectoryTest::libraryLocationUtf8() {
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     CORRADE_SKIP("Not sure how to test this.");
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
 }
-#endif
 
 void DirectoryTest::executableLocation() {
     const std::string executableLocation = Directory::executableLocation();
