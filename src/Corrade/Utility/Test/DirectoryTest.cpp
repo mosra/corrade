@@ -37,6 +37,11 @@
 
 #include "configure.h"
 
+#ifdef CORRADE_UTILITY_LINUX
+/* Needed for an XFAIL in libraryLocation() for older glibcs */
+#include <dlfcn.h>
+#endif
+
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
 struct DirectoryTest: TestSuite::Tester {
@@ -614,32 +619,44 @@ void DirectoryTest::libraryLocation() {
     /* Shouldn't be empty */
     CORRADE_VERIFY(!libraryLocation.empty());
 
-    /* There should be a TestSuite library next to this one */
-    const std::string testSuiteLibraryName =
-        #ifdef CORRADE_TARGET_WINDOWS
-        #ifdef __MINGW32__
-        "lib"
+    {
+        /* https://sourceware.org/bugzilla/show_bug.cgi?id=20292 probably?
+           doesn't seem like that, but couldn't find anything else in the
+           changelog that would be relevant */
+        #ifdef __GLIBC__
+        #if __GLIBC__*100 + __GLIBC_MINOR__ < 225
+        CORRADE_EXPECT_FAIL("glibc < 2.25 returns executable location from dladdr()");
         #endif
-        #ifdef CORRADE_IS_DEBUG_BUILD
-        "CorradeTestSuite-d.dll"
-        #else
-        "CorradeTestSuite.dll"
+        CORRADE_VERIFY(libraryLocation != Directory::executableLocation());
         #endif
-        #elif defined(CORRADE_TARGET_APPLE)
-        #ifdef CORRADE_IS_DEBUG_BUILD
-        "libCorradeTestSuite-d.dylib"
-        #else
-        "libCorradeTestSuite.dylib"
-        #endif
-        #else
-        #ifdef CORRADE_IS_DEBUG_BUILD
-        "libCorradeTestSuite-d.so"
-        #else
-        "libCorradeTestSuite.so"
-        #endif
-        #endif
-        ;
-    CORRADE_VERIFY(Directory::exists(Directory::join(Directory::path(libraryLocation), testSuiteLibraryName)));
+
+        /* There should be a TestSuite library next to this one */
+        const std::string testSuiteLibraryName =
+            #ifdef CORRADE_TARGET_WINDOWS
+            #ifdef __MINGW32__
+            "lib"
+            #endif
+            #ifdef CORRADE_IS_DEBUG_BUILD
+            "CorradeTestSuite-d.dll"
+            #else
+            "CorradeTestSuite.dll"
+            #endif
+            #elif defined(CORRADE_TARGET_APPLE)
+            #ifdef CORRADE_IS_DEBUG_BUILD
+            "libCorradeTestSuite-d.dylib"
+            #else
+            "libCorradeTestSuite.dylib"
+            #endif
+            #else
+            #ifdef CORRADE_IS_DEBUG_BUILD
+            "libCorradeTestSuite-d.so"
+            #else
+            "libCorradeTestSuite.so"
+            #endif
+            #endif
+            ;
+        CORRADE_VERIFY(Directory::exists(Directory::join(Directory::path(libraryLocation), testSuiteLibraryName)));
+    }
 
     #ifdef CORRADE_TARGET_WINDOWS
     /* It shouldn't contain backslashes */
