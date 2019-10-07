@@ -93,6 +93,19 @@ set_target_properties(
     PluginManagerAbstractPluginTest
     PROPERTIES FOLDER "Corrade/PluginManager/Test")
 
+if(CORRADE_BUILD_STATIC)
+    # CMake < 3.4 does this implicitly, but 3.4+ not anymore (see CMP0065).
+    # That's generally okay, *except if* the build is static, the executable
+    # uses a plugin manager and needs to share globals with the plugins (such
+    # as output redirection and so on).
+    set_target_properties(
+        PluginManagerManagerTest
+        PluginManagerManagerInitFiniTest
+        PluginManagerImportStaticTest
+        PluginManagerAbstractPluginTest
+        PROPERTIES ENABLE_EXPORTS ON)
+endif()
+
 if(CORRADE_BUILD_STATIC AND NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET_IOS AND NOT CORRADE_TARGET_ANDROID AND NOT CORRADE_TARGET_WINDOWS_RT)
     # Yes, adding AbstractAnimal.cpp to both targets is fine in this case.
     # The whole Corrade gets duplicated too. Using CorradePluginManagerTestLib
