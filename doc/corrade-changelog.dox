@@ -180,7 +180,7 @@ namespace Corrade {
     next.
 -   @ref PluginManager::Manager and @ref Utility::Debug now have the global
     state thread-local when the @ref CORRADE_BUILD_MULTITHREADED option is
-    enabled.
+    enabled (see also [mosra/corrade#65](https://github.com/mosra/corrade/issues/65))
 
 @subsubsection corrade-changelog-latest-changes-containers Containers library
 
