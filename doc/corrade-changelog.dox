@@ -232,6 +232,8 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-changes-utility Utility library
 
+-   Assertion messages now ignore @ref Utility::Error output redirection to
+    ensure the application never aborts without a message
 -   @ref Utility::Debug output behavior can be now configured using new
     @ref Utility::Debug::setFlags() and @ref Utility::Debug::setImmediateFlags()
     in addition to output modifiers such as @ref Utility::Debug::nospace
