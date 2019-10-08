@@ -365,10 +365,20 @@ class CORRADE_UTILITY_EXPORT Debug {
         /*@}*/
 
         /**
+         * @brief Default debug output stream
+         *
+         * Debug output when no output redirection happens. A pointer to
+         * @ref std::cout.
+         * @see @ref output()
+         */
+        static std::ostream* defaultOutput();
+
+        /**
          * @brief Current debug output stream
          *
          * Debug output constructed with the @ref Debug(Flags) constructor will
          * be using this output stream.
+         * @see @ref defaultOutput()
          */
         static std::ostream* output();
 
@@ -749,10 +759,20 @@ outputs.
 class CORRADE_UTILITY_EXPORT Warning: public Debug {
     public:
         /**
+         * @brief Default warning output stream
+         *
+         * Warning output when no output redirection happens. A pointer to
+         * @ref std::cerr.
+         * @see @ref output()
+         */
+        static std::ostream* defaultOutput();
+
+        /**
          * @brief Current warning output stream
          *
          * Warning output constructed with the @ref Warning(Flags) constructor
          * will be using this output stream.
+         * @see @ref defaultOutput()
          */
         static std::ostream* output();
 
@@ -823,10 +843,20 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
 
     public:
         /**
+         * @brief Default error output stream
+         *
+         * Error output when no output redirection happens. A pointer to
+         * @ref std::cerr.
+         * @see @ref output()
+         */
+        static std::ostream* defaultOutput();
+
+        /**
          * @brief Current error output stream
          *
          * Error output constructed with the @ref Error(Flags) constructor
          * will be using this output stream.
+         * @see @ref defaultOutput()
          */
         static std::ostream* output();
 

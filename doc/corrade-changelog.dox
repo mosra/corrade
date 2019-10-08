@@ -147,6 +147,10 @@ namespace Corrade {
 -   @ref Utility::Debug scoped output redirection and coloring is now done
     thread-local by default (see
     [mosra/corrade#66](https://github.com/mosra/corrade/pull/66))
+-   Added @ref Utility::Debug::defaultOutput(),
+    @ref Utility::Warning::defaultOutput() and
+    @ref Utility::Error::defaultOutput() for easy redirection back to the
+    default output
 -   @ref Utility::Arguments is now able to ignore unknown options in the
     prefixed variant
 -   Added @ref Utility::Arguments::addFinalOptionalArgument(), combining the

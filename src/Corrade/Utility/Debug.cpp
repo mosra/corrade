@@ -228,6 +228,10 @@ void Debug::setImmediateFlags(Flags flags) {
     _immediateFlags = InternalFlag(static_cast<unsigned char>(flags));
 }
 
+std::ostream* Debug::defaultOutput() { return &std::cout; }
+std::ostream* Warning::defaultOutput() { return &std::cerr; }
+std::ostream* Error::defaultOutput() { return &std::cerr; }
+
 std::ostream* Debug::output() { return debugGlobals.output; }
 std::ostream* Warning::output() { return debugGlobals.warningOutput; }
 std::ostream* Error::output() { return debugGlobals.errorOutput; }
