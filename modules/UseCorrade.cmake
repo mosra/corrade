@@ -527,15 +527,15 @@ function(corrade_add_plugin plugin_name debug_install_dirs release_install_dirs 
             LINK_FLAGS "-undefined dynamic_lookup")
     endif()
 
-    # Copy metadata next to the binary for testing purposes
-    add_custom_command(
-        OUTPUT ${plugin_name}.conf
+    # Force IDEs display also the resource files in project view
+    add_custom_target(${plugin_name}-metadata SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
+
+    # Copy metadata next to the binary so tests and CMake subprojects can use
+    # it as well
+    add_custom_command(TARGET ${plugin_name} POST_BUILD
+        BYPRODUCTS ${plugin_name}.conf
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} $<TARGET_FILE_DIR:${plugin_name}>/${plugin_name}.conf
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
-    add_custom_target(${plugin_name}-metadata ALL
-        DEPENDS ${plugin_name}.conf
-        # Force IDEs display also the metadata file in project view
-        SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file})
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} ${name}-metadata)
 
     # Install it somewhere, unless that's explicitly not wanted
     if(NOT debug_install_dirs STREQUAL CMAKE_CURRENT_BINARY_DIR)

@@ -304,6 +304,8 @@ namespace Corrade {
     target as well. See @ref corrade-cmake for more information.
 -   Fixed @ref corrade-cmake-add-test "corrade_add_test()" when library output
     path is set in CMake (see [mosra/corrade#77](https://github.com/mosra/corrade/pull/77))
+-   Plugin metadata are now copied next to the binary as a post-build command
+    instead of only during a full build
 
 @subsection corrade-changelog-latest-bugfixes Bug fixes
 
