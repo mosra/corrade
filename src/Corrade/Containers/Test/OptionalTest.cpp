@@ -400,6 +400,14 @@ void OptionalTest::constructMove() {
     CORRADE_COMPARE(Movable::destructed, 2);
     CORRADE_COMPARE(Movable::moved, 1);
 
+    CORRADE_VERIFY(!std::is_copy_constructible<Movable>::value);
+    CORRADE_VERIFY(!std::is_copy_assignable<Movable>::value);
+    {
+        CORRADE_EXPECT_FAIL("Optional currently doesn't propagate deleted copy constructor/assignment correctly.");
+        CORRADE_VERIFY(!std::is_copy_constructible<Optional<Movable>>::value);
+        CORRADE_VERIFY(!std::is_copy_assignable<Optional<Movable>>::value);
+    }
+
     CORRADE_VERIFY(std::is_nothrow_move_constructible<Movable>::value);
     CORRADE_VERIFY(std::is_nothrow_move_constructible<Optional<Movable>>::value);
     CORRADE_VERIFY((std::is_nothrow_constructible<Optional<Movable>, Movable&&>::value));
@@ -440,6 +448,18 @@ void OptionalTest::constructInPlace() {
 
     CORRADE_COMPARE(Immovable::constructed, 1);
     CORRADE_COMPARE(Immovable::destructed, 1);
+
+    CORRADE_VERIFY(!std::is_copy_constructible<Immovable>::value);
+    CORRADE_VERIFY(!std::is_move_constructible<Immovable>::value);
+    CORRADE_VERIFY(!std::is_copy_assignable<Immovable>::value);
+    CORRADE_VERIFY(!std::is_move_assignable<Immovable>::value);
+    {
+        CORRADE_EXPECT_FAIL("Optional currently doesn't propagate deleted copy/move constructor/assignment correctly.");
+        CORRADE_VERIFY(!std::is_copy_constructible<Optional<Immovable>>::value);
+        CORRADE_VERIFY(!std::is_move_constructible<Optional<Immovable>>::value);
+        CORRADE_VERIFY(!std::is_copy_assignable<Optional<Immovable>>::value);
+        CORRADE_VERIFY(!std::is_move_assignable<Optional<Immovable>>::value);
+    }
 
     CORRADE_VERIFY((std::is_nothrow_constructible<Optional<Immovable>, InPlaceInitT, int, int&&>::value));
     CORRADE_VERIFY((std::is_constructible<Optional<Throwable>, InPlaceInitT, int>::value));
