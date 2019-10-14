@@ -131,7 +131,7 @@ template<class T> class Optional {
          * @see @ref operator bool(), @ref operator->(), @ref operator*()
          */
         /*implicit*/ Optional(const T& value) noexcept(std::is_nothrow_copy_assignable<T>::value): _set{true} {
-            new(&_value.v) T{value};
+            new(&_value) T{value};
         }
 
         /**
@@ -141,7 +141,7 @@ template<class T> class Optional {
          * @see @ref operator bool(), @ref operator->(), @ref operator*()
          */
         /*implicit*/ Optional(T&& value) noexcept(std::is_nothrow_move_assignable<T>::value): _set{true} {
-            new(&_value.v) T{std::move(value)};
+            new(&_value) T{std::move(value)};
         }
 
         /**
@@ -152,7 +152,7 @@ template<class T> class Optional {
          *      @ref emplace()
          */
         template<class ...Args> /*implicit*/ Optional(InPlaceInitT, Args&&... args) noexcept(std::is_nothrow_constructible<T, Args&&...>::value): _set{true} {
-            new(&_value.v) T{std::forward<Args>(args)...};
+            new(&_value) T{std::forward<Args>(args)...};
         }
 
         /**
@@ -226,7 +226,7 @@ template<class T> class Optional {
          * If the optional object is not empty, calls destructor on stored
          * value.
          */
-        ~Optional() { if(_set) _value.v.~T(); }
+        ~Optional() { if(_set) _value.~T(); }
 
         /**
          * @brief Whether the optional object has a value
@@ -244,7 +244,7 @@ template<class T> class Optional {
          * otherwise.
          */
         bool operator==(const Optional<T>& other) const {
-            return (!_set && !other._set) || (_set && other._set && _value.v == other._value.v);
+            return (!_set && !other._set) || (_set && other._set && _value == other._value);
         }
 
         /**
@@ -279,7 +279,7 @@ template<class T> class Optional {
          * equal to @p other, @cpp false @ce otherwise.
          */
         bool operator==(const T& other) const {
-            return _set ? _value.v == other : false;
+            return _set ? _value == other : false;
         }
 
         /**
@@ -296,14 +296,14 @@ template<class T> class Optional {
          * @see @ref operator bool(), @ref operator*()
          */
         T* operator->() {
-            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", &_value.v);
-            return &_value.v;
+            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", &_value);
+            return &_value;
         }
 
         /** @overload */
         const T* operator->() const {
-            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", &_value.v);
-            return &_value.v;
+            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", &_value);
+            return &_value;
         }
 
         /**
@@ -313,20 +313,20 @@ template<class T> class Optional {
          * @see @ref operator bool(), @ref operator->()
          */
         T& operator*() & {
-            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", _value.v);
-            return _value.v;
+            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", _value);
+            return _value;
         }
 
         /** @overload */
         T&& operator*() && {
-            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", std::move(_value.v));
-            return std::move(_value.v);
+            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", std::move(_value));
+            return std::move(_value);
         }
 
         /** @overload */
         const T& operator*() const & {
-            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", _value.v);
-            return _value.v;
+            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", _value);
+            return _value;
         }
 
         #if !defined(__GNUC__) || defined(__clang__) || __GNUC__ > 4
@@ -334,8 +334,8 @@ template<class T> class Optional {
         /* This causes ambiguous overload on GCC 4.8 (and I assume 4.9 as
            well), so disabling it there. See also the corresponding test. */
         const T&& operator*() const && {
-            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", std::move(_value.v));
-            return std::move(_value.v);
+            CORRADE_ASSERT(_set, "Containers::Optional: the optional is empty", std::move(_value));
+            return std::move(_value);
         }
         #endif
 
@@ -349,13 +349,9 @@ template<class T> class Optional {
         template<class ...Args> T& emplace(Args&&... args);
 
     private:
-        union Storage {
-            constexpr Storage() noexcept: _{} {}
-            ~Storage() {}
-
-            T v;
-            char _;
-        } _value;
+        union {
+            T _value;
+        };
         bool _set;
 };
 
@@ -463,41 +459,41 @@ template<class T> Utility::Debug& operator<<(Utility::Debug& debug, const Option
 #endif
 
 template<class T> Optional<T>::Optional(const Optional<T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value): _set(other._set) {
-    if(_set) new(&_value.v) T{other._value.v};
+    if(_set) new(&_value) T{other._value};
 }
 
 template<class T> Optional<T>::Optional(Optional<T>&& other) noexcept(std::is_nothrow_move_constructible<T>::value): _set(other._set) {
-    if(_set) new(&_value.v) T{std::move(other._value.v)};
+    if(_set) new(&_value) T{std::move(other._value)};
 }
 
 template<class T> Optional<T>& Optional<T>::operator=(const Optional<T>& other) noexcept(std::is_nothrow_copy_assignable<T>::value) {
-    if(_set) _value.v.~T();
-    if((_set = other._set)) new(&_value.v) T{other._value.v};
+    if(_set) _value.~T();
+    if((_set = other._set)) new(&_value) T{other._value};
     return *this;
 }
 
 template<class T> Optional<T>& Optional<T>::operator=(Optional<T>&& other) noexcept(std::is_nothrow_move_assignable<T>::value) {
     if(_set && other._set) {
         using std::swap;
-        swap(other._value.v, _value.v);
+        swap(other._value, _value);
     } else {
-        if(_set) _value.v.~T();
-        if((_set = other._set)) new(&_value.v) T{std::move(other._value.v)};
+        if(_set) _value.~T();
+        if((_set = other._set)) new(&_value) T{std::move(other._value)};
     }
     return *this;
 }
 
 template<class T> Optional<T>& Optional<T>::operator=(NullOptT) noexcept {
-    if(_set) _value.v.~T();
+    if(_set) _value.~T();
     _set = false;
     return *this;
 }
 
 template<class T> template<class ...Args> T& Optional<T>::emplace(Args&&... args) {
-    if(_set) _value.v.~T();
+    if(_set) _value.~T();
     _set = true;
-    new(&_value.v) T{std::forward<Args>(args)...};
-    return _value.v;
+    new(&_value) T{std::forward<Args>(args)...};
+    return _value;
 }
 
 }}
