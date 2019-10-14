@@ -29,6 +29,8 @@
 #include <cstring>
 #include <algorithm>
 
+#include "Corrade/Containers/StaticArray.h"
+
 namespace Corrade { namespace Utility { namespace String {
 
 namespace Implementation {
@@ -213,6 +215,44 @@ std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const
         parts.push_back(string.substr(oldpos));
 
     return parts;
+}
+
+namespace {
+
+Containers::StaticArray<3, std::string> partitionInternal(const std::string& string, Containers::ArrayView<const char> separator) {
+    const std::size_t pos = string.find(separator, 0, separator.size());
+    return {
+        string.substr(0, pos),
+        pos == std::string::npos ? std::string{} : string.substr(pos, separator.size()),
+        pos == std::string::npos ? std::string{} : string.substr(pos + separator.size())
+    };
+}
+
+Containers::StaticArray<3, std::string> rpartitionInternal(const std::string& string, Containers::ArrayView<const char> separator) {
+    const std::size_t pos = string.rfind(separator, std::string::npos, separator.size());
+    return {
+        pos == std::string::npos ? std::string{} : string.substr(0, pos),
+        pos == std::string::npos ? std::string{} : string.substr(pos, separator.size()),
+        pos == std::string::npos ? string.substr(0) : string.substr(pos + separator.size())
+    };
+}
+
+}
+
+Containers::StaticArray<3, std::string> partition(const std::string& string, char separator) {
+    return partitionInternal(string, {&separator, 1});
+}
+
+Containers::StaticArray<3, std::string> partition(const std::string& string, const std::string& separator) {
+    return partitionInternal(string, {separator.data(), separator.size()});
+}
+
+Containers::StaticArray<3, std::string> rpartition(const std::string& string, char separator) {
+    return rpartitionInternal(string, {&separator, 1});
+}
+
+Containers::StaticArray<3, std::string> rpartition(const std::string& string, const std::string& separator) {
+    return rpartitionInternal(string, {separator.data(), separator.size()});
 }
 
 std::string lowercase(std::string string) {

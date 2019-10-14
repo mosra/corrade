@@ -159,6 +159,8 @@ namespace Corrade {
     example if the file is missing) and to optionally not signal a change if
     the file is empty; @ref Utility::Tweakable is using these features for more
     robustness
+-   Added @ref Utility::String::partition() and @ref Utility::String::rpartition() "rpartition()",
+    equivalent to Python's @cb{.py} str.partition() @ce
 -   New @ref CORRADE_FUNCTION utility macro for a portable C++11 @cpp __func__ @ce
 -   New @ref CORRADE_LINE_STRING utility macro for a stringified @cpp __LINE__ @ce
 -   New @ref CORRADE_THREAD_LOCAL macro for a portable @cpp thread_local @ce

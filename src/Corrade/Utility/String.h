@@ -289,6 +289,36 @@ with @cpp " \t\f\v\r\n" @ce as second parameter.
 CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std::string& string);
 
 /**
+@brief Partition a string
+
+Equivalent to Python's @m_class{m-doc-external} [str.partition()](https://docs.python.org/3/library/stdtypes.html#str.partition).
+Splits @p string at the first occurence of @p separator. First returned value
+is the part before the separator, second the separator, third a part after the
+separator. If the separator is not found, returns the input string followed by
+two empty strings.
+@see @ref rpartition()
+*/
+CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> partition(const std::string& string, char separator);
+
+/** @overload */
+CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> partition(const std::string& string, const std::string& delimiter);
+
+/**
+@brief Right-partition a string
+
+Equivalent to Python's @m_class{m-doc-external} [str.rpartition()](https://docs.python.org/3/library/stdtypes.html#str.rpartition).
+Splits @p string at the last occurence of @p separator. First returned value is
+the part before the separator, second the separator, third a part after the
+separator. If the separator is not found, returns two empty strings followed by
+the input string.
+@see @ref partition()
+*/
+CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> rpartition(const std::string& string, char separator);
+
+/** @overload */
+CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> rpartition(const std::string& string, const std::string& delimiter);
+
+/**
 @brief Join strings with given character
 @param strings      Strings to join
 @param delimiter    Delimiter

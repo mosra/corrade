@@ -25,6 +25,7 @@
 
 #include <sstream>
 
+#include "Corrade/Containers/StaticArray.h"
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h"
@@ -40,6 +41,7 @@ struct StringTest: TestSuite::Tester {
     void trimInPlace();
     void split();
     void splitMultipleCharacters();
+    void partition();
     void join();
     void lowercase();
     void uppercase();
@@ -73,6 +75,7 @@ StringTest::StringTest() {
               &StringTest::trimInPlace,
               &StringTest::split,
               &StringTest::splitMultipleCharacters,
+              &StringTest::partition,
               &StringTest::join,
               &StringTest::lowercase,
               &StringTest::uppercase,
@@ -274,6 +277,48 @@ void StringTest::splitMultipleCharacters() {
     /* Whitespace */
     CORRADE_COMPARE_AS(String::splitWithoutEmptyParts("ab c  \t \ndef\r"),
         (std::vector<std::string>{"ab", "c", "def"}), TestSuite::Compare::Container);
+}
+
+void StringTest::partition() {
+    /* Happy case */
+    CORRADE_COMPARE_AS(String::partition("ab=c", '='),
+        (Containers::StaticArray<3, std::string>{"ab", "=", "c"}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(String::rpartition("ab=c", '='),
+        (Containers::StaticArray<3, std::string>{"ab", "=", "c"}),
+        TestSuite::Compare::Container);
+
+    /* Two occurences */
+    CORRADE_COMPARE_AS(String::partition("ab=c=d", '='),
+        (Containers::StaticArray<3, std::string>{"ab", "=", "c=d"}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(String::rpartition("ab=c=d", '='),
+        (Containers::StaticArray<3, std::string>{"ab=c", "=", "d"}),
+        TestSuite::Compare::Container);
+
+    /* Not found */
+    CORRADE_COMPARE_AS(String::partition("abc", '='),
+        (Containers::StaticArray<3, std::string>{"abc", "", ""}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(String::rpartition("abc", '='),
+        (Containers::StaticArray<3, std::string>{"", "", "abc"}),
+        TestSuite::Compare::Container);
+
+    /* Empty input */
+    CORRADE_COMPARE_AS(String::partition("", '='),
+        (Containers::StaticArray<3, std::string>{"", "", ""}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(String::rpartition("", '='),
+        (Containers::StaticArray<3, std::string>{"", "", ""}),
+        TestSuite::Compare::Container);
+
+    /* More characters */
+    CORRADE_COMPARE_AS(String::partition("ab, c, d", ", "),
+        (Containers::StaticArray<3, std::string>{"ab", ", ", "c, d"}),
+        TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(String::rpartition("ab, c, d", ", "),
+        (Containers::StaticArray<3, std::string>{"ab, c", ", ", "d"}),
+        TestSuite::Compare::Container);
 }
 
 void StringTest::join() {
