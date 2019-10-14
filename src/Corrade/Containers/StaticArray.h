@@ -207,22 +207,22 @@ template<std::size_t size_, class T> class StaticArray {
         #ifdef DOXYGEN_GENERATING_OUTPUT
         template<class ...Args> /*implicit*/ StaticArray(Args&&... args);
         #else
-        template<class First, class ...Next> /*implicit*/ StaticArray(First&& first, Next&&... next): StaticArray{InPlaceInit, std::forward<First>(first), std::forward<Next>(next)...} {}
+        template<class First, class ...Next, class = typename std::enable_if<std::is_convertible<First&&, T>::value>::type> /*implicit*/ StaticArray(First&& first, Next&&... next): StaticArray{InPlaceInit, std::forward<First>(first), std::forward<Next>(next)...} {}
         #endif
 
-        /** @brief Copying is not allowed */
-        StaticArray(const StaticArray<size_, T>&) = delete;
+        /** @brief Copy constructor */
+        StaticArray(const StaticArray<size_, T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value);
 
-        /** @brief Moving is not allowed */
-        StaticArray(StaticArray<size_, T>&&) = delete;
+        /** @brief Move constructor */
+        StaticArray(StaticArray<size_, T>&& other) noexcept(std::is_nothrow_move_constructible<T>::value);
 
         ~StaticArray();
 
-        /** @brief Copying is not allowed */
-        StaticArray<size_, T>& operator=(const StaticArray<size_, T>&) = delete;
+        /** @brief Copy assignment */
+        StaticArray<size_, T>& operator=(const StaticArray<size_, T>&) noexcept(std::is_nothrow_copy_constructible<T>::value);
 
-        /** @brief Moving is not allowed */
-        StaticArray<size_, T>& operator=(StaticArray<size_, T>&&) = delete;
+        /** @brief Move assignment */
+        StaticArray<size_, T>& operator=(StaticArray<size_, T>&&) noexcept(std::is_nothrow_move_constructible<T>::value);
 
         /* The following view conversion is *not* restricted to this& because
            that would break uses like `consume(foo());`, where `consume()`
@@ -553,8 +553,31 @@ template<std::size_t size_, class T> template<class ...Args> StaticArray<size_, 
     }
 }
 
+template<std::size_t size_, class T> StaticArray<size_, T>::StaticArray(const StaticArray<size_, T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value): StaticArray{NoInit} {
+    for(std::size_t i = 0; i != other.size(); ++i)
+        new(&_data[i]) T{other._data[i]};
+}
+
+template<std::size_t size_, class T> StaticArray<size_, T>::StaticArray(StaticArray<size_, T>&& other) noexcept(std::is_nothrow_move_constructible<T>::value): StaticArray{NoInit} {
+    for(std::size_t i = 0; i != other.size(); ++i)
+        new(&_data[i]) T{std::move(other._data[i])};
+}
+
 template<std::size_t size_, class T> StaticArray<size_, T>::~StaticArray() {
     for(T& i: _data) i.~T();
+}
+
+template<std::size_t size_, class T> StaticArray<size_, T>& StaticArray<size_, T>::operator=(const StaticArray<size_, T>& other) noexcept(std::is_nothrow_copy_constructible<T>::value) {
+    for(std::size_t i = 0; i != other.size(); ++i)
+        _data[i] = other._data[i];
+    return *this;
+}
+
+template<std::size_t size_, class T> StaticArray<size_, T>& StaticArray<size_, T>::operator=(StaticArray<size_, T>&& other) noexcept(std::is_nothrow_move_constructible<T>::value) {
+    using std::swap;
+    for(std::size_t i = 0; i != other.size(); ++i)
+        swap(_data[i], other._data[i]);
+    return *this;
 }
 
 template<std::size_t size_, class T> template<std::size_t viewSize> StaticArrayView<viewSize, T> StaticArray<size_, T>::prefix() {

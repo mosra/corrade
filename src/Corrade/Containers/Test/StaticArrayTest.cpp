@@ -65,6 +65,8 @@ namespace Test { namespace {
 struct StaticArrayTest: TestSuite::Tester {
     explicit StaticArrayTest();
 
+    void resetCounters();
+
     void construct();
     void constructInPlace();
     void constructInPlaceOneArgument();
@@ -74,6 +76,9 @@ struct StaticArrayTest: TestSuite::Tester {
     void constructNonCopyable();
     void constructNoImplicitConstructor();
     void constructDirectReferences();
+
+    void copy();
+    void move();
 
     void convertBool();
     void convertPointer();
@@ -114,14 +119,24 @@ StaticArrayTest::StaticArrayTest() {
     addTests({&StaticArrayTest::construct,
               &StaticArrayTest::constructInPlace,
               &StaticArrayTest::constructInPlaceOneArgument,
-              &StaticArrayTest::constructValueInit,
-              &StaticArrayTest::constructNoInit,
-              &StaticArrayTest::constructDirectInit,
-              &StaticArrayTest::constructNonCopyable,
-              &StaticArrayTest::constructNoImplicitConstructor,
-              &StaticArrayTest::constructDirectReferences,
+              &StaticArrayTest::constructValueInit});
 
-              &StaticArrayTest::convertBool,
+    addTests({&StaticArrayTest::constructNoInit},
+        &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
+
+    addTests({&StaticArrayTest::constructDirectInit});
+
+    addTests({&StaticArrayTest::constructNonCopyable},
+        &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
+
+    addTests({&StaticArrayTest::constructNoImplicitConstructor,
+              &StaticArrayTest::constructDirectReferences});
+
+    addTests({&StaticArrayTest::copy,
+              &StaticArrayTest::move},
+        &StaticArrayTest::resetCounters, &StaticArrayTest::resetCounters);
+
+    addTests({&StaticArrayTest::convertBool,
               &StaticArrayTest::convertPointer,
               &StaticArrayTest::convertView,
               &StaticArrayTest::convertViewDerived,
@@ -192,26 +207,113 @@ void StaticArrayTest::constructValueInit() {
     CORRADE_COMPARE(a[4], 0);
 }
 
-struct Foo {
-    static int constructorCallCount;
-    static int destructorCallCount;
-    Foo() { ++constructorCallCount; }
-    ~Foo() { ++destructorCallCount; }
+struct Throwable {
+    explicit Throwable(int) {}
+    Throwable(const Throwable&) {}
+    Throwable(Throwable&&) {}
+    Throwable& operator=(const Throwable&) { return *this; }
+    Throwable& operator=(Throwable&&) { return *this; }
 };
 
-int Foo::constructorCallCount = 0;
-int Foo::destructorCallCount = 0;
+struct Copyable {
+    static int constructed;
+    static int destructed;
+    static int copied;
+    static int moved;
+
+    /*implicit*/ Copyable(int a = 0) noexcept: a{a} { ++constructed; }
+    Copyable(const Copyable& other) noexcept: a{other.a} {
+        ++constructed;
+        ++copied;
+    }
+    Copyable(Copyable&& other) noexcept: a{other.a} {
+        ++constructed;
+        ++moved;
+    }
+    ~Copyable() { ++destructed; }
+    Copyable& operator=(const Copyable& other) noexcept {
+        a = other.a;
+        ++copied;
+        return *this;
+    }
+    Copyable& operator=(Copyable&& other) noexcept {
+        a = other.a;
+        ++moved;
+        return *this;
+    }
+
+    int a;
+};
+
+int Copyable::constructed = 0;
+int Copyable::destructed = 0;
+int Copyable::copied = 0;
+int Copyable::moved = 0;
+
+struct Movable {
+    static int constructed;
+    static int destructed;
+    static int moved;
+
+    /*implicit*/ Movable(int a = 0) noexcept: a{a} { ++constructed; }
+    Movable(const Movable&) = delete;
+    Movable(Movable&& other) noexcept: a(other.a) {
+        ++constructed;
+        ++moved;
+    }
+    ~Movable() { ++destructed; }
+    Movable& operator=(const Movable&) = delete;
+    Movable& operator=(Movable&& other) noexcept {
+        a = other.a;
+        ++moved;
+        return *this;
+    }
+
+    int a;
+};
+
+int Movable::constructed = 0;
+int Movable::destructed = 0;
+int Movable::moved = 0;
+
+void swap(Movable& a, Movable& b) {
+    /* Swap these without copying the parent class */
+    std::swap(a.a, b.a);
+}
+
+struct Immovable {
+    static int constructed;
+    static int destructed;
+
+    Immovable(const Immovable&) = delete;
+    Immovable(Immovable&&) = delete;
+    /*implicit*/ Immovable(int a = 0) noexcept: a{a} { ++constructed; }
+    ~Immovable() { ++destructed; }
+    Immovable& operator=(const Immovable&) = delete;
+    Immovable& operator=(Immovable&&) = delete;
+
+    int a;
+};
+
+int Immovable::constructed = 0;
+int Immovable::destructed = 0;
+
+void StaticArrayTest::resetCounters() {
+    Copyable::constructed = Copyable::destructed = Copyable::copied = Copyable::moved =
+        Movable::constructed = Movable::destructed = Movable::moved =
+            Immovable::constructed = Immovable::destructed = 0;
+}
 
 void StaticArrayTest::constructNoInit() {
     {
-        const Containers::StaticArray<5, Foo> a{NoInit};
-        CORRADE_COMPARE(Foo::constructorCallCount, 0);
+        const Containers::StaticArray<5, Copyable> a{NoInit};
+        CORRADE_COMPARE(Copyable::constructed, 0);
 
-        const Containers::StaticArray<5, Foo> b{DefaultInit};
-        CORRADE_COMPARE(Foo::constructorCallCount, 5);
+        const Containers::StaticArray<5, Copyable> b{DefaultInit};
+        CORRADE_COMPARE(Copyable::constructed, 5);
     }
 
-    CORRADE_COMPARE(Foo::destructorCallCount, 10);
+    CORRADE_COMPARE(Copyable::destructed, 10);
 }
 
 void StaticArrayTest::constructDirectInit() {
@@ -224,20 +326,7 @@ void StaticArrayTest::constructDirectInit() {
 }
 
 void StaticArrayTest::constructNonCopyable() {
-    struct NonCopyable {
-        NonCopyable(const NonCopyable&) = delete;
-        NonCopyable(NonCopyable&&) = delete;
-        NonCopyable& operator=(const NonCopyable&) = delete;
-        NonCopyable& operator=(NonCopyable&&) = delete;
-
-        NonCopyable() {}
-
-        /* to make it non-trivial to hit
-           https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70395 */
-        ~NonCopyable() {}
-    };
-
-    const Containers::StaticArray<5, NonCopyable> a;
+    const Containers::StaticArray<5, Immovable> a;
     CORRADE_VERIFY(a);
 }
 
@@ -280,6 +369,84 @@ void StaticArrayTest::constructDirectReferences() {
 
     const Containers::StaticArray<5, Reference> b{Containers::DirectInit, a};
     CORRADE_VERIFY(b);
+}
+
+void StaticArrayTest::copy() {
+    {
+        Containers::StaticArray<3, Copyable> a{Containers::InPlaceInit, 1, 2, 3};
+
+        Containers::StaticArray<3, Copyable> b{a};
+        CORRADE_COMPARE(b[0].a, 1);
+        CORRADE_COMPARE(b[1].a, 2);
+        CORRADE_COMPARE(b[2].a, 3);
+
+        Containers::StaticArray<3, Copyable> c;
+        c = b;
+        CORRADE_COMPARE(c[0].a, 1);
+        CORRADE_COMPARE(c[1].a, 2);
+        CORRADE_COMPARE(c[2].a, 3);
+    }
+
+    CORRADE_COMPARE(Copyable::constructed, 9);
+    CORRADE_COMPARE(Copyable::destructed, 9);
+    CORRADE_COMPARE(Copyable::copied, 6);
+    CORRADE_COMPARE(Copyable::moved, 0);
+
+    CORRADE_VERIFY(std::is_nothrow_copy_constructible<Copyable>::value);
+    CORRADE_VERIFY((std::is_nothrow_copy_constructible<Containers::StaticArray<3, Copyable>>::value));
+    CORRADE_VERIFY(std::is_nothrow_copy_assignable<Copyable>::value);
+    CORRADE_VERIFY((std::is_nothrow_copy_assignable<Containers::StaticArray<3, Copyable>>::value));
+
+    CORRADE_VERIFY(std::is_copy_constructible<Throwable>::value);
+    CORRADE_VERIFY(!(std::is_nothrow_copy_constructible<Throwable>::value));
+    CORRADE_VERIFY(!(std::is_nothrow_copy_constructible<Containers::StaticArray<3, Throwable>>::value));
+    CORRADE_VERIFY(std::is_copy_assignable<Throwable>::value);
+    CORRADE_VERIFY(!std::is_nothrow_copy_assignable<Throwable>::value);
+    CORRADE_VERIFY(!(std::is_nothrow_copy_assignable<Containers::StaticArray<3, Throwable>>::value));
+}
+
+
+void StaticArrayTest::move() {
+    {
+        Containers::StaticArray<3, Movable> a{Containers::InPlaceInit, 1, 2, 3};
+
+        Containers::StaticArray<3, Movable> b{std::move(a)};
+        CORRADE_COMPARE(b[0].a, 1);
+        CORRADE_COMPARE(b[1].a, 2);
+        CORRADE_COMPARE(b[2].a, 3);
+
+        Containers::StaticArray<3, Movable> c;
+        c = std::move(b); /* this uses the swap() specialization -> no move */
+        CORRADE_COMPARE(c[0].a, 1);
+        CORRADE_COMPARE(c[1].a, 2);
+        CORRADE_COMPARE(c[2].a, 3);
+    }
+
+    CORRADE_COMPARE(Movable::constructed, 9);
+    CORRADE_COMPARE(Movable::destructed, 9);
+    CORRADE_COMPARE(Movable::moved, 3);
+
+    CORRADE_VERIFY(!std::is_copy_constructible<Movable>::value);
+    CORRADE_VERIFY(!std::is_copy_assignable<Movable>::value);
+    {
+        CORRADE_EXPECT_FAIL("StaticArray currently doesn't propagate deleted copy constructor/assignment correctly.");
+        CORRADE_VERIFY(!(std::is_copy_constructible<Containers::StaticArray<3, Movable>>::value));
+        CORRADE_VERIFY(!(std::is_copy_assignable<Containers::StaticArray<3, Movable>>::value));
+    }
+
+    CORRADE_VERIFY((std::is_move_constructible<Containers::StaticArray<3, Movable>>::value));
+    CORRADE_VERIFY(std::is_nothrow_move_constructible<Movable>::value);
+    CORRADE_VERIFY((std::is_nothrow_move_constructible<Containers::StaticArray<3, Movable>>::value));
+    CORRADE_VERIFY((std::is_move_assignable<Containers::StaticArray<3, Movable>>::value));
+    CORRADE_VERIFY(std::is_nothrow_move_assignable<Movable>::value);
+    CORRADE_VERIFY((std::is_nothrow_move_assignable<Containers::StaticArray<3, Movable>>::value));
+
+    CORRADE_VERIFY(std::is_move_constructible<Throwable>::value);
+    CORRADE_VERIFY(!(std::is_nothrow_move_constructible<Throwable>::value));
+    CORRADE_VERIFY(!(std::is_nothrow_move_constructible<Containers::StaticArray<3, Throwable>>::value));
+    CORRADE_VERIFY(std::is_move_assignable<Throwable>::value);
+    CORRADE_VERIFY(!std::is_nothrow_move_assignable<Throwable>::value);
+    CORRADE_VERIFY(!(std::is_nothrow_move_assignable<Containers::StaticArray<3, Throwable>>::value));
 }
 
 void StaticArrayTest::convertBool() {

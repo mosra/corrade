@@ -191,6 +191,12 @@ namespace Corrade {
 -   The @ref CORRADE_ENUMSET_FRIEND_OPERATORS() macro now works with templated
     classes and doesn't need a corresponding @ref CORRADE_ENUMSET_OPERATORS()
     to be present anymore
+-   @ref Containers::StaticArray is now copyable and movable if the underlying
+    type is copyable / movable as well, to make it useful in more use cases.
+    Note that currently, same as with @ref Containers::Optional,
+    @ref std::is_copy_constructible etc. don't properly report @cpp false @ce
+    for non-copyable / non-movable types. That'll get fixed in a future
+    release.
 
 @subsubsection corrade-changelog-latest-changes-Interconnect Interconnect library
 
