@@ -533,7 +533,9 @@ function(corrade_add_plugin plugin_name debug_install_dirs release_install_dirs 
     # Copy metadata next to the binary so tests and CMake subprojects can use
     # it as well
     add_custom_command(TARGET ${plugin_name} POST_BUILD
-        BYPRODUCTS ${plugin_name}.conf
+        # This would be nice to Ninja, but BYPRODUCTS don't support generator
+        # expressions right now (last checked: CMake 3.16)
+        #BYPRODUCTS $<TARGET_FILE_DIR:${plugin_name}>/${plugin_name}.conf
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} $<TARGET_FILE_DIR:${plugin_name}>/${plugin_name}.conf
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${metadata_file} ${name}-metadata)
 
