@@ -293,6 +293,11 @@ namespace Corrade {
 -   The Emscripten CMake toolchain now looks for `emcc` on @cb{.sh} $PATH @ce
     as a last resort and then uses the parent directory as `EMSCRIPTEN_PREFIX`
     (see [mosra/toolchains#8](https://github.com/mosra/toolchains/pull/8))
+-   On Windows, if the Emscripten toolchain detects Visual Studio being used
+    as a generator, it'll fail with an error suggesting to use a different
+    generator instead. Previously, CMake silently fell back to using Visual
+    Studio as a C++ compiler, resulting in seemingly impossible errors. See
+    [mosra/corrade#78](https://github.com/mosra/corrade/issues/78).
 -   Clarified interaction of `-fvisibility-inlines-hidden` and/or
     `-Wl,-Bsymbolic-functions` GCC/Clang flags and @ref Interconnect::Emitter
 -   The @ref TestSuite library and all tests created with
