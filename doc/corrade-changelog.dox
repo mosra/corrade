@@ -51,6 +51,11 @@ namespace Corrade {
 -   New @ref main "Corrade::Main" library for improved user experience and
     consistent behavior on Windows platforms (see
     [mosra/corrade#37](https://github.com/mosra/corrade/pull/37))
+-   When using Corrade as a CMake subproject, it now puts all binaries into a
+    common directory to simplify `PATH` handling and dynamic plugin loading.
+    For more information see @ref corrade-cmake-subproject,
+    [mosra/magnum#357](https://github.com/mosra/magnum/issues/357) and
+    [mosra/magnum-plugins#63](https://github.com/mosra/magnum-plugins/issues/63).
 -   Added @ref CORRADE_TARGET_POWERPC for detecting PowerPC architectures (see
     [mosra/corrade#60](https://github.com/mosra/corrade/pull/60))
 -   New set of @ref CORRADE_TARGET_LIBCXX, @ref CORRADE_TARGET_LIBSTDCXX and

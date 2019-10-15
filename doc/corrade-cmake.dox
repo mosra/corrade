@@ -70,11 +70,16 @@ find it.
 
 A self-contained alternative to the above is adding the Corrade repository into
 your project (as a Git submodule, bundling a downloaded archive etc.) and use
-@cb{.cmake} add_subdirectory() @ce. With that approach you don't need to care
+@cmake add_subdirectory() @ce. With that approach you don't need to care
 about `FindCorrade.cmake`, however the usual tradeoffs when bundling code apply
---- slower full rebuilds, IDEs having more to parse etc.
+--- slower full rebuilds, IDEs having more to parse etc. In this case, the
+@ref building-corrade-features "build-time options" are @cmake set() @ce before
+the @cmake add_subdirectory() @ce call. Note that, unless you require CMake
+3.13 at least, it's needed to use the `CACHE ... FORCE` arguments
+[in order to have the options set properly](https://cmake.org/cmake/help/latest/policy/CMP0077.html). For example:
 
 @code{.cmake}
+set(WITH_TESTSUITE OFF CACHE BOOL "" FORCE) # disable what you don't use
 add_subdirectory(corrade EXCLUDE_FROM_ALL) # so only things you use are built
 
 find_package(Corrade REQUIRED ...) # see below
@@ -106,7 +111,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "")
 add_subdirectory(corrade EXCLUDE_FROM_ALL)
 @endcode
 
-@section corrade-cmake-find-module Finding the package and its component
+@section corrade-cmake-find-module Finding the package and its components
 
 Basic usage is:
 
