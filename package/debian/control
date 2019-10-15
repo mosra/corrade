@@ -1,7 +1,7 @@
 Source: corrade
 Priority: optional
 Maintainer: Vladimír Vondruš <mosra@centrum.cz>
-Build-Depends: debhelper (>= 9), cmake (>= 3.1)
+Build-Depends: debhelper (>= 9), cmake (>= 3.4)
 Standards-Version: 3.9.2
 Section: libs
 Homepage: https://magnum.graphics/corrade/
