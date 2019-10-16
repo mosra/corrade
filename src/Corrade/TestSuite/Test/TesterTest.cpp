@@ -119,7 +119,7 @@ ComparisonStatusFlags MessageDiagnostic::flags;
 namespace Test { namespace {
 
 struct Test: Tester {
-    Test(std::ostream* out);
+    Test(std::ostream* out, const TesterConfiguration& configuration = TesterConfiguration{});
 
     void noChecks();
     void trueExpression();
@@ -185,7 +185,7 @@ struct Test: Tester {
     int _i = 0;
 };
 
-Test::Test(std::ostream* const out): _out{out} {
+Test::Test(std::ostream* const out, const TesterConfiguration& configuration): Tester{configuration}, _out{out} {
     addTests({&Test::noChecks,
               &Test::trueExpression,
               &Test::falseExpression,
@@ -533,6 +533,12 @@ struct TesterTest: Tester {
     void benchmarkCpuClock();
     void benchmarkCpuCycles();
     void benchmarkDiscardAll();
+    void benchmarkDebugBuildNote();
+    #ifdef __linux__
+    void benchmarkCpuScalingNoWarning();
+    void benchmarkCpuScalingWarning();
+    void benchmarkCpuScalingWarningVerbose();
+    #endif
 
     void testName();
 
@@ -591,6 +597,12 @@ TesterTest::TesterTest() {
               &TesterTest::benchmarkCpuClock,
               &TesterTest::benchmarkCpuCycles,
               &TesterTest::benchmarkDiscardAll,
+              &TesterTest::benchmarkDebugBuildNote,
+              #ifdef __linux__
+              &TesterTest::benchmarkCpuScalingNoWarning,
+              &TesterTest::benchmarkCpuScalingWarning,
+              &TesterTest::benchmarkCpuScalingWarningVerbose,
+              #endif
 
               &TesterTest::testName,
 
@@ -651,7 +663,11 @@ void TesterTest::test() {
         const char* argv[] = { "", "--save-diagnostic", "/some/path" };
         int argc = Containers::arraySize(argv);
         Tester::registerArguments(argc, argv);
-        Test t{&std::cout};
+        Test t{&std::cout, TesterConfiguration{}
+            #ifdef __linux__
+            .setCpuScalingGovernorFile("")
+            #endif
+        };
         t.registerTest("here.cpp", "TesterTest::Test");
         t.exec();
         Debug{} << "======================== visual color verification end =========================";
@@ -665,7 +681,11 @@ void TesterTest::test() {
     const char* argv[] = { "", "--color", "off" };
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
-    Test t{&out};
+    Test t{&out, TesterConfiguration{}
+        #ifdef __linux__
+        .setCpuScalingGovernorFile("")
+        #endif
+    };
     t.registerTest("here.cpp", "TesterTest::Test");
     int result = t.exec(&out, &out);
 
@@ -729,7 +749,11 @@ void TesterTest::skipTests() {
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
-    Test t{&out};
+    Test t{&out, TesterConfiguration{}
+        #ifdef __linux__
+        .setCpuScalingGovernorFile("")
+        #endif
+    };
     t.registerTest("here.cpp", "TesterTest::Test");
     int result = t.exec(&out, &out);
 
@@ -1215,7 +1239,11 @@ void TesterTest::benchmarkWallClock() {
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
-    Test t{&out};
+    Test t{&out, TesterConfiguration{}
+        #ifdef __linux__
+        .setCpuScalingGovernorFile("")
+        #endif
+    };
     t.registerTest("here.cpp", "TesterTest::Test");
     int result = t.exec(&out, &out);
 
@@ -1232,7 +1260,11 @@ void TesterTest::benchmarkCpuClock() {
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
-    Test t{&out};
+    Test t{&out, TesterConfiguration{}
+        #ifdef __linux__
+        .setCpuScalingGovernorFile("")
+        #endif
+    };
     t.registerTest("here.cpp", "TesterTest::Test");
     int result = t.exec(&out, &out);
 
@@ -1249,7 +1281,11 @@ void TesterTest::benchmarkCpuCycles() {
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
-    Test t{&out};
+    Test t{&out, TesterConfiguration{}
+        #ifdef __linux__
+        .setCpuScalingGovernorFile("")
+        #endif
+    };
     t.registerTest("here.cpp", "TesterTest::Test");
     int result = t.exec(&out, &out);
 
@@ -1266,7 +1302,11 @@ void TesterTest::benchmarkDiscardAll() {
     int argc = Containers::arraySize(argv);
     Tester::registerArguments(argc, argv);
 
-    Test t{&out};
+    Test t{&out, TesterConfiguration{}
+        #ifdef __linux__
+        .setCpuScalingGovernorFile("")
+        #endif
+    };
     t.registerTest("here.cpp", "TesterTest::Test");
     int result = t.exec(&out, &out);
 
@@ -1275,6 +1315,90 @@ void TesterTest::benchmarkDiscardAll() {
         Utility::Directory::join(TESTER_TEST_DIR, "benchmarkDiscardAll.txt"),
         Compare::StringToFile);
 }
+
+void TesterTest::benchmarkDebugBuildNote() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "40 42", "-v" };
+    int argc = Containers::arraySize(argv);
+    Tester::registerArguments(argc, argv);
+
+    Test t{&out, TesterConfiguration{}
+        #ifdef __linux__
+        .setCpuScalingGovernorFile("")
+        #endif
+    };
+    t.registerTest("here.cpp", "TesterTest::Test", /*isDebugBuild=*/true);
+    int result = t.exec(&out, &out);
+
+    CORRADE_COMPARE(result, 0);
+    /* Same as wall clock output */
+    CORRADE_COMPARE_AS(out.str(),
+        Utility::Directory::join(TESTER_TEST_DIR, "benchmarkDebugBuildNote.txt"),
+        Compare::StringToFile);
+}
+
+#ifdef __linux__
+void TesterTest::benchmarkCpuScalingNoWarning() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "40 42" };
+    int argc = Containers::arraySize(argv);
+    Tester::registerArguments(argc, argv);
+
+    Test t{&out, TesterConfiguration{}
+        .setCpuScalingGovernorFile(Utility::Directory::join(TESTER_TEST_DIR, "cpu-governor-performance.txt"))
+    };
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(&out, &out);
+
+    CORRADE_COMPARE(result, 0);
+    /* Same as wall clock output */
+    CORRADE_COMPARE_AS(out.str(),
+        Utility::Directory::join(TESTER_TEST_DIR, "benchmarkWallClock.txt"),
+        Compare::StringToFile);
+}
+
+void TesterTest::benchmarkCpuScalingWarning() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "40 42" };
+    int argc = Containers::arraySize(argv);
+    Tester::registerArguments(argc, argv);
+
+    Test t{&out, TesterConfiguration{}
+        .setCpuScalingGovernorFile(Utility::Directory::join(TESTER_TEST_DIR, "cpu-governor-powersave.txt"))
+    };
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(&out, &out);
+
+    CORRADE_COMPARE(result, 0);
+    /* Same as wall clock output */
+    CORRADE_COMPARE_AS(out.str(),
+        Utility::Directory::join(TESTER_TEST_DIR, "benchmarkCpuScalingWarning.txt"),
+        Compare::StringToFile);
+}
+
+void TesterTest::benchmarkCpuScalingWarningVerbose() {
+    std::stringstream out;
+
+    const char* argv[] = { "", "--color", "off", "--only", "40 42", "-v" };
+    int argc = Containers::arraySize(argv);
+    Tester::registerArguments(argc, argv);
+
+    Test t{&out, TesterConfiguration{}
+        .setCpuScalingGovernorFile(Utility::Directory::join(TESTER_TEST_DIR, "cpu-governor-powersave.txt"))
+    };
+    t.registerTest("here.cpp", "TesterTest::Test");
+    int result = t.exec(&out, &out);
+
+    CORRADE_COMPARE(result, 0);
+    /* Same as wall clock output */
+    CORRADE_COMPARE_AS(out.str(),
+        Utility::Directory::join(TESTER_TEST_DIR, "benchmarkCpuScalingWarningVerbose.txt"),
+        Compare::StringToFile);
+}
+#endif
 
 void TesterTest::testName() {
     std::stringstream out;

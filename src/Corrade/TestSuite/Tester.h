@@ -513,7 +513,27 @@ class CORRADE_TESTSUITE_EXPORT Tester {
                  */
                 TesterConfiguration& setSkippedArgumentPrefixes(std::initializer_list<std::string> prefixes);
 
+                #if defined(__linux__) || defined(DOXYGEN_GENERATING_OUTPUT)
+                /** @brief Where to check for active CPU scaling governor */
+                std::string cpuScalingGovernorFile() const;
+
+                /**
+                 * @brief Set where to check for active CPU scaling governor
+                 *
+                 * Running benchmarks on a system with dynamic CPU scaling
+                 * makes the measurements very noisy. If that's detected, a
+                 * warning is printed on output. Defaults to
+                 * `/sys/devices/system/cpu/cpu{}/cpufreq/scaling_governor`,
+                 * where `{}` is replaced with CPU ID; if the file doesn't
+                 * exist, no check is done.
+                 * @partialsupport Available only on Linux.
+                 */
+                TesterConfiguration& setCpuScalingGovernorFile(const std::string& filename);
+                #endif
+
             private:
+                friend Tester;
+
                 /* Don't want to include any vector or array here because we
                    don't need it in public APIs anyway. */
                 struct Data;
@@ -1087,7 +1107,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         template<class T> void verify(const char* expression, T&& value);
 
         /* Called from CORRADE_TEST_MAIN() */
-        void registerTest(const char* filename, const char* name);
+        void registerTest(const char* filename, const char* name, bool isDebugBuild = false);
 
         /* Called from CORRADE_SKIP() */
         CORRADE_NORETURN void skip(const std::string& message);
@@ -1198,6 +1218,16 @@ class CORRADE_TESTSUITE_EXPORT Tester {
         Containers::Pointer<TesterState> _state;
 };
 
+#ifndef DOXYGEN_GENERATING_OUTPUT
+/* Done here because CORRADE_IS_DEBUG_BUILD is defined by the buildsystem when
+   compiling the test (as opposed to defined when compiling this library) */
+#ifdef CORRADE_IS_DEBUG_BUILD
+#define _CORRADE_TESTSUITE_IS_DEBUG_BUILD true
+#else
+#define _CORRADE_TESTSUITE_IS_DEBUG_BUILD false
+#endif
+#endif
+
 /** @hideinitializer
 @brief Create `main()` function for given @ref Corrade::TestSuite::Tester "TestSuite::Tester" subclass
 
@@ -1214,7 +1244,7 @@ namespace.
     int corradeTestMain(int argc, char** argv) {                            \
         Corrade::TestSuite::Tester::registerArguments(argc, argv);          \
         Class t;                                                            \
-        t.registerTest(__FILE__, #Class);                                   \
+        t.registerTest(__FILE__, #Class, _CORRADE_TESTSUITE_IS_DEBUG_BUILD); \
         return t.exec();                                                    \
     }
 #else
@@ -1222,7 +1252,7 @@ namespace.
     int main(int argc, char** argv) {                                       \
         Corrade::TestSuite::Tester::registerArguments(argc, argv);          \
         Class t;                                                            \
-        t.registerTest(__FILE__, #Class);                                   \
+        t.registerTest(__FILE__, #Class, _CORRADE_TESTSUITE_IS_DEBUG_BUILD); \
         return t.exec();                                                    \
     }
 #endif

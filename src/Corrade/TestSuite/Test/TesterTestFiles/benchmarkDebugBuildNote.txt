@@ -1,0 +1,5 @@
+Starting TesterTest::Test with 2 test cases...
+  INFO Benchmarking a debug build.
+ BENCH [40]   0.00 ± 0.00   ns benchmarkDefault()@9x1000000000 (wall time)
+ BENCH [42] 348.36          kB benchmarkOnce()@1x1
+Finished TesterTest::Test with 0 errors out of 0 checks.

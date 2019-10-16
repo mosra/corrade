@@ -39,6 +39,9 @@ corrade_add_test(TestSuiteTesterTest TesterTest.cpp
         TesterTestFiles/benchmarkCpuCycles.txt
         TesterTestFiles/benchmarkDiscardAll.txt
         TesterTestFiles/benchmarkWallClock.txt
+        TesterTestFiles/benchmarkDebugBuildNote.txt
+        TesterTestFiles/benchmarkCpuScalingWarning.txt
+        TesterTestFiles/benchmarkCpuScalingWarningVerbose.txt
         TesterTestFiles/compareMessageFailed.txt
         TesterTestFiles/compareMessageVerboseDisabled.txt
         TesterTestFiles/compareMessageVerboseEnabled.txt
@@ -61,7 +64,10 @@ corrade_add_test(TestSuiteTesterTest TesterTest.cpp
         TesterTestFiles/skipOnly.txt
         TesterTestFiles/skipTests.txt
         TesterTestFiles/test.txt
-        TesterTestFiles/testName.txt)
+        TesterTestFiles/testName.txt
+
+        TesterTestFiles/cpu-governor-performance.txt
+        TesterTestFiles/cpu-governor-powersave.txt)
 target_include_directories(TestSuiteTesterTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 if(CORRADE_TARGET_EMSCRIPTEN OR CORRADE_TARGET_ANDROID)

@@ -112,6 +112,9 @@ namespace Corrade {
     @ref TestSuite-Tester-save-diagnostic for more information.
 -   Added @ref TestSuite::Tester::setTestCaseTemplateName() for convenient
     distinction of different specializations of templated test cases
+-   @ref TestSuite::Tester now warns when dynamic CPU scaling is used on Linux
+    and benchmarks are being run, as that makes the measurements rather noisy.
+    With the `--verbose` command-line option it prints further information.
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 

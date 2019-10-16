@@ -36,8 +36,13 @@
 #include "Corrade/TestSuite/Implementation/BenchmarkCounters.h"
 #include "Corrade/TestSuite/Implementation/BenchmarkStats.h"
 #include "Corrade/Utility/Arguments.h"
+#include "Corrade/Utility/Directory.h"
 #include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/String.h"
+
+#ifdef __linux__ /* for getting processor count */
+#include <unistd.h>
+#endif
 
 namespace Corrade { namespace TestSuite {
 
@@ -49,10 +54,17 @@ namespace {
     }
 
     constexpr const char PaddingString[] = "0000000000";
+
+    #ifdef __linux__
+    constexpr const char DefaultCpuScalingGovernorFile[] = "/sys/devices/system/cpu/cpu{}/cpufreq/scaling_governor";
+    #endif
 }
 
 struct Tester::TesterConfiguration::Data {
     std::vector<std::string> skippedArgumentPrefixes;
+    #ifdef __linux__
+    std::string cpuScalingGovernorFile = DefaultCpuScalingGovernorFile;
+    #endif
 };
 
 Tester::TesterConfiguration::TesterConfiguration() noexcept = default;
@@ -83,6 +95,18 @@ Tester::TesterConfiguration& Tester::TesterConfiguration::setSkippedArgumentPref
     return *this;
 }
 
+#ifdef __linux__
+std::string Tester::TesterConfiguration::cpuScalingGovernorFile() const {
+    return _data ? _data->cpuScalingGovernorFile : DefaultCpuScalingGovernorFile;
+}
+
+Tester::TesterConfiguration& Tester::TesterConfiguration::setCpuScalingGovernorFile(const std::string& filename) {
+    if(!_data) _data.reset(new Data);
+    _data->cpuScalingGovernorFile = filename;
+    return *this;
+}
+#endif
+
 struct Tester::TesterState {
     explicit TesterState(const TesterConfiguration& configuration): configuration{std::move(configuration)} {}
 
@@ -104,9 +128,12 @@ struct Tester::TesterState {
     std::uint64_t benchmarkBegin{};
     std::uint64_t benchmarkResult{};
     TestCase* testCase{};
+    /* When there's one more bool, this should become flags instead. Right now
+       this only fill all holes in the struct layout. */
     bool expectedFailuresDisabled{};
     bool verbose{};
     bool testCaseLabelPrinted{};
+    bool isDebugBuild{};
     ExpectedFailure* expectedFailure{};
     std::string expectedFailureMessage;
     TesterConfiguration configuration;
@@ -297,6 +324,35 @@ benchmark types:
     }
 
     Debug(logOutput, _state->useColor) << Debug::boldColor(Debug::Color::Default) << "Starting" << _state->testName << "with" << usedTestCases.size() << "test cases...";
+
+    /* If we are running a benchmark, print helpful messages in case the
+       benchmark results might be skewed. Inspiration taken from:
+       https://github.com/google/benchmark/blob/0ae233ab23c560547bf85ce1346580966e799861/src/sysinfo.cc#L209-L224
+       I doubt the code there works on macOS, so enabling it for Linux only. */
+    for(std::pair<int, TestCase> testCase: usedTestCases) {
+        if(testCase.second.type == TestCaseType::Test) continue;
+
+        if(_state->verbose && _state->isDebugBuild) {
+            Debug(logOutput, _state->useColor) << Debug::boldColor(Debug::Color::White) << "  INFO" << Debug::resetColor << "Benchmarking a debug build.";
+        }
+        #ifdef __linux__
+        for(std::size_t i = 0, count = sysconf(_SC_NPROCESSORS_ONLN); i != count; ++i) {
+            const std::string file = Utility::formatString(_state->configuration.cpuScalingGovernorFile().data(), i);
+            if(!Utility::Directory::exists(file)) break;
+            const std::string governor = Utility::String::trim(Utility::Directory::readString(file));
+            if(governor != "performance") {
+                Warning out{errorOutput, _state->useColor};
+
+                out << Debug::boldColor(Debug::Color::Yellow) << "  WARN"
+                    << Debug::resetColor << "CPU" << governor
+                    << "scaling detected, benchmark measurements may be noisy.";
+                if(_state->verbose) out << "Use\n         sudo cpupower frequency-set --governor performance\n       to get more stable results.";
+                break;
+            }
+        }
+        #endif
+        break;
+    }
 
     /* Ensure the test case IDs are valid only during the test run */
     Containers::ScopeGuard testCaseIdReset{&*_state, [](TesterState* state) {
@@ -634,9 +690,10 @@ void Tester::printComparisonMessageInternal(ComparisonStatusFlags flags, const c
         throw Exception();
 }
 
-void Tester::registerTest(const char* filename, const char* name) {
+void Tester::registerTest(const char* filename, const char* name, bool isDebugBuild) {
     _state->testFilename = std::move(filename);
     if(_state->testName.empty()) _state->testName = std::move(name);
+    _state->isDebugBuild = isDebugBuild;
 }
 
 void Tester::skip(const char* message) {
