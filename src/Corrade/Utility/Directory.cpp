@@ -645,9 +645,12 @@ Containers::Array<char> read(const std::string& filename) {
     #endif
     std::rewind(f);
 
+    /* Some special files report more bytes than they actually have (such as
+       stuff in /sys). Clamp the returned array to what was reported. */
     Containers::Array<char> out{size};
-    CORRADE_INTERNAL_ASSERT(std::fread(out, 1, size, f) == size);
-    return out;
+    const std::size_t realSize = std::fread(out, 1, size, f);
+    CORRADE_INTERNAL_ASSERT(realSize <= size);
+    return Containers::Array<char>{out.release(), realSize};
 }
 
 std::string readString(const std::string& filename) {

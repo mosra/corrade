@@ -111,6 +111,7 @@ struct DirectoryTest: TestSuite::Tester {
     void read();
     void readEmpty();
     void readNonSeekable();
+    void readEarlyEof();
     void readNonexistent();
     void readUtf8();
 
@@ -219,6 +220,7 @@ DirectoryTest::DirectoryTest() {
               &DirectoryTest::read,
               &DirectoryTest::readEmpty,
               &DirectoryTest::readNonSeekable,
+              &DirectoryTest::readEarlyEof,
               &DirectoryTest::readNonexistent,
               &DirectoryTest::readUtf8,
 
@@ -1004,6 +1006,17 @@ void DirectoryTest::readNonSeekable() {
     CORRADE_VERIFY(!data.empty());
     #else
     CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+
+void DirectoryTest::readEarlyEof() {
+    #ifdef __linux__
+    if(!Directory::exists("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"))
+        CORRADE_SKIP("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor doesn't exist, can't test");
+    const auto data = Directory::read("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+    CORRADE_VERIFY(!data.empty());
+    #else
+    CORRADE_SKIP("Not sure how to test on this platform.");
     #endif
 }
 
