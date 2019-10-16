@@ -392,9 +392,14 @@ function(corrade_add_test test_name)
                 emscripten_embed_file(${test_name} ${input_filename} "/${output_filename}")
             endforeach()
 
-            # Generate the runner file
+            # Generate the runner file, first replacing ${test_name} with
+            # configure_file() and then copying that into the final location.
+            # Two steps because file(GENERATE) can't replace variables while
+            # configure_file() can't have generator expressions in the path.
             configure_file(${CORRADE_TESTSUITE_EMSCRIPTEN_RUNNER}
                            ${CMAKE_CURRENT_BINARY_DIR}/${test_name}.html)
+            file(GENERATE OUTPUT $<TARGET_FILE_DIR:${test_name}>/${test_name}.html
+                INPUT ${CMAKE_CURRENT_BINARY_DIR}/${test_name}.html)
 
         # Run tests using ADB on Android
         elseif(CORRADE_TARGET_ANDROID)
