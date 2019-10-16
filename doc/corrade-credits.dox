@@ -110,6 +110,8 @@ Is the below list missing your name or something's wrong?
 -   **[\@jaynus](https://github.com/jaynus)** --- MSVC compilation fixes
 -   **Jonathan Hale** ([\@Squareys](https://github.com/Squareys)) ---
     various fixes, buildsystem improvements
+-   **Marco Melorio** ([\@Melix19](https://github.com/Melix19)) --- iOS
+    crosscompiling fixes
 -   **Max Schwarz** ([\@xqms](https://github.com/xqms)) --- thread-local
     @ref Utility::Debug scoped output redirection and coloring, documentation
     fixes
