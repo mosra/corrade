@@ -64,6 +64,10 @@ using Corrade::Utility::Unicode::widen;
 #include "Corrade/PluginManager/configure.h"
 #endif
 
+#if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_BUILD_STATIC) && !defined(CORRADE_TARGET_WINDOWS_RT)
+#include "Corrade/Utility/Implementation/WindowsWeakSymbol.h"
+#endif
+
 using namespace Corrade::Utility;
 
 namespace Corrade { namespace PluginManager {
@@ -131,17 +135,17 @@ struct AbstractManager::State {
 
 const int AbstractManager::Version = CORRADE_PLUGIN_VERSION;
 
-#ifndef CORRADE_BUILD_STATIC
-/* (Of course) can't be in an unnamed namespace in order to export it below */
+#if !defined(CORRADE_BUILD_STATIC) || defined(CORRADE_TARGET_WINDOWS)
+/* (Of course) can't be in an unnamed namespace in order to export it below
+   (except for Windows, where we do extern "C" so this doesn't matter) */
 namespace {
 #endif
 
-#if defined(CORRADE_BUILD_STATIC) && !defined(CORRADE_TARGET_WINDOWS)
+#if !defined(CORRADE_BUILD_STATIC) || (defined(CORRADE_BUILD_STATIC) && !defined(CORRADE_TARGET_WINDOWS)) || defined(CORRADE_TARGET_WINDOWS_RT)
+#ifdef CORRADE_BUILD_STATIC
 /* On static builds that get linked to multiple shared libraries and then used
    in a single app we want to ensure there's just one global symbol. On Linux
-   it's apparently enough to just export, macOS needs the weak attribute.
-   Windows not handled yet, as it needs a workaround using DllMain() and
-   GetProcAddress(). */
+   it's apparently enough to just export, macOS needs the weak attribute. */
 CORRADE_VISIBILITY_EXPORT
     #ifdef __GNUC__
     __attribute__((weak))
@@ -156,6 +160,11 @@ CORRADE_VISIBILITY_EXPORT
    static plugin initializers are executed, which means we don't hit any static
    initialization order fiasco. */
 Implementation::StaticPlugin* globalStaticPlugins = nullptr;
+#else
+/* On Windows the symbol is exported unmangled and then fetched via
+   GetProcAddress() to emulate weak linking. */
+extern "C" CORRADE_VISIBILITY_EXPORT Implementation::StaticPlugin* corradePluginManagerUniqueGlobalStaticPlugins = nullptr;
+#endif
 
 #ifdef CORRADE_BUILD_MULTITHREADED
 CORRADE_THREAD_LOCAL
@@ -165,7 +174,7 @@ CORRADE_THREAD_LOCAL
    static plugin registration *can't be* thread-local (it's written to from one
    thread but then only read from multiple) while the global plugin storage
    *has to be* thread-local as there's dependency management, refcounting etc.
-   going on. */
+   going on. Windows handled differently below. */
 CORRADE_VISIBILITY_EXPORT
     #ifdef __GNUC__
     __attribute__((weak))
@@ -187,8 +196,44 @@ CORRADE_VISIBILITY_EXPORT
    initialization order fiasco. */
 std::map<std::string, AbstractManager::Plugin*>* globalPlugins = nullptr;
 
-#ifndef CORRADE_BUILD_STATIC
+#if !defined(CORRADE_BUILD_STATIC) || defined(CORRADE_TARGET_WINDOWS)
 }
+#endif
+
+/* Windows can't have a symbol both thread-local and exported, moreover there
+   isn't any concept of weak symbols. Exporting thread-local symbols can be
+   worked around by exporting a function that then returns a reference to a
+   non-exported thread-local symbol; and finally GetProcAddress() on
+   GetModuleHandle(nullptr) "emulates" the weak linking as it's guaranteed to
+   pick up the same symbol of the final exe independently of the DLL it was
+   called from. To avoid #ifdef hell in code below, the globalStaticPlugins /
+   globalPlugins are redefined to return a value from this uniqueness-ensuring
+   function. */
+#if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_BUILD_STATIC) && !defined(CORRADE_TARGET_WINDOWS_RT)
+extern "C" CORRADE_VISIBILITY_EXPORT std::map<std::string, AbstractManager::Plugin*>*& corradePluginManagerUniqueGlobalPlugins() {
+    return globalPlugins;
+}
+
+namespace {
+
+Implementation::StaticPlugin*& windowsGlobalStaticPlugins() {
+    /* A function-local static to ensure it's only initialized once without any
+       race conditions among threads */
+    static Implementation::StaticPlugin** const uniqueGlobals = reinterpret_cast<Implementation::StaticPlugin**>(Utility::Implementation::windowsWeakSymbol("corradePluginManagerUniqueGlobalStaticPlugins"));
+    return *uniqueGlobals;
+}
+
+std::map<std::string, AbstractManager::Plugin*>*& windowsGlobalPlugins() {
+    /* A function-local static to ensure it's only initialized once without any
+       race conditions among threads */
+    static std::map<std::string, AbstractManager::Plugin*>*&(*const uniqueGlobals)() = reinterpret_cast<std::map<std::string, AbstractManager::Plugin*>*&(*)()>(Utility::Implementation::windowsWeakSymbol("corradePluginManagerUniqueGlobalPlugins"));
+    return uniqueGlobals();
+}
+
+}
+
+#define globalStaticPlugins windowsGlobalStaticPlugins()
+#define globalPlugins windowsGlobalPlugins()
 #endif
 
 static_assert(std::is_pod<Implementation::StaticPlugin>::value,

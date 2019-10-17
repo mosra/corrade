@@ -186,8 +186,6 @@ namespace Corrade {
 -   Global state used by @ref PluginManager::Manager, @ref Utility::Debug and
     @ref Utility::Resource internals is no longer duplicated when Corrade is
     built statically and linked to more than one dynamic library or executable.
-    Currently that holds only for Linux and macOS, Windows support will come
-    next.
 -   @ref PluginManager::Manager and @ref Utility::Debug now have the global
     state thread-local when the @ref CORRADE_BUILD_MULTITHREADED option is
     enabled (see also [mosra/corrade#65](https://github.com/mosra/corrade/issues/65))

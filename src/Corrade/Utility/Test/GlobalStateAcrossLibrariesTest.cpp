@@ -52,9 +52,6 @@ void GlobalStateAcrossLibrariesTest::debug() {
 
     {
         Debug redirectOutput{&out};
-        #ifdef CORRADE_TARGET_WINDOWS
-        CORRADE_EXPECT_FAIL("Deduplication of global data across shared libraries isn't implemented on Windows yet.");
-        #endif
         CORRADE_COMPARE(debugOutputFromALibrary(), &out);
     }
 
@@ -65,13 +62,7 @@ void GlobalStateAcrossLibrariesTest::resource() {
     /* The resource is complied into the the library, but the executable should
        see it too */
     CORRADE_VERIFY(libraryHasATestResourceGroup());
-
-    {
-        #ifdef CORRADE_TARGET_WINDOWS
-        CORRADE_EXPECT_FAIL("Deduplication of global data across shared libraries isn't implemented on Windows yet.");
-        #endif
-        CORRADE_VERIFY(Utility::Resource::hasGroup("test"));
-    }
+    CORRADE_VERIFY(Utility::Resource::hasGroup("test"));
 }
 
 }}}}

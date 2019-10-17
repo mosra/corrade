@@ -1,3 +1,5 @@
+#ifndef Corrade_Utility_WindowsWeakSymbol_h
+#define Corrade_Utility_WindowsWeakSymbol_h
 /*
     This file is part of Corrade.
 
@@ -23,37 +25,16 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <vector>
-#include <string>
+#include <Corrade/configure.h>
 
-#include "Corrade/PluginManager/Manager.h"
-#include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h"
+#if !defined(CORRADE_TARGET_WINDOWS) || !defined(CORRADE_BUILD_STATIC) || defined(CORRADE_TARGET_WINDOWS_RT)
+#error this file is only meant to be used in non-RT Windows static builds
+#endif
 
-#include "AbstractAnimal.h"
-#include "GlobalStateAcrossLibrariesLibrary.h"
+namespace Corrade { namespace Utility { namespace Implementation {
 
-namespace Corrade { namespace PluginManager { namespace Test { namespace {
+void* windowsWeakSymbol(const char* name);
 
-struct GlobalStateAcrossLibrariesTest: TestSuite::Tester {
-    explicit GlobalStateAcrossLibrariesTest();
+}}}
 
-    void test();
-};
-
-GlobalStateAcrossLibrariesTest::GlobalStateAcrossLibrariesTest() {
-    addTests({&GlobalStateAcrossLibrariesTest::test});
-}
-
-void GlobalStateAcrossLibrariesTest::test() {
-    /* Canary is linked to the library, but the executable should see it too */
-    CORRADE_COMPARE(staticPluginsLoadedInALibrary(), std::vector<std::string>{"Canary"});
-
-    /* Avoid accidentally loading the dynamic plugins as well */
-    PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-    CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"Canary"});
-}
-
-}}}}
-
-CORRADE_TEST_MAIN(Corrade::PluginManager::Test::GlobalStateAcrossLibrariesTest)
+#endif

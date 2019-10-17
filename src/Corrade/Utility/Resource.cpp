@@ -43,10 +43,16 @@
 #include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Implementation/Resource.h"
 
+#if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_BUILD_STATIC) && !defined(CORRADE_TARGET_WINDOWS_RT)
+#include "Corrade/Utility/Implementation/WindowsWeakSymbol.h"
+#endif
+
 namespace Corrade { namespace Utility {
 
-#ifndef CORRADE_BUILD_STATIC
-/* (Of course) can't be in an unnamed namespace in order to export it below */
+#if !defined(CORRADE_BUILD_STATIC) || defined(CORRADE_TARGET_WINDOWS)
+/* (Of course) can't be in an unnamed namespace in order to export it below
+   (except for Windows, where we do extern "C" so this doesn't matter, but we
+   don't want to expose the ResourceGlobals symbols if not needed) */
 namespace {
 #endif
 
@@ -61,12 +67,11 @@ struct ResourceGlobals {
     std::map<std::string, std::string>* overrideGroups;
 };
 
-#if defined(CORRADE_BUILD_STATIC) && !defined(CORRADE_TARGET_WINDOWS)
+#if !defined(CORRADE_BUILD_STATIC) || (defined(CORRADE_BUILD_STATIC) && !defined(CORRADE_TARGET_WINDOWS)) || defined(CORRADE_TARGET_WINDOWS_RT)
+#ifdef CORRADE_BUILD_STATIC
 /* On static builds that get linked to multiple shared libraries and then used
    in a single app we want to ensure there's just one global symbol. On Linux
-   it's apparently enough to just export, macOS needs the weak attribute.
-   Windows not handled yet, as it needs a workaround using DllMain() and
-   GetProcAddress(). */
+   it's apparently enough to just export, macOS needs the weak attribute. */
 CORRADE_VISIBILITY_EXPORT
     #ifdef __GNUC__
     __attribute__((weak))
@@ -78,9 +83,34 @@ CORRADE_VISIBILITY_EXPORT
    resource initializers are executed, which means we don't hit any static
    initialization order fiasco. */
 ResourceGlobals resourceGlobals{nullptr, nullptr};
+#else
+/* On Windows the symbol is exported unmangled and then fetched via
+   GetProcAddress() to emulate weak linking. */
+extern "C" CORRADE_VISIBILITY_EXPORT ResourceGlobals corradeUtilityUniqueWindowsResourceGlobals{nullptr, nullptr};
+#endif
 
-#ifndef CORRADE_BUILD_STATIC
+#if !defined(CORRADE_BUILD_STATIC) || defined(CORRADE_TARGET_WINDOWS)
 }
+#endif
+
+/* Windows don't have any concept of weak symbols, instead GetProcAddress() on
+   GetModuleHandle(nullptr) "emulates" the weak linking as it's guaranteed to
+   pick up the same symbol of the final exe independently of the DLL it was
+   called from. To avoid #ifdef hell in code below, the resourceGlobals are
+   redefined to return a value from this uniqueness-ensuring function. */
+#if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_BUILD_STATIC) && !defined(CORRADE_TARGET_WINDOWS_RT)
+namespace {
+
+ResourceGlobals& windowsResourceGlobals() {
+    /* A function-local static to ensure it's only initialized once without any
+       race conditions among threads */
+    static ResourceGlobals* const uniqueGlobals = reinterpret_cast<ResourceGlobals*>(Implementation::windowsWeakSymbol("corradeUtilityUniqueWindowsResourceGlobals"));
+    return *uniqueGlobals;
+}
+
+}
+
+#define resourceGlobals windowsResourceGlobals()
 #endif
 
 struct Resource::OverrideData {

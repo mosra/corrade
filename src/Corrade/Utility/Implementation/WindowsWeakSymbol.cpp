@@ -23,37 +23,21 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <vector>
-#include <string>
+#include "WindowsWeakSymbol.h"
 
-#include "Corrade/PluginManager/Manager.h"
-#include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/DebugStl.h"
+#include <Corrade/Utility/Assert.h>
 
-#include "AbstractAnimal.h"
-#include "GlobalStateAcrossLibrariesLibrary.h"
+#define WIN32_LEAN_AND_MEAN 1
+#define VC_EXTRALEAN
+#include <windows.h>
 
-namespace Corrade { namespace PluginManager { namespace Test { namespace {
+namespace Corrade { namespace Utility { namespace Implementation {
 
-struct GlobalStateAcrossLibrariesTest: TestSuite::Tester {
-    explicit GlobalStateAcrossLibrariesTest();
-
-    void test();
-};
-
-GlobalStateAcrossLibrariesTest::GlobalStateAcrossLibrariesTest() {
-    addTests({&GlobalStateAcrossLibrariesTest::test});
+void* windowsWeakSymbol(const char* name) {
+    /* FARPROC?! I want either a function pointer or a variable pointer */
+    void* address = reinterpret_cast<void*>(GetProcAddress(GetModuleHandleA(nullptr), name));
+    CORRADE_INTERNAL_ASSERT(address);
+    return address;
 }
 
-void GlobalStateAcrossLibrariesTest::test() {
-    /* Canary is linked to the library, but the executable should see it too */
-    CORRADE_COMPARE(staticPluginsLoadedInALibrary(), std::vector<std::string>{"Canary"});
-
-    /* Avoid accidentally loading the dynamic plugins as well */
-    PluginManager::Manager<AbstractAnimal> manager{"nonexistent"};
-    CORRADE_COMPARE(manager.pluginList(), std::vector<std::string>{"Canary"});
-}
-
-}}}}
-
-CORRADE_TEST_MAIN(Corrade::PluginManager::Test::GlobalStateAcrossLibrariesTest)
+}}}

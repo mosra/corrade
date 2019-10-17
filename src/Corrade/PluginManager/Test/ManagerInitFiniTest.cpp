@@ -85,23 +85,13 @@ void ManagerInitFiniTest::dynamicPlugin() {
            initialization is not called again. */
         out.str({});
         CORRADE_COMPARE(manager.load("InitFiniDynamic"), LoadState::Loaded);
-        {
-            #if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_BUILD_STATIC)
-            CORRADE_EXPECT_FAIL("Deduplication of global data (Debug output redirection) across shared libraries isn't implemented on Windows yet.");
-            #endif
-            CORRADE_COMPARE(out.str(), "Dynamic plugin initialized\n");
-        }
+        CORRADE_COMPARE(out.str(), "Dynamic plugin initialized\n");
 
         /* Finalization is right before manager unloads them. Base finalization
            is not called yet. */
         out.str({});
         CORRADE_COMPARE(manager.unload("InitFiniDynamic"), LoadState::NotLoaded);
-        {
-            #if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_BUILD_STATIC)
-            CORRADE_EXPECT_FAIL("Deduplication of global data (Debug output redirection) across shared libraries isn't implemented on Windows yet.");
-            #endif
-            CORRADE_COMPARE(out.str(), "Dynamic plugin finalized\n");
-        }
+        CORRADE_COMPARE(out.str(), "Dynamic plugin finalized\n");
 
         out.str({});
     }

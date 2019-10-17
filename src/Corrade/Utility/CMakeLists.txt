@@ -99,6 +99,12 @@ if(WITH_UTILITY)
         endif()
     endif()
 
+    # Functionality specific to static Windows builds
+    if(CORRADE_TARGET_WINDOWS AND NOT CORRADE_TARGET_WINDOWS_RT AND CORRADE_BUILD_STATIC)
+        list(APPEND CorradeUtility_SRCS Implementation/WindowsWeakSymbol.cpp)
+        list(APPEND CorradeUtility_PRIVATE_HEADERS Implementation/WindowsWeakSymbol.h)
+    endif()
+
     # Objects shared between main and test library
     add_library(CorradeUtilityObjects OBJECT
         ${CorradeUtility_SRCS}
@@ -189,6 +195,13 @@ if(NOT CMAKE_CROSSCOMPILING)
     if(CORRADE_TARGET_WINDOWS)
         # Needed for dealing with the design failure that's called "Unicode WINAPI"
         list(APPEND CorradeUtilityRc_SRCS Unicode.cpp)
+
+        # Functionality specific to static Windows builds. Not really needed
+        # for corrade-rc as it doesn't load any plugins yet but easier than
+        # having a special handling.
+        if(NOT CORRADE_TARGET_WINDOWS_RT)
+            list(APPEND CorradeUtilityRc_SRCS Implementation/WindowsWeakSymbol.cpp)
+        endif()
     endif()
 
     # Having a tool used during a build depend on a shared library brings a lot
