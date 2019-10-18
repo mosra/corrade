@@ -25,7 +25,7 @@
 
 #include "WindowsWeakSymbol.h"
 
-#include <Corrade/Utility/Assert.h>
+#include "Corrade/Utility/Assert.h"
 
 #define WIN32_LEAN_AND_MEAN 1
 #define VC_EXTRALEAN

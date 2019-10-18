@@ -25,7 +25,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <Corrade/configure.h>
+#include "Corrade/configure.h"
 
 #if !defined(CORRADE_TARGET_WINDOWS) || !defined(CORRADE_BUILD_STATIC) || defined(CORRADE_TARGET_WINDOWS_RT)
 #error this file is only meant to be used in non-RT Windows static builds
