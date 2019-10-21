@@ -171,7 +171,7 @@ on the filename are ignored, @cpp splitExtension("/home/.bashrc") @ce returns
 @cb{.py} os.path.splitext() @ce.
 @attention The implementation expects forward slashes as directory separators.
     Use @ref fromNativeSeparators() to convert from a platform-specific format.
-@see @ref path(), @ref filename()
+@see @ref path(), @ref filename(), @ref String::partition()
 */
 CORRADE_UTILITY_EXPORT std::pair<std::string, std::string> splitExtension(const std::string& path);
 

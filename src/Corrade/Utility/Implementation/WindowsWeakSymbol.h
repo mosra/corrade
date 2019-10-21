@@ -1,5 +1,5 @@
-#ifndef Corrade_Utility_WindowsWeakSymbol_h
-#define Corrade_Utility_WindowsWeakSymbol_h
+#ifndef Corrade_Utility_Implementation_WindowsWeakSymbol_h
+#define Corrade_Utility_Implementation_WindowsWeakSymbol_h
 /*
     This file is part of Corrade.
 
