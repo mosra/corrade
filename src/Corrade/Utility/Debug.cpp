@@ -141,7 +141,7 @@ namespace {
 DebugGlobals& windowsDebugGlobals() {
     /* A function-local static to ensure it's only initialized once without any
        race conditions among threads */
-    static DebugGlobals&(*const uniqueGlobals)() = reinterpret_cast<DebugGlobals&(*)()>(Implementation::windowsWeakSymbol("corradeUtilityUniqueDebugGlobals"));
+    static DebugGlobals&(*const uniqueGlobals)() = reinterpret_cast<DebugGlobals&(*)()>(Implementation::windowsWeakSymbol("corradeUtilityUniqueDebugGlobals", reinterpret_cast<void*>(&corradeUtilityUniqueDebugGlobals)));
     return uniqueGlobals();
 }
 

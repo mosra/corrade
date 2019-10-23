@@ -104,7 +104,7 @@ namespace {
 ResourceGlobals& windowsResourceGlobals() {
     /* A function-local static to ensure it's only initialized once without any
        race conditions among threads */
-    static ResourceGlobals* const uniqueGlobals = reinterpret_cast<ResourceGlobals*>(Implementation::windowsWeakSymbol("corradeUtilityUniqueWindowsResourceGlobals"));
+    static ResourceGlobals* uniqueGlobals = reinterpret_cast<ResourceGlobals*>(Implementation::windowsWeakSymbol("corradeUtilityUniqueWindowsResourceGlobals", &corradeUtilityUniqueWindowsResourceGlobals));
     return *uniqueGlobals;
 }
 

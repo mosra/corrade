@@ -33,7 +33,7 @@
 
 namespace Corrade { namespace Utility { namespace Implementation {
 
-void* windowsWeakSymbol(const char* name);
+void* windowsWeakSymbol(const char* name, void* backup);
 
 }}}
 

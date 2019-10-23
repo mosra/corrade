@@ -219,14 +219,14 @@ namespace {
 Implementation::StaticPlugin*& windowsGlobalStaticPlugins() {
     /* A function-local static to ensure it's only initialized once without any
        race conditions among threads */
-    static Implementation::StaticPlugin** const uniqueGlobals = reinterpret_cast<Implementation::StaticPlugin**>(Utility::Implementation::windowsWeakSymbol("corradePluginManagerUniqueGlobalStaticPlugins"));
+    static Implementation::StaticPlugin** const uniqueGlobals = reinterpret_cast<Implementation::StaticPlugin**>(Utility::Implementation::windowsWeakSymbol("corradePluginManagerUniqueGlobalStaticPlugins", &corradePluginManagerUniqueGlobalStaticPlugins));
     return *uniqueGlobals;
 }
 
 std::map<std::string, AbstractManager::Plugin*>*& windowsGlobalPlugins() {
     /* A function-local static to ensure it's only initialized once without any
        race conditions among threads */
-    static std::map<std::string, AbstractManager::Plugin*>*&(*const uniqueGlobals)() = reinterpret_cast<std::map<std::string, AbstractManager::Plugin*>*&(*)()>(Utility::Implementation::windowsWeakSymbol("corradePluginManagerUniqueGlobalPlugins"));
+    static std::map<std::string, AbstractManager::Plugin*>*&(*const uniqueGlobals)() = reinterpret_cast<std::map<std::string, AbstractManager::Plugin*>*&(*)()>(Utility::Implementation::windowsWeakSymbol("corradePluginManagerUniqueGlobalPlugins", reinterpret_cast<void*>(&corradePluginManagerUniqueGlobalPlugins)));
     return uniqueGlobals();
 }
 
