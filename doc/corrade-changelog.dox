@@ -29,9 +29,14 @@ namespace Corrade {
 
 @tableofcontents
 
-@section corrade-changelog-latest Changes since 2019.01
+@anchor corrade-changelog-latest
 
-@subsection corrade-changelog-latest-dependencies Dependency changes
+@section corrade-changelog-2019-10 2019.10
+
+Released 2019-10-24, tagged as
+[v2019.10](https://github.com/mosra/corrade/releases/tag/v2019.10).
+
+@subsection corrade-changelog-2019-10-dependencies Dependency changes
 
 -   Minimal supported CMake version is now 3.4. Older versions are not
     supported anymore and all workarounds for them were removed. Download a
@@ -40,7 +45,7 @@ namespace Corrade {
     that shouldn't affect any additional distribution compared to the CMake 3.1
     requirement in 2019.01.
 
-@subsection corrade-changelog-latest-new New features
+@subsection corrade-changelog-2019-10-new New features
 
 -   MSVC 2019 support. It needs about the same set of workarounds as MSVC 2017,
     which means there's a new (automatically enbaled) `MSVC2019_COMPATIBILITY`
@@ -50,7 +55,8 @@ namespace Corrade {
     and [mosra/magnum#343](https://github.com/mosra/magnum/pull/343).
 -   New @ref main "Corrade::Main" library for improved user experience and
     consistent behavior on Windows platforms (see
-    [mosra/corrade#37](https://github.com/mosra/corrade/pull/37))
+    [mosra/corrade#37](https://github.com/mosra/corrade/pull/37) and
+    [mosra/magnum#98](https://github.com/mosra/magnum/issues/98))
 -   When using Corrade as a CMake subproject, it now puts all binaries into a
     common directory to simplify `PATH` handling and dynamic plugin loading.
     For more information see @ref corrade-cmake-subproject,
@@ -63,7 +69,7 @@ namespace Corrade {
     implementations
 -   New @ref CORRADE_BUILD_MULTITHREADED build-time option, moved from Magnum
 
-@subsubsection corrade-changelog-latest-new-containers Containers library
+@subsubsection corrade-changelog-2019-10-new-containers Containers library
 
 -   The @ref Containers::ArrayView, @ref Containers::StaticArrayView,
     @ref Containers::StridedArrayView, @ref Containers::Array and
@@ -99,13 +105,13 @@ namespace Corrade {
 -   Added a @ref Containers::ArrayView<void> specialization as a mutable
     type-erased counterpart to @ref Containers::ArrayView<const void>
 
-@subsubsection corrade-changelog-latest-new-pluginmanager PluginManager library
+@subsubsection corrade-changelog-2019-10-new-pluginmanager PluginManager library
 
 -   Added a @ref CORRADE_PLUGIN_EJECT() macro doing an inverse of
     @ref CORRADE_PLUGIN_IMPORT() for static plugins, useful mainly for testing
     purposes
 
-@subsubsection corrade-changelog-latest-new-testsuite TestSuite library
+@subsubsection corrade-changelog-2019-10-new-testsuite TestSuite library
 
 -   Custom @ref TestSuite comparators can now optionally save diagnostic files
     as well as print formatted messages to the output. See
@@ -116,7 +122,7 @@ namespace Corrade {
     and benchmarks are being run, as that makes the measurements rather noisy.
     With the `--verbose` command-line option it prints further information.
 
-@subsubsection corrade-changelog-latest-new-utility Utility library
+@subsubsection corrade-changelog-2019-10-new-utility Utility library
 
 -   @ref Utility::Debug::packed and @ref Utility::Debug::color output modifiers
     for tighter printing of container types and printing color-like values as
@@ -181,7 +187,7 @@ namespace Corrade {
 -   Added a @ref CORRADE_NOOP() macro for a portable way to define out function
     macros on compiler command line.
 
-@subsection corrade-changelog-latest-changes Changes and improvements
+@subsection corrade-changelog-2019-10-changes Changes and improvements
 
 -   Global state used by @ref PluginManager::Manager, @ref Utility::Debug and
     @ref Utility::Resource internals is no longer duplicated when Corrade is
@@ -192,7 +198,7 @@ namespace Corrade {
     state thread-local when the @ref CORRADE_BUILD_MULTITHREADED option is
     enabled (see also [mosra/corrade#65](https://github.com/mosra/corrade/issues/65))
 
-@subsubsection corrade-changelog-latest-changes-containers Containers library
+@subsubsection corrade-changelog-2019-10-changes-containers Containers library
 
 -   It's now possible to create @ref Containers::ScopeGuard without a handle
     in order to easily call a global function or lambda on scope end
@@ -208,7 +214,7 @@ namespace Corrade {
     for non-copyable / non-movable types. That'll get fixed in a future
     release.
 
-@subsubsection corrade-changelog-latest-changes-Interconnect Interconnect library
+@subsubsection corrade-changelog-2019-10-changes-Interconnect Interconnect library
 
 -   The @ref Interconnect library internals got reworked with less allocations,
     better memory usage, improved signal emitting performance and support for
@@ -216,7 +222,7 @@ namespace Corrade {
     also [mosra/corrade#63](https://github.com/mosra/corrade/pull/63) for more
     information.
 
-@subsubsection corrade-changelog-latest-changes-pluginmanager PluginManager library
+@subsubsection corrade-changelog-2019-10-changes-pluginmanager PluginManager library
 
 -   Instantiating a @ref PluginManager::Manager without an explicit plugin
     directory will only print a warning about no dynamic plugins found if
@@ -232,7 +238,7 @@ namespace Corrade {
 -   @ref PluginManager::AbstractPlugin now implements a destructive move
     constructor
 
-@subsubsection corrade-changelog-latest-changes-testsuite TestSuite library
+@subsubsection corrade-changelog-2019-10-changes-testsuite TestSuite library
 
 -   When a test executed through CTest fails on Android, the uploaded test
     executable is kept in `/data/local/tmp` so it's possible to debug it
@@ -246,7 +252,7 @@ namespace Corrade {
     only from within actual (instanced, repeated) test cases instead of
     silently giving back an undefined value, making mistakes harder to spot
 
-@subsubsection corrade-changelog-latest-changes-utility Utility library
+@subsubsection corrade-changelog-2019-10-changes-utility Utility library
 
 -   Assertion messages now ignore @ref Utility::Error output redirection to
     ensure the application never aborts without a message
@@ -273,7 +279,7 @@ namespace Corrade {
     @cb{.cpp} char @ce array and a @ref std::string for the delimiter in
     addition to a single @cb{.cpp} char @ce
 
-@subsection corrade-changelog-latest-buildsystem Build system
+@subsection corrade-changelog-2019-10-buildsystem Build system
 
 -   @ref building-corrade-packages-msys "MSYS2 packages" are now in official
     repositories, installable directly via `pacman`
@@ -330,7 +336,7 @@ namespace Corrade {
 -   Updated the iOS toolchain to make @cmake find_package(Threads) @ce work
     correctly
 
-@subsection corrade-changelog-latest-bugfixes Bug fixes
+@subsection corrade-changelog-2019-10-bugfixes Bug fixes
 
 -   The @ref TestSuite::Comparator class by mistake did not have fuzzy
     comparison for @cpp long double @ce
@@ -375,7 +381,7 @@ namespace Corrade {
     [mosra/corrade#73](https://github.com/mosra/corrade/issues/73) for more
     information.
 
-@subsection corrade-changelog-latest-deprecated Deprecated APIs
+@subsection corrade-changelog-2019-10-deprecated Deprecated APIs
 
 -   Single-argument @cpp Utility::Arguments::setHelp() @ce is now deprecated in
     favor of @ref Utility::Arguments::setGlobalHelp() to avoid it being used
@@ -404,7 +410,7 @@ namespace Corrade {
     supported for backwards compatibility but custom comparators are strongly
     advised to upgrade
 
-@subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
+@subsection corrade-changelog-2019-10-compatibility Potential compatibility breakages, removed APIs
 
 -   @cpp Containers::StridedArrayView<T> @ce is now
     @ref Containers::StridedArrayView "Containers::StridedArrayView<dimensions, T>"
@@ -438,7 +444,7 @@ namespace Corrade {
     `CORRADE_TEST_BENCHMARK_YELLOW` and `CORRADE_TEST_BENCHMARK_RED` to be
     consistent with remaining variables understood by test suite executables.
 
-@subsection corrade-changelog-latest-documentation Documentation
+@subsection corrade-changelog-2019-10-documentation Documentation
 
 -   Updated docs of the @ref Corrade/Utility/Macros.h header mentioning what
     @ref CORRADE_DEPRECATED() macros work on what compiler (see
