@@ -29,7 +29,11 @@ namespace Corrade {
 
 @tableofcontents
 
-@anchor corrade-changelog-latest
+@section corrade-changelog-latest Changes since 2019.10
+
+@subsection corrade-changelog-latest-buildsystem Build system
+
+-   Fixed compilation of the @ref main "Corrade::Main" library on i686 MinGW
 
 @section corrade-changelog-2019-10 2019.10
 
