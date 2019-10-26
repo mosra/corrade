@@ -15,6 +15,8 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2019.10-0-g162d6a7d (2019-10-24)
+    -   Fixed OOB access when converting empty STL containers to ArrayView
     v2019.01-301-gefe8d740 (2019-08-05)
     -   MSVC 2019 compatibility
     -   Added except() for taking everything except last N elements

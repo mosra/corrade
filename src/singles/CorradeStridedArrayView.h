@@ -15,6 +15,9 @@
     -   GitHub project page — https://github.com/mosra/corrade
     -   GitHub Singles repository — https://github.com/mosra/magnum-singles
 
+    v2019.10-0-g162d6a7d (2019-10-24)
+    -   Don't assert when creating arrays with non-zero stride but zero size
+    -   Added a StridedArrayView4D convenience typedef
     v2019.01-301-gefe8d740 (2019-08-05)
     -   MSVC 2019 compatibility
     -   New constructor taking just a size, with stride calculated implicitly
