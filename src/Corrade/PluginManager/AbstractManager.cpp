@@ -210,6 +210,7 @@ std::map<std::string, AbstractManager::Plugin*>* globalPlugins = nullptr;
    globalPlugins are redefined to return a value from this uniqueness-ensuring
    function. */
 #if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_BUILD_STATIC) && !defined(CORRADE_TARGET_WINDOWS_RT)
+extern "C" CORRADE_VISIBILITY_EXPORT std::map<std::string, AbstractManager::Plugin*>*& corradePluginManagerUniqueGlobalPlugins();
 extern "C" CORRADE_VISIBILITY_EXPORT std::map<std::string, AbstractManager::Plugin*>*& corradePluginManagerUniqueGlobalPlugins() {
     return globalPlugins;
 }
