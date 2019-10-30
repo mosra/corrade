@@ -162,8 +162,12 @@ CORRADE_VISIBILITY_EXPORT
 Implementation::StaticPlugin* globalStaticPlugins = nullptr;
 #else
 /* On Windows the symbol is exported unmangled and then fetched via
-   GetProcAddress() to emulate weak linking. */
-extern "C" CORRADE_VISIBILITY_EXPORT Implementation::StaticPlugin* corradePluginManagerUniqueGlobalStaticPlugins = nullptr;
+   GetProcAddress() to emulate weak linking. Using an extern "C" block instead
+   of just a function annotation because otherwise MinGW prints a warning:
+   '...' initialized and declared 'extern' (uh?) */
+extern "C" {
+    CORRADE_VISIBILITY_EXPORT Implementation::StaticPlugin* corradePluginManagerUniqueGlobalStaticPlugins = nullptr;
+}
 #endif
 
 #ifdef CORRADE_BUILD_MULTITHREADED

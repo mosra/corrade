@@ -85,8 +85,12 @@ CORRADE_VISIBILITY_EXPORT
 ResourceGlobals resourceGlobals{nullptr, nullptr};
 #else
 /* On Windows the symbol is exported unmangled and then fetched via
-   GetProcAddress() to emulate weak linking. */
-extern "C" CORRADE_VISIBILITY_EXPORT ResourceGlobals corradeUtilityUniqueWindowsResourceGlobals{nullptr, nullptr};
+   GetProcAddress() to emulate weak linking. Using an extern "C" block instead
+   of just a function annotation because otherwise MinGW prints a warning:
+   '...' initialized and declared 'extern' (uh?) */
+extern "C" {
+    CORRADE_VISIBILITY_EXPORT ResourceGlobals corradeUtilityUniqueWindowsResourceGlobals{nullptr, nullptr};
+}
 #endif
 
 #if !defined(CORRADE_BUILD_STATIC) || defined(CORRADE_TARGET_WINDOWS)
