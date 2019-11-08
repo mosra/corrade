@@ -68,7 +68,7 @@ template<> struct ConfigurationValue<Foo> {
 
         Foo foo;
         (i >> a) && (foo.a = ConfigurationValue<int>::fromString(a, flags));
-        (i >> b) && (foo.b = ConfigurationValue<int>::fromString(a, flags));
+        (i >> b) && (foo.b = ConfigurationValue<int>::fromString(b, flags));
         return foo;
     }
 };
