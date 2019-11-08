@@ -35,6 +35,10 @@ namespace Corrade {
 
 -   Fixed compilation of the @ref main "Corrade::Main" library on i686 MinGW
 
+@subsection corrade-changelog-latest-documentation Documentation
+
+-   Various fixes (see [mosra/corrade#80](https://github.com/mosra/corrade/pull/80))
+
 @section corrade-changelog-2019-10 2019.10
 
 Released 2019-10-24, tagged as

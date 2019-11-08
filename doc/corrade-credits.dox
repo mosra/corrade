@@ -111,7 +111,7 @@ Is the below list missing your name or something's wrong?
 -   **Jonathan Hale** ([\@Squareys](https://github.com/Squareys)) ---
     various fixes, buildsystem improvements
 -   **Marco Melorio** ([\@Melix19](https://github.com/Melix19)) --- iOS
-    crosscompiling fixes
+    crosscompiling and other fixes
 -   **Max Schwarz** ([\@xqms](https://github.com/xqms)) --- thread-local
     @ref Utility::Debug scoped output redirection and coloring, documentation
     fixes
