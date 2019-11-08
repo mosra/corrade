@@ -515,8 +515,11 @@ class Array {
         /**
          * @brief Release data storage
          *
-         * Returns the data pointer and resets internal state to default.
-         * Deleting the returned array is user responsibility.
+         * Returns the data pointer and resets internal state to be equivalent
+         * to a default-constructed instance. Deleting the returned array is
+         * user responsibility --- note the array might have a custom
+         * @ref deleter() and so @cpp delete @ce might not be always
+         * appropriate.
          */
         T* release();
 
