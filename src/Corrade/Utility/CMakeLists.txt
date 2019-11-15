@@ -181,7 +181,7 @@ endif()
 # Then the condition would be if(NOT CMAKE_CROSSCOMPILING OR CORRADE_TARGET_WINDOWS_RT)
 # and similar change would be in UseCorrade.cmake. More info in this thread:
 #  https://cmake.org/pipermail/cmake-developers/2015-January/024242.html
-if(NOT CMAKE_CROSSCOMPILING)
+if(NOT CMAKE_CROSSCOMPILING OR CORRADE_TARGET_WINDOWS_RT)
     # Sources for standalone corrade-rc
     set(CorradeUtilityRc_SRCS
         Arguments.cpp
@@ -227,6 +227,9 @@ if(NOT CMAKE_CROSSCOMPILING)
         target_link_libraries(corrade-rc PRIVATE ${CMAKE_DL_LIBS})
     endif()
     set_target_properties(corrade-rc PROPERTIES FOLDER "Corrade/Utility")
+    if(CORRADE_TARGET_WINDOWS_RT)
+        set_target_properties(corrade-rc PROPERTIES VS_WINRT_COMPONENT OFF)
+    endif()
     install(TARGETS corrade-rc DESTINATION ${CORRADE_BINARY_INSTALL_DIR})
 
     # Corrade::rc target alias for superprojects
