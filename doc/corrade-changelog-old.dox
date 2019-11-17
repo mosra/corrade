@@ -132,7 +132,7 @@ for a high-level overview.
 -   Compiler compatibility mode is now automatically detected by CMake to make
     the building easier
 -   It's no longer needed to explicitly test validity of pointer returned from
-    @ref PluginManager::Manager::instance()
+    @cpp PluginManager::Manager::instance() @ce
 -   Improved error reporting in @ref PluginManager library
 -   Thorough documentation review, fixes and improvements
 
@@ -269,8 +269,8 @@ No dependency changes in this release.
 @subsection corrade-changelog-2013-10-changes Changes
 
 -   Returning @ref std::unique_ptr instead of naked pointer from
-    @ref PluginManager::Manager::instance() for better usability and to avoid
-    accidental memory leaks
+    @cpp PluginManager::Manager::instance() @ce for better usability and to
+    avoid accidental memory leaks
 -   Documentation updates and improvements to make the library more accessible
     for newcomers
 -   Various build system updates for better compile times and easier

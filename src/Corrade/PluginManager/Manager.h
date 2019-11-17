@@ -33,7 +33,6 @@
 
 #include "Corrade/Containers/Pointer.h"
 #include "Corrade/PluginManager/AbstractManager.h"
-#include "Corrade/Utility/Macros.h"
 
 #ifdef CORRADE_BUILD_DEPRECATED
 #include "Corrade/Containers/PointerStl.h"
@@ -85,7 +84,7 @@ possible to unload a plugin that still has active instances. For that to work,
 instances, otherwise @ref unload() returns @ref LoadState::Used. Moreover, in
 order to avoid double-free issues, you have to call
 @ref Containers::Pointer::release() "release()" on all @ref Containers::Pointer
-instances returned from @ref Manager::instance() or
+instances returned from @ref Manager::instantiate() or
 @ref Manager::loadAndInstantiate().
 
 @section PluginManager-Manager-data Plugin-specific data and configuration
@@ -161,15 +160,6 @@ template<class T> class Manager: public AbstractManager {
         Containers::Pointer<T> instantiate(const std::string& plugin) {
             return Containers::pointerCast<T>(instantiateInternal(plugin));
         }
-
-        #ifdef CORRADE_BUILD_DEPRECATED
-        /** @brief @copybrief instantiate()
-         * @deprecated Use @ref instantiate() instead.
-         */
-        CORRADE_DEPRECATED("use instantiate() instead") Containers::Pointer<T> instance(const std::string& plugin) {
-            return instantiate(plugin);
-        }
-        #endif
 
         /**
          * @brief Load and instantiate plugin

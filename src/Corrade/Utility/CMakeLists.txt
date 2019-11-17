@@ -93,10 +93,6 @@ if(WITH_UTILITY)
     if(CORRADE_TARGET_ANDROID)
         list(APPEND CorradeUtility_SRCS AndroidLogStreamBuffer.cpp)
         list(APPEND CorradeUtility_HEADERS AndroidLogStreamBuffer.h)
-
-        if(CORRADE_BUILD_DEPRECATED)
-            list(APPEND CorradeUtility_HEADERS AndroidStreamBuffer.h)
-        endif()
     endif()
 
     # Functionality specific to static Windows builds

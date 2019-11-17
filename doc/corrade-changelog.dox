@@ -44,6 +44,13 @@ namespace Corrade {
 
 -   Various fixes (see [mosra/corrade#80](https://github.com/mosra/corrade/pull/80))
 
+@subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
+
+-   Removed `Corrade/Utility/AndroidStreamBuffer.h` that was deprecated in
+    2018.04, use @ref Corrade/Utility/AndroidLogStreamBuffer.h instead
+-   Removed `PluginManager::Manager::instance()` that was deprecated in
+    2018.04, use @ref PluginManager::Manager::instantiate() instead
+
 @section corrade-changelog-2019-10 2019.10
 
 Released 2019-10-24, tagged as

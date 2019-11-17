@@ -335,7 +335,7 @@ class CORRADE_PLUGINMANAGER_EXPORT AbstractManager {
          *      slashes as directory separators. Use @ref Utility::Directory::fromNativeSeparators()
          *      to convert from platform-specific format.
          *
-         * @see @ref unload(), @ref loadState(), @ref Manager::instance(),
+         * @see @ref unload(), @ref loadState(), @ref Manager::instantiate(),
          *      @ref Manager::loadAndInstantiate()
          * @partialsupport On platforms without
          *      @ref CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT "dynamic plugin support"
