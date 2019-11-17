@@ -175,12 +175,8 @@ if(WITH_UTILITY)
     add_library(Corrade::Utility ALIAS CorradeUtility)
 endif()
 
-# TODO: In the future it might be possible to not require external corrade-rc
-# when generating WinRT targets by setting
-#  set_target_properties(corrade-rc PROPERTIES VS_WINRT_COMPONENT OFF)
-# Then the condition would be if(NOT CMAKE_CROSSCOMPILING OR CORRADE_TARGET_WINDOWS_RT)
-# and similar change would be in UseCorrade.cmake. More info in this thread:
-#  https://cmake.org/pipermail/cmake-developers/2015-January/024242.html
+# On Windows RT / UWP the corrade-rc has VS_WINRT_COMPONENT set and thus we
+# don't need a separate native build
 if(NOT CMAKE_CROSSCOMPILING OR CORRADE_TARGET_WINDOWS_RT)
     # Sources for standalone corrade-rc
     set(CorradeUtilityRc_SRCS
