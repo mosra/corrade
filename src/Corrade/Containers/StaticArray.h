@@ -353,13 +353,18 @@ template<std::size_t size_, class T> class StaticArray {
 
         /**
          * @brief Static array slice
+         * @m_since{2019,10}
          *
          * Equivalent to @ref StaticArrayView::slice() const.
          */
         template<std::size_t begin_, std::size_t end_> StaticArrayView<end_ - begin_, T> slice() {
             return StaticArrayView<size_, T>(*this).template slice<begin_, end_>();
         }
-        /** @overload */
+
+        /**
+         * @overload
+         * @m_since{2019,10}
+         */
         template<std::size_t begin_, std::size_t end_> StaticArrayView<end_ - begin_, const T> slice() const {
             return StaticArrayView<size_, const T>(*this).template slice<begin_, end_>();
         }
@@ -416,13 +421,18 @@ template<std::size_t size_, class T> class StaticArray {
 
         /**
          * @brief Static array suffix
+         * @m_since{2019,10}
          *
          * Equivalent to @ref StaticArrayView::suffix() const.
          */
         template<std::size_t begin_> StaticArrayView<size_ - begin_, T> suffix() {
             return StaticArrayView<size_, T>(*this).template suffix<begin_>();
         }
-        /** @overload */
+
+        /**
+         * @overload
+         * @m_since{2019,10}
+         */
         template<std::size_t begin_> StaticArrayView<size_ - begin_, const T> suffix() const {
             return StaticArrayView<size_, const T>(*this).template suffix<begin_>();
         }

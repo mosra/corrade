@@ -27,6 +27,7 @@
 
 /** @file
  * @brief Class @ref Corrade::TestSuite::Compare::SortedContainer
+ * @m_since{2019,10}
  */
 
 #include <algorithm>

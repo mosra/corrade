@@ -39,6 +39,7 @@ namespace Corrade { namespace Utility {
 
 /**
 @brief Format a string
+@m_since{2019,10}
 
 Provides type-safe formatting of arbitrary types into a template string,
 similar in syntax to Python's [format()](https://docs.python.org/3.4/library/string.html#format-string-syntax).

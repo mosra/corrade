@@ -27,6 +27,7 @@
 
 /** @file
  * @brief Function @ref Corrade::Utility::formatString(), @ref Corrade::Utility::formatInto()
+ * @m_since{2019,10}
  * @experimental
  */
 

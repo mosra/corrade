@@ -27,6 +27,7 @@
 
 /** @file
 @brief Forward declaration for @ref std::vector
+@m_since{2019,10}
 
 On @ref CORRADE_TARGET_LIBCXX "libc++" (3.9.0 and up) and
 @ref CORRADE_TARGET_LIBSTDCXX "libstdc++" (all versions) includes a lightweight

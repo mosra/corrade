@@ -95,6 +95,7 @@ template<class T> using IsIterable = std::integral_constant<bool,
 
 /**
 @brief Traits class for checking whether given type is iterable
+@m_since{2019,10}
 
 Equivalent to @ref std::true_type if the class is has a @cpp c_str() @ce
 member. Otherwise equivalent to @ref std::false_type. Useful for dispatching

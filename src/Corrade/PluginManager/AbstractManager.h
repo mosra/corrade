@@ -472,6 +472,7 @@ of application exection. It's also safe to call this macro more than once.
 @brief Eject a previously imported static plugin
 @param name      Static plugin name (the same as defined with
     @ref CORRADE_PLUGIN_REGISTER())
+@m_since{2019,10}
 
 Deregisters a plugin previously registered using @ref CORRADE_PLUGIN_IMPORT().
 

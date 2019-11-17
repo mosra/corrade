@@ -308,6 +308,7 @@ otherwise falls back to compiler-specific attribute. Example usage:
 
 /** @hideinitializer
 @brief Thread-local annotation
+@m_since{2019,10}
 
 Expands to C++11 @cpp thread_local @ce keyword on all compilers except old
 Apple Clang, where it's defined as @cpp __thread @ce. Note that the
@@ -325,6 +326,7 @@ regarding RAII.
 
 /** @hideinitializer
 @brief Always inline a function
+@m_since{2019,10}
 
 Stronger than the standard @cpp inline @ce keyword where supported, but even
 then the compiler might decide to not inline the function (for example if it's
@@ -350,6 +352,7 @@ always suppresses all inlining. Example usage:
 
 /** @hideinitializer
 @brief Never inline a function
+@m_since{2019,10}
 
 Prevents the compiler from inlining a function during an optimization pass.
 Expands to @cpp __attribute__((noinline)) @ce on GCC and Clang
@@ -372,6 +375,7 @@ elsewhere. Example usage:
 
 /** @hideinitializer
 @brief Function name
+@m_since{2019,10}
 
 Gives out an undecorated function name. Equivalent to the standard C++11
 @cpp __func__ @ce on all sane platforms and to @cpp __FUNCTION__ @ce on
@@ -392,6 +396,7 @@ concatenated with other string literals like @cpp __FILE__ @ce or
 
 /** @hideinitializer
 @brief Line number as a string
+@m_since{2019,10}
 
 Turns the standard @cpp __LINE__ @ce macro into a string. Useful for example
 to have correct line numbers when embedding GLSL shaders directly in the code:
@@ -419,6 +424,7 @@ as applying to the immediately following line, which is why the extra
 
 /** @hideinitializer
 @brief No-op
+@m_since{2019,10}
 
 Eats all arguments passed to it. Useful on compilers that don't support
 defining function macros on command line --- for example,

@@ -362,6 +362,7 @@ template<class T> class ArrayView {
 
         /**
          * @brief Static array slice
+         * @m_since{2019,10}
          *
          * At compile time expects that @cpp begin < end_ @ce, at runtime that
          * @p end_ is not larger than @ref size().
@@ -423,6 +424,7 @@ template<class T> class ArrayView {
 
         /**
          * @brief Array prefix except the last @p count items
+         * @m_since{2019,10}
          *
          * Equivalent to @cpp data.slice(0, data.size() - count) @ce.
          * @see @ref slice(std::size_t, std::size_t) const
@@ -442,6 +444,7 @@ template<class T> class ArrayView {
 
 /**
 @brief Void array view with size information
+@m_since{2019,10}
 
 Specialization of @ref ArrayView which is convertible from a compile-time
 array, @ref Array, @ref ArrayView or @ref StaticArrayView of any non-constant
@@ -953,6 +956,7 @@ template<std::size_t size_, class T> class StaticArrayView {
 
         /**
          * @brief Static array slice
+         * @m_since{2019,10}
          *
          * Expects (at compile time) that @cpp begin < end_ @ce and @p end_ is
          * not larger than @ref Size.
@@ -989,6 +993,7 @@ template<std::size_t size_, class T> class StaticArrayView {
 
         /**
          * @brief Static array suffix
+         * @m_since{2019,10}
          *
          * Equivalent to @cpp data.slice<begin_, Size>() @ce.
          * @see @ref slice() const

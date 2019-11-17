@@ -76,6 +76,7 @@ as well, have a look at @ref CORRADE_VISIBILITY_STATIC.
 
 /** @hideinitializer
 @brief Export inline class member into a shared library
+@m_since{2019,10}
 
 If the GCC/Clang `-fvisibility-inlines-hidden` flag is used (enabled by default
 when you use the `CORRADE_USE_PEDANTIC_FLAGS` @ref corrade-cmake "CMake property"),

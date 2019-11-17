@@ -27,6 +27,7 @@
 
 /** @file
 @brief STL compatibility for @ref Corrade::Containers::ArrayView and @ref Corrade::Containers::StaticArrayView
+@m_since{2019,10}
 
 Including this header allows you to convert an
 @ref Corrade::Containers::ArrayView / @ref Corrade::Containers::StaticArrayView

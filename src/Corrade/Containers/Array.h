@@ -436,6 +436,7 @@ class Array {
 
         /**
          * @brief Fixed-size array slice
+         * @m_since{2019,10}
          *
          * At compile time expects that @cpp begin < end_ @ce, at runtime that
          * @p end_ is not larger than @ref size().
@@ -443,7 +444,11 @@ class Array {
         template<std::size_t begin_, std::size_t end_> StaticArrayView<end_ - begin_, T> slice() {
             return ArrayView<T>(*this).template slice<begin_, end_>();
         }
-        /** @overload */
+
+        /**
+         * @overload
+         * @m_since{2019,10}
+         */
         template<std::size_t begin_, std::size_t end_> StaticArrayView<end_ - begin_, const T> slice() const {
             return ArrayView<const T>(*this).template slice<begin_, end_>();
         }
@@ -501,13 +506,17 @@ class Array {
 
         /**
          * @brief Array prefix except the last @p count items
+         * @m_since{2019,10}
          *
          * Equivalent to @ref ArrayView::except().
          */
         ArrayView<T> except(std::size_t count) {
             return ArrayView<T>(*this).except(count);
         }
-        /** @overload */
+        /**
+         * @overload
+         * @m_since{2019,10}
+         */
         ArrayView<const T> except(std::size_t count) const {
             return ArrayView<const T>(*this).except(count);
         }

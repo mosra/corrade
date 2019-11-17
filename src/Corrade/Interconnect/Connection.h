@@ -121,26 +121,26 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
         #ifdef CORRADE_BUILD_DEPRECATED
         /**
          * @brief Whether the connection exists
-         * @deprecated This function is dangerous as it has no way to check
-         *      that the original @ref Emitter object still exists, use
-         *      @ref Emitter::isConnected() instead.
+         * @m_deprecated_since{2019,10} This function is dangerous as it has no
+         *      way to check that the original @ref Emitter object still
+         *      exists, use @ref Emitter::isConnected() instead.
          */
         CORRADE_DEPRECATED("dangerous, use Emitter::isConnected() instead") bool isConnected() const;
 
         /**
          * @brief Remove the connection
-         * @deprecated This function is dangerous as it has no way to check
-         *      that the original @ref Emitter object still exists, use
-         *      @ref Interconnect::disconnect() instead.
+         * @m_deprecated_since{2019,10} This function is dangerous as it has no
+         *      way to check that the original @ref Emitter object still
+         *      exists, use @ref Interconnect::disconnect() instead.
          */
         CORRADE_DEPRECATED("dangerous, use Interconnect::disconnect() instead") void disconnect();
 
         /**
          * @brief Whether connection is possible
-         * @deprecated Re-connecting a disconnected signal is not possible
-         *      anymore in order to make the library more efficient. This
-         *      function now just returns the value of (also deprecated)
-         *      @ref isConnected().
+         * @m_deprecated_since{2019,10} Re-connecting a disconnected signal is
+         *      not possible anymore in order to make the library more
+         *      efficient. This function now just returns the value of (also
+         *      deprecated) @ref isConnected().
          */
         CORRADE_DEPRECATED("re-connecting a disconnected signal is not possible anymore") bool isConnectionPossible() const {
             CORRADE_IGNORE_DEPRECATED_PUSH
@@ -150,10 +150,10 @@ class CORRADE_INTERCONNECT_EXPORT Connection {
 
         /**
          * @brief Re-establish the connection
-         * @deprecated Re-connecting a disconnected signal is not possible
-         *      anymore in order to make the library more efficient. This
-         *      function now just returns the value of (also deprecated)
-         *      @ref isConnected().
+         * @m_deprecated_since{2019,10} Re-connecting a disconnected signal is
+         *      not possible anymore in order to make the library more
+         *      efficient. This function now just returns the value of (also
+         *      deprecated) @ref isConnected().
          */
         CORRADE_DEPRECATED("re-connecting a disconnected signal is not possible anymore") bool connect() {
             CORRADE_IGNORE_DEPRECATED_PUSH

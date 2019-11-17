@@ -78,6 +78,7 @@ class CORRADE_UTILITY_EXPORT FileWatcher {
     public:
         /**
          * @brief Watch behavior flag
+         * @m_since{2019,10}
          *
          * @see @ref Flags, @ref FileWatcher(const std::string&, Flags),
          *      @ref flags()
@@ -105,6 +106,7 @@ class CORRADE_UTILITY_EXPORT FileWatcher {
 
         /**
          * @brief Watch behavior flags
+         * @m_since{2019,10}
          *
          * @see @ref FileWatcher(const std::string&, Flags), @ref flags()
          */

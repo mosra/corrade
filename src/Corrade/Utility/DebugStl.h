@@ -27,6 +27,7 @@
 
 /** @file
 @brief STL compatibility for @ref Corrade::Utility::Debug
+@m_since{2019,10}
 
 Including this header allows you to use STL types such as @ref std::string or
 @ref std::tuple with @ref Corrade::Utility::Debug. See @ref Utility-Debug-stl

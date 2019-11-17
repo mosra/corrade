@@ -163,6 +163,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
              * delegating options and usage of this flag.
              *
              * It's not allowed to use this flag on unprefixed arguments.
+             * @m_since{2019,10}
              */
             IgnoreUnknownOptions = 1 << 0
         };
@@ -414,6 +415,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
 
         /**
          * @brief Add final optional argument
+         * @m_since{2019,10}
          *
          * Always parsed as the last after all other unnamed arguments.
          * Compared to arguments added with @ref addArgument() this one doesn't
@@ -507,7 +509,7 @@ class CORRADE_UTILITY_EXPORT Arguments {
 
         #ifdef CORRADE_BUILD_DEPRECATED
         /** @brief @copybrief setGlobalHelp()
-         * @deprecated Use @ref setGlobalHelp() instead.
+         * @m_deprecated_since{2019,10} Use @ref setGlobalHelp() instead.
          */
         CORRADE_DEPRECATED("use setGlobalHelp() instead") Arguments& setHelp(std::string help);
         #endif

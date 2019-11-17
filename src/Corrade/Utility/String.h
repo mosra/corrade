@@ -290,6 +290,7 @@ CORRADE_UTILITY_EXPORT std::vector<std::string> splitWithoutEmptyParts(const std
 
 /**
 @brief Partition a string
+@m_since{2019,10}
 
 Equivalent to Python's @m_class{m-doc-external} [str.partition()](https://docs.python.org/3/library/stdtypes.html#str.partition).
 Splits @p string at the first occurence of @p separator. First returned value
@@ -300,11 +301,15 @@ two empty strings.
 */
 CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> partition(const std::string& string, char separator);
 
-/** @overload */
+/**
+@overload
+@m_since{2019,10}
+*/
 CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> partition(const std::string& string, const std::string& delimiter);
 
 /**
 @brief Right-partition a string
+@m_since{2019,10}
 
 Equivalent to Python's @m_class{m-doc-external} [str.rpartition()](https://docs.python.org/3/library/stdtypes.html#str.rpartition).
 Splits @p string at the last occurence of @p separator. First returned value is
@@ -315,7 +320,10 @@ the input string.
 */
 CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> rpartition(const std::string& string, char separator);
 
-/** @overload */
+/**
+@overload
+@m_since{2019,10}
+*/
 CORRADE_UTILITY_EXPORT Containers::StaticArray<3, std::string> rpartition(const std::string& string, const std::string& delimiter);
 
 /**
@@ -327,12 +335,18 @@ inline std::string join(const std::vector<std::string>& strings, char delimiter)
     return Implementation::join(strings, {&delimiter, 1});
 }
 
-/** @overload */
+/**
+@overload
+@m_since{2019,10}
+*/
 template<std::size_t size> inline std::string join(const std::vector<std::string>& strings, const char(&delimiter)[size]) {
     return Implementation::join(strings, {delimiter, size - 1});
 }
 
-/** @overload */
+/**
+@overload
+@m_since{2019,10}
+*/
 inline std::string join(const std::vector<std::string>& strings, const std::string& delimiter) {
     return Implementation::join(strings, {delimiter.data(), delimiter.size()});
 }

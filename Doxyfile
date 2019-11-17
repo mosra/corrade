@@ -254,7 +254,11 @@ ALIASES                = \
     "m_examplenavigation{2}=" \
     "m_keywords{1}=" \
     "m_keyword{3}=" \
-    "m_enum_values_as_keywords="
+    "m_enum_values_as_keywords=" \
+    "m_since{2}=" \
+    "m_since_latest=" \
+    "m_deprecated_since{2}=@deprecated" \
+    "m_deprecated_since_latest=@deprecated"
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only).
 # A mapping has the form "name=value". For example adding "class=itcl::class"

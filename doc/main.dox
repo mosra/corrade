@@ -27,6 +27,7 @@ namespace Corrade {
 
 /** @page main Corrade::Main library
 @brief Improves general user experience on Windows.
+@m_since{2019,10}
 
 @m_keywords{Main}
 

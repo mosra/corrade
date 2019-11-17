@@ -34,7 +34,11 @@ ALIASES                = \
     "m_examplenavigation{2}=@xmlonly<mcss:examplenavigation xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:page=\"\1\" mcss:prefix=\"\2\" />@endxmlonly" \
     "m_keywords{1}=@xmlonly<mcss:search xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:keywords=\"\1\" />@endxmlonly" \
     "m_keyword{3}=@xmlonly<mcss:search xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:keyword=\"\1\" mcss:title=\"\2\" mcss:suffix-length=\"\3\" />@endxmlonly" \
-    "m_enum_values_as_keywords=@xmlonly<mcss:search xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:enum-values-as-keywords=\"true\" />@endxmlonly"
+    "m_enum_values_as_keywords=@xmlonly<mcss:search xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:enum-values-as-keywords=\"true\" />@endxmlonly"\
+    "m_since{2}=@since @m_class{m-label m-success m-flat} @ref corrade-changelog-\1-\2 \"new&nbsp;in&nbsp;\1.\2\"" \
+    "m_since_latest=@since @m_class{m-label m-success m-flat} @ref corrade-changelog-latest \"new&nbsp;in&nbsp;Git&nbsp;master\"" \
+    "m_deprecated_since{2}=@since deprecated&nbsp;in&nbsp;\1.\2 @deprecated" \
+    "m_deprecated_since_latest=@since deprecated&nbsp;in&nbsp;Git&nbsp;master @deprecated"
 
 GENERATE_TODOLIST      = NO
 GENERATE_BUGLIST       = NO

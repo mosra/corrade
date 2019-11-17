@@ -152,6 +152,7 @@ class CORRADE_UTILITY_EXPORT Debug {
     public:
         /**
          * @brief Debug output flag
+         * @m_since{2019,10}
          *
          * @see @ref Flags, @ref Debug(Flags)
          */
@@ -193,6 +194,7 @@ class CORRADE_UTILITY_EXPORT Debug {
 
         /**
          * @brief Debug output flags
+         * @m_since{2019,10}
          *
          * @see @ref Debug(Flags)
          */
@@ -333,6 +335,7 @@ class CORRADE_UTILITY_EXPORT Debug {
 
         /**
          * @brief Print the next value in a packed form
+         * @m_since{2019,10}
          *
          * Enables a more compact output for types that support it (such as
          * iterable containers).
@@ -344,6 +347,7 @@ class CORRADE_UTILITY_EXPORT Debug {
 
         /**
          * @brief Print the next value as a color
+         * @m_since{2019,10}
          *
          * Prints color-like values as actual 24bit ANSI color sequences.
          * @see @ref Flag::Color, @ref operator<<(unsigned char)
@@ -366,6 +370,7 @@ class CORRADE_UTILITY_EXPORT Debug {
 
         /**
          * @brief Default debug output stream
+         * @m_since{2019,10}
          *
          * Debug output when no output redirection happens. A pointer to
          * @ref std::cout.
@@ -458,6 +463,7 @@ class CORRADE_UTILITY_EXPORT Debug {
 
         /**
          * @brief Flags applied for all following values
+         * @m_since{2019,10}
          *
          * @see @ref Utility-Debug-modifiers, @ref immediateFlags()
          */
@@ -465,6 +471,7 @@ class CORRADE_UTILITY_EXPORT Debug {
 
         /**
          * @brief Set flags applied for all following values
+         * @m_since{2019,10}
          *
          * @see @ref Utility-Debug-modifiers, @ref setImmediateFlags()
          */
@@ -472,6 +479,7 @@ class CORRADE_UTILITY_EXPORT Debug {
 
         /**
          * @brief Flags applied for the immediately following value
+         * @m_since{2019,10}
          *
          * Returned value is a combination of @ref flags() and immediate flags.
          * The immediate part gets reset after a value is printed.
@@ -481,6 +489,7 @@ class CORRADE_UTILITY_EXPORT Debug {
 
         /**
          * @brief Set flags to be applied for the immediately following value
+         * @m_since{2019,10}
          *
          * Unlike flags set with @ref setFlags(), these get applied only to the
          * immediately following value and reset after.
@@ -760,6 +769,7 @@ class CORRADE_UTILITY_EXPORT Warning: public Debug {
     public:
         /**
          * @brief Default warning output stream
+         * @m_since{2019,10}
          *
          * Warning output when no output redirection happens. A pointer to
          * @ref std::cerr.
@@ -844,6 +854,7 @@ class CORRADE_UTILITY_EXPORT Error: public Debug {
     public:
         /**
          * @brief Default error output stream
+         * @m_since{2019,10}
          *
          * Error output when no output redirection happens. A pointer to
          * @ref std::cerr.

@@ -1013,6 +1013,7 @@ class CORRADE_TESTSUITE_EXPORT Tester {
 
         /**
          * @brief Set test case template name
+         * @m_since{2019,10}
          *
          * Useful to distinguish different specializations of the same templated
          * test case. Equivalent to the following called from inside the test
@@ -1024,8 +1025,18 @@ class CORRADE_TESTSUITE_EXPORT Tester {
          *      @ref setTestCaseDescription(), @ref CORRADE_FUNCTION
          */
         void setTestCaseTemplateName(const std::string& name);
-        void setTestCaseTemplateName(std::string&& name); /**< @overload */
-        void setTestCaseTemplateName(const char* name); /**< @overload */
+
+        /**
+         * @overload
+         * @m_since{2019,10}
+         */
+        void setTestCaseTemplateName(std::string&& name);
+
+        /**
+         * @overload
+         * @m_since{2019,10}
+         */
+        void setTestCaseTemplateName(const char* name);
 
         /**
          * @brief Set test case description

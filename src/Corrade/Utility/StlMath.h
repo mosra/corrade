@@ -27,6 +27,7 @@
 
 /** @file
 @brief Include &lt;cmath&gt;, but without the heavy C++17 additions
+@m_since{2019,10}
 
 With @ref CORRADE_TARGET_LIBSTDCXX "libstdc++" from GCC 6 and newer,
 @cpp #include <cmath> @ce is above 10k lines when building with `-std=c++17`.

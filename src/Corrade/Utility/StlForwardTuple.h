@@ -27,6 +27,7 @@
 
 /** @file
 @brief Forward declaration for @ref std::tuple
+@m_since{2019,10}
 
 On @ref CORRADE_TARGET_LIBCXX "libc++", @ref CORRADE_TARGET_LIBSTDCXX "libstdc++"
 and @ref CORRADE_TARGET_DINKUMWARE "MSVC STL" includes a lightweight

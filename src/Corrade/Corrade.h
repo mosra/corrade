@@ -83,6 +83,7 @@ Defined if built as static libraries. Default are shared libraries.
 
 /**
 @brief Multi-threaded build
+@m_since{2019,10}
 
 Defined if the library is built in a way that makes it possible to safely use
 certain Corrade features simultaenously in multiple threads. In particular:
@@ -230,6 +231,7 @@ yet.
 
 /**
 @brief PowerPC target
+@m_since{2019,10}
 
 Defined if the library is built for PowerPC platforms (32 or 64-bit). Note that
 unlike other `CORRADE_TARGET_*` variables, this variable,
@@ -245,6 +247,7 @@ yet.
 
 /**
 @brief STL libc++ target
+@m_since{2019,10}
 
 Defined if the library is built against Clang [libc++](https://libcxx.llvm.org/)
 STL implementation. This is most common on @ref CORRADE_TARGET_APPLE "Apple"
@@ -258,6 +261,7 @@ also sometimes used on Linux.
 
 /**
 @brief STL libstdc++ target
+@m_since{2019,10}
 
 Defined if the library is built against GCC [libstdc++](https://gcc.gnu.org/onlinedocs/libstdc++/)
 STL implementation. This is most common on Linux and under MinGW, note that
@@ -270,6 +274,7 @@ Clang is able to use libstdc++ as well.
 
 /**
 @brief STL Dinkumware target
+@m_since{2019,10}
 
 Defined if the library is built against Dinkumware STL implementation (used by
 MSVC). Note that Clang is able to use this implementation as well.

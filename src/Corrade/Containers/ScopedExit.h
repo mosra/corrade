@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @deprecated Use @ref Corrade/Containers/ScopeGuard.h instead.
+ * @m_deprecated_since{2019,01} Use @ref Corrade/Containers/ScopeGuard.h instead.
  */
 
 #include "Corrade/configure.h"
@@ -39,7 +39,7 @@ CORRADE_DEPRECATED_FILE("use Corrade/Containers/ScopeGuard.h instead")
 namespace Corrade { namespace Containers {
 
 /** @brief @copybrief ScopeGuard
- * @deprecated Use @ref ScopeGuard instead.
+ * @m_deprecated_since{2019,01} Use @ref ScopeGuard instead.
  */
 typedef CORRADE_DEPRECATED("use ScopeGuard instead") ScopeGuard ScopedExit;
 

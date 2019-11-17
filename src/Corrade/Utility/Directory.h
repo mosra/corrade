@@ -163,6 +163,7 @@ CORRADE_UTILITY_EXPORT std::string filename(const std::string& filename);
 
 /**
 @brief Split basename and extension
+@m_since{2019,10}
 
 Returns a pair `(root, ext)` where @cpp root + ext == path @ce, and ext is
 empty or begins with a period and contains at most one period. Leading periods
@@ -187,6 +188,7 @@ CORRADE_UTILITY_EXPORT std::string join(const std::string& path, const std::stri
 
 /**
 @brief Join paths
+@m_since{2019,10}
 
 Convenience overload to @ref join(const std::string&, const std::string&) when
 joining the path from more than two parts. When @p paths is empty, returns
@@ -243,6 +245,7 @@ CORRADE_UTILITY_EXPORT bool isSandboxed();
 
 /**
 @brief Current directory
+@m_since{2019,10}
 
 Returns current working directory on Unix systems (equivalent to the value of
 shell builtin @cb{.sh} pwd @ce), non-RT Windows and
@@ -258,6 +261,7 @@ CORRADE_UTILITY_EXPORT std::string current();
 #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
 /**
 @brief Shared library location containing given address
+@m_since{2019,10}
 
 Like @ref executableLocation() but instead of the main executable returns
 location of a shared library that contains @p address. If the address is not
@@ -268,7 +272,10 @@ string is returned. Returned value is encoded in UTF-8.
 */
 CORRADE_UTILITY_EXPORT std::string libraryLocation(const void* address);
 
-/** @overload */
+/**
+@overload
+@m_since{2019,10}
+*/
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class R, class ...Args> std::string libraryLocation(R(*address)(Args...));
 #else
@@ -349,6 +356,7 @@ CORRADE_UTILITY_EXPORT std::string tmp();
 
 /**
 @brief Check if the file or directory exists
+@m_since{2019,10}
 
 Returns @cpp true @ce if the file exists and is accessible (i.e., user has a
 permission to open it), @cpp false @ce otherwise. Expects that the filename is
@@ -359,6 +367,7 @@ CORRADE_UTILITY_EXPORT bool exists(const std::string& filename);
 
 /**
 @brief Check if given path is a directory
+@m_since{2019,10}
 
 Returns @cpp true @ce if the path exists, is accessible (i.e., user has a
 permission to open it) and is a directory, @cpp false @ce otherwise. Expects
@@ -369,7 +378,7 @@ CORRADE_UTILITY_EXPORT bool isDirectory(const std::string& path);
 
 #ifdef CORRADE_BUILD_DEPRECATED
 /** @brief @copybrief exists()
- * @deprecated Use @ref exists() instead.
+ * @m_deprecated_since{2019,10} Use @ref exists() instead.
  */
 inline CORRADE_DEPRECATED("use exists() instead") bool fileExists(const std::string& filename) {
     return exists(filename);
@@ -416,6 +425,7 @@ CORRADE_UTILITY_EXPORT bool writeString(const std::string& filename, const std::
 
 /**
 @brief Append array into a file
+@m_since{2019,10}
 
 Appends to the file as binary (i.e. without newline conversion). Returns
 @cpp false @ce and prints a message to @ref Error if the file can't be written,
@@ -426,6 +436,7 @@ CORRADE_UTILITY_EXPORT bool append(const std::string& filename, Containers::Arra
 
 /**
 @brief Write string into file
+@m_since{2019,10}
 
 Convenience overload for @ref append().
 @see @ref writeString() @ref readString(), @ref copy()
@@ -434,6 +445,7 @@ CORRADE_UTILITY_EXPORT bool appendString(const std::string& filename, const std:
 
 /**
 @brief Copy a file
+@m_since{2019,10}
 
 Zero-allocation file copy with 128 kB block size. Does not work on
 directories. Returns @cpp false @ce and prints a message to @ref Error if

@@ -94,6 +94,7 @@ namespace Implementation {
 
 /**
 @brief Helper for specifying sizes and strides for @ref StridedArrayView
+@m_since{2019,10}
 
 Main property compared to a plain C array of value is convertibility from/to
 @ref StaticArrayView, implicit conversion from/to a scalar type in the
@@ -306,14 +307,24 @@ template<unsigned dimensions, class T> class StridedArrayView {
          */
         typedef typename std::conditional<std::is_const<T>::value, const void, void>::type ErasedType;
 
-        /** @brief Size values */
+        /**
+         * @brief Size values
+         * @m_since{2019,10}
+         */
         typedef StridedDimensions<dimensions, std::size_t> Size;
 
-        /** @brief Stride values */
+        /**
+         * @brief Stride values
+         * @m_since{2019,10}
+         */
         typedef StridedDimensions<dimensions, std::ptrdiff_t> Stride;
 
         enum: unsigned {
-            Dimensions = dimensions /**< View dimensions */
+            /**
+             * View dimensions
+             * @m_since{2019,10}
+             */
+            Dimensions = dimensions
         };
 
         /** @brief Conversion from `nullptr` */
@@ -352,6 +363,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
 
         /**
          * @brief Construct a view with explicit size and stride
+         * @m_since{2019,10}
          *
          * Equivalent to calling @ref StridedArrayView(Containers::ArrayView<ErasedType>, T*, const Size&, const Stride&)
          * with @p data as the first parameter and @cpp data.data() @ce as the
@@ -361,6 +373,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
 
         /**
          * @brief Construct a view with explicit size
+         * @m_since{2019,10}
          *
          * Assuming @p data are contiguous, stride is calculated implicitly
          * from @p size --- stride of a dimension is stride of the next
@@ -603,6 +616,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
 
         /**
          * @brief Array suffix
+         * @m_since{2019,10}
          *
          * Equivalent to @cpp data.slice({}, data.size()[0] - count) @ce.
          * @see @ref slice(std::size_t, std::size_t) const,
@@ -614,6 +628,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
 
         /**
          * @brief Multi-dimensional array suffix
+         * @m_since{2019,10}
          *
          * Equivalent to @cpp data.slice<newDimensions>({}, end) @ce, where
          * @p end is @cpp data.size()[i] - count[i] @ce for all dimensions.
@@ -624,6 +639,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
 
         /**
          * @brief Pick every Nth element
+         * @m_since{2019,10}
          *
          * Multiplies @ref stride() with @p skip and adjusts @ref size()
          * accordingly. Negative @p skip is equivalent to first calling
@@ -634,6 +650,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
 
         /**
          * @brief Pick every Nth element
+         * @m_since{2019,10}
          *
          * Multiplies @ref stride() with @p skip and adjusts @ref size()
          * accordingly. Negative @p skip is equivalent to first calling
@@ -643,6 +660,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
 
         /**
          * @brief Transpose two dimensions
+         * @m_since{2019,10}
          *
          * Exchanges dimensions @p dimensionA and @p dimensionB by swapping
          * their size and stride values. Together with @ref flipped() can be
@@ -654,6 +672,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
 
         /**
          * @brief Flip a dimension
+         * @m_since{2019,10}
          *
          * Flips given @p dimension by making its stride negative and adjusting
          * the internal base data pointer. Together with @ref transposed() can
@@ -665,6 +684,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
 
         /**
          * @brief Broadcast a dimension
+         * @m_since{2019,10}
          *
          * Stretches the initial value to @p size in given @p dimension by
          * setting its stride to 0 and size to @p size. To avoid destructive
@@ -705,6 +725,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
 #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 /**
 @brief One-dimensional strided array view
+@m_since{2019,10}
 
 Convenience alternative to @cpp StridedArrayView<1, T> @ce. See
 @ref StridedArrayView for more information.
@@ -714,6 +735,7 @@ template<class T> using StridedArrayView1D = StridedArrayView<1, T>;
 
 /**
 @brief Two-dimensional strided array view
+@m_since{2019,10}
 
 Convenience alternative to @cpp StridedArrayView<2, T> @ce. See
 @ref StridedArrayView for more information.
@@ -723,6 +745,7 @@ template<class T> using StridedArrayView2D = StridedArrayView<2, T>;
 
 /**
 @brief Three-dimensional strided array view
+@m_since{2019,10}
 
 Convenience alternative to @cpp StridedArrayView<3, T> @ce. See
 @ref StridedArrayView for more information.
@@ -732,6 +755,7 @@ template<class T> using StridedArrayView3D = StridedArrayView<3, T>;
 
 /**
 @brief Four-dimensional strided array view
+@m_since{2019,10}
 
 Convenience alternative to @cpp StridedArrayView<4, T> @ce. See
 @ref StridedArrayView for more information.
@@ -741,7 +765,8 @@ template<class T> using StridedArrayView4D = StridedArrayView<4, T>;
 #endif
 
 /** @relatesalso StridedArrayView
-@brief Make a strided view on fixed-size array
+@brief Make a strided view on a fixed-size array
+@m_since{2019,10}
 
 Convenience alternative to @ref StridedArrayView::StridedArrayView(U(&)[size]).
 The following two lines are equivalent:
@@ -755,6 +780,7 @@ template<std::size_t size, class T> constexpr StridedArrayView1D<T> stridedArray
 
 /** @relatesalso StridedArrayView
 @brief Make a strided view on @ref ArrayView
+@m_since{2019,10}
 
 Convenience alternative to @ref StridedArrayView::StridedArrayView(ArrayView<U>).
 The following two lines are equivalent:
@@ -767,6 +793,7 @@ template<class T> constexpr StridedArrayView1D<T> stridedArrayView(ArrayView<T> 
 
 /** @relatesalso StridedArrayView
 @brief Make a strided view on @ref StaticArrayView
+@m_since{2019,10}
 
 Convenience alternative to @ref StridedArrayView::StridedArrayView(StaticArrayView<size, U>).
 The following two lines are equivalent:
@@ -779,6 +806,7 @@ template<std::size_t size, class T> constexpr StridedArrayView1D<T> stridedArray
 
 /** @relatesalso StridedArrayView
 @brief Make a view on a view
+@m_since{2019,10}
 
 Equivalent to the implicit @ref StridedArrayView copy constructor --- it
 shouldn't be an error to call @ref stridedArrayView() on itself.
@@ -789,6 +817,7 @@ template<unsigned dimensions, class T> constexpr StridedArrayView<dimensions, T>
 
 /** @relatesalso StridedArrayView
 @brief Make a strided view on an external type / from an external representation
+@m_since{2019,10}
 
 @see @ref Containers-ArrayView-stl
 */
@@ -862,6 +891,7 @@ template<> struct ArrayCastFlattenOrInflate<false> { /* inflate */
 
 /** @relatesalso StridedArrayView
 @brief Reinterpret-cast and flatten or inflate a strided array view
+@m_since{2019,10}
 
 If @p newDimensions is one less than @p dimensions, flattens the last dimension
 into a tightly packed new type @p U, expecting the last dimension to be tightly
