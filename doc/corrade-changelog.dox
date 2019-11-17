@@ -315,7 +315,7 @@ Released 2019-10-24, tagged as
     @ref Interconnect-Emitter-msvc-icf "Interconnect::Emitter" documentation
     for more information when using custom buildsystems, see also
     [mosra/corrade#51](https://github.com/mosra/corrade/issues/51).
--   Fixed compilation with Clang and `-std=gnu++14` (see [mosra/corrade#62](https://github.com/mosra/corrade/pull/62)
+-   Fixed compilation with Clang and `-std=gnu++14` (see [mosra/corrade#62](https://github.com/mosra/corrade/pull/62))
 -   @ref CORRADE_VISIBILITY_STATIC no longer exports symbols in static
     libraries to be consistent with hidden visibility by default, additionally
     `-fvisibility-inlines-hidden` is passed along with `-fvisibility=hidden`
