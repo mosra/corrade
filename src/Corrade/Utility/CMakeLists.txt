@@ -171,9 +171,15 @@ if(WITH_UTILITY)
     add_library(Corrade::Utility ALIAS CorradeUtility)
 endif()
 
-# On Windows RT / UWP the corrade-rc has VS_WINRT_COMPONENT set and thus we
-# don't need a separate native build
-if(NOT CMAKE_CROSSCOMPILING OR CORRADE_TARGET_WINDOWS_RT)
+# TODO: https://cmake.org/pipermail/cmake-developers/2015-January/024242.html
+# mentions that in the future it might be possible to not require external
+# corrade-rc when generating WinRT targets by setting
+#  set_target_properties(corrade-rc PROPERTIES VS_WINRT_COMPONENT OFF)
+# Then this would be if(NOT CMAKE_CROSSCOMPILING OR CORRADE_TARGET_WINDOWS_RT).
+# However, it seems like this feature never materialized, as doing this will
+# result in corrade-rc that's looking for vcruntime140_app.dll in order to be
+# run. Last checked: Nov 2019.
+if(NOT CMAKE_CROSSCOMPILING)
     # Sources for standalone corrade-rc
     set(CorradeUtilityRc_SRCS
         Arguments.cpp
@@ -219,9 +225,6 @@ if(NOT CMAKE_CROSSCOMPILING OR CORRADE_TARGET_WINDOWS_RT)
         target_link_libraries(corrade-rc PRIVATE ${CMAKE_DL_LIBS})
     endif()
     set_target_properties(corrade-rc PROPERTIES FOLDER "Corrade/Utility")
-    if(CORRADE_TARGET_WINDOWS_RT)
-        set_target_properties(corrade-rc PROPERTIES VS_WINRT_COMPONENT OFF)
-    endif()
     install(TARGETS corrade-rc DESTINATION ${CORRADE_BINARY_INSTALL_DIR})
 
     # Corrade::rc target alias for superprojects

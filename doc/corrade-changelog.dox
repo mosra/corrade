@@ -33,11 +33,6 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-buildsystem Build system
 
--   On UWP / Windows RT builds it's not needed to build a native version of
-    @ref corrade-rc "corrade-rc" anymore, it's now generated as a native
-    executable during the crosscompilation build (see
-    [mosra/corrade#81](https://github.com/mosra/corrade/issues/81) and
-    [mosra/corrade#82](https://github.com/mosra/corrade/pull/82))
 -   Fixed compilation of the @ref main "Corrade::Main" library on i686 MinGW
 
 @subsection corrade-changelog-latest-documentation Documentation

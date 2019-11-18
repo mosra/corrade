@@ -659,25 +659,28 @@ git submodule update --init
 @m_class{m-block m-primary}
 
 @par Native build of corrade-rc
-    For all cross-compilation except the UWP / Windows RT build, you need to
-    have a native version of Corrade installed, because Corrade needs to run
-    the `corrade-rc` utility on the host system as part of the build process.
-    If native version of `corrade-rc` is not found on the system,
-    cross-compilation will fail. If `corrade-rc` is not in `PATH`, point CMake
-    to it using `-DCORRADE_RC_EXECUTABLE=/path/to/corrade-rc`.
+    You also need to have a native version of Corrade installed, because
+    Corrade needs to run `corrade-rc` utility on the host system as part of the
+    build process. If native version of `corrade-rc` is not found on the
+    system, cross-compilation will fail. If `corrade-rc` is not in `PATH`,
+    point CMake to it using `-DCORRADE_RC_EXECUTABLE=/path/to/corrade-rc`.
 
-@subsection building-corrade-cross-winrt Cross-compiling for UWP / Windows RT
+@subsection building-corrade-cross-winrt Cross-compiling for Windows RT
 
 As said above, you need a native build of the `corrade-rc` executable. The
 below script assumes that a native Corrade build is installed in `C:/Sys` and
 the installation path for WinRT is in `C:/Sys-winrt`. You need at least Windows
 8.1, Visual Studio 2015 and Windows 8.1 Store/Phone SDK installed. Because
 WinRT applications run in a sandbox, it's recommended to build the library as
-static so you don't have to bundle all the DLLs. Example is below:
+static so you don't have to bundle all the DLLs. Example is below, you can omit
+specifying `CORRADE_RC_EXECUTABLE` if
+@ref building-corrade-cross-rc "natively-built corrade-rc" is accessible
+through `PATH`.
 
 @code{.bat}
 mkdir build-winrt && cd build-winrt
 cmake .. ^
+    -DCORRADE_RC_EXECUTABLE="C:/Sys/bin/corrade-rc.exe" ^
     -DCMAKE_INSTALL_PREFIX="C:/Sys-winrt" ^
     -DBUILD_STATIC=ON ^
     -DCMAKE_SYSTEM_NAME=WindowsStore ^

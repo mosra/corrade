@@ -152,7 +152,7 @@ endif()
 
 # Initialize macros etc.
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
-if(CMAKE_CROSSCOMPILING AND NOT CORRADE_TARGET_WINDOWS_RT)
+if(CMAKE_CROSSCOMPILING)
     find_program(CORRADE_RC_EXECUTABLE corrade-rc)
     if(NOT CORRADE_RC_EXECUTABLE)
         message(FATAL_ERROR "Native `corrade-rc` executable, which is needed when crosscompiling, was not found")
