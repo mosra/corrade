@@ -768,15 +768,15 @@ void ArrayTest::cast() {
     CORRADE_VERIFY((std::is_same<decltype(dc), Containers::ArrayView<const std::uint16_t>>::value));
     CORRADE_VERIFY((std::is_same<decltype(cdc), Containers::ArrayView<const std::uint16_t>>::value));
 
-    CORRADE_COMPARE(reinterpret_cast<void*>(b.begin()), reinterpret_cast<void*>(a.begin()));
-    CORRADE_COMPARE(reinterpret_cast<const void*>(cb.begin()), reinterpret_cast<const void*>(ca.begin()));
-    CORRADE_COMPARE(reinterpret_cast<const void*>(bc.begin()), reinterpret_cast<const void*>(ac.begin()));
-    CORRADE_COMPARE(reinterpret_cast<const void*>(cbc.begin()), reinterpret_cast<const void*>(cac.begin()));
+    CORRADE_COMPARE(static_cast<void*>(b.begin()), static_cast<void*>(a.begin()));
+    CORRADE_COMPARE(static_cast<const void*>(cb.begin()), static_cast<const void*>(ca.begin()));
+    CORRADE_COMPARE(static_cast<const void*>(bc.begin()), static_cast<const void*>(ac.begin()));
+    CORRADE_COMPARE(static_cast<const void*>(cbc.begin()), static_cast<const void*>(cac.begin()));
 
-    CORRADE_COMPARE(reinterpret_cast<void*>(d.begin()), reinterpret_cast<void*>(a.begin()));
-    CORRADE_COMPARE(reinterpret_cast<const void*>(cd.begin()), reinterpret_cast<const void*>(ca.begin()));
-    CORRADE_COMPARE(reinterpret_cast<const void*>(dc.begin()), reinterpret_cast<const void*>(ac.begin()));
-    CORRADE_COMPARE(reinterpret_cast<const void*>(cdc.begin()), reinterpret_cast<const void*>(cac.begin()));
+    CORRADE_COMPARE(static_cast<void*>(d.begin()), static_cast<void*>(a.begin()));
+    CORRADE_COMPARE(static_cast<const void*>(cd.begin()), static_cast<const void*>(ca.begin()));
+    CORRADE_COMPARE(static_cast<const void*>(dc.begin()), static_cast<const void*>(ac.begin()));
+    CORRADE_COMPARE(static_cast<const void*>(cdc.begin()), static_cast<const void*>(cac.begin()));
 
     CORRADE_COMPARE(a.size(), 6);
     CORRADE_COMPARE(ca.size(), 6);

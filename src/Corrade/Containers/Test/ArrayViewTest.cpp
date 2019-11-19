@@ -1095,8 +1095,8 @@ void ArrayViewTest::cast() {
 
     CORRADE_VERIFY((std::is_same<decltype(b), Containers::ArrayView<std::uint64_t>>::value));
     CORRADE_VERIFY((std::is_same<decltype(c), Containers::ArrayView<std::uint16_t>>::value));
-    CORRADE_COMPARE(reinterpret_cast<void*>(b.begin()), reinterpret_cast<void*>(a.begin()));
-    CORRADE_COMPARE(reinterpret_cast<void*>(c.begin()), reinterpret_cast<void*>(a.begin()));
+    CORRADE_COMPARE(static_cast<void*>(b.begin()), static_cast<void*>(a.begin()));
+    CORRADE_COMPARE(static_cast<void*>(c.begin()), static_cast<void*>(a.begin()));
     CORRADE_COMPARE(a.size(), 6);
     CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(c.size(), 12);
