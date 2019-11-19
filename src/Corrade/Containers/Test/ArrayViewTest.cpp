@@ -1090,30 +1090,61 @@ void ArrayViewTest::sliceToStaticPointer() {
 void ArrayViewTest::cast() {
     std::uint32_t data[6]{};
     Containers::ArrayView<std::uint32_t> a = data;
+    Containers::ArrayView<void> av = data;
+    Containers::ArrayView<const void> cav = data;
     auto b = Containers::arrayCast<std::uint64_t>(a);
+    auto bv = Containers::arrayCast<std::uint64_t>(av);
+    auto cbv = Containers::arrayCast<const std::uint64_t>(cav);
     auto c = Containers::arrayCast<std::uint16_t>(a);
+    auto cv = Containers::arrayCast<std::uint16_t>(av);
+    auto ccv = Containers::arrayCast<const std::uint16_t>(cav);
 
     CORRADE_VERIFY((std::is_same<decltype(b), Containers::ArrayView<std::uint64_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(bv), Containers::ArrayView<std::uint64_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(cbv), Containers::ArrayView<const std::uint64_t>>::value));
     CORRADE_VERIFY((std::is_same<decltype(c), Containers::ArrayView<std::uint16_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(cv), Containers::ArrayView<std::uint16_t>>::value));
+    CORRADE_VERIFY((std::is_same<decltype(ccv), Containers::ArrayView<const std::uint16_t>>::value));
     CORRADE_COMPARE(static_cast<void*>(b.begin()), static_cast<void*>(a.begin()));
+    CORRADE_COMPARE(static_cast<void*>(bv.begin()), static_cast<void*>(a.begin()));
+    CORRADE_COMPARE(static_cast<const void*>(cbv.begin()), static_cast<const void*>(a.begin()));
     CORRADE_COMPARE(static_cast<void*>(c.begin()), static_cast<void*>(a.begin()));
+    CORRADE_COMPARE(static_cast<void*>(cv.begin()), static_cast<void*>(a.begin()));
+    CORRADE_COMPARE(static_cast<const void*>(ccv.begin()), static_cast<const void*>(a.begin()));
     CORRADE_COMPARE(a.size(), 6);
+    CORRADE_COMPARE(av.size(), 6*4);
+    CORRADE_COMPARE(cav.size(), 6*4);
     CORRADE_COMPARE(b.size(), 3);
+    CORRADE_COMPARE(bv.size(), 3);
+    CORRADE_COMPARE(cbv.size(), 3);
     CORRADE_COMPARE(c.size(), 12);
+    CORRADE_COMPARE(cv.size(), 12);
+    CORRADE_COMPARE(ccv.size(), 12);
 }
 
 void ArrayViewTest::castInvalid() {
     char data[10]{};
     Containers::ArrayView<char> a = data;
+    Containers::ArrayView<void> av = data;
+    Containers::ArrayView<const void> cav = data;
 
     auto b = Containers::arrayCast<std::uint16_t>(a);
+    auto bv = Containers::arrayCast<std::uint16_t>(av);
+    auto cbv = Containers::arrayCast<const std::uint16_t>(cav);
     CORRADE_COMPARE(b.size(), 5);
+    CORRADE_COMPARE(bv.size(), 5);
+    CORRADE_COMPARE(cbv.size(), 5);
 
     {
         std::ostringstream out;
         Error redirectError{&out};
         Containers::arrayCast<std::uint32_t>(a);
-        CORRADE_COMPARE(out.str(), "Containers::arrayCast(): can't reinterpret 10 1-byte items into a 4-byte type\n");
+        Containers::arrayCast<std::uint32_t>(av);
+        Containers::arrayCast<const std::uint32_t>(cav);
+        CORRADE_COMPARE(out.str(),
+            "Containers::arrayCast(): can't reinterpret 10 1-byte items into a 4-byte type\n"
+            "Containers::arrayCast(): can't reinterpret 10 bytes into a 4-byte type\n"
+            "Containers::arrayCast(): can't reinterpret 10 bytes into a 4-byte type\n");
     }
 }
 

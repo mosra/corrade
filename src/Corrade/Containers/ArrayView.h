@@ -451,7 +451,7 @@ array, @ref Array, @ref ArrayView or @ref StaticArrayView of any non-constant
 type and also any non-constant type convertible to them. Size for a particular
 type is recalculated to a size in bytes. This specialization doesn't provide
 any accessors besides @ref data(), because it has no use for the @cpp void @ce
-type. Instead, use @ref arrayCast(ArrayView<T>) to first cast the array to a
+type. Instead, use @ref arrayCast(ArrayView<void>) to first cast the array to a
 concrete type and then access the particular elements.
 
 Usage example:
@@ -561,8 +561,8 @@ array, @ref Array, @ref ArrayView or @ref StaticArrayView of any type and also
 any type convertible to them. Size for a particular type is recalculated to
 a size in bytes. This specialization doesn't provide any accessors besides
 @ref data(), because it has no use for the @cpp void @ce type. Instead, use
-@ref arrayCast(ArrayView<T>) to first cast the array to a concrete type and
-then access the particular elements.
+@ref arrayCast(ArrayView<const void>) to first cast the array to a concrete
+type and then access the particular elements.
 
 Usage example:
 
@@ -737,6 +737,34 @@ template<class U, class T> ArrayView<U> arrayCast(ArrayView<T> view) {
     CORRADE_ASSERT(size*sizeof(U) == view.size()*sizeof(T),
         "Containers::arrayCast(): can't reinterpret" << view.size() << sizeof(T) << Utility::Debug::nospace << "-byte items into a" << sizeof(U) << Utility::Debug::nospace << "-byte type", {});
     return {reinterpret_cast<U*>(view.begin()), size};
+}
+
+/** @relatesalso ArrayView
+@brief Reinterpret-cast a void array view
+@m_since_latest
+
+Size of the new array is calculated as @cpp view.size()/sizeof(U) @ce.
+Expects that the target type is [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
+and the total byte size doesn't change.
+*/
+template<class U> ArrayView<U> arrayCast(ArrayView<void> view) {
+    static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
+    const std::size_t size = view.size()/sizeof(U);
+    CORRADE_ASSERT(size*sizeof(U) == view.size(),
+        "Containers::arrayCast(): can't reinterpret" << view.size() << "bytes into a" << sizeof(U) << Utility::Debug::nospace << "-byte type", {});
+    return {reinterpret_cast<U*>(view.data()), size};
+}
+
+/** @relatesalso ArrayView
+@overload
+@m_since_latest
+*/
+template<class U> ArrayView<U> arrayCast(ArrayView<const void> view) {
+    static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
+    const std::size_t size = view.size()/sizeof(U);
+    CORRADE_ASSERT(size*sizeof(U) == view.size(),
+        "Containers::arrayCast(): can't reinterpret" << view.size() << "bytes into a" << sizeof(U) << Utility::Debug::nospace << "-byte type", {});
+    return {reinterpret_cast<U*>(view.data()), size};
 }
 
 /** @relatesalso ArrayView
