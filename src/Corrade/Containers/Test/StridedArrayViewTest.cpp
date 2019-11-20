@@ -1878,14 +1878,14 @@ void StridedArrayViewTest::convert3DConst() {
 
 void StridedArrayViewTest::convert3DFromExternalView() {
     /* Conversion to a multi-dimensional type is not allowed */
-    CORRADE_VERIFY((std::is_convertible<IntView, Containers::StridedArrayView1D<int>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<IntView, Containers::StridedArrayView3D<int>>::value));
+    CORRADE_VERIFY((std::is_convertible<IntView, StridedArrayView1Di>::value));
+    CORRADE_VERIFY(!(std::is_convertible<IntView, StridedArrayView3Di>::value));
 }
 
 void StridedArrayViewTest::convert3DConstFromExternalView() {
     /* Conversion to a multi-dimensional type is not allowed */
-    CORRADE_VERIFY((std::is_convertible<IntView, Containers::StridedArrayView1D<const int>>::value));
-    CORRADE_VERIFY(!(std::is_convertible<IntView, Containers::StridedArrayView3D<const int>>::value));
+    CORRADE_VERIFY((std::is_convertible<IntView, ConstStridedArrayView1Di>::value));
+    CORRADE_VERIFY(!(std::is_convertible<IntView, ConstStridedArrayView3Di>::value));
 }
 
 void StridedArrayViewTest::convert3DVoidFromExternalView() {
