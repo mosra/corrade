@@ -183,6 +183,8 @@ template<unsigned dimensions, class T> class StridedDimensions {
         template<unsigned, class> friend struct Implementation::StridedElement;
         template<bool> friend struct Implementation::ArrayCastFlattenOrInflate;
         template<class U, unsigned dimensions_, class T_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, T_>&);
+        template<class U, unsigned dimensions_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, void>&);
+        template<class U, unsigned dimensions_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, const void>&);
 
         template<class U, std::size_t ...sequence> constexpr explicit StridedDimensions(const U* values, Implementation::Sequence<sequence...>) noexcept: _data{T(values[sequence])...} {}
 
@@ -276,8 +278,23 @@ Corrade type                    | ↭ | STL type
 See @ref Containers-ArrayView-stl "ArrayView STL compatibility" for more
 information.
 
-@see @ref StridedIterator, @ref StridedArrayView1D, @ref StridedArrayView2D,
-    @ref StridedArrayView3D, @ref StridedArrayView4D
+@anchor Containers-StridedArrayView-single-header
+
+<b></b>
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This class, together with the @ref StridedArrayView<dimensions, void> /
+    @ref StridedArrayView<dimensions, const void> specializations is also
+    available as a single-header [CorradeStridedArrayView.h](https://github.com/mosra/magnum-singles/tree/master/CorradeStridedArrayView.h)
+    library in the Magnum Singles repository for easier integration into your
+    projects. See @ref corrade-singles for more information.
+
+@see @ref StridedArrayView<dimensions, void>,
+    @ref StridedArrayView<dimensions, const void>, @ref StridedIterator,
+    @ref StridedArrayView1D, @ref StridedArrayView2D, @ref StridedArrayView3D,
+    @ref StridedArrayView4D
 */
 /* All member functions are const because the view doesn't own the data */
 template<unsigned dimensions, class T> class StridedArrayView {
@@ -707,6 +724,8 @@ template<unsigned dimensions, class T> class StridedArrayView {
         template<unsigned, class> friend struct Implementation::StridedElement;
         template<bool> friend struct Implementation::ArrayCastFlattenOrInflate;
         template<class U, unsigned dimensions_, class T_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, T_>&);
+        template<class U, unsigned dimensions_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, void>&);
+        template<class U, unsigned dimensions_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, const void>&);
 
         /* Internal constructor without type/size checks for things like
            slice() etc. Argument order is different to avoid this function
@@ -718,6 +737,428 @@ template<unsigned dimensions, class T> class StridedArrayView {
         }
 
         ErasedType* _data;
+        Size _size;
+        Stride _stride;
+};
+
+/**
+@brief Multi-dimensional void array view with size and stride information
+@m_since_latest
+
+Specialization of @ref StridedArrayView which is convertible from a
+compile-time array, @ref Array, @ref ArrayView, @ref StaticArrayView or
+@ref StridedArrayView of any non-constant type and also any non-constant type
+convertible to them. For arrays and non-strided views, size is taken as element
+count of the original array and stride becomes the original type size; for
+strided views the size and stride is taken as-is. This specialization doesn't
+provide any accessors besides @ref data(), because it has no use for the
+@cpp void @ce type. Instead, use @ref arrayCast(const StridedArrayView<dimensions, void>&)
+to first cast the array to a concrete type and then access the particular
+elements.
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This specialization, together with @ref StridedArrayView<dimensions, const void>
+    and the generic @ref StridedArrayView is also available as a single-header,
+    dependency-less library in the Magnum Singles repository for easier
+    integration into your projects. See the
+    @ref Containers-StridedArrayView-single-header "StridedArrayView documentation"
+    for more information.
+*/
+template<unsigned dimensions> class StridedArrayView<dimensions, void> {
+    static_assert(dimensions, "can't have a zero-dimensional view");
+
+    public:
+        /**
+         * @brief Underlying type
+         *
+         * Underlying data type. See also and @ref ErasedType.
+         */
+        typedef void Type;
+
+        /**
+         * @brief Erased type
+         *
+         * Equivalent to @ref Type
+         */
+        typedef void ErasedType;
+
+        /** @brief Size values */
+        typedef StridedDimensions<dimensions, std::size_t> Size;
+
+        /** @brief Stride values */
+        typedef StridedDimensions<dimensions, std::ptrdiff_t> Stride;
+
+        enum: unsigned {
+            Dimensions = dimensions     /**< View dimensions */
+        };
+
+        /** @brief Conversion from `nullptr` */
+        constexpr /*implicit*/ StridedArrayView(std::nullptr_t) noexcept: _data{}, _size{}, _stride{} {}
+
+        /**
+         * @brief Default constructor
+         *
+         * Creates an empty view. Copy a non-empty @ref Array, @ref ArrayView
+         * or @ref StridedArrayView onto the instance to make it useful.
+         */
+        constexpr /*implicit*/ StridedArrayView() noexcept: _data{}, _size{}, _stride{} {}
+
+        /**
+         * @brief Construct a view with explicit size and stride
+         * @param data      Continuous view on the data
+         * @param member    Pointer to the first member of the strided view
+         * @param size      Data size
+         * @param stride    Data stride
+         *
+         * The @p data view is used only for a bounds check --- expects that
+         * @p data size is enough for @p size and @p stride in the largest
+         * dimension if the stride is either positive or negative. Zero strides
+         * unfortunately can't be reliably checked for out-of-bounds
+         * conditions, so be extra careful when specifying these.
+         */
+        constexpr /*implicit*/ StridedArrayView(Containers::ArrayView<void> data, void* member, const Size& size, const Stride& stride) noexcept: _data{(
+            /** @todo can't compare void pointers to check if member is in data,
+                    it's not constexpr :( */
+            /* If any size is zero, data can be zero-sized too. If the largest
+               stride is zero, `data` can have *any* size and it could be okay,
+               can't reliably test that */
+            CORRADE_CONSTEXPR_ASSERT(Implementation::isAnySizeZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
+                "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride),
+            member)}, _size{size}, _stride{stride} {}
+
+        /**
+         * @brief Construct a view with explicit size and stride
+         *
+         * Equivalent to calling @ref StridedArrayView(Containers::ArrayView<void>, void*, const Size&, const Stride&)
+         * with @p data as the first parameter and @cpp data.data() @ce as the
+         * second parameter.
+         */
+        constexpr /*implicit*/ StridedArrayView(Containers::ArrayView<void> data, const Size& size, const Stride& stride) noexcept: StridedArrayView{data, data.data(), size, stride} {}
+
+        /* size-only constructor not provided for void overloads as there's
+           little chance one would want an implicit stride of 1 */
+
+        /**
+         * @brief Construct a void view on a fixed-size array
+         * @param data      Fixed-size array
+         *
+         * Enabled only on one-dimensional views. Size is set to @p size,
+         * stride is to @cpp sizeof(T) @ce.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class T, std::size_t size>
+        #else
+        template<class T, std::size_t size, unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
+        #endif
+        constexpr /*implicit*/ StridedArrayView(T(&data)[size]) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {}
+
+        /** @brief Construct a void view on any @ref StridedArrayView */
+        template<class T> constexpr /*implicit*/ StridedArrayView(StridedArrayView<dimensions, T> view) noexcept: _data{view._data}, _size{view._size}, _stride{view._stride} {}
+
+        /**
+         * @brief Construct a void view on any @ref ArrayView
+         *
+         * Enabled only on one-dimensional views. Size is set to @p view's
+         * size, stride is to @cpp sizeof(T) @ce.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class T>
+        #else
+        template<class T, unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
+        #endif
+        constexpr /*implicit*/ StridedArrayView(ArrayView<T> view) noexcept: _data{view.data()}, _size{view.size()}, _stride{sizeof(T)} {}
+
+        /**
+         * @brief Construct a void view on any @ref StaticArrayView
+         *
+         * Enabled only on one-dimensional views. Size is set to @p view's
+         * size, stride is to @cpp sizeof(T) @ce.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<std::size_t size, class T>
+        #else
+        template<std::size_t size, class T, unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
+        #endif
+        constexpr /*implicit*/ StridedArrayView(StaticArrayView<size, T> view) noexcept: _data{view.data()}, _size{size}, _stride{sizeof(T)} {}
+
+        /**
+         * @brief Construct a view on an external type
+         *
+         * Enabled only on one-dimensional views.
+         *
+         * @see @ref Containers-StridedArrayView-stl
+         */
+        /* There's no restriction that would disallow creating StridedArrayView
+           from e.g. std::vector<T>&& because that would break uses like
+           `consume(foo());`, where `consume()` expects a view but `foo()`
+           returns a std::vector. Besides that, there's no
+           StaticArrayViewConverter overload as we wouldn't be able to infer
+           the size parameter. Since ArrayViewConverter is supposed to handle
+           conversion from statically sized arrays as well, this is okay. */
+        template<class T, unsigned d = dimensions, class = typename std::enable_if<d == 1, decltype(Implementation::ErasedArrayViewConverter<typename std::decay<T&&>::type>::from(std::declval<T&&>()))>::type> constexpr /*implicit*/ StridedArrayView(T&& other) noexcept: StridedArrayView{Implementation::ErasedArrayViewConverter<typename std::decay<T&&>::type>::from(other)} {}
+
+        /** @brief Whether the array is non-empty */
+        constexpr explicit operator bool() const { return _data; }
+
+        /** @brief Array data */
+        constexpr void* data() const { return _data; }
+
+        /**
+         * @brief Array size
+         *
+         * Returns just @ref std::size_t instead of @ref Size for the
+         * one-dimensional case so the usual numeric operations work as
+         * expected. Explicitly cast to @ref Size to ensure consistent behavior
+         * for all dimensions in generic implementations.
+         */
+        constexpr typename std::conditional<dimensions == 1, std::size_t, const Size&>::type size() const { return _size; }
+
+        /**
+         * @brief Array stride
+         *
+         * Returns just @ref std::ptrdiff_t instead of @ref Stride for the
+         * one-dimensional case so the usual numeric operations work as
+         * expected. Explicitly cast to @ref Stride to ensure consistent
+         * behavior for all dimensions in generic implementations.
+         */
+        constexpr typename std::conditional<dimensions == 1, std::ptrdiff_t, const Stride&>::type stride() const { return _stride; }
+
+        /** @brief Whether the array is empty */
+        constexpr StridedDimensions<dimensions, bool> empty() const {
+            return emptyInternal(typename Implementation::GenerateSequence<dimensions>::Type{});
+        }
+
+    private:
+        template<unsigned, class> friend class StridedArrayView;
+
+        /* Basically just so these can access the _size / _stride without going
+           through getters (which additionally flatten their types for 1D) */
+        template<bool> friend struct Implementation::ArrayCastFlattenOrInflate;
+        template<class U, unsigned dimensions_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, void>&);
+
+        /* Internal constructor without type/size checks for things like
+           slice() etc. Argument order is different to avoid this function
+           getting matched when pass */
+        constexpr /*implicit*/ StridedArrayView(const Size& size, const Stride& stride, void* data) noexcept: _data{data}, _size{size}, _stride{stride} {}
+
+        template<std::size_t ...sequence> constexpr StridedDimensions<dimensions, bool> emptyInternal(Implementation::Sequence<sequence...>) const {
+            return StridedDimensions<dimensions, bool>{(_size._data[sequence] == 0)...};
+        }
+
+        void* _data;
+        Size _size;
+        Stride _stride;
+};
+
+/**
+@brief Multi-dimensional const void array view with size and stride information
+@m_since_latest
+
+Specialization of @ref StridedArrayView which is convertible from a
+compile-time array, @ref Array, @ref ArrayView, @ref StaticArrayView or
+@ref StridedArrayView of any type and also any type convertible to them. For
+arrays and non-strided views, size is taken as element count of the original
+array and  stride becomes the original type size; for strided views the size
+and stride is taken as-is. This specialization doesn't provide any
+accessors besides @ref data(), because it has no use for the @cpp void @ce
+type. Instead, use @ref arrayCast(const StridedArrayView<dimensions, const void>&)
+to first cast the array to a concrete type and then access the particular
+elements.
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This specialization, together with @ref StridedArrayView<dimensions, void>
+    and the generic @ref StridedArrayView is also available as a single-header,
+    dependency-less library in the Magnum Singles repository for easier
+    integration into your projects. See the
+    @ref Containers-StridedArrayView-single-header "StridedArrayView documentation"
+    for more information.
+*/
+template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
+    static_assert(dimensions, "can't have a zero-dimensional view");
+
+    public:
+        /**
+         * @brief Underlying type
+         *
+         * Underlying data type. See also and @ref ErasedType.
+         */
+        typedef const void Type;
+
+        /**
+         * @brief Erased type
+         *
+         * Equivalent to @ref Type
+         */
+        typedef const void ErasedType;
+
+        /** @brief Size values */
+        typedef StridedDimensions<dimensions, std::size_t> Size;
+
+        /** @brief Stride values */
+        typedef StridedDimensions<dimensions, std::ptrdiff_t> Stride;
+
+        enum: unsigned {
+            Dimensions = dimensions     /**< View dimensions */
+        };
+
+        /** @brief Conversion from `nullptr` */
+        constexpr /*implicit*/ StridedArrayView(std::nullptr_t) noexcept: _data{}, _size{}, _stride{} {}
+
+        /**
+         * @brief Default constructor
+         *
+         * Creates an empty view. Copy a non-empty @ref Array, @ref ArrayView
+         * or @ref StridedArrayView onto the instance to make it useful.
+         */
+        constexpr /*implicit*/ StridedArrayView() noexcept: _data{}, _size{}, _stride{} {}
+
+        /**
+         * @brief Construct a view with explicit size and stride
+         * @param data      Continuous view on the data
+         * @param member    Pointer to the first member of the strided view
+         * @param size      Data size
+         * @param stride    Data stride
+         *
+         * The @p data view is used only for a bounds check --- expects that
+         * @p data size is enough for @p size and @p stride in the largest
+         * dimension if the stride is either positive or negative. Zero strides
+         * unfortunately can't be reliably checked for out-of-bounds
+         * conditions, so be extra careful when specifying these.
+         */
+        constexpr /*implicit*/ StridedArrayView(Containers::ArrayView<const void> data, const void* member, const Size& size, const Stride& stride) noexcept: _data{(
+            /** @todo can't compare void pointers to check if member is in data,
+                    it's not constexpr :( */
+            /* If any size is zero, data can be zero-sized too. If the largest
+               stride is zero, `data` can have *any* size and it could be okay,
+               can't reliably test that */
+            CORRADE_CONSTEXPR_ASSERT(Implementation::isAnySizeZero(size, typename Implementation::GenerateSequence<dimensions>::Type{}) || Implementation::largestStride(size, stride, typename Implementation::GenerateSequence<dimensions>::Type{}) <= data.size(),
+                "Containers::StridedArrayView: data size" << data.size() << "is not enough for" << size << "elements of stride" << stride),
+            member)}, _size{size}, _stride{stride} {}
+
+        /* size-only constructor not provided for void overloads as there's
+           little chance one would want an implicit stride of 1 */
+
+        /**
+         * @brief Construct a view with explicit size and stride
+         *
+         * Equivalent to calling @ref StridedArrayView(Containers::ArrayView<const void>, const void*, const Size&, const Stride&)
+         * with @p data as the first parameter and @cpp data.data() @ce as the
+         * second parameter.
+         */
+        constexpr /*implicit*/ StridedArrayView(Containers::ArrayView<const void> data, const Size& size, const Stride& stride) noexcept: StridedArrayView{data, data.data(), size, stride} {}
+
+        /**
+         * @brief Construct a const void view on a fixed-size array
+         * @param data      Fixed-size array
+         *
+         * Enabled only on one-dimensional views. Size is set to @p size,
+         * stride is to @cpp sizeof(T) @ce.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class T, std::size_t size>
+        #else
+        template<class T, std::size_t size, unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
+        #endif
+        constexpr /*implicit*/ StridedArrayView(T(&data)[size]) noexcept: _data{data}, _size{size}, _stride{sizeof(T)} {}
+
+        /** @brief Construct a const void view on any @ref StridedArrayView */
+        template<class T> constexpr /*implicit*/ StridedArrayView(StridedArrayView<dimensions, T> view) noexcept: _data{view._data}, _size{view._size}, _stride{view._stride} {}
+
+        /**
+         * @brief Construct a const void view on any @ref ArrayView
+         *
+         * Enabled only on one-dimensional views. Size is set to @p view's
+         * size, stride is to @cpp sizeof(T) @ce.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<class T>
+        #else
+        template<class T, unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
+        #endif
+        constexpr /*implicit*/ StridedArrayView(ArrayView<T> view) noexcept: _data{view.data()}, _size{view.size()}, _stride{sizeof(T)} {}
+
+        /**
+         * @brief Construct a const void view on any @ref StaticArrayView
+         *
+         * Enabled only on one-dimensional views. Size is set to @p view's
+         * size, stride is to @cpp sizeof(T) @ce.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
+        template<std::size_t size, class T>
+        #else
+        template<std::size_t size, class T, unsigned d = dimensions, class = typename std::enable_if<d == 1>::type>
+        #endif
+        constexpr /*implicit*/ StridedArrayView(StaticArrayView<size, T> view) noexcept: _data{view.data()}, _size{size}, _stride{sizeof(T)} {}
+
+        /**
+         * @brief Construct a view on an external type
+         *
+         * Enabled only on one-dimensional views.
+         *
+         * @see @ref Containers-StridedArrayView-stl
+         */
+        /* There's no restriction that would disallow creating StridedArrayView
+           from e.g. std::vector<T>&& because that would break uses like
+           `consume(foo());`, where `consume()` expects a view but `foo()`
+           returns a std::vector. Besides that, there's no
+           StaticArrayViewConverter overload as we wouldn't be able to infer
+           the size parameter. Since ArrayViewConverter is supposed to handle
+           conversion from statically sized arrays as well, this is okay. */
+        template<class T, unsigned d = dimensions, class = typename std::enable_if<d == 1, decltype(Implementation::ErasedArrayViewConverter<const T>::from(std::declval<const T&>()))>::type> constexpr /*implicit*/ StridedArrayView(const T& other) noexcept: StridedArrayView{Implementation::ErasedArrayViewConverter<const T>::from(other)} {}
+
+        /** @brief Whether the array is non-empty */
+        constexpr explicit operator bool() const { return _data; }
+
+        /** @brief Array data */
+        constexpr const void* data() const { return _data; }
+
+        /**
+         * @brief Array size
+         *
+         * Returns just @ref std::size_t instead of @ref Size for the
+         * one-dimensional case so the usual numeric operations work as
+         * expected. Explicitly cast to @ref Size to ensure consistent behavior
+         * for all dimensions in generic implementations.
+         */
+        constexpr typename std::conditional<dimensions == 1, std::size_t, const Size&>::type size() const { return _size; }
+
+        /**
+         * @brief Array stride
+         *
+         * Returns just @ref std::ptrdiff_t instead of @ref Stride for the
+         * one-dimensional case so the usual numeric operations work as
+         * expected. Explicitly cast to @ref Stride to ensure consistent
+         * behavior for all dimensions in generic implementations.
+         */
+        constexpr typename std::conditional<dimensions == 1, std::ptrdiff_t, const Stride&>::type stride() const { return _stride; }
+
+        /** @brief Whether the array is empty */
+        constexpr StridedDimensions<dimensions, bool> empty() const {
+            return emptyInternal(typename Implementation::GenerateSequence<dimensions>::Type{});
+        }
+
+    private:
+        template<unsigned, class> friend class StridedArrayView;
+
+        /* Basically just so these can access the _size / _stride without going
+           through getters (which additionally flatten their types for 1D) */
+        template<bool> friend struct Implementation::ArrayCastFlattenOrInflate;
+        template<class U, unsigned dimensions_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, const void>&);
+
+        /* Internal constructor without type/size checks for things like
+           slice() etc. Argument order is different to avoid this function
+           getting matched when pass */
+        constexpr /*implicit*/ StridedArrayView(const Size& size, const Stride& stride, const void* data) noexcept: _data{data}, _size{size}, _stride{stride} {}
+
+        template<std::size_t ...sequence> constexpr StridedDimensions<dimensions, bool> emptyInternal(Implementation::Sequence<sequence...>) const {
+            return StridedDimensions<dimensions, bool>{(_size._data[sequence] == 0)...};
+        }
+
+        const void* _data;
         Size _size;
         Stride _stride;
 };
@@ -852,6 +1293,43 @@ template<class U, unsigned dimensions, class T> StridedArrayView<dimensions, U> 
     return StridedArrayView<dimensions, U>{view._size, view._stride, view._data};
 }
 
+/** @relatesalso StridedArrayView
+@brief Reinterpret-cast a void strided array view
+@m_since_latest
+
+Size of the new array is the same as original. Expects that the target type is
+[standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
+and @cpp sizeof(U) @ce is not larger than any @ref StridedArrayView::stride() "stride()"
+of the original array. Works with negative and zero strides as well, however
+note that no type compatibility checks can be done for zero strides, so be
+extra careful in that case.
+*/
+template<class U, unsigned dimensions> StridedArrayView<dimensions, U> arrayCast(const StridedArrayView<dimensions, void>& view) {
+    static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
+    #ifndef CORRADE_NO_DEBUG
+    for(unsigned i = 0; i != dimensions; ++i) {
+        CORRADE_ASSERT(!view._stride._data[i] || sizeof(U) <= std::size_t(view._stride._data[i] < 0 ? -view._stride._data[i] : view._stride._data[i]),
+            "Containers::arrayCast(): can't fit a" << sizeof(U) << Utility::Debug::nospace << "-byte type into a stride of" << view._stride._data[i], {});
+    }
+    #endif
+    return StridedArrayView<dimensions, U>{view._size, view._stride, view._data};
+}
+
+/** @relatesalso StridedArrayView
+@overload
+@m_since_latest
+*/
+template<class U, unsigned dimensions> StridedArrayView<dimensions, U> arrayCast(const StridedArrayView<dimensions, const void>& view) {
+    static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
+    #ifndef CORRADE_NO_DEBUG
+    for(unsigned i = 0; i != dimensions; ++i) {
+        CORRADE_ASSERT(!view._stride._data[i] || sizeof(U) <= std::size_t(view._stride._data[i] < 0 ? -view._stride._data[i] : view._stride._data[i]),
+            "Containers::arrayCast(): can't fit a" << sizeof(U) << Utility::Debug::nospace << "-byte type into a stride of" << view._stride._data[i], {});
+    }
+    #endif
+    return StridedArrayView<dimensions, U>{view._size, view._stride, view._data};
+}
+
 namespace Implementation {
 
 template<bool> struct ArrayCastFlattenOrInflate;
@@ -901,6 +1379,10 @@ element count being ratio of @p T and @p U sizes. This operation can be used
 for example to peek into individual channels pixel data:
 
 @snippet Containers.cpp arrayCast-StridedArrayView-inflate
+
+@note This function doesn't work on the @ref StridedArrayView<dimensions, void>
+    / @ref StridedArrayView<dimensions, const void> specializations --- cast
+    them to a concrete type first.
 */
 template<unsigned newDimensions, class U, unsigned dimensions, class T> StridedArrayView<newDimensions, U> arrayCast(const StridedArrayView<dimensions, T>& view) {
     static_assert(std::is_standard_layout<T>::value, "the source type is not standard layout");

@@ -38,6 +38,12 @@ namespace Corrade {
 -   Added @ref Containers::arrayCast() overloads for casting from the
     @ref Containers::ArrayView<void> and @ref Containers::ArrayView<const void>
     specializations
+-   New @ref Containers::StridedArrayView<dimensions, void> and
+    @ref Containers::StridedArrayView<dimensions, const void> together with
+    corresponding @ref Containers::arrayCast() overloads for type-erased
+    @cpp constexpr @ce enabled passing of strided array views similarly to the
+    existing @ref Containers::ArrayView<void> and
+    @ref Containers::ArrayView<const void> types
 
 @subsection corrade-changelog-latest-buildsystem Build system
 
