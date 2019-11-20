@@ -456,7 +456,7 @@ concrete type and then access the particular elements.
 
 Usage example:
 
-@snippet Containers.cpp ArrayView-const-void-usage
+@snippet Containers.cpp ArrayView-void-usage
 
 <b></b>
 
@@ -566,7 +566,7 @@ type and then access the particular elements.
 
 Usage example:
 
-@snippet Containers.cpp ArrayView-void-usage
+@snippet Containers.cpp ArrayView-const-void-usage
 
 <b></b>
 
