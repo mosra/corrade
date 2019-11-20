@@ -90,8 +90,6 @@ struct StaticArrayViewTest: TestSuite::Tester {
     void convertBool();
     void convertPointer();
     void convertConst();
-    void convertVoid();
-    void convertConstVoid();
     void convertExternalView();
     void convertConstFromExternalView();
     void convertToConstExternalView();
@@ -126,8 +124,6 @@ StaticArrayViewTest::StaticArrayViewTest() {
               &StaticArrayViewTest::convertBool,
               &StaticArrayViewTest::convertPointer,
               &StaticArrayViewTest::convertConst,
-              &StaticArrayViewTest::convertVoid,
-              &StaticArrayViewTest::convertConstVoid,
               &StaticArrayViewTest::convertExternalView,
               &StaticArrayViewTest::convertConstFromExternalView,
               &StaticArrayViewTest::convertToConstExternalView,
@@ -310,42 +306,6 @@ void StaticArrayViewTest::convertConst() {
     StaticArrayView<3> b = a;
     ConstArrayView c = b;
     CORRADE_VERIFY(c == a);
-}
-
-void StaticArrayViewTest::convertVoid() {
-    int a[] = {3, 4, 7, 12, 0, -15};
-
-    /* void reference to ArrayView */
-    StaticArrayView<6> b = a;
-    const StaticArrayView<6> cb = a;
-    VoidArrayView c = b;
-    VoidArrayView cc = cb;
-    CORRADE_VERIFY(c == b);
-    CORRADE_VERIFY(cc == cb);
-    CORRADE_COMPARE(c.size(), 6*sizeof(int));
-    CORRADE_COMPARE(cc.size(), 6*sizeof(int));
-
-    /** @todo constexpr but not const? c++14? */
-}
-
-void StaticArrayViewTest::convertConstVoid() {
-    int a[] = {3, 4, 7, 12, 0, -15};
-
-    /* void reference to ArrayView */
-    StaticArrayView<6> b = a;
-    const StaticArrayView<6> cb = a;
-    ConstVoidArrayView c = b;
-    ConstVoidArrayView cc = cb;
-    CORRADE_VERIFY(c == b);
-    CORRADE_VERIFY(cc == cb);
-    CORRADE_COMPARE(c.size(), 6*sizeof(int));
-    CORRADE_COMPARE(cc.size(), 6*sizeof(int));
-
-    /* void reference to ArrayView */
-    constexpr ConstStaticArrayView<13> ccb = Array13;
-    ConstVoidArrayView ccc = ccb;
-    CORRADE_VERIFY(ccc == ccb);
-    CORRADE_COMPARE(ccc.size(), 13*sizeof(int));
 }
 
 void StaticArrayViewTest::convertExternalView() {
