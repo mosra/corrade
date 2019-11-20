@@ -74,7 +74,7 @@ template<> struct ArrayViewConverter<const int, ConstIntView> {
 template<> struct ErasedArrayViewConverter<ConstIntView>: ArrayViewConverter<const int, ConstIntView> {};
 template<> struct ErasedArrayViewConverter<const ConstIntView>: ArrayViewConverter<const int, ConstIntView> {};
 
-/* To keep the ArrayView API in reasonable bounds, the cost-adding variants
+/* To keep the ArrayView API in reasonable bounds, the const-adding variants
    have to be implemented explicitly */
 template<> struct ArrayViewConverter<const int, IntView> {
     static ArrayView<const int> from(IntView other) {
@@ -274,7 +274,7 @@ void ArrayViewTest::constructNullptrConstVoid() {
 
 void ArrayViewTest::constructNullptrSize() {
     /* This should be allowed for e.g. just allocating memory in
-       Magnum::Buffer::setData() without passing any actual data */
+       Magnum::GL::Buffer::setData() without passing any actual data */
     ArrayView a{nullptr, 5};
     CORRADE_VERIFY(a == nullptr);
     CORRADE_VERIFY(!a.empty());

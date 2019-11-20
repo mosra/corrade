@@ -66,7 +66,7 @@ template<> struct ArrayViewConverter<const int, ConstIntView> {
 template<> struct ErasedArrayViewConverter<IntView>: ArrayViewConverter<int, IntView> {};
 template<> struct ErasedArrayViewConverter<const ConstIntView>: ArrayViewConverter<const int, ConstIntView> {};
 
-/* To keep the (Strided)ArrayView API in reasonable bounds, the cost-adding
+/* To keep the (Strided)ArrayView API in reasonable bounds, the const-adding
    variants have to be implemented explicitly */
 template<> struct ArrayViewConverter<const int, IntView> {
     static ArrayView<const int> from(IntView other) {
@@ -1221,7 +1221,7 @@ void StridedArrayViewTest::convertConstFromExternalView() {
     CORRADE_COMPARE(b.data(), data);
     CORRADE_COMPARE(b.size(), 5);
 
-    /* Conversion to a different type is not allowed */
+    /* Conversion from a different type is not allowed */
     CORRADE_VERIFY((std::is_convertible<IntView, Containers::StridedArrayView1D<const int>>::value));
     CORRADE_VERIFY(!(std::is_convertible<IntView, Containers::StridedArrayView1D<const float>>::value));
 }

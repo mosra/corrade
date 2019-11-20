@@ -447,7 +447,7 @@ template<unsigned dimensions, class T> class StridedArrayView {
         }
 
         /**
-         * @brief Construct a view from an external view representation
+         * @brief Construct a view on an external type
          *
          * Enabled only on one-dimensional views.
          *
@@ -836,7 +836,7 @@ Size of the new array is the same as original. Expects that both types are
 and @cpp sizeof(U) @ce is not larger than any @ref StridedArrayView::stride() "stride()"
 of the original array. Works with negative and zero strides as well, however
 note that no type compatibility checks can be done for zero strides, so be
-extra careful in that case.
+extra careful in that case. Example usage:
 
 @snippet Containers.cpp arrayCast-StridedArrayView
 */
