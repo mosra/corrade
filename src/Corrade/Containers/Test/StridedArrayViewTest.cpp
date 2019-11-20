@@ -910,11 +910,7 @@ void StridedArrayViewTest::constructInvalid() {
     struct {
         int value;
         int other;
-    } a[10]{
-        {2, 23125}, {16, 1}, {7853268, -2}, {-100, 5}, {234810, 1},
-        /* Otherwise GCC 4.8 loudly complains about missing initializers */
-        {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}
-    };
+    } a[10]{};
 
     std::ostringstream out;
     Error redirectError{&out};
@@ -1569,12 +1565,7 @@ void StridedArrayViewTest::construct3DOneSizeZeroConstVoid() {
 }
 
 void StridedArrayViewTest::construct3DInvalid() {
-    Plane a[2]{
-        {{{{{2, 23125}, {16, 1}, {7853268, -2}}},
-         {{{-100, 5}, {234810, 1}, {232342, -22222}}}}},
-        {{{{{0, 0}, {0, 0}, {0, 0}}},
-         {{{0, 0}, {0, 0}, {0, 0}}}}}
-    };
+    Plane a[2];
 
     std::ostringstream out;
     Error redirectError{&out};
