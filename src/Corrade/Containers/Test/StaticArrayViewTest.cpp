@@ -278,7 +278,8 @@ void StaticArrayViewTest::convertBool() {
     constexpr bool boolCc = !!cc;
     CORRADE_VERIFY(!boolCc);
 
-    CORRADE_VERIFY(!(std::is_convertible<StaticArrayView<5>, int>::value));
+    CORRADE_VERIFY((std::is_constructible<bool, StaticArrayView<5>>::value));
+    CORRADE_VERIFY(!(std::is_constructible<int, StaticArrayView<5>>::value));
 }
 
 void StaticArrayViewTest::convertPointer() {

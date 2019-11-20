@@ -302,7 +302,10 @@ void ArrayTest::constructDirectReferences() {
 void ArrayTest::convertBool() {
     CORRADE_VERIFY(Array(2));
     CORRADE_VERIFY(!Array());
-    CORRADE_VERIFY(!(std::is_convertible<Array, int>::value));
+
+    /* Explicit conversion to bool is allowed, but not to int */
+    CORRADE_VERIFY((std::is_constructible<bool, Array>::value));
+    CORRADE_VERIFY(!(std::is_constructible<int, Array>::value));
 }
 
 void ArrayTest::convertPointer() {

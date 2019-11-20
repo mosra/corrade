@@ -571,9 +571,13 @@ void ArrayViewTest::convertBool() {
     constexpr bool boolCvc = !!cvc;
     CORRADE_VERIFY(!boolCvc);
 
-    CORRADE_VERIFY(!(std::is_convertible<ArrayView, int>::value));
-    CORRADE_VERIFY(!(std::is_convertible<VoidArrayView, int>::value));
-    CORRADE_VERIFY(!(std::is_convertible<ConstVoidArrayView, int>::value));
+    /* Explicit conversion to bool is allowed, but not to int */
+    CORRADE_VERIFY((std::is_constructible<bool, ArrayView>::value));
+    CORRADE_VERIFY((std::is_constructible<bool, VoidArrayView>::value));
+    CORRADE_VERIFY((std::is_constructible<bool, ConstVoidArrayView>::value));
+    CORRADE_VERIFY(!(std::is_constructible<int, ArrayView>::value));
+    CORRADE_VERIFY(!(std::is_constructible<int, VoidArrayView>::value));
+    CORRADE_VERIFY(!(std::is_constructible<int, ConstVoidArrayView>::value));
 }
 
 void ArrayViewTest::convertPointer() {

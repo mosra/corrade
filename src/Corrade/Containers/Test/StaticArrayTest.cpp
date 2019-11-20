@@ -451,7 +451,10 @@ void StaticArrayTest::move() {
 
 void StaticArrayTest::convertBool() {
     CORRADE_VERIFY(StaticArray{});
-    CORRADE_VERIFY(!(std::is_convertible<StaticArray, int>::value));
+
+    /* Explicit conversion to bool is allowed, but not to int */
+    CORRADE_VERIFY((std::is_constructible<bool, StaticArray>::value));
+    CORRADE_VERIFY(!(std::is_constructible<int, StaticArray>::value));
 }
 
 void StaticArrayTest::convertPointer() {
