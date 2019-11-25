@@ -346,7 +346,8 @@ std::string current() {
 std::string libraryLocation(const void* address) {
     /* Linux (and macOS as well, even though Linux man pages don't mention that) */
     #ifdef CORRADE_TARGET_UNIX
-    Dl_info info{};
+    /* Otherwise GCC 4.8 loudly complains about missing initializers */
+    Dl_info info{nullptr, nullptr, nullptr, nullptr};
     if(!dladdr(address, &info)) {
         Error e;
         e << "Utility::Directory::libraryLocation(): can't get library location";

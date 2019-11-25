@@ -172,8 +172,6 @@ struct StridedArrayViewTest: TestSuite::Tester {
 
     void convert3DBool();
     void convert3DConst();
-    void convert3DVoid();
-    void convert3DConstVoid();
     void convert3DFromExternalView();
     void convert3DConstFromExternalView();
     void convert3DVoidFromExternalView();

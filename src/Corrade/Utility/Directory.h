@@ -281,14 +281,27 @@ template<class R, class ...Args> std::string libraryLocation(R(*address)(Args...
 #else
 /* Can't do a template because that would mean including <string>. NOPE NOPE */
 namespace Implementation {
-    /** @todo make a reusable type in Containers for this once there's more
-        than one use case? */
-    struct FunctionPointer {
-        /* Assuming both POSIX and Windows allow this (otherwise dlsym() or
-           GetProcAddress() wouldn't work either) */
-        template<class R, class ...Args> /*implicit*/ FunctionPointer(R(*address)(Args...)): address{reinterpret_cast<const void*>(address)} {}
-        const void* address;
-    };
+
+/** @todo make a reusable type in Containers for this once there's more
+    than one use case? */
+struct FunctionPointer {
+    /* Assuming both POSIX and Windows allow this (otherwise dlsym() or
+       GetProcAddress() wouldn't work either). GCC 4.8 complains that "ISO C++
+       forbids casting between pointer-to-function and pointer-to-object", GCC9
+       doesn't. Unfortunately __extension__ that's used inside PluginManager
+       doesn't work here (it apparently works only when going from void* to a
+       function pointer). */
+    #if defined(__GNUC__) && __GNUC__ < 5
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wpedantic"
+    #endif
+    template<class R, class ...Args> /*implicit*/ FunctionPointer(R(*address)(Args...)): address{reinterpret_cast<const void*>(address)} {}
+    #ifdef __GNUC__
+    #pragma GCC diagnostic pop
+    #endif
+    const void* address;
+};
+
 }
 CORRADE_UTILITY_EXPORT std::string libraryLocation(Implementation::FunctionPointer address);
 #endif
