@@ -88,7 +88,7 @@ template<class T, StlSpanSizeType Extent> struct ErasedArrayViewConverter<const 
 
 /* static std::span from/to StaticArrayView */
 template<std::size_t size, class T> struct StaticArrayViewConverter<size, T, std::span<T, StlSpanSizeType(size)>> {
-    constexpr static StaticArrayView<size, T> from(std::span<T> other) {
+    constexpr static StaticArrayView<size, T> from(std::span<T, StlSpanSizeType(size)> other) {
         return StaticArrayView<size, T>{other.data()};
     }
     #if !defined(CORRADE_TARGET_LIBCPP) || _LIBCPP_VERSION >= 9000
@@ -102,7 +102,7 @@ template<std::size_t size, class T> struct StaticArrayViewConverter<size, T, std
 };
 template<std::size_t size, class T> struct StaticArrayViewConverter<size, T, const std::span<T, StlSpanSizeType(size)>>: StaticArrayViewConverter<size, T, std::span<T, StlSpanSizeType(size)>> {};
 template<std::size_t size, class T> struct StaticArrayViewConverter<size, const T, std::span<T, StlSpanSizeType(size)>> {
-    constexpr static StaticArrayView<size, const T> from(std::span<T> other) {
+    constexpr static StaticArrayView<size, const T> from(std::span<T, StlSpanSizeType(size)> other) {
         return StaticArrayView<size, const T>{other.data()};
     }
 };
