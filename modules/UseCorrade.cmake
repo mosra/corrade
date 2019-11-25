@@ -76,7 +76,9 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR (CMAKE_CXX_COMPILER_ID MATCHES "(Appl
         "-Winit-self"
         "-Werror=return-type"
         "-Wmissing-declarations"
-        "-pedantic"
+        # -Wpedantic is since 4.8, until then only -pedantic (which doesn't
+        # have any -Wno-pedantic or a way to disable it for a particular line)
+        "-Wpedantic"
         # Needs to have both, otherwise Clang's linker on macOS complains that
         # "direct access in function [...] to global weak symbol [...] means the
         # weak symbol cannot be overridden at runtime. This was likely caused
