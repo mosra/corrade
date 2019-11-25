@@ -94,7 +94,8 @@ void ArrayViewStlTest::convertFromArray() {
 }
 
 void ArrayViewStlTest::convertFromArrayEmpty() {
-    std::array<float, 0> a{};
+    /* GCC 4.8 complains about missing initializers when {} is used here */
+    std::array<float, 0> a;
     ArrayView<float> b = a;
     /* If size() is 0, data() may or may not return a null pointer. So can't
        test shit. FFS, C++. */
@@ -117,7 +118,13 @@ void ArrayViewStlTest::convertFromConstArray() {
 }
 
 void ArrayViewStlTest::convertFromConstArrayEmpty() {
-    const std::array<float, 0> a{};
+    /* GCC 4.8 complains about missing initializers when {} is used here,
+       however Clang on libc++ doesn't allow the opposite. */
+    const std::array<float, 0> a
+        #if !(defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 5)
+        {}
+        #endif
+        ;
     ArrayView<const float> b = a;
     /* If size() is 0, data() may or may not return a null pointer. So can't
        test shit. FFS, C++. */
@@ -134,7 +141,8 @@ void ArrayViewStlTest::convertConstFromArray() {
 }
 
 void ArrayViewStlTest::convertConstFromArrayEmpty() {
-    std::array<float, 0> a{};
+    /* GCC 4.8 complains about missing initializers when {} is used here */
+    std::array<float, 0> a;
     ArrayView<const float> b = a;
     /* If size() is 0, data() may or may not return a null pointer. So can't
        test shit. FFS, C++. */
@@ -159,7 +167,8 @@ void ArrayViewStlTest::convertVoidFromArray() {
 }
 
 void ArrayViewStlTest::convertVoidFromArrayEmpty() {
-    std::array<float, 0> a{};
+    /* GCC 4.8 complains about missing initializers when {} is used here */
+    std::array<float, 0> a;
     ArrayView<const void> b = a;
     /* If size() is 0, data() may or may not return a null pointer. So can't
        test shit. FFS, C++. */
@@ -175,7 +184,13 @@ void ArrayViewStlTest::convertVoidFromConstArray() {
 }
 
 void ArrayViewStlTest::convertVoidFromConstArrayEmpty() {
-    const std::array<float, 0> a{};
+    /* GCC 4.8 complains about missing initializers when {} is used here,
+       however Clang on libc++ doesn't allow the opposite. */
+    const std::array<float, 0> a
+        #if !(defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 5)
+        {}
+        #endif
+        ;
     ArrayView<const void> b = a;
     /* If size() is 0, data() may or may not return a null pointer. So can't
        test shit. FFS, C++. */
