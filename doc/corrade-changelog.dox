@@ -53,6 +53,9 @@ namespace Corrade {
     @ref Containers::Array::Array(DefaultInitT, std::size_t) for trivial types.
     This is done in order to avoid needless problems with dangling custom
     deleters when returning arrays from dynamically loaded libraries.
+-   @ref Containers::ArrayView compatibility with @ref std::span was updated to
+    work with libc++ 9 (and upcoming implementations in GCC and elsewhere), as
+    it no longer uses @ref std::ptrdiff_t as a size.
 
 @subsection corrade-changelog-latest-buildsystem Build system
 

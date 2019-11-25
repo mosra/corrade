@@ -43,28 +43,5 @@ std::span<float, 3> d = Containers::staticArrayView(c);
 static_cast<void>(b);
 static_cast<void>(d);
 }
-
-{
-int data[3]{};
-/* [ArrayView-stupid-span] */
-std::span<int> a;
-std::span<int, 3> b{data};
-Containers::ArrayView<int> c = a;               // correct
-Containers::ArrayView<int> d = b;               // correct
-//Containers::StaticArrayView<3, int> e = a;    // correctly doesn't compile
-Containers::StaticArrayView<3, int> f = b;      // correct
-//Containers::StaticArrayView<4, int> g = b;    // correctly doesn't compile
-
-std::span<int> i = c;                           // correct
-std::span<int, 3> j = c;                        // incorrectly compiles, UB :(
-std::span<int, 3> k = f;                        // correct
-std::span<int, 4> l = f;                        // incorrectly compiles, UB :(
-/* [ArrayView-stupid-span] */
-static_cast<void>(d);
-static_cast<void>(i);
-static_cast<void>(j);
-static_cast<void>(k);
-static_cast<void>(l);
-}
 #endif
 }

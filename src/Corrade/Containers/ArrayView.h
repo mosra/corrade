@@ -119,29 +119,6 @@ Example:
 
 <b></b>
 
-@m_class{m-block m-danger}
-
-@par Dangers of fixed-size std::span conversions
-    The C++2a @ref std::span class has an implicit all-catching
-    @cpp span(const Container&) @ce constructor, due to which it's not possible
-    to implement the conversion to @ref std::span on Corrade side and properly
-    check for correct dimensionality *at compile time*. That means it's
-    possible to accidentally convert an arbitrary @ref ArrayView<int> to
-    @ref std::span "std::span<int, 37>" or @ref StaticArrayView "StaticArrayView<5, int>"
-    to @ref std::span "std::span<int, 6>" and there's nothing Corrade can do to
-    prevent that. Even worse, the C++ standard
-    [defines this conversion as Undefined Behavior](https://en.cppreference.com/w/cpp/container/span/span),
-    instead of, well, throwing an exception or something.
-@par
-    Fortunately, in the other direction at least, conversion of @ref std::span
-    to Corrade container classes *can* be (and is) checked at compile time.
-@par
-    @snippet Containers-stl2a.cpp ArrayView-stupid-span
-
-<b></b>
-
-<b></b>
-
 @m_class{m-block m-warning}
 
 @par Conversion from std::initializer_list

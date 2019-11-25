@@ -46,9 +46,14 @@ information.
 #ifndef DOXYGEN_GENERATING_OUTPUT
 namespace Corrade { namespace Containers { namespace Implementation {
 
-/* std::span has an implicit all-catching constructor, which means we can't
-   implement our own to() routines with compile time checks for proper size
-   in case of fixed-size views. Stupid. */
+/* libc++ before version 9 had an earlier revision of <span> with ptrdiff_t
+   used as a size type. That inconsistency was fortunately fixed, however we
+   need to preserve compatibility so this is getting a bit ugly. */
+#if defined(CORRADE_TARGET_LIBCPP) && _LIBCPP_VERSION < 9000
+typedef std::ptrdiff_t StlSpanSizeType;
+#else
+typedef std::size_t StlSpanSizeType;
+#endif
 
 /* dynamic std::span from/to ArrayView */
 template<class T> struct ArrayViewConverter<T, std::span<T>> {
@@ -66,37 +71,55 @@ template<class T> struct ErasedArrayViewConverter<std::span<T>>: ArrayViewConver
 template<class T> struct ErasedArrayViewConverter<const std::span<T>>: ArrayViewConverter<T, std::span<T>> {};
 
 /* static std::span to ArrayView */
-template<class T, std::ptrdiff_t Extent> struct ArrayViewConverter<T, std::span<T, Extent>> {
+template<class T, StlSpanSizeType Extent> struct ArrayViewConverter<T, std::span<T, Extent>> {
     constexpr static ArrayView<T> from(std::span<T, Extent> other) {
         return {other.data(), std::size_t(other.size())};
     }
     /* Other way not possible as ArrayView has dynamic size */
 };
-template<class T, std::ptrdiff_t Extent> struct ArrayViewConverter<const T, std::span<T, Extent>> {
+template<class T, StlSpanSizeType Extent> struct ArrayViewConverter<const T, std::span<T, Extent>> {
     constexpr static ArrayView<T> from(std::span<T, Extent> other) {
         return {other.data(), std::size_t(other.size())};
     }
 };
-template<class T, std::ptrdiff_t Extent> struct ArrayViewConverter<T, const std::span<T, Extent>>: ArrayViewConverter<T, std::span<T, Extent>> {};
-template<class T, std::ptrdiff_t Extent> struct ErasedArrayViewConverter<std::span<T, Extent>>: ArrayViewConverter<T, std::span<T, Extent>> {};
-template<class T, std::ptrdiff_t Extent> struct ErasedArrayViewConverter<const std::span<T, Extent>>: ArrayViewConverter<T, std::span<T, Extent>> {};
+template<class T, StlSpanSizeType Extent> struct ArrayViewConverter<T, const std::span<T, Extent>>: ArrayViewConverter<T, std::span<T, Extent>> {};
+template<class T, StlSpanSizeType Extent> struct ErasedArrayViewConverter<std::span<T, Extent>>: ArrayViewConverter<T, std::span<T, Extent>> {};
+template<class T, StlSpanSizeType Extent> struct ErasedArrayViewConverter<const std::span<T, Extent>>: ArrayViewConverter<T, std::span<T, Extent>> {};
 
 /* static std::span from/to StaticArrayView */
-template<std::size_t size, class T> struct StaticArrayViewConverter<size, T, std::span<T, std::ptrdiff_t(size)>> {
+template<std::size_t size, class T> struct StaticArrayViewConverter<size, T, std::span<T, StlSpanSizeType(size)>> {
     constexpr static StaticArrayView<size, T> from(std::span<T> other) {
         return StaticArrayView<size, T>{other.data()};
     }
+    #if !defined(CORRADE_TARGET_LIBCPP) || _LIBCPP_VERSION >= 9000
+    /* std::span in libc++ < 9 has an implicit all-catching constructor, which
+       means we can't implement our own to() routines with compile time checks
+       for proper size in case of fixed-size views */
+    constexpr static std::span<T, size> to(StaticArrayView<size, T> other) {
+        return std::span<T, size>{other.data(), other.size()};
+    }
+    #endif
 };
-template<std::size_t size, class T> struct StaticArrayViewConverter<size, T, const std::span<T, std::ptrdiff_t(size)>>: StaticArrayViewConverter<size, T, std::span<T, std::ptrdiff_t(size)>> {};
-template<std::size_t size, class T> struct StaticArrayViewConverter<size, const T, std::span<T, std::ptrdiff_t(size)>> {
+template<std::size_t size, class T> struct StaticArrayViewConverter<size, T, const std::span<T, StlSpanSizeType(size)>>: StaticArrayViewConverter<size, T, std::span<T, StlSpanSizeType(size)>> {};
+template<std::size_t size, class T> struct StaticArrayViewConverter<size, const T, std::span<T, StlSpanSizeType(size)>> {
     constexpr static StaticArrayView<size, const T> from(std::span<T> other) {
         return StaticArrayView<size, const T>{other.data()};
     }
 };
-template<class T, std::ptrdiff_t Extent> struct ErasedStaticArrayViewConverter<std::span<T, Extent>>: StaticArrayViewConverter<std::size_t(Extent), T, std::span<T, Extent>> {
+#if !defined(CORRADE_TARGET_LIBCPP) || _LIBCPP_VERSION >= 9000
+/* std::span in libc++ < 9 has an implicit all-catching constructor, which
+   means we can't implement our own to() routines with compile time checks
+   for proper size in case of fixed-size views */
+template<std::size_t size, class T> struct StaticArrayViewConverter<size, T, std::span<const T, size>> {
+    constexpr static std::span<const T, size> to(StaticArrayView<size, T> other) {
+        return std::span<const T, size>{other.data(), other.size()};
+    }
+};
+#endif
+template<class T, StlSpanSizeType Extent> struct ErasedStaticArrayViewConverter<std::span<T, Extent>>: StaticArrayViewConverter<std::size_t(Extent), T, std::span<T, Extent>> {
     static_assert(Extent >= 0, "can't convert dynamic std::span to StaticArrayView");
 };
-template<class T, std::ptrdiff_t Extent> struct ErasedStaticArrayViewConverter<const std::span<T, Extent>>: StaticArrayViewConverter<std::size_t(Extent), T, std::span<T, Extent>> {
+template<class T, StlSpanSizeType Extent> struct ErasedStaticArrayViewConverter<const std::span<T, Extent>>: StaticArrayViewConverter<std::size_t(Extent), T, std::span<T, Extent>> {
     static_assert(Extent >= 0, "can't convert dynamic std::span to StaticArrayView");
 };
 
