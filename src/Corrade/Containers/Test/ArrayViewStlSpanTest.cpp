@@ -145,8 +145,8 @@ void ArrayViewStlSpanTest::convertSpanEmpty() {
     CORRADE_COMPARE(b.size(), 0);
 
     std::span<float> c = b;
-    CORRADE_COMPARE(b.data(), nullptr);
-    CORRADE_COMPARE(b.size(), 0);
+    CORRADE_COMPARE(c.data(), nullptr);
+    CORRADE_COMPARE(c.size(), 0);
     #endif
 }
 
