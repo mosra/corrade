@@ -45,6 +45,15 @@ namespace Corrade {
     existing @ref Containers::ArrayView<void> and
     @ref Containers::ArrayView<const void> types
 
+@subsection corrade-changelog-latest-changes Changes and improvements
+
+@subsubsection corrade-changelog-latest-changes-containers Containers library
+
+-   @ref Containers::Array::Array(NoInitT, std::size_t) is now equivalent to
+    @ref Containers::Array::Array(DefaultInitT, std::size_t) for trivial types.
+    This is done in order to avoid needless problems with dangling custom
+    deleters when returning arrays from dynamically loaded libraries.
+
 @subsection corrade-changelog-latest-buildsystem Build system
 
 -   Fixed compilation of the @ref main "Corrade::Main" library on i686 MinGW

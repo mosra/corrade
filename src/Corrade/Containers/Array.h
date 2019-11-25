@@ -60,10 +60,22 @@ namespace Implementation {
         }
     };
 
-    template<class T> void noInitDeleter(T* data, std::size_t size) {
-        if(data) for(T *it = data, *end = data + size; it != end; ++it)
-            it->~T();
-        delete[] reinterpret_cast<char*>(data);
+    template<class T> T* noInitAllocate(std::size_t size, typename std::enable_if<std::is_trivial<T>::value>::type* = nullptr) {
+        return new T[size];
+    }
+    template<class T> T* noInitAllocate(std::size_t size, typename std::enable_if<!std::is_trivial<T>::value>::type* = nullptr) {
+        return reinterpret_cast<T*>(new char[size*sizeof(T)]);
+    }
+
+    template<class T> auto noInitDeleter(typename std::enable_if<std::is_trivial<T>::value>::type* = nullptr) -> void(*)(T*, std::size_t) {
+        return nullptr; /* using the default deleter for T */
+    }
+    template<class T> auto noInitDeleter(typename std::enable_if<!std::is_trivial<T>::value>::type* = nullptr) -> void(*)(T*, std::size_t) {
+        return [](T* data, std::size_t size) {
+            if(data) for(T *it = data, *end = data + size; it != end; ++it)
+                it->~T();
+            delete[] reinterpret_cast<char*>(data);
+        };
     }
 }
 
@@ -106,6 +118,9 @@ is possible to initialize the array in a different way using so-called *tags*:
 -   @ref Array(NoInitT, std::size_t) does not initialize anything and you need
     to call the constructor on all elements manually using placement new,
     @ref std::uninitialized_copy() or similar. This is the dangerous option.
+    In other words, @cpp new char[size*sizeof(T)] @ce for non-trivial types
+    to circumvent default construction and @cpp new T[size] @ce for trivial
+    types.
 
 Example:
 
@@ -232,18 +247,24 @@ class Array {
          *
          * Creates array of given size, the contents are *not* initialized. If
          * the size is zero, no allocation is done. Initialize the values using
-         * placement new.
+         * placement new. Useful if you will be overwriting all elements later
+         * anyway.
          *
-         * Useful if you will be overwriting all elements later anyway.
-         * @attention Internally the data are allocated as @cpp char @ce array
-         *      and destruction is done using custom deleter that explicitly
-         *      calls destructor on *all elements* regardless of whether they
-         *      were properly constructed or not and then deallocates the data
-         *      as @cpp char @ce array.
+         * -    For non-trivial types, the data are allocated as a
+         *      @cpp char @ce array. Destruction is done using a custom deleter
+         *      that explicitly calls destructor on *all elements* (regardless
+         *      of whether they were properly constructed or not) and then
+         *      deallocates the data as a @cpp char @ce array again.
+         * -    For trivial types is equivalent to
+         *      @ref Array(DefaultInitT, std::size_t), with @ref deleter()
+         *      being the default (@cpp nullptr @ce) as well. This is done in
+         *      order to avoid needless problems with dangling custom deleters
+         *      when returning arrays from dynamically loaded libraries.
+         *
          * @see @ref NoInit, @ref Array(DirectInitT, std::size_t, Args&&... args),
-         *      @ref deleter()
+         *      @ref deleter(), @ref std::is_trivial
          */
-        explicit Array(NoInitT, std::size_t size): _data{size ? reinterpret_cast<T*>(new char[size*sizeof(T)]) : nullptr}, _size{size}, _deleter{Implementation::noInitDeleter} {}
+        explicit Array(NoInitT, std::size_t size): _data{size ? Implementation::noInitAllocate<T>(size) : nullptr}, _size{size}, _deleter{Implementation::noInitDeleter<T>()} {}
 
         /**
          * @brief Construct direct-initialized array

@@ -74,7 +74,8 @@ struct ArrayTest: TestSuite::Tester {
     void constructNullptr();
     void constructDefaultInit();
     void constructValueInit();
-    void constructNoInit();
+    void constructNoInitNonTrivial();
+    void constructNoInitTrivial();
     void constructDirectInit();
     void constructInPlaceInit();
     void construct();
@@ -126,7 +127,8 @@ ArrayTest::ArrayTest() {
               &ArrayTest::constructNullptr,
               &ArrayTest::constructDefaultInit,
               &ArrayTest::constructValueInit,
-              &ArrayTest::constructNoInit,
+              &ArrayTest::constructNoInitNonTrivial,
+              &ArrayTest::constructNoInitTrivial,
               &ArrayTest::constructDirectInit,
               &ArrayTest::constructInPlaceInit,
               &ArrayTest::construct,
@@ -218,6 +220,13 @@ void ArrayTest::constructValueInit() {
     CORRADE_COMPARE(a[1], 0);
 }
 
+void ArrayTest::constructNoInitTrivial() {
+    const Array a{NoInit, 5};
+    CORRADE_VERIFY(a);
+    CORRADE_COMPARE(a.size(), 5);
+    CORRADE_VERIFY(!a.deleter());
+}
+
 struct Foo {
     static int constructorCallCount;
     Foo() { ++constructorCallCount; }
@@ -225,10 +234,11 @@ struct Foo {
 
 int Foo::constructorCallCount = 0;
 
-void ArrayTest::constructNoInit() {
+void ArrayTest::constructNoInitNonTrivial() {
     const Containers::Array<Foo> a{NoInit, 5};
     CORRADE_VERIFY(a);
     CORRADE_COMPARE(a.size(), 5);
+    CORRADE_VERIFY(a.deleter());
     CORRADE_COMPARE(Foo::constructorCallCount, 0);
 
     const Containers::Array<Foo> b{DefaultInit, 7};
