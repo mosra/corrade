@@ -134,16 +134,16 @@ template<std::size_t size_, class T> class StaticArray {
         typedef T Type;     /**< @brief Element type */
 
         /**
-         * @brief Construct default-initialized array
+         * @brief Construct a default-initialized array
          *
          * Creates array of given size, the contents are default-initialized
-         * (i.e. builtin types are not initialized).
+         * (i.e., builtin types are not initialized).
          * @see @ref DefaultInit, @ref StaticArray(ValueInitT)
          */
         explicit StaticArray(DefaultInitT): StaticArray{DefaultInit, std::integral_constant<bool, std::is_pod<T>::value>{}} {}
 
         /**
-         * @brief Construct value-initialized array
+         * @brief Construct a value-initialized array
          *
          * Creates array of given size, the contents are value-initialized
          * (i.e. builtin types are zero-initialized). For other than builtin
@@ -156,7 +156,7 @@ template<std::size_t size_, class T> class StaticArray {
         explicit StaticArray(ValueInitT): _data{} {}
 
         /**
-         * @brief Construct the array without initializing its contents
+         * @brief Construct an array without initializing its contents
          *
          * Creates array of given size, the contents are *not* initialized.
          * Initialize the values using placement new.
@@ -170,7 +170,7 @@ template<std::size_t size_, class T> class StaticArray {
         explicit StaticArray(NoInitT) {}
 
         /**
-         * @brief Construct direct-initialized array
+         * @brief Construct a direct-initialized array
          *
          * Constructs the array using the @ref StaticArray(NoInitT) constructor
          * and then initializes each element with placement new using forwarded
@@ -180,7 +180,7 @@ template<std::size_t size_, class T> class StaticArray {
         template<class ...Args> explicit StaticArray(DirectInitT, Args&&... args);
 
         /**
-         * @brief Construct in-place-initialized array
+         * @brief Construct an in-place-initialized array
          *
          * The arguments are forwarded to the array constructor. Same as
          * @ref StaticArray(Args&&... args).
@@ -191,7 +191,7 @@ template<std::size_t size_, class T> class StaticArray {
         }
 
         /**
-         * @brief Construct default-initialized array
+         * @brief Construct a default-initialized array
          *
          * Alias to @ref StaticArray(DefaultInitT).
          * @see @ref StaticArray(ValueInitT)
@@ -199,7 +199,7 @@ template<std::size_t size_, class T> class StaticArray {
         explicit StaticArray(): StaticArray{DefaultInit} {}
 
         /**
-         * @brief Construct in-place-initialized array
+         * @brief Construct an in-place-initialized array
          *
          * Alias to @ref StaticArray(InPlaceInitT, Args&&... args).
          * @see @ref StaticArray(DirectInitT, Args&&... args)

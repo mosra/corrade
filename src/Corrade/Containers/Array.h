@@ -212,14 +212,14 @@ class Array {
         /**
          * @brief Default constructor
          *
-         * Creates zero-sized array. Move array with nonzero size onto the
-         * instance to make it useful.
+         * Creates a zero-sized array. Move an array with a nonzero size onto
+         * the instance to make it useful.
          */
         /* GCC <=4.8 breaks on _deleter{} */
         /*implicit*/ Array() noexcept: _data(nullptr), _size(0), _deleter(Implementation::DefaultDeleter<D>{}()) {}
 
         /**
-         * @brief Construct default-initialized array
+         * @brief Construct a default-initialized array
          *
          * Creates array of given size, the contents are default-initialized
          * (i.e. builtin types are not initialized). If the size is zero, no
@@ -229,7 +229,7 @@ class Array {
         explicit Array(DefaultInitT, std::size_t size): _data{size ? new T[size] : nullptr}, _size{size}, _deleter{nullptr} {}
 
         /**
-         * @brief Construct value-initialized array
+         * @brief Construct a value-initialized array
          *
          * Creates array of given size, the contents are value-initialized
          * (i.e. builtin types are zero-initialized). For other than builtin
@@ -243,7 +243,7 @@ class Array {
         explicit Array(ValueInitT, std::size_t size): _data{size ? new T[size]() : nullptr}, _size{size}, _deleter{nullptr} {}
 
         /**
-         * @brief Construct the array without initializing its contents
+         * @brief Construct an array without initializing its contents
          *
          * Creates array of given size, the contents are *not* initialized. If
          * the size is zero, no allocation is done. Initialize the values using
@@ -267,7 +267,7 @@ class Array {
         explicit Array(NoInitT, std::size_t size): _data{size ? Implementation::noInitAllocate<T>(size) : nullptr}, _size{size}, _deleter{Implementation::noInitDeleter<T>()} {}
 
         /**
-         * @brief Construct direct-initialized array
+         * @brief Construct a direct-initialized array
          *
          * Allocates the array using the @ref Array(NoInitT, std::size_t)
          * constructor and then initializes each element with placement new
@@ -276,7 +276,7 @@ class Array {
         template<class... Args> explicit Array(DirectInitT, std::size_t size, Args&&... args);
 
         /**
-         * @brief Construct list-initialized array
+         * @brief Construct a list-initialized array
          *
          * Allocates the array using the @ref Array(NoInitT, std::size_t)
          * constructor and then copy-initializes each element with placement
@@ -288,7 +288,7 @@ class Array {
         explicit Array(InPlaceInitT, std::initializer_list<T> list);
 
         /**
-         * @brief Construct default-initialized array
+         * @brief Construct a default-initialized array
          *
          * Alias to @ref Array(DefaultInitT, std::size_t).
          * @see @ref Array(ValueInitT, std::size_t)
@@ -296,7 +296,7 @@ class Array {
         explicit Array(std::size_t size): Array{DefaultInit, size} {}
 
         /**
-         * @brief Wrap existing array
+         * @brief Wrap an existing array
          *
          * Note that the array will be deleted on destruction using given
          * @p deleter. See class documentation for more information about
