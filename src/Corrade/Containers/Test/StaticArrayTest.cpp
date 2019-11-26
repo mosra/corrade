@@ -171,6 +171,13 @@ void StaticArrayTest::construct() {
     CORRADE_VERIFY(!a.empty());
     CORRADE_COMPARE(a.size(), StaticArray::Size);
     CORRADE_COMPARE(a.size(), 5);
+
+    /* Values should be zero-initialized (same as ValueInit) */
+    CORRADE_COMPARE(a[0], 0);
+    CORRADE_COMPARE(a[1], 0);
+    CORRADE_COMPARE(a[2], 0);
+    CORRADE_COMPARE(a[3], 0);
+    CORRADE_COMPARE(a[4], 0);
 }
 
 void StaticArrayTest::constructDefaultInit() {
@@ -184,7 +191,7 @@ void StaticArrayTest::constructValueInit() {
     const StaticArray a{ValueInit};
     CORRADE_VERIFY(a);
 
-    /* Values should be zero-initialized */
+    /* Values should be zero-initialized (same as the default constructor) */
     CORRADE_COMPARE(a[0], 0);
     CORRADE_COMPARE(a[1], 0);
     CORRADE_COMPARE(a[2], 0);
@@ -332,7 +339,9 @@ void StaticArrayTest::constructDirectInit() {
 }
 
 void StaticArrayTest::constructNonCopyable() {
-    const Containers::StaticArray<5, Immovable> a;
+    /* Can't use ValueInit because that apparently copy-constructs the array
+       elements (huh?) */
+    const Containers::StaticArray<5, Immovable> a{DefaultInit};
     CORRADE_VERIFY(a);
 }
 

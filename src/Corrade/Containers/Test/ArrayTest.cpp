@@ -195,6 +195,13 @@ void ArrayTest::construct() {
     CORRADE_VERIFY(a != nullptr);
     CORRADE_COMPARE(a.size(), 5);
 
+    /* Values should be zero-initialized (same as ValueInit) */
+    CORRADE_COMPARE(a[0], 0);
+    CORRADE_COMPARE(a[1], 0);
+    CORRADE_COMPARE(a[2], 0);
+    CORRADE_COMPARE(a[3], 0);
+    CORRADE_COMPARE(a[4], 0);
+
     /* Implicit construction from std::size_t is not allowed */
     CORRADE_VERIFY(!(std::is_convertible<std::size_t, Array>::value));
 }
@@ -219,7 +226,7 @@ void ArrayTest::constructValueInit() {
     CORRADE_VERIFY(a);
     CORRADE_COMPARE(a.size(), 5);
 
-    /* Values should be zero-initialized */
+    /* Values should be zero-initialized (same as the default constructor) */
     CORRADE_COMPARE(a[0], 0);
     CORRADE_COMPARE(a[1], 0);
     CORRADE_COMPARE(a[2], 0);

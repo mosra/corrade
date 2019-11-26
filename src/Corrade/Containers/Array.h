@@ -99,16 +99,17 @@ Usage example:
 
 @section Containers-Array-initialization Array initialization
 
-The array is by default *default-initialized*, which means that trivial types
-are not initialized at all and default constructor is called on other types. It
+The array is by default *value-initialized*, which means that trivial types
+are zero-initialized and the default constructor is called on other types. It
 is possible to initialize the array in a different way using so-called *tags*:
 
--   @ref Array(DefaultInitT, std::size_t) is equivalent to the default case
-    (useful when you want to make the choice appear explicit). In other words,
+-   @ref Array(DefaultInitT, std::size_t) leaves trivial types uninitialized
+    and calls the default constructor elsewhere. In other words,
     @cpp new T[size] @ce.
--   @ref Array(ValueInitT, std::size_t) zero-initializes trivial types and
-    calls default constructor elsewhere. In other words,
-    @cpp new T[size]{} @ce.
+-   @ref Array(ValueInitT, std::size_t) is equivalent to the default case,
+    zero-initializing trivial types and calling the default constructor
+    elsewhere. Useful when you want to make the choice appear explicit. In
+    other words, @cpp new T[size]{} @ce.
 -   @ref Array(DirectInitT, std::size_t, Args&&... args) constructs all
     elements of the array using provided arguments. In other words,
     @cpp new T[size]{T{args...}, T{args...}, …} @ce.
@@ -288,12 +289,12 @@ class Array {
         explicit Array(InPlaceInitT, std::initializer_list<T> list);
 
         /**
-         * @brief Construct a default-initialized array
+         * @brief Construct a value-initialized array
          *
-         * Alias to @ref Array(DefaultInitT, std::size_t).
-         * @see @ref Array(ValueInitT, std::size_t)
+         * Alias to @ref Array(ValueInitT, std::size_t).
+         * @see @ref Array(DefaultInitT, std::size_t)
          */
-        explicit Array(std::size_t size): Array{DefaultInit, size} {}
+        explicit Array(std::size_t size): Array{ValueInit, size} {}
 
         /**
          * @brief Wrap an existing array

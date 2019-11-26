@@ -74,6 +74,12 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 
+-   @ref Containers::Array and @ref Containers::StaticArray was switched to
+    do the @ref Containers::ValueInit construction by default instead of
+    @ref Containers::DefaultInit, i.e. zero-initializing trivial types instead
+    of keeping them uninitialized. This isn't really breaking, just makes the
+    default safer; and you still have the option to choose a different
+    initialization.
 -   Removed `Corrade/Utility/AndroidStreamBuffer.h` that was deprecated in
     2018.04, use @ref Corrade/Utility/AndroidLogStreamBuffer.h instead
 -   Removed `PluginManager::Manager::instance()` that was deprecated in

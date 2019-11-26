@@ -53,22 +53,23 @@ Usage example:
 
 @section Containers-StaticArray-initialization Array initialization
 
-The array is by default *default-initialized*, which means that trivial types
-are not initialized at all and default constructor is called on other types. It
+The array is by default *value-initialized*, which means that trivial types
+are zero-initialized and the default constructor is called on other types. It
 is possible to initialize the array in a different way using so-called *tags*:
 
--   @ref StaticArray(DefaultInitT) is equivalent to the implicit parameterless
-    constructor (useful when you want to make the choice appear explicit). In
-    other words, @cpp T array[size] @ce.
--   @ref StaticArray(InPlaceInitT, Args&&... args) is equivalent to the
-    implicit parameteric constructor (again useful when you want to make the
-    choice appear explicit). Same as @ref StaticArray(Args&&... args). In
-    other words, @cpp T array[size]{args...} @ce.
--   @ref StaticArray(ValueInitT) zero-initializes trivial types and calls
-    default constructor elsewhere. In other words, @cpp T array[size]{} @ce.
+-   @ref StaticArray(DefaultInitT) leaves trivial types uninitialized
+    and calls the default constructor elsewhere. In other words,
+    @cpp T array[size] @ce.
+-   @ref StaticArray(ValueInitT) is equivalent to the implicit parameterless
+    constructor, zero-initializing trivial types and calling the default
+    constructor elsewhere. Useful when you want to make the choice appear
+    explicit. In other words, @cpp T array[size]{} @ce.
 -   @ref StaticArray(DirectInitT, Args&&... args) constructs every element of
     the array using provided arguments. In other words,
     @cpp T array[size]{T{args...}, T{args...}, …} @ce.
+-   @ref StaticArray(InPlaceInitT, Args&&... args) is equivalent to
+    @ref StaticArray(Args&&... args), again useful when you want to make the
+    choice appear explicit). In other words, @cpp T array[size]{args...} @ce.
 -   @ref StaticArray(NoInitT) does not initialize anything and you need to call
     the constructor on all elements manually using placement new,
     @ref std::uninitialized_copy() or similar. This is the dangerous option.
@@ -146,8 +147,8 @@ template<std::size_t size_, class T> class StaticArray {
          * @brief Construct a value-initialized array
          *
          * Creates array of given size, the contents are value-initialized
-         * (i.e. builtin types are zero-initialized). For other than builtin
-         * types this is the same as @ref StaticArray().
+         * (i.e., builtin types are zero-initialized). This is the same as
+         * @ref StaticArray().
          *
          * Useful if you want to create an array of primitive types and set
          * them to zero.
@@ -191,12 +192,12 @@ template<std::size_t size_, class T> class StaticArray {
         }
 
         /**
-         * @brief Construct a default-initialized array
+         * @brief Construct a value-initialized array
          *
-         * Alias to @ref StaticArray(DefaultInitT).
-         * @see @ref StaticArray(ValueInitT)
+         * Alias to @ref StaticArray(ValueInitT).
+         * @see @ref StaticArray(DefaultInitT)
          */
-        explicit StaticArray(): StaticArray{DefaultInit} {}
+        explicit StaticArray(): StaticArray{ValueInit} {}
 
         /**
          * @brief Construct an in-place-initialized array
