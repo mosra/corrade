@@ -712,6 +712,7 @@ inline Debug& operator!(Implementation::DebugSourceLocation debug) {
 #else
 /** @relatesalso Debug
 @brief Prefix the output with source location
+@m_since_latest
 
 Only on supported compilers, does nothing otherwise. See
 @ref Utility-Debug-source-location for more information.
