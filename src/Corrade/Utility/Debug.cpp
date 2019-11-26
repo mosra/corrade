@@ -60,6 +60,10 @@
 #include "Corrade/Utility/Implementation/WindowsWeakSymbol.h"
 #endif
 
+#ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
+#include "Corrade/Utility/Assert.h"
+#endif
+
 namespace Corrade { namespace Utility {
 
 namespace {
@@ -355,6 +359,15 @@ Debug::Debug(std::ostream* const output, const Flags flags): _flags{InternalFlag
     #endif
 }
 
+#if !defined(DOXYGEN_GENERATING_OUTPUT) && defined(CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION)
+namespace Implementation {
+DebugSourceLocation::DebugSourceLocation(Debug&& debug, const char* file, int line): debug{&debug} {
+    debug._sourceLocationFile = file;
+    debug._sourceLocationLine = line;
+}
+}
+#endif
+
 Warning::Warning(std::ostream* const output, const Flags flags): Debug{flags} {
     /* Save previous global output and replace it with current one */
     _previousGlobalWarningOutput = debugGlobals.warningOutput;
@@ -372,6 +385,16 @@ Warning::Warning(const Flags flags): Warning{debugGlobals.warningOutput, flags} 
 Error::Error(const Flags flags): Error{debugGlobals.errorOutput, flags} {}
 
 void Debug::cleanupOnDestruction() {
+    #ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
+    /* Print source location if not printed yet -- this means saying a
+       !Debug{}; will print just that, while Debug{}; is a no-op */
+    if(_output && _sourceLocationFile) {
+        CORRADE_INTERNAL_ASSERT(_immediateFlags & InternalFlag::NoSpace);
+        *_output << _sourceLocationFile << ":" << _sourceLocationLine;
+        _flags |= InternalFlag::ValueWritten;
+    }
+    #endif
+
     /* Reset output color */
     resetColorInternal();
 
@@ -410,6 +433,15 @@ Fatal::~Fatal() {
 
 template<class T> Debug& Debug::print(const T& value) {
     if(!_output) return *this;
+
+    #ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
+    /* Print source location, if not printed yet */
+    if(_sourceLocationFile) {
+        CORRADE_INTERNAL_ASSERT(_immediateFlags & InternalFlag::NoSpace);
+        *_output << _sourceLocationFile << ":" << _sourceLocationLine << ": ";
+        _sourceLocationFile = nullptr;
+    }
+    #endif
 
     /* Separate values with spaces if enabled; reset all internal flags after */
     if(!((_immediateFlags|_flags) & InternalFlag::NoSpace))

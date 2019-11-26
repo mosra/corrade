@@ -45,6 +45,12 @@ namespace Corrade {
     existing @ref Containers::ArrayView<void> and
     @ref Containers::ArrayView<const void> types
 
+@subsubsection corrade-changelog-latest-new-utility Utility library
+
+-   Ability to optionally prefix @ref Utility::Debug output with a source file
+    and line on supported compilers. See @ref Utility-Debug-source-location for
+    more information.
+
 @subsection corrade-changelog-latest-changes Changes and improvements
 
 @subsubsection corrade-changelog-latest-changes-containers Containers library

@@ -380,6 +380,19 @@ Utility::Debug{} << "this has default color again";
 }
 
 {
+/* [Debug-source-location] */
+float a = 336;
+
+!Utility::Debug{} << "the result is" << (a /= 8);
+!Utility::Debug{} << "but here it's" << (a /= 8);
+
+!Utility::Debug{};
+
+Utility::Debug{} << "and finally, " << (a *= 8);
+/* [Debug-source-location] */
+}
+
+{
 /* [Debug-nospace] */
 Utility::Debug{} << "Value:" << 16 << Utility::Debug::nospace << "," << 24;
 /* [Debug-nospace] */

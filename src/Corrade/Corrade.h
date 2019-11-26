@@ -323,6 +323,16 @@ the console. This is done automatically when you link to the
 */
 #define CORRADE_UTILITY_USE_ANSI_COLORS
 #undef CORRADE_UTILITY_USE_ANSI_COLORS
+
+/**
+@brief Source location support in debug output
+
+Defined if @ref Corrade::Utility::Debug "Utility::Debug" is able to print
+source location support. Available only on GCC 8.1 and newer. See
+@ref Utility-Debug-source-location for more information.
+*/
+#define CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
+#undef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
 #endif
 
 }
