@@ -111,8 +111,10 @@
 /* Otherwise no idea. */
 #endif
 
-/* Source location support in Debug */
-#if (defined(__GNUC__) && __GNUC__*100 + __GNUC_MINOR__ >= 801) || (defined(__clang__) && __clang_major__ >= 9)
+/* Source location support in Debug. Since GCC 8.1 and Clang 9+, which is
+   (hopefully) going to be Apple Clang 12. Using __apple_build_version__
+   according to https://stackoverflow.com/a/19391724 to distinguish. */
+#if (defined(__GNUC__) && __GNUC__*100 + __GNUC_MINOR__ >= 801) || (defined(__clang__) && ((defined(__apple_build_version__) && __clang_major__ >= 12) || (!defined(__apple_build_version__) && __clang_major__ >= 9)))
 #define CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
 #endif
 
