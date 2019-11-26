@@ -72,13 +72,13 @@ struct ArrayTest: TestSuite::Tester {
 
     void constructEmpty();
     void constructNullptr();
+    void construct();
     void constructDefaultInit();
     void constructValueInit();
     void constructNoInitNonTrivial();
     void constructNoInitTrivial();
     void constructDirectInit();
     void constructInPlaceInit();
-    void construct();
     void constructFromExisting();
     void constructZeroSize();
     void constructMove();
@@ -125,13 +125,13 @@ typedef Containers::ArrayView<const void> ConstVoidArrayView;
 ArrayTest::ArrayTest() {
     addTests({&ArrayTest::constructEmpty,
               &ArrayTest::constructNullptr,
+              &ArrayTest::construct,
               &ArrayTest::constructDefaultInit,
               &ArrayTest::constructValueInit,
               &ArrayTest::constructNoInitNonTrivial,
               &ArrayTest::constructNoInitTrivial,
               &ArrayTest::constructDirectInit,
               &ArrayTest::constructInPlaceInit,
-              &ArrayTest::construct,
               &ArrayTest::constructFromExisting,
               &ArrayTest::constructZeroSize,
               &ArrayTest::constructMove,
@@ -210,14 +210,21 @@ void ArrayTest::constructDefaultInit() {
     const Array a{DefaultInit, 5};
     CORRADE_VERIFY(a);
     CORRADE_COMPARE(a.size(), 5);
+
+    /* Values are random memory */
 }
 
 void ArrayTest::constructValueInit() {
-    const Array a{ValueInit, 2};
+    const Array a{ValueInit, 5};
     CORRADE_VERIFY(a);
-    CORRADE_COMPARE(a.size(), 2);
+    CORRADE_COMPARE(a.size(), 5);
+
+    /* Values should be zero-initialized */
     CORRADE_COMPARE(a[0], 0);
     CORRADE_COMPARE(a[1], 0);
+    CORRADE_COMPARE(a[2], 0);
+    CORRADE_COMPARE(a[3], 0);
+    CORRADE_COMPARE(a[4], 0);
 }
 
 void ArrayTest::constructNoInitTrivial() {
