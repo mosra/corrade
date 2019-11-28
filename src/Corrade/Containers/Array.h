@@ -82,18 +82,16 @@ namespace Implementation {
 /**
 @brief Array wrapper with size information
 @tparam T   Element type
-@tparam D   Deleter type. Defaults to pointer to @cpp void(T*, std::size_t) @ce
+@tparam D   Deleter type. Defaults to pointer to a @cpp void(T*, std::size_t) @ce
     function, where first is array pointer and second array size
 
-Provides movable RAII wrapper around plain C array. Main use case is storing
-binary data of unspecified type, where addition/removal of elements is not
-needed or harmful.
-
-However, the class is usable also as a lighter non-copyable alternative to
-@ref std::vector; usable in STL algorithms in the same way as plain C array and
-additionally also in range-for cycle.
-
-Usage example:
+Provides a RAII wrapper around a plain C array. A lighter alternative to
+@ref std::vector that's deliberately move-only to avoid accidental copies of
+large memory blocks. It's usable in STL algorithms in the same way as a plain C
+array as well as in range-for cycles and other APIs operating with iterators.
+By default the array has a non-changeable size by default and growing
+functionality is opt-in, see @ref Containers-Array-growable below for more
+information. Usage example:
 
 @snippet Containers.cpp Array-usage
 
@@ -147,6 +145,50 @@ by the deleter function. If the deleter needs to manage some state, a custom
 deleter type can be used:
 
 @snippet Containers.cpp Array-deleter
+
+@section Containers-Array-growable Growable arrays
+
+The @ref Array class provides no reallocation or growing capabilities on its
+own, and this functionality is opt-in via free functions from
+@ref Corrade/Containers/GrowableArray.h instead. This is done in order to keep
+the concept of an owning container decoupled from the extra baggage coming from
+custom allocators, type constructibility and such.
+
+As long as the type stored in the array is nothrow-move-constructible, any
+@ref Array instance can be converted to a growing contaier by calling the
+family of @ref arrayAppend(), @ref arrayReserve(), @ref arrayResize() ...
+functions. A growable array behaves the same as a regular array to its
+consumers --- its @ref size() returns the count of *real* elements, while
+available capacity can be queried through @ref arrayCapacity(). Example of
+populating an array with an undetermined amount of elements:
+
+@snippet Containers.cpp Array-growable
+
+A growable array can be turned back into a regular one using
+@ref arrayShrink() if desired. That'll free all extra memory, moving the
+elements to an array of exactly the size needed.
+
+@m_class{m-block m-success}
+
+@par Tip
+    To save typing, you can make use of ADL and call the @ref arrayAppend()
+    etc. functions unqualified, without having them explicitly prefixed with
+    @cpp Containers:: @ce.
+
+@subsection Containers-Array-growable-allocators Growable allocators
+
+Similarly to standard containers, growable arrays allow you to use a custom
+allocator that matches the documented semantics of @ref ArrayAllocator. It's
+also possible to switch between different allocators during the lifetime of an
+@ref Array instance --- internally it's the same process as when a non-growable
+array is converted to a growable version (or back, with @ref arrayShrink()).
+
+The @ref ArrayAllocator is by default aliased to @ref ArrayNewAllocator, which
+uses the standard C++ @cpp new[] @ce / @cpp delete[] @ce constructs and is
+fully move-aware, requiring the types to be only nothrow-move-constructible at
+the very least. If a type is trivially copyable, the @ref ArrayMallocAllocator
+will get picked instead, make use of @ref std::realloc() to avoid unnecessary
+memory copies when growing the array.
 
 @section Containers-Array-views Conversion to array views
 

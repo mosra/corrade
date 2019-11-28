@@ -27,6 +27,14 @@ corrade_add_test(ContainersArrayTest ArrayTest.cpp)
 corrade_add_test(ContainersArrayViewTest ArrayViewTest.cpp)
 corrade_add_test(ContainersArrayViewStlTest ArrayViewStlTest.cpp)
 corrade_add_test(ContainersEnumSetTest EnumSetTest.cpp)
+
+corrade_add_test(ContainersGrowableArrayTest GrowableArrayTest.cpp)
+if(CORRADE_TARGET_EMSCRIPTEN)
+    # We need to append to avoid overwriting -s DISABLE_EXCEPTION_CATCHING=0
+    # TODO: somehow, for std::vector the available memory is enough?
+    set_property(TARGET ContainersGrowableArrayTest APPEND_STRING PROPERTY LINK_FLAGS " -s ALLOW_MEMORY_GROWTH=1")
+endif()
+
 corrade_add_test(ContainersLinkedListTest LinkedListTest.cpp)
 corrade_add_test(ContainersOptionalTest OptionalTest.cpp)
 corrade_add_test(ContainersPointerTest PointerTest.cpp)
@@ -46,6 +54,7 @@ set_property(TARGET
     ContainersArrayTest
     ContainersArrayViewTest
     ContainersArrayViewStlTest
+    ContainersGrowableArrayTest
     ContainersOptionalTest
     ContainersPointerTest
     ContainersStaticArrayViewTest

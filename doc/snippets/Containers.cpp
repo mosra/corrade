@@ -31,6 +31,7 @@
 #endif
 
 #include "Corrade/Containers/Array.h"
+#include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Containers/EnumSet.hpp"
 #include "Corrade/Containers/LinkedList.h"
 #include "Corrade/Containers/Optional.h"
@@ -226,6 +227,30 @@ Containers::Array<char, UnmapBuffer> array{data, bufferSize, UnmapBuffer{buffer}
 #if defined(__clang__) || defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
+
+{
+struct Face {
+    int vertexCount;
+    std::uint32_t vertices[4];
+};
+
+Containers::Array<Face> mesh;
+
+/* [Array-growable] */
+/* Optimistically reserve assuming the model consists of just triangles */
+Containers::Array<std::uint32_t> triangles;
+Containers::arrayReserve(triangles, mesh.size()*3);
+for(const Face& face: mesh) {
+    /* If it's a quad, convert to two triangles */
+    if(face.vertexCount == 4) Containers::arrayAppend(triangles,
+        {face.vertices[0], face.vertices[1], face.vertices[2],
+         face.vertices[0], face.vertices[2], face.vertices[3]});
+    /* Otherwise add as-is */
+    else Containers::arrayAppend(triangles,
+        {face.vertices[0], face.vertices[1], face.vertices[2]});
+}
+/* [Array-growable] */
+}
 
 {
 /* [Array-arrayView] */

@@ -35,6 +35,9 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-new-containers Containers library
 
+-   New @ref Containers::arrayAppend(), @ref Containers::arrayReserve() family
+    of functions for opt-in growable arrays. See @ref Containers-Array-growable
+    for more information.
 -   Added @ref Containers::arrayCast() overloads for casting from the
     @ref Containers::ArrayView<void> and @ref Containers::ArrayView<const void>
     specializations
