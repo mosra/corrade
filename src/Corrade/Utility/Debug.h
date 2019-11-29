@@ -42,7 +42,19 @@
 
 namespace Corrade { namespace Utility {
 
-#ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
+/**
+@brief Source location support in debug output
+@m_since_latest
+
+Defined if @ref Corrade::Utility::Debug "Utility::Debug" is able to print
+source location support. Available on GCC at least since version 4.8 and Clang
+9+. See @ref Utility-Debug-source-location for more information.
+*/
+/* To distinguish Apple Clang (9.0 will hopefully be Xcode 12), using
+   __apple_build_version__ according to https://stackoverflow.com/a/19391724.
+   Not in MSVC yet: https://github.com/microsoft/STL/issues/54. */
+#if defined(DOXYGEN_GENERATING_OUTPUT) || (defined(__GNUC__) && !defined(__clang__)) || (defined(__clang__) && ((defined(__apple_build_version__) && __clang_major__ >= 12) || (!defined(__apple_build_version__) && __clang_major__ >= 9)))
+#define CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
 namespace Implementation { struct DebugSourceLocation; }
 #endif
 
@@ -704,13 +716,6 @@ namespace Implementation {
     };
 }
 
-/* Unfortunately it's not possible to add additional (default) arguments to
-   operator! so we need to use a implicitly convertible type and capture the
-   source location in its constructor */
-inline Debug& operator!(Implementation::DebugSourceLocation debug) {
-    return *debug.debug;
-}
-#else
 /** @relatesalso Debug
 @brief Prefix the output with source location
 @m_since_latest
@@ -718,6 +723,13 @@ inline Debug& operator!(Implementation::DebugSourceLocation debug) {
 Only on supported compilers, does nothing otherwise. See
 @ref Utility-Debug-source-location for more information.
 */
+/* Unfortunately it's not possible to add additional (default) arguments to
+   operator! so we need to use a implicitly convertible type and capture the
+   source location in its constructor */
+inline Debug& operator!(Implementation::DebugSourceLocation debug) {
+    return *debug.debug;
+}
+#else
 inline Debug& operator!(Debug&& debug) { return debug; }
 #endif
 

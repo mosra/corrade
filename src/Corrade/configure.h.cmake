@@ -111,11 +111,4 @@
 /* Otherwise no idea. */
 #endif
 
-/* Source location support in Debug. Available since at least GCC 4.8. In Clang
-   since 9.0, which is (hopefully) going to be Apple Clang 12, using __apple_build_version__ according to https://stackoverflow.com/a/19391724 to
-   distinguish. Not in MSVC yet: https://github.com/microsoft/STL/issues/54. */
-#if (defined(__GNUC__) && !defined(__clang__)) || (defined(__clang__) && ((defined(__apple_build_version__) && __clang_major__ >= 12) || (!defined(__apple_build_version__) && __clang_major__ >= 9)))
-#define CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
-#endif
-
 #endif
