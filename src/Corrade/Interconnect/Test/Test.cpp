@@ -279,9 +279,6 @@ void Test::connectionDataMember() {
 }
 
 void Test::connectionDataLambda() {
-    #if defined(CORRADE_TARGET_LIBSTDCXX) && !defined(_GLIBCXX_RELEASE)
-    Warning{} << "libstdc++ which doesn't have std::is_trivially_copyable is used, lambdas allocated on heap";
-    #endif
     int counter = 0;
 
     /* Lambdas are not trivially copyable under MSVC, working around that with
@@ -299,25 +296,14 @@ void Test::connectionDataLambda() {
     auto d = Implementation::ConnectionData::createFunctor(Lambda{counter});
     #endif
 
-    #if !defined(CORRADE_TARGET_LIBSTDCXX) || _GLIBCXX_RELEASE >= 5
     CORRADE_VERIFY(d.type == Implementation::ConnectionType::Functor);
-    #else
-    CORRADE_VERIFY(d.type == Implementation::ConnectionType::FunctorWithDestructor);
-    CORRADE_VERIFY(d.storage.functor.destruct);
-    #endif
     CORRADE_VERIFY(d.call);
 
     reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d.call)(d.storage);
     CORRADE_COMPARE(counter, 1);
 
     Implementation::ConnectionData d2{std::move(d)};
-    #if !defined(CORRADE_TARGET_LIBSTDCXX) || _GLIBCXX_RELEASE >= 5
     CORRADE_VERIFY(d2.type == Implementation::ConnectionType::Functor);
-    #else
-    CORRADE_VERIFY(d.type == Implementation::ConnectionType::Functor);
-    CORRADE_VERIFY(d2.type == Implementation::ConnectionType::FunctorWithDestructor);
-    CORRADE_VERIFY(d2.storage.functor.destruct);
-    #endif
     CORRADE_VERIFY(d2.call);
 
     reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d2.call)(d2.storage);
@@ -325,13 +311,7 @@ void Test::connectionDataLambda() {
 
     Implementation::ConnectionData d3{Implementation::ConnectionType::Member};
     d3 = std::move(d2);
-    #if !defined(CORRADE_TARGET_LIBSTDCXX) || _GLIBCXX_RELEASE >= 5
     CORRADE_VERIFY(d3.type == Implementation::ConnectionType::Functor);
-    #else
-    CORRADE_VERIFY(d2.type == Implementation::ConnectionType::Member);
-    CORRADE_VERIFY(d3.type == Implementation::ConnectionType::FunctorWithDestructor);
-    CORRADE_VERIFY(d3.storage.functor.destruct);
-    #endif
     CORRADE_VERIFY(d3.call);
 
     reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d3.call)(d3.storage);

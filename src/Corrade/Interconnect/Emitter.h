@@ -65,6 +65,16 @@ enum class ConnectionType: std::uint8_t {
     FunctorWithDestructor
 };
 
+/* Thestd::has_trivial_copy_constructor is deprecated in GCC 5+ but we can't
+   detect libstdc++ version when using Clang. The builtins aren't deprecated
+   but for those GCC commits suicide with
+    error: use of built-in trait ‘__has_trivial_copy(T)’ in function signature; use library traits instead
+   so, well, i'm defining my own! See CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+   for even more fun stories. */
+#ifndef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+template<class T> struct IsTriviallyCopyableOnOldGcc: std::integral_constant<bool, __has_trivial_copy(T)> {};
+#endif
+
 struct CORRADE_INTERCONNECT_EXPORT ConnectionData {
     union CORRADE_ALIGNAS(sizeof(std::size_t)) Storage {
         char data[FunctionPointerSize*sizeof(std::size_t) + sizeof(void*)];
@@ -100,16 +110,15 @@ struct CORRADE_INTERCONNECT_EXPORT ConnectionData {
         return out;
     }
 
-    #if !defined(CORRADE_TARGET_LIBSTDCXX) || _GLIBCXX_RELEASE >= 5
     /* Construct a simple, small enough and trivial functor connection (which
-       is not convertible to a function pointer). Trivially copyable implies
-       a trivial destructor. On libstdc++ 4 the is_trivially_copyable trait is
-       not available and is_trivially_destructible is not strong enough
-       guarantee, so in that case we play it safe and heap-allocate
-       unconditionally. Unfortunately there's no way to check for its version
-       until GCC 6 (or 7?) that provides _GLIBCXX_RELEASE, which means we
-       heap-allocate also on GCC 5 and 6. */
-    template<class ...Args, class F> static ConnectionData createFunctor(F&& f, typename std::enable_if<!std::is_convertible<typename std::decay<F>::type, void(*)(Args...)>::value && sizeof(typename std::decay<F>::type) <= sizeof(Storage) && std::is_trivially_copyable<typename std::decay<F>::type>::value>::type* = nullptr) {
+       is not convertible to a function pointer) */
+    template<class ...Args, class F> static ConnectionData createFunctor(F&& f, typename std::enable_if<!std::is_convertible<typename std::decay<F>::type, void(*)(Args...)>::value && sizeof(typename std::decay<F>::type) <= sizeof(Storage) &&
+        #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+        std::is_trivially_copyable<typename std::decay<F>::type>::value
+        #else
+        (IsTriviallyCopyableOnOldGcc<typename std::decay<F>::type>::value && std::is_trivially_destructible<typename std::decay<F>::type>::value)
+        #endif
+    >::type* = nullptr) {
         ConnectionData out{ConnectionType::Functor};
         new(&out.storage.data) typename std::decay<F>::type{std::move(f)};
         out.call = reinterpret_cast<void(*)()>(static_cast<void(*)(Storage&, Args&&...)>([](Storage& storage, Args&&... args) {
@@ -117,7 +126,6 @@ struct CORRADE_INTERCONNECT_EXPORT ConnectionData {
         }));
         return out;
     }
-    #endif
 
     /* Construct a non-trivial or too large functor connection -- if something
        is not trivially destructible, it also isn't trivially copyable
@@ -126,9 +134,13 @@ struct CORRADE_INTERCONNECT_EXPORT ConnectionData {
         /* On MSVC *all* lambdas are *for some reason* not trivially compable
            so the call gets ambiguous without the is_convertible check */
         !std::is_convertible<typename std::decay<F>::type, void(*)(Args...)>::value
-        #if !defined(CORRADE_TARGET_LIBSTDCXX) || _GLIBCXX_RELEASE >= 5
-        && ((sizeof(typename std::decay<F>::type) > sizeof(Storage)) || !std::is_trivially_copyable<typename std::decay<F>::type>::value)
-        #endif
+        && ((sizeof(typename std::decay<F>::type) > sizeof(Storage)) || !
+            #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+            std::is_trivially_copyable<typename std::decay<F>::type>::value
+            #else
+            (IsTriviallyCopyableOnOldGcc<typename std::decay<F>::type>::value && std::is_trivially_destructible<typename std::decay<F>::type>::value)
+            #endif
+        )
         >::type* = nullptr) {
         ConnectionData out{ConnectionType::FunctorWithDestructor};
         reinterpret_cast<typename std::decay<F>::type*&>(out.storage.functor.data) = new typename std::decay<F>::type{std::move(f)};

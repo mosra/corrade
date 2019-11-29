@@ -67,6 +67,11 @@ namespace Corrade {
     work with libc++ 9 (and upcoming implementations in GCC and elsewhere), as
     it no longer uses @ref std::ptrdiff_t as a size.
 
+@subsubsection corrade-changelog-latest-changes-interconnect interconnect library
+
+-   @ref Interconnect::connect() now can recognize trivially copyable lambdas
+    also on GCC versions before 5 and store them more efficiently
+
 @subsection corrade-changelog-latest-buildsystem Build system
 
 -   Fixed compilation of the @ref main "Corrade::Main" library on i686 MinGW
