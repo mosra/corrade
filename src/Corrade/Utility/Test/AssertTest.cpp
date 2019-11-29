@@ -93,6 +93,8 @@ void AssertTest::test() {
 
     if(!a || _failAssertUnreachable) CORRADE_ASSERT_UNREACHABLE();
 
+    CORRADE_ASSUME(a != 1);
+
     CORRADE_COMPARE(a, 3);
     CORRADE_COMPARE(b, 3);
     CORRADE_COMPARE(c, 3);

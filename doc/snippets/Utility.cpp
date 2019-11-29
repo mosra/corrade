@@ -129,6 +129,14 @@ CORRADE_INTERNAL_ASSERT(initialize());
 /* [CORRADE_INTERNAL_ASSERT_OUTPUT] */
 CORRADE_INTERNAL_ASSERT_OUTPUT(initialize());
 /* [CORRADE_INTERNAL_ASSERT_OUTPUT] */
+
+{
+int *src{}, *dst{}, *end{};
+/* [CORRADE_ASSUME] */
+CORRADE_ASSUME(src != dst);
+for(; src != end; ++src, ++dst) *dst += *src;
+/* [CORRADE_ASSUME] */
+}
 }
 
 enum class Flag { A, B };
