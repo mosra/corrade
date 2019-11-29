@@ -51,6 +51,9 @@ namespace Corrade {
     and line on supported compilers. See @ref Utility-Debug-source-location and
     [mosra/corrade#55](https://github.com/mosra/corrade/pull/55) for more
     information.
+-   Added a @ref CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED macro into
+    @ref Corrade/Utility/TypeTraits.h denoting if @ref std::is_trivially_copyable
+    is available in the standard library
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 

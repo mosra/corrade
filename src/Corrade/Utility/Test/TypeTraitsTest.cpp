@@ -41,6 +41,8 @@ namespace Corrade { namespace Utility { namespace Test { namespace {
 struct TypeTraitsTest: TestSuite::Tester {
     explicit TypeTraitsTest();
 
+    void isTriviallyTraitsSupported();
+
     void hasType();
 
     void isIterableMember();
@@ -55,6 +57,8 @@ struct TypeTraitsTest: TestSuite::Tester {
 TypeTraitsTest::TypeTraitsTest() {
     addTests({&TypeTraitsTest::hasType,
 
+              &TypeTraitsTest::isTriviallyTraitsSupported,
+
               &TypeTraitsTest::isIterableMember,
               &TypeTraitsTest::isIterableFreeStd,
               &TypeTraitsTest::isIterableFree,
@@ -62,6 +66,26 @@ TypeTraitsTest::TypeTraitsTest() {
 
               &TypeTraitsTest::isStringLike,
               &TypeTraitsTest::isStringLikeNot});
+}
+
+void TypeTraitsTest::isTriviallyTraitsSupported() {
+    #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+    Debug{} << "std::is_trivially_* traits supported";
+    CORRADE_VERIFY((std::is_trivially_constructible<int, int>::value));
+    CORRADE_VERIFY(std::is_trivially_default_constructible<int>::value);
+    CORRADE_VERIFY(std::is_trivially_copy_constructible<int>::value);
+    CORRADE_VERIFY(std::is_trivially_move_constructible<int>::value);
+    CORRADE_VERIFY((std::is_trivially_assignable<int&, int>::value));
+    CORRADE_VERIFY(std::is_trivially_copy_assignable<int>::value);
+    CORRADE_VERIFY(std::is_trivially_move_assignable<int>::value);
+    #else
+    Debug{} << "std::is_trivially_* traits not supported";
+    /* std::has_trivial_copy_constructor etc. emits a deprecation warning on
+       GCC 5+, so using the builtins instead. See the macro docs for details */
+    CORRADE_VERIFY(__has_trivial_constructor(int));
+    CORRADE_VERIFY(__has_trivial_copy(int));
+    CORRADE_VERIFY(__has_trivial_assign(int));
+    #endif
 }
 
 CORRADE_HAS_TYPE(HasKeyType, typename T::key_type);
