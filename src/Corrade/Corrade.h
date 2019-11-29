@@ -328,8 +328,8 @@ the console. This is done automatically when you link to the
 @brief Source location support in debug output
 
 Defined if @ref Corrade::Utility::Debug "Utility::Debug" is able to print
-source location support. Available on GCC 8.1+ and Clang 9+. See
-@ref Utility-Debug-source-location for more information.
+source location support. Available on GCC at least since version 4.8 and Clang
+9+. See @ref Utility-Debug-source-location for more information.
 */
 #define CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
 #undef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
