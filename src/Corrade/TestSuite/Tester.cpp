@@ -721,7 +721,7 @@ std::size_t Tester::testCaseInstanceId() const {
 
 std::size_t Tester::testCaseRepeatId() const {
     CORRADE_ASSERT(_state->testCaseRepeatId != ~std::size_t{},
-        "TestSuite::Tester::testCaseInstanceId(): can be called only from within a repeated test case", {});
+        "TestSuite::Tester::testCaseRepeatId(): can be called only from within a repeated test case", {});
     return _state->testCaseRepeatId;
 }
 
