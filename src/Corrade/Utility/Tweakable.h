@@ -63,7 +63,7 @@ directly. Here we'll use a single underscore:
 
 After that, enable it using @ref enable() (it's disabled by default). From that
 point onwards, all literals wrapped with this macro invocation will get
-recognized by it. To reflect source changes in the app, eriodically call
+recognized by it. To reflect source changes in the app, periodically call
 @ref update(), for best responsiveness ideally in each event loop iteration.
 
 @snippet Utility.cpp Tweakable-wrap-update
@@ -83,7 +83,7 @@ Not all code is running in every iteration of an event loop --- and it's not
 desirable to put it there just to be able to use tweakable constants. To fix
 that, there's the @ref scope() function. It takes a single-parameter function
 (or a lambda) and runs the contents as if the code was placed directly in the
-containing block. But fur every tweakable constant inside, it remembers its
+containing block. But for every tweakable constant inside, it remembers its
 surrounding scope lambda. Then, during @ref update(), whenever one of these
 constants is changed, the corresponding scope lambda gets called again (with
 the same parameter). So for example this way you can execute part of a

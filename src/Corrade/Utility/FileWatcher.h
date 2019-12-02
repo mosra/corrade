@@ -71,7 +71,7 @@ modification time:
 
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
     @ref CORRADE_TARGET_WINDOWS "Windows" platforms and on
-    @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten". On Emscripten it woeks on the
+    @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten". On Emscripten it works on the
     virtual filesystem.
 */
 class CORRADE_UTILITY_EXPORT FileWatcher {
