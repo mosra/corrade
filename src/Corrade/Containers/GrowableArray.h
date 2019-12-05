@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class @ref Corrade::Containers::ArrayAllocator, @ref Corrade::Containers::ArrayNewAllocator, @ref Corrade::Containers::ArrayMallocAllocator, function @ref Corrade::Containers::arrayIsGrowable(), @ref Corrade::Containers::arrayCapacity(), @ref Corrade::Containers::arrayReserve(), @ref Corrade::Containers::arrayResize(), @ref Corrade::Containers::arrayAppend(), @ref Corrade::Containers::arrayRemoveSuffix(), @ref Corrade::Containers::arrayShrink()
+ * @brief Class @ref Corrade::Containers::ArrayAllocator, @ref Corrade::Containers::ArrayNewAllocator, @ref Corrade::Containers::ArrayMallocAllocator, function @ref Corrade::Containers::arrayAllocatorCast(), @ref Corrade::Containers::arrayIsGrowable(), @ref Corrade::Containers::arrayCapacity(), @ref Corrade::Containers::arrayReserve(), @ref Corrade::Containers::arrayResize(), @ref Corrade::Containers::arrayAppend(), @ref Corrade::Containers::arrayRemoveSuffix(), @ref Corrade::Containers::arrayShrink()
  * @m_since_latest
  */
 
@@ -178,6 +178,11 @@ An @ref ArrayAllocator that allocates and deallocates memory using the C
 @ref std::realloc() for fast reallocations. Expects that @p T is trivially
 copyable. Similarly to @ref ArrayNewAllocator it's reserving an extra space
 *before* to store array capacity.
+
+Compared to @ref ArrayNewAllocator, this allocator stores array capacity in
+bytes and, together with the fact that @ref std::free() doesn't care about the
+actual array type, growable arrays using this allocator can be freely cast to
+different compatible types using @ref arrayAllocatorCast().
 @see @ref Containers-Array-growable
 */
 template<class T> struct ArrayMallocAllocator {
@@ -359,6 +364,52 @@ template<class T> using ArrayAllocator = typename std::conditional<
     #endif
     , ArrayMallocAllocator<T>, ArrayNewAllocator<T>>::type;
 #endif
+
+/**
+@brief Reinterpret-cast a growable array
+@m_since_latest
+
+If the array is growable using @ref ArrayMallocAllocator (which is aliased to
+@ref ArrayAllocator for all trivially-copyable types), the deleter is a simple
+call to a typeless @ref std::free(). This makes it possible to change the array
+type without having to use a different deleter, losing the growable property in
+the process. Example usage:
+
+@snippet Containers.cpp arrayAllocatorCast
+
+Equivalently to to @ref arrayCast(), the size of the new array is calculated as
+@cpp view.size()*sizeof(T)/sizeof(U) @ce. Expects that both types are
+trivially copyable and [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
+and the total byte size doesn't change.
+*/
+template<class U, class T> Array<U> arrayAllocatorCast(Array<T>&& array);
+
+/**
+@overload
+@m_since_latest
+*/
+template<class U, template<class> class Allocator, class T> Array<U> arrayAllocatorCast(Array<T>&& array) {
+    static_assert(std::is_standard_layout<T>::value, "the source type is not standard layout");
+    static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
+    static_assert(
+        #ifdef CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED
+        std::is_trivially_copyable<T>::value && std::is_trivially_copyable<U>::value
+        #else
+        Implementation::IsTriviallyCopyableOnOldGcc<T>::value && Implementation::IsTriviallyCopyableOnOldGcc<U>::value
+        #endif
+        , "only trivially copyable types can use the allocator cast");
+    CORRADE_ASSERT(array.data() == nullptr ||
+        (array.deleter() == Allocator<T>::deleter && std::is_base_of<ArrayMallocAllocator<T>, Allocator<T>>::value),
+        "Containers::arrayAllocatorCast(): the array has to use the ArrayMallocAllocator or a derivative", {});
+    const std::size_t size = array.size()*sizeof(T)/sizeof(U);
+    CORRADE_ASSERT(size*sizeof(U) == array.size()*sizeof(T),
+        "Containers::arrayAllocatorCast(): can't reinterpret" << array.size() << sizeof(T) << Utility::Debug::nospace << "-byte items into a" << sizeof(U) << Utility::Debug::nospace << "-byte type", {});
+    return Array<U>{reinterpret_cast<U*>(array.release()), size, Allocator<U>::deleter};
+}
+
+template<class U, class T> Array<U> arrayAllocatorCast(Array<T>&& array) {
+    return arrayAllocatorCast<U, ArrayAllocator, T>(std::move(array));
+}
 
 /**
 @brief Whether the array is growable

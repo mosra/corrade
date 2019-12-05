@@ -111,6 +111,12 @@ struct GrowableArrayTest: TestSuite::Tester {
 
     template<class T> void move();
 
+    void cast();
+    void castEmpty();
+    void castNonTrivial();
+    void castNonGrowable();
+    void castInvalid();
+
     void benchmarkAppendVector();
     void benchmarkAppendArray();
     void benchmarkAppendReservedVector();
@@ -258,6 +264,12 @@ GrowableArrayTest::GrowableArrayTest() {
               &GrowableArrayTest::move<int>,
               &GrowableArrayTest::move<Movable>},
         &GrowableArrayTest::resetCounters, &GrowableArrayTest::resetCounters);
+
+    addTests({&GrowableArrayTest::cast,
+              &GrowableArrayTest::castEmpty,
+              &GrowableArrayTest::castNonTrivial,
+              &GrowableArrayTest::castNonGrowable,
+              &GrowableArrayTest::castInvalid});
 
     addBenchmarks({
         &GrowableArrayTest::benchmarkAppendVector,
@@ -1372,6 +1384,55 @@ template<class T> void GrowableArrayTest::move() {
         CORRADE_COMPARE(Movable::moved, 0);
         CORRADE_COMPARE(Movable::destructed, 0);
     }
+}
+
+void GrowableArrayTest::cast() {
+    Array<char> a;
+    arrayResize(a, 10);
+
+    auto b = arrayAllocatorCast<std::uint16_t>(std::move(a));
+    CORRADE_COMPARE(b.size(), 5);
+    CORRADE_COMPARE(a.data(), nullptr);
+}
+
+void GrowableArrayTest::castEmpty() {
+    Array<char> a;
+
+    /* Shouldn't complain about any allocator, we're empty anyway */
+    auto b = arrayAllocatorCast<std::uint16_t>(std::move(a));
+    CORRADE_COMPARE(b.size(), 0);
+}
+
+void GrowableArrayTest::castNonTrivial() {
+    Array<char> a;
+    arrayResize<char, ArrayNewAllocator<char>>(a, 10);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    arrayAllocatorCast<std::uint16_t>(std::move(a));
+    CORRADE_COMPARE(out.str(),
+        "Containers::arrayAllocatorCast(): the array has to use the ArrayMallocAllocator or a derivative\n");
+}
+
+void GrowableArrayTest::castNonGrowable() {
+    Array<char> a{10};
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    arrayAllocatorCast<std::uint16_t>(std::move(a));
+    CORRADE_COMPARE(out.str(),
+        "Containers::arrayAllocatorCast(): the array has to use the ArrayMallocAllocator or a derivative\n");
+}
+
+void GrowableArrayTest::castInvalid() {
+    Array<char> a;
+    arrayResize(a, 10);
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    arrayAllocatorCast<std::uint32_t>(std::move(a));
+    CORRADE_COMPARE(out.str(),
+        "Containers::arrayAllocatorCast(): can't reinterpret 10 1-byte items into a 4-byte type\n");
 }
 
 void GrowableArrayTest::benchmarkAppendVector() {

@@ -40,6 +40,7 @@
 #include "Corrade/Containers/StaticArray.h"
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/Utility/Debug.h"
+#include "Corrade/Utility/Directory.h"
 
 using namespace Corrade;
 
@@ -259,6 +260,15 @@ arrayReserve(a, 100);
 arrayResize(a, 80);
 a[80] = 5; // Even though the memory is there, this causes ASan to complain
 /* [Array-growable-sanitizer] */
+}
+
+{
+/* [arrayAllocatorCast] */
+Containers::Array<char> data;
+Containers::Array<float> floats =
+    Containers::arrayAllocatorCast<float>(std::move(data));
+arrayAppend(floats, 37.0f);
+/* [arrayAllocatorCast] */
 }
 
 {

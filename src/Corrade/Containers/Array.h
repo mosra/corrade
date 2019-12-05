@@ -188,7 +188,10 @@ uses the standard C++ @cpp new[] @ce / @cpp delete[] @ce constructs and is
 fully move-aware, requiring the types to be only nothrow-move-constructible at
 the very least. If a type is trivially copyable, the @ref ArrayMallocAllocator
 will get picked instead, make use of @ref std::realloc() to avoid unnecessary
-memory copies when growing the array.
+memory copies when growing the array. The typeless nature of
+@ref ArrayMallocAllocator internals allows for free type-casting of the array
+instance with @ref arrayAllocatorCast(), an operation not easily doable using
+typed allocators.
 
 @subsection Containers-Array-growable-sanitizer AddressSanitizer container annotations
 
