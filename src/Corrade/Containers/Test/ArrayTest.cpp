@@ -288,7 +288,8 @@ void ArrayTest::constructZeroSize() {
 }
 
 void ArrayTest::constructMove() {
-    Array a(5);
+    auto myDeleter = [](int* data, std::size_t) { delete[] data; };
+    Array a(new int[5], 5, myDeleter);
     CORRADE_VERIFY(a);
     const int* const ptr = a;
 
@@ -297,13 +298,18 @@ void ArrayTest::constructMove() {
     CORRADE_VERIFY(b == ptr);
     CORRADE_COMPARE(a.size(), 0);
     CORRADE_COMPARE(b.size(), 5);
+    CORRADE_VERIFY(a.deleter() == nullptr);
+    CORRADE_VERIFY(b.deleter() == myDeleter);
 
-    Array c;
+    auto noDeleter = [](int*, std::size_t) {};
+    Array c{reinterpret_cast<int*>(0x3), 3, noDeleter};
     c = std::move(b);
-    CORRADE_VERIFY(b == nullptr);
+    CORRADE_VERIFY(b == reinterpret_cast<int*>(0x3));
     CORRADE_VERIFY(c == ptr);
-    CORRADE_COMPARE(b.size(), 0);
+    CORRADE_COMPARE(b.size(), 3);
     CORRADE_COMPARE(c.size(), 5);
+    CORRADE_VERIFY(b.deleter() == noDeleter);
+    CORRADE_VERIFY(c.deleter() == myDeleter);
 }
 
 void ArrayTest::constructDirectReferences() {
@@ -704,7 +710,8 @@ void ArrayTest::sliceToStaticPointer() {
 }
 
 void ArrayTest::release() {
-    Array a(5);
+    auto myDeleter = [](int* data, std::size_t) { delete[] data; };
+    Array a(new int[5], 5, myDeleter);
     int* const data = a;
     int* const released = a.release();
     delete[] released;
@@ -714,6 +721,7 @@ void ArrayTest::release() {
     CORRADE_COMPARE(reinterpret_cast<std::intptr_t>(data), reinterpret_cast<std::intptr_t>(released));
     CORRADE_COMPARE(a.begin(), nullptr);
     CORRADE_COMPARE(a.size(), 0);
+    CORRADE_VERIFY(a.deleter() == nullptr);
 }
 
 void ArrayTest::defaultDeleter() {

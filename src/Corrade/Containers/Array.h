@@ -311,14 +311,23 @@ class Array {
         /** @brief Copying is not allowed */
         Array(const Array<T, D>&) = delete;
 
-        /** @brief Move constructor */
+        /**
+         * @brief Move constructor
+         *
+         * Resets data pointer, size and deleter of @p other to be equivalent
+         * to a default-constructed instance.
+         */
         Array(Array<T, D>&& other) noexcept;
 
         /** @brief Copying is not allowed */
         Array<T, D>& operator=(const Array<T, D>&) = delete;
 
-        /** @brief Move assignment */
-        Array<T, D>& operator=(Array<T, D>&&) noexcept;
+        /**
+         * @brief Move assignment
+         *
+         * Swaps data pointer, size and deleter of the two instances.
+         */
+        Array<T, D>& operator=(Array<T, D>&& other) noexcept;
 
         /* The following view conversion is *not* restricted to this& because
            that would break uses like `consume(foo());`, where `consume()`
@@ -546,10 +555,10 @@ class Array {
         /**
          * @brief Release data storage
          *
-         * Returns the data pointer and resets internal state to be equivalent
-         * to a default-constructed instance. Deleting the returned array is
-         * user responsibility --- note the array might have a custom
-         * @ref deleter() and so @cpp delete @ce might not be always
+         * Returns the data pointer and resets data pointer, size and deleter
+         * to be equivalent to a default-constructed instance. Deleting the
+         * returned array is user responsibility --- note the array might have
+         * a custom @ref deleter() and so @cpp delete[] @ce might not be always
          * appropriate.
          */
         T* release();
@@ -610,6 +619,7 @@ template<class T> std::size_t arraySize(const Array<T>& view) {
 template<class T, class D> inline Array<T, D>::Array(Array<T, D>&& other) noexcept: _data{other._data}, _size{other._size}, _deleter{other._deleter} {
     other._data = nullptr;
     other._size = 0;
+    other._deleter = D{};
 }
 
 template<class T, class D> template<class ...Args> Array<T, D>::Array(DirectInitT, std::size_t size, Args&&... args): Array{NoInit, size} {
@@ -649,10 +659,10 @@ template<class T, class D> T& Array<T, D>::back() {
 }
 
 template<class T, class D> inline T* Array<T, D>::release() {
-    /** @todo I need `std::exchange` NOW. */
     T* const data = _data;
     _data = nullptr;
     _size = 0;
+    _deleter = D{};
     return data;
 }
 

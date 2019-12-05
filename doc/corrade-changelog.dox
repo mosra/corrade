@@ -69,6 +69,10 @@ namespace Corrade {
 -   @ref Containers::ArrayView compatibility with @ref std::span was updated to
     work with libc++ 9 (and upcoming implementations in GCC and elsewhere), as
     it no longer uses @ref std::ptrdiff_t as a size.
+-   @ref Containers::Array move constructor and @ref Containers::Array::release()
+    now reset the deleter of the originating array to @cpp nullptr @ce to avoid
+    false assumptions about moved-from instances or calling unsuspecting
+    deleters on null pointers
 
 @subsubsection corrade-changelog-latest-changes-interconnect interconnect library
 
