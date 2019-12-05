@@ -190,6 +190,28 @@ the very least. If a type is trivially copyable, the @ref ArrayMallocAllocator
 will get picked instead, make use of @ref std::realloc() to avoid unnecessary
 memory copies when growing the array.
 
+@subsection Containers-Array-growable-sanitizer AddressSanitizer container annotations
+
+Because the alloacted growable arrays have an area between @ref size() and
+@ref arrayCapacity() that shouldn't be accessed, when building with
+[Address Sanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer)
+enabled, this area is marked as "container overflow". Given the following code,
+ASan aborts and produces a failure report similar to the one below:
+
+@m_class{m-code-figure}
+
+@parblock
+
+@snippet Containers.cpp Array-growable-sanitizer
+
+<p></p>
+
+@m_class{m-nopad}
+
+@include containers-growable-array-sanitizer.ansi
+
+@endparblock
+
 @section Containers-Array-views Conversion to array views
 
 Arrays are implicitly convertible to @ref ArrayView as described in the

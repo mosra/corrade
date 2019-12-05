@@ -253,6 +253,15 @@ for(const Face& face: mesh) {
 }
 
 {
+/* [Array-growable-sanitizer] */
+Containers::Array<int> a;
+arrayReserve(a, 100);
+arrayResize(a, 80);
+a[80] = 5; // Even though the memory is there, this causes ASan to complain
+/* [Array-growable-sanitizer] */
+}
+
+{
 /* [Array-arrayView] */
 Containers::Array<std::uint32_t> data;
 

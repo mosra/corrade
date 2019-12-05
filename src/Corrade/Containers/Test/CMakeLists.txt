@@ -34,6 +34,13 @@ if(CORRADE_TARGET_EMSCRIPTEN)
     # TODO: somehow, for std::vector the available memory is enough?
     set_property(TARGET ContainersGrowableArrayTest APPEND_STRING PROPERTY LINK_FLAGS " -s ALLOW_MEMORY_GROWTH=1")
 endif()
+corrade_add_test(ContainersGrowableArraySani___FailTest GrowableArraySanitizerFailTest.cpp)
+# Not matching with the -f, as MSVC might use either /f or -f. Source:
+# https://devblogs.microsoft.com/cppblog/addresssanitizer-asan-for-windows-with-msvc/
+if(CMAKE_CXX_FLAGS MATCHES "fsanitize=address")
+    set_tests_properties(ContainersGrowableArraySani___FailTest PROPERTIES
+        PASS_REGULAR_EXPRESSION "AddressSanitizer: container-overflow")
+endif()
 
 corrade_add_test(ContainersLinkedListTest LinkedListTest.cpp)
 corrade_add_test(ContainersOptionalTest OptionalTest.cpp)

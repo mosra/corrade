@@ -36,6 +36,23 @@
 #include "Corrade/Containers/Array.h"
 #include "Corrade/Utility/TypeTraits.h"
 
+/* No __has_feature on GCC: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60512
+   Using a dedicated macro instead: https://stackoverflow.com/a/34814667 */
+#ifdef __has_feature
+#if __has_feature(address_sanitizer)
+#define _CORRADE_CONTAINERS_SANITIZER_ENABLED
+#endif
+#endif
+#ifdef __SANITIZE_ADDRESS__
+#define _CORRADE_CONTAINERS_SANITIZER_ENABLED
+#endif
+
+#ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+/* https://github.com/llvm-mirror/compiler-rt/blob/master/include/sanitizer/common_interface_defs.h */
+extern "C" void __sanitizer_annotate_contiguous_container(const void *beg,
+    const void *end, const void *old_mid, const void *new_mid);
+#endif
+
 namespace Corrade { namespace Containers {
 
 /** @{ @name Growable array utilities
@@ -54,6 +71,8 @@ move-constructible.
 @see @ref Containers-Array-growable
 */
 template<class T> struct ArrayNewAllocator {
+    typedef T Type; /**< Pointer type */
+
     /**
      * @brief Allocate (but not construct) an array of given capacity
      *
@@ -113,6 +132,15 @@ template<class T> struct ArrayNewAllocator {
     }
 
     /**
+     * @brief Array base address
+     *
+     * Returns the address with @cpp sizeof(std::size_t) @ce subtracted.
+     */
+    static void* base(T* array) {
+        return reinterpret_cast<char*>(array) - sizeof(std::size_t);
+    }
+
+    /**
      * @brief Array deleter
      *
      * Calls a destructor on @p size elements and then delegates into
@@ -160,6 +188,8 @@ template<class T> struct ArrayMallocAllocator {
         Implementation::IsTriviallyCopyableOnOldGcc<T>::value
         #endif
         , "only trivially copyable types are usable with this allocator");
+
+    typedef T Type; /**< Pointer type */
 
     /**
      * @brief Allocate an array of given capacity
@@ -215,6 +245,15 @@ template<class T> struct ArrayMallocAllocator {
     }
 
     /**
+     * @brief Array base address
+     *
+     * Returns the address with @cpp sizeof(std::size_t) @ce subtracted.
+     */
+    static void* base(T* array) {
+        return reinterpret_cast<char*>(array) - sizeof(std::size_t);
+    }
+
+    /**
      * @brief Array deleter
      *
      * Since the types have trivial destructors, directly delegates into
@@ -234,11 +273,13 @@ template<class T> struct ArrayMallocAllocator {
 Is either @ref ArrayMallocAllocator for trivially copyable @p T, or
 @ref ArrayNewAllocator otherwise. See @ref Containers-Array-growable for an
 introduction to growable arrays. You can provide your own allocator by
-implementing a class that with @ref allocate(), @ref reallocate(),
-@ref deallocate(), @ref grow(), @ref capacity() and @ref deleter() following
-the documented semantics.
+implementing a class that with @ref Type, @ref allocate(), @ref reallocate(),
+@ref deallocate(), @ref grow(), @ref capacity(), @ref base() and @ref deleter()
+following the documented semantics.
 */
 template<class T> struct ArrayAllocator {
+    typedef T Type; /**< Pointer type */
+
     /**
      * @brief Allocate (but not construct) an array of given capacity
      *
@@ -286,6 +327,15 @@ template<class T> struct ArrayAllocator {
      * @p array.
      */
     static std::size_t capacity(T* array);
+
+    /**
+     * @brief Array base address
+     *
+     * Returns base address of the allocation backing @p array. For use by
+     * Address Sanitizer to annotate which area of the allocation is safe to
+     * access and which not.
+     */
+    static void* base(T* array);
 
     /**
      * @brief Array deleter
@@ -695,6 +745,16 @@ template<class T, class Allocator> std::size_t arrayReserve(Array<T>& array, con
         array = Array<T>{newArray, arrayGuts.size, Allocator::deleter};
     } else Allocator::reallocate(arrayGuts.data, arrayGuts.size, capacity);
 
+    #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+    /** @todo with std::realloc, is that really a new allocation? what should I
+        do here? */
+    __sanitizer_annotate_contiguous_container(
+        Allocator::base(arrayGuts.data),
+        arrayGuts.data + capacity,
+        arrayGuts.data + capacity, /* ASan assumes this for new allocations */
+        arrayGuts.data + arrayGuts.size);
+    #endif
+
     return capacity;
 }
 
@@ -717,6 +777,15 @@ template<class T, class Allocator> void arrayResize(Array<T>& array, NoInitT, co
             arrayGuts.size < size ? arrayGuts.size : size);
         array = Array<T>{newArray, size, Allocator::deleter};
 
+        #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+        /* This should basically be a no-op, right? */
+        __sanitizer_annotate_contiguous_container(
+            Allocator::base(arrayGuts.data),
+            arrayGuts.data + arrayGuts.size,
+            arrayGuts.data + arrayGuts.size,
+            arrayGuts.data + arrayGuts.size);
+        #endif
+
     /* ... or the desired size is larger than the capacity. In that case make
        use of the reallocate() function that might be able to grow in-place. */
     } else if(Allocator::capacity(array) < size) {
@@ -727,6 +796,17 @@ template<class T, class Allocator> void arrayResize(Array<T>& array, NoInitT, co
             arrayGuts.size < size ? arrayGuts.size : size, size);
         arrayGuts.size = size;
 
+        #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+        /** @todo with std::realloc, is that really a new allocation? what
+            should I do here? */
+        /* This should basically be a no-op, right? */
+        __sanitizer_annotate_contiguous_container(
+            Allocator::base(arrayGuts.data),
+            arrayGuts.data + arrayGuts.size,
+            arrayGuts.data + arrayGuts.size,
+            arrayGuts.data + arrayGuts.size);
+        #endif
+
     /* Otherwise call a destructor on the extra elements. If we get here, we
        have our growable deleter and didn't need to reallocate (which would
        make this unnecessary). */
@@ -734,6 +814,13 @@ template<class T, class Allocator> void arrayResize(Array<T>& array, NoInitT, co
         Implementation::arrayDestruct<T>(arrayGuts.data + size, arrayGuts.data + arrayGuts.size);
         /* This is a NoInit resize, so not constructing the new elements, only
            updating the size */
+        #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+        __sanitizer_annotate_contiguous_container(
+            Allocator::base(arrayGuts.data),
+            arrayGuts.data + Allocator::capacity(array),
+            arrayGuts.data + arrayGuts.size,
+            arrayGuts.data + size);
+        #endif
         arrayGuts.size = size;
     }
 }
@@ -780,6 +867,17 @@ template<class T, class Allocator> void arrayGrow(Array<T>& array, const std::si
     } else {
         Allocator::reallocate(arrayGuts.data, arrayGuts.size, Allocator::grow(arrayGuts.data, desiredCapacity));
     }
+
+    #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+    /** @todo with std::realloc, is that really a new allocation? what should I
+        do here? */
+    std::size_t capacity = Allocator::capacity(arrayGuts.data);
+    __sanitizer_annotate_contiguous_container(
+        Allocator::base(arrayGuts.data),
+        arrayGuts.data + capacity,
+        arrayGuts.data + capacity, /* ASan assumes this for new allocations */
+        arrayGuts.data + arrayGuts.size);
+    #endif
 }
 
 }
@@ -804,6 +902,13 @@ template<class T, class Allocator> inline void arrayAppend(Array<T>& array, cons
 
     /* Increase array size and copy-construct the new values */
     T* it = array + arrayGuts.size;
+    #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+    __sanitizer_annotate_contiguous_container(
+        Allocator::base(arrayGuts.data),
+        arrayGuts.data + Allocator::capacity(array),
+        arrayGuts.data + arrayGuts.size,
+        arrayGuts.data + arrayGuts.size + valueCount);
+    #endif
     arrayGuts.size += valueCount;
     Implementation::arrayCopyConstruct<T>(values.data(), it, valueCount);
 }
@@ -819,6 +924,13 @@ template<class T, class Allocator, class... Args> void arrayAppend(Array<T>& arr
 
     /* Increase array size and construct the new value in-place */
     T* it = arrayGuts.data + arrayGuts.size;
+    #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+    __sanitizer_annotate_contiguous_container(
+        Allocator::base(arrayGuts.data),
+        arrayGuts.data + Allocator::capacity(arrayGuts.data),
+        arrayGuts.data + arrayGuts.size,
+        arrayGuts.data + arrayGuts.size + 1);
+    #endif
     ++arrayGuts.size;
     /* No helper function as there's no way we could memcpy such a thing. */
     new(it) T{std::forward<Args>(args)...};
@@ -845,11 +957,27 @@ template<class T, class Allocator> void arrayRemoveSuffix(Array<T>& array, const
         Implementation::arrayMoveConstruct<T>(array, newArray, arrayGuts.size - count);
         array = Array<T>{newArray, arrayGuts.size - count, Allocator::deleter};
 
+        #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+        /* This should basically be a no-op, right? */
+        __sanitizer_annotate_contiguous_container(
+            Allocator::base(arrayGuts.data),
+            arrayGuts.data + arrayGuts.size,
+            arrayGuts.data + arrayGuts.size,
+            arrayGuts.data + arrayGuts.size);
+        #endif
+
     /* Otherwise call the destructor on the excessive elements and update the
        size */
     } else {
         T* const end = arrayGuts.data + arrayGuts.size;
         Implementation::arrayDestruct<T>(end - count, end);
+        #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+        __sanitizer_annotate_contiguous_container(
+            Allocator::base(arrayGuts.data),
+            arrayGuts.data + Allocator::capacity(arrayGuts.data),
+            arrayGuts.data + arrayGuts.size,
+            arrayGuts.data + arrayGuts.size - count);
+        #endif
         arrayGuts.size -= count;
     }
 }
@@ -868,8 +996,16 @@ template<class T, class Allocator> void arrayShrink(Array<T>& array) {
     Array<T> newArray{NoInit, arrayGuts.size};
     Implementation::arrayMoveConstruct<T>(arrayGuts.data, newArray, arrayGuts.size);
     array = std::move(newArray);
+
+    #ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+    /* Nothing to do (not annotating the arrays with default deleter) */
+    #endif
 }
 
 }}
+
+#ifdef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+#undef _CORRADE_CONTAINERS_SANITIZER_ENABLED
+#endif
 
 #endif
