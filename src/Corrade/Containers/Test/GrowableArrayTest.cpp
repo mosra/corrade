@@ -117,6 +117,8 @@ struct GrowableArrayTest: TestSuite::Tester {
     void castNonGrowable();
     void castInvalid();
 
+    void explicitAllocatorParameter();
+
     void benchmarkAppendVector();
     void benchmarkAppendArray();
     void benchmarkAppendReservedVector();
@@ -269,7 +271,9 @@ GrowableArrayTest::GrowableArrayTest() {
               &GrowableArrayTest::castEmpty,
               &GrowableArrayTest::castNonTrivial,
               &GrowableArrayTest::castNonGrowable,
-              &GrowableArrayTest::castInvalid});
+              &GrowableArrayTest::castInvalid,
+
+              &GrowableArrayTest::explicitAllocatorParameter});
 
     addBenchmarks({
         &GrowableArrayTest::benchmarkAppendVector,
@@ -1433,6 +1437,41 @@ void GrowableArrayTest::castInvalid() {
     arrayAllocatorCast<std::uint32_t>(std::move(a));
     CORRADE_COMPARE(out.str(),
         "Containers::arrayAllocatorCast(): can't reinterpret 10 1-byte items into a 4-byte type\n");
+}
+
+void GrowableArrayTest::explicitAllocatorParameter() {
+    Array<int> a;
+    arrayReserve<ArrayNewAllocator>(a, 10);
+    CORRADE_VERIFY(!arrayIsGrowable(a));
+    CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
+    CORRADE_COMPARE(arrayCapacity<ArrayNewAllocator>(a), 10);
+
+    arrayResize<ArrayNewAllocator>(a, DefaultInit, 1);
+    arrayResize<ArrayNewAllocator>(a, ValueInit, 2);
+    arrayResize<ArrayNewAllocator>(a, 3);
+    arrayResize<ArrayNewAllocator>(a, NoInit, 4);
+    arrayResize<ArrayNewAllocator>(a, DirectInit, 5, 6);
+    CORRADE_VERIFY(!arrayIsGrowable(a));
+    CORRADE_VERIFY(arrayIsGrowable<ArrayNewAllocator>(a));
+    CORRADE_COMPARE(a.size(), 5);
+
+    const int six = 6;
+    arrayAppend<ArrayNewAllocator>(a, six);
+    arrayAppend<ArrayNewAllocator>(a, InPlaceInit, 7);
+    arrayAppend<ArrayNewAllocator>(a, {8, 9, 10});
+    const int values[]{11, 12, 13};
+    arrayAppend<ArrayNewAllocator>(a, arrayView(values));
+    CORRADE_COMPARE(a.size(), 13);
+
+    arrayRemoveSuffix<ArrayNewAllocator>(a);
+    arrayShrink<ArrayNewAllocator>(a);
+    CORRADE_COMPARE(a.size(), 12);
+
+    Array<Movable> b;
+    arrayResize<ArrayNewAllocator>(b, DirectInit, 5, Movable{6});
+    arrayAppend<ArrayNewAllocator>(b, Movable{1});
+    arrayAppend<ArrayNewAllocator>(b, InPlaceInit, 2);
+    CORRADE_COMPARE(b.size(), 7);
 }
 
 void GrowableArrayTest::benchmarkAppendVector() {

@@ -424,6 +424,17 @@ will reallocate the array using provided allocator if needed.
 template<class T, class Allocator = ArrayAllocator<T>> bool arrayIsGrowable(Array<T>& array);
 
 /**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class T> class Allocator, class T> inline bool arrayIsGrowable(Array<T>& array) {
+    return arrayIsGrowable<T, Allocator<T>>(array);
+}
+
+/**
 @brief Array capacity
 @m_since_latest
 
@@ -432,6 +443,17 @@ For a growable array returns its capacity, for a non-growable array returns
 @see @ref arrayIsGrowable(), @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> std::size_t arrayCapacity(Array<T>& array);
+
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class T> class Allocator, class T> inline std::size_t arrayCapacity(Array<T>& array) {
+    return arrayCapacity<T, Allocator<T>>(array);
+}
 
 /**
 @brief Reserve given capacity in an array
@@ -451,6 +473,17 @@ if the reallocation can be done in-place.
     @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> std::size_t arrayReserve(Array<T>& array, std::size_t capacity);
+
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class T> class Allocator, class T> inline std::size_t arrayReserve(Array<T>& array, std::size_t capacity) {
+    return arrayReserve<T, Allocator<T>>(array, capacity);
+}
 
 /**
 @brief Resize an array to given size, default-initializing new elements
@@ -473,6 +506,17 @@ size.
 template<class T, class Allocator = ArrayAllocator<T>> void arrayResize(Array<T>& array, DefaultInitT, std::size_t size);
 
 /**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline void arrayResize(Array<T>& array, DefaultInitT, std::size_t size) {
+    arrayResize<T, Allocator<T>>(array, DefaultInit, size);
+}
+
+/**
 @brief Resize an array to given size, value-initializing new elements
 @m_since_latest
 
@@ -485,6 +529,17 @@ otherwise).
 template<class T, class Allocator = ArrayAllocator<T>> void arrayResize(Array<T>& array, ValueInitT, std::size_t size);
 
 /**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline void arrayResize(Array<T>& array, ValueInitT, std::size_t size) {
+    arrayResize<T, Allocator<T>>(array, ValueInit, size);
+}
+
+/**
 @brief Resize an array to given size, value-initializing new elements
 @m_since_latest
 
@@ -492,6 +547,17 @@ Alias to @ref arrayResize(Array<T>&, ValueInitT, std::size_t).
 */
 template<class T, class Allocator = ArrayAllocator<T>> inline void arrayResize(Array<T>& array, std::size_t size) {
     return arrayResize<T, Allocator>(array, ValueInit, size);
+}
+
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline void arrayResize(Array<T>& array, std::size_t size) {
+    arrayResize<T, Allocator<T>>(array, size);
 }
 
 /**
@@ -504,6 +570,17 @@ uninitialized state instead.
 @see @ref Array::size(), @ref arrayIsGrowable(), @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayResize(Array<T>& array, NoInitT, std::size_t size);
+
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline void arrayResize(Array<T>& array, NoInitT, std::size_t size) {
+    arrayResize<T, Allocator<T>>(array, NoInit, size);
+}
 
 /**
 @brief Resize an array to given size, constructing new elements using provided arguments
@@ -522,6 +599,17 @@ template<class T, class... Args> void arrayResize(Array<T>& array, DirectInitT, 
 template<class T, class Allocator, class... Args> void arrayResize(Array<T>& array, DirectInitT, std::size_t size, Args&&... args);
 
 /**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T, class... Args> inline void arrayResize(Array<T>& array, DirectInitT, std::size_t size, Args&&... args) {
+    arrayResize<T, Allocator<T>>(array, DirectInit, size, std::forward<Args>(args)...);
+}
+
+/**
 @brief Copy-append an item to an array
 @m_since_latest
 
@@ -533,6 +621,17 @@ ratio is exponential.
 @see @ref arrayCapacity(), @ref arrayIsGrowable(), @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayAppend(Array<T>& array, const T& value);
+
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline void arrayAppend(Array<T>& array, const T& value) {
+    arrayAppend<T, Allocator<T>>(array, value);
+}
 
 /**
 @brief In-place append an item to an array
@@ -550,6 +649,17 @@ template<class T, class... Args> void arrayAppend(Array<T>& array, InPlaceInitT,
 template<class T, class Allocator, class... Args> void arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args);
 
 /**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T, class... Args> inline void arrayAppend(Array<T>& array, InPlaceInitT, Args&&... args) {
+    arrayAppend<T, Allocator<T>>(array, InPlaceInit, std::forward<Args>(args)...);
+}
+
+/**
 @brief Move-append an item to an array
 @m_since_latest
 
@@ -557,6 +667,17 @@ Calls @ref arrayAppend(Array<T>&, InPlaceInitT, Args&&... args) with @p value.
 */
 template<class T, class Allocator = ArrayAllocator<T>> inline void arrayAppend(Array<T>& array, T&& value) {
     arrayAppend<T, Allocator>(array, InPlaceInit, std::move(value));
+}
+
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline void arrayAppend(Array<T>& array, T&& value) {
+    arrayAppend<T, Allocator<T>>(array, InPlaceInit, std::move(value));
 }
 
 /**
@@ -572,8 +693,30 @@ template<class T, class Allocator = ArrayAllocator<T>> void arrayAppend(Array<T>
 /**
 @overload
 @m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline void arrayAppend(Array<T>& array, Containers::ArrayView<const T> values) {
+    arrayAppend<T, Allocator<T>>(array, values);
+}
+
+/**
+@overload
+@m_since_latest
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayAppend(Array<T>& array, std::initializer_list<T> values);
+
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline void arrayAppend(Array<T>& array, std::initializer_list<T> values) {
+    arrayAppend<T, Allocator<T>>(array, values);
+}
 
 /**
 @brief Remove a suffix from the array
@@ -586,6 +729,17 @@ growable version. Otherwise, a destructor is called on removed elements and the
 @see @ref arrayIsGrowable(), @ref arrayResize()
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayRemoveSuffix(Array<T>& array, std::size_t count = 1);
+
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline void arrayRemoveSuffix(Array<T>& array, std::size_t count = 1) {
+    arrayRemoveSuffix<T, Allocator<T>>(array, count);
+}
 
 /**
 @brief Convert an array back to non-growable
@@ -601,6 +755,17 @@ Complexity is at most @f$ \mathcal{O}(n) @f$ in the size of the container,
 @see @ref arrayIsGrowable(), @ref Containers-Array-growable
 */
 template<class T, class Allocator = ArrayAllocator<T>> void arrayShrink(Array<T>& array);
+
+/**
+@overload
+@m_since_latest
+
+Convenience overload allowing to specify just the allocator template, with
+array type being inferred.
+*/
+template<template<class> class Allocator, class T> inline void arrayShrink(Array<T>& array) {
+    arrayShrink<T, Allocator<T>>(array);
+}
 
 /*@}*/
 
