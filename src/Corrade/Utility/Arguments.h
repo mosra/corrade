@@ -31,9 +31,10 @@
 
 #include <string>
 #include <utility>
-#include <vector>
 
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Utility/ConfigurationValue.h"
+#include "Corrade/Utility/StlForwardVector.h"
 #include "Corrade/Utility/Utility.h"
 #include "Corrade/Utility/visibility.h"
 
@@ -804,10 +805,10 @@ class CORRADE_UTILITY_EXPORT Arguments {
         bool CORRADE_UTILITY_LOCAL skippedPrefix(const std::string& key) const;
         bool CORRADE_UTILITY_LOCAL verifyKey(const std::string& key) const;
         bool CORRADE_UTILITY_LOCAL verifyKey(char shortKey) const;
-        std::vector<Entry>::iterator CORRADE_UTILITY_LOCAL find(const std::string& key);
-        std::vector<Entry>::const_iterator CORRADE_UTILITY_LOCAL find(const std::string& key) const;
-        std::vector<Entry>::iterator CORRADE_UTILITY_LOCAL find(char shortKey);
-        std::vector<Entry>::iterator CORRADE_UTILITY_LOCAL findNextArgument(std::vector<Entry>::iterator start);
+        CORRADE_UTILITY_LOCAL Entry* find(const std::string& key);
+        CORRADE_UTILITY_LOCAL const Entry* find(const std::string& key) const;
+        CORRADE_UTILITY_LOCAL const Entry* find(char shortKey) const;
+        CORRADE_UTILITY_LOCAL const Entry* findNextArgument(const Entry* start) const;
 
         std::string CORRADE_UTILITY_LOCAL keyName(const Entry& entry) const;
 
@@ -819,10 +820,10 @@ class CORRADE_UTILITY_EXPORT Arguments {
         std::string _prefix;
         std::string _command;
         std::string _help;
-        std::vector<Entry> _entries;
-        std::vector<std::string> _values;
-        std::vector<std::pair<std::string, std::string>> _skippedPrefixes;
-        std::vector<bool> _booleans;
+        Containers::Array<Entry> _entries;
+        Containers::Array<std::string> _values;
+        Containers::Array<std::pair<std::string, std::string>> _skippedPrefixes;
+        Containers::Array<bool> _booleans;
         ParseErrorCallback _parseErrorCallback;
         void* _parseErrorCallbackState;
 };

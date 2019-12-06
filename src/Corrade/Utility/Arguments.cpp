@@ -33,6 +33,7 @@
 #include <iomanip>
 #include <sstream>
 
+#include "Corrade/Containers/GrowableArray.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/String.h"
@@ -205,7 +206,7 @@ Arguments& Arguments::addArgument(std::string key) {
     CORRADE_ASSERT(!key.empty(), "Utility::Arguments::addArgument(): key must not be empty", *this);
 
     /* Verify that the argument has an unique key */
-    CORRADE_ASSERT(find(key) == _entries.end(), "Utility::Arguments::addArgument(): the key" << key << "is already used", *this);
+    CORRADE_ASSERT(!find(key), "Utility::Arguments::addArgument(): the key" << key << "is already used", *this);
 
     /* Can't add arguments after the final optional one -- otherwise it messes
        up the order in help and usage */
@@ -217,8 +218,8 @@ Arguments& Arguments::addArgument(std::string key) {
     _flags &= ~InternalFlag::Parsed;
 
     std::string helpKey = key;
-    _entries.emplace_back(Type::Argument, '\0', std::move(key), std::move(helpKey), std::string(), _values.size());
-    _values.emplace_back();
+    arrayAppend(_entries, Containers::InPlaceInit, Type::Argument, '\0', std::move(key), std::move(helpKey), std::string(), _values.size());
+    arrayAppend(_values, Containers::InPlaceInit);
     return *this;
 }
 
@@ -226,7 +227,7 @@ Arguments& Arguments::addNamedArgument(char shortKey, std::string key) {
     CORRADE_ASSERT(verifyKey(shortKey) && verifyKey(key),
         "Utility::Arguments::addNamedArgument(): invalid key" << key << "or its short variant", *this);
 
-    CORRADE_ASSERT((!shortKey || find(shortKey) == _entries.end()) && find(_prefix + key) == _entries.end(),
+    CORRADE_ASSERT((!shortKey || !find(shortKey)) && !find(_prefix + key),
         "Utility::Arguments::addNamedArgument(): the key" << key << "or its short version is already used", *this);
 
     CORRADE_ASSERT(_prefix.empty(),
@@ -237,8 +238,8 @@ Arguments& Arguments::addNamedArgument(char shortKey, std::string key) {
     _flags &= ~InternalFlag::Parsed;
 
     std::string helpKey = key;
-    _entries.emplace_back(Type::NamedArgument, shortKey, std::move(key), std::move(helpKey), std::string(), _values.size());
-    _values.emplace_back();
+    arrayAppend(_entries, Containers::InPlaceInit, Type::NamedArgument, shortKey, std::move(key), std::move(helpKey), std::string(), _values.size());
+    arrayAppend(_values, Containers::InPlaceInit);
     return *this;
 }
 
@@ -246,7 +247,7 @@ Arguments& Arguments::addOption(char shortKey, std::string key, std::string defa
     CORRADE_ASSERT(verifyKey(shortKey) && verifyKey(key),
         "Utility::Arguments::addOption(): invalid key" << key << "or its short variant", *this);
 
-    CORRADE_ASSERT((!shortKey || find(shortKey) == _entries.end()) && find(_prefix + key) == _entries.end(),
+    CORRADE_ASSERT((!shortKey || !find(shortKey)) && !find(_prefix + key),
         "Utility::Arguments::addOption(): the key" << key << "or its short version is already used", *this);
 
     CORRADE_ASSERT(_prefix.empty() || shortKey == '\0',
@@ -266,8 +267,8 @@ Arguments& Arguments::addOption(char shortKey, std::string key, std::string defa
         key = _prefix + tmp;
         helpKey = std::move(tmp);
     }
-    _entries.emplace_back(Type::Option, shortKey, std::move(key), std::move(helpKey), std::move(defaultValue), _values.size());
-    _values.emplace_back();
+    arrayAppend(_entries, Containers::InPlaceInit, Type::Option, shortKey, std::move(key), std::move(helpKey), std::move(defaultValue), _values.size());
+    arrayAppend(_values, Containers::InPlaceInit);
     return *this;
 }
 
@@ -275,7 +276,7 @@ Arguments& Arguments::addBooleanOption(char shortKey, std::string key) {
     CORRADE_ASSERT(verifyKey(shortKey) && verifyKey(key),
         "Utility::Arguments::addBooleanOption(): invalid key" << key << "or its short variant", *this);
 
-    CORRADE_ASSERT((!shortKey || find(shortKey) == _entries.end()) && find(key) == _entries.end(),
+    CORRADE_ASSERT((!shortKey || !find(shortKey)) && !find(key),
         "Utility::Arguments::addBooleanOption(): the key" << key << "or its short version is already used", *this);
 
     CORRADE_ASSERT(_prefix.empty() || key == "help",
@@ -294,8 +295,8 @@ Arguments& Arguments::addBooleanOption(char shortKey, std::string key) {
         helpKey = key;
     else
         helpKey = key = _prefix + std::move(key);
-    _entries.emplace_back(Type::BooleanOption, shortKey, std::move(key), std::move(helpKey), std::string(), _booleans.size());
-    _booleans.push_back(false);
+    arrayAppend(_entries, Containers::InPlaceInit, Type::BooleanOption, shortKey, std::move(key), std::move(helpKey), std::string(), _booleans.size());
+    arrayAppend(_booleans, false);
     return *this;
 }
 
@@ -311,7 +312,7 @@ Arguments& Arguments::addFinalOptionalArgument(std::string key, std::string defa
         "Utility::Arguments::addFinalOptionalArgument(): argument" << key << "not allowed in prefixed version", *this);
     CORRADE_ASSERT(!key.empty(),
         "Utility::Arguments::addFinalOptionalArgument(): key must not be empty", *this);
-    CORRADE_ASSERT(find(key) == _entries.end(),
+    CORRADE_ASSERT(!find(key),
         "Utility::Arguments::addFinalOptionalArgument(): the key" << key << "is already used", *this);
     CORRADE_ASSERT(!_finalOptionalArgument,
         "Utility::Arguments::addFinalOptionalArgument(): there's already a final optional argument" << _entries[_finalOptionalArgument].key, *this);
@@ -322,8 +323,8 @@ Arguments& Arguments::addFinalOptionalArgument(std::string key, std::string defa
 
     _finalOptionalArgument = _entries.size();
     std::string helpKey = key;
-    _entries.emplace_back(Type::Argument, '\0', std::move(key), std::move(helpKey), std::move(defaultValue), _values.size());
-    _values.emplace_back();
+    arrayAppend(_entries, Containers::InPlaceInit, Type::Argument, '\0', std::move(key), std::move(helpKey), std::move(defaultValue), _values.size());
+    arrayAppend(_values, Containers::InPlaceInit);
     return *this;
 }
 
@@ -342,14 +343,14 @@ Arguments& Arguments::addSkippedPrefix(std::string prefix, std::string help) {
        `--prefix` */
     prefix += '-';
 
-    _skippedPrefixes.emplace_back(std::move(prefix), std::move(help));
+    arrayAppend(_skippedPrefixes, Containers::InPlaceInit, std::move(prefix), std::move(help));
     return *this;
 }
 
 #ifndef CORRADE_TARGET_WINDOWS_RT
 Arguments& Arguments::setFromEnvironment(const std::string& key, std::string environmentVariable) {
-    auto found = find(_prefix + key);
-    CORRADE_ASSERT(found != _entries.end(), "Utility::Arguments::setFromEnvironment(): key" << key << "doesn't exist", *this);
+    Entry* found = find(_prefix + key);
+    CORRADE_ASSERT(found, "Utility::Arguments::setFromEnvironment(): key" << key << "doesn't exist", *this);
     CORRADE_ASSERT(found->type == Type::Option || found->type == Type::BooleanOption,
         "Utility::Arguments::setFromEnvironment(): only options can be set from environment", *this);
 
@@ -384,8 +385,8 @@ Arguments& Arguments::setHelp(std::string help) {
 #endif
 
 Arguments& Arguments::setHelp(const std::string& key, std::string help, std::string helpKey) {
-    auto found = find(_prefix + key);
-    CORRADE_ASSERT(found != _entries.end(), "Utility::Arguments::setHelp(): key" << key << "doesn't exist", *this);
+    Entry* found = find(_prefix + key);
+    CORRADE_ASSERT(found, "Utility::Arguments::setHelp(): key" << key << "doesn't exist", *this);
 
     found->help = std::move(help);
 
@@ -410,7 +411,7 @@ Arguments& Arguments::setParseErrorCallback(ParseErrorCallback callback, void* s
 void Arguments::parse(const int argc, const char** const argv) {
     const bool status = tryParse(argc, argv);
 
-    if(_booleans.at(find(_prefix + "help")->id)) {
+    if(_booleans[find(_prefix + "help")->id]) {
         /* LCOV_EXCL_START */
         Debug{Debug::Flag::NoNewlineAtTheEnd} << help();
         std::exit(0);
@@ -503,19 +504,19 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
     }
     #endif
 
-    std::vector<Entry>::iterator valueFor = _entries.end();
+    const Entry* valueFor = nullptr;
     bool optionsAllowed = true;
-    std::vector<Entry>::iterator nextArgument = _entries.begin();
+    const Entry* nextArgument = _entries.begin();
     std::vector<bool> parsedArguments(_entries.size());
 
     for(int i = 1; i < argc; ++i) {
         /* Value for given argument */
-        if(valueFor != _entries.end()) {
+        if(valueFor) {
             CORRADE_INTERNAL_ASSERT(valueFor->type != Type::BooleanOption);
             CORRADE_INTERNAL_ASSERT(valueFor->id < _values.size());
             _values[valueFor->id] = argv[i];
             parsedArguments[valueFor-_entries.begin()] = true;
-            valueFor = _entries.end();
+            valueFor = nullptr;
             continue;
         }
 
@@ -523,7 +524,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
 
         /* Option or named argument */
         if(optionsAllowed && len > 1 && argv[i][0] == '-') {
-            std::vector<Entry>::iterator found = _entries.end();
+            const Entry* found = nullptr;
 
             /* Short option */
             if(len == 2) {
@@ -547,8 +548,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                 }
 
                 /* Find the option */
-                found = find(key);
-                if(found == _entries.end()) {
+                if(!(found = find(key))) {
                     if(_parseErrorCallback(*this, ParseError::UnknownShortArgument, std::string{key}))
                         continue;
 
@@ -593,8 +593,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
                     }
 
                     /* Find the option */
-                    found = find(key);
-                    if(found == _entries.end()) {
+                    if(!(found = find(key))) {
                         /* If we are told to ignore unknown options, do exactly
                            that. This should happen only in the prefixed
                            version as there we can know what's an option and
@@ -627,7 +626,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
             }
 
             /* Boolean option */
-            CORRADE_INTERNAL_ASSERT(found != _entries.end());
+            CORRADE_INTERNAL_ASSERT(found);
             if(found->type == Type::BooleanOption) {
                 CORRADE_INTERNAL_ASSERT(found->id < _booleans.size());
                 _booleans[found->id] = true;
@@ -642,8 +641,8 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
             if(!_prefix.empty()) continue;
 
             /* Find next argument */
-            const auto found = findNextArgument(nextArgument);
-            if(found == _entries.end()) {
+            const Entry* const found = findNextArgument(nextArgument);
+            if(!found) {
                 if(_parseErrorCallback(*this, ParseError::SuperfluousArgument, argv[i]))
                     continue;
 
@@ -658,7 +657,7 @@ bool Arguments::tryParse(const int argc, const char** const argv) {
     }
 
     /* Expected value, but none given */
-    if(valueFor != _entries.end() && !_parseErrorCallback(*this, ParseError::MissingValue, valueFor->key)) {
+    if(valueFor && !_parseErrorCallback(*this, ParseError::MissingValue, valueFor->key)) {
         Error() << "Missing value for command-line argument" << keyName(*valueFor);
         return false;
     }
@@ -896,8 +895,8 @@ std::string Arguments::help() const {
 }
 
 std::string Arguments::valueInternal(const std::string& key) const {
-    const auto found = find(_prefix + key);
-    CORRADE_ASSERT(found != _entries.end(), "Utility::Arguments::value(): key" << key << "not found", {});
+    const Entry* found = find(_prefix + key);
+    CORRADE_ASSERT(found, "Utility::Arguments::value(): key" << key << "not found", {});
     CORRADE_ASSERT(found->type != Type::BooleanOption,
         "Utility::Arguments::value(): cannot use this function for boolean option" << key, {});
     CORRADE_INTERNAL_ASSERT(found->id < _values.size());
@@ -906,8 +905,8 @@ std::string Arguments::valueInternal(const std::string& key) const {
 }
 
 bool Arguments::isSet(const std::string& key) const {
-    const auto found = find(_prefix + key);
-    CORRADE_ASSERT(found != _entries.end(), "Utility::Arguments::isSet(): key" << key << "not found", false);
+    const Entry* found = find(_prefix + key);
+    CORRADE_ASSERT(found, "Utility::Arguments::isSet(): key" << key << "not found", false);
     CORRADE_ASSERT(found->type == Type::BooleanOption,
         "Utility::Arguments::isSet(): cannot use this function for non-boolean value" << key, false);
     CORRADE_INTERNAL_ASSERT(found->id < _booleans.size());
@@ -934,32 +933,28 @@ bool Arguments::verifyKey(char shortKey) const {
     return !shortKey || std::strchr(allowedShort, shortKey) != nullptr;
 }
 
-auto Arguments::find(const std::string& key) -> std::vector<Entry>::iterator {
-    for(auto it = _entries.begin(); it != _entries.end(); ++it)
-        if(it->key == key) return it;
-
-    return _entries.end();
+auto Arguments::find(const std::string& key) const -> const Entry* {
+    for(const Entry& e: _entries)
+        if(e.key == key) return &e;
+    return nullptr;
 }
 
-auto Arguments::find(const std::string& key) const -> std::vector<Entry>::const_iterator {
-    for(auto it = _entries.begin(); it != _entries.end(); ++it)
-        if(it->key == key) return it;
-
-    return _entries.end();
+auto Arguments::find(const std::string& key) -> Entry* {
+    for(Entry& e: _entries)
+        if(e.key == key) return &e;
+    return nullptr;
 }
 
-auto Arguments::find(const char shortKey) -> std::vector<Entry>::iterator {
-    for(auto it = _entries.begin(); it != _entries.end(); ++it)
-        if(it->shortKey == shortKey) return it;
-
-    return _entries.end();
+auto Arguments::find(const char shortKey) const -> const Entry* {
+    for(const Entry& e: _entries)
+        if(e.shortKey == shortKey) return &e;
+    return nullptr;
 }
 
-auto Arguments::findNextArgument(const std::vector<Entry>::iterator start) -> std::vector<Entry>::iterator {
-    for(auto it = start; it != _entries.end(); ++it)
-        if(it->type == Type::Argument) return it;
-
-    return _entries.end();
+auto Arguments::findNextArgument(const Entry* start) const -> const Entry* {
+    for(const Entry* e = start; e != _entries.end(); ++e)
+        if(e->type == Type::Argument) return e;
+    return nullptr;
 }
 
 inline std::string Arguments::keyName(const Entry& entry) const {
