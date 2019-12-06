@@ -146,13 +146,18 @@ struct Movable {
     static int destructed;
     static int moved;
 
-    /*implicit*/ Movable(int a = 0) noexcept: a{a} { ++constructed; }
+    /*implicit*/ Movable(int a = 0) noexcept: a{short(a)} { ++constructed; }
     Movable(const Movable&) = delete;
     Movable(Movable&& other) noexcept: a(other.a) {
         ++constructed;
         ++moved;
     }
-    ~Movable() { ++destructed; }
+    ~Movable() {
+        /* Catch double frees */
+        CORRADE_INTERNAL_ASSERT(!thisDestructed);
+        ++destructed;
+        thisDestructed = true;
+    }
     Movable& operator=(const Movable&) = delete;
 
     /* "compatibility" with ints */
@@ -162,8 +167,11 @@ struct Movable {
     }
     explicit operator int() const { return a; }
 
-    int a;
+    short a;
+    bool thisDestructed = false;
 };
+
+static_assert(sizeof(Movable) == 4, "tests require Movable to be four bytes");
 
 int Movable::constructed = 0;
 int Movable::destructed = 0;
@@ -1039,7 +1047,7 @@ void GrowableArrayTest::appendCopy() {
 void GrowableArrayTest::appendMove() {
     {
         Array<Movable> a;
-        arrayAppend(a, Movable{2786541});
+        arrayAppend(a, Movable{25141});
         CORRADE_COMPARE(a.size(), 1);
         if(sizeof(std::size_t) == 8)
             CORRADE_COMPARE(arrayCapacity(a), 2);
@@ -1050,7 +1058,7 @@ void GrowableArrayTest::appendMove() {
             CORRADE_COMPARE(arrayCapacity(a), 3);
             #endif
         }
-        CORRADE_COMPARE(a[0].a, 2786541);
+        CORRADE_COMPARE(a[0].a, 25141);
         VERIFY_SANITIZED_PROPERLY(a, ArrayAllocator<Movable>);
     }
 
