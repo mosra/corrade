@@ -40,6 +40,9 @@
 #pragma ACME disable CORRADE_GRACEFUL_ASSERT
 #pragma ACME disable DOXYGEN_GENERATING_OUTPUT
 
+/* This is not used anywhere right now */
+#pragma ACME enable CORRADE_ASSUME
+
 /* Array views publicize some internals for buffer protocol, no need for that
    here */
 #pragma ACME enable CORRADE_NO_PYTHON_COMPATIBILITY
