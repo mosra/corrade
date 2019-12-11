@@ -88,6 +88,16 @@
 #  CORRADE_TARGET_WINDOWS_RT    - Defined if compiled for Windows RT
 #  CORRADE_TARGET_EMSCRIPTEN    - Defined if compiled for Emscripten
 #  CORRADE_TARGET_ANDROID       - Defined if compiled for Android
+#  CORRADE_TARGET_GCC           - Defined if compiling with GCC or GCC-
+#   compatible Clang
+#  CORRADE_TARGET_CLANG         - Defined if compiling with Clang or any of its
+#   variants
+#  CORRADE_TARGET_APPLE_CLANG   - Defined if compiling with Apple's Clang
+#  CORRADE_TARGET_CLANG_CL      - Defined if compiling with Clang-CL (Clang
+#   with a MSVC frontend)
+#  CORRADE_TARGET_MSVC          - Defined if compiling with MSVC or Clang with
+#   a MSVC frontend
+#  CORRADE_TARGET_MINGW`        - Defined if compiling under MinGW
 #  CORRADE_PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT - Defined if PluginManager
 #   doesn't support dynamic plugin loading due to platform limitations
 #  CORRADE_TESTSUITE_TARGET_XCTEST - Defined if TestSuite is targetting Xcode
@@ -307,6 +317,10 @@ set(_corradeFlags
     TARGET_WINDOWS_RT
     TARGET_EMSCRIPTEN
     TARGET_ANDROID
+    # TARGET_X86 etc and TARGET_LIBCXX are not exposed to CMake as the meaning
+    # is unclear on platforms with multi-arch binaries or when mixing different
+    # STL implementations. TARGET_GCC etc are figured out via UseCorrade.cmake,
+    # as the compiler can be different when compiling the lib & when using it.
     PLUGINMANAGER_NO_DYNAMIC_PLUGIN_SUPPORT
     TESTSUITE_TARGET_XCTEST
     UTILITY_USE_ANSI_COLORS)

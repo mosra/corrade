@@ -25,7 +25,11 @@
 
 corrade_add_test(MainTest MainTest.cpp
     ARGUMENTS --arg-utf hýždě --arg-another šňůra)
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
+               ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 corrade_add_test(TargetTest TargetTest.cpp)
+target_include_directories(TargetTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # Baseline, C++11, is everywhere
 corrade_add_test(Cpp11StandardTest CppStandardTest.cpp)

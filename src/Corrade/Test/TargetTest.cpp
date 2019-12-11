@@ -28,6 +28,8 @@
 #include "Corrade/TestSuite/Tester.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
+#include "configure.h"
+
 namespace Corrade { namespace Test { namespace {
 
 struct TargetTest: TestSuite::Tester {
@@ -35,12 +37,14 @@ struct TargetTest: TestSuite::Tester {
 
     void system();
     void architecture();
+    void compiler();
     void stl();
 };
 
 TargetTest::TargetTest() {
     addTests({&TargetTest::system,
               &TargetTest::architecture,
+              &TargetTest::compiler,
               &TargetTest::stl});
 }
 
@@ -119,6 +123,65 @@ void TargetTest::architecture() {
     Debug{Debug::Flag::NoNewlineAtTheEnd} << out.str();
     CORRADE_VERIFY(!out.str().empty() || !"No suitable CORRADE_TARGET_* defined");
     CORRADE_COMPARE(unique, 1);
+}
+
+void TargetTest::compiler() {
+    std::ostringstream out;
+
+    #ifdef CORRADE_TARGET_GCC
+    Debug{&out} << "CORRADE_TARGET_GCC";
+    #endif
+
+    #ifdef CORRADE_TARGET_CLANG
+    Debug{&out} << "CORRADE_TARGET_CLANG";
+    #endif
+
+    #ifdef CORRADE_TARGET_APPLE_CLANG
+    Debug{&out} << "CORRADE_TARGET_APPLE_CLANG";
+    #endif
+
+    #ifdef CORRADE_TARGET_CLANG_CL
+    Debug{&out} << "CORRADE_TARGET_CLANG_CL";
+    #endif
+
+    #ifdef CORRADE_TARGET_MSVC
+    Debug{&out} << "CORRADE_TARGET_MSVC";
+    #endif
+
+    #ifdef CORRADE_TARGET_MINGW
+    Debug{&out} << "CORRADE_TARGET_MINGW";
+    #endif
+
+    Debug{Debug::Flag::NoNewlineAtTheEnd} << out.str();
+    CORRADE_VERIFY(!out.str().empty() || !"No suitable CORRADE_TARGET_* defined");
+
+    #if defined(CMAKE_CORRADE_TARGET_GCC) != defined(CORRADE_TARGET_GCC)
+    CORRADE_VERIFY(!"Inconsistency in CMake-defined CORRADE_TARGET_GCC");
+    #endif
+
+    #if defined(CMAKE_CORRADE_TARGET_CLANG) != defined(CORRADE_TARGET_CLANG)
+    CORRADE_VERIFY(!"Inconsistency in CMake-defined CORRADE_TARGET_CLANG");
+    #endif
+
+    #if defined(CMAKE_CORRADE_TARGET_APPLE_CLANG) != defined(CORRADE_TARGET_APPLE_CLANG)
+    CORRADE_VERIFY(!"Inconsistency in CMake-defined CORRADE_TARGET_APPLE_CLANG");
+    #endif
+
+    #if defined(CMAKE_CORRADE_TARGET_CLANG_CL) != defined(CORRADE_TARGET_CLANG_CL)
+    CORRADE_VERIFY(!"Inconsistency in CMake-defined CORRADE_TARGET_CLANG_CL");
+    #endif
+
+    #if defined(CMAKE_CORRADE_TARGET_MSVC) != defined(CORRADE_TARGET_MSVC)
+    CORRADE_VERIFY(!"Inconsistency in CMake-defined CORRADE_TARGET_MSVC");
+    #endif
+
+    #if defined(CMAKE_CORRADE_TARGET_MINGW) != defined(CORRADE_TARGET_MINGW)
+    CORRADE_VERIFY(!"Inconsistency in CMake-defined CORRADE_TARGET_MINGW");
+    #endif
+
+    #if defined(CORRADE_TARGET_CLANG) && defined(CORRADE_TARGET_MSVC) == defined(CORRADE_TARGET_GCC)
+    CORRADE_VERIFY(!"Clang should have either a MSVC or a GCC frontend, but not both");
+    #endif
 }
 
 void TargetTest::stl() {

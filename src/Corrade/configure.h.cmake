@@ -111,4 +111,29 @@
 /* Otherwise no idea. */
 #endif
 
+#ifdef __GNUC__
+#define CORRADE_TARGET_GCC
+#endif
+
+#ifdef __clang__
+#define CORRADE_TARGET_CLANG
+#endif
+
+#if defined(__clang__) && defined(_MSC_VER)
+#define CORRADE_TARGET_CLANG_CL
+#endif
+
+#if defined(__clang__) && defined(__apple_build_version__)
+#define CORRADE_TARGET_APPLE_CLANG
+#endif
+
+#ifdef _MSC_VER
+#define CORRADE_TARGET_MSVC
+#endif
+
+#ifdef __MINGW32__
+#define CORRADE_TARGET_MINGW
+#endif
+
+
 #endif

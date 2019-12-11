@@ -33,6 +33,11 @@ namespace Corrade {
 
 @subsection corrade-changelog-latest-new New features
 
+-   New @ref CORRADE_TARGET_GCC, @ref CORRADE_TARGET_CLANG,
+    @ref CORRADE_TARGET_APPLE_CLANG, @ref CORRADE_TARGET_CLANG_CL,
+    @ref CORRADE_TARGET_MSVC and @ref CORRADE_TARGET_MINGW variables for easier
+    compiler identification
+
 @subsubsection corrade-changelog-latest-new-containers Containers library
 
 -   New @ref Containers::arrayAppend(), @ref Containers::arrayReserve() family

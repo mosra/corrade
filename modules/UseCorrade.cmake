@@ -36,6 +36,40 @@ if(POLICY CMP0054)
     cmake_policy(SET CMP0054 NEW)
 endif()
 
+# Compiler identification. Unlike other CORRADE_TARGET_* variables it's not
+# saved/restored from configure.h as the compiler used to compile Corrade may
+# differ from the compiler used to link to it.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CORRADE_TARGET_GCC 1)
+endif()
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(CORRADE_TARGET_CLANG 1)
+    if(CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
+        set(CORRADE_TARGET_CLANG_CL 1)
+        set(CORRADE_TARGET_MSVC 1)
+    else()
+        set(CORRADE_TARGET_GCC 1)
+    endif()
+endif()
+# With older Emscripten (or CMake?) versions the compiler is detected as
+# "unknown" instead of Clang. Force the compiler resolution in that case.
+# TODO: figure out why
+if(CORRADE_TARGET_EMSCRIPTEN)
+    set(CORRADE_TARGET_GCC 1)
+    set(CORRADE_TARGET_CLANG 1)
+endif()
+if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    set(CORRADE_TARGET_GCC 1)
+    set(CORRADE_TARGET_CLANG 1)
+    set(CORRADE_TARGET_APPLE_CLANG 1)
+endif()
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(CORRADE_TARGET_MSVC 1)
+endif()
+if(MINGW)
+    set(CORRADE_TARGET_MINGW 1)
+endif()
+
 # Check compiler version
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # Don't allow to use compilers older than what compatibility mode allows

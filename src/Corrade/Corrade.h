@@ -130,7 +130,8 @@ Defined if the library is built for some Unix flavor (Linux, BSD, macOS, iOS,
 Android...). Note that while the behavior of Emscripten is closely emulating
 Unix systems, `CORRADE_TARGET_UNIX` is not defined there, only
 @ref CORRADE_TARGET_EMSCRIPTEN.
-@see @ref CORRADE_TARGET_APPLE, @ref CORRADE_TARGET_ANDROID, @ref corrade-cmake
+@see @ref CORRADE_TARGET_APPLE, @ref CORRADE_TARGET_ANDROID,
+    @ref CORRADE_TARGET_GCC, @ref CORRADE_TARGET_CLANG, @ref corrade-cmake
 */
 #define CORRADE_TARGET_UNIX
 #undef CORRADE_TARGET_UNIX
@@ -139,7 +140,8 @@ Unix systems, `CORRADE_TARGET_UNIX` is not defined there, only
 @brief Apple target
 
 Defined if the library is built for Apple platforms (macOS, iOS).
-@see @ref CORRADE_TARGET_UNIX, @ref CORRADE_TARGET_IOS, @ref corrade-cmake
+@see @ref CORRADE_TARGET_UNIX, @ref CORRADE_TARGET_IOS,
+    @ref CORRADE_TARGET_CLANG, @ref corrade-cmake
 */
 #define CORRADE_TARGET_APPLE
 #undef CORRADE_TARGET_APPLE
@@ -168,7 +170,8 @@ Defined if the library is built for iOS Simulator.
 @brief Windows target
 
 Defined if the library is built for Windows (desktop, Store or Phone).
-@see @ref CORRADE_TARGET_WINDOWS_RT, @ref corrade-cmake
+@see @ref CORRADE_TARGET_WINDOWS_RT, @ref CORRADE_TARGET_MSVC,
+    @ref corrade-cmake
 */
 #define CORRADE_TARGET_WINDOWS
 #undef CORRADE_TARGET_WINDOWS
@@ -188,7 +191,7 @@ Defined if the library is built for Windows Store or Phone.
 Defined if the library is built for [Emscripten](http://kripken.github.io/emscripten-site/).
 Note that while the behavior of Emscripten is closely emulating Unix systems,
 @ref CORRADE_TARGET_UNIX is not defined there, only `CORRADE_TARGET_EMSCRIPTEN`.
-@see @ref building-corrade, @ref corrade-cmake
+@see @ref CORRADE_TARGET_CLANG, @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_TARGET_EMSCRIPTEN
 #undef CORRADE_TARGET_EMSCRIPTEN
@@ -197,7 +200,8 @@ Note that while the behavior of Emscripten is closely emulating Unix systems,
 @brief Android target
 
 Defined if the library is built for Android.
-@see @ref CORRADE_TARGET_UNIX, @ref building-corrade, @ref corrade-cmake
+@see @ref CORRADE_TARGET_UNIX, @ref CORRADE_TARGET_CLANG,
+    @ref building-corrade, @ref corrade-cmake
 */
 #define CORRADE_TARGET_ANDROID
 #undef CORRADE_TARGET_ANDROID
@@ -249,6 +253,110 @@ yet.
 #undef CORRADE_TARGET_POWERPC
 
 /**
+@brief GCC compiler
+@m_since_latest
+
+Defined if the code is being compiled by GCC or GCC-compatible Clang (which is
+@ref CORRADE_TARGET_APPLE_CLANG but not @ref CORRADE_TARGET_CLANG_CL, for
+example). While this variable is exposed in CMake as well, it's not guaranteed
+that the reported compiler is consistent between CMake and C++ --- for example,
+a library can be built with GCC and then used via Clang.
+@see @ref CORRADE_TARGET_CLANG, @ref CORRADE_TARGET_APPLE_CLANG,
+    @ref CORRADE_TARGET_CLANG_CL, @ref CORRADE_TARGET_MSVC,
+    @ref CORRADE_TARGET_MINGW, @ref CORRADE_TARGET_UNIX,
+    @ref CORRADE_TARGET_EMSCRIPTEN, @ref corrade-cmake
+*/
+#define CORRADE_TARGET_GCC
+#undef CORRADE_TARGET_GCC
+
+/**
+@brief Clang compiler
+@m_since_latest
+
+Defined if the code is being compiled by Clang or any of its variants
+(@ref CORRADE_TARGET_APPLE_CLANG, @ref CORRADE_TARGET_CLANG_CL). If this
+variable is defined, usually @ref CORRADE_TARGET_GCC is also defined, except
+for Clang-CL. While this variable is exposed in CMake as well, it's not
+guaranteed that the reported compiler is consistent between CMake and C++ ---
+for example, a library can be built with Clang and then used via GCC.
+@see @ref CORRADE_TARGET_GCC, @ref CORRADE_TARGET_APPLE_CLANG,
+    @ref CORRADE_TARGET_CLANG_CL, @ref CORRADE_TARGET_MSVC,
+    @ref CORRADE_TARGET_MINGW, @ref CORRADE_TARGET_UNIX,
+    @ref CORRADE_TARGET_POWERPC, @ref CORRADE_TARGET_EMSCRIPTEN,
+    @ref corrade-cmake
+*/
+#define CORRADE_TARGET_CLANG
+#undef CORRADE_TARGET_CLANG
+
+/**
+@brief Apple's Clang compiler
+@m_since_latest
+
+Defined if the code is being compiled by Apple's Clang. If this variable is
+defined, @ref CORRADE_TARGET_GCC and @ref CORRADE_TARGET_CLANG are also
+defined. This is primarily useful when checking for Clang version, as Apple
+uses a different versioning scheme. While this variable is exposed in CMake as
+well, it's not guaranteed that the reported compiler is consistent between
+CMake and C++ --- for example, a library can be built with Clang and then used
+via GCC.
+@see @ref CORRADE_TARGET_GCC, @ref CORRADE_TARGET_CLANG,
+    @ref CORRADE_TARGET_CLANG_CL, @ref CORRADE_TARGET_MSVC,
+    @ref CORRADE_TARGET_MINGW, @ref CORRADE_TARGET_APPLE, @ref corrade-cmake
+*/
+#define CORRADE_TARGET_APPLE_CLANG
+#undef CORRADE_TARGET_APPLE_CLANG
+
+/**
+@brief Clang-CL compiler
+@m_since_latest
+
+Defined if the code is being compiled by Clang with a MSVC frontend. If this
+variable is defined, @ref CORRADE_TARGET_CLANG and @ref CORRADE_TARGET_MSVC is
+also defined (but @ref CORRADE_TARGET_GCC not). While this variable is exposed
+in CMake as well, it's not guaranteed that the reported compiler is consistent
+between CMake and C++ --- for example, a library can be built with Clang-CL and
+then used via MSVC.
+@see @ref CORRADE_TARGET_GCC, @ref CORRADE_TARGET_CLANG,
+    @ref CORRADE_TARGET_APPLE_CLANG, @ref CORRADE_TARGET_MSVC,
+    @ref CORRADE_TARGET_MINGW, @ref CORRADE_TARGET_WINDOWS, @ref corrade-cmake
+*/
+#define CORRADE_TARGET_CLANG_CL
+#undef CORRADE_TARGET_CLANG_CL
+
+/**
+@brief MSVC compiler
+@m_since_latest
+
+Defined if the code is being compiled by MSVC or Clang with a MSVC frontend. If
+this variable is defined, @ref CORRADE_TARGET_CLANG might also be defined.
+While this variable is exposed in CMake as well, it's not guaranteed that the
+reported compiler is consistent between CMake and C++ --- for example, a
+library can be built with MSVC and then used via Clang-CL.
+@see @ref CORRADE_TARGET_GCC, @ref CORRADE_TARGET_CLANG,
+    @ref CORRADE_TARGET_APPLE_CLANG, @ref CORRADE_TARGET_CLANG_CL,
+    @ref CORRADE_TARGET_MINGW, @ref CORRADE_TARGET_WINDOWS, @ref corrade-cmake
+*/
+#define CORRADE_TARGET_MSVC
+#undef CORRADE_TARGET_MSVC
+
+/**
+@brief MinGW compiler
+@m_since_latest
+
+Defined if the code is being compiled by GCC / Clang running under MinGW. If
+this variable is defined, @ref CORRADE_TARGET_GCC and possibly also
+@ref CORRADE_TARGET_CLANG are defined. While this variable is exposed in CMake
+as well, it's not guaranteed that the reported compiler is consistent between
+CMake and C++ --- for example, a library can be built with MSVC and then used
+via Clang-CL.
+@see @ref CORRADE_TARGET_GCC, @ref CORRADE_TARGET_CLANG,
+    @ref CORRADE_TARGET_APPLE_CLANG, @ref CORRADE_TARGET_CLANG_CL,
+    @ref CORRADE_TARGET_MSVC, @ref CORRADE_TARGET_WINDOWS, @ref corrade-cmake
+*/
+#define CORRADE_TARGET_MINGW
+#undef CORRADE_TARGET_MINGW
+
+/**
 @brief STL libc++ target
 @m_since{2019,10}
 
@@ -260,7 +368,7 @@ variables, this variable, @ref CORRADE_TARGET_LIBSTDCXX and
 @ref CORRADE_TARGET_DINKUMWARE are not exposed in CMake because the detection
 is non-trivial.
 @see @ref CORRADE_TARGET_LIBSTDCXX, @ref CORRADE_TARGET_DINKUMWARE,
-    @ref CORRADE_CXX_STANDARD
+    @ref CORRADE_CXX_STANDARD, @ref CORRADE_TARGET_CLANG
 */
 #define CORRADE_TARGET_LIBCXX
 #undef CORRADE_TARGET_LIBCXX
@@ -276,7 +384,8 @@ variables, this variable, @ref CORRADE_TARGET_LIBCXX and
 @ref CORRADE_TARGET_DINKUMWARE are not exposed in CMake because the detection
 is non-trivial.
 @see @ref CORRADE_TARGET_LIBCXX, @ref CORRADE_TARGET_DINKUMWARE,
-    @ref CORRADE_CXX_STANDARD
+    @ref CORRADE_CXX_STANDARD, @ref CORRADE_TARGET_GCC,
+    @ref CORRADE_TARGET_CLANG
 */
 #define CORRADE_TARGET_LIBSTDCXX
 #undef CORRADE_TARGET_LIBSTDCXX
@@ -291,7 +400,7 @@ unlike other `CORRADE_TARGET_*` variables, this variable,
 @ref CORRADE_TARGET_LIBSTDCXX and  @ref CORRADE_TARGET_DINKUMWARE are not
 exposed in CMake because the detection is non-trivial.
 @see @ref CORRADE_TARGET_LIBCXX, @ref CORRADE_TARGET_LIBSTDCXX,
-    @ref CORRADE_CXX_STANDARD
+    @ref CORRADE_CXX_STANDARD, @ref CORRADE_TARGET_MSVC
 */
 #define CORRADE_TARGET_DINKUMWARE
 #undef CORRADE_TARGET_DINKUMWARE
