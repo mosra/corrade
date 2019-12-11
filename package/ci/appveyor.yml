@@ -31,6 +31,13 @@ environment:
     APPVEYOR_JOB_NAME: windows-static-msvc2019
     CONFIGURATION: Debug
     BUILD_STATIC: ON
+  - TARGET: desktop
+    COMPILER: msvc-clang
+    ANSI_COLORS: ON
+    PLATFORM: x64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    APPVEYOR_JOB_NAME: windows-msvc2019-clang
+    CONFIGURATION: Debug
   # Build the 32bit and non-ANSI as Release, one on 2015 and one on 2017, so we
   # catch things that are not a problem on either with 64bit and Debug.
   - TARGET: desktop
@@ -73,7 +80,7 @@ install:
 
 build_script:
 - IF NOT "%BUILD_STATIC%" == "ON" set BUILD_STATIC=OFF
-- IF "%TARGET%" == "desktop" IF "%COMPILER%" == "msvc" call package\ci\appveyor-desktop.bat
+- IF "%TARGET%" == "desktop" IF "%COMPILER:~0,4%" == "msvc" call package\ci\appveyor-desktop.bat
 - IF "%TARGET%" == "desktop" IF "%COMPILER%" == "mingw" call package\ci\appveyor-desktop-mingw.bat
 - IF "%TARGET%" == "rt" call package\ci\appveyor-rt.bat
 
