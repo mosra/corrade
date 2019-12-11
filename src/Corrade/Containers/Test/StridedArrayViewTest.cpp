@@ -3020,10 +3020,10 @@ void StridedArrayViewTest::castNegativeStride() {
 }
 
 void StridedArrayViewTest::castInvalid() {
-     struct {
+     struct CORRADE_ALIGNAS(2) {
         char a;
         char b;
-    } data[5] CORRADE_ALIGNAS(2) {{1, 10}, {2, 20}, {3, 30}, {4, 40}, {5, 50}};
+    } data[5] {{1, 10}, {2, 20}, {3, 30}, {4, 40}, {5, 50}};
     Containers::StridedArrayView1D<char> a{data, &data[0].a, 5, 2};
     VoidStridedArrayView1D av = a;
     ConstVoidStridedArrayView1D cav = a;
