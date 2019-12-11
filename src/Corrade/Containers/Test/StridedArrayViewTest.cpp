@@ -728,7 +728,7 @@ void StridedArrayViewTest::construct() {
         CORRADE_COMPARE(b[2], 7853268);
         CORRADE_COMPARE(b[4], 234810);
 
-        auto c = stridedArrayView(b);
+        auto c = stridedArrayView(a, &a[0].value, 10, 8);
         CORRADE_VERIFY((std::is_same<decltype(c), StridedArrayView1Di>::value));
         CORRADE_VERIFY(c.data() == a);
         CORRADE_VERIFY(!c.empty());
@@ -736,6 +736,15 @@ void StridedArrayViewTest::construct() {
         CORRADE_COMPARE(c.stride(), 8);
         CORRADE_COMPARE(c[2], 7853268);
         CORRADE_COMPARE(c[4], 234810);
+
+        auto c2 = stridedArrayView(b);
+        CORRADE_VERIFY((std::is_same<decltype(c2), StridedArrayView1Di>::value));
+        CORRADE_VERIFY(c2.data() == a);
+        CORRADE_VERIFY(!c2.empty());
+        CORRADE_COMPARE(c2.size(), 10);
+        CORRADE_COMPARE(c2.stride(), 8);
+        CORRADE_COMPARE(c2[2], 7853268);
+        CORRADE_COMPARE(c2[4], 234810);
     }
 
     {
@@ -747,7 +756,7 @@ void StridedArrayViewTest::construct() {
         CORRADE_COMPARE(cb[2], 7853268);
         CORRADE_COMPARE(cb[4], 234810);
 
-        constexpr auto cc = stridedArrayView(cb);
+        constexpr auto cc = stridedArrayView(Struct, &Struct[0].value, 10, 8);
         CORRADE_VERIFY((std::is_same<decltype(cc), const ConstStridedArrayView1Di>::value));
         CORRADE_VERIFY(cc.data() == Struct);
         CORRADE_VERIFY(!cc.empty());
@@ -755,6 +764,15 @@ void StridedArrayViewTest::construct() {
         CORRADE_COMPARE(cc.stride(), 8);
         CORRADE_COMPARE(cc[2], 7853268);
         CORRADE_COMPARE(cc[4], 234810);
+
+        constexpr auto cc2 = stridedArrayView(cb);
+        CORRADE_VERIFY((std::is_same<decltype(cc2), const ConstStridedArrayView1Di>::value));
+        CORRADE_VERIFY(cc2.data() == Struct);
+        CORRADE_VERIFY(!cc2.empty());
+        CORRADE_COMPARE(cc2.size(), 10);
+        CORRADE_COMPARE(cc2.stride(), 8);
+        CORRADE_COMPARE(cc2[2], 7853268);
+        CORRADE_COMPARE(cc2[4], 234810);
     }
 }
 

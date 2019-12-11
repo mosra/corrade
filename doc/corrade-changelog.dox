@@ -47,6 +47,8 @@ namespace Corrade {
     @cpp constexpr @ce enabled passing of strided array views similarly to the
     existing @ref Containers::ArrayView<void> and
     @ref Containers::ArrayView<const void> types
+-   New @ref Containers::stridedArrayView() convenience overload taking
+    explicit stride and size parameters
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 

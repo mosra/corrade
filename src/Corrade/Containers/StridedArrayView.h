@@ -1206,6 +1206,19 @@ template<class T> using StridedArrayView4D = StridedArrayView<4, T>;
 #endif
 
 /** @relatesalso StridedArrayView
+@brief Make an one-dimensional strided view
+@m_since_latest
+
+Convenience alternative to @ref StridedArrayView::StridedArrayView(ArrayView<ErasedType>, T*, const Size&, const Stride&).
+The following two lines are equivalent:
+
+@snippet Containers.cpp stridedArrayView-data-member
+*/
+template<class T> constexpr StridedArrayView1D<T> stridedArrayView(ArrayView<typename StridedArrayView1D<T>::ErasedType> data, T* member, std::size_t size, std::ptrdiff_t stride) {
+    return StridedArrayView1D<T>{data, member, size, stride};
+}
+
+/** @relatesalso StridedArrayView
 @brief Make a strided view on a fixed-size array
 @m_since{2019,10}
 

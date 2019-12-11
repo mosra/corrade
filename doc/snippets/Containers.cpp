@@ -762,6 +762,19 @@ static_cast<void>(gradient);
 }
 
 {
+struct Position {
+    float x, y;
+};
+/* [stridedArrayView-data-member] */
+Containers::ArrayView<Position> data;
+
+Containers::StridedArrayView1D<float> a{data, &data[0].x, 9, sizeof(Position)};
+auto b = Containers::stridedArrayView(data, &data[0].x, 9, sizeof(Position));
+/* [stridedArrayView-data-member] */
+static_cast<void>(b);
+}
+
+{
 /* [stridedArrayView-array] */
 std::uint32_t data[15];
 
