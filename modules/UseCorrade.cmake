@@ -176,12 +176,20 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_SIMULATE_ID STREQUAL "
         "/wd4910")
     set(CORRADE_PEDANTIC_COMPILER_DEFINITIONS
         # Disabling warning for not using "secure-but-not-standard" STL algos
-        "_CRT_SECURE_NO_WARNINGS" "_SCL_SECURE_NO_WARNINGS"
+        "_CRT_SECURE_NO_WARNINGS" "_SCL_SECURE_NO_WARNINGS")
+endif()
 
-        # Disabling all minmax nonsense macros
+# Compiler flags to undo horrible crimes done by windows.h, common for both
+# MSVC and MinGW
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC" OR MINGW)
+    list(APPEND CORRADE_PEDANTIC_COMPILER_DEFINITIONS
+        # Disabling all minmax nonsense macros coming from windows.h
         "NOMINMAX"
 
-        # Disabling GDI and other mud in windows.h
+        # Disabling GDI and other mud in windows.h (which in turn fixes the
+        # dreaded #define interface struct UNLESS something includes the cursed
+        # headers such as shlwapi.h directly -- libjpeg does that, for
+        # instance).
         "WIN32_LEAN_AND_MEAN")
 endif()
 

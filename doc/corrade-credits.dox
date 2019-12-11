@@ -95,6 +95,8 @@ Is the below list missing your name or something's wrong?
     --- interfacing @ref Utility::Debug with @ref std::ostream operators
 -   **Cong Xie** ([\@xiconxi](https://github.com/xiconxi)) --- buildsystem
     fixes
+-   **[\@DJQuardaboff](https://github.com/DJQuardaboff)** --- Investigation
+    into undoing horrible crimes done by windows.h
 -   **Eliot Saba** ([\@staticfloat](https://github.com/staticfloat)) --- macOS
     buildsystem fixes
 -   **Erik Wijmans** ([\@erikwijmans](https://github.com/erikwijmans)) ---
