@@ -29,7 +29,7 @@
 
 cmake_minimum_required(VERSION 3.4)
 
-project(CorradeResourceExample)
+project(CorradeResourceExample CXX)
 
 # Add module path in case this is project root
 if(PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
