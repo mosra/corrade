@@ -670,7 +670,7 @@ int foo(int a, CORRADE_UNUSED int b) {
 CORRADE_ALIGNAS(4) char data[16]; // so it can be read as 32-bit integers
 /* [CORRADE_ALIGNAS] */
 
-void exit42();
+CORRADE_NORETURN void exit42();
 /* [CORRADE_NORETURN] */
 CORRADE_NORETURN void exit42() { std::exit(42); }
 /* [CORRADE_NORETURN] */
