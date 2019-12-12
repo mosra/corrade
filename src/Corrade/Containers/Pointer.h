@@ -240,7 +240,7 @@ template<class T> class Pointer {
          *
          * Calls @cpp delete @ce on the previously stored pointer and replaces
          * it with @p pointer.
-         * @see @ref release()
+         * @see @ref emplace(), @ref release()
          */
         void reset(T* pointer = nullptr) {
             delete _pointer;
