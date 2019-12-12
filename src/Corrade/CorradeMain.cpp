@@ -58,13 +58,13 @@ Containers::Array<char*> convertWideArgv(std::size_t argc, wchar_t** wargv, Cont
     std::size_t totalSize = 0;
     for(std::size_t i = 0; i != argc; ++i) {
         totalSize += WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1, nullptr, 0, nullptr, nullptr);
-        argv[i + 1] = static_cast<char*>(nullptr) + totalSize;
+        argv[i + 1] = reinterpret_cast<char*>(totalSize);
     }
 
     /* Allocate the argument array, make the relative offsets absolute */
     storage = Containers::Array<char>{totalSize};
     for(std::size_t i = 0; i != argv.size(); ++i)
-        argv[i] += storage.data() - static_cast<char*>(nullptr);
+        argv[i] += reinterpret_cast<std::ptrdiff_t>(storage.data());
 
     /* Convert the arguments to sane UTF-8 */
     for(std::size_t i = 0; i != argc; ++i)
