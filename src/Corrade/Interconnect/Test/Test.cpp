@@ -220,7 +220,7 @@ void incrementCounter() { ++globalCounter; }
 void Test::connectionDataFree() {
     auto d = Implementation::ConnectionData::createFunctor(incrementCounter);
     CORRADE_VERIFY(d.type == Implementation::ConnectionType::Free);
-    CORRADE_COMPARE(d.storage.function, &incrementCounter);
+    CORRADE_VERIFY(d.storage.function == &incrementCounter);
     CORRADE_VERIFY(d.call);
 
     globalCounter = 0;
@@ -229,7 +229,7 @@ void Test::connectionDataFree() {
 
     Implementation::ConnectionData d2{std::move(d)};
     CORRADE_VERIFY(d2.type == Implementation::ConnectionType::Free);
-    CORRADE_COMPARE(d2.storage.function, &incrementCounter);
+    CORRADE_VERIFY(d2.storage.function == &incrementCounter);
     CORRADE_VERIFY(d2.call);
 
     reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d2.call)(d2.storage);
@@ -238,7 +238,7 @@ void Test::connectionDataFree() {
     Implementation::ConnectionData d3{Implementation::ConnectionType::Member};
     d3 = std::move(d2);
     CORRADE_VERIFY(d3.type == Implementation::ConnectionType::Free);
-    CORRADE_COMPARE(d3.storage.function, &incrementCounter);
+    CORRADE_VERIFY(d3.storage.function == &incrementCounter);
     CORRADE_VERIFY(d3.call);
 
     reinterpret_cast<void(*)(Implementation::ConnectionData::Storage&)>(d3.call)(d3.storage);

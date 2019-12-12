@@ -726,7 +726,7 @@ void ArrayTest::release() {
 
 void ArrayTest::defaultDeleter() {
     Array a{5};
-    CORRADE_COMPARE(a.deleter(), nullptr);
+    CORRADE_VERIFY(a.deleter() == nullptr);
 }
 
 int CustomDeleterDeletedCount = 0;

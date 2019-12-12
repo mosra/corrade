@@ -294,7 +294,7 @@ _('\'') // also no parser
             "Utility::Tweakable::update(): ignoring unknown new value _('\\'') in a.cpp:13\n");
         CORRADE_COMPARE(state, TweakableState::Success);
         CORRADE_COMPARE(scopes.size(), 1);
-        CORRADE_COMPARE(std::get<0>(*scopes.begin()), lambda2);
+        CORRADE_VERIFY(std::get<0>(*scopes.begin()) == lambda2);
     }
     CORRADE_COMPARE(*reinterpret_cast<int*>(variables[0].storage), 3);
     CORRADE_COMPARE(*reinterpret_cast<float*>(variables[1].storage), 4.0f);
