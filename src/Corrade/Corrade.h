@@ -114,6 +114,9 @@ returned version is:
 -   @cpp 201703 @ce when C++17 is used
 -   greater than @cpp 201703 @ce when C++2a is used
 
+Unlike most other `CORRADE_*` variables, this macro is not exposed to CMake as
+because the meaning is unclear in projects that combine more different C++
+standards in a single project.
 @see @ref CORRADE_TARGET_LIBCXX, @ref CORRADE_TARGET_LIBSTDCXX,
     @ref CORRADE_TARGET_DINKUMWARE
 */
@@ -252,7 +255,10 @@ yet.
 Defined if the library is built against Clang [libc++](https://libcxx.llvm.org/)
 STL implementation. This is most common on @ref CORRADE_TARGET_APPLE "Apple"
 macOS and iOS and on newer @ref CORRADE_TARGET_ANDROID "Android" NDKs, it's
-also sometimes used on Linux.
+also sometimes used on Linux. Note that unlike other `CORRADE_TARGET_*`
+variables, this variable, @ref CORRADE_TARGET_LIBSTDCXX and
+@ref CORRADE_TARGET_DINKUMWARE are not exposed in CMake because the detection
+is non-trivial.
 @see @ref CORRADE_TARGET_LIBSTDCXX, @ref CORRADE_TARGET_DINKUMWARE,
     @ref CORRADE_CXX_STANDARD
 */
@@ -265,7 +271,10 @@ also sometimes used on Linux.
 
 Defined if the library is built against GCC [libstdc++](https://gcc.gnu.org/onlinedocs/libstdc++/)
 STL implementation. This is most common on Linux and under MinGW, note that
-Clang is able to use libstdc++ as well.
+Clang is able to use libstdc++ as well. Note that unlike other `CORRADE_TARGET_*`
+variables, this variable, @ref CORRADE_TARGET_LIBCXX and
+@ref CORRADE_TARGET_DINKUMWARE are not exposed in CMake because the detection
+is non-trivial.
 @see @ref CORRADE_TARGET_LIBCXX, @ref CORRADE_TARGET_DINKUMWARE,
     @ref CORRADE_CXX_STANDARD
 */
@@ -277,7 +286,10 @@ Clang is able to use libstdc++ as well.
 @m_since{2019,10}
 
 Defined if the library is built against Dinkumware STL implementation (used by
-MSVC). Note that Clang is able to use this implementation as well.
+MSVC). Note that Clang is able to use this implementation as well.  Note that
+unlike other `CORRADE_TARGET_*` variables, this variable,
+@ref CORRADE_TARGET_LIBSTDCXX and  @ref CORRADE_TARGET_DINKUMWARE are not
+exposed in CMake because the detection is non-trivial.
 @see @ref CORRADE_TARGET_LIBCXX, @ref CORRADE_TARGET_LIBSTDCXX,
     @ref CORRADE_CXX_STANDARD
 */
