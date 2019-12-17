@@ -299,10 +299,9 @@ endif()
 
 # Read flags from configuration
 file(READ ${_CORRADE_CONFIGURE_FILE} _corradeConfigure)
+string(REGEX REPLACE ";" "\\\\;" _corradeConfigure "${_corradeConfigure}")
+string(REGEX REPLACE "\n" ";" _corradeConfigure "${_corradeConfigure}")
 set(_corradeFlags
-    # WARNING: CAREFUL HERE, the string(FIND) succeeds even if a subset is
-    # found -- so e.g. looking for TARGET_GL will match TARGET_GLES2 as well.
-    # So far that's not a problem, but might become an issue for new flags.
     MSVC2015_COMPATIBILITY
     MSVC2017_COMPATIBILITY
     MSVC2019_COMPATIBILITY
@@ -325,7 +324,7 @@ set(_corradeFlags
     TESTSUITE_TARGET_XCTEST
     UTILITY_USE_ANSI_COLORS)
 foreach(_corradeFlag ${_corradeFlags})
-    string(FIND "${_corradeConfigure}" "#define CORRADE_${_corradeFlag}" _corrade_${_corradeFlag})
+    list(FIND _corradeConfigure "#define CORRADE_${_corradeFlag}" _corrade_${_corradeFlag})
     if(NOT _corrade_${_corradeFlag} EQUAL -1)
         set(CORRADE_${_corradeFlag} 1)
     endif()
