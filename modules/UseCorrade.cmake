@@ -31,11 +31,6 @@ if(_CORRADE_USE_INCLUDED)
     return()
 endif()
 
-# Quoted variables should not be dereferenced (affects the "MSVC" string)
-if(POLICY CMP0054)
-    cmake_policy(SET CMP0054 NEW)
-endif()
-
 # Compiler identification. Unlike other CORRADE_TARGET_* variables it's not
 # saved/restored from configure.h as the compiler used to compile Corrade may
 # differ from the compiler used to link to it.
