@@ -136,10 +136,19 @@ DebugGlobals debugGlobals{
    called from. To avoid #ifdef hell in code below, the debugGlobals are
    redefined to return a value from this uniqueness-ensuring function. */
 #if defined(CORRADE_TARGET_WINDOWS) && defined(CORRADE_BUILD_STATIC) && !defined(CORRADE_TARGET_WINDOWS_RT)
+/* Clang-CL complains that the function has a return type incompatible with C.
+   I don't care, I only need an unmangled name to look up later at runtime. */
+#ifdef CORRADE_TARGET_CLANG_CL
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
+#endif
 extern "C" CORRADE_VISIBILITY_EXPORT DebugGlobals& corradeUtilityUniqueDebugGlobals();
 extern "C" CORRADE_VISIBILITY_EXPORT DebugGlobals& corradeUtilityUniqueDebugGlobals() {
     return debugGlobals;
 }
+#ifdef CORRADE_TARGET_CLANG_CL
+#pragma clang diagnostic pop
+#endif
 
 namespace {
 
