@@ -124,7 +124,10 @@
 #endif
 
 #if defined(__clang__) && defined(__apple_build_version__)
-#define CORRADE_TARGET_APPLE_CLANG
+/* The extra space is here to avoid issues with old & broken FindCorrade.cmake
+   matching this as CORRADE_TARGET_APPLE. Should be removed in late 2025 when
+   everyone has their find modules finally updated. */
+#define  CORRADE_TARGET_APPLE_CLANG
 #endif
 
 #ifdef _MSC_VER
