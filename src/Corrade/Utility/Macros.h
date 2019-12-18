@@ -270,9 +270,11 @@ function parameters instead.
 
 @snippet Utility.cpp CORRADE_UNUSED
 */
-#if defined(__GNUC__)
+/* clang-cl doesn't understand MSVC warning numbers right now, so the
+   MSVC-specific variant below doesn't work */
+#if defined(CORRADE_TARGET_GCC) || defined(CORRADE_TARGET_CLANG_CL)
 #define CORRADE_UNUSED __attribute__((__unused__))
-#elif defined(_MSC_VER)
+#elif defined(CORRADE_TARGET_MSVC)
 #define CORRADE_UNUSED __pragma(warning(suppress:4100))
 #else
 #define CORRADE_UNUSED
