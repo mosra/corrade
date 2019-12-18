@@ -213,6 +213,12 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_SIMULATE_ID STREQUAL "
         "_CRT_SECURE_NO_WARNINGS" "_SCL_SECURE_NO_WARNINGS")
 endif()
 
+if(CORRADE_TARGET_CLANG_CL)
+    list(APPEND CORRADE_PEDANTIC_COMPILER_OPTIONS
+        # See Utility::Directory::libraryLocation() for details
+        "-Wno-microsoft-cast")
+endif()
+
 # Compiler flags to undo horrible crimes done by windows.h, common for both
 # MSVC and MinGW
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC" OR MINGW)

@@ -303,6 +303,11 @@ struct FunctionPointer {
 };
 
 }
+/* Unfortunately, on MSVC (and clang-cl), the const void* overload is picked
+   instead, as MSVC implements implicit cast from function pointers to void*
+   (while GCC doesn't). On clang-cl it prints a -Wmicrosoft-cast warning and there's no way to make it go to this overload first without using a
+   template, so the warning is disabled globally in UseCorrade.cmake. More
+   info here: https://bugs.chromium.org/p/chromium/issues/detail?id=550065 */
 CORRADE_UTILITY_EXPORT std::string libraryLocation(Implementation::FunctionPointer address);
 #endif
 #endif

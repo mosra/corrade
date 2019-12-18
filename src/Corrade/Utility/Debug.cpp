@@ -282,14 +282,21 @@ bool Debug::isTty(std::ostream* const output) {
        ANSI colors enabled */
     #elif defined(CORRADE_UTILITY_USE_ANSI_COLORS) || defined(CORRADE_TARGET_UNIX)
     return
-        /* Windows RT projects have C4996 treated as error by default. WHY */
-        #ifdef _MSC_VER
+        /* Windows RT projects have C4996 treated as error by default. WHY.
+           Also, clang-cl doesn't understand warning IDs yet, so using its own
+           warning suppression right now. */
+        #ifdef CORRADE_TARGET_CLANG_CL
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        #elif defined(CORRADE_TARGET_MSVC)
         #pragma warning(push)
         #pragma warning(disable: 4996)
         #endif
         ((output == &std::cout && isatty(1)) ||
          (output == &std::cerr && isatty(2)))
-        #ifdef _MSC_VER
+        #ifdef CORRADE_TARGET_CLANG_CL
+        #pragma clang diagnostic pop
+        #elif defined(CORRADE_TARGET_MSVC)
         #pragma warning(pop)
         #endif
         #ifdef CORRADE_TARGET_APPLE
