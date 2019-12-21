@@ -5,6 +5,7 @@
 
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
                 2017, 2018, 2019 Vladimír Vondruš <mosra@centrum.cz>
+    Copyright © 2019 Jonathan Hale <squareys@googlemail.com>
 
     Permission is hereby granted, free of charge, to any person obtaining a
     copy of this software and associated documentation files (the "Software"),
@@ -31,6 +32,7 @@
 
 #include <string>
 
+#include "Corrade/Containers/Containers.h"
 #include "Corrade/Utility/AbstractHash.h"
 #include "Corrade/Utility/visibility.h"
 
@@ -51,7 +53,18 @@ class CORRADE_UTILITY_EXPORT Sha1: public AbstractHash<20> {
         explicit Sha1();
 
         /** @brief Add data for digesting */
+        Sha1& operator<<(Containers::ArrayView<const char> data);
+
+        /** @overload */
         Sha1& operator<<(const std::string& data);
+
+        /**
+         * @brief @cpp operator<< @ce with C strings is not allowed
+         *
+         * To clarify your intent with handling the @cpp '\0' @ce delimiter,
+         * cast to @ref Containers::ArrayView or @ref std::string instead.
+         */
+        Sha1& operator<<(const char*) = delete;
 
         /** @brief Digest of all added data */
         Digest digest();

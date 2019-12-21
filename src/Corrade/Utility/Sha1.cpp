@@ -3,6 +3,7 @@
 
     Copyright © 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
                 2017, 2018, 2019 Vladimír Vondruš <mosra@centrum.cz>
+    Copyright © 2019 Jonathan Hale <squareys@googlemail.com>
 
     Permission is hereby granted, free of charge, to any person obtaining a
     copy of this software and associated documentation files (the "Software"),
@@ -27,6 +28,7 @@
 
 #include <cstddef>
 
+#include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Utility/Endianness.h"
 
 namespace Corrade { namespace Utility {
@@ -52,7 +54,7 @@ unsigned int leftrotate(unsigned int data, unsigned int shift) {
 
 Sha1::Sha1(): _dataSize(0), _digest{InitialDigest[0], InitialDigest[1], InitialDigest[2], InitialDigest[3], InitialDigest[4]} {}
 
-Sha1& Sha1::operator<<(const std::string& data) {
+Sha1& Sha1::operator<<(Containers::ArrayView<const char> data) {
     const std::size_t dataOffset = _buffer.empty() ? 0 : 64 - _buffer.size();
 
     /* Process leftovers */
@@ -65,7 +67,7 @@ Sha1& Sha1::operator<<(const std::string& data) {
         }
 
         /* Append few last bytes to have the buffer at 64 bytes */
-        _buffer.append(data.substr(0, dataOffset));
+        _buffer.append(data.prefix(dataOffset));
         processChunk(_buffer.data());
     }
 
@@ -73,10 +75,14 @@ Sha1& Sha1::operator<<(const std::string& data) {
         processChunk(data.data() + i);
 
     /* Save last unfinished 512-bit chunk of data */
-    _buffer = data.substr(dataOffset + ((data.size() - dataOffset)/64)*64);
+    _buffer = data.suffix(dataOffset + ((data.size() - dataOffset)/64)*64);
 
     _dataSize += data.size();
     return *this;
+}
+
+Sha1& Sha1::operator<<(const std::string& data) {
+    return *this << Containers::arrayView(data.data(), data.size());
 }
 
 /* GCC 6 (and possibly 7) on Raspberry Pi 3 Model B+ (aarch64) misoptimizes the
