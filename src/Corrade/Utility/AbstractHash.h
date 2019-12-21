@@ -32,7 +32,6 @@
 #include <string>
 
 #include "Corrade/Utility/Debug.h"
-#include "Corrade/Utility/DebugStl.h"
 
 namespace Corrade { namespace Utility {
 
@@ -118,7 +117,7 @@ template<std::size_t digestSize> class AbstractHash {
 
 /** @debugoperator{HashDigest} */
 template<std::size_t size> inline Debug& operator<<(Debug& debug, const HashDigest<size>& value) {
-    return debug << value.hexString();
+    return debug << value.hexString().data();
 }
 
 template<std::size_t size> HashDigest<size> HashDigest<size>::fromHexString(std::string digest) {
