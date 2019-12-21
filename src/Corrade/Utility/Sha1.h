@@ -31,6 +31,7 @@
 
 #include <string>
 
+#include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Utility/AbstractHash.h"
 #include "Corrade/Utility/visibility.h"
 
@@ -51,7 +52,16 @@ class CORRADE_UTILITY_EXPORT Sha1: public AbstractHash<20> {
         explicit Sha1();
 
         /** @brief Add data for digesting */
+        Sha1& operator<<(Containers::ArrayView<const char> data);
+
+        /** @overload */
         Sha1& operator<<(const std::string& data);
+
+        /** @overload */
+        template<std::size_t size>
+        Sha1& operator<<(const char(&data)[size]) {
+            return *this << Containers::arrayView(data, size);
+        }
 
         /** @brief Digest of all added data */
         Digest digest();
