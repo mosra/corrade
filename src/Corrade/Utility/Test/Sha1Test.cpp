@@ -41,6 +41,7 @@ struct Sha1Test: TestSuite::Tester {
     void exact64bytes();
     void exactOneBlockPadding();
     void twoBlockPadding();
+    void zeroInLeftover();
 
     void iterative();
     void reuse();
@@ -50,7 +51,8 @@ Sha1Test::Sha1Test() {
     addTests({&Sha1Test::emptyString,
               &Sha1Test::exact64bytes,
               &Sha1Test::exactOneBlockPadding,
-              &Sha1Test::twoBlockPadding});
+              &Sha1Test::twoBlockPadding,
+              &Sha1Test::zeroInLeftover});
 
     addRepeatedTests({&Sha1Test::iterative}, 128);
 
@@ -75,6 +77,15 @@ void Sha1Test::exactOneBlockPadding() {
 void Sha1Test::twoBlockPadding() {
     CORRADE_COMPARE(Sha1::digest("123456789a123456789b123456789c123456789d123456789e123456"),
                     Sha1::Digest::fromHexString("40e94c62ada5dc762f3e9c472001ca64a67d2cbb"));
+}
+
+void Sha1Test::zeroInLeftover() {
+    Sha1 sha;
+    sha << std::string(
+        "123456789a123456789b123456789c123456789d123456789e123456789f12341\000134", 69);
+    sha << std::string("\0001", 2);
+    CORRADE_COMPARE(sha.digest(),
+        Sha1::Digest::fromHexString("5fdc3d8c862c3c3f86735c536824aee668f89967"));
 }
 
 constexpr const char Data[] =
