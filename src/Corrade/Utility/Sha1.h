@@ -36,7 +36,15 @@
 
 namespace Corrade { namespace Utility {
 
-/** @brief SHA-1 */
+/**
+@brief SHA-1
+
+Implementation of the [Secure Hash Algorithm 1](https://en.wikipedia.org/wiki/SHA-1).
+Example usage:
+
+@snippet Utility.cpp Sha1-usage
+
+*/
 class CORRADE_UTILITY_EXPORT Sha1: public AbstractHash<20> {
     public:
         /**
@@ -53,7 +61,11 @@ class CORRADE_UTILITY_EXPORT Sha1: public AbstractHash<20> {
         /** @brief Add data for digesting */
         Sha1& operator<<(Containers::ArrayView<const char> data);
 
-        /** @overload */
+        /**
+         * @overload
+         *
+         * The @cpp '\0' @ce delimiter is not included.
+         */
         Sha1& operator<<(const std::string& data);
 
         /** @overload */
