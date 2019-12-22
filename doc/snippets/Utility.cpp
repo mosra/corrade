@@ -33,6 +33,7 @@
 #include "Corrade/Utility/Arguments.h"
 #include "Corrade/Utility/Assert.h"
 #include "Corrade/Utility/Configuration.h"
+#include "Corrade/Utility/DebugStl.h"
 #include "Corrade/Utility/Directory.h"
 #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)) || defined(CORRADE_TARGET_EMSCRIPTEN)
 #include "Corrade/Utility/FileWatcher.h"
@@ -40,6 +41,7 @@
 #include "Corrade/Utility/Format.h"
 #include "Corrade/Utility/FormatStl.h"
 #include "Corrade/Utility/Macros.h"
+#include "Corrade/Utility/Sha1.h"
 
 /* [Tweakable-disable-header] */
 #define CORRADE_TWEAKABLE
@@ -604,6 +606,25 @@ struct {
     float x, y;
 } position;
 };
+}
+
+{
+/* [Sha1-usage] */
+Utility::Sha1 sha1;
+
+/* Add 7 bytes of string data */
+sha1 << std::string{"corrade"};
+
+/* Add four bytes of binary data */
+const char data[4] = { '\x35', '\xf6', '\x00', '\xab' };
+sha1 << Containers::arrayView(data);
+
+/* Print the digest as a hex string */
+Utility::Debug{} << sha1.digest().hexString();
+
+/* Shorthand variant, treating the argument as a string */
+Utility::Debug{} << Utility::Sha1::digest("corrade");
+/* [Sha1-usage] */
 }
 }
 
