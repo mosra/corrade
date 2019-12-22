@@ -68,10 +68,14 @@ class CORRADE_UTILITY_EXPORT Sha1: public AbstractHash<20> {
          */
         Sha1& operator<<(const std::string& data);
 
-        /** @overload */
-        template<std::size_t size> Sha1& operator<<(const char(&data)[size]) {
-            return *this << Containers::arrayView(data, size);
-        }
+        /**
+         * @brief @cpp operator<< @ce with string literals is not allowed
+         *
+         * Please explicitly cast to @ref Containers::ArrayView or
+         * @ref std::string instead. This ensures intentional exclusion
+         * or inclusion of the @cpp '\0' @ce delimiter.
+         */
+        Sha1& operator<<(const char*)=delete;
 
         /** @brief Digest of all added data */
         Digest digest();
