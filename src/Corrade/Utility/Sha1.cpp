@@ -27,6 +27,7 @@
 #include "Sha1.h"
 
 #include <cstddef>
+#include <string>
 
 #include "Corrade/Containers/ArrayView.h"
 #include "Corrade/Utility/Endianness.h"
@@ -52,31 +53,34 @@ unsigned int leftrotate(unsigned int data, unsigned int shift) {
 
 }
 
-Sha1::Sha1(): _dataSize(0), _digest{InitialDigest[0], InitialDigest[1], InitialDigest[2], InitialDigest[3], InitialDigest[4]} {}
+Sha1::Sha1(): _digest{InitialDigest[0], InitialDigest[1], InitialDigest[2], InitialDigest[3], InitialDigest[4]} {}
 
 Sha1& Sha1::operator<<(Containers::ArrayView<const char> data) {
-    const std::size_t dataOffset = _buffer.empty() ? 0 : 64 - _buffer.size();
+    const std::size_t dataOffset = _bufferSize ? 64 - _bufferSize : 0;
 
     /* Process leftovers */
-    if(!_buffer.empty()) {
+    if(_bufferSize != 0) {
         /* Not large enough, try it next time */
-        if(data.size() + _buffer.size() < 64) {
-            _buffer.append(data);
+        if(data.size() + _bufferSize < 64) {
+            std::memcpy(_buffer + _bufferSize, data.data(), data.size());
+            _bufferSize += data.size();
             _dataSize += data.size();
             return *this;
         }
 
         /* Append few last bytes to have the buffer at 64 bytes */
-        _buffer.append(data.prefix(dataOffset));
-        processChunk(_buffer.data());
+        std::memcpy(_buffer + _bufferSize, data.data(), dataOffset);
+        _bufferSize += dataOffset;
+        processChunk(_buffer);
     }
 
     for(std::size_t i = dataOffset; i + 64 <= data.size(); i += 64)
         processChunk(data.data() + i);
 
     /* Save last unfinished 512-bit chunk of data */
-    _buffer = data.suffix(dataOffset + ((data.size() - dataOffset)/64)*64);
-
+    auto leftOver = data.suffix(dataOffset + ((data.size() - dataOffset)/64)*64);
+    std::memcpy(_buffer, leftOver.data(), leftOver.size());
+    _bufferSize = leftOver.size();
     _dataSize += data.size();
     return *this;
 }
@@ -98,28 +102,35 @@ Sha1& Sha1::operator<<(const std::string& data) {
 #pragma GCC optimize ("O2")
 #endif
 Sha1::Digest Sha1::digest() {
-    /* Add '1' bit to the leftovers, pad to (n*64)+56 bytes */
-    _buffer.append(1, '\x80');
-    _buffer.append((_buffer.size() > 56 ? 120 : 56) - _buffer.size(), 0);
+    /* Add '1' bit to the leftovers */
+    _buffer[_bufferSize++] = '\x80';
+
+    /* Pad to (n*64)+56 bytes */
+    const size_t padding = (_bufferSize > 56 ? 120 : 56) - _bufferSize;
+    CORRADE_INTERNAL_ASSERT(_bufferSize + padding + 8 <= sizeof(_buffer));
+    std::memset(_buffer + _bufferSize, 0, padding);
+    _bufferSize += padding;
 
     /* Add size of data in bits in big endian */
     unsigned long long dataSizeBigEndian = Endianness::bigEndian<unsigned long long>(_dataSize*8);
-    _buffer.append(reinterpret_cast<const char*>(&dataSizeBigEndian), 8);
+    std::memcpy(_buffer + _bufferSize, reinterpret_cast<const char*>(&dataSizeBigEndian), 8);
+    _bufferSize += 8;
 
     /* Process remaining chunks */
-    for(std::size_t i = 0; i != _buffer.size()/64; ++i)
-        processChunk(_buffer.data()+i*64);
+    for(std::size_t i = 0; i != _bufferSize/64; ++i) {
+        processChunk(_buffer+i*64);
+    }
 
     /* Convert digest from big endian */
     unsigned int digest[5];
     for(int i = 0; i != 5; ++i)
         digest[i] = Endianness::bigEndian<unsigned int>(_digest[i]);
-    Digest d = Digest::fromByteArray(reinterpret_cast<const char*>(digest));
+    const Digest d = Digest::fromByteArray(reinterpret_cast<const char*>(digest));
 
     /* Clear data and return */
     std::copy(InitialDigest, InitialDigest+5, _digest);
-    _buffer.clear();
     _dataSize = 0;
+    _bufferSize = 0;
     return d;
 }
 #if defined(__GNUC__) && !defined(__clang__) && defined(CORRADE_TARGET_ARM) && __GNUC__ < 8

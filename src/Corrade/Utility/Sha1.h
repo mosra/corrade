@@ -30,10 +30,9 @@
  * @brief Class @ref Corrade::Utility::Sha1
  */
 
-#include <string>
-
 #include "Corrade/Containers/Containers.h"
 #include "Corrade/Utility/AbstractHash.h"
+#include "Corrade/Utility/StlForwardString.h"
 #include "Corrade/Utility/visibility.h"
 
 namespace Corrade { namespace Utility {
@@ -72,8 +71,9 @@ class CORRADE_UTILITY_EXPORT Sha1: public AbstractHash<20> {
     private:
         CORRADE_UTILITY_LOCAL void processChunk(const char* data);
 
-        std::string _buffer;
-        unsigned long long _dataSize;
+        char _buffer[128];
+        std::size_t _bufferSize = 0;
+        unsigned long long _dataSize = 0;
         unsigned int _digest[5];
 };
 
