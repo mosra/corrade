@@ -111,7 +111,7 @@ Is the below list missing your name or something's wrong?
     Stateful lambda support in the @ref Interconnect library
 -   **[\@jaynus](https://github.com/jaynus)** --- MSVC compilation fixes
 -   **Jonathan Hale** ([\@Squareys](https://github.com/Squareys)) ---
-    various fixes, buildsystem improvements
+    @ref Utility::Sha1 additions, various fixes, buildsystem improvements
 -   **Marco Melorio** ([\@Melix19](https://github.com/Melix19)) --- iOS
     crosscompiling and other fixes
 -   **Max Schwarz** ([\@xqms](https://github.com/xqms)) --- thread-local
