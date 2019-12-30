@@ -57,3 +57,6 @@ static_assert(Implementation::CanSaveDiagnostic<Comparator<FileContents>>::value
     "this snippet is broken");
 
 }}
+
+/* To prevent macOS ranlib complaining that there are no symbols */
+int main() {}

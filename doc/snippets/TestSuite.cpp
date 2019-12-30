@@ -253,3 +253,6 @@ void myTestCase() {
 }
 /* [Tester-Debug] */
 };
+
+/* To prevent macOS ranlib complaining that there are no symbols */
+int main() {}

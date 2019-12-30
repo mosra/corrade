@@ -68,3 +68,6 @@ CORRADE_COMPARE_WITH("actual.dat", "expected.dat",
 /* [Comparator-parameters-usage] */
 }
 };
+
+/* To prevent macOS ranlib complaining that there are no symbols */
+int main() {}
