@@ -49,7 +49,7 @@ namespace Corrade { namespace Containers { namespace Implementation {
 /* libc++ before version 9 had an earlier revision of <span> with ptrdiff_t
    used as a size type. That inconsistency was fortunately fixed, however we
    need to preserve compatibility so this is getting a bit ugly. */
-#if defined(CORRADE_TARGET_LIBCPP) && _LIBCPP_VERSION < 9000
+#if defined(CORRADE_TARGET_LIBCXX) && _LIBCPP_VERSION < 9000
 typedef std::ptrdiff_t StlSpanSizeType;
 #else
 typedef std::size_t StlSpanSizeType;
@@ -91,7 +91,7 @@ template<std::size_t size, class T> struct StaticArrayViewConverter<size, T, std
     constexpr static StaticArrayView<size, T> from(std::span<T, StlSpanSizeType(size)> other) {
         return StaticArrayView<size, T>{other.data()};
     }
-    #if !defined(CORRADE_TARGET_LIBCPP) || _LIBCPP_VERSION >= 9000
+    #if !defined(CORRADE_TARGET_LIBCXX) || _LIBCPP_VERSION >= 9000
     /* std::span in libc++ < 9 has an implicit all-catching constructor, which
        means we can't implement our own to() routines with compile time checks
        for proper size in case of fixed-size views */
@@ -106,7 +106,7 @@ template<std::size_t size, class T> struct StaticArrayViewConverter<size, const 
         return StaticArrayView<size, const T>{other.data()};
     }
 };
-#if !defined(CORRADE_TARGET_LIBCPP) || _LIBCPP_VERSION >= 9000
+#if !defined(CORRADE_TARGET_LIBCXX) || _LIBCPP_VERSION >= 9000
 /* std::span in libc++ < 9 has an implicit all-catching constructor, which
    means we can't implement our own to() routines with compile time checks
    for proper size in case of fixed-size views */

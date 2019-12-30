@@ -126,7 +126,7 @@ void StaticArrayStlSpanTest::convertToSpanSized() {
        that conversion to a different size or type is correctly not allowed */
     CORRADE_VERIFY((std::is_convertible<StaticArray<3, float>&, std::span<float, 3>>::value));
     {
-        #if defined(CORRADE_TARGET_LIBCPP) && _LIBCPP_VERSION < 9000
+        #if defined(CORRADE_TARGET_LIBCXX) && _LIBCPP_VERSION < 9000
         CORRADE_EXPECT_FAIL("The implicit all-catching span(Container&) constructor in libc++ < 9 causes this to be an UB instead of giving me a possibility to catch this at compile time.");
         #endif
         CORRADE_VERIFY(!(std::is_convertible<StaticArray<3, float>&, std::span<float, 4>>::value));
@@ -154,7 +154,7 @@ void StaticArrayStlSpanTest::convertToConstSpanSized() {
        that conversion to a different size or type is correctly not allowed */
     CORRADE_VERIFY((std::is_convertible<StaticArray<3, float>, std::span<const float, 3>>::value));
     {
-        #if defined(CORRADE_TARGET_LIBCPP) && _LIBCPP_VERSION < 9000
+        #if defined(CORRADE_TARGET_LIBCXX) && _LIBCPP_VERSION < 9000
         CORRADE_EXPECT_FAIL("The implicit all-catching span(Container&) constructor in libc++ < 9 causes this to be an UB instead of giving me a possibility to catch this at compile time.");
         #endif
         CORRADE_VERIFY(!(std::is_convertible<StaticArray<3, float>, std::span<const float, 4>>::value));

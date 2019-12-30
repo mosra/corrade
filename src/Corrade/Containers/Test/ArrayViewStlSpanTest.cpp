@@ -320,7 +320,7 @@ void ArrayViewStlSpanTest::convertToSpanSized() {
     #else
     CORRADE_VERIFY((std::is_convertible<ArrayView<float>&, std::span<float>>::value));
     {
-        #if defined(CORRADE_TARGET_LIBCPP) && _LIBCPP_VERSION < 9000
+        #if defined(CORRADE_TARGET_LIBCXX) && _LIBCPP_VERSION < 9000
         CORRADE_EXPECT_FAIL("The implicit all-catching span(Container&) constructor in libc++ < 9 causes this to be an UB instead of giving me a possibility to catch this at compile time.");
         #endif
         CORRADE_VERIFY(!(std::is_convertible<ArrayView<float>&, std::span<float, 3>>::value));
@@ -365,7 +365,7 @@ void ArrayViewStlSpanTest::convertToConstSpanSized() {
     CORRADE_VERIFY((std::is_convertible<ArrayView<float>&, std::span<const float>>::value));
     CORRADE_VERIFY((std::is_convertible<ArrayView<const float>&, std::span<const float>>::value));
     {
-        #if defined(CORRADE_TARGET_LIBCPP) && _LIBCPP_VERSION < 9000
+        #if defined(CORRADE_TARGET_LIBCXX) && _LIBCPP_VERSION < 9000
         CORRADE_EXPECT_FAIL("The implicit all-catching span(Container&) constructor in libc++ < 9 causes this to be an UB instead of giving me a possibility to catch this at compile time.");
         #endif
         CORRADE_VERIFY(!(std::is_convertible<ArrayView<float>&, std::span<const float, 3>>::value));
