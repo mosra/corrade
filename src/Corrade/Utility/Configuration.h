@@ -42,6 +42,8 @@ namespace Corrade { namespace Utility {
 /**
 @brief Parser and writer for configuration files
 
+@m_keywords{Serialization Parsers}
+
 Provides hierarchical configuration storage for key/value pairs with support
 for parsing and loading into an textual INI-style file format. Basic API usage
 example:

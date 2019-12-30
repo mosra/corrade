@@ -155,7 +155,7 @@ the concept of an owning container decoupled from the extra baggage coming from
 custom allocators, type constructibility and such.
 
 As long as the type stored in the array is nothrow-move-constructible, any
-@ref Array instance can be converted to a growing contaier by calling the
+@ref Array instance can be converted to a growing container by calling the
 family of @ref arrayAppend(), @ref arrayReserve(), @ref arrayResize() ...
 functions. A growable array behaves the same as a regular array to its
 consumers --- its @ref size() returns the count of *real* elements, while

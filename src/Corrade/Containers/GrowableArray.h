@@ -839,7 +839,7 @@ template<class T> inline void arrayMoveConstruct(T* src, T* dst, const std::size
     #endif
 >::type* = nullptr) {
     static_assert(std::is_nothrow_move_constructible<T>::value,
-        "noexcept move-constructibe type is required");
+        "noexcept move-constructible type is required");
     for(T* end = src + count; src != end; ++src, ++dst)
         new(dst) T{std::move(*src)};
 }

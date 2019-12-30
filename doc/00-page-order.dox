@@ -49,6 +49,8 @@ See also @ref corrade-configurationvalues and @ref corrade-tweakableliterals.
 
 @page corrade-configurationvalues Configuration value parsers and writers for custom types
 
+@m_keywords{Serialization Parsers}
+
 See also @ref corrade-debugoperators and @ref corrade-tweakableliterals.
 
 @page corrade-tweakableliterals Tweakable literal parsers
