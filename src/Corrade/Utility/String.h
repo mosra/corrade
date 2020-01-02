@@ -43,14 +43,14 @@ namespace Corrade { namespace Utility {
 @brief String utilities
 
 This library is built if `WITH_UTILITY` is enabled when building Corrade. To
-use this library with CMake, you need to request the `Utility` component of the
-`Corrade` package and link to the `Corrade::Utility` target.
+use this library with CMake, request the `Utility` component of the `Corrade`
+package and link to the `Corrade::Utility` target.
 
 @code{.cmake}
 find_package(Corrade REQUIRED Utility)
 
 # ...
-target_link_libraries(your-app Corrade::Utility)
+target_link_libraries(your-app PRIVATE Corrade::Utility)
 @endcode
 
 See also @ref building-corrade and @ref corrade-cmake for more information.
