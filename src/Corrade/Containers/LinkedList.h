@@ -130,11 +130,15 @@ template<class T> class LinkedList {
 
         /** @brief First item or `nullptr`, if the list is empty */
         T* first() { return _first; }
-        constexpr const T* first() const { return _first; } /**< @overload */
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        constexpr const T* first() const { return _first; }
 
         /** @brief Last item or `nullptr`, if the list is empty */
         T* last() { return _last; }
-        constexpr const T* last() const { return _last; } /**< @overload */
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        constexpr const T* last() const { return _last; }
 
         /** @brief Whether the list is empty */
         constexpr bool isEmpty() const { return !_first; }
@@ -234,15 +238,21 @@ class LinkedListItem {
 
         /** @brief List this item belongs to */
         List* list() { return _list; }
-        const List* list() const { return _list; } /**< @overload */
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        const List* list() const { return _list; }
 
         /** @brief Previous item or `nullptr`, if there is no previous item */
         Derived* previous() { return _previous; }
-        const Derived* previous() const { return _previous; } /**< @overload */
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        const Derived* previous() const { return _previous; }
 
         /** @brief Next item or `nullptr`, if there is no next item */
         Derived* next() { return _next; }
-        const Derived* next() const { return _next; } /**< @overload */
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        const Derived* next() const { return _next; }
 
         /**
          * @brief Erase the item

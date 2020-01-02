@@ -436,7 +436,9 @@ class Array {
 
         /** @brief Array data */
         T* data() { return _data; }
-        const T* data() const { return _data; }         /**< @overload */
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        const T* data() const { return _data; }
 
         /**
          * @brief Array deleter
@@ -459,8 +461,12 @@ class Array {
          * @see @ref front()
          */
         T* begin() { return _data; }
-        const T* begin() const { return _data; }        /**< @overload */
-        const T* cbegin() const { return _data; }       /**< @overload */
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        const T* begin() const { return _data; }
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        const T* cbegin() const { return _data; }
 
         /**
          * @brief Pointer to (one item after) last element
@@ -468,8 +474,12 @@ class Array {
          * @see @ref back()
          */
         T* end() { return _data+_size; }
-        const T* end() const { return _data+_size; }    /**< @overload */
-        const T* cend() const { return _data+_size; }   /**< @overload */
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        const T* end() const { return _data+_size; }
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        const T* cend() const { return _data+_size; }
 
         /**
          * @brief First element

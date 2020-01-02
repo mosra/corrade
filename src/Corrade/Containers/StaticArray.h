@@ -259,7 +259,9 @@ template<std::size_t size_, class T> class StaticArray {
 
         /** @brief Array data */
         T* data() { return _data; }
-        const T* data() const { return _data; }             /**< @overload */
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        const T* data() const { return _data; }
 
         /**
          * @brief Array size
@@ -281,8 +283,12 @@ template<std::size_t size_, class T> class StaticArray {
          * @see @ref front()
          */
         T* begin() { return _data; }
-        const T* begin() const { return _data; }            /**< @overload */
-        const T* cbegin() const { return _data; }           /**< @overload */
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        const T* begin() const { return _data; }
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        const T* cbegin() const { return _data; }
 
         /**
          * @brief Pointer to (one item after) last element
@@ -290,8 +296,12 @@ template<std::size_t size_, class T> class StaticArray {
          * @see @ref back()
          */
         T* end() { return _data + size_; }
-        const T* end() const { return _data + size_; }      /**< @overload */
-        const T* cend() const { return _data + size_; }     /**< @overload */
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        const T* end() const { return _data + size_; }
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        const T* cend() const { return _data + size_; }
 
         /**
          * @brief First element
@@ -299,7 +309,9 @@ template<std::size_t size_, class T> class StaticArray {
          * @see @ref begin()
          */
         T& front() { return _data[0]; }
-        const T& front() const { return _data[0]; }         /**< @overload */
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        const T& front() const { return _data[0]; }
 
         /**
          * @brief Last element
@@ -307,7 +319,9 @@ template<std::size_t size_, class T> class StaticArray {
          * @see @ref end()
          */
         T& back() { return _data[size_ - 1]; }
-        const T& back() const { return _data[size_ - 1]; }  /**< @overload */
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        const T& back() const { return _data[size_ - 1]; }
 
         /**
          * @brief Array slice

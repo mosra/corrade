@@ -102,7 +102,9 @@ class CORRADE_UTILITY_EXPORT ConfigurationGroup {
          * @see @ref addGroup(const std::string&, ConfigurationGroup*)
          */
         Configuration* configuration() { return _configuration; }
-        const Configuration* configuration() const { return _configuration; } /**< @overload */
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        const Configuration* configuration() const { return _configuration; }
 
         /**
          * @brief Whether the group is empty

@@ -170,11 +170,15 @@ template<unsigned dimensions, class T> class StridedDimensions {
 
         /** @brief First element */
         constexpr const T* begin() const { return _data; }
-        constexpr const T* cbegin() const { return _data; } /**< @overload */
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        constexpr const T* cbegin() const { return _data; }
 
         /** @brief (One item after) last element */
         constexpr const T* end() const { return _data + dimensions; }
-        constexpr const T* cend() const { return _data + dimensions; } /**< @overload */
+
+        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
+        constexpr const T* cend() const { return _data + dimensions; }
 
     private:
         template<unsigned, class> friend class StridedArrayView;
