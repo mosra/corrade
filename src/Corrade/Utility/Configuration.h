@@ -247,8 +247,9 @@ class CORRADE_UTILITY_EXPORT Configuration: public ConfigurationGroup {
         /**
          * @brief Flags for opening configuration file
          *
-         * @see @ref Configuration::Configuration()
+         * @see @ref Configuration(Flags) "Configuration()"
          */
+        /* For some reason @ref Configuration() doesn't work since 1.8.17 */
         typedef Containers::EnumSet<Flag> Flags;
 
         /**
