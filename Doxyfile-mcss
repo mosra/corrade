@@ -8,7 +8,6 @@ GENERATE_HTML          = NO
 GENERATE_XML           = YES
 XML_PROGRAMLISTING     = NO
 XML_NS_MEMB_FILE_SCOPE = YES
-EXTRACT_PRIV_VIRTUAL   = YES
 GENERATE_TAGFILE       = build/doc-mcss/corrade.tag
 
 ## Aliases copied from Doxyfile, with @cb, @cpp, @cmake and @ce modified for
