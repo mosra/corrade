@@ -113,6 +113,7 @@ struct ArrayViewTest: TestSuite::Tester {
     void constructFromStaticVoid();
     void constructFromStaticConstVoid();
     void constructDerived();
+    void constructInitializerList();
 
     void convertBool();
     void convertPointer();
@@ -169,6 +170,7 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::constructFromStaticVoid,
               &ArrayViewTest::constructFromStaticConstVoid,
               &ArrayViewTest::constructDerived,
+              &ArrayViewTest::constructInitializerList,
 
               &ArrayViewTest::convertBool,
               &ArrayViewTest::convertPointer,
@@ -542,6 +544,16 @@ void ArrayViewTest::constructDerived() {
     CORRADE_VERIFY(cav == &DerivedArray[0]);
     CORRADE_COMPARE(ca.size(), 5);
     CORRADE_COMPARE(cav.size(), 5);
+}
+
+void ArrayViewTest::constructInitializerList() {
+    std::initializer_list<int> a = {3, 5, 7};
+    ConstArrayView b = arrayView(a);
+    CORRADE_COMPARE(b.size(), 3);
+    CORRADE_COMPARE(b.back(), 7);
+
+    /* R-value init list should work too */
+    CORRADE_COMPARE(arrayView<int>({3, 5, 7}).front(), 3);
 }
 
 void ArrayViewTest::convertBool() {

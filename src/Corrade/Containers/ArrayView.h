@@ -29,6 +29,7 @@
  * @brief Class @ref Corrade::Containers::ArrayView, @ref Corrade::Containers::StaticArrayView
  */
 
+#include <initializer_list>
 #include <type_traits>
 #include <utility>
 
@@ -117,23 +118,27 @@ Example:
 
 @snippet Containers-stl2a.cpp ArrayView
 
+@anchor Containers-ArrayView-initializer-list
+
 <b></b>
 
 @m_class{m-block m-warning}
 
 @par Conversion from std::initializer_list
-    The class deliberately *doesn't* provide any conversion from
-    @ref std::initializer_list, as it would lead to dangerous behavior even in
-    very simple and seemingly innocent cases --- see the snippet below.
-    Instead, where it makes sense, functions accepting @ref ArrayView provide
-    also an overload taking @ref std::initializer_list.
+    The class deliberately *doesn't* provide a @ref std::initializer_list
+    constructor, as it would lead to dangerous behavior even in very simple and
+    seemingly innocent cases --- see the snippet below. Instead, where it makes
+    sense, functions accepting @ref ArrayView provide also an overload taking
+    @ref std::initializer_list. Alternatively, you can use
+    @ref arrayView(std::initializer_list<T>), which is more explicit and thus
+    should prevent accidental use.
 @par
     @code{.cpp}
     std::initializer_list<int> a{1, 2, 3, 4};
-    a[2] = 5; // okay
+    foo(a[2]);  // okay
 
-    Containers::ArrayView<int> b{1, 2, 3, 4}; // hypothetical, doesn't compile
-    b[2] = 5; // crash, initializer_list already destructed here
+    Containers::ArrayView<const int> b{1, 2, 3, 4}; // hypothetical, doesn't compile
+    foo(b[2]);  // crash, initializer_list already destructed here
     @endcode
 
 Other array classes provide a subset of this STL compatibility as well, see the
@@ -666,6 +671,19 @@ two lines are equivalent:
 */
 template<std::size_t size, class T> constexpr ArrayView<T> arrayView(T(&data)[size]) {
     return ArrayView<T>{data};
+}
+
+/** @relatesalso ArrayView
+@brief Make a view on an initializer list
+@m_since_latest
+
+Not present as a constructor in order to avoid accidental dangling references
+with r-value initializer lists. See
+@ref Containers-ArrayView-initializer-list "class documentation" for more
+information.
+*/
+template<class T> ArrayView<const T> arrayView(std::initializer_list<T> list) {
+    return ArrayView<const T>{list.begin(), list.size()};
 }
 
 /** @relatesalso ArrayView

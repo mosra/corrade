@@ -58,6 +58,10 @@ namespace Corrade {
     @ref Containers::ArrayView<const void> types
 -   New @ref Containers::stridedArrayView() convenience overload taking
     explicit stride and size parameters
+-   New @ref Containers::array(std::initializer_list<T>) and
+    @ref Containers::arrayView(std::initializer_list<T>) helpers for turning
+    initializer lists into array(view)s. These are deliberately not present as
+    constructors as there would be various caveats with such approach.
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 

@@ -268,16 +268,27 @@ void ArrayTest::constructDirectInit() {
 }
 
 void ArrayTest::constructInPlaceInit() {
-    Array a{InPlaceInit, {1, 3, 127, -48}};
-    CORRADE_VERIFY(a);
-    CORRADE_COMPARE(a.size(), 4);
-    CORRADE_COMPARE(a[0], 1);
-    CORRADE_COMPARE(a[1], 3);
-    CORRADE_COMPARE(a[2], 127);
-    CORRADE_COMPARE(a[3], -48);
+    Array a1{InPlaceInit, {1, 3, 127, -48}};
+    CORRADE_VERIFY(a1);
+    CORRADE_COMPARE(a1.size(), 4);
+    CORRADE_COMPARE(a1[0], 1);
+    CORRADE_COMPARE(a1[1], 3);
+    CORRADE_COMPARE(a1[2], 127);
+    CORRADE_COMPARE(a1[3], -48);
 
-    Array b{InPlaceInit, {}};
-    CORRADE_VERIFY(!b);
+    Array a2 = array<int>({1, 3, 127, -48});
+    CORRADE_VERIFY(a2);
+    CORRADE_COMPARE(a2.size(), 4);
+    CORRADE_COMPARE(a2[0], 1);
+    CORRADE_COMPARE(a2[1], 3);
+    CORRADE_COMPARE(a2[2], 127);
+    CORRADE_COMPARE(a2[3], -48);
+
+    Array b1{InPlaceInit, {}};
+    CORRADE_VERIFY(!b1);
+
+    Array b2 = array<int>({});
+    CORRADE_VERIFY(!b2);
 }
 
 void ArrayTest::constructZeroSize() {

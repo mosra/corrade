@@ -349,10 +349,15 @@ class Array {
          * Allocates the array using the @ref Array(NoInitT, std::size_t)
          * constructor and then copy-initializes each element with placement
          * new using values from @p list.
+         *
+         * Note that there's no plain initializer-list constructor because it
+         * would cause a similar fiasco as with @ref std::vector, where
+         * @cpp std::vector<int>{5} @ce creates one-element vector but
+         * @cpp std::vector<int>(5) @ce creates a zero-initialized five-element
+         * vector. To save typing, you can use the
+         * @ref array(std::initializer_list<T>) helper which doesn't suffer
+         * from this problem.
          */
-        /* There is no initializer-list constructor because it would make
-           Containers::Array<std::size_t>{5} behave differently (and that would
-           break things *badly* as this is a *very* common use-case) */
         explicit Array(InPlaceInitT, std::initializer_list<T> list);
 
         /**
@@ -645,6 +650,17 @@ class Array {
         std::size_t _size;
         D _deleter;
 };
+
+/** @relatesalso Array
+@brief Construct a list-initialized array
+@m_since_latest
+
+Convenience shortcut to the @ref Array::Array(InPlaceInitT, std::initializer_list<T>)
+constructor. See its documentation for a design rationale.
+*/
+template<class T> inline Array<T> array(std::initializer_list<T> list) {
+    return Array<T>{InPlaceInit, list};
+}
 
 /** @relatesalso ArrayView
 @brief Make view on @ref Array
