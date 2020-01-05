@@ -23,6 +23,10 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+/* Including this first so we test it guesses everything properly without
+   accidental help from standard headers */
+#include "Corrade/configure.h"
+
 #include <sstream>
 
 #include "Corrade/TestSuite/Tester.h"
