@@ -728,14 +728,7 @@ void StridedArrayViewTest::construct() {
         CORRADE_COMPARE(b[2], 7853268);
         CORRADE_COMPARE(b[4], 234810);
 
-        auto c = stridedArrayView(
-            /* GCC 4.8 (and maybe 4.9?) needs an explicit cast */
-            #if defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 5
-            Containers::arrayView(a),
-            #else
-            a,
-            #endif
-            &a[0].value, 10, 8);
+        auto c = stridedArrayView(a, &a[0].value, 10, 8);
         CORRADE_VERIFY((std::is_same<decltype(c), StridedArrayView1Di>::value));
         CORRADE_VERIFY(c.data() == a);
         CORRADE_VERIFY(!c.empty());
@@ -763,14 +756,7 @@ void StridedArrayViewTest::construct() {
         CORRADE_COMPARE(cb[2], 7853268);
         CORRADE_COMPARE(cb[4], 234810);
 
-        constexpr auto cc = stridedArrayView(
-            /* GCC 4.8 (and maybe 4.9?) needs an explicit cast */
-            #if defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 5
-            Containers::arrayView(Struct),
-            #else
-            Struct,
-            #endif
-            &Struct[0].value, 10, 8);
+        constexpr auto cc = stridedArrayView(Struct, &Struct[0].value, 10, 8);
         CORRADE_VERIFY((std::is_same<decltype(cc), const ConstStridedArrayView1Di>::value));
         CORRADE_VERIFY(cc.data() == Struct);
         CORRADE_VERIFY(!cc.empty());

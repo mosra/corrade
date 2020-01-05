@@ -1222,6 +1222,14 @@ template<class T> constexpr StridedArrayView1D<T> stridedArrayView(ArrayView<typ
     return StridedArrayView1D<T>{data, member, size, stride};
 }
 
+#if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
+/* Otherwise GCC 4.8 (and maybe 4.9?) would need an explicit arrayView(data),
+   which is too annoying */
+template<std::size_t size_, class T, class U> constexpr StridedArrayView1D<T> stridedArrayView(U(&data)[size_], T* member, std::size_t size, std::ptrdiff_t stride) {
+    return StridedArrayView1D<T>{data, member, size, stride};
+}
+#endif
+
 /** @relatesalso StridedArrayView
 @brief Make a strided view on a fixed-size array
 @m_since{2019,10}
