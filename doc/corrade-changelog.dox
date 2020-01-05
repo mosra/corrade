@@ -110,6 +110,13 @@ namespace Corrade {
     only on MSVC, causing `windows.h` to leak unforgivable crimes when
     compiling under MinGW (see [mosra/magnum-plugins#74](https://github.com/mosra/magnum-plugins/issues/74))
 
+@subsection corrade-changelog-latest-bugfixes Bug fixes
+
+-   The @ref CORRADE_TARGET_LIBSTDCXX macro was defined on GCC < 5 only when
+    certain headers were included before. That caused problems especially with
+    the new @ref CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED macro and is now
+    fixed to assume old GCC versions always use libstdc++.
+
 @subsection corrade-changelog-latest-documentation Documentation
 
 -   Various fixes (see [mosra/corrade#80](https://github.com/mosra/corrade/pull/80))

@@ -98,8 +98,7 @@
 #elif defined(__GLIBCXX__)
 #define CORRADE_TARGET_LIBSTDCXX
 /* GCC's <ciso646> provides the __GLIBCXX__ macro only since 6.1, so on older
-   versions we'll try to get it from bits/c++config.h. GCC < 5.0 doesn't have
-   __has_include, so on these versions we'll give up completely. */
+   versions we'll try to get it from bits/c++config.h */
 #elif defined(__has_include)
     #if __has_include(<bits/c++config.h>)
         #include <bits/c++config.h>
@@ -107,6 +106,11 @@
         #define CORRADE_TARGET_LIBSTDCXX
         #endif
     #endif
+/* GCC < 5.0 doesn't have __has_include, so on these versions we'll just assume
+   it's libstdc++ as I don't think those versions are used with anything else
+   nowadays anyway. Clang reports itself as GCC 4.4, so exclude that one. */
+#elif defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 5
+#define CORRADE_TARGET_LIBSTDCXX
 #else
 /* Otherwise no idea. */
 #endif
