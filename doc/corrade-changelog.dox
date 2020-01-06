@@ -88,6 +88,8 @@ namespace Corrade {
 -   Exposed @ref Utility::Endianness::swapInPlace() as a counterpart to
     @ref Utility::Endianness::littleEndianInPlace() and
     @ref Utility::Endianness::bigEndianInPlace()
+-   New family of @ref Utility::copy() functions to efficiently copy
+    multi-dimensional @ref Containers::StridedArrayView instances
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 

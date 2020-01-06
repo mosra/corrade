@@ -34,6 +34,7 @@ if(WITH_UTILITY)
         System.cpp)
 
     set(CorradeUtility_GracefulAssert_SRCS
+        Algorithms.cpp
         Arguments.cpp
         ConfigurationGroup.cpp
         Format.cpp
@@ -42,6 +43,7 @@ if(WITH_UTILITY)
         Unicode.cpp)
 
     set(CorradeUtility_HEADERS
+        Algorithms.h
         Arguments.h
         AbstractHash.h
         Assert.h
