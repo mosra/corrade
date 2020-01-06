@@ -483,17 +483,17 @@ CORRADE_UTILITY_EXPORT bool copy(const std::string& from, const std::string& to)
 #if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
 /**
 @brief Map file for reading and writing
+@m_since_latest
 
-Maps the file as read-write memory and enlarges it to @p size. If the file does
-not exist yet, it is created, if it exists, it's truncated. The array deleter
-takes care of unmapping, however the file is not deleted after unmapping. If an
-error occurs, @cpp nullptr @ce is returned and a message is printed to
-@ref Error. Expects that the filename is in UTF-8.
-@see @ref mapRead(), @ref read(), @ref write()
+Maps the file as read-write memory. The array deleter takes care of unmapping.
+If the file doesn't exist or an error occurs while mapping, @cpp nullptr @ce is
+returned and a message is printed to @ref Error. Expects that the filename is
+in UTF-8.
+@see @ref mapRead(), @ref mapWrite(), @ref read(), @ref write()
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
     @ref CORRADE_TARGET_WINDOWS "Windows" platforms.
-    */
-CORRADE_UTILITY_EXPORT Containers::Array<char, MapDeleter> map(const std::string& filename, std::size_t size);
+*/
+CORRADE_UTILITY_EXPORT Containers::Array<char, MapDeleter> map(const std::string& filename);
 
 /**
 @brief Map file for reading
@@ -502,11 +502,34 @@ Maps the file as read-only memory. The array deleter takes care of unmapping.
 If the file doesn't exist or an error occurs while mapping, @cpp nullptr @ce is
 returned and a message is printed to @ref Error. Expects that the filename is
 in UTF-8.
-@see @ref map(), @ref read()
+@see @ref map(), @ref mapWrite(), @ref read()
 @partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
     @ref CORRADE_TARGET_WINDOWS "Windows" platforms.
 */
 CORRADE_UTILITY_EXPORT Containers::Array<const char, MapDeleter> mapRead(const std::string& filename);
+
+/**
+@brief Map file for writing
+@m_since_latest
+
+Maps the file as read-write memory and enlarges it to @p size. If the file does
+not exist yet, it is created, if it exists, it's truncated --- thus no data
+is preserved. The array deleter takes care of unmapping, however the file is
+not deleted after unmapping. If an error occurs, @cpp nullptr @ce is returned
+and a message is printed to @ref Error. Expects that the filename is in UTF-8.
+@see @ref map(), @ref mapRead(), @ref read(), @ref write()
+@partialsupport Available only on @ref CORRADE_TARGET_UNIX "Unix" and non-RT
+    @ref CORRADE_TARGET_WINDOWS "Windows" platforms.
+*/
+CORRADE_UTILITY_EXPORT Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, std::size_t size);
+
+#ifdef CORRADE_BUILD_DEPRECATED
+/**
+ * @copybrief mapWrite()
+ * @m_deprecated_since_latest Use @ref mapWrite() instead.
+ */
+CORRADE_DEPRECATED("use mapWrite() instead") CORRADE_UTILITY_EXPORT Containers::Array<char, MapDeleter> map(const std::string& filename, std::size_t size);
+#endif
 #endif
 
 #ifndef DOXYGEN_GENERATING_OUTPUT

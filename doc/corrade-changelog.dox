@@ -77,6 +77,8 @@ namespace Corrade {
 -   Added a @ref CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED macro into
     @ref Corrade/Utility/TypeTraits.h denoting if @ref std::is_trivially_copyable
     is available in the standard library
+-   Added @ref Utility::Directory::map(const std::string&) that provides
+    read-write access to mapped files without truncating them.
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 
@@ -122,6 +124,13 @@ namespace Corrade {
 @subsection corrade-changelog-latest-documentation Documentation
 
 -   Various fixes (see [mosra/corrade#80](https://github.com/mosra/corrade/pull/80))
+
+@subsection corrade-changelog-latest-deprecated Deprecated APIs
+
+-   @cpp Utility::Directory::map(const std::string&, std::size_t) @ce is
+    deprecated and renamed to @ref Utility::Directory::mapWrite() as it doesn't
+    preserve original file contents and thus can't be used for read-write
+    access
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 

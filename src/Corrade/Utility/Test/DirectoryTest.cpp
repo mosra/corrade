@@ -143,12 +143,16 @@ struct DirectoryTest: TestSuite::Tester {
     #endif
 
     void map();
-    void mapNoPermission();
+    void mapNonexistent();
     void mapUtf8();
 
     void mapRead();
     void mapReadNonexistent();
     void mapReadUtf8();
+
+    void mapWrite();
+    void mapWriteNoPermission();
+    void mapWriteUtf8();
 
     std::string _testDir,
         _testDirUtf8,
@@ -257,12 +261,16 @@ DirectoryTest::DirectoryTest() {
     #endif
 
     addTests({&DirectoryTest::map,
-              &DirectoryTest::mapNoPermission,
+              &DirectoryTest::mapNonexistent,
               &DirectoryTest::mapUtf8,
 
               &DirectoryTest::mapRead,
               &DirectoryTest::mapReadNonexistent,
-              &DirectoryTest::mapReadUtf8});
+              &DirectoryTest::mapReadUtf8,
+
+              &DirectoryTest::mapWrite,
+              &DirectoryTest::mapWriteNoPermission,
+              &DirectoryTest::mapWriteUtf8});
 
     #ifdef CORRADE_TARGET_APPLE
     if(Directory::isSandboxed()
@@ -1256,31 +1264,39 @@ void DirectoryTest::copy100MMap() {
 void DirectoryTest::map() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
     std::string data{"\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11};
+    std::string file = Directory::join(_writeTestDir, "mappedFile");
+    if(Directory::exists(file)) CORRADE_VERIFY(Directory::rm(file));
+    Directory::writeString(file, data);
+
     {
-        auto mappedFile = Directory::map(Directory::join(_writeTestDir, "mappedFile"), data.size());
-        CORRADE_VERIFY(mappedFile);
-        CORRADE_COMPARE(mappedFile.size(), data.size());
-        std::copy(std::begin(data), std::end(data), mappedFile.begin());
+        auto mappedFile = Directory::map(file);
+        CORRADE_COMPARE_AS(Containers::arrayView(mappedFile),
+            Containers::arrayView<char>({'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}),
+            TestSuite::Compare::Container);
+
+        /* Write a thing there */
+        mappedFile[2] = '\xCA';
+        mappedFile[3] = '\xFE';
+
+        /* Implicit unmap */
     }
-    CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "mappedFile"),
-        data,
+
+    /* The file should be changed */
+    CORRADE_COMPARE_AS(file,
+        (std::string{"\xCA\xFE\xCA\xFE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11}),
         TestSuite::Compare::FileToString);
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
 }
 
-void DirectoryTest::mapNoPermission() {
+void DirectoryTest::mapNonexistent() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-    if(Directory::home() == "/root")
-        CORRADE_SKIP("Running under root, can't test for permissions.");
-
     {
         std::ostringstream out;
         Error err{&out};
-        auto mappedFile = Directory::map("/root/mappedFile", 64);
-        CORRADE_VERIFY(!mappedFile);
-        CORRADE_COMPARE(out.str(), "Utility::Directory::map(): can't open /root/mappedFile\n");
+        CORRADE_VERIFY(!Directory::map("nonexistent"));
+        CORRADE_COMPARE(out.str(), "Utility::Directory::map(): can't open nonexistent\n");
     }
     #else
     CORRADE_SKIP("Not implemented on this platform.");
@@ -1289,16 +1305,12 @@ void DirectoryTest::mapNoPermission() {
 
 void DirectoryTest::mapUtf8() {
     #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
-    std::string data{"\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11};
     {
-        auto mappedFile = Directory::map(Directory::join(_writeTestDir, "hýždě chlípníka"), data.size());
-        CORRADE_VERIFY(mappedFile);
-        CORRADE_COMPARE(mappedFile.size(), data.size());
-        std::copy(std::begin(data), std::end(data), mappedFile.begin());
+        const auto mappedFile = Directory::map(Directory::join(_testDirUtf8, "hýždě"));
+        CORRADE_COMPARE_AS(Containers::arrayView(mappedFile),
+            Containers::arrayView<char>({'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}),
+            TestSuite::Compare::Container);
     }
-    CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "hýždě chlípníka"),
-        data,
-        TestSuite::Compare::FileToString);
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif
@@ -1340,6 +1352,57 @@ void DirectoryTest::mapReadUtf8() {
                 {'\xCA', '\xFE', '\xBA', '\xBE', '\x0D', '\x0A', '\x00', '\xDE', '\xAD', '\xBE', '\xEF'}}),
             TestSuite::Compare::Container);
     }
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+
+void DirectoryTest::mapWrite() {
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    std::string data{"\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11};
+    {
+        auto mappedFile = Directory::mapWrite(Directory::join(_writeTestDir, "mappedWriteFile"), data.size());
+        CORRADE_VERIFY(mappedFile);
+        CORRADE_COMPARE(mappedFile.size(), data.size());
+        std::copy(std::begin(data), std::end(data), mappedFile.begin());
+    }
+    CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "mappedWriteFile"),
+        data,
+        TestSuite::Compare::FileToString);
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+
+void DirectoryTest::mapWriteNoPermission() {
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    if(Directory::home() == "/root")
+        CORRADE_SKIP("Running under root, can't test for permissions.");
+
+    {
+        std::ostringstream out;
+        Error err{&out};
+        auto mappedFile = Directory::mapWrite("/root/mappedFile", 64);
+        CORRADE_VERIFY(!mappedFile);
+        CORRADE_COMPARE(out.str(), "Utility::Directory::mapWrite(): can't open /root/mappedFile\n");
+    }
+    #else
+    CORRADE_SKIP("Not implemented on this platform.");
+    #endif
+}
+
+void DirectoryTest::mapWriteUtf8() {
+    #if defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT))
+    std::string data{"\xCA\xFE\xBA\xBE\x0D\x0A\x00\xDE\xAD\xBE\xEF", 11};
+    {
+        auto mappedFile = Directory::mapWrite(Directory::join(_writeTestDir, "hýždě chlípníka"), data.size());
+        CORRADE_VERIFY(mappedFile);
+        CORRADE_COMPARE(mappedFile.size(), data.size());
+        std::copy(std::begin(data), std::end(data), mappedFile.begin());
+    }
+    CORRADE_COMPARE_AS(Directory::join(_writeTestDir, "hýždě chlípníka"),
+        data,
+        TestSuite::Compare::FileToString);
     #else
     CORRADE_SKIP("Not implemented on this platform.");
     #endif

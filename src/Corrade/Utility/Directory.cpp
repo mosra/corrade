@@ -759,34 +759,24 @@ void MapDeleter::operator()(const char* const data, const std::size_t size) {
     if(_fd) close(_fd);
 }
 
-Containers::Array<char, MapDeleter> map(const std::string& filename, std::size_t size) {
-    /* Open the file for writing. Create if it doesn't exist, truncate it if it
-       does. */
-    const int fd = open(filename.data(), O_RDWR|O_CREAT|O_TRUNC, mode_t(0600));
+Containers::Array<char, MapDeleter> map(const std::string& filename) {
+    /* Open the file for reading */
+    const int fd = open(filename.data(), O_RDWR);
     if(fd == -1) {
-        Error() << "Utility::Directory::map(): can't open" << filename;
+        Error{} << "Utility::Directory::map(): can't open" << filename;
         return nullptr;
     }
 
-    /* Resize the file to requested size by seeking one byte before */
-    if(lseek(fd, size - 1, SEEK_SET) == -1) {
-        close(fd);
-        Error() << "Utility::Directory::map(): can't seek to resize the file";
-        return nullptr;
-    }
-
-    /* And then writing a zero byte on that position */
-    if(::write(fd, "", 1) != 1) {
-        close(fd);
-        Error() << "Utility::Directory::map(): can't write to resize the file";
-        return nullptr;
-    }
+    /* Get file size */
+    const off_t currentPos = lseek(fd, 0, SEEK_CUR);
+    const std::size_t size = lseek(fd, 0, SEEK_END);
+    lseek(fd, currentPos, SEEK_SET);
 
     /* Map the file */
     char* data = reinterpret_cast<char*>(mmap(nullptr, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0));
     if(data == MAP_FAILED) {
         close(fd);
-        Error() << "Utility::Directory::map(): can't map the file";
+        Error{} << "Utility::Directory::map(): can't map the file";
         return nullptr;
     }
 
@@ -816,6 +806,40 @@ Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
 
     return Containers::Array<const char, MapDeleter>{data, size, MapDeleter{fd}};
 }
+
+Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, std::size_t size) {
+    /* Open the file for writing. Create if it doesn't exist, truncate it if it
+       does. */
+    const int fd = open(filename.data(), O_RDWR|O_CREAT|O_TRUNC, mode_t(0600));
+    if(fd == -1) {
+        Error{} << "Utility::Directory::mapWrite(): can't open" << filename;
+        return nullptr;
+    }
+
+    /* Resize the file to requested size by seeking one byte before */
+    if(lseek(fd, size - 1, SEEK_SET) == -1) {
+        close(fd);
+        Error{} << "Utility::Directory::mapWrite(): can't seek to resize the file";
+        return nullptr;
+    }
+
+    /* And then writing a zero byte on that position */
+    if(::write(fd, "", 1) != 1) {
+        close(fd);
+        Error{} << "Utility::Directory::mapWrite(): can't write to resize the file";
+        return nullptr;
+    }
+
+    /* Map the file */
+    char* data = reinterpret_cast<char*>(mmap(nullptr, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0));
+    if(data == MAP_FAILED) {
+        close(fd);
+        Error{} << "Utility::Directory::mapWrite(): can't map the file";
+        return nullptr;
+    }
+
+    return Containers::Array<char, MapDeleter>{data, size, MapDeleter{fd}};
+}
 #elif defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)
 void MapDeleter::operator()(const char* const data, const std::size_t) {
     if(data) UnmapViewOfFile(data);
@@ -823,23 +847,26 @@ void MapDeleter::operator()(const char* const data, const std::size_t) {
     if(_hFile) CloseHandle(_hFile);
 }
 
-Containers::Array<char, MapDeleter> map(const std::string& filename, std::size_t size) {
+Containers::Array<char, MapDeleter> map(const std::string& filename) {
     /* Open the file for writing. Create if it doesn't exist, truncate it if it
        does. */
     HANDLE hFile = CreateFileW(widen(filename).data(),
-        GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS, 0, nullptr);
+        GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
     if (hFile == INVALID_HANDLE_VALUE) {
         Error() << "Utility::Directory::map(): can't open" << filename;
         return nullptr;
     }
 
     /* Create the file mapping */
-    HANDLE hMap = CreateFileMappingW(hFile, nullptr, PAGE_READWRITE, 0, size, nullptr);
+    HANDLE hMap = CreateFileMappingW(hFile, nullptr, PAGE_READWRITE, 0, 0, nullptr);
     if (!hMap) {
         Error() << "Utility::Directory::map(): can't create the file mapping:" << GetLastError();
         CloseHandle(hFile);
         return nullptr;
     }
+
+    /* Get file size */
+    const size_t size = GetFileSize(hFile, nullptr);
 
     /* Map the file */
     char* data = reinterpret_cast<char*>(::MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0));
@@ -883,6 +910,42 @@ Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
     }
 
     return Containers::Array<const char, MapDeleter>{data, size, MapDeleter{hFile, hMap}};
+}
+
+Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, std::size_t size) {
+    /* Open the file for writing. Create if it doesn't exist, truncate it if it
+       does. */
+    HANDLE hFile = CreateFileW(widen(filename).data(),
+        GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS, 0, nullptr);
+    if (hFile == INVALID_HANDLE_VALUE) {
+        Error() << "Utility::Directory::mapWrite(): can't open" << filename;
+        return nullptr;
+    }
+
+    /* Create the file mapping */
+    HANDLE hMap = CreateFileMappingW(hFile, nullptr, PAGE_READWRITE, 0, size, nullptr);
+    if (!hMap) {
+        Error() << "Utility::Directory::mapWrite(): can't create the file mapping:" << GetLastError();
+        CloseHandle(hFile);
+        return nullptr;
+    }
+
+    /* Map the file */
+    char* data = reinterpret_cast<char*>(::MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0));
+    if(!data) {
+        Error() << "Utility::Directory::mapWrite(): can't map the file:" << GetLastError();
+        CloseHandle(hMap);
+        CloseHandle(hFile);
+        return nullptr;
+    }
+
+    return Containers::Array<char, MapDeleter>{data, size, MapDeleter{hFile, hMap}};
+}
+#endif
+
+#if defined(CORRADE_BUILD_DEPRECATED) && (defined(CORRADE_TARGET_UNIX) || (defined(CORRADE_TARGET_WINDOWS) && !defined(CORRADE_TARGET_WINDOWS_RT)))
+Containers::Array<char, MapDeleter> map(const std::string& filename, const std::size_t size) {
+    return mapWrite(filename, size);
 }
 #endif
 
