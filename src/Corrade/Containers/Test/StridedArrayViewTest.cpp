@@ -599,10 +599,13 @@ void StridedArrayViewTest::dimensionsAccessInvalid() {
 }
 
 void StridedArrayViewTest::dimensionsRangeFor() {
-    Size3D a{7, 13, 29};
+    Size3D a{6, 12, 28};
+    for(std::size_t& i: a) ++i;
+    CORRADE_COMPARE(a, (Size3D{7, 13, 29}));
 
+    const Size3D ca = a;
     std::size_t sum = 1;
-    for(std::size_t i: a) sum *= i;
+    for(std::size_t i: ca) sum *= i;
     CORRADE_COMPARE(sum, 29*13*7);
 }
 
