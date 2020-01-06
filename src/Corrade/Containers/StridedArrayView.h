@@ -514,6 +514,22 @@ template<unsigned dimensions, class T> class StridedArrayView {
             return emptyInternal(typename Implementation::GenerateSequence<dimensions>::Type{});
         }
 
+        /**
+         * @brief Whether the view is contiguous from given dimension further
+         * @m_since_latest
+         *
+         * The view is considered contiguous if its last dimension has
+         * @ref stride() equal to the type size and every dimension before that
+         * until and including @p dimension has its stride equal to element
+         * count times stride of the dimension that follows it.
+         *
+         * Note that even if the data are tightly packed in memory, this
+         * function may return @cpp false @ce --- for example, a contiguous
+         * view with two dimensions @ref transposed() is no longer contiguous,
+         * same as with zero or negative strides.
+         */
+        template<unsigned dimension = 0> bool isContiguous() const;
+
         /** @brief Element access */
         ElementType operator[](std::size_t i) const;
 
@@ -1517,6 +1533,17 @@ template<unsigned dimensions, class T> class StridedIterator {
 */
 template<unsigned dimensions, class T> inline StridedIterator<dimensions, T> operator+(std::ptrdiff_t i, StridedIterator<dimensions, T> it) {
     return it + i;
+}
+
+template<unsigned dimensions, class T> template<unsigned dimension> bool StridedArrayView<dimensions, T>::isContiguous() const {
+    static_assert(dimension < dimensions, "dimension out of bounds");
+    std::size_t nextDimensionSize = sizeof(T);
+    for(std::size_t i = dimensions; i != dimension; --i) {
+        if(std::size_t(_stride[i - 1]) != nextDimensionSize) return false;
+        nextDimensionSize *= _size[i - 1];
+    }
+
+    return true;
 }
 
 namespace Implementation {

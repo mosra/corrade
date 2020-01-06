@@ -27,6 +27,7 @@
 
 #include "Corrade/Containers/StridedArrayView.h"
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/DebugStl.h" /** @todo remove when <sstream> is gone */
 
 namespace {
@@ -179,6 +180,8 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void convert3DConstVoidFromConstExternalView();
 
     void emptyCheck();
+
+    void isContiguous();
 
     void access();
     void accessConst();
@@ -364,6 +367,8 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::convert3DConstVoidFromConstExternalView,
 
               &StridedArrayViewTest::emptyCheck,
+
+              &StridedArrayViewTest::isContiguous,
 
               &StridedArrayViewTest::access,
               &StridedArrayViewTest::accessConst,
@@ -1941,6 +1946,59 @@ void StridedArrayViewTest::emptyCheck() {
     CORRADE_VERIFY(cb);
     constexpr bool cbEmpty = cb.empty();
     CORRADE_VERIFY(!cbEmpty);
+}
+
+void StridedArrayViewTest::isContiguous() {
+    int a[2*3*5];
+    StridedArrayView3Di b{a, {5, 3, 2}, {6*4, 2*4, 4}};
+
+    /* The array should be contiguous -- so if I fill it, it'll be a monotonic
+       sequence of numbers */
+    int n = 0;
+    for(StridedArrayView2Di i: b)
+        for(StridedArrayView1Di j: i)
+            for(int& k: j)
+                k = ++n;
+    CORRADE_COMPARE_AS(Containers::arrayView(a), Containers::arrayView<int>({
+         1,  2,  3,  4,  5,  6,  7,  8,  9, 10,
+        11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+        21, 22, 23, 24, 25, 26, 27, 28, 29, 30
+    }), TestSuite::Compare::Container);
+    CORRADE_VERIFY(b.isContiguous<2>());
+    CORRADE_VERIFY(b.isContiguous<1>());
+    CORRADE_VERIFY(b.isContiguous<0>());
+    CORRADE_VERIFY(b.isContiguous());
+
+    /* Sparse variants */
+    StridedArrayView3Di c{a, {2, 3, 2}, {2*6*4, 2*4, 4}};
+    CORRADE_VERIFY(c.isContiguous<2>());
+    CORRADE_VERIFY(c.isContiguous<1>());
+    CORRADE_VERIFY(!c.isContiguous<0>());
+    CORRADE_VERIFY(!c.isContiguous());
+
+    StridedArrayView3Di d{a, {5, 1, 2}, {6*4, 2*2*4, 4}};
+    CORRADE_VERIFY(d.isContiguous<2>());
+    CORRADE_VERIFY(!d.isContiguous<1>());
+    CORRADE_VERIFY(!d.isContiguous<0>());
+
+    StridedArrayView3Di e{a, {5, 3, 1}, {6*4, 2*4, 2*4}};
+    CORRADE_VERIFY(!e.isContiguous<2>());
+    CORRADE_VERIFY(!e.isContiguous<1>());
+    CORRADE_VERIFY(!e.isContiguous<0>());
+
+    /* "Broadcast" */
+    StridedArrayView3Di f{a, {5, 3, 2}, {6*4, 0, 4}};
+    CORRADE_VERIFY(f.isContiguous<2>());
+    CORRADE_VERIFY(!f.isContiguous<1>());
+    CORRADE_VERIFY(!f.isContiguous<0>());
+
+    /* Packed block of memory, but strides not in order / negative */
+    CORRADE_VERIFY(!b.flipped<2>().isContiguous<2>());
+    CORRADE_VERIFY(!b.flipped<2>().isContiguous<1>());
+    CORRADE_VERIFY(!b.flipped<2>().isContiguous<0>());
+    CORRADE_VERIFY(!(b.transposed<1, 2>().isContiguous<2>()));
+    CORRADE_VERIFY(!(b.transposed<1, 2>().isContiguous<1>()));
+    CORRADE_VERIFY(!(b.transposed<1, 2>().isContiguous<0>()));
 }
 
 void StridedArrayViewTest::access() {

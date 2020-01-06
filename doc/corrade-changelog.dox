@@ -62,6 +62,8 @@ namespace Corrade {
     @ref Containers::arrayView(std::initializer_list<T>) helpers for turning
     initializer lists into array(view)s. These are deliberately not present as
     constructors as there would be various caveats with such approach.
+-   Added @ref Containers::StridedArrayView::isContiguous() for checking
+    memory layout of particular view dimensions
 
 @subsubsection corrade-changelog-latest-new-utility Utility library
 
