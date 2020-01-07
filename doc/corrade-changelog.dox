@@ -904,14 +904,14 @@ Released 2018-05-01, tagged as
     @ref CORRADE_INTERNAL_ASSERT_OUTPUT()
 -   New @ref CORRADE_CONSTEXPR_ASSERT() and @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT()
     macros for use in C++11 constexpr functions
--   @ref String::beginsWith() and @ref String::endsWith() overloads taking just
-    a single @cpp char @ce
--   @ref String::ltrimInPlace(), @ref String::rtrimInPlace() and
-    @ref String::trimInPlace() for easier operation on mutable strings. The
-    @ref String::ltrim(), @ref String::rtrim() and @ref String::trim()
-    functions are now implemented using these.
--   @ref String::stripPrefix() and @ref String::stripSuffix() for checked
-    prefix and suffix stripping
+-   @ref Utility::String::beginsWith() and @ref Utility::String::endsWith()
+    overloads taking just a single @cpp char @ce
+-   @ref Utility::String::ltrimInPlace(), @ref Utility::String::rtrimInPlace()
+    and @ref Utility::String::trimInPlace() for easier operation on mutable
+    strings. The @ref Utility::String::ltrim(), @ref Utility::String::rtrim()
+    and @ref Utility::String::trim() functions are now implemented using these.
+-   @ref Utility::String::stripPrefix() and @ref Utility::String::stripSuffix()
+    for checked prefix and suffix stripping
 
 @subsection corrade-changelog-2018-04-buildsystem Build system
 
