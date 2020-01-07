@@ -146,13 +146,21 @@ void copy(const Containers::StridedArrayView4D<const char>& src, const Container
                                     srcPtr0 + i1*srcStride[1], size23);
                 }
             } else {
-                if(src.isContiguous<3>() && dst.isContiguous<3>()) {
-                    /* Here I tried to have a special branch where it would
-                       copy the elements directly instead of using memcpy if
-                       size[3] < 32, but that caused both debug and release
-                       performance to worsen. Additionally this would need to
-                       check for alignment etc and that's probably not worth
-                       it. */
+                /* On Clang, for smaller sizes in the last dimension we prefer
+                   Duff's device. The size is chosen based on the benchmark in
+                   the test, might need to adjust for different platforms. For
+                   Clang on Mac, copyBenchmark3DNonContiguous() numbers:
+
+                    bytes   memcpy  loop    duff
+                    ------- ------- ------- -----
+                    1B      55.3    30.37   24.43
+                    4B      19.3    13.91   12.34
+                    8B       6.6    11.32    7.90 (for >= 8B it gets worse)
+
+                   It becomes slightly worse in Debug (but not slower than a
+                   hand-written loop using operator[], so I think that's still
+                   acceptable). OTOH, GCC is slower with Duff in both Debug and Release, so there we use the loop instead. */
+                if(src.isContiguous<3>() && dst.isContiguous<3>() && size[3] >= 8) {
                     for(std::size_t i0 = 0; i0 != size[0]; ++i0) {
                         const char* srcPtr0 = srcPtr + i0*srcStride[0];
                         char* dstPtr0 = dstPtr + i0*dstStride[0];
@@ -174,9 +182,48 @@ void copy(const Containers::StridedArrayView4D<const char>& src, const Container
                             for(std::size_t i2 = 0; i2 != size[2]; ++i2) {
                                 const char* srcPtr2 = srcPtr1 + i2*srcStride[2];
                                 char* dstPtr2 = dstPtr1 + i2*dstStride[2];
+
+                                #if !defined(CORRADE_TARGET_CLANG)
                                 for(std::size_t i3 = 0; i3 != size[3]; ++i3)
                                     *(dstPtr2 + i3*dstStride[3]) =
                                         *(srcPtr2 + i3*srcStride[3]);
+                                #else
+                                std::size_t n = (size[3] + 7)/8;
+                                switch(size[3]%8) {
+                                    case 0: do { *dstPtr2 = *srcPtr2;
+                                                 dstPtr2 += dstStride[3];
+                                                 srcPtr2 += srcStride[3];
+                                                 CORRADE_FALLTHROUGH
+                                    case 7:      *dstPtr2 = *srcPtr2;
+                                                 dstPtr2 += dstStride[3];
+                                                 srcPtr2 += srcStride[3];
+                                                 CORRADE_FALLTHROUGH
+                                    case 6:      *dstPtr2 = *srcPtr2;
+                                                 dstPtr2 += dstStride[3];
+                                                 srcPtr2 += srcStride[3];
+                                                 CORRADE_FALLTHROUGH
+                                    case 5:      *dstPtr2 = *srcPtr2;
+                                                 dstPtr2 += dstStride[3];
+                                                 srcPtr2 += srcStride[3];
+                                                 CORRADE_FALLTHROUGH
+                                    case 4:      *dstPtr2 = *srcPtr2;
+                                                 dstPtr2 += dstStride[3];
+                                                 srcPtr2 += srcStride[3];
+                                                 CORRADE_FALLTHROUGH
+                                    case 3:      *dstPtr2 = *srcPtr2;
+                                                 dstPtr2 += dstStride[3];
+                                                 srcPtr2 += srcStride[3];
+                                                 CORRADE_FALLTHROUGH
+                                    case 2:      *dstPtr2 = *srcPtr2;
+                                                 dstPtr2 += dstStride[3];
+                                                 srcPtr2 += srcStride[3];
+                                                 CORRADE_FALLTHROUGH
+                                    case 1:      *dstPtr2 = *srcPtr2;
+                                                 dstPtr2 += dstStride[3];
+                                                 srcPtr2 += srcStride[3];
+                                            } while(--n > 0);
+                                }
+                                #endif
                             }
                         }
                     }

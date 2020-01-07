@@ -64,7 +64,7 @@ struct AlgorithmsTest: TestSuite::Tester {
 
     void copyBenchmark1DNonContiguous();
     void copyBenchmark2DNonContiguous();
-    void copyBenchmark3DNonContiguous();
+    template<class T> void copyBenchmark3DNonContiguous();
 };
 
 const struct {
@@ -126,12 +126,48 @@ const struct {
     {"contiguous transposed", {105, 15, 5, 1}, {105, 15, 5, 1}, false, true}
 };
 
+/* For testing large types (and the Duff's device branch, which is 8 bytes and
+   above right now) */
+template<std::size_t size> struct Data {
+    /*implicit*/ Data() = default;
+    /*implicit*/ Data(char i) { data[0] = i; }
+
+    char data[size];
+
+    Data& operator++() {
+        ++data[0];
+        return *this;
+    }
+
+    bool operator==(const Data& other) const {
+        return data[0] == other.data[0];
+    }
+};
+template<std::size_t size> Debug& operator<<(Debug& debug, const Data<size>& value) {
+    return debug << value.data[0];
+}
+
 template<class> struct TypeName;
 template<> struct TypeName<char> {
     static const char* name() { return "char"; }
 };
 template<> struct TypeName<int> {
     static const char* name() { return "int"; }
+};
+template<> struct TypeName<Data<1>> {
+    static const char* name() { return "1B"; }
+};
+template<> struct TypeName<Data<4>> {
+    static const char* name() { return "4B"; }
+};
+template<> struct TypeName<Data<8>> {
+    static const char* name() { return "8B"; }
+};
+template<> struct TypeName<Data<16>> {
+    static const char* name() { return "16B"; }
+};
+template<> struct TypeName<Data<32>> {
+    static const char* name() { return "32B"; }
 };
 
 AlgorithmsTest::AlgorithmsTest() {
@@ -152,6 +188,7 @@ AlgorithmsTest::AlgorithmsTest() {
     addInstancedTests<AlgorithmsTest>({
         &AlgorithmsTest::copyStrided4D<char>,
         &AlgorithmsTest::copyStrided4D<int>,
+        &AlgorithmsTest::copyStrided4D<Data<32>>,
         }, Containers::arraySize(Copy4DData));
 
     addTests({&AlgorithmsTest::copyNonMatchingSizes,
@@ -174,7 +211,11 @@ AlgorithmsTest::AlgorithmsTest() {
 
                    &AlgorithmsTest::copyBenchmark1DNonContiguous,
                    &AlgorithmsTest::copyBenchmark2DNonContiguous,
-                   &AlgorithmsTest::copyBenchmark3DNonContiguous}, 100);
+                   &AlgorithmsTest::copyBenchmark3DNonContiguous<Data<1>>,
+                   &AlgorithmsTest::copyBenchmark3DNonContiguous<Data<4>>,
+                   &AlgorithmsTest::copyBenchmark3DNonContiguous<Data<8>>,
+                   &AlgorithmsTest::copyBenchmark3DNonContiguous<Data<16>>,
+                   &AlgorithmsTest::copyBenchmark3DNonContiguous<Data<32>>}, 100);
 }
 
 void AlgorithmsTest::copy() {
@@ -691,27 +732,29 @@ void AlgorithmsTest::copyBenchmark2DNonContiguous() {
     CORRADE_COMPARE(dstData[Size2*Size2 - 2], Size2*Size2 + 10 - 2);
 }
 
-void AlgorithmsTest::copyBenchmark3DNonContiguous() {
-    int srcData[Size*Size*Size*2];
-    int dstData[Size*Size*Size*2];
-    Containers::StridedArrayView3D<int> src{srcData, {Size, Size, Size},
-        {Size*Size*8, Size*8, 8}};
-    Containers::StridedArrayView3D<int> dst{dstData, {Size, Size, Size},
-        {Size*Size*8, Size*8, 8}};
-    CORRADE_VERIFY(!src.isContiguous<2>());
-    CORRADE_VERIFY(!dst.isContiguous<2>());
+template<class T> void AlgorithmsTest::copyBenchmark3DNonContiguous() {
+    setTestCaseTemplateName(TypeName<T>::name());
+
+    T srcData[Size*Size*Size*2*4/sizeof(T)];
+    T dstData[Size*Size*Size*2*4/sizeof(T)];
+    Containers::StridedArrayView3D<T> src{srcData, {Size*4/sizeof(T), Size, Size},
+        {Size*Size*2*sizeof(T), Size*2*sizeof(T), 2*sizeof(T)}};
+    Containers::StridedArrayView3D<T> dst{dstData, {Size*4/sizeof(T), Size, Size},
+        {Size*Size*2*sizeof(T), Size*2*sizeof(T), 2*sizeof(T)}};
+    CORRADE_VERIFY(!src.template isContiguous<2>());
+    CORRADE_VERIFY(!dst.template isContiguous<2>());
 
     int base = 0;
     CORRADE_BENCHMARK(10) {
         int n = base;
-        for(int& i: srcData) i = ++n;
+        for(T& i: srcData) i.data[0] = ++n;
 
         Utility::copy(src, dst);
 
         ++base;
     }
 
-    CORRADE_COMPARE(dstData[Size*Size*Size - 2], Size*Size*Size + 10 - 2);
+    CORRADE_COMPARE(dstData[Size*Size*Size*4/sizeof(T) - 2].data[0], (Size*Size*Size*4/sizeof(T) + 10 - 2)%256);
 }
 
 }}}
