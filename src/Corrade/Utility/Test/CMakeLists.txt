@@ -104,7 +104,7 @@ target_compile_definitions(UtilityAssertStandardDisabledTest PRIVATE
     "CORRADE_STANDARD_ASSERT" "NDEBUG")
 
 corrade_add_test(UtilityAssertGracefulTest AssertGracefulTest.cpp)
-corrade_add_test(UtilityEndianTest EndianTest.cpp)
+corrade_add_test(UtilityEndiannessTest EndiannessTest.cpp)
 corrade_add_test(UtilityMurmurHash2Test MurmurHash2Test.cpp)
 corrade_add_test(UtilityConfigurationTest ConfigurationTest.cpp
     LIBRARIES CorradeUtilityTestLib
@@ -243,7 +243,7 @@ target_include_directories(UtilityResourceStaticTest PRIVATE ${CMAKE_CURRENT_BIN
 
 set_target_properties(
     UtilityArgumentsTest
-    UtilityEndianTest
+    UtilityEndiannessTest
     UtilityMurmurHash2Test
     UtilityConfigurationTest
     UtilityConfigurationValueTest

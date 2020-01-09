@@ -31,8 +31,8 @@
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
-struct EndianTest: TestSuite::Tester {
-    explicit EndianTest();
+struct EndiannessTest: TestSuite::Tester {
+    explicit EndiannessTest();
 
     void endianness();
     void floats();
@@ -40,14 +40,14 @@ struct EndianTest: TestSuite::Tester {
     void enumClass();
 };
 
-EndianTest::EndianTest() {
-    addTests({&EndianTest::endianness,
-              &EndianTest::floats,
-              &EndianTest::inPlace,
-              &EndianTest::enumClass});
+EndiannessTest::EndiannessTest() {
+    addTests({&EndiannessTest::endianness,
+              &EndiannessTest::floats,
+              &EndiannessTest::inPlace,
+              &EndiannessTest::enumClass});
 }
 
-void EndianTest::endianness() {
+void EndiannessTest::endianness() {
     #ifdef CORRADE_TARGET_BIG_ENDIAN
     CORRADE_VERIFY(Endianness::isBigEndian());
     Debug() << "Big endian system";
@@ -71,7 +71,7 @@ void EndianTest::endianness() {
     #undef other
 }
 
-void EndianTest::floats() {
+void EndiannessTest::floats() {
     /* Verifies that the swapping operation doesn't involve any
        information-losing type conversion */
     float original = -456.7896713f;
@@ -84,7 +84,7 @@ void EndianTest::floats() {
     CORRADE_VERIFY(back == original);
 }
 
-void EndianTest::inPlace() {
+void EndiannessTest::inPlace() {
     #ifdef CORRADE_TARGET_BIG_ENDIAN
     #define currentInPlace bigEndianInPlace
     #define otherInPlace littleEndianInPlace
@@ -114,7 +114,7 @@ void EndianTest::inPlace() {
     #undef otherInPlace
 }
 
-void EndianTest::enumClass() {
+void EndiannessTest::enumClass() {
     #ifdef CORRADE_TARGET_BIG_ENDIAN
     #define other littleEndian
     #define otherInPlace littleEndianInPlace
@@ -143,4 +143,4 @@ void EndianTest::enumClass() {
 
 }}}}
 
-CORRADE_TEST_MAIN(Corrade::Utility::Test::EndianTest)
+CORRADE_TEST_MAIN(Corrade::Utility::Test::EndiannessTest)
