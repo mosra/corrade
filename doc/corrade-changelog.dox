@@ -79,6 +79,9 @@ namespace Corrade {
     is available in the standard library
 -   Added @ref Utility::Directory::map(const std::string&) that provides
     read-write access to mapped files without truncating them.
+-   Exposed @ref Utility::Endianness::swapInPlace() as a counterpart to
+    @ref Utility::Endianness::littleEndianInPlace() and
+    @ref Utility::Endianness::bigEndianInPlace()
 
 @subsection corrade-changelog-latest-changes Changes and improvements
 
@@ -141,6 +144,11 @@ namespace Corrade {
     due to the additional zero-ininitialization this isn't really breaking,
     just makes the default safer; and you still have the option to choose a
     different initialization.
+-   @ref Utility::Endianness is now a namespace, similarly to the change done
+    to @ref Utility::Directory or @ref Utility::String in 2018.02. The API
+    doesn't change apart from that, but code previously doing
+    @cpp using Utility::Endianness @ce needs to be changed to
+    @cpp using namespace Utility::Endianness @ce to compile again.
 -   Removed `Corrade/Utility/AndroidStreamBuffer.h` that was deprecated in
     2018.04, use @ref Corrade/Utility/AndroidLogStreamBuffer.h instead
 -   Removed `PluginManager::Manager::instance()` that was deprecated in
