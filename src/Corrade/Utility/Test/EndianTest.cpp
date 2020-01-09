@@ -48,7 +48,7 @@ EndianTest::EndianTest() {
 }
 
 void EndianTest::endianness() {
-    #ifdef CORRADE_BIG_ENDIAN
+    #ifdef CORRADE_TARGET_BIG_ENDIAN
     CORRADE_VERIFY(Endianness::isBigEndian());
     Debug() << "Big endian system";
     #define current bigEndian
@@ -85,7 +85,7 @@ void EndianTest::floats() {
 }
 
 void EndianTest::inPlace() {
-    #ifdef CORRADE_BIG_ENDIAN
+    #ifdef CORRADE_TARGET_BIG_ENDIAN
     #define currentInPlace bigEndianInPlace
     #define otherInPlace littleEndianInPlace
     #else
@@ -115,7 +115,7 @@ void EndianTest::inPlace() {
 }
 
 void EndianTest::enumClass() {
-    #ifdef CORRADE_BIG_ENDIAN
+    #ifdef CORRADE_TARGET_BIG_ENDIAN
     #define other littleEndian
     #define otherInPlace littleEndianInPlace
     #else

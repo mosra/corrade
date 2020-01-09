@@ -41,6 +41,7 @@ struct TargetTest: TestSuite::Tester {
 
     void system();
     void architecture();
+    void endian();
     void compiler();
     void stl();
 };
@@ -48,6 +49,7 @@ struct TargetTest: TestSuite::Tester {
 TargetTest::TargetTest() {
     addTests({&TargetTest::system,
               &TargetTest::architecture,
+              &TargetTest::endian,
               &TargetTest::compiler,
               &TargetTest::stl});
 }
@@ -127,6 +129,23 @@ void TargetTest::architecture() {
     Debug{Debug::Flag::NoNewlineAtTheEnd} << out.str();
     CORRADE_VERIFY(!out.str().empty() || !"No suitable CORRADE_TARGET_* defined");
     CORRADE_COMPARE(unique, 1);
+}
+
+void TargetTest::endian() {
+    #ifdef CORRADE_TARGET_BIG_ENDIAN
+    Debug{} << "CORRADE_TARGET_BIG_ENDIAN";
+    #endif
+
+    union {
+        char bytes[4];
+        int number;
+    } caster;
+    caster.number = 0x03020100;
+    #ifdef CORRADE_TARGET_BIG_ENDIAN
+    CORRADE_COMPARE(caster.bytes[0], 3);
+    #else
+    CORRADE_COMPARE(caster.bytes[0], 0);
+    #endif
 }
 
 void TargetTest::compiler() {

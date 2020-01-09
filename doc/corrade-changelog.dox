@@ -40,6 +40,9 @@ namespace Corrade {
     @ref CORRADE_TARGET_APPLE_CLANG, @ref CORRADE_TARGET_CLANG_CL,
     @ref CORRADE_TARGET_MSVC and @ref CORRADE_TARGET_MINGW variables for easier
     compiler identification
+-   New @ref CORRADE_TARGET_BIG_ENDIAN macro. A variant of this macro called
+    just @cpp CORRADE_BIG_ENDIAN @ce was used internally for a long time, now
+    it's been exposed publicly.
 
 @subsubsection corrade-changelog-latest-new-containers Containers library
 
@@ -134,6 +137,9 @@ namespace Corrade {
     deprecated and renamed to @ref Utility::Directory::mapWrite() as it doesn't
     preserve original file contents and thus can't be used for read-write
     access
+-   The internal @cpp CORRADE_BIG_ENDIAN @ce macro got renamed to
+    @ref CORRADE_TARGET_BIG_ENDIAN and made public. The old variant is still
+    present for backwards compatibility, but will be removed in the future.
 
 @subsection corrade-changelog-latest-compatibility Potential compatibility breakages, removed APIs
 

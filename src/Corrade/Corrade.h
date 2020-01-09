@@ -211,9 +211,10 @@ Defined if the library is built for Android.
 
 Defined if the library is built for x86 platforms (32 or 64-bit). Note that
 unlike other `CORRADE_TARGET_*` variables, this variable,
-@ref CORRADE_TARGET_ARM and @ref CORRADE_TARGET_POWERPC are not exposed in
-CMake because the meaning is unclear on platforms with multi-architecture
-binaries. If neither @ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM nor
+@ref CORRADE_TARGET_ARM, @ref CORRADE_TARGET_POWERPC and
+@ref CORRADE_TARGET_BIG_ENDIAN are not exposed in CMake because the meaning is
+unclear on platforms with multi-architecture binaries. If neither
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM nor
 @ref CORRADE_TARGET_POWERPC is defined, the platform might be either
 @ref CORRADE_TARGET_EMSCRIPTEN or any other that the library doesn't know about
 yet.
@@ -226,9 +227,10 @@ yet.
 
 Defined if the library is built for ARM platforms (32 or 64-bit). Note that
 unlike other `CORRADE_TARGET_*` variables, this variable,
-@ref CORRADE_TARGET_X86 and @ref CORRADE_TARGET_POWERPC are not exposed in
-CMake because the meaning is unclear on platforms with multi-architecture
-binaries. If neither @ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM nor
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_POWERPC and
+@ref CORRADE_TARGET_BIG_ENDIAN are not exposed in CMake because the meaning is
+unclear on platforms with multi-architecture binaries. If neither
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM nor
 @ref CORRADE_TARGET_POWERPC is defined, the platform might be either
 @ref CORRADE_TARGET_EMSCRIPTEN or any other that the library doesn't know about
 yet.
@@ -242,15 +244,36 @@ yet.
 
 Defined if the library is built for PowerPC platforms (32 or 64-bit). Note that
 unlike other `CORRADE_TARGET_*` variables, this variable,
-@ref CORRADE_TARGET_X86 and @ref CORRADE_TARGET_ARM are not exposed in CMake
-because the meaning is unclear on platforms with multi-architecture binaries.
-If neither @ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM nor
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM and
+@ref CORRADE_TARGET_BIG_ENDIAN are not exposed in CMake because the meaning is
+unclear on platforms with multi-architecture binaries. If neither
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM nor
 @ref CORRADE_TARGET_POWERPC is defined, the platform might be either
 @ref CORRADE_TARGET_EMSCRIPTEN or any other that the library doesn't know about
 yet.
+@see @ref CORRADE_TARGET_BIG_ENDIAN
 */
 #define CORRADE_TARGET_POWERPC
 #undef CORRADE_TARGET_POWERPC
+
+/**
+@brief Big-Endian target
+@m_since_latest
+
+Defined when the platform defaults to Big-Endian (such as HP/PA RISC, Motorola
+68k, Big-Endian MIPS, PowerPC and SPARC). Not defined on Little-Endian
+platforms (such as x86 and ARM). Note that some platforms are Bi-Endian,
+meaning the endianness can be switched at runtime (and thus can't be detected
+at compile-time), this macro only reflects the usual architecture default.
+Moreover, unlike other `CORRADE_TARGET_*` variables, this variable,
+@ref CORRADE_TARGET_X86, @ref CORRADE_TARGET_ARM and
+@ref CORRADE_TARGET_POWERPC are not exposed in CMake because the meaning is
+unclear on platforms with multi-architecture binaries.
+@see @ref CORRADE_TARGET_POWERPC, @ref Corrade::Utility::Endianness,
+    @ref corrade-cmake
+*/
+#define CORRADE_TARGET_BIG_ENDIAN
+#undef CORRADE_TARGET_BIG_ENDIAN
 
 /**
 @brief GCC compiler

@@ -25,7 +25,6 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#cmakedefine CORRADE_BIG_ENDIAN
 #cmakedefine CORRADE_MSVC2019_COMPATIBILITY
 #cmakedefine CORRADE_MSVC2017_COMPATIBILITY
 #cmakedefine CORRADE_MSVC2015_COMPATIBILITY
@@ -142,5 +141,32 @@
 #define CORRADE_TARGET_MINGW
 #endif
 
+/* First checking the GCC/Clang builtin, if available. As a fallback do an
+   architecture-based check, which is mirrored from SDL_endian.h. Doing this
+   *properly* would mean we can't decide this at compile time as some
+   architectures allow switching endianness at runtime (and worse, have
+   per-page endianness). So let's pretend we never saw this article:
+    https://en.wikipedia.org/wiki/Endianness#Bi-endianness
+   For extra safety this gets runtime-tested in TargetTest, so when porting
+   to a new platform, make sure you run that test. */
+#ifdef __BYTE_ORDER__
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define CORRADE_TARGET_BIG_ENDIAN
+#elif __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
+#error what kind of endianness is this?
+#endif
+#elif defined(__hppa__) || \
+    defined(__m68k__) || defined(mc68000) || defined(_M_M68K) || \
+    (defined(__MIPS__) && defined(__MIPSEB__)) || \
+    defined(__ppc__) || defined(__POWERPC__) || defined(_M_PPC) || \
+    defined(__sparc__)
+#define CORRADE_TARGET_BIG_ENDIAN
+#endif
+/* Can't really be marked as deprecated as it's only ever used in #ifdef
+   statements. OTOH I don't want to remove this right away as it would cause
+   temporary breakages until projects such as magnum-plugins update. */
+#if defined(CORRADE_BUILD_DEPRECATED) && defined(CORRADE_TARGET_BIG_ENDIAN)
+#define CORRADE_BIG_ENDIAN
+#endif
 
 #endif

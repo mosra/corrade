@@ -3014,7 +3014,7 @@ void StridedArrayViewTest::cast() {
     CORRADE_COMPARE(b.stride(), 8);
     CORRADE_COMPARE(bv.stride(), 8);
     CORRADE_COMPARE(cbv.stride(), 8);
-    #ifndef CORRADE_BIG_ENDIAN
+    #ifndef CORRADE_TARGET_BIG_ENDIAN
     CORRADE_COMPARE(b[2], (30 << 16) | 3); /* 1966083 on LE */
     CORRADE_COMPARE(b[3], (40 << 16) | 4); /* 2621444 on LE */
     #else
@@ -3057,7 +3057,7 @@ void StridedArrayViewTest::castNegativeStride() {
     CORRADE_COMPARE(b.stride(), -8);
     CORRADE_COMPARE(bv.stride(), -8);
     CORRADE_COMPARE(cbv.stride(), -8);
-    #ifndef CORRADE_BIG_ENDIAN
+    #ifndef CORRADE_TARGET_BIG_ENDIAN
     CORRADE_COMPARE(b[2], (30 << 16) | 3); /* 1966083 on LE */
     CORRADE_COMPARE(b[3], (40 << 16) | 4); /* 2621444 on LE */
     #else
@@ -3094,7 +3094,7 @@ void StridedArrayViewTest::castInvalid() {
     CORRADE_COMPARE(b.stride(), 2);
     CORRADE_COMPARE(bv.stride(), 2);
     CORRADE_COMPARE(cbv.stride(), 2);
-    #ifndef CORRADE_BIG_ENDIAN
+    #ifndef CORRADE_TARGET_BIG_ENDIAN
     CORRADE_COMPARE(b[2], (30 << 8) | 3); /* 7683 on LE */
     CORRADE_COMPARE(b[3], (40 << 8) | 4); /* 10244 on LE */
     #else

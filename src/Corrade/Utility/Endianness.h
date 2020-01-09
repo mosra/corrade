@@ -114,9 +114,11 @@ template<class T, class ...U> inline void swapInPlace(T& first, U&... next) {
 
 /**
 @brief Whether actual system is Big-Endian
+
+@see @ref CORRADE_TARGET_BIG_ENDIAN
 */
 constexpr bool isBigEndian() {
-    #ifdef CORRADE_BIG_ENDIAN
+    #ifdef CORRADE_TARGET_BIG_ENDIAN
     return true;
     #else
     return false;
@@ -128,10 +130,11 @@ constexpr bool isBigEndian() {
 
 On Little-Endian systems calls @ref swap(), on Big-Endian systems returns the
 value unchanged.
-@see @ref isBigEndian(), @ref bigEndianInPlace()
+@see @ref isBigEndian(), @ref CORRADE_TARGET_BIG_ENDIAN,
+    @ref bigEndianInPlace()
 */
 template<class T> inline T bigEndian(T value) {
-    #ifdef CORRADE_BIG_ENDIAN
+    #ifdef CORRADE_TARGET_BIG_ENDIAN
     return value;
     #else
     return swap(value);
@@ -143,9 +146,10 @@ template<class T> inline T bigEndian(T value) {
 
 On Little-Endian systems calls @ref swapInPlace(T&... values), on Big-Endian
 systems does nothing.
-@see @ref isBigEndian(), @ref littleEndianInPlace(), @ref bigEndian()
+@see @ref isBigEndian(), @ref CORRADE_TARGET_BIG_ENDIAN,
+    @ref littleEndianInPlace(), @ref bigEndian()
 */
-#if defined(DOXYGEN_GENERATING_OUTPUT) || !defined(CORRADE_BIG_ENDIAN)
+#if defined(DOXYGEN_GENERATING_OUTPUT) || !defined(CORRADE_TARGET_BIG_ENDIAN)
 template<class ...T> inline void bigEndianInPlace(T&... values) {
     swapInPlace(values...);
 }
@@ -158,10 +162,11 @@ template<class ...T> inline void bigEndianInPlace(T&...) {}
 
 On Big-Endian systems calls @ref swap(), on Little-Endian systems returns the
 value unchanged.
-@see @ref isBigEndian(), @ref littleEndianInPlace()
+@see @ref isBigEndian(), @ref CORRADE_TARGET_BIG_ENDIAN,
+    @ref littleEndianInPlace()
 */
 template<class T> inline T littleEndian(T value) {
-    #ifdef CORRADE_BIG_ENDIAN
+    #ifdef CORRADE_TARGET_BIG_ENDIAN
     return swap(value);
     #else
     return value;
@@ -173,9 +178,10 @@ template<class T> inline T littleEndian(T value) {
 
 On Big-Endian systems calls @ref swapInPlace(T&... values), on Little-Endian
 systems does nothing.
-@see @ref isBigEndian(), @ref bigEndianInPlace(), @ref littleEndian()
+@see @ref isBigEndian(), @ref CORRADE_TARGET_BIG_ENDIAN,
+    @ref bigEndianInPlace(), @ref littleEndian()
 */
-#if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_BIG_ENDIAN)
+#if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_BIG_ENDIAN)
 template<class ...T> inline void littleEndianInPlace(T&... values) {
     swapInPlace(values...);
 }

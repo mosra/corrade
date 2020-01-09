@@ -29,12 +29,6 @@ else()
     set(SHARED_OR_STATIC STATIC)
 endif()
 
-# Assume Emscripten and iOS are little-endian (TODO: better check?)
-if(NOT CORRADE_TARGET_EMSCRIPTEN AND NOT CORRADE_TARGET_IOS)
-    include(TestBigEndian)
-    test_big_endian(CORRADE_BIG_ENDIAN)
-endif()
-
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
 
