@@ -32,6 +32,7 @@
 #include <cstdint>
 
 #include "Corrade/configure.h"
+#include "Corrade/Utility/TypeTraits.h"
 #include "Corrade/Utility/utilities.h"
 
 namespace Corrade { namespace Utility {
@@ -106,7 +107,8 @@ Calls @ref swap() on each value.
 template<class ...T> void swapInPlace(T&... values);
 #else
 inline void swapInPlace() {}
-template<class T, class ...U> inline void swapInPlace(T& first, U&... next) {
+/* to avoid the StridedArrayView overloads being taken by this one */
+template<class T, class ...U, class = typename std::enable_if<!IsIterable<T>::value>::type> inline void swapInPlace(T& first, U&... next) {
     first = swap(first);
     swapInPlace(next...);
 }
@@ -149,12 +151,21 @@ systems does nothing.
 @see @ref isBigEndian(), @ref CORRADE_TARGET_BIG_ENDIAN,
     @ref littleEndianInPlace(), @ref bigEndian()
 */
-#if defined(DOXYGEN_GENERATING_OUTPUT) || !defined(CORRADE_TARGET_BIG_ENDIAN)
-template<class ...T> inline void bigEndianInPlace(T&... values) {
-    swapInPlace(values...);
-}
+#ifdef DOXYGEN_GENERATING_OUTPUT
+template<class ...T> void bigEndianInPlace(T&... values);
 #else
-template<class ...T> inline void bigEndianInPlace(T&...) {}
+/* to avoid the StridedArrayView overloads being taken by this one */
+template<class T, class ...U, class = typename std::enable_if<!IsIterable<T>::value>::type> inline void bigEndianInPlace(T& first, U&...
+        #ifndef CORRADE_TARGET_BIG_ENDIAN
+        next
+        #endif
+    ) {
+    #ifndef CORRADE_TARGET_BIG_ENDIAN
+    swapInPlace(first, next...);
+    #else
+    static_cast<void>(first);
+    #endif
+}
 #endif
 
 /**
@@ -181,12 +192,21 @@ systems does nothing.
 @see @ref isBigEndian(), @ref CORRADE_TARGET_BIG_ENDIAN,
     @ref bigEndianInPlace(), @ref littleEndian()
 */
-#if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_BIG_ENDIAN)
-template<class ...T> inline void littleEndianInPlace(T&... values) {
-    swapInPlace(values...);
-}
+#ifdef DOXYGEN_GENERATING_OUTPUT
+template<class ...T> void littleEndianInPlace(T&... values);
 #else
-template<class ...T> inline void littleEndianInPlace(T&...) {}
+/* to avoid the StridedArrayView overloads being taken by this one */
+template<class T, class ...U, class = typename std::enable_if<!IsIterable<T>::value>::type> inline void littleEndianInPlace(T& first, U&...
+        #ifdef CORRADE_TARGET_BIG_ENDIAN
+        next
+        #endif
+    ) {
+    #ifdef CORRADE_TARGET_BIG_ENDIAN
+    swapInPlace(first, next...);
+    #else
+    static_cast<void>(first);
+    #endif
+}
 #endif
 
 }

@@ -26,8 +26,9 @@
 #include <cstdint>
 
 #include "Corrade/TestSuite/Tester.h"
+#include "Corrade/TestSuite/Compare/Container.h"
 #include "Corrade/Utility/Endianness.h"
-#include "Corrade/Utility/Debug.h"
+#include "Corrade/Utility/EndiannessBatch.h"
 
 namespace Corrade { namespace Utility { namespace Test { namespace {
 
@@ -37,6 +38,7 @@ struct EndiannessTest: TestSuite::Tester {
     void endianness();
     void floats();
     void inPlace();
+    void inPlaceList();
     void enumClass();
 };
 
@@ -44,6 +46,7 @@ EndiannessTest::EndiannessTest() {
     addTests({&EndiannessTest::endianness,
               &EndiannessTest::floats,
               &EndiannessTest::inPlace,
+              &EndiannessTest::inPlaceList,
               &EndiannessTest::enumClass});
 }
 
@@ -122,6 +125,87 @@ void EndiannessTest::inPlace() {
     CORRADE_COMPARE(b, 0x11223344);
     CORRADE_COMPARE(c, 0x7F00);
     CORRADE_COMPARE(d, 0x1122334455667788ull);
+
+    #undef currentInPlace
+    #undef otherInPlace
+}
+
+void EndiannessTest::inPlaceList() {
+    #ifdef CORRADE_TARGET_BIG_ENDIAN
+    #define currentInPlace bigEndianInPlace
+    #define otherInPlace littleEndianInPlace
+    #else
+    #define currentInPlace littleEndianInPlace
+    #define otherInPlace bigEndianInPlace
+    #endif
+
+    std::int8_t a[]{0x11, 0x22, 0x33, 0x44};
+    std::uint16_t b[]{0x1122, 0x3344};
+    std::int32_t c[]{0x11223344, 0x55667700};
+    std::uint64_t d[]{0x1122334455667700ull, 0x00aabbccddeeff11ull};
+
+    Endianness::currentInPlace(Containers::arrayView(a));
+    Endianness::currentInPlace(Containers::arrayView(b));
+    Endianness::currentInPlace(Containers::arrayView(c));
+    Endianness::currentInPlace(Containers::arrayView(d));
+    CORRADE_COMPARE_AS(Containers::arrayView(a),
+        Containers::arrayView<std::int8_t>({
+            0x11, 0x22, 0x33, 0x44
+        }), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(Containers::arrayView(b),
+        Containers::arrayView<std::uint16_t>({
+            0x1122, 0x3344
+        }), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(Containers::arrayView(c),
+        Containers::arrayView<std::int32_t>({
+            0x11223344, 0x55667700
+        }), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(Containers::arrayView(d),
+        Containers::arrayView<std::uint64_t>({
+            0x1122334455667700ull, 0x00aabbccddeeff11ull
+        }), TestSuite::Compare::Container);
+
+    Endianness::swapInPlace(Containers::arrayView(a));
+    Endianness::swapInPlace(Containers::arrayView(b));
+    Endianness::swapInPlace(Containers::arrayView(c));
+    Endianness::swapInPlace(Containers::arrayView(d));
+    CORRADE_COMPARE_AS(Containers::arrayView(a),
+        Containers::arrayView<std::int8_t>({
+            0x11, 0x22, 0x33, 0x44
+        }), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(Containers::arrayView(b),
+        Containers::arrayView<std::uint16_t>({
+            0x2211, 0x4433
+        }), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(Containers::arrayView(c),
+        Containers::arrayView<std::int32_t>({
+            0x44332211, 0x00776655
+        }), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(Containers::arrayView(d),
+        Containers::arrayView<std::uint64_t>({
+            0x0077665544332211ull, 0x11ffeeddccbbaa00ull
+        }), TestSuite::Compare::Container);
+
+    Endianness::otherInPlace(Containers::arrayView(a));
+    Endianness::otherInPlace(Containers::arrayView(b));
+    Endianness::otherInPlace(Containers::arrayView(c));
+    Endianness::otherInPlace(Containers::arrayView(d));
+    CORRADE_COMPARE_AS(Containers::arrayView(a),
+        Containers::arrayView<std::int8_t>({
+            0x11, 0x22, 0x33, 0x44
+        }), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(Containers::arrayView(b),
+        Containers::arrayView<std::uint16_t>({
+            0x1122, 0x3344
+        }), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(Containers::arrayView(c),
+        Containers::arrayView<std::int32_t>({
+            0x11223344, 0x55667700
+        }), TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(Containers::arrayView(d),
+        Containers::arrayView<std::uint64_t>({
+            0x1122334455667700ull, 0x00aabbccddeeff11ull
+        }), TestSuite::Compare::Container);
 
     #undef currentInPlace
     #undef otherInPlace

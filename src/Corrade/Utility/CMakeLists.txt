@@ -52,6 +52,7 @@ if(WITH_UTILITY)
         DebugStl.h
         Directory.h
         Endianness.h
+        EndiannessBatch.h
         Format.h
         FormatStl.h
         Macros.h

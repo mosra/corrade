@@ -82,6 +82,9 @@ namespace Corrade {
     is available in the standard library
 -   Added @ref Utility::Directory::map(const std::string&) that provides
     read-write access to mapped files without truncating them.
+-   New @ref Utility::Endianness::littleEndianInPlace() and
+    @ref Utility::Endianness::bigEndianInPlace() overloads taking strided array
+    views
 -   Exposed @ref Utility::Endianness::swapInPlace() as a counterpart to
     @ref Utility::Endianness::littleEndianInPlace() and
     @ref Utility::Endianness::bigEndianInPlace()
