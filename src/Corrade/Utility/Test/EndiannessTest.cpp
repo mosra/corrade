@@ -61,6 +61,13 @@ void EndiannessTest::endianness() {
     #endif
 
     CORRADE_COMPARE(Endianness::current<std::uint32_t>(0x11223344), 0x11223344);
+
+    CORRADE_COMPARE(Endianness::swap<std::uint8_t>(0x40), 0x40);
+    CORRADE_COMPARE(Endianness::swap<std::uint32_t>(0x11223344), 0x44332211);
+    CORRADE_COMPARE(Endianness::swap<std::int32_t>(0x77665544), 0x44556677);
+    CORRADE_COMPARE(Endianness::swap<std::int16_t>(0x7F00), 0x007F);
+    CORRADE_COMPARE(Endianness::swap<std::uint64_t>(0x1122334455667788ull), 0x8877665544332211ull);
+
     CORRADE_COMPARE(Endianness::other<std::uint8_t>(0x40), 0x40);
     CORRADE_COMPARE(Endianness::other<std::uint32_t>(0x11223344), 0x44332211);
     CORRADE_COMPARE(Endianness::other<std::int32_t>(0x77665544), 0x44556677);
@@ -98,7 +105,13 @@ void EndiannessTest::inPlace() {
     std::int16_t c = 0x7F00;
     std::uint64_t d = 0x1122334455667788ull;
 
-    Endianness::otherInPlace(a, b, c, d);
+    Endianness::currentInPlace(a, b, c, d);
+    CORRADE_COMPARE(a, 0x70);
+    CORRADE_COMPARE(b, 0x11223344);
+    CORRADE_COMPARE(c, 0x7F00);
+    CORRADE_COMPARE(d, 0x1122334455667788ull);
+
+    Endianness::swapInPlace(a, b, c, d);
     CORRADE_COMPARE(a, 0x70);
     CORRADE_COMPARE(b, 0x44332211);
     CORRADE_COMPARE(c, 0x007F);
