@@ -85,6 +85,19 @@ namespace Implementation {
               ((value >> 40) & 0x000000000000ff00ull) |
                (value << 56);
     }
+
+    /* Extremely fugly, but this is the only sane way to avoid unaligned reads
+       and writes on platforms where that matters (such as asm.js) */
+    template<class T> inline void swapInPlace(T& value) {
+        static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8,
+            "expected a 1/2/4/8-byte type");
+        auto* data = reinterpret_cast<char*>(&value);
+        for(std::size_t i = 0; i != sizeof(T)/2; ++i) {
+            char tmp = data[sizeof(T) - i - 1];
+            data[sizeof(T) - i - 1] = data[i];
+            data[i] = tmp;
+        }
+    }
 }
 
 /**
@@ -109,7 +122,7 @@ template<class ...T> void swapInPlace(T&... values);
 inline void swapInPlace() {}
 /* to avoid the StridedArrayView overloads being taken by this one */
 template<class T, class ...U, class = typename std::enable_if<!IsIterable<T>::value>::type> inline void swapInPlace(T& first, U&... next) {
-    first = swap(first);
+    Implementation::swapInPlace(first);
     swapInPlace(next...);
 }
 #endif

@@ -129,6 +129,8 @@ namespace Corrade {
     certain headers were included before. That caused problems especially with
     the new @ref CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED macro and is now
     fixed to assume old GCC versions always use libstdc++.
+-   @ref Utility::Endianness::swapInPlace() and other in-place APIs were fixed
+    to work correctly on platforms that don't allow unaligned reads and writes
 
 @subsection corrade-changelog-latest-documentation Documentation
 
