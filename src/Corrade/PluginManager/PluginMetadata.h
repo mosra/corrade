@@ -161,9 +161,7 @@ class CORRADE_PLUGINMANAGER_EXPORT PluginMetadata {
          * @see @ref data()
          */
         Utility::ConfigurationGroup& configuration() { return *_configuration; }
-
-        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
-        const Utility::ConfigurationGroup& configuration() const { return *_configuration; }
+        const Utility::ConfigurationGroup& configuration() const { return *_configuration; } /**< @overload */
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
         explicit PluginMetadata(std::string name, Utility::ConfigurationGroup& conf);

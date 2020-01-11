@@ -295,9 +295,7 @@ template<class T> class ArrayView {
          * @see @ref front()
          */
         constexpr T* begin() const { return _data; }
-
-        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
-        constexpr T* cbegin() const { return _data; }
+        constexpr T* cbegin() const { return _data; } /**< @overload */
 
         /**
          * @brief Pointer to (one item after) last element
@@ -305,9 +303,7 @@ template<class T> class ArrayView {
          * @see @ref back()
          */
         constexpr T* end() const { return _data+_size; }
-
-        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
-        constexpr T* cend() const { return _data+_size; }
+        constexpr T* cend() const { return _data+_size; } /**< @overload */
 
         /**
          * @brief First element
@@ -937,9 +933,7 @@ template<std::size_t size_, class T> class StaticArrayView {
          * @see @ref front()
          */
         constexpr T* begin() const { return _data; }
-
-        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
-        constexpr T* cbegin() const { return _data; }
+        constexpr T* cbegin() const { return _data; } /**< @overload */
 
         /**
          * @brief Pointer to (one item after) last element
@@ -947,9 +941,7 @@ template<std::size_t size_, class T> class StaticArrayView {
          * @see @ref back()
          */
         constexpr T* end() const { return _data + size_; }
-
-        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
-        constexpr T* cend() const { return _data + size_; }
+        constexpr T* cend() const { return _data + size_; } /**< @overload */
 
         /**
          * @brief First element

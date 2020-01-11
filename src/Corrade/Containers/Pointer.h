@@ -197,9 +197,7 @@ template<class T> class Pointer {
          * @see @ref operator bool(), @ref operator->(), @ref release()
          */
         T* get() { return _pointer; }
-
-        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
-        const T* get() const { return _pointer; }
+        const T* get() const { return _pointer; } /**< @overload */
 
         /**
          * @brief Access the underlying pointer

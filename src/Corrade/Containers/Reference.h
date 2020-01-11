@@ -116,9 +116,7 @@ template<class T> class Reference {
 
         /** @brief Underlying reference */
         constexpr /*implicit*/ operator T&() const { return *_reference; }
-
-        /** @overload */ /* https://github.com/doxygen/doxygen/issues/7472 */
-        constexpr /*implicit*/ operator Reference<const T>() const { return *_reference; }
+        constexpr /*implicit*/ operator Reference<const T>() const { return *_reference; } /**< @overload */
 
         /** @brief Underlying reference */
         constexpr T& get() const { return *_reference; }
