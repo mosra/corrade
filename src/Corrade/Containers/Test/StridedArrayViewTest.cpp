@@ -182,6 +182,8 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void emptyCheck();
 
     void isContiguous();
+    void asContiguous();
+    void asContiguousNonContiguous();
 
     void access();
     void accessConst();
@@ -369,6 +371,8 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::emptyCheck,
 
               &StridedArrayViewTest::isContiguous,
+              &StridedArrayViewTest::asContiguous,
+              &StridedArrayViewTest::asContiguousNonContiguous,
 
               &StridedArrayViewTest::access,
               &StridedArrayViewTest::accessConst,
@@ -2002,6 +2006,29 @@ void StridedArrayViewTest::isContiguous() {
     CORRADE_VERIFY(!(b.transposed<1, 2>().isContiguous<2>()));
     CORRADE_VERIFY(!(b.transposed<1, 2>().isContiguous<1>()));
     CORRADE_VERIFY(!(b.transposed<1, 2>().isContiguous<0>()));
+}
+
+void StridedArrayViewTest::asContiguous() {
+    int a[2*3*5];
+    StridedArrayView1Di b{a, 2*3*5, 4};
+    ArrayView<int> bc = b.asContiguous();
+    CORRADE_VERIFY(bc.data() == a);
+    CORRADE_COMPARE(bc.size(), 2*3*5);
+
+    StridedArrayView3Di c{a, {5, 3, 2}, {6*4, 2*4, 4}};
+    ArrayView<int> cc = c.asContiguous();
+    CORRADE_VERIFY(cc.data() == a);
+    CORRADE_COMPARE(cc.size(), 2*3*5);
+}
+
+void StridedArrayViewTest::asContiguousNonContiguous() {
+    int a[2*3*5];
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    StridedArrayView1Di{a, 2*3*5, 4}.flipped<0>().asContiguous();
+    CORRADE_COMPARE(out.str(),
+        "Containers::StridedArrayView::asContiguous(): the view is not contiguous\n");
 }
 
 void StridedArrayViewTest::access() {

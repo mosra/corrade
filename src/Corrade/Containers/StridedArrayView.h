@@ -529,8 +529,19 @@ template<unsigned dimensions, class T> class StridedArrayView {
          * function may return @cpp false @ce --- for example, a contiguous
          * view with two dimensions @ref transposed() is no longer contiguous,
          * same as with zero or negative strides.
+         * @see @ref asContiguous()
          */
         template<unsigned dimension = 0> bool isContiguous() const;
+
+        /**
+         * @brief Convert the view to a contiguous one
+         * @m_since_latest
+         *
+         * Returns a view large as the product of sizes in all dimensions.
+         * Expects that the view is contiguous.
+         * @see @ref isContiguous() const
+         */
+        ArrayView<T> asContiguous() const;
 
         /** @brief Element access */
         ElementType operator[](std::size_t i) const;
@@ -1546,6 +1557,13 @@ template<unsigned dimensions, class T> template<unsigned dimension> bool Strided
     }
 
     return true;
+}
+
+template<unsigned dimensions, class T> ArrayView<T> StridedArrayView<dimensions, T>::asContiguous() const {
+    CORRADE_ASSERT(isContiguous(), "Containers::StridedArrayView::asContiguous(): the view is not contiguous", {});
+    std::size_t size = _size[0];
+    for(std::size_t i = 1; i != dimensions; ++i) size *= _size[i];
+    return {static_cast<T*>(_data), size};
 }
 
 namespace Implementation {
