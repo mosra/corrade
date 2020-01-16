@@ -60,9 +60,10 @@ behavior.
 @brief Gracefully print assertions
 
 This macro is not defined by Corrade, but rather meant to be defined by the
-user. Unlike @ref CORRADE_NO_ASSERT, this macro checks assertions and prints
-a message on error, but does not call @ref std::abort(). Useful for testing
-assertion behavior. See documentation of @ref CORRADE_ASSERT(),
+user. Unlike @ref CORRADE_NO_ASSERT and in case the error output is redirected
+(i.e., in a test verifying the assert behavior) this macro checks assertions
+and prints a message on error, but does not call @ref std::abort(). Useful for
+testing assertion behavior. See documentation of @ref CORRADE_ASSERT(),
 @ref CORRADE_CONSTEXPR_ASSERT() and @ref CORRADE_ASSERT_OUTPUT() for detailed
 description of given macro behavior. The @ref CORRADE_INTERNAL_ASSERT(),
 @ref CORRADE_INTERNAL_CONSTEXPR_ASSERT(), @ref CORRADE_INTERNAL_ASSERT_OUTPUT()
@@ -107,12 +108,14 @@ Usable for sanity checks on user input, as it prints explanational message on
 error.
 
 By default, if assertion fails, @p message is printed to error output and the
-application aborts. If @ref CORRADE_GRACEFUL_ASSERT is defined, the message is
-printed and the function returns with @p returnValue. If
-@ref CORRADE_STANDARD_ASSERT is defined, this macro compiles to
-@cpp assert(condition) @ce, ignoring @p message. If @ref CORRADE_NO_ASSERT is
-defined (or if both @ref CORRADE_STANDARD_ASSERT and @cpp NDEBUG @ce are
-defined), this macro compiles to @cpp do {} while(0) @ce. Example usage:
+application aborts. If @ref CORRADE_GRACEFUL_ASSERT is defined *and*
+@ref Corrade::Utility::Error output is redirected (i.e., in tests verifying the
+assert behavior), the message is printed and the function returns with
+@p returnValue instead of aborting. If @ref CORRADE_STANDARD_ASSERT is defined,
+this macro compiles to @cpp assert(condition) @ce, ignoring @p message. If
+@ref CORRADE_NO_ASSERT is defined (or if both @ref CORRADE_STANDARD_ASSERT and
+@cpp NDEBUG @ce are defined), this macro compiles to @cpp do {} while(0) @ce.
+Example usage:
 
 @snippet Utility.cpp CORRADE_ASSERT
 
@@ -149,7 +152,8 @@ You can override this implementation by placing your own
 #define CORRADE_ASSERT(condition, message, returnValue)                     \
     do {                                                                    \
         if(!(condition)) {                                                  \
-            Corrade::Utility::Error() << message;                           \
+            Corrade::Utility::Error{} << message;                           \
+            if(Corrade::Utility::Error::defaultOutput() == Corrade::Utility::Error::output()) std::abort(); \
             return returnValue;                                             \
         }                                                                   \
     } while(false)
@@ -180,12 +184,13 @@ Unlike @ref CORRADE_ASSERT() this macro can be used in C++11
 In a @cpp constexpr @ce context, if assertion fails, the code fails to compile.
 In a non-@cpp constexpr @ce context, if assertion fails, @p message is printed
 to error output and the application aborts. If @ref CORRADE_GRACEFUL_ASSERT is
-defined, the message is printed and the rest of the function gets executed as
-usual. If @ref CORRADE_STANDARD_ASSERT is defined, @p message is ignored and
-the standard @cpp assert() @ce is called if @p condition fails. If
-@ref CORRADE_NO_ASSERT is defined (or if both @ref CORRADE_STANDARD_ASSERT and
-@cpp NDEBUG @ce are defined), this macro compiles to
-@cpp static_cast<void>(0) @ce.
+defined *and* @ref Corrade::Utility::Error output is redirected (i.e., in tests
+verifying the assert behavior), the message is printed and the rest of the
+function gets executed as usual instead of aborting. If
+@ref CORRADE_STANDARD_ASSERT is defined, @p message is ignored and the standard
+@cpp assert() @ce is called if @p condition fails. If @ref CORRADE_NO_ASSERT is
+defined (or if both @ref CORRADE_STANDARD_ASSERT and @cpp NDEBUG @ce are
+defined), this macro compiles to @cpp static_cast<void>(0) @ce.
 
 As with @ref CORRADE_ASSERT(), you can use stream output operators for
 formatting just like when printing to @ref Corrade::Utility::Debug output.
@@ -206,6 +211,7 @@ You can override this implementation by placing your own
 #define CORRADE_CONSTEXPR_ASSERT(condition, message)                        \
     static_cast<void>((condition) ? 0 : ([&]() {                            \
         Corrade::Utility::Error{} << message;                               \
+        if(Corrade::Utility::Error::defaultOutput() == Corrade::Utility::Error::output()) std::abort(); \
     }(), 0))
 #elif defined(CORRADE_STANDARD_ASSERT)
 #define CORRADE_CONSTEXPR_ASSERT(condition, message)                        \
@@ -250,6 +256,7 @@ You can override this implementation by placing your own
     do {                                                                    \
         if(!(call)) {                                                       \
             Corrade::Utility::Error{} << message;                           \
+            if(Corrade::Utility::Error::defaultOutput() == Corrade::Utility::Error::output()) std::abort(); \
             return returnValue;                                             \
         }                                                                   \
     } while(false)

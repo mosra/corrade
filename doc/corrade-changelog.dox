@@ -112,6 +112,13 @@ namespace Corrade {
 
 @subsubsection corrade-changelog-latest-changes-utility Utility library
 
+-   @ref CORRADE_ASSERT(), @ref CORRADE_CONSTEXPR_ASSERT() and
+    @ref CORRADE_ASSERT_OUTPUT() now only return if @ref CORRADE_GRACEFUL_ASSERT
+    is defined *and* @ref Utility::Error is redirected, otherwise they call
+    @ref std::abort() like if @ref CORRADE_GRACEFUL_ASSERT wouldn't be defined.
+    This makes it possible to both verify assertion behavior and catch
+    unexpected assertions in tests that enable graceful assertions for larger
+    pieces of code.
 -   @ref Utility::Sha1 can now consume also @ref Containers::ArrayView in
     addition to @ref std::string and its internal processing is completely
     allocation-less (see [mosra/corrade#85](https://github.com/mosra/corrade/pull/85))
