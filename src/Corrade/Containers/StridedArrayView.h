@@ -1446,6 +1446,16 @@ template<unsigned newDimensions, class U, unsigned dimensions, class T> StridedA
 }
 
 /**
+@brief Reinterpret-cast and inflate an array view
+@m_since_latest
+
+Converts @p view to a @ref StridedArrayView1D and calls the above function.
+*/
+template<unsigned newDimensions, class U, class T> inline StridedArrayView<newDimensions, U> arrayCast(const ArrayView<T>& view) {
+    return arrayCast<newDimensions, U, 1, T>(view);
+}
+
+/**
 @brief Strided array view iterator
 
 Used by @ref StridedArrayView to provide iterator access to its items.

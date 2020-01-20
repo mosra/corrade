@@ -109,6 +109,8 @@ namespace Corrade {
     now reset the deleter of the originating array to @cpp nullptr @ce to avoid
     false assumptions about moved-from instances or calling unsuspecting
     deleters on null pointers
+-   The dimension-changing @ref Containers::arrayCast(const StridedArrayView<dimensions, T>&)
+    utility has a new overload accepting @ref Containers::ArrayView as well
 
 @subsubsection corrade-changelog-latest-changes-interconnect Interconnect library
 

@@ -239,6 +239,7 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void castInvalid();
 
     void castInflateFlatten();
+    void castInflateFlattenArrayView();
     void castInflateFlattenInvalid();
 };
 
@@ -430,6 +431,7 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::castInvalid,
 
               &StridedArrayViewTest::castInflateFlatten,
+              &StridedArrayViewTest::castInflateFlattenArrayView,
               &StridedArrayViewTest::castInflateFlattenInvalid});
 }
 
@@ -3171,6 +3173,24 @@ void StridedArrayViewTest::castInflateFlatten() {
     CORRADE_COMPARE(c.stride(), (Stride2D{18, 6}));
     CORRADE_COMPARE(c[1][1].r, 0x88);
     CORRADE_COMPARE(c[0][2].b, 0xee);
+}
+
+void StridedArrayViewTest::castInflateFlattenArrayView() {
+    struct Rgb {
+        /* Not using a 8bit type here in order to properly test the size
+           calculation in asserts */
+        unsigned short r, g, b;
+    };
+
+    Rgb data[]{
+        {0x11, 0x33, 0x55}, {0x22, 0x44, 0x66}
+    };
+
+    StridedArrayView2D<const short> a = arrayCast<2, const short>(arrayView(data));
+    CORRADE_COMPARE(a.size(), (Size2D{2, 3}));
+    CORRADE_COMPARE(a.stride(), (Stride2D{6, 2}));
+    CORRADE_COMPARE(a[0][1], 0x33);
+    CORRADE_COMPARE(a[1][2], 0x66);
 }
 
 void StridedArrayViewTest::castInflateFlattenInvalid() {
