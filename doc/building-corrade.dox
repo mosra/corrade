@@ -89,8 +89,8 @@ executing a simple test file.
 @subsection building-corrade-packages-hunter Hunter package
 
 Starting from version 2018.10, stable releases of Corrade are available in the
-[Hunter](https://hunter.sh) CMake-driven package manager. See the
-[corrade package documentation](https://docs.hunter.sh/en/latest/packages/pkg/corrade.html)
+[Hunter](https://hunter.readthedocs.io) CMake-driven package manager. See the
+[corrade package documentation](https://hunter.readthedocs.io/en/latest/packages/pkg/corrade.html)
 for details.
 
 @subsection building-corrade-packages-vcpkg Vcpkg packages on Windows
