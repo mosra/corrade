@@ -128,6 +128,12 @@ more information.
 /* Underscore at the end to avoid conflict with member size(). It's ugly, but
    having count instead of size_ would make the naming horribly inconsistent. */
 template<std::size_t size_, class T> class StaticArray {
+    /* Ideally this could be derived from StaticArrayView<size_, T>, avoiding a
+       lot of redundant code, however I'm unable to find a way to add
+       const/non-const overloads of all slicing functions and also prevent
+       const StaticArray<size_, T>& from being sliced to a (mutable)
+       StaticArrayView<size_, T>. */
+
     public:
         enum: std::size_t {
             Size = size_    /**< Array size */

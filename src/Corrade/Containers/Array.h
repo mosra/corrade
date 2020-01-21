@@ -264,6 +264,11 @@ template<class T, class D = void(*)(T*, std::size_t)>
 template<class T, class D>
 #endif
 class Array {
+    /* Ideally this could be derived from ArrayView<T>, avoiding a lot of
+       redundant code, however I'm unable to find a way to add const/non-const
+       overloads of all slicing functions and also prevent const Array<T>& from
+       being sliced to a (mutable) ArrayView<T>. */
+
     public:
         typedef T Type;     /**< @brief Element type */
         typedef D Deleter;  /**< @brief Deleter type */
