@@ -530,6 +530,22 @@ if(watcher.hasChanged()) {
 #endif
 
 {
+int a = 2;
+int d[5]{};
+int e[5]{};
+int *b = d, *c = e;
+/* [CORRADE_FALLTHROUGH] */
+switch(a) {
+    case 2:
+        *b++ = *c++;
+        CORRADE_FALLTHROUGH
+    case 1:
+        *b++ = *c++;
+};
+/* [CORRADE_FALLTHROUGH] */
+}
+
+{
 /* [CORRADE_LINE_STRING] */
 const char* shader = "#line " CORRADE_LINE_STRING "\n" R"GLSL(
     in vec3 position;

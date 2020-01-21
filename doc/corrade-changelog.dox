@@ -77,6 +77,8 @@ namespace Corrade {
 -   New @ref CORRADE_ASSUME() macro for providing hints to the compiler
     similarly to @ref CORRADE_INTERNAL_ASSERT() but without asserting when the
     condition isn't @cpp true @ce
+-   New @ref CORRADE_FALLTHROUGH macro for suppressing warnings on fall-through
+    @cpp switch @ce cases
 -   Added a @ref CORRADE_STD_IS_TRIVIALLY_TRAITS_SUPPORTED macro into
     @ref Corrade/Utility/TypeTraits.h denoting if @ref std::is_trivially_copyable
     is available in the standard library

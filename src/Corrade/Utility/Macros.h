@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_MACRO(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_ALIGNAS(), @ref CORRADE_NORETURN, @ref CORRADE_THREAD_LOCAL, @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE, @ref CORRADE_FUNCTION, @ref CORRADE_LINE_STRING, @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
+ * @brief Macro @ref CORRADE_DEPRECATED(), @ref CORRADE_DEPRECATED_ALIAS(), @ref CORRADE_DEPRECATED_NAMESPACE(), @ref CORRADE_DEPRECATED_ENUM(), @ref CORRADE_DEPRECATED_FILE(), @ref CORRADE_DEPRECATED_MACRO(), @ref CORRADE_IGNORE_DEPRECATED_PUSH, @ref CORRADE_IGNORE_DEPRECATED_POP, @ref CORRADE_UNUSED, @ref CORRADE_ALIGNAS(), @ref CORRADE_NORETURN, @ref CORRADE_FALLTHROUGH, @ref CORRADE_THREAD_LOCAL, @ref CORRADE_ALWAYS_INLINE, @ref CORRADE_NEVER_INLINE, @ref CORRADE_FUNCTION, @ref CORRADE_LINE_STRING, @ref CORRADE_AUTOMATIC_INITIALIZER(), @ref CORRADE_AUTOMATIC_FINALIZER()
  */
 
 #include "Corrade/configure.h"
@@ -278,6 +278,25 @@ function parameters instead.
 #define CORRADE_UNUSED __pragma(warning(suppress:4100))
 #else
 #define CORRADE_UNUSED
+#endif
+
+/** @hideinitializer
+@brief Switch case fall-through
+
+Suppresses a warning about a @cpp case @ce fallthrough in a @cpp switch @ce on
+GCC >= 7 and Clang. GCC versions before 7 don't warn about the fallthrough, so
+there's no need to suppress anything; for the same reason the macro does
+nothing on MSVC. Expected to be put at a place where a @cpp break; @ce would
+usually be:
+
+@snippet Utility.cpp CORRADE_FALLTHROUGH
+*/
+#if defined(CORRADE_TARGET_GCC) && __GNUC__ >= 7
+#define CORRADE_FALLTHROUGH __attribute__((fallthrough));
+#elif defined(CORRADE_TARGET_CLANG)
+#define CORRADE_FALLTHROUGH [[clang::fallthrough]];
+#else
+#define CORRADE_FALLTHROUGH
 #endif
 
 /** @hideinitializer

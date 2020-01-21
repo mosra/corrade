@@ -42,6 +42,7 @@ struct MacrosTest: TestSuite::Tester {
     void alignAs();
     void deprecated();
     void noreturn();
+    void fallthrough();
     void cxxStandard();
     void alwaysNeverInline();
     void function();
@@ -56,6 +57,7 @@ MacrosTest::MacrosTest() {
     addTests({&MacrosTest::alignAs,
               &MacrosTest::deprecated,
               &MacrosTest::noreturn,
+              &MacrosTest::fallthrough,
               &MacrosTest::cxxStandard,
               &MacrosTest::alwaysNeverInline,
               &MacrosTest::function,
@@ -135,6 +137,23 @@ CORRADE_NORETURN void foo() { std::exit(42); }
 void MacrosTest::noreturn() {
     if(false) foo();
     CORRADE_VERIFY(true);
+}
+
+void MacrosTest::fallthrough() {
+    int a = 2;
+    int d[5]{};
+    int e[5]{5, 4, 3, 2, 1};
+    int *b = d, *c = e;
+    switch(a) {
+        case 2:
+            *b++ = *c++;
+            CORRADE_FALLTHROUGH
+        case 1:
+            *b++ = *c++;
+    };
+
+    CORRADE_COMPARE(d[0], 5);
+    CORRADE_COMPARE(d[1], 4);
 }
 
 void MacrosTest::cxxStandard() {
