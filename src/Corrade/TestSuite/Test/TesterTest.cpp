@@ -70,10 +70,10 @@ struct MessageDiagnostic;
 
 template<> class Comparator<MessageDiagnostic> {
     public:
-        explicit Comparator(ComparisonStatusFlags flags): flags{flags} {}
+        explicit Comparator(ComparisonStatusFlags flags): _flags{flags} {}
 
         ComparisonStatusFlags operator()(const std::string&, const std::string&) {
-            return flags;
+            return _flags;
         }
 
         void printMessage(ComparisonStatusFlags flags, Utility::Debug& out, const char* actual, const char* expected) const {
@@ -99,7 +99,7 @@ template<> class Comparator<MessageDiagnostic> {
         }
 
     private:
-        ComparisonStatusFlags flags;
+        ComparisonStatusFlags _flags;
 };
 
 struct MessageDiagnostic {
