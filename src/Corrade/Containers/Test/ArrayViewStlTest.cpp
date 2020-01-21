@@ -91,6 +91,11 @@ void ArrayViewStlTest::convertFromArray() {
     CORRADE_COMPARE(c, &a[0]);
     CORRADE_COMPARE(c.size(), 3);
     CORRADE_COMPARE(c[0], 42.0f);
+
+    auto d = arrayView(std::array<float, 3>{});
+    CORRADE_VERIFY((std::is_same<decltype(d), ArrayView<float>>::value));
+    CORRADE_COMPARE(c.size(), 3);
+    /* The rest is a dangling pointer, can't test */
 }
 
 void ArrayViewStlTest::convertFromArrayEmpty() {
@@ -210,6 +215,11 @@ void ArrayViewStlTest::convertFromVector() {
     CORRADE_COMPARE(c, &a[0]);
     CORRADE_COMPARE(c.size(), 3);
     CORRADE_COMPARE(c[0], 42.0f);
+
+    auto d = arrayView(std::vector<float>(3));
+    CORRADE_VERIFY((std::is_same<decltype(d), ArrayView<float>>::value));
+    CORRADE_COMPARE(c.size(), 3);
+    /* The rest is a dangling pointer, can't test */
 }
 
 void ArrayViewStlTest::convertFromVectorEmpty() {

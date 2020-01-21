@@ -51,6 +51,9 @@ template<std::size_t size, class T> struct ArrayViewConverter<T, std::array<T, s
     constexpr static ArrayView<T> from(std::array<T, size>& other) {
         return {other.data(), other.size()};
     }
+    constexpr static ArrayView<T> from(std::array<T, size>&& other) {
+        return {other.data(), other.size()};
+    }
 };
 template<std::size_t size, class T> struct ArrayViewConverter<const T, std::array<T, size>> {
     constexpr static ArrayView<const T> from(const std::array<T, size>& other) {
@@ -63,6 +66,9 @@ template<std::size_t size, class T> struct ErasedArrayViewConverter<const std::a
 /* std::vector to ArrayView */
 template<class T, class Allocator> struct ArrayViewConverter<T, std::vector<T, Allocator>> {
     static ArrayView<T> from(std::vector<T, Allocator>& other) {
+        return {other.data(), other.size()};
+    }
+    static ArrayView<T> from(std::vector<T, Allocator>&& other) {
         return {other.data(), other.size()};
     }
 };
