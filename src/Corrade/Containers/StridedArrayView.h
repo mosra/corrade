@@ -1253,7 +1253,8 @@ template<class T> constexpr StridedArrayView1D<T> stridedArrayView(ArrayView<typ
 
 #if defined(CORRADE_TARGET_GCC) && !defined(CORRADE_TARGET_CLANG) && __GNUC__ < 5
 /* Otherwise GCC 4.8 (and maybe 4.9?) would need an explicit arrayView(data),
-   which is too annoying */
+   which is too annoying. I would ideally also to do this for Array, but that
+   would introduce a header dependency :( */
 template<std::size_t size_, class T, class U> constexpr StridedArrayView1D<T> stridedArrayView(U(&data)[size_], T* member, std::size_t size, std::ptrdiff_t stride) {
     return StridedArrayView1D<T>{data, member, size, stride};
 }
@@ -1271,6 +1272,19 @@ The following two lines are equivalent:
 template<std::size_t size, class T> constexpr StridedArrayView1D<T> stridedArrayView(T(&data)[size]) {
     /* GCC 4.8 needs this to be explicit */
     return StridedArrayView1D<T>{data};
+}
+
+/** @relatesalso StridedArrayView
+@brief Make a strided view on an initializer list
+@m_since_latest
+
+Not present as a constructor in order to avoid accidental dangling references
+with r-value initializer lists. See
+@ref Containers-ArrayView-initializer-list "ArrayView documentation" for more
+information.
+*/
+template<class T> StridedArrayView1D<const T> stridedArrayView(std::initializer_list<T> list) {
+    return StridedArrayView1D<const T>{arrayView(list)};
 }
 
 /** @relatesalso StridedArrayView

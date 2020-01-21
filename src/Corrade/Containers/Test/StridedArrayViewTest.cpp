@@ -125,6 +125,7 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void constructStaticView();
     void constructStaticViewVoid();
     void constructStaticViewConstVoid();
+    void constructInitializerList();
 
     void construct3DEmpty();
     void construct3DEmptyVoid();
@@ -317,6 +318,7 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::constructStaticView,
               &StridedArrayViewTest::constructStaticViewVoid,
               &StridedArrayViewTest::constructStaticViewConstVoid,
+              &StridedArrayViewTest::constructInitializerList,
 
               &StridedArrayViewTest::construct3DEmpty,
               &StridedArrayViewTest::construct3DEmptyVoid,
@@ -1239,6 +1241,16 @@ void StridedArrayViewTest::constructStaticViewConstVoid() {
     CORRADE_VERIFY(ccc.data() == Array10);
     CORRADE_COMPARE(ccc.size(), 10);
     CORRADE_COMPARE(ccc.stride(), 4);
+}
+
+void StridedArrayViewTest::constructInitializerList() {
+    std::initializer_list<int> a = {3, 5, 7};
+    ConstStridedArrayView1Di b = stridedArrayView(a);
+    CORRADE_COMPARE(b.size(), 3);
+    CORRADE_COMPARE(b.back(), 7);
+
+    /* R-value init list should work too */
+    CORRADE_COMPARE(stridedArrayView<int>({3, 5, 7}).front(), 3);
 }
 
 void StridedArrayViewTest::construct3DEmpty() {
