@@ -852,14 +852,14 @@ Containers::Array<char, MapDeleter> map(const std::string& filename) {
        does. */
     HANDLE hFile = CreateFileW(widen(filename).data(),
         GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
-    if (hFile == INVALID_HANDLE_VALUE) {
+    if(hFile == INVALID_HANDLE_VALUE) {
         Error() << "Utility::Directory::map(): can't open" << filename;
         return nullptr;
     }
 
     /* Create the file mapping */
     HANDLE hMap = CreateFileMappingW(hFile, nullptr, PAGE_READWRITE, 0, 0, nullptr);
-    if (!hMap) {
+    if(!hMap) {
         Error() << "Utility::Directory::map(): can't create the file mapping:" << GetLastError();
         CloseHandle(hFile);
         return nullptr;
@@ -884,14 +884,14 @@ Containers::Array<const char, MapDeleter> mapRead(const std::string& filename) {
     /* Open the file for reading */
     HANDLE hFile = CreateFileW(widen(filename).data(),
         GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
-    if (hFile == INVALID_HANDLE_VALUE) {
+    if(hFile == INVALID_HANDLE_VALUE) {
         Error() << "Utility::Directory::mapRead(): can't open" << filename;
         return nullptr;
     }
 
     /* Create the file mapping */
     HANDLE hMap = CreateFileMappingW(hFile, nullptr, PAGE_READONLY, 0, 0, nullptr);
-    if (!hMap) {
+    if(!hMap) {
         Error() << "Utility::Directory::mapRead(): can't create the file mapping:" << GetLastError();
         CloseHandle(hFile);
         return nullptr;
@@ -917,14 +917,14 @@ Containers::Array<char, MapDeleter> mapWrite(const std::string& filename, std::s
        does. */
     HANDLE hFile = CreateFileW(widen(filename).data(),
         GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS, 0, nullptr);
-    if (hFile == INVALID_HANDLE_VALUE) {
+    if(hFile == INVALID_HANDLE_VALUE) {
         Error() << "Utility::Directory::mapWrite(): can't open" << filename;
         return nullptr;
     }
 
     /* Create the file mapping */
     HANDLE hMap = CreateFileMappingW(hFile, nullptr, PAGE_READWRITE, 0, size, nullptr);
-    if (!hMap) {
+    if(!hMap) {
         Error() << "Utility::Directory::mapWrite(): can't create the file mapping:" << GetLastError();
         CloseHandle(hFile);
         return nullptr;
