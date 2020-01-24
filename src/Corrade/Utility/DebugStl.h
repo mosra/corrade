@@ -103,9 +103,32 @@ template<class ...Args> Debug& operator<<(Debug& debug, const std::tuple<Args...
 
 namespace Implementation {
 
+template<typename T>
+typename std::add_lvalue_reference<T>::type declare_lvalue_reference() noexcept;
+
+template<typename T>
+struct has_ostream_operator {
+    private:
+        template<typename C>
+        static constexpr auto check(C *) ->
+        typename std::is_same<
+            decltype(declare_lvalue_reference<std::ostream>() << std::declval<C>()),
+            std::add_lvalue_reference<std::ostream>::type
+        >::type;
+
+        template<typename>
+        static constexpr std::false_type check(...);
+
+    public:
+        static constexpr bool value = decltype(check<T>(nullptr))::value;
+};
+
 /* Used by Debug::operator<<(Implementation::DebugOstreamFallback&&) */
 struct DebugOstreamFallback {
-    template<class T> /*implicit*/ DebugOstreamFallback(const T& t): applier(&DebugOstreamFallback::applyImpl<T>), value(&t) {}
+    template<
+        class T,
+        typename = typename std::enable_if<has_ostream_operator<T>::value>::type
+    > /*implicit*/ DebugOstreamFallback(const T& t): applier(&DebugOstreamFallback::applyImpl<T>), value(&t) {}
 
     void apply(std::ostream& s) const {
         (this->*applier)(s);
