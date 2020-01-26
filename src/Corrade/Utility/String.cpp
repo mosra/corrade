@@ -69,13 +69,13 @@ std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const
 
     while((pos = string.find_first_of(delimiters, oldpos, delimiters.size())) != std::string::npos) {
         if(pos != oldpos)
-            parts.push_back(string.substr(oldpos, pos-oldpos));
+            parts.emplace_back(std::move(string.substr(oldpos, pos-oldpos)));
 
         oldpos = pos+1;
     }
 
     if(!string.empty() && (oldpos < string.size()))
-        parts.push_back(string.substr(oldpos));
+        parts.emplace_back(std::move(string.substr(oldpos)));
 
     return parts;
 }
@@ -190,12 +190,12 @@ std::vector<std::string> split(const std::string& string, const char delimiter) 
     std::size_t oldpos = 0, pos = std::string::npos;
 
     while((pos = string.find(delimiter, oldpos)) != std::string::npos) {
-        parts.push_back(string.substr(oldpos, pos-oldpos));
+        parts.emplace_back(std::move(string.substr(oldpos, pos-oldpos)));
         oldpos = pos+1;
     }
 
     if(!string.empty())
-        parts.push_back(string.substr(oldpos));
+        parts.emplace_back(std::move(string.substr(oldpos)));
 
     return parts;
 }
@@ -206,13 +206,13 @@ std::vector<std::string> splitWithoutEmptyParts(const std::string& string, const
 
     while((pos = string.find(delimiter, oldpos)) != std::string::npos) {
         if(pos != oldpos)
-            parts.push_back(string.substr(oldpos, pos-oldpos));
+            parts.emplace_back(std::move(string.substr(oldpos, pos-oldpos)));
 
         oldpos = pos+1;
     }
 
     if(!string.empty() && (oldpos < string.size()))
-        parts.push_back(string.substr(oldpos));
+        parts.emplace_back(std::move(string.substr(oldpos)));
 
     return parts;
 }
