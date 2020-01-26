@@ -44,6 +44,7 @@ struct TypeTraitsTest: TestSuite::Tester {
     void isTriviallyTraitsSupported();
 
     void hasType();
+    void hasTypeComma();
 
     void isIterableMember();
     void isIterableFreeStd();
@@ -56,6 +57,7 @@ struct TypeTraitsTest: TestSuite::Tester {
 
 TypeTraitsTest::TypeTraitsTest() {
     addTests({&TypeTraitsTest::hasType,
+              &TypeTraitsTest::hasTypeComma,
 
               &TypeTraitsTest::isTriviallyTraitsSupported,
 
@@ -104,6 +106,14 @@ void TypeTraitsTest::hasType() {
     /* Non-member function */
     CORRADE_VERIFY(HasBegin<std::string>::value);
     CORRADE_VERIFY(!HasBegin<int*>::value);
+}
+
+CORRADE_HAS_TYPE(IteratorIsPointer, typename std::enable_if<std::is_same<decltype(std::declval<const T>().begin()), const typename T::value_type*>::value>::type);
+
+void TypeTraitsTest::hasTypeComma() {
+    /* Longer expressions with a comma should work too */
+    CORRADE_VERIFY(!IteratorIsPointer<std::vector<int>>::value);
+    CORRADE_VERIFY(IteratorIsPointer<std::initializer_list<int>>::value);
 }
 
 struct Type {};

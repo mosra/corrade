@@ -131,6 +131,8 @@ namespace Corrade {
 -   @ref Utility::Sha1 can now consume also @ref Containers::ArrayView in
     addition to @ref std::string and its internal processing is completely
     allocation-less (see [mosra/corrade#85](https://github.com/mosra/corrade/pull/85))
+-   @ref CORRADE_HAS_TYPE() now allows usage of template expressions containing
+    commas
 
 @subsection corrade-changelog-latest-buildsystem Build system
 
