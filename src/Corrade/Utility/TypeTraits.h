@@ -81,14 +81,15 @@ supported by Corrade, so there the macro is defined always.
 
 /** @hideinitializer
 @brief Macro for creating traits class that checks for type expression validity
-@param typeExpression   Type expression to check
 @param className        Resulting class name
+@param ...              Type expression to check. Variadic parameter to allow
+    unrestricted usage of template expressions containing commas.
 
-Defines a traits class checking whether @p typeExpression is valid. You can use
-@cpp T @ce to reference the type which is being checked. The defined class is
-then implicitly convertible to @cpp bool @ce holding the result.
+Defines a traits class checking whether an expression is valid. You can use
+@cpp T @ce to reference the type which is being checked; the type expression
+can contain
 
-Usage examples: checking for presence of @cpp key_type @ce member
+Usage examples: checking for presence of a @cpp key_type @ce member
 @cpp typedef @ce:
 
 @snippet Utility.cpp CORRADE_HAS_TYPE-type
@@ -100,9 +101,9 @@ Checking for presence of @cpp size() @ce member function:
 /* Two overloaded get() functions return type of different size. Templated
    get() is used when T has given attribute, non-templated otherwise. Bool
    value then indicates whether the templated version was called or not. */
-#define CORRADE_HAS_TYPE(className, typeExpression)                         \
+#define CORRADE_HAS_TYPE(className, ...)                                    \
 template<class U> class className {                                         \
-    template<class T> static char get(T&&, typeExpression* = nullptr);      \
+    template<class T> static char get(T&&, __VA_ARGS__* = nullptr);         \
     static short get(...);                                                  \
     public:                                                                 \
         enum: bool { value = sizeof(get(std::declval<U>())) == sizeof(char) }; \
