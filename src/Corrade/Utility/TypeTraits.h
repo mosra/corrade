@@ -163,4 +163,10 @@ template<class T> using IsStringLike = std::integral_constant<bool,
 
 }}
 
+/**
+@brief Like @cpp std::declval @ce, but declares an lvalue refrence
+*/
+template<typename T>
+typename std::add_lvalue_reference<T>::type DeclareLvalueReference() noexcept;
+
 #endif
