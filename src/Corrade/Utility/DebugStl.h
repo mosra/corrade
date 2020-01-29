@@ -149,4 +149,14 @@ CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, Implementation::DebugOstr
 
 }}
 
+template<typename T>
+typename std::enable_if<
+    Corrade::Utility::Implementation::HasDebugStreamOperator<T>::value && !Corrade::Utility::Implementation::HasOstreamOperator<T>::value,
+    std::ostream
+>::type &operator<<(std::ostream &os, const T &val) {
+  Corrade::Utility::Debug debug{&os, Corrade::Utility::Debug::Flag::NoNewlineAtTheEnd};
+  debug << val;
+  return os;
+}
+
 #endif
