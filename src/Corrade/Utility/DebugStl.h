@@ -111,11 +111,19 @@ CORRADE_HAS_TYPE(
     >::value>::type
 );
 
+CORRADE_HAS_TYPE(
+    HasDebugStreamOperator,
+    typename std::enable_if<std::is_same<
+        decltype(DeclareLvalueReference<Debug>() << std::declval<T>()),
+        std::add_lvalue_reference<Debug>::type
+    >::value>::type
+);
+
 /* Used by Debug::operator<<(Implementation::DebugOstreamFallback&&) */
 struct DebugOstreamFallback {
     template<
         class T,
-        typename = typename std::enable_if<HasOstreamOperator<T>::value>::type
+        typename = typename std::enable_if<HasOstreamOperator<T>::value && !HasDebugStreamOperator<T>::value>::type
     > /*implicit*/ DebugOstreamFallback(const T& t): applier(&DebugOstreamFallback::applyImpl<T>), value(&t) {}
 
     void apply(std::ostream& s) const {
