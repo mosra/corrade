@@ -970,10 +970,6 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
     private:
         template<unsigned, class> friend class StridedArrayView;
 
-        /* Basically just so these can access the _size / _stride without going
-           through getters (which additionally flatten their types for 1D) */
-        template<bool> friend struct Implementation::ArrayCastFlattenOrInflate;
-
         /* Internal constructor without type/size checks for things like
            slice() etc. Argument order is different to avoid this function
            getting matched when pass */
@@ -1182,7 +1178,6 @@ template<unsigned dimensions> class StridedArrayView<dimensions, const void> {
 
         /* Basically just so these can access the _size / _stride without going
            through getters (which additionally flatten their types for 1D) */
-        template<bool> friend struct Implementation::ArrayCastFlattenOrInflate;
         template<class U, unsigned dimensions_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, const void>&);
         template<unsigned newDimensions, class U, unsigned dimensions_> StridedArrayView<newDimensions, U> friend arrayCast(const StridedArrayView<dimensions_, const void>&, std::size_t);
 
