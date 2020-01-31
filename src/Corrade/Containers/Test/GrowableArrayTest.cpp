@@ -1674,7 +1674,7 @@ void GrowableArrayTest::benchmarkAppendBatchTrivialReservedArray() {
 
 const char* AllocationBenchmarkName[] {
     "allocations",
-    "allocatiion reuse",
+    "allocation reuse",
     "reallocations"
 };
 
