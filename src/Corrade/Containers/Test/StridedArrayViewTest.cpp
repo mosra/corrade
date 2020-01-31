@@ -245,6 +245,11 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void castInflateFlattenNegativeStride();
     void castInflateFlattenArrayView();
     void castInflateFlattenInvalid();
+
+    void castInflateVoid();
+    void castInflateVoidZeroStride();
+    void castInflateVoidNegativeStride();
+    void castInflateVoidInvalid();
 };
 
 typedef StridedDimensions<1, std::size_t> Size1D;
@@ -440,7 +445,12 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::castInflateFlattenZeroStride,
               &StridedArrayViewTest::castInflateFlattenNegativeStride,
               &StridedArrayViewTest::castInflateFlattenArrayView,
-              &StridedArrayViewTest::castInflateFlattenInvalid});
+              &StridedArrayViewTest::castInflateFlattenInvalid,
+
+              &StridedArrayViewTest::castInflateVoid,
+              &StridedArrayViewTest::castInflateVoidZeroStride,
+              &StridedArrayViewTest::castInflateVoidNegativeStride,
+              &StridedArrayViewTest::castInflateVoidInvalid});
 }
 
 void StridedArrayViewTest::dimensionsConstructDefault() {
@@ -3345,6 +3355,96 @@ void StridedArrayViewTest::castInflateFlattenInvalid() {
         "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride 2 but got 6\n"
         "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride 2 but got -2\n"
         "Containers::arrayCast(): can't fit a 6-byte type into a stride of 2\n");
+}
+
+void StridedArrayViewTest::castInflateVoid() {
+    struct Rgb {
+        /* Not using a 8bit type here in order to properly test the size
+           calculation in asserts */
+        unsigned short r, g, b;
+    };
+
+    Rgb image[6]{
+        {0x11, 0x33, 0x55}, {0x22, 0x44, 0x66}, {0xaa, 0xcc, 0xee},
+        {0x77, 0x99, 0xbb}, {0x88, 0xaa, 0xcc}, {0xbb, 0xdd, 0xff}
+    };
+
+    StridedArrayView2D<void> a{image, {2, 3}, {18, 6}};
+    StridedArrayView2D<const void> ca{image, {2, 3}, {18, 6}};
+    StridedArrayView3D<unsigned short> b = arrayCast<3, unsigned short>(a, 3);
+    CORRADE_COMPARE(b.size(), (Size3D{2, 3, 3}));
+    CORRADE_COMPARE(b.stride(), (Stride3D{18, 6, 2}));
+    CORRADE_COMPARE(b[1][1][0], 0x88);
+    CORRADE_COMPARE(b[0][2][2], 0xee);
+
+    StridedArrayView3D<const unsigned short> cb = arrayCast<3, const unsigned short>(ca, 3);
+    CORRADE_COMPARE(cb.size(), (Size3D{2, 3, 3}));
+    CORRADE_COMPARE(cb.stride(), (Stride3D{18, 6, 2}));
+    CORRADE_COMPARE(cb[1][1][0], 0x88);
+    CORRADE_COMPARE(cb[0][2][2], 0xee);
+}
+
+void StridedArrayViewTest::castInflateVoidZeroStride() {
+    struct Rgb {
+        /* Not using a 8bit type here in order to properly test the size
+           calculation in asserts */
+        unsigned short r, g, b;
+    };
+
+    Rgb image[3]{
+        {0x11, 0x33, 0x55},
+        {0x77, 0x99, 0xbb}
+    };
+
+    StridedArrayView2D<void> a = StridedArrayView2D<Rgb>{image, {2, 3}, {6, 0}};
+    StridedArrayView3D<unsigned short> b = arrayCast<3, unsigned short>(a, 3);
+    CORRADE_COMPARE(b.size(), (Size3D{2, 3, 3}));
+    CORRADE_COMPARE(b.stride(), (Stride3D{6, 0, 2}));
+    CORRADE_COMPARE(b[1][1][0], 0x77);
+    CORRADE_COMPARE(b[0][0][2], 0x55);
+}
+
+void StridedArrayViewTest::castInflateVoidNegativeStride() {
+    struct Rgb {
+        /* Not using a 8bit type here in order to properly test the size
+           calculation in asserts */
+        unsigned short r, g, b;
+    };
+
+    Rgb image[6]{
+        {0x11, 0x33, 0x55}, {0x22, 0x44, 0x66}, {0xaa, 0xcc, 0xee},
+        {0x77, 0x99, 0xbb}, {0x88, 0xaa, 0xcc}, {0xbb, 0xdd, 0xff}
+    };
+
+    StridedArrayView2D<void> a = StridedArrayView2D<Rgb>{image, {2, 3}, {18, 6}}.flipped<1>();
+    StridedArrayView3D<unsigned short> b = arrayCast<3, unsigned short>(a, 3);
+    CORRADE_COMPARE(b.size(), (Size3D{2, 3, 3}));
+    CORRADE_COMPARE(b.stride(), (Stride3D{18, -6, 2}));
+    /* Same as in castInflateVoid(), just inverted in second dimension */
+    CORRADE_COMPARE(b[1][1][0], 0x88);
+    CORRADE_COMPARE(b[0][0][2], 0xee);
+}
+
+void StridedArrayViewTest::castInflateVoidInvalid() {
+    struct Rgb {
+        unsigned short r, g, b;
+    };
+
+    Rgb image[6]{
+        {0x11, 0x33, 0x55}, {0x22, 0x44, 0x66}, {0xaa, 0xcc, 0xee},
+        {0x77, 0x99, 0xbb}, {0x88, 0xaa, 0xcc}, {0xbb, 0xdd, 0xff}
+    };
+
+    StridedArrayView2D<void> a{image, &image[0], {2, 3}, {18, 6}};
+    StridedArrayView2D<void> b{image, &image[0], {1, 3}, {2, 6}};
+
+    std::ostringstream out;
+    Error redirectError{&out};
+    arrayCast<3, unsigned int>(a, 3);
+    arrayCast<3, unsigned int>(b, 3);
+    CORRADE_COMPARE(out.str(),
+        "Containers::arrayCast(): can't fit 3 4-byte items into a stride of 6\n"
+        "Containers::arrayCast(): can't fit a 4-byte type into a stride of 2\n");
 }
 
 }}}}
