@@ -601,6 +601,9 @@ template<> class ArrayView<const void> {
          */
         template<class T, std::size_t size> constexpr /*implicit*/ ArrayView(T(&data)[size]) noexcept: _data(data), _size(size*sizeof(T)) {}
 
+        /** @brief Construct const void view on an @ref ArrayView<void> */
+        constexpr /*implicit*/ ArrayView(ArrayView<void> array) noexcept: _data{array}, _size{array.size()} {}
+
         /** @brief Construct const void view on any @ref ArrayView */
         template<class T> constexpr /*implicit*/ ArrayView(ArrayView<T> array) noexcept: _data(array), _size(array.size()*sizeof(T)) {}
 
@@ -742,7 +745,7 @@ Size of the new array is calculated as @cpp view.size()/sizeof(U) @ce.
 Expects that the target type is [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType)
 and the total byte size doesn't change.
 */
-template<class U> ArrayView<U> arrayCast(ArrayView<void> view) {
+template<class U> ArrayView<U> arrayCast(ArrayView<const void> view) {
     static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
     const std::size_t size = view.size()/sizeof(U);
     CORRADE_ASSERT(size*sizeof(U) == view.size(),

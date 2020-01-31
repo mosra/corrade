@@ -106,6 +106,7 @@ struct ArrayViewTest: TestSuite::Tester {
     void constructConstVoid();
     void constructVoidFrom();
     void constructConstVoidFrom();
+    void constructConstVoidFromVoid();
     void constructFixedSize();
     void constructFixedSizeVoid();
     void constructFixedSizeConstVoid();
@@ -163,6 +164,7 @@ ArrayViewTest::ArrayViewTest() {
               &ArrayViewTest::constructConstVoid,
               &ArrayViewTest::constructVoidFrom,
               &ArrayViewTest::constructConstVoidFrom,
+              &ArrayViewTest::constructConstVoidFromVoid,
               &ArrayViewTest::constructFixedSize,
               &ArrayViewTest::constructFixedSizeVoid,
               &ArrayViewTest::constructFixedSizeConstVoid,
@@ -387,6 +389,17 @@ void ArrayViewTest::constructConstVoidFrom() {
     constexpr ConstVoidArrayView ccc = ccb;
     CORRADE_VERIFY(ccc == Array30);
     CORRADE_COMPARE(ccc.size(), 30*sizeof(int));
+}
+
+void ArrayViewTest::constructConstVoidFromVoid() {
+    int a[13];
+    const ArrayView b = a;
+    VoidArrayView c = b;
+    ConstVoidArrayView cc = c;
+    CORRADE_VERIFY(c == b);
+    CORRADE_VERIFY(cc == b);
+    CORRADE_COMPARE(c.size(), 13*sizeof(int));
+    CORRADE_COMPARE(cc.size(), 13*sizeof(int));
 }
 
 /* Needs to be here in order to use it in constexpr */
