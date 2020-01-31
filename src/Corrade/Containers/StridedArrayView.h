@@ -969,7 +969,6 @@ template<unsigned dimensions> class StridedArrayView<dimensions, void> {
         /* Basically just so these can access the _size / _stride without going
            through getters (which additionally flatten their types for 1D) */
         template<bool> friend struct Implementation::ArrayCastFlattenOrInflate;
-        template<class U, unsigned dimensions_> friend StridedArrayView<dimensions_, U> arrayCast(const StridedArrayView<dimensions_, void>&);
 
         /* Internal constructor without type/size checks for things like
            slice() etc. Argument order is different to avoid this function
@@ -1372,7 +1371,7 @@ of the original array. Works with negative and zero strides as well, however
 note that no type compatibility checks can be done for zero strides, so be
 extra careful in that case.
 */
-template<class U, unsigned dimensions> StridedArrayView<dimensions, U> arrayCast(const StridedArrayView<dimensions, void>& view) {
+template<class U, unsigned dimensions> StridedArrayView<dimensions, U> arrayCast(const StridedArrayView<dimensions, const void>& view) {
     static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
     #ifndef CORRADE_NO_DEBUG
     for(unsigned i = 0; i != dimensions; ++i) {
@@ -1387,15 +1386,9 @@ template<class U, unsigned dimensions> StridedArrayView<dimensions, U> arrayCast
 @overload
 @m_since_latest
 */
-template<class U, unsigned dimensions> StridedArrayView<dimensions, U> arrayCast(const StridedArrayView<dimensions, const void>& view) {
-    static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
-    #ifndef CORRADE_NO_DEBUG
-    for(unsigned i = 0; i != dimensions; ++i) {
-        CORRADE_ASSERT(!view._stride._data[i] || sizeof(U) <= std::size_t(view._stride._data[i] < 0 ? -view._stride._data[i] : view._stride._data[i]),
-            "Containers::arrayCast(): can't fit a" << sizeof(U) << Utility::Debug::nospace << "-byte type into a stride of" << view._stride._data[i], {});
-    }
-    #endif
-    return StridedArrayView<dimensions, U>{view._size, view._stride, view._data};
+template<class U, unsigned dimensions> StridedArrayView<dimensions, U> arrayCast(const StridedArrayView<dimensions, void>& view) {
+    auto out = arrayCast<const U, dimensions>(StridedArrayView<dimensions, const void>{view});
+    return StridedArrayView<dimensions, U>{out._size, out._stride, const_cast<void*>(out._data)};
 }
 
 namespace Implementation {

@@ -757,12 +757,9 @@ template<class U> ArrayView<U> arrayCast(ArrayView<const void> view) {
 @overload
 @m_since_latest
 */
-template<class U> ArrayView<U> arrayCast(ArrayView<const void> view) {
-    static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
-    const std::size_t size = view.size()/sizeof(U);
-    CORRADE_ASSERT(size*sizeof(U) == view.size(),
-        "Containers::arrayCast(): can't reinterpret" << view.size() << "bytes into a" << sizeof(U) << Utility::Debug::nospace << "-byte type", {});
-    return {reinterpret_cast<U*>(view.data()), size};
+template<class U> ArrayView<U> arrayCast(ArrayView<void> view) {
+    auto out = arrayCast<const U>(ArrayView<const void>{view});
+    return ArrayView<U>{const_cast<U*>(out.data()), out.size()};
 }
 
 /** @relatesalso ArrayView
