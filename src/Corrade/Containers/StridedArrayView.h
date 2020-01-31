@@ -1393,10 +1393,15 @@ template<class U, unsigned dimensions> StridedArrayView<dimensions, U> arrayCast
 
 namespace Implementation {
 
+/* Even though this *could* be done directly as SFINAEd overloads of
+   arrayCast() (using a default non-type template parameter or a default
+   function parameter), it's done like this to avoid default parameters in the
+   arrayCast() so it can be forward-declared to break up header dependencies,
+   and also to make the friend declaration inside StridedArrayView simpler */
 template<bool> struct ArrayCastFlattenOrInflate;
-template<> struct ArrayCastFlattenOrInflate<true> { /* flatten */
+template<> struct ArrayCastFlattenOrInflate<true> {
     template<unsigned newDimensions, class U, unsigned dimensions, class T> static StridedArrayView<newDimensions, U> cast(const StridedArrayView<dimensions, T>& view) {
-        static_assert(newDimensions + 1 == dimensions, "mosra messed up");
+        static_assert(newDimensions + 1 == dimensions, "can flatten only into one less dimension");
         CORRADE_ASSERT(sizeof(T) == std::size_t(view._stride[dimensions - 1]),
             "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride" << sizeof(T) << "but got" << view.stride()[dimensions - 1], {});
         CORRADE_ASSERT(sizeof(T)*view._size._data[dimensions - 1] == sizeof(U),
@@ -1407,9 +1412,9 @@ template<> struct ArrayCastFlattenOrInflate<true> { /* flatten */
             view._data};
     }
 };
-template<> struct ArrayCastFlattenOrInflate<false> { /* inflate */
+template<> struct ArrayCastFlattenOrInflate<false> {
     template<unsigned newDimensions, class U, unsigned dimensions, class T> static StridedArrayView<newDimensions, U> cast(const StridedArrayView<dimensions, T>& view) {
-        static_assert(newDimensions == dimensions + 1, "mosra messed up");
+        static_assert(newDimensions == dimensions + 1, "can inflate only into one more dimension");
         constexpr std::size_t lastDimensionSize = sizeof(T)/sizeof(U);
         static_assert(sizeof(T) % lastDimensionSize == 0, "original type not a multiply of inflated type");
         std::size_t size[newDimensions];
@@ -1429,17 +1434,21 @@ template<> struct ArrayCastFlattenOrInflate<false> { /* inflate */
 }
 
 /** @relatesalso StridedArrayView
-@brief Reinterpret-cast and flatten or inflate a strided array view
+@brief Reinterpret-cast and inflate or flatten a strided array view
 @m_since{2019,10}
 
-If @p newDimensions is one less than @p dimensions, flattens the last dimension
-into a tightly packed new type @p U, expecting the last dimension to be tightly
-packed and its stride equal to size of @p U. If @p newDimensions is one more
-than @p dimensions, inflates the last dimension into the new type @p U, its
-element count being ratio of @p T and @p U sizes. This operation can be used
-for example to peek into individual channels pixel data:
+If @cpp newDimensions >= dimensions @ce, inflates the last dimension into the
+new type @p U, its element count being ratio of @p T and @p U sizes. The
+@p newDimensions template parameter is expected to always be one more than
+@p dimensions. This operation can be used for example to peek into individual
+channels pixel data:
 
 @snippet Containers.cpp arrayCast-StridedArrayView-inflate
+
+If @cpp newDimensions < dimensions @ce, flattens the last dimension into a
+tightly packed new type @p U, expecting the last dimension to be tightly packed
+and its stride equal to size of @p U. The @p newDimensions template parameter
+is expected to always be one less than @p dimensions.
 
 @note This function doesn't work on the @ref StridedArrayView<dimensions, void>
     / @ref StridedArrayView<dimensions, const void> specializations --- cast
@@ -1448,7 +1457,6 @@ for example to peek into individual channels pixel data:
 template<unsigned newDimensions, class U, unsigned dimensions, class T> StridedArrayView<newDimensions, U> arrayCast(const StridedArrayView<dimensions, T>& view) {
     static_assert(std::is_standard_layout<T>::value, "the source type is not standard layout");
     static_assert(std::is_standard_layout<U>::value, "the target type is not standard layout");
-    static_assert(newDimensions == dimensions - 1 || newDimensions == dimensions + 1, "can cast only into one more or one less dimension");
     return Implementation::ArrayCastFlattenOrInflate<newDimensions < dimensions>::template cast<newDimensions, U>(view);
 }
 
