@@ -3225,16 +3225,20 @@ void StridedArrayViewTest::castInflateFlattenInvalid() {
 
     StridedArrayView3D<unsigned short> c = a.flipped<2>();
 
+    StridedArrayView3D<unsigned short> d{image, &image[0].r, {2, 1, 3}, {18, 2, 6}};
+
     std::ostringstream out;
     Error redirectError{&out};
 
     arrayCast<2, unsigned int>(a);
     arrayCast<2, Rgb>(b);
     arrayCast<2, Rgb>(c);
+    arrayCast<2, Rgb>(d);
     CORRADE_COMPARE(out.str(),
         "Containers::arrayCast(): last dimension needs to have byte size equal to new type size in order to be flattened, expected 4 but got 6\n"
         "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride 2 but got 6\n"
-        "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride 2 but got -2\n");
+        "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride 2 but got -2\n"
+        "Containers::arrayCast(): can't fit a 6-byte type into a stride of 2\n");
 }
 
 }}}}

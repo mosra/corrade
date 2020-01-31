@@ -1402,6 +1402,13 @@ template<bool> struct ArrayCastFlattenOrInflate;
 template<> struct ArrayCastFlattenOrInflate<true> {
     template<unsigned newDimensions, class U, unsigned dimensions, class T> static StridedArrayView<newDimensions, U> cast(const StridedArrayView<dimensions, T>& view) {
         static_assert(newDimensions + 1 == dimensions, "can flatten only into one less dimension");
+        #ifndef CORRADE_NO_DEBUG
+        /* The last dimension is flattened, so not testing its stride */
+        for(unsigned i = 0; i != dimensions - 1; ++i) {
+            CORRADE_ASSERT(!view._stride._data[i] || sizeof(U) <= std::size_t(view._stride._data[i] < 0 ? -view._stride._data[i] : view._stride._data[i]),
+                "Containers::arrayCast(): can't fit a" << sizeof(U) << Utility::Debug::nospace << "-byte type into a stride of" << view._stride._data[i], {});
+        }
+        #endif
         CORRADE_ASSERT(sizeof(T) == std::size_t(view._stride[dimensions - 1]),
             "Containers::arrayCast(): last dimension needs to be tightly packed in order to be flattened, expected stride" << sizeof(T) << "but got" << view.stride()[dimensions - 1], {});
         CORRADE_ASSERT(sizeof(T)*view._size._data[dimensions - 1] == sizeof(U),
@@ -1417,6 +1424,10 @@ template<> struct ArrayCastFlattenOrInflate<false> {
         static_assert(newDimensions == dimensions + 1, "can inflate only into one more dimension");
         constexpr std::size_t lastDimensionSize = sizeof(T)/sizeof(U);
         static_assert(sizeof(T) % lastDimensionSize == 0, "original type not a multiply of inflated type");
+        /* No need to have a runtime check for the "stride fitting" like above
+           as it is already checked with the above static_assert() at compile
+           time -- assuming no stride was smaller than sizeof(T) before, it
+           won't be smaller than sizeof(U) either since sizeof(T) > sizeof(U) */
         std::size_t size[newDimensions];
         std::ptrdiff_t stride[newDimensions];
         size[dimensions] = lastDimensionSize;
@@ -1449,6 +1460,11 @@ If @cpp newDimensions < dimensions @ce, flattens the last dimension into a
 tightly packed new type @p U, expecting the last dimension to be tightly packed
 and its stride equal to size of @p U. The @p newDimensions template parameter
 is expected to always be one less than @p dimensions.
+
+Expects that both types are [standard layout](http://en.cppreference.com/w/cpp/concept/StandardLayoutType) and @cpp sizeof(U) @ce is not larger than any
+@ref StridedArrayView::stride() "stride()" of the original array. Works with
+negative and zero strides as well, however note that no type compatibility
+checks can be done for zero strides, so be extra careful in that case.
 
 @note This function doesn't work on the @ref StridedArrayView<dimensions, void>
     / @ref StridedArrayView<dimensions, const void> specializations --- cast
