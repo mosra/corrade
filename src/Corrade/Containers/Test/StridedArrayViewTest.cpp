@@ -236,10 +236,13 @@ struct StridedArrayViewTest: TestSuite::Tester {
     void broadcastedInvalid();
 
     void cast();
+    void castZeroStride();
     void castNegativeStride();
     void castInvalid();
 
     void castInflateFlatten();
+    void castInflateFlattenZeroStride();
+    void castInflateFlattenNegativeStride();
     void castInflateFlattenArrayView();
     void castInflateFlattenInvalid();
 };
@@ -429,10 +432,13 @@ StridedArrayViewTest::StridedArrayViewTest() {
               &StridedArrayViewTest::broadcastedInvalid,
 
               &StridedArrayViewTest::cast,
+              &StridedArrayViewTest::castZeroStride,
               &StridedArrayViewTest::castNegativeStride,
               &StridedArrayViewTest::castInvalid,
 
               &StridedArrayViewTest::castInflateFlatten,
+              &StridedArrayViewTest::castInflateFlattenZeroStride,
+              &StridedArrayViewTest::castInflateFlattenNegativeStride,
               &StridedArrayViewTest::castInflateFlattenArrayView,
               &StridedArrayViewTest::castInflateFlattenInvalid});
 }
@@ -3064,6 +3070,46 @@ void StridedArrayViewTest::cast() {
     #endif
 }
 
+void StridedArrayViewTest::castZeroStride() {
+    struct {
+        short a;
+        short b;
+        int c;
+    } data[1]{{5, 50, 0}};
+    auto a = Containers::StridedArrayView1D<short>{data, &data[0].a, 5, 0};
+    VoidStridedArrayView1D av = a;
+    ConstVoidStridedArrayView1D cav = a;
+
+    CORRADE_COMPARE(a.size(), 5);
+    CORRADE_COMPARE(av.size(), 5);
+    CORRADE_COMPARE(cav.size(), 5);
+    CORRADE_COMPARE(a.stride(), 0);
+    CORRADE_COMPARE(av.stride(), 0);
+    CORRADE_COMPARE(cav.stride(), 0);
+    CORRADE_COMPARE(a[2], 5);
+    CORRADE_COMPARE(a[3], 5);
+
+    auto b = Containers::arrayCast<int>(a);
+    auto bv = Containers::arrayCast<int>(av);
+    auto cbv = Containers::arrayCast<const int>(cav);
+    CORRADE_COMPARE(static_cast<void*>(b.data()), static_cast<void*>(a.data()));
+    CORRADE_COMPARE(static_cast<void*>(bv.data()), static_cast<void*>(a.data()));
+    CORRADE_COMPARE(static_cast<const void*>(cbv.data()), static_cast<const void*>(a.data()));
+    CORRADE_COMPARE(b.size(), 5);
+    CORRADE_COMPARE(bv.size(), 5);
+    CORRADE_COMPARE(cbv.size(), 5);
+    CORRADE_COMPARE(b.stride(), 0);
+    CORRADE_COMPARE(bv.stride(), 0);
+    CORRADE_COMPARE(cbv.stride(), 0);
+    #ifndef CORRADE_TARGET_BIG_ENDIAN
+    CORRADE_COMPARE(b[2], (50 << 16) | 5);
+    CORRADE_COMPARE(b[3], (50 << 16) | 5);
+    #else
+    CORRADE_COMPARE(b[2], (5 << 16) | 50);
+    CORRADE_COMPARE(b[3], (5 << 16) | 50);
+    #endif
+}
+
 void StridedArrayViewTest::castNegativeStride() {
     struct {
         short a;
@@ -3185,6 +3231,66 @@ void StridedArrayViewTest::castInflateFlatten() {
     CORRADE_COMPARE(c.stride(), (Stride2D{18, 6}));
     CORRADE_COMPARE(c[1][1].r, 0x88);
     CORRADE_COMPARE(c[0][2].b, 0xee);
+}
+
+void StridedArrayViewTest::castInflateFlattenZeroStride() {
+    struct Rgb {
+        /* Not using a 8bit type here in order to properly test the size
+           calculation in asserts */
+        unsigned short r, g, b;
+    };
+
+    Rgb image[6]{
+        {0x11, 0x33, 0x55},
+        {0x77, 0x99, 0xbb}
+    };
+
+    StridedArrayView2D<Rgb> a{image, {2, 3}, {6, 0}};
+    CORRADE_COMPARE(a[1][1].r, 0x77);
+    CORRADE_COMPARE(a[0][2].b, 0x55);
+
+    StridedArrayView3D<unsigned short> b = arrayCast<3, unsigned short>(a);
+    CORRADE_COMPARE(b.size(), (Size3D{2, 3, 3}));
+    CORRADE_COMPARE(b.stride(), (Stride3D{6, 0, 2}));
+    CORRADE_COMPARE(b[1][1][0], 0x77);
+    CORRADE_COMPARE(b[0][2][2], 0x55);
+
+    StridedArrayView2D<Rgb> c = arrayCast<2, Rgb>(b);
+    CORRADE_COMPARE(c.size(), (Size2D{2, 3}));
+    CORRADE_COMPARE(c.stride(), (Stride2D{6, 0}));
+    CORRADE_COMPARE(c[1][1].r, 0x77);
+    CORRADE_COMPARE(c[0][2].b, 0x55);
+}
+
+void StridedArrayViewTest::castInflateFlattenNegativeStride() {
+    struct Rgb {
+        /* Not using a 8bit type here in order to properly test the size
+           calculation in asserts */
+        unsigned short r, g, b;
+    };
+
+    Rgb image[6]{
+        {0x11, 0x33, 0x55}, {0x22, 0x44, 0x66}, {0xaa, 0xcc, 0xee},
+        {0x77, 0x99, 0xbb}, {0x88, 0xaa, 0xcc}, {0xbb, 0xdd, 0xff}
+    };
+
+    auto a = StridedArrayView2D<Rgb>{image, {2, 3}, {18, 6}}.flipped<1>();
+    CORRADE_COMPARE(a.size(), (Size2D{2, 3}));
+    CORRADE_COMPARE(a.stride(), (Stride2D{18, -6}));
+    CORRADE_COMPARE(a[1][1].r, 0x88);
+    CORRADE_COMPARE(a[0][0].b, 0xee);
+
+    StridedArrayView3D<unsigned short> b = arrayCast<3, unsigned short>(a);
+    CORRADE_COMPARE(b.size(), (Size3D{2, 3, 3}));
+    CORRADE_COMPARE(b.stride(), (Stride3D{18, -6, 2}));
+    CORRADE_COMPARE(b[1][1][0], 0x88);
+    CORRADE_COMPARE(b[0][0][2], 0xee);
+
+    StridedArrayView2D<Rgb> c = arrayCast<2, Rgb>(b);
+    CORRADE_COMPARE(c.size(), (Size2D{2, 3}));
+    CORRADE_COMPARE(c.stride(), (Stride2D{18, -6}));
+    CORRADE_COMPARE(c[1][1].r, 0x88);
+    CORRADE_COMPARE(c[0][0].b, 0xee);
 }
 
 void StridedArrayViewTest::castInflateFlattenArrayView() {
