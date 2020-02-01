@@ -3225,8 +3225,6 @@ void StridedArrayViewTest::castInflateFlatten() {
     };
 
     StridedArrayView2D<Rgb> a{image, {2, 3}, {18, 6}};
-    CORRADE_COMPARE(a.size(), (Size2D{2, 3}));
-    CORRADE_COMPARE(a.stride(), (Stride2D{18, 6}));
     CORRADE_COMPARE(a[1][1].r, 0x88);
     CORRADE_COMPARE(a[0][2].b, 0xee);
 
