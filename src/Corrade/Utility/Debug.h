@@ -82,6 +82,13 @@ type using @ref Debug. Note that printing @ref std::vector or @ref std::map
 containers is already possible with the generic iterable container support in
 @ref Corrade/Utility/Debug.h.
 
+@subsection Utility-Debug-stl-ostream-delegation Ostream Delegation
+
+@ref Corrade/Utility/DebugStl.h also provides an @ref std::ostream @cpp
+operator<<() @ce for printing builtin types:
+
+@snippet Utility.cpp Debug-ostream-delegation
+
 @section Utility-Debug-scoped-output Scoped output redirection
 
 Output specified in class constructor is used for all instances created during

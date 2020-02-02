@@ -31,7 +31,7 @@
 #include <vector>
 
 #include "Corrade/TestSuite/Tester.h"
-#include "Corrade/Utility/Debug.h"
+#include "Corrade/Containers/Array.h"
 #include "Corrade/Utility/DebugStl.h"
 
 #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -81,6 +81,12 @@ struct DebugTest: TestSuite::Tester {
 
     void ostreamFallback();
     void ostreamFallbackPriority();
+    
+    void ostreamDelegationInternalUsing();
+    void ostreamDelegationExternalUsing();
+    void ostreamDelegationCyclicDependency();
+    void ostreamDelegationPriority();
+    void ostreamDelegationPriorityImplicitConversion();
 
     void scopedOutput();
 
@@ -150,6 +156,12 @@ DebugTest::DebugTest() {
 
         &DebugTest::ostreamFallback,
         &DebugTest::ostreamFallbackPriority,
+        
+        &DebugTest::ostreamDelegationInternalUsing,
+        &DebugTest::ostreamDelegationExternalUsing,
+        &DebugTest::ostreamDelegationCyclicDependency,
+        &DebugTest::ostreamDelegationPriority,
+        &DebugTest::ostreamDelegationPriorityImplicitConversion,
 
         &DebugTest::scopedOutput,
 
@@ -817,6 +829,61 @@ void DebugTest::ostreamFallbackPriority() {
     std::ostringstream out;
     Debug(&out) << Baz{};
     CORRADE_COMPARE(out.str(), "baz from Debug\n");
+}
+
+namespace OstreamDelegationNamespace0 {
+    struct Corge {
+      int i;
+    };
+
+    inline Debug& operator<<(Debug& debug, const Corge& val) {
+        return debug << val.i << "corge from Debug";
+    }
+}
+
+void DebugTest::ostreamDelegationInternalUsing() {
+    using OstreamDebug::operator<<;
+    std::ostringstream out;
+    out << OstreamDelegationNamespace0::Corge{42};
+    CORRADE_COMPARE(out.str(), "42 corge from Debug");
+}
+
+namespace OstreamDelegationNamespace1 {
+    struct Grault {
+      int i;
+    };
+
+    inline Debug& operator<<(Debug& debug, const Grault& val) {
+        return debug << val.i << "grault from Debug";
+    }
+    
+    using OstreamDebug::operator<<;
+}
+
+void DebugTest::ostreamDelegationExternalUsing() {
+    std::ostringstream out;
+    out << OstreamDelegationNamespace1::Grault{36};
+    CORRADE_COMPARE(out.str(), "36 grault from Debug");
+}
+
+struct ClassWithoutStreamOperator {};
+
+void DebugTest::ostreamDelegationCyclicDependency() {
+    CORRADE_VERIFY(!Implementation::HasOstreamOperator<ClassWithoutStreamOperator>::value);
+    CORRADE_VERIFY(!Implementation::HasDebugStreamOperator<ClassWithoutStreamOperator>::value);
+}
+
+void DebugTest::ostreamDelegationPriority() {
+    std::ostringstream out;
+    out << Baz{};
+    CORRADE_COMPARE(out.str(), "baz from ostream");
+}
+
+void DebugTest::ostreamDelegationPriorityImplicitConversion() {
+    Containers::Array<int> array{Containers::InPlaceInit, { 1, 2, 3 }};
+    std::ostringstream out;
+    out << array;
+    CORRADE_COMPARE(out.str(), "{ 1, 2, 3 }");
 }
 
 void DebugTest::scopedOutput() {

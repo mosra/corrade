@@ -147,8 +147,14 @@ struct DebugOstreamFallback {
 CORRADE_UTILITY_EXPORT Debug& operator<<(Debug& debug, Implementation::DebugOstreamFallback&& value);
 #endif
 
-}}
+namespace OstreamDebug {
 
+/**
+@brief Print a builtin type to an ostream
+
+Allows calls like @cpp std::cout << Magnum::Vector2{0.2, 3.14}; @ce to be
+delegated to a @ref Debug object. Creates a @ref Debug object on every call.
+*/
 template<typename T>
 typename std::enable_if<
     Corrade::Utility::Implementation::HasDebugStreamOperator<T>::value && !Corrade::Utility::Implementation::HasOstreamOperator<T>::value,
@@ -158,5 +164,9 @@ typename std::enable_if<
   debug << val;
   return os;
 }
+
+}
+
+}}
 
 #endif

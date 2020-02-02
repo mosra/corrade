@@ -320,6 +320,21 @@ else
 }
 
 {
+auto sendMessage = [](const std::string &) {};
+/* [Debug-ostream-delegation] */
+using Utility::OstreamDebug::operator<<;
+/// unfinished
+Containers::Array<float> array{Containers::InPlaceInit, { 0.1, 22.22, 3.14 }};
+std::cout << "array = " << array << std::endl;
+
+std::ostringstream o;
+o << array << std::endl;
+sendMessage(o.str());
+/// unfinished
+/* [Debug-ostream-delegation] */
+}
+
+{
 /* [Debug-scoped-output] */
 std::ostringstream debugOut, errorOut;
 
