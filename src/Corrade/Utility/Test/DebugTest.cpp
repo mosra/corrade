@@ -1022,9 +1022,9 @@ void DebugTest::sourceLocation() {
 
     #ifdef CORRADE_UTILITY_DEBUG_HAS_SOURCE_LOCATION
     CORRADE_COMPARE(out.str(),
-        __FILE__ ":947: hello\n"
-        __FILE__ ":949: and this is from another line\n"
-        __FILE__ ":951\n"
+        __FILE__ ":1014: hello\n"
+        __FILE__ ":1016: and this is from another line\n"
+        __FILE__ ":1018\n"
         "this no longer\n");
     #else
     CORRADE_COMPARE(out.str(),
