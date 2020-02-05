@@ -81,7 +81,7 @@ struct DebugTest: TestSuite::Tester {
 
     void ostreamFallback();
     void ostreamFallbackPriority();
-    
+
     void ostreamDelegationInternalUsing();
     void ostreamDelegationExternalUsing();
     void ostreamDelegationCyclicDependency();
@@ -156,7 +156,7 @@ DebugTest::DebugTest() {
 
         &DebugTest::ostreamFallback,
         &DebugTest::ostreamFallbackPriority,
-        
+
         &DebugTest::ostreamDelegationInternalUsing,
         &DebugTest::ostreamDelegationExternalUsing,
         &DebugTest::ostreamDelegationCyclicDependency,
@@ -856,7 +856,7 @@ namespace OstreamDelegationNamespace1 {
     inline Debug& operator<<(Debug& debug, const Grault& val) {
         return debug << val.i << "grault from Debug";
     }
-    
+
     using OstreamDebug::operator<<;
 }
 
