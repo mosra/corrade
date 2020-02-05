@@ -869,8 +869,8 @@ void DebugTest::ostreamDelegationExternalUsing() {
 struct ClassWithoutStreamOperator {};
 
 void DebugTest::ostreamDelegationCyclicDependency() {
-    CORRADE_VERIFY(!Implementation::HasOstreamOperator<ClassWithoutStreamOperator>::value);
-    CORRADE_VERIFY(!Implementation::HasDebugStreamOperator<ClassWithoutStreamOperator>::value);
+    CORRADE_VERIFY(!Implementation::HasBestFittingOstreamOperator<ClassWithoutStreamOperator>::value);
+    CORRADE_VERIFY(!Implementation::HasBestFittingDebugOperator<ClassWithoutStreamOperator>::value);
 }
 
 void DebugTest::ostreamDelegationPriority() {
