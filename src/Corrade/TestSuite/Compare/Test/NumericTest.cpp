@@ -47,6 +47,9 @@ struct NumericTest: Tester {
     void aroundMulti();
 
     void explicitBoolConversion();
+
+    void divisible();
+    void notDivisible();
 };
 
 NumericTest::NumericTest() {
@@ -62,7 +65,10 @@ NumericTest::NumericTest() {
               &NumericTest::greaterMulti,
               &NumericTest::aroundMulti,
 
-              &NumericTest::explicitBoolConversion});
+              &NumericTest::explicitBoolConversion,
+
+              &NumericTest::divisible,
+              &NumericTest::notDivisible});
 }
 
 struct BVec2 {
@@ -299,6 +305,46 @@ void NumericTest::explicitBoolConversion() {
     CORRADE_COMPARE(Comparator<Compare::GreaterOrEqual<Foo>>{}({}, {}), ComparisonStatusFlags{});
     CORRADE_COMPARE(Comparator<Compare::Greater<Foo>>{}({}, {}), ComparisonStatusFlags{});
     CORRADE_COMPARE(Comparator<Compare::Around<Bar>>{{}}({}, {}), ComparisonStatusFlags{});
+}
+
+void NumericTest::divisible() {
+    int b = 4;
+    int c = 8;
+    int a = 20;
+    CORRADE_COMPARE(Comparator<Compare::Divisible<int>>{}(a, b), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::Divisible<int>>{}(a, c), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<Compare::Divisible<int>>{}(b, a), ComparisonStatusFlag::Failed);
+
+    std::stringstream out;
+
+    {
+        Error e(&out);
+        Comparator<Divisible<int>> compare;
+        ComparisonStatusFlags flags = compare(a, c);
+        compare.printMessage(flags, e, "a", "c");
+    }
+
+    CORRADE_COMPARE(out.str(), "Value a is not divisible by c, 20 % 8 was not expected to be 4\n");
+}
+
+void NumericTest::notDivisible() {
+    int b = 8;
+    int c = 4;
+    int a = 20;
+    CORRADE_COMPARE(Comparator<Compare::NotDivisible<int>>{}(a, b), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::NotDivisible<int>>{}(a, c), ComparisonStatusFlag::Failed);
+    CORRADE_COMPARE(Comparator<Compare::NotDivisible<int>>{}(b, a), ComparisonStatusFlags{});
+
+    std::stringstream out;
+
+    {
+        Error e(&out);
+        Comparator<NotDivisible<int>> compare;
+        ComparisonStatusFlags flags = compare(a, c);
+        compare.printMessage(flags, e, "a", "c");
+    }
+
+    CORRADE_COMPARE(out.str(), "Value a is divisible by c, 20 % 4 was not expected to be 0\n");
 }
 
 }}}}}

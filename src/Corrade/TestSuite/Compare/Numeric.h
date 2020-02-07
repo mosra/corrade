@@ -131,6 +131,36 @@ equivalent:
 */
 template<class T> inline Around<T> around(T epsilon) { return Around<T>{epsilon}; }
 
+/**
+@brief Pseudo-type for verifying that value is divisible by
+@m_since_latest
+
+Prints both values if the first *is not* divisible by the second. Compared type
+needs to implement at least an @cpp operator%() @ce returning the same type.
+Example usage:
+
+@snippet TestSuite.cpp Compare-Divisible
+
+See @ref TestSuite-Comparator-pseudo-types for more information.
+@see @ref NotDivisible
+*/
+template<class T> class Divisible {};
+
+/**
+@brief Pseudo-type for verifying that value is not divisible by
+@m_since_latest
+
+Prints both values if the first *is* divisible by the second. Compared type
+needs to implement at least an @cpp operator%() @ce returning the same type.
+Example usage:
+
+@snippet TestSuite.cpp Compare-NotDivisible
+
+See @ref TestSuite-Comparator-pseudo-types for more information.
+@see @ref Divisible
+*/
+template<class T> class NotDivisible {};
+
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -240,6 +270,47 @@ template<class T> class Comparator<Compare::Around<T>> {
         const T* _actualValue;
         const T* _expectedValue;
 };
+
+template<class T> class Comparator<Compare::Divisible<T>> {
+    public:
+        ComparisonStatusFlags operator()(const T& actual, const T& expected) {
+            _actualValue = &actual;
+            _expectedValue = &expected;
+            return *_actualValue % *_expectedValue == T() ?
+                ComparisonStatusFlags{} : ComparisonStatusFlag::Failed;
+        }
+
+        void printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const {
+            out << "Value" << actual << "is not divisible by" << expected
+                << Utility::Debug::nospace << "," << *_actualValue << "%"
+                << *_expectedValue << "was not expected to be" << (*_actualValue % *_expectedValue);
+        }
+
+    private:
+        const T* _actualValue;
+        const T* _expectedValue;
+};
+
+template<class T> class Comparator<Compare::NotDivisible<T>> {
+    public:
+        ComparisonStatusFlags operator()(const T& actual, const T& expected) {
+            _actualValue = &actual;
+            _expectedValue = &expected;
+            return *_actualValue % *_expectedValue != T() ?
+                ComparisonStatusFlags{} : ComparisonStatusFlag::Failed;
+        }
+
+        void printMessage(ComparisonStatusFlags, Utility::Debug& out, const char* actual, const char* expected) const {
+            out << "Value" << actual << "is divisible by" << expected
+                << Utility::Debug::nospace << "," << *_actualValue << "%"
+                << *_expectedValue << "was not expected to be 0";
+        }
+
+    private:
+        const T* _actualValue;
+        const T* _expectedValue;
+};
+
 #endif
 
 }}

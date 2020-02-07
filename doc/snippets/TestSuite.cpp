@@ -147,6 +147,20 @@ CORRADE_COMPARE_WITH(a, 9.28f, TestSuite::Compare::around(0.1f));
 }
 
 {
+/* [Compare-Divisible] */
+int a;
+CORRADE_COMPARE_AS(a, 4, TestSuite::Compare::Divisible);
+/* [Compare-Divisible] */
+}
+
+{
+/* [Compare-NotDivisible] */
+int a;
+CORRADE_COMPARE_AS(a, 4, TestSuite::Compare::NotDivisible);
+/* [Compare-NotDivisible] */
+}
+
+{
 /* [CORRADE_VERIFY] */
 std::string s("hello");
 CORRADE_VERIFY(!s.empty());

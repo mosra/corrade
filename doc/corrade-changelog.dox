@@ -96,6 +96,12 @@ namespace Corrade {
 -   New family of @ref Utility::copy() functions to efficiently copy
     multi-dimensional @ref Containers::StridedArrayView instances
 
+@subsubsection corrade-changelog-latest-new-testsuite TestSuite library
+
+-   Added @ref TestSuite::Compare::Divisible and
+    @ref TestSuite::Compare::NotDivisible pseudo-types for checking
+    divisibility with clear diagnostic messages
+
 @subsection corrade-changelog-latest-changes Changes and improvements
 
 @subsubsection corrade-changelog-latest-changes-containers Containers library
