@@ -208,31 +208,6 @@ void NumericTest::around() {
     CORRADE_COMPARE_WITH(d, b, Compare::around(0.02f));
 }
 
-void NumericTest::explicitBoolConversion() {
-    struct ExplicitBool {
-        explicit operator bool() const { return true; }
-    };
-
-    struct Foo {
-        ExplicitBool operator<(const Foo&) const { return {}; }
-        ExplicitBool operator<=(const Foo&) const { return {}; }
-        ExplicitBool operator>=(const Foo&) const { return {}; }
-        ExplicitBool operator>(const Foo&) const { return {}; }
-    };
-
-    struct Bar {
-        ExplicitBool operator>=(const Bar&) const { return {}; }
-        Bar operator-(const Bar&) const { return {}; }
-        Bar operator+(const Bar&) const { return {}; }
-    };
-
-    CORRADE_COMPARE(Comparator<Compare::Less<Foo>>{}({}, {}), ComparisonStatusFlags{});
-    CORRADE_COMPARE(Comparator<Compare::LessOrEqual<Foo>>{}({}, {}), ComparisonStatusFlags{});
-    CORRADE_COMPARE(Comparator<Compare::GreaterOrEqual<Foo>>{}({}, {}), ComparisonStatusFlags{});
-    CORRADE_COMPARE(Comparator<Compare::Greater<Foo>>{}({}, {}), ComparisonStatusFlags{});
-    CORRADE_COMPARE(Comparator<Compare::Around<Bar>>{{}}({}, {}), ComparisonStatusFlags{});
-}
-
 void NumericTest::lessMulti() {
     Vec2 a{9.27f, 3.11f};
     Vec2 b{9.28f, 3.12f};
@@ -299,6 +274,31 @@ void NumericTest::aroundMulti() {
 
     /* Too below for one and too above for the other */
     CORRADE_COMPARE(Comparator<Compare::Around<Vec2>>{epsilon}(e, b), ComparisonStatusFlag::Failed);
+}
+
+void NumericTest::explicitBoolConversion() {
+    struct ExplicitBool {
+        explicit operator bool() const { return true; }
+    };
+
+    struct Foo {
+        ExplicitBool operator<(const Foo&) const { return {}; }
+        ExplicitBool operator<=(const Foo&) const { return {}; }
+        ExplicitBool operator>=(const Foo&) const { return {}; }
+        ExplicitBool operator>(const Foo&) const { return {}; }
+    };
+
+    struct Bar {
+        ExplicitBool operator>=(const Bar&) const { return {}; }
+        Bar operator-(const Bar&) const { return {}; }
+        Bar operator+(const Bar&) const { return {}; }
+    };
+
+    CORRADE_COMPARE(Comparator<Compare::Less<Foo>>{}({}, {}), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::LessOrEqual<Foo>>{}({}, {}), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::GreaterOrEqual<Foo>>{}({}, {}), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::Greater<Foo>>{}({}, {}), ComparisonStatusFlags{});
+    CORRADE_COMPARE(Comparator<Compare::Around<Bar>>{{}}({}, {}), ComparisonStatusFlags{});
 }
 
 }}}}}
