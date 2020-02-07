@@ -657,11 +657,11 @@ template<> struct TweakableParser<T> {
 
 namespace A {
 
-template<int> class Output;
+struct Fizz;
 /* [CORRADE_DEPRECATED] */
 class CORRADE_DEPRECATED("use Bar instead") Foo;
 CORRADE_DEPRECATED("use bar() instead") void foo();
-typedef CORRADE_DEPRECATED("use Fizz instead") Output<5> Buzz;
+typedef CORRADE_DEPRECATED("use Fizz instead") Fizz Buzz;
 /* [CORRADE_DEPRECATED] */
 
 }
