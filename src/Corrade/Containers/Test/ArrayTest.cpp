@@ -399,6 +399,10 @@ void ArrayTest::convertView() {
         CORRADE_COMPARE(cb.size(), 5);
         CORRADE_COMPARE(bc.size(), 5);
         CORRADE_COMPARE(cbc.size(), 5);
+
+        ArrayView c = Array{3};
+        CORRADE_COMPARE(c.size(), 3);
+        /* The rest is a dangling pointer, can't test */
     } {
         const auto b = arrayView(a);
         const auto cb = arrayView(ca);
@@ -416,6 +420,11 @@ void ArrayTest::convertView() {
         CORRADE_COMPARE(cb.size(), 5);
         CORRADE_COMPARE(bc.size(), 5);
         CORRADE_COMPARE(cbc.size(), 5);
+
+        auto c = arrayView(Array{3});
+        CORRADE_VERIFY((std::is_same<decltype(c), ArrayView>::value));
+        CORRADE_COMPARE(c.size(), 3);
+        /* The rest is a dangling pointer, can't test */
     }
 }
 void ArrayTest::convertViewDerived() {

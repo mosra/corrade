@@ -765,6 +765,10 @@ template<class U, class T, class D> struct ArrayViewConverter<U, Array<T, D>> {
         static_assert(sizeof(T) == sizeof(U), "types are not compatible");
         return {&other[0], other.size()};
     }
+    template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<U>>::type from(Array<T, D>&& other) {
+        static_assert(sizeof(T) == sizeof(U), "types are not compatible");
+        return {&other[0], other.size()};
+    }
 };
 template<class U, class T, class D> struct ArrayViewConverter<const U, Array<T, D>> {
     template<class V = U> constexpr static typename std::enable_if<std::is_convertible<T*, V*>::value, ArrayView<const U>>::type from(const Array<T, D>& other) {
