@@ -66,7 +66,7 @@ namespace Corrade { namespace Containers {
 
 An @ref ArrayAllocator that allocates and deallocates memory using the C++
 @cpp new[] @ce / @cpp delete[] @ce constructs, reserving an extra space
-*before* to store array capacity. Expects that @p T is nothrow
+* *before* to store array capacity. Expects that @p T is nothrow
 move-constructible.
 @see @ref Containers-Array-growable
 */
@@ -170,14 +170,14 @@ template<class T> struct IsTriviallyCopyableOnOldGcc: std::integral_constant<boo
 #endif
 
 /**
-@brief New-based allocator for growable arrays
+@brief Malloc-based allocator for growable arrays
 @m_since_latest
 
 An @ref ArrayAllocator that allocates and deallocates memory using the C
 @ref std::malloc() / @ref std::free() constructs in order to be able to use
 @ref std::realloc() for fast reallocations. Expects that @p T is trivially
 copyable. Similarly to @ref ArrayNewAllocator it's reserving an extra space
-*before* to store array capacity.
+* *before* to store array capacity.
 
 Compared to @ref ArrayNewAllocator, this allocator stores array capacity in
 bytes and, together with the fact that @ref std::free() doesn't care about the
